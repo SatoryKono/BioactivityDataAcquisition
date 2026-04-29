@@ -8,15 +8,19 @@ from pathlib import Path
 CANONICAL_TARGET_RELATIVE_PATH = Path("testing_support/neo4j_memory_sync.py")
 
 
+def _canonical_target_file(repo_root: Path) -> Path:
+    return repo_root / CANONICAL_TARGET_RELATIVE_PATH
+
+
 def _resolve_target_file() -> Path:
     repo_root = Path(__file__).resolve().parents[4]
-    expected_target = (repo_root / "testing_support" / "neo4j_memory_sync.py").resolve()
-    resolved_target = (repo_root / CANONICAL_TARGET_RELATIVE_PATH).resolve()
-    if resolved_target != expected_target:
-        raise RuntimeError(f"Unexpected target file: {resolved_target}")
-    if not resolved_target.is_file():
-        raise RuntimeError(f"Target file does not exist: {resolved_target}")
-    return expected_target
+    target_file = _canonical_target_file(repo_root).resolve(strict=False)
+    repo_root_resolved = repo_root.resolve()
+    if repo_root_resolved not in target_file.parents:
+        raise RuntimeError(f"Unexpected target file outside repository root: {target_file}")
+    if not target_file.is_file():
+        raise RuntimeError(f"Target file does not exist: {target_file}")
+    return target_file
 
 
 def _read_target_text() -> str:

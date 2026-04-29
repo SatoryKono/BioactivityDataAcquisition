@@ -25,6 +25,7 @@ from bioetl.composition.services.versioning import (
 )
 from bioetl.domain.control_plane import ReplayCapability
 from bioetl.domain.control_plane.reproducibility_policy import (
+    STRICT_PERSISTENCE_PROFILES,
     legacy_config_hash_from_resolved_config_hash,
 )
 from bioetl.infrastructure.control_plane import FileRunManifestStore
@@ -179,10 +180,10 @@ def _emit_replay_reconstructability_metric(
         request.launch_context.get("required_persistence_profile")
         or "degraded_observable"
     )
-    strict_requirement = strict_replay_requested or required_persistence_profile in {
-        "replay_ready",
-        "forensic_grade",
-    }
+    strict_requirement = (
+        strict_replay_requested
+        or required_persistence_profile in STRICT_PERSISTENCE_PROFILES
+    )
     status = "reconstructable"
     if strict_requirement and (
         not strict_exact_replay_supported

@@ -12,6 +12,7 @@ from bioetl.domain.control_plane import (
     ControlPlaneArtifactRef,
     ControlPlaneArtifactSurface,
 )
+from bioetl.domain.control_plane.reproducibility_policy import STRICT_PERSISTENCE_PROFILES
 from bioetl.infrastructure.control_plane.file_artifact_lifecycle_payloads import (
     _artifact_id,
     _effective_config_artifact_id,
@@ -41,7 +42,7 @@ _INDEX_DIR_NAMES = {
     "_by_run_id",
     "_occurrences",
 }
-_EVIDENCE_FLOOR_PROFILES = frozenset({"replay_ready", "forensic_grade"})
+_EVIDENCE_FLOOR_PROFILES = STRICT_PERSISTENCE_PROFILES
 
 
 @dataclass(slots=True)

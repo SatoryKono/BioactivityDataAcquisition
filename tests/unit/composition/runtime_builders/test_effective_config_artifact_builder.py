@@ -450,6 +450,9 @@ def test_create_and_persist_composite_effective_config_artifact_forwards_require
     assert result == ("artifact-2", "resolved-hash", "effective-hash", "dq-hash")
     assert captured["required_persistence_profile"] == "forensic_grade"
     runtime_payload = captured["runtime_overrides"]["runtime"]
-    assert runtime_payload["settings_snapshot"]["control_plane"][
-        "required_persistence_profile"
-    ] == "degraded_observable"
+    assert (
+        runtime_payload["settings_snapshot"]["control_plane"][
+            "required_persistence_profile"
+        ]
+        == "degraded_observable"
+    )

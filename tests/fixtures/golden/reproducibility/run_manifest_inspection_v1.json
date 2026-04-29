@@ -180,6 +180,7 @@
       "replay_capability_reason": "immutable_input_snapshots_present",
       "replay_family_contract": {
         "contract": "snapshot_backed_exact_replay",
+        "default_required_persistence_profile": "replay_ready",
         "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
         "execution_context": "source",
         "family": "chembl.activity",
@@ -356,6 +357,7 @@
     "replay_capability_reason": "immutable_input_snapshots_present",
     "replay_family_contract": {
       "contract": "snapshot_backed_exact_replay",
+      "default_required_persistence_profile": "replay_ready",
       "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
       "execution_context": "source",
       "family": "chembl.activity",
@@ -425,6 +427,7 @@
           "blockers": [],
           "confidence": "high",
           "evidence": [
+            "legacy_config_hash_alias_semantics_ambiguous",
             "resolved_and_effective_hashes_exposed"
           ],
           "evidence_refs": [
@@ -525,6 +528,157 @@
         "run_identity": 8
       },
       "thresholds_satisfied": true
+    },
+    "reproducibility_diagnostics": {
+      "checkpoint_anchors": {
+        "current_manifest_anchors": {
+          "contract_ref": "chembl.activity",
+          "contract_version": "1.2.0",
+          "effective_config_artifact_id": "eca-golden-001",
+          "effective_config_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "execution_fingerprint": "fp-golden-001",
+          "input_snapshot_ids": [
+            "snapshot-golden-001"
+          ],
+          "manifest_id": "manifest-golden-001"
+        },
+        "resume_anchor_comparison": {
+          "checkpoint_identity_present": false,
+          "matching_fields": [],
+          "mismatched_fields": [],
+          "missing_checkpoint_fields": [],
+          "missing_current_fields": []
+        },
+        "resume_contract": {
+          "applied_checkpoint_compatibility_policy": "hard_fail",
+          "execution_context": "ordinary",
+          "occurrence_identity_anchor": null,
+          "requested_checkpoint_compatibility_policy": null,
+          "requested_exact_replay": true,
+          "resume_mode": "checkpoint_snapshot_only",
+          "resume_requested": false,
+          "semantic_identity_anchor": "execution_fingerprint",
+          "strict_replay_safe": true
+        },
+        "resume_diagnostics": null
+      },
+      "effective_config": {
+        "diff_policy": {
+          "config_hash_policy": "legacy_alias_for_resolved_config_hash",
+          "occurrence_fields": [
+            "run_id",
+            "manifest_id",
+            "manifest_created_at"
+          ],
+          "semantic_anchor": "effective_config_hash"
+        },
+        "occurrence": {
+          "manifest_created_at": "2025-01-01T12:00:00+00:00",
+          "manifest_id": "manifest-golden-001",
+          "run_id": "00000000-0000-0000-0000-000000000901"
+        },
+        "semantic": {
+          "config_hash_compatibility_anchor": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "effective_config_artifact_id": "eca-golden-001",
+          "effective_config_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "resolved_config_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+        }
+      },
+      "lineage": {
+        "lineage_closure_boundary": {
+          "family": "chembl.activity",
+          "reason": "family_within_supported_boundary",
+          "support_scope": "operator_grade_trace_debug",
+          "supported": true,
+          "supported_families": [
+            "chembl.activity",
+            "chembl.molecule",
+            "crossref.publication",
+            "pubchem.compound",
+            "pubmed.publication"
+          ]
+        },
+        "lineage_fragment_ids": [],
+        "planned_artifact_count": null,
+        "produced_artifact_trace_complete": false,
+        "published_artifact_count": 0
+      },
+      "occurrence_identity": {
+        "manifest_created_at": "2025-01-01T12:00:00+00:00",
+        "manifest_id": "manifest-golden-001",
+        "occurrence_only_diagnostics": [],
+        "run_id": "00000000-0000-0000-0000-000000000901"
+      },
+      "policy": {
+        "attained_profile": "degraded_observable",
+        "exact_replay_blockers": [],
+        "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
+        "policy_assessment": {
+          "blocking_gaps": [],
+          "replay_capability": "exact_replay_supported",
+          "required_persistence_profile": "replay_ready",
+          "required_profile_satisfied": true,
+          "snapshot_envelope": {
+            "any_input_snapshots": true,
+            "full_snapshot_envelope": true,
+            "require_full_snapshot_envelope": false,
+            "source_count": 1,
+            "sources_with_snapshots": 1
+          },
+          "strict_exact_replay_supported": true,
+          "strict_requirement_requested": true
+        },
+        "replay_capability": "exact_replay_supported",
+        "replay_family_contract": {
+          "contract": "snapshot_backed_exact_replay",
+          "default_required_persistence_profile": "replay_ready",
+          "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
+          "execution_context": "source",
+          "family": "chembl.activity",
+          "reason": "family_within_supported_boundary",
+          "strict_exact_replay_supported": true,
+          "support_scope": "operator_grade_trace_debug",
+          "supported_families": [
+            "chembl.activity",
+            "chembl.molecule",
+            "crossref.publication",
+            "pubchem.compound",
+            "pubmed.publication"
+          ]
+        },
+        "replay_mode": "exact_replay",
+        "required_persistence_profile": "replay_ready",
+        "required_profile_missing_requirements": [
+          "produced_artifact_trace"
+        ],
+        "required_profile_satisfied": false
+      },
+      "semantic_identity": {
+        "config_hash_compatibility_anchor": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "effective_config_artifact_id": "eca-golden-001",
+        "effective_config_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "execution_fingerprint": "fp-golden-001",
+        "input_snapshot_identity_fingerprint": "e58619abc415696b45e95f80c34160588cb90bb7bbacfa297d420324ebd483c3",
+        "input_snapshot_ids": [
+          "snapshot-golden-001"
+        ],
+        "resolved_config_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      }
+    },
+    "reproducibility_policy_assessment": {
+      "blocking_gaps": [],
+      "replay_capability": "exact_replay_supported",
+      "required_persistence_profile": "replay_ready",
+      "required_profile_satisfied": true,
+      "snapshot_envelope": {
+        "any_input_snapshots": true,
+        "full_snapshot_envelope": true,
+        "require_full_snapshot_envelope": false,
+        "source_count": 1,
+        "sources_with_snapshots": 1
+      },
+      "strict_exact_replay_supported": true,
+      "strict_requirement_requested": true
     },
     "requested_exact_replay": true,
     "required_persistence_profile": "replay_ready",
@@ -664,6 +818,7 @@
     "replay_capability_reason": "immutable_input_snapshots_present",
     "replay_family_contract": {
       "contract": "snapshot_backed_exact_replay",
+      "default_required_persistence_profile": "replay_ready",
       "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
       "execution_context": "source",
       "family": "chembl.activity",

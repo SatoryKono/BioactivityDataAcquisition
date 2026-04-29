@@ -239,6 +239,7 @@
       <excludeFolder url="file://$MODULE_DIR$/.agent-work/tmp" />
       <excludeFolder url="file://$MODULE_DIR$/.agent-work" />
       <excludeFolder url="file://$MODULE_DIR$/.windsurf" />
+      <excludeFolder url="file://$MODULE_DIR$/.mypy_cache_win_tmp/3.12" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.13 (BioactivityDataAcquisition2)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />

@@ -171,6 +171,48 @@ def _prune_walk_dirs(
     dirnames[:] = kept
 
 
+def _local_cache_dir_candidate(path: Path) -> CleanupCandidate:
+    return CleanupCandidate(
+        path=path,
+        category="local_cache_dir",
+        tracked=False,
+        apply_allowed=True,
+        reason="exact local artifact family outside blocked cleanup zones",
+    )
+
+
+def _safe_local_dir_candidate(
+    path: Path,
+    *,
+    repo_root: Path,
+    blocked_paths: frozenset[str],
+) -> CleanupCandidate | None:
+    if _is_blocked_path(path, repo_root, blocked_paths):
+        return None
+    return _local_cache_dir_candidate(path.relative_to(repo_root))
+
+
+def _discover_local_dir_candidates_in_base(
+    *,
+    repo_root: Path,
+    base: Path,
+    dirnames: list[str],
+    blocked_paths: frozenset[str],
+) -> list[CleanupCandidate]:
+    candidates: list[CleanupCandidate] = []
+    for name in dirnames:
+        if name not in SAFE_LOCAL_DIR_NAMES:
+            continue
+        candidate = _safe_local_dir_candidate(
+            base / name,
+            repo_root=repo_root,
+            blocked_paths=blocked_paths,
+        )
+        if candidate is not None:
+            candidates.append(candidate)
+    return candidates
+
+
 def _iter_local_dir_candidates(
     repo_root: Path,
     *,
@@ -188,21 +230,14 @@ def _iter_local_dir_candidates(
         if _is_venv_path(base):
             dirnames[:] = []
             continue
-        for name in dirnames:
-            if name not in SAFE_LOCAL_DIR_NAMES:
-                continue
-            path = base / name
-            if _is_blocked_path(path, repo_root, blocked_paths):
-                continue
-            candidates.append(
-                CleanupCandidate(
-                    path=path.relative_to(repo_root),
-                    category="local_cache_dir",
-                    tracked=False,
-                    apply_allowed=True,
-                    reason="exact local artifact family outside blocked cleanup zones",
-                )
+        candidates.extend(
+            _discover_local_dir_candidates_in_base(
+                repo_root=repo_root,
+                base=base,
+                dirnames=dirnames,
+                blocked_paths=blocked_paths,
             )
+        )
         _prune_walk_dirs(
             repo_root,
             base,
@@ -299,15 +334,7 @@ def _iter_local_dir_candidates_from_status_paths(
             if is_within_blocked_cleanup_zone(candidate_path, blocked_paths):
                 continue
             seen.add(candidate_path)
-            candidates.append(
-                CleanupCandidate(
-                    path=candidate_path,
-                    category="local_cache_dir",
-                    tracked=False,
-                    apply_allowed=True,
-                    reason="exact local artifact family outside blocked cleanup zones",
-                )
-            )
+            candidates.append(_local_cache_dir_candidate(candidate_path))
     return candidates
 
 

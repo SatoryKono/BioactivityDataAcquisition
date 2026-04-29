@@ -343,9 +343,7 @@ def _build_effective_config_diagnostics(
     """Return semantic-vs-occurrence effective-config diagnostics."""
     return {
         "semantic": {
-            "effective_config_artifact_id": summary.get(
-                "effective_config_artifact_id"
-            ),
+            "effective_config_artifact_id": summary.get("effective_config_artifact_id"),
             "resolved_config_hash": summary.get("resolved_config_hash"),
             "effective_config_hash": summary.get("effective_config_hash"),
             "config_hash_compatibility_anchor": summary.get("config_hash"),

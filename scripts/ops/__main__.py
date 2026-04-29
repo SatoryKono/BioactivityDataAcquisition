@@ -25,8 +25,6 @@ Stable commands:
 Legacy maintenance commands:
     update-issue       Update a GitHub issue title/body/comment/state (shell)
     triage-issues      Triage cleanup/docs issue wave (shell)
-    close-ge-spike     Close issue #2595 with the completed spike memo (shell)
-    close-schema-drift Close issue #2594 with the completed Pandera drift gate (shell)
 """
 
 from __future__ import annotations
@@ -50,8 +48,6 @@ COMMAND_SPECS = {name: python_command(script) for name, script in COMMAND_SPECS.
 SHELL_COMMAND_SPECS = {
     "update-issue": "maintenance/github/update_github_issue.sh",
     "triage-issues": "maintenance/github/triage_cleanup_issue_wave.sh",
-    "close-ge-spike": "maintenance/github/close_great_expectations_spike_issue.sh",
-    "close-schema-drift": "maintenance/github/close_pandera_schema_drift_issue.sh",
     "codex": "launchers/codex/codex.sh",
     "codex-exec": "launchers/codex/codex-exec.sh",
     "codex-headless": "../ai/codex/headless.sh",

@@ -20,6 +20,9 @@ from bioetl.domain.control_plane import (
     RunManifest,
     RunSourceRef,
 )
+from bioetl.domain.control_plane.reproducibility_policy import (
+    STRICT_PERSISTENCE_PROFILES,
+)
 from bioetl.domain.normalization import (
     compute_execution_identity_fingerprint,
     normalize_run_manifest_spec,
@@ -84,7 +87,7 @@ def _validate_strict_code_provenance(
     )
     strict_context = (
         bool(request.launch_context.get("exact_replay"))
-        or required_profile in {"replay_ready", "forensic_grade"}
+        or required_profile in STRICT_PERSISTENCE_PROFILES
         or request.replay_capability == ReplayCapability.EXACT_REPLAY_SUPPORTED
     )
     if not strict_context:

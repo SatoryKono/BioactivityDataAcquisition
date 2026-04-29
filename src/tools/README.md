@@ -262,37 +262,15 @@ python src/tools/differentiate_linkstyle.py --dry-run
 python src/tools/differentiate_linkstyle.py
 ```
 
-### scripts/config_matrix_generator.py
+### Schema config commands
 
-Generates a cross-config comparison matrix and discrepancy report for entity and composite YAMLs.
-
-**Location:** `src/tools/scripts/config_matrix_generator.py`
-
-**Typical usage:**
+Cross-config comparison and unified-config validation now live only on the
+canonical schema CLI surface:
 
 ```bash
 python -m scripts.schema generate-config-matrix
-```
-
-The direct legacy path remains available only as a thin compatibility wrapper
-during the migration window, but the canonical command above should be used for
-new integrations.
-
-### scripts/validate_unified_configs.py
-
-Legacy standalone validator for unified entity YAML configs.
-
-**Location:** `src/tools/scripts/validate_unified_configs.py`
-
-**Typical usage:**
-
-```bash
 python -m scripts.schema validate-unified-configs
 ```
-
-The direct legacy path remains available only as a thin compatibility wrapper
-during the migration window, but the canonical command above should be used for
-new integrations.
 
 Use `python -m scripts.schema validate-configs` only for the maintained JSON
 Schema / agent-canonical validation flow.

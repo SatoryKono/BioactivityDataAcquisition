@@ -32,30 +32,6 @@
       "review_by": "2026-07-15",
       "next_step": "Retain as the top-level scripts.ops.data module router. Promote it into a canonical supported workflow or remove it if not needed."
     },
-    "scripts/ops/maintenance/github/close_great_expectations_spike_issue.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "legacy_issue_workflow",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded issue-specific maintenance helper tied to a historical GitHub closure flow; remove it once the spike-era maintenance surface is explicitly sunset."
-    },
-    "scripts/ops/maintenance/github/close_issue_2597.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "legacy_issue_workflow",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded issue-specific maintenance helper tied to a historical GitHub closure flow; remove it once the related cleanup thread is fully retired."
-    },
-    "scripts/ops/maintenance/github/close_pandera_schema_drift_issue.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "legacy_issue_workflow",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded issue-specific maintenance helper tied to a historical GitHub closure flow; remove it once the schema-drift follow-up is fully retired."
-    },
-    "scripts/ops/maintenance/github/post_issue_2597_progress.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "legacy_issue_workflow",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded issue-specific maintenance helper tied to a historical GitHub reporting flow; remove it once the related progress-post workflow is retired."
-    },
     "scripts/ops/runtime/neo4j/neo4j_quick_start.sh": {
       "owner": "@bioetl-platform",
       "decision": "temporary_diagnostic",
@@ -464,47 +440,11 @@
       "review_by": "2026-07-15",
       "next_step": "Retain as a bounded Neo4j audit connection helper while deployment and audit runbooks still import src/tools/neo4j_audit.py directly; migrate to a canonical scripts/ops or package facade when that audit workflow is consolidated."
     },
-    "src/tools/scripts/check_application_deps.py": {
-      "owner": "@bioetl-architecture",
-      "decision": "compatibility_wrapper",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a legacy wrapper delegating to the canonical engineering QA dependency check; remove once historical src/tools wrapper references are retired."
-    },
-    "src/tools/scripts/check_architecture.py": {
-      "owner": "@bioetl-architecture",
-      "decision": "compatibility_wrapper",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a legacy wrapper delegating to the canonical engineering QA architecture check; remove once historical src/tools wrapper references are retired."
-    },
-    "src/tools/scripts/check_constructor_args.py": {
-      "owner": "@bioetl-architecture",
-      "decision": "compatibility_wrapper",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a legacy wrapper delegating to the canonical engineering QA constructor-argument check; remove once historical src/tools wrapper references are retired."
-    },
-    "src/tools/scripts/config_matrix_generator.py": {
-      "owner": "@bioetl-architecture",
-      "decision": "compatibility_wrapper",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a legacy wrapper delegating to the canonical schema config-matrix generator; remove once historical src/tools wrapper references are retired."
-    },
-    "src/tools/scripts/lint_terminology.py": {
-      "owner": "@bioetl-architecture",
-      "decision": "compatibility_wrapper",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a legacy wrapper delegating to the canonical engineering QA terminology linter; remove once historical src/tools wrapper references are retired."
-    },
     "scripts/qa/lint_terminology.py": {
       "owner": "@bioetl-architecture",
       "decision": "compatibility_wrapper",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a legacy wrapper delegating to the canonical engineering QA terminology linter; remove once historical scripts/qa entrypoints are retired."
-    },
-    "src/tools/scripts/validate_unified_configs.py": {
-      "owner": "@bioetl-architecture",
-      "decision": "compatibility_wrapper",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a legacy wrapper delegating to the canonical schema unified-config validator; remove once historical src/tools wrapper references are retired."
     },
     "scripts/engineering/ci/validate_control_plane_artifacts.py": {
       "owner": "@bioetl-platform",
