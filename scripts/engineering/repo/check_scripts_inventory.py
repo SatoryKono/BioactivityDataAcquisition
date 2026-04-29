@@ -169,12 +169,8 @@ LEGACY_MANUAL_OPS_SCRIPTS: Final[frozenset[str]] = frozenset(
 )
 LEGACY_ISSUE_SPECIFIC_OPS_SCRIPTS: Final[frozenset[str]] = frozenset(
     {
-        "scripts/ops/maintenance/github/post_issue_2597_progress.sh",
-        "scripts/ops/maintenance/github/close_issue_2597.sh",
         "scripts/ops/maintenance/github/post_issue_rescope_comments.sh",
         "scripts/ops/maintenance/github/update_issue_rescope_bodies.sh",
-        "scripts/ops/maintenance/github/close_great_expectations_spike_issue.sh",
-        "scripts/ops/maintenance/github/close_pandera_schema_drift_issue.sh",
     }
 )
 LEGACY_INTERNAL_AI_LAUNCHERS: Final[frozenset[str]] = frozenset(
@@ -192,18 +188,12 @@ LEGACY_NAMED_SCRIPTS: Final[frozenset[str]] = frozenset(
 )
 LEGACY_SRC_TOOLS_WRAPPERS: Final[frozenset[str]] = frozenset(
     {
-        "src/tools/scripts/config_matrix_generator.py",
         "src/tools/scripts/generate_contracts.py",
-        "src/tools/scripts/lint_terminology.py",
-        "src/tools/scripts/validate_unified_configs.py",
     }
 )
 DEPRECATED_LEGACY_PATHS: Final[frozenset[str]] = frozenset(
     {
         "scripts/engineering/qa/generate_reports.py",
-        "src/tools/scripts/check_architecture.py",
-        "src/tools/scripts/check_application_deps.py",
-        "src/tools/scripts/check_constructor_args.py",
     }
 )
 

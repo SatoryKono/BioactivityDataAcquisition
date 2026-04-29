@@ -21,12 +21,14 @@ from bioetl.domain.control_plane.effective_config_artifact import (
     RuntimeOverrideSnapshot,
     SourceClassProvenance,
 )
+from bioetl.domain.control_plane.reproducibility_policy import (
+    STRICT_PERSISTENCE_PROFILES,
+    normalize_required_persistence_profile,
+)
 from bioetl.domain.services.dq_policy_resolver import DQPolicyResolver
 from bioetl.domain.types import JsonDict
 from bioetl.domain.types.dq_contracts import DQDisposition, DQPolicyRef
 
-DEFAULT_REQUIRED_PERSISTENCE_PROFILE = "degraded_observable"
-STRICT_PERSISTENCE_PROFILES = frozenset({"replay_ready", "forensic_grade"})
 ALLOWLISTED_SEMANTIC_ENV_OVERRIDE_KEYS: frozenset[str] = frozenset()
 EFFECTIVE_CONFIG_SCHEMA_VERSION = "1.0"
 
@@ -164,15 +166,6 @@ def build_resolved_config_snapshot(
         config_data=resolved_config,
         config_hash=stable_hash(resolved_config),
     )
-
-
-def normalize_required_persistence_profile(required_profile: object) -> str:
-    profile = (
-        str(required_profile).strip()
-        if required_profile is not None
-        else DEFAULT_REQUIRED_PERSISTENCE_PROFILE
-    )
-    return profile or DEFAULT_REQUIRED_PERSISTENCE_PROFILE
 
 
 def coerce_runtime_override_layer(

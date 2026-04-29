@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import ast
 from pathlib import Path
 
 import pytest
@@ -11,6 +12,19 @@ ROOT = Path(__file__).resolve().parents[2]
 
 def _read(relative_path: str) -> str:
     return (ROOT / relative_path).read_text(encoding="utf-8")
+
+
+def _string_set_literal(node: ast.AST) -> set[str] | None:
+    if not isinstance(node, ast.Set):
+        return None
+    values: set[str] = set()
+    for element in node.elts:
+        if not isinstance(element, ast.Constant) or not isinstance(
+            element.value, str
+        ):
+            return None
+        values.add(element.value)
+    return values
 
 
 @pytest.mark.architecture
@@ -106,6 +120,31 @@ def test_run_manifest_config_hash_legacy_alias_contract_is_documented_and_wired(
     assert "legacy_config_hash_from_resolved_config_hash" in policy
     assert "config_hash=legacy_config_hash_from_resolved_config_hash(" in builder
     assert "config_hash=legacy_config_hash_from_resolved_config_hash(" in refs
+
+
+@pytest.mark.architecture
+def test_strict_persistence_profile_set_is_centralized_in_domain_policy() -> None:
+    """Prevent new local replay_ready/forensic_grade gates in launch paths."""
+    allowed = {
+        Path("src/bioetl/domain/control_plane/reproducibility_policy.py"),
+    }
+    strict_profiles = {"replay_ready", "forensic_grade"}
+    violations: list[str] = []
+
+    for path in sorted((ROOT / "src/bioetl").rglob("*.py")):
+        relative_path = path.relative_to(ROOT)
+        if relative_path in allowed:
+            continue
+        tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+        for node in ast.walk(tree):
+            if _string_set_literal(node) == strict_profiles:
+                violations.append(f"{relative_path}:{node.lineno}")
+
+    assert not violations, (
+        "Strict persistence profile sets must use "
+        "bioetl.domain.control_plane.reproducibility_policy."
+        f"STRICT_PERSISTENCE_PROFILES, not local literals: {violations}"
+    )
 
 
 @pytest.mark.architecture

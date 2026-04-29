@@ -87,12 +87,9 @@ def _resolve_exact_replay_blockers(
     if append_mode_sinks:
         blockers.append("append_mode_semantic_outputs")
     snapshot_envelope = policy_assessment.snapshot_envelope
-    if (
-        not snapshot_envelope.any_input_snapshots
-        or (
-            snapshot_envelope.require_full_snapshot_envelope
-            and not snapshot_envelope.full_snapshot_envelope
-        )
+    if not snapshot_envelope.any_input_snapshots or (
+        snapshot_envelope.require_full_snapshot_envelope
+        and not snapshot_envelope.full_snapshot_envelope
     ):
         blockers.append("immutable_input_snapshots_missing")
     elif manifest.replay_capability != ReplayCapability.EXACT_REPLAY_SUPPORTED:

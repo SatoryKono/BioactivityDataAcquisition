@@ -779,7 +779,7 @@ def _render_text(report: dict[str, list[str] | dict[str, list[str]]]) -> str:
     return "\n".join(lines)
 
 
-def main(argv: list[str] | None = None) -> None:
+def main(argv: list[str] | None = None) -> int:
     parser = _build_parser()
     args = parser.parse_args(argv)
     report = collect_metric_inventory(args.repo_root)
@@ -800,8 +800,8 @@ def main(argv: list[str] | None = None) -> None:
         json.dump(report, sys.stdout, indent=2, sort_keys=True)
         sys.stdout.write("\n")
         if violations:
-            raise SystemExit(1)
-        return
+            return 1
+        return 0
     print(_render_text(report))
     if violations:
         print("\nMetric inventory drift check failed:", file=sys.stderr)
@@ -809,8 +809,9 @@ def main(argv: list[str] | None = None) -> None:
             print(f"{key} ({len(values)}):", file=sys.stderr)
             for value in values:
                 print(f"  - {value}", file=sys.stderr)
-        raise SystemExit(1)
+        return 1
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

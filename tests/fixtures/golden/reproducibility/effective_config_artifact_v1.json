@@ -1,5 +1,5 @@
 {
-  "artifact_id": "effective-config-4571b94907fa1ba7",
+  "artifact_id": "effective-config-8cf5a3faf38982ea",
   "occurrence_envelope": {
     "created_at": "2025-01-01T12:00:00+00:00",
     "effective_execution_timestamp": "2025-01-01T12:00:00+00:00",
@@ -7,7 +7,7 @@
   },
   "schema_version": "1.0",
   "semantic_artifact": {
-    "artifact_id": "effective-config-4571b94907fa1ba7",
+    "artifact_id": "effective-config-8cf5a3faf38982ea",
     "contract_refs": [],
     "dq_contract_compatibility_hash": "no_dq_policies",
     "dq_policy_refs": [],
@@ -28,6 +28,13 @@
         }
       },
       "effective_hash": "a580ca1cdd3c40668a31f3d3c416b88609362ec0d0c6c18c64090a210cdfb590"
+    },
+    "execution_environment": {
+      "ambient_environment_policy": "excluded_unless_explicitly_materialized",
+      "environment_hash": "c277d3cf10c621b340bd924843c454083fab3d7ffdd2b9fec0ebef9398442907",
+      "materialized_env_keys": [],
+      "materialized_env_overrides": {},
+      "non_materialized_semantic_env_dependencies": []
     },
     "pipeline_kind": "standard",
     "pipeline_name": "chembl_activity",
@@ -106,10 +113,10 @@
         "source_class": "immutable_input_snapshot"
       },
       {
-        "anchor_field": null,
-        "artifact_surface": "not_persisted",
-        "notes": "Ambient process environment outside explicit overrides is intentionally excluded from semantic identity; strict reproducibility relies on an explicit semantic env allowlist.",
-        "provenance_status": "unsupported",
+        "anchor_field": "environment_hash",
+        "artifact_surface": "semantic_artifact.execution_environment",
+        "notes": "Ambient process environment is excluded by policy unless it is explicitly materialized through runtime_overrides.env; the execution_environment surface anchors that exclusion policy and the set of materialized semantic env overrides.",
+        "provenance_status": "policy_excluded",
         "source_class": "implicit_process_environment"
       }
     ],

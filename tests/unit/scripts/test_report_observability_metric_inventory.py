@@ -4,8 +4,6 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import pytest
-
 from scripts.engineering.qa import report_observability_metric_inventory as inventory
 
 
@@ -269,18 +267,17 @@ def test_main_check_exits_nonzero_for_metric_drift(
         },
     )
 
-    with pytest.raises(SystemExit) as exc_info:
-        inventory.main(
-            [
-                "--check",
-                "--json",
-                "--repo-root",
-                str(tmp_path),
-                "--allowlist",
-                "missing.yaml",
-            ]
-        )
-    assert exc_info.value.code == 1
+    exit_code = inventory.main(
+        [
+            "--check",
+            "--json",
+            "--repo-root",
+            str(tmp_path),
+            "--allowlist",
+            "missing.yaml",
+        ]
+    )
+    assert exit_code == 1
 
 
 def test_main_check_allows_explicit_baseline(
@@ -304,7 +301,7 @@ def test_main_check_allows_explicit_baseline(
         encoding="utf-8",
     )
 
-    inventory.main(
+    exit_code = inventory.main(
         [
             "--check",
             "--json",
@@ -314,3 +311,4 @@ def test_main_check_allows_explicit_baseline(
             str(allowlist),
         ]
     )
+    assert exit_code == 0

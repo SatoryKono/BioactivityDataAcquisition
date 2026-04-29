@@ -37,6 +37,7 @@ from bioetl.domain.constants import (
     DEFAULT_CHECKPOINT_INTERVAL,
     DEFAULT_DQ_QUALITY_SCORE_MIN,
 )
+from bioetl.domain.control_plane.reproducibility_policy import STRICT_PERSISTENCE_PROFILES
 from bioetl.infrastructure.config._yaml_settings_source import YamlSettingsSource
 from bioetl.infrastructure.config.converters import yaml_config_to_domain
 from bioetl.infrastructure.schemas.source_config import SourceYamlConfig
@@ -178,7 +179,7 @@ class PipelineSettings(BaseSettings):
                     "pipeline.control_plane.run_manifest_enabled"
                 )
             if (
-                self.required_persistence_profile in {"replay_ready", "forensic_grade"}
+                self.required_persistence_profile in STRICT_PERSISTENCE_PROFILES
                 and not self.run_manifest_enabled
             ):
                 raise ValueError(
@@ -195,10 +196,10 @@ class PipelineSettings(BaseSettings):
                     "forensic_grade requires "
                     "pipeline.control_plane.run_ledger_enabled"
                 )
-            if self.required_persistence_profile in {
-                "replay_ready",
-                "forensic_grade",
-            } and self.checkpoint_compatibility_policy in {"observe", "legacy_observe"}:
+            if (
+                self.required_persistence_profile in STRICT_PERSISTENCE_PROFILES
+                and self.checkpoint_compatibility_policy in {"observe", "legacy_observe"}
+            ):
                 raise ValueError(
                     "pipeline.control_plane.required_persistence_profile="
                     f"{self.required_persistence_profile} requires "

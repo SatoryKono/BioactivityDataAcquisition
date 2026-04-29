@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Literal
 
+from bioetl.domain.control_plane.reproducibility_policy import STRICT_PERSISTENCE_PROFILES
+
 if TYPE_CHECKING:
     from bioetl.application.core.base import BasePipeline
     from bioetl.domain.ports import LoggerPort
@@ -87,10 +89,10 @@ def resolve_checkpoint_compatibility_policy(
             applied_policy="hard_fail",
         )
         return "hard_fail"
-    if required_persistence_profile in {
-        "replay_ready",
-        "forensic_grade",
-    } and requested_policy in {"observe", "legacy_observe"}:
+    if (
+        required_persistence_profile in STRICT_PERSISTENCE_PROFILES
+        and requested_policy in {"observe", "legacy_observe"}
+    ):
         logger_port.warning(
             "Required persistence profile enforces at least soft_fail "
             "checkpoint compatibility policy; coercing requested policy.",

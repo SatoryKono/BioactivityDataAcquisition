@@ -333,9 +333,7 @@ def _assert_provenance_only_policy(
         ]
         == manifest.execution_fingerprint
     )
-    effective_config_diag = summary["reproducibility_diagnostics"][
-        "effective_config"
-    ]
+    effective_config_diag = summary["reproducibility_diagnostics"]["effective_config"]
     assert effective_config_diag["semantic"]["effective_config_hash"] == (
         _VALID_EFFECTIVE_CONFIG_HASH
     )
