@@ -136,14 +136,20 @@ local_tolerated_root_dirs:
       role: local_cache_surface_untracked
     - path: .coverage-sharded
       role: local_coverage_shards_untracked
+    - path: .junie
+      role: local_vendor_editor_state_untracked
     - path: .scannerwork
       role: local_sonar_workspace_untracked
+    - path: .sonarlint
+      role: local_sonarlint_state_untracked
     - path: .venv-docs
       role: local_docs_virtualenv_untracked
     - path: .venv-win
       role: local_windows_virtualenv_untracked
     - path: .venv-win-corrupt
       role: local_windows_virtualenv_recovery_untracked
+    - path: .windsurf
+      role: local_vendor_editor_state_untracked
 
 blocked_cleanup_zones:
   - path: docs/99-archive
