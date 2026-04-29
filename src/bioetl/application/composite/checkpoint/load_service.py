@@ -353,6 +353,7 @@ class CompositeCheckpointLoadService:
                 state.last_event_id,
             )
         except ValueError as error:
+            self._emit_checkpoint_load_status("replay_conflict")
             detail = (
                 f"checkpoint replay watermark {state.last_event_id!r} is missing "
                 f"for manifest {state.manifest_id!r}"
@@ -360,6 +361,7 @@ class CompositeCheckpointLoadService:
             raise CheckpointConflictError(self._composite_name, detail) from error
 
         if not replay_entries:
+            self._emit_checkpoint_load_status("replay_not_needed")
             return state
 
         replay_projection = project_run_ledger_replay(replay_entries)
@@ -402,4 +404,5 @@ class CompositeCheckpointLoadService:
             replay_seed_completed=replayed_state.seed_completed,
             replay_merge_completed=replayed_state.merge_completed,
         )
+        self._emit_checkpoint_load_status("replayed")
         return replayed_state

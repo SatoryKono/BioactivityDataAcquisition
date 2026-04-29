@@ -666,6 +666,7 @@ class TestLoadResume:
     ) -> None:
         """Resume replays only the suffix after the checkpoint watermark."""
         ledger_port = MagicMock()
+        metrics = MagicMock()
         first_replayed = _make_run_ledger_entry(
             entry_id="entry-2",
             stage="dependencies",
@@ -682,6 +683,7 @@ class TestLoadResume:
             run_id="run-old",
             expected_anchors=_anchors(manifest_id="manifest-123"),
             run_ledger_port=ledger_port,
+            metrics=metrics,
         )
         state_data = CompositeCheckpointState(
             composite_name="my_composite",
@@ -706,6 +708,16 @@ class TestLoadResume:
         assert state.seed_completed is True
         assert state.last_event_id == "entry-3"
         assert state.last_event_occurred_at == second_replayed.occurred_at
+        metrics.increment_counter.assert_any_call(
+            "bioetl_checkpoint_load_events_total",
+            1,
+            {"pipeline": "my_composite", "status": "loaded"},
+        )
+        metrics.increment_counter.assert_any_call(
+            "bioetl_checkpoint_load_events_total",
+            1,
+            {"pipeline": "my_composite", "status": "replayed"},
+        )
 
     @pytest.mark.asyncio
     async def test_resume_replay_preserves_snapshot_payloads_while_applying_flags(
@@ -764,17 +776,61 @@ class TestLoadResume:
         assert state.last_event_id == "entry-3"
 
     @pytest.mark.asyncio
+    async def test_resume_emits_replay_not_needed_when_no_suffix_entries_exist(
+        self,
+    ) -> None:
+        """Resume should surface that no ledger suffix replay was necessary."""
+        ledger_port = MagicMock()
+        metrics = MagicMock()
+        ledger_port.list_entries_after.return_value = []
+        svc, storage, _ = _make_service(
+            resume=True,
+            run_id="run-old",
+            expected_anchors=_anchors(manifest_id="manifest-123"),
+            run_ledger_port=ledger_port,
+            metrics=metrics,
+        )
+        state_data = CompositeCheckpointState(
+            composite_name="my_composite",
+            run_id="run-old",
+            state=CompositePipelineState.ENRICHING,
+            seed_completed=True,
+            manifest_id="manifest-123",
+            composite_run_identity="run-old",
+            last_event_id="entry-1",
+            last_event_occurred_at=datetime(2024, 6, 1, 9, 0, tzinfo=UTC),
+        )
+        storage.exists.return_value = True
+        storage.read.return_value = json.dumps(state_data.to_dict())
+
+        state = await svc.load()
+
+        assert state.last_event_id == "entry-1"
+        metrics.increment_counter.assert_any_call(
+            "bioetl_checkpoint_load_events_total",
+            1,
+            {"pipeline": "my_composite", "status": "loaded"},
+        )
+        metrics.increment_counter.assert_any_call(
+            "bioetl_checkpoint_load_events_total",
+            1,
+            {"pipeline": "my_composite", "status": "replay_not_needed"},
+        )
+
+    @pytest.mark.asyncio
     async def test_resume_raises_conflict_when_ledger_watermark_is_missing(
         self,
     ) -> None:
         """Resume fails fast when checkpoint watermark cannot be found in ledger."""
         ledger_port = MagicMock()
+        metrics = MagicMock()
         ledger_port.list_entries_after.side_effect = ValueError("missing watermark")
         svc, storage, _ = _make_service(
             resume=True,
             run_id="run-old",
             expected_anchors=_anchors(manifest_id="manifest-123"),
             run_ledger_port=ledger_port,
+            metrics=metrics,
         )
         state_data = CompositeCheckpointState(
             composite_name="my_composite",
@@ -790,6 +846,16 @@ class TestLoadResume:
 
         with pytest.raises(CheckpointConflictError):
             await svc.load()
+        metrics.increment_counter.assert_any_call(
+            "bioetl_checkpoint_load_events_total",
+            1,
+            {"pipeline": "my_composite", "status": "loaded"},
+        )
+        metrics.increment_counter.assert_any_call(
+            "bioetl_checkpoint_load_events_total",
+            1,
+            {"pipeline": "my_composite", "status": "replay_conflict"},
+        )
 
     @pytest.mark.asyncio
     async def test_resume_blocks_on_manifest_id_mismatch(self) -> None:

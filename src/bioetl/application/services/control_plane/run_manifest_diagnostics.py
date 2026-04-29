@@ -497,5 +497,4 @@ def build_diagnostics_summary(
     )
     return final_summary
 
-
 __all__ = ["build_diagnostics_summary"]

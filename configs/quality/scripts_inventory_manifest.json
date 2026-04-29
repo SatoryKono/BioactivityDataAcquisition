@@ -1,19 +1,19 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-29T06:23:19.089698+00:00",
+  "generated_at": "2026-04-29T06:33:06.536587+00:00",
   "summary": {
     "total_scripts": 367,
     "status_counts": {
-      "active": 320,
-      "supporting": 31,
-      "temporary_diagnostic": 16
+      "active": 322,
+      "supporting": 25,
+      "temporary_diagnostic": 20
     },
     "reference_group_coverage": {
       "agents": 4,
       "build": 2,
       "ci": 49,
       "docs": 121,
-      "scripts": 292,
+      "scripts": 294,
       "skills": 8,
       "tests": 131
     }
@@ -349,7 +349,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 205,
+          "line": 207,
           "source_group": "scripts",
           "text": "\"scripts/ai/codex/helper/check-env.ps1\","
         }
@@ -364,7 +364,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 206,
+          "line": 208,
           "source_group": "scripts",
           "text": "\"scripts/ai/codex/helper/check-env.sh\","
         }
@@ -559,7 +559,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 207,
+          "line": 209,
           "source_group": "scripts",
           "text": "\"scripts/ai/codex/helper/setup-env.sh\","
         }
@@ -978,7 +978,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 208,
+          "line": 210,
           "source_group": "scripts",
           "text": "\"scripts/ai/gemini/helper/check-env.ps1\","
         }
@@ -1137,7 +1137,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 209,
+          "line": 211,
           "source_group": "scripts",
           "text": "\"scripts/ai/gemini/helper/setup-env.sh\","
         }
@@ -2294,7 +2294,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 210,
+          "line": 212,
           "source_group": "scripts",
           "text": "\"scripts/ai/mistrall/helper/check-env.ps1\","
         }
@@ -2309,7 +2309,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 211,
+          "line": 213,
           "source_group": "scripts",
           "text": "\"scripts/ai/mistrall/helper/check-env.sh\","
         }
@@ -2482,7 +2482,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 212,
+          "line": 214,
           "source_group": "scripts",
           "text": "\"scripts/ai/mistrall/helper/setup-env.sh\","
         }
@@ -2611,7 +2611,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 213,
+          "line": 215,
           "source_group": "scripts",
           "text": "\"scripts/ai/mistrallvibe/helper/check-env.ps1\","
         }
@@ -2626,7 +2626,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 214,
+          "line": 216,
           "source_group": "scripts",
           "text": "\"scripts/ai/mistrallvibe/helper/check-env.sh\","
         }
@@ -2785,10 +2785,17 @@
     {
       "path": "scripts/ai/vibe/__main__.py",
       "type": "py",
-      "status": "supporting",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/engineering/repo/check_scripts_inventory.py",
+          "line": 205,
+          "source_group": "scripts",
+          "text": "\"scripts/ai/vibe/__main__.py\","
+        }
+      ]
     },
     {
       "path": "scripts/ai/vibe/launch.ps1",
@@ -8534,7 +8541,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 37,
+      "reference_count": 39,
       "references": [
         {
           "path": ".github/workflows/compiled-artifacts-block.yml",
@@ -9361,9 +9368,9 @@
     {
       "path": "scripts/ops/data/__main__.py",
       "type": "py",
-      "status": "supporting",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 10,
+      "reference_count": 11,
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
@@ -10191,7 +10198,7 @@
     {
       "path": "scripts/ops/runtime/docker/restart-docker.ps1",
       "type": "ps1",
-      "status": "supporting",
+      "status": "temporary_diagnostic",
       "agent_usage": [],
       "reference_count": 3,
       "references": [
@@ -10218,7 +10225,7 @@
     {
       "path": "scripts/ops/runtime/health/start_health_server.ps1",
       "type": "ps1",
-      "status": "supporting",
+      "status": "temporary_diagnostic",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
@@ -10226,7 +10233,7 @@
     {
       "path": "scripts/ops/runtime/neo4j/neo4j-recovery-checklist.ps1",
       "type": "ps1",
-      "status": "supporting",
+      "status": "temporary_diagnostic",
       "agent_usage": [],
       "reference_count": 4,
       "references": [
@@ -11510,7 +11517,7 @@
     {
       "path": "src/tools/neo4j_audit.py",
       "type": "py",
-      "status": "supporting",
+      "status": "temporary_diagnostic",
       "agent_usage": [],
       "reference_count": 8,
       "references": [
