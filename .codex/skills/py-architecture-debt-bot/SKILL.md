@@ -10,8 +10,8 @@ Run the role-specific workflow as defined in the py-architecture-debt-bot profil
 
 ## Source Of Truth
 
-- Primary profile: `../../../ai/claude/agents/py-architecture-debt-bot.md`
-- Team orchestration: `../../../ai/claude/agents/ORCHESTRATION.md`
+- Canonical runtime entrypoint: this `SKILL.md`
+- Team orchestration: `../../../.codex/agents/ORCHESTRATION.md`
 - Shared project context: `../../../docs/00-project/ai/memory/agent-memory.md`
 - Deterministic helpers:
   - `python -m scripts.qa generate-debt-tasks`
@@ -20,7 +20,7 @@ Run the role-specific workflow as defined in the py-architecture-debt-bot profil
 ## Workflow
 
 1. Start with the canonical memory loop from `../../../src/memory/DAILY_WORKFLOW.md` and run `python -m memory.tooling.workflow pre-task ...` for the debt-reduction task.
-1. Open and follow `../../../ai/claude/agents/py-architecture-debt-bot.md`.
+1. Treat this skill file as the canonical Codex runtime profile for the workflow.
 1. Use the deterministic helpers before editing code or delegating subagents.
 1. Keep `configs/` mutations delegated to `py-config-bot`.
 1. Close every debt-reduction wave with `py-test-bot`, `py-doc-bot`, and `py-audit-bot`.

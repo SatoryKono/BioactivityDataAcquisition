@@ -310,12 +310,10 @@ jobs:
                 with:
                     python-version: "3.12"
 
-            -   name: Run Track D fail-fast gate (fixtures + compatibility + linkage)
+            -   name: Run Track D fail-fast gate (runtime linkage)
                 run: |
                     mkdir -p reports/test-telemetry
                     uv run pytest \
-                      tests/architecture/test_config_ci_invariants.py::TestBronzeFixtureCoverage::test_bronze_fixture_coverage \
-                      tests/unit/application/core/test_checkpoint_manager.py::TestCheckpointManagerCompatibilityPolicy \
                       tests/integration/ci/test_track_d_fixture_control_plane_linkage.py \
                       -q --tb=short --maxfail=1 \
                       --junitxml=reports/test-telemetry/junit-track-d.xml

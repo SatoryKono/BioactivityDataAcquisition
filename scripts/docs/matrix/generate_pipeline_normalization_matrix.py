@@ -66,6 +66,9 @@ from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_target_component_relationships,
     normalize_profile_target_component_types,
 )
+from bioetl.domain.normalization.publication_structured_fields import (
+    publication_structured_field_policy,
+)
 from bioetl.domain.schemas.chembl.activity import ActivitySchema
 from bioetl.domain.schemas.chembl.assay import AssaySchema
 from bioetl.domain.schemas.chembl.assay_parameters import AssayParametersSchema
@@ -547,6 +550,13 @@ def _controlled_vocabulary_source(
     reference_source = REFERENCE_ID_SOURCES.get((provider, entity, field_name))
     if reference_source is not None:
         return reference_source
+    structured_policy = _publication_structured_policy(
+        provider=provider,
+        entity=entity,
+        field_name=field_name,
+    )
+    if structured_policy is not None and structured_policy.identifier_family:
+        return _REFERENCE_ID_SOURCE
 
     if provider == "chembl":
         policy_surface = chembl_policy_surface(entity, field_name)
@@ -715,6 +725,15 @@ def _semantic_category(
             return policy_surface.category
     if REFERENCE_ID_SOURCES.get((provider, entity, field_name)) is not None:
         return "ontology_reference_identifier"
+    structured_policy = _publication_structured_policy(
+        provider=provider,
+        entity=entity,
+        field_name=field_name,
+    )
+    if structured_policy is not None:
+        if structured_policy.identifier_family:
+            return "ontology_reference_identifier"
+        return "structured_json"
 
     if strictness in {
         "strict_enum",
@@ -740,6 +759,17 @@ def _hash_ordering(*, include_in_hash: bool | None, set_like: bool) -> str:
     if set_like:
         return "set_like"
     return "order_sensitive"
+
+
+def _publication_structured_policy(
+    *,
+    provider: str,
+    entity: str,
+    field_name: str,
+) -> Any | None:
+    if entity != "publication":
+        return None
+    return publication_structured_field_policy(f"{provider}.{entity}", field_name)
 
 
 def _strictness(

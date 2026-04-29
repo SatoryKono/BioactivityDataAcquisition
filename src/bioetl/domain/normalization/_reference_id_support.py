@@ -14,7 +14,7 @@ from bioetl.domain.normalization.text import normalize_string
 _GO_RE = re.compile(r"^GO[:_\s-]?(\d{7})$", re.IGNORECASE)
 _INTERPRO_RE = re.compile(r"^IPR[:_\s-]?(\d{6})$", re.IGNORECASE)
 _PFAM_RE = re.compile(r"^PF[:_\s-]?(\d{5})$", re.IGNORECASE)
-_REACTOME_RE = re.compile(r"^R-([A-Za-z0-9]+)-(\d+)$", re.IGNORECASE)
+_REACTOME_RE = re.compile(r"^R-([A-Z0-9]+)-(\d+)$", re.IGNORECASE)
 _PDB_RE = re.compile(r"^[A-Za-z0-9]{4}$")
 _ORCID_RE = re.compile(r"^\d{15}[\dX]$", re.IGNORECASE)
 _ISSN_RE = re.compile(r"^\d{7}[\dX]$", re.IGNORECASE)

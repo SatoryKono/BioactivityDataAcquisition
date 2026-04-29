@@ -47,6 +47,11 @@ from bioetl.domain.normalization.profiles.chembl_json_ordering_policy import (
 from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_canonical_smiles,
 )
+from bioetl.domain.normalization.publication_structured_fields import (
+    CollectionSemantics,
+    FieldRepresentation,
+    publication_structured_field_policy,
+)
 from bioetl.domain.schemas.chembl.publication_term import PublicationTermSchema
 
 _CHEMBL_PROFILES_BY_PIPELINE = {
@@ -57,6 +62,22 @@ _CHEMBL_PROFILES_BY_PIPELINE = {
     "chembl_target": CHEMBL_TARGET_PROFILE,
     "chembl_target_component": CHEMBL_TARGET_COMPONENT_PROFILE,
 }
+_NON_CHEMBL_PUBLICATION_PROFILES = {
+    "crossref.publication": CROSSREF_PUBLICATION_PROFILE,
+    "openalex.publication": OPENALEX_PUBLICATION_PROFILE,
+    "pubmed.publication": PUBMED_PUBLICATION_PROFILE,
+    "semanticscholar.publication": SEMANTICSCHOLAR_PUBLICATION_PROFILE,
+}
+
+
+def _load_non_chembl_normalization_cases() -> dict[str, object]:
+    fixture_path = (
+        Path(__file__).resolve().parents[4]
+        / "fixtures"
+        / "normalization"
+        / "non_chembl_identifier_cases.yaml"
+    )
+    return yaml.safe_load(fixture_path.read_text(encoding="utf-8"))
 
 
 def test_crossref_publication_profile_covers_schema_exactly() -> None:
@@ -266,13 +287,7 @@ def test_openalex_reference_ids_are_profile_canonicalized() -> None:
 
 
 def test_non_chembl_identifier_arrays_are_profile_canonicalized_from_fixture() -> None:
-    fixture_path = (
-        Path(__file__).resolve().parents[4]
-        / "fixtures"
-        / "normalization"
-        / "non_chembl_identifier_cases.yaml"
-    )
-    cases = yaml.safe_load(fixture_path.read_text(encoding="utf-8"))
+    cases = _load_non_chembl_normalization_cases()
 
     crossref_orcids = CROSSREF_PUBLICATION_PROFILE.rule_for("author_orcids")
     crossref_issns = CROSSREF_PUBLICATION_PROFILE.rule_for("issn_list")
@@ -325,6 +340,51 @@ def test_non_chembl_identifier_arrays_are_profile_canonicalized_from_fixture() -
         drugbank_ids.apply(uniprot_cases["drugbank_ids"]["input"])
         == uniprot_cases["drugbank_ids"]["expected"]
     )
+
+
+def test_non_chembl_publication_raw_type_policy_is_fixture_backed() -> None:
+    cases = _load_non_chembl_normalization_cases()
+
+    for case in cases["publication_raw_type_policy"].values():
+        profile = _NON_CHEMBL_PUBLICATION_PROFILES[case["profile"]]
+        rule = profile.rule_for(case["field"])
+
+        assert case["policy"] in {
+            "preserve_unknown_provider_value",
+            "raw_sidecar_preserved",
+        }
+        assert rule is not None
+        assert rule.apply(case["input"]) == case["expected"]
+
+
+def test_non_chembl_publication_oa_status_policy_is_fixture_backed() -> None:
+    cases = _load_non_chembl_normalization_cases()
+
+    for case in cases["publication_oa_status_policy"].values():
+        profile = _NON_CHEMBL_PUBLICATION_PROFILES[case["profile"]]
+        rule = profile.rule_for(case["field"])
+
+        assert case["policy"] in {"governed_registry", "fail_closed_unknown"}
+        assert rule is not None
+        assert rule.apply(case["input"]) == case["expected"]
+
+
+def test_non_chembl_publication_structured_policy_is_fixture_backed() -> None:
+    cases = _load_non_chembl_normalization_cases()
+
+    for case in cases["publication_structured_field_policy"].values():
+        profile = _NON_CHEMBL_PUBLICATION_PROFILES[case["profile"]]
+        rule = profile.rule_for(case["field"])
+        policy = publication_structured_field_policy(case["profile"], case["field"])
+
+        assert rule is not None
+        assert policy is not None
+        assert rule.apply(case["input"]) == case["expected"]
+        assert policy.collection_semantics is CollectionSemantics(
+            case["collection_semantics"]
+        )
+        assert policy.representation is FieldRepresentation(case["representation"])
+        assert policy.raw_sidecar_field == case["raw_sidecar_field"]
 
 
 def test_publication_oa_status_profiles_use_shared_governed_registry() -> None:

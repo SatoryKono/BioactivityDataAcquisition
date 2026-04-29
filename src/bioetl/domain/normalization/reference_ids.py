@@ -9,9 +9,17 @@ from bioetl.domain.normalization._reference_id_json_normalizers import (
 )
 from bioetl.domain.normalization._reference_id_openalex import (
     normalize_openalex_author_reference_id as _normalize_openalex_author_reference_id,
+)
+from bioetl.domain.normalization._reference_id_openalex import (
     normalize_openalex_institution_reference_id as _normalize_openalex_institution_reference_id,
+)
+from bioetl.domain.normalization._reference_id_openalex import (
     normalize_openalex_reference_id,
+)
+from bioetl.domain.normalization._reference_id_openalex import (
     normalize_openalex_topic_reference_id as _normalize_openalex_topic_reference_id,
+)
+from bioetl.domain.normalization._reference_id_openalex import (
     normalize_openalex_work_reference_id as _normalize_openalex_work_reference_id,
 )
 from bioetl.domain.normalization._reference_id_registry import (
@@ -19,7 +27,6 @@ from bioetl.domain.normalization._reference_id_registry import (
     ReferenceNormalizer,
     build_reference_identifier_families,
 )
-
 from bioetl.domain.normalization._reference_id_support import (
     _CHEMBL_ID_RE,
     _DRUGBANK_ID_RE,
@@ -68,6 +75,7 @@ __all__ = [
     "reference_identifier_families",
     "reference_identifier_family",
 ]
+
 
 def _normalize_go_text(value: str) -> str | None:
     match = _GO_RE.fullmatch(_strip_prefixes(value, _OBO_IRI_PREFIXES))
@@ -203,6 +211,7 @@ _REFERENCE_IDENTIFIER_FAMILIES = build_reference_identifier_families(
         "openalex_institution": _normalize_openalex_institution_reference_id,
         "openalex_topic": _normalize_openalex_topic_reference_id,
         "openalex_work": _normalize_openalex_work_reference_id,
+        "semantic_scholar_author": normalize_semantic_scholar_reference_id,
         "semantic_scholar_paper": normalize_semantic_scholar_reference_id,
         "uniprot_accession": normalize_uniprot_accession_reference_id,
         "go": normalize_go_reference_id,
@@ -227,4 +236,3 @@ def reference_identifier_families() -> tuple[ReferenceIdentifierFamily, ...]:
 def reference_identifier_family(name: str) -> ReferenceIdentifierFamily:
     """Return one governed reference identifier family by stable registry name."""
     return _REFERENCE_IDENTIFIER_FAMILY_BY_NAME[name]
-

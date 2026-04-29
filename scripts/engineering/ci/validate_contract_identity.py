@@ -12,6 +12,7 @@ from bioetl.domain.control_plane.contract_registry import (
     RegistryValidationIssue,
     RegistryValidationSeverity,
 )
+from bioetl.infrastructure.control_plane import FileContractRegistryStore
 
 
 def _issue_payload(issue: RegistryValidationIssue) -> dict[str, Any]:
@@ -218,7 +219,7 @@ def main() -> int:
         return 1
 
     try:
-        registry = ContractRegistry(registry_path)
+        registry = FileContractRegistryStore(registry_path).load()
         print(
             f"::notice::Loaded contract registry with {len(registry.entries)} entries"
         )

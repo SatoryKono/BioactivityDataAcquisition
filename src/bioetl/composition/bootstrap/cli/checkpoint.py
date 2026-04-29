@@ -12,7 +12,7 @@ Note:
 
 from __future__ import annotations
 
-from uuid import uuid4
+from uuid import UUID
 
 from bioetl.application.core.lifecycle.checkpoint_manager import (
     CheckpointManagerService,
@@ -51,6 +51,7 @@ from bioetl.infrastructure.config import get_settings
 from bioetl.infrastructure.time import SystemClock
 
 __all__ = [
+    "CLI_INSPECTION_RUN_ID",
     "bootstrap_audit_inspection_service",
     "bootstrap_checkpoint_manager",
     "bootstrap_checkpoint_service",
@@ -58,6 +59,9 @@ __all__ = [
     "bootstrap_quarantine_manager",
     "bootstrap_quarantine_service",
 ]
+
+CLI_INSPECTION_RUN_ID = RunID(UUID("00000000-0000-0000-0000-000000003353"))
+"""Deterministic sentinel run id for operator-only checkpoint inspection."""
 
 
 def bootstrap_quarantine_manager(pipeline_name: str) -> QuarantineManagerService:
@@ -83,7 +87,7 @@ def bootstrap_checkpoint_manager(pipeline_name: str) -> CheckpointManagerService
     """Bootstrap CheckpointManagerService for CLI inspection operations.
 
     Creates a minimal CheckpointManagerService for checkpoint listing and inspection.
-    Uses NoOpLogger and dummy run_id since CLI operations don't need full
+    Uses NoOpLogger and a deterministic sentinel run_id since CLI operations don't need full
     pipeline execution context.
 
     Args:
@@ -102,7 +106,7 @@ def bootstrap_checkpoint_manager(pipeline_name: str) -> CheckpointManagerService
         checkpoint_port=checkpoint_port,
         logger=noop_logger,
         pipeline_name=pipeline_name,
-        run_id=RunID(uuid4()),  # Dummy run_id for CLI inspection
+        run_id=CLI_INSPECTION_RUN_ID,
         resume=False,
         checkpoint_compatibility_service=compatibility_service,
     )

@@ -84,8 +84,8 @@ def _build_pipeline_metrics(
     return PipelineMetricsRecorder(host._metrics, f"composite:{host._config.name}")
 
 
-class CompositeRunnerControlPlaneMixin:
-    """Mixin that emits composite lifecycle events into RunLedgerService."""
+class _CompositeRunnerLedgerLifecycleMixin:
+    """Ledger lifecycle helpers shared by composite runner control-plane flows."""
 
     _run_ledger_service: RunLedgerService | None
     _manifest_id: str | None
@@ -208,6 +208,10 @@ class CompositeRunnerControlPlaneMixin:
     ) -> None:
         """Append one ``stage_started`` entry for merge phase."""
         self._record_stage_started(stage=_MERGE_STAGE_NAME)
+
+
+class _CompositeRunnerPhaseCompletionMixin:
+    """Composite stage-completion helpers and metrics emission."""
 
     def _record_run_finished(
         self: _CompositeRunnerControlPlaneHostProtocol,
@@ -417,3 +421,10 @@ class CompositeRunnerControlPlaneMixin:
             stage=_MERGE_STAGE_NAME,
             metrics_snapshot=build_merge_stage_metrics(merge_result),
         )
+
+
+class CompositeRunnerControlPlaneMixin(
+    _CompositeRunnerPhaseCompletionMixin,
+    _CompositeRunnerLedgerLifecycleMixin,
+):
+    """Mixin that emits composite lifecycle events into RunLedgerService."""

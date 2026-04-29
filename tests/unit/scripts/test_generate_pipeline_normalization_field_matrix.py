@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import cast
 
 import pytest
+import yaml
 
 from scripts.docs.generate_pipeline_normalization_field_matrix import (
     CSV_NAME,
@@ -35,6 +36,9 @@ from scripts.docs.generate_pipeline_normalization_field_matrix import (
 )
 from bioetl.domain.normalization.profiles.chembl_json_ordering_policy import (
     CHEMBL_JSON_ORDERING_POLICY,
+)
+from bioetl.domain.normalization.publication_structured_fields import (
+    publication_structured_field_policies,
 )
 from tests.helpers import (
     assert_check_artifacts_detects_drift,
@@ -554,6 +558,69 @@ def test_build_field_matrix_rows_exposes_non_chembl_governance_sources() -> None
     uniprot_all_mappings = _row(rows, "uniprot_idmapping", "all_mappings")
     assert uniprot_all_mappings["normalizer"] == "normalize_profile_uniprot_accessions"
     assert uniprot_all_mappings["hash_ordering"] == "set_like"
+
+
+def test_non_chembl_offline_fixture_cases_are_visible_in_matrix() -> None:
+    fixture_path = (
+        Path(__file__).resolve().parents[2]
+        / "fixtures"
+        / "normalization"
+        / "non_chembl_identifier_cases.yaml"
+    )
+    cases = yaml.safe_load(fixture_path.read_text(encoding="utf-8"))
+    rows = build_field_matrix_rows()
+
+    for case in cases["publication_raw_type_policy"].values():
+        row = _row(rows, case["profile"].replace(".", "_"), case["field"])
+        assert row["controlled_vocabulary_source"] == (
+            "configs/vocab/publication_controlled.yaml"
+        )
+        assert row["policy_scope"] == "provider_full_universe"
+        assert row["strictness"] == "normalization_only"
+
+    for case in cases["publication_oa_status_policy"].values():
+        row = _row(rows, case["profile"].replace(".", "_"), case["field"])
+        assert row["controlled_vocabulary_source"] == (
+            "domain.schemas.common.publication_base.OA_STATUS_VALUES"
+        )
+        assert row["strictness"] == "strict_enum"
+
+    for case in cases["publication_structured_field_policy"].values():
+        row = _row(rows, case["profile"].replace(".", "_"), case["field"])
+        assert row["semantic_category"] == "structured_json"
+        assert row["hash_ordering"] == "set_like"
+        assert row["controlled_vocabulary_source"] == (
+            "configs/vocab/publication_controlled.yaml"
+        )
+
+
+def test_build_field_matrix_rows_exposes_publication_structured_field_registry() -> (
+    None
+):
+    rows = build_field_matrix_rows()
+    rows_by_key = {
+        (row["provider"], row["entity"], row["field_name"]): row for row in rows
+    }
+    matched_policies = 0
+
+    for policy in publication_structured_field_policies():
+        provider, entity = policy.profile_name.split(".", maxsplit=1)
+        row = rows_by_key.get((provider, entity, policy.field_name))
+        if row is None:
+            continue
+        matched_policies += 1
+
+        assert row["semantic_category"] in {
+            "ontology_reference_identifier",
+            "structured_json",
+        }
+        assert row["hash_ordering"] == policy.hash_ordering
+        if policy.identifier_family is not None:
+            assert row["controlled_vocabulary_source"] == (
+                "domain.normalization.reference_ids"
+            )
+
+    assert matched_policies > 0
 
 
 def test_build_field_matrix_rows_keeps_chembl_cell_line_policy_fields_visible() -> None:

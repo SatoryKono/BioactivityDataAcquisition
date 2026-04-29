@@ -29,6 +29,17 @@
 composite:
   name: composite_molecule
   version: "1.0.0"
+  normalized_anchor_policy:
+    pubchem_compound:
+      join_boundary:
+        active_join_keys:
+          - inchi_key
+          - canonical_smiles
+        retained_validation_anchors:
+          - standardized_inchi_key
+          - structure_parent_key
+        activation_condition: seed pipelines emit matching normalized PubChem anchors
+        rationale: PubChem normalized anchors are retained in composite output but not used as symmetric join keys until seed sources expose the same anchor family.
 
   # ---------------------------------------------------------------------------
   # Seed Pipeline Configuration

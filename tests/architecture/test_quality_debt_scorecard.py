@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 from datetime import date
+import importlib.util
 from pathlib import Path
+import sys
+from types import ModuleType
 
 import yaml
 
@@ -26,6 +29,9 @@ from bioetl.infrastructure.quality import (
     validate_debt_scorecard,
     validate_scorecard_registry_sync,
 )
+
+
+ROOT = Path(__file__).resolve().parents[2]
 
 
 def _owner_diversification_settings(
@@ -143,6 +149,15 @@ def _technical_debt_entry_count() -> int:
         for entry in _iter_registry_entries(registries)
         if _is_technical_debt_entry(entry)
     )
+
+
+def _load_module(path: Path, module_name: str) -> ModuleType:
+    spec = importlib.util.spec_from_file_location(module_name, str(path.resolve()))
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[module_name] = module
+    spec.loader.exec_module(module)
+    return module
 
 
 def test_debt_scorecard_schema_is_valid() -> None:
@@ -269,6 +284,57 @@ def test_debt_scorecard_declares_explicit_coarse_budget_sync() -> None:
         assert (
             isinstance(metric.get("ratchet_policy"), str) and metric["ratchet_policy"]
         ), f"governance.coarse_budgets.{metric_name}.ratchet_policy must be non-empty"
+
+
+def test_debt_scorecard_declares_compatibility_debt_kpis() -> None:
+    """Compatibility facades and sunset shims must be visible scorecard debt."""
+    scorecard = load_debt_scorecard()
+    compatibility = scorecard.get("compatibility_debt_metrics", {})
+    assert isinstance(compatibility, dict)
+    assert (
+        compatibility.get("inventory_source")
+        == "configs/quality/compatibility_facade_inventory.yaml"
+    )
+    assert (
+        compatibility.get("sunset_source") == "tests/architecture/test_compat_sunset.py"
+    )
+
+    metrics = compatibility.get("metrics", {})
+    assert isinstance(metrics, dict)
+
+    inventory_path = ROOT / "configs/quality/compatibility_facade_inventory.yaml"
+    inventory_payload = yaml.safe_load(inventory_path.read_text(encoding="utf-8"))
+    assert isinstance(inventory_payload, dict)
+    retained_entrypoints = inventory_payload.get("retained_entrypoints")
+    assert isinstance(retained_entrypoints, list)
+
+    sunset_module = _load_module(
+        ROOT / "tests/architecture/test_compat_sunset.py",
+        "compat_sunset_scorecard_loader",
+    )
+    sunset_count = len(sunset_module.COMPAT_FILES) + len(sunset_module.COMPAT_MODULES)
+    expired_count = 0 if date.today() <= sunset_module.SUNSET_DATE else sunset_count
+
+    expected_counts = {
+        "retained_public_facade_count": len(retained_entrypoints),
+        "sunset_compat_count": sunset_count,
+        "expired_compat_count": expired_count,
+    }
+    for metric_name, expected_count in expected_counts.items():
+        metric = metrics.get(metric_name)
+        assert isinstance(metric, dict), (
+            f"compatibility_debt_metrics.metrics.{metric_name} must be a mapping"
+        )
+        assert metric.get("current_count") == expected_count
+        assert isinstance(metric.get("owner"), str) and metric["owner"]
+        assert isinstance(metric.get("linked_issue"), str) and metric["linked_issue"]
+        assert isinstance(metric.get("rationale"), str) and metric["rationale"]
+        assert (
+            isinstance(metric.get("ratchet_policy"), str) and metric["ratchet_policy"]
+        )
+
+    expired_metric = metrics["expired_compat_count"]
+    assert expired_metric.get("max_count") == 0
 
 
 def test_debt_scorecard_enforces_budget_only_temporary_windows() -> None:

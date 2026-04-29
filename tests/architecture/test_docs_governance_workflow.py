@@ -27,6 +27,7 @@ def test_docs_governance_profile_covers_doc_sync_architecture_tests() -> None:
         "tests/architecture/test_architecture_dependency_docs_drift.py::test_dependency_map_drift_check_passes_current_repo",
         "tests/architecture/test_config_topology_docs_drift.py",
         "tests/architecture/test_diagram_narrative_docs_sync.py",
+        "tests/architecture/test_documentation_audit_remediation.py",
         "tests/architecture/test_docs_governance_workflow.py",
         "tests/architecture/test_docs_version_sync.py::TestDocsVersionSync::test_required_docs_synced",
         "tests/architecture/test_documentation_sync.py::test_mkdocs_nav_references_existing_markdown_files",

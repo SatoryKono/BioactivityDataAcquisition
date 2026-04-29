@@ -21,3 +21,52 @@ uniprot_identifier_arrays:
   drugbank_ids:
     input: '["db00001","DB00002"]'
     expected: '["DB00001","DB00002"]'
+publication_raw_type_policy:
+  crossref_publication_type_unknown:
+    profile: crossref.publication
+    field: publication_type
+    input: " future-provider-type "
+    expected: future-provider-type
+    policy: preserve_unknown_provider_value
+  openalex_publication_type_unknown:
+    profile: openalex.publication
+    field: publication_type
+    input: " future-openalex-type "
+    expected: future-openalex-type
+    policy: preserve_unknown_provider_value
+  openalex_type_crossref_known:
+    profile: openalex.publication
+    field: type_crossref
+    input: " journal-article "
+    expected: journal-article
+    policy: raw_sidecar_preserved
+publication_oa_status_policy:
+  openalex_known_status:
+    profile: openalex.publication
+    field: oa_status
+    input: " GOLD "
+    expected: gold
+    policy: governed_registry
+  semanticscholar_unknown_status:
+    profile: semanticscholar.publication
+    field: oa_status
+    input: unknown
+    expected: null
+    policy: fail_closed_unknown
+publication_structured_field_policy:
+  pubmed_publication_type_list:
+    profile: pubmed.publication
+    field: publication_type_list
+    input: '["Review","Journal Article"]'
+    expected: '["Review","Journal Article"]'
+    collection_semantics: unordered_set
+    representation: canonical_json_string
+    raw_sidecar_field: publication_type
+  semanticscholar_publication_types:
+    profile: semanticscholar.publication
+    field: publication_types
+    input: '["JournalArticle","Review"]'
+    expected: '["JournalArticle","Review"]'
+    collection_semantics: unordered_set
+    representation: canonical_json_string
+    raw_sidecar_field: publication_type

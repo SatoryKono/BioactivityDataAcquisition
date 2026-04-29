@@ -1,0 +1,94 @@
+version: 1
+policy_scope: ci_heavy_lane_rebalance
+workflow_path: .github/workflows/tests.yml
+source_issue: 3329
+updated_at: "2026-04-29"
+success_metrics:
+  track_d_gate_scope:
+    target: "Track D gate runs only the replay/control-plane runtime linkage suite."
+    telemetry_artifact: test-telemetry-track-d
+    before:
+      included_unit_like_scenarios:
+        - tests/architecture/test_config_ci_invariants.py::TestBronzeFixtureCoverage::test_bronze_fixture_coverage
+        - tests/unit/application/core/test_checkpoint_manager.py::TestCheckpointManagerCompatibilityPolicy
+    after:
+      retained_heavy_scenarios:
+        - tests/integration/ci/test_track_d_fixture_control_plane_linkage.py
+  coverage_verify_scope:
+    target: "Coverage verification combines shards and runs only the serial subset."
+    serial_marker: "serial and not e2e and not benchmark and not memory"
+    known_exclusions:
+      - tests/e2e
+      - tests/contract
+  duration_telemetry:
+    target: "JUnit duration artifacts remain available for before/after lane timing review."
+    artifact: test-duration-telemetry
+    required_inputs:
+      - test-telemetry-track-d
+      - test-telemetry-fast
+      - test-telemetry-memory
+      - test-telemetry-${{ matrix.test-group.name }}
+lanes:
+  - job: track-d-gates
+    owner: reproducibility-control-plane
+    classification: full_bootstrap_boundary
+    full_bootstrap_policy: "Only replay/control-plane linkage scenarios may run here."
+    retained_scenarios:
+      - path: tests/integration/ci/test_track_d_fixture_control_plane_linkage.py
+        reason: "Exercises cached Bronze, run manifest, effective config, lineage, and exact replay linkage end to end."
+    relocated_scenarios:
+      - path: tests/architecture/test_config_ci_invariants.py::TestBronzeFixtureCoverage::test_bronze_fixture_coverage
+        new_lane: test-fast
+        reason: "Architecture fixture inventory check is covered by the fast architecture lane."
+      - path: tests/unit/application/core/test_checkpoint_manager.py::TestCheckpointManagerCompatibilityPolicy
+        new_lane: test-fast
+        reason: "Checkpoint policy unit checks are covered by the fast unit lane."
+    telemetry_artifact: test-telemetry-track-d
+  - job: control-plane-e2e
+    owner: control-plane-runtime
+    classification: e2e_control_plane_smoke
+    full_bootstrap_policy: "One provider full-cycle smoke validates runtime completeness without duplicating matrix coverage."
+    retained_scenarios:
+      - path: tests/e2e/test_pubchem_compound_e2e.py::test_pubchem_compound_full_cycle
+        reason: "Bounded e2e control-plane completeness smoke."
+    telemetry_artifact: control-plane-completeness
+  - job: test-matrix
+    owner: broad-suite-coverage
+    classification: parallel_coverage_shards
+    full_bootstrap_policy: "Parallel unit/integration/security shards provide breadth and coverage data without serial-only or memory tests."
+    retained_scenarios:
+      - path: tests/unit/domain/
+      - path: tests/unit/application/
+      - path: tests/unit/infrastructure/
+      - path: tests/unit/
+      - path: tests/integration/
+      - path: tests/security/
+    marker_expression: "not serial and not memory"
+    telemetry_artifact: test-telemetry-${{ matrix.test-group.name }}
+  - job: memory-tests
+    owner: memory-tooling
+    classification: isolated_environment_sensitive_lane
+    full_bootstrap_policy: "Memory-marked Neo4j/tooling checks stay isolated from coverage and broad parallel shards."
+    retained_scenarios:
+      - path: tests/unit/scripts/ops/
+        marker_expression: memory
+    telemetry_artifact: test-telemetry-memory
+  - job: performance-budgets
+    owner: performance-governance
+    classification: benchmark_budget_lane
+    full_bootstrap_policy: "Benchmark/performance budget checks run outside fast feedback and coverage verification."
+    retained_scenarios:
+      - path: tests/performance/test_hotspot_budgets.py
+        marker_expression: "benchmark and performance"
+    telemetry_artifact: performance-hotspot-budgets
+  - job: coverage-verify
+    owner: coverage-governance
+    classification: serial_plus_combined_threshold
+    full_bootstrap_policy: "Combines coverage shards and executes only serial tests that cannot run safely under xdist."
+    retained_scenarios:
+      - path: tests/
+        marker_expression: "serial and not e2e and not benchmark and not memory"
+    excluded_paths:
+      - tests/e2e
+      - tests/contract
+    telemetry_artifact: coverage-report

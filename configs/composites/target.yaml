@@ -33,6 +33,14 @@
 composite:
   name: composite_target
   version: "1.2.0"
+  normalized_anchor_policy:
+    uniprot_idmapping:
+      join_boundary:
+        source_anchor: target_id
+        normalized_output_anchor: uniprot_accession
+        required_status: found
+        downstream_pipeline: uniprot_protein
+        rationale: UniProt accession joins are chained through normalized idmapping output and filtered to mapping_status='found'.
 
   # ---------------------------------------------------------------------------
   # Seed Pipeline Configuration
