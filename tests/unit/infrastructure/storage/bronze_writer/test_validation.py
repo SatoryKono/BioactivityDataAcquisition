@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from testing_support.bronze_writer import (  # noqa: F401
+from tests.testing_support.bronze_writer import (  # noqa: F401
     TestBronzeWriterInit,
     TestBronzeWriterJsonValidation,
     TestBronzeWriterNameValidation,

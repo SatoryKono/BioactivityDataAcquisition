@@ -204,33 +204,10 @@ quality:
     severity: warn
     error_message: "Publication year before 1950 \u2014 will be filtered at Gold stage"
   - field: publication_type
-    type: enum
-    allowed:
-    - peer-review
-    - article
-    - preprint
-    - dataset
-    - database
-    - dissertation
-    - report
-    - report-component
-    - supplementary-materials
-    - software
-    - review
-    - editorial
-    - letter
-    - erratum
-    - retraction
-    - book
-    - book-chapter
-    - book-section
-    - reference-entry
-    - standard
-    - paratext
-    - libguides
-    - grant
-    - other
+    type: pattern
+    pattern: ^\S(?:.*\S)?$
     nullable: true
+    error_message: Raw OpenAlex publication_type must be non-empty when present
   - field: citations_received
     type: range
     min: 0

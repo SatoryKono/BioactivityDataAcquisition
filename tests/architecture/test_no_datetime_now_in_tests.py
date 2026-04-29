@@ -85,7 +85,6 @@ ALLOWED_PATHS: set[str] = {
     "unit/application/services/test_run_ledger_service.py",
     "unit/application/services/test_run_manifest_diagnostics.py",
     "unit/composition/factories/pipeline/test_checkpoint_metadata_helpers.py",
-    "unit/domain/control_plane/test_contract_registry.py",
     "unit/domain/models/test_metadata_output.py",
     "unit/domain/ports/test_noop_audit.py",
     "unit/domain/ports/test_port_dtos.py",

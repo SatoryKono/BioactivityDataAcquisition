@@ -213,7 +213,9 @@ async def test_write_bronze_metadata_records_artifact_publication() -> None:
 
 @pytest.mark.unit
 @pytest.mark.asyncio
-async def test_write_bronze_metadata_tracks_disabled_publication_when_no_recorder() -> None:
+async def test_write_bronze_metadata_tracks_disabled_publication_when_no_recorder() -> (
+    None
+):
     metrics = MagicMock()
     writer = MetadataWriter(logger=NoOpLogger(), metrics=metrics)
     metadata = _make_bronze_metadata()
@@ -242,7 +244,9 @@ async def test_write_bronze_metadata_tracks_disabled_publication_when_no_recorde
 
 @pytest.mark.unit
 @pytest.mark.asyncio
-async def test_write_bronze_metadata_tracks_failed_publication_when_recorder_raises() -> None:
+async def test_write_bronze_metadata_tracks_failed_publication_when_recorder_raises() -> (
+    None
+):
     metrics = MagicMock()
     writer = MetadataWriter(logger=NoOpLogger(), metrics=metrics)
     metadata = _make_bronze_metadata()

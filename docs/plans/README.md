@@ -82,16 +82,19 @@ This is now the only active execution/backlog document in `docs/plans/`.
 - [mcp-wrapper-contract-audit-2026-04-28.md](mcp-wrapper-contract-audit-2026-04-28.md)
 - [build-docs-site-parity-audit-2026-04-29.md](build-docs-site-parity-audit-2026-04-29.md)
 - [mcp-wrapper-deep-audit-2026-04-29.md](mcp-wrapper-deep-audit-2026-04-29.md)
+- [mcp-wrapper-redesign-prerequisites-2026-04-29.md](mcp-wrapper-redesign-prerequisites-2026-04-29.md)
 - [temporary-diagnostic-ttl-review-plan-2026-04-29.md](temporary-diagnostic-ttl-review-plan-2026-04-29.md)
 - [repo-governance-wrapper-closeout-2026-04-29.md](repo-governance-wrapper-closeout-2026-04-29.md)
 - [root-hygiene-cleanup-hardening-2026-04-29.md](root-hygiene-cleanup-hardening-2026-04-29.md)
 - [root-hygiene-review-lane-automation-2026-04-29.md](root-hygiene-review-lane-automation-2026-04-29.md)
 - [scripts-supporting-retained-set-closeout-2026-04-29.md](scripts-supporting-retained-set-closeout-2026-04-29.md)
+- [scripts-supporting-taxonomy-2026-04-29.md](scripts-supporting-taxonomy-2026-04-29.md)
 - [temporary-diagnostic-ttl-wave-1-closeout-2026-04-29.md](temporary-diagnostic-ttl-wave-1-closeout-2026-04-29.md)
 - [temporary-diagnostic-ttl-wave-2-closeout-2026-04-29.md](temporary-diagnostic-ttl-wave-2-closeout-2026-04-29.md)
 - [temporary-diagnostic-ttl-wave-3-closeout-2026-04-29.md](temporary-diagnostic-ttl-wave-3-closeout-2026-04-29.md)
 - [temporary-diagnostic-program-closeout-2026-04-29.md](temporary-diagnostic-program-closeout-2026-04-29.md)
 - [scripts-normalization-program-closeout-2026-04-29.md](scripts-normalization-program-closeout-2026-04-29.md)
+- [testing-support-migration-plan-2026-04-25.md](testing-support-migration-plan-2026-04-25.md)
 
 Earlier operational context files such as
 `onboarding-checklist-day-1-2026-03-20.md` and
@@ -178,6 +181,17 @@ The MCP wrapper deep audit was added on `2026-04-29` to classify the retained
 contract, and redesign prerequisites. It complements the earlier contract note
 with a body-level family map.
 
+The MCP wrapper redesign prerequisites note was added on `2026-04-29` to turn
+that audit into an implementation gate: future wrapper simplification must
+start with an explicit metadata model in `setup_mcp.py`, not with ad-hoc stem
+renames or generic-wrapper collapse.
+
+The testing-support migration plan was refreshed on `2026-04-29` against the
+live workspace snapshot. It now recommends a single-wave migration from the
+root-level `testing_support/` package into `tests/testing_support/`, because
+all currently known callers are test-only and `tests/__init__.py` already makes
+the destination package importable.
+
 The temporary diagnostic TTL review plan was added on `2026-04-29` to prevent
 `temporary_diagnostic` from becoming an unowned retention bucket. It groups the
 remaining bounded diagnostics by troubleshooting purpose, assigns explicit
@@ -205,6 +219,12 @@ freeze the remaining `supporting` inventory cluster as an intentional retained
 surface. It also records that `scripts/ops/data/__main__.py` is now treated as
 `active`, so earlier “unknown/compatibility-oriented” audit language for that
 router should be read as historical context rather than live classification.
+
+The scripts supporting taxonomy note was added on `2026-04-29` to make the
+retained `supporting` bucket semantically explicit: the inventory status stays
+`supporting`, while lifecycle `decision` acts as the authoritative subtype for
+compatibility wrappers, Windows companion launchers, shared helpers, and other
+retained non-active surfaces.
 
 The temporary diagnostic TTL wave 1 closeout note was added on `2026-04-29` to
 record the first execution wave after the TTL plan: two zero-reference

@@ -1,6 +1,6 @@
 ______________________________________________________________________
 
-Version: 6.1.0
+Version: 6.1.1
 Status: active
 Class: published
 Owner: BioETL Team
@@ -16,7 +16,7 @@ ______________________________________________________________________
 Руководство по настройке конфигурации ETL-пайплайнов в BioETL.
 
 **Версия:** 6.1.0
-**Дата обновления:** 2026-03-20
+**Дата обновления:** 2026-04-29
 
 ______________________________________________________________________
 
@@ -559,7 +559,7 @@ sink:
     enabled: true
     format: delta
     path: data/output/silver/chembl/activity
-    mode: merge                    # merge | overwrite
+    mode: merge                    # merge | append | delete
     primary_key: ["activity_id"]
     deterministic: true
     sort_by:
@@ -571,7 +571,7 @@ sink:
     enabled: true
     format: delta                  # delta | parquet
     path: data/output/gold/chembl/activity
-    mode: overwrite
+    mode: overwrite                # append | overwrite | scd2
     partition_by: ["standard_type"]
     flat-structure: true
     csv_export:
@@ -586,11 +586,17 @@ sink:
 
 ### Write Modes
 
+> **Canonical owner:** this guide documents YAML usage only. Normative
+> write-mode semantics live in `docs/00-project/RULES.md` §2.1.1-§2.1.2 and
+> the runtime enums in `src/bioetl/domain/medallion.py`.
+
 | Mode        | Bronze        | Silver            | Gold              |
 | ----------- | ------------- | ----------------- | ----------------- |
 | `append`    | Только append | —                 | —                 |
 | `merge`     | —             | Upsert по PK      | —                 |
-| `overwrite` | —             | Полная перезапись | Полная перезапись |
+| `delete`    | —             | Полная перезапись | —                 |
+| `overwrite` | —             | —                 | Полная перезапись |
+| `scd2`      | —             | —                 | Историзация Type 2 |
 
 ### Schema Mismatch Handling
 

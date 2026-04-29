@@ -170,39 +170,10 @@ quality:
     severity: warn
     error_message: "Publication year before 1950 \u2014 will be filtered at Gold stage"
   - field: publication_type
-    type: enum
-    allowed:
-    - peer-review
-    - journal-article
-    - proceedings-article
-    - posted-content
-    - dataset
-    - database
-    - dissertation
-    - report
-    - report-component
-    - component
-    - book
-    - book-chapter
-    - book-section
-    - book-part
-    - book-track
-    - book-set
-    - book-series
-    - edited-book
-    - reference-book
-    - monograph
-    - reference-entry
-    - standard
-    - journal
-    - journal-issue
-    - journal-volume
-    - proceedings
-    - proceedings-series
-    - report-series
-    - grant
-    - other
+    type: pattern
+    pattern: ^\S(?:.*\S)?$
     nullable: true
+    error_message: Raw Crossref publication_type must be non-empty when present
   - field: citations_received
     type: range
     min: 0

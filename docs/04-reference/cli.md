@@ -1,6 +1,6 @@
 ______________________________________________________________________
 
-Version: 6.1.2
+Version: 6.1.3
 Status: active
 Class: published
 Owner: BioETL Team
@@ -17,8 +17,8 @@ BioETL command-line interface (CLI) - основной способ взаимо
 Построен на фреймворке **Click** для стабильности и расширяемости.
 
 **Версия:** 6.1.2
-**Дата обновления:** 2026-04-28
-**Статус парадита:** ✅ Все команды документированы
+**Дата обновления:** 2026-04-29
+**Статус покрытия:** published command and operator surface
 
 ______________________________________________________________________
 
@@ -895,11 +895,60 @@ includes:
 - `alert_signals`;
 - `next_steps`.
 
+CLI reference owns the command and option inventory for this inspection
+surface. The control-plane contract owns persistence-profile semantics,
+event taxonomy, and rollout flags.
+
 #### `checkpoint list` — Список checkpoint
 
 ```bash
 bioetl checkpoint list --pipeline <NAME>
 ```
+
+| Опция        | Тип | По умолчанию | Описание      |
+| ------------ | --- | ------------ | ------------- |
+| `--pipeline` | str | Required     | Имя пайплайна |
+
+#### `checkpoint audit-run` — Correlated audit + run-manifest view for one run
+
+```bash
+bioetl checkpoint audit-run --run-id <UUID> [--limit 100] [--format text|json|yaml]
+```
+
+| Опция      | Тип    | По умолчанию | Описание               |
+| ---------- | ------ | ------------ | ---------------------- |
+| `--run-id` | str    | Required     | `RUN_ID` запуска       |
+| `--limit`  | int    | `100`        | Максимум audit entries |
+| `--format` | choice | `text`       | `text`, `json`, `yaml` |
+
+Показывает correlated inspection payload для одного `run_id`:
+
+- audit entries;
+- linked run-manifest diagnostics;
+- `persistence_profile`;
+- `composite_resume_reconstructability`;
+- `alert_signals`;
+- `next_steps`.
+
+#### `checkpoint inspect` — Checkpoint state with correlated audit and manifest context
+
+```bash
+bioetl checkpoint inspect --pipeline <NAME> [--run-id <UUID>] [--audit-limit 100] [--format text|json|yaml]
+```
+
+| Опция           | Тип    | По умолчанию | Описание                          |
+| --------------- | ------ | ------------ | --------------------------------- |
+| `--pipeline`    | str    | Required     | Имя пайплайна                     |
+| `--run-id`      | str    | None         | Опциональный `RUN_ID`             |
+| `--audit-limit` | int    | `100`        | Максимум correlated audit entries |
+| `--format`      | choice | `text`       | `text`, `json`, `yaml`            |
+
+Показывает:
+
+- checkpoint metadata and identity anchors;
+- correlated run-manifest context;
+- compatibility taxonomy;
+- bounded audit history for triage.
 
 ______________________________________________________________________
 

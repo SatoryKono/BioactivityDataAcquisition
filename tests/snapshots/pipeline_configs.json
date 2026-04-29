@@ -2628,7 +2628,7 @@
           "column": "reviewed",
           "operator": "in",
           "values": [
-            "true"
+            "True"
           ]
         }
       ],

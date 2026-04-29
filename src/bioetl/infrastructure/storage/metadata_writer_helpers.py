@@ -83,6 +83,110 @@ def _resolve_lineage_log_context(
     }
 
 
+def _artifact_publication_metric_labels(
+    *,
+    metadata: BronzeMetadata | SilverMetadata | GoldMetadata,
+    layer: str,
+    status: str,
+) -> dict[str, str]:
+    """Build canonical labels for artifact-publication outcome metrics."""
+    return {
+        "pipeline": metadata.pipeline.name,
+        "stage": layer,
+        "status": status,
+    }
+
+
+def _record_artifact_publication_metric(
+    *,
+    metrics: MetricsPort | None,
+    metadata: BronzeMetadata | SilverMetadata | GoldMetadata,
+    layer: str,
+    status: str,
+) -> None:
+    """Emit one bounded artifact-publication status counter when metrics exist."""
+    if metrics is None:
+        return
+    metrics.increment_counter(
+        "bioetl_output_artifact_publication_events_total",
+        1,
+        _artifact_publication_metric_labels(
+            metadata=metadata,
+            layer=layer,
+            status=status,
+        ),
+    )
+
+
+def _require_artifact_publication_identifier(
+    *,
+    raw_value: object | None,
+    missing_message: str,
+    metrics: MetricsPort | None,
+    metadata: BronzeMetadata | SilverMetadata | GoldMetadata,
+    layer: str,
+) -> str:
+    """Return a required publication identifier or raise a contract error."""
+    value = str(raw_value or "").strip()
+    if value:
+        return value
+    _record_artifact_publication_metric(
+        metrics=metrics,
+        metadata=metadata,
+        layer=layer,
+        status="failed",
+    )
+    raise RuntimeError(missing_message)
+
+
+def _build_artifact_publication_details(
+    *,
+    metadata_path: str,
+    metadata: BronzeMetadata | SilverMetadata | GoldMetadata,
+    manifest_id: str,
+    artifact_id: str,
+) -> dict[str, object]:
+    """Build callback payload for one published output artifact."""
+    lineage_context = _resolve_lineage_log_context(metadata)
+    details: dict[str, object] = {
+        "artifact_kind": "layer_output",
+        "artifact_id": artifact_id,
+        "metadata_path": metadata_path,
+        "record_count": int(metadata.output.record_count),
+        "total_bytes": int(metadata.output.total_bytes),
+        "content_hash": metadata.output.content_hash,
+        "run_id": str(metadata.runtime.run_id),
+        "manifest_id": manifest_id,
+        "pipeline_name": metadata.pipeline.name,
+        "provider": metadata.pipeline.provider,
+        "entity": metadata.pipeline.entity,
+        "dataset_ref": lineage_context["dataset_ref"],
+        "lineage_fragment_id": lineage_context["lineage_fragment_id"],
+    }
+    _attach_input_snapshot_details(details=details, metadata=metadata)
+    return details
+
+
+def _attach_input_snapshot_details(
+    *,
+    details: dict[str, object],
+    metadata: BronzeMetadata | SilverMetadata | GoldMetadata,
+) -> None:
+    """Attach Bronze input snapshot references when present."""
+    if not isinstance(metadata, BronzeMetadata):
+        return
+    input_snapshots = getattr(metadata.source, "input_snapshots", [])
+    if not input_snapshots:
+        return
+    details["input_snapshot_count"] = len(input_snapshots)
+    details["input_snapshot_ids"] = [
+        snapshot.snapshot_id for snapshot in input_snapshots
+    ]
+    details["input_snapshot_content_hashes"] = [
+        snapshot.content_hash for snapshot in input_snapshots
+    ]
+
+
 def _apply_common_metadata_finalization(
     *,
     metadata: SilverMetadata | GoldMetadata,
@@ -255,100 +359,53 @@ def _record_artifact_publication(
 ) -> None:
     """Emit the optional control-plane artifact publication callback."""
     if recorder is None:
-        if metrics is not None:
-            metrics.increment_counter(
-                "bioetl_output_artifact_publication_events_total",
-                1,
-                {
-                    "pipeline": metadata.pipeline.name,
-                    "stage": layer,
-                    "status": "disabled",
-                },
-            )
+        _record_artifact_publication_metric(
+            metrics=metrics,
+            metadata=metadata,
+            layer=layer,
+            status="disabled",
+        )
         return
-    manifest_id = str(metadata.runtime.manifest_id or "").strip()
-    if not manifest_id:
-        if metrics is not None:
-            metrics.increment_counter(
-                "bioetl_output_artifact_publication_events_total",
-                1,
-                {
-                    "pipeline": metadata.pipeline.name,
-                    "stage": layer,
-                    "status": "failed",
-                },
-            )
-        raise RuntimeError(
+    manifest_id = _require_artifact_publication_identifier(
+        raw_value=metadata.runtime.manifest_id,
+        missing_message=(
             "Control-plane artifact publication requires metadata.runtime.manifest_id"
-        )
-    artifact_id = str(metadata.output.artifact_id or "").strip()
-    if not artifact_id:
-        if metrics is not None:
-            metrics.increment_counter(
-                "bioetl_output_artifact_publication_events_total",
-                1,
-                {
-                    "pipeline": metadata.pipeline.name,
-                    "stage": layer,
-                    "status": "failed",
-                },
-            )
-        raise RuntimeError(
-            "Control-plane artifact publication requires metadata.output.artifact_id"
-        )
-    lineage_context = _resolve_lineage_log_context(metadata)
-    details: dict[str, object] = {
-        "artifact_kind": "layer_output",
-        "artifact_id": artifact_id,
-        "metadata_path": metadata_path,
-        "record_count": int(metadata.output.record_count),
-        "total_bytes": int(metadata.output.total_bytes),
-        "content_hash": metadata.output.content_hash,
-        "run_id": str(metadata.runtime.run_id),
-        "manifest_id": manifest_id,
-        "pipeline_name": metadata.pipeline.name,
-        "provider": metadata.pipeline.provider,
-        "entity": metadata.pipeline.entity,
-        "dataset_ref": lineage_context["dataset_ref"],
-        "lineage_fragment_id": lineage_context["lineage_fragment_id"],
-    }
-    input_snapshots = (
-        []
-        if not isinstance(metadata, BronzeMetadata)
-        else getattr(metadata.source, "input_snapshots", [])
+        ),
+        metrics=metrics,
+        metadata=metadata,
+        layer=layer,
     )
-    if input_snapshots:
-        details["input_snapshot_count"] = len(input_snapshots)
-        details["input_snapshot_ids"] = [
-            snapshot.snapshot_id for snapshot in input_snapshots
-        ]
-        details["input_snapshot_content_hashes"] = [
-            snapshot.content_hash for snapshot in input_snapshots
-        ]
+    artifact_id = _require_artifact_publication_identifier(
+        raw_value=metadata.output.artifact_id,
+        missing_message=(
+            "Control-plane artifact publication requires metadata.output.artifact_id"
+        ),
+        metrics=metrics,
+        metadata=metadata,
+        layer=layer,
+    )
+    details = _build_artifact_publication_details(
+        metadata_path=metadata_path,
+        metadata=metadata,
+        manifest_id=manifest_id,
+        artifact_id=artifact_id,
+    )
     try:
         recorder(layer, str(Path(base_path).resolve()), details)
-    except Exception:
-        if metrics is not None:
-            metrics.increment_counter(
-                "bioetl_output_artifact_publication_events_total",
-                1,
-                {
-                    "pipeline": metadata.pipeline.name,
-                    "stage": layer,
-                    "status": "failed",
-                },
-            )
-        raise
-    if metrics is not None:
-        metrics.increment_counter(
-            "bioetl_output_artifact_publication_events_total",
-            1,
-            {
-                "pipeline": metadata.pipeline.name,
-                "stage": layer,
-                "status": "success",
-            },
+    except RuntimeError:
+        _record_artifact_publication_metric(
+            metrics=metrics,
+            metadata=metadata,
+            layer=layer,
+            status="failed",
         )
+        raise
+    _record_artifact_publication_metric(
+        metrics=metrics,
+        metadata=metadata,
+        layer=layer,
+        status="success",
+    )
 
 
 async def _execute_prepared_metadata_write_operation(

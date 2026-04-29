@@ -125,7 +125,7 @@ def load_allowed_root_files(repo_root: Path) -> frozenset[str]:
 def approved_root_directories(catalog: dict[str, Any]) -> frozenset[str]:
     """Return allowed root directories from shared baseline and catalog policy."""
     approved_dirs: set[str] = set(BASE_ALLOWED_ROOT_DIRECTORIES)
-    for section_name in ("root_tooling_roots", "test_support_roots"):
+    for section_name in ("root_tooling_roots",):
         section = catalog.get(section_name)
         if not isinstance(section, dict):
             continue

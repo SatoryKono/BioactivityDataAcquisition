@@ -106,7 +106,6 @@ ALLOWED_ROOT_PY_FILES: set[str] = {
 }
 CATALOG_ALLOWED_PYTHON_ROOT_SECTIONS: tuple[str, ...] = (
     "root_tooling_roots",
-    "test_support_roots",
     "docs_code_zones",
 )
 CATALOG_DOCS_CODE_ZONE_SECTIONS: tuple[str, ...] = ("docs_code_zones",)

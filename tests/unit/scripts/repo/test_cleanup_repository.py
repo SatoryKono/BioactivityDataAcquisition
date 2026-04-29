@@ -40,9 +40,6 @@ def _write_governance_files(tmp_path: Path) -> None:
                 "root_tooling_roots": {
                     "approved_roots": [{"path": "tools"}],
                 },
-                "test_support_roots": {
-                    "approved_roots": [{"path": "testing_support"}],
-                },
                 "blocked_cleanup_zones": [
                     {"path": "reports"},
                     {"path": "data"},

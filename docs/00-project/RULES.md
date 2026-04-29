@@ -1,7 +1,7 @@
 ______________________________________________________________________
 
-Version: 6.1.2
-Last verified: 2026-04-09
+Version: 6.1.3
+Last verified: 2026-04-29
 Status: active
 Class: published
 Owner: BioETL Team
@@ -194,6 +194,12 @@ uv run python -m pytest tests/architecture/test_regression_metrics.py -q
 #### 2.1.1. Silver Write Modes (Режимы Записи)
 
 Режимы записи для Silver слоя строго типизированы (`SilverWriteMode` enum):
+
+> **Canonical owner note:** эта секция является нормативным owner-doc для
+> Medallion write-mode policy. `glossary.md` и
+> `03-guides/pipeline-configuration.md` должны ссылаться на эти определения и
+> не должны вводить альтернативные enum-наборы. Runtime source of truth:
+> `src/bioetl/domain/medallion.py`.
 
 - **MERGE**: Upsert по первичным ключам. Стратегия по умолчанию для incremental updates.
 - **APPEND**: Вставка новых записей без проверки дубликатов.
@@ -1646,7 +1652,7 @@ URL-адреса для ChEMBL формируются в `infrastructure/adapter
 **Health Check Endpoints**:
 
 - `GET /health` (Liveness)
-- `GET /ready` (Readiness: local storage/lock health)
+- `GET /health/ready` (Readiness: local storage/lock health)
 
 ## Приложение B: Политика Зависимостей
 
@@ -1884,9 +1890,12 @@ fields:
 | [ADR-041](../02-architecture/decisions/ADR-041-naming-policy-skills-agents.md)        | Naming Policy for Skills, Agents, Commands | Accepted                                | 2026-03-04 |
 | [ADR-042](../02-architecture/decisions/ADR-042-testing-strategy-matrix.md)            | Testing Strategy Matrix & Fixture Gov.     | Accepted                                | 2026-03-09 |
 | [ADR-043](../02-architecture/decisions/ADR-043-documentation-knowledge-management.md) | Documentation & Knowledge Management       | Accepted                                | 2026-03-09 |
+| [ADR-044](../02-architecture/decisions/ADR-044-run-manifest-ledger-control-plane.md)  | Run Manifest and Run Ledger Control Plane  | Accepted                                | 2026-03-24 |
+| [ADR-045](../02-architecture/decisions/ADR-045-dq-contract-system.md)                  | Data Quality Contract System               | Accepted                                | 2026-04-02 |
 
 ## История Изменений (Changelog)
 
+- **5.25** (2026-04-29): Documentation Audit Stop-Loss. Исправлен published readiness endpoint (`/health/ready`), синхронизирован ADR registry с ADR-044/045, а Medallion write-mode terminology закреплена как policy-owned surface в §2.1.1-§2.1.2.
 - **5.24** (2026-03-13): Docs Governance Sync. В §6 явно закреплена active-docs модель: `docs/00-05` как source of truth, `docs/99-archive/` как non-normative historical context, и docs guardrails как обязательная проверка для active/generated docs.
 - **5.23** (2026-03-02): Dependency Policy Sync. Уточнена политика зависимостей: mixed strategy (`pyproject.toml` с диапазонами + воспроизводимость через `uv.lock`), строгие `==` оставлены как исключение для критичных инструментов.
 - **5.22** (2026-02-24): Unified Entity Config. ADR-039 добавлен — Unified Entity Config Format. 21 стандартных pipeline config переведены из legacy pipeline config directory в `configs/entities/`; composite configs перенесены в `configs/composites/`; provider source configs — в `configs/providers/`.

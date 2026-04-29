@@ -68,6 +68,8 @@ plans:
       lifecycle: supporting_context
     - path: docs/plans/mcp-wrapper-deep-audit-2026-04-29.md
       lifecycle: supporting_context
+    - path: docs/plans/mcp-wrapper-redesign-prerequisites-2026-04-29.md
+      lifecycle: supporting_context
     - path: docs/plans/temporary-diagnostic-ttl-review-plan-2026-04-29.md
       lifecycle: supporting_context
     - path: docs/plans/repo-governance-wrapper-closeout-2026-04-29.md
@@ -77,6 +79,8 @@ plans:
     - path: docs/plans/root-hygiene-review-lane-automation-2026-04-29.md
       lifecycle: supporting_context
     - path: docs/plans/scripts-supporting-retained-set-closeout-2026-04-29.md
+      lifecycle: supporting_context
+    - path: docs/plans/scripts-supporting-taxonomy-2026-04-29.md
       lifecycle: supporting_context
     - path: docs/plans/temporary-diagnostic-ttl-wave-1-closeout-2026-04-29.md
       lifecycle: supporting_context
@@ -110,11 +114,6 @@ src_sidecars:
       role: approved_sidecar_tooling
     - path: src/memory
       role: approved_sidecar_memory_subsystem
-
-test_support_roots:
-  approved_roots:
-    - path: testing_support
-      role: approved_test_support_modules
 
 docs_code_zones:
   approved_roots:

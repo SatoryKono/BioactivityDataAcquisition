@@ -114,25 +114,33 @@ class TestDQConfigIntegration:
         }
         assert "protein_existence" not in range_fields
 
-    def test_non_chembl_raw_publication_type_dq_matches_vocab_registry(
+    def test_non_chembl_raw_publication_type_dq_preserves_unknown_provider_values(
         self,
         dq_loader: DQConfigLoader,
         real_configs_root: Path,
     ) -> None:
-        """Raw provider publication_type enums should stay externalized."""
+        """Raw provider publication_type DQ must not reject future provider values."""
         vocab_path = real_configs_root / "vocab" / "publication_controlled.yaml"
         vocab = yaml.safe_load(vocab_path.read_text(encoding="utf-8"))
+        assert vocab["policy"]["preserve_unknown_provider_values"] is True
 
         for provider in ("crossref", "openalex"):
-            expected = tuple(vocab["providers"][provider]["publication_type"]["values"])
+            assert vocab["providers"][provider]["publication_type"]["preserve_unknown"]
             config = dq_loader.load(provider, "publication")
-            rule = next(
+            raw_type_rules = [
                 rule
                 for rule in config.field_validations
-                if rule.field == "publication_type" and rule.validation_type == "enum"
-            )
+                if rule.field == "publication_type"
+            ]
+            enum_rules = [
+                rule for rule in raw_type_rules if rule.validation_type == "enum"
+            ]
+            pattern_rules = [
+                rule for rule in raw_type_rules if rule.validation_type == "pattern"
+            ]
 
-            assert rule.allowed == expected
+            assert enum_rules == []
+            assert pattern_rules
 
 
 @pytest.mark.integration

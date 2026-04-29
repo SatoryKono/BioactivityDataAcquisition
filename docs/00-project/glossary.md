@@ -1,6 +1,6 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.0.1
 Status: active
 Class: published
 Owner: BioETL Team
@@ -13,7 +13,7 @@ ______________________________________________________________________
 
 # BioETL Glossary (Ubiquitous Language)
 
-*Version 2.7 | Updated: 2026-03-08 | Created: 2025-12-29*
+*Version 2.7.1 | Updated: 2026-04-29 | Created: 2025-12-29*
 
 This glossary defines the canonical terminology used throughout BioETL. Following Domain-Driven Design principles, these terms form the **Ubiquitous Language** — a shared vocabulary understood by both developers and domain experts.
 
@@ -119,10 +119,14 @@ ______________________________________________________________________
 | Canonical Term      | Definition                                                | Values                                             | Avoid                  |
 | ------------------- | --------------------------------------------------------- | -------------------------------------------------- | ---------------------- |
 | **RunType**         | Enum controlling pipeline execution mode and clear policy | `INCREMENTAL`, `BACKFILL`, `REBUILD`               | `mode` (as enum name)  |
-| **SilverWriteMode** | Enum controlling Silver layer write strategy              | `MERGE`, `OVERWRITE`                               | `write mode` (generic) |
-| **GoldWriteMode**   | Enum controlling Gold layer write strategy                | `MERGE`, `OVERWRITE`, `SCD2`                       | `write mode` (generic) |
+| **SilverWriteMode** | Enum controlling Silver layer write strategy              | `MERGE`, `APPEND`, `DELETE`                        | `write mode` (generic) |
+| **GoldWriteMode**   | Enum controlling Gold layer write strategy                | `APPEND`, `OVERWRITE`, `SCD2`                      | `write mode` (generic) |
 | **HealthStatus**    | Enum representing component availability                  | `HEALTHY`, `DEGRADED`, `UNHEALTHY`                 | `status` (generic)     |
 | **FSMState**        | Enum representing pipeline finite-state-machine states    | `IDLE`, `RUNNING`, `PAUSED`, `FAILED`, `COMPLETED` | `state` (generic)      |
+
+> **Owner-doc note:** glossary is a summary surface. Canonical Medallion
+> write-mode policy lives in `docs/00-project/RULES.md` §2.1.1-§2.1.2, with
+> runtime enum source in `src/bioetl/domain/medallion.py`.
 
 ### Pipeline Context & Identity
 

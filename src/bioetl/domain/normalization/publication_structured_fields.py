@@ -142,7 +142,9 @@ _POLICY_BY_FIELD = {
 }
 
 
-def publication_structured_field_policies() -> tuple[PublicationStructuredFieldPolicy, ...]:
+def publication_structured_field_policies() -> tuple[
+    PublicationStructuredFieldPolicy, ...
+]:
     """Return all governed publication structured-field policies."""
     return _POLICIES
 
