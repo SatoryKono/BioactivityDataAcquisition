@@ -373,6 +373,7 @@ def _validate_gap_entry(
     _validate_gap_owner(key, gap, invalid_entries)
     _validate_gap_status(key, gap, allowed_gap_statuses, invalid_entries)
     _validate_gap_resolution_plan(key, gap, invalid_entries)
+    _validate_de_scoped_gap_decision(key, gap, invalid_entries)
 
     return invalid_entries
 
@@ -415,6 +416,18 @@ def _validate_gap_resolution_plan(
         "resolution_plan"
     ):
         invalid_entries.append(f"{key}: gap.resolution_plan is required")
+
+
+def _validate_de_scoped_gap_decision(
+    key: str, gap: dict[str, Any], invalid_entries: list[str]
+) -> None:
+    """Validate explicit de-scope decisions for replay fixture gaps."""
+    if gap.get("status") != "de_scoped":
+        return
+    if not isinstance(gap.get("de_scope_decision"), str) or not gap.get(
+        "de_scope_decision"
+    ):
+        invalid_entries.append(f"{key}: gap.de_scope_decision is required")
 
 
 def _fixture_coverage_findings(
@@ -974,7 +987,10 @@ class TestBronzeFixtureCoverage:
 
     _MIN_RECOMMENDED_RECORDS = 200
     _MIN_TRACKED_SAMPLE_RECORDS = 20
-    _ALLOWED_GAP_STATUS = {"open", "in_progress", "blocked"}
+    _ALLOWED_GAP_STATUS = {"open", "in_progress", "blocked", "de_scoped"}
+    _ACTIVE_GAP_STATUS = {"open", "in_progress"}
+    _MAX_BLOCKED_GAPS = 0
+    _MAX_DE_SCOPED_GAPS = 5
     _ALLOWED_FIXTURE_KINDS = {"tracked_ci_sample", "local_runtime_snapshot"}
     _ALLOWED_VALIDATION_STATUSES = {"valid", "provisional", "stale"}
 
@@ -999,6 +1015,36 @@ class TestBronzeFixtureCoverage:
         assert len(tracked) >= 4, (
             "Fixture manifest must include at least 4 valid tracked_ci_sample "
             f"entries, found {len(tracked)}: {sorted(tracked)}"
+        )
+
+    def test_bronze_fixture_gaps_are_ratchet_only(self) -> None:
+        gaps = _load_bronze_fixture_gaps()
+
+        active = sorted(
+            key
+            for key, gap in gaps.items()
+            if gap.get("status") in self._ACTIVE_GAP_STATUS
+        )
+        blocked = sorted(
+            key for key, gap in gaps.items() if gap.get("status") == "blocked"
+        )
+        de_scoped = sorted(
+            key for key, gap in gaps.items() if gap.get("status") == "de_scoped"
+        )
+
+        assert not active, (
+            "bronze_fixture_gaps.yaml must not carry active open/in_progress "
+            f"replay debt; close with tracked fixture evidence or explicitly "
+            f"de-scope: {active}"
+        )
+        assert len(blocked) <= self._MAX_BLOCKED_GAPS, (
+            "Blocked Bronze fixture gaps require an explicit budget change; "
+            f"max={self._MAX_BLOCKED_GAPS}, found={len(blocked)}: {blocked}"
+        )
+        assert len(de_scoped) <= self._MAX_DE_SCOPED_GAPS, (
+            "De-scoped Bronze fixture gaps are residual replay evidence debt and "
+            "may only grow through an explicit budget change; "
+            f"max={self._MAX_DE_SCOPED_GAPS}, found={len(de_scoped)}: {de_scoped}"
         )
 
     def test_bronze_fixture_coverage(self) -> None:

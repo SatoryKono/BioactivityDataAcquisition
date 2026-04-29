@@ -3,6 +3,9 @@
 
 from __future__ import annotations
 
+import hashlib
+from pathlib import PurePath
+
 from bioetl.domain.lineage import LineageGraphFragment, MetadataLineageBundle
 from bioetl.domain.models.metadata import (
     BronzeMetadata,
@@ -13,6 +16,7 @@ from bioetl.domain.models.metadata import (
     SourceMetadata,
 )
 from bioetl.domain.ports import BronzeMetadataInput
+from bioetl.domain.serialization import serialize_to_canonical_json
 
 
 def validate_records_present(
@@ -94,3 +98,19 @@ def build_bronze_file_output_metadata(
         size_bytes=input_data.compressed_size,
         record_count=input_data.record_count,
     )
+
+
+def build_bronze_output_content_hash(input_data: BronzeMetadataInput) -> str:
+    """Build deterministic Bronze output identity from emitted file evidence."""
+    payload = {
+        "files": [
+            {
+                "path": PurePath(input_data.output_path).as_posix(),
+                "record_count": input_data.record_count,
+                "size_bytes": input_data.compressed_size,
+                "content_hash": input_data.output_content_hash,
+            }
+        ]
+    }
+    canonical = serialize_to_canonical_json(payload)
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()

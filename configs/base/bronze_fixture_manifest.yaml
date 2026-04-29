@@ -1,5 +1,5 @@
-version: 1.1.0
-updated_at: "2026-04-24"
+version: 1.2.0
+updated_at: "2026-04-29"
 fixtures:
   chembl/activity:
     fixture_kind: tracked_ci_sample
@@ -17,6 +17,22 @@ fixtures:
     owner: "data-platform"
     last_refresh: "2026-04-24"
     validation_status: valid
+  chembl/cell_line:
+    fixture_kind: tracked_ci_sample
+    fixture_path: tests/fixtures/bronze/chembl/cell_line/sample_ci_2026-04-29.jsonl
+    records: 20
+    provenance: "Bounded CI sample extracted from the ChEMBL cell_line provider endpoint."
+    owner: "data-platform"
+    last_refresh: "2026-04-29"
+    validation_status: valid
+  chembl/compound_record:
+    fixture_kind: tracked_ci_sample
+    fixture_path: tests/fixtures/bronze/chembl/compound_record/sample_ci_2026-04-29.jsonl
+    records: 20
+    provenance: "Bounded CI sample extracted from the ChEMBL compound_record provider endpoint."
+    owner: "data-platform"
+    last_refresh: "2026-04-29"
+    validation_status: valid
   chembl/molecule:
     fixture_kind: tracked_ci_sample
     fixture_path: tests/fixtures/bronze/chembl/molecule/sample_ci_2026-03-25.jsonl
@@ -24,6 +40,14 @@ fixtures:
     provenance: "Bounded CI sample extracted from representative Bronze snapshots."
     owner: "data-platform"
     last_refresh: "2026-03-25"
+    validation_status: valid
+  chembl/protein_class:
+    fixture_kind: tracked_ci_sample
+    fixture_path: tests/fixtures/bronze/chembl/protein_class/sample_ci_2026-04-29.jsonl
+    records: 20
+    provenance: "Bounded CI sample extracted from the ChEMBL protein_classification provider endpoint."
+    owner: "data-platform"
+    last_refresh: "2026-04-29"
     validation_status: valid
   chembl/publication:
     fixture_kind: tracked_ci_sample
@@ -41,6 +65,22 @@ fixtures:
     owner: "data-platform"
     last_refresh: "2026-04-24"
     validation_status: valid
+  chembl/target_component:
+    fixture_kind: tracked_ci_sample
+    fixture_path: tests/fixtures/bronze/chembl/target_component/sample_ci_2026-04-29.jsonl
+    records: 20
+    provenance: "Bounded CI sample extracted from the ChEMBL target_component provider endpoint."
+    owner: "data-platform"
+    last_refresh: "2026-04-29"
+    validation_status: valid
+  chembl/tissue:
+    fixture_kind: tracked_ci_sample
+    fixture_path: tests/fixtures/bronze/chembl/tissue/sample_ci_2026-04-29.jsonl
+    records: 20
+    provenance: "Bounded CI sample extracted from the ChEMBL tissue provider endpoint."
+    owner: "data-platform"
+    last_refresh: "2026-04-29"
+    validation_status: valid
   crossref/publication:
     fixture_kind: tracked_ci_sample
     fixture_path: tests/fixtures/bronze/crossref/publication/sample_ci_2026-03-25.jsonl
@@ -48,6 +88,14 @@ fixtures:
     provenance: "Bounded CI sample extracted from representative Bronze snapshots."
     owner: "data-platform"
     last_refresh: "2026-03-25"
+    validation_status: valid
+  openalex/publication:
+    fixture_kind: tracked_ci_sample
+    fixture_path: tests/fixtures/bronze/openalex/publication/sample_ci_2026-04-29.jsonl
+    records: 20
+    provenance: "Bounded CI sample extracted from the OpenAlex works provider endpoint."
+    owner: "data-platform"
+    last_refresh: "2026-04-29"
     validation_status: valid
   pubchem/compound:
     fixture_kind: tracked_ci_sample
@@ -72,4 +120,12 @@ fixtures:
     provenance: "Bounded CI sample extracted from factual Bronze replay snapshots."
     owner: "data-platform"
     last_refresh: "2026-04-24"
+    validation_status: valid
+  uniprot/idmapping:
+    fixture_kind: tracked_ci_sample
+    fixture_path: tests/fixtures/bronze/uniprot/idmapping/sample_ci_2026-04-29.jsonl
+    records: 20
+    provenance: "Bounded CI sample extracted from UniProt ID Mapping results for tracked ChEMBL target IDs."
+    owner: "data-platform"
+    last_refresh: "2026-04-29"
     validation_status: valid

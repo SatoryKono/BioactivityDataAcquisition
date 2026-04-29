@@ -20,6 +20,7 @@ from bioetl.infrastructure.storage.silver.operations.metadata_sidecar_adapter im
     _build_silver_sidecar_metadata,
     _fallback_table_path,
     _SilverMetadataSidecarRequest,
+    extract_control_plane_provenance_from_records,
 )
 
 
@@ -213,6 +214,7 @@ async def _write_silver_metadata(
             transform_version=request.transform_version,
             transform_steps=request.transform_steps,
             bronze_refs=request.bronze_refs,
+            **extract_control_plane_provenance_from_records(request.records),
         )
     )
     result = await metadata_ops._persist_silver_metadata(

@@ -7,7 +7,6 @@ from dataclasses import dataclass, replace
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from types import SimpleNamespace
-from typing import cast
 from unittest.mock import AsyncMock, MagicMock
 from uuid import UUID, uuid4
 
@@ -67,6 +66,7 @@ from bioetl.infrastructure.storage.silver.validation_operations import (
     _deduplicate_by_primary_keys_impl,
 )
 from bioetl.infrastructure.control_plane.file_lineage_store import FileLineageStore
+from bioetl.infrastructure.config import Settings
 
 
 pytestmark = pytest.mark.integration
@@ -906,25 +906,24 @@ def test_reproducibility_contract_composite_full_snapshot_envelope_exact_replay_
     bundles = []
     manifests = []
     for index in range(2):
-        infra_context = cast(
-            CompositeInfrastructureContext,
-            SimpleNamespace(
-                run_id=str(UUID(f"00000000-0000-0000-0000-00000000052{index}")),
-                settings=SimpleNamespace(
-                    data_dir=str(data_dir),
-                    pipeline=SimpleNamespace(
-                        control_plane=SimpleNamespace(
-                            run_manifest_enabled=True,
-                            run_ledger_enabled=True,
-                            required_persistence_profile="replay_ready",
-                        )
-                    ),
-                ),
-                logger=MagicMock(),
-                metrics=None,
-                storage=MagicMock(),
-                lock=MagicMock(),
-            ),
+        settings = Settings(
+            data_dir=data_dir,
+            pipeline={
+                "control_plane": {
+                    "run_manifest_enabled": True,
+                    "run_ledger_enabled": True,
+                    "required_persistence_profile": "replay_ready",
+                }
+            },
+        )
+        infra_context = CompositeInfrastructureContext(
+            run_id=str(UUID(f"00000000-0000-0000-0000-00000000052{index}")),
+            settings=settings,
+            logger=MagicMock(),
+            metrics=MagicMock(),
+            tracer=MagicMock(),
+            storage=MagicMock(),
+            lock=MagicMock(),
         )
         bundle = build_composite_control_plane_bundle(
             config=config,
@@ -1134,16 +1133,18 @@ def test_reproducibility_contract_inventory_profiles_all_production_families() -
         profile_by_family["openalex.publication"]["strict_exact_replay_supported"]
         is False
     )
-    assert profile_by_family["openalex.publication"][
-        "strict_replay_runtime_verdict"
-    ] == "blocked_outside_supported_boundary"
+    assert (
+        profile_by_family["openalex.publication"]["strict_replay_runtime_verdict"]
+        == "blocked_outside_supported_boundary"
+    )
     assert (
         profile_by_family["composite.publication"]["exact_replay_support_boundary"]
         == "composite_snapshot_backed_input_envelope"
     )
-    assert profile_by_family["composite.publication"][
-        "strict_replay_runtime_verdict"
-    ] == "requires_full_composite_snapshot_envelope"
+    assert (
+        profile_by_family["composite.publication"]["strict_replay_runtime_verdict"]
+        == "requires_full_composite_snapshot_envelope"
+    )
 
 
 def test_reproducibility_contract_silver_batch_dedup_is_order_insensitive() -> None:

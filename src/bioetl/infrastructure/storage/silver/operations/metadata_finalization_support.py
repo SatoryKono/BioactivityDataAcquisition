@@ -20,6 +20,7 @@ from bioetl.infrastructure.storage.silver.metadata_request_models import (
 from bioetl.infrastructure.storage.silver.operations.metadata_sidecar_adapter import (
     _build_silver_sidecar_metadata,
     _SilverMetadataSidecarRequest,
+    extract_control_plane_provenance_from_records,
 )
 
 __all__ = [
@@ -90,6 +91,7 @@ def _build_direct_legacy_silver_metadata(
             transform_steps=transform_steps,
             bronze_refs=None,
             version_after=None,
+            **extract_control_plane_provenance_from_records(records),
         )
     )
 
@@ -164,6 +166,7 @@ async def _finalize_silver_write_result(
             primary_keys=request.primary_keys,
             version_after=context.version_after,
             hostname="test-host",
+            **extract_control_plane_provenance_from_records(request.records),
         )
     )
     await metadata_ops._persist_silver_metadata(

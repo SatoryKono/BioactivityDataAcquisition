@@ -176,6 +176,51 @@ class TestBronzeMetadata:
         assert metadata.layer == Layer.BRONZE
         assert metadata.version == "1.1"  # ADR-029 version bump
         assert metadata.output.artifact_id == f"bronze_batch:{input_data.batch_id}"
+        assert isinstance(metadata.output.content_hash, str)
+        assert len(metadata.output.content_hash) == 64
+        int(metadata.output.content_hash, 16)
+
+    def test_bronze_output_content_hash_is_deterministic(
+        self, coordinator: MetadataCoordinator
+    ) -> None:
+        """Bronze output content_hash should track emitted file identity."""
+        started_at = _FIXED_TIME
+        completed_at = started_at + timedelta(seconds=1)
+        batch_id = BatchID(uuid4())
+        input_data = BronzeMetadataInput(
+            batch_id=batch_id,
+            record_count=1000,
+            compressed_size=50000,
+            output_path="v1/chembl/activity/2024-01-15/batch_123.jsonl.zst",
+            started_at=started_at,
+            completed_at=completed_at,
+            output_content_hash="a" * 64,
+        )
+        same_input = BronzeMetadataInput(
+            batch_id=batch_id,
+            record_count=1000,
+            compressed_size=50000,
+            output_path="v1/chembl/activity/2024-01-15/batch_123.jsonl.zst",
+            started_at=started_at,
+            completed_at=completed_at,
+            output_content_hash="a" * 64,
+        )
+        changed_input = BronzeMetadataInput(
+            batch_id=batch_id,
+            record_count=1000,
+            compressed_size=50000,
+            output_path="v1/chembl/activity/2024-01-15/batch_123.jsonl.zst",
+            started_at=started_at,
+            completed_at=completed_at,
+            output_content_hash="b" * 64,
+        )
+
+        first = coordinator.create_bronze_metadata(input_data)
+        second = coordinator.create_bronze_metadata(same_input)
+        changed = coordinator.create_bronze_metadata(changed_input)
+
+        assert first.output.content_hash == second.output.content_hash
+        assert first.output.content_hash != changed.output.content_hash
 
     def test_bronze_runtime_metadata(self, coordinator: MetadataCoordinator) -> None:
         """Test Bronze runtime metadata contains correct values."""

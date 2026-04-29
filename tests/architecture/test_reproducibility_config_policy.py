@@ -14,7 +14,9 @@ PUBLISHED_COMPOSITE_CONFIGS = ROOT / "configs" / "composites"
 
 
 def _load_yaml(path: Path) -> dict[str, object]:
-    return cast(dict[str, object], yaml.safe_load(path.read_text(encoding="utf-8")) or {})
+    return cast(
+        dict[str, object], yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    )
 
 
 def _pipeline_sink(payload: dict[str, object]) -> dict[str, object]:

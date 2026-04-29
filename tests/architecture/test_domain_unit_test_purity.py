@@ -280,7 +280,9 @@ def _collect_disallowed_runtime_seams(file_path: Path) -> list[RuntimeSeamViolat
         import_seam = _import_runtime_seam(node)
         if import_seam is not None:
             violations.append(
-                _runtime_violation(file_path=file_path, line=node.lineno, seam=import_seam)
+                _runtime_violation(
+                    file_path=file_path, line=node.lineno, seam=import_seam
+                )
             )
         if isinstance(node, ast.Call):
             call_seam = _call_runtime_seam(node)

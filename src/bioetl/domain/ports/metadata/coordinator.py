@@ -45,6 +45,7 @@ class BronzeMetadataInput:
         record_count: Number of records written.
         compressed_size: Size of compressed file in bytes.
         output_path: Relative path to the written file.
+        output_content_hash: SHA256 hash of the emitted Bronze file bytes.
         started_at: UTC timestamp when write started.
         completed_at: UTC timestamp when write completed.
         source_metadata: Optional pre-built SourceMetadata with API request
@@ -60,6 +61,7 @@ class BronzeMetadataInput:
     output_path: str
     started_at: datetime
     completed_at: datetime
+    output_content_hash: str | None = None
     source_metadata: SourceMetadata | None = None
     input_snapshots: tuple[InputSnapshotRef, ...] = ()
     query_string: str | None = None

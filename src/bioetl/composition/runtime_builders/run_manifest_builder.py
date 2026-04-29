@@ -20,6 +20,10 @@ from bioetl.composition.runtime_builders._run_manifest_builder_policy import (
     resolve_manifest_reproducibility_context,
     validate_required_runtime_persistence_profile,
 )
+from bioetl.composition.runtime_builders._runner_builder_support import (
+    resolve_required_artifact_lineage_layers,
+    validate_required_persistence_profile,
+)
 from bioetl.composition.services.versioning import (
     get_pipeline_version,
 )
@@ -230,6 +234,29 @@ def create_run_manifest(
         dq_policy_ref,
         rule_bundle_version,
     ) = _manifest_support.resolve_contract_identity(provider=provider, entity=entity)
+    reproducibility_context = resolve_manifest_reproducibility_context(
+        ctx=ctx,
+        inputs=inputs,
+        provider=provider,
+        entity=entity,
+        contract_ref=contract_ref,
+    )
+    _active_layers, missing_artifact_lineage_layers = (
+        resolve_required_artifact_lineage_layers(
+            yaml_config=yaml_config,
+            skip_gold=bool(getattr(ctx, "skip_gold", False)),
+        )
+    )
+    validate_required_persistence_profile(
+        manifest_enabled=True,
+        ledger_enabled=ledger_enabled,
+        required_profile=reproducibility_context.required_persistence_profile,
+        execution_label="Pipeline execution",
+        exact_replay_execution_context_supported=(
+            reproducibility_context.strict_exact_replay_supported
+        ),
+        missing_artifact_lineage_layers=missing_artifact_lineage_layers,
+    )
     manifest_store = FileRunManifestStore(
         base_path=_manifest_support.control_plane_root(inputs.settings, "run_manifest"),
         metrics=inputs.observability.metrics,
@@ -255,13 +282,6 @@ def create_run_manifest(
             dq_contract_compatibility_hash=dq_contract_compatibility_hash,
             effective_config_artifact_id=effective_config_artifact_id,
         )
-    )
-    reproducibility_context = resolve_manifest_reproducibility_context(
-        ctx=ctx,
-        inputs=inputs,
-        provider=provider,
-        entity=entity,
-        contract_ref=contract_ref,
     )
     _emit_replay_reconstructability_metric(
         request=manifest_create_request,
