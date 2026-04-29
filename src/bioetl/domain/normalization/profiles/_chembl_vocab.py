@@ -8,6 +8,7 @@ from bioetl.domain.schemas._chembl_enum_catalog import (
 
 __all__ = ["chembl_enum"]
 
+
 def chembl_enum(entity: str, field: str) -> frozenset[str]:
     """Return an immutable ChEMBL vocabulary for a profile entity field."""
     key = (entity, field)

@@ -266,7 +266,10 @@ class TestBaseGoldColumnFilterTypedValues:
         )
 
         domain = config.to_domain()
-        by_column = {column_filter.column: column_filter for column_filter in domain.column_filters}
+        by_column = {
+            column_filter.column: column_filter
+            for column_filter in domain.column_filters
+        }
 
         assert by_column["potential_duplicate"].values == frozenset([0])
         assert by_column["reviewed"].values == frozenset([True])

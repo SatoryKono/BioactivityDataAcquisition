@@ -180,10 +180,7 @@ composite:
             - "chembl.publication.is_oa"
             - "chembl.publication.language"
             - "chembl.publication.pmc_id"
-            - "chembl.publication.publication_class"
             - "chembl.publication.publication_date"
-            - "chembl.publication.publication_subclass"
-            - "chembl.publication.publication_type_unified"
             - "crossref.publication.abstract"
             - "crossref.publication.affiliation_list"
             - "crossref.publication.author_orcids"
@@ -253,6 +250,24 @@ composite:
                 - openalex       # OpenAlex MeSH extraction (fallback)
             subject_fields:
                 - semanticscholar  # S2-unique field
+            publication_type_unified:
+                - chembl
+                - pubmed
+                - openalex
+                - crossref
+                - semanticscholar
+            publication_subclass:
+                - chembl
+                - pubmed
+                - openalex
+                - crossref
+                - semanticscholar
+            publication_class:
+                - chembl
+                - pubmed
+                - openalex
+                - crossref
+                - semanticscholar
 
             # === Author Metadata ===
             author_orcids:
@@ -362,8 +377,6 @@ composite:
                     - pmc_id
                     - pmid
                     - publication_id
-                    - publication_pmc_id
-                    - publication_pmid
                     - src_id
                 provider_order: [ semanticscholar, openalex, pubmed, chembl, crossref ]
 
@@ -382,7 +395,6 @@ composite:
                     - journal_iso_abbrev
                     - journal_issn_type
                     - journal_name_short
-                    - publication_doi
                     - publisher
                     - title
                     - venue
@@ -483,9 +495,12 @@ composite:
                     - license_url
                     - oa_status
                     - open_access_url
+                    - publication_class
                     - publication_status
+                    - publication_subclass
                     - publication_type
                     - publication_type_list
+                    - publication_type_unified
                     - publication_types
                 provider_order: [ semanticscholar, pubmed, chembl, crossref, openalex ]
 

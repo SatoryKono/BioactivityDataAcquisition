@@ -22,3 +22,10 @@ protein:
         - Inferred from homology
         - Predicted
         - Uncertain
+
+idmapping:
+    mapping_statuses:
+        - found
+        - not_found
+        - error
+        - multiple

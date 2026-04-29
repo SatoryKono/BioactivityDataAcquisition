@@ -43,7 +43,10 @@ def test_root_hygiene_workflow_uploads_cleanup_classification_artifact() -> None
     workflow = Path(".github/workflows/root-hygiene.yml").read_text(encoding="utf-8")
 
     assert "cleanup_repository.py" in workflow
-    assert "--report-json reports/quality/root-hygiene-cleanup-classification.json" in workflow
+    assert (
+        "--report-json reports/quality/root-hygiene-cleanup-classification.json"
+        in workflow
+    )
     assert "actions/upload-artifact@v4" in workflow
     assert "root-hygiene-cleanup-classification" in workflow
 

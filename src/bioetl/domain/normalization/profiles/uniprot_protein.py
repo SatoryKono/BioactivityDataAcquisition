@@ -51,7 +51,21 @@ _META_FIELDS = frozenset(
     }
 )
 _TITLE_FIELDS = frozenset({"protein_name"})
-_INT_FIELDS = frozenset({"annotation_score", "organism_id", "sequence_length"})
+_INT_FIELDS = frozenset(
+    {
+        "annotation_score",
+        "cross_reference_count",
+        "entry_version",
+        "feature_count",
+        "isoform_count",
+        "keyword_count",
+        "organism_id",
+        "publication_count",
+        "sequence_length",
+        "sequence_mass",
+        "taxonomy_id",
+    }
+)
 _SET_LIKE_FIELDS = frozenset(
     {
         "cellular_component",

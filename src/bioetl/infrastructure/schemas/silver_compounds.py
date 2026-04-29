@@ -73,47 +73,83 @@ UNIPROT_PROTEIN_SCHEMA = pa.schema(
         pa.field("active_sites", pa.string()),  # JSON: ft_act_site features
         pa.field("activity_regulation", pa.string()),  # cc_activity_regulation
         pa.field("annotation_score", pa.int64()),  # Quality score 1-5
+        pa.field("alternative_products", pa.string()),  # cc_alternative_products
         pa.field("binding_sites", pa.string()),  # JSON: ft_binding features
         pa.field("catalytic_activity", pa.string()),  # cc_catalytic_activity
         pa.field("cellular_component", pa.string()),  # GO aspect C
         pa.field("chembl_ids", pa.string()),  # ChEMBL target cross-refs (JSON array)
+        pa.field("cofactors", pa.string()),  # cc_cofactor
+        pa.field(
+            "biophysicochemical_properties", pa.string()
+        ),  # cc_biophysicochemical_properties
+        pa.field("cross_reference_count", pa.int64()),  # Cross-reference count
+        pa.field("caution", pa.string()),  # cc_caution
         pa.field("disease_involvement", pa.string()),  # cc_disease
         pa.field("disulfide_bond", pa.string()),  # PTM: disulfide bonds
         pa.field("domains", pa.string()),  # JSON: ft_domain features
         pa.field("drugbank_ids", pa.string()),  # DrugBank cross-refs (JSON array)
+        pa.field("entry_created", pa.string()),  # UniProt first public date
         pa.field("entry_name", pa.string()),  # UniProt entry name (e.g., FA10_HUMAN)
+        pa.field("entry_modified", pa.string()),  # UniProt last annotation update
+        pa.field("entry_type", pa.string()),  # Swiss-Prot / TrEMBL label
+        pa.field("entry_version", pa.int64()),  # UniProt entry audit version
+        pa.field("feature_count", pa.int64()),  # Feature count
         pa.field("features_json", pa.string()),  # All features combined (forensic)
+        pa.field("flag", pa.string()),  # Protein description flag
         pa.field("function_comment", pa.string()),  # cc_function
-        pa.field("gene_names", pa.list_(pa.string())),  # Gene name synonyms
+        pa.field("gene_names", pa.string()),  # Backward-compatible JSON gene alias
+        pa.field("gene_orf_names", pa.string()),  # Gene ORF names (JSON array)
+        pa.field("gene_primary", pa.string()),  # Primary gene name
+        pa.field("gene_synonyms", pa.string()),  # Gene synonyms (JSON array)
         pa.field("genus", pa.string()),  # Taxonomy: genus
         pa.field("glycosylation", pa.string()),  # PTM: glycosylation sites
         pa.field("go_terms", pa.string()),  # GO annotations (JSON array)
+        pa.field("guidetopharmacology_ids", pa.string()),  # GuideToPHARMACOLOGY xrefs
+        pa.field("induction", pa.string()),  # cc_induction
         pa.field("interpro_xrefs", pa.string()),  # InterPro domain IDs (JSON array)
         pa.field("intramembrane", pa.string()),  # Structural: intramembrane regions
+        pa.field("isoform_count", pa.int64()),  # Isoform count
         pa.field("isoform_ids", pa.string()),  # Isoform IDs (e.g., P12345-2)
         pa.field("isoform_names", pa.string()),  # Isoform names
         pa.field("isoform_synonyms", pa.string()),  # Isoform synonyms
+        pa.field("keyword_count", pa.int64()),  # Keyword count
+        pa.field("keywords", pa.string()),  # UniProt keywords (JSON array)
+        pa.field("lineage", pa.string()),  # Taxonomy lineage (JSON array)
         pa.field("lipidation", pa.string()),  # PTM: lipidation sites
         pa.field("modified_residue", pa.string()),  # PTM: all modified residues
         pa.field("molecular_function", pa.string()),  # GO aspect F
-        pa.field("organism_id", pa.int64()),  # NCBI Taxonomy ID
+        pa.field("organism_common", pa.string()),  # Common organism name
+        pa.field("organism_id", pa.int64()),  # Deprecated alias for taxonomy_id
+        pa.field("organism_scientific", pa.string()),  # Scientific organism name
         pa.field("pathway", pa.string()),  # cc_pathway
         pa.field("pdb_xrefs", pa.string()),  # PDB structure IDs (JSON array)
         pa.field("pfam_xrefs", pa.string()),  # Pfam family IDs (JSON array)
+        pa.field("pharmaceutical_use", pa.string()),  # cc_pharmaceutical
         pa.field("phosphorylation", pa.string()),  # PTM: phosphorylation sites
         pa.field("phylum", pa.string()),  # Taxonomy: phylum
         pa.field("propeptide", pa.string()),  # Structural: propeptide
+        pa.field("protein_alternative_names", pa.string()),  # Protein alternatives
+        pa.field("protein_ec_numbers", pa.string()),  # Protein EC numbers
         pa.field("protein_existence", pa.string()),  # Evidence level string
         pa.field("protein_name", pa.string()),  # Recommended protein name
+        pa.field("protein_short_names", pa.string()),  # Protein short names
+        pa.field("publication_count", pa.int64()),  # Publication count
         pa.field("reaction_ec_numbers", pa.string()),  # EC numbers from reactions
         pa.field("reactions", pa.string()),  # Reaction names from catalytic activity
         pa.field("reactome_xrefs", pa.string()),  # Reactome pathway IDs (JSON array)
         pa.field("reviewed", pa.bool_()),  # Swiss-Prot (true) vs TrEMBL (false)
+        pa.field("secondary_accessions", pa.string()),  # Secondary UniProt accessions
+        pa.field("sequence", pa.string()),  # Protein sequence
+        pa.field("sequence_checksum", pa.string()),  # Sequence CRC64
         pa.field("sequence_length", pa.int64()),  # Protein sequence length
+        pa.field("sequence_mass", pa.int64()),  # Molecular weight in Daltons
+        pa.field("sequence_modified", pa.string()),  # Sequence last modified date
         pa.field("signal_peptide", pa.string()),  # Structural: signal peptide
         pa.field("similarity_comment", pa.string()),  # cc_similarity
+        pa.field("subunit", pa.string()),  # cc_subunit
         pa.field("subcellular_location", pa.string()),  # cc_subcellular_location
         pa.field("superkingdom", pa.string()),  # Taxonomy: superkingdom
+        pa.field("taxonomy_id", pa.int64()),  # NCBI Taxonomy ID
         pa.field("tissue_specificity", pa.string()),  # cc_tissue_specificity
         pa.field("topology", pa.string()),  # Structural: topological domains
         pa.field("transmembrane", pa.string()),  # Structural: transmembrane regions

@@ -43,8 +43,8 @@ _PUSHGATEWAY_GROUPING_LABELS = ("pipeline", "run_type")
 
 # Re-export for backward compatibility
 __all__ = [
-    "delete_metrics_from_gateway",
     "MetricsServerError",
+    "delete_metrics_from_gateway",
     "get_metrics_server_runtime_status",
     "is_metrics_server_running",
     "push_metrics_to_gateway",

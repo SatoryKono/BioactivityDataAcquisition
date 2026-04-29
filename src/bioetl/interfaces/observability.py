@@ -34,8 +34,8 @@ if TYPE_CHECKING:
     from bioetl.composition.observability_api import MetricsOperatorProfile
 
 __all__ = [
-    "delete_metrics_from_gateway",
     "MetricsServerError",
+    "delete_metrics_from_gateway",
     "get_audit_service",
     "get_checkpoint_service",
     "get_health_service",
@@ -100,7 +100,9 @@ def delete_metrics_from_gateway(
     logger: LoggerPort | None = None,
 ) -> bool:
     """Delete metrics through the canonical composition API."""
-    from bioetl.composition.observability_api import delete_metrics_from_gateway as _impl
+    from bioetl.composition.observability_api import (
+        delete_metrics_from_gateway as _impl,
+    )
 
     return _impl(
         run_label=run_label,

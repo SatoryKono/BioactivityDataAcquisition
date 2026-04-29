@@ -394,13 +394,19 @@ metrics/admin behavior:
 - current metrics server status/config and Pushgateway publication mode should
   be discovered through `get_metrics_operator_profile()` /
   `bioetl diagnostics metrics`, not by reading composition helpers directly;
-- Pushgateway publication остаётся best-effort on run completion and не
-  требует отдельного operator command for normal execution.
+- Pushgateway publication остаётся best-effort on run completion, uses
+  replace-style bounded aggregate snapshots (`push_to_gateway`), supports
+  cleanup through `delete_metrics_from_gateway` / `delete_from_gateway`, and
+  does not require a separate operator command for normal execution.
+- Pushgateway grouping labels are limited to `pipeline` and `run_type`;
+  `run_id`, `record_id`, `payload_hash`, raw paths/URLs, and other forensic
+  anchors remain in manifest/ledger/CLI/explorer surfaces.
 
 Selected operator/admin service seams also emit bounded tracing spans through
 `TracingPort` when tracing is enabled:
 
-- `MetricsService.start`, `MetricsService.get_status`, `MetricsService.push_to_gateway`
+- `MetricsService.start`, `MetricsService.get_status`, `MetricsService.push_to_gateway`,
+  `MetricsService.delete_from_gateway`
 - `quarantine.inspect` (`QuarantineService.inspect`),
   `quarantine.get_stats` (`QuarantineService.get_stats`),
   `quarantine.replay` (`QuarantineService.replay`),

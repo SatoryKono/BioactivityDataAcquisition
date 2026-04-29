@@ -54,7 +54,7 @@ class PublicationTermTransformer(BaseChemblTransformer):
             self._get_required_field(prepared_record, self.primary_id_field),
         )
         business_data = self._extract_business_data(prepared_record, primary_id)
-        if business_data is None:
+        if business_data is None or not _has_extractable_publication_term(business_data):
             return None
         entity_id = _resolve_publication_term_entity_id(
             self, prepared_record, business_data
@@ -80,7 +80,7 @@ class PublicationTermTransformer(BaseChemblTransformer):
             self._get_required_field(prepared_record, self.primary_id_field),
         )
         business_data = self._extract_business_data(prepared_record, primary_id)
-        if business_data is None:
+        if business_data is None or not _has_extractable_publication_term(business_data):
             return None
         normalizer = RecordNormalizationProcessor(
             provider=self.provider,
@@ -254,6 +254,13 @@ def _resolve_publication_term_entity_id(
         term_type=str(business_data.get("term_type", "")),
         term=str(business_data.get("term", "")),
     )
+
+
+def _has_extractable_publication_term(business_data: GoldRecord) -> bool:
+    """Return True when extracted payload contains a meaningful term row."""
+    term = str(business_data.get("term", "")).strip()
+    term_type = str(business_data.get("term_type", "")).strip()
+    return bool(term and term_type)
 
 
 def _build_publication_term_silver_record(

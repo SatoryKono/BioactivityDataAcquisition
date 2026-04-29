@@ -193,7 +193,9 @@ def check_max_bound(val: float, max_val: float | None, inclusive: bool) -> bool:
     return val <= max_val if inclusive else val < max_val
 
 
-def _matches_filter_literal(value: object, values: frozenset[FilterScalar] | None) -> bool:
+def _matches_filter_literal(
+    value: object, values: frozenset[FilterScalar] | None
+) -> bool:
     if values is None:
         return False
     if value in values:

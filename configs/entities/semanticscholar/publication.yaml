@@ -34,8 +34,8 @@ schema:
   - name: identifiers
     fields:
     - paper_id
-    - publication_doi
-    - publication_pmid
+    - doi
+    - pmid
     - corpus_id
     - dblp_id
   - name: title
