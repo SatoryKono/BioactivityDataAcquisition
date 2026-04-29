@@ -16,7 +16,7 @@ class DQDisposition(StrEnum):
     Represents the final decision about how to handle a data quality violation.
     """
 
-    PASS = "pass"  # No violation detected
+    PASS = "pass"  # No violation detected  # nosec B105
     WARN = "warn"  # Violation detected but not severe enough for action
     QUARANTINE = "quarantine"  # Isolate records for review
     SKIP = "skip"  # Skip processing this data

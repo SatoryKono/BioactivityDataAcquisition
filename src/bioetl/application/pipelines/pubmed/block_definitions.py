@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import re
-import xml.etree.ElementTree as ET
+import xml.etree.ElementTree as ET  # nosec B405
 from collections.abc import Callable, Sequence
 from typing import TYPE_CHECKING, cast
 
