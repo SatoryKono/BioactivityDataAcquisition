@@ -117,6 +117,16 @@ def test_composition_package_root_exports_resources_api_module() -> None:
 
 
 @pytest.mark.unit
+def test_composition_package_root_budget_excludes_legacy_facade_modules() -> None:
+    """Package-root export budget should not regrow legacy compatibility modules."""
+    composition_module = importlib.import_module("bioetl.composition")
+
+    assert "bootstrap" not in composition_module.__all__
+    assert "resource_management_api" not in composition_module.__all__
+    assert "services_api" not in composition_module.__all__
+
+
+@pytest.mark.unit
 def test_composition_package_root_exports_registry_api_module() -> None:
     """Package root should expose canonical registry_api lazy export."""
     composition_module = importlib.import_module("bioetl.composition")

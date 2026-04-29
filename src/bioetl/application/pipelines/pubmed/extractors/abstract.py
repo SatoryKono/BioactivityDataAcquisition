@@ -9,7 +9,7 @@ __all__ = ["AbstractExtractor"]
 
 
 from typing import cast
-from xml.etree.ElementTree import Element
+from xml.etree.ElementTree import Element  # nosec B405
 
 from bioetl.application.pipelines.pubmed.extractors.base import BaseFieldExtractor
 

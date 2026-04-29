@@ -11,7 +11,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from bioetl.composition import PipelineRegistry
+from bioetl.composition.registry_api import PipelineRegistry
 
 
 # =============================================================================
@@ -40,7 +40,7 @@ class TestGetCheckpointService:
         with (
             patch("bioetl.composition._services._ensure_registrations") as mock_ensure,
             patch(
-                "bioetl.composition._services.bootstrap_checkpoint_service",
+                "bioetl.composition._services._invoke_bootstrap",
                 return_value=mock_service,
             ) as mock_bootstrap,
         ):
@@ -49,7 +49,7 @@ class TestGetCheckpointService:
             result = get_checkpoint_service()
 
         mock_ensure.assert_called_once()
-        mock_bootstrap.assert_called_once()
+        mock_bootstrap.assert_called_once_with("bootstrap_checkpoint_service")
         assert result is mock_service
 
 
@@ -69,7 +69,7 @@ class TestGetQuarantineService:
         with (
             patch("bioetl.composition._services._ensure_registrations") as mock_ensure,
             patch(
-                "bioetl.composition._services.bootstrap_quarantine_service",
+                "bioetl.composition._services._invoke_bootstrap",
                 return_value=mock_service,
             ) as mock_bootstrap,
         ):
@@ -78,7 +78,7 @@ class TestGetQuarantineService:
             result = get_quarantine_service()
 
         mock_ensure.assert_called_once()
-        mock_bootstrap.assert_called_once()
+        mock_bootstrap.assert_called_once_with("bootstrap_quarantine_service")
         assert result is mock_service
 
 
@@ -98,7 +98,7 @@ class TestGetBronzeCleanupService:
         with (
             patch("bioetl.composition._services._ensure_registrations") as mock_ensure,
             patch(
-                "bioetl.composition._services.bootstrap_bronze_cleanup_service",
+                "bioetl.composition._services._invoke_bootstrap",
                 return_value=mock_service,
             ) as mock_bootstrap,
         ):
@@ -107,7 +107,7 @@ class TestGetBronzeCleanupService:
             result = get_bronze_cleanup_service()
 
         mock_ensure.assert_called_once()
-        mock_bootstrap.assert_called_once()
+        mock_bootstrap.assert_called_once_with("bootstrap_bronze_cleanup_service")
         assert result is mock_service
 
 
@@ -127,7 +127,7 @@ class TestGetVacuumService:
         with (
             patch("bioetl.composition._services._ensure_registrations") as mock_ensure,
             patch(
-                "bioetl.composition._services.bootstrap_vacuum_service",
+                "bioetl.composition._services._invoke_bootstrap",
                 return_value=mock_service,
             ) as mock_bootstrap,
         ):
@@ -136,7 +136,7 @@ class TestGetVacuumService:
             result = get_vacuum_service()
 
         mock_ensure.assert_called_once()
-        mock_bootstrap.assert_called_once()
+        mock_bootstrap.assert_called_once_with("bootstrap_vacuum_service")
         assert result is mock_service
 
 
@@ -156,7 +156,7 @@ class TestGetExportService:
         with (
             patch("bioetl.composition._services._ensure_registrations") as mock_ensure,
             patch(
-                "bioetl.composition._services.bootstrap_export_service",
+                "bioetl.composition._services._invoke_bootstrap",
                 return_value=mock_service,
             ) as mock_bootstrap,
         ):
@@ -165,7 +165,7 @@ class TestGetExportService:
             result = get_export_service()
 
         mock_ensure.assert_called_once()
-        mock_bootstrap.assert_called_once()
+        mock_bootstrap.assert_called_once_with("bootstrap_export_service")
         assert result is mock_service
 
 
@@ -185,7 +185,7 @@ class TestGetLockService:
         with (
             patch("bioetl.composition._services._ensure_registrations") as mock_ensure,
             patch(
-                "bioetl.composition._services.bootstrap_lock_service",
+                "bioetl.composition._services._invoke_bootstrap",
                 return_value=mock_service,
             ) as mock_bootstrap,
         ):
@@ -194,7 +194,7 @@ class TestGetLockService:
             result = get_lock_service()
 
         mock_ensure.assert_called_once()
-        mock_bootstrap.assert_called_once()
+        mock_bootstrap.assert_called_once_with("bootstrap_lock_service")
         assert result is mock_service
 
 
@@ -289,7 +289,7 @@ class TestGetPipelineRunnerService:
         with (
             patch("bioetl.composition._services._ensure_registrations") as mock_ensure,
             patch(
-                "bioetl.composition._services.bootstrap_pipeline_runner_service",
+                "bioetl.composition._services._invoke_bootstrap",
                 return_value=mock_service,
             ) as mock_bootstrap,
         ):
@@ -298,7 +298,7 @@ class TestGetPipelineRunnerService:
             result = get_pipeline_runner_service()
 
         mock_ensure.assert_called_once()
-        mock_bootstrap.assert_called_once()
+        mock_bootstrap.assert_called_once_with("bootstrap_pipeline_runner_service", registry=None)
         assert result is mock_service
 
     def test_passes_explicit_registry_to_registration_and_bootstrap(self) -> None:
@@ -309,7 +309,7 @@ class TestGetPipelineRunnerService:
         with (
             patch("bioetl.composition._services._ensure_registrations") as mock_ensure,
             patch(
-                "bioetl.composition._services.bootstrap_pipeline_runner_service",
+                "bioetl.composition._services._invoke_bootstrap",
                 return_value=mock_service,
             ) as mock_bootstrap,
         ):
@@ -318,7 +318,10 @@ class TestGetPipelineRunnerService:
             result = get_pipeline_runner_service(registry=registry)
 
         mock_ensure.assert_called_once_with(registry=registry)
-        mock_bootstrap.assert_called_once_with(registry=registry)
+        mock_bootstrap.assert_called_once_with(
+            "bootstrap_pipeline_runner_service",
+            registry=registry,
+        )
         assert result is mock_service
 
 
@@ -338,7 +341,7 @@ class TestGetConfigService:
         with (
             patch("bioetl.composition._services._ensure_registrations") as mock_ensure,
             patch(
-                "bioetl.composition._services.bootstrap_config_service",
+                "bioetl.composition._services._invoke_bootstrap",
                 return_value=mock_service,
             ) as mock_bootstrap,
         ):
@@ -347,7 +350,7 @@ class TestGetConfigService:
             result = get_config_service()
 
         mock_ensure.assert_called_once()
-        mock_bootstrap.assert_called_once()
+        mock_bootstrap.assert_called_once_with("bootstrap_config_service")
         assert result is mock_service
 
 
@@ -367,7 +370,7 @@ class TestGetHealthService:
         with (
             patch("bioetl.composition._services._ensure_registrations") as mock_ensure,
             patch(
-                "bioetl.composition._services.bootstrap_health_service",
+                "bioetl.composition._services._invoke_bootstrap",
                 return_value=mock_service,
             ) as mock_bootstrap,
         ):
@@ -376,7 +379,7 @@ class TestGetHealthService:
             result = get_health_service()
 
         mock_ensure.assert_called_once()
-        mock_bootstrap.assert_called_once()
+        mock_bootstrap.assert_called_once_with("bootstrap_health_service")
         assert result is mock_service
 
 
@@ -396,7 +399,7 @@ class TestGetHealthServerDependencies:
         with (
             patch("bioetl.composition._services._ensure_registrations") as mock_ensure,
             patch(
-                "bioetl.composition._services.bootstrap_health_server_dependencies",
+                "bioetl.composition._services._invoke_bootstrap",
                 return_value=mock_deps,
             ) as mock_bootstrap,
         ):
@@ -405,7 +408,9 @@ class TestGetHealthServerDependencies:
             result = get_health_server_dependencies()
 
         mock_ensure.assert_called_once()
-        mock_bootstrap.assert_called_once()
+        mock_bootstrap.assert_called_once_with(
+            "bootstrap_health_server_dependencies"
+        )
         assert result is mock_deps
 
 
@@ -425,7 +430,7 @@ class TestGetMetricsService:
         with (
             patch("bioetl.composition._services._ensure_registrations") as mock_ensure,
             patch(
-                "bioetl.composition._services.bootstrap_metrics_service",
+                "bioetl.composition._services._invoke_bootstrap",
                 return_value=mock_service,
             ) as mock_bootstrap,
         ):
@@ -434,7 +439,7 @@ class TestGetMetricsService:
             result = get_metrics_service()
 
         mock_ensure.assert_called_once()
-        mock_bootstrap.assert_called_once()
+        mock_bootstrap.assert_called_once_with("bootstrap_metrics_service")
         assert result is mock_service
 
 
@@ -454,7 +459,7 @@ class TestGetAdrService:
         with (
             patch("bioetl.composition._services._ensure_registrations") as mock_ensure,
             patch(
-                "bioetl.composition._services.bootstrap_adr_service",
+                "bioetl.composition._services._invoke_bootstrap",
                 return_value=mock_service,
             ) as mock_bootstrap,
         ):
@@ -463,7 +468,7 @@ class TestGetAdrService:
             result = get_adr_service()
 
         mock_ensure.assert_called_once()
-        mock_bootstrap.assert_called_once()
+        mock_bootstrap.assert_called_once_with("bootstrap_adr_service")
         assert result is mock_service
 
 
@@ -483,7 +488,7 @@ class TestGetQuarantinePort:
         with (
             patch("bioetl.composition._services._ensure_registrations") as mock_ensure,
             patch(
-                "bioetl.composition._services.bootstrap_quarantine_port",
+                "bioetl.composition._services._invoke_bootstrap",
                 return_value=mock_port,
             ) as mock_bootstrap,
         ):
@@ -492,7 +497,7 @@ class TestGetQuarantinePort:
             result = get_quarantine_port()
 
         mock_ensure.assert_called_once()
-        mock_bootstrap.assert_called_once()
+        mock_bootstrap.assert_called_once_with("bootstrap_quarantine_port")
         assert result is mock_port
 
     def test_returns_shared_port_without_pipeline_context(self) -> None:
@@ -501,7 +506,7 @@ class TestGetQuarantinePort:
 
         with (
             patch(
-                "bioetl.composition._services.bootstrap_quarantine_port",
+                "bioetl.composition._services._invoke_bootstrap",
                 return_value=mock_port,
             ),
         ):

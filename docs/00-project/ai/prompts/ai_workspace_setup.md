@@ -276,7 +276,7 @@ diff <(ls docs/00-project/ai/skills/local/ | grep "^py-") <(ls .codex/skills/ | 
 | `AGENTS.md`                         | Корень проекта          | OpenAI Codex, generic agents | Сам файл (единственная копия)                |
 | `.github/copilot-instructions.md`   | `.github/`              | GitHub Copilot               | Сам файл                                     |
 | `.gemini/GEMINI.md`                 | `.gemini/`              | Gemini CLI                   | `docs/00-project/ai/agents/guides/GEMINI.md` |
-| Claude runtime project context file | Claude runtime registry | Claude Code (автозагрузка)   | Runtime file                                 |
+| Claude runtime compact context      | Claude runtime registry | Claude Code (автозагрузка)   | Runtime file                                 |
 | Claude runtime rules                | Claude runtime registry | Claude Code (автозагрузка)   | Runtime files                                |
 
 Claude Code НЕ требует `CLAUDE.md` в корне — он читает свой runtime project context и runtime rules автоматически.

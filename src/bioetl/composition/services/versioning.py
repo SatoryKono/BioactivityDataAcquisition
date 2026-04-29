@@ -11,7 +11,7 @@ These utilities support PipelineMetadata population as per RULES.md §2.3.
 from __future__ import annotations
 
 import hashlib
-import subprocess
+import subprocess  # nosec B404
 from dataclasses import dataclass
 from functools import lru_cache
 from importlib.metadata import PackageNotFoundError
@@ -61,7 +61,7 @@ def get_git_commit() -> str | None:
         >>> commit  # 'abc1234' or None
     """
     try:
-        result = subprocess.run(
+        result = subprocess.run(  # nosec B603 B607
             ["git", "rev-parse", "--short", "HEAD"],
             capture_output=True,
             text=True,
@@ -85,7 +85,7 @@ def get_code_revision_provenance() -> CodeRevisionProvenance:
             source_revision_state="git_unavailable",
         )
     try:
-        result = subprocess.run(
+        result = subprocess.run(  # nosec B603 B607
             ["git", "diff-index", "--quiet", "HEAD", "--"],
             capture_output=True,
             text=True,

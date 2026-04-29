@@ -106,8 +106,8 @@ ______________________________________________________________________
 1. Прочти `MEMORY_USAGE.md` — это policy для memory surfaces.
 1. Для write-capable work следуй `../policy/POST_CHANGE_VALIDATION.md`.
 1. Проверь `guides/CLAUDE.md` — справочник для Claude Code.
-1. Изучи runtime project context file для быстрой справки.
-1. Ознакомься с `../memory/agent-memory.md` — краткая выжимка по проекту.
+1. Для compact project context используй `../../memory/agent-memory.md`.
+1. Ознакомься с `../../memory/agent-memory.md` — краткая выжимка по проекту.
 1. Если задача затрагивает `grafana/dashboards/*.json`, прочитай `docs/03-guides/dashboards/dashboard-extension-llm.md`.
 1. Изучи существующий код в затрагиваемых модулях.
 

@@ -36,7 +36,7 @@ jobs:
       - name: Fail if *.pyc or __pycache__ exists
         run: |
           set -e
-          FOUND=$(find . \( -name "*.pyc" -o -name "__pycache__" \) -print | head -n 1 || true)
+          FOUND=$(find . -type d \( -name .venv -o -name .git \) -prune -o \( -name "*.pyc" -o -name "__pycache__" \) -print | head -n 1 || true)
           if [ -n "$FOUND" ]; then
             echo "Found compiled artifacts: $FOUND"
             exit 1

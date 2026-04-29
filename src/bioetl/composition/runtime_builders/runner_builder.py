@@ -9,10 +9,10 @@ from typing import TYPE_CHECKING, cast
 from bioetl.application.services.control_plane.run_ledger_service import (
     RunLedgerService,
 )
-from bioetl.composition import PipelineRegistry, create_registry
 from bioetl.composition.factories.pipeline.registry import register_all_pipelines
 from bioetl.composition.observability import ObservabilityBundle
 from bioetl.composition.providers import ensure_providers_loaded
+from bioetl.composition.registry_api import PipelineRegistry, create_registry
 from bioetl.composition.runtime_builders._runner_builder_support import (
     bind_manifest_logger_context as _bind_manifest_logger_context,
 )

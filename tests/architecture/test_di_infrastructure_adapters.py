@@ -16,7 +16,7 @@ Allowed pattern (conditional fallback):
 Forbidden pattern (unconditional):
     self._error_handler = ErrorService(logger, metrics=self._metrics)
 
-See ai-selfreview-rules.md §2 Anti-Patterns (AP-001, DI-001).
+See docs/00-project/ai/rules/bioetl-ai-rules.md for AP-001 / DI-001.
 """
 
 from __future__ import annotations

@@ -53,10 +53,12 @@ pipelines:
       - Review
     structured_json_shapes:
       authors_with_affiliations:
+        semantic_policy: raw_json_plus_canonical_json_before_semantic_transform
         collection_semantics: ordered_sequence
         raw_sidecar_field: authors_with_affiliations_raw_json
         canonical_sidecar_field: authors_with_affiliations_canonical_json
       affiliation_structured:
+        semantic_policy: raw_json_plus_canonical_json_before_semantic_transform
         collection_semantics: unordered_set
         raw_sidecar_field: affiliation_structured_raw_json
         canonical_sidecar_field: affiliation_structured_canonical_json
@@ -82,10 +84,12 @@ pipelines:
       - closed
     structured_json_shapes:
       grants:
+        semantic_policy: raw_json_plus_canonical_json_before_semantic_transform
         collection_semantics: unordered_set
         raw_sidecar_field: grants_raw_json
         canonical_sidecar_field: grants_canonical_json
       primary_topic:
+        semantic_policy: raw_json_plus_canonical_json_before_semantic_transform
         collection_semantics: structured_object
         raw_sidecar_field: primary_topic_raw_json
         canonical_sidecar_field: primary_topic_canonical_json
@@ -102,10 +106,26 @@ pipelines:
       - bronze
       - closed
     structured_json_shapes:
+      author_h_indices:
+        semantic_policy: raw_json_plus_canonical_json_before_semantic_transform
+        collection_semantics: ordered_sequence
+        raw_sidecar_field: author_h_indices_raw_json
+        canonical_sidecar_field: author_h_indices_canonical_json
+      citation_contexts:
+        semantic_policy: raw_json_plus_canonical_json_before_semantic_transform
+        collection_semantics: ordered_sequence
+        raw_sidecar_field: citation_contexts_raw_json
+        canonical_sidecar_field: citation_contexts_canonical_json
       publication_types:
+        semantic_policy: raw_json_plus_canonical_json_before_semantic_transform
         collection_semantics: unordered_set
-        raw_sidecar_field: publication_type
-        canonical_sidecar_field: publication_types
+        raw_sidecar_field: publication_types_raw_json
+        canonical_sidecar_field: publication_types_canonical_json
+      subject_fields:
+        semantic_policy: raw_json_plus_canonical_json_before_semantic_transform
+        collection_semantics: unordered_set
+        raw_sidecar_field: subject_fields_raw_json
+        canonical_sidecar_field: subject_fields_canonical_json
 composites:
   composite_publication:
     source_pipelines:
