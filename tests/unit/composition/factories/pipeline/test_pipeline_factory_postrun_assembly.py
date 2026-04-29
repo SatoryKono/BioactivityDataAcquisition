@@ -107,6 +107,7 @@ class TestBuildPostrunService:
             metrics=pipeline.services.metrics,
             pipeline_name=pipeline.config.pipeline_name,
             entity_type=pipeline.config.entity_type,
+            run_type=pipeline.runtime.run_type.value,
         )
         mock_build_dependencies.assert_called_once()
         mock_postrun_service_cls.assert_called_once_with(

@@ -1,0 +1,137 @@
+"""Shared runtime-resource helpers for composite bootstrap planning."""
+
+from __future__ import annotations
+
+import inspect
+from dataclasses import dataclass
+from typing import TYPE_CHECKING
+
+from bioetl.composition.bootstrap.composite_infrastructure_context import (
+    CompositeInfrastructureContext,
+)
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
+    from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
+    from bioetl.domain.composite.config import CompositeConfig
+    from bioetl.domain.ports import (
+        ClockPort,
+        LockPort,
+        LoggerPort,
+        MetricsPort,
+        TracingPort,
+    )
+    from bioetl.infrastructure.config import Settings
+
+
+@dataclass(frozen=True, slots=True)
+class BootstrapRuntimeResources:
+    """Resolved runtime-basics bundle shared by bootstrap orchestration."""
+
+    run_id: str
+    settings: Settings
+    logger: LoggerPort
+    metrics: MetricsPort
+    tracer: TracingPort
+    storage: object
+    lock: LockPort
+    clock: ClockPort | None = None
+    infra_context: object | None = None
+
+
+def build_bootstrap_runtime_resources(
+    *,
+    bootstrap_runtime_basics_fn: Callable[..., object],
+    config: CompositeConfig,
+    run_id: str | None,
+) -> BootstrapRuntimeResources:
+    """Resolve the canonical runtime-basics resource bundle."""
+    resolved_bundle = bootstrap_runtime_basics_fn(config=config, run_id=run_id)
+    if isinstance(resolved_bundle, CompositeInfrastructureContext) or _has_named_bundle(
+        resolved_bundle
+    ):
+        return BootstrapRuntimeResources(
+            run_id=resolved_bundle.run_id,
+            settings=resolved_bundle.settings,
+            logger=resolved_bundle.logger,
+            metrics=resolved_bundle.metrics,
+            tracer=resolved_bundle.tracer,
+            storage=resolved_bundle.storage,
+            lock=resolved_bundle.lock,
+            clock=getattr(resolved_bundle, "clock", None),
+            infra_context=resolved_bundle,
+        )
+    effective_run_id, settings, logger, metrics, tracer, storage, lock = resolved_bundle
+    return BootstrapRuntimeResources(
+        run_id=effective_run_id,
+        settings=settings,
+        logger=logger,
+        metrics=metrics,
+        tracer=tracer,
+        storage=storage,
+        lock=lock,
+    )
+
+
+def build_bootstrap_support_services(
+    *,
+    build_support_services_fn: Callable[..., object],
+    config: CompositeConfig,
+    runtime: CompositeRuntimeConfig,
+    resources: BootstrapRuntimeResources,
+    include_legacy_runtime_kwargs: bool = False,
+) -> object:
+    """Resolve support services from the shared resource bundle."""
+    call_kwargs: dict[str, object] = {
+        "config": config,
+        "runtime": runtime,
+        "infra_context": resources.infra_context or resources,
+    }
+    if include_legacy_runtime_kwargs:
+        call_kwargs.update(
+            run_id=resources.run_id,
+            settings=resources.settings,
+            logger=resources.logger,
+            metrics=resources.metrics,
+            tracer=resources.tracer,
+            storage=resources.storage,
+            lock=resources.lock,
+        )
+    return _call_supported_kwargs(build_support_services_fn, call_kwargs)
+
+
+def _has_named_bundle(resolved_bundle: object) -> bool:
+    return all(
+        hasattr(resolved_bundle, field_name)
+        for field_name in (
+            "run_id",
+            "settings",
+            "logger",
+            "metrics",
+            "tracer",
+            "storage",
+            "lock",
+        )
+    )
+
+
+def _call_supported_kwargs(
+    build_support_services_fn: Callable[..., object],
+    call_kwargs: dict[str, object],
+) -> object:
+    try:
+        parameters = inspect.signature(build_support_services_fn).parameters
+    except (TypeError, ValueError):
+        return build_support_services_fn(**call_kwargs)
+
+    if any(
+        parameter.kind is inspect.Parameter.VAR_KEYWORD
+        for parameter in parameters.values()
+    ):
+        return build_support_services_fn(**call_kwargs)
+
+    supported_kwargs = {
+        name: value for name, value in call_kwargs.items() if name in parameters
+    }
+    return build_support_services_fn(**supported_kwargs)

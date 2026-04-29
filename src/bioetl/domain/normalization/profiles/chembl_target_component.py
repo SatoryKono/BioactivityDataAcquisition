@@ -14,6 +14,7 @@ from bioetl.domain.normalization.profiles.profile_normalizers import (
 from bioetl.domain.schemas.chembl.target_component import TargetComponentSchema
 
 from ._chembl_vocab import chembl_enum
+from .chembl_json_ordering_policy import chembl_json_fields
 
 __all__ = [
     "CHEMBL_TARGET_COMPONENT_PROFILE",
@@ -39,14 +40,7 @@ _META_FIELDS = frozenset(
     }
 )
 _INT_FIELDS = frozenset({"component_id", "taxonomy_id", "protein_classification_id"})
-_STRICT_JSON_FIELDS = frozenset(
-    {
-        "protein_classification_ids",
-        "protein_classifications",
-        "target_component_synonyms",
-        "target_component_xrefs",
-    }
-)
+_STRICT_JSON_FIELDS = chembl_json_fields("chembl_target_component")
 _ENUM_FIELDS = {"component_type": TARGET_COMPONENT_TYPES}
 _SPECIAL_RULES = {
     "organism": (

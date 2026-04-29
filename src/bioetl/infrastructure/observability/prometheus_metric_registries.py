@@ -29,6 +29,7 @@ PIPELINE_RUNTIME_REGISTRY = MetricRegistryFamily(
     counters={
         "bioetl_records_processed_total": _metrics.RECORDS_PROCESSED_TOTAL,
         "bioetl_record_flow_records_total": _metrics.RECORD_FLOW_RECORDS_TOTAL,
+        "bioetl_record_flow_invariants_total": _metrics.RECORD_FLOW_INVARIANTS_TOTAL,
         "bioetl_stage_records_total": _metrics.STAGE_RECORDS_TOTAL,
         "bioetl_errors_total": _metrics.ERRORS_TOTAL,
         "bioetl_filter_ids_loaded_total": _metrics.FILTER_IDS_LOADED_TOTAL,
@@ -66,6 +67,8 @@ PIPELINE_RUNTIME_REGISTRY = MetricRegistryFamily(
         "bioetl_memory_pressure_state": _metrics.MEMORY_PRESSURE_STATE,
         "bioetl_control_plane_lifecycle_delete_candidates": _metrics.CONTROL_PLANE_LIFECYCLE_DELETE_CANDIDATES,
         "bioetl_observability_runtime_status": _metrics.OBSERVABILITY_RUNTIME_STATUS,
+        "bioetl_stage_backlog_records": _metrics.STAGE_BACKLOG_RECORDS,
+        "bioetl_stage_lag_seconds": _metrics.STAGE_LAG_SECONDS,
     },
     histograms={
         "bioetl_pipeline_duration_seconds": _metrics.PIPELINE_DURATION_SECONDS,

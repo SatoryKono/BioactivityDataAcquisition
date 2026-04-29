@@ -74,6 +74,7 @@ _STAGE_LABEL_METRICS = frozenset(
 )
 _STAGE_MODEL_LABEL_METRICS = frozenset({"bioetl_stage_records_total"})
 _STAGE_BACKLOG_LABEL_METRICS = frozenset({"bioetl_stage_backlog_records"})
+_STAGE_LAG_LABEL_METRICS = frozenset({"bioetl_stage_lag_seconds"})
 _FLOW_STAGE_LABEL_METRICS = frozenset({"bioetl_record_flow_records_total"})
 _DQ_DISPOSITION_LABEL_METRICS = frozenset({"bioetl_dq_dispositions_total"})
 _METRICS_PUBLICATION_LABEL_METRICS = frozenset(
@@ -280,6 +281,11 @@ def _normalize_publication_metric_labels(
             "mode": normalize_observability_mode(str(labels.get("mode", "other"))),
         }
     if name in _STAGE_BACKLOG_LABEL_METRICS:
+        return {
+            **labels,
+            "stage": normalize_stage_model_stage(str(labels.get("stage", "other"))),
+        }
+    if name in _STAGE_LAG_LABEL_METRICS:
         return {
             **labels,
             "stage": normalize_stage_model_stage(str(labels.get("stage", "other"))),

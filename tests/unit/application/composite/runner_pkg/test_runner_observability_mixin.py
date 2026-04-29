@@ -171,12 +171,41 @@ async def test_write_cv_quarantine_when_payloads_written_then_logs_and_emits_met
         == harness._started_at
     )
     harness._logger.info.assert_called_once()
-    harness._metrics.increment_counter.assert_called_once_with(
+    harness._metrics.increment_counter.assert_any_call(
         "bioetl_quarantine_records_total",
         2,
         {
             "pipeline": "composite:test_composite",
             "reason": "cross_validation",
+        },
+    )
+    harness._metrics.increment_counter.assert_any_call(
+        "bioetl_record_flow_records_total",
+        2,
+        {
+            "pipeline": "composite:test_composite",
+            "run_type": "composite",
+            "flow_stage": "quarantined",
+        },
+    )
+    harness._metrics.increment_counter.assert_any_call(
+        "bioetl_dq_dispositions_total",
+        2,
+        {
+            "pipeline": "composite:test_composite",
+            "stage": "validation",
+            "disposition": "quarantine",
+            "terminal_status": "success",
+        },
+    )
+    harness._metrics.increment_counter.assert_any_call(
+        "bioetl_stage_records_total",
+        2,
+        {
+            "pipeline": "composite:test_composite",
+            "run_type": "composite",
+            "stage": "validation",
+            "outcome": "quarantined",
         },
     )
 

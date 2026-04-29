@@ -15,7 +15,7 @@ python -m scripts.ai vibe "explain this code"
 ```
 
 This directory is retained for setup helpers and historical context; prefer the
-canonical `scripts.ai.vibe` surface for actual launch commands.
+canonical `python -m scripts.ai vibe` surface for actual launch commands.
 
 Edit the compatibility env file, then launch through the canonical surface:
 

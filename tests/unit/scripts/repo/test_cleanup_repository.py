@@ -92,3 +92,76 @@ def test_collect_cleanup_candidates_reports_tracked_policy_candidates(
         and candidate.rel_path == ".python-user/site.py"
         for candidate in candidates
     )
+
+
+def test_collect_cleanup_candidates_includes_safe_local_log_temp_files(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    _write_governance_files(tmp_path)
+    for relative_path in (
+        "worker.log",
+        "session.tmp",
+        "full_log.txt",
+        "final_report_debug.txt",
+        "project_rules_failures.txt",
+    ):
+        path = tmp_path / relative_path
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("artifact\n", encoding="utf-8")
+
+    monkeypatch.setattr(module, "_tracked_paths", lambda repo_root: [])
+
+    candidates = module.collect_cleanup_candidates(tmp_path)
+    rel_paths = {candidate.rel_path for candidate in candidates}
+
+    assert "worker.log" in rel_paths
+    assert "session.tmp" in rel_paths
+    assert "full_log.txt" in rel_paths
+    assert "final_report_debug.txt" in rel_paths
+    assert "project_rules_failures.txt" in rel_paths
+
+
+def test_collect_cleanup_candidates_excludes_blocked_zone_log_temp_files(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    _write_governance_files(tmp_path)
+    for relative_path in (
+        "reports/worker.log",
+        "reports/session.tmp",
+        "data/full_log.txt",
+        "data/final_report_debug.txt",
+        "reports/project_rules_failures.txt",
+    ):
+        path = tmp_path / relative_path
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("artifact\n", encoding="utf-8")
+
+    monkeypatch.setattr(module, "_tracked_paths", lambda repo_root: [])
+
+    candidates = module.collect_cleanup_candidates(tmp_path)
+    rel_paths = {candidate.rel_path for candidate in candidates}
+
+    assert "reports/worker.log" not in rel_paths
+    assert "reports/session.tmp" not in rel_paths
+    assert "data/full_log.txt" not in rel_paths
+    assert "data/final_report_debug.txt" not in rel_paths
+    assert "reports/project_rules_failures.txt" not in rel_paths
+
+
+def test_collect_cleanup_candidates_includes_egg_info_and_notebook_checkpoints(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    _write_governance_files(tmp_path)
+    (tmp_path / "dist-info.egg-info").mkdir()
+    (tmp_path / ".ipynb_checkpoints").mkdir()
+
+    monkeypatch.setattr(module, "_tracked_paths", lambda repo_root: [])
+
+    candidates = module.collect_cleanup_candidates(tmp_path)
+    rel_paths = {candidate.rel_path for candidate in candidates}
+
+    assert "dist-info.egg-info" in rel_paths
+    assert ".ipynb_checkpoints" in rel_paths

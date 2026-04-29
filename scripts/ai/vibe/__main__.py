@@ -1,9 +1,14 @@
 #!/usr/bin/env python3
-"""Unified entry point for Vibe launch tooling.
+"""Compatibility entry point for Vibe launch tooling.
 
 Usage:
+    python -m scripts.ai vibe [check|setup|args...]
     python -m scripts.ai.vibe [check|setup|args...]
+    python -m scripts.ai vibe --help
     python -m scripts.ai.vibe --help
+
+The canonical public Python surface is ``python -m scripts.ai vibe``.
+This direct module path remains only as a compatibility entrypoint.
 """
 
 from __future__ import annotations

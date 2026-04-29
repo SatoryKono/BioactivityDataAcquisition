@@ -330,6 +330,89 @@ class TestPrometheusMetrics:
                 6
             )
 
+    def test_record_flow_invariant_metrics_normalize_unknown_labels(
+        self, prometheus_metrics
+    ):
+        """Invariant metrics must stay within the canonical bounded vocabulary."""
+        with patch.dict(
+            COUNTERS,
+            {"bioetl_record_flow_invariants_total": MagicMock()},
+        ):
+            prometheus_metrics.increment_counter(
+                name="bioetl_record_flow_invariants_total",
+                value=1,
+                labels={
+                    "pipeline": "chembl_activity",
+                    "run_type": "incremental",
+                    "invariant": "custom_invariant",
+                    "status": "custom_status",
+                },
+            )
+
+            COUNTERS[
+                "bioetl_record_flow_invariants_total"
+            ].labels.assert_called_once_with(
+                pipeline="chembl_activity",
+                run_type="incremental",
+                invariant="other",
+                status="other",
+            )
+            COUNTERS[
+                "bioetl_record_flow_invariants_total"
+            ].labels().inc.assert_called_once_with(1)
+
+    def test_stage_backlog_gauge_normalizes_unknown_stage_labels(
+        self, prometheus_metrics
+    ):
+        """Stage backlog gauge must stay within the canonical stage vocabulary."""
+        with patch.dict(
+            GAUGES,
+            {"bioetl_stage_backlog_records": MagicMock()},
+        ):
+            prometheus_metrics.set_gauge(
+                name="bioetl_stage_backlog_records",
+                value=4.0,
+                labels={
+                    "pipeline": "chembl_activity",
+                    "run_type": "incremental",
+                    "stage": "wild_stage",
+                },
+            )
+
+            GAUGES["bioetl_stage_backlog_records"].labels.assert_called_once_with(
+                pipeline="chembl_activity",
+                run_type="incremental",
+                stage="other",
+            )
+            GAUGES["bioetl_stage_backlog_records"].labels().set.assert_called_once_with(
+                4.0
+            )
+
+    def test_stage_lag_gauge_normalizes_unknown_stage_labels(self, prometheus_metrics):
+        """Stage lag gauge must stay within the canonical stage vocabulary."""
+        with patch.dict(
+            GAUGES,
+            {"bioetl_stage_lag_seconds": MagicMock()},
+        ):
+            prometheus_metrics.set_gauge(
+                name="bioetl_stage_lag_seconds",
+                value=12.5,
+                labels={
+                    "pipeline": "chembl_activity",
+                    "run_type": "incremental",
+                    "stage": "wild_stage",
+                },
+            )
+
+            GAUGES["bioetl_stage_lag_seconds"].labels.assert_called_once_with(
+                pipeline="chembl_activity",
+                run_type="incremental",
+                stage="other",
+            )
+            GAUGES["bioetl_stage_lag_seconds"].labels().set.assert_called_once_with(
+                12.5
+            )
+
     def test_dq_disposition_metrics_normalize_unknown_labels(self, prometheus_metrics):
         """DQ disposition labels must stay within the bounded canonical set."""
         with patch.dict(

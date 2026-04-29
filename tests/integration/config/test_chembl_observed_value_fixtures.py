@@ -21,6 +21,9 @@ from bioetl.domain.normalization.profiles import (
     CHEMBL_TARGET_COMPONENT_PROFILE,
     CHEMBL_TARGET_PROFILE,
 )
+from bioetl.application.core.record_normalization_processor import (
+    RecordNormalizationProcessor,
+)
 
 ROOT = Path(".")
 ENUM_PATH = ROOT / "configs" / "enums" / "chembl.yaml"
@@ -199,6 +202,15 @@ def negative_values(
     return values
 
 
+@pytest.fixture(scope="module")
+def json_ordering_cases(
+    fixture_payload: dict[str, Any],
+) -> dict[str, list[dict[str, Any]]]:
+    values = fixture_payload["json_ordering_cases"]
+    assert isinstance(values, dict)
+    return values
+
+
 def _registry_values(
     enums: dict[str, Any],
     registry_path: tuple[str, ...],
@@ -372,3 +384,35 @@ def test_negative_values_fail_closed_or_downgrade_deterministically(
     rule = profile.rule_for(field)
     assert rule is not None
     assert rule.normalizer(raw_value) == expected
+
+
+@pytest.mark.integration
+def test_json_ordering_fixture_set_like_cases_are_hash_equivalent(
+    json_ordering_cases: dict[str, list[dict[str, Any]]],
+) -> None:
+    for case in json_ordering_cases["set_like"]:
+        entity = str(case["entity"])
+        field = str(case["field"])
+        processor = RecordNormalizationProcessor(provider="chembl", entity_type=entity)
+        normalized_a = processor.normalize_business_data({field: case["equivalent_a"]})
+        normalized_b = processor.normalize_business_data({field: case["equivalent_b"]})
+
+        assert processor.compute_content_hash(
+            normalized_a
+        ) == processor.compute_content_hash(normalized_b)
+
+
+@pytest.mark.integration
+def test_json_ordering_fixture_order_sensitive_cases_keep_distinct_hashes(
+    json_ordering_cases: dict[str, list[dict[str, Any]]],
+) -> None:
+    for case in json_ordering_cases["order_sensitive"]:
+        entity = str(case["entity"])
+        field = str(case["field"])
+        processor = RecordNormalizationProcessor(provider="chembl", entity_type=entity)
+        normalized_a = processor.normalize_business_data({field: case["value_a"]})
+        normalized_b = processor.normalize_business_data({field: case["value_b"]})
+
+        assert processor.compute_content_hash(
+            normalized_a
+        ) != processor.compute_content_hash(normalized_b)

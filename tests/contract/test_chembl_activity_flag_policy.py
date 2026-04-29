@@ -62,18 +62,63 @@ def test_activity_flag_fields_align_profile_schema_and_dq(
 def test_activity_ontology_bundles_publish_mapped_bundle_requirements() -> None:
     dq_config = DQConfigLoader(Path("configs")).load("chembl", "activity")
 
-    conditional_names = {rule.name for rule in dq_config.conditional_validations}
-    cross_names = {rule.name for rule in dq_config.cross_field_validations}
+    conditional_rules = {rule.name: rule for rule in dq_config.conditional_validations}
+    cross_rules = {rule.name: rule for rule in dq_config.cross_field_validations}
 
     assert {
         "bao_endpoint_requires_mapping_status",
         "bao_format_requires_mapping_status",
         "uo_unit_requires_mapping_status",
         "qudt_unit_requires_mapping_status",
-    } <= cross_names
+    } <= set(cross_rules)
     assert {
         "mapped_bao_endpoint_requires_bundle",
         "mapped_bao_format_requires_bundle",
         "mapped_uo_unit_requires_bundle",
         "mapped_qudt_unit_requires_bundle",
-    } <= conditional_names
+    } <= set(conditional_rules)
+
+    expected_cross_fields = {
+        "bao_endpoint_requires_mapping_status": (
+            "bao_endpoint",
+            "bao_endpoint_mapping_status",
+        ),
+        "bao_format_requires_mapping_status": (
+            "bao_format",
+            "bao_format_mapping_status",
+        ),
+        "uo_unit_requires_mapping_status": ("uo_units", "uo_unit_mapping_status"),
+        "qudt_unit_requires_mapping_status": ("qudt_units", "qudt_unit_mapping_status"),
+    }
+    for name, (trigger_field, required_field) in expected_cross_fields.items():
+        rule = cross_rules[name]
+        assert rule.condition == "conditional_required"
+        assert rule.trigger_field == trigger_field
+        assert rule.required_field == required_field
+
+    expected_conditional_fields = {
+        "mapped_bao_endpoint_requires_bundle": {
+            "condition_field": "bao_endpoint_mapping_status",
+            "then_fields": {"bao_endpoint_iri", "bao_ontology_version"},
+        },
+        "mapped_bao_format_requires_bundle": {
+            "condition_field": "bao_format_mapping_status",
+            "then_fields": {"bao_format_iri", "bao_ontology_version"},
+        },
+        "mapped_uo_unit_requires_bundle": {
+            "condition_field": "uo_unit_mapping_status",
+            "then_fields": {"uo_unit_iri", "uo_ontology_version"},
+        },
+        "mapped_qudt_unit_requires_bundle": {
+            "condition_field": "qudt_unit_mapping_status",
+            "then_fields": {"qudt_unit_iri", "qudt_ontology_version"},
+        },
+    }
+    for name, expected in expected_conditional_fields.items():
+        rule = conditional_rules[name]
+        assert rule.condition_field == expected["condition_field"]
+        assert rule.condition_operator == "eq"
+        assert rule.condition_value == "mapped"
+        assert {validation.field for validation in rule.then_validations} == expected[
+            "then_fields"
+        ]

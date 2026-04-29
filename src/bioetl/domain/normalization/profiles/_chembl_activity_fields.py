@@ -5,6 +5,7 @@ from __future__ import annotations
 from bioetl.domain.schemas.chembl.activity import ActivitySchema
 
 from ._chembl_vocab import chembl_enum
+from .chembl_json_ordering_policy import chembl_set_like_json_fields
 
 CHEMBL_ACTIVITY_SCHEMA_FIELDS = tuple(ActivitySchema.to_schema().columns.keys())
 
@@ -55,7 +56,7 @@ META_FIELDS = frozenset(
         "_state",
     }
 )
-SET_LIKE_FIELDS = frozenset({"activity_properties"})
+SET_LIKE_FIELDS = chembl_set_like_json_fields("chembl_activity")
 
 # Export enum constants for use in normalization
 __all__ = [

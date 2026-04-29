@@ -426,3 +426,35 @@ negative_values:
     author_orcids:
       - input: "{not json}"
         expected: null
+
+json_ordering_cases:
+  set_like:
+    - entity: activity
+      field: activity_properties
+      equivalent_a: '[{"type":"Ki"},{"type":"IC50"}]'
+      equivalent_b: '[{"type":"IC50"},{"type":"Ki"}]'
+    - entity: publication
+      field: author_orcids
+      equivalent_a: '["0000-0002-1825-0097","0000-0001-5109-3700"]'
+      equivalent_b: '["0000-0001-5109-3700","0000-0002-1825-0097"]'
+    - entity: target
+      field: component_types
+      equivalent_a: '["PROTEIN","DNA"]'
+      equivalent_b: '["DNA","PROTEIN"]'
+    - entity: target
+      field: component_relationships
+      equivalent_a: '["SINGLE PROTEIN","RNA"]'
+      equivalent_b: '["RNA","SINGLE PROTEIN"]'
+  order_sensitive:
+    - entity: assay
+      field: assay_parameters
+      value_a: '[{"type":"TEMP"},{"type":"PH"}]'
+      value_b: '[{"type":"PH"},{"type":"TEMP"}]'
+    - entity: publication
+      field: authors
+      value_a: '["Alice Smith","Bob Jones"]'
+      value_b: '["Bob Jones","Alice Smith"]'
+    - entity: target
+      field: target_components
+      value_a: '[{"component_id":1},{"component_id":2}]'
+      value_b: '[{"component_id":2},{"component_id":1}]'

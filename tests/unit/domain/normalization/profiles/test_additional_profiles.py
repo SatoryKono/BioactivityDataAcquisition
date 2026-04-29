@@ -37,10 +37,22 @@ from bioetl.domain.normalization.profiles._chembl_profile_helpers import (
     build_chembl_profile,
     chembl_schema_fields,
 )
+from bioetl.domain.normalization.profiles.chembl_json_ordering_policy import (
+    CHEMBL_JSON_ORDERING_POLICY,
+)
 from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_canonical_smiles,
 )
 from bioetl.domain.schemas.chembl.publication_term import PublicationTermSchema
+
+_CHEMBL_PROFILES_BY_PIPELINE = {
+    "chembl_activity": CHEMBL_ACTIVITY_PROFILE,
+    "chembl_assay": CHEMBL_ASSAY_PROFILE,
+    "chembl_molecule": CHEMBL_MOLECULE_PROFILE,
+    "chembl_publication": CHEMBL_PUBLICATION_PROFILE,
+    "chembl_target": CHEMBL_TARGET_PROFILE,
+    "chembl_target_component": CHEMBL_TARGET_COMPONENT_PROFILE,
+}
 
 
 def test_crossref_publication_profile_covers_schema_exactly() -> None:
@@ -75,6 +87,33 @@ def test_meta_fields_are_excluded_from_hash_across_shipped_profiles() -> None:
     assert "_run_id" in CROSSREF_PUBLICATION_PROFILE.hash_excluded_fields
     assert "_run_id" in PUBMED_PUBLICATION_PROFILE.hash_excluded_fields
     assert "_run_id" in PUBCHEM_COMPOUND_PROFILE.hash_excluded_fields
+
+
+@pytest.mark.parametrize("policy", CHEMBL_JSON_ORDERING_POLICY)
+def test_chembl_json_ordering_policy_matches_profile_set_like_semantics(
+    policy,
+) -> None:
+    profile = _CHEMBL_PROFILES_BY_PIPELINE[policy.pipeline_name]
+    rule = profile.rule_for(policy.field_name)
+
+    assert rule is not None
+    assert rule.include_in_hash is True
+    assert rule.set_like is policy.is_set_like
+
+
+def test_chembl_json_ordering_policy_names_all_current_set_like_fields() -> None:
+    expected = {
+        (policy.pipeline_name, policy.field_name)
+        for policy in CHEMBL_JSON_ORDERING_POLICY
+        if policy.is_set_like
+    }
+    actual = {
+        (pipeline_name, field_name)
+        for pipeline_name, profile in _CHEMBL_PROFILES_BY_PIPELINE.items()
+        for field_name in profile.set_like_fields
+    }
+
+    assert actual == expected
 
 
 def test_pubchem_smiles_rules_use_domain_smiles_normalization() -> None:

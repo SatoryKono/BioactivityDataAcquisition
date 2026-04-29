@@ -33,6 +33,9 @@ from scripts.docs.generate_pipeline_normalization_field_matrix import (
     render_markdown,
     write_artifacts,
 )
+from bioetl.domain.normalization.profiles.chembl_json_ordering_policy import (
+    CHEMBL_JSON_ORDERING_POLICY,
+)
 from tests.helpers import (
     assert_check_artifacts_detects_drift,
     assert_check_artifacts_passes_for_fresh_outputs,
@@ -473,6 +476,18 @@ def test_build_field_matrix_rows_exposes_dq_schema_and_vocab_governance() -> Non
     _assert_assay_parameter_rows(rows)
     _assert_publication_and_target_rows(rows)
     _assert_molecule_rows(rows)
+
+
+@pytest.mark.parametrize("policy", CHEMBL_JSON_ORDERING_POLICY)
+def test_build_field_matrix_rows_exposes_reviewed_chembl_json_ordering(
+    policy,
+) -> None:
+    rows = build_field_matrix_rows()
+    row = _row(rows, policy.pipeline_name, policy.field_name)
+
+    assert row["semantic_category"] in {"structured_json", "controlled_vocabulary"}
+    assert row["set_like"] == ("true" if policy.is_set_like else "false")
+    assert row["hash_ordering"] == policy.order_semantics
 
 
 def test_build_field_matrix_rows_exposes_non_chembl_governance_sources() -> None:

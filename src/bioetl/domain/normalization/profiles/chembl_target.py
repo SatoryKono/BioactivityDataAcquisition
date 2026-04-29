@@ -19,6 +19,11 @@ from bioetl.domain.normalization.profiles.profile_normalizers import (
 from bioetl.domain.schemas.chembl.target import TargetSchema
 from bioetl.domain.schemas.constants import TARGET_TYPES
 
+from .chembl_json_ordering_policy import (
+    chembl_json_fields,
+    chembl_set_like_json_fields,
+)
+
 __all__ = [
     "CHEMBL_TARGET_PROFILE",
     "CHEMBL_TARGET_SCHEMA_FIELDS",
@@ -43,18 +48,8 @@ _TITLE_FIELDS = frozenset({"pref_name"})
 _INT_FIELDS = frozenset({"taxonomy_id"})
 _FLOAT_FIELDS = frozenset({"primary_component_id"})
 _BOOLEAN_FIELDS = chembl_boolean_family_fields("bool_like", entity="target")
-_SET_LIKE_FIELDS = frozenset({"component_types", "component_relationships"})
-_STRICT_JSON_FIELDS = frozenset(
-    {
-        "target_components",
-        "cross_references",
-        "pipeline_stages",
-        "target_component_synonyms",
-        "component_accessions",
-        "component_descriptions",
-        "component_ids",
-    }
-)
+_SET_LIKE_FIELDS = chembl_set_like_json_fields("chembl_target")
+_STRICT_JSON_FIELDS = chembl_json_fields("chembl_target")
 _NULL_FIELDS = chembl_pseudo_null_fields("target")
 
 # Enum fields for strict validation

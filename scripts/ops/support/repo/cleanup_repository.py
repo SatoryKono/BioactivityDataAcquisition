@@ -49,6 +49,7 @@ SAFE_LOCAL_DIR_NAMES: frozenset[str] = frozenset(
         ".coverage-sharded",
         ".eggs",
         ".hypothesis",
+        ".ipynb_checkpoints",
         ".mypy_cache",
         ".pytest_cache",
         ".python-user",
@@ -59,13 +60,15 @@ SAFE_LOCAL_DIR_NAMES: frozenset[str] = frozenset(
         "htmlcov",
     }
 )
-SAFE_LOCAL_FILE_PATTERNS: tuple[tuple[str, str], ...] = (
-    ("compiled", "*.pyc"),
-    ("compiled", "*.pyo"),
-    ("coverage", COVERAGE_FILE_NAME),
-    ("coverage", COVERAGE_GLOB_PATTERN),
-    ("coverage", COVERAGE_XML_NAME),
+SAFE_LOCAL_DIR_SUFFIXES: frozenset[str] = frozenset({".egg-info"})
+EXACT_TEMP_FILE_NAMES: frozenset[str] = frozenset(
+    {
+        "full_log.txt",
+        "project_rules_failures.txt",
+    }
 )
+FINAL_REPORT_PREFIX = "final_report"
+FINAL_REPORT_SUFFIX = ".txt"
 VENV_SEGMENTS: frozenset[str] = frozenset(
     {
         ".venv",
@@ -100,6 +103,10 @@ def _discover_repo_root(start: Path) -> Path:
         if (candidate / ".git").exists():
             return candidate
     raise RuntimeError(f"Could not locate repository root from {start}")
+
+
+def _is_safe_local_dir_name(name: str) -> bool:
+    return name in SAFE_LOCAL_DIR_NAMES or name.endswith(tuple(SAFE_LOCAL_DIR_SUFFIXES))
 
 
 def _run_git(repo_root: Path, *git_args: str) -> subprocess.CompletedProcess[bytes]:
@@ -201,7 +208,7 @@ def _discover_local_dir_candidates_in_base(
 ) -> list[CleanupCandidate]:
     candidates: list[CleanupCandidate] = []
     for name in dirnames:
-        if name not in SAFE_LOCAL_DIR_NAMES:
+        if not _is_safe_local_dir_name(name):
             continue
         candidate = _safe_local_dir_candidate(
             base / name,
@@ -255,6 +262,12 @@ def _local_file_category(filename: str) -> str | None:
         return "coverage"
     if Path(filename).suffix in SAFE_LOCAL_FILE_SUFFIXES:
         return "compiled"
+    if filename.endswith((".log", ".tmp")):
+        return "logs_temp"
+    if filename in EXACT_TEMP_FILE_NAMES:
+        return "logs_temp"
+    if filename.startswith(FINAL_REPORT_PREFIX) and filename.endswith(FINAL_REPORT_SUFFIX):
+        return "logs_temp"
     return None
 
 
@@ -326,7 +339,7 @@ def _iter_local_dir_candidates_from_status_paths(
         if _is_venv_path(normalized):
             continue
         for index, segment in enumerate(normalized.parts):
-            if segment not in SAFE_LOCAL_DIR_NAMES:
+            if not _is_safe_local_dir_name(segment):
                 continue
             candidate_path = Path(*normalized.parts[: index + 1])
             if candidate_path in seen:
@@ -515,7 +528,7 @@ def parse_args() -> argparse.Namespace:
         "--no-temp",
         action="store_false",
         dest="temp",
-        help="Skip compiled/coverage local file candidates",
+        help="Skip compiled/coverage/log/temp local file candidates",
     )
     parser.add_argument(
         "--no-root",

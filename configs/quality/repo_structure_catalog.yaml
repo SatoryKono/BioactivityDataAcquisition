@@ -68,6 +68,10 @@ plans:
       lifecycle: supporting_context
     - path: docs/plans/temporary-diagnostic-ttl-review-plan-2026-04-29.md
       lifecycle: supporting_context
+    - path: docs/plans/repo-governance-wrapper-closeout-2026-04-29.md
+      lifecycle: supporting_context
+    - path: docs/plans/root-hygiene-cleanup-hardening-2026-04-29.md
+      lifecycle: supporting_context
     - path: docs/plans/silver-filter-rejects-observability-plan.md
       lifecycle: supporting_context
     - path: docs/plans/test-health-observability-plan-2026-04-22.md

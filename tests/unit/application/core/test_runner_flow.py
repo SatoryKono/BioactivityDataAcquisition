@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from types import SimpleNamespace
 from unittest.mock import MagicMock
 
@@ -9,14 +10,23 @@ from bioetl.application.core import runner_flow
 
 
 class _Host:
-    def __init__(self, *, diagnostics: dict[str, object] | None) -> None:
-        self._config = SimpleNamespace()
-        self._runtime = SimpleNamespace()
+    def __init__(
+        self,
+        *,
+        diagnostics: dict[str, object] | None,
+        execution_metrics: dict[str, int] | None = None,
+    ) -> None:
+        self._config = SimpleNamespace(pipeline_name="chembl_activity")
+        self._runtime = SimpleNamespace(run_type=SimpleNamespace(value="incremental"))
+        self._context = SimpleNamespace(
+            started_at=datetime(2026, 4, 29, 12, 0, tzinfo=UTC)
+        )
         self._executor = SimpleNamespace()
         self._checkpoint_manager = SimpleNamespace()
+        self._services = SimpleNamespace(metrics=MagicMock())
         self._logger = MagicMock()
         self._run_ledger_service = MagicMock()
-        self._execution_metrics = {"records_gold": 3}
+        self._execution_metrics = execution_metrics or {"records_gold": 3}
         self._execution_diagnostics = diagnostics or {}
 
     @property
@@ -71,6 +81,105 @@ def test_record_run_finished_includes_execution_diagnostics() -> None:
             }
         },
     )
+    invariant_calls = [
+        call
+        for call in host._services.metrics.increment_counter.call_args_list
+        if call.args[0] == "bioetl_record_flow_invariants_total"
+    ]
+    assert invariant_calls[0].args == (
+        "bioetl_record_flow_invariants_total",
+        1,
+        {
+            "pipeline": "chembl_activity",
+            "run_type": "incremental",
+            "invariant": "fetched_equals_bronze",
+            "status": "unknown",
+        },
+    )
+    assert invariant_calls[1].args == (
+        "bioetl_record_flow_invariants_total",
+        1,
+        {
+            "pipeline": "chembl_activity",
+            "run_type": "incremental",
+            "invariant": "bronze_partitioned",
+            "status": "unknown",
+        },
+    )
+    assert invariant_calls[2].args == (
+        "bioetl_record_flow_invariants_total",
+        1,
+        {
+            "pipeline": "chembl_activity",
+            "run_type": "incremental",
+            "invariant": "silver_gold_monotonic",
+            "status": "violated",
+        },
+    )
+    backlog_gauge_calls = [
+        call
+        for call in host._services.metrics.set_gauge.call_args_list
+        if call.args[0] == "bioetl_stage_backlog_records"
+    ]
+    assert backlog_gauge_calls[0].args == (
+        "bioetl_stage_backlog_records",
+        0.0,
+        {
+            "pipeline": "chembl_activity",
+            "run_type": "incremental",
+            "stage": "ingestion",
+        },
+    )
+    assert backlog_gauge_calls[1].args == (
+        "bioetl_stage_backlog_records",
+        0.0,
+        {
+            "pipeline": "chembl_activity",
+            "run_type": "incremental",
+            "stage": "validation",
+        },
+    )
+    assert backlog_gauge_calls[2].args == (
+        "bioetl_stage_backlog_records",
+        0.0,
+        {
+            "pipeline": "chembl_activity",
+            "run_type": "incremental",
+            "stage": "output",
+        },
+    )
+    lag_gauge_calls = [
+        call
+        for call in host._services.metrics.set_gauge.call_args_list
+        if call.args[0] == "bioetl_stage_lag_seconds"
+    ]
+    assert lag_gauge_calls[0].args == (
+        "bioetl_stage_lag_seconds",
+        0.0,
+        {
+            "pipeline": "chembl_activity",
+            "run_type": "incremental",
+            "stage": "ingestion",
+        },
+    )
+    assert lag_gauge_calls[1].args == (
+        "bioetl_stage_lag_seconds",
+        0.0,
+        {
+            "pipeline": "chembl_activity",
+            "run_type": "incremental",
+            "stage": "validation",
+        },
+    )
+    assert lag_gauge_calls[2].args == (
+        "bioetl_stage_lag_seconds",
+        0.0,
+        {
+            "pipeline": "chembl_activity",
+            "run_type": "incremental",
+            "stage": "output",
+        },
+    )
 
 
 def test_record_run_failed_omits_empty_execution_diagnostics() -> None:
@@ -84,3 +193,51 @@ def test_record_run_failed_omits_empty_execution_diagnostics() -> None:
         metrics_snapshot={"records_gold": 3},
         details=None,
     )
+
+
+def test_record_run_finished_emits_passed_record_flow_invariants(
+    monkeypatch,
+) -> None:
+    host = _Host(
+        diagnostics=None,
+        execution_metrics={
+            "records_fetched": 10,
+            "records_bronze": 10,
+            "records_silver": 7,
+            "records_gold": 6,
+            "records_quarantined": 2,
+            "records_filtered_out": 1,
+        },
+    )
+    monkeypatch.setattr(
+        runner_flow,
+        "current_utc_time",
+        lambda: datetime(2026, 4, 29, 12, 0, 30, tzinfo=UTC),
+    )
+
+    runner_flow.record_run_finished(host)
+
+    invariant_statuses = [
+        call.args[2]["status"]
+        for call in host._services.metrics.increment_counter.call_args_list
+        if call.args[0] == "bioetl_record_flow_invariants_total"
+    ]
+    assert invariant_statuses == ["passed", "passed", "passed"]
+    backlog_values = [
+        (call.args[2]["stage"], call.args[1])
+        for call in host._services.metrics.set_gauge.call_args_list
+        if call.args[0] == "bioetl_stage_backlog_records"
+    ]
+    assert backlog_values == [
+        ("ingestion", 0.0),
+        ("validation", 2.0),
+        ("output", 1.0),
+    ]
+    lag_values = [
+        (call.args[2]["stage"], call.args[1])
+        for call in host._services.metrics.set_gauge.call_args_list
+        if call.args[0] == "bioetl_stage_lag_seconds"
+    ]
+    assert lag_values[0] == ("ingestion", 0.0)
+    assert lag_values[1] == ("validation", 30.0)
+    assert lag_values[2] == ("output", 30.0)

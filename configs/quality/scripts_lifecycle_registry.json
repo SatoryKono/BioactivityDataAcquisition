@@ -50,6 +50,12 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a convenience Windows launcher for the mixed WSL Codex bootstrap flow while operators still use batch entrypoints; prefer documented canonical setup commands for normal contributor workflows."
     },
+    "scripts/ai/vibe/__main__.py": {
+      "owner": "@bioetl-platform",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a direct module-level compatibility entrypoint while the canonical public Python surface remains `python -m scripts.ai vibe`; remove it after caller audit and one compatibility window if no direct module callers remain."
+    },
     "scripts/ai/mcp/mcp_brave_search_wrapper.ps1": {
       "owner": "@bioetl-platform",
       "decision": "windows_compatibility_wrapper",

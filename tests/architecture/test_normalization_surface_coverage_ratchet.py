@@ -6,6 +6,9 @@ from typing import cast
 
 import pytest
 
+from bioetl.domain.normalization.profiles.chembl_json_ordering_policy import (
+    CHEMBL_JSON_ORDERING_POLICY,
+)
 from scripts.docs.generate_pipeline_normalization_field_matrix import (
     PROFILE_META_PASSTHROUGH_KPI,
     PROFILE_NON_META_PASSTHROUGH_FREE_KPI,
@@ -74,6 +77,44 @@ def _assert_profile_semantic_budgets(values_by_name: dict[str, float]) -> None:
     )
 
 
+def _field_matrix_rows_by_coordinate() -> dict[tuple[str, str], dict[str, object]]:
+    return {
+        (str(row["pipeline_name"]), str(row["field_name"])): row
+        for row in build_field_matrix_rows()
+    }
+
+
+def _assert_chembl_json_ordering_policy_is_matrix_visible(
+    rows_by_coordinate: dict[tuple[str, str], dict[str, object]],
+) -> None:
+    regressions: list[str] = []
+    for policy in CHEMBL_JSON_ORDERING_POLICY:
+        coordinate = (policy.pipeline_name, policy.field_name)
+        row = rows_by_coordinate.get(coordinate)
+        if row is None:
+            regressions.append(f"{policy.pipeline_name}.{policy.field_name}=missing")
+            continue
+
+        expected_set_like = "true" if policy.is_set_like else "false"
+        actual_set_like = str(row["set_like"])
+        actual_hash_ordering = str(row["hash_ordering"])
+        if (
+            actual_set_like != expected_set_like
+            or actual_hash_ordering != policy.order_semantics
+        ):
+            regressions.append(
+                f"{policy.pipeline_name}.{policy.field_name}: "
+                f"set_like={actual_set_like}, "
+                f"hash_ordering={actual_hash_ordering}"
+            )
+
+    assert not regressions, (
+        "ChEMBL JSON ordering matrix ratchet regressed: "
+        + "; ".join(regressions)
+        + ". Keep chembl_json_ordering_policy.py, profiles, and matrix output aligned."
+    )
+
+
 def test_normalization_surface_coverage_does_not_regress_below_reviewed_budgets() -> (
     None
 ):
@@ -99,6 +140,12 @@ def test_surface_coverage_ratchet_reports_surface_specific_regression() -> None:
 
 def test_profile_semantic_invariants_do_not_regress_below_reviewed_budgets() -> None:
     _assert_profile_semantic_budgets(_semantic_invariant_values_by_name())
+
+
+def test_chembl_json_ordering_policy_does_not_drift_from_field_matrix() -> None:
+    _assert_chembl_json_ordering_policy_is_matrix_visible(
+        _field_matrix_rows_by_coordinate()
+    )
 
 
 def test_profile_semantic_ratchet_reports_named_regression() -> None:
