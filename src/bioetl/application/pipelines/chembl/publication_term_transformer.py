@@ -140,7 +140,13 @@ class PublicationTermTransformer(BaseChemblTransformer):
 
         terms = list(self.extract_terms_from_document(record, str(primary_id)))
         if not terms:
-            return None
+            return {
+                "publication_id": str(record.get("publication_id", primary_id)),
+                "term": "",
+                "term_type": "",
+                "mesh_id": None,
+                "qualifier": None,
+            }
         return terms[0]
 
     def extract_terms_from_document(

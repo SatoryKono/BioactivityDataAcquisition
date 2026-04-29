@@ -174,6 +174,28 @@ def test_observability_api_push_metrics_delegates_via_metrics_service() -> None:
     )
 
 
+def test_observability_api_delete_metrics_delegates_via_metrics_service() -> None:
+    """Public observability API must route Pushgateway cleanup through MetricsService."""
+    source = OBSERVABILITY_API_PATH.read_text(encoding="utf-8")
+    tree = ast.parse(source)
+    function_node = _get_function_def(tree, "delete_metrics_from_gateway")
+
+    called_names, called_attrs = _collect_called_names_and_attrs(function_node)
+
+    assert "get_metrics_service" in called_names, (
+        "composition.observability_api.delete_metrics_from_gateway must obtain "
+        "the canonical metrics service via get_metrics_service()."
+    )
+    assert "delete_from_gateway" in called_attrs, (
+        "composition.observability_api.delete_metrics_from_gateway must delegate "
+        "to MetricsService.delete_from_gateway()."
+    )
+    assert "infrastructure.observability.server" not in source, (
+        "composition.observability_api.delete_metrics_from_gateway must not "
+        "import Pushgateway helpers from infrastructure directly."
+    )
+
+
 def test_runtime_observability_modules_do_not_reexport_raw_start_metrics_server() -> (
     None
 ):
