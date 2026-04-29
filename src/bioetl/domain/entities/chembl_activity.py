@@ -64,7 +64,10 @@ class Assay(BaseEntity):
 
     # BAO (BioAssay Ontology) annotations
     bao_format: str | None = None
+    bao_format_iri: str | None = None
+    bao_format_mapping_status: str | None = None
     bao_label: str | None = None
+    bao_ontology_version: str | None = None
 
     # Description and confidence
     description: str | None = None

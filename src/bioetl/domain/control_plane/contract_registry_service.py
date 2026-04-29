@@ -1,12 +1,9 @@
-"""Contract registry service with parsing, registration, and serialization logic."""
+"""Pure contract registry semantics for parsing, registration, and hashing."""
 
 from __future__ import annotations
 
 import hashlib
 import json
-from pathlib import Path
-
-import yaml
 
 from bioetl.domain.serialization import serialize_to_json_canonical
 from bioetl.domain.types import JsonDict
@@ -16,98 +13,46 @@ from .contract_registry_helpers import (
     build_version_regression_message,
     entry_payload,
     parse_entry_payload,
-    resolve_path,
 )
 from .contract_registry_types import (
     ContractRegistryEntry,
     RegistryValidationError,
     RegistryValidationIssue,
     RegistryValidationResult,
-    RegistryValidationSeverity,
 )
 
 
-class RegistryLoadError(Exception):
-    """Error loading or saving contract registry data."""
-
-
-def _missing_source_issue(
-    contract_ref: str,
-    source_path: str,
-) -> RegistryValidationIssue:
-    """Build source-path missing issue."""
-    return RegistryValidationIssue(
-        message=f"Source file not found: {source_path}",
-        severity=RegistryValidationSeverity.BLOCKING,
-        contract_ref=contract_ref,
-        field="source_path",
-    )
-
-
-def _missing_artifact_issue(
-    contract_ref: str,
-    artifact_path: str,
-) -> RegistryValidationIssue:
-    """Build artifact-path missing issue."""
-    return RegistryValidationIssue(
-        message=f"Published artifact not found: {artifact_path}",
-        severity=RegistryValidationSeverity.BLOCKING,
-        contract_ref=contract_ref,
-        field="published_artifacts",
-    )
-
-
 class ContractRegistry:
-    """Machine-verifiable contract registry."""
+    """Machine-verifiable contract registry without persistence concerns."""
 
-    def __init__(self, registry_path: Path | None = None) -> None:
-        """Initialize contract registry, optionally loading it from a file path."""
-        self.registry_path = registry_path
-        self.entries: dict[str, ContractRegistryEntry] = {}
+    def __init__(self, entries: dict[str, ContractRegistryEntry] | None = None) -> None:
+        """Initialize the registry with optional pre-parsed entries."""
+        self.entries = dict(entries or {})
         self._registry_hash_v1: str | None = None
         self._registry_hash_v2: str | None = None
-        if registry_path is not None and registry_path.is_file():
-            self.load(registry_path)
+        if self.entries:
+            self._calculate_registry_hash()
 
-    def load(self, registry_path: Path | None = None) -> None:
-        """Load registry from YAML file."""
-        path = registry_path or self.registry_path
-        if path is None:
-            raise RegistryLoadError("Registry path is not set")
-        self.registry_path = path
-        data = self._read_registry_data(path)
-        self.entries = self._parse_entries(data)
-        self._calculate_registry_hash()
+    @classmethod
+    def from_dict(cls, data: JsonDict) -> ContractRegistry:
+        """Build a registry from a parsed mapping payload."""
+        entries = cls._parse_entries(data)
+        return cls(entries=entries)
 
-    def _read_registry_data(self, path: Path) -> JsonDict:
-        """Read and parse registry YAML content."""
-        try:
-            content = path.read_text(encoding="utf-8")
-        except OSError as exc:
-            raise RegistryLoadError(f"Failed to read registry: {exc!s}") from exc
-        try:
-            loaded = yaml.safe_load(content)
-        except yaml.YAMLError as exc:
-            raise RegistryLoadError(f"Invalid registry YAML: {exc!s}") from exc
-        if not isinstance(loaded, dict):
-            raise RegistryLoadError("Invalid registry format: expected mapping")
-        return loaded
-
-    def _parse_entries(self, data: JsonDict) -> dict[str, ContractRegistryEntry]:
+    @staticmethod
+    def _parse_entries(data: JsonDict) -> dict[str, ContractRegistryEntry]:
         """Parse entries payload into typed registry entries."""
         entries_data = data.get("entries")
         if not isinstance(entries_data, dict):
-            raise RegistryLoadError(
-                "Invalid registry format: missing 'entries' mapping"
-            )
+            raise ValueError("Invalid registry format: missing 'entries' mapping")
         entries: dict[str, ContractRegistryEntry] = {}
         for contract_ref, entry_data in entries_data.items():
             if not isinstance(entry_data, dict):
-                raise RegistryLoadError(f"Invalid entry payload for {contract_ref}")
+                raise ValueError(f"Invalid entry payload for {contract_ref}")
             try:
                 parsed_entry = parse_entry_payload(str(contract_ref), entry_data)
             except ValueError as exc:
-                raise RegistryLoadError(str(exc)) from exc
+                raise ValueError(str(exc)) from exc
             entries[str(contract_ref)] = parsed_entry
         return entries
 
@@ -214,40 +159,6 @@ class ContractRegistry:
                 )
         return RegistryValidationResult(valid=len(all_issues) == 0, issues=all_issues)
 
-    def _artifact_issues(
-        self,
-        contract_ref: str,
-        artifacts: list[str],
-        base_path: Path | None,
-    ) -> list[RegistryValidationIssue]:
-        """Return missing artifact issues for one entry."""
-        issues: list[RegistryValidationIssue] = []
-        for artifact_path in artifacts:
-            if resolve_path(artifact_path, base_path).exists():
-                continue
-            issues.append(_missing_artifact_issue(contract_ref, artifact_path))
-        return issues
-
-    def validate_filesystem_consistency(
-        self,
-        base_path: Path | None = None,
-    ) -> RegistryValidationResult:
-        """Validate that source and artifact references exist on filesystem."""
-        if base_path is None and self.registry_path is not None:
-            base_path = self.registry_path.parent
-        issues: list[RegistryValidationIssue] = []
-        for contract_ref, entry in self.entries.items():
-            if not resolve_path(entry.source_path, base_path).exists():
-                issues.append(_missing_source_issue(contract_ref, entry.source_path))
-            issues.extend(
-                self._artifact_issues(
-                    contract_ref=contract_ref,
-                    artifacts=entry.published_artifacts,
-                    base_path=base_path,
-                )
-            )
-        return RegistryValidationResult(valid=len(issues) == 0, issues=issues)
-
     def to_dict(self) -> JsonDict:
         """Convert registry to dictionary for serialization."""
         return {
@@ -257,21 +168,3 @@ class ContractRegistry:
                 for contract_ref, entry in self.entries.items()
             },
         }
-
-    def save(self, output_path: Path | None = None) -> None:
-        """Save registry to YAML file."""
-        target_path = output_path or self.registry_path
-        if target_path is None:
-            raise RegistryLoadError("No output path specified and no registry path set")
-        serialized = yaml.dump(self.to_dict(), sort_keys=False)
-        try:
-            target_path.write_text(serialized, encoding="utf-8")
-        except OSError as exc:
-            raise RegistryLoadError(f"Failed to save registry: {exc!s}") from exc
-        self.registry_path = target_path
-        self._calculate_registry_hash()
-
-
-def create_contract_registry(registry_path: Path | None = None) -> ContractRegistry:
-    """Factory function for ContractRegistry."""
-    return ContractRegistry(registry_path)

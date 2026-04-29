@@ -196,6 +196,7 @@ curl http://localhost:8000/metrics | grep bioetl_
 | `bioetl_dq_check_duration_ms`         | Histogram | pipeline                                 | Длительность DQ проверок                                                                  |
 | `bioetl_dq_validation_failures_total` | Counter   | pipeline, stage, severity                | Превышения DQ порогов; `severity` использует bounded vocabulary `soft_fail` / `hard_fail` |
 | `bioetl_dq_validation_score`          | Gauge     | pipeline, entity                         | Оценка валидности (0.0-1.0)                                                               |
+| `bioetl_dq_dispositions_total`        | Counter   | pipeline, stage, disposition, terminal_status | Bounded DQ disposition outcomes with terminal correlation for `pass` / `quarantine` / `hard_fail` paths |
 | `bioetl_dq_anomaly_detected`          | Counter   | pipeline, metric, severity, anomaly_type | Обнаруженные аномалии                                                                     |
 | `bioetl_data_freshness_seconds`       | Gauge     | pipeline, entity                         | Unix timestamp последнего successful ingestion; lag вычисляется как `time() - metric`     |
 | `bioetl_dq_baseline_updated`          | Counter   | pipeline, metric                         | Обновления baseline                                                                       |
@@ -251,6 +252,8 @@ curl http://localhost:8000/metrics | grep bioetl_
 | ---------------------------------------------- | --------- | ---------------------------------------- | --------------------------------------------------------------------------------------------------------- |
 | `bioetl_control_plane_manifest_writes_total`   | Counter   | pipeline, run_type, status               | Попытки записи immutable run manifest                                                                     |
 | `bioetl_control_plane_ledger_appends_total`    | Counter   | pipeline, event_type, status             | Попытки append в run ledger                                                                               |
+| `bioetl_control_plane_terminal_events_total`   | Counter   | pipeline, terminal_status                | Terminal run outcomes, mirrored from persisted run-ledger entries for `success` / `failed` / `shutdown`  |
+| `bioetl_replay_reconstructability_events_total` | Counter  | pipeline, replay_capability, strict_requirement, status | Bounded replay reconstructability decisions emitted during manifest assembly                               |
 | `bioetl_checkpoint_compatibility_events_total` | Counter   | pipeline, disposition                    | Исходы compatibility policy при resume                                                                    |
 | `bioetl_checkpoint_load_events_total`          | Counter   | pipeline, status                         | Bounded runtime/composite checkpoint load decisions during resume paths                                   |
 | `bioetl_checkpoint_operator_operations_total`  | Counter   | operation, status                        | Bounded checkpoint admin actions for `list` / `get` / `delete` workflows                                  |
@@ -261,6 +264,8 @@ curl http://localhost:8000/metrics | grep bioetl_
 | `bioetl_lineage_refs_missing_total`            | Counter   | pipeline, layer, ref_type                | Missing upstream lineage references during persistence                                                    |
 | `bioetl_composite_source_selection_total`      | Counter   | pipeline, decision_type, selected_source | Low-cardinality composite source-selection decisions during composite persistence                         |
 | `bioetl_control_plane_reads_total`             | Counter   | store, operation, status                 | Срез успехов/промахов/провалов manifest/ledger/lineage lookup-путей                                       |
+| `bioetl_metrics_publication_events_total`      | Counter   | pipeline, run_type, target, status       | Best-effort metrics publication attempts for endpoint / Pushgateway and their bounded outcomes             |
+| `bioetl_observability_runtime_status`          | Gauge     | pipeline, component, mode                | Active runtime mode for `logger`, `metrics`, `tracing`, `audit`, and `dq_monitor` components              |
 
 > Guardrail: для control-plane/traceability метрик нельзя использовать
 > `run_id`, `manifest_id`, paths и другие high-cardinality идентификаторы как

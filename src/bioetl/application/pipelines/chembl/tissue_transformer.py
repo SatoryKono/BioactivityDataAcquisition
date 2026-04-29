@@ -65,7 +65,16 @@ class TissueTransformer(BaseChemblTransformer):
             "pref_name": normalizer.normalize_to_string(record.get("pref_name")),
             # External ontology identifiers (optional)
             "bto_id": normalizer.normalize_to_string(record.get("bto_id")),
+            "bto_iri": None,
+            "bto_mapping_status": None,
+            "bto_ontology_version": None,
             "caloha_id": normalizer.normalize_to_string(record.get("caloha_id")),
             "efo_id": normalizer.normalize_to_string(record.get("efo_id")),
+            "efo_iri": None,
+            "efo_mapping_status": None,
+            "efo_ontology_version": None,
             "uberon_id": normalizer.normalize_to_string(record.get("uberon_id")),
+            "uberon_iri": None,
+            "uberon_mapping_status": None,
+            "uberon_ontology_version": None,
         }

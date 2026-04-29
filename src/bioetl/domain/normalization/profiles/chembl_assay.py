@@ -4,7 +4,12 @@ from __future__ import annotations
 
 from collections.abc import Callable
 
-from bioetl.domain.normalization.chembl import normalize_bao_label
+from bioetl.domain.normalization.chembl import BAO_ONTOLOGY_VERSION, normalize_bao_label
+from bioetl.domain.normalization.profiles._profile_ontology_companion_normalizers import (
+    build_obo_companion_iri_normalizer,
+    build_obo_companion_mapping_status_normalizer,
+    build_obo_companion_version_normalizer,
+)
 from bioetl.domain.normalization.profiles._standard_profile_builder import (
     build_standard_profile,
 )
@@ -18,6 +23,7 @@ from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_text,
 )
 from bioetl.domain.normalization.rules import normalize_cross_pipeline_case
+from bioetl.domain.schemas.constants import ONTOLOGY_MAPPING_STATUSES
 from bioetl.domain.schemas.chembl.assay import AssaySchema
 
 from ._chembl_policy_registry import (
@@ -126,6 +132,7 @@ _ENUM_FIELDS = {
     "assay_test_type": ASSAY_TEST_TYPES,
     "assay_group": ASSAY_GROUPS,
     "relationship_type": RELATIONSHIP_TYPES,
+    "bao_format_mapping_status": ONTOLOGY_MAPPING_STATUSES,
 }
 _SPECIAL_RULE_COMPONENTS = {
     "assay_organism": (
@@ -136,6 +143,33 @@ _SPECIAL_RULE_COMPONENTS = {
         _normalize_bao_label_with_profile_context,
         "Normalize BAO label text inside the profile-visible assay contract, "
         "resolving canonical labels from sibling bao_format identifiers when present.",
+    ),
+    "bao_format_iri": (
+        build_obo_companion_iri_normalizer(
+            source_field="bao_format",
+            canonical_prefix="BAO_",
+            ontology_version=BAO_ONTOLOGY_VERSION,
+        ),
+        "Resolve the BAO format ontology companion bundle from sibling "
+        "normalized identifiers and emit the canonical OBO IRI.",
+    ),
+    "bao_format_mapping_status": (
+        build_obo_companion_mapping_status_normalizer(
+            source_field="bao_format",
+            canonical_prefix="BAO_",
+            ontology_version=BAO_ONTOLOGY_VERSION,
+        ),
+        "Resolve the BAO format ontology companion bundle from sibling "
+        "normalized identifiers and emit the canonical mapping-status enum.",
+    ),
+    "bao_ontology_version": (
+        build_obo_companion_version_normalizer(
+            source_field="bao_format",
+            canonical_prefix="BAO_",
+            ontology_version=BAO_ONTOLOGY_VERSION,
+        ),
+        "Resolve the BAO ontology companion bundle from sibling normalized "
+        "identifiers and emit the ontology version when a BAO mapping context exists.",
     ),
     "assay_subcellular_fraction_raw": (
         normalize_profile_text,

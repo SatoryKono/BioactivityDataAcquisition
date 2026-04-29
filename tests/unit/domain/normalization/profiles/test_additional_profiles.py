@@ -368,6 +368,39 @@ def test_chembl_activity_mapping_status_companions_use_shared_enum_family() -> N
     assert qudt_mapping_rule.apply("UNMAPPED") == "unmapped"
 
 
+def test_chembl_non_activity_obo_companions_are_profile_resolved() -> None:
+    assay_status_rule = CHEMBL_ASSAY_PROFILE.rule_for("bao_format_mapping_status")
+    assay_iri_rule = CHEMBL_ASSAY_PROFILE.rule_for("bao_format_iri")
+    tissue_iri_rule = CHEMBL_TISSUE_PROFILE.rule_for("bto_iri")
+    tissue_version_rule = CHEMBL_TISSUE_PROFILE.rule_for("bto_ontology_version")
+    cell_line_status_rule = CHEMBL_CELL_LINE_PROFILE.rule_for("clo_mapping_status")
+
+    assert assay_status_rule is not None
+    assert assay_status_rule.apply(None, record={"bao_format": "BAO:0000218"}) == (
+        "mapped"
+    )
+    assert assay_iri_rule is not None
+    assert assay_iri_rule.apply(None, record={"bao_format": "BAO:0000218"}) == (
+        "https://purl.obolibrary.org/obo/BAO_0000218"
+    )
+
+    assert tissue_iri_rule is not None
+    assert tissue_iri_rule.apply(None, record={"bto_id": "bto:0000068"}) == (
+        "https://purl.obolibrary.org/obo/BTO_0000068"
+    )
+    assert tissue_version_rule is not None
+    assert tissue_version_rule.apply(None, record={"bto_id": "bto:0000068"}) == (
+        "2026-01-16"
+    )
+
+    assert cell_line_status_rule is not None
+    assert cell_line_status_rule.apply(None, record={"clo_id": "not-clo"}) == (
+        "unmapped"
+    )
+    assert cell_line_status_rule.apply(" Mapped ") == "mapped"
+    assert cell_line_status_rule.apply("unknown") is None
+
+
 def test_chembl_subcellular_fraction_profiles_preserve_unknown_but_not_blank() -> None:
     assay_fraction_rule = CHEMBL_ASSAY_PROFILE.rule_for("assay_subcellular_fraction")
     assay_fraction_raw_rule = CHEMBL_ASSAY_PROFILE.rule_for(

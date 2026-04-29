@@ -37,9 +37,18 @@ schema:
     fields:
     - pref_name
     - bto_id
+    - bto_iri
+    - bto_mapping_status
+    - bto_ontology_version
     - caloha_id
     - efo_id
+    - efo_iri
+    - efo_mapping_status
+    - efo_ontology_version
     - uberon_id
+    - uberon_iri
+    - uberon_mapping_status
+    - uberon_ontology_version
   silver:
     include_groups:
     - system
@@ -67,9 +76,22 @@ quality:
     error_message: pref_name is required and must not exceed 200 chars
   - field: bto_id
     type: pattern
-    pattern: ^BTO:\d{7}$
+    pattern: ^BTO[_:]\d+$
     nullable: true
-    error_message: bto_id must match BTO format (BTO:0000000)
+    error_message: bto_id must match BTO format (BTO_0000000 or BTO:0000000)
+  - field: bto_iri
+    type: pattern
+    pattern: '^https?://[^\s]+$'
+    nullable: true
+    error_message: bto_iri must be an HTTP(S) IRI when present
+  - field: bto_mapping_status
+    type: enum
+    allowed:
+    - mapped
+    - unmapped
+    - missing
+    nullable: true
+    error_message: Invalid BTO mapping status
   - field: caloha_id
     type: pattern
     pattern: ^TS-\d{4}$
@@ -77,16 +99,105 @@ quality:
     error_message: caloha_id must match CALIPHO format (TS-0000)
   - field: efo_id
     type: pattern
-    pattern: ^EFO:\d{7}$
+    pattern: ^EFO[_:]\d+$
     nullable: true
-    error_message: efo_id must match EFO format (EFO:0000000)
+    error_message: efo_id must match EFO format (EFO_0000000 or EFO:0000000)
+  - field: efo_iri
+    type: pattern
+    pattern: '^https?://[^\s]+$'
+    nullable: true
+    error_message: efo_iri must be an HTTP(S) IRI when present
+  - field: efo_mapping_status
+    type: enum
+    allowed:
+    - mapped
+    - unmapped
+    - missing
+    nullable: true
+    error_message: Invalid EFO mapping status
   - field: uberon_id
     type: pattern
-    pattern: ^UBERON:\d{7}$
+    pattern: ^UBERON[_:]\d+$
     nullable: true
-    error_message: uberon_id must match UBERON format (UBERON:0000000)
-  entity_cross_field_validations: []
-  entity_conditional_validations: []
+    error_message: uberon_id must match UBERON format (UBERON_0000000 or UBERON:0000000)
+  - field: uberon_iri
+    type: pattern
+    pattern: '^https?://[^\s]+$'
+    nullable: true
+    error_message: uberon_iri must be an HTTP(S) IRI when present
+  - field: uberon_mapping_status
+    type: enum
+    allowed:
+    - mapped
+    - unmapped
+    - missing
+    nullable: true
+    error_message: Invalid UBERON mapping status
+  entity_cross_field_validations:
+  - name: bto_id_requires_mapping_status
+    fields:
+    - bto_id
+    - bto_mapping_status
+    condition: conditional_required
+    trigger_field: bto_id
+    required_field: bto_mapping_status
+    error_message: BTO mappings must publish a companion mapping status
+  - name: efo_id_requires_mapping_status
+    fields:
+    - efo_id
+    - efo_mapping_status
+    condition: conditional_required
+    trigger_field: efo_id
+    required_field: efo_mapping_status
+    error_message: EFO mappings must publish a companion mapping status
+  - name: uberon_id_requires_mapping_status
+    fields:
+    - uberon_id
+    - uberon_mapping_status
+    condition: conditional_required
+    trigger_field: uberon_id
+    required_field: uberon_mapping_status
+    error_message: UBERON mappings must publish a companion mapping status
+  entity_conditional_validations:
+  - name: mapped_bto_id_requires_bundle
+    condition_field: bto_mapping_status
+    condition_value: mapped
+    condition_operator: eq
+    then_validations:
+    - field: bto_iri
+      type: required
+      nullable: false
+      error_message: Mapped BTO identifiers must publish a canonical IRI
+    - field: bto_ontology_version
+      type: required
+      nullable: false
+      error_message: Mapped BTO identifiers must publish an ontology version
+  - name: mapped_efo_id_requires_bundle
+    condition_field: efo_mapping_status
+    condition_value: mapped
+    condition_operator: eq
+    then_validations:
+    - field: efo_iri
+      type: required
+      nullable: false
+      error_message: Mapped EFO identifiers must publish a canonical IRI
+    - field: efo_ontology_version
+      type: required
+      nullable: false
+      error_message: Mapped EFO identifiers must publish an ontology version
+  - name: mapped_uberon_id_requires_bundle
+    condition_field: uberon_mapping_status
+    condition_value: mapped
+    condition_operator: eq
+    then_validations:
+    - field: uberon_iri
+      type: required
+      nullable: false
+      error_message: Mapped UBERON identifiers must publish a canonical IRI
+    - field: uberon_ontology_version
+      type: required
+      nullable: false
+      error_message: Mapped UBERON identifiers must publish an ontology version
   key_nullability:
   - field: tissue_id
     key_type: merge

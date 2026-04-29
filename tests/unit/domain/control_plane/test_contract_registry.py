@@ -2,10 +2,8 @@
 
 import hashlib
 import json
-from datetime import UTC, datetime
 
 import pytest
-import yaml
 
 from bioetl.domain.serialization import serialize_to_json_canonical
 from bioetl.domain.control_plane.contract_registry import (
@@ -15,7 +13,6 @@ from bioetl.domain.control_plane.contract_registry import (
     RegistryValidationSeverity,
     RegistryValidationIssue,
     RegistryValidationError,
-    RegistryLoadError,
 )
 from bioetl.domain.types.contract_identity import (
     ContractIdentity,
@@ -24,9 +21,9 @@ from bioetl.domain.types.contract_identity import (
 )
 
 
-def _utcnow_iso() -> str:
-    """Return an aware UTC timestamp string for test fixtures."""
-    return datetime.now(UTC).isoformat()
+def _ts() -> str:
+    """Return one deterministic fixture timestamp."""
+    return "2024-01-01T00:00:00+00:00"
 
 
 class TestContractRegistryEntry:
@@ -46,7 +43,7 @@ class TestContractRegistryEntry:
             status=LifecycleStatus.ACTIVE,
             source_path="src/schemas/test.v1.yaml",
             supported_versions=["1.0.0"],
-            last_updated=_utcnow_iso(),
+            last_updated=_ts(),
             owners=["test-team"],
         )
 
@@ -70,7 +67,7 @@ class TestContractRegistryEntry:
             status=LifecycleStatus.ACTIVE,
             source_path="src/schemas/test.v1.yaml",
             supported_versions=["1.0.0"],
-            last_updated=_utcnow_iso(),
+            last_updated=_ts(),
             owners=["test-team"],
         )
         assert valid_entry.validate() == []
@@ -103,7 +100,7 @@ class TestContractRegistryEntry:
             status=LifecycleStatus.ACTIVE,
             source_path="src/schemas/test.v1.yaml",
             supported_versions=["0.9.0"],  # Missing 1.0.0
-            last_updated=_utcnow_iso(),
+            last_updated=_ts(),
             owners=["test-team"],
         )
 
@@ -123,49 +120,6 @@ class TestContractRegistry:
         assert registry.registry_hash_v1 is None
         assert registry.registry_hash_v2 is None
 
-    def test_registry_loading(self, tmp_path):
-        """Test registry loading from YAML."""
-        # Create test registry file
-        registry_data = {
-            "version": "1.0",
-            "entries": {
-                "test.contract.v1": {
-                    "identity": {
-                        "contract_version": "1.0.0",
-                        "compatibility_level": "patch",
-                        "schema_hash": "a" * 64,
-                    },
-                    "status": "active",
-                    "source_path": "src/schemas/test.v1.yaml",
-                    "supported_versions": ["1.0.0"],
-                    "last_updated": "2024-01-01T00:00:00Z",
-                    "owners": ["test-team"],
-                }
-            },
-        }
-
-        registry_file = tmp_path / "test_registry.yaml"
-        with open(registry_file, "w") as f:
-            yaml.dump(registry_data, f)
-
-        # Load registry
-        registry = ContractRegistry(registry_file)
-        assert len(registry.entries) == 1
-        assert "test.contract.v1" in registry.entries
-        assert registry.registry_hash is not None
-        assert registry.registry_hash_v1 is not None
-        assert registry.registry_hash_v2 is not None
-
-    def test_registry_loading_invalid(self, tmp_path):
-        """Test registry loading with invalid data."""
-        # Create invalid registry file
-        invalid_file = tmp_path / "invalid_registry.yaml"
-        with open(invalid_file, "w") as f:
-            f.write("invalid: yaml: content")
-
-        with pytest.raises(RegistryLoadError):
-            ContractRegistry(invalid_file)
-
     def test_contract_registration(self):
         """Test contract registration."""
         registry = ContractRegistry()
@@ -182,7 +136,7 @@ class TestContractRegistry:
             status=LifecycleStatus.ACTIVE,
             source_path="src/schemas/test.v1.yaml",
             supported_versions=["1.0.0"],
-            last_updated=_utcnow_iso(),
+            last_updated=_ts(),
             owners=["test-team"],
         )
 
@@ -206,7 +160,7 @@ class TestContractRegistry:
             status=LifecycleStatus.ACTIVE,
             source_path="src/schemas/test.v1.yaml",
             supported_versions=["1.0.0"],
-            last_updated=_utcnow_iso(),
+            last_updated=_ts(),
             owners=["test-team"],
         )
 
@@ -215,7 +169,7 @@ class TestContractRegistry:
             status=LifecycleStatus.ACTIVE,
             source_path="src/schemas/test.v2.yaml",  # Different source
             supported_versions=["1.0.0"],
-            last_updated=_utcnow_iso(),
+            last_updated=_ts(),
             owners=["test-team"],
         )
 
@@ -246,7 +200,7 @@ class TestContractRegistry:
             status=LifecycleStatus.ACTIVE,
             source_path="src/schemas/test.v1.yaml",
             supported_versions=["1.0.0"],
-            last_updated=_utcnow_iso(),
+            last_updated=_ts(),
             owners=["test-team"],
         )
 
@@ -265,7 +219,7 @@ class TestContractRegistry:
             status=LifecycleStatus.ACTIVE,
             source_path="src/schemas/test.v0.yaml",
             supported_versions=["0.9.0"],
-            last_updated=_utcnow_iso(),
+            last_updated=_ts(),
             owners=["test-team"],
         )
 
@@ -294,7 +248,7 @@ class TestContractRegistry:
             status=LifecycleStatus.ACTIVE,
             source_path="src/schemas/test.v1.yaml",
             supported_versions=["1.0.0"],
-            last_updated=_utcnow_iso(),
+            last_updated=_ts(),
             owners=["test-team"],
         )
 
@@ -313,7 +267,7 @@ class TestContractRegistry:
             status=LifecycleStatus.ACTIVE,
             source_path="src/schemas/test.v2.yaml",
             supported_versions=["1.0.0"],
-            last_updated=_utcnow_iso(),
+            last_updated=_ts(),
             owners=["test-team"],
         )
 
@@ -336,86 +290,6 @@ class TestContractRegistry:
         all_result = registry.validate_all()
         assert all_result.valid is True  # No issues because invalid entry wasn't added
         assert len(all_result.issues) == 0
-
-    def test_filesystem_consistency_validation(self, tmp_path):
-        """Test filesystem consistency validation."""
-        registry = ContractRegistry()
-
-        # Create a temporary file that exists
-        temp_file = tmp_path / "existing.yaml"
-        temp_file.touch()
-
-        identity = ContractIdentity(
-            contract_ref="test.contract.v1",
-            contract_version="1.0.0",
-            compatibility_level=CompatibilityLevel.PATCH,
-            schema_hash="a" * 64,
-        )
-
-        entry = ContractRegistryEntry(
-            identity=identity,
-            status=LifecycleStatus.ACTIVE,
-            source_path=str(temp_file.absolute()),  # This exists (absolute path)
-            published_artifacts=["missing.json"],  # This doesn't (relative path)
-            supported_versions=["1.0.0"],
-            last_updated=_utcnow_iso(),
-            owners=["test-team"],
-        )
-
-        registry.register_contract(entry)
-
-        # Validate filesystem with temp_path as base
-        result = registry.validate_filesystem_consistency(tmp_path)
-        assert result.valid is False
-        assert len(result.issues) == 1
-        assert "Published artifact not found" in result.issues[0].message
-
-    def test_registry_serialization(self, tmp_path):
-        """Test registry serialization and deserialization."""
-        registry = ContractRegistry()
-
-        # Add test entry
-        identity = ContractIdentity(
-            contract_ref="test.contract.v1",
-            contract_version="1.0.0",
-            compatibility_level=CompatibilityLevel.PATCH,
-            schema_hash="a" * 64,
-            dq_policy_ref="test.dq.v1",
-        )
-
-        entry = ContractRegistryEntry(
-            identity=identity,
-            status=LifecycleStatus.ACTIVE,
-            source_path="src/schemas/test.v1.yaml",
-            published_artifacts=["data/schemas/test.v1.json"],
-            supported_versions=["1.0.0"],
-            migration_guides={},
-            last_updated="2024-01-01T00:00:00Z",
-            owners=["test-team"],
-            dq_policy_ref="test.dq.v1",
-        )
-
-        registry.register_contract(entry)
-
-        # Save to file
-        output_file = tmp_path / "test_registry.yaml"
-        registry.save(output_file)
-
-        # Verify file exists
-        assert output_file.exists()
-
-        # Load data and verify structure
-        with open(output_file) as f:
-            data = yaml.safe_load(f)
-
-        assert data["version"] == "1.0"
-        assert "entries" in data
-        assert "test.contract.v1" in data["entries"]
-
-        # Load back and verify
-        loaded_registry = ContractRegistry(output_file)
-        assert len(loaded_registry.entries) == 1
-        assert loaded_registry.registry_hash is not None
 
     def test_registry_hash_exposes_v1_and_v2_during_migration(self):
         """Registry should expose both legacy and canonical hash variants."""
@@ -599,7 +473,7 @@ class TestRegistryIntegration:
             status=LifecycleStatus.ACTIVE,
             source_path="src/schemas/chembl/molecule.v1.yaml",
             supported_versions=["1.0.0"],
-            last_updated=_utcnow_iso(),
+            last_updated=_ts(),
             owners=["chembl-team"],
             dq_policy_ref="chembl.dq.v1",
             rule_bundle_version="dq-rules.v1.0",
@@ -630,7 +504,7 @@ class TestRegistryIntegration:
             status=LifecycleStatus.ACTIVE,
             source_path="src/schemas/chembl/molecule.v1.yaml",
             supported_versions=["1.0.0"],
-            last_updated=_utcnow_iso(),
+            last_updated=_ts(),
             owners=["chembl-team"],
             dq_policy_ref="chembl.dq.v2",  # Different policy
             rule_bundle_version="dq-rules.v1.0",

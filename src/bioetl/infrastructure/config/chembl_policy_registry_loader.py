@@ -60,6 +60,12 @@ class ChemblPolicyRegistryLoader:
                             "iri", ()
                         )
                     ),
+                    mapping_status_fields=tuple(
+                        str(field_ref)
+                        for field_ref in payload.get("companion_fields", {}).get(
+                            "mapping_status", ()
+                        )
+                    ),
                     version_fields=tuple(
                         str(field_ref)
                         for field_ref in payload.get("companion_fields", {}).get(

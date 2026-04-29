@@ -203,6 +203,7 @@ ACTIVE_EXPLICIT_SCRIPTS: Final[frozenset[str]] = frozenset(
         "scripts/check_dq_dsl_parity.py",
         "scripts/engineering/ci/validate_control_plane_artifacts.py",
         "scripts/ops/data/__main__.py",
+        "scripts/ai/codex/helper/test-basic.sh",
         "scripts/ai/codex/helper/check-env.ps1",
         "scripts/ai/codex/helper/check-env.sh",
         "scripts/ai/codex/helper/setup-env.sh",
@@ -213,6 +214,11 @@ ACTIVE_EXPLICIT_SCRIPTS: Final[frozenset[str]] = frozenset(
         "scripts/ai/mistrall/helper/setup-env.sh",
         "scripts/ai/mistrallvibe/helper/check-env.ps1",
         "scripts/ai/mistrallvibe/helper/check-env.sh",
+        "scripts/ops/runtime/docker/restart-docker.ps1",
+        "scripts/ops/runtime/neo4j/neo4j-recovery-checklist.ps1",
+        "scripts/ops/runtime/neo4j/neo4j_quick_start.sh",
+        "scripts/ops/runtime/neo4j/start-neo4j-audit.ps1",
+        "scripts/ops/runtime/neo4j/start-neo4j-audit.sh",
     }
 )
 SUPPORTING_LIFECYCLE_DECISIONS: Final[frozenset[str]] = frozenset(

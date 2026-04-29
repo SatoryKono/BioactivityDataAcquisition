@@ -20,12 +20,15 @@ from bioetl.domain.schemas.constants import (
     BAO_ID_PATTERN,
     CHEMBL_ID_PATTERN,
     CONFIDENCE_DESCRIPTIONS,
+    ONTOLOGY_MAPPING_STATUSES,
     RELATIONSHIP_TYPES,
 )
 
 __all__ = [
     "AssaySchema",
 ]
+
+HTTP_IRI_PATTERN = r"^https?://[^\s]+$"
 
 
 class AssaySchema(ETLRecordSchema):
@@ -156,7 +159,21 @@ class AssaySchema(ETLRecordSchema):
         str_matches=BAO_ID_PATTERN,
         description="BAO format.",
     )
+    bao_format_iri: Series[str] | None = pa.Field(
+        nullable=True,
+        str_matches=HTTP_IRI_PATTERN,
+        description="Persistent IRI for the BAO format ID.",
+    )
+    bao_format_mapping_status: Series[str] | None = pa.Field(
+        nullable=True,
+        isin=list(ONTOLOGY_MAPPING_STATUSES),
+        description="BAO format IRI mapping status.",
+    )
     bao_label: Series[str] | None = pa.Field(nullable=True, description="BAO label.")
+    bao_ontology_version: Series[str] | None = pa.Field(
+        nullable=True,
+        description="BAO ontology release/version used for IRI mapping.",
+    )
     aidx: Series[str] | None = pa.Field(nullable=True, description="Assay index.")
 
     # === Variant Information (Flattened) ===

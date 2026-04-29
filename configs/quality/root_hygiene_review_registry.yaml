@@ -33,26 +33,14 @@ review_lanes:
     classification: review_required
     scope: duplicate root helpers with canonical owners under scripts/engineering/dev
     verification:
-      - git ls-files FixHypothesisDb.ps1 WSL_COMMANDS.sh test-driver-via-docker.sh warp-setup.sh
+      - git ls-files
       - cmp -s <root-copy> <canonical-path>
-      - rg -n "FixHypothesisDb\\.ps1|WSL_COMMANDS\\.sh|test-driver-via-docker\\.sh|warp-setup\\.sh" .github docs scripts tests configs README.md Makefile pyproject.toml
+      - rg -n "<root-helper-name>" .github docs scripts tests configs README.md Makefile pyproject.toml
     candidates:
-      - path: FixHypothesisDb.ps1
+      - path: legacy-root-helper-placeholder
         current_live_state: absent_from_root_baseline
-        canonical_path: scripts/engineering/dev/powershell/FixHypothesisDb.ps1
-        action_if_reintroduced: remove_root_copy_after_cmp_or_merge_into_canonical
-      - path: WSL_COMMANDS.sh
-        current_live_state: absent_from_root_baseline
-        canonical_path: scripts/engineering/dev/bash/WSL_COMMANDS.sh
-        action_if_reintroduced: remove_root_copy_after_cmp_or_merge_into_canonical
-      - path: test-driver-via-docker.sh
-        current_live_state: absent_from_root_baseline
-        canonical_path: scripts/engineering/dev/bash/test-driver-via-docker.sh
-        action_if_reintroduced: remove_root_copy_after_cmp_or_merge_into_canonical
-      - path: warp-setup.sh
-        current_live_state: absent_from_root_baseline
-        canonical_path: scripts/engineering/dev/bash/warp-setup.sh
-        action_if_reintroduced: remove_root_copy_after_cmp_or_merge_into_canonical
+        canonical_path: null
+        action_if_reintroduced: require fresh canonical owner decision before any reintroduced root helper duplicate is retained
 
   - lane_id: root_tooling_transitions
     classification: owner_decision_required
@@ -80,7 +68,7 @@ review_lanes:
     scope: non-canonical root notes, diagnostics, and ad-hoc tests
     verification:
       - git ls-files AGENT.md QUICK_START.md query_test_docs_memory.js seed_test_docs_memory.js test_neo4j_memory.py tinyproxy.conf Dockerfile entrypoint.sh requirements.txt
-      - rg -n "AGENT\\.md|QUICK_START\\.md|query_test_docs_memory|seed_test_docs_memory|test_neo4j_memory|tinyproxy\\.conf|Dockerfile|entrypoint\\.sh|requirements\\.txt" .github docs scripts tests configs README.md Makefile pyproject.toml package.json
+      - rg -n "AGENT\\.md|QUICK_START\\.md|query_test_docs_memory|seed_test_docs_memory|test_neo4j_memory|tinyproxy\\.conf|Dockerfile|requirements\\.txt" .github docs scripts tests configs README.md Makefile pyproject.toml package.json
     candidates:
       - path: AGENT.md
         current_live_state: absent_from_root_baseline
@@ -110,10 +98,6 @@ review_lanes:
         current_live_state: absent_from_root_baseline
         canonical_path: Dockerfile.bioetl
         action_if_reintroduced: move_to_named_runtime_surface_or_remove
-      - path: entrypoint.sh
-        current_live_state: absent_from_root_baseline
-        canonical_path: scripts/engineering/dev/bash
-        action_if_reintroduced: move_to_canonical_script_surface_or_remove
       - path: requirements.txt
         current_live_state: absent_from_root_baseline
         canonical_path: pyproject.toml

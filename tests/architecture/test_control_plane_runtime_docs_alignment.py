@@ -137,3 +137,19 @@ def test_contract_doc_freezes_canonical_stage_sets() -> None:
         "docs/04-reference/contracts/run-manifest-ledger.md is missing canonical "
         f"stage-set fragments: {missing}"
     )
+
+
+def test_published_control_plane_docs_describe_snapshot_identity_anchors() -> None:
+    """Published traceability docs must keep snapshot/content-hash anchors visible."""
+    expected_fragments = (
+        "input_snapshot_ids",
+        "snapshot_id",
+        "content_hash",
+    )
+    for path in (CONTRACT_DOC, CLI_DOC, RUNBOOK_DOC):
+        text = path.read_text(encoding="utf-8").lower()
+        missing = [fragment for fragment in expected_fragments if fragment not in text]
+        assert not missing, (
+            f"{path.relative_to(PROJECT_ROOT)} is missing snapshot identity "
+            f"fragments: {missing}"
+        )

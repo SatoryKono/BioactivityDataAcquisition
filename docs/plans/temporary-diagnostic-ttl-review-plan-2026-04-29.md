@@ -54,11 +54,7 @@ Recommended next review:
 
 Files:
 
-- `scripts/ai/codex/launch-interactive.ps1`
 - `scripts/engineering/dev/bash/.setup_wsl_codex.sh`
-- `scripts/engineering/dev/bash/WSL_COMMANDS.sh`
-- `scripts/engineering/dev/bash/entrypoint.sh`
-- `scripts/engineering/dev/bash/warp-setup.sh`
 
 Intent:
 
@@ -79,22 +75,8 @@ Recommended next review:
 
 Files:
 
-- `scripts/engineering/dev/bash/test-driver-via-docker.sh`
-- `scripts/engineering/dev/powershell/FixHypothesisDb.ps1`
-- `scripts/engineering/dev/python/fix_neo4j_memory_sync_http_uris.py`
-
-Intent:
-
-- retained only for bounded recovery of fragile local developer workflows
-
-Exit criteria:
-
-- remove once the underlying workflow is stabilized or the manual repair path is
-  no longer needed
-
-Recommended next review:
-
-- `2026-06-30`
+Bucket C was closed by the 2026-04-29 TTL execution waves after the remaining
+local repair helpers were either removed or reclassified.
 
 ### Bucket D: Neo4j audit / recovery troubleshooting
 

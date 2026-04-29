@@ -20,6 +20,7 @@ from bioetl.domain.normalization._chembl_units import (
 from bioetl.domain.normalization._chembl_units import (
     normalize_standard_unit as _normalize_standard_unit,
 )
+from bioetl.domain.normalization.identifiers import normalize_ontology_id
 from bioetl.domain.normalization.text import normalize_string
 
 __all__ = [
@@ -35,6 +36,7 @@ __all__ = [
     "normalize_standard_unit",
     "normalize_uo_identifier",
     "resolve_activity_ontology_companion_fields",
+    "resolve_obo_ontology_companion_field",
 ]
 
 _BAO_IDENTIFIER_RE = re.compile(r"^bao[_:](\d+)$", re.IGNORECASE)
@@ -55,6 +57,10 @@ ACTIVITY_ONTOLOGY_MAPPING_STATUSES: tuple[OntologyMappingStatus, ...] = (
 
 BAO_ONTOLOGY_VERSION = "2.8.18a"
 UO_ONTOLOGY_VERSION = "2026-01-16"
+BTO_ONTOLOGY_VERSION = "2026-01-16"
+CLO_ONTOLOGY_VERSION = "2026-01-16"
+EFO_ONTOLOGY_VERSION = "2026-01-16"
+UBERON_ONTOLOGY_VERSION = "2026-01-16"
 _OBO_IRI_TEMPLATE = "https://purl.obolibrary.org/obo/{identifier}"
 
 _BAO_LABEL_BY_IDENTIFIER: dict[str, str] = {
@@ -211,6 +217,23 @@ def resolve_activity_ontology_companion_fields(
         qudt_unit_iri=qudt.iri,
         qudt_unit_mapping_status=qudt.status,
         qudt_ontology_version=qudt.ontology_version,
+    )
+
+
+def resolve_obo_ontology_companion_field(
+    value: str | None,
+    *,
+    canonical_prefix: str,
+    ontology_version: str,
+) -> OntologyMappingResult:
+    """Resolve a single OBO-style ontology ID into companion IRI metadata."""
+    normalized = normalize_ontology_id(value) if value is not None else None
+    normalized_prefix = canonical_prefix.removesuffix("_").upper()
+    pattern = re.compile(rf"^{re.escape(normalized_prefix)}_\d+$")
+    return _resolve_obo_identifier_mapping(
+        normalized,
+        pattern=pattern,
+        ontology_version=ontology_version,
     )
 
 

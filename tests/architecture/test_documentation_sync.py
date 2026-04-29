@@ -432,6 +432,30 @@ def test_no_legacy_contract_path_in_active_docs(
     )
 
 
+def test_root_readme_uses_current_docs_entrypoints() -> None:
+    """README must keep the current active-doc entrypoints and avoid stale trees."""
+    text = Path("README.md").read_text(encoding="utf-8")
+
+    required_tokens = (
+        "docs/04-reference/cli.md",
+        "docs/04-reference/contracts/run-manifest-ledger.md",
+        "docs/00-project/00-map.md",
+        "docs/99-archive/README.md",
+    )
+    legacy_tokens = (
+        "docs/cli/INDEX.md",
+        "docs/02-pipelines/",
+        "docs/operations/",
+    )
+
+    for token in required_tokens:
+        assert token in text, f"README.md is missing current docs entrypoint: {token}"
+    for token in legacy_tokens:
+        assert token not in text, (
+            f"README.md reintroduced a stale docs entrypoint: {token}"
+        )
+
+
 def test_no_legacy_kebab_pipeline_ids_in_active_docs(
     docs_markdown_files: list[Path],
     docs_text_cache: dict[Path, str],

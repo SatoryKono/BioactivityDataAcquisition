@@ -117,6 +117,82 @@ while True:
     assert result.responses[1]["id"] == 2
 
 
+def test_run_smoke_command_succeeds_when_server_stays_alive_after_handshake(
+    tmp_path: Path,
+) -> None:
+    server = tmp_path / "long_lived_mcp_server.py"
+    server.write_text(
+        """
+from __future__ import annotations
+
+import json
+import sys
+import time
+
+
+def read_frame():
+    headers = {}
+    while True:
+        line = sys.stdin.buffer.readline()
+        if not line:
+            return None
+        if line == b"\\r\\n":
+            break
+        name, _, value = line.decode("ascii").partition(":")
+        headers[name.strip().lower()] = value.strip()
+    content_length = int(headers["content-length"])
+    body = sys.stdin.buffer.read(content_length)
+    return json.loads(body.decode("utf-8"))
+
+
+def send_frame(payload):
+    body = json.dumps(payload, separators=(",", ":"), sort_keys=True).encode("utf-8")
+    sys.stdout.buffer.write(
+        f"Content-Length: {len(body)}\\r\\n\\r\\n".encode("ascii") + body
+    )
+    sys.stdout.buffer.flush()
+
+
+while True:
+    message = read_frame()
+    if message is None:
+        break
+    if message.get("method") == "initialize":
+        send_frame(
+            {
+                "jsonrpc": "2.0",
+                "id": message["id"],
+                "result": {
+                    "protocolVersion": message["params"]["protocolVersion"],
+                    "capabilities": {"tools": {}},
+                    "serverInfo": {"name": "stub", "version": "1.0"},
+                },
+            }
+        )
+    elif message.get("method") == "tools/list":
+        send_frame(
+            {
+                "jsonrpc": "2.0",
+                "id": message["id"],
+                "result": {
+                    "tools": [{"name": "search_nodes"}],
+                },
+            }
+        )
+        time.sleep(30.0)
+        break
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+
+    result = run_smoke_command([sys.executable, str(server)], timeout_seconds=5.0)
+
+    assert result.ok is True
+    assert result.returncode == 0
+    assert len(result.responses) == 2
+
+
 def test_run_smoke_command_reports_invalid_stdout_from_wrapper(tmp_path: Path) -> None:
     server = tmp_path / "bad_mcp_server.py"
     server.write_text(

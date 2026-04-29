@@ -85,3 +85,41 @@ def test_docs_publish_stage_model_and_invariant_metric_contracts() -> None:
         assert token in observability_contract, (
             f"observability.md is missing canonical observability token: {token}"
         )
+
+
+@pytest.mark.architecture
+def test_docs_publish_control_plane_and_runtime_health_metric_contracts() -> None:
+    """Published observability docs must include control-plane/runtime health families."""
+    metrics_guide = METRICS_GUIDE_PATH.read_text(encoding="utf-8")
+    observability_contract = OBSERVABILITY_CONTRACT_PATH.read_text(encoding="utf-8")
+
+    required_tokens = (
+        "bioetl_control_plane_terminal_events_total",
+        "bioetl_replay_reconstructability_events_total",
+        "bioetl_metrics_publication_events_total",
+        "bioetl_observability_runtime_status",
+    )
+
+    for token in required_tokens:
+        assert token in metrics_guide, (
+            f"metrics-monitoring.md is missing canonical observability token: {token}"
+        )
+        assert token in observability_contract, (
+            f"observability.md is missing canonical observability token: {token}"
+        )
+
+
+@pytest.mark.architecture
+def test_docs_publish_dq_disposition_metric_contract() -> None:
+    """Published observability docs must include bounded DQ disposition semantics."""
+    metrics_guide = METRICS_GUIDE_PATH.read_text(encoding="utf-8")
+    observability_contract = OBSERVABILITY_CONTRACT_PATH.read_text(encoding="utf-8")
+
+    token = "bioetl_dq_dispositions_total"
+
+    assert token in metrics_guide, (
+        f"metrics-monitoring.md is missing canonical observability token: {token}"
+    )
+    assert token in observability_contract, (
+        f"observability.md is missing canonical observability token: {token}"
+    )

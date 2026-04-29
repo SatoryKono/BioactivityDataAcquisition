@@ -116,8 +116,14 @@ class CellLine(BaseEntity):
     cell_type: str | None = None
     cellosaurus_id: str | None = None
     clo_id: str | None = None
+    clo_iri: str | None = None
+    clo_mapping_status: str | None = None
+    clo_ontology_version: str | None = None
     cl_lincs_id: str | None = None
     efo_id: str | None = None
+    efo_iri: str | None = None
+    efo_mapping_status: str | None = None
+    efo_ontology_version: str | None = None
 
     def _validate_invariants(self) -> None:
         if not self.cell_id:

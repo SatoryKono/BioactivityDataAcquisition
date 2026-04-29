@@ -180,6 +180,9 @@ class AssayTransformer(BaseChemblTransformer):
             # Declarative field groups
             **map_field_groups(record, _ASSAY_GROUPS),
             "assay_subcellular_fraction_raw": record.get("assay_subcellular_fraction"),
+            "bao_format_iri": None,
+            "bao_format_mapping_status": None,
+            "bao_ontology_version": None,
             # Nested dict extraction (variant)
             **_extract_variant(
                 cast(

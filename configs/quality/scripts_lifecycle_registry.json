@@ -8,35 +8,11 @@
       "review_by": "2026-07-15",
       "next_step": "Retain as the shared root-governance helper consumed by structure auditors and cleanup tooling; fold it into a broader canonical governance helper surface only if root policy loaders are consolidated further."
     },
-    "scripts/engineering/dev/python/fix_neo4j_memory_sync_http_uris.py": {
-      "owner": "@bioetl-platform",
-      "decision": "temporary_diagnostic",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded rewrite helper for migrating legacy test-only HTTP URI literals inside testing_support/neo4j_memory_sync.py; remove it once no further scripted rewrites are expected."
-    },
     "scripts/engineering/common/cli_dispatch.py": {
       "owner": "@bioetl-platform",
       "decision": "shared_helper_module",
       "review_by": "2026-07-15",
       "next_step": "Retain as the shared CLI dispatch helper for canonical scripts.engineering and adjacent routers; promote it to active inventory once helper modules receive explicit catalog classification."
-    },
-    "scripts/ops/runtime/neo4j/neo4j_quick_start.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "temporary_diagnostic",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded local Neo4j/MCP bootstrap helper while the Neo4j memory tooling remains an operator-maintained troubleshooting surface; either promote it into a canonical supported workflow or remove it once those setup docs are retired."
-    },
-    "scripts/ops/runtime/neo4j/start-neo4j-audit.ps1": {
-      "owner": "@bioetl-platform",
-      "decision": "temporary_diagnostic",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded Windows-side Neo4j audit/bootstrap helper while the local graph-memory troubleshooting flow remains operator-maintained; either promote it into a documented supported workflow or remove it once the audit path is retired."
-    },
-    "scripts/ops/runtime/neo4j/start-neo4j-audit.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "temporary_diagnostic",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded shell-side Neo4j audit/bootstrap helper while the local graph-memory troubleshooting flow remains operator-maintained; either promote it into a documented supported workflow or remove it once the audit path is retired."
     },
     "scripts/ops/launchers/codex/codex-wsl.bat": {
       "owner": "@bioetl-platform",
@@ -164,36 +140,6 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded shared path helper while governed scripts still depend on repository-root resolution; fold it into broader canonical helper surfaces once the remaining bootstrap helpers converge."
     },
-    "scripts/engineering/dev/bash/WSL_COMMANDS.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "temporary_diagnostic",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded WSL command reference for operator troubleshooting; remove it once the mixed Windows-WSL workflow is stabilized."
-    },
-    "scripts/engineering/dev/bash/entrypoint.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "temporary_diagnostic",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded Bash entrypoint helper for local container or terminal bootstrap experiments; remove it once the dev-shell startup path is standardized."
-    },
-    "scripts/engineering/dev/bash/test-driver-via-docker.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "temporary_diagnostic",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded Docker-based test driver helper while mixed Windows-WSL test execution remains fragile; remove it once the cross-platform test path is stable."
-    },
-    "scripts/engineering/dev/bash/warp-setup.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "temporary_diagnostic",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded Warp terminal setup helper for operator convenience; remove it once terminal setup is standardized."
-    },
-    "scripts/engineering/dev/powershell/FixHypothesisDb.ps1": {
-      "owner": "@bioetl-platform",
-      "decision": "temporary_diagnostic",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded Windows-side Hypothesis database repair helper; remove it once pytest wrappers no longer need manual cache recovery."
-    },
     "scripts/docs/_compat_shim.py": {
       "owner": "@bioetl-docs",
       "decision": "internal_helper_orphan",
@@ -214,69 +160,27 @@
     },
     "scripts/engineering/qa/hotspot_family_metrics.py": {
       "owner": "@bioetl-platform",
-      "decision": "temporary_diagnostic",
+      "decision": "shared_helper_module",
       "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded hotspot-family metrics helper while the newer baseline/report flow stabilizes; either promote it through documented call-sites or remove it."
+      "next_step": "Retain as the hotspot-family metrics helper consumed by QA report generation and architecture ratchet tests; only move or inline it if the hotspot baseline/report flow is consolidated into a different canonical helper surface."
     },
     "scripts/memory/mcp_smoke.py": {
       "owner": "@bioetl-platform",
-      "decision": "temporary_diagnostic",
+      "decision": "compatibility_wrapper",
       "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded MCP smoke helper for local memory tooling diagnostics; do not expand it into a canonical contributor workflow without stronger call-site evidence."
-    },
-    "scripts/ops/runtime/docker/restart-docker.ps1": {
-      "owner": "@bioetl-platform",
-      "decision": "temporary_diagnostic",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded Windows-side Docker Desktop recovery helper under the runtime/docker namespace for local troubleshooting."
-    },
-    "scripts/ops/runtime/health/start_health_server.ps1": {
-      "owner": "@bioetl-platform",
-      "decision": "temporary_diagnostic",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded local operator launcher for preflight and troubleshooting of the health server from Windows shells under the runtime/health namespace."
-    },
-    "scripts/ops/runtime/neo4j/neo4j-recovery-checklist.ps1": {
-      "owner": "@bioetl-platform",
-      "decision": "temporary_diagnostic",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a Windows-side Neo4j recovery checklist under the runtime/neo4j namespace for operator troubleshooting after Docker restarts."
-    },
-    "scripts/ai/codex/launch-interactive.ps1": {
-      "owner": "@bioetl-platform",
-      "decision": "temporary_diagnostic",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded Windows interactive-launch convenience helper while direct PowerShell-to-WSL Codex startup remains operator-oriented; remove it once the canonical launcher contract no longer needs a separate interactive transport."
-    },
-    "scripts/ai/codex/helper/test-basic.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "temporary_diagnostic",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded Codex smoke helper for manual environment checks; remove or promote it once there is a governed automated validation path."
-    },
-    "scripts/ai/mistrall/helper/download-image.ps1": {
-      "owner": "@bioetl-platform",
-      "decision": "temporary_diagnostic",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded Mistrall image/bootstrap helper for legacy workstation setup flows; remove it when no maintained operator path depends on it."
+      "next_step": "Retain only as a backward-compatible import shim while the canonical Neo4j memory smoke implementation lives under scripts.ai.mcp.neo4j_memory_mcp_smoke; remove it only after tests and historical import paths stop referencing scripts.memory.mcp_smoke."
     },
     "src/tools/neo4j_audit.py": {
       "owner": "@bioetl-platform",
-      "decision": "temporary_diagnostic",
+      "decision": "shared_helper_module",
       "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded Neo4j audit connection helper while deployment and audit troubleshooting runbooks still import src/tools/neo4j_audit.py directly; migrate to a canonical scripts/ops or package facade when that audit workflow is consolidated."
+      "next_step": "Retain as the context-aware Neo4j audit connection helper while deployment and live-audit runbooks still reference src/tools/neo4j_audit.py; fold it into a broader canonical ops helper surface only if the audit workflow is consolidated."
     },
-    "scripts/engineering/dev/bash/.setup_wsl_codex.sh": {
+    "scripts/memory/mcp_smoke.py": {
       "owner": "@bioetl-platform",
-      "decision": "temporary_diagnostic",
+      "decision": "compatibility_wrapper",
       "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded WSL setup helper for Codex; remove it once terminal setup is standardized."
-    },
-    "scripts/ops/observability/grafana/live_tracing_mode_smoke.py": {
-      "owner": "@bioetl-platform",
-      "decision": "temporary_diagnostic",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded live Grafana tracing-mode smoke helper for manual observability diagnostics; remove it once tracing-on/off datasource validation is either automated through a governed CI lane or explicitly retired."
+      "next_step": "Retain only as a backward-compatible import shim while the canonical Neo4j memory smoke implementation lives under scripts.ai.mcp.neo4j_memory_mcp_smoke; remove it only after tests and historical import paths stop referencing scripts.memory.mcp_smoke."
     }
   }
 }

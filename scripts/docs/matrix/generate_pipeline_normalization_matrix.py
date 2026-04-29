@@ -252,11 +252,17 @@ ENUM_CONFIG_SOURCES: dict[tuple[str, str, str], str] = {
     ("chembl", "assay", "assay_group"): _CHEMBL_ENUM_CONFIG,
     ("chembl", "assay", "assay_test_type"): _CHEMBL_ENUM_CONFIG,
     ("chembl", "assay", "assay_type"): _CHEMBL_ENUM_CONFIG,
+    ("chembl", "assay", "bao_format_mapping_status"): _CHEMBL_ENUM_CONFIG,
     ("chembl", "assay", "confidence_description"): _CHEMBL_ENUM_CONFIG,
     ("chembl", "assay", "relationship_type"): _CHEMBL_ENUM_CONFIG,
+    ("chembl", "cell_line", "clo_mapping_status"): _CHEMBL_ENUM_CONFIG,
+    ("chembl", "cell_line", "efo_mapping_status"): _CHEMBL_ENUM_CONFIG,
     ("chembl", "assay_parameters", "standard_relation"): _CHEMBL_ENUM_CONFIG,
     ("chembl", "assay_parameters", "standard_type"): _CHEMBL_ENUM_CONFIG,
     ("chembl", "assay_parameters", "standard_units"): _CHEMBL_ENUM_CONFIG,
+    ("chembl", "tissue", "bto_mapping_status"): _CHEMBL_ENUM_CONFIG,
+    ("chembl", "tissue", "efo_mapping_status"): _CHEMBL_ENUM_CONFIG,
+    ("chembl", "tissue", "uberon_mapping_status"): _CHEMBL_ENUM_CONFIG,
     ("chembl", "molecule", "max_phase"): _CHEMBL_ENUM_CONFIG,
     ("chembl", "molecule", "ro3_pass"): _CHEMBL_ENUM_CONFIG,
     ("chembl", "molecule", "molecule_type"): _CHEMBL_ENUM_CONFIG,
@@ -328,11 +334,23 @@ ENUM_REGISTRY_PATHS: dict[tuple[str, str, str], tuple[str, ...]] = {
     ("chembl", "assay", "assay_group"): ("assay", "assay_groups"),
     ("chembl", "assay", "assay_test_type"): ("assay", "test_types"),
     ("chembl", "assay", "assay_type"): ("assay", "types"),
+    ("chembl", "assay", "bao_format_mapping_status"): (
+        "activity",
+        "mapping_statuses",
+    ),
     ("chembl", "assay", "confidence_description"): (
         "assay",
         "confidence_descriptions",
     ),
     ("chembl", "assay", "relationship_type"): ("assay", "relationship_types"),
+    ("chembl", "cell_line", "clo_mapping_status"): (
+        "activity",
+        "mapping_statuses",
+    ),
+    ("chembl", "cell_line", "efo_mapping_status"): (
+        "activity",
+        "mapping_statuses",
+    ),
     ("chembl", "assay_parameters", "standard_relation"): (
         "activity",
         "standard_relations",
@@ -356,6 +374,18 @@ ENUM_REGISTRY_PATHS: dict[tuple[str, str, str], tuple[str, ...]] = {
     ("chembl", "target_component", "component_type"): (
         "target",
         "component_types",
+    ),
+    ("chembl", "tissue", "bto_mapping_status"): (
+        "activity",
+        "mapping_statuses",
+    ),
+    ("chembl", "tissue", "efo_mapping_status"): (
+        "activity",
+        "mapping_statuses",
+    ),
+    ("chembl", "tissue", "uberon_mapping_status"): (
+        "activity",
+        "mapping_statuses",
     ),
     ("crossref", "publication", "publication_type"): (
         "providers",

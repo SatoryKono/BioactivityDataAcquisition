@@ -84,6 +84,11 @@ This is now the only active execution/backlog document in `docs/plans/`.
 - [temporary-diagnostic-ttl-review-plan-2026-04-29.md](temporary-diagnostic-ttl-review-plan-2026-04-29.md)
 - [repo-governance-wrapper-closeout-2026-04-29.md](repo-governance-wrapper-closeout-2026-04-29.md)
 - [root-hygiene-cleanup-hardening-2026-04-29.md](root-hygiene-cleanup-hardening-2026-04-29.md)
+- [root-hygiene-review-lane-automation-2026-04-29.md](root-hygiene-review-lane-automation-2026-04-29.md)
+- [scripts-supporting-retained-set-closeout-2026-04-29.md](scripts-supporting-retained-set-closeout-2026-04-29.md)
+- [temporary-diagnostic-ttl-wave-1-closeout-2026-04-29.md](temporary-diagnostic-ttl-wave-1-closeout-2026-04-29.md)
+- [temporary-diagnostic-ttl-wave-2-closeout-2026-04-29.md](temporary-diagnostic-ttl-wave-2-closeout-2026-04-29.md)
+- [temporary-diagnostic-ttl-wave-3-closeout-2026-04-29.md](temporary-diagnostic-ttl-wave-3-closeout-2026-04-29.md)
 
 Earlier operational context files such as
 `onboarding-checklist-day-1-2026-03-20.md` and
@@ -179,6 +184,35 @@ The root hygiene cleanup hardening note was added on `2026-04-29` to record
 the bounded policy implementation step in `cleanup_repository.py`: exact local
 log/temp plus `.egg-info` and `.ipynb_checkpoints` discovery outside blocked
 cleanup zones, without broadening cleanup into governed report-like surfaces.
+
+The root hygiene review lane automation note was added on `2026-04-29` to
+record the follow-up evidence layer in `cleanup_repository.py`: dry-run review
+reporting now synthesizes `exists`, `tracked`, history, canonical parity, and
+reference-hit signals from `root_hygiene_review_registry.yaml` without turning
+review lanes into auto-delete surfaces.
+
+The scripts supporting retained-set closeout note was added on `2026-04-29` to
+freeze the remaining `supporting` inventory cluster as an intentional retained
+surface. It also records that `scripts/ops/data/__main__.py` is now treated as
+`active`, so earlier “unknown/compatibility-oriented” audit language for that
+router should be read as historical context rather than live classification.
+
+The temporary diagnostic TTL wave 1 closeout note was added on `2026-04-29` to
+record the first execution wave after the TTL plan: two zero-reference
+one-shot helpers were removed, and `scripts/engineering/qa/hotspot_family_metrics.py`
+was reclassified from `temporary_diagnostic` to `supporting`.
+
+The temporary diagnostic TTL wave 2 closeout note was added on `2026-04-29` to
+record the second execution wave: six zero-reference Windows/WSL convenience
+and local repair helpers were removed, and the root-hygiene review registry was
+synchronized to stop treating those deleted helper targets as live canonical
+surfaces.
+
+The temporary diagnostic TTL wave 3 closeout note was added on `2026-04-29` to
+record the third execution wave: a zero-reference duplicate WSL helper and a
+zero-reference Grafana tracing smoke script were removed, while
+`scripts/memory/mcp_smoke.py` was reclassified as a compatibility shim in the
+`supporting` bucket.
 
 ### Retained Historical Context With Live Evidence References
 

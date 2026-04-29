@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from bioetl.domain.normalization.chembl import (
     resolve_activity_ontology_companion_fields,
+    resolve_obo_ontology_companion_field,
 )
 
 LEGACY_QUDT_UNIT_URI = "http" + "://www.openphacts.org/units/Nanomolar"
@@ -71,3 +72,35 @@ def test_resolve_activity_ontology_companion_fields_preserves_unmapped_status() 
     assert companions.qudt_unit_iri is None
     assert companions.qudt_unit_mapping_status == "unmapped"
     assert companions.qudt_ontology_version == "3.2.1"
+
+
+def test_resolve_obo_ontology_companion_field_maps_colon_form() -> None:
+    result = resolve_obo_ontology_companion_field(
+        "bto:0000068",
+        canonical_prefix="BTO_",
+        ontology_version="2026-01-16",
+    )
+
+    assert result.iri == "https://purl.obolibrary.org/obo/BTO_0000068"
+    assert result.status == "mapped"
+    assert result.ontology_version == "2026-01-16"
+
+
+def test_resolve_obo_ontology_companion_field_classifies_missing_and_unmapped() -> None:
+    missing = resolve_obo_ontology_companion_field(
+        None,
+        canonical_prefix="EFO_",
+        ontology_version="2026-01-16",
+    )
+    unmapped = resolve_obo_ontology_companion_field(
+        "not-efo",
+        canonical_prefix="EFO_",
+        ontology_version="2026-01-16",
+    )
+
+    assert missing.iri is None
+    assert missing.status == "missing"
+    assert missing.ontology_version is None
+    assert unmapped.iri is None
+    assert unmapped.status == "unmapped"
+    assert unmapped.ontology_version == "2026-01-16"
