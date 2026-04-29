@@ -58,7 +58,7 @@ from bioetl.domain.filtering import (
     SilverFilterConfig,
 )
 from bioetl.domain.ports import (
-    ContractPolicyPort,
+    ContractPolicyProtocol,
     DataNormalizationPort,
     MetricsPort,
     PiiHasherPort,
@@ -108,7 +108,7 @@ def create_transformer_instance(
     identity_service: IdentityService | None = None,
     pii_hasher: PiiHasherPort | None = None,
     data_normalizer: DataNormalizationPort | None = None,
-    contract_policy: ContractPolicyPort | None = None,
+    contract_policy: ContractPolicyProtocol | None = None,
     dependencies: TransformerDependencyContext | None = None,
 ) -> BaseTransformer | None:
     """Create transformer instance with resolved dependency context."""

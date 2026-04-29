@@ -13,7 +13,7 @@ Consolidated modules (v5.2):
 - pipeline_factory: GenericPipelineFactory, runner assembly
 - services_factory: BaseServicesFactory, ServicesBuilder
 - data_source_factory: DataSourceFactory, DataSourceRegistry
-- storage: StorageAdapter, StorageContext, StorageFactory
+- storage: StorageBundle, StorageContext, StorageFactory
 - dq_services_factory: DQServicesFactory for DQ report components
 """
 
@@ -38,7 +38,7 @@ from bioetl.composition.factories.services.factory import (
 
 # Storage factory
 from bioetl.composition.factories.storage import (
-    StorageAdapter,
+    StorageBundle,
     StorageContext,
     StorageFactory,
 )
@@ -110,7 +110,7 @@ __all__ = [
     "DataSourceRegistry",
     "GenericPipelineFactory",
     "ServicesBuilder",
-    "StorageAdapter",
+    "StorageBundle",
     "StorageContext",
     "StorageFactory",
     "assemble_runner",

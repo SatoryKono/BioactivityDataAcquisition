@@ -10,15 +10,18 @@ Manage VCR cassette lifecycle for provider integration tests.
 
 ## Source Of Truth
 
-- Primary instructions: `../../../.claude/skills/vcr-record.md`
+- Canonical runtime entrypoint: this `SKILL.md`
+- Project rules: `../../../AGENTS.md`
+- Memory policy: `../../../docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
+- Post-change validation: `../../../docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
 
 ## Workflow
 
-1. Open and follow `../../../.claude/skills/vcr-record.md`.
+1. Follow this skill file as the canonical Gemini runtime instructions.
 1. Adapt shell examples to the current environment when needed.
 1. Always include cassette validation and secret sanitization checks.
 1. Prefer repository-local commands (`uv run ...`) consistent with project standards.
 
 ## Notes
 
-- The `.claude` skill file contains the canonical action modes (`record`, `list`, `validate`, `update`, `clean`).
+- Treat this file as canonical for runtime modes (`record`, `list`, `validate`, `update`, `clean`).

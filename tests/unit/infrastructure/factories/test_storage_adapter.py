@@ -1,4 +1,4 @@
-"""Unit tests for StorageAdapter."""
+"""Unit tests for StorageBundle."""
 
 from __future__ import annotations
 
@@ -10,7 +10,7 @@ from uuid import uuid4
 
 import pytest
 
-from bioetl.composition.factories.storage.adapter import StorageAdapter
+from bioetl.composition.factories.storage.adapter import StorageBundle
 from bioetl.domain.ports import (
     BronzeStoragePort,
     GoldStoragePort,
@@ -71,9 +71,9 @@ def storage_adapter(
     mock_bronze_writer: MagicMock,
     mock_silver_writer: MagicMock,
     mock_gold_writer: MagicMock,
-) -> StorageAdapter:
-    """Create StorageAdapter with mocked writers."""
-    return StorageAdapter(
+) -> StorageBundle:
+    """Create StorageBundle with mocked writers."""
+    return StorageBundle(
         bronze_writer=mock_bronze_writer,
         silver_writer=mock_silver_writer,
         gold_writer=mock_gold_writer,
@@ -81,8 +81,8 @@ def storage_adapter(
 
 
 @pytest.mark.unit
-class TestStorageAdapterInit:
-    """Tests for StorageAdapter initialization."""
+class TestStorageBundleInit:
+    """Tests for StorageBundle initialization."""
 
     def test_init(
         self,
@@ -91,7 +91,7 @@ class TestStorageAdapterInit:
         mock_gold_writer: MagicMock,
     ) -> None:
         """Test adapter initialization."""
-        adapter = StorageAdapter(
+        adapter = StorageBundle(
             bronze_writer=mock_bronze_writer,
             silver_writer=mock_silver_writer,
             gold_writer=mock_gold_writer,
@@ -114,27 +114,27 @@ class TestStorageAdapterInit:
     )
     def test_implements_narrow_storage_ports(
         self,
-        storage_adapter: StorageAdapter,
+        storage_adapter: StorageBundle,
         protocol: type[object],
     ) -> None:
-        """StorageAdapter implements the narrow storage protocols."""
+        """StorageBundle implements the narrow storage protocols."""
         assert isinstance(storage_adapter, protocol)
 
     def test_requires_silver_schema_marker(
-        self, storage_adapter: StorageAdapter
+        self, storage_adapter: StorageBundle
     ) -> None:
         """Test that REQUIRES_SILVER_SCHEMA is set."""
         assert storage_adapter.REQUIRES_SILVER_SCHEMA is True
 
 
 @pytest.mark.unit
-class TestStorageAdapterWriteBronze:
+class TestStorageBundleWriteBronze:
     """Tests for write_bronze method."""
 
     @pytest.mark.asyncio
     async def test_write_bronze_delegates(
         self,
-        storage_adapter: StorageAdapter,
+        storage_adapter: StorageBundle,
         mock_bronze_writer: MagicMock,
     ) -> None:
         """Test that write_bronze delegates to bronze writer."""
@@ -169,13 +169,13 @@ class TestStorageAdapterWriteBronze:
 
 
 @pytest.mark.unit
-class TestStorageAdapterWriteSilver:
+class TestStorageBundleWriteSilver:
     """Tests for write_silver method."""
 
     @pytest.mark.asyncio
     async def test_write_silver_delegates(
         self,
-        storage_adapter: StorageAdapter,
+        storage_adapter: StorageBundle,
         mock_silver_writer: MagicMock,
     ) -> None:
         """Test that write_silver delegates to silver writer."""
@@ -200,7 +200,7 @@ class TestStorageAdapterWriteSilver:
     @pytest.mark.asyncio
     async def test_write_silver_default_mode(
         self,
-        storage_adapter: StorageAdapter,
+        storage_adapter: StorageBundle,
         mock_silver_writer: MagicMock,
     ) -> None:
         """Test write_silver uses default merge mode."""
@@ -215,13 +215,13 @@ class TestStorageAdapterWriteSilver:
 
 
 @pytest.mark.unit
-class TestStorageAdapterWriteGold:
+class TestStorageBundleWriteGold:
     """Tests for write_gold method."""
 
     @pytest.mark.asyncio
     async def test_write_gold_delegates(
         self,
-        storage_adapter: StorageAdapter,
+        storage_adapter: StorageBundle,
         mock_gold_writer: MagicMock,
     ) -> None:
         """Test that write_gold delegates to gold writer."""
@@ -245,7 +245,7 @@ class TestStorageAdapterWriteGold:
     @pytest.mark.asyncio
     async def test_write_gold_append_mode(
         self,
-        storage_adapter: StorageAdapter,
+        storage_adapter: StorageBundle,
         mock_gold_writer: MagicMock,
     ) -> None:
         """Test write_gold with append mode."""
@@ -263,7 +263,7 @@ class TestStorageAdapterWriteGold:
     @pytest.mark.asyncio
     async def test_write_gold_default_mode(
         self,
-        storage_adapter: StorageAdapter,
+        storage_adapter: StorageBundle,
         mock_gold_writer: MagicMock,
     ) -> None:
         """Test write_gold uses default overwrite mode."""
@@ -280,7 +280,7 @@ class TestStorageAdapterWriteGold:
     @pytest.mark.asyncio
     async def test_write_gold_passes_scd_config(
         self,
-        storage_adapter: StorageAdapter,
+        storage_adapter: StorageBundle,
         mock_gold_writer: MagicMock,
     ) -> None:
         """SCD config is forwarded unchanged to the gold writer."""
@@ -301,17 +301,17 @@ class TestStorageAdapterWriteGold:
 
 
 @pytest.mark.unit
-class TestStorageAdapterClose:
+class TestStorageBundleClose:
     """Tests for aclose method."""
 
     @pytest.mark.asyncio
-    async def test_aclose(self, storage_adapter: StorageAdapter) -> None:
+    async def test_aclose(self, storage_adapter: StorageBundle) -> None:
         """Test aclose completes without error."""
         # Should not raise
         await storage_adapter.aclose()
 
     @pytest.mark.asyncio
-    async def test_aclose_is_noop(self, storage_adapter: StorageAdapter) -> None:
+    async def test_aclose_is_noop(self, storage_adapter: StorageBundle) -> None:
         """Test aclose is a no-op (writers don't need cleanup)."""
         # Can be called multiple times
         await storage_adapter.aclose()
@@ -319,13 +319,13 @@ class TestStorageAdapterClose:
 
 
 @pytest.mark.unit
-class TestStorageAdapterOptimize:
+class TestStorageBundleOptimize:
     """Tests for optimize method."""
 
     @pytest.mark.asyncio
     async def test_optimize_delegates_to_vacuum(
         self,
-        storage_adapter: StorageAdapter,
+        storage_adapter: StorageBundle,
         mock_silver_writer: MagicMock,
     ) -> None:
         """Test that optimize calls vacuum."""
@@ -341,7 +341,7 @@ class TestStorageAdapterOptimize:
     @pytest.mark.asyncio
     async def test_optimize_calls_bronze_cleanup(
         self,
-        storage_adapter: StorageAdapter,
+        storage_adapter: StorageBundle,
         mock_bronze_writer: MagicMock,
     ) -> None:
         """Test that optimize calls bronze cleanup for valid table names."""
@@ -361,7 +361,7 @@ class TestStorageAdapterOptimize:
     @pytest.mark.asyncio
     async def test_optimize_skips_bronze_cleanup_for_no_dot(
         self,
-        storage_adapter: StorageAdapter,
+        storage_adapter: StorageBundle,
         mock_bronze_writer: MagicMock,
     ) -> None:
         """Test that optimize skips bronze cleanup if table name has no dot."""
@@ -376,13 +376,13 @@ class TestStorageAdapterOptimize:
 
 
 @pytest.mark.unit
-class TestStorageAdapterWriteGoldMerged:
+class TestStorageBundleWriteGoldMerged:
     """Tests for composite Gold schema binding in write_gold_merged."""
 
     @pytest.mark.asyncio
     async def test_write_gold_merged_binds_composite_publication_schema(
         self,
-        storage_adapter: StorageAdapter,
+        storage_adapter: StorageBundle,
         mock_gold_writer: MagicMock,
     ) -> None:
         """Composite publication table should pass bound schema to GoldWriter."""
@@ -397,7 +397,7 @@ class TestStorageAdapterWriteGoldMerged:
     @pytest.mark.asyncio
     async def test_write_gold_merged_unknown_table_uses_no_schema(
         self,
-        storage_adapter: StorageAdapter,
+        storage_adapter: StorageBundle,
         mock_gold_writer: MagicMock,
     ) -> None:
         """Unknown merged table keeps backward-compatible schema=None behavior."""
@@ -411,11 +411,11 @@ class TestStorageAdapterWriteGoldMerged:
 
 
 @pytest.mark.unit
-class TestStorageAdapterAdditionalPaths:
+class TestStorageBundleAdditionalPaths:
     """Additional tests to cover maintenance and utility branches."""
 
     def test_get_table_path_defaults_to_silver_layer(
-        self, storage_adapter: StorageAdapter, mock_silver_writer: MagicMock
+        self, storage_adapter: StorageBundle, mock_silver_writer: MagicMock
     ) -> None:
         """get_table_path should resolve via Silver writer by default."""
         result = storage_adapter.get_table_path("chembl.activity")
@@ -424,7 +424,7 @@ class TestStorageAdapterAdditionalPaths:
         mock_silver_writer.get_table_path.assert_called_once_with("chembl.activity")
 
     def test_get_table_path_gold_layer_uses_gold_writer(
-        self, storage_adapter: StorageAdapter, mock_gold_writer: MagicMock
+        self, storage_adapter: StorageBundle, mock_gold_writer: MagicMock
     ) -> None:
         """get_table_path(layer='gold') should resolve via Gold writer."""
         result = storage_adapter.get_table_path("chembl.activity", layer="gold")
@@ -434,7 +434,7 @@ class TestStorageAdapterAdditionalPaths:
 
     @pytest.mark.asyncio
     async def test_read_silver_delegates(
-        self, storage_adapter: StorageAdapter, mock_silver_writer: MagicMock
+        self, storage_adapter: StorageBundle, mock_silver_writer: MagicMock
     ) -> None:
         """read_silver should delegate to Silver writer."""
         mock_silver_writer.read_silver.return_value = [{"id": 42}]
@@ -448,7 +448,7 @@ class TestStorageAdapterAdditionalPaths:
 
     @pytest.mark.asyncio
     async def test_write_silver_merged_delegates(
-        self, storage_adapter: StorageAdapter, mock_silver_writer: MagicMock
+        self, storage_adapter: StorageBundle, mock_silver_writer: MagicMock
     ) -> None:
         """write_silver_merged should pass through optional parameters."""
         await storage_adapter.write_silver_merged(
@@ -472,7 +472,7 @@ class TestStorageAdapterAdditionalPaths:
     @pytest.mark.asyncio
     async def test_clear_csv_counts_list_and_int_results(
         self,
-        storage_adapter: StorageAdapter,
+        storage_adapter: StorageBundle,
         mock_silver_writer: MagicMock,
         mock_gold_writer: MagicMock,
     ) -> None:
@@ -493,7 +493,7 @@ class TestStorageAdapterAdditionalPaths:
     @pytest.mark.asyncio
     async def test_clear_delta_with_table_name(
         self,
-        storage_adapter: StorageAdapter,
+        storage_adapter: StorageBundle,
         mock_silver_writer: MagicMock,
         mock_gold_writer: MagicMock,
     ) -> None:
@@ -510,7 +510,7 @@ class TestStorageAdapterAdditionalPaths:
     @pytest.mark.asyncio
     async def test_clear_delta_without_table_name_noop(
         self,
-        storage_adapter: StorageAdapter,
+        storage_adapter: StorageBundle,
         mock_silver_writer: MagicMock,
         mock_gold_writer: MagicMock,
     ) -> None:
@@ -521,7 +521,7 @@ class TestStorageAdapterAdditionalPaths:
         mock_gold_writer.clear.assert_not_called()
 
     def test_preview_layer_counts_files(
-        self, storage_adapter: StorageAdapter, tmp_path: Path
+        self, storage_adapter: StorageBundle, tmp_path: Path
     ) -> None:
         """_preview_layer should count files only when table path exists."""
         table_dir = tmp_path / "silver" / "chembl" / "activity"
@@ -543,7 +543,7 @@ class TestStorageAdapterAdditionalPaths:
 
     @pytest.mark.asyncio
     async def test_health_check_status_transitions(
-        self, storage_adapter: StorageAdapter, monkeypatch: pytest.MonkeyPatch
+        self, storage_adapter: StorageBundle, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         """health_check should map writable-layer count to HealthStatus."""
         monkeypatch.setattr(
@@ -564,7 +564,7 @@ class TestStorageAdapterAdditionalPaths:
 
     @pytest.mark.asyncio
     async def test_vacuum_returns_zero_when_tables_absent(
-        self, storage_adapter: StorageAdapter, tmp_path: Path
+        self, storage_adapter: StorageBundle, tmp_path: Path
     ) -> None:
         """vacuum should do nothing if Silver and Gold table paths do not exist."""
         storage_adapter.silver.get_table_path = MagicMock(
@@ -580,7 +580,7 @@ class TestStorageAdapterAdditionalPaths:
 
     @pytest.mark.asyncio
     async def test_vacuum_skips_metadata_only_gold_directory(
-        self, storage_adapter: StorageAdapter, tmp_path: Path
+        self, storage_adapter: StorageBundle, tmp_path: Path
     ) -> None:
         """vacuum should ignore Gold directories that are not real Delta tables."""
         silver_table = tmp_path / "silver_table"
@@ -607,7 +607,7 @@ class TestStorageAdapterAdditionalPaths:
 
     @pytest.mark.asyncio
     async def test_archive_copies_silver_and_gold_and_optional_remove_source(
-        self, storage_adapter: StorageAdapter, tmp_path: Path
+        self, storage_adapter: StorageBundle, tmp_path: Path
     ) -> None:
         """archive should copy both layers and optionally remove source directories."""
         silver_src = tmp_path / "silver_src"
@@ -633,7 +633,7 @@ class TestStorageAdapterAdditionalPaths:
 
     @pytest.mark.asyncio
     async def test_cleanup_bronze_delegates(
-        self, storage_adapter: StorageAdapter, mock_bronze_writer: MagicMock
+        self, storage_adapter: StorageBundle, mock_bronze_writer: MagicMock
     ) -> None:
         """cleanup_bronze should delegate to Bronze writer."""
         expected = {"files_deleted": 3, "bytes_freed": 100}
@@ -656,4 +656,4 @@ class TestStorageAdapterAdditionalPaths:
             raise OSError("denied")
 
         monkeypatch.setattr(Path, "mkdir", _raise_oserror)
-        assert StorageAdapter._check_directory_writable(tmp_path / "x") is False
+        assert StorageBundle._check_directory_writable(tmp_path / "x") is False

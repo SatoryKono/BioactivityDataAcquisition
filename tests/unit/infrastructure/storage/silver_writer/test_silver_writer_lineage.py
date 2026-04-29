@@ -8,7 +8,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from bioetl.application.services.lineage import MetadataLineageBundle
+from bioetl.application.services.lineage import MetadataLineageBundleResult
 from bioetl.domain.medallion import SilverWriteMode
 from tests.unit.infrastructure.storage._lineage_fragment_helpers import (
     make_produced_artifact_fragment,
@@ -24,7 +24,7 @@ pytestmark = pytest.mark.unit
 
 
 def _make_bundle_safe_metadata(run_id: str = "test-run") -> MagicMock:
-    """Create metadata mocks compatible with MetadataLineageBundle identity checks."""
+    """Create metadata mocks compatible with MetadataLineageBundleResult identity checks."""
     metadata = MagicMock()
     metadata.runtime = SimpleNamespace(run_id=run_id, manifest_id=None)
     metadata.output = SimpleNamespace(lineage_fragment_id=None, artifact_id=None)
@@ -420,10 +420,12 @@ class TestSilverWriterLineage:
         metadata = _make_bundle_safe_metadata()
         captured_input = None
 
-        def create_silver_metadata_bundle(input_data: object) -> MetadataLineageBundle:
+        def create_silver_metadata_bundle(
+            input_data: object,
+        ) -> MetadataLineageBundleResult:
             nonlocal captured_input
             captured_input = input_data
-            return MetadataLineageBundle(
+            return MetadataLineageBundleResult(
                 metadata=metadata,
                 lineage_fragment=make_produced_artifact_fragment(
                     fragment_id="silver:standard-fragment",
@@ -474,9 +476,11 @@ class TestSilverWriterLineage:
         """Standard and merged metadata flows should converge on one file handoff."""
         metadata = _make_bundle_safe_metadata()
 
-        def create_silver_metadata_bundle(input_data: object) -> MetadataLineageBundle:
+        def create_silver_metadata_bundle(
+            input_data: object,
+        ) -> MetadataLineageBundleResult:
             _ = input_data
-            return MetadataLineageBundle(
+            return MetadataLineageBundleResult(
                 metadata=metadata,
                 lineage_fragment=make_produced_artifact_fragment(
                     fragment_id="silver:canonical-handoff-fragment",
@@ -532,9 +536,9 @@ class TestSilverWriterLineage:
             def create_silver_metadata_bundle(
                 self,
                 input_data: object,
-            ) -> MetadataLineageBundle:
+            ) -> MetadataLineageBundleResult:
                 _ = input_data
-                return MetadataLineageBundle(
+                return MetadataLineageBundleResult(
                     metadata=metadata,
                     lineage_fragment=fragment,
                 )
@@ -569,7 +573,7 @@ class TestSilverWriterLineage:
     ):
         """Merged Silver metadata path should reuse resolved provider/entity."""
         from bioetl.application.services.lineage import (
-            MetadataLineageBundle,
+            MetadataLineageBundleResult,
         )
 
         metadata = _make_bundle_safe_metadata()
@@ -582,9 +586,9 @@ class TestSilverWriterLineage:
             def create_silver_metadata_bundle(
                 self,
                 input_data: object,
-            ) -> MetadataLineageBundle:
+            ) -> MetadataLineageBundleResult:
                 self.last_input = input_data
-                return MetadataLineageBundle(
+                return MetadataLineageBundleResult(
                     metadata=metadata,
                     lineage_fragment=make_produced_artifact_fragment(
                         fragment_id="silver:merged-input-fragment",
@@ -627,7 +631,7 @@ class TestSilverWriterLineage:
     ):
         """Merged metadata flow should converge on the same canonical file handoff."""
         from bioetl.application.services.lineage import (
-            MetadataLineageBundle,
+            MetadataLineageBundleResult,
         )
 
         metadata = _make_bundle_safe_metadata(run_id="run-1")
@@ -636,9 +640,9 @@ class TestSilverWriterLineage:
             def create_silver_metadata_bundle(
                 self,
                 input_data: object,
-            ) -> MetadataLineageBundle:
+            ) -> MetadataLineageBundleResult:
                 _ = input_data
-                return MetadataLineageBundle(
+                return MetadataLineageBundleResult(
                     metadata=metadata,
                     lineage_fragment=make_produced_artifact_fragment(
                         fragment_id="silver:merged-handoff-fragment",
@@ -692,10 +696,10 @@ class TestSilverWriterLineage:
             def create_silver_metadata_bundle(
                 self,
                 input_data: SilverMetadataInput,
-            ) -> MetadataLineageBundle:
+            ) -> MetadataLineageBundleResult:
                 nonlocal captured_input
                 captured_input = input_data
-                return MetadataLineageBundle(
+                return MetadataLineageBundleResult(
                     metadata=metadata,
                     lineage_fragment=fragment,
                 )

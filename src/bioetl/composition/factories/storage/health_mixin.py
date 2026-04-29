@@ -1,4 +1,4 @@
-"""Health check and preview operations mixin for StorageAdapter."""
+"""Health check and preview operations mixin for StorageBundle."""
 
 from __future__ import annotations
 
@@ -14,10 +14,10 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.storage.gold_writer import GoldWriter
     from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-__all__ = ["StorageAdapterHealthMixin"]
+__all__ = ["StorageBundleHealthMixin"]
 
 
-class StorageAdapterHealthMixin:
+class StorageBundleHealthMixin:
     """Mixin providing health check, preview, and lifecycle operations."""
 
     bronze: BronzeWriter

@@ -15,7 +15,7 @@ from bioetl.application.core.runner import PipelineRunner
 from bioetl.composition.factories.pipeline import GenericPipelineFactory
 
 # Import factories to ensure they are registered/available
-from bioetl.composition.factories.storage import StorageAdapter, StorageContext
+from bioetl.composition.factories.storage import StorageBundle, StorageContext
 from bioetl.composition.observability import ObservabilityBundle
 from bioetl.domain.ports.noop import NoOpAudit
 from bioetl.domain.config import RuntimeConfig
@@ -96,7 +96,7 @@ class IntegrationPipelineTestCase:
         bronze_config = config.sink.get("bronze")
         save_json = bronze_config.save_json if bronze_config else False
 
-        adapter = StorageAdapter(
+        adapter = StorageBundle(
             bronze_writer=BronzeWriter(
                 base_path=self.bronze_path,
                 logger=logger,

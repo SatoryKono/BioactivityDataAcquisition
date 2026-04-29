@@ -188,6 +188,16 @@ def test_naming_audit_registry_loader_matches_policy_registry() -> None:
     assert "UniprotTarget" in registry.class_suffix_exceptions
     assert "Compound" not in registry.class_suffix_exceptions
     assert "Protein" not in registry.class_suffix_exceptions
+    assert "Service" in registry.allowed_role_suffixes
+    assert "Protocol" in registry.allowed_role_suffixes
+    assert "Result" in registry.allowed_role_suffixes
+    assert "Assembler" in registry.allowed_role_suffixes
+
+    public_aliases = {
+        (entry.alias_name, entry.canonical_name): entry
+        for entry in registry.public_symbol_aliases
+    }
+    assert ("DataSourceCreatorPort", "DataSourceCreatorProtocol") in public_aliases
 
     stable_ids = {entry.name for entry in registry.stable_pipeline_ids}
     assert {"pubchem_compound", "uniprot_protein"} <= stable_ids
@@ -276,10 +286,13 @@ def test_naming_audit_uses_registry_for_path_level_doc_exceptions(
         root_file_exceptions=registry.root_file_exceptions,
         class_suffix_exceptions=registry.class_suffix_exceptions,
         function_prefix_exceptions=registry.function_prefix_exceptions,
+        role_suffix_families=registry.role_suffix_families,
+        allowed_role_suffixes=registry.allowed_role_suffixes,
         stable_pipeline_ids=registry.stable_pipeline_ids,
         stable_pipeline_classes=registry.stable_pipeline_classes,
         stable_transformers=registry.stable_transformers,
         stable_gold_schemas=registry.stable_gold_schemas,
+        public_symbol_aliases=registry.public_symbol_aliases,
         forbidden_domain_entity_aliases=registry.forbidden_domain_entity_aliases,
         adr_024_derived_entities=registry.adr_024_derived_entities,
         adr_024_legacy_fields=registry.adr_024_legacy_fields,
@@ -325,3 +338,17 @@ def test_naming_policy_forbids_unregistered_adr_024_domain_alias_exports() -> No
     assert "`Document`, `Compound`, and `Protein`" in naming_policy
     assert "MUST NOT" in naming_policy
     assert "compatibility export surface" in naming_policy
+
+
+def test_registered_public_symbol_alias_surfaces_exist_and_export_alias() -> None:
+    registry = _load_naming_audit_module().load_naming_registry()
+
+    for entry in registry.public_symbol_aliases:
+        defining_surface = REPO_ROOT / entry.defining_surface
+        assert defining_surface.exists(), (
+            f"Registered defining surface missing: {entry.defining_surface}"
+        )
+        exports = _extract_all_exports(defining_surface)
+        assert entry.alias_name in exports, (
+            f"{entry.alias_name} must be exported from {entry.defining_surface}"
+        )

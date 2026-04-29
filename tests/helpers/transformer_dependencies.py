@@ -13,7 +13,7 @@ if TYPE_CHECKING:
         TransformerDependencyContext,
     )
     from bioetl.domain.ports import (
-        ContractPolicyPort,
+        ContractPolicyProtocol,
         DataNormalizationPort,
         MetricsPort,
         PiiHasherPort,
@@ -36,7 +36,7 @@ def build_test_transformer_dependencies(
     identity_service: IdentityService | None = None,
     pii_hasher: PiiHasherPort | None = None,
     data_normalizer: DataNormalizationPort | None = None,
-    contract_policy: ContractPolicyPort | None = None,
+    contract_policy: ContractPolicyProtocol | None = None,
     structural_policy: StructuralPolicyProtocol | None = None,
 ) -> TransformerDependencyContext:
     """Build transformer defaults without importing composition at collect time."""

@@ -19,7 +19,9 @@ from bioetl.application.core._quarantine_support import (
     write_quarantine_request_with_events,
     write_quarantine_requests_with_events,
 )
-from bioetl.application.observability.domain_event_emitter import DomainEventEmitterPort
+from bioetl.application.observability.domain_event_emitter import (
+    DomainEventEmitterProtocol,
+)
 from bioetl.application.observability.pipeline_metrics import PipelineMetricsRecorder
 from bioetl.domain.ports import MetricsPort, QuarantinePort
 from bioetl.domain.types import BatchID, BronzeRecord, ErrorType, JsonDict, RunID
@@ -54,7 +56,7 @@ class QuarantineManagerService(QuarantineManagerSupportMixin):
         pipeline_name: str,
         metrics: MetricsPort | None = None,
         pipeline_metrics: PipelineMetricsRecorder | None = None,
-        domain_event_emitter: DomainEventEmitterPort | None = None,
+        domain_event_emitter: DomainEventEmitterProtocol | None = None,
     ) -> None:
         """Initialize QuarantineManagerService with explicit dependencies.
 

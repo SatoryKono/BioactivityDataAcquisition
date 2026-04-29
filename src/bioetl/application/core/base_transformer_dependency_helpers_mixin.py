@@ -5,7 +5,7 @@ from __future__ import annotations
 import dataclasses
 from typing import TYPE_CHECKING, Any, Protocol, cast
 
-from bioetl.domain.ports import ContractPolicyPort
+from bioetl.domain.ports import ContractPolicyProtocol
 from bioetl.domain.services import IdentityService
 from bioetl.domain.types import ContentHash, EntityID, GoldRecord
 
@@ -22,7 +22,7 @@ class _TransformerDependencyOwner(Protocol):
     entity_type: str
     GOLD_EXCLUDE_FIELDS: frozenset[str]
     _pii_hasher: PiiHasherPort
-    _contract_policy: ContractPolicyPort
+    _contract_policy: ContractPolicyProtocol
     _identity: IdentityService
 
     @staticmethod
@@ -138,7 +138,7 @@ class _BaseTransformerDependencyHelpersMixin:
 
     @staticmethod
     def _apply_hash_policy(
-        contract_policy: ContractPolicyPort,
+        contract_policy: ContractPolicyProtocol,
         business_data: GoldRecord,
     ) -> GoldRecord:
         """Apply include/exclude hash policy from contract config."""

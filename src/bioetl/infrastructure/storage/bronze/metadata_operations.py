@@ -19,7 +19,7 @@ from bioetl.infrastructure.storage.bronze.reporting_helpers import (
 )
 
 if TYPE_CHECKING:
-    from bioetl.domain.lineage import LineageGraphFragment, MetadataLineageBundle
+    from bioetl.domain.lineage import LineageGraphFragment, MetadataLineageBundleResult
     from bioetl.domain.models.metadata import (
         BronzeMetadata,
         InputSnapshotRef,
@@ -74,7 +74,7 @@ class _BronzeMetadataBundleBuilder(Protocol):
     def __call__(
         self,
         input_data: BronzeMetadataInput,
-    ) -> MetadataLineageBundle[BronzeMetadata]:
+    ) -> MetadataLineageBundleResult[BronzeMetadata]:
         """Build bundled bronze metadata and lineage."""
 
 

@@ -19,8 +19,8 @@ from bioetl.application.core.batch_executor_loop_flow import (
     process_extracted_record_iteration as process_extracted_record_iteration_from_flow,
 )
 from bioetl.application.core.batch_executor_loop_progress import (
-    _BatchCheckpointRecoveryPort,
-    _BatchProgressReporterPort,
+    _BatchCheckpointRecoveryProtocol,
+    _BatchProgressReporterProtocol,
     _BatchProgressSnapshot,
     build_batch_progress_payload,
     build_periodic_checkpoint_payload,
@@ -68,11 +68,11 @@ class BatchExtractionLoopState:
 class BatchExtractionIterationContext:
     """Shared collaborators and counters for one extraction-loop iteration."""
 
-    checkpoint_recovery_service: _BatchCheckpointRecoveryPort
+    checkpoint_recovery_service: _BatchCheckpointRecoveryProtocol
     resume_offset: int
     process_batch: _BatchStateUpdater
     memory_manager: BatchMemoryManagerService
-    progress_service: _BatchProgressReporterPort
+    progress_service: _BatchProgressReporterProtocol
     progress_state: _BatchProgressSnapshot
     checkpoint_interval: int
 
@@ -83,7 +83,7 @@ class _BatchFlushContext:
 
     process_batch: _BatchStateUpdater
     memory_manager: BatchMemoryManagerService
-    progress_service: _BatchProgressReporterPort
+    progress_service: _BatchProgressReporterProtocol
     progress_state: _BatchProgressSnapshot
 
 
@@ -153,7 +153,7 @@ async def flush_batch_if_needed(
     records_fetched: int,
     process_batch: _BatchStateUpdater,
     memory_manager: BatchMemoryManagerService,
-    progress_service: _BatchProgressReporterPort,
+    progress_service: _BatchProgressReporterProtocol,
     progress_state: _BatchProgressSnapshot,
 ) -> None:
     """Flush the current batch when adaptive size threshold is reached."""

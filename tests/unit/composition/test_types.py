@@ -29,10 +29,10 @@ class TestTypesModuleExports:
         assert PipelineRegistry is not None
 
     def test_storage_adapter_importable(self) -> None:
-        """StorageAdapter is importable from types."""
-        from bioetl.composition.types import StorageAdapter
+        """StorageBundle is importable from types."""
+        from bioetl.composition.types import StorageBundle
 
-        assert StorageAdapter is not None
+        assert StorageBundle is not None
 
     def test_create_registry_importable(self) -> None:
         """create_registry is importable from types."""
@@ -55,7 +55,7 @@ class TestTypesModuleExports:
             "ObservabilityBundle",
             "PipelineDefinition",
             "PipelineRegistry",
-            "StorageAdapter",
+            "StorageBundle",
             "create_registry",
             "get_default_registry",
             # Typed bootstrap contexts
@@ -78,7 +78,7 @@ class TestTypesModuleExports:
             "ObservabilityBundle",
             "PipelineDefinition",
             "PipelineRegistry",
-            "StorageAdapter",
+            "StorageBundle",
             "create_registry",
             "get_default_registry",
             # Typed bootstrap contexts
@@ -109,9 +109,9 @@ class TestTypesReExports:
         assert DirectRegistry is ReExportedRegistry
 
     def test_storage_adapter_is_same(self) -> None:
-        """StorageAdapter from types is same as from storage factory."""
-        from bioetl.composition.factories.storage import StorageAdapter as DirectAdapter
-        from bioetl.composition.types import StorageAdapter as ReExportedAdapter
+        """StorageBundle from types is same as from storage factory."""
+        from bioetl.composition.factories.storage import StorageBundle as DirectAdapter
+        from bioetl.composition.types import StorageBundle as ReExportedAdapter
 
         assert DirectAdapter is ReExportedAdapter
 
@@ -138,14 +138,14 @@ class TestTypesUsability:
         from bioetl.composition.types import (
             ObservabilityBundle,
             PipelineRegistry,
-            StorageAdapter,
+            StorageBundle,
         )
 
         # Just verify they can be used as type annotations
         # (this is a compile-time check, but we verify at runtime)
         def example_function(
             registry: PipelineRegistry,
-            storage: StorageAdapter,
+            storage: StorageBundle,
             observability: ObservabilityBundle,
         ) -> None:
             pass

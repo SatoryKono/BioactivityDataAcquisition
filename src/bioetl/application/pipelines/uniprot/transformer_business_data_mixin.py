@@ -81,8 +81,6 @@ class UniProtBusinessDataMixin:
         )
         self._add_counts(record, data, isoform_count=isoform_count)
 
-        # Backward-compatible alias expected by downstream contracts.
-        data["organism_id"] = data.get("taxonomy_id")
         return data
 
     def _add_core_identifiers(self, record: BronzeRecord, data: GoldRecord) -> None:
@@ -116,9 +114,6 @@ class UniProtBusinessDataMixin:
     def _add_gene_data(self, record: BronzeRecord, data: GoldRecord) -> None:
         """Add gene-related fields."""
         genes = record.get("genes")
-        data["gene_names"] = self.serialize_json_list(
-            GeneExtractor.extract_gene_names(genes)
-        )
         data["gene_primary"] = GeneExtractor.extract_primary_gene(genes)
         data["gene_synonyms"] = GeneExtractor.extract_gene_synonyms(genes)
         data["gene_orf_names"] = GeneExtractor.extract_gene_orf_names(genes)

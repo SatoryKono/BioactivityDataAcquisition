@@ -38,7 +38,7 @@ if TYPE_CHECKING:
         TransformCallback,
     )
     from bioetl.application.observability.domain_event_emitter import (
-        DomainEventEmitterPort,
+        DomainEventEmitterProtocol,
     )
     from bioetl.application.services.checkpoint_compatibility_service import (
         CheckpointCompatibilityService,
@@ -68,7 +68,7 @@ def create_batch_processing_components(
     gold_transform_callback: GoldTransformCallback,
     gold_validator: GoldValidatorPort,
     tracer: TracingPort | None = None,
-    domain_event_emitter: DomainEventEmitterPort | None = None,
+    domain_event_emitter: DomainEventEmitterProtocol | None = None,
     lock_validator: Callable[[], Awaitable[bool]] | None = None,
 ) -> BatchProcessingComponents:
     return build_batch_processing_components(

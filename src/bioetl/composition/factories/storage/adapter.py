@@ -1,4 +1,4 @@
-"""StorageAdapter - Unified storage adapter for Bronze/Silver/Gold layers.
+"""StorageBundle - Unified storage bundle for Bronze/Silver/Gold layers.
 
 Implements the narrow storage protocols from ``bioetl.domain.ports``.
 
@@ -15,19 +15,19 @@ from __future__ import annotations
 from typing import ClassVar
 
 from bioetl.composition.factories.storage.clear_mixin import (
-    StorageAdapterClearMixin,
+    StorageBundleClearMixin,
 )
 from bioetl.composition.factories.storage.health_mixin import (
-    StorageAdapterHealthMixin,
+    StorageBundleHealthMixin,
 )
 from bioetl.composition.factories.storage.maintenance_mixin import (
-    StorageAdapterMaintenanceMixin,
+    StorageBundleMaintenanceMixin,
 )
 from bioetl.composition.factories.storage.merged_mixin import (
-    StorageAdapterMergedMixin,
+    StorageBundleMergedMixin,
 )
 from bioetl.composition.factories.storage.write_mixin import (
-    StorageAdapterWriteMixin,
+    StorageBundleWriteMixin,
 )
 from bioetl.domain.contracts.gold.composite import (
     CompositeMoleculeGoldSchema,
@@ -38,17 +38,17 @@ from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-__all__ = ["StorageAdapter"]
+__all__ = ["StorageBundle"]
 
 
-class StorageAdapter(
-    StorageAdapterWriteMixin,
-    StorageAdapterMergedMixin,
-    StorageAdapterClearMixin,
-    StorageAdapterMaintenanceMixin,
-    StorageAdapterHealthMixin,
+class StorageBundle(
+    StorageBundleWriteMixin,
+    StorageBundleMergedMixin,
+    StorageBundleClearMixin,
+    StorageBundleMaintenanceMixin,
+    StorageBundleHealthMixin,
 ):
-    """Unified storage adapter for Bronze/Silver/Gold.
+    """Unified storage bundle for Bronze/Silver/Gold.
 
     Implements the narrow storage protocols from ``bioetl.domain.ports``.
     Delegates to specialized writers for each layer.
@@ -72,7 +72,7 @@ class StorageAdapter(
         silver_writer: SilverWriter,
         gold_writer: GoldWriter,
     ):
-        """Initialize StorageAdapter with injected layer writers.
+        """Initialize StorageBundle with injected layer writers.
 
         Args:
             bronze_writer: Writer for raw data ingestion into Bronze layer
@@ -85,3 +85,8 @@ class StorageAdapter(
         self.bronze = bronze_writer
         self.silver = silver_writer
         self.gold = gold_writer
+
+
+# Backward-compatible alias retained while composition callers migrate to the
+# Bundle suffix. New code should use StorageBundle directly.
+StorageAdapter = StorageBundle

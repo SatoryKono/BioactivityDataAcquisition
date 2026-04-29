@@ -83,5 +83,7 @@ def test_github_policy_records_root_hygiene_admin_verification_lane() -> None:
     )
 
     assert "Branch Protection Verification" in policy
-    assert "owner/admin access" in policy
+    assert "Verified on `2026-04-29`" in policy
     assert "#3380" in policy
+    assert "root-hygiene-required-check" in policy
+    assert "/rules/15730586" in policy

@@ -212,8 +212,8 @@ def _collect_alias_matches(
     return matches
 
 
-class _ColumnPriorityOrderingAdapter:
-    """Internal non-deprecated adapter for explicit source-priority ordering."""
+class _ColumnPriorityOrderingStrategy:
+    """Internal non-deprecated strategy for explicit source-priority ordering."""
 
     def __init__(self, logger: LoggerPort) -> None:
         self._logger = logger
@@ -304,14 +304,14 @@ class ColumnOrderService:
         config: ColumnOrderConfig | None = None,
         column_groups: Sequence[ColumnGroupConfig] | None = None,
         priority_orderer: ColumnPriorityOrderer
-        | _ColumnPriorityOrderingAdapter
+        | _ColumnPriorityOrderingStrategy
         | None = None,
     ) -> None:
         """Initialize unified column ordering service."""
         self._logger = logger
         self._config = config or DEFAULT_COLUMN_ORDER
         self._column_groups = tuple(column_groups) if column_groups else None
-        self._priority_orderer = priority_orderer or _ColumnPriorityOrderingAdapter(
+        self._priority_orderer = priority_orderer or _ColumnPriorityOrderingStrategy(
             logger
         )
 

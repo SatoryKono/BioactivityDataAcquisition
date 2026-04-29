@@ -21,7 +21,7 @@ from bioetl.composition.bootstrap.cli.storage import (
     bootstrap_lifecycle_service,
     bootstrap_vacuum_service,
 )
-from bioetl.composition.factories.storage import StorageAdapter
+from bioetl.composition.factories.storage import StorageBundle
 from bioetl.composition import PipelineRegistry
 from bioetl.infrastructure.export.csv_exporter import CsvExporter
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
@@ -42,19 +42,19 @@ def _make_storage_settings(tmp_path: Path) -> SimpleNamespace:
 
 
 @pytest.mark.unit
-class TestBootstrapStorageAdapter:
+class TestBootstrapStorageBundle:
     """Test bootstrap_storage_adapter function."""
 
     @patch("bioetl.composition.bootstrap.assembly.storage.get_settings")
     def test_returns_storage_adapter(self, mock_settings: MagicMock) -> None:
-        """Test that bootstrap_storage_adapter returns a StorageAdapter."""
+        """Test that bootstrap_storage_adapter returns a StorageBundle."""
         mock_settings.return_value.bronze_path = str(BRONZE_PATH)
         mock_settings.return_value.silver_path = str(SILVER_PATH)
         mock_settings.return_value.gold_path = str(GOLD_PATH)
 
         result = bootstrap_storage_adapter()
 
-        assert isinstance(result, StorageAdapter)
+        assert isinstance(result, StorageBundle)
 
     @patch("bioetl.composition.bootstrap.assembly.storage.get_settings")
     def test_wires_output_paths_and_noop_loggers(

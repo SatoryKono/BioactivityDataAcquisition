@@ -1,4 +1,4 @@
-"""Merged write and read operations mixin for StorageAdapter."""
+"""Merged write and read operations mixin for StorageBundle."""
 
 from __future__ import annotations
 
@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.storage.gold_writer import GoldWriter
     from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-__all__ = ["StorageAdapterMergedMixin"]
+__all__ = ["StorageBundleMergedMixin"]
 
 
 class _SilverMergedWriteProtocol(Protocol):
@@ -49,7 +49,7 @@ class _GoldMergedWriteProtocol(Protocol):
     ) -> None: ...
 
 
-class StorageAdapterMergedMixin:
+class StorageBundleMergedMixin:
     """Mixin providing merged write and read operations for composite pipelines."""
 
     silver: SilverWriter

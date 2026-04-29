@@ -1,8 +1,26 @@
 from __future__ import annotations
 
 import ast
+import importlib.util
 import re
 from pathlib import Path
+import sys
+from types import ModuleType
+
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+
+
+def _load_naming_audit_module() -> ModuleType:
+    script = REPO_ROOT / "scripts" / "engineering" / "qa" / "naming_audit.py"
+    spec = importlib.util.spec_from_file_location(
+        "naming_audit_conventions_runtime", script
+    )
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    sys.modules["naming_audit_conventions_runtime"] = module
+    spec.loader.exec_module(module)
+    return module
 
 
 def _is_constant_literal(value: ast.expr) -> bool:
@@ -31,54 +49,8 @@ def _iter_public_constant_assignments(
 
 
 def test_class_naming_suffixes(src_dir: Path, source_ast_cache: dict) -> None:
-    suffixes = (
-        "Factory",
-        "Service",
-        "Services",
-        "Transformer",
-        "Error",
-        "Config",
-        "Protocol",
-        "Port",
-        "Pipeline",
-        "Result",
-        "Extractor",
-        "Manager",
-        "Source",
-        "Callback",
-        "Analyzer",
-        "Coordinator",
-        "Runner",
-        "Processor",
-        "Validator",
-        "Executor",
-        "Aggregator",
-        "Orderer",
-        "Renamer",
-        "Deduplicator",
-        "Recorder",
-        "Helper",
-        "Schema",
-        "Writer",
-        "Observer",
-        "Parser",
-        "Utils",
-        "Task",
-        "Spec",
-        "Group",
-        "Context",
-        "Summary",
-        "Reason",
-        "Planner",
-        "Policy",
-        "Resolver",
-        "Generator",
-        "Calculator",
-        "Checker",
-        "Mixin",
-        "Callable",
-        "Assembler",
-    )
+    mod = _load_naming_audit_module()
+    registry = mod.load_naming_registry()
     app_path = src_dir / "bioetl" / "application"
     violations: list[str] = []
     for path, tree in source_ast_cache.items():
@@ -119,7 +91,11 @@ def test_class_naming_suffixes(src_dir: Path, source_ast_cache: dict) -> None:
                 )
             ):
                 continue
-            if not node.name.endswith(suffixes):
+            if not mod.has_valid_suffix(
+                node.name,
+                registry.class_suffix_exceptions,
+                registry.allowed_role_suffixes,
+            ):
                 violations.append(f"{path}:{node.lineno}:{node.name}")
     assert not violations, "Class naming violations:\n" + "\n".join(violations[:80])
 

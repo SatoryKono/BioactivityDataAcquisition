@@ -44,7 +44,7 @@ if TYPE_CHECKING:
 
 
 @runtime_checkable
-class PipelineStoragePort(
+class PipelineStorageProtocol(
     BronzeStoragePort,
     SilverStoragePort,
     GoldStoragePort,
@@ -103,7 +103,7 @@ class PipelineService:
     """
 
     data_source: DataSourcePort
-    storage: PipelineStoragePort
+    storage: PipelineStorageProtocol
     lock: LockPort
     checkpoint: CheckpointPort
     quarantine: QuarantinePort
@@ -183,4 +183,4 @@ class PipelineService:
         self.logger.info("Pipeline services closed.", stage="cleanup")
 
 
-__all__ = ["PipelineService", "PipelineStoragePort"]
+__all__ = ["PipelineService", "PipelineStorageProtocol"]

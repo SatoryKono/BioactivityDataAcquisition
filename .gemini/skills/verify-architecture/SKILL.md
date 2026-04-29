@@ -10,15 +10,17 @@ Execute architecture validation checks and report blocking/non-blocking issues.
 
 ## Source Of Truth
 
-- Primary instructions: `../../../.claude/skills/verify-architecture.md`
+- Canonical runtime entrypoint: this `SKILL.md`
+- Project rules: `../../../AGENTS.md`
+- Memory policy: `../../../docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
 
 ## Workflow
 
-1. Open and follow `../../../.claude/skills/verify-architecture.md`.
+1. Follow this skill file as the canonical Gemini runtime instructions.
 1. Select mode (`quick`, `full`, `category`) based on request scope.
 1. Adapt command examples to the active shell and installed toolchain.
 1. Report findings with failing tests/checks and actionable next fixes.
 
 ## Notes
 
-- The `.claude` skill file is canonical for test groupings and command sets.
+- Treat this file as canonical for runtime trigger and mode selection.

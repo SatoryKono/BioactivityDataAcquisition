@@ -3,9 +3,8 @@
 from __future__ import annotations
 
 from bioetl.domain.lineage import (
-    MetadataLineageBundle,
     MetadataLineageBundleResult,
     MetadataT,
 )
 
-__all__ = ["MetadataLineageBundle", "MetadataLineageBundleResult", "MetadataT"]
+__all__ = ["MetadataLineageBundleResult", "MetadataT"]

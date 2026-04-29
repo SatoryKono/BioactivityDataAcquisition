@@ -389,23 +389,26 @@ class TestUniprotTarget:
             accession="P00533",
             entry_name="EGFR_HUMAN",
             protein_name="Epidermal growth factor receptor",
-            gene_names=["EGFR", "ERBB1"],
-            organism_id=9606,
+            gene_primary="EGFR",
+            gene_synonyms='["ERBB1"]',
+            taxonomy_id=9606,
             sequence_length=1210,
         )
-        assert protein.gene_names == ["EGFR", "ERBB1"]
-        assert protein.organism_id == 9606
+        assert protein.gene_primary == "EGFR"
+        assert protein.gene_synonyms == '["ERBB1"]'
+        assert protein.taxonomy_id == 9606
         assert protein.sequence_length == 1210
 
-    def test_protein_default_gene_names_empty_list(self, base_entity_kwargs):
-        """Test that gene_names defaults to empty list."""
+    def test_protein_default_gene_primary_is_none(self, base_entity_kwargs):
+        """Test that canonical gene fields default to None."""
         protein = UniprotTarget(
             **base_entity_kwargs,
             accession="P12345",
             entry_name="TEST_HUMAN",
             protein_name="Test protein",
         )
-        assert protein.gene_names == []
+        assert protein.gene_primary is None
+        assert protein.gene_synonyms is None
 
     def test_protein_requires_accession(self, base_entity_kwargs):
         """Test that empty accession raises ValueError."""

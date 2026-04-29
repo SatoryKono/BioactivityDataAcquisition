@@ -19,7 +19,7 @@ from bioetl.infrastructure.config import load_pipeline_contract_policy
 if TYPE_CHECKING:
     from bioetl.application.core.wiring.transformer import BaseTransformer
     from bioetl.domain.config import PipelineConfig
-    from bioetl.domain.ports import ContractPolicyPort, MetricsPort, TracingPort
+    from bioetl.domain.ports import ContractPolicyProtocol, MetricsPort, TracingPort
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 
@@ -73,7 +73,7 @@ class TransformerBuilder:
 
     def _load_contract_policy(
         self, entity_type: str | None
-    ) -> ContractPolicyPort | None:
+    ) -> ContractPolicyProtocol | None:
         """Load policy for provider/entity and degrade gracefully when missing."""
         if entity_type is None:
             return None

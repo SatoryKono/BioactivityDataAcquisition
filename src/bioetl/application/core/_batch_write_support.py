@@ -17,14 +17,14 @@ from bioetl.domain.types import BatchID, ErrorType, RunID
 if TYPE_CHECKING:
     from bioetl.application.core.batch_writer import BatchWriter
     from bioetl.application.observability.domain_event_emitter import (
-        DomainEventEmitterPort,
+        DomainEventEmitterProtocol,
     )
     from bioetl.domain.ports import LoggerPort
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 
 
 def emit_domain_event(
-    emitter: DomainEventEmitterPort | None,
+    emitter: DomainEventEmitterProtocol | None,
     event: DomainEvent,
 ) -> None:
     """Best-effort publish of one typed domain event."""
@@ -35,7 +35,7 @@ def emit_domain_event(
 
 def emit_batch_written(
     *,
-    emitter: DomainEventEmitterPort | None,
+    emitter: DomainEventEmitterProtocol | None,
     run_id: RunID | None,
     batch_id: BatchID,
     layer: str,
@@ -59,7 +59,7 @@ def emit_batch_written(
 
 def emit_batch_failed(
     *,
-    emitter: DomainEventEmitterPort | None,
+    emitter: DomainEventEmitterProtocol | None,
     run_id: RunID | None,
     batch_id: BatchID,
     layer: str,
@@ -89,7 +89,7 @@ async def safe_write_layer(
     quarantine_manager: QuarantineManagerService,
     logger: LoggerPort,
     run_id: RunID | None,
-    domain_event_emitter: DomainEventEmitterPort | None,
+    domain_event_emitter: DomainEventEmitterProtocol | None,
     layer: str,
     records: list[dict[str, object]],
     batch_id: BatchID,

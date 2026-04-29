@@ -22,7 +22,7 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
     from bioetl.domain.ports import (
-        ContractPolicyPort,
+        ContractPolicyProtocol,
         DataNormalizationPort,
         MetricsPort,
         PiiHasherPort,
@@ -75,7 +75,7 @@ def create_transformer(
     identity_service: IdentityService | None = None,
     pii_hasher: PiiHasherPort | None = None,
     data_normalizer: DataNormalizationPort | None = None,
-    contract_policy: ContractPolicyPort | None = None,
+    contract_policy: ContractPolicyProtocol | None = None,
     dependencies: TransformerDependencyContext | None = None,
 ) -> BaseTransformer:
     """Create a transformer instance for the given provider and entity type.

@@ -10,7 +10,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from bioetl.composition.factories.storage import (
-    StorageAdapter,
+    StorageBundle,
     StorageContext,
     StorageFactory,
 )
@@ -172,7 +172,7 @@ class TestStorageContext:
 
     def test_storage_context_creation(self, mock_logger):
         """Test StorageContext can be created with required fields."""
-        adapter = MagicMock(spec=StorageAdapter)
+        adapter = MagicMock(spec=StorageBundle)
         context = StorageContext(
             adapter=adapter,
             bronze_path=Path("/path/to/bronze"),
@@ -189,7 +189,7 @@ class TestStorageContext:
 
     def test_storage_context_is_frozen(self, mock_logger):
         """Test StorageContext is immutable."""
-        adapter = MagicMock(spec=StorageAdapter)
+        adapter = MagicMock(spec=StorageBundle)
         context = StorageContext(
             adapter=adapter,
             bronze_path=Path("/path/to/bronze"),
@@ -452,8 +452,8 @@ class TestStorageFactoryEdgeCases:
 
 
 @pytest.mark.unit
-class TestStorageAdapterHealthCheck:
-    """Tests for StorageAdapter.health_check() method."""
+class TestStorageBundleHealthCheck:
+    """Tests for StorageBundle.health_check() method."""
 
     @pytest.fixture
     def mock_bronze_writer(self, tmp_path):
@@ -485,7 +485,7 @@ class TestStorageAdapterHealthCheck:
         """Test health check returns HEALTHY when all layers are writable."""
         from bioetl.domain.types import HealthStatus
 
-        adapter = StorageAdapter(
+        adapter = StorageBundle(
             bronze_writer=mock_bronze_writer,
             silver_writer=mock_silver_writer,
             gold_writer=mock_gold_writer,
@@ -504,14 +504,14 @@ class TestStorageAdapterHealthCheck:
 
         from bioetl.domain.types import HealthStatus
 
-        adapter = StorageAdapter(
+        adapter = StorageBundle(
             bronze_writer=mock_bronze_writer,
             silver_writer=mock_silver_writer,
             gold_writer=mock_gold_writer,
         )
 
         # Mock _check_directory_writable to return False for gold path
-        original_check = StorageAdapter._check_directory_writable
+        original_check = StorageBundle._check_directory_writable
 
         def mock_check(path):
             if "gold" in str(path):
@@ -519,7 +519,7 @@ class TestStorageAdapterHealthCheck:
             return original_check(path)
 
         with patch.object(
-            StorageAdapter, "_check_directory_writable", side_effect=mock_check
+            StorageBundle, "_check_directory_writable", side_effect=mock_check
         ):
             result = await adapter.health_check()
 
@@ -528,7 +528,7 @@ class TestStorageAdapterHealthCheck:
 
     def test_check_directory_writable_creates_probe_file(self, tmp_path):
         """Test _check_directory_writable creates and deletes probe file."""
-        adapter = StorageAdapter(
+        adapter = StorageBundle(
             bronze_writer=MagicMock(),
             silver_writer=MagicMock(),
             gold_writer=MagicMock(),
@@ -543,8 +543,8 @@ class TestStorageAdapterHealthCheck:
 
 
 @pytest.mark.unit
-class TestStorageAdapterClearOperations:
-    """Tests for StorageAdapter clear operations."""
+class TestStorageBundleClearOperations:
+    """Tests for StorageBundle clear operations."""
 
     @pytest.fixture
     def mock_bronze_writer(self, tmp_path):
@@ -576,7 +576,7 @@ class TestStorageAdapterClearOperations:
         self, mock_bronze_writer, mock_silver_writer, mock_gold_writer
     ):
         """Test clear_silver delegates to silver writer."""
-        adapter = StorageAdapter(
+        adapter = StorageBundle(
             bronze_writer=mock_bronze_writer,
             silver_writer=mock_silver_writer,
             gold_writer=mock_gold_writer,
@@ -594,7 +594,7 @@ class TestStorageAdapterClearOperations:
         self, mock_bronze_writer, mock_silver_writer, mock_gold_writer
     ):
         """Test clear_gold delegates to gold writer."""
-        adapter = StorageAdapter(
+        adapter = StorageBundle(
             bronze_writer=mock_bronze_writer,
             silver_writer=mock_silver_writer,
             gold_writer=mock_gold_writer,
@@ -607,8 +607,8 @@ class TestStorageAdapterClearOperations:
 
 
 @pytest.mark.unit
-class TestStorageAdapterPreviewCleanup:
-    """Tests for StorageAdapter.preview_cleanup() method."""
+class TestStorageBundlePreviewCleanup:
+    """Tests for StorageBundle.preview_cleanup() method."""
 
     @pytest.fixture
     def temp_storage(self, tmp_path):
@@ -647,7 +647,7 @@ class TestStorageAdapterPreviewCleanup:
             return_value=temp_storage / "gold" / "chembl" / "activity"
         )
 
-        return StorageAdapter(
+        return StorageBundle(
             bronze_writer=bronze,
             silver_writer=silver,
             gold_writer=gold,
@@ -698,7 +698,7 @@ class TestStorageAdapterPreviewCleanup:
             "exists": True,
         }
 
-        adapter = StorageAdapter(
+        adapter = StorageBundle(
             bronze_writer=MagicMock(spec=BronzeWriter),
             silver_writer=silver,
             gold_writer=gold,
@@ -715,8 +715,8 @@ class TestStorageAdapterPreviewCleanup:
 
 
 @pytest.mark.unit
-class TestStorageAdapterVacuum:
-    """Tests for StorageAdapter.vacuum() method."""
+class TestStorageBundleVacuum:
+    """Tests for StorageBundle.vacuum() method."""
 
     @pytest.fixture
     def mock_writers(self, tmp_path):
@@ -749,7 +749,7 @@ class TestStorageAdapterVacuum:
         silver.get_table_path = MagicMock(return_value=silver_path)
         gold.get_table_path = MagicMock(return_value=gold_path)
 
-        adapter = StorageAdapter(
+        adapter = StorageBundle(
             bronze_writer=bronze,
             silver_writer=silver,
             gold_writer=gold,
@@ -769,13 +769,13 @@ class TestStorageAdapterVacuum:
 
 
 @pytest.mark.unit
-class TestStorageAdapterAclose:
-    """Tests for StorageAdapter.aclose() method."""
+class TestStorageBundleAclose:
+    """Tests for StorageBundle.aclose() method."""
 
     @pytest.mark.asyncio
     async def test_aclose_completes_without_error(self):
         """Test aclose completes without raising."""
-        adapter = StorageAdapter(
+        adapter = StorageBundle(
             bronze_writer=MagicMock(),
             silver_writer=MagicMock(),
             gold_writer=MagicMock(),
@@ -787,7 +787,7 @@ class TestStorageAdapterAclose:
     @pytest.mark.asyncio
     async def test_aclose_is_idempotent(self):
         """Test aclose can be called multiple times."""
-        adapter = StorageAdapter(
+        adapter = StorageBundle(
             bronze_writer=MagicMock(),
             silver_writer=MagicMock(),
             gold_writer=MagicMock(),

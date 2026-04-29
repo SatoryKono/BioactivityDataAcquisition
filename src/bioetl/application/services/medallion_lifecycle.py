@@ -36,7 +36,7 @@ if TYPE_CHECKING:
     )
 
 
-class MedallionStoragePort(StorageMaintenancePort, Protocol):
+class MedallionStorageProtocol(StorageMaintenancePort, Protocol):
     """Lifecycle-focused storage contract for medallion service."""
 
     async def clear_silver(self, table_name: str, dry_run: bool = False) -> int:
@@ -66,7 +66,7 @@ class _MedallionClearMixin:
     is logged for observability and supports a dry-run mode.
     """
 
-    storage: MedallionStoragePort
+    storage: MedallionStorageProtocol
     logger: LoggerPort
 
     async def clear(
@@ -154,7 +154,7 @@ class _MedallionRunLifecycleMixin(_MedallionClearMixin):
     optimization (vacuum/compact) when configured.
     """
 
-    storage: MedallionStoragePort
+    storage: MedallionStorageProtocol
     logger: LoggerPort
 
     # =========================================================================
@@ -332,7 +332,7 @@ class MedallionLifecycleService(
 ):
     """Unified facade for managing medallion layer lifecycle operations."""
 
-    storage: MedallionStoragePort
+    storage: MedallionStorageProtocol
     logger: LoggerPort
 
 

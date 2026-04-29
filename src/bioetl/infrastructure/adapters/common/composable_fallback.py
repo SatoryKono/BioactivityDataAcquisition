@@ -18,13 +18,13 @@ from typing import TYPE_CHECKING
 
 from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.adapters.common.fallback_fetch_service import (
-    ExtractRecordIdPort,
-    FallbackExecutionPort,
+    ExtractRecordIdProtocol,
+    FallbackExecutionProtocol,
     FallbackFetchOrchestratorService,
     FallbackFetchRequest,
-    NormalizeIdPort,
-    Phase1SummaryLoggerPort,
-    PrimaryRecordFetchPort,
+    NormalizeIdProtocol,
+    Phase1SummaryLoggerProtocol,
+    PrimaryRecordFetchProtocol,
 )
 from bioetl.infrastructure.adapters.common.fetch_retry_policy import (
     FallbackPolicyHandler,
@@ -56,7 +56,7 @@ class ComposableFallbackDecorator:
         self,
         *,
         service: FallbackFetchOrchestratorService,
-        strategy: FallbackExecutionPort,
+        strategy: FallbackExecutionProtocol,
         config: FallbackDecoratorConfig,
         logger: LoggerPort,
     ) -> None:
@@ -83,12 +83,12 @@ class ComposableFallbackDecorator:
         *,
         filter_ids: list[str],
         fallback_mapping: dict[str, str],
-        primary_record_fetcher: PrimaryRecordFetchPort,
+        primary_record_fetcher: PrimaryRecordFetchProtocol,
         limit: int | None,
         filter_field: str | None = None,
-        phase1_summary_logger: Phase1SummaryLoggerPort | None = None,
-        normalize_id: NormalizeIdPort | None = None,
-        extract_record_id: ExtractRecordIdPort | None = None,
+        phase1_summary_logger: Phase1SummaryLoggerProtocol | None = None,
+        normalize_id: NormalizeIdProtocol | None = None,
+        extract_record_id: ExtractRecordIdProtocol | None = None,
         fallback_handler: FallbackPolicyHandler | None = None,
     ) -> AsyncIterator[BronzeRecord]:
         """Execute fallback orchestration with policy-aware filter gating.

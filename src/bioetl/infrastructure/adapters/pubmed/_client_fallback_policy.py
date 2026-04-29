@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from bioetl.infrastructure.adapters.common import FallbackDecoratorConfig
 from bioetl.infrastructure.adapters.common.fallback_fetch_service import (
-    ExtractRecordIdPort,
-    NormalizeIdPort,
+    ExtractRecordIdProtocol,
+    NormalizeIdProtocol,
 )
 from bioetl.infrastructure.adapters.pubmed.fallback import PubMedTitleFallbackHandler
 
@@ -33,11 +33,11 @@ class _PubMedFallbackPolicyMixin:
         """Return PubMed-specific default fallback config."""
         return _PUBMED_DEFAULT_FALLBACK_CONFIG
 
-    def _get_normalize_id_hook(self) -> NormalizeIdPort:
+    def _get_normalize_id_hook(self) -> NormalizeIdProtocol:
         """Return PubMed ID normalization hook."""
         return lambda value: value.lower().strip()
 
-    def _get_extract_record_id_hook(self) -> ExtractRecordIdPort:
+    def _get_extract_record_id_hook(self) -> ExtractRecordIdProtocol:
         """Return hook extracting PMID from a PubMed record."""
         return lambda rec: str(rec.get("pmid", ""))
 

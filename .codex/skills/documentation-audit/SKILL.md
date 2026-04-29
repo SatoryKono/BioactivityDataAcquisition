@@ -12,6 +12,9 @@ Perform a full documentation audit of BioETL and bring docs in sync with code an
 
 - Load `references/audit-checklist.md` — checklist for each audit area.
 - Load `references/report-template.md` — template for the audit report.
+- Treat `../../../AGENTS.md`, `../../../docs/00-project/ai/agents/guides/MEMORY_USAGE.md`,
+  and `../../../docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
+  as the active runtime policy entrypoints for AI-surface documentation work.
 
 ## Workflow
 

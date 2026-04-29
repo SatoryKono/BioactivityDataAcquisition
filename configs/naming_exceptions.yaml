@@ -201,6 +201,94 @@ function_prefix_exceptions:
     # Magic/dunder methods are exempt
     # - __init__, __call__, etc.
 
+# Canonical role suffix registry.
+# scripts/engineering/qa/naming_audit.py and architecture tests both load this
+# section; update it first when introducing or retiring role suffixes.
+role_suffix_families:
+    Factory: [Factory]
+    Client: [Client]
+    Facade: [Facade]
+    Registry: [Registry]
+    Adapter: [Adapter]
+    Protocol: [Protocol, Port, ABC]
+    Config: [Config, Model, Params, Settings]
+    Error: [Error, Exception]
+    Impl: [Impl]
+    Service: [Service, Services]
+    Writer: [Writer]
+    Manager: [Manager]
+    Monitor: [Monitor]
+    Tracker: [Tracker]
+    Builder: [Builder]
+    Validator: [Validator]
+    Exporter: [Exporter]
+    Transformer: [Transformer]
+    Pipeline: [Pipeline]
+    Observer: [Observer]
+    Handler: [Handler]
+    Processor: [Processor]
+    Recorder: [Recorder]
+    Aggregator: [Aggregator]
+    Orchestrator: [Orchestrator]
+    Collector: [Collector]
+    Assembler: [Assembler]
+    Result: [Result]
+    Extractor: [Extractor]
+    Source: [Source]
+    Callback: [Callback]
+    Analyzer: [Analyzer]
+    Coordinator: [Coordinator]
+    Runner: [Runner]
+    Executor: [Executor]
+    Orderer: [Orderer]
+    Renamer: [Renamer]
+    Deduplicator: [Deduplicator]
+    Helper: [Helper]
+    Parser: [Parser]
+    Utils: [Utils]
+    Task: [Task]
+    Spec: [Spec]
+    Group: [Group]
+    Context: [Context]
+    Summary: [Summary]
+    Reason: [Reason]
+    Planner: [Planner]
+    Policy: [Policy]
+    Resolver: [Resolver]
+    Generator: [Generator]
+    Calculator: [Calculator]
+    Checker: [Checker]
+    Mixin: [Mixin]
+    Callable: [Callable]
+    ValueObject:
+        [
+            Info,
+            Record,
+            Status,
+            Options,
+            State,
+            Preview,
+            Phase,
+            Issue,
+            Ids,
+            Date,
+            Identifiers,
+            Classification,
+            Signal,
+            Affiliation,
+            Author,
+            Raw,
+            Output,
+            Outcome,
+            Entry,
+            Dependencies,
+            Components,
+            Collaborators,
+            Snapshot,
+            Owner,
+            Completion,
+        ]
+
 # Pipeline naming format
 # Pipeline IDs follow the format: {provider}_{entity}
 # They are stable external identifiers for CLI/config/public surfaces and may
@@ -269,6 +357,17 @@ forbidden_domain_entity_aliases:
         canonical_name: UniprotTarget
         export_surface: src/bioetl/domain/entities/__init__.py
         reason: ADR-024 direct migration removed the need for a Protein alias in the canonical domain layer.
+
+# Explicitly retained public alias surfaces. These are time-bound compatibility
+# shims and must not be expanded without issue-backed justification.
+public_symbol_aliases:
+    -   alias_name: DataSourceCreatorPort
+        canonical_name: DataSourceCreatorProtocol
+        defining_surface: src/bioetl/composition/providers/_models.py
+        export_surfaces:
+            - src/bioetl/composition/providers/_models.py
+        reason: Legacy public provider wiring alias retained while composition imports migrate to the Protocol name.
+        remove_after: v2.0
 
 # Notes on enforcement
 # - scripts/engineering/qa/naming_audit.py loads this file as the naming exception registry.

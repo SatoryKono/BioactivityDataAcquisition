@@ -7,10 +7,10 @@ from typing import TYPE_CHECKING, Protocol
 if TYPE_CHECKING:
     from bioetl.domain.aggregates.events import DomainEvent
 
-__all__ = ["DomainEventEmitterPort"]
+__all__ = ["DomainEventEmitterProtocol"]
 
 
-class DomainEventEmitterPort(Protocol):
+class DomainEventEmitterProtocol(Protocol):
     """Minimal runtime contract for typed domain-event publication."""
 
     def emit_domain_event(self, event: DomainEvent) -> None:

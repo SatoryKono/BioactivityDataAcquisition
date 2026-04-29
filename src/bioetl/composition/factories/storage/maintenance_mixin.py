@@ -1,4 +1,4 @@
-"""Maintenance operations mixin for StorageAdapter (vacuum, optimize, archive)."""
+"""Maintenance operations mixin for StorageBundle (vacuum, optimize, archive)."""
 
 from __future__ import annotations
 
@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.storage.gold_writer import GoldWriter
     from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-__all__ = ["StorageAdapterMaintenanceMixin"]
+__all__ = ["StorageBundleMaintenanceMixin"]
 
 
 def _is_delta_table_dir(path: Path) -> bool:
@@ -25,7 +25,7 @@ def _is_delta_table_dir(path: Path) -> bool:
     return any(delta_log.iterdir())
 
 
-class StorageAdapterMaintenanceMixin:
+class StorageBundleMaintenanceMixin:
     """Mixin providing maintenance operations: optimize, vacuum, archive, cleanup."""
 
     bronze: BronzeWriter

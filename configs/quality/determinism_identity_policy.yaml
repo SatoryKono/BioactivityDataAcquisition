@@ -1,0 +1,40 @@
+version: 1
+policy_scope: deterministic_identity_generation
+review_date: '2026-09-30'
+allowed_occurrence_identity_generators:
+- path: src/bioetl/domain/aggregates/_batch_aggregate.py
+  symbol: Batch.create
+  generator: uuid4
+  identity_field: BatchID
+  semantic_classification: occurrence-only
+  replay_semantics: excluded_from_execution_fingerprint
+  rationale: Runtime batch occurrence identity; it must not enter semantic replay
+    identity or dataset content hashes.
+  issue: '#3407'
+- path: src/bioetl/composition/factories/batch_id_generator.py
+  symbol: UuidBatchIdGenerator.create
+  generator: uuid4
+  identity_field: BatchID
+  semantic_classification: occurrence-only
+  replay_semantics: excluded_from_execution_fingerprint
+  rationale: Composition default occurrence ID generator; deterministic tests may
+    replace this port-level implementation.
+  issue: '#3407'
+- path: src/bioetl/domain/aggregates/_quarantine_aggregate.py
+  symbol: QuarantineEntry.create
+  generator: uuid4
+  identity_field: entry_id
+  semantic_classification: occurrence-only
+  replay_semantics: excluded_from_execution_fingerprint
+  rationale: Quarantine entry ID is a correlation identifier; payload_hash remains
+    the semantic content identity.
+  issue: '#3407'
+- path: src/bioetl/domain/aggregates/events.py
+  symbol: DomainEvent.event_id
+  generator: uuid4
+  identity_field: event_id
+  semantic_classification: occurrence-only
+  replay_semantics: excluded_from_execution_fingerprint
+  rationale: Domain event ID is an idempotency/correlation identifier; event payload
+    semantics remain separate.
+  issue: '#3407'

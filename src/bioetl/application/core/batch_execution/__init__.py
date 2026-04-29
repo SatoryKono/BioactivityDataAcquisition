@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 from bioetl.application.core.batch_execution.contracts import (
-    BatchExecutionStatePort,
-    BatchResultBuilderPort,
+    BatchExecutionStateProtocol,
+    BatchResultBuilderProtocol,
 )
 from bioetl.application.core.batch_execution.lifecycle import *  # noqa: F403
 from bioetl.application.core.batch_execution.lifecycle import (
@@ -19,8 +19,8 @@ from bioetl.application.core.batch_execution.state_service import (
 
 __all__ = [
     *_LIFECYCLE_EXPORTS,
-    "BatchExecutionStatePort",
-    "BatchResultBuilderPort",
+    "BatchExecutionStateProtocol",
+    "BatchResultBuilderProtocol",
     "BatchExecutionRunService",
     "BatchExecutionStateService",
 ]

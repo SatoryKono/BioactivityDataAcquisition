@@ -39,7 +39,7 @@ if TYPE_CHECKING:
 
     from bioetl.application.core.wiring.runtime import BasePipeline
     from bioetl.application.observability.domain_event_emitter import (
-        DomainEventEmitterPort,
+        DomainEventEmitterProtocol,
     )
     from bioetl.application.services.checkpoint_compatibility_service import (
         CheckpointCompatibilityService,
@@ -77,7 +77,7 @@ class ServicesBuilder:
         gold_transform_callback: GoldTransformCallback,
         gold_validator: GoldValidatorPort,
         tracer: TracingPort | None = None,
-        domain_event_emitter: DomainEventEmitterPort | None = None,
+        domain_event_emitter: DomainEventEmitterProtocol | None = None,
         lock_validator: Callable[[], Awaitable[bool]] | None = None,
     ) -> BatchProcessingComponents:
         return create_batch_processing_components(

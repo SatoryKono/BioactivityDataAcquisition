@@ -11,7 +11,7 @@ from click.testing import CliRunner
 
 from bioetl.application.services.lineage_inspection_service import (
     LineageFragmentInspectionResult,
-    LineageNodeRelation,
+    LineageNodeRelationResult,
     LineageRunExplanationResult,
     LineageTraceResult,
 )
@@ -55,7 +55,7 @@ class _FakeLineageService:
             fragment_ids=("silver:fragment-1",),
             stored_fragment_ids=("silver:fragment-1:occurrence:abc123",),
             upstream=(
-                LineageNodeRelation(
+                LineageNodeRelationResult(
                     fragment_id="silver:fragment-1",
                     stored_fragment_id="silver:fragment-1:occurrence:abc123",
                     edge_type="derived_from",

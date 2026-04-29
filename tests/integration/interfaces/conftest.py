@@ -126,7 +126,7 @@ def create_local_storage_context(
     logger: Any = None,
 ) -> StorageContext:
     """Create a StorageContext pointing to local temp paths."""
-    from bioetl.composition.factories.storage import StorageAdapter, StorageContext
+    from bioetl.composition.factories.storage import StorageBundle, StorageContext
     from bioetl.domain.ports.noop import NoOpMetrics
     from bioetl.infrastructure.observability.noop_logger import NoOpLogger
     from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
@@ -139,7 +139,7 @@ def create_local_storage_context(
     bronze_config = config.sink.get("bronze")
     save_json = bronze_config.save_json if bronze_config else False
 
-    adapter = StorageAdapter(
+    adapter = StorageBundle(
         bronze_writer=BronzeWriter(
             base_path=str(storage_paths["bronze"]),
             logger=logger,

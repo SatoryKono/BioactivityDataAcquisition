@@ -57,13 +57,13 @@ class BatchExecutionFinalizationContext:
     memory_decision_trace: tuple[JsonDict, ...]
 
 
-class _BatchProgressInitializerPort(Protocol):
+class _BatchProgressInitializerProtocol(Protocol):
     """Minimal progress initialization contract for executor lifecycle."""
 
     async def initialize_tracking(self, limit: int | None) -> None: ...
 
 
-class _BatchCheckpointRecoveryLifecyclePort(Protocol):
+class _BatchCheckpointRecoveryLifecycleProtocol(Protocol):
     """Checkpoint finalization contract used by executor lifecycle."""
 
     async def save_checkpoint_on_exception(
@@ -82,7 +82,7 @@ class _BatchCheckpointRecoveryLifecyclePort(Protocol):
     ) -> None: ...
 
 
-class _BatchTracingLifecyclePort(Protocol):
+class _BatchTracingLifecycleProtocol(Protocol):
     """Tracing contract used by executor lifecycle orchestration."""
 
     def start_execution_span(self) -> Span | None: ...
@@ -127,9 +127,9 @@ class BatchExecutionLifecycleService:
     def __init__(
         self,
         *,
-        progress_service: _BatchProgressInitializerPort,
-        tracing_manager: _BatchTracingLifecyclePort,
-        checkpoint_recovery_service: _BatchCheckpointRecoveryLifecyclePort,
+        progress_service: _BatchProgressInitializerProtocol,
+        tracing_manager: _BatchTracingLifecycleProtocol,
+        checkpoint_recovery_service: _BatchCheckpointRecoveryLifecycleProtocol,
     ) -> None:
         """Initialize execution lifecycle service."""
         self._progress_service = progress_service

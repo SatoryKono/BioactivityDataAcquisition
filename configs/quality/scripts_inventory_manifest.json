@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-29T14:19:19.830786+00:00",
+  "generated_at": "2026-04-29T16:39:30.533026+00:00",
   "summary": {
     "total_scripts": 355,
     "status_counts": {
@@ -10,11 +10,11 @@
     "reference_group_coverage": {
       "agents": 4,
       "build": 2,
-      "ci": 49,
+      "ci": 50,
       "docs": 121,
       "scripts": 298,
       "skills": 8,
-      "tests": 139
+      "tests": 140
     }
   },
   "scripts": [
@@ -4453,21 +4453,6 @@
       "references": []
     },
     {
-      "path": "scripts/docs/build/mkdocs_build.py",
-      "type": "py",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "scripts/docs/README.md",
-          "line": 42,
-          "source_group": "scripts",
-          "text": "| `build-site`                             | `scripts/docs/build/mkdocs_build.py`                            | Build the MkDocs site through the packaged Python entrypoint                             "
-        }
-      ]
-    },
-    {
       "path": "scripts/docs/build_docs_site.sh",
       "type": "sh",
       "status": "active",
@@ -5027,7 +5012,7 @@
         },
         {
           "path": "docs/05-engineering/normalization_plan_P0_P6.md",
-          "line": 703,
+          "line": 705,
           "source_group": "docs",
           "text": "- [generate_pipeline_normalization_field_matrix.py](../../scripts/docs/generate_pipeline_normalization_field_matrix.py) already generates deterministic multi-pipeline artifacts"
         },
@@ -7003,7 +6988,7 @@
       "references": [
         {
           "path": ".github/workflows/root-hygiene.yml",
-          "line": 32,
+          "line": 35,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.engineering.diagnostics audit-structure --path ."
         },
@@ -7099,7 +7084,7 @@
         },
         {
           "path": "docs/03-guides/cleanup-policy.md",
-          "line": 207,
+          "line": 213,
           "source_group": "docs",
           "text": "python3 scripts/engineering/diagnostics/audit_structure.py --path ."
         },
@@ -7245,7 +7230,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 114,
+      "reference_count": 115,
       "references": [
         {
           "path": ".github/workflows/docs.yml",
@@ -7853,7 +7838,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 12,
+      "reference_count": 14,
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
@@ -8476,7 +8461,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 45,
+      "reference_count": 47,
       "references": [
         {
           "path": ".github/workflows/compiled-artifacts-block.yml",
@@ -8500,11 +8485,17 @@
           "path": ".github/workflows/root-hygiene.yml",
           "line": 26,
           "source_group": "ci",
-          "text": "run: uv run python -m scripts.engineering.repo check-cleanliness --strict-untracked"
+          "text": "run: uv run python -m scripts.engineering.repo check-cleanliness --strict-untracked --check-local-forbidden-outputs"
         },
         {
           "path": ".github/workflows/root-hygiene.yml",
           "line": 29,
+          "source_group": "ci",
+          "text": "run: uv run python -m scripts.engineering.repo check-cleanup-governance"
+        },
+        {
+          "path": ".github/workflows/root-hygiene.yml",
+          "line": 32,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.engineering.repo check-root-review-registry"
         },
@@ -8519,12 +8510,6 @@
           "line": 144,
           "source_group": "ci",
           "text": "uv run python -m scripts.engineering.repo check-inventory \\"
-        },
-        {
-          "path": ".github/workflows/tests.yml",
-          "line": 152,
-          "source_group": "ci",
-          "text": "run: uv run python -m scripts.engineering.repo check-catalog --catalog scripts/engineering/repo/catalog.yaml"
         }
       ]
     },
@@ -8557,31 +8542,31 @@
         },
         {
           "path": "docs/03-guides/cleanup-policy.md",
-          "line": 198,
+          "line": 204,
           "source_group": "docs",
           "text": "| Structure policy green | `python3 scripts/engineering/repo/audit_root_cleanliness.py --strict-untracked` |"
         },
         {
           "path": "docs/03-guides/cleanup-policy.md",
-          "line": 206,
+          "line": 212,
           "source_group": "docs",
           "text": "python3 scripts/engineering/repo/audit_root_cleanliness.py"
         },
         {
           "path": "docs/03-guides/cleanup-policy.md",
-          "line": 277,
+          "line": 283,
           "source_group": "docs",
           "text": "- CI **MUST** run `scripts/engineering/repo/audit_root_cleanliness.py --strict-untracked`;"
         },
         {
           "path": "docs/03-guides/cleanup-policy.md",
-          "line": 301,
+          "line": 310,
           "source_group": "docs",
           "text": "python3 scripts/engineering/repo/audit_root_cleanliness.py"
         },
         {
           "path": "docs/05-operations/runbooks/retention-sensitive-cleanup.md",
-          "line": 176,
+          "line": 180,
           "source_group": "docs",
           "text": "- root placement: `python scripts/engineering/repo/audit_root_cleanliness.py`"
         },
@@ -8594,6 +8579,33 @@
       ]
     },
     {
+      "path": "scripts/engineering/repo/check_cleanup_governance.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 3,
+      "references": [
+        {
+          "path": "scripts/engineering/repo/README.md",
+          "line": 22,
+          "source_group": "scripts",
+          "text": "| `check-cleanup-governance` | `check_cleanup_governance.py` | Block unsafe broad cleanup guidance outside allowlisted examples       |"
+        },
+        {
+          "path": "scripts/engineering/repo/README.md",
+          "line": 76,
+          "source_group": "scripts",
+          "text": "| `check_cleanup_governance.py`  | Guard active docs/scripts against broad cleanup guidance  |"
+        },
+        {
+          "path": "scripts/engineering/repo/__main__.py",
+          "line": 44,
+          "source_group": "scripts",
+          "text": "\"check-cleanup-governance\": \"check_cleanup_governance.py\","
+        }
+      ]
+    },
+    {
       "path": "scripts/engineering/repo/check_root_hygiene_review_registry.py",
       "type": "py",
       "status": "active",
@@ -8602,13 +8614,13 @@
       "references": [
         {
           "path": "scripts/engineering/repo/README.md",
-          "line": 22,
+          "line": 23,
           "source_group": "scripts",
           "text": "| `check-root-review-registry` | `check_root_hygiene_review_registry.py` | Validate review-required and blocked cleanup lanes              |"
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 43,
+          "line": 45,
           "source_group": "scripts",
           "text": "\"check-root-review-registry\": \"check_root_hygiene_review_registry.py\","
         }
@@ -8743,7 +8755,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 41,
+          "line": 42,
           "source_group": "scripts",
           "text": "\"check-versions\": \"check_version_consistency.py\","
         }
@@ -8758,37 +8770,37 @@
       "references": [
         {
           "path": "scripts/engineering/repo/README.md",
-          "line": 35,
+          "line": 36,
           "source_group": "scripts",
           "text": "bash scripts/engineering/repo/cleanup_branch_candidates.sh"
         },
         {
           "path": "scripts/engineering/repo/README.md",
-          "line": 36,
+          "line": 37,
           "source_group": "scripts",
           "text": "bash scripts/engineering/repo/cleanup_branch_candidates.sh --apply"
         },
         {
           "path": "scripts/engineering/repo/README.md",
-          "line": 37,
+          "line": 38,
           "source_group": "scripts",
           "text": "bash scripts/engineering/repo/cleanup_branch_candidates.sh --apply --with-remote"
         },
         {
           "path": "scripts/engineering/repo/README.md",
-          "line": 50,
+          "line": 51,
           "source_group": "scripts",
           "text": "`cleanup_branch_candidates.sh` when you want the same workflow through a"
         },
         {
           "path": "scripts/engineering/repo/README.md",
-          "line": 75,
+          "line": 78,
           "source_group": "scripts",
           "text": "| `cleanup_branch_candidates.sh` | Dry-run/apply cleanup for the curated branch deletion set |"
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 47,
+          "line": 49,
           "source_group": "scripts",
           "text": "\"cleanup-branch-candidates\": \"cleanup_branch_candidates.sh\","
         },
@@ -8821,7 +8833,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 39,
+          "line": 40,
           "source_group": "scripts",
           "text": "\"sync-wrapper-caller-matrix\": \"generate_scripts_wrapper_caller_matrix.py\","
         }
@@ -8842,19 +8854,19 @@
         },
         {
           "path": "scripts/engineering/repo/README.md",
-          "line": 23,
+          "line": 24,
           "source_group": "scripts",
           "text": "| `preflight-cleanup`     | `preflight_cleanup.sh`           | Preview/apply the bounded release-preflight cleanup set               |"
         },
         {
           "path": "scripts/engineering/repo/README.md",
-          "line": 74,
+          "line": 77,
           "source_group": "scripts",
           "text": "| `preflight_cleanup.sh`         | Bounded release-preflight cleanup helper                  |"
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 44,
+          "line": 46,
           "source_group": "scripts",
           "text": "\"preflight-cleanup\": \"preflight_cleanup.sh\","
         }
@@ -8869,13 +8881,13 @@
       "references": [
         {
           "path": "scripts/engineering/repo/README.md",
-          "line": 24,
+          "line": 25,
           "source_group": "scripts",
           "text": "| `split-testing-roadmap` | `split_testing_roadmap_issue.py` | Preview or create child issues for testing roadmap issue `#2511`      |"
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 45,
+          "line": 47,
           "source_group": "scripts",
           "text": "\"split-testing-roadmap\": \"split_testing_roadmap_issue.py\","
         }
@@ -8890,13 +8902,13 @@
       "references": [
         {
           "path": "scripts/engineering/repo/README.md",
-          "line": 25,
+          "line": 26,
           "source_group": "scripts",
           "text": "| `sync-docs-issues`      | `sync_docs_issues.py`            | Preview or apply labels, milestone, and comments for docs-sync issues |"
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 46,
+          "line": 48,
           "source_group": "scripts",
           "text": "\"sync-docs-issues\": \"sync_docs_issues.py\","
         }
@@ -8911,7 +8923,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 38,
+          "line": 39,
           "source_group": "scripts",
           "text": "\"sync-inventory\": \"sync_scripts_inventory.py\","
         }
@@ -8922,7 +8934,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 14,
+      "reference_count": 15,
       "references": [
         {
           "path": "docs/02-architecture/04-interfaces-layer.md",
@@ -8938,9 +8950,15 @@
         },
         {
           "path": "docs/02-architecture/07-compatibility-facade-snapshot.md",
-          "line": 45,
+          "line": 48,
           "source_group": "docs",
           "text": "- `src/bioetl/interfaces/cli/commands/run.py`"
+        },
+        {
+          "path": "docs/02-architecture/07-compatibility-facade-snapshot.md",
+          "line": 55,
+          "source_group": "docs",
+          "text": "- `src/bioetl/interfaces/cli/commands/run.py` — external breaking change required: `true`, internal callers zero: `false`"
         },
         {
           "path": "docs/02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md",
@@ -8965,12 +8983,6 @@
           "line": 309,
           "source_group": "docs",
           "text": "src/bioetl/interfaces/cli/commands/run.py"
-        },
-        {
-          "path": "scripts/engineering/README.md",
-          "line": 25,
-          "source_group": "scripts",
-          "text": "python scripts/engineering/run.py --help"
         }
       ]
     },
@@ -10457,8 +10469,14 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 5,
       "references": [
+        {
+          "path": ".github/workflows/root-hygiene.yml",
+          "line": 40,
+          "source_group": "ci",
+          "text": "uv run python scripts/ops/support/repo/cleanup_repository.py"
+        },
         {
           "path": "docs/00-project/TOOLS.md",
           "line": 146,
@@ -10476,6 +10494,12 @@
           "line": 202,
           "source_group": "scripts",
           "text": "\"scripts/ops/support/repo/cleanup_repository.py\","
+        },
+        {
+          "path": "tests/architecture/test_root_hygiene_workflow.py",
+          "line": 45,
+          "source_group": "tests",
+          "text": "assert \"cleanup_repository.py\" in workflow"
         }
       ]
     },

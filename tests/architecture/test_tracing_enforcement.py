@@ -494,14 +494,22 @@ class TestOperatorTracingPolicy:
 
     def test_metrics_service_operator_workflows_remain_traced(self):
         """MetricsService admin operations should keep application-owned spans."""
-        source = Path("src/bioetl/application/services/metrics_service.py").read_text(
-            encoding="utf-8"
+        source = "\n".join(
+            path.read_text(encoding="utf-8")
+            for path in (
+                Path("src/bioetl/application/services/metrics_service.py"),
+                Path(
+                    "src/bioetl/application/services/"
+                    "_metrics_service_gateway_support.py"
+                ),
+            )
         )
         assert "traced_operation" in source
         for span_name in (
             "metrics.start",
             "metrics.get_status",
             "metrics.push_to_gateway",
+            "metrics.delete_from_gateway",
         ):
             assert span_name in source
 

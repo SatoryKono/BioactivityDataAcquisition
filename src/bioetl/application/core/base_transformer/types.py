@@ -9,7 +9,7 @@ from bioetl.application.core.base_transformer.structural_policy import (
     StructuralPolicyProtocol,
 )
 from bioetl.domain.ports import (
-    ContractPolicyPort,
+    ContractPolicyProtocol,
     DataNormalizationPort,
     MetricsPort,
     PiiHasherPort,
@@ -37,7 +37,7 @@ class TransformerDependencyContext:
     identity_service: IdentityService
     pii_hasher: PiiHasherPort
     data_normalizer: DataNormalizationPort
-    contract_policy: ContractPolicyPort
+    contract_policy: ContractPolicyProtocol
     structural_policy: StructuralPolicyProtocol
 
 

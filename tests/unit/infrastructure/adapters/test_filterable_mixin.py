@@ -9,7 +9,7 @@ import pytest
 
 from bioetl.infrastructure.adapters.filterable_mixin import (
     DelegatingFallbackMixin,
-    FetchFilteredPort,
+    FetchFilteredProtocol,
     NotSupportedMultiFilterMixin,
 )
 
@@ -69,7 +69,7 @@ async def test_fallback_mixin_delegates_to_fetch_filtered() -> None:
 @pytest.mark.unit
 def test_has_fetch_filtered_protocol_stub_callable() -> None:
     assert (
-        FetchFilteredPort.fetch_filtered(
+        FetchFilteredProtocol.fetch_filtered(
             object(),
             entity_type="publication",
             filter_ids=["1"],

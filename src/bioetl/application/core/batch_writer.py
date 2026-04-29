@@ -40,7 +40,7 @@ if TYPE_CHECKING:
     from bioetl.domain.value_objects.silver_result import SilverWriteResult
 
 
-class BatchWriteStoragePort(Protocol):
+class BatchWriteStorageProtocol(Protocol):
     """Minimal write-only storage contract for BatchWriter."""
 
     async def write_bronze(
@@ -107,7 +107,7 @@ class BatchWriter(BatchWriterIOMixin, BatchWriterColumnsMixin, BatchWriterTracin
 
     def __init__(
         self,
-        storage: BatchWriteStoragePort,
+        storage: BatchWriteStorageProtocol,
         context: PipelineContext,
         config: RecordProcessorConfig,
         gold_validator: GoldValidatorPort,

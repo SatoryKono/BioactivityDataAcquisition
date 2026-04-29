@@ -36,7 +36,7 @@ class BatchExecutionMemoryState(Protocol):
     def decision_trace_dicts(self) -> tuple[JsonDict, ...]: ...
 
 
-class BatchResultBuilderPort(Protocol[_BatchResultT]):
+class BatchResultBuilderProtocol(Protocol[_BatchResultT]):
     """Callable result factory used to project cumulative batch counters."""
 
     def __call__(
@@ -49,7 +49,7 @@ class BatchResultBuilderPort(Protocol[_BatchResultT]):
     ) -> _BatchResultT: ...
 
 
-class BatchExecutionStatePort(BatchExecutionStatisticsState, Protocol):
+class BatchExecutionStateProtocol(BatchExecutionStatisticsState, Protocol):
     """Mutable executor state required to apply processed-batch outcomes."""
 
     def _should_collect_dq_data(self) -> bool: ...

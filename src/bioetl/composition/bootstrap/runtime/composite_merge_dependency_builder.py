@@ -26,7 +26,7 @@ from bioetl.application.composite.runtime_wiring_api import (
 from bioetl.composition.bootstrap.runtime.composite_support_service_bundles import (
     MergeDependenciesBundle,
 )
-from bioetl.composition.factories.services.polars_join_adapter import PolarsJoinAdapter
+from bioetl.composition.factories.services.polars_join_adapter import PolarsJoinBridge
 from bioetl.domain.composite.strategy import MergeStrategy
 
 if TYPE_CHECKING:
@@ -73,7 +73,7 @@ def build_merge_dependencies(
         join_type_resolver=lambda: resolve_join_how(config.merge.strategy),
     )
     # Wrap it with the real adapter
-    join_executor = PolarsJoinAdapter(join_service)
+    join_executor = PolarsJoinBridge(join_service)
     dependency_joiner = DependencyJoinerService(
         logger=logger,
         deduplicator=deduplicator,

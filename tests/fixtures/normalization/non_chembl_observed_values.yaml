@@ -1,0 +1,125 @@
+version: 1
+description: >
+  Observed-value fixture for non-ChEMBL normalization and contract governance.
+  Values are representative provider payload classes, not exhaustive provider enums.
+pipelines:
+  pubchem_compound:
+    primary_key: molecule_id
+    observed_values:
+      chemical_standardization_status:
+      - standardized
+      - unchanged
+      - failed
+  uniprot_protein:
+    primary_key: accession
+    observed_values:
+      entry_type:
+      - UniProtKB reviewed (Swiss-Prot)
+      - UniProtKB unreviewed (TrEMBL)
+      flag:
+      - Fragment
+      - Precursor
+      - Fragments
+      protein_existence:
+      - Evidence at protein level
+      - Evidence at transcript level
+      - Inferred from homology
+      taxonomy_id:
+      - 9606
+      - 10090
+    structured_json_shapes:
+      features_json:
+        semantic_policy: raw_json_plus_canonical_json_before_semantic_transform
+        collection_semantics: ordered_sequence
+        raw_sidecar_field: features_raw_json
+        canonical_sidecar_field: features_canonical_json
+  uniprot_idmapping:
+    primary_key: target_id
+    observed_values:
+      mapping_status:
+      - found
+      - not_found
+      - error
+      - multiple
+  pubmed_publication:
+    primary_key: pmid
+    observed_values:
+      publication_status:
+      - ppublish
+      - epublish
+      - aheadofprint
+      publication_type:
+      - Journal Article
+      - Review
+    structured_json_shapes:
+      authors_with_affiliations:
+        collection_semantics: ordered_sequence
+        raw_sidecar_field: authors_with_affiliations_raw_json
+        canonical_sidecar_field: authors_with_affiliations_canonical_json
+      affiliation_structured:
+        collection_semantics: unordered_set
+        raw_sidecar_field: affiliation_structured_raw_json
+        canonical_sidecar_field: affiliation_structured_canonical_json
+  crossref_publication:
+    primary_key: doi
+    observed_values:
+      publication_type:
+      - journal-article
+      - book-chapter
+      - posted-content
+  openalex_publication:
+    primary_key: openalex_id
+    observed_values:
+      publication_type:
+      - article
+      - review
+      - book-chapter
+      oa_status:
+      - gold
+      - green
+      - hybrid
+      - bronze
+      - closed
+    structured_json_shapes:
+      grants:
+        collection_semantics: unordered_set
+        raw_sidecar_field: grants_raw_json
+        canonical_sidecar_field: grants_canonical_json
+      primary_topic:
+        collection_semantics: structured_object
+        raw_sidecar_field: primary_topic_raw_json
+        canonical_sidecar_field: primary_topic_canonical_json
+  semanticscholar_publication:
+    primary_key: paper_id
+    observed_values:
+      publication_types:
+      - JournalArticle
+      - Review
+      oa_status:
+      - gold
+      - green
+      - hybrid
+      - bronze
+      - closed
+    structured_json_shapes:
+      publication_types:
+        collection_semantics: unordered_set
+        raw_sidecar_field: publication_type
+        canonical_sidecar_field: publication_types
+composites:
+  composite_publication:
+    source_pipelines:
+    - crossref_publication
+    - openalex_publication
+    - pubmed_publication
+    - semanticscholar_publication
+    required_fields:
+    - entity_id
+  composite_target:
+    source_pipelines:
+    - chembl_target
+    - uniprot_protein
+    - uniprot_idmapping
+    required_fields:
+    - target_id
+    - taxonomy_id

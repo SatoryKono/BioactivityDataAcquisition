@@ -10,6 +10,13 @@ Review note (2026-03-27): included in the repo-wide evidence-pack sweep; see `do
 > `configs/quality/test_matrix.yaml`, `configs/quality/test_health_reporting.yaml`
 > и active guides under `docs/03-guides/`.
 
+Freshness note (2026-04-29): this evidence summary is non-canonical and must not
+override active policy in `configs/quality/test_matrix.yaml`,
+`configs/quality/test_health_reporting.yaml`, `configs/quality/fixture_governance_ledger.yaml`,
+or current CI workflow definitions. Treat the "Оставшиеся пробелы" section as a
+backlog signal only until a fresh evidence-pack rebaseline or a machine-readable
+policy update confirms the finding.
+
 Примечание о rebaseline: после `RF-011` текущий confidence baseline подтверждён
 полным verify bundle: `pytest tests -q`, секторные прогоны `tests/architecture`
 и `tests/unit`, а также `ruff`, `mypy`, dependency-map `--check` и

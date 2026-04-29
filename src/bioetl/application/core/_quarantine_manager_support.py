@@ -16,7 +16,7 @@ from bioetl.application.core._quarantine_support import (
 if TYPE_CHECKING:
     from bioetl.application.core.quarantine_manager import FilteredQuarantineEntry
     from bioetl.application.observability.domain_event_emitter import (
-        DomainEventEmitterPort,
+        DomainEventEmitterProtocol,
     )
     from bioetl.application.observability.pipeline_metrics import (
         PipelineMetricsRecorder,
@@ -30,7 +30,7 @@ class QuarantineManagerSupportMixin:
 
     _pipeline_name: str
     _quarantine: QuarantinePort
-    _domain_event_emitter: DomainEventEmitterPort | None
+    _domain_event_emitter: DomainEventEmitterProtocol | None
     _metrics: MetricsPort | None
     _pipeline_metrics: PipelineMetricsRecorder
 

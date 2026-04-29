@@ -1,4 +1,4 @@
-"""StorageFactory - thin facade for creating StorageAdapters."""
+"""StorageFactory - thin facade for creating StorageBundles."""
 
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ from ._helpers import (
     build_storage_creation_context,
     create_storage_adapter,
 )
-from .adapter import StorageAdapter
+from .adapter import StorageBundle
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import (
@@ -42,7 +42,7 @@ __all__ = [
 class StorageContext:
     """Context object returned by StorageFactory containing adapter and paths."""
 
-    adapter: StorageAdapter
+    adapter: StorageBundle
     bronze_path: Path
     silver_path: Path
     gold_path: Path
@@ -50,7 +50,7 @@ class StorageContext:
 
 
 class StorageFactory:
-    """Factory for creating configured StorageAdapters for local deployment."""
+    """Factory for creating configured StorageBundles for local deployment."""
 
     @staticmethod
     def create(

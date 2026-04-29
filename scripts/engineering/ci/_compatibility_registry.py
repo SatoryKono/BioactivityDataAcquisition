@@ -65,6 +65,8 @@ class CompatibilityInventoryRow:
     owner: str
     introduced_in: str
     review_date: str
+    external_breaking_change_required: bool
+    internal_callers_zero: bool
     allowed_call_sites: str
     migration_path: str
     exit_criteria: str
@@ -166,6 +168,10 @@ def _parse_inventory_rows(
             owner=str(item["owner"]),
             introduced_in=str(item["introduced_in"]),
             review_date=str(item["review_date"]),
+            external_breaking_change_required=bool(
+                item["external_breaking_change_required"]
+            ),
+            internal_callers_zero=bool(item["internal_callers_zero"]),
             allowed_call_sites=str(item["allowed_call_sites"]),
             migration_path=str(item["migration_path"]),
             exit_criteria=str(item["exit_criteria"]),
@@ -411,6 +417,44 @@ def find_first_party_imports_of_measured_only_modules(
         module_name: tuple(sorted(importers))
         for module_name, importers in sorted(violations.items())
     }
+
+
+def find_first_party_imports_of_internal_callers_zero_rows(
+    registry: CompatibilityRegistry,
+    *,
+    src_root: Path = DEFAULT_SRC_ROOT,
+) -> dict[str, tuple[str, ...]]:
+    """Return first-party src imports of rows marked internal_callers_zero."""
+    repo_root = src_root.resolve().parents[1]
+    zero_caller_module_names = {
+        _module_name_from_src_path(row.path)
+        for row in registry.curated_rows
+        if row.internal_callers_zero
+    }
+    if not zero_caller_module_names:
+        return {}
+    violations: dict[str, set[str]] = {}
+
+    for path in _candidate_import_paths(
+        src_root=src_root,
+        measured_module_names=zero_caller_module_names,
+    ):
+        relative_path = path.resolve().relative_to(repo_root).as_posix()
+        current_module = _module_name_from_src_path(relative_path)
+        for imported_module in _iter_imported_modules(path):
+            if imported_module == current_module:
+                continue
+            if imported_module in zero_caller_module_names:
+                violations.setdefault(imported_module, set()).add(relative_path)
+
+    return {
+        module_name: tuple(sorted(importers))
+        for module_name, importers in sorted(violations.items())
+    }
+
+
+def _module_name_from_src_path(path: str) -> str:
+    return path.removeprefix("src/").removesuffix(".py").replace("/", ".")
 
 
 def _candidate_import_paths(

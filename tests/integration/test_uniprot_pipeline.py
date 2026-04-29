@@ -46,8 +46,8 @@ def uniprot_config() -> PipelineConfig:
             "accession",
             "entry_name",
             "protein_name",
-            "gene_names",
-            "organism_id",
+            "gene_primary",
+            "taxonomy_id",
             "sequence_length",
         ],
     )
@@ -166,8 +166,10 @@ class TestUniProtProteinPipelineTransform:
         assert silver_record["accession"] == "P12345"
         assert silver_record["entry_name"] == "MYC_HUMAN"
         assert silver_record["protein_name"] == "Myc proto-oncogene protein"
-        assert silver_record["gene_names"] == '["MYC","BHLHE39"]'
-        assert silver_record["organism_id"] == 9606
+        assert silver_record["gene_primary"] == "MYC"
+        assert silver_record["taxonomy_id"] == 9606
+        assert "gene_names" not in silver_record
+        assert "organism_id" not in silver_record
         assert silver_record["sequence_length"] == 439
         assert "entity_id" in silver_record
         assert "content_hash" in silver_record
@@ -182,7 +184,7 @@ class TestUniProtProteinPipelineTransform:
         """Тест трансформации минимальной записи с обязательными полями.
 
         Protein entity requires: accession, entry_name.
-        Optional fields: protein_name, gene_names, organism_id, sequence_length.
+        Optional fields: protein_name, gene_primary, taxonomy_id, sequence_length.
         """
         run_id = uuid4()
         pipeline = UniProtProteinPipeline(
@@ -218,8 +220,10 @@ class TestUniProtProteinPipelineTransform:
         assert silver_record["accession"] == "Q99999"
         assert silver_record["entry_name"] == "TEST_HUMAN"
         assert silver_record["protein_name"] is None
-        assert silver_record["gene_names"] is None
-        assert silver_record["organism_id"] is None
+        assert silver_record["gene_primary"] is None
+        assert silver_record["taxonomy_id"] is None
+        assert "gene_names" not in silver_record
+        assert "organism_id" not in silver_record
         assert silver_record["sequence_length"] is None
         assert "entity_id" in silver_record
         assert "content_hash" in silver_record
@@ -305,7 +309,8 @@ class TestUniProtProteinPipelineTransform:
         assert silver_record is not None
         assert silver_record["accession"] == "A0A000"
         assert silver_record["protein_name"] is None
-        assert silver_record["gene_names"] == '["GENE1"]'
+        assert silver_record["gene_primary"] == "GENE1"
+        assert "gene_names" not in silver_record
         assert "entity_id" in silver_record
         assert "_run_id" in silver_record
 
@@ -349,7 +354,8 @@ class TestUniProtProteinPipelineTransform:
         )
 
         assert silver_record is not None
-        assert silver_record["gene_names"] is None
+        assert silver_record["gene_primary"] is None
+        assert "gene_names" not in silver_record
         assert "_run_id" in silver_record
 
     async def test_transform_extracts_new_fields(
@@ -622,7 +628,8 @@ class TestUniProtProteinPipelineEdgeCases:
 
         assert silver_record is not None
         # Should only include valid gene names
-        assert "VALID" in silver_record["gene_names"]
+        assert silver_record["gene_primary"] == "VALID"
+        assert "gene_names" not in silver_record
         assert "_run_id" in silver_record
 
     async def test_transform_with_none_organism(
@@ -665,5 +672,6 @@ class TestUniProtProteinPipelineEdgeCases:
         )
 
         assert silver_record is not None
-        assert silver_record["organism_id"] is None
+        assert silver_record["taxonomy_id"] is None
+        assert "organism_id" not in silver_record
         assert "_run_id" in silver_record

@@ -41,7 +41,7 @@ from bioetl.application.services.lineage.metadata_lineage_fragments import (
     build_gold_lineage_fragment,
     build_silver_lineage_fragment,
 )
-from bioetl.domain.lineage import LineageGraphFragment, MetadataLineageBundle
+from bioetl.domain.lineage import LineageGraphFragment, MetadataLineageBundleResult
 from bioetl.domain.models.metadata import (
     BaseOutputMetadata,
     BronzeMetadata,
@@ -247,7 +247,7 @@ class MetadataCoordinator(MetadataCoordinatorPort):
     def create_bronze_metadata_bundle(
         self,
         input_data: BronzeMetadataInput,
-    ) -> MetadataLineageBundle[BronzeMetadata]:
+    ) -> MetadataLineageBundleResult[BronzeMetadata]:
         """Create Bronze sidecar metadata bundled with canonical lineage fragment."""
         return create_metadata_bundle(
             metadata=self.create_bronze_metadata(input_data),
@@ -288,7 +288,7 @@ class MetadataCoordinator(MetadataCoordinatorPort):
     def create_silver_metadata_bundle(
         self,
         input_data: SilverMetadataInput,
-    ) -> MetadataLineageBundle[SilverMetadata]:
+    ) -> MetadataLineageBundleResult[SilverMetadata]:
         """Create Silver sidecar metadata bundled with canonical lineage fragment."""
         return create_metadata_bundle(
             metadata=self.create_silver_metadata(input_data),
@@ -329,7 +329,7 @@ class MetadataCoordinator(MetadataCoordinatorPort):
     def create_gold_metadata_bundle(
         self,
         input_data: GoldMetadataInput,
-    ) -> MetadataLineageBundle[GoldMetadata]:
+    ) -> MetadataLineageBundleResult[GoldMetadata]:
         """Create Gold sidecar metadata bundled with canonical lineage fragment."""
         return create_metadata_bundle(
             metadata=self.create_gold_metadata(input_data),

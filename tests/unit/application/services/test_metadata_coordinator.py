@@ -12,7 +12,7 @@ import pytest
 
 from bioetl.application.services.lineage import (
     MetadataCoordinator,
-    MetadataLineageBundle,
+    MetadataLineageBundleResult,
 )
 from bioetl.domain.lineage import LineageEdgeType, LineageNodeType
 from bioetl.domain.medallion import GoldWriteMode, Layer, SilverWriteMode
@@ -1749,7 +1749,7 @@ class TestLineageFragments:
 
         bundle = coordinator.create_silver_metadata_bundle(input_data)
 
-        assert isinstance(bundle, MetadataLineageBundle)
+        assert isinstance(bundle, MetadataLineageBundleResult)
         assert bundle.metadata.lineage.source_batch_ids == ["batch-001"]
         assert bundle.metadata.lineage.transform_steps == ["normalize", "validate"]
         assert bundle.metadata.output.artifact_id == "silver:chembl.activity@4"
@@ -1784,7 +1784,7 @@ class TestLineageFragments:
 
         bundle = coordinator.create_gold_metadata_bundle(input_data)
 
-        assert isinstance(bundle, MetadataLineageBundle)
+        assert isinstance(bundle, MetadataLineageBundleResult)
         assert bundle.metadata.lineage.source_tables == {"chembl.activity": 12}
         assert bundle.metadata.lineage.transform_steps == ["merge"]
         assert bundle.metadata.output.artifact_id == "gold:chembl.activity"
@@ -1811,7 +1811,7 @@ class TestLineageFragments:
 
         bundle = coordinator.create_bronze_metadata_bundle(input_data)
 
-        assert isinstance(bundle, MetadataLineageBundle)
+        assert isinstance(bundle, MetadataLineageBundleResult)
         assert (
             bundle.metadata.output.artifact_id == f"bronze_batch:{input_data.batch_id}"
         )

@@ -42,6 +42,7 @@ git_out.txt
 .tox/
 .nox/
 .benchmarks/
+.coverage-sharded/
 test-checkpoints/
 .cache/
 

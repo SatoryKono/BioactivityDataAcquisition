@@ -1,4 +1,4 @@
-"""Unit tests for StorageAdapterWriteMixin."""
+"""Unit tests for StorageBundleWriteMixin."""
 
 from __future__ import annotations
 
@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from bioetl.composition.factories.storage.write_mixin import (
-    StorageAdapterWriteMixin,
+    StorageBundleWriteMixin,
 )
 
 
@@ -16,9 +16,9 @@ def _make_mixin(
     bronze: MagicMock | None = None,
     silver: MagicMock | None = None,
     gold: MagicMock | None = None,
-) -> StorageAdapterWriteMixin:
+) -> StorageBundleWriteMixin:
     """Create a WriteMixin instance with stub writers."""
-    mixin = StorageAdapterWriteMixin.__new__(StorageAdapterWriteMixin)
+    mixin = StorageBundleWriteMixin.__new__(StorageBundleWriteMixin)
     mixin.bronze = bronze or MagicMock()  # type: ignore[assignment]
     mixin.silver = silver or MagicMock()  # type: ignore[assignment]
     mixin.gold = gold or MagicMock()  # type: ignore[assignment]

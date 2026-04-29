@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-__all__ = ["BatchExtractionLoopService", "BatchProcessingServicePort"]
+__all__ = ["BatchExtractionLoopService", "BatchProcessingServiceProtocol"]
 
 
 from typing import TYPE_CHECKING, Protocol
@@ -27,7 +27,7 @@ if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord
 
 
-class BatchProcessingServicePort(Protocol):
+class BatchProcessingServiceProtocol(Protocol):
     """Minimal extraction contract required by loop orchestration."""
 
     def extract_records(
@@ -65,7 +65,7 @@ class BatchExtractionLoopService:
     def __init__(
         self,
         *,
-        batch_processing_service: BatchProcessingServicePort,
+        batch_processing_service: BatchProcessingServiceProtocol,
         shutdown_signal: ShutdownSignal,
         memory_manager: BatchMemoryManagerService,
         progress_service: BatchProgressService,

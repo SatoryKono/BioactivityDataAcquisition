@@ -100,7 +100,17 @@ def test_registry_yaml_has_expected_shape() -> None:
         assert row.canonical_target
         assert row.migration_path
         assert row.exit_criteria
+        assert isinstance(row.external_breaking_change_required, bool)
+        assert isinstance(row.internal_callers_zero, bool)
+        assert row.external_breaking_change_required is True, (
+            "Retained public entrypoints must declare that removal requires an "
+            f"external breaking-change process: {row.path}"
+        )
         assert date.fromisoformat(row.review_date).year >= 2026
+        assert date.fromisoformat(row.review_date) >= date.today(), (
+            "Compatibility facade review metadata is stale and must be refreshed "
+            f"before merge: {row.path} review_date={row.review_date}"
+        )
 
     for row in registry.measured_only_modules:
         assert row.path.startswith("src/bioetl/")
@@ -310,6 +320,23 @@ def test_first_party_src_does_not_import_measured_only_modules() -> None:
 
     assert not violations, (
         "First-party src must not import measured-only compatibility modules.\n"
+        + "\n".join(
+            f"{module} <- {', '.join(importers)}"
+            for module, importers in sorted(violations.items())
+        )
+    )
+
+
+@pytest.mark.architecture
+def test_internal_callers_zero_rows_have_no_first_party_src_imports() -> None:
+    """Rows marked internal_callers_zero must stay out of first-party src imports."""
+    mod = _load_registry_module()
+    registry = mod.load_compatibility_registry(REGISTRY_YAML)
+    violations = mod.find_first_party_imports_of_internal_callers_zero_rows(registry)
+
+    assert not violations, (
+        "Compatibility rows marked internal_callers_zero still have first-party "
+        "src importers.\n"
         + "\n".join(
             f"{module} <- {', '.join(importers)}"
             for module, importers in sorted(violations.items())

@@ -15,6 +15,13 @@ profiles в BioETL.
   `memory-py-*.md`
   — focused memory sheets для отдельных агентных ролей; они наследуют
   project-level context из `agent-memory.md`, а не заменяют его.
+- **Memory usage policy**:
+  [`../agents/guides/MEMORY_USAGE.md`](../agents/guides/MEMORY_USAGE.md)
+  — обязательный порядок чтения memory surfaces, conflict priority и
+  stale-memory protocol.
+- **Post-change validation policy**:
+  [`../agents/policy/POST_CHANGE_VALIDATION.md`](../agents/policy/POST_CHANGE_VALIDATION.md)
+  — validation protocol после write-capable AI work.
 - **Machine-readable memory artifact**:
   `mcp-memory.json`
   — служебный memory snapshot для tooling/integration сценариев, не human

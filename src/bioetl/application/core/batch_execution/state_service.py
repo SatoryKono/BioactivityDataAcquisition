@@ -8,9 +8,9 @@ __all__ = ["BatchExecutionStateService"]
 from typing import TYPE_CHECKING, TypeVar, cast
 
 from bioetl.application.core.batch_execution._contracts import (
-    BatchExecutionStatePort,
+    BatchExecutionStateProtocol,
     BatchExecutionStatisticsState,
-    BatchResultBuilderPort,
+    BatchResultBuilderProtocol,
 )
 from bioetl.application.core.batch_executor_helpers import (
     apply_processed_batch_outcome,
@@ -44,7 +44,7 @@ class BatchExecutionStateService:
     ) -> None:
         """Apply one successful batch outcome to executor-level state."""
         apply_processed_batch_outcome(
-            state=cast(BatchExecutionStatePort, state),
+            state=cast(BatchExecutionStateProtocol, state),
             outcome=build_processed_batch_outcome(
                 records=records,
                 output=outcome,
@@ -55,7 +55,7 @@ class BatchExecutionStateService:
         self,
         *,
         state: object,
-        batch_result_type: BatchResultBuilderPort[_BatchResultT],
+        batch_result_type: BatchResultBuilderProtocol[_BatchResultT],
     ) -> _BatchResultT:
         """Project current cumulative counters into public batch result."""
         typed_state = cast(BatchExecutionStatisticsState, state)

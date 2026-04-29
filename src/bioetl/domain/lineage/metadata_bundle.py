@@ -16,7 +16,7 @@ from bioetl.domain.models.metadata import BronzeMetadata, GoldMetadata, SilverMe
 if TYPE_CHECKING:
     from bioetl.domain.lineage.models import LineageGraphFragment
 
-__all__ = ["MetadataLineageBundle", "MetadataLineageBundleResult", "MetadataT"]
+__all__ = ["MetadataLineageBundleResult", "MetadataT"]
 
 MetadataT = TypeVar("MetadataT", BronzeMetadata, SilverMetadata, GoldMetadata)
 

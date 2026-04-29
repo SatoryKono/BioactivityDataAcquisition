@@ -20,8 +20,11 @@ Before executing workflows, discover what tools are available so commands can:
 ### Step 1: Scan for Custom Agents
 
 ```bash
-# Project-level Claude agents (preferred source of truth)
-ls .claude/agents/*.md 2>/dev/null | xargs -I {} basename {} .md
+# Project-level Codex agents
+ls .codex/agents/*.md 2>/dev/null | xargs -I {} basename {} .md
+
+# Project-level Gemini agents
+ls .gemini/agents/*.md 2>/dev/null | xargs -I {} basename {} .md
 
 # Plugin agents
 ls plugins/*/agents/*.md 2>/dev/null | while read f; do
@@ -40,8 +43,8 @@ ls .codex/skills/*/SKILL.md 2>/dev/null | while read f; do
   echo "$skill"
 done
 
-# Legacy Claude skills (fallback only)
-ls .claude/skills/*/SKILL.md 2>/dev/null | while read f; do
+# Project-level Gemini skills
+ls .gemini/skills/*/SKILL.md 2>/dev/null | while read f; do
   skill=$(dirname $f | xargs basename)
   echo "$skill"
 done
@@ -57,8 +60,9 @@ done
 ### Step 3: Scan for Custom Commands
 
 ```bash
-# Project-level commands
-ls .claude/commands/*.md 2>/dev/null | xargs -I {} basename {} .md
+# Public engineering/docs entrypoints
+python -m scripts.engineering.dev --help 2>/dev/null
+python -m scripts.docs --help 2>/dev/null
 
 # Plugin commands
 ls plugins/*/commands/*.md 2>/dev/null | while read f; do
@@ -77,11 +81,11 @@ grep -E "run_pytest|run_mypy|uv run python -m pytest|uv run python -m mypy|bioet
 # Project Codex config
 sed -n '1,120p' .codex/config.toml 2>/dev/null
 
+# Project Gemini runtime map
+sed -n '1,160p' .gemini/agents/GEMINI-RUNTIME.md 2>/dev/null
+
 # MCP server inventory
 sed -n '1,220p' .codex/settings.json 2>/dev/null
-
-# Legacy fallback
-grep -E "^(lint|test|check|format|typecheck|build):" .claude/CLAUDE.md 2>/dev/null
 ```
 
 ### Step 5: Detect Tech Stack
@@ -146,7 +150,7 @@ Based on capabilities:
 
 Before implementation:
 1. Invoke capability-discovery skill
-2. Note available `.claude/agents` and `.codex/skills`
+2. Note available `.codex/agents`, `.gemini/agents`, and runtime-local skills
 3. Note quality commands for Phase 3
 4. Store tech stack and Codex runtime constraints for appropriate tooling
 ```
@@ -168,9 +172,9 @@ When capabilities are not found:
 
 | Missing Capability                   | Fallback                              |
 | ------------------------------------ | ------------------------------------- |
-| No custom agents                     | Use built-in review checklist         |
+| No custom agents                     | Use runtime maps and built-in review checklist |
 | No lint skill                        | Detect from tech stack                |
-| No AGENTS.md / Codex config commands | Use standard tools for detected stack |
+| No AGENTS.md / runtime config commands | Use standard tools for detected stack |
 | No tech stack detected               | Ask user for commands                 |
 
 ## Integration Points
@@ -190,6 +194,6 @@ Results inform:
 ## Best Practices
 
 1. **Cache results** - Don't re-scan within same session
-1. **Prefer explicit** - `AGENTS.md` and `.codex/config.toml` over inferred defaults
+1. **Prefer explicit** - `AGENTS.md`, runtime maps, and `.codex/config.toml` over inferred defaults
 1. **Report clearly** - Show what was found and what wasn't
 1. **Enable fallbacks** - Never block workflow due to missing capabilities

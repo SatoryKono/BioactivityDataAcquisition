@@ -8,12 +8,12 @@ __all__ = [
     "ContractMigrationPlan",
     "ContractMigrationPlanSummary",
     "ContractMigrationService",
-    "ContractPolicyLoaderPort",
-    "ContractPolicyPort",
+    "ContractPolicyLoaderProtocol",
+    "ContractPolicyProtocol",
     "ContractVersionTransition",
     "ContractVersionTransitionRecord",
-    "PipelineInfoLoaderPort",
-    "RegistryEntriesLoaderPort",
+    "PipelineInfoLoaderProtocol",
+    "RegistryEntriesLoaderProtocol",
 ]
 
 from dataclasses import dataclass
@@ -28,10 +28,10 @@ from bioetl.application.services.contract_migration_models import (
     ContractVersionTransitionRecord,
 )
 from bioetl.application.services.contract_migration_ports import (
-    ContractPolicyLoaderPort,
-    ContractPolicyPort,
-    PipelineInfoLoaderPort,
-    RegistryEntriesLoaderPort,
+    ContractPolicyLoaderProtocol,
+    ContractPolicyProtocol,
+    PipelineInfoLoaderProtocol,
+    RegistryEntriesLoaderProtocol,
 )
 
 if TYPE_CHECKING:
@@ -43,9 +43,9 @@ class ContractMigrationService:
     """Build planner-only migration plans from pipeline contract rollout state."""
 
     logger: LoggerPort
-    _pipeline_info_loader: PipelineInfoLoaderPort
-    _contract_policy_loader: ContractPolicyLoaderPort
-    _registry_entries_loader: RegistryEntriesLoaderPort
+    _pipeline_info_loader: PipelineInfoLoaderProtocol
+    _contract_policy_loader: ContractPolicyLoaderProtocol
+    _registry_entries_loader: RegistryEntriesLoaderProtocol
 
     def plan_pipeline(self, pipeline_name: str) -> ContractMigrationPlanSummary:
         """Return the planner-only contract migration plan for one pipeline."""

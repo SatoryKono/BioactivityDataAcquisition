@@ -2,9 +2,7 @@
 
 from __future__ import annotations
 
-from bioetl.domain.schemas._chembl_enum_catalog import (
-    CHEMBL_ENUM_CATALOG,
-)
+from bioetl.domain.schemas import CHEMBL_ENUM_CATALOG
 
 __all__ = ["chembl_enum"]
 

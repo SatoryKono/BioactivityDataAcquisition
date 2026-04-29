@@ -9,11 +9,11 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence
 from typing import Protocol, runtime_checkable
 
-__all__ = ["ContractPolicyPort"]
+__all__ = ["ContractPolicyProtocol"]
 
 
 @runtime_checkable
-class ContractPolicyPort(Protocol):
+class ContractPolicyProtocol(Protocol):
     """Protocol for pipeline contract policy objects.
 
     Implementations may come from infrastructure schemas or test doubles,

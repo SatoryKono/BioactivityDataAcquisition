@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from collections.abc import Sequence
 
     from bioetl.application.observability.domain_event_emitter import (
-        DomainEventEmitterPort,
+        DomainEventEmitterProtocol,
     )
     from bioetl.application.observability.pipeline_metrics import (
         PipelineMetricsRecorder,
@@ -120,7 +120,7 @@ async def write_quarantine_request_with_events(
     *,
     quarantine: QuarantinePort,
     request: QuarantineWriteRequest,
-    emitter: DomainEventEmitterPort | None,
+    emitter: DomainEventEmitterProtocol | None,
     pipeline_name: str,
     error_code: str,
     error_message: str,
@@ -147,7 +147,7 @@ async def write_quarantine_requests_with_events(
     *,
     quarantine: QuarantinePort,
     requests: list[QuarantineWriteRequest],
-    emitter: DomainEventEmitterPort | None,
+    emitter: DomainEventEmitterProtocol | None,
     pipeline_name: str,
     error_codes: Sequence[str],
     error_messages: Sequence[str],
@@ -248,7 +248,7 @@ def record_filtered_quarantine_metrics(
 
 def emit_quarantine_events(
     *,
-    emitter: DomainEventEmitterPort | None,
+    emitter: DomainEventEmitterProtocol | None,
     pipeline_name: str,
     payload: BronzeRecord,
     error_code: str,

@@ -115,7 +115,6 @@ class TestFieldTypes:
             "corpus_id",  # Semantic Scholar internal corpus ID
             "doc_1",
             "doc_2",
-            "organism_id",
             "original_activity_id",
             "parent_id",  # Protein class parent ID - internal hierarchy
             "protein_class_id",

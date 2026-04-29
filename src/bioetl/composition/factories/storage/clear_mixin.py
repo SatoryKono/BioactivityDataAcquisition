@@ -1,4 +1,4 @@
-"""Clear and cleanup operations mixin for StorageAdapter."""
+"""Clear and cleanup operations mixin for StorageBundle."""
 
 from __future__ import annotations
 
@@ -9,10 +9,10 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.storage.gold_writer import GoldWriter
     from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-__all__ = ["StorageAdapterClearMixin"]
+__all__ = ["StorageBundleClearMixin"]
 
 
-class StorageAdapterClearMixin:
+class StorageBundleClearMixin:
     """Mixin providing clear/cleanup operations for Silver, Gold, CSV, and Delta."""
 
     silver: SilverWriter

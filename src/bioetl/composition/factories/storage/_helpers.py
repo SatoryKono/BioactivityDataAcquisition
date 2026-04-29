@@ -32,7 +32,7 @@ from ._resilience import (
     create_silver_atomic_retry_policy,
     create_silver_merge_resilience_policy,
 )
-from .adapter import StorageAdapter
+from .adapter import StorageBundle
 
 if TYPE_CHECKING:
     from bioetl.application.services.lineage.metadata_coordinator import (
@@ -168,8 +168,8 @@ def create_storage_adapter(
     audit: AuditPort,
     metadata_coordinator: MetadataCoordinator | None,
     silver_validator: SilverValidatorPort | None,
-) -> StorageAdapter:
-    """Create StorageAdapter with Bronze/Silver/Gold writers."""
+) -> StorageBundle:
+    """Create StorageBundle with Bronze/Silver/Gold writers."""
     metadata_atomic_retry_policy = create_silver_atomic_retry_policy(settings)
     merge_resilience_policy = create_silver_merge_resilience_policy(settings)
     silver_writer = create_silver_layer_writer_impl(
@@ -214,7 +214,7 @@ def create_storage_adapter(
         audit=audit,
         flat_structure=ctx.bronze_flat,
     )
-    return StorageAdapter(
+    return StorageBundle(
         bronze_writer=bronze_writer,
         silver_writer=silver_writer,
         gold_writer=gold_writer,

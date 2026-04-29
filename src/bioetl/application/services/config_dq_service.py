@@ -31,13 +31,13 @@ from bioetl.domain.types import JsonDict
 from bioetl.domain.types.dq_contracts import DQDisposition, DQPolicyRef
 
 
-class DQConfigLoaderPort(Protocol):
+class DQConfigLoaderProtocol(Protocol):
     """Callable port for loading DQ configs by pipeline name."""
 
     def __call__(self, pipeline_name: str) -> DQConfig: ...
 
 
-class PipelineYamlConfigGetterPort(Protocol):
+class PipelineYamlConfigGetterProtocol(Protocol):
     """Callable port returning mapped pipeline YAML config."""
 
     def __call__(self, pipeline_name: str) -> JsonDict: ...
@@ -278,8 +278,8 @@ class ConfigDQService:
     """Provide DQ/effective-config operations behind injected dependencies."""
 
     logger: LoggerPort
-    _pipeline_yaml_getter: PipelineYamlConfigGetterPort
-    _dq_config_loader: DQConfigLoaderPort
+    _pipeline_yaml_getter: PipelineYamlConfigGetterProtocol
+    _dq_config_loader: DQConfigLoaderProtocol
     _effective_config_service: EffectiveConfigService
     _repo_root: Path | None = None
 

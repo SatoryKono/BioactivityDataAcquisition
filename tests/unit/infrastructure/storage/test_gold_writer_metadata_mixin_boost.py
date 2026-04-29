@@ -46,7 +46,7 @@ def _make_record(
 
 
 def _make_bundle_safe_metadata(run_id: str = "test-run") -> MagicMock:
-    """Create metadata mocks compatible with MetadataLineageBundle identity checks."""
+    """Create metadata mocks compatible with MetadataLineageBundleResult identity checks."""
     metadata = MagicMock()
     metadata.runtime = SimpleNamespace(run_id=run_id, manifest_id=None)
     metadata.output = SimpleNamespace(lineage_fragment_id=None, artifact_id=None)
@@ -277,7 +277,7 @@ class TestWriteGoldMetadata:
     async def test_writes_metadata_for_non_empty_records(self) -> None:
         """Lines 318-336: writes metadata when records present."""
         from bioetl.application.services.lineage import (
-            MetadataLineageBundle,
+            MetadataLineageBundleResult,
         )
 
         metadata = _make_bundle_safe_metadata()
@@ -286,9 +286,9 @@ class TestWriteGoldMetadata:
             def create_gold_metadata_bundle(
                 self,
                 input_data: object,
-            ) -> MetadataLineageBundle:
+            ) -> MetadataLineageBundleResult:
                 _ = input_data
-                return MetadataLineageBundle(
+                return MetadataLineageBundleResult(
                     metadata=metadata,
                     lineage_fragment=make_produced_artifact_fragment(
                         fragment_id="gold:write-fragment",
@@ -316,7 +316,7 @@ class TestWriteGoldMetadata:
     async def test_prepares_resolved_metadata_context_before_write(self) -> None:
         """Standard Gold metadata path should resolve provider/entity before persist."""
         from bioetl.application.services.lineage import (
-            MetadataLineageBundle,
+            MetadataLineageBundleResult,
         )
 
         metadata = _make_bundle_safe_metadata()
@@ -325,9 +325,9 @@ class TestWriteGoldMetadata:
             def create_gold_metadata_bundle(
                 self,
                 input_data: object,
-            ) -> MetadataLineageBundle:
+            ) -> MetadataLineageBundleResult:
                 _ = input_data
-                return MetadataLineageBundle(
+                return MetadataLineageBundleResult(
                     metadata=metadata,
                     lineage_fragment=make_produced_artifact_fragment(
                         fragment_id="gold:resolved-fragment",
@@ -394,7 +394,7 @@ class TestWriteGoldMergedMetadata:
     async def test_with_coordinator_writes_metadata(self) -> None:
         """Lines 380-395: coordinator present writes metadata."""
         from bioetl.application.services.lineage import (
-            MetadataLineageBundle,
+            MetadataLineageBundleResult,
         )
 
         metadata = _make_bundle_safe_metadata()
@@ -403,9 +403,9 @@ class TestWriteGoldMergedMetadata:
             def create_gold_metadata_bundle(
                 self,
                 input_data: object,
-            ) -> MetadataLineageBundle:
+            ) -> MetadataLineageBundleResult:
                 _ = input_data
-                return MetadataLineageBundle(
+                return MetadataLineageBundleResult(
                     metadata=metadata,
                     lineage_fragment=make_produced_artifact_fragment(
                         fragment_id="gold:merged-write-fragment",
@@ -429,7 +429,7 @@ class TestWriteGoldMergedMetadata:
     async def test_prepares_merged_metadata_context_before_write(self) -> None:
         """Merged Gold metadata path should resolve provider/entity before persist."""
         from bioetl.application.services.lineage import (
-            MetadataLineageBundle,
+            MetadataLineageBundleResult,
         )
 
         metadata = _make_bundle_safe_metadata()
@@ -438,9 +438,9 @@ class TestWriteGoldMergedMetadata:
             def create_gold_metadata_bundle(
                 self,
                 input_data: object,
-            ) -> MetadataLineageBundle:
+            ) -> MetadataLineageBundleResult:
                 _ = input_data
-                return MetadataLineageBundle(
+                return MetadataLineageBundleResult(
                     metadata=metadata,
                     lineage_fragment=make_produced_artifact_fragment(
                         fragment_id="gold:merged-context-fragment",

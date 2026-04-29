@@ -1,0 +1,39 @@
+version: 1
+policy_scope: mutation_testing_rollout
+source_of_truth:
+  matrix_path: configs/quality/test_matrix.yaml
+  matrix_rollout_path: mutation_testing
+backlog_reference: https://github.com/SatoryKono/BioactivityDataAcquisition/issues/3410
+entries:
+- target: domain
+  status: enforced
+  owner: "@bioetl-domain"
+  min_score: 70
+  current_evidence_paths:
+  - configs/quality/test_matrix.yaml
+  - .github/workflows/mutation-testing.yml
+  - tests/architecture/test_mutation_testing_rollout.py
+  artifact_paths:
+  - src/bioetl/domain
+  - .github/workflows/mutation-testing.yml
+- target: application
+  status: staged
+  owner: "@bioetl-application"
+  min_score: 60
+  blocking_classification: missing_stable_application_mutation_baseline
+  issue: '#3410'
+  current_evidence_paths:
+  - configs/quality/test_matrix.yaml
+  - .github/workflows/mutation-testing.yml
+  - tests/architecture/test_mutation_testing_rollout.py
+  artifact_paths:
+  - src/bioetl/application
+  - .github/workflows/mutation-testing.yml
+  next_step: >-
+    Capture a stable application-layer mutation baseline, split long-running
+    targets if needed, and add an explicit CI job before switching the target
+    to enforced.
+  promotion_criteria: >-
+    Application mutation testing has a repeatable baseline at or above the
+    configured min_score, CI runtime is bounded, and the workflow enforces the
+    application target without making the domain gate less strict.

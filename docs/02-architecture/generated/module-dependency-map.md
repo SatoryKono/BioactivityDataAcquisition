@@ -5,8 +5,8 @@
 
 ## Summary
 
-- Scanned modules: `1734`
-- Internal import edges (raw): `6881`
+- Scanned modules: `1737`
+- Internal import edges (raw): `6889`
 - Aggregated layer edges: `14`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `310`
@@ -21,17 +21,17 @@ flowchart LR
     infrastructure[infrastructure]
     composition[composition]
     interfaces[interfaces]
-    application -->|1147 OK| application
-    application -->|1012 OK| domain
+    application -->|1149 OK| application
+    application -->|1014 OK| domain
     composition -->|250 OK| application
-    composition -->|542 OK| composition
+    composition -->|543 OK| composition
     composition -->|383 OK| domain
-    composition -->|302 OK| infrastructure
-    domain -->|1138 OK| domain
+    composition -->|303 OK| infrastructure
+    domain -->|1139 OK| domain
     infrastructure -->|753 OK| domain
     infrastructure -->|955 OK| infrastructure
     interfaces -->|69 OK| application
-    interfaces -->|62 OK| composition
+    interfaces -->|63 OK| composition
     interfaces -->|39 OK| domain
     interfaces -->|5 OK| infrastructure
     interfaces -->|224 OK| interfaces
@@ -41,17 +41,17 @@ flowchart LR
 
 | From             | To               | Imports | Policy  |
 | ---------------- | ---------------- | ------: | ------- |
-| `application`    | `application`    |    1147 | allowed |
-| `application`    | `domain`         |    1012 | allowed |
+| `application`    | `application`    |    1149 | allowed |
+| `application`    | `domain`         |    1014 | allowed |
 | `composition`    | `application`    |     250 | allowed |
-| `composition`    | `composition`    |     542 | allowed |
+| `composition`    | `composition`    |     543 | allowed |
 | `composition`    | `domain`         |     383 | allowed |
-| `composition`    | `infrastructure` |     302 | allowed |
-| `domain`         | `domain`         |    1138 | allowed |
+| `composition`    | `infrastructure` |     303 | allowed |
+| `domain`         | `domain`         |    1139 | allowed |
 | `infrastructure` | `domain`         |     753 | allowed |
 | `infrastructure` | `infrastructure` |     955 | allowed |
 | `interfaces`     | `application`    |      69 | allowed |
-| `interfaces`     | `composition`    |      62 | allowed |
+| `interfaces`     | `composition`    |      63 | allowed |
 | `interfaces`     | `domain`         |      39 | allowed |
 | `interfaces`     | `infrastructure` |       5 | allowed |
 | `interfaces`     | `interfaces`     |     224 | allowed |
@@ -71,7 +71,7 @@ flowchart LR
 | `application.composite`        | `domain.ports`                  |      68 |
 | `composition.factories`        | `domain.ports`                  |      63 |
 | `infrastructure.storage`       | `domain.ports`                  |      61 |
-| `application.services`         | `domain.ports`                  |      57 |
+| `application.services`         | `domain.ports`                  |      58 |
 | `application.services`         | `domain.types`                  |      55 |
 | `composition.bootstrap`        | `application.services`          |      49 |
 | `interfaces.cli`               | `application.services`          |      47 |
@@ -100,12 +100,12 @@ flowchart LR
 | `application.pipelines`        | `domain.value_objects`          |      18 |
 | `application.core`             | `domain.config`                 |      17 |
 | `application.pipelines`        | `domain.ports`                  |      17 |
+| `application.services`         | `domain.exceptions`             |      16 |
 | `composition.factories`        | `domain.config`                 |      16 |
 | `composition.runtime_builders` | `domain.context`                |      16 |
-| `application.services`         | `domain.exceptions`             |      15 |
+| `interfaces.observability`     | `composition.observability_api` |      16 |
 | `infrastructure.observability` | `domain.ports`                  |      15 |
 | `infrastructure.quality`       | `domain.types`                  |      15 |
-| `interfaces.observability`     | `composition.observability_api` |      15 |
 | `application.core`             | `domain.value_objects`          |      14 |
 | `composition.bootstrap`        | `infrastructure.observability`  |      14 |
 | `infrastructure.schemas`       | `domain.config`                 |      14 |

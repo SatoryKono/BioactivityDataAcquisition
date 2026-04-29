@@ -21,7 +21,7 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
 
 
-class PrimaryRecordFetchPort(Protocol):
+class PrimaryRecordFetchProtocol(Protocol):
     """Provider hook that yields phase-1 primary lookup records."""
 
     def __call__(
@@ -29,25 +29,25 @@ class PrimaryRecordFetchPort(Protocol):
     ) -> AsyncIterator[BronzeRecord]: ...
 
 
-class NormalizeIdPort(Protocol):
+class NormalizeIdProtocol(Protocol):
     """Provider hook for ID normalization used in fallback matching."""
 
     def __call__(self, value: str, /) -> str | None: ...
 
 
-class ExtractRecordIdPort(Protocol):
+class ExtractRecordIdProtocol(Protocol):
     """Provider hook extracting the record ID tracked as resolved."""
 
     def __call__(self, record: BronzeRecord, /) -> str | None: ...
 
 
-class Phase1SummaryLoggerPort(Protocol):
+class Phase1SummaryLoggerProtocol(Protocol):
     """Optional provider hook for phase-1 summary logging."""
 
     def __call__(self, total: int, found: int, /) -> None: ...
 
 
-class FallbackExecutionPort(Protocol):
+class FallbackExecutionProtocol(Protocol):
     """Generic strategy interface for fallback execution hooks."""
 
     def normalize_id(self, value: str, /) -> str | None:
@@ -68,8 +68,8 @@ class FallbackExecutionPort(Protocol):
 class DefaultFallbackExecution:
     """Concrete strategy wrapper for fallback hook callables."""
 
-    normalize_id_hook: NormalizeIdPort
-    extract_record_id_hook: ExtractRecordIdPort
+    normalize_id_hook: NormalizeIdProtocol
+    extract_record_id_hook: ExtractRecordIdProtocol
     fallback_handler_hook: FallbackPolicyHandler | None = None
 
     def normalize_id(self, value: str, /) -> str | None:
@@ -92,22 +92,22 @@ class FallbackFetchRequest:
 
     filter_ids: list[str]
     fallback_mapping: dict[str, str]
-    primary_record_fetcher: PrimaryRecordFetchPort
-    normalize_id: NormalizeIdPort | None = None
-    extract_record_id: ExtractRecordIdPort | None = None
+    primary_record_fetcher: PrimaryRecordFetchProtocol
+    normalize_id: NormalizeIdProtocol | None = None
+    extract_record_id: ExtractRecordIdProtocol | None = None
     fallback_handler: FallbackPolicyHandler | None = None
-    strategy: FallbackExecutionPort | None = None
+    strategy: FallbackExecutionProtocol | None = None
     limit: int | None = None
     primary_lookup_method: str | None = None
-    phase1_summary_logger: Phase1SummaryLoggerPort | None = None
+    phase1_summary_logger: Phase1SummaryLoggerProtocol | None = None
     trim_primary_ids_to_limit: bool = False
     fallback_operation: str = "fetch_filtered_with_fallback"
 
-    def resolve_normalize_id(self) -> NormalizeIdPort:
+    def resolve_normalize_id(self) -> NormalizeIdProtocol:
         """Return normalize-id hook from explicit request or strategy.
 
         Returns:
-            NormalizeIdPort callable from the request or strategy.
+            NormalizeIdProtocol callable from the request or strategy.
         """
         if self.normalize_id is not None:
             return self.normalize_id
@@ -117,11 +117,11 @@ class FallbackFetchRequest:
             "FallbackFetchRequest must define normalize_id or strategy.normalize_id"
         )
 
-    def resolve_extract_record_id(self) -> ExtractRecordIdPort:
+    def resolve_extract_record_id(self) -> ExtractRecordIdProtocol:
         """Return record-id extractor from explicit request or strategy.
 
         Returns:
-            ExtractRecordIdPort callable from the request or strategy.
+            ExtractRecordIdProtocol callable from the request or strategy.
         """
         if self.extract_record_id is not None:
             return self.extract_record_id
