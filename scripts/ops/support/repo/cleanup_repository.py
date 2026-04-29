@@ -15,11 +15,14 @@ from __future__ import annotations
 import argparse
 import logging
 import os
+import re
 import shutil
 import subprocess  # nosec B404
 import sys
 from dataclasses import dataclass
 from pathlib import Path
+
+import yaml
 
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
@@ -81,6 +84,20 @@ VENV_SEGMENTS: frozenset[str] = frozenset(
 PRUNED_WALK_DIRS: frozenset[str] = frozenset(VENV_SEGMENTS | {".git", ".worktrees", ".rollback"})
 SAFE_LOCAL_FILE_SUFFIXES: frozenset[str] = frozenset({".pyc", ".pyo"})
 DEFAULT_DETAIL_LIMIT = 25
+ROOT_HYGIENE_REVIEW_REGISTRY = Path("configs/quality/root_hygiene_review_registry.yaml")
+REVIEW_REFERENCE_SEARCH_PATHS: tuple[str, ...] = (
+    ".github",
+    "docs",
+    "scripts",
+    "tests",
+    "configs",
+    "README.md",
+    "Makefile",
+    "pyproject.toml",
+    "package.json",
+    ".gitignore",
+    ".dockerignore",
+)
 
 
 @dataclass(frozen=True)
@@ -96,6 +113,27 @@ class CleanupCandidate:
         return self.path.as_posix()
 
 
+@dataclass(frozen=True)
+class ReviewLaneEvidence:
+    lane_id: str
+    classification: str
+    path: Path
+    current_live_state: str
+    canonical_path: Path | None
+    action_if_reintroduced: str | None
+    exists: bool
+    tracked: bool
+    has_history: bool
+    canonical_exists: bool
+    cmp_status: str | None
+    reference_hits: int
+    review_status: str
+
+    @property
+    def rel_path(self) -> str:
+        return self.path.as_posix()
+
+
 def _discover_repo_root(start: Path) -> Path:
     current = start.resolve()
     search_root = current if current.is_dir() else current.parent
@@ -103,6 +141,13 @@ def _discover_repo_root(start: Path) -> Path:
         if (candidate / ".git").exists():
             return candidate
     raise RuntimeError(f"Could not locate repository root from {start}")
+
+
+def _load_yaml_object(path: Path) -> dict[str, object]:
+    payload = yaml.safe_load(path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        raise ValueError(f"{path} must contain a YAML object")
+    return payload
 
 
 def _is_safe_local_dir_name(name: str) -> bool:
@@ -118,6 +163,14 @@ def _run_git(repo_root: Path, *git_args: str) -> subprocess.CompletedProcess[byt
     )
 
 
+def _git_path_has_history(repo_root: Path, path: Path) -> bool:
+    try:
+        completed = _run_git(repo_root, "log", "--format=%H", "-n", "1", "--", path.as_posix())
+    except subprocess.CalledProcessError:
+        return False
+    return bool(completed.stdout.strip())
+
+
 def _tracked_paths(repo_root: Path) -> list[str]:
     completed = _run_git(repo_root, "ls-files", "-z")
     return [
@@ -125,6 +178,10 @@ def _tracked_paths(repo_root: Path) -> list[str]:
         for path in completed.stdout.decode("utf-8", errors="replace").split("\0")
         if path
     ]
+
+
+def _tracked_path_set(repo_root: Path) -> set[str]:
+    return set(_tracked_paths(repo_root))
 
 
 def _local_status_paths(repo_root: Path) -> list[str] | None:
@@ -149,6 +206,38 @@ def _local_status_paths(repo_root: Path) -> list[str] | None:
 
 def _is_venv_path(path: Path) -> bool:
     return bool(VENV_SEGMENTS.intersection(path.parts))
+
+
+def _count_reference_hits(repo_root: Path, path: Path) -> int:
+    filename = path.name
+    path_pattern = re.escape(path.as_posix())
+    filename_pattern = re.escape(filename)
+    pattern = rf"{path_pattern}|{filename_pattern}"
+    try:
+        completed = subprocess.run(  # nosec
+            ["rg", "-n", "-S", "-e", pattern, *REVIEW_REFERENCE_SEARCH_PATHS],
+            cwd=repo_root,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+    except OSError:
+        return 0
+    if completed.returncode not in {0, 1}:
+        return 0
+    return 0 if not completed.stdout else len(completed.stdout.splitlines())
+
+
+def _cmp_status(repo_root: Path, path: Path, canonical_path: Path | None) -> str | None:
+    if canonical_path is None:
+        return None
+    left = repo_root / path
+    right = repo_root / canonical_path
+    if not left.exists() or not right.exists():
+        return None
+    if left.is_file() and right.is_file():
+        return "match" if left.read_bytes() == right.read_bytes() else "diff"
+    return "not_applicable"
 
 
 def _is_blocked_path(path: Path, repo_root: Path, blocked_paths: frozenset[str]) -> bool:
@@ -395,6 +484,103 @@ def _tracked_policy_candidates(repo_root: Path) -> list[CleanupCandidate]:
     return candidates
 
 
+def _load_root_review_registry(repo_root: Path) -> dict[str, object]:
+    return _load_yaml_object(repo_root / ROOT_HYGIENE_REVIEW_REGISTRY)
+
+
+def _review_status_for_evidence(
+    *,
+    classification: str,
+    current_live_state: str,
+    exists: bool,
+    tracked: bool,
+    cmp_status: str | None,
+    reference_hits: int,
+) -> str:
+    if current_live_state == "absent_from_root_baseline" and not exists:
+        return "absent_baseline_ok"
+    if current_live_state != "absent_from_root_baseline" and not exists:
+        return "registry_drift"
+    if classification == "blocked_cleanup_zone":
+        return "blocked_cleanup_retained"
+    if exists and not tracked:
+        return "present_untracked_surface"
+    if classification == "owner_decision_required":
+        return "present_owner_decision_required"
+    if cmp_status == "match":
+        return "present_cmp_match"
+    if reference_hits == 0:
+        return "present_no_callers"
+    return "present_unreviewed"
+
+
+def collect_root_review_evidence(repo_root: Path) -> list[ReviewLaneEvidence]:
+    payload = _load_root_review_registry(repo_root)
+    lanes = payload.get("review_lanes")
+    if not isinstance(lanes, list):
+        return []
+
+    tracked_paths = _tracked_path_set(repo_root)
+    evidence: list[ReviewLaneEvidence] = []
+    for lane in lanes:
+        if not isinstance(lane, dict):
+            continue
+        lane_id = str(lane.get("lane_id", ""))
+        classification = str(lane.get("classification", ""))
+        candidates = lane.get("candidates")
+        if not isinstance(candidates, list):
+            continue
+        for candidate in candidates:
+            if not isinstance(candidate, dict):
+                continue
+            raw_path = candidate.get("path")
+            if not isinstance(raw_path, str) or not raw_path:
+                continue
+            path = Path(raw_path)
+            canonical_raw = candidate.get("canonical_path")
+            canonical_path = (
+                Path(canonical_raw)
+                if isinstance(canonical_raw, str) and canonical_raw
+                else None
+            )
+            exists = (repo_root / path).exists()
+            tracked = path.as_posix() in tracked_paths
+            cmp_status = _cmp_status(repo_root, path, canonical_path) if exists else None
+            reference_hits = _count_reference_hits(repo_root, path) if exists else 0
+            review_status = _review_status_for_evidence(
+                classification=classification,
+                current_live_state=str(candidate.get("current_live_state", "")),
+                exists=exists,
+                tracked=tracked,
+                cmp_status=cmp_status,
+                reference_hits=reference_hits,
+            )
+            evidence.append(
+                ReviewLaneEvidence(
+                    lane_id=lane_id,
+                    classification=classification,
+                    path=path,
+                    current_live_state=str(candidate.get("current_live_state", "")),
+                    canonical_path=canonical_path,
+                    action_if_reintroduced=(
+                        str(candidate.get("action_if_reintroduced"))
+                        if candidate.get("action_if_reintroduced") is not None
+                        else None
+                    ),
+                    exists=exists,
+                    tracked=tracked,
+                    has_history=_git_path_has_history(repo_root, path),
+                    canonical_exists=(
+                        bool(canonical_path and (repo_root / canonical_path).exists())
+                    ),
+                    cmp_status=cmp_status,
+                    reference_hits=reference_hits,
+                    review_status=review_status,
+                )
+            )
+    return sorted(evidence, key=lambda item: (item.lane_id, item.rel_path))
+
+
 def _dedupe_candidates(candidates: list[CleanupCandidate]) -> list[CleanupCandidate]:
     deduped: dict[tuple[str, str], CleanupCandidate] = {}
     for candidate in candidates:
@@ -494,6 +680,44 @@ def _log_apply_summary(
     errors: list[str],
 ) -> None:
     logger.info("=" * 70)
+
+
+def _log_review_lane_evidence(
+    evidence_rows: list[ReviewLaneEvidence],
+    *,
+    detail_limit: int = DEFAULT_DETAIL_LIMIT,
+) -> None:
+    if not evidence_rows:
+        return
+
+    lanes: dict[str, list[ReviewLaneEvidence]] = {}
+    for row in evidence_rows:
+        lanes.setdefault(row.lane_id, []).append(row)
+
+    logger.info("## ROOT REVIEW EVIDENCE")
+    for lane_id in sorted(lanes):
+        rows = lanes[lane_id]
+        visible_rows = rows[:detail_limit]
+        classification = rows[0].classification if rows else "unknown"
+        logger.info("### %s (%s, %d)", lane_id, classification, len(rows))
+        for row in visible_rows:
+            logger.info(
+                "  [%s] %s | exists=%s tracked=%s history=%s refs=%d canonical=%s cmp=%s",
+                row.review_status,
+                row.rel_path,
+                str(row.exists).lower(),
+                str(row.tracked).lower(),
+                str(row.has_history).lower(),
+                row.reference_hits,
+                str(row.canonical_exists).lower(),
+                row.cmp_status or "n/a",
+            )
+            if row.action_if_reintroduced:
+                logger.info("      action: %s", row.action_if_reintroduced)
+        hidden_count = len(rows) - len(visible_rows)
+        if hidden_count > 0:
+            logger.info("  ... %d additional review row(s) omitted", hidden_count)
+        logger.info("")
     logger.info("Deleted: %d", len(deleted))
     logger.info("Manual review candidates left untouched: %d", len(skipped_review))
     if errors:
@@ -565,6 +789,11 @@ def main() -> int:
         include_root_review=args.root,
     )
     _log_candidates(candidates, detail_limit=max(args.detail_limit, 0))
+    if args.root:
+        _log_review_lane_evidence(
+            collect_root_review_evidence(repo_root),
+            detail_limit=max(args.detail_limit, 0),
+        )
 
     if not args.apply:
         return 0

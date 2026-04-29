@@ -9,6 +9,7 @@ import pytest
 
 RULES_PATH = Path("docs/00-project/RULES.md")
 METRICS_GUIDE_PATH = Path("docs/03-guides/metrics-monitoring.md")
+OBSERVABILITY_CONTRACT_PATH = Path("docs/04-reference/contracts/observability.md")
 
 
 @pytest.mark.architecture
@@ -62,3 +63,25 @@ def test_metrics_monitoring_guide_uses_canonical_log_schema_tokens() -> None:
     assert '"timestamp": "' in text
     assert '"run_id": "' in text
     assert '"stage": "preflight"' in text
+
+
+@pytest.mark.architecture
+def test_docs_publish_stage_model_and_invariant_metric_contracts() -> None:
+    """Published observability docs must include the canonical stage/invariant families."""
+    metrics_guide = METRICS_GUIDE_PATH.read_text(encoding="utf-8")
+    observability_contract = OBSERVABILITY_CONTRACT_PATH.read_text(encoding="utf-8")
+
+    required_tokens = (
+        "bioetl_stage_records_total",
+        "bioetl_stage_backlog_records",
+        "bioetl_stage_lag_seconds",
+        "bioetl_record_flow_invariants_total",
+    )
+
+    for token in required_tokens:
+        assert token in metrics_guide, (
+            f"metrics-monitoring.md is missing canonical observability token: {token}"
+        )
+        assert token in observability_contract, (
+            f"observability.md is missing canonical observability token: {token}"
+        )

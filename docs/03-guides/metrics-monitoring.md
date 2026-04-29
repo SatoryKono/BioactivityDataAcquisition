@@ -180,6 +180,10 @@ curl http://localhost:8000/metrics | grep bioetl_
 | `bioetl_pipeline_duration_seconds` | Histogram | pipeline, stage, status, run_type | Длительность выполнения |
 | `bioetl_records_processed_total`   | Counter   | pipeline, stage, run_type         | Обработанные записи     |
 | `bioetl_record_flow_records_total` | Counter   | pipeline, run_type, flow_stage    | Bounded flow-проекция fetched/bronze/silver/gold/filtered_out/quarantined |
+| `bioetl_record_flow_invariants_total` | Counter | pipeline, run_type, invariant, status | Terminal invariants для `fetched_equals_bronze`, `bronze_partitioned`, `silver_gold_monotonic` |
+| `bioetl_stage_records_total`       | Counter   | pipeline, run_type, stage, outcome | Canonical stage-model projection для input/ingestion/transform/validation/storage/output |
+| `bioetl_stage_backlog_records`     | Gauge     | pipeline, run_type, stage         | Текущий bounded backlog по canonical stage |
+| `bioetl_stage_lag_seconds`         | Gauge     | pipeline, run_type, stage         | Текущий bounded lag для unresolved stage backlog |
 | `bioetl_errors_total`              | Counter   | pipeline, stage, error_code       | Количество ошибок       |
 | `bioetl_batch_size_records`        | Histogram | pipeline, stage                   | Размер батчей           |
 | `bioetl_pipeline_runs_total`       | Counter   | pipeline, run_type, status        | Количество запусков     |
@@ -215,6 +219,12 @@ curl http://localhost:8000/metrics | grep bioetl_
 - `bioetl_record_flow_records_total` даёт bounded flow-projection для
   `fetched`, `bronze`, `silver`, `gold`, `filtered_out`, `quarantined`.
   Это observability projection, а не замена control-plane или quarantine source of truth.
+- `bioetl_record_flow_invariants_total` публикует bounded terminal outcomes
+  для conservation-law style checks поверх flow projection. Это runtime signal
+  для alerts/rules, а не forensic source of truth.
+- `bioetl_stage_records_total`, `bioetl_stage_backlog_records`,
+  `bioetl_stage_lag_seconds` формируют canonical stage-model surface для
+  `input`, `ingestion`, `transform`, `validation`, `storage`, `output`.
 - Record-level drilldown для Silver rejects остаётся задачей quarantine CLI:
   `bioetl quarantine stats --pipeline <name> --silver-filter-only`
   и `bioetl quarantine inspect --pipeline <name> --silver-filter-only`.
