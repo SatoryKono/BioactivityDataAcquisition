@@ -15,6 +15,7 @@ from bioetl.composition.services.versioning import (
 from bioetl.domain.control_plane.reproducibility_policy import (
     STRICT_PERSISTENCE_PROFILES,
     assess_reproducibility_policy,
+    is_critical_reproducibility_runtime,
     resolve_effective_required_persistence_profile,
 )
 from bioetl.domain.control_plane.reproducibility_profiles import (
@@ -77,6 +78,10 @@ def resolve_manifest_reproducibility_context(
             reproducibility_profile.default_required_persistence_profile
         ),
         exact_replay_requested=bool(getattr(ctx, "exact_replay", False)),
+        critical_runtime=is_critical_reproducibility_runtime(
+            runtime_environment=getattr(inputs.settings, "env", None),
+            debug_mode=getattr(inputs.settings, "debug", False),
+        ),
     )
     _manifest_support.validate_reproducible_sink_modes(
         yaml_config=inputs.yaml_config,

@@ -267,6 +267,7 @@ class _FakeRunManifestService:
                     "policy": {
                         "required_persistence_profile": "replay_ready",
                         "attained_profile": "forensic_grade",
+                        "replay_capability": "exact_replay_supported",
                         "policy_assessment": {
                             "required_profile_satisfied": True,
                             "blocking_gaps": [],
@@ -276,8 +277,29 @@ class _FakeRunManifestService:
                         "execution_fingerprint": "fingerprint-1",
                         "config_hash_compatibility_anchor": "deadbeef",
                     },
+                    "effective_config": {
+                        "semantic": {
+                            "effective_config_artifact_id": "eca-123",
+                            "effective_config_hash": "deadbeef",
+                        },
+                        "diff_policy": {
+                            "semantic_anchor": "effective_config_hash",
+                            "occurrence_fields": [
+                                "run_id",
+                                "manifest_id",
+                                "manifest_created_at",
+                            ],
+                        },
+                    },
                     "checkpoint_anchors": {
-                        "resume_contract": {"resume_requested": False}
+                        "resume_contract": {"resume_requested": False},
+                        "resume_anchor_comparison": {
+                            "checkpoint_identity_present": True,
+                            "matching_fields": ["execution_fingerprint"],
+                            "mismatched_fields": [],
+                            "missing_current_fields": [],
+                            "missing_checkpoint_fields": ["input_snapshot_ids"],
+                        },
                     },
                 },
                 "alert_signals": {
@@ -594,6 +616,13 @@ class TestRunManifestCommands:
         assert "persistence_profile" in result.output
         assert "reproducibility_policy_assessment" in result.output
         assert "reproducibility_diagnostics" in result.output
+        assert "Reproducibility" in result.output
+        assert "required_profile_satisfied: true" in result.output
+        assert "effective_config_semantic_anchor: effective_config_hash" in result.output
+        assert "effective_config_occurrence_fields" in result.output
+        assert "checkpoint_identity_present: true" in result.output
+        assert "checkpoint_matching_fields" in result.output
+        assert "checkpoint_missing_checkpoint_fields" in result.output
         assert "config_hash_compatibility_anchor" in result.output
         assert "attained_profile" in result.output
         assert "forensic_grade" in result.output

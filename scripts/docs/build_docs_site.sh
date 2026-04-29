@@ -1,51 +1,44 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-TMP_SITE_DIR=".mkdocs-site-tmp"
-OUT_SITE_DIR="docs/site"
-LEGACY_SITE_DIR="site"
-BUILD_MODULE="scripts.docs.build.mkdocs_build"
+ROUTER_MODULE="scripts.docs"
+ROUTER_COMMAND="build-site"
 
-STRICT_FLAG=""
-if [[ "${1:-}" == "--strict" ]]; then
-  STRICT_FLAG="--strict"
-fi
-
-cleanup_tmp() {
-  if [[ -d "$TMP_SITE_DIR" ]]; then
-    rm -rf "$TMP_SITE_DIR"
-  fi
-  return 0
+run_router() {
+  local python_bin="$1"
+  shift
+  "$python_bin" -m "$ROUTER_MODULE" "$ROUTER_COMMAND" "$@"
 }
 
-trap cleanup_tmp EXIT
+run_windows_router_via_cmd() {
+  local win_repo_root
+  local escaped_args=()
+  local arg
 
-if python -c "import mkdocs" >/dev/null 2>&1; then
-  python -m "$BUILD_MODULE" $STRICT_FLAG --clean --site-dir "$TMP_SITE_DIR"
+  win_repo_root="$(wslpath -w "$PWD")"
+  for arg in "$@"; do
+    arg="${arg//\\/\\\\}"
+    arg="${arg//\"/\\\"}"
+    escaped_args+=("\"$arg\"")
+  done
+
+  cmd.exe /c "cd /d \"$win_repo_root\" && .venv\\Scripts\\python.exe -m $ROUTER_MODULE $ROUTER_COMMAND ${escaped_args[*]}"
+}
+
+if command -v python >/dev/null 2>&1 && python -c "import mkdocs" >/dev/null 2>&1; then
+  run_router python "$@"
+elif command -v python3 >/dev/null 2>&1 && python3 -c "import mkdocs" >/dev/null 2>&1; then
+  run_router python3 "$@"
 elif [[ -x "./.venv/bin/python" ]]; then
-  ./.venv/bin/python -m "$BUILD_MODULE" $STRICT_FLAG --clean --site-dir "$TMP_SITE_DIR"
+  run_router ./.venv/bin/python "$@"
 elif [[ -x "./.venv/Scripts/python.exe" ]]; then
   # WSL can fail executing Windows binaries directly depending on interop policy.
   if command -v cmd.exe >/dev/null 2>&1 && command -v wslpath >/dev/null 2>&1; then
-    WIN_REPO_ROOT="$(wslpath -w "$PWD")"
-    cmd.exe /c "cd /d \"$WIN_REPO_ROOT\" && .venv\\Scripts\\python.exe -m $BUILD_MODULE $STRICT_FLAG --clean --site-dir \"$TMP_SITE_DIR\""
+    run_windows_router_via_cmd "$@"
   else
-    ./.venv/Scripts/python.exe -m "$BUILD_MODULE" $STRICT_FLAG --clean --site-dir "$TMP_SITE_DIR"
+    run_router ./.venv/Scripts/python.exe "$@"
   fi
 else
-  mkdocs build $STRICT_FLAG --clean --site-dir "$TMP_SITE_DIR"
+  echo "No MkDocs-capable Python interpreter found for scripts.docs build-site" >&2
+  exit 1
 fi
-
-rm -rf "$OUT_SITE_DIR"
-mkdir -p "$(dirname "$OUT_SITE_DIR")"
-if ! mv "$TMP_SITE_DIR" "$OUT_SITE_DIR"; then
-  mkdir -p "$OUT_SITE_DIR"
-  cp -a "$TMP_SITE_DIR"/. "$OUT_SITE_DIR"/
-  rm -rf "$TMP_SITE_DIR"
-fi
-
-# Normalize generated artifacts to a single location.
-rm -rf "$LEGACY_SITE_DIR"
-
-trap - EXIT
-echo "MkDocs site generated at $OUT_SITE_DIR"

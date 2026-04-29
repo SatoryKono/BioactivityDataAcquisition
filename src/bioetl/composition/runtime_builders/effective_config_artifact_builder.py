@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 from enum import Enum
 from pathlib import Path
@@ -46,6 +47,15 @@ _EXECUTION_AFFECTING_SETTINGS_SURFACES: tuple[str, ...] = (
     "settings.strict_error_handling",
     "settings.strict_medallion",
     "settings.silver_dedup_timeout_seconds",
+    "settings.pii_salt_rotation_active",
+    "settings.json_encoder",
+    "settings.default_email",
+    "settings.pii_salt_current",
+    "settings.pii_salt_next",
+    "settings.pubmed_api_key",
+    "settings.uniprot_api_key",
+    "settings.openalex_api_key",
+    "settings.semanticscholar_api_key",
     "settings.pipeline.batch_size",
     "settings.pipeline.checkpoint_interval",
     "settings.pipeline.relaxed_dq",
@@ -59,13 +69,51 @@ _EXECUTION_AFFECTING_SETTINGS_SURFACES: tuple[str, ...] = (
     "settings.observability.audit_enabled",
 )
 
+_EXECUTION_SECRET_SETTING_SURFACES: tuple[tuple[str, str], ...] = (
+    ("settings.pii_salt_current", "pii_salt_current"),
+    ("settings.pii_salt_next", "pii_salt_next"),
+    ("settings.pubmed_api_key", "pubmed_api_key"),
+    ("settings.uniprot_api_key", "uniprot_api_key"),
+    ("settings.openalex_api_key", "openalex_api_key"),
+    ("settings.semanticscholar_api_key", "semanticscholar_api_key"),
+)
+
+
+def _sha256_text(value: str) -> str:
+    return f"sha256:{hashlib.sha256(value.encode('utf-8')).hexdigest()}"
+
+
+def _secret_value_hash(value: object) -> str | None:
+    if value is None:
+        return None
+    get_secret_value = getattr(value, "get_secret_value", None)
+    raw_value = get_secret_value() if callable(get_secret_value) else value
+    if raw_value in (None, ""):
+        return None
+    return _sha256_text(str(raw_value))
+
+
+def _build_secret_surface_inventory(settings: Settings) -> dict[str, object]:
+    secret_surfaces: dict[str, object] = {}
+    for surface, attribute_name in _EXECUTION_SECRET_SETTING_SURFACES:
+        value_hash = _secret_value_hash(getattr(settings, attribute_name, None))
+        secret_surfaces[surface] = {
+            "present": value_hash is not None,
+            "value_hash": value_hash,
+        }
+    return {
+        "policy": "secret_values_redacted_hash_anchored",
+        "hash_algorithm": "sha256",
+        "secret_surfaces": secret_surfaces,
+    }
+
 
 def _build_execution_settings_snapshot(settings: Settings) -> dict[str, object]:
     """Materialize env-derived execution settings without exposing secrets."""
     pipeline = settings.pipeline
     control_plane = pipeline.control_plane
     observability = settings.observability
-    return {
+    snapshot: dict[str, object] = {
         "schema_version": "execution-settings-v1",
         "materialized_surfaces": list(_EXECUTION_AFFECTING_SETTINGS_SURFACES),
         "settings": {
@@ -76,6 +124,9 @@ def _build_execution_settings_snapshot(settings: Settings) -> dict[str, object]:
             "strict_error_handling": settings.strict_error_handling,
             "strict_medallion": settings.strict_medallion,
             "silver_dedup_timeout_seconds": settings.silver_dedup_timeout_seconds,
+            "pii_salt_rotation_active": settings.pii_salt_rotation_active,
+            "json_encoder": settings.json_encoder,
+            "default_email": settings.default_email,
         },
         "pipeline": {
             "batch_size": pipeline.batch_size,
@@ -100,7 +151,13 @@ def _build_execution_settings_snapshot(settings: Settings) -> dict[str, object]:
             "tracing_enabled": observability.tracing_enabled,
             "audit_enabled": observability.audit_enabled,
         },
+        "secret_redaction": _build_secret_surface_inventory(settings),
+        "non_materialized_semantic_env_dependencies": [],
     }
+    snapshot["snapshot_hash"] = _sha256_text(
+        json.dumps(snapshot, sort_keys=True, separators=(",", ":"), default=str)
+    )
+    return snapshot
 
 
 def _build_runtime_overrides_snapshot(

@@ -5,7 +5,6 @@ from __future__ import annotations
 import json
 
 from bioetl.application.services.control_plane._effective_config_support import (
-    DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
     SemanticIdentityPayloadContext,
     build_dq_components,
     build_effective_config_artifact_id,
@@ -28,6 +27,9 @@ from bioetl.domain.control_plane.effective_config_artifact import (
     ConfigSourceRef,
     EffectiveConfigArtifact,
     EffectiveConfigHashes,
+)
+from bioetl.domain.control_plane.reproducibility_policy import (
+    DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
 )
 from bioetl.domain.types import JsonDict
 

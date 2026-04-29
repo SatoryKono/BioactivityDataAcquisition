@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
@@ -18,21 +18,6 @@ class PostrunFailurePolicySpec:
     strict_reason_code: str
     warning_reason: str
     warning_reason_code: str
-
-
-class _HasPostrunRuntime(Protocol):
-    """Structural contract for postrun collaborators exposing runtime config."""
-
-    _runtime: object
-
-
-class _HasPostrunFailureHandling(_HasPostrunRuntime, Protocol):
-    """Structural contract for postrun collaborators using shared failure handling."""
-
-    _logger: LoggerPort
-    _FAILURE_POLICY: PostrunFailurePolicySpec
-
-
 def is_strict_validation_enabled(runtime: object) -> bool:
     """Return True only when strict validation is explicitly enabled."""
     value = getattr(runtime, "strict_validation", False)
@@ -106,7 +91,10 @@ def apply_postrun_failure_policy_or_raise(
 class PostrunStrictValidationMixin:
     """Compatibility mixin for postrun collaborators exposing strict mode check."""
 
-    def _is_strict_validation_enabled(self: _HasPostrunRuntime) -> bool:
+    if TYPE_CHECKING:
+        _runtime: object
+
+    def _is_strict_validation_enabled(self) -> bool:
         """Compatibility wrapper around shared strict-mode evaluation."""
         return is_strict_validation_enabled(self._runtime)
 
@@ -114,8 +102,12 @@ class PostrunStrictValidationMixin:
 class PostrunFailureHandlingMixin(PostrunStrictValidationMixin):
     """Shared allowlisted failure handling for postrun collaborators."""
 
+    if TYPE_CHECKING:
+        _logger: LoggerPort
+        _FAILURE_POLICY: PostrunFailurePolicySpec
+
     def _handle_allowlisted_failure(
-        self: _HasPostrunFailureHandling,
+        self,
         error: BaseException,
         *,
         log_fields: dict[str, object] | None = None,

@@ -62,6 +62,8 @@ plans:
       lifecycle: supporting_context
     - path: docs/plans/mcp-wrapper-contract-audit-2026-04-28.md
       lifecycle: supporting_context
+    - path: docs/plans/build-docs-site-parity-audit-2026-04-29.md
+      lifecycle: supporting_context
     - path: docs/plans/silver-filter-rejects-observability-plan.md
       lifecycle: supporting_context
     - path: docs/plans/test-health-observability-plan-2026-04-22.md

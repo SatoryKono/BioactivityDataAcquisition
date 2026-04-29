@@ -1,11 +1,10 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-28T18:25:36.215494+00:00",
+  "generated_at": "2026-04-29T05:14:30.840971+00:00",
   "summary": {
-    "total_scripts": 393,
+    "total_scripts": 383,
     "status_counts": {
       "active": 306,
-      "legacy": 10,
       "orphan": 65,
       "unknown": 12
     },
@@ -14,9 +13,9 @@
       "build": 2,
       "ci": 49,
       "docs": 121,
-      "scripts": 288,
+      "scripts": 278,
       "skills": 8,
-      "tests": 138
+      "tests": 131
     }
   },
   "scripts": [
@@ -233,7 +232,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 58,
+          "line": 54,
           "source_group": "scripts",
           "text": "\"diagnose-codex-wsl\": \"../ai/codex/diagnose_wsl.sh\","
         },
@@ -323,7 +322,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 57,
+          "line": 53,
           "source_group": "scripts",
           "text": "\"codex-headless\": \"../ai/codex/headless.sh\","
         },
@@ -865,7 +864,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 59,
+          "line": 55,
           "source_group": "scripts",
           "text": "\"setup-agents\": \"../ai/codex/setup_agents.sh\","
         },
@@ -913,7 +912,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 61,
+          "line": 57,
           "source_group": "scripts",
           "text": "\"setup-skills\": \"../ai/codex/setup_skills.sh\","
         },
@@ -4427,7 +4426,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 113,
+      "reference_count": 111,
       "references": [
         {
           "path": ".github/workflows/docs-kpi-weekly.yml",
@@ -4513,13 +4512,13 @@
           "path": "scripts/docs/README.md",
           "line": 35,
           "source_group": "scripts",
-          "text": "- temporary shell-oriented habits such as `bash scripts/docs/build_docs_site.sh`, though the preferred public entrypoint is `python -m scripts.docs build-site`"
+          "text": "- shell-oriented transport needs such as `bash scripts/docs/build_docs_site.sh`, though the preferred public entrypoint is `python -m scripts.docs build-site`"
         },
         {
           "path": "scripts/docs/README.md",
           "line": 144,
           "source_group": "scripts",
-          "text": "| `scripts/docs/build_docs_site.sh`  | Shell compatibility wrapper around the packaged MkDocs build entrypoint; prefer `python -m scripts.docs build-site` |"
+          "text": "| `scripts/docs/build_docs_site.sh`  | Shell transport adapter that chooses an appropriate Python runtime and then dispatches to `python -m scripts.docs build-site` |"
         },
         {
           "path": "scripts/engineering/repo/generate_scripts_wrapper_caller_matrix.py",
@@ -4698,7 +4697,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 27,
+      "reference_count": 25,
       "references": [
         {
           "path": ".github/workflows/docs.yml",
@@ -9962,81 +9961,9 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 65,
+          "line": 61,
           "source_group": "scripts",
           "text": "\"delete-branches\": \"maintenance/git/delete-stale-branches.sh\","
-        }
-      ]
-    },
-    {
-      "path": "scripts/ops/maintenance/github/close_great_expectations_spike_issue.sh",
-      "type": "sh",
-      "status": "legacy",
-      "agent_usage": [],
-      "reference_count": 2,
-      "references": [
-        {
-          "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 176,
-          "source_group": "scripts",
-          "text": "\"scripts/ops/maintenance/github/close_great_expectations_spike_issue.sh\","
-        },
-        {
-          "path": "scripts/ops/__main__.py",
-          "line": 53,
-          "source_group": "scripts",
-          "text": "\"close-ge-spike\": \"maintenance/github/close_great_expectations_spike_issue.sh\","
-        }
-      ]
-    },
-    {
-      "path": "scripts/ops/maintenance/github/close_issue_2597.sh",
-      "type": "sh",
-      "status": "legacy",
-      "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 173,
-          "source_group": "scripts",
-          "text": "\"scripts/ops/maintenance/github/close_issue_2597.sh\","
-        }
-      ]
-    },
-    {
-      "path": "scripts/ops/maintenance/github/close_pandera_schema_drift_issue.sh",
-      "type": "sh",
-      "status": "legacy",
-      "agent_usage": [],
-      "reference_count": 2,
-      "references": [
-        {
-          "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 177,
-          "source_group": "scripts",
-          "text": "\"scripts/ops/maintenance/github/close_pandera_schema_drift_issue.sh\","
-        },
-        {
-          "path": "scripts/ops/__main__.py",
-          "line": 54,
-          "source_group": "scripts",
-          "text": "\"close-schema-drift\": \"maintenance/github/close_pandera_schema_drift_issue.sh\","
-        }
-      ]
-    },
-    {
-      "path": "scripts/ops/maintenance/github/post_issue_2597_progress.sh",
-      "type": "sh",
-      "status": "legacy",
-      "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 172,
-          "source_group": "scripts",
-          "text": "\"scripts/ops/maintenance/github/post_issue_2597_progress.sh\","
         }
       ]
     },
@@ -10049,7 +9976,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 52,
+          "line": 50,
           "source_group": "scripts",
           "text": "\"triage-issues\": \"maintenance/github/triage_cleanup_issue_wave.sh\","
         }
@@ -10060,25 +9987,13 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 1,
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 51,
+          "line": 49,
           "source_group": "scripts",
           "text": "\"update-issue\": \"maintenance/github/update_github_issue.sh\","
-        },
-        {
-          "path": "scripts/ops/maintenance/github/close_issue_2597.sh",
-          "line": 5,
-          "source_group": "scripts",
-          "text": "UPDATE_SCRIPT=\"${SCRIPT_DIR}/update_github_issue.sh\""
-        },
-        {
-          "path": "scripts/ops/maintenance/github/post_issue_2597_progress.sh",
-          "line": 5,
-          "source_group": "scripts",
-          "text": "UPDATE_SCRIPT=\"${SCRIPT_DIR}/update_github_issue.sh\""
         }
       ]
     },
@@ -10103,7 +10018,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 43,
+          "line": 41,
           "source_group": "scripts",
           "text": "\"salt-rotate\": \"maintenance/security/salt_rotate.py\","
         }
@@ -10205,7 +10120,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 44,
+          "line": 42,
           "source_group": "scripts",
           "text": "\"fix-grafana\": \"observability/grafana/fix_grafana_dashboards.py\","
         }
@@ -10228,7 +10143,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 45,
+          "line": 43,
           "source_group": "scripts",
           "text": "\"rerender-grafana\": \"observability/grafana/rerender_grafana_screenshots.py\","
         },
@@ -10267,7 +10182,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 64,
+          "line": 60,
           "source_group": "scripts",
           "text": "\"deploy\": \"runtime/deploy/deploy-bioetl.sh\","
         }
@@ -10647,7 +10562,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 62,
+          "line": 58,
           "source_group": "scripts",
           "text": "\"check-skills\": \"support/skills/check_ai_skills_layout.sh\","
         }
@@ -10921,7 +10836,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/schema/README.md",
@@ -10934,18 +10849,6 @@
           "line": 41,
           "source_group": "scripts",
           "text": "\"generate-config-matrix\": \"generate_config_matrix.py\","
-        },
-        {
-          "path": "src/tools/scripts/config_matrix_generator.py",
-          "line": 15,
-          "source_group": "scripts",
-          "text": "/ \"generate_config_matrix.py\""
-        },
-        {
-          "path": "tests/architecture/test_legacy_schema_wrappers.py",
-          "line": 25,
-          "source_group": "tests",
-          "text": "assert \"generate_config_matrix.py\" in content"
         }
       ]
     },
@@ -10982,7 +10885,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 196,
+          "line": 191,
           "source_group": "scripts",
           "text": "\"src/tools/scripts/generate_contracts.py\","
         },
@@ -11660,156 +11563,6 @@
           "line": 126,
           "source_group": "docs",
           "text": "- [ ] Review src/tools/neo4j_audit.py"
-        }
-      ]
-    },
-    {
-      "path": "src/tools/scripts/check_application_deps.py",
-      "type": "py",
-      "status": "legacy",
-      "agent_usage": [],
-      "reference_count": 2,
-      "references": [
-        {
-          "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 205,
-          "source_group": "scripts",
-          "text": "\"src/tools/scripts/check_application_deps.py\","
-        },
-        {
-          "path": "tests/architecture/test_legacy_qa_check_wrappers.py",
-          "line": 29,
-          "source_group": "tests",
-          "text": "\"src/tools/scripts/check_application_deps.py must exist\""
-        }
-      ]
-    },
-    {
-      "path": "src/tools/scripts/check_architecture.py",
-      "type": "py",
-      "status": "legacy",
-      "agent_usage": [],
-      "reference_count": 2,
-      "references": [
-        {
-          "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 204,
-          "source_group": "scripts",
-          "text": "\"src/tools/scripts/check_architecture.py\","
-        },
-        {
-          "path": "tests/architecture/test_legacy_qa_check_wrappers.py",
-          "line": 16,
-          "source_group": "tests",
-          "text": "assert wrapper_path.exists(), \"src/tools/scripts/check_architecture.py must exist\""
-        }
-      ]
-    },
-    {
-      "path": "src/tools/scripts/check_constructor_args.py",
-      "type": "py",
-      "status": "legacy",
-      "agent_usage": [],
-      "reference_count": 2,
-      "references": [
-        {
-          "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 206,
-          "source_group": "scripts",
-          "text": "\"src/tools/scripts/check_constructor_args.py\","
-        },
-        {
-          "path": "tests/architecture/test_legacy_qa_check_wrappers.py",
-          "line": 43,
-          "source_group": "tests",
-          "text": "\"src/tools/scripts/check_constructor_args.py must exist\""
-        }
-      ]
-    },
-    {
-      "path": "src/tools/scripts/config_matrix_generator.py",
-      "type": "py",
-      "status": "legacy",
-      "agent_usage": [],
-      "reference_count": 5,
-      "references": [
-        {
-          "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 195,
-          "source_group": "scripts",
-          "text": "\"src/tools/scripts/config_matrix_generator.py\","
-        },
-        {
-          "path": "src/tools/README.md",
-          "line": 265,
-          "source_group": "scripts",
-          "text": "### scripts/config_matrix_generator.py"
-        },
-        {
-          "path": "src/tools/README.md",
-          "line": 269,
-          "source_group": "scripts",
-          "text": "**Location:** `src/tools/scripts/config_matrix_generator.py`"
-        },
-        {
-          "path": "tests/architecture/test_legacy_schema_wrappers.py",
-          "line": 15,
-          "source_group": "tests",
-          "text": "repo_root / \"src\" / \"tools\" / \"scripts\" / \"config_matrix_generator.py\""
-        },
-        {
-          "path": "tests/architecture/test_legacy_schema_wrappers.py",
-          "line": 19,
-          "source_group": "tests",
-          "text": "\"src/tools/scripts/config_matrix_generator.py must exist\""
-        }
-      ]
-    },
-    {
-      "path": "src/tools/scripts/lint_terminology.py",
-      "type": "py",
-      "status": "legacy",
-      "agent_usage": [],
-      "reference_count": 2,
-      "references": [
-        {
-          "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 197,
-          "source_group": "scripts",
-          "text": "\"src/tools/scripts/lint_terminology.py\","
-        },
-        {
-          "path": "tests/architecture/test_lint_terminology_script.py",
-          "line": 37,
-          "source_group": "tests",
-          "text": "assert wrapper_path.exists(), \"src/tools/scripts/lint_terminology.py must exist\""
-        }
-      ]
-    },
-    {
-      "path": "src/tools/scripts/validate_unified_configs.py",
-      "type": "py",
-      "status": "legacy",
-      "agent_usage": [],
-      "reference_count": 3,
-      "references": [
-        {
-          "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 198,
-          "source_group": "scripts",
-          "text": "\"src/tools/scripts/validate_unified_configs.py\","
-        },
-        {
-          "path": "src/tools/README.md",
-          "line": 285,
-          "source_group": "scripts",
-          "text": "**Location:** `src/tools/scripts/validate_unified_configs.py`"
-        },
-        {
-          "path": "tests/architecture/test_legacy_schema_wrappers.py",
-          "line": 35,
-          "source_group": "tests",
-          "text": "\"src/tools/scripts/validate_unified_configs.py must exist\""
         }
       ]
     },

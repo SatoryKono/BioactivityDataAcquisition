@@ -100,6 +100,17 @@ def test_exact_replay_launch_inherits_supported_family_default_profile() -> None
     )
 
 
+def test_critical_runtime_inherits_supported_family_default_profile() -> None:
+    assert (
+        resolve_effective_required_persistence_profile(
+            configured_required_profile="degraded_observable",
+            family_default_profile="replay_ready",
+            critical_runtime=True,
+        )
+        == "replay_ready"
+    )
+
+
 def test_non_exact_launch_preserves_configured_default_profile() -> None:
     assert (
         resolve_effective_required_persistence_profile(

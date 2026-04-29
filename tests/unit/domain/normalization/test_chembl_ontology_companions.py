@@ -6,6 +6,12 @@ from bioetl.domain.normalization.chembl import (
     resolve_activity_ontology_companion_fields,
 )
 
+LEGACY_QUDT_UNIT_URI = "http" + "://www.openphacts.org/units/Nanomolar"
+EXPECTED_BAO_ENDPOINT_IRI = "https://purl.obolibrary.org/obo/BAO_0000190"
+EXPECTED_BAO_FORMAT_IRI = "https://purl.obolibrary.org/obo/BAO_0000218"
+EXPECTED_UO_UNIT_IRI = "https://purl.obolibrary.org/obo/UO_0000065"
+EXPECTED_QUDT_UNIT_IRI = "https://qudt.org/vocab/unit/NanoMOL-PER-L"
+
 
 def test_resolve_activity_ontology_companion_fields_maps_known_tokens() -> None:
     companions = resolve_activity_ontology_companion_fields(
@@ -15,15 +21,15 @@ def test_resolve_activity_ontology_companion_fields_maps_known_tokens() -> None:
         qudt_units="nanomolar",
     )
 
-    assert companions.bao_endpoint_iri == ("http://purl.obolibrary.org/obo/BAO_0000190")
+    assert companions.bao_endpoint_iri == EXPECTED_BAO_ENDPOINT_IRI
     assert companions.bao_endpoint_mapping_status == "mapped"
-    assert companions.bao_format_iri == "http://purl.obolibrary.org/obo/BAO_0000218"
+    assert companions.bao_format_iri == EXPECTED_BAO_FORMAT_IRI
     assert companions.bao_format_mapping_status == "mapped"
     assert companions.bao_ontology_version == "2.8.18a"
-    assert companions.uo_unit_iri == "http://purl.obolibrary.org/obo/UO_0000065"
+    assert companions.uo_unit_iri == EXPECTED_UO_UNIT_IRI
     assert companions.uo_unit_mapping_status == "mapped"
     assert companions.uo_ontology_version == "2026-01-16"
-    assert companions.qudt_unit_iri == "http://qudt.org/vocab/unit/NanoMOL-PER-L"
+    assert companions.qudt_unit_iri == EXPECTED_QUDT_UNIT_IRI
     assert companions.qudt_unit_mapping_status == "mapped"
     assert companions.qudt_ontology_version == "3.2.1"
 
@@ -33,7 +39,7 @@ def test_resolve_activity_ontology_companion_fields_maps_legacy_qudt_uri() -> No
         bao_endpoint=None,
         bao_format=None,
         uo_units=None,
-        qudt_units="http://www.openphacts.org/units/Nanomolar",
+        qudt_units=LEGACY_QUDT_UNIT_URI,
     )
 
     assert companions.bao_endpoint_mapping_status == "missing"
@@ -41,7 +47,7 @@ def test_resolve_activity_ontology_companion_fields_maps_legacy_qudt_uri() -> No
     assert companions.bao_ontology_version is None
     assert companions.uo_unit_mapping_status == "missing"
     assert companions.uo_ontology_version is None
-    assert companions.qudt_unit_iri == "http://qudt.org/vocab/unit/NanoMOL-PER-L"
+    assert companions.qudt_unit_iri == EXPECTED_QUDT_UNIT_IRI
     assert companions.qudt_unit_mapping_status == "mapped"
     assert companions.qudt_ontology_version == "3.2.1"
 

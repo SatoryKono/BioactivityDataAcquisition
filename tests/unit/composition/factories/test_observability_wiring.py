@@ -14,6 +14,7 @@ from bioetl.domain.context import CachedBronzeContext
 
 def test_cached_bronze_data_source_reuses_shared_metrics(
     monkeypatch,
+    tmp_path: Path,
 ) -> None:
     """Cached-bronze path must not silently downgrade to NoOpMetrics."""
     captured: dict[str, object] = {}
@@ -50,7 +51,8 @@ def test_cached_bronze_data_source_reuses_shared_metrics(
 
     shared_metrics = MagicMock(name="shared_metrics")
     logger = MagicMock(name="logger")
-    settings = SimpleNamespace(bronze_path=Path("/tmp/bronze"))
+    bronze_path = tmp_path / "bronze"
+    settings = SimpleNamespace(bronze_path=bronze_path)
     pipeline_config = SimpleNamespace(provider="chembl", entity_type="activity")
     cached_bronze = CachedBronzeContext(
         enabled=True,
@@ -68,5 +70,5 @@ def test_cached_bronze_data_source_reuses_shared_metrics(
 
     writer_kwargs = captured["writer_kwargs"]
     assert writer_kwargs["metrics"] is shared_metrics
-    assert writer_kwargs["base_path"] == Path("/tmp/bronze/chembl/activity")
+    assert writer_kwargs["base_path"] == bronze_path / "chembl" / "activity"
     assert captured["data_source_kwargs"]["bronze_date"] == "2026-04-01"

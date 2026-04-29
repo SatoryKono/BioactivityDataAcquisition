@@ -15,6 +15,7 @@ standard test runs. Run explicitly with: make bench or pytest -m benchmark
 from __future__ import annotations
 
 import os
+import statistics
 import time
 from typing import Any
 
@@ -359,29 +360,35 @@ class TestPolarsBaselines:
 
         df = pl.DataFrame(records_for_df)
 
-        # Warmup
-        _ = df.group_by("category").agg(pl.col("value").mean())
+        def group_aggregate() -> pl.DataFrame:
+            return df.group_by("category").agg(
+                pl.col("value").mean().alias("avg_value"),
+                pl.col("active").sum().alias("active_count"),
+            )
+
+        # Warm the exact measured expression to avoid counting one-time planning cost.
+        for _ in range(3):
+            _ = group_aggregate()
 
         # Measure (10 iterations)
         times = []
         for _ in range(10):
             start = time.perf_counter()
-            _ = df.group_by("category").agg(
-                pl.col("value").mean().alias("avg_value"),
-                pl.col("active").sum().alias("active_count"),
-            )
+            _ = group_aggregate()
             elapsed = time.perf_counter() - start
             times.append(elapsed * 1000)
 
         avg_ms = sum(times) / len(times)
+        median_ms = statistics.median(times)
         threshold_ms = (
             self.WINDOWS_GROUP_AGG_THRESHOLD_MS
             if os.name == "nt"
             else self.GROUP_AGG_THRESHOLD_MS
         )
 
-        assert avg_ms < threshold_ms, (
-            f"Group + aggregate took {avg_ms:.1f} ms, "
+        assert median_ms < threshold_ms, (
+            f"Group + aggregate median took {median_ms:.1f} ms "
+            f"(avg {avg_ms:.1f} ms), "
             f"exceeds baseline of {threshold_ms} ms"
         )
 

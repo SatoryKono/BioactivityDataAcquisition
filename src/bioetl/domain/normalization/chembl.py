@@ -55,7 +55,7 @@ ACTIVITY_ONTOLOGY_MAPPING_STATUSES: tuple[OntologyMappingStatus, ...] = (
 
 BAO_ONTOLOGY_VERSION = "2.8.18a"
 UO_ONTOLOGY_VERSION = "2026-01-16"
-_OBO_IRI_TEMPLATE = "http://purl.obolibrary.org/obo/{identifier}"
+_OBO_IRI_TEMPLATE = "https://purl.obolibrary.org/obo/{identifier}"
 
 _BAO_LABEL_BY_IDENTIFIER: dict[str, str] = {
     "BAO_0000019": "assay format",

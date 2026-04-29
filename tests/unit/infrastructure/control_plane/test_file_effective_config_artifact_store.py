@@ -125,6 +125,55 @@ def test_file_store_does_not_rewrite_existing_identical_semantic_artifact(
     ) != store.get_occurrence_by_run_id(second_run_id)
 
 
+def test_file_store_diffs_occurrence_only_effective_config_records(
+    tmp_path: Path,
+) -> None:
+    store = FileEffectiveConfigArtifactStore(base_path=tmp_path / "effective_config")
+    first_run_id = RunID(uuid4())
+    second_run_id = RunID(uuid4())
+    payload: dict[str, object] = {
+        "artifact_id": "effective-config-occurrence-diff",
+        "schema_version": "1.0",
+        "semantic_artifact": {
+            "artifact_id": "effective-config-occurrence-diff",
+            "pipeline_name": "chembl_activity",
+            "effective_config_hash": "sha256:stable",
+        },
+        "occurrence_envelope": {
+            "created_at": "2026-04-21T10:00:00+00:00",
+        },
+    }
+    second_payload = {
+        **payload,
+        "occurrence_envelope": {
+            "created_at": "2026-04-21T10:05:00+00:00",
+        },
+    }
+
+    store.save(
+        artifact_id="effective-config-occurrence-diff",
+        run_id=first_run_id,
+        payload=payload,
+    )
+    store.save(
+        artifact_id="effective-config-occurrence-diff",
+        run_id=second_run_id,
+        payload=second_payload,
+    )
+
+    diff = store.diff_occurrences_by_run_id(first_run_id, second_run_id)
+
+    assert diff["semantic_equivalent"] is True
+    assert diff["occurrence_only"] is True
+    fields = {
+        str(item["field"])
+        for item in diff["differences"]
+        if isinstance(item, dict)
+    }
+    assert "run_id" in fields
+    assert "occurrence_envelope.created_at" in fields
+
+
 def test_file_store_rejects_conflicting_semantic_payload_for_existing_artifact_id(
     tmp_path: Path,
 ) -> None:

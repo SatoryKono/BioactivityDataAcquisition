@@ -32,7 +32,7 @@ Compatibility wrappers are intentionally kept for:
 
 - direct file execution from CI, docs, or local habits such as `python scripts/docs/...`
 - tests that import or monkeypatch historical top-level modules
-- temporary shell-oriented habits such as `bash scripts/docs/build_docs_site.sh`, though the preferred public entrypoint is `python -m scripts.docs build-site`
+- shell-oriented transport needs such as `bash scripts/docs/build_docs_site.sh`, though the preferred public entrypoint is `python -m scripts.docs build-site`
 
 ## Commands
 
@@ -141,4 +141,4 @@ The exported contract now includes runtime-resolved `field_policy` overlays such
 
 | File                               | Description                                                                                    |
 | ---------------------------------- | ---------------------------------------------------------------------------------------------- |
-| `scripts/docs/build_docs_site.sh`  | Shell compatibility wrapper around the packaged MkDocs build entrypoint; prefer `python -m scripts.docs build-site` |
+| `scripts/docs/build_docs_site.sh`  | Shell transport adapter that chooses an appropriate Python runtime and then dispatches to `python -m scripts.docs build-site` |

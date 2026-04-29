@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+from urllib.parse import urlparse
+
 from bioetl.domain.normalization.text import normalize_string
 
 QUDT_ONTOLOGY_VERSION = "3.2.1"
-QUDT_UNIT_IRI_TEMPLATE = "http://qudt.org/vocab/unit/{identifier}"
+QUDT_UNIT_IRI_TEMPLATE = "https://qudt.org/vocab/unit/{identifier}"
 _QUDT_UNIT_IDENTIFIER_BY_UNIT: dict[str, str] = {
     "nM": "NanoMOL-PER-L",
     "µM": "MicroMOL-PER-L",
@@ -16,9 +18,6 @@ _QUDT_UNIT_IDENTIFIER_BY_UNIT: dict[str, str] = {
     "%": "PERCENT",
     "ug.mL-1": "MicroGM-PER-MilliL",
     "mg.kg-1": "MilliGM-PER-KiloGM",
-}
-_QUDT_UNIT_IDENTIFIER_BY_LEGACY_URI: dict[str, str] = {
-    "http://www.openphacts.org/units/nanomolar": "NanoMOL-PER-L",
 }
 _UNIT_ALIASES: dict[str, str] = {
     "um": "µM",
@@ -61,12 +60,22 @@ def resolve_qudt_unit_identifier(value: str) -> str | None:
         if mapped_identifier is not None:
             return mapped_identifier
 
-    return _QUDT_UNIT_IDENTIFIER_BY_LEGACY_URI.get(value.casefold())
+    return _legacy_qudt_identifier_from_uri(value)
 
 
 def _qudt_identifier_from_uri(value: str) -> str | None:
-    lowered = value.casefold()
-    for prefix in ("http://qudt.org/vocab/unit/", "https://qudt.org/vocab/unit/"):
-        if lowered.startswith(prefix):
-            return value.rsplit("/", maxsplit=1)[-1]
+    parsed = urlparse(value.strip())
+    hostname = parsed.hostname.casefold() if parsed.hostname is not None else None
+    if hostname == "qudt.org" and parsed.path.startswith("/vocab/unit/"):
+        return parsed.path.rsplit("/", maxsplit=1)[-1]
+    return None
+
+
+def _legacy_qudt_identifier_from_uri(value: str) -> str | None:
+    parsed = urlparse(value.strip())
+    hostname = parsed.hostname.casefold() if parsed.hostname is not None else None
+    if hostname != "www.openphacts.org":
+        return None
+    if parsed.path.casefold() == "/units/nanomolar":
+        return "NanoMOL-PER-L"
     return None

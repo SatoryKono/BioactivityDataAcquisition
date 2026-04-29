@@ -157,6 +157,10 @@ Interpretation:
 - missing manifest sidecar for an enabled control-plane path is an integrity issue;
 - missing ledger file is expected only when `run_ledger_enabled=false` or the run never reached ledger attachment;
 - run-id index files MUST resolve to one `manifest_id`.
+- a run-id index that points at a missing or different manifest is storage
+  corruption, not a cache miss; `bioetl run-manifest show` should surface a
+  corruption error, and read metrics should emit
+  `bioetl_control_plane_reads_total{store="manifest",status="failed"}`.
 - `_diagnostic` anchors SHOULD be present on persisted ledger entries once the ledger is attached.
 
 ### 5. Validate invariants

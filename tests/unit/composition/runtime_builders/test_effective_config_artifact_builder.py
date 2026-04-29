@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 from uuid import uuid4
 
@@ -13,6 +14,7 @@ from bioetl.application.services.effective_config_service import (
 from bioetl.composition.observability import ObservabilityBundle
 from bioetl.composition.runtime_builders.inputs_resolver import RunnerInputs
 from bioetl.composition.runtime_builders.effective_config_artifact_builder import (
+    _build_execution_settings_snapshot,
     _build_effective_config_source_refs,
     create_and_persist_composite_effective_config_artifact,
     create_and_persist_effective_config_artifact,
@@ -23,11 +25,11 @@ from bioetl.domain.control_plane.config_source_hashing import (
 from bioetl.domain.context import PipelineRunContext
 from bioetl.domain.context_cached_bronze import CachedBronzeContext
 from bioetl.domain.config import RuntimeConfig
+from bioetl.domain.ports.noop import NoOpAudit, NoOpMetrics, NoOpTracing
 from bioetl.domain.types import RunID
 from bioetl.domain.types import RunType
 from bioetl.infrastructure.config import Settings
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
-from bioetl.domain.ports.noop import NoOpAudit, NoOpMetrics, NoOpTracing
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 
@@ -104,6 +106,34 @@ def _build_pipeline_run_context() -> PipelineRunContext:
         run_id=RunID(uuid4()),
         run_type=RunType.INCREMENTAL,
     )
+
+
+def test_execution_settings_snapshot_redacts_secret_values_and_hashes_surfaces() -> None:
+    settings = Settings(
+        data_dir=Path("data"),
+        pubmed_api_key="pubmed-secret",
+        semanticscholar_api_key="semantic-secret",
+    )
+
+    snapshot = _build_execution_settings_snapshot(settings)
+    rendered = json.dumps(snapshot, sort_keys=True, default=str)
+    secret_redaction = snapshot["secret_redaction"]
+    assert isinstance(secret_redaction, dict)
+    secret_surfaces = secret_redaction["secret_surfaces"]
+    assert isinstance(secret_surfaces, dict)
+
+    assert "pubmed-secret" not in rendered
+    assert "semantic-secret" not in rendered
+    assert snapshot["snapshot_hash"].startswith("sha256:")
+    assert "settings.pubmed_api_key" in snapshot["materialized_surfaces"]
+    pubmed_surface = secret_surfaces["settings.pubmed_api_key"]
+    semantic_scholar_surface = secret_surfaces["settings.semanticscholar_api_key"]
+    assert isinstance(pubmed_surface, dict)
+    assert isinstance(semantic_scholar_surface, dict)
+    assert pubmed_surface["present"] is True
+    assert semantic_scholar_surface["present"] is True
+    assert str(pubmed_surface["value_hash"]).startswith("sha256:")
+    assert str(semantic_scholar_surface["value_hash"]).startswith("sha256:")
 
 
 def test_build_effective_config_source_refs_is_stable_across_equivalent_calls(
@@ -393,6 +423,50 @@ def test_create_and_persist_effective_config_artifact_uses_effective_replay_prof
 
     assert captured["required_persistence_profile"] == "replay_ready"
     assert captured["runtime_overrides"]["cli"]["exact_replay"] is True
+
+
+def test_create_and_persist_effective_config_artifact_promotes_prod_family_default(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    captured: dict[str, object] = {}
+
+    def _fake_payload(
+        *,
+        pipeline_name: str,
+        pipeline_kind: str,
+        resolved_config: object,
+        runtime_overrides: dict[str, object],
+        provider: str,
+        entity: str,
+        required_persistence_profile: str,
+        settings: Settings,
+        logger: object,
+        run_id: RunID,
+    ) -> tuple[str, str, str, str]:
+        captured["required_persistence_profile"] = required_persistence_profile
+        return ("artifact-1", "resolved-hash", "effective-hash", "dq-hash")
+
+    monkeypatch.setattr(
+        "bioetl.composition.runtime_builders.effective_config_artifact_builder._create_and_persist_effective_config_artifact_payload",
+        _fake_payload,
+    )
+
+    observability = ObservabilityBundle.create(
+        logger=NoOpLogger(),
+        metrics=NoOpMetrics(),
+        tracer=NoOpTracing(),
+        audit=NoOpAudit(),
+    )
+    inputs = _build_runner_inputs(Settings(env="prod", data_dir=Path("data")), observability)
+
+    create_and_persist_effective_config_artifact(
+        ctx=_build_pipeline_run_context(),
+        inputs=inputs,
+        provider="chembl",
+        entity="activity",
+    )
+
+    assert captured["required_persistence_profile"] == "replay_ready"
 
 
 def test_create_and_persist_composite_effective_config_artifact_forwards_required_profile(

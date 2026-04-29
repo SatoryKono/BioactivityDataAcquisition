@@ -95,6 +95,37 @@ class FileEffectiveConfigArtifactStore:
             return None
         return _read_json_object(occurrence_path)
 
+    def diff_occurrences_by_run_id(
+        self,
+        left_run_id: RunID,
+        right_run_id: RunID,
+    ) -> dict[str, object]:
+        """Compare semantic and occurrence identity for two effective configs."""
+        left_artifact = self.get_by_run_id(left_run_id)
+        right_artifact = self.get_by_run_id(right_run_id)
+        left_occurrence = self.get_occurrence_by_run_id(left_run_id)
+        right_occurrence = self.get_occurrence_by_run_id(right_run_id)
+        semantic_equivalent = (
+            left_artifact is not None
+            and right_artifact is not None
+            and _to_stable_json(left_artifact) == _to_stable_json(right_artifact)
+        )
+        occurrence_differences = _diff_occurrence_payloads(
+            left_occurrence,
+            right_occurrence,
+        )
+        return {
+            "left_run_id": str(left_run_id),
+            "right_run_id": str(right_run_id),
+            "left_artifact_present": left_artifact is not None,
+            "right_artifact_present": right_artifact is not None,
+            "left_occurrence_present": left_occurrence is not None,
+            "right_occurrence_present": right_occurrence is not None,
+            "semantic_equivalent": semantic_equivalent,
+            "occurrence_only": semantic_equivalent and bool(occurrence_differences),
+            "differences": occurrence_differences,
+        }
+
     def _save_semantic_artifact(
         self,
         *,
@@ -188,3 +219,42 @@ def _build_occurrence_payload(
     if schema_version is not None:
         occurrence_payload["schema_version"] = schema_version
     return occurrence_payload
+
+
+def _flatten_occurrence_payload(payload: dict[str, object] | None) -> dict[str, object]:
+    """Flatten occurrence payload fields into stable diff paths."""
+    if payload is None:
+        return {}
+    flattened = {
+        key: value
+        for key, value in payload.items()
+        if key != _OCCURRENCE_ENVELOPE_KEY
+    }
+    occurrence_envelope = payload.get(_OCCURRENCE_ENVELOPE_KEY)
+    if isinstance(occurrence_envelope, dict):
+        for key, value in sorted(occurrence_envelope.items()):
+            flattened[f"{_OCCURRENCE_ENVELOPE_KEY}.{key}"] = value
+    return flattened
+
+
+def _diff_occurrence_payloads(
+    left: dict[str, object] | None,
+    right: dict[str, object] | None,
+) -> list[dict[str, object]]:
+    """Return field-level occurrence differences for operator diagnostics."""
+    left_flat = _flatten_occurrence_payload(left)
+    right_flat = _flatten_occurrence_payload(right)
+    differences: list[dict[str, object]] = []
+    for field in sorted(set(left_flat) | set(right_flat)):
+        left_value = left_flat.get(field)
+        right_value = right_flat.get(field)
+        if left_value == right_value:
+            continue
+        differences.append(
+            {
+                "field": field,
+                "left": left_value,
+                "right": right_value,
+            }
+        )
+    return differences
