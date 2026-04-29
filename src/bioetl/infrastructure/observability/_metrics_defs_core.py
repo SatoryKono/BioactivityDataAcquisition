@@ -33,6 +33,7 @@ __all__ = [
     "QUARANTINE_OPERATOR_DURATION_SECONDS",
     "QUARANTINE_OPERATOR_OPERATIONS_TOTAL",
     "QUARANTINE_RECORDS_TOTAL",
+    "RECORD_FLOW_RECORDS_TOTAL",
     "RECORDS_PROCESSED_TOTAL",
     "SILVER_FILTER_REJECTIONS_TOTAL",
     "VACUUM_FILES_REMOVED_TOTAL",
@@ -48,6 +49,12 @@ RECORDS_PROCESSED_TOTAL = Counter(
     "bioetl_records_processed_total",
     "Total number of records processed by the pipeline",
     ["pipeline", "stage", "run_type"],
+)
+
+RECORD_FLOW_RECORDS_TOTAL = Counter(
+    "bioetl_record_flow_records_total",
+    "Total records observed in the bounded pipeline flow projection",
+    ["pipeline", "run_type", "flow_stage"],
 )
 
 ERRORS_TOTAL = Counter(

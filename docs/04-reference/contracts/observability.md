@@ -72,6 +72,37 @@ Cross-links for canonical observability governance:
 
 Важно: `kebab-case` вида `bioetl-pipeline-duration-seconds` считается legacy и неканоничным.
 
+### 2.1.1 Label normalization
+
+- `endpoint` для adapter request metrics MUST публиковаться как bounded
+  route-template (`/works/{id}`, а не `/works/123456789`)
+- `source_file` для filter metrics MUST публиковаться как normalized basename
+  token; raw paths и user/data-dependent filenames outside the bounded token
+  shape запрещены
+- `operation` для adapter fallback/retry/error families MUST использовать
+  reviewed bounded vocabulary; неизвестные значения схлопываются в `other`
+- runtime `stage`/`phase` labels MUST использовать canonical bounded vocabularies
+  rather than free-text ad hoc values
+
+Canonical ordinary lifecycle phases:
+
+- `startup`
+- `preflight`
+- `lifecycle_clear`
+- `execution`
+- `postrun`
+- `cleanup`
+
+Canonical composite/runtime phase additions:
+
+- `preflight_validation`
+- `seed`
+- `dependencies`
+- `enrichment`
+- `merge`
+- `cross_validation`
+- `gold_write`
+
 ### 2.2 Logging schema
 
 `UnifiedLogger` обеспечивает обязательные поля контекста:

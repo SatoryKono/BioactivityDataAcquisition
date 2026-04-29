@@ -79,3 +79,23 @@ class PipelineMetricsRecorder:
                 "field": field or "",
             },
         )
+
+    def record_record_flow(
+        self,
+        *,
+        run_type: str,
+        flow_stage: str,
+        count: int = 1,
+    ) -> None:
+        """Increment the canonical bounded record-flow projection counter."""
+        if self.metrics is None:
+            return
+        self.metrics.increment_counter(
+            "bioetl_record_flow_records_total",
+            count,
+            {
+                "pipeline": self.pipeline,
+                "run_type": run_type,
+                "flow_stage": flow_stage,
+            },
+        )

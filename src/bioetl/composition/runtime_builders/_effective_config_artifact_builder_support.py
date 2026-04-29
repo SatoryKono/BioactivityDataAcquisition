@@ -64,6 +64,10 @@ _EXECUTION_SECRET_SETTING_SURFACES: tuple[tuple[str, str], ...] = (
 )
 
 
+def _setting_attr(host: object, name: str, default: object = None) -> object:
+    return getattr(host, name, default)
+
+
 def _sha256_text(value: str) -> str:
     return f"sha256:{hashlib.sha256(value.encode('utf-8')).hexdigest()}"
 
@@ -95,46 +99,58 @@ def _build_secret_surface_inventory(settings: Settings) -> dict[str, object]:
 
 def build_execution_settings_snapshot(settings: Settings) -> dict[str, object]:
     """Materialize env-derived execution settings without exposing secrets."""
-    pipeline = settings.pipeline
-    control_plane = pipeline.control_plane
-    observability = settings.observability
+    pipeline = _setting_attr(settings, "pipeline", object())
+    control_plane = _setting_attr(pipeline, "control_plane", object())
+    observability = _setting_attr(settings, "observability", object())
     snapshot: dict[str, object] = {
         "schema_version": "execution-settings-v1",
         "materialized_surfaces": list(_EXECUTION_AFFECTING_SETTINGS_SURFACES),
         "settings": {
-            "env": settings.env,
-            "debug": settings.debug,
-            "test_mode": settings.test_mode,
-            "data_dir": str(settings.data_dir),
-            "strict_error_handling": settings.strict_error_handling,
-            "strict_medallion": settings.strict_medallion,
-            "silver_dedup_timeout_seconds": settings.silver_dedup_timeout_seconds,
-            "pii_salt_rotation_active": settings.pii_salt_rotation_active,
-            "json_encoder": settings.json_encoder,
-            "default_email": settings.default_email,
+            "env": _setting_attr(settings, "env"),
+            "debug": _setting_attr(settings, "debug", False),
+            "test_mode": _setting_attr(settings, "test_mode", False),
+            "data_dir": str(_setting_attr(settings, "data_dir", "")),
+            "strict_error_handling": _setting_attr(
+                settings, "strict_error_handling", False
+            ),
+            "strict_medallion": _setting_attr(settings, "strict_medallion", False),
+            "silver_dedup_timeout_seconds": _setting_attr(
+                settings, "silver_dedup_timeout_seconds", None
+            ),
+            "pii_salt_rotation_active": _setting_attr(
+                settings, "pii_salt_rotation_active", False
+            ),
+            "json_encoder": _setting_attr(settings, "json_encoder"),
+            "default_email": _setting_attr(settings, "default_email"),
         },
         "pipeline": {
-            "batch_size": pipeline.batch_size,
-            "checkpoint_interval": pipeline.checkpoint_interval,
-            "relaxed_dq": pipeline.relaxed_dq,
-            "max_concurrent_batches": pipeline.max_concurrent_batches,
-            "heartbeat_interval": pipeline.heartbeat_interval,
-            "health_check_mode": pipeline.health_check_mode,
+            "batch_size": _setting_attr(pipeline, "batch_size", None),
+            "checkpoint_interval": _setting_attr(pipeline, "checkpoint_interval", None),
+            "relaxed_dq": _setting_attr(pipeline, "relaxed_dq", False),
+            "max_concurrent_batches": _setting_attr(
+                pipeline, "max_concurrent_batches", None
+            ),
+            "heartbeat_interval": _setting_attr(pipeline, "heartbeat_interval", None),
+            "health_check_mode": _setting_attr(pipeline, "health_check_mode", None),
         },
         "control_plane": {
             "required_persistence_profile": (
-                control_plane.required_persistence_profile
+                _setting_attr(control_plane, "required_persistence_profile", None)
             ),
-            "run_manifest_enabled": control_plane.run_manifest_enabled,
-            "run_ledger_enabled": control_plane.run_ledger_enabled,
+            "run_manifest_enabled": _setting_attr(
+                control_plane, "run_manifest_enabled", True
+            ),
+            "run_ledger_enabled": _setting_attr(
+                control_plane, "run_ledger_enabled", True
+            ),
             "checkpoint_compatibility_policy": (
-                control_plane.checkpoint_compatibility_policy
+                _setting_attr(control_plane, "checkpoint_compatibility_policy", None)
             ),
         },
         "observability": {
-            "metrics_enabled": observability.metrics_enabled,
-            "tracing_enabled": observability.tracing_enabled,
-            "audit_enabled": observability.audit_enabled,
+            "metrics_enabled": _setting_attr(observability, "metrics_enabled", True),
+            "tracing_enabled": _setting_attr(observability, "tracing_enabled", False),
+            "audit_enabled": _setting_attr(observability, "audit_enabled", False),
         },
         "secret_redaction": _build_secret_surface_inventory(settings),
         "non_materialized_semantic_env_dependencies": [],

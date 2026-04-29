@@ -9,11 +9,48 @@ from bioetl.domain.observability_contract import normalize_observability_metric_
 from bioetl.domain.ports import MetricLabels
 
 OBSERVABILITY_EVENTS_COUNTER_NAME = "bioetl_observability_events_total"
+_ADAPTER_ENDPOINT_LABEL_METRICS = frozenset(
+    {
+        "bioetl_adapter_request_duration_seconds",
+        "bioetl_adapter_request_p95_seconds",
+        "bioetl_adapter_requests_total",
+        "bioetl_adapter_batch_size",
+    }
+)
+_ADAPTER_OPERATION_LABEL_METRICS = frozenset(
+    {
+        "bioetl_adapter_error_taxonomy_total",
+        "bioetl_adapter_fallback_attempts_total",
+        "bioetl_adapter_fallback_hit_rate",
+        "bioetl_adapter_fallback_hits_total",
+        "bioetl_data_source_retries_total",
+        "bioetl_data_source_retry_exhausted_total",
+    }
+)
 _SOURCE_FILE_LABEL_METRICS = frozenset(
     {
         "bioetl_filter_ids_loaded_total",
         "bioetl_filter_ids_duplicates_total",
         "bioetl_filter_combinations_loaded_total",
+    }
+)
+_STAGE_LABEL_METRICS = frozenset(
+    {
+        "bioetl_batch_size_records",
+        "bioetl_dq_context_build_failures_total",
+        "bioetl_dq_report_generated_total",
+        "bioetl_dq_report_skipped_total",
+        "bioetl_errors_total",
+        "bioetl_pipeline_duration_seconds",
+        "bioetl_records_processed_total",
+    }
+)
+_FLOW_STAGE_LABEL_METRICS = frozenset({"bioetl_record_flow_records_total"})
+_PHASE_LABEL_METRICS = frozenset({"bioetl_phase_duration_seconds"})
+_POSTRUN_PHASE_LABEL_METRICS = frozenset(
+    {
+        "bioetl_postrun_phase_duration_seconds",
+        "bioetl_postrun_phase_events_total",
     }
 )
 
@@ -134,6 +171,68 @@ _ALLOWED_STAGE_LABELS = frozenset(
         "other",
     }
 )
+_ALLOWED_RUNTIME_STAGE_LABELS = frozenset(
+    {
+        "pipeline",
+        "startup",
+        "preflight",
+        "lifecycle_clear",
+        "execution",
+        "postrun",
+        "cleanup",
+        "bronze",
+        "silver",
+        "gold",
+        "filtered_out",
+        "quarantined",
+        "transform",
+        "validation",
+        "write",
+        "checkpoint",
+        "extract",
+        "load",
+        "other",
+    }
+)
+_ALLOWED_FLOW_STAGE_LABELS = frozenset(
+    {
+        "fetched",
+        "bronze",
+        "silver",
+        "gold",
+        "filtered_out",
+        "quarantined",
+        "other",
+    }
+)
+_ALLOWED_PHASE_LABELS = frozenset(
+    {
+        "startup",
+        "preflight",
+        "lifecycle_clear",
+        "execution",
+        "postrun",
+        "cleanup",
+        "preflight_validation",
+        "seed",
+        "dependencies",
+        "enrichment",
+        "merge",
+        "cross_validation",
+        "gold_write",
+        "other",
+    }
+)
+_ALLOWED_POSTRUN_PHASE_LABELS = frozenset(
+    {
+        "dq_evaluation",
+        "dq_reports",
+        "compaction",
+        "vacuum",
+        "final_metadata",
+        "other",
+    }
+)
 _ALLOWED_SEVERITY_LABELS = frozenset(
     {"soft_fail", "hard_fail", "warning", "error", "other"}
 )
@@ -180,6 +279,19 @@ _ALLOWED_STRUCTURAL_COMPARISON_LABELS = frozenset(
         "other",
     }
 )
+_ALLOWED_ADAPTER_OPERATION_LABELS = frozenset(
+    {
+        "doi_resolution",
+        "fallback_flow",
+        "fetch",
+        "fetch_batch",
+        "fetch_filtered_with_fallback",
+        "health_check",
+        "search",
+        "title_fallback",
+        "other",
+    }
+)
 
 _DYNAMIC_ENDPOINT_SEGMENT_PATTERNS = (
     re.compile(r"^\d+$"),
@@ -198,12 +310,46 @@ def normalize_metric_dispatch_labels(
     """Normalize metric labels for metrics with stricter label contracts."""
     if name == OBSERVABILITY_EVENTS_COUNTER_NAME:
         return normalize_observability_metric_labels(labels)
+    if name in _ADAPTER_ENDPOINT_LABEL_METRICS:
+        return {
+            **labels,
+            "endpoint": normalize_adapter_endpoint_label(
+                str(labels.get("endpoint", "/unknown"))
+            ),
+        }
+    if name in _ADAPTER_OPERATION_LABEL_METRICS:
+        return {
+            **labels,
+            "operation": normalize_adapter_operation_label(
+                str(labels.get("operation", "other"))
+            ),
+        }
     if name in _SOURCE_FILE_LABEL_METRICS:
         return {
             **labels,
             "source_file": normalize_source_file_label(
                 str(labels.get("source_file", "unknown"))
             ),
+        }
+    if name in _STAGE_LABEL_METRICS:
+        return {
+            **labels,
+            "stage": normalize_runtime_stage(str(labels.get("stage", "other"))),
+        }
+    if name in _FLOW_STAGE_LABEL_METRICS:
+        return {
+            **labels,
+            "flow_stage": normalize_flow_stage(str(labels.get("flow_stage", "other"))),
+        }
+    if name in _PHASE_LABEL_METRICS:
+        return {
+            **labels,
+            "phase": normalize_runtime_phase(str(labels.get("phase", "other"))),
+        }
+    if name in _POSTRUN_PHASE_LABEL_METRICS:
+        return {
+            **labels,
+            "phase": normalize_postrun_phase(str(labels.get("phase", "other"))),
         }
     if name == "bioetl_quarantine_records_total":
         return {
@@ -293,6 +439,11 @@ def normalize_source_file_label(source_file: str) -> str:
     return collapsed[:64]
 
 
+def normalize_adapter_operation_label(operation: str) -> str:
+    """Normalize adapter operation labels to the reviewed bounded vocabulary."""
+    return _normalize_bounded_label(operation, _ALLOWED_ADAPTER_OPERATION_LABELS)
+
+
 def normalize_quarantine_reason(reason: str) -> str:
     """Normalize quarantine reason to a bounded label set."""
     return _normalize_bounded_label(reason, _ALLOWED_REASON_LABELS)
@@ -322,6 +473,26 @@ def normalize_silver_filter_field(field: str | None) -> str:
 def normalize_dq_stage(stage: str) -> str:
     """Normalize DQ stage label to a bounded label set."""
     return _normalize_bounded_label(stage, _ALLOWED_STAGE_LABELS)
+
+
+def normalize_runtime_stage(stage: str) -> str:
+    """Normalize generic runtime stage labels to a bounded label set."""
+    return _normalize_bounded_label(stage, _ALLOWED_RUNTIME_STAGE_LABELS)
+
+
+def normalize_flow_stage(flow_stage: str) -> str:
+    """Normalize record-flow stage labels to the canonical bounded set."""
+    return _normalize_bounded_label(flow_stage, _ALLOWED_FLOW_STAGE_LABELS)
+
+
+def normalize_runtime_phase(phase: str) -> str:
+    """Normalize lifecycle and composite phase labels to a bounded label set."""
+    return _normalize_bounded_label(phase, _ALLOWED_PHASE_LABELS)
+
+
+def normalize_postrun_phase(phase: str) -> str:
+    """Normalize postrun subphase labels to the canonical bounded set."""
+    return _normalize_bounded_label(phase, _ALLOWED_POSTRUN_PHASE_LABELS)
 
 
 def normalize_dq_severity(severity: str) -> str:

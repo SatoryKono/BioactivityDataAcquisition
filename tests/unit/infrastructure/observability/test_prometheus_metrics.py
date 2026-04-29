@@ -7,6 +7,10 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from bioetl.infrastructure.observability.prometheus_metric_label_policies import (
+    normalize_adapter_operation_label,
+    normalize_postrun_phase,
+    normalize_runtime_phase,
+    normalize_runtime_stage,
     normalize_source_file_label,
 )
 from bioetl.infrastructure.observability.prometheus_metrics import (
@@ -37,7 +41,8 @@ class TestPrometheusMetrics:
                 name="bioetl_pipeline_duration_seconds",
                 value=123.45,
                 labels={
-                    "pipeline_name": "test",
+                    "pipeline": "test",
+                    "stage": "pipeline",
                     "status": "success",
                     "run_type": "full",
                 },
@@ -46,7 +51,10 @@ class TestPrometheusMetrics:
             HISTOGRAMS[
                 "bioetl_pipeline_duration_seconds"
             ].labels.assert_called_once_with(
-                pipeline_name="test", status="success", run_type="full"
+                pipeline="test",
+                stage="pipeline",
+                status="success",
+                run_type="full",
             )
             HISTOGRAMS[
                 "bioetl_pipeline_duration_seconds"
@@ -70,11 +78,17 @@ class TestPrometheusMetrics:
             prometheus_metrics.increment_counter(
                 name="bioetl_records_processed_total",
                 value=100,
-                labels={"pipeline_name": "test", "status": "success"},
+                labels={
+                    "pipeline": "test",
+                    "stage": "bronze",
+                    "run_type": "incremental",
+                },
             )
 
             COUNTERS["bioetl_records_processed_total"].labels.assert_called_once_with(
-                pipeline_name="test", status="success"
+                pipeline="test",
+                stage="bronze",
+                run_type="incremental",
             )
             COUNTERS[
                 "bioetl_records_processed_total"
@@ -114,6 +128,143 @@ class TestPrometheusMetrics:
                 "bioetl_filter_ids_loaded_total"
             ].labels().inc.assert_called_once_with(7)
 
+    def test_adapter_endpoint_metrics_normalize_dynamic_endpoint_labels(
+        self, prometheus_metrics
+    ):
+        """Adapter endpoint families must re-normalize endpoint labels centrally."""
+        with patch.dict(
+            HISTOGRAMS,
+            {"bioetl_adapter_request_duration_seconds": MagicMock()},
+        ):
+            prometheus_metrics.observe_histogram(
+                name="bioetl_adapter_request_duration_seconds",
+                value=0.25,
+                labels={
+                    "provider": "crossref",
+                    "endpoint": "/works/123456789",
+                },
+            )
+
+            HISTOGRAMS[
+                "bioetl_adapter_request_duration_seconds"
+            ].labels.assert_called_once_with(
+                provider="crossref",
+                endpoint="/works/{id}",
+            )
+            HISTOGRAMS[
+                "bioetl_adapter_request_duration_seconds"
+            ].labels().observe.assert_called_once_with(0.25)
+
+    def test_adapter_operation_metrics_normalize_unreviewed_operations(
+        self, prometheus_metrics
+    ):
+        """Adapter operation labels must collapse unknown free-text to other."""
+        with patch.dict(
+            COUNTERS,
+            {"bioetl_adapter_error_taxonomy_total": MagicMock()},
+        ):
+            prometheus_metrics.increment_counter(
+                name="bioetl_adapter_error_taxonomy_total",
+                value=1,
+                labels={
+                    "provider": "chembl",
+                    "operation": "custom_operation",
+                    "error_category": "provider",
+                    "error_type": "timeout",
+                },
+            )
+
+            COUNTERS["bioetl_adapter_error_taxonomy_total"].labels.assert_called_once_with(
+                provider="chembl",
+                operation="other",
+                error_category="provider",
+                error_type="timeout",
+            )
+            COUNTERS["bioetl_adapter_error_taxonomy_total"].labels().inc.assert_called_once_with(
+                1
+            )
+
+    def test_runtime_stage_metrics_normalize_unknown_stage_values(
+        self, prometheus_metrics
+    ):
+        """Runtime stage labels must stay within the canonical bounded vocabulary."""
+        with patch.dict(
+            COUNTERS,
+            {"bioetl_records_processed_total": MagicMock()},
+        ):
+            prometheus_metrics.increment_counter(
+                name="bioetl_records_processed_total",
+                value=5,
+                labels={
+                    "pipeline": "chembl_activity",
+                    "stage": "experimental_stage",
+                    "run_type": "incremental",
+                },
+            )
+
+            COUNTERS["bioetl_records_processed_total"].labels.assert_called_once_with(
+                pipeline="chembl_activity",
+                stage="other",
+                run_type="incremental",
+            )
+            COUNTERS["bioetl_records_processed_total"].labels().inc.assert_called_once_with(
+                5
+            )
+
+    def test_runtime_phase_metrics_normalize_unknown_phase_values(
+        self, prometheus_metrics
+    ):
+        """Phase metrics must reject arbitrary free-text phase labels."""
+        with patch.dict(
+            HISTOGRAMS,
+            {"bioetl_phase_duration_seconds": MagicMock()},
+        ):
+            prometheus_metrics.observe_histogram(
+                name="bioetl_phase_duration_seconds",
+                value=1.5,
+                labels={
+                    "pipeline": "composite_target",
+                    "phase": "totally_new_phase",
+                    "status": "success",
+                },
+            )
+
+            HISTOGRAMS["bioetl_phase_duration_seconds"].labels.assert_called_once_with(
+                pipeline="composite_target",
+                phase="other",
+                status="success",
+            )
+            HISTOGRAMS["bioetl_phase_duration_seconds"].labels().observe.assert_called_once_with(
+                1.5
+            )
+
+    def test_postrun_phase_metrics_normalize_unknown_subphases(
+        self, prometheus_metrics
+    ):
+        """Postrun phase metrics must use the dedicated bounded subphase vocabulary."""
+        with patch.dict(
+            COUNTERS,
+            {"bioetl_postrun_phase_events_total": MagicMock()},
+        ):
+            prometheus_metrics.increment_counter(
+                name="bioetl_postrun_phase_events_total",
+                value=1,
+                labels={
+                    "pipeline": "chembl_activity",
+                    "phase": "custom_postrun",
+                    "status": "success",
+                },
+            )
+
+            COUNTERS["bioetl_postrun_phase_events_total"].labels.assert_called_once_with(
+                pipeline="chembl_activity",
+                phase="other",
+                status="success",
+            )
+            COUNTERS["bioetl_postrun_phase_events_total"].labels().inc.assert_called_once_with(
+                1
+            )
+
     @pytest.mark.parametrize(
         ("raw_value", "expected"),
         [
@@ -126,6 +277,52 @@ class TestPrometheusMetrics:
     def test_normalize_source_file_label(self, raw_value: str, expected: str):
         """Source file labels should collapse to bounded basename-only values."""
         assert normalize_source_file_label(raw_value) == expected
+
+    @pytest.mark.parametrize(
+        ("raw_value", "expected"),
+        [
+            ("fetch_filtered_with_fallback", "fetch_filtered_with_fallback"),
+            ("custom_operation", "other"),
+        ],
+    )
+    def test_normalize_adapter_operation_label(
+        self, raw_value: str, expected: str
+    ) -> None:
+        """Adapter operation labels should stay within the reviewed vocabulary."""
+        assert normalize_adapter_operation_label(raw_value) == expected
+
+    @pytest.mark.parametrize(
+        ("raw_value", "expected"),
+        [
+            ("bronze", "bronze"),
+            ("experimental_stage", "other"),
+        ],
+    )
+    def test_normalize_runtime_stage(self, raw_value: str, expected: str) -> None:
+        """Runtime stage labels should collapse unknown values to other."""
+        assert normalize_runtime_stage(raw_value) == expected
+
+    @pytest.mark.parametrize(
+        ("raw_value", "expected"),
+        [
+            ("seed", "seed"),
+            ("unexpected_phase", "other"),
+        ],
+    )
+    def test_normalize_runtime_phase(self, raw_value: str, expected: str) -> None:
+        """Composite/lifecycle phase labels should stay bounded."""
+        assert normalize_runtime_phase(raw_value) == expected
+
+    @pytest.mark.parametrize(
+        ("raw_value", "expected"),
+        [
+            ("dq_evaluation", "dq_evaluation"),
+            ("postrun_extra", "other"),
+        ],
+    )
+    def test_normalize_postrun_phase(self, raw_value: str, expected: str) -> None:
+        """Postrun subphase labels should use the dedicated bounded vocabulary."""
+        assert normalize_postrun_phase(raw_value) == expected
 
 
 @pytest.mark.unit

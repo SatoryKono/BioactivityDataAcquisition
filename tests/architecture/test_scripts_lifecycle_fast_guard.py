@@ -11,7 +11,7 @@ def _project_root() -> Path:
 
 
 def test_lifecycle_registry_covers_non_active_inventory_scripts() -> None:
-    """All unknown/orphan/legacy scripts in inventory must have lifecycle entries."""
+    """All non-active scripts in inventory must have lifecycle entries."""
     root = _project_root()
     manifest_path = root / "configs" / "quality" / "scripts_inventory_manifest.json"
     registry_path = root / "configs" / "quality" / "scripts_lifecycle_registry.json"
@@ -27,7 +27,13 @@ def test_lifecycle_registry_covers_non_active_inventory_scripts() -> None:
         "Lifecycle registry key 'entries' must be a dict."
     )
 
-    tracked_statuses = {"unknown", "orphan", "legacy"}
+    tracked_statuses = {
+        "unknown",
+        "orphan",
+        "temporary_diagnostic",
+        "supporting",
+        "legacy",
+    }
     required_paths = sorted(
         {
             script["path"]
@@ -41,6 +47,6 @@ def test_lifecycle_registry_covers_non_active_inventory_scripts() -> None:
 
     assert not missing_entries, (
         "Missing lifecycle registry entries for non-active scripts "
-        "(status in {'unknown', 'orphan', 'legacy'}):\n- "
+        "(status in {'unknown', 'orphan', 'temporary_diagnostic', 'supporting', 'legacy'}):\n- "
         + "\n- ".join(missing_entries)
     )

@@ -89,6 +89,7 @@ class RecordProcessor:
             BatchResult with bronze, silver, gold, and quarantined record counts.
         """
         ingestion_ts = self._context.started_at
+        self._batch_metrics.track_records_fetched(len(records))
         bronze_result = await self._execute_with_span(
             "write_bronze",
             self._writer.write_bronze(records, batch_id, ingestion_ts),

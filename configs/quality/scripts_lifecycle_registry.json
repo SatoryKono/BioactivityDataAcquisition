@@ -1,18 +1,12 @@
 {
   "schema_version": "1.0",
-  "description": "Lifecycle decisions for non-active scripts (orphan/legacy).",
+  "description": "Lifecycle decisions for non-active scripts.",
   "entries": {
     "scripts/engineering/repo/_root_governance.py": {
       "owner": "@bioetl-platform",
       "decision": "shared_helper_module",
       "review_by": "2026-07-15",
       "next_step": "Retain as the shared root-governance helper consumed by structure auditors and cleanup tooling; fold it into a broader canonical governance helper surface only if root policy loaders are consolidated further."
-    },
-    "scripts/engineering/dev/powershell/setup_git_path.ps1": {
-      "owner": "@bioetl-platform",
-      "decision": "active",
-      "review_by": "2026-07-15",
-      "next_step": "Retain as the canonical Windows-side developer helper for ensuring Git for Windows precedes GitHub Desktop in PATH; keep it under scripts/engineering/dev and avoid reintroducing a root-level copy."
     },
     "scripts/engineering/dev/python/fix_neo4j_memory_sync_http_uris.py": {
       "owner": "@bioetl-platform",
@@ -67,24 +61,6 @@
       "decision": "compatibility_wrapper",
       "review_by": "2026-07-15",
       "next_step": "Retain as the top-level scripts.ai.vibe module router during the Vibe tooling consolidation window; either add stable external call-sites so it becomes active or remove it if the bash launcher remains the only supported entrypoint."
-    },
-    "scripts/ci_check_docs_parity.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "active",
-      "review_by": "2026-07-15",
-      "next_step": "Validate active usage and integrate into canonical CI workflows."
-    },
-    "scripts/check_cli_parity.py": {
-      "owner": "@bioetl-platform",
-      "decision": "active",
-      "review_by": "2026-07-15",
-      "next_step": "Validate active usage and integrate into canonical CLI validation workflows."
-    },
-    "scripts/check_dq_dsl_parity.py": {
-      "owner": "@bioetl-platform",
-      "decision": "active",
-      "review_by": "2026-07-15",
-      "next_step": "Validate active usage and integrate into canonical DQ validation workflows."
     },
     "scripts/ai/mcp/mcp_brave_search_wrapper.ps1": {
       "owner": "@bioetl-platform",
@@ -242,12 +218,6 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a historical standalone review orchestrator snapshot; prefer the governed py-review-orchestrator skill and current reports workflow instead of extending this orphan script."
     },
-    "scripts/ops/support/repo/cleanup_repository.py": {
-      "owner": "platform-architecture",
-      "decision": "active",
-      "next_step": "Retain as the canonical repository cleanup automation script.",
-      "review_by": "2026-07-15"
-    },
     "scripts/engineering/common/repo_paths.py": {
       "owner": "@bioetl-platform",
       "decision": "internal_helper_orphan",
@@ -398,12 +368,6 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded Mistrall setup helper while environment bootstrap still depends on helper scripts; fold into the canonical setup path when the surface is simplified."
     },
-    "scripts/ai/mistral/run-mistral.ps1": {
-      "owner": "@bioetl-platform",
-      "decision": "compatibility_alias_orphan",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a thin PowerShell compatibility alias to the canonical Mistrall launcher while historical operator paths still reference scripts/ai/mistral; remove it once the alias surface is retired."
-    },
     "scripts/ai/mistrallvibe/helper/check-env.ps1": {
       "owner": "@bioetl-platform",
       "decision": "internal_helper_orphan",
@@ -440,17 +404,47 @@
       "review_by": "2026-07-15",
       "next_step": "Retain as a bounded Neo4j audit connection helper while deployment and audit runbooks still import src/tools/neo4j_audit.py directly; migrate to a canonical scripts/ops or package facade when that audit workflow is consolidated."
     },
+    "src/tools/scripts/check_application_deps.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a legacy wrapper delegating to the canonical engineering QA dependency check; remove once historical src/tools wrapper references are retired."
+    },
+    "src/tools/scripts/check_architecture.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a legacy wrapper delegating to the canonical engineering QA architecture check; remove once historical src/tools wrapper references are retired."
+    },
+    "src/tools/scripts/check_constructor_args.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a legacy wrapper delegating to the canonical engineering QA constructor-argument check; remove once historical src/tools wrapper references are retired."
+    },
+    "src/tools/scripts/config_matrix_generator.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a legacy wrapper delegating to the canonical schema config-matrix generator; remove once historical src/tools wrapper references are retired."
+    },
+    "src/tools/scripts/lint_terminology.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a legacy wrapper delegating to the canonical engineering QA terminology linter; remove once historical src/tools wrapper references are retired."
+    },
     "scripts/qa/lint_terminology.py": {
       "owner": "@bioetl-architecture",
       "decision": "compatibility_wrapper",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a legacy wrapper delegating to the canonical engineering QA terminology linter; remove once historical scripts/qa entrypoints are retired."
     },
-    "scripts/engineering/ci/validate_control_plane_artifacts.py": {
-      "owner": "@bioetl-platform",
-      "decision": "active",
-      "next_step": "Retain as the canonical script for validating control plane artifacts in CI workflows.",
-      "review_by": "2026-07-15"
+    "src/tools/scripts/validate_unified_configs.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a legacy wrapper delegating to the canonical schema unified-config validator; remove once historical src/tools wrapper references are retired."
     },
     "scripts/engineering/dev/bash/.setup_wsl_codex.sh": {
       "owner": "@bioetl-platform",

@@ -196,6 +196,31 @@ DEPRECATED_LEGACY_PATHS: Final[frozenset[str]] = frozenset(
         "scripts/engineering/qa/generate_reports.py",
     }
 )
+ACTIVE_EXPLICIT_SCRIPTS: Final[frozenset[str]] = frozenset(
+    {
+        "scripts/ci_check_docs_parity.sh",
+        "scripts/ops/support/repo/cleanup_repository.py",
+        "scripts/check_dq_dsl_parity.py",
+        "scripts/engineering/ci/validate_control_plane_artifacts.py",
+    }
+)
+SUPPORTING_LIFECYCLE_DECISIONS: Final[frozenset[str]] = frozenset(
+    {
+        "compatibility_wrapper",
+        "internal_compatibility_launcher",
+        "windows_compatibility_wrapper",
+        "shared_helper_module",
+        "internal_helper_orphan",
+        "legacy_manual_utility",
+    }
+)
+NON_ACTIVE_STATUSES: Final[tuple[str, ...]] = (
+    "unknown",
+    "orphan",
+    "temporary_diagnostic",
+    "supporting",
+    "legacy",
+)
 
 
 @dataclass(frozen=True)
@@ -651,7 +676,44 @@ def _dedupe_refs(refs: list[RefEvidence]) -> list[RefEvidence]:
     return sorted(result, key=lambda item: (item.path, item.line, item.text))
 
 
-def _status_for(script_rel: str, refs: list[RefEvidence]) -> str:
+def _status_from_lifecycle_decision(decision: str | None) -> str | None:
+    if decision == "active":
+        return "active"
+    if decision == "temporary_diagnostic":
+        return "temporary_diagnostic"
+    if decision in SUPPORTING_LIFECYCLE_DECISIONS:
+        return "supporting"
+    return None
+
+
+def _load_lifecycle_decision_map(root: Path) -> dict[str, str]:
+    registry_path = root / LIFECYCLE_REGISTRY_DEFAULT
+    if not registry_path.exists():
+        return {}
+    try:
+        registry = _load_json(registry_path)
+    except ValueError:
+        return {}
+
+    entries_raw = registry.get("entries")
+    if not isinstance(entries_raw, dict):
+        return {}
+
+    decisions: dict[str, str] = {}
+    for path_value, meta in entries_raw.items():
+        if not isinstance(path_value, str) or not isinstance(meta, dict):
+            continue
+        decision = meta.get("decision")
+        if isinstance(decision, str):
+            decisions[path_value] = decision
+    return decisions
+
+
+def _status_for(
+    script_rel: str,
+    refs: list[RefEvidence],
+    lifecycle_decisions: dict[str, str],
+) -> str:
     groups = {item.source_group for item in refs}
     legacy_status_sets = (
         LEGACY_MANUAL_OPS_SCRIPTS,
@@ -663,8 +725,16 @@ def _status_for(script_rel: str, refs: list[RefEvidence]) -> str:
     )
     if any(script_rel in candidates for candidates in legacy_status_sets):
         return "active" if groups & STRONG_ACTIVE_GROUPS else "legacy"
+    if script_rel in ACTIVE_EXPLICIT_SCRIPTS:
+        return "active"
+
+    lifecycle_status = _status_from_lifecycle_decision(
+        lifecycle_decisions.get(script_rel)
+    )
 
     if not refs:
+        if lifecycle_status is not None:
+            return lifecycle_status
         return (
             "legacy" if ("_tmp" in script_rel or "debug_" in script_rel) else "orphan"
         )
@@ -672,7 +742,11 @@ def _status_for(script_rel: str, refs: list[RefEvidence]) -> str:
     if groups & {"ci", "build", "skills", "tests", "scripts", "agents"}:
         return "active"
     if groups == {"docs"}:
+        if lifecycle_status is not None:
+            return lifecycle_status
         return "unknown"
+    if lifecycle_status is not None:
+        return lifecycle_status
     return "unknown"
 
 
@@ -694,6 +768,7 @@ def _agent_usage(refs: list[RefEvidence]) -> list[str]:
 def _build_inventory(root: Path) -> dict[str, object]:
     scripts = _iter_scripts(root)
     refs_map = _discover_refs(root, scripts)
+    lifecycle_decisions = _load_lifecycle_decision_map(root)
     rows: list[dict[str, object]] = []
     status_counts: Counter[str] = Counter()
     group_counts: Counter[str] = Counter()
@@ -701,7 +776,7 @@ def _build_inventory(root: Path) -> dict[str, object]:
     for script in scripts:
         script_rel = script.relative_to(root).as_posix()
         refs = _dedupe_refs(refs_map[script_rel])
-        status = _status_for(script_rel, refs)
+        status = _status_for(script_rel, refs, lifecycle_decisions)
         status_counts[status] += 1
         for group in {item.source_group for item in refs}:
             group_counts[group] += 1
@@ -792,7 +867,7 @@ def _write_deprecation_report(path: Path, payload: dict[str, object]) -> None:
     for item in scripts:
         assert isinstance(item, dict)
         status = str(item.get("status", "unknown"))
-        if status in {"unknown", "orphan", "legacy"}:
+        if status in NON_ACTIVE_STATUSES:
             grouped[status].append(item)
 
     lines = [
@@ -802,7 +877,7 @@ def _write_deprecation_report(path: Path, payload: dict[str, object]) -> None:
         "",
     ]
 
-    for status in ("unknown", "orphan", "legacy"):
+    for status in NON_ACTIVE_STATUSES:
         entries = sorted(grouped.get(status, []), key=lambda row: str(row["path"]))
         lines.append(f"## {status} ({len(entries)})")
         lines.append("")
@@ -823,6 +898,14 @@ def _write_deprecation_report(path: Path, payload: dict[str, object]) -> None:
             elif status == "orphan":
                 next_step = (
                     "Plan staged removal or add explicit compatibility call-site."
+                )
+            elif status == "temporary_diagnostic":
+                next_step = (
+                    "Retain only while the bounded troubleshooting flow remains live."
+                )
+            elif status == "supporting":
+                next_step = (
+                    "Retain as a supporting surface/helper until a canonical replacement exists."
                 )
             else:
                 next_step = "Archive/remove after freeze window if no active consumers."
@@ -865,7 +948,7 @@ def _check_lifecycle_registry(
     if entries_raw is None:
         return 1
     script_map = _build_script_map(payload)
-    target_statuses = {"unknown", "orphan", "legacy"}
+    target_statuses = set(NON_ACTIVE_STATUSES)
     missing, invalid, forbidden = _validate_target_registry_entries(
         script_map=script_map,
         entries_raw=entries_raw,
@@ -890,7 +973,7 @@ def _check_lifecycle_registry(
         return 1
 
     print(
-        f"[OK] Lifecycle registry covers unknown/orphan/legacy scripts: {registry_path}"
+        f"[OK] Lifecycle registry covers non-active scripts: {registry_path}"
     )
     return 0
 
@@ -1019,19 +1102,19 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         "--deprecation-report",
         default="",
         help=(
-            "Optional path to write markdown backlog for unknown/orphan/legacy scripts. "
+            "Optional path to write markdown backlog for non-active scripts. "
             f"Use default path with --deprecation-report={DEPRECATION_REPORT_DEFAULT}"
         ),
     )
     parser.add_argument(
         "--lifecycle-registry",
         default=LIFECYCLE_REGISTRY_DEFAULT,
-        help="Path to lifecycle registry JSON for orphan/legacy scripts",
+        help="Path to lifecycle registry JSON for non-active scripts",
     )
     parser.add_argument(
         "--check-lifecycle",
         action="store_true",
-        help="Validate lifecycle registry coverage for unknown/orphan/legacy scripts",
+        help="Validate lifecycle registry coverage for non-active scripts",
     )
     parser.add_argument(
         "--forbid-evaluate-active",

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import json
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
 from pathlib import Path
@@ -10,7 +11,6 @@ from typing import TYPE_CHECKING
 
 from bioetl import __version__ as BIOETL_VERSION
 from bioetl.domain.ports import ExportFileFingerprint
-from bioetl.domain.serialization import serialize_to_json_canonical
 
 if TYPE_CHECKING:
     import pyarrow as pa
@@ -364,7 +364,9 @@ def _dataset_bundle_id(
         "row_count": row_count,
         "table_name": table_name,
     }
-    digest = hashlib.sha256(serialize_to_json_canonical(payload).encode()).hexdigest()
+    digest = hashlib.sha256(
+        json.dumps(payload, sort_keys=True, separators=(",", ":"), default=str).encode()
+    ).hexdigest()
     return f"bioetl-export-{digest}"
 
 

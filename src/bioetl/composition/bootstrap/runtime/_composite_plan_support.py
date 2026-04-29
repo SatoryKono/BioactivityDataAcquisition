@@ -99,10 +99,7 @@ def build_bootstrap_runtime_resources(
     run_id: str | None,
 ) -> BootstrapRuntimeResources:
     """Resolve the canonical runtime-basics resource bundle."""
-    resolved_bundle = bootstrap_runtime_basics_fn(
-        config=config,
-        run_id=run_id,
-    )
+    resolved_bundle = bootstrap_runtime_basics_fn(config=config, run_id=run_id)
     if isinstance(resolved_bundle, CompositeInfrastructureContext):
         return BootstrapRuntimeResources(
             run_id=resolved_bundle.run_id,
@@ -114,9 +111,7 @@ def build_bootstrap_runtime_resources(
             lock=resolved_bundle.lock,
             clock=resolved_bundle.clock,
         )
-    effective_run_id, settings, logger, metrics, tracer, storage, lock = (
-        resolved_bundle
-    )
+    effective_run_id, settings, logger, metrics, tracer, storage, lock = resolved_bundle
     return BootstrapRuntimeResources(
         run_id=effective_run_id,
         settings=settings,

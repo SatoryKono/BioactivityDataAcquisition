@@ -139,6 +139,12 @@ Canonical naming rules:
 - duration families use `_seconds` or `_ms`
 - labels remain bounded and MUST NOT include `run_id`, filesystem paths,
   manifest identifiers, or other high-cardinality runtime anchors
+- adapter `endpoint` labels MUST be normalized to bounded route templates
+- filter `source_file` labels MUST be normalized to bounded basename tokens
+- adapter `operation` labels MUST use reviewed bounded vocabularies; unknown
+  values collapse to `other`
+- runtime `stage` and lifecycle/composite `phase` labels MUST use canonical
+  bounded vocabularies rather than ad hoc free-text values
 
 Representative runtime families:
 

@@ -18,7 +18,18 @@ from bioetl.infrastructure.observability.prometheus_metric_registries import (
 )
 
 _FORBIDDEN_LABELS = frozenset(
-    {"run_id", "manifest_id", "path", "file_path", "dataset_hash", "source_batch_id"}
+    {
+        "run_id",
+        "manifest_id",
+        "lineage_fragment_id",
+        "record_id",
+        "content_hash",
+        "payload_hash",
+        "path",
+        "file_path",
+        "dataset_hash",
+        "source_batch_id",
+    }
 )
 
 
@@ -222,6 +233,49 @@ def test_control_plane_and_lineage_metrics_avoid_high_cardinality_labels() -> No
     )
     assert checkpoint_operator_histogram_labels == {"operation", "status"}
     assert _FORBIDDEN_LABELS.isdisjoint(checkpoint_operator_histogram_labels)
+
+
+@pytest.mark.unit
+def test_adapter_metrics_use_bounded_label_names_only() -> None:
+    expected_counter_labels = {
+        "bioetl_adapter_requests_total": {"provider", "endpoint", "status"},
+        "bioetl_adapter_error_taxonomy_total": {
+            "provider",
+            "operation",
+            "error_category",
+            "error_type",
+        },
+        "bioetl_adapter_fallback_attempts_total": {"provider", "operation"},
+        "bioetl_adapter_fallback_hits_total": {"provider", "operation"},
+        "bioetl_filter_ids_loaded_total": {"pipeline", "source_file"},
+        "bioetl_filter_ids_duplicates_total": {"pipeline", "source_file"},
+        "bioetl_filter_combinations_loaded_total": {"pipeline", "source_file"},
+    }
+    expected_histogram_labels = {
+        "bioetl_adapter_request_duration_seconds": {"provider", "endpoint"},
+        "bioetl_adapter_batch_size": {"provider", "endpoint"},
+        "bioetl_phase_duration_seconds": {"pipeline", "phase", "status"},
+        "bioetl_postrun_phase_duration_seconds": {"pipeline", "phase", "status"},
+    }
+    expected_gauge_labels = {
+        "bioetl_adapter_request_p95_seconds": {"provider", "endpoint"},
+        "bioetl_adapter_fallback_hit_rate": {"provider", "operation"},
+    }
+
+    for metric_name, labels in expected_counter_labels.items():
+        actual_labels = set(COUNTERS[metric_name]._labelnames)
+        assert actual_labels == labels
+        assert _FORBIDDEN_LABELS.isdisjoint(actual_labels)
+
+    for metric_name, labels in expected_histogram_labels.items():
+        actual_labels = set(HISTOGRAMS[metric_name]._labelnames)
+        assert actual_labels == labels
+        assert _FORBIDDEN_LABELS.isdisjoint(actual_labels)
+
+    for metric_name, labels in expected_gauge_labels.items():
+        actual_labels = set(GAUGES[metric_name]._labelnames)
+        assert actual_labels == labels
+        assert _FORBIDDEN_LABELS.isdisjoint(actual_labels)
 
 
 @pytest.mark.unit

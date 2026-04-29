@@ -1,19 +1,19 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-29T05:21:10.745994+00:00",
+  "generated_at": "2026-04-29T05:45:18.884695+00:00",
   "summary": {
-    "total_scripts": 383,
+    "total_scripts": 386,
     "status_counts": {
-      "active": 306,
-      "orphan": 65,
-      "unknown": 12
+      "active": 310,
+      "supporting": 60,
+      "temporary_diagnostic": 16
     },
     "reference_group_coverage": {
       "agents": 4,
       "build": 2,
       "ci": 49,
       "docs": 121,
-      "scripts": 278,
+      "scripts": 282,
       "skills": 8,
       "tests": 131
     }
@@ -343,7 +343,7 @@
     {
       "path": "scripts/ai/codex/helper/check-env.ps1",
       "type": "ps1",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
@@ -351,7 +351,7 @@
     {
       "path": "scripts/ai/codex/helper/check-env.sh",
       "type": "sh",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
@@ -539,7 +539,7 @@
     {
       "path": "scripts/ai/codex/helper/setup-env.sh",
       "type": "sh",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
@@ -625,7 +625,7 @@
     {
       "path": "scripts/ai/codex/helper/test-basic.sh",
       "type": "sh",
-      "status": "unknown",
+      "status": "temporary_diagnostic",
       "agent_usage": [],
       "reference_count": 2,
       "references": [
@@ -703,7 +703,7 @@
     {
       "path": "scripts/ai/codex/launch-interactive.ps1",
       "type": "ps1",
-      "status": "orphan",
+      "status": "temporary_diagnostic",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
@@ -939,7 +939,7 @@
     {
       "path": "scripts/ai/gemini/helper/check-env.ps1",
       "type": "ps1",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
@@ -1091,7 +1091,7 @@
     {
       "path": "scripts/ai/gemini/helper/setup-env.sh",
       "type": "sh",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
@@ -1384,7 +1384,7 @@
     {
       "path": "scripts/ai/mcp/mcp_brave_search_wrapper.ps1",
       "type": "ps1",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
@@ -1419,7 +1419,7 @@
     {
       "path": "scripts/ai/mcp/mcp_chembl_wrapper.ps1",
       "type": "ps1",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
@@ -1448,7 +1448,7 @@
     {
       "path": "scripts/ai/mcp/mcp_context7_wrapper.ps1",
       "type": "ps1",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
@@ -1483,7 +1483,7 @@
     {
       "path": "scripts/ai/mcp/mcp_docker_docs_wrapper.ps1",
       "type": "ps1",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
@@ -1518,7 +1518,7 @@
     {
       "path": "scripts/ai/mcp/mcp_docker_wrapper.ps1",
       "type": "ps1",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
@@ -1553,7 +1553,7 @@
     {
       "path": "scripts/ai/mcp/mcp_dockerhub_wrapper.ps1",
       "type": "ps1",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
@@ -1588,7 +1588,7 @@
     {
       "path": "scripts/ai/mcp/mcp_grafana_wrapper.ps1",
       "type": "ps1",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
@@ -1623,7 +1623,7 @@
     {
       "path": "scripts/ai/mcp/mcp_mermaid_wrapper.ps1",
       "type": "ps1",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
@@ -1652,7 +1652,7 @@
     {
       "path": "scripts/ai/mcp/mcp_needle_wrapper.ps1",
       "type": "ps1",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
@@ -1687,7 +1687,7 @@
     {
       "path": "scripts/ai/mcp/mcp_neo4j_cypher_wrapper.ps1",
       "type": "ps1",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
@@ -1722,7 +1722,7 @@
     {
       "path": "scripts/ai/mcp/mcp_neo4j_memory_wrapper.ps1",
       "type": "ps1",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
@@ -1787,7 +1787,7 @@
     {
       "path": "scripts/ai/mcp/mcp_paper_search_wrapper.ps1",
       "type": "ps1",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
@@ -1822,7 +1822,7 @@
     {
       "path": "scripts/ai/mcp/mcp_prometheus_wrapper.ps1",
       "type": "ps1",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
@@ -1857,7 +1857,7 @@
     {
       "path": "scripts/ai/mcp/mcp_pubchem_wrapper.ps1",
       "type": "ps1",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
@@ -1886,7 +1886,7 @@
     {
       "path": "scripts/ai/mcp/mcp_pubmed_wrapper.ps1",
       "type": "ps1",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
@@ -1915,7 +1915,7 @@
     {
       "path": "scripts/ai/mcp/mcp_sonarqube_wrapper.ps1",
       "type": "ps1",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
@@ -2212,14 +2212,6 @@
       ]
     },
     {
-      "path": "scripts/ai/mistral/run-mistral.ps1",
-      "type": "ps1",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
       "path": "scripts/ai/mistral/run-mistral.sh",
       "type": "sh",
       "status": "active",
@@ -2249,7 +2241,7 @@
     {
       "path": "scripts/ai/mistrall/helper/check-env.ps1",
       "type": "ps1",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
@@ -2257,7 +2249,7 @@
     {
       "path": "scripts/ai/mistrall/helper/check-env.sh",
       "type": "sh",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
@@ -2265,7 +2257,7 @@
     {
       "path": "scripts/ai/mistrall/helper/download-image.ps1",
       "type": "ps1",
-      "status": "orphan",
+      "status": "temporary_diagnostic",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
@@ -2423,7 +2415,7 @@
     {
       "path": "scripts/ai/mistrall/helper/setup-env.sh",
       "type": "sh",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
@@ -2433,14 +2425,8 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 13,
+      "reference_count": 12,
       "references": [
-        {
-          "path": "scripts/ai/mistral/run-mistral.ps1",
-          "line": 10,
-          "source_group": "scripts",
-          "text": "$CanonicalLauncher = Join-Path (Join-Path (Split-Path $ScriptDir -Parent) \"mistrall\") \"run-mistrall.ps1\""
-        },
         {
           "path": "scripts/ai/mistrall/PREPULL_GUIDE.md",
           "line": 94,
@@ -2482,6 +2468,12 @@
           "line": 3,
           "source_group": "scripts",
           "text": "# Called by: run-mistrall.ps1"
+        },
+        {
+          "path": "scripts/ai/mistrall/helper/download-image.ps1",
+          "line": 3,
+          "source_group": "scripts",
+          "text": "# Called by: run-mistrall.ps1 setup"
         }
       ]
     },
@@ -2545,7 +2537,7 @@
     {
       "path": "scripts/ai/mistrallvibe/helper/check-env.ps1",
       "type": "ps1",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
@@ -2553,7 +2545,7 @@
     {
       "path": "scripts/ai/mistrallvibe/helper/check-env.sh",
       "type": "sh",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
@@ -2561,7 +2553,7 @@
     {
       "path": "scripts/ai/mistrallvibe/helper/run-mistrallvibe-impl.ps1",
       "type": "ps1",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
@@ -2569,7 +2561,7 @@
     {
       "path": "scripts/ai/mistrallvibe/helper/run-mistrallvibe-impl.sh",
       "type": "sh",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
@@ -2625,7 +2617,7 @@
     {
       "path": "scripts/ai/mistrallvibe/launch-interactive.ps1",
       "type": "ps1",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
@@ -2678,7 +2670,7 @@
     {
       "path": "scripts/ai/src/bioetl/application/composite/runtime_wiring_api.py",
       "type": "py",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
@@ -2743,7 +2735,7 @@
     {
       "path": "scripts/ai/src/bioetl/composition/factories/pipeline/_factory_method_types.py",
       "type": "py",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
@@ -2751,7 +2743,7 @@
     {
       "path": "scripts/ai/src/group_issues.py",
       "type": "py",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
@@ -2759,7 +2751,7 @@
     {
       "path": "scripts/ai/src/neo4j_memory_mcp_adapter.py",
       "type": "py",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
@@ -2767,7 +2759,7 @@
     {
       "path": "scripts/ai/src/neo4j_memory_mcp_smoke.py",
       "type": "py",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
@@ -2775,7 +2767,7 @@
     {
       "path": "scripts/ai/src/setup_mcp.py",
       "type": "py",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
@@ -2783,7 +2775,7 @@
     {
       "path": "scripts/ai/src/sonar_issue_processor.py",
       "type": "py",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
@@ -2791,7 +2783,7 @@
     {
       "path": "scripts/ai/src/sonar_issue_processor_demo.py",
       "type": "py",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
@@ -2799,7 +2791,7 @@
     {
       "path": "scripts/ai/src/sonarqube_mcp_smoke.py",
       "type": "py",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
@@ -2807,7 +2799,7 @@
     {
       "path": "scripts/ai/vibe/__main__.py",
       "type": "py",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
@@ -2927,20 +2919,19 @@
       ]
     },
     {
-      "path": "scripts/check_cli_parity.py",
-      "type": "py",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
       "path": "scripts/check_dq_dsl_parity.py",
       "type": "py",
-      "status": "orphan",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/engineering/repo/check_scripts_inventory.py",
+          "line": 203,
+          "source_group": "scripts",
+          "text": "\"scripts/check_dq_dsl_parity.py\","
+        }
+      ]
     },
     {
       "path": "scripts/check_entity_config_parity.py",
@@ -2978,9 +2969,9 @@
     {
       "path": "scripts/ci_check_docs_parity.sh",
       "type": "sh",
-      "status": "unknown",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "docs/03-guides/docs-parity-gate.md",
@@ -2993,6 +2984,12 @@
           "line": 59,
           "source_group": "docs",
           "text": "- bash scripts/ci_check_docs_parity.sh"
+        },
+        {
+          "path": "scripts/engineering/repo/check_scripts_inventory.py",
+          "line": 201,
+          "source_group": "scripts",
+          "text": "\"scripts/ci_check_docs_parity.sh\","
         }
       ]
     },
@@ -4481,7 +4478,7 @@
     {
       "path": "scripts/docs/_compat_shim.py",
       "type": "py",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
@@ -4645,7 +4642,7 @@
     {
       "path": "scripts/docs/checks/_bootstrap.py",
       "type": "py",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
@@ -5082,7 +5079,7 @@
     {
       "path": "scripts/docs/matrix/_bootstrap.py",
       "type": "py",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
@@ -5954,10 +5951,17 @@
     {
       "path": "scripts/engineering/ci/validate_control_plane_artifacts.py",
       "type": "py",
-      "status": "orphan",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/engineering/repo/check_scripts_inventory.py",
+          "line": 204,
+          "source_group": "scripts",
+          "text": "\"scripts/engineering/ci/validate_control_plane_artifacts.py\","
+        }
+      ]
     },
     {
       "path": "scripts/engineering/ci/validate_registry_dq_refs.py",
@@ -6034,7 +6038,7 @@
     {
       "path": "scripts/engineering/common/cli_dispatch.py",
       "type": "py",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
@@ -6042,7 +6046,7 @@
     {
       "path": "scripts/engineering/common/repo_paths.py",
       "type": "py",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
@@ -6179,7 +6183,7 @@
     {
       "path": "scripts/engineering/dev/bash/.setup_wsl_codex.sh",
       "type": "sh",
-      "status": "orphan",
+      "status": "temporary_diagnostic",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
@@ -6244,7 +6248,7 @@
     {
       "path": "scripts/engineering/dev/bash/WSL_COMMANDS.sh",
       "type": "sh",
-      "status": "orphan",
+      "status": "temporary_diagnostic",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
@@ -6252,7 +6256,7 @@
     {
       "path": "scripts/engineering/dev/bash/entrypoint.sh",
       "type": "sh",
-      "status": "orphan",
+      "status": "temporary_diagnostic",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
@@ -6260,7 +6264,7 @@
     {
       "path": "scripts/engineering/dev/bash/test-driver-via-docker.sh",
       "type": "sh",
-      "status": "orphan",
+      "status": "temporary_diagnostic",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
@@ -6268,7 +6272,7 @@
     {
       "path": "scripts/engineering/dev/bash/warp-setup.sh",
       "type": "sh",
-      "status": "orphan",
+      "status": "temporary_diagnostic",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
@@ -6318,15 +6322,7 @@
     {
       "path": "scripts/engineering/dev/powershell/FixHypothesisDb.ps1",
       "type": "ps1",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
-      "path": "scripts/engineering/dev/powershell/setup_git_path.ps1",
-      "type": "ps1",
-      "status": "orphan",
+      "status": "temporary_diagnostic",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
@@ -6406,7 +6402,7 @@
     {
       "path": "scripts/engineering/dev/python/fix_neo4j_memory_sync_http_uris.py",
       "type": "py",
-      "status": "orphan",
+      "status": "temporary_diagnostic",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
@@ -7751,7 +7747,7 @@
         },
         {
           "path": "docs/00-project/RULES.md",
-          "line": 1429,
+          "line": 1450,
           "source_group": "docs",
           "text": "- `python scripts/engineering/qa/generate_architecture_dependency_map.py --update`"
         },
@@ -7862,7 +7858,7 @@
     {
       "path": "scripts/engineering/qa/hotspot_family_metrics.py",
       "type": "py",
-      "status": "orphan",
+      "status": "temporary_diagnostic",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
@@ -7966,7 +7962,7 @@
     {
       "path": "scripts/engineering/qa/py_review_orchestrator.py",
       "type": "py",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
@@ -8589,7 +8585,7 @@
     {
       "path": "scripts/engineering/repo/_root_governance.py",
       "type": "py",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
@@ -9176,7 +9172,7 @@
     {
       "path": "scripts/memory/mcp_smoke.py",
       "type": "py",
-      "status": "orphan",
+      "status": "temporary_diagnostic",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
@@ -9361,7 +9357,7 @@
     {
       "path": "scripts/ops/data/__main__.py",
       "type": "py",
-      "status": "unknown",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 10,
       "references": [
@@ -9652,7 +9648,7 @@
     {
       "path": "scripts/ops/launchers/codex/codex-wsl.bat",
       "type": "bat",
-      "status": "unknown",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 24,
       "references": [
@@ -9880,7 +9876,7 @@
     {
       "path": "scripts/ops/launchers/codex/start-codex.bat",
       "type": "bat",
-      "status": "unknown",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 3,
       "references": [
@@ -10129,7 +10125,7 @@
     {
       "path": "scripts/ops/observability/grafana/live_tracing_mode_smoke.py",
       "type": "py",
-      "status": "orphan",
+      "status": "temporary_diagnostic",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
@@ -10191,7 +10187,7 @@
     {
       "path": "scripts/ops/runtime/docker/restart-docker.ps1",
       "type": "ps1",
-      "status": "unknown",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 3,
       "references": [
@@ -10218,7 +10214,7 @@
     {
       "path": "scripts/ops/runtime/health/start_health_server.ps1",
       "type": "ps1",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
@@ -10226,7 +10222,7 @@
     {
       "path": "scripts/ops/runtime/neo4j/neo4j-recovery-checklist.ps1",
       "type": "ps1",
-      "status": "unknown",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 4,
       "references": [
@@ -10259,7 +10255,7 @@
     {
       "path": "scripts/ops/runtime/neo4j/neo4j_quick_start.sh",
       "type": "sh",
-      "status": "unknown",
+      "status": "temporary_diagnostic",
       "agent_usage": [],
       "reference_count": 6,
       "references": [
@@ -10304,7 +10300,7 @@
     {
       "path": "scripts/ops/runtime/neo4j/start-neo4j-audit.ps1",
       "type": "ps1",
-      "status": "unknown",
+      "status": "temporary_diagnostic",
       "agent_usage": [],
       "reference_count": 24,
       "references": [
@@ -10361,7 +10357,7 @@
     {
       "path": "scripts/ops/runtime/neo4j/start-neo4j-audit.sh",
       "type": "sh",
-      "status": "unknown",
+      "status": "temporary_diagnostic",
       "agent_usage": [],
       "reference_count": 6,
       "references": [
@@ -10535,9 +10531,9 @@
     {
       "path": "scripts/ops/support/repo/cleanup_repository.py",
       "type": "py",
-      "status": "unknown",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
@@ -10550,6 +10546,12 @@
           "line": 166,
           "source_group": "docs",
           "text": "`scripts/ops/support/repo/cleanup_repository.py` больше не является broad"
+        },
+        {
+          "path": "scripts/engineering/repo/check_scripts_inventory.py",
+          "line": 202,
+          "source_group": "scripts",
+          "text": "\"scripts/ops/support/repo/cleanup_repository.py\","
         }
       ]
     },
@@ -10655,7 +10657,7 @@
     {
       "path": "scripts/qa/lint_terminology.py",
       "type": "py",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
@@ -10836,7 +10838,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/schema/README.md",
@@ -10849,6 +10851,12 @@
           "line": 41,
           "source_group": "scripts",
           "text": "\"generate-config-matrix\": \"generate_config_matrix.py\","
+        },
+        {
+          "path": "src/tools/scripts/config_matrix_generator.py",
+          "line": 15,
+          "source_group": "scripts",
+          "text": "/ \"generate_config_matrix.py\""
         }
       ]
     },
@@ -11512,7 +11520,7 @@
     {
       "path": "src/tools/neo4j_audit.py",
       "type": "py",
-      "status": "unknown",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 8,
       "references": [
@@ -11565,6 +11573,54 @@
           "text": "- [ ] Review src/tools/neo4j_audit.py"
         }
       ]
+    },
+    {
+      "path": "src/tools/scripts/check_application_deps.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "src/tools/scripts/check_architecture.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "src/tools/scripts/check_constructor_args.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "src/tools/scripts/config_matrix_generator.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "src/tools/scripts/lint_terminology.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "src/tools/scripts/validate_unified_configs.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "src/tools/verify_schema_parity.py",
