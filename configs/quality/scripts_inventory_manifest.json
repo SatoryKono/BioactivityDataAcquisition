@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-29T18:55:40.214324+00:00",
+  "generated_at": "2026-04-29T18:56:45.060655+00:00",
   "summary": {
     "total_scripts": 355,
     "status_counts": {
@@ -4633,7 +4633,7 @@
           "path": "scripts/docs/README.md",
           "line": 44,
           "source_group": "scripts",
-          "text": "| `check-drift`                            | `scripts/docs/checks/check_drift.py`                            | Check documentation drift (ports, classes, runtime mirrors, freshness)                   "
+          "text": "| `check-drift`                            | `scripts/docs/checks/check_drift.py`                            | Check documentation drift (ports, classes, runtime mirrors, freshness, AI runtime surface"
         },
         {
           "path": "tests/architecture/test_docs_internal_bootstrap_governance.py",
