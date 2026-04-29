@@ -199,10 +199,9 @@ def _checkpoint_taxonomy(
 def _replay_capability(run_manifest: RunManifestInspectionResult | None) -> object:
     if run_manifest is None:
         return None
-    return (
-        run_manifest.identity_graph.get("replay_capability")
-        or run_manifest.diagnostics.get("replay_capability")
-    )
+    return run_manifest.identity_graph.get(
+        "replay_capability"
+    ) or run_manifest.diagnostics.get("replay_capability")
 
 
 def _requested_exact_replay(run_manifest: RunManifestInspectionResult) -> object:

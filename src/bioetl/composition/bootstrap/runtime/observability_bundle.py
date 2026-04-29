@@ -223,6 +223,15 @@ def _log_observability_initialized(
         1.0,
         {
             "pipeline": pipeline_name,
+            "component": "logger",
+            "mode": "noop" if logger.__class__.__name__ == "NoOpLogger" else "active",
+        },
+    )
+    metrics.set_gauge(
+        "bioetl_observability_runtime_status",
+        1.0,
+        {
+            "pipeline": pipeline_name,
             "component": "metrics",
             "mode": "noop" if isinstance(metrics, NoOpMetrics) else "active",
         },

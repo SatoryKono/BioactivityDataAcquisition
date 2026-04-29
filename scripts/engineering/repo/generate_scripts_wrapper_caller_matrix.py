@@ -94,6 +94,10 @@ class Candidate:
 
 CANDIDATES: Final[tuple[Candidate, ...]] = (
     Candidate("scripts/docs/build_docs_site.sh", "shell transport adapter"),
+    Candidate(
+        "scripts/engineering/repo/cleanup_branch_candidates.sh",
+        COMPATIBILITY_WRAPPER_ROLE,
+    ),
     Candidate("scripts/ops/launchers/codex/codex.sh", BOOTSTRAP_TRANSPORT_ROLE),
     Candidate(
         "scripts/ops/launchers/codex/codex-exec.sh",

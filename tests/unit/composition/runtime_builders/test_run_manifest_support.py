@@ -7,9 +7,17 @@ from datetime import UTC, datetime
 from pathlib import Path
 from types import SimpleNamespace
 from typing import cast
+from unittest.mock import MagicMock
+from uuid import uuid4
 
 import pytest
 
+from bioetl.application.services.control_plane.run_manifest_service import (
+    RunManifestCreateSpec,
+)
+from bioetl.composition.runtime_builders.run_manifest_builder import (
+    _emit_replay_reconstructability_metric,
+)
 from bioetl.composition.runtime_builders._cached_bronze_snapshot_support import (
     build_cached_bronze_input_snapshot_refs,
 )
@@ -21,6 +29,7 @@ from bioetl.composition.runtime_builders._run_manifest_support import (
 )
 from bioetl.domain.control_plane import ReplayCapability
 from bioetl.domain.context import PipelineRunContext
+from bioetl.domain.types import RunID
 from bioetl.infrastructure.config import Settings
 
 
@@ -46,6 +55,28 @@ def _make_run_context(**overrides: object) -> PipelineRunContext:
     }
     defaults.update(overrides)
     return cast(PipelineRunContext, SimpleNamespace(**defaults))
+
+
+def _make_manifest_request(
+    *,
+    exact_replay: bool = False,
+    required_persistence_profile: str = "degraded_observable",
+    replay_capability: ReplayCapability = ReplayCapability.REBUILD_ONLY,
+) -> RunManifestCreateSpec:
+    return RunManifestCreateSpec(
+        run_id=RunID(uuid4()),
+        run_type="incremental",
+        pipeline_name="chembl_activity",
+        provider="chembl",
+        entity="activity",
+        launch_context={
+            "exact_replay": exact_replay,
+            "required_persistence_profile": required_persistence_profile,
+        },
+        runtime_config={},
+        resolved_config={},
+        replay_capability=replay_capability,
+    )
 
 
 @pytest.mark.unit
@@ -280,3 +311,87 @@ def test_resolve_contract_identity_falls_back_when_registry_invalid(
     result = resolve_contract_identity(provider="chembl", entity="activity")
 
     assert result == ("chembl.activity", None, None, None, None)
+
+
+@pytest.mark.unit
+def test_replay_reconstructability_metric_is_reconstructable_for_non_strict_runs() -> (
+    None
+):
+    metrics = MagicMock()
+
+    _emit_replay_reconstructability_metric(
+        request=_make_manifest_request(
+            exact_replay=False,
+            required_persistence_profile="degraded_observable",
+            replay_capability=ReplayCapability.REBUILD_ONLY,
+        ),
+        strict_exact_replay_supported=False,
+        metrics=metrics,
+    )
+
+    metrics.increment_counter.assert_called_once_with(
+        "bioetl_replay_reconstructability_events_total",
+        value=1,
+        labels={
+            "pipeline": "chembl_activity",
+            "replay_capability": "rebuild_only",
+            "strict_requirement": "false",
+            "status": "reconstructable",
+        },
+    )
+
+
+@pytest.mark.unit
+def test_replay_reconstructability_metric_marks_strict_runs_not_reconstructable() -> (
+    None
+):
+    metrics = MagicMock()
+
+    _emit_replay_reconstructability_metric(
+        request=_make_manifest_request(
+            exact_replay=True,
+            required_persistence_profile="forensic_grade",
+            replay_capability=ReplayCapability.RESUME_ONLY,
+        ),
+        strict_exact_replay_supported=False,
+        metrics=metrics,
+    )
+
+    metrics.increment_counter.assert_called_once_with(
+        "bioetl_replay_reconstructability_events_total",
+        value=1,
+        labels={
+            "pipeline": "chembl_activity",
+            "replay_capability": "resume_only",
+            "strict_requirement": "true",
+            "status": "not_reconstructable",
+        },
+    )
+
+
+@pytest.mark.unit
+def test_replay_reconstructability_metric_marks_strict_runs_reconstructable_when_supported() -> (
+    None
+):
+    metrics = MagicMock()
+
+    _emit_replay_reconstructability_metric(
+        request=_make_manifest_request(
+            exact_replay=False,
+            required_persistence_profile="replay_ready",
+            replay_capability=ReplayCapability.EXACT_REPLAY_SUPPORTED,
+        ),
+        strict_exact_replay_supported=True,
+        metrics=metrics,
+    )
+
+    metrics.increment_counter.assert_called_once_with(
+        "bioetl_replay_reconstructability_events_total",
+        value=1,
+        labels={
+            "pipeline": "chembl_activity",
+            "replay_capability": "exact_replay_supported",
+            "strict_requirement": "true",
+            "status": "reconstructable",
+        },
+    )
