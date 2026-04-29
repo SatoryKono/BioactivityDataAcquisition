@@ -74,6 +74,7 @@ class TestMetricsServerPort:
                 port: int,
                 addr: str = "0.0.0.0",
                 *,
+                started_at: datetime | None = None,
                 fail_fast: bool = False,
                 retry_count: int = 3,
                 retry_delay: float = 1.0,
@@ -194,6 +195,7 @@ class TestMetricsService:
         mock_server.start.assert_called_once_with(
             port=8000,
             addr="0.0.0.0",
+            started_at=datetime(2026, 4, 24, 12, 0, tzinfo=UTC),
             fail_fast=False,
             retry_count=3,
             retry_delay=1.0,
@@ -259,6 +261,7 @@ class TestMetricsService:
         mock_server.start.assert_called_once_with(
             port=8080,
             addr="0.0.0.0",
+            started_at=datetime(2026, 4, 24, 12, 0, tzinfo=UTC),
             fail_fast=False,
             retry_count=5,
             retry_delay=2.0,
@@ -274,6 +277,7 @@ class TestMetricsService:
         mock_server.start.assert_called_once_with(
             port=9090,
             addr="127.0.0.1",
+            started_at=datetime(2026, 4, 24, 12, 0, tzinfo=UTC),
             fail_fast=False,
             retry_count=3,
             retry_delay=1.0,
@@ -492,6 +496,7 @@ class TestMetricsServiceEdgeCases:
         mock_server.start.assert_called_with(
             port=8000,
             addr="0.0.0.0",
+            started_at=datetime(2026, 4, 24, 12, 0, tzinfo=UTC),
             fail_fast=False,
             retry_count=3,
             retry_delay=1.0,

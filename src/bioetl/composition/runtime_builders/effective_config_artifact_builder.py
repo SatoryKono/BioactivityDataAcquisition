@@ -38,7 +38,75 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.config import Settings
 
 
-def _build_runtime_overrides_snapshot(ctx: PipelineRunContext) -> dict[str, object]:
+_EXECUTION_AFFECTING_SETTINGS_SURFACES: tuple[str, ...] = (
+    "settings.env",
+    "settings.debug",
+    "settings.test_mode",
+    "settings.data_dir",
+    "settings.strict_error_handling",
+    "settings.strict_medallion",
+    "settings.silver_dedup_timeout_seconds",
+    "settings.pipeline.batch_size",
+    "settings.pipeline.checkpoint_interval",
+    "settings.pipeline.relaxed_dq",
+    "settings.pipeline.health_check_mode",
+    "settings.pipeline.control_plane.required_persistence_profile",
+    "settings.pipeline.control_plane.run_manifest_enabled",
+    "settings.pipeline.control_plane.run_ledger_enabled",
+    "settings.pipeline.control_plane.checkpoint_compatibility_policy",
+    "settings.observability.metrics_enabled",
+    "settings.observability.tracing_enabled",
+    "settings.observability.audit_enabled",
+)
+
+
+def _build_execution_settings_snapshot(settings: Settings) -> dict[str, object]:
+    """Materialize env-derived execution settings without exposing secrets."""
+    pipeline = settings.pipeline
+    control_plane = pipeline.control_plane
+    observability = settings.observability
+    return {
+        "schema_version": "execution-settings-v1",
+        "materialized_surfaces": list(_EXECUTION_AFFECTING_SETTINGS_SURFACES),
+        "settings": {
+            "env": settings.env,
+            "debug": settings.debug,
+            "test_mode": settings.test_mode,
+            "data_dir": str(settings.data_dir),
+            "strict_error_handling": settings.strict_error_handling,
+            "strict_medallion": settings.strict_medallion,
+            "silver_dedup_timeout_seconds": settings.silver_dedup_timeout_seconds,
+        },
+        "pipeline": {
+            "batch_size": pipeline.batch_size,
+            "checkpoint_interval": pipeline.checkpoint_interval,
+            "relaxed_dq": pipeline.relaxed_dq,
+            "max_concurrent_batches": pipeline.max_concurrent_batches,
+            "heartbeat_interval": pipeline.heartbeat_interval,
+            "health_check_mode": pipeline.health_check_mode,
+        },
+        "control_plane": {
+            "required_persistence_profile": (
+                control_plane.required_persistence_profile
+            ),
+            "run_manifest_enabled": control_plane.run_manifest_enabled,
+            "run_ledger_enabled": control_plane.run_ledger_enabled,
+            "checkpoint_compatibility_policy": (
+                control_plane.checkpoint_compatibility_policy
+            ),
+        },
+        "observability": {
+            "metrics_enabled": observability.metrics_enabled,
+            "tracing_enabled": observability.tracing_enabled,
+            "audit_enabled": observability.audit_enabled,
+        },
+    }
+
+
+def _build_runtime_overrides_snapshot(
+    ctx: PipelineRunContext,
+    settings: Settings,
+) -> dict[str, object]:
     """Convert launch context options into runtime-override snapshot shape."""
     raw_run_type = getattr(ctx, "run_type", "incremental")
     run_type_value = (
@@ -89,6 +157,7 @@ def _build_runtime_overrides_snapshot(ctx: PipelineRunContext) -> dict[str, obje
             "cached_bronze": _to_serializable_mapping(
                 getattr(ctx, "cached_bronze", None)
             ),
+            "settings_snapshot": _build_execution_settings_snapshot(settings),
         },
     }
 
@@ -98,6 +167,7 @@ def _build_composite_runtime_overrides_snapshot(
     pipeline_name: str,
     runtime_config: object,
     required_persistence_profile: str,
+    settings: Settings,
 ) -> dict[str, object]:
     """Convert composite runtime config into effective-config override shape."""
     runtime_payload = _to_serializable_mapping(runtime_config)
@@ -105,6 +175,9 @@ def _build_composite_runtime_overrides_snapshot(
     runtime_payload.setdefault("execution_context", "composite")
     runtime_payload.setdefault(
         "required_persistence_profile", required_persistence_profile
+    )
+    runtime_payload.setdefault(
+        "settings_snapshot", _build_execution_settings_snapshot(settings)
     )
     return {
         "cli": dict(runtime_payload),
@@ -291,7 +364,7 @@ def create_and_persist_effective_config_artifact(
         pipeline_name=ctx.pipeline_name,
         pipeline_kind="standard",
         resolved_config=inputs.yaml_config,
-        runtime_overrides=_build_runtime_overrides_snapshot(ctx),
+        runtime_overrides=_build_runtime_overrides_snapshot(ctx, inputs.settings),
         provider=provider,
         entity=entity,
         required_persistence_profile=(
@@ -322,6 +395,7 @@ def create_and_persist_composite_effective_config_artifact(
             pipeline_name=pipeline_name,
             runtime_config=runtime_config,
             required_persistence_profile=required_persistence_profile,
+            settings=settings,
         ),
         provider="composite",
         entity=pipeline_name,

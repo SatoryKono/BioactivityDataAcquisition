@@ -42,7 +42,6 @@ Primary evidence sources:
 Out of scope for this note:
 
 - blanket cleanup of `scripts/ai/mcp/*_wrapper.*`
-- `scripts/docs/check_doc_links.py`
 - body-level redesign of generated MCP config contracts
 
 ## Classification

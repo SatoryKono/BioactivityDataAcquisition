@@ -34,10 +34,6 @@ Compatibility wrappers are intentionally kept for:
 - tests that import or monkeypatch historical top-level modules
 - temporary shell-oriented habits such as `bash scripts/docs/build_docs_site.sh`, though the preferred public entrypoint is `python -m scripts.docs build-site`
 
-The only notable special case is the historical docs link-check shim: it
-remains an `exec`-based shim so legacy tests can still patch private helpers on
-the historic module surface without changing test semantics.
-
 ## Commands
 
 | Command                                  | Script                                                          | Description                                                                                        |

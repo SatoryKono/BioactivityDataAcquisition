@@ -9,6 +9,6 @@ def test_render_report_lists_known_wrapper_candidates() -> None:
     report = module._render_report(module._project_root())
 
     assert "# Scripts CLI Wrapper Caller Matrix" in report
-    assert "`scripts/docs/check_doc_links.py`" in report
+    assert "`scripts/docs/build_docs_site.sh`" in report
     assert "`scripts/ops/launchers/codex/codex.sh`" in report
     assert "retain" in report

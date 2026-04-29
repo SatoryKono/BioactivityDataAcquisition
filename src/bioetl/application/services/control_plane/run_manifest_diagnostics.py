@@ -15,6 +15,7 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_persist
     build_persistence_profile,
 )
 from bioetl.application.services.control_plane._run_manifest_diagnostics_replay import (
+    _assess_manifest_reproducibility_policy,
     _build_replay_parentage,
     _build_resume_contract,
     _collect_append_mode_semantic_sinks,
@@ -40,8 +41,7 @@ from bioetl.application.services.control_plane.run_manifest_reproducibility_scor
 )
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
 from bioetl.domain.control_plane.reproducibility_policy import (
-    DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
-    assess_reproducibility_policy,
+    ReproducibilityPolicyAssessment,
 )
 
 
@@ -58,6 +58,7 @@ class _BaseSummaryReplayContext:
     exact_replay_blockers: list[str]
     resume_contract: dict[str, object]
     replay_family_contract: dict[str, object]
+    policy_assessment: ReproducibilityPolicyAssessment
 
 
 def _resolve_base_summary_replay_context(
@@ -67,6 +68,13 @@ def _resolve_base_summary_replay_context(
     requested_exact_replay = bool(manifest.launch_context.get("exact_replay"))
     resume_requested = bool(manifest.launch_context.get("resume"))
     input_snapshots = _collect_input_snapshot_refs(manifest)
+    replay_family_contract = _resolve_replay_family_contract(manifest)
+    policy_assessment = _assess_manifest_reproducibility_policy(
+        manifest=manifest,
+        requested_exact_replay=requested_exact_replay,
+        resume_requested=resume_requested,
+        replay_family_contract=replay_family_contract,
+    )
     return _BaseSummaryReplayContext(
         requested_exact_replay=requested_exact_replay,
         resume_requested=resume_requested,
@@ -84,42 +92,17 @@ def _resolve_base_summary_replay_context(
         exact_replay_support_boundary=_resolve_exact_replay_support_boundary(manifest),
         exact_replay_blockers=_resolve_exact_replay_blockers(
             manifest=manifest,
-            input_snapshots=input_snapshots,
+            policy_assessment=policy_assessment,
         ),
         resume_contract=_build_resume_contract(
             manifest=manifest,
             requested_exact_replay=requested_exact_replay,
             resume_requested=resume_requested,
+            policy_assessment=policy_assessment,
         ),
-        replay_family_contract=_resolve_replay_family_contract(manifest),
+        replay_family_contract=replay_family_contract,
+        policy_assessment=policy_assessment,
     )
-
-
-def _build_reproducibility_policy_assessment(
-    manifest: RunManifest,
-    replay_context: _BaseSummaryReplayContext,
-) -> dict[str, object]:
-    """Return the canonical replay policy verdict for diagnostics consumers."""
-    replay_family_contract = replay_context.replay_family_contract
-    required_profile = (
-        manifest.launch_context.get("required_persistence_profile")
-        or DEFAULT_REQUIRED_PERSISTENCE_PROFILE
-    )
-    assessment = assess_reproducibility_policy(
-        source_refs=manifest.source_refs,
-        required_persistence_profile=required_profile,
-        strict_exact_replay_supported=bool(
-            replay_family_contract.get("strict_exact_replay_supported", False)
-        ),
-        exact_replay_requested=replay_context.requested_exact_replay,
-        resume_requested=replay_context.resume_requested,
-        require_full_snapshot_envelope=(
-            replay_family_contract.get("contract")
-            == "composite_snapshot_backed_exact_replay"
-        ),
-        replay_capability=manifest.replay_capability,
-    )
-    return assessment.to_dict()
 
 
 def _build_base_summary_payload(
@@ -166,8 +149,7 @@ def _build_base_summary_payload(
         "replay_parentage": _build_replay_parentage(manifest),
         "replay_capability": manifest.replay_capability.value,
         "required_persistence_profile": (
-            str(manifest.launch_context.get("required_persistence_profile") or "")
-            or "degraded_observable"
+            replay_context.policy_assessment.required_persistence_profile
         ),
         "requested_exact_replay": replay_context.requested_exact_replay,
         "exact_replay_support_boundary": replay_context.exact_replay_support_boundary,
@@ -190,7 +172,7 @@ def _build_base_summary_payload(
         "replay_mode": replay_context.replay_mode,
         "replay_family_contract": replay_context.replay_family_contract,
         "reproducibility_policy_assessment": (
-            _build_reproducibility_policy_assessment(manifest, replay_context)
+            replay_context.policy_assessment.to_dict()
         ),
         "resume_contract": replay_context.resume_contract,
         "resume_diagnostics": None,
@@ -327,6 +309,7 @@ def _build_unified_reproducibility_diagnostics(
             ),
             "input_snapshot_ids": summary.get("input_snapshot_ids", []),
         },
+        "effective_config": _build_effective_config_diagnostics(summary),
         "occurrence_identity": {
             "run_id": summary.get("run_id"),
             "manifest_id": summary.get("manifest_id"),
@@ -339,6 +322,10 @@ def _build_unified_reproducibility_diagnostics(
         "checkpoint_anchors": {
             "resume_contract": summary.get("resume_contract"),
             "resume_diagnostics": summary.get("resume_diagnostics"),
+            "current_manifest_anchors": _build_current_checkpoint_anchor_payload(
+                summary
+            ),
+            "resume_anchor_comparison": _build_resume_anchor_comparison(summary),
         },
         "lineage": {
             "lineage_closure_boundary": summary.get("lineage_closure_boundary"),
@@ -347,6 +334,105 @@ def _build_unified_reproducibility_diagnostics(
             "published_artifact_count": summary.get("published_artifact_count"),
             "produced_artifact_trace_complete": produced_artifact_trace.get("complete"),
         },
+    }
+
+
+def _build_effective_config_diagnostics(
+    summary: dict[str, object],
+) -> dict[str, object]:
+    """Return semantic-vs-occurrence effective-config diagnostics."""
+    return {
+        "semantic": {
+            "effective_config_artifact_id": summary.get(
+                "effective_config_artifact_id"
+            ),
+            "resolved_config_hash": summary.get("resolved_config_hash"),
+            "effective_config_hash": summary.get("effective_config_hash"),
+            "config_hash_compatibility_anchor": summary.get("config_hash"),
+        },
+        "occurrence": {
+            "run_id": summary.get("run_id"),
+            "manifest_id": summary.get("manifest_id"),
+            "manifest_created_at": summary.get("manifest_created_at"),
+        },
+        "diff_policy": {
+            "semantic_anchor": "effective_config_hash",
+            "occurrence_fields": [
+                "run_id",
+                "manifest_id",
+                "manifest_created_at",
+            ],
+            "config_hash_policy": "legacy_alias_for_resolved_config_hash",
+        },
+    }
+
+
+def _build_current_checkpoint_anchor_payload(
+    summary: dict[str, object],
+) -> dict[str, object]:
+    """Return current manifest anchors used for checkpoint comparisons."""
+    return {
+        "execution_fingerprint": summary.get("execution_fingerprint"),
+        "manifest_id": summary.get("manifest_id"),
+        "effective_config_hash": summary.get("effective_config_hash"),
+        "contract_ref": summary.get("contract_ref"),
+        "contract_version": summary.get("contract_version"),
+        "effective_config_artifact_id": summary.get("effective_config_artifact_id"),
+        "input_snapshot_ids": summary.get("input_snapshot_ids", []),
+    }
+
+
+def _build_resume_anchor_comparison(
+    summary: dict[str, object],
+) -> dict[str, object]:
+    """Compare current and checkpoint identities from persisted resume diagnostics."""
+    resume_diagnostics = summary.get("resume_diagnostics")
+    if not isinstance(resume_diagnostics, dict):
+        return {
+            "checkpoint_identity_present": False,
+            "matching_fields": [],
+            "mismatched_fields": [],
+            "missing_current_fields": [],
+            "missing_checkpoint_fields": [],
+        }
+    current_identity = resume_diagnostics.get("current_identity")
+    checkpoint_identity = resume_diagnostics.get("checkpoint_identity")
+    if not isinstance(current_identity, dict) or not isinstance(
+        checkpoint_identity, dict
+    ):
+        return {
+            "checkpoint_identity_present": False,
+            "matching_fields": [],
+            "mismatched_fields": [],
+            "missing_current_fields": [],
+            "missing_checkpoint_fields": [],
+        }
+
+    fields = sorted(set(current_identity) | set(checkpoint_identity))
+    matching_fields = [
+        field
+        for field in fields
+        if field in current_identity
+        and field in checkpoint_identity
+        and current_identity[field] == checkpoint_identity[field]
+    ]
+    mismatched_fields = [
+        field
+        for field in fields
+        if field in current_identity
+        and field in checkpoint_identity
+        and current_identity[field] != checkpoint_identity[field]
+    ]
+    return {
+        "checkpoint_identity_present": True,
+        "matching_fields": matching_fields,
+        "mismatched_fields": mismatched_fields,
+        "missing_current_fields": [
+            field for field in fields if field not in current_identity
+        ],
+        "missing_checkpoint_fields": [
+            field for field in fields if field not in checkpoint_identity
+        ],
     }
 
 

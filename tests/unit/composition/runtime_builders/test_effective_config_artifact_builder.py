@@ -314,6 +314,13 @@ def test_create_and_persist_effective_config_artifact_forwards_required_profile(
 
     assert result == ("artifact-1", "resolved-hash", "effective-hash", "dq-hash")
     assert captured["required_persistence_profile"] == "degraded_observable"
+    settings_snapshot = captured["runtime_overrides"]["runtime"]["settings_snapshot"]
+    assert settings_snapshot["schema_version"] == "execution-settings-v1"
+    assert settings_snapshot["settings"]["data_dir"] == "data"
+    assert (
+        "settings.pipeline.control_plane.required_persistence_profile"
+        in settings_snapshot["materialized_surfaces"]
+    )
 
 
 def test_create_and_persist_effective_config_artifact_uses_effective_replay_profile(
@@ -442,3 +449,7 @@ def test_create_and_persist_composite_effective_config_artifact_forwards_require
 
     assert result == ("artifact-2", "resolved-hash", "effective-hash", "dq-hash")
     assert captured["required_persistence_profile"] == "forensic_grade"
+    runtime_payload = captured["runtime_overrides"]["runtime"]
+    assert runtime_payload["settings_snapshot"]["control_plane"][
+        "required_persistence_profile"
+    ] == "degraded_observable"

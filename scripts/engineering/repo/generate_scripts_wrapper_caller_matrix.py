@@ -93,7 +93,6 @@ class Candidate:
 
 
 CANDIDATES: Final[tuple[Candidate, ...]] = (
-    Candidate("scripts/docs/check_doc_links.py", "special-case legacy shim"),
     Candidate("scripts/docs/build_docs_site.sh", "shell transport adapter"),
     Candidate("scripts/ops/launchers/codex/codex.sh", BOOTSTRAP_TRANSPORT_ROLE),
     Candidate(
@@ -346,9 +345,6 @@ def _render_report(root: Path) -> str:
             "`--pytest-only` semantics beyond simple delegation.",
             "- `governance-only` means runtime callers are gone and only "
             "inventory, plan, or governance-test references still mention the wrapper.",
-            "- High-risk compatibility surfaces such as "
-            "`scripts/docs/check_doc_links.py` stay retained until their "
-            "special semantics are gone.",
         )
     )
     if zero_operational_candidates:

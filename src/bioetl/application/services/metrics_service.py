@@ -262,6 +262,7 @@ class _MetricsStartMixin(_MetricsTracingMixin):
             success = self._server.start(
                 port=port,
                 addr=addr,
+                started_at=self.clock.now(),
                 fail_fast=fail_fast,
                 retry_count=retry_count,
                 retry_delay=retry_delay,

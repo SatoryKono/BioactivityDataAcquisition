@@ -6,7 +6,7 @@
 ## Summary
 
 - Scanned modules: `1731`
-- Internal import edges (raw): `6827`
+- Internal import edges (raw): `6828`
 - Aggregated layer edges: `14`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `309`
@@ -22,7 +22,7 @@ flowchart LR
     composition[composition]
     interfaces[interfaces]
     application -->|1142 OK| application
-    application -->|1004 OK| domain
+    application -->|1005 OK| domain
     composition -->|240 OK| application
     composition -->|534 OK| composition
     composition -->|374 OK| domain
@@ -42,7 +42,7 @@ flowchart LR
 | From             | To               | Imports | Policy  |
 | ---------------- | ---------------- | ------: | ------- |
 | `application`    | `application`    |    1142 | allowed |
-| `application`    | `domain`         |    1004 | allowed |
+| `application`    | `domain`         |    1005 | allowed |
 | `composition`    | `application`    |     240 | allowed |
 | `composition`    | `composition`    |     534 | allowed |
 | `composition`    | `domain`         |     374 | allowed |
@@ -92,10 +92,10 @@ flowchart LR
 | `application.composite`        | `domain.exceptions`             |      25 |
 | `infrastructure.storage`       | `domain.medallion`              |      25 |
 | `composition.bootstrap`        | `domain.composite`              |      23 |
+| `application.services`         | `domain.control_plane`          |      21 |
 | `composition.factories`        | `application.services`          |      21 |
 | `composition.factories`        | `domain.schemas`                |      21 |
 | `infrastructure.config`        | `domain.types`                  |      21 |
-| `application.services`         | `domain.control_plane`          |      20 |
 | `composition.providers`        | `infrastructure.adapters`       |      19 |
 | `application.pipelines`        | `domain.value_objects`          |      18 |
 | `application.core`             | `domain.config`                 |      17 |

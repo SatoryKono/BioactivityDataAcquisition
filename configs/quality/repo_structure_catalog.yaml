@@ -58,6 +58,10 @@ plans:
       lifecycle: supporting_context
     - path: docs/plans/codex-launcher-parity-review-2026-04-28.md
       lifecycle: supporting_context
+    - path: docs/plans/docs-cli-wrapper-closeout-2026-04-28.md
+      lifecycle: supporting_context
+    - path: docs/plans/mcp-wrapper-contract-audit-2026-04-28.md
+      lifecycle: supporting_context
     - path: docs/plans/silver-filter-rejects-observability-plan.md
       lifecycle: supporting_context
     - path: docs/plans/test-health-observability-plan-2026-04-22.md

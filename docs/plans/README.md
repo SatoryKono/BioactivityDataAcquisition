@@ -77,6 +77,8 @@ This is now the only active execution/backlog document in `docs/plans/`.
 - [repository-file-structure-remediation-plan-2026-04-28.md](repository-file-structure-remediation-plan-2026-04-28.md)
 - [scripts-cli-wrapper-caller-matrix-2026-04-28.md](scripts-cli-wrapper-caller-matrix-2026-04-28.md)
 - [codex-launcher-parity-review-2026-04-28.md](codex-launcher-parity-review-2026-04-28.md)
+- [docs-cli-wrapper-closeout-2026-04-28.md](docs-cli-wrapper-closeout-2026-04-28.md)
+- [mcp-wrapper-contract-audit-2026-04-28.md](mcp-wrapper-contract-audit-2026-04-28.md)
 
 Earlier operational context files such as
 `onboarding-checklist-day-1-2026-03-20.md` and
@@ -137,6 +139,15 @@ classification note for `scripts/ops/launchers/codex/*`. It distinguishes thin
 compatibility wrappers from retained bootstrap and transport adapters so the
 scripts cleanup wave does not treat the entire launcher cluster as removable by
 default.
+
+The docs CLI wrapper closeout note was added on `2026-04-28` as the bounded
+closeout artifact for the `scripts/docs` wrapper wave. It records the removal
+of `check_doc_links.py` and `run_mkdocs_build.py`, plus the retained parity
+decision for `build_docs_site.sh`.
+
+The MCP wrapper contract audit was added on `2026-04-28` to document why the
+named `scripts/ai/mcp/*_wrapper.*` files are contract-bound runtime surfaces
+and therefore out of scope for generic wrapper deletion.
 
 ### Retained Historical Context With Live Evidence References
 

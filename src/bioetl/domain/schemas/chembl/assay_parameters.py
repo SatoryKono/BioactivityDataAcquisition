@@ -38,7 +38,22 @@ class AssayParametersSchema(ETLRecordSchema):
         description="FK → Assay (ChEMBL ID format).",
     )
 
-    # === Parameter Type (Optional, may be None if not provided by API) ===
+    # === Raw Values (Optional) ===
+    comments: Series[str] | None = pa.Field(
+        nullable=True,
+        coerce=True,
+        description="Additional comments.",
+    )
+    relation: Series[str] | None = pa.Field(
+        nullable=True,
+        coerce=True,
+        description="Relation operator (=, <, >, ~, >=, <=).",
+    )
+    text_value: Series[str] | None = pa.Field(
+        nullable=True,
+        coerce=True,
+        description="Text value for non-numeric parameters.",
+    )
     type: Series[str] | None = pa.Field(
         nullable=True,
         coerce=True,
@@ -49,32 +64,15 @@ class AssayParametersSchema(ETLRecordSchema):
         coerce=True,
         description="Raw provider parameter type before controlled-vocabulary normalization.",
     )
-
-    # === Raw Values (Optional) ===
-    relation: Series[str] | None = pa.Field(
-        nullable=True,
-        coerce=True,
-        description="Relation operator (=, <, >, ~, >=, <=).",
-    )
-    value: Series[float] | None = pa.Field(
-        nullable=True,
-        coerce=True,
-        description="Numeric value.",
-    )
     units: Series[str] | None = pa.Field(
         nullable=True,
         coerce=True,
         description="Original units (e.g., uM, nM, %).",
     )
-    text_value: Series[str] | None = pa.Field(
+    value: Series[float] | None = pa.Field(
         nullable=True,
         coerce=True,
-        description="Text value for non-numeric parameters.",
-    )
-    comments: Series[str] | None = pa.Field(
-        nullable=True,
-        coerce=True,
-        description="Additional comments.",
+        description="Numeric value.",
     )
 
     # === Standardized Values (Optional) ===

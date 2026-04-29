@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import errno
+from datetime import UTC, datetime
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -15,6 +16,8 @@ from bioetl.infrastructure.observability.server import (
     reset_server_state,
     start_metrics_server,
 )
+
+_STARTED_AT = datetime(2026, 4, 28, 12, 0, tzinfo=UTC)
 
 
 @pytest.fixture(autouse=True)
@@ -34,7 +37,7 @@ class TestStartMetricsServer:
         with patch(
             "bioetl.infrastructure.observability.server.start_http_server"
         ) as mock_server:
-            result = start_metrics_server(port=9999)
+            result = start_metrics_server(port=9999, started_at=_STARTED_AT)
 
             assert result is True
             mock_server.assert_called_once_with(9999, addr="0.0.0.0")
@@ -44,8 +47,8 @@ class TestStartMetricsServer:
         with patch(
             "bioetl.infrastructure.observability.server.start_http_server"
         ) as mock_server:
-            result1 = start_metrics_server(port=9999)
-            result2 = start_metrics_server(port=9999)
+            result1 = start_metrics_server(port=9999, started_at=_STARTED_AT)
+            result2 = start_metrics_server(port=9999, started_at=_STARTED_AT)
 
             assert result1 is True
             assert result2 is True
@@ -55,14 +58,18 @@ class TestStartMetricsServer:
     def test_runtime_status_tracks_live_server_metadata(self):
         """Test runtime status exposes port, addr, and start time after startup."""
         with patch("bioetl.infrastructure.observability.server.start_http_server"):
-            result = start_metrics_server(port=9999, addr="127.0.0.1")
+            result = start_metrics_server(
+                port=9999,
+                addr="127.0.0.1",
+                started_at=_STARTED_AT,
+            )
 
         assert result is True
         status = get_metrics_server_runtime_status()
         assert status.running is True
         assert status.port == 9999
         assert status.addr == "127.0.0.1"
-        assert status.started_at is not None
+        assert status.started_at == _STARTED_AT
 
     def test_lenient_mode_returns_false_on_port_conflict(self):
         """Test fail_fast=False returns False on port conflict instead of raising."""
@@ -73,7 +80,11 @@ class TestStartMetricsServer:
             error.errno = errno.EADDRINUSE
             mock_server.side_effect = error
 
-            result = start_metrics_server(port=8000, fail_fast=False)
+            result = start_metrics_server(
+                port=8000,
+                started_at=_STARTED_AT,
+                fail_fast=False,
+            )
 
             assert result is False
 
@@ -87,7 +98,11 @@ class TestStartMetricsServer:
             mock_server.side_effect = error
 
             with pytest.raises(MetricsServerError) as exc_info:
-                start_metrics_server(port=8000, fail_fast=True)
+                start_metrics_server(
+                    port=8000,
+                    started_at=_STARTED_AT,
+                    fail_fast=True,
+                )
 
             assert exc_info.value.port == 8000
             assert exc_info.value.reason == "port_in_use"
@@ -103,7 +118,12 @@ class TestStartMetricsServer:
             mock_server.side_effect = error
 
             with pytest.raises(MetricsServerError) as exc_info:
-                start_metrics_server(port=80, fail_fast=True, retry_count=1)
+                start_metrics_server(
+                    port=80,
+                    started_at=_STARTED_AT,
+                    fail_fast=True,
+                    retry_count=1,
+                )
 
             assert exc_info.value.reason == "os_error"
 
@@ -115,7 +135,11 @@ class TestStartMetricsServer:
             mock_server.side_effect = RuntimeError("Unexpected")
 
             with pytest.raises(MetricsServerError) as exc_info:
-                start_metrics_server(port=8000, fail_fast=True)
+                start_metrics_server(
+                    port=8000,
+                    started_at=_STARTED_AT,
+                    fail_fast=True,
+                )
 
             assert exc_info.value.reason == "unexpected"
 
@@ -126,7 +150,11 @@ class TestStartMetricsServer:
         ) as mock_server:
             mock_server.side_effect = RuntimeError("Unexpected")
 
-            result = start_metrics_server(port=8000, fail_fast=False)
+            result = start_metrics_server(
+                port=8000,
+                started_at=_STARTED_AT,
+                fail_fast=False,
+            )
 
             assert result is False
 
@@ -142,7 +170,11 @@ class TestStartMetricsServer:
 
             with patch("bioetl.infrastructure.observability.server.time.sleep"):
                 result = start_metrics_server(
-                    port=8000, fail_fast=False, retry_count=3, retry_delay=0.01
+                    port=8000,
+                    started_at=_STARTED_AT,
+                    fail_fast=False,
+                    retry_count=3,
+                    retry_delay=0.01,
                 )
 
             assert result is True
@@ -157,7 +189,12 @@ class TestStartMetricsServer:
             error.errno = errno.EADDRINUSE
             mock_server.side_effect = error
 
-            result = start_metrics_server(port=8000, fail_fast=False, retry_count=3)
+            result = start_metrics_server(
+                port=8000,
+                started_at=_STARTED_AT,
+                fail_fast=False,
+                retry_count=3,
+            )
 
             assert result is False
             # Should only try once for EADDRINUSE
@@ -172,7 +209,11 @@ class TestStartMetricsServer:
             error.errno = errno.EADDRINUSE
             mock_server.side_effect = error
 
-            result = start_metrics_server(port=8000, fail_fast=False)
+            result = start_metrics_server(
+                port=8000,
+                started_at=_STARTED_AT,
+                fail_fast=False,
+            )
 
             assert result is False
             assert is_metrics_server_running() is False
@@ -186,8 +227,16 @@ class TestStartMetricsServer:
             error.errno = errno.EADDRINUSE
             mock_server.side_effect = [error, None]
 
-            first_result = start_metrics_server(port=8000, fail_fast=False)
-            second_result = start_metrics_server(port=8000, fail_fast=False)
+            first_result = start_metrics_server(
+                port=8000,
+                started_at=_STARTED_AT,
+                fail_fast=False,
+            )
+            second_result = start_metrics_server(
+                port=8000,
+                started_at=_STARTED_AT,
+                fail_fast=False,
+            )
 
             assert first_result is False
             assert second_result is True
@@ -205,7 +254,11 @@ class TestStartMetricsServer:
 
             with patch("bioetl.infrastructure.observability.server.time.sleep"):
                 result = start_metrics_server(
-                    port=8000, fail_fast=False, retry_count=2, retry_delay=0.01
+                    port=8000,
+                    started_at=_STARTED_AT,
+                    fail_fast=False,
+                    retry_count=2,
+                    retry_delay=0.01,
                 )
 
             assert result is False
@@ -214,7 +267,11 @@ class TestStartMetricsServer:
         """Test server start with custom logger."""
         logger = MagicMock()
         with patch("bioetl.infrastructure.observability.server.start_http_server"):
-            result = start_metrics_server(port=9999, logger=logger)
+            result = start_metrics_server(
+                port=9999,
+                started_at=_STARTED_AT,
+                logger=logger,
+            )
 
         assert result is True
         logger.info.assert_called_once()
@@ -223,7 +280,7 @@ class TestStartMetricsServer:
         """Test debug log when server already started."""
         logger = MagicMock()
         with patch("bioetl.infrastructure.observability.server.start_http_server"):
-            start_metrics_server(port=9999)
+            start_metrics_server(port=9999, started_at=_STARTED_AT)
             # Second call should hit the debug path
             result = start_metrics_server(port=9999, logger=logger)
 
