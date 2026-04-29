@@ -204,23 +204,16 @@ def test_collect_root_review_evidence_marks_absent_baseline_ok(
                 "verification": ["git ls-files foo"],
                 "candidates": [
                     {
-                        "path": "FixHypothesisDb.ps1",
+                        "path": "root-helper.ps1",
                         "current_live_state": "absent_from_root_baseline",
-                        "canonical_path": "scripts/engineering/dev/powershell/FixHypothesisDb.ps1",
+                        "canonical_path": "scripts/canonical/root-helper.ps1",
                         "action_if_reintroduced": "review",
                     }
                 ],
             }
         ],
     )
-    canonical = (
-        tmp_path
-        / "scripts"
-        / "engineering"
-        / "dev"
-        / "powershell"
-        / "FixHypothesisDb.ps1"
-    )
+    canonical = tmp_path / "scripts" / "canonical" / "root-helper.ps1"
     canonical.parent.mkdir(parents=True, exist_ok=True)
     canonical.write_text("echo hi\n", encoding="utf-8")
 
@@ -231,7 +224,7 @@ def test_collect_root_review_evidence_marks_absent_baseline_ok(
     evidence = module.collect_root_review_evidence(tmp_path)
 
     assert len(evidence) == 1
-    assert evidence[0].rel_path == "FixHypothesisDb.ps1"
+    assert evidence[0].rel_path == "root-helper.ps1"
     assert evidence[0].review_status == "absent_baseline_ok"
     assert evidence[0].canonical_exists is True
 
@@ -250,31 +243,22 @@ def test_collect_root_review_evidence_marks_present_cmp_match(
                 "verification": ["git ls-files foo"],
                 "candidates": [
                     {
-                        "path": "FixHypothesisDb.ps1",
+                        "path": "root-helper.ps1",
                         "current_live_state": "present_approved_root_surface",
-                        "canonical_path": "scripts/engineering/dev/powershell/FixHypothesisDb.ps1",
+                        "canonical_path": "scripts/canonical/root-helper.ps1",
                         "action_if_reintroduced": "review",
                     }
                 ],
             }
         ],
     )
-    root_copy = tmp_path / "FixHypothesisDb.ps1"
+    root_copy = tmp_path / "root-helper.ps1"
     root_copy.write_text("echo hi\n", encoding="utf-8")
-    canonical = (
-        tmp_path
-        / "scripts"
-        / "engineering"
-        / "dev"
-        / "powershell"
-        / "FixHypothesisDb.ps1"
-    )
+    canonical = tmp_path / "scripts" / "canonical" / "root-helper.ps1"
     canonical.parent.mkdir(parents=True, exist_ok=True)
     canonical.write_text("echo hi\n", encoding="utf-8")
 
-    monkeypatch.setattr(
-        module, "_tracked_paths", lambda repo_root: ["FixHypothesisDb.ps1"]
-    )
+    monkeypatch.setattr(module, "_tracked_paths", lambda repo_root: ["root-helper.ps1"])
     monkeypatch.setattr(module, "_git_path_has_history", lambda repo_root, path: True)
     monkeypatch.setattr(module, "_count_reference_hits", lambda repo_root, path: 3)
 

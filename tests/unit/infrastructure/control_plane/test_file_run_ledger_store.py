@@ -5,12 +5,17 @@ from __future__ import annotations
 import json
 import os
 from datetime import UTC, datetime
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, call
 from uuid import uuid4
 
 import pytest
 
 from bioetl.domain.control_plane import RunLedgerEntry
+from bioetl.domain.control_plane.run_ledger import (
+    RUN_FAILED_EVENT,
+    RUN_SHUTDOWN_EVENT,
+    STAGE_COMPLETED_EVENT,
+)
 from bioetl.domain.exceptions import StorageError
 from bioetl.domain.types import RunID
 from bioetl.infrastructure.control_plane import FileRunLedgerStore
@@ -84,6 +89,82 @@ def test_file_store_emits_ledger_append_metric(tmp_path) -> None:
             "terminal_status": "success",
         },
     )
+
+
+@pytest.mark.parametrize(
+    ("event_type", "status", "terminal_status"),
+    [
+        (RUN_FAILED_EVENT, "failed", "failed"),
+        (RUN_SHUTDOWN_EVENT, "shutdown", "shutdown"),
+    ],
+)
+def test_file_store_emits_terminal_metric_for_all_terminal_outcomes(
+    tmp_path,
+    event_type: str,
+    status: str,
+    terminal_status: str,
+) -> None:
+    metrics = MagicMock()
+    run_id = RunID(uuid4())
+    store = FileRunLedgerStore(
+        base_path=tmp_path / "run_ledger",
+        metrics=metrics,
+    )
+    entry = RunLedgerEntry(
+        entry_id="entry-1",
+        manifest_id="manifest-1",
+        run_id=run_id,
+        event_type=event_type,
+        occurred_at=_FIXED_TIME,
+        status=status,
+        details={"_diagnostic": {"pipeline": "chembl_activity"}},
+    )
+
+    store.append(entry)
+
+    assert metrics.increment_counter.call_args_list[1].args == (
+        "bioetl_control_plane_terminal_events_total",
+        1,
+        {
+            "pipeline": "chembl_activity",
+            "terminal_status": terminal_status,
+        },
+    )
+
+
+def test_file_store_does_not_emit_terminal_metric_for_non_terminal_events(
+    tmp_path,
+) -> None:
+    metrics = MagicMock()
+    run_id = RunID(uuid4())
+    store = FileRunLedgerStore(
+        base_path=tmp_path / "run_ledger",
+        metrics=metrics,
+    )
+    entry = RunLedgerEntry(
+        entry_id="entry-1",
+        manifest_id="manifest-1",
+        run_id=run_id,
+        event_type=STAGE_COMPLETED_EVENT,
+        occurred_at=_FIXED_TIME,
+        status="completed",
+        stage="execute_pipeline",
+        details={"_diagnostic": {"pipeline": "chembl_activity"}},
+    )
+
+    store.append(entry)
+
+    assert metrics.increment_counter.call_args_list == [
+        call(
+            "bioetl_control_plane_ledger_appends_total",
+            1,
+            {
+                "pipeline": "chembl_activity",
+                "event_type": "stage_completed",
+                "status": "success",
+            },
+        )
+    ]
 
 
 def test_file_store_emits_ledger_read_metric_on_list_success(tmp_path) -> None:
