@@ -7,7 +7,12 @@ from importlib import import_module
 
 
 def alias_module(module_name: str, target_module_name: str) -> None:
-    """Replace a compat shim module with the canonical target module object."""
+    """Replace a retained public command seam with its canonical target module.
+
+    This is reserved for command modules that are documented public patch/import
+    seams. Support-only helpers should live under their canonical owner modules
+    rather than adding top-level compatibility shims.
+    """
     target_module = import_module(target_module_name)
     current_module = sys.modules[module_name]
     current_module.__dict__.update(
@@ -24,21 +29,3 @@ def alias_module(module_name: str, target_module_name: str) -> None:
         [name for name in dir(target_module) if not name.startswith("_")],
     )
     sys.modules[module_name] = target_module
-
-
-def reexport_module(module_name: str, target_module_name: str) -> None:
-    """Populate a shim module with the public and private names of a target module."""
-    target_module = import_module(target_module_name)
-    target_globals = sys.modules[module_name].__dict__
-    exported_names = {
-        name: getattr(target_module, name)
-        for name in dir(target_module)
-        if not name.startswith("__")
-    }
-    target_globals.update(exported_names)
-    target_globals["__doc__"] = getattr(target_module, "__doc__", None)
-    target_globals["__all__"] = getattr(
-        target_module,
-        "__all__",
-        [name for name in exported_names if not name.startswith("_")],
-    )

@@ -150,6 +150,7 @@ tracked_suite_inventory:
     - tests/integration/composite/test_composite_config_backward_compatibility.py
     - tests/integration/composite/test_molecule_pipeline.py
     config_and_storage_surfaces:
+    - tests/integration/config/test_contract_registry_active_surface_coverage.py
     - tests/integration/config/test_chembl_contract_registry_coverage.py
     - tests/integration/config/test_chembl_enum_parity.py
     - tests/integration/config/test_chembl_observed_value_fixtures.py

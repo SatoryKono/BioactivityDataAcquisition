@@ -125,8 +125,11 @@ class TestChemblAssayEnumFields:
         assert category_rule.normalizer("mystery category") is None
         assert "controlled vocabulary" in (category_rule.notes or "").lower()
 
-        assert confidence_rule.normalizer(" active ") == "Active"
-        assert confidence_rule.normalizer("mystery confidence") is None
+        assert (
+            confidence_rule.normalizer(" direct single protein target assigned ")
+            == "Direct single protein target assigned"
+        )
+        assert confidence_rule.normalizer("mystery confidence") == "mystery confidence"
         assert "controlled vocabulary" in (confidence_rule.notes or "").lower()
 
 

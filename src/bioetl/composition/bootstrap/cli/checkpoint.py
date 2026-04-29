@@ -12,24 +12,9 @@ Note:
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
 from uuid import UUID
 
-from bioetl.application.core.lifecycle.checkpoint_manager import (
-    CheckpointManagerService,
-)
-from bioetl.application.services.admin_runtime_api import QuarantineManagerService
-from bioetl.application.services.audit_inspection_service import AuditInspectionService
-from bioetl.application.services.checkpoint_service import CheckpointService
-from bioetl.application.services.control_plane.run_manifest_inspection_service import (
-    RunManifestInspectionService,
-)
-from bioetl.application.services.lineage.lineage_inspection_service import (
-    LineageInspectionService,
-)
-from bioetl.application.services.observability_workflow_service import (
-    ObservabilityWorkflowService,
-)
-from bioetl.application.services.quarantine_service import QuarantineService
 from bioetl.composition.bootstrap.assembly.checkpoint import (
     bootstrap_checkpoint_compatibility_service,
     bootstrap_checkpoint_port,
@@ -40,15 +25,35 @@ from bioetl.composition.bootstrap.cli.noop import create_noop_logger
 from bioetl.composition.bootstrap.cli.run_manifest import (
     bootstrap_run_manifest_service,
 )
+from bioetl.composition.bootstrap.cli.service_builders import (
+    build_cli_audit_inspection_service,
+    build_cli_checkpoint_manager,
+    build_cli_checkpoint_service,
+    build_cli_observability_workflow_service,
+    build_cli_quarantine_manager,
+    build_cli_quarantine_service,
+)
 from bioetl.composition.factories.storage.audit import create_audit_port
 from bioetl.composition.observability_resolution import (
     resolve_metrics_port,
     resolve_tracing_port,
 )
 from bioetl.domain.types import RunID
-from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpointAdapter
 from bioetl.infrastructure.config import get_settings
-from bioetl.infrastructure.time import SystemClock
+
+if TYPE_CHECKING:
+    from bioetl.application.core.lifecycle.checkpoint_manager import (
+        CheckpointManagerService,
+    )
+    from bioetl.application.services.admin_runtime_api import QuarantineManagerService
+    from bioetl.application.services.audit_inspection_service import (
+        AuditInspectionService,
+    )
+    from bioetl.application.services.checkpoint_service import CheckpointService
+    from bioetl.application.services.observability_workflow_service import (
+        ObservabilityWorkflowService,
+    )
+    from bioetl.application.services.quarantine_service import QuarantineService
 
 __all__ = [
     "CLI_INSPECTION_RUN_ID",
@@ -76,9 +81,8 @@ def bootstrap_quarantine_manager(pipeline_name: str) -> QuarantineManagerService
     Returns:
         QuarantineManagerService configured for the specified pipeline.
     """
-    quarantine_port = bootstrap_quarantine_port()
-    return QuarantineManagerService(
-        quarantine_port=quarantine_port,
+    return build_cli_quarantine_manager(
+        quarantine_port_factory=bootstrap_quarantine_port,
         pipeline_name=pipeline_name,
     )
 
@@ -97,18 +101,12 @@ def bootstrap_checkpoint_manager(pipeline_name: str) -> CheckpointManagerService
     Returns:
         CheckpointManagerService configured for CLI inspection.
     """
-    checkpoint_port = bootstrap_checkpoint_port(pipeline_name)
-    noop_logger = create_noop_logger()
-
-    compatibility_service = bootstrap_checkpoint_compatibility_service(noop_logger)
-
-    return CheckpointManagerService(
-        checkpoint_port=checkpoint_port,
-        logger=noop_logger,
+    return build_cli_checkpoint_manager(
+        checkpoint_port_factory=bootstrap_checkpoint_port,
+        logger_factory=create_noop_logger,
         pipeline_name=pipeline_name,
         run_id=CLI_INSPECTION_RUN_ID,
-        resume=False,
-        checkpoint_compatibility_service=compatibility_service,
+        compatibility_service_factory=bootstrap_checkpoint_compatibility_service,
     )
 
 
@@ -121,64 +119,36 @@ def bootstrap_checkpoint_service() -> CheckpointService:
     Returns:
         CheckpointService configured for CLI operations.
     """
-    settings = get_settings()
-    # Use empty pipeline name for global operations
-    checkpoint_port = LocalCheckpointAdapter(
-        base_path=settings.checkpoint_path,
-        pipeline_name="",
-    )
-    noop_logger = create_noop_logger()
-
-    return CheckpointService(
-        checkpoint_port=checkpoint_port,
-        logger=noop_logger,
-        metrics=resolve_metrics_port(metrics=None, settings=settings),
-        tracer=resolve_tracing_port(
-            tracer=None,
-            settings=settings,
-            service_name="bioetl.checkpoint_admin",
-        ),
+    return build_cli_checkpoint_service(
+        settings=get_settings(),
+        logger_factory=create_noop_logger,
+        metrics_resolver=resolve_metrics_port,
+        tracing_resolver=resolve_tracing_port,
     )
 
 
 def bootstrap_audit_inspection_service() -> AuditInspectionService:
     """Bootstrap AuditInspectionService for operator diagnostics workflows."""
-    settings = get_settings()
-    noop_logger = create_noop_logger()
-    audit_port = create_audit_port(
-        settings=settings,
-        logger=noop_logger,
-        metrics=resolve_metrics_port(metrics=None, settings=settings),
-        tracing=resolve_tracing_port(
-            tracer=None,
-            settings=settings,
-            service_name="bioetl.audit_admin",
-        ),
+    return build_cli_audit_inspection_service(
+        settings=get_settings(),
+        logger_factory=create_noop_logger,
+        metrics_resolver=resolve_metrics_port,
+        tracing_resolver=resolve_tracing_port,
+        audit_port_factory=create_audit_port,
     )
-    return AuditInspectionService(audit_port=audit_port)
 
 
 def bootstrap_observability_workflow_service() -> ObservabilityWorkflowService:
     """Bootstrap canonical audit/checkpoint diagnostics workflows."""
     settings = get_settings()
-    checkpoint_service = bootstrap_checkpoint_service()
-    audit_service = bootstrap_audit_inspection_service()
-    run_manifest_service: RunManifestInspectionService = (
-        bootstrap_run_manifest_service()
-    )
-    lineage_service: LineageInspectionService = bootstrap_lineage_service()
-    quarantine_service: QuarantineService = bootstrap_quarantine_service()
-    return ObservabilityWorkflowService(
-        audit_service=audit_service,
-        checkpoint_service=checkpoint_service,
-        run_manifest_service=run_manifest_service,
-        lineage_service=lineage_service,
-        quarantine_service=quarantine_service,
-        tracer=resolve_tracing_port(
-            tracer=None,
-            settings=settings,
-            service_name="bioetl.diagnostics",
-        ),
+    return build_cli_observability_workflow_service(
+        settings=settings,
+        checkpoint_service_factory=bootstrap_checkpoint_service,
+        audit_service_factory=bootstrap_audit_inspection_service,
+        run_manifest_service_factory=bootstrap_run_manifest_service,
+        lineage_service_factory=bootstrap_lineage_service,
+        quarantine_service_factory=bootstrap_quarantine_service,
+        tracing_resolver=resolve_tracing_port,
     )
 
 
@@ -190,19 +160,10 @@ def bootstrap_quarantine_service() -> QuarantineService:
     Returns:
         QuarantineService configured for CLI operations.
     """
-    settings = get_settings()
-    quarantine_port = bootstrap_quarantine_port()
-    noop_logger = create_noop_logger()
-    metrics = resolve_metrics_port(metrics=None, settings=settings)
-
-    return QuarantineService(
-        quarantine_port=quarantine_port,
-        logger=noop_logger,
-        clock=SystemClock(),
-        metrics=metrics,
-        tracer=resolve_tracing_port(
-            tracer=None,
-            settings=settings,
-            service_name="bioetl.quarantine_admin",
-        ),
+    return build_cli_quarantine_service(
+        settings=get_settings(),
+        quarantine_port_factory=bootstrap_quarantine_port,
+        logger_factory=create_noop_logger,
+        metrics_resolver=resolve_metrics_port,
+        tracing_resolver=resolve_tracing_port,
     )

@@ -5,6 +5,10 @@ from pathlib import Path
 import pytest
 import yaml
 
+from bioetl.domain.control_plane.reproducibility_profiles import (
+    published_supported_reproducibility_families,
+)
+
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 MANIFEST_PATH = PROJECT_ROOT / "configs" / "base" / "bronze_fixture_manifest.yaml"
 GAPS_PATH = PROJECT_ROOT / "configs" / "base" / "bronze_fixture_gaps.yaml"
@@ -81,6 +85,35 @@ def test_replay_critical_families_are_promoted_to_tracked_ci_samples() -> None:
         assert entry.get("records") == len(lines), (
             f"{key} manifest records field must match actual line count"
         )
+
+
+def test_exact_replay_supported_families_have_bronze_fixture_evidence() -> None:
+    """Strict exact-replay source families need tracked Bronze evidence samples."""
+    manifest = _load_yaml(MANIFEST_PATH).get("fixtures", {})
+    gaps = _load_yaml(GAPS_PATH).get("gaps", {})
+    assert isinstance(manifest, dict)
+    assert isinstance(gaps, dict)
+
+    supported_fixture_keys = {
+        family.replace(".", "/", 1)
+        for family in published_supported_reproducibility_families()
+    }
+    missing_from_manifest = sorted(supported_fixture_keys - set(manifest))
+    still_in_gaps = sorted(supported_fixture_keys & set(gaps))
+
+    assert not missing_from_manifest, (
+        "Exact-replay supported families are missing Bronze fixture manifest "
+        f"entries: {missing_from_manifest}"
+    )
+    assert not still_in_gaps, (
+        "Exact-replay supported families must not remain in "
+        f"bronze_fixture_gaps.yaml: {still_in_gaps}"
+    )
+
+    for key in sorted(supported_fixture_keys):
+        entry = manifest[key]
+        assert entry.get("fixture_kind") == "tracked_ci_sample"
+        assert entry.get("validation_status") == "valid"
 
 
 def test_replay_critical_families_keep_ci_visible_consumer_paths() -> None:

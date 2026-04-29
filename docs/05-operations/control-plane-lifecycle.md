@@ -41,6 +41,17 @@ Protected references are fail-closed:
 - explicitly protected run, manifest, effective-config, lineage, and snapshot
   identifiers are always retained.
 
+## Replay Evidence Retention Matrix
+
+| Evidence surface | Retain when | Delete only when | Replay impact |
+| ---------------- | ----------- | ---------------- | ------------- |
+| `RUN_MANIFEST` | Manifest is retention-active, explicitly protected, replay parent/child-linked, or declares `required_persistence_profile=replay_ready` / `forensic_grade`. | Retention expired and not protected by run, parentage, checkpoint, lineage, or evidence-floor policy. | `strict_replay_evidence_protected` or `unprotected_replay_evidence_delete_candidate`. |
+| `RUN_LEDGER` | Ledger is tied to a retained manifest or a replay/forensic evidence floor. | Owning manifest is delete-eligible and no checkpoint/resume reconstruction path references it. | Loss removes produced-artifact trace and resume/replay audit history. |
+| `EFFECTIVE_CONFIG` | Artifact id is referenced by a retained manifest, checkpoint, or explicit protected reference. | No retained manifest/checkpoint/protected reference points at the artifact id. | Loss removes the semantic config identity proof for exact replay. |
+| `CHECKPOINT` | Checkpoint is retention-active or anchors a retained run/manifest/effective-config artifact. | Checkpoint is expired and no protected run/manifest/effective-config relationship remains. | Loss may block resume or checkpoint-compatible exact replay. |
+| `LINEAGE` | Fragment id is referenced by retained manifest/ledger sidecar links or explicit protected references. | No retained artifact, manifest, or ledger entry references the fragment id. | Loss breaks forensic closure for produced artifacts. |
+| `cached_bronze_snapshot` | Snapshot id appears in retained manifest `source_refs` or explicit protected snapshot ids. | Snapshot is not referenced by any retained manifest/checkpoint/evidence floor. | Loss downgrades exact replay to rebuild/degraded modes. |
+
 ## Commands
 
 Preview cleanup candidates:

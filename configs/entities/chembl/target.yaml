@@ -220,8 +220,6 @@ hash_policy:
             component_accessions: order_sensitive_json
             component_descriptions: order_sensitive_json
             component_ids: order_sensitive_json
-            component_types: order_sensitive_json
-            component_relationships: order_sensitive_json
         normalization:
             trim_strings: true
             round_floats:

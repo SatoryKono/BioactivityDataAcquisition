@@ -256,6 +256,7 @@ def _make_bronze_sidecar_payload() -> dict[str, object]:
             output_path="v1/chembl/activity/2025-01-01/batch-001.jsonl.zst",
             started_at=datetime(2025, 1, 1, 12, 0, tzinfo=UTC),
             completed_at=datetime(2025, 1, 1, 12, 0, 5, tzinfo=UTC),
+            output_content_hash="f" * 64,
             source_metadata=source_metadata,
         )
     )

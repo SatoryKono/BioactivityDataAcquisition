@@ -132,13 +132,14 @@ SUBCELLULAR_FRACTIONS: frozenset[str] = frozenset(
 )
 CONFIDENCE_DESCRIPTIONS: frozenset[str] = frozenset(
     [
-        "Likely active",
-        "Active",
-        "Inactive",
-        "Potentially active",
-        "Potentially inactive",
-        "Inconclusive",
-        "Not determined",
+        "Default value - Target unknown or has yet to be assigned",
+        "Direct protein complex subunits assigned",
+        "Direct single protein target assigned",
+        "Homologous single protein target assigned",
+        "Multiple direct protein targets may be assigned",
+        "Multiple homologous protein targets may be assigned",
+        "Target assigned is molecular non-protein target",
+        "Target assigned is non-molecular",
     ]
 )
 

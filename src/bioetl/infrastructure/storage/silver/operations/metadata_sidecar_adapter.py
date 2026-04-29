@@ -100,10 +100,7 @@ def extract_control_plane_provenance_from_records(
 ) -> dict[str, str | None]:
     """Extract optional sidecar provenance anchors from the first record."""
     if not records:
-        return {
-            field_name: None
-            for field_name in _CONTROL_PLANE_PROVENANCE_RECORD_KEYS
-        }
+        return dict.fromkeys(_CONTROL_PLANE_PROVENANCE_RECORD_KEYS)
     first = records[0]
     return {
         field_name: _first_text_value(first, candidate_keys)

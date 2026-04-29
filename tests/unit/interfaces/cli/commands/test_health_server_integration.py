@@ -13,7 +13,7 @@ import pytest
 from click.testing import CliRunner
 
 from bioetl.interfaces.cli import cli
-from bioetl.interfaces.cli.commands.health_server_integration import (
+from bioetl.interfaces.cli.commands.domains.health.server_integration import (
     DEFAULT_HEALTH_SERVER_PORT,
     add_health_server_options,
     echo_health_server_info,

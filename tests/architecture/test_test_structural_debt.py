@@ -15,7 +15,6 @@ TEST_FILE_LOC_EXEMPTIONS = {
 
 TEST_FUNCTION_LOC_EXEMPTIONS = {
     "tests/testing_support/neo4j_memory_sync.py::test_snapshot_contains_core_repo_surfaces": 295,
-    "tests/unit/domain/ports/test_protocol_contract_examples.py::test_write_silver_signature": 204,
 }
 
 

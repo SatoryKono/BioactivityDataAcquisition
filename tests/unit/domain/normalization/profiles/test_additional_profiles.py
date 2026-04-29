@@ -141,6 +141,22 @@ def test_chembl_json_ordering_policy_names_all_current_set_like_fields() -> None
     assert actual == expected
 
 
+def test_chembl_target_hash_config_does_not_override_set_like_component_vocab_lists() -> (
+    None
+):
+    config_path = Path("configs/entities/chembl/target.yaml")
+    config = yaml.safe_load(config_path.read_text(encoding="utf-8"))
+    assert isinstance(config, dict)
+
+    field_ordering = (
+        config.get("hash_policy", {}).get("hash_policy", {}).get("field_ordering", {})
+    )
+    assert isinstance(field_ordering, dict)
+
+    assert "component_types" not in field_ordering
+    assert "component_relationships" not in field_ordering
+
+
 def test_pubchem_smiles_rules_use_domain_smiles_normalization() -> None:
     canonical_rule = PUBCHEM_COMPOUND_PROFILE.rule_for("canonical_smiles")
     isomeric_rule = PUBCHEM_COMPOUND_PROFILE.rule_for("isomeric_smiles")

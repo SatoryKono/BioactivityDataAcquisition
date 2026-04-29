@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-29T13:07:43.391766+00:00",
+  "generated_at": "2026-04-29T14:19:19.830786+00:00",
   "summary": {
     "total_scripts": 355,
     "status_counts": {
@@ -9117,13 +9117,13 @@
         },
         {
           "path": "tests/unit/memory/test_rag_indexing.py",
-          "line": 46,
+          "line": 47,
           "source_group": "tests",
           "text": "assert infer_source_type(Path(\"src/memory/query.py\")) == \"memory\""
         },
         {
           "path": "tests/unit/memory/test_rag_indexing.py",
-          "line": 60,
+          "line": 61,
           "source_group": "tests",
           "text": "assert infer_domain(Path(\"src/memory/query.py\")) == \"memory_subsystem\""
         },
