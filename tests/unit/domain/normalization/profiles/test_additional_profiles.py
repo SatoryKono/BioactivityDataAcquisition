@@ -165,6 +165,56 @@ def test_uniprot_protein_json_array_fields_are_profile_canonicalized() -> None:
     assert UNIPROT_PROTEIN_PROFILE.rule_for("reactions").set_like is False
 
 
+def test_uniprot_protein_reference_ids_are_profile_canonicalized() -> None:
+    go_rule = UNIPROT_PROTEIN_PROFILE.rule_for("go_terms")
+    interpro_rule = UNIPROT_PROTEIN_PROFILE.rule_for("interpro_xrefs")
+    pfam_rule = UNIPROT_PROTEIN_PROFILE.rule_for("pfam_xrefs")
+    pdb_rule = UNIPROT_PROTEIN_PROFILE.rule_for("pdb_xrefs")
+    reactome_rule = UNIPROT_PROTEIN_PROFILE.rule_for("reactome_xrefs")
+
+    assert go_rule is not None
+    assert (
+        go_rule.apply('[{"term":"binding","id":"go_0005524"}]')
+        == '[{"id":"GO:0005524","term":"binding"}]'
+    )
+
+    assert interpro_rule is not None
+    assert interpro_rule.apply('[{"id":"ipr000001"}]') == '[{"id":"IPR000001"}]'
+
+    assert pfam_rule is not None
+    assert pfam_rule.apply('[{"id":"pf00001"}]') == '[{"id":"PF00001"}]'
+
+    assert pdb_rule is not None
+    assert pdb_rule.apply('[{"id":"1abc"}]') == '[{"id":"1ABC"}]'
+
+    assert reactome_rule is not None
+    assert reactome_rule.apply('[{"id":"r-hsa-164843"}]') == '[{"id":"R-HSA-164843"}]'
+
+
+def test_openalex_reference_ids_are_profile_canonicalized() -> None:
+    ror_rule = OPENALEX_PUBLICATION_PROFILE.rule_for("ror_ids")
+    topics_rule = OPENALEX_PUBLICATION_PROFILE.rule_for("subject_topics")
+    primary_topic_rule = OPENALEX_PUBLICATION_PROFILE.rule_for("primary_topic")
+
+    assert ror_rule is not None
+    assert (
+        ror_rule.apply('["HTTP://ROR.ORG/0ABCDEF12/"]')
+        == '["https://ror.org/0abcdef12"]'
+    )
+
+    assert topics_rule is not None
+    assert (
+        topics_rule.apply('[{"id":"https://openalex.org/t12345","display_name":"X"}]')
+        == '[{"display_name":"X","id":"T12345"}]'
+    )
+
+    assert primary_topic_rule is not None
+    assert (
+        primary_topic_rule.apply('{"id":"https://openalex.org/T987","score":1}')
+        == '{"id":"T987","score":1}'
+    )
+
+
 def test_chembl_target_organism_display_normalization_is_profile_visible() -> None:
     organism_rule = CHEMBL_TARGET_PROFILE.rule_for("organism")
 

@@ -60,8 +60,9 @@ def emit_composite_startup(
         info_printer("Resume mode: continuing from last checkpoint")
     if cached_bronze_enabled:
         warning_printer(
-            "Cached Bronze inputs on composite execution are outside the strict "
-            "exact-replay boundary; treat this run as rebuild/resume, not exact replay."
+            "Composite exact replay requires a full cached-Bronze snapshot envelope "
+            "for every seed, dependency, and enricher; partial cached Bronze remains "
+            "resume/rebuild evidence and fails closed for exact replay."
         )
     health_info_printer(health_server, health_port)
 

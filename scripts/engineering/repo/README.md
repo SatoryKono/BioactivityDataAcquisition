@@ -7,6 +7,7 @@ Repository hygiene and inventory governance tooling.
 ```bash
 python -m scripts.engineering.repo --help
 python -m scripts.engineering.repo <command> [args...]
+python -m scripts.engineering.repo cleanup-branch-candidates --help
 ```
 
 ## Commands
@@ -39,9 +40,11 @@ bash scripts/engineering/repo/cleanup_branch_candidates.sh --apply --with-remote
 Use the shell wrapper when you want a copy-pasteable bash entrypoint for the
 testing-roadmap issue split workflow or the docs-sync issue metadata workflow.
 Both wrappers forward all arguments to their Python implementations.
-Use `cleanup_branch_candidates.sh` when you want the agreed branch cleanup plan
-executed with a safe dry-run default and archive tags for the risky local
-branches.
+Use `python -m scripts.engineering.repo cleanup-branch-candidates` as the
+canonical branch-cleanup entrypoint. Keep
+`cleanup_branch_candidates.sh` when you want the same workflow through a
+copy-pasteable shell transport with a safe dry-run default and archive tags for
+the risky local branches.
 
 ## When to Use
 

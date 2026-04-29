@@ -176,12 +176,41 @@ async def test_write_cv_quarantine_writes_records_and_emits_metric() -> None:
         },
     )
     runner._logger.info.assert_called_once()
-    runner._metrics.increment_counter.assert_called_once_with(
+    runner._metrics.increment_counter.assert_any_call(
         "bioetl_quarantine_records_total",
         2,
         {
             "pipeline": "composite:publication",
             "reason": "cross_validation",
+        },
+    )
+    runner._metrics.increment_counter.assert_any_call(
+        "bioetl_record_flow_records_total",
+        2,
+        {
+            "pipeline": "composite:publication",
+            "run_type": "composite",
+            "flow_stage": "quarantined",
+        },
+    )
+    runner._metrics.increment_counter.assert_any_call(
+        "bioetl_dq_dispositions_total",
+        2,
+        {
+            "pipeline": "composite:publication",
+            "stage": "validation",
+            "disposition": "quarantine",
+            "terminal_status": "success",
+        },
+    )
+    runner._metrics.increment_counter.assert_any_call(
+        "bioetl_stage_records_total",
+        2,
+        {
+            "pipeline": "composite:publication",
+            "run_type": "composite",
+            "stage": "validation",
+            "outcome": "quarantined",
         },
     )
 
@@ -229,12 +258,41 @@ async def test_write_cv_quarantine_handles_non_fatal_and_bioetl_errors() -> None
             "semantic_artifact": False,
         },
     )
-    runner._metrics.increment_counter.assert_called_once_with(
+    runner._metrics.increment_counter.assert_any_call(
         "bioetl_quarantine_records_total",
         1,
         {
             "pipeline": "composite:publication",
             "reason": "cross_validation",
+        },
+    )
+    runner._metrics.increment_counter.assert_any_call(
+        "bioetl_record_flow_records_total",
+        1,
+        {
+            "pipeline": "composite:publication",
+            "run_type": "composite",
+            "flow_stage": "quarantined",
+        },
+    )
+    runner._metrics.increment_counter.assert_any_call(
+        "bioetl_dq_dispositions_total",
+        1,
+        {
+            "pipeline": "composite:publication",
+            "stage": "validation",
+            "disposition": "quarantine",
+            "terminal_status": "success",
+        },
+    )
+    runner._metrics.increment_counter.assert_any_call(
+        "bioetl_stage_records_total",
+        1,
+        {
+            "pipeline": "composite:publication",
+            "run_type": "composite",
+            "stage": "validation",
+            "outcome": "quarantined",
         },
     )
 

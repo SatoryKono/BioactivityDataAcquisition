@@ -116,6 +116,38 @@ class TestIntegrationVcrPolicy:
         assert policy["supported_scopes"]["integration"]["supported_pipeline_families"]
         assert policy["supported_scopes"]["e2e"]["representative_pipeline_families"]
 
+    def test_crossref_openalex_adapter_surfaces_are_replay_governed(self) -> None:
+        policy = _load_yaml(POLICY_PATH)
+        families = policy["supported_scopes"]["integration"][
+            "supported_pipeline_families"
+        ]
+        replay = set(families["provider_adapter_replay"])
+        mixed_mode = set(families["provider_adapter_mixed_mode"])
+        evidence = families["provider_adapter_replay_evidence"]
+        inventory = policy["tracked_suite_inventory"]["integration"][
+            "adapter_provider_surfaces"
+        ]
+
+        assert {"crossref", "openalex"} <= replay
+        assert not {"crossref", "openalex"} & mixed_mode
+
+        for provider in ("crossref", "openalex"):
+            provider_evidence = evidence[provider]
+            cassette_root = ROOT / provider_evidence["cassette_root"]
+            cassette_files = [
+                path
+                for path in cassette_root.glob("*.yaml")
+                if not path.name.endswith("_meta.yaml")
+            ]
+
+            assert cassette_root.exists()
+            assert cassette_files, f"{provider} must keep replay cassettes"
+            assert set(provider_evidence["tracked_adapter_tests"]) == set(
+                inventory[provider]
+            )
+            for relative_path in provider_evidence["tracked_adapter_tests"]:
+                assert (ROOT / relative_path).exists()
+
     def test_policy_declares_canonical_replay_and_refresh_examples(self) -> None:
         policy = _load_yaml(POLICY_PATH)
         windows = policy["execution_paths"]["local"]["windows"]

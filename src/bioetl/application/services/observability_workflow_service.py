@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 
 from bioetl.application.observability.span_helpers import traced_async_operation
 from bioetl.application.services._observability_workflow_support import (
+    build_checkpoint_compatibility_section,
     build_next_steps,
     build_status_section,
     build_traceability_section,
@@ -97,6 +98,10 @@ class CheckpointAuditWorkflowResult:
             "audit": self.audit.to_dict(),
             "run_manifest": (
                 self.run_manifest.to_dict() if self.run_manifest is not None else None
+            ),
+            "compatibility": build_checkpoint_compatibility_section(
+                checkpoint=self.checkpoint,
+                run_manifest=self.run_manifest,
             ),
         }
 

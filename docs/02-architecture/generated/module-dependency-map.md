@@ -5,8 +5,8 @@
 
 ## Summary
 
-- Scanned modules: `1733`
-- Internal import edges (raw): `6843`
+- Scanned modules: `1737`
+- Internal import edges (raw): `6853`
 - Aggregated layer edges: `14`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `310`
@@ -21,15 +21,15 @@ flowchart LR
     infrastructure[infrastructure]
     composition[composition]
     interfaces[interfaces]
-    application -->|1144 OK| application
+    application -->|1147 OK| application
     application -->|1008 OK| domain
     composition -->|240 OK| application
     composition -->|536 OK| composition
     composition -->|376 OK| domain
     composition -->|300 OK| infrastructure
-    domain -->|1112 OK| domain
+    domain -->|1118 OK| domain
     infrastructure -->|749 OK| domain
-    infrastructure -->|952 OK| infrastructure
+    infrastructure -->|953 OK| infrastructure
     interfaces -->|69 OK| application
     interfaces -->|62 OK| composition
     interfaces -->|39 OK| domain
@@ -41,15 +41,15 @@ flowchart LR
 
 | From             | To               | Imports | Policy  |
 | ---------------- | ---------------- | ------: | ------- |
-| `application`    | `application`    |    1144 | allowed |
+| `application`    | `application`    |    1147 | allowed |
 | `application`    | `domain`         |    1008 | allowed |
 | `composition`    | `application`    |     240 | allowed |
 | `composition`    | `composition`    |     536 | allowed |
 | `composition`    | `domain`         |     376 | allowed |
 | `composition`    | `infrastructure` |     300 | allowed |
-| `domain`         | `domain`         |    1112 | allowed |
+| `domain`         | `domain`         |    1118 | allowed |
 | `infrastructure` | `domain`         |     749 | allowed |
-| `infrastructure` | `infrastructure` |     952 | allowed |
+| `infrastructure` | `infrastructure` |     953 | allowed |
 | `interfaces`     | `application`    |      69 | allowed |
 | `interfaces`     | `composition`    |      62 | allowed |
 | `interfaces`     | `domain`         |      39 | allowed |

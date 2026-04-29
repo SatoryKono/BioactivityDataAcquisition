@@ -49,6 +49,12 @@ Retention-sensitive cleanup is fail-closed:
 The absence of an obvious runtime caller is not enough to delete artifacts in
 the protected surfaces above.
 
+The machine-readable replay-safe cleanup inventory is
+`configs/quality/replay_safe_cleanup_inventory.yaml`. Treat it as the canonical
+operator checklist for destructive or semi-destructive cleanup paths. Any new
+cleanup path that can touch replay evidence must be added there before it is
+used operationally.
+
 ## Surface Matrix
 
 | Surface | Cleanup status | Required procedure |
@@ -124,6 +130,22 @@ Before apply/delete, confirm:
 - no candidate is historical context in `docs/99-archive/**`;
 - no candidate is needed for replay, inspection CLI, or forensic traceability;
 - the restore path is known.
+
+replay-impact checklist:
+
+- if the candidate is under `data/output/control/**`,
+  `data/output/checkpoints/**`, or cached Bronze, use
+  `bioetl maintenance control-plane-lifecycle` and review `replay_impact`;
+- `strict_replay_evidence_protected` means deletion would violate a
+  `replay_ready` or `forensic_grade` evidence floor unless a separate override
+  review explicitly accepts that loss;
+- `recovery_evidence_protected` means the artifact is still tied to retained
+  resume/rebuild evidence and should not be deleted by ordinary cleanup;
+- `unprotected_replay_evidence_delete_candidate` is allowed only when the
+  retained manifest/checkpoint/snapshot references no longer protect it;
+- surfaces outside the control-plane lifecycle planner must still record why
+  the deletion does not affect exact replay, resume-only recovery, or forensic
+  traceability.
 
 ### 5. Apply
 

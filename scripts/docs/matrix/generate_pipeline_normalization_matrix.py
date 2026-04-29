@@ -236,6 +236,8 @@ ENTITY_DOMAIN_SCHEMA_REGISTRY: dict[str, Any] = {
 
 _CHEMBL_ENUM_CONFIG = "configs/enums/chembl.yaml"
 _UNIPROT_ENUM_CONFIG = "configs/enums/uniprot.yaml"
+_PUBLICATION_CONTROLLED_CONFIG = "configs/vocab/publication_controlled.yaml"
+_REFERENCE_ID_SOURCE = "domain.normalization.reference_ids"
 
 ENUM_CONFIG_SOURCES: dict[tuple[str, str, str], str] = {
     ("chembl", "activity", "assay_type"): _CHEMBL_ENUM_CONFIG,
@@ -263,9 +265,38 @@ ENUM_CONFIG_SOURCES: dict[tuple[str, str, str], str] = {
     ("chembl", "publication_term", "term_type"): _CHEMBL_ENUM_CONFIG,
     ("chembl", "target", "target_type"): _CHEMBL_ENUM_CONFIG,
     ("chembl", "target_component", "component_type"): _CHEMBL_ENUM_CONFIG,
+    ("crossref", "publication", "publication_type"): _PUBLICATION_CONTROLLED_CONFIG,
+    ("openalex", "publication", "publication_type"): _PUBLICATION_CONTROLLED_CONFIG,
+    ("openalex", "publication", "type_crossref"): _PUBLICATION_CONTROLLED_CONFIG,
+    ("pubmed", "publication", "publication_type"): _PUBLICATION_CONTROLLED_CONFIG,
+    ("pubmed", "publication", "publication_type_list"): _PUBLICATION_CONTROLLED_CONFIG,
+    ("pubmed", "publication", "publication_types"): _PUBLICATION_CONTROLLED_CONFIG,
+    (
+        "semanticscholar",
+        "publication",
+        "publication_type",
+    ): _PUBLICATION_CONTROLLED_CONFIG,
+    (
+        "semanticscholar",
+        "publication",
+        "publication_types",
+    ): _PUBLICATION_CONTROLLED_CONFIG,
     ("uniprot", "protein", "entry_type"): _UNIPROT_ENUM_CONFIG,
     ("uniprot", "protein", "flag"): _UNIPROT_ENUM_CONFIG,
     ("uniprot", "protein", "protein_existence"): _UNIPROT_ENUM_CONFIG,
+}
+
+REFERENCE_ID_SOURCES: dict[tuple[str, str, str], str] = {
+    ("openalex", "publication", "primary_topic"): _REFERENCE_ID_SOURCE,
+    ("openalex", "publication", "ror_ids"): _REFERENCE_ID_SOURCE,
+    ("openalex", "publication", "subject_topics"): _REFERENCE_ID_SOURCE,
+    ("uniprot", "protein", "cellular_component"): _REFERENCE_ID_SOURCE,
+    ("uniprot", "protein", "go_terms"): _REFERENCE_ID_SOURCE,
+    ("uniprot", "protein", "interpro_xrefs"): _REFERENCE_ID_SOURCE,
+    ("uniprot", "protein", "molecular_function"): _REFERENCE_ID_SOURCE,
+    ("uniprot", "protein", "pdb_xrefs"): _REFERENCE_ID_SOURCE,
+    ("uniprot", "protein", "pfam_xrefs"): _REFERENCE_ID_SOURCE,
+    ("uniprot", "protein", "reactome_xrefs"): _REFERENCE_ID_SOURCE,
 }
 
 ENUM_REGISTRY_PATHS: dict[tuple[str, str, str], tuple[str, ...]] = {
@@ -326,6 +357,54 @@ ENUM_REGISTRY_PATHS: dict[tuple[str, str, str], tuple[str, ...]] = {
         "target",
         "component_types",
     ),
+    ("crossref", "publication", "publication_type"): (
+        "providers",
+        "crossref",
+        "publication_type",
+        "values",
+    ),
+    ("openalex", "publication", "publication_type"): (
+        "providers",
+        "openalex",
+        "publication_type",
+        "values",
+    ),
+    ("openalex", "publication", "type_crossref"): (
+        "providers",
+        "openalex",
+        "type_crossref",
+        "values",
+    ),
+    ("pubmed", "publication", "publication_type"): (
+        "providers",
+        "pubmed",
+        "publication_types",
+        "values",
+    ),
+    ("pubmed", "publication", "publication_type_list"): (
+        "providers",
+        "pubmed",
+        "publication_types",
+        "values",
+    ),
+    ("pubmed", "publication", "publication_types"): (
+        "providers",
+        "pubmed",
+        "publication_types",
+        "values",
+    ),
+    ("semanticscholar", "publication", "publication_type"): (
+        "providers",
+        "semanticscholar",
+        "publication_types",
+        "values",
+    ),
+    ("semanticscholar", "publication", "publication_types"): (
+        "providers",
+        "semanticscholar",
+        "publication_types",
+        "values",
+    ),
 }
 
 ENUM_REGISTRY_UNIONS: dict[tuple[str, tuple[str, ...]], tuple[tuple[str, ...], ...]] = {
@@ -336,6 +415,10 @@ ENUM_REGISTRY_UNIONS: dict[tuple[str, tuple[str, ...]], tuple[tuple[str, ...], .
         ("activity", "standard_types"),
         ("assay", "parameter_standard_types"),
     ),
+    (
+        _PUBLICATION_CONTROLLED_CONFIG,
+        ("providers", "openalex", "type_crossref", "values"),
+    ): (("providers", "crossref", "publication_type", "values"),),
 }
 
 COMPOSITE_GOLD_SCHEMA_TYPE_REGISTRY: dict[str, str] = {
@@ -409,6 +492,9 @@ def _controlled_vocabulary_source(
     configured_source = ENUM_CONFIG_SOURCES.get((provider, entity, field_name))
     if configured_source is not None:
         return configured_source
+    reference_source = REFERENCE_ID_SOURCES.get((provider, entity, field_name))
+    if reference_source is not None:
+        return reference_source
 
     if provider == "chembl":
         policy_surface = chembl_policy_surface(entity, field_name)
@@ -573,6 +659,8 @@ def _semantic_category(
         policy_surface = chembl_policy_surface(entity, field_name)
         if policy_surface is not None:
             return policy_surface.category
+    if REFERENCE_ID_SOURCES.get((provider, entity, field_name)) is not None:
+        return "ontology_reference_identifier"
 
     if strictness in {
         "strict_enum",
@@ -660,7 +748,10 @@ def _strictness_category_match(
         or "ontology_id" in normalizer_name
     ):
         return "canonical_ontology_id"
-    if "reviewed_flag_code" in normalizer_name or "flag-like provider code" in normalized_notes:
+    if (
+        "reviewed_flag_code" in normalizer_name
+        or "flag-like provider code" in normalized_notes
+    ):
         return "strict_flag"
     if "cellosaurus" in normalizer_name or "identifier" in normalized_notes:
         return "canonical_identifier"

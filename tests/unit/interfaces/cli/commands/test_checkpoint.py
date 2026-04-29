@@ -96,6 +96,19 @@ class _FakeWorkflowService:
                         ],
                     },
                 },
+                "compatibility": {
+                    "status": "compatible",
+                    "compatible": True,
+                    "taxonomy": "resume_only",
+                    "replay_capability": "resume_only",
+                    "matched_anchors": [
+                        "manifest_id",
+                        "execution_fingerprint",
+                        "effective_config_hash",
+                    ],
+                    "mismatched_anchors": [],
+                    "missing_anchors": ["input_snapshot_fingerprint"],
+                },
             }
         )
 
@@ -338,6 +351,13 @@ class TestCheckpointCommands:
         assert "checkpoint_contract_version: 1.0.0" in result.output
         assert "checkpoint_dq_contract_compatibility_hash: dq-hash-2" in result.output
         assert "replay_capability: resume_only" in result.output
+        assert "compatibility_status: compatible" in result.output
+        assert "compatibility_taxonomy: resume_only" in result.output
+        assert "compatibility_mismatched_anchors: []" in result.output
+        assert (
+            "compatibility_missing_anchors: ['input_snapshot_fingerprint']"
+            in result.output
+        )
         assert "requested_exact_replay: False" in result.output
         assert "exact_replay_blockers: ['exact_replay_not_requested']" in result.output
         assert "persistence_profile: replay_ready" in result.output

@@ -14,6 +14,9 @@ from bioetl.application.services._observability_trace_support import (
 from bioetl.application.services._observability_trace_support import (
     trace_links_enabled as _trace_links_enabled,
 )
+from bioetl.application.services._observability_workflow_checkpoint_support import (
+    build_checkpoint_compatibility_section,
+)
 from bioetl.application.services.audit_inspection_service import AuditInspectionResult
 from bioetl.application.services.checkpoint_service import CheckpointInfo
 from bioetl.application.services.control_plane.run_manifest_inspection_service import (
@@ -28,6 +31,7 @@ if TYPE_CHECKING:
 _CRITICAL_EVIDENCE_PROFILES = frozenset({"forensic_grade"})
 
 __all__ = [
+    "build_checkpoint_compatibility_section",
     "build_next_steps",
     "build_status_section",
     "build_traceability_section",

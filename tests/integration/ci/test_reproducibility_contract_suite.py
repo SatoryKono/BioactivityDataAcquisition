@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass, replace
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
@@ -12,6 +13,7 @@ from uuid import UUID, uuid4
 import polars as pl
 import pytest
 
+from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
 from bioetl.application.composite.merger_metrics_mixin import MergeMetricsRecorderMixin
 from bioetl.application.composite.runner_pkg.runner_observability_mixin import (
     CompositeRunnerObservabilityMixin,
@@ -20,6 +22,9 @@ from bioetl.application.services.effective_config_service import EffectiveConfig
 from bioetl.application.services.lineage import MetadataCoordinator
 from bioetl.application.services.run_manifest_inspection_service import (
     RunManifestInspectionService,
+)
+from bioetl.composition.bootstrap.runtime.composite_control_plane_builder import (
+    build_composite_control_plane_bundle,
 )
 from bioetl.domain.config.dq import DQConfig
 from bioetl.domain.control_plane import (
@@ -120,6 +125,58 @@ class _CompositeReplayHost(CompositeRunnerObservabilityMixin):
         self._dq_report_service = None
         self._quarantine_port = AsyncMock()
         self._metrics = None
+
+
+class _ReplayMatrixCompositeConfig:
+    """Minimal composite config for full-envelope exact replay evidence."""
+
+    name = "composite_publication"
+    version = "1.0.0"
+    seed = SimpleNamespace(pipeline="pubmed_publication")
+    dependencies = (SimpleNamespace(pipeline="crossref_publication"),)
+    enrichers = (SimpleNamespace(pipeline="openalex_publication"),)
+    merge = SimpleNamespace(
+        output_silver_path="data/output/silver/composite/publication",
+        output_gold_path="data/output/gold/composite/publication",
+    )
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "name": self.name,
+            "version": self.version,
+            "seed": {"pipeline": self.seed.pipeline},
+            "dependencies": [
+                {"pipeline": dependency.pipeline} for dependency in self.dependencies
+            ],
+            "enrichers": [
+                {"pipeline": enricher.pipeline} for enricher in self.enrichers
+            ],
+            "merge": {
+                "output_silver_path": self.merge.output_silver_path,
+                "output_gold_path": self.merge.output_gold_path,
+            },
+        }
+
+
+def _write_composite_snapshot_envelope(bronze_root: Path) -> None:
+    """Materialize seed/dependency/enricher cached-Bronze files for replay tests."""
+    for provider, entity in (
+        ("pubmed", "publication"),
+        ("crossref", "publication"),
+        ("openalex", "publication"),
+    ):
+        bronze_day = bronze_root / provider / entity / "2026-01-01"
+        bronze_day.mkdir(parents=True, exist_ok=True)
+        (bronze_day / f"batch_{provider}_{entity}.jsonl.zst").write_bytes(
+            f"{provider}:{entity}:snapshot".encode()
+        )
+
+
+def _load_manifest_payload(data_dir: Path, manifest_id: str) -> dict[str, object]:
+    manifest_path = (
+        data_dir / "output" / "control" / "run_manifest" / f"{manifest_id}.json"
+    )
+    return json.loads(manifest_path.read_text(encoding="utf-8"))
 
 
 def _make_manifest(
@@ -817,6 +874,118 @@ def test_reproducibility_contract_composite_replay_ready_profile_is_fail_closed(
     assert score["required_profile"] == "replay_ready"
     assert score["thresholds_satisfied"] is False
     assert {"determinism", "replay_readiness"} <= set(threshold_failures)
+
+
+def test_reproducibility_contract_composite_full_snapshot_envelope_exact_replay_matrix(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Composite replay matrix must prove stable semantic identity at runtime."""
+    data_dir = tmp_path / "runtime"
+    bronze_root = tmp_path / "cached-bronze"
+    _write_composite_snapshot_envelope(bronze_root)
+    monkeypatch.setattr(
+        "bioetl.composition.bootstrap.runtime.composite_control_plane_builder.get_code_revision_provenance",
+        lambda: SimpleNamespace(
+            git_commit="test-clean-composite-replay",
+            source_revision_state="clean",
+        ),
+    )
+    config = _ReplayMatrixCompositeConfig()
+    runtime = CompositeRuntimeConfig(
+        resume=True,
+        use_cached_bronze=True,
+        cached_bronze_path=str(bronze_root),
+        cached_bronze_date="2026-01-01",
+    )
+
+    bundles = []
+    manifests = []
+    for index in range(2):
+        infra_context = SimpleNamespace(
+            run_id=str(UUID(f"00000000-0000-0000-0000-00000000052{index}")),
+            settings=SimpleNamespace(
+                data_dir=str(data_dir),
+                pipeline=SimpleNamespace(
+                    control_plane=SimpleNamespace(
+                        run_manifest_enabled=True,
+                        run_ledger_enabled=True,
+                        required_persistence_profile="replay_ready",
+                    )
+                ),
+            ),
+            logger=MagicMock(),
+            metrics=None,
+            storage=MagicMock(),
+            lock=MagicMock(),
+        )
+        bundle = build_composite_control_plane_bundle(
+            config=config,
+            runtime=runtime,
+            infra_context=infra_context,
+        )
+        bundles.append(bundle)
+        manifests.append(_load_manifest_payload(data_dir, bundle.manifest_id))
+
+    first, second = manifests
+    assert first["run_id"] != second["run_id"]
+    assert first["manifest_id"] != second["manifest_id"]
+    assert first["replay_capability"] == "exact_replay_supported"
+    assert second["replay_capability"] == "exact_replay_supported"
+    assert first["execution_fingerprint"] == second["execution_fingerprint"]
+    assert (
+        first["code_provenance"]["effective_config_artifact_id"]
+        == (second["code_provenance"]["effective_config_artifact_id"])
+    )
+    snapshot_ids_first = [
+        snapshot["snapshot_id"]
+        for source_ref in first["source_refs"]
+        for snapshot in source_ref["input_snapshots"]
+    ]
+    snapshot_ids_second = [
+        snapshot["snapshot_id"]
+        for source_ref in second["source_refs"]
+        for snapshot in source_ref["input_snapshots"]
+    ]
+    assert len(snapshot_ids_first) == 3
+    assert snapshot_ids_first == snapshot_ids_second
+
+    evidence_dir = tmp_path / "reports" / "reproducibility"
+    evidence_dir.mkdir(parents=True, exist_ok=True)
+    evidence_path = evidence_dir / "composite_publication_exact_replay_matrix.json"
+    evidence_path.write_text(
+        json.dumps(
+            {
+                "pipeline_name": config.name,
+                "case": "composite_full_snapshot_envelope_exact_replay",
+                "replay_capability": first["replay_capability"],
+                "semantic_identity": {
+                    "execution_fingerprint": first["execution_fingerprint"],
+                    "effective_config_artifact_id": first["code_provenance"][
+                        "effective_config_artifact_id"
+                    ],
+                    "snapshot_ids": snapshot_ids_first,
+                },
+                "occurrences": [
+                    {
+                        "run_id": first["run_id"],
+                        "manifest_id": first["manifest_id"],
+                    },
+                    {
+                        "run_id": second["run_id"],
+                        "manifest_id": second["manifest_id"],
+                    },
+                ],
+            },
+            sort_keys=True,
+            indent=2,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
+    assert evidence["case"] == "composite_full_snapshot_envelope_exact_replay"
+    assert len(evidence["occurrences"]) == 2
 
 
 def test_reproducibility_contract_forensic_grade_is_blocked_outside_supported_lineage_family() -> (

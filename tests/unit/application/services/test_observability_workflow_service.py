@@ -72,6 +72,40 @@ def _make_manifest_result(
     )
 
 
+def _make_checkpoint_manifest_result(
+    *,
+    execution_fingerprint: str = "fingerprint-1",
+    effective_config_hash: str = "effective-hash-1",
+) -> SimpleNamespace:
+    """Create a manifest stub with checkpoint compatibility anchors."""
+    return SimpleNamespace(
+        manifest=SimpleNamespace(
+            pipeline_name="chembl_activity",
+            provider="chembl",
+            run_type="incremental",
+            run_id="run-123",
+            manifest_id="manifest-1",
+            execution_fingerprint=execution_fingerprint,
+            launch_context={"exact_replay": True},
+            code_provenance=SimpleNamespace(
+                effective_config_hash=effective_config_hash,
+                effective_config_artifact_id="effective-artifact-1",
+                contract_ref="chembl.activity",
+                contract_version="1.0.0",
+                dq_contract_compatibility_hash="dq-hash-1",
+            ),
+        ),
+        ledger_entries=(),
+        diagnostics={
+            "requested_exact_replay": True,
+            "replay_capability": "exact_replay_supported",
+            "input_snapshot_identity_fingerprint": "snapshot-fingerprint-1",
+        },
+        identity_graph={"replay_capability": "exact_replay_supported"},
+        to_dict=lambda: {"manifest": {"pipeline_name": "chembl_activity"}},
+    )
+
+
 @pytest.mark.asyncio
 async def test_inspect_audit_run_returns_manifest_context() -> None:
     audit_result = AuditInspectionResult(query={"run_id": "abc"}, entries=())
@@ -124,6 +158,86 @@ async def test_checkpoint_workflow_derives_run_id_from_checkpoint() -> None:
     assert result.run_manifest is manifest
     audit_service.inspect_run.assert_awaited_once_with("run-123", limit=9)
     run_manifest_service.show.assert_called_once_with("run-123")
+
+
+@pytest.mark.asyncio
+async def test_checkpoint_workflow_to_dict_includes_compatibility_taxonomy() -> None:
+    checkpoint_service = mock.AsyncMock()
+    checkpoint_service.get_checkpoint.return_value = CheckpointInfo(
+        pipeline_name="chembl_activity",
+        run_id="run-123",
+        metadata={
+            "records_processed": 5,
+            "manifest_id": "manifest-1",
+            "execution_fingerprint": "fingerprint-1",
+            "effective_config_hash": "effective-hash-1",
+            "effective_config_artifact_id": "effective-artifact-1",
+            "contract_ref": "chembl.activity",
+            "contract_version": "1.0.0",
+            "dq_contract_compatibility_hash": "dq-hash-1",
+            "exact_replay": True,
+            "input_snapshot_fingerprint": "snapshot-fingerprint-1",
+        },
+    )
+    audit_result = AuditInspectionResult(query={"run_id": "run-123"}, entries=())
+    audit_service = mock.AsyncMock()
+    audit_service.inspect_run.return_value = audit_result
+    run_manifest_service = mock.Mock()
+    run_manifest_service.show.return_value = _make_checkpoint_manifest_result()
+
+    service = ObservabilityWorkflowService(
+        audit_service=audit_service,
+        checkpoint_service=checkpoint_service,
+        run_manifest_service=run_manifest_service,
+    )
+
+    result = await service.inspect_checkpoint_workflow("chembl_activity")
+    compatibility = result.to_dict()["compatibility"]
+
+    assert compatibility["status"] == "compatible"
+    assert compatibility["taxonomy"] == "exact_replay"
+    assert compatibility["replay_capability"] == "exact_replay_supported"
+    assert compatibility["mismatched_anchors"] == []
+    assert "execution_fingerprint" in compatibility["matched_anchors"]
+
+
+@pytest.mark.asyncio
+async def test_checkpoint_workflow_to_dict_blocks_identity_mismatch() -> None:
+    checkpoint_service = mock.AsyncMock()
+    checkpoint_service.get_checkpoint.return_value = CheckpointInfo(
+        pipeline_name="chembl_activity",
+        run_id="run-123",
+        metadata={
+            "records_processed": 5,
+            "manifest_id": "manifest-1",
+            "execution_fingerprint": "fingerprint-stale",
+            "effective_config_hash": "effective-hash-1",
+        },
+    )
+    audit_service = mock.AsyncMock()
+    audit_service.inspect_run.return_value = AuditInspectionResult(
+        query={"run_id": "run-123"},
+        entries=(),
+    )
+    run_manifest_service = mock.Mock()
+    run_manifest_service.show.return_value = _make_checkpoint_manifest_result()
+
+    service = ObservabilityWorkflowService(
+        audit_service=audit_service,
+        checkpoint_service=checkpoint_service,
+        run_manifest_service=run_manifest_service,
+    )
+
+    result = await service.inspect_checkpoint_workflow("chembl_activity")
+    compatibility = result.to_dict()["compatibility"]
+
+    assert compatibility["status"] == "incompatible"
+    assert compatibility["taxonomy"] == "blocked_resume"
+    assert {
+        "anchor": "execution_fingerprint",
+        "checkpoint": "fingerprint-stale",
+        "manifest": "fingerprint-1",
+    } in compatibility["mismatched_anchors"]
 
 
 @pytest.mark.asyncio

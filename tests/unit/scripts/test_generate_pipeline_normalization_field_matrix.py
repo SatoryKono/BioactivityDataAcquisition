@@ -475,6 +475,41 @@ def test_build_field_matrix_rows_exposes_dq_schema_and_vocab_governance() -> Non
     _assert_molecule_rows(rows)
 
 
+def test_build_field_matrix_rows_exposes_non_chembl_governance_sources() -> None:
+    rows = build_field_matrix_rows()
+
+    crossref_publication_type = _row(rows, "crossref_publication", "publication_type")
+    assert crossref_publication_type["controlled_vocabulary_source"] == (
+        "configs/vocab/publication_controlled.yaml"
+    )
+    assert crossref_publication_type["policy_scope"] == "provider_full_universe"
+
+    openalex_publication_type = _row(rows, "openalex_publication", "publication_type")
+    assert openalex_publication_type["controlled_vocabulary_source"] == (
+        "configs/vocab/publication_controlled.yaml"
+    )
+    assert openalex_publication_type["policy_scope"] == "provider_full_universe"
+
+    openalex_type_crossref = _row(rows, "openalex_publication", "type_crossref")
+    assert openalex_type_crossref["controlled_vocabulary_source"] == (
+        "configs/vocab/publication_controlled.yaml"
+    )
+
+    openalex_ror_ids = _row(rows, "openalex_publication", "ror_ids")
+    assert openalex_ror_ids["normalizer"] == "normalize_profile_openalex_ror_ids"
+    assert openalex_ror_ids["controlled_vocabulary_source"] == (
+        "domain.normalization.reference_ids"
+    )
+    assert openalex_ror_ids["semantic_category"] == "ontology_reference_identifier"
+
+    uniprot_go_terms = _row(rows, "uniprot_protein", "go_terms")
+    assert uniprot_go_terms["normalizer"] == "normalize_profile_uniprot_go_references"
+    assert uniprot_go_terms["controlled_vocabulary_source"] == (
+        "domain.normalization.reference_ids"
+    )
+    assert uniprot_go_terms["semantic_category"] == "ontology_reference_identifier"
+
+
 def test_build_field_matrix_rows_keeps_chembl_cell_line_policy_fields_visible() -> None:
     rows = build_field_matrix_rows()
 

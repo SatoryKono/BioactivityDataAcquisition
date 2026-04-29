@@ -8,6 +8,11 @@ from bioetl.domain.normalization.profiles._publication_classification_rules impo
 from bioetl.domain.normalization.profiles._standard_profile_builder import (
     build_standard_profile,
 )
+from bioetl.domain.normalization.profiles.profile_normalizers import (
+    normalize_profile_openalex_ror_ids,
+    normalize_profile_openalex_topic,
+    normalize_profile_openalex_topics,
+)
 from bioetl.domain.schemas.openalex.publication import OpenAlexPublicationSchema
 
 __all__ = [
@@ -83,6 +88,21 @@ _JSON_STRING_FIELDS = frozenset(
         "subject_topics",
     }
 )
+_SPECIAL_RULES = {
+    **publication_classification_rules(),
+    "primary_topic": (
+        normalize_profile_openalex_topic,
+        "Canonicalize OpenAlex primary-topic reference identifier inside a canonical JSON object.",
+    ),
+    "ror_ids": (
+        normalize_profile_openalex_ror_ids,
+        "Canonicalize OpenAlex ROR reference identifiers inside a canonical JSON array.",
+    ),
+    "subject_topics": (
+        normalize_profile_openalex_topics,
+        "Canonicalize OpenAlex topic reference identifiers inside a canonical JSON array.",
+    ),
+}
 
 OPENALEX_PUBLICATION_PROFILE = build_standard_profile(
     profile_name="openalex.publication",
@@ -100,7 +120,7 @@ OPENALEX_PUBLICATION_PROFILE = build_standard_profile(
     boolean_fields=_BOOLEAN_FIELDS,
     set_like_fields=_SET_LIKE_FIELDS,
     json_string_fields=_JSON_STRING_FIELDS,
-    special_rules=publication_classification_rules(),
+    special_rules=_SPECIAL_RULES,
 )
 
 OPENALEX_PUBLICATION_PROFILE.assert_covers_schema(OPENALEX_PUBLICATION_SCHEMA_FIELDS)
