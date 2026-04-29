@@ -35,7 +35,7 @@ if TYPE_CHECKING:
     from bioetl.application.services.lineage.lineage_inspection_service import (
         LineageInspectionService,
     )
-    from bioetl.composition import PipelineRegistry
+    from bioetl.composition.registry_api import PipelineRegistry
     from bioetl.domain.ports import (
         AuditPort,
         CheckpointPort,

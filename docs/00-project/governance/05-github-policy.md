@@ -145,6 +145,7 @@ Live GitHub enforcement state:
 - Enforcement: `disabled`.
 - Rule payload still references status check `root-hygiene`, but it is not
   active.
+- Tracking reference: `#3380`.
 - Evidence: `https://github.com/SatoryKono/BioactivityDataAcquisition/rules/15730586`
 
 The legacy repository ruleset `main`
