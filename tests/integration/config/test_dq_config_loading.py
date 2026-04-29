@@ -12,6 +12,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
+import yaml
 
 from bioetl.infrastructure.config.domain_config_resolver import (
     resolve_domain_pipeline_config,
@@ -112,6 +113,26 @@ class TestDQConfigIntegration:
             if rule.validation_type == "range"
         }
         assert "protein_existence" not in range_fields
+
+    def test_non_chembl_raw_publication_type_dq_matches_vocab_registry(
+        self,
+        dq_loader: DQConfigLoader,
+        real_configs_root: Path,
+    ) -> None:
+        """Raw provider publication_type enums should stay externalized."""
+        vocab_path = real_configs_root / "vocab" / "publication_controlled.yaml"
+        vocab = yaml.safe_load(vocab_path.read_text(encoding="utf-8"))
+
+        for provider in ("crossref", "openalex"):
+            expected = tuple(vocab["providers"][provider]["publication_type"]["values"])
+            config = dq_loader.load(provider, "publication")
+            rule = next(
+                rule
+                for rule in config.field_validations
+                if rule.field == "publication_type" and rule.validation_type == "enum"
+            )
+
+            assert rule.allowed == expected
 
 
 @pytest.mark.integration

@@ -244,8 +244,26 @@ class CompositeRunnerObservabilityMixin:
             artifact_policy=_COMPOSITE_CV_QUARANTINE_ARTIFACT_POLICY,
             replay_contract=_COMPOSITE_CV_QUARANTINE_REPLAY_CONTRACT,
         )
-        PipelineMetricsRecorder(self._metrics, pipeline_name).record_quarantine_records(
+        metrics_recorder = PipelineMetricsRecorder(self._metrics, pipeline_name)
+        metrics_recorder.record_quarantine_records(
             reason="cross_validation",
+            count=written,
+        )
+        metrics_recorder.record_record_flow(
+            run_type="composite",
+            flow_stage="quarantined",
+            count=written,
+        )
+        metrics_recorder.record_dq_disposition(
+            stage="validation",
+            disposition="quarantine",
+            terminal_status="success",
+            count=written,
+        )
+        metrics_recorder.record_stage_records(
+            run_type="composite",
+            stage="validation",
+            outcome="quarantined",
             count=written,
         )
 

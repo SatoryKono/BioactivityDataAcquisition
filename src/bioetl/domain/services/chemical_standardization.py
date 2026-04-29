@@ -9,24 +9,13 @@ require a chemistry toolkit.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Literal
 
-from bioetl.domain.value_objects import SMILES, InChIKey
-
-ChemicalStandardizationStatus = Literal[
-    "standardized",
-    "partial",
-    "invalid",
-    "missing_structure",
-]
-
-CHEMICAL_STANDARDIZATION_POLICY_VERSION = "pubchem-basic-v1"
-CHEMICAL_STANDARDIZATION_STATUSES: tuple[ChemicalStandardizationStatus, ...] = (
-    "standardized",
-    "partial",
-    "invalid",
-    "missing_structure",
+from bioetl.domain.normalization.chemical_standardization_contract import (
+    CHEMICAL_STANDARDIZATION_POLICY_VERSION,
+    CHEMICAL_STANDARDIZATION_STATUSES,
+    ChemicalStandardizationStatus,
 )
+from bioetl.domain.value_objects import SMILES, InChIKey
 
 
 @dataclass(frozen=True, slots=True)

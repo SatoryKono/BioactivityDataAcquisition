@@ -177,6 +177,21 @@ def _render_checkpoint_anchor_lines(checkpoint: dict[str, object]) -> list[str]:
     ]
 
 
+def _render_checkpoint_compatibility_lines(payload: dict[str, object]) -> list[str]:
+    """Render checkpoint compatibility taxonomy when workflow payload includes it."""
+    compatibility = payload.get("compatibility")
+    if not isinstance(compatibility, dict):
+        return []
+    return [
+        f"  compatibility_status: {compatibility.get('status')}",
+        f"  compatibility_taxonomy: {compatibility.get('taxonomy')}",
+        f"  compatibility_replay_capability: {compatibility.get('replay_capability')}",
+        f"  compatibility_matched_anchors: {compatibility.get('matched_anchors')}",
+        f"  compatibility_mismatched_anchors: {compatibility.get('mismatched_anchors')}",
+        f"  compatibility_missing_anchors: {compatibility.get('missing_anchors')}",
+    ]
+
+
 def _render_audit_run_payload(payload: dict[str, object]) -> str:
     """Render one audit-run inspection payload in human-readable text."""
     audit = payload.get("audit", {})
@@ -229,6 +244,7 @@ def _render_checkpoint_workflow_payload(payload: dict[str, object]) -> str:
             )
         if replay_view is not None:
             lines.extend(_render_replay_view_lines(replay_view))
+    lines.extend(_render_checkpoint_compatibility_lines(payload))
     lines.extend(
         [
             f"  audit_entries: {len(entries) if isinstance(entries, list) else 0}",

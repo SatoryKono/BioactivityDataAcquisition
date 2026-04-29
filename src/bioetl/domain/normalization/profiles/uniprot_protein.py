@@ -5,6 +5,13 @@ from __future__ import annotations
 from bioetl.domain.normalization.profiles._standard_profile_builder import (
     build_standard_profile,
 )
+from bioetl.domain.normalization.profiles.profile_normalizers import (
+    normalize_profile_pdb_references,
+    normalize_profile_pfam_references,
+    normalize_profile_reactome_references,
+    normalize_profile_uniprot_go_references,
+    normalize_profile_uniprot_interpro_references,
+)
 from bioetl.domain.schemas.uniprot import (
     ENTRY_TYPES,
     PROTEIN_EXISTENCE_LEVELS,
@@ -93,6 +100,58 @@ _ENUM_FIELDS = {
     "flag": frozenset(PROTEIN_FLAGS),
     "protein_existence": frozenset(PROTEIN_EXISTENCE_LEVELS),
 }
+_REFERENCE_ID_RULE_NOTES = {
+    "go": (
+        "Canonicalize UniProt GO reference identifiers inside a canonical JSON "
+        "array while preserving companion provider metadata."
+    ),
+    "interpro": (
+        "Canonicalize UniProt InterPro reference identifiers inside a canonical "
+        "JSON array while preserving companion provider metadata."
+    ),
+    "pfam": (
+        "Canonicalize UniProt Pfam reference identifiers inside a canonical JSON "
+        "array while preserving companion provider metadata."
+    ),
+    "pdb": (
+        "Canonicalize UniProt PDB reference identifiers inside a canonical JSON "
+        "array while preserving companion provider metadata."
+    ),
+    "reactome": (
+        "Canonicalize UniProt Reactome reference identifiers inside a canonical "
+        "JSON array while preserving companion provider metadata."
+    ),
+}
+_SPECIAL_RULES = {
+    "cellular_component": (
+        normalize_profile_uniprot_go_references,
+        _REFERENCE_ID_RULE_NOTES["go"],
+    ),
+    "go_terms": (
+        normalize_profile_uniprot_go_references,
+        _REFERENCE_ID_RULE_NOTES["go"],
+    ),
+    "interpro_xrefs": (
+        normalize_profile_uniprot_interpro_references,
+        _REFERENCE_ID_RULE_NOTES["interpro"],
+    ),
+    "molecular_function": (
+        normalize_profile_uniprot_go_references,
+        _REFERENCE_ID_RULE_NOTES["go"],
+    ),
+    "pdb_xrefs": (
+        normalize_profile_pdb_references,
+        _REFERENCE_ID_RULE_NOTES["pdb"],
+    ),
+    "pfam_xrefs": (
+        normalize_profile_pfam_references,
+        _REFERENCE_ID_RULE_NOTES["pfam"],
+    ),
+    "reactome_xrefs": (
+        normalize_profile_reactome_references,
+        _REFERENCE_ID_RULE_NOTES["reactome"],
+    ),
+}
 
 UNIPROT_PROTEIN_PROFILE = build_standard_profile(
     profile_name="uniprot.protein",
@@ -105,6 +164,7 @@ UNIPROT_PROTEIN_PROFILE = build_standard_profile(
     json_string_fields=_JSON_STRING_FIELDS,
     boolean_fields=_BOOLEAN_FIELDS,
     enum_fields=_ENUM_FIELDS,
+    special_rules=_SPECIAL_RULES,
 )
 
 UNIPROT_PROTEIN_PROFILE.assert_covers_schema(UNIPROT_PROTEIN_SCHEMA_FIELDS)

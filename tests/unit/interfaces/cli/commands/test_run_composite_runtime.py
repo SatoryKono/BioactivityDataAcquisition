@@ -239,10 +239,10 @@ class TestEchoCompositeStartup:
         assert "Dry-run mode: no data will be written" in out
         assert "Resume mode: continuing from last checkpoint" in out
 
-    def test_cached_bronze_true_echoes_exact_replay_boundary_warning(
+    def test_cached_bronze_true_echoes_exact_replay_envelope_warning(
         self, capsys: pytest.CaptureFixture[str]
     ) -> None:
-        """Cached Bronze on composite run prints exact-replay boundary warning."""
+        """Cached Bronze on composite run prints exact-replay envelope warning."""
         with patch(
             "bioetl.interfaces.cli.commands.domains.composite.runtime.echo_health_server_info"
         ):
@@ -256,8 +256,8 @@ class TestEchoCompositeStartup:
             )
 
         out = capsys.readouterr().out
-        assert "outside the strict exact-replay boundary" in out
-        assert "rebuild/resume, not exact replay" in out
+        assert "full cached-Bronze snapshot envelope" in out
+        assert "fails closed for exact replay" in out
 
     def test_cached_bronze_false_does_not_echo_boundary_warning(
         self, capsys: pytest.CaptureFixture[str]

@@ -24,13 +24,25 @@ supported_scopes:
     supported_pipeline_families:
       provider_adapter_replay:
       - chembl
+      - crossref
+      - openalex
       - pubchem
       - pubmed
       - semanticscholar
       - uniprot
-      provider_adapter_mixed_mode:
-      - crossref
-      - openalex
+      provider_adapter_mixed_mode: []
+      provider_adapter_replay_evidence:
+        crossref:
+          cassette_root: tests/fixtures/vcr/crossref/
+          tracked_adapter_tests:
+          - tests/integration/adapters/test_crossref.py
+          - tests/integration/adapters/test_crossref_vcr_rebalance.py
+        openalex:
+          cassette_root: tests/fixtures/vcr/openalex/
+          tracked_adapter_tests:
+          - tests/integration/adapters/openalex/test_adapter.py
+          - tests/integration/adapters/openalex/test_pipeline.py
+          - tests/integration/adapters/test_openalex_vcr_rebalance.py
       pipeline_replay_smoke:
       - chembl_activity
       - chembl_cell_line

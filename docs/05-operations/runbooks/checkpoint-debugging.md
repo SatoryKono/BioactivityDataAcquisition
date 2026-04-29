@@ -147,6 +147,40 @@ touch data/output/checkpoints/.write-test && rm data/output/checkpoints/.write-t
 cat data/output/checkpoints/chembl_activity.json | python -m json.tool
 ```
 
+### View checkpoint with replay anchors
+
+Use the workflow-backed CLI view before deciding whether a checkpoint can be
+used for resume or exact replay:
+
+```bash
+bioetl checkpoint inspect --pipeline chembl_activity --run-id "$RUN_ID"
+bioetl checkpoint inspect --pipeline chembl_activity --run-id "$RUN_ID" --format json
+bioetl checkpoint audit-run --run-id "$RUN_ID"
+```
+
+The text and JSON payloads expose:
+
+- checkpoint anchors: `manifest_id`, `execution_fingerprint`,
+  `effective_config_hash`, `effective_config_artifact_id`, contract refs, and
+  DQ compatibility hash;
+- replay taxonomy: `exact_replay`, `resume_only`, `rebuild_only`,
+  `compatible_resume`, `blocked_resume`, `missing_checkpoint`,
+  `missing_run_manifest`, or `corrupted_checkpoint_payload`;
+- anchor diff lists: matched, mismatched, and missing checkpoint-vs-manifest
+  anchors.
+
+Examples:
+
+- `compatibility_taxonomy: exact_replay` means the checkpoint anchors match a
+  manifest that is `exact_replay_supported` and exact replay was requested.
+- `compatibility_taxonomy: resume_only` means resume is compatible, but the run
+  must not be described as exact replay.
+- `compatibility_taxonomy: blocked_resume` means one or more execution identity
+  anchors differ; do not resume until the mismatch is explained.
+- `compatibility_taxonomy: missing_run_manifest` or
+  `corrupted_checkpoint_payload` means evidence is incomplete or corrupt and
+  must not be collapsed into a normal cache miss.
+
 ### Backup checkpoint
 
 ```bash

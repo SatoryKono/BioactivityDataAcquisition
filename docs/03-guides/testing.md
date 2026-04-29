@@ -363,6 +363,20 @@ control-plane smoke target
 `tests/e2e/test_pubchem_compound_e2e.py::test_pubchem_compound_full_cycle` с
 `VCR_RECORD_MODE=none` и `--vcr-record=none`.
 
+Exact replay runtime validation is covered by a focused matrix rather than the
+whole E2E lane:
+
+```bash
+uv run pytest tests/integration/ci/test_track_d_fixture_control_plane_linkage.py -q --tb=short
+uv run pytest tests/integration/ci/test_reproducibility_contract_suite.py::test_reproducibility_contract_composite_full_snapshot_envelope_exact_replay_matrix -q --tb=short
+```
+
+The matrix writes compact evidence under `reports/reproducibility/` during the
+test run. The ordinary supported-family case proves stable semantic identity
+across two cached-Bronze exact replay occurrences. The composite case proves the
+same contract only when seed, dependency, and enricher inputs all have a full
+cached-Bronze snapshot envelope.
+
 ### 2.4. Architecture Tests (`tests/architecture/`)
 
 Автоматизированный контроль за соблюдением архитектурных правил проекта.

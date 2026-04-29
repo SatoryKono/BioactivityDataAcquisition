@@ -155,8 +155,8 @@ def echo_composite_startup(
         composite: Composite pipeline name (e.g., 'publication').
         dry_run: When True, displays a dry-run warning in the output.
         resume: When True, displays a resume-mode notice in the output.
-        cached_bronze_enabled: When True, prints a warning that cached Bronze
-            on composite execution is outside the strict exact-replay boundary.
+        cached_bronze_enabled: When True, prints a warning that composite exact
+            replay requires a full seed/dependency/enricher snapshot envelope.
         health_server: Whether the HTTP health server is enabled.
         health_port: Port the health server is listening on.
     """
@@ -167,7 +167,8 @@ def echo_composite_startup(
         echo_info("Resume mode: continuing from last checkpoint")
     if cached_bronze_enabled:
         echo_warning(
-            "Cached Bronze inputs on composite execution are outside the strict "
-            "exact-replay boundary; treat this run as rebuild/resume, not exact replay."
+            "Composite exact replay requires a full cached-Bronze snapshot envelope "
+            "for every seed, dependency, and enricher; partial cached Bronze remains "
+            "resume/rebuild evidence and fails closed for exact replay."
         )
     echo_health_server_info(health_server, health_port)

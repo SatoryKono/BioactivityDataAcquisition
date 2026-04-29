@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+from bioetl.domain.normalization.chemical_standardization_contract import (
+    CHEMICAL_STANDARDIZATION_POLICY_VERSION,
+    CHEMICAL_STANDARDIZATION_STATUSES,
+)
 from bioetl.domain.normalization.profiles._standard_profile_builder import (
     build_standard_profile,
 )
@@ -10,10 +14,6 @@ from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_isomeric_smiles,
 )
 from bioetl.domain.schemas.pubchem.compound import PubchemMoleculeSchema
-from bioetl.domain.services.chemical_standardization import (
-    CHEMICAL_STANDARDIZATION_POLICY_VERSION,
-    CHEMICAL_STANDARDIZATION_STATUSES,
-)
 
 __all__ = [
     "PUBCHEM_COMPOUND_PROFILE",

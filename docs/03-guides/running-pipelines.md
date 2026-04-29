@@ -260,6 +260,13 @@ bioetl run --pipeline chembl_activity --cached-bronze-path ./my-cache
 находится **вне strict exact-replay boundary**. Exact replay для ordinary
 pipeline path по-прежнему требует snapshot-backed cached Bronze inputs.
 
+Runtime validation for supported ordinary exact replay is test-backed by
+`tests/integration/ci/test_track_d_fixture_control_plane_linkage.py`. A passing
+validation run proves that two occurrences over the same immutable cached
+Bronze snapshot keep the same `execution_fingerprint`,
+`effective_config_artifact_id`, `effective_config_hash`, DQ compatibility hash,
+and input snapshot IDs while `run_id` and `manifest_id` remain occurrence-only.
+
 ### Фильтрация по CSV
 
 Обрабатывать только записи с указанными ID:
@@ -669,11 +676,19 @@ bioetl run-composite --composite publication --seed-limit 100
 bioetl run-composite --composite publication --use-cached-bronze
 ```
 
-Если composite запуск использует cached Bronze (`--use-cached-bronze`,
-`--cached-bronze-enrichers`, `--cached-bronze-dependencies`), CLI теперь
-явно предупреждает, что такой execution context находится **вне strict
-exact-replay boundary**. Cached Bronze на composite path следует трактовать как
-rebuild/resume aid, а не как доказательство exact replay.
+Composite exact replay is supported only at the
+`composite_snapshot_backed_input_envelope` boundary. This means cached Bronze
+must be present for every seed, dependency, and enricher participant; a partial
+envelope is fail-closed and is treated as non-exact replay. The covered runtime
+validation is:
+
+```bash
+uv run pytest tests/integration/ci/test_reproducibility_contract_suite.py::test_reproducibility_contract_composite_full_snapshot_envelope_exact_replay_matrix -q --tb=short
+```
+
+The validation records two composite control-plane occurrences and proves that
+`execution_fingerprint`, effective-config semantic identity, and all participant
+snapshot IDs remain stable while `run_id` and `manifest_id` differ.
 
 ______________________________________________________________________
 
