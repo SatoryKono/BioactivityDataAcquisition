@@ -7,8 +7,8 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from collections.abc import Callable
 
-    from bioetl.composition import PipelineRegistry
     from bioetl.composition.observability import ObservabilityBundle
+    from bioetl.composition.registry_api import PipelineRegistry
     from bioetl.composition.runtime_builders.inputs_resolver import (
         ResolvedVacuumSettings,
     )

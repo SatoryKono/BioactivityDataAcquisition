@@ -6,7 +6,7 @@ from __future__ import annotations
 __all__ = ["PubMedPublicationTransformer"]
 
 import re
-import xml.etree.ElementTree as ET
+import xml.etree.ElementTree as ET  # nosec B405
 from typing import TYPE_CHECKING, Any, ClassVar, cast
 
 import defusedxml.ElementTree as defused_ET

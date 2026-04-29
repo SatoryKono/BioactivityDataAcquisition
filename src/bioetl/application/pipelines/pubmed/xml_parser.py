@@ -8,7 +8,7 @@ from __future__ import annotations
 __all__ = ["get_int", "get_text"]
 
 
-import xml.etree.ElementTree as ET
+import xml.etree.ElementTree as ET  # nosec B405
 
 
 def get_text(node: ET.Element | None) -> str | None:

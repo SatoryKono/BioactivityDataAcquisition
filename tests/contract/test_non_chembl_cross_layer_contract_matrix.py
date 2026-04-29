@@ -25,6 +25,7 @@ from bioetl.domain.contracts.gold.uniprot import (
     UniProtProteinGoldSchema,
 )
 from bioetl.domain.normalization.structured_payload_policies import (
+    StructuredPayloadSemanticPolicy,
     structured_payload_policy,
 )
 from scripts.docs.generate_pipeline_normalization_field_matrix import (
@@ -139,9 +140,13 @@ def test_structured_payload_observed_shapes_match_policy_registry() -> None:
         provider, entity = pipeline_name.split("_", maxsplit=1)
         for field_name, shape in spec.get("structured_json_shapes", {}).items():
             policy = structured_payload_policy(f"{provider}.{entity}", field_name)
-            if policy is None:
-                continue
 
+            assert policy is not None, f"{pipeline_name}.{field_name}: policy"
+            assert (
+                shape["semantic_policy"]
+                == StructuredPayloadSemanticPolicy.RAW_JSON_PLUS_CANONICAL_JSON_BEFORE_SEMANTIC_TRANSFORM
+            )
+            assert shape["semantic_policy"] == policy.semantic_policy
             assert shape["collection_semantics"] == policy.collection_semantics
             assert shape["raw_sidecar_field"] == policy.raw_sidecar_field
             assert shape["canonical_sidecar_field"] == policy.canonical_sidecar_field

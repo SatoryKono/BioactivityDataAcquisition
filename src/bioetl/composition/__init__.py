@@ -36,7 +36,6 @@ if TYPE_CHECKING:
 _COMPOSITION_REGISTRY_MODULE = "bioetl.composition.registry"
 
 _LAZY_MODULE_EXPORTS: dict[str, str] = {
-    "bootstrap": "bioetl.composition.bootstrap",
     "composite_api": "bioetl.composition.composite_api",
     "control_plane_api": "bioetl.composition.control_plane_api",
     "entrypoints": "bioetl.composition.entrypoints",
@@ -46,8 +45,6 @@ _LAZY_MODULE_EXPORTS: dict[str, str] = {
     "observability_api": "bioetl.composition.observability_api",
     "registry_api": "bioetl.composition.registry_api",
     "resources_api": "bioetl.composition.resources_api",
-    "resource_management_api": "bioetl.composition.resource_management_api",
-    "services_api": "bioetl.composition.services_api",
     "types": "bioetl.composition.types",
 }
 _LAZY_ATTR_EXPORTS: dict[str, tuple[str, str]] = {
@@ -63,7 +60,6 @@ _LAZY_ATTR_EXPORTS: dict[str, tuple[str, str]] = {
 __all__ = [
     "PipelineDefinition",
     "PipelineRegistry",
-    "bootstrap",
     "composite_api",
     "control_plane_api",
     "create_registry",
@@ -74,9 +70,7 @@ __all__ = [
     "maintenance_api",
     "observability_api",
     "registry_api",
-    "resource_management_api",
     "resources_api",
-    "services_api",
     "types",
 ]
 

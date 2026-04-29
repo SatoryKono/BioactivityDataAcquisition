@@ -134,8 +134,8 @@ ______________________________________________________________________
 
 ### 2A.1. Загрузи правила
 Прочитай эти файлы для понимания критериев:
-- runtime self-review rules — правила ревью и scoring
-- runtime project context file — контекст проекта
+- `docs/00-project/ai/rules/bioetl-ai-rules.md` — правила ревью и scoring
+- `docs/00-project/ai/memory/agent-memory.md` — контекст проекта
 
 ### 2A.2. Проведи ревью по категориям
 Для каждого файла в scope проверь применимые правила:
@@ -242,7 +242,7 @@ ______________________________________________________________________
 - Glossary consistency: термины используются единообразно (Molecule=ChEMBL, Compound=PubChem)
 - Docstring coverage: все public функции/классы в src/ имеют docstrings?
 - Broken links: ссылки между документами валидны?
-- Version sync: `docs/00-project/RULES.md` version == `ai-selfreview-rules.md` version?
+- Rule sync: `docs/00-project/RULES.md` и `docs/00-project/ai/rules/bioetl-ai-rules.md` не противоречат друг другу?
 
 ### 2A.3. УЧИТЫВАЙ ИСКЛЮЧЕНИЯ (EXC-001..015)
 **КРИТИЧЕСКИ ВАЖНО**: НЕ флагай как нарушение:
@@ -669,7 +669,7 @@ ______________________________________________________________________
 1. **MUST NOT** делегировать — всегда выполнять работу самостоятельно
 1. **MUST** создать отчёт в `reports/review/{SECTOR_ID}-*.md`
 1. **SHOULD** использовать `Grep` для системной проверки паттернов
-1. **MUST** проверить все применимые правила из ai-selfreview-rules.md
+1. **MUST** проверить все применимые правила из `docs/00-project/ai/rules/bioetl-ai-rules.md`
 
 ______________________________________________________________________
 
@@ -732,9 +732,9 @@ ______________________________________________________________________
 ## 8. References
 
 - **RULES.md** — `docs/00-project/RULES.md` (v6.1)
-- **Self-review rules** — runtime self-review rules
+- **Self-review rules** — `docs/00-project/ai/rules/bioetl-ai-rules.md`
 - **Orchestration** — `docs/00-project/ai/agents/agents/ORCHESTRATION.md`
 - **ADR Index** — `docs/02-architecture/decisions/`
 - **Architecture tests** — `tests/architecture/`
 - **Audit bot** — runtime profile `py-audit-bot`
-- **Project context** — runtime project context file
+- **Project context** — `docs/00-project/ai/memory/agent-memory.md`
