@@ -66,6 +66,34 @@ def test_layer_aware_suffix_policy_registers_expected_rule_ids() -> None:
     ), "composition/infrastructure *Service debt was retired and must stay closed"
 
 
+def test_checkpoint_quarantine_runtime_admin_family_is_role_driven() -> None:
+    """Checkpoint/quarantine names must encode runtime versus admin responsibility."""
+    module = _load_gate_module()
+    policy = module._load_layer_aware_suffix_policy(ROOT)
+    family_rules = {rule.rule_id: rule for rule in policy.family_freeze_rules}
+    rule = family_rules["runtime_admin_checkpoint_quarantine_family"]
+
+    allowed = {(item.symbol, item.path) for item in rule.allowed_symbols}
+    assert allowed == {
+        (
+            "CheckpointRuntimeService",
+            "src/bioetl/application/core/lifecycle/checkpoint_manager.py",
+        ),
+        (
+            "QuarantineRuntimeService",
+            "src/bioetl/application/core/quarantine_manager.py",
+        ),
+        (
+            "CheckpointService",
+            "src/bioetl/application/services/checkpoint_service.py",
+        ),
+        (
+            "QuarantineService",
+            "src/bioetl/application/services/quarantine_service.py",
+        ),
+    }
+
+
 def test_layer_aware_suffix_policy_stays_clean_on_current_baseline() -> None:
     """Reviewed naming debt must stay fully registered with no stray violations."""
     module = _load_gate_module()

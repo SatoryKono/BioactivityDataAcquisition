@@ -118,7 +118,7 @@ class TestCompositePublicationColumns:
         ]
         assert ordered == expected
 
-    def test_inter_group_ordering(self, orderer: ColumnOrderer) -> None:
+    def test_inter_group_ordering(self, orderer: ColumnOrderService) -> None:
         """Verify that columns from different groups are ordered correctly."""
         columns = [
             "pubmed.publication.chemicals",  # biomedical
@@ -136,7 +136,7 @@ class TestCompositePublicationColumns:
             "pubmed.publication.chemicals",
         ]
 
-    def test_dq_fields_at_very_end(self, orderer: ColumnOrderer) -> None:
+    def test_dq_fields_at_very_end(self, orderer: ColumnOrderService) -> None:
         """DQ fields must be the absolute last columns."""
         columns = [
             "_dq_error",
@@ -149,7 +149,9 @@ class TestCompositePublicationColumns:
         assert ordered[-2] == "_dq_error"
         assert ordered[-1] == "_dq_warn"
 
-    def test_full_schema_names_verification(self, orderer: ColumnOrderer) -> None:
+    def test_full_schema_names_verification(
+        self, orderer: ColumnOrderService
+    ) -> None:
         """Verify names of key columns in the final output."""
         # Simulate a realistic set of output columns
         columns = [
