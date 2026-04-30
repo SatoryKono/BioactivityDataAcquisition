@@ -43,6 +43,14 @@ def test_get_git_commit_returns_none_on_nonzero_exit(mock_run: MagicMock) -> Non
 
 @pytest.mark.unit
 @patch("bioetl.composition.services.versioning.subprocess.run")
+def test_get_git_commit_rejects_non_full_sha(mock_run: MagicMock) -> None:
+    mock_run.return_value = SimpleNamespace(returncode=0, stdout="abc1234\n")
+
+    assert versioning.get_git_commit() is None
+
+
+@pytest.mark.unit
+@patch("bioetl.composition.services.versioning.subprocess.run")
 def test_get_git_commit_returns_none_on_exception(mock_run: MagicMock) -> None:
     mock_run.side_effect = FileNotFoundError("git missing")
 
@@ -54,14 +62,15 @@ def test_get_git_commit_returns_none_on_exception(mock_run: MagicMock) -> None:
 def test_get_code_revision_provenance_reports_clean_state(
     mock_run: MagicMock,
 ) -> None:
+    full_hash = "b" * 40
     mock_run.side_effect = [
-        SimpleNamespace(returncode=0, stdout="abc1234\n"),
+        SimpleNamespace(returncode=0, stdout=f"{full_hash}\n"),
         SimpleNamespace(returncode=0, stdout=""),
     ]
 
     provenance = versioning.get_code_revision_provenance()
 
-    assert provenance.git_commit == "abc1234"
+    assert provenance.git_commit == full_hash
     assert provenance.source_revision_state == "clean"
     assert provenance.dependency_lock_hash is not None
 
@@ -71,14 +80,15 @@ def test_get_code_revision_provenance_reports_clean_state(
 def test_get_code_revision_provenance_reports_dirty_state(
     mock_run: MagicMock,
 ) -> None:
+    full_hash = "c" * 40
     mock_run.side_effect = [
-        SimpleNamespace(returncode=0, stdout="abc1234\n"),
+        SimpleNamespace(returncode=0, stdout=f"{full_hash}\n"),
         SimpleNamespace(returncode=1, stdout=""),
     ]
 
     provenance = versioning.get_code_revision_provenance()
 
-    assert provenance.git_commit == "abc1234"
+    assert provenance.git_commit == full_hash
     assert provenance.source_revision_state == "dirty"
     assert provenance.dependency_lock_hash is not None
 
@@ -97,6 +107,18 @@ def test_get_dependency_lock_hash_reads_uv_lock_from_current_tree(
     assert isinstance(digest, str)
     assert digest.startswith("sha256:")
     assert len(digest) == 71
+
+
+@pytest.mark.unit
+def test_get_dependency_lock_hash_returns_none_without_supported_lockfile(
+    tmp_path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    isolated = tmp_path / "work" / "nested"
+    isolated.mkdir(parents=True)
+    monkeypatch.chdir(isolated)
+    versioning.get_dependency_lock_hash.cache_clear()
+
+    assert versioning.get_dependency_lock_hash() is None
 
 
 @pytest.mark.unit
