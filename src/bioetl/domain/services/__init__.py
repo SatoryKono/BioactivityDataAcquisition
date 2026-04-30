@@ -8,9 +8,11 @@ This package provides specialized services for domain operations:
 - ActivityAggregator: Aggregation of multiple measurements
 - AuthorNormalizer: Author and affiliation normalization
 - CompositeValidator: Structural and deep-preflight composite validation
+- MergedMetadataExplainer: Explainability metadata for merged composite output
 - NormalizationService: Orchestrator facade combining bioactivity normalization
 - DefaultDataNormalizer: Text and data normalization (DOI, PMID, authors, HTML)
 - OrganismClassifier: Organism cellularity classification for assay filtering
+- PhasedMigrationCoordinator: Compatibility/migration phase coordination
 
 Services are pure domain logic (no I/O) per RULES.md §1.1.
 
@@ -68,12 +70,20 @@ from bioetl.domain.services.identity_service import (
     EntityIdentityGenerator,
     IdentityService,
 )
+from bioetl.domain.services.merged_metadata_explainability import (
+    MergedMetadataExplainer,
+    MergedMetadataExplainabilityService,
+)
 from bioetl.domain.services.normalization_config import NormalizationConfig
 from bioetl.domain.services.normalization_service import NormalizationService
 from bioetl.domain.services.organism_classification_service import (
     ClassificationStats,
     OrganismClassificationService,
     OrganismClassifier,
+)
+from bioetl.domain.services.phased_migration_support import (
+    PhasedMigrationCoordinator,
+    PhasedMigrationSupportService,
 )
 from bioetl.domain.services.preflight_governance import (
     PreflightGovernanceService,
@@ -106,10 +116,14 @@ __all__ = [
     "DefaultDataNormalizer",
     "EntityIdentityGenerator",
     "IdentityService",
+    "MergedMetadataExplainer",
+    "MergedMetadataExplainabilityService",
     "NormalizationConfig",
     "NormalizationService",
     "OrganismClassificationService",
     "OrganismClassifier",
+    "PhasedMigrationCoordinator",
+    "PhasedMigrationSupportService",
     "PreflightGovernanceService",
     "PreflightGovernor",
     "UnitConverter",

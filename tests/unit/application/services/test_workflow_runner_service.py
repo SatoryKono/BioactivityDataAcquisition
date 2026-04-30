@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import UTC, datetime
 from uuid import uuid4
 
 import pytest
@@ -23,6 +22,7 @@ from bioetl.domain.workflow import (
     WorkflowRunOptionsConfig,
     WorkflowStepConfig,
 )
+from tests.helpers.clock import FIXED_TEST_TIME
 
 
 @dataclass
@@ -71,15 +71,26 @@ class _PipelineRunner:
     ) -> RunResult:
         del dry_run, run_id
         self.calls.append((pipeline_name, options))
-        now = datetime.now(UTC)
         return RunResult(
             status=PipelineRunResult.SUCCESS,
             pipeline_name=pipeline_name,
             run_id=str(uuid4()),
             run_type="incremental",
-            started_at=now,
-            completed_at=now,
+            started_at=FIXED_TEST_TIME,
+            completed_at=FIXED_TEST_TIME,
         )
+
+
+class _FailingPipelineRunner:
+    async def run(
+        self,
+        pipeline_name: str,
+        dry_run: bool = False,
+        run_id: object | None = None,
+        options: object | None = None,
+    ) -> RunResult:
+        del pipeline_name, dry_run, run_id, options
+        raise RuntimeError("pipeline boom")
 
 
 @pytest.mark.asyncio
@@ -123,4 +134,40 @@ async def test_workflow_runner_executes_pipeline_then_transform() -> None:
         "bioetl_workflow_runs_total",
         1,
         {"workflow": "activity_workflow", "status": "success"},
+    )
+
+
+@pytest.mark.asyncio
+async def test_workflow_runner_returns_failed_step_result_for_pipeline_error() -> None:
+    metrics = _RecordingMetrics()
+    transform_service = WorkflowTransformService(
+        registry=WorkflowTransformRegistry(),
+        metrics=metrics,
+        monotonic=iter([1.0, 1.2]).__next__,
+    )
+    service = WorkflowRunnerService(
+        pipeline_runner=_FailingPipelineRunner(),  # type: ignore[arg-type]
+        transform_service=transform_service,
+        metrics=metrics,
+    )
+    config = WorkflowConfig(
+        name="activity_workflow",
+        steps=(
+            WorkflowStepConfig(
+                step_id="extract",
+                pipeline_name="chembl_activity",
+                run_options=WorkflowRunOptionsConfig(limit=25),
+            ),
+        ),
+    )
+
+    result = await service.run_workflow(config)
+
+    assert result.status == "failed"
+    assert result.steps[0].status == "failed"
+    assert result.steps[0].error_type == "RuntimeError"
+    assert metrics.counters[-1] == (
+        "bioetl_workflow_runs_total",
+        1,
+        {"workflow": "activity_workflow", "status": "failed"},
     )

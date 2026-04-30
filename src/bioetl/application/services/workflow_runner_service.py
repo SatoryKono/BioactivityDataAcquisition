@@ -10,6 +10,7 @@ from bioetl.application.services.workflow_transform_service import (
     WorkflowTransformExecutionResult,
     WorkflowTransformService,
 )
+from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.workflow import (
     TransformStepConfig,
     WorkflowConfig,
@@ -32,6 +33,13 @@ __all__ = [
 _WORKFLOW_RUNS_TOTAL = "bioetl_workflow_runs_total"
 _WORKFLOW_STEP_EVENTS_TOTAL = "bioetl_workflow_step_events_total"
 _STEP_KIND_PIPELINE = "pipeline"
+_WORKFLOW_STEP_FAILURES = (
+    BioETLError,
+    KeyError,
+    RuntimeError,
+    TypeError,
+    ValueError,
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -134,7 +142,7 @@ class WorkflowRunnerService:
                 step.pipeline_name,
                 options=_run_options_from_config(step.run_options),
             )
-        except Exception as exc:
+        except _WORKFLOW_STEP_FAILURES as exc:
             self._record_pipeline_step(workflow_name=workflow_name, status="failed")
             return WorkflowStepExecutionResult(
                 step_id=step.step_id,

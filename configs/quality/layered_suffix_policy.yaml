@@ -60,7 +60,7 @@ suffix_boundary_rules:
       - symbol: MergedMetadataExplainabilityService
         path: src/bioetl/domain/services/merged_metadata_explainability.py
         issue: "#3400"
-        reason: Existing domain service surface pending canonical rename decision.
+        reason: Deprecated compatibility alias for MergedMetadataExplainer pending follow-up domain naming cleanup.
       - symbol: NormalizationService
         path: src/bioetl/domain/services/normalization_service.py
         issue: "#3400"
@@ -72,7 +72,7 @@ suffix_boundary_rules:
       - symbol: PhasedMigrationSupportService
         path: src/bioetl/domain/services/phased_migration_support.py
         issue: "#3400"
-        reason: Existing domain service surface pending canonical rename decision.
+        reason: Deprecated compatibility alias for PhasedMigrationCoordinator pending follow-up domain naming cleanup.
       - symbol: PreflightGovernanceService
         path: src/bioetl/domain/services/preflight_governance.py
         issue: "#3400"

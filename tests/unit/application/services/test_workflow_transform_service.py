@@ -149,3 +149,25 @@ async def test_transform_step_returns_failed_result_for_executor_error() -> None
     assert result.status == "failed"
     assert result.error_type == "RuntimeError"
     assert metrics.counters[0][2]["status"] == "failed"
+
+
+@pytest.mark.asyncio
+async def test_transform_step_returns_failed_result_for_unknown_transform() -> None:
+    metrics = _RecordingMetrics()
+    service = WorkflowTransformService(
+        registry=WorkflowTransformRegistry(),
+        metrics=metrics,
+        monotonic=iter([5.0, 5.1]).__next__,
+    )
+
+    result = await service.run_step(
+        workflow_name="activity_workflow",
+        step=TransformStepConfig(
+            step_id="normalize",
+            transform_name="missing_transform",
+        ),
+    )
+
+    assert result.status == "failed"
+    assert result.error_type == "KeyError"
+    assert metrics.counters[0][2]["status"] == "failed"

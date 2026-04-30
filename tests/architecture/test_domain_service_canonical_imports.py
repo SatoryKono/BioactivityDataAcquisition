@@ -12,7 +12,9 @@ LEGACY_SYMBOLS = (
     "IdentityService",
     "DefaultDataNormalizationService",
     "DataNormalizationService",
+    "MergedMetadataExplainabilityService",
     "OrganismClassificationService",
+    "PhasedMigrationSupportService",
     "PreflightGovernanceService",
 )
 ALLOWED_FILES = {
@@ -21,7 +23,9 @@ ALLOWED_FILES = {
     "src/bioetl/domain/services/composite_validation_layer.py",
     "src/bioetl/domain/services/identity_service.py",
     "src/bioetl/domain/services/data_normalization_service.py",
+    "src/bioetl/domain/services/merged_metadata_explainability.py",
     "src/bioetl/domain/services/organism_classification_service.py",
+    "src/bioetl/domain/services/phased_migration_support.py",
     "src/bioetl/domain/services/preflight_governance.py",
 }
 
