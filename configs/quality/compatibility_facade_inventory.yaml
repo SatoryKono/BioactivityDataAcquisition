@@ -328,6 +328,30 @@ retained_entrypoints:
   exit_criteria: First-party `src/` imports of `bioetl.composition.bootstrap` stay
     at zero, the runtime-focused `__all__` budget remains frozen, and any new root-level
     export requires an explicit inventory review.
+- path: src/bioetl/application/services/__init__.py
+  compatibility_role: Retained application-services package-root facade that preserves
+    legacy flat service imports while first-party runtime code uses owner submodules.
+  canonical_target: bioetl.application.services.execution, bioetl.application.services.control_plane,
+    bioetl.application.services.lineage, or the concrete service/model owner module
+  status: retained-entrypoint
+  owner: bioetl.application.services
+  introduced_in: 2026-04 issue-3474 caller-zero gate
+  review_date: '2026-09-30'
+  external_breaking_change_required: true
+  internal_callers_zero: true
+  allowed_call_sites: '`src`: no direct imports from `bioetl.application.services`;
+    use semantic subpackages or concrete service/model owner modules; `tests`: temporary
+    compatibility coverage may import the package root while migrating patch seams,
+    but new production callers are blocked by architecture gates'
+  migration_path: Keep `bioetl.application.services` as an external compatibility
+    seam only. New first-party runtime code must import from canonical owner modules
+    such as `bioetl.application.services.execution.pipeline_runner_models`,
+    `bioetl.application.services.execution.pipeline_runner_service`, `export_models`,
+    `export_service`, `vacuum_service`, or focused control-plane/lineage submodules.
+  exit_criteria: First-party `src/` imports of `bioetl.application.services` stay
+    at zero, remaining test-only package-root imports are migrated or intentionally
+    retained as compatibility coverage, and any new root export requires inventory
+    review before merge.
 - path: src/bioetl/domain/composite/config.py
   compatibility_role: Permanent public entrypoint for composite config models that
     shields split config internals.

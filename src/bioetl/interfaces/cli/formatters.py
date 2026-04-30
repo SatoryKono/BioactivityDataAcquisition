@@ -17,11 +17,13 @@ if TYPE_CHECKING:
     from collections.abc import Sequence
 
     from bioetl.application.core.lifecycle.cleanup_service import CleanupPreview
-    from bioetl.application.services import (
+    from bioetl.application.services.export_models import (
         ColumnInfo,
         ExportResult,
         TableInfo,
         TablePreview,
+    )
+    from bioetl.application.services.vacuum_service import (
         TableVacuumResult,
         VacuumAllResult,
     )

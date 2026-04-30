@@ -7,9 +7,7 @@ from typing import TYPE_CHECKING
 
 import click
 
-from bioetl.application.services import (
-    RunOptions,
-)
+from bioetl.application.services.execution.pipeline_runner_models import RunOptions
 from bioetl.interfaces.cli.commands.domains.health.metrics_server_integration import (
     ensure_metrics_server_started,
 )

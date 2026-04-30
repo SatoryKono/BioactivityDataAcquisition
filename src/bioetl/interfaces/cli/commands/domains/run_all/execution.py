@@ -7,11 +7,13 @@ from contextlib import AbstractAsyncContextManager
 from dataclasses import dataclass
 from typing import Protocol
 
-from bioetl.application.services import (
+from bioetl.application.services.execution.pipeline_runner_models import (
     PipelineNotFoundError,
-    PipelineRunnerService,
     RunOptions,
     RunResult,
+)
+from bioetl.application.services.execution.pipeline_runner_service import (
+    PipelineRunnerService,
 )
 from bioetl.composition.registry_api import PipelineRegistry
 from bioetl.domain.exceptions import BioETLError

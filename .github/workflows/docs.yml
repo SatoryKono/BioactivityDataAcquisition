@@ -8,6 +8,7 @@ on:
     branches: [ "main" ]
     paths:
       - 'README.md'
+      - 'grafana/README.md'
       - 'configs/quality/xwalk_missing_backlog.yaml'
       - 'docs/**'
       - 'scripts/docs/**'
@@ -23,6 +24,7 @@ on:
     branches: [ "main" ]
     paths:
       - 'README.md'
+      - 'grafana/README.md'
       - 'configs/quality/xwalk_missing_backlog.yaml'
       - 'docs/**'
       - 'scripts/docs/**'
@@ -52,6 +54,7 @@ jobs:
           uv run pytest \
             tests/architecture/test_architecture_dependency_docs_drift.py::test_dependency_map_drift_check_passes_current_repo \
             tests/architecture/test_config_topology_docs_drift.py \
+            tests/architecture/test_control_plane_runtime_docs_alignment.py \
             tests/architecture/test_diagram_narrative_docs_sync.py \
             tests/architecture/test_documentation_audit_remediation.py \
             tests/architecture/test_docs_governance_workflow.py \
@@ -60,6 +63,8 @@ jobs:
             tests/architecture/test_docs_version_sync.py::TestDocsVersionSync::test_required_docs_synced \
             tests/architecture/test_docs_version_sync.py::TestVersionFormat::test_rules_version_format \
             tests/architecture/test_docs_version_sync.py::TestVersionFormat::test_rules_header_format \
+            tests/architecture/test_observability_docs_drift.py \
+            tests/architecture/test_observability_docs_sync.py \
             tests/architecture/test_documentation_sync.py::test_ports_count_matches_docs \
             tests/architecture/test_documentation_sync.py::test_pipeline_count_matches_docs \
             tests/architecture/test_documentation_sync.py::test_pipeline_ids_match_reference_index \
@@ -69,6 +74,7 @@ jobs:
             tests/architecture/test_documentation_sync.py::test_adr_status_is_from_allowed_set \
             tests/architecture/test_documentation_sync.py::test_mkdocs_nav_references_existing_markdown_files \
             tests/architecture/test_internal_orchestration_docs.py \
+            tests/architecture/test_reproducibility_docs_contract_drift.py \
             tests/architecture/test_runtime_agent_docs_drift.py \
             -q --tb=short
 

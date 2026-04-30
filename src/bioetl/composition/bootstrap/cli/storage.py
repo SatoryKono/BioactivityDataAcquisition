@@ -16,19 +16,26 @@ from __future__ import annotations
 from collections.abc import Callable
 from pathlib import Path
 from typing import TYPE_CHECKING
+from uuid import uuid4
 
-from bioetl.application.services import (
-    BronzeCleanupService,
-    ContractMigrationService,
-    ExportService,
-    VacuumService,
-)
 from bioetl.application.services.admin_runtime_api import CleanupService
+from bioetl.application.services.bronze_cleanup_service import BronzeCleanupService
+from bioetl.application.services.contract_migration_service import (
+    ContractMigrationService,
+)
+from bioetl.application.services.export_service import ExportService
 from bioetl.application.services.medallion_lifecycle import MedallionLifecycleService
+from bioetl.application.services.vacuum_service import VacuumService
 from bioetl.composition.bootstrap.assembly.storage import bootstrap_storage_adapter
 from bioetl.composition.bootstrap.cli.config import bootstrap_config_service
-from bioetl.composition.bootstrap.cli.noop import create_noop_logger
+from bioetl.composition.bootstrap.cli.noop import (
+    create_noop_logger,
+    create_noop_observability_bundle,
+)
 from bioetl.composition.registry_api import get_default_registry
+from bioetl.domain.context import current_utc_time
+from bioetl.domain.types import RunID, RunType
+from bioetl.domain.value_objects.run_context import RunContext
 from bioetl.infrastructure.config import get_settings
 from bioetl.infrastructure.config.contract_policy_loader import (
     load_pipeline_contract_policy,
@@ -43,6 +50,7 @@ from bioetl.infrastructure.time import SystemClock
 
 __all__ = [
     "bootstrap_bronze_cleanup_service",
+    "bootstrap_cli_storage_adapter",
     "bootstrap_cleanup_service",
     "bootstrap_contract_migration_service",
     "bootstrap_export_service",
@@ -52,6 +60,30 @@ __all__ = [
 
 if TYPE_CHECKING:
     from bioetl.composition.registry_api import PipelineRegistry
+
+
+def _create_cli_preview_run_context() -> RunContext:
+    """Create explicit CLI-only preview run context for maintenance storage."""
+    return RunContext(
+        run_id=RunID(uuid4()),
+        run_type=RunType.INCREMENTAL,
+        started_at=current_utc_time(),
+        pipeline_name="cli-storage-preview",
+        provider="cli",
+        entity="maintenance",
+    )
+
+
+def bootstrap_cli_storage_adapter(*, enable_csv_export: bool = False) -> object:
+    """Create a CLI-only storage bundle with explicit preview runtime context."""
+    noop_logger, noop_metrics, noop_tracing = create_noop_observability_bundle()
+    return bootstrap_storage_adapter(
+        run_context=_create_cli_preview_run_context(),
+        logger=noop_logger,
+        metrics=noop_metrics,
+        tracing=noop_tracing,
+        enable_csv_export=enable_csv_export,
+    )
 
 
 def bootstrap_cleanup_service() -> CleanupService:
@@ -65,7 +97,7 @@ def bootstrap_cleanup_service() -> CleanupService:
     Returns:
         CleanupService configured for the current environment.
     """
-    storage = bootstrap_storage_adapter()
+    storage = bootstrap_cli_storage_adapter()
     noop_logger = create_noop_logger()
 
     return CleanupService(storage=storage, logger=noop_logger)
@@ -80,7 +112,7 @@ def bootstrap_lifecycle_service() -> MedallionLifecycleService:
     Returns:
         MedallionLifecycleService configured for the current environment.
     """
-    storage = bootstrap_storage_adapter()
+    storage = bootstrap_cli_storage_adapter()
     noop_logger = create_noop_logger()
 
     return MedallionLifecycleService(storage=storage, logger=noop_logger)
@@ -95,7 +127,7 @@ def bootstrap_bronze_cleanup_service() -> BronzeCleanupService:
     Returns:
         BronzeCleanupService configured for the current environment.
     """
-    storage = bootstrap_storage_adapter()
+    storage = bootstrap_cli_storage_adapter()
     noop_logger = create_noop_logger()
 
     return BronzeCleanupService(

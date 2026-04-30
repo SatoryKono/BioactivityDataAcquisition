@@ -6,13 +6,13 @@ from importlib import import_module
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from bioetl.application.services import (
+    from bioetl.application.services.execution.pipeline_runner_models import (
         PipelineRunResult as PipelineRunResult,
     )
-    from bioetl.application.services import (
+    from bioetl.application.services.execution.pipeline_runner_models import (
         RunOptions as RunOptions,
     )
-    from bioetl.application.services import (
+    from bioetl.application.services.execution.pipeline_runner_models import (
         RunResult as RunResult,
     )
     from bioetl.application.services.execution.pipeline_runner_service import (
@@ -28,13 +28,15 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import ExecutionMetricsRunnerPort
 
 _PIPELINE_EXECUTION_MODULE = "bioetl.composition._pipeline_execution"
-_APPLICATION_SERVICES_MODULE = "bioetl.application.services"
+_PIPELINE_RUNNER_MODELS_MODULE = (
+    "bioetl.application.services.execution.pipeline_runner_models"
+)
 
 _PUBLIC_EXPORTS: dict[str, str] = {
     "ArchiveOptions": _PIPELINE_EXECUTION_MODULE,
-    "PipelineRunResult": _APPLICATION_SERVICES_MODULE,
-    "RunOptions": _APPLICATION_SERVICES_MODULE,
-    "RunResult": _APPLICATION_SERVICES_MODULE,
+    "PipelineRunResult": _PIPELINE_RUNNER_MODELS_MODULE,
+    "RunOptions": _PIPELINE_RUNNER_MODELS_MODULE,
+    "RunResult": _PIPELINE_RUNNER_MODELS_MODULE,
     "VacuumOptions": _PIPELINE_EXECUTION_MODULE,
     "build_pipeline_context": _PIPELINE_EXECUTION_MODULE,
     "create_pipeline_runner": _PIPELINE_EXECUTION_MODULE,

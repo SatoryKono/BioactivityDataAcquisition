@@ -23,7 +23,9 @@ _RESOURCE_MANAGEMENT_MODULE = "bioetl.composition._resource_management"
 if TYPE_CHECKING:
     from collections.abc import Awaitable, Callable
 
-    from bioetl.application.services import ContractMigrationService
+    from bioetl.application.services.contract_migration_service import (
+        ContractMigrationService,
+    )
     from bioetl.application.services.bronze_cleanup_service import (
         BronzeCleanupResult,
         BronzeCleanupService,

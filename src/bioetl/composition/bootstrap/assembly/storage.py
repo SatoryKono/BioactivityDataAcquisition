@@ -1,30 +1,25 @@
-"""Bootstrap functions for storage adapter assembly.
+"""Bootstrap functions for runtime-safe storage bundle assembly.
 
-Provides storage adapter creation for both CLI preview operations and
-composite pipeline execution. This is a shared building block.
+Provides storage bundle creation for callers that already own runtime identity.
+CLI preview operations must use ``composition.bootstrap.cli.storage`` wrappers
+that create explicit preview-only run context before calling this module.
 
 Note:
-    This function uses NoOpLogger internally as observability is not
-    required for storage adapter assembly. The actual observability
-    is provided at a higher level (BatchWriter, RecordProcessor).
+    This module must not generate run identity or wall-clock timestamps.
+    The Composition Root caller owns those runtime decisions.
 """
 
 from __future__ import annotations
 
 from pathlib import Path
 from typing import TYPE_CHECKING
-from uuid import uuid4
 
 from bioetl.application.services.lineage.metadata_coordinator import MetadataCoordinator
-from bioetl.composition.bootstrap.cli.noop import create_noop_observability_bundle
 from bioetl.composition.factories.storage import StorageBundle
 from bioetl.composition.factories.storage.resilience import (
     create_silver_atomic_retry_policy,
     create_silver_merge_resilience_policy,
 )
-from bioetl.domain.context import current_utc_time
-from bioetl.domain.types import RunID, RunType
-from bioetl.domain.value_objects.run_context import RunContext
 from bioetl.infrastructure.config import Settings, get_settings
 from bioetl.infrastructure.control_plane import FileLineageStore
 from bioetl.infrastructure.export.csv_exporter import CsvExporter
@@ -35,7 +30,8 @@ from bioetl.infrastructure.storage.metadata_writer import MetadataWriter
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
 if TYPE_CHECKING:
-    from bioetl.domain.ports import LoggerPort, MetricsPort
+    from bioetl.domain.ports import LoggerPort, MetricsPort, TracingPort
+    from bioetl.domain.value_objects.run_context import RunContext
 
 __all__ = [
     "bootstrap_storage_adapter",
@@ -48,6 +44,7 @@ def _create_composite_metadata_services(
     output_dir: Path,
     logger: LoggerPort,
     metrics: MetricsPort,
+    run_context: RunContext,
 ) -> tuple[
     MetadataWriter,
     FileLineageStore,
@@ -63,14 +60,6 @@ def _create_composite_metadata_services(
         metrics=metrics,
     )
     lineage_store = FileLineageStore(base_path=output_dir / "control" / "lineage")
-    run_context = RunContext(
-        run_id=RunID(uuid4()),
-        run_type=RunType.INCREMENTAL,
-        started_at=current_utc_time(),
-        pipeline_name="composite",
-        provider="composite",
-        entity="merged",
-    )
     return (
         metadata_writer,
         lineage_store,
@@ -94,16 +83,18 @@ def _create_csv_exporters(
     )
 
 
-def bootstrap_storage_adapter(*, enable_csv_export: bool = False) -> StorageBundle:
-    """Create a storage adapter for CLI and composite pipeline operations.
+def bootstrap_storage_adapter(
+    *,
+    run_context: RunContext,
+    logger: LoggerPort,
+    metrics: MetricsPort,
+    tracing: TracingPort,
+    enable_csv_export: bool = False,
+    settings: Settings | None = None,
+) -> StorageBundle:
+    """Create a storage bundle for callers with explicit runtime context.
 
-    Creates a StorageBundle suitable for preview operations and composite
-    pipelines. CSV export is disabled by default for read-only inspection
-    but can be enabled for composite pipelines that need CSV output.
-
-    Uses NoOpLogger since this is for CLI preview operations without observability.
-
-    Layer: Returns infrastructure adapter (StorageBundle) containing
+    Layer: Returns a composition storage bundle containing
     Bronze, Silver, and Gold writers.
 
     Note:
@@ -111,47 +102,52 @@ def bootstrap_storage_adapter(*, enable_csv_export: bool = False) -> StorageBund
         per RULES.md §4.6 Safety Guard. Infrastructure writers are pure I/O.
 
     Args:
-        enable_csv_export: If True, creates CsvExporters for Silver and Gold
-            layers. Used by composite pipelines that need CSV output.
+        run_context: Explicit runtime identity and timestamp context owned by
+            the caller.
+        logger: LoggerPort wired by the caller.
+        metrics: MetricsPort wired by the caller.
+        tracing: TracingPort wired by the caller.
+        enable_csv_export: If True, creates CsvExporters for Silver and Gold.
+        settings: Optional Settings override for tests; defaults to get_settings().
 
     Returns:
         StorageBundle configured for the current environment.
     """
-    settings = get_settings()
-    noop_logger, noop_metrics, noop_tracing = create_noop_observability_bundle()
+    effective_settings = settings if settings is not None else get_settings()
 
     # ADR-025: Use data/output/ hierarchy for consistency with pipeline configs
-    output_dir = Path(settings.data_dir) / "output"
+    output_dir = Path(effective_settings.data_dir) / "output"
     (
         metadata_writer,
         lineage_store,
         metadata_coordinator,
         merge_resilience_policy,
     ) = _create_composite_metadata_services(
-        settings=settings,
+        settings=effective_settings,
         output_dir=output_dir,
-        logger=noop_logger,
-        metrics=noop_metrics,
+        logger=logger,
+        metrics=metrics,
+        run_context=run_context,
     )
     silver_csv_exporter, gold_csv_exporter = _create_csv_exporters(
         output_dir=output_dir,
-        logger=noop_logger,
+        logger=logger,
         enable_csv_export=enable_csv_export,
     )
 
     return StorageBundle(
         bronze_writer=BronzeWriter(
             base_path=output_dir / "bronze",  # data/output/bronze
-            logger=noop_logger,
-            metrics=noop_metrics,
-            tracing=noop_tracing,
+            logger=logger,
+            metrics=metrics,
+            tracing=tracing,
             save_json=False,
             json_path=None,
         ),
         silver_writer=SilverWriter(
             base_path=output_dir / "silver",  # data/output/silver
-            logger=noop_logger,
-            tracing=noop_tracing,
+            logger=logger,
+            tracing=tracing,
             csv_exporter=silver_csv_exporter,
             metadata_writer=metadata_writer,
             metadata_coordinator=metadata_coordinator,
@@ -160,8 +156,8 @@ def bootstrap_storage_adapter(*, enable_csv_export: bool = False) -> StorageBund
         ),
         gold_writer=GoldWriter(
             base_path=output_dir / "gold",  # data/output/gold
-            logger=noop_logger,
-            tracing=noop_tracing,
+            logger=logger,
+            tracing=tracing,
             csv_exporter=gold_csv_exporter,
             metadata_writer=metadata_writer,
             metadata_coordinator=metadata_coordinator,

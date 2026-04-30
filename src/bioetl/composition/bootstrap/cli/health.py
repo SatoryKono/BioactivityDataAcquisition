@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from bioetl.application.services import HealthService
+from bioetl.application.services.health_service import HealthService
 from bioetl.composition.bootstrap.cli.noop import create_noop_logger
 from bioetl.composition.factories.datasource.data_source_factory import (
     DataSourceFactory,

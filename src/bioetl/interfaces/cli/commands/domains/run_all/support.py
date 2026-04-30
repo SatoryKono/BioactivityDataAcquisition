@@ -9,7 +9,11 @@ from typing import NoReturn, Protocol, cast
 
 import click
 
-from bioetl.application.services import PipelineRunResult, RunOptions, RunResult
+from bioetl.application.services.execution.pipeline_runner_models import (
+    PipelineRunResult,
+    RunOptions,
+    RunResult,
+)
 from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
     map_batch_run_result_to_exit_code,
 )

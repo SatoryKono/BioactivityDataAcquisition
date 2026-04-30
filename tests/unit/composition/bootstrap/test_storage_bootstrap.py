@@ -13,9 +13,9 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from bioetl.application.services.lineage import MetadataCoordinator
-from bioetl.composition.bootstrap.assembly.storage import bootstrap_storage_adapter
 from bioetl.composition.bootstrap.cli.storage import (
     _create_table_collector,
+    bootstrap_cli_storage_adapter,
     bootstrap_bronze_cleanup_service,
     bootstrap_cleanup_service,
     bootstrap_lifecycle_service,
@@ -52,7 +52,7 @@ class TestBootstrapStorageBundle:
         mock_settings.return_value.silver_path = str(SILVER_PATH)
         mock_settings.return_value.gold_path = str(GOLD_PATH)
 
-        result = bootstrap_storage_adapter()
+        result = bootstrap_cli_storage_adapter()
 
         assert isinstance(result, StorageBundle)
 
@@ -65,7 +65,7 @@ class TestBootstrapStorageBundle:
         """Bootstrap should wire writers to data/output with NoOp loggers."""
         mock_settings.return_value = _make_storage_settings(tmp_path)
 
-        result = bootstrap_storage_adapter()
+        result = bootstrap_cli_storage_adapter()
         output_root = tmp_path / "output"
 
         assert result.bronze.base_path == output_root / "bronze"
@@ -84,7 +84,7 @@ class TestBootstrapStorageBundle:
         """Bootstrap should not wire CSV exporters unless explicitly enabled."""
         mock_settings.return_value = _make_storage_settings(tmp_path)
 
-        result = bootstrap_storage_adapter()
+        result = bootstrap_cli_storage_adapter()
 
         assert result.silver.csv_exporter is None
         assert result.gold.csv_exporter is None
@@ -98,7 +98,7 @@ class TestBootstrapStorageBundle:
         """CSV-enabled bootstrap should wire exporters and shared metadata context."""
         mock_settings.return_value = _make_storage_settings(tmp_path)
 
-        result = bootstrap_storage_adapter(enable_csv_export=True)
+        result = bootstrap_cli_storage_adapter(enable_csv_export=True)
         output_root = tmp_path / "output"
         metadata_coordinator = result.silver._metadata_coordinator
 
@@ -109,9 +109,9 @@ class TestBootstrapStorageBundle:
         assert isinstance(metadata_coordinator, MetadataCoordinator)
         assert metadata_coordinator is result.gold._metadata_coordinator
         assert result.silver._metadata_writer is result.gold._metadata_writer
-        assert metadata_coordinator.run_context.pipeline_name == "composite"
-        assert metadata_coordinator.run_context.provider == "composite"
-        assert metadata_coordinator.run_context.entity == "merged"
+        assert metadata_coordinator.run_context.pipeline_name == "cli-storage-preview"
+        assert metadata_coordinator.run_context.provider == "cli"
+        assert metadata_coordinator.run_context.entity == "maintenance"
 
 
 @pytest.mark.unit

@@ -9,7 +9,9 @@ from __future__ import annotations
 
 from uuid import uuid4
 
-from bioetl.application.services import PipelineRunnerService
+from bioetl.application.services.execution.pipeline_runner_service import (
+    PipelineRunnerService,
+)
 from bioetl.application.services.execution.pipeline_run_context_service import (
     PipelineRunContextService,
 )
