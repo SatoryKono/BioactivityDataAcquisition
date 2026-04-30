@@ -316,6 +316,7 @@ class SilverWriterFinalizationCompatibilityMixin:
             or None
         )
         metadata = _build_direct_legacy_silver_metadata(
+            metadata_coordinator=getattr(self, "_metadata_coordinator", None),
             table_name=table_name,
             table_path=table_path,
             records=records,

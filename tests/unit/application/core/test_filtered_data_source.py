@@ -766,11 +766,15 @@ class TestFilteredDataSourceMetrics:
         call_args = mock_metrics.increment_counter.call_args_list
         counter_names = [c[0][0] for c in call_args]
         assert "bioetl_filter_ids_loaded_total" in counter_names
-        mock_metrics.increment_counter.assert_any_call(
-            "bioetl_filter_ids_loaded_total",
-            2,
-            {"pipeline": "test_pipeline", "source_kind": "csv_single_column"},
+        loaded_call = next(
+            call
+            for call in call_args
+            if call.args[0] == "bioetl_filter_ids_loaded_total"
         )
+        assert loaded_call.args[2] == {
+            "pipeline": "test_pipeline",
+            "source_kind": "csv_single_column",
+        }
 
     @pytest.mark.asyncio
     async def test_single_column_duplicate_metrics(

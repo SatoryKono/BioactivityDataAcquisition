@@ -7,8 +7,9 @@ from collections.abc import Callable, Sequence
 from datetime import datetime, timedelta
 from typing import Protocol
 
+from bioetl.domain.medallion import SilverWriteMode
 from bioetl.domain.models import SilverMetadata
-from bioetl.domain.models.metadata import RunTypeEnum
+from bioetl.domain.ports import MetadataCoordinatorPort, SilverMetadataInput
 from bioetl.domain.types import BronzeRecord
 from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
 from bioetl.domain.value_objects.silver_result import SilverWriteResult
@@ -16,11 +17,6 @@ from bioetl.infrastructure.storage.silver.metadata_request_models import (
     _PreparedSilverWriteFinalizationContext,
     _SilverWriteFinalizationPreparationRequest,
     _SilverWriteResultFinalizationRequest,
-)
-from bioetl.infrastructure.storage.silver.operations.metadata_sidecar_adapter import (
-    _build_silver_sidecar_metadata,
-    _SilverMetadataSidecarRequest,
-    extract_control_plane_provenance_from_records,
 )
 
 __all__ = [
@@ -33,6 +29,9 @@ __all__ = [
 
 class _MetadataFinalizationOps(Protocol):
     """Minimal host surface needed by finalization helpers."""
+
+    @property
+    def _metadata_coordinator(self) -> MetadataCoordinatorPort | None: ...
 
     async def _resolve_finalization_dq_metrics(
         self,
@@ -61,8 +60,27 @@ class _MetadataFinalizationOps(Protocol):
     ) -> _PreparedSilverWriteFinalizationContext: ...
 
 
+def _require_metadata_coordinator(
+    metadata_coordinator: MetadataCoordinatorPort | None,
+) -> MetadataCoordinatorPort:
+    """Resolve the canonical metadata coordinator for Silver finalization."""
+    if metadata_coordinator is None:
+        raise RuntimeError(
+            "MetadataCoordinatorPort is required for Silver metadata publication"
+        )
+    return metadata_coordinator
+
+
+def _source_batch_ids(source_batch_id: object | None) -> list[str] | None:
+    """Normalize optional source batch identity for SilverMetadataInput."""
+    if source_batch_id is None:
+        return None
+    return [str(source_batch_id)]
+
+
 def _build_direct_legacy_silver_metadata(
     *,
+    metadata_coordinator: MetadataCoordinatorPort | None,
     table_name: str,
     table_path: str,
     records: list[BronzeRecord],
@@ -73,36 +91,21 @@ def _build_direct_legacy_silver_metadata(
     transform_version: str | None,
     transform_steps: tuple[str, ...] | None,
 ) -> SilverMetadata:
-    """Build metadata for the isolated direct-writer compatibility fallback."""
-    provenance = extract_control_plane_provenance_from_records(records)
-    return _build_silver_sidecar_metadata(
-        _SilverMetadataSidecarRequest(
-            table_name=table_name,
+    """Build direct-writer compatibility metadata through the canonical port."""
+    del table_name, run_id, manifest_id
+    coordinator = _require_metadata_coordinator(metadata_coordinator)
+    return coordinator.create_silver_metadata(
+        SilverMetadataInput(
             table_path=table_path,
+            primary_keys=[],
+            mode=SilverWriteMode.MERGE,
             records=records,
             dq_metrics=None,
-            mode="merge",
-            runtime_started_at=started_at,
-            runtime_completed_at=completed_at,
-            run_id=run_id or "legacy-direct-metadata-writer",
-            manifest_id=manifest_id,
-            run_type="incremental",
-            source_batch_id=None,
+            total_records=len(records),
             transform_version=transform_version,
             transform_steps=transform_steps,
-            bronze_refs=None,
-            version_after=None,
-            execution_fingerprint=provenance["execution_fingerprint"],
-            config_hash=provenance["config_hash"],
-            resolved_config_hash=provenance["resolved_config_hash"],
-            effective_config_hash=provenance["effective_config_hash"],
-            effective_config_artifact_id=provenance["effective_config_artifact_id"],
-            contract_ref=provenance["contract_ref"],
-            contract_version=provenance["contract_version"],
-            contract_schema_hash=provenance["contract_schema_hash"],
-            dq_policy_ref=provenance["dq_policy_ref"],
-            rule_bundle_version=provenance["rule_bundle_version"],
-            dq_contract_compatibility_hash=provenance["dq_contract_compatibility_hash"],
+            started_at=started_at,
+            completed_at=completed_at,
         )
     )
 
@@ -153,42 +156,23 @@ async def _finalize_silver_write_result(
             start_perf=request.start_perf,
         )
     )
-    run_id = (
-        str(request.records[0]["_run_id"])
-        if request.records and "_run_id" in request.records[0]
-        else "test_run_id"
+    metadata_coordinator = _require_metadata_coordinator(
+        metadata_ops._metadata_coordinator
     )
-    provenance = extract_control_plane_provenance_from_records(request.records)
-    metadata = _build_silver_sidecar_metadata(
-        _SilverMetadataSidecarRequest(
-            table_name=request.table_name,
+    metadata = metadata_coordinator.create_silver_metadata(
+        SilverMetadataInput(
             table_path=request.table_path,
+            primary_keys=request.primary_keys,
+            mode=request.validated_mode,
             records=request.records,
             dq_metrics=context.dq_metrics,
-            mode="merge",
-            runtime_started_at=request.started_at,
-            runtime_completed_at=context.completed_at,
-            run_id=run_id,
-            manifest_id=metadata_ops._resolve_manifest_id(records=request.records),
-            run_type=RunTypeEnum.INCREMENTAL,
-            source_batch_id=request.source_batch_id,
-            transform_version=None,
-            transform_steps=None,
+            total_records=len(request.records),
+            source_batch_ids=_source_batch_ids(request.source_batch_id),
             bronze_refs=request.bronze_refs,
-            primary_keys=request.primary_keys,
             version_after=context.version_after,
-            hostname="test-host",
-            execution_fingerprint=provenance["execution_fingerprint"],
-            config_hash=provenance["config_hash"],
-            resolved_config_hash=provenance["resolved_config_hash"],
-            effective_config_hash=provenance["effective_config_hash"],
-            effective_config_artifact_id=provenance["effective_config_artifact_id"],
-            contract_ref=provenance["contract_ref"],
-            contract_version=provenance["contract_version"],
-            contract_schema_hash=provenance["contract_schema_hash"],
-            dq_policy_ref=provenance["dq_policy_ref"],
-            rule_bundle_version=provenance["rule_bundle_version"],
-            dq_contract_compatibility_hash=provenance["dq_contract_compatibility_hash"],
+            partition_by=request.partition_cols,
+            started_at=request.started_at,
+            completed_at=context.completed_at,
         )
     )
     await metadata_ops._persist_silver_metadata(

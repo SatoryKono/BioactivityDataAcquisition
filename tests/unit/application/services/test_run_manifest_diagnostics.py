@@ -227,6 +227,7 @@ def _expected_provenance_only_summary_without_score(
         "input_snapshot_content_hashes": [],
         "input_snapshot_identity_fingerprint": None,
         "replay_mode": "rebuild",
+        "continuation_mode": "rebuild_only",
         "resume_contract": _expected_resume_contract(manifest),
         "resume_diagnostics": None,
         "lineage_closure_boundary": _expected_lineage_closure_boundary(manifest),
@@ -432,8 +433,32 @@ def test_build_diagnostics_summary_distinguishes_resume_only_runs() -> None:
     assert summary["input_snapshot_content_hashes"] == []
     assert summary["input_snapshot_identity_fingerprint"] is None
     assert summary["replay_mode"] == "resume"
+    assert summary["continuation_mode"] == "checkpoint_snapshot_only_resume"
+    assert (
+        summary["resume_contract"]["continuation_mode"]
+        == "checkpoint_snapshot_only_resume"
+    )
     assert summary["input_snapshot_count"] == 0
     assert summary["input_snapshots"] == []
+
+
+def test_build_diagnostics_summary_classifies_full_scan_idempotent_rebuild() -> None:
+    manifest = replace(
+        _make_manifest(),
+        launch_context={"limit": 25, "resume": True, "exact_replay": False},
+        runtime_config={"pipeline": {"loading_strategy": "full_scan_only"}},
+        resolved_config={"pipeline": {"loading_strategy": "full_scan_only"}},
+        replay_capability=ReplayCapability.REBUILD_ONLY,
+    )
+
+    summary = build_diagnostics_summary(manifest, ())
+
+    assert summary["replay_mode"] == "resume"
+    assert summary["continuation_mode"] == "full_scan_idempotent_rebuild"
+    assert (
+        summary["resume_contract"]["continuation_mode"]
+        == "full_scan_idempotent_rebuild"
+    )
 
 
 def test_build_diagnostics_summary_surfaces_required_profile_gap() -> None:
@@ -737,6 +762,7 @@ def test_build_diagnostics_summary_exposes_required_operator_fields(
         "input_snapshot_content_hashes": [],
         "input_snapshot_identity_fingerprint": None,
         "replay_mode": "rebuild",
+        "continuation_mode": "rebuild_only",
         "resume_contract": _expected_resume_contract(manifest),
         "resume_diagnostics": None,
         "lineage_closure_boundary": _expected_lineage_closure_boundary(manifest),

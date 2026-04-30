@@ -321,6 +321,9 @@ def _build_identity_graph(
         )
     if "replay_mode" in request.base_summary:
         identity_graph["replay_mode"] = request.base_summary["replay_mode"]
+        identity_graph["continuation_mode"] = request.base_summary.get(
+            "continuation_mode"
+        )
         identity_graph["input_snapshot_count"] = request.base_summary[
             "input_snapshot_count"
         ]

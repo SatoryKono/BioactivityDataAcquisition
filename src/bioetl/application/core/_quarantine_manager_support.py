@@ -14,6 +14,7 @@ from bioetl.application.core._quarantine_support import (
 )
 
 if TYPE_CHECKING:
+    from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
     from bioetl.application.core.quarantine_manager import FilteredQuarantineEntry
     from bioetl.application.observability.domain_event_emitter import (
         DomainEventEmitterProtocol,
@@ -21,7 +22,6 @@ if TYPE_CHECKING:
     from bioetl.application.observability.pipeline_metrics import (
         PipelineMetricsRecorder,
     )
-    from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
     from bioetl.domain.ports import MetricsPort, QuarantinePort
     from bioetl.domain.types import BatchID, JsonDict, RunID
 

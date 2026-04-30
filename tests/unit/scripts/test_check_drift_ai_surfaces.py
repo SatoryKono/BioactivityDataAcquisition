@@ -66,7 +66,9 @@ def test_check_ai_surfaces_reports_write_capable_skill_without_post_change_polic
 ) -> None:
     target = tmp_path / ".codex" / "skills" / "create-pr" / "SKILL.md"
     target.parent.mkdir(parents=True, exist_ok=True)
-    target.write_text("Project runtime contract: ../../../AGENTS.md\n", encoding="utf-8")
+    target.write_text(
+        "Project runtime contract: ../../../AGENTS.md\n", encoding="utf-8"
+    )
 
     monkeypatch.setattr(check_drift, "AI_SURFACE_REQUIRED_TOKENS", {})
     monkeypatch.setattr(
@@ -99,7 +101,9 @@ def test_check_ai_surfaces_reports_docs_mirror_without_non_canonical_notice(
 ) -> None:
     target = tmp_path / "docs" / "00-project" / "ai" / "skills" / "README.md"
     target.parent.mkdir(parents=True, exist_ok=True)
-    target.write_text("Skills catalog without mirror ownership notice\n", encoding="utf-8")
+    target.write_text(
+        "Skills catalog without mirror ownership notice\n", encoding="utf-8"
+    )
 
     monkeypatch.setattr(check_drift, "AI_SURFACE_REQUIRED_TOKENS", {})
     monkeypatch.setattr(check_drift, "AI_WRITE_CAPABLE_SKILL_REQUIRED_TOKENS", {})
@@ -139,7 +143,9 @@ def test_check_ai_surfaces_reports_agent_mirror_without_runtime_header(
         / "py-audit-bot.md"
     )
     target.parent.mkdir(parents=True, exist_ok=True)
-    target.write_text("# py-audit-bot\n\nMirror body without source notice\n", encoding="utf-8")
+    target.write_text(
+        "# py-audit-bot\n\nMirror body without source notice\n", encoding="utf-8"
+    )
 
     codex_runtime = tmp_path / ".codex" / "agents" / "py-audit-bot.md"
     codex_runtime.parent.mkdir(parents=True, exist_ok=True)
@@ -170,6 +176,7 @@ def test_check_ai_surfaces_reports_agent_mirror_without_runtime_header(
         "AI docs mirror header missing canonical runtime source: .codex/agents/py-audit-bot.md",
         "AI docs mirror header missing canonical runtime source: .gemini/agents/py-audit-bot.md",
     }
+
 
 def test_check_ai_surfaces_accepts_skill_mirror_with_runtime_header(
     monkeypatch, tmp_path: Path

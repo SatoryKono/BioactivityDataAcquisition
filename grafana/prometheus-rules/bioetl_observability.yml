@@ -95,7 +95,7 @@ groups:
         expr: sum by (pipeline, run_type) (increase(bioetl_silver_filter_rejections_total[15m]))
 
       - record: bioetl_silver_filter_reject_total_mismatch_15m
-        expr: abs((bioetl_silver_filter_rejects_stage_total_15m or (bioetl_silver_filter_rejections_breakdown_total_15m * 0)) - (bioetl_silver_filter_rejections_breakdown_total_15m or (bioetl_silver_filter_rejects_stage_total_15m * 0))) > bool 0
+        expr: sum by (pipeline, run_type) (abs((bioetl_silver_filter_rejects_stage_total_15m or (bioetl_silver_filter_rejections_breakdown_total_15m * 0)) - (bioetl_silver_filter_rejections_breakdown_total_15m or (bioetl_silver_filter_rejects_stage_total_15m * 0))) > bool 0)
 
   - name: bioetl_monitoring_stack_observability
     rules:

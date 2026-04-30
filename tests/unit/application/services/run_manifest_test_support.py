@@ -396,6 +396,32 @@ def expected_resume_contract(manifest: RunManifest) -> dict[str, object]:
         "replay_ready",
         "forensic_grade",
     }
+    continuation_mode = "rebuild_only"
+    if requested_exact_replay and manifest.replay_capability == ReplayCapability.EXACT_REPLAY_SUPPORTED:
+        continuation_mode = "exact_replay"
+    elif any(
+        str(candidate or "").strip().lower() == "full_scan_only"
+        for candidate in (
+            manifest.runtime_config.get("loading_strategy"),
+            manifest.runtime_config.get("pipeline", {}).get("loading_strategy")
+            if isinstance(manifest.runtime_config.get("pipeline"), dict)
+            else None,
+            manifest.resolved_config.get("loading_strategy"),
+            manifest.resolved_config.get("pipeline", {}).get("loading_strategy")
+            if isinstance(manifest.resolved_config.get("pipeline"), dict)
+            else None,
+        )
+    ):
+        continuation_mode = "full_scan_idempotent_rebuild"
+    elif (
+        bool(manifest.launch_context.get("resume"))
+        or manifest.replay_capability == ReplayCapability.RESUME_ONLY
+    ):
+        continuation_mode = (
+            "checkpoint_snapshot_plus_ledger_suffix_resume"
+            if is_composite
+            else "checkpoint_snapshot_only_resume"
+        )
     return {
         "resume_requested": bool(manifest.launch_context.get("resume")),
         "requested_exact_replay": requested_exact_replay,
@@ -413,6 +439,7 @@ def expected_resume_contract(manifest: RunManifest) -> dict[str, object]:
             if is_composite
             else "checkpoint_snapshot_only"
         ),
+        "continuation_mode": continuation_mode,
         "semantic_identity_anchor": "execution_fingerprint",
         "occurrence_identity_anchor": (
             "composite_run_identity" if is_composite else None

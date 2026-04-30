@@ -191,7 +191,7 @@ CONTROL_PLANE_READ_DURATION_SECONDS = Histogram(
 CONTROL_PLANE_LIFECYCLE_DELETED_TOTAL = Counter(
     "bioetl_control_plane_lifecycle_deleted_total",
     "Total control-plane lifecycle artifacts deleted by retention application",
-    ["surface"],
+    ["surface", "replay_impact"],
 )
 
 CONTROL_PLANE_LIFECYCLE_DELETE_CANDIDATES = Gauge(

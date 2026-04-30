@@ -453,6 +453,44 @@ def test_worst_entity_dq_score_preserves_no_data_state() -> None:
     )
 
 
+def test_silver_filter_reject_accounting_mismatch_panel_uses_reconciliation_rule() -> (
+    None
+):
+    """DQ dashboard must surface the shipped reject-accounting reconciliation rule."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
+    panel = next(
+        (
+            item
+            for item in get_dashboard_panels(dashboard)
+            if item.get("title") == "Silver Filter Reject Accounting Mismatch"
+        ),
+        None,
+    )
+    assert panel is not None, (
+        "Panel 'Silver Filter Reject Accounting Mismatch' not found"
+    )
+
+    expressions = [
+        target.get("expr", "")
+        for target in panel.get("targets", [])
+        if isinstance(target.get("expr"), str)
+    ]
+    assert expressions, (
+        "Panel 'Silver Filter Reject Accounting Mismatch' must define a query target"
+    )
+    assert any(
+        "bioetl_silver_filter_reject_total_mismatch_15m" in expr
+        for expr in expressions
+    ), (
+        "Silver Filter Reject Accounting Mismatch must use the shipped "
+        "bioetl_silver_filter_reject_total_mismatch_15m recording rule"
+    )
+    assert any("[$__range]" in expr for expr in expressions), (
+        "Silver Filter Reject Accounting Mismatch must respect the selected "
+        "Grafana time range"
+    )
+
+
 def test_dashboards_do_not_use_prometheus_created_timestamps() -> None:
     """Operator dashboards must not expose Prometheus client bookkeeping timestamps."""
     for dashboard_path in get_dashboard_files():

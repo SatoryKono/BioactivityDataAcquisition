@@ -1071,7 +1071,10 @@ def check_ai_surfaces(report: DriftReport, *, root: Path | None = None) -> None:
             required_tokens=required_tokens,
         )
 
-    for relative_path, required_tokens in AI_WRITE_CAPABLE_SKILL_REQUIRED_TOKENS.items():
+    for (
+        relative_path,
+        required_tokens,
+    ) in AI_WRITE_CAPABLE_SKILL_REQUIRED_TOKENS.items():
         _check_ai_surface_required_tokens(
             report,
             project_root=project_root,
@@ -1115,7 +1118,9 @@ def _check_ai_surface_required_tokens(
     path = project_root / relative_path
     text = _read_doc(path)
     if not text:
-        report.add("ai-surfaces", "ERROR", str(relative_path), "AI surface file missing")
+        report.add(
+            "ai-surfaces", "ERROR", str(relative_path), "AI surface file missing"
+        )
         return
 
     for token in required_tokens:
@@ -1160,7 +1165,9 @@ def _check_ai_surface_forbidden_patterns(
     path = project_root / relative_path
     text = _read_doc(path)
     if not text:
-        report.add("ai-surfaces", "ERROR", str(relative_path), "AI surface file missing")
+        report.add(
+            "ai-surfaces", "ERROR", str(relative_path), "AI surface file missing"
+        )
         return
 
     for pattern in forbidden_patterns:
@@ -1239,7 +1246,12 @@ def _check_ai_docs_runtime_mirror_headers(
         path = project_root / target.relative_path
         text = _read_doc(path)
         if not text:
-            report.add("ai-surfaces", "ERROR", str(target.relative_path), "AI surface file missing")
+            report.add(
+                "ai-surfaces",
+                "ERROR",
+                str(target.relative_path),
+                "AI surface file missing",
+            )
             continue
 
         header_text = "\n".join(
