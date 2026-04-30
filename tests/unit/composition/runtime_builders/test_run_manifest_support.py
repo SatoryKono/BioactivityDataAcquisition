@@ -7,7 +7,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from types import SimpleNamespace
 from typing import cast
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, call
 from uuid import uuid4
 
 import pytest
@@ -360,6 +360,16 @@ def test_replay_reconstructability_metric_is_reconstructable_for_non_strict_runs
             "status": "reconstructable",
         },
     )
+    metrics.set_gauge.assert_called_once_with(
+        "bioetl_replay_lag_seconds",
+        value=0.0,
+        labels={
+            "pipeline": "chembl_activity",
+            "run_type": "incremental",
+            "replay_capability": "rebuild_only",
+            "status": "not_requested",
+        },
+    )
 
 
 @pytest.mark.unit
@@ -378,14 +388,39 @@ def test_replay_reconstructability_metric_marks_strict_runs_not_reconstructable(
         metrics=metrics,
     )
 
-    metrics.increment_counter.assert_called_once_with(
-        "bioetl_replay_reconstructability_events_total",
-        value=1,
+    metrics.increment_counter.assert_has_calls(
+        [
+            call(
+                "bioetl_replay_reconstructability_events_total",
+                value=1,
+                labels={
+                    "pipeline": "chembl_activity",
+                    "replay_capability": "resume_only",
+                    "strict_requirement": "true",
+                    "status": "not_reconstructable",
+                },
+            ),
+            call(
+                "bioetl_replay_drift_events_total",
+                value=1,
+                labels={
+                    "pipeline": "chembl_activity",
+                    "run_type": "incremental",
+                    "replay_capability": "resume_only",
+                    "drift_type": "strict_replay_not_reconstructable",
+                    "status": "detected",
+                },
+            ),
+        ]
+    )
+    metrics.set_gauge.assert_called_once_with(
+        "bioetl_replay_lag_seconds",
+        value=0.0,
         labels={
             "pipeline": "chembl_activity",
+            "run_type": "incremental",
             "replay_capability": "resume_only",
-            "strict_requirement": "true",
-            "status": "not_reconstructable",
+            "status": "blocked",
         },
     )
 
@@ -414,5 +449,15 @@ def test_replay_reconstructability_metric_marks_strict_runs_reconstructable_when
             "replay_capability": "exact_replay_supported",
             "strict_requirement": "true",
             "status": "reconstructable",
+        },
+    )
+    metrics.set_gauge.assert_called_once_with(
+        "bioetl_replay_lag_seconds",
+        value=0.0,
+        labels={
+            "pipeline": "chembl_activity",
+            "run_type": "incremental",
+            "replay_capability": "exact_replay_supported",
+            "status": "not_requested",
         },
     )

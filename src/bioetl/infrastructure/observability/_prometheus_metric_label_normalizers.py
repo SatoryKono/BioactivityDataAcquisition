@@ -16,6 +16,15 @@ _ALLOWED_REASON_LABELS = frozenset(
         "other",
     }
 )
+_ALLOWED_FILTER_SOURCE_KIND_LABELS = frozenset(
+    {
+        "csv_single_column",
+        "csv_multi_column",
+        "direct_ids",
+        "direct_multi_ids",
+        "other",
+    }
+)
 _ALLOWED_SILVER_FILTER_REASON_CODE_LABELS = frozenset(
     {
         "required_field_missing",
@@ -352,6 +361,11 @@ def normalize_source_file_label(source_file: str) -> str:
     if suffix in _SOURCE_FILE_CLASS_BY_SUFFIX:
         return _SOURCE_FILE_CLASS_BY_SUFFIX[suffix]
     return "extensionless_file" if "." not in basename else "other_file"
+
+
+def normalize_filter_source_kind_label(source_kind: str) -> str:
+    """Normalize filter source kind labels to a finite source vocabulary."""
+    return _normalize_bounded_label(source_kind, _ALLOWED_FILTER_SOURCE_KIND_LABELS)
 
 
 def normalize_adapter_operation_label(operation: str) -> str:

@@ -18,6 +18,7 @@ from bioetl.infrastructure.observability._prometheus_metric_label_normalizers im
     normalize_dq_disposition,
     normalize_dq_severity,
     normalize_dq_stage,
+    normalize_filter_source_kind_label,
     normalize_flow_stage,
     normalize_observability_component,
     normalize_observability_mode,
@@ -32,7 +33,6 @@ from bioetl.infrastructure.observability._prometheus_metric_label_normalizers im
     normalize_silver_filter_field,
     normalize_silver_filter_reason_code,
     normalize_silver_filter_rule_type,
-    normalize_source_file_label,
     normalize_stage_model_outcome,
     normalize_stage_model_stage,
     normalize_structural_action,
@@ -82,14 +82,15 @@ _ADAPTER_OPERATION_LABEL_METRICS = frozenset(
         "bioetl_data_source_retry_exhausted_total",
     }
 )
-_SOURCE_FILE_LABEL_METRICS = frozenset(
+_SOURCE_FILE_LABEL_METRICS = frozenset[str]()
+APPROVED_SOURCE_FILE_LABEL_METRICS = _SOURCE_FILE_LABEL_METRICS
+_FILTER_SOURCE_KIND_LABEL_METRICS = frozenset(
     {
         "bioetl_filter_ids_loaded_total",
         "bioetl_filter_ids_duplicates_total",
         "bioetl_filter_combinations_loaded_total",
     }
 )
-APPROVED_SOURCE_FILE_LABEL_METRICS = _SOURCE_FILE_LABEL_METRICS
 _STAGE_LABEL_METRICS = frozenset(
     {
         "bioetl_batch_size_records",
@@ -151,6 +152,7 @@ __all__ = [
     "normalize_dq_disposition",
     "normalize_dq_severity",
     "normalize_dq_stage",
+    "normalize_filter_source_kind_label",
     "normalize_flow_stage",
     "normalize_metric_dispatch_labels",
     "normalize_observability_component",
@@ -166,7 +168,6 @@ __all__ = [
     "normalize_silver_filter_field",
     "normalize_silver_filter_reason_code",
     "normalize_silver_filter_rule_type",
-    "normalize_source_file_label",
     "normalize_stage_model_outcome",
     "normalize_stage_model_stage",
     "normalize_structural_action",
@@ -190,10 +191,10 @@ def validate_metric_label_policy(name: str, labels: MetricLabels) -> None:
             f"Prometheus label 'endpoint' is only allowed for adapter endpoint "
             f"metrics; got {name}"
         )
-    if "source_file" in label_names and name not in APPROVED_SOURCE_FILE_LABEL_METRICS:
+    if "source_file" in label_names:
         raise ValueError(
-            f"Prometheus label 'source_file' is only allowed for normalized filter "
-            f"source metrics; got {name}"
+            f"Prometheus label 'source_file' is not allowed for runtime metrics; "
+            f"use bounded source_kind labels instead; got {name}"
         )
 
 
@@ -245,10 +246,10 @@ def _normalize_group_metric_labels(
             normalize_adapter_operation_label,
         ),
         (
-            _SOURCE_FILE_LABEL_METRICS,
-            "source_file",
-            "unknown",
-            normalize_source_file_label,
+            _FILTER_SOURCE_KIND_LABEL_METRICS,
+            "source_kind",
+            "other",
+            normalize_filter_source_kind_label,
         ),
         (_STAGE_LABEL_METRICS, "stage", "other", normalize_runtime_stage),
         (_FLOW_STAGE_LABEL_METRICS, "flow_stage", "other", normalize_flow_stage),

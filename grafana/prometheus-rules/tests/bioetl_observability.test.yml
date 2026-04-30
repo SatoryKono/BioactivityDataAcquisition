@@ -160,6 +160,47 @@ tests:
               description: bioetl_replay_reconstructability_events_total recorded not_reconstructable for pipeline=chembl replay_capability=resume_only strict_requirement=true in the last 30m.
               runbook: docs/05-operations/runbooks/checkpoint-debugging.md
 
+  - name: replay-lag-high
+    interval: 1m
+    input_series:
+      - series: 'bioetl_replay_lag_seconds{pipeline="chembl",run_type="incremental",replay_capability="resume_only",status="blocked"}'
+        values: '400+0x35'
+    alert_rule_test:
+      - eval_time: 31m
+        alertname: BioETLReplayLagHigh
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              pipeline: chembl
+              run_type: incremental
+              replay_capability: resume_only
+              status: blocked
+            exp_annotations:
+              summary: Replay lag is elevated
+              description: bioetl_replay_lag_seconds exceeded 300s for pipeline=chembl run_type=incremental replay_capability=resume_only status=blocked.
+              runbook: docs/05-operations/runbooks/checkpoint-debugging.md
+
+  - name: replay-drift-detected
+    interval: 1m
+    input_series:
+      - series: 'bioetl_replay_drift_events_total{pipeline="chembl",run_type="incremental",replay_capability="resume_only",drift_type="strict_replay_not_reconstructable",status="detected"}'
+        values: '0+1x35'
+    alert_rule_test:
+      - eval_time: 31m
+        alertname: BioETLReplayDriftDetected
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              pipeline: chembl
+              run_type: incremental
+              replay_capability: resume_only
+              drift_type: strict_replay_not_reconstructable
+              status: detected
+            exp_annotations:
+              summary: Replay drift was detected
+              description: bioetl_replay_drift_events_total increased for pipeline=chembl run_type=incremental replay_capability=resume_only drift_type=strict_replay_not_reconstructable.
+              runbook: docs/05-operations/runbooks/checkpoint-debugging.md
+
   - name: provider-adapter-latency-high
     interval: 1m
     input_series:

@@ -1708,9 +1708,19 @@
                 {
                     "expr": "round(sum(increase(bioetl_replay_reconstructability_events_total{pipeline=~\"$pipeline\",status=\"not_reconstructable\"}[$__range])) or vector(0))",
                     "refId": "A"
+                },
+                {
+                    "expr": "round(sum(increase(bioetl_replay_drift_events_total{pipeline=~\"$pipeline\"}[$__range])) or vector(0))",
+                    "legendFormat": "drift_events",
+                    "refId": "B"
+                },
+                {
+                    "expr": "max(bioetl_replay_lag_seconds{pipeline=~\"$pipeline\"}) or vector(0)",
+                    "legendFormat": "lag_seconds",
+                    "refId": "C"
                 }
             ],
-            "title": "Replay Not Reconstructable",
+            "title": "Replay Lag / Drift",
             "type": "stat"
         },
         {

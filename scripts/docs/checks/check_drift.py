@@ -117,6 +117,14 @@ class RuntimeMirrorRule:
     compare_version: bool = False
 
 
+@dataclass(frozen=True)
+class AIDocsMirrorTarget:
+    """Docs mirror file that must declare its canonical runtime source."""
+
+    relative_path: Path
+    canonical_sources: tuple[Path, ...]
+
+
 RUNTIME_VERSION_PATTERN = re.compile(r"(?m)^\*Версия:\s*(\d+(?:\.\d+)*)")
 AGENT_MEMORY_SYNC_PATTERN = re.compile(
     r"Синхронизировано с ORCHESTRATION\.md v(\d+(?:\.\d+)*)"
@@ -308,6 +316,12 @@ AI_MIRROR_NOTICE_REQUIRED_TOKENS: dict[Path, tuple[str, ...]] = {
         ".gemini/agents/**",
     ),
 }
+AI_DOCS_RUNTIME_MIRROR_HEADER_LINE_LIMIT = 40
+AI_DOCS_RUNTIME_MIRROR_REQUIRED_TOKENS = (
+    "Mirror status:",
+    "not a canonical runtime surface",
+    "AI_RUNTIME_MIRROR_OWNERSHIP.md",
+)
 AI_SURFACE_STALE_PATTERNS: tuple[re.Pattern[str], ...] = (
     re.compile(r"docs/00-project/ai/agents/runtime/agent-memory\.md"),
     re.compile(r"(?<!\.)runtime/agent-memory\.md"),
@@ -1088,6 +1102,8 @@ def check_ai_surfaces(report: DriftReport, *, root: Path | None = None) -> None:
             forbidden_patterns=forbidden_patterns,
         )
 
+    _check_ai_docs_runtime_mirror_headers(report, project_root=project_root)
+
 
 def _check_ai_surface_required_tokens(
     report: DriftReport,
@@ -1156,6 +1172,97 @@ def _check_ai_surface_forbidden_patterns(
                 str(relative_path),
                 f"Forbidden legacy runtime dependency detected: {match.group(0)}",
             )
+
+
+def _iter_ai_docs_runtime_mirror_targets(
+    project_root: Path,
+) -> tuple[AIDocsMirrorTarget, ...]:
+    targets: list[AIDocsMirrorTarget] = []
+
+    agents_root = project_root / "docs" / "00-project" / "ai" / "agents" / "agents"
+    for path in sorted(agents_root.glob("*.md")):
+        if path.name == "README.md":
+            continue
+        canonical_sources = tuple(
+            candidate
+            for candidate in (
+                Path(".codex/agents") / path.name,
+                Path(".gemini/agents") / path.name,
+            )
+            if (project_root / candidate).exists()
+        )
+        if canonical_sources:
+            targets.append(
+                AIDocsMirrorTarget(
+                    relative_path=path.relative_to(project_root),
+                    canonical_sources=canonical_sources,
+                )
+            )
+
+    local_skills_root = project_root / "docs" / "00-project" / "ai" / "skills" / "local"
+    for path in sorted(local_skills_root.rglob("SKILL.md")):
+        relative_skill_path = path.parent.relative_to(local_skills_root)
+        canonical = Path(".codex/skills") / relative_skill_path / "SKILL.md"
+        if (project_root / canonical).exists():
+            targets.append(
+                AIDocsMirrorTarget(
+                    relative_path=path.relative_to(project_root),
+                    canonical_sources=(canonical,),
+                )
+            )
+
+    global_skills_root = (
+        project_root / "docs" / "00-project" / "ai" / "skills" / "global"
+    )
+    for path in sorted(global_skills_root.rglob("SKILL.md")):
+        if ".system" in path.parts:
+            continue
+        relative_skill_path = path.parent.relative_to(global_skills_root)
+        canonical = Path(".gemini/skills") / relative_skill_path / "SKILL.md"
+        if (project_root / canonical).exists():
+            targets.append(
+                AIDocsMirrorTarget(
+                    relative_path=path.relative_to(project_root),
+                    canonical_sources=(canonical,),
+                )
+            )
+
+    return tuple(targets)
+
+
+def _check_ai_docs_runtime_mirror_headers(
+    report: DriftReport,
+    *,
+    project_root: Path,
+) -> None:
+    for target in _iter_ai_docs_runtime_mirror_targets(project_root):
+        path = project_root / target.relative_path
+        text = _read_doc(path)
+        if not text:
+            report.add("ai-surfaces", "ERROR", str(target.relative_path), "AI surface file missing")
+            continue
+
+        header_text = "\n".join(
+            text.splitlines()[:AI_DOCS_RUNTIME_MIRROR_HEADER_LINE_LIMIT]
+        )
+        for token in AI_DOCS_RUNTIME_MIRROR_REQUIRED_TOKENS:
+            if token not in header_text:
+                report.add(
+                    "ai-surfaces",
+                    "ERROR",
+                    str(target.relative_path),
+                    f"AI docs mirror header missing required token in first section: {token}",
+                )
+        for source in target.canonical_sources:
+            source_text = str(source)
+            if source_text not in header_text:
+                report.add(
+                    "ai-surfaces",
+                    "ERROR",
+                    str(target.relative_path),
+                    "AI docs mirror header missing canonical runtime source: "
+                    f"{source_text}",
+                )
 
 
 def print_report(report: DriftReport) -> None:

@@ -124,3 +124,97 @@ def test_check_ai_surfaces_reports_docs_mirror_without_non_canonical_notice(
         "Missing required AI policy/runtime token: Non-Canonical Mirror Notice",
         "Missing required AI policy/runtime token: .codex/skills/**",
     }
+
+
+def test_check_ai_surfaces_reports_agent_mirror_without_runtime_header(
+    monkeypatch, tmp_path: Path
+) -> None:
+    target = (
+        tmp_path
+        / "docs"
+        / "00-project"
+        / "ai"
+        / "agents"
+        / "agents"
+        / "py-audit-bot.md"
+    )
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text("# py-audit-bot\n\nMirror body without source notice\n", encoding="utf-8")
+
+    codex_runtime = tmp_path / ".codex" / "agents" / "py-audit-bot.md"
+    codex_runtime.parent.mkdir(parents=True, exist_ok=True)
+    codex_runtime.write_text("# runtime\n", encoding="utf-8")
+
+    gemini_runtime = tmp_path / ".gemini" / "agents" / "py-audit-bot.md"
+    gemini_runtime.parent.mkdir(parents=True, exist_ok=True)
+    gemini_runtime.write_text("# runtime\n", encoding="utf-8")
+
+    monkeypatch.setattr(check_drift, "AI_SURFACE_REQUIRED_TOKENS", {})
+    monkeypatch.setattr(check_drift, "AI_WRITE_CAPABLE_SKILL_REQUIRED_TOKENS", {})
+    monkeypatch.setattr(check_drift, "AI_MIRROR_NOTICE_REQUIRED_TOKENS", {})
+    monkeypatch.setattr(check_drift, "AI_SURFACE_STALE_PATTERNS", ())
+    monkeypatch.setattr(check_drift, "AI_SURFACE_FORBIDDEN_PATTERNS", {})
+
+    report = check_drift.DriftReport()
+    check_drift.check_ai_surfaces(report, root=tmp_path)
+
+    assert report.error_count == 5
+    assert {
+        issue.detail
+        for issue in report.issues
+        if issue.doc_file == "docs/00-project/ai/agents/agents/py-audit-bot.md"
+    } == {
+        "AI docs mirror header missing required token in first section: Mirror status:",
+        "AI docs mirror header missing required token in first section: not a canonical runtime surface",
+        "AI docs mirror header missing required token in first section: AI_RUNTIME_MIRROR_OWNERSHIP.md",
+        "AI docs mirror header missing canonical runtime source: .codex/agents/py-audit-bot.md",
+        "AI docs mirror header missing canonical runtime source: .gemini/agents/py-audit-bot.md",
+    }
+
+def test_check_ai_surfaces_accepts_skill_mirror_with_runtime_header(
+    monkeypatch, tmp_path: Path
+) -> None:
+    target = (
+        tmp_path
+        / "docs"
+        / "00-project"
+        / "ai"
+        / "skills"
+        / "local"
+        / "create-pr"
+        / "SKILL.md"
+    )
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(
+        "\n".join(
+            [
+                "> Mirror status: This file is a published/internal mirror.",
+                "> It is not a canonical runtime surface.",
+                "> Canonical runtime source: `.codex/skills/create-pr/SKILL.md`",
+                "> Governance: AI_RUNTIME_MIRROR_OWNERSHIP.md",
+                "",
+                "# create-pr",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    runtime = tmp_path / ".codex" / "skills" / "create-pr" / "SKILL.md"
+    runtime.parent.mkdir(parents=True, exist_ok=True)
+    runtime.write_text("# runtime\n", encoding="utf-8")
+
+    monkeypatch.setattr(check_drift, "AI_SURFACE_REQUIRED_TOKENS", {})
+    monkeypatch.setattr(check_drift, "AI_WRITE_CAPABLE_SKILL_REQUIRED_TOKENS", {})
+    monkeypatch.setattr(check_drift, "AI_MIRROR_NOTICE_REQUIRED_TOKENS", {})
+    monkeypatch.setattr(check_drift, "AI_SURFACE_STALE_PATTERNS", ())
+    monkeypatch.setattr(check_drift, "AI_SURFACE_FORBIDDEN_PATTERNS", {})
+
+    report = check_drift.DriftReport()
+    check_drift.check_ai_surfaces(report, root=tmp_path)
+
+    assert not [
+        issue
+        for issue in report.issues
+        if issue.doc_file == "docs/00-project/ai/skills/local/create-pr/SKILL.md"
+    ]

@@ -36,6 +36,8 @@ __all__ = [
     "PIPELINE_RUNS_TOTAL",
     "POSTRUN_PHASE_DURATION_SECONDS",
     "POSTRUN_PHASE_EVENTS_TOTAL",
+    "REPLAY_DRIFT_EVENTS_TOTAL",
+    "REPLAY_LAG_SECONDS",
     "REPLAY_RECONSTRUCTABILITY_EVENTS_TOTAL",
     "SHUTDOWN_COMPLETED",
     "SHUTDOWN_INITIATED",
@@ -152,7 +154,7 @@ STORAGE_OPTIMIZATION_TOTAL = Counter(
 FILTER_COMBINATIONS_LOADED_TOTAL = Counter(
     "bioetl_filter_combinations_loaded_total",
     "Total filter combinations loaded from multi-filter source",
-    ["pipeline", "source_file"],
+    ["pipeline", "source_kind"],
 )
 
 CONTROL_PLANE_MANIFEST_WRITES_TOTAL = Counter(
@@ -213,6 +215,18 @@ REPLAY_RECONSTRUCTABILITY_EVENTS_TOTAL = Counter(
     "bioetl_replay_reconstructability_events_total",
     "Total replay reconstructability observations recorded during manifest assembly",
     ["pipeline", "replay_capability", "strict_requirement", "status"],
+)
+
+REPLAY_DRIFT_EVENTS_TOTAL = Counter(
+    "bioetl_replay_drift_events_total",
+    "Total bounded replay drift observations recorded during manifest assembly",
+    ["pipeline", "run_type", "replay_capability", "drift_type", "status"],
+)
+
+REPLAY_LAG_SECONDS = Gauge(
+    "bioetl_replay_lag_seconds",
+    "Current bounded replay lag observed during manifest assembly",
+    ["pipeline", "run_type", "replay_capability", "status"],
 )
 
 MEMORY_PRESSURE_EVENTS_TOTAL = Counter(

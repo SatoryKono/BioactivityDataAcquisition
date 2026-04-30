@@ -530,6 +530,22 @@ _TUNED_ALERT_EXPECTATIONS: dict[str, dict[str, object]] = {
             "> 0",
         ],
     },
+    "BioETLReplayLagHigh": {
+        "severity": "warning",
+        "for": "15m",
+        "fragments": [
+            "bioetl_runtime_alert_condition_replay_lag_high_15m",
+            "> 0",
+        ],
+    },
+    "BioETLReplayDriftDetected": {
+        "severity": "critical",
+        "for": "5m",
+        "fragments": [
+            "bioetl_runtime_alert_condition_replay_drift_detected_30m",
+            "> 0",
+        ],
+    },
     "BioETLControlPlaneReadFailureRate": {
         "severity": "warning",
         "for": "15m",
@@ -956,6 +972,14 @@ def test_control_plane_traceability_alerts_reference_expected_metrics() -> None:
         ),
         "BioETLReplayNotReconstructable": (
             "bioetl_replay_reconstructability_events_total",
+            "docs/05-operations/runbooks/checkpoint-debugging.md",
+        ),
+        "BioETLReplayLagHigh": (
+            "bioetl_replay_lag_seconds",
+            "docs/05-operations/runbooks/checkpoint-debugging.md",
+        ),
+        "BioETLReplayDriftDetected": (
+            "bioetl_replay_drift_events_total",
             "docs/05-operations/runbooks/checkpoint-debugging.md",
         ),
         "BioETLLineageFragmentPersistenceFailed": (

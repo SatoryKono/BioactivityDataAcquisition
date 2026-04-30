@@ -59,6 +59,48 @@ async def test_write_silver_metadata_uses_record_ingestion_anchor_when_explicit_
 
 @pytest.mark.unit
 @pytest.mark.asyncio
+async def test_write_silver_metadata_emits_canonical_success_metric() -> None:
+    """Silver metadata write success should use the registered storage metric."""
+    metadata_writer = MagicMock()
+
+    async def capture_write(**kwargs):
+        await asyncio.sleep(0)
+        return None
+
+    metadata_writer.write_silver_metadata = capture_write
+    metrics = MagicMock()
+    ops = SilverMetadataOperations(
+        _logger=MagicMock(),
+        _metadata_writer=metadata_writer,
+        _metrics=metrics,
+    )
+
+    await ops.write_silver_metadata(
+        table_name="chembl.activity",
+        dq_metrics=BatchDQMetrics(
+            total_records=1,
+            valid_records=1,
+            error_records=0,
+            warning_records=0,
+        ),
+        records=[{"entity_id": "CHEMBL1"}],
+    )
+
+    metrics.increment_counter.assert_called_once_with(
+        "bioetl_metadata_write_outcomes_total",
+        1,
+        {
+            "layer": "silver",
+            "provider": "chembl",
+            "pipeline": "chembl_activity",
+            "status": "success",
+            "final_reason": "completed",
+        },
+    )
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
 async def test_resolve_finalization_dq_metrics_normalizes_mixed_struct_and_string_values() -> (
     None
 ):

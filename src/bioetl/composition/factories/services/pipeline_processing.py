@@ -80,6 +80,8 @@ def build_components_and_processing_service(
         quarantine_port=pipeline.services.quarantine,
         pipeline_name=processor_config.pipeline_name,
         metrics=pipeline.services.metrics,
+        batch_metrics=components.batch_metrics,
+        run_type=pipeline.context.run_type.value,
         domain_event_emitter=domain_event_emitter,
     )
     support_service = BatchProcessingSupportService(

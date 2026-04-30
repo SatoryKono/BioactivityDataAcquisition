@@ -26,6 +26,8 @@ from bioetl.application.observability.pipeline_metrics import PipelineMetricsRec
 from bioetl.domain.ports import MetricsPort, QuarantinePort
 from bioetl.domain.types import BatchID, BronzeRecord, ErrorType, JsonDict, RunID
 
+from .batch_metrics import BatchMetricsRecorderService
+
 
 class DQQuarantineEntry(NamedTuple):
     """A record that failed data-quality checks."""
@@ -56,6 +58,8 @@ class QuarantineRuntimeService(QuarantineManagerSupportMixin):
         pipeline_name: str,
         metrics: MetricsPort | None = None,
         pipeline_metrics: PipelineMetricsRecorder | None = None,
+        batch_metrics: BatchMetricsRecorderService | None = None,
+        run_type: str = "unknown",
         domain_event_emitter: DomainEventEmitterProtocol | None = None,
     ) -> None:
         """Initialize QuarantineRuntimeService with explicit dependencies.
@@ -66,11 +70,15 @@ class QuarantineRuntimeService(QuarantineManagerSupportMixin):
             metrics: Optional metrics port for incrementing quarantine record
                 counters per pipeline and error reason.
             pipeline_metrics: Optional prebuilt pipeline-scoped metrics recorder.
+            batch_metrics: Optional run-type-aware recorder shared with batch processing.
+            run_type: Run type label used by fallback direct metric emissions.
 
         """
         self._quarantine = quarantine_port
         self._pipeline_name = pipeline_name
         self._metrics = metrics
+        self._batch_metrics = batch_metrics
+        self._run_type = run_type
         resolved_pipeline_metrics = pipeline_metrics
         if resolved_pipeline_metrics is None:
             resolved_pipeline_metrics = PipelineMetricsRecorder(
@@ -125,13 +133,17 @@ class QuarantineRuntimeService(QuarantineManagerSupportMixin):
         track_quarantine_metrics(
             metrics=self._metrics,
             pipeline_metrics=self._pipeline_metrics,
+            batch_metrics=self._batch_metrics,
             pipeline_name=self._pipeline_name,
+            run_type=self._run_type,
             error_type=error_type,
             count=1,
         )
         track_processed_quarantined(
             metrics=self._metrics,
+            batch_metrics=self._batch_metrics,
             pipeline_name=self._pipeline_name,
+            run_type=self._run_type,
             count=1,
         )
 
@@ -174,7 +186,9 @@ class QuarantineRuntimeService(QuarantineManagerSupportMixin):
             track_quarantine_metrics(
                 metrics=self._metrics,
                 pipeline_metrics=self._pipeline_metrics,
+                batch_metrics=self._batch_metrics,
                 pipeline_name=self._pipeline_name,
+                run_type=self._run_type,
                 error_type=reason,
                 count=count,
             )

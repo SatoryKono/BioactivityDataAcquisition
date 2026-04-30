@@ -37,6 +37,10 @@ class _FilteredDataSourceState(Protocol):
     _fallback_mapping: dict[str, str] | None
 
 
+CSV_SINGLE_COLUMN_SOURCE_KIND = "csv_single_column"
+CSV_MULTI_COLUMN_SOURCE_KIND = "csv_multi_column"
+
+
 async def enter_filtered_data_source(state: _FilteredDataSourceState) -> None:
     """Enter the wrapped adapter and preload any configured filters."""
     await state._data_source.__aenter__()
@@ -175,17 +179,19 @@ def _record_filter_metrics(state: _FilteredDataSourceState) -> None:
     if not state._metrics or not state._filter_result:
         return
 
-    source_file = state._filter_config.source_path or "unknown"
     state._metrics.increment_counter(
         "bioetl_filter_ids_loaded_total",
         state._filter_result.unique_count,
-        {"pipeline": state._pipeline_name, "source_file": source_file},
+        {"pipeline": state._pipeline_name, "source_kind": CSV_SINGLE_COLUMN_SOURCE_KIND},
     )
     if state._filter_result.has_duplicates:
         state._metrics.increment_counter(
             "bioetl_filter_ids_duplicates_total",
             state._filter_result.duplicate_count,
-            {"pipeline": state._pipeline_name, "source_file": source_file},
+            {
+                "pipeline": state._pipeline_name,
+                "source_kind": CSV_SINGLE_COLUMN_SOURCE_KIND,
+            },
         )
 
 
@@ -194,12 +200,11 @@ def _record_multi_filter_metrics(state: _FilteredDataSourceState) -> None:
     if not state._metrics or not state._filter_result:
         return
 
-    source_file = state._filter_config.source_path or "unknown"
     if state._valid_combinations:
         state._metrics.increment_counter(
             "bioetl_filter_combinations_loaded_total",
             len(state._valid_combinations),
-            {"pipeline": state._pipeline_name, "source_file": source_file},
+            {"pipeline": state._pipeline_name, "source_kind": CSV_MULTI_COLUMN_SOURCE_KIND},
         )
 
     for field, ids in state._filter_result.column_ids.items():
@@ -212,6 +217,6 @@ def _record_multi_filter_metrics(state: _FilteredDataSourceState) -> None:
             len(ids),
             {
                 "pipeline": state._pipeline_name,
-                "source_file": source_file,
+                "source_kind": CSV_MULTI_COLUMN_SOURCE_KIND,
             },
         )
