@@ -6,7 +6,7 @@ import ast
 from pathlib import Path
 
 
-DOMAIN_FILE = Path("src/bioetl/domain/services/composite_validation_layer.py")
+DOMAIN_FILE = Path("src/bioetl/domain/behavior/composite_validation_layer.py")
 COMPOSITION_FACTORY_FILE = Path(
     "src/bioetl/composition/factories/dq/composite_validation.py"
 )
