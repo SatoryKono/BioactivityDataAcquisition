@@ -25,16 +25,33 @@ as a replacement for runtime truth.
 
 ## Conflict Priority
 
-When memory disagrees with the repository, use this priority:
+Use different precedence depending on the type of conflict.
 
-1. active code, configs, tests, workflows
+### AI Runtime Behavior Conflicts
+
+When agent behavior instructions disagree, use this priority:
+
+1. active runtime source for the current agent or skill in `.codex/**` or
+   `.gemini/**`
+1. `docs/00-project/RULES.md`
+1. `docs/01-requirements/REQUIREMENTS.md`
+1. accepted ADRs in `docs/02-architecture/decisions/`
+1. docs mirrors, memory sheets, and helper AI docs in `docs/00-project/ai/**`
+1. machine-readable memory artifacts such as `mcp-memory.json`
+
+### Implementation Fact Conflicts
+
+When memory disagrees with repository facts about behavior or implementation,
+use this priority:
+
+1. active code, configs, tests, workflows, and governance-sensitive artifacts
 1. `docs/00-project/RULES.md`, `docs/01-requirements/REQUIREMENTS.md`, accepted ADRs
-1. runtime maps and active runtime profiles in `.codex/**` or `.gemini/**`
+1. active runtime maps and profiles in `.codex/**` or `.gemini/**`
 1. `agent-memory.md` and `memory-py-*.md`
 1. machine-readable memory artifacts such as `mcp-memory.json`
 
 Memory is a navigation and evidence layer, not the source of truth for runtime
-behavior or project rules.
+behavior, project rules, or implementation facts.
 
 ## Stale Memory Handling
 
@@ -49,6 +66,8 @@ If a memory claim looks stale:
 
 - Use memory to find likely tests, docs, contracts, workflows, and ownership
   surfaces faster.
+- Use memory plus repo search to find related golden tests, architecture tests,
+  contract tests, diagrams, configs, and reports before narrowing validation.
 - Do not make behavior claims from memory alone when a file can be checked
   directly.
 

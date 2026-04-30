@@ -12,6 +12,8 @@ Use this file as a strict operating profile for code suggestions in this reposit
 - `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
 
 If guidance conflicts, prioritize canonical sources over this file.
+For AI runtime behavior conflicts, follow the runtime-source-first precedence
+defined in `AGENTS.md`.
 
 ## AI Runtime Notes
 
@@ -66,5 +68,7 @@ If guidance conflicts, prioritize canonical sources over this file.
 - Includes type annotations for public interfaces.
 - Preserves architecture constraints and naming conventions.
 - Adds/updates tests when behavior changes.
+- Uses memory plus repo search to identify related tests, docs, contracts, and
+  configs before narrowing the validation scope.
 - Mentions required verification commands (`make lint`, `make test`, architecture tests).
 - Includes migration notes when introducing breaking changes.

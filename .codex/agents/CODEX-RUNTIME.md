@@ -11,11 +11,18 @@ Before invoking a logical profile:
 
 - use `AGENTS.md` as the root precedence contract
 - read `docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
+- read `docs/00-project/ai/memory/agent-memory.md`
+- read the matching `docs/00-project/ai/memory/memory-py-*.md` sheet when one
+  exists for the selected logical profile
 - for write-capable work, follow
   `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
 
 `docs/00-project/ai/**` remains a mirror/guidance layer and must not override
 runtime behavior defined in `.codex/**`.
+
+Generic imported profiles still inherit BioETL guardrails from `AGENTS.md`,
+`MEMORY_USAGE.md`, and the Local-Only runtime constraints even when they are not
+fully BioETL-specific.
 
 ## Key Rule
 

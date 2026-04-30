@@ -4,14 +4,18 @@ This file contains the core architectural constraints, governance rules, and dev
 
 ## 0. Canonical Sources For AI Work
 
+- `AGENTS.md`
+- `.gemini/agents/GEMINI-RUNTIME.md`
+- active `.gemini/agents/**` and `.gemini/skills/**` surfaces for the current task
 - `docs/00-project/RULES.md`
 - `docs/01-requirements/REQUIREMENTS.md`
 - accepted ADRs in `docs/02-architecture/decisions/`
-- `AGENTS.md`
 - `docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
 - `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
 
-When guidance conflicts, use the list above in that order.
+When AI runtime guidance conflicts, use the list above in that order. For
+implementation facts, verify against code, configs, tests, workflows, and
+accepted ADRs before trusting memory or mirrors.
 
 ## 1. Core Architecture (Hexagonal / Ports & Adapters)
 
@@ -64,6 +68,8 @@ When guidance conflicts, use the list above in that order.
 
 - `.gemini/**` is the active Gemini runtime tree.
 - `docs/00-project/ai/**` is a docs mirror/guidance layer and must not override runtime behavior.
+- `.claude/**` is not a canonical runtime source for Gemini behavior unless it
+  is explicitly verified in the local checkout for a separate change program.
 - Before substantial work, read `docs/00-project/ai/memory/agent-memory.md`,
   then the relevant `memory-py-*.md` file, and use the canonical workflow from
   `src/memory/DAILY_WORKFLOW.md`.

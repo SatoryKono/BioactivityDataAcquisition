@@ -63,6 +63,7 @@ class RunManifestCreateSpec:
     pipeline_version: str | None = None
     git_commit: str | None = None
     source_revision_state: str | None = None
+    dependency_lock_hash: str | None = None
     config_hash: str | None = None
     resolved_config_hash: str | None = None
     effective_config_hash: str | None = None
@@ -132,6 +133,7 @@ class RunManifestService(
             pipeline_version=request.pipeline_version,
             git_commit=request.git_commit,
             source_revision_state=request.source_revision_state,
+            dependency_lock_hash=request.dependency_lock_hash,
             config_hash=request.config_hash,
             resolved_config_hash=request.resolved_config_hash,
             effective_config_hash=request.effective_config_hash,
