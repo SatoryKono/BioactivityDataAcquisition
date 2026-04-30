@@ -36,20 +36,8 @@ suffix_boundary_rules:
       - src/bioetl/composition/
       - src/bioetl/infrastructure/
     allowed_symbol_exceptions:
-      - symbol: RunnerFactoryBuilderService
-        path: src/bioetl/composition/bootstrap/runtime/runner_factory_builder_service.py
-        issue: "#3399"
-        reason: Existing composition naming drift pending canonical rename.
-      - symbol: CompositeFilterExtractionService
-        path: src/bioetl/composition/bootstrap/runtime/composite_filter_extraction_service.py
-        issue: "#3399"
-        reason: Existing composition naming drift pending canonical rename.
       - symbol: FsAdrService
         path: src/bioetl/infrastructure/adr/fs_adr_service.py
-        issue: "#3399"
-        reason: Existing infrastructure naming drift pending canonical rename.
-      - symbol: FallbackFetchOrchestratorService
-        path: src/bioetl/infrastructure/adapters/common/fallback_fetch_service.py
         issue: "#3399"
         reason: Existing infrastructure naming drift pending canonical rename.
       - symbol: ErrorService

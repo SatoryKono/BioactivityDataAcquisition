@@ -13,7 +13,7 @@ from bioetl.infrastructure.adapters.common import (
     ComposableFallbackDecorator,
     DefaultFallbackExecution,
     FallbackDecoratorConfig,
-    FallbackFetchOrchestratorService,
+    FallbackFetchOrchestrator,
     resolve_fallback_policy,
 )
 from bioetl.infrastructure.adapters.openalex.fallback import (
@@ -49,7 +49,7 @@ def _create_default_fallback_strategy(
 
 def _create_default_fallback_decorator(
     *,
-    service: FallbackFetchOrchestratorService,
+    service: FallbackFetchOrchestrator,
     strategy: DefaultFallbackExecution,
     config: FallbackDecoratorConfig,
     logger: LoggerPort,
@@ -77,7 +77,7 @@ def _create_default_fallback_decorator(
 class OpenAlexFallbackOrchestrator:
     """Coordinates DOI-first fetch + title fallback flow for OpenAlex."""
 
-    fallback_fetch_service: FallbackFetchOrchestratorService
+    fallback_fetch_service: FallbackFetchOrchestrator
     fallback_handler: OpenAlexTitleFallbackHandler
     normalize_id: Callable[[str], str | None]
     extract_record_id: Callable[[BronzeRecord], str | None]

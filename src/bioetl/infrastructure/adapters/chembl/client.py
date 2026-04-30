@@ -51,7 +51,7 @@ if TYPE_CHECKING:
         HttpAdapterDependencyContext,
     )
     from bioetl.infrastructure.adapters.common.fallback_fetch_service import (
-        FallbackFetchOrchestratorService,
+        FallbackFetchOrchestrator,
     )
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
@@ -72,7 +72,7 @@ class ChemblAdapter(
     error_handler: ErrorHandlerPort | None = None
     adapter_metrics: AdapterMetricsRecorder | None = None
     request_collector: APIRequestCollector | None = None
-    fallback_fetch_service: FallbackFetchOrchestratorService | None = None
+    fallback_fetch_service: FallbackFetchOrchestrator | None = None
 
     provider_name: str = field(init=False, default="chembl")
 

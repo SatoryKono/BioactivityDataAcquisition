@@ -13,7 +13,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, cast
 
 from bioetl.domain.ports import ErrorHandlerPort
-from bioetl.infrastructure.adapters.common import FallbackFetchOrchestratorService
+from bioetl.infrastructure.adapters.common import FallbackFetchOrchestrator
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort, MetricsPort
@@ -41,13 +41,13 @@ def create_default_error_handler(
 def create_default_fallback_service(
     *,
     adapter_metrics: AdapterMetricsRecorder,
-) -> FallbackFetchOrchestratorService:
-    """Create fallback orchestrator service for non-DI call sites.
+) -> FallbackFetchOrchestrator:
+    """Create fallback fetch orchestrator for non-DI call sites.
 
     Returns:
-        FallbackFetchOrchestratorService instance wired to the given adapter metrics.
+        FallbackFetchOrchestrator instance wired to the given adapter metrics.
     """
-    return FallbackFetchOrchestratorService(adapter_metrics)
+    return FallbackFetchOrchestrator(adapter_metrics)
 
 
 def create_default_adapter_metrics(

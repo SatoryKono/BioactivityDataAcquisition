@@ -20,7 +20,7 @@ from bioetl.infrastructure.adapters.common.composable_fallback import (
 from bioetl.infrastructure.adapters.common.fallback_fetch_service import (
     DefaultFallbackExecution,
     ExtractRecordIdProtocol,
-    FallbackFetchOrchestratorService,
+    FallbackFetchOrchestrator,
     NormalizeIdProtocol,
 )
 
@@ -38,7 +38,7 @@ class FallbackPolicyMixin:
     propagate the new decorator to downstream components (e.g. fetch-flow).
 
     Required attributes on the host class (set before ``configure_fallback_policy``):
-        _fallback_fetch_service: FallbackFetchOrchestratorService
+        _fallback_fetch_service: FallbackFetchOrchestrator
         logger: LoggerPort
     """
 
@@ -111,7 +111,7 @@ class FallbackPolicyMixin:
             extract_record_id_hook=self._get_extract_record_id_hook(),
             fallback_handler_hook=self._get_fallback_handler(enabled),
         )
-        fallback_fetch_service: FallbackFetchOrchestratorService = (
+        fallback_fetch_service: FallbackFetchOrchestrator = (
             self._fallback_fetch_service  # type: ignore[attr-defined]
         )
         self._fallback_decorator = ComposableFallbackDecorator(

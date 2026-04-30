@@ -11,7 +11,7 @@ import pytest
 
 from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.adapters.common.fallback_fetch_service import (
-    FallbackFetchOrchestratorService,
+    FallbackFetchOrchestrator,
     FallbackFetchRequest,
 )
 from bioetl.infrastructure.adapters.openalex.fallback_orchestrator import (
@@ -24,7 +24,7 @@ pytestmark = pytest.mark.unit
 
 def _make_orchestrator(
     *,
-    service: FallbackFetchOrchestratorService | None = None,
+    service: FallbackFetchOrchestrator | None = None,
     fallback_handler: Any = None,
     normalize_id: Any = None,
     extract_record_id: Any = None,
@@ -33,7 +33,7 @@ def _make_orchestrator(
     """Build an OpenAlexFallbackOrchestrator with injectable collaborators."""
     return OpenAlexFallbackOrchestrator(
         fallback_fetch_service=service
-        or MagicMock(spec=FallbackFetchOrchestratorService),
+        or MagicMock(spec=FallbackFetchOrchestrator),
         fallback_handler=fallback_handler or MagicMock(),
         normalize_id=normalize_id or (lambda doi: doi.strip().lower() if doi else None),
         extract_record_id=extract_record_id or (lambda rec: str(rec.get("id", ""))),
@@ -65,7 +65,7 @@ async def test_execute_builds_openalex_request_and_forwards_primary_fetcher() ->
         async for record in request.primary_record_fetcher(["10.1/A"], 5):
             yield record
 
-    service = MagicMock(spec=FallbackFetchOrchestratorService)
+    service = MagicMock(spec=FallbackFetchOrchestrator)
     service.execute = capture_execute
     orchestrator = _make_orchestrator(
         service=service,
@@ -115,7 +115,7 @@ async def test_execute_attaches_openalex_phase1_summary_logger() -> None:
         captured_requests.append(request)
         return async_iterable()
 
-    service = MagicMock(spec=FallbackFetchOrchestratorService)
+    service = MagicMock(spec=FallbackFetchOrchestrator)
     service.execute = capture_execute
     orchestrator = _make_orchestrator(service=service, logger=logger)
 
@@ -150,7 +150,7 @@ async def test_execute_attaches_openalex_phase1_summary_logger() -> None:
 @pytest.mark.asyncio
 async def test_execute_skips_service_for_unsupported_filter_field() -> None:
     """OpenAlex fallback policy should reject unsupported non-DOI filter fields."""
-    service = MagicMock(spec=FallbackFetchOrchestratorService)
+    service = MagicMock(spec=FallbackFetchOrchestrator)
     service.execute = MagicMock()
     logger = MagicMock()
     logger.warning = MagicMock()
@@ -192,7 +192,7 @@ async def test_configure_policy_can_disable_fallback_handler() -> None:
         captured_requests.append(request)
         return async_iterable()
 
-    service = MagicMock(spec=FallbackFetchOrchestratorService)
+    service = MagicMock(spec=FallbackFetchOrchestrator)
     service.execute = capture_execute
     fallback_handler = MagicMock()
     orchestrator = _make_orchestrator(

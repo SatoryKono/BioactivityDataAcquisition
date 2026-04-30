@@ -14,7 +14,7 @@ from bioetl.composition.factories.datasource.adapter_helpers import (
 from bioetl.domain.ports import ErrorHandlerPort, LoggerPort, MetricsPort
 from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
-from bioetl.infrastructure.adapters.common import FallbackFetchOrchestratorService
+from bioetl.infrastructure.adapters.common import FallbackFetchOrchestrator
 from bioetl.infrastructure.adapters.common.api_request_collector import (
     APIRequestCollector,
 )
@@ -47,7 +47,7 @@ class CrossRefAdapterComponents:
     error_handler: ErrorHandlerPort
     adapter_metrics: AdapterMetricsRecorder
     request_collector: APIRequestCollector
-    fallback_fetch_service: FallbackFetchOrchestratorService
+    fallback_fetch_service: FallbackFetchOrchestrator
     query_builder: CrossRefQueryBuilder
     response_mapper: CrossRefResponseMapper
     batch_fetcher: CrossRefBatchFetcher
@@ -72,7 +72,7 @@ def _resolve_optional_components(
     ErrorHandlerPort,
     AdapterMetricsRecorder,
     APIRequestCollector,
-    FallbackFetchOrchestratorService,
+    FallbackFetchOrchestrator,
 ]:
     error_handler = cast("ErrorHandlerPort | None", kwargs.get("error_handler"))
     adapter_metrics = cast(
@@ -84,7 +84,7 @@ def _resolve_optional_components(
         kwargs.get("request_collector"),
     )
     fallback_fetch_service = cast(
-        "FallbackFetchOrchestratorService | None",
+        "FallbackFetchOrchestrator | None",
         kwargs.get("fallback_fetch_service"),
     )
     return (

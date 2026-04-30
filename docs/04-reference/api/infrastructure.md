@@ -127,7 +127,7 @@ and lifecycle governance in
 | ---------------------------------- | -------------------------------------------- |
 | `BaseTitleFallbackHandler`         | Base class for title-based fallback search   |
 | `ComposableFallbackDecorator`      | Composable fallback fetch decorator          |
-| `FallbackFetchOrchestratorService` | Orchestrates primary + fallback fetch        |
+| `FallbackFetchOrchestrator`        | Orchestrates primary + fallback fetch        |
 | `FallbackPolicyMixin`              | Mixin for fallback policy support            |
 | `APIRequestCollector`              | Collects API request metrics                 |
 | `CachedBronzeDataSource`           | Data source reading from cached Bronze layer |

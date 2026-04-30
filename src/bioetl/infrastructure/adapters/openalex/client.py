@@ -27,7 +27,7 @@ from httpx import HTTPStatusError, RequestError
 from bioetl.domain.exceptions import BioETLError, NetworkError
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.common import (
-    FallbackFetchOrchestratorService,
+    FallbackFetchOrchestrator,
     FallbackPolicyMixin,
 )
 from bioetl.infrastructure.adapters.openalex.client_helpers_adapter_mixin import (
@@ -126,7 +126,7 @@ class OpenAlexAdapter(
     adapter_metrics: AdapterMetricsRecorder | None = None
     request_collector: APIRequestCollector | None = None
     _: KW_ONLY
-    fallback_fetch_service: FallbackFetchOrchestratorService
+    fallback_fetch_service: FallbackFetchOrchestrator
     openalex_query_executor: OpenAlexQueryExecutor | None = None
     openalex_response_mapper: OpenAlexResponseMapper | None = None
     openalex_cursor_flow: OpenAlexCursorFlowService | None = None
@@ -135,7 +135,7 @@ class OpenAlexAdapter(
 
     provider_name: str = field(init=False, default="openalex")
     """Provider identifier (required by DataSourcePort)."""
-    _fallback_fetch_service: FallbackFetchOrchestratorService = field(
+    _fallback_fetch_service: FallbackFetchOrchestrator = field(
         init=False, repr=False
     )
     _query_executor: OpenAlexQueryExecutor = field(init=False, repr=False)

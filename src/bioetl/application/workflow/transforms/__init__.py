@@ -4,12 +4,11 @@ from __future__ import annotations
 
 from collections.abc import Awaitable, Callable, Mapping
 from dataclasses import dataclass, field
-from typing import TypeAlias
 
 from bioetl.domain.workflow import WorkflowTransformSpec
 
-WorkflowTransformOutput: TypeAlias = object
-WorkflowTransformCallable: TypeAlias = Callable[
+type WorkflowTransformOutput = object
+type WorkflowTransformCallable = Callable[
     [WorkflowTransformSpec, Mapping[str, object]],
     WorkflowTransformOutput | Awaitable[WorkflowTransformOutput],
 ]
