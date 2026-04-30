@@ -109,7 +109,7 @@ grep -rn "N/A\|None\|-" src/bioetl/domain/ --include="*.py" | head -5
 
    ```bash
    # Check null handling logs
-   grep "null" logs/production.log
+   grep "null" reports/logs/bioetl.log
    ```
 
 ## ✅ Success Criteria

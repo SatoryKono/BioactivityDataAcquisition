@@ -118,7 +118,7 @@ grep -rn "assay_type\|relationship_type" src/bioetl/domain/ --include="*.py" | h
 1. **Monitor Production**
 
    ```bash
-   grep "normalize.*case" logs/production.log
+   grep "normalize.*case" reports/logs/bioetl.log
    ```
 
 ## ✅ Success Criteria

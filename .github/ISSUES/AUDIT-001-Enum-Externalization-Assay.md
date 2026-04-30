@@ -114,7 +114,7 @@ grep -rn "assay_type\|relationship_type\|assay_category" src/bioetl/domain/ --in
 1. **Monitor Production**
 
    ```bash
-   grep "enum" logs/production.log
+   grep "enum" reports/logs/bioetl.log
    ```
 
 ## ✅ Success Criteria

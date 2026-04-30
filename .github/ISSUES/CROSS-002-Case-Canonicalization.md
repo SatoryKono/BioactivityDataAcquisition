@@ -135,7 +135,7 @@ grep -rn "normalize.*case\|uppercase\|lowercase" src/bioetl/domain/normalization
 1. **Monitor Production**
 
    ```bash
-   grep "normalize.*case\|ontology" logs/production.log
+   grep "normalize.*case\|ontology" reports/logs/bioetl.log
    ```
 
 ## ✅ Success Criteria
