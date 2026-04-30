@@ -5,19 +5,19 @@
 ## Summary
 
 - Registry YAML: `configs/quality/compatibility_facade_inventory.yaml`
-- Curated inventory rows: `18`
-- Transition debt rows: `0`
-- Sanctioned public entrypoint rows: `18`
+- Curated inventory rows: `23`
+- Transition debt rows: `3`
+- Sanctioned public entrypoint rows: `20`
 - Retained review entrypoints: `2`
-- Permanent public entrypoints: `16`
-- Measured tracked modules: `18`
+- Permanent public entrypoints: `18`
+- Measured tracked modules: `23`
 - Measured-only modules outside curated inventory: `0`
 - Discovered docstring-tracked modules: `0`
 - Unexpected docstring-tracked modules: `0`
 - Missing allowlisted measured-only modules: `0`
 - First-party src imports targeting measured-only modules: `0`
-- Curated rows requiring external breaking change process: `18`
-- Curated rows marked internal-callers-zero: `2`
+- Curated rows requiring external breaking change process: `23`
+- Curated rows marked internal-callers-zero: `4`
 - First-party src imports targeting internal-callers-zero rows: `0`
 - Ratchet violations: `0`
 
@@ -37,6 +37,9 @@
 - `src/bioetl/composition/__init__.py`
 - `src/bioetl/composition/bootstrap/__init__.py`
 - `src/bioetl/composition/entrypoints.py`
+- `src/bioetl/composition/factories/__init__.py`
+- `src/bioetl/composition/providers/_models.py`
+- `src/bioetl/composition/resource_management_api.py`
 - `src/bioetl/domain/composite/config.py`
 - `src/bioetl/domain/value_objects/activity_values.py`
 - `src/bioetl/domain/value_objects/publication_field_groups.py`
@@ -44,8 +47,10 @@
 - `src/bioetl/infrastructure/adapters/semanticscholar/client.py`
 - `src/bioetl/interfaces/cli/commands/archive.py`
 - `src/bioetl/interfaces/cli/commands/cleanup.py`
+- `src/bioetl/interfaces/cli/commands/diagnostics.py`
 - `src/bioetl/interfaces/cli/commands/health.py`
 - `src/bioetl/interfaces/cli/commands/maintenance.py`
+- `src/bioetl/interfaces/cli/commands/plan.py`
 - `src/bioetl/interfaces/cli/commands/quarantine.py`
 - `src/bioetl/interfaces/cli/commands/run.py`
 - `src/bioetl/interfaces/cli/commands/run_all.py`
@@ -54,12 +59,17 @@
 
 ## Curated Row Governance Metadata
 
+- `src/bioetl/composition/resource_management_api.py` — external breaking change required: `true`, internal callers zero: `true`
+- `src/bioetl/composition/providers/_models.py` — external breaking change required: `true`, internal callers zero: `false`
+- `src/bioetl/composition/factories/__init__.py` — external breaking change required: `true`, internal callers zero: `true`
 - `src/bioetl/interfaces/cli/commands/run.py` — external breaking change required: `true`, internal callers zero: `false`
 - `src/bioetl/interfaces/cli/commands/run_all.py` — external breaking change required: `true`, internal callers zero: `false`
 - `src/bioetl/interfaces/cli/commands/run_composite.py` — external breaking change required: `true`, internal callers zero: `false`
 - `src/bioetl/interfaces/cli/commands/health.py` — external breaking change required: `true`, internal callers zero: `false`
+- `src/bioetl/interfaces/cli/commands/diagnostics.py` — external breaking change required: `true`, internal callers zero: `false`
 - `src/bioetl/interfaces/cli/commands/quarantine.py` — external breaking change required: `true`, internal callers zero: `false`
 - `src/bioetl/interfaces/cli/commands/maintenance.py` — external breaking change required: `true`, internal callers zero: `false`
+- `src/bioetl/interfaces/cli/commands/plan.py` — external breaking change required: `true`, internal callers zero: `false`
 - `src/bioetl/interfaces/cli/commands/archive.py` — external breaking change required: `true`, internal callers zero: `false`
 - `src/bioetl/interfaces/cli/commands/cleanup.py` — external breaking change required: `true`, internal callers zero: `false`
 - `src/bioetl/interfaces/cli/commands/vacuum.py` — external breaking change required: `true`, internal callers zero: `false`

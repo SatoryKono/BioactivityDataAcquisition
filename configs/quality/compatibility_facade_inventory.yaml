@@ -37,7 +37,7 @@ transition_debt:
   introduced_in: legacy-pre-2026-04
   review_date: '2026-09-30'
   external_breaking_change_required: true
-  internal_callers_zero: true
+  internal_callers_zero: false
   allowed_call_sites: '`src`: new code imports `DataSourceCreatorProtocol`; `tests`:
     compatibility/naming coverage may inspect `DataSourceCreatorPort` only to verify
     sunset governance for the legacy alias family'

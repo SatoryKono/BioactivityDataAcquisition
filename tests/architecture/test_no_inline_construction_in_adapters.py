@@ -25,7 +25,7 @@ TARGET_ADAPTERS: dict[str, Path] = {
 FORBIDDEN_HELPER_CONSTRUCTORS = {
     # Cross-cutting services (existing guard)
     "FallbackFetchOrchestrator",
-    "ErrorService",
+    "AdapterErrorHandler",
     "AdapterMetricsRecorder",
     "APIRequestCollector",
     # OpenAlex provider-specific helpers

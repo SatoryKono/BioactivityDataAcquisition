@@ -13,12 +13,6 @@ suffix_boundary_rules:
     exclude_path_prefixes:
       - src/bioetl/domain/ports/
     allowed_symbol_exceptions:
-      - symbol: EnumLoaderPort
-        path: src/bioetl/domain/config/enum_loader.py
-        issue: "#3396"
-        reason: >
-          Domain-adjacent enum loader contract still uses the legacy *Port name
-          outside domain/ports and remains pending terminology cleanup.
       - symbol: DataSourceCreatorPort
         path: src/bioetl/composition/factories/__init__.py
         issue: "#3401"
