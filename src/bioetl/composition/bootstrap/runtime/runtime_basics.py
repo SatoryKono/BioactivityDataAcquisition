@@ -70,8 +70,9 @@ def bootstrap_runtime_basics(
         settings_provider: Zero-argument callable that returns global Settings.
         logger_bootstrapper: Callable accepting (pipeline_name, run_uuid, log_level)
             and returning a LoggerPort.
-        storage_bootstrapper: Callable returning a storage adapter; called with
-            ``enable_csv_export=True`` for composite pipelines.
+        storage_bootstrapper: Callable returning a storage bundle; called with
+            explicit ``RunContext`` and ports so storage assembly does not
+            generate runtime identity.
         lock_factory: Zero-argument callable returning a LockPort.
         uuid_factory: Zero-argument callable returning a new UUID; injectable
             for deterministic testing.

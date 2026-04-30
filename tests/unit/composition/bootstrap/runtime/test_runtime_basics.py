@@ -106,23 +106,31 @@ class TestBootstrapRuntimeBasics:
         assert result[0] == str(_FIXED_UUID)
 
     def test_storage_bootstrapper_called_with_csv_export(self) -> None:
-        """storage_bootstrapper is called with enable_csv_export=True."""
+        """storage_bootstrapper receives explicit runtime context and ports."""
         storage_bootstrapper = MagicMock(return_value=MagicMock())
+        settings = SimpleNamespace(metrics_enabled=False)
+        logger = MagicMock()
+        tracer = MagicMock()
 
         bootstrap_runtime_basics(
             config=_make_config("p"),
             run_id=str(_FIXED_UUID),
-            settings_provider=MagicMock(
-                return_value=SimpleNamespace(metrics_enabled=False)
-            ),
-            logger_bootstrapper=lambda _n, _u, _l: MagicMock(),
-            tracer_bootstrapper=lambda _settings: MagicMock(),
+            settings_provider=MagicMock(return_value=settings),
+            logger_bootstrapper=lambda _n, _u, _l: logger,
+            tracer_bootstrapper=lambda _settings: tracer,
             storage_bootstrapper=storage_bootstrapper,
             lock_factory=MagicMock(return_value=MagicMock()),
             uuid_factory=MagicMock(),
         )
 
-        storage_bootstrapper.assert_called_once_with(enable_csv_export=True)
+        storage_bootstrapper.assert_called_once()
+        kwargs = storage_bootstrapper.call_args.kwargs
+        assert kwargs["enable_csv_export"] is True
+        assert kwargs["settings"] is settings
+        assert kwargs["logger"] is logger
+        assert kwargs["tracing"] is tracer
+        assert kwargs["run_context"].run_id == _FIXED_UUID
+        assert kwargs["run_context"].pipeline_name == "p"
 
     def test_logger_bootstrapper_receives_pipeline_name(self) -> None:
         """logger_bootstrapper receives config.name as the first argument."""

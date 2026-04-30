@@ -7,7 +7,10 @@ Removal horizon: 2026-09-30 compatibility facade review.
 from __future__ import annotations
 
 import warnings
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from bioetl.composition.factories.storage.bundle import StorageBundle
 
 __all__ = ["StorageBundle"]
 
