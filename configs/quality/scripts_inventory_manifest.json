@@ -1,10 +1,10 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-30T06:56:07.984633+00:00",
+  "generated_at": "2026-04-30T07:37:15.068944+00:00",
   "summary": {
-    "total_scripts": 356,
+    "total_scripts": 357,
     "status_counts": {
-      "active": 329,
+      "active": 330,
       "supporting": 27
     },
     "reference_group_coverage": {
@@ -12,9 +12,9 @@
       "build": 2,
       "ci": 50,
       "docs": 121,
-      "scripts": 299,
+      "scripts": 300,
       "skills": 8,
-      "tests": 141
+      "tests": 142
     }
   },
   "scripts": [
@@ -2967,7 +2967,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 41,
+      "reference_count": 45,
       "references": [
         {
           "path": ".pre-commit-config.yaml",
@@ -4392,7 +4392,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 118,
+      "reference_count": 123,
       "references": [
         {
           "path": ".github/workflows/docs-kpi-weekly.yml",
@@ -4663,7 +4663,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 26,
+      "reference_count": 27,
       "references": [
         {
           "path": ".github/workflows/docs.yml",
@@ -5334,8 +5334,14 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
+        {
+          "path": "scripts/ops/neo4j_memory_sync.py",
+          "line": 475,
+          "source_group": "scripts",
+          "text": "\"script_path\": \"scripts/docs/verify_docs.py\","
+        },
         {
           "path": "tests/architecture/test_docs_compat_shim_governance.py",
           "line": 26,
@@ -6283,7 +6289,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 11,
+      "reference_count": 13,
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
@@ -6411,7 +6417,7 @@
       "agent_usage": [
         "py-test-swarm"
       ],
-      "reference_count": 31,
+      "reference_count": 33,
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
@@ -6470,7 +6476,7 @@
       "agent_usage": [
         "py-test-swarm"
       ],
-      "reference_count": 31,
+      "reference_count": 33,
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
@@ -6586,7 +6592,7 @@
       "agent_usage": [
         "py-test-swarm"
       ],
-      "reference_count": 46,
+      "reference_count": 48,
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
@@ -6645,7 +6651,7 @@
       "agent_usage": [
         "py-test-swarm"
       ],
-      "reference_count": 59,
+      "reference_count": 61,
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
@@ -9251,7 +9257,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 13,
       "references": [
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
@@ -9282,6 +9288,24 @@
           "line": 52,
           "source_group": "scripts",
           "text": "For MCP operational tooling, see [scripts/ai/mcp/__main__.py](/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/__main__.py)."
+        },
+        {
+          "path": "scripts/ops/neo4j_memory_sync.py",
+          "line": 496,
+          "source_group": "scripts",
+          "text": "\"entrypoint_path\": \"scripts/diagrams/__main__.py\","
+        },
+        {
+          "path": "scripts/ops/neo4j_memory_sync.py",
+          "line": 521,
+          "source_group": "scripts",
+          "text": "\"entrypoint_path\": \"scripts/docs/__main__.py\","
+        },
+        {
+          "path": "scripts/ops/neo4j_memory_sync.py",
+          "line": 546,
+          "source_group": "scripts",
+          "text": "\"entrypoint_path\": \"scripts/schema/__main__.py\","
         }
       ]
     },
@@ -10057,6 +10081,27 @@
       ]
     },
     {
+      "path": "scripts/ops/neo4j_memory_sync.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "tests/architecture/test_test_structural_debt.py",
+          "line": 13,
+          "source_group": "tests",
+          "text": "\"tests/testing_support/neo4j_memory_sync.py\": 3175,"
+        },
+        {
+          "path": "tests/architecture/test_test_structural_debt.py",
+          "line": 17,
+          "source_group": "tests",
+          "text": "\"tests/testing_support/neo4j_memory_sync.py::test_snapshot_contains_core_repo_surfaces\": 295,"
+        }
+      ]
+    },
+    {
       "path": "scripts/ops/observability/grafana/fix_grafana_dashboards.py",
       "type": "py",
       "status": "active",
@@ -10628,7 +10673,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 56,
+      "reference_count": 61,
       "references": [
         {
           "path": ".github/workflows/quality-debt-weekly.yml",
