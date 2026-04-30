@@ -69,6 +69,9 @@ from bioetl.domain.normalization.profiles.profile_normalizers import (
 from bioetl.domain.normalization.publication_structured_fields import (
     publication_structured_field_policy,
 )
+from bioetl.domain.normalization.structured_payload_policies import (
+    structured_payload_policy,
+)
 from bioetl.domain.schemas.chembl.activity import ActivitySchema
 from bioetl.domain.schemas.chembl.assay import AssaySchema
 from bioetl.domain.schemas.chembl.assay_parameters import AssayParametersSchema
@@ -1203,6 +1206,12 @@ def _entity_profile_row(
 ) -> dict[str, str]:
     """Build one entity matrix row sourced from an explicit profile rule."""
     notes = profile_rule.notes or ""
+    notes = _augment_structured_payload_policy_notes(
+        provider=provider,
+        entity=entity,
+        field_name=field_name,
+        notes=notes,
+    )
     normalizer_name = _normalizer_name(
         profile_rule.normalizer,
         field_name=field_name,
@@ -1251,6 +1260,30 @@ def _entity_profile_row(
         ),
         "notes": notes,
     }
+
+
+def _augment_structured_payload_policy_notes(
+    *,
+    provider: str,
+    entity: str,
+    field_name: str,
+    notes: str,
+) -> str:
+    """Append raw/canonical sidecar governance notes for semantic-sensitive JSON."""
+    policy = structured_payload_policy(f"{provider}.{entity}", field_name)
+    if policy is None:
+        return notes
+
+    semantics = policy.collection_semantics.value.replace("_", " ")
+    governance_note = (
+        f"Semantic-sensitive {semantics} payload: canonical JSON is not a raw "
+        f"provider substitute; semantic transforms must materialize "
+        f"{policy.raw_sidecar_field} and {policy.canonical_sidecar_field} before "
+        f"replacing or deriving provider payload semantics."
+    )
+    if not notes:
+        return governance_note
+    return f"{notes} {governance_note}"
 
 
 def _entity_fallback_row(

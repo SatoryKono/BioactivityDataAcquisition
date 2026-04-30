@@ -352,3 +352,13 @@ def test_registered_public_symbol_alias_surfaces_exist_and_export_alias() -> Non
         assert entry.alias_name in exports, (
             f"{entry.alias_name} must be exported from {entry.defining_surface}"
         )
+        for export_surface in entry.export_surfaces:
+            export_path = REPO_ROOT / export_surface
+            assert export_path.exists(), (
+                f"Registered export surface missing: {export_surface}"
+            )
+            source = export_path.read_text(encoding="utf-8")
+            assert entry.alias_name in source, (
+                f"{entry.alias_name} missing from declared export surface "
+                f"{export_surface}"
+            )

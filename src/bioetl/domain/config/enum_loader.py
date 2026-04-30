@@ -207,7 +207,7 @@ def get_chembl_enum(
 def get_chembl_enum_set(
     entity: str,
     field: str,
-    enum_loader: EnumLoaderPort | None = None,
+    enum_loader: EnumLoaderProtocol | None = None,
 ) -> frozenset[str]:
     """Get enum values as immutable frozenset.
 

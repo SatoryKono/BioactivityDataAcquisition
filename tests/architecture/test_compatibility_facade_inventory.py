@@ -303,20 +303,21 @@ def test_cli_alias_entrypoint_modules_are_curated_rows() -> None:
 
 
 @pytest.mark.architecture
-def test_public_symbol_alias_defining_surfaces_are_curated_rows() -> None:
-    """Named public symbol aliases must anchor to a curated compatibility row."""
+def test_public_symbol_alias_surfaces_are_curated_rows() -> None:
+    """Named public symbol alias surfaces must anchor to the curated ledger."""
     compat_mod = _load_registry_module()
     naming_mod = _load_naming_audit_module()
     compat_registry = compat_mod.load_compatibility_registry(REGISTRY_YAML)
     naming_registry = naming_mod.load_naming_registry()
 
     missing = sorted(
-        entry.defining_surface
+        surface
         for entry in naming_registry.public_symbol_aliases
-        if entry.defining_surface not in compat_registry.curated_paths
+        for surface in (entry.defining_surface, *entry.export_surfaces)
+        if surface not in compat_registry.curated_paths
     )
     assert not missing, (
-        "Public symbol alias defining surfaces must be covered by the curated "
+        "Public symbol alias surfaces must be covered by the curated "
         "compatibility ledger.\n" + "\n".join(missing)
     )
 
@@ -328,14 +329,46 @@ def test_deprecated_module_alias_surfaces_remain_in_transition_debt() -> None:
     registry = mod.load_compatibility_registry(REGISTRY_YAML)
 
     expected = {
+        "src/bioetl/interfaces/cli/commands/_compat.py",
         "src/bioetl/composition/resource_management_api.py",
+        "src/bioetl/composition/providers/_models.py",
+        "src/bioetl/composition/providers/__init__.py",
+        "src/bioetl/composition/providers/provider_registry.py",
         "src/bioetl/composition/factories/__init__.py",
+        "src/bioetl/composition/factories/datasource/__init__.py",
+        "src/bioetl/composition/factories/datasource/data_source_factory.py",
     }
     transition_paths = {row.path for row in registry.transition_debt}
     missing = sorted(expected - transition_paths)
     assert not missing, (
         "Deprecated naming alias surfaces dropped out of transition debt.\n"
         + "\n".join(missing)
+    )
+
+
+@pytest.mark.architecture
+def test_cli_compat_helper_is_confined_to_curated_public_seams() -> None:
+    """CLI `_compat.py` helper must stay confined to reviewed top-level seams."""
+    mod = _load_registry_module()
+    registry = mod.load_compatibility_registry(REGISTRY_YAML)
+
+    helper_path = "src/bioetl/interfaces/cli/commands/_compat.py"
+    assert helper_path in registry.curated_paths
+
+    allowed_importers = _iter_cli_alias_entrypoint_paths()
+    observed_importers: set[str] = set()
+    for path in (ROOT / "src" / "bioetl").rglob("*.py"):
+        rel_path = path.relative_to(ROOT).as_posix()
+        if rel_path == helper_path:
+            continue
+        text = path.read_text(encoding="utf-8")
+        if "from bioetl.interfaces.cli.commands._compat import alias_module" in text:
+            observed_importers.add(rel_path)
+
+    assert observed_importers == allowed_importers, (
+        "CLI compatibility helper leaked beyond the reviewed public seam set.\n"
+        f"Observed: {sorted(observed_importers)}\n"
+        f"Allowed: {sorted(allowed_importers)}"
     )
 
 
