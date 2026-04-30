@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort, MetricsPort
     from bioetl.infrastructure.adapters.common import (
-        FallbackFetchOrchestratorService,
+        FallbackFetchOrchestrator,
         HttpAdapterDependencyContext,
     )
 
@@ -24,7 +24,7 @@ class HttpAdapterRuntimeBundle:
     """Explicit runtime collaborators for HTTP adapter tests."""
 
     dependency_context: HttpAdapterDependencyContext
-    fallback_fetch_service: FallbackFetchOrchestratorService
+    fallback_fetch_service: FallbackFetchOrchestrator
 
 
 def build_http_adapter_runtime_bundle(

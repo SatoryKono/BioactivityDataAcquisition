@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING
 from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
-from bioetl.infrastructure.adapters.common import FallbackFetchOrchestratorService
+from bioetl.infrastructure.adapters.common import FallbackFetchOrchestrator
 from bioetl.infrastructure.adapters.common.api_request_collector import (
     APIRequestCollector,
 )
@@ -55,7 +55,7 @@ ExtractRecordIdFn = Callable[[BronzeRecord], str | None]
 class OpenAlexRuntimeServices:
     """Resolved OpenAlex runtime collaborators after default/injected wiring."""
 
-    fallback_fetch_service: FallbackFetchOrchestratorService
+    fallback_fetch_service: FallbackFetchOrchestrator
     query_executor: OpenAlexQueryExecutor
     response_mapper: OpenAlexResponseMapper
     cursor_flow: OpenAlexCursorFlowService
@@ -67,7 +67,7 @@ class OpenAlexRuntimeServices:
 class OpenAlexRuntimeServicesRequest:
     """Typed input for OpenAlex runtime collaborator assembly."""
 
-    fallback_fetch_service: FallbackFetchOrchestratorService
+    fallback_fetch_service: FallbackFetchOrchestrator
     openalex_query_executor: OpenAlexQueryExecutor | None
     openalex_response_mapper: OpenAlexResponseMapper | None
     openalex_cursor_flow: OpenAlexCursorFlowService | None
@@ -225,7 +225,7 @@ def _create_default_openalex_title_fallback_handler(
 
 def _create_default_openalex_fallback_orchestrator(
     *,
-    fallback_fetch_service: FallbackFetchOrchestratorService,
+    fallback_fetch_service: FallbackFetchOrchestrator,
     fallback_handler: OpenAlexTitleFallbackHandler,
     normalize_id: NormalizeDoiFn,
     extract_record_id: ExtractRecordIdFn,

@@ -78,7 +78,7 @@ This is the most complex sub-package. It handles pipeline runtime assembly:
 | `pipeline.py`                            | Assemble BasePipeline subclass instances                                  |
 | `runner.py`                              | Assemble PipelineRunner with all dependencies                             |
 | `runner_assembly.py`                     | RunnerAssembly helpers                                                    |
-| `runner_factory_builder_service.py`      | RunnerFactoryBuilderService                                               |
+| `runner_factory_builder_service.py`      | RunnerFactoryBuilder                                                      |
 | `composite.py`                           | Composite pipeline assembly                                               |
 | `composite_bootstrap_builders.py`        | Composite-specific builder helpers                                        |
 | `composite_support_services_factory.py`  | Support services for composite pipelines                                  |

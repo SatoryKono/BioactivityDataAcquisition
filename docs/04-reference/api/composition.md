@@ -120,8 +120,8 @@ access.
 | ---------------------------------- | ------------------------------------------------- |
 | `CompositeSupportServicesFactory`  | Factory for composite pipeline support services   |
 | `CompositeSupportServices`         | Container for composite support service instances |
-| `CompositeFilterExtractionService` | Filter extraction for composite pipelines         |
-| `RunnerFactoryBuilderService`      | Builds runner factories from configuration        |
+| `CompositeFilterExtractor`         | Filter extraction for composite pipelines         |
+| `RunnerFactoryBuilder`             | Builds runner factories from configuration        |
 
 ### CLI Bootstrap
 

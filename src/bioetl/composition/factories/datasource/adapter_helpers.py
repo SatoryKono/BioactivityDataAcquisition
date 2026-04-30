@@ -13,7 +13,7 @@ from bioetl.domain.ports import (
 )
 from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
 from bioetl.infrastructure.adapters.common import (
-    FallbackFetchOrchestratorService,
+    FallbackFetchOrchestrator,
     HttpAdapterDependencyContext,
     SyncAdapterDependencyContext,
 )
@@ -37,7 +37,7 @@ class AdapterHelperServices:
     error_handler: ErrorHandlerPort
     adapter_metrics: AdapterMetricsRecorder
     request_collector: APIRequestCollector
-    fallback_fetch_service: FallbackFetchOrchestratorService
+    fallback_fetch_service: FallbackFetchOrchestrator
 
     def build_dependency_context(self) -> HttpAdapterDependencyContext:
         """Return explicit constructor context for HTTP adapter runtime deps."""
@@ -133,7 +133,7 @@ class AdapterHelpersFactory:
             ErrorHandlerPort,
             ErrorService(logger=logger, metrics=metrics_port),
         )
-        fallback_fetch_service = FallbackFetchOrchestratorService(adapter_metrics)
+        fallback_fetch_service = FallbackFetchOrchestrator(adapter_metrics)
         return AdapterHelperServices(
             metrics=metrics_port,
             error_handler=error_handler,

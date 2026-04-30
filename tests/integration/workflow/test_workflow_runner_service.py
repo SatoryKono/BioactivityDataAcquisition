@@ -13,7 +13,10 @@ from bioetl.application.services.execution.pipeline_runner_models import (
     RunResult,
 )
 from bioetl.application.services.workflow_runner_service import WorkflowRunnerService
-from bioetl.application.services.workflow_transform_service import WorkflowTransformService
+from bioetl.application.services.workflow_transform_service import (
+    WorkflowTransformExecutionResult,
+    WorkflowTransformService,
+)
 from bioetl.application.workflow.transforms import WorkflowTransformRegistry
 from bioetl.domain.workflow import (
     TransformStepConfig,
@@ -126,7 +129,8 @@ async def test_workflow_runner_roundtrips_pipeline_transform_and_metrics() -> No
     assert result.is_success
     assert [step.status for step in result.steps] == ["success", "success"]
     transform_payload = result.steps[1].payload
-    assert getattr(transform_payload, "status") == "success"
+    assert isinstance(transform_payload, WorkflowTransformExecutionResult)
+    assert transform_payload.status == "success"
     assert any(name == "bioetl_workflow_runs_total" for name, _, _ in metrics.counters)
 
 
