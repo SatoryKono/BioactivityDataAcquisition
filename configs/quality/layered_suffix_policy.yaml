@@ -44,18 +44,6 @@ suffix_boundary_rules:
         path: src/bioetl/infrastructure/adapters/error_handling.py
         issue: "#3399"
         reason: Existing infrastructure naming drift pending canonical rename.
-      - symbol: OpenAlexCursorFlowService
-        path: src/bioetl/infrastructure/adapters/openalex/cursor_flow.py
-        issue: "#3399"
-        reason: Existing infrastructure naming drift pending canonical rename.
-      - symbol: PubChemFetchFlowService
-        path: src/bioetl/infrastructure/adapters/pubchem/fetch_flow.py
-        issue: "#3399"
-        reason: Existing infrastructure naming drift pending canonical rename.
-      - symbol: DataQualityMonitorService
-        path: src/bioetl/infrastructure/observability/anomaly/monitor.py
-        issue: "#3399"
-        reason: Existing infrastructure naming drift pending canonical rename.
 
   - rule_id: domain_service_suffix_conflict
     description: >

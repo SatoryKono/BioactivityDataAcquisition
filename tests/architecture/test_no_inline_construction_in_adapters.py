@@ -31,7 +31,7 @@ FORBIDDEN_HELPER_CONSTRUCTORS = {
     # OpenAlex provider-specific helpers
     "OpenAlexQueryExecutor",
     "OpenAlexResponseMapper",
-    "OpenAlexCursorFlowService",
+    "OpenAlexCursorFlow",
     "OpenAlexTitleFallbackHandler",
     "CrossRefTitleFallbackHandler",
     "PubMedTitleFallbackHandler",

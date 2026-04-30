@@ -17,7 +17,7 @@ from bioetl.domain.value_objects.dq_anomaly import (
     DQAnomalySeverity,
     DQAnomalyType,
 )
-from bioetl.infrastructure.observability.anomaly import DataQualityMonitorService
+from bioetl.infrastructure.observability.anomaly import DataQualityMonitor
 
 
 @pytest.fixture
@@ -32,7 +32,7 @@ class TestDQMonitorAnomalyDetection:
 
     def test_dq_monitor_detects_spike(self, mock_logger: MagicMock) -> None:
         """DQ Monitor should detect record count spike."""
-        monitor = DataQualityMonitorService(logger=mock_logger, z_score_threshold=2.0)
+        monitor = DataQualityMonitor(logger=mock_logger, z_score_threshold=2.0)
 
         # Build baseline with normal values
         for _ in range(5):
@@ -53,7 +53,7 @@ class TestDQMonitorAnomalyDetection:
 
     def test_dq_monitor_detects_drop(self, mock_logger: MagicMock) -> None:
         """DQ Monitor should detect record count drop."""
-        monitor = DataQualityMonitorService(logger=mock_logger, z_score_threshold=2.0)
+        monitor = DataQualityMonitor(logger=mock_logger, z_score_threshold=2.0)
 
         # Build baseline with slight variation (required for stddev > 0)
         for value in [980.0, 1000.0, 1020.0, 990.0, 1010.0]:
@@ -69,7 +69,7 @@ class TestDQMonitorAnomalyDetection:
 
     def test_dq_monitor_threshold_exceeded(self, mock_logger: MagicMock) -> None:
         """DQ Monitor should detect threshold violations."""
-        monitor = DataQualityMonitorService(logger=mock_logger)
+        monitor = DataQualityMonitor(logger=mock_logger)
         monitor.detector.set_threshold("error_rate", min_value=0.0, max_value=0.10)
 
         anomalies = monitor.check_quality(
@@ -82,7 +82,7 @@ class TestDQMonitorAnomalyDetection:
 
     def test_dq_monitor_no_anomalies_within_range(self, mock_logger: MagicMock) -> None:
         """DQ Monitor should not detect anomalies for normal values."""
-        monitor = DataQualityMonitorService(logger=mock_logger, z_score_threshold=2.0)
+        monitor = DataQualityMonitor(logger=mock_logger, z_score_threshold=2.0)
 
         # Build baseline
         for _ in range(5):
@@ -97,7 +97,7 @@ class TestDQMonitorAnomalyDetection:
 
     def test_dq_monitor_updates_baseline(self, mock_logger: MagicMock) -> None:
         """DQ Monitor should update baseline with new metrics."""
-        monitor = DataQualityMonitorService(logger=mock_logger)
+        monitor = DataQualityMonitor(logger=mock_logger)
 
         # Initial update
         monitor.update_baseline_from_metrics({"record_count": 1000.0})
@@ -385,11 +385,11 @@ class TestDataQualityServiceMetricsEmission:
         from bioetl.application.services.data_quality_service import DataQualityService
         from bioetl.domain.config import DQConfig
         from bioetl.infrastructure.observability.anomaly import (
-            DataQualityMonitorService,
+            DataQualityMonitor,
         )
 
         config = DQConfig(soft_fail_threshold=0.05, hard_fail_threshold=0.20)
-        dq_monitor = DataQualityMonitorService(logger=recording_logger)  # type: ignore
+        dq_monitor = DataQualityMonitor(logger=recording_logger)  # type: ignore
 
         service = DataQualityService(
             dq_monitor=dq_monitor,
@@ -563,11 +563,11 @@ class TestDataQualityServiceMetricsEmission:
         from bioetl.application.services.data_quality_service import DataQualityService
         from bioetl.domain.config import DQConfig
         from bioetl.infrastructure.observability.anomaly import (
-            DataQualityMonitorService,
+            DataQualityMonitor,
         )
 
         config = DQConfig(soft_fail_threshold=0.05, hard_fail_threshold=0.20)
-        dq_monitor = DataQualityMonitorService(
+        dq_monitor = DataQualityMonitor(
             logger=recording_logger, z_score_threshold=2.0
         )  # type: ignore
 
@@ -610,11 +610,11 @@ class TestDataQualityServiceMetricsEmission:
         from bioetl.domain.config import DQConfig
         from bioetl.domain.value_objects.dq_anomaly import DQAnomalyType
         from bioetl.infrastructure.observability.anomaly import (
-            DataQualityMonitorService,
+            DataQualityMonitor,
         )
 
         config = DQConfig(soft_fail_threshold=0.05, hard_fail_threshold=0.20)
-        dq_monitor = DataQualityMonitorService(
+        dq_monitor = DataQualityMonitor(
             logger=recording_logger, z_score_threshold=2.0
         )  # type: ignore
         for value in [980.0, 1000.0, 1020.0, 990.0, 1010.0]:
@@ -658,11 +658,11 @@ class TestDataQualityServiceMetricsEmission:
         from bioetl.application.services.data_quality_service import DataQualityService
         from bioetl.domain.config import DQConfig
         from bioetl.infrastructure.observability.anomaly import (
-            DataQualityMonitorService,
+            DataQualityMonitor,
         )
 
         config = DQConfig(soft_fail_threshold=0.05, hard_fail_threshold=0.20)
-        dq_monitor = DataQualityMonitorService(logger=recording_logger)  # type: ignore
+        dq_monitor = DataQualityMonitor(logger=recording_logger)  # type: ignore
 
         service = DataQualityService(
             dq_monitor=dq_monitor,
@@ -753,11 +753,11 @@ class TestDataQualityServiceMetricsEmission:
         from bioetl.application.services.data_quality_service import DataQualityService
         from bioetl.domain.config import DQConfig
         from bioetl.infrastructure.observability.anomaly import (
-            DataQualityMonitorService,
+            DataQualityMonitor,
         )
 
         config = DQConfig(soft_fail_threshold=0.05, hard_fail_threshold=0.20)
-        dq_monitor = DataQualityMonitorService(
+        dq_monitor = DataQualityMonitor(
             logger=recording_logger, z_score_threshold=2.0
         )  # type: ignore
 

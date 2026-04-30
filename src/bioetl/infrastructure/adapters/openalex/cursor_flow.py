@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-__all__ = ["OpenAlexCursorFlowService"]
+__all__ = ["OpenAlexCursorFlow", "OpenAlexCursorFlowService"]
 
 from collections.abc import AsyncIterator, Callable
 from dataclasses import dataclass, field
@@ -26,7 +26,7 @@ if TYPE_CHECKING:
 
 
 @dataclass(slots=True)
-class OpenAlexCursorFlowService:
+class OpenAlexCursorFlow:
     """Encapsulates OpenAlex pagination/query/filter/title-search flows."""
 
     mailto: str | None
@@ -267,3 +267,6 @@ class OpenAlexCursorFlowService:
     def _normalize_dois(self, dois: list[str]) -> list[str]:
         normalized_raw = [self.normalize_doi(item) for item in dois if item]
         return [doi for doi in normalized_raw if doi is not None]
+
+
+OpenAlexCursorFlowService = OpenAlexCursorFlow

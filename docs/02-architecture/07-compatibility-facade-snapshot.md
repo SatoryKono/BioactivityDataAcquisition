@@ -5,19 +5,19 @@
 ## Summary
 
 - Registry YAML: `configs/quality/compatibility_facade_inventory.yaml`
-- Curated inventory rows: `16`
+- Curated inventory rows: `18`
 - Transition debt rows: `0`
-- Sanctioned public entrypoint rows: `16`
-- Retained review entrypoints: `0`
+- Sanctioned public entrypoint rows: `18`
+- Retained review entrypoints: `2`
 - Permanent public entrypoints: `16`
-- Measured tracked modules: `16`
+- Measured tracked modules: `18`
 - Measured-only modules outside curated inventory: `0`
 - Discovered docstring-tracked modules: `0`
 - Unexpected docstring-tracked modules: `0`
 - Missing allowlisted measured-only modules: `0`
 - First-party src imports targeting measured-only modules: `0`
-- Curated rows requiring external breaking change process: `16`
-- Curated rows marked internal-callers-zero: `0`
+- Curated rows requiring external breaking change process: `18`
+- Curated rows marked internal-callers-zero: `2`
 - First-party src imports targeting internal-callers-zero rows: `0`
 - Ratchet violations: `0`
 
@@ -34,6 +34,8 @@
 ## Expected Measured Registry
 
 - `src/bioetl/application/composite/merger.py`
+- `src/bioetl/composition/__init__.py`
+- `src/bioetl/composition/bootstrap/__init__.py`
 - `src/bioetl/composition/entrypoints.py`
 - `src/bioetl/domain/composite/config.py`
 - `src/bioetl/domain/value_objects/activity_values.py`
@@ -62,6 +64,8 @@
 - `src/bioetl/interfaces/cli/commands/cleanup.py` — external breaking change required: `true`, internal callers zero: `false`
 - `src/bioetl/interfaces/cli/commands/vacuum.py` — external breaking change required: `true`, internal callers zero: `false`
 - `src/bioetl/composition/entrypoints.py` — external breaking change required: `true`, internal callers zero: `false`
+- `src/bioetl/composition/__init__.py` — external breaking change required: `true`, internal callers zero: `true`
+- `src/bioetl/composition/bootstrap/__init__.py` — external breaking change required: `true`, internal callers zero: `true`
 - `src/bioetl/domain/composite/config.py` — external breaking change required: `true`, internal callers zero: `false`
 - `src/bioetl/domain/value_objects/activity_values.py` — external breaking change required: `true`, internal callers zero: `false`
 - `src/bioetl/domain/value_objects/publication_field_groups.py` — external breaking change required: `true`, internal callers zero: `false`
