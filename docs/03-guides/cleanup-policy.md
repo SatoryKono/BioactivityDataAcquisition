@@ -158,7 +158,7 @@ All whitelist patterns **MUST** be in `.gitignore`.
 | ---------------------------------------------- | ------------------------------------------------------------------------------- |
 | `make clean`                                   | Local-only cleanup через `python -m scripts.engineering.diagnostics cleanup`    |
 | `make clean-local-artifacts DRY_RUN=1`         | Preview локальной cleanup wave                                                  |
-| `make clean-local-artifacts`                   | Применяет локальную cleanup wave                                                |
+| `make clean-local-artifacts`                   | Применяет локальную cleanup wave, включая forbidden root outputs и `logs/`      |
 | `make clean-local-artifacts PURGE_WORKTREES=1` | Дополнительно очищает локальные `.worktrees/.rollback`                          |
 | `make clean-preflight DRY_RUN=1`               | Preview preflight-очистки через `python -m scripts.engineering.repo preflight-cleanup` |
 | `make clean-all`                               | `clean` + purge локальных логов                                                 |

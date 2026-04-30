@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import TypeAlias
 
 from bioetl.domain.filtering.column_filter import FilterOperator, GoldColumnFilter
 from bioetl.domain.filtering.list_filters import (
@@ -13,7 +12,7 @@ from bioetl.domain.filtering.list_filters import (
 from bioetl.domain.filtering.range_filter import GoldRangeFilter
 from bioetl.domain.types import JsonDict
 
-FilterScalar: TypeAlias = str | int | bool
+type FilterScalar = str | int | bool
 
 
 def check_required_fields(required_fields: tuple[str, ...], record: JsonDict) -> bool:
