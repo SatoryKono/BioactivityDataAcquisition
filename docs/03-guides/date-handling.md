@@ -87,12 +87,12 @@ parse-date-field(None)                   # → None
 
 ### `DefaultDataNormalizer.normalize-partial-date()`
 
-Location: `src/bioetl/domain/services/data_normalization_service.py:186-240`
+Location: `src/bioetl/domain/behavior/data_normalization_service.py:186-240`
 
 Service-based partial date normalization:
 
 ```python
-from bioetl.domain.services.data-normalization-service import (
+from bioetl.domain.behavior.data-normalization-service import (
     DefaultDataNormalizer,
 )
 
@@ -297,5 +297,5 @@ ______________________________________________________________________
 
 - **Audit Report**: `docs/audits/date-handling-audit-2026-01-19.md`
 - **Normalization Functions**: `src/bioetl/domain/normalization.py`
-- **Data Normalization Service**: `src/bioetl/domain/services/data_normalization_service.py`
+- **Data Normalization Service**: `src/bioetl/domain/behavior/data_normalization_service.py`
 - **RULES.md**: §2.4 Content Hash normalization

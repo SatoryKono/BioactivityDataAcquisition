@@ -56,3 +56,15 @@ def test_first_party_src_imports_domain_behavior_not_services_package() -> None:
         "bioetl.domain.behavior, not the legacy services package.\n"
         + "\n".join(sorted(violations))
     )
+
+
+def test_domain_services_package_is_only_compatibility_wrapper() -> None:
+    """Legacy domain.services must not regain owner modules."""
+    services_root = ROOT / "domain" / "services"
+    files = {
+        path.relative_to(services_root).as_posix()
+        for path in services_root.rglob("*.py")
+        if "__pycache__" not in path.parts
+    }
+
+    assert files == {"__init__.py"}

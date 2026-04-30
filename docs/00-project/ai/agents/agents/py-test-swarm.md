@@ -460,7 +460,7 @@ Task(
   "test_nodeid": "tests/unit/domain/test_X.py::test_something",
   "test_type": "unit",
   "layer": "domain",
-  "module": "domain.services.validation",
+  "module": "domain.behavior.validation",
   "provider": null,
   "outcome": "fail",
   "error_type": "AssertionError",

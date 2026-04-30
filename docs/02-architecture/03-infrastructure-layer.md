@@ -252,7 +252,7 @@ PubMedAdapter                         (pubchempy)
 | `metadata/writer_operations.py`         | Internal operations   | Подготовка, telemetry, retry для metadata                                               |
 | `metadata_builder.py`                   | `MetadataBuilder`     | Сборка metadata моделей                                                                 |
 | `metadata/builder_base.py`              | Base builder          | Базовые функции сборки metadata                                                         |
-| `metadata_builder_composite_helpers.py` | Compatibility wrapper | Transitional wrapper over canonical `bioetl.domain.services.composite_metadata_helpers` |
+| `metadata_builder_composite_helpers.py` | Compatibility wrapper | Transitional wrapper over canonical `bioetl.domain.behavior.composite_metadata_helpers` |
 
 **Other storage:**
 

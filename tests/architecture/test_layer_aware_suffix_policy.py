@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import ast
+from datetime import date
 import importlib.util
 from pathlib import Path
 import sys
@@ -283,3 +284,35 @@ def test_layer_aware_suffix_policy_stays_clean_on_current_baseline() -> None:
         "Layer-aware naming policy drifted from the current reviewed baseline.\n"
         + "\n".join(f"{item.location}: {item.details}" for item in violations)
     )
+
+
+def test_layer_aware_suffix_policy_exceptions_require_structured_expiry_metadata() -> (
+    None
+):
+    """Naming compatibility exceptions must carry owner/expiry/removal metadata."""
+    module = _load_gate_module()
+    policy = module._load_layer_aware_suffix_policy(ROOT)
+
+    allowed_symbols = []
+    for rule in policy.function_suffix_rules:
+        allowed_symbols.extend(rule.allowed_symbols)
+    for rule in policy.suffix_boundary_rules:
+        allowed_symbols.extend(rule.allowed_symbols)
+    for rule in policy.family_freeze_rules:
+        allowed_symbols.extend(rule.allowed_symbols)
+
+    assert allowed_symbols, "Expected at least one reviewed naming exception symbol"
+    today = date.today()
+    for item in allowed_symbols:
+        assert item.owner.startswith("@"), (
+            f"Naming exception owner must be an explicit handle: {item.symbol} "
+            f"({item.path})"
+        )
+        assert item.removal_step.strip(), (
+            f"Naming exception removal_step must be non-empty: {item.symbol} "
+            f"({item.path})"
+        )
+        assert date.fromisoformat(item.expires_on) >= today, (
+            "Naming exception expiry is stale and must be refreshed or removed: "
+            f"{item.symbol} ({item.path}) expires_on={item.expires_on}"
+        )

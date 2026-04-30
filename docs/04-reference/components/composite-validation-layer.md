@@ -20,13 +20,13 @@ separated and composed into operator-facing validation outcomes.
 
 Primary implementation:
 
-- `src/bioetl/domain/services/composite_validation_layer.py`
+- `src/bioetl/domain/behavior/composite_validation_layer.py`
 
 Supporting modules:
 
-- `src/bioetl/domain/services/composite_validation_helpers.py`
-- `src/bioetl/domain/services/aggregation_validator.py`
-- `src/bioetl/domain/services/cross_validation_validator.py`
+- `src/bioetl/domain/behavior/composite_validation_helpers.py`
+- `src/bioetl/domain/behavior/aggregation_validator.py`
+- `src/bioetl/domain/behavior/cross_validation_validator.py`
 
 ## Layer boundaries
 

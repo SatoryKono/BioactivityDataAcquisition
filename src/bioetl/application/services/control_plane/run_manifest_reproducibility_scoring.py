@@ -434,7 +434,9 @@ def _build_supported_boundary_verdict(
             if isinstance(lineage_boundary, dict) and lineage_boundary.get("reason")
             else "blocked_outside_supported_boundary"
         )
-    elif threshold_failures or blockers or replay_capability != "exact_replay_supported":
+    elif (
+        threshold_failures or blockers or replay_capability != "exact_replay_supported"
+    ):
         verdict = "supported_boundary_gaps_present"
         supported_boundary_satisfied = False
         reason = "supported_boundary_requirements_not_met"
