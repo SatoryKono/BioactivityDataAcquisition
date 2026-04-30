@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import cast
 from uuid import UUID
 
@@ -14,8 +14,27 @@ from bioetl.application.services.control_plane._run_manifest_inspection_mixins i
 from bioetl.application.services.control_plane.run_manifest_diagnostics import (
     build_diagnostics_summary,
 )
+from bioetl.application.services.control_plane.run_manifest_inspection_helpers import (
+    build_checkpoint_anchor_diff_payload,
+    build_checkpoint_anchor_matches,
+    build_effective_config_diff_payload,
+    build_lineage_diff_payload,
+    build_manifest_diff_payload,
+    build_run_artifact_diff_payload,
+)
+from bioetl.application.services.control_plane.run_manifest_inspection_models import (
+    RunManifestDiffEntry,
+    RunManifestDiffResult,
+    RunManifestInspectionCorruptionError,
+    RunManifestInspectionResult,
+    RunManifestVerifyResult,
+)
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
-from bioetl.domain.ports import RunLedgerPort, RunManifestPort
+from bioetl.domain.ports import (
+    EffectiveConfigArtifactStorePort,
+    RunLedgerPort,
+    RunManifestPort,
+)
 from bioetl.domain.types import RunID
 
 __all__ = [
@@ -24,221 +43,226 @@ __all__ = [
     "RunManifestInspectionCorruptionError",
     "RunManifestInspectionResult",
     "RunManifestInspectionService",
+    "RunManifestVerifyResult",
 ]
 
 
-class RunManifestInspectionCorruptionError(ValueError):
-    """Raised when manifest storage is structurally corrupted during inspection."""
-
-    def __init__(self, identifier: str, reason: str) -> None:
-        self.identifier = identifier
-        self.reason = reason
-        super().__init__(
-            f"Run manifest store corruption while resolving {identifier!r}: {reason}"
-        )
-
-
-@dataclass(frozen=True, slots=True)
-class RunManifestInspectionResult:
-    """Resolved control-plane view for one manifest and its ledger history."""
-
-    manifest: RunManifest
-    ledger_entries: tuple[RunLedgerEntry, ...] = ()
-    diagnostics: dict[str, object] = field(default_factory=dict)
-    identity_graph: dict[str, object] = field(default_factory=dict)
-
-    def to_dict(self) -> dict[str, object]:
-        """Return JSON/YAML-safe payload for CLI presentation."""
-        return {
-            "manifest": self.manifest.to_dict(),
-            "ledger_entries": [entry.to_dict() for entry in self.ledger_entries],
-            "diagnostics": self.diagnostics,
-            "identity_graph": self.identity_graph,
-        }
-
-
-@dataclass(frozen=True, slots=True)
-class RunManifestDiffEntry:
-    """One top-level manifest field difference."""
-
-    field: str
-    left: object
-    right: object
-
-    def to_dict(self) -> dict[str, object]:
-        """Return JSON/YAML-safe payload for CLI presentation."""
-        return {
-            "field": self.field,
-            "left": self.left,
-            "right": self.right,
-        }
-
-
-@dataclass(frozen=True, slots=True)
-class RunManifestDiffResult:
-    """Top-level diff between two resolved manifests."""
-
-    left_manifest_id: str
-    right_manifest_id: str
-    differences: tuple[RunManifestDiffEntry, ...]
-    classification: str = "identical"
-    semantic_equivalent: bool = True
-    occurrence_only: bool = False
-    occurrence_difference_fields: tuple[str, ...] = ()
-    semantic_difference_fields: tuple[str, ...] = ()
-    noncanonical_difference_fields: tuple[str, ...] = ()
-    replay_relationship: str = "none"
-    cross_surface_replay_diff: dict[str, object] = field(default_factory=dict)
-
-    def to_dict(self) -> dict[str, object]:
-        """Return JSON/YAML-safe payload for CLI presentation."""
-        return {
-            "left_manifest_id": self.left_manifest_id,
-            "right_manifest_id": self.right_manifest_id,
-            "classification": self.classification,
-            "semantic_equivalent": self.semantic_equivalent,
-            "occurrence_only": self.occurrence_only,
-            "occurrence_difference_fields": list(self.occurrence_difference_fields),
-            "semantic_difference_fields": list(self.semantic_difference_fields),
-            "noncanonical_difference_fields": list(self.noncanonical_difference_fields),
-            "replay_relationship": self.replay_relationship,
-            "forensic_diff": self.cross_surface_replay_diff,
-            "cross_surface_replay_diff": self.cross_surface_replay_diff,
-            "differences": [entry.to_dict() for entry in self.differences],
-        }
-
-
-def _build_checkpoint_anchor_matches(
+def _build_cross_surface_replay_diff(
     *,
     left_manifest: RunManifest,
     right_manifest: RunManifest,
-) -> dict[str, bool]:
+    classification: dict[str, object],
+) -> dict[str, object]:
+    """Return one replay-oriented diff across manifest-adjacent surfaces."""
+    effective_config_match = (
+        left_manifest.code_provenance.effective_config_hash
+        == right_manifest.code_provenance.effective_config_hash
+        and left_manifest.code_provenance.effective_config_artifact_id
+        == right_manifest.code_provenance.effective_config_artifact_id
+    )
+    checkpoint_anchor_matches = build_checkpoint_anchor_matches(
+        left_manifest=left_manifest,
+        right_manifest=right_manifest,
+    )
+    checkpoint_compatible = all(checkpoint_anchor_matches.values())
+    semantic_equivalent = bool(classification["semantic_equivalent"])
+    occurrence_only = bool(classification["occurrence_only"])
+    verdict = _resolve_cross_surface_replay_verdict(
+        semantic_equivalent=semantic_equivalent,
+        occurrence_only=occurrence_only,
+        checkpoint_compatible=checkpoint_compatible,
+    )
     return {
-        "execution_fingerprint": (
-            left_manifest.execution_fingerprint == right_manifest.execution_fingerprint
+        "verdict": verdict,
+        "manifest": build_manifest_diff_payload(
+            classification=classification,
+            semantic_equivalent=semantic_equivalent,
+            occurrence_only=occurrence_only,
         ),
-        "effective_config_hash": (
-            left_manifest.code_provenance.effective_config_hash
-            == right_manifest.code_provenance.effective_config_hash
+        "effective_config": build_effective_config_diff_payload(
+            left_manifest=left_manifest,
+            right_manifest=right_manifest,
+            effective_config_match=effective_config_match,
         ),
-        "effective_config_artifact_id": (
-            left_manifest.code_provenance.effective_config_artifact_id
-            == right_manifest.code_provenance.effective_config_artifact_id
+        "checkpoint_anchors": build_checkpoint_anchor_diff_payload(
+            checkpoint_anchor_matches=checkpoint_anchor_matches,
+            checkpoint_compatible=checkpoint_compatible,
         ),
-        "contract_ref": (
-            left_manifest.code_provenance.contract_ref
-            == right_manifest.code_provenance.contract_ref
+        "lineage": build_lineage_diff_payload(
+            left_manifest=left_manifest,
+            right_manifest=right_manifest,
         ),
-        "contract_version": (
-            left_manifest.code_provenance.contract_version
-            == right_manifest.code_provenance.contract_version
-        ),
-        "input_snapshot_ids": (
-            RunManifestInspectionService._manifest_snapshot_ids(left_manifest)
-            == RunManifestInspectionService._manifest_snapshot_ids(right_manifest)
+        "run_artifacts": build_run_artifact_diff_payload(
+            left_manifest=left_manifest,
+            right_manifest=right_manifest,
         ),
     }
 
 
-def _build_manifest_diff_payload(
+def _resolve_cross_surface_replay_verdict(
     *,
-    classification: dict[str, object],
     semantic_equivalent: bool,
     occurrence_only: bool,
-) -> dict[str, object]:
-    return {
-        "classification": classification["classification"],
-        "semantic_equivalent": semantic_equivalent,
-        "occurrence_only": occurrence_only,
-        "semantic_difference_fields": list(
-            cast(tuple[str, ...], classification["semantic_difference_fields"])
-        ),
-        "occurrence_difference_fields": list(
-            cast(tuple[str, ...], classification["occurrence_difference_fields"])
-        ),
-        "noncanonical_difference_fields": list(
-            cast(tuple[str, ...], classification["noncanonical_difference_fields"])
-        ),
-    }
+    checkpoint_compatible: bool,
+) -> str:
+    if not semantic_equivalent:
+        return "semantic_drift"
+    if not checkpoint_compatible:
+        return "checkpoint_incompatible"
+    if occurrence_only:
+        return "occurrence_only_replay"
+    return "semantic_equivalent_replay"
 
 
-def _build_effective_config_diff_payload(
+def _build_effective_config_store_verification(
+    effective_config_artifact_port: EffectiveConfigArtifactStorePort | None,
     *,
     left_manifest: RunManifest,
     right_manifest: RunManifest,
-    effective_config_match: bool,
 ) -> dict[str, object]:
-    return {
-        "semantic_equivalent": effective_config_match,
+    """Compare effective-config evidence loaded through the configured port."""
+    if effective_config_artifact_port is None:
+        return {
+            "available": False,
+            "semantic_equivalent": False,
+            "occurrence_only": False,
+            "missing_evidence": ["effective_config_store_unconfigured"],
+        }
+
+    left_artifact = effective_config_artifact_port.get_by_run_id(left_manifest.run_id)
+    right_artifact = effective_config_artifact_port.get_by_run_id(right_manifest.run_id)
+    left_occurrence = effective_config_artifact_port.get_occurrence_by_run_id(
+        left_manifest.run_id
+    )
+    right_occurrence = effective_config_artifact_port.get_occurrence_by_run_id(
+        right_manifest.run_id
+    )
+    occurrence_diff = effective_config_artifact_port.diff_occurrences_by_run_id(
+        left_manifest.run_id,
+        right_manifest.run_id,
+    )
+    missing_evidence = _effective_config_missing_evidence(
+        left_artifact=left_artifact,
+        right_artifact=right_artifact,
+        left_occurrence=left_occurrence,
+        right_occurrence=right_occurrence,
+    )
+    left_anchor = _effective_config_artifact_anchor(left_artifact)
+    right_anchor = _effective_config_artifact_anchor(right_artifact)
+    left_manifest_anchor = _manifest_effective_config_anchor(left_manifest)
+    right_manifest_anchor = _manifest_effective_config_anchor(right_manifest)
+    anchor_matches = {
+        "left_artifact_id": (
+            left_manifest_anchor["artifact_id"] == left_anchor.get("artifact_id")
+        ),
+        "right_artifact_id": (
+            right_manifest_anchor["artifact_id"] == right_anchor.get("artifact_id")
+        ),
         "left_effective_config_hash": (
-            left_manifest.code_provenance.effective_config_hash
+            left_manifest_anchor["effective_config_hash"]
+            == left_anchor.get("effective_config_hash")
         ),
         "right_effective_config_hash": (
-            right_manifest.code_provenance.effective_config_hash
-        ),
-        "left_effective_config_artifact_id": (
-            left_manifest.code_provenance.effective_config_artifact_id
-        ),
-        "right_effective_config_artifact_id": (
-            right_manifest.code_provenance.effective_config_artifact_id
+            right_manifest_anchor["effective_config_hash"]
+            == right_anchor.get("effective_config_hash")
         ),
     }
-
-
-def _build_checkpoint_anchor_diff_payload(
-    *,
-    checkpoint_anchor_matches: dict[str, bool],
-    checkpoint_compatible: bool,
-) -> dict[str, object]:
-    return {
-        "compatible": checkpoint_compatible,
-        "matching_fields": [
-            name for name, matches in checkpoint_anchor_matches.items() if matches
-        ],
-        "mismatched_fields": [
-            name for name, matches in checkpoint_anchor_matches.items() if not matches
-        ],
-    }
-
-
-def _build_lineage_diff_payload(
-    *,
-    left_manifest: RunManifest,
-    right_manifest: RunManifest,
-) -> dict[str, object]:
-    return {
-        "planned_artifacts_match": (
-            RunManifestInspectionService._planned_artifact_identity(left_manifest)
-            == RunManifestInspectionService._planned_artifact_identity(right_manifest)
-        ),
-        "left_planned_artifact_count": len(left_manifest.planned_artifacts),
-        "right_planned_artifact_count": len(right_manifest.planned_artifacts),
-    }
-
-
-def _build_run_artifact_diff_payload(
-    *,
-    left_manifest: RunManifest,
-    right_manifest: RunManifest,
-) -> dict[str, object]:
-    left_snapshots = RunManifestInspectionService._manifest_snapshot_ids(left_manifest)
-    right_snapshots = RunManifestInspectionService._manifest_snapshot_ids(
-        right_manifest
+    semantic_equivalent = (
+        bool(occurrence_diff.get("semantic_equivalent"))
+        and all(anchor_matches.values())
+        and not missing_evidence
     )
-    left_artifacts = RunManifestInspectionService._planned_artifact_identity(
-        left_manifest
-    )
-    right_artifacts = RunManifestInspectionService._planned_artifact_identity(
-        right_manifest
-    )
+    differences = occurrence_diff.get("differences")
     return {
-        "input_snapshots_match": left_snapshots == right_snapshots,
-        "left_input_snapshot_count": len(left_snapshots),
-        "right_input_snapshot_count": len(right_snapshots),
-        "planned_artifacts_match": left_artifacts == right_artifacts,
-        "left_planned_artifact_count": len(left_artifacts),
-        "right_planned_artifact_count": len(right_artifacts),
+        **occurrence_diff,
+        "available": True,
+        "semantic_equivalent": semantic_equivalent,
+        "occurrence_only": semantic_equivalent and bool(differences),
+        "left_manifest_anchor": left_manifest_anchor,
+        "right_manifest_anchor": right_manifest_anchor,
+        "left_artifact_anchor": left_anchor,
+        "right_artifact_anchor": right_anchor,
+        "anchor_matches": anchor_matches,
+        "missing_evidence": list(missing_evidence),
     }
+
+
+def _effective_config_missing_evidence(
+    *,
+    left_artifact: dict[str, object] | None,
+    right_artifact: dict[str, object] | None,
+    left_occurrence: dict[str, object] | None,
+    right_occurrence: dict[str, object] | None,
+) -> tuple[str, ...]:
+    missing: list[str] = []
+    if left_artifact is None:
+        missing.append("left_effective_config_artifact_missing")
+    if right_artifact is None:
+        missing.append("right_effective_config_artifact_missing")
+    if left_occurrence is None:
+        missing.append("left_effective_config_occurrence_missing")
+    if right_occurrence is None:
+        missing.append("right_effective_config_occurrence_missing")
+    return tuple(missing)
+
+
+def _manifest_effective_config_anchor(manifest: RunManifest) -> dict[str, object]:
+    code_provenance = manifest.code_provenance
+    return {
+        "artifact_id": code_provenance.effective_config_artifact_id,
+        "effective_config_hash": code_provenance.effective_config_hash,
+    }
+
+
+def _effective_config_artifact_anchor(
+    artifact: dict[str, object] | None,
+) -> dict[str, object]:
+    if artifact is None:
+        return {"artifact_id": None, "effective_config_hash": None}
+    semantic_artifact = artifact.get("semantic_artifact")
+    if not isinstance(semantic_artifact, dict):
+        semantic_artifact = artifact
+    return {
+        "artifact_id": artifact.get("artifact_id")
+        or semantic_artifact.get("artifact_id"),
+        "effective_config_hash": semantic_artifact.get("effective_config_hash"),
+    }
+
+
+def _resolve_verify_verdict(
+    *,
+    manifest_classification: str,
+    manifest_semantic_equivalent: bool,
+    effective_config_semantic_equivalent: bool,
+    missing_evidence: tuple[str, ...],
+    occurrence_only: bool,
+) -> str:
+    if missing_evidence:
+        return "missing_replay_evidence"
+    if not manifest_semantic_equivalent:
+        return "semantic_drift"
+    if not effective_config_semantic_equivalent:
+        return "effective_config_semantic_drift"
+    if occurrence_only or manifest_classification == "occurrence_only":
+        return "occurrence_only_replay_verified"
+    return "cross_store_replay_verified"
+
+
+def _parse_run_id(identifier: str) -> RunID | None:
+    """Parse UUID-like run identifiers safely."""
+    try:
+        return RunID(UUID(identifier))
+    except (TypeError, ValueError):
+        return None
+
+
+def _json_equal(left: object, right: object) -> bool:
+    """Compare nested payloads using canonical JSON normalization."""
+    return json.dumps(left, sort_keys=True, default=str) == json.dumps(
+        right,
+        sort_keys=True,
+        default=str,
+    )
 
 
 @dataclass(slots=True)
@@ -250,6 +274,7 @@ class RunManifestInspectionService(
 
     manifest_port: RunManifestPort
     ledger_port: RunLedgerPort | None = None
+    effective_config_artifact_port: EffectiveConfigArtifactStorePort | None = None
 
     def show(self, identifier: str) -> RunManifestInspectionResult:
         """Resolve one manifest by manifest_id or run_id."""
@@ -296,7 +321,7 @@ class RunManifestInspectionService(
                 right=right_payload.get(field),
             )
             for field in sorted(set(left_payload) | set(right_payload))
-            if not self._json_equal(left_payload.get(field), right_payload.get(field))
+            if not _json_equal(left_payload.get(field), right_payload.get(field))
         )
         classification = self._classify_manifest_diff(
             left_manifest=left_manifest,
@@ -323,99 +348,64 @@ class RunManifestInspectionService(
                 classification["noncanonical_difference_fields"],
             ),
             replay_relationship=str(classification["replay_relationship"]),
-            cross_surface_replay_diff=self._build_cross_surface_replay_diff(
+            cross_surface_replay_diff=_build_cross_surface_replay_diff(
                 left_manifest=left_manifest,
                 right_manifest=right_manifest,
                 classification=classification,
             ),
         )
 
-    @staticmethod
-    def _build_cross_surface_replay_diff(
-        *,
-        left_manifest: RunManifest,
-        right_manifest: RunManifest,
-        classification: dict[str, object],
-    ) -> dict[str, object]:
-        """Return one replay-oriented diff across manifest-adjacent surfaces."""
-        effective_config_match = (
-            left_manifest.code_provenance.effective_config_hash
-            == right_manifest.code_provenance.effective_config_hash
-            and left_manifest.code_provenance.effective_config_artifact_id
-            == right_manifest.code_provenance.effective_config_artifact_id
-        )
-        checkpoint_anchor_matches = _build_checkpoint_anchor_matches(
+    def verify(
+        self, left_identifier: str, right_identifier: str
+    ) -> RunManifestVerifyResult:
+        """Verify replay evidence across manifest and effective-config stores."""
+        diff_result = self.diff(left_identifier, right_identifier)
+        left_manifest = self._resolve_manifest(left_identifier)
+        right_manifest = self._resolve_manifest(right_identifier)
+        effective_config = _build_effective_config_store_verification(
+            self.effective_config_artifact_port,
             left_manifest=left_manifest,
             right_manifest=right_manifest,
         )
-        checkpoint_compatible = all(checkpoint_anchor_matches.values())
-        semantic_equivalent = bool(classification["semantic_equivalent"])
-        occurrence_only = bool(classification["occurrence_only"])
-        verdict = RunManifestInspectionService._resolve_cross_surface_replay_verdict(
+        raw_missing_evidence = effective_config.get("missing_evidence", ())
+        missing_evidence_items = (
+            raw_missing_evidence
+            if isinstance(raw_missing_evidence, (list, tuple))
+            else ()
+        )
+        missing_evidence = tuple(
+            item for item in missing_evidence_items if isinstance(item, str)
+        )
+        effective_config_semantic_equivalent = bool(
+            effective_config.get("semantic_equivalent")
+        )
+        effective_config_occurrence_only = bool(effective_config.get("occurrence_only"))
+        semantic_equivalent = (
+            diff_result.semantic_equivalent and effective_config_semantic_equivalent
+        )
+        occurrence_only = (
+            diff_result.occurrence_only or effective_config_occurrence_only
+        )
+        verified = semantic_equivalent and not missing_evidence
+        verdict = _resolve_verify_verdict(
+            manifest_classification=diff_result.classification,
+            manifest_semantic_equivalent=diff_result.semantic_equivalent,
+            effective_config_semantic_equivalent=effective_config_semantic_equivalent,
+            missing_evidence=missing_evidence,
+            occurrence_only=occurrence_only,
+        )
+        return RunManifestVerifyResult(
+            left_manifest_id=left_manifest.manifest_id,
+            right_manifest_id=right_manifest.manifest_id,
+            left_run_id=str(left_manifest.run_id),
+            right_run_id=str(right_manifest.run_id),
+            verdict=verdict,
+            verified=verified,
             semantic_equivalent=semantic_equivalent,
             occurrence_only=occurrence_only,
-            checkpoint_compatible=checkpoint_compatible,
-        )
-        return {
-            "verdict": verdict,
-            "manifest": _build_manifest_diff_payload(
-                classification=classification,
-                semantic_equivalent=semantic_equivalent,
-                occurrence_only=occurrence_only,
-            ),
-            "effective_config": _build_effective_config_diff_payload(
-                left_manifest=left_manifest,
-                right_manifest=right_manifest,
-                effective_config_match=effective_config_match,
-            ),
-            "checkpoint_anchors": _build_checkpoint_anchor_diff_payload(
-                checkpoint_anchor_matches=checkpoint_anchor_matches,
-                checkpoint_compatible=checkpoint_compatible,
-            ),
-            "lineage": _build_lineage_diff_payload(
-                left_manifest=left_manifest,
-                right_manifest=right_manifest,
-            ),
-            "run_artifacts": _build_run_artifact_diff_payload(
-                left_manifest=left_manifest,
-                right_manifest=right_manifest,
-            ),
-        }
-
-    @staticmethod
-    def _resolve_cross_surface_replay_verdict(
-        *,
-        semantic_equivalent: bool,
-        occurrence_only: bool,
-        checkpoint_compatible: bool,
-    ) -> str:
-        if not semantic_equivalent:
-            return "semantic_drift"
-        if not checkpoint_compatible:
-            return "checkpoint_incompatible"
-        if occurrence_only:
-            return "occurrence_only_replay"
-        return "semantic_equivalent_replay"
-
-    @staticmethod
-    def _manifest_snapshot_ids(manifest: RunManifest) -> tuple[str, ...]:
-        return tuple(
-            sorted(
-                snapshot.snapshot_id
-                for source_ref in manifest.source_refs
-                for snapshot in source_ref.input_snapshots
-            )
-        )
-
-    @staticmethod
-    def _planned_artifact_identity(
-        manifest: RunManifest,
-    ) -> tuple[tuple[str, str], ...]:
-        return tuple(
-            sorted(
-                (artifact.layer, artifact.path)
-                for artifact in manifest.planned_artifacts
-            )
+            missing_evidence=missing_evidence,
+            manifest_diff=diff_result.to_dict(),
+            effective_config=effective_config,
         )
 
     def _resolve_manifest(self, identifier: str) -> RunManifest:
@@ -426,7 +416,7 @@ class RunManifestInspectionService(
             raise RunManifestInspectionCorruptionError(identifier, str(exc)) from exc
         if manifest is not None:
             return manifest
-        run_id = self._parse_run_id(identifier)
+        run_id = _parse_run_id(identifier)
         if run_id is not None:
             try:
                 manifest = self.manifest_port.get_by_run_id(run_id)
@@ -437,20 +427,3 @@ class RunManifestInspectionService(
             if manifest is not None:
                 return manifest
         raise ValueError(f"Run manifest not found for identifier: {identifier}")
-
-    @staticmethod
-    def _parse_run_id(identifier: str) -> RunID | None:
-        """Parse UUID-like run identifiers safely."""
-        try:
-            return RunID(UUID(identifier))
-        except (TypeError, ValueError):
-            return None
-
-    @staticmethod
-    def _json_equal(left: object, right: object) -> bool:
-        """Compare nested payloads using canonical JSON normalization."""
-        return json.dumps(left, sort_keys=True, default=str) == json.dumps(
-            right,
-            sort_keys=True,
-            default=str,
-        )

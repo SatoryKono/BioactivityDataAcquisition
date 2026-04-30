@@ -509,6 +509,37 @@ def _staged_rollout_flags(test_matrix: dict[str, object]) -> tuple[str, ...]:
     return tuple(flags)
 
 
+def _not_run_lane_entries(test_matrix: dict[str, object]) -> tuple[dict[str, str], ...]:
+    confidence = test_matrix.get("test_health_confidence", {})
+    if not isinstance(confidence, dict):
+        return ()
+    entries = confidence.get("lane_absence_skip_classes", {})
+    if not isinstance(entries, list):
+        return ()
+
+    normalized: list[dict[str, str]] = []
+    for entry in entries:
+        if not isinstance(entry, dict):
+            continue
+        lane = entry.get("lane")
+        skip_class = entry.get("skip_class")
+        reason = entry.get("reason")
+        if not all(isinstance(value, str) and value for value in (lane, skip_class)):
+            continue
+        normalized.append(
+            {
+                "lane": lane,
+                "skip_class": skip_class,
+                "reason": (
+                    reason
+                    if isinstance(reason, str) and reason
+                    else f"current quality-gate run does not execute the canonical {lane} lane"
+                ),
+            }
+        )
+    return tuple(normalized)
+
+
 def _build_skip_classes(
     architecture_stats: ArchitectureTestStats,
     *,
@@ -516,6 +547,7 @@ def _build_skip_classes(
     live_api_gate_mode: str,
     pilot_providers: list[str],
     vcr_only_providers: list[str],
+    not_run_lane_entries: tuple[dict[str, str], ...],
 ) -> tuple[tuple[str, int], ...]:
     """Return stable grouped skip/conditional-confidence buckets."""
     classes: list[tuple[str, int]] = []
@@ -529,6 +561,8 @@ def _build_skip_classes(
         classes.append(("pilot_provider_count", len(pilot_providers)))
     if vcr_only_providers:
         classes.append(("vcr_only_provider_count", len(vcr_only_providers)))
+    for entry in not_run_lane_entries:
+        classes.append((entry["skip_class"], 1))
     return tuple(classes)
 
 
@@ -544,12 +578,14 @@ def _classify_test_health(
         skip_ratio = round(architecture_stats.skipped / total_executed, 4)
     contract_context = _contract_testing_context(test_matrix)
     staged_flags = _staged_rollout_flags(test_matrix)
+    not_run_lane_entries = _not_run_lane_entries(test_matrix)
     skip_classes = _build_skip_classes(
         architecture_stats,
         network_opt_in_required=contract_context.network_opt_in_required,
         live_api_gate_mode=contract_context.live_api_gate_mode,
         pilot_providers=contract_context.pilot_providers,
         vcr_only_providers=contract_context.vcr_only_providers,
+        not_run_lane_entries=not_run_lane_entries,
     )
     if not suite_green:
         return TestHealthClassification(
@@ -572,7 +608,9 @@ def _classify_test_health(
             staged_rollout_flags=staged_flags,
         )
     environment_reasons = _environment_limited_reasons(
-        architecture_stats, contract_context
+        architecture_stats,
+        contract_context,
+        not_run_lane_entries,
     )
     if environment_reasons:
         return TestHealthClassification(
@@ -658,6 +696,7 @@ def _contract_testing_context(
 def _environment_limited_reasons(
     architecture_stats: ArchitectureTestStats,
     contract_context: ContractTestingContext,
+    not_run_lane_entries: tuple[dict[str, str], ...],
 ) -> list[str]:
     reasons: list[str] = []
     if architecture_stats.skipped > 0:
@@ -681,6 +720,7 @@ def _environment_limited_reasons(
             "live minimum baseline includes "
             f"{len(contract_context.pilot_providers)} pilot provider(s)"
         )
+    reasons.extend(entry["reason"] for entry in not_run_lane_entries)
     return reasons
 
 

@@ -8,6 +8,7 @@ from bioetl.application.services.control_plane.run_manifest_inspection_service i
     RunManifestInspectionCorruptionError,
     RunManifestInspectionResult,
     RunManifestInspectionService,
+    RunManifestVerifyResult,
 )
 
 __all__ = [
@@ -16,4 +17,5 @@ __all__ = [
     "RunManifestInspectionCorruptionError",
     "RunManifestInspectionResult",
     "RunManifestInspectionService",
+    "RunManifestVerifyResult",
 ]

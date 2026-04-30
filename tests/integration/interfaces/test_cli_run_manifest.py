@@ -13,6 +13,7 @@ from bioetl.application.services.run_manifest_inspection_service import (
     RunManifestDiffEntry,
     RunManifestDiffResult,
     RunManifestInspectionResult,
+    RunManifestVerifyResult,
 )
 from bioetl.domain.control_plane import RunCodeProvenance, RunManifest
 from bioetl.domain.types import RunID, RunType
@@ -108,6 +109,31 @@ class _FakeRunManifestService:
             ),
         )
 
+    def verify(
+        self,
+        left_identifier: str,
+        right_identifier: str,
+    ) -> RunManifestVerifyResult:
+        if "missing" in {left_identifier, right_identifier}:
+            raise ValueError("missing")
+        return RunManifestVerifyResult(
+            left_manifest_id="manifest-integration",
+            right_manifest_id="manifest-other",
+            left_run_id=str(self.run_id),
+            right_run_id="00000000-0000-0000-0000-000000000003",
+            verdict="cross_store_replay_verified",
+            verified=True,
+            semantic_equivalent=True,
+            occurrence_only=False,
+            missing_evidence=(),
+            manifest_diff={"classification": "identical"},
+            effective_config={
+                "available": True,
+                "semantic_equivalent": True,
+                "missing_evidence": [],
+            },
+        )
+
 
 def _patch_run_manifest_service(monkeypatch: Any, service: object) -> None:
     import bioetl.interfaces.cli.commands.run_manifest as run_manifest_cmd
@@ -173,3 +199,27 @@ def test_run_manifest_diff_yaml_uses_top_level_cli_wiring(
     assert "classification: semantic_drift" in result.output
     assert "semantic_equivalent: false" in result.output
     assert "field: launch_context" in result.output
+
+
+def test_run_manifest_verify_yaml_uses_top_level_cli_wiring(
+    monkeypatch: Any,
+) -> None:
+    runner = CliRunner()
+    _patch_run_manifest_service(monkeypatch, _FakeRunManifestService())
+
+    result = runner.invoke(
+        cli,
+        [
+            "run-manifest",
+            "verify",
+            "manifest-integration",
+            "manifest-other",
+            "--format",
+            "yaml",
+        ],
+    )
+
+    assert result.exit_code == 0
+    assert "verdict: cross_store_replay_verified" in result.output
+    assert "verified: true" in result.output
+    assert "effective_config:" in result.output

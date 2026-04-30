@@ -53,7 +53,13 @@ _RUNTIME_METRIC_METHODS = frozenset(
     {"increment_counter", "observe_histogram", "set_gauge"}
 )
 _RUNTIME_METRIC_NAME_KEYWORDS = frozenset(
-    {"metric_name", "state_metric_name", "trip_metric_name"}
+    {
+        "metric_name",
+        "phase_duration_metric",
+        "phase_events_metric",
+        "state_metric_name",
+        "trip_metric_name",
+    }
 )
 _RUNTIME_SCAN_MARKERS: Final[tuple[str, ...]] = (
     "bioetl_",
@@ -61,9 +67,20 @@ _RUNTIME_SCAN_MARKERS: Final[tuple[str, ...]] = (
     "observe_histogram",
     "set_gauge",
     "metric_name",
+    "phase_duration_metric",
+    "phase_events_metric",
     "state_metric_name",
     "trip_metric_name",
 )
+_STATIC_RUNTIME_EMITTERS: Final[dict[str, tuple[str, ...]]] = {
+    # This family is emitted through a prometheus_client Counter collector in the
+    # metrics server rather than through the MetricsPort helper methods scanned
+    # below. Keep it explicit so registry declarations remain tied to a concrete
+    # runtime path without treating all registry modules as emitters.
+    "bioetl_metrics_publication_events_total": (
+        "src/bioetl/infrastructure/observability/server.py",
+    ),
+}
 _PROMETHEUS_FAMILY_SUFFIXES: Final[frozenset[str]] = frozenset(
     {
         "_bytes",
@@ -562,11 +579,23 @@ def _scan_runtime_metric_calls(
             helper_metric_names=helper_metric_names,
             alias_metric_names=alias_metric_names,
         )
+    _record_static_runtime_emitters(repo_root, canonical_mentions)
     return (
         dict(canonical_mentions),
         dict(helper_backed_mentions),
         dict(alias_mentions),
     )
+
+
+def _record_static_runtime_emitters(
+    repo_root: Path,
+    canonical_mentions: dict[str, list[str]],
+) -> None:
+    """Record runtime emitters that use direct Prometheus collectors."""
+    for metric_name, relative_paths in _STATIC_RUNTIME_EMITTERS.items():
+        for relative_path in relative_paths:
+            if (repo_root / relative_path).exists():
+                canonical_mentions[metric_name].append(relative_path)
 
 
 def _scan_registered_metric_names(repo_root: Path) -> frozenset[str]:

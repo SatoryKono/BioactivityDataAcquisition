@@ -990,7 +990,7 @@ class TestBronzeFixtureCoverage:
     _ALLOWED_GAP_STATUS = {"open", "in_progress", "blocked", "decision_recorded"}
     _ACTIVE_GAP_STATUS = {"open", "in_progress"}
     _MAX_BLOCKED_GAPS = 0
-    _MAX_DECISION_RECORDED_GAPS = 1
+    _MAX_DECISION_RECORDED_GAPS = 0
     _ALLOWED_FIXTURE_KINDS = {"tracked_ci_sample", "local_runtime_snapshot"}
     _ALLOWED_VALIDATION_STATUSES = {"valid", "provisional", "stale"}
 

@@ -27,17 +27,6 @@ _STANDARD_CONTRACT_PROVIDERS = {
     "semanticscholar",
     "uniprot",
 }
-_REQUIRED_DECISION_RECORDED_FIXTURE_GAP_FIELDS = {
-    "contract_ref",
-    "decision_status",
-    "decision_deadline",
-    "decision_owner",
-    "chosen_path",
-    "contract_or_projection_target",
-    "evidence_issue",
-    "de_scope_decision",
-    "resolution_plan",
-}
 _SPECIALIZED_CHEMBL_FIXTURE_CONTRACT_REFS = {
     "chembl.assay_parameters",
     "chembl.publication_similarity",
@@ -216,28 +205,9 @@ def test_specialized_chembl_fixture_surfaces_have_tracked_manifest_evidence() ->
 
 
 @pytest.mark.integration
-def test_decision_recorded_bronze_fixture_gaps_have_explicit_resolution_decisions() -> (
-    None
-):
-    """Decision-recorded Bronze fixture gaps must not remain open-ended."""
+def test_bronze_fixture_gap_registry_is_empty_after_fixture_closeout() -> None:
+    """Tracked fixture manifest should eliminate the residual Bronze gap registry."""
     payload = _fixture_gap_payload()
     gaps = payload.get("gaps", {})
     assert isinstance(gaps, dict)
-    assert set(gaps) == {"semanticscholar/publication"}
-
-    for fixture_name, metadata in gaps.items():
-        if (
-            not isinstance(metadata, dict)
-            or metadata.get("status") != "decision_recorded"
-        ):
-            continue
-
-        missing = _REQUIRED_DECISION_RECORDED_FIXTURE_GAP_FIELDS - metadata.keys()
-        assert not missing, f"{fixture_name}: missing decision fields {sorted(missing)}"
-        assert metadata["decision_status"] in {
-            "projection_required",
-            "source_required",
-            "keyed_recording_required",
-        }
-        assert str(metadata["decision_deadline"]) >= "2026-05-31"
-        assert str(metadata["evidence_issue"]).endswith("/issues/3406")
+    assert gaps == {}

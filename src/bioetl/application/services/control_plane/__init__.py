@@ -20,6 +20,7 @@ from bioetl.application.services.control_plane.run_manifest_inspection_service i
     RunManifestDiffResult,
     RunManifestInspectionResult,
     RunManifestInspectionService,
+    RunManifestVerifyResult,
 )
 from bioetl.application.services.control_plane.run_manifest_service import (
     RunManifestCreateSpec,
@@ -32,11 +33,11 @@ __all__ = [
     "ForensicRunDiffService",
     "RunLedgerService",
     "RunManifestCreateSpec",
-    "RunManifestCreateSpec",
     "RunManifestDiffEntry",
     "RunManifestDiffResult",
     "RunManifestInspectionResult",
     "RunManifestInspectionService",
     "RunManifestService",
+    "RunManifestVerifyResult",
     "build_diagnostics_summary",
 ]

@@ -32,6 +32,7 @@ __all__ = [
     "run_manifest",
     "score_command",
     "show_command",
+    "verify_command",
 ]
 
 RUN_MANIFEST_STORE_CORRUPTION = "Run manifest store corruption"
@@ -155,6 +156,38 @@ def diff_command(
     )
 
 
+@run_manifest.command("verify")
+@click.argument("left_identifier")
+@click.argument("right_identifier")
+@click.option(
+    "--format",
+    "output_format",
+    type=click.Choice(["text", "json", "yaml"]),
+    default="text",
+    help="Output format",
+)
+def verify_command(
+    left_identifier: str,
+    right_identifier: str,
+    output_format: str,
+) -> None:
+    """Verify replay evidence across manifest and effective-config stores."""
+    service = get_run_manifest_service()
+    try:
+        result = service.verify(left_identifier, right_identifier)
+    except RunManifestInspectionCorruptionError as exc:
+        echo_error(RUN_MANIFEST_STORE_CORRUPTION, str(exc))
+        return
+    except ValueError as exc:
+        echo_error("Run manifest verification failed", str(exc))
+        return
+    emit_inspection_payload(
+        result.to_dict(),
+        output_format,
+        text_renderer=render_text_payload,
+    )
+
+
 @run_manifest.command("forensic-diff")
 @click.argument("left_identifier")
 @click.argument("right_identifier")
@@ -192,4 +225,5 @@ COMMANDS = (
     forensic_diff_command,
     score_command,
     show_command,
+    verify_command,
 )

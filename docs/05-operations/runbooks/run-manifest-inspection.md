@@ -128,6 +128,24 @@ Interpretation:
   replacement for the semantic `execution_fingerprint`.
 - checkpoint compatibility may also use a narrower runtime-anchor contract when a persisted manifest fingerprint is unavailable, but that contract is intentionally smaller and must not be read as a substitute for full manifest identity.
 
+Verify replay evidence across manifest and effective-config stores:
+
+```bash
+bioetl run-manifest verify <left> <right>
+bioetl run-manifest verify <left> <right> --format json
+```
+
+Interpretation:
+
+- `verified=true` means the manifest comparison and effective-config artifact
+  store agree on semantic replay evidence.
+- `missing_replay_evidence` means at least one required effective-config
+  artifact or occurrence sidecar is absent for the resolved run IDs.
+- `effective_config_semantic_drift` means the manifest evidence may be
+  compatible, but the persisted effective-config artifacts disagree.
+- occurrence-only differences are acceptable only when semantic artifacts and
+  manifest anchors still match.
+
 ### 4. Inspect storage layout directly when needed
 
 Canonical filesystem paths:
@@ -137,6 +155,9 @@ data/output/control/run_manifest/{manifest_id}.json
 data/output/control/run_manifest/_by_run_id/{run_id}.txt
 data/output/control/run_ledger/{manifest_id}.jsonl
 data/output/control/run_ledger/_by_run_id/{run_id}.txt
+data/output/control/effective_config/{effective_config_artifact_id}.json
+data/output/control/effective_config/_by_run_id/{run_id}.txt
+data/output/control/effective_config/_occurrences/{run_id}.json
 ```
 
 Useful direct checks:

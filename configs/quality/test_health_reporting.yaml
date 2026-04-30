@@ -55,3 +55,21 @@ skip_classes:
     definition: >
       Providers still outside the live baseline and covered through replay-first
       governance.
+  contract_lane_not_run:
+    short_label: Contracts Lane Not Run
+    definition: >
+      The current quality-gate confidence slice does not execute the canonical
+      contracts lane, so schema and provider-contract drift confidence remains
+      incomplete for this run.
+  e2e_lane_not_run:
+    short_label: E2E Lane Not Run
+    definition: >
+      The current quality-gate confidence slice does not execute the canonical
+      e2e lane, so full pipeline behavior confidence remains incomplete for this
+      run.
+  memory_lane_not_run:
+    short_label: Memory Lane Not Run
+    definition: >
+      The current quality-gate confidence slice does not execute the canonical
+      memory lane, so Neo4j and MCP memory confidence remains incomplete for
+      this run.

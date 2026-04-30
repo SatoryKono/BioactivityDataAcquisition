@@ -20,7 +20,8 @@ class TestContractSnapshotGovernance:
         providers = registry.get("providers", {})
 
         assert (
-            fixture_governance.get("rollout", {}).get("contract_snapshots") == "partial"
+            fixture_governance.get("rollout", {}).get("contract_snapshots")
+            == "enforced"
         )
         assert registry.get("scope") == "bounded_live_provider_baseline"
         assert registry.get("update_env_var") == "UPDATE_SNAPSHOTS"

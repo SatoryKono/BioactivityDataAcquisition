@@ -402,6 +402,20 @@ provider_regression_suites:
       pubmed: tests/unit/infrastructure/adapters/pubmed/test_pubmed_client.py
       semanticscholar: tests/unit/infrastructure/adapters/semanticscholar/test_adapter.py
 
+# ── Test-health confidence assertions ───────────────────────
+
+test_health_confidence:
+  lane_absence_skip_classes:
+    - lane: contracts
+      skip_class: contract_lane_not_run
+      reason: Current quality-gate run does not execute the canonical contracts lane.
+    - lane: e2e
+      skip_class: e2e_lane_not_run
+      reason: Current quality-gate run does not execute the canonical e2e lane.
+    - lane: memory
+      skip_class: memory_lane_not_run
+      reason: Current quality-gate run does not execute the canonical memory lane.
+
 # ── Test boundaries (ADR-042 §Property-Based Testing) ───────
 
 property_test_boundaries:
@@ -474,7 +488,7 @@ fixture_governance:
     cassette_staleness_age: enforced
     cassette_metadata_catalog: enforced
     cassette_metadata_backfill: enforced
-    contract_snapshots: partial
+    contract_snapshots: enforced
     golden_masters: enforced
     extensionless_filenames: enforced
   golden_master_registry:
@@ -615,7 +629,7 @@ fixture_governance:
       pubchem_chemical_standardization:
         evidence:
           - src/bioetl/domain/behavior/chemical_standardization.py
-          - tests/unit/domain/behavior/test_chemical_standardization.py
+          - tests/unit/domain/services/test_chemical_standardization.py
         expectations:
           - chemical_standardization_status
           - chemical_standardization_policy_version

@@ -157,6 +157,17 @@ fixtures:
     owner: "data-platform"
     last_refresh: "2026-03-25"
     validation_status: valid
+  semanticscholar/publication:
+    fixture_kind: tracked_ci_sample
+    fixture_path: tests/fixtures/bronze/semanticscholar/publication/sample_ci_2026-04-30.jsonl
+    records: 20
+    provenance: "Bounded factual Semantic Scholar DOI lookup sample curated as a deterministic smaller Bronze baseline in provider-compatible raw payload shape."
+    owner: "data-platform"
+    last_refresh: "2026-04-30"
+    validation_status: valid
+    source_entity: semanticscholar/publication
+    resolution_kind: smaller_factual_baseline
+    extraction_contract: provider_compatible_doi_lookup_payload_shape
   uniprot/protein:
     fixture_kind: tracked_ci_sample
     fixture_path: tests/fixtures/bronze/uniprot/protein/sample_ci_2026-04-24.jsonl

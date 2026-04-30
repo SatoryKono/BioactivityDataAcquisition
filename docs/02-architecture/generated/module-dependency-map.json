@@ -1,7 +1,7 @@
 {
   "summary": {
-    "scanned_modules": 1742,
-    "total_internal_imports": 6922,
+    "scanned_modules": 1744,
+    "total_internal_imports": 6923,
     "layer_edges": 14,
     "cross_layer_group_edges": 60,
     "cross_layer_group_edges_total": 312,
@@ -11,13 +11,13 @@
     {
       "source": "application",
       "target": "application",
-      "imports": 1151,
+      "imports": 1152,
       "allowed": true
     },
     {
       "source": "application",
       "target": "domain",
-      "imports": 1029,
+      "imports": 1027,
       "allowed": true
     },
     {
@@ -29,7 +29,7 @@
     {
       "source": "composition",
       "target": "composition",
-      "imports": 547,
+      "imports": 546,
       "allowed": true
     },
     {
@@ -47,7 +47,7 @@
     {
       "source": "domain",
       "target": "domain",
-      "imports": 1147,
+      "imports": 1150,
       "allowed": true
     },
     {
@@ -97,7 +97,7 @@
     {
       "source": "application.composite",
       "target": "domain.composite",
-      "imports": 112
+      "imports": 111
     },
     {
       "source": "infrastructure.adapters",
@@ -122,7 +122,7 @@
     {
       "source": "application.composite",
       "target": "domain.ports",
-      "imports": 73
+      "imports": 71
     },
     {
       "source": "application.core",
@@ -226,6 +226,11 @@
     },
     {
       "source": "application.services",
+      "target": "domain.control_plane",
+      "imports": 28
+    },
+    {
+      "source": "application.services",
       "target": "domain.value_objects",
       "imports": 28
     },
@@ -237,11 +242,6 @@
     {
       "source": "application.pipelines",
       "target": "domain.entities",
-      "imports": 26
-    },
-    {
-      "source": "application.services",
-      "target": "domain.control_plane",
       "imports": 26
     },
     {
@@ -346,17 +346,17 @@
     },
     {
       "source": "application.pipelines",
-      "target": "domain.context",
+      "target": "domain.behavior",
       "imports": 13
     },
     {
       "source": "application.pipelines",
-      "target": "domain.services",
+      "target": "domain.context",
       "imports": 13
     },
     {
       "source": "composition.factories",
-      "target": "domain.services",
+      "target": "domain.behavior",
       "imports": 13
     },
     {
@@ -366,12 +366,12 @@
     },
     {
       "source": "application.services",
-      "target": "domain.lineage",
+      "target": "domain.behavior",
       "imports": 12
     },
     {
       "source": "application.services",
-      "target": "domain.services",
+      "target": "domain.lineage",
       "imports": 12
     },
     {

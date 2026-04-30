@@ -78,6 +78,73 @@ _InMemoryRunManifestStore = InMemoryRunManifestStore
 _InMemoryRunLedgerStore = InMemoryRunLedgerStore
 
 
+class _InMemoryEffectiveConfigArtifactStore:
+    def __init__(self) -> None:
+        self._artifacts_by_run_id: dict[RunID, dict[str, object]] = {}
+        self._occurrences_by_run_id: dict[RunID, dict[str, object]] = {}
+
+    def save(
+        self,
+        *,
+        artifact_id: str,
+        run_id: RunID,
+        payload: dict[str, object],
+        occurrence: dict[str, object] | None = None,
+    ) -> None:
+        self._artifacts_by_run_id[run_id] = {
+            "artifact_id": artifact_id,
+            **payload,
+        }
+        self._occurrences_by_run_id[run_id] = occurrence or {
+            "artifact_id": artifact_id,
+            "run_id": str(run_id),
+            "occurrence_envelope": {},
+        }
+
+    def get(self, artifact_id: str) -> dict[str, object] | None:
+        for payload in self._artifacts_by_run_id.values():
+            if payload.get("artifact_id") == artifact_id:
+                return payload
+        return None
+
+    def get_by_run_id(self, run_id: RunID) -> dict[str, object] | None:
+        return self._artifacts_by_run_id.get(run_id)
+
+    def get_occurrence_by_run_id(self, run_id: RunID) -> dict[str, object] | None:
+        return self._occurrences_by_run_id.get(run_id)
+
+    def diff_occurrences_by_run_id(
+        self,
+        left_run_id: RunID,
+        right_run_id: RunID,
+    ) -> dict[str, object]:
+        left_artifact = self.get_by_run_id(left_run_id)
+        right_artifact = self.get_by_run_id(right_run_id)
+        left_occurrence = self.get_occurrence_by_run_id(left_run_id)
+        right_occurrence = self.get_occurrence_by_run_id(right_run_id)
+        semantic_equivalent = left_artifact == right_artifact
+        differences: list[dict[str, object]] = []
+        if left_occurrence != right_occurrence:
+            differences.append(
+                {
+                    "field": "occurrence_envelope",
+                    "left": left_occurrence,
+                    "right": right_occurrence,
+                }
+            )
+        return {
+            "left_run_id": str(left_run_id),
+            "right_run_id": str(right_run_id),
+            "left_artifact_present": left_artifact is not None,
+            "right_artifact_present": right_artifact is not None,
+            "left_occurrence_present": left_occurrence is not None,
+            "right_occurrence_present": right_occurrence is not None,
+            "semantic_equivalent": semantic_equivalent,
+            "occurrence_only": semantic_equivalent and bool(differences),
+            "differences": differences,
+        }
+
+
 def _make_manifest(
     *,
     manifest_id: str,
@@ -1168,6 +1235,100 @@ def test_diff_classifies_semantic_equivalent_noncanonical_differences() -> None:
     assert result.cross_surface_replay_diff["manifest"][
         "noncanonical_difference_fields"
     ] == ["source_refs"]
+
+
+def test_verify_confirms_cross_store_effective_config_replay_evidence() -> None:
+    manifest_store = _InMemoryRunManifestStore()
+    effective_config_store = _InMemoryEffectiveConfigArtifactStore()
+    created_at = datetime(2025, 1, 1, tzinfo=UTC)
+    left_run_id = RunID(UUID("00000000-0000-0000-0000-000000000231"))
+    right_run_id = RunID(UUID("00000000-0000-0000-0000-000000000232"))
+    left = _make_manifest(
+        manifest_id="manifest-left",
+        run_id=left_run_id,
+        execution_fingerprint="fingerprint-same",
+        created_at=created_at,
+    )
+    right = _make_manifest(
+        manifest_id="manifest-right",
+        run_id=right_run_id,
+        execution_fingerprint="fingerprint-same",
+        created_at=created_at,
+    )
+    artifact_payload = {
+        "semantic_artifact": {
+            "artifact_id": "eca-123",
+            "pipeline_name": "chembl_activity",
+            "effective_config_hash": _VALID_EFFECTIVE_CONFIG_HASH,
+        },
+    }
+    manifest_store.save(left)
+    manifest_store.save(right)
+    effective_config_store.save(
+        artifact_id="eca-123",
+        run_id=left_run_id,
+        payload=artifact_payload,
+        occurrence={"artifact_id": "eca-123", "run_id": str(left_run_id)},
+    )
+    effective_config_store.save(
+        artifact_id="eca-123",
+        run_id=right_run_id,
+        payload=artifact_payload,
+        occurrence={"artifact_id": "eca-123", "run_id": str(right_run_id)},
+    )
+    service = RunManifestInspectionService(
+        manifest_port=manifest_store,
+        effective_config_artifact_port=effective_config_store,
+    )
+
+    result = service.verify("manifest-left", "manifest-right")
+
+    assert result.verified is True
+    assert result.verdict == "occurrence_only_replay_verified"
+    assert result.semantic_equivalent is True
+    assert result.occurrence_only is True
+    assert result.missing_evidence == ()
+    assert result.effective_config["semantic_equivalent"] is True
+    assert result.effective_config["anchor_matches"] == {
+        "left_artifact_id": True,
+        "right_artifact_id": True,
+        "left_effective_config_hash": True,
+        "right_effective_config_hash": True,
+    }
+    assert result.to_dict()["manifest_diff"]["classification"] == "occurrence_only"
+
+
+def test_verify_reports_missing_effective_config_evidence() -> None:
+    manifest_store = _InMemoryRunManifestStore()
+    effective_config_store = _InMemoryEffectiveConfigArtifactStore()
+    left = _make_manifest(
+        manifest_id="manifest-left",
+        run_id=RunID(UUID("00000000-0000-0000-0000-000000000233")),
+        execution_fingerprint="fingerprint-same",
+    )
+    right = _make_manifest(
+        manifest_id="manifest-right",
+        run_id=RunID(UUID("00000000-0000-0000-0000-000000000234")),
+        execution_fingerprint="fingerprint-same",
+    )
+    manifest_store.save(left)
+    manifest_store.save(right)
+    service = RunManifestInspectionService(
+        manifest_port=manifest_store,
+        effective_config_artifact_port=effective_config_store,
+    )
+
+    result = service.verify("manifest-left", "manifest-right")
+
+    assert result.verified is False
+    assert result.verdict == "missing_replay_evidence"
+    assert result.semantic_equivalent is False
+    assert result.missing_evidence == (
+        "left_effective_config_artifact_missing",
+        "right_effective_config_artifact_missing",
+        "left_effective_config_occurrence_missing",
+        "right_effective_config_occurrence_missing",
+    )
 
 
 def test_control_plane_chain_surfaces_effective_config_and_artifact_links() -> None:
