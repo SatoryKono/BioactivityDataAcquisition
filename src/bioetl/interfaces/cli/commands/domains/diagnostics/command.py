@@ -24,7 +24,7 @@ from bioetl.interfaces.cli.commands.domains.health.rendering import (
     all_health_results_healthy,
 )
 from bioetl.interfaces.cli.commands.domains.quarantine.support import (
-    _QuarantineManager,
+    _QuarantineRuntimeService,
     _show_quarantine_stats,
 )
 from bioetl.interfaces.cli.commands.domains.shared.inspection_commands import (
@@ -87,11 +87,11 @@ def get_metrics_operator_profile() -> MetricsOperatorProfile:
     return _impl()
 
 
-def get_quarantine_runtime_service(pipeline: str) -> _QuarantineManager:
+def get_quarantine_runtime_service(pipeline: str) -> _QuarantineRuntimeService:
     """Load the quarantine manager through composition on demand."""
     from bioetl.composition.health_api import get_quarantine_runtime_service as _impl
 
-    return cast(_QuarantineManager, _impl(pipeline))
+    return cast(_QuarantineRuntimeService, _impl(pipeline))
 
 
 def _build_diagnostics_guide_lines() -> list[str]:

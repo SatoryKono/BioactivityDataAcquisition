@@ -14,18 +14,18 @@ from bioetl.interfaces.cli.commands.domains.quarantine._run_scope_stats import (
     RunManifestInspectionServiceProtocol,
 )
 from bioetl.interfaces.cli.commands.domains.quarantine.support import (
-    _QuarantineManager,
+    _QuarantineRuntimeService,
     _QuarantineService,
 )
 
 SILVER_FILTER_ERROR_CODE = "FILTERED_OUT_SILVER"
 
 
-def get_quarantine_runtime_service(pipeline: str) -> _QuarantineManager:
+def get_quarantine_runtime_service(pipeline: str) -> _QuarantineRuntimeService:
     """Load the quarantine runtime service through composition on demand."""
     from bioetl.composition.health_api import get_quarantine_runtime_service as _impl
 
-    return cast(_QuarantineManager, _impl(pipeline))
+    return cast(_QuarantineRuntimeService, _impl(pipeline))
 
 
 def get_run_manifest_service() -> RunManifestInspectionServiceProtocol:

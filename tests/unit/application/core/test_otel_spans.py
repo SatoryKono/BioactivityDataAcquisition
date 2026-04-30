@@ -99,7 +99,7 @@ class TestPipelineRunnerSpan:
         from bioetl.domain.medallion import MedallionPolicy
         from bioetl.domain.types import HealthReport, HealthStatus
         from bioetl.application.core.lifecycle.checkpoint_manager import (
-            CheckpointManager,
+            CheckpointRuntimeService,
         )
         from bioetl.application.core.pipeline_services import PipelineService
         from bioetl.domain.value_objects.dq_result import DQEvaluationStatus, DQResult
@@ -156,7 +156,7 @@ class TestPipelineRunnerSpan:
         executor.records_quarantined = 5
         executor.get_dq_context = MagicMock(return_value=None)
 
-        checkpoint_manager = AsyncMock(spec=CheckpointManager)
+        checkpoint_manager = AsyncMock(spec=CheckpointRuntimeService)
         checkpoint_manager.load_checkpoint = AsyncMock(return_value=None)
         checkpoint_manager.delete_checkpoint = AsyncMock()
 
