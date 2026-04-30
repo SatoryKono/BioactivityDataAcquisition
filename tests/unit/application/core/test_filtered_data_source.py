@@ -766,6 +766,11 @@ class TestFilteredDataSourceMetrics:
         call_args = mock_metrics.increment_counter.call_args_list
         counter_names = [c[0][0] for c in call_args]
         assert "bioetl_filter_ids_loaded_total" in counter_names
+        mock_metrics.increment_counter.assert_any_call(
+            "bioetl_filter_ids_loaded_total",
+            2,
+            {"pipeline": "test_pipeline", "source_kind": "csv_single_column"},
+        )
 
     @pytest.mark.asyncio
     async def test_single_column_duplicate_metrics(
@@ -798,6 +803,11 @@ class TestFilteredDataSourceMetrics:
         call_args = mock_metrics.increment_counter.call_args_list
         counter_names = [c[0][0] for c in call_args]
         assert "bioetl_filter_ids_duplicates_total" in counter_names
+        mock_metrics.increment_counter.assert_any_call(
+            "bioetl_filter_ids_duplicates_total",
+            1,
+            {"pipeline": "test_pipeline", "source_kind": "csv_single_column"},
+        )
 
     @pytest.mark.asyncio
     async def test_no_metrics_when_metrics_is_none(
@@ -865,6 +875,10 @@ class TestFilteredDataSourceMetrics:
         counter_names = [call.args[0] for call in calls]
         assert "bioetl_filter_combinations_loaded_total" in counter_names
         assert counter_names.count("bioetl_filter_ids_loaded_total") == 2
+        for call in calls:
+            if call.args[0].startswith("bioetl_filter_"):
+                assert call.args[2]["source_kind"] == "csv_multi_column"
+                assert "source_file" not in call.args[2]
 
     @pytest.mark.asyncio
     async def test_multi_column_metrics_are_compatible_with_prometheus_adapter(

@@ -423,6 +423,75 @@ def test_collect_metric_inventory_detects_runtime_metric_without_registry(
     assert report["runtime_without_registry"] == ["bioetl_unregistered_total"]
 
 
+def test_collect_metric_inventory_detects_direct_label_contract_violations(
+    tmp_path: Path,
+    monkeypatch: object,
+) -> None:
+    monkeypatch.setattr(
+        inventory,
+        "REGISTERED_PROMETHEUS_METRIC_NAMES",
+        frozenset({"bioetl_registered_total"}),
+    )
+    monkeypatch.setattr(
+        inventory,
+        "REGISTERED_PROMETHEUS_METRIC_LABELS",
+        {"bioetl_registered_total": frozenset({"pipeline", "run_type"})},
+    )
+
+    runtime_dir = tmp_path / "src" / "bioetl" / "application"
+    runtime_dir.mkdir(parents=True)
+    (runtime_dir / "emitters.py").write_text(
+        'metrics.increment_counter("bioetl_registered_total", 1, {"pipeline": "p", "extra": "x"})\n',
+        encoding="utf-8",
+    )
+
+    report = inventory.collect_metric_inventory(tmp_path)
+
+    violations = report["runtime_label_contract_violations"]
+    assert isinstance(violations, list)
+    assert len(violations) == 1
+    assert "bioetl_registered_total @ src/bioetl/application/emitters.py:1" in (
+        violations[0]
+    )
+    assert "missing=['run_type']" in violations[0]
+    assert "extra=['extra']" in violations[0]
+
+
+def test_collect_metric_inventory_accepts_matching_direct_label_contracts(
+    tmp_path: Path,
+    monkeypatch: object,
+) -> None:
+    monkeypatch.setattr(
+        inventory,
+        "REGISTERED_PROMETHEUS_METRIC_NAMES",
+        frozenset({"bioetl_registered_total"}),
+    )
+    monkeypatch.setattr(
+        inventory,
+        "REGISTERED_PROMETHEUS_METRIC_LABELS",
+        {"bioetl_registered_total": frozenset({"pipeline", "run_type"})},
+    )
+
+    runtime_dir = tmp_path / "src" / "bioetl" / "application"
+    runtime_dir.mkdir(parents=True)
+    (runtime_dir / "emitters.py").write_text(
+        "\n".join(
+            [
+                'metrics.increment_counter("bioetl_registered_total", 1, labels={',
+                '    "pipeline": "p",',
+                '    "run_type": "incremental",',
+                "})",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    report = inventory.collect_metric_inventory(tmp_path)
+
+    assert report["runtime_label_contract_violations"] == []
+
+
 def test_validate_metric_inventory_reports_unallowed_drift() -> None:
     report = {
         "registered_without_runtime": ["bioetl_allowed_total", "bioetl_dead_total"],
@@ -431,6 +500,7 @@ def test_validate_metric_inventory_reports_unallowed_drift() -> None:
         "documented_without_registry": ["bioetl_doc_gap_total"],
         "rules_without_registry": [],
         "runtime_cardinality_review_required": ["bioetl_hotspot_total"],
+        "runtime_label_contract_violations": ["bioetl_bad_total @ src/x.py:1"],
     }
 
     violations = inventory.validate_metric_inventory(
@@ -446,6 +516,7 @@ def test_validate_metric_inventory_reports_unallowed_drift() -> None:
         "registered_without_runtime": ["bioetl_dead_total"],
         "runtime_without_registry": ["bioetl_runtime_gap_total"],
         "runtime_cardinality_review_required": ["bioetl_hotspot_total"],
+        "runtime_label_contract_violations": ["bioetl_bad_total @ src/x.py:1"],
     }
 
 
