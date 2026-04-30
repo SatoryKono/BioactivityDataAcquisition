@@ -21,7 +21,7 @@ from bioetl.infrastructure.adapters.openalex._filter_fetch_requests import (
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
     from bioetl.infrastructure.adapters.openalex.cursor_flow import (
-        OpenAlexCursorFlowService,
+        OpenAlexCursorFlow,
     )
     from bioetl.infrastructure.adapters.openalex.fallback_orchestrator import (
         OpenAlexFallbackOrchestrator,
@@ -37,7 +37,7 @@ class OpenAlexAdapterFilterFetchMixin:
     logger: LoggerPort
     _logger: LoggerPort
     _query_executor: OpenAlexQueryExecutor
-    _cursor_flow: OpenAlexCursorFlowService
+    _cursor_flow: OpenAlexCursorFlow
     _fallback_orchestrator: OpenAlexFallbackOrchestrator
 
     @staticmethod

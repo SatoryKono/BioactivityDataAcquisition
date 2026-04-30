@@ -7,9 +7,7 @@ from unittest.mock import MagicMock
 import polars as pl
 import pytest
 
-from bioetl.application.composite.column_service import (
-    ColumnOrderService as ColumnOrderer,
-)
+from bioetl.application.composite.column_service import ColumnOrderService
 from bioetl.application.composite.column_renamer import ColumnRenamer
 from bioetl.application.core.record_normalization_processor import (
     RecordNormalizationProcessor,
@@ -36,9 +34,9 @@ def renamer(mock_logger: MagicMock) -> ColumnRenamer:
 
 
 @pytest.fixture
-def orderer(mock_logger: MagicMock) -> ColumnOrderer:
-    """Create ColumnOrderer instance."""
-    return ColumnOrderer(mock_logger)
+def orderer(mock_logger: MagicMock) -> ColumnOrderService:
+    """Create ColumnOrderService instance."""
+    return ColumnOrderService(mock_logger)
 
 
 @pytest.fixture
@@ -80,7 +78,7 @@ class TestFullPipelineColumnOrder:
     def test_full_pipeline_column_order(
         self,
         renamer: ColumnRenamer,
-        orderer: ColumnOrderer,
+        orderer: ColumnOrderService,
         seed_df: pl.DataFrame,
         enricher_crossref_df: pl.DataFrame,
     ) -> None:
@@ -131,7 +129,7 @@ class TestFullPipelineColumnOrder:
     def test_provider_order_within_group(
         self,
         renamer: ColumnRenamer,
-        orderer: ColumnOrderer,
+        orderer: ColumnOrderService,
     ) -> None:
         """Within same semantic group, chembl comes before crossref."""
         # Create DataFrame with multiple providers for same field
@@ -156,7 +154,7 @@ class TestFullPipelineColumnOrder:
     def test_expected_column_order_publication(
         self,
         renamer: ColumnRenamer,
-        orderer: ColumnOrderer,
+        orderer: ColumnOrderService,
     ) -> None:
         """Verify expected column order for publication composite."""
         df = pl.DataFrame(
@@ -292,7 +290,7 @@ class TestEdgeCases:
     """Tests for edge cases."""
 
     def test_empty_dataframe(
-        self, renamer: ColumnRenamer, orderer: ColumnOrderer
+        self, renamer: ColumnRenamer, orderer: ColumnOrderService
     ) -> None:
         """Empty DataFrame handled correctly."""
         df = pl.DataFrame()
@@ -302,7 +300,7 @@ class TestEdgeCases:
         assert len(ordered.columns) == 0
 
     def test_only_system_columns(
-        self, renamer: ColumnRenamer, orderer: ColumnOrderer
+        self, renamer: ColumnRenamer, orderer: ColumnOrderService
     ) -> None:
         """DataFrame with only system columns."""
         df = pl.DataFrame(
@@ -339,7 +337,7 @@ class TestDataPreservation:
         assert result["doi"].to_list() == ["10.1/test"]
 
     def test_data_values_preserved_through_ordering(
-        self, orderer: ColumnOrderer
+        self, orderer: ColumnOrderService
     ) -> None:
         """Data values are preserved after ordering."""
         df = pl.DataFrame(
@@ -360,7 +358,7 @@ class TestDataPreservation:
     def test_row_count_preserved(
         self,
         renamer: ColumnRenamer,
-        orderer: ColumnOrderer,
+        orderer: ColumnOrderService,
         seed_df: pl.DataFrame,
     ) -> None:
         """Row count is preserved through full pipeline."""
@@ -376,7 +374,7 @@ class TestMultipleEnrichers:
     """Tests for scenarios with multiple enrichers."""
 
     def test_three_providers_merge_correctly(
-        self, renamer: ColumnRenamer, orderer: ColumnOrderer
+        self, renamer: ColumnRenamer, orderer: ColumnOrderService
     ) -> None:
         """Columns from three providers merge and order correctly."""
         # Seed from ChEMBL
@@ -522,7 +520,9 @@ class TestQualifiedColumnHandling:
         # Should not create double-qualified name
         assert "crossref.publication.chembl.publication.title" not in result.columns
 
-    def test_qualified_columns_grouped_by_field(self, orderer: ColumnOrderer) -> None:
+    def test_qualified_columns_grouped_by_field(
+        self, orderer: ColumnOrderService
+    ) -> None:
         """Qualified columns are grouped by their field semantic group."""
         df = pl.DataFrame(
             {

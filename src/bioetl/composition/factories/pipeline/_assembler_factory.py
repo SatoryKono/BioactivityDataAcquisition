@@ -57,7 +57,7 @@ from bioetl.domain.ports import (
     PipelineCreateRunnerRequest,
     TracingPort,
 )
-from bioetl.domain.services import IdentityService
+from bioetl.domain.services import EntityIdentityGenerator
 from bioetl.domain.types import GoldSchemaType
 from bioetl.infrastructure.config import Settings
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
@@ -131,7 +131,7 @@ class GenericPipelineFactory[TPipeline: "BasePipeline"]:
         metrics: MetricsPort | None = None,
         silver_filters: SilverFilterConfig | None = None,
         gold_filters: GoldFilterConfig | None = None,
-        identity_service: IdentityService | None = None,
+        identity_service: EntityIdentityGenerator | None = None,
         pii_hasher: PiiHasherPort | None = None,
         data_normalizer: DataNormalizationPort | None = None,
         contract_policy: ContractPolicyProtocol | None = None,

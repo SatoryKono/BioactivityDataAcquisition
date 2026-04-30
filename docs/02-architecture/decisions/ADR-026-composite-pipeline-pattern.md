@@ -583,7 +583,7 @@ class ConflictResolution(str, Enum):
 ### Implementation
 
 - `ColumnRenamer`: Переименование колонок в qualified format
-- `ColumnOrderer`: Упорядочивание колонок по семантическим группам
+- `ColumnOrderService`: Каноническое упорядочивание колонок по семантическим группам и source-priority rules
 - `ColumnQualifier`: Value object для qualified имён
 - `ColumnOrderConfig`: Конфигурация семантических групп
 
@@ -606,7 +606,7 @@ class ConflictResolution(str, Enum):
 ### References
 
 - ColumnRenamer: `src/bioetl/application/composite/column_renamer.py`
-- ColumnOrderer: `src/bioetl/application/composite/column_orderer.py`
+- ColumnOrderService: `src/bioetl/application/composite/column_service.py`
 - ColumnQualifier: `src/bioetl/domain/value_objects/column_qualifier.py`
 - ColumnOrderConfig: `src/bioetl/domain/value_objects/column_order.py`
 

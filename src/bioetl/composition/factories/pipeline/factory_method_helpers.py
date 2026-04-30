@@ -64,7 +64,7 @@ from bioetl.domain.ports import (
     PiiHasherPort,
     TracingPort,
 )
-from bioetl.domain.services import IdentityService
+from bioetl.domain.services import EntityIdentityGenerator
 from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config
 
 TPipeline = TypeVar("TPipeline", bound="BasePipeline")
@@ -105,7 +105,7 @@ def create_transformer_instance(
     metrics: MetricsPort | None = None,
     silver_filters: SilverFilterConfig | None = None,
     gold_filters: GoldFilterConfig | None = None,
-    identity_service: IdentityService | None = None,
+    identity_service: EntityIdentityGenerator | None = None,
     pii_hasher: PiiHasherPort | None = None,
     data_normalizer: DataNormalizationPort | None = None,
     contract_policy: ContractPolicyProtocol | None = None,

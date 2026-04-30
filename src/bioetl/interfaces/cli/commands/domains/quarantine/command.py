@@ -23,7 +23,7 @@ SILVER_FILTER_ERROR_CODE = "FILTERED_OUT_SILVER"
 
 def get_quarantine_manager(pipeline: str) -> _QuarantineManager:
     """Load the quarantine manager through composition on demand."""
-    from bioetl.composition.health_api import get_quarantine_manager as _impl
+    from bioetl.composition.health_api import get_quarantine_runtime_service as _impl
 
     return cast(_QuarantineManager, _impl(pipeline))
 

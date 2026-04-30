@@ -28,7 +28,7 @@ def test_pubchem_helper_modules_expose_contract_symbols() -> None:
         response_mapper,
     )
 
-    assert "PubChemFetchFlowService" in fetch_flow.__all__
+    assert "PubChemFetchFlow" in fetch_flow.__all__
     assert "normalize_pubchem_results" in response_mapper.__all__
     assert "build_compound_name_endpoint" in query_builder.__all__
     assert "is_limit_reached" in policy_helper.__all__

@@ -24,7 +24,7 @@ Cross-reference
 ---------------
 For cross-provider metadata normalization (author, DOI, PMID, date, text)
 see :mod:`bioetl.domain.services.data_normalization_service`
-(``DefaultDataNormalizationService``).
+(``DefaultDataNormalizer``).
 
 Pure domain service (no I/O) per RULES.md §1.1.
 """

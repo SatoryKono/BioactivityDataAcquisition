@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
     from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
 
-__all__ = ["PubChemFetchFlowService"]
+__all__ = ["PubChemFetchFlow"]
 
 
 class _RequestRecorder(Protocol):
@@ -26,7 +26,7 @@ class _RequestRecorder(Protocol):
 
 
 @dataclass(slots=True)
-class PubChemFetchFlowService:
+class PubChemFetchFlow:
     """Execute PubChem API fetches with timing, limiter, breaker and telemetry."""
 
     rate_limiter: TokenBucketRateLimiter

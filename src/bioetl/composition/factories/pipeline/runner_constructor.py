@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from bioetl.application.core.wiring.factory import (
     BasePipeline,
     BatchExecutor,
-    CheckpointManagerService,
+    CheckpointRuntimeService,
     LockCoordinator,
     PipelineRunner,
     PipelineRunnerDependencies,
@@ -25,7 +25,7 @@ from bioetl.composition.observability import ObservabilityBundle
 class RunnerAssemblyParts:
     """Concrete runner collaborators assembled before PipelineRunner creation."""
 
-    checkpoint_manager: CheckpointManagerService
+    checkpoint_manager: CheckpointRuntimeService
     lifecycle_service: MedallionLifecycleService
     lock_manager: LockCoordinator
     preflight_service: PreflightService
@@ -48,7 +48,7 @@ def create_pipeline_runner(
     pipeline: BasePipeline,
     observability: ObservabilityBundle,
     executor: BatchExecutor,
-    checkpoint_manager: CheckpointManagerService,
+    checkpoint_manager: CheckpointRuntimeService,
     lock_manager: LockCoordinator,
     preflight_service: PreflightService,
     postrun_service: PostrunService,

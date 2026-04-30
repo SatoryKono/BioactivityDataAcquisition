@@ -48,7 +48,7 @@ if TYPE_CHECKING:
         PublicationMetadataStrategy,
         TracingPort,
     )
-    from bioetl.domain.services import IdentityService
+    from bioetl.domain.services import EntityIdentityGenerator
     from bioetl.domain.types import BronzeRecord, JsonDict, PrimaryId, SilverRecord
 
 
@@ -62,7 +62,7 @@ class BasePublicationTransformerContext:
     gold_filters: GoldFilterConfig | None = None
     tracer: TracingPort | None = None
     metrics: MetricsPort | None = None
-    identity_service: IdentityService | None = None
+    identity_service: EntityIdentityGenerator | None = None
     pii_hasher: PiiHasherPort | None = None
     dependencies: TransformerDependencyContext | None = None
     data_extractor: DataExtractorStrategy | None = None
@@ -127,7 +127,7 @@ def _coerce_publication_transformer_init(
         tracer=cast("TracingPort | None", kwargs.pop("tracer", None)),
         metrics=cast("MetricsPort | None", kwargs.pop("metrics", None)),
         identity_service=cast(
-            "IdentityService | None",
+            "EntityIdentityGenerator | None",
             kwargs.pop("identity_service", None),
         ),
         pii_hasher=cast("PiiHasherPort | None", kwargs.pop("pii_hasher", None)),

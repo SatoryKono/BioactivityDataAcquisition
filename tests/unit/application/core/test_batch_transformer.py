@@ -30,7 +30,7 @@ from bioetl.application.core.transformer_runtime.state import (
 from bioetl.application.core.config import RecordProcessorConfig
 from bioetl.application.core.quarantine_manager import (
     FilteredQuarantineEntry,
-    QuarantineManagerService,
+    QuarantineRuntimeService,
 )
 from bioetl.domain.config import DQConfig
 from bioetl.domain.context import PipelineContext
@@ -61,7 +61,7 @@ def mock_error_classifier():
 @pytest.fixture
 def mock_quarantine_manager():
     """Create mock quarantine manager."""
-    manager = MagicMock(spec=QuarantineManagerService)
+    manager = MagicMock(spec=QuarantineRuntimeService)
     manager.quarantine_record = AsyncMock()
     manager.quarantine_records = AsyncMock()
     manager.quarantine_filtered_record = AsyncMock()

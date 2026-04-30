@@ -34,7 +34,7 @@ if TYPE_CHECKING:
     from bioetl.domain.entities import BaseEntity
     from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
     from bioetl.domain.ports import MetricsPort, PiiHasherPort, TracingPort
-    from bioetl.domain.services import IdentityService
+    from bioetl.domain.services import EntityIdentityGenerator
     from bioetl.domain.types import BronzeRecord, PrimaryId, SilverRecord
 
 
@@ -73,7 +73,7 @@ class BaseChemblTransformer(BaseTransformer):
         gold_filters: GoldFilterConfig | None = None,
         tracer: TracingPort | None = None,
         metrics: MetricsPort | None = None,
-        identity_service: IdentityService | None = None,
+        identity_service: EntityIdentityGenerator | None = None,
         pii_hasher: PiiHasherPort | None = None,
         dependencies: TransformerDependencyContext | None = None,
     ) -> None:
@@ -90,7 +90,7 @@ class BaseChemblTransformer(BaseTransformer):
             identity_service: Service for computing entity IDs and content hashes.
             pii_hasher: Optional PII hasher for hashing author names (RULES.md §5.4).
             data_normalizer: Data normalization service for text normalization
-                (DOI, PMID, authors, HTML). Defaults to DataNormalizationService.
+                (DOI, PMID, authors, HTML). Defaults to DefaultDataNormalizer.
             contract_policy: Optional pipeline contract policy for field renaming
                 and hash include/exclude rules.
 

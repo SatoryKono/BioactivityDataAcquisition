@@ -5,11 +5,8 @@ from __future__ import annotations
 from collections.abc import Callable, Sequence
 from typing import TYPE_CHECKING, Protocol
 
-# ColumnPriorityOrderer imported for backward compatibility during migration
-from bioetl.application.composite.column_priority_orderer import (
-    ColumnPriorityOrderer,
-)
 from bioetl.application.composite.column_service import ColumnOrderService
+from bioetl.application.composite.join_planner_helpers import parse_pipeline_name
 
 if TYPE_CHECKING:
     import polars as pl
@@ -135,7 +132,7 @@ def seed_prefix(seed_pipeline: str | None) -> str | None:
         return None
 
     try:
-        provider, entity = ColumnPriorityOrderer._parse_pipeline_name(seed_pipeline)
+        provider, entity = parse_pipeline_name(seed_pipeline)
         return f"{provider}.{entity}."
     except ValueError:
         return None
@@ -147,7 +144,7 @@ class CoalescePolicyService:
     def __init__(
         self,
         logger: LoggerPort,
-        priority_orderer: ColumnPriorityOrderer | None = None,
+        priority_orderer: _ColumnPriorityProvider | None = None,
         order_service: ColumnOrderService | None = None,
     ) -> None:
         self._logger = logger

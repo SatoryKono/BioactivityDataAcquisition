@@ -1,4 +1,4 @@
-"""Unit tests for IdentityService.
+"""Unit tests for EntityIdentityGenerator.
 
 Tests cover:
 - Determinism (same input → same hash)
@@ -16,7 +16,11 @@ import pytest
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
 
-from bioetl.domain.services.identity_service import META_FIELDS, IdentityService
+from bioetl.domain.services.identity_service import (
+    META_FIELDS,
+    EntityIdentityGenerator,
+    IdentityService,
+)
 
 
 _HASH_SAFE_TEXT = st.text(
@@ -43,12 +47,12 @@ _HASH_SAFE_SCALAR = st.one_of(
 )
 
 
-class TestIdentityServiceDeterminism:
+class TestEntityIdentityGeneratorDeterminism:
     """Test determinism of content hash generation."""
 
     def test_same_input_produces_same_hash(self) -> None:
         """Same input should always produce the same content hash."""
-        service = IdentityService()
+        service = EntityIdentityGenerator()
         record = {"field_a": "value1", "field_b": 42, "field_c": 3.14}
 
         hash1 = service.compute_content_hash("chembl", record)
@@ -61,7 +65,7 @@ class TestIdentityServiceDeterminism:
 
     def test_different_providers_produce_different_hashes(self) -> None:
         """Different providers should produce different hashes for same data."""
-        service = IdentityService()
+        service = EntityIdentityGenerator()
         record = {"id": "123", "value": 100}
 
         hash_chembl = service.compute_content_hash("chembl", record)
@@ -71,7 +75,7 @@ class TestIdentityServiceDeterminism:
 
     def test_field_order_does_not_affect_hash(self) -> None:
         """Field order should not affect hash (canonical JSON uses sorted keys)."""
-        service = IdentityService()
+        service = EntityIdentityGenerator()
         record1 = {"a": 1, "b": 2, "c": 3}
         record2 = {"c": 3, "a": 1, "b": 2}
 
