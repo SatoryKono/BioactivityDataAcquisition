@@ -1,7 +1,8 @@
 """Source configuration normalization utilities.
 
-Transforms old source-config variants into the canonical ``source`` schema
-before pydantic validation.
+Registered source-config compatibility shapes are normalized into the canonical
+``source`` schema before pydantic validation. The accepted and retired shapes
+are governed by ``configs/quality/config_compatibility_registry.yaml``.
 """
 
 from __future__ import annotations
@@ -250,7 +251,7 @@ def _finalize_source_sections(
 def normalize_source_config(
     raw: JsonDict,  # Any: normalizer; input types vary
 ) -> JsonDict:  # Any: normalizer; input types vary
-    """Normalize source config across legacy/new schemas before validation.
+    """Normalize registered source config aliases before validation.
 
     Returns:
         Normalized source configuration dictionary ready for Pydantic validation.

@@ -26,6 +26,13 @@ Consolidated agent registry for published docs navigation.
 - Use this catalog for discoverability; verify live runtime behavior in the
   relevant runtime tree before treating any profile note as authoritative.
 
+## Non-Canonical Mirror Notice
+
+`docs/00-project/ai/agents/agents/**` is a published/internal mirror surface.
+It must not define runtime behavior independently from `.codex/agents/**` or
+`.gemini/agents/**`. Edit the active runtime profile first, then refresh this
+mirror when behavior or contributor guidance changes.
+
 ## BioETL Core (8 active agents)
 
 | Agent                    | Model  | Role                                         |

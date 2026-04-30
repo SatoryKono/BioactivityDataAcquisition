@@ -11,6 +11,8 @@ Manage VCR cassette lifecycle for provider integration tests.
 ## Source Of Truth
 
 - Primary instructions: `../../../.codex/skills/vcr-record/SKILL.md`
+- Memory policy: `../../../docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
+- Post-change validation: `../../../docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
 
 ## Workflow
 

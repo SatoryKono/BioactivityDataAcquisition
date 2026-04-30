@@ -20,6 +20,7 @@ INVENTORY_PATH="$REPO_ROOT/configs/quality/pytest_shards.yaml"
 DEFAULT_WORKERS_PER_SHARD=2
 DEFAULT_DIST_MODE="loadfile"
 DEFAULT_COVERAGE_DIR="$REPO_ROOT/.coverage-sharded"
+DEFAULT_COVERAGE_REPORT_DIR="$REPO_ROOT/reports/coverage"
 DEFAULT_PYTEST_CACHE_DIR="$REPO_ROOT/.pytest_cache"
 if [[ -n "${BIOETL_JUNIT_RUN_ID:-}" ]]; then
     DEFAULT_JUNIT_DIR="$REPO_ROOT/reports/quality/test-runs/junit/$BIOETL_JUNIT_RUN_ID"
@@ -31,11 +32,13 @@ DEFAULT_TEST_HEALTH_REPORTS_DIR="$REPO_ROOT/reports/quality/test-runs"
 WORKERS_PER_SHARD="$DEFAULT_WORKERS_PER_SHARD"
 DIST_MODE="$DEFAULT_DIST_MODE"
 COVERAGE_DIR="$DEFAULT_COVERAGE_DIR"
+COVERAGE_REPORT_DIR="${BIOETL_PYTEST_SHARDED_COVERAGE_REPORT_DIR:-$DEFAULT_COVERAGE_REPORT_DIR}"
 PYTEST_CACHE_DIR="$DEFAULT_PYTEST_CACHE_DIR"
 JUNIT_DIR="$DEFAULT_JUNIT_DIR"
 TEST_HEALTH_SUITE="${BIOETL_PYTEST_SHARDED_TEST_HEALTH_SUITE:-coverage-verify}"
 TEST_HEALTH_REPORTS_DIR="${BIOETL_PYTEST_SHARDED_TEST_HEALTH_REPORTS_DIR:-$DEFAULT_TEST_HEALTH_REPORTS_DIR}"
 TEST_HEALTH_ROLLUP_MD="${BIOETL_PYTEST_SHARDED_TEST_HEALTH_ROLLUP_MD:-$TEST_HEALTH_REPORTS_DIR/rollup.md}"
+FORCE_MOUNTED_COVERAGE="${BIOETL_PYTEST_SHARDED_FORCE_COVERAGE:-0}"
 STREAM_LOGS=0
 TAIL_LOGS=0
 DRY_RUN=0
@@ -70,8 +73,12 @@ Options:
   --workers-per-shard N     xdist workers per shard (default: 2)
   --dist MODE               xdist distribution mode (default: loadfile)
   --coverage-dir PATH       Directory for per-shard coverage files
+  --coverage-report-dir PATH
+                            Directory for combined coverage XML/HTML artifacts
   --junit-dir PATH          Directory for per-shard JUnit XML files
                             (default: reports/quality/test-runs/junit/run-TIMESTAMP)
+  --force-mounted-coverage  Keep pytest-cov enabled on /mnt/* checkouts and
+                            move raw per-shard coverage files to /tmp when needed
   --stream                  Stream live shard output to console and log file
   --tail                    Tail shard log files live with shard prefixes
                             Ignored when --stream is also set
@@ -314,6 +321,14 @@ parse_args() {
                 COVERAGE_DIR="$current_value"
                 shift 2
                 ;;
+            --coverage-report-dir)
+                [[ $# -ge 2 ]] || {
+                    echo "[run_pytest_sharded][error] --coverage-report-dir requires a value" >&2
+                    exit 2
+                }
+                COVERAGE_REPORT_DIR="$current_value"
+                shift 2
+                ;;
             --junit-dir)
                 [[ $# -ge 2 ]] || {
                     echo "[run_pytest_sharded][error] --junit-dir requires a value" >&2
@@ -321,6 +336,10 @@ parse_args() {
                 }
                 JUNIT_DIR="$current_value"
                 shift 2
+                ;;
+            --force-mounted-coverage)
+                FORCE_MOUNTED_COVERAGE=1
+                shift
                 ;;
             --stream)
                 STREAM_LOGS=1
@@ -499,6 +518,14 @@ is_wsl_mounted_checkout() {
     return $?
 }
 
+coverage_dir_targets_mounted_checkout() {
+    if [[ "$COVERAGE_DIR" != /* ]]; then
+        return 0
+    fi
+    [[ "$COVERAGE_DIR" == /mnt/* ]]
+    return $?
+}
+
 default_tmp_coverage_dir() {
     local repo_name
     repo_name="$(basename "$REPO_ROOT")"
@@ -524,6 +551,20 @@ normalize_coverage_dir_for_environment() {
         return 0
     fi
 
+    if [[ "$FORCE_MOUNTED_COVERAGE" == "1" ]]; then
+        if [[ "$COVERAGE_DIR" == "$DEFAULT_COVERAGE_DIR" ]] || coverage_dir_targets_mounted_checkout; then
+            local requested_coverage_dir="$COVERAGE_DIR"
+            COVERAGE_DIR="$(default_tmp_coverage_dir)"
+            echo \
+                "[run_pytest_sharded][info] Using temp raw coverage dir $COVERAGE_DIR for mounted WSL checkout $REPO_ROOT (requested: $requested_coverage_dir)" \
+                >&2
+        fi
+        echo \
+            "[run_pytest_sharded][info] Keeping pytest-cov enabled on mounted WSL checkout because --force-mounted-coverage / BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 was requested. Combined reports will be written under $COVERAGE_REPORT_DIR" \
+            >&2
+        return 0
+    fi
+
     if [[ "$COVERAGE_DIR" == "$DEFAULT_COVERAGE_DIR" ]]; then
         COVERAGE_DIR="$(default_tmp_coverage_dir)"
         echo \
@@ -533,7 +574,7 @@ normalize_coverage_dir_for_environment() {
 
     DISABLE_COVERAGE=1
     echo \
-        "[run_pytest_sharded][info] Disabling pytest-cov for mounted WSL checkout to avoid coverage instability under /mnt/* (including sqlite lock/malformed shard data)" \
+        "[run_pytest_sharded][info] Disabling pytest-cov for mounted WSL checkout to avoid coverage instability under /mnt/* (including sqlite lock/malformed shard data). Use --force-mounted-coverage or BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 to keep coverage enabled and persist combined reports under $COVERAGE_REPORT_DIR" \
         >&2
     return 0
 }
@@ -769,6 +810,13 @@ combine_coverage() {
     printf "\n[run_pytest_sharded] Combining coverage files from %s\n" "$COVERAGE_DIR"
     COVERAGE_FILE="$COVERAGE_DIR/.coverage" "$python_bin" -m coverage combine "$COVERAGE_DIR"
     COVERAGE_FILE="$COVERAGE_DIR/.coverage" "$python_bin" -m coverage report
+    mkdir -p "$COVERAGE_REPORT_DIR"
+    rm -f "$COVERAGE_REPORT_DIR/coverage.xml" 2>/dev/null || true
+    rm -rf "$COVERAGE_REPORT_DIR/htmlcov" 2>/dev/null || true
+    COVERAGE_FILE="$COVERAGE_DIR/.coverage" "$python_bin" -m coverage xml -o "$COVERAGE_REPORT_DIR/coverage.xml"
+    COVERAGE_FILE="$COVERAGE_DIR/.coverage" "$python_bin" -m coverage html -d "$COVERAGE_REPORT_DIR/htmlcov"
+    echo "[run_pytest_sharded][ok] Coverage XML: $COVERAGE_REPORT_DIR/coverage.xml"
+    echo "[run_pytest_sharded][ok] Coverage HTML: $COVERAGE_REPORT_DIR/htmlcov/index.html"
     return 0
 }
 

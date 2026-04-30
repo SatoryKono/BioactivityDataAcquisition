@@ -133,12 +133,18 @@ def test_coverage_xml_defaults_route_under_reports_coverage() -> None:
     resilient_runner = (
         ROOT / "scripts" / "engineering" / "ci" / "run_pytest_resilient.py"
     ).read_text(encoding="utf-8")
+    sharded_runner = (
+        ROOT / "scripts" / "engineering" / "dev" / "run_pytest_sharded.sh"
+    ).read_text(encoding="utf-8")
     quality_gate = (
         ROOT / "scripts" / "engineering" / "ci" / "quality_integral_gate.py"
     ).read_text(encoding="utf-8")
 
     assert "xml:reports/coverage/coverage.xml" in resilient_runner
     assert "xml:coverage.xml" not in resilient_runner
+    assert 'DEFAULT_COVERAGE_REPORT_DIR="$REPO_ROOT/reports/coverage"' in sharded_runner
+    assert 'coverage xml -o "$COVERAGE_REPORT_DIR/coverage.xml"' in sharded_runner
+    assert "coverage xml -o coverage.xml" not in sharded_runner
     assert 'default="reports/coverage/coverage.xml"' in quality_gate
     assert 'default="coverage.xml"' not in quality_gate
 
@@ -148,6 +154,9 @@ def test_html_coverage_defaults_route_under_reports_coverage() -> None:
     dev_runner = (ROOT / "scripts" / "engineering" / "dev" / "run_tests.py").read_text(
         encoding="utf-8"
     )
+    sharded_runner = (
+        ROOT / "scripts" / "engineering" / "dev" / "run_pytest_sharded.sh"
+    ).read_text(encoding="utf-8")
     coverage_guide = (
         ROOT / "docs" / "03-guides" / "coverage-configuration.md"
     ).read_text(encoding="utf-8")
@@ -161,12 +170,14 @@ def test_html_coverage_defaults_route_under_reports_coverage() -> None:
 
     assert "--cov-report=html:reports/coverage/htmlcov" in dev_runner
     assert '--cov-report=html",' not in dev_runner
+    assert 'coverage html -d "$COVERAGE_REPORT_DIR/htmlcov"' in sharded_runner
+    assert "coverage html -d htmlcov" not in sharded_runner
     assert "HTML report: reports/coverage/htmlcov/index.html" in dev_runner
     assert "HTML report: htmlcov/index.html" not in dev_runner
     assert "coverage html -d reports/coverage/htmlcov" in coverage_guide
     assert "coverage html -d htmlcov" not in coverage_guide
-    assert "coverage html -d reports/coverage/htmlcov" in testing_guide
-    assert "coverage html -d htmlcov" not in testing_guide
+    assert "reports/coverage/htmlcov/index.html" in testing_guide
+    assert "reports/coverage/htmlcov" in testing_guide
     assert "reports/coverage/htmlcov/" in routed_outputs
 
 

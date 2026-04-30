@@ -49,8 +49,15 @@ pytest directly:
 
 ```powershell
 $env:PYTHONPATH="src"
-bash scripts/engineering/dev/run_pytest_sharded.sh --stream --keep-coverage-files --coverage-dir .coverage-sharded -- -vv --cov-report=html
+BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream --keep-coverage-files --coverage-dir .coverage-sharded -- -vv --cov-report=term-missing
 ```
+
+When coverage stays enabled, the sharded runner now saves combined artifacts to
+`reports/coverage/coverage.xml` and `reports/coverage/htmlcov/index.html`.
+Mounted WSL checkouts keep raw per-shard coverage files under `/tmp/...` when
+`BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1` (or `--force-mounted-coverage`) is
+used, so coverage reports stay stable while final artifacts remain under
+`reports/coverage/`.
 
 The same execution contract is represented in `test_lanes.execution_defaults`;
 future test-health tooling should preserve the logical `suite_name` while
@@ -438,8 +445,13 @@ make test-architecture
 # Точечное обновление VCR кассет
 uv run python -m pytest tests/integration/adapters/test_pubmed.py --vcr-record=new_episodes -v
 
-# Генерация HTML coverage report после coverage-run
-uv run coverage html -d reports/coverage/htmlcov
+# Sharded coverage run with persisted XML/HTML reports
+BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 \
+bash scripts/engineering/dev/run_pytest_sharded.sh \
+  --stream \
+  --keep-coverage-files \
+  --coverage-dir .coverage-sharded \
+  -- -vv --cov-report=term-missing
 ```
 
 ### 4.2. Integration / E2E execution matrix
@@ -526,14 +538,14 @@ actionable in CI artifacts.
 | 3   | `make test-fast`                                   | Получить быстрый feedback для unit + architecture                                        |
 | 4   | `make test`                                        | Выполнить стабильный локальный прогон с coverage gate 85%                                |
 | 5   | `make test-cov-fast-stable`                        | Выполнить ускоренный split-run для локального coverage анализа                           |
-| 6   | `uv run coverage html -d reports/coverage/htmlcov` | Сгенерировать HTML coverage report при необходимости                                     |
+| 6   | `BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream --keep-coverage-files --coverage-dir .coverage-sharded -- -vv --cov-report=term-missing` | Выполнить sharded coverage-run c сохранением `reports/coverage/coverage.xml` и `reports/coverage/htmlcov/` |
 | 7   | `uv run python -m pytest tests/e2e/ -m e2e -v`     | Отдельно запустить E2E в Local-Only режиме                                               |
 
 **Примечания:**
 
 - Если нужен быстрый coverage-run без полного serial suite, используйте `make test-cov-fast-stable`.
 - Для корректного прохождения трассировки и мониторинга установите опциональные зависимости (`psutil`, `opentelemetry-*`).
-- `make test` не генерирует `reports/coverage/htmlcov/` автоматически; HTML-отчёт создаётся отдельной командой `uv run coverage html -d reports/coverage/htmlcov`.
+- `make test` по-прежнему не генерирует `reports/coverage/htmlcov/` автоматически; для persisted local coverage artifacts используйте sharded runner с `BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1` или `--force-mounted-coverage`.
 - В CI используется `.github/workflows/tests.yml`, а локальный `make test-ci` служит способом воспроизвести resilient flow вручную.
 - В mixed Windows + WSL checkout `.venv` не должен быть общим между PowerShell и WSL: используйте `.venv-win` и внешний WSL venv через `setup_env_windows.ps1` / `setup_env_wsl.sh`.
 

@@ -2,7 +2,8 @@
 
 This module keeps source loading flow explicit and narrow:
 read -> normalize -> validate -> map.
-Compatibility migration details are delegated to source normalizers.
+Compatibility migration details are delegated to source normalizers and governed
+by configs/quality/config_compatibility_registry.yaml.
 """
 
 from __future__ import annotations
@@ -54,7 +55,7 @@ def read_source_config_payload(
 def normalize_source_config_payload(
     payload: JsonDict,  # Any: YAML config has heterogeneous values
 ) -> JsonDict:  # Any: YAML config has heterogeneous values
-    """Normalize source payload (legacy/new) to canonical schema.
+    """Normalize registered source compatibility shapes to canonical schema.
 
     Returns:
         Normalized source configuration dictionary in canonical format.

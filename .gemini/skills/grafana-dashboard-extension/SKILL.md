@@ -9,6 +9,12 @@ ______________________________________________________________________
 Use this skill when the task involves changing, extending, validating, or
 reviewing Grafana dashboards in BioETL.
 
+## BioETL Runtime Policy
+
+- Project runtime contract: `../../../AGENTS.md`
+- Memory policy: `../../../docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
+- Post-change validation: `../../../docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
+
 Default to repo dashboard mode first:
 
 - shipped dashboards under `grafana/dashboards/*.json`

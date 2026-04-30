@@ -109,9 +109,9 @@ ______________________________________________________________________
 │  ┌──────────────────────────────────────────────────────────┐    │
 │  │  Provisioning (автоматическая загрузка)                    │    │
 │  │  - Datasources: Prometheus + Quarantine Explorer          │    │
-│  │  - Dashboards: 5 JSON файлов (bioetl.yaml)               │    │
+│  │  - Dashboards: 7 JSON файлов (bioetl.yaml)               │    │
 │  │  - Обновление каждые 30 секунд                            │    │
-│  │  - allowUiUpdates: true                                   │    │
+│  │  - allowUiUpdates: false для production dashboard-as-code  │    │
 │  └──────────────────────────────────────────────────────────┘    │
 │                                                                   │
 │  Дашборды (shipped):                                             │
@@ -119,6 +119,7 @@ ______________________________________________________________________
 │  - 2. Runtime (bioetl-runtime)                                   │
 │  - 3. Provider Health (bioetl-provider-health-v2)                │
 │  - 4. Data Quality (bioetl-dq-v2)                                │
+│  - Control Plane v1 (bioetl-control-plane-v1)                    │
 │  - 5. Silver Reject Explorer (bioetl-silver-reject-explorer)     │
 │  - 6. Workflow Overview (bioetl-workflow-overview)               │
 └──────────────────────────────────────────────────────────────────┘
@@ -354,7 +355,7 @@ providers:
     type: file
     disableDeletion: false
     updateIntervalSeconds: 30       # Проверяет изменения каждые 30 сек
-    allowUiUpdates: true            # Можно редактировать через UI
+    allowUiUpdates: false           # Production source of truth is Git JSON
     options:
       path: /var/lib/grafana/dashboards   # Mount point из docker-compose
 ```
@@ -1387,6 +1388,13 @@ Entity-level gauge `bioetl_dq_validation_score` сохраняется отде�
 
 - `bioetl_records_processed_total{stage="quarantined"}` может встречаться как legacy/support signal в части runtime paths.
 - shipped dashboards и alerting должны опираться на `bioetl_dq_records_quarantined_total`, когда речь идёт именно о DQ quarantine.
+
+Silver filter rejects имеют две связанные поверхности: stage-total
+`bioetl_records_processed_total{stage="filtered_out"}` и bounded breakdown
+`bioetl_silver_filter_rejections_total{pipeline, run_type, reason_code, rule_type, field}`.
+Shipped rules публикуют `bioetl_silver_filter_reject_total_mismatch_15m` и alert
+`BioETLSilverFilterRejectAccountingMismatch`, чтобы эти surfaces не расходились
+молча.
 
 ______________________________________________________________________
 

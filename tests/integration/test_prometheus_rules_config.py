@@ -369,7 +369,9 @@ _TUNED_ALERT_EXPECTATIONS: dict[str, dict[str, object]] = {
         "for": "2m",
         "fragments": [
             "bioetl_pipeline_health_check_passed",
+            "bioetl_pipeline_runs_total",
             'component="data_source"',
+            "unless on (pipeline)",
             "[15m]",
             "== 0",
         ],
@@ -377,7 +379,13 @@ _TUNED_ALERT_EXPECTATIONS: dict[str, dict[str, object]] = {
     "BioETLPipelineInfrastructureValidationFailed": {
         "severity": "critical",
         "for": "2m",
-        "fragments": ["bioetl_infrastructure_validated", "[15m]", "< 1"],
+        "fragments": [
+            "bioetl_infrastructure_validated",
+            "bioetl_pipeline_runs_total",
+            "unless on (pipeline)",
+            "[15m]",
+            "< 1",
+        ],
     },
     "BioETLPipelineRunFailed": {
         "severity": "critical",
@@ -393,11 +401,17 @@ _TUNED_ALERT_EXPECTATIONS: dict[str, dict[str, object]] = {
         "severity": "warning",
         "for": "5m",
         "fragments": [
-            "bioetl_health_check_failures_total",
-            "bioetl_health_check_success_total",
-            "bioetl_health_check_degraded_total",
-            "[15m]",
+            "bioetl_provider_health_check_failures_15m",
+            "bioetl_provider_health_check_total_15m",
             "> 0.2",
+        ],
+    },
+    "BioETLSilverFilterRejectAccountingMismatch": {
+        "severity": "warning",
+        "for": "5m",
+        "fragments": [
+            "bioetl_silver_filter_reject_total_mismatch_15m",
+            "> 0",
         ],
     },
     "BioETLProviderRetriesExhausted": {
@@ -658,8 +672,16 @@ def test_runtime_dashboard_recording_rules_exist_and_reference_source_metrics() 
         "bioetl_runtime_alert_condition_ledger_append_failed_15m": "bioetl_control_plane_ledger_appends_total",
         "bioetl_runtime_alert_condition_checkpoint_incompatible_30m": "bioetl_checkpoint_compatibility_events_total",
         "bioetl_runtime_alert_condition_lineage_refs_missing_15m": "bioetl_lineage_refs_missing_total",
-        "bioetl_runtime_alert_condition_provider_failure_rate_high_15m": "bioetl_health_check_failures_total",
+        "bioetl_provider_health_check_provider_universe_15m": "bioetl_health_check_success_total",
+        "bioetl_provider_health_check_success_15m": "bioetl_health_check_success_total",
+        "bioetl_provider_health_check_degraded_15m": "bioetl_health_check_degraded_total",
+        "bioetl_provider_health_check_failures_15m": "bioetl_health_check_failures_total",
+        "bioetl_provider_health_check_total_15m": "bioetl_provider_health_check_success_15m",
+        "bioetl_runtime_alert_condition_provider_failure_rate_high_15m": "bioetl_provider_health_check_failures_15m",
         "bioetl_runtime_alert_condition_provider_retries_exhausted_1h": "bioetl_data_source_retry_exhausted_total",
+        "bioetl_silver_filter_rejects_stage_total_15m": "bioetl_records_processed_total",
+        "bioetl_silver_filter_rejections_breakdown_total_15m": "bioetl_silver_filter_rejections_total",
+        "bioetl_silver_filter_reject_total_mismatch_15m": "bioetl_silver_filter_rejects_stage_total_15m",
     }
 
     missing = [name for name in expected if name not in record_map]
@@ -712,6 +734,92 @@ def test_rule_expressions_reference_declared_metrics_or_recording_rules() -> Non
     assert not errors, (
         "Prometheus rules reference undeclared metric names:\n" + "\n".join(errors)
     )
+
+
+def test_pipeline_health_rules_fail_closed_on_absent_expected_series() -> None:
+    """Pipeline health rules must detect observed runs with missing health gauges."""
+    payload = _load_rules()
+    record_map = _build_record_map(payload)
+    rule_map = _build_rule_map(payload)
+
+    expectations = {
+        "bioetl_runtime_alert_condition_pipeline_preflight_failed_15m": (
+            "bioetl_pipeline_health_check_passed",
+            'component="data_source"',
+        ),
+        "bioetl_runtime_alert_condition_pipeline_infrastructure_failed_15m": (
+            "bioetl_infrastructure_validated",
+            None,
+        ),
+        "BioETLPipelinePreflightDataSourceFailed": (
+            "bioetl_pipeline_health_check_passed",
+            'component="data_source"',
+        ),
+        "BioETLPipelineInfrastructureValidationFailed": (
+            "bioetl_infrastructure_validated",
+            None,
+        ),
+    }
+
+    for rule_name, (health_metric, component_selector) in expectations.items():
+        rule = record_map.get(rule_name) or rule_map.get(rule_name)
+        assert rule is not None, f"Missing rule {rule_name}"
+        expr = rule.get("expr", "")
+        assert "bioetl_pipeline_runs_total" in expr
+        assert "unless on (pipeline)" in expr
+        assert health_metric in expr
+        if component_selector is not None:
+            assert component_selector in expr
+
+
+def test_provider_failure_rate_rules_are_sparse_counter_safe() -> None:
+    """Provider failure-rate rules must not add sparse outcome counters directly."""
+    payload = _load_rules()
+    record_map = _build_record_map(payload)
+    rule_map = _build_rule_map(payload)
+    rules = [
+        record_map["bioetl_runtime_alert_condition_provider_failure_rate_high_15m"],
+        rule_map["BioETLProviderFailureRateHigh"],
+    ]
+
+    for rule in rules:
+        expr = rule.get("expr", "")
+        assert "bioetl_provider_health_check_failures_15m" in expr
+        assert "bioetl_provider_health_check_total_15m" in expr
+        assert "clamp_min" in expr
+        assert (
+            "increase(bioetl_health_check_success_total[15m]) + increase(" not in expr
+        )
+
+    record_map = _build_record_map(payload)
+    for record_name in (
+        "bioetl_provider_health_check_success_15m",
+        "bioetl_provider_health_check_degraded_15m",
+        "bioetl_provider_health_check_failures_15m",
+    ):
+        expr = record_map[record_name].get("expr", "")
+        assert "bioetl_provider_health_check_provider_universe_15m * 0" in expr
+        assert " or " in expr
+
+
+def test_silver_filter_reject_accounting_has_reconciliation_rule_and_alert() -> None:
+    """Filtered-out stage totals and bounded breakdown totals need drift detection."""
+    payload = _load_rules()
+    record_map = _build_record_map(payload)
+    rule_map = _build_rule_map(payload)
+
+    assert "bioetl_silver_filter_rejects_stage_total_15m" in record_map
+    assert "bioetl_silver_filter_rejections_breakdown_total_15m" in record_map
+    mismatch_rule = record_map["bioetl_silver_filter_reject_total_mismatch_15m"]
+    mismatch_expr = mismatch_rule.get("expr", "")
+    assert "bioetl_silver_filter_rejects_stage_total_15m" in mismatch_expr
+    assert "bioetl_silver_filter_rejections_breakdown_total_15m" in mismatch_expr
+    assert "abs(" in mismatch_expr
+    assert "> bool 0" in mismatch_expr
+
+    alert = rule_map["BioETLSilverFilterRejectAccountingMismatch"]
+    assert "bioetl_silver_filter_reject_total_mismatch_15m" in alert.get("expr", "")
+    assert alert.get("labels", {}).get("severity") == "warning"
 
 
 def test_runtime_and_provider_rules_are_fleet_wide_not_chembl_specific() -> None:
@@ -908,6 +1016,10 @@ def test_dq_and_provider_alerts_reference_expected_metrics() -> None:
             "bioetl_silver_validation_failures_total",
             "docs/05-operations/runbooks/dq-failure-investigation.md",
         ),
+        "BioETLSilverFilterRejectAccountingMismatch": (
+            "bioetl_silver_filter_reject_total_mismatch_15m",
+            "docs/05-operations/runbooks/dq-failure-investigation.md",
+        ),
         "BioETLDataFreshnessLagHigh": (
             "bioetl_data_freshness_seconds",
             "docs/05-operations/runbooks/dq-failure-investigation.md",
@@ -917,7 +1029,7 @@ def test_dq_and_provider_alerts_reference_expected_metrics() -> None:
             "docs/05-operations/runbooks/dq-failure-investigation.md",
         ),
         "BioETLProviderFailureRateHigh": (
-            "bioetl_health_check_failures_total",
+            "bioetl_provider_health_check_failures_15m",
             "docs/05-operations/runbooks/incident-response.md",
         ),
         "BioETLProviderHealthCheckFailuresDetected": (

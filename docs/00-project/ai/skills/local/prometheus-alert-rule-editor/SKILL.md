@@ -9,6 +9,12 @@ ______________________________________________________________________
 Use this skill when editing alert rules and you need correctness, operator
 clarity, and low-noise behavior.
 
+## BioETL Runtime Policy
+
+- Project runtime contract: `../../../AGENTS.md`
+- Memory policy: `../../../docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
+- Post-change validation: `../../../docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
+
 Apply it to both repo-backed rule files and Grafana-managed Prometheus alerts,
 but keep the storage model explicit.
 

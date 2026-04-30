@@ -280,6 +280,22 @@ def _assert_provider_health_variable_contract(
         f"Dashboard {dashboard_path.name} 'provider' query must use "
         "the union of health-check outcome counters"
     )
+    adapter_var = variable_map.get("adapter")
+    assert adapter_var is not None, (
+        f"Dashboard {dashboard_path.name} must define 'adapter' variable for "
+        "circuit-breaker metrics"
+    )
+    adapter_query = adapter_var.get("query", {})
+    adapter_query_text = (
+        adapter_query.get("query", "") if isinstance(adapter_query, dict) else ""
+    )
+    assert "bioetl_circuit_breaker_state" in adapter_query_text, (
+        f"Dashboard {dashboard_path.name} 'adapter' query must use "
+        "circuit-breaker state metric"
+    )
+    assert "adapter" in adapter_query_text, (
+        f"Dashboard {dashboard_path.name} 'adapter' query must select adapter label"
+    )
     assert "pipeline" not in variable_map, (
         f"Dashboard {dashboard_path.name} must not expose misleading 'pipeline' variable"
     )

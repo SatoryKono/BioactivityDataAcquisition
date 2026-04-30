@@ -12,6 +12,8 @@ Manage VCR cassette lifecycle for provider integration tests.
 
 - Canonical runtime entrypoint: this `SKILL.md`
 - Project rules: `../../../AGENTS.md`
+- Memory policy: `../../../docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
+- Post-change validation: `../../../docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
 
 ## Workflow
 
