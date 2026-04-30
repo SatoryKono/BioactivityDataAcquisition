@@ -1,4 +1,4 @@
-"""Unit tests for FsAdrService (filesystem-backed ADR service).
+"""Unit tests for FilesystemAdrCatalog (filesystem-backed ADR catalog).
 
 Tests use tmp_path to create fake ADR markdown files without touching
 the real repository docs. All paths are injected via DI constructor.
@@ -11,7 +11,7 @@ from pathlib import Path
 import pytest
 
 from bioetl.infrastructure.adr.fs_adr_service import (
-    FsAdrService,
+    FilesystemAdrCatalog,
     _extract_meta,
     _extract_with_patterns,
     _iter_adr_files,
@@ -175,23 +175,23 @@ class TestExtractMeta:
 
 
 # ---------------------------------------------------------------------------
-# FsAdrService.list_adrs
+# FilesystemAdrCatalog.list_adrs
 # ---------------------------------------------------------------------------
 
 
 @pytest.mark.unit
-class TestFsAdrServiceListAdrs:
-    """Tests for FsAdrService.list_adrs()."""
+class TestFilesystemAdrCatalogListAdrs:
+    """Tests for FilesystemAdrCatalog.list_adrs()."""
 
     def test_list_empty_directory(self, tmp_path: Path) -> None:
         """Empty directory returns empty list."""
-        service = FsAdrService(base_path=str(tmp_path))
+        service = FilesystemAdrCatalog(base_path=str(tmp_path))
         result = service.list_adrs()
         assert result == []
 
     def test_list_nonexistent_directory(self, tmp_path: Path) -> None:
         """Non-existent directory returns empty list."""
-        service = FsAdrService(base_path=str(tmp_path / "nonexistent"))
+        service = FilesystemAdrCatalog(base_path=str(tmp_path / "nonexistent"))
         result = service.list_adrs()
         assert result == []
 
@@ -201,7 +201,7 @@ class TestFsAdrServiceListAdrs:
         _write_adr(tmp_path, 2, "second", _minimal_adr(2, "Second"))
         _write_adr(tmp_path, 1, "first", _minimal_adr(1, "First"))
 
-        service = FsAdrService(base_path=str(tmp_path))
+        service = FilesystemAdrCatalog(base_path=str(tmp_path))
         result = service.list_adrs()
 
         numbers = [a.number for a in result]
@@ -212,14 +212,14 @@ class TestFsAdrServiceListAdrs:
         _write_adr(
             tmp_path, 1, "first", "# ADR-001: My Real Title\n\n**Status:** Accepted\n"
         )
-        service = FsAdrService(base_path=str(tmp_path))
+        service = FilesystemAdrCatalog(base_path=str(tmp_path))
         result = service.list_adrs()
         assert result[0].title == "ADR-001: My Real Title"
 
     def test_list_falls_back_to_filename_slug(self, tmp_path: Path) -> None:
         """Falls back to filename slug when no H1 found."""
         _write_adr(tmp_path, 1, "my-first-adr", "No h1 here\n\n**Status:** Draft\n")
-        service = FsAdrService(base_path=str(tmp_path))
+        service = FilesystemAdrCatalog(base_path=str(tmp_path))
         result = service.list_adrs()
         # Falls back to slug with dashes replaced by spaces
         assert result[0].title == "my first adr"
@@ -228,7 +228,7 @@ class TestFsAdrServiceListAdrs:
         """Files not matching ADR-XXX-title.md pattern are skipped in list."""
         _write_adr(tmp_path, 1, "valid", _minimal_adr(1, "Valid"))
         (tmp_path / "invalid-name.md").write_text("invalid")
-        service = FsAdrService(base_path=str(tmp_path))
+        service = FilesystemAdrCatalog(base_path=str(tmp_path))
         result = service.list_adrs()
         assert len(result) == 1
         assert result[0].number == 1
@@ -236,24 +236,24 @@ class TestFsAdrServiceListAdrs:
     def test_list_provides_path(self, tmp_path: Path) -> None:
         """AdrInfo includes path to the file."""
         _write_adr(tmp_path, 1, "first", _minimal_adr(1, "First"))
-        service = FsAdrService(base_path=str(tmp_path))
+        service = FilesystemAdrCatalog(base_path=str(tmp_path))
         result = service.list_adrs()
         assert Path(result[0].path).exists()
 
 
 # ---------------------------------------------------------------------------
-# FsAdrService.get_adr
+# FilesystemAdrCatalog.get_adr
 # ---------------------------------------------------------------------------
 
 
 @pytest.mark.unit
-class TestFsAdrServiceGetAdr:
-    """Tests for FsAdrService.get_adr()."""
+class TestFilesystemAdrCatalogGetAdr:
+    """Tests for FilesystemAdrCatalog.get_adr()."""
 
     def test_get_existing_adr(self, tmp_path: Path) -> None:
         """Returns AdrDocument for an existing ADR number."""
         _write_adr(tmp_path, 1, "first", _minimal_adr(1, "First ADR"))
-        service = FsAdrService(base_path=str(tmp_path))
+        service = FilesystemAdrCatalog(base_path=str(tmp_path))
         doc = service.get_adr(1)
         assert doc.number == 1
         assert "First ADR" in doc.title
@@ -262,7 +262,7 @@ class TestFsAdrServiceGetAdr:
 
     def test_get_raises_file_not_found(self, tmp_path: Path) -> None:
         """Raises FileNotFoundError for missing ADR number."""
-        service = FsAdrService(base_path=str(tmp_path))
+        service = FilesystemAdrCatalog(base_path=str(tmp_path))
         with pytest.raises(FileNotFoundError, match="ADR-099"):
             service.get_adr(99)
 
@@ -270,7 +270,7 @@ class TestFsAdrServiceGetAdr:
         """AdrDocument.content includes the full file text."""
         content = _minimal_adr(5, "Fifth ADR")
         _write_adr(tmp_path, 5, "fifth", content)
-        service = FsAdrService(base_path=str(tmp_path))
+        service = FilesystemAdrCatalog(base_path=str(tmp_path))
         doc = service.get_adr(5)
         assert doc.content == content
 
@@ -278,7 +278,7 @@ class TestFsAdrServiceGetAdr:
         """When multiple files match (duplicates), picks lexicographic first."""
         _write_adr(tmp_path, 1, "alpha", _minimal_adr(1, "Alpha ADR"))
         _write_adr(tmp_path, 1, "beta", _minimal_adr(1, "Beta ADR"))
-        service = FsAdrService(base_path=str(tmp_path))
+        service = FilesystemAdrCatalog(base_path=str(tmp_path))
         doc = service.get_adr(1)
         # Should pick alpha (lexicographically first)
         assert "Alpha ADR" in doc.title
@@ -286,23 +286,23 @@ class TestFsAdrServiceGetAdr:
     def test_get_adr_without_h1_uses_stem(self, tmp_path: Path) -> None:
         """When no H1 found, uses file stem as title."""
         _write_adr(tmp_path, 3, "my-slug", "**Status:** Draft\n\nContent")
-        service = FsAdrService(base_path=str(tmp_path))
+        service = FilesystemAdrCatalog(base_path=str(tmp_path))
         doc = service.get_adr(3)
         assert doc.title == "ADR-003-my-slug"
 
 
 # ---------------------------------------------------------------------------
-# FsAdrService.validate
+# FilesystemAdrCatalog.validate
 # ---------------------------------------------------------------------------
 
 
 @pytest.mark.unit
-class TestFsAdrServiceValidate:
-    """Tests for FsAdrService.validate()."""
+class TestFilesystemAdrCatalogValidate:
+    """Tests for FilesystemAdrCatalog.validate()."""
 
     def test_validate_empty_directory(self, tmp_path: Path) -> None:
         """Validates empty directory as valid (no files = no errors)."""
-        service = FsAdrService(base_path=str(tmp_path))
+        service = FilesystemAdrCatalog(base_path=str(tmp_path))
         report = service.validate()
         assert report.valid is True
         assert report.total == 0
@@ -312,7 +312,7 @@ class TestFsAdrServiceValidate:
         """Valid ADR files produce no validation issues."""
         _write_adr(tmp_path, 1, "first", _minimal_adr(1, "First"))
         _write_adr(tmp_path, 2, "second", _minimal_adr(2, "Second"))
-        service = FsAdrService(base_path=str(tmp_path))
+        service = FilesystemAdrCatalog(base_path=str(tmp_path))
         report = service.validate()
         assert report.valid is True
         assert report.total == 2
@@ -322,7 +322,7 @@ class TestFsAdrServiceValidate:
         """Duplicate ADR numbers are flagged as errors."""
         _write_adr(tmp_path, 1, "alpha", _minimal_adr(1, "Alpha"))
         _write_adr(tmp_path, 1, "beta", _minimal_adr(1, "Beta"))
-        service = FsAdrService(base_path=str(tmp_path))
+        service = FilesystemAdrCatalog(base_path=str(tmp_path))
         report = service.validate()
         assert report.errors > 0
         assert report.valid is False
@@ -332,7 +332,7 @@ class TestFsAdrServiceValidate:
     def test_validate_missing_h1_title(self, tmp_path: Path) -> None:
         """ADR without H1 title is flagged as error."""
         _write_adr(tmp_path, 1, "missing-title", "**Status:** Accepted\nNo H1 here\n")
-        service = FsAdrService(base_path=str(tmp_path))
+        service = FilesystemAdrCatalog(base_path=str(tmp_path))
         report = service.validate()
         assert report.errors > 0
         error_messages = [i.message for i in report.issues]
@@ -341,7 +341,7 @@ class TestFsAdrServiceValidate:
     def test_validate_missing_status_is_warning(self, tmp_path: Path) -> None:
         """ADR without status metadata is flagged as warning (not error)."""
         _write_adr(tmp_path, 1, "no-status", "# ADR-001: No Status\n\nContent")
-        service = FsAdrService(base_path=str(tmp_path))
+        service = FilesystemAdrCatalog(base_path=str(tmp_path))
         report = service.validate()
         # Missing status → warning severity
         assert report.valid is True  # no errors, only warnings
@@ -358,7 +358,7 @@ class TestFsAdrServiceValidate:
             "mismatch",
             "# ADR-002: Wrong Number\n\n**Status:** Accepted\n",
         )
-        service = FsAdrService(base_path=str(tmp_path))
+        service = FilesystemAdrCatalog(base_path=str(tmp_path))
         report = service.validate()
         warning_messages = [i.message for i in report.issues if i.severity == "warning"]
         assert any("mismatch" in m.lower() for m in warning_messages)
@@ -370,7 +370,7 @@ class TestFsAdrServiceValidate:
         _write_adr(tmp_path, 2, "no-title", "**Status:** Draft\n")
         _write_adr(tmp_path, 3, "no-status", "# ADR-003: No Status\n")
 
-        service = FsAdrService(base_path=str(tmp_path))
+        service = FilesystemAdrCatalog(base_path=str(tmp_path))
         report = service.validate()
 
         assert report.total == 3
@@ -380,34 +380,34 @@ class TestFsAdrServiceValidate:
     def test_validate_includes_path_in_issues(self, tmp_path: Path) -> None:
         """Validation issues include the file path."""
         _write_adr(tmp_path, 1, "no-title", "**Status:** Draft\n")
-        service = FsAdrService(base_path=str(tmp_path))
+        service = FilesystemAdrCatalog(base_path=str(tmp_path))
         report = service.validate()
         assert all(i.path for i in report.issues)
 
     def test_validate_includes_number_in_issues(self, tmp_path: Path) -> None:
         """Validation issues include the ADR number."""
         _write_adr(tmp_path, 42, "some-adr", "# ADR-042: Title\n")  # missing status
-        service = FsAdrService(base_path=str(tmp_path))
+        service = FilesystemAdrCatalog(base_path=str(tmp_path))
         report = service.validate()
         issues_with_number = [i for i in report.issues if i.number == 42]
         assert len(issues_with_number) > 0
 
 
 # ---------------------------------------------------------------------------
-# FsAdrService default path property
+# FilesystemAdrCatalog default path property
 # ---------------------------------------------------------------------------
 
 
 @pytest.mark.unit
-class TestFsAdrServiceDefaultPath:
+class TestFilesystemAdrCatalogDefaultPath:
     """Tests for default base_path behavior."""
 
     def test_default_base_path(self) -> None:
         """Default base_path is set correctly."""
-        service = FsAdrService()
+        service = FilesystemAdrCatalog()
         assert service.base_path == "docs/02-architecture/decisions"
 
     def test_custom_base_path(self, tmp_path: Path) -> None:
         """Custom base_path is used."""
-        service = FsAdrService(base_path=str(tmp_path))
+        service = FilesystemAdrCatalog(base_path=str(tmp_path))
         assert service.base_path == str(tmp_path)

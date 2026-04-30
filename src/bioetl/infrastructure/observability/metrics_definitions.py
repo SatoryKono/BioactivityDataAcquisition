@@ -126,6 +126,9 @@ from bioetl.infrastructure.observability._metrics_defs_pipeline import (
     TRACED_RUNS_TOTAL,
     TRANSFORM_DURATION_SECONDS,
     TRANSFORM_ERRORS_TOTAL,
+    WORKFLOW_RUNS_TOTAL,
+    WORKFLOW_STEP_DURATION_SECONDS,
+    WORKFLOW_STEP_EVENTS_TOTAL,
 )
 from bioetl.infrastructure.observability._metrics_defs_storage import (
     AUDIT_QUERY_DURATION_SECONDS,

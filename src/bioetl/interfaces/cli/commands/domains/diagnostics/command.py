@@ -24,7 +24,7 @@ from bioetl.interfaces.cli.commands.domains.health.rendering import (
     all_health_results_healthy,
 )
 from bioetl.interfaces.cli.commands.domains.quarantine.support import (
-    _QuarantineManager,
+    _QuarantineRuntimeService,
     _show_quarantine_stats,
 )
 from bioetl.interfaces.cli.commands.domains.shared.inspection_commands import (
@@ -65,7 +65,7 @@ __all__ = [
     "diagnostics_run",
     "get_metrics_operator_profile",
     "get_observability_diagnostics_bundle",
-    "get_quarantine_manager",
+    "get_quarantine_runtime_service",
 ]
 
 _UNAVAILABLE_LINE = "  - unavailable"
@@ -87,11 +87,11 @@ def get_metrics_operator_profile() -> MetricsOperatorProfile:
     return _impl()
 
 
-def get_quarantine_manager(pipeline: str) -> _QuarantineManager:
+def get_quarantine_runtime_service(pipeline: str) -> _QuarantineRuntimeService:
     """Load the quarantine manager through composition on demand."""
-    from bioetl.composition.resources_api import get_quarantine_manager as _impl
+    from bioetl.composition.health_api import get_quarantine_runtime_service as _impl
 
-    return cast(_QuarantineManager, _impl(pipeline))
+    return cast(_QuarantineRuntimeService, _impl(pipeline))
 
 
 def _build_diagnostics_guide_lines() -> list[str]:
@@ -299,7 +299,7 @@ def diagnostics_quarantine(
     bundle = get_observability_diagnostics_bundle()
     resolved_error_code = "FILTERED_OUT_SILVER" if silver_filter_only else error_code
     _show_quarantine_stats(
-        get_quarantine_manager(pipeline),
+        get_quarantine_runtime_service(pipeline),
         pipeline=pipeline,
         output_json=output_json,
         error_code=resolved_error_code,

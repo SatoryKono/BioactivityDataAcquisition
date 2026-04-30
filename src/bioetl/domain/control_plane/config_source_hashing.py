@@ -66,7 +66,7 @@ def compute_raw_sha256(raw_bytes: bytes) -> str:
 def compute_canonical_yaml_sha256(raw_bytes: bytes) -> str:
     """Compute a SHA-256 digest from YAML semantics, ignoring formatting."""
     text = raw_bytes.decode("utf-8")
-    payload = cast(object, yaml.load(text, Loader=_UniqueKeySafeLoader))
+    payload = cast(object, yaml.load(text, Loader=_UniqueKeySafeLoader))  # nosec B506
     canonical_payload = _to_canonical_jsonable(payload)
     serialized = json.dumps(
         canonical_payload,

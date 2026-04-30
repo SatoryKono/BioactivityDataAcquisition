@@ -120,6 +120,7 @@ ______________________________________________________________________
 │  - 3. Provider Health (bioetl-provider-health-v2)                │
 │  - 4. Data Quality (bioetl-dq-v2)                                │
 │  - 5. Silver Reject Explorer (bioetl-silver-reject-explorer)     │
+│  - 6. Workflow Overview (bioetl-workflow-overview)               │
 └──────────────────────────────────────────────────────────────────┘
 ```
 
@@ -161,7 +162,8 @@ grafana/
     ├── bioetl-dq-v2.json              # Data Quality для последнего запуска (v2)
     ├── bioetl-runtime.json            # Runtime triage: log hygiene + alert conditions
     ├── bioetl-provider-health-v2.json # Здоровье провайдеров (v2)
-    └── bioetl-silver-reject-explorer.json # Record-level Silver reject explorer
+    ├── bioetl-silver-reject-explorer.json # Record-level Silver reject explorer
+    └── bioetl-workflow-overview.json  # Declarative workflow run/step overview
 
 docker-compose.monitoring.yml          # Docker Compose для стека мониторинга
 
@@ -1808,6 +1810,7 @@ ______________________________________________________________________
 | 4. Data Quality           | `bioetl-dq-v2`                  | 4            | 21     | 30s     | 12h        | Prometheus      | DQ score, quarantine, freshness, validation failures |
 | Control Plane v1          | `bioetl-control-plane-v1`       | 2            | 17     | 30s     | 6h         | Prometheus      | Manifest, ledger, checkpoint, lineage traceability |
 | 5. Silver Reject Explorer | `bioetl-silver-reject-explorer` | 1000         | 9      | 1m      | 24h        | Quarantine Explorer API | Record-level browsing for Silver rejects |
+| 6. Workflow Overview      | `bioetl-workflow-overview`      | 6            | 5      | 30s     | 12h        | Prometheus      | Declarative workflow run and step outcomes |
 
 ______________________________________________________________________
 

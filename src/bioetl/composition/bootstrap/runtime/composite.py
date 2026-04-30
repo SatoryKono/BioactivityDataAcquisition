@@ -167,13 +167,13 @@ def _build_runner_factories(
 ]:
     """Build seed/dependency/enricher runner factories for composite phases."""
     from bioetl.composition.bootstrap.runtime.composite_filter_extraction_service import (
-        CompositeFilterExtractionService,
+        CompositeFilterExtractor,
     )
     from bioetl.composition.bootstrap.runtime.pipeline import (
         bootstrap_pipeline_runner as bootstrap_pipeline_runner_impl,
     )
     from bioetl.composition.bootstrap.runtime.runner_factory_builder_service import (
-        RunnerFactoryBuilderService,
+        RunnerFactoryBuilder,
         resolve_bronze_opts,
     )
 
@@ -185,8 +185,8 @@ def _build_runner_factories(
         config=config,
         runtime=runtime,
         logger=logger,
-        runner_factory_builder_cls=RunnerFactoryBuilderService,
-        filter_extraction_service_cls=CompositeFilterExtractionService,
+        runner_factory_builder_cls=RunnerFactoryBuilder,
+        filter_extraction_service_cls=CompositeFilterExtractor,
         pipeline_runner_builder=bootstrap_pipeline_runner_impl,
         resolve_bronze_opts_fn=resolve_bronze_opts,
     )

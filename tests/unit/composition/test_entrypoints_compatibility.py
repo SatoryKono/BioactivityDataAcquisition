@@ -45,7 +45,7 @@ def test_entrypoints_legacy_symbol_budget_stays_frozen() -> None:
     """Legacy compatibility lookup surface should stay intentionally bounded."""
     entrypoints = _reload_entrypoints_module()
 
-    assert len(entrypoints._LEGACY_SYMBOL_TARGETS) == 22
+    assert len(entrypoints._LEGACY_SYMBOL_TARGETS) == 24
     assert set(entrypoints._LEGACY_SYMBOL_TARGETS.values()) == {
         "bioetl.composition.resources_api",
         "bioetl.composition.services_api",
@@ -103,7 +103,34 @@ def test_resource_management_api_alias_warns_and_reexports_resources_api() -> No
     from bioetl.composition import resources_api
 
     assert alias_module.__all__ == resources_api.__all__
-    assert alias_module.get_checkpoint_manager is resources_api.get_checkpoint_manager
+    assert (
+        alias_module.get_checkpoint_runtime_service
+        is resources_api.get_checkpoint_runtime_service
+    )
+
+
+@pytest.mark.unit
+def test_composition_package_root_surface_stays_frozen() -> None:
+    """Package root should keep the reviewed lazy-export budget exactly bounded."""
+    composition_module = importlib.import_module("bioetl.composition")
+
+    assert set(composition_module.__all__) == {
+        "PipelineDefinition",
+        "PipelineRegistry",
+        "composite_api",
+        "control_plane_api",
+        "create_registry",
+        "entrypoints",
+        "execution_api",
+        "get_default_registry",
+        "health_api",
+        "maintenance_api",
+        "observability_api",
+        "registry_api",
+        "resources_api",
+        "types",
+    }
+    assert len(composition_module.__all__) <= 14
 
 
 @pytest.mark.unit
@@ -114,6 +141,16 @@ def test_composition_package_root_exports_resources_api_module() -> None:
 
     assert "resources_api" in composition_module.__all__
     assert composition_module.resources_api is resources_api_module
+
+
+@pytest.mark.unit
+def test_composition_package_root_budget_excludes_legacy_facade_modules() -> None:
+    """Package-root export budget should not regrow legacy compatibility modules."""
+    composition_module = importlib.import_module("bioetl.composition")
+
+    assert "bootstrap" not in composition_module.__all__
+    assert "resource_management_api" not in composition_module.__all__
+    assert "services_api" not in composition_module.__all__
 
 
 @pytest.mark.unit

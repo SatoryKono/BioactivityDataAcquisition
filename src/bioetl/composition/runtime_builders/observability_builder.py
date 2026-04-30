@@ -34,7 +34,7 @@ from bioetl.domain.ports import (
 )
 from bioetl.domain.types import RunID
 from bioetl.infrastructure.config import Settings
-from bioetl.infrastructure.observability.anomaly import DataQualityMonitorService
+from bioetl.infrastructure.observability.anomaly import DataQualityMonitor
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.observability.unified_logger import UnifiedLogger
 
@@ -187,7 +187,7 @@ def build_observability_bundle(
     metrics_factory: Callable[[], MetricsPort] | None = None,
     noop_tracing_factory: Callable[[], TracingPort] | None = None,
     noop_metrics_factory: Callable[..., MetricsPort] | None = None,
-    dq_monitor_factory: Callable[..., DQMonitorPort] = DataQualityMonitorService,
+    dq_monitor_factory: Callable[..., DQMonitorPort] = DataQualityMonitor,
     noop_logger_factory: Callable[[], LoggerPort] = NoOpLogger,
 ) -> ObservabilityBundle:
     """Build observability bundle via the canonical bootstrap implementation."""

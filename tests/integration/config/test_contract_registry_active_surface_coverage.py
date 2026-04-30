@@ -26,6 +26,17 @@ _STANDARD_CONTRACT_PROVIDERS = {
     "semanticscholar",
     "uniprot",
 }
+_REQUIRED_DECISION_RECORDED_FIXTURE_GAP_FIELDS = {
+    "contract_ref",
+    "decision_status",
+    "decision_deadline",
+    "decision_owner",
+    "chosen_path",
+    "contract_or_projection_target",
+    "evidence_issue",
+    "de_scope_decision",
+    "resolution_plan",
+}
 
 
 def _active_standard_contract_refs() -> dict[str, str]:
@@ -59,19 +70,28 @@ def _gold_runtime_enabled(config_path: Path) -> bool:
     return True if enabled is None else bool(enabled)
 
 
-def _de_scoped_fixture_contract_refs() -> set[str]:
+def _decision_recorded_fixture_contract_refs() -> set[str]:
     payload = yaml.safe_load(_FIXTURE_GAPS_PATH.read_text(encoding="utf-8")) or {}
     gaps = payload.get("gaps", {})
     if not isinstance(gaps, dict):
         return set()
     refs = set()
     for fixture_name, metadata in gaps.items():
-        if not isinstance(metadata, dict) or metadata.get("status") != "de_scoped":
+        if (
+            not isinstance(metadata, dict)
+            or metadata.get("status") != "decision_recorded"
+        ):
             continue
         provider, entity = str(fixture_name).split("/", maxsplit=1)
         if provider == "chembl":
             refs.add(f"{provider}.{entity}")
     return refs
+
+
+def _fixture_gap_payload() -> dict[str, object]:
+    payload = yaml.safe_load(_FIXTURE_GAPS_PATH.read_text(encoding="utf-8")) or {}
+    assert isinstance(payload, dict)
+    return payload
 
 
 @pytest.mark.integration
@@ -126,13 +146,15 @@ def test_gold_disabled_standard_surface_can_stay_registry_published_but_not_acti
 
 
 @pytest.mark.integration
-def test_de_scoped_chembl_fixture_gap_surfaces_are_not_active_contracts() -> None:
-    """De-scoped ChEMBL fixture gaps must not advertise active contract surfaces."""
+def test_decision_recorded_chembl_fixture_gap_surfaces_are_not_active_contracts() -> (
+    None
+):
+    """Decision-recorded ChEMBL fixture gaps must not advertise active surfaces."""
     registry = FileContractRegistryStore(_REGISTRY_PATH).load()
 
     statuses = {
         contract_ref: registry.entries[contract_ref].status.value
-        for contract_ref in sorted(_de_scoped_fixture_contract_refs())
+        for contract_ref in sorted(_decision_recorded_fixture_contract_refs())
     }
 
     assert statuses == {
@@ -141,3 +163,30 @@ def test_de_scoped_chembl_fixture_gap_surfaces_are_not_active_contracts() -> Non
         "chembl.publication_term": "deprecated",
         "chembl.subcellular_fraction": "deprecated",
     }
+
+
+@pytest.mark.integration
+def test_decision_recorded_bronze_fixture_gaps_have_explicit_resolution_decisions() -> (
+    None
+):
+    """Decision-recorded Bronze fixture gaps must not remain open-ended."""
+    payload = _fixture_gap_payload()
+    gaps = payload.get("gaps", {})
+    assert isinstance(gaps, dict)
+
+    for fixture_name, metadata in gaps.items():
+        if (
+            not isinstance(metadata, dict)
+            or metadata.get("status") != "decision_recorded"
+        ):
+            continue
+
+        missing = _REQUIRED_DECISION_RECORDED_FIXTURE_GAP_FIELDS - metadata.keys()
+        assert not missing, f"{fixture_name}: missing decision fields {sorted(missing)}"
+        assert metadata["decision_status"] in {
+            "projection_required",
+            "source_required",
+            "keyed_recording_required",
+        }
+        assert str(metadata["decision_deadline"]) >= "2026-05-31"
+        assert str(metadata["evidence_issue"]).endswith("/issues/3406")

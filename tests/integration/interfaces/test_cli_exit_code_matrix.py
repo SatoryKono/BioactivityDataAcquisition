@@ -299,7 +299,7 @@ class TestCliExitCodeMatrix:
             }
         )
         with patch(
-            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_manager",
+            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_runtime_service",
             return_value=manager,
         ):
             result = cli_runner.invoke(

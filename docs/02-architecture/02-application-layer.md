@@ -81,8 +81,8 @@ ______________________________________________________________________
 - **`LockCoordinator`** (`lifecycle/lock_manager.py`) — Координация блокировок
 - **`PreflightService`** (`preflight/service.py`) — Pre-run health checks
 - **`PostrunService`** (`postrun/service.py`) — Post-run операции (DQ, VACUUM, cleanup)
-- **`CheckpointManagerService`** (`lifecycle/checkpoint_manager.py`) — Checkpoint I/O
-- **`QuarantineManager`** (`quarantine_manager.py`) — Quarantine record handling
+- **`CheckpointRuntimeService`** (`lifecycle/checkpoint_manager.py`) — runtime checkpoint I/O и resume policy
+- **`QuarantineRuntimeService`** (`quarantine_manager.py`) — runtime quarantine write-path handling
 - **`CleanupService`** (`lifecycle/cleanup_service.py`) — Bronze cleanup
 
 **Observability:**
@@ -96,10 +96,10 @@ ______________________________________________________________________
 - **`application/observability/`** — application-level observability facade (`PipelineObserver`, lifecycle events, tracing helpers). Этот пакет описывает, какие execution events испускает application-слой, а concrete metrics/logging adapters остаются в infrastructure.
 - **`application/services/dq/`** — DQ-oriented application services и orchestration seams, используемые postrun/preflight и quality workflows.
 
-Канонические имена для новых imports и документации используют суффикс `Service`.
-Короткие имена `CheckpointManager` и `BatchMetricsRecorder` сохраняются только как
-compatibility aliases в defining modules и не считаются предпочтительным API для
-нового кода.
+Checkpoint/quarantine naming is role-driven: runtime collaborators use
+`*RuntimeService`, while operator/admin inspection surfaces use
+`CheckpointService` and `QuarantineService` under `application/services/`.
+Manager-style names such as `CheckpointManager`, `CheckpointManagerService`, `QuarantineManager`, and `QuarantineManagerService` are retired from first-party code.
 
 **Data Sources:**
 
@@ -131,7 +131,7 @@ factory = GenericPipelineFactory(
 - **MUST NOT**: Пайплайн не создаёт трансформер внутри себя
 - **Template Method**: `BaseTransformer` определяет скелет алгоритма, подклассы реализуют `transform_impl()`. Примечание: `extract_business_data()` — метод промежуточных базовых классов `BaseChemblTransformer` (`base_chembl_transformer.py:160`) и `BasePublicationTransformer` (`base_publication_transformer.py:54`), не `BaseTransformer`.
 - **Explicit DI**: runtime collaborators трансформера (`TracingPort`, `MetricsPort`,
-  `IdentityService`, `PiiHasherPort`, `DataNormalizationPort`, `ContractPolicyPort`)
+  `EntityIdentityGenerator`, `PiiHasherPort`, `DataNormalizationPort`, `ContractPolicyPort`)
   канонически собираются в composition и передаются как явный dependency bundle;
   прямое no-arg создание трансформеров допускается только как compatibility path.
 - **Если трансформер не передан**: `transform_bronze_to_silver()` выбрасывает `NotImplementedError`
@@ -284,9 +284,10 @@ Compatibility bridge и collaborator bundle для `MergeService` находят
 
 | Файл                         | Компонент               | Назначение                              |
 | ---------------------------- | ----------------------- | --------------------------------------- |
-| `column_orderer.py`          | `ColumnOrdererService`  | Порядок колонок в результате merge      |
+| `column_service.py`          | `ColumnOrderService`    | Канонический порядок колонок и source-priority merge logic |
+| `column_orderer.py`          | `ColumnOrderer`         | Deprecated compatibility alias for `ColumnOrderService` |
 | `column_orderer_helpers.py`  | Helper functions        | Вспомогательные функции для ordering    |
-| `column_priority_orderer.py` | `ColumnPriorityOrderer` | Priority-based column ordering          |
+| `column_priority_orderer.py` | `ColumnPriorityOrderer` | Deprecated compatibility surface for explicit priority ordering |
 | `column_renamer.py`          | `ColumnRenamerService`  | Переименование колонок (suffix removal) |
 
 **Join infrastructure:**

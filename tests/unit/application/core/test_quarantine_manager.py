@@ -1,4 +1,4 @@
-"""Unit tests for QuarantineManagerService."""
+"""Unit tests for QuarantineRuntimeService."""
 
 from __future__ import annotations
 
@@ -11,7 +11,7 @@ import pytest
 from bioetl.application.core.quarantine_manager import (
     DQQuarantineEntry,
     FilteredQuarantineEntry,
-    QuarantineManagerService,
+    QuarantineRuntimeService,
 )
 from bioetl.domain.aggregates.events import QuarantineEntryCreated, RecordQuarantined
 from bioetl.domain.types import BatchID, ErrorType, RunID
@@ -42,7 +42,7 @@ class TestQuarantineManagerBulkWrites:
         quarantine_port: MagicMock,
         metrics: MagicMock,
     ) -> None:
-        manager = QuarantineManagerService(
+        manager = QuarantineRuntimeService(
             quarantine_port=quarantine_port,
             pipeline_name="chembl_activity",
             metrics=metrics,
@@ -83,7 +83,7 @@ class TestQuarantineManagerBulkWrites:
         metrics: MagicMock,
     ) -> None:
         """Structured reason fields should survive without replacing display text."""
-        manager = QuarantineManagerService(
+        manager = QuarantineRuntimeService(
             quarantine_port=quarantine_port,
             pipeline_name="chembl_activity",
             metrics=metrics,
@@ -126,7 +126,7 @@ class TestQuarantineManagerBulkWrites:
         quarantine_port: MagicMock,
         metrics: MagicMock,
     ) -> None:
-        manager = QuarantineManagerService(
+        manager = QuarantineRuntimeService(
             quarantine_port=quarantine_port,
             pipeline_name="chembl_activity",
             metrics=metrics,
@@ -173,7 +173,7 @@ class TestQuarantineManagerBulkWrites:
         metrics: MagicMock,
     ) -> None:
         """Single-record quarantine writes to port and increments metrics."""
-        manager = QuarantineManagerService(
+        manager = QuarantineRuntimeService(
             quarantine_port=quarantine_port,
             pipeline_name="chembl_activity",
             metrics=metrics,
@@ -210,7 +210,7 @@ class TestQuarantineManagerBulkWrites:
     ) -> None:
         """Single-record quarantine should publish creation and quarantine events."""
         event_emitter = MagicMock()
-        manager = QuarantineManagerService(
+        manager = QuarantineRuntimeService(
             quarantine_port=quarantine_port,
             pipeline_name="chembl_activity",
             metrics=metrics,
@@ -245,7 +245,7 @@ class TestQuarantineManagerBulkWrites:
     ) -> None:
         """Activity quarantine events should expose the entity PK, not shared source ids."""
         event_emitter = MagicMock()
-        manager = QuarantineManagerService(
+        manager = QuarantineRuntimeService(
             quarantine_port=quarantine_port,
             pipeline_name="chembl_activity",
             metrics=metrics,
@@ -277,7 +277,7 @@ class TestQuarantineManagerBulkWrites:
         metrics: MagicMock,
     ) -> None:
         """Empty DQ record list should not call write_many."""
-        manager = QuarantineManagerService(
+        manager = QuarantineRuntimeService(
             quarantine_port=quarantine_port,
             pipeline_name="chembl_activity",
             metrics=metrics,
@@ -294,7 +294,7 @@ class TestQuarantineManagerBulkWrites:
         metrics: MagicMock,
     ) -> None:
         """Empty filtered record list should not call write_many."""
-        manager = QuarantineManagerService(
+        manager = QuarantineRuntimeService(
             quarantine_port=quarantine_port,
             pipeline_name="chembl_activity",
             metrics=metrics,
@@ -310,7 +310,7 @@ class TestQuarantineManagerBulkWrites:
         quarantine_port: MagicMock,
     ) -> None:
         """Single-record quarantine without metrics port should succeed."""
-        manager = QuarantineManagerService(
+        manager = QuarantineRuntimeService(
             quarantine_port=quarantine_port,
             pipeline_name="test",
             metrics=None,
@@ -331,7 +331,7 @@ class TestQuarantineManagerBulkWrites:
         metrics: MagicMock,
     ) -> None:
         """NamedTuple entries should unpack correctly in quarantine_records."""
-        manager = QuarantineManagerService(
+        manager = QuarantineRuntimeService(
             quarantine_port=quarantine_port,
             pipeline_name="test",
             metrics=metrics,

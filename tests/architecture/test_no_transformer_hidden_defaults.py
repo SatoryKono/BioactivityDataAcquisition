@@ -11,9 +11,9 @@ DEPENDENCIES_MODULE_PATH = Path("src/bioetl/application/core/base_transformer/ty
 FORBIDDEN_CONSTRUCTORS = {
     "NoOpTracing",
     "NoOpMetrics",
-    "IdentityService",
+    "EntityIdentityGenerator",
     "NoOpPiiHasher",
-    "DataNormalizationService",
+    "DefaultDataNormalizer",
     "_DefaultContractPolicy",
 }
 

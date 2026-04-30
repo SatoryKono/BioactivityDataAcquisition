@@ -214,7 +214,7 @@ class TestTransformerSignatures:
     ) -> None:
         """All transformers SHOULD accept identity_service parameter.
 
-        IdentityService provides entity ID and content hash computation.
+        EntityIdentityGenerator provides entity ID and content hash computation.
         """
         sig = inspect.signature(transformer_class.__init__)
         params = set(sig.parameters.keys()) - {"self"}

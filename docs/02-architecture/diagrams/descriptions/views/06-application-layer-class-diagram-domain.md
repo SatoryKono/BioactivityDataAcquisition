@@ -17,7 +17,7 @@ ______________________________________________________________________
 
 ## Описание
 
-Эта views-диаграмма Application Layer Class Diagram Domain представляет срез типа domain для родительской схемы `06-application-layer-class-diagram-full.mermaid` и использует нотацию `flowchart`. Она концентрируется на том, как pipeline-definition и transform-oriented классы стыкуются с runtime data: `BasePipeline`, `PipelineService`, `BaseTransformer`, `BatchTransformer`, `BatchProcessingService`, `BatchWriter`, `QuarantineManagerService`, `PipelineContext`, `BatchProcessingOutcome`.
+Эта views-диаграмма Application Layer Class Diagram Domain представляет срез типа domain для родительской схемы `06-application-layer-class-diagram-full.mermaid` и использует нотацию `flowchart`. Она концентрируется на том, как pipeline-definition и transform-oriented классы стыкуются с runtime data: `BasePipeline`, `PipelineService`, `BaseTransformer`, `BatchTransformer`, `BatchProcessingService`, `BatchWriter`, `QuarantineRuntimeService`, `PipelineContext`, `BatchProcessingOutcome`.
 
 Этот view нужен не для полного каталога классов, а для проверки domain-facing seams внутри application-слоя: где pipeline определяет transform contract, как batch-processing связывает transform и write path, и где появляются runtime результаты. Он подчёркивает, что текущая модель больше не описывается старым `RecordProcessor`, а держится на `BatchProcessingService` и связанных explicit collaborators.
 

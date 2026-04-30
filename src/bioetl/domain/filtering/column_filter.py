@@ -13,14 +13,13 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import StrEnum
-from typing import TypeAlias
 
 __all__ = [
     "FilterOperator",
     "GoldColumnFilter",
 ]
 
-FilterScalar: TypeAlias = str | int | bool
+type FilterScalar = str | int | bool
 
 
 class FilterOperator(StrEnum):

@@ -1,4 +1,4 @@
-"""Tests for DefaultDataNormalizationService.
+"""Tests for DefaultDataNormalizer.
 
 Tests the unified data normalization service for text and publication metadata.
 """
@@ -12,31 +12,30 @@ import pytest
 
 from bioetl.domain.services import (
     DataNormalizationConfig,
-    DataNormalizationService,
-    DefaultDataNormalizationService,
+    DefaultDataNormalizer,
 )
 from bioetl.domain.services._author_helpers import hash_author_name
 
 
-class TestDefaultDataNormalizationServiceInit:
+class TestDefaultDataNormalizerInit:
     """Tests for service initialization."""
 
     def test_default_config(self) -> None:
         """Test service initializes with default config."""
-        service = DefaultDataNormalizationService()
+        service = DefaultDataNormalizer()
         assert service.config.min_publication_year == 1500
         assert service.config.max_publication_year == 2100
 
     def test_custom_config(self) -> None:
         """Test service accepts custom config."""
         config = DataNormalizationConfig(min_publication_year=1900)
-        service = DefaultDataNormalizationService(config=config)
+        service = DefaultDataNormalizer(config=config)
         assert service.config.min_publication_year == 1900
 
-    def test_alias_works(self) -> None:
-        """Test DataNormalizationService alias works."""
-        service = DataNormalizationService()
-        assert isinstance(service, DefaultDataNormalizationService)
+    def test_canonical_name_works(self) -> None:
+        """Test the canonical DefaultDataNormalizer surface."""
+        service = DefaultDataNormalizer()
+        assert isinstance(service, DefaultDataNormalizer)
 
 
 class TestNormalizeDoi:
@@ -57,7 +56,7 @@ class TestNormalizeDoi:
     )
     def test_normalize_doi(self, doi: str | None, expected: str | None) -> None:
         """Test DOI normalization."""
-        service = DefaultDataNormalizationService()
+        service = DefaultDataNormalizer()
         assert service.normalize_doi(doi) == expected
 
 
@@ -86,7 +85,7 @@ class TestNormalizePmid:
     )
     def test_normalize_pmid(self, pmid: str | int | None, expected: str | None) -> None:
         """Test PMID normalization."""
-        service = DefaultDataNormalizationService()
+        service = DefaultDataNormalizer()
         assert service.normalize_pmid(pmid) == expected
 
 
@@ -109,7 +108,7 @@ class TestNormalizeYear:
         self, year: int | None, expected_year: int | None, expected_warning: bool
     ) -> None:
         """Test year normalization with default config."""
-        service = DefaultDataNormalizationService()
+        service = DefaultDataNormalizer()
         result_year, result_warning = service.normalize_year(year)
         assert result_year == expected_year
         assert result_warning == expected_warning
@@ -119,7 +118,7 @@ class TestNormalizeYear:
         config = DataNormalizationConfig(
             min_publication_year=1900, max_publication_year=2050
         )
-        service = DefaultDataNormalizationService(config=config)
+        service = DefaultDataNormalizer(config=config)
 
         # 1899 should be flagged as warning with custom range
         year, warning = service.normalize_year(1899)
@@ -137,7 +136,7 @@ class TestNormalizeAuthors:
 
     def test_normalize_authors_list(self) -> None:
         """Test normalizing list of authors (hashed output)."""
-        service = DefaultDataNormalizationService()
+        service = DefaultDataNormalizer()
         result = service.normalize_authors(["John Doe", "Jane Smith"], salt="test")
 
         assert result is not None
@@ -148,7 +147,7 @@ class TestNormalizeAuthors:
 
     def test_normalize_authors_string(self) -> None:
         """Test normalizing semicolon-separated authors."""
-        service = DefaultDataNormalizationService()
+        service = DefaultDataNormalizer()
         result = service.normalize_authors("John Doe; Jane Smith", salt="test")
 
         assert result is not None
@@ -157,7 +156,7 @@ class TestNormalizeAuthors:
 
     def test_normalize_authors_json_string(self) -> None:
         """Test normalizing JSON-serialized authors."""
-        service = DefaultDataNormalizationService()
+        service = DefaultDataNormalizer()
         result = service.normalize_authors('["John Doe", "Jane Smith"]', salt="test")
 
         assert result is not None
@@ -166,7 +165,7 @@ class TestNormalizeAuthors:
 
     def test_normalize_authors_empty(self) -> None:
         """Test empty authors returns None."""
-        service = DefaultDataNormalizationService()
+        service = DefaultDataNormalizer()
         assert service.normalize_authors(None, salt="test") is None
         assert service.normalize_authors([], salt="test") is None
         assert service.normalize_authors("", salt="test") is None
@@ -197,7 +196,7 @@ class TestStripHtmlTags:
     )
     def test_strip_html_tags(self, text: str | None, expected: str | None) -> None:
         """Test HTML tag stripping with entity decoding."""
-        service = DefaultDataNormalizationService()
+        service = DefaultDataNormalizer()
         assert service.strip_html_tags(text) == expected
 
 
@@ -224,7 +223,7 @@ class TestNormalizeOaStatus:
         self, status: str | None, expected: str | None
     ) -> None:
         """Test OA status normalization."""
-        service = DefaultDataNormalizationService()
+        service = DefaultDataNormalizer()
         assert service.normalize_oa_status(status) == expected
 
 
@@ -244,7 +243,7 @@ class TestNormalizeString:
     )
     def test_normalize_string(self, value: str | None, expected: str | None) -> None:
         """Test string normalization."""
-        service = DefaultDataNormalizationService()
+        service = DefaultDataNormalizer()
         assert service.normalize_string(value) == expected
 
 
@@ -280,12 +279,12 @@ class TestParseAuthorsToList:
         self, input_authors: list[str] | str | None, expected: list[str]
     ) -> None:
         """Test parsing various author input formats."""
-        service = DefaultDataNormalizationService()
+        service = DefaultDataNormalizer()
         assert service.parse_authors_to_list(input_authors) == expected
 
     def test_parse_authors_semicolon_preference(self) -> None:
         """Test that semicolon takes precedence over comma as delimiter."""
-        service = DefaultDataNormalizationService()
+        service = DefaultDataNormalizer()
         # When both semicolon and comma are present, semicolon wins
         result = service.parse_authors_to_list("Doe, John; Smith, Jane")
         assert result == ["Doe, John", "Smith, Jane"]
@@ -333,7 +332,7 @@ class TestNormalizePartialDate:
         self, date_str: str | None, expected: str | None
     ) -> None:
         """Test partial date normalization with end of period strategy."""
-        service = DefaultDataNormalizationService()
+        service = DefaultDataNormalizer()
         assert service.normalize_partial_date(date_str) == expected
 
 
@@ -369,7 +368,7 @@ class TestFormatDateParts:
         self, date_parts: list[list[int]] | None, expected: str | None
     ) -> None:
         """Test date-parts formatting with end-of-period normalization."""
-        service = DefaultDataNormalizationService()
+        service = DefaultDataNormalizer()
         assert service.format_date_parts(date_parts) == expected
 
 
@@ -518,13 +517,13 @@ class TestNormalizeTitle:
     )
     def test_normalize_title(self, title: str | None, expected: str | None) -> None:
         """Test title normalization with various inputs."""
-        service = DefaultDataNormalizationService()
+        service = DefaultDataNormalizer()
         result = service.normalize_title(title)
         assert result == expected
 
     def test_unicode_nfc_normalization(self) -> None:
         """Test that unicode is normalized to NFC form."""
-        service = DefaultDataNormalizationService()
+        service = DefaultDataNormalizer()
 
         # Create NFD string (decomposed form: e + combining acute accent)
         nfd_title = unicodedata.normalize("NFD", "Café")
@@ -539,7 +538,7 @@ class TestNormalizeTitle:
 
     def test_idempotency(self) -> None:
         """Test that normalization is idempotent."""
-        service = DefaultDataNormalizationService()
+        service = DefaultDataNormalizer()
         title = "<b>Test</b>  with   spaces"
 
         normalized_once = service.normalize_title(title)
@@ -591,13 +590,13 @@ class TestNormalizeAbstract:
         self, abstract: str | None, expected: str | None
     ) -> None:
         """Test abstract normalization with various inputs."""
-        service = DefaultDataNormalizationService()
+        service = DefaultDataNormalizer()
         result = service.normalize_abstract(abstract)
         assert result == expected
 
     def test_preserves_special_characters(self) -> None:
         """Test that scientific special characters are preserved."""
-        service = DefaultDataNormalizationService()
+        service = DefaultDataNormalizer()
 
         abstract = "Study found p<0.05, R²=0.98, ±2σ, α=0.01"
         result = service.normalize_abstract(abstract)
@@ -610,7 +609,7 @@ class TestNormalizeAbstract:
 
     def test_long_abstract_performance(self) -> None:
         """Test normalization of long abstracts (performance check)."""
-        service = DefaultDataNormalizationService()
+        service = DefaultDataNormalizer()
 
         # Create a long abstract (typical length ~3000 chars)
         long_abstract = "<p>" + ("Study of proteins. " * 150) + "</p>"

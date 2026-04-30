@@ -32,7 +32,9 @@ from bioetl.application.core.batch_processing_support import (
 from bioetl.application.core.batch_progress_service import BatchProgressService
 from bioetl.application.core.batch_tracing import BatchTracingManagerService
 from bioetl.application.core.lifecycle.batch_fsm import BatchExecutionFSM
-from bioetl.application.core.lifecycle.checkpoint_manager import CheckpointManager
+from bioetl.application.core.lifecycle.checkpoint_manager import (
+    CheckpointRuntimeService,
+)
 from bioetl.application.core.config import RecordProcessorConfig
 from bioetl.application.core.pipeline_services import PipelineService
 from bioetl.application.core.lifecycle.shutdown import ShutdownSignal
@@ -82,7 +84,7 @@ def mock_context():
 @pytest.fixture
 def mock_checkpoint_manager():
     """Create mock checkpoint manager."""
-    manager = MagicMock(spec=CheckpointManager)
+    manager = MagicMock(spec=CheckpointRuntimeService)
     manager.save_checkpoint = AsyncMock()
     return manager
 

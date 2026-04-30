@@ -20,6 +20,7 @@ from bioetl.composition.factories.services.factory import (
     BaseServicesFactory,
     ServicesBuilder,
 )
+from bioetl.domain.services import DataNormalizationConfig, DefaultDataNormalizer
 from bioetl.composition.factories.services.port_factories import (
     create_metrics,
 )
@@ -449,33 +450,16 @@ def test_create_record_processor_from_pipeline_delegates() -> None:
 
 @pytest.mark.unit
 def test_create_data_normalization_service_uses_default_config() -> None:
-    with (
-        patch("bioetl.domain.services.DataNormalizationConfig") as mock_config,
-        patch("bioetl.domain.services.DefaultDataNormalizationService") as mock_service,
-    ):
-        config_instance = MagicMock()
-        service_instance = MagicMock()
-        mock_config.return_value = config_instance
-        mock_service.return_value = service_instance
+    result = create_data_normalization_service(config=None)
 
-        result = create_data_normalization_service(config=None)
-
-    assert result is service_instance
-    mock_config.assert_called_once_with()
-    mock_service.assert_called_once_with(config=config_instance)
+    assert isinstance(result, DefaultDataNormalizer)
+    assert isinstance(result.config, DataNormalizationConfig)
 
 
 @pytest.mark.unit
 def test_create_data_normalization_service_uses_explicit_config() -> None:
     explicit_config = MagicMock()
+    result = create_data_normalization_service(config=explicit_config)
 
-    with patch(
-        "bioetl.domain.services.DefaultDataNormalizationService"
-    ) as mock_service:
-        expected_service = MagicMock()
-        mock_service.return_value = expected_service
-
-        result = create_data_normalization_service(config=explicit_config)
-
-    assert result is expected_service
-    mock_service.assert_called_once_with(config=explicit_config)
+    assert isinstance(result, DefaultDataNormalizer)
+    assert result.config is explicit_config

@@ -37,7 +37,10 @@ import json
 import re
 import sys
 from dataclasses import dataclass, field
+from datetime import date
 from pathlib import Path
+
+import yaml
 
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -148,6 +151,18 @@ RUNTIME_MIRROR_RULES: tuple[RuntimeMirrorRule, ...] = (
 
 AGENT_MEMORY_PATH = Path("docs/00-project/ai/memory/agent-memory.md")
 FILE_POLICY_PATH = Path("docs/00-project/governance/03-file-policy.md")
+ACTIVE_NON_CANONICAL_EVIDENCE_SUMMARIES = (
+    Path("docs/reports/evidence/project-test-health/SUMMARY.md"),
+)
+REQUIRED_EVIDENCE_METADATA_FIELDS = frozenset(
+    {
+        "status",
+        "last_verified",
+        "canonical_sources",
+        "freshness_window_days",
+        "owner",
+    }
+)
 AI_SURFACE_REQUIRED_TOKENS: dict[Path, tuple[str, ...]] = {
     Path("AGENTS.md"): (
         "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
@@ -249,6 +264,18 @@ def _read_doc(path: Path) -> str:
     if path.exists():
         return path.read_text(encoding="utf-8")
     return ""
+
+
+def _extract_front_matter_metadata(text: str) -> dict[str, object] | None:
+    """Return YAML front-matter metadata when a document declares it."""
+    if not text.startswith("---\n"):
+        return None
+    end_marker = "\n---\n"
+    end_index = text.find(end_marker, 4)
+    if end_index == -1:
+        return None
+    payload = yaml.safe_load(text[4:end_index]) or {}
+    return payload if isinstance(payload, dict) else None
 
 
 def _rel(path: Path) -> str:
@@ -737,6 +764,101 @@ def _check_runtime_mirror_section(
         )
 
 
+def _check_active_non_canonical_evidence_summary(
+    report: DriftReport,
+    relative_path: Path,
+) -> None:
+    """Validate freshness metadata for an active non-canonical evidence summary."""
+    path = PROJECT_ROOT / relative_path
+    text = _read_doc(path)
+    if not text:
+        report.add(
+            "freshness",
+            "ERROR",
+            _rel(path),
+            "Active non-canonical evidence summary missing",
+        )
+        return
+
+    metadata = _extract_front_matter_metadata(text)
+    if metadata is None:
+        report.add(
+            "freshness",
+            "ERROR",
+            _rel(path),
+            "Active non-canonical evidence summary lacks YAML front-matter metadata",
+        )
+        return
+
+    missing_fields = sorted(REQUIRED_EVIDENCE_METADATA_FIELDS - metadata.keys())
+    if missing_fields:
+        report.add(
+            "freshness",
+            "ERROR",
+            _rel(path),
+            "Evidence freshness metadata missing required fields: "
+            + ", ".join(missing_fields),
+        )
+        return
+
+    if metadata["status"] != "active-non-canonical":
+        report.add(
+            "freshness",
+            "ERROR",
+            _rel(path),
+            "Active evidence summary must declare status=active-non-canonical",
+        )
+
+    try:
+        last_verified = date.fromisoformat(str(metadata["last_verified"]))
+        freshness_window_days = int(metadata["freshness_window_days"])
+    except (TypeError, ValueError):
+        report.add(
+            "freshness",
+            "ERROR",
+            _rel(path),
+            "Evidence freshness metadata has invalid last_verified or freshness_window_days",
+        )
+        return
+
+    age_days = (date.today() - last_verified).days
+    if age_days > freshness_window_days:
+        report.add(
+            "freshness",
+            "ERROR",
+            _rel(path),
+            "Active non-canonical evidence summary is stale: "
+            f"{age_days}d > {freshness_window_days}d",
+        )
+
+    canonical_sources = metadata["canonical_sources"]
+    if not isinstance(canonical_sources, list) or not canonical_sources:
+        report.add(
+            "freshness",
+            "ERROR",
+            _rel(path),
+            "Evidence freshness metadata must list canonical_sources",
+        )
+        return
+
+    for source in canonical_sources:
+        source_path = PROJECT_ROOT / str(source)
+        if not source_path.exists():
+            report.add(
+                "freshness",
+                "ERROR",
+                _rel(path),
+                f"Evidence canonical source does not exist: {source}",
+            )
+        if f"`{source}`" not in text and str(source) not in text:
+            report.add(
+                "freshness",
+                "ERROR",
+                _rel(path),
+                f"Evidence summary does not link canonical source: {source}",
+            )
+
+
 def check_freshness(report: DriftReport) -> None:
     """Verify active docs use consistent freshness/version metadata."""
     canonical_orchestration = PROJECT_ROOT / ".codex" / "agents" / "ORCHESTRATION.md"
@@ -807,6 +929,9 @@ def check_freshness(report: DriftReport) -> None:
             _rel(PROJECT_ROOT / FILE_POLICY_PATH),
             "File policy contains duplicate freshness markers; keep a single active marker",
         )
+
+    for relative_path in ACTIVE_NON_CANONICAL_EVIDENCE_SUMMARIES:
+        _check_active_non_canonical_evidence_summary(report, relative_path)
 
 
 def check_ai_surfaces(report: DriftReport, *, root: Path | None = None) -> None:

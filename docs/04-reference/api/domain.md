@@ -38,7 +38,7 @@ ______________________________________________________________________
 | `domain.composite`       | Composite pipeline models (ADR-026)                                                                  | `CompositeConfig`, `EnricherConfig`, `MergeStrategy`                                             |
 | `domain.contracts`       | Pandera Gold schema definitions                                                                      | `ChEMBLActivityGoldSchema`, `PubChemCompoundGoldSchema`                                          |
 | `domain.schemas`         | Column ordering, constants, validators                                                               | `canonical_column_order`, `CHEMBL_ID_PATTERN`                                                    |
-| `domain.services`        | Pure domain services (no I/O)                                                                        | `IdentityService`, `NormalizationService`, `UnitConverter`                                       |
+| `domain.services`        | Pure domain services (no I/O)                                                                        | `EntityIdentityGenerator`, `BioactivityNormalizer`, `UnitConverter`                                       |
 | `domain.validation`      | Pure validation functions                                                                            | `validate_doi`, `validate_smiles`, `validate_inchi_key`                                          |
 | `domain.transformations` | Hashing, drift detection, coercion                                                                   | `generate_entity_id`, `generate_content_hash`, `safe_float`                                      |
 | `domain.filtering`       | Filter configuration models                                                                          | `InputFilterConfig`, `GoldFilterConfig`, `GoldRangeFilter`                                       |
@@ -368,13 +368,13 @@ ______________________________________________________________________
 
 | Service                         | Description                                   |
 | ------------------------------- | --------------------------------------------- |
-| `IdentityService`               | Entity ID and content hash generation         |
-| `NormalizationService`          | Bioactivity normalization facade              |
-| `DataNormalizationService`      | Text normalization (DOI, PMID, authors, HTML) |
+| `EntityIdentityGenerator`               | Entity ID and content hash generation         |
+| `BioactivityNormalizer`          | Bioactivity normalization facade              |
+| `DefaultDataNormalizer`      | Text normalization (DOI, PMID, authors, HTML) |
 | `UnitConverter`                 | Concentration unit conversion (nM, uM, mM)    |
 | `ValueValidator`                | Bioactivity value range validation            |
 | `ActivityAggregator`            | Multiple measurement aggregation              |
-| `OrganismClassificationService` | Organism cellularity classification           |
+| `OrganismClassifier` | Organism cellularity classification           |
 | `DQMetricsCalculator`           | DQ metrics computation                        |
 | `DQReportSerializer`            | DQ report serialization                       |
 | `DateNormalizationService`      | Date normalization                            |

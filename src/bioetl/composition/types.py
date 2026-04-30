@@ -21,12 +21,6 @@ Typed contexts for bootstrap functions (replacing untyped tuples):
 
 from __future__ import annotations
 
-from bioetl.composition import (
-    PipelineDefinition,
-    PipelineRegistry,
-    create_registry,
-    get_default_registry,
-)
 from bioetl.composition.bootstrap_contexts import (
     CircuitBreakerConfig,
     DQConfigsContext,
@@ -36,6 +30,12 @@ from bioetl.composition.bootstrap_contexts import (
 )
 from bioetl.composition.factories.storage import StorageBundle
 from bioetl.composition.observability import ObservabilityBundle
+from bioetl.composition.registry_api import (
+    PipelineDefinition,
+    PipelineRegistry,
+    create_registry,
+    get_default_registry,
+)
 
 StorageAdapter = StorageBundle
 

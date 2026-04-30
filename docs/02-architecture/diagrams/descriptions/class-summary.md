@@ -54,7 +54,7 @@ diagrams, но сам `class-summary.md` по-прежнему остаётся 
 
 ## 07-application-core-services — Application Core Services
 
-Диаграмма «Application Core Services» описывает application-core orchestration и фиксирует архитектурные границы, основные роли классов и характер их взаимодействий. Основной фокус: runner, batch-execution, lifecycle, preflight и postrun service families внутри `application/core`. Для быстрого чтения и ревью полезно начать с элементов: PipelineRunner, BatchExecutor, RecordProcessor, BatchWriter, CheckpointManagerService, BatchMemoryManagerService, BatchMetricsRecorderService, BatchTracingManagerService, PreflightService, PostrunService.
+Диаграмма «Application Core Services» описывает application-core orchestration и фиксирует архитектурные границы, основные роли классов и характер их взаимодействий. Основной фокус: runner, batch-execution, lifecycle, preflight и postrun service families внутри `application/core`. Для быстрого чтения и ревью полезно начать с элементов: PipelineRunner, BatchExecutor, RecordProcessor, BatchWriter, CheckpointRuntimeService, BatchMemoryManagerService, BatchMetricsRecorderService, BatchTracingManagerService, PreflightService, PostrunService.
 
 ## 08-application-services — Application Services
 
@@ -82,7 +82,7 @@ diagrams, но сам `class-summary.md` по-прежнему остаётся 
 
 ## 13-domain-services — Domain Services
 
-Диаграмма «Domain Services» описывает модуль `13-domain-services` и фиксирует архитектурные границы, основные роли классов и характер их взаимодействий. Основной фокус: Pure domain services without I/O. Схема используется как representative family-level overview, а не как исчерпывающий инвентарь текущей кодовой поверхности. Для быстрого чтения и ревью полезно начать с элементов: IdentityService, NormalizationService, DataNormalizationService, AuthorNormalizationService, ActivityAggregator, UnitConverter.
+Диаграмма «Domain Services» описывает модуль `13-domain-services` и фиксирует архитектурные границы, основные роли классов и характер их взаимодействий. Основной фокус: Pure domain services without I/O. Схема используется как representative family-level overview, а не как исчерпывающий инвентарь текущей кодовой поверхности. Для быстрого чтения и ревью полезно начать с элементов: EntityIdentityGenerator, BioactivityNormalizer, DefaultDataNormalizer, AuthorNormalizer, ActivityAggregator, UnitConverter.
 
 ## 14-observability — Observability Components
 
@@ -98,4 +98,4 @@ diagrams, но сам `class-summary.md` по-прежнему остаётся 
 
 ## 16-factories-bootstrap — Factories & Bootstrap
 
-Диаграмма «Factories & Bootstrap» описывает модуль `16-factories-bootstrap` и фиксирует архитектурные границы, основные роли классов и характер их взаимодействий. Основной фокус: current composition-layer factories, provider registry, and runtime assembly seams. Схема используется как representative family-level overview, а не как исчерпывающий инвентарь текущей кодовой поверхности. Для быстрого чтения и ревью полезно начать с элементов: ProviderRegistry, DataSourceFactory, PipelineRegistry, RunnerFactory, RunnerFactoryBuilderService, CompositeSupportServicesFactory.
+Диаграмма «Factories & Bootstrap» описывает модуль `16-factories-bootstrap` и фиксирует архитектурные границы, основные роли классов и характер их взаимодействий. Основной фокус: current composition-layer factories, provider registry, and runtime assembly seams. Схема используется как representative family-level overview, а не как исчерпывающий инвентарь текущей кодовой поверхности. Для быстрого чтения и ревью полезно начать с элементов: ProviderRegistry, DataSourceFactory, PipelineRegistry, RunnerFactory, RunnerFactoryBuilder, CompositeSupportServicesFactory.

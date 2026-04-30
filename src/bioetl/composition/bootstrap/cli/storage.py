@@ -25,10 +25,10 @@ from bioetl.application.services import (
 )
 from bioetl.application.services.admin_runtime_api import CleanupService
 from bioetl.application.services.medallion_lifecycle import MedallionLifecycleService
-from bioetl.composition import get_default_registry
 from bioetl.composition.bootstrap.assembly.storage import bootstrap_storage_adapter
 from bioetl.composition.bootstrap.cli.config import bootstrap_config_service
 from bioetl.composition.bootstrap.cli.noop import create_noop_logger
+from bioetl.composition.registry_api import get_default_registry
 from bioetl.infrastructure.config import get_settings
 from bioetl.infrastructure.config.contract_policy_loader import (
     load_pipeline_contract_policy,
@@ -51,7 +51,7 @@ __all__ = [
 ]
 
 if TYPE_CHECKING:
-    from bioetl.composition import PipelineRegistry
+    from bioetl.composition.registry_api import PipelineRegistry
 
 
 def bootstrap_cleanup_service() -> CleanupService:

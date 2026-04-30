@@ -13,9 +13,9 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import TYPE_CHECKING
 
-from bioetl.composition import PipelineRegistry, create_registry
 from bioetl.composition.factories.pipeline.registry import register_all_pipelines
 from bioetl.composition.providers import ensure_providers_loaded
+from bioetl.composition.registry_api import PipelineRegistry, create_registry
 from bioetl.composition.runtime_builders.runner_builder import build_pipeline_runner
 
 if TYPE_CHECKING:

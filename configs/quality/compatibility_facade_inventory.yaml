@@ -8,7 +8,170 @@ tracked_docstring_prefixes:
 - Composition-level compatibility
 - Pipeline factory compatibility-only facade
 - Storage compatibility-only facade
-transition_debt: []
+transition_debt:
+- path: src/bioetl/interfaces/cli/commands/_compat.py
+  compatibility_role: Internal CLI compatibility shim helper that powers retained
+    top-level command alias modules.
+  canonical_target: bioetl.interfaces.cli.commands
+  status: compat-shim
+  owner: bioetl.interfaces.cli.commands
+  introduced_in: 2026-03 RF-024
+  review_date: '2026-09-30'
+  external_breaking_change_required: true
+  internal_callers_zero: false
+  allowed_call_sites: >-
+    `src`: only retained top-level CLI public seam modules under
+    `src/bioetl/interfaces/cli/commands/` may import `alias_module`; `tests`:
+    dedicated CLI boundary coverage may exercise the helper indirectly through
+    those public seam modules
+  migration_path: >-
+    Keep top-level CLI public seams as the sanctioned import targets; do not
+    import `_compat.py` outside the retained command-seam modules.
+  exit_criteria: >-
+    `_compat.py` remains confined to the reviewed top-level command seams and
+    can be removed once those seams no longer need helper-based alias forwarding.
+- path: src/bioetl/composition/resource_management_api.py
+  compatibility_role: Deprecated composition alias module that re-exports
+    `resources_api` for legacy import paths.
+  canonical_target: bioetl.composition.resources_api
+  status: deprecated-warn
+  owner: bioetl.composition
+  introduced_in: legacy-pre-2026-04
+  review_date: '2026-09-30'
+  external_breaking_change_required: true
+  internal_callers_zero: true
+  allowed_call_sites: '`src`: no direct imports; `tests`: dedicated compatibility
+    coverage may import `bioetl.composition.resource_management_api` only to verify
+    deprecation warning and re-export behavior'
+  migration_path: Import `bioetl.composition.resources_api` directly for cleanup,
+    checkpoint, quarantine, and lifecycle helpers.
+  exit_criteria: First-party `src/` imports remain at zero, only dedicated compatibility
+    tests exercise the alias module, and the deprecated module can be removed in
+    the next breaking-change window.
+- path: src/bioetl/composition/providers/_models.py
+  compatibility_role: Mixed owner module for provider creator contracts that still
+    exports the deprecated `DataSourceCreatorPort` alias alongside the canonical
+    `DataSourceCreatorProtocol`.
+  canonical_target: bioetl.composition.providers._models.DataSourceCreatorProtocol
+  status: mixed-module
+  owner: bioetl.composition.providers
+  introduced_in: legacy-pre-2026-04
+  review_date: '2026-09-30'
+  external_breaking_change_required: true
+  internal_callers_zero: false
+  allowed_call_sites: '`src`: new code imports `DataSourceCreatorProtocol`; `tests`:
+    compatibility/naming coverage may inspect `DataSourceCreatorPort` only to verify
+    sunset governance for the legacy alias family'
+  migration_path: Use `DataSourceCreatorProtocol` as the canonical provider-creator
+    contract and treat `DataSourceCreatorPort` as compatibility-only across provider/factory
+    re-export surfaces.
+  exit_criteria: First-party `src/` imports rely only on `DataSourceCreatorProtocol`,
+    the alias family remains explicitly governed, and `DataSourceCreatorPort` can
+    be retired from provider-facing exports during the next breaking-change wave.
+- path: src/bioetl/composition/providers/__init__.py
+  compatibility_role: Compatibility re-export surface that still exposes
+    `DataSourceCreatorPort` from the provider package root.
+  canonical_target: bioetl.composition.providers.DataSourceCreatorProtocol
+  status: compat-shim
+  owner: bioetl.composition.providers
+  introduced_in: legacy-pre-2026-04
+  review_date: '2026-09-30'
+  external_breaking_change_required: true
+  internal_callers_zero: true
+  allowed_call_sites: >-
+    `src`: no direct imports of `DataSourceCreatorPort`; `tests`: dedicated
+    compatibility coverage may verify the package-root alias surface while
+    ordinary code imports `DataSourceCreatorProtocol`
+  migration_path: >-
+    Import `DataSourceCreatorProtocol` from the provider package root or owner
+    modules instead of using `DataSourceCreatorPort`.
+  exit_criteria: >-
+    First-party `src/` imports of the package-root alias remain at zero and the
+    compatibility re-export can be removed in the next breaking-change wave.
+- path: src/bioetl/composition/providers/provider_registry.py
+  compatibility_role: Compatibility re-export surface that still exposes
+    `DataSourceCreatorPort` from the provider registry facade.
+  canonical_target: bioetl.composition.providers.provider_registry.DataSourceCreatorProtocol
+  status: compat-shim
+  owner: bioetl.composition.providers
+  introduced_in: legacy-pre-2026-04
+  review_date: '2026-09-30'
+  external_breaking_change_required: true
+  internal_callers_zero: false
+  allowed_call_sites: >-
+    `src`: no direct imports of `DataSourceCreatorPort`; `tests`: dedicated
+    compatibility coverage may verify the registry-facade alias while ordinary
+    code imports `DataSourceCreatorProtocol`
+  migration_path: >-
+    Import `DataSourceCreatorProtocol` from `provider_registry` only when the
+    canonical protocol surface is needed; do not use `DataSourceCreatorPort`.
+  exit_criteria: >-
+    First-party `src/` imports of the registry-facade alias remain at zero and
+    the compatibility re-export can be removed in the next breaking-change wave.
+- path: src/bioetl/composition/factories/__init__.py
+  compatibility_role: Mixed factory facade that still defines the deprecated warning
+    class `DataSourceCreatorPort` for legacy callers.
+  canonical_target: bioetl.composition.factories.DataSourceCreatorProtocol
+  status: mixed-module
+  owner: bioetl.composition.factories
+  introduced_in: legacy-pre-2026-04
+  review_date: '2026-09-30'
+  external_breaking_change_required: true
+  internal_callers_zero: true
+  allowed_call_sites: >-
+    `src`: new code imports `DataSourceCreatorProtocol`; `tests`: dedicated
+    compatibility coverage may instantiate `DataSourceCreatorPort` only to
+    verify deprecation behavior
+  migration_path: >-
+    Import `DataSourceCreatorProtocol` directly from the sanctioned
+    factory/provider surfaces instead of instantiating or annotating
+    `DataSourceCreatorPort`.
+  exit_criteria: >-
+    First-party `src/` imports and annotations stop using `DataSourceCreatorPort`,
+    compatibility tests remain the only live caller lane, and the warning alias
+    can be removed in the next breaking-change wave.
+- path: src/bioetl/composition/factories/datasource/__init__.py
+  compatibility_role: Compatibility re-export surface that still exposes
+    `DataSourceCreatorPort` from the datasource subpackage root.
+  canonical_target: bioetl.composition.factories.datasource.DataSourceCreatorProtocol
+  status: compat-shim
+  owner: bioetl.composition.factories.datasource
+  introduced_in: legacy-pre-2026-04
+  review_date: '2026-09-30'
+  external_breaking_change_required: true
+  internal_callers_zero: true
+  allowed_call_sites: >-
+    `src`: no direct imports of `DataSourceCreatorPort`; `tests`: dedicated
+    compatibility coverage may verify the datasource package-root alias while
+    ordinary code imports `DataSourceCreatorProtocol`
+  migration_path: >-
+    Import `DataSourceCreatorProtocol` from the datasource package root instead
+    of using `DataSourceCreatorPort`.
+  exit_criteria: >-
+    First-party `src/` imports of the datasource package-root alias remain at
+    zero and the compatibility re-export can be removed in the next
+    breaking-change wave.
+- path: src/bioetl/composition/factories/datasource/data_source_factory.py
+  compatibility_role: Mixed datasource factory module that still re-exports
+    `DataSourceCreatorPort` alongside the canonical `DataSourceCreatorProtocol`.
+  canonical_target: bioetl.composition.factories.datasource.data_source_factory.DataSourceCreatorProtocol
+  status: mixed-module
+  owner: bioetl.composition.factories.datasource
+  introduced_in: legacy-pre-2026-04
+  review_date: '2026-09-30'
+  external_breaking_change_required: true
+  internal_callers_zero: false
+  allowed_call_sites: >-
+    `src`: no direct imports of `DataSourceCreatorPort`; `tests`: dedicated
+    compatibility coverage may verify the alias while ordinary code imports
+    `DataSourceCreatorProtocol`
+  migration_path: >-
+    Import `DataSourceCreatorProtocol` directly from the datasource factory
+    module when the canonical protocol surface is needed.
+  exit_criteria: >-
+    First-party `src/` imports of `DataSourceCreatorPort` remain at zero,
+    compatibility coverage is explicit, and the alias can be removed in the
+    next breaking-change wave.
 retained_entrypoints:
 - path: src/bioetl/interfaces/cli/commands/run.py
   compatibility_role: Permanent public run command seam over the split internal owner
@@ -94,6 +257,27 @@ retained_entrypoints:
   exit_criteria: The top-level module remains the sanctioned public CLI patch/import
     seam, and direct internal-owner imports remain confined to the owning package
     plus dedicated boundary tests.
+- path: src/bioetl/interfaces/cli/commands/diagnostics.py
+  compatibility_role: Permanent public diagnostics command seam over the internal
+    owner module `bioetl.interfaces.cli.commands.domains.diagnostics.command`.
+  canonical_target: bioetl.interfaces.cli.commands.diagnostics
+  status: public-entrypoint
+  owner: bioetl.interfaces.cli.commands
+  introduced_in: 2026-03 RF-024
+  review_date: '2026-09-30'
+  external_breaking_change_required: true
+  internal_callers_zero: false
+  allowed_call_sites: '`src`: use `bioetl.interfaces.cli.commands.diagnostics` as
+    the public seam; direct internal-owner imports stay confined to `src/bioetl/interfaces/cli/commands/domains/diagnostics/__init__.py`;
+    `tests`: patch/import coverage may target `bioetl.interfaces.cli.commands.diagnostics`,
+    while direct `bioetl.interfaces.cli.commands.domains.diagnostics.command` imports
+    stay confined to dedicated boundary coverage'
+  migration_path: Use `bioetl.interfaces.cli.commands.diagnostics` for public CLI
+    wiring and patch targets; do not import `bioetl.interfaces.cli.commands.domains.diagnostics.command`
+    directly outside the owning package or dedicated boundary tests.
+  exit_criteria: The top-level module remains the sanctioned public CLI patch/import
+    seam, and direct internal-owner imports remain confined to the owning package
+    plus dedicated boundary tests.
 - path: src/bioetl/interfaces/cli/commands/quarantine.py
   compatibility_role: Permanent public quarantine command seam over the internal owner
     module `bioetl.interfaces.cli.commands.domains.quarantine.command`.
@@ -132,6 +316,27 @@ retained_entrypoints:
     stay confined to dedicated boundary coverage'
   migration_path: Use `bioetl.interfaces.cli.commands.maintenance` for public CLI
     wiring; do not import `bioetl.interfaces.cli.commands.domains.maintenance.command`
+    directly outside the owning package or dedicated boundary tests.
+  exit_criteria: The top-level module remains the sanctioned public CLI patch/import
+    seam, and direct internal-owner imports remain confined to the owning package
+    plus dedicated boundary tests.
+- path: src/bioetl/interfaces/cli/commands/plan.py
+  compatibility_role: Permanent public plan command seam over the internal owner
+    module `bioetl.interfaces.cli.commands.domains.maintenance.plan`.
+  canonical_target: bioetl.interfaces.cli.commands.plan
+  status: public-entrypoint
+  owner: bioetl.interfaces.cli.commands
+  introduced_in: 2026-03 RF-024
+  review_date: '2026-09-30'
+  external_breaking_change_required: true
+  internal_callers_zero: false
+  allowed_call_sites: '`src`: use `bioetl.interfaces.cli.commands.plan` as the public
+    seam; direct internal-owner imports stay confined to `src/bioetl/interfaces/cli/commands/domains/maintenance/__init__.py`;
+    `tests`: patch/import coverage may target `bioetl.interfaces.cli.commands.plan`,
+    while direct `bioetl.interfaces.cli.commands.domains.maintenance.plan` imports
+    stay confined to dedicated boundary coverage'
+  migration_path: Use `bioetl.interfaces.cli.commands.plan` for public CLI wiring
+    and patch targets; do not import `bioetl.interfaces.cli.commands.domains.maintenance.plan`
     directly outside the owning package or dedicated boundary tests.
   exit_criteria: The top-level module remains the sanctioned public CLI patch/import
     seam, and direct internal-owner imports remain confined to the owning package
@@ -224,6 +429,47 @@ retained_entrypoints:
   exit_criteria: The public entrypoint remains sanctioned, internal implementation-module
     imports outside `composition/` stay at zero, and internal-module patch coverage
     remains confined to the dedicated entrypoint-boundary tests.
+- path: src/bioetl/composition/__init__.py
+  compatibility_role: Retained package-root composition facade that preserves
+    import stability for registry discovery and sanctioned public submodule access
+    while first-party `src/` callers migrate to owner-focused APIs.
+  canonical_target: bioetl.composition
+  status: retained-entrypoint
+  owner: bioetl.composition
+  introduced_in: 2026-04 TD-005 TD-006
+  review_date: '2026-09-30'
+  external_breaking_change_required: true
+  internal_callers_zero: true
+  allowed_call_sites: '`src`: no direct imports; use `bioetl.composition.registry_api`,
+    `execution_api`, `control_plane_api`, `health_api`, `maintenance_api`, `composite_api`,
+    or `observability_api`; `tests`: dedicated compatibility coverage may import the
+    package root to verify the frozen lazy-export budget'
+  migration_path: Keep `bioetl.composition` only as a retained public compatibility
+    seam for external import stability and discovery. New first-party `src/` imports
+    must point at owner-focused composition APIs instead of the package root.
+  exit_criteria: First-party `src/` imports of `bioetl.composition` stay at zero,
+    the package-root export budget remains frozen, and any future surface change is
+    reviewed through this inventory first.
+- path: src/bioetl/composition/bootstrap/__init__.py
+  compatibility_role: Retained runtime-focused bootstrap package facade that preserves
+    historical import stability while owner-focused execution, composite, and observability
+    APIs serve as the canonical first-party composition seams.
+  canonical_target: bioetl.composition.bootstrap
+  status: retained-entrypoint
+  owner: bioetl.composition.bootstrap
+  introduced_in: 2026-04 TD-001
+  review_date: '2026-09-30'
+  external_breaking_change_required: true
+  internal_callers_zero: true
+  allowed_call_sites: '`src`: no direct imports; use `bioetl.composition.execution_api`,
+    `composite_api`, or `observability_api`; `tests`: dedicated compatibility and
+    runtime-boundary coverage may import the bootstrap package root'
+  migration_path: Keep `bioetl.composition.bootstrap` as a retained compatibility
+    seam for runtime-facing import stability, but route new first-party `src/` imports
+    through owner-focused composition APIs instead of the bootstrap package root.
+  exit_criteria: First-party `src/` imports of `bioetl.composition.bootstrap` stay
+    at zero, the runtime-focused `__all__` budget remains frozen, and any new root-level
+    export requires an explicit inventory review.
 - path: src/bioetl/domain/composite/config.py
   compatibility_role: Permanent public entrypoint for composite config models that
     shields split config internals.

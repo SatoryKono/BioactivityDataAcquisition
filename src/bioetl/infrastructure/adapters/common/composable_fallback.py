@@ -20,7 +20,7 @@ from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.adapters.common.fallback_fetch_service import (
     ExtractRecordIdProtocol,
     FallbackExecutionProtocol,
-    FallbackFetchOrchestratorService,
+    FallbackFetchOrchestrator,
     FallbackFetchRequest,
     NormalizeIdProtocol,
     Phase1SummaryLoggerProtocol,
@@ -55,7 +55,7 @@ class ComposableFallbackDecorator:
     def __init__(
         self,
         *,
-        service: FallbackFetchOrchestratorService,
+        service: FallbackFetchOrchestrator,
         strategy: FallbackExecutionProtocol,
         config: FallbackDecoratorConfig,
         logger: LoggerPort,

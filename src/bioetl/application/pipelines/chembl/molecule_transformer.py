@@ -57,8 +57,8 @@ _PROPERTIES_FIELDS: JsonDict = {  # Any: converter callables or None
     "heavy_atoms": safe_int,
     "aromatic_rings": safe_int,
     "qed_weighted": safe_float,
-    "full_molformula": None,
-    "ro3_pass": None,
+    "full_molformula": None,  # nosec B105
+    "ro3_pass": None,  # nosec B105
 }
 
 # Rename mapping: all property_* fields → canonical alias names for Gold unification
@@ -75,7 +75,7 @@ _PROPERTIES_RENAMES: dict[str, str] = {
     "property_aromatic_rings": "aromatic_ring_count",
     "property_qed_weighted": "qed_score",
     "property_full_molformula": "molecular_formula",
-    "property_ro3_pass": "ro3_pass",
+    "property_ro3_pass": "ro3_pass",  # nosec B105
 }
 
 _STRUCTURES_FIELDS: JsonDict = {  # Any: converter callables or None

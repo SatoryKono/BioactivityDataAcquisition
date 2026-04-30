@@ -14,16 +14,16 @@ import pytest
 
 
 # =============================================================================
-# Tests for get_quarantine_manager
+# Tests for get_quarantine_runtime_service
 # =============================================================================
 
 
 @pytest.mark.unit
-class TestGetQuarantineManager:
-    """Tests for get_quarantine_manager function."""
+class TestGetQuarantineRuntimeService:
+    """Tests for get_quarantine_runtime_service function."""
 
     def test_calls_ensure_registrations_and_bootstrap(self) -> None:
-        """Test that get_quarantine_manager calls _ensure_registrations and bootstrap."""
+        """Test that get_quarantine_runtime_service calls _ensure_registrations and bootstrap."""
         mock_manager = MagicMock()
 
         with (
@@ -31,13 +31,13 @@ class TestGetQuarantineManager:
                 "bioetl.composition._resource_management._ensure_registrations"
             ) as mock_ensure,
             patch(
-                "bioetl.composition._resource_management.bootstrap_quarantine_manager",
+                "bioetl.composition._resource_management.bootstrap_quarantine_runtime_service",
                 return_value=mock_manager,
             ) as mock_bootstrap,
         ):
-            from bioetl.composition.resources_api import get_quarantine_manager
+            from bioetl.composition.resources_api import get_quarantine_runtime_service
 
-            result = get_quarantine_manager("chembl_activity")
+            result = get_quarantine_runtime_service("chembl_activity")
 
         mock_ensure.assert_called_once()
         mock_bootstrap.assert_called_once_with("chembl_activity")
@@ -50,13 +50,13 @@ class TestGetQuarantineManager:
         with (
             patch("bioetl.composition._resource_management._ensure_registrations"),
             patch(
-                "bioetl.composition._resource_management.bootstrap_quarantine_manager",
+                "bioetl.composition._resource_management.bootstrap_quarantine_runtime_service",
                 return_value=expected,
             ),
         ):
-            from bioetl.composition.resources_api import get_quarantine_manager
+            from bioetl.composition.resources_api import get_quarantine_runtime_service
 
-            result = get_quarantine_manager("any_pipeline")
+            result = get_quarantine_runtime_service("any_pipeline")
 
         assert result is expected
 
@@ -65,27 +65,27 @@ class TestGetQuarantineManager:
         with (
             patch("bioetl.composition._resource_management._ensure_registrations"),
             patch(
-                "bioetl.composition._resource_management.bootstrap_quarantine_manager"
+                "bioetl.composition._resource_management.bootstrap_quarantine_runtime_service"
             ) as mock_bootstrap,
         ):
-            from bioetl.composition.resources_api import get_quarantine_manager
+            from bioetl.composition.resources_api import get_quarantine_runtime_service
 
-            get_quarantine_manager("pubmed_publication")
+            get_quarantine_runtime_service("pubmed_publication")
 
         mock_bootstrap.assert_called_once_with("pubmed_publication")
 
 
 # =============================================================================
-# Tests for get_checkpoint_manager
+# Tests for get_checkpoint_runtime_service
 # =============================================================================
 
 
 @pytest.mark.unit
-class TestGetCheckpointManager:
-    """Tests for get_checkpoint_manager function."""
+class TestGetCheckpointRuntimeService:
+    """Tests for get_checkpoint_runtime_service function."""
 
     def test_calls_ensure_registrations_and_bootstrap(self) -> None:
-        """Test that get_checkpoint_manager calls _ensure_registrations and bootstrap."""
+        """Test that get_checkpoint_runtime_service calls _ensure_registrations and bootstrap."""
         mock_manager = MagicMock()
 
         with (
@@ -93,13 +93,13 @@ class TestGetCheckpointManager:
                 "bioetl.composition._resource_management._ensure_registrations"
             ) as mock_ensure,
             patch(
-                "bioetl.composition._resource_management.bootstrap_checkpoint_manager",
+                "bioetl.composition._resource_management.bootstrap_checkpoint_runtime_service",
                 return_value=mock_manager,
             ) as mock_bootstrap,
         ):
-            from bioetl.composition.resources_api import get_checkpoint_manager
+            from bioetl.composition.resources_api import get_checkpoint_runtime_service
 
-            result = get_checkpoint_manager("chembl_activity")
+            result = get_checkpoint_runtime_service("chembl_activity")
 
         mock_ensure.assert_called_once()
         mock_bootstrap.assert_called_once_with("chembl_activity")
@@ -110,12 +110,12 @@ class TestGetCheckpointManager:
         with (
             patch("bioetl.composition._resource_management._ensure_registrations"),
             patch(
-                "bioetl.composition._resource_management.bootstrap_checkpoint_manager"
+                "bioetl.composition._resource_management.bootstrap_checkpoint_runtime_service"
             ) as mock_bootstrap,
         ):
-            from bioetl.composition.resources_api import get_checkpoint_manager
+            from bioetl.composition.resources_api import get_checkpoint_runtime_service
 
-            get_checkpoint_manager("uniprot_protein")
+            get_checkpoint_runtime_service("uniprot_protein")
 
         mock_bootstrap.assert_called_once_with("uniprot_protein")
 
@@ -414,7 +414,7 @@ class TestInspectQuarantine:
 
         with (
             patch(
-                "bioetl.composition._resource_management.get_quarantine_manager",
+                "bioetl.composition._resource_management.get_quarantine_runtime_service",
                 return_value=mock_manager,
             ),
         ):
@@ -433,7 +433,7 @@ class TestInspectQuarantine:
 
         with (
             patch(
-                "bioetl.composition._resource_management.get_quarantine_manager",
+                "bioetl.composition._resource_management.get_quarantine_runtime_service",
                 return_value=mock_manager,
             ),
         ):
@@ -463,7 +463,7 @@ class TestListCheckpoints:
 
         with (
             patch(
-                "bioetl.composition._resource_management.get_checkpoint_manager",
+                "bioetl.composition._resource_management.get_checkpoint_runtime_service",
                 return_value=mock_manager,
             ),
         ):
@@ -482,7 +482,7 @@ class TestListCheckpoints:
 
         with (
             patch(
-                "bioetl.composition._resource_management.get_checkpoint_manager",
+                "bioetl.composition._resource_management.get_checkpoint_runtime_service",
                 return_value=mock_manager,
             ),
         ):

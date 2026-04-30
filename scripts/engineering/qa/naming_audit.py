@@ -783,6 +783,11 @@ def _repo_relative_path(path: Path) -> str:
         return path.as_posix()
 
 
+def _normalize_surface_path(surface: str | Path) -> str:
+    """Normalize registry and discovered surfaces to the same comparison key."""
+    return _repo_relative_path(Path(surface))
+
+
 def _iter_public_alias_assignments(tree: ast.Module) -> Iterator[tuple[int, str, str]]:
     """Yield top-level alias assignments of the form Alias = Canonical."""
     for node in tree.body:
@@ -808,7 +813,11 @@ def _public_symbol_alias_index(
 ) -> dict[tuple[str, str, str], PublicSymbolAlias]:
     """Index registry-backed public symbol aliases by defining surface/name."""
     return {
-        (entry.defining_surface, entry.alias_name, entry.canonical_name): entry
+        (
+            _normalize_surface_path(entry.defining_surface),
+            entry.alias_name,
+            entry.canonical_name,
+        ): entry
         for entry in registry.public_symbol_aliases
     }
 

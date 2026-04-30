@@ -68,8 +68,8 @@ clean-preflight:
 	$(RUN) scripts.engineering.repo preflight-cleanup $(if $(filter 1 true yes TRUE YES,$(DRY_RUN)),--dry-run)
 
 clean-local-artifacts:
-	$(RUN) scripts.engineering.diagnostics cleanup $(CLEAN_APPLY_FLAG)
-	@if [ -n "$(PURGE_WORKTREES_CMD)" ]; then $(PURGE_WORKTREES_CMD); fi
+	$(RUN) scripts.engineering.diagnostics cleanup $(CLEAN_APPLY_FLAG) --purge-logs
+	@$(if $(PURGE_WORKTREES_CMD),$(PURGE_WORKTREES_CMD),:)
 
 test:
 	$(RUN) pytest

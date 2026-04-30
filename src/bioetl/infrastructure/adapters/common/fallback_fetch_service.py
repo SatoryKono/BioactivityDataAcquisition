@@ -145,11 +145,11 @@ class FallbackFetchRequest:
         return None
 
 
-class FallbackFetchOrchestratorService:
-    """Shared service for fallback-enabled filtered fetch flows."""
+class FallbackFetchOrchestrator:
+    """Shared orchestrator for fallback-enabled filtered fetch flows."""
 
     def __init__(self, adapter_metrics: AdapterMetricsRecorder | None = None) -> None:
-        """Initialize the fallback orchestrator service.
+        """Initialize the fallback fetch orchestrator.
 
         Args:
             adapter_metrics: Optional metrics recorder for tracking fallback

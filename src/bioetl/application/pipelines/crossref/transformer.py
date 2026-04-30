@@ -11,7 +11,7 @@ Terminology:
 - All layers use "publication" to refer to scholarly works (articles, preprints, etc.)
 
 Note: Business logic functions are delegated to domain layer per REFACTOR-004.
-Uses DataNormalizationService for text normalization (DI pattern).
+Uses DefaultDataNormalizer for text normalization (DI pattern).
 """
 
 from __future__ import annotations
@@ -44,7 +44,7 @@ if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
     from bioetl.domain.ports import MetricsPort, PiiHasherPort, TracingPort
-    from bioetl.domain.services import IdentityService
+    from bioetl.domain.services import EntityIdentityGenerator
     from bioetl.domain.types import BronzeRecord
 
 
@@ -72,7 +72,7 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
         gold_filters: GoldFilterConfig | None = None,
         tracer: TracingPort | None = None,
         metrics: MetricsPort | None = None,
-        identity_service: IdentityService | None = None,
+        identity_service: EntityIdentityGenerator | None = None,
         pii_hasher: PiiHasherPort | None = None,
         dependencies: TransformerDependencyContext | None = None,
     ) -> None:

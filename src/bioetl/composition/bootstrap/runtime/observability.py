@@ -20,7 +20,7 @@ from bioetl.infrastructure.observability import (
     PrometheusMetrics,
     UnifiedLogger,
 )
-from bioetl.infrastructure.observability.anomaly import DataQualityMonitorService
+from bioetl.infrastructure.observability.anomaly import DataQualityMonitor
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 
 from .dq_bootstrap import bootstrap_dq_monitor_port as _bootstrap_dq_monitor_port_impl
@@ -258,7 +258,7 @@ def bootstrap_dq_monitor_port(
     return _bootstrap_dq_monitor_port_impl(
         settings=settings,
         logger=logger,
-        monitor_factory=DataQualityMonitorService,
+        monitor_factory=DataQualityMonitor,
         noop_logger_factory=NoOpLogger,
     )
 

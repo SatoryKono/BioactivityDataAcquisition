@@ -1,6 +1,7 @@
 [importlinter]
 root_package = bioetl
 include_external_packages = False
+cache_dir = /tmp/bioetl-importlinter-cache
 
 # Hexagonal Architecture Layer Contracts
 # See CLAUDE.md §2.1 for the import matrix

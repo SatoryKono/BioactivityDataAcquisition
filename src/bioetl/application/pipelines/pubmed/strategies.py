@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import xml.etree.ElementTree as ET
+import xml.etree.ElementTree as ET  # nosec B405
 from typing import TYPE_CHECKING, ClassVar
 
 import defusedxml.ElementTree as defused_ET  # type: ignore[import-untyped]

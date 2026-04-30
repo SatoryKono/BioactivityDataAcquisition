@@ -14,7 +14,7 @@ from bioetl.application.core.wiring.runtime import (
     BatchMemoryManagerService,
     BatchProgressService,
     BatchTracingManagerService,
-    CheckpointManagerService,
+    CheckpointRuntimeService,
     RecordProcessorConfig,
 )
 from bioetl.composition.factories.batch_id_generator import UuidBatchIdGenerator
@@ -52,7 +52,7 @@ def build_runtime_managers(
     *,
     pipeline: BasePipeline,
     processor_config: RecordProcessorConfig,
-    checkpoint_manager: CheckpointManagerService,
+    checkpoint_manager: CheckpointRuntimeService,
     memory_monitor: MemoryMonitorPort | None,
     memory_config: MemoryConfig | None,
     tracer: TracingPort | None,

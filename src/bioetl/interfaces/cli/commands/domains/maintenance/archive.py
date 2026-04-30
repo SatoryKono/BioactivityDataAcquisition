@@ -29,7 +29,7 @@ __all__ = [
 
 def get_lifecycle_service() -> MedallionLifecycleService:
     """Load the lifecycle service through composition on demand."""
-    from bioetl.composition.resources_api import get_lifecycle_service as _impl
+    from bioetl.composition.maintenance_api import get_lifecycle_service as _impl
 
     impl = cast("Callable[[], MedallionLifecycleService]", _impl)
     return impl()

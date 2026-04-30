@@ -4,10 +4,17 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+<<<<<<< Updated upstream
 from bioetl.application.services._checkpoint_compatibility_execution_validation import (
     validate_execution_identity_compatibility,
     validate_lenient_execution_identity_compatibility,
 )
+||||||| Stash base
+=======
+from bioetl.application.services.checkpoint_compatibility_runtime import (
+    check_execution_identity_compatibility,
+)
+>>>>>>> Stashed changes
 from bioetl.domain.types.checkpoint_metadata import (
     CheckpointCompatibilityResult,
     CheckpointMetadata,
@@ -115,6 +122,227 @@ def _validate_rule_bundle_compatibility(
     return messages
 
 
+<<<<<<< Updated upstream
+||||||| Stash base
+def _validate_execution_identity_compatibility(
+    current_metadata: CheckpointMetadata,
+    checkpoint_metadata: CheckpointMetadata,
+) -> tuple[bool, list[str]]:
+    messages: list[str] = []
+    execution_identity_compatible = True
+    current_runtime_anchor_fingerprint = current_metadata.runtime_anchor_fingerprint()
+    checkpoint_runtime_anchor_fingerprint = (
+        checkpoint_metadata.runtime_anchor_fingerprint()
+    )
+    if (
+        current_metadata.execution_fingerprint
+        and checkpoint_metadata.execution_fingerprint
+    ):
+        if (
+            current_metadata.execution_fingerprint
+            != checkpoint_metadata.execution_fingerprint
+        ):
+            execution_identity_compatible = False
+            messages.append(
+                "Execution fingerprint mismatch: "
+                f"current={current_metadata.execution_fingerprint}, "
+                f"checkpoint={checkpoint_metadata.execution_fingerprint}"
+            )
+        return execution_identity_compatible, messages
+    if (
+        current_runtime_anchor_fingerprint
+        and checkpoint_runtime_anchor_fingerprint
+        and current_runtime_anchor_fingerprint != checkpoint_runtime_anchor_fingerprint
+    ):
+        execution_identity_compatible = False
+        messages.append(
+            "Runtime anchor fingerprint mismatch: "
+            f"current={current_runtime_anchor_fingerprint}, "
+            f"checkpoint={checkpoint_runtime_anchor_fingerprint}"
+        )
+    if (
+        current_metadata.effective_config_hash
+        and checkpoint_metadata.effective_config_hash
+        and current_metadata.effective_config_hash
+        != checkpoint_metadata.effective_config_hash
+    ):
+        execution_identity_compatible = False
+        messages.append(
+            "Effective config hash mismatch: "
+            f"current={current_metadata.effective_config_hash}, "
+            f"checkpoint={checkpoint_metadata.effective_config_hash}"
+        )
+    if (
+        current_metadata.manifest_id
+        and checkpoint_metadata.manifest_id
+        and current_metadata.manifest_id != checkpoint_metadata.manifest_id
+    ):
+        execution_identity_compatible = False
+        messages.append(
+            "Manifest identity mismatch: "
+            f"current={current_metadata.manifest_id}, "
+            f"checkpoint={checkpoint_metadata.manifest_id}"
+        )
+    if (
+        current_metadata.contract_ref
+        and checkpoint_metadata.contract_ref
+        and current_metadata.contract_ref != checkpoint_metadata.contract_ref
+    ):
+        execution_identity_compatible = False
+        messages.append(
+            "Contract reference mismatch: "
+            f"current={current_metadata.contract_ref}, "
+            f"checkpoint={checkpoint_metadata.contract_ref}"
+        )
+    if (
+        current_metadata.contract_version
+        and checkpoint_metadata.contract_version
+        and current_metadata.contract_version != checkpoint_metadata.contract_version
+    ):
+        execution_identity_compatible = False
+        messages.append(
+            "Contract version mismatch: "
+            f"current={current_metadata.contract_version}, "
+            f"checkpoint={checkpoint_metadata.contract_version}"
+        )
+    if current_metadata.exact_replay:
+        if checkpoint_metadata.exact_replay is not True:
+            execution_identity_compatible = False
+            messages.append(
+                "Exact replay mismatch: current run requires exact replay but "
+                "checkpoint was not captured in exact replay mode"
+            )
+        elif not checkpoint_metadata.input_snapshot_ids:
+            execution_identity_compatible = False
+            messages.append(
+                "Exact replay requires checkpoint input snapshot anchors, but none were persisted"
+            )
+    if (
+        current_metadata.input_snapshot_ids
+        and checkpoint_metadata.input_snapshot_ids
+        and current_metadata.input_snapshot_ids != checkpoint_metadata.input_snapshot_ids
+    ):
+        execution_identity_compatible = False
+        messages.append(
+            "Input snapshot identity mismatch: "
+            f"current={list(current_metadata.input_snapshot_ids)}, "
+            f"checkpoint={list(checkpoint_metadata.input_snapshot_ids)}"
+        )
+    return execution_identity_compatible, messages
+
+
+=======
+def _validate_execution_identity_compatibility(
+    current_metadata: CheckpointMetadata,
+    checkpoint_metadata: CheckpointMetadata,
+) -> tuple[bool, list[str]]:
+    messages: list[str] = []
+    execution_identity_compatible = True
+    execution_identity_result = check_execution_identity_compatibility(
+        current_execution_fingerprint=current_metadata.execution_fingerprint,
+        checkpoint_execution_fingerprint=checkpoint_metadata.execution_fingerprint,
+        current_manifest_id=current_metadata.manifest_id,
+        checkpoint_manifest_id=checkpoint_metadata.manifest_id,
+        current_contract_ref=current_metadata.contract_ref,
+        checkpoint_contract_ref=checkpoint_metadata.contract_ref,
+        current_contract_version=current_metadata.contract_version,
+        checkpoint_contract_version=checkpoint_metadata.contract_version,
+        current_effective_config_hash=current_metadata.effective_config_hash,
+        checkpoint_effective_config_hash=checkpoint_metadata.effective_config_hash,
+        current_effective_config_artifact_id=current_metadata.effective_config_artifact_id,
+        checkpoint_effective_config_artifact_id=checkpoint_metadata.effective_config_artifact_id,
+    )
+    if (
+        current_metadata.execution_fingerprint
+        and checkpoint_metadata.execution_fingerprint
+    ):
+        if not bool(execution_identity_result["compatible"]):
+            execution_identity_compatible = False
+            messages.append(
+                "Execution fingerprint mismatch: "
+                f"current={current_metadata.execution_fingerprint}, "
+                f"checkpoint={checkpoint_metadata.execution_fingerprint}"
+            )
+        return execution_identity_compatible, messages
+    if execution_identity_result["reason"] == "runtime_anchor_fingerprint_mismatch":
+        execution_identity_compatible = False
+        messages.append(
+            "Runtime anchor fingerprint mismatch: "
+            f"current={current_metadata.runtime_anchor_fingerprint()}, "
+            f"checkpoint={checkpoint_metadata.runtime_anchor_fingerprint()}"
+        )
+    if (
+        current_metadata.effective_config_hash
+        and checkpoint_metadata.effective_config_hash
+        and current_metadata.effective_config_hash
+        != checkpoint_metadata.effective_config_hash
+    ):
+        execution_identity_compatible = False
+        messages.append(
+            "Effective config hash mismatch: "
+            f"current={current_metadata.effective_config_hash}, "
+            f"checkpoint={checkpoint_metadata.effective_config_hash}"
+        )
+    if (
+        current_metadata.manifest_id
+        and checkpoint_metadata.manifest_id
+        and current_metadata.manifest_id != checkpoint_metadata.manifest_id
+    ):
+        execution_identity_compatible = False
+        messages.append(
+            "Manifest identity mismatch: "
+            f"current={current_metadata.manifest_id}, "
+            f"checkpoint={checkpoint_metadata.manifest_id}"
+        )
+    if (
+        current_metadata.contract_ref
+        and checkpoint_metadata.contract_ref
+        and current_metadata.contract_ref != checkpoint_metadata.contract_ref
+    ):
+        execution_identity_compatible = False
+        messages.append(
+            "Contract reference mismatch: "
+            f"current={current_metadata.contract_ref}, "
+            f"checkpoint={checkpoint_metadata.contract_ref}"
+        )
+    if (
+        current_metadata.contract_version
+        and checkpoint_metadata.contract_version
+        and current_metadata.contract_version != checkpoint_metadata.contract_version
+    ):
+        execution_identity_compatible = False
+        messages.append(
+            "Contract version mismatch: "
+            f"current={current_metadata.contract_version}, "
+            f"checkpoint={checkpoint_metadata.contract_version}"
+        )
+    if current_metadata.exact_replay:
+        if checkpoint_metadata.exact_replay is not True:
+            execution_identity_compatible = False
+            messages.append(
+                "Exact replay mismatch: current run requires exact replay but "
+                "checkpoint was not captured in exact replay mode"
+            )
+        elif not checkpoint_metadata.input_snapshot_ids:
+            execution_identity_compatible = False
+            messages.append(
+                "Exact replay requires checkpoint input snapshot anchors, but none were persisted"
+            )
+    if (
+        current_metadata.input_snapshot_ids
+        and checkpoint_metadata.input_snapshot_ids
+        and current_metadata.input_snapshot_ids != checkpoint_metadata.input_snapshot_ids
+    ):
+        execution_identity_compatible = False
+        messages.append(
+            "Input snapshot identity mismatch: "
+            f"current={list(current_metadata.input_snapshot_ids)}, "
+            f"checkpoint={list(checkpoint_metadata.input_snapshot_ids)}"
+        )
+    return execution_identity_compatible, messages
+
+
+>>>>>>> Stashed changes
 def _validate_lenient_dq_compatibility(
     current_metadata: CheckpointMetadata,
     checkpoint_metadata: CheckpointMetadata,

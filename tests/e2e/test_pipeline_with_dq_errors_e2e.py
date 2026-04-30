@@ -101,7 +101,7 @@ class TestDQSoftThreshold:
         from bioetl.application.core.batch_metrics import BatchMetricsRecorder
         from bioetl.application.core.batch_transformer import BatchTransformer
         from bioetl.application.core.config import RecordProcessorConfig
-        from bioetl.application.core.quarantine_manager import QuarantineManagerService
+        from bioetl.application.core.quarantine_manager import QuarantineRuntimeService
         from bioetl.domain.error_classifier import ErrorClassifier
         from bioetl.domain.types import BatchID
 
@@ -129,7 +129,7 @@ class TestDQSoftThreshold:
             ),
         )
 
-        quarantine_manager = MagicMock(spec=QuarantineManagerService)
+        quarantine_manager = MagicMock(spec=QuarantineRuntimeService)
         quarantine_manager.quarantine_record = AsyncMock()
         quarantine_manager.quarantine_filtered_record = AsyncMock()
 
@@ -183,7 +183,7 @@ class TestDQSoftThreshold:
         from bioetl.application.core.batch_metrics import BatchMetricsRecorder
         from bioetl.application.core.batch_transformer import BatchTransformer
         from bioetl.application.core.config import RecordProcessorConfig
-        from bioetl.application.core.quarantine_manager import QuarantineManagerService
+        from bioetl.application.core.quarantine_manager import QuarantineRuntimeService
         from bioetl.domain.error_classifier import ErrorClassifier
         from bioetl.domain.types import BatchID
 
@@ -209,7 +209,7 @@ class TestDQSoftThreshold:
             ),
         )
 
-        quarantine_manager = MagicMock(spec=QuarantineManagerService)
+        quarantine_manager = MagicMock(spec=QuarantineRuntimeService)
         quarantine_manager.quarantine_record = AsyncMock()
         quarantine_manager.quarantine_filtered_record = AsyncMock()
 
@@ -266,7 +266,7 @@ class TestDQHardThreshold:
         from bioetl.application.core.batch_metrics import BatchMetricsRecorder
         from bioetl.application.core.batch_transformer import BatchTransformer
         from bioetl.application.core.config import RecordProcessorConfig
-        from bioetl.application.core.quarantine_manager import QuarantineManagerService
+        from bioetl.application.core.quarantine_manager import QuarantineRuntimeService
         from bioetl.domain.error_classifier import ErrorClassifier
         from bioetl.domain.types import BatchID
 
@@ -291,7 +291,7 @@ class TestDQHardThreshold:
             ),
         )
 
-        quarantine_manager = MagicMock(spec=QuarantineManagerService)
+        quarantine_manager = MagicMock(spec=QuarantineRuntimeService)
         quarantine_manager.quarantine_record = AsyncMock()
         quarantine_manager.quarantine_filtered_record = AsyncMock()
 
@@ -332,7 +332,7 @@ class TestDQHardThreshold:
         from bioetl.application.core.batch_metrics import BatchMetricsRecorder
         from bioetl.application.core.batch_transformer import BatchTransformer
         from bioetl.application.core.config import RecordProcessorConfig
-        from bioetl.application.core.quarantine_manager import QuarantineManagerService
+        from bioetl.application.core.quarantine_manager import QuarantineRuntimeService
         from bioetl.domain.error_classifier import ErrorClassifier
         from bioetl.domain.types import BatchID
 
@@ -357,7 +357,7 @@ class TestDQHardThreshold:
             ),
         )
 
-        quarantine_manager = MagicMock(spec=QuarantineManagerService)
+        quarantine_manager = MagicMock(spec=QuarantineRuntimeService)
         quarantine_manager.quarantine_record = AsyncMock()
         quarantine_manager.quarantine_filtered_record = AsyncMock()
 
@@ -395,7 +395,7 @@ class TestDQHardThreshold:
         from bioetl.application.core.batch_metrics import BatchMetricsRecorder
         from bioetl.application.core.batch_transformer import BatchTransformer
         from bioetl.application.core.config import RecordProcessorConfig
-        from bioetl.application.core.quarantine_manager import QuarantineManagerService
+        from bioetl.application.core.quarantine_manager import QuarantineRuntimeService
         from bioetl.domain.error_classifier import ErrorClassifier
         from bioetl.domain.types import BatchID
 
@@ -420,7 +420,7 @@ class TestDQHardThreshold:
             ),
         )
 
-        quarantine_manager = MagicMock(spec=QuarantineManagerService)
+        quarantine_manager = MagicMock(spec=QuarantineRuntimeService)
         quarantine_manager.quarantine_record = AsyncMock()
         quarantine_manager.quarantine_filtered_record = AsyncMock()
 
@@ -466,7 +466,7 @@ class TestDQQuarantineBehavior:
         from bioetl.application.core.batch_metrics import BatchMetricsRecorder
         from bioetl.application.core.batch_transformer import BatchTransformer
         from bioetl.application.core.config import RecordProcessorConfig
-        from bioetl.application.core.quarantine_manager import QuarantineManagerService
+        from bioetl.application.core.quarantine_manager import QuarantineRuntimeService
         from bioetl.domain.error_classifier import ErrorClassifier
         from bioetl.domain.types import BatchID
 
@@ -492,7 +492,7 @@ class TestDQQuarantineBehavior:
         )
 
         quarantined_records: list[dict] = []
-        quarantine_manager = MagicMock(spec=QuarantineManagerService)
+        quarantine_manager = MagicMock(spec=QuarantineRuntimeService)
 
         async def capture_quarantine_records(records, batch_id, **kwargs):
             await asyncio.sleep(0)

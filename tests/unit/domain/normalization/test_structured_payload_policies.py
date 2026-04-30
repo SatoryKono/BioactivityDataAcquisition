@@ -18,6 +18,10 @@ def test_semantic_sensitive_payload_registry_declares_raw_sidecar_migration_poli
         ("openalex.publication", "primary_topic"),
         ("pubmed.publication", "affiliation_structured"),
         ("pubmed.publication", "authors_with_affiliations"),
+        ("semanticscholar.publication", "author_h_indices"),
+        ("semanticscholar.publication", "citation_contexts"),
+        ("semanticscholar.publication", "publication_types"),
+        ("semanticscholar.publication", "subject_fields"),
         ("uniprot.protein", "features_json"),
     }
 
@@ -61,6 +65,22 @@ def test_semantic_sensitive_payload_registry_classifies_collection_semantics() -
             "pubmed.publication",
             "authors_with_affiliations",
         ): StructuredPayloadCollectionSemantics.ORDERED_SEQUENCE,
+        (
+            "semanticscholar.publication",
+            "author_h_indices",
+        ): StructuredPayloadCollectionSemantics.ORDERED_SEQUENCE,
+        (
+            "semanticscholar.publication",
+            "citation_contexts",
+        ): StructuredPayloadCollectionSemantics.ORDERED_SEQUENCE,
+        (
+            "semanticscholar.publication",
+            "publication_types",
+        ): StructuredPayloadCollectionSemantics.UNORDERED_SET,
+        (
+            "semanticscholar.publication",
+            "subject_fields",
+        ): StructuredPayloadCollectionSemantics.UNORDERED_SET,
         (
             "uniprot.protein",
             "features_json",

@@ -15,7 +15,7 @@ ______________________________________________________________________
 
 ## Purpose
 
-`CompositeValidationService` is the domain service entrypoint for composite
+`CompositeValidator` is the domain service entrypoint for composite
 config validation before execution. It combines structural checks, deep preflight
 checks, and governance decisioning into a single report. Construction of the
 default service wiring now lives in
@@ -37,14 +37,14 @@ Configuration envelope with:
 - `strict_mode`
 - `governance_policy`
 
-### `CompositeValidationService.validate_composite(config)`
+### `CompositeValidator.validate_composite(config)`
 
 Returns `CompositeValidationReport` with:
 
 - `structural_result`
 - `deep_preflight_result`
 - `runtime_guard_result` (currently `None` in this layer)
-- `execution_decision` (from `PreflightGovernanceService`)
+- `execution_decision` (from `PreflightGovernor`)
 
 ## Validation flow
 
@@ -70,10 +70,10 @@ Returns `CompositeValidationReport` with:
 
 - `AggregationValidator`
 - `CrossValidationValidator`
-- `PreflightGovernanceService`
+- `PreflightGovernor`
 - helpers from `composite_validation_helpers.py`
 
-These collaborators are injected into `CompositeValidationService` by the
+These collaborators are injected into `CompositeValidator` by the
 composition layer; the domain module no longer assembles them internally.
 
 ## Related docs

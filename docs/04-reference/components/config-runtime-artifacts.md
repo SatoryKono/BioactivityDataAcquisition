@@ -665,10 +665,10 @@ git status configs/
 
 ```python
 from bioetl.domain.services.phased_migration_support import (
-    PhasedMigrationSupportService,
+    PhasedMigrationCoordinator,
 )
 
-service = PhasedMigrationSupportService()
+service = PhasedMigrationCoordinator()
 status = service.get_current_migration_status()
 print(f"Current phase: {status.current_phase}")
 print(f"Migration warnings: {status.migration_warnings}")

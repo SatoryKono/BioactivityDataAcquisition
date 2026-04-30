@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Literal
 
 from bioetl.application.core.wiring.runtime import (
     BatchProcessingComponents,
-    CheckpointManagerService,
+    CheckpointRuntimeService,
 )
 from bioetl.composition.bootstrap_contexts import PipelineCallbacksContext
 from bioetl.composition.factories.services._pipeline_batch_executor_types import (
@@ -100,8 +100,8 @@ def create_checkpoint_manager(
     compatibility_policy: Literal[
         "observe", "legacy_observe", "soft_fail", "hard_fail"
     ] = "soft_fail",
-) -> CheckpointManagerService:
-    return CheckpointManagerService(
+) -> CheckpointRuntimeService:
+    return CheckpointRuntimeService(
         checkpoint_port=checkpoint_port,
         logger=logger,
         pipeline_name=pipeline_name,

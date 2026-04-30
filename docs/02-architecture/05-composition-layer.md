@@ -24,7 +24,7 @@ ______________________________________________________________________
 **Ключевые характеристики:**
 
 - **Глобальная осведомленность:** Единственный слой (наряду с `Interfaces`), который "знает" обо всех остальных слоях. Ему разрешено импортировать из `infrastructure`, `application` и `domain`.
-- **Сборка зависимостей:** Здесь происходит внедрение зависимостей (Dependency Injection). Канонические public seams проходят через `entrypoints.py`, `execution_api.py`, `services_api.py`, `resources_api.py`, а специализированные factory/bootstrap модули собирают runtime-компоненты.
+- **Сборка зависимостей:** Здесь происходит внедрение зависимостей (Dependency Injection). Канонические first-party public seams проходят через `entrypoints.py`, `execution_api.py`, `registry_api.py`, `control_plane_api.py`, `health_api.py`, `maintenance_api.py`, `composite_api.py`, `observability_api.py`; `services_api.py` и `resources_api.py` остаются compatibility-only façades и не являются целевым import surface для нового first-party кода.
 - **Конфигурация:** Потребляет уже загруженные и нормализованные конфигурации. Канонический owner для YAML I/O, merge и normalization находится в `bioetl.infrastructure.config`, а `composition` сохраняет только thin public access / compat seams (`load_pipeline_config()`, `load_composite_config()`) для стабильных runtime entrypoints.
 
 ## 2. Ключевые Компоненты
@@ -139,29 +139,42 @@ import paths.
 Сборка `BasePublicationTransformer` теперь использует паттерн Стратегия вместо Template Method. При инстанцировании через `GenericPipelineFactory` могут быть внедрены `DataExtractorStrategy`, `IdentifierResolverStrategy` и `PublicationMetadataStrategy`, что устраняет проблему "God Object" и позволяет переиспользовать логику между провайдерами без наследования.
 
 Начиная с `RF-014`, composition также остаётся канонической точкой сборки
-`TransformerDependencyContext`: `NoOp` observability ports, `IdentityService`,
-`DataNormalizationService` и `ContractPolicyPort` должны собираться здесь, а не
+`TransformerDependencyContext`: `NoOp` observability ports, `EntityIdentityGenerator`,
+`DefaultDataNormalizer` и `ContractPolicyPort` должны собираться здесь, а не
 неявно внутри `BaseTransformer`.
 
 **Root-level файлы и публичные seams:**
 
 Также в корне `composition/` находятся:
 `bootstrap_contexts.py`, `bootstrap_logger.py`, `builders.py`, `entrypoints.py`,
-`execution_api.py`, `services_api.py`, `resources_api.py`, `composite_api.py`,
+`execution_api.py`, `registry_api.py`, `control_plane_api.py`, `health_api.py`,
+`maintenance_api.py`, `services_api.py`, `resources_api.py`, `composite_api.py`,
 `observability_api.py`, `observability.py`, `registry.py`, `types.py`,
 `_pipeline_execution.py`, `_resource_management.py`, `_services.py`.
 
 Политика использования root-level composition seams:
 
 - `entrypoints.py` — `public-entrypoint` и стабильный публичный composition seam.
-- `execution_api.py`, `services_api.py`, `resources_api.py` — узкие sanctioned public APIs
-  для новых internal call sites в `interfaces`.
+- `execution_api.py`, `registry_api.py`, `control_plane_api.py`, `health_api.py`,
+  `maintenance_api.py`, `composite_api.py`, `observability_api.py` — канонический
+  first-party composition import surface для `src/`.
+- `services_api.py`, `resources_api.py`, package root `bioetl.composition` и
+  package root `bioetl.composition.bootstrap` — compatibility-only façades;
+  они остаются стабильными для внешнего import/patch contract, но новые
+  first-party `src/` imports туда не добавляются.
 - `composite_api.py`, `observability_api.py` — узкие façade-модули для composite runtime
+<<<<<<< Updated upstream
   и observability-related call sites; `observability_api.py` является каноническим
   public seam для metrics bootstrap, Pushgateway publication и operator diagnostics bundle.
   Metrics publication route проходит через `MetricsService` и composition-owned
   publisher adapter, а selection `NoOpMetrics` / `NoOpTracing` централизована в
   `observability_resolution.py`.
+||||||| Stash base
+  и observability-related call sites.
+=======
+  и observability-related call sites; `observability_api.py` является каноническим
+  public seam для metrics bootstrap и operator diagnostics bundle.
+>>>>>>> Stashed changes
 - `_pipeline_execution.py`, `_resource_management.py`, `_services.py` — internal implementation
   modules; прямые импорты вне `composition/` запрещены policy-тестами.
 

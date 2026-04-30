@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-__all__ = ["OpenAlexCursorFlowService"]
+__all__ = ["OpenAlexCursorFlow"]
 
 from collections.abc import AsyncIterator, Callable
 from dataclasses import dataclass, field
@@ -26,7 +26,7 @@ if TYPE_CHECKING:
 
 
 @dataclass(slots=True)
-class OpenAlexCursorFlowService:
+class OpenAlexCursorFlow:
     """Encapsulates OpenAlex pagination/query/filter/title-search flows."""
 
     mailto: str | None

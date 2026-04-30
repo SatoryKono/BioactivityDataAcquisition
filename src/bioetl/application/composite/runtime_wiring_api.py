@@ -14,9 +14,6 @@ from bioetl.application.composite.checkpoint import (
     CompositeCheckpointServiceContext,
 )
 from bioetl.application.composite.coalesce_policy import CoalescePolicyService
-from bioetl.application.composite.column_priority_orderer import (
-    ColumnPriorityOrderer,
-)
 from bioetl.application.composite.column_renamer import ColumnRenamer
 from bioetl.application.composite.column_service import ColumnOrderService
 from bioetl.application.composite.conflict_resolver import ConflictResolverService
@@ -74,7 +71,6 @@ __all__ = [
     "JOIN_KEY_NORMALIZATION_POLICIES",
     "CoalescePolicyService",
     "ColumnOrderService",
-    "ColumnPriorityOrderer",
     "ColumnRenamer",
     "CompositeCheckpointService",
     "CompositeCheckpointServiceContext",

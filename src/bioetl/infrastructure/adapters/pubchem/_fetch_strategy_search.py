@@ -20,7 +20,7 @@ if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
     from bioetl.infrastructure.adapters.pubchem.fetch_flow import (
-        PubChemFetchFlowService,
+        PubChemFetchFlow,
     )
     from bioetl.infrastructure.adapters.pubchem.response_mapper import (
         PubChemResponseMapper,
@@ -30,7 +30,7 @@ if TYPE_CHECKING:
 class _PubChemSearchFetchMixin:
     """Query-based PubChem fetch strategies for compounds, substances, and assays."""
 
-    _fetch_flow: PubChemFetchFlowService
+    _fetch_flow: PubChemFetchFlow
     _response_mapper: PubChemResponseMapper
 
     async def fetch_by_query(

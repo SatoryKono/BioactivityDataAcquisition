@@ -1,0 +1,93 @@
+version: 1
+policy_scope: adr_041_layer_aware_naming
+
+suffix_boundary_rules:
+  - rule_id: non_domain_port_protocols
+    description: >
+      Outside src/bioetl/domain/ports, protocol-like contracts must use *Protocol.
+      *Port is reserved for domain boundary ports or explicit compatibility shims.
+    suffixes:
+      - Port
+    include_path_prefixes:
+      - src/bioetl/
+    exclude_path_prefixes:
+      - src/bioetl/domain/ports/
+    allowed_symbol_exceptions:
+      - symbol: DataSourceCreatorPort
+        path: src/bioetl/composition/factories/__init__.py
+        issue: "#3401"
+        reason: >
+          Deprecated public composition alias retained until the v2.0 sunset of
+          DataSourceCreatorProtocol terminology migration.
+
+  - rule_id: composition_infrastructure_service_suffix
+    description: >
+      Composition and infrastructure layers must not expose new first-party
+      *Service classes. The reviewed baseline is currently clean and must stay
+      exception-free unless ADR-041 governance is updated deliberately.
+    suffixes:
+      - Service
+    include_path_prefixes:
+      - src/bioetl/composition/
+      - src/bioetl/infrastructure/
+    allowed_symbol_exceptions:
+
+  - rule_id: domain_service_suffix_conflict
+    description: >
+      Domain-layer pure behavior surfaces must not expose first-party *Service
+      classes. The reviewed baseline is now clean and should remain exception-free.
+    suffixes:
+      - Service
+    include_path_prefixes:
+      - src/bioetl/domain/services/
+    allowed_symbol_exceptions:
+
+family_freeze_rules:
+  - rule_id: runtime_admin_checkpoint_quarantine_family
+    description: >
+      Checkpoint/quarantine runtime-admin naming is role-driven: runtime write
+      collaborators use *RuntimeService and operator/admin services use
+      *Service. Manager-style names are retired from first-party code.
+    include_path_prefixes:
+      - src/bioetl/application/core/
+      - src/bioetl/application/services/
+      - src/bioetl/composition/
+    match_regex: ^(CheckpointRuntimeService|QuarantineRuntimeService|CheckpointService|QuarantineService)$
+    allowed_symbols:
+      - symbol: CheckpointRuntimeService
+        path: src/bioetl/application/core/lifecycle/checkpoint_manager.py
+        issue: "#3398"
+        reason: Canonical runtime checkpoint collaborator.
+      - symbol: QuarantineRuntimeService
+        path: src/bioetl/application/core/quarantine_manager.py
+        issue: "#3398"
+        reason: Canonical runtime quarantine write-path collaborator.
+      - symbol: CheckpointService
+        path: src/bioetl/application/services/checkpoint_service.py
+        issue: "#3398"
+        reason: Canonical operator/admin checkpoint service.
+      - symbol: QuarantineService
+        path: src/bioetl/application/services/quarantine_service.py
+        issue: "#3398"
+        reason: Canonical operator/admin quarantine service.
+
+  - rule_id: column_ordering_family
+    description: >
+      Column ordering naming remains frozen while ambiguity collapses toward
+      ColumnOrderService as the canonical surface.
+    include_path_prefixes:
+      - src/bioetl/application/composite/
+    match_regex: ^Column(?:Priority)?Order(?:er|Service)$
+    allowed_symbols:
+      - symbol: ColumnOrderService
+        path: src/bioetl/application/composite/column_service.py
+        issue: "#3402"
+        reason: Canonical unified column ordering surface.
+      - symbol: ColumnOrderer
+        path: src/bioetl/application/composite/column_orderer.py
+        issue: "#3402"
+        reason: Deprecated compatibility alias pending removal.
+      - symbol: ColumnPriorityOrderer
+        path: src/bioetl/application/composite/column_priority_orderer.py
+        issue: "#3402"
+        reason: Deprecated compatibility surface pending removal.

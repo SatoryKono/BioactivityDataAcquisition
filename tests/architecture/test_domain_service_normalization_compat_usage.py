@@ -20,10 +20,10 @@ LEGACY_SERVICE_MODULES = frozenset(
 LEGACY_SERVICE_PARENT_IMPORTS = {
     "bioetl.domain.services": frozenset(
         {
-            "DateNormalizationService",
-            "DoiNormalizationService",
-            "PmidNormalizationService",
-            "TextNormalizationService",
+            "DateBioactivityNormalizer",
+            "DoiBioactivityNormalizer",
+            "PmidBioactivityNormalizer",
+            "TextBioactivityNormalizer",
         }
     )
 }

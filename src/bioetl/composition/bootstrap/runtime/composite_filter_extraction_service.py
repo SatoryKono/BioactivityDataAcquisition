@@ -1,4 +1,4 @@
-"""Filter extraction service for composite runtime runner factories."""
+"""Filter extraction helpers for composite runtime runner factories."""
 
 from __future__ import annotations
 
@@ -18,7 +18,7 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
 
 
-class CompositeFilterExtractionService:
+class CompositeFilterExtractor:
     """Extract runner filter inputs from keys DataFrame."""
 
     def __init__(
@@ -197,4 +197,4 @@ class CompositeFilterExtractionService:
             self._logger.warning(event, **kwargs)
 
 
-__all__ = ["CompositeFilterExtractionService"]
+__all__ = ["CompositeFilterExtractor"]

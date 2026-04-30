@@ -597,7 +597,13 @@ def test_import_linter_contracts(project_root: Path, src_dir: Path) -> None:
 
     try:
         result = subprocess.run(
-            [lint_imports_cmd, "--config", str(importlinter_config)],
+            [
+                lint_imports_cmd,
+                "--config",
+                str(importlinter_config),
+                "--cache-dir",
+                "/tmp/bioetl-importlinter-cache",
+            ],
             capture_output=True,
             text=True,
             encoding="utf-8",

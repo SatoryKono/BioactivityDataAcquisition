@@ -8,7 +8,7 @@ Internal design — mixin chain::
 
     _NormalizationActivityMixin   (single-value: convert, validate, pChEMBL)
         └── _NormalizationBatchMixin  (multi-value: aggregate, concentrations)
-                └── NormalizationService  (public facade, @dataclass)
+                └── BioactivityNormalizer  (public facade, @dataclass)
 
 Collaborators (all injected via dataclass fields):
 - ``NormalizationConfig``  — thresholds, default unit, aggregation method
@@ -24,7 +24,7 @@ Cross-reference
 ---------------
 For cross-provider metadata normalization (author, DOI, PMID, date, text)
 see :mod:`bioetl.domain.services.data_normalization_service`
-(``DefaultDataNormalizationService``).
+(``DefaultDataNormalizer``).
 
 Pure domain service (no I/O) per RULES.md §1.1.
 """
@@ -46,8 +46,8 @@ if TYPE_CHECKING:
     from bioetl.domain.value_objects.activity_values import Concentration
 
 __all__ = [
+    "BioactivityNormalizer",
     "NormalizationResult",
-    "NormalizationService",
 ]
 
 
@@ -273,8 +273,8 @@ class _NormalizationBatchMixin(_NormalizationActivityMixin):
 
 
 @dataclass(slots=True)
-class NormalizationService(_NormalizationBatchMixin):
-    """Facade service for bioactivity data normalization."""
+class BioactivityNormalizer(_NormalizationBatchMixin):
+    """Facade normalizer for bioactivity activity-value normalization."""
 
     config: NormalizationConfig = field(default_factory=NormalizationConfig)
     converter: UnitConverter = field(default_factory=UnitConverter)

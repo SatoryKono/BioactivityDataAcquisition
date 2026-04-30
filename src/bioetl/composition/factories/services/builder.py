@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Literal
 from bioetl.application.core.wiring.runtime import (
     BatchExecutor,
     BatchProcessingComponents,
-    CheckpointManagerService,
+    CheckpointRuntimeService,
     GoldFilterCallback,
     GoldTransformCallback,
     PipelineService,
@@ -109,7 +109,7 @@ class ServicesBuilder:
         compatibility_policy: Literal[
             "observe", "legacy_observe", "soft_fail", "hard_fail"
         ] = "soft_fail",
-    ) -> CheckpointManagerService:
+    ) -> CheckpointRuntimeService:
         return create_checkpoint_manager(
             checkpoint_port=checkpoint_port,
             logger=logger,

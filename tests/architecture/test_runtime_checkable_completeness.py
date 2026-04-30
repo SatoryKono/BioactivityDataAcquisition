@@ -3,7 +3,7 @@
 Ensures that all public port protocols in domain/ports/ are decorated with
 @runtime_checkable, enabling isinstance() boundary checks at composition time.
 
-See: TYPE-004 in ai-selfreview-rules.md
+See: TYPE-004 in docs/00-project/ai/rules/bioetl-ai-rules.md
 """
 
 from __future__ import annotations
@@ -27,15 +27,16 @@ def _discover_all_port_classes() -> list[str]:
 
 
 ALL_PORT_NAMES = _discover_all_port_classes()
+EXPECTED_PORT_COUNT = 73
 
 
 class TestAllPortsRuntimeCheckable:
     """Every port protocol MUST be @runtime_checkable (TYPE-004)."""
 
-    def test_port_count_is_74(self) -> None:
-        """Sanity check: we expect exactly 74 port protocols."""
-        assert len(ALL_PORT_NAMES) == 74, (
-            f"Expected 74 ports, found {len(ALL_PORT_NAMES)}. "
+    def test_port_count_matches_live_baseline(self) -> None:
+        """Sanity check: the facade currently exports 73 port protocols."""
+        assert len(ALL_PORT_NAMES) == EXPECTED_PORT_COUNT, (
+            f"Expected {EXPECTED_PORT_COUNT} ports, found {len(ALL_PORT_NAMES)}. "
             f"If you added/removed a port, update this test. "
             f"Current ports: {ALL_PORT_NAMES}"
         )

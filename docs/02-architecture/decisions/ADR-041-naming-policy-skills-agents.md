@@ -211,7 +211,7 @@ ______________________________________________________________________
 
 ## Compliance
 
-This ADR establishes rules **NAME-007** through **NAME-009** to be added to `ai-selfreview-rules.md`:
+This ADR establishes rules **NAME-007** through **NAME-009** for the active AI rules surface `docs/00-project/ai/rules/bioetl-ai-rules.md`:
 
 | Rule     | Severity | Description                                                                        |
 | -------- | -------- | ---------------------------------------------------------------------------------- |
