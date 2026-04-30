@@ -1,4 +1,4 @@
-"""Tests for CompositePreflightValidator.
+"""Tests for CompositePreflightValidationService.
 
 Tests preflight validation of field_priorities configuration against source schemas,
 including negative cases for:
@@ -12,7 +12,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from bioetl.application.composite.preflight_validator import (
-    CompositePreflightValidationService as CompositePreflightValidator,
+    CompositePreflightValidationService,
     FieldInfo,
     PreflightValidationError,
     PreflightValidationResult,
@@ -40,9 +40,9 @@ def mock_logger() -> MagicMock:
 
 
 @pytest.fixture
-def validator(mock_logger: MagicMock) -> CompositePreflightValidator:
-    """Create CompositePreflightValidator instance."""
-    return CompositePreflightValidator(mock_logger)
+def validator(mock_logger: MagicMock) -> CompositePreflightValidationService:
+    """Create CompositePreflightValidationService instance."""
+    return CompositePreflightValidationService(mock_logger)
 
 
 @pytest.fixture
@@ -199,12 +199,12 @@ class TestPreflightValidationError:
         assert error.result == result
 
 
-class TestCompositePreflightValidatorBasic:
-    """Basic tests for CompositePreflightValidator."""
+class TestCompositePreflightValidationServiceBasic:
+    """Basic tests for CompositePreflightValidationService."""
 
     def test_get_valid_sources(
         self,
-        validator: CompositePreflightValidator,
+        validator: CompositePreflightValidationService,
         basic_composite_config: CompositeConfig,
     ) -> None:
         """Validator extracts valid source names from config."""
@@ -216,7 +216,7 @@ class TestCompositePreflightValidatorBasic:
         assert "pubmed" in sources
 
     def test_simplify_dtype_common_types(
-        self, validator: CompositePreflightValidator
+        self, validator: CompositePreflightValidationService
     ) -> None:
         """Validator simplifies common dtype strings."""
         assert validator._simplify_dtype("Int64Dtype()") == "int"
@@ -227,7 +227,7 @@ class TestCompositePreflightValidatorBasic:
         assert validator._simplify_dtype("boolean") == "bool"
 
     def test_dtype_in_group_string_types(
-        self, validator: CompositePreflightValidator
+        self, validator: CompositePreflightValidationService
     ) -> None:
         """String types are in same compatibility group."""
         str_group = frozenset({"str", "object", "String"})
@@ -236,7 +236,7 @@ class TestCompositePreflightValidatorBasic:
         assert validator._dtype_in_group("object", str_group)
 
     def test_dtype_in_group_numeric_types(
-        self, validator: CompositePreflightValidator
+        self, validator: CompositePreflightValidationService
     ) -> None:
         """Numeric types are in same compatibility group."""
         num_group = frozenset(
@@ -247,11 +247,11 @@ class TestCompositePreflightValidatorBasic:
         assert validator._dtype_in_group("Int64", num_group)
 
 
-class TestCompositePreflightValidatorValidation:
+class TestCompositePreflightValidationServiceValidation:
     """Tests for validation logic."""
 
     def test_validate_skips_when_no_field_priorities(
-        self, validator: CompositePreflightValidator, mock_logger: MagicMock
+        self, validator: CompositePreflightValidationService, mock_logger: MagicMock
     ) -> None:
         """Validation passes when no field_priorities configured."""
         config = CompositeConfig(
@@ -279,7 +279,7 @@ class TestCompositePreflightValidatorValidation:
         assert result.issues == []
 
     def test_validate_unknown_source_error(
-        self, validator: CompositePreflightValidator, mock_logger: MagicMock
+        self, validator: CompositePreflightValidationService, mock_logger: MagicMock
     ) -> None:
         """Validation fails for unknown source in field_priorities."""
         config = CompositeConfig(
@@ -312,7 +312,7 @@ class TestCompositePreflightValidatorValidation:
         assert unknown_issues[0].source == "unknown_provider"
 
     def test_validate_missing_field_in_all_sources_error(
-        self, validator: CompositePreflightValidator, mock_logger: MagicMock
+        self, validator: CompositePreflightValidationService, mock_logger: MagicMock
     ) -> None:
         """Validation fails when field doesn't exist in ANY source."""
         config = CompositeConfig(
@@ -345,7 +345,7 @@ class TestCompositePreflightValidatorValidation:
         assert "completely_nonexistent_field_xyz123" in missing_errors[0].field
 
     def test_validate_raises_on_error_when_fail_on_error_true(
-        self, validator: CompositePreflightValidator, mock_logger: MagicMock
+        self, validator: CompositePreflightValidationService, mock_logger: MagicMock
     ) -> None:
         """Validation raises PreflightValidationError when fail_on_error=True."""
         config = CompositeConfig(
@@ -377,11 +377,11 @@ class TestCompositePreflightValidatorValidation:
         assert len(exc_info.value.result.errors) >= 1
 
 
-class TestCompositePreflightValidatorWithSchemas:
+class TestCompositePreflightValidationServiceWithSchemas:
     """Tests that use actual schema registry."""
 
     def test_validate_valid_field_priorities(
-        self, validator: CompositePreflightValidator, mock_logger: MagicMock
+        self, validator: CompositePreflightValidationService, mock_logger: MagicMock
     ) -> None:
         """Validation passes for valid field_priorities with real schemas."""
         config = CompositeConfig(
@@ -418,7 +418,7 @@ class TestCompositePreflightValidatorWithSchemas:
         assert len(result.resolved_fields) > 0
 
     def test_log_resolved_field_sources(
-        self, validator: CompositePreflightValidator, mock_logger: MagicMock
+        self, validator: CompositePreflightValidationService, mock_logger: MagicMock
     ) -> None:
         """Validator logs resolved field sources."""
         result = PreflightValidationResult(
@@ -443,7 +443,7 @@ class TestTypeCompatibility:
     """Tests for type compatibility checking."""
 
     def test_check_type_compatibility_same_types(
-        self, validator: CompositePreflightValidator
+        self, validator: CompositePreflightValidationService
     ) -> None:
         """Same types are compatible."""
         result = validator._check_type_compatibility(
@@ -453,7 +453,7 @@ class TestTypeCompatibility:
         assert result is None  # No issue
 
     def test_check_type_compatibility_compatible_types(
-        self, validator: CompositePreflightValidator
+        self, validator: CompositePreflightValidationService
     ) -> None:
         """Types in same group are compatible."""
         # String types
@@ -471,7 +471,7 @@ class TestTypeCompatibility:
         assert result is None  # No issue
 
     def test_check_type_compatibility_incompatible_types(
-        self, validator: CompositePreflightValidator
+        self, validator: CompositePreflightValidationService
     ) -> None:
         """Incompatible types return validation issue."""
         result = validator._check_type_compatibility(
@@ -488,7 +488,7 @@ class TestValidateFieldPriority:
     """Tests for _validate_field_priority method."""
 
     def test_validate_field_priority_all_valid(
-        self, validator: CompositePreflightValidator
+        self, validator: CompositePreflightValidationService
     ) -> None:
         """All valid sources and fields return no issues."""
         valid_sources = frozenset({"seed", "chembl", "crossref", "pubmed"})
@@ -520,7 +520,7 @@ class TestValidateFieldPriority:
         assert resolved == "chembl"  # First source with field
 
     def test_validate_field_priority_unknown_source(
-        self, validator: CompositePreflightValidator
+        self, validator: CompositePreflightValidationService
     ) -> None:
         """Unknown source in priorities returns error."""
         valid_sources = frozenset({"seed", "chembl"})
@@ -541,7 +541,7 @@ class TestValidateFieldPriority:
         assert unknown_issues[0].source == "unknown"
 
     def test_validate_field_priority_missing_in_some_sources_warning(
-        self, validator: CompositePreflightValidator
+        self, validator: CompositePreflightValidationService
     ) -> None:
         """Field missing in some sources returns warning (not error)."""
         valid_sources = frozenset({"seed", "chembl", "crossref"})
@@ -570,7 +570,7 @@ class TestValidateFieldPriority:
         assert resolved == "chembl"
 
     def test_validate_field_priority_missing_in_all_sources_error(
-        self, validator: CompositePreflightValidator
+        self, validator: CompositePreflightValidationService
     ) -> None:
         """Field missing in ALL sources returns error."""
         valid_sources = frozenset({"seed", "chembl", "crossref"})

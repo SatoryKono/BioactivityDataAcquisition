@@ -17,7 +17,7 @@ from bioetl.application.composite.checkpoint._checkpoint_runtime import (
     warn_if_checkpoint_stale,
 )
 from bioetl.application.composite.checkpoint.state import CompositeCheckpointState
-from bioetl.application.composite.port_types import (
+from bioetl.domain.ports import (
     ClockPort,
     CompositeCheckpointPort,
     LoggerPort,

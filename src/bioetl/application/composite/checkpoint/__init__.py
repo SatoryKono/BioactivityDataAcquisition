@@ -8,7 +8,6 @@ as ``checkpoint.anchor_context``.
 Public API remains stable at:
 - bioetl.application.composite.checkpoint.CompositeCheckpointState
 - bioetl.application.composite.checkpoint.CompositeCheckpointService
-- bioetl.application.composite.checkpoint.CompositeCheckpointManager
 - bioetl.application.composite.checkpoint.ExpectedCheckpointContext
 - bioetl.application.composite.checkpoint.create_expected_checkpoint_context
 - bioetl.application.composite.checkpoint.merge_expected_anchors
@@ -24,14 +23,12 @@ from bioetl.application.composite.checkpoint._anchor_context import (
     merge_expected_anchors,
 )
 from bioetl.application.composite.checkpoint.service import (
-    CompositeCheckpointManager,
     CompositeCheckpointService,
     CompositeCheckpointServiceContext,
 )
 from bioetl.application.composite.checkpoint.state import CompositeCheckpointState
 
 __all__ = [
-    "CompositeCheckpointManager",
     "CompositeCheckpointService",
     "CompositeCheckpointServiceContext",
     "CompositeCheckpointState",

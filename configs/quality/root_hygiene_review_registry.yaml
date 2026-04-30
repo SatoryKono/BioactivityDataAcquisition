@@ -88,7 +88,7 @@ review_lanes:
         canonical_path: null
         action_if_reintroduced: keep_untracked_or_reclassify_through_explicit_structure_governance
       - path: .agentbridge
-        current_live_state: present_local_only_root_surface
+        current_live_state: absent_from_root_baseline
         canonical_path: null
         action_if_reintroduced: keep_untracked_or_reclassify_through_explicit_structure_governance
       - path: .cache

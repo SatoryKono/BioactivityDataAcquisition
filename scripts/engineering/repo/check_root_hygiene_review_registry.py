@@ -26,6 +26,8 @@ ALLOWED_LIVE_STATES: Final[frozenset[str]] = frozenset(
         "absent_from_root_baseline",
         "present_approved_root_surface",
         "present_blocked_cleanup_zone",
+        "present_curated_root_surface",
+        "present_local_only_root_surface",
     }
 )
 

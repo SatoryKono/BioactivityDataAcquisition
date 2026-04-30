@@ -15,7 +15,7 @@ from bioetl.application.composite.fsm_helper import FSMStateHelperService
 from bioetl.application.composite.lifecycle_observer_service import (
     CompositeLifecycleObserverService,
 )
-from bioetl.application.composite.port_types import (
+from bioetl.domain.ports import (
     ClockPort,
     ExecutionMetricsRunnerPort,
     LoggerPort,

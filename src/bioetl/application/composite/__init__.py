@@ -1,7 +1,7 @@
 """Composite pipeline application services.
 
 This package contains application services for composite pipeline orchestration:
-- CompositePipelineRunnerService: Main orchestrator for composite pipelines
+- CompositePipelineRunner: Main orchestrator for composite pipelines
 - DependencyCoordinatorService: Sequential execution of dependency pipelines
 - EnrichmentCoordinatorService: Fan-out/fan-in coordination for enrichers
 - MergeService: Data merging with conflict resolution
@@ -24,14 +24,11 @@ from importlib import import_module
 __all__ = [
     "ColumnOrderService",
     "ColumnRenamer",
-    "CompositeCheckpointManager",
     "CompositeCheckpointService",
     "CompositeCheckpointState",
     "CompositePipelineRunner",
-    "CompositePipelineRunnerService",
     "CompositePipelineState",
     "CompositePreflightValidationService",
-    "CompositePreflightValidator",
     "CompositeRuntimeConfig",
     "DependencyCoordinatorService",
     "EnrichmentCoordinatorService",
@@ -52,10 +49,6 @@ _LAZY_ATTR_EXPORTS: dict[str, tuple[str, str]] = {
         "ColumnOrderService",
     ),
     "ColumnRenamer": ("bioetl.application.composite.column_renamer", "ColumnRenamer"),
-    "CompositeCheckpointManager": (
-        _COMPOSITE_CHECKPOINT_MODULE,
-        "CompositeCheckpointManager",
-    ),
     "CompositeCheckpointService": (
         _COMPOSITE_CHECKPOINT_MODULE,
         "CompositeCheckpointService",
@@ -68,10 +61,6 @@ _LAZY_ATTR_EXPORTS: dict[str, tuple[str, str]] = {
         "bioetl.application.composite.runner_pkg",
         "CompositePipelineRunner",
     ),
-    "CompositePipelineRunnerService": (
-        "bioetl.application.composite.runner_pkg",
-        "CompositePipelineRunnerService",
-    ),
     "CompositePipelineState": (
         "bioetl.domain.composite.state",
         "CompositePipelineState",
@@ -79,10 +68,6 @@ _LAZY_ATTR_EXPORTS: dict[str, tuple[str, str]] = {
     "CompositePreflightValidationService": (
         _COMPOSITE_PREFLIGHT_VALIDATOR_MODULE,
         "CompositePreflightValidationService",
-    ),
-    "CompositePreflightValidator": (
-        _COMPOSITE_PREFLIGHT_VALIDATOR_MODULE,
-        "CompositePreflightValidator",
     ),
     "CompositeRuntimeConfig": (
         "bioetl.application.composite.runtime_models",
