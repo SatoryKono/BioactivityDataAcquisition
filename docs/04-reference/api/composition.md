@@ -283,6 +283,8 @@ Its explicit public surface (`__all__`) is intentionally execution-focused:
 
 Legacy service/resource symbols are still resolved through lazy compatibility lookup
 and emit `DeprecationWarning` with canonical targets.
+First-party source must not add imports of those deprecated symbols; they are
+retained only for external compatibility and dedicated boundary tests.
 
 When new call sites only need one capability family, import the narrower
 `execution_api`, `services_api`, or `resources_api` modules directly instead of

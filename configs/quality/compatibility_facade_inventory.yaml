@@ -30,6 +30,26 @@ transition_debt:
   exit_criteria: >-
     `_compat.py` remains confined to the reviewed top-level command seams and
     can be removed once those seams no longer need helper-based alias forwarding.
+- path: src/bioetl/composition/factories/storage/adapter.py
+  compatibility_role: Deprecated compatibility shim for the storage bundle module
+    after the canonical implementation moved to
+    `bioetl.composition.factories.storage.bundle`.
+  canonical_target: bioetl.composition.factories.storage.bundle
+  status: deprecated-warn
+  owner: bioetl.composition.factories.storage
+  introduced_in: 2026-04 storage factory naming cleanup
+  review_date: '2026-09-30'
+  external_breaking_change_required: true
+  internal_callers_zero: true
+  allowed_call_sites: '`src`: no direct imports; use `bioetl.composition.factories.storage.bundle`;
+    `tests`: dedicated storage bootstrap governance may inspect the shim to verify
+    the deprecation warning and removal horizon'
+  migration_path: Import `StorageBundle` from `bioetl.composition.factories.storage.bundle`
+    in all first-party code. Keep this module only as a warning compatibility seam
+    until the 2026-09-30 compatibility review.
+  exit_criteria: First-party `src` imports remain at zero, governance tests confirm
+    the shim stays warning-only, and the module is removed after the compatibility
+    review or explicit breaking-change window.
 retained_entrypoints:
 - path: src/bioetl/interfaces/cli/commands/run.py
   compatibility_role: Permanent public run command seam over the split internal owner
@@ -276,15 +296,19 @@ retained_entrypoints:
   review_date: '2026-09-30'
   external_breaking_change_required: true
   internal_callers_zero: false
-  allowed_call_sites: '`src`: canonical entrypoint usage allowed; `tests`: public
-    entrypoint imports may appear in interface/composition boundary coverage, but
-    direct internal-module patch targets stay confined to `tests/unit/composition/test_entrypoints.py`,
+  allowed_call_sites: '`src`: only explicit execution-focused public symbols from
+    `__all__` may be imported from `bioetl.composition.entrypoints`; deprecated
+    service/resource symbols resolved through `_LEGACY_SYMBOL_TARGETS` are external-compatibility
+    only and are blocked in first-party source. `tests`: public entrypoint imports
+    may appear in interface/composition boundary coverage, but direct internal-module
+    patch targets stay confined to `tests/unit/composition/test_entrypoints.py`,
     `tests/unit/composition/test_resource_management.py`, and `tests/unit/composition/test_services_entrypoints.py`'
   migration_path: Use `bioetl.composition.entrypoints` as the sanctioned public
     seam; do not import `bioetl.composition._pipeline_execution`, `bioetl.composition._resource_management`,
     or `bioetl.composition._services` directly outside dedicated entrypoint-boundary
     coverage.
-  exit_criteria: The public entrypoint remains sanctioned, internal implementation-module
+  exit_criteria: The public entrypoint remains sanctioned, deprecated service/resource
+    symbol imports in first-party source stay at zero, internal implementation-module
     imports outside `composition/` stay at zero, and internal-module patch coverage
     remains confined to the dedicated entrypoint-boundary tests.
 - path: src/bioetl/composition/__init__.py

@@ -50,8 +50,8 @@ from bioetl.infrastructure.time import SystemClock
 
 __all__ = [
     "bootstrap_bronze_cleanup_service",
-    "bootstrap_cli_storage_adapter",
     "bootstrap_cleanup_service",
+    "bootstrap_cli_storage_adapter",
     "bootstrap_contract_migration_service",
     "bootstrap_export_service",
     "bootstrap_lifecycle_service",
