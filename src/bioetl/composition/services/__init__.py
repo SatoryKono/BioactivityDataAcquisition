@@ -16,6 +16,7 @@ from importlib import import_module
 from bioetl.composition.services.versioning import (
     compute_config_hash,
     get_code_revision_provenance,
+    get_dependency_lock_hash,
     get_git_commit,
     get_pipeline_version,
 )
@@ -33,6 +34,7 @@ __all__ = [
     *_LAZY_EXPORTS,
     "compute_config_hash",
     "get_code_revision_provenance",
+    "get_dependency_lock_hash",
     "get_git_commit",
     "get_pipeline_version",
 ]

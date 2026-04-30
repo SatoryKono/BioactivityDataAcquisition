@@ -11,6 +11,7 @@ These utilities support PipelineMetadata population as per RULES.md §2.3.
 from __future__ import annotations
 
 import hashlib
+import re
 import subprocess  # nosec B404
 from dataclasses import dataclass
 from functools import lru_cache
@@ -23,6 +24,8 @@ from bioetl.domain.normalization import serialize_json_canonical
 
 if TYPE_CHECKING:
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+
+_FULL_GIT_SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 
 __all__ = [
     "CodeRevisionProvenance",
@@ -72,7 +75,8 @@ def get_git_commit() -> str | None:
             check=False,
         )
         if result.returncode == 0:
-            return result.stdout.strip()
+            commit = result.stdout.strip().lower()
+            return commit if _FULL_GIT_SHA_RE.fullmatch(commit) else None
         return None
     except (subprocess.SubprocessError, FileNotFoundError, OSError):
         return None

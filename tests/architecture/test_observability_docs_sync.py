@@ -224,7 +224,10 @@ def test_grafana_readme_health_metric_catalog_matches_canonical_label_policy() -
     text = GRAFANA_README_PATH.read_text(encoding="utf-8")
 
     assert "| `bioetl_infrastructure_validated`      | Gauge     | `pipeline`" in text
-    assert "`bioetl_infrastructure_validated`      | Gauge     | `pipeline`, `run_id`" not in text
+    assert (
+        "`bioetl_infrastructure_validated`      | Gauge     | `pipeline`, `run_id`"
+        not in text
+    )
     assert text.count("`bioetl_health_check_latency_seconds`") == 1, (
         "grafana/README.md must not duplicate the "
         "`bioetl_health_check_latency_seconds` metric row."

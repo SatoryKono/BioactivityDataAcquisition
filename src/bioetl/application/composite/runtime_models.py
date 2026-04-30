@@ -18,15 +18,6 @@ from bioetl.domain.constants import DEFAULT_LOCK_TTL_SECONDS
 if TYPE_CHECKING:
     import polars as pl
 
-    from bioetl.domain.ports import (
-        ClockPort,
-        ExecutionMetricsRunnerPort,
-        LockPort,
-        LoggerPort,
-        MetricsPort,
-        QuarantinePort,
-        TracingPort,
-    )
     from bioetl.application.composite.runtime_wiring_api import (
         CompositeCheckpointService,
         CompositeLifecycleObserverService,
@@ -41,6 +32,15 @@ if TYPE_CHECKING:
         RunLedgerService,
     )
     from bioetl.application.services.dq_report_service import DQReportService
+    from bioetl.domain.ports import (
+        ClockPort,
+        ExecutionMetricsRunnerPort,
+        LockPort,
+        LoggerPort,
+        MetricsPort,
+        QuarantinePort,
+        TracingPort,
+    )
 
 __all__ = [
     "CompositeExecutionContext",

@@ -36,6 +36,7 @@ class RunContextCreateInput:
     transform_steps: tuple[str, ...] = ()
     pipeline_version: str | None = None
     git_commit: str | None = None
+    dependency_lock_hash: str | None = None
     config_hash: str | None = None
     resolved_config_hash: str | None = None
     effective_config_hash: str | None = None
@@ -69,6 +70,7 @@ class RunContext:
         transform_steps: Tuple of transform step names applied.
         pipeline_version: Pipeline version for reproducibility (e.g., '1.0.0').
         git_commit: Git commit hash for reproducibility.
+        dependency_lock_hash: Dependency lockfile content hash for forensic replay.
         config_hash: Legacy compatibility anchor for resolved configuration identity.
         resolved_config_hash: SHA256 hash of resolved declarative configuration.
         effective_config_hash: SHA256 hash of final effective execution configuration.
@@ -105,6 +107,7 @@ class RunContext:
     transform_steps: tuple[str, ...] = ()
     pipeline_version: str | None = None
     git_commit: str | None = None
+    dependency_lock_hash: str | None = None
     config_hash: str | None = None
     resolved_config_hash: str | None = None
     effective_config_hash: str | None = None
@@ -155,6 +158,7 @@ class RunContext:
             transform_steps=create_input.transform_steps,
             pipeline_version=create_input.pipeline_version,
             git_commit=create_input.git_commit,
+            dependency_lock_hash=create_input.dependency_lock_hash,
             config_hash=create_input.config_hash,
             resolved_config_hash=create_input.resolved_config_hash,
             effective_config_hash=create_input.effective_config_hash,

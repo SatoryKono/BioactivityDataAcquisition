@@ -18,12 +18,6 @@ from bioetl.application.composite.dependency_progress_tracker import (
 from bioetl.application.composite.dependency_result_mapper import (
     DependencyResultService,
 )
-from bioetl.domain.ports import (
-    ClockPort,
-    DeltaReaderPort,
-    ExecutionMetricsRunnerPort,
-    LoggerPort,
-)
 from bioetl.application.runtime_clock import resolve_runtime_clock
 from bioetl.application.runtime_timestamps import (
     capture_runtime_timing_anchor,
@@ -36,6 +30,12 @@ from bioetl.domain.exceptions import (
     DataQualityError,
     NetworkError,
     StorageError,
+)
+from bioetl.domain.ports import (
+    ClockPort,
+    DeltaReaderPort,
+    ExecutionMetricsRunnerPort,
+    LoggerPort,
 )
 
 if TYPE_CHECKING:

@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.1.0
-Status: active
+Version: 1.1.1
+Status: compatibility-redirect
 Class: published
 Owner: Architecture / Domain
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-04-10'
+  Last verified: '2026-04-30'
 
 ______________________________________________________________________
 
@@ -16,6 +16,11 @@ ______________________________________________________________________
 The canonical normalization plan moved to:
 
 - [normalization_plan_P0_P6.md](./normalization_plan_P0_P6.md)
+
+This redirect remains only for temporary compatibility with historical links.
+First-party docs, tests, and tooling should use the underscored path directly.
+
+Removal target: after caller-zero proof for first-party surfaces.
 
 Use the underscored path as the source of truth for:
 

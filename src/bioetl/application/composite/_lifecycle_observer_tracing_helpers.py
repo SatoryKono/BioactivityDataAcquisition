@@ -5,8 +5,8 @@ from __future__ import annotations
 import time
 from typing import TYPE_CHECKING, Protocol
 
-from bioetl.domain.ports import LoggerPort, MetricsPort, TracingPort
 from bioetl.domain.observability_contract import build_observability_contract_payload
+from bioetl.domain.ports import LoggerPort, MetricsPort, TracingPort
 
 if TYPE_CHECKING:
     from types import TracebackType

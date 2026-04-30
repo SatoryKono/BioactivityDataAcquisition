@@ -1,4 +1,7 @@
-# ADR 039: God Objects Decomposition
+# Legacy ADR 039: God Objects Decomposition
+
+> Archived from the legacy `docs/05-architecture/decisions/` namespace.
+> Canonical accepted ADRs live in `docs/02-architecture/decisions/`.
 
 ## Status
 

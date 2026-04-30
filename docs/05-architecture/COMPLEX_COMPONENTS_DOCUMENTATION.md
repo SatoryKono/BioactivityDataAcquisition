@@ -63,7 +63,7 @@ def _should_continue_retry(
 
 **Documentation**:
 
-- **ADR**: `docs/05-architecture/decisions/ADR-035-composite-checkpoint-state-analysis.md`
+- **Historical architecture note**: `docs/99-archive/legacy-05-architecture/decisions/LEGACY-ADR-035-composite-checkpoint-state-analysis.md`
 - **Analysis**: Comprehensive usage analysis across 12+ files
 - **Decision**: Active infrastructure, not technical debt
 - **Architecture**: State machine with proper separation
@@ -124,30 +124,33 @@ classDiagram
     CompositePipelineRunner --|> CompositeRunnerMergeStageMixin
 ```
 
-## Architecture Decision Records (ADRs)
+## Historical Architecture Notes
 
-### Completed ADRs
+Canonical project ADRs live in `docs/02-architecture/decisions/`.
+The files below are retained as historical analysis notes only.
 
-1. **ADR-035**: Composite Checkpoint State Analysis
+### Completed Legacy Notes
+
+1. **Legacy ADR-035**: Composite Checkpoint State Analysis
    - **Status**: ✅ Completed
    - **Decision**: Active infrastructure, maintain and enhance
-   - **Location**: `docs/05-architecture/decisions/ADR-035-composite-checkpoint-state-analysis.md`
+   - **Location**: `docs/99-archive/legacy-05-architecture/decisions/LEGACY-ADR-035-composite-checkpoint-state-analysis.md`
 
-### Planned ADRs (Issue #6 Deliverables)
+### Planned Notes (Issue #6 Deliverables)
 
-2. **ADR-036**: Enrichment Coordinator Architecture
+2. **Legacy ADR-036**: Enrichment Coordinator Architecture
 
    - **Status**: ⏳ Planned
    - **Purpose**: Document coordinator design rationale
    - **Content**: Mixin patterns, error handling, orchestration
 
-1. **ADR-037**: Runner Stage Mixin Architecture
+1. **Legacy ADR-037**: Runner Stage Mixin Architecture
 
    - **Status**: ⏳ Planned
    - **Purpose**: Document runner composition patterns
    - **Content**: Separation of concerns, testability, extensibility
 
-1. **ADR-038**: HTTP Client Retry Patterns
+1. **Legacy ADR-038**: HTTP Client Retry Patterns
 
    - **Status**: ⏳ Planned
    - **Purpose**: Document retry architecture decisions
