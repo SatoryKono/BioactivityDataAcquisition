@@ -9,7 +9,7 @@ This package provides specialized services for domain operations:
 - AuthorNormalizer: Author and affiliation normalization
 - CompositeValidator: Structural and deep-preflight composite validation
 - MergedMetadataExplainer: Explainability metadata for merged composite output
-- NormalizationService: Orchestrator facade combining bioactivity normalization
+- BioactivityNormalizer: Orchestrator facade combining bioactivity normalization
 - DefaultDataNormalizer: Text and data normalization (DOI, PMID, authors, HTML)
 - OrganismClassifier: Organism cellularity classification for assay filtering
 - PhasedMigrationCoordinator: Compatibility/migration phase coordination
@@ -27,9 +27,9 @@ Usage:
     >>> entity_id = identity.compute_entity_id("chembl", "activity", "12345", {})
     >>> content_hash = identity.compute_content_hash("chembl", {"value": 100})
 
-    >>> from bioetl.domain.services import NormalizationService, NormalizationConfig
+    >>> from bioetl.domain.services import BioactivityNormalizer, NormalizationConfig
     >>> config = NormalizationConfig()
-    >>> service = NormalizationService(config)
+    >>> service = BioactivityNormalizer(config)
     >>> result = service.normalize_activity(100.0, "nM", "IC50")
 
     >>> from bioetl.domain.services import DefaultDataNormalizer
@@ -71,11 +71,14 @@ from bioetl.domain.services.identity_service import (
     IdentityService,
 )
 from bioetl.domain.services.merged_metadata_explainability import (
-    MergedMetadataExplainer,
     MergedMetadataExplainabilityService,
+    MergedMetadataExplainer,
 )
 from bioetl.domain.services.normalization_config import NormalizationConfig
-from bioetl.domain.services.normalization_service import NormalizationService
+from bioetl.domain.services.normalization_service import (
+    BioactivityNormalizer,
+    NormalizationService,
+)
 from bioetl.domain.services.organism_classification_service import (
     ClassificationStats,
     OrganismClassificationService,
@@ -102,6 +105,7 @@ __all__ = [
     "ActivityAggregator",
     "AuthorNormalizationService",
     "AuthorNormalizer",
+    "BioactivityNormalizer",
     "ChemicalStandardizationResult",
     "ChemicalStandardizationStatus",
     "ClassificationStats",
@@ -116,8 +120,8 @@ __all__ = [
     "DefaultDataNormalizer",
     "EntityIdentityGenerator",
     "IdentityService",
-    "MergedMetadataExplainer",
     "MergedMetadataExplainabilityService",
+    "MergedMetadataExplainer",
     "NormalizationConfig",
     "NormalizationService",
     "OrganismClassificationService",

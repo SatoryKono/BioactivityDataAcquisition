@@ -61,29 +61,21 @@ def sample_records() -> list[dict[str, object]]:
 class TestClassify:
     """Tests for classify() method."""
 
-    def test_classify_human_by_taxonomy(
-        self, service: OrganismClassifier
-    ) -> None:
+    def test_classify_human_by_taxonomy(self, service: OrganismClassifier) -> None:
         result = service.classify("Homo sapiens", 9606)
         assert result.organism_class == CellularityType.MULTICELLULAR
         assert result.source == "taxonomy_id"
         assert result.source_conflict is False
 
-    def test_classify_ecoli_by_taxonomy(
-        self, service: OrganismClassifier
-    ) -> None:
+    def test_classify_ecoli_by_taxonomy(self, service: OrganismClassifier) -> None:
         result = service.classify("Escherichia coli", 562)
         assert result.organism_class == CellularityType.UNICELLULAR
 
-    def test_classify_hiv_by_taxonomy(
-        self, service: OrganismClassifier
-    ) -> None:
+    def test_classify_hiv_by_taxonomy(self, service: OrganismClassifier) -> None:
         result = service.classify("HIV-1", 11676)
         assert result.organism_class == CellularityType.ACELLULAR
 
-    def test_classify_by_name_only(
-        self, service: OrganismClassifier
-    ) -> None:
+    def test_classify_by_name_only(self, service: OrganismClassifier) -> None:
         result = service.classify("Homo sapiens", None)
         assert result.organism_class == CellularityType.MULTICELLULAR
         assert result.source == "organism_name"

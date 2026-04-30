@@ -64,7 +64,7 @@ suffix_boundary_rules:
       - symbol: NormalizationService
         path: src/bioetl/domain/services/normalization_service.py
         issue: "#3400"
-        reason: Existing domain service surface pending canonical rename decision.
+        reason: Deprecated compatibility alias for BioactivityNormalizer pending follow-up domain naming cleanup.
       - symbol: OrganismClassificationService
         path: src/bioetl/domain/services/organism_classification_service.py
         issue: "#3400"

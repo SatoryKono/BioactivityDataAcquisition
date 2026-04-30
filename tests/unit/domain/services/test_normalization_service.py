@@ -1,4 +1,4 @@
-"""Unit tests for NormalizationService facade."""
+"""Unit tests for BioactivityNormalizer facade."""
 
 from __future__ import annotations
 
@@ -6,36 +6,38 @@ import pytest
 
 from bioetl.domain.services.normalization_config import NormalizationConfig
 from bioetl.domain.services.normalization_service import (
+    BioactivityNormalizer,
     NormalizationResult,
     NormalizationService,
 )
 from bioetl.domain.value_objects import Concentration, ConcentrationUnit
 
 
-class TestNormalizationServiceBasic:
-    """Basic tests for NormalizationService."""
+class TestBioactivityNormalizerBasic:
+    """Basic tests for BioactivityNormalizer."""
 
     @pytest.fixture
-    def service(self) -> NormalizationService:
-        """Create a NormalizationService instance."""
-        return NormalizationService()
+    def service(self) -> BioactivityNormalizer:
+        """Create a BioactivityNormalizer instance."""
+        return BioactivityNormalizer()
 
-    def test_service_has_subservices(self, service: NormalizationService) -> None:
+    def test_service_has_subservices(self, service: BioactivityNormalizer) -> None:
         """Test that service has all sub-services."""
         assert service.converter is not None
         assert service.validator is not None
         assert service.aggregator is not None
         assert service.config is not None
+        assert NormalizationService is BioactivityNormalizer
 
 
-class TestNormalizationServiceNormalizeActivity:
+class TestBioactivityNormalizerNormalizeActivity:
     """Tests for normalize_activity method."""
 
     @pytest.fixture
-    def service(self) -> NormalizationService:
-        return NormalizationService()
+    def service(self) -> BioactivityNormalizer:
+        return BioactivityNormalizer()
 
-    def test_normalize_activity_basic(self, service: NormalizationService) -> None:
+    def test_normalize_activity_basic(self, service: BioactivityNormalizer) -> None:
         """Test basic activity normalization."""
         result = service.normalize_activity(100.0, "nM", "IC50")
         assert isinstance(result, NormalizationResult)
@@ -44,7 +46,7 @@ class TestNormalizationServiceNormalizeActivity:
         assert result.is_valid is True
 
     def test_normalize_activity_converts_unit(
-        self, service: NormalizationService
+        self, service: BioactivityNormalizer
     ) -> None:
         """Test that activity is converted to default unit (nM)."""
         result = service.normalize_activity(1.0, "uM", "IC50")
@@ -52,7 +54,7 @@ class TestNormalizationServiceNormalizeActivity:
         assert result.unit == "nM"
 
     def test_normalize_activity_calculates_pchembl(
-        self, service: NormalizationService
+        self, service: BioactivityNormalizer
     ) -> None:
         """Test that pChEMBL is calculated."""
         result = service.normalize_activity(100.0, "nM", "IC50")
@@ -60,7 +62,7 @@ class TestNormalizationServiceNormalizeActivity:
         assert result.pchembl.value == pytest.approx(7.0)
 
     def test_normalize_activity_potency_flag(
-        self, service: NormalizationService
+        self, service: BioactivityNormalizer
     ) -> None:
         """Test potency flag based on pChEMBL threshold."""
         # 100 nM = pChEMBL 7.0, threshold is 5.0
@@ -72,7 +74,7 @@ class TestNormalizationServiceNormalizeActivity:
         assert result.is_potent is False
 
     def test_normalize_activity_invalid_negative(
-        self, service: NormalizationService
+        self, service: BioactivityNormalizer
     ) -> None:
         """Test that negative values are invalid."""
         result = service.normalize_activity(-100.0, "nM", "IC50")
@@ -81,7 +83,7 @@ class TestNormalizationServiceNormalizeActivity:
         assert "cannot be negative" in result.validation_message
 
     def test_normalize_activity_skip_validation(
-        self, service: NormalizationService
+        self, service: BioactivityNormalizer
     ) -> None:
         """Test skipping validation."""
         # Zero would normally be invalid, but with validate=False it passes
@@ -91,21 +93,21 @@ class TestNormalizationServiceNormalizeActivity:
         assert result.unit == "nM"
 
 
-class TestNormalizationServiceNormalizeToPchembl:
+class TestBioactivityNormalizerNormalizeToPchembl:
     """Tests for normalize_to_pchembl method."""
 
     @pytest.fixture
-    def service(self) -> NormalizationService:
-        return NormalizationService()
+    def service(self) -> BioactivityNormalizer:
+        return BioactivityNormalizer()
 
-    def test_normalize_to_pchembl(self, service: NormalizationService) -> None:
+    def test_normalize_to_pchembl(self, service: BioactivityNormalizer) -> None:
         """Test conversion to pChEMBL value."""
         result = service.normalize_to_pchembl(100.0, "nM")
         assert result is not None
         assert result.value == pytest.approx(7.0)
 
     def test_normalize_to_pchembl_micromolar(
-        self, service: NormalizationService
+        self, service: BioactivityNormalizer
     ) -> None:
         """Test pChEMBL from micromolar."""
         result = service.normalize_to_pchembl(1.0, "uM")
@@ -114,7 +116,7 @@ class TestNormalizationServiceNormalizeToPchembl:
         assert result.value == pytest.approx(6.0)
 
     def test_normalize_to_pchembl_invalid_returns_none(
-        self, service: NormalizationService
+        self, service: BioactivityNormalizer
     ) -> None:
         """Test that invalid values return None."""
         # Zero concentration can't be converted to pChEMBL
@@ -122,14 +124,16 @@ class TestNormalizationServiceNormalizeToPchembl:
         assert result is None
 
 
-class TestNormalizationServiceNormalizeMultiple:
+class TestBioactivityNormalizerNormalizeMultiple:
     """Tests for normalize_multiple method."""
 
     @pytest.fixture
-    def service(self) -> NormalizationService:
-        return NormalizationService()
+    def service(self) -> BioactivityNormalizer:
+        return BioactivityNormalizer()
 
-    def test_normalize_multiple_aggregates(self, service: NormalizationService) -> None:
+    def test_normalize_multiple_aggregates(
+        self, service: BioactivityNormalizer
+    ) -> None:
         """Test aggregation of multiple values."""
         result = service.normalize_multiple(
             [90.0, 100.0, 110.0], "nM", "IC50", aggregate=True
@@ -140,7 +144,7 @@ class TestNormalizationServiceNormalizeMultiple:
         assert result.is_valid is True
 
     def test_normalize_multiple_no_aggregate(
-        self, service: NormalizationService
+        self, service: BioactivityNormalizer
     ) -> None:
         """Test returning individual results without aggregation."""
         results = service.normalize_multiple(
@@ -151,7 +155,7 @@ class TestNormalizationServiceNormalizeMultiple:
         assert all(r.is_valid for r in results)
 
     def test_normalize_multiple_filters_invalid(
-        self, service: NormalizationService
+        self, service: BioactivityNormalizer
     ) -> None:
         """Test that invalid values are filtered by default."""
         result = service.normalize_multiple(
@@ -166,7 +170,7 @@ class TestNormalizationServiceNormalizeMultiple:
         assert result.is_valid is True
 
     def test_normalize_multiple_all_invalid(
-        self, service: NormalizationService
+        self, service: BioactivityNormalizer
     ) -> None:
         """Test when all values are invalid."""
         result = service.normalize_multiple(
@@ -176,14 +180,14 @@ class TestNormalizationServiceNormalizeMultiple:
         assert "No valid values" in result.validation_message
 
 
-class TestNormalizationServiceNormalizeConcentrations:
+class TestBioactivityNormalizerNormalizeConcentrations:
     """Tests for normalize_concentrations method."""
 
     @pytest.fixture
-    def service(self) -> NormalizationService:
-        return NormalizationService()
+    def service(self) -> BioactivityNormalizer:
+        return BioactivityNormalizer()
 
-    def test_normalize_concentrations(self, service: NormalizationService) -> None:
+    def test_normalize_concentrations(self, service: BioactivityNormalizer) -> None:
         """Test normalization of Concentration objects."""
         concs = [
             Concentration(100.0, ConcentrationUnit.NANOMOLAR),
@@ -197,7 +201,7 @@ class TestNormalizationServiceNormalizeConcentrations:
         assert result.is_valid is True
 
     def test_normalize_concentrations_empty(
-        self, service: NormalizationService
+        self, service: BioactivityNormalizer
     ) -> None:
         """Test with empty concentration list."""
         result = service.normalize_concentrations([])
@@ -205,24 +209,24 @@ class TestNormalizationServiceNormalizeConcentrations:
         assert "No concentrations" in result.validation_message
 
 
-class TestNormalizationServicePotencyMethods:
+class TestBioactivityNormalizerPotencyMethods:
     """Tests for potency classification methods."""
 
     @pytest.fixture
-    def service(self) -> NormalizationService:
-        return NormalizationService()
+    def service(self) -> BioactivityNormalizer:
+        return BioactivityNormalizer()
 
-    def test_is_potent(self, service: NormalizationService) -> None:
+    def test_is_potent(self, service: BioactivityNormalizer) -> None:
         """Test is_potent method."""
         assert service.is_potent(6.0) is True  # Above 5.0 threshold
         assert service.is_potent(4.0) is False  # Below 5.0 threshold
 
-    def test_is_highly_potent(self, service: NormalizationService) -> None:
+    def test_is_highly_potent(self, service: BioactivityNormalizer) -> None:
         """Test is_highly_potent method."""
         assert service.is_highly_potent(8.0) is True  # Above 7.0 threshold
         assert service.is_highly_potent(6.0) is False  # Below 7.0 threshold
 
-    def test_classify_potency(self, service: NormalizationService) -> None:
+    def test_classify_potency(self, service: BioactivityNormalizer) -> None:
         """Test potency classification."""
         assert service.classify_potency(3.0) == "inactive"
         assert service.classify_potency(4.5) == "weak"
@@ -231,19 +235,19 @@ class TestNormalizationServicePotencyMethods:
         assert service.classify_potency(8.0) == "highly_potent"
 
 
-class TestNormalizationServiceWithConfig:
-    """Tests for NormalizationService with custom config."""
+class TestBioactivityNormalizerWithConfig:
+    """Tests for BioactivityNormalizer with custom config."""
 
     def test_strict_validation(self) -> None:
         """Test that strict config enables strict validation."""
         config = NormalizationConfig(strict_validation=True)
-        service = NormalizationService(config=config)
+        service = BioactivityNormalizer(config=config)
         assert service.validator.strict is True
 
     def test_custom_output_unit(self) -> None:
         """Test custom output unit in config."""
         config = NormalizationConfig(default_output_unit="uM")
-        service = NormalizationService(config=config)
+        service = BioactivityNormalizer(config=config)
         result = service.normalize_activity(1000.0, "nM", "IC50")
         # 1000 nM = 1 uM
         assert result.value == pytest.approx(1.0)
@@ -252,7 +256,7 @@ class TestNormalizationServiceWithConfig:
     def test_custom_potency_threshold(self) -> None:
         """Test custom potency threshold."""
         config = NormalizationConfig(potency_threshold=6.0)
-        service = NormalizationService(config=config)
+        service = BioactivityNormalizer(config=config)
 
         # pChEMBL 5.5 is below new threshold
         result = service.normalize_activity(3162.0, "nM", "IC50")  # ~pChEMBL 5.5
@@ -261,14 +265,14 @@ class TestNormalizationServiceWithConfig:
     def test_screening_config(self) -> None:
         """Test with screening configuration."""
         config = NormalizationConfig.for_screening()
-        service = NormalizationService(config=config)
+        service = BioactivityNormalizer(config=config)
         assert service.config.default_aggregation_method == "mean"
         assert service.config.potency_threshold == pytest.approx(4.0)
 
     def test_medicinal_chemistry_config(self) -> None:
         """Test with medicinal chemistry configuration."""
         config = NormalizationConfig.for_medicinal_chemistry()
-        service = NormalizationService(config=config)
+        service = BioactivityNormalizer(config=config)
         assert service.config.default_aggregation_method == "median"
         assert service.config.strict_validation is True
         assert service.validator.strict is True

@@ -8,7 +8,7 @@ Internal design — mixin chain::
 
     _NormalizationActivityMixin   (single-value: convert, validate, pChEMBL)
         └── _NormalizationBatchMixin  (multi-value: aggregate, concentrations)
-                └── NormalizationService  (public facade, @dataclass)
+                └── BioactivityNormalizer  (public facade, @dataclass)
 
 Collaborators (all injected via dataclass fields):
 - ``NormalizationConfig``  — thresholds, default unit, aggregation method
@@ -46,6 +46,7 @@ if TYPE_CHECKING:
     from bioetl.domain.value_objects.activity_values import Concentration
 
 __all__ = [
+    "BioactivityNormalizer",
     "NormalizationResult",
     "NormalizationService",
 ]
@@ -273,8 +274,8 @@ class _NormalizationBatchMixin(_NormalizationActivityMixin):
 
 
 @dataclass(slots=True)
-class NormalizationService(_NormalizationBatchMixin):
-    """Facade service for bioactivity data normalization."""
+class BioactivityNormalizer(_NormalizationBatchMixin):
+    """Facade normalizer for bioactivity activity-value normalization."""
 
     config: NormalizationConfig = field(default_factory=NormalizationConfig)
     converter: UnitConverter = field(default_factory=UnitConverter)
@@ -284,3 +285,6 @@ class NormalizationService(_NormalizationBatchMixin):
     def __post_init__(self) -> None:
         """Initialize validator with config settings."""
         self.validator.strict = self.config.strict_validation
+
+
+NormalizationService = BioactivityNormalizer
