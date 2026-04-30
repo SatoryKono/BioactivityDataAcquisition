@@ -1,4 +1,4 @@
-"""Organism classification service for assay data normalization and filtering."""
+"""Organism classifier for assay data normalization and filtering."""
 
 from __future__ import annotations
 
@@ -25,12 +25,13 @@ from bioetl.domain.types import CellularityType, JsonDict
 __all__ = [
     "ClassificationStats",
     "OrganismClassificationService",
+    "OrganismClassifier",
 ]
 
 
 @dataclass(frozen=True, slots=True)
-class OrganismClassificationService:
-    """Domain service for organism cellularity classification."""
+class OrganismClassifier:
+    """Classifier for organism cellularity."""
 
     organism_field: str = _DEFAULT_ORGANISM_FIELD
     taxonomy_id_field: str = _DEFAULT_TAXONOMY_ID_FIELD
@@ -196,3 +197,7 @@ class OrganismClassificationService:
         organism = record.get(self.organism_field)
         taxonomy_id = record.get(self.taxonomy_id_field)
         return classify_organism(organism, taxonomy_id)
+
+
+# Deprecated compatibility alias retained during ADR-041 migration.
+OrganismClassificationService = OrganismClassifier

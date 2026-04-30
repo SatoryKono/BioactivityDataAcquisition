@@ -60,9 +60,7 @@ def test_no_runtime_imports_of_deprecated_column_ordering_symbols() -> None:
 
 
 @pytest.mark.architecture
-def test_application_and_integration_tests_use_canonical_column_order_service() -> (
-    None
-):
+def test_application_and_integration_tests_use_canonical_column_order_service() -> None:
     roots = (
         TEST_ROOT / "unit" / "application" / "composite",
         TEST_ROOT / "integration" / "composite",

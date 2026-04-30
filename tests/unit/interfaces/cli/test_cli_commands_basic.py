@@ -49,7 +49,9 @@ class TestQuarantineCommands:
     """Tests for quarantine CLI commands."""
 
     @patch("bioetl.interfaces.cli.commands.quarantine.get_quarantine_runtime_service")
-    def test_quarantine_inspect_command(self, mock_get_quarantine_runtime_service, runner):
+    def test_quarantine_inspect_command(
+        self, mock_get_quarantine_runtime_service, runner
+    ):
         """Test that quarantine inspect command works."""
         mock_quarantine_manager = AsyncMock()
         mock_quarantine_manager.inspect.return_value = [

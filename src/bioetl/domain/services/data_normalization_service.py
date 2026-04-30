@@ -10,7 +10,7 @@ all work is delegated to canonical ``bioetl.domain.normalization`` helpers.
 
 Inheritance chain::
 
-    AuthorNormalizationService          (author + affiliation logic)
+    AuthorNormalizer          (author + affiliation logic)
         └── DefaultDataNormalizer  (adds DOI, PMID, date, text delegation)
 
 Delegated helper modules:
@@ -71,7 +71,7 @@ from bioetl.domain.normalization.text import (
     strip_html_tags as _strip_html_tags,
 )
 from bioetl.domain.services.author_normalization_service import (
-    AuthorNormalizationService,
+    AuthorNormalizer,
 )
 from bioetl.domain.services.data_normalization_config import DataNormalizationConfig
 
@@ -85,10 +85,10 @@ __all__ = [
 
 
 @dataclass(frozen=True, slots=True)
-class DefaultDataNormalizer(AuthorNormalizationService):
+class DefaultDataNormalizer(AuthorNormalizer):
     """Facade for data normalization, delegating to specialized services.
 
-    Inherits author/affiliation normalization from AuthorNormalizationService.
+    Inherits author/affiliation normalization from AuthorNormalizer.
     Delegates identifier, date, and text normalization to pure helper modules.
     Maintains backward-compatible API as per DataNormalizationPort.
     """

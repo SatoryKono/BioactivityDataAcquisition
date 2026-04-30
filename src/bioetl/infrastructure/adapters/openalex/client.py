@@ -135,9 +135,7 @@ class OpenAlexAdapter(
 
     provider_name: str = field(init=False, default="openalex")
     """Provider identifier (required by DataSourcePort)."""
-    _fallback_fetch_service: FallbackFetchOrchestrator = field(
-        init=False, repr=False
-    )
+    _fallback_fetch_service: FallbackFetchOrchestrator = field(init=False, repr=False)
     _query_executor: OpenAlexQueryExecutor = field(init=False, repr=False)
     _response_mapper: OpenAlexResponseMapper = field(init=False, repr=False)
     _cursor_flow: OpenAlexCursorFlow = field(init=False, repr=False)

@@ -6,9 +6,11 @@ This package provides specialized services for domain operations:
 - UnitConverter: Conversion between concentration units (nM, µM, mM)
 - ValueValidator: Validation of bioactivity value ranges
 - ActivityAggregator: Aggregation of multiple measurements
+- AuthorNormalizer: Author and affiliation normalization
+- CompositeValidator: Structural and deep-preflight composite validation
 - NormalizationService: Orchestrator facade combining bioactivity normalization
 - DefaultDataNormalizer: Text and data normalization (DOI, PMID, authors, HTML)
-- OrganismClassificationService: Organism cellularity classification for assay filtering
+- OrganismClassifier: Organism cellularity classification for assay filtering
 
 Services are pure domain logic (no I/O) per RULES.md §1.1.
 
@@ -37,12 +39,20 @@ Usage:
 from __future__ import annotations
 
 from bioetl.domain.services.activity_aggregator import ActivityAggregator
+from bioetl.domain.services.author_normalization_service import (
+    AuthorNormalizationService,
+    AuthorNormalizer,
+)
 from bioetl.domain.services.chemical_standardization import (
     CHEMICAL_STANDARDIZATION_POLICY_VERSION,
     CHEMICAL_STANDARDIZATION_STATUSES,
     ChemicalStandardizationResult,
     ChemicalStandardizationStatus,
     standardize_chemical_structure,
+)
+from bioetl.domain.services.composite_validation_layer import (
+    CompositeValidationService,
+    CompositeValidator,
 )
 from bioetl.domain.services.data_normalization_config import DataNormalizationConfig
 from bioetl.domain.services.data_normalization_service import (
@@ -63,6 +73,7 @@ from bioetl.domain.services.normalization_service import NormalizationService
 from bioetl.domain.services.organism_classification_service import (
     ClassificationStats,
     OrganismClassificationService,
+    OrganismClassifier,
 )
 from bioetl.domain.services.preflight_governance import (
     PreflightGovernanceService,
@@ -79,9 +90,13 @@ __all__ = [
     "CHEMICAL_STANDARDIZATION_POLICY_VERSION",
     "CHEMICAL_STANDARDIZATION_STATUSES",
     "ActivityAggregator",
+    "AuthorNormalizationService",
+    "AuthorNormalizer",
     "ChemicalStandardizationResult",
     "ChemicalStandardizationStatus",
     "ClassificationStats",
+    "CompositeValidationService",
+    "CompositeValidator",
     "DQMetricsCalculator",
     "DQMetricsInput",
     "DQReportSerializer",
@@ -94,6 +109,7 @@ __all__ = [
     "NormalizationConfig",
     "NormalizationService",
     "OrganismClassificationService",
+    "OrganismClassifier",
     "PreflightGovernanceService",
     "PreflightGovernor",
     "UnitConverter",

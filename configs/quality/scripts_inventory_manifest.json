@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-30T06:04:51.048952+00:00",
+  "generated_at": "2026-04-30T06:21:50.757510+00:00",
   "summary": {
     "total_scripts": 356,
     "status_counts": {
@@ -5554,7 +5554,7 @@
         },
         {
           "path": "tests/architecture/test_compatibility_facade_inventory.py",
-          "line": 53,
+          "line": 51,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"ci\" / \"_compatibility_registry.py\","
         },

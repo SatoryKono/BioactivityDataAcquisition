@@ -1029,9 +1029,7 @@ class TestBronzeFixtureCoverage:
             key for key, gap in gaps.items() if gap.get("status") == "blocked"
         )
         decision_recorded = sorted(
-            key
-            for key, gap in gaps.items()
-            if gap.get("status") == "decision_recorded"
+            key for key, gap in gaps.items() if gap.get("status") == "decision_recorded"
         )
 
         assert not active, (

@@ -48,8 +48,8 @@ class CompositeValidationConfig:
     governance_policy: GovernancePolicy = GovernancePolicy.BLOCK_ON_BLOCKERS_ONLY
 
 
-class CompositeValidationService:
-    """Service for structural and deep-preflight composite validation."""
+class CompositeValidator:
+    """Validator for structural and deep-preflight composite checks."""
 
     def __init__(
         self,
@@ -302,3 +302,7 @@ class CompositeValidationService:
     def _is_valid_lineage_config(config: JsonDict) -> bool:
         is_valid: bool = _is_valid_lineage_config(config)
         return is_valid
+
+
+# Deprecated compatibility alias retained during ADR-041 migration.
+CompositeValidationService = CompositeValidator

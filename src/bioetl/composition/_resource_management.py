@@ -132,6 +132,8 @@ def get_quarantine_runtime_service(pipeline: str) -> QuarantineRuntimeServicePro
         QuarantineRuntimeServiceProtocol,
         _bootstrap_registered_resource(bootstrap_quarantine_runtime_service, pipeline),
     )
+
+
 def get_checkpoint_runtime_service(pipeline: str) -> CheckpointRuntimeServiceProtocol:
     """Get the checkpoint runtime service for the given pipeline.
 
@@ -151,6 +153,8 @@ def get_checkpoint_runtime_service(pipeline: str) -> CheckpointRuntimeServicePro
         CheckpointRuntimeServiceProtocol,
         _bootstrap_registered_resource(bootstrap_checkpoint_runtime_service, pipeline),
     )
+
+
 def get_lifecycle_service() -> MedallionLifecycleServiceProtocol:
     """Get the lifecycle service for maintenance operations.
 

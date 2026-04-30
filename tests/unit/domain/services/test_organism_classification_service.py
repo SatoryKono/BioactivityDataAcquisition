@@ -1,4 +1,4 @@
-"""Unit tests for OrganismClassificationService.
+"""Unit tests for OrganismClassifier.
 
 Tests cover:
 - Single-record classification (classify, get_cellularity, normalize_name)
@@ -16,6 +16,7 @@ import pytest
 from bioetl.domain.mapping.organism_classification import OrganismClassificationResult
 from bioetl.domain.services.organism_classification_service import (
     ClassificationStats,
+    OrganismClassifier,
     OrganismClassificationService,
 )
 from bioetl.domain.types import CellularityType
@@ -27,15 +28,15 @@ from bioetl.domain.types import CellularityType
 
 
 @pytest.fixture()
-def service() -> OrganismClassificationService:
+def service() -> OrganismClassifier:
     """Default service with standard ChEMBL field names."""
-    return OrganismClassificationService()
+    return OrganismClassifier()
 
 
 @pytest.fixture()
-def custom_service() -> OrganismClassificationService:
+def custom_service() -> OrganismClassifier:
     """Service with custom field names."""
-    return OrganismClassificationService(
+    return OrganismClassifier(
         organism_field="organism_name",
         taxonomy_id_field="tax_id",
     )
@@ -61,7 +62,7 @@ class TestClassify:
     """Tests for classify() method."""
 
     def test_classify_human_by_taxonomy(
-        self, service: OrganismClassificationService
+        self, service: OrganismClassifier
     ) -> None:
         result = service.classify("Homo sapiens", 9606)
         assert result.organism_class == CellularityType.MULTICELLULAR
@@ -69,30 +70,30 @@ class TestClassify:
         assert result.source_conflict is False
 
     def test_classify_ecoli_by_taxonomy(
-        self, service: OrganismClassificationService
+        self, service: OrganismClassifier
     ) -> None:
         result = service.classify("Escherichia coli", 562)
         assert result.organism_class == CellularityType.UNICELLULAR
 
     def test_classify_hiv_by_taxonomy(
-        self, service: OrganismClassificationService
+        self, service: OrganismClassifier
     ) -> None:
         result = service.classify("HIV-1", 11676)
         assert result.organism_class == CellularityType.ACELLULAR
 
     def test_classify_by_name_only(
-        self, service: OrganismClassificationService
+        self, service: OrganismClassifier
     ) -> None:
         result = service.classify("Homo sapiens", None)
         assert result.organism_class == CellularityType.MULTICELLULAR
         assert result.source == "organism_name"
 
-    def test_classify_unresolved(self, service: OrganismClassificationService) -> None:
+    def test_classify_unresolved(self, service: OrganismClassifier) -> None:
         result = service.classify("Unknown organism", None)
         assert result.organism_class is None
         assert result.source == "unresolved"
 
-    def test_classify_none_inputs(self, service: OrganismClassificationService) -> None:
+    def test_classify_none_inputs(self, service: OrganismClassifier) -> None:
         result = service.classify(None, None)
         assert result.organism_class is None
         assert result.source == "unresolved"

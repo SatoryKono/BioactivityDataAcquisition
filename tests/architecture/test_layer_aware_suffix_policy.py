@@ -31,8 +31,7 @@ def test_layer_aware_suffix_policy_yaml_exists_and_is_wired() -> None:
     policy_path = ROOT / module.LAYER_AWARE_SUFFIX_POLICY_PATH
 
     assert policy_path.exists(), (
-        "Missing layer-aware naming policy: "
-        "configs/quality/layered_suffix_policy.yaml"
+        "Missing layer-aware naming policy: configs/quality/layered_suffix_policy.yaml"
     )
     assert module.LAYER_AWARE_SUFFIX_POLICY_PATH.as_posix() == (
         "configs/quality/layered_suffix_policy.yaml"

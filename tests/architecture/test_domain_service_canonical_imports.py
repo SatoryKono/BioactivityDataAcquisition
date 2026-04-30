@@ -7,15 +7,21 @@ from pathlib import Path
 
 ROOT = Path("src/bioetl")
 LEGACY_SYMBOLS = (
+    "AuthorNormalizationService",
+    "CompositeValidationService",
     "IdentityService",
     "DefaultDataNormalizationService",
     "DataNormalizationService",
+    "OrganismClassificationService",
     "PreflightGovernanceService",
 )
 ALLOWED_FILES = {
     "src/bioetl/domain/services/__init__.py",
+    "src/bioetl/domain/services/author_normalization_service.py",
+    "src/bioetl/domain/services/composite_validation_layer.py",
     "src/bioetl/domain/services/identity_service.py",
     "src/bioetl/domain/services/data_normalization_service.py",
+    "src/bioetl/domain/services/organism_classification_service.py",
     "src/bioetl/domain/services/preflight_governance.py",
 }
 

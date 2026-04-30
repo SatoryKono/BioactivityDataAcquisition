@@ -103,7 +103,10 @@ def test_resource_management_api_alias_warns_and_reexports_resources_api() -> No
     from bioetl.composition import resources_api
 
     assert alias_module.__all__ == resources_api.__all__
-    assert alias_module.get_checkpoint_runtime_service is resources_api.get_checkpoint_runtime_service
+    assert (
+        alias_module.get_checkpoint_runtime_service
+        is resources_api.get_checkpoint_runtime_service
+    )
 
 
 @pytest.mark.unit

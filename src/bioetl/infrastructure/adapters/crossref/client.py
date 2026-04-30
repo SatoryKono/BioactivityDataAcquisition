@@ -110,9 +110,7 @@ class CrossRefAdapter(
     fetch_flow: CrossRefFetchFlow | None = None
 
     provider_name: str = field(init=False, default="crossref")  # DataSourcePort ID
-    _fallback_fetch_service: FallbackFetchOrchestrator = field(
-        init=False, repr=False
-    )
+    _fallback_fetch_service: FallbackFetchOrchestrator = field(init=False, repr=False)
     _fallback_decorator: ComposableFallbackDecorator = field(init=False, repr=False)
     _query_builder: CrossRefQueryBuilder = field(init=False, repr=False)
     _response_mapper: CrossRefResponseMapper = field(init=False, repr=False)

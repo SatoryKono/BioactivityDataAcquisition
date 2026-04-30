@@ -1,4 +1,4 @@
-"""Author and affiliation normalization service.
+"""Author and affiliation normalizer.
 
 Pure domain service (no I/O) per RULES.md §1.1.
 Provides unified normalization for author names and affiliations across providers.
@@ -31,8 +31,8 @@ def _filter_string_items(
 
 
 @dataclass(frozen=True, slots=True)
-class AuthorNormalizationService:
-    """Unified author and affiliation normalization service.
+class AuthorNormalizer:
+    """Unified author and affiliation normalizer.
 
     Handles normalization for all publication providers:
     - ChEMBL: concatenated string ("Author1; Author2")
@@ -187,4 +187,7 @@ class AuthorNormalizationService:
         return parse_author_names(authors)
 
 
-__all__ = ["AuthorNormalizationService"]
+# Deprecated compatibility alias retained during ADR-041 migration.
+AuthorNormalizationService = AuthorNormalizer
+
+__all__ = ["AuthorNormalizationService", "AuthorNormalizer"]

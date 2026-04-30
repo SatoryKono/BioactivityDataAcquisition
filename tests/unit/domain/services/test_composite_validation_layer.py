@@ -4,10 +4,11 @@ from bioetl.domain.services.aggregation_validator import AggregationValidator
 from bioetl.domain.services.composite_validation_layer import (
     CompositeValidationConfig,
     CompositeValidationService,
+    CompositeValidator,
 )
 from bioetl.domain.services.cross_validation_validator import CrossValidationValidator
 from bioetl.domain.services.preflight_governance import (
-    PreflightGovernanceService,
+    PreflightGovernor,
 )
 from bioetl.domain.types.validation_result import CompositeValidationReport
 from bioetl.domain.types.validation_severity import (
@@ -17,11 +18,11 @@ from bioetl.domain.types.validation_severity import (
 )
 
 
-def _create_service() -> CompositeValidationService:
-    return CompositeValidationService(
+def _create_service() -> CompositeValidator:
+    return CompositeValidator(
         aggregation_validator=AggregationValidator(),
         cross_validation_validator=CrossValidationValidator(),
-        preflight_governance=PreflightGovernanceService(),
+        preflight_governance=PreflightGovernor(),
     )
 
 
@@ -29,9 +30,9 @@ def test_composite_validation_service_creation():
     """Test that validation service uses injected collaborators."""
     aggregation_validator = AggregationValidator()
     cross_validation_validator = CrossValidationValidator()
-    preflight_governance = PreflightGovernanceService()
+    preflight_governance = PreflightGovernor()
 
-    service = CompositeValidationService(
+    service = CompositeValidator(
         aggregation_validator=aggregation_validator,
         cross_validation_validator=cross_validation_validator,
         preflight_governance=preflight_governance,
@@ -40,6 +41,11 @@ def test_composite_validation_service_creation():
     assert service._aggregation_validator is aggregation_validator
     assert service._cross_validation_validator is cross_validation_validator
     assert service._preflight_governance is preflight_governance
+
+
+def test_composite_validation_service_alias_points_to_canonical() -> None:
+    """Legacy service name should remain a compatibility alias."""
+    assert CompositeValidationService is CompositeValidator
 
 
 def test_valid_composite_config():
