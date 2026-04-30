@@ -33,10 +33,8 @@ if TYPE_CHECKING:
 
 __all__ = [
     "archive_table",
-    "get_checkpoint_manager",
     "get_checkpoint_runtime_service",
     "get_lifecycle_service",
-    "get_quarantine_manager",
     "get_quarantine_runtime_service",
     "inspect_quarantine",
     "list_checkpoints",
@@ -115,10 +113,6 @@ def _bootstrap_registered_resource[**_P, _T](
     return bootstrap_fn(*args, **kwargs)
 
 
-QuarantineManagerProtocol = QuarantineRuntimeServiceProtocol
-CheckpointManagerProtocol = CheckpointRuntimeServiceProtocol
-
-
 def get_quarantine_runtime_service(pipeline: str) -> QuarantineRuntimeServiceProtocol:
     """Get the quarantine runtime service for the given pipeline.
 
@@ -138,13 +132,6 @@ def get_quarantine_runtime_service(pipeline: str) -> QuarantineRuntimeServicePro
         QuarantineRuntimeServiceProtocol,
         _bootstrap_registered_resource(bootstrap_quarantine_runtime_service, pipeline),
     )
-
-
-def get_quarantine_manager(pipeline: str) -> QuarantineRuntimeServiceProtocol:
-    """Compatibility wrapper for the retired manager-style resource API."""
-    return get_quarantine_runtime_service(pipeline)
-
-
 def get_checkpoint_runtime_service(pipeline: str) -> CheckpointRuntimeServiceProtocol:
     """Get the checkpoint runtime service for the given pipeline.
 
@@ -164,13 +151,6 @@ def get_checkpoint_runtime_service(pipeline: str) -> CheckpointRuntimeServicePro
         CheckpointRuntimeServiceProtocol,
         _bootstrap_registered_resource(bootstrap_checkpoint_runtime_service, pipeline),
     )
-
-
-def get_checkpoint_manager(pipeline: str) -> CheckpointRuntimeServiceProtocol:
-    """Compatibility wrapper for the retired manager-style resource API."""
-    return get_checkpoint_runtime_service(pipeline)
-
-
 def get_lifecycle_service() -> MedallionLifecycleServiceProtocol:
     """Get the lifecycle service for maintenance operations.
 
@@ -289,10 +269,10 @@ async def inspect_quarantine(
         >>> [rec['error_code'] for rec in records]  # List of error codes
         ['DQ_MISSING_FIELD', 'DQ_INVALID_SMILES']
     """
-    manager = get_quarantine_runtime_service(pipeline)
+    runtime_service = get_quarantine_runtime_service(pipeline)
     records: list[
         JsonDict  # Any: factory wiring; concrete types resolved at runtime
-    ] = await manager.inspect(  # Any: factory wiring; concrete types resolved at runtime
+    ] = await runtime_service.inspect(  # Any: factory wiring; concrete types resolved at runtime
         limit=limit
     )  # Any: factory wiring; concrete types resolved at runtime
     return records
@@ -314,6 +294,6 @@ async def list_checkpoints(pipeline: str) -> list[str]:
         >>> checkpoints  # List of checkpoint identifiers
         ['checkpoint_2024_01_15', 'checkpoint_2024_01_16']
     """
-    manager = get_checkpoint_runtime_service(pipeline)
-    checkpoints = cast(list[str], await manager.list_all())
+    runtime_service = get_checkpoint_runtime_service(pipeline)
+    checkpoints = cast(list[str], await runtime_service.list_all())
     return checkpoints

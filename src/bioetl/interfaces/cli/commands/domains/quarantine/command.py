@@ -21,8 +21,8 @@ from bioetl.interfaces.cli.commands.domains.quarantine.support import (
 SILVER_FILTER_ERROR_CODE = "FILTERED_OUT_SILVER"
 
 
-def get_quarantine_manager(pipeline: str) -> _QuarantineManager:
-    """Load the quarantine manager through composition on demand."""
+def get_quarantine_runtime_service(pipeline: str) -> _QuarantineManager:
+    """Load the quarantine runtime service through composition on demand."""
     from bioetl.composition.health_api import get_quarantine_runtime_service as _impl
 
     return cast(_QuarantineManager, _impl(pipeline))
@@ -76,7 +76,7 @@ def quarantine_inspect(
 
     resolved_error_code = SILVER_FILTER_ERROR_CODE if silver_filter_only else error_code
     _inspect_quarantine(
-        get_quarantine_manager(pipeline),
+        get_quarantine_runtime_service(pipeline),
         pipeline=pipeline,
         limit=limit,
         error_code=resolved_error_code,
@@ -135,7 +135,7 @@ def quarantine_stats(
 
     resolved_error_code = SILVER_FILTER_ERROR_CODE if silver_filter_only else error_code
     _show_quarantine_stats(
-        get_quarantine_manager(pipeline),
+        get_quarantine_runtime_service(pipeline),
         pipeline=pipeline,
         output_json=output_json,
         error_code=resolved_error_code,
@@ -229,7 +229,7 @@ COMMANDS = (
 )
 
 __all__ = [
-    "get_quarantine_manager",
+    "get_quarantine_runtime_service",
     "get_quarantine_service",
     "get_run_manifest_service",
     "quarantine",

@@ -94,6 +94,32 @@ def test_checkpoint_quarantine_runtime_admin_family_is_role_driven() -> None:
     }
 
 
+def test_column_ordering_family_is_frozen_to_one_canonical_surface_plus_compat() -> (
+    None
+):
+    """Column-ordering family must keep one canonical name plus explicit compat shims."""
+    module = _load_gate_module()
+    policy = module._load_layer_aware_suffix_policy(ROOT)
+    family_rules = {rule.rule_id: rule for rule in policy.family_freeze_rules}
+    rule = family_rules["column_ordering_family"]
+
+    allowed = {(item.symbol, item.path) for item in rule.allowed_symbols}
+    assert allowed == {
+        (
+            "ColumnOrderService",
+            "src/bioetl/application/composite/column_service.py",
+        ),
+        (
+            "ColumnOrderer",
+            "src/bioetl/application/composite/column_orderer.py",
+        ),
+        (
+            "ColumnPriorityOrderer",
+            "src/bioetl/application/composite/column_priority_orderer.py",
+        ),
+    }
+
+
 def test_layer_aware_suffix_policy_stays_clean_on_current_baseline() -> None:
     """Reviewed naming debt must stay fully registered with no stray violations."""
     module = _load_gate_module()

@@ -5,8 +5,8 @@ from __future__ import annotations
 __all__ = [
     "GovernancePolicy",
     "PreflightGovernanceConfig",
-    "PreflightGovernor",
     "PreflightGovernanceService",
+    "PreflightGovernor",
 ]
 
 from bioetl.domain.services._preflight_governance_helpers import (

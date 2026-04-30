@@ -183,11 +183,5 @@ class QuarantineRuntimeService(QuarantineManagerSupportMixin):
 __all__ = [
     "DQQuarantineEntry",
     "FilteredQuarantineEntry",
-    "QuarantineManager",
-    "QuarantineManagerService",
     "QuarantineRuntimeService",
 ]
-
-# Backward-compatible public alias for historical call sites and tests.
-QuarantineManagerService = QuarantineRuntimeService
-QuarantineManager = QuarantineRuntimeService

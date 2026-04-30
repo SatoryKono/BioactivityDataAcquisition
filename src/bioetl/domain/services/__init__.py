@@ -46,8 +46,8 @@ from bioetl.domain.services.chemical_standardization import (
 )
 from bioetl.domain.services.data_normalization_config import DataNormalizationConfig
 from bioetl.domain.services.data_normalization_service import (
-    DefaultDataNormalizer,
     DefaultDataNormalizationService,
+    DefaultDataNormalizer,
 )
 from bioetl.domain.services.dq_metrics_calculator import (
     DQMetricsCalculator,
@@ -65,8 +65,8 @@ from bioetl.domain.services.organism_classification_service import (
     OrganismClassificationService,
 )
 from bioetl.domain.services.preflight_governance import (
-    PreflightGovernor,
     PreflightGovernanceService,
+    PreflightGovernor,
 )
 from bioetl.domain.services.text_similarity import jaccard_similarity, normalize_text
 from bioetl.domain.services.unit_converter import UnitConverter
@@ -87,15 +87,15 @@ __all__ = [
     "DQReportSerializer",
     "DataNormalizationConfig",
     "DataNormalizationService",
-    "DefaultDataNormalizer",
     "DefaultDataNormalizationService",
+    "DefaultDataNormalizer",
     "EntityIdentityGenerator",
     "IdentityService",
     "NormalizationConfig",
     "NormalizationService",
     "OrganismClassificationService",
-    "PreflightGovernor",
     "PreflightGovernanceService",
+    "PreflightGovernor",
     "UnitConverter",
     "ValueValidator",
     "jaccard_similarity",
