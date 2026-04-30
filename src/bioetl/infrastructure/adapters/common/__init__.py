@@ -23,7 +23,7 @@ from bioetl.infrastructure.adapters.common.dependency_context import (
 from bioetl.infrastructure.adapters.common.fallback_fetch_service import (
     DefaultFallbackExecution,
     FallbackExecutionProtocol,
-    FallbackFetchOrchestratorService,
+    FallbackFetchOrchestrator,
     FallbackFetchRequest,
 )
 from bioetl.infrastructure.adapters.common.fallback_policy_mixin import (
@@ -62,7 +62,7 @@ __all__ = [
     "DefaultFallbackExecution",
     "FallbackDecoratorConfig",
     "FallbackExecutionProtocol",
-    "FallbackFetchOrchestratorService",
+    "FallbackFetchOrchestrator",
     "FallbackFetchRequest",
     "FallbackPolicyMixin",
     "FilteredBatchRecoveryHost",
