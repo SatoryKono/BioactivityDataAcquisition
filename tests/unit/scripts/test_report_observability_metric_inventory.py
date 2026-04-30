@@ -284,18 +284,73 @@ def test_validate_metric_inventory_reports_unallowed_drift() -> None:
         "dead_metrics": [],
         "documented_without_registry": ["bioetl_doc_gap_total"],
         "rules_without_registry": [],
+        "runtime_cardinality_review_required": ["bioetl_hotspot_total"],
     }
 
     violations = inventory.validate_metric_inventory(
         report,
-        allowlist={"registered_without_runtime": {"bioetl_allowed_total"}},
+        allowlist={
+            "registered_without_runtime": {"bioetl_allowed_total"},
+            "runtime_cardinality_review_required": set(),
+        },
     )
 
     assert violations == {
         "documented_without_registry": ["bioetl_doc_gap_total"],
         "registered_without_runtime": ["bioetl_dead_total"],
         "runtime_without_registry": ["bioetl_runtime_gap_total"],
+        "runtime_cardinality_review_required": ["bioetl_hotspot_total"],
     }
+
+
+def test_load_drift_allowlist_supports_metadata_entries_for_cardinality_reviews(
+    tmp_path: Path,
+) -> None:
+    allowlist = tmp_path / "allowlist.yaml"
+    allowlist.write_text(
+        "\n".join(
+            [
+                "allowed:",
+                "  runtime_cardinality_review_required:",
+                "    - metric: bioetl_hotspot_total",
+                '      owner: "@bioetl-observability"',
+                '      reason: "Static multi-emitter fanout is expected for this family"',
+                "      review_date: '2026-09-30'",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    loaded = inventory._load_drift_allowlist(allowlist)
+
+    assert loaded["runtime_cardinality_review_required"] == {"bioetl_hotspot_total"}
+
+
+def test_load_drift_allowlist_rejects_metadata_free_cardinality_entries(
+    tmp_path: Path,
+) -> None:
+    allowlist = tmp_path / "allowlist.yaml"
+    allowlist.write_text(
+        "\n".join(
+            [
+                "allowed:",
+                "  runtime_cardinality_review_required:",
+                "    - bioetl_hotspot_total",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    try:
+        inventory._load_drift_allowlist(allowlist)
+    except ValueError as exc:
+        assert "metric/owner/reason/review_date" in str(exc)
+    else:  # pragma: no cover - defensive branch for clearer failure output
+        raise AssertionError(
+            "runtime_cardinality_review_required must reject string-only allowlist entries"
+        )
 
 
 def test_main_check_exits_nonzero_for_metric_drift(
@@ -311,6 +366,7 @@ def test_main_check_exits_nonzero_for_metric_drift(
             "dead_metrics": [],
             "documented_without_registry": [],
             "rules_without_registry": [],
+            "runtime_cardinality_review_required": [],
         },
     )
 
@@ -340,6 +396,7 @@ def test_main_check_allows_explicit_baseline(
             "dead_metrics": [],
             "documented_without_registry": [],
             "rules_without_registry": [],
+            "runtime_cardinality_review_required": [],
         },
     )
     allowlist = tmp_path / "allowlist.yaml"

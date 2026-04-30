@@ -22,6 +22,19 @@ runtime_cardinality_review:
     Repo-static inventory cannot measure live label cardinality directly, so the
     governance layer uses multi-emitter metric families as a bounded review
     proxy that still surfaces likely operator-significant hotspots.
+  exception_allowlist_field: runtime_cardinality_review_required
+  exception_metadata_fields:
+  - metric
+  - owner
+  - reason
+  - review_date
+  evidence_collection:
+    mode: offline_static_inventory_review
+    artifact: configs/quality/observability_metric_inventory_allowlist.yaml
+    command: python -m scripts.engineering.qa.report_observability_metric_inventory --check --json
+    rationale: >
+      Cardinality exceptions are reviewed offline through the repo-local metric
+      inventory and curated allowlist metadata instead of live scrape sampling.
 unused_signal_policy:
   rationale: >
     Registered metrics without runtime emission are treated as unused declared

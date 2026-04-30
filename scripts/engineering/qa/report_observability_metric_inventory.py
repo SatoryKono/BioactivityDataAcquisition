@@ -95,6 +95,10 @@ _CHECK_DRIFT_KEYS: Final[tuple[str, ...]] = (
     "dead_metrics",
     "documented_without_registry",
     "rules_without_registry",
+    "runtime_cardinality_review_required",
+)
+_ALLOWLIST_METADATA_REQUIRED_KEYS: Final[frozenset[str]] = frozenset(
+    {"runtime_cardinality_review_required"}
 )
 
 
@@ -742,6 +746,32 @@ def _build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def _parse_allowlist_metric_name(
+    key: str, item: object
+) -> str | None:  # pragma: no cover - exercised through _load_drift_allowlist
+    if isinstance(item, str):
+        if key in _ALLOWLIST_METADATA_REQUIRED_KEYS:
+            raise ValueError(
+                f"{key} entries must be mappings with metric/owner/reason/review_date"
+            )
+        return item
+    if not isinstance(item, dict):
+        raise ValueError(f"{key} entries must be strings or mappings")
+
+    metric_name = item.get("metric")
+    if not isinstance(metric_name, str) or not metric_name:
+        raise ValueError(f"{key} mapping entries must declare a non-empty metric")
+
+    if key in _ALLOWLIST_METADATA_REQUIRED_KEYS:
+        for field_name in ("owner", "reason", "review_date"):
+            field_value = item.get(field_name)
+            if not isinstance(field_value, str) or not field_value.strip():
+                raise ValueError(
+                    f"{key} metric {metric_name!r} is missing required {field_name}"
+                )
+    return metric_name
+
+
 def _load_drift_allowlist(path: Path) -> dict[str, set[str]]:
     if not path.exists():
         return {}
@@ -760,7 +790,13 @@ def _load_drift_allowlist(path: Path) -> dict[str, set[str]]:
         values = raw_allowed.get(key, [])
         if not isinstance(values, list):
             continue
-        allowlist[key] = {str(value) for value in values}
+        allowlist[key] = {
+            metric_name
+            for metric_name in (
+                _parse_allowlist_metric_name(key, value) for value in values
+            )
+            if metric_name
+        }
     return allowlist
 
 
