@@ -100,17 +100,13 @@ class TestClassify:
 class TestGetCellularity:
     """Tests for get_cellularity() convenience method."""
 
-    def test_returns_cellularity_type(
-        self, service: OrganismClassifier
-    ) -> None:
+    def test_returns_cellularity_type(self, service: OrganismClassifier) -> None:
         assert (
             service.get_cellularity("Homo sapiens", 9606)
             == CellularityType.MULTICELLULAR
         )
 
-    def test_returns_none_for_unresolved(
-        self, service: OrganismClassifier
-    ) -> None:
+    def test_returns_none_for_unresolved(self, service: OrganismClassifier) -> None:
         assert service.get_cellularity("Unknown", None) is None
 
 
@@ -191,17 +187,13 @@ class TestEnrichRecords:
         service.enrich_records(sample_records)
         assert "organism_class" not in sample_records[0]
 
-    def test_unresolved_gets_none_class(
-        self, service: OrganismClassifier
-    ) -> None:
+    def test_unresolved_gets_none_class(self, service: OrganismClassifier) -> None:
         records = [{"assay_organism": "Unknown", "assay_tax_id": None}]
         enriched = service.enrich_records(records)
         assert enriched[0]["organism_class"] is None
         assert enriched[0]["classification_source"] == "unresolved"
 
-    def test_preserves_existing_fields(
-        self, service: OrganismClassifier
-    ) -> None:
+    def test_preserves_existing_fields(self, service: OrganismClassifier) -> None:
         records = [
             {"assay_organism": "Homo sapiens", "assay_tax_id": 9606, "extra": 42}
         ]

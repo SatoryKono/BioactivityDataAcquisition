@@ -186,4 +186,5 @@ class AuthorNormalizer:
         """Parse various author formats to list of name strings."""
         return parse_author_names(authors)
 
+
 __all__ = ["AuthorNormalizer"]

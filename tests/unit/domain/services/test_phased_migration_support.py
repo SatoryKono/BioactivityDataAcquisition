@@ -256,9 +256,7 @@ class TestPhasedMigrationCoordinator:
         result = service._version_compare("1.2.4", "1.2.3")
         assert result == 1
 
-    def test_version_comparison_less(
-        self, service: PhasedMigrationCoordinator
-    ) -> None:
+    def test_version_comparison_less(self, service: PhasedMigrationCoordinator) -> None:
         """Test version comparison for lesser version."""
         result = service._version_compare("1.2.2", "1.2.3")
         assert result == -1

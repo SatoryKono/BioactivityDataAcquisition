@@ -469,9 +469,7 @@ def test_create_data_normalization_service_uses_default_config() -> None:
 def test_create_data_normalization_service_uses_explicit_config() -> None:
     explicit_config = MagicMock()
 
-    with patch(
-        "bioetl.domain.services.DefaultDataNormalizer"
-    ) as mock_service:
+    with patch("bioetl.domain.services.DefaultDataNormalizer") as mock_service:
         expected_service = MagicMock()
         mock_service.return_value = expected_service
 

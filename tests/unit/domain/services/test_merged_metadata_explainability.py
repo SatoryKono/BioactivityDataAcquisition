@@ -341,8 +341,6 @@ class TestMergedMetadataExplainer:
 # Helper function for easier testing
 
 
-def create_merged_metadata_explainability_service() -> (
-    MergedMetadataExplainer
-):
+def create_merged_metadata_explainability_service() -> MergedMetadataExplainer:
     """Factory function for MergedMetadataExplainer."""
     return MergedMetadataExplainer()
