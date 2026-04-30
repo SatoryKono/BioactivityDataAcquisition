@@ -1056,7 +1056,7 @@
             },
             "targets": [
                 {
-                    "expr": "max(max_over_time(bioetl_circuit_breaker_state{adapter=~\"$provider\"}[$__range])) or vector(0)",
+                    "expr": "max(max_over_time(bioetl_circuit_breaker_state{adapter=~\"$adapter\"}[$__range])) or vector(0)",
                     "refId": "A"
                 }
             ],
@@ -1126,7 +1126,7 @@
             },
             "targets": [
                 {
-                    "expr": "sum by (adapter) (increase(bioetl_circuit_breaker_trips_total{adapter=~\"$provider\"}[$__interval])) or label_replace(vector(0), \"adapter\", \"none\", \"\", \"\")",
+                    "expr": "sum by (adapter) (increase(bioetl_circuit_breaker_trips_total{adapter=~\"$adapter\"}[$__interval])) or label_replace(vector(0), \"adapter\", \"none\", \"\", \"\")",
                     "legendFormat": "{{adapter}}",
                     "refId": "A"
                 }
@@ -1159,6 +1159,31 @@
                 "options": [],
                 "query": {
                     "query": "label_values({__name__=~\"bioetl_health_check_(success|degraded|failures)_total\"}, provider)",
+                    "refId": "StandardVariableQuery"
+                },
+                "refresh": 1,
+                "regex": "",
+                "skipUrlSync": false,
+                "sort": 1,
+                "tagValuesQuery": "",
+                "tags": [],
+                "tagsQuery": "",
+                "type": "query",
+                "useTags": false
+            },
+            {
+                "allValue": null,
+                "current": {},
+                "datasource": "Prometheus",
+                "definition": "label_values(bioetl_circuit_breaker_state, adapter)",
+                "hide": 0,
+                "includeAll": true,
+                "label": "Adapter",
+                "multi": true,
+                "name": "adapter",
+                "options": [],
+                "query": {
+                    "query": "label_values(bioetl_circuit_breaker_state, adapter)",
                     "refId": "StandardVariableQuery"
                 },
                 "refresh": 1,

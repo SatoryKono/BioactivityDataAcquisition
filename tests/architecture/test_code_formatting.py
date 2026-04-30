@@ -28,7 +28,10 @@ def _resolve_ruff_cmd() -> list[str] | None:
     tests are run with a different system Python interpreter.
     """
     if os.name == "nt":
-        local_candidates = [_REPO_ROOT / ".venv" / "Scripts" / "ruff.exe"]
+        local_candidates = [
+            _REPO_ROOT / ".venv" / "Scripts" / "ruff.exe",
+            _REPO_ROOT / ".venv-win" / "Scripts" / "ruff.exe",
+        ]
     else:
         local_candidates = [_REPO_ROOT / ".venv" / "bin" / "ruff"]
     for candidate in local_candidates:
