@@ -42,12 +42,12 @@ ______________________________________________________________________
 
 Default precedence for AI behavior and guidance:
 
+1. active runtime source for the current agent or skill in `.codex/**` or
+   `.gemini/**`
 1. `docs/00-project/RULES.md`
 1. `docs/01-requirements/REQUIREMENTS.md`
 1. accepted ADRs
-1. runtime maps in `.codex/**` or `.gemini/**`
-1. runtime profiles and skills in the same runtime tree
-1. docs mirrors and contributor guides
+1. docs mirrors, memory sheets, and contributor guides
 
 The docs mirror MAY summarize or link to runtime behavior, but it MUST NOT
 override the active runtime tree.
@@ -69,12 +69,17 @@ This means:
 - docs-only edits MAY improve wording, indexes, and navigation, but MUST NOT
   silently override runtime truth
 
-## Sync Checklist
+## Mechanical Sync Checklist
 
-1. Edit the canonical runtime surface first.
-1. Sync the affected docs mirror or guide second.
+1. Identify whether the change touches runtime behavior, contributor guidance,
+   memory navigation, or local runtime config strategy.
+1. Edit the canonical runtime surface first when behavior changed.
+1. Sync the affected docs mirror, guide, or index second.
+1. Confirm published examples still point at live runtime entrypoints.
 1. Run runtime/doc drift checks third.
-1. Report any intentional divergence explicitly.
+1. Run surface-specific validation from `POST_CHANGE_VALIDATION.md`.
+1. Report any intentional divergence explicitly, including why it exists and
+   who owns the follow-up.
 
 ## Allowed Divergence
 
@@ -92,6 +97,8 @@ The following divergence is not acceptable:
   source for behavior changes
 - active Codex/Gemini runtime surfaces depend on `.claude/**` as a canonical
   behavior source
+- runtime config docs claim portability while the checked-in config still
+  depends on machine-local absolute paths
 
 ## Edit Rules
 
@@ -117,4 +124,5 @@ The following divergence is not acceptable:
 - [Skills Mirror in docs/](../../skills/README.md)
 - [Memory Usage](../guides/MEMORY_USAGE.md)
 - [Post-Change Validation](POST_CHANGE_VALIDATION.md)
+- [MCP Local Runtime Config Strategy](MCP_LOCAL_RUNTIME_CONFIG.md)
 - [Documentation Publication Policy](../../../governance/06-doc-publication-policy.md)

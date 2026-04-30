@@ -5,14 +5,17 @@ repository.
 
 ## Canonical Precedence
 
-1. `docs/00-project/RULES.md`
-1. `docs/01-requirements/REQUIREMENTS.md`
-1. accepted ADRs in `docs/02-architecture/decisions/`
-1. runtime maps:
+For AI runtime behavior and workflow conflicts, use this priority:
+
+1. active runtime source for the current agent or skill:
    - `.codex/agents/CODEX-RUNTIME.md`
    - `.gemini/agents/GEMINI-RUNTIME.md`
 1. runtime profiles and skills in the matching runtime tree
-1. docs mirrors in `docs/00-project/ai/**` for navigation and guidance only
+1. `docs/00-project/RULES.md`
+1. `docs/01-requirements/REQUIREMENTS.md`
+1. accepted ADRs in `docs/02-architecture/decisions/`
+1. docs mirrors and helper AI docs in `docs/00-project/ai/**` for navigation
+   and guidance only
 
 Docs mirrors MUST NOT redefine runtime behavior on their own.
 
@@ -49,7 +52,8 @@ Minimum expectation:
 - `.codex/**` is the canonical Codex runtime source.
 - `.gemini/**` is the canonical Gemini runtime source.
 - `.claude/**` is not an active runtime source for Codex/Gemini behavior in
-  this change program.
+  this change program and is treated as unavailable until a local checkout
+  proves otherwise.
 - `docs/00-project/ai/memory/mcp-memory.json` and
   `docs/00-project/ai/memory/gemini-memory.json` are machine-readable memory
   artifacts, not human source of truth.
@@ -59,3 +63,4 @@ Minimum expectation:
 - `docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md`
 - `docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
 - `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
+- `docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md`

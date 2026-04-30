@@ -205,6 +205,15 @@ profiles в BioETL.
 - Prompts живут в `docs/00-project/ai/prompts/`.
 - Skills и reference mirrors живут в `docs/00-project/ai/skills/`.
 
+## Operating Reminder
+
+- Use `MEMORY_USAGE.md` for runtime-source-first conflict handling and stale
+  memory protocol.
+- Use `POST_CHANGE_VALIDATION.md` for write-capable validation and final-report
+  expectations.
+- Treat this directory as a navigation/evidence layer, not as the runtime
+  source of truth for agent behavior.
+
 ## Implementation Rollout Note
 
 The memory **implementation subsystem** is being formalized under

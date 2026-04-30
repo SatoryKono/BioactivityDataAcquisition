@@ -252,6 +252,7 @@ def _build_composite_manifest_create_request(
         pipeline_version=contract_version or None,
         git_commit=code_revision.git_commit,
         source_revision_state=code_revision.source_revision_state,
+        dependency_lock_hash=code_revision.dependency_lock_hash,
         config_hash=legacy_config_hash_from_resolved_config_hash(
             resolved_config_hash or None
         ),

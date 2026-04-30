@@ -80,6 +80,7 @@ class RunCodeProvenance:
     pipeline_version: str | None = None
     git_commit: str | None = None
     source_revision_state: str | None = None
+    dependency_lock_hash: str | None = None
     config_hash: str | None = None
     resolved_config_hash: str | None = None
     effective_config_hash: str | None = None
@@ -173,6 +174,7 @@ def _load_code_provenance(raw_code: object) -> RunCodeProvenance:
         pipeline_version=_load_optional_str(payload, "pipeline_version"),
         git_commit=_load_optional_str(payload, "git_commit"),
         source_revision_state=_load_optional_str(payload, "source_revision_state"),
+        dependency_lock_hash=_load_optional_str(payload, "dependency_lock_hash"),
         config_hash=_load_optional_str(payload, "config_hash"),
         resolved_config_hash=_load_optional_str(payload, "resolved_config_hash"),
         effective_config_hash=_load_optional_str(payload, "effective_config_hash"),

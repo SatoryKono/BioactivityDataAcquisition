@@ -16,6 +16,7 @@ from dataclasses import dataclass
 from functools import lru_cache
 from importlib.metadata import PackageNotFoundError
 from importlib.metadata import version as pkg_version
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 from bioetl.domain.normalization import serialize_json_canonical
@@ -27,6 +28,7 @@ __all__ = [
     "CodeRevisionProvenance",
     "compute_config_hash",
     "get_code_revision_provenance",
+    "get_dependency_lock_hash",
     "get_git_commit",
     "get_pipeline_version",
 ]
@@ -38,13 +40,14 @@ class CodeRevisionProvenance:
 
     git_commit: str | None
     source_revision_state: str
+    dependency_lock_hash: str | None = None
 
 
 @lru_cache(maxsize=1)
 def get_git_commit() -> str | None:
     """Get the current git commit hash.
 
-    Returns the short (7-character) git commit hash of HEAD.
+    Returns the full git commit hash of HEAD.
     Returns None if:
     - Not in a git repository
     - Git is not installed
@@ -54,15 +57,15 @@ def get_git_commit() -> str | None:
     doesn't change during execution.
 
     Returns:
-        Short git commit hash (e.g., 'abc1234') or None.
+        Full git commit hash (e.g., a 40-character SHA-1) or None.
 
     Example:
         >>> commit = get_git_commit()
-        >>> commit  # 'abc1234' or None
+        >>> commit  # full HEAD SHA or None
     """
     try:
         result = subprocess.run(  # nosec B603 B607
-            ["git", "rev-parse", "--short", "HEAD"],
+            ["git", "rev-parse", "HEAD"],
             capture_output=True,
             text=True,
             timeout=5,  # Local git subprocess — 5s is generous
@@ -76,13 +79,27 @@ def get_git_commit() -> str | None:
 
 
 @lru_cache(maxsize=1)
+def get_dependency_lock_hash() -> str | None:
+    """Return the content hash for the active dependency lockfile, if present."""
+    for directory in (Path.cwd(), *Path.cwd().parents):
+        for lockfile_name in ("uv.lock", "poetry.lock"):
+            lockfile = directory / lockfile_name
+            if lockfile.is_file():
+                digest = hashlib.sha256(lockfile.read_bytes()).hexdigest()
+                return f"sha256:{digest}"
+    return None
+
+
+@lru_cache(maxsize=1)
 def get_code_revision_provenance() -> CodeRevisionProvenance:
     """Return git commit plus coarse source revision state for manifests."""
     commit = get_git_commit()
+    dependency_lock_hash = get_dependency_lock_hash()
     if commit is None:
         return CodeRevisionProvenance(
             git_commit=None,
             source_revision_state="git_unavailable",
+            dependency_lock_hash=dependency_lock_hash,
         )
     try:
         result = subprocess.run(  # nosec B603 B607
@@ -96,6 +113,7 @@ def get_code_revision_provenance() -> CodeRevisionProvenance:
         return CodeRevisionProvenance(
             git_commit=commit,
             source_revision_state="dirty_state_unknown",
+            dependency_lock_hash=dependency_lock_hash,
         )
     if result.returncode == 0:
         state = "clean"
@@ -103,7 +121,11 @@ def get_code_revision_provenance() -> CodeRevisionProvenance:
         state = "dirty"
     else:
         state = "dirty_state_unknown"
-    return CodeRevisionProvenance(git_commit=commit, source_revision_state=state)
+    return CodeRevisionProvenance(
+        git_commit=commit,
+        source_revision_state=state,
+        dependency_lock_hash=dependency_lock_hash,
+    )
 
 
 def _normalize_for_hash(obj: object) -> object:

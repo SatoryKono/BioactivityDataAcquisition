@@ -66,6 +66,10 @@ class RunManifestHydrationMixin:
                 payload,
                 "source_revision_state",
             ),
+            dependency_lock_hash=_optional_payload_string(
+                payload,
+                "dependency_lock_hash",
+            ),
             config_hash=_optional_payload_string(payload, "config_hash"),
             resolved_config_hash=_optional_payload_string(
                 payload,
@@ -273,6 +277,7 @@ class RunManifestPayloadMixin:
                 "pipeline_version": code_provenance.pipeline_version,
                 "git_commit": code_provenance.git_commit,
                 "source_revision_state": code_provenance.source_revision_state,
+                "dependency_lock_hash": code_provenance.dependency_lock_hash,
                 "config_hash": code_provenance.config_hash,
                 "resolved_config_hash": code_provenance.resolved_config_hash,
                 "effective_config_hash": code_provenance.effective_config_hash,

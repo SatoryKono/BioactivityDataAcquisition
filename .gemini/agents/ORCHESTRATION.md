@@ -1,21 +1,24 @@
-# ORCHESTRATION.md — Оркестрация команды subagent-ов BioETL
+# ORCHESTRATION.md — Оркестрация команды sub-agent tool-ов BioETL
 
-*Версия: 4.2 | Дата: 2026-03-26 | Supersedes v4.1 | Платформа: Codex CLI*
+*Версия: 4.3 | Дата: 2026-04-30 | Supersedes v4.2 | Платформа: Gemini CLI*
 
 ## 1. Обзор
 
-Команда из **9 активных субагентов** (7 core + 2 orchestrator/swarm) обеспечивает полный жизненный цикл задачи разработки BioETL. Основной агент (Codex) выступает оркестратором, делегируя работу субагентам через native agent roles (`default` / `explorer` / `worker`) с привязкой к логическим профилям `py-*`. Production-код пишется напрямую оркестратором (без отдельного `py-code-bot`).
+Команда из **9 активных субагентных поверхностей** (7 core + 2 orchestrator/swarm)
+обеспечивает полный жизненный цикл задачи разработки BioETL. Основной агент
+(Gemini CLI) выступает оркестратором, делегируя работу через Gemini sub-agent
+tools с привязкой к логическим профилям `py-*`. Production-код пишется
+напрямую оркестратором (без отдельного `py-code-bot`).
 
-**Запуск логического профиля в Codex runtime:**
+**Запуск логического профиля в Gemini runtime:**
 
 ```
-spawn_agent(
-  agent_type="default",
-  message="Follow .codex/agents/py-audit-bot.md for task_id=AUD-001, phase=baseline, scope=src/bioetl/application/."
+py-audit-bot(
+  query="Follow .gemini/agents/py-audit-bot.md for task_id=AUD-001, phase=baseline, scope=src/bioetl/application/."
 )
 ```
 
-> Runtime mapping: см. `.codex/agents/CODEX-RUNTIME.md`.
+> Runtime mapping: см. `.gemini/agents/GEMINI-RUNTIME.md`.
 
 |  #   | Субагент (`subagent_type`)   | Model  | Роль                                                                                   | Артефакт                                               |
 | :--: | ---------------------------- | ------ | -------------------------------------------------------------------------------------- | ------------------------------------------------------ |
@@ -46,7 +49,7 @@ spawn_agent(
 
 ### Определения субагентов
 
-Файлы: `.codex/agents/py-*.md` — каждый содержит YAML-frontmatter (`name`, `description`, `model`) + полную спецификацию с инлайнированными знаниями.
+Файлы: `.gemini/agents/py-*.md` — каждый содержит YAML-frontmatter (`name`, `description`, `model`) + полную спецификацию с инлайнированными знаниями.
 
 ## 1.1 Evidence Calibration
 
@@ -80,7 +83,7 @@ Operational defaults:
 1. `python -m memory.tooling.workflow post-task --task-id <id> --title "<task>" --summary "<result>"`
 1. promotion только для durable knowledge
 
-Это не заменяет runtime source или `.codex/agents/*.md`, а стандартизирует:
+Это не заменяет runtime source или `.gemini/agents/*.md`, а стандартизирует:
 
 - pre-task retrieval
 - session-note creation
@@ -392,7 +395,7 @@ ______________________________________________________________________
 
 | Документ                                               | Описание                                 |
 | ------------------------------------------------------ | ---------------------------------------- |
-| `.codex/agents/py-*.md`                                | Спецификации субагентов для Codex CLI    |
+| `.gemini/agents/py-*.md`                               | Спецификации субагентов для Gemini CLI   |
 | `docs/00-project/ai/rules/bioetl-ai-rules.md`          | Правила автоматической самопроверки кода |
 | `docs/00-project/RULES.md`                             | Архитектурные правила проекта            |
 | `docs/02-architecture/decisions/`                      | ADR-001..ADR-043                         |
@@ -404,7 +407,9 @@ ______________________________________________________________________
 
 ## 9a. Инлайнированные знания
 
-В Codex CLI ключевые знания для BioETL-профилей инлайнированы непосредственно в файлы субагентов (`.codex/agents/py-*.md`) и подключаются через skill wrappers в `.codex/skills/`.
+В Gemini CLI ключевые знания для BioETL-профилей инлайнированы непосредственно
+в файлы субагентов (`.gemini/agents/py-*.md`) и подключаются через skill
+wrappers в `.gemini/skills/`.
 
 ### 9a.1 Маппинг знаний на субагенты
 
@@ -435,7 +440,9 @@ ______________________________________________________________________
 
 ### 10.1 Матрица MCP-серверы × Субагенты
 
-Каждый субагент имеет доступ к MCP-серверам через runtime tooling. Полные описания сценариев — в соответствующих `.codex/agents/py-*.md`, секция `## MCP Tools`.
+Каждый субагент имеет доступ к MCP-серверам через runtime tooling. Полные
+описания сценариев — в соответствующих `.gemini/agents/py-*.md`, секция
+`## MCP Tools`.
 
 > **Примечание:** Перед использованием MCP инструментов необходимо вызвать `ToolSearch("<provider>")` для загрузки.
 
@@ -456,7 +463,7 @@ ______________________________________________________________________
 
 ### 10.3 Протокол использования MCP
 
-**В Claude Code CLI:**
+**В Gemini CLI:**
 
 1. Субагент определяет, нужны ли MCP-вызовы для текущей задачи (по таблице §10.1)
 1. Вызывает `ToolSearch("<provider>")` для загрузки MCP инструментов
@@ -495,10 +502,10 @@ ______________________________________________________________________
 
 ### v4.1 (2026-03-10)
 
-- **PLATFORM**: основной runtime зафиксирован как Codex CLI
-- **ADDED**: `.codex/agents/CODEX-RUNTIME.md` для маппинга logical profiles → native agent roles
-- **CHANGED**: source-of-truth ссылки переключены на `.codex/agents/`
-- **CHANGED**: примеры запуска адаптированы под `spawn_agent(...)`
+- **PLATFORM**: основной runtime зафиксирован как Gemini CLI
+- **ADDED**: `.gemini/agents/GEMINI-RUNTIME.md` для маппинга logical profiles → Gemini sub-agent tools
+- **CHANGED**: source-of-truth ссылки переключены на `.gemini/agents/`
+- **CHANGED**: примеры запуска адаптированы под вызовы Gemini sub-agent tools
 
 ### v4.0 (2026-03-04)
 
@@ -514,7 +521,7 @@ ______________________________________________________________________
 
 ### v3.0 (2026-02-08)
 
-- **PLATFORM**: Адаптация для Claude Code CLI (ранее Codex/Claude.ai)
+- **PLATFORM**: Историческая адаптация для другого runtime слоя до Gemini CLI
 - **CHANGED**: Все субагенты переименованы: `pyXxxBot` → `py-xxx-bot` (для `subagent_type` в Task tool)
 - **CHANGED**: 8 старых Claude Code агентов заменены на 7 унифицированных: `py-audit-bot`, `py-plan-bot`, `py-test-bot`, `py-code-bot`, `py-config-bot`, `py-debug-bot`, `py-doc-bot`
 - **CHANGED**: Навыки из `/mnt/skills/` инлайнированы в файлы субагентов (секция `## Инлайнированные знания`)
@@ -522,7 +529,7 @@ ______________________________________________________________________
 - **CHANGED**: `web_search` / `web_fetch` → `WebSearch` / `WebFetch` (встроенные инструменты Claude Code)
 - **CHANGED**: MCP инструменты доступны через `ToolSearch` (deferred loading)
 - **CHANGED**: §9a — Skill Activation Protocol → Инлайнированные знания
-- **NEW**: Ссылки на `.claude/agents/py-*.md` вместо `SUBAGENT.md`
+- **NEW**: Исторические ссылки на `.claude/agents/py-*.md` вместо `SUBAGENT.md`
 
 ### v2.2 (2026-02-07)
 
