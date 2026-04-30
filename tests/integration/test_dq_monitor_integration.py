@@ -124,7 +124,7 @@ class TestDQMonitorSeverityLevels:
 
     def test_low_severity_for_small_deviation(self, mock_logger: MagicMock) -> None:
         """Small deviations should get LOW severity."""
-        monitor = DataQualityMonitorService(logger=mock_logger, z_score_threshold=2.0)
+        monitor = DataQualityMonitor(logger=mock_logger, z_score_threshold=2.0)
 
         # Build baseline with consistent values
         # mean=100, stddev≈1.58
@@ -144,7 +144,7 @@ class TestDQMonitorSeverityLevels:
         self, mock_logger: MagicMock
     ) -> None:
         """Extreme deviations should get CRITICAL severity."""
-        monitor = DataQualityMonitorService(logger=mock_logger, z_score_threshold=2.0)
+        monitor = DataQualityMonitor(logger=mock_logger, z_score_threshold=2.0)
 
         # Build baseline with consistent values
         for value in [100.0, 102.0, 98.0, 101.0, 99.0]:
@@ -167,7 +167,7 @@ class TestDQMonitorBaselineManagement:
         self, mock_logger: MagicMock
     ) -> None:
         """Baseline should not be updated when critical anomaly detected."""
-        monitor = DataQualityMonitorService(logger=mock_logger, z_score_threshold=2.0)
+        monitor = DataQualityMonitor(logger=mock_logger, z_score_threshold=2.0)
         monitor.detector.set_threshold("error_rate", min_value=0.0, max_value=0.10)
 
         # Add initial baseline
@@ -191,7 +191,7 @@ class TestDQMonitorBaselineManagement:
 
     def test_baseline_window_limits_samples(self, mock_logger: MagicMock) -> None:
         """Baseline should respect window size limit."""
-        monitor = DataQualityMonitorService(logger=mock_logger, baseline_window=5)
+        monitor = DataQualityMonitor(logger=mock_logger, baseline_window=5)
 
         # Add more samples than window size
         for i in range(10):

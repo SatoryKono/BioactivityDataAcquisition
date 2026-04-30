@@ -36,14 +36,6 @@ suffix_boundary_rules:
       - src/bioetl/composition/
       - src/bioetl/infrastructure/
     allowed_symbol_exceptions:
-      - symbol: FsAdrService
-        path: src/bioetl/infrastructure/adr/fs_adr_service.py
-        issue: "#3399"
-        reason: Existing infrastructure naming drift pending canonical rename.
-      - symbol: ErrorService
-        path: src/bioetl/infrastructure/adapters/error_handling.py
-        issue: "#3399"
-        reason: Existing infrastructure naming drift pending canonical rename.
 
   - rule_id: domain_service_suffix_conflict
     description: >
