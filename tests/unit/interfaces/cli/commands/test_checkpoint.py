@@ -212,14 +212,14 @@ def _patch_workflow_service(monkeypatch: Any, service: object) -> None:
 
 
 @pytest.mark.unit
-def test_get_checkpoint_runtime_service_delegates_to_resources_api() -> None:
-    """Checkpoint command module should lazily delegate manager resolution."""
+def test_get_checkpoint_runtime_service_delegates_to_control_plane_api() -> None:
+    """Checkpoint command module should lazily delegate runtime resolution."""
     import bioetl.interfaces.cli.commands.checkpoint as checkpoint_module
 
     manager = MagicMock()
 
     with patch(
-        "bioetl.composition.resources_api.get_checkpoint_runtime_service",
+        "bioetl.composition.control_plane_api.get_checkpoint_runtime_service",
         return_value=manager,
     ) as mock_get_checkpoint_runtime_service:
         result = checkpoint_module.get_checkpoint_runtime_service("chembl_activity")
