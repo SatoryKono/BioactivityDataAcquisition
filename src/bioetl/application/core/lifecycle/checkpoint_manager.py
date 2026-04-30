@@ -1,4 +1,4 @@
-"""Checkpoint Manager for ETL Pipelines."""
+"""Runtime checkpoint service for ETL pipelines."""
 
 from __future__ import annotations
 
@@ -27,7 +27,7 @@ from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
 _OPERATION_ERRORS = _RF005_OPERATION_ERRORS
 
 
-class CheckpointManagerService:
+class CheckpointRuntimeService:
     """Framework-agnostic checkpoint persistence and resume management."""
 
     def __init__(
@@ -255,6 +255,11 @@ class CheckpointManagerService:
         return await self._checkpoint.list_all()
 
 
-CheckpointManager = CheckpointManagerService
+CheckpointManagerService = CheckpointRuntimeService
+CheckpointManager = CheckpointRuntimeService
 
-__all__ = ["CheckpointManager", "CheckpointManagerService"]
+__all__ = [
+    "CheckpointManager",
+    "CheckpointManagerService",
+    "CheckpointRuntimeService",
+]

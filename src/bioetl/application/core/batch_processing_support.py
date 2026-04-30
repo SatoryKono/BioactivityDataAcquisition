@@ -26,7 +26,7 @@ from bioetl.application.core.batch_runtime_failure_policy import (
     PIPELINE_EXECUTION_ERRORS as _RF005_SHARED_FAILURE_POLICY,
 )
 from bioetl.application.core.batch_transformer import TransformResult
-from bioetl.application.core.quarantine_manager import QuarantineManagerService
+from bioetl.application.core.quarantine_manager import QuarantineRuntimeService
 from bioetl.domain.aggregates.events import DomainEvent
 from bioetl.domain.models.metadata import SourceMetadata
 from bioetl.domain.types import BatchID, BronzeRecord, RunID
@@ -64,7 +64,7 @@ class BatchProcessingSupportService:
         transformer: BatchTransformer,
         writer: BatchWriter,
         tracing: BatchTracingManagerService,
-        quarantine_manager: QuarantineManagerService,
+        quarantine_manager: QuarantineRuntimeService,
         run_id: RunID | None = None,
         domain_event_emitter: DomainEventEmitterProtocol | None = None,
     ) -> None:

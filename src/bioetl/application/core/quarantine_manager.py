@@ -1,4 +1,4 @@
-"""Quarantine Manager for ETL Pipelines.
+"""Runtime quarantine service for ETL pipelines.
 
 Refactored per ADR-005 to accept explicit dependencies instead of full pipeline.
 """
@@ -43,11 +43,11 @@ class FilteredQuarantineEntry(NamedTuple):
     details: JsonDict | None = None
 
 
-class QuarantineManagerService(QuarantineManagerSupportMixin):
-    """Manages quarantining of records that fail processing.
+class QuarantineRuntimeService(QuarantineManagerSupportMixin):
+    """Write records that fail processing to quarantine storage.
 
-    This manager handles writing failed records to quarantine storage
-    for later analysis and potential reprocessing.
+    Admin/operator inspection and purge workflows live in
+    ``application.services.quarantine_service.QuarantineService``.
     """
 
     def __init__(
@@ -58,7 +58,7 @@ class QuarantineManagerService(QuarantineManagerSupportMixin):
         pipeline_metrics: PipelineMetricsRecorder | None = None,
         domain_event_emitter: DomainEventEmitterProtocol | None = None,
     ) -> None:
-        """Initialize QuarantineManagerService with explicit dependencies.
+        """Initialize QuarantineRuntimeService with explicit dependencies.
 
         Args:
             quarantine_port: Port for writing to quarantine storage.
@@ -185,7 +185,9 @@ __all__ = [
     "FilteredQuarantineEntry",
     "QuarantineManager",
     "QuarantineManagerService",
+    "QuarantineRuntimeService",
 ]
 
 # Backward-compatible public alias for historical call sites and tests.
-QuarantineManager = QuarantineManagerService
+QuarantineManagerService = QuarantineRuntimeService
+QuarantineManager = QuarantineRuntimeService

@@ -81,8 +81,8 @@ ______________________________________________________________________
 - **`LockCoordinator`** (`lifecycle/lock_manager.py`) — Координация блокировок
 - **`PreflightService`** (`preflight/service.py`) — Pre-run health checks
 - **`PostrunService`** (`postrun/service.py`) — Post-run операции (DQ, VACUUM, cleanup)
-- **`CheckpointManagerService`** (`lifecycle/checkpoint_manager.py`) — Checkpoint I/O
-- **`QuarantineManager`** (`quarantine_manager.py`) — Quarantine record handling
+- **`CheckpointRuntimeService`** (`lifecycle/checkpoint_manager.py`) — runtime checkpoint I/O и resume policy
+- **`QuarantineRuntimeService`** (`quarantine_manager.py`) — runtime quarantine write-path handling
 - **`CleanupService`** (`lifecycle/cleanup_service.py`) — Bronze cleanup
 
 **Observability:**
@@ -96,10 +96,12 @@ ______________________________________________________________________
 - **`application/observability/`** — application-level observability facade (`PipelineObserver`, lifecycle events, tracing helpers). Этот пакет описывает, какие execution events испускает application-слой, а concrete metrics/logging adapters остаются в infrastructure.
 - **`application/services/dq/`** — DQ-oriented application services и orchestration seams, используемые postrun/preflight и quality workflows.
 
-Канонические имена для новых imports и документации используют суффикс `Service`.
-Короткие имена `CheckpointManager` и `BatchMetricsRecorder` сохраняются только как
-compatibility aliases в defining modules и не считаются предпочтительным API для
-нового кода.
+Checkpoint/quarantine naming is role-driven: runtime collaborators use
+`*RuntimeService`, while operator/admin inspection surfaces use
+`CheckpointService` and `QuarantineService` under `application/services/`.
+Manager-style names such as `CheckpointManager`, `CheckpointManagerService`,
+`QuarantineManager`, and `QuarantineManagerService` remain only as compatibility
+aliases in defining modules and are not preferred for new code.
 
 **Data Sources:**
 

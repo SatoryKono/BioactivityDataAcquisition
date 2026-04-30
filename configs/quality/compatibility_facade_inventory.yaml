@@ -97,7 +97,7 @@ transition_debt:
   introduced_in: legacy-pre-2026-04
   review_date: '2026-09-30'
   external_breaking_change_required: true
-  internal_callers_zero: true
+  internal_callers_zero: false
   allowed_call_sites: >-
     `src`: no direct imports of `DataSourceCreatorPort`; `tests`: dedicated
     compatibility coverage may verify the registry-facade alias while ordinary
@@ -160,7 +160,7 @@ transition_debt:
   introduced_in: legacy-pre-2026-04
   review_date: '2026-09-30'
   external_breaking_change_required: true
-  internal_callers_zero: true
+  internal_callers_zero: false
   allowed_call_sites: >-
     `src`: no direct imports of `DataSourceCreatorPort`; `tests`: dedicated
     compatibility coverage may verify the alias while ordinary code imports

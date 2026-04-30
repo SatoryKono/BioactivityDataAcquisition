@@ -21,7 +21,7 @@ from bioetl.interfaces.cli.formatters import echo_checkpoint, echo_info
 
 if TYPE_CHECKING:
     from bioetl.application.core.lifecycle.checkpoint_manager import (
-        CheckpointManagerService,
+        CheckpointRuntimeService,
     )
     from bioetl.application.services.observability_workflow_service import (
         ObservabilityWorkflowService,
@@ -43,11 +43,11 @@ def checkpoint() -> None:
     """Manage checkpoints."""
 
 
-def get_checkpoint_manager(pipeline: str) -> CheckpointManagerService:
+def get_checkpoint_manager(pipeline: str) -> CheckpointRuntimeService:
     """Load the checkpoint manager through composition on demand."""
     from bioetl.composition.control_plane_api import get_checkpoint_manager as _impl
 
-    impl = cast("Callable[[str], CheckpointManagerService]", _impl)
+    impl = cast("Callable[[str], CheckpointRuntimeService]", _impl)
     return impl(pipeline)
 
 

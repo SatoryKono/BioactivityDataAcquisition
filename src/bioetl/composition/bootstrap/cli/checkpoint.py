@@ -43,9 +43,9 @@ from bioetl.infrastructure.config import get_settings
 
 if TYPE_CHECKING:
     from bioetl.application.core.lifecycle.checkpoint_manager import (
-        CheckpointManagerService,
+        CheckpointRuntimeService,
     )
-    from bioetl.application.services.admin_runtime_api import QuarantineManagerService
+    from bioetl.application.services.admin_runtime_api import QuarantineRuntimeService
     from bioetl.application.services.audit_inspection_service import (
         AuditInspectionService,
     )
@@ -69,17 +69,17 @@ CLI_INSPECTION_RUN_ID = RunID(UUID("00000000-0000-0000-0000-000000003353"))
 """Deterministic sentinel run id for operator-only checkpoint inspection."""
 
 
-def bootstrap_quarantine_manager(pipeline_name: str) -> QuarantineManagerService:
-    """Bootstrap QuarantineManagerService for CLI inspection operations.
+def bootstrap_quarantine_manager(pipeline_name: str) -> QuarantineRuntimeService:
+    """Bootstrap QuarantineRuntimeService for CLI inspection operations.
 
-    Creates a QuarantineManagerService for quarantine inspection and reporting.
+    Creates a QuarantineRuntimeService for quarantine inspection and reporting.
     Used by CLI for `quarantine inspect` and similar commands.
 
     Args:
         pipeline_name: Name of the pipeline to inspect.
 
     Returns:
-        QuarantineManagerService configured for the specified pipeline.
+        QuarantineRuntimeService configured for the specified pipeline.
     """
     return build_cli_quarantine_manager(
         quarantine_port_factory=bootstrap_quarantine_port,
@@ -87,10 +87,10 @@ def bootstrap_quarantine_manager(pipeline_name: str) -> QuarantineManagerService
     )
 
 
-def bootstrap_checkpoint_manager(pipeline_name: str) -> CheckpointManagerService:
-    """Bootstrap CheckpointManagerService for CLI inspection operations.
+def bootstrap_checkpoint_manager(pipeline_name: str) -> CheckpointRuntimeService:
+    """Bootstrap CheckpointRuntimeService for CLI inspection operations.
 
-    Creates a minimal CheckpointManagerService for checkpoint listing and inspection.
+    Creates a minimal CheckpointRuntimeService for checkpoint listing and inspection.
     Uses NoOpLogger and a deterministic sentinel run_id since CLI operations don't need full
     pipeline execution context.
 
@@ -99,7 +99,7 @@ def bootstrap_checkpoint_manager(pipeline_name: str) -> CheckpointManagerService
             for operations like list_all).
 
     Returns:
-        CheckpointManagerService configured for CLI inspection.
+        CheckpointRuntimeService configured for CLI inspection.
     """
     return build_cli_checkpoint_manager(
         checkpoint_port_factory=bootstrap_checkpoint_port,

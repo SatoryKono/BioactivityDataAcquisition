@@ -81,30 +81,31 @@ suffix_boundary_rules:
 family_freeze_rules:
   - rule_id: runtime_admin_checkpoint_quarantine_family
     description: >
-      Checkpoint/quarantine runtime-admin naming remains frozen to the reviewed
-      four-surface set while the runtime/admin split is canonicalized.
+      Checkpoint/quarantine runtime-admin naming is role-driven: runtime write
+      collaborators use *RuntimeService, operator/admin services use *Service,
+      and manager-style names are compatibility aliases only.
     include_path_prefixes:
       - src/bioetl/application/core/
       - src/bioetl/application/services/
       - src/bioetl/composition/
-    match_regex: ^(Checkpoint(?:Manager)?Service|Quarantine(?:Manager)?Service)$
+    match_regex: ^(Checkpoint(?:Runtime|Manager)?Service|Quarantine(?:Runtime|Manager)?Service)$
     allowed_symbols:
-      - symbol: CheckpointManagerService
+      - symbol: CheckpointRuntimeService
         path: src/bioetl/application/core/lifecycle/checkpoint_manager.py
         issue: "#3398"
-        reason: Runtime checkpoint manager retained pending family consolidation.
-      - symbol: QuarantineManagerService
+        reason: Canonical runtime checkpoint collaborator.
+      - symbol: QuarantineRuntimeService
         path: src/bioetl/application/core/quarantine_manager.py
         issue: "#3398"
-        reason: Runtime quarantine manager retained pending family consolidation.
+        reason: Canonical runtime quarantine write-path collaborator.
       - symbol: CheckpointService
         path: src/bioetl/application/services/checkpoint_service.py
         issue: "#3398"
-        reason: Admin checkpoint service retained pending family consolidation.
+        reason: Canonical operator/admin checkpoint service.
       - symbol: QuarantineService
         path: src/bioetl/application/services/quarantine_service.py
         issue: "#3398"
-        reason: Admin quarantine service retained pending family consolidation.
+        reason: Canonical operator/admin quarantine service.
 
   - rule_id: column_ordering_family
     description: >

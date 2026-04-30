@@ -24,7 +24,7 @@ from bioetl.application.core._batch_transformer_support import (
     build_default_normalization_processor,
 )
 from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
-from bioetl.application.core.quarantine_manager import QuarantineManagerService
+from bioetl.application.core.quarantine_manager import QuarantineRuntimeService
 from bioetl.application.core.record_normalization_processor import (
     RecordNormalizationProcessor,
 )
@@ -75,7 +75,7 @@ class BatchTransformer:
         context: PipelineContext,
         config: RecordProcessorConfig,
         error_classifier: ErrorClassifier,
-        quarantine_manager: QuarantineManagerService,
+        quarantine_manager: QuarantineRuntimeService,
         batch_metrics: BatchMetricsRecorderService,
         transform_callback: TransformCallback,
         gold_filter_callback: GoldFilterCallback,

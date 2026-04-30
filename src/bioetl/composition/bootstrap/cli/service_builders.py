@@ -6,10 +6,10 @@ from collections.abc import Callable
 from typing import TYPE_CHECKING, cast
 
 from bioetl.application.core.lifecycle.checkpoint_manager import (
-    CheckpointManagerService,
+    CheckpointRuntimeService,
 )
 from bioetl.application.services import ConfigService
-from bioetl.application.services.admin_runtime_api import QuarantineManagerService
+from bioetl.application.services.admin_runtime_api import QuarantineRuntimeService
 from bioetl.application.services.audit_inspection_service import AuditInspectionService
 from bioetl.application.services.checkpoint_service import CheckpointService
 from bioetl.application.services.config_dq_service import ConfigDQService
@@ -98,9 +98,9 @@ def build_cli_quarantine_manager(
     *,
     pipeline_name: str,
     quarantine_port_factory: Callable[[], QuarantinePort],
-) -> QuarantineManagerService:
+) -> QuarantineRuntimeService:
     """Build the CLI quarantine manager graph."""
-    return QuarantineManagerService(
+    return QuarantineRuntimeService(
         quarantine_port=quarantine_port_factory(),
         pipeline_name=pipeline_name,
     )
@@ -115,10 +115,10 @@ def build_cli_checkpoint_manager(
     compatibility_service_factory: Callable[
         [LoggerPort], CheckpointCompatibilityService
     ],
-) -> CheckpointManagerService:
+) -> CheckpointRuntimeService:
     """Build the CLI checkpoint manager graph."""
     logger = logger_factory()
-    return CheckpointManagerService(
+    return CheckpointRuntimeService(
         checkpoint_port=checkpoint_port_factory(pipeline_name),
         logger=logger,
         pipeline_name=pipeline_name,

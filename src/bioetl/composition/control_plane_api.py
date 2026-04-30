@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from bioetl.application.core.lifecycle.checkpoint_manager import (
-        CheckpointManagerService,
+        CheckpointRuntimeService,
     )
     from bioetl.application.services.audit_inspection_service import (
         AuditInspectionService,
@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 
     def get_adr_service() -> AuditInspectionService: ...
 
-    def get_checkpoint_manager(pipeline: str) -> CheckpointManagerService: ...
+    def get_checkpoint_manager(pipeline: str) -> CheckpointRuntimeService: ...
 
     def get_config_service() -> ConfigService: ...
 

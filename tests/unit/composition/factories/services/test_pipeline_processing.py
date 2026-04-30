@@ -33,7 +33,7 @@ class TestBuildComponentsAndProcessingService:
         "bioetl.composition.factories.services.pipeline_processing.BatchProcessingSupportService"
     )
     @patch(
-        "bioetl.composition.factories.services.pipeline_processing.QuarantineManagerService"
+        "bioetl.composition.factories.services.pipeline_processing.QuarantineRuntimeService"
     )
     def test_delegates_component_build_and_wraps_processing_service(
         self,
