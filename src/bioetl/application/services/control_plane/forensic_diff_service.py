@@ -72,6 +72,18 @@ def _trace_missing_requirements(diagnostics: dict[str, object]) -> tuple[str, ..
     return tuple(str(item) for item in missing)
 
 
+def _string_list_or_empty(value: object) -> list[str]:
+    """Return a stringified list view for loosely typed diagnostics payloads."""
+    if not isinstance(value, list):
+        return []
+    return [str(item) for item in value]
+
+
+def _string_list(value: tuple[str, ...]) -> list[str]:
+    """Return a concrete list for tuple-backed string fields."""
+    return list(value)
+
+
 def _trace_complete(diagnostics: dict[str, object]) -> bool:
     trace = _dict_or_empty(diagnostics.get("produced_artifact_trace"))
     return bool(trace.get("complete", False))
@@ -154,13 +166,35 @@ def _checkpoint_compatibility_payload(
     return {
         "available": bool(anchors),
         "compatible": anchors.get("compatible") if anchors else None,
-        "matching_fields": list(anchors.get("matching_fields", []))
-        if isinstance(anchors.get("matching_fields"), list)
-        else [],
-        "mismatched_fields": list(anchors.get("mismatched_fields", []))
-        if isinstance(anchors.get("mismatched_fields"), list)
-        else [],
+        "matching_fields": _string_list_or_empty(anchors.get("matching_fields")),
+        "mismatched_fields": _string_list_or_empty(anchors.get("mismatched_fields")),
     }
+
+
+def _resolve_forensic_verdict(
+    *,
+    manifest_diff: RunManifestDiffResult,
+    forensic_diff: dict[str, object],
+) -> str:
+    if manifest_diff.classification == "semantic_drift":
+        return "semantic_drift"
+    anchors = _dict_or_empty(forensic_diff.get("checkpoint_anchors"))
+    if anchors.get("compatible") is False:
+        return "checkpoint_incompatible"
+    if manifest_diff.occurrence_only:
+        return "occurrence_only_replay"
+    return "semantic_equivalent_replay"
+
+
+def _forensic_diff_payload(manifest_diff: RunManifestDiffResult) -> dict[str, object]:
+    payload = _dict_or_empty(manifest_diff.cross_surface_replay_diff)
+    verdict = payload.get("verdict")
+    if not isinstance(verdict, str):
+        payload["verdict"] = _resolve_forensic_verdict(
+            manifest_diff=manifest_diff,
+            forensic_diff=payload,
+        )
+    return payload
 
 
 def _diagnostic_snapshot(result: RunManifestInspectionResult) -> dict[str, object]:
@@ -220,21 +254,24 @@ class ForensicRunDiffResult:
 
     def to_dict(self) -> dict[str, object]:
         """Return JSON/YAML-safe payload for CLI/API presentation."""
+        semantic_difference_fields = _string_list(
+            self.manifest_diff.semantic_difference_fields
+        )
+        occurrence_difference_fields = _string_list(
+            self.manifest_diff.occurrence_difference_fields
+        )
+        noncanonical_difference_fields = _string_list(
+            self.manifest_diff.noncanonical_difference_fields
+        )
         return {
             "left_manifest_id": self.left_manifest_id,
             "right_manifest_id": self.right_manifest_id,
             "classification": self.manifest_diff.classification,
             "semantic_equivalent": self.manifest_diff.semantic_equivalent,
             "occurrence_only": self.manifest_diff.occurrence_only,
-            "semantic_difference_fields": list(
-                self.manifest_diff.semantic_difference_fields
-            ),
-            "occurrence_difference_fields": list(
-                self.manifest_diff.occurrence_difference_fields
-            ),
-            "noncanonical_difference_fields": list(
-                self.manifest_diff.noncanonical_difference_fields
-            ),
+            "semantic_difference_fields": semantic_difference_fields,
+            "occurrence_difference_fields": occurrence_difference_fields,
+            "noncanonical_difference_fields": noncanonical_difference_fields,
             "replay_relationship": self.manifest_diff.replay_relationship,
             "forensic_diff": self.forensic_diff,
             "left_diagnostics": self.left_diagnostics,
@@ -272,16 +309,17 @@ class ForensicRunDiffService:
         left = inspection.show(left_identifier)
         right = inspection.show(right_identifier)
         manifest_diff = inspection.diff(left_identifier, right_identifier)
+        forensic_diff = _forensic_diff_payload(manifest_diff)
         return ForensicRunDiffResult(
             left_manifest_id=left.manifest.manifest_id,
             right_manifest_id=right.manifest.manifest_id,
             manifest_diff=manifest_diff,
-            forensic_diff=manifest_diff.cross_surface_replay_diff,
+            forensic_diff=forensic_diff,
             left_diagnostics=_diagnostic_snapshot(left),
             right_diagnostics=_diagnostic_snapshot(right),
             replay_capability=_replay_capability_payload(left=left, right=right),
             checkpoint_compatibility=_checkpoint_compatibility_payload(
-                manifest_diff.cross_surface_replay_diff,
+                forensic_diff,
             ),
             artifact_completeness={
                 "left": _artifact_completeness(left),

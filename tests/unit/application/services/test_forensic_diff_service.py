@@ -178,9 +178,9 @@ def test_forensic_diff_reports_missing_sidecars_and_incomplete_trace() -> None:
     payload = service.compare("manifest-left", "manifest-left").to_dict()
 
     assert payload["artifact_completeness"]["left"]["complete"] is False
-    assert payload["artifact_completeness"]["left"][
-        "metadata_sidecar_missing_count"
-    ] == 1
+    assert (
+        payload["artifact_completeness"]["left"]["metadata_sidecar_missing_count"] == 1
+    )
     assert payload["missing_evidence"]["left"] == ["metadata_sidecars_missing"]
 
 
@@ -208,6 +208,7 @@ def test_forensic_diff_reports_checkpoint_mismatch() -> None:
 
     assert payload["checkpoint_compatibility"]["available"] is True
     assert payload["checkpoint_compatibility"]["compatible"] is False
-    assert "execution_fingerprint" in payload["checkpoint_compatibility"][
-        "mismatched_fields"
-    ]
+    assert (
+        "execution_fingerprint"
+        in payload["checkpoint_compatibility"]["mismatched_fields"]
+    )

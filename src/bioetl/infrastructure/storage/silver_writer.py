@@ -330,6 +330,10 @@ class SilverWriter(
         request: _DeltaWriteRequest,
     ) -> None:
         """Dispatch Delta write through runtime services or legacy mixin fallback."""
+        legacy_dispatch = getattr(self, "_dispatch_write", None)
+        if callable(legacy_dispatch):
+            await legacy_dispatch(request)
+            return
         if self._delta is not None:
             await self._delta._dispatch_write_with_domain_errors(
                 table_name=table_name,

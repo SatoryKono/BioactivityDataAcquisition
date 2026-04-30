@@ -235,6 +235,28 @@ def _collect_class_attribute_bindings(tree: ast.AST) -> dict[str, str]:
     return bindings
 
 
+def _collect_repo_class_attribute_bindings(repo_root: Path) -> dict[str, str]:
+    """Collect string-valued class attributes across runtime scan roots.
+
+    This lets helper modules resolve ``self.METRIC_*`` style references even when
+    the concrete string constant is declared on a subclass in another file.
+    """
+    bindings: dict[str, str] = {}
+    for path in _iter_text_files(repo_root / _RUNTIME_SCAN_ROOT):
+        path_str = path.as_posix()
+        if any(excluded in path_str for excluded in _RUNTIME_EXCLUDE_PARTS):
+            continue
+        text = _read_runtime_candidate_text(path)
+        if text is None:
+            continue
+        try:
+            tree = ast.parse(text)
+        except SyntaxError:
+            continue
+        bindings.update(_collect_class_attribute_bindings(tree))
+    return bindings
+
+
 def _resolve_metric_name_expr(
     node: ast.expr,
     *,
@@ -475,6 +497,7 @@ def _scan_runtime_metric_file(
     *,
     repo_root: Path,
     import_binding_cache: dict[Path, dict[str, str]],
+    repo_attribute_bindings: dict[str, str] | None = None,
     preloaded_text: str | None = None,
 ) -> tuple[str, set[str], set[str], set[str]] | None:
     text = preloaded_text if preloaded_text is not None else _read_runtime_candidate_text(path)
@@ -490,7 +513,8 @@ def _scan_runtime_metric_file(
         cache=import_binding_cache,
     )
     string_bindings.update(_collect_local_string_bindings(tree))
-    attribute_bindings = _collect_class_attribute_bindings(tree)
+    attribute_bindings = dict(repo_attribute_bindings or {})
+    attribute_bindings.update(_collect_class_attribute_bindings(tree))
     direct_metric_names, helper_metric_names, alias_metric_names = (
         _scan_metric_names_in_tree(
             tree,
@@ -513,6 +537,7 @@ def _scan_runtime_metric_calls(
     helper_backed_mentions: dict[str, list[str]] = defaultdict(list)
     alias_mentions: dict[str, list[str]] = defaultdict(list)
     import_binding_cache: dict[Path, dict[str, str]] = {}
+    repo_attribute_bindings = _collect_repo_class_attribute_bindings(repo_root)
     for path in _iter_text_files(repo_root / _RUNTIME_SCAN_ROOT):
         path_str = path.as_posix()
         if any(excluded in path_str for excluded in _RUNTIME_EXCLUDE_PARTS):
@@ -521,6 +546,7 @@ def _scan_runtime_metric_calls(
             path,
             repo_root=repo_root,
             import_binding_cache=import_binding_cache,
+            repo_attribute_bindings=repo_attribute_bindings,
         )
         if scan_result is None:
             continue

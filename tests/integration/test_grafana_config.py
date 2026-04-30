@@ -680,6 +680,34 @@ def test_stage_drilldown_variable_is_available_for_runtime_and_dq_dashboards(
     assert "stage" in query_text
 
 
+def test_control_plane_dashboard_uses_control_plane_native_variable_sources() -> None:
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
+    variable_map = {
+        var.get("name"): var
+        for var in dashboard.get("templating", {}).get("list", [])
+        if var.get("name")
+    }
+
+    pipeline_var = variable_map.get("pipeline")
+    run_type_var = variable_map.get("run_type")
+    assert pipeline_var is not None
+    assert run_type_var is not None
+
+    pipeline_query = pipeline_var.get("query", {})
+    run_type_query = run_type_var.get("query", {})
+    pipeline_query_text = (
+        pipeline_query.get("query", "") if isinstance(pipeline_query, dict) else ""
+    )
+    run_type_query_text = (
+        run_type_query.get("query", "") if isinstance(run_type_query, dict) else ""
+    )
+
+    assert "bioetl_control_plane_manifest_writes_total" in pipeline_query_text
+    assert "bioetl_control_plane_manifest_writes_total" in run_type_query_text
+    assert "bioetl_records_processed_total" not in pipeline_query_text
+    assert "bioetl_records_processed_total" not in run_type_query_text
+
+
 def test_runtime_dashboard_contains_runtime_hygiene_and_alert_condition_metrics():
     """Ensure runtime dashboard stays anchored to log hygiene and alert-condition metrics."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
@@ -701,6 +729,10 @@ def test_runtime_dashboard_contains_runtime_hygiene_and_alert_condition_metrics(
         "bioetl_runtime_alert_condition_pipeline_infrastructure_failed_15m",
         "bioetl_runtime_alert_condition_pipeline_runs_failed_15m",
         "bioetl_runtime_alert_condition_runtime_error_rate_high_30m",
+        "bioetl_runtime_alert_condition_record_flow_invariant_violated_15m",
+        "bioetl_runtime_alert_condition_ingestion_throughput_degraded_15m",
+        "bioetl_runtime_alert_condition_stage_backlog_active_15m",
+        "bioetl_runtime_alert_condition_stage_lag_high_15m",
         "bioetl_runtime_alert_condition_dq_soft_threshold_15m",
         "bioetl_runtime_alert_condition_dq_hard_fail_15m",
         "bioetl_runtime_alert_condition_dq_critical_anomaly_30m",
@@ -739,6 +771,31 @@ def test_runtime_dashboard_contains_runtime_hygiene_and_alert_condition_metrics(
     assert any('__error__!=""' in expr for expr in loki_exprs), (
         "Runtime dashboard must expose unstructured-log hygiene signal"
     )
+
+
+def test_overview_dashboard_surfaces_backlog_and_stage_lag_metrics() -> None:
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
+    all_expressions = "\n".join(get_panel_expressions(dashboard))
+
+    required_metrics = [
+        "bioetl_records_processed_total",
+        "bioetl_stage_backlog_records",
+        "bioetl_stage_lag_seconds",
+    ]
+    missing = [metric for metric in required_metrics if metric not in all_expressions]
+    assert not missing, f"Overview dashboard missing metrics: {missing}"
+
+
+def test_dq_dashboard_surfaces_record_flow_invariant_metrics() -> None:
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
+    all_expressions = "\n".join(get_panel_expressions(dashboard))
+
+    required_metrics = [
+        "bioetl_records_processed_total",
+        "bioetl_record_flow_invariants_total",
+    ]
+    missing = [metric for metric in required_metrics if metric not in all_expressions]
+    assert not missing, f"DQ dashboard missing metrics: {missing}"
 
 
 def test_runtime_dashboard_keeps_loki_log_hygiene_in_collapsed_tracing_row() -> None:
