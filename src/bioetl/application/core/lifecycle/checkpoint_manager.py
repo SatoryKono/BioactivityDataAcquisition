@@ -255,6 +255,14 @@ class CheckpointRuntimeService:
         return await self._checkpoint.list_all()
 
 
+# Compatibility aliases retained while downstream callers complete migration to
+# the runtime-service vocabulary.
+CheckpointManager = CheckpointRuntimeService
+CheckpointManagerService = CheckpointRuntimeService
+
+
 __all__ = [
+    "CheckpointManager",
+    "CheckpointManagerService",
     "CheckpointRuntimeService",
 ]

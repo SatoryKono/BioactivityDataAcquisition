@@ -180,8 +180,16 @@ class QuarantineRuntimeService(QuarantineManagerSupportMixin):
             )
 
 
+# Compatibility aliases retained while downstream callers complete migration to
+# the runtime-service vocabulary.
+QuarantineManager = QuarantineRuntimeService
+QuarantineManagerService = QuarantineRuntimeService
+
+
 __all__ = [
     "DQQuarantineEntry",
     "FilteredQuarantineEntry",
+    "QuarantineManager",
+    "QuarantineManagerService",
     "QuarantineRuntimeService",
 ]
