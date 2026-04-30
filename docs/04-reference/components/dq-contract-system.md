@@ -234,10 +234,10 @@ Manages backward compatibility during breaking changes:
 
 ```python
 from bioetl.domain.services.phased_migration_support import (
-    PhasedMigrationSupportService,
+    PhasedMigrationCoordinator,
 )
 
-service = PhasedMigrationSupportService()
+service = PhasedMigrationCoordinator()
 
 # Get current migration status
 status = service.get_current_migration_status()

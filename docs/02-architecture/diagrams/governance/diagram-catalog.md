@@ -44,7 +44,7 @@ ______________________________________________________________________
 11. **Domain Model Overview** - Class - Все entities, value objects, aggregates
 01. **Ports Architecture** - Interface - 24 порта и их категории
 01. **DDD Aggregates** - Class - PipelineRun, Batch, QuarantineEntry с границами
-01. **Domain Services** - Component - DataNormalizationService, IdentityService и др.
+01. **Domain Services** - Component - DefaultDataNormalizer, EntityIdentityGenerator и др.
 01. **Value Objects Hierarchy** - Class - Все value objects и их отношения
 01. **Entity Relationships** - ER - Связи между domain entities
 01. **Configuration Objects** - Class - PipelineConfig, DQConfig, RuntimeConfig и др.

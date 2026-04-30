@@ -381,7 +381,7 @@ Representative карта доменной модели с DDD aggregates, entit
 
 **Domain Services:**
 
-- DataNormalizationService, IdentityService
+- DefaultDataNormalizer, EntityIdentityGenerator
 - UnitConverter, ActivityAggregator, ValueValidator
 
 **Файл:** [`docs/02-architecture/diagrams/foundation/13-domain-models-relationship.mmd`](../foundation/13-domain-models-relationship.mmd)

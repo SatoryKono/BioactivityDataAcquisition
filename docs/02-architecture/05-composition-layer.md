@@ -139,8 +139,8 @@ import paths.
 Сборка `BasePublicationTransformer` теперь использует паттерн Стратегия вместо Template Method. При инстанцировании через `GenericPipelineFactory` могут быть внедрены `DataExtractorStrategy`, `IdentifierResolverStrategy` и `PublicationMetadataStrategy`, что устраняет проблему "God Object" и позволяет переиспользовать логику между провайдерами без наследования.
 
 Начиная с `RF-014`, composition также остаётся канонической точкой сборки
-`TransformerDependencyContext`: `NoOp` observability ports, `IdentityService`,
-`DataNormalizationService` и `ContractPolicyPort` должны собираться здесь, а не
+`TransformerDependencyContext`: `NoOp` observability ports, `EntityIdentityGenerator`,
+`DefaultDataNormalizer` и `ContractPolicyPort` должны собираться здесь, а не
 неявно внутри `BaseTransformer`.
 
 **Root-level файлы и публичные seams:**

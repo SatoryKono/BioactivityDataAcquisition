@@ -100,7 +100,7 @@ Current Silver contract жёстко опирается на:
 
 ### 3.4. Авторы и текстовые поля
 
-- `title` и `abstract` проходят через `DataNormalizationService`
+- `title` и `abstract` проходят через `DefaultDataNormalizer`
 - `authors` нормализуются в сериализованное представление
 - `author_keys` вычисляются отдельно для downstream matching/join сценариев
 
