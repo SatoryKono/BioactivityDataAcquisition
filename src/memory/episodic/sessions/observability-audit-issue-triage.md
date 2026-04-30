@@ -1,22 +1,22 @@
 ---
 id: observability-audit-issue-triage
-title: Create GitHub issues from observability audit
+title: Create issues from observability audit
 task_id: observability-audit-issue-triage
-created_at: '2026-04-30T07:49:10Z'
+created_at: '2026-04-30T16:04:32Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
-- docs/03-guides/metrics-monitoring.md
+- <add-source-ref>
 summary: Active task session context.
-query: observability audit confirmed issues metrics monitoring grafana prometheus
+query: observability metrics Prometheus Grafana issue triage
 ---
 
 # Session note
 
 ## Task
 
-- Title: Create GitHub issues from observability audit
-- Retrieval query: observability audit confirmed issues metrics monitoring grafana prometheus
+- Title: Create issues from observability audit
+- Retrieval query: observability metrics Prometheus Grafana issue triage
 
 ## Retrieved context
 

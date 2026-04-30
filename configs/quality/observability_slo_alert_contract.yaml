@@ -184,6 +184,8 @@ slo_contracts:
       - bioetl_health_check_success_total
       - bioetl_health_check_degraded_total
       - bioetl_health_check_failures_total
+      - bioetl_provider_health_check_failures_15m
+      - bioetl_provider_health_check_total_15m
       - bioetl_circuit_breaker_state
       - bioetl_adapter_request_duration_seconds
       - bioetl_http_request_errors_total
@@ -257,6 +259,7 @@ slo_contracts:
       - bioetl_dq_validation_failures_total
       - bioetl_dq_anomaly_detected
       - bioetl_silver_validation_failures_total
+      - bioetl_silver_filter_reject_total_mismatch_15m
     alerts:
       - name: BioETLDQValidationFailuresCritical
         severity: critical
@@ -271,6 +274,10 @@ slo_contracts:
         for: 5m
         runbook: docs/05-operations/runbooks/dq-failure-investigation.md
       - name: BioETLSilverValidationFailuresDetected
+        severity: warning
+        for: 5m
+        runbook: docs/05-operations/runbooks/dq-failure-investigation.md
+      - name: BioETLSilverFilterRejectAccountingMismatch
         severity: warning
         for: 5m
         runbook: docs/05-operations/runbooks/dq-failure-investigation.md
