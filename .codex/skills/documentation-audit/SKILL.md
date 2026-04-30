@@ -29,6 +29,8 @@ Perform a full documentation audit of BioETL and bring docs in sync with code an
 - Compare documentation to current code and configs.
 - Focus: RULES.md, REQUIREMENTS.md, architecture, provider, contract docs.
 - Check ADR alignment: ADR-010 (Local-Only), ADR-014 (Determinism), ADR-017 (Observability).
+- Trace doc claims back to runtime/code/config/workflow sources and note mirror
+  surfaces when AI guidance files are involved.
 - Record findings with severity: Critical, High, Medium, Low.
 
 ### 3. Plan
@@ -48,6 +50,8 @@ Perform a full documentation audit of BioETL and bring docs in sync with code an
 - Check links and nav entries (mkdocs.yml).
 - Confirm RULES.md and REQUIREMENTS.md are synchronized.
 - Ensure ADRs are reflected in top-level docs.
+- When AI runtime/docs surfaces were touched, verify runtime source first and
+  mirror consistency second.
 
 ## Practical commands
 

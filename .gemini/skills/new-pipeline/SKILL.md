@@ -18,8 +18,14 @@ Create a new ETL pipeline for a provider/entity pair in BioETL.
 ## Workflow
 
 1. Follow this skill file as the canonical Gemini runtime instructions.
+1. Read `../../../docs/00-project/ai/memory/agent-memory.md`, then the matching
+   `memory-py-*.md` sheet when one exists for the active role, and use memory
+   plus repo search to discover related configs, tests, contract docs, and
+   diagrams before scaffolding.
 1. If source examples are shell-specific, adapt commands to the current shell/environment.
 1. Keep generated code/config aligned with project architecture rules in `AGENTS.md`.
+1. Before finalizing, re-scan for impacted tests, contract surfaces, config
+   validators, docs, and runtime mirrors affected by the scaffold.
 1. Run verification commands from this skill (or closest working equivalents in this environment).
 
 ## Notes

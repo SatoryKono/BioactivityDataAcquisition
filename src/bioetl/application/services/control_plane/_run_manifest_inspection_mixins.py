@@ -153,11 +153,13 @@ class RunManifestInspectionIdentityGraphMixin:
             "effective_config_hash": code_provenance.effective_config_hash,
             "git_commit": code_provenance.git_commit,
             "source_revision_state": code_provenance.source_revision_state,
+            "dependency_lock_hash": code_provenance.dependency_lock_hash,
             "code_provenance_state": diagnostics.get(
                 "code_provenance_state",
                 {
                     "git_commit": code_provenance.git_commit,
                     "source_revision_state": code_provenance.source_revision_state,
+                    "dependency_lock_hash": code_provenance.dependency_lock_hash,
                     "strict_code_provenance_ready": (
                         bool(code_provenance.git_commit)
                         and str(code_provenance.source_revision_state or "")
