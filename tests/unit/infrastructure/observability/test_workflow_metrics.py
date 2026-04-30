@@ -34,9 +34,9 @@ def test_workflow_step_metrics_use_bounded_label_surface() -> None:
         metrics.increment_counter("bioetl_workflow_step_events_total", 1, labels)
         metrics.observe_histogram("bioetl_workflow_step_duration_seconds", 0.2, labels)
 
-        COUNTERS[
-            "bioetl_workflow_step_events_total"
-        ].labels.assert_called_once_with(**labels)
+        COUNTERS["bioetl_workflow_step_events_total"].labels.assert_called_once_with(
+            **labels
+        )
         HISTOGRAMS[
             "bioetl_workflow_step_duration_seconds"
         ].labels.assert_called_once_with(**labels)

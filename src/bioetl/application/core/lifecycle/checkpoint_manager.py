@@ -255,11 +255,6 @@ class CheckpointRuntimeService:
         return await self._checkpoint.list_all()
 
 
-CheckpointManagerService = CheckpointRuntimeService
-CheckpointManager = CheckpointRuntimeService
-
 __all__ = [
-    "CheckpointManager",
-    "CheckpointManagerService",
     "CheckpointRuntimeService",
 ]

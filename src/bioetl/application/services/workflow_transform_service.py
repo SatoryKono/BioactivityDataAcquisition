@@ -9,6 +9,7 @@ from time import perf_counter
 from typing import TYPE_CHECKING
 
 from bioetl.application.workflow.transforms import WorkflowTransformRegistry
+from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.workflow import TransformStepConfig, WorkflowTransformSpec
 
 if TYPE_CHECKING:
@@ -23,6 +24,13 @@ __all__ = [
 _WORKFLOW_STEP_EVENTS_TOTAL = "bioetl_workflow_step_events_total"
 _WORKFLOW_STEP_DURATION_SECONDS = "bioetl_workflow_step_duration_seconds"
 _STEP_KIND_TRANSFORM = "transform"
+_WORKFLOW_TRANSFORM_FAILURES = (
+    BioETLError,
+    KeyError,
+    RuntimeError,
+    TypeError,
+    ValueError,
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -80,7 +88,7 @@ class WorkflowTransformService:
             output = executor(spec, upstream_outputs or {})
             if isawaitable(output):
                 output = await output
-        except Exception as exc:
+        except _WORKFLOW_TRANSFORM_FAILURES as exc:
             self._record_step_metrics(
                 workflow_name=workflow_name,
                 status="failed",

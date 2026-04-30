@@ -243,7 +243,7 @@ class TestDomainImmutability:
         # Service classes that hold configuration/dependencies
         "ActivityAggregator",  # Service with aggregation strategies
         "NormalizationResult",  # Result dataclass from service (could be frozen, but exempted)
-        "NormalizationService",  # Service with validation logic
+        "BioactivityNormalizer",  # Service with validation logic
         "ValueValidator",  # Service with validation configuration
     }
 

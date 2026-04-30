@@ -91,9 +91,7 @@ class TestColumnOrderService:
 
         assert max(title_indices) < min(abstract_indices)
 
-    def test_provider_priority_within_group(
-        self, orderer: ColumnOrderService
-    ) -> None:
+    def test_provider_priority_within_group(self, orderer: ColumnOrderService) -> None:
         """Within same group, chembl comes before crossref."""
         df = pl.DataFrame(
             {
@@ -157,9 +155,7 @@ class TestColumnOrderService:
         assert "chembl.publication.title" in groups[SemanticGroup.TITLE]
         assert "crossref.publication.abstract" in groups[SemanticGroup.ABSTRACT]
 
-    def test_data_preserved_after_reorder(
-        self, orderer: ColumnOrderService
-    ) -> None:
+    def test_data_preserved_after_reorder(self, orderer: ColumnOrderService) -> None:
         """Data values are preserved after reordering."""
         df = pl.DataFrame(
             {

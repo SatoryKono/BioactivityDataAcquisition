@@ -76,9 +76,7 @@ def build_transformer_dependencies(
         identity_service=resolved_identity_service,
         pii_hasher=pii_hasher if pii_hasher is not None else NoOpPiiHasher(),
         data_normalizer=(
-            data_normalizer
-            if data_normalizer is not None
-            else DefaultDataNormalizer()
+            data_normalizer if data_normalizer is not None else DefaultDataNormalizer()
         ),
         contract_policy=resolved_contract_policy,
         structural_policy=(

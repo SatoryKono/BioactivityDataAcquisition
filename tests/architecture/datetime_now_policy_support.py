@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import ast
 from pathlib import Path
-from typing import Callable
+from collections.abc import Callable
 
 
 def collect_datetime_now_calls(

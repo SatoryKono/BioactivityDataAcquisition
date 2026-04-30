@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import ast
 import importlib.util
 from pathlib import Path
 import sys
@@ -31,8 +32,7 @@ def test_layer_aware_suffix_policy_yaml_exists_and_is_wired() -> None:
     policy_path = ROOT / module.LAYER_AWARE_SUFFIX_POLICY_PATH
 
     assert policy_path.exists(), (
-        "Missing layer-aware naming policy: "
-        "configs/quality/layered_suffix_policy.yaml"
+        "Missing layer-aware naming policy: configs/quality/layered_suffix_policy.yaml"
     )
     assert module.LAYER_AWARE_SUFFIX_POLICY_PATH.as_posix() == (
         "configs/quality/layered_suffix_policy.yaml"
@@ -90,6 +90,75 @@ def test_checkpoint_quarantine_runtime_admin_family_is_role_driven() -> None:
         (
             "QuarantineService",
             "src/bioetl/application/services/quarantine_service.py",
+        ),
+    }
+
+
+def test_checkpoint_quarantine_manager_aliases_are_not_exported() -> None:
+    """Runtime/admin modules must not retain manager-style compatibility aliases."""
+    forbidden_aliases = {
+        "CheckpointManager",
+        "CheckpointManagerService",
+        "QuarantineManager",
+        "QuarantineManagerService",
+    }
+    module_paths = (
+        ROOT
+        / "src"
+        / "bioetl"
+        / "application"
+        / "core"
+        / "lifecycle"
+        / "checkpoint_manager.py",
+        ROOT / "src" / "bioetl" / "application" / "core" / "quarantine_manager.py",
+        ROOT / "src" / "bioetl" / "application" / "services" / "admin_runtime_api.py",
+    )
+    violations: list[str] = []
+
+    for module_path in module_paths:
+        tree = ast.parse(module_path.read_text(encoding="utf-8"))
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Assign):
+                for target in node.targets:
+                    if isinstance(target, ast.Name) and target.id in forbidden_aliases:
+                        violations.append(
+                            f"{module_path.relative_to(ROOT)}:{node.lineno}"
+                        )
+            if isinstance(node, ast.ImportFrom):
+                for alias in node.names:
+                    if alias.name in forbidden_aliases:
+                        violations.append(
+                            f"{module_path.relative_to(ROOT)}:{node.lineno}"
+                        )
+
+    assert violations == [], (
+        "Manager-style checkpoint/quarantine aliases must stay removed:\n"
+        + "\n".join(violations)
+    )
+
+
+def test_column_ordering_family_is_frozen_to_one_canonical_surface_plus_compat() -> (
+    None
+):
+    """Column-ordering family must keep one canonical name plus explicit compat shims."""
+    module = _load_gate_module()
+    policy = module._load_layer_aware_suffix_policy(ROOT)
+    family_rules = {rule.rule_id: rule for rule in policy.family_freeze_rules}
+    rule = family_rules["column_ordering_family"]
+
+    allowed = {(item.symbol, item.path) for item in rule.allowed_symbols}
+    assert allowed == {
+        (
+            "ColumnOrderService",
+            "src/bioetl/application/composite/column_service.py",
+        ),
+        (
+            "ColumnOrderer",
+            "src/bioetl/application/composite/column_orderer.py",
+        ),
+        (
+            "ColumnPriorityOrderer",
+            "src/bioetl/application/composite/column_priority_orderer.py",
         ),
     }
 

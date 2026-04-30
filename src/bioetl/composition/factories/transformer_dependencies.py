@@ -46,9 +46,7 @@ def build_transformer_dependencies(
         ),
         pii_hasher=pii_hasher if pii_hasher is not None else NoOpPiiHasher(),
         data_normalizer=(
-            data_normalizer
-            if data_normalizer is not None
-            else DefaultDataNormalizer()
+            data_normalizer if data_normalizer is not None else DefaultDataNormalizer()
         ),
         contract_policy=(
             contract_policy if contract_policy is not None else DefaultContractPolicy()

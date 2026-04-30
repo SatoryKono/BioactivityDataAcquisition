@@ -6,6 +6,9 @@ from pathlib import Path
 
 import pytest
 
+from bioetl.application import composite as composite_package
+from bioetl.application.composite import runtime_wiring_api
+
 ROOT = Path(__file__).resolve().parents[2]
 SRC_ROOT = ROOT / "src"
 TEST_ROOT = ROOT / "tests"
@@ -57,9 +60,7 @@ def test_no_runtime_imports_of_deprecated_column_ordering_symbols() -> None:
 
 
 @pytest.mark.architecture
-def test_application_and_integration_tests_use_canonical_column_order_service() -> (
-    None
-):
+def test_application_and_integration_tests_use_canonical_column_order_service() -> None:
     roots = (
         TEST_ROOT / "unit" / "application" / "composite",
         TEST_ROOT / "integration" / "composite",
@@ -71,3 +72,17 @@ def test_application_and_integration_tests_use_canonical_column_order_service() 
         "First-party tests must use ColumnOrderService as the canonical default "
         "surface:\n" + "\n".join(f"  - {hit}" for hit in hits)
     )
+
+
+@pytest.mark.architecture
+def test_public_composite_exports_only_expose_canonical_column_order_service() -> None:
+    """Deprecated orderer names must stay out of package/runtime public exports."""
+    composite_exports = set(composite_package.__all__)
+    runtime_exports = set(runtime_wiring_api.__all__)
+
+    assert "ColumnOrderService" in composite_exports
+    assert "ColumnOrderService" in runtime_exports
+    assert "ColumnOrderer" not in composite_exports
+    assert "ColumnOrderer" not in runtime_exports
+    assert "ColumnPriorityOrderer" not in composite_exports
+    assert "ColumnPriorityOrderer" not in runtime_exports

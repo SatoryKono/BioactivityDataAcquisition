@@ -79,14 +79,14 @@ def version_compare(v1: str, v2: str) -> int:
 
 ## API Reference
 
-### PhasedMigrationSupportService
+### PhasedMigrationCoordinator
 
 ```python
 from bioetl.domain.services.phased_migration_support import (
-    PhasedMigrationSupportService,
+    PhasedMigrationCoordinator,
 )
 
-service = PhasedMigrationSupportService()
+service = PhasedMigrationCoordinator()
 ```
 
 #### get_current_migration_status() -> MigrationStatus
@@ -229,7 +229,7 @@ class MigrationStatus:
 # Migrate configuration safely between versions
 def safe_migrate_config(config: dict, target_version: str) -> dict:
     """Safely migrate configuration to target version"""
-    service = PhasedMigrationSupportService()
+    service = PhasedMigrationCoordinator()
 
     # Check current status
     status = service.get_current_migration_status()
@@ -267,7 +267,7 @@ process_pipeline(migrated_config)
 # Execute pipeline with version awareness
 def run_pipeline_with_version_awareness(pipeline_config: dict):
     """Run pipeline with migration awareness"""
-    service = PhasedMigrationSupportService()
+    service = PhasedMigrationCoordinator()
     status = service.get_current_migration_status()
 
     print(f"Running pipeline in phase: {status.current_phase}")
@@ -305,7 +305,7 @@ results = run_pipeline_with_version_awareness(base_config)
 # Test migration between versions
 def test_migration(from_version: str, to_version: str, test_config: dict):
     """Test migration path between versions"""
-    service = PhasedMigrationSupportService()
+    service = PhasedMigrationCoordinator()
 
     print(f"Testing migration: {from_version} -> {to_version}")
 
@@ -353,7 +353,7 @@ for from_ver, to_ver, config in migration_tests:
 # Plan rollback strategy
 def create_rollback_plan(current_version: str) -> dict:
     """Create rollback plan for current version"""
-    service = PhasedMigrationSupportService()
+    service = PhasedMigrationCoordinator()
 
     # Get current status
     status = service.get_current_migration_status()
@@ -422,7 +422,7 @@ for i, step in enumerate(rollback_plan["rollback_steps"], 1):
 
 ```python
 # Force immediate migration
-service = PhasedMigrationSupportService()
+service = PhasedMigrationCoordinator()
 
 # Get current phase
 status = service.get_current_migration_status()
@@ -454,7 +454,7 @@ if status.current_phase != "v2.0":
 
 ```python
 # Gradual migration with monitoring
-service = PhasedMigrationSupportService()
+service = PhasedMigrationCoordinator()
 
 # Phase 1: Enable new version
 service.update_migration_phase(
@@ -498,7 +498,7 @@ disable_old_versions()
 
 ```python
 # Optional migration with user choice
-service = PhasedMigrationSupportService()
+service = PhasedMigrationCoordinator()
 
 # Enable optional version
 service.add_optional_version(
@@ -668,7 +668,7 @@ from functools import lru_cache
 @lru_cache(maxsize=100)
 def check_migration_cached(config_hash: str, target_phase: str) -> dict:
     """Cached migration compatibility check"""
-    service = PhasedMigrationSupportService()
+    service = PhasedMigrationCoordinator()
     config = get_config_by_hash(config_hash)
     return service.check_backward_compatibility(config, target_phase)
 
@@ -683,7 +683,7 @@ issues = check_migration_cached("abc123", "v1.1")
 # Process multiple configurations efficiently
 def migrate_config_batch(configs: list, target_phase: str) -> list:
     """Migrate batch of configurations"""
-    service = PhasedMigrationSupportService()
+    service = PhasedMigrationCoordinator()
     results = []
 
     for config in configs:
@@ -725,7 +725,7 @@ import concurrent.futures
 
 def parallel_migrate(configs: list, target_phase: str, workers: int = 4) -> list:
     """Migrate configurations in parallel"""
-    service = PhasedMigrationSupportService()
+    service = PhasedMigrationCoordinator()
 
     def migrate_one(config):
         try:

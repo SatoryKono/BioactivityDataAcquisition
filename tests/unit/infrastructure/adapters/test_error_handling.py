@@ -59,16 +59,12 @@ class TestAdapterErrorHandler:
 
     # HTTP Status Classification Tests
 
-    def test_classify_http_401_as_critical(
-        self, handler: AdapterErrorHandler
-    ) -> None:
+    def test_classify_http_401_as_critical(self, handler: AdapterErrorHandler) -> None:
         """HTTP 401 Unauthorized should be CRITICAL."""
         category = handler.classify_http_error(401)
         assert category == ErrorCategory.CRITICAL
 
-    def test_classify_http_403_as_critical(
-        self, handler: AdapterErrorHandler
-    ) -> None:
+    def test_classify_http_403_as_critical(self, handler: AdapterErrorHandler) -> None:
         """HTTP 403 Forbidden should be CRITICAL."""
         category = handler.classify_http_error(403)
         assert category == ErrorCategory.CRITICAL
@@ -272,9 +268,7 @@ class TestAdapterErrorHandler:
         error = ServiceUnavailableError("Timeout", service_name="test")
         assert handler.should_retry(error) is True
 
-    def test_should_not_retry_auth_error(
-        self, handler: AdapterErrorHandler
-    ) -> None:
+    def test_should_not_retry_auth_error(self, handler: AdapterErrorHandler) -> None:
         """Auth errors should NOT be retried."""
         error = ServiceAuthenticationError("Auth failed", service_name="test")
         # Auth errors are critical but may not return False for should_retry
@@ -291,15 +285,11 @@ class TestAdapterErrorHandler:
         """HTTP 500 should be retried."""
         assert handler.should_retry_status(500) is True
 
-    def test_should_not_retry_status_401(
-        self, handler: AdapterErrorHandler
-    ) -> None:
+    def test_should_not_retry_status_401(self, handler: AdapterErrorHandler) -> None:
         """HTTP 401 should NOT be retried."""
         assert handler.should_retry_status(401) is False
 
-    def test_should_not_retry_status_400(
-        self, handler: AdapterErrorHandler
-    ) -> None:
+    def test_should_not_retry_status_400(self, handler: AdapterErrorHandler) -> None:
         """HTTP 400 should NOT be retried."""
         assert handler.should_retry_status(400) is False
 
@@ -336,9 +326,7 @@ class TestAdapterErrorHandler:
         assert wrapped.service_name == "uniprot"
         assert wrapped.status_code == 500
 
-    def test_wrap_error_401_raises_critical(
-        self, handler: AdapterErrorHandler
-    ) -> None:
+    def test_wrap_error_401_raises_critical(self, handler: AdapterErrorHandler) -> None:
         """HTTP 401 should raise CriticalError."""
         error = ValueError("Unauthorized")
 
@@ -352,9 +340,7 @@ class TestAdapterErrorHandler:
         assert "pubmed" in str(exc_info.value)
         assert "authentication failed" in str(exc_info.value).lower()
 
-    def test_wrap_error_403_raises_critical(
-        self, handler: AdapterErrorHandler
-    ) -> None:
+    def test_wrap_error_403_raises_critical(self, handler: AdapterErrorHandler) -> None:
         """HTTP 403 should raise CriticalError."""
         error = ValueError("Forbidden")
 
@@ -367,9 +353,7 @@ class TestAdapterErrorHandler:
 
         assert "chembl" in str(exc_info.value)
 
-    def test_wrap_error_without_status_code(
-        self, handler: AdapterErrorHandler
-    ) -> None:
+    def test_wrap_error_without_status_code(self, handler: AdapterErrorHandler) -> None:
         """Wrapping without status_code should use exception type."""
         error = RateLimitExceededError("Rate limit", service_name="test")
         wrapped = handler.wrap_error(

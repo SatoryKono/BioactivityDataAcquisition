@@ -35,6 +35,7 @@ if TYPE_CHECKING:
 
 __all__ = [
     "MetricsServerError",
+    "ObservabilityDiagnosticsBundle",
     "delete_metrics_from_gateway",
     "get_audit_service",
     "get_checkpoint_service",

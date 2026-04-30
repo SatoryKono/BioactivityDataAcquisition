@@ -39,3 +39,24 @@ def test_transform_fingerprint_changes_when_config_changes() -> None:
     )
 
     assert base.fingerprint != changed.fingerprint
+
+
+def test_transform_fingerprint_normalizes_tuple_and_nested_sequence_values() -> None:
+    left = WorkflowTransformSpec(
+        step_id="normalize",
+        transform_name="normalize_activity",
+        config={
+            "targets": ("b", "a"),
+            "nested": ({"y": 2, "x": 1}, ["keep", {"b": 2, "a": 1}]),
+        },
+    )
+    right = WorkflowTransformSpec(
+        step_id="normalize",
+        transform_name="normalize_activity",
+        config={
+            "targets": ["b", "a"],
+            "nested": [{"x": 1, "y": 2}, ["keep", {"a": 1, "b": 2}]],
+        },
+    )
+
+    assert left.fingerprint == right.fingerprint

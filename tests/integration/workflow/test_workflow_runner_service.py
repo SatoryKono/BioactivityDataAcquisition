@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import UTC, datetime
 from uuid import uuid4
 
 import pytest
@@ -25,6 +24,7 @@ from bioetl.domain.workflow import (
     WorkflowStepConfig,
     WorkflowTransformSpec,
 )
+from tests.helpers.clock import FIXED_TEST_TIME
 
 pytestmark = pytest.mark.integration
 
@@ -71,7 +71,6 @@ class _PipelineRunner:
         options: object | None = None,
     ) -> RunResult:
         del dry_run, run_id, options
-        now = datetime.now(UTC)
         return RunResult(
             status=PipelineRunResult.SUCCESS,
             pipeline_name=pipeline_name,
@@ -79,8 +78,8 @@ class _PipelineRunner:
             run_type="incremental",
             records_bronze=3,
             records_silver=3,
-            started_at=now,
-            completed_at=now,
+            started_at=FIXED_TEST_TIME,
+            completed_at=FIXED_TEST_TIME,
         )
 
 

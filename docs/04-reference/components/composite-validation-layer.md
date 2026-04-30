@@ -49,7 +49,7 @@ Produces issues under `ValidationLayer.DEEP_PREFLIGHT`.
 
 ### Governance decision layer
 
-`PreflightGovernanceService` evaluates validation report severity/policy and
+`PreflightGovernor` evaluates validation report severity/policy and
 returns execution decision (block, allow, warn) according to governance config.
 
 ## Operational notes

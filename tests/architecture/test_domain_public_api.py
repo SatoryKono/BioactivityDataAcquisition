@@ -54,7 +54,7 @@ def test_domain_all_is_complete(src_dir: Path) -> None:
         "resilience",
         "schemas",  # Pandera schemas (provider-specific, accessed directly)
         "serialization",
-        "services",  # Submodule for domain services (IdentityService)
+        "services",  # Submodule for domain services (EntityIdentityGenerator)
         "transformations",
         "types",
         "validation",  # REFACTOR-004: import from bioetl.domain.validation

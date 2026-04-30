@@ -245,9 +245,9 @@ class TestBootstrapFunctionCategorization:
         content = cli_init.read_text(encoding="utf-8")
 
         expected_cli_functions = [
-            "bootstrap_checkpoint_manager",
+            "bootstrap_checkpoint_runtime_service",
             "bootstrap_checkpoint_service",
-            "bootstrap_quarantine_manager",
+            "bootstrap_quarantine_runtime_service",
             "bootstrap_quarantine_service",
             "bootstrap_config_service",
             "bootstrap_health_service",

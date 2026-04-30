@@ -1,4 +1,4 @@
-"""Phased migration support service for composite pipelines."""
+"""Phased migration coordinator for composite pipelines."""
 
 from __future__ import annotations
 
@@ -33,8 +33,8 @@ class MigrationStatus:
     is_migration_mode: bool = False
 
 
-class PhasedMigrationSupportService:
-    """Service for managing phased migrations and backward compatibility."""
+class PhasedMigrationCoordinator:
+    """Coordinator for phased migrations and backward compatibility."""
 
     def __init__(self) -> None:
         self._current_version = get_version()
@@ -288,6 +288,6 @@ def _ensure_cross_validation_strict_mode(
     warnings.append("Added missing strict_mode field with default value")
 
 
-def create_phased_migration_support_service() -> PhasedMigrationSupportService:
-    """Factory function for PhasedMigrationSupportService."""
-    return PhasedMigrationSupportService()
+def create_phased_migration_support_service() -> PhasedMigrationCoordinator:
+    """Factory function for the canonical phased migration coordinator."""
+    return PhasedMigrationCoordinator()

@@ -567,9 +567,7 @@ class TestDataQualityServiceMetricsEmission:
         )
 
         config = DQConfig(soft_fail_threshold=0.05, hard_fail_threshold=0.20)
-        dq_monitor = DataQualityMonitor(
-            logger=recording_logger, z_score_threshold=2.0
-        )  # type: ignore
+        dq_monitor = DataQualityMonitor(logger=recording_logger, z_score_threshold=2.0)  # type: ignore
 
         service = DataQualityService(
             dq_monitor=dq_monitor,
@@ -614,9 +612,7 @@ class TestDataQualityServiceMetricsEmission:
         )
 
         config = DQConfig(soft_fail_threshold=0.05, hard_fail_threshold=0.20)
-        dq_monitor = DataQualityMonitor(
-            logger=recording_logger, z_score_threshold=2.0
-        )  # type: ignore
+        dq_monitor = DataQualityMonitor(logger=recording_logger, z_score_threshold=2.0)  # type: ignore
         for value in [980.0, 1000.0, 1020.0, 990.0, 1010.0]:
             dq_monitor.update_baseline_from_metrics({"record_count": value})
 
@@ -757,9 +753,7 @@ class TestDataQualityServiceMetricsEmission:
         )
 
         config = DQConfig(soft_fail_threshold=0.05, hard_fail_threshold=0.20)
-        dq_monitor = DataQualityMonitor(
-            logger=recording_logger, z_score_threshold=2.0
-        )  # type: ignore
+        dq_monitor = DataQualityMonitor(logger=recording_logger, z_score_threshold=2.0)  # type: ignore
 
         service = DataQualityService(
             dq_monitor=dq_monitor,

@@ -149,9 +149,7 @@ class TestCompositePublicationColumns:
         assert ordered[-2] == "_dq_error"
         assert ordered[-1] == "_dq_warn"
 
-    def test_full_schema_names_verification(
-        self, orderer: ColumnOrderService
-    ) -> None:
+    def test_full_schema_names_verification(self, orderer: ColumnOrderService) -> None:
         """Verify names of key columns in the final output."""
         # Simulate a realistic set of output columns
         columns = [

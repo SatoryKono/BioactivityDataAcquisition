@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import threading
 from types import MappingProxyType
-from typing import cast
+from typing import Protocol, cast
 
 from bioetl.application.core.wiring.registry import GenericPipeline
 from bioetl.composition.factories.pipeline.assembler import (
@@ -14,9 +14,24 @@ from bioetl.composition.factories.pipeline.contract_validator import create_fact
 from bioetl.composition.factories.pipeline.registry_manifest import (
     PIPELINE_CONFIGS,
 )
-from bioetl.composition.registry import PipelineRegistry
 from bioetl.composition.registry_default import get_default_registry
 from bioetl.domain.ports import PipelineFactoryPort
+
+
+class PipelineRegistryProtocol(Protocol):
+    """Minimal pipeline registry contract required for factory registration."""
+
+    def list_pipelines(self) -> list[str]:
+        """Return registered pipeline names."""
+        ...
+
+    def register_factory(self, factory: PipelineFactoryPort) -> None:
+        """Register one pipeline factory."""
+        ...
+
+    def clear(self) -> None:
+        """Clear registered factories."""
+        ...
 
 
 def _build_factories() -> dict[str, GenericPipelineFactory[GenericPipeline]]:
@@ -76,7 +91,7 @@ def _get_default_registration_state() -> _PipelineFactoryRegistrationState:
     return _default_registration_state
 
 
-def _register_to_explicit_registry(registry: PipelineRegistry) -> None:
+def _register_to_explicit_registry(registry: PipelineRegistryProtocol) -> None:
     """Register factories into an explicit registry instance."""
     _register_factories_to(registry)
 
@@ -94,7 +109,7 @@ def _register_default_registry_once(
         registration_state._registered = True
 
 
-def register_all_pipelines(registry: PipelineRegistry | None = None) -> None:
+def register_all_pipelines(registry: PipelineRegistryProtocol | None = None) -> None:
     """Explicitly register all pipeline factories with PipelineRegistry.
 
     This function is idempotent and thread-safe - calling it multiple times
@@ -120,7 +135,7 @@ def register_all_pipelines(registry: PipelineRegistry | None = None) -> None:
     _register_default_registry_once(_get_default_registration_state())
 
 
-def _register_factories_to(registry: PipelineRegistry) -> None:
+def _register_factories_to(registry: PipelineRegistryProtocol) -> None:
     """Register all factory instances to the given registry.
 
     Internal helper for register_all_pipelines().

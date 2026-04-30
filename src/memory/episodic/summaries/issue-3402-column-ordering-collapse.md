@@ -2,15 +2,15 @@
 id: issue-3402-column-ordering-collapse
 title: Collapse column ordering naming family to canonical ColumnOrderService
 task_id: issue-3402-column-ordering-collapse
-created_at: '2026-04-30T06:03:07Z'
+created_at: '2026-04-30T06:14:17Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
 - https://github.com/SatoryKono/BioactivityDataAcquisition/issues/3402
-summary: Collapsed first-party column ordering references to ColumnOrderService, confined
-  deprecated ColumnOrderer and ColumnPriorityOrderer names to compatibility shims/tests,
-  added an architecture guard, and updated architecture/reference docs plus diagram
-  sources.
+summary: 'Finished the column-ordering collapse by enforcing canonical package/runtime
+  exports for ColumnOrderService, preserving only explicit compatibility shims for
+  ColumnOrderer and ColumnPriorityOrderer, and closing GitHub issue #3402 as completed
+  on 2026-04-30.'
 ---
 
 # Episodic summary
@@ -21,7 +21,7 @@ summary: Collapsed first-party column ordering references to ColumnOrderService,
 
 ## Outcome
 
-- Collapsed first-party column ordering references to ColumnOrderService, confined deprecated ColumnOrderer and ColumnPriorityOrderer names to compatibility shims/tests, added an architecture guard, and updated architecture/reference docs plus diagram sources.
+- Finished the column-ordering collapse by enforcing canonical package/runtime exports for ColumnOrderService, preserving only explicit compatibility shims for ColumnOrderer and ColumnPriorityOrderer, and closing GitHub issue #3402 as completed on 2026-04-30.
 
 ## Lessons learned
 

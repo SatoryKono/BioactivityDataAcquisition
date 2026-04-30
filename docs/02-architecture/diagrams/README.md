@@ -137,7 +137,7 @@ classes that was not already covered by the curated set.
 | 12  | Adapters                      | `class-diagrams/10-adapters.mmd`                                | BaseHttpAdapter, all provider adapters, resilience                          |
 | 13  | Storage                       | `class-diagrams/11-storage.mmd`                                 | BronzeWriter, SilverWriter, GoldWriter, DeltaReader                         |
 | 14  | Composite Pipeline            | `class-diagrams/12-composite-pipeline.mmd`                      | Runner, coordinators, merger, FSM                                           |
-| 15  | Domain Services               | `class-diagrams/13-domain-services.mmd`                         | IdentityService, Normalization, UnitConverter                               |
+| 15  | Domain Services               | `class-diagrams/13-domain-services.mmd`                         | EntityIdentityGenerator, Normalization, UnitConverter                               |
 | 16  | Observability                 | `class-diagrams/14-observability.mmd`                           | Logger, Metrics, Tracing implementations                                    |
 | 17  | Observability (L2 Methods)    | `class-diagrams/14a-observability-method-catalog.mmd`           | Method-level catalog for logging/metrics/tracing                            |
 | 18  | Extractors                    | `class-diagrams/15-extractors.mmd`                              | BaseFieldExtractor, PubMed & UniProt extractors                             |

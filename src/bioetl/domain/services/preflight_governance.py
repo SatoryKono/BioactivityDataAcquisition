@@ -6,7 +6,6 @@ __all__ = [
     "GovernancePolicy",
     "PreflightGovernanceConfig",
     "PreflightGovernor",
-    "PreflightGovernanceService",
 ]
 
 from bioetl.domain.services._preflight_governance_helpers import (
@@ -215,7 +214,3 @@ class PreflightGovernor:
                 if issue["governance_impact"] == "execution_blocker"
             ],
         }
-
-
-# Deprecated compatibility alias retained during ADR-041 migration.
-PreflightGovernanceService = PreflightGovernor

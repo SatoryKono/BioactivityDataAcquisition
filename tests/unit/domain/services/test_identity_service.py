@@ -19,7 +19,6 @@ from hypothesis import strategies as st
 from bioetl.domain.services.identity_service import (
     META_FIELDS,
     EntityIdentityGenerator,
-    IdentityService,
 )
 
 
@@ -90,7 +89,7 @@ class TestFloatNormalization:
 
     def test_float_rounded_to_10_decimals(self) -> None:
         """Floats should be rounded to 10 decimal places."""
-        service = IdentityService()
+        service = EntityIdentityGenerator()
 
         # These should produce the same hash after rounding
         record1 = {"value": 3.14159265358979323846}
@@ -103,7 +102,7 @@ class TestFloatNormalization:
 
     def test_nan_normalized_to_none(self) -> None:
         """NaN values should be normalized to None."""
-        service = IdentityService()
+        service = EntityIdentityGenerator()
         record_with_nan = {"value": float("nan")}
         record_with_none = {"value": None}
 
@@ -114,7 +113,7 @@ class TestFloatNormalization:
 
     def test_inf_normalized_to_none(self) -> None:
         """Infinity values should be normalized to None."""
-        service = IdentityService()
+        service = EntityIdentityGenerator()
         record_with_inf = {"value": float("inf")}
         record_with_none = {"value": None}
 
@@ -125,7 +124,7 @@ class TestFloatNormalization:
 
     def test_negative_inf_normalized_to_none(self) -> None:
         """Negative infinity values should be normalized to None."""
-        service = IdentityService()
+        service = EntityIdentityGenerator()
         record_with_neg_inf = {"value": float("-inf")}
         record_with_none = {"value": None}
 
@@ -155,7 +154,7 @@ class TestMetaFieldExclusion:
     )
     def test_meta_field_excluded_from_hash(self, meta_field: str) -> None:
         """Meta-fields should not affect content hash."""
-        service = IdentityService()
+        service = EntityIdentityGenerator()
         base_record = {"id": "123", "value": 100}
 
         record_with_meta = {**base_record, meta_field: "should_be_ignored"}
@@ -200,7 +199,7 @@ class TestMetaFieldExclusion:
         meta_value: object,
     ) -> None:
         """Metadata-only mutations MUST NOT alter content hash."""
-        service = IdentityService()
+        service = EntityIdentityGenerator()
         base_hash = service.compute_content_hash("test", business_record)
 
         augmented = {
@@ -220,7 +219,7 @@ class TestCanonicalJSON:
 
     def test_nested_dicts_sorted(self) -> None:
         """Nested dictionaries should also have sorted keys."""
-        service = IdentityService()
+        service = EntityIdentityGenerator()
         record1 = {"outer": {"z": 1, "a": 2}}
         record2 = {"outer": {"a": 2, "z": 1}}
 
@@ -231,7 +230,7 @@ class TestCanonicalJSON:
 
     def test_list_order_preserved(self) -> None:
         """List order should be preserved (not sorted)."""
-        service = IdentityService()
+        service = EntityIdentityGenerator()
         record1 = {"items": [1, 2, 3]}
         record2 = {"items": [3, 2, 1]}
 
@@ -247,7 +246,7 @@ class TestDateNormalization:
 
     def test_datetime_normalized_to_date_iso(self) -> None:
         """Datetime should be normalized to date ISO string."""
-        service = IdentityService()
+        service = EntityIdentityGenerator()
 
         # Different times on same date should produce same hash
         dt1 = datetime(2024, 1, 15, 10, 30, 0)
@@ -263,7 +262,7 @@ class TestDateNormalization:
 
     def test_date_normalized_to_iso(self) -> None:
         """Date should be normalized to ISO string."""
-        service = IdentityService()
+        service = EntityIdentityGenerator()
         d = date(2024, 1, 15)
 
         record = {"date_field": d}
@@ -277,7 +276,7 @@ class TestStringNormalization:
 
     def test_string_stripped(self) -> None:
         """Strings should be stripped of whitespace."""
-        service = IdentityService()
+        service = EntityIdentityGenerator()
         record1 = {"name": "  test  "}
         record2 = {"name": "test"}
 
@@ -292,7 +291,7 @@ class TestEntityIdGeneration:
 
     def test_entity_id_with_source_id(self) -> None:
         """Entity ID should use source_id when provided."""
-        service = IdentityService()
+        service = EntityIdentityGenerator()
 
         entity_id = service.compute_entity_id(
             provider="chembl",
@@ -305,7 +304,7 @@ class TestEntityIdGeneration:
 
     def test_entity_id_without_source_id_uses_hash(self) -> None:
         """Entity ID should use hash prefix when source_id is None."""
-        service = IdentityService()
+        service = EntityIdentityGenerator()
 
         entity_id = service.compute_entity_id(
             provider="chembl",
@@ -321,7 +320,7 @@ class TestEntityIdGeneration:
 
     def test_entity_id_format(self) -> None:
         """Entity ID should have correct format."""
-        service = IdentityService()
+        service = EntityIdentityGenerator()
 
         entity_id = service.compute_entity_id(
             provider="pubchem",
@@ -336,7 +335,7 @@ class TestEntityIdGeneration:
 
     def test_entity_id_deterministic_without_source(self) -> None:
         """Entity ID without source_id should be deterministic."""
-        service = IdentityService()
+        service = EntityIdentityGenerator()
         record = {"stable": "data"}
 
         id1 = service.compute_entity_id("test", "entity", None, record)
@@ -350,7 +349,7 @@ class TestExcludeNone:
 
     def test_exclude_none_true(self) -> None:
         """When exclude_none=True, None values should be excluded."""
-        service = IdentityService()
+        service = EntityIdentityGenerator()
         record_with_none = {"a": 1, "b": None}
         record_without_none = {"a": 1}
 
@@ -365,7 +364,7 @@ class TestExcludeNone:
 
     def test_exclude_none_false(self) -> None:
         """When exclude_none=False, None values should be included."""
-        service = IdentityService()
+        service = EntityIdentityGenerator()
         record_with_none = {"a": 1, "b": None}
         record_without_none = {"a": 1}
 
@@ -384,7 +383,7 @@ class TestNestedStructures:
 
     def test_nested_dict_normalized(self) -> None:
         """Nested dicts should be normalized recursively."""
-        service = IdentityService()
+        service = EntityIdentityGenerator()
         record = {"outer": {"inner": {"value": 3.14159265358979}}}
 
         normalized = service._normalize_for_hash(record)
@@ -394,7 +393,7 @@ class TestNestedStructures:
 
     def test_nested_list_normalized(self) -> None:
         """Lists should have elements normalized recursively."""
-        service = IdentityService()
+        service = EntityIdentityGenerator()
         record = {"items": [1.23456789012345, "  text  ", {"key": float("nan")}]}
 
         normalized = service._normalize_for_hash(record)
@@ -409,7 +408,7 @@ class TestHashFormat:
 
     def test_hash_is_sha256_hex(self) -> None:
         """Hash should be SHA256 hex digest (64 characters)."""
-        service = IdentityService()
+        service = EntityIdentityGenerator()
         content_hash = service.compute_content_hash("test", {"id": "123"})
 
         assert len(str(content_hash)) == 64
@@ -421,7 +420,7 @@ class TestServiceStateless:
 
     def test_multiple_calls_independent(self) -> None:
         """Multiple calls should be independent (no state)."""
-        service = IdentityService()
+        service = EntityIdentityGenerator()
 
         hash1 = service.compute_content_hash("provider1", {"a": 1})
         hash2 = service.compute_content_hash("provider2", {"b": 2})

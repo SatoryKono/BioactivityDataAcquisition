@@ -44,7 +44,7 @@ ______________________________________________________________________
 11. **Domain Model Overview** - Class - Все entities, value objects, aggregates
 01. **Ports Architecture** - Interface - 24 порта и их категории
 01. **DDD Aggregates** - Class - PipelineRun, Batch, QuarantineEntry с границами
-01. **Domain Services** - Component - DataNormalizationService, IdentityService и др.
+01. **Domain Services** - Component - DefaultDataNormalizer, EntityIdentityGenerator и др.
 01. **Value Objects Hierarchy** - Class - Все value objects и их отношения
 01. **Entity Relationships** - ER - Связи между domain entities
 01. **Configuration Objects** - Class - PipelineConfig, DQConfig, RuntimeConfig и др.
@@ -307,9 +307,9 @@ ______________________________________________________________________
 001. **BaseTransformer** - Class - Abstract transformer
 001. **BasePipeline** - Class - Abstract pipeline
 001. **LockCoordinator** - Class - Lock orchestration
-001. **CheckpointManagerService** - Class - Checkpoint handling
+001. **CheckpointRuntimeService** - Class - Checkpoint handling
 001. **PipelineService** - Class - Services bundle
-001. **QuarantineManager** - Class - Quarantine management
+001. **QuarantineRuntimeService** - Class - Quarantine management
 001. **PreflightService** - Class - Pre-run checks
 001. **PostrunService** - Class - Post-run operations
 001. **MemoryMonitor** - Class - Memory tracking
@@ -421,8 +421,8 @@ ______________________________________________________________________
 001. **HTTPClient ↔ RateLimiter** - Sequence - Rate limiting
 001. **HTTPClient ↔ CircuitBreaker** - Sequence - Fault tolerance
 001. **LockCoordinator ↔ LockPort** - Sequence - Lock lifecycle
-001. **CheckpointManagerService ↔ CheckpointPort** - Sequence - State persistence
-001. **QuarantineManager ↔ QuarantinePort** - Sequence - Quarantine ops
+001. **CheckpointRuntimeService ↔ CheckpointPort** - Sequence - State persistence
+001. **QuarantineRuntimeService ↔ QuarantinePort** - Sequence - Quarantine ops
 001. **Observer ↔ Services** - Sequence - Observability integration
 001. **Preflight ↔ HealthChecks** - Sequence - Pre-run validation
 001. **Postrun ↔ DQAnalyzers** - Sequence - DQ analysis

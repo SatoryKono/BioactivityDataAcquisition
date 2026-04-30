@@ -14,7 +14,7 @@ if TYPE_CHECKING:
         get_observability_diagnostics_bundle as get_observability_diagnostics_bundle,
     )
     from bioetl.interfaces.cli.commands.domains.diagnostics.command import (
-        get_quarantine_manager as get_quarantine_manager,
+        get_quarantine_runtime_service as get_quarantine_runtime_service,
     )
 
 alias_module(__name__, "bioetl.interfaces.cli.commands.domains.diagnostics.command")

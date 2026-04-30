@@ -19,7 +19,7 @@ if TYPE_CHECKING:
         PiiHasherPort,
         TracingPort,
     )
-    from bioetl.domain.services import IdentityService
+    from bioetl.domain.services import EntityIdentityGenerator
 
 TTransformer = TypeVar("TTransformer")
 
@@ -33,7 +33,7 @@ def build_test_transformer_dependencies(
     *,
     tracer: TracingPort | None = None,
     metrics: MetricsPort | None = None,
-    identity_service: IdentityService | None = None,
+    identity_service: EntityIdentityGenerator | None = None,
     pii_hasher: PiiHasherPort | None = None,
     data_normalizer: DataNormalizationPort | None = None,
     contract_policy: ContractPolicyProtocol | None = None,

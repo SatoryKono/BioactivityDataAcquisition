@@ -26,7 +26,6 @@ from bioetl.domain.types import ContentHash, EntityID, JsonDict
 __all__ = [
     "META_FIELDS",
     "EntityIdentityGenerator",
-    "IdentityService",
 ]
 
 
@@ -204,7 +203,3 @@ class EntityIdentityGenerator:
             include_fields=resolved_include_fields,
             exclude_fields=resolved_exclude_fields,
         )
-
-
-# Deprecated compatibility alias retained during ADR-041 migration.
-IdentityService = EntityIdentityGenerator

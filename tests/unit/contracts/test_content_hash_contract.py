@@ -4,13 +4,13 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from bioetl.domain.services import IdentityService
+from bioetl.domain.services import EntityIdentityGenerator
 from bioetl.domain.transformations import generate_content_hash
 
 
 def test_content_hash_normalization_contract() -> None:
     """Hash MUST be stable across normalization-equivalent values."""
-    service = IdentityService()
+    service = EntityIdentityGenerator()
 
     record_a = {
         "name": "  Alpha  ",
@@ -30,7 +30,7 @@ def test_content_hash_normalization_contract() -> None:
 
 def test_content_hash_excludes_meta_and_dq_prefix_contract() -> None:
     """Meta fields and _dq_* fields MUST NOT influence content hash."""
-    service = IdentityService()
+    service = EntityIdentityGenerator()
 
     base = {"activity_id": "A1", "value": 10}
     with_meta = {
@@ -47,7 +47,7 @@ def test_content_hash_excludes_meta_and_dq_prefix_contract() -> None:
 
 def test_content_hash_excludes_occurrence_only_source_batch_id_contract() -> None:
     """Occurrence-only BatchID lineage metadata MUST NOT alter semantic identity."""
-    service = IdentityService()
+    service = EntityIdentityGenerator()
 
     base = {"activity_id": "A1", "value": 10}
     with_batch_a = {
@@ -65,8 +65,8 @@ def test_content_hash_excludes_occurrence_only_source_batch_id_contract() -> Non
 
 
 def test_content_hash_service_matches_canonical_transform_contract() -> None:
-    """IdentityService MUST delegate to the canonical transformation path."""
-    service = IdentityService()
+    """EntityIdentityGenerator MUST delegate to the canonical transformation path."""
+    service = EntityIdentityGenerator()
     record = {
         "activity_id": "A1",
         "value": 10,
@@ -82,7 +82,7 @@ def test_content_hash_service_matches_canonical_transform_contract() -> None:
 
 def test_content_hash_future_meta_field_contract() -> None:
     """Future underscore-prefixed technical fields MUST NOT alter content hash."""
-    service = IdentityService()
+    service = EntityIdentityGenerator()
 
     base = {"activity_id": "A1", "value": 10}
     with_future_meta = {
@@ -97,8 +97,8 @@ def test_content_hash_future_meta_field_contract() -> None:
 
 
 def test_content_hash_schema_include_exclude_contract() -> None:
-    """Schema include/exclude policy MUST be applied by IdentityService."""
-    service = IdentityService(
+    """Schema include/exclude policy MUST be applied by EntityIdentityGenerator."""
+    service = EntityIdentityGenerator(
         content_hash_include_fields={"activity_id", "value", "ignore_me"},
         content_hash_exclude_fields={"ignore_me"},
     )

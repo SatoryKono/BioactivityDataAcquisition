@@ -109,14 +109,14 @@ def test_control_plane_api_reexports_canonical_control_plane_services() -> None:
     """Control-plane API should expose canonical admin and inspection seams."""
     from bioetl.composition.control_plane_api import (
         get_adr_service as canonical_get_adr_service,
-        get_checkpoint_manager as canonical_get_checkpoint_manager,
+        get_checkpoint_runtime_service as canonical_get_checkpoint_runtime_service,
         get_config_service as canonical_get_config_service,
     )
-    from bioetl.composition.resources_api import get_checkpoint_manager
+    from bioetl.composition.resources_api import get_checkpoint_runtime_service
     from bioetl.composition.services_api import get_adr_service, get_config_service
 
     assert canonical_get_adr_service is get_adr_service
-    assert canonical_get_checkpoint_manager is get_checkpoint_manager
+    assert canonical_get_checkpoint_runtime_service is get_checkpoint_runtime_service
     assert canonical_get_config_service is get_config_service
 
 
@@ -128,10 +128,10 @@ def test_health_api_reexports_canonical_health_services() -> None:
     from bioetl.composition.health_api import (
         HealthServerDependencies,
         get_health_service as canonical_get_health_service,
-        get_quarantine_manager as canonical_get_quarantine_manager,
+        get_quarantine_runtime_service as canonical_get_quarantine_runtime_service,
         get_quarantine_service as canonical_get_quarantine_service,
     )
-    from bioetl.composition.resources_api import get_quarantine_manager
+    from bioetl.composition.resources_api import get_quarantine_runtime_service
     from bioetl.composition.services_api import (
         get_health_service,
         get_quarantine_service,
@@ -139,7 +139,7 @@ def test_health_api_reexports_canonical_health_services() -> None:
 
     assert HealthServerDependencies is CanonicalHealthServerDependencies
     assert canonical_get_health_service is get_health_service
-    assert canonical_get_quarantine_manager is get_quarantine_manager
+    assert canonical_get_quarantine_runtime_service is get_quarantine_runtime_service
     assert canonical_get_quarantine_service is get_quarantine_service
 
 

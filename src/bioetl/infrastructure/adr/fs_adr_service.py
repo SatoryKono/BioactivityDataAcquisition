@@ -388,4 +388,5 @@ class FilesystemAdrCatalog(AdrServicePort):
             issues=issues,
         )
 
+
 __all__ = ["FilesystemAdrCatalog"]

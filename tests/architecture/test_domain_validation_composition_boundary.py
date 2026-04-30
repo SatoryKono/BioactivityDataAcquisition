@@ -47,11 +47,11 @@ def test_composite_validation_domain_module_has_no_factory_helper() -> None:
     )
 
 
-def test_composite_validation_service_init_has_no_hardcoded_collaborators() -> None:
-    """CompositeValidationService.__init__ should not construct its own collaborators."""
+def test_composite_validator_init_has_no_hardcoded_collaborators() -> None:
+    """CompositeValidator.__init__ should not construct its own collaborators."""
     init_fn = _get_method(
         _load_tree(DOMAIN_FILE),
-        "CompositeValidationService",
+        "CompositeValidator",
         "__init__",
     )
     violations = _find_constructor_calls(
@@ -59,27 +59,27 @@ def test_composite_validation_service_init_has_no_hardcoded_collaborators() -> N
         {
             "AggregationValidator",
             "CrossValidationValidator",
-            "PreflightGovernanceService",
+            "PreflightGovernor",
         },
     )
 
     assert not violations, (
-        "CompositeValidationService.__init__ still constructs dependencies:\n"
+        "CompositeValidator.__init__ still constructs dependencies:\n"
         + "\n".join(f"  - {violation}" for violation in violations)
     )
 
 
 def test_validate_composite_has_no_method_level_governance_instantiation() -> None:
-    """validate_composite() should pass governance data, not create a service."""
+    """validate_composite() should pass governance data, not create a governor."""
     validate_fn = _get_method(
         _load_tree(DOMAIN_FILE),
-        "CompositeValidationService",
+        "CompositeValidator",
         "validate_composite",
     )
-    violations = _find_constructor_calls(validate_fn, {"PreflightGovernanceService"})
+    violations = _find_constructor_calls(validate_fn, {"PreflightGovernor"})
 
     assert not violations, (
-        "validate_composite() still instantiates PreflightGovernanceService:\n"
+        "validate_composite() still instantiates PreflightGovernor:\n"
         + "\n".join(f"  - {violation}" for violation in violations)
     )
 

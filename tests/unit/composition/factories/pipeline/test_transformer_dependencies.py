@@ -14,9 +14,9 @@ from bioetl.domain.ports.noop import (
     NoOpPiiHasher,
     NoOpTracing,
 )
-from bioetl.domain.services import IdentityService
+from bioetl.domain.services import EntityIdentityGenerator
 from bioetl.domain.services.data_normalization_service import (
-    DefaultDataNormalizationService,
+    DefaultDataNormalizer,
 )
 
 
@@ -63,9 +63,9 @@ class TestBuildTransformerDependencies:
 
         assert isinstance(result.tracer, NoOpTracing)
         assert isinstance(result.metrics, NoOpMetrics)
-        assert isinstance(result.identity_service, IdentityService)
+        assert isinstance(result.identity_service, EntityIdentityGenerator)
         assert result.identity_service._content_hash_include_fields == {"doi", "title"}
         assert result.identity_service._content_hash_exclude_fields == {"tmp"}
         assert isinstance(result.pii_hasher, NoOpPiiHasher)
-        assert isinstance(result.data_normalizer, DefaultDataNormalizationService)
+        assert isinstance(result.data_normalizer, DefaultDataNormalizer)
         assert result.contract_policy.primary_key == ["entity_id"]

@@ -129,9 +129,7 @@ class SemanticScholarAdapter(
     title_fallback_handler: SemanticScholarTitleFallbackHandler | None = None
 
     provider_name: str = field(init=False, default="semanticscholar")
-    _fallback_fetch_service: FallbackFetchOrchestrator = field(
-        init=False, repr=False
-    )
+    _fallback_fetch_service: FallbackFetchOrchestrator = field(init=False, repr=False)
     _fallback_decorator: ComposableFallbackDecorator = field(init=False, repr=False)
 
     def __post_init__(self) -> None:

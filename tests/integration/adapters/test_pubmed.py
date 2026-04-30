@@ -17,9 +17,6 @@ from bioetl.infrastructure.adapters.pubmed import ENTREZ_API_BASE, PubMedAdapter
 from tests.integration.adapters.pubmed_integration_support import (
     build_pubmed_articles_xml,
     build_pubmed_search_ids,
-    http_client,
-    mock_logger,
-    pubmed_adapter,
 )
 
 # VCR cassette directory for PubMed adapter tests

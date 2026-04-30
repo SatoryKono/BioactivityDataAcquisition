@@ -99,9 +99,7 @@ ______________________________________________________________________
 Checkpoint/quarantine naming is role-driven: runtime collaborators use
 `*RuntimeService`, while operator/admin inspection surfaces use
 `CheckpointService` and `QuarantineService` under `application/services/`.
-Manager-style names such as `CheckpointManager`, `CheckpointManagerService`,
-`QuarantineManager`, and `QuarantineManagerService` remain only as compatibility
-aliases in defining modules and are not preferred for new code.
+Manager-style names such as `CheckpointManager`, `CheckpointManagerService`, `QuarantineManager`, and `QuarantineManagerService` are retired from first-party code.
 
 **Data Sources:**
 
@@ -133,7 +131,7 @@ factory = GenericPipelineFactory(
 - **MUST NOT**: Пайплайн не создаёт трансформер внутри себя
 - **Template Method**: `BaseTransformer` определяет скелет алгоритма, подклассы реализуют `transform_impl()`. Примечание: `extract_business_data()` — метод промежуточных базовых классов `BaseChemblTransformer` (`base_chembl_transformer.py:160`) и `BasePublicationTransformer` (`base_publication_transformer.py:54`), не `BaseTransformer`.
 - **Explicit DI**: runtime collaborators трансформера (`TracingPort`, `MetricsPort`,
-  `IdentityService`, `PiiHasherPort`, `DataNormalizationPort`, `ContractPolicyPort`)
+  `EntityIdentityGenerator`, `PiiHasherPort`, `DataNormalizationPort`, `ContractPolicyPort`)
   канонически собираются в composition и передаются как явный dependency bundle;
   прямое no-arg создание трансформеров допускается только как compatibility path.
 - **Если трансформер не передан**: `transform_bronze_to_silver()` выбрасывает `NotImplementedError`
