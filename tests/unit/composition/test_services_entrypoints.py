@@ -298,7 +298,9 @@ class TestGetPipelineRunnerService:
             result = get_pipeline_runner_service()
 
         mock_ensure.assert_called_once()
-        mock_bootstrap.assert_called_once_with("bootstrap_pipeline_runner_service", registry=None)
+        mock_bootstrap.assert_called_once_with(
+            "bootstrap_pipeline_runner_service", registry=None
+        )
         assert result is mock_service
 
     def test_passes_explicit_registry_to_registration_and_bootstrap(self) -> None:
@@ -408,9 +410,7 @@ class TestGetHealthServerDependencies:
             result = get_health_server_dependencies()
 
         mock_ensure.assert_called_once()
-        mock_bootstrap.assert_called_once_with(
-            "bootstrap_health_server_dependencies"
-        )
+        mock_bootstrap.assert_called_once_with("bootstrap_health_server_dependencies")
         assert result is mock_deps
 
 

@@ -279,7 +279,7 @@
     },
     "content_domain_crossmark_restriction": {
       "type": [
-        "boolean",
+        "object",
         "null"
       ],
       "nullable": true,

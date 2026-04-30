@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 from tests.architecture._test_matrix_policy_support import (
     ROOT,
     TESTS_DIR,
@@ -10,6 +12,7 @@ from tests.architecture._test_matrix_policy_support import (
 )
 
 import pytest
+import yaml
 
 
 @pytest.mark.architecture
@@ -229,4 +232,23 @@ class TestFixtureGovernanceRollout:
                 assert (
                     "uv run python scripts/ops/migrations/active/backfill_vcr_metadata_sidecars.py --check"
                     in workflow
+                )
+
+    def test_partial_rollout_entries_carry_review_dates_and_targets(self) -> None:
+        matrix = load_matrix()
+        ledger_path = ROOT / matrix["fixture_governance"]["governance_ledger_location"]
+        ledger = yaml.safe_load(ledger_path.read_text(encoding="utf-8"))
+
+        for entry in ledger["entries"]:
+            status = entry.get("status")
+            if status != "partial":
+                continue
+            assert entry["last_reviewed"].startswith("2026-")
+            assert entry["target_resolution_date"].startswith("2026-")
+            for relative_path in (
+                entry["current_evidence_paths"] + entry["artifact_paths"]
+            ):
+                assert (ROOT / Path(relative_path)).exists(), (
+                    f"fixture-governance ledger path is missing for {entry['field']}: "
+                    f"{relative_path}"
                 )

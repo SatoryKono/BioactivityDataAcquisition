@@ -76,6 +76,16 @@ BUILD_DIRS: tuple[str, ...] = (
     ".eggs",
 )
 
+# Root-level local output directories that violate root hygiene when left behind.
+ROOT_LOCAL_OUTPUT_DIRS: tuple[str, ...] = (
+    ".coverage-sharded",
+    "node_modules",
+    "test-output",
+)
+
+# Root-level log/output directories that are forbidden by root hygiene.
+ROOT_LOG_OUTPUT_DIRS: tuple[str, ...] = ("logs",)
+
 # Egg-info patterns
 EGGINFO_PATTERN = "*.egg-info"
 
@@ -360,6 +370,35 @@ def _find_build_dirs(
     return targets
 
 
+def _find_root_output_dirs(
+    root: Path,
+    *,
+    blocked_cleanup_paths: frozenset[str],
+    include_logs: bool,
+) -> list[CleanupTarget]:
+    """Find root-level local output directories forbidden by root hygiene."""
+    targets: list[CleanupTarget] = []
+    dir_names = list(ROOT_LOCAL_OUTPUT_DIRS)
+    if include_logs:
+        dir_names.extend(ROOT_LOG_OUTPUT_DIRS)
+
+    for name in dir_names:
+        candidate = root / name
+        if (
+            candidate.exists()
+            and candidate.is_dir()
+            and not _is_excluded_cleanup_path(
+                root,
+                candidate,
+                blocked_cleanup_paths=blocked_cleanup_paths,
+            )
+        ):
+            category = "log" if name in ROOT_LOG_OUTPUT_DIRS else "root_output"
+            targets.append(_dir_target(candidate, category))
+
+    return targets
+
+
 def _find_coverage_files(
     root: Path,
     *,
@@ -493,6 +532,13 @@ def find_cleanup_targets(
     )
     targets.extend(
         _find_build_dirs(root, blocked_cleanup_paths=effective_blocked_paths)
+    )
+    targets.extend(
+        _find_root_output_dirs(
+            root,
+            blocked_cleanup_paths=effective_blocked_paths,
+            include_logs=include_logs,
+        )
     )
     targets.extend(
         _find_coverage_files(root, blocked_cleanup_paths=effective_blocked_paths)

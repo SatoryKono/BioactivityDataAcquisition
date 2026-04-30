@@ -68,6 +68,8 @@ PIPELINE_RUNTIME_REGISTRY = MetricRegistryFamily(
             _metrics.REPLAY_RECONSTRUCTABILITY_EVENTS_TOTAL
         ),
         "bioetl_metrics_publication_events_total": _metrics.METRICS_PUBLICATION_EVENTS_TOTAL,
+        "bioetl_workflow_runs_total": _metrics.WORKFLOW_RUNS_TOTAL,
+        "bioetl_workflow_step_events_total": _metrics.WORKFLOW_STEP_EVENTS_TOTAL,
     },
     gauges={
         "bioetl_memory_pressure_state": _metrics.MEMORY_PRESSURE_STATE,
@@ -85,6 +87,7 @@ PIPELINE_RUNTIME_REGISTRY = MetricRegistryFamily(
         "bioetl_control_plane_read_duration_seconds": _metrics.CONTROL_PLANE_READ_DURATION_SECONDS,
         "bioetl_checkpoint_operator_duration_seconds": _metrics.CHECKPOINT_OPERATOR_DURATION_SECONDS,
         "bioetl_checkpoint_save_duration_seconds": _metrics.CHECKPOINT_SAVE_DURATION_SECONDS,
+        "bioetl_workflow_step_duration_seconds": _metrics.WORKFLOW_STEP_DURATION_SECONDS,
     },
 )
 

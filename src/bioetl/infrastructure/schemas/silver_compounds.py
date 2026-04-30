@@ -72,25 +72,25 @@ UNIPROT_PROTEIN_SCHEMA = pa.schema(
         pa.field("acetylation", pa.string()),  # PTM: acetylation sites
         pa.field("active_sites", pa.string()),  # JSON: ft_act_site features
         pa.field("activity_regulation", pa.string()),  # cc_activity_regulation
-        pa.field("annotation_score", pa.int64()),  # Quality score 1-5
         pa.field("alternative_products", pa.string()),  # cc_alternative_products
+        pa.field("annotation_score", pa.int64()),  # Quality score 1-5
         pa.field("binding_sites", pa.string()),  # JSON: ft_binding features
-        pa.field("catalytic_activity", pa.string()),  # cc_catalytic_activity
-        pa.field("cellular_component", pa.string()),  # GO aspect C
-        pa.field("chembl_ids", pa.string()),  # ChEMBL target cross-refs (JSON array)
-        pa.field("cofactors", pa.string()),  # cc_cofactor
         pa.field(
             "biophysicochemical_properties", pa.string()
         ),  # cc_biophysicochemical_properties
-        pa.field("cross_reference_count", pa.int64()),  # Cross-reference count
+        pa.field("catalytic_activity", pa.string()),  # cc_catalytic_activity
         pa.field("caution", pa.string()),  # cc_caution
+        pa.field("cellular_component", pa.string()),  # GO aspect C
+        pa.field("chembl_ids", pa.string()),  # ChEMBL target cross-refs (JSON array)
+        pa.field("cofactors", pa.string()),  # cc_cofactor
+        pa.field("cross_reference_count", pa.int64()),  # Cross-reference count
         pa.field("disease_involvement", pa.string()),  # cc_disease
         pa.field("disulfide_bond", pa.string()),  # PTM: disulfide bonds
         pa.field("domains", pa.string()),  # JSON: ft_domain features
         pa.field("drugbank_ids", pa.string()),  # DrugBank cross-refs (JSON array)
         pa.field("entry_created", pa.string()),  # UniProt first public date
-        pa.field("entry_name", pa.string()),  # UniProt entry name (e.g., FA10_HUMAN)
         pa.field("entry_modified", pa.string()),  # UniProt last annotation update
+        pa.field("entry_name", pa.string()),  # UniProt entry name (e.g., FA10_HUMAN)
         pa.field("entry_type", pa.string()),  # Swiss-Prot / TrEMBL label
         pa.field("entry_version", pa.int64()),  # UniProt entry audit version
         pa.field("feature_count", pa.int64()),  # Feature count
@@ -144,8 +144,8 @@ UNIPROT_PROTEIN_SCHEMA = pa.schema(
         pa.field("sequence_modified", pa.string()),  # Sequence last modified date
         pa.field("signal_peptide", pa.string()),  # Structural: signal peptide
         pa.field("similarity_comment", pa.string()),  # cc_similarity
-        pa.field("subunit", pa.string()),  # cc_subunit
         pa.field("subcellular_location", pa.string()),  # cc_subcellular_location
+        pa.field("subunit", pa.string()),  # cc_subunit
         pa.field("superkingdom", pa.string()),  # Taxonomy: superkingdom
         pa.field("taxonomy_id", pa.int64()),  # NCBI Taxonomy ID
         pa.field("tissue_specificity", pa.string()),  # cc_tissue_specificity
