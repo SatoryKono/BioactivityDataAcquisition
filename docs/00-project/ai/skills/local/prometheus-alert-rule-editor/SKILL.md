@@ -1,3 +1,8 @@
+> Mirror status: This file is a published/internal mirror under `docs/00-project/ai/**`. It is not a canonical runtime surface.
+> Canonical runtime source:
+> - Gemini: `/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/.codex/skills/prometheus-alert-rule-editor/SKILL.md`
+> Governance: [AI Runtime Mirror Ownership](../../../agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md), [Memory Usage](../../../agents/guides/MEMORY_USAGE.md), [Post-Change Validation](../../../agents/policy/POST_CHANGE_VALIDATION.md).
+> Edit the runtime source first, then refresh this mirror.
 ______________________________________________________________________
 
 ## name: prometheus-alert-rule-editor description: Create, review, and safely update Prometheus-backed alert rules, including expressions, labels, annotations, severity, and rule-group structure. Use when tasks touch alert behavior in Prometheus or Grafana-managed Prometheus alerting.

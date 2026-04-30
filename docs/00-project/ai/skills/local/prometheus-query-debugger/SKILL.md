@@ -1,3 +1,8 @@
+> Mirror status: This file is a published/internal mirror under `docs/00-project/ai/**`. It is not a canonical runtime surface.
+> Canonical runtime source:
+> - Gemini: `/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/.codex/skills/prometheus-query-debugger/SKILL.md`
+> Governance: [AI Runtime Mirror Ownership](../../../agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md), [Memory Usage](../../../agents/guides/MEMORY_USAGE.md), [Post-Change Validation](../../../agents/policy/POST_CHANGE_VALIDATION.md).
+> Edit the runtime source first, then refresh this mirror.
 ______________________________________________________________________
 
 ## name: prometheus-query-debugger description: Debug PromQL semantics, empty results, aggregation mistakes, histogram queries, and `No data` versus `0` behavior. Use when Prometheus-backed Grafana panels, recording rules, or alert expressions behave unexpectedly.

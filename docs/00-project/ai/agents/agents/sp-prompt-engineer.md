@@ -1,3 +1,8 @@
+> Mirror status: This file is a published/internal mirror under `docs/00-project/ai/**`. It is not a canonical runtime surface.
+> Canonical runtime source:
+> - Gemini: `/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/.gemini/agents/sp-prompt-engineer.md`
+> Governance: [AI Runtime Mirror Ownership](../policy/AI_RUNTIME_MIRROR_OWNERSHIP.md), [Memory Usage](../guides/MEMORY_USAGE.md), [Post-Change Validation](../policy/POST_CHANGE_VALIDATION.md).
+> Edit the runtime source first, then refresh this mirror.
 ______________________________________________________________________
 
 ## name: sp-prompt-engineer description: "Use this agent when you need to design, optimize, test, or evaluate prompts for large language models in production systems." tools: Read, Write, Edit, Bash, Glob, Grep model: sonnet

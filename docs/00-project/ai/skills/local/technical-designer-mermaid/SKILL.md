@@ -1,3 +1,8 @@
+> Mirror status: This file is a published/internal mirror under `docs/00-project/ai/**`. It is not a canonical runtime surface.
+> Canonical runtime source:
+> - Gemini: `/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/.codex/skills/technical-designer-mermaid/SKILL.md`
+> Governance: [AI Runtime Mirror Ownership](../../../agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md), [Memory Usage](../../../agents/guides/MEMORY_USAGE.md), [Post-Change Validation](../../../agents/policy/POST_CHANGE_VALIDATION.md).
+> Edit the runtime source first, then refresh this mirror.
 ______________________________________________________________________
 
 ## name: technical-designer-mermaid description: Design technical diagrams in Mermaid syntax for architecture, data flows, API interactions, domain models, and process behavior. Supports generic Mermaid tasks and BioETL project mode with ADR-040 compliance, lint/render workflow, and repository file conventions. Use when users ask for Mermaid diagrams, mention common typos like "merimad/merimd", convert text/design docs into diagrams, or improve existing Mermaid blocks.

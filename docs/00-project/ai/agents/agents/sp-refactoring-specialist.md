@@ -1,3 +1,8 @@
+> Mirror status: This file is a published/internal mirror under `docs/00-project/ai/**`. It is not a canonical runtime surface.
+> Canonical runtime source:
+> - Gemini: `/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/.gemini/agents/sp-refactoring-specialist.md`
+> Governance: [AI Runtime Mirror Ownership](../policy/AI_RUNTIME_MIRROR_OWNERSHIP.md), [Memory Usage](../guides/MEMORY_USAGE.md), [Post-Change Validation](../policy/POST_CHANGE_VALIDATION.md).
+> Edit the runtime source first, then refresh this mirror.
 ______________________________________________________________________
 
 ## name: sp-refactoring-specialist description: "Use when you need to transform poorly structured, complex, or duplicated code into clean, maintainable systems while preserving all existing behavior." tools: Read, Write, Edit, Bash, Glob, Grep model: sonnet

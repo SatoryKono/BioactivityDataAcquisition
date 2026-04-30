@@ -140,7 +140,8 @@ Canonical naming rules:
 - labels remain bounded and MUST NOT include `run_id`, filesystem paths,
   manifest identifiers, or other high-cardinality runtime anchors
 - adapter `endpoint` labels MUST be normalized to bounded route templates
-- filter `source_file` labels MUST be normalized to bounded basename tokens
+- filter `source_kind` labels MUST use a bounded source vocabulary; raw file/path
+  identity MUST NOT be published as Prometheus labels
 - adapter `operation` labels MUST use reviewed bounded vocabularies; unknown
   values collapse to `other`
 - runtime `stage` and lifecycle/composite `phase` labels MUST use canonical

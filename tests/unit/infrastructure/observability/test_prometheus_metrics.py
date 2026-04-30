@@ -9,6 +9,7 @@ import pytest
 from bioetl.infrastructure.observability.prometheus_metric_label_policies import (
     normalize_adapter_operation_label,
     normalize_dq_disposition,
+    normalize_filter_source_kind_label,
     normalize_flow_stage,
     normalize_observability_mode,
     normalize_postrun_phase,
@@ -110,10 +111,10 @@ class TestPrometheusMetrics:
                 labels={"label": "value"},
             )
 
-    def test_filter_source_metrics_normalize_source_file_label(
+    def test_filter_source_metrics_normalize_source_kind_label(
         self, prometheus_metrics
     ):
-        """Filter-source metrics must not emit raw path labels."""
+        """Filter-source metrics must emit bounded source-kind labels."""
         with patch.dict(
             COUNTERS,
             {"bioetl_filter_ids_loaded_total": MagicMock()},
@@ -123,17 +124,33 @@ class TestPrometheusMetrics:
                 value=7,
                 labels={
                     "pipeline": "chembl_activity",
-                    "source_file": r"filters\Activity IDs.csv",
+                    "source_kind": "csv-single-column",
                 },
             )
 
             COUNTERS["bioetl_filter_ids_loaded_total"].labels.assert_called_once_with(
                 pipeline="chembl_activity",
-                source_file="csv_file",
+                source_kind="csv_single_column",
             )
             COUNTERS[
                 "bioetl_filter_ids_loaded_total"
             ].labels().inc.assert_called_once_with(7)
+
+    def test_filter_source_metrics_reject_source_file_label(self, prometheus_metrics):
+        """Raw filter source paths must not be accepted as metric labels."""
+        with patch.dict(
+            COUNTERS,
+            {"bioetl_filter_ids_loaded_total": MagicMock()},
+        ):
+            with pytest.raises(ValueError, match="source_file"):
+                prometheus_metrics.increment_counter(
+                    name="bioetl_filter_ids_loaded_total",
+                    value=7,
+                    labels={
+                        "pipeline": "chembl_activity",
+                        "source_file": r"filters\Activity IDs.csv",
+                    },
+                )
 
     def test_adapter_endpoint_metrics_normalize_dynamic_endpoint_labels(
         self, prometheus_metrics
@@ -578,6 +595,20 @@ class TestPrometheusMetrics:
     def test_normalize_source_file_label(self, raw_value: str, expected: str):
         """Source file labels should collapse to bounded source classes."""
         assert normalize_source_file_label(raw_value) == expected
+
+    @pytest.mark.parametrize(
+        ("raw_value", "expected"),
+        [
+            ("csv-single-column", "csv_single_column"),
+            ("csv_multi_column", "csv_multi_column"),
+            ("unknown/path.csv", "other"),
+        ],
+    )
+    def test_normalize_filter_source_kind_label(
+        self, raw_value: str, expected: str
+    ) -> None:
+        """Filter source kinds should stay within the bounded vocabulary."""
+        assert normalize_filter_source_kind_label(raw_value) == expected
 
     @pytest.mark.parametrize(
         ("raw_value", "expected"),

@@ -334,11 +334,13 @@ Guardrail:
 
 | Метрика                                   | Тип     | Labels                | Описание            |
 | ----------------------------------------- | ------- | --------------------- | ------------------- |
-| `bioetl_filter_ids_loaded_total`          | Counter | pipeline, source_file | Загруженные ID      |
-| `bioetl_filter_ids_duplicates_total`      | Counter | pipeline, source_file | Дубликаты ID        |
-| `bioetl_filter_combinations_loaded_total` | Counter | pipeline, source_file | Комбинации фильтров |
+| `bioetl_filter_ids_loaded_total`          | Counter | pipeline, source_kind | Загруженные ID      |
+| `bioetl_filter_ids_duplicates_total`      | Counter | pipeline, source_kind | Дубликаты ID        |
+| `bioetl_filter_combinations_loaded_total` | Counter | pipeline, source_kind | Комбинации фильтров |
 
-`source_file` в этих family не должен содержать raw paths. Канонический label
+`source_kind` в этих family должен использовать bounded vocabulary
+(`csv_single_column`, `csv_multi_column`, `direct_ids`, `direct_multi_ids`, `other`).
+Raw paths остаются в логах/manifest surfaces, а не в Prometheus labels.
 shape — normalized basename token (`activity_ids.csv`), неизвестные или
 неразборчивые значения схлопываются в `unknown`.
 

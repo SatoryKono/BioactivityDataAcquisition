@@ -76,7 +76,9 @@ Cross-links for canonical observability governance:
 
 - `endpoint` для adapter request metrics MUST публиковаться как bounded
   route-template (`/works/{id}`, а не `/works/123456789`)
-- `source_file` для filter metrics MUST публиковаться как normalized basename
+- `source_kind` для filter metrics MUST публиковаться как bounded vocabulary
+  (`csv_single_column`, `csv_multi_column`, `direct_ids`, `direct_multi_ids`, `other`);
+  raw file/path identity MUST NOT be used as a Prometheus label
   token; raw paths и user/data-dependent filenames outside the bounded token
   shape запрещены
 - `operation` для adapter fallback/retry/error families MUST использовать

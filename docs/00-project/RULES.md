@@ -804,8 +804,8 @@ pmid → pmid → pubmed-id
 | `bioetl_records_processed_total`   | Counter   | pipeline, stage, run_type         | Количество обработанных записей |
 | `bioetl_errors_total`              | Counter   | pipeline, stage, error_code       | Количество ошибок по типам      |
 | `bioetl_batch_size_records`        | Histogram | pipeline, stage                   | Распределение размеров батчей   |
-| `bioetl_filter_ids_loaded_total`   | Counter   | pipeline, source_file             | Загружено ID для фильтрации     |
-| `bioetl_filter_ids_duplicates_total` | Counter | pipeline, source_file             | Дубликаты в файле фильтрации    |
+| `bioetl_filter_ids_loaded_total`   | Counter   | pipeline, source_kind             | Загружено ID для фильтрации     |
+| `bioetl_filter_ids_duplicates_total` | Counter | pipeline, source_kind             | Дубликаты в файле фильтрации    |
 
 Для runtime `stage`/`phase` labels используйте только bounded vocabulary:
 
@@ -820,7 +820,8 @@ pmid → pmid → pubmed-id
 
 - `endpoint` MUST быть нормализован к bounded route-template виду
   (`/works/{id}`, а не `/works/123456789`)
-- `source_file` MUST публиковаться как bounded normalized basename token
+- `source_kind` MUST публиковаться как bounded source vocabulary; raw file/path
+  identity MUST NOT appear in Prometheus labels
 - `operation` MUST использовать reviewable bounded vocabulary; неизвестные
   значения схлопываются в `other`
 

@@ -83,7 +83,12 @@ async def test_write_silver_metadata_emits_canonical_success_metric() -> None:
             error_records=0,
             warning_records=0,
         ),
-        records=[{"entity_id": "CHEMBL1"}],
+        records=[
+            {
+                "entity_id": "CHEMBL1",
+                "_ingestion_ts": datetime(2025, 1, 15, 12, 0, tzinfo=UTC).isoformat(),
+            }
+        ],
     )
 
     metrics.increment_counter.assert_called_once_with(

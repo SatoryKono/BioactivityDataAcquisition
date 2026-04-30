@@ -1,3 +1,8 @@
+> Mirror status: This file is a published/internal mirror under `docs/00-project/ai/**`. It is not a canonical runtime surface.
+> Canonical runtime source:
+> - Gemini: `/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/.codex/skills/nci-analysis/SKILL.md`
+> Governance: [AI Runtime Mirror Ownership](../../../agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md), [Memory Usage](../../../agents/guides/MEMORY_USAGE.md), [Post-Change Validation](../../../agents/policy/POST_CHANGE_VALIDATION.md).
+> Edit the runtime source first, then refresh this mirror.
 ______________________________________________________________________
 
 ## name: nci-analysis description: Use when asked to analyze content for manipulation, propaganda, disinformation patterns, or when user provides a URL or text asking "is this manipulative?", "analyze this for bias", "check for propaganda", or similar requests. Detects emotional manipulation, suspicious timing, uniform messaging, tribal division, and missing information across 20 categories. context: fork agent: general-purpose
