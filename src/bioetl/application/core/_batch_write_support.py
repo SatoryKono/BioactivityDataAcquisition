@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 
 from bioetl.application.core.quarantine_manager import (
     DQQuarantineEntry,
-    QuarantineManagerService,
+    QuarantineRuntimeService,
 )
 from bioetl.domain.aggregates.events import BatchFailed, BatchWritten, DomainEvent
 from bioetl.domain.exceptions import SchemaViolationError
@@ -86,7 +86,7 @@ async def safe_write_layer(
     *,
     execute_with_span: Callable[..., Awaitable[object]],
     writer: BatchWriter,
-    quarantine_manager: QuarantineManagerService,
+    quarantine_manager: QuarantineRuntimeService,
     logger: LoggerPort,
     run_id: RunID | None,
     domain_event_emitter: DomainEventEmitterProtocol | None,

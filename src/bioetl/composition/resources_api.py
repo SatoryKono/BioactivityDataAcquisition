@@ -9,9 +9,11 @@ if TYPE_CHECKING:
     from bioetl.composition._pipeline_execution import ArchiveOptions, VacuumOptions
     from bioetl.composition._resource_management import (
         CheckpointManagerProtocol,
+        CheckpointRuntimeServiceProtocol,
         CleanupPreviewProtocol,
         MedallionLifecycleServiceProtocol,
         QuarantineManagerProtocol,
+        QuarantineRuntimeServiceProtocol,
     )
     from bioetl.domain.types import JsonDict
 
@@ -20,8 +22,10 @@ __all__ = [
     "VacuumOptions",
     "archive_table",
     "get_checkpoint_manager",
+    "get_checkpoint_runtime_service",
     "get_lifecycle_service",
     "get_quarantine_manager",
+    "get_quarantine_runtime_service",
     "inspect_quarantine",
     "list_checkpoints",
     "preview_cleanup",
@@ -35,8 +39,10 @@ _PUBLIC_EXPORTS = {
     "VacuumOptions": _PIPELINE_EXECUTION_MODULE,
     "archive_table": _RESOURCE_MANAGEMENT_MODULE,
     "get_checkpoint_manager": _RESOURCE_MANAGEMENT_MODULE,
+    "get_checkpoint_runtime_service": _RESOURCE_MANAGEMENT_MODULE,
     "get_lifecycle_service": _RESOURCE_MANAGEMENT_MODULE,
     "get_quarantine_manager": _RESOURCE_MANAGEMENT_MODULE,
+    "get_quarantine_runtime_service": _RESOURCE_MANAGEMENT_MODULE,
     "inspect_quarantine": _RESOURCE_MANAGEMENT_MODULE,
     "list_checkpoints": _RESOURCE_MANAGEMENT_MODULE,
     "preview_cleanup": _RESOURCE_MANAGEMENT_MODULE,
@@ -49,9 +55,17 @@ if TYPE_CHECKING:
 
     def get_checkpoint_manager(pipeline: str) -> CheckpointManagerProtocol: ...
 
+    def get_checkpoint_runtime_service(
+        pipeline: str,
+    ) -> CheckpointRuntimeServiceProtocol: ...
+
     def get_lifecycle_service() -> MedallionLifecycleServiceProtocol: ...
 
     def get_quarantine_manager(pipeline: str) -> QuarantineManagerProtocol: ...
+
+    def get_quarantine_runtime_service(
+        pipeline: str,
+    ) -> QuarantineRuntimeServiceProtocol: ...
 
     async def inspect_quarantine(
         pipeline: str,

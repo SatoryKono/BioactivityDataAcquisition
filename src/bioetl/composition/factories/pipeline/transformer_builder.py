@@ -13,7 +13,7 @@ from bioetl.composition.factories.pipeline.construction_types import (
 from bioetl.composition.factories.transformer_dependencies import (
     build_transformer_dependencies,
 )
-from bioetl.domain.services import IdentityService
+from bioetl.domain.services import EntityIdentityGenerator
 from bioetl.infrastructure.config import load_pipeline_contract_policy
 
 if TYPE_CHECKING:
@@ -46,7 +46,7 @@ class TransformerBuilder:
         if transformer_class is None:
             return None
 
-        identity_service = IdentityService(
+        identity_service = EntityIdentityGenerator(
             content_hash_include_fields=set(yaml_config.content_hash.include) or None,
             content_hash_exclude_fields=set(yaml_config.content_hash.exclude),
         )

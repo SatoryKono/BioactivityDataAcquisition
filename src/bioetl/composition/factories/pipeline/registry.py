@@ -14,7 +14,7 @@ from bioetl.composition.factories.pipeline.contract_validator import create_fact
 from bioetl.composition.factories.pipeline.registry_manifest import (
     PIPELINE_CONFIGS,
 )
-from bioetl.composition.registry_api import PipelineRegistry
+from bioetl.composition.registry import PipelineRegistry
 from bioetl.composition.registry_default import get_default_registry
 from bioetl.domain.ports import PipelineFactoryPort
 

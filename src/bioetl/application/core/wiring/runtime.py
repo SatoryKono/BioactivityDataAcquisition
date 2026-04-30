@@ -37,7 +37,7 @@ from bioetl.application.core.config import (
     RecordProcessorConfig,
 )
 from bioetl.application.core.lifecycle import (
-    CheckpointManagerService,
+    CheckpointRuntimeService,
     ShutdownSignal,
 )
 from bioetl.application.core.lifecycle.batch_fsm import BatchExecutionFSM
@@ -50,7 +50,7 @@ from bioetl.application.core.protocols import (
     GoldTransformCallback,
     TransformCallback,
 )
-from bioetl.application.core.quarantine_manager import QuarantineManagerService
+from bioetl.application.core.quarantine_manager import QuarantineRuntimeService
 from bioetl.application.core.record_normalization_processor import (
     RecordNormalizationProcessor,
 )
@@ -76,14 +76,14 @@ __all__ = [
     "BatchTransformer",
     "BatchWriter",
     "BatchWriterOptions",
-    "CheckpointManagerService",
+    "CheckpointRuntimeService",
     "ContentHashPolicyByVersion",
     "ContentHashVersionPolicy",
     "GoldFilterCallback",
     "GoldTransformCallback",
     "PipelineService",
     "PipelineStorageProtocol",
-    "QuarantineManagerService",
+    "QuarantineRuntimeService",
     "RecordNormalizationProcessor",
     "RecordProcessor",
     "RecordProcessorConfig",

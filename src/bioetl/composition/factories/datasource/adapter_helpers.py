@@ -20,7 +20,7 @@ from bioetl.infrastructure.adapters.common import (
 from bioetl.infrastructure.adapters.common.api_request_collector import (
     APIRequestCollector,
 )
-from bioetl.infrastructure.adapters.error_handling import ErrorService
+from bioetl.infrastructure.adapters.error_handling import AdapterErrorHandler
 
 __all__ = [
     "AdapterHelperServices",
@@ -131,7 +131,7 @@ class AdapterHelpersFactory:
         request_collector = APIRequestCollector()
         error_handler = cast(
             ErrorHandlerPort,
-            ErrorService(logger=logger, metrics=metrics_port),
+            AdapterErrorHandler(logger=logger, metrics=metrics_port),
         )
         fallback_fetch_service = FallbackFetchOrchestrator(adapter_metrics)
         return AdapterHelperServices(
@@ -166,7 +166,7 @@ class AdapterHelpersFactory:
         request_collector = APIRequestCollector()
         error_handler = cast(
             ErrorHandlerPort,
-            ErrorService(logger=logger, metrics=metrics_port),
+            AdapterErrorHandler(logger=logger, metrics=metrics_port),
         )
         return SyncAdapterHelperServices(
             metrics=metrics_port,

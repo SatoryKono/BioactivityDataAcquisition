@@ -14,9 +14,9 @@ from uuid import UUID
 import pytest
 
 from bioetl.application.core.lifecycle.checkpoint_manager import (
-    CheckpointManagerService as CheckpointManager,
+    CheckpointRuntimeService as CheckpointManager,
 )
-from bioetl.application.core.quarantine_manager import QuarantineManagerService
+from bioetl.application.core.quarantine_manager import QuarantineRuntimeService
 from bioetl.application.services import CheckpointService, QuarantineService
 from bioetl.composition.bootstrap.assembly.checkpoint import (
     bootstrap_checkpoint_port,
@@ -151,14 +151,14 @@ class TestBootstrapQuarantineManager:
     """Tests for bootstrap_quarantine_manager function."""
 
     def test_bootstrap_quarantine_manager_returns_manager(self):
-        """Test that bootstrap_quarantine_manager returns QuarantineManagerService."""
+        """Test that bootstrap_quarantine_manager returns QuarantineRuntimeService."""
         with patch(
             "bioetl.composition.bootstrap.assembly.checkpoint.get_settings"
         ) as mock_settings:
             mock_settings.return_value = MagicMock(quarantine_path=QUARANTINE_PATH)
             result = bootstrap_quarantine_manager("test_pipeline")
 
-        assert isinstance(result, QuarantineManagerService)
+        assert isinstance(result, QuarantineRuntimeService)
 
     def test_bootstrap_quarantine_manager_passes_pipeline_name(self):
         """Test that bootstrap_quarantine_manager passes pipeline name correctly."""
@@ -178,7 +178,7 @@ class TestBootstrapQuarantineManager:
             mock_settings.return_value = MagicMock(quarantine_path=QUARANTINE_PATH)
             result = bootstrap_quarantine_manager("test_pipeline")
 
-        # QuarantineManagerService uses _quarantine attribute
+        # QuarantineRuntimeService uses _quarantine attribute
         assert isinstance(result._quarantine, UnifiedQuarantineAdapter)
 
 

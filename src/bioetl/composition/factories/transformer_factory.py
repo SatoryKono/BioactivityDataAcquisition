@@ -28,7 +28,7 @@ if TYPE_CHECKING:
         PiiHasherPort,
         TracingPort,
     )
-    from bioetl.domain.services import IdentityService
+    from bioetl.domain.services import EntityIdentityGenerator
 
 # Mapping of (provider, entity_type) to transformer class
 _TRANSFORMER_REGISTRY: dict[tuple[str, str], type[BaseTransformer]] = {}
@@ -72,7 +72,7 @@ def create_transformer(
     metrics: MetricsPort | None = None,
     silver_filters: SilverFilterConfig | None = None,
     gold_filters: GoldFilterConfig | None = None,
-    identity_service: IdentityService | None = None,
+    identity_service: EntityIdentityGenerator | None = None,
     pii_hasher: PiiHasherPort | None = None,
     data_normalizer: DataNormalizationPort | None = None,
     contract_policy: ContractPolicyProtocol | None = None,

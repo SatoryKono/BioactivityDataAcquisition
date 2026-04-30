@@ -61,10 +61,10 @@ def extract_pipeline_callbacks(pipeline: BasePipeline) -> PipelineCallbacksConte
 def create_data_normalization_service(
     config: DataNormalizationConfig | None = None,
 ) -> DataNormalizationPort:
-    """Create DataNormalizationService with optional configuration."""
+    """Create the canonical data normalizer with optional configuration."""
     from bioetl.domain.services import (
         DataNormalizationConfig,
-        DefaultDataNormalizationService,
+        DefaultDataNormalizer,
     )
 
-    return DefaultDataNormalizationService(config=config or DataNormalizationConfig())
+    return DefaultDataNormalizer(config=config or DataNormalizationConfig())

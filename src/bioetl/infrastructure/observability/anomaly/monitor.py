@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-__all__ = ["DataQualityMonitorService"]
+__all__ = ["DataQualityMonitor"]
 
 
 from datetime import datetime
@@ -17,7 +17,7 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
 
 
-class DataQualityMonitorService:
+class DataQualityMonitor:
     """Monitor data quality metrics and detect issues.
 
     Combines multiple detectors to monitor:
@@ -27,7 +27,7 @@ class DataQualityMonitorService:
     - Validation failure rates
 
     Usage:
-        monitor = DataQualityMonitorService(logger=my_logger)
+        monitor = DataQualityMonitor(logger=my_logger)
         monitor.add_metric("record_count", baseline=[1000, 1050, 980])
 
         issues = monitor.check_quality({

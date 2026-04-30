@@ -13,12 +13,6 @@ suffix_boundary_rules:
     exclude_path_prefixes:
       - src/bioetl/domain/ports/
     allowed_symbol_exceptions:
-      - symbol: EnumLoaderPort
-        path: src/bioetl/domain/config/enum_loader.py
-        issue: "#3396"
-        reason: >
-          Domain-adjacent enum loader contract still uses the legacy *Port name
-          outside domain/ports and remains pending terminology cleanup.
       - symbol: DataSourceCreatorPort
         path: src/bioetl/composition/factories/__init__.py
         issue: "#3401"
@@ -28,34 +22,15 @@ suffix_boundary_rules:
 
   - rule_id: composition_infrastructure_service_suffix
     description: >
-      Composition and infrastructure layers must not grow new *Service classes
-      without explicit ADR-041 review. The current surfaces remain as tracked debt.
+      Composition and infrastructure layers must not expose new first-party
+      *Service classes. The reviewed baseline is currently clean and must stay
+      exception-free unless ADR-041 governance is updated deliberately.
     suffixes:
       - Service
     include_path_prefixes:
       - src/bioetl/composition/
       - src/bioetl/infrastructure/
     allowed_symbol_exceptions:
-      - symbol: FsAdrService
-        path: src/bioetl/infrastructure/adr/fs_adr_service.py
-        issue: "#3399"
-        reason: Existing infrastructure naming drift pending canonical rename.
-      - symbol: ErrorService
-        path: src/bioetl/infrastructure/adapters/error_handling.py
-        issue: "#3399"
-        reason: Existing infrastructure naming drift pending canonical rename.
-      - symbol: OpenAlexCursorFlowService
-        path: src/bioetl/infrastructure/adapters/openalex/cursor_flow.py
-        issue: "#3399"
-        reason: Existing infrastructure naming drift pending canonical rename.
-      - symbol: PubChemFetchFlowService
-        path: src/bioetl/infrastructure/adapters/pubchem/fetch_flow.py
-        issue: "#3399"
-        reason: Existing infrastructure naming drift pending canonical rename.
-      - symbol: DataQualityMonitorService
-        path: src/bioetl/infrastructure/observability/anomaly/monitor.py
-        issue: "#3399"
-        reason: Existing infrastructure naming drift pending canonical rename.
 
   - rule_id: domain_service_suffix_conflict
     description: >
@@ -77,11 +52,11 @@ suffix_boundary_rules:
       - symbol: DefaultDataNormalizationService
         path: src/bioetl/domain/services/data_normalization_service.py
         issue: "#3400"
-        reason: Existing domain service surface pending canonical rename decision.
+        reason: Deprecated compatibility alias for DefaultDataNormalizer pending follow-up domain naming cleanup.
       - symbol: IdentityService
         path: src/bioetl/domain/services/identity_service.py
         issue: "#3400"
-        reason: Existing domain service surface pending canonical rename decision.
+        reason: Deprecated compatibility alias for EntityIdentityGenerator pending follow-up domain naming cleanup.
       - symbol: MergedMetadataExplainabilityService
         path: src/bioetl/domain/services/merged_metadata_explainability.py
         issue: "#3400"
@@ -101,35 +76,36 @@ suffix_boundary_rules:
       - symbol: PreflightGovernanceService
         path: src/bioetl/domain/services/preflight_governance.py
         issue: "#3400"
-        reason: Existing domain service surface pending canonical rename decision.
+        reason: Deprecated compatibility alias for PreflightGovernor pending follow-up domain naming cleanup.
 
 family_freeze_rules:
   - rule_id: runtime_admin_checkpoint_quarantine_family
     description: >
-      Checkpoint/quarantine runtime-admin naming remains frozen to the reviewed
-      four-surface set while the runtime/admin split is canonicalized.
+      Checkpoint/quarantine runtime-admin naming is role-driven: runtime write
+      collaborators use *RuntimeService, operator/admin services use *Service,
+      and manager-style names are compatibility aliases only.
     include_path_prefixes:
       - src/bioetl/application/core/
       - src/bioetl/application/services/
       - src/bioetl/composition/
-    match_regex: ^(Checkpoint(?:Manager)?Service|Quarantine(?:Manager)?Service)$
+    match_regex: ^(Checkpoint(?:Runtime|Manager)?Service|Quarantine(?:Runtime|Manager)?Service)$
     allowed_symbols:
-      - symbol: CheckpointManagerService
+      - symbol: CheckpointRuntimeService
         path: src/bioetl/application/core/lifecycle/checkpoint_manager.py
         issue: "#3398"
-        reason: Runtime checkpoint manager retained pending family consolidation.
-      - symbol: QuarantineManagerService
+        reason: Canonical runtime checkpoint collaborator.
+      - symbol: QuarantineRuntimeService
         path: src/bioetl/application/core/quarantine_manager.py
         issue: "#3398"
-        reason: Runtime quarantine manager retained pending family consolidation.
+        reason: Canonical runtime quarantine write-path collaborator.
       - symbol: CheckpointService
         path: src/bioetl/application/services/checkpoint_service.py
         issue: "#3398"
-        reason: Admin checkpoint service retained pending family consolidation.
+        reason: Canonical operator/admin checkpoint service.
       - symbol: QuarantineService
         path: src/bioetl/application/services/quarantine_service.py
         issue: "#3398"
-        reason: Admin quarantine service retained pending family consolidation.
+        reason: Canonical operator/admin quarantine service.
 
   - rule_id: column_ordering_family
     description: >

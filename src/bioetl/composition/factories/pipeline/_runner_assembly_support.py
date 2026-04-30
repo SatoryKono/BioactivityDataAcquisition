@@ -38,7 +38,7 @@ if TYPE_CHECKING:
 
     from bioetl.application.core.base import BasePipeline
     from bioetl.application.core.batch_executor import BatchExecutor
-    from bioetl.application.core.lifecycle import CheckpointManagerService
+    from bioetl.application.core.lifecycle import CheckpointRuntimeService
     from bioetl.application.core.postrun import PostrunService
     from bioetl.composition.observability import ObservabilityBundle
     from bioetl.domain.ports import LoggerPort
@@ -63,7 +63,7 @@ class RunnerAssemblyContext:
 def build_lock_manager(
     context: RunnerAssemblyContext,
     *,
-    checkpoint_manager: CheckpointManagerService,
+    checkpoint_manager: CheckpointRuntimeService,
     context_holder: LockContextHolder,
 ) -> LockCoordinator:
     """Build the lock coordinator for one assembled runner."""
@@ -134,7 +134,7 @@ def build_observer(context: RunnerAssemblyContext) -> PipelineObserver:
 def build_batch_executor(
     context: RunnerAssemblyContext,
     *,
-    checkpoint_manager: CheckpointManagerService,
+    checkpoint_manager: CheckpointRuntimeService,
     lock_manager: LockCoordinator,
     observer: PipelineObserver,
 ) -> BatchExecutor:
@@ -196,7 +196,7 @@ def build_runner_constructor_payload(
 def assemble_runner_parts(
     context: RunnerAssemblyContext,
     *,
-    checkpoint_manager_builder: Callable[..., CheckpointManagerService],
+    checkpoint_manager_builder: Callable[..., CheckpointRuntimeService],
     lock_manager_builder: Callable[..., LockCoordinator],
     preflight_service_builder: Callable[[RunnerAssemblyContext], PreflightService],
     observer_builder: Callable[[RunnerAssemblyContext], PipelineObserver],

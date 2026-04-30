@@ -33,9 +33,9 @@ def create_default_error_handler(
     Returns:
         ErrorHandlerPort implementation configured with the given logger and metrics.
     """
-    from bioetl.infrastructure.adapters.error_handling import ErrorService
+    from bioetl.infrastructure.adapters.error_handling import AdapterErrorHandler
 
-    return cast("ErrorHandlerPort", ErrorService(logger, metrics=metrics))
+    return cast("ErrorHandlerPort", AdapterErrorHandler(logger, metrics=metrics))
 
 
 def create_default_fallback_service(

@@ -6,7 +6,7 @@ import dataclasses
 from typing import TYPE_CHECKING, Any, Protocol, cast
 
 from bioetl.domain.ports import ContractPolicyProtocol
-from bioetl.domain.services import IdentityService
+from bioetl.domain.services import EntityIdentityGenerator
 from bioetl.domain.types import ContentHash, EntityID, GoldRecord
 
 if TYPE_CHECKING:
@@ -23,7 +23,7 @@ class _TransformerDependencyOwner(Protocol):
     GOLD_EXCLUDE_FIELDS: frozenset[str]
     _pii_hasher: PiiHasherPort
     _contract_policy: ContractPolicyProtocol
-    _identity: IdentityService
+    _identity: EntityIdentityGenerator
 
     @staticmethod
     def _normalize_lineage_value(field_name: str, value: object) -> object:

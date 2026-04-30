@@ -26,7 +26,7 @@ from bioetl.domain.types import JsonDict
 if TYPE_CHECKING:
     from bioetl.application.core.batch_executor import BatchExecutor
     from bioetl.application.core.lifecycle.checkpoint_manager import (
-        CheckpointManagerService,
+        CheckpointRuntimeService,
     )
     from bioetl.application.core.pipeline_services import PipelineService
     from bioetl.application.observability.pipeline_metrics import (
@@ -45,7 +45,7 @@ class _PipelineRunnerFlowHostProtocol(Protocol):
     _context: object
     _runtime: RuntimeConfig
     _executor: BatchExecutor
-    _checkpoint_manager: CheckpointManagerService
+    _checkpoint_manager: CheckpointRuntimeService
     _services: PipelineService
     _logger: LoggerPort
     _run_ledger_service: RunLedgerService | None
@@ -86,7 +86,7 @@ def _record_run_metrics_event(
 async def resolve_execution_offset(
     host: _PipelineRunnerFlowHostProtocol,
     load_checkpoint: Callable[
-        [CheckpointManagerService],
+        [CheckpointRuntimeService],
         Awaitable[CheckpointMetadata | dict[str, object] | None],
     ],
 ) -> int | None:

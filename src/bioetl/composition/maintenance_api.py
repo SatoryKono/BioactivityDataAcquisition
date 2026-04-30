@@ -11,6 +11,7 @@ __all__ = [
     "get_lifecycle_service",
     "get_bronze_cleanup_service",
     "get_contract_migration_service",
+    "get_lifecycle_service",
     "get_vacuum_service",
     "preview_cleanup",
     "vacuum_table",

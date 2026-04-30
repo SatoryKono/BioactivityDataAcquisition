@@ -6,10 +6,10 @@ from collections.abc import Callable
 from typing import TYPE_CHECKING, cast
 
 from bioetl.application.core.lifecycle.checkpoint_manager import (
-    CheckpointManagerService,
+    CheckpointRuntimeService,
 )
 from bioetl.application.services import ConfigService
-from bioetl.application.services.admin_runtime_api import QuarantineManagerService
+from bioetl.application.services.admin_runtime_api import QuarantineRuntimeService
 from bioetl.application.services.audit_inspection_service import AuditInspectionService
 from bioetl.application.services.checkpoint_service import CheckpointService
 from bioetl.application.services.config_dq_service import ConfigDQService
@@ -50,10 +50,12 @@ if TYPE_CHECKING:
 __all__ = [
     "build_cli_audit_inspection_service",
     "build_cli_checkpoint_manager",
+    "build_cli_checkpoint_runtime_service",
     "build_cli_checkpoint_service",
     "build_cli_config_service",
     "build_cli_observability_workflow_service",
     "build_cli_quarantine_manager",
+    "build_cli_quarantine_runtime_service",
     "build_cli_quarantine_service",
 ]
 
@@ -94,15 +96,49 @@ def build_cli_config_service(
     )
 
 
+def build_cli_quarantine_runtime_service(
+    *,
+    pipeline_name: str,
+    quarantine_port_factory: Callable[[], QuarantinePort],
+) -> QuarantineRuntimeService:
+    """Build the CLI quarantine runtime-service graph."""
+    return QuarantineRuntimeService(
+        quarantine_port=quarantine_port_factory(),
+        pipeline_name=pipeline_name,
+    )
+
+
 def build_cli_quarantine_manager(
     *,
     pipeline_name: str,
     quarantine_port_factory: Callable[[], QuarantinePort],
-) -> QuarantineManagerService:
-    """Build the CLI quarantine manager graph."""
-    return QuarantineManagerService(
-        quarantine_port=quarantine_port_factory(),
+) -> QuarantineRuntimeService:
+    """Compatibility wrapper for the retired manager-style builder name."""
+    return build_cli_quarantine_runtime_service(
         pipeline_name=pipeline_name,
+        quarantine_port_factory=quarantine_port_factory,
+    )
+
+
+def build_cli_checkpoint_runtime_service(
+    *,
+    pipeline_name: str,
+    run_id: RunID,
+    checkpoint_port_factory: Callable[[str], CheckpointPort],
+    logger_factory: Callable[[], LoggerPort],
+    compatibility_service_factory: Callable[
+        [LoggerPort], CheckpointCompatibilityService
+    ],
+) -> CheckpointRuntimeService:
+    """Build the CLI checkpoint runtime-service graph."""
+    logger = logger_factory()
+    return CheckpointRuntimeService(
+        checkpoint_port=checkpoint_port_factory(pipeline_name),
+        logger=logger,
+        pipeline_name=pipeline_name,
+        run_id=run_id,
+        resume=False,
+        checkpoint_compatibility_service=compatibility_service_factory(logger),
     )
 
 
@@ -115,16 +151,14 @@ def build_cli_checkpoint_manager(
     compatibility_service_factory: Callable[
         [LoggerPort], CheckpointCompatibilityService
     ],
-) -> CheckpointManagerService:
-    """Build the CLI checkpoint manager graph."""
-    logger = logger_factory()
-    return CheckpointManagerService(
-        checkpoint_port=checkpoint_port_factory(pipeline_name),
-        logger=logger,
+) -> CheckpointRuntimeService:
+    """Compatibility wrapper for the retired manager-style builder name."""
+    return build_cli_checkpoint_runtime_service(
         pipeline_name=pipeline_name,
         run_id=run_id,
-        resume=False,
-        checkpoint_compatibility_service=compatibility_service_factory(logger),
+        checkpoint_port_factory=checkpoint_port_factory,
+        logger_factory=logger_factory,
+        compatibility_service_factory=compatibility_service_factory,
     )
 
 

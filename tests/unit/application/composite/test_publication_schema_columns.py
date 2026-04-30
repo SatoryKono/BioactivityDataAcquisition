@@ -12,9 +12,7 @@ from unittest.mock import MagicMock
 import pytest
 import yaml
 
-from bioetl.application.composite.column_service import (
-    ColumnOrderService as ColumnOrderer,
-)
+from bioetl.application.composite.column_service import ColumnOrderService
 from bioetl.domain.composite.config import ColumnGroupConfig
 
 
@@ -42,10 +40,10 @@ def column_groups(publication_config: dict) -> list[ColumnGroupConfig]:
 
 
 @pytest.fixture
-def orderer(column_groups: list[ColumnGroupConfig]) -> ColumnOrderer:
-    """Create ColumnOrderer with real publication groups."""
+def orderer(column_groups: list[ColumnGroupConfig]) -> ColumnOrderService:
+    """Create ColumnOrderService with real publication groups."""
     logger = MagicMock()
-    return ColumnOrderer(logger, column_groups=column_groups)
+    return ColumnOrderService(logger, column_groups=column_groups)
 
 
 class TestCompositePublicationColumns:
@@ -85,7 +83,7 @@ class TestCompositePublicationColumns:
         assert len(all_fields) >= 90
         assert len(set(all_fields)) == len(all_fields), "Duplicate fields across groups"
 
-    def test_system_columns_at_start(self, orderer: ColumnOrderer) -> None:
+    def test_system_columns_at_start(self, orderer: ColumnOrderService) -> None:
         """System columns must always be first."""
         columns = [
             "chembl.publication.title",
@@ -98,7 +96,7 @@ class TestCompositePublicationColumns:
         assert ordered[0] == "entity_id"
         assert ordered[1] == "_run_id"
 
-    def test_qualified_columns_ordering(self, orderer: ColumnOrderer) -> None:
+    def test_qualified_columns_ordering(self, orderer: ColumnOrderService) -> None:
         """Verify ordering of qualified columns for the same field."""
         # For 'title' in 'journal' group, provider_order is:
         # [pubmed, semanticscholar, chembl, crossref, openalex]
@@ -120,7 +118,7 @@ class TestCompositePublicationColumns:
         ]
         assert ordered == expected
 
-    def test_inter_group_ordering(self, orderer: ColumnOrderer) -> None:
+    def test_inter_group_ordering(self, orderer: ColumnOrderService) -> None:
         """Verify that columns from different groups are ordered correctly."""
         columns = [
             "pubmed.publication.chemicals",  # biomedical
@@ -138,7 +136,7 @@ class TestCompositePublicationColumns:
             "pubmed.publication.chemicals",
         ]
 
-    def test_dq_fields_at_very_end(self, orderer: ColumnOrderer) -> None:
+    def test_dq_fields_at_very_end(self, orderer: ColumnOrderService) -> None:
         """DQ fields must be the absolute last columns."""
         columns = [
             "_dq_error",
@@ -151,7 +149,9 @@ class TestCompositePublicationColumns:
         assert ordered[-2] == "_dq_error"
         assert ordered[-1] == "_dq_warn"
 
-    def test_full_schema_names_verification(self, orderer: ColumnOrderer) -> None:
+    def test_full_schema_names_verification(
+        self, orderer: ColumnOrderService
+    ) -> None:
         """Verify names of key columns in the final output."""
         # Simulate a realistic set of output columns
         columns = [

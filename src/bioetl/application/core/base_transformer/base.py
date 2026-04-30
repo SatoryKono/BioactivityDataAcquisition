@@ -19,7 +19,7 @@ from bioetl.application.core.base_transformer_helpers_mixin import (
     _BaseTransformerRecordHelpersMixin,
 )
 from bioetl.domain.context import PipelineContext
-from bioetl.domain.services import IdentityService
+from bioetl.domain.services import EntityIdentityGenerator
 
 if TYPE_CHECKING:
     from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
@@ -34,7 +34,7 @@ def _resolve_transformer_dependencies(
     dependencies: TransformerDependencyContext | None,
     tracer: TracingPort | None,
     metrics: MetricsPort | None,
-    identity_service: IdentityService | None,
+    identity_service: EntityIdentityGenerator | None,
     pii_hasher: PiiHasherPort | None,
 ) -> TransformerDependencyContext:
     """Resolve explicit collaborator bundle for transformer construction."""
@@ -84,7 +84,7 @@ class BaseTransformer(
         gold_filters: GoldFilterConfig | None = None,
         tracer: TracingPort | None = None,
         metrics: MetricsPort | None = None,
-        identity_service: IdentityService | None = None,
+        identity_service: EntityIdentityGenerator | None = None,
         pii_hasher: PiiHasherPort | None = None,
         dependencies: TransformerDependencyContext | None = None,
     ) -> None:

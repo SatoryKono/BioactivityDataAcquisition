@@ -38,7 +38,7 @@ from bioetl.infrastructure.adapters.openalex.client_runtime_helpers import (
     build_openalex_runtime_services,
 )
 from bioetl.infrastructure.adapters.openalex.cursor_flow import (
-    OpenAlexCursorFlowService,
+    OpenAlexCursorFlow,
 )
 from bioetl.infrastructure.adapters.openalex.fallback import (
     OpenAlexTitleFallbackHandler,
@@ -129,7 +129,7 @@ class OpenAlexAdapter(
     fallback_fetch_service: FallbackFetchOrchestrator
     openalex_query_executor: OpenAlexQueryExecutor | None = None
     openalex_response_mapper: OpenAlexResponseMapper | None = None
-    openalex_cursor_flow: OpenAlexCursorFlowService | None = None
+    openalex_cursor_flow: OpenAlexCursorFlow | None = None
     title_fallback_handler: OpenAlexTitleFallbackHandler | None = None
     openalex_fallback_orchestrator: OpenAlexFallbackOrchestrator | None = None
 
@@ -140,7 +140,7 @@ class OpenAlexAdapter(
     )
     _query_executor: OpenAlexQueryExecutor = field(init=False, repr=False)
     _response_mapper: OpenAlexResponseMapper = field(init=False, repr=False)
-    _cursor_flow: OpenAlexCursorFlowService = field(init=False, repr=False)
+    _cursor_flow: OpenAlexCursorFlow = field(init=False, repr=False)
     _fallback_orchestrator: OpenAlexFallbackOrchestrator = field(init=False, repr=False)
 
     def __post_init__(self) -> None:

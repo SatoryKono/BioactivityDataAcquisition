@@ -15,7 +15,7 @@ from bioetl.infrastructure.adapters.common.api_request_collector import (
 )
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.openalex.cursor_flow import (
-    OpenAlexCursorFlowService,
+    OpenAlexCursorFlow,
 )
 from bioetl.infrastructure.adapters.openalex.fallback import (
     OpenAlexTitleFallbackHandler,
@@ -58,7 +58,7 @@ class OpenAlexRuntimeServices:
     fallback_fetch_service: FallbackFetchOrchestrator
     query_executor: OpenAlexQueryExecutor
     response_mapper: OpenAlexResponseMapper
-    cursor_flow: OpenAlexCursorFlowService
+    cursor_flow: OpenAlexCursorFlow
     fallback_handler: OpenAlexTitleFallbackHandler
     fallback_orchestrator: OpenAlexFallbackOrchestrator
 
@@ -70,7 +70,7 @@ class OpenAlexRuntimeServicesRequest:
     fallback_fetch_service: FallbackFetchOrchestrator
     openalex_query_executor: OpenAlexQueryExecutor | None
     openalex_response_mapper: OpenAlexResponseMapper | None
-    openalex_cursor_flow: OpenAlexCursorFlowService | None
+    openalex_cursor_flow: OpenAlexCursorFlow | None
     title_fallback_handler: OpenAlexTitleFallbackHandler | None
     openalex_fallback_orchestrator: OpenAlexFallbackOrchestrator | None
     http_client: UnifiedHTTPClient
@@ -198,9 +198,9 @@ def _create_default_openalex_cursor_flow(
     response_mapper: OpenAlexResponseMapper,
     logger: LoggerPort,
     runtime_errors: tuple[type[Exception], ...],
-) -> OpenAlexCursorFlowService:
-    """Create the default OpenAlex cursor flow service."""
-    return OpenAlexCursorFlowService(
+) -> OpenAlexCursorFlow:
+    """Create the default OpenAlex cursor flow."""
+    return OpenAlexCursorFlow(
         mailto=mailto,
         api_key=api_key,
         batch_size=batch_size,

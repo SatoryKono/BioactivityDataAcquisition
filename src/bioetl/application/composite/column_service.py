@@ -20,8 +20,8 @@ from bioetl.application.composite.column_orderer_semantic import (
     group_columns,
 )
 from bioetl.application.composite.column_priority_orderer import (
-    ColumnPriorityOrderer,
     collect_priority_field_columns,
+    get_enricher_prefix,
     order_priority_columns,
 )
 from bioetl.application.composite.join_planner_helpers import parse_pipeline_name
@@ -292,7 +292,7 @@ class _ColumnPriorityOrderingStrategy:
     @staticmethod
     def get_enricher_prefix(enricher_pipeline: str) -> str:
         """Expose legacy prefix helper for compatibility call sites."""
-        return ColumnPriorityOrderer.get_enricher_prefix(enricher_pipeline)
+        return get_enricher_prefix(enricher_pipeline)
 
 
 class ColumnOrderService:
@@ -303,9 +303,7 @@ class ColumnOrderService:
         logger: LoggerPort,
         config: ColumnOrderConfig | None = None,
         column_groups: Sequence[ColumnGroupConfig] | None = None,
-        priority_orderer: ColumnPriorityOrderer
-        | _ColumnPriorityOrderingStrategy
-        | None = None,
+        priority_orderer: _ColumnPriorityOrderingStrategy | None = None,
     ) -> None:
         """Initialize unified column ordering service."""
         self._logger = logger
@@ -491,7 +489,7 @@ class ColumnOrderService:
     @staticmethod
     def get_enricher_prefix(enricher_pipeline: str) -> str:
         """Get enricher prefix with trailing separator."""
-        return ColumnPriorityOrderer.get_enricher_prefix(enricher_pipeline)
+        return get_enricher_prefix(enricher_pipeline)
 
     @staticmethod
     def _parse_pipeline_name(pipeline: str) -> tuple[str, str]:

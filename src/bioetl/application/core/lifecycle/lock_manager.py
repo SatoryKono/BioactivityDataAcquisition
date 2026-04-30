@@ -28,7 +28,7 @@ from bioetl.domain.types import RunID, RunType
 
 if TYPE_CHECKING:
     from bioetl.application.core.lifecycle.checkpoint_manager import (
-        CheckpointManagerService,
+        CheckpointRuntimeService,
     )
     from bioetl.domain.ports import LockPort, LoggerPort
 
@@ -46,7 +46,7 @@ class LockCoordinatorCreateContext:
     heartbeat_interval: int
     logger: LoggerPort
     shutdown_signal: ShutdownSignal
-    checkpoint_manager: CheckpointManagerService | None = None
+    checkpoint_manager: CheckpointRuntimeService | None = None
     context_holder: LockContextHolder | None = None
     heartbeat_factory: Callable[..., HeartbeatTask] | None = None
 
@@ -82,7 +82,7 @@ class LockCoordinator:
         config: LockConfig,
         logger: LoggerPort,
         shutdown_signal: ShutdownSignal,
-        checkpoint_manager: CheckpointManagerService | None = None,
+        checkpoint_manager: CheckpointRuntimeService | None = None,
         context_holder: LockContextHolder | None = None,
         heartbeat_factory: Callable[..., HeartbeatTask] | None = None,
     ) -> None:

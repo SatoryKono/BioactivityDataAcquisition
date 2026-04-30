@@ -201,7 +201,7 @@ async def test_quarantine_records_are_persisted(e2e_data_dir: Path):
     """
     from datetime import datetime
 
-    from bioetl.application.core.quarantine_manager import QuarantineManagerService
+    from bioetl.application.core.quarantine_manager import QuarantineRuntimeService
     from bioetl.domain.types import ErrorType
     from bioetl.infrastructure.quarantine.unified import UnifiedQuarantineAdapter
 
@@ -213,7 +213,7 @@ async def test_quarantine_records_are_persisted(e2e_data_dir: Path):
         base_path=str(quarantine_path),
     )
 
-    manager = QuarantineManagerService(
+    manager = QuarantineRuntimeService(
         quarantine_port=quarantine, pipeline_name="test_pipeline"
     )
 

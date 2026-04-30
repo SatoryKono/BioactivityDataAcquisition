@@ -37,7 +37,7 @@ ______________________________________________________________________
 | `infrastructure.serialization` | JSON encoders                               | `StdLibJsonEncoder`, `OrjsonEncoder`                          |
 | `infrastructure.security`      | PII hashing                                 | `Sha256PiiHasher`                                             |
 | `infrastructure.audit`         | Audit trail persistence                     | `FileAuditAdapter`                                            |
-| `infrastructure.adr`           | ADR document management                     | `FsAdrService`                                                |
+| `infrastructure.adr`           | ADR document management                     | `FilesystemAdrCatalog`                                        |
 | `infrastructure.export`        | Data export (CSV, DQ reports)               | `CsvExporter`, `DQReportWriter`                               |
 | `infrastructure.errors`        | Error mapping utilities                     | `DomainInfraExceptionMapper`                                  |
 | `infrastructure.schemas`       | Pydantic config schemas for YAML validation | `BaseDQConfig`, `BaseApiConfig`                               |
@@ -295,7 +295,7 @@ ______________________________________________________________________
 
 | Class          | Implements       | Description                     |
 | -------------- | ---------------- | ------------------------------- |
-| `FsAdrService` | `AdrServicePort` | Filesystem-based ADR management |
+| `FilesystemAdrCatalog` | `AdrServicePort` | Filesystem-based ADR management |
 
 ______________________________________________________________________
 

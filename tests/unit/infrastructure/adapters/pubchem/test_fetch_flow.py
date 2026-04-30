@@ -1,7 +1,7 @@
-"""Tests for PubChem fetch flow service.
+"""Tests for PubChem fetch flow.
 
 Covers:
-- PubChemFetchFlowService.execute: happy path, error propagation, request recording
+- PubChemFetchFlow.execute: happy path, error propagation, request recording
 """
 
 from __future__ import annotations
@@ -11,7 +11,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from bioetl.infrastructure.adapters.pubchem.fetch_flow import PubChemFetchFlowService
+from bioetl.infrastructure.adapters.pubchem.fetch_flow import PubChemFetchFlow
 
 
 @pytest.fixture
@@ -49,8 +49,8 @@ def fetch_flow(
     mock_run_in_executor: AsyncMock,
     mock_record_request: MagicMock,
     mock_normalize_results: MagicMock,
-) -> PubChemFetchFlowService:
-    return PubChemFetchFlowService(
+) -> PubChemFetchFlow:
+    return PubChemFetchFlow(
         rate_limiter=mock_rate_limiter,
         circuit_breaker=mock_circuit_breaker,
         run_in_executor=mock_run_in_executor,
@@ -63,7 +63,7 @@ def fetch_flow(
 class TestFetchFlowExecute:
     async def test_happy_path(
         self,
-        fetch_flow: PubChemFetchFlowService,
+        fetch_flow: PubChemFetchFlow,
         mock_rate_limiter: AsyncMock,
         mock_circuit_breaker: AsyncMock,
         mock_record_request: MagicMock,
@@ -91,7 +91,7 @@ class TestFetchFlowExecute:
 
     async def test_records_duration_ms(
         self,
-        fetch_flow: PubChemFetchFlowService,
+        fetch_flow: PubChemFetchFlow,
         mock_circuit_breaker: AsyncMock,
         mock_record_request: MagicMock,
     ) -> None:
@@ -111,7 +111,7 @@ class TestFetchFlowExecute:
 
     async def test_error_propagation_from_circuit_breaker(
         self,
-        fetch_flow: PubChemFetchFlowService,
+        fetch_flow: PubChemFetchFlow,
         mock_circuit_breaker: AsyncMock,
     ) -> None:
         """Errors from circuit_breaker.call propagate up."""
@@ -126,7 +126,7 @@ class TestFetchFlowExecute:
 
     async def test_rate_limiter_called_before_circuit_breaker(
         self,
-        fetch_flow: PubChemFetchFlowService,
+        fetch_flow: PubChemFetchFlow,
         mock_rate_limiter: AsyncMock,
         mock_circuit_breaker: AsyncMock,
     ) -> None:
@@ -156,7 +156,7 @@ class TestFetchFlowExecute:
 
     async def test_normalize_called_with_raw_results(
         self,
-        fetch_flow: PubChemFetchFlowService,
+        fetch_flow: PubChemFetchFlow,
         mock_circuit_breaker: AsyncMock,
         mock_normalize_results: MagicMock,
     ) -> None:

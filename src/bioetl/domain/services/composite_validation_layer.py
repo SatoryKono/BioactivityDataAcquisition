@@ -18,8 +18,8 @@ from bioetl.domain.services.composite_validation_helpers import (
 from bioetl.domain.services.cross_validation_validator import CrossValidationValidator
 from bioetl.domain.services.preflight_governance import (
     GovernancePolicy,
+    PreflightGovernor,
     PreflightGovernanceConfig,
-    PreflightGovernanceService,
 )
 from bioetl.domain.services.validation_result_envelopes import (
     build_validation_result,
@@ -56,7 +56,7 @@ class CompositeValidationService:
         *,
         aggregation_validator: AggregationValidator,
         cross_validation_validator: CrossValidationValidator,
-        preflight_governance: PreflightGovernanceService,
+        preflight_governance: PreflightGovernor,
     ) -> None:
         self._aggregation_validator = aggregation_validator
         self._cross_validation_validator = cross_validation_validator
