@@ -22,6 +22,7 @@ _RUN_CONTEXT_OPTIONAL_DEFAULTS: dict[str, object] = {
     "transform_steps": (),
     "pipeline_version": None,
     "git_commit": None,
+    "dependency_lock_hash": None,
     "config_hash": None,
     "resolved_config_hash": None,
     "effective_config_hash": None,
@@ -132,6 +133,9 @@ def coerce_run_context_create_input(
         transform_steps=cast("tuple[str, ...]", values["transform_steps"]),
         pipeline_version=cast(_OPTIONAL_STR_ANNOTATION, values["pipeline_version"]),
         git_commit=cast(_OPTIONAL_STR_ANNOTATION, values["git_commit"]),
+        dependency_lock_hash=cast(
+            _OPTIONAL_STR_ANNOTATION, values["dependency_lock_hash"]
+        ),
         config_hash=cast(_OPTIONAL_STR_ANNOTATION, values["config_hash"]),
         resolved_config_hash=cast(
             _OPTIONAL_STR_ANNOTATION, values["resolved_config_hash"]

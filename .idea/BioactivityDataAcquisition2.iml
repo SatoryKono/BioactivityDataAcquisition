@@ -243,6 +243,7 @@
       <excludeFolder url="file://$MODULE_DIR$/.mypy_cache_win_tmp" />
       <excludeFolder url="file://$MODULE_DIR$/.mypy_cache_win_tmp/3.12" />
       <excludeFolder url="file://$MODULE_DIR$/data/.idea" />
+      <excludeFolder url="file://$MODULE_DIR$/docs/99-archive/legacy-05-architecture" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.13 (BioactivityDataAcquisition2)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />

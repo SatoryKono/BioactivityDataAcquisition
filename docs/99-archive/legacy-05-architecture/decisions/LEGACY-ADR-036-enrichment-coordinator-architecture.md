@@ -1,4 +1,7 @@
-# ADR 036: Enrichment Coordinator Architecture
+# Legacy ADR 036: Enrichment Coordinator Architecture
+
+> Archived from the legacy `docs/05-architecture/decisions/` namespace.
+> Canonical accepted ADRs live in `docs/02-architecture/decisions/`.
 
 ## Status
 

@@ -1,4 +1,7 @@
-# ADR 035: Composite Checkpoint State Analysis
+# Legacy ADR 035: Composite Checkpoint State Analysis
+
+> Archived from the legacy `docs/05-architecture/decisions/` namespace.
+> Canonical accepted ADRs live in `docs/02-architecture/decisions/`.
 
 ## Status
 

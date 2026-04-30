@@ -122,11 +122,6 @@
 05-architecture/analysis/GOD_OBJECTS_DECOMPOSITION_ANALYSIS.md
 05-architecture/analysis/NEO4J_MEMORY_TECHNICAL_DEBT_ANALYSIS.md
 05-architecture/analysis/RUNNER_MIXIN_ARCHITECTURE_ANALYSIS.md
-05-architecture/decisions/ADR-035-composite-checkpoint-state-analysis.md
-05-architecture/decisions/ADR-036-enrichment-coordinator-architecture.md
-05-architecture/decisions/ADR-037-runner-stage-mixin-architecture.md
-05-architecture/decisions/ADR-038-http-client-retry-patterns.md
-05-architecture/decisions/ADR-039-god-objects-decomposition.md
 05-engineering/normalization_plan_P0_P6.md
 05-operations/control-plane-lifecycle.md
 05-operations/deployment/NEO4J-COMPLETION-GUIDE.md

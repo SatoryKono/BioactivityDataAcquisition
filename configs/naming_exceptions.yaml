@@ -30,6 +30,11 @@ documentation_exceptions:
     - docs/05-architecture/TECHNICAL_DEBT_REDUCTION_SUMMARY.md
     - docs/05-architecture/TECHNICAL_DEBT_TRACKING.md
     - docs/05-engineering/normalization_plan_P0_P6.md
+    - docs/99-archive/legacy-05-architecture/decisions/LEGACY-ADR-035-composite-checkpoint-state-analysis.md
+    - docs/99-archive/legacy-05-architecture/decisions/LEGACY-ADR-036-enrichment-coordinator-architecture.md
+    - docs/99-archive/legacy-05-architecture/decisions/LEGACY-ADR-037-runner-stage-mixin-architecture.md
+    - docs/99-archive/legacy-05-architecture/decisions/LEGACY-ADR-038-http-client-retry-patterns.md
+    - docs/99-archive/legacy-05-architecture/decisions/LEGACY-ADR-039-god-objects-decomposition.md
     - docs/fixes/cross_platform_test_setup.md
     - docs/fixes/test_dependency_fixes.md
     - docs/refactoring_plans/runtime_metadata_factory_refactoring_plan.md

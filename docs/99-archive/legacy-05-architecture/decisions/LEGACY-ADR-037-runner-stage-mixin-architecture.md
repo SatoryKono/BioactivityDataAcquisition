@@ -1,4 +1,7 @@
-# ADR 037: Runner Stage Mixin Architecture
+# Legacy ADR 037: Runner Stage Mixin Architecture
+
+> Archived from the legacy `docs/05-architecture/decisions/` namespace.
+> Canonical accepted ADRs live in `docs/02-architecture/decisions/`.
 
 ## Status
 

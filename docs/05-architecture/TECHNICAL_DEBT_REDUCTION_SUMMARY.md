@@ -250,12 +250,13 @@ barChart
 
 ### Documentation Index
 
-**ADRs (Architecture Decision Records)**:
+**Historical architecture notes**:
 
-- `docs/05-architecture/decisions/ADR-035-composite-checkpoint-state-analysis.md`
-- `docs/05-architecture/decisions/ADR-036-enrichment-coordinator-architecture.md`
-- `docs/05-architecture/decisions/ADR-037-runner-stage-mixin-architecture.md`
-- `docs/05-architecture/decisions/ADR-038-http-client-retry-patterns.md`
+- `docs/99-archive/legacy-05-architecture/decisions/LEGACY-ADR-035-composite-checkpoint-state-analysis.md`
+- `docs/99-archive/legacy-05-architecture/decisions/LEGACY-ADR-036-enrichment-coordinator-architecture.md`
+- `docs/99-archive/legacy-05-architecture/decisions/LEGACY-ADR-037-runner-stage-mixin-architecture.md`
+- `docs/99-archive/legacy-05-architecture/decisions/LEGACY-ADR-038-http-client-retry-patterns.md`
+- `docs/99-archive/legacy-05-architecture/decisions/LEGACY-ADR-039-god-objects-decomposition.md`
 
 **Analysis Documents**:
 

@@ -1,4 +1,7 @@
-# ADR 038: HTTP Client Retry Patterns
+# Legacy ADR 038: HTTP Client Retry Patterns
+
+> Archived from the legacy `docs/05-architecture/decisions/` namespace.
+> Canonical accepted ADRs live in `docs/02-architecture/decisions/`.
 
 ## Status
 
