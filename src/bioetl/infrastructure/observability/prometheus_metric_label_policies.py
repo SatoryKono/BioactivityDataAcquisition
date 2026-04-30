@@ -54,6 +54,7 @@ FORBIDDEN_PROMETHEUS_LABEL_NAMES = frozenset(
         "raw_message",
         "path",
         "raw_path",
+        "source_file",
         "file_path",
         "url",
         "raw_url",

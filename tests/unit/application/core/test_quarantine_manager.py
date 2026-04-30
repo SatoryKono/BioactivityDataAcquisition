@@ -201,6 +201,77 @@ class TestQuarantineManagerBulkWrites:
             "quarantined",
             1,
         )
+        metrics.increment_counter.assert_any_call(
+            "bioetl_dq_records_quarantined_total",
+            1,
+            {
+                "pipeline": "chembl_activity",
+                "error_type": ErrorType.INVALID_DATA.value,
+                "run_type": "unknown",
+            },
+        )
+        metrics.increment_counter.assert_any_call(
+            "bioetl_records_processed_total",
+            1,
+            {
+                "pipeline": "chembl_activity",
+                "stage": "quarantined",
+                "run_type": "unknown",
+            },
+        )
+
+    @pytest.mark.asyncio
+    async def test_runtime_batch_metrics_path_emits_run_type_labels(
+        self,
+        quarantine_port: MagicMock,
+        metrics: MagicMock,
+    ) -> None:
+        """Runtime DI path should delegate quarantine counters to batch metrics."""
+        from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
+
+        batch_metrics = BatchMetricsRecorderService(
+            metrics=metrics,
+            pipeline_label="chembl_activity",
+            run_type_label="incremental",
+        )
+        manager = QuarantineRuntimeService(
+            quarantine_port=quarantine_port,
+            pipeline_name="chembl_activity",
+            metrics=metrics,
+            batch_metrics=batch_metrics,
+            run_type="incremental",
+        )
+        batch_id = BatchID(uuid4())
+        run_id = RunID(uuid4())
+        ingestion_ts = datetime(2026, 3, 10, 12, 0, 0, tzinfo=UTC)
+
+        await manager.quarantine_record(
+            record={"activity_id": "1"},
+            error_type=ErrorType.INVALID_DATA,
+            batch_id=batch_id,
+            error_details="bad value",
+            run_id=run_id,
+            ingestion_ts=ingestion_ts,
+        )
+
+        metrics.increment_counter.assert_any_call(
+            "bioetl_dq_records_quarantined_total",
+            1,
+            {
+                "pipeline": "chembl_activity",
+                "error_type": ErrorType.INVALID_DATA.value,
+                "run_type": "incremental",
+            },
+        )
+        metrics.increment_counter.assert_any_call(
+            "bioetl_records_processed_total",
+            1,
+            {
+                "pipeline": "chembl_activity",
+                "stage": "quarantined",
+                "run_type": "incremental",
+            },
+        )
 
     @pytest.mark.asyncio
     async def test_quarantine_record_emits_typed_quarantine_events(

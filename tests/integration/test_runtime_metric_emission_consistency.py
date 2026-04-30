@@ -76,3 +76,9 @@ def test_critical_observability_metric_families_have_runtime_emitters() -> None:
         "Critical observability families must stay backed by expected runtime "
         f"emitters: {missing}"
     )
+
+
+def test_direct_runtime_metric_emitters_match_declared_label_contracts() -> None:
+    report = inventory.collect_metric_inventory(ROOT)
+
+    assert report["runtime_label_contract_violations"] == []

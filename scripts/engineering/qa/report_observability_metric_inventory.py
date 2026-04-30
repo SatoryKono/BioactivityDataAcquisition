@@ -481,6 +481,85 @@ def _direct_metric_name(
     )
 
 
+def _dict_literal_string_keys(node: ast.expr) -> frozenset[str] | None:
+    """Return literal string keys when *node* is a dict literal."""
+    if not isinstance(node, ast.Dict):
+        return None
+    keys: set[str] = set()
+    for key_node in node.keys:
+        if not isinstance(key_node, ast.Constant) or not isinstance(
+            key_node.value, str
+        ):
+            return None
+        keys.add(key_node.value)
+    return frozenset(keys)
+
+
+def _direct_metric_label_keys(node: ast.Call) -> frozenset[str] | None:
+    """Resolve statically declared label keys from one direct metric call."""
+    for keyword in node.keywords:
+        if keyword.arg == "labels" and keyword.value is not None:
+            return _dict_literal_string_keys(keyword.value)
+    if len(node.args) >= 3:
+        return _dict_literal_string_keys(node.args[2])
+    return frozenset()
+
+
+def _scan_direct_metric_label_shapes(
+    tree: ast.AST,
+    *,
+    string_bindings: dict[str, str],
+    attribute_bindings: dict[str, str],
+) -> list[tuple[str, frozenset[str] | None, int]]:
+    """Return direct metric label shapes resolved from literal label dictionaries."""
+    shapes: list[tuple[str, frozenset[str] | None, int]] = []
+    for call_node in _call_nodes(tree):
+        if _call_method_name(call_node) not in _RUNTIME_METRIC_METHODS:
+            continue
+        metric_name = _direct_metric_name(
+            call_node,
+            string_bindings=string_bindings,
+            attribute_bindings=attribute_bindings,
+        )
+        if metric_name is None or not metric_name.startswith("bioetl_"):
+            continue
+        shapes.append(
+            (
+                metric_name,
+                _direct_metric_label_keys(call_node),
+                getattr(call_node, "lineno", 0),
+            )
+        )
+    return shapes
+
+
+def _record_label_contract_violations(
+    *,
+    label_contract_violations: list[str],
+    label_contract_unresolved: list[str],
+    relative_path: str,
+    label_shapes: list[tuple[str, frozenset[str] | None, int]],
+) -> None:
+    """Compare direct emitter label keys against declared registry contracts."""
+    for metric_name, emitted_labels, lineno in label_shapes:
+        declared_labels = REGISTERED_PROMETHEUS_METRIC_LABELS.get(metric_name)
+        if declared_labels is None:
+            continue
+        location = f"{relative_path}:{lineno}"
+        if emitted_labels is None:
+            label_contract_unresolved.append(f"{metric_name} @ {location}")
+            continue
+        missing = sorted(declared_labels - emitted_labels)
+        extra = sorted(emitted_labels - declared_labels)
+        if missing or extra:
+            emitted = sorted(emitted_labels)
+            declared = sorted(declared_labels)
+            label_contract_violations.append(
+                f"{metric_name} @ {location} missing={missing} extra={extra} "
+                f"emitted={emitted} declared={declared}"
+            )
+
+
 def _partition_helper_metric_candidates(
     metric_names: set[str],
     *,
@@ -523,7 +602,13 @@ def _scan_runtime_metric_file(
     import_binding_cache: dict[Path, dict[str, str]],
     repo_attribute_bindings: dict[str, str] | None = None,
     preloaded_text: str | None = None,
-) -> tuple[str, set[str], set[str], set[str]] | None:
+) -> tuple[
+    str,
+    set[str],
+    set[str],
+    set[str],
+    list[tuple[str, frozenset[str] | None, int]],
+] | None:
     text = preloaded_text if preloaded_text is not None else _read_runtime_candidate_text(path)
     if text is None:
         return None
@@ -546,20 +631,34 @@ def _scan_runtime_metric_file(
             attribute_bindings=attribute_bindings,
         )
     )
+    label_shapes = _scan_direct_metric_label_shapes(
+        tree,
+        string_bindings=string_bindings,
+        attribute_bindings=attribute_bindings,
+    )
     return (
         _as_repo_relative(path, repo_root),
         direct_metric_names,
         helper_metric_names,
         alias_metric_names,
+        label_shapes,
     )
 
 
 def _scan_runtime_metric_calls(
     repo_root: Path,
-) -> tuple[dict[str, list[str]], dict[str, list[str]], dict[str, list[str]]]:
+) -> tuple[
+    dict[str, list[str]],
+    dict[str, list[str]],
+    dict[str, list[str]],
+    list[str],
+    list[str],
+]:
     canonical_mentions: dict[str, list[str]] = defaultdict(list)
     helper_backed_mentions: dict[str, list[str]] = defaultdict(list)
     alias_mentions: dict[str, list[str]] = defaultdict(list)
+    label_contract_violations: list[str] = []
+    label_contract_unresolved: list[str] = []
     import_binding_cache: dict[Path, dict[str, str]] = {}
     repo_attribute_bindings = _collect_repo_class_attribute_bindings(repo_root)
     for path in _iter_text_files(repo_root / _RUNTIME_SCAN_ROOT):
@@ -574,9 +673,13 @@ def _scan_runtime_metric_calls(
         )
         if scan_result is None:
             continue
-        relative_path, direct_metric_names, helper_metric_names, alias_metric_names = (
-            scan_result
-        )
+        (
+            relative_path,
+            direct_metric_names,
+            helper_metric_names,
+            alias_metric_names,
+            label_shapes,
+        ) = scan_result
         _record_runtime_mentions(
             canonical_mentions=canonical_mentions,
             helper_backed_mentions=helper_backed_mentions,
@@ -586,11 +689,19 @@ def _scan_runtime_metric_calls(
             helper_metric_names=helper_metric_names,
             alias_metric_names=alias_metric_names,
         )
+        _record_label_contract_violations(
+            label_contract_violations=label_contract_violations,
+            label_contract_unresolved=label_contract_unresolved,
+            relative_path=relative_path,
+            label_shapes=label_shapes,
+        )
     _record_static_runtime_emitters(repo_root, canonical_mentions)
     return (
         dict(canonical_mentions),
         dict(helper_backed_mentions),
         dict(alias_mentions),
+        sorted(label_contract_violations),
+        sorted(label_contract_unresolved),
     )
 
 
@@ -710,7 +821,13 @@ def collect_metric_inventory(
     repo_root: Path,
 ) -> dict[str, list[str] | dict[str, list[str]]]:
     registered = sorted(REGISTERED_PROMETHEUS_METRIC_NAMES)
-    runtime_mentions, helper_backed_mentions, alias_mentions = (
+    (
+        runtime_mentions,
+        helper_backed_mentions,
+        alias_mentions,
+        label_contract_violations,
+        label_contract_unresolved,
+    ) = (
         _scan_runtime_metric_calls(repo_root)
     )
 
@@ -756,6 +873,8 @@ def collect_metric_inventory(
         "dashboarded_without_emission": sorted(documented_without_runtime),
         "alerted_without_emission": sorted(ruled_without_runtime),
         "runtime_cardinality_review_required": runtime_cardinality_review_required,
+        "runtime_label_contract_violations": label_contract_violations,
+        "runtime_label_contract_unresolved": label_contract_unresolved,
         "registered_metrics": registered,
         "live_metrics": sorted(registered_set & runtime_set),
         "direct_live_metrics": sorted(registered_set & direct_runtime_set),
@@ -904,6 +1023,8 @@ def _render_text(report: dict[str, list[str] | dict[str, list[str]]]) -> str:
         "dashboarded_without_emission",
         "alerted_without_emission",
         "runtime_cardinality_review_required",
+        "runtime_label_contract_violations",
+        "runtime_label_contract_unresolved",
         "live_metrics",
         "direct_live_metrics",
         "helper_backed_live_metrics",
