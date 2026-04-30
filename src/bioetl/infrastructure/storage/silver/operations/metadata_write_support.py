@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Protocol, cast
@@ -119,6 +120,37 @@ _AUDIT_SUPPORT_DEFAULTS: dict[str, object] = {
     "source_batch_id": None,
     "ingestion_ts": None,
 }
+_METRIC_LABEL_SANITIZER = re.compile(r"[^a-z0-9_]+")
+
+
+def _normalize_metric_label(value: object, *, fallback: str) -> str:
+    """Normalize free-form storage identifiers to bounded metric label values."""
+    normalized = _METRIC_LABEL_SANITIZER.sub(
+        "_",
+        str(value or "").strip().lower(),
+    ).strip("_")
+    return normalized or fallback
+
+
+def _silver_metadata_write_success_labels(table_name: str) -> dict[str, str]:
+    """Build canonical labels for successful Silver metadata sidecar writes."""
+    table_parts = [part for part in str(table_name or "").split(".") if part]
+    provider = (
+        _normalize_metric_label(table_parts[0], fallback="storage")
+        if len(table_parts) >= 2
+        else "storage"
+    )
+    pipeline_source = "_".join(table_parts) if table_parts else table_name
+    return {
+        "layer": "silver",
+        "provider": provider,
+        "pipeline": _normalize_metric_label(
+            pipeline_source,
+            fallback="silver_metadata",
+        ),
+        "status": "success",
+        "final_reason": "completed",
+    }
 
 
 def _coerce_silver_metadata_audit_request(
@@ -253,7 +285,11 @@ def _emit_silver_metadata_write_success(
 ) -> None:
     """Emit success metrics and audit for one Silver metadata write."""
     if metadata_ops._metrics:
-        metadata_ops._metrics.increment_counter("silver.metadata_write_success", 1)
+        metadata_ops._metrics.increment_counter(
+            "bioetl_metadata_write_outcomes_total",
+            1,
+            _silver_metadata_write_success_labels(table_name),
+        )
 
     if metadata_ops._audit:
         metadata_ops._audit.log_event(

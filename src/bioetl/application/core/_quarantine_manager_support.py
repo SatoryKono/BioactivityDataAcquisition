@@ -21,6 +21,7 @@ if TYPE_CHECKING:
     from bioetl.application.observability.pipeline_metrics import (
         PipelineMetricsRecorder,
     )
+    from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
     from bioetl.domain.ports import MetricsPort, QuarantinePort
     from bioetl.domain.types import BatchID, JsonDict, RunID
 
@@ -32,6 +33,7 @@ class QuarantineManagerSupportMixin:
     _quarantine: QuarantinePort
     _domain_event_emitter: DomainEventEmitterProtocol | None
     _metrics: MetricsPort | None
+    _batch_metrics: BatchMetricsRecorderService | None
     _pipeline_metrics: PipelineMetricsRecorder
 
     async def quarantine_filtered_record(

@@ -55,6 +55,8 @@ def create_batch_processing_components(
         quarantine_port=services.quarantine,
         pipeline_name=config.pipeline_name,
         metrics=services.metrics,
+        batch_metrics=batch_metrics,
+        run_type=context.run_type.value,
         domain_event_emitter=domain_event_emitter,
     )
     normalization_processor = (

@@ -156,13 +156,13 @@ BATCH_SIZE_RECORDS = Histogram(
 FILTER_IDS_LOADED_TOTAL = Counter(
     "bioetl_filter_ids_loaded_total",
     "Total unique IDs loaded from input filter source",
-    ["pipeline", "source_file"],
+    ["pipeline", "source_kind"],
 )
 
 FILTER_IDS_DUPLICATES_TOTAL = Counter(
     "bioetl_filter_ids_duplicates_total",
     "Total duplicate IDs found in input filter source",
-    ["pipeline", "source_file"],
+    ["pipeline", "source_kind"],
 )
 
 DQ_RECORDS_QUARANTINED_TOTAL = Counter(

@@ -67,6 +67,7 @@ PIPELINE_RUNTIME_REGISTRY = MetricRegistryFamily(
         "bioetl_replay_reconstructability_events_total": (
             _metrics.REPLAY_RECONSTRUCTABILITY_EVENTS_TOTAL
         ),
+        "bioetl_replay_drift_events_total": _metrics.REPLAY_DRIFT_EVENTS_TOTAL,
         "bioetl_metrics_publication_events_total": _metrics.METRICS_PUBLICATION_EVENTS_TOTAL,
         "bioetl_workflow_runs_total": _metrics.WORKFLOW_RUNS_TOTAL,
         "bioetl_workflow_step_events_total": _metrics.WORKFLOW_STEP_EVENTS_TOTAL,
@@ -77,6 +78,7 @@ PIPELINE_RUNTIME_REGISTRY = MetricRegistryFamily(
         "bioetl_observability_runtime_status": _metrics.OBSERVABILITY_RUNTIME_STATUS,
         "bioetl_stage_backlog_records": _metrics.STAGE_BACKLOG_RECORDS,
         "bioetl_stage_lag_seconds": _metrics.STAGE_LAG_SECONDS,
+        "bioetl_replay_lag_seconds": _metrics.REPLAY_LAG_SECONDS,
     },
     histograms={
         "bioetl_pipeline_duration_seconds": _metrics.PIPELINE_DURATION_SECONDS,

@@ -183,6 +183,7 @@ def _emit_replay_reconstructability_metric(
     increment_counter = getattr(metrics, "increment_counter", None)
     if not callable(increment_counter):
         return
+    set_gauge = getattr(metrics, "set_gauge", None)
     strict_replay_requested = bool(request.launch_context.get("exact_replay"))
     required_persistence_profile = str(
         request.launch_context.get("required_persistence_profile")
@@ -198,6 +199,9 @@ def _emit_replay_reconstructability_metric(
         or request.replay_capability != ReplayCapability.EXACT_REPLAY_SUPPORTED
     ):
         status = "not_reconstructable"
+    raw_run_type = getattr(request.run_type, "value", request.run_type)
+    run_type = str(raw_run_type or "unknown").strip().lower().replace(" ", "_")
+    bounded_run_type = run_type or "unknown"
     increment_counter(
         "bioetl_replay_reconstructability_events_total",
         value=1,
@@ -208,6 +212,32 @@ def _emit_replay_reconstructability_metric(
             "status": status,
         },
     )
+    lag_status = "not_requested"
+    if status == "not_reconstructable":
+        lag_status = "blocked"
+    elif strict_replay_requested:
+        lag_status = "ready"
+    replay_labels = {
+        "pipeline": request.pipeline_name,
+        "run_type": bounded_run_type,
+        "replay_capability": request.replay_capability.value,
+    }
+    if callable(set_gauge):
+        set_gauge(
+            "bioetl_replay_lag_seconds",
+            value=0.0,
+            labels={**replay_labels, "status": lag_status},
+        )
+    if status == "not_reconstructable":
+        increment_counter(
+            "bioetl_replay_drift_events_total",
+            value=1,
+            labels={
+                **replay_labels,
+                "drift_type": "strict_replay_not_reconstructable",
+                "status": "detected",
+            },
+        )
 
 
 def _create_manifest_store(inputs: RunnerInputs) -> FileRunManifestStore:

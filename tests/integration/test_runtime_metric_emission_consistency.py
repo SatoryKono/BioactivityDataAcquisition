@@ -21,6 +21,8 @@ def test_critical_observability_metric_families_are_runtime_emitted() -> None:
         "bioetl_control_plane_manifest_writes_total",
         "bioetl_control_plane_ledger_appends_total",
         "bioetl_checkpoint_compatibility_events_total",
+        "bioetl_replay_drift_events_total",
+        "bioetl_replay_lag_seconds",
         "bioetl_replay_reconstructability_events_total",
         "bioetl_record_flow_invariants_total",
         "bioetl_stage_backlog_records",
@@ -48,6 +50,12 @@ def test_critical_observability_metric_families_have_runtime_emitters() -> None:
         "bioetl_control_plane_ledger_appends_total": "src/bioetl/infrastructure/control_plane",
         "bioetl_checkpoint_compatibility_events_total": "src/bioetl/application",
         "bioetl_replay_reconstructability_events_total": (
+            "src/bioetl/composition/runtime_builders/run_manifest_builder.py"
+        ),
+        "bioetl_replay_drift_events_total": (
+            "src/bioetl/composition/runtime_builders/run_manifest_builder.py"
+        ),
+        "bioetl_replay_lag_seconds": (
             "src/bioetl/composition/runtime_builders/run_manifest_builder.py"
         ),
         "bioetl_record_flow_invariants_total": "src/bioetl/application",

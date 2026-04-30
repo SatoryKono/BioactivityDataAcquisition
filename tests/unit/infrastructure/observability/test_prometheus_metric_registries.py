@@ -136,7 +136,7 @@ def test_metric_definition_exports_remain_stable() -> None:
 @pytest.mark.unit
 def test_grouped_registry_inventory_preserves_expected_size() -> None:
     # This ratchet intentionally changes only when we add/remove public metrics.
-    assert len(REGISTERED_PROMETHEUS_METRIC_NAMES) == 140
+    assert len(REGISTERED_PROMETHEUS_METRIC_NAMES) == 142
 
 
 @pytest.mark.unit
@@ -362,6 +362,13 @@ def test_adapter_metrics_use_bounded_label_names_only() -> None:
             "target",
             "status",
         },
+        "bioetl_replay_drift_events_total": {
+            "pipeline",
+            "run_type",
+            "replay_capability",
+            "drift_type",
+            "status",
+        },
     }
     expected_histogram_labels = {
         "bioetl_adapter_request_duration_seconds": {"provider", "endpoint"},
@@ -373,6 +380,12 @@ def test_adapter_metrics_use_bounded_label_names_only() -> None:
         "bioetl_observability_runtime_status": {"pipeline", "component", "mode"},
         "bioetl_stage_backlog_records": {"pipeline", "run_type", "stage"},
         "bioetl_stage_lag_seconds": {"pipeline", "run_type", "stage"},
+        "bioetl_replay_lag_seconds": {
+            "pipeline",
+            "run_type",
+            "replay_capability",
+            "status",
+        },
     }
     expected_adapter_gauge_labels = {
         "bioetl_adapter_request_p95_seconds": {"provider", "endpoint"},

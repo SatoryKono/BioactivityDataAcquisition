@@ -46,6 +46,12 @@ groups:
       - record: bioetl_runtime_alert_condition_checkpoint_incompatible_30m
         expr: sum by (pipeline) (increase(bioetl_checkpoint_compatibility_events_total{disposition=~".*_incompatible"}[30m])) > bool 0
 
+      - record: bioetl_runtime_alert_condition_replay_lag_high_15m
+        expr: max by (pipeline, run_type, replay_capability, status) (max_over_time(bioetl_replay_lag_seconds[15m])) >= bool 300
+
+      - record: bioetl_runtime_alert_condition_replay_drift_detected_30m
+        expr: sum by (pipeline, run_type, replay_capability, drift_type, status) (increase(bioetl_replay_drift_events_total[30m])) > bool 0
+
       - record: bioetl_runtime_alert_condition_lineage_refs_missing_15m
         expr: sum by (pipeline) (increase(bioetl_lineage_refs_missing_total[15m])) > bool 0
 
@@ -336,6 +342,26 @@ groups:
         annotations:
           summary: "Replay request cannot be reconstructed safely"
           description: "bioetl_replay_reconstructability_events_total recorded not_reconstructable for pipeline={{ $labels.pipeline }} replay_capability={{ $labels.replay_capability }} strict_requirement={{ $labels.strict_requirement }} in the last 30m."
+          runbook: "docs/05-operations/runbooks/checkpoint-debugging.md"
+
+      - alert: BioETLReplayLagHigh
+        expr: bioetl_runtime_alert_condition_replay_lag_high_15m > 0
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Replay lag is elevated"
+          description: "bioetl_replay_lag_seconds exceeded 300s for pipeline={{ $labels.pipeline }} run_type={{ $labels.run_type }} replay_capability={{ $labels.replay_capability }} status={{ $labels.status }}."
+          runbook: "docs/05-operations/runbooks/checkpoint-debugging.md"
+
+      - alert: BioETLReplayDriftDetected
+        expr: bioetl_runtime_alert_condition_replay_drift_detected_30m > 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Replay drift was detected"
+          description: "bioetl_replay_drift_events_total increased for pipeline={{ $labels.pipeline }} run_type={{ $labels.run_type }} replay_capability={{ $labels.replay_capability }} drift_type={{ $labels.drift_type }}."
           runbook: "docs/05-operations/runbooks/checkpoint-debugging.md"
 
       - alert: BioETLLineageFragmentPersistenceFailed
