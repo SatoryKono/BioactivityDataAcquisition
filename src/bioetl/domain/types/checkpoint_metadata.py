@@ -44,6 +44,7 @@ class CheckpointMetadata:
         run_type: Canonical run type used for execution identity.
         pipeline_version: Version of the pipeline configuration.
         git_commit: Git commit anchor included in canonical execution identity.
+        dependency_lock_hash: Dependency lockfile content hash for forensic replay.
         effective_config_hash: Canonical effective-config hash for execution identity.
         effective_config_artifact_id: Effective-config artifact reference for provenance.
         execution_fingerprint: Canonical execution-identity fingerprint shared
@@ -68,6 +69,7 @@ class CheckpointMetadata:
     run_type: _OPTIONAL_STR = None
     pipeline_version: _OPTIONAL_STR = None
     git_commit: _OPTIONAL_STR = None
+    dependency_lock_hash: _OPTIONAL_STR = None
     effective_config_hash: _OPTIONAL_STR = None
     effective_config_artifact_id: _OPTIONAL_STR = None
     execution_fingerprint: _OPTIONAL_STR = None
@@ -102,6 +104,11 @@ class CheckpointMetadata:
             run_type=cast(_OPTIONAL_STR, legacy_metadata.get("run_type")),
             pipeline_version=legacy_metadata.get("pipeline_version"),
             git_commit=cast(_OPTIONAL_STR, legacy_metadata.get("git_commit")),
+            dependency_lock_hash=cast(
+                _OPTIONAL_STR,
+                legacy_metadata.get("dependency_lock_hash")
+                or extract_run_context_anchor(legacy_metadata, "dependency_lock_hash"),
+            ),
             effective_config_hash=legacy_metadata.get("effective_config_hash"),
             effective_config_artifact_id=legacy_metadata.get(
                 "effective_config_artifact_id"
@@ -153,6 +160,7 @@ class CheckpointMetadata:
             ("run_type", self.run_type),
             ("pipeline_version", self.pipeline_version),
             ("git_commit", self.git_commit),
+            ("dependency_lock_hash", self.dependency_lock_hash),
             ("effective_config_hash", self.effective_config_hash),
             ("effective_config_artifact_id", self.effective_config_artifact_id),
             ("execution_fingerprint", self.execution_fingerprint),
@@ -191,6 +199,11 @@ class CheckpointMetadata:
             run_type=cast(_OPTIONAL_STR, data.get("run_type")),
             pipeline_version=data.get("pipeline_version"),
             git_commit=cast(_OPTIONAL_STR, data.get("git_commit")),
+            dependency_lock_hash=cast(
+                _OPTIONAL_STR,
+                data.get("dependency_lock_hash")
+                or extract_run_context_anchor(data, "dependency_lock_hash"),
+            ),
             effective_config_hash=data.get("effective_config_hash"),
             effective_config_artifact_id=data.get("effective_config_artifact_id"),
             execution_fingerprint=data.get("execution_fingerprint"),

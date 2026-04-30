@@ -166,6 +166,7 @@ class PipelineMetadata(BaseModel):
         entity: Entity type (e.g., 'activity').
         version: Pipeline/transform version.
         git_commit: Git commit hash for reproducibility.
+        dependency_lock_hash: Dependency lockfile content hash for forensic replay.
         config_hash: Legacy compatibility anchor for the resolved config hash.
         resolved_config_hash: SHA256 hash of resolved declarative config.
         effective_config_hash: SHA256 hash of final effective execution config.
@@ -176,6 +177,10 @@ class PipelineMetadata(BaseModel):
     entity: str = Field(description="Entity type")
     version: str = Field(default="1.0.0", description="Pipeline version")
     git_commit: str | None = Field(default=None, description="Git commit hash")
+    dependency_lock_hash: str | None = Field(
+        default=None,
+        description="Dependency lockfile content hash for forensic replay",
+    )
     config_hash: str | None = Field(
         default=None,
         description=(

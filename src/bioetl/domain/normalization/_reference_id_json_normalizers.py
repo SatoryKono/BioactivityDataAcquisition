@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from typing import cast
 
 from bioetl.domain.normalization._reference_id_support import (
     _dedupe_reference_items,
@@ -58,4 +59,6 @@ def normalize_json_object_reference_id(
     parsed = _parse_json_object(value)
     if parsed is None:
         return _json_fallback(value)
-    return serialize_json_canonical(_normalize_reference_item(parsed, id_normalizer))
+    return serialize_json_canonical(
+        cast("dict[str, object]", _normalize_reference_item(parsed, id_normalizer))
+    )

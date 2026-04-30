@@ -184,9 +184,11 @@ def _expected_provenance_only_summary_without_score(
         "pipeline_version": "1.0.0",
         "git_commit": "abc1234",
         "source_revision_state": "clean",
+        "dependency_lock_state": "missing",
         "code_provenance_state": {
             "git_commit": "abc1234",
             "source_revision_state": "clean",
+            "dependency_lock_state": "missing",
             "strict_code_provenance_ready": True,
             "strict_code_provenance_blockers": [],
         },
@@ -665,9 +667,11 @@ def test_build_diagnostics_summary_exposes_required_operator_fields(
         "effective_config_hash": _VALID_EFFECTIVE_CONFIG_HASH,
         "git_commit": "abc1234",
         "source_revision_state": "clean",
+        "dependency_lock_state": "missing",
         "code_provenance_state": {
             "git_commit": "abc1234",
             "source_revision_state": "clean",
+            "dependency_lock_state": "missing",
             "strict_code_provenance_ready": True,
             "strict_code_provenance_blockers": [],
         },

@@ -193,6 +193,7 @@ async def _write_silver_metadata(
         records=request.records,
     )
     table_path_placeholder = _fallback_table_path(request.table_name)
+    provenance = extract_control_plane_provenance_from_records(request.records)
     metadata = _build_silver_sidecar_metadata(
         _SilverMetadataSidecarRequest(
             table_name=request.table_name,
@@ -214,7 +215,19 @@ async def _write_silver_metadata(
             transform_version=request.transform_version,
             transform_steps=request.transform_steps,
             bronze_refs=request.bronze_refs,
-            **extract_control_plane_provenance_from_records(request.records),
+            execution_fingerprint=provenance["execution_fingerprint"],
+            config_hash=provenance["config_hash"],
+            resolved_config_hash=provenance["resolved_config_hash"],
+            effective_config_hash=provenance["effective_config_hash"],
+            effective_config_artifact_id=provenance["effective_config_artifact_id"],
+            contract_ref=provenance["contract_ref"],
+            contract_version=provenance["contract_version"],
+            contract_schema_hash=provenance["contract_schema_hash"],
+            dq_policy_ref=provenance["dq_policy_ref"],
+            rule_bundle_version=provenance["rule_bundle_version"],
+            dq_contract_compatibility_hash=provenance[
+                "dq_contract_compatibility_hash"
+            ],
         )
     )
     result = await metadata_ops._persist_silver_metadata(

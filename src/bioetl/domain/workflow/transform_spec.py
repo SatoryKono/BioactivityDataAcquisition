@@ -6,6 +6,7 @@ import hashlib
 import json
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
+from typing import TypeGuard
 
 from bioetl.domain.types import JsonDict
 from bioetl.domain.workflow.config import TransformStepConfig
@@ -68,7 +69,7 @@ def _normalize_mapping_value(value: Mapping[object, object]) -> JsonDict:
     }
 
 
-def _is_json_sequence(value: object) -> bool:
+def _is_json_sequence(value: object) -> TypeGuard[Sequence[object]]:
     """Return whether value should normalize as an ordered JSON array."""
     return isinstance(value, Sequence) and not isinstance(
         value,

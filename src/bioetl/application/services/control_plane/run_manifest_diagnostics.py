@@ -140,9 +140,13 @@ def _build_base_summary_payload(
         strict_code_provenance_blockers.append("git_commit_missing")
     if str(code_provenance.source_revision_state or "").strip().lower() != "clean":
         strict_code_provenance_blockers.append("source_revision_state_not_clean")
+    dependency_lock_state = (
+        "present" if code_provenance.dependency_lock_hash is not None else "missing"
+    )
     code_provenance_state: dict[str, object] = {
         "git_commit": code_provenance.git_commit,
         "source_revision_state": code_provenance.source_revision_state,
+        "dependency_lock_state": dependency_lock_state,
         "strict_code_provenance_ready": not strict_code_provenance_blockers,
         "strict_code_provenance_blockers": strict_code_provenance_blockers,
     }
@@ -164,6 +168,7 @@ def _build_base_summary_payload(
         "pipeline_version": code_provenance.pipeline_version,
         "git_commit": code_provenance.git_commit,
         "source_revision_state": code_provenance.source_revision_state,
+        "dependency_lock_state": dependency_lock_state,
         "code_provenance_state": code_provenance_state,
         "contract_ref": code_provenance.contract_ref,
         "contract_version": code_provenance.contract_version,

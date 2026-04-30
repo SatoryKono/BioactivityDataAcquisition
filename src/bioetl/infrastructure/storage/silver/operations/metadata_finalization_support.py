@@ -74,6 +74,7 @@ def _build_direct_legacy_silver_metadata(
     transform_steps: tuple[str, ...] | None,
 ) -> SilverMetadata:
     """Build metadata for the isolated direct-writer compatibility fallback."""
+    provenance = extract_control_plane_provenance_from_records(records)
     return _build_silver_sidecar_metadata(
         _SilverMetadataSidecarRequest(
             table_name=table_name,
@@ -91,7 +92,19 @@ def _build_direct_legacy_silver_metadata(
             transform_steps=transform_steps,
             bronze_refs=None,
             version_after=None,
-            **extract_control_plane_provenance_from_records(records),
+            execution_fingerprint=provenance["execution_fingerprint"],
+            config_hash=provenance["config_hash"],
+            resolved_config_hash=provenance["resolved_config_hash"],
+            effective_config_hash=provenance["effective_config_hash"],
+            effective_config_artifact_id=provenance["effective_config_artifact_id"],
+            contract_ref=provenance["contract_ref"],
+            contract_version=provenance["contract_version"],
+            contract_schema_hash=provenance["contract_schema_hash"],
+            dq_policy_ref=provenance["dq_policy_ref"],
+            rule_bundle_version=provenance["rule_bundle_version"],
+            dq_contract_compatibility_hash=provenance[
+                "dq_contract_compatibility_hash"
+            ],
         )
     )
 
@@ -147,6 +160,7 @@ async def _finalize_silver_write_result(
         if request.records and "_run_id" in request.records[0]
         else "test_run_id"
     )
+    provenance = extract_control_plane_provenance_from_records(request.records)
     metadata = _build_silver_sidecar_metadata(
         _SilverMetadataSidecarRequest(
             table_name=request.table_name,
@@ -166,7 +180,19 @@ async def _finalize_silver_write_result(
             primary_keys=request.primary_keys,
             version_after=context.version_after,
             hostname="test-host",
-            **extract_control_plane_provenance_from_records(request.records),
+            execution_fingerprint=provenance["execution_fingerprint"],
+            config_hash=provenance["config_hash"],
+            resolved_config_hash=provenance["resolved_config_hash"],
+            effective_config_hash=provenance["effective_config_hash"],
+            effective_config_artifact_id=provenance["effective_config_artifact_id"],
+            contract_ref=provenance["contract_ref"],
+            contract_version=provenance["contract_version"],
+            contract_schema_hash=provenance["contract_schema_hash"],
+            dq_policy_ref=provenance["dq_policy_ref"],
+            rule_bundle_version=provenance["rule_bundle_version"],
+            dq_contract_compatibility_hash=provenance[
+                "dq_contract_compatibility_hash"
+            ],
         )
     )
     await metadata_ops._persist_silver_metadata(

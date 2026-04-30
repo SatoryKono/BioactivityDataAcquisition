@@ -282,13 +282,18 @@ def expected_exact_replay_anchors(
             for snapshot in source_ref.input_snapshots
         }
     )
-    return {
+    anchors: dict[str, object] = {
         "semantic_identity_anchor": "execution_fingerprint",
         "execution_fingerprint": manifest.execution_fingerprint,
         "pipeline_name": manifest.pipeline_name,
         "run_type": manifest.run_type.value,
         "pipeline_version": manifest.code_provenance.pipeline_version,
         "git_commit": manifest.code_provenance.git_commit,
+        "dependency_lock_state": (
+            "present"
+            if manifest.code_provenance.dependency_lock_hash is not None
+            else "missing"
+        ),
         "effective_config_hash": manifest.code_provenance.effective_config_hash,
         "dq_contract_compatibility_hash": (
             manifest.code_provenance.dq_contract_compatibility_hash
@@ -305,6 +310,9 @@ def expected_exact_replay_anchors(
         "published_artifact_paths": published_artifact_paths or [],
         "lineage_fragment_ids": lineage_fragment_ids or [],
     }
+    if manifest.code_provenance.dependency_lock_hash is not None:
+        anchors["dependency_lock_hash"] = manifest.code_provenance.dependency_lock_hash
+    return anchors
 
 
 def expected_produced_artifact_trace(

@@ -27,7 +27,7 @@ from bioetl.composition.runtime_builders._runner_builder_support import (
 from bioetl.composition.services.versioning import (
     get_pipeline_version,
 )
-from bioetl.domain.control_plane import ReplayCapability
+from bioetl.domain.control_plane import ReplayCapability, RunManifest
 from bioetl.domain.control_plane.reproducibility_policy import (
     STRICT_PERSISTENCE_PROFILES,
     legacy_config_hash_from_resolved_config_hash,
@@ -222,7 +222,7 @@ def _create_manifest_record(
     manifest_store: FileRunManifestStore,
     manifest_create_request: RunManifestCreateSpec,
     ledger_service: RunLedgerService | None,
-) -> object:
+) -> RunManifest:
     manifest = RunManifestService(
         manifest_port=manifest_store,
         clock=SystemClock(),

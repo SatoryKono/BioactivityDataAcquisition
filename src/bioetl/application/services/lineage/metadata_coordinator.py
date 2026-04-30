@@ -163,6 +163,7 @@ class MetadataCoordinator(MetadataCoordinatorPort):
             entity=self._context.entity,
             version=self._context.pipeline_version or "1.0.0",
             git_commit=self._context.git_commit,
+            dependency_lock_hash=self._context.dependency_lock_hash,
             config_hash=self._context.config_hash,
             resolved_config_hash=self._context.resolved_config_hash,
             effective_config_hash=self._context.effective_config_hash,

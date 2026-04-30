@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 
 __all__ = ["SilverWriterAuditMetadataCompatibilityMixin"]
 
-_ASYNC_SILVER_WRITER_METHOD = "Callable[..., Awaitable[None]]"
+type _AsyncSilverWriterMethod = Callable[..., Awaitable[None]]
 
 
 class _SilverAuditMetadataOps(Protocol):
@@ -64,7 +64,7 @@ class SilverWriterAuditMetadataCompatibilityMixin:
         )
 
         await cast(
-            _ASYNC_SILVER_WRITER_METHOD,
+            _AsyncSilverWriterMethod,
             SilverWriterMetadataMixin._log_silver_audit,
         )(
             self._as_metadata_mixin(),
@@ -114,7 +114,7 @@ class SilverWriterAuditMetadataCompatibilityMixin:
         )
 
         await cast(
-            _ASYNC_SILVER_WRITER_METHOD,
+            _AsyncSilverWriterMethod,
             SilverWriterMetadataMixin._write_silver_metadata_file,
         )(
             self._as_metadata_mixin(),
@@ -142,7 +142,7 @@ class SilverWriterAuditMetadataCompatibilityMixin:
         )
 
         await cast(
-            _ASYNC_SILVER_WRITER_METHOD,
+            _AsyncSilverWriterMethod,
             SilverWriterMetadataMixin._maybe_log_silver_audit,
         )(
             self._as_metadata_mixin(),
@@ -199,7 +199,7 @@ class SilverWriterAuditMetadataCompatibilityMixin:
         )
 
         await cast(
-            _ASYNC_SILVER_WRITER_METHOD,
+            _AsyncSilverWriterMethod,
             SilverWriterMetadataMixin._write_silver_metadata,
         )(
             self._as_metadata_mixin(),
