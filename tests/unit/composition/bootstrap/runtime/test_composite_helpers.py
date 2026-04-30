@@ -4,7 +4,7 @@ Covers the stateless helper functions that can be tested without bootstrapping
 the full composition root:
 - _resolve_composite_gold_schema (composite.py)
 - _resolve_composite_config_path (composite.py)
-- CompositeFilterExtractionService methods (composite_filter_extraction_service.py)
+- CompositeFilterExtractor methods (composite_filter_extraction_service.py)
 - resolve_bronze_opts (runner_factory_builder_service.py)
 - _load_field_group_registry (composite.py, graceful degradation path)
 """
@@ -44,7 +44,7 @@ def _import_helpers():
         _resolve_composite_gold_schema,
     )
     from bioetl.composition.bootstrap.runtime.composite_filter_extraction_service import (
-        CompositeFilterExtractionService,
+        CompositeFilterExtractor,
     )
     from bioetl.composition.bootstrap.runtime.runner_factory_builder_service import (
         resolve_bronze_opts,
@@ -53,27 +53,28 @@ def _import_helpers():
     return {
         "_build_fallback_mapping": lambda keys, filter_key, join_keys: (
             CompositeFilterExtractionService().build_fallback_mapping(
+            CompositeFilterExtractor().build_fallback_mapping(
                 keys=keys,
                 filter_key=filter_key,
                 join_keys=join_keys,
             )
         ),
         "_extract_field_values": lambda keys, field: (
-            CompositeFilterExtractionService().extract_field_values(keys, field)
+            CompositeFilterExtractor().extract_field_values(keys, field)
         ),
         "_extract_filter_ids_from_keys": lambda enricher_cfg, keys, logger=None: (
-            CompositeFilterExtractionService(logger=logger).extract_enricher_filters(
+            CompositeFilterExtractor(logger=logger).extract_enricher_filters(
                 enricher_cfg=enricher_cfg,
                 keys=keys,
             )
         ),
         "_extract_multi_filter_ids": lambda dep_cfg, keys, logger=None: (
-            CompositeFilterExtractionService(logger=logger).extract_multi_filter_ids(
+            CompositeFilterExtractor(logger=logger).extract_multi_filter_ids(
                 dep_cfg=dep_cfg,
                 keys=keys,
             )
         ),
-        "_find_filter_key": CompositeFilterExtractionService.find_filter_key,
+        "_find_filter_key": CompositeFilterExtractor.find_filter_key,
         "_resolve_bronze_opts": resolve_bronze_opts,
         "_resolve_composite_config_path": _resolve_composite_config_path,
         "_resolve_composite_gold_schema": _resolve_composite_gold_schema,

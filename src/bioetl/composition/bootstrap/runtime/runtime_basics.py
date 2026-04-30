@@ -23,7 +23,7 @@ if TYPE_CHECKING:
     from bioetl.application.composite.runtime_wiring_api import PipelineRunner
     from bioetl.application.services.dq_report_service import DQReportService
     from bioetl.composition.bootstrap.runtime.composite_filter_extraction_service import (
-        CompositeFilterExtractionService,
+        CompositeFilterExtractor,
     )
     from bioetl.composition.bootstrap.runtime.composite_support_services_factory import (
         CompositeSupportServices,
@@ -31,7 +31,7 @@ if TYPE_CHECKING:
     )
     from bioetl.composition.bootstrap.runtime.runner_factory_builder_service import (
         BronzeRunOptions,
-        RunnerFactoryBuilderService,
+        RunnerFactoryBuilder,
     )
     from bioetl.composition.execution_api import RunOptions
     from bioetl.domain.composite.config import CompositeConfig
@@ -99,8 +99,8 @@ def build_runner_factories(
     config: CompositeConfig,
     runtime: CompositeRuntimeConfig,
     logger: LoggerPort,
-    runner_factory_builder_cls: type[RunnerFactoryBuilderService[RunOptions]],
-    filter_extraction_service_cls: type[CompositeFilterExtractionService],
+    runner_factory_builder_cls: type[RunnerFactoryBuilder[RunOptions]],
+    filter_extraction_service_cls: type[CompositeFilterExtractor],
     pipeline_runner_builder: Callable[[PipelineRunContext], PipelineRunner],
     resolve_bronze_opts_fn: Callable[
         [CompositeRuntimeConfig, bool | None], BronzeRunOptions
@@ -141,7 +141,7 @@ def build_runner_factories(
         build_pipeline_context
     )
     runner_factory_builder = cast(
-        "Callable[..., RunnerFactoryBuilderService[RunOptions]]",
+        "Callable[..., RunnerFactoryBuilder[RunOptions]]",
         runner_factory_builder_cls,
     )(
         logger=logger,
