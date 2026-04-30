@@ -89,7 +89,7 @@ def get_metrics_operator_profile() -> MetricsOperatorProfile:
 
 def get_quarantine_manager(pipeline: str) -> _QuarantineManager:
     """Load the quarantine manager through composition on demand."""
-    from bioetl.composition.resources_api import get_quarantine_manager as _impl
+    from bioetl.composition.health_api import get_quarantine_manager as _impl
 
     return cast(_QuarantineManager, _impl(pipeline))
 

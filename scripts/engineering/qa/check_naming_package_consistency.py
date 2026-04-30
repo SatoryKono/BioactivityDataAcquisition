@@ -3,9 +3,11 @@
 
 Rules:
 1) strict suffix-policy: delegated to ``scripts/engineering/qa/naming_audit.py --check``.
-2) factory-only-in-composition: no ``Factory`` classes or ``*factory*.py`` modules
+2) layer-aware suffix/family policy: enforced from
+   ``configs/quality/layered_suffix_policy.yaml``.
+3) factory-only-in-composition: no ``Factory`` classes or ``*factory*.py`` modules
    outside ``src/bioetl/composition``.
-3) canonical role subpackage names: ``contracts/mappers/services/facades`` only
+4) canonical role subpackage names: ``contracts/mappers/services/facades`` only
    (singular forms are forbidden).
 """
 
@@ -13,13 +15,17 @@ from __future__ import annotations
 
 import argparse
 import ast
+import re
 import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
 
+import yaml
+
 SRC_ROOT = Path("src/bioetl")
 CANONICAL_NAMING_AUDIT_PATH = Path("scripts/engineering/qa/naming_audit.py")
+LAYER_AWARE_SUFFIX_POLICY_PATH = Path("configs/quality/layered_suffix_policy.yaml")
 FORBIDDEN_FACTORY_LAYERS = (
     SRC_ROOT / "application",
     SRC_ROOT / "infrastructure",
@@ -44,6 +50,49 @@ class Violation:
     rule: str
     location: str
     details: str
+
+
+@dataclass(frozen=True)
+class AllowedSymbol:
+    """Machine-readable exception or allowed legacy symbol."""
+
+    symbol: str
+    path: str
+    issue: str
+    reason: str
+
+
+@dataclass(frozen=True)
+class SuffixBoundaryRule:
+    """Layer-aware suffix boundary rule."""
+
+    rule_id: str
+    description: str
+    suffixes: tuple[str, ...]
+    include_path_prefixes: tuple[str, ...]
+    exclude_path_prefixes: tuple[str, ...]
+    allowed_symbols: tuple[AllowedSymbol, ...]
+
+
+@dataclass(frozen=True)
+class FamilyFreezeRule:
+    """Frozen name-family rule for reviewed ambiguity debt."""
+
+    rule_id: str
+    description: str
+    include_path_prefixes: tuple[str, ...]
+    match_regex: str
+    allowed_symbols: tuple[AllowedSymbol, ...]
+
+
+@dataclass(frozen=True)
+class LayerAwareNamingPolicy:
+    """Structured layer-aware naming policy loaded from YAML."""
+
+    version: int
+    policy_scope: str
+    suffix_boundary_rules: tuple[SuffixBoundaryRule, ...]
+    family_freeze_rules: tuple[FamilyFreezeRule, ...]
 
 
 def _run_suffix_policy_check(repo_root: Path) -> list[Violation]:
@@ -84,6 +133,183 @@ def _run_suffix_policy_check(repo_root: Path) -> list[Violation]:
             details=preview or "naming_audit returned non-zero exit code",
         )
     ]
+
+
+def _flatten_string_sequence(raw: object) -> tuple[str, ...]:
+    if not isinstance(raw, list):
+        return ()
+    return tuple(
+        value.strip()
+        for value in raw
+        if isinstance(value, str) and value.strip()
+    )
+
+
+def _load_allowed_symbols(raw: object) -> tuple[AllowedSymbol, ...]:
+    if not isinstance(raw, list):
+        return ()
+
+    allowed: list[AllowedSymbol] = []
+    for item in raw:
+        if not isinstance(item, dict):
+            continue
+        symbol = str(item.get("symbol", "")).strip()
+        path = str(item.get("path", "")).strip()
+        issue = str(item.get("issue", "")).strip()
+        reason = str(item.get("reason", "")).strip()
+        if symbol and path and issue and reason:
+            allowed.append(
+                AllowedSymbol(symbol=symbol, path=path, issue=issue, reason=reason)
+            )
+    return tuple(allowed)
+
+
+def _load_layer_aware_suffix_policy(repo_root: Path) -> LayerAwareNamingPolicy:
+    path = repo_root / LAYER_AWARE_SUFFIX_POLICY_PATH
+    payload = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    if not isinstance(payload, dict):
+        raise ValueError(
+            "configs/quality/layered_suffix_policy.yaml must be a YAML mapping"
+        )
+
+    version = int(payload.get("version", 0))
+    policy_scope = str(payload.get("policy_scope", "")).strip()
+
+    suffix_rules: list[SuffixBoundaryRule] = []
+    for item in payload.get("suffix_boundary_rules", []):
+        if not isinstance(item, dict):
+            continue
+        rule_id = str(item.get("rule_id", "")).strip()
+        description = str(item.get("description", "")).strip()
+        suffixes = _flatten_string_sequence(item.get("suffixes", []))
+        include_path_prefixes = _flatten_string_sequence(
+            item.get("include_path_prefixes", [])
+        )
+        exclude_path_prefixes = _flatten_string_sequence(
+            item.get("exclude_path_prefixes", [])
+        )
+        allowed_symbols = _load_allowed_symbols(item.get("allowed_symbol_exceptions", []))
+        if rule_id and description and suffixes and include_path_prefixes:
+            suffix_rules.append(
+                SuffixBoundaryRule(
+                    rule_id=rule_id,
+                    description=description,
+                    suffixes=suffixes,
+                    include_path_prefixes=include_path_prefixes,
+                    exclude_path_prefixes=exclude_path_prefixes,
+                    allowed_symbols=allowed_symbols,
+                )
+            )
+
+    family_rules: list[FamilyFreezeRule] = []
+    for item in payload.get("family_freeze_rules", []):
+        if not isinstance(item, dict):
+            continue
+        rule_id = str(item.get("rule_id", "")).strip()
+        description = str(item.get("description", "")).strip()
+        include_path_prefixes = _flatten_string_sequence(
+            item.get("include_path_prefixes", [])
+        )
+        match_regex = str(item.get("match_regex", "")).strip()
+        allowed_symbols = _load_allowed_symbols(item.get("allowed_symbols", []))
+        if rule_id and description and include_path_prefixes and match_regex:
+            family_rules.append(
+                FamilyFreezeRule(
+                    rule_id=rule_id,
+                    description=description,
+                    include_path_prefixes=include_path_prefixes,
+                    match_regex=match_regex,
+                    allowed_symbols=allowed_symbols,
+                )
+            )
+
+    return LayerAwareNamingPolicy(
+        version=version,
+        policy_scope=policy_scope,
+        suffix_boundary_rules=tuple(suffix_rules),
+        family_freeze_rules=tuple(family_rules),
+    )
+
+
+def _matches_any_prefix(path: str, prefixes: tuple[str, ...]) -> bool:
+    return any(path.startswith(prefix) for prefix in prefixes)
+
+
+def _is_allowed_symbol(
+    *,
+    symbol: str,
+    relative_path: str,
+    allowed_symbols: tuple[AllowedSymbol, ...],
+) -> bool:
+    return any(
+        item.symbol == symbol and item.path == relative_path for item in allowed_symbols
+    )
+
+
+def _layer_aware_suffix_violations(repo_root: Path) -> list[Violation]:
+    policy = _load_layer_aware_suffix_policy(repo_root)
+    src_root = repo_root / SRC_ROOT
+    violations: list[Violation] = []
+
+    for py_file in src_root.rglob("*.py"):
+        if "__pycache__" in py_file.parts:
+            continue
+        try:
+            tree = ast.parse(py_file.read_text(encoding="utf-8"), filename=str(py_file))
+        except SyntaxError:
+            continue
+        relative_path = py_file.relative_to(repo_root).as_posix()
+
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.ClassDef) or node.name.startswith("_"):
+                continue
+
+            for rule in policy.suffix_boundary_rules:
+                if not _matches_any_prefix(relative_path, rule.include_path_prefixes):
+                    continue
+                if _matches_any_prefix(relative_path, rule.exclude_path_prefixes):
+                    continue
+                if not any(node.name.endswith(suffix) for suffix in rule.suffixes):
+                    continue
+                if _is_allowed_symbol(
+                    symbol=node.name,
+                    relative_path=relative_path,
+                    allowed_symbols=rule.allowed_symbols,
+                ):
+                    continue
+                violations.append(
+                    Violation(
+                        rule="layer-aware-suffix-policy",
+                        location=f"{relative_path}:{node.lineno}",
+                        details=(
+                            f"[{rule.rule_id}] class {node.name} violates the "
+                            f"reviewed suffix boundary for {', '.join(rule.suffixes)}"
+                        ),
+                    )
+                )
+
+            for rule in policy.family_freeze_rules:
+                if not _matches_any_prefix(relative_path, rule.include_path_prefixes):
+                    continue
+                if re.match(rule.match_regex, node.name) is None:
+                    continue
+                if _is_allowed_symbol(
+                    symbol=node.name,
+                    relative_path=relative_path,
+                    allowed_symbols=rule.allowed_symbols,
+                ):
+                    continue
+                violations.append(
+                    Violation(
+                        rule="layer-aware-suffix-policy",
+                        location=f"{relative_path}:{node.lineno}",
+                        details=(
+                            f"[{rule.rule_id}] class {node.name} is not registered "
+                            "in the frozen naming family"
+                        ),
+                    )
+                )
+    return violations
 
 
 def _factory_module_violation(py_file: Path, *, repo_root: Path) -> Violation | None:
@@ -181,6 +407,7 @@ def run_checks(repo_root: Path) -> list[Violation]:
     """Run all consistency checks and return merged violations."""
     violations: list[Violation] = []
     violations.extend(_run_suffix_policy_check(repo_root))
+    violations.extend(_layer_aware_suffix_violations(repo_root))
     violations.extend(_factory_violations(repo_root))
     violations.extend(_package_template_violations(repo_root))
     return violations
@@ -207,7 +434,10 @@ def main() -> int:
     if not violations:
         print(
             "Naming/package consistency: OK "
-            "(suffix-policy, factory-only-in-composition, subpackage-template)"
+            "("
+            "suffix-policy, layer-aware-suffix-policy, "
+            "factory-only-in-composition, subpackage-template"
+            ")"
         )
         return 0
 

@@ -140,6 +140,7 @@ def test_dashboard_has_required_variables(dashboard_path):
         "bioetl-runtime.json": {"pipeline", "run_type", "stage"},
         "bioetl-provider-health-v2.json": {"provider"},
         "bioetl-control-plane-v1.json": {"pipeline", "run_type"},
+        "bioetl-workflow-overview.json": {"workflow", "status"},
         "bioetl-silver-reject-explorer.json": {
             "pipeline",
             "run_type",
@@ -193,6 +194,15 @@ def test_variable_query_sources(dashboard_path):
 
     if dashboard_path.name == "bioetl-silver-reject-explorer.json":
         _assert_silver_reject_explorer_variable_contract(dashboard_path, variable_map)
+        return
+
+    if dashboard_path.name == "bioetl-workflow-overview.json":
+        workflow_query = variable_map["workflow"].get("query", {})
+        status_query = variable_map["status"].get("query", {})
+        assert isinstance(workflow_query, dict)
+        assert isinstance(status_query, dict)
+        assert "bioetl_workflow_runs_total" in workflow_query.get("query", "")
+        assert "bioetl_workflow_runs_total" in status_query.get("query", "")
         return
 
     if dashboard_path.name == "bioetl-provider-health-v2.json":
@@ -1434,6 +1444,10 @@ def test_dashboard_queries_do_not_filter_by_run_id_label(dashboard_path):
     if dashboard_path.name == "bioetl-provider-health-v2.json":
         assert "provider" in variables, (
             "Provider dashboard must define 'provider' template variable"
+        )
+    elif dashboard_path.name == "bioetl-workflow-overview.json":
+        assert "workflow" in variables, (
+            "Workflow dashboard must define 'workflow' template variable"
         )
     else:
         assert "pipeline" in variables, (

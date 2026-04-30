@@ -11,9 +11,12 @@ if TYPE_CHECKING:
     from bioetl.composition.bootstrap.cli.health import (
         HealthServerDependencies as HealthServerDependencies,
     )
+    from bioetl.composition._resource_management import QuarantineManagerProtocol
     from bioetl.domain.ports import HealthMonitorPort, MetricsPort, QuarantinePort
 
     def get_health_server_dependencies() -> HealthServerDependenciesProtocol: ...
+
+    def get_quarantine_manager(pipeline: str) -> QuarantineManagerProtocol: ...
 
     def get_health_service() -> HealthService: ...
 
@@ -27,16 +30,19 @@ __all__ = [
     "HealthServerDependenciesProtocol",
     "get_health_server_dependencies",
     "get_health_service",
+    "get_quarantine_manager",
     "get_quarantine_port",
     "get_quarantine_service",
 ]
 
 _SERVICES_MODULE = "bioetl.composition._services"
 _BOOTSTRAP_HEALTH_MODULE = "bioetl.composition.bootstrap.cli.health"
+_RESOURCE_MANAGEMENT_MODULE = "bioetl.composition._resource_management"
 _PUBLIC_EXPORTS = {
     "HealthServerDependencies": _BOOTSTRAP_HEALTH_MODULE,
     "get_health_server_dependencies": _SERVICES_MODULE,
     "get_health_service": _SERVICES_MODULE,
+    "get_quarantine_manager": _RESOURCE_MANAGEMENT_MODULE,
     "get_quarantine_port": _SERVICES_MODULE,
     "get_quarantine_service": _SERVICES_MODULE,
 }
