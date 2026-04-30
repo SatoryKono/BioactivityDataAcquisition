@@ -27,6 +27,7 @@
       "strict_code_provenance_ready": true
     },
     "config_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "continuation_mode": "exact_replay",
     "contract_ref": "chembl.activity",
     "contract_version": "1.2.0",
     "dependency_lock_state": "missing",
@@ -90,6 +91,7 @@
         "strict_code_provenance_ready": true
       },
       "config_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "continuation_mode": "exact_replay",
       "contract_ref": "chembl.activity",
       "contract_version": "1.2.0",
       "degraded_runtime_anchor": {
@@ -214,6 +216,7 @@
       "resolved_config_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
       "resume_contract": {
         "applied_checkpoint_compatibility_policy": "hard_fail",
+        "continuation_mode": "exact_replay",
         "execution_context": "ordinary",
         "occurrence_identity_anchor": null,
         "requested_checkpoint_compatibility_policy": null,
@@ -613,6 +616,7 @@
         },
         "resume_contract": {
           "applied_checkpoint_compatibility_policy": "hard_fail",
+          "continuation_mode": "exact_replay",
           "execution_context": "ordinary",
           "occurrence_identity_anchor": null,
           "requested_checkpoint_compatibility_policy": null,
@@ -673,6 +677,7 @@
       },
       "policy": {
         "attained_profile": "degraded_observable",
+        "continuation_mode": "exact_replay",
         "exact_replay_blockers": [],
         "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
         "policy_assessment": {
@@ -748,6 +753,7 @@
     "resolved_config_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
     "resume_contract": {
       "applied_checkpoint_compatibility_policy": "hard_fail",
+      "continuation_mode": "exact_replay",
       "execution_context": "ordinary",
       "occurrence_identity_anchor": null,
       "requested_checkpoint_compatibility_policy": null,
@@ -788,6 +794,7 @@
       "strict_code_provenance_ready": true
     },
     "config_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "continuation_mode": "exact_replay",
     "contract_ref": "chembl.activity",
     "contract_version": "1.2.0",
     "degraded_runtime_anchor": {
@@ -912,6 +919,7 @@
     "resolved_config_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
     "resume_contract": {
       "applied_checkpoint_compatibility_policy": "hard_fail",
+      "continuation_mode": "exact_replay",
       "execution_context": "ordinary",
       "occurrence_identity_anchor": null,
       "requested_checkpoint_compatibility_policy": null,

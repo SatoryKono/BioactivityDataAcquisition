@@ -5,14 +5,40 @@ from __future__ import annotations
 import asyncio
 from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock, patch
+from uuid import uuid4
 
 import pytest
 
+from bioetl.application.services.lineage import MetadataCoordinator
 from bioetl.domain.medallion import SilverWriteMode
+from bioetl.domain.types import RunID, RunType
 from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
+from bioetl.domain.value_objects.run_context import RunContext
 from bioetl.infrastructure.storage.silver.operations.metadata_operations import (
     SilverMetadataOperations,
 )
+
+
+def _metadata_coordinator(
+    *,
+    started_at: datetime | None = None,
+) -> MetadataCoordinator:
+    """Build a canonical Silver metadata coordinator with control-plane anchors."""
+    context = RunContext.create(
+        run_id=RunID(uuid4()),
+        run_type=RunType.INCREMENTAL,
+        started_at=started_at or datetime(2025, 1, 15, 12, 0, tzinfo=UTC),
+        provider="chembl",
+        entity="activity",
+        manifest_id="manifest-canonical",
+        execution_fingerprint="fingerprint-canonical",
+        effective_config_hash="effective-config-canonical",
+        effective_config_artifact_id="effective-config-artifact-canonical",
+        contract_ref="contracts/chembl/activity",
+        contract_version="1.2.3",
+        dq_contract_compatibility_hash="dq-compat-canonical",
+    )
+    return MetadataCoordinator(context)
 
 
 @pytest.mark.unit
@@ -34,6 +60,7 @@ async def test_write_silver_metadata_uses_record_ingestion_anchor_when_explicit_
     ops = SilverMetadataOperations(
         _logger=MagicMock(),
         _metadata_writer=metadata_writer,
+        _metadata_coordinator=_metadata_coordinator(started_at=expected),
     )
 
     await ops.write_silver_metadata(
@@ -72,6 +99,7 @@ async def test_write_silver_metadata_emits_canonical_success_metric() -> None:
     ops = SilverMetadataOperations(
         _logger=MagicMock(),
         _metadata_writer=metadata_writer,
+        _metadata_coordinator=_metadata_coordinator(),
         _metrics=metrics,
     )
 
@@ -102,6 +130,61 @@ async def test_write_silver_metadata_emits_canonical_success_metric() -> None:
             "final_reason": "completed",
         },
     )
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_write_silver_metadata_uses_coordinator_control_plane_anchors() -> None:
+    """Silver sidecar support must not derive provenance from record payloads."""
+    captured: dict[str, object] = {}
+
+    async def capture_write(**kwargs):
+        await asyncio.sleep(0)
+        captured.update(kwargs)
+        return None
+
+    metadata_writer = MagicMock()
+    metadata_writer.write_silver_metadata = capture_write
+    ops = SilverMetadataOperations(
+        _logger=MagicMock(),
+        _metadata_writer=metadata_writer,
+        _metadata_coordinator=_metadata_coordinator(),
+    )
+
+    await ops.write_silver_metadata(
+        table_name="chembl.activity",
+        dq_metrics=BatchDQMetrics(
+            total_records=1,
+            valid_records=1,
+            error_records=0,
+            warning_records=0,
+        ),
+        records=[
+            {
+                "entity_id": "CHEMBL1",
+                "_ingestion_ts": datetime(2025, 1, 15, 12, 0, tzinfo=UTC).isoformat(),
+                "_manifest_id": "manifest-from-record",
+                "_execution_fingerprint": "fingerprint-from-record",
+                "_effective_config_hash": "effective-config-from-record",
+                "_effective_config_artifact_id": "artifact-from-record",
+                "_contract_ref": "contracts/from-record",
+                "_contract_version": "9.9.9",
+                "_dq_contract_compatibility_hash": "dq-compat-from-record",
+            }
+        ],
+    )
+
+    metadata = captured["metadata"]
+    assert metadata.runtime.manifest_id == "manifest-canonical"
+    assert metadata.pipeline.execution_fingerprint == "fingerprint-canonical"
+    assert metadata.pipeline.effective_config_hash == "effective-config-canonical"
+    assert (
+        metadata.pipeline.effective_config_artifact_id
+        == "effective-config-artifact-canonical"
+    )
+    assert metadata.pipeline.contract_ref == "contracts/chembl/activity"
+    assert metadata.pipeline.contract_version == "1.2.3"
+    assert metadata.pipeline.dq_contract_compatibility_hash == "dq-compat-canonical"
 
 
 @pytest.mark.unit

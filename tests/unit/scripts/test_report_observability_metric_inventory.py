@@ -654,6 +654,8 @@ def test_main_write_evidence_writes_replayable_json_artifact(
             "dashboarded_without_emission": [],
             "alerted_without_emission": [],
             "runtime_cardinality_review_required": [],
+            "runtime_label_contract_violations": [],
+            "runtime_label_contract_unresolved": [],
             "live_metrics": ["bioetl_example_total"],
             "direct_live_metrics": ["bioetl_example_total"],
             "helper_backed_live_metrics": [],

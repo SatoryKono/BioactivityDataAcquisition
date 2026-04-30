@@ -43,6 +43,29 @@ def _resolve_replay_mode(
     return "rebuild"
 
 
+def _resolve_continuation_mode(
+    *,
+    manifest: RunManifest,
+    requested_exact_replay: bool,
+    resume_requested: bool,
+) -> str:
+    """Resolve the bounded continuation/replay/rebuild classification."""
+    profile = _resolve_reproducibility_profile(manifest)
+    if (
+        requested_exact_replay
+        and manifest.replay_capability == ReplayCapability.EXACT_REPLAY_SUPPORTED
+        and profile.strict_exact_replay_supported
+    ):
+        return "exact_replay"
+    if _is_full_scan_idempotent_rebuild(manifest):
+        return "full_scan_idempotent_rebuild"
+    if resume_requested or manifest.replay_capability == ReplayCapability.RESUME_ONLY:
+        if _is_composite_execution_context(manifest):
+            return "checkpoint_snapshot_plus_ledger_suffix_resume"
+        return "checkpoint_snapshot_only_resume"
+    return "rebuild_only"
+
+
 def _resolve_replay_capability_reason(
     *,
     manifest: RunManifest,
@@ -186,6 +209,20 @@ def _is_composite_execution_context(manifest: RunManifest) -> bool:
     return execution_context == "composite" or manifest.provider == "composite"
 
 
+def _is_full_scan_idempotent_rebuild(manifest: RunManifest) -> bool:
+    """Return whether manifest config declares the full-scan rebuild strategy."""
+    for payload in (manifest.runtime_config, manifest.resolved_config):
+        for candidate in (
+            payload.get("loading_strategy"),
+            _lookup_mapping_path(payload, "loading", "strategy"),
+            _lookup_mapping_path(payload, "pipeline", "loading_strategy"),
+            _lookup_mapping_path(payload, "pipeline", "loading", "strategy"),
+        ):
+            if str(candidate or "").strip().lower() == "full_scan_only":
+                return True
+    return False
+
+
 def _resolve_reproducibility_profile(
     manifest: RunManifest,
 ) -> ReproducibilityFamilyProfile:
@@ -236,6 +273,11 @@ def _build_resume_contract(
     )
     is_composite = _is_composite_execution_context(manifest)
     execution_context = "composite" if is_composite else "ordinary"
+    continuation_mode = _resolve_continuation_mode(
+        manifest=manifest,
+        requested_exact_replay=requested_exact_replay,
+        resume_requested=resume_requested,
+    )
     return {
         "resume_requested": resume_requested,
         "requested_exact_replay": requested_exact_replay,
@@ -253,6 +295,7 @@ def _build_resume_contract(
             if is_composite
             else "checkpoint_snapshot_only"
         ),
+        "continuation_mode": continuation_mode,
         "semantic_identity_anchor": "execution_fingerprint",
         "occurrence_identity_anchor": (
             "composite_run_identity" if is_composite else None

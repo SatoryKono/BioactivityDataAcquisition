@@ -20,11 +20,13 @@ TARGET_MODULE = (
 LEGACY_TARGET_MODULE = (
     "bioetl.infrastructure.storage.silver.operations.metadata_builders"
 )
-ALLOWED_ADAPTER_IMPORTERS = {
-    "src/bioetl/infrastructure/storage/silver/operations/metadata_write_support.py",
-    "src/bioetl/infrastructure/storage/silver/operations/metadata_operations.py",
-    "src/bioetl/infrastructure/storage/silver/operations/metadata_finalization_support.py",
-}
+ACTIVE_SILVER_METADATA_PATHS = (
+    ROOT / "src/bioetl/infrastructure/storage/silver/operations/metadata_write_support.py",
+    ROOT
+    / "src/bioetl/infrastructure/storage/silver/operations/metadata_finalization_support.py",
+    ROOT
+    / "src/bioetl/infrastructure/storage/silver/finalization_pipeline_compatibility_mixin.py",
+)
 
 
 @pytest.mark.architecture
@@ -79,8 +81,8 @@ def test_source_tree_does_not_reintroduce_silver_placeholder_identity() -> None:
 
 
 @pytest.mark.architecture
-def test_runtime_code_imports_silver_sidecar_adapter_only_through_adapters() -> None:
-    """Keep sidecar construction isolated inside operations-level adapters."""
+def test_runtime_code_does_not_import_quarantined_silver_sidecar_adapter() -> None:
+    """Active Silver runtime paths must use MetadataCoordinatorPort, not adapter."""
     importers: set[str] = set()
     for path in sorted((ROOT / "src").rglob("*.py")):
         if path == TARGET:
@@ -89,7 +91,26 @@ def test_runtime_code_imports_silver_sidecar_adapter_only_through_adapters() -> 
         if TARGET_MODULE in source:
             importers.add(path.relative_to(ROOT).as_posix())
 
-    assert importers <= ALLOWED_ADAPTER_IMPORTERS
+    assert not importers
+
+
+@pytest.mark.architecture
+def test_active_silver_metadata_paths_do_not_extract_record_provenance() -> None:
+    """Silver production paths must not assemble provenance from record payloads."""
+    forbidden_fragments = (
+        "extract_control_plane_provenance_from_records",
+        "_CONTROL_PLANE_PROVENANCE_RECORD_KEYS",
+        "_build_silver_sidecar_metadata",
+        "_SilverMetadataSidecarRequest",
+    )
+    violations: dict[str, list[str]] = {}
+    for path in ACTIVE_SILVER_METADATA_PATHS:
+        source = path.read_text(encoding="utf-8")
+        found = [fragment for fragment in forbidden_fragments if fragment in source]
+        if found:
+            violations[path.relative_to(ROOT).as_posix()] = found
+
+    assert not violations
 
 
 @pytest.mark.architecture

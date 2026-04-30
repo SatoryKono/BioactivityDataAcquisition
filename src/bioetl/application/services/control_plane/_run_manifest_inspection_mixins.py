@@ -223,6 +223,7 @@ class RunManifestInspectionIdentityGraphMixin:
             ),
             "replay_family_contract": diagnostics.get("replay_family_contract"),
             "replay_capability_reason": diagnostics.get("replay_capability_reason"),
+            "continuation_mode": diagnostics.get("continuation_mode"),
             "exact_replay_eligible": diagnostics.get(
                 "exact_replay_eligible",
                 manifest.replay_capability.value == "exact_replay_supported",
@@ -257,6 +258,7 @@ class RunManifestInspectionIdentityGraphMixin:
                 "input_snapshot_identity_fingerprint"
             ),
             "replay_mode": diagnostics.get("replay_mode", "rebuild"),
+            "continuation_mode": diagnostics.get("continuation_mode"),
             "input_snapshot_count": diagnostics.get("input_snapshot_count", 0),
             "input_snapshots": diagnostics.get("input_snapshots", []),
         }

@@ -249,6 +249,7 @@
         },
         {
             "datasource": "Prometheus",
+            "description": "Preserve Grafana no-data when no DQ score samples exist for the selected scope; do not collapse missing validation output into score 0.",
             "fieldConfig": {
                 "defaults": {
                     "color": {
@@ -299,6 +300,63 @@
                 }
             ],
             "title": "Source Records in Range (Bronze)",
+            "type": "stat"
+        },
+        {
+            "datasource": "Prometheus",
+            "description": "Non-zero means the stage-total filtered_out counter diverges from the bounded Silver reject breakdown metric over the last 15 minutes. Zero is healthy; no data means the reconciliation rule is not publishing.",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "decimals": 0,
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "red",
+                                "value": 1
+                            }
+                        ]
+                    },
+                    "unit": "short"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 8,
+                "x": 8,
+                "y": 64
+            },
+            "id": 152,
+            "options": {
+                "colorMode": "value",
+                "graphMode": "none",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "textMode": "auto"
+            },
+            "targets": [
+                {
+                    "expr": "round(sum(max_over_time(bioetl_silver_filter_reject_total_mismatch_15m{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range]))",
+                    "refId": "A"
+                }
+            ],
+            "title": "Silver Filter Reject Accounting Mismatch",
             "type": "stat"
         },
         {

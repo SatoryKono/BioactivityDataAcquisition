@@ -26,6 +26,7 @@ from bioetl.domain.control_plane.reproducibility_policy import (
     STRICT_PERSISTENCE_PROFILES,
     normalize_required_persistence_profile,
 )
+from bioetl.domain.normalization import serialize_json_canonical
 from bioetl.domain.types import JsonDict
 from bioetl.domain.types.dq_contracts import DQDisposition, DQPolicyRef
 
@@ -55,11 +56,7 @@ def to_jsonable(value: object) -> object:
 
 
 def stable_hash(payload: object) -> str:
-    serialized = json.dumps(
-        to_jsonable(payload),
-        sort_keys=True,
-        separators=(",", ":"),
-    )
+    serialized = serialize_json_canonical(cast(JsonDict, to_jsonable(payload)))
     return hashlib.sha256(serialized.encode("utf-8")).hexdigest()
 
 

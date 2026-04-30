@@ -18,6 +18,7 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_replay 
     _compute_input_snapshot_identity_fingerprint,
     _resolve_exact_replay_blockers,
     _resolve_exact_replay_support_boundary,
+    _resolve_continuation_mode,
     _resolve_replay_capability_reason,
     _resolve_replay_family_contract,
     _resolve_replay_mode,
@@ -40,6 +41,7 @@ class _BaseSummaryReplayContext:
     resume_requested: bool
     input_snapshots: list[dict[str, object]]
     replay_mode: str
+    continuation_mode: str
     replay_capability_reason: str
     exact_replay_support_boundary: str
     exact_replay_blockers: list[str]
@@ -90,6 +92,11 @@ def _resolve_base_summary_replay_context(
         resume_requested=resume_requested,
         input_snapshots=input_snapshots,
         replay_mode=_resolve_replay_mode(
+            manifest=manifest,
+            requested_exact_replay=requested_exact_replay,
+            resume_requested=resume_requested,
+        ),
+        continuation_mode=_resolve_continuation_mode(
             manifest=manifest,
             requested_exact_replay=requested_exact_replay,
             resume_requested=resume_requested,
@@ -193,6 +200,7 @@ def _build_base_summary_payload(
             _compute_input_snapshot_identity_fingerprint(replay_context.input_snapshots)
         ),
         "replay_mode": replay_context.replay_mode,
+        "continuation_mode": replay_context.continuation_mode,
         "replay_family_contract": replay_context.replay_family_contract,
         "reproducibility_policy_assessment": (
             replay_context.policy_assessment.to_dict()

@@ -9,19 +9,19 @@ from typing import Protocol, cast
 
 from bioetl.domain.medallion import SilverWriteMode
 from bioetl.domain.models.metadata import SilverMetadata
-from bioetl.domain.ports import AuditPort, LoggerPort, MetricsPort
+from bioetl.domain.ports import (
+    AuditPort,
+    LoggerPort,
+    MetadataCoordinatorPort,
+    MetricsPort,
+    SilverMetadataInput,
+)
 from bioetl.domain.types import BatchID, BronzeRecord, RunID, RunType
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
 from bioetl.domain.value_objects.silver_result import SilverWriteResult
 from bioetl.infrastructure.storage.metadata.builder_base import (
     _resolve_metadata_timestamp,
-)
-from bioetl.infrastructure.storage.silver.operations.metadata_sidecar_adapter import (
-    _build_silver_sidecar_metadata,
-    _fallback_table_path,
-    _SilverMetadataSidecarRequest,
-    extract_control_plane_provenance_from_records,
 )
 
 
@@ -33,6 +33,9 @@ class _MetadataWriteOps(Protocol):
 
     @property
     def _audit(self) -> AuditPort | None: ...
+
+    @property
+    def _metadata_coordinator(self) -> MetadataCoordinatorPort | None: ...
 
     async def _persist_silver_metadata(
         self,
@@ -123,6 +126,11 @@ _AUDIT_SUPPORT_DEFAULTS: dict[str, object] = {
 _METRIC_LABEL_SANITIZER = re.compile(r"[^a-z0-9_]+")
 
 
+def _fallback_table_path(table_name: str) -> str:
+    """Build a deterministic Silver sidecar path for support-level writes."""
+    return f"data/output/silver/{str(table_name).replace('.', '/')}"
+
+
 def _normalize_metric_label(value: object, *, fallback: str) -> str:
     """Normalize free-form storage identifiers to bounded metric label values."""
     normalized = _METRIC_LABEL_SANITIZER.sub(
@@ -151,6 +159,25 @@ def _silver_metadata_write_success_labels(table_name: str) -> dict[str, str]:
         "status": "success",
         "final_reason": "completed",
     }
+
+
+def _require_metadata_coordinator(
+    metadata_ops: _MetadataWriteOps,
+) -> MetadataCoordinatorPort:
+    """Resolve the canonical metadata coordinator for Silver sidecar writes."""
+    coordinator = metadata_ops._metadata_coordinator
+    if coordinator is None:
+        raise RuntimeError(
+            "MetadataCoordinatorPort is required for Silver metadata publication"
+        )
+    return coordinator
+
+
+def _source_batch_ids(source_batch_id: BatchID | None) -> list[str] | None:
+    """Normalize optional source batch identity for SilverMetadataInput."""
+    if source_batch_id is None:
+        return None
+    return [str(source_batch_id)]
 
 
 def _coerce_silver_metadata_audit_request(
@@ -217,47 +244,27 @@ async def _write_silver_metadata(
     metadata_ops: _MetadataWriteOps,
     request: _SilverMetadataWriteSupportRequest,
 ) -> SilverWriteResult | None:
-    """Write one Silver metadata sidecar through the configured writer."""
-    _ = request.validated_mode
-
+    """Write one Silver metadata sidecar through the canonical coordinator port."""
+    coordinator = _require_metadata_coordinator(metadata_ops)
     runtime_anchor = _resolve_metadata_timestamp(
         explicit=request.ingestion_ts,
         records=request.records,
     )
     table_path_placeholder = _fallback_table_path(request.table_name)
-    provenance = extract_control_plane_provenance_from_records(request.records)
-    metadata = _build_silver_sidecar_metadata(
-        _SilverMetadataSidecarRequest(
-            table_name=request.table_name,
+    metadata = coordinator.create_silver_metadata(
+        SilverMetadataInput(
             table_path=table_path_placeholder,
+            primary_keys=[],
+            mode=request.validated_mode,
             records=request.records,
+            total_records=len(request.records),
+            source_batch_ids=_source_batch_ids(request.source_batch_id),
+            bronze_refs=request.bronze_refs,
             dq_metrics=request.dq_metrics,
-            mode=request.mode,
-            runtime_started_at=runtime_anchor,
-            runtime_completed_at=runtime_anchor,
-            run_id=request.run_id,
-            manifest_id=(
-                str(request.records[0]["_manifest_id"])
-                if request.records
-                and request.records[0].get("_manifest_id") is not None
-                else None
-            ),
-            run_type=request.run_type,
-            source_batch_id=request.source_batch_id,
             transform_version=request.transform_version,
             transform_steps=request.transform_steps,
-            bronze_refs=request.bronze_refs,
-            execution_fingerprint=provenance["execution_fingerprint"],
-            config_hash=provenance["config_hash"],
-            resolved_config_hash=provenance["resolved_config_hash"],
-            effective_config_hash=provenance["effective_config_hash"],
-            effective_config_artifact_id=provenance["effective_config_artifact_id"],
-            contract_ref=provenance["contract_ref"],
-            contract_version=provenance["contract_version"],
-            contract_schema_hash=provenance["contract_schema_hash"],
-            dq_policy_ref=provenance["dq_policy_ref"],
-            rule_bundle_version=provenance["rule_bundle_version"],
-            dq_contract_compatibility_hash=provenance["dq_contract_compatibility_hash"],
+            started_at=runtime_anchor,
+            completed_at=runtime_anchor,
         )
     )
     result = await metadata_ops._persist_silver_metadata(

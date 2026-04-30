@@ -16,10 +16,12 @@ from bioetl.infrastructure.observability.prometheus_metric_label_policies import
     normalize_publication_status,
     normalize_runtime_phase,
     normalize_runtime_stage,
-    normalize_source_file_label,
     normalize_stage_model_outcome,
     normalize_stage_model_stage,
     normalize_terminal_status,
+)
+from bioetl.infrastructure.observability._prometheus_metric_label_normalizers import (
+    normalize_source_file_label,
 )
 from bioetl.infrastructure.observability.prometheus_metrics import (
     COUNTERS,

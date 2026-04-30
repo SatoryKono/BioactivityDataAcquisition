@@ -8,10 +8,14 @@ from typing import Any
 
 import pytest
 
+from bioetl.application.services.control_plane._effective_config_support import (
+    stable_hash,
+)
 from bioetl.application.services.effective_config_service import (
     EffectiveConfigService,
     create_effective_config_service,
 )
+from bioetl.domain.normalization import serialize_json_canonical
 from bioetl.domain.config.dq import DQConfig
 from bioetl.domain.control_plane.effective_config_artifact import (
     ConfigSourceRef,
@@ -203,6 +207,24 @@ class TestEffectiveConfigService:
         artifact2 = self.service.create_effective_config_artifact(**kwargs)
 
         assert artifact1.artifact_id == artifact2.artifact_id
+
+    def test_stable_hash_uses_canonical_json_serializer_contract(self) -> None:
+        """Effective-config hashes must share control-plane canonical JSON semantics."""
+        payload = {"z": [3, 2, 1], "a": {"b": "café"}}
+
+        expected = hashlib.sha256(
+            serialize_json_canonical(payload).encode("utf-8")
+        ).hexdigest()
+
+        assert stable_hash(payload) == expected
+
+    def test_stable_hash_rejects_non_finite_float_values(self) -> None:
+        """Effective-config hashing must fail closed like execution fingerprints."""
+        with pytest.raises(
+            ValueError,
+            match="Canonical JSON serialization does not allow NaN or Infinity",
+        ):
+            stable_hash({"runtime": {"limit": float("nan")}})
 
     def test_artifact_id_differs_from_legacy_hash_bundle_identifier(self) -> None:
         """Artifact identity must track full semantic payload, not only hash bundles."""

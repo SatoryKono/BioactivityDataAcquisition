@@ -14,13 +14,13 @@ from bioetl.domain.types import BatchID, BronzeRecord, ErrorType, JsonDict, RunI
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
+    from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
     from bioetl.application.observability.domain_event_emitter import (
         DomainEventEmitterProtocol,
     )
     from bioetl.application.observability.pipeline_metrics import (
         PipelineMetricsRecorder,
     )
-    from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
     from bioetl.domain.ports import MetricsPort, QuarantinePort
 
 

@@ -260,6 +260,7 @@ def test_show_resolves_manifest_by_run_id_and_includes_ledger_history() -> None:
         "input_snapshot_content_hashes": ["sha256:snapshot-1"],
         "input_snapshot_identity_fingerprint": _SNAPSHOT_IDENTITY_FINGERPRINT,
         "replay_mode": "exact_replay",
+        "continuation_mode": "exact_replay",
         "input_snapshot_count": 1,
         "input_snapshots": [
             {
@@ -392,6 +393,7 @@ def _expected_identity_graph_without_ledger(
         "input_snapshot_content_hashes": ["sha256:snapshot-1"],
         "input_snapshot_identity_fingerprint": _SNAPSHOT_IDENTITY_FINGERPRINT,
         "replay_mode": "exact_replay",
+        "continuation_mode": "exact_replay",
         "input_snapshot_count": 1,
         "input_snapshots": _expected_input_snapshots(),
         "planned_artifacts": [],
@@ -448,6 +450,7 @@ def _expected_diagnostics_without_ledger(
         "input_snapshot_content_hashes": ["sha256:snapshot-1"],
         "input_snapshot_identity_fingerprint": _SNAPSHOT_IDENTITY_FINGERPRINT,
         "replay_mode": "exact_replay",
+        "continuation_mode": "exact_replay",
         "input_snapshot_count": 1,
         "input_snapshots": _expected_input_snapshots(),
         "dq_policy_ref": "chembl_activity.gold",
@@ -665,6 +668,10 @@ def test_show_resume_only_manifest_reports_resume_mode() -> None:
     assert result.diagnostics["input_snapshot_content_hashes"] == []
     assert result.diagnostics["input_snapshot_identity_fingerprint"] is None
     assert result.diagnostics["replay_mode"] == "resume"
+    assert (
+        result.diagnostics["continuation_mode"]
+        == "checkpoint_snapshot_only_resume"
+    )
     assert result.identity_graph["replay_capability"] == "resume_only"
     assert result.identity_graph["requested_exact_replay"] is False
     assert (
@@ -679,6 +686,10 @@ def test_show_resume_only_manifest_reports_resume_mode() -> None:
         == "resume_requested_without_snapshot_backed_inputs"
     )
     assert result.identity_graph["replay_mode"] == "resume"
+    assert (
+        result.identity_graph["continuation_mode"]
+        == "checkpoint_snapshot_only_resume"
+    )
     assert result.identity_graph["resume_contract"] == _expected_resume_contract(
         manifest
     )

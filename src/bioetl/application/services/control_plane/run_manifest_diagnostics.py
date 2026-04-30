@@ -113,6 +113,7 @@ def _build_unified_reproducibility_diagnostics(
             ),
             "replay_capability": summary.get("replay_capability"),
             "replay_mode": summary.get("replay_mode"),
+            "continuation_mode": summary.get("continuation_mode"),
             "replay_family_contract": summary.get("replay_family_contract"),
             "exact_replay_support_boundary": summary.get(
                 "exact_replay_support_boundary"

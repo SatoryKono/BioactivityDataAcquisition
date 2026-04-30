@@ -104,7 +104,19 @@ def get_metric_label_sets() -> dict[str, frozenset[str]]:
             record_name = rule.get("record")
             expr = rule.get("expr")
             if isinstance(record_name, str) and isinstance(expr, str):
-                label_sets[record_name] = _infer_recording_rule_labels(expr)
+                inferred_labels = _infer_recording_rule_labels(expr)
+                if not inferred_labels:
+                    referenced_label_sets = [
+                        label_sets[metric_name]
+                        for metric_name in re.findall(r"\b(bioetl_[a-z0-9_]+)\b", expr)
+                        if metric_name in label_sets
+                    ]
+                    if referenced_label_sets:
+                        shared_labels = set(referenced_label_sets[0])
+                        for candidate in referenced_label_sets[1:]:
+                            shared_labels &= set(candidate)
+                        inferred_labels = frozenset(shared_labels)
+                label_sets[record_name] = inferred_labels
 
     return label_sets
 
