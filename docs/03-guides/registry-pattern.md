@@ -143,11 +143,11 @@ data_source = ProviderRegistry.create_data_source(
 )
 ```
 
-## Legacy DataSourceRegistry Compatibility
+## Canonical Datasource Creator Path
 
-`DataSourceRegistry` remains available only for explicit backward-compatibility
-coverage. New code should use `get_data_source_creator()`, `DataSourceFactory`,
-or `ProviderRegistry`.
+`get_data_source_creator()` is the canonical provider-bound creator seam. New
+code should use `get_data_source_creator()`, `DataSourceFactory`, or
+`ProviderRegistry`.
 
 ```python
 from bioetl.composition.factories.datasource.data_source_factory import (
@@ -159,10 +159,9 @@ providers = DataSourceFactory.list_providers()
 creator = get_data_source_creator("chembl")
 ```
 
-`DataSourceRegistry.register()` is no longer part of the supported API. Register
-new providers through the composition-owned registration flow
-(`register_all_providers()` / registration helpers over a target registry); keep
-the legacy facade only where compatibility tests explicitly require it.
+Register new providers through the composition-owned registration flow
+(`register_all_providers()` / registration helpers over a target registry)
+rather than introducing ad-hoc datasource registry facades.
 
 The broader module-level status and deprecation plan for compatibility facades
 is tracked in

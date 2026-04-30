@@ -13,25 +13,8 @@ ROOT = Path(__file__).resolve().parents[2]
 SRC_ROOT = ROOT / "src"
 TEST_ROOT = ROOT / "tests"
 DEPRECATED_SYMBOLS = ("ColumnOrderer", "ColumnPriorityOrderer")
-SRC_ALLOWLIST = frozenset(
-    {
-        SRC_ROOT / "bioetl" / "application" / "composite" / "column_orderer.py",
-        SRC_ROOT
-        / "bioetl"
-        / "application"
-        / "composite"
-        / "column_priority_orderer.py",
-    }
-)
-TEST_ALLOWLIST = frozenset(
-    {
-        TEST_ROOT
-        / "unit"
-        / "application"
-        / "composite"
-        / "test_column_priority_orderer.py",
-    }
-)
+SRC_ALLOWLIST: frozenset[Path] = frozenset()
+TEST_ALLOWLIST: frozenset[Path] = frozenset()
 
 
 def _python_files(root: Path) -> list[Path]:
@@ -54,8 +37,8 @@ def _symbol_hits(root: Path, allowlist: frozenset[Path]) -> list[str]:
 def test_no_runtime_imports_of_deprecated_column_ordering_symbols() -> None:
     hits = _symbol_hits(SRC_ROOT / "bioetl", SRC_ALLOWLIST)
     assert hits == [], (
-        "Deprecated column-ordering symbols must stay confined to dedicated "
-        "compatibility shims:\n" + "\n".join(f"  - {hit}" for hit in hits)
+        "Deprecated column-ordering symbols must stay removed from runtime src:\n"
+        + "\n".join(f"  - {hit}" for hit in hits)
     )
 
 
@@ -67,7 +50,7 @@ def test_application_and_integration_tests_use_canonical_column_order_service() 
     )
     hits: list[str] = []
     for root in roots:
-        hits.extend(_symbol_hits(root, TEST_ALLOWLIST))
+        hits.extend(_symbol_hits(root, frozenset()))
     assert hits == [], (
         "First-party tests must use ColumnOrderService as the canonical default "
         "surface:\n" + "\n".join(f"  - {hit}" for hit in hits)
@@ -86,3 +69,6 @@ def test_public_composite_exports_only_expose_canonical_column_order_service() -
     assert "ColumnOrderer" not in runtime_exports
     assert "ColumnPriorityOrderer" not in composite_exports
     assert "ColumnPriorityOrderer" not in runtime_exports
+
+
+SRC_ALLOWLIST = frozenset()

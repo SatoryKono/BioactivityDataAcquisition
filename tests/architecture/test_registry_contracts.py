@@ -32,21 +32,14 @@ class TestRegistryProtocol:
             "PipelineRegistry MUST have list_pipelines() method"
         )
 
-    def test_datasource_registry_has_required_methods(self) -> None:
-        """DataSourceRegistry must have get, list_providers methods.
-
-        Note: register() was deprecated and removed. New registrations
-        should use ProviderRegistry.register() instead.
-        """
+    def test_datasource_creator_helper_exists(self) -> None:
+        """Datasource factory module must expose the canonical creator helper."""
         from bioetl.composition.factories.datasource.data_source_factory import (
-            DataSourceRegistry,
+            get_data_source_creator,
         )
 
-        assert hasattr(DataSourceRegistry, "get"), (
-            "DataSourceRegistry MUST have get() method"
-        )
-        assert hasattr(DataSourceRegistry, "list_providers"), (
-            "DataSourceRegistry MUST have list_providers() method"
+        assert callable(get_data_source_creator), (
+            "Datasource factory module MUST expose get_data_source_creator()"
         )
 
     def test_provider_registry_has_required_methods(self) -> None:
@@ -188,14 +181,14 @@ class TestRegistryRaiseOnMissingKey:
         with pytest.raises((RuntimeError, ValueError, KeyError)):
             isolated_registry.get("nonexistent_pipeline_12345")
 
-    def test_datasource_registry_raises_on_missing(self) -> None:
-        """DataSourceRegistry raises KeyError for unknown provider."""
+    def test_datasource_creator_helper_raises_on_missing(self) -> None:
+        """Canonical datasource helper raises KeyError for unknown provider."""
         from bioetl.composition.factories.datasource.data_source_factory import (
-            DataSourceRegistry,
+            get_data_source_creator,
         )
 
         with pytest.raises(KeyError):
-            DataSourceRegistry.get("nonexistent_provider_12345")
+            get_data_source_creator("nonexistent_provider_12345")
 
     def test_provider_registry_raises_on_missing(self) -> None:
         """ProviderRegistry raises KeyError for unknown provider."""
@@ -249,21 +242,6 @@ class TestRegistryInstanceVariables:
         # Should be different lock instances
         assert registry1._lock is not registry2._lock, (
             "PipelineRegistry instances MUST have independent _lock"
-        )
-
-    def test_datasource_registry_uses_classvar(self) -> None:
-        """DataSourceRegistry._creators must be ClassVar."""
-        from bioetl.composition.factories.datasource.data_source_factory import (
-            DataSourceRegistry,
-        )
-
-        assert "_creators" in DataSourceRegistry.__annotations__, (
-            "DataSourceRegistry MUST have _creators annotation"
-        )
-
-        hint = DataSourceRegistry.__annotations__["_creators"]
-        assert "ClassVar" in str(hint), (
-            "DataSourceRegistry._creators MUST be ClassVar for singleton pattern"
         )
 
     def test_provider_registry_uses_instance_scoped_providers(self) -> None:
@@ -330,16 +308,15 @@ class TestRegistryReturnTypes:
         for item in result:
             assert isinstance(item, str), "list_pipelines() MUST return list of strings"
 
-    def test_datasource_registry_list_returns_list(self) -> None:
-        """DataSourceRegistry.list_providers must return list[str]."""
-        from bioetl.composition.factories.datasource.data_source_factory import (
-            DataSourceRegistry,
-        )
+    def test_provider_registry_list_includes_loaded_provider_names(self) -> None:
+        """ProviderRegistry.list_providers must return loaded provider names."""
+        from bioetl.composition.providers import ensure_providers_loaded
+        from bioetl.composition.providers.provider_registry import ProviderRegistry
 
-        result = DataSourceRegistry.list_providers()
+        ensure_providers_loaded()
+        result = ProviderRegistry.list_providers()
         assert isinstance(result, list), "list_providers() MUST return a list"
-        for item in result:
-            assert isinstance(item, str), "list_providers() MUST return list of strings"
+        assert {"chembl", "pubchem", "uniprot"} <= set(result)
 
     def test_provider_registry_list_returns_sorted_list(self) -> None:
         """ProviderRegistry.list_providers must return sorted list[str]."""
@@ -352,24 +329,18 @@ class TestRegistryReturnTypes:
 
 
 class TestRegistryConsistency:
-    """Test consistency between registries."""
+    """Test consistency between provider registry and creator helper."""
 
-    def test_datasource_includes_provider_registry_providers(self) -> None:
-        """DataSourceRegistry.list_providers includes ProviderRegistry entries."""
+    def test_datasource_creator_helper_binds_provider_registry_providers(self) -> None:
+        """get_data_source_creator should work for registered provider names."""
         from bioetl.composition.factories.datasource.data_source_factory import (
-            DataSourceRegistry,
+            get_data_source_creator,
         )
         from bioetl.composition.providers import ensure_providers_loaded
 
-        # Ensure providers are loaded
         ensure_providers_loaded()
-
-        providers = DataSourceRegistry.list_providers()
-
-        # Should include common providers
-        common_providers = {"chembl", "pubchem", "uniprot"}
-        for provider in common_providers:
-            assert provider in providers, f"DataSourceRegistry MUST include {provider}"
+        for provider in {"chembl", "pubchem", "uniprot"}:
+            assert callable(get_data_source_creator(provider))
 
 
 class TestRegistryFactoryProtocol:

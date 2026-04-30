@@ -5,8 +5,8 @@ from __future__ import annotations
 import dataclasses
 from typing import TYPE_CHECKING, Any, Protocol, cast
 
+from bioetl.domain.behavior import EntityIdentityGenerator
 from bioetl.domain.ports import ContractPolicyProtocol
-from bioetl.domain.services import EntityIdentityGenerator
 from bioetl.domain.types import ContentHash, EntityID, GoldRecord
 
 if TYPE_CHECKING:

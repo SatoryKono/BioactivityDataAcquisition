@@ -24,6 +24,7 @@ from bioetl.application.services.lineage.metadata_assemblers_helpers import (
     _resolve_source_batch_ids,
     _resolve_transform_metadata,
 )
+from bioetl.domain.behavior.schema_metadata_extractor import extract_schema_metadata
 from bioetl.domain.models.metadata import (
     BaseOutputMetadata,
     EnvironmentMetadata,
@@ -33,7 +34,6 @@ from bioetl.domain.models.metadata import (
     SilverOutputExt,
 )
 from bioetl.domain.ports import GoldMetadataInput, SilverMetadataInput
-from bioetl.domain.services.schema_metadata_extractor import extract_schema_metadata
 from bioetl.domain.value_objects.run_context import RunContext
 
 

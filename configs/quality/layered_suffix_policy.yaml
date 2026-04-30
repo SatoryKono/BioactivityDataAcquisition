@@ -93,42 +93,6 @@ suffix_boundary_rules:
     exclude_path_prefixes:
       - src/bioetl/domain/ports/
     allowed_symbol_exceptions:
-      - symbol: DataSourceCreatorPort
-        path: src/bioetl/composition/factories/__init__.py
-        issue: "#3401"
-        reason: >
-          Deprecated public composition alias retained until the v2.0 sunset of
-          DataSourceCreatorProtocol terminology migration.
-      - symbol: DataSourceCreatorPort
-        path: src/bioetl/composition/providers/_models.py
-        issue: "#3401"
-        reason: >
-          Deprecated provider alias retained while first-party composition code
-          converges on DataSourceCreatorProtocol.
-      - symbol: DataSourceCreatorPort
-        path: src/bioetl/composition/providers/__init__.py
-        issue: "#3401"
-        reason: >
-          Deprecated provider package-root alias retained for reviewed
-          compatibility imports only.
-      - symbol: DataSourceCreatorPort
-        path: src/bioetl/composition/providers/provider_registry.py
-        issue: "#3401"
-        reason: >
-          Deprecated provider registry alias retained for reviewed compatibility
-          imports only.
-      - symbol: DataSourceCreatorPort
-        path: src/bioetl/composition/factories/datasource/__init__.py
-        issue: "#3401"
-        reason: >
-          Deprecated datasource package-root alias retained for reviewed
-          compatibility imports only.
-      - symbol: DataSourceCreatorPort
-        path: src/bioetl/composition/factories/datasource/data_source_factory.py
-        issue: "#3401"
-        reason: >
-          Deprecated datasource factory alias retained for reviewed
-          compatibility imports only.
 
   - rule_id: non_infrastructure_adapter_aliases
     description: >
@@ -142,30 +106,6 @@ suffix_boundary_rules:
     exclude_path_prefixes:
       - src/bioetl/infrastructure/
     allowed_symbol_exceptions:
-      - symbol: StorageAdapter
-        path: src/bioetl/composition/types.py
-        issue: "#3437"
-        reason: >
-          Deprecated composition alias retained while external callers migrate
-          to StorageBundle.
-      - symbol: StorageAdapter
-        path: src/bioetl/composition/factories/storage/__init__.py
-        issue: "#3437"
-        reason: >
-          Deprecated storage package-root alias retained while external callers
-          migrate to StorageBundle.
-      - symbol: StorageAdapter
-        path: src/bioetl/composition/factories/storage/adapter.py
-        issue: "#3437"
-        reason: >
-          Deprecated storage owner-module alias retained while external callers
-          migrate to StorageBundle.
-      - symbol: PolarsJoinAdapter
-        path: src/bioetl/composition/factories/services/polars_join_adapter.py
-        issue: "#3437"
-        reason: >
-          Deprecated composition alias retained while callers migrate to
-          PolarsJoinBridge.
 
   - rule_id: composition_infrastructure_service_suffix
     description: >
@@ -236,50 +176,25 @@ family_freeze_rules:
         path: src/bioetl/application/composite/column_service.py
         issue: "#3402"
         reason: Canonical unified column ordering surface.
-      - symbol: ColumnOrderer
-        path: src/bioetl/application/composite/column_orderer.py
-        issue: "#3402"
-        reason: Deprecated compatibility alias pending removal.
-      - symbol: ColumnPriorityOrderer
-        path: src/bioetl/application/composite/column_priority_orderer.py
-        issue: "#3402"
-        reason: Deprecated compatibility surface pending removal.
 
   - rule_id: composite_canonical_alias_family
     description: >
       Application composite naming is canonicalized to
       CompositeCheckpointService, CompositePipelineRunner, and
-      CompositePreflightValidationService. Remaining deprecated aliases stay
-      confined to reviewed owner modules until their v2.0 sunset.
+      CompositePreflightValidationService.
     include_path_prefixes:
       - src/bioetl/application/composite/
-    match_regex: ^Composite(?:Checkpoint(?:Manager|Service)|PipelineRunner(?:Service(?:_legacy)?|)?|Preflight(?:Validator|ValidationService))$
+    match_regex: ^(?:CompositeCheckpointService|CompositePipelineRunner|CompositePreflightValidationService)$
     allowed_symbols:
       - symbol: CompositeCheckpointService
         path: src/bioetl/application/composite/checkpoint/service.py
         issue: "#3443"
         reason: Canonical composite checkpoint facade.
-      - symbol: CompositeCheckpointManager
-        path: src/bioetl/application/composite/checkpoint/service.py
-        issue: "#3443"
-        reason: Deprecated compatibility alias pending v2.0 removal.
       - symbol: CompositePipelineRunner
         path: src/bioetl/application/composite/runner_pkg/runner.py
         issue: "#3443"
         reason: Canonical composite runner facade.
-      - symbol: CompositePipelineRunnerService
-        path: src/bioetl/application/composite/runner_pkg/runner.py
-        issue: "#3443"
-        reason: Deprecated compatibility alias pending v2.0 removal.
-      - symbol: CompositePipelineRunnerService_legacy
-        path: src/bioetl/application/composite/runner_pkg/runner.py
-        issue: "#3443"
-        reason: Deprecated reverse alias pending v2.0 removal.
       - symbol: CompositePreflightValidationService
         path: src/bioetl/application/composite/preflight_validator.py
         issue: "#3443"
         reason: Canonical composite preflight validation facade.
-      - symbol: CompositePreflightValidator
-        path: src/bioetl/application/composite/preflight_validator.py
-        issue: "#3443"
-        reason: Deprecated compatibility alias pending v2.0 removal.

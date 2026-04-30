@@ -232,9 +232,13 @@ def _assert_standard_variable_contract(
     pipeline_query_text = (
         pipeline_query.get("query", "") if isinstance(pipeline_query, dict) else ""
     )
-    assert "bioetl_records_processed_total" in pipeline_query_text, (
+    if dashboard_path.name == "bioetl-control-plane-v1.json":
+        expected_pipeline_metric = "bioetl_control_plane_manifest_writes_total"
+    else:
+        expected_pipeline_metric = "bioetl_records_processed_total"
+    assert expected_pipeline_metric in pipeline_query_text, (
         f"Dashboard {dashboard_path.name} 'pipeline' query must use "
-        "bioetl_records_processed_total"
+        f"{expected_pipeline_metric}"
     )
 
     run_type_var = variable_map.get("run_type")
@@ -245,9 +249,9 @@ def _assert_standard_variable_contract(
     run_type_query_text = (
         run_type_query.get("query", "") if isinstance(run_type_query, dict) else ""
     )
-    assert "bioetl_records_processed_total" in run_type_query_text, (
+    assert expected_pipeline_metric in run_type_query_text, (
         f"Dashboard {dashboard_path.name} 'run_type' query must use "
-        "bioetl_records_processed_total"
+        f"{expected_pipeline_metric}"
     )
     assert "run_type" in run_type_query_text, (
         f"Dashboard {dashboard_path.name} 'run_type' query must select run_type label"

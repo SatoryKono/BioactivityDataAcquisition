@@ -131,22 +131,12 @@ def test_entrypoints_unknown_symbol_raises_attribute_error() -> None:
 
 
 @pytest.mark.unit
-def test_resource_management_api_alias_warns_and_reexports_resources_api() -> None:
-    """Deprecated module alias should warn and forward to resources_api symbols."""
+def test_resource_management_api_module_is_removed() -> None:
+    """Legacy resource_management_api facade should no longer import."""
     sys.modules.pop("bioetl.composition.resource_management_api", None)
 
-    with pytest.deprecated_call(match=r"resource_management_api.*resources_api"):
-        alias_module = importlib.import_module(
-            "bioetl.composition.resource_management_api"
-        )
-
-    from bioetl.composition import resources_api
-
-    assert alias_module.__all__ == resources_api.__all__
-    assert (
-        alias_module.get_checkpoint_runtime_service
-        is resources_api.get_checkpoint_runtime_service
-    )
+    with pytest.raises(ModuleNotFoundError):
+        importlib.import_module("bioetl.composition.resource_management_api")
 
 
 @pytest.mark.unit

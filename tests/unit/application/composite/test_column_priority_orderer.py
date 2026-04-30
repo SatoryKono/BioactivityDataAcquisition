@@ -1,4 +1,4 @@
-"""Unit tests for ColumnPriorityOrderer."""
+"""Unit tests for canonical column-priority helper functions."""
 
 from __future__ import annotations
 
@@ -9,8 +9,10 @@ import pytest
 
 from bioetl.application.composite.column_service import ColumnOrderService
 from bioetl.application.composite.column_priority_orderer import (
-    ColumnPriorityOrderer,
+    get_enricher_prefix,
+    resolve_priority_column,
 )
+from bioetl.application.composite.join_planner_helpers import parse_pipeline_name
 from bioetl.domain.composite.config import EnricherConfig
 
 
@@ -175,23 +177,20 @@ def test_filter_compatible_columns_tracks_incompatible_columns_and_logs(
 
 
 def test_get_enricher_prefix_prefers_provider_entity_format() -> None:
-    assert (
-        ColumnPriorityOrderer.get_enricher_prefix("crossref_publication")
-        == "crossref.publication."
-    )
+    assert get_enricher_prefix("crossref_publication") == "crossref.publication."
 
 
 def test_get_enricher_prefix_uses_legacy_format_when_pipeline_name_invalid() -> None:
-    assert ColumnPriorityOrderer.get_enricher_prefix("legacyname") == "legacyname_"
+    assert get_enricher_prefix("legacyname") == "legacyname_"
 
 
 def test_parse_pipeline_name_raises_for_invalid_format() -> None:
     with pytest.raises(ValueError, match="must be in format"):
-        ColumnPriorityOrderer._parse_pipeline_name("invalid")
+        parse_pipeline_name("invalid")
 
 
 def test_resolve_priority_column_returns_none_for_seed_without_seed_context() -> None:
-    resolved = ColumnPriorityOrderer._resolve_priority_column(
+    resolved = resolve_priority_column(
         source="seed",
         field="title",
         columns_set={"crossref.publication.title"},

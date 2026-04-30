@@ -321,15 +321,34 @@ class _FakeRunManifestService:
                     ),
                 ],
                 "reproducibility_audit_score": {
-                    "schema_version": "1.0",
+                    "schema_version": "2.0",
                     "contract_version": "1.2.0",
                     "scale": "0-10",
+                    "score_scope": "supported_boundary_run",
                     "overall_score": 9.4,
                     "blockers": [],
                     "evidence_refs": [
                         "diagnostics.git_commit",
                         "diagnostics.source_revision_state",
                     ],
+                    "supported_boundary_verdict": {
+                        "scope": "supported_boundary_run",
+                        "supported_boundary_satisfied": True,
+                        "verdict": "supported_boundary_satisfied",
+                        "reason": "supported_boundary_requirements_met",
+                        "exact_replay_support_boundary": (
+                            "snapshot_backed_source_runs_only"
+                        ),
+                    },
+                    "global_reproducibility_claim": {
+                        "scope": "project_wide_exact_replay",
+                        "claimed": False,
+                        "verdict": "universal_exact_replay_not_claimed",
+                        "reason": (
+                            "published_contract_limits_exact_replay_to_"
+                            "supported_boundary"
+                        ),
+                    },
                     "scored_at": self._manifest.created_at.isoformat(),
                     "source": "run_manifest_diagnostics",
                     "category_scores": {
@@ -623,10 +642,37 @@ class TestRunManifestCommands:
         payload = json.loads(result.output)
         score = payload["reproducibility_audit_score"]
         assert payload["manifest_id"] == "manifest-1"
-        assert score["schema_version"] == "1.0"
+        assert score["schema_version"] == "2.0"
         assert score["contract_version"] == "1.2.0"
+        assert score["score_scope"] == "supported_boundary_run"
+        assert score["supported_boundary_verdict"]["scope"] == (
+            "supported_boundary_run"
+        )
+        assert score["global_reproducibility_claim"]["claimed"] is False
         assert score["blockers"] == []
         assert "diagnostics.git_commit" in score["evidence_refs"]
+
+    def test_score_text_labels_boundary_and_global_claim(
+        self,
+        cli_runner: CliRunner,
+        monkeypatch: Any,
+    ) -> None:
+        _patch_run_manifest_service(monkeypatch, _FakeRunManifestService())
+
+        result = cli_runner.invoke(
+            cli,
+            ["run-manifest", "score", "manifest-1", "--format", "text"],
+        )
+
+        assert result.exit_code == 0
+        assert "Run Manifest Score" in result.output
+        assert "run_scoped_score: 9.4" in result.output
+        assert "score_scope: supported_boundary_run" in result.output
+        assert "supported_boundary_verdict:" in result.output
+        assert "verdict: supported_boundary_satisfied" in result.output
+        assert "global_reproducibility_claim:" in result.output
+        assert "claimed: false" in result.output
+        assert "verdict: universal_exact_replay_not_claimed" in result.output
 
     def test_show_yaml_outputs_manifest_and_diagnostics(
         self,

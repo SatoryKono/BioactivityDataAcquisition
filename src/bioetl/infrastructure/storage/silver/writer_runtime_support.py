@@ -9,6 +9,7 @@ from pathlib import Path
 from types import SimpleNamespace
 from typing import Any, Protocol, cast
 
+from bioetl.domain.behavior.dq_metrics_calculator import DQMetricsCalculator
 from bioetl.domain.context import current_utc_time
 from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.medallion import WriteModePolicy
@@ -22,7 +23,6 @@ from bioetl.domain.ports import (
     SilverValidatorPort,
     TracingPort,
 )
-from bioetl.domain.services.dq_metrics_calculator import DQMetricsCalculator
 from bioetl.domain.types import BronzeRecord
 from bioetl.domain.types.contract_rollout import ContractRolloutPolicy
 from bioetl.domain.value_objects.silver_result import SilverWriteResult

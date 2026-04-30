@@ -1,17 +1,13 @@
-"""Tests for DataSourceRegistry.
-
-Verifies data source creator registration and retrieval.
-After registry unification, DataSourceRegistry delegates to ProviderRegistry.
-"""
+"""Tests for the canonical datasource creator helper."""
 
 from __future__ import annotations
 
+from inspect import signature
 from unittest.mock import MagicMock
 
 import pytest
 
 from bioetl.composition.factories.datasource.data_source_factory import (
-    DataSourceRegistry,
     get_data_source_creator,
 )
 from bioetl.composition.providers import ProviderRegistry, ensure_providers_loaded
@@ -21,125 +17,40 @@ from bioetl.composition.providers.provider_registry import (
 )
 
 
-class TestDataSourceRegistry:
-    """Tests for DataSourceRegistry class."""
+class TestCanonicalDataSourceCreator:
+    """Tests for the canonical provider-bound creator helper."""
 
     def test_get_chembl_creator(self):
-        """Verify chembl creator can be retrieved."""
         ensure_providers_loaded()
-        creator = DataSourceRegistry.get("chembl")
-        assert creator is not None
-        assert callable(creator)
+        assert callable(get_data_source_creator("chembl"))
 
     def test_get_pubchem_creator(self):
-        """Verify pubchem creator can be retrieved."""
         ensure_providers_loaded()
-        creator = DataSourceRegistry.get("pubchem")
-        assert creator is not None
-        assert callable(creator)
+        assert callable(get_data_source_creator("pubchem"))
 
     def test_get_uniprot_creator(self):
-        """Verify uniprot creator can be retrieved."""
         ensure_providers_loaded()
-        creator = DataSourceRegistry.get("uniprot")
-        assert creator is not None
-        assert callable(creator)
+        assert callable(get_data_source_creator("uniprot"))
 
     def test_get_pubmed_creator(self):
-        """Verify pubmed creator can be retrieved."""
         ensure_providers_loaded()
-        creator = DataSourceRegistry.get("pubmed")
-        assert creator is not None
-        assert callable(creator)
+        assert callable(get_data_source_creator("pubmed"))
 
-    def test_get_unknown_provider_raises_key_error(self):
-        """Verify unknown provider raises KeyError with helpful message."""
+    def test_unknown_provider_raises_key_error(self):
         ensure_providers_loaded()
         with pytest.raises(KeyError) as exc_info:
-            DataSourceRegistry.get("unknown_provider")
+            get_data_source_creator("unknown_provider")
 
         error_message = str(exc_info.value)
         assert "unknown_provider" in error_message
         assert "Available:" in error_message
 
-    def test_list_providers(self):
-        """Verify list_providers returns all registered providers."""
+    def test_provider_registry_list_covers_common_helper_providers(self):
         ensure_providers_loaded()
-        providers = DataSourceRegistry.list_providers()
-
-        assert isinstance(providers, list)
-        assert "chembl" in providers
-        assert "pubchem" in providers
-        assert "uniprot" in providers
-        assert "pubmed" in providers
-        assert len(providers) >= 4
-
-    def test_contains_returns_true_for_registered(self):
-        """Verify contains returns True for registered providers."""
-        ensure_providers_loaded()
-        assert DataSourceRegistry.contains("chembl") is True
-        assert DataSourceRegistry.contains("pubchem") is True
-        assert DataSourceRegistry.contains("uniprot") is True
-        assert DataSourceRegistry.contains("pubmed") is True
-
-    def test_contains_returns_false_for_unknown(self):
-        """Verify contains returns False for unknown providers."""
-        ensure_providers_loaded()
-        assert DataSourceRegistry.contains("unknown_provider") is False
-
-
-class TestDataSourceRegistryDelegation:
-    """Tests for delegation to ProviderRegistry."""
-
-    def test_get_delegates_to_provider_registry(self):
-        """Verify get() returns a creator that calls ProviderRegistry."""
-        ensure_providers_loaded()
-
-        # Get creator from DataSourceRegistry
-        creator = DataSourceRegistry.get("chembl")
-
-        # Verify it's callable and matches protocol
-        assert callable(creator)
-
-        # Creator should have correct signature (protocol compliance)
-        import inspect
-
-        sig = inspect.signature(creator)
-        param_names = set(sig.parameters.keys())
-        expected = {"settings", "pipeline_config", "logger"}
-        assert expected <= param_names
-
-    def test_list_providers_matches_provider_registry(self):
-        """Verify list_providers matches ProviderRegistry."""
-        ensure_providers_loaded()
-
-        ds_providers = set(DataSourceRegistry.list_providers())
-        pr_providers = set(ProviderRegistry.list_providers())
-
-        # DataSourceRegistry should include all ProviderRegistry providers
-        assert ds_providers == pr_providers
-
-
-class TestCanonicalDataSourceCreator:
-    """Tests for the canonical provider-bound creator helper."""
-
-    def test_get_data_source_creator_returns_callable(self):
-        """Verify the canonical helper returns a provider-bound callable."""
-        ensure_providers_loaded()
-
-        creator = get_data_source_creator("chembl")
-
-        assert callable(creator)
-
-    def test_get_data_source_creator_raises_for_unknown_provider(self):
-        """Verify the canonical helper raises KeyError for unknown providers."""
-        ensure_providers_loaded()
-
-        with pytest.raises(KeyError, match="Unknown provider"):
-            get_data_source_creator("unknown_provider")
+        providers = set(ProviderRegistry.list_providers())
+        assert {"chembl", "pubchem", "uniprot", "pubmed"} <= providers
 
     def test_get_data_source_creator_uses_explicit_registry_instance(self):
-        """Explicit registry path should not depend on the default singleton."""
         isolated = create_provider_registry()
         expected = MagicMock(name="data_source")
         creator = MagicMock(return_value=expected)
@@ -169,12 +80,9 @@ class TestCanonicalDataSourceCreator:
 
 
 class TestDataSourceCreatorProtocol:
-    """Tests for DataSourceCreatorProtocol compliance."""
+    """Tests for provider-bound creator protocol compliance."""
 
     def test_all_creators_match_protocol(self):
-        """Verify all registered creators match the protocol signature."""
-        from inspect import signature
-
         ensure_providers_loaded()
 
         expected_params = {
@@ -186,12 +94,9 @@ class TestDataSourceCreatorProtocol:
             "pipeline_name",
         }
 
-        for provider in DataSourceRegistry.list_providers():
-            creator = DataSourceRegistry.get(provider)
-            sig = signature(creator)
-            param_names = set(sig.parameters.keys())
-
-            # All required parameters should be present
+        for provider in ProviderRegistry.list_providers():
+            creator = get_data_source_creator(provider)
+            param_names = set(signature(creator).parameters.keys())
             assert expected_params <= param_names, (
                 f"Creator for {provider} missing params: "
                 f"{expected_params - param_names}"
@@ -199,10 +104,9 @@ class TestDataSourceCreatorProtocol:
 
 
 class TestWrapWithFilter:
-    """Tests for _wrap_with_filter helper function (now in registration.py)."""
+    """Tests for _wrap_with_filter helper function."""
 
     def test_returns_original_when_no_filter(self):
-        """Verify original data source returned when filter is None."""
         from bioetl.composition.providers._config_helpers import _wrap_with_filter
 
         mock_data_source = MagicMock()
@@ -212,7 +116,6 @@ class TestWrapWithFilter:
         assert result is mock_data_source
 
     def test_returns_original_when_filter_disabled(self):
-        """Verify original data source returned when filter is disabled."""
         from bioetl.composition.providers._config_helpers import _wrap_with_filter
 
         mock_data_source = MagicMock()
@@ -224,7 +127,6 @@ class TestWrapWithFilter:
         assert result is mock_data_source
 
     def test_wraps_when_filter_enabled(self):
-        """Verify FilteredDataSource is created when filter is enabled."""
         from bioetl.application.core.filtered_data_source import FilteredDataSource
         from bioetl.composition.providers._config_helpers import _wrap_with_filter
 
@@ -234,13 +136,10 @@ class TestWrapWithFilter:
 
         result = _wrap_with_filter(mock_data_source, mock_filter)
 
-        # Result should be different from original (wrapped)
         assert result is not mock_data_source
-        # Should be FilteredDataSource instance
         assert isinstance(result, FilteredDataSource)
 
     def test_wraps_with_metrics(self):
-        """Verify metrics are passed to FilteredDataSource."""
         from bioetl.application.core.filtered_data_source import FilteredDataSource
         from bioetl.composition.providers._config_helpers import _wrap_with_filter
 

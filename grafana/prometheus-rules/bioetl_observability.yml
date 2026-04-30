@@ -13,6 +13,18 @@ groups:
       - record: bioetl_runtime_alert_condition_runtime_error_rate_high_30m
         expr: ((sum by (pipeline) (increase(bioetl_errors_total[30m])) / clamp_min(sum by (pipeline) (increase(bioetl_records_processed_total{stage="bronze"}[30m])), 1)) > bool 0.05) and (sum by (pipeline) (increase(bioetl_records_processed_total{stage="bronze"}[30m])) >= bool 20)
 
+      - record: bioetl_runtime_alert_condition_record_flow_invariant_violated_15m
+        expr: sum by (pipeline, run_type, invariant) (increase(bioetl_record_flow_invariants_total{status="violated"}[15m])) > bool 0
+
+      - record: bioetl_runtime_alert_condition_ingestion_throughput_degraded_15m
+        expr: (max by (pipeline, run_type) (max_over_time(bioetl_stage_backlog_records{stage="ingestion"}[15m])) > bool 0) and on (pipeline, run_type) (max by (pipeline, run_type) (max_over_time(bioetl_stage_lag_seconds{stage="ingestion"}[15m])) >= bool 300)
+
+      - record: bioetl_runtime_alert_condition_stage_backlog_active_15m
+        expr: max by (pipeline, run_type, stage) (max_over_time(bioetl_stage_backlog_records[15m])) > bool 0
+
+      - record: bioetl_runtime_alert_condition_stage_lag_high_15m
+        expr: max by (pipeline, run_type, stage) (max_over_time(bioetl_stage_lag_seconds[15m])) >= bool 300
+
       - record: bioetl_runtime_alert_condition_dq_soft_threshold_15m
         expr: sum by (pipeline) (increase(bioetl_dq_soft_threshold_exceeded[15m])) > bool 0
 
@@ -158,6 +170,46 @@ groups:
         annotations:
           summary: "Pipeline runtime error ratio is elevated"
           description: "Pipeline runtime error ratio exceeded 5% for pipeline={{ $labels.pipeline }} over the last 30m, with at least 20 bronze records observed."
+          runbook: "docs/05-operations/runbooks/observability-checklist.md"
+
+      - alert: BioETLRecordFlowInvariantViolated
+        expr: sum by (pipeline, run_type, invariant) (increase(bioetl_record_flow_invariants_total{status="violated"}[15m])) > 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Record-flow invariant violated"
+          description: "bioetl_record_flow_invariants_total recorded violated status for invariant={{ $labels.invariant }} pipeline={{ $labels.pipeline }} run_type={{ $labels.run_type }} in the last 15m."
+          runbook: "docs/05-operations/runbooks/observability-checklist.md"
+
+      - alert: BioETLIngestionThroughputDegraded
+        expr: (max by (pipeline, run_type) (max_over_time(bioetl_stage_backlog_records{stage="ingestion"}[15m])) > 0) and on (pipeline, run_type) (max by (pipeline, run_type) (max_over_time(bioetl_stage_lag_seconds{stage="ingestion"}[15m])) >= 300)
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Ingestion throughput is degraded"
+          description: "Ingestion backlog remained active and stage lag exceeded 300s for pipeline={{ $labels.pipeline }} run_type={{ $labels.run_type }}."
+          runbook: "docs/05-operations/runbooks/observability-checklist.md"
+
+      - alert: BioETLStageBacklogActive
+        expr: max by (pipeline, run_type, stage) (max_over_time(bioetl_stage_backlog_records[15m])) > 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Stage backlog remains active"
+          description: "bioetl_stage_backlog_records stayed above zero for pipeline={{ $labels.pipeline }} run_type={{ $labels.run_type }} stage={{ $labels.stage }} within the last 15m."
+          runbook: "docs/05-operations/runbooks/observability-checklist.md"
+
+      - alert: BioETLStageLagHigh
+        expr: max by (pipeline, run_type, stage) (max_over_time(bioetl_stage_lag_seconds[15m])) >= 300
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Stage lag is elevated"
+          description: "bioetl_stage_lag_seconds exceeded 300s for pipeline={{ $labels.pipeline }} run_type={{ $labels.run_type }} stage={{ $labels.stage }} within the last 15m."
           runbook: "docs/05-operations/runbooks/observability-checklist.md"
 
       - alert: BioETLMemoryPressureActive

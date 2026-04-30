@@ -9,10 +9,10 @@ from platform import python_version
 from typing import TYPE_CHECKING
 
 from bioetl import __version__ as BIOETL_VERSION
-from bioetl.domain.lineage import DatasetRef
-from bioetl.domain.services.composite_metadata_helpers import (
+from bioetl.domain.behavior.composite_metadata_helpers import (
     summarize_composite_cv_dq,
 )
+from bioetl.domain.lineage import DatasetRef
 from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:

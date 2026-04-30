@@ -66,8 +66,3 @@ class PolarsJoinBridge:
 
 
 __all__ = ["PolarsJoinBridge"]
-
-
-# Backward-compatible alias retained while composition callers migrate to the
-# Bridge suffix. New code should use PolarsJoinBridge directly.
-PolarsJoinAdapter = PolarsJoinBridge

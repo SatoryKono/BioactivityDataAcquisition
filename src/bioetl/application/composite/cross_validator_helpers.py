@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from bioetl.domain.behavior.text_similarity import jaccard_similarity
 from bioetl.domain.composite.cross_validation import ComparisonMethod
-from bioetl.domain.services.text_similarity import jaccard_similarity
 
 if TYPE_CHECKING:
     import polars as pl

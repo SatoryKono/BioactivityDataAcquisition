@@ -45,11 +45,11 @@ from bioetl.domain.types import GoldRecord, JsonDict
 from bioetl.domain.value_objects import PublicationYear
 
 if TYPE_CHECKING:
+    from bioetl.domain.behavior import EntityIdentityGenerator
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.entities import BaseEntity
     from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
     from bioetl.domain.ports import MetricsPort, PiiHasherPort, TracingPort
-    from bioetl.domain.services import EntityIdentityGenerator
     from bioetl.domain.types import BronzeRecord
 
 

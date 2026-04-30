@@ -11,6 +11,7 @@ from typing import Literal, Protocol, cast
 from bioetl.application.services.control_plane.effective_config_service import (
     EffectiveConfigService,
 )
+from bioetl.domain.behavior.dq_policy_resolver import DQPolicyResolver
 from bioetl.domain.config.dq import DQConfig
 from bioetl.domain.control_plane.config_source_hashing import (
     ConfigSourceHashStrategy,
@@ -26,7 +27,6 @@ from bioetl.domain.control_plane.effective_config_artifact import (
     RuntimeOverrideSnapshot,
 )
 from bioetl.domain.ports import LoggerPort
-from bioetl.domain.services.dq_policy_resolver import DQPolicyResolver
 from bioetl.domain.types import JsonDict
 from bioetl.domain.types.dq_contracts import DQDisposition, DQPolicyRef
 

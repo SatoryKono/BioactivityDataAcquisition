@@ -33,9 +33,9 @@ from bioetl.domain.value_objects import PublicationYear
 from bioetl.domain.value_objects.publications import DOI, PubMedId
 
 if TYPE_CHECKING:
+    from bioetl.domain.behavior import EntityIdentityGenerator
     from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
     from bioetl.domain.ports import MetricsPort, PiiHasherPort, TracingPort
-    from bioetl.domain.services import EntityIdentityGenerator
     from bioetl.domain.types import BronzeRecord
 
 

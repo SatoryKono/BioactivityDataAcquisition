@@ -1,58 +1,6 @@
-version: 1.4.0
+version: 1.5.0
 updated_at: "2026-04-30"
 gaps:
-  chembl/assay_parameters:
-    status: decision_recorded
-    reason: "The ChEMBL assay endpoint exposes nested assay_parameters without the assay_param_id primary key required by the current assay_parameters Bronze contract; no dedicated factual 20-record provider snapshot is available."
-    owner: "data-platform"
-    contract_ref: "chembl.assay_parameters"
-    decision_status: "projection_required"
-    decision_deadline: "2026-05-31"
-    decision_owner: "data-platform"
-    chosen_path: "deterministic_adapter_projection"
-    contract_or_projection_target: "Materialize assay parameter rows only when provider-backed nested assay parameter values can be tied to a stable parent assay identity; do not create standalone synthetic assay_param_id values."
-    evidence_issue: "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/3406"
-    resolution_plan: "Decision recorded pending a stable assay_parameters Bronze source with provider-backed assay_param_id values."
-    de_scope_decision: "Do not synthesize assay_param_id values solely to satisfy replay fixture coverage."
-  chembl/publication_similarity:
-    status: decision_recorded
-    reason: "The live ChEMBL document_similarity endpoint omits the sim_id/doc_1/doc_2 Bronze contract fields consumed by the publication_similarity transformer; no factual 20-record contract-aligned snapshot is available."
-    owner: "data-platform"
-    contract_ref: "chembl.publication_similarity"
-    decision_status: "projection_required"
-    decision_deadline: "2026-05-31"
-    decision_owner: "data-platform"
-    chosen_path: "deterministic_adapter_projection"
-    contract_or_projection_target: "Project factual document_similarity payloads into the publication_similarity contract only from stable provider document identifiers; keep sim_id absent until a deterministic provider-backed identity is available."
-    evidence_issue: "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/3406"
-    resolution_plan: "Decision recorded pending a deterministic provider-backed projection from document_similarity payloads into the publication_similarity Bronze contract."
-    de_scope_decision: "Do not mint synthetic sim_id values in tracked Bronze fixtures."
-  chembl/publication_term:
-    status: decision_recorded
-    reason: "publication_term is a derived term surface and the current tracked publication/provider samples do not provide 20 factual mesh_terms or keywords records."
-    owner: "data-platform"
-    contract_ref: "chembl.publication_term"
-    decision_status: "source_required"
-    decision_deadline: "2026-05-31"
-    decision_owner: "data-platform"
-    chosen_path: "recorded_provider_or_deterministic_derived_source"
-    contract_or_projection_target: "Populate publication_term from recorded provider publication metadata or a deterministic derived extraction with explicit parent publication provenance and factual term values."
-    evidence_issue: "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/3406"
-    resolution_plan: "Decision recorded pending a dedicated provider-backed or recorded source with at least 20 factual term records."
-    de_scope_decision: "Do not duplicate or fabricate terms from sparse publication samples."
-  chembl/subcellular_fraction:
-    status: decision_recorded
-    reason: "subcellular_fraction is derived from assay_subcellular_fraction values and the bounded live scan did not provide a stable 20-record distinct Bronze source."
-    owner: "data-platform"
-    contract_ref: "chembl.subcellular_fraction"
-    decision_status: "source_required"
-    decision_deadline: "2026-05-31"
-    decision_owner: "data-platform"
-    chosen_path: "controlled_extraction_run"
-    contract_or_projection_target: "Use a controlled extraction run that records distinct factual assay_subcellular_fraction values; if 20 distinct values are not factual, keep the entity as a smaller derived dimension with explicit cardinality exception."
-    evidence_issue: "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/3406"
-    resolution_plan: "Decision recorded pending a controlled extraction run that materializes at least 20 factual subcellular_fraction records."
-    de_scope_decision: "Do not repeat sparse values to meet tracked sample cardinality."
   semanticscholar/publication:
     status: decision_recorded
     reason: "The unauthenticated Semantic Scholar search endpoint is rate-limited and existing recorded cassettes contain fewer than 20 publication records, so no stable factual tracked CI sample is available without API-key-backed recording."

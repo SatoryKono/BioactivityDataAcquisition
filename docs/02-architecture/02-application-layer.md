@@ -285,9 +285,8 @@ Compatibility bridge и collaborator bundle для `MergeService` находят
 | Файл                         | Компонент               | Назначение                              |
 | ---------------------------- | ----------------------- | --------------------------------------- |
 | `column_service.py`          | `ColumnOrderService`    | Канонический порядок колонок и source-priority merge logic |
-| `column_orderer.py`          | `ColumnOrderer`         | Deprecated compatibility alias for `ColumnOrderService` |
 | `column_orderer_helpers.py`  | Helper functions        | Вспомогательные функции для ordering    |
-| `column_priority_orderer.py` | `ColumnPriorityOrderer` | Deprecated compatibility surface for explicit priority ordering |
+| `column_priority_orderer.py` | Priority helper functions | Вспомогательные canonical helpers for explicit priority ordering |
 | `column_renamer.py`          | `ColumnRenamerService`  | Переименование колонок (suffix removal) |
 
 **Join infrastructure:**

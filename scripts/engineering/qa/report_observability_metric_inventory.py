@@ -769,6 +769,11 @@ def _build_parser() -> argparse.ArgumentParser:
         default=Path.cwd(),
         help="Repository root to scan",
     )
+    parser.add_argument(
+        "--write-evidence",
+        type=Path,
+        help="Write collected inventory JSON to a replayable evidence artifact path",
+    )
     return parser
 
 
@@ -884,6 +889,15 @@ def main(argv: list[str] | None = None) -> int:
     parser = _build_parser()
     args = parser.parse_args(argv)
     report = collect_metric_inventory(args.repo_root)
+    if args.write_evidence is not None:
+        evidence_path = args.write_evidence
+        if not evidence_path.is_absolute():
+            evidence_path = args.repo_root / evidence_path
+        evidence_path.parent.mkdir(parents=True, exist_ok=True)
+        evidence_path.write_text(
+            json.dumps(report, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
     allowlist_path = args.allowlist
     if not allowlist_path.is_absolute():
         allowlist_path = args.repo_root / allowlist_path

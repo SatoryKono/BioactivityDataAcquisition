@@ -6,17 +6,17 @@ from collections.abc import Mapping, Sequence
 from datetime import datetime
 from typing import TYPE_CHECKING
 
+from bioetl.domain.behavior.composite_metadata_helpers import (
+    extract_composite_lineage_metadata,
+    parse_composite_field_sources,
+    summarize_composite_cv_dq,
+)
 from bioetl.domain.lineage import (
     CompositeLineageMetadata,
     LineageEdge,
     LineageEdgeType,
     LineageNodeRef,
     LineageNodeType,
-)
-from bioetl.domain.services.composite_metadata_helpers import (
-    extract_composite_lineage_metadata,
-    parse_composite_field_sources,
-    summarize_composite_cv_dq,
 )
 
 if TYPE_CHECKING:

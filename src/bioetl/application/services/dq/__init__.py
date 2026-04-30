@@ -18,7 +18,7 @@ from bioetl.application.services.dq.silver_analyzer import SilverDQAnalyzer
 from bioetl.application.services.dq.silver_check_executor import SilverCheckExecutor
 from bioetl.application.services.dq.silver_statistics import SilverStatisticsCalculator
 from bioetl.application.services.dq.silver_threshold import SilverThresholdChecker
-from bioetl.domain.services.dq_serializer import DQReportSerializer
+from bioetl.domain.behavior.dq_serializer import DQReportSerializer
 
 __all__ = [
     "BronzeDQAnalyzer",

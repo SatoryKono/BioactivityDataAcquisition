@@ -11,6 +11,7 @@ from bioetl.application.services.lineage.metadata_assemblers_helpers import (
     _resolve_source_batch_ids,
     _resolve_transform_metadata,
 )
+from bioetl.domain.behavior.schema_metadata_extractor import extract_schema_metadata
 from bioetl.domain.context import current_utc_time
 from bioetl.domain.lineage import (
     DatasetRef,
@@ -21,7 +22,6 @@ from bioetl.domain.lineage import (
     SchemaRef,
     TransformRef,
 )
-from bioetl.domain.services.schema_metadata_extractor import extract_schema_metadata
 
 if TYPE_CHECKING:
     from bioetl.domain.models.metadata import SourceMetadata

@@ -235,7 +235,7 @@ def test_checkpoint_quarantine_manager_aliases_are_not_exported() -> None:
 def test_column_ordering_family_is_frozen_to_one_canonical_surface_plus_compat() -> (
     None
 ):
-    """Column-ordering family must keep one canonical name plus explicit compat shims."""
+    """Column-ordering family must stay collapsed to the canonical service name."""
     module = _load_gate_module()
     policy = module._load_layer_aware_suffix_policy(ROOT)
     family_rules = {rule.rule_id: rule for rule in policy.family_freeze_rules}
@@ -247,19 +247,11 @@ def test_column_ordering_family_is_frozen_to_one_canonical_surface_plus_compat()
             "ColumnOrderService",
             "src/bioetl/application/composite/column_service.py",
         ),
-        (
-            "ColumnOrderer",
-            "src/bioetl/application/composite/column_orderer.py",
-        ),
-        (
-            "ColumnPriorityOrderer",
-            "src/bioetl/application/composite/column_priority_orderer.py",
-        ),
     }
 
 
 def test_composite_alias_family_is_frozen_to_owner_modules_only() -> None:
-    """Composite canonical/compat alias family must stay confined and explicit."""
+    """Composite naming family must stay collapsed to the canonical surfaces."""
     module = _load_gate_module()
     policy = module._load_layer_aware_suffix_policy(ROOT)
     family_rules = {rule.rule_id: rule for rule in policy.family_freeze_rules}
@@ -272,27 +264,11 @@ def test_composite_alias_family_is_frozen_to_owner_modules_only() -> None:
             "src/bioetl/application/composite/checkpoint/service.py",
         ),
         (
-            "CompositeCheckpointManager",
-            "src/bioetl/application/composite/checkpoint/service.py",
-        ),
-        (
             "CompositePipelineRunner",
             "src/bioetl/application/composite/runner_pkg/runner.py",
         ),
         (
-            "CompositePipelineRunnerService",
-            "src/bioetl/application/composite/runner_pkg/runner.py",
-        ),
-        (
-            "CompositePipelineRunnerService_legacy",
-            "src/bioetl/application/composite/runner_pkg/runner.py",
-        ),
-        (
             "CompositePreflightValidationService",
-            "src/bioetl/application/composite/preflight_validator.py",
-        ),
-        (
-            "CompositePreflightValidator",
             "src/bioetl/application/composite/preflight_validator.py",
         ),
     }

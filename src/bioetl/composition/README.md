@@ -14,7 +14,6 @@ composition/
 ├── maintenance_api.py          # Canonical maintenance service API
 ├── services_api.py             # Legacy umbrella service-bootstrap API
 ├── resources_api.py            # Canonical resource-management API
-├── resource_management_api.py  # Deprecated alias for resources_api (compat only)
 ├── registry.py                 # PipelineRegistry — maps (provider, entity) → pipeline class
 ├── builders.py                 # High-level builder helpers for CLI/orchestration
 ├── types.py                    # Shared type aliases for composition
@@ -111,7 +110,7 @@ StorageFactory
   ├── health_mixin.py     → storage health checks
   ├── maintenance_mixin.py → vacuum, compaction
   ├── merged_mixin.py     → merged storage for composite pipelines
-  ├── adapter.py          → StorageAdapter (composite of all ports)
+  ├── adapter.py          → StorageBundle (composite of all ports)
   ├── factory.py          → Core factory logic
   └── storage_factory.py  → Public StorageFactory class
 ```

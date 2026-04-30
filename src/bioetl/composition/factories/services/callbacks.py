@@ -16,8 +16,8 @@ from bioetl.application.core.wiring.runtime import (
 from bioetl.composition.bootstrap_contexts import PipelineCallbacksContext
 
 if TYPE_CHECKING:
+    from bioetl.domain.behavior import DataNormalizationConfig
     from bioetl.domain.ports import DataNormalizationPort
-    from bioetl.domain.services import DataNormalizationConfig
 
 __all__ = ["create_data_normalization_service", "extract_pipeline_callbacks"]
 
@@ -62,7 +62,7 @@ def create_data_normalization_service(
     config: DataNormalizationConfig | None = None,
 ) -> DataNormalizationPort:
     """Create the canonical data normalizer with optional configuration."""
-    from bioetl.domain.services import (
+    from bioetl.domain.behavior import (
         DataNormalizationConfig,
         DefaultDataNormalizer,
     )

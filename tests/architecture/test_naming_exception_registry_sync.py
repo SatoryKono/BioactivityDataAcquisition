@@ -197,7 +197,7 @@ def test_naming_audit_registry_loader_matches_policy_registry() -> None:
         (entry.alias_name, entry.canonical_name): entry
         for entry in registry.public_symbol_aliases
     }
-    assert ("DataSourceCreatorPort", "DataSourceCreatorProtocol") in public_aliases
+    assert ("DataSourceCreatorPort", "DataSourceCreatorProtocol") not in public_aliases
 
     stable_ids = {entry.name for entry in registry.stable_pipeline_ids}
     assert {"pubchem_compound", "uniprot_protein"} <= stable_ids

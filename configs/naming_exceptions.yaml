@@ -365,19 +365,7 @@ forbidden_domain_entity_aliases:
 
 # Explicitly retained public alias surfaces. These are time-bound compatibility
 # shims and must not be expanded without issue-backed justification.
-public_symbol_aliases:
-    -   alias_name: DataSourceCreatorPort
-        canonical_name: DataSourceCreatorProtocol
-        defining_surface: src/bioetl/composition/providers/_models.py
-        export_surfaces:
-            - src/bioetl/composition/providers/_models.py
-            - src/bioetl/composition/providers/__init__.py
-            - src/bioetl/composition/providers/provider_registry.py
-            - src/bioetl/composition/factories/__init__.py
-            - src/bioetl/composition/factories/datasource/__init__.py
-            - src/bioetl/composition/factories/datasource/data_source_factory.py
-        reason: Legacy public provider wiring alias retained while composition imports migrate to the Protocol name.
-        remove_after: v2.0
+public_symbol_aliases: []
 
 # Notes on enforcement
 # - scripts/engineering/qa/naming_audit.py loads this file as the naming exception registry.

@@ -9,6 +9,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from bioetl.domain.behavior.dq_metrics_calculator import DQMetricsCalculator
 from bioetl.domain.medallion import WriteModePolicy
 from bioetl.domain.ports import (
     AuditPort,
@@ -21,7 +22,6 @@ from bioetl.domain.ports import (
     TracingPort,
 )
 from bioetl.domain.ports.noop import NoOpMetadataWriter
-from bioetl.domain.services.dq_metrics_calculator import DQMetricsCalculator
 from bioetl.domain.types import BronzeRecord
 from bioetl.domain.types.contract_rollout import ContractRolloutPolicy
 from bioetl.infrastructure.export.csv_exporter import CsvExporter

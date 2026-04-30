@@ -13,19 +13,19 @@ def test_storage_factory_reexports_storage_factory() -> None:
     assert CanonicalStorageFactory is StorageFactory
 
 
-def test_datasource_package_reexports_registry_and_factory() -> None:
-    """Datasource package root should expose the canonical data-source API."""
+def test_datasource_package_reexports_factory_and_creator_helper() -> None:
+    """Datasource package root should expose only the canonical datasource seams."""
     from bioetl.composition.factories.datasource.data_source_factory import (
         DataSourceFactory as CanonicalDataSourceFactory,
-        DataSourceRegistry as CanonicalDataSourceRegistry,
+        get_data_source_creator as canonical_get_data_source_creator,
     )
     from bioetl.composition.factories.datasource import (
         DataSourceFactory,
-        DataSourceRegistry,
+        get_data_source_creator,
     )
 
     assert CanonicalDataSourceFactory is DataSourceFactory
-    assert CanonicalDataSourceRegistry is DataSourceRegistry
+    assert canonical_get_data_source_creator is get_data_source_creator
 
 
 def test_pipeline_runner_service_bootstrap_reexports_legacy_entrypoint() -> None:

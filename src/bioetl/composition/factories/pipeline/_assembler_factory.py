@@ -40,6 +40,7 @@ from bioetl.composition.factories.pipeline.factory_method_helpers import (
     extract_entity_type as _extract_entity_type,
 )
 from bioetl.composition.providers.provider_registry import ProviderRegistry
+from bioetl.domain.behavior import EntityIdentityGenerator
 from bioetl.domain.filtering import (
     GoldFilterConfig,
     InputFilterConfig,
@@ -57,7 +58,6 @@ from bioetl.domain.ports import (
     PipelineCreateRunnerRequest,
     TracingPort,
 )
-from bioetl.domain.services import EntityIdentityGenerator
 from bioetl.domain.types import GoldSchemaType
 from bioetl.infrastructure.config import Settings
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig

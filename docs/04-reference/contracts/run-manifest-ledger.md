@@ -757,16 +757,33 @@ semantic sink with `mode=append` is reported as
 
 `score` emits the `reproducibility_audit_score` block directly for automation.
 The score payload includes `schema_version`, `contract_version`, `scale`,
-`required_profile`, `overall_score`, category scores, score `thresholds`,
+`required_profile`, run-scoped `score_scope`, backward-compatible
+run-scoped `overall_score`, category scores, score `thresholds`,
 `threshold_failures`, `thresholds_satisfied`, `blockers`, `evidence_refs`,
+explicit `supported_boundary_verdict`, explicit `global_reproducibility_claim`,
 `scored_at`, and `source`.
+
+`overall_score` remains a legacy-compatible summary for the inspected
+run/family within its published replay boundary. It is not a project-wide claim
+that BioETL supports universal exact replay for every family and every
+historical occurrence.
+
+`supported_boundary_verdict` is the machine-readable run verdict. It answers
+whether the inspected run satisfies its published boundary requirements or is
+blocked/gapped by replay capability, lineage closure, thresholds, or other
+boundary evidence.
+
+`global_reproducibility_claim` is the machine-readable project-wide claim
+surface. It remains explicit even when the inspected run scores well inside its
+supported boundary. Until the published contract changes, the platform does not
+claim universal exact reproducibility outside the supported boundary.
 
 Current published lineage closure boundary for Bronze -> Silver -> Gold
 operator-grade trace/debug support covers these source families:
 
 - `chembl.activity`
 - `chembl.molecule`
-- `crossref.works`
+- `crossref.publication`
 - `pubchem.compound`
 - `pubmed.publication`
 

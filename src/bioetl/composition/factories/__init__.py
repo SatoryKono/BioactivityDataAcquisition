@@ -12,7 +12,7 @@ All pipeline factories are auto-registered when this module is imported.
 Consolidated modules (v5.2):
 - pipeline_factory: GenericPipelineFactory, runner assembly
 - services_factory: BaseServicesFactory, ServicesBuilder
-- data_source_factory: DataSourceFactory, DataSourceRegistry
+- data_source_factory: DataSourceFactory, get_data_source_creator
 - storage: StorageBundle, StorageContext, StorageFactory
 - dq_services_factory: DQServicesFactory for DQ report components
 """
@@ -23,7 +23,7 @@ from __future__ import annotations
 from bioetl.composition.factories.datasource.data_source_factory import (
     DataSourceCreatorProtocol,
     DataSourceFactory,
-    DataSourceRegistry,
+    get_data_source_creator,
 )
 
 # DQ services factory
@@ -63,21 +63,6 @@ _PIPELINE_FACTORY_EXPORTS = frozenset(
         "uniprot_protein_factory",
     }
 )
-# Compatibility alias retained for legacy imports; new code should use
-# DataSourceCreatorProtocol directly.
-import warnings
-
-
-class DataSourceCreatorPort(DataSourceCreatorProtocol):
-    def __init__(self, *args: object, **kwargs: object) -> None:
-        warnings.warn(
-            "DataSourceCreatorPort is deprecated and will be removed in v2.0. "
-            "Use DataSourceCreatorProtocol instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        super().__init__(*args, **kwargs)
-
 
 _PIPELINE_EXPORTS = frozenset(
     {
@@ -107,7 +92,6 @@ __all__ = [
     "DQServicesFactory",
     "DataSourceCreatorProtocol",
     "DataSourceFactory",
-    "DataSourceRegistry",
     "GenericPipelineFactory",
     "ServicesBuilder",
     "StorageBundle",
@@ -120,6 +104,7 @@ __all__ = [
     "create_pipeline_factory",
     "create_transformer",
     "datasource",
+    "get_data_source_creator",
     "get_transformer_class",
     "pubchem_compound_factory",
     "pubmed_publication_factory",

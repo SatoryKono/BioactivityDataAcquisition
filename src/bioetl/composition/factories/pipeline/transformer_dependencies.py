@@ -15,6 +15,7 @@ from bioetl.composition.observability_resolution import (
     resolve_metrics_port,
     resolve_tracing_port,
 )
+from bioetl.domain.behavior import DefaultDataNormalizer, EntityIdentityGenerator
 from bioetl.domain.ports import (
     ContractPolicyProtocol,
     DataNormalizationPort,
@@ -23,7 +24,6 @@ from bioetl.domain.ports import (
     TracingPort,
 )
 from bioetl.domain.ports.noop import NoOpPiiHasher
-from bioetl.domain.services import DefaultDataNormalizer, EntityIdentityGenerator
 
 
 class ContractPolicyLoader(Protocol):

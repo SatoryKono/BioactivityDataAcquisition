@@ -5,17 +5,17 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING, Protocol, cast
 
-from bioetl.domain.models.metadata import DQSummary
-from bioetl.domain.services.composite_metadata_helpers import (
+from bioetl.domain.behavior.composite_metadata_helpers import (
     extract_composite_output_ext,
     parse_composite_list,
     parse_composite_status,
     parse_lineage_created_at,
     summarize_composite_cv_dq,
 )
-from bioetl.domain.services.dataset_content_identity import (
+from bioetl.domain.behavior.dataset_content_identity import (
     build_dataset_content_hash,
 )
+from bioetl.domain.models.metadata import DQSummary
 
 if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence

@@ -764,6 +764,13 @@ def test_reproducibility_contract_forensic_grade_profile_is_attained(
         result.diagnostics["alert_signals"]["required_persistence_profile_gap"] is False
     )
     score = result.diagnostics["reproducibility_audit_score"]
+    assert score["schema_version"] == "2.0"
+    assert score["score_scope"] == "supported_boundary_run"
+    assert score["supported_boundary_verdict"]["verdict"] == (
+        "supported_boundary_satisfied"
+    )
+    assert score["supported_boundary_verdict"]["supported_boundary_satisfied"] is True
+    assert score["global_reproducibility_claim"]["claimed"] is False
     assert score["required_profile"] == "forensic_grade"
     assert score["thresholds"] == {
         "determinism": 8,
@@ -817,6 +824,13 @@ def test_reproducibility_contract_replay_ready_profile_requires_snapshot_backed_
     )
     assert result.diagnostics["alert_signals"]["immutable_input_snapshot_gap"] is True
     score = result.diagnostics["reproducibility_audit_score"]
+    assert score["schema_version"] == "2.0"
+    assert score["score_scope"] == "supported_boundary_run"
+    assert score["supported_boundary_verdict"]["verdict"] == (
+        "supported_boundary_gaps_present"
+    )
+    assert score["supported_boundary_verdict"]["supported_boundary_satisfied"] is False
+    assert score["global_reproducibility_claim"]["claimed"] is False
     assert score["required_profile"] == "replay_ready"
     assert score["thresholds"] == {
         "determinism": 7,
@@ -882,6 +896,13 @@ def test_reproducibility_contract_composite_replay_ready_profile_is_fail_closed(
         result.diagnostics["alert_signals"]["required_persistence_profile_gap"] is True
     )
     score = result.diagnostics["reproducibility_audit_score"]
+    assert score["schema_version"] == "2.0"
+    assert score["score_scope"] == "supported_boundary_run"
+    assert score["supported_boundary_verdict"]["verdict"] == (
+        "blocked_outside_supported_boundary"
+    )
+    assert score["supported_boundary_verdict"]["supported_boundary_satisfied"] is False
+    assert score["global_reproducibility_claim"]["claimed"] is False
     threshold_failures = {
         item["category"]: item for item in score["threshold_failures"]
     }
@@ -1111,6 +1132,13 @@ def test_reproducibility_contract_forensic_grade_is_blocked_outside_supported_li
         result.diagnostics["alert_signals"]["required_persistence_profile_gap"] is True
     )
     score = result.diagnostics["reproducibility_audit_score"]
+    assert score["schema_version"] == "2.0"
+    assert score["score_scope"] == "supported_boundary_run"
+    assert score["supported_boundary_verdict"]["verdict"] == (
+        "blocked_outside_supported_boundary"
+    )
+    assert score["supported_boundary_verdict"]["supported_boundary_satisfied"] is False
+    assert score["global_reproducibility_claim"]["claimed"] is False
     threshold_failures = {
         item["category"]: item for item in score["threshold_failures"]
     }

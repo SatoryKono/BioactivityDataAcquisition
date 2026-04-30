@@ -8,6 +8,7 @@ from tests.architecture._test_matrix_policy_support import (
     MATRIX_PATH,
     ROOT,
     TESTS_DIR,
+    golden_master_registry_pipelines,
     iter_entity_configs,
     load_matrix,
     ownership_paths,
@@ -66,15 +67,17 @@ class TestEntityOwnershipCoverage:
     def test_golden_master_representative_set_matches_matrix_policy(self) -> None:
         matrix = load_matrix()
         represented = represented_golden_master_entities()
+        registry = golden_master_registry_pipelines(matrix)
 
-        for provider, config in matrix["providers"].items():
-            if provider == "chembl":
-                continue
-            if config.get("golden_masters") in {"SHOULD", "MAY"}:
-                assert provider in represented, (
-                    f"provider '{provider}' is eligible for golden-master coverage but "
-                    "is missing from the representative pipeline set"
-                )
+        for provider, pipelines in registry.items():
+            expected_entities = {
+                pipeline.split("_", maxsplit=1)[1] for pipeline in pipelines
+            }
+            assert represented.get(provider, set()) == expected_entities, (
+                f"provider '{provider}' golden-master registry mismatch: "
+                f"expected entities {sorted(expected_entities)}, "
+                f"represented {sorted(represented.get(provider, set()))}"
+            )
 
     def test_provider_matrix_only_references_existing_entity_configs(self) -> None:
         matrix = load_matrix()

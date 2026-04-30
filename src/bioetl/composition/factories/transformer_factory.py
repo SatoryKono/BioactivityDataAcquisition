@@ -20,6 +20,7 @@ if TYPE_CHECKING:
     from bioetl.application.core.base_transformer.types import (
         TransformerDependencyContext,
     )
+    from bioetl.domain.behavior import EntityIdentityGenerator
     from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
     from bioetl.domain.ports import (
         ContractPolicyProtocol,
@@ -28,7 +29,6 @@ if TYPE_CHECKING:
         PiiHasherPort,
         TracingPort,
     )
-    from bioetl.domain.services import EntityIdentityGenerator
 
 # Mapping of (provider, entity_type) to transformer class
 _TRANSFORMER_REGISTRY: dict[tuple[str, str], type[BaseTransformer]] = {}

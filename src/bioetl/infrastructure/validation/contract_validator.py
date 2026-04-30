@@ -8,8 +8,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from bioetl.domain.behavior.dq_policy_resolver import DQPolicyResolver
 from bioetl.domain.config.dq import DQConfig
-from bioetl.domain.services.dq_policy_resolver import DQPolicyResolver
 from bioetl.domain.types import JsonDict
 from bioetl.domain.types.dq_contracts import (
     DQDisposition,

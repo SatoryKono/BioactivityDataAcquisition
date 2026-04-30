@@ -13,7 +13,7 @@ Classification priority:
 Pure domain logic with deterministic lookup tables (no I/O).
 
 See Also:
-    ``bioetl.domain.services.organism_classification_service`` for the service wrapper.
+    ``bioetl.domain.behavior.organism_classification_service`` for the service wrapper.
 """
 
 from __future__ import annotations

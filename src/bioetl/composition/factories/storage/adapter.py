@@ -85,8 +85,3 @@ class StorageBundle(
         self.bronze = bronze_writer
         self.silver = silver_writer
         self.gold = gold_writer
-
-
-# Backward-compatible alias retained while composition callers migrate to the
-# Bundle suffix. New code should use StorageBundle directly.
-StorageAdapter = StorageBundle

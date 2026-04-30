@@ -37,6 +37,7 @@ from bioetl.domain.mapping.publication_type_classification import (
 )
 
 if TYPE_CHECKING:
+    from bioetl.domain.behavior import EntityIdentityGenerator
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.entities.base import BaseEntity
     from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
@@ -48,7 +49,6 @@ if TYPE_CHECKING:
         PublicationMetadataStrategy,
         TracingPort,
     )
-    from bioetl.domain.services import EntityIdentityGenerator
     from bioetl.domain.types import BronzeRecord, JsonDict, PrimaryId, SilverRecord
 
 

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from bioetl.domain.services import standardize_chemical_structure
+from bioetl.domain.behavior import standardize_chemical_structure
 from bioetl.domain.transformations import safe_float, safe_int
 from bioetl.domain.validation import validate_molecular_weight, validate_non_negative
 from bioetl.domain.value_objects import InChIKey

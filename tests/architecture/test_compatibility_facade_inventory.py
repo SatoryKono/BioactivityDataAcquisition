@@ -322,19 +322,12 @@ def test_public_symbol_alias_surfaces_are_curated_rows() -> None:
 
 @pytest.mark.architecture
 def test_deprecated_module_alias_surfaces_remain_in_transition_debt() -> None:
-    """Known deprecated alias modules must stay visible in transition-debt review."""
+    """Only live deprecated alias helpers should remain in transition-debt review."""
     mod = _load_registry_module()
     registry = mod.load_compatibility_registry(REGISTRY_YAML)
 
     expected = {
         "src/bioetl/interfaces/cli/commands/_compat.py",
-        "src/bioetl/composition/resource_management_api.py",
-        "src/bioetl/composition/providers/_models.py",
-        "src/bioetl/composition/providers/__init__.py",
-        "src/bioetl/composition/providers/provider_registry.py",
-        "src/bioetl/composition/factories/__init__.py",
-        "src/bioetl/composition/factories/datasource/__init__.py",
-        "src/bioetl/composition/factories/datasource/data_source_factory.py",
     }
     transition_paths = {row.path for row in registry.transition_debt}
     missing = sorted(expected - transition_paths)

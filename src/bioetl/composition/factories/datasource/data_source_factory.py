@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, cast
+from typing import TYPE_CHECKING, cast
 
 from bioetl.composition.factories.datasource.adapter_helpers import (
     AdapterHelpersFactory,
@@ -21,8 +21,6 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
     from bioetl.infrastructure.config import Settings
 
-DataSourceCreatorPort = DataSourceCreatorProtocol
-
 
 def get_data_source_creator(
     provider: str,
@@ -32,56 +30,6 @@ def get_data_source_creator(
     """Return the canonical provider-bound data-source creator callback."""
     registry = _resolve_provider_registry(provider_registry)
     return registry.build_data_source_creator(provider)
-
-
-class DataSourceRegistry:
-    """Legacy compatibility facade over the canonical provider creator path."""
-
-    # Retained for backward-compatible test fixtures that backup/restore this
-    # dict.  Never populated in production — all delegation goes via
-    # ProviderRegistry.
-    _creators: ClassVar[dict[str, DataSourceCreatorProtocol]] = {}
-
-    @classmethod
-    def get(
-        cls,
-        provider: str,
-        *,
-        provider_registry: ProviderRegistry | None = None,
-    ) -> DataSourceCreatorProtocol:
-        """Get creator function for provider via the canonical creator path."""
-        return get_data_source_creator(
-            provider,
-            provider_registry=provider_registry,
-        )
-
-    @classmethod
-    def list_providers(
-        cls,
-        *,
-        provider_registry: ProviderRegistry | None = None,
-    ) -> list[str]:
-        """List providers that expose data-source creators."""
-        registry = _resolve_provider_registry(provider_registry)
-        providers: list[str] = registry.list_providers()
-        return providers
-
-    @classmethod
-    def list_keys(cls) -> list[str]:
-        """Alias for list_providers()."""
-        return cls.list_providers()
-
-    @classmethod
-    def contains(cls, key: str) -> bool:
-        """Check if provider is registered and has a data-source creator."""
-        registry = _resolve_provider_registry()
-        contains_provider: bool = registry.has_data_source_creator(key)
-        return contains_provider
-
-    @classmethod
-    def clear(cls) -> None:
-        """Clear the local legacy facade cache used only by compatibility tests."""
-        cls._creators.clear()
 
 
 class DataSourceFactory:
@@ -167,6 +115,5 @@ class DataSourceFactory:
 __all__ = [
     "DataSourceCreatorProtocol",
     "DataSourceFactory",
-    "DataSourceRegistry",
     "get_data_source_creator",
 ]

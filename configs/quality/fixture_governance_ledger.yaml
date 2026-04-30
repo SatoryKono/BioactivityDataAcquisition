@@ -102,26 +102,30 @@ entries:
       without depending on silver schema snapshots as the only external drift
       signal.
   - field: golden_masters
-    status: partial
+    status: enforced
     owner: "@bioetl-data-model"
-    blocking_classification: representative_scope_gap
+    blocking_classification: representative_provider_baseline
     last_reviewed: '2026-04-29'
     target_resolution_date: '2026-06-30'
     current_evidence_paths:
       - tests/fixtures/golden
+      - tests/fixtures/golden/README.md
       - tests/architecture/test_config_golden_master.py
       - tests/architecture/test_test_matrix_entity_ownership.py
+      - configs/quality/test_matrix.yaml
     artifact_paths:
       - tests/fixtures/golden
+      - tests/fixtures/golden/README.md
       - tests/architecture/test_config_golden_master.py
       - configs/quality/test_matrix.yaml
     next_step: >-
-      Expand the representative golden-master set so provider-level SHOULD/MAY
-      coverage is explained by a stable selection policy instead of a sparse
-      partial inventory.
+      Keep the matrix-declared representative golden-master registry aligned
+      with the adopted provider baseline and update it only through reviewed
+      policy changes that add or remove explicit provider pipelines.
     promotion_criteria: >-
-      The representative golden-master set is intentionally mapped to provider
-      policy and the partial rollout no longer hides unexplained scope gaps.
+      The representative golden-master set is explicit, machine-readable,
+      owner-reviewed, and CI-enforced for every adopted provider pipeline in
+      the bounded baseline.
   - field: extensionless_filenames
     status: enforced
     owner: "@bioetl-platform"

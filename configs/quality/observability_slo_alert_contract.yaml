@@ -66,6 +66,29 @@ slo_contracts:
         severity: warning
         for: 10m
         runbook: docs/05-operations/runbooks/observability-checklist.md
+  pipeline_flow_invariant_health:
+    target: "zero sustained record-flow invariant breaches, ingestion throughput stalls, unresolved backlog, or stage lag >= 300s"
+    metrics:
+      - bioetl_record_flow_invariants_total
+      - bioetl_stage_backlog_records
+      - bioetl_stage_lag_seconds
+    alerts:
+      - name: BioETLRecordFlowInvariantViolated
+        severity: critical
+        for: 5m
+        runbook: docs/05-operations/runbooks/observability-checklist.md
+      - name: BioETLIngestionThroughputDegraded
+        severity: warning
+        for: 1m
+        runbook: docs/05-operations/runbooks/observability-checklist.md
+      - name: BioETLStageBacklogActive
+        severity: warning
+        for: 5m
+        runbook: docs/05-operations/runbooks/observability-checklist.md
+      - name: BioETLStageLagHigh
+        severity: warning
+        for: 5m
+        runbook: docs/05-operations/runbooks/observability-checklist.md
   adaptive_memory_health:
     target: "Adaptive memory pressure should not remain active for sustained windows"
     metrics:
