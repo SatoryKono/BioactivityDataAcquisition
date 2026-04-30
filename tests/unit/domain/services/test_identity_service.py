@@ -19,7 +19,6 @@ from hypothesis import strategies as st
 from bioetl.domain.services.identity_service import (
     META_FIELDS,
     EntityIdentityGenerator,
-    EntityIdentityGenerator,
 )
 
 

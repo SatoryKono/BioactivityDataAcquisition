@@ -8,7 +8,6 @@ from bioetl.domain.services.normalization_config import NormalizationConfig
 from bioetl.domain.services.normalization_service import (
     BioactivityNormalizer,
     NormalizationResult,
-    BioactivityNormalizer,
 )
 from bioetl.domain.value_objects import Concentration, ConcentrationUnit
 
@@ -27,7 +26,7 @@ class TestBioactivityNormalizerBasic:
         assert service.validator is not None
         assert service.aggregator is not None
         assert service.config is not None
-        assert BioactivityNormalizer is BioactivityNormalizer
+        assert isinstance(service, BioactivityNormalizer)
 
 
 class TestBioactivityNormalizerNormalizeActivity:

@@ -13,8 +13,6 @@ import pytest
 from bioetl.domain.services import (
     DataNormalizationConfig,
     DefaultDataNormalizer,
-    DefaultDataNormalizer,
-    DefaultDataNormalizer,
 )
 from bioetl.domain.services._author_helpers import hash_author_name
 
@@ -34,8 +32,8 @@ class TestDefaultDataNormalizerInit:
         service = DefaultDataNormalizer(config=config)
         assert service.config.min_publication_year == 1900
 
-    def test_alias_works(self) -> None:
-        """Test DefaultDataNormalizer alias works."""
+    def test_canonical_name_works(self) -> None:
+        """Test the canonical DefaultDataNormalizer surface."""
         service = DefaultDataNormalizer()
         assert isinstance(service, DefaultDataNormalizer)
 

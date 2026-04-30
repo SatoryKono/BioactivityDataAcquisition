@@ -8,7 +8,6 @@ from bioetl.domain.services.composite_validation_layer import (
 from bioetl.domain.services.cross_validation_validator import CrossValidationValidator
 from bioetl.domain.services.preflight_governance import (
     GovernancePolicy,
-    PreflightGovernor,
     PreflightGovernanceConfig,
     PreflightGovernor,
 )

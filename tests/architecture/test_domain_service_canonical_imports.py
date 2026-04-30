@@ -7,29 +7,17 @@ from pathlib import Path
 
 ROOT = Path("src/bioetl")
 LEGACY_SYMBOLS = (
-    "AuthorNormalizer",
-    "CompositeValidator",
-    "EntityIdentityGenerator",
-    "DefaultDataNormalizer",
-    "DefaultDataNormalizer",
-    "MergedMetadataExplainer",
-    "BioactivityNormalizer",
-    "OrganismClassifier",
-    "PhasedMigrationCoordinator",
-    "PreflightGovernor",
+    "AuthorNormalizationService",
+    "CompositeValidationService",
+    "IdentityService",
+    "DefaultDataNormalizationService",
+    "DataNormalizationService",
+    "MergedMetadataExplainabilityService",
+    "NormalizationService",
+    "OrganismClassificationService",
+    "PhasedMigrationSupportService",
+    "PreflightGovernanceService",
 )
-ALLOWED_FILES = {
-    "src/bioetl/domain/services/__init__.py",
-    "src/bioetl/domain/services/author_normalization_service.py",
-    "src/bioetl/domain/services/composite_validation_layer.py",
-    "src/bioetl/domain/services/identity_service.py",
-    "src/bioetl/domain/services/data_normalization_service.py",
-    "src/bioetl/domain/services/merged_metadata_explainability.py",
-    "src/bioetl/domain/services/normalization_service.py",
-    "src/bioetl/domain/services/organism_classification_service.py",
-    "src/bioetl/domain/services/phased_migration_support.py",
-    "src/bioetl/domain/services/preflight_governance.py",
-}
 
 
 def test_first_party_src_prefers_canonical_domain_behavior_names() -> None:
@@ -38,8 +26,6 @@ def test_first_party_src_prefers_canonical_domain_behavior_names() -> None:
 
     for path in ROOT.rglob("*.py"):
         rel_path = path.as_posix()
-        if rel_path in ALLOWED_FILES:
-            continue
         text = path.read_text(encoding="utf-8")
         if "/tests/" in rel_path:
             continue
