@@ -42,6 +42,9 @@ from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import echo_error
 
 if TYPE_CHECKING:
+    from bioetl.application.services.control_plane.forensic_diff_service import (
+        ForensicRunDiffService,
+    )
     from bioetl.application.services.control_plane.run_manifest_inspection_service import (
         RunManifestInspectionService,
     )
@@ -57,6 +60,7 @@ __all__ = [
     "diagnostics_checkpoint",
     "diagnostics_contract_checks",
     "diagnostics_dossier",
+    "diagnostics_forensic_diff",
     "diagnostics_guide",
     "diagnostics_health",
     "diagnostics_manifest",
@@ -92,6 +96,15 @@ def get_quarantine_runtime_service(pipeline: str) -> _QuarantineRuntimeService:
     from bioetl.composition.health_api import get_quarantine_runtime_service as _impl
 
     return cast(_QuarantineRuntimeService, _impl(pipeline))
+
+
+def get_forensic_run_diff_service() -> ForensicRunDiffService:
+    """Load the canonical forensic diff service on demand."""
+    from bioetl.composition.control_plane_api import (
+        get_forensic_run_diff_service as _impl,
+    )
+
+    return _impl()
 
 
 def _build_diagnostics_guide_lines() -> list[str]:
@@ -254,6 +267,35 @@ def _emit_manifest_payload(
     )
 
 
+@diagnostics.command("forensic-diff")
+@click.argument("left_identifier")
+@click.argument("right_identifier")
+@click.option(
+    "--format",
+    "output_format",
+    type=click.Choice(["text", "json", "yaml"]),
+    default="text",
+    help="Output format",
+)
+def diagnostics_forensic_diff(
+    left_identifier: str,
+    right_identifier: str,
+    output_format: str,
+) -> None:
+    """Compare two runs or manifests across forensic evidence surfaces."""
+    service = get_forensic_run_diff_service()
+    try:
+        result = service.compare(left_identifier, right_identifier)
+    except ValueError as exc:
+        echo_error("Forensic run diff failed", str(exc))
+        return
+    emit_inspection_payload(
+        result.to_dict(),
+        output_format,
+        text_renderer=render_text_payload,
+    )
+
+
 @diagnostics.command("quarantine")
 @click.option("--pipeline", required=True, help="Pipeline name")
 @click.option("--json", "output_json", is_flag=True, help="Output as JSON")
@@ -319,6 +361,7 @@ _COMMAND_OBJECTS = (
     diagnostics_contract_checks,
     diagnostics_checkpoint,
     diagnostics_manifest,
+    diagnostics_forensic_diff,
     diagnostics_quarantine,
 )
 
@@ -331,5 +374,6 @@ COMMANDS = (
     "contract-checks",
     "checkpoint",
     "manifest",
+    "forensic-diff",
     "quarantine",
 )

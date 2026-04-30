@@ -135,6 +135,46 @@ _POSTRUN_PHASE_LABEL_METRICS = frozenset(
 
 type _StringLabelNormalizer = Callable[[str], str]
 
+__all__ = [
+    "APPROVED_ENDPOINT_LABEL_METRICS",
+    "APPROVED_SOURCE_FILE_LABEL_METRICS",
+    "FORBIDDEN_PROMETHEUS_LABEL_NAMES",
+    "OBSERVABILITY_EVENTS_COUNTER_NAME",
+    "normalize_adapter_endpoint_label",
+    "normalize_adapter_operation_label",
+    "normalize_batch_lifecycle_event",
+    "normalize_composite_phase_error_kind",
+    "normalize_composite_phase_loss_kind",
+    "normalize_composite_phase_record_outcome",
+    "normalize_composite_phase_retry_kind",
+    "normalize_dq_check_type",
+    "normalize_dq_disposition",
+    "normalize_dq_severity",
+    "normalize_dq_stage",
+    "normalize_flow_stage",
+    "normalize_metric_dispatch_labels",
+    "normalize_observability_component",
+    "normalize_observability_mode",
+    "normalize_postrun_phase",
+    "normalize_publication_status",
+    "normalize_publication_target",
+    "normalize_quarantine_reason",
+    "normalize_record_flow_invariant",
+    "normalize_record_flow_invariant_status",
+    "normalize_runtime_phase",
+    "normalize_runtime_stage",
+    "normalize_silver_filter_field",
+    "normalize_silver_filter_reason_code",
+    "normalize_silver_filter_rule_type",
+    "normalize_source_file_label",
+    "normalize_stage_model_outcome",
+    "normalize_stage_model_stage",
+    "normalize_structural_action",
+    "normalize_structural_comparison",
+    "normalize_terminal_status",
+    "validate_metric_label_policy",
+]
+
 
 def validate_metric_label_policy(name: str, labels: MetricLabels) -> None:
     """Reject high-cardinality or raw labels before Prometheus dispatch."""

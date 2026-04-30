@@ -17,6 +17,7 @@ from pathlib import Path
 import pickle
 import subprocess
 import tempfile
+from uuid import uuid4
 
 import pytest
 import yaml
@@ -109,15 +110,26 @@ def _store_disk_cache(
     """Persist a cache snapshot atomically for reuse across reruns."""
     signature = _cache_signature(paths)
     cache_path = _cache_file_path(cache_name, signature)
-    temp_path = cache_path.with_suffix(".tmp")
+    temp_path = cache_path.with_name(
+        f"{cache_path.name}.{os.getpid()}.{uuid4().hex}.tmp"
+    )
 
     try:
         cache_path.parent.mkdir(parents=True, exist_ok=True)
         with temp_path.open("wb") as handle:
             pickle.dump(payload, handle, protocol=pickle.HIGHEST_PROTOCOL)
-        temp_path.replace(cache_path)
+        try:
+            temp_path.replace(cache_path)
+        except PermissionError:
+            # Another process may have published the same cache payload already.
+            if cache_path.exists():
+                return
+            raise
     except OSError:
-        temp_path.unlink(missing_ok=True)
+        try:
+            temp_path.unlink(missing_ok=True)
+        except OSError:
+            pass
 
 
 def _resolve_disk_text_cache_request(

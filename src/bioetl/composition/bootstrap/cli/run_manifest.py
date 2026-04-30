@@ -52,4 +52,8 @@ def bootstrap_forensic_run_diff_service() -> ForensicRunDiffService:
     return ForensicRunDiffService(
         manifest_port=manifest_store,
         ledger_port=ledger_store,
+        inspection_service_factory=lambda: RunManifestInspectionService(
+            manifest_port=manifest_store,
+            ledger_port=ledger_store,
+        ),
     )

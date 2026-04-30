@@ -20,6 +20,12 @@ function_suffix_rules:
         reason: >
           Reviewed bootstrap factory that constructs the checkpoint port
           implementation for CLI/runtime wiring.
+      - symbol: bootstrap_composite_checkpoint_port
+        path: src/bioetl/composition/bootstrap/assembly/checkpoint.py
+        issue: "#3442"
+        reason: >
+          Reviewed bootstrap factory that constructs the composite checkpoint
+          port for runtime resume and repair flows.
       - symbol: bootstrap_quarantine_port
         path: src/bioetl/composition/bootstrap/assembly/checkpoint.py
         issue: "#3442"
@@ -27,29 +33,53 @@ function_suffix_rules:
           Reviewed bootstrap factory that constructs the quarantine port
           implementation for CLI/runtime wiring.
       - symbol: bootstrap_dq_monitor_port
+        path: src/bioetl/composition/bootstrap/runtime/dq_bootstrap.py
+        issue: "#3442"
+        reason: >
+          Reviewed observability bootstrap implementation retained behind the
+          runtime observability facade.
+      - symbol: bootstrap_dq_monitor_port
         path: src/bioetl/composition/bootstrap/runtime/observability.py
         issue: "#3442"
         reason: >
-          Reviewed observability bootstrap factory retained for runtime-facing
-          import stability.
+          Reviewed public runtime observability facade retained as the canonical
+          bootstrap seam for DQ monitor port wiring.
+      - symbol: bootstrap_logger_port
+        path: src/bioetl/composition/bootstrap/runtime/logger_bootstrap.py
+        issue: "#3442"
+        reason: >
+          Reviewed observability bootstrap implementation retained behind the
+          runtime observability facade.
       - symbol: bootstrap_logger_port
         path: src/bioetl/composition/bootstrap/runtime/observability.py
         issue: "#3442"
         reason: >
-          Reviewed observability bootstrap factory retained for runtime-facing
-          import stability.
+          Reviewed public runtime observability facade retained as the canonical
+          bootstrap seam for logger port wiring.
+      - symbol: bootstrap_metrics_port
+        path: src/bioetl/composition/bootstrap/runtime/metrics_bootstrap.py
+        issue: "#3442"
+        reason: >
+          Reviewed observability bootstrap implementation retained behind the
+          runtime observability facade.
       - symbol: bootstrap_metrics_port
         path: src/bioetl/composition/bootstrap/runtime/observability.py
         issue: "#3442"
         reason: >
-          Reviewed observability bootstrap factory retained for runtime-facing
-          import stability.
+          Reviewed public runtime observability facade retained as the canonical
+          bootstrap seam for metrics port wiring.
+      - symbol: bootstrap_tracer_port
+        path: src/bioetl/composition/bootstrap/runtime/tracing_bootstrap.py
+        issue: "#3442"
+        reason: >
+          Reviewed observability bootstrap implementation retained behind the
+          runtime observability facade.
       - symbol: bootstrap_tracer_port
         path: src/bioetl/composition/bootstrap/runtime/observability.py
         issue: "#3442"
         reason: >
-          Reviewed observability bootstrap factory retained for runtime-facing
-          import stability.
+          Reviewed public runtime observability facade retained as the canonical
+          bootstrap seam for tracer port wiring.
 
 suffix_boundary_rules:
   - rule_id: non_domain_port_protocols

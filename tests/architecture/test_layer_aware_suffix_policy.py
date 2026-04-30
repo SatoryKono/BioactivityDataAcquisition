@@ -147,8 +147,16 @@ def test_composition_bootstrap_port_function_exceptions_are_explicit_and_bounded
             "src/bioetl/composition/bootstrap/assembly/checkpoint.py",
         ),
         (
+            "bootstrap_composite_checkpoint_port",
+            "src/bioetl/composition/bootstrap/assembly/checkpoint.py",
+        ),
+        (
             "bootstrap_quarantine_port",
             "src/bioetl/composition/bootstrap/assembly/checkpoint.py",
+        ),
+        (
+            "bootstrap_dq_monitor_port",
+            "src/bioetl/composition/bootstrap/runtime/dq_bootstrap.py",
         ),
         (
             "bootstrap_dq_monitor_port",
@@ -156,11 +164,23 @@ def test_composition_bootstrap_port_function_exceptions_are_explicit_and_bounded
         ),
         (
             "bootstrap_logger_port",
+            "src/bioetl/composition/bootstrap/runtime/logger_bootstrap.py",
+        ),
+        (
+            "bootstrap_logger_port",
             "src/bioetl/composition/bootstrap/runtime/observability.py",
         ),
         (
             "bootstrap_metrics_port",
+            "src/bioetl/composition/bootstrap/runtime/metrics_bootstrap.py",
+        ),
+        (
+            "bootstrap_metrics_port",
             "src/bioetl/composition/bootstrap/runtime/observability.py",
+        ),
+        (
+            "bootstrap_tracer_port",
+            "src/bioetl/composition/bootstrap/runtime/tracing_bootstrap.py",
         ),
         (
             "bootstrap_tracer_port",

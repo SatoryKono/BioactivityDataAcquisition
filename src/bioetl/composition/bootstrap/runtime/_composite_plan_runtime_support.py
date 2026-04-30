@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import inspect
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Protocol, TypeGuard
+from typing import TYPE_CHECKING, Protocol, TypeGuard, cast
 
 from bioetl.composition.bootstrap.composite_infrastructure_context import (
     CompositeInfrastructureContext,
@@ -50,6 +50,20 @@ class _NamedRuntimeBundle(Protocol):
     lock: LockPort
 
 
+def _coerce_legacy_runtime_bundle(
+    resolved_bundle: object,
+) -> tuple[str, Settings, LoggerPort, MetricsPort, TracingPort, object, LockPort] | None:
+    """Return the legacy positional runtime bundle shape when present."""
+    if not isinstance(resolved_bundle, tuple | list):
+        return None
+    if len(resolved_bundle) != 7:
+        return None
+    return cast(
+        "tuple[str, Settings, LoggerPort, MetricsPort, TracingPort, object, LockPort]",
+        tuple(resolved_bundle),
+    )
+
+
 def build_bootstrap_runtime_resources(
     *,
     bootstrap_runtime_basics_fn: Callable[..., object],
@@ -73,7 +87,13 @@ def build_bootstrap_runtime_resources(
             clock=getattr(named_bundle, "clock", None),
             infra_context=named_bundle,
         )
-    effective_run_id, settings, logger, metrics, tracer, storage, lock = resolved_bundle
+    legacy_bundle = _coerce_legacy_runtime_bundle(resolved_bundle)
+    if legacy_bundle is None:
+        raise TypeError(
+            "bootstrap_runtime_basics_fn must return a named runtime bundle or "
+            "legacy 7-tuple runtime bundle"
+        )
+    effective_run_id, settings, logger, metrics, tracer, storage, lock = legacy_bundle
     return BootstrapRuntimeResources(
         run_id=effective_run_id,
         settings=settings,

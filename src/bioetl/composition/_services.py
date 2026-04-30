@@ -15,11 +15,11 @@ if TYPE_CHECKING:
         BronzeCleanupService,
     )
     from bioetl.application.services.checkpoint_service import CheckpointService
-    from bioetl.application.services.control_plane.run_manifest_inspection_service import (
-        RunManifestInspectionService,
-    )
     from bioetl.application.services.control_plane.forensic_diff_service import (
         ForensicRunDiffService,
+    )
+    from bioetl.application.services.control_plane.run_manifest_inspection_service import (
+        RunManifestInspectionService,
     )
     from bioetl.application.services.execution.pipeline_runner_service import (
         PipelineRunnerService,

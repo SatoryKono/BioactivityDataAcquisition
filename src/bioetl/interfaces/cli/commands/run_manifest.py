@@ -18,6 +18,9 @@ from bioetl.interfaces.cli.commands.run_manifest_output import (
 from bioetl.interfaces.cli.formatters import echo_error
 
 if TYPE_CHECKING:
+    from bioetl.application.services.control_plane.forensic_diff_service import (
+        ForensicRunDiffService,
+    )
     from bioetl.application.services.control_plane.run_manifest_inspection_service import (
         RunManifestInspectionService,
     )
@@ -25,6 +28,7 @@ if TYPE_CHECKING:
 __all__ = [
     "COMMANDS",
     "diff_command",
+    "forensic_diff_command",
     "run_manifest",
     "score_command",
     "show_command",
@@ -37,6 +41,15 @@ def get_run_manifest_service() -> RunManifestInspectionService:
     """Load the run-manifest inspection service through composition on demand."""
     from bioetl.composition.control_plane_api import (
         get_run_manifest_service as _impl,
+    )
+
+    return _impl()
+
+
+def get_forensic_run_diff_service() -> ForensicRunDiffService:
+    """Load the forensic run-diff service through composition on demand."""
+    from bioetl.composition.control_plane_api import (
+        get_forensic_run_diff_service as _impl,
     )
 
     return _impl()
@@ -142,8 +155,41 @@ def diff_command(
     )
 
 
+@run_manifest.command("forensic-diff")
+@click.argument("left_identifier")
+@click.argument("right_identifier")
+@click.option(
+    "--format",
+    "output_format",
+    type=click.Choice(["text", "json", "yaml"]),
+    default="text",
+    help="Output format",
+)
+def forensic_diff_command(
+    left_identifier: str,
+    right_identifier: str,
+    output_format: str,
+) -> None:
+    """Compare two runs or manifests across forensic evidence surfaces."""
+    service = get_forensic_run_diff_service()
+    try:
+        result = service.compare(left_identifier, right_identifier)
+    except RunManifestInspectionCorruptionError as exc:
+        echo_error(RUN_MANIFEST_STORE_CORRUPTION, str(exc))
+        return
+    except ValueError as exc:
+        echo_error("Forensic run diff failed", str(exc))
+        return
+    emit_inspection_payload(
+        result.to_dict(),
+        output_format,
+        text_renderer=render_text_payload,
+    )
+
+
 COMMANDS = (
     diff_command,
+    forensic_diff_command,
     score_command,
     show_command,
 )
