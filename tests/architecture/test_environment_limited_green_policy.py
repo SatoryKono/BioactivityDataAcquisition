@@ -79,6 +79,22 @@ class TestEnvironmentLimitedGreenPolicy:
         coarse_budgets = scorecard.get("governance", {}).get("coarse_budgets", {})
         assert coarse_budgets.get("architecture_skip_count", {}).get("max_count") == 7
 
+    def test_environment_limited_tracking_has_numerical_threshold(self) -> None:
+        policy = _load_yaml(POLICY_PATH)
+        measurement_policy = policy.get("measurement_policy", {})
+
+        assert measurement_policy.get("repeated_run_window") >= 10
+        assert 0 < measurement_policy.get("max_environment_limited_green_rate") < 1
+        assert measurement_policy.get("scheduled_tracking_mode") == "non_blocking"
+        assert (
+            measurement_policy.get("unavailable_data_behavior")
+            == "explicit_unavailable_state"
+        )
+        assert measurement_policy.get("reopened_gap_thresholds") == {
+            "pilot_provider_count": 0,
+            "vcr_only_provider_count": 0,
+        }
+
     def test_reason_postures_distinguish_policy_from_reopened_gap(self) -> None:
         policy = _load_yaml(POLICY_PATH)
         entries = {

@@ -224,6 +224,47 @@ retained_entrypoints:
   exit_criteria: The public entrypoint remains sanctioned, internal implementation-module
     imports outside `composition/` stay at zero, and internal-module patch coverage
     remains confined to the dedicated entrypoint-boundary tests.
+- path: src/bioetl/composition/__init__.py
+  compatibility_role: Retained package-root composition facade that preserves
+    import stability for registry discovery and sanctioned public submodule access
+    while first-party `src/` callers migrate to owner-focused APIs.
+  canonical_target: bioetl.composition
+  status: retained-entrypoint
+  owner: bioetl.composition
+  introduced_in: 2026-04 TD-005 TD-006
+  review_date: '2026-09-30'
+  external_breaking_change_required: true
+  internal_callers_zero: true
+  allowed_call_sites: '`src`: no direct imports; use `bioetl.composition.registry_api`,
+    `execution_api`, `control_plane_api`, `health_api`, `maintenance_api`, `composite_api`,
+    or `observability_api`; `tests`: dedicated compatibility coverage may import the
+    package root to verify the frozen lazy-export budget'
+  migration_path: Keep `bioetl.composition` only as a retained public compatibility
+    seam for external import stability and discovery. New first-party `src/` imports
+    must point at owner-focused composition APIs instead of the package root.
+  exit_criteria: First-party `src/` imports of `bioetl.composition` stay at zero,
+    the package-root export budget remains frozen, and any future surface change is
+    reviewed through this inventory first.
+- path: src/bioetl/composition/bootstrap/__init__.py
+  compatibility_role: Retained runtime-focused bootstrap package facade that preserves
+    historical import stability while owner-focused execution, composite, and observability
+    APIs serve as the canonical first-party composition seams.
+  canonical_target: bioetl.composition.bootstrap
+  status: retained-entrypoint
+  owner: bioetl.composition.bootstrap
+  introduced_in: 2026-04 TD-001
+  review_date: '2026-09-30'
+  external_breaking_change_required: true
+  internal_callers_zero: true
+  allowed_call_sites: '`src`: no direct imports; use `bioetl.composition.execution_api`,
+    `composite_api`, or `observability_api`; `tests`: dedicated compatibility and
+    runtime-boundary coverage may import the bootstrap package root'
+  migration_path: Keep `bioetl.composition.bootstrap` as a retained compatibility
+    seam for runtime-facing import stability, but route new first-party `src/` imports
+    through owner-focused composition APIs instead of the bootstrap package root.
+  exit_criteria: First-party `src/` imports of `bioetl.composition.bootstrap` stay
+    at zero, the runtime-focused `__all__` budget remains frozen, and any new root-level
+    export requires an explicit inventory review.
 - path: src/bioetl/domain/composite/config.py
   compatibility_role: Permanent public entrypoint for composite config models that
     shields split config internals.

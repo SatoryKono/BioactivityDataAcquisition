@@ -63,7 +63,7 @@ def build_cli_registry() -> PipelineRegistry:
 
 async def preview_cleanup(pipeline: str) -> CleanupPreview:
     """Compatibility seam for cleanup preview patched by CLI dry-run tests."""
-    from bioetl.composition.resources_api import preview_cleanup as _impl
+    from bioetl.composition.maintenance_api import preview_cleanup as _impl
 
     impl = cast("Callable[[str], Awaitable[CleanupPreview]]", _impl)
     return await impl(pipeline)
