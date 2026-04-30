@@ -441,7 +441,7 @@ class TestDryRunMode:
     """Tests for dry-run mode and cleanup preview rendering."""
 
     @patch(
-        "bioetl.composition.resources_api.preview_cleanup",
+        "bioetl.interfaces.cli.commands.domains.run.support.preview_cleanup",
         new_callable=AsyncMock,
     )
     def test_dry_run_shows_preview(
@@ -477,7 +477,7 @@ class TestDryRunMode:
         assert "No changes were made" in result.output
 
     @patch(
-        "bioetl.composition.resources_api.preview_cleanup",
+        "bioetl.interfaces.cli.commands.domains.run.support.preview_cleanup",
         new_callable=AsyncMock,
     )
     def test_dry_run_counts_existing_files(
@@ -508,7 +508,7 @@ class TestDryRunMode:
         assert "2 files" in result.output
 
     @patch(
-        "bioetl.composition.resources_api.preview_cleanup",
+        "bioetl.interfaces.cli.commands.domains.run.support.preview_cleanup",
         new_callable=AsyncMock,
     )
     def test_dry_run_preview_runtime_error(
@@ -535,7 +535,7 @@ class TestDryRunMode:
         assert "Error previewing cleanup" in result.output
 
     @patch(
-        "bioetl.composition.resources_api.preview_cleanup",
+        "bioetl.interfaces.cli.commands.domains.run.support.preview_cleanup",
         new_callable=AsyncMock,
     )
     def test_dry_run_preview_variations(

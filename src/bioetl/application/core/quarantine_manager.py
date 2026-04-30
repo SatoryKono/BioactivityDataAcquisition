@@ -180,13 +180,8 @@ class QuarantineRuntimeService(QuarantineManagerSupportMixin):
             )
 
 
-QuarantineManagerService = QuarantineRuntimeService
-QuarantineManager = QuarantineRuntimeService
-
 __all__ = [
     "DQQuarantineEntry",
     "FilteredQuarantineEntry",
-    "QuarantineManager",
-    "QuarantineManagerService",
     "QuarantineRuntimeService",
 ]

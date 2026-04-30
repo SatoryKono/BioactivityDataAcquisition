@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import ast
 import importlib.util
 from pathlib import Path
 import sys
@@ -91,6 +92,49 @@ def test_checkpoint_quarantine_runtime_admin_family_is_role_driven() -> None:
             "src/bioetl/application/services/quarantine_service.py",
         ),
     }
+
+
+def test_checkpoint_quarantine_manager_aliases_are_not_exported() -> None:
+    """Runtime/admin modules must not retain manager-style compatibility aliases."""
+    forbidden_aliases = {
+        "CheckpointManager",
+        "CheckpointManagerService",
+        "QuarantineManager",
+        "QuarantineManagerService",
+    }
+    module_paths = (
+        ROOT
+        / "src"
+        / "bioetl"
+        / "application"
+        / "core"
+        / "lifecycle"
+        / "checkpoint_manager.py",
+        ROOT / "src" / "bioetl" / "application" / "core" / "quarantine_manager.py",
+        ROOT / "src" / "bioetl" / "application" / "services" / "admin_runtime_api.py",
+    )
+    violations: list[str] = []
+
+    for module_path in module_paths:
+        tree = ast.parse(module_path.read_text(encoding="utf-8"))
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Assign):
+                for target in node.targets:
+                    if isinstance(target, ast.Name) and target.id in forbidden_aliases:
+                        violations.append(
+                            f"{module_path.relative_to(ROOT)}:{node.lineno}"
+                        )
+            if isinstance(node, ast.ImportFrom):
+                for alias in node.names:
+                    if alias.name in forbidden_aliases:
+                        violations.append(
+                            f"{module_path.relative_to(ROOT)}:{node.lineno}"
+                        )
+
+    assert violations == [], (
+        "Manager-style checkpoint/quarantine aliases must stay removed:\n"
+        + "\n".join(violations)
+    )
 
 
 def test_column_ordering_family_is_frozen_to_one_canonical_surface_plus_compat() -> (
