@@ -6,7 +6,7 @@
 ## Summary
 
 - Scanned modules: `1744`
-- Internal import edges (raw): `6923`
+- Internal import edges (raw): `6927`
 - Aggregated layer edges: `14`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `312`
@@ -21,15 +21,15 @@ flowchart LR
     infrastructure[infrastructure]
     composition[composition]
     interfaces[interfaces]
-    application -->|1152 OK| application
-    application -->|1027 OK| domain
+    application -->|1155 OK| application
+    application -->|1028 OK| domain
     composition -->|250 OK| application
     composition -->|546 OK| composition
     composition -->|382 OK| domain
     composition -->|304 OK| infrastructure
     domain -->|1150 OK| domain
-    infrastructure -->|753 OK| domain
-    infrastructure -->|955 OK| infrastructure
+    infrastructure -->|755 OK| domain
+    infrastructure -->|953 OK| infrastructure
     interfaces -->|71 OK| application
     interfaces -->|65 OK| composition
     interfaces -->|39 OK| domain
@@ -41,15 +41,15 @@ flowchart LR
 
 | From             | To               | Imports | Policy  |
 | ---------------- | ---------------- | ------: | ------- |
-| `application`    | `application`    |    1152 | allowed |
-| `application`    | `domain`         |    1027 | allowed |
+| `application`    | `application`    |    1155 | allowed |
+| `application`    | `domain`         |    1028 | allowed |
 | `composition`    | `application`    |     250 | allowed |
 | `composition`    | `composition`    |     546 | allowed |
 | `composition`    | `domain`         |     382 | allowed |
 | `composition`    | `infrastructure` |     304 | allowed |
 | `domain`         | `domain`         |    1150 | allowed |
-| `infrastructure` | `domain`         |     753 | allowed |
-| `infrastructure` | `infrastructure` |     955 | allowed |
+| `infrastructure` | `domain`         |     755 | allowed |
+| `infrastructure` | `infrastructure` |     953 | allowed |
 | `interfaces`     | `application`    |      71 | allowed |
 | `interfaces`     | `composition`    |      65 | allowed |
 | `interfaces`     | `domain`         |      39 | allowed |
@@ -70,8 +70,8 @@ flowchart LR
 | `composition.factories`        | `application.core`              |      71 |
 | `infrastructure.storage`       | `domain.types`                  |      69 |
 | `composition.factories`        | `domain.ports`                  |      63 |
+| `infrastructure.storage`       | `domain.ports`                  |      63 |
 | `application.services`         | `domain.ports`                  |      61 |
-| `infrastructure.storage`       | `domain.ports`                  |      61 |
 | `application.services`         | `domain.types`                  |      55 |
 | `composition.bootstrap`        | `application.services`          |      50 |
 | `interfaces.cli`               | `application.services`          |      49 |
@@ -85,13 +85,13 @@ flowchart LR
 | `application.core`             | `domain.context`                |      35 |
 | `infrastructure.adapters`      | `domain.exceptions`             |      34 |
 | `composition.factories`        | `infrastructure.adapters`       |      31 |
-| `infrastructure.storage`       | `domain.models`                 |      31 |
+| `infrastructure.storage`       | `domain.models`                 |      30 |
 | `application.services`         | `domain.control_plane`          |      28 |
 | `application.services`         | `domain.value_objects`          |      28 |
 | `composition.factories`        | `infrastructure.schemas`        |      28 |
 | `application.pipelines`        | `domain.entities`               |      26 |
+| `infrastructure.storage`       | `domain.medallion`              |      26 |
 | `application.composite`        | `domain.exceptions`             |      25 |
-| `infrastructure.storage`       | `domain.medallion`              |      25 |
 | `composition.bootstrap`        | `domain.composite`              |      24 |
 | `composition.factories`        | `application.services`          |      21 |
 | `composition.factories`        | `domain.schemas`                |      21 |

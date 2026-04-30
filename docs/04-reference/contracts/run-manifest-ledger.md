@@ -291,6 +291,7 @@ paths:
 | `composite failure`  | none                                       | Manifest exists before execution starts; ledger writes `manifest_created`, composite lifecycle events, and terminal failure semantics when ledger is enabled                                                             |
 | `composite shutdown` | none                                       | Manifest exists before execution starts; ledger writes `manifest_created`, composite lifecycle events, and `run_shutdown` when ledger is enabled                                                                         |
 | `composite resume`   | checkpoint snapshot + ledger suffix replay | Manifest still exists before execution starts; resume restores checkpoint snapshot first and then replays only the ledger suffix strictly after `last_event_id`                                                          |
+| `full-scan rebuild`  | full scan + content-hash deduplication     | `full_scan_only` pipelines intentionally block checkpoint resume; diagnostics classify this path as `full_scan_idempotent_rebuild`, not exact replay or checkpoint resume                                               |
 
 No supported execution path may bypass manifest creation or, when
 `run_ledger_enabled=true`, ledger attachment. Runtime assembly coerces invalid
@@ -561,7 +562,9 @@ Hash semantics are deliberately split:
   into the execution surface.
 - `effective_config_hash` is the hash of the final effective execution
   configuration after supported runtime overrides and control-plane
-  normalization.
+  normalization. Effective-config hash inputs use the same strict canonical JSON
+  serializer contract as execution fingerprints, including deterministic key
+  ordering and non-finite float rejection.
 
 New manifest creation, diagnostics, inspection output, metadata sidecars, and
 lineage nodes MUST preserve those fields separately. Backward-compatible
@@ -862,6 +865,14 @@ surface:
   exact replay are rendered as `replay_mode=same_data_state_recovery`;
 - non-snapshot source runs that stay outside strict exact replay are rendered
   as `replay_mode=rebuild`.
+- `continuation_mode` is the bounded operator taxonomy for execution
+  continuation semantics. Current values are `exact_replay`,
+  `checkpoint_snapshot_only_resume`,
+  `checkpoint_snapshot_plus_ledger_suffix_resume`,
+  `full_scan_idempotent_rebuild`, and `rebuild_only`. `resume_mode` remains in
+  `resume_contract` for backward compatibility, but operators should use
+  `continuation_mode` when deciding whether a run is replay, checkpoint-only
+  continuation, composite ledger-suffix continuation, or rebuild.
 - `replay_of_run_id` and `replay_of_manifest_id` record replay ancestry when a
   run is an explicit exact replay of a previous execution rather than merely a
   semantically equivalent new run;
