@@ -102,6 +102,7 @@ class RunManifestDiffResult:
             "semantic_difference_fields": list(self.semantic_difference_fields),
             "noncanonical_difference_fields": list(self.noncanonical_difference_fields),
             "replay_relationship": self.replay_relationship,
+            "forensic_diff": self.cross_surface_replay_diff,
             "cross_surface_replay_diff": self.cross_surface_replay_diff,
             "differences": [entry.to_dict() for entry in self.differences],
         }
@@ -212,6 +213,29 @@ def _build_lineage_diff_payload(
         ),
         "left_planned_artifact_count": len(left_manifest.planned_artifacts),
         "right_planned_artifact_count": len(right_manifest.planned_artifacts),
+    }
+
+
+def _build_run_artifact_diff_payload(
+    *,
+    left_manifest: RunManifest,
+    right_manifest: RunManifest,
+) -> dict[str, object]:
+    left_snapshots = RunManifestInspectionService._manifest_snapshot_ids(left_manifest)
+    right_snapshots = RunManifestInspectionService._manifest_snapshot_ids(right_manifest)
+    left_artifacts = RunManifestInspectionService._planned_artifact_identity(
+        left_manifest
+    )
+    right_artifacts = RunManifestInspectionService._planned_artifact_identity(
+        right_manifest
+    )
+    return {
+        "input_snapshots_match": left_snapshots == right_snapshots,
+        "left_input_snapshot_count": len(left_snapshots),
+        "right_input_snapshot_count": len(right_snapshots),
+        "planned_artifacts_match": left_artifacts == right_artifacts,
+        "left_planned_artifact_count": len(left_artifacts),
+        "right_planned_artifact_count": len(right_artifacts),
     }
 
 
@@ -347,6 +371,10 @@ class RunManifestInspectionService(
                 checkpoint_compatible=checkpoint_compatible,
             ),
             "lineage": _build_lineage_diff_payload(
+                left_manifest=left_manifest,
+                right_manifest=right_manifest,
+            ),
+            "run_artifacts": _build_run_artifact_diff_payload(
                 left_manifest=left_manifest,
                 right_manifest=right_manifest,
             ),
