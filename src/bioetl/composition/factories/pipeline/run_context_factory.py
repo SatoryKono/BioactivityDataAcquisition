@@ -15,6 +15,7 @@ from bioetl.composition.factories.pipeline.construction_types import (
 )
 from bioetl.composition.services.versioning import (
     compute_config_hash,
+    get_dependency_lock_hash,
     get_git_commit,
     get_pipeline_version,
 )
@@ -97,6 +98,7 @@ class RunContextFactory:
     entity_type_extractor: EntityTypeExtractor
     pipeline_version_getter: Callable[[PipelineYamlConfig], str] = get_pipeline_version
     git_commit_getter: Callable[[], str | None] = get_git_commit
+    dependency_lock_hash_getter: Callable[[], str | None] = get_dependency_lock_hash
     config_hash_getter: Callable[[PipelineYamlConfig], str] = compute_config_hash
     transform_version_getter: Callable[[PipelineYamlConfig], str | None] = (
         _get_transform_version
@@ -149,6 +151,7 @@ class RunContextFactory:
                 transform_steps=self.transform_steps_getter(yaml_config),
                 pipeline_version=self.pipeline_version_getter(yaml_config),
                 git_commit=self.git_commit_getter(),
+                dependency_lock_hash=self.dependency_lock_hash_getter(),
                 config_hash=legacy_config_hash,
                 resolved_config_hash=resolved_hash,
                 effective_config_hash=effective_config_hash,

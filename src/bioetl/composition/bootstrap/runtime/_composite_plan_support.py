@@ -22,6 +22,18 @@ from bioetl.infrastructure.config.composite_config_api import (
     load_composite_config as _load_composite_config_impl,
 )
 
+__all__ = [
+    "CompositeBootstrapPlan",
+    "bootstrap_runtime_basics_impl",
+    "build_bootstrap_runner_factories",
+    "build_bootstrap_runtime_resources",
+    "build_bootstrap_support_services",
+    "build_composite_bootstrap_plan_impl",
+    "build_runner_factories_impl",
+    "build_support_services_impl",
+    "load_composite_config_impl",
+]
+
 if TYPE_CHECKING:
     from collections.abc import Callable
     from uuid import UUID

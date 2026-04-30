@@ -36,13 +36,14 @@ if TYPE_CHECKING:
         RunLedgerService,
     )
     from bioetl.domain.config import PipelineConfig, RuntimeConfig
+    from bioetl.domain.context import PipelineContext
     from bioetl.domain.ports import LoggerPort
     from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
 
 
 class _PipelineRunnerFlowHostProtocol(Protocol):
     _config: PipelineConfig
-    _context: object
+    _context: PipelineContext
     _runtime: RuntimeConfig
     _executor: BatchExecutor
     _checkpoint_manager: CheckpointRuntimeService

@@ -22,7 +22,7 @@ from threading import Lock
 from typing import TYPE_CHECKING
 
 from bioetl.domain.exceptions import BioETLError
-from bioetl.infrastructure.observability.prometheus_metric_label_policies import (
+from bioetl.infrastructure.observability._prometheus_metric_label_normalizers import (
     normalize_adapter_endpoint_label,
 )
 

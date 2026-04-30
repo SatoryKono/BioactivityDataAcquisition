@@ -104,6 +104,11 @@ def enrich_metadata_with_execution_identity(
             metadata.pipeline_version,
             identity.pipeline_version,
         ),
+        git_commit=_prefer_identity_value(metadata.git_commit, identity.git_commit),
+        dependency_lock_hash=_prefer_identity_value(
+            metadata.dependency_lock_hash,
+            identity.dependency_lock_hash,
+        ),
         effective_config_hash=_prefer_identity_value(
             metadata.effective_config_hash,
             identity.effective_config_hash,

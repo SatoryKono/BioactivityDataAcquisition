@@ -121,7 +121,7 @@ class PublicationTermTransformer(BaseChemblTransformer):
         self,
         record: BronzeRecord,
         primary_id: PrimaryId,
-    ) -> GoldRecord | None:
+    ) -> GoldRecord:
         """Extract one normalized publication-term payload from the input."""
         if "term" in record and "term_type" in record:
             raw_term = record.get("term")

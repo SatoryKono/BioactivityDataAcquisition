@@ -103,6 +103,7 @@ def _resolve_run_context_metadata(
     field_names = (
         "pipeline_version",
         "git_commit",
+        "dependency_lock_hash",
         "effective_config_hash",
         "dq_contract_compatibility_hash",
         "manifest_id",
@@ -163,6 +164,8 @@ def build_current_checkpoint_metadata(pipeline: BasePipeline) -> CheckpointMetad
             "dq_contract_compatibility_hash"
         ],
         pipeline_version=identity_payload["pipeline_version"],
+        git_commit=identity_payload["git_commit"],
+        dependency_lock_hash=run_context_metadata["dependency_lock_hash"],
         effective_config_hash=identity_payload["effective_config_hash"],
         effective_config_artifact_id=run_context_metadata[
             "effective_config_artifact_id"
@@ -180,6 +183,7 @@ def build_current_checkpoint_metadata(pipeline: BasePipeline) -> CheckpointMetad
             "manifest_id": run_context_metadata["manifest_id"],
             "execution_fingerprint": execution_fingerprint,
             "git_commit": run_context_metadata["git_commit"],
+            "dependency_lock_hash": run_context_metadata["dependency_lock_hash"],
             "effective_config_hash": identity_payload["effective_config_hash"],
             "effective_config_artifact_id": run_context_metadata[
                 "effective_config_artifact_id"

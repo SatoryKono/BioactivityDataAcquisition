@@ -262,6 +262,9 @@ class _PipelineMetricsRecorderCore:
 class _CompositePhaseMetricsRecorderMixin:
     """Composite-phase specific metrics emitted by pipeline-scoped recorders."""
 
+    metrics: MetricsPort | None
+    pipeline: str
+
     def record_composite_phase_records(
         self,
         *,

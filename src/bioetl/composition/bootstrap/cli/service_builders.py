@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 from bioetl.application.core.lifecycle.checkpoint_manager import (
     CheckpointRuntimeService,
@@ -12,7 +12,11 @@ from bioetl.application.services import ConfigService
 from bioetl.application.services.admin_runtime_api import QuarantineRuntimeService
 from bioetl.application.services.audit_inspection_service import AuditInspectionService
 from bioetl.application.services.checkpoint_service import CheckpointService
-from bioetl.application.services.config_dq_service import ConfigDQService
+from bioetl.application.services.config_dq_service import (
+    ConfigDQService,
+    DQConfigLoaderProtocol,
+    PipelineYamlConfigGetterProtocol,
+)
 from bioetl.application.services.observability_workflow_service import (
     ObservabilityWorkflowService,
 )
@@ -23,7 +27,7 @@ from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpointAda
 from bioetl.infrastructure.time import SystemClock
 
 if TYPE_CHECKING:
-    from bioetl.application.core.lifecycle.checkpoint_compatibility import (
+    from bioetl.application.core.lifecycle._checkpoint_types import (
         CheckpointCompatibilityService,
     )
     from bioetl.application.services.control_plane.effective_config_service import (
@@ -39,9 +43,13 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import (
         AuditPort,
         CheckpointPort,
+        DomainConfigMapperPort,
         LoggerPort,
         MetricsPort,
+        PipelineConfigLoaderPort,
         QuarantinePort,
+        RegistryAccessorPort,
+        SettingsLoaderPort,
         TracingPort,
     )
     from bioetl.domain.types import JsonDict
@@ -65,12 +73,12 @@ def build_cli_config_service(
     registry: PipelineRegistry | None,
     logger_factory: Callable[[], LoggerPort],
     register_pipelines: Callable[[], object],
-    default_registry_accessor: Callable[[], PipelineRegistry],
+    default_registry_accessor: RegistryAccessorPort,
     settings_loader: SettingsLoaderPort,
-    pipeline_config_loader: Callable[[str], object],
+    pipeline_config_loader: PipelineConfigLoaderPort,
     domain_config_mapper: DomainConfigMapperPort,
-    pipeline_yaml_getter: Callable[[str], JsonDict],
-    dq_config_loader: Callable[[str], object],
+    pipeline_yaml_getter: PipelineYamlConfigGetterProtocol,
+    dq_config_loader: DQConfigLoaderProtocol,
     effective_config_service_factory: Callable[[], EffectiveConfigService],
 ) -> ConfigService:
     """Build the CLI-facing ``ConfigService`` graph."""
@@ -88,10 +96,10 @@ def build_cli_config_service(
     )
     return ConfigService(
         logger=logger,
-        _settings_loader=cast(SettingsLoaderPort, settings_loader),
+        _settings_loader=settings_loader,
         _pipeline_config_loader=pipeline_config_loader,
-        _domain_config_mapper=cast(DomainConfigMapperPort, domain_config_mapper),
-        _registry_accessor=lambda: cast("PipelineRegistry", effective_registry),
+        _domain_config_mapper=domain_config_mapper,
+        _registry_accessor=lambda: effective_registry,
         _dq_service=dq_service,
     )
 
