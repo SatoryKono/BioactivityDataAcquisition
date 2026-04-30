@@ -299,6 +299,3 @@ class CompositeValidator:
     @staticmethod
     def _is_valid_lineage_config(config: JsonDict) -> bool:
         return _is_valid_lineage_config(config)
-
-
-CompositeValidationService = CompositeValidator

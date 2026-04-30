@@ -24,7 +24,6 @@ from bioetl.domain.types import CellularityType, JsonDict
 
 __all__ = [
     "ClassificationStats",
-    "OrganismClassificationService",
     "OrganismClassifier",
 ]
 
@@ -197,7 +196,3 @@ class OrganismClassifier:
         organism = record.get(self.organism_field)
         taxonomy_id = record.get(self.taxonomy_id_field)
         return classify_organism(organism, taxonomy_id)
-
-
-# Deprecated compatibility alias retained during ADR-041 migration.
-OrganismClassificationService = OrganismClassifier

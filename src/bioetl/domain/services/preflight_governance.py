@@ -5,7 +5,6 @@ from __future__ import annotations
 __all__ = [
     "GovernancePolicy",
     "PreflightGovernanceConfig",
-    "PreflightGovernanceService",
     "PreflightGovernor",
 ]
 
@@ -215,7 +214,3 @@ class PreflightGovernor:
                 if issue["governance_impact"] == "execution_blocker"
             ],
         }
-
-
-# Deprecated compatibility alias retained during ADR-041 migration.
-PreflightGovernanceService = PreflightGovernor

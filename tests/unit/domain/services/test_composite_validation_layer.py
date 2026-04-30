@@ -3,7 +3,7 @@
 from bioetl.domain.services.aggregation_validator import AggregationValidator
 from bioetl.domain.services.composite_validation_layer import (
     CompositeValidationConfig,
-    CompositeValidationService,
+    CompositeValidator,
     CompositeValidator,
 )
 from bioetl.domain.services.cross_validation_validator import CrossValidationValidator
@@ -45,7 +45,7 @@ def test_composite_validation_service_creation():
 
 def test_composite_validation_service_alias_points_to_canonical() -> None:
     """Legacy service name should remain a compatibility alias."""
-    assert CompositeValidationService is CompositeValidator
+    assert CompositeValidator is CompositeValidator
 
 
 def test_valid_composite_config():

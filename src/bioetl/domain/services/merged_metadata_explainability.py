@@ -270,10 +270,6 @@ def _safe_ratio(numerator: int, denominator: int) -> float:
     return numerator / denominator if denominator > 0 else 0.0
 
 
-# Deprecated compatibility alias retained during ADR-041 migration.
-MergedMetadataExplainabilityService = MergedMetadataExplainer
-
-
 def create_merged_metadata_explainability_service() -> MergedMetadataExplainer:
     """Factory function for the canonical merged metadata explainer."""
     return MergedMetadataExplainer()

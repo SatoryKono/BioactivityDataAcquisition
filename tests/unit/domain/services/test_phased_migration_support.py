@@ -1,4 +1,4 @@
-"""Unit tests for PhasedMigrationSupportService."""
+"""Unit tests for PhasedMigrationCoordinator."""
 
 from __future__ import annotations
 
@@ -8,17 +8,17 @@ from unittest.mock import patch
 from bioetl.domain.services.phased_migration_support import (
     MigrationPhaseConfig,
     MigrationStatus,
-    PhasedMigrationSupportService,
+    PhasedMigrationCoordinator,
 )
 
 
-class TestPhasedMigrationSupportService:
-    """Tests for PhasedMigrationSupportService."""
+class TestPhasedMigrationCoordinator:
+    """Tests for PhasedMigrationCoordinator."""
 
     @pytest.fixture
-    def service(self) -> PhasedMigrationSupportService:
-        """Create a PhasedMigrationSupportService instance."""
-        return PhasedMigrationSupportService()
+    def service(self) -> PhasedMigrationCoordinator:
+        """Create a PhasedMigrationCoordinator instance."""
+        return PhasedMigrationCoordinator()
 
     # ==========================================================================
     # MigrationPhaseConfig tests
@@ -58,7 +58,7 @@ class TestPhasedMigrationSupportService:
     # ==========================================================================
 
     def test_get_current_migration_status(
-        self, service: PhasedMigrationSupportService
+        self, service: PhasedMigrationCoordinator
     ) -> None:
         """Test getting current migration status."""
         status = service.get_current_migration_status()
@@ -76,7 +76,7 @@ class TestPhasedMigrationSupportService:
             "bioetl.domain.services.phased_migration_support.get_version",
             return_value="1.1.5",
         ):
-            service = PhasedMigrationSupportService()
+            service = PhasedMigrationCoordinator()
             status = service.get_current_migration_status()
             assert status.current_version == "1.1.5"
             assert status.current_phase == "v1.1"
@@ -87,7 +87,7 @@ class TestPhasedMigrationSupportService:
             "bioetl.domain.services.phased_migration_support.get_version",
             return_value="unknown",
         ):
-            service = PhasedMigrationSupportService()
+            service = PhasedMigrationCoordinator()
             status = service.get_current_migration_status()
             assert status.current_version == "unknown"
             # Should default to latest phase
@@ -98,7 +98,7 @@ class TestPhasedMigrationSupportService:
     # ==========================================================================
 
     def test_check_backward_compatibility_current_phase(
-        self, service: PhasedMigrationSupportService
+        self, service: PhasedMigrationCoordinator
     ) -> None:
         """Test backward compatibility check for current phase."""
         config = {"test": "config"}
@@ -108,7 +108,7 @@ class TestPhasedMigrationSupportService:
         assert issues == {}
 
     def test_check_backward_compatibility_invalid_phase(
-        self, service: PhasedMigrationSupportService
+        self, service: PhasedMigrationCoordinator
     ) -> None:
         """Test backward compatibility check with invalid phase."""
         config = {"test": "config"}
@@ -122,7 +122,7 @@ class TestPhasedMigrationSupportService:
     # ==========================================================================
 
     def test_get_migration_guide_same_phase(
-        self, service: PhasedMigrationSupportService
+        self, service: PhasedMigrationCoordinator
     ) -> None:
         """Test migration guide for same phase."""
         guide = service.get_migration_guide("v1.1", "v1.1")
@@ -133,7 +133,7 @@ class TestPhasedMigrationSupportService:
         assert "new_features" in guide
 
     def test_get_migration_guide_v1_0_to_v1_1(
-        self, service: PhasedMigrationSupportService
+        self, service: PhasedMigrationCoordinator
     ) -> None:
         """Test migration guide from v1.0 to v1.1."""
         guide = service.get_migration_guide("v1.0", "v1.1")
@@ -142,7 +142,7 @@ class TestPhasedMigrationSupportService:
         assert "Enhanced cross-validation governance" in guide["new_features"]
 
     def test_get_migration_guide_v1_1_to_v1_2(
-        self, service: PhasedMigrationSupportService
+        self, service: PhasedMigrationCoordinator
     ) -> None:
         """Test migration guide from v1.1 to v1.2."""
         guide = service.get_migration_guide("v1.1", "v1.2")
@@ -152,7 +152,7 @@ class TestPhasedMigrationSupportService:
         assert "Phased migration support" in guide["new_features"]
 
     def test_get_migration_guide_invalid_phases(
-        self, service: PhasedMigrationSupportService
+        self, service: PhasedMigrationCoordinator
     ) -> None:
         """Test migration guide with invalid phase names."""
         guide = service.get_migration_guide("invalid_from", "invalid_to")
@@ -164,7 +164,7 @@ class TestPhasedMigrationSupportService:
     # ==========================================================================
 
     def test_apply_migration_fallback_v1_0(
-        self, service: PhasedMigrationSupportService
+        self, service: PhasedMigrationCoordinator
     ) -> None:
         """Test migration fallback to v1.0."""
         config = {"aggregation": {}}
@@ -176,7 +176,7 @@ class TestPhasedMigrationSupportService:
         assert "Added missing provenance_tracking field" in warnings[0]
 
     def test_apply_migration_fallback_v1_1(
-        self, service: PhasedMigrationSupportService
+        self, service: PhasedMigrationCoordinator
     ) -> None:
         """Test migration fallback to v1.1."""
         config = {"cross_validation": {}}
@@ -188,7 +188,7 @@ class TestPhasedMigrationSupportService:
         assert "Added missing strict_mode field" in warnings[0]
 
     def test_apply_migration_fallback_error_behavior(
-        self, service: PhasedMigrationSupportService
+        self, service: PhasedMigrationCoordinator
     ) -> None:
         """Test migration fallback with error behavior."""
         config = {"aggregation": {}}
@@ -199,7 +199,7 @@ class TestPhasedMigrationSupportService:
         assert "Migration fallback errors" in str(exc_info.value)
 
     def test_apply_migration_fallback_silent_behavior(
-        self, service: PhasedMigrationSupportService
+        self, service: PhasedMigrationCoordinator
     ) -> None:
         """Test migration fallback with silent behavior."""
         config = {"aggregation": {}}
@@ -211,7 +211,7 @@ class TestPhasedMigrationSupportService:
         assert len(warnings) == 1  # Still collects warnings, just doesn't raise error
 
     def test_apply_migration_fallback_invalid_phase(
-        self, service: PhasedMigrationSupportService
+        self, service: PhasedMigrationCoordinator
     ) -> None:
         """Test migration fallback with invalid phase."""
         config = {}
@@ -227,7 +227,7 @@ class TestPhasedMigrationSupportService:
     # get_supported_phases() tests
     # ==========================================================================
 
-    def test_get_supported_phases(self, service: PhasedMigrationSupportService) -> None:
+    def test_get_supported_phases(self, service: PhasedMigrationCoordinator) -> None:
         """Test getting list of supported phases."""
         phases = service.get_supported_phases()
 
@@ -243,49 +243,49 @@ class TestPhasedMigrationSupportService:
     # ==========================================================================
 
     def test_version_comparison_equal(
-        self, service: PhasedMigrationSupportService
+        self, service: PhasedMigrationCoordinator
     ) -> None:
         """Test version comparison for equal versions."""
         result = service._version_compare("1.2.3", "1.2.3")
         assert result == 0
 
     def test_version_comparison_greater(
-        self, service: PhasedMigrationSupportService
+        self, service: PhasedMigrationCoordinator
     ) -> None:
         """Test version comparison for greater version."""
         result = service._version_compare("1.2.4", "1.2.3")
         assert result == 1
 
     def test_version_comparison_less(
-        self, service: PhasedMigrationSupportService
+        self, service: PhasedMigrationCoordinator
     ) -> None:
         """Test version comparison for lesser version."""
         result = service._version_compare("1.2.2", "1.2.3")
         assert result == -1
 
     def test_version_comparison_major_difference(
-        self, service: PhasedMigrationSupportService
+        self, service: PhasedMigrationCoordinator
     ) -> None:
         """Test version comparison for major version difference."""
         result = service._version_compare("2.0.0", "1.2.3")
         assert result == 1
 
     def test_version_comparison_minor_difference(
-        self, service: PhasedMigrationSupportService
+        self, service: PhasedMigrationCoordinator
     ) -> None:
         """Test version comparison for minor version difference."""
         result = service._version_compare("1.3.0", "1.2.3")
         assert result == 1
 
     def test_version_comparison_patch_difference(
-        self, service: PhasedMigrationSupportService
+        self, service: PhasedMigrationCoordinator
     ) -> None:
         """Test version comparison for patch version difference."""
         result = service._version_compare("1.2.4", "1.2.3")
         assert result == 1
 
     def test_version_comparison_different_lengths(
-        self, service: PhasedMigrationSupportService
+        self, service: PhasedMigrationCoordinator
     ) -> None:
         """Test version comparison for versions with different lengths."""
         result = service._version_compare("1.2", "1.2.3")
@@ -298,12 +298,12 @@ class TestPhasedMigrationSupportService:
     def test_factory_function(self) -> None:
         """Test the factory function."""
         service = create_phased_migration_support_service()
-        assert isinstance(service, PhasedMigrationSupportService)
+        assert isinstance(service, PhasedMigrationCoordinator)
 
 
 # Helper function for easier testing
 
 
-def create_phased_migration_support_service() -> PhasedMigrationSupportService:
-    """Factory function for PhasedMigrationSupportService."""
-    return PhasedMigrationSupportService()
+def create_phased_migration_support_service() -> PhasedMigrationCoordinator:
+    """Factory function for PhasedMigrationCoordinator."""
+    return PhasedMigrationCoordinator()

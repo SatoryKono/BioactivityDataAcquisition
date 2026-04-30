@@ -48,7 +48,6 @@ if TYPE_CHECKING:
 __all__ = [
     "BioactivityNormalizer",
     "NormalizationResult",
-    "NormalizationService",
 ]
 
 
@@ -285,6 +284,3 @@ class BioactivityNormalizer(_NormalizationBatchMixin):
     def __post_init__(self) -> None:
         """Initialize validator with config settings."""
         self.validator.strict = self.config.strict_validation
-
-
-NormalizationService = BioactivityNormalizer

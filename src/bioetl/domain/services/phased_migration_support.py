@@ -288,10 +288,6 @@ def _ensure_cross_validation_strict_mode(
     warnings.append("Added missing strict_mode field with default value")
 
 
-# Deprecated compatibility alias retained during ADR-041 migration.
-PhasedMigrationSupportService = PhasedMigrationCoordinator
-
-
 def create_phased_migration_support_service() -> PhasedMigrationCoordinator:
     """Factory function for the canonical phased migration coordinator."""
     return PhasedMigrationCoordinator()

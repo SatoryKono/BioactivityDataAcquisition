@@ -1,4 +1,4 @@
-"""Unit tests for MergedMetadataExplainabilityService."""
+"""Unit tests for MergedMetadataExplainer."""
 
 from __future__ import annotations
 
@@ -8,18 +8,18 @@ from datetime import datetime
 from bioetl.domain.services.merged_metadata_explainability import (
     MergedFieldExplanation,
     MergedRecordExplanation,
-    MergedMetadataExplainabilityService,
+    MergedMetadataExplainer,
 )
 from bioetl.domain.models.metadata import CompositeOutputExt
 
 
-class TestMergedMetadataExplainabilityService:
-    """Tests for MergedMetadataExplainabilityService."""
+class TestMergedMetadataExplainer:
+    """Tests for MergedMetadataExplainer."""
 
     @pytest.fixture
-    def service(self) -> MergedMetadataExplainabilityService:
-        """Create a MergedMetadataExplainabilityService instance."""
-        return MergedMetadataExplainabilityService()
+    def service(self) -> MergedMetadataExplainer:
+        """Create a MergedMetadataExplainer instance."""
+        return MergedMetadataExplainer()
 
     @pytest.fixture
     def composite_metadata(self) -> CompositeOutputExt:
@@ -65,7 +65,7 @@ class TestMergedMetadataExplainabilityService:
 
     def test_generate_field_explanation_basic(
         self,
-        service: MergedMetadataExplainabilityService,
+        service: MergedMetadataExplainer,
         composite_metadata: CompositeOutputExt,
         sample_record: dict,
     ) -> None:
@@ -85,7 +85,7 @@ class TestMergedMetadataExplainabilityService:
 
     def test_generate_field_explanation_with_priorities(
         self,
-        service: MergedMetadataExplainabilityService,
+        service: MergedMetadataExplainer,
         composite_metadata: CompositeOutputExt,
         sample_record: dict,
         field_priorities: dict[str, dict],
@@ -103,7 +103,7 @@ class TestMergedMetadataExplainabilityService:
 
     def test_generate_field_explanation_no_enrichments(
         self,
-        service: MergedMetadataExplainabilityService,
+        service: MergedMetadataExplainer,
         composite_metadata: CompositeOutputExt,
         sample_record: dict,
     ) -> None:
@@ -129,7 +129,7 @@ class TestMergedMetadataExplainabilityService:
 
     def test_generate_record_explanation_basic(
         self,
-        service: MergedMetadataExplainabilityService,
+        service: MergedMetadataExplainer,
         composite_metadata: CompositeOutputExt,
         sample_record: dict,
     ) -> None:
@@ -153,7 +153,7 @@ class TestMergedMetadataExplainabilityService:
 
     def test_generate_record_explanation_with_priorities(
         self,
-        service: MergedMetadataExplainabilityService,
+        service: MergedMetadataExplainer,
         composite_metadata: CompositeOutputExt,
         sample_record: dict,
         field_priorities: dict[str, dict],
@@ -181,7 +181,7 @@ class TestMergedMetadataExplainabilityService:
 
     def test_generate_record_explanation_empty_record(
         self,
-        service: MergedMetadataExplainabilityService,
+        service: MergedMetadataExplainer,
         composite_metadata: CompositeOutputExt,
     ) -> None:
         """Test record explanation with empty record."""
@@ -202,7 +202,7 @@ class TestMergedMetadataExplainabilityService:
 
     def test_generate_explainability_metadata_multiple_records(
         self,
-        service: MergedMetadataExplainabilityService,
+        service: MergedMetadataExplainer,
         composite_metadata: CompositeOutputExt,
         sample_record: dict,
     ) -> None:
@@ -231,7 +231,7 @@ class TestMergedMetadataExplainabilityService:
     # ==========================================================================
 
     def test_generate_explainability_summary_empty(
-        self, service: MergedMetadataExplainabilityService
+        self, service: MergedMetadataExplainer
     ) -> None:
         """Test summary generation with empty explanations."""
         summary = service.generate_explainability_summary([])
@@ -246,7 +246,7 @@ class TestMergedMetadataExplainabilityService:
 
     def test_generate_explainability_summary_with_data(
         self,
-        service: MergedMetadataExplainabilityService,
+        service: MergedMetadataExplainer,
         composite_metadata: CompositeOutputExt,
         sample_record: dict,
         field_priorities: dict[str, dict],
@@ -287,7 +287,7 @@ class TestMergedMetadataExplainabilityService:
 
     def test_generate_field_priority_explanation(
         self,
-        service: MergedMetadataExplainabilityService,
+        service: MergedMetadataExplainer,
         field_priorities: dict[str, dict],
     ) -> None:
         """Test generation of field priority explanations."""
@@ -305,7 +305,7 @@ class TestMergedMetadataExplainabilityService:
         assert activity_explanation["conflict_resolution"] == "priority_based"
 
     def test_generate_field_priority_explanation_empty(
-        self, service: MergedMetadataExplainabilityService
+        self, service: MergedMetadataExplainer
     ) -> None:
         """Test field priority explanation with empty input."""
         results = service.generate_field_priority_explanation({})
@@ -317,7 +317,7 @@ class TestMergedMetadataExplainabilityService:
 
     def test_record_without_standard_id_fields(
         self,
-        service: MergedMetadataExplainabilityService,
+        service: MergedMetadataExplainer,
         composite_metadata: CompositeOutputExt,
     ) -> None:
         """Test record explanation when standard ID fields are missing."""
@@ -335,14 +335,14 @@ class TestMergedMetadataExplainabilityService:
     def test_factory_function(self) -> None:
         """Test the factory function."""
         service = create_merged_metadata_explainability_service()
-        assert isinstance(service, MergedMetadataExplainabilityService)
+        assert isinstance(service, MergedMetadataExplainer)
 
 
 # Helper function for easier testing
 
 
 def create_merged_metadata_explainability_service() -> (
-    MergedMetadataExplainabilityService
+    MergedMetadataExplainer
 ):
-    """Factory function for MergedMetadataExplainabilityService."""
-    return MergedMetadataExplainabilityService()
+    """Factory function for MergedMetadataExplainer."""
+    return MergedMetadataExplainer()

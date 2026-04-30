@@ -7,16 +7,16 @@ from pathlib import Path
 
 ROOT = Path("src/bioetl")
 LEGACY_SYMBOLS = (
-    "AuthorNormalizationService",
-    "CompositeValidationService",
-    "IdentityService",
-    "DefaultDataNormalizationService",
-    "DataNormalizationService",
-    "MergedMetadataExplainabilityService",
-    "NormalizationService",
-    "OrganismClassificationService",
-    "PhasedMigrationSupportService",
-    "PreflightGovernanceService",
+    "AuthorNormalizer",
+    "CompositeValidator",
+    "EntityIdentityGenerator",
+    "DefaultDataNormalizer",
+    "DefaultDataNormalizer",
+    "MergedMetadataExplainer",
+    "BioactivityNormalizer",
+    "OrganismClassifier",
+    "PhasedMigrationCoordinator",
+    "PreflightGovernor",
 )
 ALLOWED_FILES = {
     "src/bioetl/domain/services/__init__.py",

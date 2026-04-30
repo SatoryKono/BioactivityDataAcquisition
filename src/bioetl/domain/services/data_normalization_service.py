@@ -79,7 +79,6 @@ if TYPE_CHECKING:
     from collections.abc import Sequence
 
 __all__ = [
-    "DefaultDataNormalizationService",
     "DefaultDataNormalizer",
 ]
 
@@ -232,7 +231,3 @@ class DefaultDataNormalizer(AuthorNormalizer):
             Normalized abstract or None.
         """
         return _normalize_abstract(abstract)
-
-
-# Deprecated compatibility alias retained during ADR-041 migration.
-DefaultDataNormalizationService = DefaultDataNormalizer
