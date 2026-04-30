@@ -13,6 +13,7 @@ Use this skill when a single-pass manual review is too large or error-prone.
 
 Read, in this order:
 
+1. `../../../docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
 1. `../../../docs/00-project/ai/memory/agent-memory.md`
 1. `../../../.codex/agents/ORCHESTRATION.md`
 1. `../documentation-audit/SKILL.md`
@@ -34,6 +35,8 @@ Read, in this order:
 2. Execute shard audits in parallel (conceptually or via subagents if available).
 
 - For each shard, apply the checklist from `documentation-audit`.
+- Use memory plus repo search to find doc claim surfaces, linked runtime
+  guidance, related diagrams, and validation gates for each shard.
 - Capture findings with severity and evidence (`file + lines + command`).
 
 3. Normalize findings.
@@ -62,6 +65,7 @@ Required artifacts:
 - Every high-severity claim has evidence.
 - Every proposed doc change maps to a concrete file path.
 - RULES/REQUIREMENTS/ADRs consistency is explicitly checked.
+- Runtime-vs-mirror consistency is explicitly checked when AI guidance files are touched.
 - The final plan distinguishes factual drift vs style improvements.
 
 ## Constraints

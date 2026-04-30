@@ -154,9 +154,11 @@ def _build_base_summary_payload(
         "pipeline_version": code_provenance.pipeline_version,
         "git_commit": code_provenance.git_commit,
         "source_revision_state": code_provenance.source_revision_state,
+        "dependency_lock_hash": code_provenance.dependency_lock_hash,
         "code_provenance_state": {
             "git_commit": code_provenance.git_commit,
             "source_revision_state": code_provenance.source_revision_state,
+            "dependency_lock_hash": code_provenance.dependency_lock_hash,
             "strict_code_provenance_ready": not strict_code_provenance_blockers,
             "strict_code_provenance_blockers": strict_code_provenance_blockers,
         },

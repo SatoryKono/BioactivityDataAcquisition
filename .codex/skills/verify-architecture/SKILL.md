@@ -17,6 +17,8 @@ Execute architecture validation checks and report blocking/non-blocking issues.
 ## Workflow
 
 1. Follow this skill file as the canonical Codex runtime instructions.
+1. Use memory plus repo search to locate related architecture tests, ADRs,
+   docs, diagrams, and evidence reports before choosing validation scope.
 1. Select mode (`quick`, `full`, `category`) based on request scope.
 1. Adapt command examples to the active shell and installed toolchain.
 1. Report findings with failing tests/checks and actionable next fixes.

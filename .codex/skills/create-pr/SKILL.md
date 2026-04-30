@@ -77,6 +77,13 @@ Creates GitHub PRs with Conventional Commits titles adapted for BioETL project.
    - Scope: Which provider/layer/feature is affected?
    - Summary: What does the change do?
 
+1. **Run impact discovery** before finalizing the PR body:
+
+   - Use memory plus repo search to list related tests, docs, ADRs, contracts,
+     configs, diagrams, and reports.
+   - Note any checks that were intentionally skipped and the exact command that
+     should be run later.
+
 1. **Run checks before PR**:
 
    ```bash
