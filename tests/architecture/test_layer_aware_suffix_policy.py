@@ -50,6 +50,7 @@ def test_layer_aware_suffix_policy_registers_expected_rule_ids() -> None:
     suffix_rule_ids = {rule.rule_id for rule in policy.suffix_boundary_rules}
     assert {
         "non_domain_port_protocols",
+        "non_infrastructure_adapter_aliases",
         "composition_infrastructure_service_suffix",
         "domain_service_suffix_conflict",
     } <= suffix_rule_ids
@@ -61,9 +62,41 @@ def test_layer_aware_suffix_policy_registers_expected_rule_ids() -> None:
     } <= family_rule_ids
 
     suffix_rules = {rule.rule_id: rule for rule in policy.suffix_boundary_rules}
-    assert (
-        suffix_rules["composition_infrastructure_service_suffix"].allowed_symbols == ()
-    ), "composition/infrastructure *Service debt was retired and must stay closed"
+    allowed_service_symbols = {
+        (item.symbol, item.path)
+        for item in suffix_rules[
+            "composition_infrastructure_service_suffix"
+        ].allowed_symbols
+    }
+    assert allowed_service_symbols == {
+        (
+            "FallbackFetchOrchestratorService",
+            "src/bioetl/infrastructure/adapters/common/fallback_fetch_service.py",
+        )
+    }, (
+        "composition/infrastructure *Service debt must stay frozen to the reviewed compat alias"
+    )
+
+
+def test_layer_aware_suffix_gate_detects_alias_assignments() -> None:
+    """Alias assignments and public re-exports must be inspected."""
+    module = _load_gate_module()
+    tree = ast.parse(
+        "FooPort = BarProtocol\n"
+        "StorageAdapter = StorageBundle\n"
+        "from somewhere import CompositePipelineRunnerService\n"
+        '__all__ = ["CompositePipelineRunnerService"]\n'
+        "class VisibleService: ...\n"
+        "_PrivateAlias = VisibleService\n"
+    )
+
+    symbols = module._iter_layer_aware_symbols(tree)
+
+    assert ("FooPort", 1, "alias") in symbols
+    assert ("StorageAdapter", 2, "alias") in symbols
+    assert ("CompositePipelineRunnerService", 3, "re-export") in symbols
+    assert ("VisibleService", 5, "class") in symbols
+    assert all(symbol[0] != "_PrivateAlias" for symbol in symbols)
 
 
 def test_checkpoint_quarantine_runtime_admin_family_is_role_driven() -> None:

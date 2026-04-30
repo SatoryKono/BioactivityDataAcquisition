@@ -147,14 +147,13 @@ def _build_exact_replay_anchors(
     published_artifact_paths = _sorted_text_items(
         [artifact_ref.get("artifact_path") for artifact_ref in artifact_refs]
     )
-    return {
+    anchors: dict[str, object] = {
         "semantic_identity_anchor": "execution_fingerprint",
         "execution_fingerprint": manifest.execution_fingerprint,
         "pipeline_name": manifest.pipeline_name,
         "run_type": manifest.run_type.value,
         "pipeline_version": summary.get("pipeline_version"),
         "git_commit": summary.get("git_commit"),
-        "dependency_lock_hash": summary.get("dependency_lock_hash"),
         "effective_config_hash": summary.get("effective_config_hash"),
         "dq_contract_compatibility_hash": summary.get("dq_contract_compatibility_hash"),
         "contract_ref": summary.get("contract_ref"),
@@ -171,6 +170,9 @@ def _build_exact_replay_anchors(
         "published_artifact_paths": published_artifact_paths,
         "lineage_fragment_ids": sorted(lineage_fragment_ids),
     }
+    if summary.get("dependency_lock_hash") is not None:
+        anchors["dependency_lock_hash"] = summary.get("dependency_lock_hash")
+    return anchors
 
 
 def _build_canonical_execution_identity(
@@ -253,7 +255,6 @@ def _build_identity_graph(
         "effective_config_hash": request.base_summary.get("effective_config_hash"),
         "git_commit": request.base_summary.get("git_commit"),
         "source_revision_state": request.base_summary.get("source_revision_state"),
-        "dependency_lock_hash": request.base_summary.get("dependency_lock_hash"),
         "code_provenance_state": request.base_summary.get("code_provenance_state"),
         "contract_ref": request.base_summary.get("contract_ref"),
         "contract_version": request.base_summary.get("contract_version"),
@@ -312,6 +313,10 @@ def _build_identity_graph(
             request.occurrence_only_diagnostic_scopes
         ),
     }
+    if request.base_summary.get("dependency_lock_hash") is not None:
+        identity_graph["dependency_lock_hash"] = request.base_summary.get(
+            "dependency_lock_hash"
+        )
     if "replay_mode" in request.base_summary:
         identity_graph["replay_mode"] = request.base_summary["replay_mode"]
         identity_graph["input_snapshot_count"] = request.base_summary[

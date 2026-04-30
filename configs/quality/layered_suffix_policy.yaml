@@ -19,6 +19,73 @@ suffix_boundary_rules:
         reason: >
           Deprecated public composition alias retained until the v2.0 sunset of
           DataSourceCreatorProtocol terminology migration.
+      - symbol: DataSourceCreatorPort
+        path: src/bioetl/composition/providers/_models.py
+        issue: "#3401"
+        reason: >
+          Deprecated provider alias retained while first-party composition code
+          converges on DataSourceCreatorProtocol.
+      - symbol: DataSourceCreatorPort
+        path: src/bioetl/composition/providers/__init__.py
+        issue: "#3401"
+        reason: >
+          Deprecated provider package-root alias retained for reviewed
+          compatibility imports only.
+      - symbol: DataSourceCreatorPort
+        path: src/bioetl/composition/providers/provider_registry.py
+        issue: "#3401"
+        reason: >
+          Deprecated provider registry alias retained for reviewed compatibility
+          imports only.
+      - symbol: DataSourceCreatorPort
+        path: src/bioetl/composition/factories/datasource/__init__.py
+        issue: "#3401"
+        reason: >
+          Deprecated datasource package-root alias retained for reviewed
+          compatibility imports only.
+      - symbol: DataSourceCreatorPort
+        path: src/bioetl/composition/factories/datasource/data_source_factory.py
+        issue: "#3401"
+        reason: >
+          Deprecated datasource factory alias retained for reviewed
+          compatibility imports only.
+
+  - rule_id: non_infrastructure_adapter_aliases
+    description: >
+      Outside infrastructure, *Adapter names are allowed only as reviewed
+      compatibility aliases. New composition/application/interface adapter
+      aliases must not appear without explicit registry coverage.
+    suffixes:
+      - Adapter
+    include_path_prefixes:
+      - src/bioetl/
+    exclude_path_prefixes:
+      - src/bioetl/infrastructure/
+    allowed_symbol_exceptions:
+      - symbol: StorageAdapter
+        path: src/bioetl/composition/types.py
+        issue: "#3437"
+        reason: >
+          Deprecated composition alias retained while external callers migrate
+          to StorageBundle.
+      - symbol: StorageAdapter
+        path: src/bioetl/composition/factories/storage/__init__.py
+        issue: "#3437"
+        reason: >
+          Deprecated storage package-root alias retained while external callers
+          migrate to StorageBundle.
+      - symbol: StorageAdapter
+        path: src/bioetl/composition/factories/storage/adapter.py
+        issue: "#3437"
+        reason: >
+          Deprecated storage owner-module alias retained while external callers
+          migrate to StorageBundle.
+      - symbol: PolarsJoinAdapter
+        path: src/bioetl/composition/factories/services/polars_join_adapter.py
+        issue: "#3437"
+        reason: >
+          Deprecated composition alias retained while callers migrate to
+          PolarsJoinBridge.
 
   - rule_id: composition_infrastructure_service_suffix
     description: >
@@ -31,6 +98,12 @@ suffix_boundary_rules:
       - src/bioetl/composition/
       - src/bioetl/infrastructure/
     allowed_symbol_exceptions:
+      - symbol: FallbackFetchOrchestratorService
+        path: src/bioetl/infrastructure/adapters/common/fallback_fetch_service.py
+        issue: "#3437"
+        reason: >
+          Deprecated infrastructure alias retained while callers migrate to
+          FallbackFetchOrchestrator.
 
   - rule_id: domain_service_suffix_conflict
     description: >

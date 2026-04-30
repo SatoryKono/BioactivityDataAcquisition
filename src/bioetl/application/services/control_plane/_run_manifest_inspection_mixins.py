@@ -144,7 +144,32 @@ class RunManifestInspectionIdentityGraphMixin:
         code_provenance: RunCodeProvenance,
     ) -> dict[str, object]:
         """Return the provenance and contract section of the identity graph."""
-        return {
+        fallback_code_provenance_state: dict[str, object] = {
+            "git_commit": code_provenance.git_commit,
+            "source_revision_state": code_provenance.source_revision_state,
+            "strict_code_provenance_ready": (
+                bool(code_provenance.git_commit)
+                and str(code_provenance.source_revision_state or "").strip().lower()
+                == "clean"
+            ),
+            "strict_code_provenance_blockers": [
+                blocker
+                for blocker, enabled in (
+                    ("git_commit_missing", not code_provenance.git_commit),
+                    (
+                        "source_revision_state_not_clean",
+                        str(code_provenance.source_revision_state or "").strip().lower()
+                        != "clean",
+                    ),
+                )
+                if enabled
+            ],
+        }
+        if code_provenance.dependency_lock_hash is not None:
+            fallback_code_provenance_state["dependency_lock_hash"] = (
+                code_provenance.dependency_lock_hash
+            )
+        payload: dict[str, object] = {
             "run_id": str(manifest.run_id),
             "manifest_id": manifest.manifest_id,
             "execution_fingerprint": manifest.execution_fingerprint,
@@ -153,35 +178,9 @@ class RunManifestInspectionIdentityGraphMixin:
             "effective_config_hash": code_provenance.effective_config_hash,
             "git_commit": code_provenance.git_commit,
             "source_revision_state": code_provenance.source_revision_state,
-            "dependency_lock_hash": code_provenance.dependency_lock_hash,
             "code_provenance_state": diagnostics.get(
                 "code_provenance_state",
-                {
-                    "git_commit": code_provenance.git_commit,
-                    "source_revision_state": code_provenance.source_revision_state,
-                    "dependency_lock_hash": code_provenance.dependency_lock_hash,
-                    "strict_code_provenance_ready": (
-                        bool(code_provenance.git_commit)
-                        and str(code_provenance.source_revision_state or "")
-                        .strip()
-                        .lower()
-                        == "clean"
-                    ),
-                    "strict_code_provenance_blockers": [
-                        blocker
-                        for blocker, enabled in (
-                            ("git_commit_missing", not code_provenance.git_commit),
-                            (
-                                "source_revision_state_not_clean",
-                                str(code_provenance.source_revision_state or "")
-                                .strip()
-                                .lower()
-                                != "clean",
-                            ),
-                        )
-                        if enabled
-                    ],
-                },
+                fallback_code_provenance_state,
             ),
             "contract_ref": code_provenance.contract_ref,
             "contract_version": code_provenance.contract_version,
@@ -189,6 +188,9 @@ class RunManifestInspectionIdentityGraphMixin:
             "replay_of_manifest_id": diagnostics.get("replay_of_manifest_id"),
             "replay_parentage": diagnostics.get("replay_parentage"),
         }
+        if code_provenance.dependency_lock_hash is not None:
+            payload["dependency_lock_hash"] = code_provenance.dependency_lock_hash
+        return payload
 
     @staticmethod
     def _build_identity_graph_replay_section(

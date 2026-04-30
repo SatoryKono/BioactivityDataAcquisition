@@ -122,6 +122,7 @@ def test_build_composite_manifest_create_request_wires_control_plane_payloads() 
             return_value=SimpleNamespace(
                 git_commit="abc1234",
                 source_revision_state="clean",
+                dependency_lock_hash="sha256:deps-abc1234",
             ),
         ),
     ):
@@ -259,6 +260,7 @@ def test_build_composite_control_plane_bundle_can_disable_ledger_while_keeping_m
         return_value=SimpleNamespace(
             git_commit="abc1234",
             source_revision_state="clean",
+            dependency_lock_hash="sha256:deps-abc1234",
         ),
     ):
         bundle = build_composite_control_plane_bundle(
@@ -430,6 +432,7 @@ def test_build_composite_control_plane_bundle_allows_replay_ready_with_full_snap
         return_value=SimpleNamespace(
             git_commit="abc1234",
             source_revision_state="clean",
+            dependency_lock_hash="sha256:deps-abc1234",
         ),
     ):
         bundle = build_composite_control_plane_bundle(
@@ -483,6 +486,7 @@ def test_build_composite_control_plane_bundle_persists_manifest_created_when_led
         return_value=SimpleNamespace(
             git_commit="abc1234",
             source_revision_state="clean",
+            dependency_lock_hash="sha256:deps-abc1234",
         ),
     ):
         bundle = build_composite_control_plane_bundle(
@@ -534,6 +538,7 @@ def test_build_composite_control_plane_bundle_persists_effective_config_artifact
         return_value=SimpleNamespace(
             git_commit="abc1234",
             source_revision_state="clean",
+            dependency_lock_hash="sha256:deps-abc1234",
         ),
     ):
         bundle = build_composite_control_plane_bundle(

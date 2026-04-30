@@ -114,6 +114,11 @@ bioetl run-manifest show <RUN-ID|MANIFEST-ID>
 bioetl run-manifest diff <LEFT> <RIGHT>
 ```
 
+`run-manifest diff` exposes a `forensic_diff` / `cross_surface_replay_diff`
+section for manifest, effective-config, checkpoint-anchor, lineage, input
+snapshot, and planned-artifact drift. New manifests also surface
+`dependency_lock_hash` when a repository lockfile is available.
+
 Файловое MVP-хранилище control-plane лежит в:
 
 ```text

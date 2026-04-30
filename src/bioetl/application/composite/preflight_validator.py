@@ -29,7 +29,6 @@ from bioetl.domain.ports import LoggerPort
 
 __all__ = [
     "CompositePreflightValidationService",
-    "CompositePreflightValidator",
     "FieldInfo",
     "PreflightValidationError",
     "PreflightValidationResult",
