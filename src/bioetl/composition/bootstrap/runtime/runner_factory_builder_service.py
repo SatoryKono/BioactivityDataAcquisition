@@ -1,4 +1,4 @@
-"""Builder service for composite runner factories."""
+"""Builder helpers for composite runner factories."""
 
 from __future__ import annotations
 

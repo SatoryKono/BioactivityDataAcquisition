@@ -52,7 +52,6 @@ def _import_helpers():
 
     return {
         "_build_fallback_mapping": lambda keys, filter_key, join_keys: (
-            CompositeFilterExtractionService().build_fallback_mapping(
             CompositeFilterExtractor().build_fallback_mapping(
                 keys=keys,
                 filter_key=filter_key,
