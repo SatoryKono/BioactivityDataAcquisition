@@ -307,9 +307,9 @@ ______________________________________________________________________
 001. **BaseTransformer** - Class - Abstract transformer
 001. **BasePipeline** - Class - Abstract pipeline
 001. **LockCoordinator** - Class - Lock orchestration
-001. **CheckpointManagerService** - Class - Checkpoint handling
+001. **CheckpointRuntimeService** - Class - Checkpoint handling
 001. **PipelineService** - Class - Services bundle
-001. **QuarantineManager** - Class - Quarantine management
+001. **QuarantineRuntimeService** - Class - Quarantine management
 001. **PreflightService** - Class - Pre-run checks
 001. **PostrunService** - Class - Post-run operations
 001. **MemoryMonitor** - Class - Memory tracking
@@ -421,8 +421,8 @@ ______________________________________________________________________
 001. **HTTPClient ↔ RateLimiter** - Sequence - Rate limiting
 001. **HTTPClient ↔ CircuitBreaker** - Sequence - Fault tolerance
 001. **LockCoordinator ↔ LockPort** - Sequence - Lock lifecycle
-001. **CheckpointManagerService ↔ CheckpointPort** - Sequence - State persistence
-001. **QuarantineManager ↔ QuarantinePort** - Sequence - Quarantine ops
+001. **CheckpointRuntimeService ↔ CheckpointPort** - Sequence - State persistence
+001. **QuarantineRuntimeService ↔ QuarantinePort** - Sequence - Quarantine ops
 001. **Observer ↔ Services** - Sequence - Observability integration
 001. **Preflight ↔ HealthChecks** - Sequence - Pre-run validation
 001. **Postrun ↔ DQAnalyzers** - Sequence - DQ analysis

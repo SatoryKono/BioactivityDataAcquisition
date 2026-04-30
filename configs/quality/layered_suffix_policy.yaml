@@ -44,11 +44,11 @@ suffix_boundary_rules:
       - symbol: AuthorNormalizationService
         path: src/bioetl/domain/services/author_normalization_service.py
         issue: "#3400"
-        reason: Existing domain service surface pending canonical rename decision.
+        reason: Deprecated compatibility alias for AuthorNormalizer pending follow-up domain naming cleanup.
       - symbol: CompositeValidationService
         path: src/bioetl/domain/services/composite_validation_layer.py
         issue: "#3400"
-        reason: Existing domain service surface pending canonical rename decision.
+        reason: Deprecated compatibility alias for CompositeValidator pending follow-up domain naming cleanup.
       - symbol: DefaultDataNormalizationService
         path: src/bioetl/domain/services/data_normalization_service.py
         issue: "#3400"
@@ -68,7 +68,7 @@ suffix_boundary_rules:
       - symbol: OrganismClassificationService
         path: src/bioetl/domain/services/organism_classification_service.py
         issue: "#3400"
-        reason: Existing domain service surface pending canonical rename decision.
+        reason: Deprecated compatibility alias for OrganismClassifier pending follow-up domain naming cleanup.
       - symbol: PhasedMigrationSupportService
         path: src/bioetl/domain/services/phased_migration_support.py
         issue: "#3400"
@@ -82,13 +82,13 @@ family_freeze_rules:
   - rule_id: runtime_admin_checkpoint_quarantine_family
     description: >
       Checkpoint/quarantine runtime-admin naming is role-driven: runtime write
-      collaborators use *RuntimeService, operator/admin services use *Service,
-      and manager-style names are compatibility aliases only.
+      collaborators use *RuntimeService and operator/admin services use
+      *Service. Manager-style names are retired from first-party code.
     include_path_prefixes:
       - src/bioetl/application/core/
       - src/bioetl/application/services/
       - src/bioetl/composition/
-    match_regex: ^(Checkpoint(?:Runtime|Manager)?Service|Quarantine(?:Runtime|Manager)?Service)$
+    match_regex: ^(CheckpointRuntimeService|QuarantineRuntimeService|CheckpointService|QuarantineService)$
     allowed_symbols:
       - symbol: CheckpointRuntimeService
         path: src/bioetl/application/core/lifecycle/checkpoint_manager.py

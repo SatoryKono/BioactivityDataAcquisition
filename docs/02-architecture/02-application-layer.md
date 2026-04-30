@@ -99,9 +99,7 @@ ______________________________________________________________________
 Checkpoint/quarantine naming is role-driven: runtime collaborators use
 `*RuntimeService`, while operator/admin inspection surfaces use
 `CheckpointService` and `QuarantineService` under `application/services/`.
-Manager-style names such as `CheckpointManager`, `CheckpointManagerService`,
-`QuarantineManager`, and `QuarantineManagerService` remain only as compatibility
-aliases in defining modules and are not preferred for new code.
+Manager-style names such as `CheckpointManager`, `CheckpointManagerService`, `QuarantineManager`, and `QuarantineManagerService` are retired from first-party code.
 
 **Data Sources:**
 

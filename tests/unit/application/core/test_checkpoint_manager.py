@@ -1,4 +1,4 @@
-"""Unit tests for CheckpointManager."""
+"""Unit tests for CheckpointRuntimeService."""
 
 from __future__ import annotations
 
@@ -9,7 +9,7 @@ from uuid import uuid4
 import pytest
 
 from bioetl.application.core.lifecycle.checkpoint_manager import (
-    CheckpointRuntimeService as CheckpointManager,
+    CheckpointRuntimeService,
 )
 from bioetl.application.services.checkpoint_compatibility_service import (
     CheckpointCompatibilityService,
@@ -49,9 +49,9 @@ def mock_metrics():
 
 @pytest.fixture
 def checkpoint_manager(mock_checkpoint_port, mock_logger):
-    """Create CheckpointManager instance."""
+    """Create CheckpointRuntimeService instance."""
     run_id = uuid4()
-    return CheckpointManager(
+    return CheckpointRuntimeService(
         checkpoint_port=mock_checkpoint_port,
         logger=mock_logger,
         pipeline_name="test_pipeline",
@@ -62,12 +62,12 @@ def checkpoint_manager(mock_checkpoint_port, mock_logger):
 
 @pytest.mark.unit
 class TestCheckpointManagerInit:
-    """Tests for CheckpointManager initialization."""
+    """Tests for CheckpointRuntimeService initialization."""
 
     def test_init_with_all_params(self, mock_checkpoint_port, mock_logger):
         """Test initialization with all parameters."""
         run_id = uuid4()
-        manager = CheckpointManager(
+        manager = CheckpointRuntimeService(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="my_pipeline",
@@ -82,7 +82,7 @@ class TestCheckpointManagerInit:
 
 @pytest.mark.unit
 class TestCheckpointManagerLoadCheckpoint:
-    """Tests for CheckpointManager.load_checkpoint method."""
+    """Tests for CheckpointRuntimeService.load_checkpoint method."""
 
     async def test_load_checkpoint_when_resume_true_and_exists(
         self, mock_checkpoint_port, mock_logger
@@ -95,7 +95,7 @@ class TestCheckpointManagerLoadCheckpoint:
         )
 
         run_id = uuid4()
-        manager = CheckpointManager(
+        manager = CheckpointRuntimeService(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="test_pipeline",
@@ -138,7 +138,7 @@ class TestCheckpointManagerLoadCheckpoint:
             },
         )
 
-        manager = CheckpointManager(
+        manager = CheckpointRuntimeService(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="test_pipeline",
@@ -166,7 +166,7 @@ class TestCheckpointManagerLoadCheckpoint:
             {"records_processed": 1000},
         )
 
-        manager = CheckpointManager(
+        manager = CheckpointRuntimeService(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="test_pipeline",
@@ -191,7 +191,7 @@ class TestCheckpointManagerLoadCheckpoint:
         mock_checkpoint_port.load.return_value = None
 
         run_id = uuid4()
-        manager = CheckpointManager(
+        manager = CheckpointRuntimeService(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="test_pipeline",
@@ -210,7 +210,7 @@ class TestCheckpointManagerLoadCheckpoint:
         """Missing checkpoint emits bounded missing status."""
         mock_checkpoint_port.load.return_value = None
 
-        manager = CheckpointManager(
+        manager = CheckpointRuntimeService(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="test_pipeline",
@@ -233,7 +233,7 @@ class TestCheckpointManagerLoadCheckpoint:
     ):
         """Test load_checkpoint when not resuming."""
         run_id = uuid4()
-        manager = CheckpointManager(
+        manager = CheckpointRuntimeService(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="test_pipeline",
@@ -249,7 +249,7 @@ class TestCheckpointManagerLoadCheckpoint:
 
 @pytest.mark.unit
 class TestCheckpointManagerSaveCheckpoint:
-    """Tests for CheckpointManager.save_checkpoint method."""
+    """Tests for CheckpointRuntimeService.save_checkpoint method."""
 
     async def test_save_checkpoint_saves_metadata(
         self, checkpoint_manager, mock_checkpoint_port
@@ -267,7 +267,7 @@ class TestCheckpointManagerSaveCheckpoint:
 
 @pytest.mark.unit
 class TestCheckpointManagerDeleteCheckpoint:
-    """Tests for CheckpointManager.delete_checkpoint method."""
+    """Tests for CheckpointRuntimeService.delete_checkpoint method."""
 
     async def test_delete_checkpoint(self, checkpoint_manager, mock_checkpoint_port):
         """Test delete_checkpoint calls port.delete."""
@@ -278,7 +278,7 @@ class TestCheckpointManagerDeleteCheckpoint:
 
 @pytest.mark.unit
 class TestCheckpointManagerListAll:
-    """Tests for CheckpointManager.list_all method."""
+    """Tests for CheckpointRuntimeService.list_all method."""
 
     async def test_list_all_delegates_to_port(
         self, checkpoint_manager, mock_checkpoint_port
@@ -292,7 +292,7 @@ class TestCheckpointManagerListAll:
 
 @pytest.mark.unit
 class TestCheckpointManagerFullScanOnly:
-    """Tests for CheckpointManager loading_strategy=FULL_SCAN_ONLY behavior (ADR-031)."""
+    """Tests for CheckpointRuntimeService loading_strategy=FULL_SCAN_ONLY behavior (ADR-031)."""
 
     async def test_load_checkpoint_blocked_when_full_scan_only(
         self, mock_checkpoint_port, mock_logger
@@ -307,7 +307,7 @@ class TestCheckpointManagerFullScanOnly:
         )
 
         run_id = uuid4()
-        manager = CheckpointManager(
+        manager = CheckpointRuntimeService(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="chembl_publication",
@@ -330,7 +330,7 @@ class TestCheckpointManagerFullScanOnly:
         """Blocked resume path emits bounded blocked status."""
         from bioetl.domain.medallion import LoadingStrategy
 
-        manager = CheckpointManager(
+        manager = CheckpointRuntimeService(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="chembl_publication",
@@ -356,7 +356,7 @@ class TestCheckpointManagerFullScanOnly:
         from bioetl.domain.medallion import LoadingStrategy
 
         run_id = uuid4()
-        manager = CheckpointManager(
+        manager = CheckpointRuntimeService(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="pubmed_publication",
@@ -381,7 +381,7 @@ class TestCheckpointManagerFullScanOnly:
         )
 
         run_id = uuid4()
-        manager = CheckpointManager(
+        manager = CheckpointRuntimeService(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="chembl_activity",
@@ -403,7 +403,7 @@ class TestCheckpointManagerFullScanOnly:
         from bioetl.domain.medallion import LoadingStrategy
 
         run_id = uuid4()
-        manager = CheckpointManager(
+        manager = CheckpointRuntimeService(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="chembl_publication",
@@ -428,7 +428,7 @@ class TestCheckpointManagerFullScanOnly:
         )
 
         run_id = uuid4()
-        manager = CheckpointManager(
+        manager = CheckpointRuntimeService(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="test_pipeline",
@@ -444,7 +444,7 @@ class TestCheckpointManagerFullScanOnly:
 
 @pytest.mark.unit
 class TestCheckpointManagerLoadingStrategy:
-    """Tests for CheckpointManager loading_strategy behavior (ADR-031)."""
+    """Tests for CheckpointRuntimeService loading_strategy behavior (ADR-031)."""
 
     async def test_load_checkpoint_blocked_when_loading_strategy_full_scan_only(
         self, mock_checkpoint_port, mock_logger
@@ -459,7 +459,7 @@ class TestCheckpointManagerLoadingStrategy:
         )
 
         run_id = uuid4()
-        manager = CheckpointManager(
+        manager = CheckpointRuntimeService(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="chembl_publication",
@@ -487,7 +487,7 @@ class TestCheckpointManagerLoadingStrategy:
         )
 
         run_id = uuid4()
-        manager = CheckpointManager(
+        manager = CheckpointRuntimeService(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="test_pipeline",
@@ -509,7 +509,7 @@ class TestCheckpointManagerLoadingStrategy:
         from bioetl.domain.medallion import LoadingStrategy
 
         run_id = uuid4()
-        manager = CheckpointManager(
+        manager = CheckpointRuntimeService(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="chembl_publication",
@@ -531,9 +531,9 @@ class TestCheckpointManagerLoadingStrategy:
         from bioetl.domain.medallion import LoadingStrategy
 
         run_id = uuid4()
-        # Note: CheckpointManager receives LoadingStrategy enum from PipelineConfig
+        # Note: CheckpointRuntimeService receives LoadingStrategy enum from PipelineConfig
         # This test verifies the enum-based behavior
-        manager = CheckpointManager(
+        manager = CheckpointRuntimeService(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="test_pipeline",
@@ -567,7 +567,7 @@ class TestCheckpointManagerCompatibilityPolicy:
             )
         )
 
-        manager = CheckpointManager(
+        manager = CheckpointRuntimeService(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="chembl_activity",
@@ -610,7 +610,7 @@ class TestCheckpointManagerCompatibilityPolicy:
             )
         )
 
-        manager = CheckpointManager(
+        manager = CheckpointRuntimeService(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="chembl_activity",
@@ -661,7 +661,7 @@ class TestCheckpointManagerCompatibilityPolicy:
             )
         )
 
-        manager = CheckpointManager(
+        manager = CheckpointRuntimeService(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="chembl_activity",
@@ -711,7 +711,7 @@ class TestCheckpointManagerCompatibilityPolicy:
             )
         )
 
-        manager = CheckpointManager(
+        manager = CheckpointRuntimeService(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="chembl_activity",
@@ -740,7 +740,7 @@ class TestCheckpointManagerCompatibilityPolicy:
     async def test_save_checkpoint_enriches_execution_identity(
         self, mock_checkpoint_port, mock_logger
     ) -> None:
-        manager = CheckpointManager(
+        manager = CheckpointRuntimeService(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="chembl_activity",
@@ -822,7 +822,7 @@ class TestCheckpointManagerCompatibilityPolicy:
             )
         )
 
-        manager = CheckpointManager(
+        manager = CheckpointRuntimeService(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="chembl_activity",
@@ -863,7 +863,7 @@ class TestCheckpointManagerCompatibilityPolicy:
             {"records_processed": 42},
         )
 
-        manager = CheckpointManager(
+        manager = CheckpointRuntimeService(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="chembl_activity",
@@ -902,7 +902,7 @@ class TestCheckpointManagerCompatibilityPolicy:
             {"records_processed": 42},
         )
 
-        manager = CheckpointManager(
+        manager = CheckpointRuntimeService(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="chembl_activity",
@@ -951,7 +951,7 @@ class TestCheckpointManagerCompatibilityPolicy:
             )
         )
 
-        manager = CheckpointManager(
+        manager = CheckpointRuntimeService(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="chembl_activity",
@@ -995,7 +995,7 @@ class TestCheckpointManagerCompatibilityPolicy:
             {"records_processed": 100, "manifest_id": "manifest-old"},
         )
 
-        manager = CheckpointManager(
+        manager = CheckpointRuntimeService(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="chembl_activity",
@@ -1027,7 +1027,7 @@ class TestCheckpointManagerCompatibilityPolicy:
             },
         )
 
-        manager = CheckpointManager(
+        manager = CheckpointRuntimeService(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="chembl_activity",
@@ -1060,7 +1060,7 @@ class TestCheckpointManagerCompatibilityPolicy:
             },
         )
 
-        manager = CheckpointManager(
+        manager = CheckpointRuntimeService(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="chembl_activity",
@@ -1106,7 +1106,7 @@ class TestCheckpointManagerCompatibilityPolicy:
             },
         )
 
-        manager = CheckpointManager(
+        manager = CheckpointRuntimeService(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="chembl_activity",
@@ -1144,7 +1144,7 @@ class TestCheckpointManagerCompatibilityPolicy:
             },
         )
 
-        manager = CheckpointManager(
+        manager = CheckpointRuntimeService(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="chembl_activity",

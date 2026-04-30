@@ -926,7 +926,7 @@ class TestEchoFunctions:
 
 @pytest.fixture
 def mock_quarantine_manager():
-    """Create a mock QuarantineManager."""
+    """Create a mock QuarantineRuntimeService."""
     manager = MagicMock()
     # echo_quarantine_record expects dict[str, Any], not dataclass
     manager.inspect = AsyncMock(
@@ -1041,7 +1041,7 @@ class MockCheckpoint:
 
 @pytest.fixture
 def mock_checkpoint_manager():
-    """Create a mock CheckpointManager."""
+    """Create a mock CheckpointRuntimeService."""
     manager = MagicMock()
     manager.list_all = AsyncMock(
         return_value=[
