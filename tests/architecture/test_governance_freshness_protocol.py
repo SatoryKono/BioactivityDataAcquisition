@@ -97,7 +97,7 @@ def test_project_test_health_summary_declares_machine_readable_freshness_metadat
     metadata = yaml.safe_load(metadata_text)
 
     assert metadata["status"] == "active-non-canonical"
-    assert metadata["last_verified"] == "2026-04-29"
+    assert metadata["last_verified"] == "2026-04-30"
     assert metadata["freshness_window_days"] > 0
     assert metadata["owner"] == "quality"
     assert set(metadata["canonical_sources"]) >= {
