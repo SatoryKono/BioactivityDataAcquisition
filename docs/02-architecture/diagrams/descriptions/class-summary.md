@@ -82,7 +82,7 @@ diagrams, но сам `class-summary.md` по-прежнему остаётся 
 
 ## 13-domain-services — Domain Services
 
-Диаграмма «Domain Services» описывает модуль `13-domain-services` и фиксирует архитектурные границы, основные роли классов и характер их взаимодействий. Основной фокус: Pure domain services without I/O. Схема используется как representative family-level overview, а не как исчерпывающий инвентарь текущей кодовой поверхности. Для быстрого чтения и ревью полезно начать с элементов: IdentityService, NormalizationService, DataNormalizationService, AuthorNormalizationService, ActivityAggregator, UnitConverter.
+Диаграмма «Domain Services» описывает модуль `13-domain-services` и фиксирует архитектурные границы, основные роли классов и характер их взаимодействий. Основной фокус: Pure domain services without I/O. Схема используется как representative family-level overview, а не как исчерпывающий инвентарь текущей кодовой поверхности. Для быстрого чтения и ревью полезно начать с элементов: EntityIdentityGenerator, BioactivityNormalizer, DefaultDataNormalizer, AuthorNormalizer, ActivityAggregator, UnitConverter.
 
 ## 14-observability — Observability Components
 

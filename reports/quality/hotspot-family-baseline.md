@@ -10,4 +10,4 @@
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- | --- |
 | `application_core` | 162 | 19420 | 12 | 0.345 | 0 | 15 | `bioetl.application.core.pipeline_services` | `files_ge_250_loc=18, max_internal_fan_in=22` |
 | `composition_bootstrap_runtime` | 37 | 4992 | 5 | 0.341 | 0 | 7 | `bioetl.composition.bootstrap.runtime.composite_support_services_factory` | `files_ge_250_loc=6, max_internal_fan_in=7` |
-| `composition_factories_pipeline` | 29 | 3819 | 0 | 0.394 | 0 | 4 | `bioetl.composition.factories.pipeline.control_plane_artifacts` | `files_ge_250_loc=4, max_internal_fan_in=6` |
+| `composition_factories_pipeline` | 29 | 3834 | 0 | 0.384 | 0 | 4 | `bioetl.composition.factories.pipeline.control_plane_artifacts` | `files_ge_250_loc=4, max_internal_fan_in=6` |
