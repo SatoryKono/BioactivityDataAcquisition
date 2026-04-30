@@ -18,6 +18,9 @@ if TYPE_CHECKING:
     from bioetl.application.services.control_plane.run_manifest_inspection_service import (
         RunManifestInspectionService,
     )
+    from bioetl.application.services.control_plane.forensic_diff_service import (
+        ForensicRunDiffService,
+    )
     from bioetl.application.services.execution.pipeline_runner_service import (
         PipelineRunnerService,
     )
@@ -56,6 +59,7 @@ __all__ = [
     "get_config_service",
     "get_contract_migration_service",
     "get_export_service",
+    "get_forensic_run_diff_service",
     "get_health_server_dependencies",
     "get_health_service",
     "get_lineage_service",
@@ -78,6 +82,7 @@ _BOOTSTRAP_EXPORT_MODULES: dict[str, str] = {
     "bootstrap_config_service": "bioetl.composition.bootstrap.cli.config",
     "bootstrap_contract_migration_service": "bioetl.composition.bootstrap.cli.storage",
     "bootstrap_export_service": "bioetl.composition.bootstrap.cli.storage",
+    "bootstrap_forensic_run_diff_service": "bioetl.composition.bootstrap.cli.run_manifest",
     "bootstrap_health_server_dependencies": "bioetl.composition.bootstrap.cli.health",
     "bootstrap_health_service": "bioetl.composition.bootstrap.cli.health",
     "bootstrap_lineage_service": "bioetl.composition.bootstrap.cli.checkpoint",
@@ -226,6 +231,13 @@ def get_run_manifest_service() -> RunManifestInspectionService:
     _ensure_registrations()
     bootstrap = _resolve_bootstrap_callable("bootstrap_run_manifest_service")
     return cast("RunManifestInspectionService", bootstrap())
+
+
+def get_forensic_run_diff_service() -> ForensicRunDiffService:
+    """Get a unified forensic run-diff service for control-plane diagnostics."""
+    _ensure_registrations()
+    bootstrap = _resolve_bootstrap_callable("bootstrap_forensic_run_diff_service")
+    return cast("ForensicRunDiffService", bootstrap())
 
 
 def get_lineage_service() -> LineageInspectionService:

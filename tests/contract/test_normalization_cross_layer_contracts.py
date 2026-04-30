@@ -31,7 +31,10 @@ from bioetl.domain.normalization import (
     normalize_runtime_anchor_payload,
 )
 from bioetl.domain.normalization.json import canonicalize_json_string
-from bioetl.domain.normalization.profiles import CHEMBL_ACTIVITY_PROFILE
+from bioetl.domain.normalization.profiles import (
+    CHEMBL_ACTIVITY_PROFILE,
+    NORMALIZATION_PROFILE_REGISTRY,
+)
 from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_doi,
     normalize_profile_json_string_strict,
@@ -304,6 +307,31 @@ def test_publication_set_like_json_fields_are_hash_order_invariant() -> None:
     )
 
     assert record_a != record_b
+    assert processor.compute_content_hash(record_a) == processor.compute_content_hash(
+        record_b
+    )
+
+
+@pytest.mark.parametrize(
+    ("provider", "entity_type", "field_name"),
+    [
+        (provider, entity_type, field_name)
+        for (provider, entity_type), profile in sorted(
+            NORMALIZATION_PROFILE_REGISTRY.items()
+        )
+        for field_name in sorted(profile.set_like_fields)
+    ],
+)
+def test_all_profile_set_like_fields_are_hash_order_invariant(
+    provider: str,
+    entity_type: str,
+    field_name: str,
+) -> None:
+    """Every declared profile set-like field must be covered by hash-order guardrails."""
+    processor = RecordNormalizationProcessor(provider=provider, entity_type=entity_type)
+    record_a = {field_name: ["beta", "alpha"]}
+    record_b = {field_name: ["alpha", "beta"]}
+
     assert processor.compute_content_hash(record_a) == processor.compute_content_hash(
         record_b
     )

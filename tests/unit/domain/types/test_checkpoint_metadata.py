@@ -133,6 +133,7 @@ class TestCheckpointMetadata:
         assert metadata.run_context == {
             "manifest_id": "manifest-legacy",
             "composite_run_identity": "run-legacy",
+            "dependency_lock_hash": "sha256:deps-legacy",
         }
 
     def test_checkpoint_metadata_to_dict(self) -> None:

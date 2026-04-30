@@ -235,6 +235,32 @@ def _diagnostics_section_items(
     diagnostics: dict[str, object],
 ) -> tuple[tuple[str, object], ...]:
     return (
+        *_diagnostics_core_items(diagnostics),
+        *_diagnostics_replay_items(diagnostics),
+        *_diagnostics_artifact_items(diagnostics),
+        *_diagnostics_dq_items(diagnostics),
+        ("persistence_profile", diagnostics.get("persistence_profile")),
+        (
+            "reproducibility_policy_assessment",
+            diagnostics.get("reproducibility_policy_assessment"),
+        ),
+        (
+            "reproducibility_diagnostics",
+            diagnostics.get("reproducibility_diagnostics"),
+        ),
+        (
+            "reproducibility_audit_score",
+            diagnostics.get("reproducibility_audit_score"),
+        ),
+        ("alert_signals", diagnostics.get("alert_signals")),
+        ("next_steps", diagnostics.get("next_steps")),
+    )
+
+
+def _diagnostics_core_items(
+    diagnostics: dict[str, object],
+) -> tuple[tuple[str, object], ...]:
+    return (
         ("latest_status", diagnostics.get("latest_status")),
         ("latest_event_type", diagnostics.get("latest_event_type")),
         ("total_events", diagnostics.get("total_events")),
@@ -251,6 +277,13 @@ def _diagnostics_section_items(
         ("contract_version", diagnostics.get("contract_version")),
         ("dq_policy_ref", diagnostics.get("dq_policy_ref")),
         ("rule_bundle_version", diagnostics.get("rule_bundle_version")),
+    )
+
+
+def _diagnostics_replay_items(
+    diagnostics: dict[str, object],
+) -> tuple[tuple[str, object], ...]:
+    return (
         (
             "effective_config_artifact_id",
             diagnostics.get("effective_config_artifact_id"),
@@ -284,6 +317,13 @@ def _diagnostics_section_items(
         ("replay_parentage", diagnostics.get("replay_parentage")),
         ("input_snapshot_count", diagnostics.get("input_snapshot_count")),
         ("input_snapshots", diagnostics.get("input_snapshots")),
+    )
+
+
+def _diagnostics_artifact_items(
+    diagnostics: dict[str, object],
+) -> tuple[tuple[str, object], ...]:
+    return (
         ("event_family_counts", diagnostics.get("event_family_counts")),
         ("event_type_counts", diagnostics.get("event_type_counts")),
         ("planned_artifact_count", diagnostics.get("planned_artifact_count")),
@@ -293,6 +333,13 @@ def _diagnostics_section_items(
         ("artifact_refs", diagnostics.get("artifact_refs")),
         ("produced_artifact_trace", diagnostics.get("produced_artifact_trace")),
         ("identity_graph_complete", diagnostics.get("identity_graph_complete")),
+    )
+
+
+def _diagnostics_dq_items(
+    diagnostics: dict[str, object],
+) -> tuple[tuple[str, object], ...]:
+    return (
         ("dq_rule_ids", diagnostics.get("dq_rule_ids")),
         ("dq_dispositions", diagnostics.get("dq_dispositions")),
         ("dq_report_paths", diagnostics.get("dq_report_paths")),
@@ -316,21 +363,6 @@ def _diagnostics_section_items(
             diagnostics.get("cross_validation_signal_present"),
         ),
         ("correlation_anchor_gaps", diagnostics.get("correlation_anchor_gaps")),
-        ("persistence_profile", diagnostics.get("persistence_profile")),
-        (
-            "reproducibility_policy_assessment",
-            diagnostics.get("reproducibility_policy_assessment"),
-        ),
-        (
-            "reproducibility_diagnostics",
-            diagnostics.get("reproducibility_diagnostics"),
-        ),
-        (
-            "reproducibility_audit_score",
-            diagnostics.get("reproducibility_audit_score"),
-        ),
-        ("alert_signals", diagnostics.get("alert_signals")),
-        ("next_steps", diagnostics.get("next_steps")),
     )
 
 

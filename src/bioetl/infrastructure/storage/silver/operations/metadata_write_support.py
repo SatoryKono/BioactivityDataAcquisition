@@ -225,9 +225,7 @@ async def _write_silver_metadata(
             contract_schema_hash=provenance["contract_schema_hash"],
             dq_policy_ref=provenance["dq_policy_ref"],
             rule_bundle_version=provenance["rule_bundle_version"],
-            dq_contract_compatibility_hash=provenance[
-                "dq_contract_compatibility_hash"
-            ],
+            dq_contract_compatibility_hash=provenance["dq_contract_compatibility_hash"],
         )
     )
     result = await metadata_ops._persist_silver_metadata(

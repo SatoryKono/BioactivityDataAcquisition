@@ -86,11 +86,24 @@ class FamilyFreezeRule:
 
 
 @dataclass(frozen=True)
+class FunctionSuffixRule:
+    """Reviewed function-level suffix rule."""
+
+    rule_id: str
+    description: str
+    suffixes: tuple[str, ...]
+    include_path_prefixes: tuple[str, ...]
+    exclude_path_prefixes: tuple[str, ...]
+    allowed_symbols: tuple[AllowedSymbol, ...]
+
+
+@dataclass(frozen=True)
 class LayerAwareNamingPolicy:
     """Structured layer-aware naming policy loaded from YAML."""
 
     version: int
     policy_scope: str
+    function_suffix_rules: tuple[FunctionSuffixRule, ...]
     suffix_boundary_rules: tuple[SuffixBoundaryRule, ...]
     family_freeze_rules: tuple[FamilyFreezeRule, ...]
 
@@ -175,6 +188,32 @@ def _load_layer_aware_suffix_policy(repo_root: Path) -> LayerAwareNamingPolicy:
     version = int(payload.get("version", 0))
     policy_scope = str(payload.get("policy_scope", "")).strip()
 
+    function_rules: list[FunctionSuffixRule] = []
+    for item in payload.get("function_suffix_rules", []):
+        if not isinstance(item, dict):
+            continue
+        rule_id = str(item.get("rule_id", "")).strip()
+        description = str(item.get("description", "")).strip()
+        suffixes = _flatten_string_sequence(item.get("suffixes", []))
+        include_path_prefixes = _flatten_string_sequence(
+            item.get("include_path_prefixes", [])
+        )
+        exclude_path_prefixes = _flatten_string_sequence(
+            item.get("exclude_path_prefixes", [])
+        )
+        allowed_symbols = _load_allowed_symbols(item.get("allowed_symbols", []))
+        if rule_id and description and suffixes and include_path_prefixes:
+            function_rules.append(
+                FunctionSuffixRule(
+                    rule_id=rule_id,
+                    description=description,
+                    suffixes=suffixes,
+                    include_path_prefixes=include_path_prefixes,
+                    exclude_path_prefixes=exclude_path_prefixes,
+                    allowed_symbols=allowed_symbols,
+                )
+            )
+
     suffix_rules: list[SuffixBoundaryRule] = []
     for item in payload.get("suffix_boundary_rules", []):
         if not isinstance(item, dict):
@@ -226,6 +265,7 @@ def _load_layer_aware_suffix_policy(repo_root: Path) -> LayerAwareNamingPolicy:
     return LayerAwareNamingPolicy(
         version=version,
         policy_scope=policy_scope,
+        function_suffix_rules=tuple(function_rules),
         suffix_boundary_rules=tuple(suffix_rules),
         family_freeze_rules=tuple(family_rules),
     )
@@ -322,6 +362,17 @@ def _iter_layer_aware_symbols(tree: ast.Module) -> list[tuple[str, int, str]]:
     return symbols
 
 
+def _iter_public_function_symbols(tree: ast.Module) -> list[tuple[str, int, str]]:
+    """Yield top-level public function names for reviewed suffix checks."""
+    symbols: list[tuple[str, int, str]] = []
+    for node in tree.body:
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            if node.name.startswith("_"):
+                continue
+            symbols.append((node.name, node.lineno, "function"))
+    return symbols
+
+
 def _layer_aware_suffix_violations(repo_root: Path) -> list[Violation]:
     policy = _load_layer_aware_suffix_policy(repo_root)
     src_root = repo_root / SRC_ROOT
@@ -335,6 +386,31 @@ def _layer_aware_suffix_violations(repo_root: Path) -> list[Violation]:
         except SyntaxError:
             continue
         relative_path = py_file.relative_to(repo_root).as_posix()
+
+        for symbol_name, lineno, symbol_kind in _iter_public_function_symbols(tree):
+            for rule in policy.function_suffix_rules:
+                if not _matches_any_prefix(relative_path, rule.include_path_prefixes):
+                    continue
+                if _matches_any_prefix(relative_path, rule.exclude_path_prefixes):
+                    continue
+                if not any(symbol_name.endswith(suffix) for suffix in rule.suffixes):
+                    continue
+                if _is_allowed_symbol(
+                    symbol=symbol_name,
+                    relative_path=relative_path,
+                    allowed_symbols=rule.allowed_symbols,
+                ):
+                    continue
+                violations.append(
+                    Violation(
+                        rule="layer-aware-suffix-policy",
+                        location=f"{relative_path}:{lineno}",
+                        details=(
+                            f"[{rule.rule_id}] {symbol_kind} {symbol_name} violates the "
+                            f"reviewed function suffix boundary for {', '.join(rule.suffixes)}"
+                        ),
+                    )
+                )
 
         for symbol_name, lineno, symbol_kind in _iter_layer_aware_symbols(tree):
             for rule in policy.suffix_boundary_rules:

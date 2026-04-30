@@ -19,6 +19,7 @@
   "append_mode_semantic_sinks": [],
   "artifact_refs": [],
   "code_provenance_state": {
+    "dependency_lock_state": "missing",
     "git_commit": "abc1234",
     "source_revision_state": "clean",
     "strict_code_provenance_blockers": [],
@@ -27,6 +28,7 @@
   "config_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
   "contract_ref": "chembl.activity",
   "contract_version": "1.2.0",
+  "dependency_lock_state": "missing",
   "dq_contract_compatibility_hash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
   "dq_policy_ref": "chembl_activity.gold",
   "effective_config_artifact_id": "eca-golden-001",
@@ -35,6 +37,7 @@
   "exact_replay_anchors": {
     "contract_ref": "chembl.activity",
     "contract_version": "1.2.0",
+    "dependency_lock_state": "missing",
     "dq_contract_compatibility_hash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
     "effective_config_artifact_id": "eca-golden-001",
     "effective_config_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",

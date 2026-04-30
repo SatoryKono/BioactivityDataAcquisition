@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from dataclasses import replace
-from typing import cast
 
 from bioetl.application.composite.checkpoint._anchor_context import (
     ExpectedCheckpointContext,

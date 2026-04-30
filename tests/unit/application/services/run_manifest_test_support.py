@@ -140,6 +140,7 @@ class RunManifestOverrides:
     rule_bundle_version: str = "2026.03"
     dq_contract_compatibility_hash: str = "compat-hash-1"
     effective_config_artifact_id: str | None = "eca-123"
+    dependency_lock_hash: str | None = None
 
 
 def make_run_manifest(
@@ -185,6 +186,7 @@ def make_run_manifest(
             pipeline_version="1.0.0",
             git_commit="abc1234",
             source_revision_state="clean",
+            dependency_lock_hash=resolved_overrides.dependency_lock_hash,
             config_hash=config_hash,
             resolved_config_hash=resolved_overrides.resolved_config_hash,
             effective_config_hash=resolved_overrides.effective_config_hash,

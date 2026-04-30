@@ -5,6 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
+import yaml
 
 from bioetl.application import composite as composite_package
 from bioetl.application.composite import checkpoint as checkpoint_package
@@ -15,6 +16,9 @@ from bioetl.application.composite.runner_pkg import runner as runner_module
 ROOT = Path(__file__).resolve().parents[2]
 SRC_ROOT = ROOT / "src"
 TEST_ROOT = ROOT / "tests"
+COMPAT_REGISTRY_PATH = (
+    ROOT / "configs" / "quality" / "compatibility_facade_inventory.yaml"
+)
 DEPRECATED_COMPOSITE_SYMBOLS = (
     "CompositeCheckpointManager",
     "CompositePipelineRunnerService",
@@ -119,3 +123,24 @@ def test_application_composite_does_not_keep_port_types_shadow_seam() -> None:
         "application composite code must not import a local port_types seam:\n"
         + "\n".join(f"  - {hit}" for hit in hits)
     )
+
+
+@pytest.mark.architecture
+def test_composite_owner_module_aliases_are_curated_in_compatibility_inventory() -> (
+    None
+):
+    """Remaining composite owner-module aliases must stay visible in the ledger."""
+    payload = yaml.safe_load(COMPAT_REGISTRY_PATH.read_text(encoding="utf-8")) or {}
+    rows = payload.get("transition_debt", [])
+    assert isinstance(rows, list), "transition_debt must be a list"
+
+    curated_paths = {
+        row["path"]
+        for row in rows
+        if isinstance(row, dict) and isinstance(row.get("path"), str)
+    }
+    assert {
+        "src/bioetl/application/composite/checkpoint/service.py",
+        "src/bioetl/application/composite/runner_pkg/runner.py",
+        "src/bioetl/application/composite/preflight_validator.py",
+    } <= curated_paths

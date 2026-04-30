@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from bioetl.application.core.lifecycle._checkpoint_types import (
+    CheckpointCompatibilityService,
+)
 from bioetl.application.core.lifecycle.checkpoint_manager import (
     CheckpointRuntimeService,
 )
@@ -19,6 +22,7 @@ from bioetl.application.core.lifecycle.shutdown import (
 )
 
 __all__ = [
+    "CheckpointCompatibilityService",
     "CheckpointRuntimeService",
     "CleanupPreview",
     "CleanupResult",

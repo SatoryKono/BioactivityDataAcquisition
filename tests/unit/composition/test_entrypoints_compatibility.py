@@ -46,9 +46,25 @@ def test_entrypoints_legacy_symbol_budget_stays_frozen() -> None:
     entrypoints = _reload_entrypoints_module()
 
     assert len(entrypoints._LEGACY_SYMBOL_TARGETS) == 24
+    target_modules = {
+        value[0] if isinstance(value, tuple) else value
+        for value in entrypoints._LEGACY_SYMBOL_TARGETS.values()
+    }
+    assert target_modules == {
+        "bioetl.composition.resources_api",
+        "bioetl.composition.services_api",
+    }
     assert set(entrypoints._LEGACY_SYMBOL_TARGETS.values()) == {
         "bioetl.composition.resources_api",
         "bioetl.composition.services_api",
+        (
+            "bioetl.composition.resources_api",
+            "get_checkpoint_runtime_service",
+        ),
+        (
+            "bioetl.composition.resources_api",
+            "get_quarantine_runtime_service",
+        ),
     }
 
 
@@ -80,6 +96,30 @@ def test_entrypoints_legacy_resource_symbol_warns_and_delegates() -> None:
         resolved = entrypoints.preview_cleanup
 
     assert resolved is resources_api.preview_cleanup
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    ("legacy_name", "canonical_name"),
+    (
+        ("get_checkpoint_manager", "get_checkpoint_runtime_service"),
+        ("get_quarantine_manager", "get_quarantine_runtime_service"),
+    ),
+)
+def test_entrypoints_legacy_manager_symbol_warns_and_delegates_to_runtime_service(
+    legacy_name: str,
+    canonical_name: str,
+) -> None:
+    """Legacy manager names must remain working shims to runtime services."""
+    entrypoints = _reload_entrypoints_module()
+    from bioetl.composition import resources_api
+
+    with pytest.deprecated_call(
+        match=rf"entrypoints\.{legacy_name}.*{canonical_name}.*resources_api"
+    ):
+        resolved = getattr(entrypoints, legacy_name)
+
+    assert resolved is getattr(resources_api, canonical_name)
 
 
 @pytest.mark.unit

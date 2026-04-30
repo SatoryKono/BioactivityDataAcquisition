@@ -16,6 +16,9 @@ if TYPE_CHECKING:
     from bioetl.application.services.control_plane.run_manifest_inspection_service import (
         RunManifestInspectionService,
     )
+    from bioetl.application.services.control_plane.forensic_diff_service import (
+        ForensicRunDiffService,
+    )
     from bioetl.application.services.export_service import ExportService
     from bioetl.application.services.lineage.lineage_inspection_service import (
         LineageInspectionService,
@@ -30,6 +33,8 @@ if TYPE_CHECKING:
 
     def get_export_service() -> ExportService: ...
 
+    def get_forensic_run_diff_service() -> ForensicRunDiffService: ...
+
     def get_lineage_service() -> LineageInspectionService: ...
 
     def get_lock_service() -> LockService: ...
@@ -42,6 +47,7 @@ __all__ = [
     "get_checkpoint_runtime_service",
     "get_config_service",
     "get_export_service",
+    "get_forensic_run_diff_service",
     "get_lineage_service",
     "get_lock_service",
     "get_run_manifest_service",
@@ -54,6 +60,7 @@ _PUBLIC_EXPORTS = {
     "get_checkpoint_runtime_service": _RESOURCE_MANAGEMENT_MODULE,
     "get_config_service": _SERVICES_MODULE,
     "get_export_service": _SERVICES_MODULE,
+    "get_forensic_run_diff_service": _SERVICES_MODULE,
     "get_lineage_service": _SERVICES_MODULE,
     "get_lock_service": _SERVICES_MODULE,
     "get_run_manifest_service": _SERVICES_MODULE,

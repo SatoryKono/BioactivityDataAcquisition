@@ -5,6 +5,10 @@ from __future__ import annotations
 from bioetl.application.services.control_plane.effective_config_service import (
     EffectiveConfigService,
 )
+from bioetl.application.services.control_plane.forensic_diff_service import (
+    ForensicRunDiffResult,
+    ForensicRunDiffService,
+)
 from bioetl.application.services.control_plane.run_ledger_service import (
     RunLedgerService,
 )
@@ -24,6 +28,8 @@ from bioetl.application.services.control_plane.run_manifest_service import (
 
 __all__ = [
     "EffectiveConfigService",
+    "ForensicRunDiffResult",
+    "ForensicRunDiffService",
     "RunLedgerService",
     "RunManifestCreateSpec",
     "RunManifestCreateSpec",

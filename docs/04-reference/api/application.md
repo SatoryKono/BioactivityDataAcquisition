@@ -33,7 +33,7 @@ ______________________________________________________________________
 | --------------------------- | ---------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
 | `application.core`          | Pipeline runner, batch processing, transformer/runtime internals | No active package-root facade; import defining submodules directly                                          |
 | `application.services`      | Application services (runner, config, export, health, admin)     | `PipelineRunnerService`, `ConfigService`, `ExportService`, `HealthService`, `VacuumService`                 |
-| `application.composite`     | Composite pipeline orchestration (ADR-026)                       | `CompositePipelineRunner`, `CompositePipelineRunnerService`, `MergeService`, `EnrichmentCoordinatorService` |
+| `application.composite`     | Composite pipeline orchestration (ADR-026)                       | `CompositePipelineRunner`, `CompositePreflightValidationService`, `MergeService`, `EnrichmentCoordinatorService` |
 | `application.observability` | Pipeline lifecycle observation                                   | `PipelineObserver`, `LifecyclePhase`, `traced_operation`, `traced_async_operation`                          |
 | `application.pipelines`     | Provider-specific pipeline and transformer definitions           | `GenericPipeline` at package root; provider packages export their own pipeline classes                      |
 
@@ -169,7 +169,7 @@ from those modules when used directly.
 | Symbol                                | Description                                            |
 | ------------------------------------- | ------------------------------------------------------ |
 | `CompositePipelineRunner`             | Main composite pipeline runner (seed + enrich + merge) |
-| `CompositePipelineRunnerService`      | Service facade for composite pipeline execution        |
+| `CompositePipelineRunner`             | Canonical facade for composite pipeline execution      |
 | `CompositeRuntimeConfig`              | Composite pipeline runtime configuration               |
 | `EnrichmentCoordinatorService`        | Orchestrates enrichment pipeline execution             |
 | `KeyExtractorService`                 | Extracts join keys from records                        |
@@ -180,7 +180,7 @@ from those modules when used directly.
 | `CompositeCheckpointService`          | Checkpoint management for composite runs               |
 | `CompositeCheckpointState`            | Checkpoint state tracking                              |
 | `CompositePreflightValidationService` | Preflight validation for composite pipelines           |
-| `CompositePreflightValidator`         | Validator for composite preflight rules                |
+| `CompositePreflightValidationService` | Canonical validator for composite preflight rules      |
 | `PreflightValidationError`            | Composite preflight validation error                   |
 | `PreflightValidationResult`           | Composite preflight validation result                  |
 
