@@ -9,10 +9,10 @@ from bioetl.domain.mapping.organism_classification import (
     classify_organism,
     normalize_organism_name,
 )
-from bioetl.domain.services.organism_classification_service_filtering import (
+from bioetl.domain.behavior.organism_classification_service_filtering import (
     build_filter_strategy,
 )
-from bioetl.domain.services.organism_classification_service_models import (
+from bioetl.domain.behavior.organism_classification_service_models import (
     _DEFAULT_ORGANISM_FIELD,
     _DEFAULT_TAXONOMY_ID_FIELD,
     _OUT_CELLULARITY,

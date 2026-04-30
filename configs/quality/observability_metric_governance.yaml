@@ -29,12 +29,12 @@ runtime_cardinality_review:
   - reason
   - review_date
   evidence_collection:
-    mode: offline_static_inventory_review
-    artifact: configs/quality/observability_metric_inventory_allowlist.yaml
-    command: python -m scripts.engineering.qa.report_observability_metric_inventory --check --json
+    mode: replayable_inventory_evidence_workflow
+    artifact: artifacts/observability/runtime_cardinality_inventory.json
+    command: python -m scripts.engineering.qa.report_observability_metric_inventory --check --json --write-evidence artifacts/observability/runtime_cardinality_inventory.json
     rationale: >
-      Cardinality exceptions are reviewed offline through the repo-local metric
-      inventory and curated allowlist metadata instead of live scrape sampling.
+      Cardinality exceptions are reviewed through repo-local inventory plus a
+      replayable evidence artifact that is generated during governance checks.
 unused_signal_policy:
   rationale: >
     Registered metrics without runtime emission are treated as unused declared

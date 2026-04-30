@@ -23,7 +23,7 @@ metadata fields (authors, DOIs, dates, text).
 Cross-reference
 ---------------
 For cross-provider metadata normalization (author, DOI, PMID, date, text)
-see :mod:`bioetl.domain.services.data_normalization_service`
+see :mod:`bioetl.domain.behavior.data_normalization_service`
 (``DefaultDataNormalizer``).
 
 Pure domain service (no I/O) per RULES.md §1.1.
@@ -34,10 +34,10 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
-from bioetl.domain.services.activity_aggregator import ActivityAggregator
-from bioetl.domain.services.normalization_config import NormalizationConfig
-from bioetl.domain.services.unit_converter import UnitConverter
-from bioetl.domain.services.value_validator import ValueValidator
+from bioetl.domain.behavior.activity_aggregator import ActivityAggregator
+from bioetl.domain.behavior.normalization_config import NormalizationConfig
+from bioetl.domain.behavior.unit_converter import UnitConverter
+from bioetl.domain.behavior.value_validator import ValueValidator
 from bioetl.domain.value_objects.activity_values import PChemblValue
 
 if TYPE_CHECKING:

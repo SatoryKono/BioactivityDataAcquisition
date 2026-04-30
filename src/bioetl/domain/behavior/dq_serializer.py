@@ -9,7 +9,7 @@ from typing import Any, cast  # Any: needed for _serialize_value recursive retur
 
 import orjson
 
-from bioetl.domain.services._dq_serializer_html import (
+from bioetl.domain.behavior._dq_serializer_html import (
     format_detail_value,
     generate_html_report,
     render_check_details_html,

@@ -5,14 +5,14 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import StrEnum
 
-from bioetl.domain.services.cross_validation_helpers import (
+from bioetl.domain.behavior.cross_validation_helpers import (
     _append_threshold_issue,
     _create_issue,
     _validate_coverage,
     _validate_pairs,
     _validate_rules,
 )
-from bioetl.domain.services.validation_result_envelopes import (
+from bioetl.domain.behavior.validation_result_envelopes import (
     build_validation_result,
 )
 from bioetl.domain.types import JsonDict

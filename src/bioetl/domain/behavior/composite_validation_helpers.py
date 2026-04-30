@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from bioetl.domain.services.aggregation_validator import AggregationConfig
-from bioetl.domain.services.cross_validation_validator import CrossValidationConfig
+from bioetl.domain.behavior.aggregation_validator import AggregationConfig
+from bioetl.domain.behavior.cross_validation_validator import CrossValidationConfig
 from bioetl.domain.types import JsonDict
 from bioetl.domain.types.validation_result import ValidationIssue
 from bioetl.domain.types.validation_severity import (

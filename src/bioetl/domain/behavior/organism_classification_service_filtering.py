@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from bioetl.domain.services.organism_classification_service_models import (
+from bioetl.domain.behavior.organism_classification_service_models import (
     CellularityFilterStrategy,
 )
 from bioetl.domain.types import CellularityType

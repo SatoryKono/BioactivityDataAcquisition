@@ -8,17 +8,17 @@ __all__ = [
     "PreflightGovernor",
 ]
 
-from bioetl.domain.services._preflight_governance_helpers import (
+from bioetl.domain.behavior._preflight_governance_helpers import (
     build_governance_metadata,
     format_issue,
     rebuild_validation_result,
     resolve_policy_block_state,
 )
-from bioetl.domain.services._preflight_governance_types import (
+from bioetl.domain.behavior._preflight_governance_types import (
     GovernancePolicy,
     PreflightGovernanceConfig,
 )
-from bioetl.domain.services.preflight_governance_reporting import (
+from bioetl.domain.behavior.preflight_governance_reporting import (
     build_validation_summary,
 )
 from bioetl.domain.types import JsonDict

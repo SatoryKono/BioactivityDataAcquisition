@@ -1,89 +1,39 @@
-"""Canonical pure domain behavior surface.
-
-This package replaces first-party imports from ``bioetl.domain.services`` while
-the legacy services package remains as a compatibility wrapper.
-"""
+"""Canonical pure domain behavior surface."""
 
 from __future__ import annotations
 
-import sys
-from importlib import import_module
-
-from bioetl.domain.services import (
+from bioetl.domain.behavior.activity_aggregator import ActivityAggregator
+from bioetl.domain.behavior.author_normalization_service import AuthorNormalizer
+from bioetl.domain.behavior.chemical_standardization import (
     CHEMICAL_STANDARDIZATION_POLICY_VERSION,
     CHEMICAL_STANDARDIZATION_STATUSES,
-    ActivityAggregator,
-    AuthorNormalizer,
-    BioactivityNormalizer,
     ChemicalStandardizationResult,
     ChemicalStandardizationStatus,
-    ClassificationStats,
-    CompositeValidator,
-    DataNormalizationConfig,
-    DefaultDataNormalizer,
-    DQMetricsCalculator,
-    DQMetricsInput,
-    DQReportSerializer,
-    EntityIdentityGenerator,
-    MergedMetadataExplainer,
-    NormalizationConfig,
-    OrganismClassifier,
-    PhasedMigrationCoordinator,
-    PreflightGovernor,
-    UnitConverter,
-    ValueValidator,
-    jaccard_similarity,
-    normalize_text,
     standardize_chemical_structure,
 )
-
-_COMPAT_SUBMODULES = (
-    "_author_helpers",
-    "_dq_serializer_html",
-    "_preflight_governance_helpers",
-    "_preflight_governance_types",
-    "activity_aggregator",
-    "aggregation_validator",
-    "author_normalization_service",
-    "chemical_standardization",
-    "composite_metadata_cv",
-    "composite_metadata_helpers",
-    "composite_validation_helpers",
-    "composite_validation_layer",
-    "cross_validation_helpers",
-    "cross_validation_validator",
-    "data_normalization_config",
-    "data_normalization_service",
-    "dataset_content_identity",
-    "dq_metrics_calculator",
-    "dq_policy_resolver",
-    "dq_serializer",
-    "identity_service",
-    "merged_metadata_explainability",
-    "normalization_config",
-    "normalization_service",
-    "organism_classification_service",
-    "organism_classification_service_filtering",
-    "organism_classification_service_models",
-    "phased_migration_support",
-    "preflight_governance",
-    "preflight_governance_reporting",
-    "schema_classifier",
-    "schema_classifier_helpers",
-    "schema_metadata_extractor",
-    "staged_enforcement",
-    "text_similarity",
-    "unit_converter",
-    "validation_helpers",
-    "validation_result_envelopes",
-    "value_validator",
-    "value_validator_rules",
+from bioetl.domain.behavior.composite_validation_layer import CompositeValidator
+from bioetl.domain.behavior.data_normalization_config import DataNormalizationConfig
+from bioetl.domain.behavior.data_normalization_service import DefaultDataNormalizer
+from bioetl.domain.behavior.dq_metrics_calculator import (
+    DQMetricsCalculator,
+    DQMetricsInput,
 )
-
-for _name in _COMPAT_SUBMODULES:
-    sys.modules[f"{__name__}.{_name}"] = import_module(
-        f"bioetl.domain.services.{_name}"
-    )
+from bioetl.domain.behavior.dq_serializer import DQReportSerializer
+from bioetl.domain.behavior.identity_service import EntityIdentityGenerator
+from bioetl.domain.behavior.merged_metadata_explainability import (
+    MergedMetadataExplainer,
+)
+from bioetl.domain.behavior.normalization_config import NormalizationConfig
+from bioetl.domain.behavior.normalization_service import BioactivityNormalizer
+from bioetl.domain.behavior.organism_classification_service import (
+    ClassificationStats,
+    OrganismClassifier,
+)
+from bioetl.domain.behavior.phased_migration_support import PhasedMigrationCoordinator
+from bioetl.domain.behavior.preflight_governance import PreflightGovernor
+from bioetl.domain.behavior.text_similarity import jaccard_similarity, normalize_text
+from bioetl.domain.behavior.unit_converter import UnitConverter
+from bioetl.domain.behavior.value_validator import ValueValidator
 
 __all__ = [
     "CHEMICAL_STANDARDIZATION_POLICY_VERSION",

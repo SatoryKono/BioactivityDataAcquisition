@@ -22,7 +22,7 @@ from ._methods import (
 )
 
 if TYPE_CHECKING:
-    from bioetl.domain.services.normalization_config import NormalizationConfig
+    from bioetl.domain.behavior.normalization_config import NormalizationConfig
 
 
 @dataclass(slots=True)
