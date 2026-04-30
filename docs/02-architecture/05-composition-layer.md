@@ -163,18 +163,11 @@ import paths.
   они остаются стабильными для внешнего import/patch contract, но новые
   first-party `src/` imports туда не добавляются.
 - `composite_api.py`, `observability_api.py` — узкие façade-модули для composite runtime
-<<<<<<< Updated upstream
   и observability-related call sites; `observability_api.py` является каноническим
   public seam для metrics bootstrap, Pushgateway publication и operator diagnostics bundle.
   Metrics publication route проходит через `MetricsService` и composition-owned
   publisher adapter, а selection `NoOpMetrics` / `NoOpTracing` централизована в
   `observability_resolution.py`.
-||||||| Stash base
-  и observability-related call sites.
-=======
-  и observability-related call sites; `observability_api.py` является каноническим
-  public seam для metrics bootstrap и operator diagnostics bundle.
->>>>>>> Stashed changes
 - `_pipeline_execution.py`, `_resource_management.py`, `_services.py` — internal implementation
   modules; прямые импорты вне `composition/` запрещены policy-тестами.
 
