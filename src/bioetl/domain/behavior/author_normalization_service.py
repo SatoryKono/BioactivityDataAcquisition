@@ -10,7 +10,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from bioetl.domain.serialization import serialize_to_json
-from bioetl.domain.services._author_helpers import (
+from bioetl.domain.behavior._author_helpers import (
     collect_affiliations_from_authors,
     deduplicate_case_insensitive,
     extract_affiliation_strings,

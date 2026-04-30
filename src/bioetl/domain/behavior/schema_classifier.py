@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 
-from bioetl.domain.services.schema_classifier_helpers import (
+from bioetl.domain.behavior.schema_classifier_helpers import (
     added_field_changes,
     build_detailed_changes,
     changed_field_changes,

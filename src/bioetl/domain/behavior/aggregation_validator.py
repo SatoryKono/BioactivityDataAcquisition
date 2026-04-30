@@ -5,7 +5,7 @@ from __future__ import annotations
 import dataclasses
 from dataclasses import dataclass
 
-from bioetl.domain.services.validation_result_envelopes import (
+from bioetl.domain.behavior.validation_result_envelopes import (
     build_validation_result,
 )
 from bioetl.domain.types import JsonDict

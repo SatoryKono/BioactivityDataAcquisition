@@ -5,8 +5,8 @@ from __future__ import annotations
 from collections.abc import Callable
 from dataclasses import dataclass
 
-from bioetl.domain.services.aggregation_validator import AggregationValidator
-from bioetl.domain.services.composite_validation_helpers import (
+from bioetl.domain.behavior.aggregation_validator import AggregationValidator
+from bioetl.domain.behavior.composite_validation_helpers import (
     _append_config_issue_if_invalid,
     _convert_to_aggregation_config,
     _convert_to_cross_validation_config,
@@ -15,13 +15,13 @@ from bioetl.domain.services.composite_validation_helpers import (
     _is_valid_field_priorities,
     _is_valid_lineage_config,
 )
-from bioetl.domain.services.cross_validation_validator import CrossValidationValidator
-from bioetl.domain.services.preflight_governance import (
+from bioetl.domain.behavior.cross_validation_validator import CrossValidationValidator
+from bioetl.domain.behavior.preflight_governance import (
     GovernancePolicy,
     PreflightGovernanceConfig,
     PreflightGovernor,
 )
-from bioetl.domain.services.validation_result_envelopes import (
+from bioetl.domain.behavior.validation_result_envelopes import (
     build_validation_result,
 )
 from bioetl.domain.types import JsonDict

@@ -26,7 +26,7 @@ Cross-reference
 ---------------
 For ChEMBL-specific bioactivity scalar normalization (unit conversion,
 pChEMBL calculation, potency classification, batch aggregation) see
-:mod:`bioetl.domain.services.normalization_service`
+:mod:`bioetl.domain.behavior.normalization_service`
 (``BioactivityNormalizer``).
 
 Pure domain service (no I/O) per RULES.md §1.1.
@@ -70,10 +70,10 @@ from bioetl.domain.normalization.text import (
 from bioetl.domain.normalization.text import (
     strip_html_tags as _strip_html_tags,
 )
-from bioetl.domain.services.author_normalization_service import (
+from bioetl.domain.behavior.author_normalization_service import (
     AuthorNormalizer,
 )
-from bioetl.domain.services.data_normalization_config import DataNormalizationConfig
+from bioetl.domain.behavior.data_normalization_config import DataNormalizationConfig
 
 if TYPE_CHECKING:
     from collections.abc import Sequence

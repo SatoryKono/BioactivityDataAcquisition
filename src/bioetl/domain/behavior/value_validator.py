@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
-from bioetl.domain.services.value_validator_rules import (
+from bioetl.domain.behavior.value_validator_rules import (
     DEFAULT_CONCENTRATION_RANGES,
     PCHEMBL_MAX,
     PCHEMBL_MIN,
@@ -18,7 +18,7 @@ from bioetl.domain.services.value_validator_rules import (
 from bioetl.domain.value_objects.activity_values import ActivityType
 
 if TYPE_CHECKING:
-    from bioetl.domain.services.normalization_config import NormalizationConfig
+    from bioetl.domain.behavior.normalization_config import NormalizationConfig
 
 __all__ = [
     "PCHEMBL_MAX",

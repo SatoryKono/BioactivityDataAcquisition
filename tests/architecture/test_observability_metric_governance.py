@@ -64,12 +64,14 @@ def test_observability_metric_governance_declares_required_views_and_evidence_pa
     }
 
     evidence_collection = runtime_cardinality_review["evidence_collection"]
-    assert evidence_collection["mode"] == "offline_static_inventory_review"
+    assert evidence_collection["mode"] == "replayable_inventory_evidence_workflow"
     assert (
         evidence_collection["artifact"]
-        == "configs/quality/observability_metric_inventory_allowlist.yaml"
+        == "artifacts/observability/runtime_cardinality_inventory.json"
     )
-    assert "report_observability_metric_inventory" in evidence_collection["command"]
+    command = evidence_collection["command"]
+    assert "report_observability_metric_inventory" in command
+    assert "--write-evidence" in command
 
 
 @pytest.mark.architecture
