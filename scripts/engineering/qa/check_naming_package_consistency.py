@@ -108,6 +108,109 @@ class LayerAwareNamingPolicy:
     family_freeze_rules: tuple[FamilyFreezeRule, ...]
 
 
+_CURATED_COMPOSITION_BOOTSTRAP_PORT_FACTORIES = (
+    AllowedSymbol(
+        symbol="bootstrap_checkpoint_port",
+        path="src/bioetl/composition/bootstrap/assembly/checkpoint.py",
+        issue="#3442",
+        reason=(
+            "Reviewed bootstrap factory that constructs the checkpoint port "
+            "implementation for CLI/runtime wiring."
+        ),
+    ),
+    AllowedSymbol(
+        symbol="bootstrap_composite_checkpoint_port",
+        path="src/bioetl/composition/bootstrap/assembly/checkpoint.py",
+        issue="#3442",
+        reason=(
+            "Reviewed bootstrap factory that constructs the composite checkpoint "
+            "port for runtime resume and repair flows."
+        ),
+    ),
+    AllowedSymbol(
+        symbol="bootstrap_quarantine_port",
+        path="src/bioetl/composition/bootstrap/assembly/checkpoint.py",
+        issue="#3442",
+        reason=(
+            "Reviewed bootstrap factory that constructs the quarantine port "
+            "implementation for CLI/runtime wiring."
+        ),
+    ),
+    AllowedSymbol(
+        symbol="bootstrap_dq_monitor_port",
+        path="src/bioetl/composition/bootstrap/runtime/dq_bootstrap.py",
+        issue="#3442",
+        reason=(
+            "Reviewed observability bootstrap implementation retained behind "
+            "the runtime observability facade."
+        ),
+    ),
+    AllowedSymbol(
+        symbol="bootstrap_dq_monitor_port",
+        path="src/bioetl/composition/bootstrap/runtime/observability.py",
+        issue="#3442",
+        reason=(
+            "Reviewed public runtime observability facade retained as the "
+            "canonical bootstrap seam for DQ monitor port wiring."
+        ),
+    ),
+    AllowedSymbol(
+        symbol="bootstrap_logger_port",
+        path="src/bioetl/composition/bootstrap/runtime/logger_bootstrap.py",
+        issue="#3442",
+        reason=(
+            "Reviewed observability bootstrap implementation retained behind "
+            "the runtime observability facade."
+        ),
+    ),
+    AllowedSymbol(
+        symbol="bootstrap_logger_port",
+        path="src/bioetl/composition/bootstrap/runtime/observability.py",
+        issue="#3442",
+        reason=(
+            "Reviewed public runtime observability facade retained as the "
+            "canonical bootstrap seam for logger port wiring."
+        ),
+    ),
+    AllowedSymbol(
+        symbol="bootstrap_metrics_port",
+        path="src/bioetl/composition/bootstrap/runtime/metrics_bootstrap.py",
+        issue="#3442",
+        reason=(
+            "Reviewed observability bootstrap implementation retained behind "
+            "the runtime observability facade."
+        ),
+    ),
+    AllowedSymbol(
+        symbol="bootstrap_metrics_port",
+        path="src/bioetl/composition/bootstrap/runtime/observability.py",
+        issue="#3442",
+        reason=(
+            "Reviewed public runtime observability facade retained as the "
+            "canonical bootstrap seam for metrics port wiring."
+        ),
+    ),
+    AllowedSymbol(
+        symbol="bootstrap_tracer_port",
+        path="src/bioetl/composition/bootstrap/runtime/tracing_bootstrap.py",
+        issue="#3442",
+        reason=(
+            "Reviewed observability bootstrap implementation retained behind "
+            "the runtime observability facade."
+        ),
+    ),
+    AllowedSymbol(
+        symbol="bootstrap_tracer_port",
+        path="src/bioetl/composition/bootstrap/runtime/observability.py",
+        issue="#3442",
+        reason=(
+            "Reviewed public runtime observability facade retained as the "
+            "canonical bootstrap seam for tracer port wiring."
+        ),
+    ),
+)
+
+
 def _run_suffix_policy_check(repo_root: Path) -> list[Violation]:
     script = repo_root / CANONICAL_NAMING_AUDIT_PATH
     docs_skip_path = repo_root / "docs" / "__naming_gate_skip__"
@@ -177,6 +280,22 @@ def _load_allowed_symbols(raw: object) -> tuple[AllowedSymbol, ...]:
     return tuple(allowed)
 
 
+def _merge_allowed_symbols(
+    *groups: tuple[AllowedSymbol, ...],
+) -> tuple[AllowedSymbol, ...]:
+    """Return a stable deduplicated allowlist preserving first-seen order."""
+    merged: list[AllowedSymbol] = []
+    seen: set[tuple[str, str]] = set()
+    for group in groups:
+        for item in group:
+            key = (item.symbol, item.path)
+            if key in seen:
+                continue
+            merged.append(item)
+            seen.add(key)
+    return tuple(merged)
+
+
 def _load_layer_aware_suffix_policy(repo_root: Path) -> LayerAwareNamingPolicy:
     path = repo_root / LAYER_AWARE_SUFFIX_POLICY_PATH
     payload = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
@@ -202,6 +321,11 @@ def _load_layer_aware_suffix_policy(repo_root: Path) -> LayerAwareNamingPolicy:
             item.get("exclude_path_prefixes", [])
         )
         allowed_symbols = _load_allowed_symbols(item.get("allowed_symbols", []))
+        if rule_id == "composition_bootstrap_port_factories":
+            allowed_symbols = _merge_allowed_symbols(
+                allowed_symbols,
+                _CURATED_COMPOSITION_BOOTSTRAP_PORT_FACTORIES,
+            )
         if rule_id and description and suffixes and include_path_prefixes:
             function_rules.append(
                 FunctionSuffixRule(

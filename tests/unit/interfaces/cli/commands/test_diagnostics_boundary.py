@@ -20,5 +20,6 @@ def test_diagnostics_group_exposes_expected_commands() -> None:
         "contract-checks",
         "checkpoint",
         "manifest",
+        "forensic-diff",
         "quarantine",
     )

@@ -226,6 +226,64 @@ def test_collect_metric_inventory_tracks_helper_backed_emitters(
     ]
 
 
+def test_collect_metric_inventory_resolves_cross_file_class_metric_constants(
+    tmp_path: Path,
+    monkeypatch: object,
+) -> None:
+    monkeypatch.setattr(
+        inventory,
+        "REGISTERED_PROMETHEUS_METRIC_NAMES",
+        frozenset(
+            {
+                "bioetl_postrun_phase_events_total",
+                "bioetl_postrun_phase_duration_seconds",
+            }
+        ),
+    )
+
+    runtime_dir = tmp_path / "src" / "bioetl" / "application" / "postrun"
+    runtime_dir.mkdir(parents=True)
+    (runtime_dir / "service.py").write_text(
+        "\n".join(
+            [
+                "class PostrunService:",
+                '    METRIC_POSTRUN_PHASE_EVENTS_TOTAL = "bioetl_postrun_phase_events_total"',
+                '    METRIC_POSTRUN_PHASE_DURATION_SECONDS = "bioetl_postrun_phase_duration_seconds"',
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    (runtime_dir / "_support.py").write_text(
+        "\n".join(
+            [
+                "class PostrunServiceSupportMixin:",
+                "    def emit(self, metrics):",
+                "        metrics.increment_counter(self.METRIC_POSTRUN_PHASE_EVENTS_TOTAL, labels={})",
+                "        metrics.observe_histogram(self.METRIC_POSTRUN_PHASE_DURATION_SECONDS, value=1.0, labels={})",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    report = inventory.collect_metric_inventory(tmp_path)
+
+    assert report["helper_backed_live_metrics"] == [
+        "bioetl_postrun_phase_duration_seconds",
+        "bioetl_postrun_phase_events_total",
+    ]
+    helper_emitters = report["helper_backed_emitters"]
+    assert isinstance(helper_emitters, dict)
+    assert helper_emitters["bioetl_postrun_phase_events_total"] == [
+        "src/bioetl/application/postrun/_support.py"
+    ]
+    assert helper_emitters["bioetl_postrun_phase_duration_seconds"] == [
+        "src/bioetl/application/postrun/_support.py"
+    ]
+    assert report["registered_without_runtime"] == []
+
+
 def test_collect_metric_inventory_flags_multi_emitter_cardinality_review_candidates(
     tmp_path: Path,
     monkeypatch: object,

@@ -52,7 +52,9 @@ class _NamedRuntimeBundle(Protocol):
 
 def _coerce_legacy_runtime_bundle(
     resolved_bundle: object,
-) -> tuple[str, Settings, LoggerPort, MetricsPort, TracingPort, object, LockPort] | None:
+) -> (
+    tuple[str, Settings, LoggerPort, MetricsPort, TracingPort, object, LockPort] | None
+):
     """Return the legacy positional runtime bundle shape when present."""
     if not isinstance(resolved_bundle, tuple | list):
         return None

@@ -145,6 +145,13 @@ def _dict_value(payload: dict[str, object], key: str) -> dict[str, object]:
     return value if isinstance(value, dict) else {}
 
 
+def _items_from_keys(
+    payload: dict[str, object],
+    *keys: str,
+) -> tuple[tuple[str, object], ...]:
+    return tuple((key, payload.get(key)) for key in keys)
+
+
 def render_reproducibility_compact_section(
     diagnostics: dict[str, object],
     *,
@@ -260,109 +267,86 @@ def _diagnostics_section_items(
 def _diagnostics_core_items(
     diagnostics: dict[str, object],
 ) -> tuple[tuple[str, object], ...]:
-    return (
-        ("latest_status", diagnostics.get("latest_status")),
-        ("latest_event_type", diagnostics.get("latest_event_type")),
-        ("total_events", diagnostics.get("total_events")),
-        ("execution_fingerprint", diagnostics.get("execution_fingerprint")),
-        ("config_hash", diagnostics.get("config_hash")),
-        ("resolved_config_hash", diagnostics.get("resolved_config_hash")),
-        ("effective_config_hash", diagnostics.get("effective_config_hash")),
-        ("git_commit", diagnostics.get("git_commit")),
-        ("source_revision_state", diagnostics.get("source_revision_state")),
-        ("dependency_lock_state", diagnostics.get("dependency_lock_state")),
-        ("dependency_lock_hash", diagnostics.get("dependency_lock_hash")),
-        ("code_provenance_state", diagnostics.get("code_provenance_state")),
-        ("contract_ref", diagnostics.get("contract_ref")),
-        ("contract_version", diagnostics.get("contract_version")),
-        ("dq_policy_ref", diagnostics.get("dq_policy_ref")),
-        ("rule_bundle_version", diagnostics.get("rule_bundle_version")),
+    return _items_from_keys(
+        diagnostics,
+        "latest_status",
+        "latest_event_type",
+        "total_events",
+        "execution_fingerprint",
+        "config_hash",
+        "resolved_config_hash",
+        "effective_config_hash",
+        "git_commit",
+        "source_revision_state",
+        "dependency_lock_state",
+        "dependency_lock_hash",
+        "code_provenance_state",
+        "contract_ref",
+        "contract_version",
+        "dq_policy_ref",
+        "rule_bundle_version",
     )
 
 
 def _diagnostics_replay_items(
     diagnostics: dict[str, object],
 ) -> tuple[tuple[str, object], ...]:
-    return (
-        (
-            "effective_config_artifact_id",
-            diagnostics.get("effective_config_artifact_id"),
-        ),
-        (
-            "dq_contract_compatibility_hash",
-            diagnostics.get("dq_contract_compatibility_hash"),
-        ),
-        ("requested_exact_replay", diagnostics.get("requested_exact_replay")),
-        (
-            "exact_replay_support_boundary",
-            diagnostics.get("exact_replay_support_boundary"),
-        ),
-        ("replay_family_contract", diagnostics.get("replay_family_contract")),
-        ("replay_capability_reason", diagnostics.get("replay_capability_reason")),
-        ("exact_replay_blockers", diagnostics.get("exact_replay_blockers")),
-        ("append_mode_semantic_sinks", diagnostics.get("append_mode_semantic_sinks")),
-        ("input_snapshot_ids", diagnostics.get("input_snapshot_ids")),
-        (
-            "input_snapshot_content_hashes",
-            diagnostics.get("input_snapshot_content_hashes"),
-        ),
-        (
-            "input_snapshot_identity_fingerprint",
-            diagnostics.get("input_snapshot_identity_fingerprint"),
-        ),
-        ("exact_replay_anchors", diagnostics.get("exact_replay_anchors")),
-        ("replay_mode", diagnostics.get("replay_mode")),
-        ("replay_of_run_id", diagnostics.get("replay_of_run_id")),
-        ("replay_of_manifest_id", diagnostics.get("replay_of_manifest_id")),
-        ("replay_parentage", diagnostics.get("replay_parentage")),
-        ("input_snapshot_count", diagnostics.get("input_snapshot_count")),
-        ("input_snapshots", diagnostics.get("input_snapshots")),
+    return _items_from_keys(
+        diagnostics,
+        "effective_config_artifact_id",
+        "dq_contract_compatibility_hash",
+        "requested_exact_replay",
+        "exact_replay_support_boundary",
+        "replay_family_contract",
+        "replay_capability_reason",
+        "exact_replay_blockers",
+        "append_mode_semantic_sinks",
+        "input_snapshot_ids",
+        "input_snapshot_content_hashes",
+        "input_snapshot_identity_fingerprint",
+        "exact_replay_anchors",
+        "replay_mode",
+        "replay_of_run_id",
+        "replay_of_manifest_id",
+        "replay_parentage",
+        "input_snapshot_count",
+        "input_snapshots",
     )
 
 
 def _diagnostics_artifact_items(
     diagnostics: dict[str, object],
 ) -> tuple[tuple[str, object], ...]:
-    return (
-        ("event_family_counts", diagnostics.get("event_family_counts")),
-        ("event_type_counts", diagnostics.get("event_type_counts")),
-        ("planned_artifact_count", diagnostics.get("planned_artifact_count")),
-        ("published_artifact_count", diagnostics.get("published_artifact_count")),
-        ("missing_artifact_links", diagnostics.get("missing_artifact_links")),
-        ("lineage_fragment_ids", diagnostics.get("lineage_fragment_ids")),
-        ("artifact_refs", diagnostics.get("artifact_refs")),
-        ("produced_artifact_trace", diagnostics.get("produced_artifact_trace")),
-        ("identity_graph_complete", diagnostics.get("identity_graph_complete")),
+    return _items_from_keys(
+        diagnostics,
+        "event_family_counts",
+        "event_type_counts",
+        "planned_artifact_count",
+        "published_artifact_count",
+        "missing_artifact_links",
+        "lineage_fragment_ids",
+        "artifact_refs",
+        "produced_artifact_trace",
+        "identity_graph_complete",
     )
 
 
 def _diagnostics_dq_items(
     diagnostics: dict[str, object],
 ) -> tuple[tuple[str, object], ...]:
-    return (
-        ("dq_rule_ids", diagnostics.get("dq_rule_ids")),
-        ("dq_dispositions", diagnostics.get("dq_dispositions")),
-        ("dq_report_paths", diagnostics.get("dq_report_paths")),
-        ("dq_violation_kinds", diagnostics.get("dq_violation_kinds")),
-        ("cross_validation_rule_ids", diagnostics.get("cross_validation_rule_ids")),
-        (
-            "cross_validation_config_paths",
-            diagnostics.get("cross_validation_config_paths"),
-        ),
-        (
-            "cross_validation_quarantine_policy",
-            diagnostics.get("cross_validation_quarantine_policy"),
-        ),
-        (
-            "cross_validation_quarantine_replay_contract",
-            diagnostics.get("cross_validation_quarantine_replay_contract"),
-        ),
-        ("occurrence_only_diagnostics", diagnostics.get("occurrence_only_diagnostics")),
-        (
-            "cross_validation_signal_present",
-            diagnostics.get("cross_validation_signal_present"),
-        ),
-        ("correlation_anchor_gaps", diagnostics.get("correlation_anchor_gaps")),
+    return _items_from_keys(
+        diagnostics,
+        "dq_rule_ids",
+        "dq_dispositions",
+        "dq_report_paths",
+        "dq_violation_kinds",
+        "cross_validation_rule_ids",
+        "cross_validation_config_paths",
+        "cross_validation_quarantine_policy",
+        "cross_validation_quarantine_replay_contract",
+        "occurrence_only_diagnostics",
+        "cross_validation_signal_present",
+        "correlation_anchor_gaps",
     )
 
 
@@ -392,60 +376,43 @@ def render_identity_graph_section(
     append_section(
         lines,
         "Identity Graph",
-        (
-            ("run_id", identity_graph.get("run_id")),
-            ("manifest_id", identity_graph.get("manifest_id")),
-            ("execution_fingerprint", identity_graph.get("execution_fingerprint")),
-            ("config_hash", identity_graph.get("config_hash")),
-            ("resolved_config_hash", identity_graph.get("resolved_config_hash")),
-            ("effective_config_hash", identity_graph.get("effective_config_hash")),
-            ("git_commit", identity_graph.get("git_commit")),
-            ("source_revision_state", identity_graph.get("source_revision_state")),
-            ("dependency_lock_state", identity_graph.get("dependency_lock_state")),
-            ("dependency_lock_hash", identity_graph.get("dependency_lock_hash")),
-            ("code_provenance_state", identity_graph.get("code_provenance_state")),
-            ("contract_ref", identity_graph.get("contract_ref")),
-            ("contract_version", identity_graph.get("contract_version")),
-            ("replay_capability", identity_graph.get("replay_capability")),
-            ("requested_exact_replay", identity_graph.get("requested_exact_replay")),
-            (
-                "exact_replay_support_boundary",
-                identity_graph.get("exact_replay_support_boundary"),
-            ),
-            ("replay_family_contract", identity_graph.get("replay_family_contract")),
-            (
-                "replay_capability_reason",
-                identity_graph.get("replay_capability_reason"),
-            ),
-            ("exact_replay_eligible", identity_graph.get("exact_replay_eligible")),
-            ("exact_replay_blockers", identity_graph.get("exact_replay_blockers")),
-            (
-                "append_mode_semantic_sinks",
-                identity_graph.get("append_mode_semantic_sinks"),
-            ),
-            ("input_snapshot_ids", identity_graph.get("input_snapshot_ids")),
-            (
-                "input_snapshot_content_hashes",
-                identity_graph.get("input_snapshot_content_hashes"),
-            ),
-            (
-                "input_snapshot_identity_fingerprint",
-                identity_graph.get("input_snapshot_identity_fingerprint"),
-            ),
-            ("exact_replay_anchors", identity_graph.get("exact_replay_anchors")),
-            ("replay_mode", identity_graph.get("replay_mode")),
-            ("replay_of_run_id", identity_graph.get("replay_of_run_id")),
-            ("replay_of_manifest_id", identity_graph.get("replay_of_manifest_id")),
-            ("replay_parentage", identity_graph.get("replay_parentage")),
-            ("input_snapshot_count", identity_graph.get("input_snapshot_count")),
-            ("input_snapshots", identity_graph.get("input_snapshots")),
-            ("planned_artifacts", identity_graph.get("planned_artifacts")),
-            ("published_artifacts", identity_graph.get("published_artifacts")),
-            ("produced_artifact_trace", identity_graph.get("produced_artifact_trace")),
-            (
-                "occurrence_only_diagnostics",
-                identity_graph.get("occurrence_only_diagnostics"),
-            ),
+        _items_from_keys(
+            identity_graph,
+            "run_id",
+            "manifest_id",
+            "execution_fingerprint",
+            "config_hash",
+            "resolved_config_hash",
+            "effective_config_hash",
+            "git_commit",
+            "source_revision_state",
+            "dependency_lock_state",
+            "dependency_lock_hash",
+            "code_provenance_state",
+            "contract_ref",
+            "contract_version",
+            "replay_capability",
+            "requested_exact_replay",
+            "exact_replay_support_boundary",
+            "replay_family_contract",
+            "replay_capability_reason",
+            "exact_replay_eligible",
+            "exact_replay_blockers",
+            "append_mode_semantic_sinks",
+            "input_snapshot_ids",
+            "input_snapshot_content_hashes",
+            "input_snapshot_identity_fingerprint",
+            "exact_replay_anchors",
+            "replay_mode",
+            "replay_of_run_id",
+            "replay_of_manifest_id",
+            "replay_parentage",
+            "input_snapshot_count",
+            "input_snapshots",
+            "planned_artifacts",
+            "published_artifacts",
+            "produced_artifact_trace",
+            "occurrence_only_diagnostics",
         ),
         json_renderer=json_renderer,
     )

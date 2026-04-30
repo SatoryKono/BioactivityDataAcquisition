@@ -1054,7 +1054,7 @@
                 "allValue": null,
                 "current": {},
                 "datasource": "Prometheus",
-                "definition": "label_values(bioetl_records_processed_total, pipeline)",
+                "definition": "label_values(bioetl_control_plane_manifest_writes_total, pipeline)",
                 "hide": 0,
                 "includeAll": true,
                 "label": "Pipeline",
@@ -1062,7 +1062,7 @@
                 "name": "pipeline",
                 "options": [],
                 "query": {
-                    "query": "label_values(bioetl_records_processed_total, pipeline)",
+                    "query": "label_values(bioetl_control_plane_manifest_writes_total, pipeline)",
                     "refId": "StandardVariableQuery"
                 },
                 "refresh": 1,
@@ -1079,7 +1079,7 @@
                 "allValue": null,
                 "current": {},
                 "datasource": "Prometheus",
-                "definition": "label_values(bioetl_records_processed_total{pipeline=~\"$pipeline\"}, run_type)",
+                "definition": "label_values(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\"}, run_type)",
                 "hide": 0,
                 "includeAll": true,
                 "label": "Run Type",
@@ -1087,7 +1087,7 @@
                 "name": "run_type",
                 "options": [],
                 "query": {
-                    "query": "label_values(bioetl_records_processed_total{pipeline=~\"$pipeline\"}, run_type)",
+                    "query": "label_values(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\"}, run_type)",
                     "refId": "StandardVariableQuery"
                 },
                 "refresh": 1,

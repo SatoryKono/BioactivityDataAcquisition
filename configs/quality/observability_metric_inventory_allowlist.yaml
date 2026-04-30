@@ -1,9 +1,5 @@
 allowed:
-  registered_without_runtime:
-    # Emitted indirectly through PostrunService metric-name attributes; the
-    # static inventory scanner cannot currently resolve that protocol handoff.
-    - bioetl_postrun_phase_duration_seconds
-    - bioetl_postrun_phase_events_total
+  registered_without_runtime: []
   runtime_without_registry: []
   dead_metrics: []
   documented_without_registry: []
