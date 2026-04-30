@@ -109,9 +109,7 @@ class PubMedAdapter(
     title_fallback_handler: PubMedTitleFallbackHandler | None = None
 
     provider_name: str = field(init=False, default="pubmed")
-    _fallback_fetch_service: FallbackFetchOrchestrator = field(
-        init=False, repr=False
-    )
+    _fallback_fetch_service: FallbackFetchOrchestrator = field(init=False, repr=False)
     _fallback_decorator: ComposableFallbackDecorator = field(init=False, repr=False)
 
     def __post_init__(self) -> None:

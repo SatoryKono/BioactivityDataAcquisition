@@ -60,17 +60,31 @@ def build_workflow_transform_fingerprint(spec: WorkflowTransformSpec) -> str:
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
+def _normalize_mapping_value(value: Mapping[object, object]) -> JsonDict:
+    """Normalize mapping keys deterministically for fingerprint payloads."""
+    return {
+        str(key): _normalize_json_value(item)
+        for key, item in sorted(value.items(), key=lambda pair: str(pair[0]))
+    }
+
+
+def _is_json_sequence(value: object) -> bool:
+    """Return whether value should normalize as an ordered JSON array."""
+    return isinstance(value, Sequence) and not isinstance(
+        value,
+        str | bytes | bytearray,
+    )
+
+
+def _normalize_sequence_value(value: Sequence[object]) -> list[object]:
+    """Normalize sequence items while preserving sequence ordering."""
+    return [_normalize_json_value(item) for item in value]
+
+
 def _normalize_json_value(value: object) -> object:
     """Normalize JSON-compatible values without changing list ordering."""
     if isinstance(value, Mapping):
-        return {
-            str(key): _normalize_json_value(item)
-            for key, item in sorted(value.items(), key=lambda pair: str(pair[0]))
-        }
-    if isinstance(value, tuple):
-        return [_normalize_json_value(item) for item in value]
-    if isinstance(value, list):
-        return [_normalize_json_value(item) for item in value]
-    if isinstance(value, Sequence) and not isinstance(value, str | bytes | bytearray):
-        return [_normalize_json_value(item) for item in value]
+        return _normalize_mapping_value(value)
+    if _is_json_sequence(value):
+        return _normalize_sequence_value(value)
     return value

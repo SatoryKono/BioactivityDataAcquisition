@@ -34,61 +34,25 @@ suffix_boundary_rules:
 
   - rule_id: domain_service_suffix_conflict
     description: >
-      Domain-layer *Service names are frozen to the current reviewed set while the
-      canonical replacement vocabulary is decided.
+      Domain-layer pure behavior surfaces must not expose first-party *Service
+      classes. The reviewed baseline is now clean and should remain exception-free.
     suffixes:
       - Service
     include_path_prefixes:
       - src/bioetl/domain/services/
     allowed_symbol_exceptions:
-      - symbol: AuthorNormalizationService
-        path: src/bioetl/domain/services/author_normalization_service.py
-        issue: "#3400"
-        reason: Existing domain service surface pending canonical rename decision.
-      - symbol: CompositeValidationService
-        path: src/bioetl/domain/services/composite_validation_layer.py
-        issue: "#3400"
-        reason: Existing domain service surface pending canonical rename decision.
-      - symbol: DefaultDataNormalizationService
-        path: src/bioetl/domain/services/data_normalization_service.py
-        issue: "#3400"
-        reason: Deprecated compatibility alias for DefaultDataNormalizer pending follow-up domain naming cleanup.
-      - symbol: IdentityService
-        path: src/bioetl/domain/services/identity_service.py
-        issue: "#3400"
-        reason: Deprecated compatibility alias for EntityIdentityGenerator pending follow-up domain naming cleanup.
-      - symbol: MergedMetadataExplainabilityService
-        path: src/bioetl/domain/services/merged_metadata_explainability.py
-        issue: "#3400"
-        reason: Existing domain service surface pending canonical rename decision.
-      - symbol: NormalizationService
-        path: src/bioetl/domain/services/normalization_service.py
-        issue: "#3400"
-        reason: Existing domain service surface pending canonical rename decision.
-      - symbol: OrganismClassificationService
-        path: src/bioetl/domain/services/organism_classification_service.py
-        issue: "#3400"
-        reason: Existing domain service surface pending canonical rename decision.
-      - symbol: PhasedMigrationSupportService
-        path: src/bioetl/domain/services/phased_migration_support.py
-        issue: "#3400"
-        reason: Existing domain service surface pending canonical rename decision.
-      - symbol: PreflightGovernanceService
-        path: src/bioetl/domain/services/preflight_governance.py
-        issue: "#3400"
-        reason: Deprecated compatibility alias for PreflightGovernor pending follow-up domain naming cleanup.
 
 family_freeze_rules:
   - rule_id: runtime_admin_checkpoint_quarantine_family
     description: >
       Checkpoint/quarantine runtime-admin naming is role-driven: runtime write
-      collaborators use *RuntimeService, operator/admin services use *Service,
-      and manager-style names are compatibility aliases only.
+      collaborators use *RuntimeService and operator/admin services use
+      *Service. Manager-style names are retired from first-party code.
     include_path_prefixes:
       - src/bioetl/application/core/
       - src/bioetl/application/services/
       - src/bioetl/composition/
-    match_regex: ^(Checkpoint(?:Runtime|Manager)?Service|Quarantine(?:Runtime|Manager)?Service)$
+    match_regex: ^(CheckpointRuntimeService|QuarantineRuntimeService|CheckpointService|QuarantineService)$
     allowed_symbols:
       - symbol: CheckpointRuntimeService
         path: src/bioetl/application/core/lifecycle/checkpoint_manager.py

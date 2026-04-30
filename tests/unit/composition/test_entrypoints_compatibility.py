@@ -103,7 +103,34 @@ def test_resource_management_api_alias_warns_and_reexports_resources_api() -> No
     from bioetl.composition import resources_api
 
     assert alias_module.__all__ == resources_api.__all__
-    assert alias_module.get_checkpoint_manager is resources_api.get_checkpoint_manager
+    assert (
+        alias_module.get_checkpoint_runtime_service
+        is resources_api.get_checkpoint_runtime_service
+    )
+
+
+@pytest.mark.unit
+def test_composition_package_root_surface_stays_frozen() -> None:
+    """Package root should keep the reviewed lazy-export budget exactly bounded."""
+    composition_module = importlib.import_module("bioetl.composition")
+
+    assert set(composition_module.__all__) == {
+        "PipelineDefinition",
+        "PipelineRegistry",
+        "composite_api",
+        "control_plane_api",
+        "create_registry",
+        "entrypoints",
+        "execution_api",
+        "get_default_registry",
+        "health_api",
+        "maintenance_api",
+        "observability_api",
+        "registry_api",
+        "resources_api",
+        "types",
+    }
+    assert len(composition_module.__all__) <= 14
 
 
 @pytest.mark.unit

@@ -89,7 +89,7 @@ class TestQuarantineInspect:
         mock_quarantine_manager.inspect = AsyncMock(return_value=[])
 
         with patch(
-            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_manager",
+            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_runtime_service",
             return_value=mock_quarantine_manager,
         ):
             result = cli_runner.invoke(
@@ -119,7 +119,7 @@ class TestQuarantineInspect:
         mock_quarantine_manager.inspect = AsyncMock(return_value=sample_records)
 
         with patch(
-            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_manager",
+            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_runtime_service",
             return_value=mock_quarantine_manager,
         ):
             result = cli_runner.invoke(
@@ -140,7 +140,7 @@ class TestQuarantineInspect:
         mock_quarantine_manager.inspect = AsyncMock(return_value=[])
 
         with patch(
-            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_manager",
+            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_runtime_service",
             return_value=mock_quarantine_manager,
         ):
             result = cli_runner.invoke(
@@ -171,7 +171,7 @@ class TestQuarantineInspect:
         mock_quarantine_manager.inspect = AsyncMock(return_value=[])
 
         with patch(
-            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_manager",
+            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_runtime_service",
             return_value=mock_quarantine_manager,
         ):
             result = cli_runner.invoke(
@@ -201,7 +201,7 @@ class TestQuarantineInspect:
         mock_quarantine_manager.inspect = AsyncMock(return_value=[])
 
         with patch(
-            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_manager",
+            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_runtime_service",
             return_value=mock_quarantine_manager,
         ):
             result = cli_runner.invoke(
@@ -230,7 +230,7 @@ class TestQuarantineInspect:
         mock_quarantine_manager.inspect = AsyncMock(return_value=[])
 
         with patch(
-            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_manager",
+            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_runtime_service",
             return_value=mock_quarantine_manager,
         ):
             result = cli_runner.invoke(
@@ -287,7 +287,7 @@ class TestQuarantineStats:
         )
 
         with patch(
-            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_manager",
+            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_runtime_service",
             return_value=mock_quarantine_manager,
         ):
             result = cli_runner.invoke(
@@ -313,7 +313,7 @@ class TestQuarantineStats:
         )
 
         with patch(
-            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_manager",
+            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_runtime_service",
             return_value=mock_quarantine_manager,
         ):
             result = cli_runner.invoke(
@@ -353,7 +353,7 @@ class TestQuarantineStats:
         )
 
         with patch(
-            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_manager",
+            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_runtime_service",
             return_value=mock_quarantine_manager,
         ):
             result = cli_runner.invoke(
@@ -410,7 +410,7 @@ class TestQuarantineStats:
         )
 
         with patch(
-            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_manager",
+            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_runtime_service",
             return_value=mock_quarantine_manager,
         ):
             with patch(
@@ -469,7 +469,7 @@ class TestQuarantineStats:
         )
 
         with patch(
-            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_manager",
+            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_runtime_service",
             return_value=mock_quarantine_manager,
         ):
             result = cli_runner.invoke(
@@ -520,7 +520,7 @@ class TestQuarantineStats:
         )
 
         with patch(
-            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_manager",
+            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_runtime_service",
             return_value=mock_quarantine_manager,
         ):
             result = cli_runner.invoke(
@@ -572,7 +572,7 @@ class TestQuarantineStats:
         )
 
         with patch(
-            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_manager",
+            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_runtime_service",
             return_value=mock_quarantine_manager,
         ):
             result = cli_runner.invoke(
@@ -619,7 +619,7 @@ class TestQuarantineStats:
         )
 
         with patch(
-            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_manager",
+            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_runtime_service",
             return_value=mock_quarantine_manager,
         ):
             result = cli_runner.invoke(
@@ -654,7 +654,7 @@ class TestQuarantineStats:
         mock_quarantine_manager.get_stats = AsyncMock(return_value=stats_data)
 
         with patch(
-            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_manager",
+            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_runtime_service",
             return_value=mock_quarantine_manager,
         ):
             result = cli_runner.invoke(
@@ -679,7 +679,7 @@ class TestQuarantineStats:
         )
 
         with patch(
-            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_manager",
+            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_runtime_service",
             return_value=mock_quarantine_manager,
         ):
             result = cli_runner.invoke(
@@ -701,7 +701,7 @@ class TestQuarantineStats:
         )
 
         with patch(
-            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_manager",
+            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_runtime_service",
             return_value=mock_quarantine_manager,
         ):
             result = cli_runner.invoke(
@@ -1183,7 +1183,7 @@ class TestQuarantineResolve:
 class TestQuarantineEdgeCases:
     """Test edge cases and error handling for quarantine commands."""
 
-    @patch("bioetl.interfaces.cli.commands.quarantine.get_quarantine_manager")
+    @patch("bioetl.interfaces.cli.commands.quarantine.get_quarantine_runtime_service")
     def test_inspect_displays_info_message(
         self,
         mock_get_manager: MagicMock,

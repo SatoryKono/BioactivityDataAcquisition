@@ -139,8 +139,8 @@ import paths.
 Сборка `BasePublicationTransformer` теперь использует паттерн Стратегия вместо Template Method. При инстанцировании через `GenericPipelineFactory` могут быть внедрены `DataExtractorStrategy`, `IdentifierResolverStrategy` и `PublicationMetadataStrategy`, что устраняет проблему "God Object" и позволяет переиспользовать логику между провайдерами без наследования.
 
 Начиная с `RF-014`, composition также остаётся канонической точкой сборки
-`TransformerDependencyContext`: `NoOp` observability ports, `IdentityService`,
-`DataNormalizationService` и `ContractPolicyPort` должны собираться здесь, а не
+`TransformerDependencyContext`: `NoOp` observability ports, `EntityIdentityGenerator`,
+`DefaultDataNormalizer` и `ContractPolicyPort` должны собираться здесь, а не
 неявно внутри `BaseTransformer`.
 
 **Root-level файлы и публичные seams:**
@@ -163,11 +163,18 @@ import paths.
   они остаются стабильными для внешнего import/patch contract, но новые
   first-party `src/` imports туда не добавляются.
 - `composite_api.py`, `observability_api.py` — узкие façade-модули для composite runtime
+<<<<<<< Updated upstream
   и observability-related call sites; `observability_api.py` является каноническим
   public seam для metrics bootstrap, Pushgateway publication и operator diagnostics bundle.
   Metrics publication route проходит через `MetricsService` и composition-owned
   publisher adapter, а selection `NoOpMetrics` / `NoOpTracing` централизована в
   `observability_resolution.py`.
+||||||| Stash base
+  и observability-related call sites.
+=======
+  и observability-related call sites; `observability_api.py` является каноническим
+  public seam для metrics bootstrap и operator diagnostics bundle.
+>>>>>>> Stashed changes
 - `_pipeline_execution.py`, `_resource_management.py`, `_services.py` — internal implementation
   modules; прямые импорты вне `composition/` запрещены policy-тестами.
 

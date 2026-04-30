@@ -32,8 +32,7 @@ def _make_orchestrator(
 ) -> OpenAlexFallbackOrchestrator:
     """Build an OpenAlexFallbackOrchestrator with injectable collaborators."""
     return OpenAlexFallbackOrchestrator(
-        fallback_fetch_service=service
-        or MagicMock(spec=FallbackFetchOrchestrator),
+        fallback_fetch_service=service or MagicMock(spec=FallbackFetchOrchestrator),
         fallback_handler=fallback_handler or MagicMock(),
         normalize_id=normalize_id or (lambda doi: doi.strip().lower() if doi else None),
         extract_record_id=extract_record_id or (lambda rec: str(rec.get("id", ""))),

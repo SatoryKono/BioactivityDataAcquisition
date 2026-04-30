@@ -26,7 +26,6 @@ from bioetl.infrastructure.validation.pandera_validator import (
 from tests.unit.infrastructure.storage.silver_writer._test_support import (
     assert_standard_silver_write_succeeds,
     make_silver_writer,
-    patch_new_silver_write,
     silver_table_path,
     write_standard_silver,
 )

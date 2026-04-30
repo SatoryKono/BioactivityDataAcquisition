@@ -12,8 +12,6 @@ directly from their defining submodules:
 - ``bioetl.application.core.transformer_runtime`` — Batch-transform helper primitives
 - ``bioetl.application.core.field_transforms``    — Field specs, dict transforms, entity IDs
 - ``bioetl.application.core.lifecycle.checkpoint_manager``  — CheckpointRuntimeService
-  (legacy ``CheckpointManager`` and ``CheckpointManagerService`` aliases remain
-  only for compatibility in the defining module)
 - ``bioetl.application.core.lifecycle.cleanup_service``     — CleanupService, CleanupResult
 - ``bioetl.application.core.lifecycle.lock_manager``        — LockCoordinator
 - ``bioetl.application.core.lifecycle.shutdown``            — ShutdownService, ShutdownSignal

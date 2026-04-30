@@ -1,4 +1,4 @@
-"""Merged metadata explainability service for composite pipelines."""
+"""Merged metadata explainer for composite pipelines."""
 
 from __future__ import annotations
 
@@ -34,8 +34,8 @@ class MergedRecordExplanation:
     enrichment_count: int = 0
 
 
-class MergedMetadataExplainabilityService:
-    """Service for generating explainability metadata for merged records."""
+class MergedMetadataExplainer:
+    """Explainer for merged-record provenance and merge decisions."""
 
     def generate_field_explanation(
         self,
@@ -270,8 +270,6 @@ def _safe_ratio(numerator: int, denominator: int) -> float:
     return numerator / denominator if denominator > 0 else 0.0
 
 
-def create_merged_metadata_explainability_service() -> (
-    MergedMetadataExplainabilityService
-):
-    """Factory function for MergedMetadataExplainabilityService."""
-    return MergedMetadataExplainabilityService()
+def create_merged_metadata_explainability_service() -> MergedMetadataExplainer:
+    """Factory function for the canonical merged metadata explainer."""
+    return MergedMetadataExplainer()

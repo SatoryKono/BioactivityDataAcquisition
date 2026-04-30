@@ -1,4 +1,4 @@
-"""Tests for AuthorNormalizationService.
+"""Tests for AuthorNormalizer.
 
 Tests unified author and affiliation normalization across providers.
 """
@@ -16,7 +16,7 @@ from bioetl.domain.services._author_helpers import (
     normalize_to_surname_initial,
 )
 from bioetl.domain.services.author_normalization_service import (
-    AuthorNormalizationService,
+    AuthorNormalizer,
 )
 
 
@@ -24,11 +24,11 @@ class TestNormalizeAuthorList:
     """Tests for normalize_author_list method."""
 
     @pytest.fixture
-    def service(self) -> AuthorNormalizationService:
+    def service(self) -> AuthorNormalizer:
         """Create service instance."""
-        return AuthorNormalizationService()
+        return AuthorNormalizer()
 
-    def test_list_of_strings(self, service: AuthorNormalizationService) -> None:
+    def test_list_of_strings(self, service: AuthorNormalizer) -> None:
         """Test normalization with list of author name strings."""
         authors = ["John Doe", "Jane Smith"]
         result = service.normalize_author_list(authors)
@@ -39,7 +39,7 @@ class TestNormalizeAuthorList:
         assert len(parsed) == 2
         assert parsed == ["John Doe", "Jane Smith"]
 
-    def test_list_of_dicts_with_name(self, service: AuthorNormalizationService) -> None:
+    def test_list_of_dicts_with_name(self, service: AuthorNormalizer) -> None:
         """Test normalization with list of author dicts (PubMed/CrossRef format)."""
         authors = [
             {"name": "John Doe", "orcid": "0000-0001-2345-6789"},
@@ -52,9 +52,7 @@ class TestNormalizeAuthorList:
         assert len(parsed) == 2
         assert parsed == ["John Doe", "Jane Smith"]
 
-    def test_semicolon_delimited_string(
-        self, service: AuthorNormalizationService
-    ) -> None:
+    def test_semicolon_delimited_string(self, service: AuthorNormalizer) -> None:
         """Test normalization with semicolon-delimited string (ChEMBL format)."""
         authors = "John Doe; Jane Smith; Bob Johnson"
         result = service.normalize_author_list(authors)
@@ -64,7 +62,7 @@ class TestNormalizeAuthorList:
         assert len(parsed) == 3
         assert parsed == ["John Doe", "Jane Smith", "Bob Johnson"]
 
-    def test_comma_delimited_string(self, service: AuthorNormalizationService) -> None:
+    def test_comma_delimited_string(self, service: AuthorNormalizer) -> None:
         """Test normalization with comma-delimited string."""
         authors = "John Doe, Jane Smith, Bob Johnson"
         result = service.normalize_author_list(authors)
@@ -74,7 +72,7 @@ class TestNormalizeAuthorList:
         assert len(parsed) == 3
         assert parsed == ["John Doe", "Jane Smith", "Bob Johnson"]
 
-    def test_json_string_of_names(self, service: AuthorNormalizationService) -> None:
+    def test_json_string_of_names(self, service: AuthorNormalizer) -> None:
         """Test normalization with JSON array string."""
         authors = '["John Doe", "Jane Smith"]'
         result = service.normalize_author_list(authors)
@@ -84,7 +82,7 @@ class TestNormalizeAuthorList:
         assert len(parsed) == 2
         assert parsed == ["John Doe", "Jane Smith"]
 
-    def test_json_string_of_dicts(self, service: AuthorNormalizationService) -> None:
+    def test_json_string_of_dicts(self, service: AuthorNormalizer) -> None:
         """Test normalization with JSON array of dicts."""
         authors = '[{"name": "John Doe"}, {"name": "Jane Smith"}]'
         result = service.normalize_author_list(authors)
@@ -94,18 +92,14 @@ class TestNormalizeAuthorList:
         assert len(parsed) == 2
         assert parsed == ["John Doe", "Jane Smith"]
 
-    def test_empty_inputs_return_none(
-        self, service: AuthorNormalizationService
-    ) -> None:
+    def test_empty_inputs_return_none(self, service: AuthorNormalizer) -> None:
         """Test that empty inputs return None."""
         assert service.normalize_author_list(None) is None
         assert service.normalize_author_list([]) is None
         assert service.normalize_author_list("") is None
         assert service.normalize_author_list("   ") is None
 
-    def test_whitespace_normalization(
-        self, service: AuthorNormalizationService
-    ) -> None:
+    def test_whitespace_normalization(self, service: AuthorNormalizer) -> None:
         """Test that whitespace is normalized in author names."""
         authors = ["  John Doe  ", "Jane Smith"]
         result = service.normalize_author_list(authors)
@@ -115,9 +109,7 @@ class TestNormalizeAuthorList:
         expected = service.normalize_author_list(["John Doe", "Jane Smith"])
         assert result == expected
 
-    def test_case_preserved_in_output(
-        self, service: AuthorNormalizationService
-    ) -> None:
+    def test_case_preserved_in_output(self, service: AuthorNormalizer) -> None:
         """Test that case is preserved in normalized output."""
         result = service.normalize_author_list(["John Doe"])
 
@@ -125,7 +117,7 @@ class TestNormalizeAuthorList:
         parsed = json.loads(result)
         assert parsed == ["John Doe"]
 
-    def test_deterministic_output(self, service: AuthorNormalizationService) -> None:
+    def test_deterministic_output(self, service: AuthorNormalizer) -> None:
         """Test that normalization is deterministic."""
         authors = ["John Doe"]
         result1 = service.normalize_author_list(authors)
@@ -138,11 +130,11 @@ class TestNormalizeAffiliations:
     """Tests for normalize_affiliations method."""
 
     @pytest.fixture
-    def service(self) -> AuthorNormalizationService:
+    def service(self) -> AuthorNormalizer:
         """Create service instance."""
-        return AuthorNormalizationService()
+        return AuthorNormalizer()
 
-    def test_list_of_strings(self, service: AuthorNormalizationService) -> None:
+    def test_list_of_strings(self, service: AuthorNormalizer) -> None:
         """Test normalization with list of affiliation strings."""
         affiliations = ["MIT", "Harvard University", "Stanford"]
         result = service.normalize_affiliations(affiliations)
@@ -152,9 +144,7 @@ class TestNormalizeAffiliations:
         assert len(parsed) == 3
         assert sorted(parsed) == parsed  # Should be sorted
 
-    def test_case_insensitive_deduplication(
-        self, service: AuthorNormalizationService
-    ) -> None:
+    def test_case_insensitive_deduplication(self, service: AuthorNormalizer) -> None:
         """Test that affiliations are deduplicated case-insensitively."""
         affiliations = ["MIT", "mit", "Harvard", "HARVARD", "Stanford"]
         result = service.normalize_affiliations(affiliations)
@@ -168,9 +158,7 @@ class TestNormalizeAffiliations:
         assert "Harvard" in parsed
         assert "Stanford" in parsed
 
-    def test_whitespace_normalization(
-        self, service: AuthorNormalizationService
-    ) -> None:
+    def test_whitespace_normalization(self, service: AuthorNormalizer) -> None:
         """Test that whitespace is normalized in affiliations."""
         affiliations = ["  MIT  ", "MIT", "  MIT"]
         result = service.normalize_affiliations(affiliations)
@@ -181,7 +169,7 @@ class TestNormalizeAffiliations:
         assert len(parsed) == 1
         assert parsed[0] == "MIT"
 
-    def test_html_cleanup(self, service: AuthorNormalizationService) -> None:
+    def test_html_cleanup(self, service: AuthorNormalizer) -> None:
         """Test that HTML tags are removed from affiliations."""
         affiliations = ["<b>MIT</b>", "Harvard &amp; MIT"]
         result = service.normalize_affiliations(affiliations)
@@ -191,9 +179,7 @@ class TestNormalizeAffiliations:
         assert "MIT" in parsed
         assert "Harvard & MIT" in parsed
 
-    def test_list_of_dicts_with_name_key(
-        self, service: AuthorNormalizationService
-    ) -> None:
+    def test_list_of_dicts_with_name_key(self, service: AuthorNormalizer) -> None:
         """Test normalization with dicts containing 'name' key (CrossRef format)."""
         affiliations = [{"name": "MIT"}, {"name": "Harvard"}]
         result = service.normalize_affiliations(affiliations)
@@ -205,7 +191,7 @@ class TestNormalizeAffiliations:
         assert "Harvard" in parsed
 
     def test_list_of_dicts_with_display_name_key(
-        self, service: AuthorNormalizationService
+        self, service: AuthorNormalizer
     ) -> None:
         """Test normalization with dicts containing 'display_name' key (OpenAlex)."""
         affiliations = [
@@ -218,14 +204,12 @@ class TestNormalizeAffiliations:
         parsed = json.loads(result)
         assert len(parsed) == 2
 
-    def test_empty_inputs_return_none(
-        self, service: AuthorNormalizationService
-    ) -> None:
+    def test_empty_inputs_return_none(self, service: AuthorNormalizer) -> None:
         """Test that empty inputs return None."""
         assert service.normalize_affiliations(None) is None
         assert service.normalize_affiliations([]) is None
 
-    def test_sorted_output(self, service: AuthorNormalizationService) -> None:
+    def test_sorted_output(self, service: AuthorNormalizer) -> None:
         """Test that output is sorted alphabetically."""
         affiliations = ["Stanford", "MIT", "Harvard", "Berkeley"]
         result = service.normalize_affiliations(affiliations)
@@ -239,13 +223,11 @@ class TestExtractAffiliationsFromAuthors:
     """Tests for extract_affiliations_from_authors method."""
 
     @pytest.fixture
-    def service(self) -> AuthorNormalizationService:
+    def service(self) -> AuthorNormalizer:
         """Create service instance."""
-        return AuthorNormalizationService()
+        return AuthorNormalizer()
 
-    def test_extract_from_author_dicts(
-        self, service: AuthorNormalizationService
-    ) -> None:
+    def test_extract_from_author_dicts(self, service: AuthorNormalizer) -> None:
         """Test extraction from author dicts with affiliations."""
         authors = [
             {"name": "John Doe", "affiliations": ["MIT", "Harvard"]},
@@ -256,9 +238,7 @@ class TestExtractAffiliationsFromAuthors:
         assert len(result) == 3
         assert sorted(result) == ["Harvard", "MIT", "Stanford"]
 
-    def test_deduplication_across_authors(
-        self, service: AuthorNormalizationService
-    ) -> None:
+    def test_deduplication_across_authors(self, service: AuthorNormalizer) -> None:
         """Test that affiliations are deduplicated across authors."""
         authors = [
             {"name": "John Doe", "affiliations": ["MIT", "Harvard"]},
@@ -271,7 +251,7 @@ class TestExtractAffiliationsFromAuthors:
         assert len(result) == 3
         assert set(result) == {"MIT", "Harvard", "Stanford"}
 
-    def test_empty_affiliations(self, service: AuthorNormalizationService) -> None:
+    def test_empty_affiliations(self, service: AuthorNormalizer) -> None:
         """Test handling of authors without affiliations."""
         authors = [
             {"name": "John Doe", "affiliations": []},
@@ -281,9 +261,7 @@ class TestExtractAffiliationsFromAuthors:
 
         assert result == []
 
-    def test_single_affiliation_string(
-        self, service: AuthorNormalizationService
-    ) -> None:
+    def test_single_affiliation_string(self, service: AuthorNormalizer) -> None:
         """Test handling of single affiliation as string (not list)."""
         authors = [
             {"name": "John Doe", "affiliations": "MIT"},
@@ -407,42 +385,40 @@ class TestNormalizeToSurnameInitial:
 
 
 class TestNormalizeAuthorKeys:
-    """Tests for normalize_author_keys method on AuthorNormalizationService."""
+    """Tests for normalize_author_keys method on AuthorNormalizer."""
 
     @pytest.fixture
-    def service(self) -> AuthorNormalizationService:
-        return AuthorNormalizationService()
+    def service(self) -> AuthorNormalizer:
+        return AuthorNormalizer()
 
-    def test_list_of_strings(self, service: AuthorNormalizationService) -> None:
+    def test_list_of_strings(self, service: AuthorNormalizer) -> None:
         """Test pipe-delimited output from list of name strings."""
         result = service.normalize_author_keys(["John Doe", "Jane Smith"])
         assert result == "Doe_J|Smith_J"
 
-    def test_list_of_dicts(self, service: AuthorNormalizationService) -> None:
+    def test_list_of_dicts(self, service: AuthorNormalizer) -> None:
         """Test with list of author dicts (name key)."""
         authors = [{"name": "John Doe"}, {"name": "Jane Smith"}]
         result = service.normalize_author_keys(authors)
         assert result == "Doe_J|Smith_J"
 
-    def test_semicolon_delimited_chembl(
-        self, service: AuthorNormalizationService
-    ) -> None:
+    def test_semicolon_delimited_chembl(self, service: AuthorNormalizer) -> None:
         """Test with ChEMBL semicolon-delimited string."""
         result = service.normalize_author_keys("Smith J; Doe JA; Zhou X")
         assert result == "Smith_J|Doe_J|Zhou_X"
 
-    def test_empty_returns_none(self, service: AuthorNormalizationService) -> None:
+    def test_empty_returns_none(self, service: AuthorNormalizer) -> None:
         """Test that empty inputs return None."""
         assert service.normalize_author_keys(None) is None
         assert service.normalize_author_keys([]) is None
         assert service.normalize_author_keys("") is None
 
-    def test_single_author(self, service: AuthorNormalizationService) -> None:
+    def test_single_author(self, service: AuthorNormalizer) -> None:
         """Test with single author (no pipe delimiter)."""
         result = service.normalize_author_keys(["John Doe"])
         assert result == "Doe_J"
 
-    def test_mixed_formats(self, service: AuthorNormalizationService) -> None:
+    def test_mixed_formats(self, service: AuthorNormalizer) -> None:
         """Test with mixed name formats in one list."""
         result = service.normalize_author_keys(
             ["John Doe", "Smith, J", "X. Zhou", "WHO"]

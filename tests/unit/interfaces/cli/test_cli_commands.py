@@ -926,7 +926,7 @@ class TestEchoFunctions:
 
 @pytest.fixture
 def mock_quarantine_manager():
-    """Create a mock QuarantineManager."""
+    """Create a mock QuarantineRuntimeService."""
     manager = MagicMock()
     # echo_quarantine_record expects dict[str, Any], not dataclass
     manager.inspect = AsyncMock(
@@ -970,7 +970,7 @@ class TestQuarantineInspectCommand:
     def test_quarantine_inspect_success(self, cli_runner, mock_quarantine_manager):
         """Test successful quarantine inspection."""
         with patch(
-            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_manager",
+            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_runtime_service",
             return_value=mock_quarantine_manager,
         ):
             result = cli_runner.invoke(
@@ -987,7 +987,7 @@ class TestQuarantineInspectCommand:
     ):
         """Test quarantine inspection with custom limit."""
         with patch(
-            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_manager",
+            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_runtime_service",
             return_value=mock_quarantine_manager,
         ):
             result = cli_runner.invoke(
@@ -1013,7 +1013,7 @@ class TestQuarantineInspectCommand:
         mock_manager.inspect = AsyncMock(return_value=[])
 
         with patch(
-            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_manager",
+            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_runtime_service",
             return_value=mock_manager,
         ):
             result = cli_runner.invoke(
@@ -1041,7 +1041,7 @@ class MockCheckpoint:
 
 @pytest.fixture
 def mock_checkpoint_manager():
-    """Create a mock CheckpointManager."""
+    """Create a mock CheckpointRuntimeService."""
     manager = MagicMock()
     manager.list_all = AsyncMock(
         return_value=[
@@ -1083,7 +1083,7 @@ class TestCheckpointListCommand:
     def test_checkpoint_list_success(self, cli_runner, mock_checkpoint_manager):
         """Test successful checkpoint listing."""
         with patch(
-            "bioetl.interfaces.cli.commands.checkpoint.get_checkpoint_manager",
+            "bioetl.interfaces.cli.commands.checkpoint.get_checkpoint_runtime_service",
             return_value=mock_checkpoint_manager,
         ):
             result = cli_runner.invoke(

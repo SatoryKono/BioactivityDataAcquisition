@@ -10,7 +10,7 @@ all work is delegated to canonical ``bioetl.domain.normalization`` helpers.
 
 Inheritance chain::
 
-    AuthorNormalizationService          (author + affiliation logic)
+    AuthorNormalizer          (author + affiliation logic)
         └── DefaultDataNormalizer  (adds DOI, PMID, date, text delegation)
 
 Delegated helper modules:
@@ -27,7 +27,7 @@ Cross-reference
 For ChEMBL-specific bioactivity scalar normalization (unit conversion,
 pChEMBL calculation, potency classification, batch aggregation) see
 :mod:`bioetl.domain.services.normalization_service`
-(``NormalizationService``).
+(``BioactivityNormalizer``).
 
 Pure domain service (no I/O) per RULES.md §1.1.
 """
@@ -71,7 +71,7 @@ from bioetl.domain.normalization.text import (
     strip_html_tags as _strip_html_tags,
 )
 from bioetl.domain.services.author_normalization_service import (
-    AuthorNormalizationService,
+    AuthorNormalizer,
 )
 from bioetl.domain.services.data_normalization_config import DataNormalizationConfig
 
@@ -80,15 +80,14 @@ if TYPE_CHECKING:
 
 __all__ = [
     "DefaultDataNormalizer",
-    "DefaultDataNormalizationService",
 ]
 
 
 @dataclass(frozen=True, slots=True)
-class DefaultDataNormalizer(AuthorNormalizationService):
+class DefaultDataNormalizer(AuthorNormalizer):
     """Facade for data normalization, delegating to specialized services.
 
-    Inherits author/affiliation normalization from AuthorNormalizationService.
+    Inherits author/affiliation normalization from AuthorNormalizer.
     Delegates identifier, date, and text normalization to pure helper modules.
     Maintains backward-compatible API as per DataNormalizationPort.
     """
@@ -232,7 +231,3 @@ class DefaultDataNormalizer(AuthorNormalizationService):
             Normalized abstract or None.
         """
         return _normalize_abstract(abstract)
-
-
-# Deprecated compatibility alias retained during ADR-041 migration.
-DefaultDataNormalizationService = DefaultDataNormalizer

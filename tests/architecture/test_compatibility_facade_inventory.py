@@ -31,9 +31,7 @@ SNAPSHOT_SCRIPT = (
     / "qa"
     / "generate_compatibility_facade_snapshot.py"
 )
-NAMING_AUDIT_SCRIPT = (
-    ROOT / "scripts" / "engineering" / "qa" / "naming_audit.py"
-)
+NAMING_AUDIT_SCRIPT = ROOT / "scripts" / "engineering" / "qa" / "naming_audit.py"
 COMPOSITION_DOC = ROOT / "docs" / "02-architecture" / "05-composition-layer.md"
 REGISTRY_GUIDE = ROOT / "docs" / "03-guides" / "registry-pattern.md"
 INVENTORY_ROW_CELL_COUNT = 10

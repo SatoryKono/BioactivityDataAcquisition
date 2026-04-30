@@ -18,8 +18,8 @@ from bioetl.domain.services.composite_validation_helpers import (
 from bioetl.domain.services.cross_validation_validator import CrossValidationValidator
 from bioetl.domain.services.preflight_governance import (
     GovernancePolicy,
-    PreflightGovernor,
     PreflightGovernanceConfig,
+    PreflightGovernor,
 )
 from bioetl.domain.services.validation_result_envelopes import (
     build_validation_result,
@@ -48,8 +48,8 @@ class CompositeValidationConfig:
     governance_policy: GovernancePolicy = GovernancePolicy.BLOCK_ON_BLOCKERS_ONLY
 
 
-class CompositeValidationService:
-    """Service for structural and deep-preflight composite validation."""
+class CompositeValidator:
+    """Validator for structural and deep-preflight composite checks."""
 
     def __init__(
         self,
@@ -290,15 +290,12 @@ class CompositeValidationService:
         ]
 
     def _is_valid_field_priorities(self, priorities: JsonDict) -> bool:
-        is_valid: bool = _is_valid_field_priorities(priorities)
-        return is_valid
+        return _is_valid_field_priorities(priorities)
 
     @staticmethod
     def _extract_priority(priority_config: object) -> object | None:
-        priority: object | None = _extract_priority(priority_config)
-        return priority
+        return _extract_priority(priority_config)
 
     @staticmethod
     def _is_valid_lineage_config(config: JsonDict) -> bool:
-        is_valid: bool = _is_valid_lineage_config(config)
-        return is_valid
+        return _is_valid_lineage_config(config)
