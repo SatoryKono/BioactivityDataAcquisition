@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-30T06:47:53.044298+00:00",
+  "generated_at": "2026-04-30T06:56:07.984633+00:00",
   "summary": {
     "total_scripts": 356,
     "status_counts": {
@@ -7525,7 +7525,7 @@
         },
         {
           "path": "tests/architecture/test_layer_aware_suffix_policy.py",
-          "line": 12,
+          "line": 13,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"qa\" / \"check_naming_package_consistency.py\""
         }
