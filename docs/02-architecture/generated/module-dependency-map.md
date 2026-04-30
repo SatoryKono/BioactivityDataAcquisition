@@ -111,11 +111,11 @@ flowchart LR
 | `composition.bootstrap`        | `infrastructure.observability`  |      14 |
 | `infrastructure.schemas`       | `domain.config`                 |      14 |
 | `application.pipelines`        | `domain.context`                |      13 |
-| `application.pipelines`        | `domain.services`               |      13 |
-| `composition.factories`        | `domain.services`               |      13 |
+| `application.pipelines`        | `domain.behavior`               |      13 |
+| `composition.factories`        | `domain.behavior`               |      13 |
 | `composition.runtime_builders` | `domain.control_plane`          |      13 |
 | `application.services`         | `domain.lineage`                |      12 |
-| `application.services`         | `domain.services`               |      12 |
+| `application.services`         | `domain.behavior`               |      12 |
 | `composition.factories`        | `domain.context`                |      12 |
 | `composition.runtime_builders` | `infrastructure.config`         |      12 |
 | `infrastructure.adapters`      | `domain.models`                 |      12 |

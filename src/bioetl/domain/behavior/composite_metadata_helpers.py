@@ -13,12 +13,12 @@ from collections.abc import Mapping, Sequence
 from datetime import datetime
 from typing import cast
 
+from bioetl.domain.behavior.composite_metadata_cv import summarize_composite_cv_dq
 from bioetl.domain.composite.lineage import CompositeLineageMetadata
 from bioetl.domain.models.metadata import (
     CompositeOutputExt,
     CompositeSchemaValidationMetadata,
 )
-from bioetl.domain.behavior.composite_metadata_cv import summarize_composite_cv_dq
 
 __all__ = [
     "extract_composite_lineage_metadata",

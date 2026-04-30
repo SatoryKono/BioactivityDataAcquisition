@@ -37,6 +37,10 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
+from bioetl.domain.behavior.author_normalization_service import (
+    AuthorNormalizer,
+)
+from bioetl.domain.behavior.data_normalization_config import DataNormalizationConfig
 from bioetl.domain.normalization.dates import (
     format_date_parts as _format_date_parts,
 )
@@ -70,10 +74,6 @@ from bioetl.domain.normalization.text import (
 from bioetl.domain.normalization.text import (
     strip_html_tags as _strip_html_tags,
 )
-from bioetl.domain.behavior.author_normalization_service import (
-    AuthorNormalizer,
-)
-from bioetl.domain.behavior.data_normalization_config import DataNormalizationConfig
 
 if TYPE_CHECKING:
     from collections.abc import Sequence

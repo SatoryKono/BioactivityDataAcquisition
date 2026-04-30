@@ -202,23 +202,19 @@ def render_score_payload(payload: dict[str, object]) -> str:
         f"  identifier: {format_scalar(payload.get('identifier'))}",
         f"  manifest_id: {format_scalar(payload.get('manifest_id'))}",
         f"  run_id: {format_scalar(payload.get('run_id'))}",
-        "  run_scoped_score: "
-        f"{format_scalar(score.get('overall_score'))}",
+        f"  run_scoped_score: {format_scalar(score.get('overall_score'))}",
         f"  score_scope: {format_scalar(score.get('score_scope'))}",
         f"  required_profile: {format_scalar(score.get('required_profile'))}",
-        "  thresholds_satisfied: "
-        f"{format_scalar(score.get('thresholds_satisfied'))}",
+        f"  thresholds_satisfied: {format_scalar(score.get('thresholds_satisfied'))}",
     ]
     if isinstance(boundary_verdict, dict):
         lines.extend(
             [
                 "  supported_boundary_verdict:",
-                "    verdict: "
-                f"{format_scalar(boundary_verdict.get('verdict'))}",
+                f"    verdict: {format_scalar(boundary_verdict.get('verdict'))}",
                 "    supported_boundary_satisfied: "
                 f"{format_scalar(boundary_verdict.get('supported_boundary_satisfied'))}",
-                "    reason: "
-                f"{format_scalar(boundary_verdict.get('reason'))}",
+                f"    reason: {format_scalar(boundary_verdict.get('reason'))}",
                 "    exact_replay_support_boundary: "
                 f"{format_scalar(boundary_verdict.get('exact_replay_support_boundary'))}",
             ]

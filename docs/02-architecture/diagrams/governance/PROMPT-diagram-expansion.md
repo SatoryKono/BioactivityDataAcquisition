@@ -168,12 +168,12 @@ src/bioetl/domain/entities/crossref.py
 src/bioetl/domain/entities/pubmed.py
 
 # Domain Layer — Services
-src/bioetl/domain/services/data-normalization-service.py
-src/bioetl/domain/services/identity-service.py
-src/bioetl/domain/services/unit-converter.py
-src/bioetl/domain/services/activity-aggregator.py
-src/bioetl/domain/services/value-validator.py
-src/bioetl/domain/services/dq-serializer.py
+src/bioetl/domain/behavior/data-normalization-service.py
+src/bioetl/domain/behavior/identity-service.py
+src/bioetl/domain/behavior/unit-converter.py
+src/bioetl/domain/behavior/activity-aggregator.py
+src/bioetl/domain/behavior/value-validator.py
+src/bioetl/domain/behavior/dq-serializer.py
 
 # Domain Layer — Exceptions & Types
 src/bioetl/domain/exceptions/__init__.py

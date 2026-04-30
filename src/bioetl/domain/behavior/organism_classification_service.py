@@ -4,11 +4,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from bioetl.domain.mapping.organism_classification import (
-    OrganismClassificationResult,
-    classify_organism,
-    normalize_organism_name,
-)
 from bioetl.domain.behavior.organism_classification_service_filtering import (
     build_filter_strategy,
 )
@@ -19,6 +14,11 @@ from bioetl.domain.behavior.organism_classification_service_models import (
     _OUT_CLASSIFICATION_SOURCE,
     _OUT_NORMALIZED_ORGANISM,
     ClassificationStats,
+)
+from bioetl.domain.mapping.organism_classification import (
+    OrganismClassificationResult,
+    classify_organism,
+    normalize_organism_name,
 )
 from bioetl.domain.types import CellularityType, JsonDict
 

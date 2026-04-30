@@ -127,7 +127,7 @@ hash: "a1b2c3...finalhash...7890"
 ### EffectiveConfigService
 
 ```python
-from bioetl.domain.services.effective_config_service import EffectiveConfigService
+from bioetl.domain.behavior.effective_config_service import EffectiveConfigService
 
 service = EffectiveConfigService()
 ```
@@ -664,7 +664,7 @@ git status configs/
 3. **Review Migration Status**:
 
 ```python
-from bioetl.domain.services.phased_migration_support import (
+from bioetl.domain.behavior.phased_migration_support import (
     PhasedMigrationCoordinator,
 )
 

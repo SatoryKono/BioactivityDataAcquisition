@@ -236,7 +236,7 @@ For faster inner loops, prefer markers and narrow paths over broad full-suite ru
 
 ```bash
 uv run pytest tests/unit/domain/ -q
-uv run pytest tests/unit/domain/services/ -k "cross_validation or aggregation"
+uv run pytest tests/unit/domain/behavior/ -k "cross_validation or aggregation"
 uv run pytest tests/architecture/ -q --tb=short
 uv run pytest tests/ -p no:xdist --lf
 ```

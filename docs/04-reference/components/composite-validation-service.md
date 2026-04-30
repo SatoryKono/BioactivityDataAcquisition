@@ -23,7 +23,7 @@ default service wiring now lives in
 
 Source of truth:
 
-- `src/bioetl/domain/services/composite_validation_layer.py`
+- `src/bioetl/domain/behavior/composite_validation_layer.py`
 
 ## Public API
 

@@ -34,7 +34,7 @@ shards:
   - name: S1-domain-services
     wave: 1
     paths:
-      - tests/unit/domain/services
+      - tests/unit/domain/behavior
       - tests/unit/domain/control_plane
       - tests/unit/domain/config
       - tests/unit/domain/configs

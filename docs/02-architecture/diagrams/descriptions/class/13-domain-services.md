@@ -17,7 +17,7 @@ ______________________________________________________________________
 
 ## Описание
 
-Диаграмма Domain Services показывает архитектурный срез семейства `bioetl.domain.services` и фиксирует роли pure domain services без I/O. Её следует читать как representative class view: схема помогает увидеть основные service families и точки расширения, но не является исчерпывающим каталогом всей текущей кодовой поверхности. Ключевые элементы для быстрого чтения: `EntityIdentityGenerator`, `BioactivityNormalizer`, `DefaultDataNormalizer`, `AuthorNormalizer`, `ActivityAggregator`, `UnitConverter`. Этот срез полезен при ревью инвариантов domain layer и проверке того, что новые сервисы не протаскивают инфраструктурные зависимости в `domain`.
+Диаграмма Domain Services показывает архитектурный срез семейства `bioetl.domain.behavior` и фиксирует роли pure domain services без I/O. Её следует читать как representative class view: схема помогает увидеть основные service families и точки расширения, но не является исчерпывающим каталогом всей текущей кодовой поверхности. Ключевые элементы для быстрого чтения: `EntityIdentityGenerator`, `BioactivityNormalizer`, `DefaultDataNormalizer`, `AuthorNormalizer`, `ActivityAggregator`, `UnitConverter`. Этот срез полезен при ревью инвариантов domain layer и проверке того, что новые сервисы не протаскивают инфраструктурные зависимости в `domain`.
 
 ## Метаданные
 

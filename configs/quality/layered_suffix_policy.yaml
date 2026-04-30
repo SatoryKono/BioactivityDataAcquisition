@@ -17,66 +17,99 @@ function_suffix_rules:
       - symbol: bootstrap_checkpoint_port
         path: src/bioetl/composition/bootstrap/assembly/checkpoint.py
         issue: "#3442"
+        owner: "@bioetl-architecture"
+        expires_on: "2026-12-31"
+        removal_step: Remove after bootstrap port factories are consolidated to canonical runtime builders.
         reason: >
           Reviewed bootstrap factory that constructs the checkpoint port
           implementation for CLI/runtime wiring.
       - symbol: bootstrap_composite_checkpoint_port
         path: src/bioetl/composition/bootstrap/assembly/checkpoint.py
         issue: "#3442"
+        owner: "@bioetl-architecture"
+        expires_on: "2026-12-31"
+        removal_step: Remove after composite checkpoint wiring no longer requires compatibility factory seams.
         reason: >
           Reviewed bootstrap factory that constructs the composite checkpoint
           port for runtime resume and repair flows.
       - symbol: bootstrap_quarantine_port
         path: src/bioetl/composition/bootstrap/assembly/checkpoint.py
         issue: "#3442"
+        owner: "@bioetl-architecture"
+        expires_on: "2026-12-31"
+        removal_step: Remove after quarantine port wiring is fully collapsed to canonical bootstrap composition APIs.
         reason: >
           Reviewed bootstrap factory that constructs the quarantine port
           implementation for CLI/runtime wiring.
       - symbol: bootstrap_dq_monitor_port
         path: src/bioetl/composition/bootstrap/runtime/dq_bootstrap.py
         issue: "#3442"
+        owner: "@bioetl-observability"
+        expires_on: "2026-12-31"
+        removal_step: Remove when runtime observability bootstrap internals are merged and no longer need port-suffixed compatibility wrappers.
         reason: >
           Reviewed observability bootstrap implementation retained behind the
           runtime observability facade.
       - symbol: bootstrap_dq_monitor_port
         path: src/bioetl/composition/bootstrap/runtime/observability.py
         issue: "#3442"
+        owner: "@bioetl-observability"
+        expires_on: "2026-12-31"
+        removal_step: Remove after public observability bootstrap surface is stabilized without *_port compatibility factories.
         reason: >
           Reviewed public runtime observability facade retained as the canonical
           bootstrap seam for DQ monitor port wiring.
       - symbol: bootstrap_logger_port
         path: src/bioetl/composition/bootstrap/runtime/logger_bootstrap.py
         issue: "#3442"
+        owner: "@bioetl-observability"
+        expires_on: "2026-12-31"
+        removal_step: Remove when logger port bootstrap path is canonicalized and compatibility wrappers are deleted.
         reason: >
           Reviewed observability bootstrap implementation retained behind the
           runtime observability facade.
       - symbol: bootstrap_logger_port
         path: src/bioetl/composition/bootstrap/runtime/observability.py
         issue: "#3442"
+        owner: "@bioetl-observability"
+        expires_on: "2026-12-31"
+        removal_step: Remove after observability facade no longer exposes logger *_port bootstrap seam.
         reason: >
           Reviewed public runtime observability facade retained as the canonical
           bootstrap seam for logger port wiring.
       - symbol: bootstrap_metrics_port
         path: src/bioetl/composition/bootstrap/runtime/metrics_bootstrap.py
         issue: "#3442"
+        owner: "@bioetl-observability"
+        expires_on: "2026-12-31"
+        removal_step: Remove when metrics port bootstrap path is canonicalized and compatibility wrappers are deleted.
         reason: >
           Reviewed observability bootstrap implementation retained behind the
           runtime observability facade.
       - symbol: bootstrap_metrics_port
         path: src/bioetl/composition/bootstrap/runtime/observability.py
         issue: "#3442"
+        owner: "@bioetl-observability"
+        expires_on: "2026-12-31"
+        removal_step: Remove after observability facade no longer exposes metrics *_port bootstrap seam.
         reason: >
           Reviewed public runtime observability facade retained as the canonical
           bootstrap seam for metrics port wiring.
       - symbol: bootstrap_tracer_port
         path: src/bioetl/composition/bootstrap/runtime/tracing_bootstrap.py
         issue: "#3442"
+        owner: "@bioetl-observability"
+        expires_on: "2026-12-31"
+        removal_step: Remove when tracer port bootstrap path is canonicalized and compatibility wrappers are deleted.
         reason: >
           Reviewed observability bootstrap implementation retained behind the
           runtime observability facade.
       - symbol: bootstrap_tracer_port
         path: src/bioetl/composition/bootstrap/runtime/observability.py
         issue: "#3442"
+        owner: "@bioetl-observability"
+        expires_on: "2026-12-31"
+        removal_step: Remove after observability facade no longer exposes tracer *_port bootstrap seam.
         reason: >
           Reviewed public runtime observability facade retained as the canonical
           bootstrap seam for tracer port wiring.
@@ -121,6 +154,9 @@ suffix_boundary_rules:
       - symbol: FallbackFetchOrchestratorService
         path: src/bioetl/infrastructure/adapters/common/fallback_fetch_service.py
         issue: "#3437"
+        owner: "@bioetl-platform"
+        expires_on: "2026-09-30"
+        removal_step: Remove after all callers migrate to FallbackFetchOrchestrator and deprecated alias is deleted.
         reason: >
           Deprecated infrastructure alias retained while callers migrate to
           FallbackFetchOrchestrator.
@@ -132,7 +168,7 @@ suffix_boundary_rules:
     suffixes:
       - Service
     include_path_prefixes:
-      - src/bioetl/domain/services/
+      - src/bioetl/domain/behavior/
     allowed_symbol_exceptions:
 
 family_freeze_rules:
@@ -150,18 +186,30 @@ family_freeze_rules:
       - symbol: CheckpointRuntimeService
         path: src/bioetl/application/core/lifecycle/checkpoint_manager.py
         issue: "#3398"
+        owner: "@bioetl-platform"
+        expires_on: "2026-12-31"
+        removal_step: Remove family exception once runtime/admin naming freeze is retired by ADR-041 follow-up.
         reason: Canonical runtime checkpoint collaborator.
       - symbol: QuarantineRuntimeService
         path: src/bioetl/application/core/quarantine_manager.py
         issue: "#3398"
+        owner: "@bioetl-platform"
+        expires_on: "2026-12-31"
+        removal_step: Remove family exception once runtime/admin naming freeze is retired by ADR-041 follow-up.
         reason: Canonical runtime quarantine write-path collaborator.
       - symbol: CheckpointService
         path: src/bioetl/application/services/checkpoint_service.py
         issue: "#3398"
+        owner: "@bioetl-platform"
+        expires_on: "2026-12-31"
+        removal_step: Remove family exception once runtime/admin naming freeze is retired by ADR-041 follow-up.
         reason: Canonical operator/admin checkpoint service.
       - symbol: QuarantineService
         path: src/bioetl/application/services/quarantine_service.py
         issue: "#3398"
+        owner: "@bioetl-platform"
+        expires_on: "2026-12-31"
+        removal_step: Remove family exception once runtime/admin naming freeze is retired by ADR-041 follow-up.
         reason: Canonical operator/admin quarantine service.
 
   - rule_id: column_ordering_family
@@ -175,6 +223,9 @@ family_freeze_rules:
       - symbol: ColumnOrderService
         path: src/bioetl/application/composite/column_service.py
         issue: "#3402"
+        owner: "@bioetl-architecture"
+        expires_on: "2026-12-31"
+        removal_step: Remove freeze exception once column-ordering family policy is retired with zero ambiguity aliases.
         reason: Canonical unified column ordering surface.
 
   - rule_id: composite_canonical_alias_family
@@ -189,12 +240,21 @@ family_freeze_rules:
       - symbol: CompositeCheckpointService
         path: src/bioetl/application/composite/checkpoint/service.py
         issue: "#3443"
+        owner: "@bioetl-architecture"
+        expires_on: "2026-12-31"
+        removal_step: Remove freeze exception once composite canonical alias family rule is retired.
         reason: Canonical composite checkpoint facade.
       - symbol: CompositePipelineRunner
         path: src/bioetl/application/composite/runner_pkg/runner.py
         issue: "#3443"
+        owner: "@bioetl-architecture"
+        expires_on: "2026-12-31"
+        removal_step: Remove freeze exception once composite canonical alias family rule is retired.
         reason: Canonical composite runner facade.
       - symbol: CompositePreflightValidationService
         path: src/bioetl/application/composite/preflight_validator.py
         issue: "#3443"
+        owner: "@bioetl-architecture"
+        expires_on: "2026-12-31"
+        removal_step: Remove freeze exception once composite canonical alias family rule is retired.
         reason: Canonical composite preflight validation facade.

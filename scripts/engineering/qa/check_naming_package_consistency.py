@@ -19,6 +19,7 @@ import re
 import subprocess
 import sys
 from dataclasses import dataclass
+from datetime import date
 from pathlib import Path
 
 import yaml
@@ -60,6 +61,9 @@ class AllowedSymbol:
     path: str
     issue: str
     reason: str
+    owner: str
+    expires_on: str
+    removal_step: str
 
 
 @dataclass(frozen=True)
@@ -117,6 +121,9 @@ _CURATED_COMPOSITION_BOOTSTRAP_PORT_FACTORIES = (
             "Reviewed bootstrap factory that constructs the checkpoint port "
             "implementation for CLI/runtime wiring."
         ),
+        owner="@bioetl-architecture",
+        expires_on="2026-12-31",
+        removal_step="Remove after bootstrap port factories are consolidated to canonical runtime builders.",
     ),
     AllowedSymbol(
         symbol="bootstrap_composite_checkpoint_port",
@@ -126,6 +133,9 @@ _CURATED_COMPOSITION_BOOTSTRAP_PORT_FACTORIES = (
             "Reviewed bootstrap factory that constructs the composite checkpoint "
             "port for runtime resume and repair flows."
         ),
+        owner="@bioetl-architecture",
+        expires_on="2026-12-31",
+        removal_step="Remove after composite checkpoint wiring no longer requires compatibility factory seams.",
     ),
     AllowedSymbol(
         symbol="bootstrap_quarantine_port",
@@ -135,6 +145,9 @@ _CURATED_COMPOSITION_BOOTSTRAP_PORT_FACTORIES = (
             "Reviewed bootstrap factory that constructs the quarantine port "
             "implementation for CLI/runtime wiring."
         ),
+        owner="@bioetl-architecture",
+        expires_on="2026-12-31",
+        removal_step="Remove after quarantine port wiring is fully collapsed to canonical bootstrap composition APIs.",
     ),
     AllowedSymbol(
         symbol="bootstrap_dq_monitor_port",
@@ -144,6 +157,9 @@ _CURATED_COMPOSITION_BOOTSTRAP_PORT_FACTORIES = (
             "Reviewed observability bootstrap implementation retained behind "
             "the runtime observability facade."
         ),
+        owner="@bioetl-observability",
+        expires_on="2026-12-31",
+        removal_step="Remove when runtime observability bootstrap internals are merged and no longer need port-suffixed compatibility wrappers.",
     ),
     AllowedSymbol(
         symbol="bootstrap_dq_monitor_port",
@@ -153,6 +169,9 @@ _CURATED_COMPOSITION_BOOTSTRAP_PORT_FACTORIES = (
             "Reviewed public runtime observability facade retained as the "
             "canonical bootstrap seam for DQ monitor port wiring."
         ),
+        owner="@bioetl-observability",
+        expires_on="2026-12-31",
+        removal_step="Remove after public observability bootstrap surface is stabilized without *_port compatibility factories.",
     ),
     AllowedSymbol(
         symbol="bootstrap_logger_port",
@@ -162,6 +181,9 @@ _CURATED_COMPOSITION_BOOTSTRAP_PORT_FACTORIES = (
             "Reviewed observability bootstrap implementation retained behind "
             "the runtime observability facade."
         ),
+        owner="@bioetl-observability",
+        expires_on="2026-12-31",
+        removal_step="Remove when logger port bootstrap path is canonicalized and compatibility wrappers are deleted.",
     ),
     AllowedSymbol(
         symbol="bootstrap_logger_port",
@@ -171,6 +193,9 @@ _CURATED_COMPOSITION_BOOTSTRAP_PORT_FACTORIES = (
             "Reviewed public runtime observability facade retained as the "
             "canonical bootstrap seam for logger port wiring."
         ),
+        owner="@bioetl-observability",
+        expires_on="2026-12-31",
+        removal_step="Remove after observability facade no longer exposes logger *_port bootstrap seam.",
     ),
     AllowedSymbol(
         symbol="bootstrap_metrics_port",
@@ -180,6 +205,9 @@ _CURATED_COMPOSITION_BOOTSTRAP_PORT_FACTORIES = (
             "Reviewed observability bootstrap implementation retained behind "
             "the runtime observability facade."
         ),
+        owner="@bioetl-observability",
+        expires_on="2026-12-31",
+        removal_step="Remove when metrics port bootstrap path is canonicalized and compatibility wrappers are deleted.",
     ),
     AllowedSymbol(
         symbol="bootstrap_metrics_port",
@@ -189,6 +217,9 @@ _CURATED_COMPOSITION_BOOTSTRAP_PORT_FACTORIES = (
             "Reviewed public runtime observability facade retained as the "
             "canonical bootstrap seam for metrics port wiring."
         ),
+        owner="@bioetl-observability",
+        expires_on="2026-12-31",
+        removal_step="Remove after observability facade no longer exposes metrics *_port bootstrap seam.",
     ),
     AllowedSymbol(
         symbol="bootstrap_tracer_port",
@@ -198,6 +229,9 @@ _CURATED_COMPOSITION_BOOTSTRAP_PORT_FACTORIES = (
             "Reviewed observability bootstrap implementation retained behind "
             "the runtime observability facade."
         ),
+        owner="@bioetl-observability",
+        expires_on="2026-12-31",
+        removal_step="Remove when tracer port bootstrap path is canonicalized and compatibility wrappers are deleted.",
     ),
     AllowedSymbol(
         symbol="bootstrap_tracer_port",
@@ -207,6 +241,9 @@ _CURATED_COMPOSITION_BOOTSTRAP_PORT_FACTORIES = (
             "Reviewed public runtime observability facade retained as the "
             "canonical bootstrap seam for tracer port wiring."
         ),
+        owner="@bioetl-observability",
+        expires_on="2026-12-31",
+        removal_step="Remove after observability facade no longer exposes tracer *_port bootstrap seam.",
     ),
 )
 
@@ -273,9 +310,32 @@ def _load_allowed_symbols(raw: object) -> tuple[AllowedSymbol, ...]:
         path = str(item.get("path", "")).strip()
         issue = str(item.get("issue", "")).strip()
         reason = str(item.get("reason", "")).strip()
-        if symbol and path and issue and reason:
+        owner = str(item.get("owner", "")).strip()
+        expires_on = str(item.get("expires_on", "")).strip()
+        removal_step = str(item.get("removal_step", "")).strip()
+        if (
+            symbol
+            and path
+            and issue
+            and reason
+            and owner
+            and expires_on
+            and removal_step
+        ):
+            try:
+                date.fromisoformat(expires_on)
+            except ValueError:
+                continue
             allowed.append(
-                AllowedSymbol(symbol=symbol, path=path, issue=issue, reason=reason)
+                AllowedSymbol(
+                    symbol=symbol,
+                    path=path,
+                    issue=issue,
+                    reason=reason,
+                    owner=owner,
+                    expires_on=expires_on,
+                    removal_step=removal_step,
+                )
             )
     return tuple(allowed)
 

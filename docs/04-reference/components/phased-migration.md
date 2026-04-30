@@ -82,7 +82,7 @@ def version_compare(v1: str, v2: str) -> int:
 ### PhasedMigrationCoordinator
 
 ```python
-from bioetl.domain.services.phased_migration_support import (
+from bioetl.domain.behavior.phased_migration_support import (
     PhasedMigrationCoordinator,
 )
 

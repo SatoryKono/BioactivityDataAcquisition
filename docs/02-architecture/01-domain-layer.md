@@ -218,7 +218,7 @@ domain surface. Runtime execution остаётся на `PipelineRunContext` и
 
 ### 2.6. Доменные сервисы (`services/`)
 
-`src/bioetl/domain/services/` содержит чистые доменные сервисы без I/O, например:
+`src/bioetl/domain/behavior/` содержит чистые доменные сервисы без I/O, например:
 
 - `EntityIdentityGenerator` (детерминированные `entity_id`/`content_hash`),
 - нормализация DOI/PMID/текста/дат,

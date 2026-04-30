@@ -356,7 +356,7 @@ ______________________________________________________________________
 | S1.1    | domain/ports/ + domain/contracts/                                                                                             | Выделяй отдельно из-за import-boundary и protocol review |
 | S1.2    | domain/entities/ + domain/value_objects/                                                                                      | Удобно держать в одной предметной подзоне                |
 | S1.3    | domain/schemas/                                                                                                               | Отдельная подзона для schema/rules drift                 |
-| S1.4    | domain/services/ + domain/filtering/ + domain/mapping/                                                                        | Часто cohesive review block                              |
+| S1.4    | domain/behavior/ + domain/filtering/ + domain/mapping/                                                                        | Часто cohesive review block                              |
 | S1.5    | domain/config/ + domain/composite/ + domain/aggregates/ + domain/registry/ + domain/models/ + domain/exceptions/ + root files | При превышении порога разбей дополнительно               |
 
 **Для S2 (Application; пересчитай live перед запуском):**

@@ -129,6 +129,7 @@ tracked_suite_inventory:
     - tests/integration/test_cross_pipeline_normalization.py
     - tests/integration/test_cross_provider_doi_normalization.py
     - tests/integration/test_json_hash_stability.py
+    - tests/integration/test_runtime_metric_emission_consistency.py
     - tests/integration/workflow/test_workflow_runner_service.py
     governance_and_runtime_surfaces:
       control_plane:

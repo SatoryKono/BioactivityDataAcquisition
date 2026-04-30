@@ -9,7 +9,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from bioetl.domain.serialization import serialize_to_json
 from bioetl.domain.behavior._author_helpers import (
     collect_affiliations_from_authors,
     deduplicate_case_insensitive,
@@ -20,6 +19,7 @@ from bioetl.domain.behavior._author_helpers import (
     parse_author_names,
     parse_author_string,
 )
+from bioetl.domain.serialization import serialize_to_json
 from bioetl.domain.types import JsonDict
 
 

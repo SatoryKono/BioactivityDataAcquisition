@@ -168,7 +168,7 @@ Global Fallback Policy
 **Example:**
 
 ```python
-from bioetl.domain.services.dq_policy_resolver import DQPolicyResolver
+from bioetl.domain.behavior.dq_policy_resolver import DQPolicyResolver
 
 resolver = DQPolicyResolver()
 policy = resolver.resolve_policy(
@@ -206,7 +206,7 @@ effective_config:
 **Usage:**
 
 ```python
-from bioetl.domain.services.effective_config_service import EffectiveConfigService
+from bioetl.domain.behavior.effective_config_service import EffectiveConfigService
 
 service = EffectiveConfigService()
 
@@ -233,7 +233,7 @@ compatible = service.is_checkpoint_compatible(
 Manages backward compatibility during breaking changes:
 
 ```python
-from bioetl.domain.services.phased_migration_support import (
+from bioetl.domain.behavior.phased_migration_support import (
     PhasedMigrationCoordinator,
 )
 
@@ -264,8 +264,8 @@ guide = service.get_migration_guide("v1.0", "v1.1")
 
 ```python
 from bioetl.composition.factories.dq import create_composite_validation_service
-from bioetl.domain.services.composite_validation_layer import CompositeValidationConfig
-from bioetl.domain.services.dq_policy_resolver import DQPolicyResolver
+from bioetl.domain.behavior.composite_validation_layer import CompositeValidationConfig
+from bioetl.domain.behavior.dq_policy_resolver import DQPolicyResolver
 
 # Initialize services
 validation_service = create_composite_validation_service()
