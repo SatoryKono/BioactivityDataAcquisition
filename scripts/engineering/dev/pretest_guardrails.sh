@@ -382,7 +382,6 @@ run_auto_fix() {
     # Keep inventory refresh last because upstream auto-fix steps may rewrite
     # tracked files that contribute script references.
     run_step inventory-sync \
-<<<<<<< Updated upstream:scripts/engineering/dev/pretest_guardrails.sh
         "$PYTHON_BIN" -m scripts.engineering.repo sync-inventory --write
     # Refresh the hotspot-family baseline after inventory sync because the
     # baseline report consumes inventory-derived metadata.
@@ -390,13 +389,6 @@ run_auto_fix() {
         "$PYTHON_BIN" -m scripts.engineering.qa report-family-baseline \
         --active-only \
         --update
-||||||| Stash base:scripts/dev/pretest_guardrails.sh
-        "$PYTHON_BIN" -m scripts.repo sync-inventory --write
-=======
-        "$PYTHON_BIN" -m scripts.repo sync-inventory --write
-    run_step hotspot-family-baseline-sync \
-        "$PYTHON_BIN" -m scripts.qa report-family-baseline --update
->>>>>>> Stashed changes:scripts/dev/pretest_guardrails.sh
 }
 
 run_repo_checks() {

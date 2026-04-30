@@ -270,7 +270,6 @@ def test_get_observability_diagnostics_bundle_builds_unified_bundle() -> None:
     ) as mock_impl:
         bundle = observability.get_observability_diagnostics_bundle()
 
-<<<<<<< Updated upstream
     assert bundle is expected
     mock_impl.assert_called_once_with()
 
@@ -288,18 +287,3 @@ def test_inspect_run_dossier_delegates_to_composition_api() -> None:
 
     assert result is expected
     mock_impl.assert_awaited_once_with("run-123", audit_limit=9)
-||||||| Stash base
-    assert bundle.health_service is health_service
-    assert bundle.metrics_service is metrics_service
-    assert bundle.quarantine_service is quarantine_service
-    assert bundle.run_manifest_service is run_manifest_service
-    assert bundle.lineage_service is lineage_service
-    mock_health.assert_called_once_with()
-    mock_metrics.assert_called_once_with()
-    mock_quarantine.assert_called_once_with()
-    mock_manifest.assert_called_once_with()
-    mock_lineage.assert_called_once_with()
-=======
-    assert bundle is expected
-    mock_impl.assert_called_once_with()
->>>>>>> Stashed changes
