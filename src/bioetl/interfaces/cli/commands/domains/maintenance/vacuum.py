@@ -5,8 +5,7 @@ Implements vacuum operations for Delta tables storage reclamation.
 
 from __future__ import annotations
 
-from collections.abc import Callable
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 import click
 
@@ -47,8 +46,7 @@ def get_lifecycle_service() -> MedallionLifecycleService:
     """Load the lifecycle service through composition on demand."""
     from bioetl.composition.maintenance_api import get_lifecycle_service as _impl
 
-    impl = cast("Callable[[], MedallionLifecycleService]", _impl)
-    return impl()
+    return _impl()
 
 
 def get_vacuum_service() -> VacuumService:

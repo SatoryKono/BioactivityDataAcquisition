@@ -31,6 +31,7 @@ def _factory() -> RunContextFactory:
         entity_type_extractor=lambda _pipeline_name: "activity",
         pipeline_version_getter=lambda _yaml_config: "1.0.0",
         git_commit_getter=lambda: "abc123",
+        dependency_lock_hash_getter=lambda: "sha256:deps",
         config_hash_getter=lambda _yaml_config: "resolved-hash",
         transform_version_getter=lambda _yaml_config: None,
         transform_steps_getter=lambda _yaml_config: (),
@@ -63,6 +64,7 @@ def test_run_context_factory_preserves_distinct_config_hash_surfaces() -> None:
     assert context.config_hash == "legacy-config-hash"
     assert context.resolved_config_hash == "resolved-config-hash"
     assert context.effective_config_hash == "effective-config-hash"
+    assert context.dependency_lock_hash == "sha256:deps"
 
 
 def test_run_context_factory_does_not_alias_missing_effective_hash() -> None:

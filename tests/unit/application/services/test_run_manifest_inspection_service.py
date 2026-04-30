@@ -64,6 +64,11 @@ def _expected_code_provenance_state(manifest: RunManifest) -> dict[str, object]:
     return {
         "git_commit": manifest.code_provenance.git_commit,
         "source_revision_state": manifest.code_provenance.source_revision_state,
+        "dependency_lock_state": (
+            "present"
+            if manifest.code_provenance.dependency_lock_hash is not None
+            else "missing"
+        ),
         "strict_code_provenance_ready": bool(manifest.code_provenance.git_commit),
         "strict_code_provenance_blockers": [],
     }
@@ -156,6 +161,7 @@ def test_show_resolves_manifest_by_run_id_and_includes_ledger_history() -> None:
         "effective_config_hash": _VALID_EFFECTIVE_CONFIG_HASH,
         "git_commit": "abc1234",
         "source_revision_state": "clean",
+        "dependency_lock_state": "missing",
         "code_provenance_state": _expected_code_provenance_state(manifest),
         "contract_ref": "chembl.activity",
         "contract_version": "1.2.0",
@@ -288,6 +294,7 @@ def _expected_identity_graph_without_ledger(
         "effective_config_hash": _VALID_EFFECTIVE_CONFIG_HASH,
         "git_commit": "abc1234",
         "source_revision_state": "clean",
+        "dependency_lock_state": "missing",
         "code_provenance_state": _expected_code_provenance_state(manifest),
         "contract_ref": "chembl.activity",
         "contract_version": "1.2.0",
@@ -351,6 +358,7 @@ def _expected_diagnostics_without_ledger(
         "pipeline_version": "1.0.0",
         "git_commit": "abc1234",
         "source_revision_state": "clean",
+        "dependency_lock_state": "missing",
         "code_provenance_state": _expected_code_provenance_state(manifest),
         "contract_ref": "chembl.activity",
         "contract_version": "1.2.0",

@@ -270,6 +270,7 @@ class TestBronzeMetadata:
             started_at=_FIXED_TIME,
             provider="chembl",
             entity="activity",
+            dependency_lock_hash="sha256:deps-001",
             config_hash="a" * 64,
             effective_config_hash="b" * 64,
             effective_config_artifact_id="artifact-001",
@@ -293,6 +294,7 @@ class TestBronzeMetadata:
 
         metadata = coordinator.create_bronze_metadata(input_data)
 
+        assert metadata.pipeline.dependency_lock_hash == "sha256:deps-001"
         assert metadata.pipeline.config_hash == "a" * 64
         assert metadata.pipeline.effective_config_hash == "b" * 64
         assert metadata.pipeline.effective_config_artifact_id == "artifact-001"

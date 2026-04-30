@@ -88,6 +88,9 @@ def build_cli_config_service(
         register_pipelines()
         effective_registry = default_registry_accessor()
 
+    def _registry_accessor() -> PipelineRegistry:
+        return effective_registry
+
     dq_service = ConfigDQService(
         logger=logger,
         _pipeline_yaml_getter=pipeline_yaml_getter,
@@ -99,7 +102,7 @@ def build_cli_config_service(
         _settings_loader=settings_loader,
         _pipeline_config_loader=pipeline_config_loader,
         _domain_config_mapper=domain_config_mapper,
-        _registry_accessor=lambda: effective_registry,
+        _registry_accessor=_registry_accessor,
         _dq_service=dq_service,
     )
 
