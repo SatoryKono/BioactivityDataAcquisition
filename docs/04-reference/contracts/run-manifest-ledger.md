@@ -693,6 +693,14 @@ produced-artifact traces, absent ledger entries, and unsupported lineage
 closure are represented as missing/unsupported evidence instead of being
 collapsed into a successful match.
 
+`run-manifest verify` is the stricter replay-evidence command for automation.
+It resolves both identifiers through the manifest store, then verifies
+effective-config evidence through the effective-config artifact store by
+`run_id`. The command reports manifest classification, effective-config
+semantic equivalence, occurrence-only differences, missing evidence, and
+artifact/hash anchor matches. Missing effective-config sidecars or occurrences
+are reported as `missing_replay_evidence`, not as a successful replay match.
+
 ## Canonical Stage Sets
 
 When `event_type` is `stage_started` or `stage_completed`, the current contract
@@ -732,6 +740,7 @@ Supported inspection commands:
 ```bash
 bioetl run-manifest show <run-id|manifest-id>
 bioetl run-manifest diff <left> <right>
+bioetl run-manifest verify <left> <right>
 bioetl run-manifest score <run-id|manifest-id>
 ```
 

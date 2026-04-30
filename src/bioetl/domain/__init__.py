@@ -31,6 +31,7 @@ _RUNTIME_OBSERVABILITY_PUBLICATION_CONTRACT_MODULE = (
 _OBSERVABILITY_EVENT_MAPPING_MODULE = "bioetl.domain.observability_event_mapping"
 
 _LAZY_ATTRIBUTE_EXPORTS: dict[str, tuple[str, str]] = {
+    "behavior": ("bioetl.domain.behavior", "behavior"),
     "DomainEventObservabilityEnvelope": (
         _OBSERVABILITY_EVENT_MAPPING_MODULE,
         "DomainEventObservabilityEnvelope",
@@ -84,6 +85,7 @@ _LAZY_ATTRIBUTE_EXPORTS: dict[str, tuple[str, str]] = {
 }
 
 __all__ = [
+    "behavior",
     "DomainEventObservabilityEnvelope",
     "PipelineEvent",
     "composite",
@@ -117,6 +119,7 @@ def __getattr__(name: str) -> object:
         raise AttributeError(f"module {__name__!r} has no attribute {name!r}") from exc
 
     if name in {
+        "behavior",
         "composite",
         "constants",
         "contracts",

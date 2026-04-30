@@ -1,4 +1,4 @@
-"""Compatibility wrapper for legacy ``bioetl.domain.services`` imports.
+"""Legacy import bridge for ``bioetl.domain.services``.
 
 First-party code must use ``bioetl.domain.behavior``. This package remains only
 to keep old public imports resolving until the registered compatibility sunset.

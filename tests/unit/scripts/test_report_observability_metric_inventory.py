@@ -284,6 +284,94 @@ def test_collect_metric_inventory_resolves_cross_file_class_metric_constants(
     assert report["registered_without_runtime"] == []
 
 
+def test_collect_metric_inventory_resolves_helper_metric_keyword_bindings(
+    tmp_path: Path,
+    monkeypatch: object,
+) -> None:
+    monkeypatch.setattr(
+        inventory,
+        "REGISTERED_PROMETHEUS_METRIC_NAMES",
+        frozenset(
+            {
+                "bioetl_postrun_phase_events_total",
+                "bioetl_postrun_phase_duration_seconds",
+            }
+        ),
+    )
+
+    runtime_dir = tmp_path / "src" / "bioetl" / "application" / "core" / "postrun"
+    runtime_dir.mkdir(parents=True)
+    (runtime_dir / "service.py").write_text(
+        "\n".join(
+            [
+                "class PostrunService:",
+                '    METRIC_POSTRUN_PHASE_EVENTS_TOTAL = "bioetl_postrun_phase_events_total"',
+                '    METRIC_POSTRUN_PHASE_DURATION_SECONDS = "bioetl_postrun_phase_duration_seconds"',
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    (runtime_dir / "_service_support.py").write_text(
+        "\n".join(
+            [
+                "class PostrunServiceSupportMixin:",
+                "    def emit(self):",
+                "        emit_postrun_phase_observability(",
+                "            phase_events_metric=self.METRIC_POSTRUN_PHASE_EVENTS_TOTAL,",
+                "            phase_duration_metric=self.METRIC_POSTRUN_PHASE_DURATION_SECONDS,",
+                "        )",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    report = inventory.collect_metric_inventory(tmp_path)
+
+    assert report["helper_backed_live_metrics"] == [
+        "bioetl_postrun_phase_duration_seconds",
+        "bioetl_postrun_phase_events_total",
+    ]
+    helper_emitters = report["helper_backed_emitters"]
+    assert isinstance(helper_emitters, dict)
+    assert helper_emitters["bioetl_postrun_phase_events_total"] == [
+        "src/bioetl/application/core/postrun/_service_support.py"
+    ]
+    assert helper_emitters["bioetl_postrun_phase_duration_seconds"] == [
+        "src/bioetl/application/core/postrun/_service_support.py"
+    ]
+    assert report["registered_without_runtime"] == []
+
+
+def test_collect_metric_inventory_records_static_prometheus_collector_emitters(
+    tmp_path: Path,
+    monkeypatch: object,
+) -> None:
+    monkeypatch.setattr(
+        inventory,
+        "REGISTERED_PROMETHEUS_METRIC_NAMES",
+        frozenset({"bioetl_metrics_publication_events_total"}),
+    )
+
+    metrics_dir = tmp_path / "src" / "bioetl" / "infrastructure" / "observability"
+    metrics_dir.mkdir(parents=True)
+    (metrics_dir / "server.py").write_text(
+        "METRICS_PUBLICATION_EVENTS_TOTAL.labels(status='success').inc()\n",
+        encoding="utf-8",
+    )
+
+    report = inventory.collect_metric_inventory(tmp_path)
+
+    assert report["direct_live_metrics"] == ["bioetl_metrics_publication_events_total"]
+    runtime_emitters = report["runtime_emitters"]
+    assert isinstance(runtime_emitters, dict)
+    assert runtime_emitters["bioetl_metrics_publication_events_total"] == [
+        "src/bioetl/infrastructure/observability/server.py"
+    ]
+    assert report["registered_without_runtime"] == []
+
+
 def test_collect_metric_inventory_flags_multi_emitter_cardinality_review_candidates(
     tmp_path: Path,
     monkeypatch: object,

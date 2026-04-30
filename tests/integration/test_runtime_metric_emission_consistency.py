@@ -47,7 +47,9 @@ def test_critical_observability_metric_families_have_runtime_emitters() -> None:
         "bioetl_control_plane_manifest_writes_total": "src/bioetl/infrastructure/control_plane",
         "bioetl_control_plane_ledger_appends_total": "src/bioetl/infrastructure/control_plane",
         "bioetl_checkpoint_compatibility_events_total": "src/bioetl/application",
-        "bioetl_replay_reconstructability_events_total": "src/bioetl/application",
+        "bioetl_replay_reconstructability_events_total": (
+            "src/bioetl/composition/runtime_builders/run_manifest_builder.py"
+        ),
         "bioetl_record_flow_invariants_total": "src/bioetl/application",
         "bioetl_stage_backlog_records": "src/bioetl/application",
         "bioetl_stage_lag_seconds": "src/bioetl/application",

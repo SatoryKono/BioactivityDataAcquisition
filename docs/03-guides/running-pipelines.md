@@ -112,6 +112,7 @@ lifecycle и artifact publication events, связанную через `manifes
 ```bash
 bioetl run-manifest show <RUN-ID|MANIFEST-ID>
 bioetl run-manifest diff <LEFT> <RIGHT>
+bioetl run-manifest verify <LEFT> <RIGHT>
 bioetl run-manifest forensic-diff <LEFT> <RIGHT>
 bioetl diagnostics forensic-diff <LEFT> <RIGHT>
 ```
@@ -120,7 +121,9 @@ bioetl diagnostics forensic-diff <LEFT> <RIGHT>
 section for manifest, effective-config, checkpoint-anchor, lineage, input
 snapshot, and planned-artifact drift. New manifests also surface
 `dependency_lock_hash` when a repository lockfile is available.
-Use `forensic-diff` when the operator-facing report must also include replay
+Use `run-manifest verify` when automation must fail closed on missing
+effective-config replay evidence. Use `forensic-diff` when the operator-facing
+report must also include replay
 capability, exact-replay blockers, artifact/sidecar completeness, lineage
 closure status, and missing-evidence classification.
 

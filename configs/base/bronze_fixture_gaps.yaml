@@ -1,16 +1,3 @@
 version: 1.5.0
 updated_at: "2026-04-30"
-gaps:
-  semanticscholar/publication:
-    status: decision_recorded
-    reason: "The unauthenticated Semantic Scholar search endpoint is rate-limited and existing recorded cassettes contain fewer than 20 publication records, so no stable factual tracked CI sample is available without API-key-backed recording."
-    owner: "data-platform"
-    contract_ref: "semanticscholar.publication"
-    decision_status: "keyed_recording_required"
-    decision_deadline: "2026-05-31"
-    decision_owner: "data-platform"
-    chosen_path: "offline_keyed_cassette_refresh"
-    contract_or_projection_target: "Keep CI deterministic by accepting only a keyed/offline cassette refresh or a documented smaller factual baseline; never depend on unauthenticated live search for tracked Bronze fixture cardinality."
-    evidence_issue: "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/3406"
-    resolution_plan: "Decision recorded pending a keyed recording or approved cassette refresh that provides a stable 20-record publication sample."
-    de_scope_decision: "Do not add a flaky live-generated fixture from an unauthenticated 429-prone API."
+gaps: {}

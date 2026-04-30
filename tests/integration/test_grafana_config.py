@@ -1,8 +1,4 @@
-"""Integration tests for Grafana dashboard configurations.
-
-Ensures that dashboards are synchronized with the application metrics
-and follow the project's observability standards.
-"""
+"""Integration tests for Grafana dashboard configurations and observability contracts."""
 
 from collections import Counter
 from pathlib import Path

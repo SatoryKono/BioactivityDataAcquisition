@@ -17,6 +17,7 @@ from bioetl.application.services.run_manifest_inspection_service import (
     RunManifestDiffResult,
     RunManifestInspectionCorruptionError,
     RunManifestInspectionResult,
+    RunManifestVerifyResult,
 )
 from bioetl.domain.control_plane import (
     RunCodeProvenance,
@@ -451,6 +452,41 @@ class _FakeRunManifestService:
             ),
         )
 
+    def verify(
+        self,
+        left_identifier: str,
+        right_identifier: str,
+    ) -> RunManifestVerifyResult:
+        if "missing" in {left_identifier, right_identifier}:
+            raise ValueError("missing")
+        return RunManifestVerifyResult(
+            left_manifest_id="manifest-1",
+            right_manifest_id="manifest-2",
+            left_run_id=str(self._run_id),
+            right_run_id="00000000-0000-0000-0000-000000000002",
+            verdict="cross_store_replay_verified",
+            verified=True,
+            semantic_equivalent=True,
+            occurrence_only=False,
+            missing_evidence=(),
+            manifest_diff={
+                "classification": "identical",
+                "semantic_equivalent": True,
+            },
+            effective_config={
+                "available": True,
+                "semantic_equivalent": True,
+                "occurrence_only": False,
+                "anchor_matches": {
+                    "left_artifact_id": True,
+                    "right_artifact_id": True,
+                    "left_effective_config_hash": True,
+                    "right_effective_config_hash": True,
+                },
+                "missing_evidence": [],
+            },
+        )
+
 
 class _CorruptRunManifestService:
     def show(self, identifier: str) -> RunManifestInspectionResult:
@@ -564,6 +600,7 @@ class TestRunManifestCommands:
         assert "diff" in result.output
         assert "forensic-diff" in result.output
         assert "score" in result.output
+        assert "verify" in result.output
 
     def test_run_manifest_help_avoids_eager_registry_build(
         self,
@@ -870,6 +907,70 @@ class TestRunManifestCommands:
         assert "replay_relationship: right_is_exact_replay_of_left" in result.output
         assert "differences:" in result.output
         assert "field: runtime_config" in result.output
+
+    def test_verify_json_outputs_cross_store_replay_evidence(
+        self,
+        cli_runner: CliRunner,
+        monkeypatch: Any,
+    ) -> None:
+        _patch_run_manifest_service(monkeypatch, _FakeRunManifestService())
+
+        result = cli_runner.invoke(
+            cli,
+            [
+                "run-manifest",
+                "verify",
+                "manifest-1",
+                "manifest-2",
+                "--format",
+                "json",
+            ],
+        )
+
+        assert result.exit_code == 0
+        payload = json.loads(result.output)
+        assert payload["verdict"] == "cross_store_replay_verified"
+        assert payload["verified"] is True
+        assert payload["effective_config"]["semantic_equivalent"] is True
+        assert payload["effective_config"]["anchor_matches"] == {
+            "left_artifact_id": True,
+            "right_artifact_id": True,
+            "left_effective_config_hash": True,
+            "right_effective_config_hash": True,
+        }
+
+    def test_verify_defaults_to_human_readable_text(
+        self,
+        cli_runner: CliRunner,
+        monkeypatch: Any,
+    ) -> None:
+        _patch_run_manifest_service(monkeypatch, _FakeRunManifestService())
+
+        result = cli_runner.invoke(
+            cli,
+            ["run-manifest", "verify", "manifest-1", "manifest-2"],
+        )
+
+        assert result.exit_code == 0
+        assert "Run Manifest Verification" in result.output
+        assert "verdict: cross_store_replay_verified" in result.output
+        assert "verified: true" in result.output
+        assert "effective_config:" in result.output
+
+    def test_verify_missing_manifest_prints_error(
+        self,
+        cli_runner: CliRunner,
+        monkeypatch: Any,
+    ) -> None:
+        _patch_run_manifest_service(monkeypatch, _FakeRunManifestService())
+
+        result = cli_runner.invoke(
+            cli,
+            ["run-manifest", "verify", "manifest-1", "missing"],
+        )
+
+        assert result.exit_code == 0
+        assert "Run manifest verification failed" in result.stderr
 
     def test_forensic_diff_json_outputs_cross_artifact_report(
         self,

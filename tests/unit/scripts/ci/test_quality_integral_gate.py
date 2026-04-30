@@ -13,6 +13,9 @@ NETWORK_OPT_IN_GATE = "live_network_opt_in_gate"
 LIVE_API_GATE_MODE_NON_ALWAYS = "live_api_gate_mode_non_always"
 PILOT_PROVIDER_COUNT = "pilot_provider_count"
 VCR_ONLY_PROVIDER_COUNT = "vcr_only_provider_count"
+CONTRACT_LANE_NOT_RUN = "contract_lane_not_run"
+E2E_LANE_NOT_RUN = "e2e_lane_not_run"
+MEMORY_LANE_NOT_RUN = "memory_lane_not_run"
 ENFORCED_PROVIDERS = "enforced_providers"
 LIVE_API_GATE_MODE = "live_api_gate_mode"
 NETWORK_OPT_IN_REQUIRED = "network_opt_in_required"
@@ -155,6 +158,76 @@ def test_classify_test_health_fully_exercised_green() -> None:
     assert result.staged_rollout_flags == ()
 
 
+def test_classify_test_health_marks_contract_e2e_memory_lanes_as_not_run() -> None:
+    """Explicit not-run confidence lanes should keep the result environment-limited."""
+    architecture_stats = ArchitectureTestStats(
+        tests=80,
+        failures=0,
+        errors=0,
+        skipped=0,
+        returncode=0,
+    )
+    test_matrix = {
+        "contract_testing": {
+            NETWORK_OPT_IN_REQUIRED: False,
+            LIVE_API_GATE_MODE: "always",
+            LIVE_API_MINIMUM_BASELINE: {
+                ENFORCED_PROVIDERS: ["chembl", "pubchem", "uniprot"],
+                "pilot_providers": [],
+                "vcr_only_providers": [],
+            },
+        },
+        "test_health_confidence": {
+            "lane_absence_skip_classes": [
+                {
+                    "lane": "contracts",
+                    "skip_class": CONTRACT_LANE_NOT_RUN,
+                    "reason": "Current quality-gate run does not execute the canonical contracts lane.",
+                },
+                {
+                    "lane": "e2e",
+                    "skip_class": E2E_LANE_NOT_RUN,
+                    "reason": "Current quality-gate run does not execute the canonical e2e lane.",
+                },
+                {
+                    "lane": "memory",
+                    "skip_class": MEMORY_LANE_NOT_RUN,
+                    "reason": "Current quality-gate run does not execute the canonical memory lane.",
+                },
+            ]
+        },
+        "fixture_governance": {
+            "rollout": {
+                "cassette_metadata": "enforced",
+                "cassette_metadata_catalog": "enforced",
+            }
+        },
+        "mutation_testing": {
+            "ci_gate_mode": "full",
+            "targets": {
+                "domain": {"enforced": True},
+                "application": {"enforced": True},
+            },
+        },
+    }
+
+    result = _classify_test_health(
+        architecture_stats,
+        test_matrix,
+        suite_green=True,
+    )
+
+    assert result.status == "environment_limited_green"
+    assert "canonical contracts lane" in " | ".join(result.reasons)
+    assert "canonical e2e lane" in " | ".join(result.reasons)
+    assert "canonical memory lane" in " | ".join(result.reasons)
+    assert dict(result.skip_classes) == {
+        CONTRACT_LANE_NOT_RUN: 1,
+        E2E_LANE_NOT_RUN: 1,
+        MEMORY_LANE_NOT_RUN: 1,
+    }
+
+
 def test_build_test_health_payload_uses_canonical_taxonomy() -> None:
     """Rendered payload should carry canonical labels and merge semantics."""
     classification = HealthClassification(
@@ -201,6 +274,18 @@ def test_build_test_health_payload_uses_canonical_taxonomy() -> None:
             VCR_ONLY_PROVIDER_COUNT: {
                 "short_label": "VCR-Only Providers",
                 "definition": "Providers still outside live baseline enforcement.",
+            },
+            CONTRACT_LANE_NOT_RUN: {
+                "short_label": "Contracts Lane Not Run",
+                "definition": "The canonical contracts lane was not part of this run.",
+            },
+            E2E_LANE_NOT_RUN: {
+                "short_label": "E2E Lane Not Run",
+                "definition": "The canonical e2e lane was not part of this run.",
+            },
+            MEMORY_LANE_NOT_RUN: {
+                "short_label": "Memory Lane Not Run",
+                "definition": "The canonical memory lane was not part of this run.",
             },
         },
     }

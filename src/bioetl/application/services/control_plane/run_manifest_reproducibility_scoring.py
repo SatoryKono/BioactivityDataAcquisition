@@ -92,7 +92,6 @@ def build_reproducibility_audit_scoring(summary: JsonDict) -> JsonDict:
             summary=summary,
             required_profile=required_profile,
             threshold_failures=threshold_failures,
-            blockers=blockers,
         ),
         "global_reproducibility_claim": _build_global_reproducibility_claim(
             summary=summary,
@@ -409,7 +408,6 @@ def _build_supported_boundary_verdict(
     summary: JsonDict,
     required_profile: str,
     threshold_failures: list[JsonDict],
-    blockers: list[str],
 ) -> JsonDict:
     lineage_boundary = summary.get("lineage_closure_boundary")
     replay_family_contract = summary.get("replay_family_contract")
@@ -425,18 +423,26 @@ def _build_supported_boundary_verdict(
         else False
     )
     replay_capability = str(summary.get("replay_capability") or "")
+    persistence_profile = summary.get("persistence_profile")
+    required_profile_satisfied = (
+        bool(persistence_profile.get("required_profile_satisfied"))
+        if isinstance(persistence_profile, dict)
+        else False
+    )
+    blocked_outside_supported_boundary = (
+        not strict_exact_replay_supported or not lineage_supported
+    )
+    has_supported_boundary_gaps = (
+        bool(threshold_failures)
+        or not required_profile_satisfied
+        or replay_capability != "exact_replay_supported"
+    )
 
-    if not strict_exact_replay_supported or not lineage_supported:
+    if blocked_outside_supported_boundary:
         verdict = "blocked_outside_supported_boundary"
         supported_boundary_satisfied = False
-        reason = (
-            str(lineage_boundary.get("reason"))
-            if isinstance(lineage_boundary, dict) and lineage_boundary.get("reason")
-            else "blocked_outside_supported_boundary"
-        )
-    elif (
-        threshold_failures or blockers or replay_capability != "exact_replay_supported"
-    ):
+        reason = _supported_boundary_block_reason(lineage_boundary)
+    elif has_supported_boundary_gaps:
         verdict = "supported_boundary_gaps_present"
         supported_boundary_satisfied = False
         reason = "supported_boundary_requirements_not_met"
@@ -455,6 +461,12 @@ def _build_supported_boundary_verdict(
         "exact_replay_support_boundary": summary.get("exact_replay_support_boundary"),
         "lineage_closure_supported": lineage_supported,
     }
+
+
+def _supported_boundary_block_reason(lineage_boundary: object) -> str:
+    if isinstance(lineage_boundary, dict) and lineage_boundary.get("reason"):
+        return str(lineage_boundary.get("reason"))
+    return "blocked_outside_supported_boundary"
 
 
 def _build_global_reproducibility_claim(

@@ -38,6 +38,7 @@ from bioetl.domain.ports.config import (
     SettingsPort,
 )
 from bioetl.domain.ports.control_plane import (
+    EffectiveConfigArtifactStorePort,
     LineageStorePort,
     RunLedgerPort,
     RunManifestPort,
@@ -181,6 +182,7 @@ __all__ = [
     "DebugAction",
     "DeltaReaderPort",
     "DomainConfigMapperPort",
+    "EffectiveConfigArtifactStorePort",
     "ErrorClassifierPort",
     "ErrorHandlerPort",
     "ExecutionMetricsReadablePort",

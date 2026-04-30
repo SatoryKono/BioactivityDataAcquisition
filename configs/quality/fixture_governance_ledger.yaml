@@ -54,11 +54,9 @@ entries:
       - tests/fixtures/vcr
       - .github/workflows/tests.yml
   - field: contract_snapshots
-    status: partial
+    status: enforced
     owner: "@bioetl-data-model"
-    blocking_classification: representative_scope_gap
     last_reviewed: '2026-04-29'
-    target_resolution_date: '2026-06-30'
     current_evidence_paths:
       - configs/quality/test_matrix.yaml
       - tests/architecture/test_contract_snapshot_governance.py

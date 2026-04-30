@@ -200,3 +200,35 @@ class TestCanonicalTestLanes:
             lanes["coverage-verify"]["marker_expression"]
             == "not e2e and not benchmark and not memory"
         )
+
+    def test_test_health_confidence_policy_tracks_not_run_lane_assertions(self) -> None:
+        matrix = load_matrix()
+        confidence = matrix.get("test_health_confidence", {})
+        entries = confidence.get("lane_absence_skip_classes", [])
+
+        assert isinstance(entries, list)
+        assert entries == [
+            {
+                "lane": "contracts",
+                "skip_class": "contract_lane_not_run",
+                "reason": (
+                    "Current quality-gate run does not execute the canonical "
+                    "contracts lane."
+                ),
+            },
+            {
+                "lane": "e2e",
+                "skip_class": "e2e_lane_not_run",
+                "reason": (
+                    "Current quality-gate run does not execute the canonical e2e lane."
+                ),
+            },
+            {
+                "lane": "memory",
+                "skip_class": "memory_lane_not_run",
+                "reason": (
+                    "Current quality-gate run does not execute the canonical "
+                    "memory lane."
+                ),
+            },
+        ]
