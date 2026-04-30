@@ -1,6 +1,6 @@
 ---
 status: active-non-canonical
-last_verified: "2026-04-29"
+last_verified: "2026-04-30"
 freshness_window_days: 90
 owner: quality
 canonical_sources:
@@ -46,6 +46,10 @@ compatibility-snapshot `--check` зелёные на актуальном дер
 | `coverage-governance`              |                9 | PASSED |
 | `semanticscholar-pilot-options`    |                6 | PASSED |
 | `semanticscholar-enforced-options` |                6 | PASSED |
+| `flaky-rate`                       |                1 | PASSED |
+| `uncovered-module-risk-map`        |                1 | PASSED |
+| `semanticscholar-environment-limited-frequency` |    1 | PASSED |
+| `environment-limited-threshold`    |                1 | PASSED |
 
 ## Главные выводы
 
@@ -59,9 +63,13 @@ compatibility-snapshot `--check` зелёные на актуальном дер
 - The test tree is large (`994` test files) and dominated by unit plus architecture coverage, with topology itself enforced as a governance surface.
 - Текущий baseline больше не держится только на секторных smoke-подтверждениях: после `RF-011` полный verify bundle снова подтверждён на актуальном дереве, так что главный residual risk смещается от broad correctness к future flakiness/order sensitivity monitoring.
 
-## Оставшиеся пробелы
+## Закрытые follow-up gaps
 
-- No shard yet measures historical flaky frequency from CI artifacts.
-- No shard yet maps uncovered or weakly covered modules back to current refactor or risk priorities.
-- No shard yet measures how often the newly enforced Semantic Scholar core baseline still behaves like environment-limited green over repeated live runs.
-- No shard yet defines a hard numerical threshold for how much residual environment-limited behavior is acceptable inside an enforced live provider.
+- `flaky-rate` now defines the retained telemetry source and explicit
+  unavailable-data behavior for missing historical CI artifacts.
+- `uncovered-module-risk-map` maps weak confidence surfaces to structural
+  risk/refactor priorities through `configs/quality/test_structural_watchlist_map.yaml`.
+- `semanticscholar-environment-limited-frequency` now has a scheduled,
+  non-blocking repeated-run tracking path through retained test-health summaries.
+- `environment-limited-threshold` defines a numerical acceptance threshold in
+  `configs/quality/environment_limited_green_policy.yaml`.

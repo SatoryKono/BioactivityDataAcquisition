@@ -571,7 +571,6 @@ class TestInterfacesBootstrapIsolation:
             "  - bioetl.composition.control_plane_api\n"
             "  - bioetl.composition.health_api\n"
             "  - bioetl.composition.maintenance_api\n"
-            "  - bioetl.composition.resources_api\n"
             "  - bioetl.composition.composite_api\n"
             "  - bioetl.composition.observability_api\n\n"
             "Violations:\n" + "\n".join(f"  - {item}" for item in violations)
@@ -597,7 +596,6 @@ class TestInterfacesBootstrapIsolation:
             "  - bioetl.composition.control_plane_api\n"
             "  - bioetl.composition.health_api\n"
             "  - bioetl.composition.maintenance_api\n"
-            "  - bioetl.composition.resources_api\n"
             "  - bioetl.composition.composite_api\n"
             "  - bioetl.composition.observability_api\n\n"
             "Violations:\n" + "\n".join(f"  - {item}" for item in violations)
@@ -623,9 +621,29 @@ class TestInterfacesBootstrapIsolation:
             "  - bioetl.composition.health_api\n"
             "  - bioetl.composition.maintenance_api\n"
             "  - bioetl.composition.registry_api\n"
-            "  - bioetl.composition.resources_api\n"
             "  - bioetl.composition.composite_api\n"
             "  - bioetl.composition.observability_api\n\n"
+            "Violations:\n" + "\n".join(f"  - {item}" for item in violations)
+        )
+
+    def test_interfaces_no_direct_resources_api_imports(self, src_dir: Path) -> None:
+        """Interfaces must consume owner-focused APIs instead of resources_api."""
+        violations: list[str] = []
+        for py_file in _python_files(_interfaces_path(src_dir)):
+            violations.extend(
+                _module_import_violations(
+                    py_file,
+                    src_dir,
+                    exact_modules={"bioetl.composition.resources_api"},
+                )
+            )
+
+        assert not violations, (
+            "Interfaces layer must not import bioetl.composition.resources_api.\n"
+            "Use owner-focused public APIs instead:\n"
+            "  - bioetl.composition.control_plane_api\n"
+            "  - bioetl.composition.health_api\n"
+            "  - bioetl.composition.maintenance_api\n\n"
             "Violations:\n" + "\n".join(f"  - {item}" for item in violations)
         )
 
@@ -685,7 +703,6 @@ class TestInterfacesBootstrapIsolation:
             "bioetl.composition.maintenance_api",
             "bioetl.composition.observability_api",
             "bioetl.composition.registry_api",
-            "bioetl.composition.resources_api",
         }
         violations: list[str] = []
         for py_file in _python_files(_interfaces_path(src_dir)):
@@ -706,8 +723,7 @@ class TestInterfacesBootstrapIsolation:
             "  - bioetl.composition.health_api\n"
             "  - bioetl.composition.maintenance_api\n"
             "  - bioetl.composition.observability_api\n"
-            "  - bioetl.composition.registry_api\n"
-            "  - bioetl.composition.resources_api\n\n"
+            "  - bioetl.composition.registry_api\n\n"
             "Violations:\n" + "\n".join(f"  - {item}" for item in violations)
         )
 

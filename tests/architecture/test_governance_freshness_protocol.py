@@ -132,9 +132,14 @@ def test_project_test_health_summary_has_machine_readable_metadata() -> None:
     assert shard_registry["owner"]
     assert shard_registry["shards"]
 
-    planned_shards = {
+    resolved_shards = {
         shard["id"]
         for shard in shard_registry["shards"]
-        if shard.get("status") == "planned"
+        if shard.get("status") == "passed"
     }
-    assert {"flaky-rate", "uncovered-module-risk-map"} <= planned_shards
+    assert {
+        "flaky-rate",
+        "uncovered-module-risk-map",
+        "semanticscholar-environment-limited-frequency",
+        "environment-limited-threshold",
+    } <= resolved_shards
