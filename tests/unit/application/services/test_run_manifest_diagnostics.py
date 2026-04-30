@@ -123,16 +123,28 @@ def _assert_provenance_only_score(
     summary: dict[str, object], manifest: RunManifest
 ) -> None:
     score = summary["reproducibility_audit_score"]
-    assert score["schema_version"] == "1.0"
+    assert score["schema_version"] == "2.0"
     assert score["contract_version"] == "1.2.0"
     assert score["scale"] == "0-10"
     assert score["required_profile"] == "degraded_observable"
+    assert score["score_scope"] == "supported_boundary_run"
     assert score["overall_score"] == pytest.approx(7.4)
     assert score["thresholds"] == {}
     assert score["threshold_failures"] == []
     assert score["thresholds_satisfied"] is True
     assert score["scored_at"] == manifest.created_at.isoformat()
     assert score["source"] == "run_manifest_diagnostics"
+    assert score["supported_boundary_verdict"]["scope"] == "supported_boundary_run"
+    assert score["supported_boundary_verdict"]["verdict"] == (
+        "supported_boundary_gaps_present"
+    )
+    assert score["supported_boundary_verdict"]["supported_boundary_satisfied"] is (
+        False
+    )
+    assert score["global_reproducibility_claim"]["claimed"] is False
+    assert score["global_reproducibility_claim"]["verdict"] == (
+        "universal_exact_replay_not_claimed"
+    )
     assert score["blockers"] == [
         "exact_replay_not_eligible",
         "identity_graph_incomplete",

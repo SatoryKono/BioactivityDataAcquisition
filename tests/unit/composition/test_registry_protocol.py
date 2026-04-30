@@ -1,10 +1,8 @@
-"""Unit tests for unified Registry protocol.
-
-Verifies that all registries implement the unified API.
-"""
+"""Unit tests for canonical registry and datasource-helper surfaces."""
 
 from __future__ import annotations
 
+from inspect import signature
 from unittest.mock import MagicMock
 
 import pytest
@@ -79,141 +77,88 @@ class TestPipelineRegistryUnifiedAPI:
             self.registry.register("different_pipeline", mock_factory)
 
 
-class TestDataSourceRegistryUnifiedAPI:
-    """Test that DataSourceRegistry has unified API methods."""
-
-    @pytest.fixture(autouse=True)
-    def setup_and_teardown(self):
-        """Restore registry after test."""
-        from bioetl.composition.factories.datasource.data_source_factory import (
-            DataSourceRegistry,
-        )
-
-        backup = DataSourceRegistry._creators.copy()
-
-        yield
-
-        DataSourceRegistry._creators.clear()
-        DataSourceRegistry._creators.update(backup)
-
-    def test_list_keys_returns_list(self):
-        """DataSourceRegistry.list_keys() should return a list."""
-        from bioetl.composition.factories.datasource.data_source_factory import (
-            DataSourceRegistry,
-        )
-
-        keys = DataSourceRegistry.list_keys()
-        assert isinstance(keys, list)
-
-    def test_list_keys_matches_list_providers(self):
-        """list_keys() should return same result as list_providers()."""
-        from bioetl.composition.factories.datasource.data_source_factory import (
-            DataSourceRegistry,
-        )
-
-        assert DataSourceRegistry.list_keys() == DataSourceRegistry.list_providers()
-
-    def test_contains_returns_true_for_registered(self):
-        """contains() should return True for registered providers."""
-        from bioetl.composition.factories.datasource.data_source_factory import (
-            DataSourceRegistry,
-        )
-
-        assert DataSourceRegistry.contains("chembl")
-
-    def test_contains_returns_false_for_unknown(self):
-        """contains() should return False for unknown provider."""
-        from bioetl.composition.factories.datasource.data_source_factory import (
-            DataSourceRegistry,
-        )
-
-        assert not DataSourceRegistry.contains("unknown_provider_xyz")
-
-    def test_clear_empties_registry(self):
-        """clear() should empty the registry."""
-        from bioetl.composition.factories.datasource.data_source_factory import (
-            DataSourceRegistry,
-        )
-
-        # DataSourceRegistry now delegates to ProviderRegistry,
-        # so _creators is not used. Test that list_keys works correctly.
-        keys_before = DataSourceRegistry.list_keys()
-        assert len(keys_before) > 0
-
-        DataSourceRegistry.clear()
-
-        # After clear, local _creators should be empty
-        assert len(DataSourceRegistry._creators) == 0
-
-    def test_get_raises_keyerror_for_unknown(self):
-        """get() should raise KeyError for unknown provider."""
-        from bioetl.composition.factories.datasource.data_source_factory import (
-            DataSourceRegistry,
-        )
-
-        with pytest.raises(KeyError):
-            DataSourceRegistry.get("unknown_provider_xyz")
-
-
-class TestUnifiedAPIConsistency:
-    """Test that all registries have consistent API."""
+class TestDataSourceCreatorHelper:
+    """Canonical datasource helper should bind provider-specific creators."""
 
     @pytest.fixture(autouse=True)
     def setup_registry(self, isolated_registry):
-        """Use isolated registry for tests."""
+        """Populate isolated pipeline registry for pipeline-side checks."""
         register_all_pipelines(registry=isolated_registry)
         self.registry = isolated_registry
         yield
 
-    def test_both_registries_have_list_keys(self):
-        """Both registries should have list_keys() method."""
-        from bioetl.composition.factories.datasource.data_source_factory import (
-            DataSourceRegistry,
-        )
+    def test_provider_registry_has_list_keys(self):
+        """ProviderRegistry should retain the unified list_keys() surface."""
+        from bioetl.composition.providers.provider_registry import ProviderRegistry
 
         assert hasattr(self.registry, "list_keys")
-        assert hasattr(DataSourceRegistry, "list_keys")
+        assert hasattr(ProviderRegistry, "list_keys")
         assert callable(self.registry.list_keys)
-        assert callable(DataSourceRegistry.list_keys)
+        assert callable(ProviderRegistry.list_keys)
 
-    def test_both_registries_have_contains(self):
-        """Both registries should have contains() method."""
-        from bioetl.composition.factories.datasource.data_source_factory import (
-            DataSourceRegistry,
-        )
+    def test_provider_registry_has_contains(self):
+        """ProviderRegistry should retain the unified contains() surface."""
+        from bioetl.composition.providers.provider_registry import ProviderRegistry
 
         assert hasattr(self.registry, "contains")
-        assert hasattr(DataSourceRegistry, "contains")
+        assert hasattr(ProviderRegistry, "contains")
         assert callable(self.registry.contains)
-        assert callable(DataSourceRegistry.contains)
+        assert callable(ProviderRegistry.contains)
 
-    def test_both_registries_have_clear(self):
-        """Both registries should have clear() method."""
-        from bioetl.composition.factories.datasource.data_source_factory import (
-            DataSourceRegistry,
-        )
+    def test_provider_registry_has_clear(self):
+        """ProviderRegistry should retain the unified clear() surface."""
+        from bioetl.composition.providers.provider_registry import ProviderRegistry
 
         assert hasattr(self.registry, "clear")
-        assert hasattr(DataSourceRegistry, "clear")
+        assert hasattr(ProviderRegistry, "clear")
         assert callable(self.registry.clear)
-        assert callable(DataSourceRegistry.clear)
+        assert callable(ProviderRegistry.clear)
 
-    def test_both_registries_have_get(self):
-        """Both registries should have get() method."""
+    def test_get_data_source_creator_returns_callable(self):
+        """Canonical helper should return a provider-bound creator callable."""
         from bioetl.composition.factories.datasource.data_source_factory import (
-            DataSourceRegistry,
+            get_data_source_creator,
         )
+        from bioetl.composition.providers import ensure_providers_loaded
 
-        assert hasattr(self.registry, "get")
-        assert hasattr(DataSourceRegistry, "get")
-        assert callable(self.registry.get)
-        assert callable(DataSourceRegistry.get)
+        ensure_providers_loaded()
+        creator = get_data_source_creator("chembl")
+
+        assert callable(creator)
+
+    def test_get_data_source_creator_raises_keyerror_for_unknown_provider(self):
+        """Canonical helper should raise KeyError for unknown providers."""
+        from bioetl.composition.factories.datasource.data_source_factory import (
+            get_data_source_creator,
+        )
+        from bioetl.composition.providers import ensure_providers_loaded
+
+        ensure_providers_loaded()
+
+        with pytest.raises(KeyError):
+            get_data_source_creator("unknown_provider_xyz")
+
+    def test_get_data_source_creator_matches_protocol_signature(self):
+        """Bound creator should expose the canonical datasource protocol signature."""
+        from bioetl.composition.factories.datasource.data_source_factory import (
+            get_data_source_creator,
+        )
+        from bioetl.composition.providers import ensure_providers_loaded
+
+        ensure_providers_loaded()
+        creator = get_data_source_creator("chembl")
+        param_names = set(signature(creator).parameters)
+
+        assert {
+            "settings",
+            "pipeline_config",
+            "logger",
+            "filter_config",
+            "metrics",
+            "pipeline_name",
+        } <= param_names
 
     def test_pipeline_registry_has_register(self):
-        """PipelineRegistry should have register() method.
-
-        Note: DataSourceRegistry.register() was removed as deprecated.
-        New registrations should use ProviderRegistry.register() instead.
-        """
+        """PipelineRegistry should keep register() as the canonical pipeline seam."""
         assert hasattr(self.registry, "register")
         assert callable(self.registry.register)

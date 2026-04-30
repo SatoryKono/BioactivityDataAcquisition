@@ -142,15 +142,15 @@ bronze_fixture_replay_debt_metrics:
         change instead of remaining as side backlog.
       ratchet_policy: Zero-budget unless a reviewed exception updates the budget.
     decision_recorded_fixture_gap_count:
-      current_count: 5
-      max_count: 5
+      current_count: 1
+      max_count: 1
       owner: '@bioetl-data-platform'
       rationale: Decision-recorded fixture families are residual replay evidence
         debt and must not grow without a reviewed policy change.
       ratchet_policy: Ratchet downward as derived/specialized surfaces gain factual
         provider-backed tracked samples.
     tracked_bronze_fixture_count:
-      current_count: 16
+      current_count: 20
       owner: '@bioetl-data-platform'
       rationale: Tracked CI samples are the first-class evidence signal for
         determinism and replay coverage across supported Bronze families.

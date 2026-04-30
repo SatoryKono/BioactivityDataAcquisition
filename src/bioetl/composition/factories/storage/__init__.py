@@ -9,9 +9,6 @@ from bioetl.composition.factories.storage.resilience import (
     create_silver_merge_resilience_policy,
 )
 
-# Backward-compatible package alias retained for explicit legacy imports.
-StorageAdapter = StorageBundle
-
 __all__ = [
     "StorageBundle",
     "StorageContext",

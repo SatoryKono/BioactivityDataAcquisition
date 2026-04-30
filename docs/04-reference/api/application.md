@@ -195,7 +195,6 @@ The symbols below live in nested composite modules and are not exported by the
 | `EnricherDeduplicatorService`      | Deduplicates enrichment records            |
 | `ConflictResolverService`          | Resolves field conflicts between providers |
 | `CoalescePolicyService`            | Coalescing policy for merged fields        |
-| `ColumnPriorityOrderer`            | Deprecated compatibility surface for priority-based ordering |
 | `JoinPlannerService`               | Plans join operations between datasets     |
 | `JoinExecutorService`              | Executes planned join operations           |
 | `JoinKeyResolverService`           | Resolves join keys across providers        |

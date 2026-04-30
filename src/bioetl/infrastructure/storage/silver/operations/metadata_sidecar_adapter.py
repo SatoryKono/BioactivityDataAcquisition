@@ -16,6 +16,7 @@ from typing import Literal
 
 import orjson
 
+from bioetl.domain.behavior.dataset_content_identity import build_dataset_content_hash
 from bioetl.domain.lineage import DatasetRef
 from bioetl.domain.models.metadata import (
     BaseOutputMetadata,
@@ -31,7 +32,6 @@ from bioetl.domain.models.metadata import (
     SilverMetadata,
     SilverOutputExt,
 )
-from bioetl.domain.services.dataset_content_identity import build_dataset_content_hash
 from bioetl.domain.types import BatchID, BronzeRecord, RunID, RunType
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics

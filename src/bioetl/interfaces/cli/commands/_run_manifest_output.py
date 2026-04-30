@@ -189,6 +189,52 @@ def render_forensic_diff_payload(payload: dict[str, object]) -> str:
     return "\n".join(lines)
 
 
+def render_score_payload(payload: dict[str, object]) -> str:
+    """Render one run-manifest score payload in human-readable text mode."""
+    score = payload.get("reproducibility_audit_score")
+    if not isinstance(score, dict):
+        return json.dumps(payload, indent=2, default=str)
+
+    boundary_verdict = score.get("supported_boundary_verdict")
+    global_claim = score.get("global_reproducibility_claim")
+    lines = [
+        "Run Manifest Score",
+        f"  identifier: {format_scalar(payload.get('identifier'))}",
+        f"  manifest_id: {format_scalar(payload.get('manifest_id'))}",
+        f"  run_id: {format_scalar(payload.get('run_id'))}",
+        "  run_scoped_score: "
+        f"{format_scalar(score.get('overall_score'))}",
+        f"  score_scope: {format_scalar(score.get('score_scope'))}",
+        f"  required_profile: {format_scalar(score.get('required_profile'))}",
+        "  thresholds_satisfied: "
+        f"{format_scalar(score.get('thresholds_satisfied'))}",
+    ]
+    if isinstance(boundary_verdict, dict):
+        lines.extend(
+            [
+                "  supported_boundary_verdict:",
+                "    verdict: "
+                f"{format_scalar(boundary_verdict.get('verdict'))}",
+                "    supported_boundary_satisfied: "
+                f"{format_scalar(boundary_verdict.get('supported_boundary_satisfied'))}",
+                "    reason: "
+                f"{format_scalar(boundary_verdict.get('reason'))}",
+                "    exact_replay_support_boundary: "
+                f"{format_scalar(boundary_verdict.get('exact_replay_support_boundary'))}",
+            ]
+        )
+    if isinstance(global_claim, dict):
+        lines.extend(
+            [
+                "  global_reproducibility_claim:",
+                f"    claimed: {format_scalar(global_claim.get('claimed'))}",
+                f"    verdict: {format_scalar(global_claim.get('verdict'))}",
+                f"    reason: {format_scalar(global_claim.get('reason'))}",
+            ]
+        )
+    return "\n".join(lines)
+
+
 def render_text_payload(payload: dict[str, object]) -> str:
     """Render CLI payload in human-readable text mode."""
     if "manifest" in payload:
@@ -197,4 +243,6 @@ def render_text_payload(payload: dict[str, object]) -> str:
         return render_diff_payload(payload)
     if "manifest_diff" in payload and "forensic_diff" in payload:
         return render_forensic_diff_payload(payload)
+    if "reproducibility_audit_score" in payload:
+        return render_score_payload(payload)
     return json.dumps(payload, indent=2, default=str)

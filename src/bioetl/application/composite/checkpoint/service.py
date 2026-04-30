@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import asyncio
-import warnings
 from collections.abc import Callable
 from dataclasses import dataclass, fields
 from typing import TypedDict, cast
@@ -266,17 +265,3 @@ class CompositeCheckpointService:
         """List all checkpoints for this composite pipeline."""
         await asyncio.sleep(0)
         return self._persistence_service.list_all()
-
-
-class CompositeCheckpointManager(CompositeCheckpointService):
-    def __init__(
-        self,
-        init: CompositeCheckpointServiceContext | None = None,
-        **kwargs: object,
-    ) -> None:
-        message = (
-            "CompositeCheckpointManager is deprecated and will be removed in v2.0. "
-            "Use CompositeCheckpointService instead."
-        )
-        warnings.warn(message, DeprecationWarning, stacklevel=3)
-        super().__init__(init=init, **kwargs)

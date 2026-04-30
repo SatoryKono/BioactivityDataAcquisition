@@ -35,10 +35,6 @@ from bioetl.composition.providers.provider_registry import (
 )
 from bioetl.composition.providers.registration import register_all_providers
 
-# Compatibility alias retained for legacy imports; new code should use
-# DataSourceCreatorProtocol directly.
-DataSourceCreatorPort = DataSourceCreatorProtocol
-
 __all__ = [
     "DataSourceCreatorProtocol",
     "HttpConfig",

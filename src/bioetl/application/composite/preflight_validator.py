@@ -9,8 +9,6 @@ See ADR-026 for composite pipeline architectural decisions.
 
 from __future__ import annotations
 
-import warnings
-
 from bioetl.application.composite._preflight_orchestration import (
     PreflightSchemaOrchestrationMixin,
 )
@@ -215,14 +213,3 @@ class CompositePreflightValidationService(
         if fail_on_error and not is_valid:
             raise PreflightValidationError(result)
         return result
-
-
-class CompositePreflightValidator(CompositePreflightValidationService):
-    def __init__(self, logger: LoggerPort) -> None:
-        warnings.warn(
-            "CompositePreflightValidator is deprecated and will be removed in v2.0. "
-            "Use CompositePreflightValidationService instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        super().__init__(logger)

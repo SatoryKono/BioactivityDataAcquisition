@@ -102,3 +102,14 @@ def represented_golden_master_entities() -> dict[str, set[str]]:
         if pipeline_name in PIPELINES:
             represented.setdefault(provider, set()).add(entity)
     return represented
+
+
+def golden_master_registry_pipelines(matrix: YamlMap) -> dict[str, tuple[str, ...]]:
+    """Return the declared golden-master pipeline registry by provider."""
+    registry = matrix.get("fixture_governance", {}).get("golden_master_registry", {})
+    providers = registry.get("providers", {})
+    result: dict[str, tuple[str, ...]] = {}
+    for provider, provider_config in providers.items():
+        pipelines = provider_config.get("pipelines", [])
+        result[str(provider)] = tuple(str(pipeline) for pipeline in pipelines)
+    return result

@@ -13,7 +13,6 @@ if TYPE_CHECKING:
 
 __all__ = [
     "AdapterCreator",
-    "DataSourceCreatorPort",
     "DataSourceCreatorProtocol",
     "HttpConfig",
     "ProviderConfig",
@@ -102,8 +101,3 @@ class ProviderConfig:
     default_kwargs: dict[str, object] = field(default_factory=dict)
     custom_creator: AdapterCreator | None = None
     data_source_creator: DataSourceCreatorProtocol | None = None
-
-
-# Compatibility alias retained for legacy imports; new code should use
-# DataSourceCreatorProtocol directly.
-DataSourceCreatorPort = DataSourceCreatorProtocol

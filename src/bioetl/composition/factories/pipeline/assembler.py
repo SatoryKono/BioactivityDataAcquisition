@@ -39,6 +39,7 @@ from bioetl.composition.factories.pipeline.runner_assembly import (
 )
 from bioetl.composition.observability import ObservabilityBundle
 from bioetl.composition.providers.provider_registry import ProviderRegistry
+from bioetl.domain.behavior import EntityIdentityGenerator
 from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
 from bioetl.domain.ports import (
     ContractPolicyProtocol,
@@ -47,7 +48,6 @@ from bioetl.domain.ports import (
     PiiHasherPort,
     TracingPort,
 )
-from bioetl.domain.services import EntityIdentityGenerator
 from bioetl.domain.types import GoldSchemaType
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 

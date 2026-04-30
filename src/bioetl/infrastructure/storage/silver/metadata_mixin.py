@@ -13,6 +13,7 @@ from typing import Protocol
 import pyarrow as pa
 from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 
+from bioetl.domain.behavior.dq_metrics_calculator import DQMetricsCalculator
 from bioetl.domain.medallion import SilverWriteMode
 from bioetl.domain.models.metadata import SilverMetadata
 from bioetl.domain.ports import (
@@ -24,7 +25,6 @@ from bioetl.domain.ports import (
     MetricsPort,
 )
 from bioetl.domain.ports.noop import NoOpMetadataWriter
-from bioetl.domain.services.dq_metrics_calculator import DQMetricsCalculator
 from bioetl.domain.types import BatchID, BronzeRecord, RunID, RunType
 from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
 from bioetl.domain.value_objects.silver_result import SilverWriteResult
@@ -143,7 +143,7 @@ class SilverWriterMetadataMixin:
         validation_errors: Sequence[str] | None = None,
     ) -> BatchDQMetrics:
         """Compute DQ metrics using injected calculator."""
-        from bioetl.domain.services.dq_metrics_calculator import DQMetricsInput
+        from bioetl.domain.behavior.dq_metrics_calculator import DQMetricsInput
 
         existing_schema = await self._get_table_schema(table_name)
         existing_fields: set[str] | None = None

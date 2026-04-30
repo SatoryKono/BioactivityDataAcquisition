@@ -36,7 +36,7 @@ class DataNormalizationPort(Protocol):
     identifiers, and text content from various data sources.
 
     Example:
-        >>> from bioetl.domain.services import DefaultDataNormalizer
+        >>> from bioetl.domain.behavior import DefaultDataNormalizer
         >>> normalizer = DefaultDataNormalizer()
         >>> normalizer.normalize_doi("10.1038/NATURE12373")
         '10.1038/nature12373'

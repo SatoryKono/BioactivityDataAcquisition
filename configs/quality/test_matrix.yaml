@@ -475,8 +475,44 @@ fixture_governance:
     cassette_metadata_catalog: enforced
     cassette_metadata_backfill: enforced
     contract_snapshots: partial
-    golden_masters: partial
+    golden_masters: enforced
     extensionless_filenames: enforced
+  golden_master_registry:
+    scope: representative_provider_baseline
+    documentation: tests/fixtures/golden
+    update_env_var: UPDATE_SNAPSHOTS
+    providers:
+      chembl:
+        pipelines:
+          - chembl_activity
+          - chembl_molecule
+          - chembl_publication_term
+        rationale: Representative ChEMBL baseline spans activity, molecule, and a derived publication surface.
+      crossref:
+        pipelines:
+          - crossref_publication
+        rationale: CrossRef keeps one representative publication golden master in the enforced baseline.
+      openalex:
+        pipelines:
+          - openalex_publication
+        rationale: OpenAlex keeps one representative publication golden master in the enforced baseline.
+      pubchem:
+        pipelines:
+          - pubchem_compound
+        rationale: PubChem compound remains the representative compound baseline.
+      pubmed:
+        pipelines:
+          - pubmed_publication
+        rationale: PubMed publication remains the representative publication baseline.
+      semanticscholar:
+        pipelines:
+          - semanticscholar_publication
+        rationale: Semantic Scholar publication remains a bounded representative golden-master baseline despite live fixture scarcity elsewhere.
+      uniprot:
+        pipelines:
+          - uniprot_protein
+          - uniprot_idmapping
+        rationale: UniProt keeps protein plus idmapping representative golden masters because both surfaces are active and behaviorally distinct.
   contract_snapshot_registry:
     scope: bounded_live_provider_baseline
     documentation: tests/fixtures/contracts/README.md

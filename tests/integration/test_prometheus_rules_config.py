@@ -281,6 +281,47 @@ _TUNED_ALERT_EXPECTATIONS: dict[str, dict[str, object]] = {
             "[30m]",
         ],
     },
+    "BioETLRecordFlowInvariantViolated": {
+        "severity": "critical",
+        "for": "5m",
+        "fragments": [
+            "bioetl_record_flow_invariants_total",
+            'status="violated"',
+            "[15m]",
+            "> 0",
+        ],
+    },
+    "BioETLIngestionThroughputDegraded": {
+        "severity": "warning",
+        "for": "1m",
+        "fragments": [
+            "bioetl_stage_backlog_records",
+            'stage="ingestion"',
+            "bioetl_stage_lag_seconds",
+            ">= 300",
+            "[15m]",
+        ],
+    },
+    "BioETLStageBacklogActive": {
+        "severity": "warning",
+        "for": "5m",
+        "fragments": [
+            "bioetl_stage_backlog_records",
+            "max_over_time",
+            "[15m]",
+            "> 0",
+        ],
+    },
+    "BioETLStageLagHigh": {
+        "severity": "warning",
+        "for": "5m",
+        "fragments": [
+            "bioetl_stage_lag_seconds",
+            "max_over_time",
+            "[15m]",
+            ">= 300",
+        ],
+    },
     "BioETLMemoryPressureActive": {
         "severity": "warning",
         "for": "10m",
@@ -605,6 +646,10 @@ def test_runtime_dashboard_recording_rules_exist_and_reference_source_metrics() 
         "bioetl_runtime_alert_condition_pipeline_infrastructure_failed_15m": "bioetl_infrastructure_validated",
         "bioetl_runtime_alert_condition_pipeline_runs_failed_15m": "bioetl_pipeline_runs_total",
         "bioetl_runtime_alert_condition_runtime_error_rate_high_30m": "bioetl_errors_total",
+        "bioetl_runtime_alert_condition_record_flow_invariant_violated_15m": "bioetl_record_flow_invariants_total",
+        "bioetl_runtime_alert_condition_ingestion_throughput_degraded_15m": "bioetl_stage_backlog_records",
+        "bioetl_runtime_alert_condition_stage_backlog_active_15m": "bioetl_stage_backlog_records",
+        "bioetl_runtime_alert_condition_stage_lag_high_15m": "bioetl_stage_lag_seconds",
         "bioetl_runtime_alert_condition_dq_soft_threshold_15m": "bioetl_dq_soft_threshold_exceeded",
         "bioetl_runtime_alert_condition_dq_hard_fail_15m": "bioetl_dq_validation_failures_total",
         "bioetl_runtime_alert_condition_dq_critical_anomaly_30m": "bioetl_dq_anomaly_detected",
@@ -729,6 +774,22 @@ def test_pipeline_runtime_alerts_reference_expected_metrics() -> None:
         ),
         "BioETLRuntimeErrorRateHigh": (
             "bioetl_errors_total",
+            "docs/05-operations/runbooks/observability-checklist.md",
+        ),
+        "BioETLRecordFlowInvariantViolated": (
+            "bioetl_record_flow_invariants_total",
+            "docs/05-operations/runbooks/observability-checklist.md",
+        ),
+        "BioETLIngestionThroughputDegraded": (
+            "bioetl_stage_backlog_records",
+            "docs/05-operations/runbooks/observability-checklist.md",
+        ),
+        "BioETLStageBacklogActive": (
+            "bioetl_stage_backlog_records",
+            "docs/05-operations/runbooks/observability-checklist.md",
+        ),
+        "BioETLStageLagHigh": (
+            "bioetl_stage_lag_seconds",
             "docs/05-operations/runbooks/observability-checklist.md",
         ),
         "BioETLMemoryPressureActive": (

@@ -242,7 +242,7 @@ operator-grade trace/debug claims covers these source families:
 
 - `chembl.activity`
 - `chembl.molecule`
-- `crossref.works`
+- `crossref.publication`
 - `pubchem.compound`
 - `pubmed.publication`
 
@@ -292,6 +292,16 @@ Focus on:
   `input_snapshot_ids`, and `input_snapshot_content_hashes`;
 - `dq_policy_ref`, `rule_bundle_version`, and `dq_contract_compatibility_hash` as adjacent DQ/control-plane anchors that are related but not interchangeable with manifest identity;
 - `correlation_anchor_gaps`, `alert_signals`, `next_steps`.
+
+When using `bioetl run-manifest score`, interpret the score payload in two
+layers:
+
+- `overall_score` is a run-scoped summary for the inspected family within its
+  published boundary;
+- `supported_boundary_verdict` states whether this run satisfies that boundary
+  or remains blocked/gapped;
+- `global_reproducibility_claim` states the project-wide claim status and must
+  remain explicit even when the inspected run is replay-ready.
 
 Interpretation examples:
 

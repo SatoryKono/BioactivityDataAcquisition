@@ -25,6 +25,7 @@ from pathlib import Path
 from typing import Any, cast
 
 import pytest
+import yaml
 
 from bioetl.domain.config import PipelineConfig
 from bioetl.infrastructure.config import load_pipeline_config, yaml_config_to_domain
@@ -32,6 +33,7 @@ from bioetl.infrastructure.config import load_pipeline_config, yaml_config_to_do
 # Path to store snapshots
 SNAPSHOT_DIR = Path("tests/snapshots")
 SNAPSHOT_FILE = SNAPSHOT_DIR / "pipeline_configs.json"
+MATRIX_PATH = Path("configs/quality/test_matrix.yaml")
 EXCLUDED_PROVIDER_SURFACES = frozenset({"chembl", "composite"})
 
 # List of all pipeline config names to test
@@ -101,6 +103,16 @@ def _active_entity_pipelines() -> dict[str, str]:
     return providers
 
 
+def _golden_master_registry() -> dict[str, tuple[str, ...]]:
+    matrix = yaml.safe_load(MATRIX_PATH.read_text(encoding="utf-8")) or {}
+    registry = matrix.get("fixture_governance", {}).get("golden_master_registry", {})
+    providers = registry.get("providers", {})
+    return {
+        str(provider): tuple(str(pipeline) for pipeline in config.get("pipelines", []))
+        for provider, config in providers.items()
+    }
+
+
 @pytest.mark.parametrize("pipeline_name", PIPELINES)
 def test_pipeline_config_golden_master(
     pipeline_name: str, golden_snapshots: dict[str, Any]
@@ -158,3 +170,10 @@ def test_golden_master_pipeline_set_covers_each_non_chembl_provider() -> None:
 def test_golden_master_pipeline_set_includes_special_case_pipeline() -> None:
     """Representative set should keep a non-trivial pipeline shape in scope."""
     assert "chembl_publication_term" in PIPELINES
+
+
+def test_golden_master_pipeline_set_matches_declared_registry() -> None:
+    """Representative pipeline set must match the matrix-declared registry."""
+    registry = _golden_master_registry()
+    expected = {pipeline for pipelines in registry.values() for pipeline in pipelines}
+    assert set(PIPELINES) == expected

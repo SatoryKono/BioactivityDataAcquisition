@@ -66,7 +66,7 @@ class TestFixtureGovernanceRollout:
             )
 
         if golden_files:
-            assert rollout.get("golden_masters") in {"partial", "enforced"}
+            assert rollout.get("golden_masters") == "enforced"
         else:
             assert rollout.get("golden_masters") == "planned"
 

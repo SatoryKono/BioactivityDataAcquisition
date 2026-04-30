@@ -9,6 +9,10 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Protocol, cast
 
+from bioetl.domain.behavior.dq_metrics_calculator import (
+    DQMetricsCalculator,
+    DQMetricsInput,
+)
 from bioetl.domain.medallion import SilverWriteMode
 from bioetl.domain.models.metadata import SilverMetadata
 from bioetl.domain.ports import (
@@ -18,10 +22,6 @@ from bioetl.domain.ports import (
     MetadataCoordinatorPort,
     MetadataWriterPort,
     MetricsPort,
-)
-from bioetl.domain.services.dq_metrics_calculator import (
-    DQMetricsCalculator,
-    DQMetricsInput,
 )
 from bioetl.domain.types import BatchID, BronzeRecord, RunID, RunType
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult

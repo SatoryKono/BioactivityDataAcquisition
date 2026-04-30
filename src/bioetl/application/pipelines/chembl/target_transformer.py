@@ -17,8 +17,8 @@ from bioetl.application.core.dict_transformers import (
 from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
 )
+from bioetl.domain.behavior import OrganismClassifier
 from bioetl.domain.entities import Target
-from bioetl.domain.services import OrganismClassifier
 from bioetl.domain.transformations import safe_int
 from bioetl.domain.types import GoldRecord, JsonDict
 from bioetl.domain.value_objects.taxonomy_id import TaxonomyId

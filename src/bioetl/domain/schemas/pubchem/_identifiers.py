@@ -8,11 +8,11 @@ from typing import cast
 import pandera.pandas as pa
 from pandera.typing import Series
 
-from bioetl.domain.schemas.base import ETLRecordSchema
-from bioetl.domain.services.chemical_standardization import (
+from bioetl.domain.behavior.chemical_standardization import (
     CHEMICAL_STANDARDIZATION_POLICY_VERSION,
     CHEMICAL_STANDARDIZATION_STATUSES,
 )
+from bioetl.domain.schemas.base import ETLRecordSchema
 from bioetl.domain.validation import INCHI_KEY_REGEX_PATTERN
 
 __all__ = [

@@ -37,8 +37,6 @@ from bioetl.composition.registry_api import (
     get_default_registry,
 )
 
-StorageAdapter = StorageBundle
-
 __all__ = [
     "CircuitBreakerConfig",
     "DQConfigsContext",

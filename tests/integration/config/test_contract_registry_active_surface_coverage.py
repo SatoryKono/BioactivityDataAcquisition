@@ -16,6 +16,7 @@ _CONFIGS_ROOT = Path("configs")
 _ENTITY_CONFIGS_ROOT = _CONFIGS_ROOT / "entities"
 _REGISTRY_PATH = _CONFIGS_ROOT / "base" / "contract_registry.yaml"
 _FIXTURE_GAPS_PATH = _CONFIGS_ROOT / "base" / "bronze_fixture_gaps.yaml"
+_FIXTURE_MANIFEST_PATH = _CONFIGS_ROOT / "base" / "bronze_fixture_manifest.yaml"
 _GOLD_CONTRACTS_ROOT = Path("docs/04-reference/contracts/gold")
 _STANDARD_CONTRACT_PROVIDERS = {
     "chembl",
@@ -37,6 +38,13 @@ _REQUIRED_DECISION_RECORDED_FIXTURE_GAP_FIELDS = {
     "de_scope_decision",
     "resolution_plan",
 }
+_SPECIALIZED_CHEMBL_FIXTURE_CONTRACT_REFS = {
+    "chembl.assay_parameters",
+    "chembl.publication_similarity",
+    "chembl.publication_term",
+    "chembl.subcellular_fraction",
+}
+_ALLOWED_ACTIVE_REGISTRY_REFS_WITHOUT_ENTITY_CONFIG: frozenset[str] = frozenset()
 
 
 def _active_standard_contract_refs() -> dict[str, str]:
@@ -70,26 +78,14 @@ def _gold_runtime_enabled(config_path: Path) -> bool:
     return True if enabled is None else bool(enabled)
 
 
-def _decision_recorded_fixture_contract_refs() -> set[str]:
-    payload = yaml.safe_load(_FIXTURE_GAPS_PATH.read_text(encoding="utf-8")) or {}
-    gaps = payload.get("gaps", {})
-    if not isinstance(gaps, dict):
-        return set()
-    refs = set()
-    for fixture_name, metadata in gaps.items():
-        if (
-            not isinstance(metadata, dict)
-            or metadata.get("status") != "decision_recorded"
-        ):
-            continue
-        provider, entity = str(fixture_name).split("/", maxsplit=1)
-        if provider == "chembl":
-            refs.add(f"{provider}.{entity}")
-    return refs
-
-
 def _fixture_gap_payload() -> dict[str, object]:
     payload = yaml.safe_load(_FIXTURE_GAPS_PATH.read_text(encoding="utf-8")) or {}
+    assert isinstance(payload, dict)
+    return payload
+
+
+def _fixture_manifest_payload() -> dict[str, object]:
+    payload = yaml.safe_load(_FIXTURE_MANIFEST_PATH.read_text(encoding="utf-8")) or {}
     assert isinstance(payload, dict)
     return payload
 
@@ -103,6 +99,29 @@ def test_contract_registry_covers_active_standard_provider_surfaces() -> None:
     assert expected_refs <= set(registry.entries), (
         "Contract registry missing active provider surfaces: "
         f"{sorted(expected_refs - set(registry.entries))}"
+    )
+
+
+@pytest.mark.integration
+def test_active_contract_registry_surfaces_have_active_entity_config_or_alias_governance() -> (
+    None
+):
+    """Every active standard registry ref must map back to config or alias governance."""
+    registry = FileContractRegistryStore(_REGISTRY_PATH).load()
+    expected_refs = set(_active_standard_contract_refs().values())
+    active_registry_refs = {
+        ref
+        for ref, entry in registry.entries.items()
+        if ref.split(".", maxsplit=1)[0] in _STANDARD_CONTRACT_PROVIDERS
+        and entry.status.value == "active"
+    }
+    uncovered = active_registry_refs - expected_refs
+    allowed = _ALLOWED_ACTIVE_REGISTRY_REFS_WITHOUT_ENTITY_CONFIG
+
+    assert uncovered <= allowed, (
+        "Active registry refs must have an active entity config or explicit alias "
+        "governance: "
+        f"{sorted(uncovered - allowed)}"
     )
 
 
@@ -146,15 +165,13 @@ def test_gold_disabled_standard_surface_can_stay_registry_published_but_not_acti
 
 
 @pytest.mark.integration
-def test_decision_recorded_chembl_fixture_gap_surfaces_are_not_active_contracts() -> (
-    None
-):
-    """Decision-recorded ChEMBL fixture gaps must not advertise active surfaces."""
+def test_specialized_chembl_fixture_surfaces_are_not_active_contracts() -> None:
+    """Resolved specialized ChEMBL fixture surfaces stay registry-published, not active."""
     registry = FileContractRegistryStore(_REGISTRY_PATH).load()
 
     statuses = {
         contract_ref: registry.entries[contract_ref].status.value
-        for contract_ref in sorted(_decision_recorded_fixture_contract_refs())
+        for contract_ref in sorted(_SPECIALIZED_CHEMBL_FIXTURE_CONTRACT_REFS)
     }
 
     assert statuses == {
@@ -166,6 +183,39 @@ def test_decision_recorded_chembl_fixture_gap_surfaces_are_not_active_contracts(
 
 
 @pytest.mark.integration
+def test_crossref_works_is_compatibility_only_not_active_runtime_surface() -> None:
+    """Legacy Crossref works ref must not compete with crossref.publication."""
+    registry = FileContractRegistryStore(_REGISTRY_PATH).load()
+
+    assert registry.entries["crossref.publication"].status.value == "active"
+    assert registry.entries["crossref.works"].status.value == "deprecated"
+
+
+@pytest.mark.integration
+def test_specialized_chembl_fixture_surfaces_have_tracked_manifest_evidence() -> None:
+    """Specialized ChEMBL surfaces must resolve to tracked manifest evidence."""
+    payload = _fixture_manifest_payload()
+    fixtures = payload.get("fixtures", {})
+    assert isinstance(fixtures, dict)
+
+    expected = {
+        "chembl/assay_parameters": "deterministic_adapter_projection",
+        "chembl/publication_similarity": "provider_contract_alignment",
+        "chembl/publication_term": "recorded_provider_or_deterministic_derived_source",
+        "chembl/subcellular_fraction": "controlled_extraction_run",
+    }
+
+    for fixture_name, resolution_kind in expected.items():
+        entry = fixtures.get(fixture_name)
+        assert isinstance(entry, dict), (
+            f"missing fixture manifest entry: {fixture_name}"
+        )
+        assert entry.get("fixture_kind") == "tracked_ci_sample"
+        assert entry.get("validation_status") == "valid"
+        assert entry.get("resolution_kind") == resolution_kind
+
+
+@pytest.mark.integration
 def test_decision_recorded_bronze_fixture_gaps_have_explicit_resolution_decisions() -> (
     None
 ):
@@ -173,6 +223,7 @@ def test_decision_recorded_bronze_fixture_gaps_have_explicit_resolution_decision
     payload = _fixture_gap_payload()
     gaps = payload.get("gaps", {})
     assert isinstance(gaps, dict)
+    assert set(gaps) == {"semanticscholar/publication"}
 
     for fixture_name, metadata in gaps.items():
         if (

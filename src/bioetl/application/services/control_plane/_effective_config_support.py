@@ -9,6 +9,7 @@ from dataclasses import asdict, dataclass, is_dataclass
 from datetime import datetime
 from typing import cast
 
+from bioetl.domain.behavior.dq_policy_resolver import DQPolicyResolver
 from bioetl.domain.config.dq import DQConfig
 from bioetl.domain.control_plane.effective_config_artifact import (
     ConfigResolutionPolicy,
@@ -25,7 +26,6 @@ from bioetl.domain.control_plane.reproducibility_policy import (
     STRICT_PERSISTENCE_PROFILES,
     normalize_required_persistence_profile,
 )
-from bioetl.domain.services.dq_policy_resolver import DQPolicyResolver
 from bioetl.domain.types import JsonDict
 from bioetl.domain.types.dq_contracts import DQDisposition, DQPolicyRef
 

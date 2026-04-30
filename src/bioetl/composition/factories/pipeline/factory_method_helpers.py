@@ -53,6 +53,7 @@ from bioetl.composition.factories.services.bundle import (
     build_pipeline_services,
     create_pipeline_with_services,
 )
+from bioetl.domain.behavior import EntityIdentityGenerator
 from bioetl.domain.filtering import (
     GoldFilterConfig,
     SilverFilterConfig,
@@ -64,7 +65,6 @@ from bioetl.domain.ports import (
     PiiHasherPort,
     TracingPort,
 )
-from bioetl.domain.services import EntityIdentityGenerator
 from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config
 
 TPipeline = TypeVar("TPipeline", bound="BasePipeline")

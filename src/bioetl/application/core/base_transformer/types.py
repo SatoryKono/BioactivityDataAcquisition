@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, Any, Protocol, TypeVar, runtime_checkable
 from bioetl.application.core.base_transformer.structural_policy import (
     StructuralPolicyProtocol,
 )
+from bioetl.domain.behavior import EntityIdentityGenerator
 from bioetl.domain.ports import (
     ContractPolicyProtocol,
     DataNormalizationPort,
@@ -15,7 +16,6 @@ from bioetl.domain.ports import (
     PiiHasherPort,
     TracingPort,
 )
-from bioetl.domain.services import EntityIdentityGenerator
 
 if TYPE_CHECKING:
     from bioetl.domain.entities import BaseEntity

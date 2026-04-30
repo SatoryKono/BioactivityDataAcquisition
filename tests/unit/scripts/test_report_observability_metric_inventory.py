@@ -269,16 +269,16 @@ def test_collect_metric_inventory_resolves_cross_file_class_metric_constants(
 
     report = inventory.collect_metric_inventory(tmp_path)
 
-    assert report["helper_backed_live_metrics"] == [
+    assert report["direct_live_metrics"] == [
         "bioetl_postrun_phase_duration_seconds",
         "bioetl_postrun_phase_events_total",
     ]
-    helper_emitters = report["helper_backed_emitters"]
-    assert isinstance(helper_emitters, dict)
-    assert helper_emitters["bioetl_postrun_phase_events_total"] == [
+    runtime_emitters = report["runtime_emitters"]
+    assert isinstance(runtime_emitters, dict)
+    assert runtime_emitters["bioetl_postrun_phase_events_total"] == [
         "src/bioetl/application/postrun/_support.py"
     ]
-    assert helper_emitters["bioetl_postrun_phase_duration_seconds"] == [
+    assert runtime_emitters["bioetl_postrun_phase_duration_seconds"] == [
         "src/bioetl/application/postrun/_support.py"
     ]
     assert report["registered_without_runtime"] == []
@@ -474,3 +474,60 @@ def test_main_check_allows_explicit_baseline(
         ]
     )
     assert exit_code == 0
+
+
+def test_main_write_evidence_writes_replayable_json_artifact(
+    tmp_path: Path,
+    monkeypatch: object,
+) -> None:
+    monkeypatch.setattr(
+        inventory,
+        "collect_metric_inventory",
+        lambda _repo_root: {
+            "declared_metrics": ["bioetl_example_total"],
+            "emitted_metrics": ["bioetl_example_total"],
+            "dashboarded_metrics": [],
+            "alerted_metrics": [],
+            "unused_declared_metrics": [],
+            "emitted_without_declaration": [],
+            "dashboarded_without_declaration": [],
+            "alerted_without_declaration": [],
+            "dashboarded_without_emission": [],
+            "alerted_without_emission": [],
+            "runtime_cardinality_review_required": [],
+            "live_metrics": ["bioetl_example_total"],
+            "direct_live_metrics": ["bioetl_example_total"],
+            "helper_backed_live_metrics": [],
+            "registered_without_runtime": [],
+            "runtime_without_registry": [],
+            "registry_only_metrics": [],
+            "dead_metrics": [],
+            "documented_without_registry": [],
+            "rules_without_registry": [],
+            "documented_without_runtime": [],
+            "documented_only_metrics": [],
+            "ruled_without_runtime": [],
+            "compatibility_alias_candidates": [],
+            "runtime_emitters": {},
+            "helper_backed_emitters": {},
+            "docs_mentions": {},
+            "rules_mentions": {},
+            "alias_emitters": {},
+        },
+    )
+    evidence_path = tmp_path / "evidence" / "observability-runtime-cardinality.json"
+
+    exit_code = inventory.main(
+        [
+            "--repo-root",
+            str(tmp_path),
+            "--write-evidence",
+            str(evidence_path),
+        ]
+    )
+
+    assert exit_code == 0
+    assert evidence_path.exists()
+    payload = evidence_path.read_text(encoding="utf-8")
+    assert '"declared_metrics"' in payload
+    assert "bioetl_example_total" in payload

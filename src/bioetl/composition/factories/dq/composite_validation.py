@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-from bioetl.domain.services.aggregation_validator import AggregationValidator
-from bioetl.domain.services.composite_validation_layer import CompositeValidator
-from bioetl.domain.services.cross_validation_validator import CrossValidationValidator
-from bioetl.domain.services.preflight_governance import PreflightGovernor
+from bioetl.domain.behavior.aggregation_validator import AggregationValidator
+from bioetl.domain.behavior.composite_validation_layer import CompositeValidator
+from bioetl.domain.behavior.cross_validation_validator import CrossValidationValidator
+from bioetl.domain.behavior.preflight_governance import PreflightGovernor
 
 
 def create_composite_validation_service() -> CompositeValidator:

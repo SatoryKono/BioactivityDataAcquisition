@@ -73,18 +73,31 @@ def build_reproducibility_audit_scoring(summary: JsonDict) -> JsonDict:
         sum(card.score for card in score_cards) / max(len(score_cards), 1),
         1,
     )
+    blockers = _overall_blockers(summary, score_cards)
+    evidence_refs = _overall_evidence_refs(score_cards)
     return {
-        "schema_version": "1.0",
+        "schema_version": "2.0",
         "contract_version": summary.get("contract_version"),
         "scale": "0-10",
         "required_profile": required_profile,
+        "score_scope": "supported_boundary_run",
         "overall_score": overall,
         "category_scores": category_scores,
         "thresholds": thresholds,
         "threshold_failures": threshold_failures,
         "thresholds_satisfied": not threshold_failures,
-        "blockers": _overall_blockers(summary, score_cards),
-        "evidence_refs": _overall_evidence_refs(score_cards),
+        "blockers": blockers,
+        "evidence_refs": evidence_refs,
+        "supported_boundary_verdict": _build_supported_boundary_verdict(
+            summary=summary,
+            required_profile=required_profile,
+            threshold_failures=threshold_failures,
+            blockers=blockers,
+        ),
+        "global_reproducibility_claim": _build_global_reproducibility_claim(
+            summary=summary,
+            evidence_refs=evidence_refs,
+        ),
         "scored_at": summary.get("manifest_created_at"),
         "source": "run_manifest_diagnostics",
     }
@@ -389,6 +402,83 @@ def _overall_evidence_refs(score_cards: tuple[_ScoreCard, ...]) -> list[str]:
     for card in score_cards:
         refs.extend(card.evidence_refs)
     return sorted(dict.fromkeys(refs))
+
+
+def _build_supported_boundary_verdict(
+    *,
+    summary: JsonDict,
+    required_profile: str,
+    threshold_failures: list[JsonDict],
+    blockers: list[str],
+) -> JsonDict:
+    lineage_boundary = summary.get("lineage_closure_boundary")
+    replay_family_contract = summary.get("replay_family_contract")
+
+    lineage_supported = (
+        bool(lineage_boundary.get("supported"))
+        if isinstance(lineage_boundary, dict)
+        else False
+    )
+    strict_exact_replay_supported = (
+        bool(replay_family_contract.get("strict_exact_replay_supported"))
+        if isinstance(replay_family_contract, dict)
+        else False
+    )
+    replay_capability = str(summary.get("replay_capability") or "")
+
+    if not strict_exact_replay_supported or not lineage_supported:
+        verdict = "blocked_outside_supported_boundary"
+        supported_boundary_satisfied = False
+        reason = (
+            str(lineage_boundary.get("reason"))
+            if isinstance(lineage_boundary, dict) and lineage_boundary.get("reason")
+            else "blocked_outside_supported_boundary"
+        )
+    elif threshold_failures or blockers or replay_capability != "exact_replay_supported":
+        verdict = "supported_boundary_gaps_present"
+        supported_boundary_satisfied = False
+        reason = "supported_boundary_requirements_not_met"
+    else:
+        verdict = "supported_boundary_satisfied"
+        supported_boundary_satisfied = True
+        reason = "supported_boundary_requirements_met"
+
+    return {
+        "scope": "supported_boundary_run",
+        "supported_boundary_satisfied": supported_boundary_satisfied,
+        "verdict": verdict,
+        "reason": reason,
+        "required_profile": required_profile,
+        "replay_capability": replay_capability,
+        "exact_replay_support_boundary": summary.get("exact_replay_support_boundary"),
+        "lineage_closure_supported": lineage_supported,
+    }
+
+
+def _build_global_reproducibility_claim(
+    *,
+    summary: JsonDict,
+    evidence_refs: list[str],
+) -> JsonDict:
+    claim_refs = sorted(
+        dict.fromkeys(
+            [
+                *evidence_refs,
+                "diagnostics.exact_replay_support_boundary",
+                "diagnostics.lineage_closure_boundary",
+                "diagnostics.replay_family_contract",
+            ]
+        )
+    )
+    return {
+        "scope": "project_wide_exact_replay",
+        "claimed": False,
+        "verdict": "universal_exact_replay_not_claimed",
+        "reason": "published_contract_limits_exact_replay_to_supported_boundary",
+        "exact_replay_support_boundary": summary.get("exact_replay_support_boundary"),
+        "lineage_closure_boundary": summary.get("lineage_closure_boundary"),
+        "evidence_refs": claim_refs,
+    }
 
 
 __all__ = ["build_reproducibility_audit_scoring"]

@@ -190,6 +190,16 @@
                     "expr": "sum by (stage) (increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__interval]))",
                     "legendFormat": "{{stage}}",
                     "refId": "A"
+                },
+                {
+                    "expr": "max by (stage) (max_over_time(bioetl_stage_backlog_records{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__interval]))",
+                    "legendFormat": "backlog / {{stage}}",
+                    "refId": "B"
+                },
+                {
+                    "expr": "max by (stage) (max_over_time(bioetl_stage_lag_seconds{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__interval]))",
+                    "legendFormat": "lag_seconds / {{stage}}",
+                    "refId": "C"
                 }
             ],
             "title": "Processing Volume by Stage",

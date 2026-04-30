@@ -6,7 +6,7 @@ from typing import cast
 
 import polars as pl
 
-from bioetl.domain.services.dq_serializer import to_dict
+from bioetl.domain.behavior.dq_serializer import to_dict
 from bioetl.domain.types import JsonDict
 from bioetl.domain.value_objects.dq_report import (
     CategoricalDistribution,

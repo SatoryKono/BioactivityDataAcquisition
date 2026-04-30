@@ -122,7 +122,7 @@ import paths.
 | `datasource/data_source_factory.py` | `DataSourceFactory`                             | Создает `DataSourcePort` для провайдера                        |
 | `datasource/http_client.py`         | `HttpClientFactory`                             | Настроенные `UnifiedHTTPClient` с Rate Limits, Circuit Breaker |
 | `storage/factory.py`                | `StorageFactory`                                | Сборка `StoragePort` (Bronze + Silver + Gold)                  |
-| `storage/adapter.py`                | `StorageAdapter`                                | Создание отдельных storage адаптеров                           |
+| `storage/adapter.py`                | `StorageBundle`                                 | Создание отдельных storage адаптеров                           |
 | `services/factory.py`               | `BaseServicesFactory`                           | Создание core сервисов                                         |
 | `services/builder.py`               | `ServicesBuilder`                               | Создание `PipelineService` bundle                              |
 | `services/port_factories.py`        | Port factory functions                          | Boundary-validated port creation                               |

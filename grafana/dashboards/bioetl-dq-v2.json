@@ -176,6 +176,11 @@
                     "expr": "sum by (pipeline, stage) (increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=~\"$stage\"}[$__interval]))",
                     "legendFormat": "{{pipeline}} / {{stage}}",
                     "refId": "A"
+                },
+                {
+                    "expr": "sum by (invariant, status) (increase(bioetl_record_flow_invariants_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__interval]))",
+                    "legendFormat": "{{invariant}} / {{status}}",
+                    "refId": "B"
                 }
             ],
             "title": "Data Flow in Range: Bronze -> Silver -> Gold",

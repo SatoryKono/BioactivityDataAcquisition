@@ -18,8 +18,8 @@ from bioetl.application.core.base_transformer_execution_mixin import (
 from bioetl.application.core.base_transformer_helpers_mixin import (
     _BaseTransformerRecordHelpersMixin,
 )
+from bioetl.domain.behavior import EntityIdentityGenerator
 from bioetl.domain.context import PipelineContext
-from bioetl.domain.services import EntityIdentityGenerator
 
 if TYPE_CHECKING:
     from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig

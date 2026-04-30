@@ -7,11 +7,11 @@ from collections import Counter
 from collections.abc import Callable, Mapping, Sequence
 from typing import TYPE_CHECKING, TypeVar, cast
 
-from bioetl.domain.ports import LineageStorePort
-from bioetl.domain.services.composite_metadata_helpers import (
+from bioetl.domain.behavior.composite_metadata_helpers import (
     parse_composite_field_sources,
     parse_composite_list,
 )
+from bioetl.domain.ports import LineageStorePort
 
 if TYPE_CHECKING:
     from bioetl.domain.lineage import LineageGraphFragment

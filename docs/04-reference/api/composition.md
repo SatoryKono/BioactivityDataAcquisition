@@ -57,7 +57,7 @@ submodules remain useful, but they are not package-root exports unless noted.
 | `assemble_runner()`         | Public helper for runner assembly from a configured pipeline  |
 | `DataSourceFactory`         | Creates data source adapters for all providers                |
 | `StorageFactory`            | Creates storage components (Bronze/Silver/Gold writers)       |
-| `StorageAdapter`            | Unified storage adapter combining all writer ports            |
+| `StorageBundle`             | Unified storage bundle combining all writer ports             |
 | `StorageContext`            | Storage context with paths and configuration                  |
 | `DQServicesFactory`         | Creates data quality service instances                        |
 | `BaseServicesFactory`       | Base factory for application services                         |

@@ -5,7 +5,6 @@ Coordinates high-level execution flow while delegating stage logic to mixins.
 
 from __future__ import annotations
 
-import warnings
 from typing import TYPE_CHECKING
 
 from bioetl.application.composite.lifecycle_observer_service import (
@@ -288,24 +287,3 @@ class CompositePipelineRunner(
         state = await self._prepare_run_state()
         state, execution_context = await self._execute_locked_run_phases(state)
         return await self._complete_successful_run(state, execution_context)
-
-
-class CompositePipelineRunnerService(CompositePipelineRunner):
-    def __init__(
-        self,
-        config: CompositeConfig,
-        runtime: CompositeRuntimeConfig,
-        deps: CompositeRunnerDependencies,
-        run_id: str | None = None,
-    ) -> None:
-        warnings.warn(
-            "CompositePipelineRunnerService is deprecated and will be removed in v2.0. "
-            "Use CompositePipelineRunner instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        super().__init__(config=config, runtime=runtime, deps=deps, run_id=run_id)
-
-
-# Also provide the reverse alias for completeness
-CompositePipelineRunnerService_legacy = CompositePipelineRunnerService
