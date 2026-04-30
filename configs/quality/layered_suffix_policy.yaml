@@ -1,6 +1,56 @@
 version: 1
 policy_scope: adr_041_layer_aware_naming
 
+function_suffix_rules:
+  - rule_id: composition_bootstrap_port_factories
+    description: >
+      Composition bootstrap may retain a narrow reviewed family of `*_port`
+      factory functions whose job is to construct implementations of domain port
+      contracts. This exception is limited to bootstrap factories and must not
+      expand to new composition functions without explicit governance review.
+    suffixes:
+      - _port
+    include_path_prefixes:
+      - src/bioetl/composition/bootstrap/
+    exclude_path_prefixes: []
+    allowed_symbols:
+      - symbol: bootstrap_checkpoint_port
+        path: src/bioetl/composition/bootstrap/assembly/checkpoint.py
+        issue: "#3442"
+        reason: >
+          Reviewed bootstrap factory that constructs the checkpoint port
+          implementation for CLI/runtime wiring.
+      - symbol: bootstrap_quarantine_port
+        path: src/bioetl/composition/bootstrap/assembly/checkpoint.py
+        issue: "#3442"
+        reason: >
+          Reviewed bootstrap factory that constructs the quarantine port
+          implementation for CLI/runtime wiring.
+      - symbol: bootstrap_dq_monitor_port
+        path: src/bioetl/composition/bootstrap/runtime/observability.py
+        issue: "#3442"
+        reason: >
+          Reviewed observability bootstrap factory retained for runtime-facing
+          import stability.
+      - symbol: bootstrap_logger_port
+        path: src/bioetl/composition/bootstrap/runtime/observability.py
+        issue: "#3442"
+        reason: >
+          Reviewed observability bootstrap factory retained for runtime-facing
+          import stability.
+      - symbol: bootstrap_metrics_port
+        path: src/bioetl/composition/bootstrap/runtime/observability.py
+        issue: "#3442"
+        reason: >
+          Reviewed observability bootstrap factory retained for runtime-facing
+          import stability.
+      - symbol: bootstrap_tracer_port
+        path: src/bioetl/composition/bootstrap/runtime/observability.py
+        issue: "#3442"
+        reason: >
+          Reviewed observability bootstrap factory retained for runtime-facing
+          import stability.
+
 suffix_boundary_rules:
   - rule_id: non_domain_port_protocols
     description: >
@@ -164,3 +214,42 @@ family_freeze_rules:
         path: src/bioetl/application/composite/column_priority_orderer.py
         issue: "#3402"
         reason: Deprecated compatibility surface pending removal.
+
+  - rule_id: composite_canonical_alias_family
+    description: >
+      Application composite naming is canonicalized to
+      CompositeCheckpointService, CompositePipelineRunner, and
+      CompositePreflightValidationService. Remaining deprecated aliases stay
+      confined to reviewed owner modules until their v2.0 sunset.
+    include_path_prefixes:
+      - src/bioetl/application/composite/
+    match_regex: ^Composite(?:Checkpoint(?:Manager|Service)|PipelineRunner(?:Service(?:_legacy)?|)?|Preflight(?:Validator|ValidationService))$
+    allowed_symbols:
+      - symbol: CompositeCheckpointService
+        path: src/bioetl/application/composite/checkpoint/service.py
+        issue: "#3443"
+        reason: Canonical composite checkpoint facade.
+      - symbol: CompositeCheckpointManager
+        path: src/bioetl/application/composite/checkpoint/service.py
+        issue: "#3443"
+        reason: Deprecated compatibility alias pending v2.0 removal.
+      - symbol: CompositePipelineRunner
+        path: src/bioetl/application/composite/runner_pkg/runner.py
+        issue: "#3443"
+        reason: Canonical composite runner facade.
+      - symbol: CompositePipelineRunnerService
+        path: src/bioetl/application/composite/runner_pkg/runner.py
+        issue: "#3443"
+        reason: Deprecated compatibility alias pending v2.0 removal.
+      - symbol: CompositePipelineRunnerService_legacy
+        path: src/bioetl/application/composite/runner_pkg/runner.py
+        issue: "#3443"
+        reason: Deprecated reverse alias pending v2.0 removal.
+      - symbol: CompositePreflightValidationService
+        path: src/bioetl/application/composite/preflight_validator.py
+        issue: "#3443"
+        reason: Canonical composite preflight validation facade.
+      - symbol: CompositePreflightValidator
+        path: src/bioetl/application/composite/preflight_validator.py
+        issue: "#3443"
+        reason: Deprecated compatibility alias pending v2.0 removal.

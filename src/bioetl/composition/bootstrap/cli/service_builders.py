@@ -5,7 +5,8 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import TYPE_CHECKING
 
-from bioetl.application.core.lifecycle.checkpoint_manager import (
+from bioetl.application.core.lifecycle import (
+    CheckpointCompatibilityService,
     CheckpointRuntimeService,
 )
 from bioetl.application.services import ConfigService
@@ -27,9 +28,6 @@ from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpointAda
 from bioetl.infrastructure.time import SystemClock
 
 if TYPE_CHECKING:
-    from bioetl.application.core.lifecycle._checkpoint_types import (
-        CheckpointCompatibilityService,
-    )
     from bioetl.application.services.control_plane.effective_config_service import (
         EffectiveConfigService,
     )
@@ -39,7 +37,6 @@ if TYPE_CHECKING:
     from bioetl.application.services.lineage.lineage_inspection_service import (
         LineageInspectionService,
     )
-    from bioetl.composition.registry_api import PipelineRegistry
     from bioetl.domain.ports import (
         AuditPort,
         CheckpointPort,
@@ -47,12 +44,12 @@ if TYPE_CHECKING:
         LoggerPort,
         MetricsPort,
         PipelineConfigLoaderPort,
+        PipelineRegistryPort,
         QuarantinePort,
         RegistryAccessorPort,
         SettingsLoaderPort,
         TracingPort,
     )
-    from bioetl.domain.types import JsonDict
     from bioetl.infrastructure.config import Settings
 
 __all__ = [
@@ -70,7 +67,7 @@ __all__ = [
 
 def build_cli_config_service(
     *,
-    registry: PipelineRegistry | None,
+    registry: PipelineRegistryPort | None,
     logger_factory: Callable[[], LoggerPort],
     register_pipelines: Callable[[], object],
     default_registry_accessor: RegistryAccessorPort,
@@ -88,7 +85,7 @@ def build_cli_config_service(
         register_pipelines()
         effective_registry = default_registry_accessor()
 
-    def _registry_accessor() -> PipelineRegistry:
+    def _registry_accessor() -> PipelineRegistryPort:
         return effective_registry
 
     dq_service = ConfigDQService(

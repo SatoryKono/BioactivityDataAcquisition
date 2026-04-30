@@ -25,6 +25,7 @@ from tests.unit.application.services.run_manifest_test_support import (
     VALID_CONFIG_HASH as _VALID_CONFIG_HASH,
     VALID_EFFECTIVE_CONFIG_HASH as _VALID_EFFECTIVE_CONFIG_HASH,
     VALID_RESOLVED_CONFIG_HASH as _VALID_RESOLVED_CONFIG_HASH,
+    RunManifestOverrides,
     build_published_silver_artifact,
     build_source_refs,
     expected_canonical_execution_identity as _expected_canonical_execution_identity,
@@ -367,6 +368,28 @@ def test_build_diagnostics_summary_without_ledger_returns_provenance_only() -> N
     }
     assert summary_without_score == _expected_provenance_only_summary_without_score(
         manifest
+    )
+
+
+def test_build_diagnostics_summary_classifies_dependency_lock_provenance() -> None:
+    manifest = _build_manifest(
+        manifest_id="manifest-deps",
+        execution_fingerprint="fingerprint-deps",
+        run_id=RunID(uuid4()),
+        overrides=RunManifestOverrides(dependency_lock_hash="sha256:deps-present"),
+    )
+
+    summary = build_diagnostics_summary(manifest, ())
+
+    assert summary["dependency_lock_state"] == "present"
+    assert summary["dependency_lock_hash"] == "sha256:deps-present"
+    assert summary["code_provenance_state"]["dependency_lock_state"] == "present"
+    assert (
+        summary["code_provenance_state"]["dependency_lock_hash"]
+        == "sha256:deps-present"
+    )
+    assert (
+        summary["exact_replay_anchors"]["dependency_lock_hash"] == "sha256:deps-present"
     )
 
 

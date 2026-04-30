@@ -285,6 +285,7 @@ def test_build_pipeline_runner_wires_dependencies(tmp_path: Path) -> None:
         return_value=SimpleNamespace(
             git_commit="deadbeef" * 5,
             source_revision_state="clean",
+            dependency_lock_hash="sha256:test-lock",
         ),
     ):
         result = runner_builder.build_pipeline_runner(
@@ -657,6 +658,7 @@ def test_build_pipeline_runner_keeps_snapshot_backed_execution_identity_stable_a
             return_value=SimpleNamespace(
                 git_commit="deadbeef" * 5,
                 source_revision_state="clean",
+                dependency_lock_hash="sha256:test-lock",
             ),
         ):
             runner_builder.build_pipeline_runner(
@@ -1098,6 +1100,7 @@ def test_build_pipeline_runner_requires_git_commit_for_replay_ready_profile(
             return_value=SimpleNamespace(
                 git_commit=None,
                 source_revision_state="git_unavailable",
+                dependency_lock_hash=None,
             ),
         ),
         pytest.raises(RuntimeError, match="requires git_commit code provenance"),
@@ -1197,6 +1200,7 @@ def test_build_pipeline_runner_allows_forensic_grade_with_exact_replay_and_sidec
         return_value=SimpleNamespace(
             git_commit="deadbeef" * 5,
             source_revision_state="clean",
+            dependency_lock_hash="sha256:test-lock",
         ),
     ):
         result = _call_build_pipeline_runner(
@@ -1258,6 +1262,7 @@ def test_build_pipeline_runner_promotes_supported_exact_replay_to_family_default
         return_value=SimpleNamespace(
             git_commit="deadbeef" * 5,
             source_revision_state="clean",
+            dependency_lock_hash="sha256:test-lock",
         ),
     ):
         _call_build_pipeline_runner(
@@ -1313,6 +1318,7 @@ def test_build_pipeline_runner_promoted_replay_ready_requires_ledger(
             return_value=SimpleNamespace(
                 git_commit="deadbeef" * 5,
                 source_revision_state="clean",
+                dependency_lock_hash="sha256:test-lock",
             ),
         ),
         pytest.raises(

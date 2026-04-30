@@ -319,6 +319,11 @@ bundle = bootstrap_observability_bundle_impl(
 )
 ```
 
+`bootstrap_*_port` names in this layer are sanctioned composition bootstrap
+factory functions, not domain `*Port` contract definitions. The reviewed
+allowlist is governed by `configs/quality/layered_suffix_policy.yaml` and must
+not expand without explicit naming-policy review.
+
 ### Usage in Pipeline
 
 ```python

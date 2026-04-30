@@ -172,6 +172,77 @@ transition_debt:
     First-party `src/` imports of `DataSourceCreatorPort` remain at zero,
     compatibility coverage is explicit, and the alias can be removed in the
     next breaking-change wave.
+- path: src/bioetl/application/composite/checkpoint/service.py
+  compatibility_role: Mixed owner module that still defines the deprecated
+    `CompositeCheckpointManager` alias alongside the canonical
+    `CompositeCheckpointService`.
+  canonical_target: bioetl.application.composite.checkpoint.service.CompositeCheckpointService
+  status: mixed-module
+  owner: bioetl.application.composite.checkpoint
+  introduced_in: legacy-pre-2026-04
+  review_date: '2026-09-30'
+  external_breaking_change_required: true
+  internal_callers_zero: false
+  allowed_call_sites: >-
+    `src`: import `CompositeCheckpointService` from the checkpoint package root
+    or owner module; `tests`: dedicated compatibility coverage may instantiate
+    `CompositeCheckpointManager` only to verify deprecation behavior and owner-module
+    confinement
+  migration_path: >-
+    Use `CompositeCheckpointService` as the canonical checkpoint facade and
+    treat `CompositeCheckpointManager` as a temporary owner-module compatibility
+    alias only.
+  exit_criteria: >-
+    First-party `src/` imports use `CompositeCheckpointService`, dedicated
+    compatibility coverage is explicit, and `CompositeCheckpointManager` can be
+    removed in the next breaking-change wave.
+- path: src/bioetl/application/composite/runner_pkg/runner.py
+  compatibility_role: Mixed owner module that still defines the deprecated
+    `CompositePipelineRunnerService` and `CompositePipelineRunnerService_legacy`
+    aliases alongside the canonical `CompositePipelineRunner`.
+  canonical_target: bioetl.application.composite.runner_pkg.runner.CompositePipelineRunner
+  status: mixed-module
+  owner: bioetl.application.composite.runner_pkg
+  introduced_in: legacy-pre-2026-04
+  review_date: '2026-09-30'
+  external_breaking_change_required: true
+  internal_callers_zero: false
+  allowed_call_sites: >-
+    `src`: import `CompositePipelineRunner` from the runner package root or
+    owner module; `tests`: dedicated compatibility coverage may instantiate
+    `CompositePipelineRunnerService` only to verify deprecation behavior and
+    owner-module confinement
+  migration_path: >-
+    Use `CompositePipelineRunner` as the canonical composite runner surface and
+    treat `CompositePipelineRunnerService` / `_legacy` as temporary owner-module
+    aliases only.
+  exit_criteria: >-
+    First-party `src/` imports use `CompositePipelineRunner`, dedicated
+    compatibility coverage is explicit, and the deprecated service aliases can
+    be removed in the next breaking-change wave.
+- path: src/bioetl/application/composite/preflight_validator.py
+  compatibility_role: Mixed owner module that still defines the deprecated
+    `CompositePreflightValidator` alias alongside the canonical
+    `CompositePreflightValidationService`.
+  canonical_target: bioetl.application.composite.preflight_validator.CompositePreflightValidationService
+  status: mixed-module
+  owner: bioetl.application.composite
+  introduced_in: legacy-pre-2026-04
+  review_date: '2026-09-30'
+  external_breaking_change_required: true
+  internal_callers_zero: false
+  allowed_call_sites: >-
+    `src`: import `CompositePreflightValidationService` from the owner module or
+    application composite facade; `tests`: dedicated compatibility coverage may
+    instantiate `CompositePreflightValidator` only to verify deprecation behavior
+    and owner-module confinement
+  migration_path: >-
+    Use `CompositePreflightValidationService` as the canonical preflight facade
+    and treat `CompositePreflightValidator` as a temporary owner-module alias only.
+  exit_criteria: >-
+    First-party `src/` imports use `CompositePreflightValidationService`,
+    dedicated compatibility coverage is explicit, and the deprecated validator
+    alias can be removed in the next breaking-change wave.
 retained_entrypoints:
 - path: src/bioetl/interfaces/cli/commands/run.py
   compatibility_role: Permanent public run command seam over the split internal owner

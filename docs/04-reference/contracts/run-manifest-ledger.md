@@ -576,7 +576,10 @@ Strict exact-replay, `replay_ready`, and `forensic_grade` manifests require
 provenance is visible to operators and automation. New manifests should record
 `dependency_lock_hash` as a forensic anchor when a repository lockfile is
 available; the field is not a domain I/O concern and must be resolved by
-composition/runtime wiring.
+composition/runtime wiring. Diagnostics expose `dependency_lock_state` as
+`present` or `missing` so absent lockfile evidence remains operator-visible.
+Metadata sidecars and checkpoint metadata carry the same lock hash when it is
+available through the run context.
 
 Checkpoint / resume compatibility may additionally rely on a narrower
 runtime-anchor contract derived from a subset of control-plane fields such as
@@ -673,6 +676,11 @@ The diff payload should therefore expose:
   `cross_surface_replay_diff` key for CLI/API compatibility while exposing a
   unified forensic view of manifest, effective-config, checkpoint-anchor,
   lineage, input-snapshot, and planned-artifact drift.
+
+The application-level `ForensicRunDiffService` builds the same report through
+the existing manifest and ledger ports. It must classify missing optional
+evidence, such as absent run-ledger entries or missing published artifacts,
+rather than silently treating unavailable evidence as a match.
 
 ## Canonical Stage Sets
 

@@ -76,7 +76,7 @@ _PUBLIC_SYMBOL_TARGETS: dict[str, str] = {
     "start_metrics_server": "bioetl.composition.observability_api",
 }
 
-_LEGACY_SYMBOL_TARGETS: dict[str, str] = {
+_LEGACY_SYMBOL_TARGETS: dict[str, str | tuple[str, str]] = {
     # services_api
     "cleanup_bronze": _COMPOSITION_SERVICES_API_MODULE,
     "get_adr_service": _COMPOSITION_SERVICES_API_MODULE,
@@ -94,10 +94,16 @@ _LEGACY_SYMBOL_TARGETS: dict[str, str] = {
     "get_vacuum_service": _COMPOSITION_SERVICES_API_MODULE,
     # resources_api
     "archive_table": _COMPOSITION_RESOURCES_API_MODULE,
-    "get_checkpoint_manager": _COMPOSITION_RESOURCES_API_MODULE,
+    "get_checkpoint_manager": (
+        _COMPOSITION_RESOURCES_API_MODULE,
+        "get_checkpoint_runtime_service",
+    ),
     "get_checkpoint_runtime_service": _COMPOSITION_RESOURCES_API_MODULE,
     "get_lifecycle_service": _COMPOSITION_RESOURCES_API_MODULE,
-    "get_quarantine_manager": _COMPOSITION_RESOURCES_API_MODULE,
+    "get_quarantine_manager": (
+        _COMPOSITION_RESOURCES_API_MODULE,
+        "get_quarantine_runtime_service",
+    ),
     "get_quarantine_runtime_service": _COMPOSITION_RESOURCES_API_MODULE,
     "inspect_quarantine": _COMPOSITION_RESOURCES_API_MODULE,
     "list_checkpoints": _COMPOSITION_RESOURCES_API_MODULE,
@@ -117,20 +123,24 @@ def __getattr__(
         globals()[name] = value
         return value
 
-    module_name = _LEGACY_SYMBOL_TARGETS.get(name)
-    if module_name is None:
+    legacy_target = _LEGACY_SYMBOL_TARGETS.get(name)
+    if legacy_target is None:
         raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+    canonical_name = name
+    if isinstance(legacy_target, tuple):
+        module_name, canonical_name = legacy_target
+    else:
+        module_name = legacy_target
     module = import_module(module_name)
-    value = getattr(module, name)
+    value = getattr(module, canonical_name)
     warnings.warn(
         (
             f"`bioetl.composition.entrypoints.{name}` is deprecated; "
-            f"import `{name}` from `{module_name}` instead."
+            f"import `{canonical_name}` from `{module_name}` instead."
         ),
         DeprecationWarning,
         stacklevel=2,
     )
-    globals()[name] = value
     return value
 
 

@@ -47,6 +47,9 @@ def test_layer_aware_suffix_policy_registers_expected_rule_ids() -> None:
     assert policy.version == 1
     assert policy.policy_scope == "adr_041_layer_aware_naming"
 
+    function_rule_ids = {rule.rule_id for rule in policy.function_suffix_rules}
+    assert {"composition_bootstrap_port_factories"} <= function_rule_ids
+
     suffix_rule_ids = {rule.rule_id for rule in policy.suffix_boundary_rules}
     assert {
         "non_domain_port_protocols",
@@ -59,6 +62,7 @@ def test_layer_aware_suffix_policy_registers_expected_rule_ids() -> None:
     assert {
         "runtime_admin_checkpoint_quarantine_family",
         "column_ordering_family",
+        "composite_canonical_alias_family",
     } <= family_rule_ids
 
     suffix_rules = {rule.rule_id: rule for rule in policy.suffix_boundary_rules}
@@ -123,6 +127,44 @@ def test_checkpoint_quarantine_runtime_admin_family_is_role_driven() -> None:
         (
             "QuarantineService",
             "src/bioetl/application/services/quarantine_service.py",
+        ),
+    }
+
+
+def test_composition_bootstrap_port_function_exceptions_are_explicit_and_bounded() -> (
+    None
+):
+    """Reviewed composition bootstrap `*_port` functions must stay exact."""
+    module = _load_gate_module()
+    policy = module._load_layer_aware_suffix_policy(ROOT)
+    function_rules = {rule.rule_id: rule for rule in policy.function_suffix_rules}
+    rule = function_rules["composition_bootstrap_port_factories"]
+
+    allowed = {(item.symbol, item.path) for item in rule.allowed_symbols}
+    assert allowed == {
+        (
+            "bootstrap_checkpoint_port",
+            "src/bioetl/composition/bootstrap/assembly/checkpoint.py",
+        ),
+        (
+            "bootstrap_quarantine_port",
+            "src/bioetl/composition/bootstrap/assembly/checkpoint.py",
+        ),
+        (
+            "bootstrap_dq_monitor_port",
+            "src/bioetl/composition/bootstrap/runtime/observability.py",
+        ),
+        (
+            "bootstrap_logger_port",
+            "src/bioetl/composition/bootstrap/runtime/observability.py",
+        ),
+        (
+            "bootstrap_metrics_port",
+            "src/bioetl/composition/bootstrap/runtime/observability.py",
+        ),
+        (
+            "bootstrap_tracer_port",
+            "src/bioetl/composition/bootstrap/runtime/observability.py",
         ),
     }
 
@@ -192,6 +234,46 @@ def test_column_ordering_family_is_frozen_to_one_canonical_surface_plus_compat()
         (
             "ColumnPriorityOrderer",
             "src/bioetl/application/composite/column_priority_orderer.py",
+        ),
+    }
+
+
+def test_composite_alias_family_is_frozen_to_owner_modules_only() -> None:
+    """Composite canonical/compat alias family must stay confined and explicit."""
+    module = _load_gate_module()
+    policy = module._load_layer_aware_suffix_policy(ROOT)
+    family_rules = {rule.rule_id: rule for rule in policy.family_freeze_rules}
+    rule = family_rules["composite_canonical_alias_family"]
+
+    allowed = {(item.symbol, item.path) for item in rule.allowed_symbols}
+    assert allowed == {
+        (
+            "CompositeCheckpointService",
+            "src/bioetl/application/composite/checkpoint/service.py",
+        ),
+        (
+            "CompositeCheckpointManager",
+            "src/bioetl/application/composite/checkpoint/service.py",
+        ),
+        (
+            "CompositePipelineRunner",
+            "src/bioetl/application/composite/runner_pkg/runner.py",
+        ),
+        (
+            "CompositePipelineRunnerService",
+            "src/bioetl/application/composite/runner_pkg/runner.py",
+        ),
+        (
+            "CompositePipelineRunnerService_legacy",
+            "src/bioetl/application/composite/runner_pkg/runner.py",
+        ),
+        (
+            "CompositePreflightValidationService",
+            "src/bioetl/application/composite/preflight_validator.py",
+        ),
+        (
+            "CompositePreflightValidator",
+            "src/bioetl/application/composite/preflight_validator.py",
         ),
     }
 

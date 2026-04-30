@@ -287,7 +287,7 @@ src/bioetl/
 │   │   ├── coordinator.py      # EnrichmentCoordinator (fan-out logic)
 │   │   ├── merger.py           # MergeService (join + conflict resolution)
 │   │   ├── key_extractor.py    # KeyExtractorService
-│   │   └── checkpoint/         # CompositeCheckpointManager (package)
+│   │   └── checkpoint/         # CompositeCheckpointService (package)
 │   │       └── service.py
 │   └── core/
 │       └── runner.py           # Existing PipelineRunner (unchanged)
@@ -774,7 +774,7 @@ class CompositePipelineRunner:
         key-extractor: KeyExtractorService,
         coordinator: EnrichmentCoordinator,
         merger: MergeService,
-        checkpoint-manager: CompositeCheckpointManager,
+        checkpoint-service: CompositeCheckpointService,
         logger: LoggerPort,
         lock-manager: CompositeLockCoordinator,
     ) -> None:
@@ -1334,7 +1334,7 @@ def run_composite_command(composite: str, enrich_only: str | None, required_only
 
 - [ ] Parallel enricher execution (asyncio.gather)
 - [ ] Timeout handling per enricher
-- [ ] CompositeCheckpointManager for resume
+- [ ] CompositeCheckpointService for resume
 
 ### Phase 3: Advanced Features (v1.2)
 

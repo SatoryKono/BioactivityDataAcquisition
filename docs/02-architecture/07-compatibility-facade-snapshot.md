@@ -5,18 +5,18 @@
 ## Summary
 
 - Registry YAML: `configs/quality/compatibility_facade_inventory.yaml`
-- Curated inventory rows: `28`
-- Transition debt rows: `8`
+- Curated inventory rows: `31`
+- Transition debt rows: `11`
 - Sanctioned public entrypoint rows: `20`
 - Retained review entrypoints: `2`
 - Permanent public entrypoints: `18`
-- Measured tracked modules: `28`
+- Measured tracked modules: `31`
 - Measured-only modules outside curated inventory: `0`
 - Discovered docstring-tracked modules: `0`
 - Unexpected docstring-tracked modules: `0`
 - Missing allowlisted measured-only modules: `0`
 - First-party src imports targeting measured-only modules: `0`
-- Curated rows requiring external breaking change process: `28`
+- Curated rows requiring external breaking change process: `31`
 - Curated rows marked internal-callers-zero: `6`
 - First-party src imports targeting internal-callers-zero rows: `0`
 - Ratchet violations: `0`
@@ -33,7 +33,10 @@
 
 ## Expected Measured Registry
 
+- `src/bioetl/application/composite/checkpoint/service.py`
 - `src/bioetl/application/composite/merger.py`
+- `src/bioetl/application/composite/preflight_validator.py`
+- `src/bioetl/application/composite/runner_pkg/runner.py`
 - `src/bioetl/composition/__init__.py`
 - `src/bioetl/composition/bootstrap/__init__.py`
 - `src/bioetl/composition/entrypoints.py`
@@ -72,6 +75,9 @@
 - `src/bioetl/composition/factories/__init__.py` — external breaking change required: `true`, internal callers zero: `true`
 - `src/bioetl/composition/factories/datasource/__init__.py` — external breaking change required: `true`, internal callers zero: `true`
 - `src/bioetl/composition/factories/datasource/data_source_factory.py` — external breaking change required: `true`, internal callers zero: `false`
+- `src/bioetl/application/composite/checkpoint/service.py` — external breaking change required: `true`, internal callers zero: `false`
+- `src/bioetl/application/composite/runner_pkg/runner.py` — external breaking change required: `true`, internal callers zero: `false`
+- `src/bioetl/application/composite/preflight_validator.py` — external breaking change required: `true`, internal callers zero: `false`
 - `src/bioetl/interfaces/cli/commands/run.py` — external breaking change required: `true`, internal callers zero: `false`
 - `src/bioetl/interfaces/cli/commands/run_all.py` — external breaking change required: `true`, internal callers zero: `false`
 - `src/bioetl/interfaces/cli/commands/run_composite.py` — external breaking change required: `true`, internal callers zero: `false`
