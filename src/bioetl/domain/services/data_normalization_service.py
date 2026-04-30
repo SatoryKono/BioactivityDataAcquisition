@@ -27,7 +27,7 @@ Cross-reference
 For ChEMBL-specific bioactivity scalar normalization (unit conversion,
 pChEMBL calculation, potency classification, batch aggregation) see
 :mod:`bioetl.domain.services.normalization_service`
-(``NormalizationService``).
+(``BioactivityNormalizer``).
 
 Pure domain service (no I/O) per RULES.md §1.1.
 """

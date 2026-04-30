@@ -290,19 +290,15 @@ class CompositeValidator:
         ]
 
     def _is_valid_field_priorities(self, priorities: JsonDict) -> bool:
-        is_valid: bool = _is_valid_field_priorities(priorities)
-        return is_valid
+        return _is_valid_field_priorities(priorities)
 
     @staticmethod
     def _extract_priority(priority_config: object) -> object | None:
-        priority: object | None = _extract_priority(priority_config)
-        return priority
+        return _extract_priority(priority_config)
 
     @staticmethod
     def _is_valid_lineage_config(config: JsonDict) -> bool:
-        is_valid: bool = _is_valid_lineage_config(config)
-        return is_valid
+        return _is_valid_lineage_config(config)
 
 
-# Deprecated compatibility alias retained during ADR-041 migration.
 CompositeValidationService = CompositeValidator

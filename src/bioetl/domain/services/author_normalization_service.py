@@ -186,8 +186,4 @@ class AuthorNormalizer:
         """Parse various author formats to list of name strings."""
         return parse_author_names(authors)
 
-
-# Deprecated compatibility alias retained during ADR-041 migration.
-AuthorNormalizationService = AuthorNormalizer
-
-__all__ = ["AuthorNormalizationService", "AuthorNormalizer"]
+__all__ = ["AuthorNormalizer"]
