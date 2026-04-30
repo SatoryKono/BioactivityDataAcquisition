@@ -81,6 +81,7 @@ Pushgateway publication на завершении run. Это позволяет
 - **1. Overview / 2. Runtime / 4. Data Quality**: `$pipeline`, `$run_type`
 - **3. Provider Health**: `$provider`
 - **5. Silver Reject Explorer**: `$pipeline`, `$run_type`, `$reason_code`, `$field`, `$run_id`, `$payload_hash`
+- **6. Workflow Overview**: `$workflow`, `$status`
 
 > **Важно**: для `1-4` dashboard допустим общий scope (`All`), но
 > `5. Silver Reject Explorer` требует **scoped pipeline** (single-select, без
@@ -232,6 +233,18 @@ Record-level dashboard для `FILTERED_OUT_SILVER` записей (quarantine-b
 - **Top Reject Reasons / Fields / Signatures**: агрегаты в том же scoped контексте.
 - **Datasource**: `Quarantine Explorer` (JSON/Infinity), не Prometheus.
 - **Drilldown**: links `Back to Overview`, `Back to Data Quality`, `Open Logs`, `Open Traces` и row-level link в CLI-команду.
+
+#### 6. 6. Workflow Overview
+
+Prometheus dashboard для declarative workflow orchestration. Используйте его,
+когда pipeline-level панели зелёные, но workflow DAG показывает failed/skipped
+step outcomes.
+
+- **Workflow Runs**: selected-range count по `bioetl_workflow_runs_total`.
+- **Step Outcomes by Kind**: breakdown по bounded `step_kind/status` без
+  `run_id` или `step_id` labels.
+- **Step Duration p95**: latency по `bioetl_workflow_step_duration_seconds`.
+- **Drilldown**: links `Back to Overview`, `2. Runtime`, `Control Plane v1`.
 
 #### Quarantine operator metrics
 

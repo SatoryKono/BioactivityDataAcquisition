@@ -18,12 +18,8 @@ if TYPE_CHECKING:
     from bioetl.application.services.execution.pipeline_runner_service import (
         PipelineRunnerService as PipelineRunnerService,
     )
-    from bioetl.composition import (
-        ArchiveOptions as ArchiveOptions,
-    )
-    from bioetl.composition import (
-        VacuumOptions as VacuumOptions,
-    )
+    from bioetl.composition._pipeline_execution import ArchiveOptions as ArchiveOptions
+    from bioetl.composition._pipeline_execution import VacuumOptions as VacuumOptions
     from bioetl.composition.bootstrap.runtime.observability import (
         maybe_start_metrics_server as maybe_start_metrics_server,
     )

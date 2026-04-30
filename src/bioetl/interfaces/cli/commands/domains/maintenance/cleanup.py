@@ -54,7 +54,7 @@ def get_bronze_cleanup_service() -> BronzeCleanupService:
 
 async def preview_pipeline_cleanup(pipeline: str) -> CleanupPreview:
     """Preview pipeline cleanup scope through composition on demand."""
-    from bioetl.composition.resources_api import preview_cleanup as _impl
+    from bioetl.composition.maintenance_api import preview_cleanup as _impl
 
     impl = cast("Callable[[str], Awaitable[CleanupPreview]]", _impl)
     return await impl(pipeline)
