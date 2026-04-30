@@ -8,6 +8,7 @@ from bioetl.domain.services.composite_validation_layer import (
 from bioetl.domain.services.cross_validation_validator import CrossValidationValidator
 from bioetl.domain.services.preflight_governance import (
     GovernancePolicy,
+    PreflightGovernor,
     PreflightGovernanceConfig,
     PreflightGovernanceService,
 )
@@ -18,13 +19,13 @@ def _create_validation_service() -> CompositeValidationService:
     return CompositeValidationService(
         aggregation_validator=AggregationValidator(),
         cross_validation_validator=CrossValidationValidator(),
-        preflight_governance=PreflightGovernanceService(),
+        preflight_governance=PreflightGovernor(),
     )
 
 
 def test_preflight_governance_service_creation():
     """Test that governance service can be created."""
-    service = PreflightGovernanceService()
+    service = PreflightGovernor()
     assert service.config.policy == GovernancePolicy.BLOCK_ON_BLOCKERS_ONLY
 
 
@@ -35,7 +36,7 @@ def test_custom_config():
         ci_integration=True,
         fail_fast=False,
     )
-    service = PreflightGovernanceService(config)
+    service = PreflightGovernor(config)
     assert service.config.policy == GovernancePolicy.CI_STRICT
     assert service.config.ci_integration is True
     assert service.config.fail_fast is False

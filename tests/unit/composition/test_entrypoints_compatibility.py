@@ -45,7 +45,7 @@ def test_entrypoints_legacy_symbol_budget_stays_frozen() -> None:
     """Legacy compatibility lookup surface should stay intentionally bounded."""
     entrypoints = _reload_entrypoints_module()
 
-    assert len(entrypoints._LEGACY_SYMBOL_TARGETS) == 22
+    assert len(entrypoints._LEGACY_SYMBOL_TARGETS) == 24
     assert set(entrypoints._LEGACY_SYMBOL_TARGETS.values()) == {
         "bioetl.composition.resources_api",
         "bioetl.composition.services_api",

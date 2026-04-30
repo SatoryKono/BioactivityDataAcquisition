@@ -1,10 +1,11 @@
-"""Preflight governance service for composite execution."""
+"""Preflight governance evaluator for composite execution."""
 
 from __future__ import annotations
 
 __all__ = [
     "GovernancePolicy",
     "PreflightGovernanceConfig",
+    "PreflightGovernor",
     "PreflightGovernanceService",
 ]
 
@@ -29,8 +30,8 @@ from bioetl.domain.types.validation_result import (
 from bioetl.domain.types.validation_severity import ValidationLayer, ValidationSeverity
 
 
-class PreflightGovernanceService:
-    """Service for preflight execution governance."""
+class PreflightGovernor:
+    """Evaluator for preflight execution governance."""
 
     def __init__(self, config: PreflightGovernanceConfig | None = None):
         self.config = config or PreflightGovernanceConfig(
@@ -214,3 +215,7 @@ class PreflightGovernanceService:
                 if issue["governance_impact"] == "execution_blocker"
             ],
         }
+
+
+# Deprecated compatibility alias retained during ADR-041 migration.
+PreflightGovernanceService = PreflightGovernor

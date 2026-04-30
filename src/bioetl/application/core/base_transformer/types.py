@@ -15,7 +15,7 @@ from bioetl.domain.ports import (
     PiiHasherPort,
     TracingPort,
 )
-from bioetl.domain.services import IdentityService
+from bioetl.domain.services import EntityIdentityGenerator
 
 if TYPE_CHECKING:
     from bioetl.domain.entities import BaseEntity
@@ -34,7 +34,7 @@ class TransformerDependencyContext:
 
     tracer: TracingPort
     metrics: MetricsPort
-    identity_service: IdentityService
+    identity_service: EntityIdentityGenerator
     pii_hasher: PiiHasherPort
     data_normalizer: DataNormalizationPort
     contract_policy: ContractPolicyProtocol

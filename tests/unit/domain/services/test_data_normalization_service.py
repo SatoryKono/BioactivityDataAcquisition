@@ -1,4 +1,4 @@
-"""Tests for DefaultDataNormalizationService.
+"""Tests for DefaultDataNormalizer.
 
 Tests the unified data normalization service for text and publication metadata.
 """
@@ -13,30 +13,31 @@ import pytest
 from bioetl.domain.services import (
     DataNormalizationConfig,
     DataNormalizationService,
+    DefaultDataNormalizer,
     DefaultDataNormalizationService,
 )
 from bioetl.domain.services._author_helpers import hash_author_name
 
 
-class TestDefaultDataNormalizationServiceInit:
+class TestDefaultDataNormalizerInit:
     """Tests for service initialization."""
 
     def test_default_config(self) -> None:
         """Test service initializes with default config."""
-        service = DefaultDataNormalizationService()
+        service = DefaultDataNormalizer()
         assert service.config.min_publication_year == 1500
         assert service.config.max_publication_year == 2100
 
     def test_custom_config(self) -> None:
         """Test service accepts custom config."""
         config = DataNormalizationConfig(min_publication_year=1900)
-        service = DefaultDataNormalizationService(config=config)
+        service = DefaultDataNormalizer(config=config)
         assert service.config.min_publication_year == 1900
 
     def test_alias_works(self) -> None:
         """Test DataNormalizationService alias works."""
         service = DataNormalizationService()
-        assert isinstance(service, DefaultDataNormalizationService)
+        assert isinstance(service, DefaultDataNormalizer)
 
 
 class TestNormalizeDoi:

@@ -23,7 +23,7 @@ from bioetl.domain.ports import (
     TracingPort,
 )
 from bioetl.domain.ports.noop import NoOpPiiHasher
-from bioetl.domain.services import DataNormalizationService, IdentityService
+from bioetl.domain.services import DefaultDataNormalizer, EntityIdentityGenerator
 
 
 class ContractPolicyLoader(Protocol):
@@ -40,7 +40,7 @@ def build_transformer_dependencies(
     entity_type: str | None,
     tracer: TracingPort | None = None,
     metrics: MetricsPort | None = None,
-    identity_service: IdentityService | None = None,
+    identity_service: EntityIdentityGenerator | None = None,
     pii_hasher: PiiHasherPort | None = None,
     data_normalizer: DataNormalizationPort | None = None,
     contract_policy: ContractPolicyProtocol | None = None,
@@ -61,7 +61,7 @@ def build_transformer_dependencies(
 
     resolved_identity_service = identity_service
     if resolved_identity_service is None:
-        resolved_identity_service = IdentityService(
+        resolved_identity_service = EntityIdentityGenerator(
             content_hash_include_fields=(
                 set(content_hash_include_fields)
                 if content_hash_include_fields
@@ -78,7 +78,7 @@ def build_transformer_dependencies(
         data_normalizer=(
             data_normalizer
             if data_normalizer is not None
-            else DataNormalizationService()
+            else DefaultDataNormalizer()
         ),
         contract_policy=resolved_contract_policy,
         structural_policy=(

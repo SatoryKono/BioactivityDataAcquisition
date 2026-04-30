@@ -52,11 +52,11 @@ suffix_boundary_rules:
       - symbol: DefaultDataNormalizationService
         path: src/bioetl/domain/services/data_normalization_service.py
         issue: "#3400"
-        reason: Existing domain service surface pending canonical rename decision.
+        reason: Deprecated compatibility alias for DefaultDataNormalizer pending follow-up domain naming cleanup.
       - symbol: IdentityService
         path: src/bioetl/domain/services/identity_service.py
         issue: "#3400"
-        reason: Existing domain service surface pending canonical rename decision.
+        reason: Deprecated compatibility alias for EntityIdentityGenerator pending follow-up domain naming cleanup.
       - symbol: MergedMetadataExplainabilityService
         path: src/bioetl/domain/services/merged_metadata_explainability.py
         issue: "#3400"
@@ -76,7 +76,7 @@ suffix_boundary_rules:
       - symbol: PreflightGovernanceService
         path: src/bioetl/domain/services/preflight_governance.py
         issue: "#3400"
-        reason: Existing domain service surface pending canonical rename decision.
+        reason: Deprecated compatibility alias for PreflightGovernor pending follow-up domain naming cleanup.
 
 family_freeze_rules:
   - rule_id: runtime_admin_checkpoint_quarantine_family

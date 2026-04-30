@@ -1,17 +1,17 @@
-"""Cross-provider metadata normalization service (DataNormalizationPort implementation).
+"""Cross-provider metadata normalizer (DataNormalizationPort implementation).
 
 Scope — normalization of publication metadata fields that are shared across all
 literature/bioactivity providers: author names, affiliations, DOIs, PMIDs,
 publication dates, and free-text fields (titles, abstracts, OA status).
 
-``DefaultDataNormalizationService`` is the concrete implementation of
+``DefaultDataNormalizer`` is the concrete implementation of
 ``DataNormalizationPort`` used throughout the pipeline. It is a pure facade:
 all work is delegated to canonical ``bioetl.domain.normalization`` helpers.
 
 Inheritance chain::
 
     AuthorNormalizationService          (author + affiliation logic)
-        └── DefaultDataNormalizationService  (adds DOI, PMID, date, text delegation)
+        └── DefaultDataNormalizer  (adds DOI, PMID, date, text delegation)
 
 Delegated helper modules:
 - ``normalization.identifiers`` — DOI/PMID coercion
@@ -79,12 +79,13 @@ if TYPE_CHECKING:
     from collections.abc import Sequence
 
 __all__ = [
+    "DefaultDataNormalizer",
     "DefaultDataNormalizationService",
 ]
 
 
 @dataclass(frozen=True, slots=True)
-class DefaultDataNormalizationService(AuthorNormalizationService):
+class DefaultDataNormalizer(AuthorNormalizationService):
     """Facade for data normalization, delegating to specialized services.
 
     Inherits author/affiliation normalization from AuthorNormalizationService.
@@ -231,3 +232,7 @@ class DefaultDataNormalizationService(AuthorNormalizationService):
             Normalized abstract or None.
         """
         return _normalize_abstract(abstract)
+
+
+# Deprecated compatibility alias retained during ADR-041 migration.
+DefaultDataNormalizationService = DefaultDataNormalizer

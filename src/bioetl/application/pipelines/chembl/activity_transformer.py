@@ -39,7 +39,7 @@ if TYPE_CHECKING:
     from bioetl.application.core.base_transformer import TransformerDependencyContext
     from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
     from bioetl.domain.ports import MetricsPort, PiiHasherPort, TracingPort
-    from bioetl.domain.services import IdentityService
+    from bioetl.domain.services import EntityIdentityGenerator
     from bioetl.domain.types import BronzeRecord, PrimaryId
 
 OptionalString = str | None
@@ -187,7 +187,7 @@ class ActivityTransformer(BaseChemblTransformer):
         gold_filters: GoldFilterConfig | None = None,
         tracer: TracingPort | None = None,
         metrics: MetricsPort | None = None,
-        identity_service: IdentityService | None = None,
+        identity_service: EntityIdentityGenerator | None = None,
         pii_hasher: PiiHasherPort | None = None,
         dependencies: TransformerDependencyContext | None = None,
     ) -> None:
