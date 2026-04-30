@@ -33,8 +33,8 @@ if TYPE_CHECKING:
     )
     from bioetl.application.services.quarantine_service import QuarantineService
     from bioetl.application.services.vacuum_service import VacuumService
-    from bioetl.composition import PipelineRegistry
     from bioetl.composition.health_api import HealthServerDependenciesProtocol
+    from bioetl.composition.registry_api import PipelineRegistry
     from bioetl.domain.ports import QuarantinePort
     from bioetl.domain.workflow import WorkflowConfig
 
@@ -70,69 +70,40 @@ __all__ = [
     "load_workflow_config",
 ]
 
+_BOOTSTRAP_EXPORT_MODULES: dict[str, str] = {
+    "bootstrap_adr_service": "bioetl.composition.bootstrap.cli.adr",
+    "bootstrap_audit_inspection_service": "bioetl.composition.bootstrap.cli.checkpoint",
+    "bootstrap_bronze_cleanup_service": "bioetl.composition.bootstrap.cli.storage",
+    "bootstrap_checkpoint_service": "bioetl.composition.bootstrap.cli.checkpoint",
+    "bootstrap_config_service": "bioetl.composition.bootstrap.cli.config",
+    "bootstrap_contract_migration_service": "bioetl.composition.bootstrap.cli.storage",
+    "bootstrap_export_service": "bioetl.composition.bootstrap.cli.storage",
+    "bootstrap_health_server_dependencies": "bioetl.composition.bootstrap.cli.health",
+    "bootstrap_health_service": "bioetl.composition.bootstrap.cli.health",
+    "bootstrap_lineage_service": "bioetl.composition.bootstrap.cli.checkpoint",
+    "bootstrap_lock_service": "bioetl.composition.bootstrap.cli.lock",
+    "bootstrap_metrics_service": "bioetl.composition.bootstrap.cli.metrics",
+    "bootstrap_observability_workflow_service": "bioetl.composition.bootstrap.cli.checkpoint",
+    "bootstrap_pipeline_runner_service": "bioetl.composition.bootstrap.runtime.runner",
+    "bootstrap_quarantine_port": "bioetl.composition.bootstrap.assembly.checkpoint",
+    "bootstrap_quarantine_service": "bioetl.composition.bootstrap.cli.checkpoint",
+    "bootstrap_run_manifest_service": "bioetl.composition.bootstrap.cli.checkpoint",
+    "bootstrap_vacuum_service": "bioetl.composition.bootstrap.cli.storage",
+}
+
 
 def resolve_bootstrap_attr(name: str) -> object:
     """Resolve one public bootstrap export lazily without invoking it."""
-    bootstrap = import_module("bioetl.composition.bootstrap")
-    return getattr(bootstrap, name)
+    module_name = _BOOTSTRAP_EXPORT_MODULES.get(name)
+    if module_name is None:
+        raise AttributeError(f"Unknown bootstrap export: {name!r}")
+    return getattr(import_module(module_name), name)
 
 
-def _call_bootstrap(name: str, *args: object, **kwargs: object) -> object:
-    """Resolve one public bootstrap export lazily and invoke it as a callable."""
+def _invoke_bootstrap(name: str, *args: object, **kwargs: object) -> object:
+    """Resolve one bootstrap owner lazily and invoke it as a callable."""
     bootstrap_fn = cast("Callable[..., object]", resolve_bootstrap_attr(name))
     return bootstrap_fn(*args, **kwargs)
-
-
-def bootstrap_checkpoint_service(*args: object, **kwargs: object) -> object:
-    return _call_bootstrap("bootstrap_checkpoint_service", *args, **kwargs)
-
-
-def bootstrap_quarantine_service(*args: object, **kwargs: object) -> object:
-    return _call_bootstrap("bootstrap_quarantine_service", *args, **kwargs)
-
-
-def bootstrap_bronze_cleanup_service(*args: object, **kwargs: object) -> object:
-    return _call_bootstrap("bootstrap_bronze_cleanup_service", *args, **kwargs)
-
-
-def bootstrap_vacuum_service(*args: object, **kwargs: object) -> object:
-    return _call_bootstrap("bootstrap_vacuum_service", *args, **kwargs)
-
-
-def bootstrap_export_service(*args: object, **kwargs: object) -> object:
-    return _call_bootstrap("bootstrap_export_service", *args, **kwargs)
-
-
-def bootstrap_lock_service(*args: object, **kwargs: object) -> object:
-    return _call_bootstrap("bootstrap_lock_service", *args, **kwargs)
-
-
-def bootstrap_pipeline_runner_service(*args: object, **kwargs: object) -> object:
-    return _call_bootstrap("bootstrap_pipeline_runner_service", *args, **kwargs)
-
-
-def bootstrap_config_service(*args: object, **kwargs: object) -> object:
-    return _call_bootstrap("bootstrap_config_service", *args, **kwargs)
-
-
-def bootstrap_health_service(*args: object, **kwargs: object) -> object:
-    return _call_bootstrap("bootstrap_health_service", *args, **kwargs)
-
-
-def bootstrap_health_server_dependencies(*args: object, **kwargs: object) -> object:
-    return _call_bootstrap("bootstrap_health_server_dependencies", *args, **kwargs)
-
-
-def bootstrap_metrics_service(*args: object, **kwargs: object) -> object:
-    return _call_bootstrap("bootstrap_metrics_service", *args, **kwargs)
-
-
-def bootstrap_adr_service(*args: object, **kwargs: object) -> object:
-    return _call_bootstrap("bootstrap_adr_service", *args, **kwargs)
-
-
-def bootstrap_quarantine_port(*args: object, **kwargs: object) -> object:
-    return _call_bootstrap("bootstrap_quarantine_port", *args, **kwargs)
 
 
 def _resolve_bootstrap_callable(name: str) -> Callable[[], object]:
@@ -152,7 +123,10 @@ def _ensure_registrations(registry: PipelineRegistry | None = None) -> None:
 def get_checkpoint_service() -> CheckpointService:
     """Get checkpoint administration service."""
     _ensure_registrations()
-    return cast("CheckpointService", bootstrap_checkpoint_service())
+    return cast(
+        "CheckpointService",
+        _invoke_bootstrap("bootstrap_checkpoint_service"),
+    )
 
 
 def get_audit_service() -> AuditInspectionService:
@@ -165,31 +139,37 @@ def get_audit_service() -> AuditInspectionService:
 def get_quarantine_service() -> QuarantineService:
     """Get quarantine administration service."""
     _ensure_registrations()
-    return cast("QuarantineService", bootstrap_quarantine_service())
+    return cast(
+        "QuarantineService",
+        _invoke_bootstrap("bootstrap_quarantine_service"),
+    )
 
 
 def get_bronze_cleanup_service() -> BronzeCleanupService:
     """Get Bronze cleanup service."""
     _ensure_registrations()
-    return cast("BronzeCleanupService", bootstrap_bronze_cleanup_service())
+    return cast(
+        "BronzeCleanupService",
+        _invoke_bootstrap("bootstrap_bronze_cleanup_service"),
+    )
 
 
 def get_vacuum_service() -> VacuumService:
     """Get batch vacuum service."""
     _ensure_registrations()
-    return cast("VacuumService", bootstrap_vacuum_service())
+    return cast("VacuumService", _invoke_bootstrap("bootstrap_vacuum_service"))
 
 
 def get_export_service() -> ExportService:
     """Get Delta export service."""
     _ensure_registrations()
-    return cast("ExportService", bootstrap_export_service())
+    return cast("ExportService", _invoke_bootstrap("bootstrap_export_service"))
 
 
 def get_lock_service() -> LockService:
     """Get administrative lock service."""
     _ensure_registrations()
-    return cast("LockService", bootstrap_lock_service())
+    return cast("LockService", _invoke_bootstrap("bootstrap_lock_service"))
 
 
 async def cleanup_bronze(
@@ -212,14 +192,14 @@ def get_pipeline_runner_service(
     _ensure_registrations(registry=registry)
     return cast(
         "PipelineRunnerService",
-        bootstrap_pipeline_runner_service(registry=registry),
+        _invoke_bootstrap("bootstrap_pipeline_runner_service", registry=registry),
     )
 
 
 def get_config_service() -> object:
     """Get application configuration service."""
     _ensure_registrations()
-    return bootstrap_config_service()
+    return _invoke_bootstrap("bootstrap_config_service")
 
 
 def load_workflow_config(name: str) -> WorkflowConfig:
@@ -258,7 +238,7 @@ def get_lineage_service() -> LineageInspectionService:
 def get_health_service() -> HealthService:
     """Get provider health service."""
     _ensure_registrations()
-    return cast("HealthService", bootstrap_health_service())
+    return cast("HealthService", _invoke_bootstrap("bootstrap_health_service"))
 
 
 def get_observability_workflow_service() -> ObservabilityWorkflowService:
@@ -273,23 +253,23 @@ def get_health_server_dependencies() -> HealthServerDependenciesProtocol:
     _ensure_registrations()
     return cast(
         "HealthServerDependenciesProtocol",
-        bootstrap_health_server_dependencies(),
+        _invoke_bootstrap("bootstrap_health_server_dependencies"),
     )
 
 
 def get_metrics_service() -> MetricsService:
     """Get metrics administration service."""
     _ensure_registrations()
-    return cast("MetricsService", bootstrap_metrics_service())
+    return cast("MetricsService", _invoke_bootstrap("bootstrap_metrics_service"))
 
 
 def get_adr_service() -> object:
     """Get ADR management port."""
     _ensure_registrations()
-    return bootstrap_adr_service()
+    return _invoke_bootstrap("bootstrap_adr_service")
 
 
 def get_quarantine_port() -> QuarantinePort:
     """Get the shared low-level quarantine port."""
     _ensure_registrations()
-    return cast("QuarantinePort", bootstrap_quarantine_port())
+    return cast("QuarantinePort", _invoke_bootstrap("bootstrap_quarantine_port"))

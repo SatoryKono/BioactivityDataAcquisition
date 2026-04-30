@@ -28,7 +28,7 @@ from bioetl.domain.control_plane.run_ledger import ORDINARY_RUN_LEDGER_STAGE_NAM
 if TYPE_CHECKING:
     from bioetl.application.core.batch_executor import BatchExecutor
     from bioetl.application.core.lifecycle.checkpoint_manager import (
-        CheckpointManagerService,
+        CheckpointRuntimeService,
     )
     from bioetl.application.core.pipeline_services import PipelineService
     from bioetl.application.core.postrun.service import PostrunService
@@ -60,7 +60,7 @@ class _PipelineRunnerExecutionHostProtocol(Protocol):
     _runtime: RuntimeConfig
     _services: PipelineService
     _executor: BatchExecutor
-    _checkpoint_manager: CheckpointManagerService
+    _checkpoint_manager: CheckpointRuntimeService
     _preflight_service: PreflightService
     _postrun_service: PostrunService
     _lifecycle_service: MedallionLifecycleService

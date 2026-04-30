@@ -49,7 +49,7 @@ flowchart TB
     subgraph FanIn["Fan-In (MergeService)"]
         DD["EnricherDeduplicator<br/>• remove duplicates<br/>across enrichers<br/><br/>"]
         MS["MergeService.merge()<br/>LEFT OUTER JOIN<br/>seed ⟕ enrichers<br/>coalesce first non-null"]
-        CO["ColumnOrderer<br/>• FieldGroup priority<br/>• exclude TRASH group<br/><br/>"]
+        CO["ColumnOrderService<br/>• FieldGroup priority<br/>• exclude TRASH group<br/><br/>"]
     end
 
     subgraph Output["Gold Output"]

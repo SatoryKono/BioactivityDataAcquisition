@@ -1,4 +1,4 @@
-"""Builder service for composite runner factories."""
+"""Builder helpers for composite runner factories."""
 
 from __future__ import annotations
 
@@ -19,7 +19,7 @@ from bioetl.composition.bootstrap.runtime._dependency_runner_support import (
     resolve_dependency_runner_limit,
 )
 from bioetl.composition.bootstrap.runtime.composite_filter_extraction_service import (
-    CompositeFilterExtractionService,
+    CompositeFilterExtractor,
 )
 
 
@@ -53,7 +53,7 @@ def resolve_bronze_opts(
     )
 
 
-class RunnerFactoryBuilderService[RunOptionsT]:
+class RunnerFactoryBuilder[RunOptionsT]:
     """Build seed/enricher/dependency runner factories."""
 
     def __init__(
@@ -63,7 +63,7 @@ class RunnerFactoryBuilderService[RunOptionsT]:
         run_options_cls: Callable[..., _RunOptionsT],
         build_context: Callable[[str, _RunOptionsT], PipelineRunContext],
         pipeline_runner_builder: Callable[[PipelineRunContext], PipelineRunner],
-        filter_extraction_service: CompositeFilterExtractionService,
+        filter_extraction_service: CompositeFilterExtractor,
     ) -> None:
         self._logger = logger
         self._run_options_cls = run_options_cls
@@ -227,4 +227,4 @@ class RunnerFactoryBuilderService[RunOptionsT]:
         return dependency_runner_factory
 
 
-__all__ = ["BronzeRunOptions", "RunnerFactoryBuilderService", "resolve_bronze_opts"]
+__all__ = ["BronzeRunOptions", "RunnerFactoryBuilder", "resolve_bronze_opts"]

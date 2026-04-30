@@ -1,4 +1,4 @@
-"""Filesystem-based ADR service implementation.
+"""Filesystem-based ADR catalog implementation.
 
 Reads ADR markdown files from the repository (default path:
 ``docs/02-architecture/decisions``) and provides list/show/validate
@@ -162,8 +162,8 @@ def _extract_meta(text: str) -> tuple[str | None, str | None]:
 
 
 @dataclass(slots=True)
-class FsAdrService(AdrServicePort):
-    """Filesystem-backed ADR service."""
+class FilesystemAdrCatalog(AdrServicePort):
+    """Filesystem-backed ADR catalog."""
 
     base_path: str = "docs/02-architecture/decisions"
 
@@ -389,4 +389,4 @@ class FsAdrService(AdrServicePort):
         )
 
 
-__all__ = ["FsAdrService"]
+__all__ = ["FilesystemAdrCatalog"]

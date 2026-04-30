@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, cast
 if TYPE_CHECKING:
     from bioetl.application.core.batch_executor import BatchExecutor
     from bioetl.application.core.lifecycle.checkpoint_manager import (
-        CheckpointManagerService,
+        CheckpointRuntimeService,
     )
     from bioetl.application.core.lifecycle.lock_manager import LockCoordinator
     from bioetl.application.core.lifecycle.shutdown import ShutdownSignal
@@ -26,7 +26,7 @@ class PipelineRunnerDependencies:
     """Grouped collaborators for PipelineRunner."""
 
     executor: BatchExecutor
-    checkpoint_manager: CheckpointManagerService
+    checkpoint_manager: CheckpointRuntimeService
     lock_manager: LockCoordinator
     preflight: PreflightService
     postrun: PostrunService
@@ -55,7 +55,7 @@ def resolve_legacy_runner_dependencies(
     return PipelineRunnerDependencies(
         executor=cast("BatchExecutor", values["executor"]),
         checkpoint_manager=cast(
-            "CheckpointManagerService", values["checkpoint_manager"]
+            "CheckpointRuntimeService", values["checkpoint_manager"]
         ),
         lock_manager=cast("LockCoordinator", values["lock_manager"]),
         preflight=cast("PreflightService", values["preflight"]),
@@ -70,7 +70,7 @@ def resolve_legacy_runner_dependencies(
 
 
 async def load_runner_checkpoint(
-    checkpoint_manager: CheckpointManagerService,
+    checkpoint_manager: CheckpointRuntimeService,
 ) -> CheckpointMetadata | dict[str, object] | None:
     """Load checkpoint with the current execution metadata."""
     return await checkpoint_manager.load_checkpoint(

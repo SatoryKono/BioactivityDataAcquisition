@@ -13,7 +13,7 @@ from bioetl.domain.types import BronzeRecord, HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.common import (
     ComposableFallbackDecorator,
-    FallbackFetchOrchestratorService,
+    FallbackFetchOrchestrator,
     FallbackPolicyMixin,
 )
 from bioetl.infrastructure.adapters.crossref._client_fallback_policy import (
@@ -101,7 +101,7 @@ class CrossRefAdapter(
     adapter_metrics: AdapterMetricsRecorder | None = None
     request_collector: APIRequestCollector | None = None
     _: KW_ONLY
-    fallback_fetch_service: FallbackFetchOrchestratorService
+    fallback_fetch_service: FallbackFetchOrchestrator
     query_builder: CrossRefQueryBuilder | None = None
     response_mapper: CrossRefResponseMapper | None = None
     batch_fetcher: CrossRefBatchFetcher | None = None
@@ -110,9 +110,7 @@ class CrossRefAdapter(
     fetch_flow: CrossRefFetchFlow | None = None
 
     provider_name: str = field(init=False, default="crossref")  # DataSourcePort ID
-    _fallback_fetch_service: FallbackFetchOrchestratorService = field(
-        init=False, repr=False
-    )
+    _fallback_fetch_service: FallbackFetchOrchestrator = field(init=False, repr=False)
     _fallback_decorator: ComposableFallbackDecorator = field(init=False, repr=False)
     _query_builder: CrossRefQueryBuilder = field(init=False, repr=False)
     _response_mapper: CrossRefResponseMapper = field(init=False, repr=False)

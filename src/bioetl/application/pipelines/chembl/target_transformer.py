@@ -18,7 +18,7 @@ from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
 )
 from bioetl.domain.entities import Target
-from bioetl.domain.services import OrganismClassificationService
+from bioetl.domain.services import OrganismClassifier
 from bioetl.domain.transformations import safe_int
 from bioetl.domain.types import GoldRecord, JsonDict
 from bioetl.domain.value_objects.taxonomy_id import TaxonomyId
@@ -27,9 +27,9 @@ if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord, PrimaryId
 
 
-def _create_default_organism_classifier() -> OrganismClassificationService:
+def _create_default_organism_classifier() -> OrganismClassifier:
     """Create default organism classifier used by target transformer."""
-    return OrganismClassificationService(
+    return OrganismClassifier(
         organism_field="organism",
         taxonomy_id_field="tax_id",
     )
@@ -44,7 +44,7 @@ class TargetTransformer(BaseChemblTransformer):
     entity_class = Target
     primary_id_field = "target_id"
 
-    _organism_classifier: OrganismClassificationService = _DEFAULT_ORGANISM_CLASSIFIER
+    _organism_classifier: OrganismClassifier = _DEFAULT_ORGANISM_CLASSIFIER
 
     def _prepare_record(
         self,
@@ -189,7 +189,7 @@ class TargetTransformer(BaseChemblTransformer):
         )
         taxonomy_id = taxonomy_id_vo.value if taxonomy_id_vo else None
 
-        # Classify organism cellularity using OrganismClassificationService
+        # Classify organism cellularity using OrganismClassifier
         organism_name = cast("str | None", record.get("organism"))
         classification = self._organism_classifier.classify(organism_name, raw_tax_id)
         organism_class = (

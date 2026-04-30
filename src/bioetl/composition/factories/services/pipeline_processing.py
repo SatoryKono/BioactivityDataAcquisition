@@ -12,7 +12,7 @@ from bioetl.application.core.wiring.runtime import (
     BatchProcessingSupportService,
     BatchTracingManagerService,
     GoldFilterCallback,
-    QuarantineManagerService,
+    QuarantineRuntimeService,
     RecordProcessorConfig,
 )
 from bioetl.composition.bootstrap_contexts import PipelineCallbacksContext
@@ -76,7 +76,7 @@ def build_components_and_processing_service(
         domain_event_emitter=domain_event_emitter,
         lock_validator=lock_validator,
     )
-    quarantine_manager = QuarantineManagerService(
+    quarantine_manager = QuarantineRuntimeService(
         quarantine_port=pipeline.services.quarantine,
         pipeline_name=processor_config.pipeline_name,
         metrics=pipeline.services.metrics,

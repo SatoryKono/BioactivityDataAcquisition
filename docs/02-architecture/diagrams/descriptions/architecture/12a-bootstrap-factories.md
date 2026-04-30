@@ -17,7 +17,7 @@ ______________________________________________________________________
 
 ## Описание
 
-Диаграмма Bootstrap: Factories and Registries показывает архитектурный срез BioETL на уровне System / Component и использует нотацию flowchart. Она концентрируется на актуальных public and factory seams composition-слоя: `composition.entrypoints`, `composition.bootstrap`, `ProviderRegistry`, `PipelineRegistry`, `DataSourceFactory`, `GenericPipelineFactory / RunnerFactory`, `StorageFactory` и composite-specific helper seam, где остаются `RunnerFactoryBuilderService + CompositeSupportServicesFactory`.
+Диаграмма Bootstrap: Factories and Registries показывает архитектурный срез BioETL на уровне System / Component и использует нотацию flowchart. Она концентрируется на актуальных public and factory seams composition-слоя: `composition.entrypoints`, `composition.bootstrap`, `ProviderRegistry`, `PipelineRegistry`, `DataSourceFactory`, `GenericPipelineFactory / RunnerFactory`, `StorageFactory` и composite-specific helper seam, где остаются `RunnerFactoryBuilder + CompositeSupportServicesFactory`.
 
 Этот срез нужен для быстрого чтения factory topology без лишней runtime-детализации. По нему удобно видеть, что provider/data source и pipeline/storage creation теперь читаются через канонические registry/factory seams, а legacy-looking helper names сохранены только там, где они действительно обслуживают composite runtime path.
 

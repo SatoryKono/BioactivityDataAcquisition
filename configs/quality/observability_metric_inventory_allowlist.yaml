@@ -8,3 +8,4 @@ allowed:
   dead_metrics: []
   documented_without_registry: []
   rules_without_registry: []
+  runtime_cardinality_review_required: []

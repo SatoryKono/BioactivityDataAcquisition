@@ -62,7 +62,7 @@ classDiagram
         +rename_columns(df, rename_map)
     }
 
-    class ColumnOrderer {
+    class ColumnOrderService {
         +order_column_names(columns)
     }
 
@@ -99,7 +99,7 @@ classDiagram
     MergeService *-- EnricherDeduplicator
     MergeService *-- EnricherAggregator
     MergeService *-- ColumnRenamer
-    MergeService *-- ColumnOrderer
+    MergeService *-- ColumnOrderService
 
     CompositePipelineRunner --> FSMStateHelper
     CompositePipelineRunner --> EnrichmentCrossValidator

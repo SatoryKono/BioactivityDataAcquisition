@@ -1,5 +1,5 @@
 %% Title: Five-Layer Import Matrix Enforcement (ARCH-001)
-%% Covers: RULES.md §1.1, ai-selfreview-rules.md ARCH-001
+%% Covers: RULES.md §1.1, docs/00-project/ai/rules/bioetl-ai-rules.md ARCH-001
 %% Rank: 2 (Score 9.00) — Critical architectural rule visualization
 %% Updated: 2026-02-17
 
@@ -69,7 +69,7 @@ flowchart TB
     subgraph Enforcement["Enforcement Mechanism"]
         IL["import-linter<br/>Blocks PR on violation<br/>"]
         AT["tests/architecture/<br/>pytest architecture tests<br/>"]
-        SR["ai-selfreview-rules.md<br/>ARCH-001 detection scripts<br/>"]
+        SR["bioetl-ai-rules.md<br/>ARCH-001 detection scripts<br/>"]
     end
 
     IL -.-> Layers

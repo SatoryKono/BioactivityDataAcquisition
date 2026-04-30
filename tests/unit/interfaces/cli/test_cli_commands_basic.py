@@ -31,12 +31,12 @@ def runner():
 class TestCheckpointCommands:
     """Tests for checkpoint CLI commands."""
 
-    @patch("bioetl.interfaces.cli.commands.checkpoint.get_checkpoint_manager")
-    def test_checkpoint_list_command(self, mock_get_checkpoint_manager, runner):
+    @patch("bioetl.interfaces.cli.commands.checkpoint.get_checkpoint_runtime_service")
+    def test_checkpoint_list_command(self, mock_get_checkpoint_runtime_service, runner):
         """Test that checkpoint list command works."""
         mock_checkpoint_manager = AsyncMock()
         mock_checkpoint_manager.list_all.return_value = ["cp1", "cp2"]
-        mock_get_checkpoint_manager.return_value = mock_checkpoint_manager
+        mock_get_checkpoint_runtime_service.return_value = mock_checkpoint_manager
 
         result = runner.invoke(cli, ["checkpoint", "list", "--pipeline", "dummy"])
 
@@ -48,14 +48,16 @@ class TestCheckpointCommands:
 class TestQuarantineCommands:
     """Tests for quarantine CLI commands."""
 
-    @patch("bioetl.interfaces.cli.commands.quarantine.get_quarantine_manager")
-    def test_quarantine_inspect_command(self, mock_get_quarantine_manager, runner):
+    @patch("bioetl.interfaces.cli.commands.quarantine.get_quarantine_runtime_service")
+    def test_quarantine_inspect_command(
+        self, mock_get_quarantine_runtime_service, runner
+    ):
         """Test that quarantine inspect command works."""
         mock_quarantine_manager = AsyncMock()
         mock_quarantine_manager.inspect.return_value = [
             {"error_code": "ERR01", "payload": "{}"}
         ]
-        mock_get_quarantine_manager.return_value = mock_quarantine_manager
+        mock_get_quarantine_runtime_service.return_value = mock_quarantine_manager
 
         result = runner.invoke(
             cli,
@@ -66,14 +68,14 @@ class TestQuarantineCommands:
         assert "Inspecting quarantine for test_pipeline" in result.output
         assert "ERR01" in result.output
 
-    @patch("bioetl.interfaces.cli.commands.quarantine.get_quarantine_manager")
+    @patch("bioetl.interfaces.cli.commands.quarantine.get_quarantine_runtime_service")
     def test_quarantine_inspect_empty_command(
-        self, mock_get_quarantine_manager, runner
+        self, mock_get_quarantine_runtime_service, runner
     ):
         """Test quarantine inspect command with no records."""
         mock_quarantine_manager = AsyncMock()
         mock_quarantine_manager.inspect.return_value = []
-        mock_get_quarantine_manager.return_value = mock_quarantine_manager
+        mock_get_quarantine_runtime_service.return_value = mock_quarantine_manager
 
         result = runner.invoke(
             cli,
@@ -439,7 +441,7 @@ class TestDryRunMode:
     """Tests for dry-run mode and cleanup preview rendering."""
 
     @patch(
-        "bioetl.composition.resources_api.preview_cleanup",
+        "bioetl.interfaces.cli.commands.domains.run.support.preview_cleanup",
         new_callable=AsyncMock,
     )
     def test_dry_run_shows_preview(
@@ -475,7 +477,7 @@ class TestDryRunMode:
         assert "No changes were made" in result.output
 
     @patch(
-        "bioetl.composition.resources_api.preview_cleanup",
+        "bioetl.interfaces.cli.commands.domains.run.support.preview_cleanup",
         new_callable=AsyncMock,
     )
     def test_dry_run_counts_existing_files(
@@ -506,7 +508,7 @@ class TestDryRunMode:
         assert "2 files" in result.output
 
     @patch(
-        "bioetl.composition.resources_api.preview_cleanup",
+        "bioetl.interfaces.cli.commands.domains.run.support.preview_cleanup",
         new_callable=AsyncMock,
     )
     def test_dry_run_preview_runtime_error(
@@ -533,7 +535,7 @@ class TestDryRunMode:
         assert "Error previewing cleanup" in result.output
 
     @patch(
-        "bioetl.composition.resources_api.preview_cleanup",
+        "bioetl.interfaces.cli.commands.domains.run.support.preview_cleanup",
         new_callable=AsyncMock,
     )
     def test_dry_run_preview_variations(

@@ -13,14 +13,14 @@ from bioetl.domain.ports import (
 )
 from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
 from bioetl.infrastructure.adapters.common import (
-    FallbackFetchOrchestratorService,
+    FallbackFetchOrchestrator,
     HttpAdapterDependencyContext,
     SyncAdapterDependencyContext,
 )
 from bioetl.infrastructure.adapters.common.api_request_collector import (
     APIRequestCollector,
 )
-from bioetl.infrastructure.adapters.error_handling import ErrorService
+from bioetl.infrastructure.adapters.error_handling import AdapterErrorHandler
 
 __all__ = [
     "AdapterHelperServices",
@@ -37,7 +37,7 @@ class AdapterHelperServices:
     error_handler: ErrorHandlerPort
     adapter_metrics: AdapterMetricsRecorder
     request_collector: APIRequestCollector
-    fallback_fetch_service: FallbackFetchOrchestratorService
+    fallback_fetch_service: FallbackFetchOrchestrator
 
     def build_dependency_context(self) -> HttpAdapterDependencyContext:
         """Return explicit constructor context for HTTP adapter runtime deps."""
@@ -131,9 +131,9 @@ class AdapterHelpersFactory:
         request_collector = APIRequestCollector()
         error_handler = cast(
             ErrorHandlerPort,
-            ErrorService(logger=logger, metrics=metrics_port),
+            AdapterErrorHandler(logger=logger, metrics=metrics_port),
         )
-        fallback_fetch_service = FallbackFetchOrchestratorService(adapter_metrics)
+        fallback_fetch_service = FallbackFetchOrchestrator(adapter_metrics)
         return AdapterHelperServices(
             metrics=metrics_port,
             error_handler=error_handler,
@@ -166,7 +166,7 @@ class AdapterHelpersFactory:
         request_collector = APIRequestCollector()
         error_handler = cast(
             ErrorHandlerPort,
-            ErrorService(logger=logger, metrics=metrics_port),
+            AdapterErrorHandler(logger=logger, metrics=metrics_port),
         )
         return SyncAdapterHelperServices(
             metrics=metrics_port,

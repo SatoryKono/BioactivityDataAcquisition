@@ -53,10 +53,10 @@ class TestCreateCheckpointManager:
     """Tests for create_checkpoint_manager."""
 
     @patch(
-        "bioetl.composition.factories.services.pipeline_builder.CheckpointManagerService"
+        "bioetl.composition.factories.services.pipeline_builder.CheckpointRuntimeService"
     )
     def test_creates_checkpoint_manager_service(self, mock_cls: MagicMock) -> None:
-        """Creates CheckpointManagerService with all params."""
+        """Creates CheckpointRuntimeService with all params."""
         expected = MagicMock()
         mock_cls.return_value = expected
 
@@ -72,7 +72,7 @@ class TestCreateCheckpointManager:
         mock_cls.assert_called_once()
 
     @patch(
-        "bioetl.composition.factories.services.pipeline_builder.CheckpointManagerService"
+        "bioetl.composition.factories.services.pipeline_builder.CheckpointRuntimeService"
     )
     def test_passes_loading_strategy(self, mock_cls: MagicMock) -> None:
         """Loading strategy is forwarded to constructor."""
@@ -92,7 +92,7 @@ class TestCreateCheckpointManager:
         assert call_kwargs["loading_strategy"] is strategy
 
     @patch(
-        "bioetl.composition.factories.services.pipeline_builder.CheckpointManagerService"
+        "bioetl.composition.factories.services.pipeline_builder.CheckpointRuntimeService"
     )
     def test_passes_checkpoint_compatibility_arguments(
         self, mock_cls: MagicMock
@@ -136,7 +136,7 @@ class TestCreateBatchProcessingComponents:
         "bioetl.composition.factories.services.pipeline_processing_components_builder.BatchMetricsRecorderService"
     )
     @patch(
-        "bioetl.composition.factories.services.pipeline_processing_components_builder.QuarantineManagerService"
+        "bioetl.composition.factories.services.pipeline_processing_components_builder.QuarantineRuntimeService"
     )
     def test_returns_batch_processing_components(
         self,
@@ -196,7 +196,7 @@ class TestCreateBatchProcessingComponents:
         "bioetl.composition.factories.services.pipeline_processing_components_builder.BatchMetricsRecorderService"
     )
     @patch(
-        "bioetl.composition.factories.services.pipeline_processing_components_builder.QuarantineManagerService"
+        "bioetl.composition.factories.services.pipeline_processing_components_builder.QuarantineRuntimeService"
     )
     def test_creates_column_orderer_when_column_groups_present(
         self,
@@ -251,7 +251,7 @@ class TestCreateBatchProcessingComponents:
         "bioetl.composition.factories.services.pipeline_processing_components_builder.BatchMetricsRecorderService"
     )
     @patch(
-        "bioetl.composition.factories.services.pipeline_processing_components_builder.QuarantineManagerService"
+        "bioetl.composition.factories.services.pipeline_processing_components_builder.QuarantineRuntimeService"
     )
     def test_forwards_tracer_and_lock_validator_into_writer_options(
         self,

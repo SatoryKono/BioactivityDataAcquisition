@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Protocol, cast
 
 from bioetl.domain.ports import DQMonitorPort, LoggerPort
-from bioetl.infrastructure.observability.anomaly import DataQualityMonitorService
+from bioetl.infrastructure.observability.anomaly import DataQualityMonitor
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 
 if TYPE_CHECKING:
@@ -42,7 +42,7 @@ __all__ = [
 def bootstrap_dq_monitor_port(
     settings: Settings,
     logger: LoggerPort | None = None,
-    monitor_factory: Callable[..., DQMonitorPort] = DataQualityMonitorService,
+    monitor_factory: Callable[..., DQMonitorPort] = DataQualityMonitor,
     noop_logger_factory: Callable[[], LoggerPort] = NoOpLogger,
 ) -> DQMonitorPort | None:
     """Create a data quality monitor port implementation.

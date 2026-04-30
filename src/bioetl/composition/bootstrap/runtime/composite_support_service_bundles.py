@@ -11,7 +11,6 @@ if TYPE_CHECKING:
     from bioetl.application.composite.runtime_wiring_api import (
         CoalescePolicyService,
         ColumnOrderService,
-        ColumnPriorityOrderer,
         ColumnRenamer,
         CompositeCheckpointService,
         ConflictResolverService,
@@ -66,7 +65,7 @@ class MergeDependenciesBundle:
     aggregator: EnricherAggregator
     renamer: ColumnRenamer
     orderer: ColumnOrderService | None
-    priority_orderer: ColumnPriorityOrderer | None
+    priority_orderer: object | None
     order_service: ColumnOrderService
     coalesce_policy: CoalescePolicyService
     conflict_resolver: ConflictResolverService

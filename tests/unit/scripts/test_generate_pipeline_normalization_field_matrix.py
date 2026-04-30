@@ -40,6 +40,9 @@ from bioetl.domain.normalization.profiles.chembl_json_ordering_policy import (
 from bioetl.domain.normalization.publication_structured_fields import (
     publication_structured_field_policies,
 )
+from bioetl.domain.normalization.structured_payload_policies import (
+    semantic_sensitive_structured_payload_policies,
+)
 from tests.helpers import (
     assert_check_artifacts_detects_drift,
     assert_check_artifacts_passes_for_fresh_outputs,
@@ -621,6 +624,21 @@ def test_build_field_matrix_rows_exposes_publication_structured_field_registry()
             )
 
     assert matched_policies > 0
+
+
+def test_build_field_matrix_rows_documents_structured_payload_sidecar_policy() -> None:
+    rows = build_field_matrix_rows()
+
+    for policy in semantic_sensitive_structured_payload_policies():
+        pipeline_name = policy.profile_name.replace(".", "_")
+        row = _row(rows, pipeline_name, policy.field_name)
+        semantics = policy.collection_semantics.value.replace("_", " ")
+
+        assert row["normalization_summary"] == row["notes"]
+        assert semantics in row["notes"]
+        assert policy.raw_sidecar_field in row["notes"]
+        assert policy.canonical_sidecar_field in row["notes"]
+        assert "not a raw provider substitute" in row["notes"]
 
 
 def test_build_field_matrix_rows_keeps_chembl_cell_line_policy_fields_visible() -> None:

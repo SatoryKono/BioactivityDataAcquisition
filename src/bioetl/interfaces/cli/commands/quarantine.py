@@ -8,7 +8,7 @@ from bioetl.interfaces.cli.commands._compat import alias_module
 
 if TYPE_CHECKING:
     from bioetl.interfaces.cli.commands.domains.quarantine.command import (
-        get_quarantine_manager as get_quarantine_manager,
+        get_quarantine_runtime_service as get_quarantine_runtime_service,
     )
     from bioetl.interfaces.cli.commands.domains.quarantine.command import (
         get_quarantine_service as get_quarantine_service,

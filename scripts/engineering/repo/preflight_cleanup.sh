@@ -129,6 +129,10 @@ EXCLUDE_DIRS=(
   tmp
 )
 
+PROTECTED_BUILD_DIRS=(
+  ./scripts/docs/build
+)
+
 build_find_prune() {
   local expr=()
   expr+=( '(' )
@@ -167,6 +171,13 @@ done
 
 if (( ${#DIR_TARGETS[@]} > 0 )); then
   mapfile -t DIR_TARGETS < <(printf '%s\n' "${DIR_TARGETS[@]}" | sort -u)
+fi
+
+if (( ${#DIR_TARGETS[@]} > 0 )) && (( ${#PROTECTED_BUILD_DIRS[@]} > 0 )); then
+  protected_regex="$(printf '%s\n' "${PROTECTED_BUILD_DIRS[@]}" | sed 's/[.[\*^$()+?{}|]/\\&/g' | paste -sd'|' -)"
+  mapfile -t DIR_TARGETS < <(
+    printf '%s\n' "${DIR_TARGETS[@]}" | rg -v "^(${protected_regex})$"
+  )
 fi
 
 total_targets=$(( ${#DIR_TARGETS[@]} + ${#FILE_TARGETS[@]} ))

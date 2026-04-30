@@ -71,7 +71,7 @@ ______________________________________________________________________
 
 | Class                      | Description                                   |
 | -------------------------- | --------------------------------------------- |
-| `CheckpointManagerService` | Checkpoint save/load coordination             |
+| `CheckpointRuntimeService` | Checkpoint save/load coordination             |
 | `LockCoordinator`          | Runtime lock acquisition and release          |
 | `HeartbeatTask`            | Periodic heartbeat for long-running pipelines |
 | `ShutdownSignal`           | Graceful shutdown signal handling             |
@@ -176,7 +176,7 @@ from those modules when used directly.
 | `MergeService`                        | Merges seed and enrichment data                        |
 | `DependencyCoordinatorService`        | Coordinates dependent pipeline execution               |
 | `ColumnRenamer`                       | Unified column renaming helper                         |
-| `ColumnOrderer`                       | Semantic column ordering helper                        |
+| `ColumnOrderService`                  | Canonical unified column ordering service              |
 | `CompositeCheckpointService`          | Checkpoint management for composite runs               |
 | `CompositeCheckpointState`            | Checkpoint state tracking                              |
 | `CompositePreflightValidationService` | Preflight validation for composite pipelines           |
@@ -195,7 +195,7 @@ The symbols below live in nested composite modules and are not exported by the
 | `EnricherDeduplicatorService`      | Deduplicates enrichment records            |
 | `ConflictResolverService`          | Resolves field conflicts between providers |
 | `CoalescePolicyService`            | Coalescing policy for merged fields        |
-| `ColumnPriorityOrdererService`     | Priority-based column ordering             |
+| `ColumnPriorityOrderer`            | Deprecated compatibility surface for priority-based ordering |
 | `JoinPlannerService`               | Plans join operations between datasets     |
 | `JoinExecutorService`              | Executes planned join operations           |
 | `JoinKeyResolverService`           | Resolves join keys across providers        |

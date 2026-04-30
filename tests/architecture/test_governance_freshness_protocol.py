@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import yaml
+
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -84,3 +86,60 @@ def test_project_test_health_summary_is_evidence_only_with_freshness_note() -> N
         assert canonical_source in text
     assert "backlog signal only" in lower_text
     assert "fresh evidence-pack rebaseline" in lower_text
+
+
+def test_project_test_health_summary_declares_machine_readable_freshness_metadata() -> (
+    None
+):
+    text = _read("docs/reports/evidence/project-test-health/SUMMARY.md")
+    assert text.startswith("---\n")
+    metadata_text = text.split("\n---\n", maxsplit=2)[0].removeprefix("---\n")
+    metadata = yaml.safe_load(metadata_text)
+
+    assert metadata["status"] == "active-non-canonical"
+    assert metadata["last_verified"] == "2026-04-30"
+    assert metadata["freshness_window_days"] > 0
+    assert metadata["owner"] == "quality"
+    assert set(metadata["canonical_sources"]) >= {
+        "configs/quality/test_matrix.yaml",
+        "configs/quality/test_health_reporting.yaml",
+        "configs/quality/fixture_governance_ledger.yaml",
+    }
+
+
+def test_project_test_health_summary_has_machine_readable_metadata() -> None:
+    metadata_path = (
+        ROOT / "docs" / "reports" / "evidence" / "project-test-health" / "metadata.yaml"
+    )
+    shard_registry_path = (
+        ROOT
+        / "docs"
+        / "reports"
+        / "evidence"
+        / "project-test-health"
+        / "shard_registry.yaml"
+    )
+
+    metadata = yaml.safe_load(metadata_path.read_text(encoding="utf-8"))
+    shard_registry = yaml.safe_load(shard_registry_path.read_text(encoding="utf-8"))
+    assert metadata["policy_scope"] == "non_canonical_evidence_summary"
+    assert metadata["owner"]
+    assert metadata["freshness_window_days"] >= 1
+    assert metadata["last_verified"].startswith("2026-")
+    assert metadata["allowed_interpretation"] == "backlog_signal_only"
+    assert metadata["canonical_sources"]
+    assert shard_registry["policy_scope"] == "project_test_health_evidence_shards"
+    assert shard_registry["owner"]
+    assert shard_registry["shards"]
+
+    resolved_shards = {
+        shard["id"]
+        for shard in shard_registry["shards"]
+        if shard.get("status") == "passed"
+    }
+    assert {
+        "flaky-rate",
+        "uncovered-module-risk-map",
+        "semanticscholar-environment-limited-frequency",
+        "environment-limited-threshold",
+    } <= resolved_shards

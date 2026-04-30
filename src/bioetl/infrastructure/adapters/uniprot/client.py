@@ -14,7 +14,7 @@ from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
 from bioetl.infrastructure.adapters.common import (
     FallbackDecoratorConfig,
-    FallbackFetchOrchestratorService,
+    FallbackFetchOrchestrator,
     FallbackPolicyMixin,
 )
 from bioetl.infrastructure.adapters.common.api_request_collector import (
@@ -96,7 +96,7 @@ class UniProtAdapter(
         http_client: UnifiedHTTPClient,
         logger: LoggerPort,
         *,
-        fallback_fetch_service: FallbackFetchOrchestratorService,
+        fallback_fetch_service: FallbackFetchOrchestrator,
         api_key: str | None = None,
         base_url: str = UNIPROT_API_BASE,
         strict_error_handling: bool = False,

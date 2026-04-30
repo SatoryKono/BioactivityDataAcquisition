@@ -61,7 +61,7 @@ bash scripts/engineering/dev/run_mypy.sh
 **Главные ресурсы:**
 
 1. `docs/00-project/RULES.md` — Конституция проекта (RFC 2119 keywords)
-1. runtime project context file — Компактный контекст
+1. `docs/00-project/ai/memory/agent-memory.md` — Компактный контекст
 1. `AGENT.md` — Детальные инструкции для агента
 1. `docs/03-guides/dashboards/dashboard-extension-llm.md` — если задача затрагивает `grafana/dashboards/*.json`, links или drilldown в Grafana
 1. `docs/99-archive/refactoring-plan.md` — Архив плана рефакторинга (исторический справочник, optional)
@@ -558,7 +558,7 @@ ______________________________________________________________________
 | ------------------------------------------- | ------------------------------------------------------------------------------- |
 | `docs/00-project/RULES.md`                  | **Конституция проекта** — единственный источник истины для архитектурных правил |
 | `docs/00-project/ai/agents/guides/AGENT.md` | Инструкции для агента (персона, workflow, специфика работы)                     |
-| runtime project context file                | Компактный контекст для быстрой справки                                         |
+| `docs/00-project/ai/memory/agent-memory.md` | Компактный контекст для быстрой справки                                         |
 | `docs/02-architecture/decisions/`           | Актуальный набор ADR — архитектурные решения                                    |
 | `docs/01-requirements/REQUIREMENTS.md`      | Тестируемые требования; при ссылке на total проверяй live по текущему документу |
 

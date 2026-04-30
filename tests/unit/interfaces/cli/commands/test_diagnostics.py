@@ -679,7 +679,7 @@ def test_diagnostics_quarantine_json_reuses_quarantine_stats_helper(
     )
     monkeypatch.setattr(
         diagnostics_module,
-        "get_quarantine_manager",
+        "get_quarantine_runtime_service",
         lambda pipeline: manager,
         raising=True,
     )

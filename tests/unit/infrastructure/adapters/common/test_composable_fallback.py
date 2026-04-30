@@ -14,7 +14,7 @@ from bioetl.infrastructure.adapters.common.composable_fallback import (
 )
 from bioetl.infrastructure.adapters.common.fallback_fetch_service import (
     DefaultFallbackExecution,
-    FallbackFetchOrchestratorService,
+    FallbackFetchOrchestrator,
     FallbackFetchRequest,
 )
 from tests.helpers.async_iterables import async_iterable
@@ -43,13 +43,13 @@ def _make_strategy(
 
 def _make_decorator(
     *,
-    service: FallbackFetchOrchestratorService | None = None,
+    service: FallbackFetchOrchestrator | None = None,
     strategy: DefaultFallbackExecution | None = None,
     config: FallbackDecoratorConfig | None = None,
     logger: Any = None,
 ) -> ComposableFallbackDecorator:
     return ComposableFallbackDecorator(
-        service=service or MagicMock(spec=FallbackFetchOrchestratorService),
+        service=service or MagicMock(spec=FallbackFetchOrchestrator),
         strategy=strategy or _make_strategy(),
         config=config or FallbackDecoratorConfig(),
         logger=logger or MagicMock(),
@@ -76,7 +76,7 @@ async def test_execute_builds_request_from_strategy_defaults() -> None:
         captured_requests.append(request)
         yield {"id": "from-service"}
 
-    service = MagicMock(spec=FallbackFetchOrchestratorService)
+    service = MagicMock(spec=FallbackFetchOrchestrator)
     service.execute = capture_execute
     decorator = _make_decorator(
         service=service,
@@ -133,7 +133,7 @@ async def test_execute_prefers_explicit_overrides_over_strategy_hooks() -> None:
         captured_requests.append(request)
         return async_iterable()
 
-    service = MagicMock(spec=FallbackFetchOrchestratorService)
+    service = MagicMock(spec=FallbackFetchOrchestrator)
     service.execute = capture_execute
     decorator = _make_decorator(service=service, strategy=strategy)
 
@@ -165,7 +165,7 @@ async def test_execute_skips_service_for_unsupported_filter_field_when_configure
     None
 ):
     logger = MagicMock()
-    service = MagicMock(spec=FallbackFetchOrchestratorService)
+    service = MagicMock(spec=FallbackFetchOrchestrator)
     service.execute = MagicMock()
     decorator = _make_decorator(
         service=service,
@@ -216,7 +216,7 @@ async def test_execute_logs_but_continues_when_unsupported_filter_is_permissive(
         captured_requests.append(request)
         yield {"id": "from-service"}
 
-    service = MagicMock(spec=FallbackFetchOrchestratorService)
+    service = MagicMock(spec=FallbackFetchOrchestrator)
     service.execute = capture_execute
     decorator = _make_decorator(
         service=service,

@@ -7,7 +7,7 @@ Uses declarative field_specs DSL for mapping.
     Uses ChemblPublication (canonical) instead of Document (deprecated).
 
 .. versionchanged:: 2.1.0
-    Uses DataNormalizationService for text normalization (DI pattern).
+    Uses DefaultDataNormalizer for text normalization (DI pattern).
 """
 
 from __future__ import annotations
@@ -47,7 +47,7 @@ from bioetl.domain.value_objects.publications import DOI
 if TYPE_CHECKING:
     from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
     from bioetl.domain.ports import MetricsPort, PiiHasherPort, TracingPort
-    from bioetl.domain.services import IdentityService
+    from bioetl.domain.services import EntityIdentityGenerator
     from bioetl.domain.types import PrimaryId
 
 
@@ -110,7 +110,7 @@ class PublicationTransformer(BaseChemblTransformer):
     """Transforms ChEMBL bronze publication records to silver.
 
     Uses ChemblPublication entity (canonical name).
-    Uses DataNormalizationService for text normalization (DI pattern).
+    Uses DefaultDataNormalizer for text normalization (DI pattern).
 
     .. versionchanged:: 2.0.0
         Renamed from DocumentTransformer to PublicationTransformer (ADR-024).
@@ -127,7 +127,7 @@ class PublicationTransformer(BaseChemblTransformer):
         gold_filters: GoldFilterConfig | None = None,
         tracer: TracingPort | None = None,
         metrics: MetricsPort | None = None,
-        identity_service: IdentityService | None = None,
+        identity_service: EntityIdentityGenerator | None = None,
         pii_hasher: PiiHasherPort | None = None,
         dependencies: TransformerDependencyContext | None = None,
     ) -> None:

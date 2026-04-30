@@ -1,4 +1,4 @@
-"""Identity Service for entity identification and content hashing.
+"""Entity identity generator for deterministic IDs and content hashes.
 
 Provides centralized logic for computing entity identifiers and content hashes
 according to RULES.md §2.8.
@@ -25,12 +25,12 @@ from bioetl.domain.types import ContentHash, EntityID, JsonDict
 
 __all__ = [
     "META_FIELDS",
-    "IdentityService",
+    "EntityIdentityGenerator",
 ]
 
 
-class IdentityService:
-    """Service for generating entity identifiers and content hashes.
+class EntityIdentityGenerator:
+    """Generator for entity identifiers and content hashes.
 
     This is the canonical domain facade for content hashing. It delegates to the
     single hashing implementation in ``bioetl.domain.transformations`` so callers
@@ -49,7 +49,7 @@ class IdentityService:
     All methods are pure (deterministic, side-effect free).
 
     Example:
-        >>> identity = IdentityService()
+        >>> identity = EntityIdentityGenerator()
         >>> entity_id = identity.compute_entity_id(
         ...     provider="chembl",
         ...     entity_type="activity",

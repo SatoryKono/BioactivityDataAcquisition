@@ -6,7 +6,7 @@ from collections.abc import Mapping
 from typing import Protocol
 
 __all__ = [
-    "EnumLoaderPort",
+    "EnumLoaderProtocol",
     "get_chembl_enum",
     "get_chembl_enum_set",
     "get_enum_config",
@@ -18,7 +18,7 @@ __all__ = [
 ]
 
 
-class EnumLoaderPort(Protocol):
+class EnumLoaderProtocol(Protocol):
     """Port for loading enum configurations. Implemented by infrastructure layer."""
 
     def load_provider_enums(
@@ -66,7 +66,7 @@ def _require_list(
 
 def load_provider_enums(
     provider: str,
-    enum_loader: EnumLoaderPort | None = None,
+    enum_loader: EnumLoaderProtocol | None = None,
 ) -> dict[str, object]:
     """Load enum configurations for a provider using injected dependency.
 
@@ -76,12 +76,14 @@ def load_provider_enums(
     normalized_provider = _normalize_coordinate(provider, label="provider")
     if enum_loader is None:
         raise NotImplementedError(
-            "Domain layer cannot perform direct I/O. Please inject EnumLoaderPort implementation."
+            "Domain layer cannot perform direct I/O. Please inject EnumLoaderProtocol implementation."
         )
     return enum_loader.load_provider_enums(normalized_provider)
 
 
-def load_chembl_enums(enum_loader: EnumLoaderPort | None = None) -> dict[str, object]:
+def load_chembl_enums(
+    enum_loader: EnumLoaderProtocol | None = None,
+) -> dict[str, object]:
     """Load ChEMBL enum configurations using injected dependency.
 
     Args:
@@ -97,7 +99,7 @@ def load_chembl_enums(enum_loader: EnumLoaderPort | None = None) -> dict[str, ob
 
 
 def get_enum_config(
-    section: str, key: str, enum_loader: EnumLoaderPort | None = None
+    section: str, key: str, enum_loader: EnumLoaderProtocol | None = None
 ) -> list[str]:
     """Get a ChEMBL enum configuration.
 
@@ -119,7 +121,7 @@ def get_provider_enum_config(
     provider: str,
     entity: str,
     field: str,
-    enum_loader: EnumLoaderPort | None = None,
+    enum_loader: EnumLoaderProtocol | None = None,
 ) -> list[str]:
     """Get a provider enum configuration.
 
@@ -159,7 +161,7 @@ def get_provider_enum(
     provider: str,
     entity: str,
     field: str,
-    enum_loader: EnumLoaderPort | None = None,
+    enum_loader: EnumLoaderProtocol | None = None,
 ) -> list[str]:
     """Get enum values for any provider/entity/field coordinate.
 
@@ -174,7 +176,7 @@ def get_enum_set(
     provider: str,
     entity: str,
     field: str,
-    enum_loader: EnumLoaderPort | None = None,
+    enum_loader: EnumLoaderProtocol | None = None,
 ) -> frozenset[str]:
     """Get provider enum values as an immutable frozenset."""
     return frozenset(get_provider_enum(provider, entity, field, enum_loader))
@@ -183,7 +185,7 @@ def get_enum_set(
 def get_chembl_enum(
     entity: str,
     field: str,
-    enum_loader: EnumLoaderPort | None = None,
+    enum_loader: EnumLoaderProtocol | None = None,
 ) -> list[str]:
     """Get enum values for any ChEMBL entity.
 
@@ -205,7 +207,7 @@ def get_chembl_enum(
 def get_chembl_enum_set(
     entity: str,
     field: str,
-    enum_loader: EnumLoaderPort | None = None,
+    enum_loader: EnumLoaderProtocol | None = None,
 ) -> frozenset[str]:
     """Get enum values as immutable frozenset.
 

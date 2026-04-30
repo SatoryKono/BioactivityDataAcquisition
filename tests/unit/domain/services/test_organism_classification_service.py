@@ -1,4 +1,4 @@
-"""Unit tests for OrganismClassificationService.
+"""Unit tests for OrganismClassifier.
 
 Tests cover:
 - Single-record classification (classify, get_cellularity, normalize_name)
@@ -16,7 +16,8 @@ import pytest
 from bioetl.domain.mapping.organism_classification import OrganismClassificationResult
 from bioetl.domain.services.organism_classification_service import (
     ClassificationStats,
-    OrganismClassificationService,
+    OrganismClassifier,
+    OrganismClassifier,
 )
 from bioetl.domain.types import CellularityType
 
@@ -27,15 +28,15 @@ from bioetl.domain.types import CellularityType
 
 
 @pytest.fixture()
-def service() -> OrganismClassificationService:
+def service() -> OrganismClassifier:
     """Default service with standard ChEMBL field names."""
-    return OrganismClassificationService()
+    return OrganismClassifier()
 
 
 @pytest.fixture()
-def custom_service() -> OrganismClassificationService:
+def custom_service() -> OrganismClassifier:
     """Service with custom field names."""
-    return OrganismClassificationService(
+    return OrganismClassifier(
         organism_field="organism_name",
         taxonomy_id_field="tax_id",
     )
@@ -60,45 +61,37 @@ def sample_records() -> list[dict[str, object]]:
 class TestClassify:
     """Tests for classify() method."""
 
-    def test_classify_human_by_taxonomy(
-        self, service: OrganismClassificationService
-    ) -> None:
+    def test_classify_human_by_taxonomy(self, service: OrganismClassifier) -> None:
         result = service.classify("Homo sapiens", 9606)
         assert result.organism_class == CellularityType.MULTICELLULAR
         assert result.source == "taxonomy_id"
         assert result.source_conflict is False
 
-    def test_classify_ecoli_by_taxonomy(
-        self, service: OrganismClassificationService
-    ) -> None:
+    def test_classify_ecoli_by_taxonomy(self, service: OrganismClassifier) -> None:
         result = service.classify("Escherichia coli", 562)
         assert result.organism_class == CellularityType.UNICELLULAR
 
-    def test_classify_hiv_by_taxonomy(
-        self, service: OrganismClassificationService
-    ) -> None:
+    def test_classify_hiv_by_taxonomy(self, service: OrganismClassifier) -> None:
         result = service.classify("HIV-1", 11676)
         assert result.organism_class == CellularityType.ACELLULAR
 
-    def test_classify_by_name_only(
-        self, service: OrganismClassificationService
-    ) -> None:
+    def test_classify_by_name_only(self, service: OrganismClassifier) -> None:
         result = service.classify("Homo sapiens", None)
         assert result.organism_class == CellularityType.MULTICELLULAR
         assert result.source == "organism_name"
 
-    def test_classify_unresolved(self, service: OrganismClassificationService) -> None:
+    def test_classify_unresolved(self, service: OrganismClassifier) -> None:
         result = service.classify("Unknown organism", None)
         assert result.organism_class is None
         assert result.source == "unresolved"
 
-    def test_classify_none_inputs(self, service: OrganismClassificationService) -> None:
+    def test_classify_none_inputs(self, service: OrganismClassifier) -> None:
         result = service.classify(None, None)
         assert result.organism_class is None
         assert result.source == "unresolved"
 
     def test_classify_with_string_taxonomy_id(
-        self, service: OrganismClassificationService
+        self, service: OrganismClassifier
     ) -> None:
         result = service.classify("Homo sapiens", "9606")
         assert result.organism_class == CellularityType.MULTICELLULAR
@@ -107,36 +100,32 @@ class TestClassify:
 class TestGetCellularity:
     """Tests for get_cellularity() convenience method."""
 
-    def test_returns_cellularity_type(
-        self, service: OrganismClassificationService
-    ) -> None:
+    def test_returns_cellularity_type(self, service: OrganismClassifier) -> None:
         assert (
             service.get_cellularity("Homo sapiens", 9606)
             == CellularityType.MULTICELLULAR
         )
 
-    def test_returns_none_for_unresolved(
-        self, service: OrganismClassificationService
-    ) -> None:
+    def test_returns_none_for_unresolved(self, service: OrganismClassifier) -> None:
         assert service.get_cellularity("Unknown", None) is None
 
 
 class TestNormalizeName:
     """Tests for normalize_name() method."""
 
-    def test_lowercases(self, service: OrganismClassificationService) -> None:
+    def test_lowercases(self, service: OrganismClassifier) -> None:
         assert service.normalize_name("Homo Sapiens") == "homo sapiens"
 
-    def test_strips_parenthetical(self, service: OrganismClassificationService) -> None:
+    def test_strips_parenthetical(self, service: OrganismClassifier) -> None:
         assert service.normalize_name("E. coli (strain K12)") == "e. coli"
 
-    def test_resolves_alias(self, service: OrganismClassificationService) -> None:
+    def test_resolves_alias(self, service: OrganismClassifier) -> None:
         assert service.normalize_name("HIV") == "human immunodeficiency virus 1"
 
-    def test_none_input(self, service: OrganismClassificationService) -> None:
+    def test_none_input(self, service: OrganismClassifier) -> None:
         assert service.normalize_name(None) is None
 
-    def test_empty_input(self, service: OrganismClassificationService) -> None:
+    def test_empty_input(self, service: OrganismClassifier) -> None:
         assert service.normalize_name("") is None
 
 
@@ -150,7 +139,7 @@ class TestClassifyRecords:
 
     def test_returns_paired_tuples(
         self,
-        service: OrganismClassificationService,
+        service: OrganismClassifier,
         sample_records: list[dict[str, object]],
     ) -> None:
         results = service.classify_records(sample_records)
@@ -161,7 +150,7 @@ class TestClassifyRecords:
 
     def test_preserves_record_order(
         self,
-        service: OrganismClassificationService,
+        service: OrganismClassifier,
         sample_records: list[dict[str, object]],
     ) -> None:
         results = service.classify_records(sample_records)
@@ -170,7 +159,7 @@ class TestClassifyRecords:
         assert results[2][1].organism_class == CellularityType.ACELLULAR
         assert results[3][1].organism_class is None
 
-    def test_empty_input(self, service: OrganismClassificationService) -> None:
+    def test_empty_input(self, service: OrganismClassifier) -> None:
         assert service.classify_records([]) == []
 
 
@@ -179,7 +168,7 @@ class TestEnrichRecords:
 
     def test_adds_classification_fields(
         self,
-        service: OrganismClassificationService,
+        service: OrganismClassifier,
         sample_records: list[dict[str, object]],
     ) -> None:
         enriched = service.enrich_records(sample_records)
@@ -192,30 +181,26 @@ class TestEnrichRecords:
 
     def test_does_not_mutate_originals(
         self,
-        service: OrganismClassificationService,
+        service: OrganismClassifier,
         sample_records: list[dict[str, object]],
     ) -> None:
         service.enrich_records(sample_records)
         assert "organism_class" not in sample_records[0]
 
-    def test_unresolved_gets_none_class(
-        self, service: OrganismClassificationService
-    ) -> None:
+    def test_unresolved_gets_none_class(self, service: OrganismClassifier) -> None:
         records = [{"assay_organism": "Unknown", "assay_tax_id": None}]
         enriched = service.enrich_records(records)
         assert enriched[0]["organism_class"] is None
         assert enriched[0]["classification_source"] == "unresolved"
 
-    def test_preserves_existing_fields(
-        self, service: OrganismClassificationService
-    ) -> None:
+    def test_preserves_existing_fields(self, service: OrganismClassifier) -> None:
         records = [
             {"assay_organism": "Homo sapiens", "assay_tax_id": 9606, "extra": 42}
         ]
         enriched = service.enrich_records(records)
         assert enriched[0]["extra"] == 42
 
-    def test_empty_input(self, service: OrganismClassificationService) -> None:
+    def test_empty_input(self, service: OrganismClassifier) -> None:
         assert service.enrich_records([]) == []
 
 
@@ -229,7 +214,7 @@ class TestFilterByCellularity:
 
     def test_include_multicellular(
         self,
-        service: OrganismClassificationService,
+        service: OrganismClassifier,
         sample_records: list[dict[str, object]],
     ) -> None:
         filtered = service.filter_by_cellularity(
@@ -242,7 +227,7 @@ class TestFilterByCellularity:
 
     def test_exclude_acellular(
         self,
-        service: OrganismClassificationService,
+        service: OrganismClassifier,
         sample_records: list[dict[str, object]],
     ) -> None:
         filtered = service.filter_by_cellularity(
@@ -257,7 +242,7 @@ class TestFilterByCellularity:
 
     def test_keep_unresolved_true(
         self,
-        service: OrganismClassificationService,
+        service: OrganismClassifier,
         sample_records: list[dict[str, object]],
     ) -> None:
         filtered = service.filter_by_cellularity(
@@ -272,7 +257,7 @@ class TestFilterByCellularity:
 
     def test_keep_unresolved_false(
         self,
-        service: OrganismClassificationService,
+        service: OrganismClassifier,
         sample_records: list[dict[str, object]],
     ) -> None:
         filtered = service.filter_by_cellularity(
@@ -284,7 +269,7 @@ class TestFilterByCellularity:
 
     def test_no_filter_passes_all(
         self,
-        service: OrganismClassificationService,
+        service: OrganismClassifier,
         sample_records: list[dict[str, object]],
     ) -> None:
         filtered = service.filter_by_cellularity(sample_records)
@@ -292,7 +277,7 @@ class TestFilterByCellularity:
 
     def test_include_multiple_types(
         self,
-        service: OrganismClassificationService,
+        service: OrganismClassifier,
         sample_records: list[dict[str, object]],
     ) -> None:
         filtered = service.filter_by_cellularity(
@@ -302,7 +287,7 @@ class TestFilterByCellularity:
         )
         assert len(filtered) == 2
 
-    def test_empty_input(self, service: OrganismClassificationService) -> None:
+    def test_empty_input(self, service: OrganismClassifier) -> None:
         assert service.filter_by_cellularity([]) == []
 
 
@@ -316,7 +301,7 @@ class TestComputeStats:
 
     def test_stats_from_mixed_results(
         self,
-        service: OrganismClassificationService,
+        service: OrganismClassifier,
         sample_records: list[dict[str, object]],
     ) -> None:
         paired = service.classify_records(sample_records)
@@ -333,7 +318,7 @@ class TestComputeStats:
 
     def test_resolution_rate(
         self,
-        service: OrganismClassificationService,
+        service: OrganismClassifier,
         sample_records: list[dict[str, object]],
     ) -> None:
         paired = service.classify_records(sample_records)
@@ -342,12 +327,12 @@ class TestComputeStats:
         assert stats.resolved_count == 3
         assert stats.resolution_rate == pytest.approx(0.75)
 
-    def test_empty_stats(self, service: OrganismClassificationService) -> None:
+    def test_empty_stats(self, service: OrganismClassifier) -> None:
         stats = service.compute_stats([])
         assert stats.total == 0
         assert stats.resolution_rate == pytest.approx(0.0)
 
-    def test_all_resolved(self, service: OrganismClassificationService) -> None:
+    def test_all_resolved(self, service: OrganismClassifier) -> None:
         records = [
             {"assay_organism": "Homo sapiens", "assay_tax_id": 9606},
             {"assay_organism": "Escherichia coli", "assay_tax_id": 562},
@@ -367,13 +352,13 @@ class TestComputeStats:
 class TestCustomFieldNames:
     """Tests for service with non-default field names."""
 
-    def test_custom_fields(self, custom_service: OrganismClassificationService) -> None:
+    def test_custom_fields(self, custom_service: OrganismClassifier) -> None:
         records = [{"organism_name": "Homo sapiens", "tax_id": 9606}]
         enriched = custom_service.enrich_records(records)
         assert enriched[0]["organism_class"] == "multicellular"
 
     def test_filter_with_custom_fields(
-        self, custom_service: OrganismClassificationService
+        self, custom_service: OrganismClassifier
     ) -> None:
         records = [
             {"organism_name": "Homo sapiens", "tax_id": 9606},
@@ -388,7 +373,7 @@ class TestCustomFieldNames:
         assert filtered[0]["organism_name"] == "Escherichia coli"
 
     def test_missing_fields_treated_as_none(
-        self, custom_service: OrganismClassificationService
+        self, custom_service: OrganismClassifier
     ) -> None:
         records = [{"some_other_field": "value"}]
         enriched = custom_service.enrich_records(records)

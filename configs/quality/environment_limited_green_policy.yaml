@@ -21,6 +21,15 @@ current_baseline:
     live execution is intentionally network-gated or scheduled, while pilot or
     VCR-only provider counts would represent a reopened baseline gap rather than
     acceptable steady-state posture.
+measurement_policy:
+  repeated_run_window: 20
+  max_environment_limited_green_rate: 0.25
+  scheduled_tracking_mode: non_blocking
+  retained_summary_glob: reports/quality/test-runs/*.json
+  unavailable_data_behavior: explicit_unavailable_state
+  reopened_gap_thresholds:
+    pilot_provider_count: 0
+    vcr_only_provider_count: 0
 reason_policy:
   - skip_class: architecture_suite_skips
     posture: transitional_debt

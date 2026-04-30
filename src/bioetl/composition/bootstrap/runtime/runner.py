@@ -16,7 +16,6 @@ from bioetl.application.services.execution.pipeline_run_context_service import (
 from bioetl.application.services.execution.pipeline_run_execution_service import (
     PipelineRunExecutionService,
 )
-from bioetl.composition import PipelineRegistry
 from bioetl.composition.bootstrap.runtime.observability import (
     bootstrap_observability_bundle,
 )
@@ -24,6 +23,7 @@ from bioetl.composition.factories.pipeline.runner import (
     create_metrics_extractor,
     create_runner_factory,
 )
+from bioetl.composition.registry_api import PipelineRegistry
 from bioetl.composition.runtime_builders.config_access import get_settings
 from bioetl.infrastructure.time import SystemClock
 

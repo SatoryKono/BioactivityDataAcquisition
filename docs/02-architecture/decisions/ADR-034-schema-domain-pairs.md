@@ -26,7 +26,7 @@ value objects (frozen dataclasses) для конфигурации. Infrastructu
 Оба слоя имеют классы с одинаковыми или похожими именами (например, DQConfig,
 BaseClientConfig), что создаёт видимость дупликации при code review.
 
-Ref: RULES.md §3 (Architecture), ai-selfreview-rules.md §7 (EXC-015).
+Ref: RULES.md §3 (Architecture), docs/00-project/ai/rules/bioetl-ai-rules.md (EXC-015 context).
 
 ## Decision
 

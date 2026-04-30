@@ -14,6 +14,8 @@ INTERNAL_COMPOSITION_ENTRYPOINT_MODULES = (
     "bioetl.composition._resource_management",
     "bioetl.composition._services",
 )
+COMPOSITION_BOOTSTRAP_FACADE_MODULE = "bioetl.composition.bootstrap"
+SERVICE_BOOTSTRAPS_COMPAT_MODULE = "bioetl.composition._service_bootstraps"
 CLI_REGISTRY_HELPER_MODULE = "bioetl.interfaces.cli.registry_helpers"
 METADATA_BUILDER_COMPAT_MODULE = (
     "bioetl.infrastructure.storage.metadata_builder_composite_helpers"
@@ -118,6 +120,14 @@ TRANSFORMER_DEPENDENCY_SHIM_PATH = (
     / "core"
     / "base_transformer"
     / "dependencies.py"
+)
+BIOETL_PACKAGE_INIT_PATH = ROOT / "src" / "bioetl" / "__init__.py"
+COMPOSITION_PACKAGE_INIT_PATH = ROOT / "src" / "bioetl" / "composition" / "__init__.py"
+COMPOSITION_BOOTSTRAP_INIT_PATH = (
+    ROOT / "src" / "bioetl" / "composition" / "bootstrap" / "__init__.py"
+)
+SERVICE_BOOTSTRAPS_COMPAT_MODULE_PATH = (
+    ROOT / "src" / "bioetl" / "composition" / "_service_bootstraps.py"
 )
 
 ALLOWED_DATASOURCE_REGISTRY_SRC_FILES = frozenset(
@@ -523,6 +533,7 @@ ALLOWED_COMPOSITION_DEFAULT_REGISTRY_SRC_FILES = frozenset(
 ALLOWED_COMPOSITION_REGISTRY_MODULE_SRC_FILES = frozenset(
     {
         ROOT / "src" / "bioetl" / "composition" / "__init__.py",
+        ROOT / "src" / "bioetl" / "composition" / "registry_api.py",
         ROOT / "src" / "bioetl" / "composition" / "registry_default.py",
     }
 )
@@ -822,6 +833,43 @@ def _assert_no_violations(violations: list[str], failure_message: str) -> None:
     assert not violations, failure_message + "\n" + "\n".join(violations)
 
 
+def _literal_assignment_names(path: Path, assignment_name: str) -> frozenset[str]:
+    """Return string keys/items assigned to a module-level literal."""
+    tree = ast.parse(path.read_text(encoding="utf-8"))
+    for node in tree.body:
+        if isinstance(node, ast.Assign):
+            matching_assignment = any(
+                isinstance(target, ast.Name) and target.id == assignment_name
+                for target in node.targets
+            )
+            value = node.value
+        elif isinstance(node, ast.AnnAssign):
+            matching_assignment = (
+                isinstance(node.target, ast.Name)
+                and node.target.id == assignment_name
+                and node.value is not None
+            )
+            value = node.value
+        else:
+            matching_assignment = False
+            value = None
+        if not matching_assignment or value is None:
+            continue
+        if isinstance(value, ast.Dict):
+            return frozenset(
+                key.value
+                for key in value.keys
+                if isinstance(key, ast.Constant) and isinstance(key.value, str)
+            )
+        if isinstance(value, ast.List | ast.Tuple | ast.Set):
+            return frozenset(
+                item.value
+                for item in value.elts
+                if isinstance(item, ast.Constant) and isinstance(item.value, str)
+            )
+    raise AssertionError(f"{path} missing module-level {assignment_name}")
+
+
 def _resolve_cache_fixture(
     request: pytest.FixtureRequest,
     cache_fixture_name: str,
@@ -937,6 +985,34 @@ _MODULE_IMPORT_SCOPE_CASES = (
             "canonical package-root and compatibility seams:"
         ),
         id="registry-module-src",
+    ),
+    pytest.param(
+        "src",
+        "source_ast_cache",
+        COMPOSITION_BOOTSTRAP_FACADE_MODULE,
+        frozenset(),
+        (
+            "First-party src must import canonical bootstrap owners "
+            "(`bootstrap.runtime`, `bootstrap.cli`, or `bootstrap.assembly`) "
+            "instead of the package-level bootstrap facade:"
+        ),
+        id="composition-bootstrap-facade-src",
+    ),
+    pytest.param(
+        "src",
+        "source_ast_cache",
+        SERVICE_BOOTSTRAPS_COMPAT_MODULE,
+        frozenset(),
+        "_service_bootstraps compatibility wrapper imports must stay removed from src:",
+        id="service-bootstraps-src",
+    ),
+    pytest.param(
+        "tests",
+        "test_ast_cache",
+        SERVICE_BOOTSTRAPS_COMPAT_MODULE,
+        frozenset(),
+        "_service_bootstraps compatibility wrapper imports must stay removed from tests:",
+        id="service-bootstraps-tests",
     ),
     pytest.param(
         "tests",
@@ -1190,3 +1266,63 @@ def test_imported_symbol_seams_are_confined(
         allowed_files=allowed_files,
     )
     _assert_no_violations(violations, failure_message)
+
+
+@pytest.mark.architecture
+def test_package_level_lazy_proxy_surfaces_stay_frozen() -> None:
+    """Package-level proxy exports must not grow without an explicit policy change."""
+    bioetl_text = BIOETL_PACKAGE_INIT_PATH.read_text(encoding="utf-8")
+    assert "__getattr__" not in bioetl_text
+    assert _literal_assignment_names(BIOETL_PACKAGE_INIT_PATH, "__all__") == {
+        "__version__"
+    }
+
+    assert _literal_assignment_names(
+        COMPOSITION_PACKAGE_INIT_PATH, "_LAZY_MODULE_EXPORTS"
+    ) == {
+        "composite_api",
+        "control_plane_api",
+        "entrypoints",
+        "execution_api",
+        "health_api",
+        "maintenance_api",
+        "observability_api",
+        "registry_api",
+        "resources_api",
+        "types",
+    }
+    assert _literal_assignment_names(
+        COMPOSITION_PACKAGE_INIT_PATH, "_LAZY_ATTR_EXPORTS"
+    ) == {
+        "PipelineDefinition",
+        "PipelineRegistry",
+        "create_registry",
+        "get_default_registry",
+    }
+
+    expected_bootstrap_exports = {
+        "bootstrap_composite_runner",
+        "bootstrap_dq_monitor_port",
+        "bootstrap_logger_port",
+        "bootstrap_metrics_port",
+        "bootstrap_observability_bundle",
+        "bootstrap_pipeline_runner",
+        "bootstrap_tracer_port",
+        "load_composite_config",
+        "load_pipeline_config",
+        "maybe_start_metrics_server",
+    }
+    assert (
+        _literal_assignment_names(COMPOSITION_BOOTSTRAP_INIT_PATH, "__all__")
+        == expected_bootstrap_exports
+    )
+    assert (
+        _literal_assignment_names(COMPOSITION_BOOTSTRAP_INIT_PATH, "_PUBLIC_EXPORTS")
+        == expected_bootstrap_exports
+    )
+
+
+@pytest.mark.architecture
+def test_service_bootstraps_compat_wrapper_file_stays_removed() -> None:
+    """The retired `_service_bootstraps` wrapper module must not be reintroduced."""
+    assert not SERVICE_BOOTSTRAPS_COMPAT_MODULE_PATH.exists()

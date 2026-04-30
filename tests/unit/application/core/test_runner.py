@@ -8,7 +8,9 @@ from uuid import UUID, uuid4
 
 import pytest
 
-from bioetl.application.core.lifecycle.checkpoint_manager import CheckpointManager
+from bioetl.application.core.lifecycle.checkpoint_manager import (
+    CheckpointRuntimeService,
+)
 from bioetl.application.core.lifecycle.lock_manager import LockCoordinator
 from bioetl.application.core.pipeline_services import PipelineService
 from bioetl.application.core.postrun.service import PostrunService
@@ -141,7 +143,7 @@ def mock_executor():
 @pytest.fixture
 def mock_checkpoint_manager():
     """Create a mock checkpoint manager."""
-    manager = AsyncMock(spec=CheckpointManager)
+    manager = AsyncMock(spec=CheckpointRuntimeService)
     manager.load_checkpoint = AsyncMock(return_value=None)
     manager.delete_checkpoint = AsyncMock()
     return manager

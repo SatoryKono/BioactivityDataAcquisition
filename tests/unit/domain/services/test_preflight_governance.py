@@ -3,28 +3,28 @@
 from bioetl.domain.services.aggregation_validator import AggregationValidator
 from bioetl.domain.services.composite_validation_layer import (
     CompositeValidationConfig,
-    CompositeValidationService,
+    CompositeValidator,
 )
 from bioetl.domain.services.cross_validation_validator import CrossValidationValidator
 from bioetl.domain.services.preflight_governance import (
     GovernancePolicy,
     PreflightGovernanceConfig,
-    PreflightGovernanceService,
+    PreflightGovernor,
 )
 from bioetl.domain.types.validation_severity import ValidationSeverity
 
 
-def _create_validation_service() -> CompositeValidationService:
-    return CompositeValidationService(
+def _create_validation_service() -> CompositeValidator:
+    return CompositeValidator(
         aggregation_validator=AggregationValidator(),
         cross_validation_validator=CrossValidationValidator(),
-        preflight_governance=PreflightGovernanceService(),
+        preflight_governance=PreflightGovernor(),
     )
 
 
 def test_preflight_governance_service_creation():
     """Test that governance service can be created."""
-    service = PreflightGovernanceService()
+    service = PreflightGovernor()
     assert service.config.policy == GovernancePolicy.BLOCK_ON_BLOCKERS_ONLY
 
 
@@ -35,7 +35,7 @@ def test_custom_config():
         ci_integration=True,
         fail_fast=False,
     )
-    service = PreflightGovernanceService(config)
+    service = PreflightGovernor(config)
     assert service.config.policy == GovernancePolicy.CI_STRICT
     assert service.config.ci_integration is True
     assert service.config.fail_fast is False
@@ -52,7 +52,7 @@ def test_block_on_blockers_only_policy():
     validation_report = validation_service.validate_composite(config)
 
     # Apply governance
-    governance_service = PreflightGovernanceService()
+    governance_service = PreflightGovernor()
     governance_report = governance_service.apply_governance(validation_report)
 
     # Should block execution due to blockers
@@ -81,7 +81,7 @@ def test_block_on_any_issue_policy():
     governance_config = PreflightGovernanceConfig(
         policy=GovernancePolicy.BLOCK_ON_ANY_ISSUE
     )
-    governance_service = PreflightGovernanceService(governance_config)
+    governance_service = PreflightGovernor(governance_config)
     governance_report = governance_service.apply_governance(validation_report)
 
     # Should block execution due to any issue
@@ -102,7 +102,7 @@ def test_warning_only_policy():
 
     # Apply warning-only governance
     governance_config = PreflightGovernanceConfig(policy=GovernancePolicy.WARNING_ONLY)
-    governance_service = PreflightGovernanceService(governance_config)
+    governance_service = PreflightGovernor(governance_config)
     governance_report = governance_service.apply_governance(validation_report)
 
     # Should allow execution despite blockers
@@ -130,7 +130,7 @@ def test_ci_strict_policy():
     governance_config = PreflightGovernanceConfig(
         policy=GovernancePolicy.CI_STRICT, ci_integration=True
     )
-    governance_service = PreflightGovernanceService(governance_config)
+    governance_service = PreflightGovernor(governance_config)
     governance_report = governance_service.apply_governance(validation_report)
 
     # Should block execution due to any issue in CI strict mode
@@ -158,7 +158,7 @@ def test_ci_relaxed_policy():
     governance_config = PreflightGovernanceConfig(
         policy=GovernancePolicy.CI_RELAXED, ci_integration=True
     )
-    governance_service = PreflightGovernanceService(governance_config)
+    governance_service = PreflightGovernor(governance_config)
     governance_report = governance_service.apply_governance(validation_report)
 
     # Should allow execution with only warnings in CI relaxed mode
@@ -183,7 +183,7 @@ def test_issue_code_overrides():
             "CMP-STR-CONFIG-002": ValidationSeverity.WARNING,  # Downgrade missing field
         },
     )
-    governance_service = PreflightGovernanceService(governance_config)
+    governance_service = PreflightGovernor(governance_config)
     governance_report = governance_service.apply_governance(validation_report)
 
     # Should allow execution since blocker was downgraded
@@ -202,7 +202,7 @@ def test_governance_report_structure():
     validation_report = validation_service.validate_composite(config)
 
     # Apply governance
-    governance_service = PreflightGovernanceService()
+    governance_service = PreflightGovernor()
     governance_report = governance_service.apply_governance(
         validation_report,
         execution_context={"environment": "test", "user": "test_user"},
@@ -254,7 +254,7 @@ def test_ci_gate_report():
     validation_report = validation_service.validate_composite(config)
 
     # Apply governance
-    governance_service = PreflightGovernanceService()
+    governance_service = PreflightGovernor()
     governance_report = governance_service.apply_governance(validation_report)
 
     # Create CI gate report
@@ -295,7 +295,7 @@ def test_no_issues_scenario():
     validation_report = validation_service.validate_composite(config)
 
     # Apply governance
-    governance_service = PreflightGovernanceService()
+    governance_service = PreflightGovernor()
     governance_report = governance_service.apply_governance(validation_report)
 
     # Should allow execution with no issues
@@ -324,7 +324,7 @@ def test_governance_impact_determination():
     validation_report = validation_service.validate_composite(config)
 
     # Apply governance
-    governance_service = PreflightGovernanceService()
+    governance_service = PreflightGovernor()
     governance_report = governance_service.apply_governance(validation_report)
 
     # Check governance impacts

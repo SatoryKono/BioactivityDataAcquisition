@@ -24,6 +24,25 @@ def test_composite_api_reexports_bootstrap_entrypoints() -> None:
 
 
 @pytest.mark.unit
+def test_bootstrap_package_root_surface_stays_runtime_focused() -> None:
+    """Package bootstrap facade should stay limited to runtime/composite helpers."""
+    bootstrap_module = importlib.import_module("bioetl.composition.bootstrap")
+
+    assert set(bootstrap_module.__all__) == {
+        "bootstrap_composite_runner",
+        "bootstrap_dq_monitor_port",
+        "bootstrap_logger_port",
+        "bootstrap_metrics_port",
+        "bootstrap_observability_bundle",
+        "bootstrap_pipeline_runner",
+        "bootstrap_tracer_port",
+        "load_composite_config",
+        "load_pipeline_config",
+        "maybe_start_metrics_server",
+    }
+
+
+@pytest.mark.unit
 def test_pipeline_construction_module_reexports_canonical_builders() -> None:
     """Public construction seam should expose its delegated helper owners."""
     sys.modules.pop("bioetl.composition.factories.pipeline.construction", None)

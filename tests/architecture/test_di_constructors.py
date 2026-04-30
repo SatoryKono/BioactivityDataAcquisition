@@ -334,10 +334,7 @@ class TestDIConstructors:
             found_services.update(_service_like_classes_in_file(py_file))
 
         # Filter out known exceptions (data containers, not services)
-        exceptions = {
-            # These are data containers, not services
-            "CheckpointManager",  # Same-module alias for CheckpointManagerService
-        }
+        exceptions = set()
         relevant_services = found_services - exceptions
 
         # Check for services that might be missing from forbidden list

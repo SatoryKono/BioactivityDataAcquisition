@@ -95,6 +95,11 @@ ______________________________________________________________________
 | `subject_fields`    | `str` | JSON-массив научных областей |
 | `publication_types` | `str` | JSON-массив типов публикации |
 
+`subject_fields` and `publication_types` are set-like canonical JSON fields.
+`author_h_indices` and `citation_contexts` remain order-sensitive canonical JSON
+fields. Semantic transforms must add `*_raw_json` plus `*_canonical_json`
+sidecars before replacing or deriving these provider payloads.
+
 ### Lookup Metadata
 
 | Поле             | Тип           | Описание                                               |

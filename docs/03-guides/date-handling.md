@@ -85,7 +85,7 @@ parse-date-field("invalid")              # → None
 parse-date-field(None)                   # → None
 ```
 
-### `DefaultDataNormalizationService.normalize-partial-date()`
+### `DefaultDataNormalizer.normalize-partial-date()`
 
 Location: `src/bioetl/domain/services/data_normalization_service.py:186-240`
 
@@ -93,10 +93,10 @@ Service-based partial date normalization:
 
 ```python
 from bioetl.domain.services.data-normalization-service import (
-    DefaultDataNormalizationService,
+    DefaultDataNormalizer,
 )
 
-service = DefaultDataNormalizationService()
+service = DefaultDataNormalizer()
 
 service.normalize-partial-date("2024-03-15")  # → "2024-03-15"
 service.normalize-partial-date("2024-03")     # → "2024-03-30"

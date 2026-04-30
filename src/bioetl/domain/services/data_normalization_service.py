@@ -1,17 +1,17 @@
-"""Cross-provider metadata normalization service (DataNormalizationPort implementation).
+"""Cross-provider metadata normalizer (DataNormalizationPort implementation).
 
 Scope — normalization of publication metadata fields that are shared across all
 literature/bioactivity providers: author names, affiliations, DOIs, PMIDs,
 publication dates, and free-text fields (titles, abstracts, OA status).
 
-``DefaultDataNormalizationService`` is the concrete implementation of
+``DefaultDataNormalizer`` is the concrete implementation of
 ``DataNormalizationPort`` used throughout the pipeline. It is a pure facade:
 all work is delegated to canonical ``bioetl.domain.normalization`` helpers.
 
 Inheritance chain::
 
-    AuthorNormalizationService          (author + affiliation logic)
-        └── DefaultDataNormalizationService  (adds DOI, PMID, date, text delegation)
+    AuthorNormalizer          (author + affiliation logic)
+        └── DefaultDataNormalizer  (adds DOI, PMID, date, text delegation)
 
 Delegated helper modules:
 - ``normalization.identifiers`` — DOI/PMID coercion
@@ -27,7 +27,7 @@ Cross-reference
 For ChEMBL-specific bioactivity scalar normalization (unit conversion,
 pChEMBL calculation, potency classification, batch aggregation) see
 :mod:`bioetl.domain.services.normalization_service`
-(``NormalizationService``).
+(``BioactivityNormalizer``).
 
 Pure domain service (no I/O) per RULES.md §1.1.
 """
@@ -71,7 +71,7 @@ from bioetl.domain.normalization.text import (
     strip_html_tags as _strip_html_tags,
 )
 from bioetl.domain.services.author_normalization_service import (
-    AuthorNormalizationService,
+    AuthorNormalizer,
 )
 from bioetl.domain.services.data_normalization_config import DataNormalizationConfig
 
@@ -79,15 +79,15 @@ if TYPE_CHECKING:
     from collections.abc import Sequence
 
 __all__ = [
-    "DefaultDataNormalizationService",
+    "DefaultDataNormalizer",
 ]
 
 
 @dataclass(frozen=True, slots=True)
-class DefaultDataNormalizationService(AuthorNormalizationService):
+class DefaultDataNormalizer(AuthorNormalizer):
     """Facade for data normalization, delegating to specialized services.
 
-    Inherits author/affiliation normalization from AuthorNormalizationService.
+    Inherits author/affiliation normalization from AuthorNormalizer.
     Delegates identifier, date, and text normalization to pure helper modules.
     Maintains backward-compatible API as per DataNormalizationPort.
     """

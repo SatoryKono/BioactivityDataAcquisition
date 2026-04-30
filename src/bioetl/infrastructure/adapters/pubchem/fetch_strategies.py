@@ -15,7 +15,7 @@ from bioetl.infrastructure.adapters.pubchem._fetch_strategy_search import (
     _PubChemSearchFetchMixin,
 )
 from bioetl.infrastructure.adapters.pubchem.constants import PUBCHEM_API_BASE
-from bioetl.infrastructure.adapters.pubchem.fetch_flow import PubChemFetchFlowService
+from bioetl.infrastructure.adapters.pubchem.fetch_flow import PubChemFetchFlow
 from bioetl.infrastructure.adapters.pubchem.policy_helper import (
     is_blank_value,
     is_limit_reached,
@@ -70,7 +70,7 @@ class PubChemFetchStrategies(_PubChemSearchFetchMixin):
         provider_name: str = "pubchem",
         request_collector: APIRequestCollector | None = None,
         response_mapper: PubChemResponseMapper | None = None,
-        fetch_flow: PubChemFetchFlowService | None = None,
+        fetch_flow: PubChemFetchFlow | None = None,
     ) -> None:
         """Initialize fetch strategies."""
         self._logger = logger
@@ -81,7 +81,7 @@ class PubChemFetchStrategies(_PubChemSearchFetchMixin):
         self._provider_name = provider_name
         self._request_collector = request_collector
         self._response_mapper = response_mapper or PubChemResponseMapper(mapper)
-        self._fetch_flow = fetch_flow or PubChemFetchFlowService(
+        self._fetch_flow = fetch_flow or PubChemFetchFlow(
             rate_limiter=rate_limiter,
             circuit_breaker=circuit_breaker,
             run_in_executor=run_in_executor,

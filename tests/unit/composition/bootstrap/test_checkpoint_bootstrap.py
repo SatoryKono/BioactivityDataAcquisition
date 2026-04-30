@@ -14,9 +14,9 @@ from uuid import UUID
 import pytest
 
 from bioetl.application.core.lifecycle.checkpoint_manager import (
-    CheckpointManagerService as CheckpointManager,
+    CheckpointRuntimeService,
 )
-from bioetl.application.core.quarantine_manager import QuarantineManagerService
+from bioetl.application.core.quarantine_manager import QuarantineRuntimeService
 from bioetl.application.services import CheckpointService, QuarantineService
 from bioetl.composition.bootstrap.assembly.checkpoint import (
     bootstrap_checkpoint_port,
@@ -25,10 +25,10 @@ from bioetl.composition.bootstrap.assembly.checkpoint import (
 )
 from bioetl.composition.bootstrap.cli.checkpoint import (
     CLI_INSPECTION_RUN_ID,
-    bootstrap_checkpoint_manager,
+    bootstrap_checkpoint_runtime_service,
     bootstrap_checkpoint_service,
     bootstrap_observability_workflow_service,
-    bootstrap_quarantine_manager,
+    bootstrap_quarantine_runtime_service,
     bootstrap_quarantine_service,
 )
 from bioetl.domain.ports import (
@@ -147,94 +147,96 @@ class TestBootstrapCompositeCheckpointPort:
 
 
 @pytest.mark.unit
-class TestBootstrapQuarantineManager:
-    """Tests for bootstrap_quarantine_manager function."""
+class TestBootstrapQuarantineRuntimeService:
+    """Tests for bootstrap_quarantine_runtime_service function."""
 
-    def test_bootstrap_quarantine_manager_returns_manager(self):
-        """Test that bootstrap_quarantine_manager returns QuarantineManagerService."""
+    def test_bootstrap_quarantine_runtime_service_returns_runtime_service(self):
+        """Test that bootstrap_quarantine_runtime_service returns QuarantineRuntimeService."""
         with patch(
             "bioetl.composition.bootstrap.assembly.checkpoint.get_settings"
         ) as mock_settings:
             mock_settings.return_value = MagicMock(quarantine_path=QUARANTINE_PATH)
-            result = bootstrap_quarantine_manager("test_pipeline")
+            result = bootstrap_quarantine_runtime_service("test_pipeline")
 
-        assert isinstance(result, QuarantineManagerService)
+        assert isinstance(result, QuarantineRuntimeService)
 
-    def test_bootstrap_quarantine_manager_passes_pipeline_name(self):
-        """Test that bootstrap_quarantine_manager passes pipeline name correctly."""
+    def test_bootstrap_quarantine_runtime_service_passes_pipeline_name(self):
+        """Test that bootstrap_quarantine_runtime_service passes pipeline name correctly."""
         with patch(
             "bioetl.composition.bootstrap.assembly.checkpoint.get_settings"
         ) as mock_settings:
             mock_settings.return_value = MagicMock(quarantine_path=QUARANTINE_PATH)
-            result = bootstrap_quarantine_manager("chembl_activity")
+            result = bootstrap_quarantine_runtime_service("chembl_activity")
 
         assert result._pipeline_name == "chembl_activity"
 
-    def test_bootstrap_quarantine_manager_wires_quarantine_port(self):
-        """Test that bootstrap_quarantine_manager wires QuarantinePort correctly."""
+    def test_bootstrap_quarantine_runtime_service_wires_quarantine_port(self):
+        """Test that bootstrap_quarantine_runtime_service wires QuarantinePort correctly."""
         with patch(
             "bioetl.composition.bootstrap.assembly.checkpoint.get_settings"
         ) as mock_settings:
             mock_settings.return_value = MagicMock(quarantine_path=QUARANTINE_PATH)
-            result = bootstrap_quarantine_manager("test_pipeline")
+            result = bootstrap_quarantine_runtime_service("test_pipeline")
 
-        # QuarantineManagerService uses _quarantine attribute
+        # QuarantineRuntimeService uses _quarantine attribute
         assert isinstance(result._quarantine, UnifiedQuarantineAdapter)
 
 
 @pytest.mark.unit
-class TestBootstrapCheckpointManager:
-    """Tests for bootstrap_checkpoint_manager function."""
+class TestBootstrapCheckpointRuntimeService:
+    """Tests for bootstrap_checkpoint_runtime_service function."""
 
-    def test_bootstrap_checkpoint_manager_returns_manager(self):
-        """Test that bootstrap_checkpoint_manager returns CheckpointManager."""
+    def test_bootstrap_checkpoint_runtime_service_returns_runtime_service(self):
+        """Test that bootstrap_checkpoint_runtime_service returns CheckpointRuntimeService."""
         with patch(
             "bioetl.composition.bootstrap.assembly.checkpoint.get_settings"
         ) as mock_settings:
             mock_settings.return_value = MagicMock(checkpoint_path=CHECKPOINT_PATH)
-            result = bootstrap_checkpoint_manager("test_pipeline")
+            result = bootstrap_checkpoint_runtime_service("test_pipeline")
 
-        assert isinstance(result, CheckpointManager)
+        assert isinstance(result, CheckpointRuntimeService)
 
-    def test_bootstrap_checkpoint_manager_passes_pipeline_name(self):
-        """Test that bootstrap_checkpoint_manager passes pipeline name correctly."""
+    def test_bootstrap_checkpoint_runtime_service_passes_pipeline_name(self):
+        """Test that bootstrap_checkpoint_runtime_service passes pipeline name correctly."""
         with patch(
             "bioetl.composition.bootstrap.assembly.checkpoint.get_settings"
         ) as mock_settings:
             mock_settings.return_value = MagicMock(checkpoint_path=CHECKPOINT_PATH)
-            result = bootstrap_checkpoint_manager("chembl_activity")
+            result = bootstrap_checkpoint_runtime_service("chembl_activity")
 
         assert result._pipeline_name == "chembl_activity"
 
-    def test_bootstrap_checkpoint_manager_wires_checkpoint_port(self):
-        """Test that bootstrap_checkpoint_manager wires CheckpointPort correctly."""
+    def test_bootstrap_checkpoint_runtime_service_wires_checkpoint_port(self):
+        """Test that bootstrap_checkpoint_runtime_service wires CheckpointPort correctly."""
         with patch(
             "bioetl.composition.bootstrap.assembly.checkpoint.get_settings"
         ) as mock_settings:
             mock_settings.return_value = MagicMock(checkpoint_path=CHECKPOINT_PATH)
-            result = bootstrap_checkpoint_manager("test_pipeline")
+            result = bootstrap_checkpoint_runtime_service("test_pipeline")
 
-        # CheckpointManager uses _checkpoint attribute
+        # CheckpointRuntimeService uses _checkpoint attribute
         assert isinstance(result._checkpoint, LocalCheckpointAdapter)
 
-    def test_bootstrap_checkpoint_manager_uses_deterministic_inspection_run_id(self):
+    def test_bootstrap_checkpoint_runtime_service_uses_deterministic_inspection_run_id(
+        self,
+    ):
         """Test that CLI inspection bootstrap avoids nondeterministic dummy run ids."""
         with patch(
             "bioetl.composition.bootstrap.assembly.checkpoint.get_settings"
         ) as mock_settings:
             mock_settings.return_value = MagicMock(checkpoint_path=CHECKPOINT_PATH)
-            result = bootstrap_checkpoint_manager("test_pipeline")
+            result = bootstrap_checkpoint_runtime_service("test_pipeline")
 
         assert isinstance(result._run_id, UUID)
         assert result._run_id == CLI_INSPECTION_RUN_ID
 
-    def test_bootstrap_checkpoint_manager_sets_resume_false(self):
-        """Test that bootstrap_checkpoint_manager sets resume to False."""
+    def test_bootstrap_checkpoint_runtime_service_sets_resume_false(self):
+        """Test that bootstrap_checkpoint_runtime_service sets resume to False."""
         with patch(
             "bioetl.composition.bootstrap.assembly.checkpoint.get_settings"
         ) as mock_settings:
             mock_settings.return_value = MagicMock(checkpoint_path=CHECKPOINT_PATH)
-            result = bootstrap_checkpoint_manager("test_pipeline")
+            result = bootstrap_checkpoint_runtime_service("test_pipeline")
 
         assert result._resume is False
 

@@ -34,6 +34,7 @@ Grafana dashboards в BioETL.
 - `BioETL Control Plane v1` — `Back to Overview`, `2. Runtime`, `4. Data Quality` + Explore links
 - `3. Provider Health` — `Back to Overview`, `2. Runtime` + Explore links
 - `4. Data Quality` — `Back to Overview`, `5. Silver Reject Explorer` + Explore links
+- `6. Workflow Overview` — `Back to Overview`, `2. Runtime`, `Control Plane v1`
 
 Если правка меняет эту модель, синхронизируй docs в том же change set.
 

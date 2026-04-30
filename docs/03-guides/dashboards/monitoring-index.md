@@ -27,6 +27,7 @@ the linked owner docs.
 | Is DQ quality/freshness/quarantine unhealthy? | `bioetl-dq-v2` | `bioetl diagnostics quarantine --pipeline <pipeline>` | [DQ Failure Investigation](../../05-operations/runbooks/dq-failure-investigation.md) |
 | Which exact Silver-filtered record failed and why? | `bioetl-silver-reject-explorer` | `bioetl quarantine inspect --pipeline <pipeline> --silver-filter-only ...` | [Quarantine Management](../../05-operations/runbooks/quarantine-management.md) |
 | Did manifest, ledger, checkpoint, or lineage evidence fail? | `bioetl-control-plane-v1` | `bioetl checkpoint inspect ...`; `bioetl checkpoint audit-run ...` | [Run Manifest Inspection](../../05-operations/runbooks/run-manifest-inspection.md) |
+| Are declarative workflow steps failing or skipping? | `bioetl-workflow-overview` | workflow runner metrics via `bioetl_workflow_*` | [Dashboard v2 Usage](dashboard-v2-usage.md) |
 | Is the metric/rule/dashboard vocabulary drifting? | inventory helper | `python -m scripts.engineering.qa report-observability-metric-inventory --json` | [Observability Metrics Contract](../../04-reference/contracts/observability.md) |
 
 Boundary rule: Prometheus/Grafana answer aggregate operational questions.

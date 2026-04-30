@@ -135,7 +135,7 @@ class BaseHttpAdapter(HealthCheckProviderMixin, DataSourcePort):
                     authoritative source for metrics, error handling, request
                     collection, and adapter metrics.
             error_handler: Pre-built error handler (optional, injected by
-                    AdapterHelpersFactory). Falls back to inline ErrorService.
+                    AdapterHelpersFactory). Falls back to inline AdapterErrorHandler.
             adapter_metrics: Pre-built adapter metrics (optional, injected by
                     AdapterHelpersFactory). Falls back to inline AdapterMetricsRecorder.
             request_collector: Pre-built request collector (optional, injected by

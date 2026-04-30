@@ -1,16 +1,16 @@
-"""Adapter implementing EnumLoaderPort for infrastructure layer."""
+"""Adapter implementing EnumLoaderProtocol for infrastructure layer."""
 
 from __future__ import annotations
 
 from pathlib import Path
 from typing import Any
 
-from bioetl.domain.config.enum_loader import EnumLoaderPort
+from bioetl.domain.config.enum_loader import EnumLoaderProtocol
 
 __all__ = ["FileSystemEnumLoader"]
 
 
-class FileSystemEnumLoader(EnumLoaderPort):
+class FileSystemEnumLoader(EnumLoaderProtocol):
     """Infrastructure adapter for loading enums from filesystem."""
 
     def __init__(self, base_path: Path | None = None) -> None:

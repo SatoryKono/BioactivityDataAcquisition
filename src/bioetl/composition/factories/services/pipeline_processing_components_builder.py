@@ -15,7 +15,7 @@ from bioetl.application.core.wiring.runtime import (
     GoldFilterCallback,
     GoldTransformCallback,
     PipelineService,
-    QuarantineManagerService,
+    QuarantineRuntimeService,
     RecordNormalizationProcessor,
     RecordProcessorConfig,
     TransformCallback,
@@ -51,7 +51,7 @@ def create_batch_processing_components(
         f"{config.provider}_{config.entity_type}",
         context.run_type.value,
     )
-    quarantine_manager = QuarantineManagerService(
+    quarantine_manager = QuarantineRuntimeService(
         quarantine_port=services.quarantine,
         pipeline_name=config.pipeline_name,
         metrics=services.metrics,

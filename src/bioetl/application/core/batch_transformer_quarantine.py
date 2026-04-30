@@ -12,7 +12,7 @@ from bioetl.application.core.batch_transformer_state import (
 from bioetl.application.core.quarantine_manager import (
     DQQuarantineEntry,
     FilteredQuarantineEntry,
-    QuarantineManagerService,
+    QuarantineRuntimeService,
 )
 
 if TYPE_CHECKING:
@@ -25,7 +25,7 @@ QUARANTINE_WRITE_WARN_ONLY_ERRORS = OPERATION_ERRORS
 async def flush_filtered_records(
     *,
     context: PipelineContext,
-    quarantine_manager: QuarantineManagerService,
+    quarantine_manager: QuarantineRuntimeService,
     records: list[FilteredQuarantineEntry],
     batch_id: BatchID,
 ) -> int:
@@ -53,7 +53,7 @@ async def flush_filtered_records(
 async def flush_dq_records(
     *,
     context: PipelineContext,
-    quarantine_manager: QuarantineManagerService,
+    quarantine_manager: QuarantineRuntimeService,
     records: list[DQQuarantineEntry],
     batch_id: BatchID,
 ) -> int:
@@ -81,7 +81,7 @@ async def flush_dq_records(
 async def route_single_transform_attempt(
     *,
     context: PipelineContext,
-    quarantine_manager: QuarantineManagerService,
+    quarantine_manager: QuarantineRuntimeService,
     attempt: RecordTransformOutcome,
     batch_id: BatchID,
 ) -> TransformedRecord:

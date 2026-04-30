@@ -50,7 +50,7 @@ if TYPE_CHECKING:
     from bioetl.application.core.base import BasePipeline
     from bioetl.application.core.batch_executor import BatchExecutor
     from bioetl.application.core.lifecycle import (
-        CheckpointManagerService,
+        CheckpointRuntimeService,
         LockCoordinator,
     )
     from bioetl.application.core.postrun import PostrunService
@@ -72,7 +72,7 @@ def _build_checkpoint_manager(
     *,
     pipeline: BasePipeline,
     logger_port: LoggerPort,
-) -> CheckpointManagerService:
+) -> CheckpointRuntimeService:
     current_metadata = _build_current_checkpoint_metadata(pipeline)
     compatibility_service = CheckpointCompatibilityService(
         logger=logger_port,
@@ -104,7 +104,7 @@ def _build_current_checkpoint_metadata(pipeline: BasePipeline) -> CheckpointMeta
 def _build_lock_manager(
     context: _RunnerAssemblyContext,
     *,
-    checkpoint_manager: CheckpointManagerService,
+    checkpoint_manager: CheckpointRuntimeService,
     context_holder: LockContextHolder,
 ) -> LockCoordinator:
     return _build_lock_manager_impl(
@@ -129,7 +129,7 @@ def _build_observer(
 def _build_batch_executor(
     context: _RunnerAssemblyContext,
     *,
-    checkpoint_manager: CheckpointManagerService,
+    checkpoint_manager: CheckpointRuntimeService,
     lock_manager: LockCoordinator,
     observer: PipelineObserver,
 ) -> BatchExecutor:

@@ -17,7 +17,7 @@ ______________________________________________________________________
 
 ## Описание
 
-Диаграмма Application Core Services показывает актуальную архитектурную модель `application/core` после decomposition waves в runtime/lifecycle/postrun. Это representative view, а не полный перечень всех helper-модулей: схема специально удерживает основной execution surface вокруг `PipelineRunner`, `PipelineService`, `BatchExecutor`, `BatchTransformer`, `BatchWriter`, `CheckpointManagerService`, `LockCoordinator`, `PreflightService`, `PostrunService`, `MedallionLifecycleService`, `PipelineObserver`, `QuarantineManagerService`, `BatchMetricsRecorderService` и `BatchTracingManagerService`. Диаграмму удобно использовать для оценки влияния изменений в orchestration seams и для проверки, что cleanup/refactor waves по-прежнему сохраняют границы между batch processing, lifecycle coordination, observability и support services.
+Диаграмма Application Core Services показывает актуальную архитектурную модель `application/core` после decomposition waves в runtime/lifecycle/postrun. Это representative view, а не полный перечень всех helper-модулей: схема специально удерживает основной execution surface вокруг `PipelineRunner`, `PipelineService`, `BatchExecutor`, `BatchTransformer`, `BatchWriter`, `CheckpointRuntimeService`, `LockCoordinator`, `PreflightService`, `PostrunService`, `MedallionLifecycleService`, `PipelineObserver`, `QuarantineRuntimeService`, `BatchMetricsRecorderService` и `BatchTracingManagerService`. Диаграмму удобно использовать для оценки влияния изменений в orchestration seams и для проверки, что cleanup/refactor waves по-прежнему сохраняют границы между batch processing, lifecycle coordination, observability и support services.
 
 ## Метаданные
 

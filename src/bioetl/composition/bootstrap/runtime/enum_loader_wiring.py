@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from bioetl.domain.config.enum_loader import EnumLoaderPort
+from bioetl.domain.config.enum_loader import EnumLoaderProtocol
 from bioetl.infrastructure.config.enum_loader_adapter import FileSystemEnumLoader
 
 __all__ = [
@@ -11,11 +11,11 @@ __all__ = [
 ]
 
 
-def create_enum_loader_for_domain() -> EnumLoaderPort:
+def create_enum_loader_for_domain() -> EnumLoaderProtocol:
     """Create enum loader instance for domain layer dependency injection.
 
     Returns:
-        Configured EnumLoaderPort implementation
+        Configured EnumLoaderProtocol implementation
     """
     return FileSystemEnumLoader()
 

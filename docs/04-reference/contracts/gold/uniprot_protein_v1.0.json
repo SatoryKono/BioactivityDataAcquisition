@@ -43,6 +43,46 @@
       "nullable": true,
       "description": ""
     },
+    "entry_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "secondary_accessions": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "entry_created": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "entry_modified": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "entry_version": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
     "acetylation": {
       "type": [
         "string",
@@ -179,6 +219,30 @@
       "nullable": true,
       "description": ""
     },
+    "alternative_products": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "biophysicochemical_properties": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "caution": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
     "catalytic_activity": {
       "type": [
         "string",
@@ -188,6 +252,14 @@
       "description": ""
     },
     "cellular_component": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "cofactors": {
       "type": [
         "string",
         "null"
@@ -211,6 +283,14 @@
       "nullable": true,
       "description": ""
     },
+    "induction": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
     "molecular_function": {
       "type": [
         "string",
@@ -220,6 +300,14 @@
       "description": ""
     },
     "pathway": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "pharmaceutical_use": {
       "type": [
         "string",
         "null"
@@ -244,6 +332,14 @@
       "description": ""
     },
     "similarity_comment": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "subunit": {
       "type": [
         "string",
         "null"
@@ -291,6 +387,14 @@
       "nullable": true,
       "description": ""
     },
+    "guidetopharmacology_ids": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
     "interpro_xrefs": {
       "type": [
         "string",
@@ -323,7 +427,31 @@
       "nullable": true,
       "description": ""
     },
-    "gene_names": {
+    "flag": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "gene_orf_names": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "gene_primary": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "gene_synonyms": {
       "type": [
         "string",
         "null"
@@ -363,15 +491,55 @@
       "nullable": true,
       "description": ""
     },
-    "organism_id": {
+    "keywords": {
       "type": [
-        "number",
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "lineage": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "organism_common": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "organism_scientific": {
+      "type": [
+        "string",
         "null"
       ],
       "nullable": true,
       "description": ""
     },
     "phylum": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "protein_alternative_names": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "protein_ec_numbers": {
       "type": [
         "string",
         "null"
@@ -387,9 +555,49 @@
       "nullable": true,
       "description": ""
     },
+    "protein_short_names": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "sequence": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "sequence_checksum": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
     "sequence_length": {
       "type": [
         "number",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "sequence_mass": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "sequence_modified": {
+      "type": [
+        "string",
         "null"
       ],
       "nullable": true,
@@ -403,7 +611,47 @@
       "nullable": true,
       "description": ""
     },
+    "taxonomy_id": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
     "annotation_score": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "cross_reference_count": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "feature_count": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "isoform_count": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "keyword_count": {
       "type": [
         "number",
         "null"
@@ -419,9 +667,17 @@
       "nullable": true,
       "description": ""
     },
+    "publication_count": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
     "reviewed": {
       "type": [
-        "boolean",
+        "object",
         "null"
       ],
       "nullable": true,

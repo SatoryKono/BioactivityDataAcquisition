@@ -18,13 +18,9 @@ if TYPE_CHECKING:
     from bioetl.application.services.execution.pipeline_runner_service import (
         PipelineRunnerService as PipelineRunnerService,
     )
-    from bioetl.composition import (
-        ArchiveOptions as ArchiveOptions,
-    )
-    from bioetl.composition import (
-        VacuumOptions as VacuumOptions,
-    )
-    from bioetl.composition.bootstrap import (
+    from bioetl.composition._pipeline_execution import ArchiveOptions as ArchiveOptions
+    from bioetl.composition._pipeline_execution import VacuumOptions as VacuumOptions
+    from bioetl.composition.bootstrap.runtime.observability import (
         maybe_start_metrics_server as maybe_start_metrics_server,
     )
     from bioetl.composition.registry_api import PipelineRegistry
@@ -44,7 +40,7 @@ _PUBLIC_EXPORTS: dict[str, str] = {
     "create_pipeline_runner": _PIPELINE_EXECUTION_MODULE,
     "ensure_metrics_server_started": _PIPELINE_EXECUTION_MODULE,
     "get_pipeline_runner_service": "bioetl.composition._services",
-    "maybe_start_metrics_server": "bioetl.composition.bootstrap",
+    "maybe_start_metrics_server": "bioetl.composition.bootstrap.runtime.observability",
     "run_pipeline": _PIPELINE_EXECUTION_MODULE,
 }
 

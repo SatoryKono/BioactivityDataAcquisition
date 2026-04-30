@@ -220,7 +220,7 @@ domain surface. Runtime execution остаётся на `PipelineRunContext` и
 
 `src/bioetl/domain/services/` содержит чистые доменные сервисы без I/O, например:
 
-- `IdentityService` (детерминированные `entity_id`/`content_hash`),
+- `EntityIdentityGenerator` (детерминированные `entity_id`/`content_hash`),
 - нормализация DOI/PMID/текста/дат,
 - вычисление и сериализация DQ-метрик,
 - классификация и валидация доменных значений.

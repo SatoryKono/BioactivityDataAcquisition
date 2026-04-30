@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal, TypeAlias
+from typing import TYPE_CHECKING, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     )
 
 
-FilterScalar: TypeAlias = str | int | bool
+type FilterScalar = str | int | bool
 
 
 class BaseFilterColumnSchema(BaseModel):

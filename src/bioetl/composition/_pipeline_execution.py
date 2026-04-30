@@ -15,14 +15,14 @@ from bioetl.application.runtime_timestamps import (
     derive_completion_timestamp,
 )
 from bioetl.application.services import PipelineRunResult, RunOptions, RunResult
-from bioetl.composition import PipelineRegistry
-from bioetl.composition.bootstrap import (
-    bootstrap_pipeline_runner,
+from bioetl.composition.bootstrap.runtime.observability import (
     maybe_start_metrics_server,
 )
+from bioetl.composition.bootstrap.runtime.pipeline import bootstrap_pipeline_runner
 from bioetl.composition.factories.pipeline.registry import register_all_pipelines
 from bioetl.composition.factories.pipeline.runner import create_metrics_extractor
 from bioetl.composition.providers import ensure_providers_loaded
+from bioetl.composition.registry_api import PipelineRegistry
 from bioetl.domain.context import (
     CachedBronzeContext,
     InputFilterContext,

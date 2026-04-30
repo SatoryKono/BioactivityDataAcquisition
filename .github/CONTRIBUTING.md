@@ -100,9 +100,11 @@ rules and local/CI command paths, is documented in
 [docs/03-guides/testing.md](../docs/03-guides/testing.md) and tracked in
 `configs/quality/integration_vcr_policy.yaml`.
 
-## Branch Protection (Required Status Checks)
+## Branch Protection / PR Validation
 
-For PRs to `main`, configure GitHub branch protection/rulesets to require:
+Direct merges to `main` are currently allowed. When you open a PR, keep these
+checks green even though GitHub branch protection is not currently enforcing
+them:
 
 - `checks-complete` (from `.github/workflows/import-linter.yml` — lint, C901 governance, import-linter + architecture gates)
 - `coverage-verify` (from `.github/workflows/tests.yml` — 85% coverage threshold)
@@ -111,7 +113,8 @@ For PRs to `main`, configure GitHub branch protection/rulesets to require:
 - `detect-secrets` (from `.github/workflows/security.yml`)
 - `root-hygiene` (from `.github/workflows/root-hygiene.yml` — root allowlist, docs/plans catalog, and generated artifact bans)
 
-This ensures no PR can be merged with failing tests, lint errors, or secret leaks.
+These checks still reduce the risk of merging failing tests, lint errors, or
+secret leaks.
 
 ## Pull Request Checklist
 

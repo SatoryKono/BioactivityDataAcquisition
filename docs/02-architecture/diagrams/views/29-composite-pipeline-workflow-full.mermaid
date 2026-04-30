@@ -18,7 +18,7 @@ flowchart TB
     SB ==> KE["KeyExtractorService"] ==> KEYS["Filter keys"]
     KEYS ==> EC["EnrichmentCoordinator<br/>asyncio.gather(return_exceptions=True)"]
     EC ==> EOUT["Enriched silver outputs"]
-    EOUT ==> DD["EnricherDeduplicator"] ==> MS["MergeService"] ==> CO["ColumnOrderer"] ==> CR["ColumnRenamer"]
+    EOUT ==> DD["EnricherDeduplicator"] ==> MS["MergeService"] ==> CO["ColumnOrderService"] ==> CR["ColumnRenamer"]
     CR ==> XV["EnrichmentCrossValidator"] ==> GW["GoldWriter.write_gold"] ==> GT["Gold table"]
     CCM["Checkpoint snapshot +<br/>ledger suffix replay gate"] -.->|"save / resume"| SP
     CCM -.->|"save / resume"| DC

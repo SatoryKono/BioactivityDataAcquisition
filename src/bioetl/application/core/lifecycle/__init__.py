@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from bioetl.application.core.lifecycle.checkpoint_manager import (
-    CheckpointManagerService,
+    CheckpointRuntimeService,
 )
 from bioetl.application.core.lifecycle.cleanup_service import (
     CleanupPreview,
@@ -19,7 +19,7 @@ from bioetl.application.core.lifecycle.shutdown import (
 )
 
 __all__ = [
-    "CheckpointManagerService",
+    "CheckpointRuntimeService",
     "CleanupPreview",
     "CleanupResult",
     "CleanupService",

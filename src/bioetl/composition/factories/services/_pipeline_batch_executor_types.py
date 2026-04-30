@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 
 from bioetl.application.core.wiring.runtime import (
     BatchProcessingComponents,
-    CheckpointManagerService,
+    CheckpointRuntimeService,
 )
 from bioetl.composition.bootstrap_contexts import PipelineCallbacksContext
 
@@ -39,7 +39,7 @@ class BatchExecutorBuildRequest:
     callbacks: PipelineCallbacksContext
     silver_schema: pa.Schema | None
     gold_schema: GoldSchemaType
-    checkpoint_manager: CheckpointManagerService
+    checkpoint_manager: CheckpointRuntimeService
     shutdown_signal: ShutdownSignal
     create_batch_processing_components_fn: BatchProcessingComponentsFactory
     strict_gold_validation: bool = True

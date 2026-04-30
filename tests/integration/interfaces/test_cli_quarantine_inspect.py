@@ -59,7 +59,7 @@ class TestCliQuarantineInspect:
         mock_manager.inspect = AsyncMock(return_value=[])
 
         with patch(
-            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_manager",
+            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_runtime_service",
             return_value=mock_manager,
         ):
             result = cli_runner.invoke(
@@ -94,7 +94,7 @@ class TestCliQuarantineInspect:
         mock_manager.inspect = AsyncMock(return_value=sample_records)
 
         with patch(
-            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_manager",
+            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_runtime_service",
             return_value=mock_manager,
         ):
             result = cli_runner.invoke(
@@ -117,7 +117,7 @@ class TestCliQuarantineInspect:
         mock_manager.inspect = AsyncMock(return_value=[])
 
         with patch(
-            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_manager",
+            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_runtime_service",
             return_value=mock_manager,
         ):
             result = cli_runner.invoke(
@@ -150,7 +150,7 @@ class TestCliQuarantineInspect:
         mock_manager.inspect = AsyncMock(return_value=[])
 
         with patch(
-            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_manager",
+            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_runtime_service",
             return_value=mock_manager,
         ):
             result = cli_runner.invoke(
@@ -187,7 +187,7 @@ class TestCliQuarantineInspect:
         mock_manager.inspect = AsyncMock(return_value=sample_records)
 
         with patch(
-            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_manager",
+            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_runtime_service",
             return_value=mock_manager,
         ):
             result = cli_runner.invoke(
@@ -227,7 +227,7 @@ class TestCliQuarantineInspect:
         mock_manager.inspect = AsyncMock(return_value=sample_records)
 
         with patch(
-            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_manager",
+            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_runtime_service",
             return_value=mock_manager,
         ):
             result = cli_runner.invoke(
@@ -261,7 +261,7 @@ class TestCliQuarantineInspect:
         mock_manager.inspect = AsyncMock(return_value=[])
 
         with patch(
-            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_manager",
+            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_runtime_service",
             return_value=mock_manager,
         ) as mock_bootstrap:
             # Inspect chembl_activity

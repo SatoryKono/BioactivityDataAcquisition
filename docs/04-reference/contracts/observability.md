@@ -346,10 +346,23 @@ alert `BioETLControlPlaneReadFailureRate` (см. `docs/05-operations/runbooks/ob
 ## 4.1 Operator-facing diagnostics surface
 
 Operator diagnostics не ограничиваются только `health` и metrics server.
+<<<<<<< Updated upstream
 Канонический public seam для observability-related bootstrap и diagnostics —
 `bioetl.composition.observability_api`. `bioetl.interfaces.observability`
 сохраняется как compatibility facade для interface-layer consumers и делегирует
 в composition API.
+||||||| Stash base
+Публикуемый interface seam `bioetl.interfaces.observability` теперь
+экспортирует единый diagnostics bundle поверх composition entrypoints:
+=======
+Канонический public seam для observability-related bootstrap и diagnostics —
+`bioetl.composition.observability_api`. `bioetl.interfaces.observability`
+сохраняется как compatibility facade для interface-layer consumers и делегирует
+в composition API.
+
+`bioetl.composition.observability_api` экспортирует единый diagnostics bundle и
+service getters:
+>>>>>>> Stashed changes
 
 `bioetl.composition.observability_api` экспортирует единый diagnostics bundle и
 service getters:
@@ -365,6 +378,7 @@ service getters:
 - `get_lineage_service()`
 - `get_observability_diagnostics_bundle()`
 
+<<<<<<< Updated upstream
 Это keeps-one-place discovery contract для public callers, при этом реальное
 создание зависимостей остаётся в composition layer.
 
@@ -423,6 +437,13 @@ Intentional non-goals for now:
   `list_filtered_records`, `get_filtered_record`, `get_filtered_stats`,
   `get_filtered_filter_options`
 - CLI commands themselves do not create spans directly; tracing stays in application services
+||||||| Stash base
+Это keeps-one-place discovery contract для interface-layer consumers, при этом
+реальное создание зависимостей остаётся в composition layer.
+=======
+Это keeps-one-place discovery contract для public callers, при этом реальное
+создание зависимостей остаётся в composition layer.
+>>>>>>> Stashed changes
 
 ## 5. Provider Rate-Limit Baseline (as configured)
 

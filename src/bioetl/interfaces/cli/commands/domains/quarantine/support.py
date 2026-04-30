@@ -43,8 +43,8 @@ __all__ = [
 ]
 
 
-class _QuarantineManager(Protocol):
-    """Protocol for quarantine manager methods used by CLI."""
+class _QuarantineRuntimeService(Protocol):
+    """Protocol for quarantine runtime service methods used by CLI."""
 
     async def inspect(
         self,
@@ -170,7 +170,7 @@ def _render_stats_dashboard(
 
 
 def _inspect_quarantine(
-    manager: _QuarantineManager,
+    runtime_service: _QuarantineRuntimeService,
     *,
     pipeline: str,
     limit: int,
@@ -183,8 +183,8 @@ def _inspect_quarantine(
 
     async def _inspect() -> list[JsonDict]:
         if run_id is None:
-            return await manager.inspect(limit=limit, error_code=error_code)
-        return await manager.inspect(
+            return await runtime_service.inspect(limit=limit, error_code=error_code)
+        return await runtime_service.inspect(
             limit=limit,
             error_code=error_code,
             run_id=run_id,
@@ -206,7 +206,7 @@ def _inspect_quarantine(
 
 
 def _show_quarantine_stats(
-    manager: _QuarantineManager,
+    runtime_service: _QuarantineRuntimeService,
     *,
     pipeline: str,
     output_json: bool,
@@ -220,7 +220,7 @@ def _show_quarantine_stats(
     context = _QuarantineCommandContext(pipeline=pipeline)
 
     async def _stats() -> JsonDict:
-        return await manager.get_stats(error_code=error_code, run_id=run_id)
+        return await runtime_service.get_stats(error_code=error_code, run_id=run_id)
 
     stats = context.run_async(
         _stats(),

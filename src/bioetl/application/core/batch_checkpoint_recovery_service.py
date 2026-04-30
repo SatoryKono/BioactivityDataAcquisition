@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 
     from bioetl.application.core.batch_memory_manager import BatchMemoryManagerService
     from bioetl.application.core.lifecycle.checkpoint_manager import (
-        CheckpointManagerService,
+        CheckpointRuntimeService,
     )
     from bioetl.domain.ports import LoggerPort, MetricsPort, TracingPort
 
@@ -30,7 +30,7 @@ class BatchCheckpointRecoveryService:
     def __init__(
         self,
         *,
-        checkpoint_manager: CheckpointManagerService,
+        checkpoint_manager: CheckpointRuntimeService,
         logger: LoggerPort,
         metrics: MetricsPort | None = None,
         tracer: TracingPort | None = None,

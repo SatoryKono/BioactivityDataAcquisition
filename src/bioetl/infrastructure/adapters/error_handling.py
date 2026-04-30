@@ -33,8 +33,8 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort, MetricsPort
 
 
-class ErrorService:
-    """Adapter-facing service for classification, logging, and error wrapping."""
+class AdapterErrorHandler:
+    """Adapter-facing helper for classification, logging, and error wrapping."""
 
     def __init__(
         self,
@@ -44,7 +44,7 @@ class ErrorService:
         adapter_classifier: AdapterErrorClassifier | None = None,
         error_mapper: DomainInfraExceptionMapper | None = None,
     ) -> None:
-        """Initialize service with logging, optional classifier, and metrics."""
+        """Initialize handler with logging, optional classifier, and metrics."""
         self._logger = logger
         self._classifier = classifier or ErrorClassifier()
         self._adapter_classifier = adapter_classifier or AdapterErrorClassifier(
@@ -266,6 +266,6 @@ class ErrorService:
 
 __all__ = [
     "AdapterErrorContext",
+    "AdapterErrorHandler",
     "ErrorCategory",
-    "ErrorService",
 ]

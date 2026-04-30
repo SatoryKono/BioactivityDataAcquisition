@@ -71,5 +71,7 @@ class TestMutationTestingRollout:
             if entry["status"] == "staged":
                 assert entry["blocking_classification"]
                 assert entry["issue"].startswith("#")
+                assert entry["last_reviewed"].startswith("2026-")
+                assert entry["target_resolution_date"].startswith("2026-")
                 assert entry["next_step"]
                 assert entry["promotion_criteria"]

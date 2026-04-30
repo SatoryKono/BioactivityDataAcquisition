@@ -33,7 +33,7 @@ CLI_ALIAS_MODULE_CASES = (
             "diagnostics",
             "get_observability_diagnostics_bundle",
             "get_metrics_operator_profile",
-            "get_quarantine_manager",
+            "get_quarantine_runtime_service",
         ),
         True,
     ),
@@ -58,7 +58,7 @@ CLI_ALIAS_MODULE_CASES = (
     (
         "bioetl.interfaces.cli.commands.quarantine",
         "bioetl.interfaces.cli.commands.domains.quarantine.command",
-        ("quarantine", "get_quarantine_manager", "get_quarantine_service"),
+        ("quarantine", "get_quarantine_runtime_service", "get_quarantine_service"),
         True,
     ),
     (

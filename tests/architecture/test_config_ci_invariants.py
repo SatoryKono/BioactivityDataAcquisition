@@ -421,8 +421,8 @@ def _validate_gap_resolution_plan(
 def _validate_de_scoped_gap_decision(
     key: str, gap: dict[str, Any], invalid_entries: list[str]
 ) -> None:
-    """Validate explicit de-scope decisions for replay fixture gaps."""
-    if gap.get("status") != "de_scoped":
+    """Validate decision-recorded governance for replay fixture gaps."""
+    if gap.get("status") != "decision_recorded":
         return
     if not isinstance(gap.get("de_scope_decision"), str) or not gap.get(
         "de_scope_decision"
@@ -987,10 +987,10 @@ class TestBronzeFixtureCoverage:
 
     _MIN_RECOMMENDED_RECORDS = 200
     _MIN_TRACKED_SAMPLE_RECORDS = 20
-    _ALLOWED_GAP_STATUS = {"open", "in_progress", "blocked", "de_scoped"}
+    _ALLOWED_GAP_STATUS = {"open", "in_progress", "blocked", "decision_recorded"}
     _ACTIVE_GAP_STATUS = {"open", "in_progress"}
     _MAX_BLOCKED_GAPS = 0
-    _MAX_DE_SCOPED_GAPS = 5
+    _MAX_DECISION_RECORDED_GAPS = 5
     _ALLOWED_FIXTURE_KINDS = {"tracked_ci_sample", "local_runtime_snapshot"}
     _ALLOWED_VALIDATION_STATUSES = {"valid", "provisional", "stale"}
 
@@ -1028,8 +1028,8 @@ class TestBronzeFixtureCoverage:
         blocked = sorted(
             key for key, gap in gaps.items() if gap.get("status") == "blocked"
         )
-        de_scoped = sorted(
-            key for key, gap in gaps.items() if gap.get("status") == "de_scoped"
+        decision_recorded = sorted(
+            key for key, gap in gaps.items() if gap.get("status") == "decision_recorded"
         )
 
         assert not active, (
@@ -1041,10 +1041,11 @@ class TestBronzeFixtureCoverage:
             "Blocked Bronze fixture gaps require an explicit budget change; "
             f"max={self._MAX_BLOCKED_GAPS}, found={len(blocked)}: {blocked}"
         )
-        assert len(de_scoped) <= self._MAX_DE_SCOPED_GAPS, (
-            "De-scoped Bronze fixture gaps are residual replay evidence debt and "
-            "may only grow through an explicit budget change; "
-            f"max={self._MAX_DE_SCOPED_GAPS}, found={len(de_scoped)}: {de_scoped}"
+        assert len(decision_recorded) <= self._MAX_DECISION_RECORDED_GAPS, (
+            "Decision-recorded Bronze fixture gaps are residual replay evidence "
+            "debt and may only grow through an explicit budget change; "
+            f"max={self._MAX_DECISION_RECORDED_GAPS}, found={len(decision_recorded)}: "
+            f"{decision_recorded}"
         )
 
     def test_bronze_fixture_coverage(self) -> None:

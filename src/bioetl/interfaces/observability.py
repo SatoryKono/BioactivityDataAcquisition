@@ -9,7 +9,14 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+<<<<<<< Updated upstream
 from bioetl.composition.observability_api import ObservabilityDiagnosticsBundle
+||||||| Stash base
+=======
+from bioetl.composition.observability_api import (
+    ObservabilityDiagnosticsBundle,
+)
+>>>>>>> Stashed changes
 from bioetl.domain.exceptions import MetricsServerError
 from bioetl.domain.ports import LoggerPort
 
@@ -35,9 +42,14 @@ if TYPE_CHECKING:
 
 __all__ = [
     "MetricsServerError",
+<<<<<<< Updated upstream
     "delete_metrics_from_gateway",
     "get_audit_service",
     "get_checkpoint_service",
+||||||| Stash base
+    "ObservabilityDiagnosticsBundle",
+=======
+>>>>>>> Stashed changes
     "get_health_service",
     "get_lineage_service",
     "get_metrics_operator_profile",
@@ -74,6 +86,7 @@ def start_metrics_server(
     )
 
 
+<<<<<<< Updated upstream
 def push_metrics_to_gateway(
     run_label: str = "bioetl",
     *,
@@ -115,6 +128,15 @@ def delete_metrics_from_gateway(
 def get_checkpoint_service() -> CheckpointService:
     """Load the checkpoint diagnostics service through the canonical composition API."""
     from bioetl.composition.observability_api import get_checkpoint_service as _impl
+||||||| Stash base
+def get_metrics_service() -> MetricsService:
+    """Load the metrics diagnostics service through composition on demand."""
+    from bioetl.composition.services_api import get_metrics_service as _impl
+=======
+def get_metrics_service() -> MetricsService:
+    """Load the metrics diagnostics service through the canonical composition API."""
+    from bioetl.composition.observability_api import get_metrics_service as _impl
+>>>>>>> Stashed changes
 
     return _impl()
 

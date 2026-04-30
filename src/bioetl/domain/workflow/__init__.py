@@ -14,6 +14,10 @@ from bioetl.domain.workflow.dag import (
     topologically_sorted_step_ids,
     validate_workflow_dag,
 )
+from bioetl.domain.workflow.transform_spec import (
+    WorkflowTransformSpec,
+    build_workflow_transform_fingerprint,
+)
 
 __all__ = [
     "TransformStepConfig",
@@ -22,6 +26,8 @@ __all__ = [
     "WorkflowRunOptionsConfig",
     "WorkflowStep",
     "WorkflowStepConfig",
+    "WorkflowTransformSpec",
+    "build_workflow_transform_fingerprint",
     "topologically_sorted_step_ids",
     "validate_workflow_dag",
 ]

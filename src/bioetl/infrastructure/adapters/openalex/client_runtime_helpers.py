@@ -9,13 +9,13 @@ from typing import TYPE_CHECKING
 from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
-from bioetl.infrastructure.adapters.common import FallbackFetchOrchestratorService
+from bioetl.infrastructure.adapters.common import FallbackFetchOrchestrator
 from bioetl.infrastructure.adapters.common.api_request_collector import (
     APIRequestCollector,
 )
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.openalex.cursor_flow import (
-    OpenAlexCursorFlowService,
+    OpenAlexCursorFlow,
 )
 from bioetl.infrastructure.adapters.openalex.fallback import (
     OpenAlexTitleFallbackHandler,
@@ -55,10 +55,10 @@ ExtractRecordIdFn = Callable[[BronzeRecord], str | None]
 class OpenAlexRuntimeServices:
     """Resolved OpenAlex runtime collaborators after default/injected wiring."""
 
-    fallback_fetch_service: FallbackFetchOrchestratorService
+    fallback_fetch_service: FallbackFetchOrchestrator
     query_executor: OpenAlexQueryExecutor
     response_mapper: OpenAlexResponseMapper
-    cursor_flow: OpenAlexCursorFlowService
+    cursor_flow: OpenAlexCursorFlow
     fallback_handler: OpenAlexTitleFallbackHandler
     fallback_orchestrator: OpenAlexFallbackOrchestrator
 
@@ -67,10 +67,10 @@ class OpenAlexRuntimeServices:
 class OpenAlexRuntimeServicesRequest:
     """Typed input for OpenAlex runtime collaborator assembly."""
 
-    fallback_fetch_service: FallbackFetchOrchestratorService
+    fallback_fetch_service: FallbackFetchOrchestrator
     openalex_query_executor: OpenAlexQueryExecutor | None
     openalex_response_mapper: OpenAlexResponseMapper | None
-    openalex_cursor_flow: OpenAlexCursorFlowService | None
+    openalex_cursor_flow: OpenAlexCursorFlow | None
     title_fallback_handler: OpenAlexTitleFallbackHandler | None
     openalex_fallback_orchestrator: OpenAlexFallbackOrchestrator | None
     http_client: UnifiedHTTPClient
@@ -198,9 +198,9 @@ def _create_default_openalex_cursor_flow(
     response_mapper: OpenAlexResponseMapper,
     logger: LoggerPort,
     runtime_errors: tuple[type[Exception], ...],
-) -> OpenAlexCursorFlowService:
-    """Create the default OpenAlex cursor flow service."""
-    return OpenAlexCursorFlowService(
+) -> OpenAlexCursorFlow:
+    """Create the default OpenAlex cursor flow."""
+    return OpenAlexCursorFlow(
         mailto=mailto,
         api_key=api_key,
         batch_size=batch_size,
@@ -225,7 +225,7 @@ def _create_default_openalex_title_fallback_handler(
 
 def _create_default_openalex_fallback_orchestrator(
     *,
-    fallback_fetch_service: FallbackFetchOrchestratorService,
+    fallback_fetch_service: FallbackFetchOrchestrator,
     fallback_handler: OpenAlexTitleFallbackHandler,
     normalize_id: NormalizeDoiFn,
     extract_record_id: ExtractRecordIdFn,

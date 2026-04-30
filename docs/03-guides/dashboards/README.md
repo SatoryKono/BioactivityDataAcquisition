@@ -37,6 +37,7 @@ ______________________________________________________________________
 - `2. Runtime` -> `Back to Overview` / `Control Plane v1` / `4. Data Quality`
 - `3. Provider Health` -> `Back to Overview` / `2. Runtime`
 - `4. Data Quality` -> `Back to Overview` / `5. Silver Reject Explorer`
+- `6. Workflow Overview` -> `Back to Overview` / `2. Runtime` / `Control Plane v1`
 
 ## Legacy-документы
 

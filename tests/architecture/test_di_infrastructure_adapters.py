@@ -1,7 +1,7 @@
 """Architecture test: DI compliance for infrastructure adapter constructors.
 
 REQ-ARCH-DI-012: Infrastructure adapter constructors MUST NOT unconditionally
-instantiate cross-cutting helper services (ErrorService, AdapterMetricsRecorder).
+instantiate cross-cutting helper services (AdapterErrorHandler, AdapterMetricsRecorder).
 
 These services should be accepted as optional constructor parameters with
 inline creation only as a fallback when not injected (behind ``if ... is None``
@@ -10,13 +10,13 @@ guard). This enables composition-root injection via AdapterHelpersFactory.
 Allowed pattern (conditional fallback):
     self._error_handler = (
         error_handler if error_handler is not None
-        else ErrorService(logger, metrics=self._metrics)
+        else AdapterErrorHandler(logger, metrics=self._metrics)
     )
 
 Forbidden pattern (unconditional):
-    self._error_handler = ErrorService(logger, metrics=self._metrics)
+    self._error_handler = AdapterErrorHandler(logger, metrics=self._metrics)
 
-See ai-selfreview-rules.md §2 Anti-Patterns (AP-001, DI-001).
+See docs/00-project/ai/rules/bioetl-ai-rules.md for AP-001 / DI-001.
 """
 
 from __future__ import annotations
@@ -31,7 +31,7 @@ ADAPTERS_DIR = Path("src/bioetl/infrastructure/adapters")
 
 # Cross-cutting services that MUST use conditional instantiation in adapters.
 GUARDED_SERVICE_CLASSES: frozenset[str] = frozenset(
-    {"ErrorService", "AdapterMetricsRecorder"}
+    {"AdapterErrorHandler", "AdapterMetricsRecorder"}
 )
 
 # Files where unconditional instantiation is expected (class definitions).
@@ -164,7 +164,7 @@ class TestInfrastructureAdapterDI:
     ) -> None:
         """Adapter __init__/__post_init__ MUST guard service instantiation.
 
-        Cross-cutting helpers (ErrorService, AdapterMetricsRecorder) must be behind
+        Cross-cutting helpers (AdapterErrorHandler, AdapterMetricsRecorder) must be behind
         an ``if ... is None`` check so that AdapterHelpersFactory can inject
         pre-built instances from the composition root.
         """
@@ -199,7 +199,7 @@ class TestInfrastructureAdapterDI:
                 "Fix: accept optional parameter and use conditional:\n"
                 "  self._error_handler = (\n"
                 "      error_handler if error_handler is not None\n"
-                "      else ErrorService(...)\n"
+                "      else AdapterErrorHandler(...)\n"
                 "  )"
             )
 
@@ -211,13 +211,13 @@ class TestInfrastructureAdapterDIDetection:
         code = """
 class BadAdapter:
     def __init__(self):
-        self._error_handler = ErrorService(logger)
+        self._error_handler = AdapterErrorHandler(logger)
 """
         tree = ast.parse(code)
         finder = _UnconditionalInstantiationFinder(GUARDED_SERVICE_CLASSES)
         finder.visit(tree)
         assert len(finder.violations) == 1
-        assert finder.violations[0][1] == "ErrorService"
+        assert finder.violations[0][1] == "AdapterErrorHandler"
 
     def test_allows_guarded_if(self) -> None:
         code = """
@@ -226,7 +226,7 @@ class GoodAdapter:
         if error_handler is not None:
             self._error_handler = error_handler
         else:
-            self._error_handler = ErrorService(logger)
+            self._error_handler = AdapterErrorHandler(logger)
 """
         tree = ast.parse(code)
         finder = _UnconditionalInstantiationFinder(GUARDED_SERVICE_CLASSES)
@@ -239,7 +239,7 @@ class GoodAdapter:
     def __init__(self, error_handler=None):
         self._error_handler = (
             error_handler if error_handler is not None
-            else ErrorService(logger)
+            else AdapterErrorHandler(logger)
         )
 """
         tree = ast.parse(code)
@@ -254,7 +254,7 @@ class SomeAdapter:
         pass
 
     def setup(self):
-        self._error_handler = ErrorService(logger)
+        self._error_handler = AdapterErrorHandler(logger)
 """
         tree = ast.parse(code)
         finder = _UnconditionalInstantiationFinder(GUARDED_SERVICE_CLASSES)
