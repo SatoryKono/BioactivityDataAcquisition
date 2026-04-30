@@ -60,6 +60,11 @@ def test_layer_aware_suffix_policy_registers_expected_rule_ids() -> None:
         "column_ordering_family",
     } <= family_rule_ids
 
+    suffix_rules = {rule.rule_id: rule for rule in policy.suffix_boundary_rules}
+    assert (
+        suffix_rules["composition_infrastructure_service_suffix"].allowed_symbols == ()
+    ), "composition/infrastructure *Service debt was retired and must stay closed"
+
 
 def test_layer_aware_suffix_policy_stays_clean_on_current_baseline() -> None:
     """Reviewed naming debt must stay fully registered with no stray violations."""

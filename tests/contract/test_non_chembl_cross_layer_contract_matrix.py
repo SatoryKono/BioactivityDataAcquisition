@@ -26,6 +26,7 @@ from bioetl.domain.contracts.gold.uniprot import (
 )
 from bioetl.domain.normalization.structured_payload_policies import (
     StructuredPayloadSemanticPolicy,
+    semantic_sensitive_structured_payload_policies,
     structured_payload_policy,
 )
 from scripts.docs.generate_pipeline_normalization_field_matrix import (
@@ -150,6 +151,31 @@ def test_structured_payload_observed_shapes_match_policy_registry() -> None:
             assert shape["collection_semantics"] == policy.collection_semantics
             assert shape["raw_sidecar_field"] == policy.raw_sidecar_field
             assert shape["canonical_sidecar_field"] == policy.canonical_sidecar_field
+
+
+def test_structured_payload_sidecar_fields_are_not_in_current_cross_layer_surfaces() -> (
+    None
+):
+    matrix_rows = {
+        (row["pipeline_name"], row["field_name"]) for row in build_field_matrix_rows()
+    }
+
+    for policy in semantic_sensitive_structured_payload_policies():
+        pipeline_name = policy.profile_name.replace(".", "_")
+        config_fields = _config_fields(_entity_config_path(pipeline_name))
+        silver_fields = _arrow_fields(ENTITY_SILVER_SCHEMA_REGISTRY[pipeline_name])
+        domain_fields = _pandera_fields(ENTITY_DOMAIN_SCHEMA_REGISTRY[pipeline_name])
+        gold_fields = _pandera_fields(GOLD_SCHEMA_REGISTRY[pipeline_name])
+
+        for sidecar_field in (
+            policy.raw_sidecar_field,
+            policy.canonical_sidecar_field,
+        ):
+            assert sidecar_field not in config_fields
+            assert sidecar_field not in silver_fields
+            assert sidecar_field not in domain_fields
+            assert sidecar_field not in gold_fields
+            assert (pipeline_name, sidecar_field) not in matrix_rows
 
 
 def test_target_composite_excludes_no_legacy_uniprot_aliases() -> None:

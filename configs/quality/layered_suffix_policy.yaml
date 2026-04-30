@@ -22,8 +22,9 @@ suffix_boundary_rules:
 
   - rule_id: composition_infrastructure_service_suffix
     description: >
-      Composition and infrastructure layers must not grow new *Service classes
-      without explicit ADR-041 review. The current surfaces remain as tracked debt.
+      Composition and infrastructure layers must not expose new first-party
+      *Service classes. The reviewed baseline is currently clean and must stay
+      exception-free unless ADR-041 governance is updated deliberately.
     suffixes:
       - Service
     include_path_prefixes:

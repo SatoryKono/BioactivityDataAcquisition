@@ -5,20 +5,20 @@
 ## Summary
 
 - Registry YAML: `configs/quality/compatibility_facade_inventory.yaml`
-- Curated inventory rows: `23`
-- Transition debt rows: `3`
+- Curated inventory rows: `28`
+- Transition debt rows: `8`
 - Sanctioned public entrypoint rows: `20`
 - Retained review entrypoints: `2`
 - Permanent public entrypoints: `18`
-- Measured tracked modules: `23`
+- Measured tracked modules: `28`
 - Measured-only modules outside curated inventory: `0`
 - Discovered docstring-tracked modules: `0`
 - Unexpected docstring-tracked modules: `0`
 - Missing allowlisted measured-only modules: `0`
 - First-party src imports targeting measured-only modules: `0`
-- Curated rows requiring external breaking change process: `23`
-- Curated rows marked internal-callers-zero: `4`
-- First-party src imports targeting internal-callers-zero rows: `0`
+- Curated rows requiring external breaking change process: `28`
+- Curated rows marked internal-callers-zero: `8`
+- First-party src imports targeting internal-callers-zero rows: `2`
 - Ratchet violations: `0`
 
 ## Tracked Docstring Prefixes
@@ -38,13 +38,18 @@
 - `src/bioetl/composition/bootstrap/__init__.py`
 - `src/bioetl/composition/entrypoints.py`
 - `src/bioetl/composition/factories/__init__.py`
+- `src/bioetl/composition/factories/datasource/__init__.py`
+- `src/bioetl/composition/factories/datasource/data_source_factory.py`
+- `src/bioetl/composition/providers/__init__.py`
 - `src/bioetl/composition/providers/_models.py`
+- `src/bioetl/composition/providers/provider_registry.py`
 - `src/bioetl/composition/resource_management_api.py`
 - `src/bioetl/domain/composite/config.py`
 - `src/bioetl/domain/value_objects/activity_values.py`
 - `src/bioetl/domain/value_objects/publication_field_groups.py`
 - `src/bioetl/infrastructure/adapters/pubmed/client.py`
 - `src/bioetl/infrastructure/adapters/semanticscholar/client.py`
+- `src/bioetl/interfaces/cli/commands/_compat.py`
 - `src/bioetl/interfaces/cli/commands/archive.py`
 - `src/bioetl/interfaces/cli/commands/cleanup.py`
 - `src/bioetl/interfaces/cli/commands/diagnostics.py`
@@ -59,9 +64,14 @@
 
 ## Curated Row Governance Metadata
 
+- `src/bioetl/interfaces/cli/commands/_compat.py` — external breaking change required: `true`, internal callers zero: `false`
 - `src/bioetl/composition/resource_management_api.py` — external breaking change required: `true`, internal callers zero: `true`
 - `src/bioetl/composition/providers/_models.py` — external breaking change required: `true`, internal callers zero: `false`
+- `src/bioetl/composition/providers/__init__.py` — external breaking change required: `true`, internal callers zero: `true`
+- `src/bioetl/composition/providers/provider_registry.py` — external breaking change required: `true`, internal callers zero: `true`
 - `src/bioetl/composition/factories/__init__.py` — external breaking change required: `true`, internal callers zero: `true`
+- `src/bioetl/composition/factories/datasource/__init__.py` — external breaking change required: `true`, internal callers zero: `true`
+- `src/bioetl/composition/factories/datasource/data_source_factory.py` — external breaking change required: `true`, internal callers zero: `true`
 - `src/bioetl/interfaces/cli/commands/run.py` — external breaking change required: `true`, internal callers zero: `false`
 - `src/bioetl/interfaces/cli/commands/run_all.py` — external breaking change required: `true`, internal callers zero: `false`
 - `src/bioetl/interfaces/cli/commands/run_composite.py` — external breaking change required: `true`, internal callers zero: `false`
@@ -137,4 +147,5 @@
 
 ### First-Party Src Imports Of Internal-Callers-Zero Rows
 
-- None.
+- `bioetl.composition.factories.datasource.data_source_factory` imported by `src/bioetl/composition/bootstrap/cli/health.py`, `src/bioetl/composition/factories/__init__.py`, `src/bioetl/composition/factories/datasource/__init__.py`, `src/bioetl/composition/factories/pipeline/_assembler_factory.py`, `src/bioetl/composition/factories/pipeline/_creation_wiring.py`, `src/bioetl/composition/factories/pipeline/_factory_method_types.py`, `src/bioetl/composition/factories/pipeline/assembler.py`, `src/bioetl/composition/factories/pipeline/assembler_helpers.py`, `src/bioetl/composition/factories/pipeline/contract_validator.py`, `src/bioetl/composition/factories/services/_bundle_support.py`, `src/bioetl/composition/factories/services/bundle.py`, `src/bioetl/composition/providers/_registration_contracts.py`
+- `bioetl.composition.providers.provider_registry` imported by `src/bioetl/composition/factories/datasource/data_source_factory.py`, `src/bioetl/composition/factories/datasource/http_client.py`, `src/bioetl/composition/factories/datasource/provider_registry_resolution.py`, `src/bioetl/composition/factories/pipeline/_assembler_factory.py`, `src/bioetl/composition/factories/pipeline/assembler.py`, `src/bioetl/composition/factories/pipeline/contract_validator.py`, `src/bioetl/composition/providers/__init__.py`, `src/bioetl/composition/providers/_default_registry.py`, `src/bioetl/composition/providers/_registration_contracts.py`, `src/bioetl/composition/providers/_registry_resolution.py`, `src/bioetl/composition/providers/decorators.py`, `src/bioetl/composition/providers/loader.py`

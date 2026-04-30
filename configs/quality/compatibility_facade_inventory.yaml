@@ -19,14 +19,17 @@ transition_debt:
   review_date: '2026-09-30'
   external_breaking_change_required: true
   internal_callers_zero: false
-  allowed_call_sites: '`src`: only retained top-level CLI public seam modules under
-    `src/bioetl/interfaces/cli/commands/` may import `alias_module`; `tests`: dedicated
-    CLI boundary coverage may exercise the helper indirectly through those public
-    seam modules'
-  migration_path: Keep top-level CLI public seams as the sanctioned import targets;
-    do not import `_compat.py` outside the retained command-seam modules.
-  exit_criteria: `_compat.py` remains confined to the reviewed top-level command
-    seams and can be removed once those seams no longer need helper-based alias forwarding.
+  allowed_call_sites: >-
+    `src`: only retained top-level CLI public seam modules under
+    `src/bioetl/interfaces/cli/commands/` may import `alias_module`; `tests`:
+    dedicated CLI boundary coverage may exercise the helper indirectly through
+    those public seam modules
+  migration_path: >-
+    Keep top-level CLI public seams as the sanctioned import targets; do not
+    import `_compat.py` outside the retained command-seam modules.
+  exit_criteria: >-
+    `_compat.py` remains confined to the reviewed top-level command seams and
+    can be removed once those seams no longer need helper-based alias forwarding.
 - path: src/bioetl/composition/resource_management_api.py
   compatibility_role: Deprecated composition alias module that re-exports
     `resources_api` for legacy import paths.
@@ -75,13 +78,16 @@ transition_debt:
   review_date: '2026-09-30'
   external_breaking_change_required: true
   internal_callers_zero: true
-  allowed_call_sites: '`src`: no direct imports of `DataSourceCreatorPort`; `tests`:
-    dedicated compatibility coverage may verify the package-root alias surface while
-    ordinary code imports `DataSourceCreatorProtocol`'
-  migration_path: Import `DataSourceCreatorProtocol` from the provider package root
-    or owner modules instead of using `DataSourceCreatorPort`.
-  exit_criteria: First-party `src/` imports of the package-root alias remain at zero
-    and the compatibility re-export can be removed in the next breaking-change wave.
+  allowed_call_sites: >-
+    `src`: no direct imports of `DataSourceCreatorPort`; `tests`: dedicated
+    compatibility coverage may verify the package-root alias surface while
+    ordinary code imports `DataSourceCreatorProtocol`
+  migration_path: >-
+    Import `DataSourceCreatorProtocol` from the provider package root or owner
+    modules instead of using `DataSourceCreatorPort`.
+  exit_criteria: >-
+    First-party `src/` imports of the package-root alias remain at zero and the
+    compatibility re-export can be removed in the next breaking-change wave.
 - path: src/bioetl/composition/providers/provider_registry.py
   compatibility_role: Compatibility re-export surface that still exposes
     `DataSourceCreatorPort` from the provider registry facade.
@@ -92,13 +98,16 @@ transition_debt:
   review_date: '2026-09-30'
   external_breaking_change_required: true
   internal_callers_zero: true
-  allowed_call_sites: '`src`: no direct imports of `DataSourceCreatorPort`; `tests`:
-    dedicated compatibility coverage may verify the registry-facade alias while ordinary
-    code imports `DataSourceCreatorProtocol`'
-  migration_path: Import `DataSourceCreatorProtocol` from `provider_registry` only
-    when the canonical protocol surface is needed; do not use `DataSourceCreatorPort`.
-  exit_criteria: First-party `src/` imports of the registry-facade alias remain at
-    zero and the compatibility re-export can be removed in the next breaking-change wave.
+  allowed_call_sites: >-
+    `src`: no direct imports of `DataSourceCreatorPort`; `tests`: dedicated
+    compatibility coverage may verify the registry-facade alias while ordinary
+    code imports `DataSourceCreatorProtocol`
+  migration_path: >-
+    Import `DataSourceCreatorProtocol` from `provider_registry` only when the
+    canonical protocol surface is needed; do not use `DataSourceCreatorPort`.
+  exit_criteria: >-
+    First-party `src/` imports of the registry-facade alias remain at zero and
+    the compatibility re-export can be removed in the next breaking-change wave.
 - path: src/bioetl/composition/factories/__init__.py
   compatibility_role: Mixed factory facade that still defines the deprecated warning
     class `DataSourceCreatorPort` for legacy callers.
@@ -109,12 +118,16 @@ transition_debt:
   review_date: '2026-09-30'
   external_breaking_change_required: true
   internal_callers_zero: true
-  allowed_call_sites: '`src`: new code imports `DataSourceCreatorProtocol`; `tests`:
-    dedicated compatibility coverage may instantiate `DataSourceCreatorPort` only
-    to verify deprecation behavior'
-  migration_path: Import `DataSourceCreatorProtocol` directly from the sanctioned
-    factory/provider surfaces instead of instantiating or annotating `DataSourceCreatorPort`.
-  exit_criteria: First-party `src/` imports and annotations stop using `DataSourceCreatorPort`,
+  allowed_call_sites: >-
+    `src`: new code imports `DataSourceCreatorProtocol`; `tests`: dedicated
+    compatibility coverage may instantiate `DataSourceCreatorPort` only to
+    verify deprecation behavior
+  migration_path: >-
+    Import `DataSourceCreatorProtocol` directly from the sanctioned
+    factory/provider surfaces instead of instantiating or annotating
+    `DataSourceCreatorPort`.
+  exit_criteria: >-
+    First-party `src/` imports and annotations stop using `DataSourceCreatorPort`,
     compatibility tests remain the only live caller lane, and the warning alias
     can be removed in the next breaking-change wave.
 - path: src/bioetl/composition/factories/datasource/__init__.py
@@ -127,13 +140,17 @@ transition_debt:
   review_date: '2026-09-30'
   external_breaking_change_required: true
   internal_callers_zero: true
-  allowed_call_sites: '`src`: no direct imports of `DataSourceCreatorPort`; `tests`:
-    dedicated compatibility coverage may verify the datasource package-root alias
-    while ordinary code imports `DataSourceCreatorProtocol`'
-  migration_path: Import `DataSourceCreatorProtocol` from the datasource package
-    root instead of using `DataSourceCreatorPort`.
-  exit_criteria: First-party `src/` imports of the datasource package-root alias remain
-    at zero and the compatibility re-export can be removed in the next breaking-change wave.
+  allowed_call_sites: >-
+    `src`: no direct imports of `DataSourceCreatorPort`; `tests`: dedicated
+    compatibility coverage may verify the datasource package-root alias while
+    ordinary code imports `DataSourceCreatorProtocol`
+  migration_path: >-
+    Import `DataSourceCreatorProtocol` from the datasource package root instead
+    of using `DataSourceCreatorPort`.
+  exit_criteria: >-
+    First-party `src/` imports of the datasource package-root alias remain at
+    zero and the compatibility re-export can be removed in the next
+    breaking-change wave.
 - path: src/bioetl/composition/factories/datasource/data_source_factory.py
   compatibility_role: Mixed datasource factory module that still re-exports
     `DataSourceCreatorPort` alongside the canonical `DataSourceCreatorProtocol`.
@@ -144,13 +161,17 @@ transition_debt:
   review_date: '2026-09-30'
   external_breaking_change_required: true
   internal_callers_zero: true
-  allowed_call_sites: '`src`: no direct imports of `DataSourceCreatorPort`; `tests`:
-    dedicated compatibility coverage may verify the alias while ordinary code imports
-    `DataSourceCreatorProtocol`'
-  migration_path: Import `DataSourceCreatorProtocol` directly from the datasource
-    factory module when the canonical protocol surface is needed.
-  exit_criteria: First-party `src/` imports of `DataSourceCreatorPort` remain at zero,
-    compatibility coverage is explicit, and the alias can be removed in the next breaking-change wave.
+  allowed_call_sites: >-
+    `src`: no direct imports of `DataSourceCreatorPort`; `tests`: dedicated
+    compatibility coverage may verify the alias while ordinary code imports
+    `DataSourceCreatorProtocol`
+  migration_path: >-
+    Import `DataSourceCreatorProtocol` directly from the datasource factory
+    module when the canonical protocol surface is needed.
+  exit_criteria: >-
+    First-party `src/` imports of `DataSourceCreatorPort` remain at zero,
+    compatibility coverage is explicit, and the alias can be removed in the
+    next breaking-change wave.
 retained_entrypoints:
 - path: src/bioetl/interfaces/cli/commands/run.py
   compatibility_role: Permanent public run command seam over the split internal owner
