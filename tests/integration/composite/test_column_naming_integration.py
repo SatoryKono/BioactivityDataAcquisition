@@ -7,9 +7,7 @@ from unittest.mock import MagicMock
 import polars as pl
 import pytest
 
-from bioetl.application.composite.column_service import (
-    ColumnOrderService as ColumnOrderer,
-)
+from bioetl.application.composite.column_service import ColumnOrderService
 from bioetl.application.composite.column_renamer import ColumnRenamer
 from bioetl.application.core.record_normalization_processor import (
     RecordNormalizationProcessor,
@@ -36,9 +34,9 @@ def renamer(mock_logger: MagicMock) -> ColumnRenamer:
 
 
 @pytest.fixture
-def orderer(mock_logger: MagicMock) -> ColumnOrderer:
-    """Create ColumnOrderer instance."""
-    return ColumnOrderer(mock_logger)
+def orderer(mock_logger: MagicMock) -> ColumnOrderService:
+    """Create ColumnOrderService instance."""
+    return ColumnOrderService(mock_logger)
 
 
 @pytest.fixture

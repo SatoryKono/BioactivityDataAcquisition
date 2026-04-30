@@ -388,7 +388,4 @@ class FilesystemAdrCatalog(AdrServicePort):
             issues=issues,
         )
 
-
-FsAdrService = FilesystemAdrCatalog
-
-__all__ = ["FilesystemAdrCatalog", "FsAdrService"]
+__all__ = ["FilesystemAdrCatalog"]

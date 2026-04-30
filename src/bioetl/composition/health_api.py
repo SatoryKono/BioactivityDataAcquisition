@@ -8,7 +8,10 @@ from typing import TYPE_CHECKING, Protocol
 if TYPE_CHECKING:
     from bioetl.application.services.health_service import HealthService
     from bioetl.application.services.quarantine_service import QuarantineService
-    from bioetl.composition._resource_management import QuarantineManagerProtocol
+    from bioetl.composition._resource_management import (
+        QuarantineManagerProtocol,
+        QuarantineRuntimeServiceProtocol,
+    )
     from bioetl.composition.bootstrap.cli.health import (
         HealthServerDependencies as HealthServerDependencies,
     )
@@ -17,6 +20,10 @@ if TYPE_CHECKING:
     def get_health_server_dependencies() -> HealthServerDependenciesProtocol: ...
 
     def get_quarantine_manager(pipeline: str) -> QuarantineManagerProtocol: ...
+
+    def get_quarantine_runtime_service(
+        pipeline: str,
+    ) -> QuarantineRuntimeServiceProtocol: ...
 
     def get_health_service() -> HealthService: ...
 
@@ -32,6 +39,7 @@ __all__ = [
     "get_health_service",
     "get_quarantine_manager",
     "get_quarantine_port",
+    "get_quarantine_runtime_service",
     "get_quarantine_service",
 ]
 
@@ -44,6 +52,7 @@ _PUBLIC_EXPORTS = {
     "get_health_service": _SERVICES_MODULE,
     "get_quarantine_manager": _RESOURCE_MANAGEMENT_MODULE,
     "get_quarantine_port": _SERVICES_MODULE,
+    "get_quarantine_runtime_service": _RESOURCE_MANAGEMENT_MODULE,
     "get_quarantine_service": _SERVICES_MODULE,
 }
 

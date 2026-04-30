@@ -28,9 +28,11 @@ from bioetl.composition.bootstrap.cli.run_manifest import (
 from bioetl.composition.bootstrap.cli.service_builders import (
     build_cli_audit_inspection_service,
     build_cli_checkpoint_manager,
+    build_cli_checkpoint_runtime_service,
     build_cli_checkpoint_service,
     build_cli_observability_workflow_service,
     build_cli_quarantine_manager,
+    build_cli_quarantine_runtime_service,
     build_cli_quarantine_service,
 )
 from bioetl.composition.factories.storage.audit import create_audit_port
@@ -59,9 +61,11 @@ __all__ = [
     "CLI_INSPECTION_RUN_ID",
     "bootstrap_audit_inspection_service",
     "bootstrap_checkpoint_manager",
+    "bootstrap_checkpoint_runtime_service",
     "bootstrap_checkpoint_service",
     "bootstrap_observability_workflow_service",
     "bootstrap_quarantine_manager",
+    "bootstrap_quarantine_runtime_service",
     "bootstrap_quarantine_service",
 ]
 
@@ -69,7 +73,9 @@ CLI_INSPECTION_RUN_ID = RunID(UUID("00000000-0000-0000-0000-000000003353"))
 """Deterministic sentinel run id for operator-only checkpoint inspection."""
 
 
-def bootstrap_quarantine_manager(pipeline_name: str) -> QuarantineRuntimeService:
+def bootstrap_quarantine_runtime_service(
+    pipeline_name: str,
+) -> QuarantineRuntimeService:
     """Bootstrap QuarantineRuntimeService for CLI inspection operations.
 
     Creates a QuarantineRuntimeService for quarantine inspection and reporting.
@@ -81,13 +87,20 @@ def bootstrap_quarantine_manager(pipeline_name: str) -> QuarantineRuntimeService
     Returns:
         QuarantineRuntimeService configured for the specified pipeline.
     """
-    return build_cli_quarantine_manager(
+    return build_cli_quarantine_runtime_service(
         quarantine_port_factory=bootstrap_quarantine_port,
         pipeline_name=pipeline_name,
     )
 
 
-def bootstrap_checkpoint_manager(pipeline_name: str) -> CheckpointRuntimeService:
+def bootstrap_quarantine_manager(pipeline_name: str) -> QuarantineRuntimeService:
+    """Compatibility wrapper for the retired manager-style bootstrap name."""
+    return bootstrap_quarantine_runtime_service(pipeline_name)
+
+
+def bootstrap_checkpoint_runtime_service(
+    pipeline_name: str,
+) -> CheckpointRuntimeService:
     """Bootstrap CheckpointRuntimeService for CLI inspection operations.
 
     Creates a minimal CheckpointRuntimeService for checkpoint listing and inspection.
@@ -101,13 +114,18 @@ def bootstrap_checkpoint_manager(pipeline_name: str) -> CheckpointRuntimeService
     Returns:
         CheckpointRuntimeService configured for CLI inspection.
     """
-    return build_cli_checkpoint_manager(
+    return build_cli_checkpoint_runtime_service(
         checkpoint_port_factory=bootstrap_checkpoint_port,
         logger_factory=create_noop_logger,
         pipeline_name=pipeline_name,
         run_id=CLI_INSPECTION_RUN_ID,
         compatibility_service_factory=bootstrap_checkpoint_compatibility_service,
     )
+
+
+def bootstrap_checkpoint_manager(pipeline_name: str) -> CheckpointRuntimeService:
+    """Compatibility wrapper for the retired manager-style bootstrap name."""
+    return bootstrap_checkpoint_runtime_service(pipeline_name)
 
 
 def bootstrap_checkpoint_service() -> CheckpointService:

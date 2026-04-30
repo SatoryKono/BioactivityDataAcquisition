@@ -29,7 +29,6 @@ from bioetl.infrastructure.observability.anomaly.detectors import (
 )
 from bioetl.infrastructure.observability.anomaly.monitor import (
     DataQualityMonitor,
-    DataQualityMonitorService,
 )
 from bioetl.infrastructure.observability.anomaly.types import (
     AnomalyRecord,
@@ -44,7 +43,6 @@ __all__ = [
     "AnomalySeverity",
     "AnomalyType",
     "DataQualityMonitor",
-    "DataQualityMonitorService",
     "DetectorStrategy",
     "ZScoreDetector",
 ]

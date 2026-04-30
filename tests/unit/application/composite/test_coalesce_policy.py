@@ -8,9 +8,6 @@ import polars as pl
 import pytest
 
 from bioetl.application.composite.coalesce_policy import CoalescePolicyService
-from bioetl.application.composite.column_priority_orderer import (
-    ColumnPriorityOrderer,
-)
 
 
 @pytest.fixture
@@ -25,7 +22,7 @@ def mock_logger() -> MagicMock:
 
 @pytest.fixture
 def mock_priority_orderer() -> MagicMock:
-    orderer = MagicMock(spec=ColumnPriorityOrderer)
+    orderer = MagicMock()
     orderer.collect_field_columns = MagicMock(return_value=[])
     orderer.order_columns_by_priority = MagicMock(return_value=[])
     orderer.filter_compatible_columns = MagicMock(return_value=([], []))

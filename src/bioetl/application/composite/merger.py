@@ -37,9 +37,6 @@ from bioetl.domain.composite.result import (
 )
 
 if TYPE_CHECKING:
-    from bioetl.application.composite.column_priority_orderer import (
-        ColumnPriorityOrderer,
-    )
     from bioetl.application.composite.column_service import (
         _ColumnPriorityOrderingStrategy,
     )
@@ -78,7 +75,7 @@ class MergeService(
     _parse_pipeline_name = staticmethod(parse_pipeline_name)
     _get_field_aliases = staticmethod(resolve_field_aliases_from_registry)
     _extract_base_column = staticmethod(extract_base_column)
-    _priority_orderer: ColumnPriorityOrderer | _ColumnPriorityOrderingStrategy | None
+    _priority_orderer: _ColumnPriorityOrderingStrategy | Any | None
 
     def __init__(
         self,
@@ -133,19 +130,15 @@ class MergeService(
         self._deduplicator = collaborators.deduplicator
         self._aggregator = collaborators.aggregator
         self._renamer = collaborators.renamer
-        # Use order_service if available, fall back to deprecated orderer
         self._orderer = collaborators.order_service or collaborators.orderer
-        # Priority orderer logic: use explicit priority_orderer if provided,
-        # otherwise try to get from order_service if it's a ColumnOrderService,
-        # otherwise fall back to None
         if collaborators.priority_orderer is not None:
             self._priority_orderer = collaborators.priority_orderer
-        elif collaborators.order_service and hasattr(
-            collaborators.order_service, "_priority_orderer"
-        ):
-            self._priority_orderer = collaborators.order_service._priority_orderer
         else:
-            self._priority_orderer = None
+            self._priority_orderer = getattr(
+                collaborators.order_service,
+                "_priority_orderer",
+                None,
+            )
         self._coalesce_policy = collaborators.coalesce_policy
         self._conflict_resolver = collaborators.conflict_resolver
         self._join_planner = collaborators.join_planner

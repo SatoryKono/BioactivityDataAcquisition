@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-__all__ = ["OpenAlexCursorFlow", "OpenAlexCursorFlowService"]
+__all__ = ["OpenAlexCursorFlow"]
 
 from collections.abc import AsyncIterator, Callable
 from dataclasses import dataclass, field
@@ -267,6 +267,3 @@ class OpenAlexCursorFlow:
     def _normalize_dois(self, dois: list[str]) -> list[str]:
         normalized_raw = [self.normalize_doi(item) for item in dois if item]
         return [doi for doi in normalized_raw if doi is not None]
-
-
-OpenAlexCursorFlowService = OpenAlexCursorFlow

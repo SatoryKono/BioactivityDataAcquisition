@@ -12,9 +12,7 @@ from unittest.mock import MagicMock
 import pytest
 import yaml
 
-from bioetl.application.composite.column_service import (
-    ColumnOrderService as ColumnOrderer,
-)
+from bioetl.application.composite.column_service import ColumnOrderService
 from bioetl.domain.composite.config import ColumnGroupConfig
 
 
@@ -42,10 +40,10 @@ def column_groups(publication_config: dict) -> list[ColumnGroupConfig]:
 
 
 @pytest.fixture
-def orderer(column_groups: list[ColumnGroupConfig]) -> ColumnOrderer:
-    """Create ColumnOrderer with real publication groups."""
+def orderer(column_groups: list[ColumnGroupConfig]) -> ColumnOrderService:
+    """Create ColumnOrderService with real publication groups."""
     logger = MagicMock()
-    return ColumnOrderer(logger, column_groups=column_groups)
+    return ColumnOrderService(logger, column_groups=column_groups)
 
 
 class TestCompositePublicationColumns:
@@ -85,7 +83,7 @@ class TestCompositePublicationColumns:
         assert len(all_fields) >= 90
         assert len(set(all_fields)) == len(all_fields), "Duplicate fields across groups"
 
-    def test_system_columns_at_start(self, orderer: ColumnOrderer) -> None:
+    def test_system_columns_at_start(self, orderer: ColumnOrderService) -> None:
         """System columns must always be first."""
         columns = [
             "chembl.publication.title",
@@ -98,7 +96,7 @@ class TestCompositePublicationColumns:
         assert ordered[0] == "entity_id"
         assert ordered[1] == "_run_id"
 
-    def test_qualified_columns_ordering(self, orderer: ColumnOrderer) -> None:
+    def test_qualified_columns_ordering(self, orderer: ColumnOrderService) -> None:
         """Verify ordering of qualified columns for the same field."""
         # For 'title' in 'journal' group, provider_order is:
         # [pubmed, semanticscholar, chembl, crossref, openalex]

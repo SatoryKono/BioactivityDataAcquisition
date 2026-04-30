@@ -180,7 +180,7 @@ class TestExtractMeta:
 
 
 @pytest.mark.unit
-class TestFsAdrServiceListAdrs:
+class TestFilesystemAdrCatalogListAdrs:
     """Tests for FilesystemAdrCatalog.list_adrs()."""
 
     def test_list_empty_directory(self, tmp_path: Path) -> None:
@@ -247,7 +247,7 @@ class TestFsAdrServiceListAdrs:
 
 
 @pytest.mark.unit
-class TestFsAdrServiceGetAdr:
+class TestFilesystemAdrCatalogGetAdr:
     """Tests for FilesystemAdrCatalog.get_adr()."""
 
     def test_get_existing_adr(self, tmp_path: Path) -> None:
@@ -297,7 +297,7 @@ class TestFsAdrServiceGetAdr:
 
 
 @pytest.mark.unit
-class TestFsAdrServiceValidate:
+class TestFilesystemAdrCatalogValidate:
     """Tests for FilesystemAdrCatalog.validate()."""
 
     def test_validate_empty_directory(self, tmp_path: Path) -> None:
@@ -399,7 +399,7 @@ class TestFsAdrServiceValidate:
 
 
 @pytest.mark.unit
-class TestFsAdrServiceDefaultPath:
+class TestFilesystemAdrCatalogDefaultPath:
     """Tests for default base_path behavior."""
 
     def test_default_base_path(self) -> None:

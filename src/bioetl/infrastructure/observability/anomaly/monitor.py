@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-__all__ = ["DataQualityMonitor", "DataQualityMonitorService"]
+__all__ = ["DataQualityMonitor"]
 
 
 from datetime import datetime
@@ -144,6 +144,3 @@ class DataQualityMonitor:
             metric_name: Name of the metric.
         """
         return self.detector.get_baseline_stats(metric_name)
-
-
-DataQualityMonitorService = DataQualityMonitor

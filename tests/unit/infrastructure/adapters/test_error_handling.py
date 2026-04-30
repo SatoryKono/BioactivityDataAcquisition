@@ -514,7 +514,7 @@ class TestAdapterErrorContext:
         assert context.extra == {}
 
 
-class TestErrorServiceConsistency:
+class TestAdapterErrorHandlerConsistency:
     """Tests to verify consistent error handling across adapters."""
 
     @pytest.fixture

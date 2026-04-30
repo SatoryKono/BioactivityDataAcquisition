@@ -26,6 +26,8 @@ if TYPE_CHECKING:
 
     def get_checkpoint_manager(pipeline: str) -> CheckpointRuntimeService: ...
 
+    def get_checkpoint_runtime_service(pipeline: str) -> CheckpointRuntimeService: ...
+
     def get_config_service() -> ConfigService: ...
 
     def get_export_service() -> ExportService: ...
@@ -40,6 +42,7 @@ if TYPE_CHECKING:
 __all__ = [
     "get_adr_service",
     "get_checkpoint_manager",
+    "get_checkpoint_runtime_service",
     "get_config_service",
     "get_export_service",
     "get_lineage_service",
@@ -52,6 +55,7 @@ _RESOURCE_MANAGEMENT_MODULE = "bioetl.composition._resource_management"
 _PUBLIC_EXPORTS = {
     "get_adr_service": _SERVICES_MODULE,
     "get_checkpoint_manager": _RESOURCE_MANAGEMENT_MODULE,
+    "get_checkpoint_runtime_service": _RESOURCE_MANAGEMENT_MODULE,
     "get_config_service": _SERVICES_MODULE,
     "get_export_service": _SERVICES_MODULE,
     "get_lineage_service": _SERVICES_MODULE,

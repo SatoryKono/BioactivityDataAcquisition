@@ -268,8 +268,4 @@ __all__ = [
     "AdapterErrorContext",
     "AdapterErrorHandler",
     "ErrorCategory",
-    "ErrorService",
 ]
-
-
-ErrorService = AdapterErrorHandler
