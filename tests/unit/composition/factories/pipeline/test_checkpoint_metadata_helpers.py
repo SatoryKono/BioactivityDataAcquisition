@@ -62,6 +62,8 @@ def test_build_current_checkpoint_metadata_includes_resume_anchors(tmp_path) -> 
         provider="chembl",
         entity="activity",
         pipeline_version="1.2.3",
+        git_commit="a" * 40,
+        dependency_lock_hash="sha256:deps-001",
         config_hash="a" * 64,
         effective_config_hash="a" * 64,
         manifest_id="manifest-1",
@@ -86,6 +88,10 @@ def test_build_current_checkpoint_metadata_includes_resume_anchors(tmp_path) -> 
     assert metadata.manifest_id == "manifest-1"
     assert metadata.pipeline_name == "chembl_activity"
     assert metadata.run_type == "incremental"
+    assert metadata.git_commit == "a" * 40
+    assert metadata.dependency_lock_hash == "sha256:deps-001"
+    assert metadata.run_context is not None
+    assert metadata.run_context["dependency_lock_hash"] == "sha256:deps-001"
     assert metadata.contract_ref == "chembl.activity"
     assert metadata.contract_version == "1.0.0"
     assert metadata.exact_replay is True

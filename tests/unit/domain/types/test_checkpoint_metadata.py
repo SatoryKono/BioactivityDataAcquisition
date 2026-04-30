@@ -26,6 +26,8 @@ class TestCheckpointMetadata:
             pipeline_name="chembl_activity",
             run_type="incremental",
             pipeline_version="1.0.0",
+            git_commit="a" * 40,
+            dependency_lock_hash="sha256:deps-001",
             effective_config_hash="cfg_hash",
             effective_config_artifact_id="artifact-42",
             execution_fingerprint="fingerprint-1",
@@ -61,6 +63,8 @@ class TestCheckpointMetadata:
         assert metadata.pipeline_name == "chembl_activity"
         assert metadata.run_type == "incremental"
         assert metadata.pipeline_version == "1.0.0"
+        assert metadata.git_commit == "a" * 40
+        assert metadata.dependency_lock_hash == "sha256:deps-001"
         assert metadata.effective_config_hash == "cfg_hash"
         assert metadata.effective_config_artifact_id == "artifact-42"
         assert metadata.execution_fingerprint == "fingerprint-1"
@@ -85,6 +89,8 @@ class TestCheckpointMetadata:
         assert metadata.pipeline_name is None
         assert metadata.run_type is None
         assert metadata.pipeline_version is None
+        assert metadata.git_commit is None
+        assert metadata.dependency_lock_hash is None
         assert metadata.effective_config_hash is None
         assert metadata.effective_config_artifact_id is None
         assert metadata.execution_fingerprint is None
@@ -107,6 +113,7 @@ class TestCheckpointMetadata:
             "run_context": {
                 "manifest_id": "manifest-legacy",
                 "composite_run_identity": "run-legacy",
+                "dependency_lock_hash": "sha256:deps-legacy",
             },
         }
 
@@ -116,6 +123,7 @@ class TestCheckpointMetadata:
         assert metadata.dq_contract_compatibility_hash == "legacy_hash"
         assert metadata.dq_policy_hash == "legacy_policy"
         assert metadata.pipeline_version == "0.9.0"
+        assert metadata.dependency_lock_hash == "sha256:deps-legacy"
         assert metadata.dq_rule_bundle_version is None
         assert metadata.effective_config_hash is None
         assert metadata.effective_config_artifact_id is None
@@ -373,6 +381,7 @@ class TestCheckpointMetadataSerialization:
             dq_policy_hash="policy_456",
             dq_rule_bundle_version="2024.2",
             pipeline_version="2.0.0",
+            dependency_lock_hash="sha256:deps-roundtrip",
             effective_config_hash="cfg_roundtrip",
             effective_config_artifact_id="artifact-roundtrip",
             execution_fingerprint="fingerprint-roundtrip",
@@ -401,6 +410,7 @@ class TestCheckpointMetadataSerialization:
         assert original.dq_policy_hash == deserialized.dq_policy_hash
         assert original.dq_rule_bundle_version == deserialized.dq_rule_bundle_version
         assert original.pipeline_version == deserialized.pipeline_version
+        assert original.dependency_lock_hash == deserialized.dependency_lock_hash
         assert original.effective_config_hash == deserialized.effective_config_hash
         assert (
             original.effective_config_artifact_id
