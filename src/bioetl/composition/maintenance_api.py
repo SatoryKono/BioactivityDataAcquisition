@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING
 __all__ = [
     "archive_table",
     "cleanup_bronze",
+    "get_lifecycle_service",
     "get_bronze_cleanup_service",
     "get_contract_migration_service",
     "get_lifecycle_service",

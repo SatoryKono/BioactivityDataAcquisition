@@ -15,6 +15,7 @@ if TYPE_CHECKING:
     from bioetl.composition.bootstrap.cli.health import (
         HealthServerDependencies as HealthServerDependencies,
     )
+    from bioetl.composition._resource_management import QuarantineManagerProtocol
     from bioetl.domain.ports import HealthMonitorPort, MetricsPort, QuarantinePort
 
     def get_health_server_dependencies() -> HealthServerDependenciesProtocol: ...
