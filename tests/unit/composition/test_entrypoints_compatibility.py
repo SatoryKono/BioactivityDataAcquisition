@@ -134,30 +134,6 @@ def test_composition_package_root_surface_stays_frozen() -> None:
 
 
 @pytest.mark.unit
-def test_composition_package_root_surface_stays_frozen() -> None:
-    """Package root should keep the reviewed lazy-export budget exactly bounded."""
-    composition_module = importlib.import_module("bioetl.composition")
-
-    assert set(composition_module.__all__) == {
-        "PipelineDefinition",
-        "PipelineRegistry",
-        "composite_api",
-        "control_plane_api",
-        "create_registry",
-        "entrypoints",
-        "execution_api",
-        "get_default_registry",
-        "health_api",
-        "maintenance_api",
-        "observability_api",
-        "registry_api",
-        "resources_api",
-        "types",
-    }
-    assert len(composition_module.__all__) <= 14
-
-
-@pytest.mark.unit
 def test_composition_package_root_exports_resources_api_module() -> None:
     """Package root should expose canonical resources_api lazy export."""
     composition_module = importlib.import_module("bioetl.composition")
