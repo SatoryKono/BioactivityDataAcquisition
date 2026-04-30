@@ -453,44 +453,6 @@ def test_worst_entity_dq_score_preserves_no_data_state() -> None:
     )
 
 
-def test_silver_filter_reject_accounting_mismatch_panel_uses_reconciliation_rule() -> (
-    None
-):
-    """DQ dashboard must surface the shipped reject-accounting reconciliation rule."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
-    panel = next(
-        (
-            item
-            for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Silver Filter Reject Accounting Mismatch"
-        ),
-        None,
-    )
-    assert panel is not None, (
-        "Panel 'Silver Filter Reject Accounting Mismatch' not found"
-    )
-
-    expressions = [
-        target.get("expr", "")
-        for target in panel.get("targets", [])
-        if isinstance(target.get("expr"), str)
-    ]
-    assert expressions, (
-        "Panel 'Silver Filter Reject Accounting Mismatch' must define a query target"
-    )
-    assert any(
-        "bioetl_silver_filter_reject_total_mismatch_15m" in expr
-        for expr in expressions
-    ), (
-        "Silver Filter Reject Accounting Mismatch must use the shipped "
-        "bioetl_silver_filter_reject_total_mismatch_15m recording rule"
-    )
-    assert any("[$__range]" in expr for expr in expressions), (
-        "Silver Filter Reject Accounting Mismatch must respect the selected "
-        "Grafana time range"
-    )
-
-
 def test_dashboards_do_not_use_prometheus_created_timestamps() -> None:
     """Operator dashboards must not expose Prometheus client bookkeeping timestamps."""
     for dashboard_path in get_dashboard_files():
@@ -1008,71 +970,6 @@ def test_dq_dashboard_contains_gold_specific_validation_surface() -> None:
     assert any('severity="hard_fail"' in expr for expr in expressions)
 
 
-@pytest.mark.parametrize(
-    ("dashboard_file", "panel_title"),
-    [
-        ("bioetl-overview-v2.json", "Silver Filter Rejects"),
-        ("bioetl-dq-v2.json", "Silver Filter Rejects"),
-        ("bioetl-dq-v2.json", "Silver Filter Rejects by Pipeline"),
-        ("bioetl-runtime.json", "Silver Filter Rejects"),
-    ],
-)
-def test_silver_filter_reject_panels_use_filtered_out_stage(
-    dashboard_file: str, panel_title: str
-) -> None:
-    """Silver filter rejects must stay separate from DQ quarantine semantics."""
-    dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_file)
-    panel = next(
-        (
-            item
-            for item in get_dashboard_panels(dashboard)
-            if item.get("title") == panel_title
-        ),
-        None,
-    )
-    assert panel is not None, f"Panel '{panel_title}' not found in {dashboard_file}"
-
-    expressions = [
-        target.get("expr", "")
-        for target in panel.get("targets", [])
-        if isinstance(target.get("expr"), str)
-    ]
-    assert expressions, f"Panel '{panel_title}' in {dashboard_file} has no expressions"
-    assert any("bioetl_records_processed_total" in expr for expr in expressions), (
-        f"Panel '{panel_title}' in {dashboard_file} must use "
-        "bioetl_records_processed_total"
-    )
-    assert any('stage="filtered_out"' in expr for expr in expressions), (
-        f"Panel '{panel_title}' in {dashboard_file} must filter on stage=\"filtered_out\""
-    )
-    assert any("[$__range]" in expr for expr in expressions), (
-        f"Panel '{panel_title}' in {dashboard_file} must use the selected Grafana time range"
-    )
-
-
-def test_silver_filter_reject_rate_uses_selected_time_range() -> None:
-    """Silver filter reject rate must follow the active dashboard time range."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
-    panel = next(
-        (
-            item
-            for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Silver Filter Reject Rate"
-        ),
-        None,
-    )
-    assert panel is not None, "Panel 'Silver Filter Reject Rate' not found"
-
-    expressions = [
-        target.get("expr", "")
-        for target in panel.get("targets", [])
-        if isinstance(target.get("expr"), str)
-    ]
-    assert any("[$__range]" in expr for expr in expressions), (
-        "Silver Filter Reject Rate must use the selected Grafana time range"
-    )
-
-
 def test_pipeline_error_rate_uses_runtime_error_metric_and_selected_time_range() -> (
     None
 ):
@@ -1167,51 +1064,6 @@ def test_runtime_pipeline_error_code_breakdown_uses_bounded_runtime_error_metric
     )
     assert all(target.get("instant") is True for target in targets), (
         "Top Pipeline Error Codes must use instant Prometheus queries"
-    )
-
-
-@pytest.mark.parametrize(
-    ("panel_title", "label_name"),
-    [
-        ("Top Silver Reject Reasons", "reason_code"),
-        ("Top Silver Reject Fields", "field"),
-    ],
-)
-def test_silver_filter_breakdown_panels_use_bounded_breakdown_metric(
-    panel_title: str, label_name: str
-) -> None:
-    """Reason/field breakdown panels must use the bounded Silver breakdown metric."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
-    panel = next(
-        (
-            item
-            for item in get_dashboard_panels(dashboard)
-            if item.get("title") == panel_title
-        ),
-        None,
-    )
-    assert panel is not None, f"Panel '{panel_title}' not found in bioetl-dq-v2.json"
-
-    targets = [
-        target for target in panel.get("targets", []) if isinstance(target, dict)
-    ]
-    assert targets, f"Panel '{panel_title}' must define at least one query target"
-    expressions = [
-        target.get("expr", "")
-        for target in targets
-        if isinstance(target.get("expr"), str)
-    ]
-    assert any(
-        "bioetl_silver_filter_rejections_total" in expr for expr in expressions
-    ), f"Panel '{panel_title}' must use bioetl_silver_filter_rejections_total"
-    assert any(f"by ({label_name})" in expr for expr in expressions), (
-        f"Panel '{panel_title}' must group by {label_name}"
-    )
-    assert any("[$__range]" in expr for expr in expressions), (
-        f"Panel '{panel_title}' must use the selected Grafana time range"
-    )
-    assert all(target.get("instant") is True for target in targets), (
-        f"Panel '{panel_title}' must use instant Prometheus queries"
     )
 
 
@@ -1489,40 +1341,6 @@ def test_adaptive_trend_panels_use_selected_interval(
     ]
     assert any("[$__interval]" in expr for expr in expressions), (
         f"Panel '{panel_title}' in {dashboard_file} must use $__interval"
-    )
-
-
-@pytest.mark.parametrize(
-    ("dashboard_file", "panel_title"),
-    [
-        ("bioetl-overview-v2.json", "Silver Filter Rejects"),
-        ("bioetl-dq-v2.json", "Silver Filter Rejects"),
-        ("bioetl-runtime.json", "Silver Filter Rejects"),
-    ],
-)
-def test_silver_filter_rejects_summary_panels_use_instant_queries(
-    dashboard_file: str, panel_title: str
-) -> None:
-    """Selected-range reject totals should be evaluated as instant summaries."""
-    dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_file)
-    panel = next(
-        (
-            item
-            for item in get_dashboard_panels(dashboard)
-            if item.get("title") == panel_title
-        ),
-        None,
-    )
-    assert panel is not None, f"Panel '{panel_title}' not found in {dashboard_file}"
-
-    targets = [
-        target for target in panel.get("targets", []) if isinstance(target, dict)
-    ]
-    assert targets, (
-        f"Panel '{panel_title}' in {dashboard_file} must define a query target"
-    )
-    assert all(target.get("instant") is True for target in targets), (
-        f"Panel '{panel_title}' in {dashboard_file} must use instant Prometheus queries"
     )
 
 

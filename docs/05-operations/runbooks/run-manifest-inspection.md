@@ -208,6 +208,8 @@ The supported resume contract is intentionally dual-mode:
   without ledger suffix replay;
 - composite resume uses checkpoint snapshot state as the base and then applies
   ledger suffix replay.
+- full-scan pipelines block checkpoint resume and should be diagnosed as
+  idempotent rebuilds with Silver `content_hash` deduplication.
 
 Composite resume currently follows a checkpoint snapshot + ledger suffix replay
 model.
@@ -416,6 +418,12 @@ than silently accepting the bundle as canonical.
 - `replay_mode=rebuild` means the run is on the ordinary rebuild/rerun path and
   operators must not read it as strict exact replay or snapshot-backed same-data-state
   recovery;
+- `continuation_mode` is the primary bounded continuation taxonomy. Treat
+  `exact_replay`, `checkpoint_snapshot_only_resume`,
+  `checkpoint_snapshot_plus_ledger_suffix_resume`,
+  `full_scan_idempotent_rebuild`, and `rebuild_only` as distinct operational
+  states. In particular, ordinary checkpoint resume is not composite ledger
+  suffix replay, and `full_scan_idempotent_rebuild` is not checkpoint resume.
 - `alert_signals.immutable_input_snapshot_gap=true` means the run is still on
   the ordinary source boundary, but immutable cached-Bronze input snapshots are
   missing, so strict exact replay cannot be claimed yet;
