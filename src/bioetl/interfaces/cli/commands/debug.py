@@ -16,7 +16,10 @@ from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import echo_error, echo_info
 
 if TYPE_CHECKING:
-    from bioetl.application.services import RunOptions, RunResult
+    from bioetl.application.services.execution.pipeline_runner_models import (
+        RunOptions,
+        RunResult,
+    )
     from bioetl.application.services.pipeline_debug_service import DebugAbortError
     from bioetl.application.services.pipeline_runner_service import (
         PipelineRunnerService,
@@ -46,7 +49,7 @@ def _load_stage_breakpoint() -> type[StageBreakpoint]:
 
 def _load_run_options_type() -> type[RunOptions]:
     """Resolve RunOptions lazily to keep CLI imports lightweight."""
-    from bioetl.application.services import RunOptions
+    from bioetl.application.services.execution.pipeline_runner_models import RunOptions
 
     return RunOptions
 

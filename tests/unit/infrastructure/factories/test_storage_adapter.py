@@ -10,7 +10,7 @@ from uuid import uuid4
 
 import pytest
 
-from bioetl.composition.factories.storage.adapter import StorageBundle
+from bioetl.composition.factories.storage.bundle import StorageBundle
 from bioetl.domain.ports import (
     BronzeStoragePort,
     GoldStoragePort,

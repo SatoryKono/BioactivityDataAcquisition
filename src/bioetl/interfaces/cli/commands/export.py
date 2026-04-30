@@ -17,7 +17,7 @@ from bioetl.interfaces.cli.commands.export_support import (
 )
 
 if TYPE_CHECKING:
-    from bioetl.application.services import ExportService
+    from bioetl.application.services.export_service import ExportService
 
 __all__ = ["ExportFormat", "export_command"]
 

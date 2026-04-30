@@ -19,7 +19,9 @@ from bioetl.interfaces.cli.commands.inspection_output import (
 if TYPE_CHECKING:
     from collections.abc import Callable
 
-    from bioetl.application.services import ContractMigrationService
+    from bioetl.application.services.contract_migration_service import (
+        ContractMigrationService,
+    )
 
 __all__ = [
     "get_contract_migration_service",

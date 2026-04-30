@@ -110,7 +110,8 @@ StorageFactory
   ├── health_mixin.py     → storage health checks
   ├── maintenance_mixin.py → vacuum, compaction
   ├── merged_mixin.py     → merged storage for composite pipelines
-  ├── adapter.py          → StorageBundle (composite of all ports)
+  ├── bundle.py           → StorageBundle (composite of all ports)
+  ├── adapter.py          → deprecated compatibility shim for bundle.py
   ├── factory.py          → Core factory logic
   └── storage_factory.py  → Public StorageFactory class
 ```

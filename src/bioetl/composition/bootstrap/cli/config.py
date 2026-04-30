@@ -24,7 +24,7 @@ from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_confi
 __all__ = ["bootstrap_config_service"]
 
 if TYPE_CHECKING:
-    from bioetl.application.services import ConfigService
+    from bioetl.application.services.config_service import ConfigService
     from bioetl.composition.registry_api import PipelineRegistry
 
 

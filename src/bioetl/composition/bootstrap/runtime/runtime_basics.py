@@ -15,6 +15,9 @@ from bioetl.composition.bootstrap.composite_infrastructure_context import (
     CompositeInfrastructureContext,
 )
 from bioetl.composition.factories.services.port_factories import create_metrics
+from bioetl.domain.types import RunID, RunType
+from bioetl.domain.value_objects.run_context import RunContext
+from bioetl.infrastructure.time import SystemClock
 
 if TYPE_CHECKING:
     import polars as pl
@@ -89,7 +92,23 @@ def bootstrap_runtime_basics(
 
     metrics = create_metrics(settings)
     tracer = tracer_bootstrapper(settings)
-    storage = storage_bootstrapper(enable_csv_export=True)
+    clock = SystemClock()
+    storage_run_context = RunContext(
+        run_id=RunID(UUID(effective_run_id)),
+        run_type=RunType.INCREMENTAL,
+        started_at=clock.now(),
+        pipeline_name=config.name,
+        provider="composite",
+        entity="merged",
+    )
+    storage = storage_bootstrapper(
+        run_context=storage_run_context,
+        logger=logger,
+        metrics=metrics,
+        tracing=tracer,
+        enable_csv_export=True,
+        settings=settings,
+    )
     lock = lock_factory()
     return effective_run_id, settings, logger, metrics, tracer, storage, lock
 

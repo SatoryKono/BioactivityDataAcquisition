@@ -1,87 +1,32 @@
-"""StorageBundle - Unified storage bundle for Bronze/Silver/Gold layers.
+"""Deprecated compatibility shim for the storage bundle module.
 
-Implements the narrow storage protocols from ``bioetl.domain.ports``.
-
-This module was extracted from storage.py as part of the storage factory split
-to improve maintainability and reduce file size.
-
-Note:
-    Lock validation is performed at Application layer (BatchWriter).
-    Infrastructure writers are pure I/O adapters.
+Use ``bioetl.composition.factories.storage.bundle.StorageBundle`` instead.
+Removal horizon: 2026-09-30 compatibility facade review.
 """
 
 from __future__ import annotations
 
-from typing import ClassVar
-
-from bioetl.composition.factories.storage.clear_mixin import (
-    StorageBundleClearMixin,
-)
-from bioetl.composition.factories.storage.health_mixin import (
-    StorageBundleHealthMixin,
-)
-from bioetl.composition.factories.storage.maintenance_mixin import (
-    StorageBundleMaintenanceMixin,
-)
-from bioetl.composition.factories.storage.merged_mixin import (
-    StorageBundleMergedMixin,
-)
-from bioetl.composition.factories.storage.write_mixin import (
-    StorageBundleWriteMixin,
-)
-from bioetl.domain.contracts.gold.composite import (
-    CompositeMoleculeGoldSchema,
-    CompositePublicationGoldSchema,
-)
-from bioetl.domain.types import JsonDict
-from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
-from bioetl.infrastructure.storage.gold_writer import GoldWriter
-from bioetl.infrastructure.storage.silver_writer import SilverWriter
+import warnings
+from typing import Any
 
 __all__ = ["StorageBundle"]
 
 
-class StorageBundle(
-    StorageBundleWriteMixin,
-    StorageBundleMergedMixin,
-    StorageBundleClearMixin,
-    StorageBundleMaintenanceMixin,
-    StorageBundleHealthMixin,
-):
-    """Unified storage bundle for Bronze/Silver/Gold.
+def __getattr__(name: str) -> Any:
+    """Resolve deprecated storage bundle exports lazily."""
+    if name != "StorageBundle":
+        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
-    Implements the narrow storage protocols from ``bioetl.domain.ports``.
-    Delegates to specialized writers for each layer.
-    """
+    from bioetl.composition.factories.storage.bundle import StorageBundle
 
-    _COMPOSITE_GOLD_SCHEMAS: ClassVar[
-        JsonDict  # Any: record/metadata values are heterogeneous
-    ] = {
-        "composite/publication": CompositePublicationGoldSchema,
-        "composite_publication": CompositePublicationGoldSchema,
-        "composite/molecule": CompositeMoleculeGoldSchema,
-        "composite_molecule": CompositeMoleculeGoldSchema,
-    }
-
-    # Protocol compliance marker
-    REQUIRES_SILVER_SCHEMA: bool = True
-
-    def __init__(
-        self,
-        bronze_writer: BronzeWriter,
-        silver_writer: SilverWriter,
-        gold_writer: GoldWriter,
-    ):
-        """Initialize StorageBundle with injected layer writers.
-
-        Args:
-            bronze_writer: Writer for raw data ingestion into Bronze layer
-                (zst-compressed JSONL files with optional JSON and metadata).
-            silver_writer: Writer for transformed data into Silver layer
-                (Delta Lake tables with schema enforcement and optional CSV export).
-            gold_writer: Writer for aggregated/validated data into Gold layer
-                (Delta Lake tables with Pandera validation and optional CSV export).
-        """
-        self.bronze = bronze_writer
-        self.silver = silver_writer
-        self.gold = gold_writer
+    warnings.warn(
+        (
+            "`bioetl.composition.factories.storage.adapter.StorageBundle` is "
+            "deprecated; import `StorageBundle` from "
+            "`bioetl.composition.factories.storage.bundle` instead."
+        ),
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    globals()[name] = StorageBundle
+    return StorageBundle

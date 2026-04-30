@@ -5,19 +5,19 @@
 ## Summary
 
 - Registry YAML: `configs/quality/compatibility_facade_inventory.yaml`
-- Curated inventory rows: `21`
+- Curated inventory rows: `22`
 - Transition debt rows: `1`
-- Sanctioned public entrypoint rows: `20`
-- Retained review entrypoints: `2`
+- Sanctioned public entrypoint rows: `21`
+- Retained review entrypoints: `3`
 - Permanent public entrypoints: `18`
-- Measured tracked modules: `21`
+- Measured tracked modules: `22`
 - Measured-only modules outside curated inventory: `0`
-- Discovered docstring-tracked modules: `0`
-- Unexpected docstring-tracked modules: `0`
+- Discovered docstring-tracked modules: `1`
+- Unexpected docstring-tracked modules: `1`
 - Missing allowlisted measured-only modules: `0`
 - First-party src imports targeting measured-only modules: `0`
-- Curated rows requiring external breaking change process: `21`
-- Curated rows marked internal-callers-zero: `2`
+- Curated rows requiring external breaking change process: `22`
+- Curated rows marked internal-callers-zero: `3`
 - First-party src imports targeting internal-callers-zero rows: `0`
 - Ratchet violations: `0`
 
@@ -34,6 +34,7 @@
 ## Expected Measured Registry
 
 - `src/bioetl/application/composite/merger.py`
+- `src/bioetl/application/services/__init__.py`
 - `src/bioetl/composition/__init__.py`
 - `src/bioetl/composition/bootstrap/__init__.py`
 - `src/bioetl/composition/entrypoints.py`
@@ -72,6 +73,7 @@
 - `src/bioetl/composition/entrypoints.py` — external breaking change required: `true`, internal callers zero: `false`
 - `src/bioetl/composition/__init__.py` — external breaking change required: `true`, internal callers zero: `true`
 - `src/bioetl/composition/bootstrap/__init__.py` — external breaking change required: `true`, internal callers zero: `true`
+- `src/bioetl/application/services/__init__.py` — external breaking change required: `true`, internal callers zero: `true`
 - `src/bioetl/domain/composite/config.py` — external breaking change required: `true`, internal callers zero: `false`
 - `src/bioetl/domain/value_objects/activity_values.py` — external breaking change required: `true`, internal callers zero: `false`
 - `src/bioetl/domain/value_objects/publication_field_groups.py` — external breaking change required: `true`, internal callers zero: `false`
@@ -117,11 +119,11 @@
 
 ### Discovered Docstring-Tracked Modules
 
-- None.
+- `src/bioetl/composition/factories/storage/adapter.py`
 
 ### Unexpected Docstring-Tracked Modules
 
-- None.
+- `src/bioetl/composition/factories/storage/adapter.py`
 
 ### Missing Allowlisted Measured-Only Modules
 

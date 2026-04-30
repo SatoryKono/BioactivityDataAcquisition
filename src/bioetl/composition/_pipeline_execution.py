@@ -14,7 +14,11 @@ from bioetl.application.runtime_timestamps import (
     capture_runtime_timing_anchor,
     derive_completion_timestamp,
 )
-from bioetl.application.services import PipelineRunResult, RunOptions, RunResult
+from bioetl.application.services.execution.pipeline_runner_models import (
+    PipelineRunResult,
+    RunOptions,
+    RunResult,
+)
 from bioetl.composition.bootstrap.runtime.observability import (
     maybe_start_metrics_server,
 )
