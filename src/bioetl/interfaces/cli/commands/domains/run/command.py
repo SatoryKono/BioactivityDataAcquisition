@@ -71,16 +71,16 @@ from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import echo_error, echo_warning
 
 if TYPE_CHECKING:
-    from bioetl.application.services.execution.pipeline_runner_models import (
-        RunOptions,
-        RunResult,
-    )
     from bioetl.application.services.execution.cli_run_orchestration_models import (
         CliRunOptionsInput,
         RunExecutionRequest,
     )
     from bioetl.application.services.execution.cli_run_orchestration_service import (
         CliRunOrchestrationService,
+    )
+    from bioetl.application.services.execution.pipeline_runner_models import (
+        RunOptions,
+        RunResult,
     )
     from bioetl.composition.registry_api import PipelineRegistry
 
