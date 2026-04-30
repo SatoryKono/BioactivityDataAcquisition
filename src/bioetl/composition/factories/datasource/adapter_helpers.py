@@ -133,7 +133,7 @@ class AdapterHelpersFactory:
             ErrorHandlerPort,
             ErrorService(logger=logger, metrics=metrics_port),
         )
-        fallback_fetch_service = FallbackFetchOrchestratorService(adapter_metrics)
+        fallback_fetch_service = FallbackFetchOrchestrator(adapter_metrics)
         return AdapterHelperServices(
             metrics=metrics_port,
             error_handler=error_handler,

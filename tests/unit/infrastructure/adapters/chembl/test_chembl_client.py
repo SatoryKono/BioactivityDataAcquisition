@@ -22,7 +22,7 @@ from bioetl.infrastructure.adapters.common.api_request_collector import (
     APIRequestCollector,
 )
 from bioetl.infrastructure.adapters.common.fallback_fetch_service import (
-    FallbackFetchOrchestratorService,
+    FallbackFetchOrchestrator,
 )
 
 
@@ -1081,7 +1081,7 @@ class TestChemblAdapterExtractionParams:
         self, mock_http_client, mock_logger
     ) -> None:
         """Test constructor compatibility with helper-service DI wiring."""
-        fallback_fetch_service = MagicMock(spec=FallbackFetchOrchestratorService)
+        fallback_fetch_service = MagicMock(spec=FallbackFetchOrchestrator)
 
         adapter = ChemblAdapter(
             http_client=mock_http_client,

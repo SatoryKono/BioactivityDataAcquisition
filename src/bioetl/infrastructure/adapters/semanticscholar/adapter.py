@@ -21,7 +21,7 @@ from bioetl.domain.exceptions import BioETLError, NetworkError
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.common import (
     ComposableFallbackDecorator,
-    FallbackFetchOrchestratorService,
+    FallbackFetchOrchestrator,
     FallbackPolicyMixin,
 )
 from bioetl.infrastructure.adapters.semanticscholar._client_fallback_policy import (
@@ -125,11 +125,11 @@ class SemanticScholarAdapter(
     adapter_metrics: AdapterMetricsRecorder | None = None
     request_collector: APIRequestCollector | None = None
     _: KW_ONLY
-    fallback_fetch_service: FallbackFetchOrchestratorService
+    fallback_fetch_service: FallbackFetchOrchestrator
     title_fallback_handler: SemanticScholarTitleFallbackHandler | None = None
 
     provider_name: str = field(init=False, default="semanticscholar")
-    _fallback_fetch_service: FallbackFetchOrchestratorService = field(
+    _fallback_fetch_service: FallbackFetchOrchestrator = field(
         init=False, repr=False
     )
     _fallback_decorator: ComposableFallbackDecorator = field(init=False, repr=False)

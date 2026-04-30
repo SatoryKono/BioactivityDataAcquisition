@@ -10,7 +10,7 @@ from tests.async_utils import collect_async_iterator
 
 import bioetl.infrastructure.adapters.common.fallback_fetch_service as fallback_service
 from bioetl.infrastructure.adapters.common.fallback_fetch_service import (
-    FallbackFetchOrchestratorService,
+    FallbackFetchOrchestrator,
     FallbackFetchRequest,
 )
 
@@ -31,7 +31,7 @@ def _extract_record_id(record: dict[str, object]) -> str:
 async def test_execute_splits_and_trims_primary_ids(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    orchestrator = FallbackFetchOrchestratorService()
+    orchestrator = FallbackFetchOrchestrator()
     seen: dict[str, Any] = {}
     primary_call: dict[str, Any] = {}
 
@@ -106,7 +106,7 @@ async def test_execute_splits_and_trims_primary_ids(
 async def test_execute_without_trim_keeps_all_primary_ids(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    orchestrator = FallbackFetchOrchestratorService()
+    orchestrator = FallbackFetchOrchestrator()
     seen_primary_ids: list[str] = []
 
     async def fake_policy(
@@ -167,7 +167,7 @@ async def test_execute_records_unified_fallback_metrics(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     mock_adapter_metrics = MagicMock()
-    orchestrator = FallbackFetchOrchestratorService(mock_adapter_metrics)
+    orchestrator = FallbackFetchOrchestrator(mock_adapter_metrics)
 
     async def fake_policy(
         *,
