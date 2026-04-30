@@ -9,14 +9,14 @@ from __future__ import annotations
 
 from uuid import uuid4
 
-from bioetl.application.services.execution.pipeline_runner_service import (
-    PipelineRunnerService,
-)
 from bioetl.application.services.execution.pipeline_run_context_service import (
     PipelineRunContextService,
 )
 from bioetl.application.services.execution.pipeline_run_execution_service import (
     PipelineRunExecutionService,
+)
+from bioetl.application.services.execution.pipeline_runner_service import (
+    PipelineRunnerService,
 )
 from bioetl.composition.bootstrap.runtime.observability import (
     bootstrap_observability_bundle,
