@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
 
 from bioetl.application.services.control_plane.run_manifest_inspection_service import (
@@ -16,6 +16,20 @@ __all__ = [
     "ForensicRunDiffResult",
     "ForensicRunDiffService",
 ]
+
+
+def _inspection_service_factory_from_ports(
+    manifest_port: RunManifestPort,
+    ledger_port: RunLedgerPort | None,
+    provided_factory: Callable[[], RunManifestInspectionService] | None,
+) -> Callable[[], RunManifestInspectionService]:
+    """Resolve the inspection-service factory without assembling in method bodies."""
+    if provided_factory is not None:
+        return provided_factory
+    return lambda: RunManifestInspectionService(
+        manifest_port=manifest_port,
+        ledger_port=ledger_port,
+    )
 
 
 def _dict_or_empty(value: object) -> dict[str, object]:
@@ -242,6 +256,7 @@ class ForensicRunDiffService:
 
     manifest_port: RunManifestPort
     ledger_port: RunLedgerPort | None = None
+    inspection_service_factory: Callable[[], RunManifestInspectionService] | None = None
 
     def compare(
         self,
@@ -249,10 +264,11 @@ class ForensicRunDiffService:
         right_identifier: str,
     ) -> ForensicRunDiffResult:
         """Compare two run or manifest identifiers using existing inspection seams."""
-        inspection = RunManifestInspectionService(
-            manifest_port=self.manifest_port,
-            ledger_port=self.ledger_port,
-        )
+        inspection = _inspection_service_factory_from_ports(
+            self.manifest_port,
+            self.ledger_port,
+            self.inspection_service_factory,
+        )()
         left = inspection.show(left_identifier)
         right = inspection.show(right_identifier)
         manifest_diff = inspection.diff(left_identifier, right_identifier)

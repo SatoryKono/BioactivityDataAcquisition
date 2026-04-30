@@ -13,11 +13,11 @@ if TYPE_CHECKING:
         AuditInspectionService,
     )
     from bioetl.application.services.config_service import ConfigService
-    from bioetl.application.services.control_plane.run_manifest_inspection_service import (
-        RunManifestInspectionService,
-    )
     from bioetl.application.services.control_plane.forensic_diff_service import (
         ForensicRunDiffService,
+    )
+    from bioetl.application.services.control_plane.run_manifest_inspection_service import (
+        RunManifestInspectionService,
     )
     from bioetl.application.services.export_service import ExportService
     from bioetl.application.services.lineage.lineage_inspection_service import (

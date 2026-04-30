@@ -681,6 +681,17 @@ The application-level `ForensicRunDiffService` builds the same report through
 the existing manifest and ledger ports. It must classify missing optional
 evidence, such as absent run-ledger entries or missing published artifacts,
 rather than silently treating unavailable evidence as a match.
+The operator-facing CLI/API entrypoints are:
+
+- `bioetl run-manifest forensic-diff <LEFT> <RIGHT>`
+- `bioetl diagnostics forensic-diff <LEFT> <RIGHT>`
+
+The `forensic-diff` report is a bounded application DTO with explicit sections
+for `replay_capability`, `checkpoint_compatibility`, `artifact_completeness`,
+`lineage_closure`, and `missing_evidence`. Missing sidecars, incomplete
+produced-artifact traces, absent ledger entries, and unsupported lineage
+closure are represented as missing/unsupported evidence instead of being
+collapsed into a successful match.
 
 ## Canonical Stage Sets
 

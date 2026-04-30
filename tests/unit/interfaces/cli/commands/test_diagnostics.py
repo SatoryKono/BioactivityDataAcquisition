@@ -22,6 +22,49 @@ class _FakeInspectionResult:
         return self._payload
 
 
+class _FakeForensicDiffService:
+    def compare(
+        self,
+        left_identifier: str,
+        right_identifier: str,
+    ) -> _FakeInspectionResult:
+        return _FakeInspectionResult(
+            {
+                "left_manifest_id": left_identifier,
+                "right_manifest_id": right_identifier,
+                "classification": "semantic_drift",
+                "semantic_equivalent": False,
+                "occurrence_only": False,
+                "replay_relationship": "unrelated",
+                "forensic_diff": {
+                    "verdict": "semantic_drift",
+                    "checkpoint_anchors": {
+                        "compatible": False,
+                        "mismatched_fields": ["execution_fingerprint"],
+                    },
+                },
+                "checkpoint_compatibility": {
+                    "available": True,
+                    "compatible": False,
+                    "mismatched_fields": ["execution_fingerprint"],
+                },
+                "artifact_completeness": {
+                    "left": {"complete": True},
+                    "right": {"complete": False},
+                },
+                "lineage_closure": {
+                    "left": {"status": "supported"},
+                    "right": {"status": "supported"},
+                },
+                "missing_evidence": {
+                    "left": [],
+                    "right": ["published_artifacts_missing"],
+                },
+                "manifest_diff": {"classification": "semantic_drift"},
+            }
+        )
+
+
 class _FakeHealthSummary:
     def __init__(self, payload: dict[str, dict[str, str | float]]) -> None:
         self._payload = payload
@@ -219,6 +262,7 @@ def test_diagnostics_help_displays_subcommands(cli_runner: CliRunner) -> None:
     assert "run" in result.output
     assert "checkpoint" in result.output
     assert "manifest" in result.output
+    assert "forensic-diff" in result.output
     assert "quarantine" in result.output
 
 
@@ -234,6 +278,7 @@ def test_diagnostics_guide_displays_canonical_routes(cli_runner: CliRunner) -> N
     assert "bioetl diagnostics contract-checks" in result.output
     assert "bioetl diagnostics checkpoint" in result.output
     assert "bioetl diagnostics manifest" in result.output
+    assert "bioetl diagnostics forensic-diff" in result.output
     assert "bioetl diagnostics quarantine" in result.output
     assert "auto-managed during pipeline runs" in result.output
     assert "bioetl diagnostics contract-checks" in result.output
@@ -255,6 +300,7 @@ def test_diagnostics_guide_matches_exact_output(cli_runner: CliRunner) -> None:
         "  checkpoint: bioetl diagnostics checkpoint --pipeline <pipeline>"
         " [--run-id <run-id>] [--audit-limit 100] [--format text|json|yaml]",
         "  manifest: bioetl diagnostics manifest <run-id|manifest-id> [--format text|json|yaml]",
+        "  forensic-diff: bioetl diagnostics forensic-diff <left> <right> [--format text|json|yaml]",
         "  quarantine: bioetl diagnostics quarantine --pipeline <pipeline>"
         " [--run-id <run-id>] [--group-by reason-signature] [--json]",
         "",
@@ -659,6 +705,40 @@ def test_diagnostics_manifest_json_outputs_manifest_payload(
     payload = json.loads(result.output)
     assert payload["manifest"]["manifest_id"] == "manifest-1"
     assert payload["diagnostics"]["latest_status"] == "success"
+
+
+@pytest.mark.unit
+def test_diagnostics_forensic_diff_json_outputs_cross_artifact_report(
+    cli_runner: CliRunner,
+    monkeypatch: Any,
+) -> None:
+    import bioetl.interfaces.cli.commands.diagnostics as diagnostics_module
+
+    monkeypatch.setattr(
+        diagnostics_module,
+        "get_forensic_run_diff_service",
+        lambda: _FakeForensicDiffService(),
+        raising=True,
+    )
+
+    result = cli_runner.invoke(
+        cli,
+        [
+            "diagnostics",
+            "forensic-diff",
+            "manifest-1",
+            "manifest-2",
+            "--format",
+            "json",
+        ],
+    )
+
+    assert result.exit_code == 0
+    payload = json.loads(result.output)
+    assert payload["classification"] == "semantic_drift"
+    assert payload["checkpoint_compatibility"]["compatible"] is False
+    assert payload["artifact_completeness"]["right"]["complete"] is False
+    assert payload["missing_evidence"]["right"] == ["published_artifacts_missing"]
 
 
 @pytest.mark.unit

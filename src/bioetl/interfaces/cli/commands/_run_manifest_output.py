@@ -161,10 +161,40 @@ def render_diff_payload(payload: dict[str, object]) -> str:
     return "\n".join(lines)
 
 
+def render_forensic_diff_payload(payload: dict[str, object]) -> str:
+    """Render one cross-artifact forensic diff payload in human-readable form."""
+    lines = [
+        "Forensic Run Diff",
+        f"  left_manifest_id: {format_scalar(payload.get('left_manifest_id'))}",
+        f"  right_manifest_id: {format_scalar(payload.get('right_manifest_id'))}",
+        f"  classification: {format_scalar(payload.get('classification'))}",
+        f"  semantic_equivalent: {format_scalar(payload.get('semantic_equivalent'))}",
+        f"  occurrence_only: {format_scalar(payload.get('occurrence_only'))}",
+        f"  replay_relationship: {format_scalar(payload.get('replay_relationship'))}",
+    ]
+    lines.extend(_render_cross_surface_replay_diff(payload))
+    for label in (
+        "replay_capability",
+        "checkpoint_compatibility",
+        "artifact_completeness",
+        "lineage_closure",
+        "missing_evidence",
+    ):
+        rendered = format_block(payload.get(label), json_renderer=_render_jsonish_block)
+        if len(rendered) == 1:
+            lines.append(f"  {label}: {rendered[0]}")
+            continue
+        lines.append(f"  {label}:")
+        lines.extend(f"    {line}" for line in rendered)
+    return "\n".join(lines)
+
+
 def render_text_payload(payload: dict[str, object]) -> str:
     """Render CLI payload in human-readable text mode."""
     if "manifest" in payload:
         return render_show_payload(payload)
     if "differences" in payload:
         return render_diff_payload(payload)
+    if "manifest_diff" in payload and "forensic_diff" in payload:
+        return render_forensic_diff_payload(payload)
     return json.dumps(payload, indent=2, default=str)

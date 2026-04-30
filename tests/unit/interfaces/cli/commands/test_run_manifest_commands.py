@@ -451,6 +451,63 @@ class _CorruptRunManifestService:
         )
 
 
+class _FakeForensicRunDiffResult:
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "left_manifest_id": "manifest-1",
+            "right_manifest_id": "manifest-2",
+            "classification": "semantic_drift",
+            "semantic_equivalent": False,
+            "occurrence_only": False,
+            "semantic_difference_fields": ["execution_fingerprint"],
+            "occurrence_difference_fields": ["run_id"],
+            "noncanonical_difference_fields": [],
+            "replay_relationship": "unrelated",
+            "forensic_diff": {
+                "verdict": "semantic_drift",
+                "checkpoint_anchors": {
+                    "compatible": False,
+                    "matching_fields": [],
+                    "mismatched_fields": ["execution_fingerprint"],
+                },
+            },
+            "replay_capability": {
+                "capability_match": False,
+                "left": {"replay_capability": "exact_replay_supported"},
+                "right": {"replay_capability": "rebuild_only"},
+            },
+            "checkpoint_compatibility": {
+                "available": True,
+                "compatible": False,
+                "matching_fields": [],
+                "mismatched_fields": ["execution_fingerprint"],
+            },
+            "artifact_completeness": {
+                "left": {"complete": True, "published_artifact_count": 1},
+                "right": {"complete": False, "published_artifact_count": 0},
+            },
+            "lineage_closure": {
+                "left": {"status": "supported"},
+                "right": {"status": "supported"},
+            },
+            "missing_evidence": {
+                "left": [],
+                "right": [
+                    "run_ledger_entries_missing",
+                    "published_artifacts_missing",
+                ],
+            },
+            "manifest_diff": {"classification": "semantic_drift"},
+        }
+
+
+class _FakeForensicRunDiffService:
+    def compare(self, left_identifier: str, right_identifier: str) -> object:
+        if "missing" in {left_identifier, right_identifier}:
+            raise ValueError("missing")
+        return _FakeForensicRunDiffResult()
+
+
 @pytest.fixture
 def cli_runner() -> CliRunner:
     return CliRunner()
@@ -467,6 +524,17 @@ def _patch_run_manifest_service(monkeypatch: Any, service: object) -> None:
     )
 
 
+def _patch_forensic_diff_service(monkeypatch: Any, service: object) -> None:
+    import bioetl.interfaces.cli.commands.run_manifest as run_manifest_cmd
+
+    monkeypatch.setattr(
+        run_manifest_cmd,
+        "get_forensic_run_diff_service",
+        lambda: service,
+        raising=True,
+    )
+
+
 @pytest.mark.unit
 class TestRunManifestCommands:
     def test_run_manifest_help_shows_subcommands(self, cli_runner: CliRunner) -> None:
@@ -475,6 +543,7 @@ class TestRunManifestCommands:
         assert result.exit_code == 0
         assert "show" in result.output
         assert "diff" in result.output
+        assert "forensic-diff" in result.output
         assert "score" in result.output
 
     def test_run_manifest_help_avoids_eager_registry_build(
@@ -755,3 +824,51 @@ class TestRunManifestCommands:
         assert "replay_relationship: right_is_exact_replay_of_left" in result.output
         assert "differences:" in result.output
         assert "field: runtime_config" in result.output
+
+    def test_forensic_diff_json_outputs_cross_artifact_report(
+        self,
+        cli_runner: CliRunner,
+        monkeypatch: Any,
+    ) -> None:
+        _patch_forensic_diff_service(monkeypatch, _FakeForensicRunDiffService())
+
+        result = cli_runner.invoke(
+            cli,
+            [
+                "run-manifest",
+                "forensic-diff",
+                "manifest-1",
+                "manifest-2",
+                "--format",
+                "json",
+            ],
+        )
+
+        assert result.exit_code == 0
+        payload = json.loads(result.output)
+        assert payload["classification"] == "semantic_drift"
+        assert payload["checkpoint_compatibility"]["compatible"] is False
+        assert payload["artifact_completeness"]["right"]["complete"] is False
+        assert payload["missing_evidence"]["right"] == [
+            "run_ledger_entries_missing",
+            "published_artifacts_missing",
+        ]
+
+    def test_forensic_diff_defaults_to_human_readable_text(
+        self,
+        cli_runner: CliRunner,
+        monkeypatch: Any,
+    ) -> None:
+        _patch_forensic_diff_service(monkeypatch, _FakeForensicRunDiffService())
+
+        result = cli_runner.invoke(
+            cli,
+            ["run-manifest", "forensic-diff", "manifest-1", "manifest-2"],
+        )
+
+        assert result.exit_code == 0
+        assert "Forensic Run Diff" in result.output
+        assert "classification: semantic_drift" in result.output
+        assert "checkpoint_compatibility:" in result.output
+        assert "artifact_completeness:" in result.output
+        assert "missing_evidence:" in result.output

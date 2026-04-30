@@ -41,6 +41,10 @@ def build_diagnostics_guide_lines() -> list[str]:
             "[--format text|json|yaml]"
         ),
         (
+            "  forensic-diff: bioetl diagnostics forensic-diff <left> <right> "
+            "[--format text|json|yaml]"
+        ),
+        (
             "  quarantine: bioetl diagnostics quarantine --pipeline <pipeline> "
             "[--run-id <run-id>] [--group-by reason-signature] [--json]"
         ),
