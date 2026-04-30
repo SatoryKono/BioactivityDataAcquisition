@@ -6,6 +6,12 @@ ______________________________________________________________________
 
 This skill provides dynamic repository configuration for all gh-workflow commands, auto-detecting settings so commands work in any repository without hardcoding.
 
+## BioETL Runtime Policy
+
+- Project runtime contract: `../../../AGENTS.md`
+- Memory policy: `../../../docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
+- Post-change validation: `../../../docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
+
 Use TodoWrite to track these mandatory steps:
 
 <required>

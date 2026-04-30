@@ -1,8 +1,9 @@
 """Pipeline payload normalization helpers for canonical config orchestration.
 
-Keeps convention defaults, source merging, and legacy/new-shape schema
-normalization behind one infrastructure boundary used by the staged
-pipeline-config flow.
+Keeps convention defaults, source merging, and registered config compatibility
+shapes behind one infrastructure boundary used by the staged pipeline-config
+flow. Compatibility scope is governed by
+``configs/quality/config_compatibility_registry.yaml``.
 """
 
 from __future__ import annotations

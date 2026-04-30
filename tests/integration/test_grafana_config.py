@@ -28,6 +28,10 @@ from tests.integration._grafana_test_support import (
 pytestmark = pytest.mark.integration
 
 RULES_PATH = Path("grafana/prometheus-rules/bioetl_observability.yml")
+GRAFANA_DASHBOARD_PROVISIONING_PATH = Path(
+    "grafana/provisioning/dashboards/bioetl.yaml"
+)
+GRAFANA_README_PATH = Path("grafana/README.md")
 _BIOETL_METRIC_TOKEN_RE = re.compile(r"\b(bioetl_[a-z0-9_]+)\b")
 
 
@@ -134,7 +138,7 @@ def test_dashboard_has_required_variables(dashboard_path):
         "bioetl-overview-v2.json": {"pipeline", "run_type"},
         "bioetl-dq-v2.json": {"pipeline", "run_type", "stage"},
         "bioetl-runtime.json": {"pipeline", "run_type", "stage"},
-        "bioetl-provider-health-v2.json": {"provider"},
+        "bioetl-provider-health-v2.json": {"provider", "adapter"},
         "bioetl-control-plane-v1.json": {"pipeline", "run_type"},
         "bioetl-workflow-overview.json": {"workflow", "status"},
         "bioetl-silver-reject-explorer.json": {
@@ -205,6 +209,39 @@ def test_variable_query_sources(dashboard_path):
         _assert_provider_health_variable_contract(dashboard_path, variable_map)
     else:
         _assert_standard_variable_contract(dashboard_path, variable_map)
+
+
+def test_production_dashboard_provisioning_disables_ui_updates() -> None:
+    """Production dashboards must remain dashboard-as-code, not mutable UI state."""
+    payload = yaml.safe_load(
+        GRAFANA_DASHBOARD_PROVISIONING_PATH.read_text(encoding="utf-8")
+    )
+    providers = payload.get("providers", []) if isinstance(payload, dict) else []
+    bioetl_provider = next(
+        (
+            provider
+            for provider in providers
+            if isinstance(provider, dict) and provider.get("name") == "BioETL"
+        ),
+        None,
+    )
+    assert bioetl_provider is not None, "BioETL dashboard provider is missing"
+    assert bioetl_provider.get("allowUiUpdates") is False, (
+        "Production BioETL dashboard provisioning must disable UI updates"
+    )
+
+
+def test_monitoring_readme_dashboard_inventory_matches_shipped_json() -> None:
+    """README dashboard inventory must not drift from shipped dashboard JSON files."""
+    dashboard_names = sorted(path.name for path in get_dashboard_files())
+    readme = GRAFANA_README_PATH.read_text(encoding="utf-8")
+
+    assert "Dashboards: 5 JSON" not in readme
+    assert f"Dashboards: {len(dashboard_names)} JSON" in readme
+    for dashboard_name in dashboard_names:
+        assert dashboard_name.removesuffix(".json") in readme, (
+            f"grafana/README.md must mention shipped dashboard {dashboard_name}"
+        )
 
 
 def test_summary_queries_use_zero_fallbacks() -> None:
@@ -393,6 +430,26 @@ def test_dq_score_uses_validation_metric(dashboard_file, panel_title):
     )
     assert any("or vector(0)" in expr for expr in expressions), (
         f"Panel '{panel_title}' in {dashboard_file} must stay zero-safe"
+    )
+
+
+def test_worst_entity_dq_score_preserves_no_data_state() -> None:
+    """Worst-score gauges must not collapse missing DQ samples into score zero."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
+    panel = next(
+        (
+            item
+            for item in get_dashboard_panels(dashboard)
+            if item.get("title") == "Worst-Entity DQ Score"
+        ),
+        None,
+    )
+    assert panel is not None, "Panel 'Worst-Entity DQ Score' not found"
+
+    expressions = [target.get("expr", "") for target in panel.get("targets", [])]
+    assert any("bioetl_dq_validation_score" in expr for expr in expressions)
+    assert all("or vector(0)" not in expr for expr in expressions), (
+        "Worst-Entity DQ Score must preserve no-data rather than rendering score 0"
     )
 
 
@@ -1152,6 +1209,39 @@ def test_provider_health_summary_panels_use_selected_time_range(
     assert any(expected_snippet in expr for expr in expressions), (
         f"Panel '{panel_title}' must use the selected Grafana time range"
     )
+
+
+def test_provider_circuit_breaker_panels_use_adapter_variable() -> None:
+    """Circuit-breaker metrics expose adapter labels, not provider labels."""
+    dashboard = load_dashboard(
+        Path("grafana/dashboards/bioetl-provider-health-v2.json")
+    )
+
+    for panel_title in (
+        "Circuit Breaker State (max)",
+        "Circuit Breaker Trips by Provider",
+    ):
+        panel = next(
+            (
+                item
+                for item in get_dashboard_panels(dashboard)
+                if item.get("title") == panel_title
+            ),
+            None,
+        )
+        assert panel is not None, f"Panel '{panel_title}' not found"
+        expressions = [
+            target.get("expr", "")
+            for target in panel.get("targets", [])
+            if isinstance(target.get("expr"), str)
+        ]
+        assert expressions, f"Panel '{panel_title}' has no PromQL expressions"
+        assert any('adapter=~"$adapter"' in expr for expr in expressions), (
+            f"Panel '{panel_title}' must filter circuit-breaker metrics via adapter"
+        )
+        assert all('adapter=~"$provider"' not in expr for expr in expressions), (
+            f"Panel '{panel_title}' must not assume provider equals adapter"
+        )
 
 
 @pytest.mark.parametrize(

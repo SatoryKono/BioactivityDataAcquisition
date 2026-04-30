@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-30T15:32:33.781518+00:00",
+  "generated_at": "2026-04-30T17:02:28.510954+00:00",
   "summary": {
     "total_scripts": 356,
     "status_counts": {
@@ -5587,7 +5587,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 209,
+          "line": 220,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"ci\" / \"apply_ci_fixes.py\""
         }
@@ -5734,7 +5734,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 137,
+          "line": 140,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"ci\" / \"quality_integral_gate.py\""
         }
@@ -6651,19 +6651,31 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 12,
+      "reference_count": 16,
       "references": [
         {
           "path": "docs/03-guides/testing.md",
           "line": 52,
           "source_group": "docs",
-          "text": "bash scripts/engineering/dev/run_pytest_sharded.sh --stream --keep-coverage-files --coverage-dir .coverage-sharded -- -vv --cov-report=html"
+          "text": "BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream --keep-coverage-files --coverage-dir .coverage-sharded -- -vv --cov-report=term-missing"
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 58,
+          "line": 65,
           "source_group": "docs",
           "text": "ignore/deselect inventory for `run_pytest_sharded.sh` lives in"
+        },
+        {
+          "path": "docs/03-guides/testing.md",
+          "line": 450,
+          "source_group": "docs",
+          "text": "bash scripts/engineering/dev/run_pytest_sharded.sh \\"
+        },
+        {
+          "path": "docs/03-guides/testing.md",
+          "line": 541,
+          "source_group": "docs",
+          "text": "| 6   | `BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream --keep-coverage-files --coverage-dir .coverage-sharded -- -vv --cov-report=term-missing` | В"
         },
         {
           "path": "scripts/engineering/dev/README.md",
@@ -6688,18 +6700,6 @@
           "line": 109,
           "source_group": "scripts",
           "text": "`run_pytest_sharded.sh` are now externalized in"
-        },
-        {
-          "path": "scripts/engineering/dev/README.md",
-          "line": 168,
-          "source_group": "scripts",
-          "text": "| `pytest-sharded`     | `scripts/engineering/dev/run_pytest_sharded.sh`              | Run the recommended path-based pytest shards                     |"
-        },
-        {
-          "path": "scripts/engineering/dev/README.md",
-          "line": 201,
-          "source_group": "scripts",
-          "text": "| `scripts/engineering/dev/run_pytest_sharded.sh`              | Run the recommended path-based pytest shard plan (shell variant)                          |"
         }
       ]
     },
@@ -7579,7 +7579,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 293,
+          "line": 304,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"qa\" / \"generate_architecture_debt_tasks.py\""
         }
@@ -7895,7 +7895,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 296,
+          "line": 307,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"qa\" / \"reduce_architecture_debt.py\""
         }
@@ -8078,7 +8078,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 126,
+          "line": 133,
           "source_group": "docs",
           "text": "- canonical tooling paths активированы для enforced rollout: `scripts/engineering/qa/report_vcr_metadata_catalog.py` генерирует/проверяет catalog, а `scripts/ops/migrations/active/backfill_vcr_metadat"
         },
@@ -8279,7 +8279,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 471,
+          "line": 483,
           "source_group": "docs",
           "text": "- `python -m scripts.engineering.qa.vcr check-placement`"
         },
@@ -8342,7 +8342,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 472,
+          "line": 484,
           "source_group": "docs",
           "text": "- `python -m scripts.engineering.qa.vcr check-naming`"
         },
@@ -8369,7 +8369,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 124,
+          "line": 131,
           "source_group": "docs",
           "text": "- `vcr_cassette_max_age_days: 90` является blocking stale-age threshold: CI теперь валидирует managed metadata inventory через `scripts/engineering/qa/vcr/check_vcr_metadata_age.py --max-age-days 90`"
         },
@@ -9735,7 +9735,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 91,
+          "line": 98,
           "source_group": "docs",
           "text": "`scripts/ops/launchers/codex/setup_plugins.sh --pytest-only` перед запуском pytest."
         },
@@ -9957,7 +9957,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 126,
+          "line": 133,
           "source_group": "docs",
           "text": "- canonical tooling paths активированы для enforced rollout: `scripts/engineering/qa/report_vcr_metadata_catalog.py` генерирует/проверяет catalog, а `scripts/ops/migrations/active/backfill_vcr_metadat"
         },
@@ -10074,7 +10074,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 181,
+          "line": 192,
           "source_group": "tests",
           "text": "/ \"rerender_grafana_screenshots.py\""
         }

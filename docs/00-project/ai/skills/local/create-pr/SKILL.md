@@ -6,6 +6,12 @@ ______________________________________________________________________
 
 Creates GitHub PRs with Conventional Commits titles adapted for BioETL project.
 
+## BioETL Runtime Policy
+
+- Project runtime contract: `../../../AGENTS.md`
+- Memory policy: `../../../docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
+- Post-change validation: `../../../docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
+
 ## PR Title Format
 
 ```

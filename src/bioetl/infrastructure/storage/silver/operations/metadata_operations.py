@@ -9,6 +9,8 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Protocol, cast
 
+import orjson
+
 from bioetl.domain.behavior.dq_metrics_calculator import (
     DQMetricsCalculator,
     DQMetricsInput,
@@ -23,23 +25,26 @@ from bioetl.domain.ports import (
     MetadataWriterPort,
     MetricsPort,
 )
+from bioetl.domain.ports.noop import NoOpMetadataWriter
 from bioetl.domain.types import BatchID, BronzeRecord, RunID, RunType
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
 from bioetl.domain.value_objects.silver_result import SilverWriteResult
+from bioetl.infrastructure.storage.metadata.builder_base import _parse_table_name
+from bioetl.infrastructure.storage.silver.metadata_operations import (
+    _build_silver_write_result,
+    _coerce_silver_metadata_write_request,
+    _execute_silver_metadata_write,
+    _prepare_silver_metadata_write,
+    _prepare_silver_write_finalization_context,
+)
 from bioetl.infrastructure.storage.silver.metadata_request_models import (
     _coerce_silver_write_finalization_preparation_request,
     _coerce_silver_write_result_finalization_request,
+    _PreparedSilverWriteFinalizationContext,
+    _SilverMetadataWriteRequest,
     _SilverWriteFinalizationPreparationRequest,
     _SilverWriteResultFinalizationRequest,
-)
-from bioetl.infrastructure.storage.silver.operations.metadata_finalization_support import (
-    _finalize_silver_write_result,
-    _prepare_silver_write_finalization_context,
-    _PreparedSilverWriteFinalizationContext,
-)
-from bioetl.infrastructure.storage.silver.operations.metadata_sidecar_adapter import (
-    _normalize_records_for_dq_metrics,
 )
 from bioetl.infrastructure.storage.silver.operations.metadata_write_support import (
     _coerce_silver_metadata_audit_request,
@@ -68,6 +73,26 @@ class _DeltaVersionHostOverride(Protocol):
     async def _get_delta_version(self, table_path: str) -> int | None: ...
 
 
+def _normalize_record_value_for_dq_metrics(value: object) -> object:
+    """Normalize heterogeneous record values for DQ metric tabularization."""
+    if isinstance(value, (dict, list, tuple)):
+        return orjson.dumps(value, option=orjson.OPT_SORT_KEYS).decode("utf-8")
+    return value
+
+
+def _normalize_records_for_dq_metrics(
+    records: list[BronzeRecord],
+) -> list[BronzeRecord]:
+    """Normalize record payloads before temporary DQ metrics conversion."""
+    return [
+        {
+            key: _normalize_record_value_for_dq_metrics(value)
+            for key, value in record.items()
+        }
+        for record in records
+    ]
+
+
 @dataclass(frozen=True, slots=True)
 class SilverMetadataOperations:
     """Silver-layer metadata operations via composition."""
@@ -80,6 +105,27 @@ class SilverMetadataOperations:
     _lineage_store: LineageStorePort | None = None
     _dq_calculator: DQMetricsCalculator | None = None
     _host: object | None = None
+
+    @property
+    def _flat_structure(self) -> bool:
+        """Resolve flat-structure metadata mode from the current host, if any."""
+        return bool(getattr(self._host, "_flat_structure", False))
+
+    @property
+    def _transform_version(self) -> str | None:
+        """Resolve transform version from the current host, if any."""
+        value = getattr(self._host, "_transform_version", None)
+        return str(value) if value is not None else None
+
+    @property
+    def _transform_steps(self) -> tuple[str, ...]:
+        """Resolve transform steps from the current host with a stable fallback."""
+        value = getattr(self._host, "_transform_steps", ())
+        if isinstance(value, tuple):
+            return tuple(str(step) for step in value)
+        if isinstance(value, list):
+            return tuple(str(step) for step in value)
+        return ()
 
     def _log_debug(self, message: str) -> None:
         """Best-effort debug logging."""
@@ -126,39 +172,14 @@ class SilverMetadataOperations:
         table_path: str,
     ) -> SilverWriteResult | None:
         """Persist metadata using whichever writer signature is available."""
-        if self._metadata_writer is None:
-            self._log_info(
-                "Skipping Silver metadata persistence: metadata writer missing"
-            )
-            return None
-
-        write_silver_metadata = self._metadata_writer.write_silver_metadata
-        parameters = inspect.signature(write_silver_metadata).parameters
-        accepts_var_kwargs = any(
-            parameter.kind is inspect.Parameter.VAR_KEYWORD
-            for parameter in parameters.values()
+        provider_name, entity_name = _parse_table_name(table_name)
+        await self._write_silver_metadata_file(
+            table_path=table_path,
+            metadata=metadata,
+            table_name=table_name,
+            provider_name=provider_name,
+            entity_name=entity_name,
         )
-
-        if "base_path" in parameters or accepts_var_kwargs:
-            await write_silver_metadata(
-                base_path=table_path,
-                metadata=metadata,
-                table_name=table_name,
-            )
-        elif "table_path" in parameters:
-            legacy_write = cast(
-                Any, write_silver_metadata
-            )  # Any: legacy writer accepts historical table_path kwargs
-            await legacy_write(
-                table_path=table_path,
-                metadata=metadata,
-                table_name=table_name,
-            )
-        else:
-            legacy_write = cast(
-                Any, write_silver_metadata
-            )  # Any: legacy writer may expose a positional signature
-            await legacy_write(table_path, metadata, table_name=table_name)
         return None
 
     async def _resolve_finalization_dq_metrics(
@@ -203,6 +224,25 @@ class SilverMetadataOperations:
             return await host._get_delta_version(table_path)
         return 0
 
+    async def _get_delta_version(self, table_path: str) -> int | None:
+        """Compatibility hook expected by canonical metadata helpers."""
+        return await self._resolve_version_after(table_path)
+
+    async def _compute_dq_metrics(
+        self,
+        table_name: str,
+        records: list[BronzeRecord],
+        quarantined_count: int = 0,
+        validation_errors: Sequence[str] | None = None,
+    ) -> BatchDQMetrics:
+        """Compatibility hook expected by canonical finalization helpers."""
+        return await self._resolve_finalization_dq_metrics(
+            table_name=table_name,
+            records=records,
+            quarantined_count=quarantined_count,
+            validation_errors=validation_errors,
+        )
+
     async def compute_dq_metrics(
         self,
         arrow_data: pa.Table,
@@ -230,6 +270,103 @@ class SilverMetadataOperations:
         )
 
         return await asyncio.to_thread(self._dq_calculator.calculate, dq_input)
+
+    def _should_skip_silver_metadata_write(
+        self,
+        *,
+        records: list[BronzeRecord],
+        table_path: str,
+        event_name: str,
+    ) -> bool:
+        """Return whether canonical Silver metadata publication should short-circuit."""
+        del table_path, event_name
+        if not records:
+            return True
+        if isinstance(self._metadata_writer, NoOpMetadataWriter):
+            return True
+        if self._metadata_coordinator is None:
+            raise RuntimeError(
+                "MetadataCoordinator with create_silver_metadata_bundle is required "
+                "for Silver metadata publication"
+            )
+        return False
+
+    async def _write_silver_metadata_file(
+        self,
+        *,
+        table_path: str,
+        metadata: SilverMetadata,
+        table_name: str,
+        provider_name: str,
+        entity_name: str,
+    ) -> None:
+        """Persist one canonical Silver metadata sidecar through the writer port."""
+        if self._metadata_writer is None:
+            self._log_info(
+                "Skipping Silver metadata persistence: metadata writer missing"
+            )
+            return
+
+        write_silver_metadata = self._metadata_writer.write_silver_metadata
+        parameters = inspect.signature(write_silver_metadata).parameters
+        accepts_var_kwargs = any(
+            parameter.kind is inspect.Parameter.VAR_KEYWORD
+            for parameter in parameters.values()
+        )
+
+        kwargs: dict[str, Any] = {"metadata": metadata}
+        if "base_path" in parameters or accepts_var_kwargs:
+            kwargs["base_path"] = table_path
+        elif "table_path" in parameters:
+            kwargs["table_path"] = table_path
+        else:
+            legacy_write = cast(
+                Any, write_silver_metadata
+            )  # Any: positional legacy metadata writers remain supported
+            await legacy_write(
+                table_path,
+                metadata,
+                table_name=table_name,
+                flat_structure=self._flat_structure,
+                provider=provider_name,
+                entity=entity_name,
+            )
+            return
+
+        if "table_name" in parameters or accepts_var_kwargs:
+            kwargs["table_name"] = table_name
+        if "flat_structure" in parameters or accepts_var_kwargs:
+            kwargs["flat_structure"] = self._flat_structure
+        if "provider" in parameters or accepts_var_kwargs:
+            kwargs["provider"] = provider_name
+        if "entity" in parameters or accepts_var_kwargs:
+            kwargs["entity"] = entity_name
+
+        await write_silver_metadata(**kwargs)
+
+    async def _write_silver_metadata(
+        self,
+        request: _SilverMetadataWriteRequest | str | None = None,
+        *args: object,
+        **kwargs: object,
+    ) -> None:
+        """Canonical Silver metadata publication path for composition-backed ops."""
+        resolved_request = _coerce_silver_metadata_write_request(
+            request,
+            args=args,
+            kwargs=kwargs,
+        )
+        if self._should_skip_silver_metadata_write(
+            records=resolved_request.records,
+            table_path=resolved_request.table_path,
+            event_name="silver_metadata_skipped",
+        ):
+            return
+        await _execute_silver_metadata_write(
+            self,
+            request=resolved_request,
+            prepare=_prepare_silver_metadata_write,
+        )
 
     async def write_silver_metadata(
         self,
@@ -348,7 +485,37 @@ class SilverMetadataOperations:
             args=args,
             kwargs=kwargs,
         )
-        return await _finalize_silver_write_result(
-            self,
-            resolved_request,
+        context = await self._prepare_silver_write_finalization_context(
+            table_name=resolved_request.table_name,
+            records=resolved_request.records,
+            table_path=resolved_request.table_path,
+            quarantined_count=resolved_request.quarantined_count,
+            validation_errors=resolved_request.validation_errors,
+            started_at=resolved_request.started_at,
+            start_perf=resolved_request.start_perf,
+        )
+
+        await self._write_silver_metadata(
+            table_path=resolved_request.table_path,
+            table_name=resolved_request.table_name,
+            records=resolved_request.records,
+            primary_keys=resolved_request.primary_keys,
+            mode=resolved_request.validated_mode,
+            bronze_refs=resolved_request.bronze_refs,
+            dq_metrics=context.dq_metrics,
+            partition_by=resolved_request.partition_cols,
+            source_batch_ids=(
+                [str(resolved_request.source_batch_id)]
+                if resolved_request.source_batch_id is not None
+                else None
+            ),
+            started_at=resolved_request.started_at,
+            completed_at=context.completed_at,
+            version_after=context.version_after,
+        )
+        return _build_silver_write_result(
+            table_name=resolved_request.table_name,
+            table_path=resolved_request.table_path,
+            version_after=context.version_after,
+            records_count=len(resolved_request.records),
         )

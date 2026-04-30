@@ -9,6 +9,12 @@ ______________________________________________________________________
 Use this skill to verify repo-backed Prometheus rule behavior with explicit test
 cases instead of intuition.
 
+## BioETL Runtime Policy
+
+- Project runtime contract: `../../../AGENTS.md`
+- Memory policy: `../../../docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
+- Post-change validation: `../../../docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
+
 This skill is for Prometheus rule files that can be validated with `promtool`.
 For Grafana-managed alerts, use `prometheus-alert-rule-editor` and live query
 validation instead.

@@ -197,6 +197,117 @@ AI_SURFACE_REQUIRED_TOKENS: dict[Path, tuple[str, ...]] = {
         "../memory/agent-memory.md",
     ),
 }
+AI_WRITE_CAPABLE_SKILL_REQUIRED_TOKENS: dict[Path, tuple[str, ...]] = {
+    Path(".codex/skills/create-pr/SKILL.md"): (
+        "AGENTS.md",
+        "MEMORY_USAGE.md",
+        "POST_CHANGE_VALIDATION.md",
+    ),
+    Path(".codex/skills/repo-config/SKILL.md"): (
+        "AGENTS.md",
+        "MEMORY_USAGE.md",
+        "POST_CHANGE_VALIDATION.md",
+    ),
+    Path(".codex/skills/grafana-dashboard-extension/SKILL.md"): (
+        "AGENTS.md",
+        "MEMORY_USAGE.md",
+        "POST_CHANGE_VALIDATION.md",
+    ),
+    Path(".codex/skills/prometheus-alert-rule-editor/SKILL.md"): (
+        "AGENTS.md",
+        "MEMORY_USAGE.md",
+        "POST_CHANGE_VALIDATION.md",
+    ),
+    Path(".codex/skills/prometheus-metric-discovery/SKILL.md"): (
+        "AGENTS.md",
+        "MEMORY_USAGE.md",
+        "POST_CHANGE_VALIDATION.md",
+    ),
+    Path(".codex/skills/prometheus-query-debugger/SKILL.md"): (
+        "AGENTS.md",
+        "MEMORY_USAGE.md",
+        "POST_CHANGE_VALIDATION.md",
+    ),
+    Path(".codex/skills/prometheus-rule-testing/SKILL.md"): (
+        "AGENTS.md",
+        "MEMORY_USAGE.md",
+        "POST_CHANGE_VALIDATION.md",
+    ),
+    Path(".codex/skills/technical-designer-mermaid/SKILL.md"): (
+        "AGENTS.md",
+        "MEMORY_USAGE.md",
+        "POST_CHANGE_VALIDATION.md",
+    ),
+    Path(".codex/skills/vcr-record/SKILL.md"): (
+        "AGENTS.md",
+        "MEMORY_USAGE.md",
+        "POST_CHANGE_VALIDATION.md",
+    ),
+    Path(".gemini/skills/create-pr/SKILL.md"): (
+        "AGENTS.md",
+        "MEMORY_USAGE.md",
+        "POST_CHANGE_VALIDATION.md",
+    ),
+    Path(".gemini/skills/repo-config/SKILL.md"): (
+        "AGENTS.md",
+        "MEMORY_USAGE.md",
+        "POST_CHANGE_VALIDATION.md",
+    ),
+    Path(".gemini/skills/grafana-dashboard-extension/SKILL.md"): (
+        "AGENTS.md",
+        "MEMORY_USAGE.md",
+        "POST_CHANGE_VALIDATION.md",
+    ),
+    Path(".gemini/skills/prometheus-alert-rule-editor/SKILL.md"): (
+        "AGENTS.md",
+        "MEMORY_USAGE.md",
+        "POST_CHANGE_VALIDATION.md",
+    ),
+    Path(".gemini/skills/prometheus-metric-discovery/SKILL.md"): (
+        "AGENTS.md",
+        "MEMORY_USAGE.md",
+        "POST_CHANGE_VALIDATION.md",
+    ),
+    Path(".gemini/skills/prometheus-query-debugger/SKILL.md"): (
+        "AGENTS.md",
+        "MEMORY_USAGE.md",
+        "POST_CHANGE_VALIDATION.md",
+    ),
+    Path(".gemini/skills/prometheus-rule-testing/SKILL.md"): (
+        "AGENTS.md",
+        "MEMORY_USAGE.md",
+        "POST_CHANGE_VALIDATION.md",
+    ),
+    Path(".gemini/skills/technical-designer-mermaid/SKILL.md"): (
+        "AGENTS.md",
+        "MEMORY_USAGE.md",
+        "POST_CHANGE_VALIDATION.md",
+    ),
+    Path(".gemini/skills/vcr-record/SKILL.md"): (
+        "AGENTS.md",
+        "MEMORY_USAGE.md",
+        "POST_CHANGE_VALIDATION.md",
+    ),
+    Path(".gemini/skills/documentation-audit/SKILL.md"): (
+        "AGENTS.md",
+        "MEMORY_USAGE.md",
+        "POST_CHANGE_VALIDATION.md",
+    ),
+}
+AI_MIRROR_NOTICE_REQUIRED_TOKENS: dict[Path, tuple[str, ...]] = {
+    Path("docs/00-project/ai/skills/README.md"): (
+        "Non-Canonical Mirror Notice",
+        "docs/00-project/ai/skills/**",
+        ".codex/skills/**",
+        ".gemini/skills/**",
+    ),
+    Path("docs/00-project/ai/agents/agents/README.md"): (
+        "Non-Canonical Mirror Notice",
+        "docs/00-project/ai/agents/agents/**",
+        ".codex/agents/**",
+        ".gemini/agents/**",
+    ),
+}
 AI_SURFACE_STALE_PATTERNS: tuple[re.Pattern[str], ...] = (
     re.compile(r"docs/00-project/ai/agents/runtime/agent-memory\.md"),
     re.compile(r"(?<!\.)runtime/agent-memory\.md"),
@@ -939,6 +1050,22 @@ def check_ai_surfaces(report: DriftReport, *, root: Path | None = None) -> None:
     project_root = root or PROJECT_ROOT
 
     for relative_path, required_tokens in AI_SURFACE_REQUIRED_TOKENS.items():
+        _check_ai_surface_required_tokens(
+            report,
+            project_root=project_root,
+            relative_path=relative_path,
+            required_tokens=required_tokens,
+        )
+
+    for relative_path, required_tokens in AI_WRITE_CAPABLE_SKILL_REQUIRED_TOKENS.items():
+        _check_ai_surface_required_tokens(
+            report,
+            project_root=project_root,
+            relative_path=relative_path,
+            required_tokens=required_tokens,
+        )
+
+    for relative_path, required_tokens in AI_MIRROR_NOTICE_REQUIRED_TOKENS.items():
         _check_ai_surface_required_tokens(
             report,
             project_root=project_root,

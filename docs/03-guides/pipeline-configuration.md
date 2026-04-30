@@ -279,6 +279,19 @@ ______________________________________________________________________
 > canonical-но грузится из `configs/providers/{provider}.yaml`, затем merge-ится
 > с inline `source:` overrides в entity pipeline config.
 
+### Config Compatibility Registry
+
+Legacy/new-shape compatibility in config loading is bounded by
+`configs/quality/config_compatibility_registry.yaml`. The registry lists accepted
+source aliases such as `source.api`, `source.client`, and `source.batch`, rejected
+retired forms such as `source.provider_config.batch_size`, and removal criteria
+for transitional fields such as `filter_batch_size`.
+
+New compatibility normalization rules must be added to that registry before they
+are accepted in `src/bioetl/infrastructure/config/*`. The canonical source
+pagination contract remains `source.provider_config.pagination.*`; the only
+pipeline-level pagination override is `page_size_override`.
+
 ### Авто-пропагация sort-by (ADR-014 compliance)
 
 Параметры `sink.silver.sort_by` и `sink.gold.sort_by` **автоматически вычисляются**

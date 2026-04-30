@@ -185,3 +185,34 @@ async def test_prepare_finalization_context_passes_explicit_validation_context(
     assert context.dq_metrics is dq_metrics
     assert context.version_after == 7
     assert context.completed_at >= started_at
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_internal_write_silver_metadata_uses_canonical_execution_path(
+    tmp_path,
+) -> None:
+    """Composition-backed metadata ops should delegate sidecar writes to canonical helpers."""
+    metadata_coordinator = MagicMock()
+    metadata_writer = MagicMock()
+    ops = SilverMetadataOperations(
+        _logger=MagicMock(),
+        _metadata_writer=metadata_writer,
+        _metadata_coordinator=metadata_coordinator,
+    )
+    execute_silver_metadata_write = AsyncMock()
+
+    with patch(
+        "bioetl.infrastructure.storage.silver.operations.metadata_operations."
+        "_execute_silver_metadata_write",
+        execute_silver_metadata_write,
+    ):
+        await ops._write_silver_metadata(
+            table_path=str(tmp_path / "silver" / "chembl" / "activity"),
+            table_name="chembl.activity",
+            records=[{"activity_id": "A1"}],
+            primary_keys=["activity_id"],
+            mode=SilverWriteMode.MERGE,
+        )
+
+    execute_silver_metadata_write.assert_awaited_once()

@@ -9,6 +9,12 @@ ______________________________________________________________________
 Create, refactor, and review Mermaid diagrams with a technical-design mindset.
 Prioritize structural correctness, semantic clarity, and maintainability over decoration.
 
+## BioETL Runtime Policy
+
+- Project runtime contract: `../../../AGENTS.md`
+- Memory policy: `../../../docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
+- Post-change validation: `../../../docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
+
 This skill has two operation modes:
 
 - Generic Mermaid mode: use for standalone diagrams or unknown repositories.

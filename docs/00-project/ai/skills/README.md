@@ -28,6 +28,13 @@ This directory stores published documentation for BioETL AI skills across suppor
 - **Reference mirror**: `_references/` stores read-only mirrored reference
   bundles used by skills consistency tooling.
 
+## Non-Canonical Mirror Notice
+
+`docs/00-project/ai/skills/**` is a published/internal mirror surface. It must
+not define runtime behavior independently from `.codex/skills/**` or
+`.gemini/skills/**`. Edit the active runtime skill first, then refresh this
+mirror when behavior or contributor guidance changes.
+
 ## Canonical Source
 
 - Canonical Codex runtime skill source: `.codex/skills/`

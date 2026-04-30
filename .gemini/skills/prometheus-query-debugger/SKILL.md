@@ -9,6 +9,12 @@ ______________________________________________________________________
 Use this skill to diagnose why a PromQL expression is empty, noisy,
 misleading, or too expensive.
 
+## BioETL Runtime Policy
+
+- Project runtime contract: `../../../AGENTS.md`
+- Memory policy: `../../../docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
+- Post-change validation: `../../../docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
+
 Default to reproducing the current query exactly before rewriting it.
 
 ## When To Use

@@ -407,7 +407,7 @@
             },
             "targets": [
                 {
-                    "expr": "min(bioetl_dq_validation_score{pipeline=~\"$pipeline\"}) or vector(0)",
+                    "expr": "min(bioetl_dq_validation_score{pipeline=~\"$pipeline\"})",
                     "legendFormat": "Worst Entity",
                     "refId": "A"
                 }
