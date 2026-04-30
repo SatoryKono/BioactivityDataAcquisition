@@ -309,6 +309,66 @@ def test_publication_set_like_json_fields_are_hash_order_invariant() -> None:
     )
 
 
+def test_semanticscholar_set_like_fields_are_hash_order_invariant() -> None:
+    """SemanticScholar set-like arrays must not drift content_hash by array order."""
+    processor = RecordNormalizationProcessor(
+        provider="semanticscholar", entity_type="publication"
+    )
+
+    record_a = processor.normalize_business_data(
+        {
+            "paper_id": "S2-123",
+            "doi": "10.1000/example",
+            "author_orcids": '["0000-0002", "0000-0001"]',
+            "author_s2_ids": '["222", "111"]',
+            "publication_types": '["Review", "JournalArticle"]',
+            "subject_fields": '["Biology", "Chemistry"]',
+        }
+    )
+    record_b = processor.normalize_business_data(
+        {
+            "paper_id": "S2-123",
+            "doi": "10.1000/example",
+            "author_orcids": '["0000-0001", "0000-0002"]',
+            "author_s2_ids": '["111", "222"]',
+            "publication_types": '["JournalArticle", "Review"]',
+            "subject_fields": '["Chemistry", "Biology"]',
+        }
+    )
+
+    assert processor.compute_content_hash(record_a) == processor.compute_content_hash(
+        record_b
+    )
+
+
+def test_semanticscholar_order_sensitive_fields_remain_hash_order_sensitive() -> None:
+    """Order-sensitive arrays must not be accidentally promoted to set-like hash fields."""
+    processor = RecordNormalizationProcessor(
+        provider="semanticscholar", entity_type="publication"
+    )
+
+    record_a = processor.normalize_business_data(
+        {
+            "paper_id": "S2-123",
+            "doi": "10.1000/example",
+            "author_h_indices": "[40, 10]",
+            "citation_contexts": '["first mention", "second mention"]',
+        }
+    )
+    record_b = processor.normalize_business_data(
+        {
+            "paper_id": "S2-123",
+            "doi": "10.1000/example",
+            "author_h_indices": "[10, 40]",
+            "citation_contexts": '["second mention", "first mention"]',
+        }
+    )
+
+    assert processor.compute_content_hash(record_a) != processor.compute_content_hash(
+        record_b
+    )
+
+
 def test_chembl_publication_structured_json_fields_fail_closed_on_malformed_payloads() -> (
     None
 ):

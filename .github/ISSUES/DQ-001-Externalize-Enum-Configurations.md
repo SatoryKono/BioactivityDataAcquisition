@@ -116,7 +116,7 @@ grep -rn "assay_type\|action_type\|standard_units" src/bioetl/domain/ --include=
 
    ```bash
    # Check for enum validation errors
-   grep "enum" logs/production.log
+   grep "enum" reports/logs/bioetl.log
    ```
 
 ## ✅ Success Criteria

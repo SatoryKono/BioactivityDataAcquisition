@@ -590,10 +590,9 @@ ______________________________________________________________________
 | Метрика                                | Тип       | Labels                  | Описание                                                               |
 | -------------------------------------- | --------- | ----------------------- | ---------------------------------------------------------------------- |
 | `bioetl_pipeline_health_check_passed`  | Gauge     | `pipeline`, `component` | Статус health check компонента (1=passed, 0=failed).                   |
-| `bioetl_infrastructure_validated`      | Gauge     | `pipeline`, `run_id`    | Статус валидации инфраструктуры (1=validated, 0=not).                  |
+| `bioetl_infrastructure_validated`      | Gauge     | `pipeline`              | Статус валидации инфраструктуры (1=validated, 0=not).                  |
 | `bioetl_health_check_duration_seconds` | Histogram | `pipeline`              | Длительность health check операций в секундах.                         |
 | `bioetl_health_check_status`           | Gauge     | `component`             | Статус здоровья компонента: 0=unknown, 1=healthy, 2=degraded.          |
-| `bioetl_health_check_latency_seconds`  | Histogram | `provider`              | Латентность health check в секундах.                                   |
 | `bioetl_health_check_latency_seconds`  | Histogram | `provider`              | Латентность health check в секундах.                                   |
 | `bioetl_health_check_success_total`    | Counter   | `provider`              | Количество health check с результатом `HEALTHY`.                       |
 | `bioetl_health_check_degraded_total`   | Counter   | `provider`              | Количество health check с результатом `DEGRADED`.                      |

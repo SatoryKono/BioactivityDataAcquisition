@@ -33,24 +33,21 @@ ______________________________________________________________________
   `docs/05-operations/`, а одноразовые status/recovery/final-summary артефакты
   MUST архивироваться под `docs/99-archive/`.
 - Root-level tracked директории MUST ограничиваться approved runtime/tooling and
-  project surfaces: `.ai`, `.aiassistant`, `ai`, `.codex`,
-  `.cursor`, `.gemini`, `.github`, `.idea`, `.jules`, `.junie`, `.sonarlint`,
-  `.vibe`, `.vscode`, `assets`, `configs`, `data`, `docs`, `grafana`,
-  `reports`, `scripts`, `src`, and `tests`.
+  project surfaces: `.codex`, `.github`, `.vibe`, `assets`, `configs`, `data`,
+  `docs`, `grafana`, `reports`, `scripts`, `src`, and `tests`.
 - Служебные локальные деревья (`.worktrees/`, `.rollback/`) MUST NOT попадать в git-index.
-- Shared repo tooling surfaces such as `.codex/`, `.gemini/`, `.vibe/`,
-  `.vscode/`, and `.cursor/` MAY оставаться tracked только если они
-  поддерживаются как проектные runtime/editor integrations.
-- `.idea/` MAY содержать curated shared project metadata (например,
-  run configurations, scopes, inspections, словарь), но local/plugin state
-  files such as `workspace.xml`, `shelf/`, `dataSources*/`, `.ai/`,
-  `AICommit.xml`, `claudeCodeTabState.xml`, `codex.xml`,
-  `copilot.data.migration*.xml`, `csv-editor.xml`, `git_toolbox_prj.xml`,
-  `junie.xml`, `sonarlint.xml`, and `webResources.xml` MUST оставаться
-  untracked.
-- Локальные tooling-каталоги без статуса shared repo surface (например,
-  `.sonarlint/`, `.trae/`, `.windsurf/`) MAY существовать в рабочем дереве,
-  но MUST оставаться untracked и игнорироваться `.gitignore`.
+- Shared repo tooling surfaces such as `.codex/` and curated `.vibe/` MAY
+  оставаться tracked только если они поддерживаются как проектные
+  runtime/editor integrations.
+- Editor/vendor/tooling roots such as `.ai/`, `.aiassistant/`, `ai/`,
+  `.gemini/`, `.jules/`, `.junie/`, `.sonarlint/`, `.windsurf/`,
+  `.agent-work/`, `.agentbridge/`, and `.cache/` MAY существовать в рабочем
+  дереве, но MUST оставаться untracked и игнорироваться `.gitignore`, если не
+  были явно promoted через structure governance.
+- `.idea/`, `.vscode/`, and `.cursor/` MAY содержать curated shared project
+  metadata (например, run configurations, scopes, inspections, словарь), но по
+  умолчанию рассматриваются как local/editor state surfaces и MUST оставаться
+  untracked, если не зарегистрированы как curated shared surfaces.
 - Generated/runtime root trees such as `node_modules/`, `output/`, `test-output/`,
   `logs/`, `MagicMock/`, and local package trees like `.python-user/` MUST NOT
   попадать в git-index.
@@ -60,6 +57,11 @@ Root allowlist интерпретируется как policy surface, а не �
 финального статуса волны, он не должен закрепляться в корне.
 
 `.codex_tmp/` is a local scratch/cache surface and MUST remain untracked.
+`.gemini/` is a local runtime/editor surface distinct from the tracked
+`GEMINI.md` root entrypoint and MUST remain untracked unless explicitly
+reclassified through structure governance.
+`.jules/` is a local vendor workspace surface and MUST remain untracked unless
+explicitly reclassified through structure governance.
 `.vibe/` may remain tracked only for curated project-local Mistral Vibe
 configuration such as `.vibe/config.toml`; credentials, runtime state, and
 generated local package/output trees are excluded from this exception.

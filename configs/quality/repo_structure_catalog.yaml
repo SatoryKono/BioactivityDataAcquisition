@@ -126,8 +126,17 @@ docs_code_zones:
     - path: docs/plugins/link_checker
       role: approved_docs_plugin_source_tree
 
+root_tooling_roots:
+  approved_roots:
+    - path: .codex
+      role: curated_shared_agent_runtime_surface
+    - path: .vibe
+      role: curated_shared_vendor_runtime_surface
+
 local_tolerated_root_dirs:
   approved_roots:
+    - path: .ai
+      role: local_ai_runtime_state_untracked
     - path: .agent-work
       role: local_agent_runtime_state_untracked
     - path: .agentbridge
@@ -136,6 +145,10 @@ local_tolerated_root_dirs:
       role: local_cache_surface_untracked
     - path: .coverage-sharded
       role: local_coverage_shards_untracked
+    - path: .gemini
+      role: local_vendor_runtime_state_untracked
+    - path: .jules
+      role: local_vendor_workspace_state_untracked
     - path: .junie
       role: local_vendor_editor_state_untracked
     - path: .scannerwork

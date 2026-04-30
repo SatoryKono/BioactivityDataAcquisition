@@ -111,7 +111,7 @@ grep -rn "standard_units" src/bioetl/domain/ --include="*.py" | head -5
 
    ```bash
    # Check normalization logs
-   grep "normalize" logs/production.log
+   grep "normalize" reports/logs/bioetl.log
    ```
 
 ## ✅ Success Criteria

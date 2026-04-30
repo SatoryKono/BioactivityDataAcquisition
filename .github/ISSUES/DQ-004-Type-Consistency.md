@@ -99,7 +99,7 @@ grep -rn "manual_curation_flag" src/bioetl/domain/ --include="*.py" | head -5
 
    ```bash
    # Check type validation logs
-   grep "type" logs/production.log
+   grep "type" reports/logs/bioetl.log
    ```
 
 ## ✅ Success Criteria
