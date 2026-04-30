@@ -345,7 +345,7 @@ groups:
           runbook: "docs/05-operations/runbooks/checkpoint-debugging.md"
 
       - alert: BioETLReplayLagHigh
-        expr: bioetl_runtime_alert_condition_replay_lag_high_15m > 0
+        expr: (bioetl_runtime_alert_condition_replay_lag_high_15m > 0) and on (pipeline, run_type, replay_capability, status) (bioetl_replay_lag_seconds >= 300)
         for: 15m
         labels:
           severity: warning
@@ -355,7 +355,7 @@ groups:
           runbook: "docs/05-operations/runbooks/checkpoint-debugging.md"
 
       - alert: BioETLReplayDriftDetected
-        expr: bioetl_runtime_alert_condition_replay_drift_detected_30m > 0
+        expr: (bioetl_runtime_alert_condition_replay_drift_detected_30m > 0) and on (pipeline, run_type, replay_capability, drift_type, status) (increase(bioetl_replay_drift_events_total[30m]) > 0)
         for: 5m
         labels:
           severity: critical

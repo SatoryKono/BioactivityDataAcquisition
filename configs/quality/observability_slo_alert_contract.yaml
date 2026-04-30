@@ -140,6 +140,8 @@ slo_contracts:
       - bioetl_checkpoint_save_events_total
       - bioetl_lineage_fragments_emitted_total
       - bioetl_lineage_refs_missing_total
+      - bioetl_replay_drift_events_total
+      - bioetl_replay_lag_seconds
       - bioetl_replay_reconstructability_events_total
     alerts:
       - name: BioETLCheckpointCompatibilityBlocked
@@ -167,6 +169,14 @@ slo_contracts:
         for: 15m
         runbook: docs/05-operations/runbooks/checkpoint-debugging.md
       - name: BioETLReplayNotReconstructable
+        severity: critical
+        for: 5m
+        runbook: docs/05-operations/runbooks/checkpoint-debugging.md
+      - name: BioETLReplayLagHigh
+        severity: warning
+        for: 15m
+        runbook: docs/05-operations/runbooks/checkpoint-debugging.md
+      - name: BioETLReplayDriftDetected
         severity: critical
         for: 5m
         runbook: docs/05-operations/runbooks/checkpoint-debugging.md

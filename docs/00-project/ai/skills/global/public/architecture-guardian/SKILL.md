@@ -1,3 +1,8 @@
+> Mirror status: This file is a published/internal mirror under `docs/00-project/ai/**`. It is not a canonical runtime surface.
+> Canonical runtime source:
+> - Gemini: `/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/.gemini/skills/public/architecture-guardian/SKILL.md`
+> Governance: [AI Runtime Mirror Ownership](../../../../agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md), [Memory Usage](../../../../agents/guides/MEMORY_USAGE.md), [Post-Change Validation](../../../../agents/policy/POST_CHANGE_VALIDATION.md).
+> Edit the runtime source first, then refresh this mirror.
 ______________________________________________________________________
 
 ## name: architecture-guardian description: "Validate BioETL architecture boundaries, ADR compliance, naming conventions, and anti-patterns. Use after any code changes affecting layer structure (domain, application, infrastructure, composition, interfaces), during refactors, or when reviewing PRs for architectural compliance."

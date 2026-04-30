@@ -687,6 +687,8 @@ def test_runtime_dashboard_recording_rules_exist_and_reference_source_metrics() 
         "bioetl_runtime_alert_condition_manifest_write_failed_15m": "bioetl_control_plane_manifest_writes_total",
         "bioetl_runtime_alert_condition_ledger_append_failed_15m": "bioetl_control_plane_ledger_appends_total",
         "bioetl_runtime_alert_condition_checkpoint_incompatible_30m": "bioetl_checkpoint_compatibility_events_total",
+        "bioetl_runtime_alert_condition_replay_lag_high_15m": "bioetl_replay_lag_seconds",
+        "bioetl_runtime_alert_condition_replay_drift_detected_30m": "bioetl_replay_drift_events_total",
         "bioetl_runtime_alert_condition_lineage_refs_missing_15m": "bioetl_lineage_refs_missing_total",
         "bioetl_provider_health_check_provider_universe_15m": "bioetl_health_check_success_total",
         "bioetl_provider_health_check_success_15m": "bioetl_health_check_success_total",

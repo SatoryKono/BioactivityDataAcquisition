@@ -28,6 +28,12 @@ _SRC_ROOT = _REPO_ROOT / "src"
 if str(_SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(_SRC_ROOT))
 
+from bioetl.infrastructure.observability.prometheus_metric_registries import (  # noqa: E402
+    COUNTERS,
+    GAUGES,
+    HISTOGRAMS,
+)
+
 _CANONICAL_METRIC_RE = re.compile(r"\bbioetl_[a-z0-9_]+\b")
 
 _RUNTIME_SCAN_ROOT = Path("src/bioetl")
@@ -113,6 +119,7 @@ _CHECK_DRIFT_KEYS: Final[tuple[str, ...]] = (
     "documented_without_registry",
     "rules_without_registry",
     "runtime_cardinality_review_required",
+    "runtime_label_contract_violations",
 )
 _ALLOWLIST_METADATA_REQUIRED_KEYS: Final[frozenset[str]] = frozenset(
     {"runtime_cardinality_review_required"}
@@ -610,6 +617,11 @@ def _scan_registered_metric_names(repo_root: Path) -> frozenset[str]:
 
 
 REGISTERED_PROMETHEUS_METRIC_NAMES = _scan_registered_metric_names(_REPO_ROOT)
+REGISTERED_PROMETHEUS_METRIC_LABELS: dict[str, frozenset[str]] = {
+    name: frozenset(metric._labelnames)
+    for registry in (COUNTERS, GAUGES, HISTOGRAMS)
+    for name, metric in registry.items()
+}
 
 
 def _looks_like_metric_family_name(name: str) -> bool:

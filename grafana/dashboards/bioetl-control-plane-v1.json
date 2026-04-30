@@ -676,7 +676,7 @@
                     "refId": "C"
                 }
             ],
-            "title": "Replay Lag / Drift",
+            "title": "Replay Not Reconstructable",
             "type": "stat"
         },
         {

@@ -558,9 +558,9 @@ ______________________________________________________________________
 
 | Метрика                                   | Тип     | Labels                    | Описание                                             |
 | ----------------------------------------- | ------- | ------------------------- | ---------------------------------------------------- |
-| `bioetl_filter_ids_loaded_total`          | Counter | `pipeline`, `source_file` | Количество уникальных ID, загруженных из фильтра.    |
-| `bioetl_filter_ids_duplicates_total`      | Counter | `pipeline`, `source_file` | Количество дубликатов, найденных в фильтре.          |
-| `bioetl_filter_combinations_loaded_total` | Counter | `pipeline`, `source_file` | Количество загруженных комбинаций из мульти-фильтра. |
+| `bioetl_filter_ids_loaded_total`          | Counter | `pipeline`, `source_kind` | Количество уникальных ID, загруженных из фильтра.    |
+| `bioetl_filter_ids_duplicates_total`      | Counter | `pipeline`, `source_kind` | Количество дубликатов, найденных в фильтре.          |
+| `bioetl_filter_combinations_loaded_total` | Counter | `pipeline`, `source_kind` | Количество загруженных комбинаций из мульти-фильтра. |
 
 ### 5.3 Data Quality Metrics
 

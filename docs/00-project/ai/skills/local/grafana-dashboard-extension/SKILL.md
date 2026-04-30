@@ -1,3 +1,8 @@
+> Mirror status: This file is a published/internal mirror under `docs/00-project/ai/**`. It is not a canonical runtime surface.
+> Canonical runtime source:
+> - Gemini: `/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/.codex/skills/grafana-dashboard-extension/SKILL.md`
+> Governance: [AI Runtime Mirror Ownership](../../../agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md), [Memory Usage](../../../agents/guides/MEMORY_USAGE.md), [Post-Change Validation](../../../agents/policy/POST_CHANGE_VALIDATION.md).
+> Edit the runtime source first, then refresh this mirror.
 ______________________________________________________________________
 
 ## name: grafana-dashboard-extension description: Extend, edit, validate, and review shipped Grafana dashboards for BioETL. Use when tasks touch `grafana/dashboards/*.json`, dashboard navigation, panel queries, variables, units, thresholds, Loki/Tempo drilldowns, or operator-facing dashboard UX. Treat repo dashboard JSON as source of truth and update docs when shipped dashboard behavior changes.

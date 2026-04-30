@@ -112,7 +112,7 @@ def test_no_registered_metric_declares_forbidden_high_cardinality_labels() -> No
 
 @pytest.mark.unit
 def test_rawish_label_names_are_confined_to_normalized_metric_families() -> None:
-    """Endpoint/source_file labels are allowed only behind central normalizers."""
+    """Endpoint labels are allowed only behind central normalizers."""
     endpoint_metrics = {
         name
         for name, labels in _iter_registered_metric_labels()
@@ -345,9 +345,9 @@ def test_adapter_metrics_use_bounded_label_names_only() -> None:
         },
         "bioetl_adapter_fallback_attempts_total": {"provider", "operation"},
         "bioetl_adapter_fallback_hits_total": {"provider", "operation"},
-        "bioetl_filter_ids_loaded_total": {"pipeline", "source_file"},
-        "bioetl_filter_ids_duplicates_total": {"pipeline", "source_file"},
-        "bioetl_filter_combinations_loaded_total": {"pipeline", "source_file"},
+        "bioetl_filter_ids_loaded_total": {"pipeline", "source_kind"},
+        "bioetl_filter_ids_duplicates_total": {"pipeline", "source_kind"},
+        "bioetl_filter_combinations_loaded_total": {"pipeline", "source_kind"},
         "bioetl_record_flow_records_total": {"pipeline", "run_type", "flow_stage"},
         "bioetl_record_flow_invariants_total": {
             "pipeline",
