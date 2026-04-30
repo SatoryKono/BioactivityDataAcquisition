@@ -67,7 +67,6 @@ shards:
       - --ignore=tests/architecture/test_docs_version_sync.py
       - --ignore=tests/architecture/test_documentation_sync.py
       - --ignore=tests/architecture/test_code_metrics.py
-      - --ignore=tests/architecture/test_legacy_schema_wrappers.py
       - --ignore=tests/architecture/test_diagram_regression_workflow.py
       - --ignore=tests/architecture/test_docs_governance_workflow.py
       - --ignore=tests/architecture/test_quality_debt_scorecard.py
@@ -102,7 +101,6 @@ shards:
       - --ignore=tests/architecture/test_docs_version_sync.py
       - --ignore=tests/architecture/test_documentation_sync.py
       - --ignore=tests/architecture/test_code_metrics.py
-      - --ignore=tests/architecture/test_legacy_schema_wrappers.py
       - --ignore=tests/architecture/test_diagram_regression_workflow.py
       - --ignore=tests/architecture/test_docs_governance_workflow.py
       - --ignore=tests/architecture/test_quality_debt_scorecard.py
@@ -140,7 +138,6 @@ shards:
       - --ignore=tests/architecture/test_docs_version_sync.py
       - --ignore=tests/architecture/test_documentation_sync.py
       - --ignore=tests/architecture/test_code_metrics.py
-      - --ignore=tests/architecture/test_legacy_schema_wrappers.py
       - --ignore=tests/architecture/test_diagram_regression_workflow.py
       - --ignore=tests/architecture/test_docs_governance_workflow.py
       - --ignore=tests/architecture/test_quality_debt_scorecard.py
@@ -158,7 +155,6 @@ shards:
       - tests/architecture/test_docs_version_sync.py
       - tests/architecture/test_documentation_sync.py
       - tests/architecture/test_code_metrics.py
-      - tests/architecture/test_legacy_schema_wrappers.py
       - tests/architecture/test_diagram_regression_workflow.py
       - tests/architecture/test_docs_governance_workflow.py
       - tests/architecture/test_quality_debt_scorecard.py
@@ -194,7 +190,6 @@ shards:
       - --ignore=tests/architecture/test_docs_version_sync.py
       - --ignore=tests/architecture/test_documentation_sync.py
       - --ignore=tests/architecture/test_code_metrics.py
-      - --ignore=tests/architecture/test_legacy_schema_wrappers.py
       - --ignore=tests/architecture/test_diagram_regression_workflow.py
       - --ignore=tests/architecture/test_docs_governance_workflow.py
       - --ignore=tests/architecture/test_quality_debt_scorecard.py
