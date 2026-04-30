@@ -97,7 +97,7 @@ def test_project_test_health_summary_declares_machine_readable_freshness_metadat
     metadata = yaml.safe_load(metadata_text)
 
     assert metadata["status"] == "active-non-canonical"
-    assert metadata["last_verified"] == "2026-04-29"
+    assert metadata["last_verified"] == "2026-04-30"
     assert metadata["freshness_window_days"] > 0
     assert metadata["owner"] == "quality"
     assert set(metadata["canonical_sources"]) >= {
@@ -132,9 +132,14 @@ def test_project_test_health_summary_has_machine_readable_metadata() -> None:
     assert shard_registry["owner"]
     assert shard_registry["shards"]
 
-    planned_shards = {
+    resolved_shards = {
         shard["id"]
         for shard in shard_registry["shards"]
-        if shard.get("status") == "planned"
+        if shard.get("status") == "passed"
     }
-    assert {"flaky-rate", "uncovered-module-risk-map"} <= planned_shards
+    assert {
+        "flaky-rate",
+        "uncovered-module-risk-map",
+        "semanticscholar-environment-limited-frequency",
+        "environment-limited-threshold",
+    } <= resolved_shards

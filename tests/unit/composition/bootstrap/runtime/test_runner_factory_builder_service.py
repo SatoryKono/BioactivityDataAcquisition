@@ -1,4 +1,4 @@
-"""Snapshot-like tests for RunnerFactoryBuilderService RunOptions payloads."""
+"""Snapshot-like tests for RunnerFactoryBuilder RunOptions payloads."""
 
 from __future__ import annotations
 
@@ -11,10 +11,10 @@ import pytest
 
 from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
 from bioetl.composition.bootstrap.runtime.composite_filter_extraction_service import (
-    CompositeFilterExtractionService,
+    CompositeFilterExtractor,
 )
 from bioetl.composition.bootstrap.runtime.runner_factory_builder_service import (
-    RunnerFactoryBuilderService,
+    RunnerFactoryBuilder,
     resolve_bronze_opts,
 )
 
@@ -52,12 +52,12 @@ def _make_runtime(**overrides: object) -> CompositeRuntimeConfig:
 @pytest.mark.unit
 def test_seed_runoptions_snapshot() -> None:
     recorder = _RunOptionsRecorder()
-    builder = RunnerFactoryBuilderService(
+    builder = RunnerFactoryBuilder(
         logger=MagicMock(),
         run_options_cls=recorder,
         build_context=_build_context,
         pipeline_runner_builder=_build_runner,
-        filter_extraction_service=CompositeFilterExtractionService(),
+        filter_extraction_service=CompositeFilterExtractor(),
     )
 
     runtime = _make_runtime(
@@ -88,12 +88,12 @@ def test_seed_runoptions_snapshot() -> None:
 @pytest.mark.unit
 def test_enricher_runoptions_snapshot() -> None:
     recorder = _RunOptionsRecorder()
-    builder = RunnerFactoryBuilderService(
+    builder = RunnerFactoryBuilder(
         logger=MagicMock(),
         run_options_cls=recorder,
         build_context=_build_context,
         pipeline_runner_builder=_build_runner,
-        filter_extraction_service=CompositeFilterExtractionService(),
+        filter_extraction_service=CompositeFilterExtractor(),
     )
     bronze_opts = {
         "use_cached_bronze": True,
@@ -133,12 +133,12 @@ def test_enricher_runoptions_snapshot() -> None:
 @pytest.mark.unit
 def test_dependency_runoptions_snapshot_single_and_multi_filter() -> None:
     recorder = _RunOptionsRecorder()
-    builder = RunnerFactoryBuilderService(
+    builder = RunnerFactoryBuilder(
         logger=MagicMock(),
         run_options_cls=recorder,
         build_context=_build_context,
         pipeline_runner_builder=_build_runner,
-        filter_extraction_service=CompositeFilterExtractionService(),
+        filter_extraction_service=CompositeFilterExtractor(),
     )
     bronze_opts = {
         "use_cached_bronze": False,

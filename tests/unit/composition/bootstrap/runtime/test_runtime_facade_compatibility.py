@@ -53,10 +53,10 @@ def test_composite_runtime_patch_points_remain_available() -> None:
 def test_composite_runtime_does_not_expose_helper_only_symbols() -> None:
     """Helper-only wiring symbols should not leak through the runtime facade."""
     unexpected_attrs = {
-        "CompositeFilterExtractionService",
+        "CompositeFilterExtractor",
         "CompositeSupportServicesFactory",
         "MemoryLock",
-        "RunnerFactoryBuilderService",
+        "RunnerFactoryBuilder",
         "resolve_bronze_opts",
         "bootstrap_pipeline_runner",
         "bootstrap_logger_port",
