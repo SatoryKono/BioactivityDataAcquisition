@@ -107,6 +107,7 @@ def patch_clean_code_revision(
         lambda: CodeRevisionProvenance(
             git_commit=git_commit,
             source_revision_state="clean",
+            dependency_lock_hash="sha256:test-lock-clean-replay",
         ),
         raising=True,
     )

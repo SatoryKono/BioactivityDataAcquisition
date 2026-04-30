@@ -235,6 +235,11 @@ def _matches_any_prefix(path: str, prefixes: tuple[str, ...]) -> bool:
     return any(path.startswith(prefix) for prefix in prefixes)
 
 
+def _is_public_facade_module(relative_path: str) -> bool:
+    path = Path(relative_path)
+    return path.name == "__init__.py" or path.name.endswith("_api.py")
+
+
 def _is_allowed_symbol(
     *,
     symbol: str,
@@ -244,6 +249,77 @@ def _is_allowed_symbol(
     return any(
         item.symbol == symbol and item.path == relative_path for item in allowed_symbols
     )
+
+
+def _literal_assignment_names(
+    tree: ast.Module,
+    assignment_name: str,
+) -> set[str]:
+    """Extract string literal names from a top-level list/tuple/set assignment."""
+    for node in tree.body:
+        if not isinstance(node, ast.Assign):
+            continue
+        if not any(
+            isinstance(target, ast.Name) and target.id == assignment_name
+            for target in node.targets
+        ):
+            continue
+        value = node.value
+        if not isinstance(value, (ast.List, ast.Tuple, ast.Set)):
+            return set()
+        return {
+            element.value
+            for element in value.elts
+            if isinstance(element, ast.Constant) and isinstance(element.value, str)
+        }
+    return set()
+
+
+def _iter_layer_aware_symbols(tree: ast.Module) -> list[tuple[str, int, str]]:
+    """Yield top-level class, alias, and public re-export symbols."""
+    symbols: list[tuple[str, int, str]] = []
+    exported_names = _literal_assignment_names(tree, "__all__")
+    seen_symbols: set[str] = set()
+
+    def record(name: str, lineno: int, kind: str) -> None:
+        if name in seen_symbols:
+            return
+        symbols.append((name, lineno, kind))
+        seen_symbols.add(name)
+
+    for node in tree.body:
+        if isinstance(node, ast.ClassDef):
+            if node.name.startswith("_"):
+                continue
+            record(node.name, node.lineno, "class")
+            continue
+        if isinstance(node, ast.ImportFrom):
+            for alias in node.names:
+                if alias.name == "*":
+                    continue
+                public_name = alias.asname or alias.name.rsplit(".", 1)[-1]
+                if public_name.startswith("_") or public_name not in exported_names:
+                    continue
+                record(public_name, node.lineno, "re-export")
+            continue
+        if isinstance(node, ast.Import):
+            for alias in node.names:
+                public_name = alias.asname or alias.name.rsplit(".", 1)[-1]
+                if public_name.startswith("_") or public_name not in exported_names:
+                    continue
+                record(public_name, node.lineno, "re-export")
+            continue
+        if not isinstance(node, ast.Assign):
+            continue
+        if len(node.targets) != 1 or not isinstance(node.targets[0], ast.Name):
+            continue
+        if not isinstance(node.value, (ast.Name, ast.Attribute)):
+            continue
+        target_name = node.targets[0].id
+        if target_name.startswith("_"):
+            continue
+        record(target_name, node.lineno, "alias")
+    return symbols
 
 
 def _layer_aware_suffix_violations(repo_root: Path) -> list[Violation]:
@@ -260,19 +336,20 @@ def _layer_aware_suffix_violations(repo_root: Path) -> list[Violation]:
             continue
         relative_path = py_file.relative_to(repo_root).as_posix()
 
-        for node in ast.walk(tree):
-            if not isinstance(node, ast.ClassDef) or node.name.startswith("_"):
-                continue
-
+        for symbol_name, lineno, symbol_kind in _iter_layer_aware_symbols(tree):
             for rule in policy.suffix_boundary_rules:
+                if symbol_kind == "re-export" and not _is_public_facade_module(
+                    relative_path
+                ):
+                    continue
                 if not _matches_any_prefix(relative_path, rule.include_path_prefixes):
                     continue
                 if _matches_any_prefix(relative_path, rule.exclude_path_prefixes):
                     continue
-                if not any(node.name.endswith(suffix) for suffix in rule.suffixes):
+                if not any(symbol_name.endswith(suffix) for suffix in rule.suffixes):
                     continue
                 if _is_allowed_symbol(
-                    symbol=node.name,
+                    symbol=symbol_name,
                     relative_path=relative_path,
                     allowed_symbols=rule.allowed_symbols,
                 ):
@@ -280,21 +357,23 @@ def _layer_aware_suffix_violations(repo_root: Path) -> list[Violation]:
                 violations.append(
                     Violation(
                         rule="layer-aware-suffix-policy",
-                        location=f"{relative_path}:{node.lineno}",
+                        location=f"{relative_path}:{lineno}",
                         details=(
-                            f"[{rule.rule_id}] class {node.name} violates the "
+                            f"[{rule.rule_id}] {symbol_kind} {symbol_name} violates the "
                             f"reviewed suffix boundary for {', '.join(rule.suffixes)}"
                         ),
                     )
                 )
 
             for rule in policy.family_freeze_rules:
+                if symbol_kind == "re-export":
+                    continue
                 if not _matches_any_prefix(relative_path, rule.include_path_prefixes):
                     continue
-                if re.match(rule.match_regex, node.name) is None:
+                if re.match(rule.match_regex, symbol_name) is None:
                     continue
                 if _is_allowed_symbol(
-                    symbol=node.name,
+                    symbol=symbol_name,
                     relative_path=relative_path,
                     allowed_symbols=rule.allowed_symbols,
                 ):
@@ -302,9 +381,10 @@ def _layer_aware_suffix_violations(repo_root: Path) -> list[Violation]:
                 violations.append(
                     Violation(
                         rule="layer-aware-suffix-policy",
-                        location=f"{relative_path}:{node.lineno}",
+                        location=f"{relative_path}:{lineno}",
                         details=(
-                            f"[{rule.rule_id}] class {node.name} is not registered "
+                            f"[{rule.rule_id}] {symbol_kind} {symbol_name} is not "
+                            "registered "
                             "in the frozen naming family"
                         ),
                     )

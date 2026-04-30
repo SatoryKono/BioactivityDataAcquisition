@@ -83,7 +83,7 @@ Canonical docs filenames aligned:
 
 1. `qa_orchestrator.md` -> `runtime/py-qa-orchestrator.md`
 1. `diagram_docs_orchestrator.md` -> `runtime/py-diagram-docs-orchestrator.md`
-1. `memory.md` -> `runtime/agent-memory.md`
+1. `memory.md` -> `docs/00-project/ai/memory/agent-memory.md`
 1. `orchestration/ORCHESTRATION.md` -> `agents/ORCHESTRATION.md`
 1. `AGENT.md` -> `guides/AGENT.md`
 1. `CLAUDE.md` -> `guides/CLAUDE.md`

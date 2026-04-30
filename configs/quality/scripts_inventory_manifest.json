@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-30T08:07:04.034662+00:00",
+  "generated_at": "2026-04-30T08:31:55.262354+00:00",
   "summary": {
     "total_scripts": 357,
     "status_counts": {
@@ -2705,63 +2705,6 @@
           "line": 88,
           "source_group": "scripts",
           "text": "python3 sonar_issue_processor.py"
-        }
-      ]
-    },
-    {
-      "path": "scripts/ai/src/bioetl/composition/bootstrap/runtime/runner_assembly.py",
-      "type": "py",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 9,
-      "references": [
-        {
-          "path": "docs/02-architecture/05-composition-layer.md",
-          "line": 69,
-          "source_group": "docs",
-          "text": "| `runner_assembly.py`                                                      | Runner assembly helpers                                              |"
-        },
-        {
-          "path": "docs/02-architecture/diagrams/bundles/foundation.bundle.md",
-          "line": 1064,
-          "source_group": "docs",
-          "text": "Диаграмма «PipelineRunner Collaborator Diagram» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате диаграмма классов (class diagr"
-        },
-        {
-          "path": "docs/02-architecture/diagrams/descriptions/foundation/38-runtime-assembly-sequence.md",
-          "line": 20,
-          "source_group": "docs",
-          "text": "Диаграмма Title: Runtime Assembly Sequence — build_pipeline_runner to PipelineRunner из foundation-набора фиксирует актуальный runtime assembly path проекта BioETL после выноса composition wiring в `r"
-        },
-        {
-          "path": "docs/02-architecture/diagrams/descriptions/foundation/42-pipeline-runner-class.md",
-          "line": 20,
-          "source_group": "docs",
-          "text": "Диаграмма Title: PipelineRunner Collaborator Diagram показывает актуальную модель `PipelineRunner` после перехода на grouped dependency contract `PipelineRunnerDependencies` и выделенные lifecycle/pre"
-        },
-        {
-          "path": "docs/02-architecture/diagrams/foundation/38-runtime-assembly-sequence.mmd",
-          "line": 24,
-          "source_group": "docs",
-          "text": "participant RA as runner_assembly.py"
-        },
-        {
-          "path": "docs/02-architecture/diagrams/foundation/42-pipeline-runner-class.mmd",
-          "line": 2,
-          "source_group": "docs",
-          "text": "%% Covers: application/core/runner.py, application/core/pipeline_services.py, composition/factories/pipeline/runner_assembly.py"
-        },
-        {
-          "path": "docs/02-architecture/diagrams/foundation/svg/38-runtime-assembly-sequence.svg",
-          "line": 1,
-          "source_group": "docs",
-          "text": "<svg id=\"my-svg\" width=\"100%\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" style=\"max-width: 3921.5px; background-color: white;\" viewBox=\"-50 -16 3921.5 2806\" role=\"gr"
-        },
-        {
-          "path": "tests/architecture/test_composite_cli_runtime_config_boundaries.py",
-          "line": 30,
-          "source_group": "tests",
-          "text": "Path(\"bioetl/composition/bootstrap/runtime/runner_assembly.py\"),"
         }
       ]
     },
@@ -6433,13 +6376,13 @@
         },
         {
           "path": ".codex/skills/py-test-swarm/SKILL.md",
-          "line": 38,
+          "line": 43,
           "source_group": "skills",
           "text": "- Windows PowerShell in a mixed checkout: `.\\scripts\\dev\\run_pytest.ps1`, `.\\scripts\\dev\\run_mypy.ps1`, or `.\\.venv-win\\Scripts\\python.exe -m ...`"
         },
         {
           "path": ".codex/skills/py-test-swarm/SKILL.md",
-          "line": 115,
+          "line": 120,
           "source_group": "skills",
           "text": "- Use the OS-appropriate command path: `uv run python -m ...` in CI/single-OS, `.\\scripts\\engineering\\dev\\run_pytest.ps1` / `.\\scripts\\engineering\\dev\\run_mypy.ps1` in PowerShell, and `bash scripts/en"
         },
@@ -6492,13 +6435,13 @@
         },
         {
           "path": ".codex/skills/py-test-swarm/SKILL.md",
-          "line": 39,
+          "line": 44,
           "source_group": "skills",
           "text": "- WSL/Linux in a mixed checkout: `bash scripts/engineering/dev/run_pytest.sh`, `bash scripts/engineering/dev/run_mypy.sh`, or `\"${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python\" -m ...`"
         },
         {
           "path": ".codex/skills/py-test-swarm/SKILL.md",
-          "line": 115,
+          "line": 120,
           "source_group": "skills",
           "text": "- Use the OS-appropriate command path: `uv run python -m ...` in CI/single-OS, `.\\scripts\\engineering\\dev\\run_pytest.ps1` / `.\\scripts\\engineering\\dev\\run_mypy.ps1` in PowerShell, and `bash scripts/en"
         },
@@ -6608,13 +6551,13 @@
         },
         {
           "path": ".codex/skills/py-test-swarm/SKILL.md",
-          "line": 38,
+          "line": 43,
           "source_group": "skills",
           "text": "- Windows PowerShell in a mixed checkout: `.\\scripts\\dev\\run_pytest.ps1`, `.\\scripts\\dev\\run_mypy.ps1`, or `.\\.venv-win\\Scripts\\python.exe -m ...`"
         },
         {
           "path": ".codex/skills/py-test-swarm/SKILL.md",
-          "line": 115,
+          "line": 120,
           "source_group": "skills",
           "text": "- Use the OS-appropriate command path: `uv run python -m ...` in CI/single-OS, `.\\scripts\\engineering\\dev\\run_pytest.ps1` / `.\\scripts\\engineering\\dev\\run_mypy.ps1` in PowerShell, and `bash scripts/en"
         },
@@ -6667,13 +6610,13 @@
         },
         {
           "path": ".codex/skills/py-test-swarm/SKILL.md",
-          "line": 39,
+          "line": 44,
           "source_group": "skills",
           "text": "- WSL/Linux in a mixed checkout: `bash scripts/engineering/dev/run_pytest.sh`, `bash scripts/engineering/dev/run_mypy.sh`, or `\"${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python\" -m ...`"
         },
         {
           "path": ".codex/skills/py-test-swarm/SKILL.md",
-          "line": 115,
+          "line": 120,
           "source_group": "skills",
           "text": "- Use the OS-appropriate command path: `uv run python -m ...` in CI/single-OS, `.\\scripts\\engineering\\dev\\run_pytest.ps1` / `.\\scripts\\engineering\\dev\\run_mypy.ps1` in PowerShell, and `bash scripts/en"
         },

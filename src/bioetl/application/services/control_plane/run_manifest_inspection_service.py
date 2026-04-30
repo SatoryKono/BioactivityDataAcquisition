@@ -222,7 +222,9 @@ def _build_run_artifact_diff_payload(
     right_manifest: RunManifest,
 ) -> dict[str, object]:
     left_snapshots = RunManifestInspectionService._manifest_snapshot_ids(left_manifest)
-    right_snapshots = RunManifestInspectionService._manifest_snapshot_ids(right_manifest)
+    right_snapshots = RunManifestInspectionService._manifest_snapshot_ids(
+        right_manifest
+    )
     left_artifacts = RunManifestInspectionService._planned_artifact_identity(
         left_manifest
     )

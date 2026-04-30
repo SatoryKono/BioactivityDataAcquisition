@@ -140,6 +140,16 @@ def _build_base_summary_payload(
         strict_code_provenance_blockers.append("git_commit_missing")
     if str(code_provenance.source_revision_state or "").strip().lower() != "clean":
         strict_code_provenance_blockers.append("source_revision_state_not_clean")
+    code_provenance_state: dict[str, object] = {
+        "git_commit": code_provenance.git_commit,
+        "source_revision_state": code_provenance.source_revision_state,
+        "strict_code_provenance_ready": not strict_code_provenance_blockers,
+        "strict_code_provenance_blockers": strict_code_provenance_blockers,
+    }
+    if code_provenance.dependency_lock_hash is not None:
+        code_provenance_state["dependency_lock_hash"] = (
+            code_provenance.dependency_lock_hash
+        )
     summary: dict[str, object] = {
         "manifest_id": manifest.manifest_id,
         "manifest_created_at": manifest.created_at.isoformat(),
@@ -154,14 +164,7 @@ def _build_base_summary_payload(
         "pipeline_version": code_provenance.pipeline_version,
         "git_commit": code_provenance.git_commit,
         "source_revision_state": code_provenance.source_revision_state,
-        "dependency_lock_hash": code_provenance.dependency_lock_hash,
-        "code_provenance_state": {
-            "git_commit": code_provenance.git_commit,
-            "source_revision_state": code_provenance.source_revision_state,
-            "dependency_lock_hash": code_provenance.dependency_lock_hash,
-            "strict_code_provenance_ready": not strict_code_provenance_blockers,
-            "strict_code_provenance_blockers": strict_code_provenance_blockers,
-        },
+        "code_provenance_state": code_provenance_state,
         "contract_ref": code_provenance.contract_ref,
         "contract_version": code_provenance.contract_version,
         "dq_policy_ref": code_provenance.dq_policy_ref,
@@ -215,6 +218,8 @@ def _build_base_summary_payload(
         ],
         "occurrence_only_diagnostics": [],
     }
+    if code_provenance.dependency_lock_hash is not None:
+        summary["dependency_lock_hash"] = code_provenance.dependency_lock_hash
     summary["artifact_refs"] = []
     summary["lineage_fragment_ids"] = []
     summary["published_artifact_count"] = 0

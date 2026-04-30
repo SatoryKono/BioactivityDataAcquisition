@@ -537,6 +537,7 @@ published effective-config baseline is:
 - `pipeline_version`
 - `git_commit`
 - `source_revision_state`
+- `dependency_lock_hash`
 - `config_hash`
 - `resolved_config_hash`
 - `effective_config_hash`
@@ -572,7 +573,10 @@ Strict exact-replay, `replay_ready`, and `forensic_grade` manifests require
 `git_commit` to be present. Inspection diagnostics must expose both
 `git_commit` and `source_revision_state` through `diagnostics`,
 `code_provenance_state`, and `identity_graph` so missing or dirty code
-provenance is visible to operators and automation.
+provenance is visible to operators and automation. New manifests should record
+`dependency_lock_hash` as a forensic anchor when a repository lockfile is
+available; the field is not a domain I/O concern and must be resolved by
+composition/runtime wiring.
 
 Checkpoint / resume compatibility may additionally rely on a narrower
 runtime-anchor contract derived from a subset of control-plane fields such as
@@ -665,6 +669,10 @@ The diff payload should therefore expose:
 - `semantic_difference_fields`
 - `noncanonical_difference_fields`
 - `replay_relationship`
+- `forensic_diff` / `cross_surface_replay_diff`, retaining the legacy
+  `cross_surface_replay_diff` key for CLI/API compatibility while exposing a
+  unified forensic view of manifest, effective-config, checkpoint-anchor,
+  lineage, input-snapshot, and planned-artifact drift.
 
 ## Canonical Stage Sets
 

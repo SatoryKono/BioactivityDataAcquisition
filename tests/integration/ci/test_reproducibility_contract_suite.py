@@ -903,6 +903,7 @@ def test_reproducibility_contract_composite_full_snapshot_envelope_exact_replay_
         lambda: SimpleNamespace(
             git_commit="test-clean-composite-replay",
             source_revision_state="clean",
+            dependency_lock_hash="sha256:test-lock-composite-replay",
         ),
     )
     config = _build_replay_matrix_composite_config()

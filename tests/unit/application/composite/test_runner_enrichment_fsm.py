@@ -97,7 +97,7 @@ def mock_merger() -> AsyncMock:
 
 @pytest.fixture
 def mock_checkpoint_manager() -> AsyncMock:
-    """Create a mock CompositeCheckpointManager that tracks state transitions."""
+    """Create a mock composite checkpoint service that tracks state transitions."""
     return support.create_tracking_checkpoint_manager()
 
 

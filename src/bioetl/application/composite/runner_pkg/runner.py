@@ -66,7 +66,6 @@ if TYPE_CHECKING:
 
 __all__ = [
     "CompositePipelineRunner",
-    "CompositePipelineRunnerService",
 ]
 
 
