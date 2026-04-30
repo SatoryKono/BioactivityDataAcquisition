@@ -20,7 +20,7 @@ from bioetl.application.composite._preflight_types import (
     ValidationIssue,
 )
 from bioetl.application.composite.preflight_validator import (
-    CompositePreflightValidationService as CompositePreflightValidator,
+    CompositePreflightValidationService,
 )
 
 
@@ -95,8 +95,8 @@ class TestPreflightTypes:
 # ---------------------------------------------------------------------------
 
 
-def _make_validator() -> CompositePreflightValidator:
-    return CompositePreflightValidator(MagicMock())
+def _make_validator() -> CompositePreflightValidationService:
+    return CompositePreflightValidationService(MagicMock())
 
 
 @pytest.mark.unit

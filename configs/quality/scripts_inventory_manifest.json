@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-30T07:38:42.984949+00:00",
+  "generated_at": "2026-04-30T08:07:04.034662+00:00",
   "summary": {
     "total_scripts": 357,
     "status_counts": {
@@ -4697,7 +4697,7 @@
         },
         {
           "path": "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
-          "line": 40,
+          "line": 44,
           "source_group": "docs",
           "text": "- run `python -m scripts.docs check-links --links --specs --configs`"
         },
@@ -7099,7 +7099,7 @@
         },
         {
           "path": "docs/00-project/governance/03-file-policy.md",
-          "line": 71,
+          "line": 73,
           "source_group": "docs",
           "text": "python3 scripts/engineering/diagnostics/audit_structure.py --path ."
         },
@@ -8557,13 +8557,13 @@
       "references": [
         {
           "path": "docs/00-project/governance/03-file-policy.md",
-          "line": 70,
+          "line": 72,
           "source_group": "docs",
           "text": "python3 scripts/engineering/repo/audit_root_cleanliness.py"
         },
         {
           "path": "docs/00-project/governance/03-file-policy.md",
-          "line": 101,
+          "line": 103,
           "source_group": "docs",
           "text": "`scripts/engineering/repo/audit_root_cleanliness.py` MUST использовать этот"
         },

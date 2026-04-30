@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from bioetl.application.composite.runner_pkg.runner import (
     CompositePipelineRunner,
-    CompositePipelineRunnerService,
 )
 from bioetl.application.composite.runtime_models import (
     CompositeRunnerDependencies,
@@ -13,7 +12,6 @@ from bioetl.application.composite.runtime_models import (
 
 __all__ = [
     "CompositePipelineRunner",
-    "CompositePipelineRunnerService",
     "CompositeRunnerDependencies",
     "CompositeRuntimeConfig",
 ]

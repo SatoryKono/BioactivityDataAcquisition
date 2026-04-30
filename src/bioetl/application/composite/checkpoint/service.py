@@ -19,7 +19,7 @@ from bioetl.application.composite.checkpoint.persistence_service import (
     CompositeCheckpointPersistenceService,
 )
 from bioetl.application.composite.checkpoint.state import CompositeCheckpointState
-from bioetl.application.composite.port_types import (
+from bioetl.domain.ports import (
     ClockPort,
     CompositeCheckpointPort,
     LoggerPort,

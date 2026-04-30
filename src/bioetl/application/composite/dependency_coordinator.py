@@ -18,7 +18,7 @@ from bioetl.application.composite.dependency_progress_tracker import (
 from bioetl.application.composite.dependency_result_mapper import (
     DependencyResultService,
 )
-from bioetl.application.composite.port_types import (
+from bioetl.domain.ports import (
     ClockPort,
     DeltaReaderPort,
     ExecutionMetricsRunnerPort,

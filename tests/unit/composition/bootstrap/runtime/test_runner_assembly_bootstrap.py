@@ -28,7 +28,7 @@ class TestCreateCompositeRunnerService:
     """Tests for create_composite_runner_service."""
 
     def test_returns_runner_service(self) -> None:
-        """Creates CompositePipelineRunnerService with all provided deps."""
+        """Creates CompositePipelineRunner with all provided deps."""
         config = MagicMock()
         runtime = MagicMock()
         logger = MagicMock()

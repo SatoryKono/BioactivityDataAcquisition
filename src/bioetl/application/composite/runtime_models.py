@@ -18,7 +18,7 @@ from bioetl.domain.constants import DEFAULT_LOCK_TTL_SECONDS
 if TYPE_CHECKING:
     import polars as pl
 
-    from bioetl.application.composite.port_types import (
+    from bioetl.domain.ports import (
         ClockPort,
         ExecutionMetricsRunnerPort,
         LockPort,

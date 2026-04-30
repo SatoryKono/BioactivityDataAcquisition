@@ -64,6 +64,7 @@ def _expected_code_provenance_state(manifest: RunManifest) -> dict[str, object]:
     return {
         "git_commit": manifest.code_provenance.git_commit,
         "source_revision_state": manifest.code_provenance.source_revision_state,
+        "dependency_lock_hash": manifest.code_provenance.dependency_lock_hash,
         "strict_code_provenance_ready": bool(manifest.code_provenance.git_commit),
         "strict_code_provenance_blockers": [],
     }
