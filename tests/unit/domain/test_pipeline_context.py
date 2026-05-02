@@ -17,6 +17,7 @@ from bioetl.domain.context import (
     VacuumSettings,
 )
 from bioetl.domain.types import BatchID, RunID, RunType
+from tests.helpers.clock import FIXED_TEST_TIME
 
 CACHED_BRONZE_PATH = "test-output/bronze"
 
@@ -260,7 +261,7 @@ class TestPipelineContextEquality:
         """Contexts with same values should be equal."""
         run_id = uuid4()
         logger = MagicMock()
-        started_at = datetime.now(UTC)
+        started_at = FIXED_TEST_TIME
 
         ctx1 = PipelineContext(
             run_id=run_id,

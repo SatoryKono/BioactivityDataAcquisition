@@ -22,6 +22,24 @@ profiles в BioETL.
 - **Post-change validation policy**:
   [`../agents/policy/POST_CHANGE_VALIDATION.md`](../agents/policy/POST_CHANGE_VALIDATION.md)
   — validation protocol после write-capable AI work.
+
+## Role Memory Coverage Matrix
+
+| Role profile | Role memory sheet | Coverage status |
+| --- | --- | --- |
+| `py-audit-bot` | `memory-py-audit-bot.md` | dedicated |
+| `py-plan-bot` | `memory-py-plan-bot.md` | dedicated |
+| `py-test-bot` | `memory-py-test-bot.md` | dedicated |
+| `py-config-bot` | `memory-py-config-bot.md` | dedicated |
+| `py-debug-bot` | `memory-py-debug-bot.md` | dedicated |
+| `py-doc-bot` | `memory-py-doc-bot.md` | dedicated |
+| `py-architecture-debt-bot` | `memory-py-architecture-debt-bot.md` | dedicated |
+| `py-review-orchestrator` | `memory-py-review-orchestrator.md` | dedicated |
+| `py-test-swarm` | `memory-py-test-swarm.md` | dedicated |
+
+If a runtime profile is renamed or added, update this matrix and the matching
+role profile anchors in `.codex/agents/*.md` and `.gemini/agents/*.md` in the
+same change set.
 - **Machine-readable memory artifact**:
   `mcp-memory.json`
   — служебный memory snapshot для tooling/integration сценариев, не human

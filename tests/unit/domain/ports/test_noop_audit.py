@@ -10,6 +10,7 @@ import pytest
 from bioetl.domain.ports.audit import AuditEntry, AuditLayer, AuditOperation
 from bioetl.domain.ports.noop import NoOpAudit
 from bioetl.domain.types import RunID
+from tests.helpers.clock import FIXED_TEST_TIME
 
 
 @pytest.fixture
@@ -23,7 +24,7 @@ def sample_entry(run_id: RunID) -> AuditEntry:
     """Create a sample audit entry."""
     return AuditEntry(
         run_id=run_id,
-        timestamp=datetime.now(UTC),
+        timestamp=FIXED_TEST_TIME,
         layer=AuditLayer.BRONZE,
         table_name="test_table",
         operation=AuditOperation.WRITE,

@@ -116,6 +116,8 @@ class TestBuildComponentsAndProcessingService:
             quarantine_port=pipeline.services.quarantine,
             pipeline_name=processor_config.pipeline_name,
             metrics=pipeline.services.metrics,
+            batch_metrics=components.batch_metrics,
+            run_type=pipeline.context.run_type.value,
             domain_event_emitter=None,
         )
         mock_support_service_cls.assert_called_once_with(

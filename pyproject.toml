@@ -185,9 +185,11 @@ addopts = [
 markers = [
     "unit: Unit tests (fast, no I/O)",
     "integration: Integration tests (may use I/O)",
+    "relaxed_dq: Integration tests that explicitly opt in to relaxed DQ thresholds for replay stability",
     "e2e: End-to-end tests (slow, requires Docker)",
     "asyncio: Async IO tests powered by pytest-asyncio",
     "slow: Slow tests (hypothesis, long-running)",
+    "network: Tests requiring outbound network access",
     "memory: Neo4j project-memory and MCP tests run in a dedicated non-coverage lane",
     "hypothesis: Property-based tests using Hypothesis",
     "security: Security tests",
@@ -199,10 +201,14 @@ markers = [
     "smoke: Smoke tests (quick sanity checks for local development)",
     "serial: Tests that must run serially (not parallel-safe, e.g., shared state)",
     "no_api: Tests that do not require external API access",
+    "chembl: ChEMBL provider-specific tests",
+    "pubchem: PubChem provider-specific tests",
+    "pubmed: PubMed provider-specific tests",
     "uniprot: UniProt provider-specific tests",
     "crossref: CrossRef provider-specific tests",
     "openalex: OpenAlex provider-specific tests",
     "semanticscholar: Semantic Scholar provider-specific tests",
+    "pilot_soak: richer pilot-only live contract checks requiring explicit opt-in",
 ]
 # Default timeout: 60 seconds per test (prevents CI hangs from stuck tests)
 # Override per-test with @pytest.mark.timeout(N) or disable with @pytest.mark.timeout(0)

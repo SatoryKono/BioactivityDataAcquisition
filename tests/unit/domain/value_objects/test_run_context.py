@@ -9,6 +9,7 @@ import pytest
 
 from bioetl.domain.types import RunID, RunType
 from bioetl.domain.value_objects.run_context import RunContext
+from tests.helpers.clock import FIXED_TEST_TIME
 
 
 def _make_run_id() -> RunID:
@@ -16,7 +17,7 @@ def _make_run_id() -> RunID:
 
 
 def _now_utc() -> datetime:
-    return datetime.now(UTC)
+    return FIXED_TEST_TIME
 
 
 @pytest.mark.unit

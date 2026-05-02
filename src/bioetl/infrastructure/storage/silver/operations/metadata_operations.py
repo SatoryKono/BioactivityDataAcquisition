@@ -457,18 +457,6 @@ class SilverMetadataOperations:
         """Resolve transform steps from the current host with a stable fallback."""
         return _resolve_transform_steps(self._host)
 
-    def _log_debug(self, message: str) -> None:
-        """Best-effort debug logging."""
-        _best_effort_log(self._logger, "debug", message)
-
-    def _log_info(self, message: str) -> None:
-        """Best-effort info logging."""
-        _best_effort_log(self._logger, "info", message)
-
-    def _log_warning(self, message: str) -> None:
-        """Best-effort warning logging."""
-        _best_effort_log(self._logger, "warning", message)
-
     def _resolve_manifest_id(self, *, records: list[BronzeRecord]) -> str | None:
         """Resolve control-plane manifest id from records, host, or coordinator."""
         return _resolve_manifest_id(self, records=records)

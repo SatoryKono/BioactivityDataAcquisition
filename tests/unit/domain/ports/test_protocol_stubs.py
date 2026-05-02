@@ -56,6 +56,7 @@ from bioetl.domain.ports import (
     StorageMaintenancePort,
     TracingPort,
 )
+from tests.helpers.clock import FIXED_TEST_TIME
 
 PROTOCOL_CLASSES = [
     DataNormalizationPort,
@@ -121,7 +122,7 @@ def _dummy_value_for_name(lower_name: str) -> Any | None:
         (lower_name in {"filters", "fallback_mapping", "labels", "scd_config"}, {}),
         (
             lower_name in {"date", "ingestion_ts", "timestamp", "start_time"},
-            datetime.now(UTC),
+            FIXED_TEST_TIME,
         ),
         (
             lower_name

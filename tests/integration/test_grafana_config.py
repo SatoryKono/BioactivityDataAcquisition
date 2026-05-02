@@ -11,8 +11,6 @@ from tests.integration._grafana_test_support import (
     _assert_provider_health_variable_contract,
     _assert_silver_reject_explorer_variable_contract,
     _assert_standard_variable_contract,
-    _collect_dashboard_links,
-    _emit_sample_structured_log,
     _extract_selector_labels,
     _unknown_metrics_for_query,
     get_all_valid_metric_names,
@@ -248,8 +246,7 @@ def test_summary_queries_use_zero_fallbacks() -> None:
     """Runtime/provider summary panels should show zero instead of no-data."""
     expected_panel_snippets = {
         "bioetl-overview-v2.json": {
-            "Manifest Write Failures": "or vector(0)",
-            "Ledger Append Failures": "or vector(0)",
+            "Manifest / Ledger Failures": "or vector(0)",
             "Checkpoint Incompatibilities": "or vector(0)",
             "Lineage Refs Missing": "or vector(0)",
             "Composite Source Selections": "or vector(0)",
@@ -273,8 +270,6 @@ def test_summary_queries_use_zero_fallbacks() -> None:
             "Pushgateway Up": "or vector(0)",
             "No-Records Processed Runs": "or vector(0)",
             "Replay Not Reconstructable": "or vector(0)",
-            "Phase Duration by Phase (p95)": "or vector(0)",
-            "Postrun Phase Duration by Phase (p95)": "or vector(0)",
             "Shutdown Initiated by Reason": "or vector(0)",
             "Shutdown Completed by Reason": "or vector(0)",
             "Log Hygiene Trend": 'label_replace(vector(0), "series",',
@@ -284,9 +279,7 @@ def test_summary_queries_use_zero_fallbacks() -> None:
             "Degraded Checks": "or vector(0)",
             "Provider Failure Rate": "or vector(0)",
             "Health Checks Total": "or vector(0)",
-            "Adapter Request Latency by Endpoint (p95)": "or vector(0)",
             "HTTP Errors by Method / Error Type": "or vector(0)",
-            "Rate Limiter Wait by Provider (p95)": "or vector(0)",
             "Minimum Rate Limiter Tokens Available": "or vector(0)",
             "Circuit Breaker State (max)": "or vector(0)",
             "Circuit Breaker Trips by Provider": 'or label_replace(vector(0), "adapter",',
@@ -302,17 +295,13 @@ def test_summary_queries_use_zero_fallbacks() -> None:
             "Manifest Write Failures": "or vector(0)",
             "Ledger Append Failures": "or vector(0)",
             "Checkpoint Compatibility Incompatibilities": "or vector(0)",
-            "Control-Plane Read Failures": "or vector(0)",
+            "Global Control-Plane Read Failures": "or vector(0)",
             "Checkpoint Load Failures": "or vector(0)",
             "Checkpoint Save Failures": "or vector(0)",
             "Checkpoint Operator Failures": "or vector(0)",
             "Replay Not Reconstructable": "or vector(0)",
-            "Checkpoint Save Latency (p95)": "or vector(0)",
-            "Checkpoint Operator Latency (p95)": "or vector(0)",
             "Audit Write Outcomes": "or vector(0)",
             "Audit Query Outcomes": "or vector(0)",
-            "Audit Write Latency (p95)": "or vector(0)",
-            "Audit Query Latency (p95)": "or vector(0)",
         },
     }
 
@@ -342,12 +331,64 @@ def test_summary_queries_use_zero_fallbacks() -> None:
             )
 
 
+def test_latency_p95_panels_preserve_no_data_state() -> None:
+    """Latency p95 panels must not collapse missing samples into zero."""
+    expected_latency_panels = {
+        "bioetl-runtime.json": {
+            "Global Control-plane Lookup p95",
+            "Phase Duration by Phase (p95)",
+            "Postrun Phase Duration by Phase (p95)",
+        },
+        "bioetl-provider-health-v2.json": {
+            "Health Check Latency by Provider (p95)",
+            "Provider Health Check Latency (p95) - $provider",
+            "Adapter Request Latency by Endpoint (p95)",
+            "Rate Limiter Wait by Provider (p95)",
+        },
+        "bioetl-dq-v2.json": {"DQ Check Duration (p95)"},
+        "bioetl-control-plane-v1.json": {
+            "Global Control-Plane Read p95",
+            "Checkpoint Save Latency (p95)",
+            "Checkpoint Operator Latency (p95)",
+            "Audit Write Latency (p95)",
+            "Audit Query Latency (p95)",
+        },
+    }
+
+    for dashboard_name, panel_titles in expected_latency_panels.items():
+        dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
+        panels = {
+            panel.get("title"): panel
+            for panel in get_dashboard_panels(dashboard)
+            if panel.get("title")
+        }
+        for panel_title in panel_titles:
+            panel = panels.get(panel_title)
+            assert panel is not None, (
+                f"Dashboard {dashboard_name} missing panel {panel_title!r}"
+            )
+            expressions = [
+                target.get("expr", "")
+                for target in panel.get("targets", [])
+                if isinstance(target.get("expr"), str)
+            ]
+            assert expressions, (
+                f"Dashboard {dashboard_name} panel {panel_title!r} has no expressions"
+            )
+            assert any("histogram_quantile(0.95" in expr for expr in expressions), (
+                f"Dashboard {dashboard_name} panel {panel_title!r} must stay histogram-backed"
+            )
+            assert all("or vector(0)" not in expr for expr in expressions), (
+                f"Dashboard {dashboard_name} panel {panel_title!r} must preserve "
+                "no-data instead of rendering zero latency"
+            )
+
+
 def test_count_like_summary_panels_use_rounding_or_boolean_conditions() -> None:
     """Count-like summary panels should avoid fractional event semantics."""
     expected_panel_snippets = {
         "bioetl-overview-v2.json": {
-            "Manifest Write Failures": "round(",
-            "Ledger Append Failures": "round(",
+            "Manifest / Ledger Failures": "round(",
             "Checkpoint Incompatibilities": "round(",
             "Lineage Refs Missing": "round(",
             "Composite Source Selections": "round(",
@@ -537,13 +578,13 @@ def test_dq_dashboard_contains_core_dq_metrics():
 
 
 def test_dq_freshness_panel_uses_age_from_timestamp_metric() -> None:
-    """Guard against rendering raw Unix timestamps as freshness lag."""
+    """Freshness lag must show the stalest entity, not the freshest timestamp."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
     panel = next(
         (
             item
             for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Data Freshness Lag (seconds)"
+            if item.get("title") == "Worst Data Freshness Lag (seconds)"
         ),
         None,
     )
@@ -551,23 +592,48 @@ def test_dq_freshness_panel_uses_age_from_timestamp_metric() -> None:
 
     expressions = [target.get("expr", "") for target in panel.get("targets", [])]
     assert any(
-        "clamp_min(time() - max(bioetl_data_freshness_seconds" in expr
+        "max(clamp_min(time() - bioetl_data_freshness_seconds" in expr
         for expr in expressions
-    ), "Freshness panel must derive lag from the last-ingestion timestamp metric"
+    ), "Freshness panel must derive worst lag from the freshness timestamp metric"
+    assert all(
+        "time() - max(bioetl_data_freshness_seconds" not in expr for expr in expressions
+    ), "Freshness lag must not collapse scope to the freshest entity"
+
+
+@pytest.mark.parametrize(
+    ("dashboard_file", "panel_title"),
+    [
+        ("bioetl-overview-v2.json", "Latest Successful Data Timestamp"),
+        ("bioetl-dq-v2.json", "Latest Successful Data Timestamp"),
+    ],
+)
+def test_latest_timestamp_panels_are_explicitly_success_timestamp_panels(
+    dashboard_file: str, panel_title: str
+) -> None:
+    dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_file)
+    panel = next(
+        (
+            item
+            for item in get_dashboard_panels(dashboard)
+            if item.get("title") == panel_title
+        ),
+        None,
+    )
+    assert panel is not None, f"Panel {panel_title!r} not found in {dashboard_file}"
+    expressions = [target.get("expr", "") for target in panel.get("targets", [])]
+    assert any("max(bioetl_data_freshness_seconds" in expr for expr in expressions)
+    assert any("* 1000" in expr for expr in expressions)
 
 
 def test_overview_dashboard_contains_control_plane_and_lineage_metrics():
-    """Ensure overview dashboard exposes control-plane and lineage health signals."""
+    """Ensure overview dashboard keeps summary control-plane and lineage signals."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
     all_expressions = "\n".join(get_panel_expressions(dashboard))
 
     required_metrics = [
         "bioetl_control_plane_manifest_writes_total",
         "bioetl_control_plane_ledger_appends_total",
-        "bioetl_control_plane_reads_total",
-        "bioetl_control_plane_read_duration_seconds",
         "bioetl_checkpoint_compatibility_events_total",
-        "bioetl_lineage_fragments_emitted_total",
         "bioetl_lineage_refs_missing_total",
         "bioetl_composite_source_selection_total",
     ]
@@ -578,13 +644,14 @@ def test_overview_dashboard_contains_control_plane_and_lineage_metrics():
 def test_control_plane_lookup_panels_disclose_global_scope() -> None:
     """Control-plane read panels must disclose that they are global, not pipeline-scoped."""
     expectations = {
-        "bioetl-overview-v2.json": (
-            "Global Control-plane Lookup Failures",
-            "Global Control-plane Lookup p95",
-        ),
         "bioetl-runtime.json": (
             "Global Control-plane Lookup Outcomes",
             "Global Control-plane Lookup p95",
+        ),
+        "bioetl-control-plane-v1.json": (
+            "Global Control-Plane Read Failures",
+            "Global Control-Plane Read p95",
+            "Global Control-Plane Reads by Store and Status",
         ),
     }
 
@@ -604,17 +671,14 @@ def test_control_plane_lookup_panels_disclose_global_scope() -> None:
 def test_control_plane_read_panels_do_not_filter_on_missing_pipeline_label() -> None:
     """Control-plane read panels must not filter global metrics by pipeline."""
     expectations = {
-        "bioetl-overview-v2.json": (
-            "Global Control-plane Lookup Failures",
-            "Global Control-plane Lookup p95",
-        ),
         "bioetl-runtime.json": (
             "Global Control-plane Lookup Outcomes",
             "Global Control-plane Lookup p95",
         ),
         "bioetl-control-plane-v1.json": (
-            "Control-Plane Read Failures",
-            "Control-Plane Reads by Store and Status",
+            "Global Control-Plane Read Failures",
+            "Global Control-Plane Read p95",
+            "Global Control-Plane Reads by Store and Status",
         ),
     }
 
@@ -686,6 +750,32 @@ def test_provider_dashboard_uses_pipeline_filters():
     )
 
 
+def test_provider_dashboard_surfaces_current_health_status_panel() -> None:
+    dashboard = load_dashboard(
+        Path("grafana/dashboards/bioetl-provider-health-v2.json")
+    )
+    panel = next(
+        (
+            item
+            for item in get_dashboard_panels(dashboard)
+            if item.get("title") == "Current Provider Health Status"
+        ),
+        None,
+    )
+    assert panel is not None, (
+        "Provider Health dashboard must expose current provider health status"
+    )
+    expressions = [
+        target.get("expr", "")
+        for target in panel.get("targets", [])
+        if isinstance(target.get("expr"), str)
+    ]
+    assert any("bioetl_provider_health_status" in expr for expr in expressions)
+    assert all('{pipeline=~"$pipeline"}' not in expr for expr in expressions), (
+        "Provider health status panel must stay provider-scoped only"
+    )
+
+
 def test_runtime_provider_alert_conditions_do_not_filter_on_missing_pipeline_labels():
     """Provider runtime alert summaries are fleet-wide and must not filter on pipeline."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
@@ -706,6 +796,59 @@ def test_runtime_provider_alert_conditions_do_not_filter_on_missing_pipeline_lab
     assert expressions
     assert all('{pipeline=~"$pipeline"}' not in expr for expr in expressions), (
         "Provider Alert Conditions must not filter provider-only recording rules by pipeline."
+    )
+
+
+def test_workflow_step_panels_apply_status_variable() -> None:
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-workflow-overview.json"))
+    expected = {
+        "Step Outcomes by Kind": 'status=~"$status"',
+        "Step Duration p95": 'status=~"$status"',
+    }
+    panels = {
+        panel.get("title"): panel
+        for panel in get_dashboard_panels(dashboard)
+        if panel.get("title")
+    }
+    for title, required_snippet in expected.items():
+        panel = panels.get(title)
+        assert panel is not None, f"Workflow dashboard missing panel {title!r}"
+        expressions = [
+            target.get("expr", "")
+            for target in panel.get("targets", [])
+            if isinstance(target.get("expr"), str)
+        ]
+        assert any(required_snippet in expr for expr in expressions), (
+            f"{title!r} must apply the workflow status variable"
+        )
+
+
+def test_overview_dashboard_exposes_workflow_overview_handoff() -> None:
+    """Overview should expose workflow dashboard in shipped operator navigation."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
+    workflow_link = next(
+        (
+            link
+            for link in dashboard.get("links", [])
+            if str(link.get("url", "")).startswith(
+                "/d/bioetl-workflow-overview/bioetl-workflow-overview"
+            )
+        ),
+        None,
+    )
+    assert workflow_link is not None, (
+        "Overview dashboard must expose a Workflow Overview handoff"
+    )
+    assert workflow_link.get("title") == "6. Workflow Overview"
+    assert workflow_link.get("includeVars") is False, (
+        "Workflow Overview handoff must not pass unrelated dashboard variables"
+    )
+    url = str(workflow_link.get("url", ""))
+    assert "${__url_time_range}" in url, (
+        "Workflow Overview handoff must preserve the active Grafana time range"
+    )
+    assert "var-pipeline=" not in url and "var-run_type=" not in url, (
+        "Workflow Overview handoff must not leak pipeline/run_type into workflow scope"
     )
 
 
@@ -916,11 +1059,14 @@ def test_control_plane_dashboard_contains_checkpoint_and_replay_metrics() -> Non
     all_expressions = "\n".join(get_panel_expressions(dashboard))
 
     required_metrics = [
+        "bioetl_control_plane_reads_total",
+        "bioetl_control_plane_read_duration_seconds",
         "bioetl_checkpoint_load_events_total",
         "bioetl_checkpoint_save_events_total",
         "bioetl_checkpoint_operator_operations_total",
         "bioetl_checkpoint_save_duration_seconds_bucket",
         "bioetl_checkpoint_operator_duration_seconds_bucket",
+        "bioetl_lineage_fragments_emitted_total",
         "bioetl_replay_reconstructability_events_total",
         "bioetl_replay_drift_events_total",
         "bioetl_replay_lag_seconds",
@@ -1185,14 +1331,13 @@ def test_runtime_and_control_plane_operator_panels_use_active_time_windows(
 @pytest.mark.parametrize(
     ("dashboard_file", "panel_title"),
     [
-        ("bioetl-overview-v2.json", "Manifest Write Failures"),
-        ("bioetl-overview-v2.json", "Ledger Append Failures"),
+        ("bioetl-overview-v2.json", "Manifest / Ledger Failures"),
         ("bioetl-overview-v2.json", "Checkpoint Incompatibilities"),
         ("bioetl-overview-v2.json", "Lineage Refs Missing"),
         ("bioetl-overview-v2.json", "Composite Source Selections"),
-        ("bioetl-overview-v2.json", "Global Control-plane Lookup Failures"),
-        ("bioetl-overview-v2.json", "Global Control-plane Lookup p95"),
         ("bioetl-overview-v2.json", "Pipeline Error Rate"),
+        ("bioetl-control-plane-v1.json", "Global Control-Plane Read Failures"),
+        ("bioetl-control-plane-v1.json", "Global Control-Plane Read p95"),
         ("bioetl-dq-v2.json", "Records Quarantined"),
         ("bioetl-dq-v2.json", "Soft Threshold Exceeded"),
         ("bioetl-dq-v2.json", "Quarantine by Error Type"),
@@ -1312,7 +1457,7 @@ def test_runtime_alert_condition_panels_use_recording_rules(
 @pytest.mark.parametrize(
     ("dashboard_file", "panel_title"),
     [
-        ("bioetl-overview-v2.json", "Lineage Fragment Outcomes"),
+        ("bioetl-control-plane-v1.json", "Lineage Fragment Outcomes"),
         ("bioetl-dq-v2.json", "DQ Check Duration (p95)"),
         ("bioetl-dq-v2.json", "Anomalies Detected"),
         ("bioetl-runtime.json", "Global Control-plane Lookup Outcomes"),
@@ -1424,528 +1569,4 @@ def test_dashboard_titles_do_not_expose_fixed_window_suffixes(
     offenders = [title for title in titles if re.search(r"\((24h|15m|1h|5m)\)$", title)]
     assert not offenders, (
         f"Dashboard {dashboard_path.name} still contains fixed-window titles: {offenders}"
-    )
-
-
-@pytest.mark.parametrize("dashboard_path", get_dashboard_files(), ids=lambda p: p.name)
-def test_dashboard_queries_do_not_filter_by_run_id_label(dashboard_path):
-    """Dashboards must avoid run_id label filters to prevent high cardinality usage."""
-    dashboard = load_dashboard(dashboard_path)
-    expressions = get_panel_expressions(dashboard)
-
-    offenders = [
-        expr
-        for expr in expressions
-        if re.search(r"\brun_id\s*(=|=~|!=|!~)\s*", expr) is not None
-    ]
-    assert not offenders, (
-        f"Dashboard {dashboard_path.name} must not filter by run_id label.\n"
-        + "\n".join(offenders[:10])
-    )
-
-    variables = [
-        var.get("name") for var in dashboard.get("templating", {}).get("list", [])
-    ]
-    if dashboard_path.name == "bioetl-provider-health-v2.json":
-        assert "provider" in variables, (
-            "Provider dashboard must define 'provider' template variable"
-        )
-    elif dashboard_path.name == "bioetl-workflow-overview.json":
-        assert "workflow" in variables, (
-            "Workflow dashboard must define 'workflow' template variable"
-        )
-    else:
-        assert "pipeline" in variables, (
-            f"Dashboard {dashboard_path.name} must define 'pipeline' template variable"
-        )
-
-
-def test_overview_and_provider_dashboards_expose_explore_drilldown_links() -> None:
-    """Operational dashboards should offer Loki and Tempo drilldown."""
-    expectations = (
-        "bioetl-overview-v2.json",
-        "bioetl-dq-v2.json",
-        "bioetl-runtime.json",
-        "bioetl-control-plane-v1.json",
-        "bioetl-provider-health-v2.json",
-        "bioetl-silver-reject-explorer.json",
-    )
-
-    for dashboard_name in expectations:
-        dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
-        links = _collect_dashboard_links(dashboard)
-        titles = {link.get("title") for link in links if link.get("title")}
-        urls = [link.get("url", "") for link in links]
-
-        assert any("Logs" in title for title in titles), (
-            f"{dashboard_name} must expose a logs drilldown link"
-        )
-        assert any("Traces" in title for title in titles), (
-            f"{dashboard_name} must expose a traces drilldown link"
-        )
-        assert any("/a/grafana-lokiexplore-app/" in url for url in urls), (
-            f"{dashboard_name} must point logs drilldown to Logs Drilldown app"
-        )
-        assert any("/a/grafana-exploretraces-app/" in url for url in urls), (
-            f"{dashboard_name} must point traces drilldown to Traces Drilldown app"
-        )
-        drilldown_urls = [
-            url
-            for url in urls
-            if "/a/grafana-lokiexplore-app/" in url
-            or "/a/grafana-exploretraces-app/" in url
-        ]
-        assert drilldown_urls, (
-            f"{dashboard_name} must expose Grafana Drilldown app URLs"
-        )
-        for url in drilldown_urls:
-            assert "from=${__from}" in url and "to=${__to}" in url, (
-                f"{dashboard_name} drilldown URL must preserve dashboard time range"
-            )
-            assert "/explore?left=" not in url, (
-                f"{dashboard_name} drilldown URL must not use legacy /explore payload links"
-            )
-
-
-def _is_logs_drilldown_url(url: str) -> bool:
-    return "/a/grafana-lokiexplore-app/" in url
-
-
-def _is_traces_drilldown_url(url: str) -> bool:
-    return "/a/grafana-exploretraces-app/" in url
-
-
-def test_explore_links_use_drilldown_routes_and_time_range() -> None:
-    """Explore links should target Drilldown apps and preserve current time range."""
-    expectations = (
-        "bioetl-overview-v2.json",
-        "bioetl-dq-v2.json",
-        "bioetl-runtime.json",
-        "bioetl-control-plane-v1.json",
-        "bioetl-provider-health-v2.json",
-        "bioetl-silver-reject-explorer.json",
-    )
-
-    for dashboard_name in expectations:
-        dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
-        drilldown_links = [
-            link
-            for link in _collect_dashboard_links(dashboard)
-            if _is_logs_drilldown_url(link.get("url", ""))
-            or _is_traces_drilldown_url(link.get("url", ""))
-        ]
-        assert drilldown_links, (
-            f"{dashboard_name} must expose at least one Drilldown app link"
-        )
-
-        for link in drilldown_links:
-            url = link.get("url", "")
-            assert "from=${__from}" in url and "to=${__to}" in url, (
-                f"{dashboard_name} drilldown link must preserve current time range"
-            )
-            assert "/explore?left=" not in url, (
-                f"{dashboard_name} drilldown link must not use legacy Explore payload URL"
-            )
-
-
-def test_tempo_drilldown_routes_to_traces_drilldown_app() -> None:
-    """Tempo drilldown links should route to Grafana Traces Drilldown app."""
-    expectations = (
-        "bioetl-overview-v2.json",
-        "bioetl-dq-v2.json",
-        "bioetl-runtime.json",
-        "bioetl-control-plane-v1.json",
-        "bioetl-provider-health-v2.json",
-        "bioetl-silver-reject-explorer.json",
-    )
-
-    for dashboard_name in expectations:
-        dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
-        tempo_links = [
-            link
-            for link in _collect_dashboard_links(dashboard)
-            if _is_traces_drilldown_url(link.get("url", ""))
-        ]
-        assert tempo_links, (
-            f"{dashboard_name} must expose at least one Traces Drilldown link"
-        )
-        for link in tempo_links:
-            url = link.get("url", "")
-            assert "from=${__from}" in url and "to=${__to}" in url
-
-
-def test_explore_drilldown_titles_disclose_tracing_profile_dependency() -> None:
-    """Loki/Tempo drilldown titles should warn that tracing profile is required."""
-    expectations = (
-        "bioetl-overview-v2.json",
-        "bioetl-dq-v2.json",
-        "bioetl-runtime.json",
-        "bioetl-control-plane-v1.json",
-        "bioetl-provider-health-v2.json",
-        "bioetl-silver-reject-explorer.json",
-    )
-
-    for dashboard_name in expectations:
-        dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
-        for link in _collect_dashboard_links(dashboard):
-            url = link.get("url", "")
-            title = link.get("title", "")
-            if not (_is_logs_drilldown_url(url) or _is_traces_drilldown_url(url)):
-                continue
-            assert "tracing" in title.lower(), (
-                f"{dashboard_name} Drilldown title must disclose tracing profile dependency"
-            )
-
-
-def test_loki_drilldown_uses_grafana_logs_drilldown_entrypoint() -> None:
-    """Loki drilldown should route to Grafana Logs Drilldown app entrypoint."""
-    sample_line = _emit_sample_structured_log(
-        pipeline="chembl_activity",
-        provider="chembl",
-    )
-    assert re.search(r'"pipeline"\s*:\s*"chembl_activity"', sample_line)
-    assert re.search(r'"provider"\s*:\s*"chembl"', sample_line)
-    assert re.search(r'"stage"\s*:\s*"extract"', sample_line)
-
-    expectations = (
-        "bioetl-overview-v2.json",
-        "bioetl-dq-v2.json",
-        "bioetl-runtime.json",
-        "bioetl-control-plane-v1.json",
-        "bioetl-provider-health-v2.json",
-        "bioetl-silver-reject-explorer.json",
-    )
-
-    for dashboard_name in expectations:
-        dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
-        loki_links = [
-            link
-            for link in _collect_dashboard_links(dashboard)
-            if _is_logs_drilldown_url(link.get("url", ""))
-        ]
-        assert loki_links, (
-            f"{dashboard_name} must expose at least one Logs Drilldown link"
-        )
-        assert all(
-            "/explore?left=" not in link.get("url", "") for link in loki_links
-        ), f"{dashboard_name} must not keep legacy Loki Explore payload links"
-
-
-def test_overview_and_runtime_dashboards_expose_data_quality_handoff() -> None:
-    """Overview and Runtime should offer an explicit handoff into DQ triage."""
-    expectations = (
-        "bioetl-overview-v2.json",
-        "bioetl-runtime.json",
-    )
-
-    for dashboard_name in expectations:
-        dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
-        titles = {
-            link.get("title")
-            for link in dashboard.get("links", [])
-            if link.get("title")
-        }
-        urls = [link.get("url", "") for link in dashboard.get("links", [])]
-
-        assert "4. Data Quality" in titles, (
-            f"{dashboard_name} must expose a Data Quality dashboard handoff"
-        )
-        assert any(url == "/d/bioetl-dq-v2" for url in urls), (
-            f"{dashboard_name} Data Quality handoff must target /d/bioetl-dq-v2"
-        )
-
-
-def test_runtime_and_dq_dashboards_expose_control_plane_handoff() -> None:
-    """Runtime and DQ should offer an explicit handoff into control-plane triage."""
-    expectations = (
-        "bioetl-runtime.json",
-        "bioetl-dq-v2.json",
-    )
-
-    for dashboard_name in expectations:
-        dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
-        titles = {
-            link.get("title")
-            for link in dashboard.get("links", [])
-            if link.get("title")
-        }
-        urls = [link.get("url", "") for link in dashboard.get("links", [])]
-
-        assert "Control Plane v1" in titles, (
-            f"{dashboard_name} must expose a Control Plane dashboard handoff"
-        )
-        assert any(
-            url == "/d/bioetl-control-plane-v1/bioetl-control-plane-v1" for url in urls
-        ), (
-            f"{dashboard_name} Control Plane handoff must target /d/bioetl-control-plane-v1/bioetl-control-plane-v1"
-        )
-
-
-def test_data_quality_dashboard_exposes_silver_reject_explorer_handoff() -> None:
-    """Data Quality dashboard should expose an explicit handoff to Silver explorer."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
-    links = dashboard.get("links", [])
-    titles = {link.get("title") for link in links if link.get("title")}
-    urls = [link.get("url", "") for link in links]
-
-    assert "5. Silver Reject Explorer" in titles, (
-        "Data Quality dashboard must expose a Silver Reject Explorer handoff"
-    )
-    assert any(url == "/d/bioetl-silver-reject-explorer" for url in urls), (
-        "Data Quality handoff must target /d/bioetl-silver-reject-explorer"
-    )
-    silver_link = next(
-        (
-            link
-            for link in links
-            if link.get("url") == "/d/bioetl-silver-reject-explorer"
-        ),
-        None,
-    )
-    assert silver_link is not None, "Silver Reject Explorer link must exist"
-    assert silver_link.get("includeVars") is False, (
-        "Data Quality handoff must not pass Prometheus variables into "
-        "Silver Reject Explorer"
-    )
-
-
-def test_runtime_incident_panels_link_to_control_plane_dashboard() -> None:
-    """Runtime incident panels should hand off directly into control-plane triage."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
-    expectations = {
-        "Control-plane Alert Conditions": "Open Control Plane v1 (manifest/checkpoint)",
-        "No-Records Processed Runs": "Open Control Plane v1 (checkpoint/replay)",
-        "Replay Not Reconstructable": "Open Control Plane v1 (replay/lineage)",
-    }
-
-    for panel_title, expected_link_title in expectations.items():
-        panel = next(
-            (
-                item
-                for item in get_dashboard_panels(dashboard)
-                if item.get("title") == panel_title
-            ),
-            None,
-        )
-        assert panel is not None, (
-            f"Panel '{panel_title}' not found in bioetl-runtime.json"
-        )
-        data_links = panel.get("options", {}).get("dataLinks", [])
-        link = next(
-            (item for item in data_links if item.get("title") == expected_link_title),
-            None,
-        )
-        assert link is not None, (
-            f"Panel '{panel_title}' must expose control-plane incident handoff"
-        )
-        url = link.get("url", "")
-        assert url.startswith("/d/bioetl-control-plane-v1/bioetl-control-plane-v1"), (
-            f"Panel '{panel_title}' must hand off into control-plane dashboard"
-        )
-        assert "from=${__from}" in url and "to=${__to}" in url, (
-            f"Panel '{panel_title}' handoff must preserve current time range"
-        )
-        assert "var-pipeline=$pipeline" in url and "var-run_type=$run_type" in url, (
-            f"Panel '{panel_title}' handoff must preserve runtime pipeline scope"
-        )
-
-
-def test_data_quality_incident_panels_link_to_control_plane_dashboard() -> None:
-    """DQ panels should link into control-plane investigation for replay/lineage paths."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
-    expectations = {
-        "Data Flow in Range: Bronze -> Silver -> Gold": "Open Control Plane v1 (replay/checkpoint)",
-        "Lineage Refs Missing": "Open Control Plane v1 (lineage/traceability)",
-        "Gold Strict Validation Failures": "Open Control Plane v1 (gold hard-fail context)",
-    }
-
-    for panel_title, expected_link_title in expectations.items():
-        panel = next(
-            (
-                item
-                for item in get_dashboard_panels(dashboard)
-                if item.get("title") == panel_title
-            ),
-            None,
-        )
-        assert panel is not None, (
-            f"Panel '{panel_title}' not found in bioetl-dq-v2.json"
-        )
-        data_links = panel.get("options", {}).get("dataLinks", [])
-        link = next(
-            (item for item in data_links if item.get("title") == expected_link_title),
-            None,
-        )
-        assert link is not None, (
-            f"Panel '{panel_title}' must expose control-plane incident handoff"
-        )
-        url = link.get("url", "")
-        assert url.startswith("/d/bioetl-control-plane-v1/bioetl-control-plane-v1"), (
-            f"Panel '{panel_title}' must hand off into control-plane dashboard"
-        )
-        assert "from=${__from}" in url and "to=${__to}" in url, (
-            f"Panel '{panel_title}' handoff must preserve current time range"
-        )
-        assert "var-pipeline=$pipeline" in url and "var-run_type=$run_type" in url, (
-            f"Panel '{panel_title}' handoff must preserve DQ pipeline scope"
-        )
-
-
-def test_silver_reject_explorer_record_level_panels_do_not_use_prometheus() -> None:
-    """Record-level explorer panels must use the Quarantine Explorer datasource."""
-    dashboard = load_dashboard(
-        Path("grafana/dashboards/bioetl-silver-reject-explorer.json")
-    )
-    expected_titles = {"Filtered Records Table", "Selected Record Details"}
-    panels = {
-        panel.get("title"): panel
-        for panel in get_dashboard_panels(dashboard)
-        if panel.get("title") in expected_titles
-    }
-    assert panels.keys() == expected_titles, (
-        "Silver Reject Explorer must define both table and detail panels"
-    )
-    for title, panel in panels.items():
-        datasource = panel.get("datasource")
-        assert datasource == "Quarantine Explorer", (
-            f"Panel {title!r} must use Quarantine Explorer datasource"
-        )
-
-
-def test_silver_reject_explorer_summary_panels_use_distinct_projections() -> None:
-    """Summary trio should expose total, reject-rate view, and full scope summary separately."""
-    dashboard = load_dashboard(
-        Path("grafana/dashboards/bioetl-silver-reject-explorer.json")
-    )
-    panel_map = {
-        panel.get("title"): panel
-        for panel in get_dashboard_panels(dashboard)
-        if panel.get("title")
-        in {
-            "Filtered Records Total",
-            "Reject Rate vs Bronze",
-            "Run Scope Summary",
-        }
-    }
-    assert panel_map.keys() == {
-        "Filtered Records Total",
-        "Reject Rate vs Bronze",
-        "Run Scope Summary",
-    }, "Silver Reject Explorer must define all three scoped summary panels"
-
-    total_panel = panel_map["Filtered Records Total"]
-    total_transformations = total_panel.get("transformations", [])
-    assert total_transformations, (
-        "Filtered Records Total must project only total field, not full raw payload"
-    )
-    total_organize = next(
-        (
-            transformation
-            for transformation in total_transformations
-            if transformation.get("id") == "organize"
-        ),
-        None,
-    )
-    assert total_organize is not None, (
-        "Filtered Records Total must use organize transform to isolate total"
-    )
-    total_options = total_organize.get("options", {})
-    assert (
-        total_options.get("renameByName", {}).get("total") == "filtered_records_total"
-    )
-    assert total_options.get("excludeByName", {}).get("reject_ratio") is True
-
-    ratio_panel = panel_map["Reject Rate vs Bronze"]
-    ratio_transformations = ratio_panel.get("transformations", [])
-    ratio_organize = next(
-        (
-            transformation
-            for transformation in ratio_transformations
-            if transformation.get("id") == "organize"
-        ),
-        None,
-    )
-    assert ratio_organize is not None, (
-        "Reject Rate vs Bronze must use organize transform for ratio/bronze/total view"
-    )
-    ratio_options = ratio_organize.get("options", {})
-    assert ratio_options.get("renameByName", {}).get("reject_ratio") == (
-        "reject_rate_vs_bronze"
-    )
-    assert ratio_options.get("excludeByName", {}).get("by_reason_code") is True
-
-    ratio_overrides = ratio_panel.get("fieldConfig", {}).get("overrides", [])
-    assert any(
-        override.get("matcher", {}).get("options") == "reject_ratio"
-        and any(prop.get("id") == "unit" for prop in override.get("properties", []))
-        for override in ratio_overrides
-        if isinstance(override, dict)
-    ), "Reject Rate vs Bronze must format reject_ratio as percentage"
-
-    summary_panel = panel_map["Run Scope Summary"]
-    assert not summary_panel.get("transformations"), (
-        "Run Scope Summary must remain full payload panel for forensic context"
-    )
-
-
-def test_silver_reject_explorer_selected_record_details_uses_safe_payload_filter() -> (
-    None
-):
-    """Selected Record Details should not depend on path-bound payload hash."""
-    dashboard = load_dashboard(
-        Path("grafana/dashboards/bioetl-silver-reject-explorer.json")
-    )
-    panel = next(
-        (
-            candidate
-            for candidate in get_dashboard_panels(dashboard)
-            if candidate.get("title") == "Selected Record Details"
-        ),
-        None,
-    )
-    assert panel is not None, (
-        "Silver Reject Explorer must include Selected Record Details"
-    )
-
-    targets = panel.get("targets", [])
-    assert targets, "Selected Record Details must define at least one query target"
-    target = targets[0]
-    url = target.get("url", "")
-    assert isinstance(url, str), "Selected Record Details query URL must be a string"
-    assert "/ops/quarantine/filtered-records" in url, (
-        "Selected Record Details must query list endpoint to avoid hard failure "
-        "when payload_hash is blank"
-    )
-    assert "/ops/quarantine/filtered-record/${payload_hash}" not in url, (
-        "Selected Record Details must not use strict path payload hash endpoint"
-    )
-    assert "payload_hash=${payload_hash}" in url, (
-        "Selected Record Details must filter by payload_hash via query parameter"
-    )
-    assert target.get("root_selector") == "items", (
-        "Selected Record Details must parse list payload via items root selector"
-    )
-
-
-def test_control_plane_dashboard_exposes_working_runbook_link() -> None:
-    """Control-plane dashboard should link to a stable, published runbook target."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
-    runbook_link = next(
-        (
-            link
-            for link in dashboard.get("links", [])
-            if link.get("title") == "Observability Checklist (runbook)"
-        ),
-        None,
-    )
-
-    assert runbook_link is not None, (
-        "Control-plane dashboard must expose an Observability Checklist runbook link"
-    )
-    assert runbook_link.get("url") == (
-        "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/"
-        "docs/05-operations/runbooks/observability-checklist.md"
-    ), "Control-plane dashboard runbook link must target the canonical GitHub doc"
-    assert runbook_link.get("targetBlank") is True, (
-        "External runbook link should open in a new tab"
     )

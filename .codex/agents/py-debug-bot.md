@@ -24,6 +24,8 @@ ______________________________________________________________________
 > **При старте** прочитай специализированную память:
 > `docs/00-project/ai/memory/memory-py-debug-bot.md` — error classification, debugging methodology, known issues, fix patterns, escalation.
 > Общий контекст: `docs/00-project/ai/memory/agent-memory.md`
+> Memory policy: `docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
+> Post-change protocol: `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
 > Evidence calibration: `docs/reports/evidence/project-package-topology/04-decisions/SUMMARY.md`, `docs/reports/evidence/governance-signals/SUMMARY.md`
 
 ______________________________________________________________________

@@ -24,6 +24,11 @@ from tests.helpers.control_plane_replay import (
     run_cached_fixture_pipeline,
 )
 
+pytestmark = [
+    pytest.mark.relaxed_dq,
+    pytest.mark.usefixtures("relaxed_dq_env"),
+]
+
 _PIPELINE_KEY = "chembl/activity"
 _PIPELINE_NAME = "chembl_activity"
 
@@ -57,8 +62,6 @@ async def test_tracked_fixture_run_persists_linked_control_plane_artifacts(
     monkeypatch.setenv("BIOETL_DATA_DIR", str(data_dir))
     monkeypatch.setenv("BIOETL_TEST_MODE", "true")
     monkeypatch.setenv("BIOETL_PIPELINE__HEALTH_CHECK_MODE", "probe")
-    monkeypatch.setenv("BIOETL_TEST_RELAXED_DQ", "1")
-    monkeypatch.setenv("BIOETL_PIPELINE__RELAXED_DQ", "1")
     patch_clean_code_revision(monkeypatch)
     get_settings.cache_clear()
     get_pipeline_config.cache_clear()
@@ -197,8 +200,6 @@ async def test_tracked_fixture_exact_replay_avoids_live_data_source_path(
     monkeypatch.setenv("BIOETL_DATA_DIR", str(data_dir))
     monkeypatch.setenv("BIOETL_TEST_MODE", "true")
     monkeypatch.setenv("BIOETL_PIPELINE__HEALTH_CHECK_MODE", "probe")
-    monkeypatch.setenv("BIOETL_TEST_RELAXED_DQ", "1")
-    monkeypatch.setenv("BIOETL_PIPELINE__RELAXED_DQ", "1")
     patch_clean_code_revision(monkeypatch)
 
     def _raise_live_data_source(*args: object, **kwargs: object) -> object:
@@ -252,8 +253,6 @@ async def test_exact_replay_without_materialized_cached_bronze_batches_fails_clo
     monkeypatch.setenv("BIOETL_DATA_DIR", str(data_dir))
     monkeypatch.setenv("BIOETL_TEST_MODE", "true")
     monkeypatch.setenv("BIOETL_PIPELINE__HEALTH_CHECK_MODE", "probe")
-    monkeypatch.setenv("BIOETL_TEST_RELAXED_DQ", "1")
-    monkeypatch.setenv("BIOETL_PIPELINE__RELAXED_DQ", "1")
     patch_clean_code_revision(monkeypatch)
     get_settings.cache_clear()
     get_pipeline_config.cache_clear()

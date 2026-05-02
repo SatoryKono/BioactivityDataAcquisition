@@ -16,6 +16,7 @@ from bioetl.domain.entities import (
     UniprotTarget,
 )
 from bioetl.domain.types import ContentHash, EntityID, RunType
+from tests.helpers.clock import FIXED_TEST_TIME
 
 
 @pytest.fixture
@@ -27,7 +28,7 @@ def base_entity_kwargs():
         "run_id": uuid4(),
         "run_type": RunType.INCREMENTAL,
         "source_batch_id": uuid4(),
-        "ingestion_ts": datetime.now(UTC),
+        "ingestion_ts": FIXED_TEST_TIME,
         "_index": 0,
     }
 
@@ -235,7 +236,7 @@ class TestBioactivity:
             Bioactivity.from_raw(
                 raw_data={"molecule_id": "CHEMBL1"},
                 run_id=uuid4(),
-                ingestion_ts=datetime.now(UTC),
+                ingestion_ts=FIXED_TEST_TIME,
             )
 
     def test_bioactivity_from_raw_missing_molecule_id(self):
@@ -244,7 +245,7 @@ class TestBioactivity:
             Bioactivity.from_raw(
                 raw_data={"activity_id": 123},
                 run_id=uuid4(),
-                ingestion_ts=datetime.now(UTC),
+                ingestion_ts=FIXED_TEST_TIME,
             )
 
 

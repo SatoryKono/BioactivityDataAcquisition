@@ -212,7 +212,7 @@
             },
             "targets": [
                 {
-                    "expr": "sum by (step_kind, status) (increase(bioetl_workflow_step_events_total{workflow=~\"$workflow\"}[$__interval])) or vector(0)",
+                    "expr": "sum by (step_kind, status) (increase(bioetl_workflow_step_events_total{workflow=~\"$workflow\",status=~\"$status\"}[$__interval])) or vector(0)",
                     "legendFormat": "{{step_kind}} / {{status}}",
                     "refId": "A"
                 }
@@ -260,7 +260,7 @@
             },
             "targets": [
                 {
-                    "expr": "histogram_quantile(0.95, sum by (le, step_kind, status) (rate(bioetl_workflow_step_duration_seconds_bucket{workflow=~\"$workflow\"}[$__rate_interval])))",
+                    "expr": "histogram_quantile(0.95, sum by (le, step_kind, status) (rate(bioetl_workflow_step_duration_seconds_bucket{workflow=~\"$workflow\",status=~\"$status\"}[$__rate_interval])))",
                     "legendFormat": "p95 {{step_kind}} / {{status}}",
                     "refId": "A"
                 }

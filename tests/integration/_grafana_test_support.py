@@ -345,6 +345,12 @@ def _assert_silver_reject_explorer_variable_contract(
         f"Dashboard {dashboard_path.name} 'pipeline' query must use "
         "bioetl_records_processed_total"
     )
+    assert pipeline_var.get("includeAll") is False, (
+        f"Dashboard {dashboard_path.name} 'pipeline' must disable All scope"
+    )
+    assert pipeline_var.get("multi") is False, (
+        f"Dashboard {dashboard_path.name} 'pipeline' must be single-select"
+    )
 
     for variable_name in ("run_type", "reason_code", "field", "run_id"):
         variable = variable_map.get(variable_name)
@@ -360,6 +366,18 @@ def _assert_silver_reject_explorer_variable_contract(
             f"Dashboard {dashboard_path.name} '{variable_name}' query must use "
             "/ops/quarantine/filter-options endpoint"
         )
+        assert "pipeline=${pipeline:csv}" not in query_url, (
+            f"Dashboard {dashboard_path.name} '{variable_name}' query must pass "
+            "one concrete pipeline value"
+        )
+
+    run_id_var = variable_map["run_id"]
+    assert run_id_var.get("includeAll") is False, (
+        f"Dashboard {dashboard_path.name} 'run_id' must disable All scope"
+    )
+    assert run_id_var.get("multi") is False, (
+        f"Dashboard {dashboard_path.name} 'run_id' must stay bounded as single-select"
+    )
 
     payload_hash_var = variable_map.get("payload_hash")
     assert payload_hash_var is not None, (

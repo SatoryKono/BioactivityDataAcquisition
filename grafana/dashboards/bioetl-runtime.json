@@ -55,7 +55,7 @@
             "targetBlank": false,
             "title": "Explore Logs (Loki, tracing profile)",
             "type": "link",
-            "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}"
+            "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D"
         },
         {
             "asDropdown": false,
@@ -65,7 +65,7 @@
             "targetBlank": false,
             "title": "Explore Traces (Tempo, tracing profile)",
             "type": "link",
-            "url": "/a/grafana-exploretraces-app/?from=${__from}&to=${__to}"
+            "url": "/a/grafana-exploretraces-app/?from=${__from}&to=${__to}&queryType=traceqlSearch&query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline:regex}%22%20%26%26%20span.%22bioetl.run_type%22%20%3D~%20%22${run_type:regex}%22%20%7D"
         }
     ],
     "panels": [
@@ -313,11 +313,11 @@
                         "dataLinks": [
                             {
                                 "title": "Open Logs in Loki Explore (tracing profile)",
-                                "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}"
+                                "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D"
                             },
                             {
                                 "title": "Open Traces in Tempo Explore (tracing profile)",
-                                "url": "/a/grafana-exploretraces-app/?from=${__from}&to=${__to}"
+                                "url": "/a/grafana-exploretraces-app/?from=${__from}&to=${__to}&queryType=traceqlSearch&query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline:regex}%22%20%26%26%20span.%22bioetl.run_type%22%20%3D~%20%22${run_type:regex}%22%20%7D"
                             }
                         ],
                         "legend": {
@@ -400,7 +400,13 @@
                     "fields": "",
                     "values": false
                 },
-                "textMode": "auto"
+                "textMode": "auto",
+                "dataLinks": [
+                    {
+                        "title": "Open Pipeline Failure Runbook",
+                        "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/pipeline-failure-critical.md"
+                    }
+                ]
             },
             "targets": [
                 {
@@ -459,7 +465,13 @@
                     "fields": "",
                     "values": false
                 },
-                "textMode": "auto"
+                "textMode": "auto",
+                "dataLinks": [
+                    {
+                        "title": "Open DQ Failure Runbook",
+                        "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/dq-failure-investigation.md"
+                    }
+                ]
             },
             "targets": [
                 {
@@ -523,6 +535,14 @@
                     {
                         "title": "Open Control Plane v1 (manifest/checkpoint)",
                         "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?from=${__from}&to=${__to}&var-pipeline=$pipeline&var-run_type=$run_type"
+                    },
+                    {
+                        "title": "Open Run Manifest Runbook",
+                        "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/run-manifest-inspection.md"
+                    },
+                    {
+                        "title": "Open Observability Checklist Runbook",
+                        "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/observability-checklist.md"
                     }
                 ]
             },
@@ -583,7 +603,13 @@
                     "fields": "",
                     "values": false
                 },
-                "textMode": "auto"
+                "textMode": "auto",
+                "dataLinks": [
+                    {
+                        "title": "Open Provider Incident Runbook",
+                        "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/incident-response.md"
+                    }
+                ]
             },
             "targets": [
                 {
@@ -642,7 +668,13 @@
                     "fields": "",
                     "values": false
                 },
-                "textMode": "auto"
+                "textMode": "auto",
+                "dataLinks": [
+                    {
+                        "title": "Open DQ Freshness Runbook",
+                        "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/dq-failure-investigation.md"
+                    }
+                ]
             },
             "targets": [
                 {
@@ -1011,7 +1043,7 @@
             },
             "targets": [
                 {
-                    "expr": "histogram_quantile(0.95, sum by (le) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range]))) or vector(0)",
+                    "expr": "histogram_quantile(0.95, sum by (le) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range])))",
                     "refId": "A"
                 }
             ],
@@ -1701,6 +1733,10 @@
                     {
                         "title": "Open Control Plane v1 (replay/lineage)",
                         "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?from=${__from}&to=${__to}&var-pipeline=$pipeline&var-run_type=$run_type"
+                    },
+                    {
+                        "title": "Open Checkpoint Debugging Runbook",
+                        "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/checkpoint-debugging.md"
                     }
                 ]
             },
@@ -1785,7 +1821,7 @@
             },
             "targets": [
                 {
-                    "expr": "histogram_quantile(0.95, sum by (le, phase) (increase(bioetl_phase_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__interval]))) or vector(0)",
+                    "expr": "histogram_quantile(0.95, sum by (le, phase) (increase(bioetl_phase_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__interval])))",
                     "legendFormat": "{{ phase }} p95",
                     "refId": "A"
                 }
@@ -1855,7 +1891,7 @@
             },
             "targets": [
                 {
-                    "expr": "histogram_quantile(0.95, sum by (le, phase) (increase(bioetl_postrun_phase_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__interval]))) or vector(0)",
+                    "expr": "histogram_quantile(0.95, sum by (le, phase) (increase(bioetl_postrun_phase_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__interval])))",
                     "legendFormat": "{{ phase }} p95",
                     "refId": "A"
                 }

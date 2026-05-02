@@ -25,6 +25,8 @@ ______________________________________________________________________
 > **При старте** прочитай специализированную память:
 > `docs/00-project/ai/memory/memory-py-test-bot.md` — test structure, thresholds, VCR, failure classification, selection strategy.
 > Общий контекст: `docs/00-project/ai/memory/agent-memory.md`
+> Memory policy: `docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
+> Post-change protocol: `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
 > Evidence calibration: `docs/reports/evidence/project-package-topology/04-decisions/SUMMARY.md`, `docs/reports/evidence/governance-signals/SUMMARY.md`
 
 ______________________________________________________________________

@@ -25,6 +25,7 @@ from bioetl.domain.models.metadata import (
     SilverMetadata,
     SilverOutputExt,
 )
+from tests.helpers.clock import FIXED_TEST_TIME
 
 
 class TestBaseOutputMetadata:
@@ -81,7 +82,7 @@ class TestBaseOutputMetadata:
         """GIVEN missing started_at WHEN accessing write_duration_ms THEN returns None."""
         output = BaseOutputMetadata(
             record_count=100,
-            write_completed_at=datetime.now(UTC),
+            write_completed_at=FIXED_TEST_TIME,
         )
         assert output.write_duration_ms is None
 
@@ -89,7 +90,7 @@ class TestBaseOutputMetadata:
         """GIVEN missing completed_at WHEN accessing write_duration_ms THEN returns None."""
         output = BaseOutputMetadata(
             record_count=100,
-            write_started_at=datetime.now(UTC),
+            write_started_at=FIXED_TEST_TIME,
         )
         assert output.write_duration_ms is None
 
@@ -222,7 +223,7 @@ class TestLayerMetadataComposition:
         return RuntimeMetadata(
             run_id="test-run-123",
             run_type=RunTypeEnum.INCREMENTAL,
-            started_at_utc=datetime.now(UTC),
+            started_at_utc=FIXED_TEST_TIME,
         )
 
     @pytest.fixture
@@ -266,7 +267,7 @@ class TestLayerMetadataComposition:
         environment: EnvironmentMetadata,
     ) -> None:
         """GIVEN BronzeMetadata with output data THEN fields accessible."""
-        started = datetime.now(UTC)
+        started = FIXED_TEST_TIME
         completed = started + timedelta(seconds=5)
 
         metadata = BronzeMetadata(
@@ -394,7 +395,7 @@ class TestMetadataVersionBump:
         return RuntimeMetadata(
             run_id="test-run-123",
             run_type=RunTypeEnum.INCREMENTAL,
-            started_at_utc=datetime.now(UTC),
+            started_at_utc=FIXED_TEST_TIME,
         )
 
     @pytest.fixture

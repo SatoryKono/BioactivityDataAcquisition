@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pytest
-from datetime import datetime
 
 from bioetl.domain.services.merged_metadata_explainability import (
     MergedFieldExplanation,
@@ -11,6 +10,7 @@ from bioetl.domain.services.merged_metadata_explainability import (
     MergedMetadataExplainer,
 )
 from bioetl.domain.models.metadata import CompositeOutputExt
+from tests.helpers.clock import FIXED_TEST_TIME
 
 
 class TestMergedMetadataExplainer:
@@ -28,7 +28,7 @@ class TestMergedMetadataExplainer:
             composite_run_id="test_run_123",
             source_providers=["chembl", "pubchem"],
             enrichment_status={"uniprot": "applied", "go": "not_applied"},
-            lineage_created_at=datetime.now(),
+            lineage_created_at=FIXED_TEST_TIME.replace(tzinfo=None),
         )
 
     @pytest.fixture

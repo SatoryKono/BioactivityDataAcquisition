@@ -195,6 +195,18 @@ AI_SURFACE_REQUIRED_TOKENS: dict[Path, tuple[str, ...]] = {
         "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
         "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
     ),
+    Path(".codex/agents/README.md"): (
+        "AGENTS.md",
+        ".codex/agents/CODEX-RUNTIME.md",
+        "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
+        "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
+    ),
+    Path(".gemini/agents/README.md"): (
+        "AGENTS.md",
+        ".gemini/agents/GEMINI-RUNTIME.md",
+        "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
+        "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
+    ),
     Path("docs/00-project/ai/agents/guides/CODEX.md"): (
         "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
         "docs/00-project/ai/memory/agent-memory.md",
@@ -302,6 +314,124 @@ AI_WRITE_CAPABLE_SKILL_REQUIRED_TOKENS: dict[Path, tuple[str, ...]] = {
         "POST_CHANGE_VALIDATION.md",
     ),
 }
+AI_ROLE_PROFILE_REQUIRED_TOKENS: dict[Path, tuple[str, ...]] = {
+    Path(".codex/agents/py-audit-bot.md"): (
+        "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
+        "docs/00-project/ai/memory/agent-memory.md",
+        "docs/00-project/ai/memory/memory-py-audit-bot.md",
+    ),
+    Path(".codex/agents/py-plan-bot.md"): (
+        "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
+        "docs/00-project/ai/memory/agent-memory.md",
+        "docs/00-project/ai/memory/memory-py-plan-bot.md",
+    ),
+    Path(".codex/agents/py-config-bot.md"): (
+        "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
+        "docs/00-project/ai/memory/agent-memory.md",
+        "docs/00-project/ai/memory/memory-py-config-bot.md",
+        "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
+    ),
+    Path(".codex/agents/py-debug-bot.md"): (
+        "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
+        "docs/00-project/ai/memory/agent-memory.md",
+        "docs/00-project/ai/memory/memory-py-debug-bot.md",
+        "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
+    ),
+    Path(".codex/agents/py-doc-bot.md"): (
+        "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
+        "docs/00-project/ai/memory/agent-memory.md",
+        "docs/00-project/ai/memory/memory-py-doc-bot.md",
+        "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
+    ),
+    Path(".codex/agents/py-test-bot.md"): (
+        "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
+        "docs/00-project/ai/memory/agent-memory.md",
+        "docs/00-project/ai/memory/memory-py-test-bot.md",
+        "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
+    ),
+    Path(".codex/agents/py-architecture-debt-bot.md"): (
+        "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
+        "docs/00-project/ai/memory/agent-memory.md",
+        "docs/00-project/ai/memory/memory-py-architecture-debt-bot.md",
+        "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
+    ),
+    Path(".codex/agents/py-review-orchestrator.md"): (
+        "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
+        "docs/00-project/ai/memory/agent-memory.md",
+        "docs/00-project/ai/memory/memory-py-review-orchestrator.md",
+        "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
+    ),
+    Path(".codex/agents/py-test-swarm.md"): (
+        "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
+        "docs/00-project/ai/memory/agent-memory.md",
+        "docs/00-project/ai/memory/memory-py-test-swarm.md",
+        "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
+    ),
+    Path(".gemini/agents/py-audit-bot.md"): (
+        "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
+        "docs/00-project/ai/memory/agent-memory.md",
+        "docs/00-project/ai/memory/memory-py-audit-bot.md",
+    ),
+    Path(".gemini/agents/py-plan-bot.md"): (
+        "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
+        "docs/00-project/ai/memory/agent-memory.md",
+        "docs/00-project/ai/memory/memory-py-plan-bot.md",
+    ),
+    Path(".gemini/agents/py-config-bot.md"): (
+        "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
+        "docs/00-project/ai/memory/agent-memory.md",
+        "docs/00-project/ai/memory/memory-py-config-bot.md",
+        "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
+    ),
+    Path(".gemini/agents/py-debug-bot.md"): (
+        "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
+        "docs/00-project/ai/memory/agent-memory.md",
+        "docs/00-project/ai/memory/memory-py-debug-bot.md",
+        "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
+    ),
+    Path(".gemini/agents/py-doc-bot.md"): (
+        "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
+        "docs/00-project/ai/memory/agent-memory.md",
+        "docs/00-project/ai/memory/memory-py-doc-bot.md",
+        "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
+    ),
+    Path(".gemini/agents/py-test-bot.md"): (
+        "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
+        "docs/00-project/ai/memory/agent-memory.md",
+        "docs/00-project/ai/memory/memory-py-test-bot.md",
+        "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
+    ),
+    Path(".gemini/agents/py-architecture-debt-bot.md"): (
+        "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
+        "docs/00-project/ai/memory/agent-memory.md",
+        "docs/00-project/ai/memory/memory-py-architecture-debt-bot.md",
+        "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
+    ),
+    Path(".gemini/agents/py-review-orchestrator.md"): (
+        "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
+        "docs/00-project/ai/memory/agent-memory.md",
+        "docs/00-project/ai/memory/memory-py-review-orchestrator.md",
+        "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
+    ),
+    Path(".gemini/agents/py-test-swarm.md"): (
+        "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
+        "docs/00-project/ai/memory/agent-memory.md",
+        "docs/00-project/ai/memory/memory-py-test-swarm.md",
+        "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
+    ),
+}
+AI_ROLE_MEMORY_COVERAGE_REQUIRED_TOKENS: dict[Path, tuple[str, ...]] = {
+    Path("docs/00-project/ai/memory/README.md"): (
+        "memory-py-architecture-debt-bot.md",
+        "memory-py-review-orchestrator.md",
+        "memory-py-test-swarm.md",
+    ),
+    Path("docs/00-project/ai/memory/agent-memory.md"): (
+        "memory-py-architecture-debt-bot.md",
+        "memory-py-review-orchestrator.md",
+        "memory-py-test-swarm.md",
+    ),
+}
 AI_MIRROR_NOTICE_REQUIRED_TOKENS: dict[Path, tuple[str, ...]] = {
     Path("docs/00-project/ai/skills/README.md"): (
         "Non-Canonical Mirror Notice",
@@ -389,6 +519,11 @@ def _read_doc(path: Path) -> str:
     if path.exists():
         return path.read_text(encoding="utf-8")
     return ""
+
+
+def _display_relative_path(path: Path) -> str:
+    """Return stable POSIX-style report paths across platforms."""
+    return path.as_posix()
 
 
 def _extract_front_matter_metadata(text: str) -> dict[str, object] | None:
@@ -1082,6 +1217,25 @@ def check_ai_surfaces(report: DriftReport, *, root: Path | None = None) -> None:
             required_tokens=required_tokens,
         )
 
+    for relative_path, required_tokens in AI_ROLE_PROFILE_REQUIRED_TOKENS.items():
+        _check_ai_surface_required_tokens(
+            report,
+            project_root=project_root,
+            relative_path=relative_path,
+            required_tokens=required_tokens,
+        )
+
+    for (
+        relative_path,
+        required_tokens,
+    ) in AI_ROLE_MEMORY_COVERAGE_REQUIRED_TOKENS.items():
+        _check_ai_surface_required_tokens(
+            report,
+            project_root=project_root,
+            relative_path=relative_path,
+            required_tokens=required_tokens,
+        )
+
     for relative_path, required_tokens in AI_MIRROR_NOTICE_REQUIRED_TOKENS.items():
         _check_ai_surface_required_tokens(
             report,
@@ -1090,7 +1244,10 @@ def check_ai_surfaces(report: DriftReport, *, root: Path | None = None) -> None:
             required_tokens=required_tokens,
         )
 
-    for relative_path in AI_SURFACE_REQUIRED_TOKENS:
+    for relative_path in (
+        *AI_SURFACE_REQUIRED_TOKENS,
+        *AI_ROLE_PROFILE_REQUIRED_TOKENS,
+    ):
         _check_ai_surface_stale_refs(
             report,
             project_root=project_root,
@@ -1119,7 +1276,10 @@ def _check_ai_surface_required_tokens(
     text = _read_doc(path)
     if not text:
         report.add(
-            "ai-surfaces", "ERROR", str(relative_path), "AI surface file missing"
+            "ai-surfaces",
+            "ERROR",
+            _display_relative_path(relative_path),
+            "AI surface file missing",
         )
         return
 
@@ -1128,7 +1288,7 @@ def _check_ai_surface_required_tokens(
             report.add(
                 "ai-surfaces",
                 "ERROR",
-                str(relative_path),
+                _display_relative_path(relative_path),
                 f"Missing required AI policy/runtime token: {token}",
             )
 
@@ -1150,7 +1310,7 @@ def _check_ai_surface_stale_refs(
             report.add(
                 "ai-surfaces",
                 "ERROR",
-                str(relative_path),
+                _display_relative_path(relative_path),
                 f"Stale AI runtime path detected: {match.group(0)}",
             )
 
@@ -1166,7 +1326,10 @@ def _check_ai_surface_forbidden_patterns(
     text = _read_doc(path)
     if not text:
         report.add(
-            "ai-surfaces", "ERROR", str(relative_path), "AI surface file missing"
+            "ai-surfaces",
+            "ERROR",
+            _display_relative_path(relative_path),
+            "AI surface file missing",
         )
         return
 
@@ -1176,7 +1339,7 @@ def _check_ai_surface_forbidden_patterns(
             report.add(
                 "ai-surfaces",
                 "ERROR",
-                str(relative_path),
+                _display_relative_path(relative_path),
                 f"Forbidden legacy runtime dependency detected: {match.group(0)}",
             )
 
@@ -1249,11 +1412,12 @@ def _check_ai_docs_runtime_mirror_headers(
             report.add(
                 "ai-surfaces",
                 "ERROR",
-                str(target.relative_path),
+                _display_relative_path(target.relative_path),
                 "AI surface file missing",
             )
             continue
 
+        target_report_path = _display_relative_path(target.relative_path)
         header_text = "\n".join(
             text.splitlines()[:AI_DOCS_RUNTIME_MIRROR_HEADER_LINE_LIMIT]
         )
@@ -1262,16 +1426,16 @@ def _check_ai_docs_runtime_mirror_headers(
                 report.add(
                     "ai-surfaces",
                     "ERROR",
-                    str(target.relative_path),
+                    target_report_path,
                     f"AI docs mirror header missing required token in first section: {token}",
                 )
         for source in target.canonical_sources:
-            source_text = str(source)
+            source_text = _display_relative_path(source)
             if source_text not in header_text:
                 report.add(
                     "ai-surfaces",
                     "ERROR",
-                    str(target.relative_path),
+                    target_report_path,
                     "AI docs mirror header missing canonical runtime source: "
                     f"{source_text}",
                 )

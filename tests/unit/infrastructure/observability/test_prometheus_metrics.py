@@ -16,6 +16,7 @@ from bioetl.infrastructure.observability.prometheus_metric_label_policies import
     normalize_publication_status,
     normalize_runtime_phase,
     normalize_runtime_stage,
+    normalize_silver_filter_field,
     normalize_stage_model_outcome,
     normalize_stage_model_stage,
     normalize_terminal_status,
@@ -994,6 +995,24 @@ class TestPrometheusCounterLabelNormalization:
             COUNTERS[
                 "bioetl_silver_filter_rejections_total"
             ].labels().inc.assert_called_once_with(3)
+
+    @pytest.mark.parametrize(
+        ("raw_field", "expected"),
+        [
+            ("publication_id", "publication_id"),
+            ("totally_unknown_field", "other"),
+            ("metadata.source.url", "other"),
+            ("/tmp/provider/path.csv", "other"),
+            ("sha256:deadbeef", "other"),
+            ("", "other"),
+            (None, "other"),
+        ],
+    )
+    def test_silver_filter_field_normalizer_is_bounded(
+        self, raw_field: str | None, expected: str
+    ) -> None:
+        """Silver reject field labels must collapse free text to the bounded set."""
+        assert normalize_silver_filter_field(raw_field) == expected
 
 
 @pytest.mark.unit

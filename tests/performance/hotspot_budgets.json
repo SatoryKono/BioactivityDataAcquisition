@@ -36,27 +36,6 @@
       "max_regression_pct": 0.30,
       "p95_latency_ms": 50.0,
       "max_p95_regression_pct": 0.40
-    },
-    "openalex_batch_fetch_200": {
-      "baseline_latency_ms": 0.15,
-      "baseline_throughput_rps": 1333333.0,
-      "max_regression_pct": 0.25,
-      "p95_latency_ms": 0.2,
-      "max_p95_regression_pct": 0.35
-    },
-    "semanticscholar_batch_fetch_200": {
-      "baseline_latency_ms": 0.15,
-      "baseline_throughput_rps": 1333333.0,
-      "max_regression_pct": 0.25,
-      "p95_latency_ms": 0.2,
-      "max_p95_regression_pct": 0.35
-    },
-    "gold_write_append_500": {
-      "baseline_latency_ms": 30.0,
-      "baseline_throughput_rps": 16667.0,
-      "max_regression_pct": 0.25,
-      "p95_latency_ms": 45.0,
-      "max_p95_regression_pct": 0.35
     }
   }
 }

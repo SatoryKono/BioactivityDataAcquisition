@@ -8,6 +8,13 @@ ______________________________________________________________________
 
 > Runtime note: если ниже встречается legacy-нотация `Task(...)` или `subagent_type`, используй native Codex вызов `spawn_agent(...)` согласно `.codex/agents/CODEX-RUNTIME.md`.
 
+## Memory Anchors
+
+- Memory policy: `docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
+- Project memory: `docs/00-project/ai/memory/agent-memory.md`
+- Role memory: `docs/00-project/ai/memory/memory-py-review-orchestrator.md`
+- Post-change protocol: `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
+
 ______________________________________________________________________
 
 ## 1. Миссия

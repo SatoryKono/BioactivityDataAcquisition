@@ -43,6 +43,10 @@ Grafana dashboards в BioETL.
 - Не меняй `uid` без явной migration reason.
 - Не invent metric names — используй только реально существующие метрики.
 - Не добавляй high-cardinality filters/labels в summary-panels без необходимости.
+- Для cross-dashboard links не полагайся на blanket `includeVars=true`:
+  передавай только target-scoped `var-*` параметры.
+- Не копируй Explorer-only forensic filters (`run_id`, `payload_hash`) в
+  Prometheus dashboards, summary panels или generic drilldowns.
 - Не используй encoded Loki interpolation по `$pipeline/$provider` как источник истины.
 - Не превращай `Alert Conditions` в “real alert engine”, если datasource/state этого не поддерживает.
 
@@ -58,6 +62,11 @@ sum(increase(metric_name[24h])) or vector(0)
 
 Если отсутствие серии должно остаться диагностическим сигналом, не маскируй его
 через `or vector(0)`.
+
+Для histogram/rate latency panels это правило особенно строгое: `No data`
+обычно означает “нет samples / нет probe activity / scrape gap”, а не
+`0s latency`. `or vector(0)` допустим для count-like healthy-zero panels, но не
+для p95 latency unless issue body explicitly justifies zero-as-valid semantics.
 
 ### Loki
 
@@ -94,6 +103,14 @@ query = { span."bioetl.provider" =~ "${provider:regex}" }
 - time range / refresh
 - operator role dashboard
 - drilldown behavior
+
+Проверь также:
+
+- Loki drilldown links стартуют с `{job="bioetl"}` и не encode'ят
+  `$pipeline/$provider` в query payload.
+- Tempo drilldown links используют `queryType=traceqlSearch` и contextual
+  TraceQL scope (`bioetl.pipeline`/`bioetl.run_type` либо `bioetl.provider`).
+- Runtime condition-summary panels не теряют direct runbook links.
 
 то обнови минимум:
 

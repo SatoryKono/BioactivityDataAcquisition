@@ -24,9 +24,10 @@ from dataclasses import replace
 from functools import cache
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, cast
-from uuid import uuid4
+from uuid import UUID, uuid4, uuid5
 
 import pytest
+from tests.helpers.clock import FIXED_TEST_TIME
 
 if TYPE_CHECKING:
     import httpx
@@ -65,6 +66,7 @@ _E2E_VCR_CASSETTE_NAME_OVERRIDES: dict[str, str] = {
         "test_chembl_activity_full_run"
     ),
 }
+_E2E_RUN_ID_NAMESPACE = UUID("f42c4f5c-1b2c-4db0-8f58-bc97f92a5f2f")
 
 
 @cache
@@ -303,6 +305,77 @@ def create_test_context(
     filter_ids: tuple[str, ...] | None = None,
     filter_field: str | None = None,
 ) -> PipelineRunContext:
+    """Create an occurrence-safe E2E context for one pipeline run."""
+    return build_e2e_run_context(
+        pipeline_name=pipeline_name,
+        limit=limit,
+        run_type=run_type,
+        resume=resume,
+        query=query,
+        filter_ids=filter_ids,
+        filter_field=filter_field,
+    )
+
+
+def _build_e2e_run_id(seed: str) -> UUID:
+    """Return deterministic UUID for E2E contexts and retries."""
+    return uuid5(_E2E_RUN_ID_NAMESPACE, seed)
+
+
+def _build_e2e_context_seed(
+    *,
+    pipeline_name: str,
+    run_type: str,
+    limit: int | None,
+    resume: bool,
+    query: str | None,
+    filter_ids: tuple[str, ...] | None,
+    filter_field: str | None,
+) -> str:
+    """Serialize E2E context inputs into a stable seed string."""
+    normalized_filter_ids = ",".join(filter_ids or ())
+    return (
+        f"pipeline={pipeline_name}|run_type={run_type}|limit={limit}|resume={resume}|"
+        f"query={query or ''}|filter_field={filter_field or ''}|filter_ids={normalized_filter_ids}"
+    )
+
+
+def _resolve_e2e_run_id(
+    *,
+    run_id_seed: str | None,
+    pipeline_name: str,
+    run_type: str,
+    limit: int | None,
+    resume: bool,
+    query: str | None,
+    filter_ids: tuple[str, ...] | None,
+    filter_field: str | None,
+) -> UUID:
+    """Return explicit deterministic IDs only when a test opts into a seed."""
+    if run_id_seed is not None:
+        seed = _build_e2e_context_seed(
+            pipeline_name=pipeline_name,
+            run_type=run_type,
+            limit=limit,
+            resume=resume,
+            query=query,
+            filter_ids=filter_ids,
+            filter_field=filter_field,
+        )
+        return _build_e2e_run_id(f"{run_id_seed}|{seed}")
+    return uuid4()
+
+
+def build_e2e_run_context(
+    pipeline_name: str,
+    limit: int | None = 10,
+    run_type: RunType | None = None,
+    resume: bool = False,
+    query: str | None = None,
+    filter_ids: tuple[str, ...] | None = None,
+    filter_field: str | None = None,
+    run_id_seed: str | None = None,
+) -> PipelineRunContext:
     """Создание контекста для E2E теста.
 
     Args:
@@ -319,7 +392,6 @@ def create_test_context(
     """
     from bioetl.domain.context import InputFilterContext
     from bioetl.domain.context import PipelineRunContext
-    from bioetl.domain.context import current_utc_time
     from bioetl.domain.types import RunID, RunType
 
     if filter_ids is not None and filter_field is not None:
@@ -328,15 +400,53 @@ def create_test_context(
         input_filter = InputFilterContext.disabled()
 
     resolved_run_type = run_type or RunType.INCREMENTAL
+    run_id = _resolve_e2e_run_id(
+        run_id_seed=run_id_seed,
+        pipeline_name=pipeline_name,
+        run_type=resolved_run_type.value,
+        limit=limit,
+        resume=resume,
+        query=query,
+        filter_ids=filter_ids,
+        filter_field=filter_field,
+    )
     return PipelineRunContext(
         pipeline_name=pipeline_name,
-        run_id=RunID(uuid4()),
+        run_id=RunID(run_id),
         run_type=resolved_run_type,
-        started_at=current_utc_time(),
+        started_at=FIXED_TEST_TIME,
         resume=resume,
         limit=limit,
         query=query,
         input_filter=input_filter,
+    )
+
+
+def build_e2e_replay_context(
+    context: PipelineRunContext,
+    *,
+    replay_of_run_id: str | None = None,
+    replay_of_manifest_id: str | None = None,
+) -> PipelineRunContext:
+    """Return deterministic replay context linked to a parent run/manifest."""
+    from bioetl.domain.context import PipelineRunContext
+    from bioetl.domain.types import RunID
+
+    parent_run_id = replay_of_run_id or str(context.run_id)
+    replay_seed = (
+        f"replay|pipeline={context.pipeline_name}|parent_run_id={parent_run_id}|"
+        f"parent_manifest_id={replay_of_manifest_id or ''}|limit={context.limit}|"
+        f"resume={context.resume}|query={context.query or ''}"
+    )
+    return cast(
+        PipelineRunContext,
+        replace(
+            context,
+            run_id=RunID(_build_e2e_run_id(replay_seed)),
+            started_at=FIXED_TEST_TIME,
+            replay_of_run_id=parent_run_id,
+            replay_of_manifest_id=replay_of_manifest_id,
+        ),
     )
 
 
@@ -384,7 +494,15 @@ def _create_retry_run_context(
 
     if attempt == 0:
         return context
-    return cast(PipelineRunContext, replace(context, run_id=RunID(uuid4())))
+    retry_seed = f"retry|pipeline={context.pipeline_name}|run_id={context.run_id}|attempt={attempt}"
+    return cast(
+        PipelineRunContext,
+        replace(
+            context,
+            run_id=RunID(_build_e2e_run_id(retry_seed)),
+            started_at=FIXED_TEST_TIME,
+        ),
+    )
 
 
 def _get_transient_reason_code(exc: Exception | None) -> str:

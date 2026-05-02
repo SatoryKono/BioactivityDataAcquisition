@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import os
 from typing import TYPE_CHECKING
 
 import pytest
@@ -24,11 +23,38 @@ def _build_circuit_breaker_guard() -> CircuitBreakerGuard:
     return CircuitBreakerGuard(provider="integration_test")
 
 
-@pytest.fixture(scope="session", autouse=True)
-def integration_relaxed_dq() -> None:
-    """Relax DQ thresholds for integration tests using VCR cassettes."""
-    os.environ["BIOETL_TEST_RELAXED_DQ"] = "1"
-    os.environ["BIOETL_PIPELINE__RELAXED_DQ"] = "1"
+def _clear_runtime_config_caches() -> None:
+    """Clear runtime settings/config caches after environment mutations."""
+    from bioetl.infrastructure.config import get_pipeline_config, get_settings
+    from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config
+    from bioetl.infrastructure.config.source_config_loader import load_source_config
+
+    get_settings.cache_clear()
+    get_pipeline_config.cache_clear()
+    load_pipeline_config.cache_clear()
+    load_source_config.cache_clear()
+
+
+@pytest.fixture
+def relaxed_dq_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Enable relaxed DQ thresholds explicitly for replay-heavy integration tests."""
+    _clear_runtime_config_caches()
+    monkeypatch.setenv("BIOETL_TEST_RELAXED_DQ", "1")
+    monkeypatch.setenv("BIOETL_PIPELINE__RELAXED_DQ", "1")
+    _clear_runtime_config_caches()
+    yield
+    _clear_runtime_config_caches()
+
+
+@pytest.fixture
+def strict_dq_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Force strict DQ mode for integration tests that validate strict behavior."""
+    _clear_runtime_config_caches()
+    monkeypatch.delenv("BIOETL_TEST_RELAXED_DQ", raising=False)
+    monkeypatch.setenv("BIOETL_PIPELINE__RELAXED_DQ", "0")
+    _clear_runtime_config_caches()
+    yield
+    _clear_runtime_config_caches()
 
 
 @pytest.fixture

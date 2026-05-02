@@ -17,6 +17,7 @@ from bioetl.domain.schemas.common.publication_base import (
     LOOKUP_METHODS,
     PublicationBaseSchema,
 )
+from tests.helpers.clock import FIXED_TEST_TIME
 
 
 @pytest.fixture
@@ -34,7 +35,7 @@ def valid_base_record() -> dict:
         "_run_id": "run-001",
         "_run_type": "incremental",
         "_source_batch_id": "batch-001",
-        "_ingestion_ts": datetime.now(UTC).isoformat(),
+        "_ingestion_ts": FIXED_TEST_TIME.isoformat(),
         "_dq_warn": False,
         "_dq_error": False,
         "_index": 0,
@@ -220,7 +221,7 @@ class TestPublicationBaseSchemaFieldValidation:
 
     def test_year_range_valid(self, valid_base_record: dict) -> None:
         """Year should be within valid range (1950-CURRENT_YEAR+1)."""
-        current_year = datetime.now(UTC).year
+        current_year = FIXED_TEST_TIME.year
         valid_years = [1950, 1990, 2000, 2024, current_year + 1]
 
         for year in valid_years:

@@ -19,6 +19,8 @@ from bioetl.domain.value_objects.dq_anomaly import (
 )
 from bioetl.infrastructure.observability.anomaly import DataQualityMonitor
 
+pytestmark = pytest.mark.usefixtures("strict_dq_env")
+
 
 @pytest.fixture
 def mock_logger() -> MagicMock:

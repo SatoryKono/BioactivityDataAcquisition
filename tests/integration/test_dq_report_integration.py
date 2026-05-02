@@ -27,6 +27,8 @@ from bioetl.infrastructure.schemas.dq_report_config import (
     SilverDQReportConfig,
 )
 
+pytestmark = pytest.mark.usefixtures("strict_dq_env")
+
 
 @pytest.fixture
 def mock_logger() -> MagicMock:

@@ -14,15 +14,14 @@ Run the role-specific workflow as defined in the py-review-orchestrator profile.
 - Team orchestration: `../../../.gemini/agents/ORCHESTRATION.md`
 - Shared project context: `../../../docs/00-project/ai/memory/agent-memory.md`
 - Memory policy: `../../../docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
-- Role-specific memory: matching `../../../docs/00-project/ai/memory/memory-py-*.md`
-  sheet when one exists for delegated review roles
+- Role-specific memory: `../../../docs/00-project/ai/memory/memory-py-review-orchestrator.md`
 
 ## Workflow
 
 1. Start with the canonical memory loop from `../../../src/memory/DAILY_WORKFLOW.md` and run `python -m memory.tooling.workflow pre-task ...` for the review task.
-1. Read `MEMORY_USAGE.md`, `agent-memory.md`, and the relevant delegated
-   role-memory sheets when they exist. If no direct review-orchestrator sheet
-   exists, record that and continue with project memory plus repo search.
+1. Read `MEMORY_USAGE.md`, `agent-memory.md`, and
+   `memory-py-review-orchestrator.md`; then add delegated role-memory sheets
+   for sector-specific reviewers.
 1. Treat this skill file as the canonical Gemini runtime profile for the workflow.
 1. Execute hierarchical review orchestration (Wave 1, then Wave 2) and respect sector dependencies.
 1. Aggregate sector reports into `reports/{LLM}/review_py-review-orchestrator_{YYYYMMDD}_{HHMM}_FINAL.md` (LLM = caller) with complete critical/high issue rollup.

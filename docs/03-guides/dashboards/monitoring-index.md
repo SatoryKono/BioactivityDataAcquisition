@@ -70,16 +70,17 @@ in manifest/ledger/CLI/explorer surfaces, not Prometheus labels.
 
 Архивные файлы перенесены в `docs/03-guides/dashboards/legacy/` и могут описывать устаревшие переменные (`$run-id`, `execution`) или старые метрики.
 
-Текущий `bioetl-overview-v2` также считается канонической точкой входа для
-control-plane и lineage health: manifest writes, ledger appends, checkpoint
-compatibility, lineage refs missing, composite source-selection decisions и
-lineage fragment outcomes.
+Текущий `bioetl-overview-v2` остаётся первой точкой входа для operator summary,
+но больше не несёт весь control-plane/detail surface. Он показывает компактные
+selected-range summary сигналы и направляет в `bioetl-control-plane-v1` для
+global read telemetry, replay/lineage detail и deeper control-plane triage.
 
 Новый `bioetl-control-plane-v1` собирает агрегированные панели по manifest
-writes, ledger appends, checkpoint compatibility и read failures. Это dashboard
-показывает доли ошибок и предлагает direct link на alert `BioETLControlPlaneReadFailureRate`
-(runbook: `docs/05-operations/runbooks/observability-checklist.md`) для быстрого
-реагирования на контрольные-plane regressions.
+writes, ledger appends, checkpoint compatibility, global read telemetry и
+lineage fragment outcomes. Это dashboard показывает доли ошибок и предлагает
+direct link на alert `BioETLControlPlaneReadFailureRate`
+(runbook: `docs/05-operations/runbooks/observability-checklist.md`) для
+быстрого реагирования на control-plane regressions.
 
 `bioetl-runtime` считается канонической triage-точкой для runtime hygiene:
 warnings, unstructured logs, adaptive-memory signals и Prometheus-backed alert
