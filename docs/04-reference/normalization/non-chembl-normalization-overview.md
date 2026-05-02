@@ -29,8 +29,10 @@ values, canonical normalized values, DQ expectations, and composite impact.
 
 ## Canonical Evidence Surfaces
 
-- generated matrix:
-  [pipeline_normalization_field_matrix.md](../../reports/generated/pipeline_normalization_field_matrix/pipeline_normalization_field_matrix.md)
+- generated-matrix entrypoint:
+  [Normalization Plan P0-P6](../../05-engineering/normalization_plan_P0_P6.md)
+  with generated artifact path
+  `docs/reports/generated/pipeline_normalization_field_matrix/pipeline_normalization_field_matrix.md`
 - observed values:
   [non_chembl_observed_values.yaml](../../../tests/fixtures/normalization/non_chembl_observed_values.yaml)
 - identifier cases:
@@ -94,9 +96,9 @@ Do not:
 
 | Composite | Normalization boundary | Current evidence |
 | --- | --- | --- |
-| `composite_publication` | canonical join keys `doi`, `pmid`, fallback `title`; non-key publication fields remain upstream inherited | `configs/composites/publication.yaml`, matrix rows for `composite_publication` |
-| `composite_molecule` | canonical join keys are molecule identity anchors; non-key PubChem fields stay upstream inherited | matrix rows plus `non_chembl_identifier_cases.yaml` |
-| `composite_target` | `target_id` and `uniprot_accession` are normalized join/bridge anchors; UniProt evidence fields stay upstream inherited | matrix rows plus `non_chembl_identifier_cases.yaml` |
+| `composite_publication` | canonical join keys `doi`, `pmid`, fallback `title`; non-key publication fields remain upstream inherited | `configs/composites/publication.yaml`, generated matrix rows for `composite_publication` |
+| `composite_molecule` | canonical join keys are molecule identity anchors; non-key PubChem fields stay upstream inherited | generated matrix rows plus `non_chembl_identifier_cases.yaml` |
+| `composite_target` | `target_id` and `uniprot_accession` are normalized join/bridge anchors; UniProt evidence fields stay upstream inherited | generated matrix rows plus `non_chembl_identifier_cases.yaml` |
 
 ## Related Published References
 

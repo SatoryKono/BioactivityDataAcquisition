@@ -21,7 +21,9 @@ Scope:
 
 Primary evidence:
 
-- [pipeline_normalization_field_matrix.md](../../reports/generated/pipeline_normalization_field_matrix/pipeline_normalization_field_matrix.md)
+- [Normalization Plan P0-P6](../../05-engineering/normalization_plan_P0_P6.md)
+  plus generated matrix path
+  `docs/reports/generated/pipeline_normalization_field_matrix/pipeline_normalization_field_matrix.md`
 - [non_chembl_observed_values.yaml](../../../tests/fixtures/normalization/non_chembl_observed_values.yaml)
 - [non_chembl_identifier_cases.yaml](../../../tests/fixtures/normalization/non_chembl_identifier_cases.yaml)
 - [reference-identifiers.md](reference-identifiers.md)
@@ -67,7 +69,7 @@ hash-affecting unless the governing policy changes explicitly.
 
 ## Composite Target Impact
 
-Current composite-target normalization boundary:
+Current composite target normalization boundary:
 
 - seed anchor: `target_id`
 - bridge anchor: `uniprot_accession`
