@@ -186,3 +186,29 @@ class TestRunLedgerReplayProjection:
             "postrun",
             "checkpoint_finalize",
         )
+
+    def test_legacy_entry_payload_without_idempotency_key_deserializes(self) -> None:
+        entry = RunLedgerEntry.from_dict(
+            {
+                "entry_id": "entry-legacy",
+                "manifest_id": "manifest-123",
+                "run_id": str(TEST_RUN_ID),
+                "event_type": "run_started",
+                "occurred_at": "2024-06-01T09:00:00+00:00",
+            }
+        )
+
+        assert entry.idempotency_key is None
+        assert entry.to_dict()["idempotency_key"] is None
+
+    def test_entry_idempotency_key_is_trimmed_on_creation(self) -> None:
+        entry = RunLedgerEntry(
+            entry_id="entry-keyed",
+            manifest_id="manifest-123",
+            run_id=TEST_RUN_ID,
+            event_type="run_started",
+            occurred_at=datetime(2024, 6, 1, 9, 0, tzinfo=UTC),
+            idempotency_key=" sha256:abc ",
+        )
+
+        assert entry.idempotency_key == "sha256:abc"
