@@ -58,9 +58,10 @@ def test_molecule_join_key_fixture_matches_pubchem_anchor_boundary_contract() ->
     ]
 
     assert policy["active_join_keys"] == molecule_case["active_join_keys"]
-    assert policy["retained_validation_anchors"] == molecule_case[
-        "retained_validation_anchors"
-    ]
+    assert (
+        policy["retained_validation_anchors"]
+        == molecule_case["retained_validation_anchors"]
+    )
 
 
 @pytest.mark.unit
@@ -75,7 +76,5 @@ def test_target_join_key_fixture_matches_uniprot_mapping_gate_contract() -> None
     ]
 
     assert policy["source_anchor"] == target_case["source_anchor"]
-    assert policy["normalized_output_anchor"] == target_case[
-        "normalized_output_anchor"
-    ]
+    assert policy["normalized_output_anchor"] == target_case["normalized_output_anchor"]
     assert policy["required_status"] == target_case["required_status"]

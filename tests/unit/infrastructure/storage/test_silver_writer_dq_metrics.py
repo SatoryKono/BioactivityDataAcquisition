@@ -126,9 +126,7 @@ class TestSilverWriterDQMetrics:
             assert result.schema_drift is None
 
     @pytest.mark.asyncio
-    async def test_compute_dq_metrics_handles_late_mixed_type_values(
-        self, noop_logger
-    ):
+    async def test_compute_dq_metrics_handles_late_mixed_type_values(self, noop_logger):
         """Mixed-type values after default inference window should not crash DQ metrics."""
         from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 

@@ -40,6 +40,24 @@ publication_raw_type_policy:
     input: " journal-article "
     expected: journal-article
     policy: raw_sidecar_preserved
+  openalex_type_crossref_unknown:
+    profile: openalex.publication
+    field: type_crossref
+    input: " future-crossref-type "
+    expected: future-crossref-type
+    policy: preserve_unknown_provider_value
+  pubmed_publication_type_unknown:
+    profile: pubmed.publication
+    field: publication_type
+    input: " Future PubMed Type "
+    expected: Future PubMed Type
+    policy: preserve_unknown_provider_value
+  semanticscholar_publication_type_unknown:
+    profile: semanticscholar.publication
+    field: publication_type
+    input: " FutureSemanticScholarType "
+    expected: FutureSemanticScholarType
+    policy: preserve_unknown_provider_value
 publication_oa_status_policy:
   openalex_known_status:
     profile: openalex.publication
