@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-30T17:02:28.510954+00:00",
+  "generated_at": "2026-05-02T08:16:04.854103+00:00",
   "summary": {
     "total_scripts": 356,
     "status_counts": {
@@ -2854,7 +2854,7 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 106,
+          "line": 112,
           "source_group": "ci",
           "text": "run: uv run python scripts/check_entity_config_parity.py"
         },
@@ -3091,7 +3091,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 214,
+          "line": 220,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check_diagram_artifacts.py \\"
         },
@@ -3148,7 +3148,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 234,
+          "line": 240,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check_diagram_quality_gates.py \\"
         },
@@ -3201,7 +3201,7 @@
       "references": [
         {
           "path": ".codex/skills/technical-designer-mermaid/SKILL.md",
-          "line": 107,
+          "line": 113,
           "source_group": "skills",
           "text": "- `python scripts/diagrams/check_diagram_visual_smoke.py --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt`"
         },
@@ -3213,13 +3213,13 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 224,
+          "line": 230,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check_diagram_visual_smoke.py \\"
         },
         {
           "path": "docs/00-project/ai/skills/local/technical-designer-mermaid/SKILL.md",
-          "line": 107,
+          "line": 118,
           "source_group": "docs",
           "text": "- `python scripts/diagrams/check_diagram_visual_smoke.py --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt`"
         },
@@ -3303,7 +3303,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 219,
+          "line": 225,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check_svg_text_visibility.py \\"
         },
@@ -3779,7 +3779,7 @@
       "references": [
         {
           "path": ".codex/skills/technical-designer-mermaid/SKILL.md",
-          "line": 103,
+          "line": 109,
           "source_group": "skills",
           "text": "- `python scripts/diagrams/lint_diagrams.py docs`"
         },
@@ -3791,13 +3791,13 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 182,
+          "line": 188,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/lint_diagrams.py docs/02-architecture/diagrams --json > /tmp/diagram-lint.json || true"
         },
         {
           "path": "docs/00-project/ai/skills/local/technical-designer-mermaid/SKILL.md",
-          "line": 103,
+          "line": 114,
           "source_group": "docs",
           "text": "- `python scripts/diagrams/lint_diagrams.py docs`"
         },
@@ -3953,7 +3953,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/agents/py-doc-bot.md",
-          "line": 181,
+          "line": 187,
           "source_group": "docs",
           "text": "1. `run_diagram_checks.sh` завершён без ошибок"
         },
@@ -4157,7 +4157,7 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 183,
+          "line": 189,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/summarize_diagram_lint.py /tmp/diagram-lint.json"
         },
@@ -4282,7 +4282,7 @@
       "references": [
         {
           "path": ".codex/skills/technical-designer-mermaid/SKILL.md",
-          "line": 104,
+          "line": 110,
           "source_group": "skills",
           "text": "- `bash scripts/diagrams/validate_mermaid_syntax.sh`"
         },
@@ -4294,7 +4294,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 177,
+          "line": 183,
           "source_group": "ci",
           "text": "bash scripts/diagrams/validate_mermaid_syntax.sh \\"
         },
@@ -4306,7 +4306,7 @@
         },
         {
           "path": "docs/00-project/ai/skills/local/technical-designer-mermaid/SKILL.md",
-          "line": 104,
+          "line": 115,
           "source_group": "docs",
           "text": "- `bash scripts/diagrams/validate_mermaid_syntax.sh`"
         },
@@ -4345,13 +4345,13 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 97,
+          "line": 103,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.docs check-links --links --specs --configs --report-json docs/reports/docs-link-check-report.json"
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 109,
+          "line": 115,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.docs verify"
         },
@@ -4610,7 +4610,7 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 97,
+          "line": 103,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.docs check-links --links --specs --configs --report-json docs/reports/docs-link-check-report.json"
         },
@@ -6400,13 +6400,13 @@
         },
         {
           "path": "docs/00-project/ai/agents/agents/py-test-swarm.md",
-          "line": 22,
+          "line": 28,
           "source_group": "docs",
           "text": "- Mixed checkout в Windows PowerShell: `.\\scripts\\engineering\\dev\\run_pytest.ps1`, `.\\scripts\\engineering\\dev\\run_mypy.ps1`, `.\\.venv-win\\Scripts\\python.exe -m ...`"
         },
         {
           "path": "docs/00-project/ai/agents/agents/py-test-swarm.md",
-          "line": 355,
+          "line": 361,
           "source_group": "docs",
           "text": "> - Команды: используй OS-appropriate path. CI/single-OS: `uv run python -m ...`; PowerShell mixed checkout: `.\\scripts\\engineering\\dev\\run_pytest.ps1` / `.\\scripts\\engineering\\dev\\run_mypy.ps1`; WSL "
         }
@@ -6459,13 +6459,13 @@
         },
         {
           "path": "docs/00-project/ai/agents/agents/py-test-swarm.md",
-          "line": 23,
+          "line": 29,
           "source_group": "docs",
           "text": "- Mixed checkout в WSL/Linux: `bash scripts/engineering/dev/run_pytest.sh`, `bash scripts/engineering/dev/run_mypy.sh`, `\"${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python\" -m ...`"
         },
         {
           "path": "docs/00-project/ai/agents/agents/py-test-swarm.md",
-          "line": 355,
+          "line": 361,
           "source_group": "docs",
           "text": "> - Команды: используй OS-appropriate path. CI/single-OS: `uv run python -m ...`; PowerShell mixed checkout: `.\\scripts\\engineering\\dev\\run_pytest.ps1` / `.\\scripts\\engineering\\dev\\run_mypy.ps1`; WSL "
         }
@@ -6575,13 +6575,13 @@
         },
         {
           "path": "docs/00-project/ai/agents/agents/py-test-swarm.md",
-          "line": 22,
+          "line": 28,
           "source_group": "docs",
           "text": "- Mixed checkout в Windows PowerShell: `.\\scripts\\engineering\\dev\\run_pytest.ps1`, `.\\scripts\\engineering\\dev\\run_mypy.ps1`, `.\\.venv-win\\Scripts\\python.exe -m ...`"
         },
         {
           "path": "docs/00-project/ai/agents/agents/py-test-swarm.md",
-          "line": 355,
+          "line": 361,
           "source_group": "docs",
           "text": "> - Команды: используй OS-appropriate path. CI/single-OS: `uv run python -m ...`; PowerShell mixed checkout: `.\\scripts\\engineering\\dev\\run_pytest.ps1` / `.\\scripts\\engineering\\dev\\run_mypy.ps1`; WSL "
         }
@@ -6634,13 +6634,13 @@
         },
         {
           "path": "docs/00-project/ai/agents/agents/py-test-swarm.md",
-          "line": 23,
+          "line": 29,
           "source_group": "docs",
           "text": "- Mixed checkout в WSL/Linux: `bash scripts/engineering/dev/run_pytest.sh`, `bash scripts/engineering/dev/run_mypy.sh`, `\"${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python\" -m ...`"
         },
         {
           "path": "docs/00-project/ai/agents/agents/py-test-swarm.md",
-          "line": 355,
+          "line": 361,
           "source_group": "docs",
           "text": "> - Команды: используй OS-appropriate path. CI/single-OS: `uv run python -m ...`; PowerShell mixed checkout: `.\\scripts\\engineering\\dev\\run_pytest.ps1` / `.\\scripts\\engineering\\dev\\run_mypy.ps1`; WSL "
         }
@@ -7198,7 +7198,7 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 77,
+          "line": 83,
           "source_group": "ci",
           "text": "uv run python -m scripts.engineering.qa check-xwalk-missing-backlog \\"
         },
@@ -7522,13 +7522,13 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 14,
+          "line": 15,
           "source_group": "ci",
           "text": "- 'scripts/engineering/qa/check_xwalk_missing_backlog.py'"
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 29,
+          "line": 31,
           "source_group": "ci",
           "text": "- 'scripts/engineering/qa/check_xwalk_missing_backlog.py'"
         },
@@ -7600,13 +7600,13 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 112,
+          "line": 118,
           "source_group": "ci",
           "text": "run: uv run python scripts/engineering/qa/generate_architecture_dependency_map.py --check"
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 116,
+          "line": 122,
           "source_group": "ci",
           "text": "run: uv run python scripts/engineering/qa/generate_architecture_dependency_map.py --update"
         },
@@ -7624,7 +7624,7 @@
         },
         {
           "path": "docs/00-project/RULES.md",
-          "line": 1456,
+          "line": 1457,
           "source_group": "docs",
           "text": "- `python scripts/engineering/qa/generate_architecture_dependency_map.py --update`"
         },
@@ -8441,7 +8441,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 94,
+          "line": 100,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.engineering.repo check-versions"
         },
@@ -8914,19 +8914,19 @@
         },
         {
           "path": "docs/02-architecture/07-compatibility-facade-inventory.md",
-          "line": 123,
+          "line": 124,
           "source_group": "docs",
-          "text": "| `src/bioetl/interfaces/cli/commands/run.py`                    | Permanent public run command seam over the split internal owner module `bioetl.interfaces.cli.commands.domains.run.command`.         "
+          "text": "| `src/bioetl/interfaces/cli/commands/run.py` | Permanent public run command seam over the split internal owner module `bioetl.interfaces.cli.commands.domains.run.command`. | `bioetl.interfaces.cli.co"
         },
         {
           "path": "docs/02-architecture/07-compatibility-facade-snapshot.md",
-          "line": 53,
+          "line": 55,
           "source_group": "docs",
           "text": "- `src/bioetl/interfaces/cli/commands/run.py`"
         },
         {
           "path": "docs/02-architecture/07-compatibility-facade-snapshot.md",
-          "line": 61,
+          "line": 64,
           "source_group": "docs",
           "text": "- `src/bioetl/interfaces/cli/commands/run.py` — external breaking change required: `true`, internal callers zero: `false`"
         },
@@ -11454,7 +11454,7 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 229,
+          "line": 235,
           "source_group": "ci",
           "text": "python3 src/tools/harmonize_link_styles.py --dry-run --fail-on-errors"
         }

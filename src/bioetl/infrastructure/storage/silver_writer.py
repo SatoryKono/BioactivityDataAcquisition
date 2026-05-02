@@ -2,38 +2,46 @@
 
 from __future__ import annotations
 
-import asyncio as _asyncio
+import asyncio
+from collections.abc import Sequence
+from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal, cast
 
+import polars as pl
 import pyarrow as pa
-from deltalake import DeltaTable as _DeltaTable
-from deltalake import write_deltalake as _write_deltalake
+from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 
 from bioetl.domain.config import KeyNullabilityRule
 from bioetl.domain.medallion import SilverWriteMode, WriteMode
 from bioetl.domain.ports import (
+    AuditPort,
+    LineageStorePort,
     LoggerPort,
+    MetadataCoordinatorPort,
+    MetadataWriterPort,
+    MetricsPort,
+    SilverValidatorPort,
+    SilverWriteRequest,
+    TracingPort,
+    coerce_silver_write_request,
 )
-from bioetl.domain.types import BronzeRecord
+from bioetl.domain.types import BatchID, BronzeRecord
+from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
+from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
+from bioetl.domain.value_objects.silver_result import SilverWriteResult
+from bioetl.infrastructure.export.csv_exporter import CsvExporter
+from bioetl.infrastructure.storage.delta.resilience import SilverMergeResiliencePolicy
 from bioetl.infrastructure.storage.base_delta_writer import (
     BaseDeltaWriter,
-)
-from bioetl.infrastructure.storage.silver.compatibility_mixins import (
-    SilverWriterDQCompatibilityMixin,
-    SilverWriterMergedCompatibilityMixin,
-    SilverWriterWriteCompatibilityMixin,
 )
 from bioetl.infrastructure.storage.silver.delta_helpers import (
     _DeltaWriteRequest,
 )
-from bioetl.infrastructure.storage.silver.finalization_compatibility_mixins import (
-    SilverWriterAuditMetadataCompatibilityMixin,
-    SilverWriterFinalizationCompatibilityMixin,
-)
 from bioetl.infrastructure.storage.silver.maintenance_mixin import (
     SilverWriterMaintenanceMixin,
 )
+from bioetl.infrastructure.storage.silver.metadata_operations import _read_delta_version
 
 # SilverWriterValidationMixin removed; validation handled by SilverValidationOperations service
 from bioetl.infrastructure.storage.silver.operations.validation_operations import (
@@ -56,6 +64,7 @@ from bioetl.infrastructure.storage.silver.pipeline_helpers import (
 # Postwrite operations now handled by SilverPostwriteOperations service
 from bioetl.infrastructure.storage.silver.runtime_helpers import (
     SilverWriterRuntimeServices,
+    SilverWriterRuntimeServicesRequest,
 )
 from bioetl.infrastructure.storage.silver.validation_operations import (
     _PreparedSilverWritePayload,
@@ -64,9 +73,6 @@ from bioetl.infrastructure.storage.silver.validation_operations import (
 )
 from bioetl.infrastructure.storage.silver.writer_runtime_support import (
     _assign_runtime_services,
-    _AwaitTrackingAsyncCallable,
-    _coerce_silver_write_invocation,
-    _pop_legacy_runtime_kwargs,
     _resolve_runtime_services_for_writer,
     _rewire_runtime_services,
     _write_dual_targets,
@@ -75,9 +81,10 @@ from bioetl.infrastructure.storage.silver.writer_runtime_support import (
 
 if TYPE_CHECKING:
     from bioetl.domain import ports as domain_ports
+    from bioetl.domain.behavior.dq_metrics_calculator import DQMetricsCalculator
+    from bioetl.domain.medallion import WriteModePolicy
     from bioetl.domain.types import contract_rollout as contract_rollout_types
     from bioetl.domain.value_objects import silver_result as silver_result_types
-    from bioetl.infrastructure.storage.silver import postwrite_mixin
     from bioetl.infrastructure.storage.silver.operations import (
         arrow_operations,
         delta_operations,
@@ -88,10 +95,6 @@ if TYPE_CHECKING:
         validation_operations,
     )
 
-# Backward-compatible module aliases for tests patching historical symbols.
-asyncio = _asyncio
-DeltaTable = _DeltaTable
-write_deltalake = _write_deltalake
 # Architecture marker imports keep SilverWriter policy/schema hooks discoverable
 # in this root module while the implementations live in split validation helpers.
 
@@ -114,11 +117,6 @@ async def _write_single_target(
 
 
 class SilverWriter(
-    SilverWriterWriteCompatibilityMixin,
-    SilverWriterMergedCompatibilityMixin,
-    SilverWriterDQCompatibilityMixin,
-    SilverWriterFinalizationCompatibilityMixin,
-    SilverWriterAuditMetadataCompatibilityMixin,
     BaseDeltaWriter,
     SilverWriterMaintenanceMixin,
 ):
@@ -150,7 +148,17 @@ class SilverWriter(
         runtime_services: SilverWriterRuntimeServices | None = None,
         flat_structure: bool = False,
         pipeline_name: str | None = None,
-        **legacy_kwargs: object,
+        csv_exporter: CsvExporter | None = None,
+        tracing: TracingPort | None = None,
+        write_policy: "WriteModePolicy | None" = None,
+        metrics: MetricsPort | None = None,
+        audit: AuditPort | None = None,
+        silver_validator: SilverValidatorPort | None = None,
+        metadata_writer: MetadataWriterPort | None = None,
+        metadata_coordinator: MetadataCoordinatorPort | None = None,
+        lineage_store: LineageStorePort | None = None,
+        dq_calculator: "DQMetricsCalculator | None" = None,
+        merge_resilience_policy: SilverMergeResiliencePolicy | None = None,
     ) -> None:
         """Initialize Silver writer.
 
@@ -165,7 +173,20 @@ class SilverWriter(
             pipeline_name: Optional pipeline name for metric labeling.
         """
         self._pipeline_name = pipeline_name
-        runtime_request = _pop_legacy_runtime_kwargs(dict(legacy_kwargs))
+        runtime_request = SilverWriterRuntimeServicesRequest(
+            csv_exporter=csv_exporter,
+            tracing=tracing,
+            write_policy=write_policy,
+            metrics=metrics,
+            audit=audit,
+            logger=None,
+            silver_validator=silver_validator,
+            metadata_writer=metadata_writer,
+            metadata_coordinator=metadata_coordinator,
+            lineage_store=lineage_store,
+            dq_calculator=dq_calculator,
+            merge_resilience_policy=merge_resilience_policy,
+        )
         super().__init__(base_path, logger, flat_structure=flat_structure)
         services = _resolve_runtime_services_for_writer(
             writer=self,
@@ -178,11 +199,6 @@ class SilverWriter(
         self._transform_version = transform_version
         self._transform_steps = transform_steps or ()
         self._host = self
-        object.__setattr__(
-            self,
-            "_check_schema_drift",
-            _AwaitTrackingAsyncCallable(self._check_schema_drift),
-        )
 
     def _should_dual_write(self) -> bool:
         """Return True when rollout policy requires Silver shadow writes."""

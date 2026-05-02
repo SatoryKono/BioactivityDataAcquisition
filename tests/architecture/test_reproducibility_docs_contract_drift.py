@@ -99,6 +99,25 @@ def test_run_manifest_contract_documents_lifecycle_snapshot_and_scoring_surfaces
 
 
 @pytest.mark.architecture
+def test_run_manifest_docs_define_replay_equivalence_levels() -> None:
+    """Replay docs must distinguish semantic equivalence from byte equality."""
+    contract = _read("docs/04-reference/contracts/run-manifest-ledger.md")
+    runbook = _read("docs/05-operations/runbooks/run-manifest-inspection.md")
+
+    for text, doc_name in (
+        (contract, "run-manifest-ledger.md"),
+        (runbook, "run-manifest-inspection.md"),
+    ):
+        assert "semantic_execution_equivalence" in text, doc_name
+        assert "artifact_byte_equivalence" in text, doc_name
+        assert "occurrence-only" in text, doc_name
+        assert "sidecar `output.content_hash`" in text, doc_name
+
+    assert "not as a byte-identical artifact claim" in contract
+    assert "semantically equivalent rather than byte-identical" in runbook
+
+
+@pytest.mark.architecture
 def test_run_manifest_config_hash_legacy_alias_contract_is_documented_and_wired() -> (
     None
 ):

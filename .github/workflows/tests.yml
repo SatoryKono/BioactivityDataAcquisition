@@ -113,6 +113,46 @@ jobs:
                     if-no-files-found: warn
                     retention-days: 14
 
+    # Blocking confidence lane outside the aggregate 85% coverage threshold.
+    # This protects offline contract surfaces while live provider contracts stay
+    # in the scheduled contract-tests workflow.
+    contract-confidence:
+        runs-on: ubuntu-latest
+        timeout-minutes: 15
+        needs: smoke-check
+        permissions:
+            contents: read
+
+        steps:
+            -   name: Checkout code
+                uses: actions/checkout@v6
+
+            -   name: Setup Python + uv
+                uses: ./.github/actions/setup-python-uv
+                with:
+                    python-version: "3.12"
+                    enable-pytest-cache: "true"
+                    pytest-cache-prefix: "pytest-contract-confidence"
+                    pytest-cache-fingerprint: ${{ hashFiles('tests/contract/**/*.py', 'tests/unit/contracts/**/*.py', 'tests/conftest.py', 'tests/contract/conftest.py', 'pyproject.toml') }}
+
+            -   name: Run offline contract confidence lane
+                run: |
+                    mkdir -p reports/test-telemetry
+                    uv run pytest \
+                      tests/contract/ tests/unit/contracts/ \
+                      -m "no_api or not network" \
+                      -q --tb=short \
+                      --junitxml=reports/test-telemetry/junit-contract-confidence.xml
+
+            -   name: Upload contract confidence telemetry
+                if: always()
+                uses: actions/upload-artifact@v4
+                with:
+                    name: test-telemetry-contract-confidence
+                    path: reports/test-telemetry/junit-contract-confidence.xml
+                    if-no-files-found: warn
+                    retention-days: 14
+
     governance-preflight:
         runs-on: ubuntu-latest
         timeout-minutes: 10
@@ -664,6 +704,7 @@ jobs:
         if: always()
         runs-on: ubuntu-latest
         needs:
+            - contract-confidence
             - track-d-gates
             - test-fast
             - test-matrix
@@ -739,6 +780,15 @@ jobs:
                         --reports-dir reports/quality/test-runs \
                         --junit reports/test-telemetry/raw/junit-memory.xml \
                         --command "tests.yml memory lane"
+                    fi
+
+                    if [ -f reports/test-telemetry/raw/junit-contract-confidence.xml ]; then
+                      uv run python -m scripts.engineering.qa summarize-junit \
+                        --suite contracts \
+                        --run-id "contracts-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+                        --reports-dir reports/quality/test-runs \
+                        --junit reports/test-telemetry/raw/junit-contract-confidence.xml \
+                        --command "tests.yml contract confidence lane"
                     fi
 
                     if [ -f reports/test-telemetry/raw/junit-track-d.xml ]; then

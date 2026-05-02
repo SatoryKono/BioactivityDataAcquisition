@@ -50,6 +50,28 @@ transition_debt:
   exit_criteria: First-party `src` imports remain at zero, governance tests confirm
     the shim stays warning-only, and the module is removed after the compatibility
     review or explicit breaking-change window.
+- path: src/bioetl/domain/services/__init__.py
+  compatibility_role: Bounded legacy import bridge from `bioetl.domain.services`
+    to the canonical domain behavior package.
+  canonical_target: bioetl.domain.behavior
+  status: compat-shim
+  owner: bioetl.domain.behavior
+  introduced_in: 2026-05 #3494
+  review_date: '2026-09-30'
+  external_breaking_change_required: true
+  internal_callers_zero: true
+  allowed_call_sites: >-
+    `src`: no production imports of `bioetl.domain.services`; use
+    `bioetl.domain.behavior`. `tests`: only dedicated compatibility or legacy
+    import coverage may exercise the bridge until the review date.
+  migration_path: >-
+    Keep all first-party production imports on `bioetl.domain.behavior`; migrate
+    remaining non-compatibility tests to the canonical package and retain only
+    explicit bridge coverage.
+  exit_criteria: >-
+    Production callers remain zero, non-compatibility tests no longer import the
+    legacy package, and the bridge is removed or explicitly renewed during the
+    2026-09-30 compatibility review.
 retained_entrypoints:
 - path: src/bioetl/interfaces/cli/commands/run.py
   compatibility_role: Permanent public run command seam over the split internal owner

@@ -4,8 +4,14 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import yaml
+
 
 ROOT = Path("src/bioetl")
+REPO_ROOT = Path(__file__).resolve().parents[2]
+COMPATIBILITY_INVENTORY = (
+    REPO_ROOT / "configs" / "quality" / "compatibility_facade_inventory.yaml"
+)
 LEGACY_SYMBOLS = (
     "AuthorNormalizationService",
     "CompositeValidationService",
@@ -68,3 +74,27 @@ def test_domain_services_package_is_only_compatibility_wrapper() -> None:
     }
 
     assert files == {"__init__.py"}
+
+
+def test_domain_services_bridge_is_registered_and_time_bounded() -> None:
+    """Legacy domain.services bridge must stay visible in compatibility governance."""
+    inventory = yaml.safe_load(COMPATIBILITY_INVENTORY.read_text(encoding="utf-8"))
+    rows = [
+        row
+        for group in ("transition_debt", "retained_entrypoints")
+        for row in inventory.get(group, [])
+    ]
+    row = next(
+        (
+            item
+            for item in rows
+            if item.get("path") == "src/bioetl/domain/services/__init__.py"
+        ),
+        None,
+    )
+
+    assert row is not None
+    assert row["canonical_target"] == "bioetl.domain.behavior"
+    assert row["status"] == "compat-shim"
+    assert row["internal_callers_zero"] is True
+    assert row["review_date"] == "2026-09-30"

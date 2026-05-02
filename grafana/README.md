@@ -944,10 +944,10 @@ topk(5, sum(bioetl_records_processed_total) by (pipeline))
 
 ```promql
 # P95 длительности пайплайна
-histogram_quantile(0.95, rate(bioetl_pipeline_duration_seconds_bucket[5m]))
+histogram_quantile(0.95, sum by (le, pipeline, stage) (rate(bioetl_pipeline_duration_seconds_bucket[5m])))
 
 # P50 (медиана)
-histogram_quantile(0.50, rate(bioetl_pipeline_duration_seconds_bucket[5m]))
+histogram_quantile(0.50, sum by (le, pipeline, stage) (rate(bioetl_pipeline_duration_seconds_bucket[5m])))
 
 # Средняя длительность (sum / count)
 rate(bioetl_pipeline_duration_seconds_sum[5m]) / rate(bioetl_pipeline_duration_seconds_count[5m])
@@ -976,7 +976,8 @@ avg(time() - bioetl_data_freshness_seconds) by (pipeline)
 sum(bioetl_records_processed_total{stage="gold"}) / sum(bioetl_records_processed_total{stage="bronze"})
 
 # Error Rate (%)
-rate(bioetl_errors_total[5m]) / rate(bioetl_records_processed_total[5m]) * 100
+sum by (pipeline) (rate(bioetl_errors_total[5m])) /
+  clamp_min(sum by (pipeline) (rate(bioetl_records_processed_total[5m])), 1) * 100
 
 # Quarantine Rate
 sum(rate(bioetl_dq_records_quarantined_total[5m])) /
@@ -993,7 +994,7 @@ bioetl_circuit_breaker_state == 2
 
 ```promql
 # P95 latency per provider
-histogram_quantile(0.95, rate(bioetl_adapter_request_duration_seconds_bucket[5m])) by (provider)
+histogram_quantile(0.95, sum by (le, provider) (rate(bioetl_adapter_request_duration_seconds_bucket[5m])))
 
 # Request rate per provider
 sum(rate(bioetl_adapter_requests_total[5m])) by (provider)
@@ -1221,7 +1222,7 @@ Histogram собирает наблюдения (обычно длительно
 
 ```promql
 # P95 латентность API-запросов к ChemBL
-histogram_quantile(0.95, rate(bioetl_adapter_request_duration_seconds_bucket{provider="chembl"}[5m]))
+histogram_quantile(0.95, sum by (le) (rate(bioetl_adapter_request_duration_seconds_bucket{provider="chembl"}[5m])))
 ```
 
 Эта функция вычисляет значение, ниже которого попадает заданный процент наблюдений. P95 = значение, ниже которого 95% запросов. Чем выше перцентиль, тем больше "хвостовую" латентность он захватывает.
@@ -1495,7 +1496,7 @@ BioETL реализует rate limiting для предотвращения пр
 bioetl_rate_limiter_tokens_available
 
 # P95 ожидание в rate limiter
-histogram_quantile(0.95, rate(bioetl_rate_limiter_wait_seconds_bucket[5m])) by (provider)
+histogram_quantile(0.95, sum by (le, provider) (rate(bioetl_rate_limiter_wait_seconds_bucket[5m])))
 
 # Среднее время ожидания за последний час
 rate(bioetl_rate_limiter_wait_seconds_sum[1h]) / rate(bioetl_rate_limiter_wait_seconds_count[1h])
@@ -1566,7 +1567,7 @@ Grafana автоматически обнаружит новый файл в т�
 | -------------------- | -------------------------- | --------------------------------------------------- |
 | Counter (total)      | Timeseries с `rate()`      | `rate(metric[5m])`                                  |
 | Counter (total)      | Stat (суммарное значение)  | `sum(metric)`                                       |
-| Histogram (duration) | Timeseries с перцентилями  | `histogram_quantile(0.95, rate(metric_bucket[5m]))` |
+| Histogram (duration) | Timeseries с перцентилями  | `histogram_quantile(0.95, sum by (le, <bounded_label>) (rate(metric_bucket[5m])))` |
 | Histogram (size)     | Bar chart                  | `histogram_quantile(0.50, metric_bucket)`           |
 | Gauge (state)        | Stat с color mapping       | `metric` (сырое значение)                           |
 | Gauge (score)        | Gauge с thresholds         | `metric` (значение 0-1)                             |
@@ -1691,7 +1692,7 @@ Grafana поддерживает встроенные алерты на осно
 
 | Алерт                | Условие PromQL                                                                                                                           | Severity | Описание                                                       |
 | -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | -------- | -------------------------------------------------------------- |
-| High Latency         | `histogram_quantile(0.95, rate(bioetl_adapter_request_duration_seconds_bucket[5m])) > 5`                                                 | WARNING  | P95 латентность API > 5 секунд. Провайдер может деградировать. |
+| High Latency         | `histogram_quantile(0.95, sum by (le, provider) (rate(bioetl_adapter_request_duration_seconds_bucket[5m]))) > 5`                         | WARNING  | P95 латентность API > 5 секунд. Провайдер может деградировать. |
 | Error Rate Spike     | `rate(bioetl_http_request_errors_total[5m]) > 0.1`                                                                                       | WARNING  | Более 10% запросов завершаются ошибкой.                        |
 | Data Staleness       | `(time() - bioetl_data_freshness_seconds) > 86400`                                                                                       | WARNING  | Данные старше 24 часов. Пайплайн не выполнялся.                |
 | Retry Exhaustion     | `increase(bioetl_data_source_retry_exhausted_total[1h]) > 0`                                                                             | WARNING  | Retry-попытки исчерпаны. Запросы к провайдеру не проходят.     |
@@ -1717,7 +1718,7 @@ groups:
           description: "Circuit breaker for adapter {{ $labels.adapter }} has been open for 5 minutes."
 
       - alert: HighAPILatency
-        expr: histogram_quantile(0.95, rate(bioetl_adapter_request_duration_seconds_bucket[5m])) > 5
+        expr: histogram_quantile(0.95, sum by (le, provider) (rate(bioetl_adapter_request_duration_seconds_bucket[5m]))) > 5
         for: 10m
         labels:
           severity: warning
