@@ -967,7 +967,9 @@ class TestQuarantineInspectCommand:
         assert "--pipeline" in result.output
         assert "--limit" in result.output
 
-    def test_quarantine_inspect_success(self, cli_runner, mock_quarantine_runtime_service):
+    def test_quarantine_inspect_success(
+        self, cli_runner, mock_quarantine_runtime_service
+    ):
         """Test successful quarantine inspection."""
         with patch(
             "bioetl.interfaces.cli.commands.quarantine.get_quarantine_runtime_service",

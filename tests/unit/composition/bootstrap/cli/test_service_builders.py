@@ -29,6 +29,8 @@ def test_service_builders_public_surface_prefers_runtime_service_vocabulary() ->
     assert "build_cli_quarantine_runtime_service" in service_builders.__all__
     assert "build_cli_checkpoint_manager" not in service_builders.__all__
     assert "build_cli_quarantine_manager" not in service_builders.__all__
+    assert not hasattr(service_builders, "build_cli_checkpoint_manager")
+    assert not hasattr(service_builders, "build_cli_quarantine_manager")
 
 
 @pytest.mark.unit

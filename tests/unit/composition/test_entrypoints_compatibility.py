@@ -45,7 +45,7 @@ def test_entrypoints_legacy_symbol_budget_stays_frozen() -> None:
     """Legacy compatibility lookup surface should stay intentionally bounded."""
     entrypoints = _reload_entrypoints_module()
 
-    assert len(entrypoints._LEGACY_SYMBOL_TARGETS) == 24
+    assert len(entrypoints._LEGACY_SYMBOL_TARGETS) == 22
     target_modules = {
         value[0] if isinstance(value, tuple) else value
         for value in entrypoints._LEGACY_SYMBOL_TARGETS.values()
@@ -57,14 +57,6 @@ def test_entrypoints_legacy_symbol_budget_stays_frozen() -> None:
     assert set(entrypoints._LEGACY_SYMBOL_TARGETS.values()) == {
         "bioetl.composition.resources_api",
         "bioetl.composition.services_api",
-        (
-            "bioetl.composition.resources_api",
-            "get_checkpoint_runtime_service",
-        ),
-        (
-            "bioetl.composition.resources_api",
-            "get_quarantine_runtime_service",
-        ),
     }
 
 
@@ -100,26 +92,22 @@ def test_entrypoints_legacy_resource_symbol_warns_and_delegates() -> None:
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    ("legacy_name", "canonical_name"),
+    "removed_name",
     (
-        ("get_checkpoint_manager", "get_checkpoint_runtime_service"),
-        ("get_quarantine_manager", "get_quarantine_runtime_service"),
+        "get_checkpoint_manager",
+        "get_quarantine_manager",
     ),
 )
-def test_entrypoints_legacy_manager_symbol_warns_and_delegates_to_runtime_service(
-    legacy_name: str,
-    canonical_name: str,
+def test_entrypoints_manager_aliases_are_removed_from_compatibility_surface(
+    removed_name: str,
 ) -> None:
-    """Legacy manager names must remain working shims to runtime services."""
+    """Manager-style entrypoint aliases should not survive as official shims."""
     entrypoints = _reload_entrypoints_module()
-    from bioetl.composition import resources_api
 
-    with pytest.deprecated_call(
-        match=rf"entrypoints\.{legacy_name}.*{canonical_name}.*resources_api"
-    ):
-        resolved = getattr(entrypoints, legacy_name)
-
-    assert resolved is getattr(resources_api, canonical_name)
+    assert removed_name not in entrypoints._LEGACY_SYMBOL_TARGETS
+    assert removed_name not in dir(entrypoints)
+    with pytest.raises(AttributeError):
+        getattr(entrypoints, removed_name)
 
 
 @pytest.mark.unit

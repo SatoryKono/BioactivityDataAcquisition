@@ -89,13 +89,6 @@ def bootstrap_quarantine_runtime_service(
     )
 
 
-def bootstrap_quarantine_manager(
-    pipeline_name: str,
-) -> QuarantineRuntimeService:
-    """Compatibility wrapper for the retired manager-style bootstrap name."""
-    return bootstrap_quarantine_runtime_service(pipeline_name)
-
-
 def bootstrap_checkpoint_runtime_service(
     pipeline_name: str,
 ) -> CheckpointRuntimeService:
@@ -119,13 +112,6 @@ def bootstrap_checkpoint_runtime_service(
         run_id=CLI_INSPECTION_RUN_ID,
         compatibility_service_factory=bootstrap_checkpoint_compatibility_service,
     )
-
-
-def bootstrap_checkpoint_manager(
-    pipeline_name: str,
-) -> CheckpointRuntimeService:
-    """Compatibility wrapper for the retired manager-style bootstrap name."""
-    return bootstrap_checkpoint_runtime_service(pipeline_name)
 
 
 def bootstrap_checkpoint_service() -> CheckpointService:

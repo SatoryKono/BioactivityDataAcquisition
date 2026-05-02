@@ -114,18 +114,6 @@ def build_cli_quarantine_runtime_service(
     )
 
 
-def build_cli_quarantine_manager(
-    *,
-    pipeline_name: str,
-    quarantine_port_factory: Callable[[], QuarantinePort],
-) -> QuarantineRuntimeService:
-    """Compatibility wrapper for the retired manager-style builder name."""
-    return build_cli_quarantine_runtime_service(
-        pipeline_name=pipeline_name,
-        quarantine_port_factory=quarantine_port_factory,
-    )
-
-
 def build_cli_checkpoint_runtime_service(
     *,
     pipeline_name: str,
@@ -145,26 +133,6 @@ def build_cli_checkpoint_runtime_service(
         run_id=run_id,
         resume=False,
         checkpoint_compatibility_service=compatibility_service_factory(logger),
-    )
-
-
-def build_cli_checkpoint_manager(
-    *,
-    pipeline_name: str,
-    run_id: RunID,
-    checkpoint_port_factory: Callable[[str], CheckpointPort],
-    logger_factory: Callable[[], LoggerPort],
-    compatibility_service_factory: Callable[
-        [LoggerPort], CheckpointCompatibilityService
-    ],
-) -> CheckpointRuntimeService:
-    """Compatibility wrapper for the retired manager-style builder name."""
-    return build_cli_checkpoint_runtime_service(
-        pipeline_name=pipeline_name,
-        run_id=run_id,
-        checkpoint_port_factory=checkpoint_port_factory,
-        logger_factory=logger_factory,
-        compatibility_service_factory=compatibility_service_factory,
     )
 
 

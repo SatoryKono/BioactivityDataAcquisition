@@ -94,16 +94,8 @@ _LEGACY_SYMBOL_TARGETS: dict[str, str | tuple[str, str]] = {
     "get_vacuum_service": _COMPOSITION_SERVICES_API_MODULE,
     # resources_api
     "archive_table": _COMPOSITION_RESOURCES_API_MODULE,
-    "get_checkpoint_manager": (
-        _COMPOSITION_RESOURCES_API_MODULE,
-        "get_checkpoint_runtime_service",
-    ),
     "get_checkpoint_runtime_service": _COMPOSITION_RESOURCES_API_MODULE,
     "get_lifecycle_service": _COMPOSITION_RESOURCES_API_MODULE,
-    "get_quarantine_manager": (
-        _COMPOSITION_RESOURCES_API_MODULE,
-        "get_quarantine_runtime_service",
-    ),
     "get_quarantine_runtime_service": _COMPOSITION_RESOURCES_API_MODULE,
     "inspect_quarantine": _COMPOSITION_RESOURCES_API_MODULE,
     "list_checkpoints": _COMPOSITION_RESOURCES_API_MODULE,
