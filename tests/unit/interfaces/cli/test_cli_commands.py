@@ -925,11 +925,11 @@ class TestEchoFunctions:
 
 
 @pytest.fixture
-def mock_quarantine_manager():
+def mock_quarantine_runtime_service():
     """Create a mock QuarantineRuntimeService."""
-    manager = MagicMock()
+    runtime_service = MagicMock()
     # echo_quarantine_record expects dict[str, Any], not dataclass
-    manager.inspect = AsyncMock(
+    runtime_service.inspect = AsyncMock(
         return_value=[
             {
                 "record_id": "rec_001",
@@ -945,7 +945,7 @@ def mock_quarantine_manager():
             },
         ]
     )
-    return manager
+    return runtime_service
 
 
 @pytest.mark.unit
@@ -967,28 +967,28 @@ class TestQuarantineInspectCommand:
         assert "--pipeline" in result.output
         assert "--limit" in result.output
 
-    def test_quarantine_inspect_success(self, cli_runner, mock_quarantine_manager):
+    def test_quarantine_inspect_success(self, cli_runner, mock_quarantine_runtime_service):
         """Test successful quarantine inspection."""
         with patch(
             "bioetl.interfaces.cli.commands.quarantine.get_quarantine_runtime_service",
-            return_value=mock_quarantine_manager,
+            return_value=mock_quarantine_runtime_service,
         ):
             result = cli_runner.invoke(
                 cli, ["quarantine", "inspect", "--pipeline", "chembl_activity"]
             )
 
         assert result.exit_code == 0
-        mock_quarantine_manager.inspect.assert_called_once_with(
+        mock_quarantine_runtime_service.inspect.assert_called_once_with(
             limit=100, error_code=None
         )
 
     def test_quarantine_inspect_with_custom_limit(
-        self, cli_runner, mock_quarantine_manager
+        self, cli_runner, mock_quarantine_runtime_service
     ):
         """Test quarantine inspection with custom limit."""
         with patch(
             "bioetl.interfaces.cli.commands.quarantine.get_quarantine_runtime_service",
-            return_value=mock_quarantine_manager,
+            return_value=mock_quarantine_runtime_service,
         ):
             result = cli_runner.invoke(
                 cli,
@@ -1003,7 +1003,7 @@ class TestQuarantineInspectCommand:
             )
 
         assert result.exit_code == 0
-        mock_quarantine_manager.inspect.assert_called_once_with(
+        mock_quarantine_runtime_service.inspect.assert_called_once_with(
             limit=50, error_code=None
         )
 
@@ -1040,10 +1040,10 @@ class MockCheckpoint:
 
 
 @pytest.fixture
-def mock_checkpoint_manager():
+def mock_checkpoint_runtime_service():
     """Create a mock CheckpointRuntimeService."""
-    manager = MagicMock()
-    manager.list_all = AsyncMock(
+    runtime_service = MagicMock()
+    runtime_service.list_all = AsyncMock(
         return_value=[
             MockCheckpoint(
                 checkpoint_id="cp_001",
@@ -1059,7 +1059,7 @@ def mock_checkpoint_manager():
             ),
         ]
     )
-    return manager
+    return runtime_service
 
 
 @pytest.mark.unit
@@ -1080,18 +1080,18 @@ class TestCheckpointListCommand:
         assert result.exit_code == 0
         assert "--pipeline" in result.output
 
-    def test_checkpoint_list_success(self, cli_runner, mock_checkpoint_manager):
+    def test_checkpoint_list_success(self, cli_runner, mock_checkpoint_runtime_service):
         """Test successful checkpoint listing."""
         with patch(
             "bioetl.interfaces.cli.commands.checkpoint.get_checkpoint_runtime_service",
-            return_value=mock_checkpoint_manager,
+            return_value=mock_checkpoint_runtime_service,
         ):
             result = cli_runner.invoke(
                 cli, ["checkpoint", "list", "--pipeline", "chembl_activity"]
             )
 
         assert result.exit_code == 0
-        mock_checkpoint_manager.list_all.assert_called_once()
+        mock_checkpoint_runtime_service.list_all.assert_called_once()
 
 
 # =============================================================================

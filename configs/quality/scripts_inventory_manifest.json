@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-05-02T11:54:33.104557+00:00",
+  "generated_at": "2026-05-02T17:20:37.674901+00:00",
   "summary": {
     "total_scripts": 355,
     "status_counts": {
@@ -11,10 +11,10 @@
       "agents": 4,
       "build": 2,
       "ci": 50,
-      "docs": 120,
+      "docs": 121,
       "scripts": 299,
       "skills": 8,
-      "tests": 142
+      "tests": 143
     }
   },
   "scripts": [
@@ -4970,7 +4970,7 @@
         },
         {
           "path": "docs/05-engineering/normalization_plan_P0_P6.md",
-          "line": 705,
+          "line": 709,
           "source_group": "docs",
           "text": "- [generate_pipeline_normalization_field_matrix.py](../../scripts/docs/generate_pipeline_normalization_field_matrix.py) already generates deterministic multi-pipeline artifacts"
         },
@@ -8018,7 +8018,7 @@
         },
         {
           "path": "tests/architecture/test_observability_metric_governance.py",
-          "line": 28,
+          "line": 29,
           "source_group": "tests",
           "text": "== \"scripts/engineering/qa/report_observability_metric_inventory.py\""
         }
@@ -8914,7 +8914,7 @@
         },
         {
           "path": "docs/02-architecture/07-compatibility-facade-inventory.md",
-          "line": 125,
+          "line": 124,
           "source_group": "docs",
           "text": "| `src/bioetl/interfaces/cli/commands/run.py` | Permanent public run command seam over the split internal owner module `bioetl.interfaces.cli.commands.domains.run.command`. | `bioetl.interfaces.cli.co"
         },
@@ -11408,7 +11408,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 5,
       "references": [
         {
           "path": ".github/workflows/schema-governance.yml",
@@ -11427,6 +11427,18 @@
           "line": 129,
           "source_group": "ci",
           "text": "run: uv run python src/tools/generate_json_field_typing_inventory.py"
+        },
+        {
+          "path": "docs/03-data-model/json-field-typing-inventory.md",
+          "line": 8,
+          "source_group": "docs",
+          "text": "`src/tools/generate_json_field_typing_inventory.py`."
+        },
+        {
+          "path": "tests/architecture/test_non_chembl_json_field_typing_policy.py",
+          "line": 115,
+          "source_group": "tests",
+          "text": "assert \"src/tools/generate_json_field_typing_inventory.py\" in actual"
         }
       ]
     },

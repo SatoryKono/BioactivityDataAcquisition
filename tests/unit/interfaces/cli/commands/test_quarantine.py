@@ -23,12 +23,12 @@ def cli_runner() -> CliRunner:
 
 
 @pytest.fixture
-def mock_quarantine_manager() -> MagicMock:
-    """Create a mock quarantine manager."""
-    manager = MagicMock()
-    manager.inspect = AsyncMock(return_value=[])
-    manager.get_stats = AsyncMock(return_value={"total_count": 0})
-    return manager
+def mock_quarantine_runtime_service() -> MagicMock:
+    """Create a mock quarantine runtime service."""
+    runtime_service = MagicMock()
+    runtime_service.inspect = AsyncMock(return_value=[])
+    runtime_service.get_stats = AsyncMock(return_value={"total_count": 0})
+    return runtime_service
 
 
 @pytest.fixture
@@ -83,14 +83,14 @@ class TestQuarantineInspect:
     def test_inspect_empty_quarantine(
         self,
         cli_runner: CliRunner,
-        mock_quarantine_manager: MagicMock,
+        mock_quarantine_runtime_service: MagicMock,
     ) -> None:
         """Test quarantine inspect with no records."""
-        mock_quarantine_manager.inspect = AsyncMock(return_value=[])
+        mock_quarantine_runtime_service.inspect = AsyncMock(return_value=[])
 
         with patch(
             "bioetl.interfaces.cli.commands.quarantine.get_quarantine_runtime_service",
-            return_value=mock_quarantine_manager,
+            return_value=mock_quarantine_runtime_service,
         ):
             result = cli_runner.invoke(
                 cli,
@@ -103,7 +103,7 @@ class TestQuarantineInspect:
     def test_inspect_with_records(
         self,
         cli_runner: CliRunner,
-        mock_quarantine_manager: MagicMock,
+        mock_quarantine_runtime_service: MagicMock,
     ) -> None:
         """Test quarantine inspect with existing records."""
         sample_records = [
@@ -116,11 +116,11 @@ class TestQuarantineInspect:
                 "payload": {"molecule_id": "CHEMBL456"},
             },
         ]
-        mock_quarantine_manager.inspect = AsyncMock(return_value=sample_records)
+        mock_quarantine_runtime_service.inspect = AsyncMock(return_value=sample_records)
 
         with patch(
             "bioetl.interfaces.cli.commands.quarantine.get_quarantine_runtime_service",
-            return_value=mock_quarantine_manager,
+            return_value=mock_quarantine_runtime_service,
         ):
             result = cli_runner.invoke(
                 cli,
@@ -134,14 +134,14 @@ class TestQuarantineInspect:
     def test_inspect_with_error_code_filter(
         self,
         cli_runner: CliRunner,
-        mock_quarantine_manager: MagicMock,
+        mock_quarantine_runtime_service: MagicMock,
     ) -> None:
         """Test quarantine inspect with --error-code filter."""
-        mock_quarantine_manager.inspect = AsyncMock(return_value=[])
+        mock_quarantine_runtime_service.inspect = AsyncMock(return_value=[])
 
         with patch(
             "bioetl.interfaces.cli.commands.quarantine.get_quarantine_runtime_service",
-            return_value=mock_quarantine_manager,
+            return_value=mock_quarantine_runtime_service,
         ):
             result = cli_runner.invoke(
                 cli,
@@ -156,7 +156,7 @@ class TestQuarantineInspect:
             )
 
         # Verify inspect was called with correct error_code
-        mock_quarantine_manager.inspect.assert_called_once_with(
+        mock_quarantine_runtime_service.inspect.assert_called_once_with(
             limit=100,
             error_code="DQ_MISSING_FIELD",
         )
@@ -165,14 +165,14 @@ class TestQuarantineInspect:
     def test_inspect_with_custom_limit(
         self,
         cli_runner: CliRunner,
-        mock_quarantine_manager: MagicMock,
+        mock_quarantine_runtime_service: MagicMock,
     ) -> None:
         """Test quarantine inspect with custom --limit."""
-        mock_quarantine_manager.inspect = AsyncMock(return_value=[])
+        mock_quarantine_runtime_service.inspect = AsyncMock(return_value=[])
 
         with patch(
             "bioetl.interfaces.cli.commands.quarantine.get_quarantine_runtime_service",
-            return_value=mock_quarantine_manager,
+            return_value=mock_quarantine_runtime_service,
         ):
             result = cli_runner.invoke(
                 cli,
@@ -186,7 +186,7 @@ class TestQuarantineInspect:
                 ],
             )
 
-        mock_quarantine_manager.inspect.assert_called_once_with(
+        mock_quarantine_runtime_service.inspect.assert_called_once_with(
             limit=50,
             error_code=None,
         )
@@ -195,14 +195,14 @@ class TestQuarantineInspect:
     def test_inspect_with_silver_filter_shortcut(
         self,
         cli_runner: CliRunner,
-        mock_quarantine_manager: MagicMock,
+        mock_quarantine_runtime_service: MagicMock,
     ) -> None:
         """Test quarantine inspect with --silver-filter-only shortcut."""
-        mock_quarantine_manager.inspect = AsyncMock(return_value=[])
+        mock_quarantine_runtime_service.inspect = AsyncMock(return_value=[])
 
         with patch(
             "bioetl.interfaces.cli.commands.quarantine.get_quarantine_runtime_service",
-            return_value=mock_quarantine_manager,
+            return_value=mock_quarantine_runtime_service,
         ):
             result = cli_runner.invoke(
                 cli,
@@ -215,7 +215,7 @@ class TestQuarantineInspect:
                 ],
             )
 
-        mock_quarantine_manager.inspect.assert_called_once_with(
+        mock_quarantine_runtime_service.inspect.assert_called_once_with(
             limit=100,
             error_code="FILTERED_OUT_SILVER",
         )
@@ -224,14 +224,14 @@ class TestQuarantineInspect:
     def test_inspect_with_run_id_filter(
         self,
         cli_runner: CliRunner,
-        mock_quarantine_manager: MagicMock,
+        mock_quarantine_runtime_service: MagicMock,
     ) -> None:
         """Test quarantine inspect with explicit run-id scoping."""
-        mock_quarantine_manager.inspect = AsyncMock(return_value=[])
+        mock_quarantine_runtime_service.inspect = AsyncMock(return_value=[])
 
         with patch(
             "bioetl.interfaces.cli.commands.quarantine.get_quarantine_runtime_service",
-            return_value=mock_quarantine_manager,
+            return_value=mock_quarantine_runtime_service,
         ):
             result = cli_runner.invoke(
                 cli,
@@ -245,7 +245,7 @@ class TestQuarantineInspect:
                 ],
             )
 
-        mock_quarantine_manager.inspect.assert_called_once_with(
+        mock_quarantine_runtime_service.inspect.assert_called_once_with(
             limit=100,
             error_code=None,
             run_id="00000000-0000-0000-0000-000000000123",
@@ -279,16 +279,16 @@ class TestQuarantineStats:
     def test_stats_empty_quarantine(
         self,
         cli_runner: CliRunner,
-        mock_quarantine_manager: MagicMock,
+        mock_quarantine_runtime_service: MagicMock,
     ) -> None:
         """Test quarantine stats with no records."""
-        mock_quarantine_manager.get_stats = AsyncMock(
+        mock_quarantine_runtime_service.get_stats = AsyncMock(
             return_value={"total_count": 0, "by_error_code": {}, "by_status": {}}
         )
 
         with patch(
             "bioetl.interfaces.cli.commands.quarantine.get_quarantine_runtime_service",
-            return_value=mock_quarantine_manager,
+            return_value=mock_quarantine_runtime_service,
         ):
             result = cli_runner.invoke(
                 cli,
@@ -301,10 +301,10 @@ class TestQuarantineStats:
     def test_stats_with_records(
         self,
         cli_runner: CliRunner,
-        mock_quarantine_manager: MagicMock,
+        mock_quarantine_runtime_service: MagicMock,
     ) -> None:
         """Test quarantine stats with records."""
-        mock_quarantine_manager.get_stats = AsyncMock(
+        mock_quarantine_runtime_service.get_stats = AsyncMock(
             return_value={
                 "total_count": 100,
                 "by_error_code": {"VALIDATION_ERROR": 60, "SCHEMA_ERROR": 40},
@@ -314,7 +314,7 @@ class TestQuarantineStats:
 
         with patch(
             "bioetl.interfaces.cli.commands.quarantine.get_quarantine_runtime_service",
-            return_value=mock_quarantine_manager,
+            return_value=mock_quarantine_runtime_service,
         ):
             result = cli_runner.invoke(
                 cli,
@@ -331,10 +331,10 @@ class TestQuarantineStats:
     def test_stats_with_silver_filter_shortcut(
         self,
         cli_runner: CliRunner,
-        mock_quarantine_manager: MagicMock,
+        mock_quarantine_runtime_service: MagicMock,
     ) -> None:
         """Test quarantine stats with --silver-filter-only shortcut."""
-        mock_quarantine_manager.get_stats = AsyncMock(
+        mock_quarantine_runtime_service.get_stats = AsyncMock(
             return_value={
                 "total_count": 3,
                 "by_error_code": {"FILTERED_OUT_SILVER": 3},
@@ -354,7 +354,7 @@ class TestQuarantineStats:
 
         with patch(
             "bioetl.interfaces.cli.commands.quarantine.get_quarantine_runtime_service",
-            return_value=mock_quarantine_manager,
+            return_value=mock_quarantine_runtime_service,
         ):
             result = cli_runner.invoke(
                 cli,
@@ -367,7 +367,7 @@ class TestQuarantineStats:
                 ],
             )
 
-        mock_quarantine_manager.get_stats.assert_called_once_with(
+        mock_quarantine_runtime_service.get_stats.assert_called_once_with(
             error_code="FILTERED_OUT_SILVER",
             run_id=None,
         )
@@ -378,10 +378,10 @@ class TestQuarantineStats:
     def test_stats_with_run_id_and_bronze_ratio(
         self,
         cli_runner: CliRunner,
-        mock_quarantine_manager: MagicMock,
+        mock_quarantine_runtime_service: MagicMock,
     ) -> None:
         """Test run-scoped Silver reject summary includes Bronze denominator."""
-        mock_quarantine_manager.get_stats = AsyncMock(
+        mock_quarantine_runtime_service.get_stats = AsyncMock(
             return_value={
                 "total_count": 4,
                 "by_error_code": {"FILTERED_OUT_SILVER": 4},
@@ -411,7 +411,7 @@ class TestQuarantineStats:
 
         with patch(
             "bioetl.interfaces.cli.commands.quarantine.get_quarantine_runtime_service",
-            return_value=mock_quarantine_manager,
+            return_value=mock_quarantine_runtime_service,
         ):
             with patch(
                 "bioetl.interfaces.cli.commands.quarantine.get_run_manifest_service",
@@ -430,7 +430,7 @@ class TestQuarantineStats:
                     ],
                 )
 
-        mock_quarantine_manager.get_stats.assert_called_once_with(
+        mock_quarantine_runtime_service.get_stats.assert_called_once_with(
             error_code="FILTERED_OUT_SILVER",
             run_id="00000000-0000-0000-0000-000000000123",
         )
@@ -444,10 +444,10 @@ class TestQuarantineStats:
     def test_stats_with_focused_group_by_reason_code_field(
         self,
         cli_runner: CliRunner,
-        mock_quarantine_manager: MagicMock,
+        mock_quarantine_runtime_service: MagicMock,
     ) -> None:
         """Test quarantine stats focused grouping for Silver reject causes."""
-        mock_quarantine_manager.get_stats = AsyncMock(
+        mock_quarantine_runtime_service.get_stats = AsyncMock(
             return_value={
                 "total_count": 4,
                 "by_error_code": {"FILTERED_OUT_SILVER": 4},
@@ -470,7 +470,7 @@ class TestQuarantineStats:
 
         with patch(
             "bioetl.interfaces.cli.commands.quarantine.get_quarantine_runtime_service",
-            return_value=mock_quarantine_manager,
+            return_value=mock_quarantine_runtime_service,
         ):
             result = cli_runner.invoke(
                 cli,
@@ -495,10 +495,10 @@ class TestQuarantineStats:
     def test_stats_with_focused_group_by_reason_signature(
         self,
         cli_runner: CliRunner,
-        mock_quarantine_manager: MagicMock,
+        mock_quarantine_runtime_service: MagicMock,
     ) -> None:
         """Test quarantine stats focused grouping for stable signatures."""
-        mock_quarantine_manager.get_stats = AsyncMock(
+        mock_quarantine_runtime_service.get_stats = AsyncMock(
             return_value={
                 "total_count": 2,
                 "by_error_code": {"FILTERED_OUT_SILVER": 2},
@@ -521,7 +521,7 @@ class TestQuarantineStats:
 
         with patch(
             "bioetl.interfaces.cli.commands.quarantine.get_quarantine_runtime_service",
-            return_value=mock_quarantine_manager,
+            return_value=mock_quarantine_runtime_service,
         ):
             result = cli_runner.invoke(
                 cli,
@@ -547,10 +547,10 @@ class TestQuarantineStats:
     def test_stats_with_top_limits_group_output(
         self,
         cli_runner: CliRunner,
-        mock_quarantine_manager: MagicMock,
+        mock_quarantine_runtime_service: MagicMock,
     ) -> None:
         """Test quarantine stats honors --top for focused Silver grouping."""
-        mock_quarantine_manager.get_stats = AsyncMock(
+        mock_quarantine_runtime_service.get_stats = AsyncMock(
             return_value={
                 "total_count": 6,
                 "by_error_code": {"FILTERED_OUT_SILVER": 6},
@@ -573,7 +573,7 @@ class TestQuarantineStats:
 
         with patch(
             "bioetl.interfaces.cli.commands.quarantine.get_quarantine_runtime_service",
-            return_value=mock_quarantine_manager,
+            return_value=mock_quarantine_runtime_service,
         ):
             result = cli_runner.invoke(
                 cli,
@@ -598,10 +598,10 @@ class TestQuarantineStats:
     def test_stats_with_focused_group_by_zero_state(
         self,
         cli_runner: CliRunner,
-        mock_quarantine_manager: MagicMock,
+        mock_quarantine_runtime_service: MagicMock,
     ) -> None:
         """Test focused grouping zero-state message when values are unavailable."""
-        mock_quarantine_manager.get_stats = AsyncMock(
+        mock_quarantine_runtime_service.get_stats = AsyncMock(
             return_value={
                 "total_count": 1,
                 "by_error_code": {"FILTERED_OUT_SILVER": 1},
@@ -620,7 +620,7 @@ class TestQuarantineStats:
 
         with patch(
             "bioetl.interfaces.cli.commands.quarantine.get_quarantine_runtime_service",
-            return_value=mock_quarantine_manager,
+            return_value=mock_quarantine_runtime_service,
         ):
             result = cli_runner.invoke(
                 cli,
@@ -643,7 +643,7 @@ class TestQuarantineStats:
     def test_stats_json_output(
         self,
         cli_runner: CliRunner,
-        mock_quarantine_manager: MagicMock,
+        mock_quarantine_runtime_service: MagicMock,
     ) -> None:
         """Test quarantine stats with JSON output."""
         stats_data = {
@@ -651,11 +651,11 @@ class TestQuarantineStats:
             "by_error_code": {"DQ_MISSING": 30, "DQ_INVALID": 20},
             "by_status": {"NEW": 40, "RESOLVED": 10},
         }
-        mock_quarantine_manager.get_stats = AsyncMock(return_value=stats_data)
+        mock_quarantine_runtime_service.get_stats = AsyncMock(return_value=stats_data)
 
         with patch(
             "bioetl.interfaces.cli.commands.quarantine.get_quarantine_runtime_service",
-            return_value=mock_quarantine_manager,
+            return_value=mock_quarantine_runtime_service,
         ):
             result = cli_runner.invoke(
                 cli,
@@ -671,16 +671,16 @@ class TestQuarantineStats:
     def test_stats_exception_handling(
         self,
         cli_runner: CliRunner,
-        mock_quarantine_manager: MagicMock,
+        mock_quarantine_runtime_service: MagicMock,
     ) -> None:
         """Test quarantine stats handles exceptions."""
-        mock_quarantine_manager.get_stats = AsyncMock(
+        mock_quarantine_runtime_service.get_stats = AsyncMock(
             side_effect=RuntimeError("Database error")
         )
 
         with patch(
             "bioetl.interfaces.cli.commands.quarantine.get_quarantine_runtime_service",
-            return_value=mock_quarantine_manager,
+            return_value=mock_quarantine_runtime_service,
         ):
             result = cli_runner.invoke(
                 cli,
@@ -693,16 +693,16 @@ class TestQuarantineStats:
     def test_stats_dashboard_header(
         self,
         cli_runner: CliRunner,
-        mock_quarantine_manager: MagicMock,
+        mock_quarantine_runtime_service: MagicMock,
     ) -> None:
         """Test quarantine stats displays dashboard header."""
-        mock_quarantine_manager.get_stats = AsyncMock(
+        mock_quarantine_runtime_service.get_stats = AsyncMock(
             return_value={"total_count": 0, "by_error_code": {}, "by_status": {}}
         )
 
         with patch(
             "bioetl.interfaces.cli.commands.quarantine.get_quarantine_runtime_service",
-            return_value=mock_quarantine_manager,
+            return_value=mock_quarantine_runtime_service,
         ):
             result = cli_runner.invoke(
                 cli,
@@ -1186,13 +1186,13 @@ class TestQuarantineEdgeCases:
     @patch("bioetl.interfaces.cli.commands.quarantine.get_quarantine_runtime_service")
     def test_inspect_displays_info_message(
         self,
-        mock_get_manager: MagicMock,
+        mock_get_runtime_service: MagicMock,
         cli_runner: CliRunner,
     ) -> None:
         """Test that inspect displays informational message."""
-        mock_manager = MagicMock()
-        mock_manager.inspect = AsyncMock(return_value=[])
-        mock_get_manager.return_value = mock_manager
+        mock_runtime_service = MagicMock()
+        mock_runtime_service.inspect = AsyncMock(return_value=[])
+        mock_get_runtime_service.return_value = mock_runtime_service
 
         result = cli_runner.invoke(
             cli,

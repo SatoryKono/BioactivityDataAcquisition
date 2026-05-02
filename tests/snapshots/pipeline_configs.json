@@ -1271,6 +1271,8 @@
         "fields": [
           "subject_topics",
           "primary_topic",
+          "primary_topic_canonical_json",
+          "primary_topic_raw_json",
           "subject_keywords",
           "subject_mesh"
         ],
@@ -1300,7 +1302,9 @@
       },
       {
         "fields": [
-          "grants"
+          "grants",
+          "grants_canonical_json",
+          "grants_raw_json"
         ],
         "name": "funding",
         "pattern": null,
@@ -1701,7 +1705,9 @@
         "fields": [
           "authors",
           "author_count",
-          "authors_with_affiliations"
+          "authors_with_affiliations",
+          "authors_with_affiliations_canonical_json",
+          "authors_with_affiliations_raw_json"
         ],
         "name": "authors",
         "pattern": null,
@@ -1716,7 +1722,9 @@
       {
         "fields": [
           "affiliation_list",
-          "affiliation_structured"
+          "affiliation_structured",
+          "affiliation_structured_canonical_json",
+          "affiliation_structured_raw_json"
         ],
         "name": "affiliations",
         "pattern": null,
@@ -2080,7 +2088,9 @@
         "fields": [
           "author_s2_ids",
           "author_orcids",
-          "author_h_indices"
+          "author_h_indices",
+          "author_h_indices_canonical_json",
+          "author_h_indices_raw_json"
         ],
         "name": "authors",
         "pattern": null,
@@ -2171,7 +2181,9 @@
           "citations_received",
           "citations_made",
           "influential_citation_count",
-          "citation_contexts"
+          "citation_contexts",
+          "citation_contexts_canonical_json",
+          "citation_contexts_raw_json"
         ],
         "name": "citations",
         "pattern": null,
@@ -2186,7 +2198,11 @@
       {
         "fields": [
           "subject_fields",
-          "publication_types"
+          "subject_fields_canonical_json",
+          "subject_fields_raw_json",
+          "publication_types",
+          "publication_types_canonical_json",
+          "publication_types_raw_json"
         ],
         "name": "subjects",
         "pattern": null,
@@ -2545,7 +2561,9 @@
           "genus",
           "molecular_function",
           "cellular_component",
+          "features_canonical_json",
           "features_json",
+          "features_raw_json",
           "domains",
           "binding_sites",
           "active_sites",
