@@ -13,6 +13,18 @@ strict_validation: false
 invalid_record_policy: "quarantine"
 disposition_overrides:
   "molecule_id_required": "fail"
+  "molecule_type_allowed": "warn"
+  "max_phase_range": "warn"
+  "structure_type_allowed": "warn"
+  "therapeutic_flag_boolean": "warn"
+  "black_box_warning_boolean": "warn"
+  "withdrawn_flag_boolean": "warn"
+  "oral_boolean": "warn"
+  "parenteral_boolean": "warn"
+  "topical_boolean": "warn"
+  "first_in_class_boolean": "warn"
+  "prodrug_boolean": "warn"
+  "natural_product_boolean": "warn"
 report:
   enabled: true
   format: "json"

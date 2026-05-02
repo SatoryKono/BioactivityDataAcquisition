@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
+from datetime import datetime
 from typing import TYPE_CHECKING, Any
 
 from bioetl.domain.context import current_utc_time
@@ -28,6 +30,7 @@ class SilverMaintenanceOperations:
         pipeline_name: str,
         metrics: MetricsPort | None = None,
         audit: AuditPort | None = None,
+        audit_timestamp_factory: Callable[[], datetime] | None = None,
     ) -> None:
         """Initialize maintenance operations.
 
@@ -37,18 +40,32 @@ class SilverMaintenanceOperations:
             pipeline_name: Name of the pipeline for metric labeling
             metrics: Optional metrics port for instrumentation
             audit: Optional audit port for logging
+            audit_timestamp_factory: Optional deterministic timestamp provider for
+                maintenance audit events.
         """
         self._csv_exporter = csv_exporter
         self._retention_manager = retention_manager
         self._pipeline_name = pipeline_name
         self._metrics = metrics
         self._audit = audit
+        self._audit_timestamp_factory = audit_timestamp_factory or current_utc_time
+
+    def _resolve_audit_timestamp(
+        self,
+        *,
+        audit_timestamp: datetime | None,
+    ) -> datetime:
+        """Resolve audit timestamp from explicit input or injected factory."""
+        if audit_timestamp is not None:
+            return audit_timestamp
+        return self._audit_timestamp_factory()
 
     async def maybe_export_csv(
         self,
         table_name: str,
         arrow_data: pa.Table,
         export_path: str,
+        audit_timestamp: datetime | None = None,
         **kwargs: Any,  # Any: Flexible CSV export options
     ) -> None:
         """Export data to CSV if exporter is configured.
@@ -62,6 +79,11 @@ class SilverMaintenanceOperations:
         if self._csv_exporter is None:
             return
         _ = export_path
+        event_timestamp = (
+            self._resolve_audit_timestamp(audit_timestamp=audit_timestamp)
+            if self._audit is not None
+            else None
+        )
 
         if self._metrics:
             self._metrics.increment_counter(
@@ -82,7 +104,7 @@ class SilverMaintenanceOperations:
                 self._audit.log_event(
                     "SilverCsvExport",
                     {"table": table_name, "rows": len(arrow_data), "status": "success"},
-                    timestamp=current_utc_time(),
+                    timestamp=event_timestamp,
                 )
         except Exception as e:
             if self._metrics:
@@ -99,7 +121,7 @@ class SilverMaintenanceOperations:
                 self._audit.log_event(
                     "SilverCsvExport",
                     {"table": table_name, "status": "failed", "error": str(e)},
-                    timestamp=current_utc_time(),
+                    timestamp=event_timestamp,
                 )
             raise
 
@@ -108,6 +130,8 @@ class SilverMaintenanceOperations:
         table_name: str,
         retention_hours: int,
         dry_run: bool = False,
+        *,
+        audit_timestamp: datetime | None = None,
     ) -> JsonDict:
         """Execute vacuum operation on Delta table.
 
@@ -121,6 +145,11 @@ class SilverMaintenanceOperations:
         """
         if self._metrics:
             self._metrics.increment_counter("bioetl_silver_vacuum_start_total", 1)
+        event_timestamp = (
+            self._resolve_audit_timestamp(audit_timestamp=audit_timestamp)
+            if self._audit is not None
+            else None
+        )
 
         removed_files = await self._retention_manager.vacuum(
             table_name, retention_hours, dry_run=dry_run
@@ -145,7 +174,7 @@ class SilverMaintenanceOperations:
             self._audit.log_event(
                 "SilverVacuum",
                 result,
-                timestamp=current_utc_time(),
+                timestamp=event_timestamp,
             )
 
         return result
@@ -154,6 +183,7 @@ class SilverMaintenanceOperations:
         self,
         table_name: str,
         zorder_by: list[str] | None = None,
+        audit_timestamp: datetime | None = None,
         **kwargs: Any,  # Any: Flexible optimize operation options
     ) -> JsonDict:
         """Execute optimize operation on Delta table.
@@ -168,6 +198,11 @@ class SilverMaintenanceOperations:
         """
         if self._metrics:
             self._metrics.increment_counter("bioetl_silver_optimize_start_total", 1)
+        event_timestamp = (
+            self._resolve_audit_timestamp(audit_timestamp=audit_timestamp)
+            if self._audit is not None
+            else None
+        )
 
         result = await self._retention_manager.optimize(
             table_name,
@@ -183,7 +218,7 @@ class SilverMaintenanceOperations:
             self._audit.log_event(
                 "SilverOptimize",
                 result,
-                timestamp=current_utc_time(),
+                timestamp=event_timestamp,
             )
 
         return result

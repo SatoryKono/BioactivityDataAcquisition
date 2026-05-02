@@ -76,6 +76,37 @@ _EXPECTED_CHEMBL_CONTRACT_SURFACE: dict[str, dict[str, str]] = {
     },
 }
 
+_EXPECTED_CHEMBL_SEMANTIC_DQ_RULES: dict[str, frozenset[str]] = {
+    "chembl_activity": frozenset(
+        {
+            "standard_units_allowed",
+            "standard_relation_allowed",
+            "standard_flag_boolean",
+            "potential_duplicate_flag",
+            "manual_curation_flag",
+            "taxonomy_id_positive",
+            "action_type_allowed_or_unknown",
+            "value_requires_units",
+        }
+    ),
+    "chembl_molecule": frozenset(
+        {
+            "molecule_type_allowed",
+            "max_phase_range",
+            "structure_type_allowed",
+            "therapeutic_flag_boolean",
+            "black_box_warning_boolean",
+            "withdrawn_flag_boolean",
+            "oral_boolean",
+            "parenteral_boolean",
+            "topical_boolean",
+            "first_in_class_boolean",
+            "prodrug_boolean",
+            "natural_product_boolean",
+        }
+    ),
+}
+
 
 @pytest.mark.integration
 def test_chembl_contract_registry_covers_all_shipped_gold_surfaces() -> None:
@@ -179,3 +210,25 @@ def test_chembl_contract_loader_resolves_each_registered_surface(
     assert dq_config.contract_ref == contract_ref
     assert dq_config.contract_version == "1.0.0"
     assert dq_config.rule_bundle_version == "dq-rules.v1.0"
+
+
+@pytest.mark.integration
+@pytest.mark.parametrize(
+    ("pipeline_name", "expected_rule_ids"),
+    sorted(_EXPECTED_CHEMBL_SEMANTIC_DQ_RULES.items()),
+)
+def test_chembl_semantic_rules_are_governed_by_dq_contracts(
+    pipeline_name: str,
+    expected_rule_ids: frozenset[str],
+) -> None:
+    """High-risk ChEMBL semantic checks must be contract-governed."""
+    dq_config = DQContractConfigLoader(_CONFIGS_ROOT).load_dq_config_for_pipeline(
+        pipeline_name
+    )
+
+    configured_rule_ids = {
+        rule_id for rule_id, _disposition in dq_config.disposition_overrides
+    }
+
+    assert expected_rule_ids <= configured_rule_ids
+    assert dq_config.soft_fail_threshold < dq_config.hard_fail_threshold

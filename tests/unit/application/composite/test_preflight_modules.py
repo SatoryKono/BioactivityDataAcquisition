@@ -296,6 +296,64 @@ class TestPreflightOrchestration:
         result = mixin._load_pipeline_schema_fields("nounderscore")
         assert result is None
 
+    def test_load_pipeline_schema_fields_resolves_provider_entity_key(self) -> None:
+        mixin = _make_orchestration_mixin()
+
+        fake_schema = type("FakeSchema", (), {})
+        expected_fields = {"record_id": FieldInfo("record_id", "int", False, "x")}
+        mixin._extract_fields_from_schema = MagicMock(return_value=expected_fields)
+        PreflightSchemaOrchestrationMixin._SCHEMA_REGISTRY = {
+            "chembl_compound_record": fake_schema
+        }
+
+        result = mixin._load_pipeline_schema_fields("chembl_compound_record")
+
+        assert result == expected_fields
+        mixin._extract_fields_from_schema.assert_called_once_with(
+            fake_schema,
+            source="chembl.compound_record",
+        )
+
+    def test_load_source_fields_includes_dependencies_and_qualified_aliases(self) -> None:
+        mixin = _make_orchestration_mixin()
+
+        config = MagicMock()
+        config.seed.pipeline = "chembl_activity"
+        dependency = MagicMock()
+        dependency.pipeline = "chembl_compound_record"
+        config.dependencies = (dependency,)
+        enricher = MagicMock()
+        enricher.pipeline = "crossref_publication"
+        config.enrichers = (enricher,)
+
+        seed_fields = {"activity_id": FieldInfo("activity_id", "str", False, "seed")}
+        dependency_fields = {
+            "record_id": FieldInfo("record_id", "int", False, "dependency")
+        }
+        enricher_fields = {"doi": FieldInfo("doi", "str", True, "enricher")}
+        by_pipeline = {
+            "chembl_activity": seed_fields,
+            "chembl_compound_record": dependency_fields,
+            "crossref_publication": enricher_fields,
+        }
+        mixin._load_pipeline_schema_fields = MagicMock(
+            side_effect=lambda pipeline: by_pipeline.get(pipeline)
+        )
+
+        result = mixin._load_source_fields(config)
+
+        assert result["seed"] is seed_fields
+        assert result["chembl"] is seed_fields
+        assert result["chembl_activity"] is seed_fields
+        assert result["chembl.activity"] is seed_fields
+
+        assert result["chembl_compound_record"] is dependency_fields
+        assert result["chembl.compound_record"] is dependency_fields
+
+        assert result["crossref"] is enricher_fields
+        assert result["crossref_publication"] is enricher_fields
+        assert result["crossref.publication"] is enricher_fields
+
     def test_extract_fields_from_annotations_skips_private(self) -> None:
         mixin = _make_orchestration_mixin()
 

@@ -86,6 +86,7 @@ class _GoldMergedWriteHostProtocol(Protocol):
     _validate_records_against_schema: Callable[
         [list[GoldRecord], DataFrameSchema], Awaitable[None]
     ]
+    _validate_schema_strict: Callable[[DataFrameSchema], None]
 
     async def _run_in_executor(
         self,
@@ -101,7 +102,7 @@ class _GoldMergedWriteRequest:
     table_name: str
     records: list[GoldRecord]
     primary_keys: list[str] | None
-    schema: DataFrameSchema | None
+    schema: DataFrameSchema
     completed_at: datetime | None
     run_id: str | None
     sources_used: list[str] | None
@@ -151,16 +152,20 @@ async def _prepare_gold_merged_write(
     request: _GoldMergedWriteRequest,
 ) -> _PreparedGoldMergedWrite:
     """Validate and prepare one merged Gold write request."""
-    if request.schema is not None:
-        await host._validate_records_against_schema(request.records, request.schema)
+    host._validate_schema_strict(request.schema)
+    arrow_table = _prepare_gold_merged_table(
+        records=request.records,
+        primary_keys=request.primary_keys,
+        preserve_column_order=request.preserve_column_order,
+    )
+    await host._validate_records_against_schema(
+        cast("list[GoldRecord]", arrow_table.to_pylist()),
+        request.schema,
+    )
     return _PreparedGoldMergedWrite(
         request=request,
         table_path=host._resolve_table_path(request.table_name),
-        arrow_table=_prepare_gold_merged_table(
-            records=request.records,
-            primary_keys=request.primary_keys,
-            preserve_column_order=request.preserve_column_order,
-        ),
+        arrow_table=arrow_table,
     )
 
 
@@ -251,6 +256,7 @@ class _GoldWriterMergedDispatchMixin(_GoldWriterExecutorArrowMixin):
     _validate_records_against_schema: Callable[
         [list[GoldRecord], DataFrameSchema], Awaitable[None]
     ]
+    _validate_schema_strict: Callable[[DataFrameSchema], None]
 
     async def write_gold_merged(
         self,
@@ -264,13 +270,18 @@ class _GoldWriterMergedDispatchMixin(_GoldWriterExecutorArrowMixin):
         sources_used: list[str] | None = None,
         preserve_column_order: bool = False,
     ) -> None:
-        """Write merged records to Gold layer with optional strict validation."""
+        """Write merged records to Gold layer with mandatory strict validation."""
         if not records:
             self.logger.warning(
                 "No records to write for merged Gold",
                 table_name=table_name,
             )
             return
+        if schema is None:
+            raise ValueError(
+                "Merged Gold writes require a registered strict schema: "
+                f"table_name={table_name}"
+            )
 
         request = _GoldMergedWriteRequest(
             table_name=table_name,

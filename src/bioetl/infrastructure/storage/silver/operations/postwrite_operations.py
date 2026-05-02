@@ -30,6 +30,7 @@ class _SilverMaintenancePostwriteOps(Protocol):
         arrow_data: pa.Table,
         export_path: str,
         primary_keys: list[str],
+        audit_timestamp: datetime | None = None,
     ) -> None: ...
 
 
@@ -355,6 +356,7 @@ class SilverPostwriteOperations:
                 arrow_data=payload.arrow_data,
                 export_path=export_path,
                 primary_keys=ctx.primary_keys,
+                audit_timestamp=ctx.ingestion_ts,
             )
             return
 

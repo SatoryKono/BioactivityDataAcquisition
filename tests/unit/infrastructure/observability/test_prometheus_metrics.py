@@ -155,7 +155,9 @@ class TestPrometheusMetrics:
                     },
                 )
 
-    def test_silver_maintenance_metrics_normalize_table_labels(self, prometheus_metrics):
+    def test_silver_maintenance_metrics_normalize_table_labels(
+        self, prometheus_metrics
+    ):
         """Table-scoped maintenance metrics must collapse table labels to canonical form."""
         with patch.dict(
             COUNTERS,
@@ -170,7 +172,9 @@ class TestPrometheusMetrics:
                 },
             )
 
-            COUNTERS["bioetl_silver_csv_export_start_total"].labels.assert_called_once_with(
+            COUNTERS[
+                "bioetl_silver_csv_export_start_total"
+            ].labels.assert_called_once_with(
                 table="chembl_activity",
                 pipeline="chembl_activity",
             )

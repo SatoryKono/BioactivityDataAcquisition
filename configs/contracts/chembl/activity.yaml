@@ -14,6 +14,14 @@ invalid_record_policy: "quarantine"
 disposition_overrides:
   "activity_id_required": "fail"
   "standard_value_range": "warn"
+  "standard_units_allowed": "warn"
+  "standard_relation_allowed": "warn"
+  "standard_flag_boolean": "warn"
+  "potential_duplicate_flag": "warn"
+  "manual_curation_flag": "warn"
+  "taxonomy_id_positive": "warn"
+  "action_type_allowed_or_unknown": "warn"
+  "value_requires_units": "warn"
 report:
   enabled: true
   format: "json"

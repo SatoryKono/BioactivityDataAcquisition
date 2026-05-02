@@ -137,6 +137,7 @@ async def test_postwrite_operations_preserve_service_specific_export_and_audit()
     assert call_kwargs["table_name"] == "test.table"
     assert call_kwargs["arrow_data"] is payload.arrow_data
     assert call_kwargs["primary_keys"] == ["entity_id"]
+    assert call_kwargs["audit_timestamp"] == ctx.ingestion_ts
     # Normalize paths for comparison to handle different separators
     expected_path = str(Path(SILVER_EXPORT_PATH).resolve())
     actual_path = str(Path(call_kwargs["export_path"]).resolve())

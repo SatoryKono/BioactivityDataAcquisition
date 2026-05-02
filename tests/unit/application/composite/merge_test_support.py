@@ -115,6 +115,7 @@ def build_merge_service(
     merge_config: MergeConfig,
     logger: MagicMock,
     storage: MagicMock,
+    gold_schema: object | None = None,
 ) -> MergeService:
     """Create a fully wired MergeService for composite unit tests."""
     from bioetl.application.composite.aggregator import EnricherAggregator
@@ -152,6 +153,7 @@ def build_merge_service(
         storage=storage,
         logger=logger,
         silver_reader=storage,
+        gold_schema=gold_schema,
         clock=FixedClock(datetime(2026, 4, 28, 12, 0, tzinfo=UTC)),
         collaborators=MergeCollaboratorGroup(
             deduplicator=deduplicator,

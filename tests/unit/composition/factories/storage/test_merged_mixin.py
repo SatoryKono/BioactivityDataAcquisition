@@ -96,9 +96,21 @@ async def test_write_gold_merged_uses_composite_schema() -> None:
 @pytest.mark.unit
 @pytest.mark.asyncio
 async def test_write_gold_merged_unknown_table_passes_none_schema() -> None:
-    """write_gold_merged passes None schema for unknown tables."""
+    """write_gold_merged fails fast for unknown Gold tables."""
     mixin = _make_mixin()
     records = [{"id": 1}]
-    await mixin.write_gold_merged("unknown.table", records)
+    with pytest.raises(ValueError, match="registered strict schema"):
+        await mixin.write_gold_merged("unknown.table", records)
+    mixin.gold.write_gold_merged.assert_not_called()
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_write_gold_merged_uses_explicit_schema_for_unknown_table() -> None:
+    """write_gold_merged allows an explicit strict schema at the storage seam."""
+    mixin = _make_mixin()
+    records = [{"id": 1}]
+    schema = MagicMock()
+    await mixin.write_gold_merged("unknown.table", records, schema=schema)
     call_kwargs = mixin.gold.write_gold_merged.call_args
-    assert call_kwargs[1]["schema"] is None
+    assert call_kwargs[1]["schema"] is schema

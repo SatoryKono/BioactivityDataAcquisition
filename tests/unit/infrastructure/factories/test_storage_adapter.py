@@ -400,14 +400,14 @@ class TestStorageBundleWriteGoldMerged:
         storage_adapter: StorageBundle,
         mock_gold_writer: MagicMock,
     ) -> None:
-        """Unknown merged table keeps backward-compatible schema=None behavior."""
-        await storage_adapter.write_gold_merged(
-            table_name="custom/merged",
-            records=[{"entity_id": "x", "content_hash": "y"}],
-        )
+        """Unknown merged Gold tables fail before the writer is called."""
+        with pytest.raises(ValueError, match="registered strict schema"):
+            await storage_adapter.write_gold_merged(
+                table_name="custom/merged",
+                records=[{"entity_id": "x", "content_hash": "y"}],
+            )
 
-        call_kwargs = mock_gold_writer.write_gold_merged.call_args[1]
-        assert call_kwargs["schema"] is None
+        mock_gold_writer.write_gold_merged.assert_not_called()
 
 
 @pytest.mark.unit

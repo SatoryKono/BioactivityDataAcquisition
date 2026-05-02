@@ -1306,16 +1306,17 @@ class TestGoldWriterMergedValidation:
         mock_write_deltalake.assert_called_once()
 
     @patch("bioetl.infrastructure.storage.gold_writer.write_deltalake")
-    async def test_write_gold_merged_non_strict_schema_allowed(
+    async def test_write_gold_merged_non_strict_schema_rejected(
         self, mock_write_deltalake, gold_writer, non_strict_schema, valid_records
     ):
-        """Test write_gold_merged accepts non-strict schema (composite pipelines)."""
-        await gold_writer.write_gold_merged(
-            table_name="test.merged_table",
-            records=valid_records,
-            schema=non_strict_schema,
-        )
-        mock_write_deltalake.assert_called_once()
+        """write_gold_merged rejects non-strict schemas."""
+        with pytest.raises(ValueError, match="strict=True"):
+            await gold_writer.write_gold_merged(
+                table_name="test.merged_table",
+                records=valid_records,
+                schema=non_strict_schema,
+            )
+        mock_write_deltalake.assert_not_called()
 
     async def test_write_gold_merged_schema_validation_failure(
         self, gold_writer, strict_schema
@@ -1333,16 +1334,37 @@ class TestGoldWriterMergedValidation:
             )
 
     @patch("bioetl.infrastructure.storage.gold_writer.write_deltalake")
-    async def test_write_gold_merged_without_schema_still_works(
+    async def test_write_gold_merged_without_schema_fails_fast(
         self, mock_write_deltalake, gold_writer, valid_records
     ):
-        """Test write_gold_merged works without schema (backward compat)."""
-        await gold_writer.write_gold_merged(
-            table_name="test.merged_table",
-            records=valid_records,
-        )
+        """Merged Gold writes require a registered strict schema."""
+        with pytest.raises(ValueError, match="require a registered strict schema"):
+            await gold_writer.write_gold_merged(
+                table_name="test.merged_table",
+                records=valid_records,
+            )
 
-        mock_write_deltalake.assert_called_once()
+        mock_write_deltalake.assert_not_called()
+
+    async def test_write_gold_merged_rejects_non_strict_schema(
+        self, gold_writer, valid_records
+    ):
+        """Merged Gold writes reject schemas that do not enforce strict mode."""
+        import pandera.pandas as pa
+        from pandera.typing import Series
+
+        class NonStrictSchema(pa.DataFrameModel):
+            entity_id: Series[str] = pa.Field(nullable=False)
+
+            class Config:
+                strict = False
+
+        with pytest.raises(ValueError, match="strict=True"):
+            await gold_writer.write_gold_merged(
+                table_name="test.merged_table",
+                records=valid_records,
+                schema=NonStrictSchema,
+            )
 
     async def test_write_gold_merged_empty_records_returns(
         self, gold_writer, strict_schema
