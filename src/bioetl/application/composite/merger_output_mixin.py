@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
+from bioetl.domain.exceptions import DataQualityError
+
 if TYPE_CHECKING:
     from datetime import datetime
 
@@ -101,6 +103,11 @@ class MergeOutputWriterMixin:
 
         df = self._coerce_null_columns(df)
         table_name = self._path_to_table_name(self._config.output_gold_path)
+        if self._gold_schema is None:
+            raise DataQualityError(
+                "Composite Gold write requires a registered strict schema: "
+                f"table_name={table_name}"
+            )
         records = df.to_dicts()
         await self._storage.write_gold_merged(
             table_name,

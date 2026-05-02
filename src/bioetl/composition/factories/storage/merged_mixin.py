@@ -42,7 +42,7 @@ class _GoldMergedWriteProtocol(Protocol):
         primary_keys: list[str] | None = None,
         *,
         completed_at: datetime | None = None,
-        schema: DataFrameSchema | None = None,
+        schema: DataFrameSchema,
         run_id: str | None = None,
         sources_used: list[str] | None = None,
         preserve_column_order: bool = False,
@@ -54,9 +54,7 @@ class StorageBundleMergedMixin:
 
     silver: SilverWriter
     gold: GoldWriter
-    _COMPOSITE_GOLD_SCHEMAS: ClassVar[
-        JsonDict  # Any: record/metadata values are heterogeneous
-    ]
+    _COMPOSITE_GOLD_SCHEMAS: ClassVar[dict[str, object]]
 
     def get_table_path(
         self,
@@ -149,9 +147,10 @@ class StorageBundleMergedMixin:
         preserve_column_order: bool = False,
         schema: object | None = None,
     ) -> None:
-        """Write merged records to Gold layer without Pandera schema.
+        """Write merged records to Gold layer with a required composite schema.
 
-        Used by composite pipelines where schema is dynamically determined.
+        Used by composite pipelines where the schema is resolved from the
+        registered composite Gold contract surface.
 
         Args:
             table_name: The name of the table to write to.
@@ -161,9 +160,15 @@ class StorageBundleMergedMixin:
             run_id: Optional composite run ID for metadata tracking.
             sources_used: Optional list of source pipelines used in merge.
             preserve_column_order: If True, skip canonical reordering.
-            schema: Optional Pandera schema for strict contract validation.
+            schema: Optional caller-provided Pandera schema. If omitted, a
+                registered composite schema must exist for ``table_name``.
         """
-        composite_schema = self._COMPOSITE_GOLD_SCHEMAS.get(table_name)
+        composite_schema = schema or self._COMPOSITE_GOLD_SCHEMAS.get(table_name)
+        if composite_schema is None:
+            raise ValueError(
+                "Composite Gold write requires a registered strict schema: "
+                f"table_name={table_name}"
+            )
 
         await cast(
             _GoldMergedWriteProtocol,

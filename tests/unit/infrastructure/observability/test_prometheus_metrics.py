@@ -155,6 +155,48 @@ class TestPrometheusMetrics:
                     },
                 )
 
+    def test_silver_maintenance_metrics_normalize_table_labels(self, prometheus_metrics):
+        """Table-scoped maintenance metrics must collapse table labels to canonical form."""
+        with patch.dict(
+            COUNTERS,
+            {"bioetl_silver_csv_export_start_total": MagicMock()},
+        ):
+            prometheus_metrics.increment_counter(
+                name="bioetl_silver_csv_export_start_total",
+                value=1,
+                labels={
+                    "table": "chembl.activity__v2_0_0",
+                    "pipeline": "chembl_activity",
+                },
+            )
+
+            COUNTERS["bioetl_silver_csv_export_start_total"].labels.assert_called_once_with(
+                table="chembl_activity",
+                pipeline="chembl_activity",
+            )
+            COUNTERS[
+                "bioetl_silver_csv_export_start_total"
+            ].labels().inc.assert_called_once_with(1)
+
+    def test_table_label_rejected_for_unapproved_metric_families(
+        self, prometheus_metrics
+    ):
+        """Raw table labels must be rejected outside reviewed table-scoped metrics."""
+        with patch.dict(COUNTERS, {"bioetl_records_processed_total": MagicMock()}):
+            with pytest.raises(ValueError, match="table"):
+                prometheus_metrics.increment_counter(
+                    name="bioetl_records_processed_total",
+                    value=1,
+                    labels={
+                        "pipeline": "chembl_activity",
+                        "stage": "bronze",
+                        "run_type": "incremental",
+                        "table": "chembl.activity",
+                    },
+                )
+
+            COUNTERS["bioetl_records_processed_total"].labels.assert_not_called()
+
     def test_adapter_endpoint_metrics_normalize_dynamic_endpoint_labels(
         self, prometheus_metrics
     ):

@@ -123,6 +123,40 @@ def _build_supported_version_issues(
     ]
 
 
+def _build_dq_identity_alignment_issues(
+    entry: ContractRegistryEntry,
+) -> list[RegistryValidationIssue]:
+    """Validate DQ metadata is identical in identity and entry payloads."""
+    checks = (
+        (
+            "dq_policy_ref",
+            entry.identity.dq_policy_ref,
+            entry.dq_policy_ref,
+        ),
+        (
+            "rule_bundle_version",
+            entry.identity.rule_bundle_version,
+            entry.rule_bundle_version,
+        ),
+    )
+    issues: list[RegistryValidationIssue] = []
+    for field_name, identity_value, entry_value in checks:
+        if identity_value == entry_value:
+            continue
+        issues.append(
+            RegistryValidationIssue(
+                message=(
+                    f"{field_name} mismatch between identity and registry entry: "
+                    f"identity={identity_value!r}, entry={entry_value!r}"
+                ),
+                severity=RegistryValidationSeverity.BLOCKING,
+                contract_ref=entry.identity.contract_ref,
+                field=field_name,
+            )
+        )
+    return issues
+
+
 @dataclass(frozen=True)
 class ContractRegistryEntry:
     """Single entry in the contract registry."""
@@ -156,4 +190,5 @@ class ContractRegistryEntry:
                 supported_versions=self.supported_versions,
             )
         )
+        issues.extend(_build_dq_identity_alignment_issues(self))
         return issues
