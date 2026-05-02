@@ -8,6 +8,15 @@ threshold_policy:
     Coverage enforcement is centralized in the dedicated coverage-verify job.
     Other jobs may contribute shard data or execution confidence without
     directly enforcing the threshold.
+confidence_lane_policy:
+  notes: >-
+    Contract, e2e, and memory confidence lanes are blocking pass/fail gates even
+    when they do not emit coverage shards and do not participate in the hard 85
+    percent aggregate coverage threshold.
+  required_blocking_jobs:
+    - contract-confidence
+    - control-plane-e2e
+    - memory-tests
 lanes:
   - job: smoke-check
     lane_type: execution_only
@@ -20,13 +29,43 @@ lanes:
       lanes start, but it no longer emits coverage data into the hard gate.
   - job: control-plane-e2e
     lane_type: execution_only
+    blocking_confidence_lane: true
     emits_coverage_artifact: false
     participates_in_hard_threshold: false
     threshold_enforced_in_job: false
     execution_confidence_role: e2e_control_plane
+    blocking_assertions:
+      command_contains:
+        - tests/e2e/test_pubchem_compound_e2e.py::test_pubchem_compound_full_cycle
+        - --junitxml=reports/e2e/control-plane-completeness.xml
+      required_artifacts:
+        - control-plane-completeness
+        - reports/e2e/control-plane-completeness.xml
     notes: >-
-      Control-plane completeness smoke gives execution confidence only; it does
-      not feed the combined hard coverage threshold.
+      Control-plane completeness smoke is a blocking execution-confidence lane.
+      It does not feed the combined hard coverage threshold, but failure blocks
+      the workflow independently from the percentage gate.
+  - job: contract-confidence
+    lane_type: execution_only
+    blocking_confidence_lane: true
+    emits_coverage_artifact: false
+    participates_in_hard_threshold: false
+    threshold_enforced_in_job: false
+    execution_confidence_role: offline_contract_confidence
+    blocking_assertions:
+      command_contains:
+        - tests/contract/
+        - tests/unit/contracts/
+        - -m "no_api or not network"
+        - --junitxml=reports/test-telemetry/junit-contract-confidence.xml
+      required_artifacts:
+        - test-telemetry-contract-confidence
+        - reports/test-telemetry/junit-contract-confidence.xml
+    notes: >-
+      Offline contract assertions are a blocking confidence lane for schema,
+      snapshot, and replay-contract drift. Live provider contracts remain in the
+      scheduled contract workflow, while this lane protects PRs without adding
+      network dependence to the coverage threshold path.
   - job: track-d-gates
     lane_type: execution_only
     emits_coverage_artifact: false
@@ -38,14 +77,23 @@ lanes:
       the hard coverage combine path.
   - job: memory-tests
     lane_type: execution_only
+    blocking_confidence_lane: true
     emits_coverage_artifact: false
     participates_in_hard_threshold: false
     threshold_enforced_in_job: false
     execution_confidence_role: neo4j_memory_isolated_execution
+    blocking_assertions:
+      command_contains:
+        - tests/unit/scripts/ops/
+        - -m "memory"
+        - --junitxml=reports/test-telemetry/junit-memory.xml
+      required_artifacts:
+        - test-telemetry-memory
+        - reports/test-telemetry/junit-memory.xml
     notes: >-
-      Neo4j project-memory and MCP tests run in a dedicated execution lane so
-      the main coverage-enforced path excludes environment-sensitive memory
-      tooling without losing regression visibility.
+      Neo4j project-memory and MCP tests run in a dedicated blocking execution
+      lane so the main coverage-enforced path excludes environment-sensitive
+      memory tooling without losing regression visibility.
   - job: test-fast
     lane_type: execution_only
     emits_coverage_artifact: false

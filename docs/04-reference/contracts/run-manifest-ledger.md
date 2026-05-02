@@ -531,6 +531,30 @@ published effective-config baseline is:
   runtime must not leave a newly committed semantic artifact or occurrence
   envelope behind when a later consistency step fails in-process.
 
+### Replay equivalence levels
+
+Run-manifest replay diagnostics distinguish semantic replay from byte-for-byte
+artifact equality:
+
+- `semantic_execution_equivalence` means two runs have the same semantic
+  execution identity and replay anchors. The comparison uses
+  `execution_fingerprint`, normalized effective-config semantic artifacts,
+  immutable input snapshot IDs/content hashes, contract references, and the
+  produced-artifact trace. Occurrence-only fields such as `run_id`,
+  `manifest_id`, ledger append order, wall-clock timestamps, host/runtime
+  diagnostics, and occurrence envelopes may differ.
+- `artifact_byte_equivalence` means the compared artifacts are byte-for-byte
+  identical. This is stricter than semantic replay and is not implied when
+  sidecars or metadata envelopes contain occurrence-scoped timestamps, run IDs,
+  manifest IDs, lineage timestamps, or host/runtime fields.
+
+Dataset rows and metadata sidecars preserve the same boundary: semantic
+`content_hash` values exclude occurrence-scoped runtime anchors, while raw
+artifact bytes can still differ when occurrence-rich sidecars are regenerated.
+Operators must therefore treat semantic replay success as a replay-contract
+claim, not as a byte-identical artifact claim unless byte equality is measured
+separately.
+
 ### `RunCodeProvenance` field set
 
 `code_provenance` currently includes these optional anchors:

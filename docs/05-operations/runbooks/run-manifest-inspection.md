@@ -146,6 +146,23 @@ Interpretation:
 - occurrence-only differences are acceptable only when semantic artifacts and
   manifest anchors still match.
 
+Equivalence interpretation:
+
+- `semantic_execution_equivalence` means the manifests and effective-config
+  artifacts agree on semantic execution identity and replay anchors. It allows
+  occurrence-only differences such as `run_id`, `manifest_id`, control-plane
+  timestamps, ledger append order, host/runtime diagnostics, and occurrence
+  sidecars.
+- `artifact_byte_equivalence` means the compared output artifacts or sidecars
+  are byte-for-byte identical. It is stricter than semantic replay and is not
+  implied by `verified=true` when occurrence-rich sidecars or metadata envelopes
+  are regenerated.
+- The sidecar `output.content_hash` is semantic: it excludes occurrence-scoped
+  runtime anchors such as run IDs, manifest IDs, lineage/write timestamps, and
+  host/runtime fields. If content hashes and replay anchors match but raw
+  sidecar bytes differ only in occurrence metadata, diagnose the run as
+  semantically equivalent rather than byte-identical.
+
 ### 4. Inspect storage layout directly when needed
 
 Canonical filesystem paths:

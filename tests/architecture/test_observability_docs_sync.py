@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 import pytest
@@ -12,6 +13,42 @@ METRICS_GUIDE_PATH = Path("docs/03-guides/metrics-monitoring.md")
 OBSERVABILITY_CONTRACT_PATH = Path("docs/04-reference/contracts/observability.md")
 GRAFANA_README_PATH = Path("grafana/README.md")
 MONITORING_INDEX_PATH = Path("docs/03-guides/dashboards/monitoring-index.md")
+
+
+@pytest.mark.architecture
+def test_monitoring_docs_do_not_publish_unsafe_promql_examples() -> None:
+    """Operator docs must not publish known unsafe PromQL copy-paste patterns."""
+    docs = {
+        "docs/03-guides/metrics-monitoring.md": METRICS_GUIDE_PATH.read_text(
+            encoding="utf-8"
+        ),
+        "docs/04-reference/contracts/observability.md": (
+            OBSERVABILITY_CONTRACT_PATH.read_text(encoding="utf-8")
+        ),
+        "grafana/README.md": GRAFANA_README_PATH.read_text(encoding="utf-8"),
+    }
+
+    unsafe_patterns = (
+        (
+            re.compile(r"histogram_quantile\(\s*0\.\d+\s*,\s*rate\(", re.MULTILINE),
+            "histogram_quantile must aggregate buckets with sum by (le, ...) "
+            "before quantile calculation",
+        ),
+        (
+            re.compile(r"rate\(bioetl_errors_total\[5m\]\)\s*>\s*10"),
+            "bioetl_errors_total alerts must use an explicit processed-record "
+            "denominator or be documented as raw error throughput",
+        ),
+    )
+
+    violations: list[str] = []
+    for doc_name, text in docs.items():
+        for pattern, reason in unsafe_patterns:
+            for match in pattern.finditer(text):
+                line_number = text.count("\n", 0, match.start()) + 1
+                violations.append(f"{doc_name}:{line_number}: {reason}")
+
+    assert not violations, "\n".join(violations)
 
 
 @pytest.mark.architecture

@@ -398,7 +398,12 @@ shape — normalized basename token (`activity_ids.csv`), неизвестные
 rate(bioetl_records_processed_total{pipeline="chembl_activity"}[5m])
 
 # 95-й перцентиль длительности пайплайна
-histogram_quantile(0.95, rate(bioetl_pipeline_duration_seconds_bucket[5m]))
+histogram_quantile(
+  0.95,
+  sum by (le, pipeline, stage) (
+    rate(bioetl_pipeline_duration_seconds_bucket[5m])
+  )
+)
 
 # Количество ошибок за час
 increase(bioetl_errors_total[1h])
@@ -406,9 +411,9 @@ increase(bioetl_errors_total[1h])
 # Текущее состояние Circuit Breaker
 bioetl_circuit_breaker_state{adapter="chembl"}
 
-# Процент карантинных записей
-sum(rate(bioetl_dq_records_quarantined_total[5m])) /
-sum(rate(bioetl_records_processed_total[5m])) * 100
+# Процент карантинных записей по pipeline
+sum by (pipeline) (rate(bioetl_dq_records_quarantined_total[5m])) /
+clamp_min(sum by (pipeline) (rate(bioetl_records_processed_total[5m])), 1) * 100
 ```
 
 ______________________________________________________________________
@@ -603,7 +608,13 @@ groups:
           summary: "Circuit breaker open for {{ $labels.adapter }}"
 
       - alert: HighErrorRate
-        expr: rate(bioetl_errors_total[5m]) > 10
+        expr: |
+          sum by (pipeline) (rate(bioetl_errors_total[5m]))
+          /
+          clamp_min(
+            sum by (pipeline) (rate(bioetl_records_processed_total[5m])),
+            1
+          ) > 0.05
         for: 5m
         labels:
           severity: warning
@@ -612,8 +623,8 @@ groups:
 
       - alert: HighQuarantineRate
         expr: |
-          sum(rate(bioetl_dq_records_quarantined_total[5m])) by (pipeline) /
-          sum(rate(bioetl_records_processed_total[5m])) by (pipeline) > 0.05
+          sum by (pipeline) (rate(bioetl_dq_records_quarantined_total[5m])) /
+          clamp_min(sum by (pipeline) (rate(bioetl_records_processed_total[5m])), 1) > 0.05
         for: 10m
         labels:
           severity: warning
