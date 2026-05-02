@@ -72,8 +72,10 @@ What can still be strict:
 
 ## Evidence
 
-- matrix:
-  [pipeline_normalization_field_matrix.md](../../reports/generated/pipeline_normalization_field_matrix/pipeline_normalization_field_matrix.md)
+- matrix entrypoint:
+  [Normalization Plan P0-P6](../../05-engineering/normalization_plan_P0_P6.md)
+  with generated artifact path
+  `docs/reports/generated/pipeline_normalization_field_matrix/pipeline_normalization_field_matrix.md`
 - identifier fixtures:
   [non_chembl_identifier_cases.yaml](../../../tests/fixtures/normalization/non_chembl_identifier_cases.yaml)
 - source registry:

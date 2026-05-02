@@ -23,8 +23,10 @@ Covered pipelines:
 - `openalex_publication`
 - `semanticscholar_publication`
 
-Use the generated matrix for full field-by-field detail:
-[pipeline_normalization_field_matrix.md](../../reports/generated/pipeline_normalization_field_matrix/pipeline_normalization_field_matrix.md).
+Use the generated matrix for full field-by-field detail via the published
+[Normalization Plan P0-P6](../../05-engineering/normalization_plan_P0_P6.md).
+The generated artifact path is
+`docs/reports/generated/pipeline_normalization_field_matrix/pipeline_normalization_field_matrix.md`.
 Use representative fixtures for reviewed examples:
 [non_chembl_observed_values.yaml](../../../tests/fixtures/normalization/non_chembl_observed_values.yaml)
 and
