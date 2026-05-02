@@ -344,10 +344,28 @@
     "required": false,
     "unique": false
   },
+  "features_canonical_json": {
+    "checks": [],
+    "coerce": false,
+    "description": "Canonical JSON companion for all sequence features",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
   "features_json": {
     "checks": [],
     "coerce": false,
     "description": "JSON array of all sequence features",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "features_raw_json": {
+    "checks": [],
+    "coerce": false,
+    "description": "Raw provider JSON for all sequence features",
     "dtype": "str",
     "nullable": true,
     "required": false,

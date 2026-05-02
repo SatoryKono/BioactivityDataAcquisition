@@ -33,6 +33,7 @@ from bioetl.domain.normalization.profiles import (
     UNIPROT_PROTEIN_SCHEMA_FIELDS,
 )
 from bioetl.domain.normalization.chemical_standardization_contract import (
+    CHEMICAL_STANDARDIZATION_POLICY_VERSION,
     CHEMICAL_STANDARDIZATION_STATUSES,
 )
 from bioetl.domain.normalization.profiles._standard_profile_builder import (
@@ -184,8 +185,72 @@ def test_pubchem_standardization_fields_are_profile_enums() -> None:
     assert status_rule.apply("failed") is None
 
     assert policy_rule is not None
-    assert policy_rule.apply("PUBCHEM-BASIC-V1") == "pubchem-basic-v1"
+    assert policy_rule.apply("PUBCHEM-BASIC-V1") == (
+        CHEMICAL_STANDARDIZATION_POLICY_VERSION
+    )
     assert policy_rule.apply("pubchem-basic-v2") is None
+
+
+def test_semantic_sensitive_sidecars_preserve_raw_and_canonical_companions() -> None:
+    openalex_primary_topic_raw = OPENALEX_PUBLICATION_PROFILE.rule_for(
+        "primary_topic_raw_json"
+    )
+    openalex_primary_topic_canonical = OPENALEX_PUBLICATION_PROFILE.rule_for(
+        "primary_topic_canonical_json"
+    )
+    pubmed_authors_raw = PUBMED_PUBLICATION_PROFILE.rule_for(
+        "authors_with_affiliations_raw_json"
+    )
+    pubmed_authors_canonical = PUBMED_PUBLICATION_PROFILE.rule_for(
+        "authors_with_affiliations_canonical_json"
+    )
+    semanticscholar_types_raw = SEMANTICSCHOLAR_PUBLICATION_PROFILE.rule_for(
+        "publication_types_raw_json"
+    )
+    semanticscholar_types_canonical = SEMANTICSCHOLAR_PUBLICATION_PROFILE.rule_for(
+        "publication_types_canonical_json"
+    )
+    uniprot_features_raw = UNIPROT_PROTEIN_PROFILE.rule_for("features_raw_json")
+    uniprot_features_canonical = UNIPROT_PROTEIN_PROFILE.rule_for(
+        "features_canonical_json"
+    )
+
+    assert openalex_primary_topic_raw is not None
+    assert openalex_primary_topic_raw.apply(
+        ' { "id": " https://openalex.org/t987 " } '
+    ) == (' { "id": " https://openalex.org/t987 " } ')
+    assert openalex_primary_topic_canonical is not None
+    assert (
+        openalex_primary_topic_canonical.apply(
+            '{"id":"https://openalex.org/T987","score":1}'
+        )
+        == '{"id":"T987","score":1}'
+    )
+
+    assert pubmed_authors_raw is not None
+    assert pubmed_authors_raw.apply(' [ { "name": "A" } ] ') == ' [ { "name": "A" } ] '
+    assert pubmed_authors_canonical is not None
+    assert pubmed_authors_canonical.apply(' [ { "name": "A" } ] ') == '[{"name":"A"}]'
+
+    assert semanticscholar_types_raw is not None
+    assert semanticscholar_types_raw.apply(' [ "Review", "JournalArticle" ] ') == (
+        ' [ "Review", "JournalArticle" ] '
+    )
+    assert semanticscholar_types_canonical is not None
+    assert (
+        semanticscholar_types_canonical.apply('["Review","JournalArticle"]')
+        == '["Review","JournalArticle"]'
+    )
+
+    assert uniprot_features_raw is not None
+    assert uniprot_features_raw.apply(' [ { "type": "DOMAIN" } ] ') == (
+        ' [ { "type": "DOMAIN" } ] '
+    )
+    assert uniprot_features_canonical is not None
+    assert (
+        uniprot_features_canonical.apply(' [ { "type": "DOMAIN" } ] ')
+        == '[{"type":"DOMAIN"}]'
+    )
 
 
 def test_uniprot_idmapping_mapping_status_uses_profile_enum() -> None:

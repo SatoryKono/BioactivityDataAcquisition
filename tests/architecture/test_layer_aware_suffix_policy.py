@@ -64,6 +64,7 @@ def test_layer_aware_suffix_policy_registers_expected_rule_ids() -> None:
         "runtime_admin_checkpoint_quarantine_family",
         "column_ordering_family",
         "composite_canonical_alias_family",
+        "provider_connector_adapter_module_family",
     } <= family_rule_ids
 
     suffix_rules = {rule.rule_id: rule for rule in policy.suffix_boundary_rules}
@@ -268,6 +269,62 @@ def test_composite_alias_family_is_frozen_to_owner_modules_only() -> None:
             "src/bioetl/application/composite/preflight_validator.py",
         ),
     }
+
+
+def test_provider_connector_adapter_family_is_owned_by_adapter_modules_only() -> None:
+    """Provider adapter family must be owned by adapter.py modules only."""
+    module = _load_gate_module()
+    policy = module._load_layer_aware_suffix_policy(ROOT)
+    family_rules = {rule.rule_id: rule for rule in policy.family_freeze_rules}
+    rule = family_rules["provider_connector_adapter_module_family"]
+
+    allowed = {(item.symbol, item.path) for item in rule.allowed_symbols}
+    assert allowed == {
+        (
+            "PubMedAdapter",
+            "src/bioetl/infrastructure/adapters/pubmed/adapter.py",
+        ),
+        (
+            "SemanticScholarAdapter",
+            "src/bioetl/infrastructure/adapters/semanticscholar/adapter.py",
+        ),
+    }
+
+    pubmed_package = (
+        ROOT / "src" / "bioetl" / "infrastructure" / "adapters" / "pubmed" / "__init__.py"
+    )
+    semanticscholar_package = (
+        ROOT
+        / "src"
+        / "bioetl"
+        / "infrastructure"
+        / "adapters"
+        / "semanticscholar"
+        / "__init__.py"
+    )
+    pubmed_client = (
+        ROOT / "src" / "bioetl" / "infrastructure" / "adapters" / "pubmed" / "client.py"
+    )
+    semanticscholar_client = (
+        ROOT
+        / "src"
+        / "bioetl"
+        / "infrastructure"
+        / "adapters"
+        / "semanticscholar"
+        / "client.py"
+    )
+
+    assert (
+        "from bioetl.infrastructure.adapters.pubmed.adapter import "
+        in pubmed_package.read_text(encoding="utf-8")
+    )
+    assert (
+        "from bioetl.infrastructure.adapters.semanticscholar.adapter import "
+        in semanticscholar_package.read_text(encoding="utf-8")
+    )
+    assert "deprecated" in pubmed_client.read_text(encoding="utf-8").lower()
+    assert "deprecated" in semanticscholar_client.read_text(encoding="utf-8").lower()
 
 
 def test_layer_aware_suffix_policy_stays_clean_on_current_baseline() -> None:

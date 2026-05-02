@@ -5,38 +5,41 @@ from __future__ import annotations
 from importlib import import_module
 
 
-def test_pubmed_canonical_entrypoint_reexports_legacy_adapter() -> None:
-    """Canonical PubMed client module should preserve the legacy adapter object."""
+def test_pubmed_canonical_adapter_module_reexports_legacy_adapter() -> None:
+    """Canonical PubMed adapter module should preserve compatibility adapter objects."""
     canonical_cls = import_module(
+        "bioetl.infrastructure.adapters.pubmed.adapter"
+    ).PubMedAdapter
+    client_shim_cls = import_module(
         "bioetl.infrastructure.adapters.pubmed.client"
     ).PubMedAdapter
-    legacy_cls = import_module(
+    legacy_module_cls = import_module(
         "bioetl.infrastructure.adapters.pubmed.pubmed_client"
     ).PubMedAdapter
-    assert canonical_cls is legacy_cls
+    assert canonical_cls is client_shim_cls is legacy_module_cls
 
 
-def test_pubmed_canonical_entrypoint_exposes_public_factory_alias() -> None:
-    """Canonical PubMed client module should expose a public adapter factory."""
-    canonical_module = import_module("bioetl.infrastructure.adapters.pubmed.client")
+def test_pubmed_canonical_adapter_module_exposes_public_factory_alias() -> None:
+    """Canonical PubMed adapter module should expose a public adapter factory."""
+    canonical_module = import_module("bioetl.infrastructure.adapters.pubmed.adapter")
     canonical_factory = canonical_module.create_pubmed_adapter
     legacy_factory = import_module(
         "bioetl.infrastructure.adapters.pubmed.pubmed_client"
     )._create_pubmed_adapter
 
     assert canonical_factory is legacy_factory
-    assert not hasattr(canonical_module, "_create_pubmed_adapter")
+    assert hasattr(canonical_module, "_create_pubmed_adapter")
 
 
-def test_semanticscholar_canonical_entrypoint_reexports_legacy_adapter() -> None:
-    """Canonical Semantic Scholar client module should preserve the legacy adapter object."""
+def test_semanticscholar_canonical_adapter_module_reexports_client_shim() -> None:
+    """Canonical Semantic Scholar adapter module should preserve shim adapter object."""
     canonical_cls = import_module(
-        "bioetl.infrastructure.adapters.semanticscholar.client"
-    ).SemanticScholarAdapter
-    legacy_cls = import_module(
         "bioetl.infrastructure.adapters.semanticscholar.adapter"
     ).SemanticScholarAdapter
-    assert canonical_cls is legacy_cls
+    shim_cls = import_module(
+        "bioetl.infrastructure.adapters.semanticscholar.client"
+    ).SemanticScholarAdapter
+    assert canonical_cls is shim_cls
 
 
 def test_openalex_package_root_does_not_reexport_private_factory() -> None:

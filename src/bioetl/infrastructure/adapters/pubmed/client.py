@@ -1,18 +1,28 @@
-"""PubMed adapter entrypoint.
+"""Deprecated compatibility shim for PubMed adapter client-path imports.
 
-Stable canonical import path — use this module (or the package
-``bioetl.infrastructure.adapters.pubmed``) for all imports.
-Implementation lives in ``pubmed_client``.
+Canonical provider adapter surface:
+    - ``bioetl.infrastructure.adapters.pubmed``
+    - ``bioetl.infrastructure.adapters.pubmed.adapter``
 """
 
 from __future__ import annotations
 
-from bioetl.infrastructure.adapters.pubmed.pubmed_client import (
+import warnings
+
+from bioetl.infrastructure.adapters.pubmed.adapter import (
     ENTREZ_API_BASE,
     PubMedAdapter,
 )
-from bioetl.infrastructure.adapters.pubmed.pubmed_client import (
+from bioetl.infrastructure.adapters.pubmed.adapter import (
     _create_pubmed_adapter as create_pubmed_adapter,
+)
+
+warnings.warn(
+    "bioetl.infrastructure.adapters.pubmed.client is deprecated; "
+    "import PubMedAdapter from bioetl.infrastructure.adapters.pubmed or "
+    "bioetl.infrastructure.adapters.pubmed.adapter instead.",
+    DeprecationWarning,
+    stacklevel=2,
 )
 
 __all__ = ["ENTREZ_API_BASE", "PubMedAdapter", "create_pubmed_adapter"]

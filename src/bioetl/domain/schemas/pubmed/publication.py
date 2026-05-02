@@ -193,11 +193,11 @@ class PubMedPublicationSchema(_PublicationBaseSchema):
             "Each object contains: text, identifier, identifier_source, email_hash"
         ),
     )
-    affiliation_structured_raw_json: Series[str] = pa.Field(
+    affiliation_structured_raw_json: Series[str] | None = pa.Field(
         nullable=True,
         description="Raw provider JSON for structured affiliations.",
     )
-    affiliation_structured_canonical_json: Series[str] = pa.Field(
+    affiliation_structured_canonical_json: Series[str] | None = pa.Field(
         nullable=True,
         description="Canonical JSON companion for structured affiliations.",
     )
@@ -296,11 +296,11 @@ class PubMedPublicationSchema(_PublicationBaseSchema):
         nullable=True,
         description="JSON array of authors with their affiliations and identifiers",
     )
-    authors_with_affiliations_raw_json: Series[str] = pa.Field(
+    authors_with_affiliations_raw_json: Series[str] | None = pa.Field(
         nullable=True,
         description="Raw provider JSON for authors-with-affiliations payload.",
     )
-    authors_with_affiliations_canonical_json: Series[str] = pa.Field(
+    authors_with_affiliations_canonical_json: Series[str] | None = pa.Field(
         nullable=True,
         description="Canonical JSON companion for authors-with-affiliations payload.",
     )

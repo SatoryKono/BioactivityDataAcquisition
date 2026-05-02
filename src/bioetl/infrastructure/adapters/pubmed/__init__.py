@@ -5,7 +5,7 @@ This package provides the adapter for interacting with the PubMed API.
 
 from __future__ import annotations
 
-from bioetl.infrastructure.adapters.pubmed.client import (
+from bioetl.infrastructure.adapters.pubmed.adapter import (
     ENTREZ_API_BASE,
     PubMedAdapter,
     create_pubmed_adapter,

@@ -25,13 +25,17 @@ def _normalize_source_batch_id(source_batch_id: UUID | None) -> BatchID | None:
 
 
 def _build_content_hash(raw_data: JsonDict) -> ContentHash:
-    """Build deterministic content hash from canonical JSON payload."""
+    """Build deterministic content hash from canonical hash-identity payload."""
     import hashlib
 
-    from bioetl.domain.serialization import serialize_to_json_canonical
+    from bioetl.domain.normalization.hash_identity import (
+        normalize_hash_identity_record,
+        serialize_hash_identity_canonical_json,
+    )
 
+    normalized_record = normalize_hash_identity_record(raw_data)
     content_hash_str = hashlib.sha256(
-        serialize_to_json_canonical(raw_data).encode()
+        serialize_hash_identity_canonical_json(normalized_record).encode()
     ).hexdigest()
     return ContentHash(content_hash_str)
 

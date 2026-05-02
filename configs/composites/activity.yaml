@@ -122,11 +122,7 @@ composite:
         fields:
           - entity_id
           - content_hash
-          - _run_id
-          - _run_type
-          - _source_batch_id
           - _source
-          - _ingestion_ts
           - _index
           - _lookup_method
           - _original_id

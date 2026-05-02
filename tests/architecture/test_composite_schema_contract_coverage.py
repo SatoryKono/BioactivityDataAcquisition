@@ -11,6 +11,15 @@ from bioetl.infrastructure.config.composite_config_api import (
 )
 from bioetl.domain.contracts.gold import composite as composite_contracts
 
+_FORBIDDEN_OCCURRENCE_FIELDS = frozenset(
+    {
+        "_run_id",
+        "_run_type",
+        "_source_batch_id",
+        "_ingestion_ts",
+    }
+)
+
 
 def _expected_contract_name(stem: str) -> str:
     return f"Composite{stem.capitalize()}GoldSchema"
@@ -59,4 +68,35 @@ def test_each_composite_pipeline_has_schema_and_contract() -> None:
     assert not missing_registry_links, (
         "Missing composite contract registry links in runner bootstrap:\n"
         + "\n".join(f"  - {stem}" for stem in missing_registry_links)
+    )
+
+
+def test_composite_column_groups_exclude_occurrence_scoped_runtime_fields() -> None:
+    """Composite persisted output groups must not include occurrence-scoped provenance."""
+    config_dir = _resolve_composite_config_dir()
+    violations: list[str] = []
+
+    for config_path in sorted(config_dir.glob("*.yaml")):
+        raw = yaml.safe_load(config_path.read_text(encoding="utf-8")) or {}
+        groups = raw.get("composite", {}).get("merge", {}).get("column_groups", [])
+        if not isinstance(groups, list):
+            continue
+        for group in groups:
+            if not isinstance(group, dict):
+                continue
+            group_name = str(group.get("name", "<unknown>"))
+            fields = group.get("fields", [])
+            if not isinstance(fields, list):
+                continue
+            forbidden_hits = sorted(
+                _FORBIDDEN_OCCURRENCE_FIELDS & {str(x) for x in fields}
+            )
+            if forbidden_hits:
+                violations.append(
+                    f"{config_path}: group={group_name} contains {forbidden_hits}"
+                )
+
+    assert not violations, (
+        "Composite merge.column_groups must not carry occurrence-scoped runtime provenance.\n"
+        + "\n".join(f"  - {entry}" for entry in violations)
     )

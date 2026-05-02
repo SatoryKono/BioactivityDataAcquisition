@@ -70,6 +70,7 @@ from bioetl.domain.normalization.publication_structured_fields import (
     publication_structured_field_policy,
 )
 from bioetl.domain.normalization.structured_payload_policies import (
+    semantic_sensitive_structured_payload_policies,
     structured_payload_policy,
 )
 from bioetl.domain.schemas.chembl.activity import ActivitySchema
@@ -241,6 +242,7 @@ ENTITY_DOMAIN_SCHEMA_REGISTRY: dict[str, Any] = {
 }
 
 _CHEMBL_ENUM_CONFIG = "configs/enums/chembl.yaml"
+_PUBCHEM_ENUM_CONFIG = "configs/enums/pubchem.yaml"
 _UNIPROT_ENUM_CONFIG = "configs/enums/uniprot.yaml"
 _PUBLICATION_CONTROLLED_CONFIG = "configs/vocab/publication_controlled.yaml"
 _CHEMBL_REFERENCE_SOURCES_CONFIG = "configs/vocab/chembl_reference_sources.yaml"
@@ -283,6 +285,12 @@ ENUM_CONFIG_SOURCES: dict[tuple[str, str, str], str] = {
     ("crossref", "publication", "publication_type"): _PUBLICATION_CONTROLLED_CONFIG,
     ("openalex", "publication", "publication_type"): _PUBLICATION_CONTROLLED_CONFIG,
     ("openalex", "publication", "type_crossref"): _PUBLICATION_CONTROLLED_CONFIG,
+    (
+        "pubchem",
+        "compound",
+        "chemical_standardization_policy_version",
+    ): _PUBCHEM_ENUM_CONFIG,
+    ("pubchem", "compound", "chemical_standardization_status"): _PUBCHEM_ENUM_CONFIG,
     ("pubmed", "publication", "publication_type"): _PUBLICATION_CONTROLLED_CONFIG,
     ("pubmed", "publication", "publication_type_list"): _PUBLICATION_CONTROLLED_CONFIG,
     ("pubmed", "publication", "publication_types"): _PUBLICATION_CONTROLLED_CONFIG,
@@ -439,6 +447,15 @@ ENUM_REGISTRY_PATHS: dict[tuple[str, str, str], tuple[str, ...]] = {
         "openalex",
         "type_crossref",
         "values",
+    ),
+    (
+        "pubchem",
+        "compound",
+        "chemical_standardization_policy_version",
+    ): ("compound", "chemical_standardization_policy_versions"),
+    ("pubchem", "compound", "chemical_standardization_status"): (
+        "compound",
+        "chemical_standardization_statuses",
     ),
     ("pubmed", "publication", "publication_type"): (
         "providers",
@@ -1967,6 +1984,10 @@ def _update_profile_semantic_stats(
     if field_name in profile.meta_fields:
         _update_meta_profile_semantics(stats, location, rule)
         return
+    if _is_governed_raw_structured_sidecar(provider, entity, field_name, rule):
+        stats.non_meta_total += 1
+        stats.non_meta_ok += 1
+        return
     _update_non_meta_profile_semantics(stats, location, rule)
 
 
@@ -1981,6 +2002,22 @@ def _normalizer_regression(location: str, rule: Any) -> str:
         rule.normalizer, "__name__", type(rule.normalizer).__name__
     )
     return f"{location} -> {normalizer_name}"
+
+
+def _is_governed_raw_structured_sidecar(
+    provider: str,
+    entity: str,
+    field_name: str,
+    rule: Any,
+) -> bool:
+    """Return whether passthrough is an intentional raw-sidecar policy seam."""
+    if rule.normalizer is not normalize_profile_passthrough:
+        return False
+    profile_name = f"{provider}.{entity}"
+    return any(
+        policy.profile_name == profile_name and field_name == policy.raw_sidecar_field
+        for policy in semantic_sensitive_structured_payload_policies()
+    )
 
 
 def _is_json_string_normalizer(rule: Any) -> bool:

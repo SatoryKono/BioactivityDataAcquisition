@@ -42,6 +42,59 @@ class TestBioactivityState:
 class TestBioactivity:
     """Tests for Bioactivity domain entity."""
 
+    def test_from_raw_content_hash_ignores_meta_and_runtime_fields(self) -> None:
+        ingestion_ts = datetime(2024, 6, 1, tzinfo=UTC)
+        base_raw = {
+            "activity_id": "ACT_001",
+            "molecule_id": "CHEMBL25",
+            "standard_type": "IC50",
+            "standard_value": 50.0,
+        }
+        runtime_augmented_raw = {
+            **base_raw,
+            "_run_id": "runtime-run-id",
+            "_ingestion_ts": "2026-01-01T00:00:00Z",
+            "_runtime_trace_id": "trace-1",
+            "_dq_warn": True,
+            "_dq_error": False,
+        }
+
+        base_entity = Bioactivity.from_raw(
+            raw_data=base_raw,
+            run_id="run-001",
+            ingestion_ts=ingestion_ts,
+        )
+        runtime_augmented_entity = Bioactivity.from_raw(
+            raw_data=runtime_augmented_raw,
+            run_id="run-002",
+            ingestion_ts=ingestion_ts,
+        )
+
+        assert base_entity.content_hash == runtime_augmented_entity.content_hash
+
+    def test_from_raw_content_hash_changes_on_semantic_field_change(self) -> None:
+        ingestion_ts = datetime(2024, 6, 1, tzinfo=UTC)
+        base_raw = {
+            "activity_id": "ACT_001",
+            "molecule_id": "CHEMBL25",
+            "standard_type": "IC50",
+            "standard_value": 50.0,
+        }
+        changed_raw = {**base_raw, "standard_value": 75.0}
+
+        base_entity = Bioactivity.from_raw(
+            raw_data=base_raw,
+            run_id="run-001",
+            ingestion_ts=ingestion_ts,
+        )
+        changed_entity = Bioactivity.from_raw(
+            raw_data=changed_raw,
+            run_id="run-001",
+            ingestion_ts=ingestion_ts,
+        )
+
+        assert base_entity.content_hash != changed_entity.content_hash
+
     def test_valid_creation_minimal(self) -> None:
         b = Bioactivity(
             **BASE_KWARGS,

@@ -83,8 +83,10 @@ class TestCompositePublicationColumns:
         assert len(all_fields) >= 90
         assert len(set(all_fields)) == len(all_fields), "Duplicate fields across groups"
 
-    def test_system_columns_at_start(self, orderer: ColumnOrderService) -> None:
-        """System columns must always be first."""
+    def test_persisted_system_columns_at_start(
+        self, orderer: ColumnOrderService
+    ) -> None:
+        """Persisted system columns must be first; occurrence fields are not prioritized."""
         columns = [
             "chembl.publication.title",
             "entity_id",
@@ -94,7 +96,8 @@ class TestCompositePublicationColumns:
         ordered = orderer.order_column_names(columns)
 
         assert ordered[0] == "entity_id"
-        assert ordered[1] == "_run_id"
+        assert ordered[1] == "doi"
+        assert ordered[-1] == "_run_id"
 
     def test_qualified_columns_ordering(self, orderer: ColumnOrderService) -> None:
         """Verify ordering of qualified columns for the same field."""

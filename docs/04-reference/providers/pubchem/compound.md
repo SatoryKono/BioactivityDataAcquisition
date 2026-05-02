@@ -74,6 +74,11 @@ Legacy placeholder values such as `unchanged` and `failed` are not part of the
 governed vocabulary for `pubchem-basic-v1` and MUST NOT appear in normalization
 fixtures, DQ enums, or Gold-facing contracts.
 
+Canonical vocabulary source for these fields is
+`configs/enums/pubchem.yaml`, with code-side parity enforced through
+`domain.normalization._pubchem_standardization_catalog` and
+`chemical_standardization_contract.py`.
+
 ### 3.3. Load
 
 | Слой       | Формат                  | Стратегия                | Таблица/Путь                  |
