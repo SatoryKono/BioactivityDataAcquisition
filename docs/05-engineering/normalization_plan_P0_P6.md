@@ -598,6 +598,9 @@ Use explicit profiles as canonical contracts for covered pipeline schemas.
   - `crossref.publication`
   - `openalex.publication`
   - `pubchem.compound`
+    - canonical chemical standardization statuses are `standardized`,
+      `partial`, `invalid`, and `missing_structure`; legacy fixture placeholders
+      like `unchanged` / `failed` are retired from governed surfaces
   - `pubmed.publication`
   - `semanticscholar.publication`
   - `uniprot.idmapping`

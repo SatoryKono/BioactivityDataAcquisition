@@ -32,6 +32,9 @@ from bioetl.domain.normalization.profiles import (
     UNIPROT_PROTEIN_PROFILE,
     UNIPROT_PROTEIN_SCHEMA_FIELDS,
 )
+from bioetl.domain.normalization.chemical_standardization_contract import (
+    CHEMICAL_STANDARDIZATION_STATUSES,
+)
 from bioetl.domain.normalization.profiles._standard_profile_builder import (
     build_standard_profile,
 )
@@ -174,8 +177,11 @@ def test_pubchem_standardization_fields_are_profile_enums() -> None:
     )
 
     assert status_rule is not None
-    assert status_rule.apply(" Partial ") == "partial"
+    for value in CHEMICAL_STANDARDIZATION_STATUSES:
+        assert status_rule.apply(f" {value.upper()} ") == value
     assert status_rule.apply("unknown") is None
+    assert status_rule.apply("unchanged") is None
+    assert status_rule.apply("failed") is None
 
     assert policy_rule is not None
     assert policy_rule.apply("PUBCHEM-BASIC-V1") == "pubchem-basic-v1"

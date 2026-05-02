@@ -70,6 +70,10 @@ RDKit/OpenBabel-backed policy.
 | `invalid`           | Raw structural identifiers were present, but none passed validation.     |
 | `missing_structure` | No SMILES/InChI/InChIKey input was present for the standardization pass. |
 
+Legacy placeholder values such as `unchanged` and `failed` are not part of the
+governed vocabulary for `pubchem-basic-v1` and MUST NOT appear in normalization
+fixtures, DQ enums, or Gold-facing contracts.
+
 ### 3.3. Load
 
 | Слой       | Формат                  | Стратегия                | Таблица/Путь                  |

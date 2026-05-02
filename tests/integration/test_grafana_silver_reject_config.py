@@ -235,3 +235,64 @@ def test_silver_filter_rejects_summary_panels_use_instant_queries(
     assert all(target.get("instant") is True for target in targets), (
         f"Panel '{panel_title}' in {dashboard_file} must use instant Prometheus queries"
     )
+
+
+def test_silver_reject_explorer_payload_link_preserves_time_scope() -> None:
+    """Payload-hash self-link should keep the active time range."""
+    dashboard = load_dashboard(
+        Path("grafana/dashboards/bioetl-silver-reject-explorer.json")
+    )
+    panel = next(
+        (
+            item
+            for item in get_dashboard_panels(dashboard)
+            if item.get("title") == "Filtered Records Table"
+        ),
+        None,
+    )
+    assert panel is not None
+    links = panel.get("fieldConfig", {}).get("defaults", {}).get("links", [])
+    payload_link = next(
+        (
+            link
+            for link in links
+            if link.get("title") == "Open same dashboard with this payload_hash"
+        ),
+        None,
+    )
+    assert payload_link is not None
+    url = str(payload_link.get("url", ""))
+    assert "${__url_time_range}" in url or ("${__from}" in url and "${__to}" in url), (
+        "Payload drilldown link must preserve forensic time scope"
+    )
+    description = str(panel.get("description", ""))
+    assert "latest 100" in description.lower()
+
+
+def test_dq_reject_breakdown_panels_link_to_silver_reject_explorer() -> None:
+    """DQ reject breakdown panels should hand off to Silver Reject Explorer."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
+    for panel_title in ("Top Silver Reject Reasons", "Top Silver Reject Fields"):
+        panel = next(
+            (
+                item
+                for item in get_dashboard_panels(dashboard)
+                if item.get("title") == panel_title
+            ),
+            None,
+        )
+        assert panel is not None
+        links = panel.get("options", {}).get("dataLinks", [])
+        explorer_link = next(
+            (
+                link
+                for link in links
+                if "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer"
+                in str(link.get("url", ""))
+            ),
+            None,
+        )
+        assert explorer_link is not None, (
+            f"{panel_title!r} must expose Explorer handoff"
+        )
+        assert "${__url_time_range}" in str(explorer_link.get("url", ""))
