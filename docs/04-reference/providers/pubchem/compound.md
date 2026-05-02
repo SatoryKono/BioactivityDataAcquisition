@@ -76,7 +76,7 @@ fixtures, DQ enums, or Gold-facing contracts.
 
 Canonical vocabulary source for these fields is
 `configs/enums/pubchem.yaml`, with code-side parity enforced through
-`domain.normalization._pubchem_standardization_catalog` and
+`domain.pubchem_standardization_catalog` and
 `chemical_standardization_contract.py`.
 
 ### 3.3. Load
