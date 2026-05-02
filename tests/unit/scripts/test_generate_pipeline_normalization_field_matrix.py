@@ -596,6 +596,52 @@ def test_non_chembl_offline_fixture_cases_are_visible_in_matrix() -> None:
             "configs/vocab/publication_controlled.yaml"
         )
 
+    for section in (
+        "composite_publication_join_keys",
+        "composite_molecule_join_keys",
+        "composite_target_join_keys",
+    ):
+        for case in cases[section].values():
+            field_name = case.get("key")
+            composite_name = case.get("composite")
+            if not isinstance(field_name, str) or not isinstance(composite_name, str):
+                continue
+
+            row = _row(rows, composite_name, field_name)
+            assert row["normalization_source"] == "composite_join_key_policy"
+            assert row["normalizer"] == "join_key_policy"
+            assert row["strictness"] == "join_key_policy"
+
+
+def test_build_field_matrix_rows_exposes_non_chembl_composite_join_key_contracts() -> (
+    None
+):
+    rows = build_field_matrix_rows()
+
+    composite_publication_doi = _row(rows, "composite_publication", "doi")
+    assert composite_publication_doi["normalization_summary"] == (
+        "Validate DOI through the canonical domain identifier contract, then emit "
+        "lowercase join-canonical text."
+    )
+
+    composite_molecule_inchi_key = _row(rows, "composite_molecule", "inchi_key")
+    assert composite_molecule_inchi_key["normalization_summary"] == (
+        "Validate InChIKey through the canonical domain value-object contract, then "
+        "emit uppercase join-canonical text."
+    )
+
+    composite_target_target_id = _row(rows, "composite_target", "target_id")
+    assert composite_target_target_id["normalization_summary"] == (
+        "Validate ChEMBL target identifier through the canonical domain value-object "
+        "contract, then emit uppercase join-canonical text."
+    )
+
+    composite_target_uniprot = _row(rows, "composite_target", "uniprot_accession")
+    assert composite_target_uniprot["normalization_summary"] == (
+        "Validate UniProt accession through the canonical domain value-object "
+        "contract, then emit uppercase join-canonical text."
+    )
+
 
 def test_build_field_matrix_rows_exposes_publication_structured_field_registry() -> (
     None

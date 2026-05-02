@@ -82,7 +82,15 @@ class SilverWriterMetadataFacade:
         validation_errors: Sequence[str] | None = None,
     ) -> BatchDQMetrics:
         """Compute batch DQ metrics with schema drift information."""
-        frame = records if isinstance(records, pl.DataFrame) else pl.DataFrame(records)
+        frame = (
+            records
+            if isinstance(records, pl.DataFrame)
+            else pl.from_dicts(
+                records,
+                strict=False,
+                infer_schema_length=None,
+            )
+        )
         valid_records = len(frame)
         column_stats = {
             column: self._compute_column_stats(frame[column], valid_records)

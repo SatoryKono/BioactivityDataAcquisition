@@ -571,6 +571,64 @@ def test_load_drift_allowlist_rejects_metadata_free_cardinality_entries(
         )
 
 
+def test_load_drift_allowlist_rejects_expired_cardinality_review_dates(
+    tmp_path: Path,
+) -> None:
+    allowlist = tmp_path / "allowlist.yaml"
+    allowlist.write_text(
+        "\n".join(
+            [
+                "allowed:",
+                "  runtime_cardinality_review_required:",
+                "    - metric: bioetl_hotspot_total",
+                '      owner: "@bioetl-observability"',
+                '      reason: "Static multi-emitter fanout is expected for this family"',
+                "      review_date: '2000-01-01'",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    try:
+        inventory._load_drift_allowlist(allowlist)
+    except ValueError as exc:
+        assert "expired review_date" in str(exc)
+    else:  # pragma: no cover - defensive branch for clearer failure output
+        raise AssertionError(
+            "runtime_cardinality_review_required must reject expired lifecycle entries"
+        )
+
+
+def test_load_drift_allowlist_rejects_non_iso_review_dates(
+    tmp_path: Path,
+) -> None:
+    allowlist = tmp_path / "allowlist.yaml"
+    allowlist.write_text(
+        "\n".join(
+            [
+                "allowed:",
+                "  runtime_cardinality_review_required:",
+                "    - metric: bioetl_hotspot_total",
+                '      owner: "@bioetl-observability"',
+                '      reason: "Static multi-emitter fanout is expected for this family"',
+                "      review_date: '09/30/2026'",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    try:
+        inventory._load_drift_allowlist(allowlist)
+    except ValueError as exc:
+        assert "invalid review_date" in str(exc)
+    else:  # pragma: no cover - defensive branch for clearer failure output
+        raise AssertionError(
+            "runtime_cardinality_review_required must reject non-ISO review_date values"
+        )
+
+
 def test_main_check_exits_nonzero_for_metric_drift(
     tmp_path: Path,
     monkeypatch: object,

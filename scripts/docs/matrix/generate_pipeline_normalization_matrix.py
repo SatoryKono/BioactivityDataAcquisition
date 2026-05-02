@@ -1051,6 +1051,11 @@ def _normalize_summary_from_policy(*, key: str, trim: bool, lowercase: bool) -> 
             "Validate DOI through the canonical domain identifier contract, then "
             "emit lowercase join-canonical text."
         )
+    if key == "inchi_key":
+        return (
+            "Validate InChIKey through the canonical domain value-object contract, "
+            "then emit uppercase join-canonical text."
+        )
     if key == "pmid":
         return (
             "Validate PMID through the canonical domain identifier contract, then "
@@ -1060,6 +1065,16 @@ def _normalize_summary_from_policy(*, key: str, trim: bool, lowercase: bool) -> 
         return (
             "Validate PMC identifier through the canonical domain identifier "
             "contract, then emit lowercase join-canonical text."
+        )
+    if key == "target_id":
+        return (
+            "Validate ChEMBL target identifier through the canonical domain value-"
+            "object contract, then emit uppercase join-canonical text."
+        )
+    if key == "uniprot_accession":
+        return (
+            "Validate UniProt accession through the canonical domain value-object "
+            "contract, then emit uppercase join-canonical text."
         )
     if trim and lowercase:
         return "Trim surrounding whitespace and lowercase join-key text."

@@ -45,9 +45,11 @@ def test_normalize_join_key_scalar_preserves_non_string_values() -> None:
     ("key", "raw_value", "expected"),
     (
         ("doi", " 10.1000/ABC ", "10.1000/abc"),
+        ("inchi_key", " bsynrymutxbxsq-uhfffaoysa-n ", "BSYNRYMUTXBXSQ-UHFFFAOYSA-N"),
         ("pmid", " PMID:12345 ", "12345"),
         ("pmc_id", " PMC123 ", "pmc123"),
-        ("uniprot_accession", " P12345 ", "p12345"),
+        ("target_id", " chembl0203 ", "CHEMBL203"),
+        ("uniprot_accession", " p12345 ", "P12345"),
         ("title", "  Mixed Case Title  ", "Mixed Case Title"),
         ("canonical_smiles", " C[C@H](O)C ", "C[C@H](O)C"),
     ),

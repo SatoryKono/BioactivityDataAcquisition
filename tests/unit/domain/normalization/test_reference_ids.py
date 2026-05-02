@@ -107,6 +107,16 @@ def test_reference_identifier_registry_normalizes_legacy_transport_aliases() -> 
         assert normalizer(raw_value) == expected
 
 
+def test_uniprot_reference_identifier_registry_canonicalizes_uppercase_accessions() -> (
+    None
+):
+    normalizer = reference_identifier_family("uniprot_accession").normalizer
+
+    assert normalizer is not None
+    assert normalizer(" p12345 ") == "P12345"
+    assert normalizer("q9y6k9") == "Q9Y6K9"
+
+
 def test_semantic_scholar_corpus_id_registry_preserves_numeric_scalar_contract() -> (
     None
 ):

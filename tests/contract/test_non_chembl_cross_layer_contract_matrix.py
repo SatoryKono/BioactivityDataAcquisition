@@ -84,6 +84,21 @@ def _config_allowed_values(path: Path, field_name: str) -> set[str]:
     raise AssertionError(f"{path}:{field_name} missing enum validation")
 
 
+def _iter_composite_join_keys(composite: dict[str, Any]) -> set[str]:
+    join_keys: set[str] = set()
+    for section in ("dependencies", "enrichers"):
+        entries = composite.get(section, ())
+        if not isinstance(entries, list):
+            continue
+        for entry in entries:
+            if not isinstance(entry, dict):
+                continue
+            configured = entry.get("join_keys", ())
+            if isinstance(configured, list):
+                join_keys.update(value for value in configured if isinstance(value, str))
+    return join_keys
+
+
 def _arrow_fields(schema: pa_arrow.Schema) -> set[str]:
     return set(schema.names)
 
@@ -204,6 +219,42 @@ def test_pubchem_standardization_status_vocab_is_cross_layer_canonical() -> None
     assert policy_rule.apply(CHEMICAL_STANDARDIZATION_POLICY_VERSION.upper()) == (
         CHEMICAL_STANDARDIZATION_POLICY_VERSION
     )
+
+
+def test_non_chembl_composite_join_key_fixture_matches_configs_and_matrix() -> None:
+    cases = yaml.safe_load(
+        Path("tests/fixtures/normalization/non_chembl_identifier_cases.yaml").read_text(
+            encoding="utf-8"
+        )
+    )
+    matrix_rows = {
+        (row["pipeline_name"], row["field_name"]): row for row in build_field_matrix_rows()
+    }
+
+    for section in (
+        "composite_publication_join_keys",
+        "composite_molecule_join_keys",
+        "composite_target_join_keys",
+    ):
+        for case in cases[section].values():
+            composite_name = case.get("composite")
+            field_name = case.get("key")
+            if not isinstance(composite_name, str) or not isinstance(field_name, str):
+                continue
+
+            composite_config = yaml.safe_load(
+                Path("configs/composites", f"{composite_name.removeprefix('composite_')}.yaml").read_text(
+                    encoding="utf-8"
+                )
+            )
+            config_join_keys = set(
+                _iter_composite_join_keys(composite_config["composite"])
+            )
+            row = matrix_rows[(composite_name, field_name)]
+
+            assert field_name in config_join_keys
+            assert row["normalization_source"] == "composite_join_key_policy"
+            assert row["normalizer"] == "join_key_policy"
 
 
 def test_structured_payload_sidecar_fields_are_not_in_current_cross_layer_surfaces() -> (

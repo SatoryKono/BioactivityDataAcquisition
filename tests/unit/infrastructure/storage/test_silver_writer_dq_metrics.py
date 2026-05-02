@@ -126,6 +126,30 @@ class TestSilverWriterDQMetrics:
             assert result.schema_drift is None
 
     @pytest.mark.asyncio
+    async def test_compute_dq_metrics_handles_late_mixed_type_values(
+        self, noop_logger
+    ):
+        """Mixed-type values after default inference window should not crash DQ metrics."""
+        from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
+
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
+
+        records = [{"entity_id": index} for index in range(101)]
+        records.append({"entity_id": "Q72547"})
+
+        with patch(
+            "bioetl.infrastructure.storage.base_delta_writer.DeltaTable",
+            side_effect=DeltaTableNotFoundError("Not found"),
+        ):
+            writer = SilverWriter(base_path=str(SILVER_BASE_PATH), logger=noop_logger)
+            result = await writer._compute_dq_metrics("test.table", records)
+
+            assert result.total_records == 102
+            assert result.valid_records == 102
+            assert result.error_records == 0
+            assert "entity_id" in result.column_stats
+
+    @pytest.mark.asyncio
     async def test_detect_schema_drift_returns_schema_drift_info(self, noop_logger):
         """Test _detect_schema_drift returns SchemaDriftInfo."""
         import pyarrow as pa

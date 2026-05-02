@@ -221,7 +221,7 @@ class TestChainedKeyResolver:
             "doi": ["10.1/abc"],
             "title": ["Mixed Case Title"],
             "pmid": ["12345"],
-            "uniprot_accession": ["p12345"],
+            "uniprot_accession": ["P12345"],
         }
 
     @pytest.mark.asyncio
