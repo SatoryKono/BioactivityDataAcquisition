@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from bioetl.domain.services.value_validator import (
+from bioetl.domain.behavior.value_validator import (
     PCHEMBL_MAX,
     PCHEMBL_MIN,
     ValueValidator,

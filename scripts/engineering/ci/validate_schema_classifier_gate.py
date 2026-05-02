@@ -25,7 +25,7 @@ from bioetl.domain.control_plane.contract_registry_helpers import (
     parse_semver,
     resolve_path,
 )
-from bioetl.domain.services.schema_classifier import create_schema_classifier
+from bioetl.domain.behavior.schema_classifier import create_schema_classifier
 from bioetl.domain.types.schema_policy import ChangeClassification
 
 

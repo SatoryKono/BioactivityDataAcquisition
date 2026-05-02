@@ -11,6 +11,7 @@ from bioetl.domain.normalization.profiles._standard_profile_builder import (
 from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_oa_status,
     normalize_profile_orcid_ids,
+    normalize_profile_passthrough,
     normalize_profile_semantic_scholar_id,
     normalize_profile_semantic_scholar_ids,
 )
@@ -79,7 +80,9 @@ _SET_LIKE_FIELDS = frozenset(
         "affiliation_list",
         "author_orcids",
         "author_s2_ids",
+        "publication_types_canonical_json",
         "publication_types",
+        "subject_fields_canonical_json",
         "subject_fields",
     }
 )
@@ -87,11 +90,19 @@ _JSON_STRING_FIELDS = frozenset(
     {
         "affiliation_list",
         "author_h_indices",
+        "author_h_indices_canonical_json",
+        "author_h_indices_raw_json",
         "author_orcids",
         "author_s2_ids",
         "authors",
         "citation_contexts",
+        "citation_contexts_canonical_json",
+        "citation_contexts_raw_json",
+        "publication_types_canonical_json",
+        "publication_types_raw_json",
         "publication_types",
+        "subject_fields_canonical_json",
+        "subject_fields_raw_json",
         "subject_fields",
     }
 )
@@ -112,6 +123,22 @@ _SPECIAL_RULES = {
     "paper_id": (
         normalize_profile_semantic_scholar_id,
         "Canonicalize Semantic Scholar paper identifier through the shared ID registry.",
+    ),
+    "author_h_indices_raw_json": (
+        normalize_profile_passthrough,
+        "Preserve the raw provider JSON for author h-index payloads.",
+    ),
+    "citation_contexts_raw_json": (
+        normalize_profile_passthrough,
+        "Preserve the raw provider JSON for citation-context payloads.",
+    ),
+    "publication_types_raw_json": (
+        normalize_profile_passthrough,
+        "Preserve the raw provider JSON for publication-type payloads.",
+    ),
+    "subject_fields_raw_json": (
+        normalize_profile_passthrough,
+        "Preserve the raw provider JSON for subject-field payloads.",
     ),
 }
 

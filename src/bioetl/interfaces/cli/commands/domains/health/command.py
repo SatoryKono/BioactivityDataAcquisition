@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import sys
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 import click
 
@@ -27,9 +27,13 @@ from bioetl.interfaces.cli.exit_codes import ExitCode
 if TYPE_CHECKING:
     from bioetl.application.services.health_service import HealthService
     from bioetl.application.services.quarantine_service import QuarantineService
-    from bioetl.composition.health_api import HealthServerDependenciesProtocol
+    from bioetl.composition.health_api import (
+        HealthServerDependenciesProtocol,
+    )
+    from bioetl.composition.health_api import (
+        RuntimeSettingsProtocol as Settings,
+    )
     from bioetl.domain.ports import LoggerPort
-    from bioetl.infrastructure.config import Settings
 
 _HEALTH_SERVER_DOMAIN_ERROR_TITLE = "Health server failed with domain error"
 _HEALTH_SERVER_UNEXPECTED_ERROR_TITLE = "Unexpected error in health server command"
@@ -62,10 +66,10 @@ def get_quarantine_service() -> QuarantineService:
 
 
 def get_settings() -> Settings:
-    """Load runtime settings on demand."""
-    from bioetl.infrastructure.config import get_settings as _impl
+    """Load runtime settings through composition on demand."""
+    from bioetl.composition.health_api import get_runtime_settings as _impl
 
-    return _impl()
+    return cast("Settings", _impl())
 
 
 def _start_metrics_server_via_interface(

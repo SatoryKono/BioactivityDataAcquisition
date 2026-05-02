@@ -24,6 +24,14 @@ class UniprotFeatureSchema(pa.DataFrameModel):  # Pandera typing limitation
     features_json: Series[str] | None = pa.Field(
         nullable=True, description="JSON array of all sequence features"
     )
+    features_raw_json: Series[str] | None = pa.Field(
+        nullable=True,
+        description="Raw provider JSON for all sequence features",
+    )
+    features_canonical_json: Series[str] | None = pa.Field(
+        nullable=True,
+        description="Canonical JSON companion for all sequence features",
+    )
     domains: Series[str] | None = pa.Field(
         nullable=True, description="JSON array of protein domain features"
     )

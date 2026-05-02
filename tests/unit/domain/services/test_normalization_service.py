@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import pytest
 
-from bioetl.domain.services.normalization_config import NormalizationConfig
-from bioetl.domain.services.normalization_service import (
+from bioetl.domain.behavior.normalization_config import NormalizationConfig
+from bioetl.domain.behavior.normalization_service import (
     BioactivityNormalizer,
     NormalizationResult,
 )

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from bioetl.domain.services.cross_validation_validator import (
+from bioetl.domain.behavior.cross_validation_validator import (
     CrossValidationConfig,
     CrossValidationValidator,
 )
@@ -310,7 +310,7 @@ class TestCrossValidationDisposition:
 
     def test_warning_only_policy_downgrades_blockers(self) -> None:
         """Test that WARNING_ONLY policy downgrades blocker issues to warnings."""
-        from bioetl.domain.services.cross_validation_validator import (
+        from bioetl.domain.behavior.cross_validation_validator import (
             CrossValidationConfig,
             CrossValidationDispositionPolicy,
             CrossValidationValidator,
@@ -353,7 +353,7 @@ class TestCrossValidationDisposition:
 
     def test_quarantine_policy_adds_metadata(self) -> None:
         """Test that QUARANTINE policy keeps blockers but adds quarantine metadata."""
-        from bioetl.domain.services.cross_validation_validator import (
+        from bioetl.domain.behavior.cross_validation_validator import (
             CrossValidationConfig,
             CrossValidationDispositionPolicy,
             CrossValidationValidator,
@@ -394,7 +394,7 @@ class TestCrossValidationDisposition:
 
     def test_fail_policy_keeps_blockers(self) -> None:
         """Test that FAIL policy keeps blockers with fail metadata."""
-        from bioetl.domain.services.cross_validation_validator import (
+        from bioetl.domain.behavior.cross_validation_validator import (
             CrossValidationConfig,
             CrossValidationDispositionPolicy,
             CrossValidationValidator,
@@ -435,7 +435,7 @@ class TestCrossValidationDisposition:
 
     def test_disposition_with_no_issues(self) -> None:
         """Test that disposition with no issues returns unchanged result."""
-        from bioetl.domain.services.cross_validation_validator import (
+        from bioetl.domain.behavior.cross_validation_validator import (
             CrossValidationConfig,
             CrossValidationDispositionPolicy,
             CrossValidationValidator,

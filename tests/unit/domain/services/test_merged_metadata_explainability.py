@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from bioetl.domain.services.merged_metadata_explainability import (
+from bioetl.domain.behavior.merged_metadata_explainability import (
     MergedFieldExplanation,
     MergedRecordExplanation,
     MergedMetadataExplainer,

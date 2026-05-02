@@ -16,7 +16,7 @@ import pytest
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
 
-from bioetl.domain.services.identity_service import (
+from bioetl.domain.behavior.identity_service import (
     META_FIELDS,
     EntityIdentityGenerator,
 )

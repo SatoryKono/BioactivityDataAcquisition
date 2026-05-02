@@ -88,6 +88,8 @@ schema:
     fields:
     - subject_topics
     - primary_topic
+    - primary_topic_raw_json
+    - primary_topic_canonical_json
     - subject_keywords
     - subject_mesh
   - name: publisher
@@ -96,6 +98,8 @@ schema:
   - name: funding
     fields:
     - grants
+    - grants_raw_json
+    - grants_canonical_json
   - name: doc_type
     fields:
     - publication_type
@@ -155,6 +159,7 @@ schema:
     - subjects
     - doc_type
     - quality
+    - funding
     exclude_fields:
     - _dq_*
     - _source_batch_id

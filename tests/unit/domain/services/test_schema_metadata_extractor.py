@@ -6,7 +6,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from bioetl.domain.services.schema_metadata_extractor import extract_schema_metadata
+from bioetl.domain.behavior.schema_metadata_extractor import extract_schema_metadata
 
 
 class _FakeColumn:
@@ -74,7 +74,7 @@ def test_extract_schema_metadata_handles_schema_extraction_error() -> None:
 def test_extract_schema_metadata_contract_path_vector(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    import bioetl.domain.services.schema_metadata_extractor as extractor_module
+    import bioetl.domain.behavior.schema_metadata_extractor as extractor_module
 
     fake_module = SimpleNamespace(
         __file__="/workspace/src/bioetl/domain/contracts/gold/fake_schema.py"

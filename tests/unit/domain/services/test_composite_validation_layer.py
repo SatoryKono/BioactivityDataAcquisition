@@ -1,12 +1,12 @@
 """Unit tests for composite validation layer service."""
 
-from bioetl.domain.services.aggregation_validator import AggregationValidator
-from bioetl.domain.services.composite_validation_layer import (
+from bioetl.domain.behavior.aggregation_validator import AggregationValidator
+from bioetl.domain.behavior.composite_validation_layer import (
     CompositeValidationConfig,
     CompositeValidator,
 )
-from bioetl.domain.services.cross_validation_validator import CrossValidationValidator
-from bioetl.domain.services.preflight_governance import (
+from bioetl.domain.behavior.cross_validation_validator import CrossValidationValidator
+from bioetl.domain.behavior.preflight_governance import (
     PreflightGovernor,
 )
 from bioetl.domain.types.validation_result import CompositeValidationReport
@@ -271,7 +271,7 @@ def test_layer_separation():
 
 def test_preflight_governance_integration():
     """Test that preflight governance is properly integrated."""
-    from bioetl.domain.services.preflight_governance import GovernancePolicy
+    from bioetl.domain.behavior.preflight_governance import GovernancePolicy
 
     # Test with default governance policy
     service = _create_service()
@@ -304,7 +304,7 @@ def test_preflight_governance_integration():
 
 def test_preflight_governance_warning_only():
     """Test warning-only governance policy."""
-    from bioetl.domain.services.preflight_governance import GovernancePolicy
+    from bioetl.domain.behavior.preflight_governance import GovernancePolicy
 
     service = _create_service()
     config = CompositeValidationConfig(

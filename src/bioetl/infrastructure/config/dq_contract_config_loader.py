@@ -39,8 +39,7 @@ def _require_registry_identity_value(
     if value:
         return value
     raise ValueError(
-        "Malformed DQ contract registry entry for "
-        f"{contract_ref}: missing {field_name}"
+        f"Malformed DQ contract registry entry for {contract_ref}: missing {field_name}"
     )
 
 
@@ -248,9 +247,7 @@ class DQContractConfigLoader:
             )
         registry_data = _load_yaml_file(self._registry_path)
         if not isinstance(registry_data, dict):
-            raise ValueError(
-                f"Malformed DQ contract registry: {self._registry_path}"
-            )
+            raise ValueError(f"Malformed DQ contract registry: {self._registry_path}")
         entries = registry_data.get("entries", {})
         if not isinstance(entries, dict):
             raise ValueError(

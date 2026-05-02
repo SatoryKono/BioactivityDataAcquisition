@@ -17,7 +17,7 @@ from __future__ import annotations
 import pytest
 
 from bioetl.domain.config.dq import DQConfig
-from bioetl.domain.services.dq_policy_resolver import DQPolicyResolver
+from bioetl.domain.behavior.dq_policy_resolver import DQPolicyResolver
 from bioetl.domain.types.dq_contracts import (
     DQDisposition,
     DQPolicyRef,

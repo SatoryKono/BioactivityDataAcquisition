@@ -10,11 +10,11 @@ import unicodedata
 
 import pytest
 
-from bioetl.domain.services import (
+from bioetl.domain.behavior import (
     DataNormalizationConfig,
     DefaultDataNormalizer,
 )
-from bioetl.domain.services._author_helpers import hash_author_name
+from bioetl.domain.behavior._author_helpers import hash_author_name
 
 
 class TestDefaultDataNormalizerInit:

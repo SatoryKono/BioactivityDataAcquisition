@@ -14,7 +14,7 @@ from __future__ import annotations
 import pytest
 
 from bioetl.domain.mapping.organism_classification import OrganismClassificationResult
-from bioetl.domain.services.organism_classification_service import (
+from bioetl.domain.behavior.organism_classification_service import (
     ClassificationStats,
     OrganismClassifier,
 )

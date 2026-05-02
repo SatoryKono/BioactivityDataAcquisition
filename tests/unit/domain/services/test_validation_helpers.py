@@ -2,7 +2,7 @@
 
 import pytest
 
-from bioetl.domain.services.validation_helpers import validate_data
+from bioetl.domain.behavior.validation_helpers import validate_data
 
 
 def test_validate_data_success():

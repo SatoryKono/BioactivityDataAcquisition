@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import pytest
-from bioetl.domain.services.composite_metadata_helpers import (
+from bioetl.domain.behavior.composite_metadata_helpers import (
     _parse_literal,
     parse_composite_list,
     parse_composite_status,

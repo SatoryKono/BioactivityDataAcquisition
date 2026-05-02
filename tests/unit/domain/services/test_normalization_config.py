@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from bioetl.domain.services.normalization_config import (
+from bioetl.domain.behavior.normalization_config import (
     ConcentrationRangeConfig,
     NormalizationConfig,
     PChemblRangeConfig,

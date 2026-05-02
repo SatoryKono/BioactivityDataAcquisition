@@ -5,7 +5,7 @@ from __future__ import annotations
 import pytest
 from unittest.mock import patch
 
-from bioetl.domain.services.phased_migration_support import (
+from bioetl.domain.behavior.phased_migration_support import (
     MigrationPhaseConfig,
     MigrationStatus,
     PhasedMigrationCoordinator,
@@ -73,7 +73,7 @@ class TestPhasedMigrationCoordinator:
     def test_get_current_migration_status_specific_version(self) -> None:
         """Test migration status with specific version."""
         with patch(
-            "bioetl.domain.services.phased_migration_support.get_version",
+            "bioetl.domain.behavior.phased_migration_support.get_version",
             return_value="1.1.5",
         ):
             service = PhasedMigrationCoordinator()
@@ -84,7 +84,7 @@ class TestPhasedMigrationCoordinator:
     def test_get_current_migration_status_unknown_version(self) -> None:
         """Test migration status with unknown version."""
         with patch(
-            "bioetl.domain.services.phased_migration_support.get_version",
+            "bioetl.domain.behavior.phased_migration_support.get_version",
             return_value="unknown",
         ):
             service = PhasedMigrationCoordinator()

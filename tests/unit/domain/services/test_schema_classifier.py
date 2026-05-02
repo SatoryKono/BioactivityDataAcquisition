@@ -3,7 +3,7 @@
 import json
 
 
-from bioetl.domain.services.schema_classifier import (
+from bioetl.domain.behavior.schema_classifier import (
     SchemaClassifier,
     create_schema_classifier,
 )

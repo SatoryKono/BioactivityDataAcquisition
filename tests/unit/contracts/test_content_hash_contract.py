@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from bioetl.domain.services import EntityIdentityGenerator
+from bioetl.domain.behavior import EntityIdentityGenerator
 from bioetl.domain.transformations import generate_content_hash
 
 

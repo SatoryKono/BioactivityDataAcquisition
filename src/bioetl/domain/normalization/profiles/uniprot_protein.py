@@ -9,6 +9,7 @@ from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_chembl_ids,
     normalize_profile_drugbank_ids,
     normalize_profile_pdb_references,
+    normalize_profile_passthrough,
     normalize_profile_pfam_references,
     normalize_profile_reactome_references,
     normalize_profile_uniprot_accessions,
@@ -90,6 +91,7 @@ _JSON_STRING_FIELDS = frozenset(
         "cellular_component",
         "cofactors",
         "features_json",
+        "features_canonical_json",
         "isoform_ids",
         "isoform_names",
         "isoform_synonyms",
@@ -142,6 +144,10 @@ _SPECIAL_RULES = {
     "drugbank_ids": (
         normalize_profile_drugbank_ids,
         "Canonicalize DrugBank identifiers inside a set-like canonical JSON array.",
+    ),
+    "features_raw_json": (
+        normalize_profile_passthrough,
+        "Preserve the raw provider JSON for UniProt feature payloads.",
     ),
     "go_terms": (
         normalize_profile_uniprot_go_references,

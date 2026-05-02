@@ -19,7 +19,7 @@ if TYPE_CHECKING:
         PiiHasherPort,
         TracingPort,
     )
-    from bioetl.domain.services import EntityIdentityGenerator
+    from bioetl.domain.behavior import EntityIdentityGenerator
 
 TTransformer = TypeVar("TTransformer")
 

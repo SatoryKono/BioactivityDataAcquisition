@@ -50,6 +50,8 @@ class UniProtProteinGoldSchema(StrictGoldContractSchema):
     disulfide_bond: Series[str] = pa.Field(nullable=True)  # PTM: disulfide bonds
     domains: Series[str] = pa.Field(nullable=True)  # ft_domain features
     features_json: Series[str] = pa.Field(nullable=True)  # All features (forensic)
+    features_raw_json: Series[str] = pa.Field(nullable=True)
+    features_canonical_json: Series[str] = pa.Field(nullable=True)
     glycosylation: Series[str] = pa.Field(nullable=True)  # PTM: glycosylation sites
     intramembrane: Series[str] = pa.Field(nullable=True)  # Structural: intramembrane
     lipidation: Series[str] = pa.Field(nullable=True)  # PTM: lipidation sites

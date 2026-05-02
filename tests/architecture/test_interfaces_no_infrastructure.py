@@ -8,12 +8,58 @@ composition entrypoints rather than bind themselves to infrastructure modules.
 from __future__ import annotations
 
 import ast
+from datetime import date
 from pathlib import Path
 
 import pytest
 
 # Base path for source files
 SRC_PATH = Path(__file__).parent.parent.parent / "src" / "bioetl"
+INTERFACES_INFRASTRUCTURE_IMPORT_ALLOWLIST: dict[str, dict[str, object]] = {}
+_ALLOWLIST_REQUIRED_FIELDS = frozenset({"imports", "owner", "reason", "review_by"})
+
+
+def _interfaces_python_files() -> list[Path]:
+    interfaces_path = SRC_PATH / "interfaces"
+    assert interfaces_path.exists(), "Interfaces layer not found"
+    return sorted(interfaces_path.rglob("*.py"))
+
+
+def _relative_source_path(path: Path) -> str:
+    return path.relative_to(SRC_PATH.parent).as_posix()
+
+
+def _direct_infrastructure_imports(path: Path) -> list[str]:
+    return sorted(
+        {
+            imported
+            for imported in get_imports_from_file(path)
+            if imported == "bioetl.infrastructure"
+            or imported.startswith("bioetl.infrastructure.")
+        }
+    )
+
+
+def _allowlisted_imports_for(path: Path) -> frozenset[str]:
+    entry = INTERFACES_INFRASTRUCTURE_IMPORT_ALLOWLIST.get(_relative_source_path(path))
+    if entry is None:
+        return frozenset()
+
+    missing_fields = _ALLOWLIST_REQUIRED_FIELDS - set(entry)
+    assert not missing_fields, (
+        f"{_relative_source_path(path)} allowlist entry is missing fields: "
+        f"{sorted(missing_fields)}"
+    )
+    assert str(entry["owner"]).strip(), f"{_relative_source_path(path)} owner required"
+    assert str(entry["reason"]).strip(), (
+        f"{_relative_source_path(path)} reason required"
+    )
+    date.fromisoformat(str(entry["review_by"]))
+    imports = entry["imports"]
+    assert isinstance(imports, (list, tuple, set, frozenset)), (
+        f"{_relative_source_path(path)} imports allowlist must be a collection"
+    )
+    return frozenset(str(item) for item in imports)
 
 
 def get_imports_from_file(file_path: Path) -> list[str]:
@@ -80,6 +126,34 @@ def _runtime_import_from_node(
 @pytest.mark.architecture
 class TestInterfacesNoDIrectInfrastructure:
     """Test that interfaces don't directly import infrastructure."""
+
+    def test_all_interfaces_files_no_direct_infrastructure_imports(self):
+        """All interfaces modules must route infrastructure access through composition."""
+        violations: list[str] = []
+        unused_allowlist_paths = set(INTERFACES_INFRASTRUCTURE_IMPORT_ALLOWLIST)
+
+        for py_file in _interfaces_python_files():
+            rel_path = _relative_source_path(py_file)
+            unused_allowlist_paths.discard(rel_path)
+            allowlisted_imports = _allowlisted_imports_for(py_file)
+            forbidden_imports = [
+                imported
+                for imported in _direct_infrastructure_imports(py_file)
+                if imported not in allowlisted_imports
+            ]
+            if forbidden_imports:
+                violations.append(f"{rel_path}: {forbidden_imports}")
+
+        assert not unused_allowlist_paths, (
+            "Interfaces infrastructure import allowlist has stale paths: "
+            f"{sorted(unused_allowlist_paths)}"
+        )
+        assert violations == [], (
+            "Interfaces layer must not import infrastructure directly.\n"
+            "Route access through composition APIs or add a timeboxed allowlist "
+            "entry with imports, owner, reason, and review_by.\n"
+            + "\n".join(f"  - {violation}" for violation in violations)
+        )
 
     def test_cli_no_infrastructure_imports(self):
         """Test that CLI doesn't import from infrastructure directly."""

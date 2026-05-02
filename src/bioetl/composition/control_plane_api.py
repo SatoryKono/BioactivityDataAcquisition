@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from importlib import import_module
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Protocol
 
 if TYPE_CHECKING:
     from bioetl.application.core.lifecycle.checkpoint_manager import (
@@ -24,8 +24,30 @@ if TYPE_CHECKING:
         LineageInspectionService,
     )
     from bioetl.application.services.lock_service import LockService
+    from bioetl.domain.control_plane import (
+        ControlPlaneArtifactLifecycleApplyResult,
+        ControlPlaneArtifactLifecyclePlan,
+        ControlPlaneArtifactLifecyclePolicy,
+    )
+
+    class ControlPlaneArtifactLifecycleStoreProtocol(Protocol):
+        def plan(
+            self,
+            policy: ControlPlaneArtifactLifecyclePolicy,
+            *,
+            dry_run: bool,
+        ) -> ControlPlaneArtifactLifecyclePlan: ...
+
+        def apply(
+            self,
+            plan: ControlPlaneArtifactLifecyclePlan,
+        ) -> ControlPlaneArtifactLifecycleApplyResult: ...
 
     def get_adr_service() -> AuditInspectionService: ...
+
+    def bootstrap_control_plane_lifecycle_store() -> (
+        ControlPlaneArtifactLifecycleStoreProtocol
+    ): ...
 
     def get_checkpoint_runtime_service(pipeline: str) -> CheckpointRuntimeService: ...
 
@@ -43,6 +65,7 @@ if TYPE_CHECKING:
 
 
 __all__ = [
+    "bootstrap_control_plane_lifecycle_store",
     "get_adr_service",
     "get_checkpoint_runtime_service",
     "get_config_service",
@@ -55,7 +78,11 @@ __all__ = [
 
 _SERVICES_MODULE = "bioetl.composition._services"
 _RESOURCE_MANAGEMENT_MODULE = "bioetl.composition._resource_management"
+_CLI_CONTROL_PLANE_LIFECYCLE_MODULE = (
+    "bioetl.composition.bootstrap.cli.control_plane_lifecycle"
+)
 _PUBLIC_EXPORTS = {
+    "bootstrap_control_plane_lifecycle_store": _CLI_CONTROL_PLANE_LIFECYCLE_MODULE,
     "get_adr_service": _SERVICES_MODULE,
     "get_checkpoint_runtime_service": _RESOURCE_MANAGEMENT_MODULE,
     "get_config_service": _SERVICES_MODULE,
