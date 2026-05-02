@@ -50,10 +50,10 @@ class TestCompositeGoldSchemaContract:
         "schema_cls",
         [CompositePublicationGoldSchema, CompositeMoleculeGoldSchema],
     )
-    def test_schema_strict_mode_false(self, schema_cls: type) -> None:
-        """Composite schema uses strict=False to allow extra enricher columns."""
+    def test_schema_strict_mode_true(self, schema_cls: type) -> None:
+        """Composite Gold contracts are strict like the rest of the Gold layer."""
         strict_value = getattr(schema_cls.Config, "strict", None)
-        assert strict_value is False
+        assert strict_value is True
 
 
 @pytest.mark.contracts

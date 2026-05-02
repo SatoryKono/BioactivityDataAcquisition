@@ -15,12 +15,12 @@ from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_uniprot_go_references,
     normalize_profile_uniprot_interpro_references,
 )
-from bioetl.domain.schemas.uniprot import (
-    ENTRY_TYPES,
-    PROTEIN_EXISTENCE_LEVELS,
-    PROTEIN_FLAGS,
-    UniprotTargetSchema,
+from bioetl.domain.schemas.constants import (
+    UNIPROT_ENTRY_TYPES,
+    UNIPROT_PROTEIN_EXISTENCE_LEVELS,
+    UNIPROT_PROTEIN_FLAGS,
 )
+from bioetl.domain.schemas.uniprot import UniprotTargetSchema
 
 __all__ = [
     "UNIPROT_PROTEIN_PROFILE",
@@ -104,9 +104,9 @@ _JSON_STRING_FIELDS = frozenset(
 )
 _BOOLEAN_FIELDS = frozenset({"reviewed"})
 _ENUM_FIELDS = {
-    "entry_type": frozenset(ENTRY_TYPES),
-    "flag": frozenset(PROTEIN_FLAGS),
-    "protein_existence": frozenset(PROTEIN_EXISTENCE_LEVELS),
+    "entry_type": frozenset(UNIPROT_ENTRY_TYPES),
+    "flag": frozenset(UNIPROT_PROTEIN_FLAGS),
+    "protein_existence": frozenset(UNIPROT_PROTEIN_EXISTENCE_LEVELS),
 }
 _REFERENCE_ID_RULE_NOTES = {
     "go": (

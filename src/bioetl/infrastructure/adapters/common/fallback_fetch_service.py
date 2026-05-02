@@ -234,6 +234,3 @@ class FallbackFetchOrchestrator:
             candidates=candidates,
             hits=fallback_hits,
         )
-
-
-FallbackFetchOrchestratorService = FallbackFetchOrchestrator

@@ -150,16 +150,7 @@ suffix_boundary_rules:
     include_path_prefixes:
       - src/bioetl/composition/
       - src/bioetl/infrastructure/
-    allowed_symbol_exceptions:
-      - symbol: FallbackFetchOrchestratorService
-        path: src/bioetl/infrastructure/adapters/common/fallback_fetch_service.py
-        issue: "#3437"
-        owner: "@bioetl-platform"
-        expires_on: "2026-09-30"
-        removal_step: Remove after all callers migrate to FallbackFetchOrchestrator and deprecated alias is deleted.
-        reason: >
-          Deprecated infrastructure alias retained while callers migrate to
-          FallbackFetchOrchestrator.
+    allowed_symbol_exceptions: []
 
   - rule_id: domain_service_suffix_conflict
     description: >

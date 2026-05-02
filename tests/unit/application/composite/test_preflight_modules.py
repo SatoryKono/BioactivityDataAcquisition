@@ -314,7 +314,9 @@ class TestPreflightOrchestration:
             source="chembl.compound_record",
         )
 
-    def test_load_source_fields_includes_dependencies_and_qualified_aliases(self) -> None:
+    def test_load_source_fields_includes_dependencies_and_qualified_aliases(
+        self,
+    ) -> None:
         mixin = _make_orchestration_mixin()
 
         config = MagicMock()

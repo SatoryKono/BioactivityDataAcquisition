@@ -648,3 +648,34 @@ class TestValidateFieldPriority:
         assert "nonexistent" in errors[0].message
         # No resolved source
         assert resolved is None
+
+    def test_validate_field_priority_supports_pipeline_token(
+        self, validator: CompositePreflightValidationService
+    ) -> None:
+        """Pipeline-id source tokens should resolve against source field map."""
+        valid_sources = frozenset(
+            {
+                "seed",
+                "chembl",
+                "chembl.activity",
+                "chembl_activity",
+                "chembl.compound_record",
+                "chembl_compound_record",
+            }
+        )
+        source_fields = {
+            "chembl_compound_record": {
+                "record_id": FieldInfo("record_id", "int", False, "dependency"),
+            },
+        }
+
+        issues, resolved = validator._validate_field_priority(
+            field_name="record_id",
+            priorities=("chembl_compound_record",),
+            valid_sources=valid_sources,
+            source_fields=source_fields,
+        )
+
+        errors = [i for i in issues if i.severity == "error"]
+        assert errors == []
+        assert resolved == "chembl_compound_record"

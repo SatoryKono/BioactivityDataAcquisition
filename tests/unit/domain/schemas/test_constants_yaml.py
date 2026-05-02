@@ -216,17 +216,24 @@ class TestUniProtSync:
     """UniProt enum constants must match YAML."""
 
     def test_uniprot_protein_enums(self, uniprot_yaml: dict[str, Any]) -> None:
-        from bioetl.domain.schemas.uniprot._core import (
-            ENTRY_TYPES,
-            PROTEIN_EXISTENCE_LEVELS,
-            PROTEIN_FLAGS,
+        from bioetl.domain.schemas.constants import (
+            UNIPROT_ENTRY_TYPES,
+            UNIPROT_PROTEIN_EXISTENCE_LEVELS,
+            UNIPROT_PROTEIN_FLAGS,
         )
 
-        assert ENTRY_TYPES == uniprot_yaml["protein"]["entry_types"]
-        assert PROTEIN_FLAGS == uniprot_yaml["protein"]["protein_flags"]
+        assert UNIPROT_ENTRY_TYPES == tuple(uniprot_yaml["protein"]["entry_types"])
+        assert UNIPROT_PROTEIN_FLAGS == tuple(uniprot_yaml["protein"]["protein_flags"])
         assert (
-            PROTEIN_EXISTENCE_LEVELS
-            == uniprot_yaml["protein"]["protein_existence_levels"]
+            UNIPROT_PROTEIN_EXISTENCE_LEVELS
+            == tuple(uniprot_yaml["protein"]["protein_existence_levels"])
+        )
+
+    def test_uniprot_idmapping_statuses(self, uniprot_yaml: dict[str, Any]) -> None:
+        from bioetl.domain.schemas.constants import UNIPROT_MAPPING_STATUSES
+
+        assert UNIPROT_MAPPING_STATUSES == tuple(
+            uniprot_yaml["idmapping"]["mapping_statuses"]
         )
 
 

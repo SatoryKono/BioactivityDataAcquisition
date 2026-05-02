@@ -14,6 +14,11 @@ import pandera.pandas as pa
 from pandera.typing import Series
 
 from bioetl.domain.schemas.base import ETLRecordSchema
+from bioetl.domain.schemas.constants import (
+    UNIPROT_ENTRY_TYPES,
+    UNIPROT_PROTEIN_EXISTENCE_LEVELS,
+    UNIPROT_PROTEIN_FLAGS,
+)
 
 __all__ = [
     "ENTRY_TYPES",
@@ -22,21 +27,10 @@ __all__ = [
     "UniprotCoreSchema",
 ]
 
-# === Fixed Value Constants ===
-PROTEIN_EXISTENCE_LEVELS = [
-    "Evidence at protein level",
-    "Evidence at transcript level",
-    "Inferred from homology",
-    "Predicted",
-    "Uncertain",
-]
-
-ENTRY_TYPES = [
-    "UniProtKB reviewed (Swiss-Prot)",
-    "UniProtKB unreviewed (TrEMBL)",
-]
-
-PROTEIN_FLAGS = ["Fragment", "Precursor", "Fragments"]
+# Backward-compatible aliases for public imports.
+PROTEIN_EXISTENCE_LEVELS = UNIPROT_PROTEIN_EXISTENCE_LEVELS
+ENTRY_TYPES = UNIPROT_ENTRY_TYPES
+PROTEIN_FLAGS = UNIPROT_PROTEIN_FLAGS
 
 
 class UniprotCoreSchema(ETLRecordSchema):

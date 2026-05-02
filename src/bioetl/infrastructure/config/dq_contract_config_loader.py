@@ -12,12 +12,36 @@ from bioetl.domain.types.dq_contracts import DQDisposition
 from bioetl.infrastructure.config.base_config_loader import _load_yaml_file
 
 
-def _resolve_identity_data(registry_entry: JsonDict) -> JsonDict:
+def _resolve_identity_data(
+    registry_entry: JsonDict,
+    *,
+    contract_ref: str,
+) -> JsonDict:
     """Extract normalized identity payload from registry entry."""
     identity_data = registry_entry.get("identity", {})
     if isinstance(identity_data, dict):
         return identity_data
-    return {}
+    raise ValueError(
+        "Malformed DQ contract registry entry for "
+        f"{contract_ref}: identity must be a mapping"
+    )
+
+
+def _require_registry_identity_value(
+    *,
+    contract_ref: str,
+    field_name: str,
+    identity_data: JsonDict,
+    registry_entry: JsonDict,
+) -> object:
+    """Resolve a required identity value from identity or legacy entry fields."""
+    value = identity_data.get(field_name) or registry_entry.get(field_name)
+    if value:
+        return value
+    raise ValueError(
+        "Malformed DQ contract registry entry for "
+        f"{contract_ref}: missing {field_name}"
+    )
 
 
 def _validate_identity_field(
@@ -163,16 +187,28 @@ class DQContractConfigLoader:
     ) -> JsonDict:
         """Align contract config identity fields with contract registry entry."""
         registry_entry = self._lookup_registry_entry(contract_ref)
-        if registry_entry is None:
-            return contract_config
 
-        identity_data = _resolve_identity_data(registry_entry)
-        expected_contract_version = identity_data.get("contract_version")
-        expected_rule_bundle = identity_data.get(
-            "rule_bundle_version"
-        ) or registry_entry.get("rule_bundle_version")
-        expected_dq_policy = identity_data.get("dq_policy_ref") or registry_entry.get(
-            "dq_policy_ref"
+        identity_data = _resolve_identity_data(
+            registry_entry,
+            contract_ref=contract_ref,
+        )
+        expected_contract_version = _require_registry_identity_value(
+            contract_ref=contract_ref,
+            field_name="contract_version",
+            identity_data=identity_data,
+            registry_entry=registry_entry,
+        )
+        expected_rule_bundle = _require_registry_identity_value(
+            contract_ref=contract_ref,
+            field_name="rule_bundle_version",
+            identity_data=identity_data,
+            registry_entry=registry_entry,
+        )
+        expected_dq_policy = _require_registry_identity_value(
+            contract_ref=contract_ref,
+            field_name="dq_policy_ref",
+            identity_data=identity_data,
+            registry_entry=registry_entry,
         )
 
         merged = dict(contract_config)
@@ -204,17 +240,32 @@ class DQContractConfigLoader:
         )
         return merged
 
-    def _lookup_registry_entry(self, contract_ref: str) -> JsonDict | None:
+    def _lookup_registry_entry(self, contract_ref: str) -> JsonDict:
         """Resolve registry entry for contract_ref."""
         if not self._registry_path.exists():
-            return None
+            raise FileNotFoundError(
+                f"DQ contract registry not found: {self._registry_path}"
+            )
         registry_data = _load_yaml_file(self._registry_path)
+        if not isinstance(registry_data, dict):
+            raise ValueError(
+                f"Malformed DQ contract registry: {self._registry_path}"
+            )
         entries = registry_data.get("entries", {})
         if not isinstance(entries, dict):
-            return None
+            raise ValueError(
+                "Malformed DQ contract registry: entries must be a mapping"
+            )
         entry = entries.get(contract_ref)
+        if entry is None:
+            raise KeyError(
+                f"DQ contract registry entry not found for contract_ref: {contract_ref}"
+            )
         if not isinstance(entry, dict):
-            return None
+            raise ValueError(
+                "Malformed DQ contract registry entry for "
+                f"{contract_ref}: entry must be a mapping"
+            )
         return entry
 
     def _load_contract_config(
@@ -240,9 +291,13 @@ class DQContractConfigLoader:
         )
 
 
-def load_dq_config_for_pipeline(pipeline_name: str) -> DQConfig:
+def load_dq_config_for_pipeline(
+    pipeline_name: str,
+    *,
+    configs_root: Path,
+) -> DQConfig:
     """Convenience function to load DQ config for a pipeline."""
-    loader = DQContractConfigLoader(Path("configs"))
+    loader = DQContractConfigLoader(configs_root)
     return loader.load_dq_config_for_pipeline(pipeline_name)
 
 

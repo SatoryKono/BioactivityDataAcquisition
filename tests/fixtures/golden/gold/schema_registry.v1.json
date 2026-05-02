@@ -1957,7 +1957,7 @@
       },
       "published_contract_path": "docs/04-reference/contracts/gold/composite_activity_v1.0.json",
       "schema_class": "CompositeActivityGoldSchema",
-      "strict": false
+      "strict": true
     },
     "composite_assay": {
       "fields": {
@@ -1994,7 +1994,7 @@
       },
       "published_contract_path": "docs/04-reference/contracts/gold/composite_assay_v1.0.json",
       "schema_class": "CompositeAssayGoldSchema",
-      "strict": false
+      "strict": true
     },
     "composite_molecule": {
       "fields": {
@@ -2031,7 +2031,7 @@
       },
       "published_contract_path": "docs/04-reference/contracts/gold/composite_molecule_v1.0.json",
       "schema_class": "CompositeMoleculeGoldSchema",
-      "strict": false
+      "strict": true
     },
     "composite_publication": {
       "fields": {
@@ -2083,7 +2083,7 @@
       },
       "published_contract_path": "docs/04-reference/contracts/gold/composite_publication_v1.0.json",
       "schema_class": "CompositePublicationGoldSchema",
-      "strict": false
+      "strict": true
     },
     "composite_target": {
       "fields": {
@@ -2120,7 +2120,7 @@
       },
       "published_contract_path": "docs/04-reference/contracts/gold/composite_target_v1.0.json",
       "schema_class": "CompositeTargetGoldSchema",
-      "strict": false
+      "strict": true
     },
     "crossref_publication": {
       "fields": {

@@ -10,10 +10,8 @@ from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_uniprot_accession,
     normalize_profile_uniprot_accessions,
 )
-from bioetl.domain.schemas.uniprot.idmapping import (
-    MAPPING_STATUSES,
-    IDMappingSchema,
-)
+from bioetl.domain.schemas.constants import UNIPROT_MAPPING_STATUSES
+from bioetl.domain.schemas.uniprot.idmapping import IDMappingSchema
 
 __all__ = [
     "UNIPROT_IDMAPPING_PROFILE",
@@ -42,7 +40,7 @@ _INT_FIELDS = frozenset(
 _JSON_STRING_FIELDS = frozenset({"all_mappings"})
 _SET_LIKE_FIELDS = frozenset({"all_mappings"})
 _BOOLEAN_FIELDS = frozenset({"reviewed"})
-_ENUM_FIELDS = {"mapping_status": frozenset(MAPPING_STATUSES)}
+_ENUM_FIELDS = {"mapping_status": frozenset(UNIPROT_MAPPING_STATUSES)}
 _SPECIAL_RULES = {
     "all_mappings": (
         normalize_profile_uniprot_accessions,
