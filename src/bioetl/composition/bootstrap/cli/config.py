@@ -40,18 +40,6 @@ def _pipeline_yaml_for_dq(pipeline_name: str) -> JsonDict:
     raise TypeError("Pipeline YAML config must provide model_dump() or be a mapping")
 
 
-def _load_dq_config_for_pipeline_with_root(
-    pipeline_name: str,
-    *,
-    configs_root: Path,
-) -> DQConfig:
-    """Load governed DQ config from the injected configs root."""
-    return load_dq_config_for_pipeline(
-        pipeline_name,
-        configs_root=configs_root,
-    )
-
-
 def bootstrap_config_service(
     *,
     registry: PipelineRegistry | None = None,
@@ -67,9 +55,9 @@ def bootstrap_config_service(
         pipeline_config_loader=load_pipeline_config,
         domain_config_mapper=cast(DomainConfigMapperPort, yaml_config_to_domain),
         pipeline_yaml_getter=_pipeline_yaml_for_dq,
-        dq_config_loader=lambda pipeline_name: _load_dq_config_for_pipeline_with_root(
-            pipeline_name,
-            configs_root=configs_root,
+        dq_config_loader=lambda pipeline_name: cast(
+            DQConfig,
+            load_dq_config_for_pipeline(pipeline_name, configs_root=configs_root),
         ),
         effective_config_service_factory=create_effective_config_service,
     )

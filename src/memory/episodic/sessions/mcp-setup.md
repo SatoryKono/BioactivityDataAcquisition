@@ -1,27 +1,27 @@
 ---
 id: mcp-setup
-title: Setup MCP and checkpoint import triage
+title: Setup MCP runtime
 task_id: mcp-setup
-created_at: '2026-04-30T06:23:55Z'
+created_at: '2026-05-02T16:51:45Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
-- src/bioetl/composition/bootstrap/cli/checkpoint.py
+- docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md
 summary: Active task session context.
-query: setup-mcp bootstrap_checkpoint_manager
+query: mcp
 ---
 
 # Session note
 
 ## Task
 
-- Title: Setup MCP and checkpoint import triage
-- Retrieval query: setup-mcp bootstrap_checkpoint_manager
+- Title: Setup MCP runtime
+- Retrieval query: mcp
 
 ## Retrieved context
 
 - Catalog hits: 0
-- RAG hits: 0
+- RAG hits: 10
 - Timeline hits: 0
 
 ## Working notes

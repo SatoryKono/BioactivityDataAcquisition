@@ -18,8 +18,8 @@ from bioetl.domain.normalization.profiles.profile_normalizers import (
 )
 from bioetl.domain.schemas.constants import (
     UNIPROT_ENTRY_TYPES,
-    UNIPROT_PROTEIN_EXISTENCE_LEVELS,
     UNIPROT_PROTEIN_FLAGS,
+    UNIPROT_PROTEIN_EXISTENCE_LEVELS,
 )
 from bioetl.domain.schemas.uniprot import UniprotTargetSchema
 

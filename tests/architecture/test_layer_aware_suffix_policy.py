@@ -291,7 +291,13 @@ def test_provider_connector_adapter_family_is_owned_by_adapter_modules_only() ->
     }
 
     pubmed_package = (
-        ROOT / "src" / "bioetl" / "infrastructure" / "adapters" / "pubmed" / "__init__.py"
+        ROOT
+        / "src"
+        / "bioetl"
+        / "infrastructure"
+        / "adapters"
+        / "pubmed"
+        / "__init__.py"
     )
     semanticscholar_package = (
         ROOT

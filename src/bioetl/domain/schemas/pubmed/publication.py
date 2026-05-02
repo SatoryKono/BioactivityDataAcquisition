@@ -140,7 +140,6 @@ class PubMedPublicationSchema(_PublicationBaseSchema):
     page_range: Series[str] = pa.Field(
         nullable=True, description="Page numbers (unified field name)"
     )
-
     pub_month: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True, description="Publication month"
     )

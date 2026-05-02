@@ -25,8 +25,20 @@ RETAINED_ENTRYPOINT_MODULES = frozenset(
 )
 ALLOWED_SRC_FILES = frozenset(
     {
-        ROOT / "src" / "bioetl" / "infrastructure" / "adapters" / "pubmed" / "client.py",
-        ROOT / "src" / "bioetl" / "infrastructure" / "adapters" / "pubmed" / "adapter.py",
+        ROOT
+        / "src"
+        / "bioetl"
+        / "infrastructure"
+        / "adapters"
+        / "pubmed"
+        / "client.py",
+        ROOT
+        / "src"
+        / "bioetl"
+        / "infrastructure"
+        / "adapters"
+        / "pubmed"
+        / "adapter.py",
         ROOT
         / "src"
         / "bioetl"
@@ -99,10 +111,7 @@ ALLOWED_RETAINED_ENTRYPOINT_SRC_FILES = frozenset(
 ALLOWED_TEST_FILES = frozenset(
     {
         CURRENT_TEST_FILE,
-        ROOT
-        / "tests"
-        / "architecture"
-        / "test_layer_aware_suffix_policy.py",
+        ROOT / "tests" / "architecture" / "test_layer_aware_suffix_policy.py",
         ROOT
         / "tests"
         / "unit"

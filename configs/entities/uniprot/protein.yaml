@@ -90,9 +90,9 @@ schema:
     - genus
     - molecular_function
     - cellular_component
+    - features_canonical_json
     - features_json
     - features_raw_json
-    - features_canonical_json
     - domains
     - binding_sites
     - active_sites

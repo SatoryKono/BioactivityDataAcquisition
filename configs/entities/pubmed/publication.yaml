@@ -52,14 +52,14 @@ schema:
     - authors
     - author_count
     - authors_with_affiliations
-    - authors_with_affiliations_raw_json
     - authors_with_affiliations_canonical_json
+    - authors_with_affiliations_raw_json
   - name: affiliations
     fields:
     - affiliation_list
     - affiliation_structured
-    - affiliation_structured_raw_json
     - affiliation_structured_canonical_json
+    - affiliation_structured_raw_json
   - name: journal
     fields:
     - journal

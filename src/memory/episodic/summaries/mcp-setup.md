@@ -1,25 +1,25 @@
 ---
 id: mcp-setup
-title: Setup MCP
+title: Setup MCP runtime
 task_id: mcp-setup
-created_at: '2026-04-30T06:25:17Z'
+created_at: '2026-05-02T16:51:15Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
 - scripts/ai/codex/setup_mcp.py
-summary: Synchronized workspace MCP configs and Codex MCP config; codex mcp list succeeded
-  via setup-mcp.
+summary: Ran the canonical setup-mcp entry point, refreshed workspace and user MCP
+  configs, and verified JSON/TOML syntax plus codex mcp list.
 ---
 
 # Episodic summary
 
 ## Task
 
-- Title: Setup MCP
+- Title: Setup MCP runtime
 
 ## Outcome
 
-- Synchronized workspace MCP configs and Codex MCP config; codex mcp list succeeded via setup-mcp.
+- Ran the canonical setup-mcp entry point, refreshed workspace and user MCP configs, and verified JSON/TOML syntax plus codex mcp list.
 
 ## Lessons learned
 
