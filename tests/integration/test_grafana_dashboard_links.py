@@ -559,7 +559,7 @@ def test_runtime_alert_condition_panels_expose_direct_runbook_links() -> None:
             "Open Run Manifest Runbook",
             "docs/05-operations/runbooks/run-manifest-inspection.md",
         ),
-        "Provider Alert Conditions": (
+        "GLOBAL Provider Alert Conditions": (
             "Open Provider Incident Runbook",
             "docs/05-operations/runbooks/incident-response.md",
         ),

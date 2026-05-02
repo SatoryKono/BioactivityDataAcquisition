@@ -28,7 +28,19 @@ _TRUTHY_ENV_VALUES = frozenset({"1", "true", "yes", "on"})
 
 
 def pytest_configure(config: pytest.Config) -> None:
-    """Register provider markers used by contract test inventory governance."""
+    """Register contract-suite markers used during collection-time mutation.
+
+    ``network`` and ``pilot_soak`` are applied dynamically during collection,
+    so keep a local fallback registration here even though the canonical marker
+    inventory also lives in ``pyproject.toml``.
+    """
+    config.addinivalue_line("markers", "network: outbound-network contract tests")
+    config.addinivalue_line(
+        "markers", "pilot_soak: richer pilot-only contract suites"
+    )
+    config.addinivalue_line(
+        "markers", "no_api: contract checks that do not require live API access"
+    )
     config.addinivalue_line("markers", "chembl: ChEMBL contract provider tests")
     config.addinivalue_line("markers", "pubchem: PubChem contract provider tests")
     config.addinivalue_line("markers", "uniprot: UniProt contract provider tests")

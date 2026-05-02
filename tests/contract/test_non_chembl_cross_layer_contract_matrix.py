@@ -24,6 +24,13 @@ from bioetl.domain.contracts.gold.uniprot import (
     UniProtIDMappingGoldSchema,
     UniProtProteinGoldSchema,
 )
+from bioetl.domain.normalization.chemical_standardization_contract import (
+    CHEMICAL_STANDARDIZATION_POLICY_VERSION,
+    CHEMICAL_STANDARDIZATION_STATUSES,
+)
+from bioetl.domain.normalization.profiles.pubchem_compound import (
+    PUBCHEM_COMPOUND_PROFILE,
+)
 from bioetl.domain.normalization.structured_payload_policies import (
     StructuredPayloadSemanticPolicy,
     semantic_sensitive_structured_payload_policies,
@@ -66,6 +73,15 @@ def _config_fields(path: Path) -> set[str]:
     for group in schema["column_groups"]:
         fields.update(group.get("fields", ()))
     return fields
+
+
+def _config_allowed_values(path: Path, field_name: str) -> set[str]:
+    payload = yaml.safe_load(path.read_text(encoding="utf-8"))
+    validations = payload["quality"]["entity_field_validations"]
+    for rule in validations:
+        if rule.get("field") == field_name:
+            return {str(value) for value in rule.get("allowed_values", ())}
+    raise AssertionError(f"{path}:{field_name} missing enum validation")
 
 
 def _arrow_fields(schema: pa_arrow.Schema) -> set[str]:
@@ -151,6 +167,43 @@ def test_structured_payload_observed_shapes_match_policy_registry() -> None:
             assert shape["collection_semantics"] == policy.collection_semantics
             assert shape["raw_sidecar_field"] == policy.raw_sidecar_field
             assert shape["canonical_sidecar_field"] == policy.canonical_sidecar_field
+
+
+def test_pubchem_standardization_status_vocab_is_cross_layer_canonical() -> None:
+    fixture = _load_fixture()
+    fixture_values = set(
+        fixture["pipelines"]["pubchem_compound"]["observed_values"][
+            "chemical_standardization_status"
+        ]
+    )
+    config_path = Path("configs/entities/pubchem/compound.yaml")
+    config_values = _config_allowed_values(
+        config_path,
+        "chemical_standardization_status",
+    )
+    policy_version_values = _config_allowed_values(
+        config_path,
+        "chemical_standardization_policy_version",
+    )
+    status_rule = PUBCHEM_COMPOUND_PROFILE.rule_for("chemical_standardization_status")
+    policy_rule = PUBCHEM_COMPOUND_PROFILE.rule_for(
+        "chemical_standardization_policy_version"
+    )
+
+    assert fixture_values == set(CHEMICAL_STANDARDIZATION_STATUSES)
+    assert config_values == set(CHEMICAL_STANDARDIZATION_STATUSES)
+    assert policy_version_values == {CHEMICAL_STANDARDIZATION_POLICY_VERSION}
+
+    assert status_rule is not None
+    for value in CHEMICAL_STANDARDIZATION_STATUSES:
+        assert status_rule.apply(f" {value.upper()} ") == value
+    assert status_rule.apply("unchanged") is None
+    assert status_rule.apply("failed") is None
+
+    assert policy_rule is not None
+    assert policy_rule.apply(CHEMICAL_STANDARDIZATION_POLICY_VERSION.upper()) == (
+        CHEMICAL_STANDARDIZATION_POLICY_VERSION
+    )
 
 
 def test_structured_payload_sidecar_fields_are_not_in_current_cross_layer_surfaces() -> (

@@ -8,8 +8,9 @@ pipelines:
     observed_values:
       chemical_standardization_status:
       - standardized
-      - unchanged
-      - failed
+      - partial
+      - invalid
+      - missing_structure
   uniprot_protein:
     primary_key: accession
     observed_values:
