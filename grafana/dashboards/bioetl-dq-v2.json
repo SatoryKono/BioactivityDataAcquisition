@@ -21,26 +21,26 @@
         {
             "asDropdown": false,
             "icon": "external link",
-            "includeVars": true,
+            "includeVars": false,
             "keepTime": true,
             "tags": [],
             "targetBlank": false,
             "title": "Back to Overview",
             "tooltip": "",
             "type": "link",
-            "url": "/d/bioetl-overview-v2/bioetl-overview-v2"
+            "url": "/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
         },
         {
             "asDropdown": false,
             "icon": "external link",
-            "includeVars": true,
+            "includeVars": false,
             "keepTime": true,
             "tags": [],
             "targetBlank": false,
             "title": "Control Plane v1",
             "tooltip": "",
             "type": "link",
-            "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1"
+            "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
         },
         {
             "asDropdown": false,
@@ -52,12 +52,12 @@
             "title": "5. Silver Reject Explorer",
             "tooltip": "",
             "type": "link",
-            "url": "/d/bioetl-silver-reject-explorer"
+            "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
         },
         {
             "asDropdown": false,
             "icon": "logs",
-            "includeVars": true,
+            "includeVars": false,
             "keepTime": true,
             "tags": [],
             "targetBlank": false,
@@ -69,7 +69,7 @@
         {
             "asDropdown": false,
             "icon": "share-alt",
-            "includeVars": true,
+            "includeVars": false,
             "keepTime": true,
             "tags": [],
             "targetBlank": false,
@@ -923,6 +923,7 @@
                     "refId": "A"
                 }
             ],
+            "description": "Bounded schema-field summary only; use 5. Silver Reject Explorer or quarantine CLI for exact record context.",
             "title": "Top Silver Reject Fields",
             "type": "bargauge"
         },

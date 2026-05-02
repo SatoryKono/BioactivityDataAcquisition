@@ -55,6 +55,7 @@ class _SilverWriterDispatchHost(Protocol):
         self,
         *,
         invocation: _SilverWriteInvocation,
+        table_name: str | None = None,
     ) -> SilverWriteResult | None: ...
 
 
@@ -198,7 +199,10 @@ async def _write_dual_targets(
             ),
         )
         try:
-            result = await writer._write_single_target(invocation=target_invocation)
+            result = await writer._write_single_target(
+                invocation=target_invocation,
+                table_name=physical_table,
+            )
         except (BioETLError, OSError, RuntimeError, ValueError) as exc:
             writer.logger.error(
                 "silver_dual_write_failed",

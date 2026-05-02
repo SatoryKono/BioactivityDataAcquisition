@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 __all__ = ["StorageBundle"]
 
 
-def __getattr__(name: str) -> Any:
+def __getattr__(name: str) -> Any:  # Any: module-level deprecated export shim
     """Resolve deprecated storage bundle exports lazily."""
     if name != "StorageBundle":
         raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

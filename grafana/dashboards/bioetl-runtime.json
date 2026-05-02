@@ -20,37 +20,37 @@
         {
             "asDropdown": false,
             "icon": "external link",
-            "includeVars": true,
+            "includeVars": false,
             "keepTime": true,
             "targetBlank": false,
             "title": "Back to Overview",
             "type": "link",
-            "url": "/d/bioetl-overview-v2/bioetl-overview-v2"
+            "url": "/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
         },
         {
             "asDropdown": false,
             "icon": "external link",
-            "includeVars": true,
+            "includeVars": false,
             "keepTime": true,
             "targetBlank": false,
             "title": "Control Plane v1",
             "type": "link",
-            "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1"
+            "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
         },
         {
             "asDropdown": false,
             "icon": "external link",
-            "includeVars": true,
+            "includeVars": false,
             "keepTime": true,
             "targetBlank": false,
             "title": "4. Data Quality",
             "type": "link",
-            "url": "/d/bioetl-dq-v2"
+            "url": "/d/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
         },
         {
             "asDropdown": false,
             "icon": "logs",
-            "includeVars": true,
+            "includeVars": false,
             "keepTime": true,
             "targetBlank": false,
             "title": "Explore Logs (Loki, tracing profile)",
@@ -60,7 +60,7 @@
         {
             "asDropdown": false,
             "icon": "share-alt",
-            "includeVars": true,
+            "includeVars": false,
             "keepTime": true,
             "targetBlank": false,
             "title": "Explore Traces (Tempo, tracing profile)",

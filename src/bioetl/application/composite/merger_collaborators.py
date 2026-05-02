@@ -29,4 +29,6 @@ class MergeCollaboratorGroup:
     conflict_resolver: ConflictResolverService
     join_planner: JoinPlannerService
     orderer: ColumnOrderService | None = None  # Deprecated: Use order_service
-    priority_orderer: Any | None = None  # Deprecated: Use order_service
+    priority_orderer: Any | None = (
+        None  # Any: deprecated ordering collaborator compatibility
+    )

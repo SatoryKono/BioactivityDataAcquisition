@@ -775,7 +775,7 @@ class TestSilverWriterValidation:
             return expected_result
 
         monkeypatch.setattr(
-            "bioetl.infrastructure.storage.silver_writer.execute_silver_write_with_tracing",
+            "bioetl.infrastructure.storage.silver.writer_runtime_facade.execute_silver_write_with_tracing",
             fake_execute_silver_write_with_tracing,
         )
 

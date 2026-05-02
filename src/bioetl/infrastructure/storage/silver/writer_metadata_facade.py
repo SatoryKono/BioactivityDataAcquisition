@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 from collections.abc import Sequence
 from datetime import datetime, timedelta
-from typing import Literal, cast
+from typing import TYPE_CHECKING, Literal, cast
 
 import polars as pl
 import pyarrow as pa
@@ -13,6 +13,7 @@ from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 
 from bioetl.domain.medallion import SilverWriteMode
 from bioetl.domain.models.metadata import SilverMetadata
+from bioetl.domain.ports.noop import NoOpMetadataWriter
 from bioetl.domain.types import BatchID, BronzeRecord, RunID, RunType
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.domain.value_objects.dq_metrics import (
@@ -22,15 +23,34 @@ from bioetl.domain.value_objects.dq_metrics import (
 )
 from bioetl.domain.value_objects.silver_result import SilverWriteResult
 from bioetl.infrastructure.storage.base_delta_writer import BaseDeltaWriter
-from bioetl.infrastructure.storage.silver.metadata_operations import _read_delta_version
+from bioetl.infrastructure.storage.silver.metadata_operations import (
+    _coerce_silver_metadata_write_request,
+    _execute_silver_metadata_write,
+    _prepare_silver_metadata_write,
+    _read_delta_version,
+    _SilverMetadataWriteHostProtocol,
+)
+from bioetl.infrastructure.storage.silver.metadata_request_models import (
+    _PreparedSilverWriteFinalizationContext,
+    _SilverMetadataWriteRequest,
+)
+
+if TYPE_CHECKING:
+    from bioetl.infrastructure.storage.silver.operations.metadata_operations import (
+        SilverMetadataOperations,
+    )
 
 
 class SilverWriterMetadataFacade:
     """Writer-level metadata helper methods backed by composition services."""
 
+    _metadata: SilverMetadataOperations | None
+
     async def _get_table_schema(self, table_name: str) -> pa.Schema | None:
         """Get the schema of an existing Silver table."""
-        return await BaseDeltaWriter._get_table_schema(self, table_name)
+        return await BaseDeltaWriter._get_table_schema(
+            cast(BaseDeltaWriter, self), table_name
+        )
 
     async def _detect_schema_drift(
         self,
@@ -65,20 +85,13 @@ class SilverWriterMetadataFacade:
         frame = records if isinstance(records, pl.DataFrame) else pl.DataFrame(records)
         valid_records = len(frame)
         column_stats = {
-            column: ColumnStats(
-                null_rate=(frame[column].null_count() / valid_records)
-                if valid_records
-                else 0.0,
-                unique_count=frame[column].n_unique(),
-            )
+            column: self._compute_column_stats(frame[column], valid_records)
             for column in frame.columns
             if column
             not in {"_run_id", "_run_type", "_source_batch_id", "_ingestion_ts"}
         }
         normalized_records = (
-            cast(list[BronzeRecord], frame.to_dicts())
-            if isinstance(records, pl.DataFrame)
-            else records
+            frame.to_dicts() if isinstance(records, pl.DataFrame) else records
         )
         return BatchDQMetrics(
             total_records=valid_records + quarantined_count,
@@ -91,6 +104,42 @@ class SilverWriterMetadataFacade:
             validation_errors=tuple(validation_errors or ()),
         )
 
+    @staticmethod
+    def _compute_column_stats(series: pl.Series, valid_records: int) -> ColumnStats:
+        """Compute bounded DQ stats for one Silver metadata column."""
+        numeric_values = [
+            float(value)
+            for value in series.drop_nulls().to_list()
+            if isinstance(value, int | float) and not isinstance(value, bool)
+        ]
+        return ColumnStats(
+            null_rate=(series.null_count() / valid_records) if valid_records else 0.0,
+            unique_count=series.n_unique(),
+            min_value=min(numeric_values) if numeric_values else None,
+            max_value=max(numeric_values) if numeric_values else None,
+            mean_value=(sum(numeric_values) / len(numeric_values))
+            if numeric_values
+            else None,
+        )
+
+    def _should_skip_silver_metadata_write(
+        self,
+        *,
+        records: list[BronzeRecord],
+    ) -> bool:
+        """Return whether canonical Silver metadata publication should short-circuit."""
+        metadata_writer = getattr(self, "_metadata_writer", None)
+        if not records:
+            return True
+        if isinstance(metadata_writer, NoOpMetadataWriter):
+            return True
+        if getattr(self, "_metadata_coordinator", None) is None:
+            raise RuntimeError(
+                "MetadataCoordinator with create_silver_metadata_bundle is required "
+                "for Silver metadata publication"
+            )
+        return False
+
     async def _write_silver_metadata(
         self,
         request: object | str | None = None,
@@ -100,7 +149,18 @@ class SilverWriterMetadataFacade:
         """Publish canonical Silver metadata through metadata operations."""
         if self._metadata is None:
             raise RuntimeError("Silver metadata operations are required")
-        await self._metadata._write_silver_metadata(request, *args, **kwargs)  # type: ignore[arg-type]
+        resolved_request = _coerce_silver_metadata_write_request(
+            cast(_SilverMetadataWriteRequest | str | None, request),
+            args=args,
+            kwargs=kwargs,
+        )
+        if self._should_skip_silver_metadata_write(records=resolved_request.records):
+            return
+        await _execute_silver_metadata_write(
+            cast(_SilverMetadataWriteHostProtocol, self),
+            request=resolved_request,
+            prepare=_prepare_silver_metadata_write,
+        )
 
     async def _write_silver_metadata_file(
         self,
@@ -159,7 +219,7 @@ class SilverWriterMetadataFacade:
         validation_errors: Sequence[str] | None = None,
         started_at: datetime,
         start_perf: float,
-    ) -> object:
+    ) -> _PreparedSilverWriteFinalizationContext:
         """Prepare DQ/version/timing context before metadata persistence."""
         dq_metrics = await self._compute_dq_metrics(
             table_name,
@@ -168,9 +228,6 @@ class SilverWriterMetadataFacade:
             validation_errors=validation_errors,
         )
         from bioetl.infrastructure.storage.silver import metadata_mixin
-        from bioetl.infrastructure.storage.silver.metadata_request_models import (
-            _PreparedSilverWriteFinalizationContext,
-        )
 
         return _PreparedSilverWriteFinalizationContext(
             dq_metrics=dq_metrics,

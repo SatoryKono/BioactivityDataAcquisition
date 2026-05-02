@@ -22,7 +22,7 @@ class TestSilverWriterKeyNullability:
     async def test_non_nullable_merge_key_rejects_null(self) -> None:
         """Non-null merge key policy must reject records with null merge key."""
         writer = SilverWriter(base_path=TEST_SILVER_ROOT, logger=NoOpLogger())
-        writer._dispatch_write = AsyncMock()  # type: ignore[method-assign,assignment]
+        writer._dispatch_write_with_domain_errors = AsyncMock()  # type: ignore[method-assign]
 
         records = [
             {
@@ -64,8 +64,7 @@ class TestSilverWriterKeyNullability:
         """Nullable partition key policy should allow null partition values."""
         writer = SilverWriter(base_path=TEST_SILVER_ROOT, logger=NoOpLogger())
 
-        writer._dispatch_write = AsyncMock()  # type: ignore[method-assign,assignment]
-        writer._dispatch_write.return_value = None
+        writer._dispatch_write_with_domain_errors = AsyncMock(return_value=None)  # type: ignore[method-assign]
         writer._get_delta_version = AsyncMock(return_value=1)  # type: ignore[assignment]
         writer._get_table_schema = AsyncMock(return_value=None)  # type: ignore[assignment]
 

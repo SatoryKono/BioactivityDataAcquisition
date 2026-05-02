@@ -8,7 +8,7 @@ services.
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Literal, cast
 
 import pyarrow as pa
 
@@ -18,8 +18,17 @@ from bioetl.domain.ports import SilverWriteRequest, coerce_silver_write_request
 from bioetl.domain.types import BronzeRecord
 from bioetl.domain.value_objects.silver_result import SilverWriteResult
 from bioetl.infrastructure.storage.silver.delta_helpers import _DeltaWriteRequest
+from bioetl.infrastructure.storage.silver.metadata_operations import (
+    _execute_silver_metadata_write,
+    _prepare_silver_merged_metadata_write,
+    _SilverMetadataWriteHostProtocol,
+)
+from bioetl.infrastructure.storage.silver.metadata_request_models import (
+    _build_silver_merged_metadata_write_request,
+)
 from bioetl.infrastructure.storage.silver.operations.validation_operations import (
     _prepare_silver_write_payload_impl,
+    _SilverPayloadPreparationHostProtocol,
 )
 from bioetl.infrastructure.storage.silver.pipeline_helpers import (
     _SilverWriteExecutionContext,
@@ -36,12 +45,28 @@ from bioetl.infrastructure.storage.silver.writer_metadata_facade import (
     SilverWriterMetadataFacade,
 )
 from bioetl.infrastructure.storage.silver.writer_runtime_support import (
+    _SilverWriterDispatchHost,
     _write_dual_targets,
     _write_single_target_impl,
 )
 
 if TYPE_CHECKING:
     from bioetl.domain.value_objects import silver_result as silver_result_types
+    from bioetl.infrastructure.storage.silver.operations.delta_operations import (
+        SilverDeltaOperations,
+    )
+    from bioetl.infrastructure.storage.silver.operations.merged_operations import (
+        SilverMergedOperations,
+    )
+    from bioetl.infrastructure.storage.silver.operations.metadata_operations import (
+        SilverMetadataOperations,
+    )
+    from bioetl.infrastructure.storage.silver.operations.postwrite_operations import (
+        SilverPostwriteOperations,
+    )
+    from bioetl.infrastructure.storage.silver.operations.validation_operations import (
+        SilverValidationOperations,
+    )
 
 
 async def _write_single_target(
@@ -51,7 +76,7 @@ async def _write_single_target(
 ) -> silver_result_types.SilverWriteResult | None:
     """Execute one physical Silver write target with the historical trace name."""
     return await _write_single_target_impl(
-        writer,
+        cast(_SilverWriterDispatchHost, writer),
         invocation=invocation,
         execute_with_tracing=execute_silver_write_with_tracing,
         module_name="bioetl.infrastructure.storage.silver_writer",
@@ -60,6 +85,19 @@ async def _write_single_target(
 
 class SilverWriterRuntimeFacade(SilverWriterMetadataFacade):
     """Writer-level Silver orchestration delegated to runtime operation services."""
+
+    _validation: SilverValidationOperations | None
+    _delta: SilverDeltaOperations | None
+    _postwrite: SilverPostwriteOperations | None
+    _metadata: SilverMetadataOperations | None
+    _merged: SilverMergedOperations | None
+    _host: object | None
+
+    if TYPE_CHECKING:
+
+        def _resolve_table_path(self, table_name: str) -> str: ...
+
+        def _should_dual_write(self) -> bool: ...
 
     def _enforce_write_policy(self, mode: SilverWriteMode, table_name: str) -> None:
         """Delegate Silver write-mode enforcement to the validation service."""
@@ -91,7 +129,7 @@ class SilverWriterRuntimeFacade(SilverWriterMetadataFacade):
     ) -> _PreparedSilverWritePayload:
         """Prepare a validated Silver payload through the validation service."""
         return await _prepare_silver_write_payload_impl(
-            self,
+            cast(_SilverPayloadPreparationHostProtocol, self),
             table_name=table_name,
             records=records,
             primary_keys=primary_keys,
@@ -142,8 +180,26 @@ class SilverWriterRuntimeFacade(SilverWriterMetadataFacade):
         self,
         *,
         invocation: _SilverWriteInvocation,
+        table_name: str | None = None,
+        run_id: object | None = None,
+        run_type: object | None = None,
+        source_batch_id: object | None = None,
+        ingestion_ts: object | None = None,
     ) -> SilverWriteResult | None:
         """Execute one physical Silver write target."""
+        if table_name is not None and table_name != invocation.table_name:
+            raise TypeError("table_name does not match invocation.table_name")
+        if run_id is not None and run_id != invocation.run_id:
+            raise TypeError("run_id does not match invocation.run_id")
+        if run_type is not None and run_type != invocation.run_type:
+            raise TypeError("run_type does not match invocation.run_type")
+        if (
+            source_batch_id is not None
+            and source_batch_id != invocation.source_batch_id
+        ):
+            raise TypeError("source_batch_id does not match invocation.source_batch_id")
+        if ingestion_ts is not None and ingestion_ts != invocation.ingestion_ts:
+            raise TypeError("ingestion_ts does not match invocation.ingestion_ts")
         return await _write_single_target(self, invocation=invocation)
 
     async def _write_dual_targets(
@@ -152,7 +208,9 @@ class SilverWriterRuntimeFacade(SilverWriterMetadataFacade):
         invocation: _SilverWriteInvocation,
     ) -> SilverWriteResult | None:
         """Execute all configured Silver contract-version write targets."""
-        return await _write_dual_targets(self, invocation=invocation)
+        return await _write_dual_targets(
+            cast(_SilverWriterDispatchHost, self), invocation=invocation
+        )
 
     async def _dispatch_write_with_domain_errors(
         self,
@@ -201,14 +259,44 @@ class SilverWriterRuntimeFacade(SilverWriterMetadataFacade):
             if isinstance(completed_at, str)
             else completed_at
         )
-        await self._metadata._write_silver_merged_metadata(
-            table_path=table_path,
+        if self._should_skip_silver_metadata_write(records=records):
+            return
+        await _execute_silver_metadata_write(
+            cast(_SilverMetadataWriteHostProtocol, self),
+            request=_build_silver_merged_metadata_write_request(
+                table_path=table_path,
+                table_name=table_name,
+                records=records,
+                primary_keys=primary_keys,
+                completed_at=resolved_completed_at,
+                run_id=run_id,
+                sources_used=sources_used,
+            ),
+            prepare=_prepare_silver_merged_metadata_write,
+        )
+
+    async def write_silver_merged(
+        self,
+        table_name: str,
+        records: list[BronzeRecord],
+        primary_keys: list[str] | None = None,
+        *,
+        completed_at: datetime | None = None,
+        run_id: str | None = None,
+        sources_used: list[str] | None = None,
+        preserve_column_order: bool = False,
+    ) -> None:
+        """Write merged records to Silver through merged runtime operations."""
+        if self._merged is None:
+            raise RuntimeError("Silver merged operations are required")
+        await self._merged.write_silver_merged(
             table_name=table_name,
             records=records,
             primary_keys=primary_keys,
-            completed_at=resolved_completed_at,
+            completed_at=completed_at,
             run_id=run_id,
             sources_used=sources_used,
+            preserve_column_order=preserve_column_order,
         )
 
     async def write_silver(
@@ -239,7 +327,14 @@ class SilverWriterRuntimeFacade(SilverWriterMetadataFacade):
         )
         if self._should_dual_write():
             return await self._write_dual_targets(invocation=invocation)
-        return await self._write_single_target(invocation=invocation)
+        return await self._write_single_target(
+            invocation=invocation,
+            table_name=invocation.table_name,
+            run_id=invocation.run_id,
+            run_type=invocation.run_type,
+            source_batch_id=invocation.source_batch_id,
+            ingestion_ts=invocation.ingestion_ts,
+        )
 
     async def _execute_silver_write_pipeline(
         self,

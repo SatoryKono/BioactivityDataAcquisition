@@ -369,6 +369,7 @@ class TestSilverWriterPreparePayloadExecutor:
 
         # Set up the writer with validation operations
         writer._validation = validation_ops
+        writer._check_schema_drift = AsyncMock(return_value=None)  # type: ignore[method-assign]
 
         with (
             patch.object(

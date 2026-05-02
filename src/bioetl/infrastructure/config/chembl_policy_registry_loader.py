@@ -87,7 +87,7 @@ class ChemblPolicyRegistryLoader:
 
     @staticmethod
     def _load_strict_scalar_families(
-        payload: dict[str, Any],
+        payload: dict[str, object],
         *,
         registry_key: str,
     ) -> tuple[ChemblStrictScalarFamily, ...]:

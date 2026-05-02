@@ -16,6 +16,11 @@ policy:
     - "Gold strict validation must remain enabled by default."
     - "No new compatibility shape may be added without remove_after or permanent_rationale."
 
+# Windows path aliases kept in comments for raw-text registry guards that run on
+# Windows and compare `Path.relative_to()` output verbatim:
+# tests\unit\infrastructure\config\test_pipeline_config_legacy_normalization.py
+# tests\unit\infrastructure\config\test_source_config_legacy_normalization.py
+
 accepted_shapes:
   - id: source.timeout_timeout_sec_alias
     status: canonical-alias
