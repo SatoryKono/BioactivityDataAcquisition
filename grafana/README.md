@@ -612,7 +612,7 @@ ______________________________________________________________________
 | `bioetl_http_request_duration_seconds`     | Histogram | `provider`, `method`, `status`     | Длительность HTTP-запросов в секундах.                            |
 | `bioetl_http_retries_total`                | Counter   | `provider`, `method`               | Количество HTTP retry-попыток.                                    |
 | `bioetl_http_request_errors_total`         | Counter   | `provider`, `method`, `error_type` | Количество HTTP-ошибок.                                           |
-| `bioetl_provider_health_status`            | Gauge     | `provider`                         | Статус здоровья провайдера: 0=unknown, 1=healthy, 2=degraded.     |
+| `bioetl_provider_health_status`            | Gauge     | `provider`                         | Статус здоровья провайдера: 0=unhealthy, 1=degraded, 2=healthy.   |
 | `bioetl_rate_limiter_tokens_available`     | Gauge     | `provider`                         | Текущее количество доступных токенов в rate limiter.              |
 | `bioetl_rate_limiter_wait_seconds`         | Histogram | `provider`                         | Время ожидания в rate limiter.                                    |
 
@@ -646,7 +646,9 @@ ______________________________________________________________________
 
 ## 6. Переменные фильтрации (Template Variables)
 
-Все дашборды поддерживают две template variables для динамической фильтрации данных. Переменные отображаются как выпадающие списки в верхней части дашборда.
+Shipped dashboards используют несколько template variables в зависимости от
+операторской роли dashboard. Переменные отображаются как выпадающие списки в
+верхней части дашборда.
 
 ### 6.1 `$pipeline`
 
@@ -670,6 +672,21 @@ ______________________________________________________________________
   - `backfill` — ретроспективное заполнение данных за прошлые периоды.
   - `rebuild` — полная пересборка данных с нуля.
 - **Применение:** Фильтрует метрики по типу запуска. Доступен только на метриках, имеющих label `run_type` (основные pipeline-метрики).
+
+- **`$stage`** (`bioetl-dq-v2`, `bioetl-runtime`):
+  `label_values(bioetl_records_processed_total{pipeline=~"$pipeline",run_type=~"$run_type"}, stage)`.
+  Это bounded stage breakdown filter, а не forensic selector.
+
+- **`Control Plane v1`** использует собственные `$pipeline/$run_type` queries
+  на базе `bioetl_control_plane_manifest_writes_total`, потому что dashboard
+  ориентирован на control-plane write scope, а global read-panels не несут
+  pipeline label.
+
+- **`Workflow Overview`** использует только `$workflow` и `$status` через
+  `label_values(bioetl_workflow_runs_total, workflow|status)`.
+
+- **`Provider Health`** использует `$provider` и `$adapter`; pipeline scope там
+  intentionally отсутствует.
 
 **Каскадная зависимость:** Значения `$run_type` зависят от выбранного `$pipeline`. При смене пайплайна список доступных run types автоматически обновляется.
 
@@ -706,7 +723,7 @@ ______________________________________________________________________
 **UID:** `bioetl-overview-v2`
 **Refresh:** 30 секунд
 **Time range:** Последние 12 часов
-**Назначение:** Обзор operator-facing selected-range сигналов: stage volume, distribution, yield, control-plane и lineage health.
+**Назначение:** Overview hub для operator-facing selected-range сигналов: stage volume, distribution, yield и короткого handoff в Runtime / Control Plane / DQ / Provider / Workflow surfaces.
 
 ### Панели
 
@@ -718,14 +735,14 @@ ______________________________________________________________________
 | 2   | Stage Distribution in Range    | Piechart   | `sum by (stage) (last_over_time(...[$__range]))`                                                                             | Распределение последних observed stage totals внутри выбранного временного окна.                                                                                                 |
 | 3   | Pipeline Distribution in Range | Piechart   | `sum by (pipeline) (last_over_time(...[$__range]))`                                                                          | Распределение последних observed totals по пайплайнам внутри выбранного временного окна.                                                                                         |
 | 4   | Overall Yield (Selected Range) | Gauge      | `gold_last[$__range] / clamp_min(bronze_last[$__range], 1)`                                                                  | Yield по последним observed Bronze/Gold totals внутри выбранного временного окна.                                                                                                |
-| 101 | Latest Data Timestamp          | Stat       | `max(bioetl_data_freshness_seconds{pipeline=~"$pipeline"})`                                                                  | Последний observed ingestion timestamp из доменной freshness-метрики.                                                                                                            |
+| 101 | Latest Successful Data Timestamp | Stat     | `max(bioetl_data_freshness_seconds{pipeline=~"$pipeline"})`                                                                  | Последний observed ingestion timestamp из доменной freshness-метрики.                                                                                                            |
 | 118 | Silver Filter Rejects          | Stat       | `round(sum(increase(bioetl_records_processed_total{...stage="filtered_out"}[$__range])) or vector(0))`                       | Отдельный shipped signal для Silver filter rejection внутри выбранного временного окна Grafana; показывает selected-range increase.                                         |
 | 119 | Silver Filter Reject Rate      | Gauge      | `filtered_out_last[$__range] / clamp_min(bronze_last[$__range], 1)`                                                          | Доля intentionally excluded Silver filters относительно Bronze input по последним observed totals внутри выбранного временного окна.                                             |
 
 **Используемые метрики:** `records_processed_total`, `data_freshness_seconds`.
 
 **Drilldown:** dashboard links `2. Runtime`, `Control Plane v1`, `3. Provider Health`,
-`4. Data Quality`, `Explore Logs (Loki, tracing profile)` и `Explore Traces (Tempo, tracing profile)` используют
+`4. Data Quality`, `6. Workflow Overview`, `Explore Logs (Loki, tracing profile)` и `Explore Traces (Tempo, tracing profile)` используют
 текущее временное окно. Panel `Processing Volume by Stage` дублирует Explore handoff
 через data links для быстрого перехода в Grafana Explore. Tempo handoff для
 pipeline dashboards использует TraceQL filter по `span."bioetl.pipeline"` и
@@ -766,7 +783,7 @@ ______________________________________________________________________
 | 121 | Top Silver Reject Reasons                    | Bar gauge  | `topk(10, sum by (reason_code) (increase(bioetl_silver_filter_rejections_total{...}[$__range])))`                                      | Bounded top-10 summary по `reason_code` поверх shipped Silver reject breakdown metric.                                                                                       |
 | 122 | Top Silver Reject Fields                     | Bar gauge  | `topk(10, sum by (field) (increase(bioetl_silver_filter_rejections_total{...}[$__range])))`                                            | Bounded top-10 summary по `field`; exact field/root-cause drilldown делается в `5. Silver Reject Explorer`.                                                                |
 | 152 | Silver Filter Reject Accounting Mismatch     | Stat       | `round(sum(max_over_time(bioetl_silver_filter_reject_total_mismatch_15m{...}[$__range])))`                                              | Reconciliation guard между stage-total `filtered_out` surface и bounded breakdown metric. `0` = healthy, non-zero = расследовать drift, `No data` = recording rule не публикуется. |
-| 101 | Latest Data Timestamp                        | Stat       | `max(bioetl_data_freshness_seconds{pipeline=~"$pipeline"})`                                                                            | Последний observed ingestion timestamp внутри выбранного pipeline scope.                                                                                                   |
+| 101 | Latest Successful Data Timestamp             | Stat       | `max(bioetl_data_freshness_seconds{pipeline=~"$pipeline"})`                                                                            | Последний observed ingestion timestamp внутри выбранного pipeline scope.                                                                                                   |
 
 **Используемые метрики:** `records_processed_total`, `data_freshness_seconds`.
 
@@ -804,12 +821,15 @@ ______________________________________________________________________
 | Reject Rate vs Bronze                    | Gauge             | `/ops/quarantine/filtered-stats`                 |
 | Top Reject Reasons / Fields / Signatures | Bar gauge / Table | `/ops/quarantine/filtered-stats`                 |
 | Filtered Records Table                   | Table             | `/ops/quarantine/filtered-records`               |
-| Selected Record Details                  | Table             | `/ops/quarantine/filtered-record/{payload_hash}` |
+| Selected Record Details                  | Table             | `/ops/quarantine/filtered-records?...&payload_hash=<hash>` |
 | Run Scope Summary                        | Stat              | `/ops/quarantine/filtered-stats`                 |
 
 **Datasource:** `Quarantine Explorer` (`yesoreyeram-infinity-datasource`, provisioning: `grafana/provisioning/datasources-core/quarantine-explorer.yml`).
 
 **Фильтры:** `$pipeline`, `$run_type`, `$reason_code`, `$field`, `$run_id`, `$payload_hash` + стандартный Grafana time picker.
+`$pipeline` здесь intentionally single-select/no-All. `$run_id` и
+`$payload_hash` остаются Explorer-only forensic filters и не должны протекать в
+Prometheus labels, summary dashboards или cross-dashboard handoffs.
 
 **Важно:** это не Prometheus dashboard для row-level таблиц.
 `1-4` dashboards остаются Prometheus summary/bounded-breakdown поверхностями;
@@ -826,13 +846,14 @@ ______________________________________________________________________
 **UID:** `bioetl-provider-health-v2`
 **Refresh:** 30 секунд
 **Time range:** Последние 12 часов
-**Назначение:** Операционный incident dashboard по внешним провайдерам: p95 latency, failure/degraded trends, failure share и retry exhaustion.
+**Назначение:** Операционный incident dashboard по внешним провайдерам: current health status, p95 latency, failure/degraded trends, failure share и retry exhaustion.
 
 ### Панели
 
 | ID  | Название                                        | Тип            | PromQL                                                                                                               | Описание                                                  |
 | --- | ----------------------------------------------- | -------------- | -------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
-| 1   | Health Check Latency by Provider (p95)          | Timeseries     | `histogram_quantile(0.95, sum by (le, provider) (increase(...[$__interval])))`                                       | p95 latency trend по выбранным providers.                 |
+| 1   | Health Check Latency by Provider (p95)          | Timeseries     | `histogram_quantile(0.95, sum by (le, provider) (increase(...[$__interval])))`                                       | p95 latency trend по выбранным providers; `No data` сохраняется как diagnostic gap, не маскируется в `0s`. |
+| 114 | Current Provider Health Status                  | Table          | `max by (provider) (bioetl_provider_health_status{provider=~"$provider"})`                                           | Текущий статус по provider с mapping `0=UNHEALTHY`, `1=DEGRADED`, `2=HEALTHY`. |
 | 2   | Healthy Checks                                  | Stat           | `round(sum(increase(bioetl_health_check_success_total{provider=~"$provider"}[$__range])) or vector(0))`              | Completed probes со статусом `HEALTHY` в выбранном окне.  |
 | 105 | Degraded Checks                                 | Stat           | `round(sum(increase(bioetl_health_check_degraded_total{provider=~"$provider"}[$__range])) or vector(0))`             | Completed probes со статусом `DEGRADED` в выбранном окне. |
 | 104 | Provider Failure Rate                           | Gauge          | `failures_increase / clamp_min(total_increase, 1)`                                                                   | Failure-rate за выбранный range.                          |
@@ -841,7 +862,7 @@ ______________________________________________________________________
 | 107 | Provider Failure Share (Selected Range)         | Bar gauge      | `100 * failures_by_provider / clamp_min(total_failures, 1)`                                                          | Ранжирование providers по доле failed probes.             |
 | 108 | Retries Exhausted by Provider / Operation       | Table          | `round(sum by (provider, operation) (increase(bioetl_data_source_retry_exhausted_total[$__range])) or vector(0))`    | Где retries чаще всего исчерпываются.                     |
 | 109 | Retries Exhausted Trend by Provider / Operation | Timeseries     | `round(sum by (provider, operation) (increase(bioetl_data_source_retry_exhausted_total[$__interval])) or vector(0))` | Тренд retry exhaustion incidents во времени.              |
-| 102 | Provider Health Check Latency (p95) - $provider | Repeated Gauge | `histogram_quantile(0.95, sum by (le, provider) (increase(...[$__range])))`                                          | Current p95 by provider для выбранного range.             |
+| 102 | Provider Health Check Latency (p95) - $provider | Repeated Gauge | `histogram_quantile(0.95, sum by (le, provider) (increase(...[$__range])))`                                          | Current p95 by provider для выбранного range; отсутствие samples остаётся `No data`. |
 
 **Используемые метрики:** `health_check_latency_seconds`, `provider_health_status`, `health_check_success_total`, `health_check_degraded_total`, `health_check_failures_total`.
 
@@ -898,6 +919,11 @@ handoff в `Control Plane v1`, чтобы checkpoint/replay/lineage incident flo
 застревал на runtime summary surface. Как и в остальных shipped dashboards, Loki handoff
 стартует с безопасного `{job="bioetl"}` entrypoint. Tempo handoff использует
 тот же dashboard scope через `span."bioetl.pipeline"` и `span."bioetl.run_type"`.
+`Pipeline/DQ/Control-plane/Provider/Freshness Alert Conditions` дополнительно
+ведут прямо в canonical runbooks (`pipeline-failure-critical`,
+`dq-failure-investigation`, `run-manifest-inspection`,
+`observability-checklist`, `incident-response`) без ручного поиска следующего
+operator шага.
 
 Панели `Pipeline/DQ/Control-plane/Provider Alert Conditions` читают recording-rule
 серии `bioetl_runtime_alert_condition_*`, чтобы dashboard JSON не дублировал

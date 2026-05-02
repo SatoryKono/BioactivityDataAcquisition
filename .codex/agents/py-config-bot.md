@@ -27,6 +27,8 @@ ______________________________________________________________________
 > **При старте** прочитай специализированную память:
 > `docs/00-project/ai/memory/memory-py-config-bot.md` — config hierarchy, templates, ADR compliance, composite rules, validation.
 > Общий контекст: `docs/00-project/ai/memory/agent-memory.md`
+> Memory policy: `docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
+> Post-change protocol: `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
 > Evidence calibration: `docs/reports/evidence/project-file-structure/04-decisions/SUMMARY.md`, `docs/reports/evidence/project-package-topology/SUMMARY.md`
 
 ______________________________________________________________________

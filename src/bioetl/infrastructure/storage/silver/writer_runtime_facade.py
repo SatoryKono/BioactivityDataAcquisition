@@ -58,9 +58,6 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.storage.silver.operations.merged_operations import (
         SilverMergedOperations,
     )
-    from bioetl.infrastructure.storage.silver.operations.metadata_operations import (
-        SilverMetadataOperations,
-    )
     from bioetl.infrastructure.storage.silver.operations.postwrite_operations import (
         SilverPostwriteOperations,
     )
@@ -89,7 +86,6 @@ class SilverWriterRuntimeFacade(SilverWriterMetadataFacade):
     _validation: SilverValidationOperations | None
     _delta: SilverDeltaOperations | None
     _postwrite: SilverPostwriteOperations | None
-    _metadata: SilverMetadataOperations | None
     _merged: SilverMergedOperations | None
     _host: object | None
 

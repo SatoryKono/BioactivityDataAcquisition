@@ -12,7 +12,7 @@
             }
         ]
     },
-    "description": "Control-plane aggregate telemetry for manifest, ledger, checkpoint compatibility, and read operations.",
+    "description": "Control-plane aggregate telemetry for manifest, ledger, checkpoint compatibility, replay, audit, and global read operations. Read-path metrics are global by store/status and are not filtered by $pipeline.",
     "editable": true,
     "gnetId": null,
     "graphTooltip": 1,
@@ -57,7 +57,7 @@
             "targetBlank": false,
             "title": "Explore Logs (Loki, tracing profile)",
             "type": "link",
-            "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}"
+            "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D"
         },
         {
             "asDropdown": false,
@@ -67,7 +67,7 @@
             "targetBlank": false,
             "title": "Explore Traces (Tempo, tracing profile)",
             "type": "link",
-            "url": "/a/grafana-exploretraces-app/?from=${__from}&to=${__to}"
+            "url": "/a/grafana-exploretraces-app/?from=${__from}&to=${__to}&queryType=traceqlSearch&query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline:regex}%22%20%26%26%20span.%22bioetl.run_type%22%20%3D~%20%22${run_type:regex}%22%20%7D"
         },
         {
             "asDropdown": false,
@@ -235,7 +235,7 @@
             },
             "gridPos": {
                 "h": 8,
-                "w": 6,
+                "w": 8,
                 "x": 0,
                 "y": 8
             },
@@ -296,8 +296,8 @@
             },
             "gridPos": {
                 "h": 8,
-                "w": 6,
-                "x": 6,
+                "w": 8,
+                "x": 8,
                 "y": 8
             },
             "id": 4,
@@ -322,7 +322,68 @@
                     "refId": "A"
                 }
             ],
-            "title": "Control-Plane Read Failures",
+            "title": "Global Control-Plane Read Failures",
+            "type": "stat"
+        },
+        {
+            "datasource": "Prometheus",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "decimals": 3,
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "yellow",
+                                "value": 0.05
+                            },
+                            {
+                                "color": "red",
+                                "value": 0.5
+                            }
+                        ]
+                    },
+                    "unit": "s"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 8,
+                "x": 16,
+                "y": 8
+            },
+            "id": 111,
+            "options": {
+                "colorMode": "value",
+                "graphMode": "none",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "textMode": "auto"
+            },
+            "targets": [
+                {
+                    "expr": "histogram_quantile(0.95, sum by (le) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range])))",
+                    "legendFormat": "read p95",
+                    "refId": "A"
+                }
+            ],
+            "title": "Global Control-Plane Read p95",
             "type": "stat"
         },
         {
@@ -402,7 +463,7 @@
                     "refId": "A"
                 }
             ],
-            "title": "Control-Plane Reads by Store and Status",
+            "title": "Global Control-Plane Reads by Store and Status",
             "type": "timeseries"
         },
         {
@@ -728,7 +789,7 @@
             },
             "targets": [
                 {
-                    "expr": "histogram_quantile(0.95, sum by (le, pipeline, operation) (increase(bioetl_checkpoint_save_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__range]))) or vector(0)",
+                    "expr": "histogram_quantile(0.95, sum by (le, pipeline, operation) (increase(bioetl_checkpoint_save_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__range])))",
                     "refId": "A"
                 }
             ],
@@ -784,7 +845,7 @@
             },
             "targets": [
                 {
-                    "expr": "histogram_quantile(0.95, sum by (le, operation) (increase(bioetl_checkpoint_operator_duration_seconds_bucket[$__range]))) or vector(0)",
+                    "expr": "histogram_quantile(0.95, sum by (le, operation) (increase(bioetl_checkpoint_operator_duration_seconds_bucket[$__range])))",
                     "refId": "A"
                 }
             ],
@@ -981,7 +1042,7 @@
             },
             "targets": [
                 {
-                    "expr": "histogram_quantile(0.95, sum by (le) (increase(bioetl_audit_write_duration_seconds_bucket[$__interval]))) or vector(0)",
+                    "expr": "histogram_quantile(0.95, sum by (le) (increase(bioetl_audit_write_duration_seconds_bucket[$__interval])))",
                     "legendFormat": "write p95",
                     "refId": "A"
                 }
@@ -1039,13 +1100,82 @@
             },
             "targets": [
                 {
-                    "expr": "histogram_quantile(0.95, sum by (le) (increase(bioetl_audit_query_duration_seconds_bucket[$__interval]))) or vector(0)",
+                    "expr": "histogram_quantile(0.95, sum by (le) (increase(bioetl_audit_query_duration_seconds_bucket[$__interval])))",
                     "legendFormat": "query p95",
                     "refId": "A"
                 }
             ],
             "title": "Audit Query Latency (p95)",
             "type": "stat"
+        },
+        {
+            "datasource": "Prometheus",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisLabel": "Fragments",
+                        "axisPlacement": "auto",
+                        "drawStyle": "line",
+                        "fillOpacity": 10,
+                        "gradientMode": "none",
+                        "lineInterpolation": "linear",
+                        "lineWidth": 2,
+                        "pointSize": 5,
+                        "showPoints": "auto",
+                        "spanNulls": false,
+                        "stacking": {
+                            "group": "A",
+                            "mode": "none"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 24,
+                "x": 0,
+                "y": 56
+            },
+            "id": 112,
+            "options": {
+                "legend": {
+                    "calcs": [
+                        "last"
+                    ],
+                    "displayMode": "table",
+                    "placement": "bottom"
+                },
+                "tooltip": {
+                    "mode": "multi",
+                    "sort": "desc"
+                }
+            },
+            "targets": [
+                {
+                    "expr": "sum(increase(bioetl_lineage_fragments_emitted_total{pipeline=~\"$pipeline\"}[$__interval])) by (layer, status)",
+                    "legendFormat": "{{layer}} / {{status}}",
+                    "refId": "A"
+                }
+            ],
+            "title": "Lineage Fragment Outcomes",
+            "type": "timeseries"
         }
     ],
     "refresh": "30s",

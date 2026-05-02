@@ -12,7 +12,7 @@
             }
         ]
     },
-    "description": "Pipeline overview for selected time range",
+    "description": "Pipeline overview hub for selected time range",
     "editable": true,
     "gnetId": null,
     "graphTooltip": 1,
@@ -68,6 +68,18 @@
         },
         {
             "asDropdown": false,
+            "icon": "external link",
+            "includeVars": false,
+            "keepTime": true,
+            "tags": [],
+            "targetBlank": false,
+            "title": "6. Workflow Overview",
+            "tooltip": "",
+            "type": "link",
+            "url": "/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}"
+        },
+        {
+            "asDropdown": false,
             "icon": "logs",
             "includeVars": false,
             "keepTime": true,
@@ -76,7 +88,7 @@
             "title": "Explore Logs (Loki, tracing profile)",
             "tooltip": "",
             "type": "link",
-            "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}"
+            "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D"
         },
         {
             "asDropdown": false,
@@ -88,7 +100,7 @@
             "title": "Explore Traces (Tempo, tracing profile)",
             "tooltip": "",
             "type": "link",
-            "url": "/a/grafana-exploretraces-app/?from=${__from}&to=${__to}"
+            "url": "/a/grafana-exploretraces-app/?from=${__from}&to=${__to}&queryType=traceqlSearch&query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline:regex}%22%20%26%26%20span.%22bioetl.run_type%22%20%3D~%20%22${run_type:regex}%22%20%7D"
         }
     ],
     "panels": [
@@ -177,11 +189,11 @@
                     },
                     {
                         "title": "Open Logs in Loki Explore (tracing profile)",
-                        "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}"
+                        "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D"
                     },
                     {
                         "title": "Open Traces in Tempo Explore (tracing profile)",
-                        "url": "/a/grafana-exploretraces-app/?from=${__from}&to=${__to}"
+                        "url": "/a/grafana-exploretraces-app/?from=${__from}&to=${__to}&queryType=traceqlSearch&query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline:regex}%22%20%26%26%20span.%22bioetl.run_type%22%20%3D~%20%22${run_type:regex}%22%20%7D"
                     }
                 ]
             },
@@ -446,7 +458,7 @@
                     "refId": "A"
                 }
             ],
-            "title": "Latest Data Timestamp",
+            "title": "Latest Successful Data Timestamp",
             "type": "stat"
         },
         {
@@ -458,7 +470,7 @@
             },
             "id": 110,
             "options": {
-                "content": "<center><h3>Control Plane &amp; Lineage</h3><p>Pipeline-level traceability health signals</p></center>",
+                "content": "<center><h3>Control Plane &amp; Lineage</h3><p>Compact traceability summary only. Open <strong>Control Plane v1</strong> for global reads, audit, replay, and lineage detail.</p></center>",
                 "mode": "html"
             },
             "title": "Control Plane & Lineage",
@@ -496,7 +508,7 @@
             },
             "gridPos": {
                 "h": 6,
-                "w": 4,
+                "w": 6,
                 "x": 0,
                 "y": 22
             },
@@ -517,12 +529,12 @@
             },
             "targets": [
                 {
-                    "expr": "round(sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", status=\"failed\"}[$__range])) or vector(0))",
-                    "legendFormat": "Manifest Write Failures",
+                    "expr": "(round(sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", status=\"failed\"}[$__range])) or vector(0))) + (round(sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range])) or vector(0)))",
+                    "legendFormat": "Manifest / Ledger Failures",
                     "refId": "A"
                 }
             ],
-            "title": "Manifest Write Failures",
+            "title": "Manifest / Ledger Failures",
             "type": "stat"
         },
         {
@@ -557,69 +569,8 @@
             },
             "gridPos": {
                 "h": 6,
-                "w": 4,
-                "x": 4,
-                "y": 22
-            },
-            "id": 112,
-            "options": {
-                "colorMode": "value",
-                "graphMode": "area",
-                "justifyMode": "auto",
-                "orientation": "auto",
-                "reduceOptions": {
-                    "calcs": [
-                        "lastNotNull"
-                    ],
-                    "fields": "",
-                    "values": false
-                },
-                "textMode": "auto"
-            },
-            "targets": [
-                {
-                    "expr": "round(sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range])) or vector(0))",
-                    "legendFormat": "Ledger Append Failures",
-                    "refId": "A"
-                }
-            ],
-            "title": "Ledger Append Failures",
-            "type": "stat"
-        },
-        {
-            "datasource": "Prometheus",
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "thresholds"
-                    },
-                    "decimals": 0,
-                    "mappings": [],
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "green",
-                                "value": null
-                            },
-                            {
-                                "color": "yellow",
-                                "value": 1
-                            },
-                            {
-                                "color": "red",
-                                "value": 5
-                            }
-                        ]
-                    },
-                    "unit": "short"
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 6,
-                "w": 4,
-                "x": 8,
+                "w": 6,
+                "x": 6,
                 "y": 22
             },
             "id": 113,
@@ -679,7 +630,7 @@
             },
             "gridPos": {
                 "h": 6,
-                "w": 4,
+                "w": 6,
                 "x": 12,
                 "y": 22
             },
@@ -709,126 +660,19 @@
             "type": "stat"
         },
         {
-            "datasource": "Prometheus",
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "thresholds"
-                    },
-                    "decimals": 0,
-                    "mappings": [],
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "green",
-                                "value": null
-                            },
-                            {
-                                "color": "yellow",
-                                "value": 1
-                            },
-                            {
-                                "color": "red",
-                                "value": 5
-                            }
-                        ]
-                    },
-                    "unit": "short"
-                },
-                "overrides": []
-            },
             "gridPos": {
                 "h": 6,
-                "w": 4,
-                "x": 16,
+                "w": 6,
+                "x": 18,
                 "y": 22
             },
             "id": 116,
             "options": {
-                "colorMode": "background",
-                "graphMode": "none",
-                "justifyMode": "center",
-                "orientation": "auto",
-                "reduceOptions": {
-                    "calcs": [
-                        "lastNotNull"
-                    ],
-                    "fields": "",
-                    "values": false
-                },
-                "textMode": "auto"
+                "content": "<div style=\"padding:0.4rem 0.6rem;line-height:1.5\"><strong>Need control-plane depth?</strong><br/>Open <strong>Control Plane v1</strong> for global read failures/p95, audit telemetry, replay diagnostics, and lineage fragment trends.</div>",
+                "mode": "html"
             },
-            "targets": [
-                {
-                    "expr": "round(sum(increase(bioetl_control_plane_reads_total{status=\"failed\"}[$__range])) or vector(0))",
-                    "legendFormat": "Failed Lookups",
-                    "refId": "A"
-                }
-            ],
-            "title": "Global Control-plane Lookup Failures",
-            "type": "stat"
-        },
-        {
-            "datasource": "Prometheus",
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "thresholds"
-                    },
-                    "decimals": 3,
-                    "mappings": [],
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "green",
-                                "value": null
-                            },
-                            {
-                                "color": "yellow",
-                                "value": 0.05
-                            },
-                            {
-                                "color": "red",
-                                "value": 0.5
-                            }
-                        ]
-                    },
-                    "unit": "s"
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 6,
-                "w": 4,
-                "x": 20,
-                "y": 22
-            },
-            "id": 117,
-            "options": {
-                "colorMode": "background",
-                "graphMode": "none",
-                "justifyMode": "center",
-                "orientation": "auto",
-                "reduceOptions": {
-                    "calcs": [
-                        "lastNotNull"
-                    ],
-                    "fields": "",
-                    "values": false
-                },
-                "textMode": "auto"
-            },
-            "targets": [
-                {
-                    "expr": "histogram_quantile(0.95, sum by (le) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range]))) or vector(0)",
-                    "legendFormat": "Lookup p95",
-                    "refId": "A"
-                }
-            ],
-            "title": "Global Control-plane Lookup p95",
-            "type": "stat"
+            "title": "Control Plane v1 Handoff",
+            "type": "text"
         },
         {
             "datasource": "Prometheus",
@@ -1071,75 +915,6 @@
             ],
             "title": "Pipeline Error Rate",
             "type": "gauge"
-        },
-        {
-            "datasource": "Prometheus",
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "palette-classic"
-                    },
-                    "custom": {
-                        "axisLabel": "Fragments",
-                        "axisPlacement": "auto",
-                        "drawStyle": "line",
-                        "fillOpacity": 10,
-                        "gradientMode": "none",
-                        "lineInterpolation": "linear",
-                        "lineWidth": 2,
-                        "pointSize": 5,
-                        "showPoints": "auto",
-                        "spanNulls": false,
-                        "stacking": {
-                            "group": "A",
-                            "mode": "none"
-                        },
-                        "thresholdsStyle": {
-                            "mode": "off"
-                        }
-                    },
-                    "mappings": [],
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "green",
-                                "value": null
-                            }
-                        ]
-                    }
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 8,
-                "w": 24,
-                "x": 0,
-                "y": 34
-            },
-            "id": 115,
-            "options": {
-                "legend": {
-                    "calcs": [
-                        "last"
-                    ],
-                    "displayMode": "table",
-                    "placement": "bottom"
-                },
-                "tooltip": {
-                    "mode": "multi",
-                    "sort": "desc"
-                }
-            },
-            "targets": [
-                {
-                    "expr": "sum(increase(bioetl_lineage_fragments_emitted_total{pipeline=~\"$pipeline\"}[$__interval])) by (layer, status)",
-                    "legendFormat": "{{layer}} / {{status}}",
-                    "refId": "A"
-                }
-            ],
-            "title": "Lineage Fragment Outcomes",
-            "type": "timeseries"
         }
     ],
     "refresh": "30s",

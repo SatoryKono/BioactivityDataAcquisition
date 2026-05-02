@@ -17,11 +17,9 @@ Decompose work into L2/L3 agents, enforce constraints, aggregate evidence, and p
 1. Read memory:
 
 - `../../../docs/00-project/ai/memory/agent-memory.md`
+- `../../../docs/00-project/ai/memory/memory-py-test-swarm.md`
 - `../../../docs/00-project/ai/memory/memory-py-test-bot.md`
 - `../../../.codex/agents/ORCHESTRATION.md` (sections 2-7)
-- There is no dedicated `memory-py-test-swarm.md` sheet today; use
-  `agent-memory.md` plus `memory-py-test-bot.md` and record that fallback in
-  the report when it matters.
 
 3. Read profile:
 

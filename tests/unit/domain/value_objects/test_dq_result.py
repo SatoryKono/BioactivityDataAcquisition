@@ -12,6 +12,7 @@ from bioetl.domain.value_objects.dq_anomaly import (
     DQAnomalyType,
 )
 from bioetl.domain.value_objects.dq_result import DQEvaluationStatus, DQResult
+from tests.helpers.clock import FIXED_TEST_TIME
 
 
 def _sample_anomaly(metric_name: str = "error_rate") -> DQAnomaly:
@@ -23,7 +24,7 @@ def _sample_anomaly(metric_name: str = "error_rate") -> DQAnomaly:
         anomaly_type=DQAnomalyType.THRESHOLD_EXCEEDED,
         severity=DQAnomalySeverity.HIGH,
         z_score=15.0,
-        timestamp=datetime.now(UTC),
+        timestamp=FIXED_TEST_TIME,
         message=f"{metric_name} exceeded expected range",
     )
 

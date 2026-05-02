@@ -13,7 +13,10 @@ ______________________________________________________________________
 При старте прочитай:
 
 - `docs/00-project/ai/memory/agent-memory.md` — общий контекст проекта
-- `docs/00-project/ai/memory/memory-py-test-bot.md` — test structure, thresholds, VCR, failure classification
+- `docs/00-project/ai/memory/memory-py-test-swarm.md` — swarm decomposition, telemetry, flakiness protocol
+- `docs/00-project/ai/memory/memory-py-test-bot.md` — delegated test execution and coverage details
+- `docs/00-project/ai/agents/guides/MEMORY_USAGE.md` — runtime-source-first memory protocol
+- `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md` — post-change validation protocol
 - `.codex/agents/ORCHESTRATION.md` — протокол оркестрации (§2-§7)
 
 ## Runtime Note

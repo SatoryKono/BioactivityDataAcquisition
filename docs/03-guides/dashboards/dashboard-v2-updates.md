@@ -18,21 +18,32 @@ ______________________________________________________________________
 ## Проверенные дашборды
 
 - `bioetl-overview-v2`
+- `bioetl-control-plane-v1`
 - `bioetl-dq-v2`
 - `bioetl-provider-health-v2`
 - `bioetl-runtime`
+- `bioetl-silver-reject-explorer`
+- `bioetl-workflow-overview`
 
 ## Подтверждено по JSON
 
-- Все 4 дашборда используют `refresh: 30s`.
-- `time.from` для всех 4 shipped dashboards = `now-12h`.
-- Переменные `overview/dq/runtime`: `$pipeline`, `$run_type`.
-- Переменные `provider-health-v2`: `$provider`.
-- В JSON отсутствуют `$run_id` и `execution`.
+- Все shipped dashboards, кроме `bioetl-silver-reject-explorer`, используют `refresh: 30s`.
+- `bioetl-silver-reject-explorer` использует `refresh: 1m` и `time.from: now-24h`.
+- `time.from` для `overview/runtime/provider-health/dq/workflow` = `now-12h`.
+- `time.from` для `control-plane-v1` = `now-6h`.
+- Переменные `overview`: `$pipeline`, `$run_type`.
+- Переменные `control-plane-v1`: `$pipeline`, `$run_type`.
+- Переменные `dq/runtime`: `$pipeline`, `$run_type`, `$stage`.
+- Переменные `provider-health-v2`: `$provider`, `$adapter`.
+- Переменные `workflow-overview`: `$workflow`, `$status`.
+- В Prometheus-backed dashboards отсутствуют forensic variables `$run_id` и `execution`.
+- `bioetl-silver-reject-explorer` остаётся единственным shipped exception для `$run_id`/`$payload_hash`.
 
 ## Исправления, внесенные в JSON
 
-1. Удалены устаревшие переменные `run_id` из всех 4 дашбордов.
+1. Удалены устаревшие forensic variables `run_id`/`execution` из всех
+   Prometheus-backed dashboards; они остались только в
+   `bioetl-silver-reject-explorer`.
 1. Удалены вводящие в заблуждение формулировки про "Latest Run Only".
 1. Исправлен DQ panel `id=12`:
 
@@ -105,16 +116,20 @@ histogram_quantile(0.95, sum by (le, provider) (rate(bioetl_health_check_latency
 8. Синхронизирована dashboard-навигация:
 
 - `1. Overview` содержит links `2. Runtime`, `3. Provider Health`,
-  `4. Data Quality`, `Explore Logs (Loki, tracing profile)`, `Explore Traces (Tempo, tracing profile)`;
-- `2. Runtime`, `3. Provider Health` и `4. Data Quality` содержат `Back to Overview`
-  и Explore links.
+  `4. Data Quality`, `6. Workflow Overview`, `Explore Logs (Loki, tracing profile)`,
+  `Explore Traces (Tempo, tracing profile)`;
+- `2. Runtime`, `3. Provider Health`, `4. Data Quality` и
+  `6. Workflow Overview` встроены в shipped operator flow и используют
+  target-scoped handoffs без variable leakage.
 
 ## Актуальные ключевые панели
 
-- `bioetl-overview-v2`: `id=99`, `id=101`, `id=1..4`, `id=110..115`
+- `bioetl-overview-v2`: `id=99`, `id=101`, `id=1..4`, `id=110..114`, `id=116`, `id=118..120`, `id=221`
+- `bioetl-control-plane-v1`: checkpoint/replay/audit/global-read + lineage detail
 - `bioetl-dq-v2`: `id=99`, `id=101`, `id=1..12`, `id=116`
 - `bioetl-provider-health-v2`: row `id=91` + панели `1,2,104,7,102`
 - `bioetl-runtime`: `id=1..9`, `Back to Overview`, links в `Explore`
+- `bioetl-workflow-overview`: `id=1..5` с `$workflow/$status` scope
 
 ## Примечание по старым гайдам
 

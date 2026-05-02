@@ -15,6 +15,7 @@ from bioetl.domain.ports import (
     AuditOperation,
     BronzeMetadataInput,
 )
+from tests.helpers.clock import FIXED_TEST_TIME
 
 
 @pytest.mark.unit
@@ -34,7 +35,7 @@ class TestAuditDataClasses:
         assert AuditLayer.GOLD == "gold"
 
     def test_audit_entry_creation(self) -> None:
-        now = datetime.now(UTC)
+        now = FIXED_TEST_TIME
         entry = AuditEntry(
             run_id="run-123",
             timestamp=now,
@@ -49,7 +50,7 @@ class TestAuditDataClasses:
         assert entry.metadata == {}
 
     def test_audit_entry_with_metadata(self) -> None:
-        now = datetime.now(UTC)
+        now = FIXED_TEST_TIME
         entry = AuditEntry(
             run_id="run-456",
             timestamp=now,
@@ -62,7 +63,7 @@ class TestAuditDataClasses:
         assert entry.metadata["provider"] == "pubmed"
 
     def test_audit_entry_to_dict(self) -> None:
-        now = datetime.now(UTC)
+        now = FIXED_TEST_TIME
         entry = AuditEntry(
             run_id="run-789",
             timestamp=now,
@@ -79,7 +80,7 @@ class TestAuditDataClasses:
         assert result["timestamp"] == now.isoformat()
 
     def test_audit_entry_immutable(self) -> None:
-        now = datetime.now(UTC)
+        now = FIXED_TEST_TIME
         entry = AuditEntry(
             run_id="run-1",
             timestamp=now,
@@ -155,7 +156,7 @@ class TestMetadataCoordinatorDataClasses:
     """Tests for metadata coordinator DTOs."""
 
     def test_bronze_metadata_input(self) -> None:
-        now = datetime.now(UTC)
+        now = FIXED_TEST_TIME
         inp = BronzeMetadataInput(
             batch_id="batch-001",
             record_count=100,
@@ -170,7 +171,7 @@ class TestMetadataCoordinatorDataClasses:
         assert inp.governance is None
 
     def test_bronze_metadata_input_immutable(self) -> None:
-        now = datetime.now(UTC)
+        now = FIXED_TEST_TIME
         inp = BronzeMetadataInput(
             batch_id="b",
             record_count=1,

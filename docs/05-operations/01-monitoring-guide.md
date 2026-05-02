@@ -78,8 +78,9 @@ Pushgateway publication на завершении run. Это позволяет
 
 В верхней части каждого дашборда расположены выпадающие списки:
 
-- **1. Overview / 2. Runtime / 4. Data Quality**: `$pipeline`, `$run_type`
-- **3. Provider Health**: `$provider`
+- **1. Overview / Control Plane v1**: `$pipeline`, `$run_type`
+- **2. Runtime / 4. Data Quality**: `$pipeline`, `$run_type`, `$stage`
+- **3. Provider Health**: `$provider`, `$adapter`
 - **5. Silver Reject Explorer**: `$pipeline`, `$run_type`, `$reason_code`, `$field`, `$run_id`, `$payload_hash`
 - **6. Workflow Overview**: `$workflow`, `$status`
 
@@ -96,23 +97,22 @@ Pushgateway publication на завершении run. Это позволяет
 - **Processing Volume by Stage**: stage-volume trend за активное окно Grafana.
 - **Stage Distribution in Range / Pipeline Distribution in Range**: selected-range срезы распределения.
 - **Overall Yield (Selected Range)**: `gold[$__range] / clamp-min(bronze[$__range], 1)`.
-- **Control Plane & Lineage**: отдельная строка для `Manifest Writes (24h)`,
-  `Ledger Appends (24h)`, `Checkpoint Incompatibilities (24h)`,
-  `Lineage Refs Missing (24h)` и `Global Control-plane Lookup` сигналов.
+- **Control Plane Summary**: компактная строка для `Manifest / Ledger Failures`,
+  `Checkpoint Incompatibilities (24h)`, `Lineage Refs Missing (24h)` и
+  явного handoff в `Control Plane v1`.
 - **Composite Source Selections (24h)**: informational counter по
   `bioetl_composite_source_selection_total`, который показывает bounded
   composite arbitration activity в выбранном `$pipeline`. Это не alert-state
   signal, а operator context для случаев, когда composite path неожиданно
   меняет источник данных или перестаёт выбирать expected source.
-- **Global Control-plane Lookup Failures (24h) / Global Control-plane Lookup p95 (1h)**:
-  показывают, можно ли читать manifest/ledger/lineage обратно и насколько
-  дорогими становятся lookup paths во время расследований. Эти сигналы сейчас
-  global по стеку и не фильтруются по `$pipeline`.
-- **Lineage Fragment Outcomes (1h)**: тренд публикации lineage fragments по
-  `layer/status` без использования high-cardinality labels.
+- **Control Plane v1 Handoff**: если incident требует global read / replay /
+  lineage detail, используйте явный переход в `bioetl-control-plane-v1`, а не
+  пытайтесь расследовать это только из overview.
 - **Drilldown**: dashboard links `Explore Logs (Loki, tracing profile)` / `Explore Traces (Tempo, tracing profile)`
   и data links у `Processing Volume by Stage` переводят оператора в Grafana Explore с тем
-  же временным окном. Tempo handoff уже предфильтрован по текущим `$pipeline/$run_type`.
+  же временным окном. Overview теперь также даёт явный handoff в
+  `6. Workflow Overview`, если расследование уходит в declarative DAG/status
+  surface. Tempo handoff уже предфильтрован по текущим `$pipeline/$run_type`.
 
 #### 2. 2. Runtime
 
@@ -141,7 +141,9 @@ adaptive-memory и alert-condition панели должны быть usable д�
   `Replay Not Reconstructable` дополнительно дают прямой handoff в
   `Control Plane v1`, чтобы checkpoint/replay/lineage incidents не требовали
   ручного поиска следующего dashboard. Для Tempo runtime surface используется
-  TraceQL filter по текущим `$pipeline/$run_type`, а не пустой search.
+  TraceQL filter по текущим `$pipeline/$run_type`, а не пустой search. Loki
+  handoff стартует с безопасного `{job="bioetl"}` baseline, а не с пустого
+  queryless surface.
 
 - **Tracing Mode Note**: верхняя note-панель прямо под `Runtime Scope`
   напоминает, что без включённого `tracing` profile оператор должен опираться
@@ -168,27 +170,32 @@ adaptive-memory и alert-condition панели должны быть usable д�
   рискам: preflight `data_source`, `infrastructure_validated` и
   `pipeline_runs_total{status="failed"}`. Если панель активна, расследование
   стоит начинать с `pipeline-failure-critical.md`, а не только с provider/DQ path.
+  Панель теперь даёт direct runbook handoff в этот документ.
   Начиная с текущего baseline dashboard читает recording-rule series
   `bioetl_runtime_alert_condition_*`, чтобы не дублировать тяжёлую alert
   PromQL-логику прямо в JSON-панелях.
 
 - **Global Control-plane Lookup Outcomes (1h) / Global Control-plane Lookup p95 (1h)**:
   runtime-срез по success/miss/failed для manifest, ledger и lineage lookup
-  paths. Эти панели особенно полезны, когда write-side выглядит здоровым, но
-  follow-up investigation или lineage drilldown начинают терять данные. Они не
-  привязаны к `$pipeline`, потому что underlying control-plane read metrics не
-  несут pipeline label.
+  paths. Эти панели особенно полезны как alert-adjacent signal до перехода в
+  `Control Plane v1`. Они не привязаны к `$pipeline`, потому что underlying
+  control-plane read metrics не несут pipeline label.
 
 - **Control-plane aggregate view**: используйте `bioetl-control-plane-v1` для
-  мониторинга aggregated manifest write failures, ledger append failures,
-  checkpoint compatibility и read failure ratio. Новое правило
+  мониторинга aggregated manifest/ledger failures, checkpoint compatibility,
+  global read failures/p95 и lineage fragment outcomes. Новое правило
   `BioETLControlPlaneReadFailureRate` (см. `docs/05-operations/runbooks/observability-checklist.md`)
   срабатывает, если доля failed reads по store/operation превышает 5% за 30m.
+  `Control-plane Alert Conditions` теперь ведёт не только в `Control Plane v1`,
+  но и в `run-manifest-inspection.md` / `observability-checklist.md`.
 
 #### 3. 3. Provider Health
 
 Технический мониторинг состояния внешних API (ChEMBL, UniProt и др.).
 
+- **Current Provider Health Status**: table panel по
+  `bioetl_provider_health_status{provider}` с явным mapping:
+  `0=UNHEALTHY`, `1=DEGRADED`, `2=HEALTHY`.
 - **Health Check Latency by Provider (p95)**: тренд латентности провайдеров.
 - **Healthy Checks / Degraded Checks / Health Checks Total**: разделяют completed probes по outcome и не маскируют `DEGRADED` как success.
 - **Failure & Degraded Trend by Provider**: показывает устойчивость деградации по каждому provider в выбранном time range.
@@ -196,6 +203,8 @@ adaptive-memory и alert-condition панели должны быть usable д�
 - **Retries Exhausted by Provider / Operation** и **Retries Exhausted Trend by Provider / Operation**:
   показывают, где и насколько часто исчерпываются retries (`bioetl_data_source_retry_exhausted_total`).
 - **Per-provider gauge (102)**: повторяемая p95-панель по `$provider`.
+- Для provider/control-plane/runtime/DQ latency panels `No data` нужно читать
+  как “в окне нет latency samples”, а не как нормализованный `0s`.
 - **Drilldown**: dashboard links `Back to Overview`, `2. Runtime`, `Explore Logs (Loki, tracing profile)` /
   `Explore Traces (Tempo, tracing profile)` и data links у latency-панели открывают correlation path. Для Loki shipped
   baseline стартует с общего `{job="bioetl"}` stream, а дополнительное
@@ -210,11 +219,12 @@ adaptive-memory и alert-condition панели должны быть usable д�
   `bioetl_dq_validation_score` и `bioetl_dq_validation_record_count`.
 - **Worst-Entity DQ Score**: быстрый worst-case сигнал по сущностям в выбранном pipeline scope.
 - **Quarantine / Soft Threshold / Validation Failures**: контроль деградаций по окнам времени.
-- **Anomalies / DQ p95 / Data Freshness**: детальные DQ-сигналы. Текущий
-  freshness gauge отражает ingestion anchor текущего успешного запуска
-  (сейчас это `PipelineContext.started_at`, который также прокидывается в
-  `_ingestion_ts` runtime writes); lag интерпретируется как
-  `time() - bioetl_data_freshness_seconds`.
+- **Anomalies / DQ p95 / Data Freshness**: детальные DQ-сигналы. `Worst Data
+  Freshness Lag (seconds)` теперь показывает самый stale entity в выбранном
+  scope через `max(time() - bioetl_data_freshness_seconds)`, а
+  `Latest Successful Data Timestamp` остаётся отдельным latest-success anchor.
+  Это intentionally разные сигналы: latest success не должен маскировать worst
+  freshness lag.
 - **Drilldown**: dashboard links `Back to Overview`, `Control Plane v1`,
   `Explore Logs (Loki, tracing profile)` / `Explore Traces (Tempo, tracing profile)`
   и data links у `Data Flow in Range: Bronze -> Silver -> Gold` переводят расследование
@@ -232,6 +242,8 @@ Record-level dashboard для `FILTERED_OUT_SILVER` записей (quarantine-b
 - **Selected Record Details**: exact reject context по выбранному `payload_hash`.
 - **Top Reject Reasons / Fields / Signatures**: агрегаты в том же scoped контексте.
 - **Datasource**: `Quarantine Explorer` (JSON/Infinity), не Prometheus.
+- **Scope contract**: `$pipeline` всегда single-select/no-All; `run_id` и
+  `payload_hash` остаются Explorer-only forensic filters.
 - **Drilldown**: links `Back to Overview`, `Back to Data Quality`, `Open Logs`, `Open Traces` и row-level link в CLI-команду.
 
 #### 6. 6. Workflow Overview
@@ -242,8 +254,9 @@ step outcomes.
 
 - **Workflow Runs**: selected-range count по `bioetl_workflow_runs_total`.
 - **Step Outcomes by Kind**: breakdown по bounded `step_kind/status` без
-  `run_id` или `step_id` labels.
-- **Step Duration p95**: latency по `bioetl_workflow_step_duration_seconds`.
+  `run_id` или `step_id` labels; panel now respects selected `$status`.
+- **Step Duration p95**: latency по `bioetl_workflow_step_duration_seconds`;
+  panel now also respects selected `$status`.
 - **Drilldown**: links `Back to Overview`, `2. Runtime`, `Control Plane v1`.
 
 #### Quarantine operator metrics

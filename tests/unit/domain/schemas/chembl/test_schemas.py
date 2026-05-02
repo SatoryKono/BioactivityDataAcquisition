@@ -21,6 +21,7 @@ from bioetl.domain.schemas.chembl.publication_similarity import (
 from bioetl.domain.schemas.chembl.publication_term import PublicationTermSchema
 from bioetl.domain.schemas.chembl.target import TargetSchema
 from bioetl.domain.schemas.chembl.target_component import TargetComponentSchema
+from tests.helpers.clock import FIXED_TEST_TIME
 
 
 @pytest.mark.unit
@@ -36,7 +37,7 @@ class TestChemblSchemas:
             "_run_id": str(uuid4()),
             "_run_type": "incremental",
             "_source_batch_id": None,
-            "_ingestion_ts": datetime.now(UTC).isoformat(),
+            "_ingestion_ts": FIXED_TEST_TIME.isoformat(),
             "_index": 0,
             "_dq_warn": False,
             "_dq_error": False,

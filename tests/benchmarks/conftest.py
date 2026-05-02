@@ -119,13 +119,6 @@ def delta_output_dir(tmp_path: Path) -> Path:
     return delta_dir
 
 
-def pytest_configure(config):
-    """Configure pytest for benchmarks."""
-    config.addinivalue_line(
-        "markers", "benchmark: mark test as a performance benchmark"
-    )
-
-
 if not HAS_BENCHMARK:
 
     @pytest.fixture

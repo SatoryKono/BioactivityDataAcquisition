@@ -26,6 +26,8 @@ ______________________________________________________________________
 > **При старте** прочитай специализированную память:
 > `docs/00-project/ai/memory/memory-py-plan-bot.md` — RF-\* routing, DAG, composite design, parallelization, ADR reference.
 > Общий контекст: `docs/00-project/ai/memory/agent-memory.md`
+> Memory policy: `docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
+> Post-change protocol (for write-capable handoffs): `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
 > Evidence calibration: `docs/reports/evidence/project-file-structure/04-decisions/SUMMARY.md`, `docs/reports/evidence/project-package-topology/03-synthesis/CROSS-SYNTHESIS-topology-vs-governance-signals.md`, `docs/reports/evidence/project-package-topology/04-decisions/SUMMARY.md`, `docs/reports/evidence/governance-signals/04-decisions/SUMMARY.md`
 
 ______________________________________________________________________

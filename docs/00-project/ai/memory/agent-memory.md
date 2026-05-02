@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.12
+Version: 1.0.13
 Status: active
 Class: internal-published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-04-16'
+  Last verified: '2026-05-02'
 
 ______________________________________________________________________
 
@@ -15,13 +15,18 @@ ______________________________________________________________________
 
 *Статус: internal-published (Internal / Extended)*
 
-*Версия: 1.0.12 | Дата: 2026-04-16 | Синхронизировано с Codex ORCHESTRATION.md v4.2, RULES.md v6.1.2*
+*Версия: 1.0.13 | Дата: 2026-05-02 | Синхронизировано с Codex ORCHESTRATION.md v4.2, RULES.md v6.1.3*
 
 > **Runtime note:** для Codex source-of-truth orchestration живёт в `.codex/agents/ORCHESTRATION.md`; другие runtimes могут сохранять отдельные runtime-specific copies и не обязаны совпадать побайтно с Codex surface.
 
 > **Surface note:** этот файл является project memory entry point внутри
 > `docs/00-project/ai/memory/`; role-specific `memory-py-*.md` sheets дополняют
 > его, а не заменяют runtime source или canonical governance docs.
+>
+> **Governance note:** version markers в memory — это navigation hints.
+> Решения и проверки MUST подтверждаться по актуальным canonical surfaces:
+> `docs/00-project/RULES.md`, `docs/00-project/REQUIREMENTS.md`,
+> `AGENTS.md`, active ADRs и runtime source files.
 
 > **Назначение**: Полный контекст для быстрого онбординга новой AI-сессии в BioETL.
 > При старте новой сессии — попроси агент прочитать этот файл:
@@ -51,7 +56,7 @@ ______________________________________________________________________
 | Провайдеры      | ChEMBL, PubChem, UniProt, PubMed, CrossRef, OpenAlex, SemanticScholar (7 шт.)     |
 | ADR             | Текущий набор в `docs/02-architecture/decisions/`; ADR-008 исторически superseded |
 | Coverage target | ≥85% overall, ≥90% domain                                                         |
-| RULES.md        | v6.1.2 (2026-04-09)                                                               |
+| RULES.md        | v6.1.3 (2026-04-29)                                                               |
 
 ### Ключевые файлы
 
@@ -324,6 +329,9 @@ docs/00-project/ai/memory/memory-py-test-bot.md    — test structure, threshold
 docs/00-project/ai/memory/memory-py-config-bot.md  — config hierarchy, templates, ADR compliance, composite rules
 docs/00-project/ai/memory/memory-py-debug-bot.md   — error classification, debugging methodology, fix patterns
 docs/00-project/ai/memory/memory-py-doc-bot.md     — doc structure, ADR management, CHANGELOG, docstrings, diagrams
+docs/00-project/ai/memory/memory-py-architecture-debt-bot.md — architecture debt waves, exemption governance, closure gates
+docs/00-project/ai/memory/memory-py-review-orchestrator.md   — sector review map, evidence rollup, severity calibration
+docs/00-project/ai/memory/memory-py-test-swarm.md            — swarm decomposition, failure telemetry, flakiness protocol
 ```
 
 ### 3.3 Входы субагентов (обязательные параметры)

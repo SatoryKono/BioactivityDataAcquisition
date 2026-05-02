@@ -10,8 +10,11 @@ import pytest
 from bioetl.domain.exceptions.network import ExternalServiceError
 
 from .conftest import (
+    build_e2e_run_context,
     build_e2e_skip_reason,
+    build_e2e_replay_context,
     create_test_context,
+    _create_retry_run_context,
     run_pipeline_or_skip_transient,
 )
 from .test_pipeline_matrix_e2e import (
@@ -133,4 +136,61 @@ def test_build_e2e_fail_reason_is_deterministic() -> None:
 def test_create_test_context_initializes_started_at() -> None:
     """E2E test contexts must not inherit the sentinel runtime timestamp."""
     context = create_test_context("chembl_activity", limit=1)
-    assert context.started_at.year >= 2000
+    assert context.started_at.isoformat() == "2026-04-28T12:00:00+00:00"
+
+
+def test_create_test_context_uses_unique_occurrence_run_ids() -> None:
+    """Repeated E2E contexts must not collide in control-plane run-id indexes."""
+    ctx1 = create_test_context("chembl_activity", limit=3, resume=False)
+    ctx2 = create_test_context("chembl_activity", limit=3, resume=False)
+
+    assert ctx1.run_id != ctx2.run_id
+    assert ctx1.started_at == ctx2.started_at
+
+
+def test_build_e2e_run_context_accepts_explicit_deterministic_seed() -> None:
+    """Tests that need stable replay IDs must opt in with an explicit seed."""
+    ctx1 = build_e2e_run_context(
+        "chembl_activity",
+        limit=3,
+        resume=False,
+        run_id_seed="stable-case",
+    )
+    ctx2 = build_e2e_run_context(
+        "chembl_activity",
+        limit=3,
+        resume=False,
+        run_id_seed="stable-case",
+    )
+
+    assert ctx1.run_id == ctx2.run_id
+    assert ctx1.started_at == ctx2.started_at
+
+
+def test_retry_run_context_uses_deterministic_attempt_seed() -> None:
+    """Retry contexts must derive stable per-attempt IDs instead of uuid4()."""
+    context = create_test_context("chembl_activity", limit=1)
+
+    retry1 = _create_retry_run_context(context, 1)
+    retry1_again = _create_retry_run_context(context, 1)
+    retry2 = _create_retry_run_context(context, 2)
+
+    assert retry1.run_id == retry1_again.run_id
+    assert retry1.run_id != context.run_id
+    assert retry2.run_id != retry1.run_id
+    assert retry1.started_at == context.started_at
+
+
+def test_build_e2e_replay_context_tracks_parentage_deterministically() -> None:
+    """Replay helper must preserve deterministic timestamps and parent links."""
+    context = create_test_context("chembl_activity", limit=2)
+
+    replay = build_e2e_replay_context(
+        context,
+        replay_of_manifest_id="manifest-123",
+    )
+
+    assert replay.replay_of_run_id == str(context.run_id)
+    assert replay.replay_of_manifest_id == "manifest-123"
+    assert replay.run_id != context.run_id
+    assert replay.started_at == context.started_at

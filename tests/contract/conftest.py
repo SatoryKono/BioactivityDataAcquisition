@@ -27,6 +27,17 @@ _NETWORK_PROBE_TIMEOUT_SECONDS = 2.0
 _TRUTHY_ENV_VALUES = frozenset({"1", "true", "yes", "on"})
 
 
+def pytest_configure(config: pytest.Config) -> None:
+    """Register provider markers used by contract test inventory governance."""
+    config.addinivalue_line("markers", "chembl: ChEMBL contract provider tests")
+    config.addinivalue_line("markers", "pubchem: PubChem contract provider tests")
+    config.addinivalue_line("markers", "uniprot: UniProt contract provider tests")
+    config.addinivalue_line("markers", "pubmed: PubMed contract provider tests")
+    config.addinivalue_line("markers", "crossref: CrossRef contract provider tests")
+    config.addinivalue_line("markers", "openalex: OpenAlex contract provider tests")
+    config.addinivalue_line("markers", "semanticscholar: contract provider tests")
+
+
 def _is_contract_test_path(path_str: str) -> bool:
     return (
         _CONTRACT_PATH_TOKEN_POSIX in path_str
@@ -53,33 +64,6 @@ def _has_outbound_connectivity() -> bool:
         except OSError:
             continue
     return False
-
-
-def pytest_configure(config: pytest.Config) -> None:
-    """Register custom markers for contract tests."""
-    config.addinivalue_line(
-        "markers",
-        "network: tests requiring outbound network access (opt-in via --network)",
-    )
-    config.addinivalue_line("markers", "chembl: ChEMBL API contract tests")
-    config.addinivalue_line("markers", "pubchem: PubChem API contract tests")
-    config.addinivalue_line("markers", "uniprot: UniProt API contract tests")
-    config.addinivalue_line("markers", "pubmed: PubMed API contract tests")
-    config.addinivalue_line("markers", "crossref: Crossref API contract tests")
-    config.addinivalue_line("markers", "openalex: OpenAlex API contract tests")
-    config.addinivalue_line(
-        "markers", "semanticscholar: Semantic Scholar API contract tests"
-    )
-    config.addinivalue_line(
-        "markers", "slow: Tests that may be slow due to rate limits"
-    )
-    config.addinivalue_line(
-        "markers", "no_api: Contract tests that don't require live API access"
-    )
-    config.addinivalue_line(
-        "markers",
-        "pilot_soak: richer pilot-only live contract checks requiring explicit opt-in",
-    )
 
 
 def pytest_collection_modifyitems(

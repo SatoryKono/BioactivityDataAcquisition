@@ -115,6 +115,49 @@ def test_silver_filter_reject_rate_uses_selected_time_range() -> None:
     )
 
 
+def test_silver_reject_explorer_pipeline_scope_is_single_select_and_fail_closed() -> (
+    None
+):
+    """Explorer must enforce one concrete pipeline for quarantine-backed reads."""
+    dashboard = load_dashboard(
+        Path("grafana/dashboards/bioetl-silver-reject-explorer.json")
+    )
+    variable_map = {
+        variable.get("name"): variable
+        for variable in dashboard.get("templating", {}).get("list", [])
+        if variable.get("name")
+    }
+
+    pipeline_var = variable_map["pipeline"]
+    assert pipeline_var.get("multi") is False
+    assert pipeline_var.get("includeAll") is False
+
+    note_panel = next(
+        (
+            panel
+            for panel in get_dashboard_panels(dashboard)
+            if panel.get("title") == "Scope"
+        ),
+        None,
+    )
+    assert note_panel is not None, "Silver Reject Explorer must define Scope note"
+    content = note_panel.get("options", {}).get("content", "")
+    assert "Select exactly one pipeline" in content
+    assert "explorer-only" in content
+
+    for panel in get_dashboard_panels(dashboard):
+        for target in panel.get("targets", []):
+            url = target.get("url", "")
+            if not isinstance(url, str) or "/ops/quarantine/" not in url:
+                continue
+            assert "pipeline=${pipeline:csv}" not in url, (
+                "Quarantine Explorer URLs must not pass multi-pipeline CSV scope"
+            )
+            assert "pipeline=${pipeline}" in url, (
+                "Quarantine Explorer URLs must pass one concrete pipeline value"
+            )
+
+
 @pytest.mark.parametrize(
     ("panel_title", "label_name"),
     [

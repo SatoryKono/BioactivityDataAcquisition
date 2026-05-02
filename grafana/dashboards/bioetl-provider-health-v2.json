@@ -52,7 +52,7 @@
             "title": "Explore Logs (Loki, tracing profile)",
             "tooltip": "",
             "type": "link",
-            "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}"
+            "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D"
         },
         {
             "asDropdown": false,
@@ -64,7 +64,7 @@
             "title": "Explore Traces (Tempo, tracing profile)",
             "tooltip": "",
             "type": "link",
-            "url": "/a/grafana-exploretraces-app/?from=${__from}&to=${__to}"
+            "url": "/a/grafana-exploretraces-app/?from=${__from}&to=${__to}&queryType=traceqlSearch&query=%7B%20span.%22bioetl.provider%22%20%3D~%20%22${provider:regex}%22%20%7D"
         }
     ],
     "panels": [
@@ -110,7 +110,7 @@
             },
             "gridPos": {
                 "h": 8,
-                "w": 16,
+                "w": 12,
                 "x": 0,
                 "y": 0
             },
@@ -131,23 +131,104 @@
                 "dataLinks": [
                     {
                         "title": "Open Logs in Loki Explore (tracing profile)",
-                        "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}"
+                        "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D"
                     },
                     {
                         "title": "Open Traces in Tempo Explore (tracing profile)",
-                        "url": "/a/grafana-exploretraces-app/?from=${__from}&to=${__to}"
+                        "url": "/a/grafana-exploretraces-app/?from=${__from}&to=${__to}&queryType=traceqlSearch&query=%7B%20span.%22bioetl.provider%22%20%3D~%20%22${provider:regex}%22%20%7D"
                     }
                 ]
             },
             "targets": [
                 {
-                    "expr": "histogram_quantile(0.95, sum by (le, provider) (increase(bioetl_health_check_latency_seconds_bucket{provider=~\"$provider\"}[$__interval]))) or vector(0)",
+                    "expr": "histogram_quantile(0.95, sum by (le, provider) (increase(bioetl_health_check_latency_seconds_bucket{provider=~\"$provider\"}[$__interval])))",
                     "legendFormat": "{{ provider }} p95",
                     "refId": "A"
                 }
             ],
             "title": "Health Check Latency by Provider (p95)",
             "type": "timeseries"
+        },
+        {
+            "datasource": "Prometheus",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "mappings": [
+                        {
+                            "options": {
+                                "0": {
+                                    "color": "red",
+                                    "index": 0,
+                                    "text": "UNHEALTHY"
+                                },
+                                "1": {
+                                    "color": "yellow",
+                                    "index": 1,
+                                    "text": "DEGRADED"
+                                },
+                                "2": {
+                                    "color": "green",
+                                    "index": 2,
+                                    "text": "HEALTHY"
+                                }
+                            },
+                            "type": "value"
+                        }
+                    ],
+                    "max": 2,
+                    "min": 0,
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "red",
+                                "value": null
+                            },
+                            {
+                                "color": "yellow",
+                                "value": 1
+                            },
+                            {
+                                "color": "green",
+                                "value": 2
+                            }
+                        ]
+                    },
+                    "unit": "short"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 4,
+                "x": 12,
+                "y": 0
+            },
+            "id": 114,
+            "options": {
+                "footer": {
+                    "fields": "",
+                    "reducer": [
+                        "max"
+                    ],
+                    "show": false
+                },
+                "showHeader": true
+            },
+            "targets": [
+                {
+                    "expr": "max by (provider) (bioetl_provider_health_status{provider=~\"$provider\"})",
+                    "format": "table",
+                    "instant": true,
+                    "legendFormat": "{{ provider }}",
+                    "refId": "A"
+                }
+            ],
+            "title": "Current Provider Health Status",
+            "type": "table"
         },
         {
             "datasource": "Prometheus",
@@ -720,7 +801,7 @@
             "maxPerRow": 4,
             "targets": [
                 {
-                    "expr": "histogram_quantile(0.95, sum by (le, provider) (increase(bioetl_health_check_latency_seconds_bucket{provider=~\"$provider\"}[$__range]))) or vector(0)",
+                    "expr": "histogram_quantile(0.95, sum by (le, provider) (increase(bioetl_health_check_latency_seconds_bucket{provider=~\"$provider\"}[$__range])))",
                     "legendFormat": "{{ provider }}",
                     "refId": "A"
                 }
@@ -780,7 +861,7 @@
             },
             "targets": [
                 {
-                    "expr": "histogram_quantile(0.95, sum by (le, provider, endpoint) (increase(bioetl_adapter_request_duration_seconds_bucket{provider=~\"$provider\"}[$__interval]))) or vector(0)",
+                    "expr": "histogram_quantile(0.95, sum by (le, provider, endpoint) (increase(bioetl_adapter_request_duration_seconds_bucket{provider=~\"$provider\"}[$__interval])))",
                     "legendFormat": "{{ provider }} {{ endpoint }} p95",
                     "refId": "A"
                 }
@@ -936,7 +1017,7 @@
             },
             "targets": [
                 {
-                    "expr": "histogram_quantile(0.95, sum by (le, provider) (increase(bioetl_rate_limiter_wait_seconds_bucket{provider=~\"$provider\"}[$__interval]))) or vector(0)",
+                    "expr": "histogram_quantile(0.95, sum by (le, provider) (increase(bioetl_rate_limiter_wait_seconds_bucket{provider=~\"$provider\"}[$__interval])))",
                     "legendFormat": "{{ provider }} p95",
                     "refId": "A"
                 }

@@ -1,3 +1,10 @@
+> **BioETL Guardrail Banner (Runtime-Source-First)**
+> This catalog is subordinate to BioETL runtime policy and must not override it.
+> Read first: `AGENTS.md`, `.codex/agents/CODEX-RUNTIME.md`,
+> `docs/00-project/ai/agents/guides/MEMORY_USAGE.md`,
+> `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`.
+> For project context, use `docs/00-project/ai/memory/agent-memory.md`.
+
 # Research & Analysis Subagents
 
 Research & Analysis subagents are your investigative powerhouses, specializing in finding, analyzing, and synthesizing information from diverse sources. These experts excel at deep research, competitive intelligence, market analysis, and trend identification. They transform raw information into actionable insights, helping you make informed decisions based on comprehensive analysis and data-driven research.

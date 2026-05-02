@@ -21,6 +21,8 @@ def test_check_ai_surfaces_reports_missing_policy_token(
     monkeypatch.setattr(check_drift, "AI_SURFACE_STALE_PATTERNS", ())
     monkeypatch.setattr(check_drift, "AI_SURFACE_FORBIDDEN_PATTERNS", {})
     monkeypatch.setattr(check_drift, "AI_WRITE_CAPABLE_SKILL_REQUIRED_TOKENS", {})
+    monkeypatch.setattr(check_drift, "AI_ROLE_PROFILE_REQUIRED_TOKENS", {})
+    monkeypatch.setattr(check_drift, "AI_ROLE_MEMORY_COVERAGE_REQUIRED_TOKENS", {})
     monkeypatch.setattr(check_drift, "AI_MIRROR_NOTICE_REQUIRED_TOKENS", {})
 
     report = check_drift.DriftReport()
@@ -42,6 +44,8 @@ def test_check_ai_surfaces_reports_forbidden_legacy_runtime_dependency(
 
     monkeypatch.setattr(check_drift, "AI_SURFACE_REQUIRED_TOKENS", {})
     monkeypatch.setattr(check_drift, "AI_WRITE_CAPABLE_SKILL_REQUIRED_TOKENS", {})
+    monkeypatch.setattr(check_drift, "AI_ROLE_PROFILE_REQUIRED_TOKENS", {})
+    monkeypatch.setattr(check_drift, "AI_ROLE_MEMORY_COVERAGE_REQUIRED_TOKENS", {})
     monkeypatch.setattr(check_drift, "AI_MIRROR_NOTICE_REQUIRED_TOKENS", {})
     monkeypatch.setattr(check_drift, "AI_SURFACE_STALE_PATTERNS", ())
     monkeypatch.setattr(
@@ -82,6 +86,8 @@ def test_check_ai_surfaces_reports_write_capable_skill_without_post_change_polic
             )
         },
     )
+    monkeypatch.setattr(check_drift, "AI_ROLE_PROFILE_REQUIRED_TOKENS", {})
+    monkeypatch.setattr(check_drift, "AI_ROLE_MEMORY_COVERAGE_REQUIRED_TOKENS", {})
     monkeypatch.setattr(check_drift, "AI_MIRROR_NOTICE_REQUIRED_TOKENS", {})
     monkeypatch.setattr(check_drift, "AI_SURFACE_STALE_PATTERNS", ())
     monkeypatch.setattr(check_drift, "AI_SURFACE_FORBIDDEN_PATTERNS", {})
@@ -107,6 +113,8 @@ def test_check_ai_surfaces_reports_docs_mirror_without_non_canonical_notice(
 
     monkeypatch.setattr(check_drift, "AI_SURFACE_REQUIRED_TOKENS", {})
     monkeypatch.setattr(check_drift, "AI_WRITE_CAPABLE_SKILL_REQUIRED_TOKENS", {})
+    monkeypatch.setattr(check_drift, "AI_ROLE_PROFILE_REQUIRED_TOKENS", {})
+    monkeypatch.setattr(check_drift, "AI_ROLE_MEMORY_COVERAGE_REQUIRED_TOKENS", {})
     monkeypatch.setattr(
         check_drift,
         "AI_MIRROR_NOTICE_REQUIRED_TOKENS",
@@ -157,6 +165,8 @@ def test_check_ai_surfaces_reports_agent_mirror_without_runtime_header(
 
     monkeypatch.setattr(check_drift, "AI_SURFACE_REQUIRED_TOKENS", {})
     monkeypatch.setattr(check_drift, "AI_WRITE_CAPABLE_SKILL_REQUIRED_TOKENS", {})
+    monkeypatch.setattr(check_drift, "AI_ROLE_PROFILE_REQUIRED_TOKENS", {})
+    monkeypatch.setattr(check_drift, "AI_ROLE_MEMORY_COVERAGE_REQUIRED_TOKENS", {})
     monkeypatch.setattr(check_drift, "AI_MIRROR_NOTICE_REQUIRED_TOKENS", {})
     monkeypatch.setattr(check_drift, "AI_SURFACE_STALE_PATTERNS", ())
     monkeypatch.setattr(check_drift, "AI_SURFACE_FORBIDDEN_PATTERNS", {})
@@ -213,6 +223,8 @@ def test_check_ai_surfaces_accepts_skill_mirror_with_runtime_header(
 
     monkeypatch.setattr(check_drift, "AI_SURFACE_REQUIRED_TOKENS", {})
     monkeypatch.setattr(check_drift, "AI_WRITE_CAPABLE_SKILL_REQUIRED_TOKENS", {})
+    monkeypatch.setattr(check_drift, "AI_ROLE_PROFILE_REQUIRED_TOKENS", {})
+    monkeypatch.setattr(check_drift, "AI_ROLE_MEMORY_COVERAGE_REQUIRED_TOKENS", {})
     monkeypatch.setattr(check_drift, "AI_MIRROR_NOTICE_REQUIRED_TOKENS", {})
     monkeypatch.setattr(check_drift, "AI_SURFACE_STALE_PATTERNS", ())
     monkeypatch.setattr(check_drift, "AI_SURFACE_FORBIDDEN_PATTERNS", {})
@@ -225,3 +237,86 @@ def test_check_ai_surfaces_accepts_skill_mirror_with_runtime_header(
         for issue in report.issues
         if issue.doc_file == "docs/00-project/ai/skills/local/create-pr/SKILL.md"
     ]
+
+
+def test_check_ai_surfaces_reports_missing_role_profile_post_change_anchor(
+    monkeypatch, tmp_path: Path
+) -> None:
+    target = tmp_path / ".codex" / "agents" / "py-config-bot.md"
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(
+        "\n".join(
+            [
+                "Memory policy: docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
+                "Project memory: docs/00-project/ai/memory/agent-memory.md",
+                "Role memory: docs/00-project/ai/memory/memory-py-config-bot.md",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr(check_drift, "AI_SURFACE_REQUIRED_TOKENS", {})
+    monkeypatch.setattr(check_drift, "AI_WRITE_CAPABLE_SKILL_REQUIRED_TOKENS", {})
+    monkeypatch.setattr(
+        check_drift,
+        "AI_ROLE_PROFILE_REQUIRED_TOKENS",
+        {
+            Path(".codex/agents/py-config-bot.md"): (
+                "MEMORY_USAGE.md",
+                "agent-memory.md",
+                "memory-py-config-bot.md",
+                "POST_CHANGE_VALIDATION.md",
+            )
+        },
+    )
+    monkeypatch.setattr(check_drift, "AI_ROLE_MEMORY_COVERAGE_REQUIRED_TOKENS", {})
+    monkeypatch.setattr(check_drift, "AI_MIRROR_NOTICE_REQUIRED_TOKENS", {})
+    monkeypatch.setattr(check_drift, "AI_SURFACE_STALE_PATTERNS", ())
+    monkeypatch.setattr(check_drift, "AI_SURFACE_FORBIDDEN_PATTERNS", {})
+
+    report = check_drift.DriftReport()
+    check_drift.check_ai_surfaces(report, root=tmp_path)
+
+    assert report.error_count == 1
+    assert report.issues[0].doc_file == ".codex/agents/py-config-bot.md"
+    assert report.issues[0].detail.endswith("POST_CHANGE_VALIDATION.md")
+
+
+def test_check_ai_surfaces_reports_missing_specialized_role_memory_coverage(
+    monkeypatch, tmp_path: Path
+) -> None:
+    target = tmp_path / "docs" / "00-project" / "ai" / "memory" / "README.md"
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(
+        "Role matrix without specialized orchestrator memory rows\n",
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr(check_drift, "AI_SURFACE_REQUIRED_TOKENS", {})
+    monkeypatch.setattr(check_drift, "AI_WRITE_CAPABLE_SKILL_REQUIRED_TOKENS", {})
+    monkeypatch.setattr(check_drift, "AI_ROLE_PROFILE_REQUIRED_TOKENS", {})
+    monkeypatch.setattr(
+        check_drift,
+        "AI_ROLE_MEMORY_COVERAGE_REQUIRED_TOKENS",
+        {
+            Path("docs/00-project/ai/memory/README.md"): (
+                "memory-py-architecture-debt-bot.md",
+                "memory-py-review-orchestrator.md",
+                "memory-py-test-swarm.md",
+            )
+        },
+    )
+    monkeypatch.setattr(check_drift, "AI_MIRROR_NOTICE_REQUIRED_TOKENS", {})
+    monkeypatch.setattr(check_drift, "AI_SURFACE_STALE_PATTERNS", ())
+    monkeypatch.setattr(check_drift, "AI_SURFACE_FORBIDDEN_PATTERNS", {})
+
+    report = check_drift.DriftReport()
+    check_drift.check_ai_surfaces(report, root=tmp_path)
+
+    assert report.error_count == 3
+    assert {issue.detail for issue in report.issues} == {
+        "Missing required AI policy/runtime token: memory-py-architecture-debt-bot.md",
+        "Missing required AI policy/runtime token: memory-py-review-orchestrator.md",
+        "Missing required AI policy/runtime token: memory-py-test-swarm.md",
+    }

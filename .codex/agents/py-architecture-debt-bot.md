@@ -25,6 +25,13 @@ ______________________________________________________________________
   - `docs/00-project/ai/prompts/architecture_metric_exemptions_tasks_json_prompt.md`
   - `docs/00-project/ai/prompts/architecture_debt_reduction_orchestration.md`
 
+## Memory Anchors
+
+- Memory policy: `docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
+- Project memory: `docs/00-project/ai/memory/agent-memory.md`
+- Role memory: `docs/00-project/ai/memory/memory-py-architecture-debt-bot.md`
+- Post-change protocol: `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
+
 ## Hard Ownership Rules
 
 1. `configs/` меняет только `py-config-bot`.

@@ -14,6 +14,7 @@ import pytest
 from pandera.errors import SchemaError
 
 from bioetl.domain.schemas.openalex.publication import OpenAlexPublicationSchema
+from tests.helpers.clock import FIXED_TEST_TIME
 
 # Pandera DataFrameModel has issues with Python 3.14+ due to function dispatch bug
 # See: https://github.com/unionai-oss/pandera/issues
@@ -32,7 +33,7 @@ def valid_record() -> dict:
         "_run_id": uuid4(),
         "_run_type": "incremental",
         "_source_batch_id": None,
-        "_ingestion_ts": datetime.now(UTC).isoformat(),
+        "_ingestion_ts": FIXED_TEST_TIME.isoformat(),
         "_dq_warn": False,
         "_dq_error": False,
         "_index": 0,

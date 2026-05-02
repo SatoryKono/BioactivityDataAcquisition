@@ -1,8 +1,5 @@
 """Tests for contract identity model."""
 
-from datetime import UTC, datetime
-
-
 from bioetl.domain.types.contract_identity import (
     CompatibilityLevel,
     ContractIdentity,
@@ -10,11 +7,12 @@ from bioetl.domain.types.contract_identity import (
     DQContractCompatibility,
     LifecycleStatus,
 )
+from tests.helpers.clock import FIXED_TEST_TIME
 
 
 def _utcnow_iso() -> str:
     """Return an aware UTC timestamp string for test fixtures."""
-    return datetime.now(UTC).isoformat()
+    return FIXED_TEST_TIME.isoformat()
 
 
 class TestContractIdentity:

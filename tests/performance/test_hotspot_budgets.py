@@ -59,6 +59,15 @@ _PLATFORM_OVERRIDE_TABLES = {
         "p95_ms": _WINDOWS_P95_OVERRIDES,
     }
 }
+_IMPLEMENTED_BENCHMARK_KEYS = frozenset(
+    {
+        "silver_prepare_arrow_2000",
+        "silver_write_append_600",
+        "silver_write_merge_600",
+        "crossref_batch_fetch_200",
+        "atomic_write_group_50",
+    }
+)
 
 
 @dataclass(frozen=True)
@@ -116,6 +125,12 @@ def _load_budgets() -> dict[str, HotspotBudget]:
         )
         for key, value in budgets.items()
     }
+
+
+def test_hotspot_budget_registry_matches_implemented_benchmarks() -> None:
+    """Budget registry must track only the benchmark gates implemented here."""
+    budgets = _load_budgets()
+    assert set(budgets) == set(_IMPLEMENTED_BENCHMARK_KEYS)
 
 
 def _median(values: list[float]) -> float:
