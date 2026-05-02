@@ -4,7 +4,7 @@ Provides basic port creation for checkpoint and quarantine infrastructure.
 These are low-level building blocks used by both CLI and runtime.
 
 Note:
-    Higher-level managers and services are created in cli/ module
+    Higher-level runtime services and administration services are created in cli/ module
     since they require additional context (pipeline_name, run_id, etc.)
     and use NoOp observability for CLI operations.
 """

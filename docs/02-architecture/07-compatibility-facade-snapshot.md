@@ -5,19 +5,19 @@
 ## Summary
 
 - Registry YAML: `configs/quality/compatibility_facade_inventory.yaml`
-- Curated inventory rows: `24`
-- Transition debt rows: `3`
+- Curated inventory rows: `23`
+- Transition debt rows: `2`
 - Sanctioned public entrypoint rows: `21`
 - Retained review entrypoints: `3`
 - Permanent public entrypoints: `18`
-- Measured tracked modules: `24`
+- Measured tracked modules: `23`
 - Measured-only modules outside curated inventory: `0`
-- Discovered docstring-tracked modules: `1`
+- Discovered docstring-tracked modules: `3`
 - Unexpected docstring-tracked modules: `0`
 - Missing allowlisted measured-only modules: `0`
 - First-party src imports targeting measured-only modules: `0`
-- Curated rows requiring external breaking change process: `24`
-- Curated rows marked internal-callers-zero: `5`
+- Curated rows requiring external breaking change process: `23`
+- Curated rows marked internal-callers-zero: `4`
 - First-party src imports targeting internal-callers-zero rows: `0`
 - Ratchet violations: `0`
 
@@ -40,7 +40,6 @@
 - `src/bioetl/composition/entrypoints.py`
 - `src/bioetl/composition/factories/storage/adapter.py`
 - `src/bioetl/domain/composite/config.py`
-- `src/bioetl/domain/services/__init__.py`
 - `src/bioetl/domain/value_objects/activity_values.py`
 - `src/bioetl/domain/value_objects/publication_field_groups.py`
 - `src/bioetl/infrastructure/adapters/pubmed/client.py`
@@ -62,7 +61,6 @@
 
 - `src/bioetl/interfaces/cli/commands/_compat.py` — external breaking change required: `true`, internal callers zero: `false`
 - `src/bioetl/composition/factories/storage/adapter.py` — external breaking change required: `true`, internal callers zero: `true`
-- `src/bioetl/domain/services/__init__.py` — external breaking change required: `true`, internal callers zero: `true`
 - `src/bioetl/interfaces/cli/commands/run.py` — external breaking change required: `true`, internal callers zero: `false`
 - `src/bioetl/interfaces/cli/commands/run_all.py` — external breaking change required: `true`, internal callers zero: `false`
 - `src/bioetl/interfaces/cli/commands/run_composite.py` — external breaking change required: `true`, internal callers zero: `false`
@@ -124,6 +122,8 @@
 ### Discovered Docstring-Tracked Modules
 
 - `src/bioetl/composition/factories/storage/adapter.py`
+- `src/bioetl/infrastructure/adapters/pubmed/client.py`
+- `src/bioetl/infrastructure/adapters/semanticscholar/client.py`
 
 ### Unexpected Docstring-Tracked Modules
 

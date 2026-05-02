@@ -183,14 +183,22 @@ class TestSemanticScholarYearValidation:
             "open_access_url": None,
             "oa_status": None,
             "subject_fields": None,
+            "subject_fields_canonical_json": None,
+            "subject_fields_raw_json": None,
             "publication_types": None,
+            "publication_types_canonical_json": None,
+            "publication_types_raw_json": None,
             # Author affiliations
             "affiliation_list": None,
             # Author identifiers
             "author_s2_ids": None,
             "author_h_indices": None,
+            "author_h_indices_canonical_json": None,
+            "author_h_indices_raw_json": None,
             # Citation context
             "citation_contexts": None,
+            "citation_contexts_canonical_json": None,
+            "citation_contexts_raw_json": None,
         }
 
     def test_year_boundary_values(self, valid_record: dict) -> None:
@@ -370,6 +378,8 @@ class TestPubMedYearValidation:
             "citation_subset": None,
             # Enhanced affiliation data (unified field name)
             "affiliation_structured": None,
+            "affiliation_structured_canonical_json": None,
+            "affiliation_structured_raw_json": None,
             # Counts
             "author_count": 5,
             "mesh_heading_count": 10,
@@ -387,6 +397,8 @@ class TestPubMedYearValidation:
             # Note: affiliation_list inherited from base (unified field name)
             # Author-affiliation mapping
             "authors_with_affiliations": None,
+            "authors_with_affiliations_canonical_json": None,
+            "authors_with_affiliations_raw_json": None,
         }
 
     def test_year_boundary_values(self, valid_record: dict) -> None:

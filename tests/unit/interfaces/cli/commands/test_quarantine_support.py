@@ -20,15 +20,15 @@ from bioetl.interfaces.cli.commands.domains.quarantine.support import (
 from bioetl.interfaces.cli.exit_codes import ExitCode
 
 
-def _make_manager(
+def _make_runtime_service(
     records: list | None = None,
     stats: dict | None = None,
 ) -> MagicMock:
-    """Create a mock quarantine manager."""
-    manager = MagicMock()
-    manager.inspect = AsyncMock(return_value=records or [])
-    manager.get_stats = AsyncMock(return_value=stats or {"total_count": 0})
-    return manager
+    """Create a mock quarantine runtime service."""
+    runtime_service = MagicMock()
+    runtime_service.inspect = AsyncMock(return_value=records or [])
+    runtime_service.get_stats = AsyncMock(return_value=stats or {"total_count": 0})
+    return runtime_service
 
 
 def _make_service(
@@ -56,13 +56,13 @@ class TestInspectQuarantine:
         self, capsys: pytest.CaptureFixture
     ) -> None:
         """Test that empty inspection prints a 'no records' message."""
-        manager = _make_manager(records=[])
+        runtime_service = _make_runtime_service(records=[])
 
         with patch(
             "bioetl.interfaces.cli.commands.domains.quarantine.support.echo_info"
         ) as mock_echo:
             _inspect_quarantine(
-                manager,
+                runtime_service,
                 pipeline="chembl_activity",
                 limit=10,
                 error_code=None,
@@ -74,32 +74,32 @@ class TestInspectQuarantine:
     def test_records_are_echoed(self) -> None:
         """Test that found records are echoed via echo_quarantine_record."""
         record = {"payload_hash": "abc123", "error_code": "VALIDATION_FAILED"}
-        manager = _make_manager(records=[record])
+        runtime_service = _make_runtime_service(records=[record])
 
         with patch(
             "bioetl.interfaces.cli.commands.domains.quarantine.support.echo_quarantine_record"
         ) as mock_echo:
             _inspect_quarantine(
-                manager,
+                runtime_service,
                 pipeline="chembl_activity",
                 limit=10,
                 error_code=None,
             )
 
         mock_echo.assert_called_once_with(record)
-        manager.inspect.assert_awaited_once_with(
+        runtime_service.inspect.assert_awaited_once_with(
             limit=10,
             error_code=None,
         )
 
     def test_domain_error_exits_with_fail(self) -> None:
         """Test that BioETLError during inspect exits with FAIL code."""
-        manager = MagicMock()
-        manager.inspect = AsyncMock(side_effect=BioETLError("inspect error"))
+        runtime_service = MagicMock()
+        runtime_service.inspect = AsyncMock(side_effect=BioETLError("inspect error"))
 
         with pytest.raises(SystemExit) as exc_info:
             _inspect_quarantine(
-                manager,
+                runtime_service,
                 pipeline="chembl_activity",
                 limit=10,
                 error_code=None,
@@ -115,13 +115,13 @@ class TestShowQuarantineStats:
     def test_json_output_mode(self) -> None:
         """Test that output_json=True emits JSON to stdout."""
         stats = {"total_count": 5, "by_error_code": {"VALIDATION_FAILED": 5}}
-        manager = _make_manager(stats=stats)
+        runtime_service = _make_runtime_service(stats=stats)
 
         with patch(
             "bioetl.interfaces.cli.commands.domains.quarantine.support.click.echo"
         ) as mock_echo:
             _show_quarantine_stats(
-                manager,
+                runtime_service,
                 pipeline="chembl_activity",
                 output_json=True,
                 error_code=None,
@@ -139,13 +139,13 @@ class TestShowQuarantineStats:
             "by_error_code": {"SCHEMA_ERROR": 10},
             "by_status": {"PENDING": 10},
         }
-        manager = _make_manager(stats=stats)
+        runtime_service = _make_runtime_service(stats=stats)
 
         with patch(
             "bioetl.interfaces.cli.commands.domains.quarantine.support.click.echo"
         ) as mock_echo:
             _show_quarantine_stats(
-                manager,
+                runtime_service,
                 pipeline="chembl_activity",
                 output_json=False,
                 error_code=None,
@@ -153,7 +153,7 @@ class TestShowQuarantineStats:
 
         output = " ".join(str(c) for c in mock_echo.call_args_list)
         assert "chembl_activity" in output or "SCHEMA_ERROR" in output
-        manager.get_stats.assert_awaited_once_with(error_code=None, run_id=None)
+        runtime_service.get_stats.assert_awaited_once_with(error_code=None, run_id=None)
 
     def test_run_scoped_stats_enrich_bronze_ratio(self) -> None:
         """Run-scoped stats should surface Bronze denominator when available."""
@@ -171,7 +171,7 @@ class TestShowQuarantineStats:
                 "by_reason_signature": {},
             },
         }
-        manager = _make_manager(stats=stats)
+        runtime_service = _make_runtime_service(stats=stats)
         run_manifest_service = MagicMock()
         run_manifest_service.show.return_value = MagicMock(
             ledger_entries=(MagicMock(metrics_snapshot={"records_bronze": 20}),)
@@ -181,7 +181,7 @@ class TestShowQuarantineStats:
             "bioetl.interfaces.cli.commands.domains.quarantine.support.click.echo"
         ) as mock_echo:
             _show_quarantine_stats(
-                manager,
+                runtime_service,
                 pipeline="chembl_activity",
                 output_json=False,
                 error_code="FILTERED_OUT_SILVER",
@@ -192,19 +192,19 @@ class TestShowQuarantineStats:
         output = " ".join(str(c) for c in mock_echo.call_args_list)
         assert "Run ID Scope: 00000000-0000-0000-0000-000000000123" in output
         assert "Silver Rejects vs Bronze: 4/20 (20.0%)" in output
-        manager.get_stats.assert_awaited_once_with(
+        runtime_service.get_stats.assert_awaited_once_with(
             error_code="FILTERED_OUT_SILVER",
             run_id="00000000-0000-0000-0000-000000000123",
         )
 
     def test_domain_error_exits_with_fail(self) -> None:
         """Test that BioETLError during stats fetch exits with FAIL code."""
-        manager = MagicMock()
-        manager.get_stats = AsyncMock(side_effect=BioETLError("stats error"))
+        runtime_service = MagicMock()
+        runtime_service.get_stats = AsyncMock(side_effect=BioETLError("stats error"))
 
         with pytest.raises(SystemExit) as exc_info:
             _show_quarantine_stats(
-                manager,
+                runtime_service,
                 pipeline="chembl_activity",
                 output_json=False,
                 error_code=None,

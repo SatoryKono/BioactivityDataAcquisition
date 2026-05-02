@@ -95,7 +95,6 @@ class PubMedPublicationSchema(_PublicationBaseSchema):
         nullable=False,
         description="Article title (required)",
     )
-
     abstract_structured: Series[bool] = pa.Field(
         nullable=True, description="Whether abstract has NLM sections"
     )
@@ -117,14 +116,11 @@ class PubMedPublicationSchema(_PublicationBaseSchema):
         str_matches=ISSN_PATTERN,
         description="ISSN (print or electronic)",
     )
-
     journal_issn_type: Series[str] = pa.Field(nullable=True, description="ISSN type")
-
     @_typed_check("journal_issn_type", name="journal_issn_type_values")
     def _check_journal_issn_type(cls, series: Series[str]) -> Series[bool]:
         """Validate ISSN type values."""
         return cast(Series[bool], series.isna() | series.isin(ISSN_TYPES))
-
     nlm_unique_id: Series[str] = pa.Field(nullable=True, description="NLM catalog ID")
     country: Series[str] = pa.Field(
         nullable=True, description="Journal country of publication"
@@ -175,7 +171,6 @@ class PubMedPublicationSchema(_PublicationBaseSchema):
     date_revised: Series[datetime] = pa.Field(
         nullable=True, description="Record revision date"
     )
-
     # === Metadata ===
     citation_subset: Series[str] = pa.Field(
         nullable=True, description="Citation subset codes (e.g., 'AIM')"
@@ -189,11 +184,11 @@ class PubMedPublicationSchema(_PublicationBaseSchema):
             "Each object contains: text, identifier, identifier_source, email_hash"
         ),
     )
-    affiliation_structured_canonical_json: Series[str] | None = pa.Field(
+    affiliation_structured_canonical_json: Series[str] = pa.Field(
         nullable=True,
         description="Canonical JSON companion for structured affiliations.",
     )
-    affiliation_structured_raw_json: Series[str] | None = pa.Field(
+    affiliation_structured_raw_json: Series[str] = pa.Field(
         nullable=True,
         description="Raw provider JSON for structured affiliations.",
     )
@@ -274,7 +269,6 @@ class PubMedPublicationSchema(_PublicationBaseSchema):
         nullable=True,
         description="Publication types (JSON array, e.g., Journal Article, Review)",
     )
-
     # === System Fields ===
     _source: Series[str] = pa.Field(
         nullable=False,
@@ -292,11 +286,11 @@ class PubMedPublicationSchema(_PublicationBaseSchema):
         nullable=True,
         description="JSON array of authors with their affiliations and identifiers",
     )
-    authors_with_affiliations_canonical_json: Series[str] | None = pa.Field(
+    authors_with_affiliations_canonical_json: Series[str] = pa.Field(
         nullable=True,
         description="Canonical JSON companion for authors-with-affiliations payload.",
     )
-    authors_with_affiliations_raw_json: Series[str] | None = pa.Field(
+    authors_with_affiliations_raw_json: Series[str] = pa.Field(
         nullable=True,
         description="Raw provider JSON for authors-with-affiliations payload.",
     )
