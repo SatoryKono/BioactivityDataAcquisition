@@ -314,6 +314,38 @@ class TestPublicationTypePayload:
         assert payload["publication_type_unified"] == "Review"
         assert payload["publication_class"] == "REV"
 
+    def test_unknown_raw_provider_value_is_preserved_while_derived_fields_fail_closed(
+        self,
+    ) -> None:
+        payload = build_publication_type_classification_payload(
+            "crossref",
+            raw_type="future-provider-type",
+            raw_field_name="publication_type",
+        )
+
+        assert payload == {
+            "publication_type": "future-provider-type",
+            "publication_type_unified": None,
+            "publication_subclass": None,
+            "publication_class": None,
+        }
+
+    def test_unknown_raw_provider_type_list_is_preserved_without_deriving_taxonomy(
+        self,
+    ) -> None:
+        payload = build_publication_type_classification_payload(
+            "semanticscholar",
+            raw_types_list=["FutureType", "NovelLabel"],
+            raw_field_name="publication_type",
+        )
+
+        assert payload == {
+            "publication_type": "FutureType|NovelLabel",
+            "publication_type_unified": None,
+            "publication_subclass": None,
+            "publication_class": None,
+        }
+
     @pytest.mark.parametrize(
         ("raw_type", "expected_unified"),
         [

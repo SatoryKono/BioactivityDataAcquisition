@@ -200,10 +200,10 @@ quality:
     error_message: Publication must have DOI and title
   entity_conditional_validations:
   - name: article_requires_title
-    condition_field: publication_type
+    condition_field: publication_type_unified
     condition_value:
-    - journal-article
-    - proceedings-article
+    - Journal Article
+    - Conference Paper
     condition_operator: in
     then_validations:
     - field: title

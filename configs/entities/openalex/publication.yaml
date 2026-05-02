@@ -240,10 +240,10 @@ quality:
     error_message: Publication must have OpenAlex ID and title
   entity_conditional_validations:
   - name: article_requires_title
-    condition_field: publication_type
+    condition_field: publication_type_unified
     condition_value:
-    - article
-    - review
+    - Journal Article
+    - Review
     condition_operator: in
     then_validations:
     - field: title

@@ -1,4 +1,13 @@
-"""Unified publication type classification for cross-provider harmonization."""
+"""Unified publication type classification for cross-provider harmonization.
+
+This module governs only the derived taxonomy-backed fields:
+``publication_type_unified``, ``publication_subclass``, and
+``publication_class``.
+
+Raw provider-native labels remain provider sidecars. Unknown raw values are
+preserved in the raw field and do not implicitly become accepted taxonomy
+members.
+"""
 
 from __future__ import annotations
 
@@ -178,6 +187,8 @@ def build_publication_type_classification_payload(
     The default raw field is intentionally named ``publication_type_raw`` for
     callers that need an explicit sidecar field. Existing Silver schemas use
     ``publication_type`` for the same raw value and pass that name explicitly.
+    Unknown raw provider values remain preserved in that raw field while the
+    derived taxonomy fields fail closed to ``None``.
     """
     raw_value = raw_publication_type(
         raw_type=raw_type,

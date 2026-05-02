@@ -4,7 +4,10 @@ from __future__ import annotations
 
 from collections.abc import Callable
 
-from bioetl.domain.observability_contract import normalize_observability_metric_labels
+from bioetl.domain.observability_contract import (
+    normalize_observability_metric_labels,
+    normalize_observability_pipeline_label,
+)
 from bioetl.domain.ports import MetricLabels
 from bioetl.infrastructure.observability._prometheus_metric_label_normalizers import (
     normalize_adapter_endpoint_label,
@@ -85,6 +88,16 @@ _ADAPTER_OPERATION_LABEL_METRICS = frozenset(
 )
 _SOURCE_FILE_LABEL_METRICS = frozenset[str]()
 APPROVED_SOURCE_FILE_LABEL_METRICS = _SOURCE_FILE_LABEL_METRICS
+_TABLE_LABEL_METRICS = frozenset(
+    {
+        "bioetl_silver_csv_export_start_total",
+        "bioetl_silver_csv_export_success_total",
+        "bioetl_silver_csv_export_failures_total",
+        "bioetl_silver_validation_failures_total",
+        "bioetl_vacuum_files_removed_total",
+    }
+)
+APPROVED_TABLE_LABEL_METRICS = _TABLE_LABEL_METRICS
 _FILTER_SOURCE_KIND_LABEL_METRICS = frozenset(
     {
         "bioetl_filter_ids_loaded_total",
@@ -140,6 +153,7 @@ type _StringLabelNormalizer = Callable[[str], str]
 __all__ = [
     "APPROVED_ENDPOINT_LABEL_METRICS",
     "APPROVED_SOURCE_FILE_LABEL_METRICS",
+    "APPROVED_TABLE_LABEL_METRICS",
     "FORBIDDEN_PROMETHEUS_LABEL_NAMES",
     "OBSERVABILITY_EVENTS_COUNTER_NAME",
     "normalize_adapter_endpoint_label",
@@ -197,6 +211,11 @@ def validate_metric_label_policy(name: str, labels: MetricLabels) -> None:
             f"Prometheus label 'source_file' is not allowed for runtime metrics; "
             f"use bounded source_kind labels instead; got {name}"
         )
+    if "table" in label_names and name not in APPROVED_TABLE_LABEL_METRICS:
+        raise ValueError(
+            f"Prometheus label 'table' is only allowed for reviewed "
+            f"table-scoped metrics; got {name}"
+        )
 
 
 def _normalize_single_metric_label(
@@ -251,6 +270,12 @@ def _normalize_group_metric_labels(
             "source_kind",
             "other",
             normalize_filter_source_kind_label,
+        ),
+        (
+            _TABLE_LABEL_METRICS,
+            "table",
+            "unknown",
+            normalize_observability_pipeline_label,
         ),
         (_STAGE_LABEL_METRICS, "stage", "other", normalize_runtime_stage),
         (_FLOW_STAGE_LABEL_METRICS, "flow_stage", "other", normalize_flow_stage),

@@ -148,3 +148,25 @@ def test_semanticscholar_dq_conditions_use_derived_publication_taxonomy() -> Non
 
     assert journal_article_rule["condition_field"] == "publication_type_unified"
     assert journal_article_rule["condition_value"] == "Journal Article"
+
+
+def test_crossref_dq_conditions_use_derived_publication_taxonomy() -> None:
+    config = _load_yaml("configs/entities/crossref/publication.yaml")
+    conditional_rules = config["quality"]["entity_conditional_validations"]
+    article_rule = next(
+        rule for rule in conditional_rules if rule["name"] == "article_requires_title"
+    )
+
+    assert article_rule["condition_field"] == "publication_type_unified"
+    assert article_rule["condition_value"] == ["Journal Article", "Conference Paper"]
+
+
+def test_openalex_dq_conditions_use_derived_publication_taxonomy() -> None:
+    config = _load_yaml("configs/entities/openalex/publication.yaml")
+    conditional_rules = config["quality"]["entity_conditional_validations"]
+    article_rule = next(
+        rule for rule in conditional_rules if rule["name"] == "article_requires_title"
+    )
+
+    assert article_rule["condition_field"] == "publication_type_unified"
+    assert article_rule["condition_value"] == ["Journal Article", "Review"]

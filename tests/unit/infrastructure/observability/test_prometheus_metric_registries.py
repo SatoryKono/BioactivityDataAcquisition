@@ -11,6 +11,7 @@ from bioetl.infrastructure.observability.metrics_export_names import (
 from bioetl.infrastructure.observability.prometheus_metric_label_policies import (
     APPROVED_ENDPOINT_LABEL_METRICS,
     APPROVED_SOURCE_FILE_LABEL_METRICS,
+    APPROVED_TABLE_LABEL_METRICS,
     FORBIDDEN_PROMETHEUS_LABEL_NAMES,
 )
 from bioetl.infrastructure.observability.prometheus_metric_registries import (
@@ -123,9 +124,13 @@ def test_rawish_label_names_are_confined_to_normalized_metric_families() -> None
         for name, labels in _iter_registered_metric_labels()
         if "source_file" in labels
     }
+    table_metrics = {
+        name for name, labels in _iter_registered_metric_labels() if "table" in labels
+    }
 
     assert endpoint_metrics == APPROVED_ENDPOINT_LABEL_METRICS
     assert source_file_metrics == APPROVED_SOURCE_FILE_LABEL_METRICS
+    assert table_metrics == APPROVED_TABLE_LABEL_METRICS
 
 
 @pytest.mark.unit

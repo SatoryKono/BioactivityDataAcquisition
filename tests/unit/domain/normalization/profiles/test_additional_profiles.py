@@ -391,6 +391,28 @@ def test_non_chembl_publication_oa_status_policy_is_fixture_backed() -> None:
         assert rule.apply(case["input"]) == case["expected"]
 
 
+def test_non_chembl_derived_publication_classification_fields_use_strict_taxonomy() -> (
+    None
+):
+    for profile in _NON_CHEMBL_PUBLICATION_PROFILES.values():
+        unified_rule = profile.rule_for("publication_type_unified")
+        subclass_rule = profile.rule_for("publication_subclass")
+        class_rule = profile.rule_for("publication_class")
+
+        assert unified_rule is not None
+        assert subclass_rule is not None
+        assert class_rule is not None
+
+        assert unified_rule.apply(" journal article ") == "Journal Article"
+        assert unified_rule.apply("future-provider-type") is None
+        assert subclass_rule.apply(" original experimental data ") == (
+            "Original Experimental Data"
+        )
+        assert subclass_rule.apply("future-subclass") is None
+        assert class_rule.apply("exp") == "EXP"
+        assert class_rule.apply("future-class") is None
+
+
 def test_non_chembl_publication_structured_policy_is_fixture_backed() -> None:
     cases = _load_non_chembl_normalization_cases()
 

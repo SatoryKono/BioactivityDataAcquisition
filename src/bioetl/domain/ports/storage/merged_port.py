@@ -18,8 +18,8 @@ __all__ = ["MergedStoragePort"]
 class MergedStoragePort(Protocol):
     """Port for composite pipeline merged writes.
 
-    Used by composite pipelines where schema is dynamically determined
-    by the merge operation, bypassing strict schema validation.
+    Silver merged writes infer their schema from records. Production Gold
+    merged writes require an explicit strict schema.
     """
 
     async def write_silver_merged(
@@ -61,13 +61,12 @@ class MergedStoragePort(Protocol):
         run_id: str | None = None,
         sources_used: list[str] | None = None,
         preserve_column_order: bool = False,
-        schema: DataFrameSchema[object] | None = None,
+        schema: DataFrameSchema[object],
     ) -> None:
-        """Write merged records to Gold layer without Pandera schema.
+        """Write merged records to Gold layer with mandatory strict schema.
 
-        Used by composite pipelines where schema is dynamically determined
-        by the merge operation. Optional Pandera validation can be applied
-        when a composite contract is available.
+        Used by composite pipelines only when a registered composite Gold
+        contract is available.
 
         Args:
             table_name: The name of the table to write to.
@@ -79,6 +78,6 @@ class MergedStoragePort(Protocol):
             preserve_column_order: If True, skip canonical_column_order()
                 and preserve the column order from records (e.g. semantic
                 ordering applied by ColumnOrderService in composite pipelines).
-            schema: Optional Pandera schema used for strict contract validation.
+            schema: Pandera schema used for strict contract validation.
         """
         ...

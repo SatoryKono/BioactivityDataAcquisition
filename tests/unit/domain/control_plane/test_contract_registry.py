@@ -485,7 +485,7 @@ class TestRegistryIntegration:
         assert len(registry.entries) == 1
 
     def test_registry_misaligned_dq(self):
-        """Test registry with misaligned DQ compatibility."""
+        """Registry blocks misaligned DQ identity metadata."""
         registry = ContractRegistry()
 
         # Create contract identity
@@ -510,12 +510,15 @@ class TestRegistryIntegration:
             rule_bundle_version="dq-rules.v1.0",
         )
 
-        # This should still register but identity validation will catch the mismatch
         result = registry.register_contract(entry)
-        assert result.valid is True  # Entry itself is valid
+        assert result.valid is False
+        assert registry.entries == {}
+        assert result.has_blocking_issues is True
+        assert any(
+            issue.field == "dq_policy_ref"
+            and "mismatch between identity and registry entry" in issue.message
+            for issue in result.issues
+        )
 
-        # But identity validation should catch the issue
         identity_issues = identity.validate()
-        assert len(identity_issues) == 0  # Identity is valid on its own
-
-        # The mismatch would be caught at runtime when both are used together
+        assert len(identity_issues) == 0
