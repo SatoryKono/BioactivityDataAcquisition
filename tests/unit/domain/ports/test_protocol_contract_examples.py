@@ -126,6 +126,7 @@ class _ValidStorage:
         records: list[dict[str, Any]],
         primary_keys: list[str] | None = None,
         *,
+        schema: Any,
         completed_at: datetime | None = None,
         run_id: str | None = None,
         sources_used: list[str] | None = None,
@@ -133,6 +134,7 @@ class _ValidStorage:
     ) -> None:
         await _yield_once()
         del completed_at
+        del schema
 
     async def aclose(self) -> None:
         await _yield_once()

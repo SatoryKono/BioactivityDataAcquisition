@@ -391,6 +391,7 @@ def test_non_chembl_publication_oa_status_policy_is_fixture_backed() -> None:
         assert rule.apply(case["input"]) == case["expected"]
 
 
+@pytest.mark.usefixtures("publication_type_classification_data")
 def test_non_chembl_derived_publication_classification_fields_use_strict_taxonomy() -> (
     None
 ):

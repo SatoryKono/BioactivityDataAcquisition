@@ -109,6 +109,7 @@ def merge_service(merge_config, mock_storage, mock_logger):
         merge_config=merge_config,
         logger=mock_logger,
         storage=mock_storage,
+        gold_schema=MagicMock(),
     )
 
 

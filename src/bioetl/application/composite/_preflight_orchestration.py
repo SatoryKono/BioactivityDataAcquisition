@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from importlib import import_module
+
 from bioetl.application.composite._preflight_types import FieldInfo, SchemaFields
 from bioetl.domain.composite.config import CompositeConfig
 from bioetl.domain.exceptions import BioETLError, DataQualityError
@@ -14,42 +16,99 @@ class PreflightSchemaOrchestrationMixin:
     _SCHEMA_REGISTRY: dict[str, type] | None = None
     _logger: LoggerPort
 
+    def _parse_pipeline_identity(self, pipeline_name: str) -> tuple[str, str] | None:
+        """Return ``(provider, entity)`` for ``provider_entity`` pipelines."""
+        if "_" not in pipeline_name:
+            return None
+        provider, entity = pipeline_name.split("_", 1)
+        provider = provider.strip().lower()
+        entity = entity.strip().lower()
+        if not provider or not entity:
+            return None
+        return provider, entity
+
+    def _register_source_aliases(
+        self,
+        result: dict[str, SchemaFields],
+        *,
+        pipeline_name: str,
+        fields: SchemaFields,
+        is_seed: bool = False,
+    ) -> None:
+        """Register canonical and compatibility source aliases for a schema payload."""
+        identity = self._parse_pipeline_identity(pipeline_name)
+        if identity is None:
+            return
+        provider, entity = identity
+        pipeline_key = f"{provider}_{entity}"
+        provider_entity_key = f"{provider}.{entity}"
+
+        if is_seed:
+            result["seed"] = fields
+            result[provider] = fields
+        else:
+            result.setdefault(provider, fields)
+
+        result[pipeline_key] = fields
+        result[provider_entity_key] = fields
+
     def _load_source_fields(self, config: CompositeConfig) -> dict[str, SchemaFields]:
         """Load field definitions from source schemas."""
         result: dict[str, SchemaFields] = {}
 
         seed_pipeline = config.seed.pipeline
         seed_fields = self._load_pipeline_schema_fields(seed_pipeline)
-        if seed_fields and "_" in seed_pipeline:
-            provider = seed_pipeline.split("_", 1)[0].lower()
-            result[provider] = seed_fields
-            result["seed"] = seed_fields
+        if seed_fields:
+            self._register_source_aliases(
+                result,
+                pipeline_name=seed_pipeline,
+                fields=seed_fields,
+                is_seed=True,
+            )
+
+        for dependency in config.dependencies:
+            dependency_fields = self._load_pipeline_schema_fields(dependency.pipeline)
+            if dependency_fields:
+                self._register_source_aliases(
+                    result,
+                    pipeline_name=dependency.pipeline,
+                    fields=dependency_fields,
+                )
 
         for enricher in config.enrichers:
             enricher_fields = self._load_pipeline_schema_fields(enricher.pipeline)
-            if enricher_fields and "_" in enricher.pipeline:
-                provider = enricher.pipeline.split("_", 1)[0].lower()
-                result[provider] = enricher_fields
+            if enricher_fields:
+                self._register_source_aliases(
+                    result,
+                    pipeline_name=enricher.pipeline,
+                    fields=enricher_fields,
+                )
 
         return result
 
     def _load_pipeline_schema_fields(self, pipeline_name: str) -> SchemaFields | None:
         """Load schema fields for a specific pipeline."""
         registry = self._get_schema_registry()
-        if "_" not in pipeline_name:
+        identity = self._parse_pipeline_identity(pipeline_name)
+        if identity is None:
             return None
 
-        provider = pipeline_name.split("_", 1)[0].lower()
-        schema_class = registry.get(provider)
+        provider, entity = identity
+        pipeline_key = f"{provider}_{entity}"
+        schema_class = registry.get(pipeline_key)
         if schema_class is None:
             self._logger.debug(
-                "No schema found for provider",
+                "No schema found for pipeline",
                 provider=provider,
+                entity=entity,
+                pipeline_key=pipeline_key,
                 pipeline=pipeline_name,
             )
             return None
 
-        return self._extract_fields_from_schema(schema_class, provider)
+        return self._extract_fields_from_schema(
+            schema_class, source=f"{provider}.{entity}"
+        )
 
     def _extract_fields_from_schema(
         self, schema_class: type, source: str
@@ -152,52 +211,42 @@ class PreflightSchemaOrchestrationMixin:
 
     @classmethod
     def _get_schema_registry(cls) -> dict[str, type]:
-        """Get or create the schema registry."""
+        """Get or create the schema registry keyed by ``provider_entity``."""
         if cls._SCHEMA_REGISTRY is not None:
             return cls._SCHEMA_REGISTRY
 
+        module_aliases: dict[tuple[str, str], str] = {
+            ("chembl", "protein_class"): "protein_classification",
+        }
         registry: dict[str, type] = {}
 
-        try:
-            from bioetl.domain.schemas.chembl.publication import ChemblPublicationSchema
+        from bioetl.domain.schemas.generated.registry import CANONICAL_SCHEMA_REGISTRY
 
-            registry["chembl"] = ChemblPublicationSchema
-        except ImportError:
-            pass  # Why: optional feature; chembl schema unavailable, skip registration
+        for entry in CANONICAL_SCHEMA_REGISTRY:
+            provider = entry.provider.lower()
+            entity = entry.entity.lower()
+            module_entity = module_aliases.get((provider, entity), entity)
+            module_name = f"bioetl.domain.schemas.{provider}.{module_entity}"
+            pipeline_key = f"{provider}_{entity}"
 
-        try:
-            from bioetl.domain.schemas.crossref.publication import (
-                PublicationEnrichedSchema,
-            )
+            try:
+                module = import_module(module_name)
+            except ImportError:
+                continue
 
-            registry["crossref"] = PublicationEnrichedSchema
-        except ImportError:
-            pass  # Why: optional feature; crossref schema unavailable, skip registration
-
-        try:
-            from bioetl.domain.schemas.openalex.publication import (
-                OpenAlexPublicationSchema,
-            )
-
-            registry["openalex"] = OpenAlexPublicationSchema
-        except ImportError:
-            pass  # Why: optional feature; openalex schema unavailable, skip registration
-
-        try:
-            from bioetl.domain.schemas.pubmed.publication import PubMedPublicationSchema
-
-            registry["pubmed"] = PubMedPublicationSchema
-        except ImportError:
-            pass  # Why: optional feature; pubmed schema unavailable, skip registration
-
-        try:
-            from bioetl.domain.schemas.semanticscholar.publication import (
-                SemanticScholarPublicationSchema,
-            )
-
-            registry["semanticscholar"] = SemanticScholarPublicationSchema
-        except ImportError:
-            pass  # Why: optional feature; semanticscholar schema unavailable, skip registration
+            schema_class: type | None = None
+            for exported_name in getattr(module, "__all__", ()):
+                candidate = getattr(module, exported_name, None)
+                if isinstance(candidate, type) and hasattr(candidate, "to_schema"):
+                    schema_class = candidate
+                    break
+            if schema_class is None:
+                for candidate in module.__dict__.values():
+                    if isinstance(candidate, type) and hasattr(candidate, "to_schema"):
+                        schema_class = candidate
+                        break
+            if schema_class is not None:
+                registry[pipeline_key] = schema_class
 
         cls._SCHEMA_REGISTRY = registry
         return registry

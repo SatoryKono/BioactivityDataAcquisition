@@ -21,11 +21,13 @@ from bioetl.application.composite.preflight_validator import (
 from bioetl.domain.composite.config import (
     CompositeConfig,
     CompositeDQConfig,
+    DependencyConfig,
     EnricherConfig,
     MergeConfig,
     SeedConfig,
 )
 from bioetl.domain.composite.strategy import ConflictResolution, MergeStrategy
+from bioetl.infrastructure.config.composite_config_api import load_composite_config
 
 
 @pytest.fixture
@@ -214,6 +216,45 @@ class TestCompositePreflightValidationServiceBasic:
         assert "chembl" in sources
         assert "crossref" in sources
         assert "pubmed" in sources
+
+    def test_get_valid_sources_includes_dependency_and_qualified_tokens(
+        self,
+        validator: CompositePreflightValidationService,
+    ) -> None:
+        config = CompositeConfig(
+            name="test_composite",
+            version="1.0.0",
+            seed=SeedConfig(
+                pipeline="chembl_activity",
+                output_keys=("activity_id", "molecule_id", "publication_id"),
+                silver_table="silver/chembl/activity",
+            ),
+            dependencies=(
+                DependencyConfig(
+                    pipeline="chembl_compound_record",
+                    join_keys=("molecule_id", "publication_id"),
+                ),
+            ),
+            enrichers=(),
+            merge=MergeConfig(
+                strategy=MergeStrategy.LEFT_OUTER,
+                conflict_resolution=ConflictResolution.EXPLICIT_RULES,
+                output_silver_path="silver/composite/test",
+                output_gold_path="gold/composite/test",
+                field_priorities={
+                    "molecule_id": ("chembl.activity",),
+                },
+            ),
+        )
+
+        sources = validator._get_valid_sources(config)
+
+        assert "seed" in sources
+        assert "chembl" in sources
+        assert "chembl.activity" in sources
+        assert "chembl_activity" in sources
+        assert "chembl.compound_record" in sources
+        assert "chembl_compound_record" in sources
 
     def test_simplify_dtype_common_types(
         self, validator: CompositePreflightValidationService
@@ -416,6 +457,20 @@ class TestCompositePreflightValidationServiceWithSchemas:
         assert result.is_valid is True or len(result.errors) == 0
         # Should have resolved fields
         assert len(result.resolved_fields) > 0
+
+    def test_activity_composite_loads_dependency_schema_surface(
+        self,
+        validator: CompositePreflightValidationService,
+    ) -> None:
+        """Dependency-backed composite should load dependency entity schema."""
+        config = load_composite_config("activity")
+
+        source_fields = validator._load_source_fields(config)
+
+        assert "chembl.compound_record" in source_fields
+        dependency_fields = source_fields["chembl.compound_record"]
+        assert "record_id" in dependency_fields
+        assert "doi" not in dependency_fields
 
     def test_log_resolved_field_sources(
         self, validator: CompositePreflightValidationService, mock_logger: MagicMock

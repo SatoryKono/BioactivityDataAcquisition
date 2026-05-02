@@ -53,22 +53,36 @@ class CompositePreflightValidationService(
     def __init__(self, logger: LoggerPort) -> None:
         self._logger = logger
 
+    def _add_pipeline_source_tokens(
+        self,
+        sources: set[str],
+        pipeline_name: str,
+        *,
+        include_seed_alias: bool = False,
+    ) -> None:
+        """Register accepted source token variants for one pipeline."""
+        identity = self._parse_pipeline_identity(pipeline_name)
+        if identity is None:
+            return
+        provider, entity = identity
+        sources.add(provider)
+        sources.add(f"{provider}.{entity}")
+        sources.add(f"{provider}_{entity}")
+        if include_seed_alias:
+            sources.add("seed")
+
     def _get_valid_sources(self, config: CompositeConfig) -> frozenset[str]:
         """Extract valid source names from composite config."""
-        sources: set[str] = {"seed"}
-
-        seed_pipeline = config.seed.pipeline
-        if "_" in seed_pipeline:
-            seed_provider = seed_pipeline.split("_", 1)[0]
-            sources.add(seed_provider)
-            sources.add(seed_provider.lower())
-
+        sources: set[str] = set()
+        self._add_pipeline_source_tokens(
+            sources,
+            config.seed.pipeline,
+            include_seed_alias=True,
+        )
+        for dependency in config.dependencies:
+            self._add_pipeline_source_tokens(sources, dependency.pipeline)
         for enricher in config.enrichers:
-            if "_" in enricher.pipeline:
-                provider = enricher.pipeline.split("_", 1)[0]
-                sources.add(provider)
-                sources.add(provider.lower())
-
+            self._add_pipeline_source_tokens(sources, enricher.pipeline)
         return frozenset(sources)
 
     def _validate_field_priority(

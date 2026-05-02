@@ -31,6 +31,9 @@ from bioetl.domain.normalization.chemical_standardization_contract import (
 from bioetl.domain.normalization.profiles.pubchem_compound import (
     PUBCHEM_COMPOUND_PROFILE,
 )
+from bioetl.domain.normalization.publication_structured_fields import (
+    publication_structured_field_policies,
+)
 from bioetl.domain.normalization.structured_payload_policies import (
     StructuredPayloadSemanticPolicy,
     semantic_sensitive_structured_payload_policies,
@@ -109,6 +112,17 @@ def _pandera_fields(schema: type[pa.DataFrameModel]) -> set[str]:
     return set(schema.to_schema().columns)
 
 
+def _is_arrow_string_type(data_type: pa_arrow.DataType) -> bool:
+    return pa_arrow.types.is_string(data_type) or pa_arrow.types.is_large_string(
+        data_type
+    )
+
+
+def _is_pandera_string_dtype(dtype: object) -> bool:
+    normalized = str(dtype).strip().lower()
+    return "str" in normalized or normalized == "string"
+
+
 def test_non_chembl_observed_value_fixture_has_cross_layer_field_coverage() -> None:
     fixture = _load_fixture()
     matrix_rows = {
@@ -184,6 +198,36 @@ def test_structured_payload_observed_shapes_match_policy_registry() -> None:
             assert shape["collection_semantics"] == policy.collection_semantics
             assert shape["raw_sidecar_field"] == policy.raw_sidecar_field
             assert shape["canonical_sidecar_field"] == policy.canonical_sidecar_field
+
+
+def test_governed_non_chembl_structured_fields_are_string_typed_cross_layer() -> None:
+    rows_by_key = {
+        (row["pipeline_name"], row["field_name"]): row for row in build_field_matrix_rows()
+    }
+    governed_keys = {
+        (
+            policy.profile_name.replace(".", "_"),
+            policy.field_name,
+        )
+        for policy in publication_structured_field_policies()
+    }
+    governed_keys.update(
+        (
+            policy.profile_name.replace(".", "_"),
+            policy.field_name,
+        )
+        for policy in semantic_sensitive_structured_payload_policies()
+    )
+
+    for pipeline_name, field_name in sorted(governed_keys):
+        silver_schema = ENTITY_SILVER_SCHEMA_REGISTRY[pipeline_name]
+        domain_schema = ENTITY_DOMAIN_SCHEMA_REGISTRY[pipeline_name].to_schema()
+        gold_schema = GOLD_SCHEMA_REGISTRY[pipeline_name].to_schema()
+
+        assert _is_arrow_string_type(silver_schema.field(field_name).type)
+        assert _is_pandera_string_dtype(domain_schema.columns[field_name].dtype)
+        assert _is_pandera_string_dtype(gold_schema.columns[field_name].dtype)
+        assert rows_by_key[(pipeline_name, field_name)]["field_type"] == "string"
 
 
 def test_pubchem_standardization_status_vocab_is_cross_layer_canonical() -> None:

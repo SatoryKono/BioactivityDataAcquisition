@@ -263,7 +263,9 @@ async def test_write_gold_merged_no_records(gold_writer, noop_logger):
     )
 
 
-async def test_write_gold_merged_calls_write_deltalake(gold_writer, valid_records):
+async def test_write_gold_merged_calls_write_deltalake(
+    gold_writer, valid_records, strict_schema
+):
     """Test write_gold_merged writes data with overwrite mode."""
     with patch(
         "bioetl.infrastructure.storage.gold_writer.write_deltalake"
@@ -272,6 +274,7 @@ async def test_write_gold_merged_calls_write_deltalake(gold_writer, valid_record
             table_name="test_merged",
             records=valid_records,
             primary_keys=["id"],
+            schema=strict_schema,
         )
 
         mock_write.assert_called_once()
@@ -294,10 +297,18 @@ async def test_write_gold_merged_sorts_by_primary_keys(gold_writer):
     with patch(
         "bioetl.infrastructure.storage.gold_writer.write_deltalake"
     ) as mock_write:
+        schema = DataFrameSchema(
+            {
+                "id": pa.Column(str),
+                "value": pa.Column(int),
+            },
+            strict=True,
+        )
         await gold_writer.write_gold_merged(
             table_name="test_sorted",
             records=records,
             primary_keys=["id"],
+            schema=schema,
         )
 
         mock_write.assert_called_once()
@@ -325,10 +336,18 @@ async def test_write_gold_merged_strips_runtime_occurrence_fields(gold_writer):
     with patch(
         "bioetl.infrastructure.storage.gold_writer.write_deltalake"
     ) as mock_write:
+        schema = DataFrameSchema(
+            {
+                "id": pa.Column(str),
+                "value": pa.Column(int),
+            },
+            strict=True,
+        )
         await gold_writer.write_gold_merged(
             table_name="test_runtime_contract",
             records=records,
             primary_keys=["id"],
+            schema=schema,
         )
 
         written_data = mock_write.call_args[0][1]

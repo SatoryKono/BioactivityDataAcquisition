@@ -57,11 +57,11 @@ class MergedStoragePort(Protocol):
         records: list[GoldRecord],
         primary_keys: list[str] | None = None,
         *,
+        schema: DataFrameSchema[object],
         completed_at: datetime | None = None,
         run_id: str | None = None,
         sources_used: list[str] | None = None,
         preserve_column_order: bool = False,
-        schema: DataFrameSchema[object],
     ) -> None:
         """Write merged records to Gold layer with mandatory strict schema.
 

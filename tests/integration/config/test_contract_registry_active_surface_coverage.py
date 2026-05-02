@@ -92,6 +92,21 @@ def test_contract_registry_covers_active_standard_provider_surfaces() -> None:
 
 
 @pytest.mark.integration
+def test_contract_registry_dq_identity_metadata_is_entry_aligned() -> None:
+    """Registry DQ identity anchors must match entry-level metadata."""
+    registry = FileContractRegistryStore(_REGISTRY_PATH).load()
+
+    mismatches = [
+        contract_ref
+        for contract_ref, entry in sorted(registry.entries.items())
+        if entry.identity.dq_policy_ref != entry.dq_policy_ref
+        or entry.identity.rule_bundle_version != entry.rule_bundle_version
+    ]
+
+    assert mismatches == []
+
+
+@pytest.mark.integration
 def test_active_contract_registry_surfaces_have_active_entity_config_or_alias_governance() -> (
     None
 ):

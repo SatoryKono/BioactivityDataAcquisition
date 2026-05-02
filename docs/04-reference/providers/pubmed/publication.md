@@ -42,7 +42,7 @@ ______________________________________________________________________
 | ------------------ | ----------- | ---------------- |
 | `title`            | `str`       | Название статьи  |
 | `abstract`         | `str`       | Аннотация        |
-| `authors`          | `list[str]` | Список авторов   |
+| `authors`          | `str \| None` | JSON-массив авторов   |
 | `journal`          | `str`       | Название журнала |
 | `publication_date` | `str`       | Дата публикации  |
 | `volume`           | `str`       | Том журнала      |
@@ -65,9 +65,9 @@ ______________________________________________________________________
 | `publication_class`        | `str`         | Класс публикации: EXP, REV, PEER       |
 | `publication_subclass`     | `str \| None` | Подкласс (L2): ~16 групп               |
 | `publication_type_unified` | `str \| None` | Унифицированный тип (L3): 214 значений |
-| `subject_mesh`             | `list[str]`   | MeSH термины                           |
-| `subject_keywords`         | `list[str]`   | Ключевые слова                         |
-| `publication_types`        | `list[str]`   | Типы публикации                        |
+| `subject_mesh`             | `str \| None` | JSON-массив MeSH терминов              |
+| `subject_keywords`         | `str \| None` | JSON-массив ключевых слов              |
+| `publication_types`        | `str \| None` | JSON-массив типов публикации           |
 
 ______________________________________________________________________
 

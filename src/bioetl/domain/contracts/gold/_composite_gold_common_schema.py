@@ -32,7 +32,7 @@ class CompositeGoldCommonSchema(pa.DataFrameModel):
     class Config:
         """Pandera configuration for composite outputs."""
 
-        strict = False
+        strict = True
         coerce = True
 
 
