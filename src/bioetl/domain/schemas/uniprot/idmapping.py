@@ -18,9 +18,10 @@ import pandera.pandas as pa
 from pandera.typing import Series
 
 from bioetl.domain.schemas.base import ETLRecordSchema
+from bioetl.domain.schemas.constants import UNIPROT_MAPPING_STATUSES
 
-# === Fixed Value Constants ===
-MAPPING_STATUSES = ["found", "not_found", "error", "multiple"]
+# Backward-compatible alias for public imports.
+MAPPING_STATUSES = UNIPROT_MAPPING_STATUSES
 
 
 class IDMappingSchema(ETLRecordSchema):

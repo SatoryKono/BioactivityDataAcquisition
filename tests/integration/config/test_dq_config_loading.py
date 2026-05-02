@@ -87,10 +87,10 @@ class TestDQConfigIntegration:
         self, dq_loader: DQConfigLoader
     ) -> None:
         """UniProt vocabulary fields should use enum DQ, not numeric ranges."""
-        from bioetl.domain.schemas.uniprot._core import (
-            ENTRY_TYPES,
-            PROTEIN_EXISTENCE_LEVELS,
-            PROTEIN_FLAGS,
+        from bioetl.domain.schemas.constants import (
+            UNIPROT_ENTRY_TYPES,
+            UNIPROT_PROTEIN_EXISTENCE_LEVELS,
+            UNIPROT_PROTEIN_FLAGS,
         )
 
         config = dq_loader.load("uniprot", "protein")
@@ -101,10 +101,10 @@ class TestDQConfigIntegration:
             and rule.field in {"entry_type", "flag", "protein_existence"}
         }
 
-        assert enum_rules["entry_type"].allowed == tuple(ENTRY_TYPES)
-        assert enum_rules["flag"].allowed == tuple(PROTEIN_FLAGS)
+        assert enum_rules["entry_type"].allowed == tuple(UNIPROT_ENTRY_TYPES)
+        assert enum_rules["flag"].allowed == tuple(UNIPROT_PROTEIN_FLAGS)
         assert enum_rules["protein_existence"].allowed == tuple(
-            PROTEIN_EXISTENCE_LEVELS
+            UNIPROT_PROTEIN_EXISTENCE_LEVELS
         )
 
         range_fields = {

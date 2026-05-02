@@ -28,6 +28,13 @@ from bioetl.domain.schemas._chembl_enum_catalog import (
     TARGET_COMPONENT_TYPES,
     TARGET_TYPES,
 )
+from bioetl.domain.schemas._uniprot_enum_catalog import (
+    UNIPROT_ENTRY_TYPES,
+    UNIPROT_ENUM_CATALOG,
+    UNIPROT_MAPPING_STATUSES,
+    UNIPROT_PROTEIN_EXISTENCE_LEVELS,
+    UNIPROT_PROTEIN_FLAGS,
+)
 from bioetl.domain.schemas._schema_validation_patterns import (
     BAO_ID_PATTERN,
     BTO_ID_PATTERN,
@@ -108,4 +115,9 @@ __all__ = [
     "TARGET_TYPES",
     "UBERON_ID_PATTERN",
     "UO_ID_PATTERN",
+    "UNIPROT_ENTRY_TYPES",
+    "UNIPROT_ENUM_CATALOG",
+    "UNIPROT_MAPPING_STATUSES",
+    "UNIPROT_PROTEIN_EXISTENCE_LEVELS",
+    "UNIPROT_PROTEIN_FLAGS",
 ]

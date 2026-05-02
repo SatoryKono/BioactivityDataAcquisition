@@ -10,6 +10,7 @@ import yaml
 from bioetl.domain.types.dq_contracts import DQDisposition
 from bioetl.infrastructure.config.dq_contract_config_loader import (
     DQContractConfigLoader,
+    load_dq_config_for_pipeline,
 )
 
 
@@ -154,3 +155,92 @@ def test_loader_does_not_fallback_to_legacy_dq_files(tmp_path: Path) -> None:
     loader = DQContractConfigLoader(tmp_path)
     with pytest.raises(FileNotFoundError, match="DQ contract config not found"):
         _ = loader.load_dq_config_for_pipeline("chembl_activity")
+
+
+def test_loader_fails_fast_when_registry_is_missing(tmp_path: Path) -> None:
+    """Contract config loading must not silently bypass missing registry."""
+    _write_yaml(
+        tmp_path / "contracts" / "chembl" / "activity.yaml",
+        {
+            "default_disposition_policy": "warn",
+            "strictness_mode": "moderate",
+        },
+    )
+
+    loader = DQContractConfigLoader(tmp_path)
+    with pytest.raises(FileNotFoundError, match="DQ contract registry not found"):
+        _ = loader.load_dq_config_for_pipeline("chembl_activity")
+
+
+def test_loader_fails_fast_when_registry_entry_is_missing(tmp_path: Path) -> None:
+    """Every loaded DQ contract must be registered by contract_ref."""
+    _write_yaml(tmp_path / "base" / "contract_registry.yaml", {"entries": {}})
+    _write_yaml(
+        tmp_path / "contracts" / "chembl" / "activity.yaml",
+        {
+            "default_disposition_policy": "warn",
+            "strictness_mode": "moderate",
+        },
+    )
+
+    loader = DQContractConfigLoader(tmp_path)
+    with pytest.raises(KeyError, match="chembl.activity"):
+        _ = loader.load_dq_config_for_pipeline("chembl_activity")
+
+
+def test_loader_fails_fast_on_malformed_registry_entries(tmp_path: Path) -> None:
+    """Malformed registry entries payloads are governance failures."""
+    _write_yaml(
+        tmp_path / "base" / "contract_registry.yaml",
+        {"entries": ["chembl.activity"]},
+    )
+    _write_yaml(
+        tmp_path / "contracts" / "chembl" / "activity.yaml",
+        {
+            "default_disposition_policy": "warn",
+            "strictness_mode": "moderate",
+        },
+    )
+
+    loader = DQContractConfigLoader(tmp_path)
+    with pytest.raises(ValueError, match="entries must be a mapping"):
+        _ = loader.load_dq_config_for_pipeline("chembl_activity")
+
+
+def test_loader_fails_fast_on_malformed_registry_identity(tmp_path: Path) -> None:
+    """Registry entry identity must be a mapping with DQ identity fields."""
+    _write_yaml(
+        tmp_path / "base" / "contract_registry.yaml",
+        {
+            "entries": {
+                "chembl.activity": {
+                    "identity": "chembl.activity.v1",
+                    "dq_policy_ref": "chembl.dq.v1",
+                    "rule_bundle_version": "dq-rules.v1.0",
+                }
+            }
+        },
+    )
+    _write_yaml(
+        tmp_path / "contracts" / "chembl" / "activity.yaml",
+        {
+            "default_disposition_policy": "warn",
+            "strictness_mode": "moderate",
+        },
+    )
+
+    loader = DQContractConfigLoader(tmp_path)
+    with pytest.raises(ValueError, match="identity must be a mapping"):
+        _ = loader.load_dq_config_for_pipeline("chembl_activity")
+
+
+def test_convenience_loader_requires_explicit_configs_root(
+    temp_contract_root: Path,
+) -> None:
+    """Convenience helper must avoid implicit CWD-sensitive configs root."""
+    dq_config = load_dq_config_for_pipeline(
+        "chembl_activity",
+        configs_root=temp_contract_root,
+    )
+
+    assert dq_config.contract_ref == "chembl.activity"

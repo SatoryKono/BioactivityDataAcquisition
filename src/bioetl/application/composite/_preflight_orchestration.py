@@ -10,6 +10,19 @@ from bioetl.domain.exceptions import BioETLError, DataQualityError
 from bioetl.domain.ports import LoggerPort
 
 
+def _find_schema_class(module: object) -> type | None:
+    """Return the first exported generated schema class from a module."""
+    for exported_name in getattr(module, "__all__", ()):
+        candidate = getattr(module, exported_name, None)
+        if isinstance(candidate, type) and hasattr(candidate, "to_schema"):
+            return candidate
+
+    for candidate in vars(module).values():
+        if isinstance(candidate, type) and hasattr(candidate, "to_schema"):
+            return candidate
+    return None
+
+
 class PreflightSchemaOrchestrationMixin:
     """Schema discovery and dtype extraction helper methods."""
 
@@ -234,17 +247,7 @@ class PreflightSchemaOrchestrationMixin:
             except ImportError:
                 continue
 
-            schema_class: type | None = None
-            for exported_name in getattr(module, "__all__", ()):
-                candidate = getattr(module, exported_name, None)
-                if isinstance(candidate, type) and hasattr(candidate, "to_schema"):
-                    schema_class = candidate
-                    break
-            if schema_class is None:
-                for candidate in module.__dict__.values():
-                    if isinstance(candidate, type) and hasattr(candidate, "to_schema"):
-                        schema_class = candidate
-                        break
+            schema_class = _find_schema_class(module)
             if schema_class is not None:
                 registry[pipeline_key] = schema_class
 

@@ -73,13 +73,8 @@ def test_layer_aware_suffix_policy_registers_expected_rule_ids() -> None:
             "composition_infrastructure_service_suffix"
         ].allowed_symbols
     }
-    assert allowed_service_symbols == {
-        (
-            "FallbackFetchOrchestratorService",
-            "src/bioetl/infrastructure/adapters/common/fallback_fetch_service.py",
-        )
-    }, (
-        "composition/infrastructure *Service debt must stay frozen to the reviewed compat alias"
+    assert allowed_service_symbols == set(), (
+        "composition/infrastructure *Service suffix boundary must stay exception-free"
     )
 
 

@@ -10,7 +10,7 @@ from bioetl.domain.normalization.identifiers import (
     normalize_pmc_id,
     normalize_pmid,
 )
-from bioetl.domain.value_objects._chemical_identifiers import InChIKey
+from bioetl.domain.value_objects import InChIKey
 from bioetl.domain.value_objects.identifiers import ChemblId, UniProtId
 
 __all__ = [
