@@ -127,3 +127,24 @@ def test_tests_workflow_has_dedicated_memory_lane_outside_coverage() -> None:
     assert ' -m "memory" \\' in workflow or '-m "memory"' in workflow, (
         "memory-tests job must run only the dedicated memory-marked suite"
     )
+
+
+def test_tests_workflow_has_dedicated_contract_confidence_lane_outside_coverage() -> None:
+    """Offline contract confidence should block independently from coverage."""
+    workflow = _read_workflow(".github/workflows/tests.yml")
+    assert "contract-confidence:" in workflow, (
+        "tests workflow should define a blocking offline contract-confidence job"
+    )
+    assert "tests/contract/ tests/unit/contracts/" in workflow, (
+        "contract-confidence must run the canonical contract surfaces"
+    )
+    assert '-m "no_api or not network"' in workflow, (
+        "contract-confidence must avoid live network contract tests"
+    )
+    assert (
+        "--junitxml=reports/test-telemetry/junit-contract-confidence.xml"
+        in workflow
+    ), "contract-confidence must emit JUnit telemetry"
+    assert "test-telemetry-contract-confidence" in workflow, (
+        "contract-confidence telemetry should be uploaded for test-health rollups"
+    )

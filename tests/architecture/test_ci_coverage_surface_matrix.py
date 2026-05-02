@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 import pytest
@@ -18,6 +19,16 @@ def _load_yaml(path: Path) -> dict:
 
 def _read_workflow(path: Path) -> str:
     return path.read_text(encoding="utf-8")
+
+
+def _job_block(workflow: str, job: str) -> str:
+    match = re.search(
+        rf"^    {re.escape(job)}:\n(?P<body>.*?)(?=^    [A-Za-z0-9_-]+:|\Z)",
+        workflow,
+        flags=re.MULTILINE | re.DOTALL,
+    )
+    assert match, f"workflow is missing mapped job '{job}'"
+    return match.group("body")
 
 
 @pytest.mark.architecture
@@ -42,6 +53,7 @@ class TestCiCoverageSurfaceMatrix:
         assert jobs == {
             "smoke-check",
             "control-plane-e2e",
+            "contract-confidence",
             "track-d-gates",
             "memory-tests",
             "test-fast",
@@ -73,6 +85,7 @@ class TestCiCoverageSurfaceMatrix:
         execution_only_jobs = {
             "smoke-check",
             "control-plane-e2e",
+            "contract-confidence",
             "track-d-gates",
             "memory-tests",
             "test-fast",
@@ -102,6 +115,8 @@ class TestCiCoverageSurfaceMatrix:
         assert "coverage report --show-missing --fail-under=85" in workflow
         assert "test-telemetry-memory" in workflow
         assert "junit-memory.xml" in workflow
+        assert "test-telemetry-contract-confidence" in workflow
+        assert "junit-contract-confidence.xml" in workflow
 
         coverage_verify = entries["coverage-verify"]
         for excluded_path in coverage_verify.get("known_exclusions", []):
@@ -112,6 +127,39 @@ class TestCiCoverageSurfaceMatrix:
         assert "name: test-duration-telemetry" in workflow
         assert "control-plane-completeness" in workflow
         assert "junit-track-d.xml" in workflow
+
+    def test_excluded_confidence_lanes_have_blocking_assertions(self) -> None:
+        matrix = _load_yaml(MATRIX_PATH)
+        workflow = _read_workflow(ROOT / matrix["workflow_path"])
+        entries = {entry["job"]: entry for entry in matrix.get("lanes", [])}
+
+        required_jobs = set(
+            matrix.get("confidence_lane_policy", {}).get("required_blocking_jobs", [])
+        )
+        assert required_jobs == {
+            "contract-confidence",
+            "control-plane-e2e",
+            "memory-tests",
+        }
+
+        for job in sorted(required_jobs):
+            entry = entries[job]
+            assert entry["lane_type"] == "execution_only"
+            assert entry["blocking_confidence_lane"] is True
+            assert entry["participates_in_hard_threshold"] is False
+            assert entry["threshold_enforced_in_job"] is False
+            assert entry["emits_coverage_artifact"] is False
+
+            block = _job_block(workflow, job)
+            assertions = entry["blocking_assertions"]
+            for expected in assertions["command_contains"]:
+                assert expected in block, f"{job} is missing command assertion {expected}"
+            for expected in assertions["required_artifacts"]:
+                assert expected in block, f"{job} is missing artifact assertion {expected}"
+
+        duration_block = _job_block(workflow, "duration-telemetry")
+        assert "junit-contract-confidence.xml" in duration_block
+        assert "--suite contracts" in duration_block
 
     def test_coverage_shard_python_versions_match_workflow(self) -> None:
         matrix = _load_yaml(MATRIX_PATH)
