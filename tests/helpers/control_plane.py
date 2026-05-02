@@ -39,6 +39,12 @@ class InMemoryRunLedgerStore(RunLedgerPort):
         return self._items
 
     def append(self, entry: RunLedgerEntry) -> None:
+        if entry.idempotency_key is not None and any(
+            item.manifest_id == entry.manifest_id
+            and item.idempotency_key == entry.idempotency_key
+            for item in self._items
+        ):
+            return
         self._items.append(entry)
 
     def list_entries(self, manifest_id: str) -> list[RunLedgerEntry]:

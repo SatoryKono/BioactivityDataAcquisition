@@ -101,6 +101,17 @@ def _emit_terminal_event_metric(
     )
 
 
+def _has_idempotent_duplicate(
+    entries: list[RunLedgerEntry],
+    *,
+    idempotency_key: str | None,
+) -> bool:
+    """Return whether a logical event has already been persisted."""
+    if idempotency_key is None:
+        return False
+    return any(entry.idempotency_key == idempotency_key for entry in entries)
+
+
 def _truncate_ledger_to_offset(path: Path, *, offset: int) -> None:
     """Best-effort rollback to one known-good byte offset."""
     if not path.exists():
@@ -191,6 +202,18 @@ class FileRunLedgerStore(RunLedgerPort):
         try:
             self.base_path.mkdir(parents=True, exist_ok=True)
             run_index_dir.mkdir(parents=True, exist_ok=True)
+            if _has_idempotent_duplicate(
+                self._load_entries(entry.manifest_id),
+                idempotency_key=entry.idempotency_key,
+            ):
+                atomic_write_text(run_index_path, entry.manifest_id)
+                _emit_ledger_append_metric(
+                    self.metrics,
+                    pipeline=pipeline,
+                    event_type=entry.event_type,
+                    status="duplicate",
+                )
+                return
             append_checkpoint_size = _append_jsonl_payload(ledger_path, payload)
             atomic_write_text(run_index_path, entry.manifest_id)
         except (OSError, TypeError, ValueError) as error:

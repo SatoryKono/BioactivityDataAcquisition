@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
+import json
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
 from datetime import datetime
+from hashlib import sha256
 from uuid import uuid4
 
 from bioetl.application.services.control_plane._run_ledger_diagnostic_support import (
@@ -34,6 +36,35 @@ from bioetl.domain.types import RunID
 from bioetl.domain.types.dq_contracts import DQDisposition
 
 __all__ = ["RunLedgerService"]
+
+_IDEMPOTENCY_KEY_FIELDS = (
+    "manifest_id",
+    "run_id",
+    "event_type",
+    "event_family",
+    "status",
+    "stage",
+    "message",
+    "error_type",
+    "dataset_ref",
+    "lineage_fragment_id",
+    "metrics_snapshot",
+    "details",
+)
+
+
+def _build_run_ledger_idempotency_key(payload: Mapping[str, object]) -> str:
+    """Build a stable key for one logical lifecycle event."""
+    semantic_payload = {
+        field_name: payload.get(field_name) for field_name in _IDEMPOTENCY_KEY_FIELDS
+    }
+    serialized = json.dumps(
+        semantic_payload,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=True,
+    )
+    return f"sha256:{sha256(serialized.encode('utf-8')).hexdigest()}"
 
 
 @dataclass(slots=True)
@@ -299,6 +330,7 @@ class RunLedgerService:
                 ),
             }
         )
+        payload["idempotency_key"] = _build_run_ledger_idempotency_key(payload)
         entry = RunLedgerEntry.from_dict(payload)
         self.ledger_port.append(entry)
         return entry

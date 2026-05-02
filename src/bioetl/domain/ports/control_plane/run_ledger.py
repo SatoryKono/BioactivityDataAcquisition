@@ -15,7 +15,12 @@ class RunLedgerPort(Protocol):
     """Persist and query append-only run-ledger events."""
 
     def append(self, entry: RunLedgerEntry) -> None:
-        """Append one ledger event."""
+        """Append one ledger event.
+
+        Implementations should treat non-empty ``idempotency_key`` values as
+        stable logical-event identity and avoid persisting duplicates for the
+        same manifest.
+        """
         ...
 
     def list_entries(self, manifest_id: str) -> list[RunLedgerEntry]:

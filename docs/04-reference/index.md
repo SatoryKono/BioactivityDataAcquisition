@@ -28,6 +28,7 @@ design rationale and layer structure.
 | ----------------- | ------------------------------------------------------------------- | ------------------------------------------------------ |
 | CLI               | Supported command-line surface                                      | [cli.md](cli.md)                                       |
 | Contracts         | Published control-plane, observability, and gold-contract material  | [contracts/README.md](contracts/README.md)             |
+| Normalization     | Published normalization governance for provider fields and IDs      | [normalization/non-chembl-normalization-overview.md](normalization/non-chembl-normalization-overview.md) |
 | Providers         | Provider-specific published specs and field surfaces                | [providers/README.md](providers/README.md)             |
 | Pipelines         | Pipeline-specific published specs and historical pipeline artifacts | [pipelines/README.md](pipelines/README.md)             |
 | API               | Generated or curated package/module API reference                   | [api/index.md](api/index.md)                           |
@@ -40,6 +41,8 @@ design rationale and layer structure.
 - [Observability Metrics](contracts/observability.md)
 - [CLI Reference](cli.md)
 - [Gold Schemas](contracts/gold-schemas.md)
+- [Non-ChEMBL Normalization Overview](normalization/non-chembl-normalization-overview.md)
+- [Publication Normalization](normalization/publication-normalization.md)
 - [Publication Validation Index](publication-validation-index.md)
 
 ## Boundary With Architecture Docs

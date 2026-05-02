@@ -230,6 +230,7 @@ class RunLedgerEntry:
     error_type: str | None = None
     dataset_ref: str | None = None
     lineage_fragment_id: str | None = None
+    idempotency_key: str | None = None
     metrics_snapshot: dict[str, int] | None = None
     details: dict[str, object] | None = None
 
@@ -244,6 +245,13 @@ class RunLedgerEntry:
             "stage",
             _normalize_run_ledger_stage(normalized_event_type, self.stage),
         )
+        if self.idempotency_key is not None:
+            normalized_key = str(self.idempotency_key).strip()
+            object.__setattr__(
+                self,
+                "idempotency_key",
+                normalized_key or None,
+            )
         if self.event_family is None:
             object.__setattr__(
                 self,
@@ -273,6 +281,7 @@ class RunLedgerEntry:
             error_type=load_optional_str(payload, "error_type"),
             dataset_ref=load_optional_str(payload, "dataset_ref"),
             lineage_fragment_id=load_optional_str(payload, "lineage_fragment_id"),
+            idempotency_key=load_optional_str(payload, "idempotency_key"),
             metrics_snapshot=load_metrics_snapshot(payload.get("metrics_snapshot")),
             details=load_details(payload.get("details")),
         )

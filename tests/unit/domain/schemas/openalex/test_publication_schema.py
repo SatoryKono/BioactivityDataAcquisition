@@ -77,8 +77,12 @@ def valid_record() -> dict:
         # Topics (hierarchical classification - replaces deprecated concepts)
         "subject_topics": '[{"id": "T12345", "display_name": "Topic A", "score": 0.95}]',
         "primary_topic": '{"id": "T12345", "display_name": "Topic A", "score": 0.95}',
+        "primary_topic_canonical_json": '{"id":"T12345","display_name":"Topic A","score":0.95}',
+        "primary_topic_raw_json": '{"id":"T12345","display_name":"Topic A","score":0.95}',
         # Grants/funding information
         "grants": '[{"funder": "F1234", "funder_display_name": "NIH", "award_id": "R01"}]',
+        "grants_canonical_json": '[{"award_id":"R01","funder":"F1234","funder_display_name":"NIH"}]',
+        "grants_raw_json": '[{"award_id":"R01","funder":"F1234","funder_display_name":"NIH"}]',
         # Classification (JSON arrays, unified field names)
         "concepts": '["Biology", "Genetics"]',  # Extra column (not in schema, allowed by strict=False)
         "subject_mesh": '["D000123", "D000456"]',

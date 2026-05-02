@@ -324,6 +324,12 @@ nav:
     -   Reference:
             -   "Reference Index": 04-reference/index.md
             -   CLI: 04-reference/cli.md
+            -   Normalization:
+                    -   Overview: 04-reference/normalization/non-chembl-normalization-overview.md
+                    -   "Publication": 04-reference/normalization/publication-normalization.md
+                    -   "PubChem": 04-reference/normalization/pubchem-normalization.md
+                    -   "UniProt": 04-reference/normalization/uniprot-normalization.md
+                    -   "Reference Identifiers": 04-reference/normalization/reference-identifiers.md
             -   Templates: 04-reference/templates/index.md
             -   API:
                     -   Overview: 04-reference/api/index.md

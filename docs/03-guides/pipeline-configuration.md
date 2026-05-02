@@ -292,6 +292,28 @@ are accepted in `src/bioetl/infrastructure/config/*`. The canonical source
 pagination contract remains `source.provider_config.pagination.*`; the only
 pipeline-level pagination override is `page_size_override`.
 
+### Normalization Governance For New Non-ChEMBL Fields
+
+Если новый non-ChEMBL field попадает в active pipeline config, работа считается
+незавершённой, пока не синхронизированы все связанные governance surfaces:
+
+1. normalization profile coverage в `src/bioetl/domain/normalization/profiles/`
+1. generated evidence в
+   `docs/reports/generated/pipeline_normalization_field_matrix/`
+1. representative fixtures в
+   `tests/fixtures/normalization/non_chembl_identifier_cases.yaml` или
+   `tests/fixtures/normalization/non_chembl_observed_values.yaml`
+1. DQ and schema alignment в `configs/entities/{provider}/{entity}.yaml` и
+   domain Silver schema
+1. composite impact, если поле propagates into `configs/composites/*.yaml`
+
+Published reference entrypoint for this workflow:
+
+- [Non-ChEMBL Normalization Overview](../04-reference/normalization/non-chembl-normalization-overview.md)
+- [Publication Normalization](../04-reference/normalization/publication-normalization.md)
+- [PubChem Normalization](../04-reference/normalization/pubchem-normalization.md)
+- [UniProt Normalization](../04-reference/normalization/uniprot-normalization.md)
+
 ### Авто-пропагация sort-by (ADR-014 compliance)
 
 Параметры `sink.silver.sort_by` и `sink.gold.sort_by` **автоматически вычисляются**

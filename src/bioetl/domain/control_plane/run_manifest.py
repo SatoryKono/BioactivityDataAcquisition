@@ -8,12 +8,13 @@ descriptors.
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass, fields
 from datetime import datetime
 from enum import StrEnum
 from uuid import UUID
 
 from bioetl.domain.control_plane._run_manifest_serialization import (
+    freeze_manifest_payload,
     normalize_manifest_created_at,
     normalize_manifest_serializable,
 )
@@ -128,12 +129,20 @@ class RunManifest:
             "created_at",
             normalize_manifest_created_at(self.created_at),
         )
+        for field_name in ("launch_context", "runtime_config", "resolved_config"):
+            object.__setattr__(
+                self,
+                field_name,
+                freeze_manifest_payload(getattr(self, field_name)),
+            )
 
     def to_dict(self) -> dict[str, object]:
         """Return a JSON-serializable manifest payload."""
         return {
             key: normalize_manifest_serializable(value)
-            for key, value in asdict(self).items()
+            for key, value in (
+                (field.name, getattr(self, field.name)) for field in fields(self)
+            )
         }
 
     @classmethod
