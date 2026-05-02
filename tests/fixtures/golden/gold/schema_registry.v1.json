@@ -2461,6 +2461,16 @@
           "dtype": "str",
           "nullable": true
         },
+        "grants_canonical_json": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "grants_raw_json": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
         "institution_country_codes": {
           "description": "",
           "dtype": "str",
@@ -2537,6 +2547,16 @@
           "nullable": true
         },
         "primary_topic": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "primary_topic_canonical_json": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "primary_topic_raw_json": {
           "description": "",
           "dtype": "str",
           "nullable": true
@@ -2865,6 +2885,16 @@
           "dtype": "str",
           "nullable": true
         },
+        "affiliation_structured_canonical_json": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "affiliation_structured_raw_json": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
         "author_count": {
           "description": "",
           "dtype": "float64",
@@ -2881,6 +2911,16 @@
           "nullable": true
         },
         "authors_with_affiliations": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "authors_with_affiliations_canonical_json": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "authors_with_affiliations_raw_json": {
           "description": "",
           "dtype": "str",
           "nullable": true
@@ -3177,6 +3217,16 @@
           "dtype": "str",
           "nullable": true
         },
+        "author_h_indices_canonical_json": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "author_h_indices_raw_json": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
         "author_keys": {
           "description": "",
           "dtype": "str",
@@ -3198,6 +3248,16 @@
           "nullable": true
         },
         "citation_contexts": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "citation_contexts_canonical_json": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "citation_contexts_raw_json": {
           "description": "",
           "dtype": "str",
           "nullable": true
@@ -3327,12 +3387,32 @@
           "dtype": "str",
           "nullable": true
         },
+        "publication_types_canonical_json": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "publication_types_raw_json": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
         "publication_year": {
           "description": "",
           "dtype": "float64",
           "nullable": true
         },
         "subject_fields": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "subject_fields_canonical_json": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "subject_fields_raw_json": {
           "description": "",
           "dtype": "str",
           "nullable": true
@@ -3606,7 +3686,17 @@
           "dtype": "float64",
           "nullable": true
         },
+        "features_canonical_json": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
         "features_json": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "features_raw_json": {
           "description": "",
           "dtype": "str",
           "nullable": true

@@ -231,11 +231,7 @@ composite:
         fields:
           - entity_id
           - content_hash
-          - _run_id
-          - _run_type
-          - _source_batch_id
           - _source
-          - _ingestion_ts
           - _index
         pattern: "^_composite_|^_source_providers|^_enrichment_|^_lineage_"
         provider_order: [chembl, pubchem]

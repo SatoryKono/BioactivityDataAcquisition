@@ -127,6 +127,24 @@
     "required": true,
     "unique": false
   },
+  "author_h_indices_canonical_json": {
+    "checks": [],
+    "coerce": false,
+    "description": "Canonical JSON companion for author h-index payload.",
+    "dtype": "str",
+    "nullable": true,
+    "required": true,
+    "unique": false
+  },
+  "author_h_indices_raw_json": {
+    "checks": [],
+    "coerce": false,
+    "description": "Raw provider JSON for author h-index payload.",
+    "dtype": "str",
+    "nullable": true,
+    "required": true,
+    "unique": false
+  },
   "author_keys": {
     "checks": [],
     "coerce": false,
@@ -167,6 +185,24 @@
     "checks": [],
     "coerce": false,
     "description": "Citation context sentences (JSON array)",
+    "dtype": "str",
+    "nullable": true,
+    "required": true,
+    "unique": false
+  },
+  "citation_contexts_canonical_json": {
+    "checks": [],
+    "coerce": false,
+    "description": "Canonical JSON companion for citation-context payload.",
+    "dtype": "str",
+    "nullable": true,
+    "required": true,
+    "unique": false
+  },
+  "citation_contexts_raw_json": {
+    "checks": [],
+    "coerce": false,
+    "description": "Raw provider JSON for citation-context payload.",
     "dtype": "str",
     "nullable": true,
     "required": true,
@@ -462,6 +498,24 @@
     "required": true,
     "unique": false
   },
+  "publication_types_canonical_json": {
+    "checks": [],
+    "coerce": false,
+    "description": "Canonical JSON companion for publication-types payload.",
+    "dtype": "str",
+    "nullable": true,
+    "required": true,
+    "unique": false
+  },
+  "publication_types_raw_json": {
+    "checks": [],
+    "coerce": false,
+    "description": "Raw provider JSON for publication-types payload.",
+    "dtype": "str",
+    "nullable": true,
+    "required": true,
+    "unique": false
+  },
   "publication_year": {
     "checks": [
       {
@@ -484,6 +538,24 @@
     "checks": [],
     "coerce": false,
     "description": "Fields of study (JSON array)",
+    "dtype": "str",
+    "nullable": true,
+    "required": true,
+    "unique": false
+  },
+  "subject_fields_canonical_json": {
+    "checks": [],
+    "coerce": false,
+    "description": "Canonical JSON companion for subject-fields payload.",
+    "dtype": "str",
+    "nullable": true,
+    "required": true,
+    "unique": false
+  },
+  "subject_fields_raw_json": {
+    "checks": [],
+    "coerce": false,
+    "description": "Raw provider JSON for subject-fields payload.",
     "dtype": "str",
     "nullable": true,
     "required": true,

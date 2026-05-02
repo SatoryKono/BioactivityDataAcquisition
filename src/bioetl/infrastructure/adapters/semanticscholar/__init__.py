@@ -6,7 +6,7 @@ Provides SemanticScholarAdapter for batch DOI resolution with title fallback.
 
 from __future__ import annotations
 
-from bioetl.infrastructure.adapters.semanticscholar.client import (
+from bioetl.infrastructure.adapters.semanticscholar.adapter import (
     SemanticScholarAdapter,
 )
 from bioetl.infrastructure.adapters.semanticscholar.constants import (

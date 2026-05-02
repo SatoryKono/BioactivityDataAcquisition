@@ -249,3 +249,28 @@ family_freeze_rules:
         expires_on: "2026-12-31"
         removal_step: Remove freeze exception once composite canonical alias family rule is retired.
         reason: Canonical composite preflight validation facade.
+
+  - rule_id: provider_connector_adapter_module_family
+    description: >
+      Provider connector adapter classes must be canonically owned by
+      `adapter.py` modules. Provider-level `client.py` modules are compatibility
+      shims and must not become adapter owners.
+    include_path_prefixes:
+      - src/bioetl/infrastructure/adapters/pubmed/
+      - src/bioetl/infrastructure/adapters/semanticscholar/
+    match_regex: ^(?:PubMedAdapter|SemanticScholarAdapter)$
+    allowed_symbols:
+      - symbol: PubMedAdapter
+        path: src/bioetl/infrastructure/adapters/pubmed/adapter.py
+        issue: "#3553"
+        owner: "@bioetl-architecture"
+        expires_on: "2026-12-31"
+        removal_step: Remove freeze exception once provider connector module naming ambiguity is retired.
+        reason: Canonical PubMed provider adapter owner module.
+      - symbol: SemanticScholarAdapter
+        path: src/bioetl/infrastructure/adapters/semanticscholar/adapter.py
+        issue: "#3553"
+        owner: "@bioetl-architecture"
+        expires_on: "2026-12-31"
+        removal_step: Remove freeze exception once provider connector module naming ambiguity is retired.
+        reason: Canonical Semantic Scholar provider adapter owner module.

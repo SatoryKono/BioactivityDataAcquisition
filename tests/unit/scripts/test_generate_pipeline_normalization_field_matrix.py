@@ -500,6 +500,22 @@ def test_build_field_matrix_rows_exposes_reviewed_chembl_json_ordering(
 def test_build_field_matrix_rows_exposes_non_chembl_governance_sources() -> None:
     rows = build_field_matrix_rows()
 
+    pubchem_standardization_status = _row(
+        rows, "pubchem_compound", "chemical_standardization_status"
+    )
+    assert pubchem_standardization_status["controlled_vocabulary_source"] == (
+        "configs/enums/pubchem.yaml"
+    )
+    assert pubchem_standardization_status["policy_scope"] == "provider_full_universe"
+
+    pubchem_standardization_policy = _row(
+        rows, "pubchem_compound", "chemical_standardization_policy_version"
+    )
+    assert pubchem_standardization_policy["controlled_vocabulary_source"] == (
+        "configs/enums/pubchem.yaml"
+    )
+    assert pubchem_standardization_policy["policy_scope"] == "provider_full_universe"
+
     crossref_publication_type = _row(rows, "crossref_publication", "publication_type")
     assert crossref_publication_type["controlled_vocabulary_source"] == (
         "configs/vocab/publication_controlled.yaml"
@@ -679,12 +695,16 @@ def test_build_field_matrix_rows_documents_structured_payload_sidecar_policy() -
         pipeline_name = policy.profile_name.replace(".", "_")
         row = _row(rows, pipeline_name, policy.field_name)
         semantics = policy.collection_semantics.value.replace("_", " ")
+        raw_row = _row(rows, pipeline_name, policy.raw_sidecar_field)
+        canonical_row = _row(rows, pipeline_name, policy.canonical_sidecar_field)
 
         assert row["normalization_summary"] == row["notes"]
         assert semantics in row["notes"]
         assert policy.raw_sidecar_field in row["notes"]
         assert policy.canonical_sidecar_field in row["notes"]
         assert "not a raw provider substitute" in row["notes"]
+        assert raw_row["normalizer"] == "normalize_profile_passthrough"
+        assert canonical_row["field_type"] == "string"
 
 
 def test_build_field_matrix_rows_keeps_chembl_cell_line_policy_fields_visible() -> None:

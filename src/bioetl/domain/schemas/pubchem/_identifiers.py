@@ -8,7 +8,7 @@ from typing import cast
 import pandera.pandas as pa
 from pandera.typing import Series
 
-from bioetl.domain.behavior.chemical_standardization import (
+from bioetl.domain.normalization.chemical_standardization_contract import (
     CHEMICAL_STANDARDIZATION_POLICY_VERSION,
     CHEMICAL_STANDARDIZATION_STATUSES,
 )

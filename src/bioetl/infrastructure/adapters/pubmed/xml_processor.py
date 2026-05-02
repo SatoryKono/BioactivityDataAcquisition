@@ -2,7 +2,7 @@
 """PubMed XML processing utilities.
 
 Provides XML parsing and record extraction for PubMed API responses.
-Extracted from pubmed_client.py for better separation of concerns.
+Extracted from the PubMed adapter module for better separation of concerns.
 """
 
 from __future__ import annotations

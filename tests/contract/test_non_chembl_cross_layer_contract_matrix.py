@@ -275,6 +275,23 @@ def test_pubchem_standardization_status_vocab_is_cross_layer_canonical() -> None
     )
 
 
+def test_pubchem_standardization_matrix_uses_externalized_enum_source() -> None:
+    rows_by_key = {
+        (row["pipeline_name"], row["field_name"]): row
+        for row in build_field_matrix_rows()
+    }
+
+    status_row = rows_by_key[("pubchem_compound", "chemical_standardization_status")]
+    policy_row = rows_by_key[
+        ("pubchem_compound", "chemical_standardization_policy_version")
+    ]
+
+    assert status_row["controlled_vocabulary_source"] == "configs/enums/pubchem.yaml"
+    assert status_row["policy_scope"] == "provider_full_universe"
+    assert policy_row["controlled_vocabulary_source"] == "configs/enums/pubchem.yaml"
+    assert policy_row["policy_scope"] == "provider_full_universe"
+
+
 def test_non_chembl_composite_join_key_fixture_matches_configs_and_matrix() -> None:
     cases = yaml.safe_load(
         Path("tests/fixtures/normalization/non_chembl_identifier_cases.yaml").read_text(
@@ -313,7 +330,7 @@ def test_non_chembl_composite_join_key_fixture_matches_configs_and_matrix() -> N
             assert row["normalizer"] == "join_key_policy"
 
 
-def test_structured_payload_sidecar_fields_are_not_in_current_cross_layer_surfaces() -> (
+def test_structured_payload_sidecar_fields_are_in_current_cross_layer_surfaces() -> (
     None
 ):
     matrix_rows = {
@@ -331,11 +348,11 @@ def test_structured_payload_sidecar_fields_are_not_in_current_cross_layer_surfac
             policy.raw_sidecar_field,
             policy.canonical_sidecar_field,
         ):
-            assert sidecar_field not in config_fields
-            assert sidecar_field not in silver_fields
-            assert sidecar_field not in domain_fields
-            assert sidecar_field not in gold_fields
-            assert (pipeline_name, sidecar_field) not in matrix_rows
+            assert sidecar_field in config_fields
+            assert sidecar_field in silver_fields
+            assert sidecar_field in domain_fields
+            assert sidecar_field in gold_fields
+            assert (pipeline_name, sidecar_field) in matrix_rows
 
 
 def test_target_composite_excludes_no_legacy_uniprot_aliases() -> None:

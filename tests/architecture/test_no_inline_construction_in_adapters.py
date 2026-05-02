@@ -11,7 +11,7 @@ import pytest
 TARGET_ADAPTERS: dict[str, Path] = {
     "OpenAlexAdapter": Path("src/bioetl/infrastructure/adapters/openalex/client.py"),
     "CrossRefAdapter": Path("src/bioetl/infrastructure/adapters/crossref/client.py"),
-    "PubMedAdapter": Path("src/bioetl/infrastructure/adapters/pubmed/pubmed_client.py"),
+    "PubMedAdapter": Path("src/bioetl/infrastructure/adapters/pubmed/adapter.py"),
     "SemanticScholarAdapter": Path(
         "src/bioetl/infrastructure/adapters/semanticscholar/adapter.py"
     ),

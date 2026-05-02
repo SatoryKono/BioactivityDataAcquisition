@@ -136,6 +136,24 @@
     "required": true,
     "unique": false
   },
+  "affiliation_structured_canonical_json": {
+    "checks": [],
+    "coerce": false,
+    "description": "Canonical JSON companion for structured affiliations.",
+    "dtype": "str",
+    "nullable": true,
+    "required": true,
+    "unique": false
+  },
+  "affiliation_structured_raw_json": {
+    "checks": [],
+    "coerce": false,
+    "description": "Raw provider JSON for structured affiliations.",
+    "dtype": "str",
+    "nullable": true,
+    "required": true,
+    "unique": false
+  },
   "author_count": {
     "checks": [
       {
@@ -180,6 +198,24 @@
     "checks": [],
     "coerce": false,
     "description": "JSON array of authors with their affiliations and identifiers",
+    "dtype": "str",
+    "nullable": true,
+    "required": true,
+    "unique": false
+  },
+  "authors_with_affiliations_canonical_json": {
+    "checks": [],
+    "coerce": false,
+    "description": "Canonical JSON companion for authors-with-affiliations payload.",
+    "dtype": "str",
+    "nullable": true,
+    "required": true,
+    "unique": false
+  },
+  "authors_with_affiliations_raw_json": {
+    "checks": [],
+    "coerce": false,
+    "description": "Raw provider JSON for authors-with-affiliations payload.",
     "dtype": "str",
     "nullable": true,
     "required": true,

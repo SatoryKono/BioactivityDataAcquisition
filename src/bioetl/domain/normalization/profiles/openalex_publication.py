@@ -78,7 +78,6 @@ _SET_LIKE_FIELDS = frozenset(
         "grants_canonical_json",
         "institution_country_codes",
         "institution_ids",
-        "primary_topic_canonical_json",
         "ror_ids",
         "subject_keywords",
         "subject_mesh",

@@ -350,8 +350,8 @@ composite:
         # Canonical field names and aliases live in
         # configs/entities/{provider}/publication.yaml and provider reference docs.
         #
-        # The "system" group MUST be first: it captures ETL metadata columns
-        # (entity_id, content_hash, _run_id, etc.) that would otherwise fall
+        # The "system" group MUST be first: it captures persisted system columns
+        # (entity_id, content_hash, etc.) that would otherwise fall
         # into the "remaining" bucket at the end of the output.
         column_groups:
             # === System / ETL metadata (MUST be first) ===
@@ -359,11 +359,7 @@ composite:
                 fields:
                     - entity_id
                     - content_hash
-                    - _run_id
-                    - _run_type
-                    - _source_batch_id
                     - _source
-                    - _ingestion_ts
                     - _index
                     - _lookup_method
                     - _original_id

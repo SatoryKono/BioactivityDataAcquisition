@@ -1,11 +1,8 @@
 """Semantic Scholar adapter implementation for publication data extraction.
 
-Compatibility note:
-    This module remains the implementation home for ``SemanticScholarAdapter``,
-    but new imports should use
-    ``bioetl.infrastructure.adapters.semanticscholar`` or
-    ``bioetl.infrastructure.adapters.semanticscholar.client`` as the canonical
-    entrypoint.
+Canonical provider adapter surface:
+    - ``bioetl.infrastructure.adapters.semanticscholar``
+    - ``bioetl.infrastructure.adapters.semanticscholar.adapter``
 """
 
 from __future__ import annotations

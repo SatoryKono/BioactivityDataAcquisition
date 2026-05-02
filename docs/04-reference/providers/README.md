@@ -75,3 +75,4 @@ configs/entities/
 - [03-guides/add-new-source.md](../../03-guides/add-new-source.md) - Adding new providers
 - [02-architecture/03-infrastructure-layer.md](../../02-architecture/03-infrastructure-layer.md) - Adapter architecture
 - [publication-normalization.md](publication-normalization.md) - Raw provider publication types vs derived harmonized taxonomy
+- [../03-data-model/reference-identifier-families.md](../../03-data-model/reference-identifier-families.md) - Canonical non-ChEMBL identifier families and storage semantics

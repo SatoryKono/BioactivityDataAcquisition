@@ -80,6 +80,10 @@ PUBMED_SPECIFIC = [
     "gene_symbols",
     "publication_types",
     "authors_with_affiliations",
+    "authors_with_affiliations_raw_json",
+    "authors_with_affiliations_canonical_json",
+    "affiliation_structured_raw_json",
+    "affiliation_structured_canonical_json",
 ]
 
 CHEMBL_SPECIFIC = [

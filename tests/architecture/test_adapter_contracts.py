@@ -435,7 +435,7 @@ class TestAdapterPortCompliance:
                 "OpenAlexAdapter",
             ),
             (
-                "bioetl.infrastructure.adapters.pubmed.client",
+                "bioetl.infrastructure.adapters.pubmed",
                 "PubMedAdapter",
             ),
             (
@@ -443,7 +443,7 @@ class TestAdapterPortCompliance:
                 "PubChemAdapter",
             ),
             (
-                "bioetl.infrastructure.adapters.semanticscholar.client",
+                "bioetl.infrastructure.adapters.semanticscholar",
                 "SemanticScholarAdapter",
             ),
             (
@@ -516,7 +516,6 @@ class TestAdapterPortCompliance:
             "bioetl.infrastructure.adapters.pubmed.client": "PubMedAdapter",
             "bioetl.infrastructure.adapters.pubmed.pubmed_client": "PubMedAdapter",
             "bioetl.infrastructure.adapters.semanticscholar.client": "SemanticScholarAdapter",
-            "bioetl.infrastructure.adapters.semanticscholar.adapter": "SemanticScholarAdapter",
             "bioetl.infrastructure.adapters.uniprot.client": "UniProtAdapter",
         }
         allowed_files = {

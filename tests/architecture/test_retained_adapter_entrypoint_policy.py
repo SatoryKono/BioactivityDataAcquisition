@@ -13,24 +13,27 @@ CURRENT_TEST_FILE = Path(__file__).resolve()
 LEGACY_IMPLEMENTATION_PATHS = frozenset(
     {
         "bioetl.infrastructure.adapters.pubmed.pubmed_client",
-        "bioetl.infrastructure.adapters.semanticscholar.adapter",
-    }
-)
-RETAINED_ENTRYPOINT_MODULES = frozenset(
-    {
         "bioetl.infrastructure.adapters.pubmed.client",
         "bioetl.infrastructure.adapters.semanticscholar.client",
     }
 )
+RETAINED_ENTRYPOINT_MODULES = frozenset(
+    {
+        "bioetl.infrastructure.adapters.pubmed.adapter",
+        "bioetl.infrastructure.adapters.semanticscholar.adapter",
+    }
+)
 ALLOWED_SRC_FILES = frozenset(
     {
+        ROOT / "src" / "bioetl" / "infrastructure" / "adapters" / "pubmed" / "client.py",
+        ROOT / "src" / "bioetl" / "infrastructure" / "adapters" / "pubmed" / "adapter.py",
         ROOT
         / "src"
         / "bioetl"
         / "infrastructure"
         / "adapters"
         / "pubmed"
-        / "client.py",
+        / "pubmed_client.py",
         ROOT
         / "src"
         / "bioetl"
@@ -55,6 +58,20 @@ ALLOWED_RETAINED_ENTRYPOINT_SRC_FILES = frozenset(
         / "infrastructure"
         / "adapters"
         / "pubmed"
+        / "client.py",
+        ROOT
+        / "src"
+        / "bioetl"
+        / "infrastructure"
+        / "adapters"
+        / "pubmed"
+        / "adapter.py",
+        ROOT
+        / "src"
+        / "bioetl"
+        / "infrastructure"
+        / "adapters"
+        / "pubmed"
         / "pubmed_client.py",
         ROOT
         / "src"
@@ -62,7 +79,7 @@ ALLOWED_RETAINED_ENTRYPOINT_SRC_FILES = frozenset(
         / "infrastructure"
         / "adapters"
         / "semanticscholar"
-        / "__init__.py",
+        / "client.py",
         ROOT
         / "src"
         / "bioetl"
@@ -70,11 +87,22 @@ ALLOWED_RETAINED_ENTRYPOINT_SRC_FILES = frozenset(
         / "adapters"
         / "semanticscholar"
         / "adapter.py",
+        ROOT
+        / "src"
+        / "bioetl"
+        / "infrastructure"
+        / "adapters"
+        / "semanticscholar"
+        / "__init__.py",
     }
 )
 ALLOWED_TEST_FILES = frozenset(
     {
         CURRENT_TEST_FILE,
+        ROOT
+        / "tests"
+        / "architecture"
+        / "test_layer_aware_suffix_policy.py",
         ROOT
         / "tests"
         / "unit"
@@ -150,13 +178,13 @@ def test_legacy_adapter_paths_are_confined_to_dedicated_compat_tests() -> None:
 
 @pytest.mark.architecture
 def test_public_adapter_entrypoints_are_confined_to_package_roots_in_src() -> None:
-    """First-party src should import provider package roots, not public client modules."""
+    """First-party src should import provider package roots, not adapter owner modules."""
     violations = _iter_public_entrypoint_mentions(
         SRC_ROOT,
         allowed_files=ALLOWED_RETAINED_ENTRYPOINT_SRC_FILES,
     )
     assert not violations, (
-        "Retained adapter client entrypoints leaked into first-party src/ beyond "
+        "Retained adapter owner modules leaked into first-party src/ beyond "
         "provider package roots:\n" + "\n".join(violations)
     )
 

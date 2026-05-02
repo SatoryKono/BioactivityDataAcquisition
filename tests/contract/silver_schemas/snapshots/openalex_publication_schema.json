@@ -242,6 +242,24 @@
     "required": true,
     "unique": false
   },
+  "grants_canonical_json": {
+    "checks": [],
+    "coerce": false,
+    "description": "Canonical JSON companion for grants payload.",
+    "dtype": "str",
+    "nullable": true,
+    "required": true,
+    "unique": false
+  },
+  "grants_raw_json": {
+    "checks": [],
+    "coerce": false,
+    "description": "Raw provider JSON for grants payload.",
+    "dtype": "str",
+    "nullable": true,
+    "required": true,
+    "unique": false
+  },
   "institution_country_codes": {
     "checks": [],
     "coerce": false,
@@ -411,6 +429,24 @@
     "checks": [],
     "coerce": false,
     "description": "Primary topic classification (JSON object)",
+    "dtype": "str",
+    "nullable": true,
+    "required": true,
+    "unique": false
+  },
+  "primary_topic_canonical_json": {
+    "checks": [],
+    "coerce": false,
+    "description": "Canonical JSON companion for primary-topic payload.",
+    "dtype": "str",
+    "nullable": true,
+    "required": true,
+    "unique": false
+  },
+  "primary_topic_raw_json": {
+    "checks": [],
+    "coerce": false,
+    "description": "Raw provider JSON for primary-topic payload.",
     "dtype": "str",
     "nullable": true,
     "required": true,
