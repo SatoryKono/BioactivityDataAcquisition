@@ -397,7 +397,10 @@ def expected_resume_contract(manifest: RunManifest) -> dict[str, object]:
         "forensic_grade",
     }
     continuation_mode = "rebuild_only"
-    if requested_exact_replay and manifest.replay_capability == ReplayCapability.EXACT_REPLAY_SUPPORTED:
+    if (
+        requested_exact_replay
+        and manifest.replay_capability == ReplayCapability.EXACT_REPLAY_SUPPORTED
+    ):
         continuation_mode = "exact_replay"
     elif any(
         str(candidate or "").strip().lower() == "full_scan_only"

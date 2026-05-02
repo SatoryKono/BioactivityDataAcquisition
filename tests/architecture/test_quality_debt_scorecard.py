@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from datetime import date
 import importlib.util
+from itertools import pairwise
 from pathlib import Path
 import sys
 from types import ModuleType
@@ -337,6 +338,72 @@ def test_debt_scorecard_declares_compatibility_debt_kpis() -> None:
     assert expired_metric.get("max_count") == 0
 
 
+def test_debt_scorecard_bronze_fixture_replay_metrics_match_sources() -> None:
+    """Bronze fixture debt metrics must stay synchronized with canonical sources."""
+    scorecard = load_debt_scorecard()
+    bronze_metrics = scorecard.get("bronze_fixture_replay_debt_metrics", {})
+    assert isinstance(bronze_metrics, dict)
+    assert (
+        bronze_metrics.get("manifest_source")
+        == "configs/base/bronze_fixture_manifest.yaml"
+    )
+    assert bronze_metrics.get("gap_source") == "configs/base/bronze_fixture_gaps.yaml"
+
+    manifest_path = ROOT / str(bronze_metrics["manifest_source"])
+    gaps_path = ROOT / str(bronze_metrics["gap_source"])
+    manifest_payload = yaml.safe_load(manifest_path.read_text(encoding="utf-8"))
+    gaps_payload = yaml.safe_load(gaps_path.read_text(encoding="utf-8"))
+    assert isinstance(manifest_payload, dict)
+    assert isinstance(gaps_payload, dict)
+
+    fixtures = manifest_payload.get("fixtures", {})
+    gaps = gaps_payload.get("gaps", {})
+    assert isinstance(fixtures, dict)
+    assert isinstance(gaps, dict)
+
+    expected_counts = {
+        "tracked_bronze_fixture_count": sum(
+            1
+            for entry in fixtures.values()
+            if isinstance(entry, dict)
+            and entry.get("fixture_kind") == "tracked_ci_sample"
+        ),
+        "active_fixture_gap_count": sum(
+            1
+            for gap in gaps.values()
+            if isinstance(gap, dict) and gap.get("status") in {"open", "in_progress"}
+        ),
+        "blocked_fixture_gap_count": sum(
+            1
+            for gap in gaps.values()
+            if isinstance(gap, dict) and gap.get("status") == "blocked"
+        ),
+        "decision_recorded_fixture_gap_count": sum(
+            1
+            for gap in gaps.values()
+            if isinstance(gap, dict) and gap.get("status") == "decision_recorded"
+        ),
+    }
+
+    metrics = bronze_metrics.get("metrics", {})
+    assert isinstance(metrics, dict)
+    for metric_name, expected_count in expected_counts.items():
+        metric = metrics.get(metric_name)
+        assert isinstance(metric, dict), (
+            "bronze_fixture_replay_debt_metrics.metrics."
+            f"{metric_name} must be a mapping"
+        )
+        assert metric.get("current_count") == expected_count, (
+            f"{metric_name} current_count must match canonical Bronze fixture "
+            f"sources: expected {expected_count}, found {metric.get('current_count')}"
+        )
+        assert isinstance(metric.get("owner"), str) and metric["owner"]
+        assert isinstance(metric.get("rationale"), str) and metric["rationale"]
+        assert (
+            isinstance(metric.get("ratchet_policy"), str) and metric["ratchet_policy"]
+        )
+
+
 def test_compatibility_facade_budget_declares_dated_downward_ratchet_schedule() -> None:
     """Retained compatibility facade budget must carry a dated downward ratchet."""
     scorecard = load_debt_scorecard()
@@ -372,7 +439,7 @@ def test_compatibility_facade_budget_declares_dated_downward_ratchet_schedule() 
     assert effective_dates == sorted(effective_dates), (
         "ratchet_schedule dates must be chronological"
     )
-    assert all(prev >= nxt for prev, nxt in zip(limits, limits[1:], strict=False)), (
+    assert all(prev >= nxt for prev, nxt in pairwise(limits)), (
         "ratchet_schedule max_count values must be monotonically non-increasing"
     )
     assert limits[0] == retained["max_count"], (

@@ -450,8 +450,9 @@ def test_collect_metric_inventory_detects_direct_label_contract_violations(
     violations = report["runtime_label_contract_violations"]
     assert isinstance(violations, list)
     assert len(violations) == 1
-    assert "bioetl_registered_total @ src/bioetl/application/emitters.py:1" in (
-        violations[0]
+    assert (
+        "bioetl_registered_total @ src/bioetl/application/emitters.py:1"
+        in (violations[0])
     )
     assert "missing=['run_type']" in violations[0]
     assert "extra=['extra']" in violations[0]
