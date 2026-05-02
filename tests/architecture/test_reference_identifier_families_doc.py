@@ -1,4 +1,4 @@
-"""Tests for the governed non-ChEMBL reference identifier family registry."""
+"""Doc governance for the non-ChEMBL reference identifier family registry."""
 
 from __future__ import annotations
 

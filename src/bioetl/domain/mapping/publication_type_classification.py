@@ -216,16 +216,6 @@ def build_publication_type_classification_payload(
     return payload
 
 
-def _find_matching_classification_value(
-    normalized: str,
-    allowed: frozenset[str],
-) -> str | None:
-    for allowed_value in allowed:
-        if normalized.lower() == allowed_value.lower():
-            return allowed_value
-    return None
-
-
 def normalize_publication_classification_field(
     field_name: str,
     value: object,
