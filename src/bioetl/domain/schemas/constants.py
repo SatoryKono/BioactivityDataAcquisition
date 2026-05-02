@@ -2,6 +2,11 @@
 
 from __future__ import annotations
 
+from bioetl.domain.pubchem_standardization_catalog import (
+    PUBCHEM_CHEMICAL_STANDARDIZATION_POLICY_VERSION,
+    PUBCHEM_CHEMICAL_STANDARDIZATION_STATUSES,
+    PUBCHEM_STANDARDIZATION_ENUM_CATALOG,
+)
 from bioetl.domain.schemas._chembl_enum_catalog import (
     ACTIVITY_STANDARD_TYPES,
     ACTIVITY_STANDARD_UNITS,
@@ -28,18 +33,6 @@ from bioetl.domain.schemas._chembl_enum_catalog import (
     TARGET_COMPONENT_TYPES,
     TARGET_TYPES,
 )
-from bioetl.domain.normalization._pubchem_standardization_catalog import (
-    PUBCHEM_CHEMICAL_STANDARDIZATION_POLICY_VERSION,
-    PUBCHEM_CHEMICAL_STANDARDIZATION_STATUSES,
-    PUBCHEM_STANDARDIZATION_ENUM_CATALOG,
-)
-from bioetl.domain.schemas._uniprot_enum_catalog import (
-    UNIPROT_ENTRY_TYPES,
-    UNIPROT_ENUM_CATALOG,
-    UNIPROT_MAPPING_STATUSES,
-    UNIPROT_PROTEIN_EXISTENCE_LEVELS,
-    UNIPROT_PROTEIN_FLAGS,
-)
 from bioetl.domain.schemas._schema_validation_patterns import (
     BAO_ID_PATTERN,
     BTO_ID_PATTERN,
@@ -53,6 +46,13 @@ from bioetl.domain.schemas._schema_validation_patterns import (
     ORCID_PATTERN,
     UBERON_ID_PATTERN,
     UO_ID_PATTERN,
+)
+from bioetl.domain.schemas._uniprot_enum_catalog import (
+    UNIPROT_ENTRY_TYPES,
+    UNIPROT_ENUM_CATALOG,
+    UNIPROT_MAPPING_STATUSES,
+    UNIPROT_PROTEIN_EXISTENCE_LEVELS,
+    UNIPROT_PROTEIN_FLAGS,
 )
 
 # =============================================================================
@@ -108,11 +108,11 @@ __all__ = [
     "OA_STATUS_VALUES",
     "ONTOLOGY_MAPPING_STATUSES",
     "ORCID_PATTERN",
-    "PUBLICATION_TERM_TYPES",
-    "PUBLICATION_TYPES",
     "PUBCHEM_CHEMICAL_STANDARDIZATION_POLICY_VERSION",
     "PUBCHEM_CHEMICAL_STANDARDIZATION_STATUSES",
     "PUBCHEM_STANDARDIZATION_ENUM_CATALOG",
+    "PUBLICATION_TERM_TYPES",
+    "PUBLICATION_TYPES",
     "RELATIONSHIP_TYPES",
     "RO3_PASS_VALUES",
     "STANDARD_RELATIONS",
@@ -122,10 +122,10 @@ __all__ = [
     "TARGET_COMPONENT_TYPES",
     "TARGET_TYPES",
     "UBERON_ID_PATTERN",
-    "UO_ID_PATTERN",
     "UNIPROT_ENTRY_TYPES",
     "UNIPROT_ENUM_CATALOG",
     "UNIPROT_MAPPING_STATUSES",
     "UNIPROT_PROTEIN_EXISTENCE_LEVELS",
     "UNIPROT_PROTEIN_FLAGS",
+    "UO_ID_PATTERN",
 ]

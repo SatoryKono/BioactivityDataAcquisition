@@ -123,13 +123,13 @@ class SemanticScholarPublicationSchema(PublicationBaseSchema):
         nullable=True,
         description="Fields of study (JSON array)",
     )
-    subject_fields_raw_json: Series[str] | None = pa.Field(
-        nullable=True,
-        description="Raw provider JSON for subject-fields payload.",
-    )
     subject_fields_canonical_json: Series[str] | None = pa.Field(
         nullable=True,
         description="Canonical JSON companion for subject-fields payload.",
+    )
+    subject_fields_raw_json: Series[str] | None = pa.Field(
+        nullable=True,
+        description="Raw provider JSON for subject-fields payload.",
     )
 
     publication_type: Series[str] = pa.Field(
@@ -141,13 +141,13 @@ class SemanticScholarPublicationSchema(PublicationBaseSchema):
         nullable=True,
         description="Publication types (JSON array)",
     )
-    publication_types_raw_json: Series[str] | None = pa.Field(
-        nullable=True,
-        description="Raw provider JSON for publication-types payload.",
-    )
     publication_types_canonical_json: Series[str] | None = pa.Field(
         nullable=True,
         description="Canonical JSON companion for publication-types payload.",
+    )
+    publication_types_raw_json: Series[str] | None = pa.Field(
+        nullable=True,
+        description="Raw provider JSON for publication-types payload.",
     )
 
     # === Author Identifiers (for author-level analytics and disambiguation) ===
@@ -162,13 +162,13 @@ class SemanticScholarPublicationSchema(PublicationBaseSchema):
         nullable=True,
         description="Author h-index values (JSON array, null for missing)",
     )
-    author_h_indices_raw_json: Series[str] | None = pa.Field(
-        nullable=True,
-        description="Raw provider JSON for author h-index payload.",
-    )
     author_h_indices_canonical_json: Series[str] | None = pa.Field(
         nullable=True,
         description="Canonical JSON companion for author h-index payload.",
+    )
+    author_h_indices_raw_json: Series[str] | None = pa.Field(
+        nullable=True,
+        description="Raw provider JSON for author h-index payload.",
     )
 
     # === Citation Context (for citation sentiment analysis) ===
@@ -176,13 +176,13 @@ class SemanticScholarPublicationSchema(PublicationBaseSchema):
         nullable=True,
         description="Citation context sentences (JSON array)",
     )
-    citation_contexts_raw_json: Series[str] | None = pa.Field(
-        nullable=True,
-        description="Raw provider JSON for citation-context payload.",
-    )
     citation_contexts_canonical_json: Series[str] | None = pa.Field(
         nullable=True,
         description="Canonical JSON companion for citation-context payload.",
+    )
+    citation_contexts_raw_json: Series[str] | None = pa.Field(
+        nullable=True,
+        description="Raw provider JSON for citation-context payload.",
     )
 
     class Config:

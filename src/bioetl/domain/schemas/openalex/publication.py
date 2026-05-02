@@ -124,13 +124,13 @@ class OpenAlexPublicationSchema(PublicationBaseSchema):
         nullable=True,
         description="Primary topic classification (JSON object)",
     )
-    primary_topic_raw_json: Series[str] | None = pa.Field(
-        nullable=True,
-        description="Raw provider JSON for primary-topic payload.",
-    )
     primary_topic_canonical_json: Series[str] | None = pa.Field(
         nullable=True,
         description="Canonical JSON companion for primary-topic payload.",
+    )
+    primary_topic_raw_json: Series[str] | None = pa.Field(
+        nullable=True,
+        description="Raw provider JSON for primary-topic payload.",
     )
 
     # === Grants/Funding Information ===
@@ -139,13 +139,13 @@ class OpenAlexPublicationSchema(PublicationBaseSchema):
         nullable=True,
         description="Funding/grant information (JSON array)",
     )
-    grants_raw_json: Series[str] | None = pa.Field(
-        nullable=True,
-        description="Raw provider JSON for grants payload.",
-    )
     grants_canonical_json: Series[str] | None = pa.Field(
         nullable=True,
         description="Canonical JSON companion for grants payload.",
+    )
+    grants_raw_json: Series[str] | None = pa.Field(
+        nullable=True,
+        description="Raw provider JSON for grants payload.",
     )
 
     # === Classification Fields (extracted by transformer) ===
