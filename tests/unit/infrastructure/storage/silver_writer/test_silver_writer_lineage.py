@@ -461,8 +461,8 @@ class TestSilverWriterLineage:
         )
         assert silver_input.version_after == 7
         mock_metadata_writer.write_silver_metadata.assert_awaited_once_with(
-            silver_table_path("chembl.activity"),
-            metadata,
+            metadata=metadata,
+            base_path=silver_table_path("chembl.activity"),
             table_name="chembl.activity",
             flat_structure=False,
             provider="chembl",
@@ -617,8 +617,8 @@ class TestSilverWriterLineage:
         assert input_arg.mode == SilverWriteMode.DELETE
         assert input_arg.version_after == 11
         mock_metadata_writer.write_silver_metadata.assert_awaited_once_with(
-            silver_table_path("composite.publication"),
-            metadata,
+            metadata=metadata,
+            base_path=silver_table_path("composite.publication"),
             table_name="composite.publication",
             flat_structure=False,
             provider="composite",

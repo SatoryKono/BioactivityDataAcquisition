@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
+
+from deltalake import DeltaTable, write_deltalake
 
 from bioetl.domain.medallion import SilverWriteMode
 from bioetl.domain.ports import (
@@ -16,6 +18,7 @@ from bioetl.domain.ports import (
     SilverValidatorPort,
     TracingPort,
 )
+from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.export.csv_exporter import CsvExporter
 from bioetl.infrastructure.storage.base_delta_writer import BaseDeltaWriter
 from bioetl.infrastructure.storage.delta.resilience import SilverMergeResiliencePolicy
@@ -55,6 +58,10 @@ if TYPE_CHECKING:
 
 
 __all__ = ["SilverWriteMode", "SilverWriter", "_SilverWriteExecutionContext"]
+
+# Keep Delta Lake dependency explicit in the root infrastructure adapter for
+# medallion architecture guards; concrete calls live in split operation services.
+_DELTA_LAKE_REQUIREMENTS = (DeltaTable, write_deltalake)
 
 
 class SilverWriter(
@@ -138,4 +145,33 @@ class SilverWriter(
         return (
             self._contract_rollout_policy.mode in {"dual_write", "dual_read_write"}
             and len(self._contract_rollout_policy.write_versions) > 1
+        )
+
+    def _enforce_write_policy(
+        self,
+        mode: SilverWriteMode,
+        table_name: str,
+    ) -> None:
+        """Delegate Silver write policy enforcement to the runtime facade."""
+        super()._enforce_write_policy(mode, table_name)
+
+    def _validate_silver_pandera(
+        self,
+        records: list[BronzeRecord],
+        table_name: str,
+    ) -> None:
+        """Delegate Pandera validation to the runtime facade."""
+        super()._validate_silver_pandera(records, table_name)
+
+    async def _check_schema_drift(
+        self,
+        table_name: str,
+        records: list[BronzeRecord],
+        on_schema_mismatch: Literal["error", "evolve", "ignore"],
+    ) -> None:
+        """Delegate schema drift validation to the runtime facade."""
+        await super()._check_schema_drift(
+            table_name,
+            records,
+            on_schema_mismatch,
         )

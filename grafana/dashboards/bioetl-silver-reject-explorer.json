@@ -12,7 +12,7 @@
             }
         ]
     },
-    "description": "Record-level explorer for Silver filtered_out rows (quarantine-backed, read-only)",
+    "description": "Record-level explorer for Silver filtered_out rows (quarantine-backed, read-only, single-pipeline scoped)",
     "editable": true,
     "gnetId": null,
     "graphTooltip": 1,
@@ -21,31 +21,31 @@
         {
             "asDropdown": false,
             "icon": "external link",
-            "includeVars": true,
+            "includeVars": false,
             "keepTime": true,
             "tags": [],
             "targetBlank": false,
             "title": "Back to Overview",
             "tooltip": "",
             "type": "link",
-            "url": "/d/bioetl-overview-v2/bioetl-overview-v2"
+            "url": "/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
         },
         {
             "asDropdown": false,
             "icon": "external link",
-            "includeVars": true,
+            "includeVars": false,
             "keepTime": true,
             "tags": [],
             "targetBlank": false,
             "title": "Back to Data Quality",
             "tooltip": "",
             "type": "link",
-            "url": "/d/bioetl-dq-v2/bioetl-dq-v2"
+            "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
         },
         {
             "asDropdown": false,
             "icon": "logs",
-            "includeVars": true,
+            "includeVars": false,
             "keepTime": true,
             "tags": [],
             "targetBlank": false,
@@ -57,7 +57,7 @@
         {
             "asDropdown": false,
             "icon": "share-alt",
-            "includeVars": true,
+            "includeVars": false,
             "keepTime": true,
             "tags": [],
             "targetBlank": false,
@@ -77,7 +77,7 @@
             },
             "id": 1,
             "options": {
-                "content": "<center><h2>Pipeline: $pipeline | Run Type: $run_type | Reason: $reason_code | Field: $field | Run ID: $run_id</h2></center>",
+                "content": "<center><h2>Pipeline: $pipeline | Run Type: $run_type | Reason: $reason_code | Field: $field | Run ID: $run_id</h2><div><small>Select exactly one pipeline. Quarantine Explorer is fail-closed and forensic filters like run_id/payload_hash stay explorer-only, not Prometheus labels.</small></div></center>",
                 "mode": "html"
             },
             "title": "Scope",
@@ -134,7 +134,7 @@
                     "root_selector": "$",
                     "source": "url",
                     "type": "json",
-                    "url": "/ops/quarantine/filtered-stats?pipeline=${pipeline:csv}&run_type=${run_type:csv}&reason_code=${reason_code:csv}&field=${field:csv}&run_id=${run_id}&from=${__from:date:iso}&to=${__to:date:iso}",
+                    "url": "/ops/quarantine/filtered-stats?pipeline=${pipeline}&run_type=${run_type:csv}&reason_code=${reason_code:csv}&field=${field:csv}&run_id=${run_id}&from=${__from:date:iso}&to=${__to:date:iso}",
                     "url_options": {
                         "data": "",
                         "method": "GET"
@@ -213,7 +213,7 @@
                     "root_selector": "$",
                     "source": "url",
                     "type": "json",
-                    "url": "/ops/quarantine/filtered-stats?pipeline=${pipeline:csv}&run_type=${run_type:csv}&reason_code=${reason_code:csv}&field=${field:csv}&run_id=${run_id}&from=${__from:date:iso}&to=${__to:date:iso}",
+                    "url": "/ops/quarantine/filtered-stats?pipeline=${pipeline}&run_type=${run_type:csv}&reason_code=${reason_code:csv}&field=${field:csv}&run_id=${run_id}&from=${__from:date:iso}&to=${__to:date:iso}",
                     "url_options": {
                         "data": "",
                         "method": "GET"
@@ -255,7 +255,7 @@
                     "root_selector": "$",
                     "source": "url",
                     "type": "json",
-                    "url": "/ops/quarantine/filtered-stats?pipeline=${pipeline:csv}&run_type=${run_type:csv}&reason_code=${reason_code:csv}&field=${field:csv}&run_id=${run_id}&from=${__from:date:iso}&to=${__to:date:iso}",
+                    "url": "/ops/quarantine/filtered-stats?pipeline=${pipeline}&run_type=${run_type:csv}&reason_code=${reason_code:csv}&field=${field:csv}&run_id=${run_id}&from=${__from:date:iso}&to=${__to:date:iso}",
                     "url_options": {
                         "data": "",
                         "method": "GET"
@@ -294,7 +294,7 @@
                     "root_selector": "by_reason_code",
                     "source": "url",
                     "type": "json",
-                    "url": "/ops/quarantine/filtered-stats?pipeline=${pipeline:csv}&run_type=${run_type:csv}&reason_code=${reason_code:csv}&field=${field:csv}&run_id=${run_id}&from=${__from:date:iso}&to=${__to:date:iso}",
+                    "url": "/ops/quarantine/filtered-stats?pipeline=${pipeline}&run_type=${run_type:csv}&reason_code=${reason_code:csv}&field=${field:csv}&run_id=${run_id}&from=${__from:date:iso}&to=${__to:date:iso}",
                     "url_options": {
                         "data": "",
                         "method": "GET"
@@ -333,7 +333,7 @@
                     "root_selector": "by_field",
                     "source": "url",
                     "type": "json",
-                    "url": "/ops/quarantine/filtered-stats?pipeline=${pipeline:csv}&run_type=${run_type:csv}&reason_code=${reason_code:csv}&field=${field:csv}&run_id=${run_id}&from=${__from:date:iso}&to=${__to:date:iso}",
+                    "url": "/ops/quarantine/filtered-stats?pipeline=${pipeline}&run_type=${run_type:csv}&reason_code=${reason_code:csv}&field=${field:csv}&run_id=${run_id}&from=${__from:date:iso}&to=${__to:date:iso}",
                     "url_options": {
                         "data": "",
                         "method": "GET"
@@ -372,7 +372,7 @@
                     "root_selector": "by_reason_signature",
                     "source": "url",
                     "type": "json",
-                    "url": "/ops/quarantine/filtered-stats?pipeline=${pipeline:csv}&run_type=${run_type:csv}&reason_code=${reason_code:csv}&field=${field:csv}&run_id=${run_id}&from=${__from:date:iso}&to=${__to:date:iso}",
+                    "url": "/ops/quarantine/filtered-stats?pipeline=${pipeline}&run_type=${run_type:csv}&reason_code=${reason_code:csv}&field=${field:csv}&run_id=${run_id}&from=${__from:date:iso}&to=${__to:date:iso}",
                     "url_options": {
                         "data": "",
                         "method": "GET"
@@ -431,7 +431,7 @@
                     "root_selector": "items",
                     "source": "url",
                     "type": "json",
-                    "url": "/ops/quarantine/filtered-records?pipeline=${pipeline:csv}&run_type=${run_type:csv}&reason_code=${reason_code:csv}&field=${field:csv}&run_id=${run_id}&from=${__from:date:iso}&to=${__to:date:iso}&limit=100&offset=0&sort=ingestion_ts_desc",
+                    "url": "/ops/quarantine/filtered-records?pipeline=${pipeline}&run_type=${run_type:csv}&reason_code=${reason_code:csv}&field=${field:csv}&run_id=${run_id}&from=${__from:date:iso}&to=${__to:date:iso}&limit=100&offset=0&sort=ingestion_ts_desc",
                     "url_options": {
                         "data": "",
                         "method": "GET"
@@ -470,7 +470,7 @@
                     "root_selector": "items",
                     "source": "url",
                     "type": "json",
-                    "url": "/ops/quarantine/filtered-records?pipeline=${pipeline:csv}&run_type=${run_type:csv}&reason_code=${reason_code:csv}&field=${field:csv}&run_id=${run_id}&payload_hash=${payload_hash}&from=${__from:date:iso}&to=${__to:date:iso}&limit=1&offset=0&sort=ingestion_ts_desc",
+                    "url": "/ops/quarantine/filtered-records?pipeline=${pipeline}&run_type=${run_type:csv}&reason_code=${reason_code:csv}&field=${field:csv}&run_id=${run_id}&payload_hash=${payload_hash}&from=${__from:date:iso}&to=${__to:date:iso}&limit=1&offset=0&sort=ingestion_ts_desc",
                     "url_options": {
                         "data": "",
                         "method": "GET"
@@ -500,9 +500,9 @@
                 "datasource": "Prometheus",
                 "definition": "label_values(bioetl_records_processed_total, pipeline)",
                 "hide": 0,
-                "includeAll": true,
+                "includeAll": false,
                 "label": "Pipeline",
-                "multi": true,
+                "multi": false,
                 "name": "pipeline",
                 "options": [],
                 "query": {
@@ -523,7 +523,7 @@
                 "allValue": null,
                 "current": {},
                 "datasource": "Quarantine Explorer",
-                "definition": "/ops/quarantine/filter-options?dimension=run_type&pipeline=${pipeline:csv}",
+                "definition": "/ops/quarantine/filter-options?dimension=run_type&pipeline=${pipeline}",
                 "hide": 0,
                 "includeAll": true,
                 "label": "Run Type",
@@ -534,7 +534,7 @@
                     "infinityQuery": {
                         "type": "json",
                         "source": "url",
-                        "url": "/ops/quarantine/filter-options?dimension=run_type&pipeline=${pipeline:csv}"
+                        "url": "/ops/quarantine/filter-options?dimension=run_type&pipeline=${pipeline}"
                     }
                 },
                 "refresh": 1,
@@ -551,7 +551,7 @@
                 "allValue": null,
                 "current": {},
                 "datasource": "Quarantine Explorer",
-                "definition": "/ops/quarantine/filter-options?dimension=reason_code&pipeline=${pipeline:csv}&run_type=${run_type:csv}",
+                "definition": "/ops/quarantine/filter-options?dimension=reason_code&pipeline=${pipeline}&run_type=${run_type:csv}",
                 "hide": 0,
                 "includeAll": true,
                 "label": "Reason Code",
@@ -562,7 +562,7 @@
                     "infinityQuery": {
                         "type": "json",
                         "source": "url",
-                        "url": "/ops/quarantine/filter-options?dimension=reason_code&pipeline=${pipeline:csv}&run_type=${run_type:csv}"
+                        "url": "/ops/quarantine/filter-options?dimension=reason_code&pipeline=${pipeline}&run_type=${run_type:csv}"
                     }
                 },
                 "refresh": 1,
@@ -579,7 +579,7 @@
                 "allValue": null,
                 "current": {},
                 "datasource": "Quarantine Explorer",
-                "definition": "/ops/quarantine/filter-options?dimension=field&pipeline=${pipeline:csv}&run_type=${run_type:csv}&reason_code=${reason_code:csv}",
+                "definition": "/ops/quarantine/filter-options?dimension=field&pipeline=${pipeline}&run_type=${run_type:csv}&reason_code=${reason_code:csv}",
                 "hide": 0,
                 "includeAll": true,
                 "label": "Field",
@@ -590,7 +590,7 @@
                     "infinityQuery": {
                         "type": "json",
                         "source": "url",
-                        "url": "/ops/quarantine/filter-options?dimension=field&pipeline=${pipeline:csv}&run_type=${run_type:csv}&reason_code=${reason_code:csv}"
+                        "url": "/ops/quarantine/filter-options?dimension=field&pipeline=${pipeline}&run_type=${run_type:csv}&reason_code=${reason_code:csv}"
                     }
                 },
                 "refresh": 1,
@@ -607,18 +607,18 @@
                 "allValue": null,
                 "current": {},
                 "datasource": "Quarantine Explorer",
-                "definition": "/ops/quarantine/filter-options?dimension=run_id&pipeline=${pipeline:csv}&run_type=${run_type:csv}&reason_code=${reason_code:csv}&field=${field:csv}",
+                "definition": "/ops/quarantine/filter-options?dimension=run_id&pipeline=${pipeline}&run_type=${run_type:csv}&reason_code=${reason_code:csv}&field=${field:csv}",
                 "hide": 0,
-                "includeAll": true,
+                "includeAll": false,
                 "label": "Run ID",
-                "multi": true,
+                "multi": false,
                 "name": "run_id",
                 "options": [],
                 "query": {
                     "infinityQuery": {
                         "type": "json",
                         "source": "url",
-                        "url": "/ops/quarantine/filter-options?dimension=run_id&pipeline=${pipeline:csv}&run_type=${run_type:csv}&reason_code=${reason_code:csv}&field=${field:csv}"
+                        "url": "/ops/quarantine/filter-options?dimension=run_id&pipeline=${pipeline}&run_type=${run_type:csv}&reason_code=${reason_code:csv}&field=${field:csv}"
                     }
                 },
                 "refresh": 1,

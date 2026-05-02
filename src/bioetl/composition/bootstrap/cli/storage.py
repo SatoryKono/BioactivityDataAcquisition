@@ -15,16 +15,20 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 from uuid import uuid4
 
+from bioetl.application.core.lifecycle.cleanup_service import CleanupStorageProtocol
 from bioetl.application.services.admin_runtime_api import CleanupService
 from bioetl.application.services.bronze_cleanup_service import BronzeCleanupService
 from bioetl.application.services.contract_migration_service import (
     ContractMigrationService,
 )
 from bioetl.application.services.export_service import ExportService
-from bioetl.application.services.medallion_lifecycle import MedallionLifecycleService
+from bioetl.application.services.medallion_lifecycle import (
+    MedallionLifecycleService,
+    MedallionStorageProtocol,
+)
 from bioetl.application.services.vacuum_service import VacuumService
 from bioetl.composition.bootstrap.assembly.storage import bootstrap_storage_adapter
 from bioetl.composition.bootstrap.cli.config import bootstrap_config_service
@@ -34,6 +38,7 @@ from bioetl.composition.bootstrap.cli.noop import (
 )
 from bioetl.composition.registry_api import get_default_registry
 from bioetl.domain.context import current_utc_time
+from bioetl.domain.ports import BronzeStoragePort
 from bioetl.domain.types import RunID, RunType
 from bioetl.domain.value_objects.run_context import RunContext
 from bioetl.infrastructure.config import get_settings
@@ -97,7 +102,7 @@ def bootstrap_cleanup_service() -> CleanupService:
     Returns:
         CleanupService configured for the current environment.
     """
-    storage = bootstrap_cli_storage_adapter()
+    storage = cast(CleanupStorageProtocol, bootstrap_cli_storage_adapter())
     noop_logger = create_noop_logger()
 
     return CleanupService(storage=storage, logger=noop_logger)
@@ -112,7 +117,7 @@ def bootstrap_lifecycle_service() -> MedallionLifecycleService:
     Returns:
         MedallionLifecycleService configured for the current environment.
     """
-    storage = bootstrap_cli_storage_adapter()
+    storage = cast(MedallionStorageProtocol, bootstrap_cli_storage_adapter())
     noop_logger = create_noop_logger()
 
     return MedallionLifecycleService(storage=storage, logger=noop_logger)
@@ -127,7 +132,7 @@ def bootstrap_bronze_cleanup_service() -> BronzeCleanupService:
     Returns:
         BronzeCleanupService configured for the current environment.
     """
-    storage = bootstrap_cli_storage_adapter()
+    storage = cast(BronzeStoragePort, bootstrap_cli_storage_adapter())
     noop_logger = create_noop_logger()
 
     return BronzeCleanupService(

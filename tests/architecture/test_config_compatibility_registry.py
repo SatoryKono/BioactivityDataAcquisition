@@ -183,9 +183,9 @@ def test_no_new_unregistered_config_compatibility_test_names() -> None:
     registry_text = REGISTRY_PATH.read_text(encoding="utf-8")
 
     missing = [
-        str(path.relative_to(PROJECT_ROOT))
+        path.relative_to(PROJECT_ROOT).as_posix()
         for path in suspects
-        if str(path.relative_to(PROJECT_ROOT)) not in registry_text
+        if path.relative_to(PROJECT_ROOT).as_posix() not in registry_text
     ]
 
     assert not missing, (

@@ -539,7 +539,7 @@ class TestSilverWriterErrorHandling:
                 delta_table_mock,
             ),
             patch(
-                "bioetl.infrastructure.storage.silver_writer.asyncio.wait_for",
+                "bioetl.infrastructure.storage.silver.delta_helpers.asyncio.wait_for",
                 side_effect=asyncio.TimeoutError,
             ),
             patch(
@@ -625,7 +625,7 @@ class TestSilverWriterErrorHandling:
                 delta_table_mock,
             ),
             patch(
-                "bioetl.infrastructure.storage.silver_writer.asyncio.wait_for",
+                "bioetl.infrastructure.storage.silver.delta_helpers.asyncio.wait_for",
                 side_effect=asyncio.TimeoutError,
             ),
         ):

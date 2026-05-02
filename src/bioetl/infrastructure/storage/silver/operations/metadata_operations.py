@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import inspect
-from collections.abc import Callable, Sequence
+from collections.abc import Awaitable, Callable, Sequence
 from dataclasses import dataclass
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, cast
@@ -38,6 +38,7 @@ from bioetl.infrastructure.storage.silver.metadata_operations import (
     _prepare_silver_merged_metadata_write,
     _prepare_silver_metadata_write,
     _prepare_silver_write_finalization_context,
+    _SilverMetadataWriteHostProtocol,
 )
 from bioetl.infrastructure.storage.silver.metadata_request_models import (
     _build_silver_merged_metadata_write_request,
@@ -58,6 +59,9 @@ from bioetl.infrastructure.storage.silver.operations.metadata_write_support impo
 
 if TYPE_CHECKING:
     import pyarrow as pa
+
+
+_GetDeltaVersion = Callable[[str], Awaitable[int | None]]
 
 
 def _normalize_record_value_for_dq_metrics(value: object) -> object:
@@ -183,7 +187,11 @@ async def _resolve_version_after(
     if metadata_ops._host is not None and hasattr(
         metadata_ops._host, "_get_delta_version"
     ):
-        return await metadata_ops._host._get_delta_version(table_path)
+        get_delta_version = cast(
+            _GetDeltaVersion,
+            metadata_ops._host._get_delta_version,
+        )
+        return await get_delta_version(table_path)
     return 0
 
 
@@ -262,14 +270,17 @@ async def _write_silver_metadata_file(
         for parameter in parameters.values()
     )
 
-    kwargs: dict[str, Any] = {"metadata": metadata}  # Any: dynamic metadata writer kwargs
+    kwargs: dict[str, Any] = {
+        "metadata": metadata
+    }  # Any: dynamic metadata writer kwargs
     if "base_path" in parameters or accepts_var_kwargs:
         kwargs["base_path"] = table_path
     elif "table_path" in parameters:
         kwargs["table_path"] = table_path
     else:
         legacy_write = cast(
-            Any, write_silver_metadata  # Any: positional legacy metadata writers
+            Any,
+            write_silver_metadata,  # Any: positional legacy metadata writers
         )
         await legacy_write(
             table_path,
@@ -431,392 +442,298 @@ class SilverMetadataOperations:
     _dq_calculator: DQMetricsCalculator | None = None
     _host: object | None = None
 
+    @property
+    def _flat_structure(self) -> bool:
+        """Resolve flat-structure metadata mode from the current host, if any."""
+        return _resolve_flat_structure(self._host)
 
-@property
-def _silver_metadata_operations_flat_structure(self: SilverMetadataOperations) -> bool:
-    """Resolve flat-structure metadata mode from the current host, if any."""
-    return _resolve_flat_structure(self._host)
+    @property
+    def _transform_version(self) -> str | None:
+        """Resolve transform version from the current host, if any."""
+        return _resolve_transform_version(self._host)
 
+    @property
+    def _transform_steps(self) -> tuple[str, ...]:
+        """Resolve transform steps from the current host with a stable fallback."""
+        return _resolve_transform_steps(self._host)
 
-@property
-def _silver_metadata_operations_transform_version(
-    self: SilverMetadataOperations,
-) -> str | None:
-    """Resolve transform version from the current host, if any."""
-    return _resolve_transform_version(self._host)
+    def _log_debug(self, message: str) -> None:
+        """Best-effort debug logging."""
+        _best_effort_log(self._logger, "debug", message)
 
+    def _log_info(self, message: str) -> None:
+        """Best-effort info logging."""
+        _best_effort_log(self._logger, "info", message)
 
-@property
-def _silver_metadata_operations_transform_steps(
-    self: SilverMetadataOperations,
-) -> tuple[str, ...]:
-    """Resolve transform steps from the current host with a stable fallback."""
-    return _resolve_transform_steps(self._host)
+    def _log_warning(self, message: str) -> None:
+        """Best-effort warning logging."""
+        _best_effort_log(self._logger, "warning", message)
 
+    def _resolve_manifest_id(self, *, records: list[BronzeRecord]) -> str | None:
+        """Resolve control-plane manifest id from records, host, or coordinator."""
+        return _resolve_manifest_id(self, records=records)
 
-def _silver_metadata_operations_log_debug(
-    self: SilverMetadataOperations, message: str
-) -> None:
-    """Best-effort debug logging."""
-    _best_effort_log(self._logger, "debug", message)
-
-
-def _silver_metadata_operations_log_info(
-    self: SilverMetadataOperations, message: str
-) -> None:
-    """Best-effort info logging."""
-    _best_effort_log(self._logger, "info", message)
-
-
-def _silver_metadata_operations_log_warning(
-    self: SilverMetadataOperations, message: str
-) -> None:
-    """Best-effort warning logging."""
-    _best_effort_log(self._logger, "warning", message)
-
-
-def _silver_metadata_operations_resolve_manifest_id(
-    self: SilverMetadataOperations,
-    *,
-    records: list[BronzeRecord],
-) -> str | None:
-    """Resolve control-plane manifest id from records, host, or coordinator."""
-    return _resolve_manifest_id(self, records=records)
-
-
-async def _silver_metadata_operations_persist_silver_metadata(
-    self: SilverMetadataOperations,
-    *,
-    metadata: SilverMetadata,
-    table_name: str,
-    table_path: str,
-) -> SilverWriteResult | None:
-    """Persist metadata using whichever writer signature is available."""
-    return await _persist_silver_metadata(
+    async def _persist_silver_metadata(
         self,
-        metadata=metadata,
-        table_name=table_name,
-        table_path=table_path,
-    )
-
-
-async def _silver_metadata_operations_resolve_finalization_dq_metrics(
-    self: SilverMetadataOperations,
-    *,
-    table_name: str,
-    records: list[BronzeRecord],
-    quarantined_count: int | None = None,
-    validation_errors: Sequence[str] | None = None,
-) -> BatchDQMetrics:
-    """Resolve DQ metrics via host override when present, otherwise compute them."""
-    return await _resolve_finalization_dq_metrics(
-        self,
-        table_name=table_name,
-        records=records,
-        quarantined_count=quarantined_count,
-        validation_errors=validation_errors,
-    )
-
-
-async def _silver_metadata_operations_resolve_version_after(
-    self: SilverMetadataOperations, table_path: str
-) -> int | None:
-    """Read Delta version via host helper when available."""
-    return await _resolve_version_after(self, table_path)
-
-
-async def _silver_metadata_operations_get_delta_version(
-    self: SilverMetadataOperations, table_path: str
-) -> int | None:
-    """Compatibility hook expected by canonical metadata helpers."""
-    return await self._resolve_version_after(table_path)
-
-
-async def _silver_metadata_operations_compute_dq_metrics_compat(
-    self: SilverMetadataOperations,
-    table_name: str,
-    records: list[BronzeRecord],
-    quarantined_count: int = 0,
-    validation_errors: Sequence[str] | None = None,
-) -> BatchDQMetrics:
-    """Compatibility hook expected by canonical finalization helpers."""
-    return await self._resolve_finalization_dq_metrics(
-        table_name=table_name,
-        records=records,
-        quarantined_count=quarantined_count,
-        validation_errors=validation_errors,
-    )
-
-
-async def _silver_metadata_operations_compute_dq_metrics(
-    self: SilverMetadataOperations,
-    arrow_data: pa.Table,
-    *,
-    quarantined_count: int | None = None,
-    validation_errors: Sequence[str] | None = None,
-) -> BatchDQMetrics:
-    """Compute data quality metrics for Silver write."""
-    return await _compute_dq_metrics_from_arrow_data(
-        self,
-        arrow_data,
-        quarantined_count=quarantined_count,
-        validation_errors=validation_errors,
-    )
-
-
-def _silver_metadata_operations_should_skip_silver_metadata_write(
-    self: SilverMetadataOperations,
-    *,
-    records: list[BronzeRecord],
-    table_path: str,
-    event_name: str,
-) -> bool:
-    """Return whether canonical Silver metadata publication should short-circuit."""
-    del table_path, event_name
-    return _should_skip_silver_metadata_write(self, records=records)
-
-
-async def _silver_metadata_operations_write_silver_metadata_file(
-    self: SilverMetadataOperations,
-    *,
-    table_path: str,
-    metadata: SilverMetadata,
-    table_name: str,
-    provider_name: str,
-    entity_name: str,
-) -> None:
-    """Persist one canonical Silver metadata sidecar through the writer port."""
-    await _write_silver_metadata_file(
-        self,
-        table_path=table_path,
-        metadata=metadata,
-        table_name=table_name,
-        provider_name=provider_name,
-        entity_name=entity_name,
-    )
-
-
-async def _silver_metadata_operations_write_silver_metadata_internal(
-    self: SilverMetadataOperations,
-    request: _SilverMetadataWriteRequest | str | None = None,
-    *args: object,
-    **kwargs: object,
-) -> None:
-    """Canonical Silver metadata publication path for composition-backed ops."""
-    resolved_request = _coerce_silver_metadata_write_request(
-        request,
-        args=args,
-        kwargs=kwargs,
-    )
-    if self._should_skip_silver_metadata_write(
-        records=resolved_request.records,
-        table_path=resolved_request.table_path,
-        event_name="silver_metadata_skipped",
-    ):
-        return
-    await _execute_silver_metadata_write(
-        self,
-        request=resolved_request,
-        prepare=_prepare_silver_metadata_write,
-    )
-
-
-async def _silver_metadata_operations_write_silver_merged_metadata(
-    self: SilverMetadataOperations,
-    *,
-    table_path: str,
-    table_name: str,
-    records: list[BronzeRecord],
-    primary_keys: list[str],
-    completed_at: datetime | None = None,
-    run_id: str | None = None,
-    sources_used: list[str] | None = None,
-) -> None:
-    """Canonical Silver metadata publication path for merged composite writes."""
-    if self._should_skip_silver_metadata_write(
-        records=records,
-        table_path=table_path,
-        event_name="silver_merged_metadata_skipped",
-    ):
-        return
-    await _execute_silver_metadata_write(
-        self,
-        request=_build_silver_merged_metadata_write_request(
+        *,
+        metadata: SilverMetadata,
+        table_name: str,
+        table_path: str,
+    ) -> SilverWriteResult | None:
+        """Persist metadata using whichever writer signature is available."""
+        return await _persist_silver_metadata(
+            self,
+            metadata=metadata,
+            table_name=table_name,
             table_path=table_path,
+        )
+
+    async def _resolve_finalization_dq_metrics(
+        self,
+        *,
+        table_name: str,
+        records: list[BronzeRecord],
+        quarantined_count: int | None = None,
+        validation_errors: Sequence[str] | None = None,
+    ) -> BatchDQMetrics:
+        """Resolve DQ metrics via host override when present, otherwise compute them."""
+        return await _resolve_finalization_dq_metrics(
+            self,
             table_name=table_name,
             records=records,
-            primary_keys=primary_keys,
-            completed_at=completed_at,
+            quarantined_count=quarantined_count,
+            validation_errors=validation_errors,
+        )
+
+    async def _resolve_version_after(self, table_path: str) -> int | None:
+        """Read Delta version via host helper when available."""
+        return await _resolve_version_after(self, table_path)
+
+    async def _get_delta_version(self, table_path: str) -> int | None:
+        """Compatibility hook expected by canonical metadata helpers."""
+        return await self._resolve_version_after(table_path)
+
+    async def _compute_dq_metrics(
+        self,
+        table_name: str,
+        records: list[BronzeRecord],
+        quarantined_count: int = 0,
+        validation_errors: Sequence[str] | None = None,
+    ) -> BatchDQMetrics:
+        """Compatibility hook expected by canonical finalization helpers."""
+        return await self._resolve_finalization_dq_metrics(
+            table_name=table_name,
+            records=records,
+            quarantined_count=quarantined_count,
+            validation_errors=validation_errors,
+        )
+
+    async def compute_dq_metrics(
+        self,
+        arrow_data: pa.Table,
+        *,
+        quarantined_count: int | None = None,
+        validation_errors: Sequence[str] | None = None,
+    ) -> BatchDQMetrics:
+        """Compute data quality metrics for Silver write."""
+        return await _compute_dq_metrics_from_arrow_data(
+            self,
+            arrow_data,
+            quarantined_count=quarantined_count,
+            validation_errors=validation_errors,
+        )
+
+    def _should_skip_silver_metadata_write(
+        self,
+        *,
+        records: list[BronzeRecord],
+        table_path: str,
+        event_name: str,
+    ) -> bool:
+        """Return whether canonical Silver metadata publication should short-circuit."""
+        del table_path, event_name
+        return _should_skip_silver_metadata_write(self, records=records)
+
+    async def _write_silver_metadata_file(
+        self,
+        *,
+        table_path: str,
+        metadata: SilverMetadata,
+        table_name: str,
+        provider_name: str,
+        entity_name: str,
+    ) -> None:
+        """Persist one canonical Silver metadata sidecar through the writer port."""
+        await _write_silver_metadata_file(
+            self,
+            table_path=table_path,
+            metadata=metadata,
+            table_name=table_name,
+            provider_name=provider_name,
+            entity_name=entity_name,
+        )
+
+    async def _write_silver_metadata(
+        self,
+        request: _SilverMetadataWriteRequest | str | None = None,
+        *args: object,
+        **kwargs: object,
+    ) -> None:
+        """Canonical Silver metadata publication path for composition-backed ops."""
+        resolved_request = _coerce_silver_metadata_write_request(
+            request,
+            args=args,
+            kwargs=kwargs,
+        )
+        if self._should_skip_silver_metadata_write(
+            records=resolved_request.records,
+            table_path=resolved_request.table_path,
+            event_name="silver_metadata_skipped",
+        ):
+            return
+        await _execute_silver_metadata_write(
+            cast(_SilverMetadataWriteHostProtocol, self),
+            request=resolved_request,
+            prepare=_prepare_silver_metadata_write,
+        )
+
+    async def _write_silver_merged_metadata(
+        self,
+        *,
+        table_path: str,
+        table_name: str,
+        records: list[BronzeRecord],
+        primary_keys: list[str],
+        completed_at: datetime | None = None,
+        run_id: str | None = None,
+        sources_used: list[str] | None = None,
+    ) -> None:
+        """Canonical Silver metadata publication path for merged composite writes."""
+        if self._should_skip_silver_metadata_write(
+            records=records,
+            table_path=table_path,
+            event_name="silver_merged_metadata_skipped",
+        ):
+            return
+        await _execute_silver_metadata_write(
+            cast(_SilverMetadataWriteHostProtocol, self),
+            request=_build_silver_merged_metadata_write_request(
+                table_path=table_path,
+                table_name=table_name,
+                records=records,
+                primary_keys=primary_keys,
+                completed_at=completed_at,
+                run_id=run_id,
+                sources_used=sources_used,
+            ),
+            prepare=_prepare_silver_merged_metadata_write,
+        )
+
+    async def write_silver_metadata(
+        self,
+        table_name: str,
+        dq_metrics: BatchDQMetrics,
+        records: list[BronzeRecord],
+        bronze_refs: list[BronzeWriteResult] | None = None,
+        mode: str = "merge",
+        validated_mode: SilverWriteMode = SilverWriteMode.MERGE,
+        run_id: RunID | None = None,
+        run_type: RunType | None = None,
+        source_batch_id: BatchID | None = None,
+        ingestion_ts: datetime | None = None,
+        transform_version: str | None = None,
+        transform_steps: tuple[str, ...] | None = None,
+    ) -> SilverWriteResult | None:
+        """Write metadata for Silver layer."""
+        return await _write_silver_metadata_via_support_request(
+            self,
+            table_name=table_name,
+            dq_metrics=dq_metrics,
+            records=records,
+            bronze_refs=bronze_refs,
+            mode=mode,
+            validated_mode=validated_mode,
             run_id=run_id,
-            sources_used=sources_used,
-        ),
-        prepare=_prepare_silver_merged_metadata_write,
-    )
+            run_type=run_type,
+            source_batch_id=source_batch_id,
+            ingestion_ts=ingestion_ts,
+            transform_version=transform_version,
+            transform_steps=transform_steps,
+        )
 
-
-async def _silver_metadata_operations_write_silver_metadata(
-    self: SilverMetadataOperations,
-    table_name: str,
-    dq_metrics: BatchDQMetrics,
-    records: list[BronzeRecord],
-    bronze_refs: list[BronzeWriteResult] | None = None,
-    mode: str = "merge",
-    validated_mode: SilverWriteMode = SilverWriteMode.MERGE,
-    run_id: RunID | None = None,
-    run_type: RunType | None = None,
-    source_batch_id: BatchID | None = None,
-    ingestion_ts: datetime | None = None,
-    transform_version: str | None = None,
-    transform_steps: tuple[str, ...] | None = None,
-) -> SilverWriteResult | None:
-    """Write metadata for Silver layer."""
-    return await _write_silver_metadata_via_support_request(
+    async def log_silver_audit(
         self,
-        table_name=table_name,
-        dq_metrics=dq_metrics,
-        records=records,
-        bronze_refs=bronze_refs,
-        mode=mode,
-        validated_mode=validated_mode,
-        run_id=run_id,
-        run_type=run_type,
-        source_batch_id=source_batch_id,
-        ingestion_ts=ingestion_ts,
-        transform_version=transform_version,
-        transform_steps=transform_steps,
-    )
+        table_name: str,
+        records: list[BronzeRecord],
+        mode: str,
+        validated_mode: SilverWriteMode,
+        run_id: RunID | None = None,
+        run_type: RunType | None = None,
+        source_batch_id: BatchID | None = None,
+        ingestion_ts: datetime | None = None,
+        error: str | None = None,
+    ) -> None:
+        """Log Silver write audit event."""
+        del mode, error
+        await _log_silver_audit_via_support_request(
+            self,
+            table_name=table_name,
+            records=records,
+            validated_mode=validated_mode,
+            run_id=run_id,
+            run_type=run_type,
+            source_batch_id=source_batch_id,
+            ingestion_ts=ingestion_ts,
+        )
 
-
-async def _silver_metadata_operations_log_silver_audit(
-    self: SilverMetadataOperations,
-    table_name: str,
-    records: list[BronzeRecord],
-    mode: str,
-    validated_mode: SilverWriteMode,
-    run_id: RunID | None = None,
-    run_type: RunType | None = None,
-    source_batch_id: BatchID | None = None,
-    ingestion_ts: datetime | None = None,
-    error: str | None = None,
-) -> None:
-    """Log Silver write audit event."""
-    del mode, error
-    await _log_silver_audit_via_support_request(
+    async def _log_silver_audit(
         self,
-        table_name=table_name,
-        records=records,
-        validated_mode=validated_mode,
-        run_id=run_id,
-        run_type=run_type,
-        source_batch_id=source_batch_id,
-        ingestion_ts=ingestion_ts,
-    )
+        request: _SilverMetadataAuditSupportRequest | None = None,
+        *args: object,
+        **kwargs: object,
+    ) -> None:
+        """Backward compatibility alias for log_silver_audit."""
+        resolved_request = _coerce_silver_metadata_audit_request(
+            request,
+            args=args,
+            kwargs=kwargs,
+        )
+        await _log_silver_audit_event(
+            self,
+            resolved_request,
+        )
 
-
-async def _silver_metadata_operations_log_silver_audit_compat(
-    self: SilverMetadataOperations,
-    request: _SilverMetadataAuditSupportRequest | None = None,
-    *args: object,
-    **kwargs: object,
-) -> None:
-    """Backward compatibility alias for log_silver_audit."""
-    resolved_request = _coerce_silver_metadata_audit_request(
-        request,
-        args=args,
-        kwargs=kwargs,
-    )
-    await _log_silver_audit_event(
+    async def _prepare_silver_write_finalization_context(
         self,
-        resolved_request,
-    )
+        request: _SilverWriteFinalizationPreparationRequest | None = None,
+        *args: object,
+        perf_counter: Callable[[], float] | None = None,
+        **kwargs: object,
+    ) -> _PreparedSilverWriteFinalizationContext:
+        """Prepare DQ/version/timing context before Silver metadata persistence."""
+        resolved_request = _coerce_silver_write_finalization_preparation_request(
+            request,
+            args=args,
+            kwargs=kwargs,
+        )
+        return (
+            await _prepare_silver_write_finalization_context_with_default_perf_counter(
+                self,
+                resolved_request,
+                perf_counter=perf_counter,
+            )
+        )
 
-
-async def _silver_metadata_operations_prepare_silver_write_finalization_context(
-    self: SilverMetadataOperations,
-    request: _SilverWriteFinalizationPreparationRequest | None = None,
-    *args: object,
-    perf_counter: Callable[[], float] | None = None,
-    **kwargs: object,
-) -> _PreparedSilverWriteFinalizationContext:
-    """Prepare DQ/version/timing context before Silver metadata persistence."""
-    resolved_request = _coerce_silver_write_finalization_preparation_request(
-        request,
-        args=args,
-        kwargs=kwargs,
-    )
-    return await _prepare_silver_write_finalization_context_with_default_perf_counter(
+    async def _finalize_silver_write_result(
         self,
-        resolved_request,
-        perf_counter=perf_counter,
-    )
-
-
-async def _silver_metadata_operations_finalize_silver_write_result(
-    self: SilverMetadataOperations,
-    request: _SilverWriteResultFinalizationRequest | None = None,
-    *args: object,
-    **kwargs: object,
-) -> SilverWriteResult | None:
-    """Compute DQ metrics, write metadata, and build final result."""
-    resolved_request = _coerce_silver_write_result_finalization_request(
-        request,
-        args=args,
-        kwargs=kwargs,
-    )
-    return await _finalize_silver_write_result_from_request(self, resolved_request)
-
-
-SilverMetadataOperations._flat_structure = _silver_metadata_operations_flat_structure
-SilverMetadataOperations._transform_version = (
-    _silver_metadata_operations_transform_version
-)
-SilverMetadataOperations._transform_steps = _silver_metadata_operations_transform_steps
-SilverMetadataOperations._log_debug = _silver_metadata_operations_log_debug
-SilverMetadataOperations._log_info = _silver_metadata_operations_log_info
-SilverMetadataOperations._log_warning = _silver_metadata_operations_log_warning
-SilverMetadataOperations._resolve_manifest_id = (
-    _silver_metadata_operations_resolve_manifest_id
-)
-SilverMetadataOperations._persist_silver_metadata = (
-    _silver_metadata_operations_persist_silver_metadata
-)
-SilverMetadataOperations._resolve_finalization_dq_metrics = (
-    _silver_metadata_operations_resolve_finalization_dq_metrics
-)
-SilverMetadataOperations._resolve_version_after = (
-    _silver_metadata_operations_resolve_version_after
-)
-SilverMetadataOperations._get_delta_version = (
-    _silver_metadata_operations_get_delta_version
-)
-SilverMetadataOperations._compute_dq_metrics = (
-    _silver_metadata_operations_compute_dq_metrics_compat
-)
-SilverMetadataOperations.compute_dq_metrics = (
-    _silver_metadata_operations_compute_dq_metrics
-)
-SilverMetadataOperations._should_skip_silver_metadata_write = (
-    _silver_metadata_operations_should_skip_silver_metadata_write
-)
-SilverMetadataOperations._write_silver_metadata_file = (
-    _silver_metadata_operations_write_silver_metadata_file
-)
-SilverMetadataOperations._write_silver_metadata = (
-    _silver_metadata_operations_write_silver_metadata_internal
-)
-SilverMetadataOperations._write_silver_merged_metadata = (
-    _silver_metadata_operations_write_silver_merged_metadata
-)
-SilverMetadataOperations.write_silver_metadata = (
-    _silver_metadata_operations_write_silver_metadata
-)
-SilverMetadataOperations.log_silver_audit = _silver_metadata_operations_log_silver_audit
-SilverMetadataOperations._log_silver_audit = (
-    _silver_metadata_operations_log_silver_audit_compat
-)
-SilverMetadataOperations._prepare_silver_write_finalization_context = (
-    _silver_metadata_operations_prepare_silver_write_finalization_context
-)
-SilverMetadataOperations._finalize_silver_write_result = (
-    _silver_metadata_operations_finalize_silver_write_result
-)
+        request: _SilverWriteResultFinalizationRequest | None = None,
+        *args: object,
+        **kwargs: object,
+    ) -> SilverWriteResult | None:
+        """Compute DQ metrics, write metadata, and build final result."""
+        resolved_request = _coerce_silver_write_result_finalization_request(
+            request,
+            args=args,
+            kwargs=kwargs,
+        )
+        return await _finalize_silver_write_result_from_request(self, resolved_request)

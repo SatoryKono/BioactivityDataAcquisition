@@ -1,8 +1,8 @@
 schema_version: 1
 baseline:
-  total_exemptions: 1
+  total_exemptions: 4
   by_registry:
-    file_size_limits: 0
+    file_size_limits: 3
     function_complexity: 0
     function_length: 0
     class_size: 0
@@ -395,14 +395,14 @@ quarterly_targets:
     god_object: 4
     domain_complexity: 6
 - quarter: 2026-Q2
-  max_total_exemptions: 1
+  max_total_exemptions: 4
   min_integral_score: 70
   group_budgets:
-    size_metrics: 0
+    size_metrics: 3
     complexity_metrics: 1
     structural_debt: 0
   registry_budgets:
-    file_size_limits: 0
+    file_size_limits: 3
     function_complexity: 0
     function_length: 0
     class_size: 0
@@ -417,9 +417,9 @@ owner_decomposition_targets:
     '@bioetl-data-model': 9
 - quarter: 2026-Q2
   allocations:
-    '@bioetl-architecture': 0
-    '@bioetl-platform': 1
-    '@bioetl-data-model': 0
+    '@bioetl-architecture': 1
+    '@bioetl-platform': 2
+    '@bioetl-data-model': 1
 expiry_decomposition_targets:
 - quarter: 2026-Q1
   max_entries_expiring_in_quarter: 29

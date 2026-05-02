@@ -20,32 +20,32 @@
         {
             "asDropdown": false,
             "icon": "external link",
-            "includeVars": true,
+            "includeVars": false,
             "keepTime": true,
             "targetBlank": false,
             "title": "Back to Overview",
             "type": "link",
-            "url": "/d/bioetl-overview-v2/bioetl-overview-v2"
+            "url": "/d/bioetl-overview-v2/bioetl-overview-v2?${__url_time_range}"
         },
         {
             "asDropdown": false,
             "icon": "external link",
-            "includeVars": true,
+            "includeVars": false,
             "keepTime": true,
             "targetBlank": false,
             "title": "2. Runtime",
             "type": "link",
-            "url": "/d/bioetl-runtime"
+            "url": "/d/bioetl-runtime/bioetl-runtime?${__url_time_range}"
         },
         {
             "asDropdown": false,
             "icon": "external link",
-            "includeVars": true,
+            "includeVars": false,
             "keepTime": true,
             "targetBlank": false,
             "title": "Control Plane v1",
             "type": "link",
-            "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1"
+            "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?${__url_time_range}"
         }
     ],
     "panels": [

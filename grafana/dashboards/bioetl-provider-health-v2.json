@@ -21,31 +21,31 @@
         {
             "asDropdown": false,
             "icon": "external link",
-            "includeVars": true,
+            "includeVars": false,
             "keepTime": true,
             "tags": [],
             "targetBlank": false,
             "title": "Back to Overview",
             "tooltip": "",
             "type": "link",
-            "url": "/d/bioetl-overview-v2/bioetl-overview-v2"
+            "url": "/d/bioetl-overview-v2/bioetl-overview-v2?${__url_time_range}"
         },
         {
             "asDropdown": false,
             "icon": "external link",
-            "includeVars": true,
+            "includeVars": false,
             "keepTime": true,
             "tags": [],
             "targetBlank": false,
             "title": "2. Runtime",
             "tooltip": "",
             "type": "link",
-            "url": "/d/bioetl-runtime/bioetl-runtime"
+            "url": "/d/bioetl-runtime/bioetl-runtime?${__url_time_range}"
         },
         {
             "asDropdown": false,
             "icon": "logs",
-            "includeVars": true,
+            "includeVars": false,
             "keepTime": true,
             "tags": [],
             "targetBlank": false,
@@ -57,7 +57,7 @@
         {
             "asDropdown": false,
             "icon": "share-alt",
-            "includeVars": true,
+            "includeVars": false,
             "keepTime": true,
             "tags": [],
             "targetBlank": false,
