@@ -132,6 +132,57 @@ def test_file_store_emits_terminal_metric_for_all_terminal_outcomes(
     )
 
 
+def test_file_store_noops_duplicate_idempotency_key_without_terminal_recount(
+    tmp_path,
+) -> None:
+    metrics = MagicMock()
+    run_id = RunID(uuid4())
+    store = FileRunLedgerStore(
+        base_path=tmp_path / "run_ledger",
+        metrics=metrics,
+    )
+    first = RunLedgerEntry(
+        entry_id="entry-1",
+        manifest_id="manifest-1",
+        run_id=run_id,
+        event_type="run_finished",
+        occurred_at=_FIXED_TIME,
+        status="success",
+        idempotency_key="sha256:logical-event",
+        details={"_diagnostic": {"pipeline": "chembl_activity"}},
+    )
+    retry = RunLedgerEntry(
+        entry_id="entry-2",
+        manifest_id="manifest-1",
+        run_id=run_id,
+        event_type="run_finished",
+        occurred_at=datetime(2025, 1, 1, 12, 1, tzinfo=UTC),
+        status="success",
+        idempotency_key="sha256:logical-event",
+        details={"_diagnostic": {"pipeline": "chembl_activity"}},
+    )
+
+    store.append(first)
+    run_index_path = tmp_path / "run_ledger" / "_by_run_id" / f"{run_id}.txt"
+    run_index_path.unlink()
+    metrics.reset_mock()
+    store.append(retry)
+
+    ledger_path = tmp_path / "run_ledger" / "manifest-1.jsonl"
+    assert len(ledger_path.read_text(encoding="utf-8").splitlines()) == 1
+    assert store.list_entries("manifest-1") == [first]
+    assert store.list_entries_by_run_id(run_id) == [first]
+    metrics.increment_counter.assert_called_once_with(
+        "bioetl_control_plane_ledger_appends_total",
+        1,
+        {
+            "pipeline": "chembl_activity",
+            "event_type": "run_finished",
+            "status": "duplicate",
+        },
+    )
+
+
 def test_file_store_does_not_emit_terminal_metric_for_non_terminal_events(
     tmp_path,
 ) -> None:

@@ -293,6 +293,53 @@ def test_record_run_finished_captures_success_metrics() -> None:
     }
 
 
+def test_record_run_finished_retry_reuses_logical_idempotency_key() -> None:
+    run_id = RunID(uuid4())
+    store = _InMemoryRunLedgerStore()
+    entry_ids = iter(["entry-run-finished-1", "entry-run-finished-2"])
+    occurred_at_values = iter(
+        [
+            datetime(2026, 4, 24, 12, 0, tzinfo=UTC),
+            datetime(2026, 4, 24, 12, 1, tzinfo=UTC),
+        ]
+    )
+    service = RunLedgerService(
+        ledger_port=store,
+        manifest_id="manifest-1",
+        run_id=run_id,
+        _entry_id_factory=lambda: next(entry_ids),
+        _occurred_at_factory=lambda: next(occurred_at_values),
+    )
+
+    first = service.record_run_finished(metrics_snapshot={"records_gold": 9})
+    retry = service.record_run_finished(metrics_snapshot={"records_gold": 9})
+
+    assert first.entry_id == "entry-run-finished-1"
+    assert retry.entry_id == "entry-run-finished-2"
+    assert first.occurred_at != retry.occurred_at
+    assert first.idempotency_key is not None
+    assert first.idempotency_key == retry.idempotency_key
+    assert store.list_entries("manifest-1") == [first]
+
+
+def test_record_run_finished_distinguishes_different_logical_payloads() -> None:
+    run_id = RunID(uuid4())
+    store = _InMemoryRunLedgerStore()
+    entry_ids = iter(["entry-run-finished-1", "entry-run-finished-2"])
+    service = RunLedgerService(
+        ledger_port=store,
+        manifest_id="manifest-1",
+        run_id=run_id,
+        _entry_id_factory=lambda: next(entry_ids),
+    )
+
+    first = service.record_run_finished(metrics_snapshot={"records_gold": 9})
+    second = service.record_run_finished(metrics_snapshot={"records_gold": 10})
+
+    assert first.idempotency_key != second.idempotency_key
+    assert store.list_entries("manifest-1") == [first, second]
+
+
 def test_record_run_shutdown_captures_shutdown_metrics() -> None:
     run_id = RunID(uuid4())
     store = _InMemoryRunLedgerStore()
