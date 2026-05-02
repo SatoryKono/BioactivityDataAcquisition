@@ -35,9 +35,7 @@ def pytest_configure(config: pytest.Config) -> None:
     inventory also lives in ``pyproject.toml``.
     """
     config.addinivalue_line("markers", "network: outbound-network contract tests")
-    config.addinivalue_line(
-        "markers", "pilot_soak: richer pilot-only contract suites"
-    )
+    config.addinivalue_line("markers", "pilot_soak: richer pilot-only contract suites")
     config.addinivalue_line(
         "markers", "no_api: contract checks that do not require live API access"
     )

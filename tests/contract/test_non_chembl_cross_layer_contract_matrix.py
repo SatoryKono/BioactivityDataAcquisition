@@ -95,7 +95,9 @@ def _iter_composite_join_keys(composite: dict[str, Any]) -> set[str]:
                 continue
             configured = entry.get("join_keys", ())
             if isinstance(configured, list):
-                join_keys.update(value for value in configured if isinstance(value, str))
+                join_keys.update(
+                    value for value in configured if isinstance(value, str)
+                )
     return join_keys
 
 
@@ -228,7 +230,8 @@ def test_non_chembl_composite_join_key_fixture_matches_configs_and_matrix() -> N
         )
     )
     matrix_rows = {
-        (row["pipeline_name"], row["field_name"]): row for row in build_field_matrix_rows()
+        (row["pipeline_name"], row["field_name"]): row
+        for row in build_field_matrix_rows()
     }
 
     for section in (
@@ -243,9 +246,10 @@ def test_non_chembl_composite_join_key_fixture_matches_configs_and_matrix() -> N
                 continue
 
             composite_config = yaml.safe_load(
-                Path("configs/composites", f"{composite_name.removeprefix('composite_')}.yaml").read_text(
-                    encoding="utf-8"
-                )
+                Path(
+                    "configs/composites",
+                    f"{composite_name.removeprefix('composite_')}.yaml",
+                ).read_text(encoding="utf-8")
             )
             config_join_keys = set(
                 _iter_composite_join_keys(composite_config["composite"])
