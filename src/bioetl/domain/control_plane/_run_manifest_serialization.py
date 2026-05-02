@@ -3,16 +3,65 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
+from copy import deepcopy
 from dataclasses import asdict, is_dataclass
 from datetime import UTC, datetime
 from enum import Enum
-from typing import cast
+from typing import NoReturn, cast
 from uuid import UUID
 
 from bioetl.domain.normalization.control_plane import (
     normalize_control_plane_datetime,
     normalize_control_plane_uuid,
 )
+
+
+class _FrozenManifestMapping(dict[object, object]):
+    """Immutable dict-compatible payload mapping for manifest snapshots."""
+
+    __slots__ = ()
+
+    @staticmethod
+    def _raise_immutable() -> NoReturn:
+        raise TypeError("RunManifest payload mappings are immutable")
+
+    def __setitem__(self, key: object, value: object) -> None:
+        self._raise_immutable()
+
+    def __delitem__(self, key: object) -> None:
+        self._raise_immutable()
+
+    def clear(self) -> None:
+        self._raise_immutable()
+
+    def pop(self, _key: object, _default: object = None) -> object:
+        self._raise_immutable()
+
+    def popitem(self) -> tuple[object, object]:
+        self._raise_immutable()
+
+    def setdefault(self, _key: object, _default: object = None) -> object:
+        self._raise_immutable()
+
+    def update(self, *_args: object, **_kwargs: object) -> None:
+        self._raise_immutable()
+
+    def __ior__(self, other: object) -> object:
+        self._raise_immutable()
+
+
+def freeze_manifest_payload(value: object) -> object:
+    """Deep-freeze manifest payload values while preserving dict-like access."""
+    if isinstance(value, Mapping):
+        return _FrozenManifestMapping(
+            (deepcopy(key), freeze_manifest_payload(item))
+            for key, item in value.items()
+        )
+    if isinstance(value, (list, tuple)):
+        return tuple(freeze_manifest_payload(item) for item in value)
+    if isinstance(value, (set, frozenset)):
+        return frozenset(freeze_manifest_payload(item) for item in value)
+    return deepcopy(value)
 
 
 def normalize_manifest_serializable(value: object) -> object:

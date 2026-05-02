@@ -135,6 +135,24 @@ Rollout notes:
   generated matrix artifacts, and `CHANGELOG.md` describe the same policy
   state.
 
+## 2026-05-02 Non-ChEMBL Governance Publication Closure
+
+Issues `#3498`, `#3500`, `#3503`, `#3504`, `#3506`, and `#3507` close the
+remaining documentation gap between current non-ChEMBL normalization code and
+the published reference surface.
+
+The active publication rule is:
+
+- the generated matrix and reviewed fixtures remain the evidence source for raw
+  provider values, identifier families, structured payload sidecars, and
+  composite impact
+- published docs under `docs/04-reference/normalization/` summarize the current
+  governance boundary without redefining code-owned behavior
+- raw publication provider types and ontology/reference identifiers must remain
+  explicitly documented as non-enum surfaces
+- composite docs must describe upstream-inherited non-key semantics rather than
+  implying a second composite-local normalization pass
+
 ## 2026-04-28 ChEMBL Family Semantic-Alignment Closure
 
 Issues `#3259`-`#3268` tighten family-level semantics for shipped `chembl_*`
@@ -352,6 +370,7 @@ Current evidence bundle on `main`:
 - canonical plan: [normalization_plan_P0_P6.md](normalization_plan_P0_P6.md)
 - shipped multi-pipeline matrix: [pipeline_normalization_field_matrix.md](../reports/generated/pipeline_normalization_field_matrix/pipeline_normalization_field_matrix.md)
 - fallback inventory report: [report_normalization_fallback_inventory.py](../../scripts/engineering/qa/report_normalization_fallback_inventory.py)
+- published normalization reference entrypoint: [non-chembl-normalization-overview.md](../04-reference/normalization/non-chembl-normalization-overview.md)
 - join-key policy seams: [join_keys.py](../../src/bioetl/domain/normalization/join_keys.py) and [join_key_normalization.py](../../src/bioetl/application/composite/join_key_normalization.py)
 - non-ChEMBL identifier and collection fixtures: [non_chembl_identifier_cases.yaml](../../tests/fixtures/normalization/non_chembl_identifier_cases.yaml)
 - non-ChEMBL observed-value fixtures: [non_chembl_observed_values.yaml](../../tests/fixtures/normalization/non_chembl_observed_values.yaml)

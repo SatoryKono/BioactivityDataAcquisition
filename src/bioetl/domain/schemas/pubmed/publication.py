@@ -117,10 +117,12 @@ class PubMedPublicationSchema(_PublicationBaseSchema):
         description="ISSN (print or electronic)",
     )
     journal_issn_type: Series[str] = pa.Field(nullable=True, description="ISSN type")
+
     @_typed_check("journal_issn_type", name="journal_issn_type_values")
     def _check_journal_issn_type(cls, series: Series[str]) -> Series[bool]:
         """Validate ISSN type values."""
         return cast(Series[bool], series.isna() | series.isin(ISSN_TYPES))
+
     nlm_unique_id: Series[str] = pa.Field(nullable=True, description="NLM catalog ID")
     country: Series[str] = pa.Field(
         nullable=True, description="Journal country of publication"
