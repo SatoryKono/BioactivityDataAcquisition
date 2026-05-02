@@ -30,9 +30,7 @@ EXPECTED_TEST_IMPORTS: dict[str, frozenset[str]] = {
     "tests/unit/application/services/test_run_options_execution_context.py": frozenset(
         {"RunOptions"}
     ),
-    "tests/unit/composition/bootstrap/cli/test_config.py": frozenset(
-        {"ConfigService"}
-    ),
+    "tests/unit/composition/bootstrap/cli/test_config.py": frozenset({"ConfigService"}),
     "tests/unit/composition/bootstrap/cli/test_service_builders.py": frozenset(
         {"CheckpointService"}
     ),
@@ -119,7 +117,9 @@ def _collect_imports(root: Path) -> dict[str, frozenset[str]]:
                 for alias in node.names:
                     if alias.name == PACKAGE_ROOT_MODULE:
                         imported_names.add(_DIRECT_MODULE_IMPORT_SENTINEL)
-            elif isinstance(node, ast.ImportFrom) and node.module == PACKAGE_ROOT_MODULE:
+            elif (
+                isinstance(node, ast.ImportFrom) and node.module == PACKAGE_ROOT_MODULE
+            ):
                 imported_names.update(alias.name for alias in node.names)
 
         if imported_names:

@@ -668,10 +668,7 @@ def test_show_resume_only_manifest_reports_resume_mode() -> None:
     assert result.diagnostics["input_snapshot_content_hashes"] == []
     assert result.diagnostics["input_snapshot_identity_fingerprint"] is None
     assert result.diagnostics["replay_mode"] == "resume"
-    assert (
-        result.diagnostics["continuation_mode"]
-        == "checkpoint_snapshot_only_resume"
-    )
+    assert result.diagnostics["continuation_mode"] == "checkpoint_snapshot_only_resume"
     assert result.identity_graph["replay_capability"] == "resume_only"
     assert result.identity_graph["requested_exact_replay"] is False
     assert (
@@ -687,8 +684,7 @@ def test_show_resume_only_manifest_reports_resume_mode() -> None:
     )
     assert result.identity_graph["replay_mode"] == "resume"
     assert (
-        result.identity_graph["continuation_mode"]
-        == "checkpoint_snapshot_only_resume"
+        result.identity_graph["continuation_mode"] == "checkpoint_snapshot_only_resume"
     )
     assert result.identity_graph["resume_contract"] == _expected_resume_contract(
         manifest

@@ -20,11 +20,7 @@ def _legacy_entrypoint_symbols() -> set[str]:
 
 
 def _iter_python_files() -> list[Path]:
-    return [
-        path
-        for path in SRC_ROOT.rglob("*.py")
-        if path != ENTRYPOINTS_FILE
-    ]
+    return [path for path in SRC_ROOT.rglob("*.py") if path != ENTRYPOINTS_FILE]
 
 
 def _entrypoint_aliases(tree: ast.Module) -> set[str]:

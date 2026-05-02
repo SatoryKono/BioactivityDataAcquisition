@@ -182,7 +182,10 @@ def _record_filter_metrics(state: _FilteredDataSourceState) -> None:
     state._metrics.increment_counter(
         "bioetl_filter_ids_loaded_total",
         state._filter_result.unique_count,
-        {"pipeline": state._pipeline_name, "source_kind": CSV_SINGLE_COLUMN_SOURCE_KIND},
+        {
+            "pipeline": state._pipeline_name,
+            "source_kind": CSV_SINGLE_COLUMN_SOURCE_KIND,
+        },
     )
     if state._filter_result.has_duplicates:
         state._metrics.increment_counter(
@@ -204,7 +207,10 @@ def _record_multi_filter_metrics(state: _FilteredDataSourceState) -> None:
         state._metrics.increment_counter(
             "bioetl_filter_combinations_loaded_total",
             len(state._valid_combinations),
-            {"pipeline": state._pipeline_name, "source_kind": CSV_MULTI_COLUMN_SOURCE_KIND},
+            {
+                "pipeline": state._pipeline_name,
+                "source_kind": CSV_MULTI_COLUMN_SOURCE_KIND,
+            },
         )
 
     for field, ids in state._filter_result.column_ids.items():

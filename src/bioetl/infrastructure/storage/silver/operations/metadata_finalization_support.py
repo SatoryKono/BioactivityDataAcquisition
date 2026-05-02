@@ -4,10 +4,9 @@ from __future__ import annotations
 
 import time
 from collections.abc import Callable, Sequence
-from datetime import datetime, timedelta
+from datetime import timedelta
 from typing import Protocol
 
-from bioetl.domain.medallion import SilverWriteMode
 from bioetl.domain.models import SilverMetadata
 from bioetl.domain.ports import MetadataCoordinatorPort, SilverMetadataInput
 from bioetl.domain.types import BronzeRecord
@@ -21,7 +20,6 @@ from bioetl.infrastructure.storage.silver.metadata_request_models import (
 
 __all__ = [
     "_PreparedSilverWriteFinalizationContext",
-    "_build_direct_legacy_silver_metadata",
     "_finalize_silver_write_result",
     "_prepare_silver_write_finalization_context",
 ]
@@ -76,38 +74,6 @@ def _source_batch_ids(source_batch_id: object | None) -> list[str] | None:
     if source_batch_id is None:
         return None
     return [str(source_batch_id)]
-
-
-def _build_direct_legacy_silver_metadata(
-    *,
-    metadata_coordinator: MetadataCoordinatorPort | None,
-    table_name: str,
-    table_path: str,
-    records: list[BronzeRecord],
-    started_at: datetime,
-    completed_at: datetime,
-    run_id: str,
-    manifest_id: str | None,
-    transform_version: str | None,
-    transform_steps: tuple[str, ...] | None,
-) -> SilverMetadata:
-    """Build direct-writer compatibility metadata through the canonical port."""
-    del table_name, run_id, manifest_id
-    coordinator = _require_metadata_coordinator(metadata_coordinator)
-    return coordinator.create_silver_metadata(
-        SilverMetadataInput(
-            table_path=table_path,
-            primary_keys=[],
-            mode=SilverWriteMode.MERGE,
-            records=records,
-            dq_metrics=None,
-            total_records=len(records),
-            transform_version=transform_version,
-            transform_steps=transform_steps,
-            started_at=started_at,
-            completed_at=completed_at,
-        )
-    )
 
 
 async def _prepare_silver_write_finalization_context(

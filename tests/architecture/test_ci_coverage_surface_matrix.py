@@ -153,9 +153,13 @@ class TestCiCoverageSurfaceMatrix:
             block = _job_block(workflow, job)
             assertions = entry["blocking_assertions"]
             for expected in assertions["command_contains"]:
-                assert expected in block, f"{job} is missing command assertion {expected}"
+                assert expected in block, (
+                    f"{job} is missing command assertion {expected}"
+                )
             for expected in assertions["required_artifacts"]:
-                assert expected in block, f"{job} is missing artifact assertion {expected}"
+                assert expected in block, (
+                    f"{job} is missing artifact assertion {expected}"
+                )
 
         duration_block = _job_block(workflow, "duration-telemetry")
         assert "junit-contract-confidence.xml" in duration_block

@@ -56,7 +56,7 @@ transition_debt:
   canonical_target: bioetl.domain.behavior
   status: compat-shim
   owner: bioetl.domain.behavior
-  introduced_in: 2026-05 #3494
+  introduced_in: '2026-05 #3494'
   review_date: '2026-09-30'
   external_breaking_change_required: true
   internal_callers_zero: true

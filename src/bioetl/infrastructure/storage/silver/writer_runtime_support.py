@@ -3,33 +3,20 @@
 from __future__ import annotations
 
 import time
-from collections.abc import Awaitable, Callable, Mapping
+from collections.abc import Awaitable, Callable
 from dataclasses import replace
 from pathlib import Path
-from types import SimpleNamespace
-from typing import Any, Protocol, cast
+from typing import Any, Protocol
 
-from bioetl.domain.behavior.dq_metrics_calculator import DQMetricsCalculator
 from bioetl.domain.context import current_utc_time
 from bioetl.domain.exceptions import BioETLError
-from bioetl.domain.medallion import WriteModePolicy
 from bioetl.domain.ports import (
-    AuditPort,
-    LineageStorePort,
     LoggerPort,
-    MetadataCoordinatorPort,
-    MetadataWriterPort,
-    MetricsPort,
-    SilverValidatorPort,
     TracingPort,
 )
 from bioetl.domain.types import BronzeRecord
 from bioetl.domain.types.contract_rollout import ContractRolloutPolicy
 from bioetl.domain.value_objects.silver_result import SilverWriteResult
-from bioetl.infrastructure.export.csv_exporter import CsvExporter
-from bioetl.infrastructure.storage.delta.resilience import (
-    SilverMergeResiliencePolicy,
-)
 from bioetl.infrastructure.storage.silver.operations.postwrite_operations import (
     SilverPostwriteOperations,
 )
@@ -47,34 +34,6 @@ from bioetl.infrastructure.storage.writer_common import (
     iterate_write_targets,
     validate_write_versions,
 )
-
-
-class _AwaitTrackingAsyncCallable:
-    """Tiny await-tracking proxy for compatibility seams used in tests."""
-
-    def __init__(self, func: Callable[..., object]) -> None:
-        self._func = func
-        self.await_count = 0
-        self.await_args: SimpleNamespace | None = None
-
-    async def __call__(self, *args: object, **kwargs: object) -> object:
-        self.await_count += 1
-        self.await_args = SimpleNamespace(args=args, kwargs=kwargs)
-        result = self._func(*args, **kwargs)
-        if hasattr(result, "__await__"):
-            return await cast(Awaitable[object], result)
-        return result
-
-    def assert_awaited_once_with(self, *args: object, **kwargs: object) -> None:
-        if self.await_count != 1:
-            raise AssertionError(f"Expected one await, observed {self.await_count}")
-        actual = self.await_args
-        if actual is None or actual.args != args or actual.kwargs != kwargs:
-            raise AssertionError(
-                f"Await args mismatch: expected args={args}, kwargs={kwargs}; "
-                f"got args={getattr(actual, 'args', None)}, "
-                f"kwargs={getattr(actual, 'kwargs', None)}"
-            )
 
 
 class _SilverWriterDispatchHost(Protocol):
@@ -95,64 +54,8 @@ class _SilverWriterDispatchHost(Protocol):
     async def _write_single_target(
         self,
         *,
-        invocation: _SilverWriteInvocation | None = None,
-        **legacy_kwargs: object,
+        invocation: _SilverWriteInvocation,
     ) -> SilverWriteResult | None: ...
-
-
-def _pop_legacy_runtime_kwargs(
-    legacy_kwargs: dict[str, object],
-) -> SilverWriterRuntimeServicesRequest:
-    """Translate historical SilverWriter kwargs into a runtime-services request."""
-    csv_exporter = cast("CsvExporter | None", legacy_kwargs.pop("csv_exporter", None))
-    tracing = cast("TracingPort | None", legacy_kwargs.pop("tracing", None))
-    write_policy = cast(
-        "WriteModePolicy | None",
-        legacy_kwargs.pop("write_policy", None),
-    )
-    metrics = cast("MetricsPort | None", legacy_kwargs.pop("metrics", None))
-    audit = cast("AuditPort | None", legacy_kwargs.pop("audit", None))
-    silver_validator = cast(
-        "SilverValidatorPort | None",
-        legacy_kwargs.pop("silver_validator", None),
-    )
-    metadata_writer = cast(
-        "MetadataWriterPort | None",
-        legacy_kwargs.pop("metadata_writer", None),
-    )
-    metadata_coordinator = cast(
-        "MetadataCoordinatorPort | None",
-        legacy_kwargs.pop("metadata_coordinator", None),
-    )
-    lineage_store = cast(
-        "LineageStorePort | None",
-        legacy_kwargs.pop("lineage_store", None),
-    )
-    dq_calculator = cast(
-        "DQMetricsCalculator | None",
-        legacy_kwargs.pop("dq_calculator", None),
-    )
-    merge_resilience_policy = cast(
-        "SilverMergeResiliencePolicy | None",
-        legacy_kwargs.pop("merge_resilience_policy", None),
-    )
-    if legacy_kwargs:
-        unexpected = ", ".join(sorted(legacy_kwargs))
-        raise TypeError(f"Unexpected SilverWriter options: {unexpected}")
-    return SilverWriterRuntimeServicesRequest(
-        csv_exporter=csv_exporter,
-        tracing=tracing,
-        write_policy=write_policy,
-        metrics=metrics,
-        audit=audit,
-        logger=None,
-        silver_validator=silver_validator,
-        metadata_writer=metadata_writer,
-        metadata_coordinator=metadata_coordinator,
-        lineage_store=lineage_store,
-        dq_calculator=dq_calculator,
-        merge_resilience_policy=merge_resilience_policy,
-    )
 
 
 def _resolve_runtime_services_for_writer(
@@ -251,50 +154,6 @@ def _project_records_for_contract_version(
     return projected_records
 
 
-def _coerce_silver_write_invocation(
-    *,
-    invocation: _SilverWriteInvocation | None,
-    legacy_kwargs: Mapping[str, object],
-    table_key: str = "table_name",
-) -> _SilverWriteInvocation:
-    """Accept the canonical invocation object while preserving legacy kwargs."""
-    if invocation is not None:
-        normalized_legacy = dict(legacy_kwargs)
-        if (
-            table_key in normalized_legacy
-            and "table_name" not in normalized_legacy
-            and table_key != "table_name"
-        ):
-            normalized_legacy["table_name"] = normalized_legacy.pop(table_key)
-        allowed_transport_aliases = {"table_name"}
-        if set(normalized_legacy) - allowed_transport_aliases:
-            unexpected = ", ".join(
-                sorted(set(normalized_legacy) - allowed_transport_aliases)
-            )
-            raise TypeError(
-                "unexpected legacy keyword arguments when invocation is provided: "
-                f"{unexpected}"
-            )
-        if (
-            "table_name" in normalized_legacy
-            and normalized_legacy["table_name"] != invocation.table_name
-        ):
-            raise TypeError(
-                "legacy table_name does not match invocation.table_name when both "
-                "are provided"
-            )
-        return invocation
-
-    payload = dict(legacy_kwargs)
-    if (
-        table_key != "table_name"
-        and table_key in payload
-        and "table_name" not in payload
-    ):
-        payload["table_name"] = payload.pop(table_key)
-    return _SilverWriteInvocation(**payload)  # type: ignore[arg-type]
-
-
 async def _write_single_target_impl(
     writer: _SilverWriterDispatchHost,
     *,
@@ -339,10 +198,7 @@ async def _write_dual_targets(
             ),
         )
         try:
-            result = await writer._write_single_target(
-                invocation=target_invocation,
-                table_name=physical_table,
-            )
+            result = await writer._write_single_target(invocation=target_invocation)
         except (BioETLError, OSError, RuntimeError, ValueError) as exc:
             writer.logger.error(
                 "silver_dual_write_failed",

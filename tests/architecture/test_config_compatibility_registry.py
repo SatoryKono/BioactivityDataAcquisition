@@ -9,14 +9,24 @@ from typing import Any
 import yaml
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-REGISTRY_PATH = PROJECT_ROOT / "configs" / "quality" / "config_compatibility_registry.yaml"
+REGISTRY_PATH = (
+    PROJECT_ROOT / "configs" / "quality" / "config_compatibility_registry.yaml"
+)
 
 MIGRATION_STATUSES = {"migration-supported", "deprecated-migration"}
 PERMANENT_STATUSES = {"canonical-alias"}
 RETIRED_STATUSES = {"rejected"}
 VALID_STATUSES = MIGRATION_STATUSES | PERMANENT_STATUSES | RETIRED_STATUSES
 
-SOURCE_NORMALIZER = PROJECT_ROOT / "src" / "bioetl" / "infrastructure" / "config" / "source_normalizers" / "source.py"
+SOURCE_NORMALIZER = (
+    PROJECT_ROOT
+    / "src"
+    / "bioetl"
+    / "infrastructure"
+    / "config"
+    / "source_normalizers"
+    / "source.py"
+)
 PIPELINE_NORMALIZER = (
     PROJECT_ROOT
     / "src"
@@ -26,7 +36,14 @@ PIPELINE_NORMALIZER = (
     / "pipeline_payload_normalization.py"
 )
 PIPELINE_SCHEMA = PROJECT_ROOT / "configs" / "_schema" / "pipeline.json"
-CONFIG_CI_CONTRACT = PROJECT_ROOT / "src" / "bioetl" / "infrastructure" / "config" / "config_ci_contract.py"
+CONFIG_CI_CONTRACT = (
+    PROJECT_ROOT
+    / "src"
+    / "bioetl"
+    / "infrastructure"
+    / "config"
+    / "config_ci_contract.py"
+)
 
 REQUIRED_MARKERS = {
     SOURCE_NORMALIZER: {

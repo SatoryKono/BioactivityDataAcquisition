@@ -37,9 +37,7 @@ def test_composition_adapter_modules_are_limited_to_reviewed_shims() -> None:
         path.relative_to(ROOT).as_posix()
         for path in COMPOSITION_ROOT.rglob("adapter.py")
     }
-    assert adapter_modules == {
-        "src/bioetl/composition/factories/storage/adapter.py"
-    }
+    assert adapter_modules == {"src/bioetl/composition/factories/storage/adapter.py"}
 
     shim_text = STORAGE_SHIM.read_text(encoding="utf-8")
     assert "DeprecationWarning" in shim_text

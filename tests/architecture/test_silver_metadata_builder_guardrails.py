@@ -21,11 +21,11 @@ LEGACY_TARGET_MODULE = (
     "bioetl.infrastructure.storage.silver.operations.metadata_builders"
 )
 ACTIVE_SILVER_METADATA_PATHS = (
-    ROOT / "src/bioetl/infrastructure/storage/silver/operations/metadata_write_support.py",
+    ROOT
+    / "src/bioetl/infrastructure/storage/silver/operations/metadata_write_support.py",
     ROOT
     / "src/bioetl/infrastructure/storage/silver/operations/metadata_finalization_support.py",
-    ROOT
-    / "src/bioetl/infrastructure/storage/silver/finalization_pipeline_compatibility_mixin.py",
+    ROOT / "src/bioetl/infrastructure/storage/silver/writer_runtime_facade.py",
 )
 
 

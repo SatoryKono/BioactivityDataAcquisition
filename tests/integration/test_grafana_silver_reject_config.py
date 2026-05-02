@@ -39,8 +39,7 @@ def test_silver_filter_reject_accounting_mismatch_panel_uses_reconciliation_rule
         "Panel 'Silver Filter Reject Accounting Mismatch' must define a query target"
     )
     assert any(
-        "bioetl_silver_filter_reject_total_mismatch_15m" in expr
-        for expr in expressions
+        "bioetl_silver_filter_reject_total_mismatch_15m" in expr for expr in expressions
     ), (
         "Silver Filter Reject Accounting Mismatch must use the shipped "
         "bioetl_silver_filter_reject_total_mismatch_15m recording rule"
