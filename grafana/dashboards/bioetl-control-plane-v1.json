@@ -322,7 +322,7 @@
                     "refId": "A"
                 }
             ],
-            "title": "Global Control-Plane Read Failures",
+            "title": "GLOBAL Control-Plane Read Failures",
             "type": "stat"
         },
         {
@@ -383,7 +383,7 @@
                     "refId": "A"
                 }
             ],
-            "title": "Global Control-Plane Read p95",
+            "title": "GLOBAL Control-Plane Read p95",
             "type": "stat"
         },
         {
@@ -458,12 +458,12 @@
             },
             "targets": [
                 {
-                    "expr": "sum by (store, status) (increase(bioetl_control_plane_reads_total[$__interval]))",
-                    "legendFormat": "{{store}} / {{status}}",
+                    "expr": "sum by (store, operation, status) (increase(bioetl_control_plane_reads_total[$__interval]))",
+                    "legendFormat": "{{store}} / {{operation}} / {{status}}",
                     "refId": "A"
                 }
             ],
-            "title": "Global Control-Plane Reads by Store and Status",
+            "title": "GLOBAL Control-Plane Reads by Store / Operation / Status",
             "type": "timeseries"
         },
         {
@@ -671,7 +671,7 @@
                     "refId": "A"
                 }
             ],
-            "title": "Checkpoint Operator Failures",
+            "title": "GLOBAL Checkpoint Operator Failures",
             "type": "stat"
         },
         {
@@ -725,16 +725,6 @@
                 {
                     "expr": "round(sum(increase(bioetl_replay_reconstructability_events_total{pipeline=~\"$pipeline\",status=\"not_reconstructable\"}[$__range])) or vector(0))",
                     "refId": "A"
-                },
-                {
-                    "expr": "round(sum(increase(bioetl_replay_drift_events_total{pipeline=~\"$pipeline\"}[$__range])) or vector(0))",
-                    "legendFormat": "drift_events",
-                    "refId": "B"
-                },
-                {
-                    "expr": "max(bioetl_replay_lag_seconds{pipeline=~\"$pipeline\"}) or vector(0)",
-                    "legendFormat": "lag_seconds",
-                    "refId": "C"
                 }
             ],
             "title": "Replay Not Reconstructable",
@@ -849,7 +839,7 @@
                     "refId": "A"
                 }
             ],
-            "title": "Checkpoint Operator Latency (p95)",
+            "title": "GLOBAL Checkpoint Operator Latency (p95)",
             "type": "stat"
         },
         {
@@ -1176,6 +1166,92 @@
             ],
             "title": "Lineage Fragment Outcomes",
             "type": "timeseries"
+        },
+        {
+            "datasource": "Prometheus",
+            "description": "Replay drift events separated from reconstructability and lag.",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "mappings": [],
+                    "unit": "short"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 64
+            },
+            "id": 120,
+            "options": {
+                "displayMode": "gradient",
+                "orientation": "horizontal",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "showUnfilled": true
+            },
+            "targets": [
+                {
+                    "expr": "sum by (run_type, replay_capability, drift_type, status) (increase(bioetl_replay_drift_events_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}[$__range])) or label_replace(vector(0), \"drift_type\", \"none\", \"\", \"\")",
+                    "instant": true,
+                    "legendFormat": "{{run_type}} / {{replay_capability}} / {{drift_type}} / {{status}}",
+                    "refId": "A"
+                }
+            ],
+            "title": "Replay Drift Events",
+            "type": "bargauge"
+        },
+        {
+            "datasource": "Prometheus",
+            "description": "Replay lag seconds separated from reconstructability and drift.",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "mappings": [],
+                    "unit": "s"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 12,
+                "y": 64
+            },
+            "id": 121,
+            "options": {
+                "displayMode": "gradient",
+                "orientation": "horizontal",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "showUnfilled": true
+            },
+            "targets": [
+                {
+                    "expr": "max by (run_type, replay_capability, status) (bioetl_replay_lag_seconds{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or vector(0)",
+                    "instant": true,
+                    "legendFormat": "{{run_type}} / {{replay_capability}} / {{status}}",
+                    "refId": "A"
+                }
+            ],
+            "title": "Replay Lag Seconds",
+            "type": "bargauge"
         }
     ],
     "refresh": "30s",

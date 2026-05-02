@@ -730,7 +730,8 @@
             "type": "timeseries"
         },
         {
-            "collapsed": false,
+            "collapsed": true,
+            "description": "Expand only after selecting one provider or a bounded provider subset.",
             "gridPos": {
                 "h": 1,
                 "w": 24,
@@ -739,7 +740,7 @@
             },
             "id": 91,
             "panels": [],
-            "title": "Selected Providers",
+            "title": "Selected Provider Detail",
             "type": "row"
         },
         {
