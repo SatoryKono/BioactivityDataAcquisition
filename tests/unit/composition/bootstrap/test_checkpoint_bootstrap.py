@@ -49,13 +49,17 @@ QUARANTINE_PATH = TEST_ROOT / "quarantine"
 
 
 @pytest.mark.unit
-def test_checkpoint_bootstrap_public_surface_prefers_runtime_service_vocabulary() -> None:
+def test_checkpoint_bootstrap_public_surface_prefers_runtime_service_vocabulary() -> (
+    None
+):
     from bioetl.composition.bootstrap.cli import checkpoint as checkpoint_bootstrap
 
     assert "bootstrap_checkpoint_runtime_service" in checkpoint_bootstrap.__all__
     assert "bootstrap_quarantine_runtime_service" in checkpoint_bootstrap.__all__
     assert "bootstrap_checkpoint_manager" not in checkpoint_bootstrap.__all__
     assert "bootstrap_quarantine_manager" not in checkpoint_bootstrap.__all__
+    assert not hasattr(checkpoint_bootstrap, "bootstrap_checkpoint_manager")
+    assert not hasattr(checkpoint_bootstrap, "bootstrap_quarantine_manager")
 
 
 @pytest.mark.unit

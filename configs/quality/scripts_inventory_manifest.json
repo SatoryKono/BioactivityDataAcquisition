@@ -8920,13 +8920,13 @@
         },
         {
           "path": "docs/02-architecture/07-compatibility-facade-snapshot.md",
-          "line": 56,
+          "line": 55,
           "source_group": "docs",
           "text": "- `src/bioetl/interfaces/cli/commands/run.py`"
         },
         {
           "path": "docs/02-architecture/07-compatibility-facade-snapshot.md",
-          "line": 66,
+          "line": 64,
           "source_group": "docs",
           "text": "- `src/bioetl/interfaces/cli/commands/run.py` — external breaking change required: `true`, internal callers zero: `false`"
         },

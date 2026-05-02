@@ -36,7 +36,9 @@ class TestCheckpointCommands:
         """Test that checkpoint list command works."""
         mock_checkpoint_runtime_service = AsyncMock()
         mock_checkpoint_runtime_service.list_all.return_value = ["cp1", "cp2"]
-        mock_get_checkpoint_runtime_service.return_value = mock_checkpoint_runtime_service
+        mock_get_checkpoint_runtime_service.return_value = (
+            mock_checkpoint_runtime_service
+        )
 
         result = runner.invoke(cli, ["checkpoint", "list", "--pipeline", "dummy"])
 
@@ -57,7 +59,9 @@ class TestQuarantineCommands:
         mock_quarantine_runtime_service.inspect.return_value = [
             {"error_code": "ERR01", "payload": "{}"}
         ]
-        mock_get_quarantine_runtime_service.return_value = mock_quarantine_runtime_service
+        mock_get_quarantine_runtime_service.return_value = (
+            mock_quarantine_runtime_service
+        )
 
         result = runner.invoke(
             cli,
@@ -75,7 +79,9 @@ class TestQuarantineCommands:
         """Test quarantine inspect command with no records."""
         mock_quarantine_runtime_service = AsyncMock()
         mock_quarantine_runtime_service.inspect.return_value = []
-        mock_get_quarantine_runtime_service.return_value = mock_quarantine_runtime_service
+        mock_get_quarantine_runtime_service.return_value = (
+            mock_quarantine_runtime_service
+        )
 
         result = runner.invoke(
             cli,
