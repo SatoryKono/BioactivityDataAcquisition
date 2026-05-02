@@ -24,7 +24,7 @@ class TestGetQuarantineRuntimeService:
 
     def test_calls_ensure_registrations_and_bootstrap(self) -> None:
         """Test that get_quarantine_runtime_service calls _ensure_registrations and bootstrap."""
-        mock_manager = MagicMock()
+        mock_runtime_service = MagicMock()
 
         with (
             patch(
@@ -32,7 +32,7 @@ class TestGetQuarantineRuntimeService:
             ) as mock_ensure,
             patch(
                 "bioetl.composition._resource_management.bootstrap_quarantine_runtime_service",
-                return_value=mock_manager,
+                return_value=mock_runtime_service,
             ) as mock_bootstrap,
         ):
             from bioetl.composition.resources_api import get_quarantine_runtime_service
@@ -41,11 +41,11 @@ class TestGetQuarantineRuntimeService:
 
         mock_ensure.assert_called_once()
         mock_bootstrap.assert_called_once_with("chembl_activity")
-        assert result is mock_manager
+        assert result is mock_runtime_service
 
     def test_returns_bootstrap_result(self) -> None:
         """Test that the return value is exactly what bootstrap returns."""
-        expected = MagicMock(name="QuarantineManagerMock")
+        expected = MagicMock(name="QuarantineRuntimeServiceMock")
 
         with (
             patch("bioetl.composition._resource_management._ensure_registrations"),
@@ -86,7 +86,7 @@ class TestGetCheckpointRuntimeService:
 
     def test_calls_ensure_registrations_and_bootstrap(self) -> None:
         """Test that get_checkpoint_runtime_service calls _ensure_registrations and bootstrap."""
-        mock_manager = MagicMock()
+        mock_runtime_service = MagicMock()
 
         with (
             patch(
@@ -94,7 +94,7 @@ class TestGetCheckpointRuntimeService:
             ) as mock_ensure,
             patch(
                 "bioetl.composition._resource_management.bootstrap_checkpoint_runtime_service",
-                return_value=mock_manager,
+                return_value=mock_runtime_service,
             ) as mock_bootstrap,
         ):
             from bioetl.composition.resources_api import get_checkpoint_runtime_service
@@ -103,7 +103,7 @@ class TestGetCheckpointRuntimeService:
 
         mock_ensure.assert_called_once()
         mock_bootstrap.assert_called_once_with("chembl_activity")
-        assert result is mock_manager
+        assert result is mock_runtime_service
 
     def test_passes_pipeline_name_to_bootstrap(self) -> None:
         """Test that pipeline name is forwarded to bootstrap function."""
@@ -405,43 +405,43 @@ class TestInspectQuarantine:
     """Tests for inspect_quarantine async function."""
 
     @pytest.mark.asyncio
-    async def test_inspect_quarantine_calls_manager_inspect(self) -> None:
-        """Test that inspect_quarantine calls manager.inspect with limit."""
+    async def test_inspect_quarantine_calls_runtime_service_inspect(self) -> None:
+        """Test that inspect_quarantine calls runtime_service.inspect with limit."""
         mock_records = [{"error_code": "DQ_MISSING_FIELD", "id": "1"}]
 
-        mock_manager = MagicMock()
-        mock_manager.inspect = AsyncMock(return_value=mock_records)
+        mock_runtime_service = MagicMock()
+        mock_runtime_service.inspect = AsyncMock(return_value=mock_records)
 
         with (
             patch(
                 "bioetl.composition._resource_management.get_quarantine_runtime_service",
-                return_value=mock_manager,
+                return_value=mock_runtime_service,
             ),
         ):
             from bioetl.composition.resources_api import inspect_quarantine
 
             result = await inspect_quarantine("chembl_activity", limit=50)
 
-        mock_manager.inspect.assert_called_once_with(limit=50)
+        mock_runtime_service.inspect.assert_called_once_with(limit=50)
         assert result == mock_records
 
     @pytest.mark.asyncio
     async def test_inspect_quarantine_default_limit(self) -> None:
         """Test that inspect_quarantine uses default limit of 100."""
-        mock_manager = MagicMock()
-        mock_manager.inspect = AsyncMock(return_value=[])
+        mock_runtime_service = MagicMock()
+        mock_runtime_service.inspect = AsyncMock(return_value=[])
 
         with (
             patch(
                 "bioetl.composition._resource_management.get_quarantine_runtime_service",
-                return_value=mock_manager,
+                return_value=mock_runtime_service,
             ),
         ):
             from bioetl.composition.resources_api import inspect_quarantine
 
             await inspect_quarantine("chembl_activity")
 
-        mock_manager.inspect.assert_called_once_with(limit=100)
+        mock_runtime_service.inspect.assert_called_once_with(limit=100)
 
 
 # =============================================================================
@@ -454,36 +454,36 @@ class TestListCheckpoints:
     """Tests for list_checkpoints async function."""
 
     @pytest.mark.asyncio
-    async def test_list_checkpoints_calls_manager_list_all(self) -> None:
-        """Test that list_checkpoints calls manager.list_all."""
+    async def test_list_checkpoints_calls_runtime_service_list_all(self) -> None:
+        """Test that list_checkpoints calls runtime_service.list_all."""
         mock_checkpoints = ["checkpoint_2024_01_15", "checkpoint_2024_01_16"]
 
-        mock_manager = MagicMock()
-        mock_manager.list_all = AsyncMock(return_value=mock_checkpoints)
+        mock_runtime_service = MagicMock()
+        mock_runtime_service.list_all = AsyncMock(return_value=mock_checkpoints)
 
         with (
             patch(
                 "bioetl.composition._resource_management.get_checkpoint_runtime_service",
-                return_value=mock_manager,
+                return_value=mock_runtime_service,
             ),
         ):
             from bioetl.composition.resources_api import list_checkpoints
 
             result = await list_checkpoints("chembl_activity")
 
-        mock_manager.list_all.assert_called_once()
+        mock_runtime_service.list_all.assert_called_once()
         assert result == mock_checkpoints
 
     @pytest.mark.asyncio
     async def test_list_checkpoints_empty_list(self) -> None:
         """Test that list_checkpoints returns empty list when no checkpoints."""
-        mock_manager = MagicMock()
-        mock_manager.list_all = AsyncMock(return_value=[])
+        mock_runtime_service = MagicMock()
+        mock_runtime_service.list_all = AsyncMock(return_value=[])
 
         with (
             patch(
                 "bioetl.composition._resource_management.get_checkpoint_runtime_service",
-                return_value=mock_manager,
+                return_value=mock_runtime_service,
             ),
         ):
             from bioetl.composition.resources_api import list_checkpoints

@@ -11,7 +11,7 @@ import pytest
 from bioetl.application.services import CheckpointService
 from bioetl.composition import PipelineRegistry
 from bioetl.composition.bootstrap.cli.service_builders import (
-    build_cli_checkpoint_manager,
+    build_cli_checkpoint_runtime_service,
     build_cli_checkpoint_service,
     build_cli_config_service,
     build_cli_observability_workflow_service,
@@ -19,6 +19,16 @@ from bioetl.composition.bootstrap.cli.service_builders import (
 from bioetl.domain.ports.noop import NoOpMetrics, NoOpTracing
 from bioetl.domain.types import RunID
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
+
+
+@pytest.mark.unit
+def test_service_builders_public_surface_prefers_runtime_service_vocabulary() -> None:
+    from bioetl.composition.bootstrap.cli import service_builders
+
+    assert "build_cli_checkpoint_runtime_service" in service_builders.__all__
+    assert "build_cli_quarantine_runtime_service" in service_builders.__all__
+    assert "build_cli_checkpoint_manager" not in service_builders.__all__
+    assert "build_cli_quarantine_manager" not in service_builders.__all__
 
 
 @pytest.mark.unit
@@ -48,7 +58,7 @@ def test_build_cli_config_service_owns_registration_and_dq_wiring() -> None:
 
 
 @pytest.mark.unit
-def test_build_cli_checkpoint_manager_uses_injected_sentinel_and_compatibility() -> (
+def test_build_cli_checkpoint_runtime_service_uses_injected_sentinel_and_compatibility() -> (
     None
 ):
     checkpoint_port = MagicMock()
@@ -56,7 +66,7 @@ def test_build_cli_checkpoint_manager_uses_injected_sentinel_and_compatibility()
     compatibility_service = MagicMock()
     run_id = RunID(UUID("00000000-0000-0000-0000-000000003351"))
 
-    manager = build_cli_checkpoint_manager(
+    runtime_service = build_cli_checkpoint_runtime_service(
         pipeline_name="chembl_activity",
         run_id=run_id,
         checkpoint_port_factory=MagicMock(return_value=checkpoint_port),
@@ -64,11 +74,11 @@ def test_build_cli_checkpoint_manager_uses_injected_sentinel_and_compatibility()
         compatibility_service_factory=MagicMock(return_value=compatibility_service),
     )
 
-    assert manager._checkpoint is checkpoint_port
-    assert manager._logger is logger
-    assert manager._run_id == run_id
-    assert manager._resume is False
-    assert manager._compatibility_service is compatibility_service
+    assert runtime_service._checkpoint is checkpoint_port
+    assert runtime_service._logger is logger
+    assert runtime_service._run_id == run_id
+    assert runtime_service._resume is False
+    assert runtime_service._compatibility_service is compatibility_service
 
 
 @pytest.mark.unit

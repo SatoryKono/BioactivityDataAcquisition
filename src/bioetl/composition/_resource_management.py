@@ -1,7 +1,7 @@
 # ruff: noqa: UP049
 """Resource management entrypoints.
 
-Legacy managers, maintenance operations (vacuum, archive),
+Runtime services, maintenance operations (vacuum, archive),
 and inspection functions (quarantine, checkpoints).
 Split from entrypoints.py per audit-package-structure-2026-02-07.
 """

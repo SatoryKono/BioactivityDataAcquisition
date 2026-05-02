@@ -54,12 +54,10 @@ if TYPE_CHECKING:
 
 __all__ = [
     "build_cli_audit_inspection_service",
-    "build_cli_checkpoint_manager",
     "build_cli_checkpoint_runtime_service",
     "build_cli_checkpoint_service",
     "build_cli_config_service",
     "build_cli_observability_workflow_service",
-    "build_cli_quarantine_manager",
     "build_cli_quarantine_runtime_service",
     "build_cli_quarantine_service",
 ]

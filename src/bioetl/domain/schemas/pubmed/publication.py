@@ -12,12 +12,9 @@ from pandera.typing import Series
 
 from bioetl.domain.schemas.common.publication_base import LOOKUP_METHODS
 from bioetl.domain.schemas.constants import ISSN_PATTERN
-from bioetl.domain.validation import (
-    DOI_REGEX_PATTERN,
-)
+from bioetl.domain.validation import DOI_REGEX_PATTERN
 
 if TYPE_CHECKING:
-
     class _PublicationBaseSchema:
         """Typing-only base to avoid skipped-import degradation to Any."""
 
@@ -33,14 +30,12 @@ ISSN_TYPES = ["Print", "Electronic", "Linking"]
 
 _CheckMethod = TypeVar("_CheckMethod", bound=Callable[..., object])
 
-
 def _typed_check(
     *fields: str,
     **kwargs: Any,  # Any: Pandera decorator kwargs are intentionally open-ended
 ) -> Callable[[_CheckMethod], _CheckMethod]:
     """Typed shim around ``pa.check`` until Pandera exposes a typed decorator."""
     return cast(Callable[[_CheckMethod], _CheckMethod], pa.check(*fields, **kwargs))
-
 
 class PubMedPublicationSchema(_PublicationBaseSchema):
     """PubMed Publication validation schema for Silver layer.
@@ -66,14 +61,12 @@ class PubMedPublicationSchema(_PublicationBaseSchema):
         str_matches=r"^[1-9]\d{0,9}$",
         description="PubMed ID (PK, numeric string < 10^10)",
     )
-
     # === External Identifiers (override doi for check method) ===
     doi: Series[str] = pa.Field(
         nullable=True,
         str_matches=DOI_REGEX_PATTERN,
         description="Digital Object Identifier",
     )
-
     @_typed_check("pmc_id", name="pmc_id_format")
     def _check_pmc_id(cls, series: Series[str]) -> Series[bool]:
         """Validate PMCID format."""
@@ -143,25 +136,20 @@ class PubMedPublicationSchema(_PublicationBaseSchema):
     pub_month: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True, description="Publication month"
     )
-
     @_typed_check("pub_month", name="pub_month_range")
     def _check_pub_month(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
         """Validate publication month range."""
         return cast(Series[bool], series.isna() | ((series >= 1) & (series <= 12)))
-
     pub_day: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True, description="Publication day"
     )
-
     @_typed_check("pub_day", name="pub_day_range")
     def _check_pub_day(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
         """Validate publication day range."""
         return cast(Series[bool], series.isna() | ((series >= 1) & (series <= 31)))
-
     publication_status: Series[str] = pa.Field(
         nullable=True, description="Publication status"
     )
-
     @_typed_check("publication_status", name="publication_status_values")
     def _check_publication_status(cls, series: Series[str]) -> Series[bool]:
         """Validate publication status values."""
@@ -192,13 +180,13 @@ class PubMedPublicationSchema(_PublicationBaseSchema):
             "Each object contains: text, identifier, identifier_source, email_hash"
         ),
     )
-    affiliation_structured_raw_json: Series[str] | None = pa.Field(
-        nullable=True,
-        description="Raw provider JSON for structured affiliations.",
-    )
     affiliation_structured_canonical_json: Series[str] | None = pa.Field(
         nullable=True,
         description="Canonical JSON companion for structured affiliations.",
+    )
+    affiliation_structured_raw_json: Series[str] | None = pa.Field(
+        nullable=True,
+        description="Raw provider JSON for structured affiliations.",
     )
 
     # === Counts (denormalized for query efficiency) ===
@@ -295,13 +283,13 @@ class PubMedPublicationSchema(_PublicationBaseSchema):
         nullable=True,
         description="JSON array of authors with their affiliations and identifiers",
     )
-    authors_with_affiliations_raw_json: Series[str] | None = pa.Field(
-        nullable=True,
-        description="Raw provider JSON for authors-with-affiliations payload.",
-    )
     authors_with_affiliations_canonical_json: Series[str] | None = pa.Field(
         nullable=True,
         description="Canonical JSON companion for authors-with-affiliations payload.",
+    )
+    authors_with_affiliations_raw_json: Series[str] | None = pa.Field(
+        nullable=True,
+        description="Raw provider JSON for authors-with-affiliations payload.",
     )
 
     class Config:

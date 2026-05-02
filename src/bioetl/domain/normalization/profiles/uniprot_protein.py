@@ -8,8 +8,8 @@ from bioetl.domain.normalization.profiles._standard_profile_builder import (
 from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_chembl_ids,
     normalize_profile_drugbank_ids,
-    normalize_profile_pdb_references,
     normalize_profile_passthrough,
+    normalize_profile_pdb_references,
     normalize_profile_pfam_references,
     normalize_profile_reactome_references,
     normalize_profile_uniprot_accessions,
@@ -18,8 +18,8 @@ from bioetl.domain.normalization.profiles.profile_normalizers import (
 )
 from bioetl.domain.schemas.constants import (
     UNIPROT_ENTRY_TYPES,
-    UNIPROT_PROTEIN_FLAGS,
     UNIPROT_PROTEIN_EXISTENCE_LEVELS,
+    UNIPROT_PROTEIN_FLAGS,
 )
 from bioetl.domain.schemas.uniprot import UniprotTargetSchema
 
