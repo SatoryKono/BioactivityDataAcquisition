@@ -40,9 +40,11 @@ def test_normalize_join_key_dataframe_columns_covers_supported_mutating_families
     df = pl.DataFrame(
         {
             "doi": [" 10.1000/ABC "],
+            "inchi_key": [" bsynrymutxbxsq-uhfffaoysa-n "],
             "pmid": [" PMID:12345 "],
             "pmc_id": [" PMC123 "],
-            "uniprot_accession": [" P12345 "],
+            "target_id": [" chembl0203 "],
+            "uniprot_accession": [" p12345 "],
             "title": ["  Mixed Case Title  "],
             "canonical_smiles": [" C[C@H](O)C "],
         }
@@ -52,8 +54,10 @@ def test_normalize_join_key_dataframe_columns_covers_supported_mutating_families
         df=df,
         join_keys=(
             "doi",
+            "inchi_key",
             "pmid",
             "pmc_id",
+            "target_id",
             "uniprot_accession",
             "title",
             "canonical_smiles",
@@ -62,9 +66,11 @@ def test_normalize_join_key_dataframe_columns_covers_supported_mutating_families
 
     assert result.to_dict(as_series=False) == {
         "doi": ["10.1000/abc"],
+        "inchi_key": ["BSYNRYMUTXBXSQ-UHFFFAOYSA-N"],
         "pmid": ["12345"],
         "pmc_id": ["pmc123"],
-        "uniprot_accession": ["p12345"],
+        "target_id": ["CHEMBL203"],
+        "uniprot_accession": ["P12345"],
         "title": ["Mixed Case Title"],
         "canonical_smiles": ["C[C@H](O)C"],
     }

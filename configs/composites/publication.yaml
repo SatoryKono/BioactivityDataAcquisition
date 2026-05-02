@@ -35,6 +35,14 @@
 composite:
     name: composite_publication
     version: "1.1.0"
+    normalized_join_key_policy:
+        publication_identity:
+            primary_join_keys:
+                - doi
+                - pmid
+            fallback_join_keys:
+                - title
+            rationale: DOI and PMID are canonical identifier joins; title is a trimmed fallback only when identifier joins are unavailable.
 
     # ---------------------------------------------------------------------------
     # Seed Pipeline Configuration

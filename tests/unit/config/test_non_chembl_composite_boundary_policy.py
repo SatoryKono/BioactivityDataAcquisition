@@ -54,6 +54,16 @@ def test_composite_publication_promotes_harmonized_classification() -> None:
         assert f"chembl.publication.{field_name}" not in merge["exclude_fields"]
 
 
+def test_publication_composite_documents_normalized_identifier_and_title_fallback() -> (
+    None
+):
+    config = _load_yaml("configs/composites/publication.yaml")
+    policy = config["composite"]["normalized_join_key_policy"]["publication_identity"]
+
+    assert policy["primary_join_keys"] == ["doi", "pmid"]
+    assert policy["fallback_join_keys"] == ["title"]
+
+
 def test_publication_field_groups_keep_publication_doi_as_chembl_legacy_only() -> None:
     config = _load_yaml("configs/composites/field_groups/publication.yaml")
     id_group = next(

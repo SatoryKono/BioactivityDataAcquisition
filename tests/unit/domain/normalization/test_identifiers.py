@@ -79,6 +79,8 @@ class TestNormalizePMID:
         assert normalize_pmid("1234567") == "1234567"
         assert normalize_pmid("  1234567  ") == "1234567"
         assert normalize_pmid("001234567") == "1234567"
+        assert normalize_pmid("PMID:001234567") == "1234567"
+        assert normalize_pmid("https://pubmed.ncbi.nlm.nih.gov/1234567/") == "1234567"
 
     def test_normalize_pmid_integer(self) -> None:
         """Test PMID normalization from integer."""

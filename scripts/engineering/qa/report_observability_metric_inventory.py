@@ -20,6 +20,7 @@ import json
 import re
 import sys
 from collections import defaultdict
+from datetime import date
 from pathlib import Path
 from typing import Final
 
@@ -960,7 +961,32 @@ def _parse_allowlist_metric_name(
                 raise ValueError(
                     f"{key} metric {metric_name!r} is missing required {field_name}"
                 )
+        _validate_allowlist_review_date(
+            key=key,
+            metric_name=metric_name,
+            raw_review_date=str(item["review_date"]),
+        )
     return metric_name
+
+
+def _validate_allowlist_review_date(
+    *,
+    key: str,
+    metric_name: str,
+    raw_review_date: str,
+) -> None:
+    try:
+        review_date = date.fromisoformat(raw_review_date)
+    except ValueError as exc:
+        raise ValueError(
+            f"{key} metric {metric_name!r} has invalid review_date "
+            f"{raw_review_date!r}; expected ISO YYYY-MM-DD"
+        ) from exc
+    if review_date < date.today():
+        raise ValueError(
+            f"{key} metric {metric_name!r} has expired review_date "
+            f"{raw_review_date}; refresh or remove this lifecycle exception"
+        )
 
 
 def _load_drift_allowlist(path: Path) -> dict[str, set[str]]:

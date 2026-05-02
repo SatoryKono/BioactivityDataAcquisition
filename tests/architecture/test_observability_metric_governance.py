@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import date
 from pathlib import Path
 
 import pytest
@@ -80,12 +81,26 @@ def test_runtime_cardinality_allowlist_entries_require_metadata() -> None:
     runtime_allowlist = payload["allowed"]["runtime_cardinality_review_required"]
 
     assert isinstance(runtime_allowlist, list)
+    seen_metrics: set[str] = set()
     for entry in runtime_allowlist:
         assert isinstance(entry, dict), (
             "runtime_cardinality_review_required entries must be structured "
             "mappings with metric ownership metadata"
         )
-        assert entry["metric"]
-        assert entry["owner"]
-        assert entry["reason"]
-        assert entry["review_date"]
+        metric = str(entry["metric"])
+        owner = str(entry["owner"])
+        reason = str(entry["reason"])
+        review_date = str(entry["review_date"])
+
+        assert metric
+        assert owner.startswith("@")
+        assert reason.strip()
+        assert date.fromisoformat(review_date) >= date.today(), (
+            "runtime_cardinality_review_required lifecycle exception has expired "
+            f"review_date: metric={metric} review_date={review_date}"
+        )
+        assert metric not in seen_metrics, (
+            "runtime_cardinality_review_required must not duplicate metric entries: "
+            f"{metric}"
+        )
+        seen_metrics.add(metric)

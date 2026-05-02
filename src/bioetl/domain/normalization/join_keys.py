@@ -10,6 +10,8 @@ from bioetl.domain.normalization.identifiers import (
     normalize_pmc_id,
     normalize_pmid,
 )
+from bioetl.domain.value_objects._chemical_identifiers import InChIKey
+from bioetl.domain.value_objects.identifiers import ChemblId, UniProtId
 
 __all__ = [
     "JOIN_KEY_NORMALIZATION_POLICIES",
@@ -53,6 +55,24 @@ def _normalize_join_key_pmc_id(value: str) -> str | None:
     return normalize_pmc_id(value)
 
 
+def _normalize_join_key_inchi_key(value: str) -> str | None:
+    """Normalize InChIKey join text through the canonical value object seam."""
+    normalized = InChIKey.from_raw(value)
+    return None if normalized is None else normalized.value
+
+
+def _normalize_join_key_target_id(value: str) -> str | None:
+    """Normalize ChEMBL target join text through the canonical value object seam."""
+    normalized = ChemblId.from_raw(value)
+    return None if normalized is None else normalized.value
+
+
+def _normalize_join_key_uniprot_accession(value: str) -> str | None:
+    """Normalize UniProt accession join text through the canonical value object seam."""
+    normalized = UniProtId.from_raw(value)
+    return None if normalized is None else normalized.value
+
+
 _NOOP_POLICY = JoinKeyNormalizationPolicy()  # EXC-002: immutable module constant
 
 JOIN_KEY_NORMALIZATION_POLICIES: Mapping[str, JoinKeyNormalizationPolicy] = {
@@ -63,7 +83,10 @@ JOIN_KEY_NORMALIZATION_POLICIES: Mapping[str, JoinKeyNormalizationPolicy] = {
         lowercase=True,
         domain_canonicalizer=_normalize_join_key_doi,
     ),
-    "inchi_key": JoinKeyNormalizationPolicy(trim=True),
+    "inchi_key": JoinKeyNormalizationPolicy(
+        trim=True,
+        domain_canonicalizer=_normalize_join_key_inchi_key,
+    ),
     "molecule_id": _NOOP_POLICY,
     "pmc_id": JoinKeyNormalizationPolicy(
         trim=True,
@@ -78,10 +101,16 @@ JOIN_KEY_NORMALIZATION_POLICIES: Mapping[str, JoinKeyNormalizationPolicy] = {
     "primary_component_id": _NOOP_POLICY,
     "protein_classification_id": _NOOP_POLICY,
     "publication_id": _NOOP_POLICY,
-    "target_id": _NOOP_POLICY,
+    "target_id": JoinKeyNormalizationPolicy(
+        trim=True,
+        domain_canonicalizer=_normalize_join_key_target_id,
+    ),
     "title": JoinKeyNormalizationPolicy(trim=True),
     "tissue_id": _NOOP_POLICY,
-    "uniprot_accession": JoinKeyNormalizationPolicy(trim=True, lowercase=True),
+    "uniprot_accession": JoinKeyNormalizationPolicy(
+        trim=True,
+        domain_canonicalizer=_normalize_join_key_uniprot_accession,
+    ),
 }
 
 

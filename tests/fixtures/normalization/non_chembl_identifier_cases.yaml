@@ -70,3 +70,70 @@ publication_structured_field_policy:
     collection_semantics: unordered_set
     representation: canonical_json_string
     raw_sidecar_field: publication_type
+composite_publication_join_keys:
+  doi_primary:
+    composite: composite_publication
+    key: doi
+    raw_values:
+      - " https://doi.org/10.1000/ABC "
+      - "DOI:10.1000/abc"
+      - "10.1000/AbC"
+    expected: "10.1000/abc"
+  pmid_primary:
+    composite: composite_publication
+    key: pmid
+    raw_values:
+      - " PMID:0012345 "
+      - "https://pubmed.ncbi.nlm.nih.gov/12345/"
+      - 12345
+    expected: "12345"
+  title_fallback:
+    composite: composite_publication
+    key: title
+    raw_values:
+      - "  Mixed Case Title  "
+      - "Mixed Case Title"
+    expected: "Mixed Case Title"
+composite_molecule_join_keys:
+  inchi_key_primary:
+    composite: composite_molecule
+    key: inchi_key
+    raw_values:
+      - " bsynrymutxbxsq-uhfffaoysa-n "
+      - "BSYNRYMUTXBXSQ-UHFFFAOYSA-N"
+    expected: "BSYNRYMUTXBXSQ-UHFFFAOYSA-N"
+  canonical_smiles_fallback:
+    composite: composite_molecule
+    key: canonical_smiles
+    raw_values:
+      - " C[C@H](O)C "
+      - "C[C@H](O)C"
+    expected: "C[C@H](O)C"
+  pubchem_anchor_boundary:
+    composite: composite_molecule
+    active_join_keys:
+      - inchi_key
+      - canonical_smiles
+    retained_validation_anchors:
+      - standardized_inchi_key
+      - structure_parent_key
+composite_target_join_keys:
+  target_id_seed:
+    composite: composite_target
+    key: target_id
+    raw_values:
+      - " chembl203 "
+      - "CHEMBL0203"
+    expected: "CHEMBL203"
+  uniprot_accession_chain:
+    composite: composite_target
+    key: uniprot_accession
+    raw_values:
+      - " p12345 "
+      - "P12345"
+    expected: "P12345"
+  uniprot_mapping_gate:
+    composite: composite_target
+    source_anchor: target_id
+    normalized_output_anchor: uniprot_accession
+    required_status: found
