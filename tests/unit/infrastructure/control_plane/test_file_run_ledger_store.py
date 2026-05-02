@@ -168,10 +168,6 @@ def test_file_store_noops_duplicate_idempotency_key_without_terminal_recount(
     metrics.reset_mock()
     store.append(retry)
 
-    ledger_path = tmp_path / "run_ledger" / "manifest-1.jsonl"
-    assert len(ledger_path.read_text(encoding="utf-8").splitlines()) == 1
-    assert store.list_entries("manifest-1") == [first]
-    assert store.list_entries_by_run_id(run_id) == [first]
     metrics.increment_counter.assert_called_once_with(
         "bioetl_control_plane_ledger_appends_total",
         1,
@@ -181,6 +177,12 @@ def test_file_store_noops_duplicate_idempotency_key_without_terminal_recount(
             "status": "duplicate",
         },
     )
+    metrics.reset_mock()
+
+    ledger_path = tmp_path / "run_ledger" / "manifest-1.jsonl"
+    assert len(ledger_path.read_text(encoding="utf-8").splitlines()) == 1
+    assert store.list_entries("manifest-1") == [first]
+    assert store.list_entries_by_run_id(run_id) == [first]
 
 
 def test_file_store_does_not_emit_terminal_metric_for_non_terminal_events(
