@@ -393,7 +393,7 @@
                     "links": [
                         {
                             "title": "Open same dashboard with this payload_hash",
-                            "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=${__data.fields.pipeline}&var-run_type=${__data.fields.run_type}&var-reason_code=${__data.fields.reason_code}&var-field=${__data.fields.field}&var-run_id=${__data.fields.run_id}&var-payload_hash=${__data.fields.payload_hash}"
+                            "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=${__data.fields.pipeline}&var-run_type=${__data.fields.run_type}&var-reason_code=${__data.fields.reason_code}&var-field=${__data.fields.field}&var-run_id=${__data.fields.run_id}&var-payload_hash=${__data.fields.payload_hash}&${__url_time_range}"
                         },
                         {
                             "title": "Open quarantine CLI command",
@@ -439,6 +439,7 @@
                     "expr": ""
                 }
             ],
+            "description": "Shows latest 100 records for selected scope, sorted by ingestion_ts descending.",
             "title": "Filtered Records Table",
             "type": "table"
         },
@@ -478,6 +479,7 @@
                     "expr": ""
                 }
             ],
+            "description": "Select a row or set payload_hash to inspect one specific record.",
             "title": "Selected Record Details",
             "type": "table"
         }

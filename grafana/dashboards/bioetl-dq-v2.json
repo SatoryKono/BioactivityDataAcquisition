@@ -304,7 +304,7 @@
         },
         {
             "datasource": "Prometheus",
-            "description": "Non-zero means the stage-total filtered_out counter diverges from the bounded Silver reject breakdown metric over the last 15 minutes. Zero is healthy; no data means the reconciliation rule is not publishing.",
+            "description": "Silver reject reconciliation signal. Non-zero means the stage-total filtered_out counter diverges from the bounded Silver reject breakdown metric over the selected range.",
             "fieldConfig": {
                 "defaults": {
                     "color": {
@@ -332,8 +332,8 @@
             "gridPos": {
                 "h": 8,
                 "w": 8,
-                "x": 8,
-                "y": 64
+                "x": 16,
+                "y": 26
             },
             "id": 152,
             "options": {
@@ -352,7 +352,7 @@
             },
             "targets": [
                 {
-                    "expr": "round(sum(max_over_time(bioetl_silver_filter_reject_total_mismatch_15m{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range]))",
+                    "expr": "round(sum(max_over_time(bioetl_silver_filter_reject_total_mismatch_15m{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])) or vector(0))",
                     "refId": "A"
                 }
             ],
@@ -758,7 +758,7 @@
             },
             "gridPos": {
                 "h": 8,
-                "w": 16,
+                "w": 8,
                 "x": 8,
                 "y": 26
             },
@@ -836,6 +836,12 @@
             "options": {
                 "displayMode": "gradient",
                 "orientation": "horizontal",
+                "dataLinks": [
+                    {
+                        "title": "Open Silver Reject Explorer",
+                        "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
+                    }
+                ],
                 "reduceOptions": {
                     "calcs": [
                         "lastNotNull"
@@ -906,6 +912,12 @@
             "options": {
                 "displayMode": "gradient",
                 "orientation": "horizontal",
+                "dataLinks": [
+                    {
+                        "title": "Open Silver Reject Explorer",
+                        "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
+                    }
+                ],
                 "reduceOptions": {
                     "calcs": [
                         "lastNotNull"

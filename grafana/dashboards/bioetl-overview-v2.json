@@ -161,7 +161,7 @@
             },
             "gridPos": {
                 "h": 8,
-                "w": 24,
+                "w": 12,
                 "x": 0,
                 "y": 3
             },
@@ -202,19 +202,167 @@
                     "expr": "sum by (stage) (increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__interval]))",
                     "legendFormat": "{{stage}}",
                     "refId": "A"
-                },
-                {
-                    "expr": "max by (stage) (max_over_time(bioetl_stage_backlog_records{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__interval]))",
-                    "legendFormat": "backlog / {{stage}}",
-                    "refId": "B"
-                },
-                {
-                    "expr": "max by (stage) (max_over_time(bioetl_stage_lag_seconds{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__interval]))",
-                    "legendFormat": "lag_seconds / {{stage}}",
-                    "refId": "C"
                 }
             ],
             "title": "Processing Volume by Stage",
+            "type": "timeseries"
+        },
+        {
+            "datasource": "Prometheus",
+            "description": "Backlog records by stage over the selected time range.",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisLabel": "Records",
+                        "axisPlacement": "auto",
+                        "drawStyle": "line",
+                        "fillOpacity": 10,
+                        "gradientMode": "none",
+                        "lineInterpolation": "linear",
+                        "lineWidth": 2,
+                        "pointSize": 5,
+                        "showPoints": "auto",
+                        "spanNulls": false,
+                        "stacking": {
+                            "group": "A",
+                            "mode": "none"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "yellow",
+                                "value": 1
+                            },
+                            {
+                                "color": "red",
+                                "value": 1000
+                            }
+                        ]
+                    },
+                    "unit": "short"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 6,
+                "x": 12,
+                "y": 3
+            },
+            "id": 1210,
+            "options": {
+                "legend": {
+                    "calcs": [
+                        "max"
+                    ],
+                    "displayMode": "table",
+                    "placement": "bottom"
+                },
+                "tooltip": {
+                    "mode": "multi",
+                    "sort": "desc"
+                }
+            },
+            "targets": [
+                {
+                    "expr": "max by (stage) (max_over_time(bioetl_stage_backlog_records{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])) or vector(0)",
+                    "legendFormat": "{{stage}}",
+                    "refId": "A"
+                }
+            ],
+            "title": "Stage Backlog Records",
+            "type": "timeseries"
+        },
+        {
+            "datasource": "Prometheus",
+            "description": "Stage lag in seconds over the selected time range.",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisLabel": "Seconds",
+                        "axisPlacement": "auto",
+                        "drawStyle": "line",
+                        "fillOpacity": 10,
+                        "gradientMode": "none",
+                        "lineInterpolation": "linear",
+                        "lineWidth": 2,
+                        "pointSize": 5,
+                        "showPoints": "auto",
+                        "spanNulls": false,
+                        "stacking": {
+                            "group": "A",
+                            "mode": "none"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "yellow",
+                                "value": 300
+                            },
+                            {
+                                "color": "red",
+                                "value": 900
+                            }
+                        ]
+                    },
+                    "unit": "s"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 6,
+                "x": 18,
+                "y": 3
+            },
+            "id": 1211,
+            "options": {
+                "legend": {
+                    "calcs": [
+                        "max"
+                    ],
+                    "displayMode": "table",
+                    "placement": "bottom"
+                },
+                "tooltip": {
+                    "mode": "multi",
+                    "sort": "desc"
+                }
+            },
+            "targets": [
+                {
+                    "expr": "max by (stage) (max_over_time(bioetl_stage_lag_seconds{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])) or vector(0)",
+                    "legendFormat": "{{stage}}",
+                    "refId": "A"
+                }
+            ],
+            "title": "Stage Lag Seconds",
             "type": "timeseries"
         },
         {

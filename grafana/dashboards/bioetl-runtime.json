@@ -617,7 +617,7 @@
                     "refId": "A"
                 }
             ],
-            "title": "Provider Alert Conditions",
+            "title": "GLOBAL Provider Alert Conditions",
             "type": "stat"
         },
         {
@@ -1744,16 +1744,6 @@
                 {
                     "expr": "round(sum(increase(bioetl_replay_reconstructability_events_total{pipeline=~\"$pipeline\",status=\"not_reconstructable\"}[$__range])) or vector(0))",
                     "refId": "A"
-                },
-                {
-                    "expr": "round(sum(increase(bioetl_replay_drift_events_total{pipeline=~\"$pipeline\"}[$__range])) or vector(0))",
-                    "legendFormat": "drift_events",
-                    "refId": "B"
-                },
-                {
-                    "expr": "max(bioetl_replay_lag_seconds{pipeline=~\"$pipeline\"}) or vector(0)",
-                    "legendFormat": "lag_seconds",
-                    "refId": "C"
                 }
             ],
             "title": "Replay Not Reconstructable",
@@ -2107,6 +2097,384 @@
                 }
             ],
             "title": "Top Pipeline Error Codes",
+            "type": "bargauge"
+        },
+        {
+            "datasource": "Prometheus",
+            "description": "Per-condition pipeline alert breakdown for the selected runtime scope.",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "mappings": [],
+                    "unit": "short"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 89
+            },
+            "id": 230,
+            "options": {
+                "displayMode": "gradient",
+                "orientation": "horizontal",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "showUnfilled": true
+            },
+            "targets": [
+                {
+                    "expr": "sum(bioetl_runtime_alert_condition_pipeline_preflight_failed_15m{pipeline=~\"$pipeline\"}) or vector(0)",
+                    "instant": true,
+                    "legendFormat": "preflight_failed",
+                    "refId": "A"
+                },
+                {
+                    "expr": "sum(bioetl_runtime_alert_condition_pipeline_infrastructure_failed_15m{pipeline=~\"$pipeline\"}) or vector(0)",
+                    "instant": true,
+                    "legendFormat": "infrastructure_failed",
+                    "refId": "B"
+                },
+                {
+                    "expr": "sum(bioetl_runtime_alert_condition_pipeline_runs_failed_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or vector(0)",
+                    "instant": true,
+                    "legendFormat": "runs_failed",
+                    "refId": "C"
+                },
+                {
+                    "expr": "sum(bioetl_runtime_alert_condition_runtime_error_rate_high_30m{pipeline=~\"$pipeline\"}) or vector(0)",
+                    "instant": true,
+                    "legendFormat": "runtime_error_rate_high",
+                    "refId": "D"
+                },
+                {
+                    "expr": "sum(bioetl_runtime_alert_condition_record_flow_invariant_violated_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or vector(0)",
+                    "instant": true,
+                    "legendFormat": "record_flow_invariant",
+                    "refId": "E"
+                },
+                {
+                    "expr": "sum(bioetl_runtime_alert_condition_ingestion_throughput_degraded_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or vector(0)",
+                    "instant": true,
+                    "legendFormat": "throughput_degraded",
+                    "refId": "F"
+                },
+                {
+                    "expr": "sum(bioetl_runtime_alert_condition_stage_backlog_active_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or vector(0)",
+                    "instant": true,
+                    "legendFormat": "stage_backlog_active",
+                    "refId": "G"
+                },
+                {
+                    "expr": "sum(bioetl_runtime_alert_condition_stage_lag_high_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or vector(0)",
+                    "instant": true,
+                    "legendFormat": "stage_lag_high",
+                    "refId": "H"
+                }
+            ],
+            "title": "Pipeline Alert Condition Breakdown",
+            "type": "bargauge"
+        },
+        {
+            "datasource": "Prometheus",
+            "description": "Per-condition DQ alert breakdown for the selected runtime scope.",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "mappings": [],
+                    "unit": "short"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 12,
+                "y": 89
+            },
+            "id": 231,
+            "options": {
+                "displayMode": "gradient",
+                "orientation": "horizontal",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "showUnfilled": true
+            },
+            "targets": [
+                {
+                    "expr": "sum(bioetl_runtime_alert_condition_dq_soft_threshold_15m{pipeline=~\"$pipeline\"}) or vector(0)",
+                    "instant": true,
+                    "legendFormat": "soft_threshold",
+                    "refId": "A"
+                },
+                {
+                    "expr": "sum(bioetl_runtime_alert_condition_dq_hard_fail_15m{pipeline=~\"$pipeline\"}) or vector(0)",
+                    "instant": true,
+                    "legendFormat": "hard_fail",
+                    "refId": "B"
+                },
+                {
+                    "expr": "sum(bioetl_runtime_alert_condition_dq_critical_anomaly_30m{pipeline=~\"$pipeline\"}) or vector(0)",
+                    "instant": true,
+                    "legendFormat": "critical_anomaly",
+                    "refId": "C"
+                },
+                {
+                    "expr": "sum(bioetl_runtime_alert_condition_silver_validation_failures_30m{pipeline=~\"$pipeline\"}) or vector(0)",
+                    "instant": true,
+                    "legendFormat": "silver_validation_failures",
+                    "refId": "D"
+                }
+            ],
+            "title": "DQ Alert Condition Breakdown",
+            "type": "bargauge"
+        },
+        {
+            "datasource": "Prometheus",
+            "description": "Per-condition control-plane alert breakdown for the selected runtime scope.",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "mappings": [],
+                    "unit": "short"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 97
+            },
+            "id": 232,
+            "options": {
+                "displayMode": "gradient",
+                "orientation": "horizontal",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "showUnfilled": true
+            },
+            "targets": [
+                {
+                    "expr": "sum(bioetl_runtime_alert_condition_manifest_write_failed_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or vector(0)",
+                    "instant": true,
+                    "legendFormat": "manifest_write_failed",
+                    "refId": "A"
+                },
+                {
+                    "expr": "sum(bioetl_runtime_alert_condition_ledger_append_failed_15m{pipeline=~\"$pipeline\"}) or vector(0)",
+                    "instant": true,
+                    "legendFormat": "ledger_append_failed",
+                    "refId": "B"
+                },
+                {
+                    "expr": "sum(bioetl_runtime_alert_condition_checkpoint_incompatible_30m{pipeline=~\"$pipeline\"}) or vector(0)",
+                    "instant": true,
+                    "legendFormat": "checkpoint_incompatible",
+                    "refId": "C"
+                },
+                {
+                    "expr": "sum(bioetl_runtime_alert_condition_replay_lag_high_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or vector(0)",
+                    "instant": true,
+                    "legendFormat": "replay_lag_high",
+                    "refId": "D"
+                },
+                {
+                    "expr": "sum(bioetl_runtime_alert_condition_replay_drift_detected_30m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or vector(0)",
+                    "instant": true,
+                    "legendFormat": "replay_drift_detected",
+                    "refId": "E"
+                },
+                {
+                    "expr": "sum(bioetl_runtime_alert_condition_lineage_refs_missing_15m{pipeline=~\"$pipeline\"}) or vector(0)",
+                    "instant": true,
+                    "legendFormat": "lineage_refs_missing",
+                    "refId": "F"
+                }
+            ],
+            "title": "Control-plane Alert Condition Breakdown",
+            "type": "bargauge"
+        },
+        {
+            "datasource": "Prometheus",
+            "description": "GLOBAL provider-fleet alert-condition breakdown (not pipeline-scoped).",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "mappings": [],
+                    "unit": "short"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 12,
+                "y": 97
+            },
+            "id": 233,
+            "options": {
+                "displayMode": "gradient",
+                "orientation": "horizontal",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "showUnfilled": true
+            },
+            "targets": [
+                {
+                    "expr": "sum(bioetl_runtime_alert_condition_provider_failure_rate_high_15m) or vector(0)",
+                    "instant": true,
+                    "legendFormat": "failure_rate_high",
+                    "refId": "A"
+                },
+                {
+                    "expr": "sum(bioetl_runtime_alert_condition_provider_retries_exhausted_1h) or vector(0)",
+                    "instant": true,
+                    "legendFormat": "retries_exhausted",
+                    "refId": "B"
+                },
+                {
+                    "expr": "sum(bioetl_runtime_alert_condition_provider_adapter_latency_high_30m) or vector(0)",
+                    "instant": true,
+                    "legendFormat": "adapter_latency_high",
+                    "refId": "C"
+                },
+                {
+                    "expr": "sum(bioetl_runtime_alert_condition_provider_http_error_rate_high_15m) or vector(0)",
+                    "instant": true,
+                    "legendFormat": "http_error_rate_high",
+                    "refId": "D"
+                },
+                {
+                    "expr": "sum(bioetl_runtime_alert_condition_provider_rate_limiter_wait_high_30m) or vector(0)",
+                    "instant": true,
+                    "legendFormat": "rate_limiter_wait_high",
+                    "refId": "E"
+                },
+                {
+                    "expr": "sum(bioetl_runtime_alert_condition_provider_rate_limiter_tokens_depleted_15m) or vector(0)",
+                    "instant": true,
+                    "legendFormat": "rate_limiter_tokens_depleted",
+                    "refId": "F"
+                }
+            ],
+            "title": "GLOBAL Provider Alert Condition Breakdown",
+            "type": "bargauge"
+        },
+        {
+            "datasource": "Prometheus",
+            "description": "Replay drift events separated from reconstructability and lag.",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "mappings": [],
+                    "unit": "short"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 105
+            },
+            "id": 234,
+            "options": {
+                "displayMode": "gradient",
+                "orientation": "horizontal",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "showUnfilled": true
+            },
+            "targets": [
+                {
+                    "expr": "sum by (drift_type, status) (increase(bioetl_replay_drift_events_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}[$__range])) or label_replace(vector(0), \"drift_type\", \"none\", \"\", \"\")",
+                    "instant": true,
+                    "legendFormat": "{{drift_type}} / {{status}}",
+                    "refId": "A"
+                }
+            ],
+            "title": "Replay Drift Events",
+            "type": "bargauge"
+        },
+        {
+            "datasource": "Prometheus",
+            "description": "Replay lag in seconds separated from reconstructability and drift.",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "mappings": [],
+                    "unit": "s"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 12,
+                "y": 105
+            },
+            "id": 235,
+            "options": {
+                "displayMode": "gradient",
+                "orientation": "horizontal",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "showUnfilled": true
+            },
+            "targets": [
+                {
+                    "expr": "max by (run_type, replay_capability, status) (bioetl_replay_lag_seconds{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or vector(0)",
+                    "instant": true,
+                    "legendFormat": "{{run_type}} / {{replay_capability}} / {{status}}",
+                    "refId": "A"
+                }
+            ],
+            "title": "Replay Lag Seconds",
             "type": "bargauge"
         }
     ],
