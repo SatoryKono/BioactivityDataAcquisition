@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from datetime import datetime, UTC
 from enum import Enum
 
-from bioetl.domain.services.dq_serializer import to_dict
+from bioetl.domain.behavior.dq_serializer import to_dict
 
 
 class SampleStatus(Enum):

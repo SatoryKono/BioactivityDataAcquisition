@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from bioetl.domain.services.activity_aggregator import (
+from bioetl.domain.behavior.activity_aggregator import (
     ActivityAggregator,
     AggregationMethod,
 )

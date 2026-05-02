@@ -12,6 +12,8 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 COMPATIBILITY_INVENTORY = (
     REPO_ROOT / "configs" / "quality" / "compatibility_facade_inventory.yaml"
 )
+SCRIPTS_ROOT = REPO_ROOT / "scripts"
+TESTS_ROOT = REPO_ROOT / "tests"
 LEGACY_SYMBOLS = (
     "AuthorNormalizationService",
     "CompositeValidationService",
@@ -23,6 +25,13 @@ LEGACY_SYMBOLS = (
     "OrganismClassificationService",
     "PhasedMigrationSupportService",
     "PreflightGovernanceService",
+)
+ALLOWED_LEGACY_REFERENCE_FILES = frozenset(
+    {
+        Path("tests/architecture/test_domain_service_canonical_imports.py"),
+        Path("tests/architecture/test_domain_service_normalization_compat_usage.py"),
+        Path("tests/architecture/test_domain_normalization_guardrails.py"),
+    }
 )
 
 
@@ -64,37 +73,47 @@ def test_first_party_src_imports_domain_behavior_not_services_package() -> None:
     )
 
 
-def test_domain_services_package_is_only_compatibility_wrapper() -> None:
-    """Legacy domain.services must not regain owner modules."""
-    services_root = ROOT / "domain" / "services"
-    files = {
-        path.relative_to(services_root).as_posix()
-        for path in services_root.rglob("*.py")
-        if "__pycache__" not in path.parts
-    }
+def test_first_party_scripts_and_tests_no_longer_import_domain_services() -> None:
+    """First-party scripts/tests must migrate to the canonical behavior package."""
+    roots = (SCRIPTS_ROOT, TESTS_ROOT)
+    violations: list[str] = []
 
-    assert files == {"__init__.py"}
+    for root in roots:
+        for path in root.rglob("*.py"):
+            rel_path = path.relative_to(REPO_ROOT)
+            if rel_path in ALLOWED_LEGACY_REFERENCE_FILES:
+                continue
+            text = path.read_text(encoding="utf-8")
+            if "bioetl.domain.services" in text:
+                violations.append(rel_path.as_posix())
+
+    assert not violations, (
+        "First-party scripts/tests must not import bioetl.domain.services.\n"
+        + "\n".join(sorted(violations))
+    )
 
 
-def test_domain_services_bridge_is_registered_and_time_bounded() -> None:
-    """Legacy domain.services bridge must stay visible in compatibility governance."""
+def test_domain_services_package_is_removed() -> None:
+    """Legacy domain.services package should be removed after migration."""
+    assert not (ROOT / "domain" / "services" / "__init__.py").exists()
+
+
+def test_domain_services_bridge_removed_from_compatibility_inventory() -> None:
+    """Compatibility inventory must not retain removed domain.services bridge rows."""
     inventory = yaml.safe_load(COMPATIBILITY_INVENTORY.read_text(encoding="utf-8"))
     rows = [
         row
         for group in ("transition_debt", "retained_entrypoints")
         for row in inventory.get(group, [])
     ]
-    row = next(
-        (
-            item
-            for item in rows
-            if item.get("path") == "src/bioetl/domain/services/__init__.py"
-        ),
-        None,
+    assert (
+        next(
+            (
+                item
+                for item in rows
+                if item.get("path") == "src/bioetl/domain/services/__init__.py"
+            ),
+            None,
+        )
+        is None
     )
-
-    assert row is not None
-    assert row["canonical_target"] == "bioetl.domain.behavior"
-    assert row["status"] == "compat-shim"
-    assert row["internal_callers_zero"] is True
-    assert row["review_date"] == "2026-09-30"

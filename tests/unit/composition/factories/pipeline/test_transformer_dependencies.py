@@ -14,8 +14,8 @@ from bioetl.domain.ports.noop import (
     NoOpPiiHasher,
     NoOpTracing,
 )
-from bioetl.domain.services import EntityIdentityGenerator
-from bioetl.domain.services.data_normalization_service import (
+from bioetl.domain.behavior import EntityIdentityGenerator
+from bioetl.domain.behavior.data_normalization_service import (
     DefaultDataNormalizer,
 )
 

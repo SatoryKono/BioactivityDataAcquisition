@@ -20,7 +20,7 @@ from bioetl.composition.factories.services.factory import (
     BaseServicesFactory,
     ServicesBuilder,
 )
-from bioetl.domain.services import DataNormalizationConfig, DefaultDataNormalizer
+from bioetl.domain.behavior import DataNormalizationConfig, DefaultDataNormalizer
 from bioetl.composition.factories.services.port_factories import (
     create_metrics,
 )

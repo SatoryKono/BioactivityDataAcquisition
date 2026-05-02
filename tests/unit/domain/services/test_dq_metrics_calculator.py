@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from bioetl.domain.services.dq_metrics_calculator import (
+from bioetl.domain.behavior.dq_metrics_calculator import (
     DQMetricsCalculator,
     DQMetricsInput,
 )

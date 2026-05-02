@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from bioetl.domain.services.staged_enforcement import (
+from bioetl.domain.behavior.staged_enforcement import (
     CheckResult,
     EnforcementPolicy,
     EnforcementStage,

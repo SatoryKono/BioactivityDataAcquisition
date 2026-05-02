@@ -29,6 +29,14 @@ def uniprot_yaml() -> dict[str, Any]:
         return yaml.safe_load(f)
 
 
+@pytest.fixture(scope="module")
+def pubchem_yaml() -> dict[str, Any]:
+    """Load PubChem enum config for comparison."""
+    yaml_path = Path("configs/enums/pubchem.yaml")
+    with yaml_path.open(encoding="utf-8") as f:
+        return yaml.safe_load(f)
+
+
 class TestYamlFileIntegrity:
     """Ensure the YAML enum config exists and is well-formed."""
 
@@ -54,6 +62,12 @@ class TestYamlFileIntegrity:
 
     def test_uniprot_yaml_has_version(self, uniprot_yaml: dict[str, Any]) -> None:
         assert "version" in uniprot_yaml
+
+    def test_pubchem_yaml_exists(self) -> None:
+        assert Path("configs/enums/pubchem.yaml").exists()
+
+    def test_pubchem_yaml_has_version(self, pubchem_yaml: dict[str, Any]) -> None:
+        assert "version" in pubchem_yaml
 
 
 class TestActivitySync:
@@ -224,9 +238,8 @@ class TestUniProtSync:
 
         assert UNIPROT_ENTRY_TYPES == tuple(uniprot_yaml["protein"]["entry_types"])
         assert UNIPROT_PROTEIN_FLAGS == tuple(uniprot_yaml["protein"]["protein_flags"])
-        assert (
-            UNIPROT_PROTEIN_EXISTENCE_LEVELS
-            == tuple(uniprot_yaml["protein"]["protein_existence_levels"])
+        assert UNIPROT_PROTEIN_EXISTENCE_LEVELS == tuple(
+            uniprot_yaml["protein"]["protein_existence_levels"]
         )
 
     def test_uniprot_idmapping_statuses(self, uniprot_yaml: dict[str, Any]) -> None:
@@ -235,6 +248,32 @@ class TestUniProtSync:
         assert UNIPROT_MAPPING_STATUSES == tuple(
             uniprot_yaml["idmapping"]["mapping_statuses"]
         )
+
+
+class TestPubChemSync:
+    """PubChem enum constants must match YAML."""
+
+    def test_pubchem_standardization_statuses(
+        self, pubchem_yaml: dict[str, Any]
+    ) -> None:
+        from bioetl.domain.schemas.constants import (
+            PUBCHEM_CHEMICAL_STANDARDIZATION_STATUSES,
+        )
+
+        assert PUBCHEM_CHEMICAL_STANDARDIZATION_STATUSES == tuple(
+            pubchem_yaml["compound"]["chemical_standardization_statuses"]
+        )
+
+    def test_pubchem_standardization_policy_version(
+        self, pubchem_yaml: dict[str, Any]
+    ) -> None:
+        from bioetl.domain.schemas.constants import (
+            PUBCHEM_CHEMICAL_STANDARDIZATION_POLICY_VERSION,
+        )
+
+        assert pubchem_yaml["compound"]["chemical_standardization_policy_versions"] == [
+            PUBCHEM_CHEMICAL_STANDARDIZATION_POLICY_VERSION
+        ]
 
 
 class TestConstantInvariants:

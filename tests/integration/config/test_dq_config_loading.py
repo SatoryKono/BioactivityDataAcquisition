@@ -114,6 +114,21 @@ class TestDQConfigIntegration:
         }
         assert "protein_existence" not in range_fields
 
+    def test_uniprot_idmapping_mapping_status_validation_uses_canonical_vocab(
+        self, dq_loader: DQConfigLoader
+    ) -> None:
+        """UniProt idmapping status DQ must match the canonical enum catalog."""
+        from bioetl.domain.schemas.constants import UNIPROT_MAPPING_STATUSES
+
+        config = dq_loader.load("uniprot", "idmapping")
+        enum_rules = {
+            rule.field: rule
+            for rule in config.field_validations
+            if rule.validation_type == "enum" and rule.field == "mapping_status"
+        }
+
+        assert enum_rules["mapping_status"].allowed == tuple(UNIPROT_MAPPING_STATUSES)
+
     def test_non_chembl_raw_publication_type_dq_preserves_unknown_provider_values(
         self,
         dq_loader: DQConfigLoader,

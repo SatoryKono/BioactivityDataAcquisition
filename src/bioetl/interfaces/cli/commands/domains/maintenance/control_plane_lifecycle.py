@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from pathlib import Path
+from typing import TYPE_CHECKING, Protocol, cast
 
 import click
 
@@ -12,11 +12,24 @@ from bioetl.domain.control_plane import (
     ControlPlaneArtifactLifecyclePlan,
     ControlPlaneArtifactLifecyclePolicy,
 )
-from bioetl.domain.ports.noop import NoOpMetrics
-from bioetl.infrastructure.config import get_settings
-from bioetl.infrastructure.control_plane import FileControlPlaneArtifactLifecycleStore
-from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.interfaces.cli.formatters import echo_dry_run_prefix, echo_info
+
+if TYPE_CHECKING:
+    from bioetl.domain.control_plane import ControlPlaneArtifactLifecycleApplyResult
+
+    class ControlPlaneArtifactLifecycleStoreProtocol(Protocol):
+        def plan(
+            self,
+            policy: ControlPlaneArtifactLifecyclePolicy,
+            *,
+            dry_run: bool,
+        ) -> ControlPlaneArtifactLifecyclePlan: ...
+
+        def apply(
+            self,
+            plan: ControlPlaneArtifactLifecyclePlan,
+        ) -> ControlPlaneArtifactLifecycleApplyResult: ...
+
 
 __all__ = [
     "bootstrap_control_plane_lifecycle_store",
@@ -24,15 +37,15 @@ __all__ = [
 ]
 
 
-def bootstrap_control_plane_lifecycle_store() -> FileControlPlaneArtifactLifecycleStore:
-    """Build the file-backed lifecycle store for CLI operations."""
-    settings = get_settings()
-    output_root = Path(settings.data_dir) / "output"
-    return FileControlPlaneArtifactLifecycleStore(
-        base_path=output_root / "control",
-        logger=NoOpLogger(),
-        metrics=NoOpMetrics(),
+def bootstrap_control_plane_lifecycle_store() -> (
+    ControlPlaneArtifactLifecycleStoreProtocol
+):
+    """Build the lifecycle store through the composition boundary."""
+    from bioetl.composition.control_plane_api import (
+        bootstrap_control_plane_lifecycle_store as _impl,
     )
+
+    return cast("ControlPlaneArtifactLifecycleStoreProtocol", _impl())
 
 
 @click.command("control-plane-lifecycle")

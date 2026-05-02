@@ -51,7 +51,7 @@ class TestSilverWriterInit:
         """Runtime helper should resolve the standard SilverWriter defaults."""
         from bioetl.domain.medallion import WriteModePolicy
         from bioetl.domain.ports.noop import NoOpMetadataWriter
-        from bioetl.domain.services.dq_metrics_calculator import DQMetricsCalculator
+        from bioetl.domain.behavior.dq_metrics_calculator import DQMetricsCalculator
         from bioetl.infrastructure.storage.silver.runtime_helpers import (
             resolve_silver_writer_runtime,
         )
@@ -88,7 +88,7 @@ class TestSilverWriterInit:
     def test_runtime_helper_preserves_custom_dependencies(self) -> None:
         """Runtime helper should preserve explicitly provided dependencies."""
         from bioetl.domain.medallion import WriteModePolicy
-        from bioetl.domain.services.dq_metrics_calculator import DQMetricsCalculator
+        from bioetl.domain.behavior.dq_metrics_calculator import DQMetricsCalculator
         from bioetl.infrastructure.storage.silver.runtime_helpers import (
             resolve_silver_writer_runtime,
         )

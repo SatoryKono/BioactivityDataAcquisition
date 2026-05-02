@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import pytest
 
-from bioetl.domain.services.text_similarity import jaccard_similarity, normalize_text
+from bioetl.domain.behavior.text_similarity import jaccard_similarity, normalize_text
 
 
 class TestNormalizeText:

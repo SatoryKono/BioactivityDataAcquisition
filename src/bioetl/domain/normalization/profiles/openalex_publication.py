@@ -18,6 +18,7 @@ from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_openalex_topics,
     normalize_profile_openalex_work_id,
     normalize_profile_orcid_ids,
+    normalize_profile_passthrough,
 )
 from bioetl.domain.schemas.openalex.publication import OpenAlexPublicationSchema
 
@@ -74,8 +75,10 @@ _SET_LIKE_FIELDS = frozenset(
         "author_openalex_ids",
         "author_orcids",
         "grants",
+        "grants_canonical_json",
         "institution_country_codes",
         "institution_ids",
+        "primary_topic_canonical_json",
         "ror_ids",
         "subject_keywords",
         "subject_mesh",
@@ -89,7 +92,11 @@ _JSON_STRING_FIELDS = frozenset(
         "author_orcids",
         "authors",
         "grants",
+        "grants_canonical_json",
+        "grants_raw_json",
         "primary_topic",
+        "primary_topic_canonical_json",
+        "primary_topic_raw_json",
         "ror_ids",
         "subject_topics",
     }
@@ -124,6 +131,14 @@ _SPECIAL_RULES = {
         normalize_profile_openalex_topic,
         "Canonicalize OpenAlex primary-topic reference identifier inside a canonical JSON object.",
     ),
+    "primary_topic_raw_json": (
+        normalize_profile_passthrough,
+        "Preserve the raw provider JSON for the primary-topic payload.",
+    ),
+    "primary_topic_canonical_json": (
+        normalize_profile_openalex_topic,
+        "Canonicalize the primary-topic companion JSON payload for semantic-sensitive sidecar storage.",
+    ),
     "ror_ids": (
         normalize_profile_openalex_ror_ids,
         "Canonicalize OpenAlex ROR reference identifiers inside a canonical JSON array.",
@@ -131,6 +146,10 @@ _SPECIAL_RULES = {
     "subject_topics": (
         normalize_profile_openalex_topics,
         "Canonicalize OpenAlex topic reference identifiers inside a canonical JSON array.",
+    ),
+    "grants_raw_json": (
+        normalize_profile_passthrough,
+        "Preserve the raw provider JSON for the grants payload.",
     ),
 }
 

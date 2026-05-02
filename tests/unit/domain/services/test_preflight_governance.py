@@ -1,12 +1,12 @@
 """Unit tests for preflight governance service."""
 
-from bioetl.domain.services.aggregation_validator import AggregationValidator
-from bioetl.domain.services.composite_validation_layer import (
+from bioetl.domain.behavior.aggregation_validator import AggregationValidator
+from bioetl.domain.behavior.composite_validation_layer import (
     CompositeValidationConfig,
     CompositeValidator,
 )
-from bioetl.domain.services.cross_validation_validator import CrossValidationValidator
-from bioetl.domain.services.preflight_governance import (
+from bioetl.domain.behavior.cross_validation_validator import CrossValidationValidator
+from bioetl.domain.behavior.preflight_governance import (
     GovernancePolicy,
     PreflightGovernanceConfig,
     PreflightGovernor,

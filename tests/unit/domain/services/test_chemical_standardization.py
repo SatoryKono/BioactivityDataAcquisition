@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from bioetl.domain.services.chemical_standardization import (
+from bioetl.domain.behavior.chemical_standardization import (
     CHEMICAL_STANDARDIZATION_POLICY_VERSION,
     standardize_chemical_structure,
 )

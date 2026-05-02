@@ -95,6 +95,8 @@ UNIPROT_PROTEIN_SCHEMA = pa.schema(
         pa.field("entry_version", pa.int64()),  # UniProt entry audit version
         pa.field("feature_count", pa.int64()),  # Feature count
         pa.field("features_json", pa.string()),  # All features combined (forensic)
+        pa.field("features_raw_json", pa.string()),
+        pa.field("features_canonical_json", pa.string()),
         pa.field("flag", pa.string()),  # Protein description flag
         pa.field("function_comment", pa.string()),  # cc_function
         pa.field("gene_orf_names", pa.string()),  # Gene ORF names (JSON array)

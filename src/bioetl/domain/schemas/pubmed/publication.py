@@ -193,6 +193,14 @@ class PubMedPublicationSchema(_PublicationBaseSchema):
             "Each object contains: text, identifier, identifier_source, email_hash"
         ),
     )
+    affiliation_structured_raw_json: Series[str] = pa.Field(
+        nullable=True,
+        description="Raw provider JSON for structured affiliations.",
+    )
+    affiliation_structured_canonical_json: Series[str] = pa.Field(
+        nullable=True,
+        description="Canonical JSON companion for structured affiliations.",
+    )
 
     # === Counts (denormalized for query efficiency) ===
     author_count: Series[pd.Int64Dtype] | None = pa.Field(
@@ -287,6 +295,14 @@ class PubMedPublicationSchema(_PublicationBaseSchema):
     authors_with_affiliations: Series[str] = pa.Field(
         nullable=True,
         description="JSON array of authors with their affiliations and identifiers",
+    )
+    authors_with_affiliations_raw_json: Series[str] = pa.Field(
+        nullable=True,
+        description="Raw provider JSON for authors-with-affiliations payload.",
+    )
+    authors_with_affiliations_canonical_json: Series[str] = pa.Field(
+        nullable=True,
+        description="Canonical JSON companion for authors-with-affiliations payload.",
     )
 
     class Config:

@@ -7,7 +7,7 @@ from datetime import UTC, datetime
 import pytest
 
 from bioetl.domain.medallion import Layer as MedallionLayer
-from bioetl.domain.services.dq_serializer import DQReportSerializer, to_dict
+from bioetl.domain.behavior.dq_serializer import DQReportSerializer, to_dict
 from bioetl.domain.value_objects.dq_report import (
     BronzeDQReport,
     DQCheckStatus,

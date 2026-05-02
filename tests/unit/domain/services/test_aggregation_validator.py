@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from bioetl.domain.services.aggregation_validator import (
+from bioetl.domain.behavior.aggregation_validator import (
     AggregationConfig,
     AggregationProvenance,
     AggregationValidator,
