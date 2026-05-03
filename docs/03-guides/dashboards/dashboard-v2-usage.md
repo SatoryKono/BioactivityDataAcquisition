@@ -51,16 +51,14 @@ Machine-readable navigation contract: `docs/03-guides/dashboards/contracts/navig
    `Worst Lag Stage` и `Flow Balance` отвечают на L0 вопрос: что broken/degraded
    и куда открыть drilldown первым. `OK` считается здоровым только при recent
    activity; отсутствие samples остаётся `UNKNOWN`, а не зелёным нулём.
-1. `bioetl-runtime`, top answer row:
-   `Runtime Blockers / 15m`, `Failed Runs / 15m`, `No-Records Runs / 30m`,
-   `Runtime Error Rate / 30m`, `Worst Stage Lag / 15m`,
-   `Memory Pressure Active / 15m` отвечают на L2 вопрос без прокрутки.
-1. `bioetl-runtime`, localization row:
-   `Stage Backlog Trend`, `Records by Stage / Interval`,
-   `Pipeline Phase Duration p50/p95/p99`,
-   `Pipeline Duration p50/p95/p99`,
-   `Errors by Stage / Error Code / Range`,
-   `Records by Stage / Run Type / Range`.
+1. `bioetl-runtime`, верхний блок `Incident Summary` (без скролла):
+   `Runtime Blockers / 15m`, `Failed Runs / 15m`,
+   `Runtime Error Rate / 30m`, `Worst Stage Lag / 15m` +
+   `Active Runtime Blocker Detail` отвечают на L2 вопрос «есть ли инцидент и где первый culprit».
+1. `bioetl-runtime`, collapsed row-группы по сценарию:
+   `Backlog Trends`, `Durations`, `Shutdown Diagnostics`,
+   `Tracing-only Log Hygiene`. Открывайте ровно одну нужную группу после
+   чтения summary KPI, чтобы сократить шум первого экрана.
 1. `bioetl-control-plane-v1`, answer row:
    `Replay / Resume Blockers`, `Manifest Write Failures`,
    `Ledger Append Failures`, `Checkpoint Incompatibilities`,
@@ -300,3 +298,8 @@ Variable handoff policy for dashboard links remains strict and bounded:
 1. `bioetl-silver-reject-explorer` показывает plugin error или `No data`:
    проверьте, что выбран конкретный `$pipeline` (не `All`) и что backend отвечает на
    `/ops/quarantine/filter-options?pipeline=<pipeline_name>`.
+
+
+### Runtime dashboard layout note (Incident Summary-first)
+
+`bioetl-runtime` теперь использует компактный first screen: сверху фиксированный блок `Incident Summary` из 4 ключевых KPI (blockers, failed runs, worst lag, error rate), ниже текстовый блок `Recommended Next Drilldown` с 3 маршрутами, а остальные diagnostic panels перенесены в свернутые row-группы (`Backlog Trends`, `Durations`, `Shutdown Diagnostics`, `Tracing-only`).
