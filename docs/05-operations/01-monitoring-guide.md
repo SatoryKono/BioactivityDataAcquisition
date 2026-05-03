@@ -78,7 +78,7 @@ Pushgateway publication на завершении run. Это позволяет
 
 В верхней части каждого дашборда расположены выпадающие списки:
 
-- **1. BioETL Overview / Control Plane v1**: `$pipeline`, `$run_type`
+- **1. BioETL Overview / Control Plane / Replay Safety**: `$pipeline`, `$run_type`
 - **2. Runtime / 4. Data Quality**: `$pipeline`, `$run_type`, `$stage`
 - **3. Provider Health**: `$provider`, `$adapter`
 - **5. Silver Reject Explorer**: `$pipeline`, `$run_type`, `$reason_code`, `$field`, `$run_id`, `$payload_hash`
@@ -95,18 +95,23 @@ Pushgateway publication на завершении run. Это позволяет
 L0 дашборд для одного operator question: что сейчас broken/degraded в BioETL и
 куда drill down первым.
 
-- **Answer row**: `Failed Pipeline Runs`, `Overall Yield`,
-  `Active Stage Backlog`, `Worst Stage Lag`, `DQ Blocking`,
-  `Control Plane Unsafe`, `Provider Degraded`.
+- **Answer row**: `System Status`, `Next Action`, `Failed Runs in Range`,
+  `Recent Activity`, `Worst Backlog Stage`, `Worst Lag Stage`. `OK` requires
+  recent activity; no samples/no denominator stays `UNKNOWN`, not green.
+- **Flow evidence**: `Flow Balance` replaces the old yield gauge and shows
+  Bronze denominator, Gold output, filtered/quarantined counts and unaccounted
+  loss. `Backlog Causality` places backlog, lag and throughput together for the
+  runtime invariant `backlog(t+1) = backlog(t) + ingestion - output`.
 - **Trend row**: `Processing Volume by Stage`, `Pipeline Run Outcomes`,
   `Stage Backlog Trend`, `Stage Lag Trend`; это context для L0 решения, а не
   forensic/debugging surface.
-- **Operational handoff**: `Runtime Handoff`, `Data Quality Handoff`,
-  `Control Plane Handoff`, `Provider Handoff`, `Workflow Handoff` открывают
-  соответствующие L1/L2 dashboards.
+- **Subsystem routing**: `Runtime Status`, `Data Quality Status`,
+  `Control Plane Status`, `Provider Status`, `Workflow Status` показывают
+  status + reason + next dashboard вместо numeric handoff cards.
 - **Failure summary**: только compact selected-range summaries по manifest /
-  ledger, checkpoint, lineage и Silver rejects. Distribution pie panels и
-  composite source-selection detail не входят в L0 flow.
+  ledger, checkpoint, lineage и `Silver Rejects Count + Rate`. Distribution
+  pie panels, standalone vanity yield/rate gauges и composite source-selection
+  detail не входят в L0 flow.
 - **Drilldown**: dashboard links `Explore Logs (Loki, tracing profile)` /
   `Explore Traces (Tempo, tracing profile)` и data links у
   `Processing Volume by Stage` переводят оператора в Grafana Explore с тем же
@@ -115,78 +120,65 @@ L0 дашборд для одного operator question: что сейчас bro
 
 #### 2. 2. Runtime
 
-Смешанный runtime/ops surface для triage log hygiene и alert-condition сигналов.
-Dashboard теперь намеренно остаётся **Prometheus-first**: базовые summary,
-adaptive-memory и alert-condition панели должны быть usable даже без Loki/Tempo,
-а tracing-backed log hygiene вынесен в collapsed row `Tracing-only Log Hygiene
-(requires optional tracing profile)`.
+`2. Runtime` теперь является **L2 diagnostic dashboard**. Его primary question:
+где pipeline runtime теряет время, падает, копит backlog или даёт
+warning/error conditions. Dashboard остаётся **Prometheus-first**:
+answer row, latency/localization и handoff-панели usable без Loki/Tempo, а
+tracing-backed log hygiene живёт в collapsed row
+`Tracing-only Log Hygiene (requires optional tracing profile)`.
 
-- **Warnings / Unstructured Logs**: range-based count structured warning logs и unstructured rows по текущему `$pipeline`.
-  Эти Loki-панели живут внутри collapsed tracing-only row и не считаются частью
-  обязательного base layout для режима без `tracing` profile.
+- **Top answer row**:
+  `Runtime Blockers / 15m`, `Failed Runs / 15m`, `No-Records Runs / 30m`,
+  `Runtime Error Rate / 30m`, `Worst Stage Lag / 15m`,
+  `Memory Pressure Active / 15m`.
+  Это первый экран triage. Если здесь уже понятно, что runtime blocked,
+  оператор не должен сначала прокручивать в logs/traces.
 
-- **Pipeline / DQ / Control-plane / Provider / Freshness Alert Conditions**: Prometheus-backed stat panels, которые отражают те же условия, что и alert rules, но не притворяются real alert-state engine.
+- **Localization row**:
+  `Stage Backlog Trend`, `Records by Stage / Interval`,
+  `Pipeline Phase Duration p50/p95/p99`,
+  `Pipeline Duration p50/p95/p99`,
+  `Errors by Stage / Error Code / Range`,
+  `Records by Stage / Run Type / Range`.
+  Эти панели отвечают на вопрос, в каком stage/phase runtime теряет время,
+  поток записей или стабильность.
 
-- `Pipeline / DQ / Control-plane / Provider / Freshness Alert Conditions` теперь считают
-  количество активных семейств условий, а не сырые суммы event counters.
+- **Handoff row**:
+  `Pipeline Alert Conditions`, `DQ Alert Conditions`,
+  `Control-plane Alert Conditions`, `GLOBAL Provider Alert Conditions`,
+  `Freshness Alert Conditions`,
+  `Shutdown Initiated by Reason / Interval`,
+  `Shutdown Completed by Reason / Interval`.
+  Это именно compact handoff surfaces, а не попытка дублировать DQ,
+  Provider Health или Control Plane dashboards.
 
-- **Top Warning Events**: быстрый range-based срез наиболее частых warning events.
+- **Logs/traces row**:
+  `Warnings`, `Unstructured Logs`, `Top Warning Events`, `Log Hygiene Trend`
+  остаются shipped, но спрятаны в collapsed tracing-only row. Если tracing
+  profile выключен, оператор всё равно получает usable runtime triage без Loki
+  и Tempo.
 
-- **Log Hygiene Trend**: короткий timeseries-тренд warnings vs unstructured rows через `$__interval`.
+- **Drilldown contract**:
+  top-level links `Back to Overview`, `Control Plane v1`,
+  `3. Provider Health`, `4. Data Quality`, `Explore Logs`, `Explore Traces`,
+  `Runtime Runbook`.
+  Panel-level handoffs передают только target-scoped variables и не используют
+  blanket `includeVars=true`. `run_id`, `payload_hash`, `record_id` в runtime
+  dashboard запрещены.
 
-- **Drilldown**: dashboard links `Back to Overview`, `Control Plane v1`,
-  `Explore Logs (Loki, tracing profile)` / `Explore Traces (Tempo, tracing profile)` и data links у `Log Hygiene Trend` ведут в Explore с тем же временным окном.
-  Panels `Control-plane Alert Conditions`, `No-Records Processed Runs` и
-  `Replay Not Reconstructable` дополнительно дают прямой handoff в
-  `Control Plane v1`, чтобы checkpoint/replay/lineage incidents не требовали
-  ручного поиска следующего dashboard. Для Tempo runtime surface используется
-  TraceQL filter по текущим `$pipeline/$run_type`, а не пустой search. Loki
-  handoff стартует с безопасного `{job="bioetl"}` baseline, а не с пустого
-  queryless surface.
+- **Runbook routing**:
+  `Pipeline Alert Conditions` -> `pipeline-failure-critical.md`,
+  `DQ Alert Conditions` / `Freshness Alert Conditions` ->
+  `dq-failure-investigation.md`,
+  `Control-plane Alert Conditions` -> `run-manifest-inspection.md`,
+  `GLOBAL Provider Alert Conditions` -> `incident-response.md`,
+  `No-Records Runs / 30m` -> `checkpoint-debugging.md`.
 
-- **Tracing Mode Note**: верхняя note-панель прямо под `Runtime Scope`
-  напоминает, что без включённого `tracing` profile оператор должен опираться
-  на Prometheus-backed surfaces (`Overview`, `Control Plane`, `Data Quality`) и
-  разворачивать tracing-only row только в окружениях с реальными Loki/Tempo
-  datasource.
-
-- **DQ Context Failures (24h) / DQ Reports Skipped (24h) / DQ Reports Generated (24h)**:
-  lifecycle counters для DQ reporting. Используйте их, когда нужно быстро
-  понять, не сломалась ли сборка DQ context, отчёты системно пропускаются или
-  наоборот стабильно доходят до успешной генерации.
-
-- **Memory Pressure Events / Batch Resize Events / Fallback Monitor Decisions / Memory Pressure Active**:
-  adaptive-memory triage surface. Эти панели помогают отделить реальное memory
-  pressure от recovery/fallback-mode решений и быстро увидеть, не ушёл ли
-  runtime в `resource` / `estimate` path вместо штатного monitor mode.
-
-- **Trace-enabled Runs (24h)**: показывает, были ли за окно запуски с реальным
-  tracing path. Если здесь `0`, пустой Tempo для выбранного `$pipeline/$run_type`
-  ожидаем. Если здесь значение больше нуля, а `Explore Traces (Tempo, tracing profile)` пуст,
-  это уже сигнал разбирать exporter / flush / ingestion path.
-
-- **Pipeline Alert Conditions (15m)**: fleet-wide срез по трем главным runtime
-  рискам: preflight `data_source`, `infrastructure_validated` и
-  `pipeline_runs_total{status="failed"}`. Если панель активна, расследование
-  стоит начинать с `pipeline-failure-critical.md`, а не только с provider/DQ path.
-  Панель теперь даёт direct runbook handoff в этот документ.
-  Начиная с текущего baseline dashboard читает recording-rule series
-  `bioetl_runtime_alert_condition_*`, чтобы не дублировать тяжёлую alert
-  PromQL-логику прямо в JSON-панелях.
-
-- **Global Control-plane Lookup Outcomes (1h) / Global Control-plane Lookup p95 (1h)**:
-  runtime-срез по success/miss/failed для manifest, ledger и lineage lookup
-  paths. Эти панели особенно полезны как alert-adjacent signal до перехода в
-  `Control Plane v1`. Они не привязаны к `$pipeline`, потому что underlying
-  control-plane read metrics не несут pipeline label.
-
-- **Control-plane aggregate view**: используйте `bioetl-control-plane-v1` для
-  мониторинга aggregated manifest/ledger failures, checkpoint compatibility,
-  global read failures/p95 и lineage fragment outcomes. Новое правило
-  `BioETLControlPlaneReadFailureRate` (см. `docs/05-operations/runbooks/observability-checklist.md`)
-  срабатывает, если доля failed reads по store/operation превышает 5% за 30m.
-  `Control-plane Alert Conditions` теперь ведёт не только в `Control Plane v1`,
-  но и в `run-manifest-inspection.md` / `observability-checklist.md`.
+- **Known missing metrics**:
+  `Retry vs Failure` и `Batch Size Distribution` сознательно не показаны в
+  runtime dashboard, потому что в shipped repo нет подтверждённой bounded
+  runtime metric family для этих решений. Это отдельный instrumentation
+  follow-up, а не повод выдумывать PromQL.
 
 #### 3. 3. Provider Health
 
@@ -224,13 +216,13 @@ adaptive-memory и alert-condition панели должны быть usable д�
   `Latest Successful Data Timestamp` остаётся отдельным latest-success anchor.
   Это intentionally разные сигналы: latest success не должен маскировать worst
   freshness lag.
-- **Drilldown**: dashboard links `Back to Overview`, `Control Plane v1`,
+- **Drilldown**: dashboard links `Back to Overview`, `Control Plane / Replay Safety`,
   `Explore Logs (Loki, tracing profile)` / `Explore Traces (Tempo, tracing profile)`
   и data links у `Data Flow in Range: Bronze -> Silver -> Gold` переводят расследование
   DQ incidents и freshness lag в Grafana Explore с тем же временным окном.
   Для replay/checkpoint traceability panel `Data Flow in Range: Bronze -> Silver -> Gold`,
   а также `Lineage Refs Missing` и `Gold Strict Validation Failures`, теперь
-  дают прямой handoff в `Control Plane v1`.
+  дают прямой handoff в `Control Plane / Replay Safety`.
   Tempo handoff уже ограничен текущими `$pipeline/$run_type`.
 
 #### 5. 5. Silver Reject Explorer
@@ -256,7 +248,7 @@ step outcomes.
   `run_id` или `step_id` labels; panel now respects selected `$status`.
 - **Step Duration p95**: latency по `bioetl_workflow_step_duration_seconds`;
   panel now also respects selected `$status`.
-- **Drilldown**: links `Back to Overview`, `2. Runtime`, `Control Plane v1`.
+- **Drilldown**: links `Back to Overview`, `2. Runtime`, `Control Plane / Replay Safety`.
 
 #### Quarantine operator metrics
 
