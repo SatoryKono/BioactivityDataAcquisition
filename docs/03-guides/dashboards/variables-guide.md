@@ -58,6 +58,13 @@ ______________________________________________________________________
 1. **Forensic → Core**: передавать обратно только `pipeline`, `run_type`; не передавать `run_id`, `payload_hash`, `reason_code`, `field`.
 1. **Workflow dashboards** (`workflow`, `status`) изолированы; при переходах в runtime/control-plane действует fallback на defaults target dashboards.
 
+
+## Navigation time-range policy
+
+- Для всех `links[].url` с dashboard route (`/d/...`) используем единый time handoff: `${__url_time_range}`.
+- Для всех `links[].url` с Explore route (`/explore`, `/a/grafana-lokiexplore-app/explore`, `/a/grafana-exploretraces-app/`) используем `from=${__from}&to=${__to}`.
+- Смешанные/legacy варианты (`from=$__from`, отсутствие time-range, `includeVars=true`) не допускаются.
+
 ## Test coverage expectations
 
 - Links contract: `tests/integration/test_grafana_dashboard_links.py`
