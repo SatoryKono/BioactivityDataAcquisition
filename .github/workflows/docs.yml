@@ -84,6 +84,9 @@ jobs:
             --json-out reports/quality/xwalk-missing-backlog.json \
             --markdown-out reports/quality/xwalk-missing-backlog.md
 
+      - name: Check dashboard inventory parity
+        run: uv run python -m scripts.engineering.qa report-dashboard-inventory --check --json
+
   validate-mkdocs:
     needs: docs-governance
     runs-on: ubuntu-latest
