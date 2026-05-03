@@ -47,6 +47,7 @@
       "tags": [],
       "targetBlank": false,
       "title": "3. Provider Health",
+      "tooltip": "Cross-scope handoff: opens Provider Health with var-provider=All and var-adapter=All; pipeline/run_type/stage do not transfer.",
       "type": "link",
       "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=All&var-adapter=All&${__url_time_range}"
     },

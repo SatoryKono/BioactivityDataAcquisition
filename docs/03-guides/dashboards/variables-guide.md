@@ -59,6 +59,19 @@ ______________________________________________________________________
 1. **Workflow dashboards** (`workflow`, `status`) изолированы; при переходах в runtime/control-plane действует fallback на defaults target dashboards.
 
 
+
+## Context reset UX
+
+Cross-scope links MUST явно предупреждать оператора, что filters не переносятся и target откроется с `All` scope.
+
+### Примеры link behavior
+
+- **Core → Provider** (`Overview/Runtime` → `Provider Health`): link title/tooltip содержит `opens with All provider scope`; URL принудительно задаёт `var-provider=All&var-adapter=All`.
+- **Provider → Core** (`Provider Health` → `Overview/Runtime`): link title/tooltip содержит `opens with All core scope`; URL задаёт `var-pipeline=All&var-run_type=All` (и `var-stage=All` для Runtime).
+- **Workflow → Core** (`Workflow Overview` → `Overview/Runtime`): link title/tooltip содержит `opens with All core scope`; workflow variables (`workflow`, `status`) не передаются.
+
+UX цель: убрать ложное ожидание, что source filters автоматически сохранятся при переходе между разными scope-контрактами.
+
 ## Navigation time-range policy
 
 - Для всех `links[].url` с dashboard route (`/d/...`) используем единый time handoff: `${__url_time_range}`.
