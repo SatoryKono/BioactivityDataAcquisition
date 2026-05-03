@@ -47,6 +47,9 @@ in manifest/ledger/CLI/explorer surfaces, not Prometheus labels.
 | Replay/resume trust issues | `bioetl-control-plane-v1` | `Replay / Resume Blockers` |
 | Workflow steps failed/skipped | `bioetl-workflow-overview` | `Failed Workflow Runs`, `Step Outcomes by Kind` |
 
+
+- `bioetl-runtime` adopts Incident Summary-first layout: top block contains 4 triage KPIs (`Runtime Blockers / 15m`, `Failed Runs / 15m`, `Worst Stage Lag / 15m`, `Runtime Error Rate / 30m`); deeper panels are intentionally moved to collapsed groups (`Backlog Trends`, `Durations`, `Shutdown Diagnostics`, `Tracing-only Log Hygiene`) plus `Recommended Next Drilldown` text routes.
+
 ## Dashboard UX KPIs
 
 Use these UX KPIs as mandatory acceptance checks after any dashboard UX change.
