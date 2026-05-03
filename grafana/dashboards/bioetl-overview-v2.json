@@ -28,7 +28,7 @@
       "title": "2. Runtime",
       "tooltip": "L2 runtime drilldown with bounded scope handoff",
       "type": "link",
-      "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type"
+      "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
     },
     {
       "asDropdown": false,
@@ -40,7 +40,7 @@
       "title": "Control Plane v1",
       "tooltip": "Replay/resume safety drilldown with bounded scope handoff",
       "type": "link",
-      "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type"
+      "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
     },
     {
       "asDropdown": false,
@@ -52,7 +52,7 @@
       "title": "3. Provider Health",
       "tooltip": "Provider health drilldown without var handoff",
       "type": "link",
-      "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2"
+      "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${__url_time_range}"
     },
     {
       "asDropdown": false,
@@ -64,7 +64,7 @@
       "title": "4. Data Quality",
       "tooltip": "Data quality drilldown with bounded scope handoff",
       "type": "link",
-      "url": "/d/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type"
+      "url": "/d/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
     },
     {
       "asDropdown": false,
@@ -76,7 +76,7 @@
       "title": "6. Workflow Overview",
       "tooltip": "Workflow drilldown without var handoff",
       "type": "link",
-      "url": "/d/bioetl-workflow-overview/bioetl-workflow-overview"
+      "url": "/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}"
     },
     {
       "asDropdown": false,
@@ -88,7 +88,7 @@
       "title": "Explore Logs (Loki, tracing profile)",
       "tooltip": "Open Loki Explore with tracing profile and selected time range",
       "type": "link",
-      "url": "/explore?schemaVersion=1&panes={\"67f\":{\"datasource\":\"loki\",\"queries\":[{\"expr\":\"{job=\\\"bioetl\\\"}\"}],\"range\":{\"from\":\"$__from\",\"to\":\"$__to\"}}}&orgId=1"
+      "url": "/explore?schemaVersion=1&panes={\"67f\":{\"datasource\":\"loki\",\"queries\":[{\"expr\":\"{job=\\\"bioetl\\\"}\"}],\"range\":{\"from\":\"$__from\",\"to\":\"$__to\"}}}&orgId=1&from=${__from}&to=${__to}"
     },
     {
       "asDropdown": false,
@@ -100,7 +100,7 @@
       "title": "Explore Traces (Tempo, tracing profile)",
       "tooltip": "Open Tempo Explore with tracing profile and selected time range",
       "type": "link",
-      "url": "/explore?schemaVersion=1&panes={\"q9t\":{\"datasource\":\"tempo\",\"queries\":[{\"query\":\"{ span.\\\"bioetl.pipeline\\\" = \\\"$pipeline\\\" && span.\\\"bioetl.run_type\\\" = \\\"$run_type\\\" }\"}],\"range\":{\"from\":\"$__from\",\"to\":\"$__to\"}}}&orgId=1"
+      "url": "/explore?schemaVersion=1&panes={\"q9t\":{\"datasource\":\"tempo\",\"queries\":[{\"query\":\"{ span.\\\"bioetl.pipeline\\\" = \\\"$pipeline\\\" && span.\\\"bioetl.run_type\\\" = \\\"$run_type\\\" }\"}],\"range\":{\"from\":\"$__from\",\"to\":\"$__to\"}}}&orgId=1&from=${__from}&to=${__to}"
     }
   ],
   "panels": [
