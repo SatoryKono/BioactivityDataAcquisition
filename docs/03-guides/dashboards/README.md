@@ -41,12 +41,14 @@ ______________________________________________________________________
 
 `bioetl-overview-v2` is the L0 answer-first surface. It answers one question:
 what is currently broken or degraded in BioETL, and where should the operator
-drill down first? The first visible answer is `System Status` plus `Next Action`;
-`OK` requires recent activity, while missing samples/no denominator remain
-`UNKNOWN`. Backlog/lag cards expose the responsible stage, and `Flow Balance`
-replaces vanity yield with Bronze/Gold/loss denominator context. Keep
-record-level filters, provider deep diagnostics, DQ cause breakdowns, and
-control-plane replay/audit detail out of Overview.
+drill down first? The first visible answer is now a compact KPI-first row: `System Status`,
+`Next Action`, `Failed Runs in Range`, `Worst Backlog Stage`, `Worst Lag Stage`,
+and `Flow Balance`. `OK` requires recent activity, while missing samples/no
+denominator remain `UNKNOWN`. Detail panels are moved to collapsed rows
+(`Throughput details`, `Freshness breakdown`, `Extended distributions`) so the
+first screen answers the operator question without scroll. Keep record-level
+filters, provider deep diagnostics, DQ cause breakdowns, and control-plane
+replay/audit detail out of Overview.
 
 `bioetl-control-plane-v1` is the Control Plane / Replay Safety surface. It
 answers whether manifest, ledger, checkpoint, replay, and lineage state are
@@ -59,3 +61,22 @@ documented as blind spots until instrumentation exists.
 Архивные материалы перемещены в `docs/03-guides/dashboards/legacy/`.
 
 Они могут содержать устаревшие переменные (`$run-id`, `execution`) и старые формулы.
+
+
+## Regenerate and verify parity
+
+Для регенерации инвентаризации dashboard metadata (UID/title/variables/links/tags):
+
+```bash
+uv run python -m scripts.engineering.qa report-dashboard-inventory --json
+```
+
+Для проверки parity с каноническими документами (`variables-guide.md`, `monitoring-index.md`)
+и mandatory links contract:
+
+```bash
+uv run python -m scripts.engineering.qa report-dashboard-inventory --check --json
+```
+
+CI gate запускает эту проверку в `docs.yml` и фейлит pipeline при расхождении
+канонических полей.

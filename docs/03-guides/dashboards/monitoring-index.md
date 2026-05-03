@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.2
+Version: 1.0.3
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-04-13'
+  Last verified: '2026-05-03'
 
 ______________________________________________________________________
 
@@ -33,6 +33,32 @@ the linked owner docs.
 Boundary rule: Prometheus/Grafana answer aggregate operational questions.
 Record-level forensics, exact replay evidence, and per-run identifiers belong
 in manifest/ledger/CLI/explorer surfaces, not Prometheus labels.
+
+
+## If X symptom → open dashboard Y → panel Z
+
+| Symptom (X) | Dashboard (Y) | Panel (Z) |
+| --- | --- | --- |
+| "What is broken/degraded right now?" | `bioetl-overview-v2` | `System Status`, then `Next Action` |
+| Runtime failures / lag / blockers | `bioetl-runtime` | `Runtime Blockers / 15m`, `Worst Stage Lag / 15m` |
+| Provider degradation or retry exhaustion | `bioetl-provider-health-v2` | `Current Provider Health Status`, `Retries Exhausted by Provider / Operation` |
+| DQ deterioration / quarantine growth | `bioetl-dq-v2` | `Data Quality Score (Volume-weighted)`, `Records Quarantined` |
+| Need exact rejected record (Silver filter) | `bioetl-silver-reject-explorer` | `Main records table` (row-level drilldown by `payload_hash`) |
+| Replay/resume trust issues | `bioetl-control-plane-v1` | `Replay / Resume Blockers` |
+| Workflow steps failed/skipped | `bioetl-workflow-overview` | `Failed Workflow Runs`, `Step Outcomes by Kind` |
+
+## Dashboard UX KPIs
+
+Use these UX KPIs as mandatory acceptance checks after any dashboard UX change.
+
+- **time-to-first-action**: elapsed time from opening `bioetl-overview-v2` to
+  first correct operator handoff (Runtime, Provider Health, Data Quality, Control
+  Plane / Replay Safety, Workflow Overview, or Explore link).
+- **click-depth to root cause**: number of clicks required to reach a panel,
+  link, or evidence surface that identifies the likely incident root cause.
+- **first-hop accuracy from Overview**: share of incident scenarios where the
+  first selected link/action in `1. Overview` leads to the correct L1 dashboard
+  or evidence surface without corrective backtracking.
 
 ## Architecture Map
 
