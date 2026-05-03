@@ -559,6 +559,9 @@ def test_data_quality_dashboard_exposes_silver_reject_explorer_handoff() -> None
     assert "var-pipeline=$pipeline" in url and "var-run_type=$run_type" in url, (
         "Data Quality handoff must pass only bounded explorer pipeline/run_type scope"
     )
+    assert "wider default time range for rare incidents" in str(
+        silver_link.get("tooltip", "")
+    ), "Data Quality handoff should explain 24h forensic default for rare incidents"
 
 
 def test_runtime_incident_panels_link_to_control_plane_dashboard() -> None:
