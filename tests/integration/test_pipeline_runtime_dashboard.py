@@ -158,7 +158,10 @@ def test_pipeline_runtime_latency_panels_have_p50_p95_p99() -> None:
         for panel in _runtime_data_panels()
         if panel.get("title")
     }
-    for title in ("Pipeline Phase Duration p50/p95/p99", "Pipeline Duration p50/p95/p99"):
+    for title in (
+        "Pipeline Phase Duration p50/p95/p99",
+        "Pipeline Duration p50/p95/p99",
+    ):
         panel = panels.get(title)
         assert panel is not None, f"Missing latency panel: {title}"
         expressions = [
@@ -237,10 +240,105 @@ def test_pipeline_runtime_recording_rules_exist() -> None:
             expr = target.get("expr", "")
             if not isinstance(expr, str):
                 continue
-            for token in re.findall(r"\b(bioetl_runtime_alert_condition_[a-z0-9_]+)\b", expr):
+            for token in re.findall(
+                r"\b(bioetl_runtime_alert_condition_[a-z0-9_]+)\b", expr
+            ):
                 if token not in get_all_valid_metric_names():
                     missing.append(f"{panel.get('title')}: {token}")
     assert not missing, (
-        "Runtime dashboard references missing recording rules:\n"
-        + "\n".join(missing)
+        "Runtime dashboard references missing recording rules:\n" + "\n".join(missing)
+    )
+
+
+def test_runtime_blockers_panel_does_not_filter_by_stage() -> None:
+    """Runtime Blockers aggregate must include all stages (incl. output/gold).
+
+    The stage variable filter was the root cause of L0/L2 desync: Overview
+    saw output backlog but Runtime Blockers filtered it out via stage=~"$stage".
+    """
+    panels = {p.get("title"): p for p in _runtime_data_panels()}
+    blockers_panel = panels.get("Runtime Blockers / 15m")
+    assert blockers_panel is not None, "Runtime Blockers / 15m panel is missing"
+    expr = blockers_panel["targets"][0]["expr"]
+    backlog_term = "bioetl_runtime_alert_condition_stage_backlog_active_15m"
+    lag_term = "bioetl_runtime_alert_condition_stage_lag_high_15m"
+    for term in (backlog_term, lag_term):
+        start = expr.find(term)
+        assert start != -1, f"Missing {term} in Runtime Blockers query"
+        brace_end = expr.find(")", start)
+        selector = expr[start:brace_end]
+        assert 'stage=~"$stage"' not in selector, (
+            f"{term} in Runtime Blockers must not filter by stage variable"
+        )
+
+
+def test_runtime_blockers_includes_gold_write_missing() -> None:
+    """Runtime Blockers must include gold_write_missing recording rule."""
+    panels = {p.get("title"): p for p in _runtime_data_panels()}
+    blockers_panel = panels.get("Runtime Blockers / 15m")
+    assert blockers_panel is not None
+    expr = blockers_panel["targets"][0]["expr"]
+    assert "bioetl_runtime_alert_condition_gold_write_missing_15m" in expr, (
+        "Runtime Blockers query must reference gold_write_missing recording rule"
+    )
+
+
+def test_runtime_blockers_includes_no_terminal_run() -> None:
+    """Runtime Blockers must include no_terminal_run recording rule."""
+    panels = {p.get("title"): p for p in _runtime_data_panels()}
+    blockers_panel = panels.get("Runtime Blockers / 15m")
+    assert blockers_panel is not None
+    expr = blockers_panel["targets"][0]["expr"]
+    assert "bioetl_runtime_alert_condition_no_terminal_run_30m" in expr, (
+        "Runtime Blockers query must reference no_terminal_run recording rule"
+    )
+
+
+def test_active_runtime_blocker_detail_panel_exists() -> None:
+    """Active Runtime Blocker Detail table panel must be present."""
+    panels = {p.get("title"): p for p in _runtime_data_panels()}
+    detail_panel = panels.get("Active Runtime Blocker Detail")
+    assert detail_panel is not None, "Active Runtime Blocker Detail panel is missing"
+    assert detail_panel["type"] == "table"
+    targets = detail_panel.get("targets", [])
+    blocker_names = set()
+    for t in targets:
+        expr = t.get("expr", "")
+        if "label_replace" in expr:
+            for match in re.findall(r'"blocker",\s*"([^"]+)"', expr):
+                blocker_names.add(match)
+    expected = {
+        "preflight_failed",
+        "runs_failed",
+        "stage_backlog_active",
+        "stage_lag_high",
+        "gold_write_missing",
+        "no_terminal_run",
+        "flow_invariant_violated",
+    }
+    assert expected <= blocker_names, (
+        f"Active Runtime Blocker Detail missing blockers: {expected - blocker_names}"
+    )
+
+
+def test_stage_expectedness_panel_exists() -> None:
+    """Stage Expectedness panel must be present on Runtime dashboard."""
+    panels = {p.get("title"): p for p in _runtime_data_panels()}
+    panel = panels.get("Stage Expectedness")
+    assert panel is not None, "Stage Expectedness panel is missing"
+    assert panel["type"] == "table"
+    expr_texts = [t.get("expr", "") for t in panel.get("targets", [])]
+    assert any("bioetl_pipeline_stage_expected" in e for e in expr_texts), (
+        "Stage Expectedness panel must query bioetl_pipeline_stage_expected"
+    )
+
+
+def test_pipeline_duration_has_explicit_no_value_message() -> None:
+    """Pipeline Duration panel must show explicit message instead of bare No data."""
+    panels = {p.get("title"): p for p in _runtime_data_panels()}
+    panel = panels.get("Pipeline Duration p50/p95/p99")
+    assert panel is not None
+    no_value = panel.get("fieldConfig", {}).get("defaults", {}).get("noValue", "")
+    assert "terminal" in no_value.lower() or "samples" in no_value.lower(), (
+        f"Pipeline Duration noValue must explain missing terminal metric, got: {no_value!r}"
     )

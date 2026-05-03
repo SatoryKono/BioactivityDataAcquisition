@@ -144,6 +144,24 @@ class _PipelineMetricsRecorderCore:
             },
         )
 
+    def record_pipeline_stage_expected(
+        self,
+        *,
+        stage: str,
+        expected: bool,
+    ) -> None:
+        """Set whether a pipeline stage is expected per entity config."""
+        if self.metrics is None:
+            return
+        self.metrics.set_gauge(
+            "bioetl_pipeline_stage_expected",
+            1.0 if expected else 0.0,
+            {
+                "pipeline": self.pipeline,
+                "stage": stage,
+            },
+        )
+
     def record_stage_backlog(
         self,
         *,

@@ -254,7 +254,6 @@ def test_summary_queries_use_zero_fallbacks() -> None:
             "Silver Rejects Count + Rate": "or vector(0)",
             "DQ Hard Blockers": "or vector(0)",
             "Control-plane Blockers": "or vector(0)",
-            "Global Provider Degradation": "or vector(0)",
             "Workflow Status": "or vector(0)",
         },
         "bioetl-runtime.json": {
@@ -711,17 +710,22 @@ def test_overview_has_system_status_panel() -> None:
         for target in panel.get("targets", [])
         if isinstance(target.get("expr"), str)
     )
+    for recording_rule in (
+        "bioetl_runtime_alert_condition_pipeline_runs_failed_15m",
+        "bioetl_runtime_alert_condition_stage_backlog_active_15m",
+        "bioetl_runtime_alert_condition_stage_lag_high_15m",
+        "bioetl_runtime_alert_condition_gold_write_missing_15m",
+    ):
+        assert recording_rule in expr, (
+            f"System Status must use recording rule {recording_rule}"
+        )
     for metric_name in (
-        "bioetl_pipeline_runs_total",
-        "bioetl_stage_backlog_records",
-        "bioetl_stage_lag_seconds",
         "bioetl_dq_validation_failures_total",
         "bioetl_control_plane_manifest_writes_total",
         "bioetl_checkpoint_compatibility_events_total",
         "bioetl_lineage_refs_missing_total",
     ):
         assert metric_name in expr
-    assert 'status="failed"' in expr
     assert 'severity="hard_fail"' in expr
     assert "[$__range]" in expr
     assert "or vector(0)" in expr
@@ -749,7 +753,7 @@ def test_overview_has_next_action_panel() -> None:
         "Open 6. Workflow Overview",
     ):
         assert expected_target in serialized_panel
-    assert "Runtime > DQ > Control Plane > Provider > Workflow" in serialized_panel
+    assert "Runtime > CP > DQ > Provider > Workflow" in serialized_panel
 
 
 def test_overview_does_not_render_yield_green_without_denominator() -> None:

@@ -25,6 +25,21 @@ groups:
       - record: bioetl_runtime_alert_condition_stage_lag_high_15m
         expr: max by (pipeline, run_type, stage) (max_over_time(bioetl_stage_lag_seconds[15m])) >= bool 300
 
+      - record: bioetl_runtime_alert_condition_gold_write_missing_15m
+        expr: >-
+          (
+            (max by (pipeline, run_type) (max_over_time(bioetl_stage_backlog_records{stage="output"}[15m])) > bool 0)
+            and on (pipeline) (bioetl_pipeline_stage_expected{stage="gold"} == bool 1)
+          ) or vector(0) * 0
+
+      - record: bioetl_runtime_alert_condition_no_terminal_run_30m
+        expr: >-
+          (
+            (sum by (pipeline, run_type) (increase(bioetl_records_processed_total{stage="bronze"}[30m])) > bool 0)
+            unless on (pipeline, run_type)
+            (sum by (pipeline, run_type) (increase(bioetl_pipeline_runs_total{status=~"completed|failed"}[30m])) > bool 0)
+          ) or vector(0) * 0
+
       - record: bioetl_runtime_alert_condition_dq_soft_threshold_15m
         expr: sum by (pipeline) (increase(bioetl_dq_soft_threshold_exceeded[15m])) > bool 0
 
