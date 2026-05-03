@@ -144,6 +144,9 @@ def test_silver_reject_explorer_pipeline_scope_is_single_select_and_fail_closed(
     content = note_panel.get("options", {}).get("content", "")
     assert "Select exactly one pipeline" in content
     assert "explorer-only" in content
+    assert "default 24h forensic window" in content, (
+        "Silver Reject Explorer scope note must include default forensic window banner"
+    )
 
     for panel in get_dashboard_panels(dashboard):
         for target in panel.get("targets", []):
