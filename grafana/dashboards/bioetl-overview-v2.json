@@ -20,15 +20,14 @@
   "links": [
     {
       "asDropdown": false,
-      "icon": "external link",
+      "icon": "arrow-left",
       "includeVars": false,
       "keepTime": true,
       "tags": [],
       "targetBlank": false,
-      "title": "2. Runtime",
-      "tooltip": "",
-      "type": "link",
-      "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
+      "title": "Back to Overview",
+      "type": "dashboards",
+      "url": "/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&var-run_type=$run_type"
     },
     {
       "asDropdown": false,
@@ -37,46 +36,9 @@
       "keepTime": true,
       "tags": [],
       "targetBlank": false,
-      "title": "Control Plane v1",
-      "tooltip": "",
+      "title": "Next Recommended Drilldown",
       "type": "link",
-      "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
-    },
-    {
-      "asDropdown": false,
-      "icon": "external link",
-      "includeVars": false,
-      "keepTime": true,
-      "tags": [],
-      "targetBlank": false,
-      "title": "3. Provider Health",
-      "tooltip": "",
-      "type": "link",
-      "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${__url_time_range}"
-    },
-    {
-      "asDropdown": false,
-      "icon": "external link",
-      "includeVars": false,
-      "keepTime": true,
-      "tags": [],
-      "targetBlank": false,
-      "title": "4. Data Quality",
-      "tooltip": "",
-      "type": "link",
-      "url": "/d/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
-    },
-    {
-      "asDropdown": false,
-      "icon": "external link",
-      "includeVars": false,
-      "keepTime": true,
-      "tags": [],
-      "targetBlank": false,
-      "title": "6. Workflow Overview",
-      "tooltip": "",
-      "type": "link",
-      "url": "/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}"
+      "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type"
     },
     {
       "asDropdown": false,
@@ -85,22 +47,20 @@
       "keepTime": true,
       "tags": [],
       "targetBlank": false,
-      "title": "Explore Logs (Loki, tracing profile)",
-      "tooltip": "",
+      "title": "Explore Logs",
       "type": "link",
-      "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D"
+      "url": "/explore?schemaVersion=1&panes={\"67f\":{\"datasource\":\"loki\",\"queries\":[{\"expr\":\"{job=\\\"bioetl\\\"}\"}],\"range\":{\"from\":\"$__from\",\"to\":\"$__to\"}}}&orgId=1"
     },
     {
       "asDropdown": false,
-      "icon": "share-alt",
+      "icon": "bolt",
       "includeVars": false,
       "keepTime": true,
       "tags": [],
       "targetBlank": false,
-      "title": "Explore Traces (Tempo, tracing profile)",
-      "tooltip": "",
+      "title": "Explore Traces",
       "type": "link",
-      "url": "/a/grafana-exploretraces-app/?from=${__from}&to=${__to}&queryType=traceqlSearch&query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline:regex}%22%20%26%26%20span.%22bioetl.run_type%22%20%3D~%20%22${run_type:regex}%22%20%7D"
+      "url": "/explore?schemaVersion=1&panes={\"q9t\":{\"datasource\":\"tempo\",\"queries\":[{\"query\":\"{ span.\\\"bioetl.pipeline\\\" = \\\"$pipeline\\\" && span.\\\"bioetl.run_type\\\" = \\\"$run_type\\\" }\"}],\"range\":{\"from\":\"$__from\",\"to\":\"$__to\"}}}&orgId=1"
     }
   ],
   "panels": [
