@@ -65,9 +65,7 @@ def resolve_legacy_runner_dependencies(
         checkpoint_manager=cast(
             "CheckpointRuntimeService", values["checkpoint_manager"]
         ),
-        lock_runtime_service=cast(
-            "LockRuntimeService", values["lock_runtime_service"]
-        ),
+        lock_runtime_service=cast("LockRuntimeService", values["lock_runtime_service"]),
         preflight=cast("PreflightService", values["preflight"]),
         postrun=cast("PostrunService", values["postrun"]),
         lifecycle_service=cast(

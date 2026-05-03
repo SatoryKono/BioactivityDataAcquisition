@@ -67,6 +67,7 @@ def test_docs_cli_generate_pipeline_normalization_matrix_execution_smoke(
     assert_cli_succeeded(generate)
     assert (out_dir / "pipeline_normalization_field_matrix.csv").exists()
     assert (out_dir / "pipeline_normalization_field_matrix.md").exists()
+    assert (out_dir / "non_chembl_normalization_field_matrix.md").exists()
 
     check = run_python_cli(
         "-m",

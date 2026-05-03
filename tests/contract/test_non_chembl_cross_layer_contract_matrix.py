@@ -125,8 +125,9 @@ def _is_pandera_string_dtype(dtype: object) -> bool:
 
 def test_non_chembl_observed_value_fixture_has_cross_layer_field_coverage() -> None:
     fixture = _load_fixture()
-    matrix_rows = {
-        (row["pipeline_name"], row["field_name"]) for row in build_field_matrix_rows()
+    rows_by_key = {
+        (row["pipeline_name"], row["field_name"]): row
+        for row in build_field_matrix_rows()
     }
 
     for pipeline_name, spec in fixture["pipelines"].items():
@@ -137,7 +138,11 @@ def test_non_chembl_observed_value_fixture_has_cross_layer_field_coverage() -> N
         checked_fields = {
             spec["primary_key"],
             *spec.get("observed_values", {}),
+            *spec.get("observed_raw_values", {}),
+            *spec.get("expected_normalized_values", {}),
+            *spec.get("expected_controlled_values", {}),
             *spec.get("structured_json_shapes", {}),
+            *spec.get("classification", {}),
         }
 
         for field_name in checked_fields:
@@ -145,9 +150,46 @@ def test_non_chembl_observed_value_fixture_has_cross_layer_field_coverage() -> N
             assert field_name in silver_fields, f"{pipeline_name}.{field_name}: Silver"
             assert field_name in domain_fields, f"{pipeline_name}.{field_name}: domain"
             assert field_name in gold_fields, f"{pipeline_name}.{field_name}: Gold"
-            assert (pipeline_name, field_name) in matrix_rows, (
+            assert (pipeline_name, field_name) in rows_by_key, (
                 f"{pipeline_name}.{field_name}: generated matrix"
             )
+            row = rows_by_key[(pipeline_name, field_name)]
+            assert row["classification"], f"{pipeline_name}.{field_name}: classification"
+            assert row["observed_source"], f"{pipeline_name}.{field_name}: observed_source"
+
+
+def test_non_chembl_structured_inventory_fields_publish_sidecar_evidence() -> None:
+    fixture = _load_fixture()
+    rows_by_key = {
+        (row["pipeline_name"], row["field_name"]): row
+        for row in build_field_matrix_rows()
+    }
+
+    for pipeline_name, spec in fixture["pipelines"].items():
+        for field_name, shape in spec.get("structured_json_shapes", {}).items():
+            row = rows_by_key[(pipeline_name, field_name)]
+
+            assert row["classification"] == "structured_json_sidecar"
+            assert row["collection_semantics"] == shape["collection_semantics"]
+            assert row["raw_sidecar"] == shape["raw_sidecar_field"]
+            assert row["canonical_sidecar"] == shape["canonical_sidecar_field"]
+
+
+def test_publication_raw_type_rows_remain_open_world_not_fixture_enum_driven() -> None:
+    rows_by_key = {
+        (row["pipeline_name"], row["field_name"]): row
+        for row in build_field_matrix_rows()
+    }
+
+    for pipeline_name in (
+        "crossref_publication",
+        "openalex_publication",
+        "pubmed_publication",
+        "semanticscholar_publication",
+    ):
+        row = rows_by_key[(pipeline_name, "publication_type")]
+        assert row["classification"] == "raw_provider_value"
+        assert row["strictness"] != "strict_enum"
 
 
 def test_uniprot_protein_matrix_uses_canonical_taxonomy_and_gene_fields() -> None:

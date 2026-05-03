@@ -2,6 +2,9 @@ publication_identifier_arrays:
   author_orcids:
     input: '["https://orcid.org/0000-0002-1825-0097","0000000218250097"]'
     expected: '["0000-0002-1825-0097"]'
+  author_orcids_drops_invalid:
+    input: '["not-an-orcid","0000-0002-1825-0097","0000000218250097"]'
+    expected: '["0000-0002-1825-0097"]'
   issn_list:
     input: '["2049-3630","ISSN:1234567X"]'
     expected: '["1234-567X","2049-3630"]'
@@ -15,6 +18,9 @@ uniprot_identifier_arrays:
   all_mappings:
     input: '["p00742","P00742","q9y6k9"]'
     expected: '["P00742","Q9Y6K9"]'
+  all_mappings_drops_noise:
+    input: '["p00742","n/a","CHEMBL203","   "]'
+    expected: '["CHEMBL203","P00742"]'
   chembl_ids:
     input: '["chembl25","CHEMBL1"]'
     expected: '["CHEMBL1","CHEMBL25"]'
@@ -58,6 +64,12 @@ publication_raw_type_policy:
     input: " FutureSemanticScholarType "
     expected: FutureSemanticScholarType
     policy: preserve_unknown_provider_value
+  semanticscholar_publication_type_mixed_case_known:
+    profile: semanticscholar.publication
+    field: publication_type
+    input: " journalarticle "
+    expected: JournalArticle
+    policy: known_provider_value_canonicalized_without_closing_the_universe
 publication_oa_status_policy:
   openalex_known_status:
     profile: openalex.publication
