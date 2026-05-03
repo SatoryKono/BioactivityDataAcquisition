@@ -1,674 +1,674 @@
 {
-    "annotations": {
-        "list": [
-            {
-                "builtIn": 1,
-                "datasource": "-- Grafana --",
-                "enable": true,
-                "hide": true,
-                "iconColor": "rgba(0, 211, 255, 1)",
-                "name": "Annotations & Alerts",
-                "type": "dashboard"
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "description": "Record-level explorer for Silver filtered_out rows (quarantine-backed, read-only, single-pipeline scoped)",
+  "editable": true,
+  "gnetId": null,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": false,
+      "keepTime": true,
+      "tags": [],
+      "targetBlank": false,
+      "title": "Back to Overview",
+      "tooltip": "",
+      "type": "link",
+      "url": "/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
+    },
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": false,
+      "keepTime": true,
+      "tags": [],
+      "targetBlank": false,
+      "title": "Back to Data Quality",
+      "tooltip": "",
+      "type": "link",
+      "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
+    },
+    {
+      "asDropdown": false,
+      "icon": "logs",
+      "includeVars": false,
+      "keepTime": true,
+      "tags": [],
+      "targetBlank": false,
+      "title": "Explore Logs (Loki, tracing profile)",
+      "tooltip": "",
+      "type": "link",
+      "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D"
+    },
+    {
+      "asDropdown": false,
+      "icon": "share-alt",
+      "includeVars": false,
+      "keepTime": true,
+      "tags": [],
+      "targetBlank": false,
+      "title": "Explore Traces (Tempo, tracing profile)",
+      "tooltip": "",
+      "type": "link",
+      "url": "/a/grafana-exploretraces-app/?from=${__from}&to=${__to}&queryType=traceqlSearch&query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline:regex}%22%20%26%26%20span.%22bioetl.run_type%22%20%3D~%20%22${run_type:regex}%22%20%7D"
+    }
+  ],
+  "panels": [
+    {
+      "gridPos": {
+        "h": 3,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "content": "<center><h2>Pipeline: $pipeline | Run Type: $run_type | Reason: $reason_code | Field: $field | Run ID: $run_id</h2><div><small>Select exactly one pipeline. Quarantine Explorer is fail-closed and forensic filters like run_id/payload_hash stay explorer-only, not Prometheus labels.</small></div></center>",
+        "mode": "html"
+      },
+      "title": "Scope",
+      "type": "text"
+    },
+    {
+      "datasource": "Quarantine Explorer",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 0,
+        "y": 3
+      },
+      "id": 2,
+      "options": {
+        "showHeader": true
+      },
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "bronze_records": true,
+              "by_field": true,
+              "by_reason_code": true,
+              "by_reason_signature": true,
+              "reject_ratio": true
+            },
+            "indexByName": {
+              "total": 0
+            },
+            "renameByName": {
+              "total": "filtered_records_total"
             }
-        ]
+          }
+        }
+      ],
+      "targets": [
+        {
+          "format": "table",
+          "json_options": {
+            "root_is_not_array": true
+          },
+          "parser": "backend",
+          "refId": "A",
+          "root_selector": "$",
+          "source": "url",
+          "type": "json",
+          "url": "/ops/quarantine/filtered-stats?pipeline=${pipeline}&run_type=${run_type:csv}&reason_code=${reason_code:csv}&field=${field:csv}&run_id=${run_id}&from=${__from:date:iso}&to=${__to:date:iso}",
+          "url_options": {
+            "data": "",
+            "method": "GET"
+          },
+          "expr": ""
+        }
+      ],
+      "title": "Filtered Records Total",
+      "type": "table"
     },
-    "description": "Record-level explorer for Silver filtered_out rows (quarantine-backed, read-only, single-pipeline scoped)",
-    "editable": true,
-    "gnetId": null,
-    "graphTooltip": 1,
-    "id": null,
-    "links": [
-        {
-            "asDropdown": false,
-            "icon": "external link",
-            "includeVars": false,
-            "keepTime": true,
-            "tags": [],
-            "targetBlank": false,
-            "title": "Back to Overview",
-            "tooltip": "",
-            "type": "link",
-            "url": "/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
+    {
+      "datasource": "Quarantine Explorer",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          }
         },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "reject_ratio"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percentunit"
+              },
+              {
+                "id": "decimals",
+                "value": 4
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 8,
+        "y": 3
+      },
+      "id": 3,
+      "options": {
+        "showHeader": true
+      },
+      "transformations": [
         {
-            "asDropdown": false,
-            "icon": "external link",
-            "includeVars": false,
-            "keepTime": true,
-            "tags": [],
-            "targetBlank": false,
-            "title": "Back to Data Quality",
-            "tooltip": "",
-            "type": "link",
-            "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
-        },
-        {
-            "asDropdown": false,
-            "icon": "logs",
-            "includeVars": false,
-            "keepTime": true,
-            "tags": [],
-            "targetBlank": false,
-            "title": "Open Logs (Loki, tracing profile)",
-            "tooltip": "",
-            "type": "link",
-            "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D"
-        },
-        {
-            "asDropdown": false,
-            "icon": "share-alt",
-            "includeVars": false,
-            "keepTime": true,
-            "tags": [],
-            "targetBlank": false,
-            "title": "Open Traces (Tempo, tracing profile)",
-            "tooltip": "",
-            "type": "link",
-            "url": "/a/grafana-exploretraces-app/?from=${__from}&to=${__to}&queryType=traceqlSearch&query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline:regex}%22%20%26%26%20span.%22bioetl.run_type%22%20%3D~%20%22${run_type:regex}%22%20%7D"
-        }
-    ],
-    "panels": [
-        {
-            "gridPos": {
-                "h": 3,
-                "w": 24,
-                "x": 0,
-                "y": 0
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "by_field": true,
+              "by_reason_code": true,
+              "by_reason_signature": true
             },
-            "id": 1,
-            "options": {
-                "content": "<center><h2>Pipeline: $pipeline | Run Type: $run_type | Reason: $reason_code | Field: $field | Run ID: $run_id</h2><div><small>Select exactly one pipeline. Quarantine Explorer is fail-closed and forensic filters like run_id/payload_hash stay explorer-only, not Prometheus labels.</small></div></center>",
-                "mode": "html"
+            "indexByName": {
+              "reject_ratio": 0,
+              "bronze_records": 1,
+              "total": 2
             },
-            "title": "Scope",
-            "type": "text"
-        },
-        {
-            "datasource": "Quarantine Explorer",
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "palette-classic"
-                    }
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 7,
-                "w": 8,
-                "x": 0,
-                "y": 3
-            },
-            "id": 2,
-            "options": {
-                "showHeader": true
-            },
-            "transformations": [
-                {
-                    "id": "organize",
-                    "options": {
-                        "excludeByName": {
-                            "bronze_records": true,
-                            "by_field": true,
-                            "by_reason_code": true,
-                            "by_reason_signature": true,
-                            "reject_ratio": true
-                        },
-                        "indexByName": {
-                            "total": 0
-                        },
-                        "renameByName": {
-                            "total": "filtered_records_total"
-                        }
-                    }
-                }
-            ],
-            "targets": [
-                {
-                    "format": "table",
-                    "json_options": {
-                        "root_is_not_array": true
-                    },
-                    "parser": "backend",
-                    "refId": "A",
-                    "root_selector": "$",
-                    "source": "url",
-                    "type": "json",
-                    "url": "/ops/quarantine/filtered-stats?pipeline=${pipeline}&run_type=${run_type:csv}&reason_code=${reason_code:csv}&field=${field:csv}&run_id=${run_id}&from=${__from:date:iso}&to=${__to:date:iso}",
-                    "url_options": {
-                        "data": "",
-                        "method": "GET"
-                    },
-                    "expr": ""
-                }
-            ],
-            "title": "Filtered Records Total",
-            "type": "table"
-        },
-        {
-            "datasource": "Quarantine Explorer",
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "palette-classic"
-                    }
-                },
-                "overrides": [
-                    {
-                        "matcher": {
-                            "id": "byName",
-                            "options": "reject_ratio"
-                        },
-                        "properties": [
-                            {
-                                "id": "unit",
-                                "value": "percentunit"
-                            },
-                            {
-                                "id": "decimals",
-                                "value": 4
-                            }
-                        ]
-                    }
-                ]
-            },
-            "gridPos": {
-                "h": 7,
-                "w": 8,
-                "x": 8,
-                "y": 3
-            },
-            "id": 3,
-            "options": {
-                "showHeader": true
-            },
-            "transformations": [
-                {
-                    "id": "organize",
-                    "options": {
-                        "excludeByName": {
-                            "by_field": true,
-                            "by_reason_code": true,
-                            "by_reason_signature": true
-                        },
-                        "indexByName": {
-                            "reject_ratio": 0,
-                            "bronze_records": 1,
-                            "total": 2
-                        },
-                        "renameByName": {
-                            "reject_ratio": "reject_rate_vs_bronze"
-                        }
-                    }
-                }
-            ],
-            "targets": [
-                {
-                    "format": "table",
-                    "json_options": {
-                        "root_is_not_array": true
-                    },
-                    "parser": "backend",
-                    "refId": "A",
-                    "root_selector": "$",
-                    "source": "url",
-                    "type": "json",
-                    "url": "/ops/quarantine/filtered-stats?pipeline=${pipeline}&run_type=${run_type:csv}&reason_code=${reason_code:csv}&field=${field:csv}&run_id=${run_id}&from=${__from:date:iso}&to=${__to:date:iso}",
-                    "url_options": {
-                        "data": "",
-                        "method": "GET"
-                    },
-                    "expr": ""
-                }
-            ],
-            "title": "Reject Rate vs Bronze",
-            "type": "table"
-        },
-        {
-            "datasource": "Quarantine Explorer",
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "palette-classic"
-                    }
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 7,
-                "w": 8,
-                "x": 16,
-                "y": 3
-            },
-            "id": 4,
-            "options": {
-                "showHeader": true
-            },
-            "targets": [
-                {
-                    "format": "table",
-                    "json_options": {
-                        "root_is_not_array": true
-                    },
-                    "parser": "backend",
-                    "refId": "A",
-                    "root_selector": "$",
-                    "source": "url",
-                    "type": "json",
-                    "url": "/ops/quarantine/filtered-stats?pipeline=${pipeline}&run_type=${run_type:csv}&reason_code=${reason_code:csv}&field=${field:csv}&run_id=${run_id}&from=${__from:date:iso}&to=${__to:date:iso}",
-                    "url_options": {
-                        "data": "",
-                        "method": "GET"
-                    },
-                    "expr": ""
-                }
-            ],
-            "title": "Run Scope Summary",
-            "type": "table"
-        },
-        {
-            "datasource": "Quarantine Explorer",
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "palette-classic"
-                    }
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 8,
-                "w": 8,
-                "x": 0,
-                "y": 10
-            },
-            "id": 5,
-            "options": {
-                "showHeader": true
-            },
-            "targets": [
-                {
-                    "format": "table",
-                    "parser": "backend",
-                    "refId": "A",
-                    "root_selector": "by_reason_code",
-                    "source": "url",
-                    "type": "json",
-                    "url": "/ops/quarantine/filtered-stats?pipeline=${pipeline}&run_type=${run_type:csv}&reason_code=${reason_code:csv}&field=${field:csv}&run_id=${run_id}&from=${__from:date:iso}&to=${__to:date:iso}",
-                    "url_options": {
-                        "data": "",
-                        "method": "GET"
-                    },
-                    "expr": ""
-                }
-            ],
-            "title": "Top Reject Reasons",
-            "type": "table"
-        },
-        {
-            "datasource": "Quarantine Explorer",
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "palette-classic"
-                    }
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 8,
-                "w": 8,
-                "x": 8,
-                "y": 10
-            },
-            "id": 6,
-            "options": {
-                "showHeader": true
-            },
-            "targets": [
-                {
-                    "format": "table",
-                    "parser": "backend",
-                    "refId": "A",
-                    "root_selector": "by_field",
-                    "source": "url",
-                    "type": "json",
-                    "url": "/ops/quarantine/filtered-stats?pipeline=${pipeline}&run_type=${run_type:csv}&reason_code=${reason_code:csv}&field=${field:csv}&run_id=${run_id}&from=${__from:date:iso}&to=${__to:date:iso}",
-                    "url_options": {
-                        "data": "",
-                        "method": "GET"
-                    },
-                    "expr": ""
-                }
-            ],
-            "title": "Top Reject Fields",
-            "type": "table"
-        },
-        {
-            "datasource": "Quarantine Explorer",
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "palette-classic"
-                    }
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 8,
-                "w": 8,
-                "x": 16,
-                "y": 10
-            },
-            "id": 7,
-            "options": {
-                "showHeader": true
-            },
-            "targets": [
-                {
-                    "format": "table",
-                    "parser": "backend",
-                    "refId": "A",
-                    "root_selector": "by_reason_signature",
-                    "source": "url",
-                    "type": "json",
-                    "url": "/ops/quarantine/filtered-stats?pipeline=${pipeline}&run_type=${run_type:csv}&reason_code=${reason_code:csv}&field=${field:csv}&run_id=${run_id}&from=${__from:date:iso}&to=${__to:date:iso}",
-                    "url_options": {
-                        "data": "",
-                        "method": "GET"
-                    },
-                    "expr": ""
-                }
-            ],
-            "title": "Top Reason Signatures",
-            "type": "table"
-        },
-        {
-            "datasource": "Quarantine Explorer",
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "palette-classic"
-                    },
-                    "links": [
-                        {
-                            "title": "Open same dashboard with this payload_hash",
-                            "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=${__data.fields.pipeline}&var-run_type=${__data.fields.run_type}&var-reason_code=${__data.fields.reason_code}&var-field=${__data.fields.field}&var-run_id=${__data.fields.run_id}&var-payload_hash=${__data.fields.payload_hash}&${__url_time_range}"
-                        },
-                        {
-                            "title": "Open quarantine CLI command",
-                            "url": "data:text/plain,bioetl%20quarantine%20inspect%20--pipeline%20${__data.fields.pipeline}%20--silver-filter-only%20--run-id%20${__data.fields.run_id}%20--limit%20200"
-                        },
-                        {
-                            "title": "Open Logs",
-                            "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D"
-                        }
-                    ]
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 12,
-                "w": 24,
-                "x": 0,
-                "y": 18
-            },
-            "id": 8,
-            "options": {
-                "showHeader": true,
-                "sortBy": [
-                    {
-                        "desc": true,
-                        "displayName": "ingestion_ts"
-                    }
-                ]
-            },
-            "targets": [
-                {
-                    "format": "table",
-                    "parser": "backend",
-                    "refId": "A",
-                    "root_selector": "items",
-                    "source": "url",
-                    "type": "json",
-                    "url": "/ops/quarantine/filtered-records?pipeline=${pipeline}&run_type=${run_type:csv}&reason_code=${reason_code:csv}&field=${field:csv}&run_id=${run_id}&from=${__from:date:iso}&to=${__to:date:iso}&limit=100&offset=0&sort=ingestion_ts_desc",
-                    "url_options": {
-                        "data": "",
-                        "method": "GET"
-                    },
-                    "expr": ""
-                }
-            ],
-            "description": "Shows latest 100 records for selected scope, sorted by ingestion_ts descending.",
-            "title": "Filtered Records Table",
-            "type": "table"
-        },
-        {
-            "datasource": "Quarantine Explorer",
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "palette-classic"
-                    }
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 10,
-                "w": 24,
-                "x": 0,
-                "y": 30
-            },
-            "id": 9,
-            "options": {
-                "showHeader": true
-            },
-            "targets": [
-                {
-                    "format": "table",
-                    "parser": "backend",
-                    "refId": "A",
-                    "root_selector": "items",
-                    "source": "url",
-                    "type": "json",
-                    "url": "/ops/quarantine/filtered-records?pipeline=${pipeline}&run_type=${run_type:csv}&reason_code=${reason_code:csv}&field=${field:csv}&run_id=${run_id}&payload_hash=${payload_hash}&from=${__from:date:iso}&to=${__to:date:iso}&limit=1&offset=0&sort=ingestion_ts_desc",
-                    "url_options": {
-                        "data": "",
-                        "method": "GET"
-                    },
-                    "expr": ""
-                }
-            ],
-            "description": "Select a row or set payload_hash to inspect one specific record.",
-            "title": "Selected Record Details",
-            "type": "table"
-        }
-    ],
-    "refresh": "1m",
-    "schemaVersion": 30,
-    "style": "dark",
-    "tags": [
-        "bioetl",
-        "quarantine",
-        "silver",
-        "filtered-out",
-        "explorer"
-    ],
-    "templating": {
-        "list": [
-            {
-                "allValue": null,
-                "current": {},
-                "datasource": "Prometheus",
-                "definition": "label_values(bioetl_records_processed_total, pipeline)",
-                "hide": 0,
-                "includeAll": false,
-                "label": "Pipeline",
-                "multi": false,
-                "name": "pipeline",
-                "options": [],
-                "query": {
-                    "query": "label_values(bioetl_records_processed_total, pipeline)",
-                    "refId": "StandardVariableQuery"
-                },
-                "refresh": 1,
-                "regex": "",
-                "skipUrlSync": false,
-                "sort": 1,
-                "tagValuesQuery": "",
-                "tags": [],
-                "tagsQuery": "",
-                "type": "query",
-                "useTags": false
-            },
-            {
-                "allValue": null,
-                "current": {},
-                "datasource": "Quarantine Explorer",
-                "definition": "/ops/quarantine/filter-options?dimension=run_type&pipeline=${pipeline}",
-                "hide": 0,
-                "includeAll": true,
-                "label": "Run Type",
-                "multi": true,
-                "name": "run_type",
-                "options": [],
-                "query": {
-                    "infinityQuery": {
-                        "type": "json",
-                        "source": "url",
-                        "url": "/ops/quarantine/filter-options?dimension=run_type&pipeline=${pipeline}"
-                    }
-                },
-                "refresh": 1,
-                "regex": "",
-                "skipUrlSync": false,
-                "sort": 1,
-                "tagValuesQuery": "",
-                "tags": [],
-                "tagsQuery": "",
-                "type": "query",
-                "useTags": false
-            },
-            {
-                "allValue": null,
-                "current": {},
-                "datasource": "Quarantine Explorer",
-                "definition": "/ops/quarantine/filter-options?dimension=reason_code&pipeline=${pipeline}&run_type=${run_type:csv}",
-                "hide": 0,
-                "includeAll": true,
-                "label": "Reason Code",
-                "multi": true,
-                "name": "reason_code",
-                "options": [],
-                "query": {
-                    "infinityQuery": {
-                        "type": "json",
-                        "source": "url",
-                        "url": "/ops/quarantine/filter-options?dimension=reason_code&pipeline=${pipeline}&run_type=${run_type:csv}"
-                    }
-                },
-                "refresh": 1,
-                "regex": "",
-                "skipUrlSync": false,
-                "sort": 1,
-                "tagValuesQuery": "",
-                "tags": [],
-                "tagsQuery": "",
-                "type": "query",
-                "useTags": false
-            },
-            {
-                "allValue": null,
-                "current": {},
-                "datasource": "Quarantine Explorer",
-                "definition": "/ops/quarantine/filter-options?dimension=field&pipeline=${pipeline}&run_type=${run_type:csv}&reason_code=${reason_code:csv}",
-                "hide": 0,
-                "includeAll": true,
-                "label": "Field",
-                "multi": true,
-                "name": "field",
-                "options": [],
-                "query": {
-                    "infinityQuery": {
-                        "type": "json",
-                        "source": "url",
-                        "url": "/ops/quarantine/filter-options?dimension=field&pipeline=${pipeline}&run_type=${run_type:csv}&reason_code=${reason_code:csv}"
-                    }
-                },
-                "refresh": 1,
-                "regex": "",
-                "skipUrlSync": false,
-                "sort": 1,
-                "tagValuesQuery": "",
-                "tags": [],
-                "tagsQuery": "",
-                "type": "query",
-                "useTags": false
-            },
-            {
-                "allValue": null,
-                "current": {},
-                "datasource": "Quarantine Explorer",
-                "definition": "/ops/quarantine/filter-options?dimension=run_id&pipeline=${pipeline}&run_type=${run_type:csv}&reason_code=${reason_code:csv}&field=${field:csv}",
-                "hide": 0,
-                "includeAll": false,
-                "label": "Run ID",
-                "multi": false,
-                "name": "run_id",
-                "options": [],
-                "query": {
-                    "infinityQuery": {
-                        "type": "json",
-                        "source": "url",
-                        "url": "/ops/quarantine/filter-options?dimension=run_id&pipeline=${pipeline}&run_type=${run_type:csv}&reason_code=${reason_code:csv}&field=${field:csv}"
-                    }
-                },
-                "refresh": 1,
-                "regex": "",
-                "skipUrlSync": false,
-                "sort": 1,
-                "tagValuesQuery": "",
-                "tags": [],
-                "tagsQuery": "",
-                "type": "query",
-                "useTags": false
-            },
-            {
-                "current": {
-                    "selected": false,
-                    "text": "",
-                    "value": ""
-                },
-                "hide": 0,
-                "label": "Payload Hash",
-                "name": "payload_hash",
-                "options": [],
-                "query": "",
-                "skipUrlSync": false,
-                "type": "textbox"
+            "renameByName": {
+              "reject_ratio": "reject_rate_vs_bronze"
             }
+          }
+        }
+      ],
+      "targets": [
+        {
+          "format": "table",
+          "json_options": {
+            "root_is_not_array": true
+          },
+          "parser": "backend",
+          "refId": "A",
+          "root_selector": "$",
+          "source": "url",
+          "type": "json",
+          "url": "/ops/quarantine/filtered-stats?pipeline=${pipeline}&run_type=${run_type:csv}&reason_code=${reason_code:csv}&field=${field:csv}&run_id=${run_id}&from=${__from:date:iso}&to=${__to:date:iso}",
+          "url_options": {
+            "data": "",
+            "method": "GET"
+          },
+          "expr": ""
+        }
+      ],
+      "title": "Reject Rate vs Bronze",
+      "type": "table"
+    },
+    {
+      "datasource": "Quarantine Explorer",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 16,
+        "y": 3
+      },
+      "id": 4,
+      "options": {
+        "showHeader": true
+      },
+      "targets": [
+        {
+          "format": "table",
+          "json_options": {
+            "root_is_not_array": true
+          },
+          "parser": "backend",
+          "refId": "A",
+          "root_selector": "$",
+          "source": "url",
+          "type": "json",
+          "url": "/ops/quarantine/filtered-stats?pipeline=${pipeline}&run_type=${run_type:csv}&reason_code=${reason_code:csv}&field=${field:csv}&run_id=${run_id}&from=${__from:date:iso}&to=${__to:date:iso}",
+          "url_options": {
+            "data": "",
+            "method": "GET"
+          },
+          "expr": ""
+        }
+      ],
+      "title": "Run Scope Summary",
+      "type": "table"
+    },
+    {
+      "datasource": "Quarantine Explorer",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 10
+      },
+      "id": 5,
+      "options": {
+        "showHeader": true
+      },
+      "targets": [
+        {
+          "format": "table",
+          "parser": "backend",
+          "refId": "A",
+          "root_selector": "by_reason_code",
+          "source": "url",
+          "type": "json",
+          "url": "/ops/quarantine/filtered-stats?pipeline=${pipeline}&run_type=${run_type:csv}&reason_code=${reason_code:csv}&field=${field:csv}&run_id=${run_id}&from=${__from:date:iso}&to=${__to:date:iso}",
+          "url_options": {
+            "data": "",
+            "method": "GET"
+          },
+          "expr": ""
+        }
+      ],
+      "title": "Top Reject Reasons",
+      "type": "table"
+    },
+    {
+      "datasource": "Quarantine Explorer",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 10
+      },
+      "id": 6,
+      "options": {
+        "showHeader": true
+      },
+      "targets": [
+        {
+          "format": "table",
+          "parser": "backend",
+          "refId": "A",
+          "root_selector": "by_field",
+          "source": "url",
+          "type": "json",
+          "url": "/ops/quarantine/filtered-stats?pipeline=${pipeline}&run_type=${run_type:csv}&reason_code=${reason_code:csv}&field=${field:csv}&run_id=${run_id}&from=${__from:date:iso}&to=${__to:date:iso}",
+          "url_options": {
+            "data": "",
+            "method": "GET"
+          },
+          "expr": ""
+        }
+      ],
+      "title": "Top Reject Fields",
+      "type": "table"
+    },
+    {
+      "datasource": "Quarantine Explorer",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 10
+      },
+      "id": 7,
+      "options": {
+        "showHeader": true
+      },
+      "targets": [
+        {
+          "format": "table",
+          "parser": "backend",
+          "refId": "A",
+          "root_selector": "by_reason_signature",
+          "source": "url",
+          "type": "json",
+          "url": "/ops/quarantine/filtered-stats?pipeline=${pipeline}&run_type=${run_type:csv}&reason_code=${reason_code:csv}&field=${field:csv}&run_id=${run_id}&from=${__from:date:iso}&to=${__to:date:iso}",
+          "url_options": {
+            "data": "",
+            "method": "GET"
+          },
+          "expr": ""
+        }
+      ],
+      "title": "Top Reason Signatures",
+      "type": "table"
+    },
+    {
+      "datasource": "Quarantine Explorer",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "links": [
+            {
+              "title": "Open same dashboard with this payload_hash",
+              "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=${__data.fields.pipeline}&var-run_type=${__data.fields.run_type}&var-reason_code=${__data.fields.reason_code}&var-field=${__data.fields.field}&var-run_id=${__data.fields.run_id}&var-payload_hash=${__data.fields.payload_hash}&${__url_time_range}"
+            },
+            {
+              "title": "Open quarantine CLI command",
+              "url": "data:text/plain,bioetl%20quarantine%20inspect%20--pipeline%20${__data.fields.pipeline}%20--silver-filter-only%20--run-id%20${__data.fields.run_id}%20--limit%20200"
+            },
+            {
+              "title": "Open Logs",
+              "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D"
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 18
+      },
+      "id": 8,
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "ingestion_ts"
+          }
         ]
+      },
+      "targets": [
+        {
+          "format": "table",
+          "parser": "backend",
+          "refId": "A",
+          "root_selector": "items",
+          "source": "url",
+          "type": "json",
+          "url": "/ops/quarantine/filtered-records?pipeline=${pipeline}&run_type=${run_type:csv}&reason_code=${reason_code:csv}&field=${field:csv}&run_id=${run_id}&from=${__from:date:iso}&to=${__to:date:iso}&limit=100&offset=0&sort=ingestion_ts_desc",
+          "url_options": {
+            "data": "",
+            "method": "GET"
+          },
+          "expr": ""
+        }
+      ],
+      "description": "Shows latest 100 records for selected scope, sorted by ingestion_ts descending.",
+      "title": "Filtered Records Table",
+      "type": "table"
     },
-    "time": {
-        "from": "now-24h",
-        "to": "now"
-    },
-    "timepicker": {
-        "refresh_intervals": [
-            "5s",
-            "10s",
-            "30s",
-            "1m",
-            "5m",
-            "15m",
-            "30m",
-            "1h",
-            "2h",
-            "1d"
-        ]
-    },
-    "timezone": "",
-    "title": "5. Silver Reject Explorer",
-    "uid": "bioetl-silver-reject-explorer",
-    "version": 1000
+    {
+      "datasource": "Quarantine Explorer",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 30
+      },
+      "id": 9,
+      "options": {
+        "showHeader": true
+      },
+      "targets": [
+        {
+          "format": "table",
+          "parser": "backend",
+          "refId": "A",
+          "root_selector": "items",
+          "source": "url",
+          "type": "json",
+          "url": "/ops/quarantine/filtered-records?pipeline=${pipeline}&run_type=${run_type:csv}&reason_code=${reason_code:csv}&field=${field:csv}&run_id=${run_id}&payload_hash=${payload_hash}&from=${__from:date:iso}&to=${__to:date:iso}&limit=1&offset=0&sort=ingestion_ts_desc",
+          "url_options": {
+            "data": "",
+            "method": "GET"
+          },
+          "expr": ""
+        }
+      ],
+      "description": "Select a row or set payload_hash to inspect one specific record.",
+      "title": "Selected Record Details",
+      "type": "table"
+    }
+  ],
+  "refresh": "1m",
+  "schemaVersion": 30,
+  "style": "dark",
+  "tags": [
+    "bioetl",
+    "quarantine",
+    "silver",
+    "filtered-out",
+    "explorer"
+  ],
+  "templating": {
+    "list": [
+      {
+        "allValue": null,
+        "current": {},
+        "datasource": "Prometheus",
+        "definition": "label_values(bioetl_records_processed_total, pipeline)",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Pipeline",
+        "multi": false,
+        "name": "pipeline",
+        "options": [],
+        "query": {
+          "query": "label_values(bioetl_records_processed_total, pipeline)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {},
+        "datasource": "Quarantine Explorer",
+        "definition": "/ops/quarantine/filter-options?dimension=run_type&pipeline=${pipeline}",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Run Type",
+        "multi": true,
+        "name": "run_type",
+        "options": [],
+        "query": {
+          "infinityQuery": {
+            "type": "json",
+            "source": "url",
+            "url": "/ops/quarantine/filter-options?dimension=run_type&pipeline=${pipeline}"
+          }
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {},
+        "datasource": "Quarantine Explorer",
+        "definition": "/ops/quarantine/filter-options?dimension=reason_code&pipeline=${pipeline}&run_type=${run_type:csv}",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Reason Code",
+        "multi": true,
+        "name": "reason_code",
+        "options": [],
+        "query": {
+          "infinityQuery": {
+            "type": "json",
+            "source": "url",
+            "url": "/ops/quarantine/filter-options?dimension=reason_code&pipeline=${pipeline}&run_type=${run_type:csv}"
+          }
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {},
+        "datasource": "Quarantine Explorer",
+        "definition": "/ops/quarantine/filter-options?dimension=field&pipeline=${pipeline}&run_type=${run_type:csv}&reason_code=${reason_code:csv}",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Field",
+        "multi": true,
+        "name": "field",
+        "options": [],
+        "query": {
+          "infinityQuery": {
+            "type": "json",
+            "source": "url",
+            "url": "/ops/quarantine/filter-options?dimension=field&pipeline=${pipeline}&run_type=${run_type:csv}&reason_code=${reason_code:csv}"
+          }
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {},
+        "datasource": "Quarantine Explorer",
+        "definition": "/ops/quarantine/filter-options?dimension=run_id&pipeline=${pipeline}&run_type=${run_type:csv}&reason_code=${reason_code:csv}&field=${field:csv}",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Run ID",
+        "multi": false,
+        "name": "run_id",
+        "options": [],
+        "query": {
+          "infinityQuery": {
+            "type": "json",
+            "source": "url",
+            "url": "/ops/quarantine/filter-options?dimension=run_id&pipeline=${pipeline}&run_type=${run_type:csv}&reason_code=${reason_code:csv}&field=${field:csv}"
+          }
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "",
+          "value": ""
+        },
+        "hide": 0,
+        "label": "Payload Hash",
+        "name": "payload_hash",
+        "options": [],
+        "query": "",
+        "skipUrlSync": false,
+        "type": "textbox"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-24h",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": [
+      "5s",
+      "10s",
+      "30s",
+      "1m",
+      "5m",
+      "15m",
+      "30m",
+      "1h",
+      "2h",
+      "1d"
+    ]
+  },
+  "timezone": "",
+  "title": "5. Silver Reject Explorer",
+  "uid": "bioetl-silver-reject-explorer",
+  "version": 1000
 }

@@ -30,6 +30,68 @@ _ALLOWED_DASHBOARD_LINK_VARS = {
 }
 
 
+_REQUIRED_TOP_LEVEL_LINKS_BY_UID = {
+    "bioetl-overview-v2": frozenset(
+        {
+            "2. Runtime",
+            "Control Plane v1",
+            "3. Provider Health",
+            "4. Data Quality",
+            "6. Workflow Overview",
+            "Explore Logs (Loki, tracing profile)",
+            "Explore Traces (Tempo, tracing profile)",
+        }
+    ),
+    "bioetl-runtime": frozenset(
+        {
+            "Back to Overview",
+            "Control Plane v1",
+            "3. Provider Health",
+            "4. Data Quality",
+            "Explore Logs (Loki, tracing profile)",
+            "Explore Traces (Tempo, tracing profile)",
+        }
+    ),
+    "bioetl-control-plane-v1": frozenset(
+        {
+            "Back to Overview",
+            "2. Runtime",
+            "4. Data Quality",
+            "Explore Logs (Loki, tracing profile)",
+            "Explore Traces (Tempo, tracing profile)",
+        }
+    ),
+    "bioetl-provider-health-v2": frozenset(
+        {
+            "Back to Overview",
+            "2. Runtime",
+            "Explore Logs (Loki, tracing profile)",
+            "Explore Traces (Tempo, tracing profile)",
+        }
+    ),
+    "bioetl-dq-v2": frozenset(
+        {
+            "Back to Overview",
+            "Control Plane v1",
+            "5. Silver Reject Explorer",
+            "Explore Logs (Loki, tracing profile)",
+            "Explore Traces (Tempo, tracing profile)",
+        }
+    ),
+    "bioetl-silver-reject-explorer": frozenset(
+        {
+            "Back to Overview",
+            "Back to Data Quality",
+            "Explore Logs (Loki, tracing profile)",
+            "Explore Traces (Tempo, tracing profile)",
+        }
+    ),
+    "bioetl-workflow-overview": frozenset(
+        {"Back to Overview", "2. Runtime", "Control Plane v1"}
+    ),
+}
+
+
 def _extract_dashboard_uid(url: str) -> str | None:
     match = _DASHBOARD_UID_RE.match(url)
     return match.group(1) if match is not None else None
@@ -153,6 +215,46 @@ def test_cross_dashboard_links_pass_only_target_scoped_variables() -> None:
                 )
 
 
+
+
+def test_dashboard_top_level_navigation_contract_by_uid() -> None:
+    """Each dashboard UID must expose required top-level navigation links."""
+    for dashboard_path in get_dashboard_files():
+        dashboard = load_dashboard(dashboard_path)
+        uid = dashboard.get("uid")
+        assert isinstance(uid, str), f"{dashboard_path.name} must declare string uid"
+
+        required_links = _REQUIRED_TOP_LEVEL_LINKS_BY_UID.get(uid)
+        assert required_links is not None, f"Unknown dashboard uid in contract: {uid}"
+
+        titles = {
+            link.get("title")
+            for link in dashboard.get("links", [])
+            if isinstance(link.get("title"), str)
+        }
+        missing = required_links - titles
+        assert not missing, (
+            f"{dashboard_path.name} ({uid}) is missing required top-level links: "
+            f"{sorted(missing)}"
+        )
+
+
+def test_dashboard_links_forbid_universal_handoff_patterns() -> None:
+    """Dashboard links must avoid generic includeVars and legacy Explore payloads."""
+    forbidden_tokens = ("includeVars=true", "/explore?left=")
+
+    for dashboard_path in get_dashboard_files():
+        dashboard = load_dashboard(dashboard_path)
+        for link in _collect_dashboard_links(dashboard):
+            url = str(link.get("url", ""))
+            assert not any(token in url for token in forbidden_tokens), (
+                f"{dashboard_path.name} link uses forbidden universal handoff pattern: {url}"
+            )
+
+            if url.startswith("/d/") and link in dashboard.get("links", []):
+                assert link.get("includeVars") is False, (
+                    f"{dashboard_path.name} top-level cross-dashboard link must pin includeVars=false: {url}"
+                )
 def test_overview_and_provider_dashboards_expose_explore_drilldown_links() -> None:
     """Operational dashboards should offer Loki and Tempo drilldown."""
     expectations = (
