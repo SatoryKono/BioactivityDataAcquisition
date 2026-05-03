@@ -59,7 +59,7 @@
       "targetBlank": false,
       "title": "4. Data Quality",
       "type": "link",
-      "url": "/d/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&${__url_time_range}"
+      "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&${__url_time_range}"
     },
     {
       "asDropdown": false,
@@ -184,7 +184,7 @@
           },
           {
             "title": "Open Data Quality v2",
-            "url": "/d/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&${__url_time_range}"
+            "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&${__url_time_range}"
           },
           {
             "title": "Open Runtime Troubleshooting Runbook",
@@ -1400,7 +1400,7 @@
         "dataLinks": [
           {
             "title": "Open Data Quality v2",
-            "url": "/d/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&${__url_time_range}"
+            "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&${__url_time_range}"
           },
           {
             "title": "Open DQ Failure Runbook",
@@ -1646,7 +1646,7 @@
         "dataLinks": [
           {
             "title": "Open Data Quality v2",
-            "url": "/d/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&${__url_time_range}"
+            "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&${__url_time_range}"
           },
           {
             "title": "Open DQ Freshness Runbook",
