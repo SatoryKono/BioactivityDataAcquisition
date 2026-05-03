@@ -48,7 +48,7 @@
       "targetBlank": false,
       "title": "Explore Logs (Loki, tracing profile)",
       "type": "link",
-      "url": "/explore?schemaVersion=1&panes={\"67f\":{\"datasource\":\"loki\",\"queries\":[{\"expr\":\"{job=\\\"bioetl\\\"}\"}],\"range\":{\"from\":\"$__from\",\"to\":\"$__to\"}}}&orgId=1&from=${__from}&to=${__to}"
+      "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D"
     },
     {
       "asDropdown": false,
@@ -59,7 +59,7 @@
       "targetBlank": false,
       "title": "Explore Traces (Tempo, tracing profile)",
       "type": "link",
-      "url": "/explore?schemaVersion=1&panes={\"q9t\":{\"datasource\":\"tempo\",\"queries\":[{\"query\":\"{}\"}],\"range\":{\"from\":\"$__from\",\"to\":\"$__to\"}}}&orgId=1&from=${__from}&to=${__to}"
+      "url": "/a/grafana-exploretraces-app/?from=${__from}&to=${__to}&queryType=traceqlSearch&query=%7B%7D"
     }
   ],
   "panels": [
