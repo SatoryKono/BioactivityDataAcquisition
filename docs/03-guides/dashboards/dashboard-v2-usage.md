@@ -123,15 +123,11 @@ Machine-readable navigation contract: `docs/03-guides/dashboards/contracts/navig
   он показывает только compact handoff conditions.
 - Для bounded cause summary используйте `Top Silver Reject Reasons` и
   `Top Silver Reject Fields` в `bioetl-dq-v2`.
-- Короткая triage sequence:
-  1. Начните с `1. BioETL Overview` или `2. Runtime`, чтобы подтвердить spike по
-     `Silver Rejects Count + Rate` / `Silver Filter Rejects` в текущем time range.
-  1. Перейдите в `4. Data Quality` и проверьте `Top Silver Reject Reasons` /
-     `Top Silver Reject Fields`, чтобы сузить проблему до bounded cause summary.
-  1. Откройте `5. Silver Reject Explorer` для record-level списка, выбора
-     `reason_code/field/run_id` и detail по конкретному `payload_hash`.
-  1. Используйте quarantine CLI для action-операций (`replay/resolve/purge`) и
-     финального подтверждения remediation.
+- Маршрут triage: **L1 summary -> L2 explorer**.
+  1. **L1 summary:** начните с `4. Data Quality` (first-screen KPI: score, blocked share, quarantined, freshness lag), чтобы подтвердить масштаб инцидента в выбранном time range.
+  1. **L1 cause narrowing:** раскройте collapsed rows `Reject / Pareto / Fields` и `Validation Diagnostics`, проверьте `Top Silver Reject Reasons` / `Top Silver Reject Fields` и связанные diagnostics.
+  1. **L2 explorer:** откройте `5. Silver Reject Explorer` по explicit panel data links для record-level списка, выбора `reason_code/field/run_id` и detail по `payload_hash`.
+  1. Используйте quarantine CLI для action-операций (`replay/resolve/purge`) и финального подтверждения remediation.
 - Эти панели отвечают на вопросы:
   - растёт ли объём `filtered_out`;
   - в каком `$pipeline` проблема сильнее;
