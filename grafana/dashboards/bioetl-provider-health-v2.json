@@ -144,8 +144,9 @@
           "refId": "A"
         }
       ],
-      "title": "Health Check Latency by Provider (p95)",
-      "type": "timeseries"
+      "title": "Monitor Health Check Latency by Provider (p95)",
+      "type": "timeseries",
+      "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
     },
     {
       "datasource": "Prometheus",
@@ -225,8 +226,9 @@
           "refId": "A"
         }
       ],
-      "title": "Current Provider Health Status",
-      "type": "table"
+      "title": "Monitor Current Provider Health Status",
+      "type": "table",
+      "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
     },
     {
       "datasource": "Prometheus",
@@ -295,8 +297,9 @@
           "refId": "A"
         }
       ],
-      "title": "Healthy Checks",
-      "type": "stat"
+      "title": "Monitor Healthy Checks",
+      "type": "stat",
+      "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
     },
     {
       "datasource": "Prometheus",
@@ -367,8 +370,9 @@
           "refId": "A"
         }
       ],
-      "title": "Provider Failure Rate",
-      "type": "gauge"
+      "title": "Track Provider Failure Rate",
+      "type": "gauge",
+      "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
     },
     {
       "datasource": "Prometheus",
@@ -439,8 +443,9 @@
           "refId": "A"
         }
       ],
-      "title": "Health Checks Total",
-      "type": "stat"
+      "title": "Track Health Checks Total",
+      "type": "stat",
+      "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
     },
     {
       "datasource": "Prometheus",
@@ -511,8 +516,9 @@
           "refId": "A"
         }
       ],
-      "title": "Degraded Checks",
-      "type": "stat"
+      "title": "Track Degraded Checks",
+      "type": "stat",
+      "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
     },
     {
       "datasource": "Prometheus",
@@ -586,8 +592,9 @@
           "refId": "B"
         }
       ],
-      "title": "Failure & Degraded Trend by Provider",
-      "type": "timeseries"
+      "title": "Track Failure and Degraded Trend by Provider",
+      "type": "timeseries",
+      "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
     },
     {
       "datasource": "Prometheus",
@@ -647,8 +654,9 @@
           "refId": "A"
         }
       ],
-      "title": "Provider Failure Share (Selected Range)",
-      "type": "bargauge"
+      "title": "Track Provider Failure Share (Selected Range)",
+      "type": "bargauge",
+      "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
     },
     {
       "datasource": "Prometheus",
@@ -709,8 +717,9 @@
           "refId": "A"
         }
       ],
-      "title": "Retries Exhausted by Provider / Operation",
-      "type": "table"
+      "title": "Track Retries Exhausted by Provider/Operation",
+      "type": "table",
+      "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
     },
     {
       "datasource": "Prometheus",
@@ -787,8 +796,9 @@
           "refId": "A"
         }
       ],
-      "title": "Retries Exhausted Trend by Provider / Operation",
-      "type": "timeseries"
+      "title": "Track Retries Exhausted Trend by Provider/Operation",
+      "type": "timeseries",
+      "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
     },
     {
       "collapsed": true,
@@ -876,8 +886,9 @@
           "refId": "A"
         }
       ],
-      "title": "Provider Health Check Latency (p95) - $provider",
-      "type": "gauge"
+      "title": "Inspect Provider Health Check Latency (p95) - $provider",
+      "type": "gauge",
+      "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
     },
     {
       "datasource": "Prometheus",
@@ -936,8 +947,9 @@
           "refId": "A"
         }
       ],
-      "title": "Adapter Request Latency by Endpoint (p95)",
-      "type": "timeseries"
+      "title": "Inspect Adapter Request Latency by Endpoint (p95)",
+      "type": "timeseries",
+      "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
     },
     {
       "datasource": "Prometheus",
@@ -1014,8 +1026,9 @@
           "refId": "A"
         }
       ],
-      "title": "HTTP Errors by Method / Error Type",
-      "type": "timeseries"
+      "title": "Inspect HTTP Errors by Method/Error Type",
+      "type": "timeseries",
+      "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
     },
     {
       "datasource": "Prometheus",
@@ -1092,8 +1105,9 @@
           "refId": "A"
         }
       ],
-      "title": "Rate Limiter Wait by Provider (p95)",
-      "type": "timeseries"
+      "title": "Track Rate Limiter Wait by Provider (p95)",
+      "type": "timeseries",
+      "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
     },
     {
       "datasource": "Prometheus",
@@ -1151,8 +1165,9 @@
           "refId": "A"
         }
       ],
-      "title": "Minimum Rate Limiter Tokens Available",
-      "type": "bargauge"
+      "title": "Monitor Minimum Rate Limiter Tokens Available",
+      "type": "bargauge",
+      "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
     },
     {
       "datasource": "Prometheus",
@@ -1222,8 +1237,9 @@
           "refId": "A"
         }
       ],
-      "title": "Circuit Breaker State (max)",
-      "type": "stat"
+      "title": "Monitor Circuit Breaker State (max)",
+      "type": "stat",
+      "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
     },
     {
       "datasource": "Prometheus",
@@ -1293,8 +1309,9 @@
           "refId": "A"
         }
       ],
-      "title": "Circuit Breaker Trips by Provider",
-      "type": "timeseries"
+      "title": "Track Circuit Breaker Trips by Provider",
+      "type": "timeseries",
+      "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
     }
   ],
   "refresh": "30s",

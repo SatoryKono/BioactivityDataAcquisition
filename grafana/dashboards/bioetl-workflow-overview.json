@@ -88,8 +88,9 @@
         "content": "<center><h2>Workflow Overview / $workflow / $status</h2></center>",
         "mode": "html"
       },
-      "title": "Workflow Scope",
-      "type": "text"
+      "title": "Monitor Workflow Scope",
+      "type": "text",
+      "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
     },
     {
       "datasource": "Prometheus",
@@ -159,8 +160,9 @@
           "refId": "A"
         }
       ],
-      "title": "Workflow Runs",
-      "type": "stat"
+      "title": "Monitor Workflow Runs",
+      "type": "stat",
+      "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
     },
     {
       "datasource": "Prometheus",
@@ -230,8 +232,9 @@
           "refId": "A"
         }
       ],
-      "title": "Failed Workflow Runs",
-      "type": "stat"
+      "title": "Inspect Failed Workflow Runs",
+      "type": "stat",
+      "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
     },
     {
       "datasource": "Prometheus",
@@ -278,8 +281,9 @@
           "refId": "A"
         }
       ],
-      "title": "Step Outcomes by Kind",
-      "type": "timeseries"
+      "title": "Track Step Outcomes by Kind",
+      "type": "timeseries",
+      "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
     },
     {
       "datasource": "Prometheus",
@@ -326,8 +330,9 @@
           "refId": "A"
         }
       ],
-      "title": "Step Duration p95",
-      "type": "timeseries"
+      "title": "Track Step Duration p95",
+      "type": "timeseries",
+      "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
     }
   ],
   "refresh": "30s",
