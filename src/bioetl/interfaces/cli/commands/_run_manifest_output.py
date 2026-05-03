@@ -4,11 +4,13 @@ from __future__ import annotations
 
 import json
 
+from bioetl.interfaces.cli.commands._run_manifest_output_diagnostics import (
+    render_diagnostics_section,
+    render_identity_graph_section,
+)
 from bioetl.interfaces.cli.commands._run_manifest_output_support import (
     format_block,
     format_scalar,
-    render_diagnostics_section,
-    render_identity_graph_section,
     render_ledger_section,
     render_manifest_section,
     render_reproducibility_compact_section,
