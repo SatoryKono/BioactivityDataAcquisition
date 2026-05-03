@@ -1,1305 +1,1387 @@
 {
-    "annotations": {
-        "list": [
-            {
-                "builtIn": 1,
-                "datasource": "-- Grafana --",
-                "enable": true,
-                "hide": true,
-                "iconColor": "rgba(0, 211, 255, 1)",
-                "name": "Annotations & Alerts",
-                "type": "dashboard"
-            }
-        ]
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "description": "Operational provider health incident dashboard for health-check latency, adapter/API pressure, retry exhaustion, circuit-breaker state, and provider-level failure share.",
+  "editable": true,
+  "gnetId": null,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": false,
+      "keepTime": true,
+      "tags": [],
+      "targetBlank": false,
+      "title": "Back to Overview",
+      "tooltip": "",
+      "type": "link",
+      "url": "/d/bioetl-overview-v2/bioetl-overview-v2?${__url_time_range}"
     },
-    "description": "Operational provider health incident dashboard for health-check latency, adapter/API pressure, retry exhaustion, circuit-breaker state, and provider-level failure share.",
-    "editable": true,
-    "gnetId": null,
-    "graphTooltip": 1,
-    "id": null,
-    "links": [
-        {
-            "asDropdown": false,
-            "icon": "external link",
-            "includeVars": false,
-            "keepTime": true,
-            "tags": [],
-            "targetBlank": false,
-            "title": "Back to Overview",
-            "tooltip": "",
-            "type": "link",
-            "url": "/d/bioetl-overview-v2/bioetl-overview-v2?${__url_time_range}"
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": false,
+      "keepTime": true,
+      "tags": [],
+      "targetBlank": false,
+      "title": "2. Runtime",
+      "tooltip": "",
+      "type": "link",
+      "url": "/d/bioetl-runtime/bioetl-runtime?${__url_time_range}"
+    },
+    {
+      "asDropdown": false,
+      "icon": "logs",
+      "includeVars": false,
+      "keepTime": true,
+      "tags": [],
+      "targetBlank": false,
+      "title": "Explore Logs (Loki, tracing profile)",
+      "tooltip": "",
+      "type": "link",
+      "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D"
+    },
+    {
+      "asDropdown": false,
+      "icon": "share-alt",
+      "includeVars": false,
+      "keepTime": true,
+      "tags": [],
+      "targetBlank": false,
+      "title": "Explore Traces (Tempo, tracing profile)",
+      "tooltip": "",
+      "type": "link",
+      "url": "/a/grafana-exploretraces-app/?from=${__from}&to=${__to}&queryType=traceqlSearch&query=%7B%20span.%22bioetl.provider%22%20%3D~%20%22${provider:regex}%22%20%7D"
+    }
+  ],
+  "panels": [
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "Duration (seconds)",
+            "axisPlacement": "auto",
+            "drawStyle": "bars",
+            "fillOpacity": 50,
+            "gradientMode": "none",
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "normal"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "s"
         },
-        {
-            "asDropdown": false,
-            "icon": "external link",
-            "includeVars": false,
-            "keepTime": true,
-            "tags": [],
-            "targetBlank": false,
-            "title": "2. Runtime",
-            "tooltip": "",
-            "type": "link",
-            "url": "/d/bioetl-runtime/bioetl-runtime?${__url_time_range}"
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "legend": {
+          "calcs": [
+            "sum",
+            "mean"
+          ],
+          "displayMode": "table",
+          "placement": "bottom"
         },
-        {
-            "asDropdown": false,
-            "icon": "logs",
-            "includeVars": false,
-            "keepTime": true,
-            "tags": [],
-            "targetBlank": false,
-            "title": "Explore Logs (Loki, tracing profile)",
-            "tooltip": "",
-            "type": "link",
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "dataLinks": [
+          {
+            "title": "Open Logs in Loki Explore (tracing profile)",
             "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D"
-        },
-        {
-            "asDropdown": false,
-            "icon": "share-alt",
-            "includeVars": false,
-            "keepTime": true,
-            "tags": [],
-            "targetBlank": false,
-            "title": "Explore Traces (Tempo, tracing profile)",
-            "tooltip": "",
-            "type": "link",
+          },
+          {
+            "title": "Open Traces in Tempo Explore (tracing profile)",
             "url": "/a/grafana-exploretraces-app/?from=${__from}&to=${__to}&queryType=traceqlSearch&query=%7B%20span.%22bioetl.provider%22%20%3D~%20%22${provider:regex}%22%20%7D"
+          }
+        ]
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum by (le, provider) (increase(bioetl_health_check_latency_seconds_bucket{provider=~\"$provider\"}[$__interval])))",
+          "legendFormat": "{{ provider }} p95",
+          "refId": "A"
         }
-    ],
-    "panels": [
-        {
-            "datasource": "Prometheus",
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "palette-classic"
-                    },
-                    "custom": {
-                        "axisLabel": "Duration (seconds)",
-                        "axisPlacement": "auto",
-                        "drawStyle": "bars",
-                        "fillOpacity": 50,
-                        "gradientMode": "none",
-                        "lineInterpolation": "linear",
-                        "lineWidth": 1,
-                        "pointSize": 5,
-                        "showPoints": "auto",
-                        "spanNulls": false,
-                        "stacking": {
-                            "group": "A",
-                            "mode": "normal"
-                        },
-                        "thresholdsStyle": {
-                            "mode": "off"
-                        }
-                    },
-                    "mappings": [],
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "green",
-                                "value": null
-                            }
-                        ]
-                    },
-                    "unit": "s"
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 8,
-                "w": 12,
-                "x": 0,
-                "y": 0
-            },
-            "id": 1,
-            "options": {
-                "legend": {
-                    "calcs": [
-                        "sum",
-                        "mean"
-                    ],
-                    "displayMode": "table",
-                    "placement": "bottom"
-                },
-                "tooltip": {
-                    "mode": "multi",
-                    "sort": "desc"
-                },
-                "dataLinks": [
-                    {
-                        "title": "Open Logs in Loki Explore (tracing profile)",
-                        "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D"
-                    },
-                    {
-                        "title": "Open Traces in Tempo Explore (tracing profile)",
-                        "url": "/a/grafana-exploretraces-app/?from=${__from}&to=${__to}&queryType=traceqlSearch&query=%7B%20span.%22bioetl.provider%22%20%3D~%20%22${provider:regex}%22%20%7D"
-                    }
-                ]
-            },
-            "targets": [
-                {
-                    "expr": "histogram_quantile(0.95, sum by (le, provider) (increase(bioetl_health_check_latency_seconds_bucket{provider=~\"$provider\"}[$__interval])))",
-                    "legendFormat": "{{ provider }} p95",
-                    "refId": "A"
-                }
-            ],
-            "title": "Health Check Latency by Provider (p95)",
-            "type": "timeseries"
-        },
-        {
-            "datasource": "Prometheus",
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "thresholds"
-                    },
-                    "mappings": [
-                        {
-                            "options": {
-                                "0": {
-                                    "color": "red",
-                                    "index": 0,
-                                    "text": "UNHEALTHY"
-                                },
-                                "1": {
-                                    "color": "yellow",
-                                    "index": 1,
-                                    "text": "DEGRADED"
-                                },
-                                "2": {
-                                    "color": "green",
-                                    "index": 2,
-                                    "text": "HEALTHY"
-                                }
-                            },
-                            "type": "value"
-                        }
-                    ],
-                    "max": 2,
-                    "min": 0,
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "red",
-                                "value": null
-                            },
-                            {
-                                "color": "yellow",
-                                "value": 1
-                            },
-                            {
-                                "color": "green",
-                                "value": 2
-                            }
-                        ]
-                    },
-                    "unit": "short"
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 8,
-                "w": 4,
-                "x": 12,
-                "y": 0
-            },
-            "id": 114,
-            "options": {
-                "footer": {
-                    "fields": "",
-                    "reducer": [
-                        "max"
-                    ],
-                    "show": false
-                },
-                "showHeader": true
-            },
-            "targets": [
-                {
-                    "expr": "max by (provider) (bioetl_provider_health_status{provider=~\"$provider\"})",
-                    "format": "table",
-                    "instant": true,
-                    "legendFormat": "{{ provider }}",
-                    "refId": "A"
-                }
-            ],
-            "title": "Current Provider Health Status",
-            "type": "table"
-        },
-        {
-            "datasource": "Prometheus",
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "thresholds"
-                    },
-                    "mappings": [],
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "red",
-                                "value": null
-                            },
-                            {
-                                "color": "green",
-                                "value": 1
-                            }
-                        ]
-                    }
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 8,
-                "w": 8,
-                "x": 16,
-                "y": 0
-            },
-            "id": 2,
-            "options": {
-                "colorMode": "background",
-                "graphMode": "area",
-                "justifyMode": "center",
-                "orientation": "auto",
-                "reduceOptions": {
-                    "calcs": [
-                        "lastNotNull"
-                    ],
-                    "fields": "",
-                    "values": false
-                },
-                "textMode": "auto"
-            },
-            "targets": [
-                {
-                    "expr": "round(sum(increase(bioetl_health_check_success_total{provider=~\"$provider\"}[$__range])) or vector(0))",
-                    "legendFormat": "{{ provider }}",
-                    "refId": "A"
-                }
-            ],
-            "title": "Healthy Checks",
-            "type": "stat"
-        },
-        {
-            "datasource": "Prometheus",
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "thresholds"
-                    },
-                    "decimals": 2,
-                    "max": 1,
-                    "min": 0,
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "green",
-                                "value": null
-                            },
-                            {
-                                "color": "yellow",
-                                "value": 0.05
-                            },
-                            {
-                                "color": "red",
-                                "value": 0.2
-                            }
-                        ]
-                    },
-                    "unit": "percentunit"
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 8,
-                "w": 8,
-                "x": 16,
-                "y": 8
-            },
-            "id": 104,
-            "options": {
-                "orientation": "auto",
-                "reduceOptions": {
-                    "calcs": [
-                        "lastNotNull"
-                    ],
-                    "fields": "",
-                    "values": false
-                },
-                "showThresholdLabels": false,
-                "showThresholdMarkers": true
-            },
-            "targets": [
-                {
-                    "expr": "(sum(increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[$__range])) or vector(0)) / clamp_min((sum(increase(bioetl_health_check_success_total{provider=~\"$provider\"}[$__range])) or vector(0)) + (sum(increase(bioetl_health_check_degraded_total{provider=~\"$provider\"}[$__range])) or vector(0)) + (sum(increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[$__range])) or vector(0)), 1)",
-                    "legendFormat": "failure_rate",
-                    "refId": "A"
-                }
-            ],
-            "title": "Provider Failure Rate",
-            "type": "gauge"
-        },
-        {
-            "datasource": "Prometheus",
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "thresholds"
-                    },
-                    "decimals": 0,
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "green",
-                                "value": null
-                            }
-                        ]
-                    },
-                    "unit": "short"
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 8,
-                "w": 8,
-                "x": 0,
-                "y": 8
-            },
-            "id": 7,
-            "options": {
-                "colorMode": "value",
-                "graphMode": "area",
-                "justifyMode": "auto",
-                "orientation": "auto",
-                "reduceOptions": {
-                    "calcs": [
-                        "lastNotNull"
-                    ],
-                    "fields": "",
-                    "values": false
-                },
-                "textMode": "auto"
-            },
-            "targets": [
-                {
-                    "expr": "round((sum(increase(bioetl_health_check_success_total{provider=~\"$provider\"}[$__range])) or vector(0)) + (sum(increase(bioetl_health_check_degraded_total{provider=~\"$provider\"}[$__range])) or vector(0)) + (sum(increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[$__range])) or vector(0)))",
-                    "legendFormat": "{{ provider }}",
-                    "refId": "A"
-                }
-            ],
-            "title": "Health Checks Total",
-            "type": "stat"
-        },
-        {
-            "datasource": "Prometheus",
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "thresholds"
-                    },
-                    "decimals": 0,
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "green",
-                                "value": null
-                            },
-                            {
-                                "color": "yellow",
-                                "value": 1
-                            }
-                        ]
-                    },
-                    "unit": "short"
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 8,
-                "w": 8,
-                "x": 8,
-                "y": 8
-            },
-            "id": 105,
-            "options": {
-                "colorMode": "background",
-                "graphMode": "area",
-                "justifyMode": "center",
-                "orientation": "auto",
-                "reduceOptions": {
-                    "calcs": [
-                        "lastNotNull"
-                    ],
-                    "fields": "",
-                    "values": false
-                },
-                "textMode": "auto"
-            },
-            "targets": [
-                {
-                    "expr": "round(sum(increase(bioetl_health_check_degraded_total{provider=~\"$provider\"}[$__range])) or vector(0))",
-                    "legendFormat": "{{ provider }}",
-                    "refId": "A"
-                }
-            ],
-            "title": "Degraded Checks",
-            "type": "stat"
-        },
-        {
-            "datasource": "Prometheus",
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "palette-classic"
-                    },
-                    "custom": {
-                        "axisLabel": "Checks / interval",
-                        "axisPlacement": "auto",
-                        "drawStyle": "line",
-                        "fillOpacity": 20,
-                        "gradientMode": "none",
-                        "lineInterpolation": "linear",
-                        "lineWidth": 2,
-                        "pointSize": 5,
-                        "showPoints": "auto",
-                        "spanNulls": false,
-                        "stacking": {
-                            "group": "A",
-                            "mode": "none"
-                        },
-                        "thresholdsStyle": {
-                            "mode": "off"
-                        }
-                    },
-                    "mappings": [],
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "green",
-                                "value": null
-                            }
-                        ]
-                    },
-                    "unit": "short"
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 8,
-                "w": 12,
-                "x": 0,
-                "y": 16
-            },
-            "id": 106,
-            "options": {
-                "legend": {
-                    "calcs": [
-                        "sum"
-                    ],
-                    "displayMode": "list",
-                    "placement": "bottom"
-                },
-                "tooltip": {
-                    "mode": "multi",
-                    "sort": "desc"
-                }
-            },
-            "targets": [
-                {
-                    "expr": "round(sum by (provider) (increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[$__interval])) or vector(0))",
-                    "legendFormat": "failures {{ provider }}",
-                    "refId": "A"
-                },
-                {
-                    "expr": "round(sum by (provider) (increase(bioetl_health_check_degraded_total{provider=~\"$provider\"}[$__interval])) or vector(0))",
-                    "legendFormat": "degraded {{ provider }}",
-                    "refId": "B"
-                }
-            ],
-            "title": "Failure & Degraded Trend by Provider",
-            "type": "timeseries"
-        },
-        {
-            "datasource": "Prometheus",
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "continuous-GrYlRd"
-                    },
-                    "decimals": 2,
-                    "mappings": [],
-                    "max": 100,
-                    "min": 0,
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "green",
-                                "value": null
-                            },
-                            {
-                                "color": "yellow",
-                                "value": 10
-                            },
-                            {
-                                "color": "red",
-                                "value": 30
-                            }
-                        ]
-                    },
-                    "unit": "percent"
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 8,
-                "w": 12,
-                "x": 12,
-                "y": 16
-            },
-            "id": 107,
-            "options": {
-                "displayMode": "gradient",
-                "orientation": "horizontal",
-                "reduceOptions": {
-                    "calcs": [
-                        "lastNotNull"
-                    ],
-                    "fields": "",
-                    "values": false
-                },
-                "showUnfilled": true
-            },
-            "targets": [
-                {
-                    "expr": "(100 * sum by (provider) (increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[$__range])) / clamp_min(sum(increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[$__range])), 1)) or vector(0)",
-                    "legendFormat": "{{ provider }}",
-                    "refId": "A"
-                }
-            ],
-            "title": "Provider Failure Share (Selected Range)",
-            "type": "bargauge"
-        },
-        {
-            "datasource": "Prometheus",
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "palette-classic"
-                    },
-                    "custom": {
-                        "align": "auto",
-                        "displayMode": "auto"
-                    },
-                    "mappings": [],
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "green",
-                                "value": null
-                            },
-                            {
-                                "color": "yellow",
-                                "value": 1
-                            },
-                            {
-                                "color": "red",
-                                "value": 3
-                            }
-                        ]
-                    },
-                    "unit": "short"
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 8,
-                "w": 12,
-                "x": 0,
-                "y": 24
-            },
-            "id": 108,
-            "options": {
-                "footer": {
-                    "fields": "",
-                    "reducer": [
-                        "sum"
-                    ],
-                    "show": true
-                },
-                "showHeader": true
-            },
-            "targets": [
-                {
-                    "expr": "round(sum by (provider, operation) (increase(bioetl_data_source_retry_exhausted_total{provider=~\"$provider\"}[$__range])) or vector(0))",
-                    "format": "table",
-                    "instant": true,
-                    "legendFormat": "{{ provider }} {{ operation }}",
-                    "refId": "A"
-                }
-            ],
-            "title": "Retries Exhausted by Provider / Operation",
-            "type": "table"
-        },
-        {
-            "datasource": "Prometheus",
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "palette-classic"
-                    },
-                    "custom": {
-                        "axisLabel": "Exhaustions / interval",
-                        "axisPlacement": "auto",
-                        "drawStyle": "line",
-                        "fillOpacity": 20,
-                        "gradientMode": "none",
-                        "lineInterpolation": "linear",
-                        "lineWidth": 2,
-                        "pointSize": 5,
-                        "showPoints": "auto",
-                        "spanNulls": false,
-                        "stacking": {
-                            "group": "A",
-                            "mode": "none"
-                        },
-                        "thresholdsStyle": {
-                            "mode": "off"
-                        }
-                    },
-                    "mappings": [],
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "green",
-                                "value": null
-                            },
-                            {
-                                "color": "yellow",
-                                "value": 1
-                            },
-                            {
-                                "color": "red",
-                                "value": 3
-                            }
-                        ]
-                    },
-                    "unit": "short"
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 8,
-                "w": 12,
-                "x": 12,
-                "y": 24
-            },
-            "id": 109,
-            "options": {
-                "legend": {
-                    "calcs": [
-                        "sum"
-                    ],
-                    "displayMode": "table",
-                    "placement": "bottom"
-                },
-                "tooltip": {
-                    "mode": "multi",
-                    "sort": "desc"
-                }
-            },
-            "targets": [
-                {
-                    "expr": "round(sum by (provider, operation) (increase(bioetl_data_source_retry_exhausted_total{provider=~\"$provider\"}[$__interval])) or vector(0))",
-                    "legendFormat": "{{ provider }} {{ operation }}",
-                    "refId": "A"
-                }
-            ],
-            "title": "Retries Exhausted Trend by Provider / Operation",
-            "type": "timeseries"
-        },
-        {
-            "collapsed": true,
-            "description": "Expand only after selecting one provider or a bounded provider subset.",
-            "gridPos": {
-                "h": 1,
-                "w": 24,
-                "x": 0,
-                "y": 32
-            },
-            "id": 91,
-            "panels": [],
-            "title": "Selected Provider Detail",
-            "type": "row"
-        },
-        {
-            "datasource": "Prometheus",
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "thresholds"
-                    },
-                    "decimals": 3,
-                    "max": 10,
-                    "min": 0,
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "green",
-                                "value": null
-                            },
-                            {
-                                "color": "yellow",
-                                "value": 0.5
-                            },
-                            {
-                                "color": "orange",
-                                "value": 2
-                            },
-                            {
-                                "color": "red",
-                                "value": 5
-                            }
-                        ]
-                    },
-                    "unit": "s"
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 8,
-                "w": 6,
-                "x": 0,
-                "y": 33
-            },
-            "id": 102,
-            "options": {
-                "orientation": "auto",
-                "reduceOptions": {
-                    "calcs": [
-                        "lastNotNull"
-                    ],
-                    "fields": "",
-                    "values": false
-                },
-                "showThresholdLabels": false,
-                "showThresholdMarkers": true
-            },
-            "repeat": "provider",
-            "repeatDirection": "h",
-            "maxPerRow": 4,
-            "targets": [
-                {
-                    "expr": "histogram_quantile(0.95, sum by (le, provider) (increase(bioetl_health_check_latency_seconds_bucket{provider=~\"$provider\"}[$__range])))",
-                    "legendFormat": "{{ provider }}",
-                    "refId": "A"
-                }
-            ],
-            "title": "Provider Health Check Latency (p95) - $provider",
-            "type": "gauge"
-        },
-        {
-            "datasource": "Prometheus",
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "thresholds"
-                    },
-                    "decimals": 0,
-                    "mappings": [],
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "green",
-                                "value": null
-                            },
-                            {
-                                "color": "yellow",
-                                "value": 1
-                            },
-                            {
-                                "color": "red",
-                                "value": 2
-                            }
-                        ]
-                    },
-                    "unit": "short"
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 8,
-                "w": 12,
-                "x": 0,
-                "y": 41
-            },
-            "id": 110,
-            "options": {
-                "legend": {
-                    "calcs": [
-                        "max"
-                    ],
-                    "displayMode": "table",
-                    "placement": "bottom"
-                },
-                "tooltip": {
-                    "mode": "multi",
-                    "sort": "desc"
-                }
-            },
-            "targets": [
-                {
-                    "expr": "histogram_quantile(0.95, sum by (le, provider, endpoint) (increase(bioetl_adapter_request_duration_seconds_bucket{provider=~\"$provider\"}[$__interval])))",
-                    "legendFormat": "{{ provider }} {{ endpoint }} p95",
-                    "refId": "A"
-                }
-            ],
-            "title": "Adapter Request Latency by Endpoint (p95)",
-            "type": "timeseries"
-        },
-        {
-            "datasource": "Prometheus",
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "palette-classic"
-                    },
-                    "custom": {
-                        "axisLabel": "Errors / interval",
-                        "axisPlacement": "auto",
-                        "drawStyle": "line",
-                        "fillOpacity": 20,
-                        "gradientMode": "none",
-                        "lineInterpolation": "linear",
-                        "lineWidth": 2,
-                        "pointSize": 5,
-                        "showPoints": "auto",
-                        "spanNulls": false,
-                        "stacking": {
-                            "group": "A",
-                            "mode": "none"
-                        },
-                        "thresholdsStyle": {
-                            "mode": "off"
-                        }
-                    },
-                    "mappings": [],
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "green",
-                                "value": null
-                            },
-                            {
-                                "color": "yellow",
-                                "value": 1
-                            },
-                            {
-                                "color": "red",
-                                "value": 5
-                            }
-                        ]
-                    },
-                    "unit": "short"
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 8,
-                "w": 12,
-                "x": 12,
-                "y": 41
-            },
-            "id": 111,
-            "options": {
-                "legend": {
-                    "calcs": [
-                        "sum"
-                    ],
-                    "displayMode": "table",
-                    "placement": "bottom"
-                },
-                "tooltip": {
-                    "mode": "multi",
-                    "sort": "desc"
-                }
-            },
-            "targets": [
-                {
-                    "expr": "round(sum by (provider, method, error_type) (increase(bioetl_http_request_errors_total{provider=~\"$provider\"}[$__interval])) or vector(0))",
-                    "legendFormat": "{{ provider }} {{ method }} {{ error_type }}",
-                    "refId": "A"
-                }
-            ],
-            "title": "HTTP Errors by Method / Error Type",
-            "type": "timeseries"
-        },
-        {
-            "datasource": "Prometheus",
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "palette-classic"
-                    },
-                    "custom": {
-                        "axisLabel": "Wait (seconds)",
-                        "axisPlacement": "auto",
-                        "drawStyle": "line",
-                        "fillOpacity": 20,
-                        "gradientMode": "none",
-                        "lineInterpolation": "linear",
-                        "lineWidth": 2,
-                        "pointSize": 5,
-                        "showPoints": "auto",
-                        "spanNulls": false,
-                        "stacking": {
-                            "group": "A",
-                            "mode": "none"
-                        },
-                        "thresholdsStyle": {
-                            "mode": "off"
-                        }
-                    },
-                    "mappings": [],
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "green",
-                                "value": null
-                            },
-                            {
-                                "color": "yellow",
-                                "value": 0.5
-                            },
-                            {
-                                "color": "red",
-                                "value": 2
-                            }
-                        ]
-                    },
-                    "unit": "s"
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 8,
-                "w": 12,
-                "x": 0,
-                "y": 49
-            },
-            "id": 112,
-            "options": {
-                "legend": {
-                    "calcs": [
-                        "max"
-                    ],
-                    "displayMode": "table",
-                    "placement": "bottom"
-                },
-                "tooltip": {
-                    "mode": "multi",
-                    "sort": "desc"
-                }
-            },
-            "targets": [
-                {
-                    "expr": "histogram_quantile(0.95, sum by (le, provider) (increase(bioetl_rate_limiter_wait_seconds_bucket{provider=~\"$provider\"}[$__interval])))",
-                    "legendFormat": "{{ provider }} p95",
-                    "refId": "A"
-                }
-            ],
-            "title": "Rate Limiter Wait by Provider (p95)",
-            "type": "timeseries"
-        },
-        {
-            "datasource": "Prometheus",
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "continuous-BlYlRd"
-                    },
-                    "decimals": 2,
-                    "mappings": [],
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "red",
-                                "value": null
-                            },
-                            {
-                                "color": "yellow",
-                                "value": 1
-                            },
-                            {
-                                "color": "green",
-                                "value": 5
-                            }
-                        ]
-                    },
-                    "unit": "short"
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 8,
-                "w": 12,
-                "x": 12,
-                "y": 49
-            },
-            "id": 113,
-            "options": {
-                "displayMode": "gradient",
-                "orientation": "horizontal",
-                "reduceOptions": {
-                    "calcs": [
-                        "lastNotNull"
-                    ],
-                    "fields": "",
-                    "values": false
-                },
-                "showUnfilled": true
-            },
-            "targets": [
-                {
-                    "expr": "min by (provider) (min_over_time(bioetl_rate_limiter_tokens_available{provider=~\"$provider\"}[$__range])) or vector(0)",
-                    "legendFormat": "{{ provider }}",
-                    "refId": "A"
-                }
-            ],
-            "title": "Minimum Rate Limiter Tokens Available",
-            "type": "bargauge"
-        },
-        {
-            "datasource": "Prometheus",
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "thresholds"
-                    },
-                    "decimals": 0,
-                    "mappings": [],
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "green",
-                                "value": null
-                            },
-                            {
-                                "color": "yellow",
-                                "value": 1
-                            },
-                            {
-                                "color": "red",
-                                "value": 2
-                            }
-                        ]
-                    },
-                    "unit": "short"
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 8,
-                "w": 12,
-                "x": 0,
-                "y": 57
-            },
-            "id": 31,
-            "options": {
-                "colorMode": "value",
-                "graphMode": "none",
-                "justifyMode": "auto",
-                "orientation": "auto",
-                "reduceOptions": {
-                    "calcs": [
-                        "lastNotNull"
-                    ],
-                    "fields": "",
-                    "values": false
-                },
-                "textMode": "auto"
-            },
-            "targets": [
-                {
-                    "expr": "max(max_over_time(bioetl_circuit_breaker_state{adapter=~\"$adapter\"}[$__range])) or vector(0)",
-                    "refId": "A"
-                }
-            ],
-            "title": "Circuit Breaker State (max)",
-            "type": "stat"
-        },
-        {
-            "datasource": "Prometheus",
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "palette-classic"
-                    },
-                    "custom": {
-                        "axisLabel": "Trips",
-                        "axisPlacement": "auto",
-                        "drawStyle": "line",
-                        "fillOpacity": 0,
-                        "gradientMode": "none",
-                        "lineInterpolation": "linear",
-                        "lineWidth": 2,
-                        "pointSize": 5,
-                        "showPoints": "auto",
-                        "spanNulls": false,
-                        "stacking": {
-                            "group": "A",
-                            "mode": "none"
-                        },
-                        "thresholdsStyle": {
-                            "mode": "off"
-                        }
-                    },
-                    "mappings": [],
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "green",
-                                "value": null
-                            }
-                        ]
-                    },
-                    "unit": "short"
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 8,
-                "w": 12,
-                "x": 12,
-                "y": 57
-            },
-            "id": 32,
-            "options": {
-                "legend": {
-                    "calcs": [
-                        "sum",
-                        "max"
-                    ],
-                    "displayMode": "table",
-                    "placement": "bottom"
-                },
-                "tooltip": {
-                    "mode": "multi",
-                    "sort": "desc"
-                }
-            },
-            "targets": [
-                {
-                    "expr": "sum by (adapter) (increase(bioetl_circuit_breaker_trips_total{adapter=~\"$adapter\"}[$__interval])) or label_replace(vector(0), \"adapter\", \"none\", \"\", \"\")",
-                    "legendFormat": "{{adapter}}",
-                    "refId": "A"
-                }
-            ],
-            "title": "Circuit Breaker Trips by Provider",
-            "type": "timeseries"
-        }
-    ],
-    "refresh": "30s",
-    "schemaVersion": 30,
-    "style": "dark",
-    "tags": [
-        "bioetl",
-        "provider",
-        "health",
-        "v2"
-    ],
-    "templating": {
-        "list": [
+      ],
+      "title": "Health Check Latency by Provider (p95)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
             {
-                "allValue": null,
-                "current": {},
-                "datasource": "Prometheus",
-                "definition": "label_values({__name__=~\"bioetl_health_check_(success|degraded|failures)_total\"}, provider)",
-                "hide": 0,
-                "includeAll": true,
-                "label": "Provider",
-                "multi": true,
-                "name": "provider",
-                "options": [],
-                "query": {
-                    "query": "label_values({__name__=~\"bioetl_health_check_(success|degraded|failures)_total\"}, provider)",
-                    "refId": "StandardVariableQuery"
+              "options": {
+                "0": {
+                  "color": "red",
+                  "index": 0,
+                  "text": "UNHEALTHY"
                 },
-                "refresh": 1,
-                "regex": "",
-                "skipUrlSync": false,
-                "sort": 1,
-                "tagValuesQuery": "",
-                "tags": [],
-                "tagsQuery": "",
-                "type": "query",
-                "useTags": false
-            },
-            {
-                "allValue": null,
-                "current": {},
-                "datasource": "Prometheus",
-                "definition": "label_values(bioetl_circuit_breaker_state, adapter)",
-                "hide": 0,
-                "includeAll": true,
-                "label": "Adapter",
-                "multi": true,
-                "name": "adapter",
-                "options": [],
-                "query": {
-                    "query": "label_values(bioetl_circuit_breaker_state, adapter)",
-                    "refId": "StandardVariableQuery"
+                "1": {
+                  "color": "yellow",
+                  "index": 1,
+                  "text": "DEGRADED"
                 },
-                "refresh": 1,
-                "regex": "",
-                "skipUrlSync": false,
-                "sort": 1,
-                "tagValuesQuery": "",
-                "tags": [],
-                "tagsQuery": "",
-                "type": "query",
-                "useTags": false
+                "2": {
+                  "color": "green",
+                  "index": 2,
+                  "text": "HEALTHY"
+                }
+              },
+              "type": "value"
             }
-        ]
+          ],
+          "max": 2,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 1
+              },
+              {
+                "color": "green",
+                "value": 2
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 4,
+        "x": 12,
+        "y": 0
+      },
+      "id": 114,
+      "options": {
+        "footer": {
+          "fields": "",
+          "reducer": [
+            "max"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "targets": [
+        {
+          "expr": "max by (provider) (bioetl_provider_health_status{provider=~\"$provider\"})",
+          "format": "table",
+          "instant": true,
+          "legendFormat": "{{ provider }}",
+          "refId": "A"
+        }
+      ],
+      "title": "Current Provider Health Status",
+      "type": "table"
     },
-    "time": {
-        "from": "now-12h",
-        "to": "now"
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 0
+      },
+      "id": 2,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "round(sum(increase(bioetl_health_check_success_total{provider=~\"$provider\"}[$__range])) or vector(0))",
+          "legendFormat": "{{ provider }}",
+          "refId": "A"
+        }
+      ],
+      "title": "Healthy Checks",
+      "type": "stat"
     },
-    "timepicker": {
-        "refresh_intervals": [
-            "5s",
-            "10s",
-            "30s",
-            "1m",
-            "5m",
-            "15m",
-            "30m",
-            "1h",
-            "2h",
-            "1d"
-        ]
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 2,
+          "max": 1,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 2
+              }
+            ]
+          },
+          "unit": "percentunit",
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 8
+      },
+      "id": 104,
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "targets": [
+        {
+          "expr": "(sum(increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[$__range])) or vector(0)) / clamp_min((sum(increase(bioetl_health_check_success_total{provider=~\"$provider\"}[$__range])) or vector(0)) + (sum(increase(bioetl_health_check_degraded_total{provider=~\"$provider\"}[$__range])) or vector(0)) + (sum(increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[$__range])) or vector(0)), 1)",
+          "legendFormat": "failure_rate",
+          "refId": "A"
+        }
+      ],
+      "title": "Provider Failure Rate",
+      "type": "gauge"
     },
-    "timezone": "",
-    "title": "3. Provider Health",
-    "uid": "bioetl-provider-health-v2",
-    "version": 6
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 2
+              }
+            ]
+          },
+          "unit": "short",
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 8
+      },
+      "id": 7,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "round((sum(increase(bioetl_health_check_success_total{provider=~\"$provider\"}[$__range])) or vector(0)) + (sum(increase(bioetl_health_check_degraded_total{provider=~\"$provider\"}[$__range])) or vector(0)) + (sum(increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[$__range])) or vector(0)))",
+          "legendFormat": "{{ provider }}",
+          "refId": "A"
+        }
+      ],
+      "title": "Health Checks Total",
+      "type": "stat"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 2
+              }
+            ]
+          },
+          "unit": "short",
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 8
+      },
+      "id": 105,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "round(sum(increase(bioetl_health_check_degraded_total{provider=~\"$provider\"}[$__range])) or vector(0))",
+          "legendFormat": "{{ provider }}",
+          "refId": "A"
+        }
+      ],
+      "title": "Degraded Checks",
+      "type": "stat"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "Checks / interval",
+            "axisPlacement": "auto",
+            "drawStyle": "line",
+            "fillOpacity": 20,
+            "gradientMode": "none",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 16
+      },
+      "id": 106,
+      "options": {
+        "legend": {
+          "calcs": [
+            "sum"
+          ],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "expr": "round(sum by (provider) (increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[$__interval])) or vector(0))",
+          "legendFormat": "failures {{ provider }}",
+          "refId": "A"
+        },
+        {
+          "expr": "round(sum by (provider) (increase(bioetl_health_check_degraded_total{provider=~\"$provider\"}[$__interval])) or vector(0))",
+          "legendFormat": "degraded {{ provider }}",
+          "refId": "B"
+        }
+      ],
+      "title": "Failure & Degraded Trend by Provider",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-GrYlRd"
+          },
+          "decimals": 2,
+          "mappings": [],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 10
+              },
+              {
+                "color": "red",
+                "value": 30
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 16
+      },
+      "id": 107,
+      "options": {
+        "displayMode": "gradient",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showUnfilled": true
+      },
+      "targets": [
+        {
+          "expr": "(100 * sum by (provider) (increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[$__range])) / clamp_min(sum(increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[$__range])), 1)) or vector(0)",
+          "legendFormat": "{{ provider }}",
+          "refId": "A"
+        }
+      ],
+      "title": "Provider Failure Share (Selected Range)",
+      "type": "bargauge"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "align": "auto",
+            "displayMode": "auto"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 3
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 24
+      },
+      "id": 108,
+      "options": {
+        "footer": {
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": true
+        },
+        "showHeader": true
+      },
+      "targets": [
+        {
+          "expr": "round(sum by (provider, operation) (increase(bioetl_data_source_retry_exhausted_total{provider=~\"$provider\"}[$__range])) or vector(0))",
+          "format": "table",
+          "instant": true,
+          "legendFormat": "{{ provider }} {{ operation }}",
+          "refId": "A"
+        }
+      ],
+      "title": "Retries Exhausted by Provider / Operation",
+      "type": "table"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "Exhaustions / interval",
+            "axisPlacement": "auto",
+            "drawStyle": "line",
+            "fillOpacity": 20,
+            "gradientMode": "none",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 3
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 24
+      },
+      "id": 109,
+      "options": {
+        "legend": {
+          "calcs": [
+            "sum"
+          ],
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "expr": "round(sum by (provider, operation) (increase(bioetl_data_source_retry_exhausted_total{provider=~\"$provider\"}[$__interval])) or vector(0))",
+          "legendFormat": "{{ provider }} {{ operation }}",
+          "refId": "A"
+        }
+      ],
+      "title": "Retries Exhausted Trend by Provider / Operation",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": true,
+      "description": "Expand only after selecting one provider or a bounded provider subset.",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 32
+      },
+      "id": 91,
+      "panels": [],
+      "title": "Selected Provider Detail",
+      "type": "row"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 3,
+          "max": 10,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 2
+              }
+            ]
+          },
+          "unit": "s",
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 0,
+        "y": 33
+      },
+      "id": 102,
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "repeat": "provider",
+      "repeatDirection": "h",
+      "maxPerRow": 4,
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum by (le, provider) (increase(bioetl_health_check_latency_seconds_bucket{provider=~\"$provider\"}[$__range])))",
+          "legendFormat": "{{ provider }}",
+          "refId": "A"
+        }
+      ],
+      "title": "Provider Health Check Latency (p95) - $provider",
+      "type": "gauge"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 2
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 41
+      },
+      "id": 110,
+      "options": {
+        "legend": {
+          "calcs": [
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum by (le, provider, endpoint) (increase(bioetl_adapter_request_duration_seconds_bucket{provider=~\"$provider\"}[$__interval])))",
+          "legendFormat": "{{ provider }} {{ endpoint }} p95",
+          "refId": "A"
+        }
+      ],
+      "title": "Adapter Request Latency by Endpoint (p95)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "Errors / interval",
+            "axisPlacement": "auto",
+            "drawStyle": "line",
+            "fillOpacity": 20,
+            "gradientMode": "none",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 5
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 41
+      },
+      "id": 111,
+      "options": {
+        "legend": {
+          "calcs": [
+            "sum"
+          ],
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "expr": "round(sum by (provider, method, error_type) (increase(bioetl_http_request_errors_total{provider=~\"$provider\"}[$__interval])) or vector(0))",
+          "legendFormat": "{{ provider }} {{ method }} {{ error_type }}",
+          "refId": "A"
+        }
+      ],
+      "title": "HTTP Errors by Method / Error Type",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "Wait (seconds)",
+            "axisPlacement": "auto",
+            "drawStyle": "line",
+            "fillOpacity": 20,
+            "gradientMode": "none",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.5
+              },
+              {
+                "color": "red",
+                "value": 2
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 49
+      },
+      "id": 112,
+      "options": {
+        "legend": {
+          "calcs": [
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum by (le, provider) (increase(bioetl_rate_limiter_wait_seconds_bucket{provider=~\"$provider\"}[$__interval])))",
+          "legendFormat": "{{ provider }} p95",
+          "refId": "A"
+        }
+      ],
+      "title": "Rate Limiter Wait by Provider (p95)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-BlYlRd"
+          },
+          "decimals": 2,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 1
+              },
+              {
+                "color": "green",
+                "value": 5
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 49
+      },
+      "id": 113,
+      "options": {
+        "displayMode": "gradient",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showUnfilled": true
+      },
+      "targets": [
+        {
+          "expr": "min by (provider) (min_over_time(bioetl_rate_limiter_tokens_available{provider=~\"$provider\"}[$__range])) or vector(0)",
+          "legendFormat": "{{ provider }}",
+          "refId": "A"
+        }
+      ],
+      "title": "Minimum Rate Limiter Tokens Available",
+      "type": "bargauge"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 2
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 57
+      },
+      "id": 31,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "max(max_over_time(bioetl_circuit_breaker_state{adapter=~\"$adapter\"}[$__range])) or vector(0)",
+          "refId": "A"
+        }
+      ],
+      "title": "Circuit Breaker State (max)",
+      "type": "stat"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "Trips",
+            "axisPlacement": "auto",
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 57
+      },
+      "id": 32,
+      "options": {
+        "legend": {
+          "calcs": [
+            "sum",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum by (adapter) (increase(bioetl_circuit_breaker_trips_total{adapter=~\"$adapter\"}[$__interval])) or label_replace(vector(0), \"adapter\", \"none\", \"\", \"\")",
+          "legendFormat": "{{adapter}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Circuit Breaker Trips by Provider",
+      "type": "timeseries"
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 30,
+  "style": "dark",
+  "tags": [
+    "bioetl",
+    "provider",
+    "health",
+    "v2"
+  ],
+  "templating": {
+    "list": [
+      {
+        "allValue": null,
+        "current": {},
+        "datasource": "Prometheus",
+        "definition": "label_values({__name__=~\"bioetl_health_check_(success|degraded|failures)_total\"}, provider)",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Provider",
+        "multi": true,
+        "name": "provider",
+        "options": [],
+        "query": {
+          "query": "label_values({__name__=~\"bioetl_health_check_(success|degraded|failures)_total\"}, provider)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {},
+        "datasource": "Prometheus",
+        "definition": "label_values(bioetl_circuit_breaker_state, adapter)",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Adapter",
+        "multi": true,
+        "name": "adapter",
+        "options": [],
+        "query": {
+          "query": "label_values(bioetl_circuit_breaker_state, adapter)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      }
+    ]
+  },
+  "time": {
+    "from": "now-12h",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": [
+      "5s",
+      "10s",
+      "30s",
+      "1m",
+      "5m",
+      "15m",
+      "30m",
+      "1h",
+      "2h",
+      "1d"
+    ]
+  },
+  "timezone": "",
+  "title": "3. Provider Health",
+  "uid": "bioetl-provider-health-v2",
+  "version": 6
 }

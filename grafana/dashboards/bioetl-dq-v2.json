@@ -1,1518 +1,1695 @@
 {
-    "annotations": {
-        "list": [
-            {
-                "builtIn": 1,
-                "datasource": "-- Grafana --",
-                "enable": true,
-                "hide": true,
-                "iconColor": "rgba(0, 211, 255, 1)",
-                "name": "Annotations & Alerts",
-                "type": "dashboard"
-            }
-        ]
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "description": "Data Quality metrics for selected time range",
+  "editable": true,
+  "gnetId": null,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": false,
+      "keepTime": true,
+      "tags": [],
+      "targetBlank": false,
+      "title": "Back to Overview",
+      "tooltip": "",
+      "type": "link",
+      "url": "/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
     },
-    "description": "Data Quality metrics for selected time range",
-    "editable": true,
-    "gnetId": null,
-    "graphTooltip": 1,
-    "id": null,
-    "links": [
-        {
-            "asDropdown": false,
-            "icon": "external link",
-            "includeVars": false,
-            "keepTime": true,
-            "tags": [],
-            "targetBlank": false,
-            "title": "Back to Overview",
-            "tooltip": "",
-            "type": "link",
-            "url": "/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": false,
+      "keepTime": true,
+      "tags": [],
+      "targetBlank": false,
+      "title": "Control Plane v1",
+      "tooltip": "",
+      "type": "link",
+      "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
+    },
+    {
+      "asDropdown": false,
+      "icon": "list-ul",
+      "includeVars": false,
+      "keepTime": true,
+      "tags": [],
+      "targetBlank": false,
+      "title": "5. Silver Reject Explorer",
+      "tooltip": "",
+      "type": "link",
+      "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
+    },
+    {
+      "asDropdown": false,
+      "icon": "logs",
+      "includeVars": false,
+      "keepTime": true,
+      "tags": [],
+      "targetBlank": false,
+      "title": "Explore Logs (Loki, tracing profile)",
+      "tooltip": "",
+      "type": "link",
+      "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D"
+    },
+    {
+      "asDropdown": false,
+      "icon": "share-alt",
+      "includeVars": false,
+      "keepTime": true,
+      "tags": [],
+      "targetBlank": false,
+      "title": "Explore Traces (Tempo, tracing profile)",
+      "tooltip": "",
+      "type": "link",
+      "url": "/a/grafana-exploretraces-app/?from=${__from}&to=${__to}&queryType=traceqlSearch&query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline:regex}%22%20%26%26%20span.%22bioetl.run_type%22%20%3D~%20%22${run_type:regex}%22%20%7D"
+    }
+  ],
+  "panels": [
+    {
+      "gridPos": {
+        "h": 3,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "id": 99,
+      "options": {
+        "content": "<center><h2>$pipeline</h2></center>",
+        "mode": "html"
+      },
+      "title": "Pipeline",
+      "type": "text"
+    },
+    {
+      "datasource": "Prometheus",
+      "description": "Bounded reason summary only. Use quarantine CLI for exact record-level causes and stable reason signatures.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "Records",
+            "axisPlacement": "auto",
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
         },
-        {
-            "asDropdown": false,
-            "icon": "external link",
-            "includeVars": false,
-            "keepTime": true,
-            "tags": [],
-            "targetBlank": false,
-            "title": "Control Plane v1",
-            "tooltip": "",
-            "type": "link",
-            "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 3
+      },
+      "id": 1,
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom"
         },
-        {
-            "asDropdown": false,
-            "icon": "list-ul",
-            "includeVars": false,
-            "keepTime": true,
-            "tags": [],
-            "targetBlank": false,
-            "title": "5. Silver Reject Explorer",
-            "tooltip": "",
-            "type": "link",
-            "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
         },
-        {
-            "asDropdown": false,
-            "icon": "logs",
-            "includeVars": false,
-            "keepTime": true,
-            "tags": [],
-            "targetBlank": false,
-            "title": "Explore Logs (Loki, tracing profile)",
-            "tooltip": "",
-            "type": "link",
+        "dataLinks": [
+          {
+            "title": "Open Logs in Loki Explore (tracing profile)",
             "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D"
-        },
-        {
-            "asDropdown": false,
-            "icon": "share-alt",
-            "includeVars": false,
-            "keepTime": true,
-            "tags": [],
-            "targetBlank": false,
-            "title": "Explore Traces (Tempo, tracing profile)",
-            "tooltip": "",
-            "type": "link",
+          },
+          {
+            "title": "Open Traces in Tempo Explore (tracing profile)",
             "url": "/a/grafana-exploretraces-app/?from=${__from}&to=${__to}&queryType=traceqlSearch&query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline:regex}%22%20%26%26%20span.%22bioetl.run_type%22%20%3D~%20%22${run_type:regex}%22%20%7D"
+          },
+          {
+            "title": "Open Control Plane v1 (replay/checkpoint)",
+            "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?from=${__from}&to=${__to}&var-pipeline=$pipeline&var-run_type=$run_type"
+          }
+        ]
+      },
+      "targets": [
+        {
+          "expr": "sum by (pipeline, stage) (increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=~\"$stage\"}[$__interval]))",
+          "legendFormat": "{{pipeline}} / {{stage}}",
+          "refId": "A"
+        },
+        {
+          "expr": "sum by (invariant, status) (increase(bioetl_record_flow_invariants_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__interval]))",
+          "legendFormat": "{{invariant}} / {{status}}",
+          "refId": "B"
         }
-    ],
-    "panels": [
-        {
-            "gridPos": {
-                "h": 3,
-                "w": 12,
-                "x": 0,
-                "y": 0
-            },
-            "id": 99,
-            "options": {
-                "content": "<center><h2>$pipeline</h2></center>",
-                "mode": "html"
-            },
-            "title": "Pipeline",
-            "type": "text"
-        },
-        {
-            "datasource": "Prometheus",
-            "description": "Bounded reason summary only. Use quarantine CLI for exact record-level causes and stable reason signatures.",
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "palette-classic"
-                    },
-                    "custom": {
-                        "axisLabel": "Records",
-                        "axisPlacement": "auto",
-                        "drawStyle": "line",
-                        "fillOpacity": 0,
-                        "gradientMode": "none",
-                        "lineInterpolation": "linear",
-                        "lineWidth": 2,
-                        "pointSize": 5,
-                        "showPoints": "auto",
-                        "spanNulls": false,
-                        "stacking": {
-                            "group": "A",
-                            "mode": "none"
-                        },
-                        "thresholdsStyle": {
-                            "mode": "off"
-                        }
-                    },
-                    "mappings": [],
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "green",
-                                "value": null
-                            }
-                        ]
-                    },
-                    "unit": "short"
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 8,
-                "w": 24,
-                "x": 0,
-                "y": 3
-            },
-            "id": 1,
-            "options": {
-                "legend": {
-                    "calcs": [
-                        "mean",
-                        "max"
-                    ],
-                    "displayMode": "table",
-                    "placement": "bottom"
-                },
-                "tooltip": {
-                    "mode": "multi",
-                    "sort": "desc"
-                },
-                "dataLinks": [
-                    {
-                        "title": "Open Logs in Loki Explore (tracing profile)",
-                        "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D"
-                    },
-                    {
-                        "title": "Open Traces in Tempo Explore (tracing profile)",
-                        "url": "/a/grafana-exploretraces-app/?from=${__from}&to=${__to}&queryType=traceqlSearch&query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline:regex}%22%20%26%26%20span.%22bioetl.run_type%22%20%3D~%20%22${run_type:regex}%22%20%7D"
-                    },
-                    {
-                        "title": "Open Control Plane v1 (replay/checkpoint)",
-                        "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?from=${__from}&to=${__to}&var-pipeline=$pipeline&var-run_type=$run_type"
-                    }
-                ]
-            },
-            "targets": [
-                {
-                    "expr": "sum by (pipeline, stage) (increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=~\"$stage\"}[$__interval]))",
-                    "legendFormat": "{{pipeline}} / {{stage}}",
-                    "refId": "A"
-                },
-                {
-                    "expr": "sum by (invariant, status) (increase(bioetl_record_flow_invariants_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__interval]))",
-                    "legendFormat": "{{invariant}} / {{status}}",
-                    "refId": "B"
-                }
-            ],
-            "title": "Data Flow in Range: Bronze -> Silver -> Gold",
-            "type": "timeseries"
-        },
-        {
-            "datasource": "Prometheus",
-            "description": "Bounded field summary only. Use quarantine CLI when you need exact record-level field failures and payload context.",
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "thresholds"
-                    },
-                    "decimals": 2,
-                    "max": 1,
-                    "min": 0,
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "red",
-                                "value": null
-                            },
-                            {
-                                "color": "yellow",
-                                "value": 0.8
-                            },
-                            {
-                                "color": "green",
-                                "value": 0.9
-                            }
-                        ]
-                    },
-                    "unit": "percentunit"
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 8,
-                "w": 8,
-                "x": 0,
-                "y": 11
-            },
-            "id": 2,
-            "options": {
-                "orientation": "auto",
-                "reduceOptions": {
-                    "calcs": [
-                        "lastNotNull"
-                    ],
-                    "fields": "",
-                    "values": false
-                },
-                "showThresholdLabels": false,
-                "showThresholdMarkers": true
-            },
-            "targets": [
-                {
-                    "expr": "((sum((bioetl_dq_validation_score{pipeline=~\"$pipeline\"} * bioetl_dq_validation_record_count{pipeline=~\"$pipeline\"})) or vector(0)) / clamp_min((sum(bioetl_dq_validation_record_count{pipeline=~\"$pipeline\"}) or vector(0)), 1))",
-                    "legendFormat": "Quality",
-                    "refId": "A"
-                }
-            ],
-            "title": "Data Quality Score (Volume-weighted)",
-            "type": "gauge"
-        },
-        {
-            "datasource": "Prometheus",
-            "description": "Preserve Grafana no-data when no DQ score samples exist for the selected scope; do not collapse missing validation output into score 0.",
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "thresholds"
-                    },
-                    "decimals": 0,
-                    "mappings": [],
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "green",
-                                "value": null
-                            }
-                        ]
-                    },
-                    "unit": "short"
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 8,
-                "w": 8,
-                "x": 8,
-                "y": 11
-            },
-            "id": 3,
-            "options": {
-                "colorMode": "value",
-                "graphMode": "area",
-                "justifyMode": "auto",
-                "orientation": "auto",
-                "reduceOptions": {
-                    "calcs": [
-                        "lastNotNull"
-                    ],
-                    "fields": "",
-                    "values": false
-                },
-                "textMode": "auto"
-            },
-            "targets": [
-                {
-                    "expr": "round(sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"bronze\"}[$__range])) or vector(0))",
-                    "instant": true,
-                    "legendFormat": "Bronze",
-                    "refId": "A"
-                }
-            ],
-            "title": "Source Records in Range (Bronze)",
-            "type": "stat"
-        },
-        {
-            "datasource": "Prometheus",
-            "description": "Silver reject reconciliation signal. Non-zero means the stage-total filtered_out counter diverges from the bounded Silver reject breakdown metric over the selected range.",
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "thresholds"
-                    },
-                    "decimals": 0,
-                    "mappings": [],
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "green",
-                                "value": null
-                            },
-                            {
-                                "color": "red",
-                                "value": 1
-                            }
-                        ]
-                    },
-                    "unit": "short"
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 8,
-                "w": 8,
-                "x": 16,
-                "y": 26
-            },
-            "id": 152,
-            "options": {
-                "colorMode": "value",
-                "graphMode": "none",
-                "justifyMode": "auto",
-                "orientation": "auto",
-                "reduceOptions": {
-                    "calcs": [
-                        "lastNotNull"
-                    ],
-                    "fields": "",
-                    "values": false
-                },
-                "textMode": "auto"
-            },
-            "targets": [
-                {
-                    "expr": "round(sum(max_over_time(bioetl_silver_filter_reject_total_mismatch_15m{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])) or vector(0))",
-                    "refId": "A"
-                }
-            ],
-            "title": "Silver Filter Reject Accounting Mismatch",
-            "type": "stat"
-        },
-        {
-            "datasource": "Prometheus",
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "thresholds"
-                    },
-                    "decimals": 0,
-                    "mappings": [],
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "green",
-                                "value": null
-                            }
-                        ]
-                    },
-                    "unit": "short"
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 8,
-                "w": 8,
-                "x": 16,
-                "y": 11
-            },
-            "id": 4,
-            "options": {
-                "colorMode": "value",
-                "graphMode": "area",
-                "justifyMode": "auto",
-                "orientation": "auto",
-                "reduceOptions": {
-                    "calcs": [
-                        "lastNotNull"
-                    ],
-                    "fields": "",
-                    "values": false
-                },
-                "textMode": "auto"
-            },
-            "targets": [
-                {
-                    "expr": "round(sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"gold\"}[$__range])) or vector(0))",
-                    "instant": true,
-                    "legendFormat": "Gold",
-                    "refId": "A"
-                }
-            ],
-            "title": "Clean Records in Range (Gold)",
-            "type": "stat"
-        },
-        {
-            "datasource": "Prometheus",
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "thresholds"
-                    },
-                    "decimals": 2,
-                    "max": 1,
-                    "min": 0,
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "red",
-                                "value": null
-                            },
-                            {
-                                "color": "yellow",
-                                "value": 0.8
-                            },
-                            {
-                                "color": "green",
-                                "value": 0.9
-                            }
-                        ]
-                    },
-                    "unit": "percentunit"
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 7,
-                "w": 6,
-                "x": 0,
-                "y": 19
-            },
-            "id": 5,
-            "options": {
-                "orientation": "auto",
-                "reduceOptions": {
-                    "calcs": [
-                        "lastNotNull"
-                    ],
-                    "fields": "",
-                    "values": false
-                },
-                "showThresholdLabels": false,
-                "showThresholdMarkers": true
-            },
-            "targets": [
-                {
-                    "expr": "min(bioetl_dq_validation_score{pipeline=~\"$pipeline\"})",
-                    "legendFormat": "Worst Entity",
-                    "refId": "A"
-                }
-            ],
-            "title": "Worst-Entity DQ Score",
-            "type": "gauge"
-        },
-        {
-            "datasource": "Prometheus",
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "thresholds"
-                    },
-                    "decimals": 0,
-                    "mappings": [],
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "green",
-                                "value": null
-                            },
-                            {
-                                "color": "yellow",
-                                "value": 10
-                            },
-                            {
-                                "color": "red",
-                                "value": 100
-                            }
-                        ]
-                    },
-                    "unit": "short"
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 7,
-                "w": 6,
-                "x": 6,
-                "y": 19
-            },
-            "id": 6,
-            "options": {
-                "colorMode": "value",
-                "graphMode": "none",
-                "justifyMode": "auto",
-                "orientation": "auto",
-                "reduceOptions": {
-                    "calcs": [
-                        "lastNotNull"
-                    ],
-                    "fields": "",
-                    "values": false
-                },
-                "textMode": "auto"
-            },
-            "targets": [
-                {
-                    "expr": "round(sum(increase(bioetl_dq_records_quarantined_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])) or vector(0))",
-                    "legendFormat": "Quarantined",
-                    "refId": "A"
-                }
-            ],
-            "title": "Records Quarantined",
-            "type": "stat"
-        },
-        {
-            "datasource": "Prometheus",
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "thresholds"
-                    },
-                    "decimals": 0,
-                    "mappings": [],
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "green",
-                                "value": null
-                            },
-                            {
-                                "color": "yellow",
-                                "value": 1
-                            },
-                            {
-                                "color": "red",
-                                "value": 10
-                            }
-                        ]
-                    },
-                    "unit": "short"
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 7,
-                "w": 6,
-                "x": 12,
-                "y": 19
-            },
-            "id": 7,
-            "options": {
-                "colorMode": "value",
-                "graphMode": "none",
-                "justifyMode": "auto",
-                "orientation": "auto",
-                "reduceOptions": {
-                    "calcs": [
-                        "lastNotNull"
-                    ],
-                    "fields": "",
-                    "values": false
-                },
-                "textMode": "auto"
-            },
-            "targets": [
-                {
-                    "expr": "round(sum(increase(bioetl_dq_soft_threshold_exceeded{pipeline=~\"$pipeline\"}[$__range])) or vector(0))",
-                    "legendFormat": "Threshold Exceeded",
-                    "refId": "A"
-                }
-            ],
-            "title": "Soft Threshold Exceeded",
-            "type": "stat"
-        },
-        {
-            "datasource": "Prometheus",
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "thresholds"
-                    },
-                    "decimals": 0,
-                    "mappings": [],
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "green",
-                                "value": null
-                            },
-                            {
-                                "color": "yellow",
-                                "value": 86400
-                            },
-                            {
-                                "color": "red",
-                                "value": 259200
-                            }
-                        ]
-                    },
-                    "unit": "s"
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 7,
-                "w": 6,
-                "x": 18,
-                "y": 19
-            },
-            "id": 8,
-            "options": {
-                "orientation": "auto",
-                "reduceOptions": {
-                    "calcs": [
-                        "lastNotNull"
-                    ],
-                    "fields": "",
-                    "values": false
-                },
-                "showThresholdLabels": false,
-                "showThresholdMarkers": true
-            },
-            "targets": [
-                {
-                    "expr": "max(clamp_min(time() - bioetl_data_freshness_seconds{pipeline=~\"$pipeline\"}, 0))",
-                    "legendFormat": "Worst Freshness",
-                    "refId": "A"
-                }
-            ],
-            "title": "Worst Data Freshness Lag (seconds)",
-            "type": "gauge"
-        },
-        {
-            "datasource": "Prometheus",
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "thresholds"
-                    },
-                    "decimals": 0,
-                    "mappings": [],
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "green",
-                                "value": null
-                            },
-                            {
-                                "color": "yellow",
-                                "value": 1
-                            },
-                            {
-                                "color": "red",
-                                "value": 25
-                            }
-                        ]
-                    },
-                    "unit": "short"
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 8,
-                "w": 8,
-                "x": 0,
-                "y": 26
-            },
-            "id": 117,
-            "options": {
-                "colorMode": "value",
-                "graphMode": "none",
-                "justifyMode": "auto",
-                "orientation": "auto",
-                "reduceOptions": {
-                    "calcs": [
-                        "lastNotNull"
-                    ],
-                    "fields": "",
-                    "values": false
-                },
-                "textMode": "auto"
-            },
-            "targets": [
-                {
-                    "expr": "round(sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__range])) or vector(0))",
-                    "instant": true,
-                    "legendFormat": "Filtered Out",
-                    "refId": "A"
-                }
-            ],
-            "title": "Silver Filter Rejects",
-            "type": "stat"
-        },
-        {
-            "datasource": "Prometheus",
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "palette-classic"
-                    },
-                    "custom": {
-                        "axisLabel": "Rejects",
-                        "axisPlacement": "auto",
-                        "drawStyle": "line",
-                        "fillOpacity": 10,
-                        "gradientMode": "none",
-                        "lineInterpolation": "linear",
-                        "lineWidth": 2,
-                        "pointSize": 5,
-                        "showPoints": "auto",
-                        "spanNulls": false,
-                        "stacking": {
-                            "group": "A",
-                            "mode": "none"
-                        },
-                        "thresholdsStyle": {
-                            "mode": "off"
-                        }
-                    },
-                    "mappings": [],
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "green",
-                                "value": null
-                            }
-                        ]
-                    },
-                    "unit": "short"
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 8,
-                "w": 8,
-                "x": 8,
-                "y": 26
-            },
-            "id": 118,
-            "options": {
-                "displayMode": "gradient",
-                "orientation": "horizontal",
-                "reduceOptions": {
-                    "calcs": [
-                        "lastNotNull"
-                    ],
-                    "fields": "",
-                    "values": false
-                },
-                "showUnfilled": true
-            },
-            "targets": [
-                {
-                    "expr": "sum by (pipeline) (increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__range])) or label_replace(vector(0), \"pipeline\", \"no_events\", \"\", \"\")",
-                    "instant": true,
-                    "legendFormat": "{{pipeline}}",
-                    "refId": "A"
-                }
-            ],
-            "title": "Silver Filter Rejects by Pipeline",
-            "type": "bargauge"
-        },
-        {
-            "datasource": "Prometheus",
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "palette-classic"
-                    },
-                    "custom": {
-                        "axisLabel": "Rejects",
-                        "axisPlacement": "auto",
-                        "drawStyle": "line",
-                        "fillOpacity": 10,
-                        "gradientMode": "none",
-                        "lineInterpolation": "linear",
-                        "lineWidth": 2,
-                        "pointSize": 5,
-                        "showPoints": "auto",
-                        "spanNulls": false,
-                        "stacking": {
-                            "group": "A",
-                            "mode": "none"
-                        },
-                        "thresholdsStyle": {
-                            "mode": "off"
-                        }
-                    },
-                    "mappings": [],
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "green",
-                                "value": null
-                            }
-                        ]
-                    },
-                    "unit": "short"
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 8,
-                "w": 12,
-                "x": 0,
-                "y": 34
-            },
-            "id": 121,
-            "options": {
-                "displayMode": "gradient",
-                "orientation": "horizontal",
-                "dataLinks": [
-                    {
-                        "title": "Open Silver Reject Explorer",
-                        "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
-                    }
-                ],
-                "reduceOptions": {
-                    "calcs": [
-                        "lastNotNull"
-                    ],
-                    "fields": "",
-                    "values": false
-                },
-                "showUnfilled": true
-            },
-            "targets": [
-                {
-                    "expr": "topk(10, sum by (reason_code) (increase(bioetl_silver_filter_rejections_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range]))) or label_replace(vector(0), \"reason_code\", \"none\", \"\", \"\")",
-                    "instant": true,
-                    "legendFormat": "{{reason_code}}",
-                    "refId": "A"
-                }
-            ],
-            "title": "Top Silver Reject Reasons",
-            "type": "bargauge"
-        },
-        {
-            "datasource": "Prometheus",
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "palette-classic"
-                    },
-                    "custom": {
-                        "axisLabel": "Rejects",
-                        "axisPlacement": "auto",
-                        "drawStyle": "line",
-                        "fillOpacity": 10,
-                        "gradientMode": "none",
-                        "lineInterpolation": "linear",
-                        "lineWidth": 2,
-                        "pointSize": 5,
-                        "showPoints": "auto",
-                        "spanNulls": false,
-                        "stacking": {
-                            "group": "A",
-                            "mode": "none"
-                        },
-                        "thresholdsStyle": {
-                            "mode": "off"
-                        }
-                    },
-                    "mappings": [],
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "green",
-                                "value": null
-                            }
-                        ]
-                    },
-                    "unit": "short"
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 8,
-                "w": 12,
-                "x": 12,
-                "y": 34
-            },
-            "id": 122,
-            "options": {
-                "displayMode": "gradient",
-                "orientation": "horizontal",
-                "dataLinks": [
-                    {
-                        "title": "Open Silver Reject Explorer",
-                        "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
-                    }
-                ],
-                "reduceOptions": {
-                    "calcs": [
-                        "lastNotNull"
-                    ],
-                    "fields": "",
-                    "values": false
-                },
-                "showUnfilled": true
-            },
-            "targets": [
-                {
-                    "expr": "topk(10, sum by (field) (increase(bioetl_silver_filter_rejections_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range]))) or label_replace(vector(0), \"field\", \"none\", \"\", \"\")",
-                    "instant": true,
-                    "legendFormat": "{{field}}",
-                    "refId": "A"
-                }
-            ],
-            "description": "Bounded schema-field summary only; use 5. Silver Reject Explorer or quarantine CLI for exact record context.",
-            "title": "Top Silver Reject Fields",
-            "type": "bargauge"
-        },
-        {
-            "datasource": "Prometheus",
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "palette-classic"
-                    },
-                    "mappings": [],
-                    "unit": "short"
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 8,
-                "w": 8,
-                "x": 0,
-                "y": 42
-            },
-            "id": 9,
-            "options": {
-                "displayLabels": [
-                    "name",
-                    "percent"
-                ],
-                "legend": {
-                    "displayMode": "table",
-                    "placement": "right"
-                },
-                "pieType": "pie",
-                "reduceOptions": {
-                    "calcs": [
-                        "lastNotNull"
-                    ],
-                    "fields": "",
-                    "values": false
-                },
-                "tooltip": {
-                    "mode": "single"
-                }
-            },
-            "targets": [
-                {
-                    "expr": "sum by (error_type) (increase(bioetl_dq_records_quarantined_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])) or label_replace(vector(0), \"error_type\", \"none\", \"\", \"\")",
-                    "legendFormat": "{{error_type}}",
-                    "refId": "A"
-                }
-            ],
-            "title": "Quarantine by Error Type",
-            "type": "piechart"
-        },
-        {
-            "datasource": "Prometheus",
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "palette-classic"
-                    },
-                    "custom": {
-                        "axisLabel": "Anomalies",
-                        "axisPlacement": "auto",
-                        "drawStyle": "line",
-                        "fillOpacity": 0,
-                        "gradientMode": "none",
-                        "lineInterpolation": "linear",
-                        "lineWidth": 2,
-                        "pointSize": 5,
-                        "showPoints": "auto",
-                        "spanNulls": false,
-                        "stacking": {
-                            "group": "A",
-                            "mode": "none"
-                        },
-                        "thresholdsStyle": {
-                            "mode": "off"
-                        }
-                    },
-                    "mappings": [],
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "green",
-                                "value": null
-                            }
-                        ]
-                    },
-                    "unit": "short"
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 8,
-                "w": 16,
-                "x": 8,
-                "y": 42
-            },
-            "id": 10,
-            "options": {
-                "legend": {
-                    "calcs": [
-                        "sum",
-                        "max"
-                    ],
-                    "displayMode": "table",
-                    "placement": "bottom"
-                },
-                "tooltip": {
-                    "mode": "multi",
-                    "sort": "desc"
-                }
-            },
-            "targets": [
-                {
-                    "expr": "sum by (severity, anomaly_type) (increase(bioetl_dq_anomaly_detected{pipeline=~\"$pipeline\"}[$__interval])) or label_replace(label_replace(vector(0), \"severity\", \"none\", \"\", \"\"), \"anomaly_type\", \"none\", \"\", \"\")",
-                    "legendFormat": "{{severity}} / {{anomaly_type}}",
-                    "refId": "A"
-                }
-            ],
-            "title": "Anomalies Detected",
-            "type": "timeseries"
-        },
-        {
-            "datasource": "Prometheus",
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "palette-classic"
-                    },
-                    "custom": {
-                        "axisLabel": "Duration (ms)",
-                        "axisPlacement": "auto",
-                        "drawStyle": "line",
-                        "fillOpacity": 0,
-                        "gradientMode": "none",
-                        "lineInterpolation": "linear",
-                        "lineWidth": 2,
-                        "pointSize": 5,
-                        "showPoints": "auto",
-                        "spanNulls": false,
-                        "stacking": {
-                            "group": "A",
-                            "mode": "none"
-                        },
-                        "thresholdsStyle": {
-                            "mode": "off"
-                        }
-                    },
-                    "mappings": [],
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "green",
-                                "value": null
-                            }
-                        ]
-                    },
-                    "unit": "ms"
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 8,
-                "w": 12,
-                "x": 0,
-                "y": 50
-            },
-            "id": 11,
-            "options": {
-                "legend": {
-                    "calcs": [
-                        "mean",
-                        "max"
-                    ],
-                    "displayMode": "table",
-                    "placement": "bottom"
-                },
-                "tooltip": {
-                    "mode": "multi",
-                    "sort": "desc"
-                }
-            },
-            "targets": [
-                {
-                    "expr": "histogram_quantile(0.95, sum by (le, pipeline) (increase(bioetl_dq_check_duration_ms_bucket{pipeline=~\"$pipeline\"}[$__interval])))",
-                    "legendFormat": "{{pipeline}} p95",
-                    "refId": "A"
-                }
-            ],
-            "title": "DQ Check Duration (p95)",
-            "type": "timeseries"
-        },
-        {
-            "datasource": "Prometheus",
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "thresholds"
-                    },
-                    "decimals": 0,
-                    "mappings": [],
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "green",
-                                "value": null
-                            },
-                            {
-                                "color": "yellow",
-                                "value": 1
-                            },
-                            {
-                                "color": "red",
-                                "value": 10
-                            }
-                        ]
-                    },
-                    "unit": "short"
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 8,
-                "w": 6,
-                "x": 12,
-                "y": 50
-            },
-            "id": 12,
-            "options": {
-                "colorMode": "value",
-                "graphMode": "none",
-                "justifyMode": "auto",
-                "orientation": "auto",
-                "reduceOptions": {
-                    "calcs": [
-                        "lastNotNull"
-                    ],
-                    "fields": "",
-                    "values": false
-                },
-                "textMode": "auto"
-            },
-            "targets": [
-                {
-                    "expr": "round(sum(increase(bioetl_silver_validation_failures_total{pipeline=~\"$pipeline\"}[$__range])) or vector(0))",
-                    "legendFormat": "Validation Failures",
-                    "refId": "A"
-                }
-            ],
-            "title": "Silver Validation Failures",
-            "type": "stat"
-        },
-        {
-            "datasource": "Prometheus",
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "thresholds"
-                    },
-                    "decimals": 0,
-                    "mappings": [],
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "green",
-                                "value": null
-                            },
-                            {
-                                "color": "yellow",
-                                "value": 1
-                            },
-                            {
-                                "color": "red",
-                                "value": 10
-                            }
-                        ]
-                    },
-                    "unit": "short"
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 8,
-                "w": 6,
-                "x": 18,
-                "y": 50
-            },
-            "id": 116,
-            "options": {
-                "colorMode": "value",
-                "graphMode": "none",
-                "justifyMode": "auto",
-                "orientation": "auto",
-                "reduceOptions": {
-                    "calcs": [
-                        "lastNotNull"
-                    ],
-                    "fields": "",
-                    "values": false
-                },
-                "textMode": "auto",
-                "dataLinks": [
-                    {
-                        "title": "Open Control Plane v1 (lineage/traceability)",
-                        "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?from=${__from}&to=${__to}&var-pipeline=$pipeline&var-run_type=$run_type"
-                    }
-                ]
-            },
-            "targets": [
-                {
-                    "expr": "round(sum(increase(bioetl_lineage_refs_missing_total{pipeline=~\"$pipeline\"}[$__range])) or vector(0))",
-                    "legendFormat": "Missing Refs",
-                    "refId": "A"
-                }
-            ],
-            "title": "Lineage Refs Missing",
-            "type": "stat"
-        },
-        {
-            "datasource": "Prometheus",
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "palette-classic"
-                    },
-                    "custom": {
-                        "hideFrom": {
-                            "legend": false,
-                            "tooltip": false,
-                            "viz": false
-                        }
-                    },
-                    "mappings": [],
-                    "unit": "dateTimeAsLocal",
-                    "decimals": 0,
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "green",
-                                "value": null
-                            }
-                        ]
-                    }
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 3,
-                "w": 12,
-                "x": 12,
-                "y": 0
-            },
-            "id": 101,
-            "options": {
-                "colorMode": "background",
-                "graphMode": "none",
-                "justifyMode": "center",
-                "orientation": "auto",
-                "reduceOptions": {
-                    "calcs": [
-                        "lastNotNull"
-                    ],
-                    "fields": "",
-                    "values": false
-                },
-                "textMode": "auto"
-            },
-            "targets": [
-                {
-                    "expr": "max(bioetl_data_freshness_seconds{pipeline=~\"$pipeline\"}) * 1000",
-                    "legendFormat": "Latest Data",
-                    "refId": "A"
-                }
-            ],
-            "title": "Latest Successful Data Timestamp",
-            "type": "stat"
-        },
-        {
-            "datasource": "Prometheus",
-            "fieldConfig": {
-                "defaults": {
-                    "mappings": [],
-                    "unit": "short"
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 4,
-                "w": 24,
-                "x": 0,
-                "y": 60
-            },
-            "id": 150,
-            "options": {
-                "content": "### Control-plane aggregates available\n- Open `BioETL Control Plane v1` for aggregated manifest writes, ledger appends, checkpoint compatibility outcomes, and control-plane read failures.\n- Use the `Observability Checklist (runbook)` dashboard link when `BioETLControlPlaneReadFailureRate` or related aggregate signals require operator follow-up.\n",
-                "mode": "markdown"
-            },
-            "type": "text"
-        },
-        {
-            "datasource": "Prometheus",
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "thresholds"
-                    },
-                    "decimals": 0,
-                    "mappings": [],
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "green",
-                                "value": null
-                            },
-                            {
-                                "color": "red",
-                                "value": 1
-                            }
-                        ]
-                    },
-                    "unit": "short"
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 8,
-                "w": 8,
-                "x": 0,
-                "y": 64
-            },
-            "id": 151,
-            "options": {
-                "colorMode": "value",
-                "graphMode": "none",
-                "justifyMode": "auto",
-                "orientation": "auto",
-                "reduceOptions": {
-                    "calcs": [
-                        "lastNotNull"
-                    ],
-                    "fields": "",
-                    "values": false
-                },
-                "textMode": "auto",
-                "dataLinks": [
-                    {
-                        "title": "Open Control Plane v1 (gold hard-fail context)",
-                        "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?from=${__from}&to=${__to}&var-pipeline=$pipeline&var-run_type=$run_type"
-                    }
-                ]
-            },
-            "targets": [
-                {
-                    "expr": "round(sum(increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\", stage=\"gold\", severity=\"hard_fail\"}[$__range])) or vector(0))",
-                    "refId": "A"
-                }
-            ],
-            "title": "Gold Strict Validation Failures",
-            "type": "stat"
-        }
-    ],
-    "refresh": "30s",
-    "schemaVersion": 30,
-    "style": "dark",
-    "tags": [
-        "bioetl",
-        "data-quality",
-        "dq",
-        "validation",
-        "v2"
-    ],
-    "templating": {
-        "list": [
+      ],
+      "title": "Data Flow in Range: Bronze -> Silver -> Gold",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "description": "Bounded field summary only. Use quarantine CLI when you need exact record-level field failures and payload context.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 2,
+          "max": 1,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 2
+              }
+            ]
+          },
+          "unit": "percentunit",
+          "mappings": [
             {
-                "allValue": null,
-                "current": {},
-                "datasource": "Prometheus",
-                "definition": "label_values(bioetl_records_processed_total, pipeline)",
-                "hide": 0,
-                "includeAll": true,
-                "label": "Pipeline",
-                "multi": true,
-                "name": "pipeline",
-                "options": [],
-                "query": {
-                    "query": "label_values(bioetl_records_processed_total, pipeline)",
-                    "refId": "StandardVariableQuery"
-                },
-                "refresh": 1,
-                "regex": "",
-                "skipUrlSync": false,
-                "sort": 1,
-                "tagValuesQuery": "",
-                "tags": [],
-                "tagsQuery": "",
-                "type": "query",
-                "useTags": false
-            },
-            {
-                "allValue": null,
-                "current": {},
-                "datasource": "Prometheus",
-                "definition": "label_values(bioetl_records_processed_total{pipeline=~\"$pipeline\"}, run_type)",
-                "hide": 0,
-                "includeAll": true,
-                "label": "Run Type",
-                "multi": true,
-                "name": "run_type",
-                "options": [],
-                "query": {
-                    "query": "label_values(bioetl_records_processed_total{pipeline=~\"$pipeline\"}, run_type)",
-                    "refId": "StandardVariableQuery"
-                },
-                "refresh": 1,
-                "regex": "",
-                "skipUrlSync": false,
-                "sort": 1,
-                "tagValuesQuery": "",
-                "tags": [],
-                "tagsQuery": "",
-                "type": "query",
-                "useTags": false
-            },
-            {
-                "allValue": null,
-                "current": {},
-                "datasource": "Prometheus",
-                "definition": "label_values(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}, stage)",
-                "hide": 0,
-                "includeAll": true,
-                "label": "Stage",
-                "multi": true,
-                "name": "stage",
-                "options": [],
-                "query": {
-                    "query": "label_values(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}, stage)",
-                    "refId": "StandardVariableQuery"
-                },
-                "refresh": 1,
-                "regex": "",
-                "skipUrlSync": false,
-                "sort": 1,
-                "tagValuesQuery": "",
-                "tags": [],
-                "tagsQuery": "",
-                "type": "query",
-                "useTags": false
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
             }
+          ]
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 11
+      },
+      "id": 2,
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "targets": [
+        {
+          "expr": "((sum((bioetl_dq_validation_score{pipeline=~\"$pipeline\"} * bioetl_dq_validation_record_count{pipeline=~\"$pipeline\"})) or vector(0)) / clamp_min((sum(bioetl_dq_validation_record_count{pipeline=~\"$pipeline\"}) or vector(0)), 1))",
+          "legendFormat": "Quality",
+          "refId": "A"
+        }
+      ],
+      "title": "Data Quality Score (Volume-weighted)",
+      "type": "gauge"
+    },
+    {
+      "datasource": "Prometheus",
+      "description": "Preserve Grafana no-data when no DQ score samples exist for the selected scope; do not collapse missing validation output into score 0.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 2
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 11
+      },
+      "id": 3,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "round(sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"bronze\"}[$__range])) or vector(0))",
+          "instant": true,
+          "legendFormat": "Bronze",
+          "refId": "A"
+        }
+      ],
+      "title": "Source Records in Range (Bronze)",
+      "type": "stat"
+    },
+    {
+      "datasource": "Prometheus",
+      "description": "Silver reject reconciliation signal. Non-zero means the stage-total filtered_out counter diverges from the bounded Silver reject breakdown metric over the selected range.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 2
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 26
+      },
+      "id": 152,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "round(sum(max_over_time(bioetl_silver_filter_reject_total_mismatch_15m{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])) or vector(0))",
+          "refId": "A"
+        }
+      ],
+      "title": "Silver Filter Reject Accounting Mismatch",
+      "type": "stat"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 2
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 11
+      },
+      "id": 4,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "round(sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"gold\"}[$__range])) or vector(0))",
+          "instant": true,
+          "legendFormat": "Gold",
+          "refId": "A"
+        }
+      ],
+      "title": "Clean Records in Range (Gold)",
+      "type": "stat"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 2,
+          "max": 1,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 2
+              }
+            ]
+          },
+          "unit": "percentunit",
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 6,
+        "x": 0,
+        "y": 19
+      },
+      "id": 5,
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "targets": [
+        {
+          "expr": "min(bioetl_dq_validation_score{pipeline=~\"$pipeline\"})",
+          "legendFormat": "Worst Entity",
+          "refId": "A"
+        }
+      ],
+      "title": "Worst-Entity DQ Score",
+      "type": "gauge"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 2
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 6,
+        "x": 6,
+        "y": 19
+      },
+      "id": 6,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "round(sum(increase(bioetl_dq_records_quarantined_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])) or vector(0))",
+          "legendFormat": "Quarantined",
+          "refId": "A"
+        }
+      ],
+      "title": "Records Quarantined",
+      "type": "stat"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 2
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 6,
+        "x": 12,
+        "y": 19
+      },
+      "id": 7,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "round(sum(increase(bioetl_dq_soft_threshold_exceeded{pipeline=~\"$pipeline\"}[$__range])) or vector(0))",
+          "legendFormat": "Threshold Exceeded",
+          "refId": "A"
+        }
+      ],
+      "title": "Soft Threshold Exceeded",
+      "type": "stat"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 2
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 6,
+        "x": 18,
+        "y": 19
+      },
+      "id": 8,
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "targets": [
+        {
+          "expr": "max(clamp_min(time() - bioetl_data_freshness_seconds{pipeline=~\"$pipeline\"}, 0))",
+          "legendFormat": "Worst Freshness",
+          "refId": "A"
+        }
+      ],
+      "title": "Worst Data Freshness Lag (seconds)",
+      "type": "gauge"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 2
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 26
+      },
+      "id": 117,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "round(sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__range])) or vector(0))",
+          "instant": true,
+          "legendFormat": "Filtered Out",
+          "refId": "A"
+        }
+      ],
+      "title": "Silver Filter Rejects",
+      "type": "stat"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "Rejects",
+            "axisPlacement": "auto",
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 26
+      },
+      "id": 118,
+      "options": {
+        "displayMode": "gradient",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showUnfilled": true
+      },
+      "targets": [
+        {
+          "expr": "sum by (pipeline) (increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__range])) or label_replace(vector(0), \"pipeline\", \"no_events\", \"\", \"\")",
+          "instant": true,
+          "legendFormat": "{{pipeline}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Silver Filter Rejects by Pipeline",
+      "type": "bargauge"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "Rejects",
+            "axisPlacement": "auto",
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 34
+      },
+      "id": 121,
+      "options": {
+        "displayMode": "gradient",
+        "orientation": "horizontal",
+        "dataLinks": [
+          {
+            "title": "Open Silver Reject Explorer",
+            "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
+          }
+        ],
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showUnfilled": true
+      },
+      "targets": [
+        {
+          "expr": "topk(10, sum by (reason_code) (increase(bioetl_silver_filter_rejections_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range]))) or label_replace(vector(0), \"reason_code\", \"none\", \"\", \"\")",
+          "instant": true,
+          "legendFormat": "{{reason_code}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Top Silver Reject Reasons",
+      "type": "bargauge"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "Rejects",
+            "axisPlacement": "auto",
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 34
+      },
+      "id": 122,
+      "options": {
+        "displayMode": "gradient",
+        "orientation": "horizontal",
+        "dataLinks": [
+          {
+            "title": "Open Silver Reject Explorer",
+            "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
+          }
+        ],
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showUnfilled": true
+      },
+      "targets": [
+        {
+          "expr": "topk(10, sum by (field) (increase(bioetl_silver_filter_rejections_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range]))) or label_replace(vector(0), \"field\", \"none\", \"\", \"\")",
+          "instant": true,
+          "legendFormat": "{{field}}",
+          "refId": "A"
+        }
+      ],
+      "description": "Bounded schema-field summary only; use 5. Silver Reject Explorer or quarantine CLI for exact record context.",
+      "title": "Top Silver Reject Fields",
+      "type": "bargauge"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "mappings": [],
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 42
+      },
+      "id": 9,
+      "options": {
+        "displayLabels": [
+          "name",
+          "percent"
+        ],
+        "legend": {
+          "displayMode": "table",
+          "placement": "right"
+        },
+        "pieType": "pie",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum by (error_type) (increase(bioetl_dq_records_quarantined_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])) or label_replace(vector(0), \"error_type\", \"none\", \"\", \"\")",
+          "legendFormat": "{{error_type}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Quarantine by Error Type",
+      "type": "piechart"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "Anomalies",
+            "axisPlacement": "auto",
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 16,
+        "x": 8,
+        "y": 42
+      },
+      "id": 10,
+      "options": {
+        "legend": {
+          "calcs": [
+            "sum",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum by (severity, anomaly_type) (increase(bioetl_dq_anomaly_detected{pipeline=~\"$pipeline\"}[$__interval])) or label_replace(label_replace(vector(0), \"severity\", \"none\", \"\", \"\"), \"anomaly_type\", \"none\", \"\", \"\")",
+          "legendFormat": "{{severity}} / {{anomaly_type}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Anomalies Detected",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "Duration (ms)",
+            "axisPlacement": "auto",
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 50
+      },
+      "id": 11,
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum by (le, pipeline) (increase(bioetl_dq_check_duration_ms_bucket{pipeline=~\"$pipeline\"}[$__interval])))",
+          "legendFormat": "{{pipeline}} p95",
+          "refId": "A"
+        }
+      ],
+      "title": "DQ Check Duration (p95)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 2
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 12,
+        "y": 50
+      },
+      "id": 12,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "round(sum(increase(bioetl_silver_validation_failures_total{pipeline=~\"$pipeline\"}[$__range])) or vector(0))",
+          "legendFormat": "Validation Failures",
+          "refId": "A"
+        }
+      ],
+      "title": "Silver Validation Failures",
+      "type": "stat"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 2
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 18,
+        "y": 50
+      },
+      "id": 116,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto",
+        "dataLinks": [
+          {
+            "title": "Open Control Plane v1 (lineage/traceability)",
+            "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?from=${__from}&to=${__to}&var-pipeline=$pipeline&var-run_type=$run_type"
+          }
         ]
+      },
+      "targets": [
+        {
+          "expr": "round(sum(increase(bioetl_lineage_refs_missing_total{pipeline=~\"$pipeline\"}[$__range])) or vector(0))",
+          "legendFormat": "Missing Refs",
+          "refId": "A"
+        }
+      ],
+      "title": "Lineage Refs Missing",
+      "type": "stat"
     },
-    "time": {
-        "from": "now-12h",
-        "to": "now"
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            }
+          ],
+          "unit": "dateTimeAsLocal",
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "id": 101,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "max(bioetl_data_freshness_seconds{pipeline=~\"$pipeline\"}) * 1000",
+          "legendFormat": "Latest Data",
+          "refId": "A"
+        }
+      ],
+      "title": "Latest Successful Data Timestamp",
+      "type": "stat"
     },
-    "timepicker": {
-        "refresh_intervals": [
-            "5s",
-            "10s",
-            "30s",
-            "1m",
-            "5m",
-            "15m",
-            "30m",
-            "1h",
-            "2h",
-            "1d"
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 24,
+        "x": 0,
+        "y": 60
+      },
+      "id": 150,
+      "options": {
+        "content": "### Control-plane aggregates available\n- Open `BioETL Control Plane v1` for aggregated manifest writes, ledger appends, checkpoint compatibility outcomes, and control-plane read failures.\n- Use the `Observability Checklist (runbook)` dashboard link when `BioETLControlPlaneReadFailureRate` or related aggregate signals require operator follow-up.\n",
+        "mode": "markdown"
+      },
+      "type": "text"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 2
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 64
+      },
+      "id": 151,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto",
+        "dataLinks": [
+          {
+            "title": "Open Control Plane v1 (gold hard-fail context)",
+            "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?from=${__from}&to=${__to}&var-pipeline=$pipeline&var-run_type=$run_type"
+          }
         ]
-    },
-    "timezone": "",
-    "title": "4. Data Quality",
-    "uid": "bioetl-dq-v2",
-    "version": 4
+      },
+      "targets": [
+        {
+          "expr": "round(sum(increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\", stage=\"gold\", severity=\"hard_fail\"}[$__range])) or vector(0))",
+          "refId": "A"
+        }
+      ],
+      "title": "Gold Strict Validation Failures",
+      "type": "stat"
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 30,
+  "style": "dark",
+  "tags": [
+    "bioetl",
+    "data-quality",
+    "dq",
+    "validation",
+    "v2"
+  ],
+  "templating": {
+    "list": [
+      {
+        "allValue": null,
+        "current": {},
+        "datasource": "Prometheus",
+        "definition": "label_values(bioetl_records_processed_total, pipeline)",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Pipeline",
+        "multi": true,
+        "name": "pipeline",
+        "options": [],
+        "query": {
+          "query": "label_values(bioetl_records_processed_total, pipeline)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {},
+        "datasource": "Prometheus",
+        "definition": "label_values(bioetl_records_processed_total{pipeline=~\"$pipeline\"}, run_type)",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Run Type",
+        "multi": true,
+        "name": "run_type",
+        "options": [],
+        "query": {
+          "query": "label_values(bioetl_records_processed_total{pipeline=~\"$pipeline\"}, run_type)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {},
+        "datasource": "Prometheus",
+        "definition": "label_values(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}, stage)",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Stage",
+        "multi": true,
+        "name": "stage",
+        "options": [],
+        "query": {
+          "query": "label_values(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}, stage)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      }
+    ]
+  },
+  "time": {
+    "from": "now-12h",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": [
+      "5s",
+      "10s",
+      "30s",
+      "1m",
+      "5m",
+      "15m",
+      "30m",
+      "1h",
+      "2h",
+      "1d"
+    ]
+  },
+  "timezone": "",
+  "title": "4. Data Quality",
+  "uid": "bioetl-dq-v2",
+  "version": 4
 }
