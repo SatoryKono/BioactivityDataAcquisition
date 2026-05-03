@@ -343,7 +343,7 @@
     },
     {
       "datasource": "Prometheus",
-      "description": "Non-zero means replay/resume is not safe without investigation. Derived from manifest, ledger, checkpoint compatibility, replay reconstructability, replay drift, and lineage reference signals. Alerts: BioETLControlPlaneManifestWriteFailed, BioETLRunLedgerAppendFailed, BioETLCheckpointCompatibilityBlocked, BioETLReplayNotReconstructable, BioETLReplayDriftDetected, BioETLLineageRefsMissing.",
+      "description": "Threshold semantics: replay/resume blockers are binary—green at 0, red at >=1. Next action: stop replay/resume and investigate the first failing signal (manifest, ledger, checkpoint, replay drift, or lineage refs).",
       "fieldConfig": {
         "defaults": {
           "color": {

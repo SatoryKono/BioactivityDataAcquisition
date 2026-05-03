@@ -117,7 +117,7 @@
     },
     {
       "datasource": "Prometheus",
-      "description": "Combined runtime blocker count from shipped 15m/30m recording rules: preflight, infrastructure, failed runs, invariant violations, stage backlog (all stages incl. output), stage lag, gold write missing, no terminal run, no-record runs, and memory pressure. Stage filter is intentionally removed from aggregate blocker count to ensure output/gold stages are always visible.",
+      "description": "Threshold semantics: any non-zero failed runs in 15m is a runtime blocker; zero is healthy only with recent runtime activity. Next action: inspect runtime blockers table and stage culprit panels, then correlate in logs/traces if needed.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -371,7 +371,7 @@
     },
     {
       "datasource": "Prometheus",
-      "description": "Runtime errors normalized by bronze input over the last 30 minutes.",
+      "description": "Threshold semantics: error rate is normalized by Bronze input; elevated ratio with non-trivial denominator means runtime degradation/blocker risk. Next action: open Runtime Errors by Stage/Error Code and check failed runs/backlog/lag to isolate culprit stage.",
       "fieldConfig": {
         "defaults": {
           "color": {
