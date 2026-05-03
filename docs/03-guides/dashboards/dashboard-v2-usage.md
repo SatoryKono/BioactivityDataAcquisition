@@ -187,6 +187,38 @@ Variable handoff policy for dashboard links remains strict and bounded:
 2. **Click #2:** открыть рекомендуемый dashboard из top-level minimum (`2. Runtime`, `Control Plane v1`, `4. Data Quality`) или при forensic/pattern-specific нужде раскрыть `Additional Navigation & Forensics` и перейти в `Provider Health`/`Workflow`/`Explore`.
 
 Цель сценария: root-cause направление должно быть определено максимум за 2 клика без обязательной прокрутки по нечастым CTA.
+
+## Standard L1 text block examples: `Next Recommended Drilldown`
+
+Ниже — канонические примеры для panel description/annotation в L1 surfaces.
+Формат соответствует `design-system.md` и использует только contract titles.
+
+### DQ-centric incident (4. Data Quality)
+
+```text
+Next Recommended Drilldown
+• 5. Silver Reject Explorer — isolate top reason_code/field and inspect payload-level rejects.
+• 2. Runtime — confirm whether runtime failures/backlog are secondary effects.
+• 6. Workflow Overview — verify step-level failures for the affected pipeline.
+```
+
+### Provider-centric incident (3. Provider Health)
+
+```text
+Next Recommended Drilldown
+• 2. Runtime — check failed runs and stage lag caused by provider instability.
+• 4. Data Quality — confirm whether provider degradation increased quarantine/reject pressure.
+• 6. Workflow Overview — verify whether provider issues map to workflow step failures.
+```
+
+### Workflow-centric incident (6. Workflow Overview)
+
+```text
+Next Recommended Drilldown
+• 2. Runtime — inspect runtime blockers and error-rate impact for failed workflow steps.
+• Control Plane v1 — validate replay/resume safety before remediation.
+• 4. Data Quality — check downstream data-quality fallout after workflow failure.
+```
 - `bioetl-runtime`: top-level links `Back to Overview`, `Control Plane v1`,
   `3. Provider Health`, `4. Data Quality`, `Explore Logs (Loki, tracing profile)`,
   `Explore Traces (Tempo, tracing profile)` и `Runtime Runbook` дают явный

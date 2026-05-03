@@ -165,3 +165,26 @@ uv run python -m scripts.engineering.qa check-dashboard-visual-semantics
 }
 ```
 
+## 10) Standard L1 block: `Next Recommended Drilldown` (обязательно для guide/examples)
+
+Для документационных примеров L1-panels MUST использовать единый markdown/text блок:
+
+- Заголовок блока: `Next Recommended Drilldown`
+- Формат строки: `<Target Dashboard> — <why this is next>`
+- `Target Dashboard` MUST совпадать с canonical title из `navigation-contract.md`
+- Причина MUST быть bounded (1 короткая фраза без runbook-эссе)
+
+Нормативный шаблон:
+
+```text
+Next Recommended Drilldown
+• 2. Runtime — incident is runtime-centric (errors/backlog/failed runs).
+• 4. Data Quality — reject/quarantine pressure dominates incident.
+• 3. Provider Health — provider-side latency/failure dominates incident.
+• 6. Workflow Overview — orchestration/step-level failure dominates incident.
+```
+
+Ограничения:
+- Этот блок — **guide-level standard** для panel descriptions, annotation texts и doc-примеров.
+- В shipped top-level `links[].title` нельзя использовать строку `Next Recommended Drilldown` (см. раздел UI-лексики).
+- Блок не отменяет контракт `includeVars=false` + target-scoped `var-*` handoff.

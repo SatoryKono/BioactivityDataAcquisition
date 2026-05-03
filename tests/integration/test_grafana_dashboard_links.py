@@ -18,6 +18,10 @@ pytestmark = pytest.mark.integration
 
 _DASHBOARD_UID_RE = re.compile(r"^/d/([^/?]+)")
 _LINK_VAR_RE = re.compile(r"(?:\?|&)var-([A-Za-z_]+)=")
+_NEXT_RECOMMENDED_TITLE_RE = re.compile(
+    r"^Next Recommended Drilldown:\s+"
+    r"(2\. Runtime|3\. Provider Health|4\. Data Quality|5\. Silver Reject Explorer|6\. Workflow Overview|Control Plane v1)$"
+)
 _NAV_LINK_CONTRACT_PATH = Path("docs/03-guides/dashboards/contracts/navigation-links.yaml")
 
 
@@ -212,6 +216,40 @@ def test_dashboard_links_forbid_universal_handoff_patterns() -> None:
                 assert link.get("includeVars") is False, (
                     f"{dashboard_path.name} top-level cross-dashboard link must pin includeVars=false: {url}"
                 )
+
+
+def test_next_recommended_drilldown_links_use_valid_format_and_target() -> None:
+    """If present, Next Recommended Drilldown links must use canonical title and dashboard target."""
+    title_to_uid = {
+        "2. Runtime": "bioetl-runtime",
+        "3. Provider Health": "bioetl-provider-health-v2",
+        "4. Data Quality": "bioetl-dq-v2",
+        "5. Silver Reject Explorer": "bioetl-silver-reject-explorer",
+        "6. Workflow Overview": "bioetl-workflow-overview",
+        "Control Plane v1": "bioetl-control-plane-v1",
+    }
+
+    for dashboard_path in get_dashboard_files():
+        dashboard = load_dashboard(dashboard_path)
+        for link in _collect_dashboard_links(dashboard):
+            title = link.get("title")
+            if not isinstance(title, str) or not title.startswith(
+                "Next Recommended Drilldown"
+            ):
+                continue
+
+            assert _NEXT_RECOMMENDED_TITLE_RE.match(title), (
+                f"{dashboard_path.name} has invalid Next Recommended Drilldown "
+                f"title format: {title}"
+            )
+            target_title = title.split(": ", maxsplit=1)[1]
+            expected_uid = title_to_uid[target_title]
+            url = str(link.get("url", ""))
+            actual_uid = _extract_dashboard_uid(url)
+            assert actual_uid == expected_uid, (
+                f"{dashboard_path.name} link '{title}' must target uid "
+                f"{expected_uid}, got {actual_uid} via {url}"
+            )
 def test_overview_and_provider_dashboards_expose_explore_drilldown_links() -> None:
     """Operational dashboards should offer Loki and Tempo drilldown."""
     expectations = (
