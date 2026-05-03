@@ -1765,6 +1765,16 @@ def test_overview_processing_volume_panel_splits_units() -> None:
     assert "bioetl_stage_backlog_records" not in processing_expr
     assert "bioetl_stage_lag_seconds" not in processing_expr
 
+    active_backlog = panels.get("Active Stage Backlog")
+    assert active_backlog is not None
+    active_backlog_expr = "\n".join(
+        target.get("expr", "")
+        for target in active_backlog.get("targets", [])
+        if isinstance(target.get("expr"), str)
+    )
+    assert "bioetl_stage_backlog_records" in active_backlog_expr
+    assert "[$__range]" in active_backlog_expr
+
     backlog = panels.get("Stage Backlog Trend")
     assert backlog is not None
     backlog_expr = "\n".join(
@@ -1773,7 +1783,17 @@ def test_overview_processing_volume_panel_splits_units() -> None:
         if isinstance(target.get("expr"), str)
     )
     assert "bioetl_stage_backlog_records" in backlog_expr
-    assert "[$__range]" in backlog_expr
+    assert "[$__interval]" in backlog_expr
+
+    worst_lag = panels.get("Worst Stage Lag")
+    assert worst_lag is not None
+    worst_lag_expr = "\n".join(
+        target.get("expr", "")
+        for target in worst_lag.get("targets", [])
+        if isinstance(target.get("expr"), str)
+    )
+    assert "bioetl_stage_lag_seconds" in worst_lag_expr
+    assert "[$__range]" in worst_lag_expr
 
     lag = panels.get("Stage Lag Trend")
     assert lag is not None
@@ -1783,6 +1803,7 @@ def test_overview_processing_volume_panel_splits_units() -> None:
         if isinstance(target.get("expr"), str)
     )
     assert "bioetl_stage_lag_seconds" in lag_expr
+    assert "[$__interval]" in lag_expr
     assert lag.get("fieldConfig", {}).get("defaults", {}).get("unit") == "s"
 
 

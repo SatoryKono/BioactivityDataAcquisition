@@ -20,7 +20,7 @@ ______________________________________________________________________
 
 | Dashboard                 | UID                             | Для чего                                                                                   |
 | ------------------------- | ------------------------------- | ------------------------------------------------------------------------------------------ |
-| 1. Overview               | `bioetl-overview-v2`            | Hub для selected-range pipeline summary и handoff в Runtime / Control Plane / DQ / Provider / Workflow |
+| 1. BioETL Overview        | `bioetl-overview-v2`            | L0 answer-first dashboard: что сейчас сломано/degraded и куда drill down дальше |
 | 2. Runtime                | `bioetl-runtime`                | Runtime triage: warnings, unstructured logs, adaptive-memory signals, alert conditions     |
 | 3. Provider Health        | `bioetl-provider-health-v2`     | Incident triage по provider health: latency/failures/degraded/retries exhausted            |
 | 4. Data Quality           | `bioetl-dq-v2`                  | Качество данных, карантин, аномалии, freshness                                             |
@@ -43,8 +43,11 @@ ______________________________________________________________________
 
 ## Что смотреть в первую очередь
 
-1. `bioetl-overview-v2`, panel `id=4` (`Overall Yield (Selected Range)`):
-   `sum(increase(gold[$__range])) / clamp_min(sum(increase(bronze[$__range])), 1)`
+1. `bioetl-overview-v2`, top answer row:
+   `Failed Pipeline Runs`, `Overall Yield`, `Active Stage Backlog`,
+   `Worst Stage Lag`, `DQ Blocking`, `Control Plane Unsafe` и
+   `Provider Degraded` отвечают на L0 вопрос: что broken/degraded и куда
+   открыть drilldown первым.
 1. `bioetl-runtime`, panel `id=2`, `id=3`, `id=4`, `id=5`, `id=6`, `id=7`:
    warnings, unstructured logs и alert-condition сигналы по DQ/control-plane/provider/freshness.
 1. `bioetl-runtime`, panel `id=18`, `id=19`, `id=20`, `id=21`:
@@ -56,10 +59,11 @@ ______________________________________________________________________
    `bioetl_dq_validation_score` и `bioetl_dq_validation_record_count`
 1. `bioetl-dq-v2`, panel `id=6`, `id=7`, `id=12`:
    range-based quarantine/threshold/failures for the active Grafana window.
-1. `bioetl-overview-v2`, panel `id=111`, `id=113`, `id=114`, `id=116`, `id=120`:
-   selected-range summary по manifest/ledger failures, checkpoint incompatibilities,
-   missing lineage refs, composite source selections и явный handoff в
-   `Control Plane v1` для global read / lineage detail.
+1. `bioetl-overview-v2`, handoff/failure rows:
+   `Runtime Handoff`, `Data Quality Handoff`, `Control Plane Handoff`,
+   `Provider Handoff`, `Workflow Handoff` и compact summaries по manifest/ledger,
+   checkpoint, lineage и Silver rejects. Composite source-selection detail
+   вынесен из L0 flow в Control Plane diagnostics.
 1. `bioetl-workflow-overview`, panel `id=2`, `id=3`, `id=4`, `id=5`:
    declarative workflow runs, failed runs, step outcomes и step latency;
    используйте его, когда pipeline summary выглядит здоровым, но orchestration
@@ -68,15 +72,15 @@ ______________________________________________________________________
 ## Silver Filter Rejects workflow
 
 - Для быстрых summary используйте shipped panels `Silver Filter Rejects` и
-  `Silver Filter Rejects by Pipeline` в `bioetl-overview-v2`, `bioetl-dq-v2`,
-  `bioetl-runtime`.
+  `Silver Filter Reject Rate` в `bioetl-overview-v2`, а detailed bounded
+  breakdown смотрите в `bioetl-dq-v2` / `bioetl-runtime`.
 - `bioetl-overview-v2` и `bioetl-runtime` теперь содержат явный handoff в
   `4. Data Quality`, чтобы оператор мог быстро перейти от summary spike к
   bounded cause breakdown.
 - Для bounded cause summary используйте `Top Silver Reject Reasons` и
   `Top Silver Reject Fields` в `bioetl-dq-v2`.
 - Короткая triage sequence:
-  1. Начните с `1. Overview` или `2. Runtime`, чтобы подтвердить spike по
+  1. Начните с `1. BioETL Overview` или `2. Runtime`, чтобы подтвердить spike по
      `Silver Filter Rejects` в текущем time range.
   1. Перейдите в `4. Data Quality` и проверьте `Top Silver Reject Reasons` /
      `Top Silver Reject Fields`, чтобы сузить проблему до bounded cause summary.
@@ -102,7 +106,15 @@ ______________________________________________________________________
 
 ## Drilldown
 
-- `bioetl-overview-v2`: dashboard links `2. Runtime`, `Control Plane v1`, `3. Provider Health`, `4. Data Quality`, `6. Workflow Overview`, `Explore Logs (Loki, tracing profile)` и `Explore Traces (Tempo, tracing profile)` открывают соседние dashboards и Grafana Explore в текущем time range. Cross-dashboard URLs передают только target-scoped variables; provider/workflow dashboards не наследуют `$pipeline/$run_type` leakage. Panel `id=1` (`Processing Volume by Stage`) дублирует Explore handoff через data links.
+- `bioetl-overview-v2`: L0 Overview отвечает на один primary question:
+  what is currently broken or degraded in BioETL, and where should the
+  operator drill down first? Dashboard links `2. Runtime`, `Control Plane v1`,
+  `3. Provider Health`, `4. Data Quality`, `6. Workflow Overview`,
+  `Explore Logs (Loki, tracing profile)` и `Explore Traces (Tempo, tracing profile)`
+  открывают соседние dashboards и Grafana Explore в текущем time range.
+  Cross-dashboard URLs передают только target-scoped variables; provider/workflow
+  dashboards не наследуют `$pipeline/$run_type` leakage. Panel `id=1`
+  (`Processing Volume by Stage`) дублирует Explore handoff через data links.
 - `bioetl-runtime`: dashboard link `Back to Overview` плюс `Explore Logs (Loki, tracing profile)` и `Explore Traces (Tempo, tracing profile)` дают короткий путь из warning/unstructured-log spikes, adaptive-memory regressions и alert spikes обратно в overview и в Explore. Dashboard handoffs передают только `$pipeline/$run_type` для runtime-compatible targets. Panel `id=9` (`Log Hygiene Trend`) дублирует Explore handoff через data links, а `Pipeline/DQ/Control-plane/Provider/Freshness Alert Conditions` теперь дают прямые runbook links для следующего operator шага.
 - `bioetl-provider-health-v2`: dashboard links `Back to Overview`, `2. Runtime`, `Explore Logs (Loki, tracing profile)` и `Explore Traces (Tempo, tracing profile)` дают быстрый переход из provider health surface в runtime/overview и correlation flow без ложного pipeline scope в target dashboards. Panel `id=114` (`Current Provider Health Status`) показывает явный enum mapping `0=UNHEALTHY`, `1=DEGRADED`, `2=HEALTHY`, а panel `id=1` (`Health Check Latency by Provider (p95)`) дублирует Explore handoff через data links.
 - `bioetl-dq-v2`: dashboard link `Back to Overview` плюс `5. Silver Reject Explorer`, `Explore Logs (Loki, tracing profile)` и `Explore Traces (Tempo, tracing profile)` дают тот же переход для DQ incidents и freshness investigation. Handoff в Explorer передаёт только bounded `$pipeline/$run_type` scope, а не generic `includeVars` leakage. Panel `id=1` (`Data Flow in Range: Bronze -> Silver -> Gold`) дублирует Explore handoff через data links.
@@ -118,6 +130,8 @@ ______________________________________________________________________
 
 ## Важные пороги (из JSON)
 
+- `overview.answer row`: Failed pipeline/DQ/control-plane red `>=1`; backlog
+  yellow `>0`; lag yellow `>=300s`; provider degradation yellow/red non-zero.
 - `overview.id=4`: red `<0.8`, yellow `>=0.8`, green `>=0.9`
 - `dq.id=5`: red `<0.8`, yellow `>=0.8`, green `>=0.9`
 - `dq.id=8`: yellow `>=3600s`, red `>=21600s`; gauge now shows the worst stale entity in scope, not the freshest timestamp

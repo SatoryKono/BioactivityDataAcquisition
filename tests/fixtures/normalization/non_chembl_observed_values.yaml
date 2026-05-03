@@ -296,8 +296,6 @@ pipelines:
       publication_type:
         - Journal Article
         - Review
-      is_oa:
-        - false
     observed_raw_values:
       pmid:
         - PMID:0012345
@@ -377,10 +375,6 @@ pipelines:
         category: derived_vocabulary
         collection_semantics: scalar
         composite_usage: composite_publication:upstream_inherited
-      is_oa:
-        category: strict_boolean
-        collection_semantics: scalar
-        composite_usage: composite_publication:upstream_inherited
       authors_with_affiliations:
         category: structured_json_sidecar
         collection_semantics: ordered_sequence
@@ -401,9 +395,6 @@ pipelines:
         - journal-article
         - book-chapter
         - posted-content
-      is_oa:
-        - true
-        - false
     observed_raw_values:
       doi:
         - https://doi.org/10.1000/ABC
@@ -444,10 +435,6 @@ pipelines:
         composite_usage: composite_publication:upstream_inherited
       publication_class:
         category: derived_vocabulary
-        collection_semantics: scalar
-        composite_usage: composite_publication:upstream_inherited
-      is_oa:
-        category: strict_boolean
         collection_semantics: scalar
         composite_usage: composite_publication:upstream_inherited
 
