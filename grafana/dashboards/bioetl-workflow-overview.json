@@ -19,33 +19,47 @@
   "links": [
     {
       "asDropdown": false,
-      "icon": "external link",
+      "icon": "arrow-left",
       "includeVars": false,
       "keepTime": true,
+      "tags": [],
       "targetBlank": false,
       "title": "Back to Overview",
-      "type": "link",
-      "url": "/d/bioetl-overview-v2/bioetl-overview-v2?${__url_time_range}"
+      "type": "dashboards",
+      "url": "/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&var-run_type=$run_type"
     },
     {
       "asDropdown": false,
       "icon": "external link",
       "includeVars": false,
       "keepTime": true,
+      "tags": [],
       "targetBlank": false,
-      "title": "2. Runtime",
+      "title": "Next Recommended Drilldown",
       "type": "link",
-      "url": "/d/bioetl-runtime/bioetl-runtime?${__url_time_range}"
+      "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=All&var-run_type=All&var-stage=All"
     },
     {
       "asDropdown": false,
-      "icon": "external link",
+      "icon": "logs",
       "includeVars": false,
       "keepTime": true,
+      "tags": [],
       "targetBlank": false,
-      "title": "Control Plane v1",
+      "title": "Explore Logs",
       "type": "link",
-      "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?${__url_time_range}"
+      "url": "/explore?schemaVersion=1&panes={\"67f\":{\"datasource\":\"loki\",\"queries\":[{\"expr\":\"{job=\\\"bioetl\\\"}\"}],\"range\":{\"from\":\"$__from\",\"to\":\"$__to\"}}}&orgId=1"
+    },
+    {
+      "asDropdown": false,
+      "icon": "bolt",
+      "includeVars": false,
+      "keepTime": true,
+      "tags": [],
+      "targetBlank": false,
+      "title": "Explore Traces",
+      "type": "link",
+      "url": "/explore?schemaVersion=1&panes={\"q9t\":{\"datasource\":\"tempo\",\"queries\":[{\"query\":\"{}\"}],\"range\":{\"from\":\"$__from\",\"to\":\"$__to\"}}}&orgId=1"
     }
   ],
   "panels": [
