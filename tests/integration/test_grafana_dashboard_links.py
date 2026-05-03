@@ -507,8 +507,7 @@ def test_runtime_incident_panels_link_to_control_plane_dashboard() -> None:
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
     expectations = {
         "Control-plane Alert Conditions": "Open Control Plane v1 (manifest/checkpoint)",
-        "No-Records Processed Runs": "Open Control Plane v1 (checkpoint/replay)",
-        "Replay Not Reconstructable": "Open Control Plane v1 (replay/lineage)",
+        "No-Records Runs / 30m": "Open Control Plane v1 (checkpoint/replay)",
     }
 
     for panel_title, expected_link_title in expectations.items():
@@ -567,7 +566,7 @@ def test_runtime_alert_condition_panels_expose_direct_runbook_links() -> None:
             "Open DQ Freshness Runbook",
             "docs/05-operations/runbooks/dq-failure-investigation.md",
         ),
-        "Replay Not Reconstructable": (
+        "No-Records Runs / 30m": (
             "Open Checkpoint Debugging Runbook",
             "docs/05-operations/runbooks/checkpoint-debugging.md",
         ),

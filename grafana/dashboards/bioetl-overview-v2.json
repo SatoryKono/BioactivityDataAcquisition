@@ -747,7 +747,7 @@
             ],
             "title": "Runtime Status",
             "type": "stat",
-            "description": "Replaces numeric Runtime Handoff. BROKEN means at least one runtime blocker is active: failed runs, backlog, or lag."
+            "description": "BROKEN means at least one runtime blocker is active: failed runs, backlog, or lag."
         },
         {
             "datasource": "Prometheus",
@@ -1307,7 +1307,7 @@
             ],
             "title": "Flow Balance",
             "type": "table",
-            "description": "Replaces Overall Yield. If Bronze input is zero or missing, yield is unavailable/no recent input; the dashboard must not show green 100% health."
+            "description": "If Bronze input is zero or missing, yield is unavailable/no recent input; the dashboard must not show green 100% health."
         },
         {
             "datasource": "Prometheus",

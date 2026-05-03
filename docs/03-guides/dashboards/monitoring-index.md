@@ -21,12 +21,12 @@ the linked owner docs.
 
 | Question / symptom | Open first | Then use | Owner doc |
 | ------------------ | ---------- | -------- | --------- |
-| What is currently broken or degraded, and where should I drill down first? | `bioetl-overview-v2` | `2. Runtime`, `4. Data Quality`, `3. Provider Health`, `Control Plane v1`, or `6. Workflow Overview` based on the answer row | [Dashboard v2 Usage](dashboard-v2-usage.md) |
+| What is currently broken or degraded, and where should I drill down first? | `bioetl-overview-v2` | `System Status` + `Next Action`, then `2. Runtime`, `4. Data Quality`, `3. Provider Health`, `Control Plane / Replay Safety`, or `6. Workflow Overview` based on the status reason | [Dashboard v2 Usage](dashboard-v2-usage.md) |
 | Did runtime health, logs, memory, or alert-condition panels regress? | `bioetl-runtime` | `bioetl diagnostics guide`; [Observability Checklist](../../05-operations/runbooks/observability-checklist.md) | [Monitoring Guide](../../05-operations/01-monitoring-guide.md) |
 | Is a provider slow, degraded, or exhausting retries? | `bioetl-provider-health-v2` | `bioetl diagnostics health --json`; provider incident runbook | [Incident Response](../../05-operations/runbooks/incident-response.md) |
 | Is DQ quality/freshness/quarantine unhealthy? | `bioetl-dq-v2` | `bioetl diagnostics quarantine --pipeline <pipeline>` | [DQ Failure Investigation](../../05-operations/runbooks/dq-failure-investigation.md) |
 | Which exact Silver-filtered record failed and why? | `bioetl-silver-reject-explorer` | `bioetl quarantine inspect --pipeline <pipeline> --silver-filter-only ...` | [Quarantine Management](../../05-operations/runbooks/quarantine-management.md) |
-| Did manifest, ledger, checkpoint, or lineage evidence fail? | `bioetl-control-plane-v1` | `bioetl checkpoint inspect ...`; `bioetl checkpoint audit-run ...` | [Run Manifest Inspection](../../05-operations/runbooks/run-manifest-inspection.md) |
+| Can replay/resume be trusted for the selected pipeline/run_type/time range? | `bioetl-control-plane-v1` | `Replay / Resume Blockers`, then `bioetl checkpoint inspect ...`; `bioetl checkpoint audit-run ...` | [Run Manifest Inspection](../../05-operations/runbooks/run-manifest-inspection.md) |
 | Are declarative workflow steps failing or skipping? | `bioetl-workflow-overview` | workflow runner metrics via `bioetl_workflow_*` | [Dashboard v2 Usage](dashboard-v2-usage.md) |
 | Is the metric/rule/dashboard vocabulary drifting? | inventory helper | `python -m scripts.engineering.qa report-observability-metric-inventory --json` | [Observability Metrics Contract](../../04-reference/contracts/observability.md) |
 
@@ -72,16 +72,20 @@ in manifest/ledger/CLI/explorer surfaces, not Prometheus labels.
 
 Текущий `bioetl-overview-v2` является L0 answer-first точкой входа. Он отвечает
 только на вопрос, что сейчас broken/degraded и какой drilldown открыть первым:
-`2. Runtime`, `4. Data Quality`, `3. Provider Health`, `Control Plane v1` или
-`6. Workflow Overview`. Deep DQ/provider/control-plane/forensic диагностика
-остаётся в соответствующих L1/L2 dashboards и explorer surfaces.
+`2. Runtime`, `4. Data Quality`, `3. Provider Health`,
+`Control Plane / Replay Safety` или
+`6. Workflow Overview`. Ответ начинается с `System Status` / `Next Action`;
+зелёный `OK` не выводится без recent activity, а backlog/lag cards показывают
+culprit stage. Deep DQ/provider/control-plane/forensic диагностика остаётся в
+соответствующих L1/L2 dashboards и explorer surfaces.
 
-Новый `bioetl-control-plane-v1` собирает агрегированные панели по manifest
-writes, ledger appends, checkpoint compatibility, global read telemetry и
-lineage fragment outcomes. Это dashboard показывает доли ошибок и предлагает
-direct link на alert `BioETLControlPlaneReadFailureRate`
-(runbook: `docs/05-operations/runbooks/observability-checklist.md`) для
-быстрого реагирования на control-plane regressions.
+`bioetl-control-plane-v1` теперь является `Control Plane / Replay Safety`
+surface. Он отвечает на один вопрос: можно ли доверять manifest/ledger/
+checkpoint/replay/lineage state и безопасно выполнять replay/resume. Первый
+ряд показывает только replay/resume blockers; GLOBAL read-path panels вынесены
+в diagnostic row, явно помечены `GLOBAL` и не фильтруются по `$pipeline` /
+`$run_type`. Missing checkpoint-age/RPO и replay-duplicate signals
+документируются как blind spots, а не подменяются fake PromQL.
 
 `bioetl-runtime` считается канонической triage-точкой для runtime hygiene:
 warnings, unstructured logs, adaptive-memory signals и Prometheus-backed alert

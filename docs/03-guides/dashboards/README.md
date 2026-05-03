@@ -33,16 +33,26 @@ ______________________________________________________________________
 
 Текущая навигационная модель:
 
-- `1. BioETL Overview` -> `2. Runtime` / `Control Plane v1` / `3. Provider Health` / `4. Data Quality` / `6. Workflow Overview`
-- `2. Runtime` -> `Back to Overview` / `Control Plane v1` / `4. Data Quality`
+- `1. BioETL Overview` -> `2. Runtime` / `Control Plane / Replay Safety` / `3. Provider Health` / `4. Data Quality` / `6. Workflow Overview`
+- `2. Runtime` -> `Back to Overview` / `Control Plane / Replay Safety` / `4. Data Quality`
 - `3. Provider Health` -> `Back to Overview` / `2. Runtime`
 - `4. Data Quality` -> `Back to Overview` / `5. Silver Reject Explorer`
-- `6. Workflow Overview` -> `Back to Overview` / `2. Runtime` / `Control Plane v1`
+- `6. Workflow Overview` -> `Back to Overview` / `2. Runtime` / `Control Plane / Replay Safety`
 
 `bioetl-overview-v2` is the L0 answer-first surface. It answers one question:
 what is currently broken or degraded in BioETL, and where should the operator
-drill down first? Keep record-level filters, provider deep diagnostics, DQ
-cause breakdowns, and control-plane replay/audit detail out of Overview.
+drill down first? The first visible answer is `System Status` plus `Next Action`;
+`OK` requires recent activity, while missing samples/no denominator remain
+`UNKNOWN`. Backlog/lag cards expose the responsible stage, and `Flow Balance`
+replaces vanity yield with Bronze/Gold/loss denominator context. Keep
+record-level filters, provider deep diagnostics, DQ cause breakdowns, and
+control-plane replay/audit detail out of Overview.
+
+`bioetl-control-plane-v1` is the Control Plane / Replay Safety surface. It
+answers whether manifest, ledger, checkpoint, replay, and lineage state are
+trustworthy enough to allow replay/resume. GLOBAL read panels are diagnostic,
+not pipeline-scoped, and missing checkpoint-age / replay-duplicate metrics are
+documented as blind spots until instrumentation exists.
 
 ## Legacy-документы
 

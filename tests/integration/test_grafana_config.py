@@ -258,25 +258,20 @@ def test_summary_queries_use_zero_fallbacks() -> None:
             "Workflow Status": "or vector(0)",
         },
         "bioetl-runtime.json": {
-            "Warnings": "or vector(0)",
-            "Unstructured Logs": "or vector(0)",
+            "Runtime Blockers / 15m": "or vector(0)",
+            "Failed Runs / 15m": "or vector(0)",
+            "No-Records Runs / 30m": "or vector(0)",
+            "Runtime Error Rate / 30m": "or vector(0)",
+            "Worst Stage Lag / 15m": "or vector(0)",
+            "Memory Pressure Active / 15m": "or vector(0)",
+            "Records by Stage / Interval": "or vector(0)",
             "Pipeline Alert Conditions": "or vector(0)",
             "DQ Alert Conditions": "or vector(0)",
             "Control-plane Alert Conditions": "or vector(0)",
             "GLOBAL Provider Alert Conditions": "or vector(0)",
             "Freshness Alert Conditions": "or vector(0)",
-            "Trace-enabled Runs": "or vector(0)",
-            "Pipeline Errors": "or vector(0)",
-            "Silver Filter Rejects": "or vector(0)",
-            "Metrics Endpoint Up": "or vector(0)",
-            "Prometheus Up": "or vector(0)",
-            "Grafana Up": "or vector(0)",
-            "Pushgateway Up": "or vector(0)",
-            "No-Records Processed Runs": "or vector(0)",
-            "Replay Not Reconstructable": "or vector(0)",
-            "Shutdown Initiated by Reason": "or vector(0)",
-            "Shutdown Completed by Reason": "or vector(0)",
-            "Log Hygiene Trend": 'label_replace(vector(0), "series",',
+            "Shutdown Initiated by Reason / Interval": "or vector(0)",
+            "Shutdown Completed by Reason / Interval": "or vector(0)",
         },
         "bioetl-provider-health-v2.json": {
             "Healthy Checks": "or vector(0)",
@@ -296,16 +291,22 @@ def test_summary_queries_use_zero_fallbacks() -> None:
             "Gold Strict Validation Failures": "or vector(0)",
         },
         "bioetl-control-plane-v1.json": {
+            "Replay / Resume Blockers": "or vector(0)",
             "Manifest Write Failures": "or vector(0)",
             "Ledger Append Failures": "or vector(0)",
-            "Checkpoint Compatibility Incompatibilities": "or vector(0)",
+            "Checkpoint Incompatibilities": "or vector(0)",
             "GLOBAL Control-Plane Read Failures": "or vector(0)",
+            "GLOBAL Control-Plane Read Failure Ratio": "or vector(0)",
             "Checkpoint Load Failures": "or vector(0)",
             "Checkpoint Save Failures": "or vector(0)",
             "GLOBAL Checkpoint Operator Failures": "or vector(0)",
             "Replay Not Reconstructable": "or vector(0)",
+            "Replay Drift": "or vector(0)",
+            "Replay Lag Seconds": "or vector(0)",
             "Audit Write Outcomes": "or vector(0)",
             "Audit Query Outcomes": "or vector(0)",
+            "Lineage Fragment Persistence Failures": "or vector(0)",
+            "Lineage Refs Missing": "or vector(0)",
         },
     }
 
@@ -339,9 +340,8 @@ def test_latency_p95_panels_preserve_no_data_state() -> None:
     """Latency p95 panels must not collapse missing samples into zero."""
     expected_latency_panels = {
         "bioetl-runtime.json": {
-            "Global Control-plane Lookup p95",
-            "Phase Duration by Phase (p95)",
-            "Postrun Phase Duration by Phase (p95)",
+            "Pipeline Phase Duration p50/p95/p99",
+            "Pipeline Duration p50/p95/p99",
         },
         "bioetl-provider-health-v2.json": {
             "Health Check Latency by Provider (p95)",
@@ -351,11 +351,11 @@ def test_latency_p95_panels_preserve_no_data_state() -> None:
         },
         "bioetl-dq-v2.json": {"DQ Check Duration (p95)"},
         "bioetl-control-plane-v1.json": {
-            "GLOBAL Control-Plane Read p95",
-            "Checkpoint Save Latency (p95)",
-            "GLOBAL Checkpoint Operator Latency (p95)",
-            "Audit Write Latency (p95)",
-            "Audit Query Latency (p95)",
+            "GLOBAL Control-Plane Read Latency p50/p95/p99",
+            "Checkpoint Save Latency p50/p95/p99",
+            "GLOBAL Checkpoint Operator Latency p50/p95/p99",
+            "Audit Write Latency p50/p95/p99",
+            "Audit Query Latency p50/p95/p99",
         },
     }
 
@@ -419,11 +419,8 @@ def test_count_like_summary_panels_use_rounding_or_boolean_conditions() -> None:
             "DQ Alert Conditions": "bioetl_runtime_alert_condition_dq_soft_threshold_15m",
             "Control-plane Alert Conditions": "bioetl_runtime_alert_condition_manifest_write_failed_15m",
             "GLOBAL Provider Alert Conditions": "bioetl_runtime_alert_condition_provider_failure_rate_high_15m",
-            "Trace-enabled Runs": "round(",
-            "Pipeline Errors": "round(",
-            "Silver Filter Rejects": "round(",
-            "Shutdown Initiated by Reason": "round(",
-            "Shutdown Completed by Reason": "round(",
+            "Shutdown Initiated by Reason / Interval": "round(",
+            "Shutdown Completed by Reason / Interval": "round(",
         },
     }
 
@@ -529,9 +526,10 @@ def test_selected_range_kpis_do_not_use_raw_counters() -> None:
             "Clean Records in Range (Gold)": ("increase(", "last_over_time("),
         },
         "bioetl-runtime.json": {
-            "Silver Filter Rejects": ("increase(",),
-            "Shutdown Initiated by Reason": ("increase(",),
-            "Shutdown Completed by Reason": ("increase(",),
+            "Errors by Stage / Error Code / Range": ("increase(",),
+            "Records by Stage / Run Type / Range": ("increase(",),
+            "Shutdown Initiated by Reason / Interval": ("increase(",),
+            "Shutdown Completed by Reason / Interval": ("increase(",),
         },
     }
 
@@ -987,17 +985,85 @@ def test_overview_contains_runtime_dq_provider_control_workflow_status_cards() -
         assert any(expected_url in link.get("url", "") for link in links)
 
 
+def test_control_plane_dashboard_has_primary_question() -> None:
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
+    description = str(dashboard.get("description", ""))
+
+    assert "Primary question:" in description
+    assert "safely replay/resume" in description
+    assert "GLOBAL read-path panels are not pipeline-scoped" in description
+
+
+def test_control_plane_answer_row_has_max_seven_panels() -> None:
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
+    panels = get_dashboard_panels(dashboard)
+    answer_row = next(
+        panel
+        for panel in panels
+        if panel.get("type") == "row"
+        and panel.get("title") == "Answer: Replay / Resume Safety"
+    )
+    next_row_y = min(
+        panel["gridPos"]["y"]
+        for panel in panels
+        if panel.get("type") == "row"
+        and panel["gridPos"]["y"] > answer_row["gridPos"]["y"]
+    )
+    answer_panels = [
+        panel
+        for panel in panels
+        if panel.get("type") != "row"
+        and answer_row["gridPos"]["y"] < panel.get("gridPos", {}).get("y", -1) < next_row_y
+    ]
+
+    assert 3 <= len(answer_panels) <= 7
+    assert {panel.get("title") for panel in answer_panels} == {
+        "Replay / Resume Blockers",
+        "Manifest Write Failures",
+        "Ledger Append Failures",
+        "Checkpoint Incompatibilities",
+        "Replay Not Reconstructable",
+        "Replay Drift",
+        "Lineage Refs Missing",
+    }
+
+
+def test_control_plane_has_replay_resume_blockers_panel() -> None:
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
+    panels = {
+        panel.get("title"): panel
+        for panel in get_dashboard_panels(dashboard)
+        if panel.get("title")
+    }
+    panel = panels.get("Replay / Resume Blockers")
+
+    assert panel is not None
+    expr = "\n".join(
+        target.get("expr", "")
+        for target in panel.get("targets", [])
+        if isinstance(target.get("expr"), str)
+    )
+    for metric in (
+        "bioetl_control_plane_manifest_writes_total",
+        "bioetl_control_plane_ledger_appends_total",
+        "bioetl_checkpoint_compatibility_events_total",
+        "bioetl_replay_reconstructability_events_total",
+        "bioetl_replay_drift_events_total",
+        "bioetl_lineage_refs_missing_total",
+    ):
+        assert metric in expr
+
+
 def test_control_plane_lookup_panels_disclose_global_scope() -> None:
     """Control-plane read panels must disclose that they are global, not pipeline-scoped."""
     expectations = {
-        "bioetl-runtime.json": (
-            "Global Control-plane Lookup Outcomes",
-            "Global Control-plane Lookup p95",
-        ),
         "bioetl-control-plane-v1.json": (
             "GLOBAL Control-Plane Read Failures",
-            "GLOBAL Control-Plane Read p95",
+            "GLOBAL Control-Plane Read Failure Ratio",
+            "GLOBAL Control-Plane Read Latency p50/p95/p99",
             "GLOBAL Control-Plane Reads by Store / Operation / Status",
+            "GLOBAL Checkpoint Operator Failures",
+            "GLOBAL Checkpoint Operator Latency p50/p95/p99",
         ),
     }
 
@@ -1017,13 +1083,10 @@ def test_control_plane_lookup_panels_disclose_global_scope() -> None:
 def test_control_plane_read_panels_do_not_filter_on_missing_pipeline_label() -> None:
     """Control-plane read panels must not filter global metrics by pipeline."""
     expectations = {
-        "bioetl-runtime.json": (
-            "Global Control-plane Lookup Outcomes",
-            "Global Control-plane Lookup p95",
-        ),
         "bioetl-control-plane-v1.json": (
             "GLOBAL Control-Plane Read Failures",
-            "GLOBAL Control-Plane Read p95",
+            "GLOBAL Control-Plane Read Failure Ratio",
+            "GLOBAL Control-Plane Read Latency p50/p95/p99",
             "GLOBAL Control-Plane Reads by Store / Operation / Status",
         ),
     }
@@ -1057,6 +1120,108 @@ def test_control_plane_read_panels_do_not_filter_on_missing_pipeline_label() -> 
                         "global control-plane metric by nonexistent pipeline label:\n"
                         f"{expr}"
                     )
+                    assert '{run_type=~"$run_type"' not in expr, (
+                        f"{dashboard_name} panel {panel_title!r} filters a "
+                        "global control-plane metric by nonexistent run_type label:\n"
+                        f"{expr}"
+                    )
+
+
+def test_control_plane_global_panels_are_marked_global() -> None:
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
+    global_metric_tokens = (
+        "bioetl_control_plane_reads_total",
+        "bioetl_control_plane_read_duration_seconds_bucket",
+        "bioetl_checkpoint_operator_operations_total",
+        "bioetl_checkpoint_operator_duration_seconds_bucket",
+    )
+
+    for panel in get_dashboard_panels(dashboard):
+        expressions = [
+            target.get("expr", "")
+            for target in panel.get("targets", [])
+            if isinstance(target.get("expr"), str)
+        ]
+        if any(
+            token in expr
+            for expr in expressions
+            for token in global_metric_tokens
+        ):
+            assert "GLOBAL" in str(panel.get("title", ""))
+
+
+def test_control_plane_latency_panels_have_p50_p95_p99() -> None:
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
+    panels = {
+        panel.get("title"): panel
+        for panel in get_dashboard_panels(dashboard)
+        if panel.get("title")
+    }
+    latency_panels = (
+        "Checkpoint Save Latency p50/p95/p99",
+        "GLOBAL Checkpoint Operator Latency p50/p95/p99",
+        "GLOBAL Control-Plane Read Latency p50/p95/p99",
+        "Audit Write Latency p50/p95/p99",
+        "Audit Query Latency p50/p95/p99",
+    )
+
+    for panel_title in latency_panels:
+        panel = panels.get(panel_title)
+        assert panel is not None, f"Control-plane dashboard missing {panel_title!r}"
+        expressions = "\n".join(
+            target.get("expr", "")
+            for target in panel.get("targets", [])
+            if isinstance(target.get("expr"), str)
+        )
+        assert "histogram_quantile(0.50" in expressions
+        assert "histogram_quantile(0.95" in expressions
+        assert "histogram_quantile(0.99" in expressions
+        assert "or vector(0)" not in expressions
+
+
+def test_control_plane_no_missing_metric_promql() -> None:
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
+    expressions = "\n".join(get_panel_expressions(dashboard))
+
+    assert "bioetl_checkpoint_age_seconds" not in expressions
+    assert "bioetl_replay_duplicate_records_total" not in expressions
+
+
+def test_control_plane_missing_signals_text_panel_exists() -> None:
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
+    panel = next(
+        (
+            panel
+            for panel in get_dashboard_panels(dashboard)
+            if panel.get("title") == "Known Missing Replay-Safety Signals"
+        ),
+        None,
+    )
+
+    assert panel is not None
+    content = panel.get("options", {}).get("content", "")
+    assert "checkpoint_age <= recovery window / RPO" in content
+    assert "replay does not create unexplained duplicate records" in content
+    assert "bioetl_checkpoint_age_seconds" in content
+    assert "bioetl_replay_duplicate_records_total" in content
+
+
+def test_control_plane_dashboard_links_are_scoped() -> None:
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
+    links = {
+        link.get("title"): link
+        for link in dashboard.get("links", [])
+        if link.get("title")
+    }
+
+    assert links
+    assert all(link.get("includeVars") is False for link in links.values())
+    assert "includeVars=true" not in json.dumps(links)
+    for title in ("Back to Overview", "2. Runtime", "4. Data Quality"):
+        url = str(links[title].get("url", ""))
+        assert "var-pipeline=$pipeline" in url
+        assert "var-run_type=$run_type" in url
+        assert "${__url_time_range}" in url
 
 
 def test_silver_validation_panels_use_explicit_pipeline_label() -> None:
@@ -1251,30 +1416,26 @@ def test_control_plane_dashboard_uses_control_plane_native_variable_sources() ->
 
 
 def test_runtime_dashboard_contains_runtime_hygiene_and_alert_condition_metrics():
-    """Ensure runtime dashboard stays anchored to log hygiene and alert-condition metrics."""
+    """Ensure runtime dashboard stays anchored to L2 runtime triage metrics."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
     all_expressions = "\n".join(get_panel_expressions(dashboard))
 
     required_metrics = [
+        "bioetl_pipeline_runs_total",
+        "bioetl_pipeline_duration_seconds_bucket",
+        "bioetl_phase_duration_seconds_bucket",
         "bioetl_errors_total",
         "bioetl_records_processed_total",
-        "bioetl_memory_pressure_events_total",
-        "bioetl_memory_batch_resize_events_total",
-        "bioetl_memory_monitor_fallback_events_total",
         "bioetl_memory_pressure_state",
-        "bioetl_phase_duration_seconds",
-        "bioetl_postrun_phase_duration_seconds",
+        "bioetl_stage_backlog_records",
+        "bioetl_stage_lag_seconds",
         "bioetl_shutdown_initiated",
         "bioetl_shutdown_completed",
-        "bioetl_replay_reconstructability_events_total",
-        "bioetl_replay_drift_events_total",
-        "bioetl_replay_lag_seconds",
         "bioetl_runtime_alert_condition_pipeline_preflight_failed_15m",
         "bioetl_runtime_alert_condition_pipeline_infrastructure_failed_15m",
         "bioetl_runtime_alert_condition_pipeline_runs_failed_15m",
         "bioetl_runtime_alert_condition_runtime_error_rate_high_30m",
         "bioetl_runtime_alert_condition_record_flow_invariant_violated_15m",
-        "bioetl_runtime_alert_condition_ingestion_throughput_degraded_15m",
         "bioetl_runtime_alert_condition_stage_backlog_active_15m",
         "bioetl_runtime_alert_condition_stage_lag_high_15m",
         "bioetl_runtime_alert_condition_dq_soft_threshold_15m",
@@ -1294,13 +1455,6 @@ def test_runtime_dashboard_contains_runtime_hygiene_and_alert_condition_metrics(
         "bioetl_runtime_alert_condition_provider_rate_limiter_wait_high_30m",
         "bioetl_runtime_alert_condition_provider_rate_limiter_tokens_depleted_15m",
         "bioetl_data_freshness_seconds",
-        "bioetl_control_plane_reads_total",
-        "bioetl_control_plane_read_duration_seconds",
-        "bioetl_traced_runs_total",
-        'up{job="bioetl"}',
-        'up{job="prometheus"}',
-        'up{job="grafana"}',
-        'up{job="pushgateway"}',
     ]
     missing = [metric for metric in required_metrics if metric not in all_expressions]
     assert not missing, f"Runtime dashboard missing metrics: {missing}"
@@ -1387,7 +1541,7 @@ def test_runtime_dashboard_describes_tracing_optional_mode() -> None:
         (
             panel
             for panel in dashboard.get("panels", [])
-            if panel.get("title") == "Tracing Mode Note"
+            if panel.get("title") == "Diagnostic Scope Note"
         ),
         None,
     )
@@ -1395,9 +1549,10 @@ def test_runtime_dashboard_describes_tracing_optional_mode() -> None:
         "Runtime dashboard must expose a tracing-mode guidance note"
     )
     content = note_panel.get("options", {}).get("content", "")
+    assert "L2 diagnostic flow" in content
     assert "Prometheus-first mode" in content
     assert "Tracing-only Log Hygiene" in content
-    assert "Overview, Control Plane, and Data Quality" in content
+    assert "DQ / Control Plane / Provider Health" in content
 
 
 def test_control_plane_dashboard_contains_checkpoint_and_replay_metrics() -> None:
@@ -1494,17 +1649,17 @@ def test_overview_failed_runs_uses_run_metric_and_selected_time_range() -> (
 def test_runtime_pipeline_errors_panel_uses_runtime_error_metric_and_selected_time_range() -> (
     None
 ):
-    """Runtime Pipeline Errors must use shipped runtime errors over the active range."""
+    """Runtime error-rate panel must use shipped runtime errors over its fixed window."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
     panel = next(
         (
             item
             for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Pipeline Errors"
+            if item.get("title") == "Runtime Error Rate / 30m"
         ),
         None,
     )
-    assert panel is not None, "Panel 'Pipeline Errors' not found"
+    assert panel is not None, "Panel 'Runtime Error Rate / 30m' not found"
 
     expressions = [
         target.get("expr", "")
@@ -1512,48 +1667,53 @@ def test_runtime_pipeline_errors_panel_uses_runtime_error_metric_and_selected_ti
         if isinstance(target.get("expr"), str)
     ]
     assert any("bioetl_errors_total" in expr for expr in expressions), (
-        "Pipeline Errors must use bioetl_errors_total"
+        "Runtime Error Rate / 30m must use bioetl_errors_total"
     )
-    assert any("[$__range]" in expr for expr in expressions), (
-        "Pipeline Errors must use the selected Grafana time range"
+    assert any("[30m]" in expr for expr in expressions), (
+        "Runtime Error Rate / 30m must use the shipped 30-minute window"
     )
 
 
 def test_runtime_pipeline_error_code_breakdown_uses_bounded_runtime_error_metric() -> (
     None
 ):
-    """Top Pipeline Error Codes must stay on bounded runtime error labels."""
+    """Runtime error breakdown must stay on bounded stage/error_code labels."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
     panel = next(
         (
             item
             for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Top Pipeline Error Codes"
+            if item.get("title") == "Errors by Stage / Error Code / Range"
         ),
         None,
     )
-    assert panel is not None, "Panel 'Top Pipeline Error Codes' not found"
+    assert panel is not None, "Panel 'Errors by Stage / Error Code / Range' not found"
 
     targets = [
         target for target in panel.get("targets", []) if isinstance(target, dict)
     ]
-    assert targets, "Panel 'Top Pipeline Error Codes' must define a query target"
+    assert targets, (
+        "Panel 'Errors by Stage / Error Code / Range' must define a query target"
+    )
     expressions = [
         target.get("expr", "")
         for target in targets
         if isinstance(target.get("expr"), str)
     ]
     assert any("bioetl_errors_total" in expr for expr in expressions), (
-        "Top Pipeline Error Codes must use bioetl_errors_total"
+        "Errors by Stage / Error Code / Range must use bioetl_errors_total"
     )
-    assert any("by (error_code)" in expr for expr in expressions), (
-        "Top Pipeline Error Codes must group by error_code"
+    assert any(
+        "by(stage, error_code)" in expr or "by (stage, error_code)" in expr
+        for expr in expressions
+    ), (
+        "Errors by Stage / Error Code / Range must group by stage and error_code"
     )
     assert any("[$__range]" in expr for expr in expressions), (
-        "Top Pipeline Error Codes must use the selected Grafana time range"
+        "Errors by Stage / Error Code / Range must use the selected Grafana time range"
     )
     assert all(target.get("instant") is True for target in targets), (
-        "Top Pipeline Error Codes must use instant Prometheus queries"
+        "Errors by Stage / Error Code / Range must use instant Prometheus queries"
     )
 
 
@@ -1633,18 +1793,14 @@ def test_provider_circuit_breaker_panels_use_adapter_variable() -> None:
 @pytest.mark.parametrize(
     ("dashboard_file", "panel_title", "expected_snippet"),
     [
-        ("bioetl-runtime.json", "Phase Duration by Phase (p95)", "[$__interval]"),
-        (
-            "bioetl-runtime.json",
-            "Postrun Phase Duration by Phase (p95)",
-            "[$__interval]",
-        ),
-        ("bioetl-runtime.json", "Shutdown Initiated by Reason", "[$__interval]"),
-        ("bioetl-runtime.json", "Shutdown Completed by Reason", "[$__interval]"),
+        ("bioetl-runtime.json", "Pipeline Phase Duration p50/p95/p99", "[$__rate_interval]"),
+        ("bioetl-runtime.json", "Pipeline Duration p50/p95/p99", "[$__rate_interval]"),
+        ("bioetl-runtime.json", "Shutdown Initiated by Reason / Interval", "[$__interval]"),
+        ("bioetl-runtime.json", "Shutdown Completed by Reason / Interval", "[$__interval]"),
         ("bioetl-control-plane-v1.json", "Audit Write Outcomes", "[$__interval]"),
         ("bioetl-control-plane-v1.json", "Audit Query Outcomes", "[$__interval]"),
-        ("bioetl-control-plane-v1.json", "Audit Write Latency (p95)", "[$__interval]"),
-        ("bioetl-control-plane-v1.json", "Audit Query Latency (p95)", "[$__interval]"),
+        ("bioetl-control-plane-v1.json", "Audit Write Latency p50/p95/p99", "[$__range]"),
+        ("bioetl-control-plane-v1.json", "Audit Query Latency p50/p95/p99", "[$__range]"),
     ],
 )
 def test_runtime_and_control_plane_operator_panels_use_active_time_windows(
@@ -1684,7 +1840,7 @@ def test_runtime_and_control_plane_operator_panels_use_active_time_windows(
         ("bioetl-overview-v2.json", "Global Provider Degradation"),
         ("bioetl-overview-v2.json", "Workflow Status"),
         ("bioetl-control-plane-v1.json", "GLOBAL Control-Plane Read Failures"),
-        ("bioetl-control-plane-v1.json", "GLOBAL Control-Plane Read p95"),
+        ("bioetl-control-plane-v1.json", "GLOBAL Control-Plane Read Latency p50/p95/p99"),
         ("bioetl-dq-v2.json", "Records Quarantined"),
         ("bioetl-dq-v2.json", "Soft Threshold Exceeded"),
         ("bioetl-dq-v2.json", "Quarantine by Error Type"),
@@ -1692,18 +1848,9 @@ def test_runtime_and_control_plane_operator_panels_use_active_time_windows(
         ("bioetl-dq-v2.json", "Lineage Refs Missing"),
         ("bioetl-runtime.json", "Warnings"),
         ("bioetl-runtime.json", "Unstructured Logs"),
-        ("bioetl-runtime.json", "DQ Context Failures"),
-        ("bioetl-runtime.json", "DQ Reports Skipped"),
-        ("bioetl-runtime.json", "DQ Reports Generated"),
-        ("bioetl-runtime.json", "Pipeline Errors"),
-        ("bioetl-runtime.json", "Memory Pressure Events"),
-        ("bioetl-runtime.json", "Batch Resize Events"),
-        ("bioetl-runtime.json", "Fallback Monitor Decisions"),
-        ("bioetl-runtime.json", "Memory Pressure Active"),
-        ("bioetl-runtime.json", "Global Control-plane Lookup p95"),
+        ("bioetl-runtime.json", "Errors by Stage / Error Code / Range"),
+        ("bioetl-runtime.json", "Records by Stage / Run Type / Range"),
         ("bioetl-runtime.json", "Top Warning Events"),
-        ("bioetl-runtime.json", "Top Pipeline Error Codes"),
-        ("bioetl-runtime.json", "Trace-enabled Runs"),
     ],
 )
 def test_range_aware_summary_panels_use_selected_time_range(
@@ -1807,7 +1954,7 @@ def test_runtime_alert_condition_panels_use_recording_rules(
         ("bioetl-control-plane-v1.json", "Lineage Fragment Outcomes"),
         ("bioetl-dq-v2.json", "DQ Check Duration (p95)"),
         ("bioetl-dq-v2.json", "Anomalies Detected"),
-        ("bioetl-runtime.json", "Global Control-plane Lookup Outcomes"),
+        ("bioetl-runtime.json", "Records by Stage / Interval"),
         ("bioetl-runtime.json", "Log Hygiene Trend"),
     ],
 )
@@ -1846,8 +1993,13 @@ def test_adaptive_trend_panels_use_selected_interval(
         ),
         (
             "bioetl-runtime.json",
-            "Top Pipeline Error Codes",
-            'label_replace(vector(0), "error_code", "none", "", "")',
+            "Errors by Stage / Error Code / Range",
+            'label_replace(label_replace(vector(0), "stage", "none", "", ""), "error_code", "none", "", "")',
+        ),
+        (
+            "bioetl-control-plane-v1.json",
+            "Checkpoint Compatibility Outcomes",
+            'label_replace(vector(0), "disposition", "no_events", "", "")',
         ),
         (
             "bioetl-dq-v2.json",
@@ -1858,16 +2010,6 @@ def test_adaptive_trend_panels_use_selected_interval(
             "bioetl-dq-v2.json",
             "Anomalies Detected",
             'label_replace(label_replace(vector(0), "severity", "none", "", ""), "anomaly_type", "none", "", "")',
-        ),
-        (
-            "bioetl-runtime.json",
-            "Global Control-plane Lookup Outcomes",
-            'label_replace(label_replace(vector(0), "store", "none", "", ""), "status", "none", "", "")',
-        ),
-        (
-            "bioetl-control-plane-v1.json",
-            "Checkpoint Compatibility Outcomes by Disposition",
-            'label_replace(vector(0), "disposition", "no_events", "", "")',
         ),
         (
             "bioetl-dq-v2.json",
@@ -1986,13 +2128,13 @@ def test_overview_processing_volume_panel_splits_units() -> None:
 
 
 def test_runtime_alert_condition_breakdown_panels_exist() -> None:
-    """Runtime must expose per-condition breakdowns in addition to summary cards."""
+    """Runtime must expose localization panels in addition to summary cards."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
     expected = {
-        "Pipeline Alert Condition Breakdown": "bioetl_runtime_alert_condition_pipeline_preflight_failed_15m",
-        "DQ Alert Condition Breakdown": "bioetl_runtime_alert_condition_dq_soft_threshold_15m",
-        "Control-plane Alert Condition Breakdown": "bioetl_runtime_alert_condition_manifest_write_failed_15m",
-        "GLOBAL Provider Alert Condition Breakdown": "bioetl_runtime_alert_condition_provider_failure_rate_high_15m",
+        "Stage Backlog Trend": "bioetl_stage_backlog_records",
+        "Errors by Stage / Error Code / Range": "bioetl_errors_total",
+        "Records by Stage / Run Type / Range": "bioetl_records_processed_total",
+        "Pipeline Phase Duration p50/p95/p99": "bioetl_phase_duration_seconds_bucket",
     }
     panels = {
         panel.get("title"): panel
@@ -2011,10 +2153,10 @@ def test_runtime_alert_condition_breakdown_panels_exist() -> None:
 
 
 @pytest.mark.parametrize(
-    "dashboard_file", ["bioetl-runtime.json", "bioetl-control-plane-v1.json"]
+    "dashboard_file", ["bioetl-control-plane-v1.json"]
 )
 def test_replay_panels_are_split_by_semantics(dashboard_file: str) -> None:
-    """Reconstructability, drift, and lag should be represented by distinct panels."""
+    """Control-plane replay diagnostics must keep reconstructability, drift, and lag separate."""
     dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_file)
     panels = {
         panel.get("title"): panel
@@ -2034,6 +2176,8 @@ def test_replay_panels_are_split_by_semantics(dashboard_file: str) -> None:
     assert "bioetl_replay_lag_seconds" not in reconstruct_expr
 
     drift = panels.get("Replay Drift Events")
+    if dashboard_file == "bioetl-control-plane-v1.json":
+        drift = panels.get("Replay Drift")
     assert drift is not None
     drift_expr = "\n".join(
         target.get("expr", "")

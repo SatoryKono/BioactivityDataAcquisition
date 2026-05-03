@@ -119,7 +119,7 @@ ______________________________________________________________________
 │  - 2. Runtime (bioetl-runtime)                                   │
 │  - 3. Provider Health (bioetl-provider-health-v2)                │
 │  - 4. Data Quality (bioetl-dq-v2)                                │
-│  - Control Plane v1 (bioetl-control-plane-v1)                    │
+│  - Control Plane / Replay Safety (bioetl-control-plane-v1)       │
 │  - 5. Silver Reject Explorer (bioetl-silver-reject-explorer)     │
 │  - 6. Workflow Overview (bioetl-workflow-overview)               │
 └──────────────────────────────────────────────────────────────────┘
@@ -161,7 +161,7 @@ grafana/
 └── dashboards/
     ├── bioetl-overview-v2.json        # Обзор для последнего запуска (v2)
     ├── bioetl-dq-v2.json              # Data Quality для последнего запуска (v2)
-    ├── bioetl-runtime.json            # Runtime triage: log hygiene + alert conditions
+    ├── bioetl-runtime.json            # L2 runtime triage: blockers, latency, backlog, handoffs
     ├── bioetl-provider-health-v2.json # Здоровье провайдеров (v2)
     ├── bioetl-silver-reject-explorer.json # Record-level Silver reject explorer
     └── bioetl-workflow-overview.json  # Declarative workflow run/step overview
@@ -677,10 +677,10 @@ Shipped dashboards используют несколько template variables в
   `label_values(bioetl_records_processed_total{pipeline=~"$pipeline",run_type=~"$run_type"}, stage)`.
   Это bounded stage breakdown filter, а не forensic selector.
 
-- **`Control Plane v1`** использует собственные `$pipeline/$run_type` queries
-  на базе `bioetl_control_plane_manifest_writes_total`, потому что dashboard
-  ориентирован на control-plane write scope, а global read-panels не несут
-  pipeline label.
+- **`Control Plane / Replay Safety`** использует собственные
+  `$pipeline/$run_type` queries для manifest/ledger/checkpoint/replay/lineage
+  decision row. GLOBAL read-path и checkpoint-operator panels не несут
+  pipeline/run_type labels, поэтому не фильтруются по этим переменным.
 
 - **`Workflow Overview`** использует только `$workflow` и `$status` через
   `label_values(bioetl_workflow_runs_total, workflow|status)`.
@@ -730,26 +730,29 @@ ______________________________________________________________________
 | ID  | Название                       | Тип        | PromQL                                                                                                                       | Описание                                                                                                                                                                         |
 | --- | ------------------------------ | ---------- | ---------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 99  | L0 Overview Scope              | Text       | n/a                                                                                                                          | Primary question, scope, owner, audience.                                                                                                                                       |
-| 201 | Failed Pipeline Runs           | Stat       | `round(sum(increase(bioetl_pipeline_runs_total{...status="failed"}[$__range])) or vector(0))`                               | Red `>=1`; open `2. Runtime`.                                                                                                                                                   |
-| 4   | Overall Yield                  | Gauge      | `sum(increase(gold[$__range])) / clamp_min(sum(increase(bronze[$__range])), 1)`                                             | Red `<0.8`, yellow `>=0.8`, green `>=0.9`; open `4. Data Quality`.                                                                                                              |
-| 202 | Active Stage Backlog           | Stat       | `max(max_over_time(bioetl_stage_backlog_records{...}[$__range])) or vector(0)`                                              | Non-zero backlog; open `2. Runtime`.                                                                                                                                            |
-| 203 | Worst Stage Lag                | Stat       | `max(max_over_time(bioetl_stage_lag_seconds{...}[$__range])) or vector(0)`                                                  | Yellow `>=300s`; open `2. Runtime`.                                                                                                                                             |
-| 204 | DQ Blocking                    | Stat       | `round(sum(increase(bioetl_dq_validation_failures_total{severity="hard_fail"}[$__range])) or vector(0))`                    | Red `>=1`; open `4. Data Quality`.                                                                                                                                              |
-| 205 | Control Plane Unsafe           | Stat       | manifest + ledger + checkpoint + lineage selected-range failures                                                             | Red `>=1`; open `Control Plane v1`.                                                                                                                                             |
-| 206 | Provider Degraded              | Stat       | degraded/failure health checks + retry exhaustion selected-range counts                                                      | Yellow/red non-zero; open `3. Provider Health`.                                                                                                                                 |
+| 214 | System Status                  | Stat       | failed runs + backlog + lag + DQ hard fail + control-plane blockers + warnings                                               | `UNKNOWN`/`OK`/`DEGRADED`/`BROKEN`; `OK` requires recent activity and no blockers/warnings.                                                                                     |
+| 215 | Next Action                    | Stat       | priority expression: runtime > DQ > control-plane > provider > workflow                                                      | Explicit next dashboard. Runtime backlog/lag routes to `2. Runtime`.                                                                                                            |
+| 201 | Failed Runs in Range           | Stat       | `round(sum(increase(bioetl_pipeline_runs_total{...status="failed"}[$__range])) or vector(0))`                               | Red `>=1`; open `2. Runtime`.                                                                                                                                                   |
+| 216 | Recent Activity                | Stat       | selected-range runs + records + backlog                                                                                      | `NO RECENT ACTIVITY`, `ACTIVE`, or `STALLED`; prevents zero failures from implying health.                                                                                       |
+| 202 | Worst Backlog Stage            | Table      | `topk(1, max by (stage) (max_over_time(bioetl_stage_backlog_records{...}[$__range])))`                                      | Shows culprit stage and backlog value; open `2. Runtime`.                                                                                                                       |
+| 203 | Worst Lag Stage                | Table      | `topk(1, max by (stage) (max_over_time(bioetl_stage_lag_seconds{...}[$__range])))`                                          | Shows culprit stage and lag value; open `2. Runtime`.                                                                                                                           |
+| 208-212 | Subsystem Status Cards     | Stat       | Runtime / DQ / Control Plane / Provider / Workflow status expressions                                                        | Replaces numeric handoff cards; each card exposes status, reason and next dashboard.                                                                                            |
+| 217 | Backlog Causality              | Table      | backlog + lag + processed rate by stage                                                                                      | Supports `backlog(t+1) = backlog(t) + ingestion - output` triage.                                                                                                               |
+| 4   | Flow Balance                   | Table      | Bronze input, Gold output, filtered out, quarantined, unaccounted loss                                                       | Replaces misleading yield gauge; Bronze denominator `0` means yield unavailable/no recent input, not green `100%`.                                                              |
 | 1   | Processing Volume by Stage     | Timeseries | `sum by (stage) (increase(bioetl_records_processed_total{...}[$__interval]))`                                                | Throughput trend supporting the L0 answer.                                                                                                                                      |
 | 207 | Pipeline Run Outcomes          | Timeseries | `sum by (status) (increase(bioetl_pipeline_runs_total{...}[$__interval]))`                                                   | Run status trend.                                                                                                                                                               |
 | 1210 | Stage Backlog Trend           | Timeseries | `max by (stage) (max_over_time(bioetl_stage_backlog_records{...}[$__interval])) or vector(0)`                               | Gauge trend for backlog context.                                                                                                                                                |
 | 1211 | Stage Lag Trend               | Timeseries | `max by (stage) (max_over_time(bioetl_stage_lag_seconds{...}[$__interval])) or vector(0)`                                   | Gauge trend for lag context.                                                                                                                                                    |
-| 208-212 | Operational Handoffs       | Stat       | Runtime / DQ / Control Plane / Provider / Workflow summary counts                                                            | Compact links to target dashboards.                                                                                                                                             |
-| 111/113/114/118/119 | Failure Summary | Stat/Gauge | Manifest/ledger, checkpoint, lineage, Silver reject count/rate                                                               | Compact L0 summaries only; deep diagnostics live in target dashboards.                                                                                                          |
+| 204/205/206 | Supporting Blockers       | Stat       | DQ hard blockers, control-plane blockers, global provider degradation                                                        | Compact supporting checks; not duplicate handoff cards.                                                                                                                         |
+| 111/113/114/118/119 | Supporting Checks | Stat      | Manifest/ledger, checkpoint, lineage, Silver rejects count/rate, latest successful data timestamp                           | Compact L0 checks only; deep diagnostics live in target dashboards.                                                                                                             |
+| 213 | Drilldown Links                 | Text       | n/a                                                                                                                          | Scoped links to Runtime, DQ, Provider Health, Control Plane, Workflow, Loki and Tempo.                                                                                           |
 
 **Используемые метрики:** `bioetl_pipeline_runs_total`, `bioetl_records_processed_total`,
 `bioetl_stage_backlog_records`, `bioetl_stage_lag_seconds`,
-`bioetl_dq_validation_failures_total`, control-plane metrics, provider health
-metrics и `bioetl_workflow_runs_total`.
+`bioetl_dq_validation_failures_total`, `bioetl_dq_records_quarantined_total`,
+control-plane metrics, provider health metrics и `bioetl_workflow_runs_total`.
 
-**Drilldown:** dashboard links `2. Runtime`, `Control Plane v1`, `3. Provider Health`,
+**Drilldown:** dashboard links `2. Runtime`, `Control Plane / Replay Safety`, `3. Provider Health`,
 `4. Data Quality`, `6. Workflow Overview`, `Explore Logs (Loki, tracing profile)` и `Explore Traces (Tempo, tracing profile)` используют
 текущее временное окно. Panel `Processing Volume by Stage` дублирует Explore handoff
 через data links для быстрого перехода в Grafana Explore. Tempo handoff для
@@ -759,7 +762,7 @@ pipeline dashboards использует TraceQL filter по `span."bioetl.pipel
 **Silver Rejects triage sequence:**
 
 1. Начните с `1. BioETL Overview` или `2. Runtime`, чтобы увидеть summary spike по
-   `Silver Filter Rejects`.
+   `Silver Rejects Count + Rate` / `Silver Filter Rejects`.
 1. Перейдите в `4. Data Quality`, чтобы проверить bounded breakdown через
    `Top Silver Reject Reasons` и `Top Silver Reject Fields`.
 1. Перейдите в `5. Silver Reject Explorer` для record-level browsing.
@@ -806,9 +809,9 @@ ______________________________________________________________________
 - неизвестные значения схлопываются в `other`
 - raw `message` не используется как Prometheus label
 
-**Drilldown:** dashboard links `Back to Overview`, `Control Plane v1`, `5. Silver Reject Explorer`, `Explore Logs (Loki, tracing profile)` и
+**Drilldown:** dashboard links `Back to Overview`, `Control Plane / Replay Safety`, `5. Silver Reject Explorer`, `Explore Logs (Loki, tracing profile)` и
 `Explore Traces (Tempo, tracing profile)` используют текущее временное окно. Panel `Data Flow in Range: Bronze -> Silver -> Gold` дублирует Explore handoff через data links для DQ
-incidents и freshness investigation, а также даёт прямой переход в `Control Plane v1` для replay/checkpoint расследования. Панели `Lineage Refs Missing` и `Gold Strict Validation Failures` тоже ведут в `Control Plane v1`, чтобы traceability и hard-fail incidents не требовали ручного поиска следующего dashboard. Tempo drilldown предфильтрован по
+incidents и freshness investigation, а также даёт прямой переход в `Control Plane / Replay Safety` для replay/checkpoint расследования. Панели `Lineage Refs Missing` и `Gold Strict Validation Failures` тоже ведут в `Control Plane / Replay Safety`, чтобы traceability и hard-fail incidents не требовали ручного поиска следующего dashboard. Tempo drilldown предфильтрован по
 `span."bioetl.pipeline"` и `span."bioetl.run_type"`.
 
 ______________________________________________________________________
@@ -893,63 +896,84 @@ ______________________________________________________________________
 **UID:** `bioetl-runtime`
 **Refresh:** 30 секунд
 **Time range:** Последние 12 часов
-**Назначение:** Отдельный runtime/ops surface для triage log hygiene, adaptive-memory и alert-condition сигналов. Не заменяет `1. BioETL Overview`, а собирает Prometheus-first summary, adaptive-memory bounded diagnostics и tracing-backed log hygiene в одном месте.
+**Назначение:** L2 diagnostic dashboard для runtime-triage. Он отвечает на вопрос:
+где pipeline runtime теряет время, падает, копит backlog или даёт
+warning/error conditions. Dashboard остаётся **Prometheus-first**: first screen
+должен работать без Loki/Tempo, а tracing-backed log hygiene вынесен в
+collapsed row `Tracing-only Log Hygiene (requires optional tracing profile)`.
 
-### Панели
+### Контракт
 
-| ID  | Название                       | Тип        | Query                                                                                                             | Описание                                                                                                                                                                                                                                                                                          |
-| --- | ------------------------------ | ---------- | ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2   | Warnings                       | Stat       | Loki `count_over_time(... level=\"warning\" ... [$__range])`                                                      | Количество structured warning logs за текущее временное окно Grafana по `$pipeline`. Панель находится внутри collapsed row `Tracing-only Log Hygiene`, чтобы базовый runtime surface оставался usable без Loki/Tempo datasource.                                                                 |
-| 3   | Unstructured Logs              | Stat       | Loki `count_over_time(... | json | __error__!="" [$__range])`                                                    | Количество log rows, которые не распарсились как structured JSON. Панель тоже живёт внутри collapsed tracing-only row.                                                                                                                                                                            |
-| 4   | DQ Alert Conditions            | Stat       | Prometheus                                                                                                        | Суммарный triage-signal по shipped DQ alert families, привязанный к тем же fixed windows, что и rule pack (`15m`/`30m`).                                                                                                                                                                          |
-| 5   | Control-plane Alert Conditions | Stat       | Prometheus                                                                                                        | Failures по manifest writes, ledger appends, checkpoint incompatibility и missing lineage refs, привязанные к shipped alert windows (`15m`/`30m`).                                                                                                                                                |
-| 6   | Provider Alert Conditions      | Stat       | Prometheus                                                                                                        | Fleet-wide provider failure-rate и retry-exhaustion conditions, привязанные к shipped alert windows (`15m` и `1h`). Панель не фильтрует provider-only recording rules по `pipeline`.                                                                                                           |
-| 7   | Freshness Alert Conditions     | Stat       | Prometheus                                                                                                        | Количество freshness conditions старше 24h.                                                                                                                                                                                                                                                       |
-| 8   | Top Warning Events             | Bar gauge  | Loki                                                                                                              | Наиболее частые warning events за текущее временное окно Grafana. Панель показывается только после expand tracing-only row.                                                                                                                                                                       |
-| 9   | Log Hygiene Trend              | Timeseries | Loki                                                                                                              | Тренд warnings против unstructured rows с adaptive bucket size через `$__interval`. Панель остаётся shipped, но скрыта в collapsed tracing-only row до явного operator expand.                                                                                                                     |
-| 18  | Memory Pressure Events         | Stat       | `round(sum(increase(bioetl_memory_pressure_events_total{pipeline=~"$pipeline",stage=~"$stage"}[$__range])) or vector(0))` | Количество adaptive-memory решений, которые реально увидели pressure внутри выбранного окна; panel уважает first-class `$stage` drill-down.                                                                                                                                                     |
-| 19  | Batch Resize Events            | Stat       | `round(sum(increase(bioetl_memory_batch_resize_events_total{pipeline=~"$pipeline"}[$__range])) or vector(0))`     | Сколько раз runtime менял batch size из-за pressure или recovery-шага.                                                                                                                                                                                                                            |
-| 20  | Fallback Monitor Decisions     | Stat       | `round(sum(increase(bioetl_memory_monitor_fallback_events_total{pipeline=~"$pipeline"}[$__range])) or vector(0))` | Сигнал, что memory decisions шли через bounded fallback monitor modes (`resource`, `estimate`, `unknown`), а не по основному psutil path.                                                                                                                                                         |
-| 21  | Memory Pressure Active         | Stat       | `max(max_over_time(bioetl_memory_pressure_state{pipeline=~"$pipeline",stage=~"$stage"}[$__range])) or vector(0)` | Быстрый бинарный индикатор, был ли pressure хотя бы раз за выбранный диапазон, с stage drill-down.                                                                                                                                                                                               |
-| 17  | Silver Filter Rejects          | Stat       | `round(sum(increase(bioetl_records_processed_total{...stage="filtered_out"}[$__range])) or vector(0))`            | Быстрый selected-range triage-signal, который помогает отличить intentional Silver exclusions от DQ/schema проблем. Panel description направляет в `4. Data Quality` для bounded cause breakdown и в quarantine CLI для exact drilldown. |
+- **Audience:** SRE, developer, data engineer
+- **Primary question:** где runtime теряет время, падает, копит backlog или даёт warning/error signals
+- **Variables:** только bounded `$pipeline`, `$run_type`, `$stage`
+- **Forbidden variables:** `run_id`, `payload_hash`, `record_id`
+- **Top links:** `Back to Overview`, `Control Plane v1`, `3. Provider Health`,
+  `4. Data Quality`, `Explore Logs`, `Explore Traces`, `Runtime Runbook`
+- **Known blocked panels:** `Retry vs Failure` и `Batch Size Distribution`
+  сознательно не shipped, потому что в текущем metric surface нет подтверждённых
+  bounded runtime metrics для этих решений
 
-Дополнительно runtime dashboard теперь включает operator-facing stack-health panels (`Metrics Endpoint Up`, `Prometheus Up`, `Grafana Up`, `Pushgateway Up`) и bounded replay signal `Replay Not Reconstructable`.
+### Answer Row
 
-Runtime dashboard теперь явно помечен как **Prometheus-first**: note `Tracing Mode Note` объясняет, что summary panels и alert-condition surfaces остаются рабочими без Loki/Tempo, а row `Tracing-only Log Hygiene (requires optional tracing profile)` нужно разворачивать только в окружениях с включённым `tracing` profile.
+| Панель | Query family | Unit | Threshold |
+| --- | --- | --- | --- |
+| `Runtime Blockers / 15m` | shipped `bioetl_runtime_alert_condition_*` + no-record + memory-pressure signals | count | red `>=1` |
+| `Failed Runs / 15m` | `increase(bioetl_pipeline_runs_total{status="failed"}[15m])` | count | red `>=1` |
+| `No-Records Runs / 30m` | runtime no-record contract over `bioetl_pipeline_runs_total` vs `bioetl_records_processed_total` | count | yellow `>=1` |
+| `Runtime Error Rate / 30m` | `bioetl_errors_total / bronze records` | percent | yellow `>5%`, red `>20%` |
+| `Worst Stage Lag / 15m` | `bioetl_stage_lag_seconds` | seconds | yellow `>=300`, red `>=1800` |
+| `Memory Pressure Active / 15m` | `bioetl_memory_pressure_state` | boolean | yellow/red `>0` |
 
-**Фильтрация:** `$pipeline`, `$run_type`, `$stage`.
+### Localization Row
 
-**Drilldown:** dashboard links `Back to Overview`, `Control Plane v1`, `4. Data Quality`, `Explore Logs (Loki, tracing profile)` и
-`Explore Traces (Tempo, tracing profile)` плюс data links у `Log Hygiene Trend` ведут в
-Explore с тем же time range. Дополнительно панели `Control-plane Alert Conditions`,
-`No-Records Processed Runs` и `Replay Not Reconstructable` теперь дают прямой
-handoff в `Control Plane v1`, чтобы checkpoint/replay/lineage incident flow не
-застревал на runtime summary surface. Как и в остальных shipped dashboards, Loki handoff
-стартует с безопасного `{job="bioetl"}` entrypoint. Tempo handoff использует
-тот же dashboard scope через `span."bioetl.pipeline"` и `span."bioetl.run_type"`.
-`Pipeline/DQ/Control-plane/Provider/Freshness Alert Conditions` дополнительно
-ведут прямо в canonical runbooks (`pipeline-failure-critical`,
-`dq-failure-investigation`, `run-manifest-inspection`,
-`observability-checklist`, `incident-response`) без ручного поиска следующего
-operator шага.
+- `Stage Backlog Trend`: sustained backlog by `stage`
+- `Records by Stage / Interval`: throughput by `stage`
+- `Pipeline Phase Duration p50/p95/p99`: phase latency distribution over
+  `bioetl_phase_duration_seconds_bucket`
+- `Pipeline Duration p50/p95/p99`: runtime/stage latency distribution over
+  `bioetl_pipeline_duration_seconds_bucket`
+- `Errors by Stage / Error Code / Range`: bounded runtime error localization
+- `Records by Stage / Run Type / Range`: dropped/stalled stage localization
 
-Панели `Pipeline/DQ/Control-plane/Provider Alert Conditions` читают recording-rule
-серии `bioetl_runtime_alert_condition_*`, чтобы dashboard JSON не дублировал
-тяжёлые alert-condition выражения целиком.
+### Handoff Row
 
-Memory triage panels используют только bounded adaptive-memory metric families
-(`bioetl_memory_*`). Детали вроде `decision_index`, `record_index`,
-old/new batch sizes и host-specific memory values остаются в checkpoint metadata,
-run ledger diagnostics и trace events, а не в Grafana labels.
+- `Pipeline Alert Conditions`: runtime failure family using shipped `15m/30m`
+  recording rules; links to `pipeline-failure-critical.md`
+- `DQ Alert Conditions`: compact DQ handoff only; detailed DQ debugging lives in
+  `4. Data Quality`
+- `Control-plane Alert Conditions`: manifest/checkpoint/replay/lineage handoff
+  into `Control Plane v1`
+- `GLOBAL Provider Alert Conditions`: compact provider handoff only; provider
+  deep-debug stays in `3. Provider Health`
+- `Freshness Alert Conditions`: stale-output handoff into DQ/source investigation
+- `Shutdown Initiated by Reason / Interval` and
+  `Shutdown Completed by Reason / Interval`: graceful shutdown visibility
 
-**Silver Rejects triage sequence:**
+### Logs And Traces
 
-1. Используйте panel `Silver Filter Rejects` как быстрый runtime signal, чтобы
-   отделить intentional exclusions от общего DQ/runtime шума.
-1. Если spike подтверждён, переходите по dashboard link `4. Data Quality` за
-   bounded cause summary.
-1. Для record-level списка и details переходите в `5. Silver Reject Explorer`.
-1. Для execution (`resolve/replay/purge`) используйте quarantine CLI.
+- `Warnings`, `Unstructured Logs`, `Top Warning Events`, `Log Hygiene Trend`
+  живут в collapsed tracing-only row и не ломают base runtime surface в
+  окружениях без Loki/Tempo
+- Loki handoff стартует с безопасного `{job="bioetl"}` entrypoint
+- Tempo handoff остаётся bounded по `pipeline/run_type`; forensic IDs в runtime
+  dashboard не протаскиваются
+
+### Drilldown
+
+- Cross-dashboard links передают только target-scoped variables
+- Panel-level handoffs используют явные `from/to`, а не blanket `includeVars=true`
+- `Control-plane Alert Conditions` и `No-Records Runs / 30m` дают прямой handoff
+  в `Control Plane v1`
+- `Pipeline/DQ/Control-plane/Provider/Freshness Alert Conditions` дополнительно
+  ведут в canonical runbooks
+
+### Instrumentation Debt
+
+- В shipped runtime dashboard отсутствуют `Retry vs Failure` и
+  `Batch Size Distribution`, потому что текущий repo не подтверждает bounded
+  runtime metric family для этих решений. Это остаётся отдельным follow-up по
+  instrumentation, а не поводом выдумывать PromQL.
 
 ______________________________________________________________________
 
@@ -1847,11 +1871,11 @@ ______________________________________________________________________
 
 | Dashboard                 | UID                             | JSON version | Panels | Refresh | Time Range | Primary surface | Purpose |
 | ------------------------- | ------------------------------- | ------------ | ------ | ------- | ---------- | --------------- | ------- |
-| 1. BioETL Overview        | `bioetl-overview-v2`            | 5            | 23     | 30s     | 12h        | Prometheus      | L0 broken/degraded answer and operational handoff |
-| 2. Runtime                | `bioetl-runtime`                | 2            | 31     | 30s     | 12h        | Prometheus + optional Loki/Tempo links | Runtime hygiene, warnings, alert conditions |
+| 1. BioETL Overview        | `bioetl-overview-v2`            | 5            | 27     | 30s     | 12h        | Prometheus      | L0 broken/degraded answer and operational handoff |
+| 2. Runtime                | `bioetl-runtime`                | 2            | 26     | 30s     | 12h        | Prometheus + optional Loki/Tempo links | L2 runtime triage: blockers, latency, backlog, handoffs |
 | 3. Provider Health        | `bioetl-provider-health-v2`     | 6            | 17     | 30s     | 12h        | Prometheus      | Provider latency, health, retries, failure ratios |
 | 4. Data Quality           | `bioetl-dq-v2`                  | 4            | 21     | 30s     | 12h        | Prometheus      | DQ score, quarantine, freshness, validation failures |
-| Control Plane v1          | `bioetl-control-plane-v1`       | 2            | 17     | 30s     | 6h         | Prometheus      | Manifest, ledger, checkpoint, lineage traceability |
+| Control Plane / Replay Safety | `bioetl-control-plane-v1`       | 2            | 32     | 30s     | 6h         | Prometheus      | Replay/resume safety, GLOBAL read diagnostics, missing-signal markers |
 | 5. Silver Reject Explorer | `bioetl-silver-reject-explorer` | 1000         | 9      | 1m      | 24h        | Quarantine Explorer API | Record-level browsing for Silver rejects |
 | 6. Workflow Overview      | `bioetl-workflow-overview`      | 6            | 5      | 30s     | 12h        | Prometheus      | Declarative workflow run and step outcomes |
 
