@@ -167,7 +167,13 @@
           "fields": "",
           "values": false
         },
-        "textMode": "auto"
+        "textMode": "auto",
+        "dataLinks": [
+          {
+            "title": "Open Control Plane runbook",
+            "url": "https://github.com/BioETL/BioactivityDataAcquisition/blob/main/docs/03-guides/operations/observability-checklist.md"
+          }
+        ]
       },
       "pluginVersion": "9.5.0",
       "targets": [
@@ -240,7 +246,13 @@
           "fields": "",
           "values": false
         },
-        "textMode": "auto"
+        "textMode": "auto",
+        "dataLinks": [
+          {
+            "title": "Open Control Plane runbook",
+            "url": "https://github.com/BioETL/BioactivityDataAcquisition/blob/main/docs/03-guides/operations/observability-checklist.md"
+          }
+        ]
       },
       "pluginVersion": "9.5.0",
       "targets": [
@@ -313,7 +325,13 @@
           "fields": "",
           "values": false
         },
-        "textMode": "auto"
+        "textMode": "auto",
+        "dataLinks": [
+          {
+            "title": "Open Control Plane runbook",
+            "url": "https://github.com/BioETL/BioactivityDataAcquisition/blob/main/docs/03-guides/operations/observability-checklist.md"
+          }
+        ]
       },
       "pluginVersion": "9.5.0",
       "targets": [
@@ -403,7 +421,13 @@
           "fields": "",
           "values": false
         },
-        "textMode": "auto"
+        "textMode": "auto",
+        "dataLinks": [
+          {
+            "title": "Open Control Plane runbook",
+            "url": "https://github.com/BioETL/BioactivityDataAcquisition/blob/main/docs/03-guides/operations/observability-checklist.md"
+          }
+        ]
       },
       "pluginVersion": "9.5.0",
       "targets": [
@@ -509,7 +533,13 @@
               "fields": "",
               "values": false
             },
-            "textMode": "auto"
+            "textMode": "auto",
+            "dataLinks": [
+              {
+                "title": "Open Control Plane runbook",
+                "url": "https://github.com/BioETL/BioactivityDataAcquisition/blob/main/docs/03-guides/operations/observability-checklist.md"
+              }
+            ]
           },
           "pluginVersion": "9.5.0",
           "targets": [
@@ -589,7 +619,13 @@
               "fields": "",
               "values": false
             },
-            "textMode": "auto"
+            "textMode": "auto",
+            "dataLinks": [
+              {
+                "title": "Open Control Plane runbook",
+                "url": "https://github.com/BioETL/BioactivityDataAcquisition/blob/main/docs/03-guides/operations/observability-checklist.md"
+              }
+            ]
           },
           "pluginVersion": "9.5.0",
           "targets": [
@@ -669,7 +705,13 @@
               "fields": "",
               "values": false
             },
-            "textMode": "auto"
+            "textMode": "auto",
+            "dataLinks": [
+              {
+                "title": "Open Control Plane runbook",
+                "url": "https://github.com/BioETL/BioactivityDataAcquisition/blob/main/docs/03-guides/operations/observability-checklist.md"
+              }
+            ]
           },
           "pluginVersion": "9.5.0",
           "targets": [
@@ -749,7 +791,13 @@
               "fields": "",
               "values": false
             },
-            "textMode": "auto"
+            "textMode": "auto",
+            "dataLinks": [
+              {
+                "title": "Open Control Plane runbook",
+                "url": "https://github.com/BioETL/BioactivityDataAcquisition/blob/main/docs/03-guides/operations/observability-checklist.md"
+              }
+            ]
           },
           "pluginVersion": "9.5.0",
           "targets": [
@@ -829,7 +877,13 @@
               "fields": "",
               "values": false
             },
-            "textMode": "auto"
+            "textMode": "auto",
+            "dataLinks": [
+              {
+                "title": "Open Control Plane runbook",
+                "url": "https://github.com/BioETL/BioactivityDataAcquisition/blob/main/docs/03-guides/operations/observability-checklist.md"
+              }
+            ]
           },
           "pluginVersion": "9.5.0",
           "targets": [
@@ -909,7 +963,13 @@
               "fields": "",
               "values": false
             },
-            "textMode": "auto"
+            "textMode": "auto",
+            "dataLinks": [
+              {
+                "title": "Open Control Plane runbook",
+                "url": "https://github.com/BioETL/BioactivityDataAcquisition/blob/main/docs/03-guides/operations/observability-checklist.md"
+              }
+            ]
           },
           "pluginVersion": "9.5.0",
           "targets": [
@@ -989,7 +1049,13 @@
               "fields": "",
               "values": false
             },
-            "textMode": "auto"
+            "textMode": "auto",
+            "dataLinks": [
+              {
+                "title": "Open Control Plane runbook",
+                "url": "https://github.com/BioETL/BioactivityDataAcquisition/blob/main/docs/03-guides/operations/observability-checklist.md"
+              }
+            ]
           },
           "pluginVersion": "9.5.0",
           "targets": [
@@ -1407,7 +1473,13 @@
               "fields": "",
               "values": false
             },
-            "textMode": "auto"
+            "textMode": "auto",
+            "dataLinks": [
+              {
+                "title": "Open Control Plane runbook",
+                "url": "https://github.com/BioETL/BioactivityDataAcquisition/blob/main/docs/03-guides/operations/observability-checklist.md"
+              }
+            ]
           },
           "pluginVersion": "9.5.0",
           "targets": [
@@ -1487,7 +1559,13 @@
               "fields": "",
               "values": false
             },
-            "textMode": "auto"
+            "textMode": "auto",
+            "dataLinks": [
+              {
+                "title": "Open Control Plane runbook",
+                "url": "https://github.com/BioETL/BioactivityDataAcquisition/blob/main/docs/03-guides/operations/observability-checklist.md"
+              }
+            ]
           },
           "pluginVersion": "9.5.0",
           "targets": [
@@ -1663,7 +1741,13 @@
               "fields": "",
               "values": false
             },
-            "textMode": "auto"
+            "textMode": "auto",
+            "dataLinks": [
+              {
+                "title": "Open Control Plane runbook",
+                "url": "https://github.com/BioETL/BioactivityDataAcquisition/blob/main/docs/03-guides/operations/observability-checklist.md"
+              }
+            ]
           },
           "pluginVersion": "9.5.0",
           "targets": [
@@ -1743,7 +1827,13 @@
               "fields": "",
               "values": false
             },
-            "textMode": "auto"
+            "textMode": "auto",
+            "dataLinks": [
+              {
+                "title": "Open Control Plane runbook",
+                "url": "https://github.com/BioETL/BioactivityDataAcquisition/blob/main/docs/03-guides/operations/observability-checklist.md"
+              }
+            ]
           },
           "pluginVersion": "9.5.0",
           "targets": [
@@ -1837,7 +1927,13 @@
               "fields": "",
               "values": false
             },
-            "textMode": "auto"
+            "textMode": "auto",
+            "dataLinks": [
+              {
+                "title": "Open Control Plane runbook",
+                "url": "https://github.com/BioETL/BioactivityDataAcquisition/blob/main/docs/03-guides/operations/observability-checklist.md"
+              }
+            ]
           },
           "pluginVersion": "9.5.0",
           "targets": [
@@ -1917,7 +2013,13 @@
               "fields": "",
               "values": false
             },
-            "textMode": "auto"
+            "textMode": "auto",
+            "dataLinks": [
+              {
+                "title": "Open Control Plane runbook",
+                "url": "https://github.com/BioETL/BioactivityDataAcquisition/blob/main/docs/03-guides/operations/observability-checklist.md"
+              }
+            ]
           },
           "pluginVersion": "9.5.0",
           "targets": [
@@ -2135,7 +2237,13 @@
               "fields": "",
               "values": false
             },
-            "textMode": "auto"
+            "textMode": "auto",
+            "dataLinks": [
+              {
+                "title": "Open Control Plane runbook",
+                "url": "https://github.com/BioETL/BioactivityDataAcquisition/blob/main/docs/03-guides/operations/observability-checklist.md"
+              }
+            ]
           },
           "pluginVersion": "9.5.0",
           "targets": [
@@ -2215,7 +2323,13 @@
               "fields": "",
               "values": false
             },
-            "textMode": "auto"
+            "textMode": "auto",
+            "dataLinks": [
+              {
+                "title": "Open Control Plane runbook",
+                "url": "https://github.com/BioETL/BioactivityDataAcquisition/blob/main/docs/03-guides/operations/observability-checklist.md"
+              }
+            ]
           },
           "pluginVersion": "9.5.0",
           "targets": [
@@ -2273,7 +2387,13 @@
           },
           "id": 138,
           "options": {
-            "showHeader": true
+            "showHeader": true,
+            "dataLinks": [
+              {
+                "title": "Open Control Plane runbook",
+                "url": "https://github.com/BioETL/BioactivityDataAcquisition/blob/main/docs/03-guides/operations/observability-checklist.md"
+              }
+            ]
           },
           "targets": [
             {

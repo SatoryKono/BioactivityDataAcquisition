@@ -214,7 +214,13 @@
           ],
           "show": false
         },
-        "showHeader": true
+        "showHeader": true,
+        "dataLinks": [
+          {
+            "title": "Open 2. Runtime",
+            "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
+          }
+        ]
       },
       "targets": [
         {
@@ -286,7 +292,13 @@
           "fields": "",
           "values": false
         },
-        "textMode": "auto"
+        "textMode": "auto",
+        "dataLinks": [
+          {
+            "title": "Open 2. Runtime",
+            "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
+          }
+        ]
       },
       "targets": [
         {
@@ -358,7 +370,13 @@
           "values": false
         },
         "showThresholdLabels": false,
-        "showThresholdMarkers": true
+        "showThresholdMarkers": true,
+        "dataLinks": [
+          {
+            "title": "Open 2. Runtime",
+            "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
+          }
+        ]
       },
       "targets": [
         {
@@ -430,7 +448,13 @@
           "fields": "",
           "values": false
         },
-        "textMode": "auto"
+        "textMode": "auto",
+        "dataLinks": [
+          {
+            "title": "Open 2. Runtime",
+            "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
+          }
+        ]
       },
       "targets": [
         {
@@ -502,7 +526,13 @@
           "fields": "",
           "values": false
         },
-        "textMode": "auto"
+        "textMode": "auto",
+        "dataLinks": [
+          {
+            "title": "Open 2. Runtime",
+            "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
+          }
+        ]
       },
       "targets": [
         {
@@ -698,7 +728,13 @@
           ],
           "show": true
         },
-        "showHeader": true
+        "showHeader": true,
+        "dataLinks": [
+          {
+            "title": "Open 2. Runtime",
+            "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
+          }
+        ]
       },
       "targets": [
         {
@@ -864,7 +900,13 @@
           "values": false
         },
         "showThresholdLabels": false,
-        "showThresholdMarkers": true
+        "showThresholdMarkers": true,
+        "dataLinks": [
+          {
+            "title": "Open 2. Runtime",
+            "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
+          }
+        ]
       },
       "repeat": "provider",
       "repeatDirection": "h",
@@ -1214,7 +1256,13 @@
           "fields": "",
           "values": false
         },
-        "textMode": "auto"
+        "textMode": "auto",
+        "dataLinks": [
+          {
+            "title": "Open 2. Runtime",
+            "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
+          }
+        ]
       },
       "targets": [
         {

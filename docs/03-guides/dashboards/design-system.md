@@ -149,7 +149,9 @@ uv run python -m scripts.engineering.qa check-dashboard-visual-semantics
 Минимальный контракт:
 - `options.dataLinks` содержит хотя бы один объект;
 - `title` начинается с шаблона `Open <target>`;
-- `url` ведёт в целевой dashboard/runbook для drilldown.
+- `url` ведёт в целевой dashboard/runbook для drilldown;
+- для dashboard target (`/d/...`) URL MUST включать `${__url_time_range}`;
+- для Explore handoff URL MUST использовать `from=${__from}&to=${__to}`.
 
 Пример:
 
@@ -157,11 +159,15 @@ uv run python -m scripts.engineering.qa check-dashboard-visual-semantics
 "options": {
   "dataLinks": [
     {
-      "title": "Open bioetl-runtime",
-      "url": "/d/bioetl-runtime/bioetl-runtime",
+      "title": "Open Runtime",
+      "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
+      "targetBlank": false
+    },
+    {
+      "title": "Open Reject Explorer",
+      "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline&var-run_type=$run_type&from=${__from}&to=${__to}",
       "targetBlank": false
     }
   ]
 }
 ```
-

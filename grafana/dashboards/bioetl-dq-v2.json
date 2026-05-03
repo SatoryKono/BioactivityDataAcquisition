@@ -242,7 +242,13 @@
           "values": false
         },
         "showThresholdLabels": false,
-        "showThresholdMarkers": true
+        "showThresholdMarkers": true,
+        "dataLinks": [
+          {
+            "title": "Open 5. Silver Reject Explorer",
+            "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline&var-run_type=$run_type&from=${__from}&to=${__to}"
+          }
+        ]
       },
       "targets": [
         {
@@ -315,7 +321,13 @@
           "fields": "",
           "values": false
         },
-        "textMode": "auto"
+        "textMode": "auto",
+        "dataLinks": [
+          {
+            "title": "Open 5. Silver Reject Explorer",
+            "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline&var-run_type=$run_type&from=${__from}&to=${__to}"
+          }
+        ]
       },
       "targets": [
         {
@@ -389,7 +401,13 @@
           "fields": "",
           "values": false
         },
-        "textMode": "auto"
+        "textMode": "auto",
+        "dataLinks": [
+          {
+            "title": "Open 5. Silver Reject Explorer",
+            "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline&var-run_type=$run_type&from=${__from}&to=${__to}"
+          }
+        ]
       },
       "targets": [
         {
@@ -460,7 +478,13 @@
           "fields": "",
           "values": false
         },
-        "textMode": "auto"
+        "textMode": "auto",
+        "dataLinks": [
+          {
+            "title": "Open 5. Silver Reject Explorer",
+            "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline&var-run_type=$run_type&from=${__from}&to=${__to}"
+          }
+        ]
       },
       "targets": [
         {
@@ -533,7 +557,13 @@
           "values": false
         },
         "showThresholdLabels": false,
-        "showThresholdMarkers": true
+        "showThresholdMarkers": true,
+        "dataLinks": [
+          {
+            "title": "Open 5. Silver Reject Explorer",
+            "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline&var-run_type=$run_type&from=${__from}&to=${__to}"
+          }
+        ]
       },
       "targets": [
         {
@@ -605,7 +635,13 @@
           "fields": "",
           "values": false
         },
-        "textMode": "auto"
+        "textMode": "auto",
+        "dataLinks": [
+          {
+            "title": "Open 5. Silver Reject Explorer",
+            "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline&var-run_type=$run_type&from=${__from}&to=${__to}"
+          }
+        ]
       },
       "targets": [
         {
@@ -677,7 +713,13 @@
           "fields": "",
           "values": false
         },
-        "textMode": "auto"
+        "textMode": "auto",
+        "dataLinks": [
+          {
+            "title": "Open 5. Silver Reject Explorer",
+            "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline&var-run_type=$run_type&from=${__from}&to=${__to}"
+          }
+        ]
       },
       "targets": [
         {
@@ -747,7 +789,13 @@
           "values": false
         },
         "showThresholdLabels": false,
-        "showThresholdMarkers": true
+        "showThresholdMarkers": true,
+        "dataLinks": [
+          {
+            "title": "Open 5. Silver Reject Explorer",
+            "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline&var-run_type=$run_type&from=${__from}&to=${__to}"
+          }
+        ]
       },
       "targets": [
         {
@@ -819,7 +867,13 @@
           "fields": "",
           "values": false
         },
-        "textMode": "auto"
+        "textMode": "auto",
+        "dataLinks": [
+          {
+            "title": "Open 5. Silver Reject Explorer",
+            "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline&var-run_type=$run_type&from=${__from}&to=${__to}"
+          }
+        ]
       },
       "targets": [
         {
@@ -1319,7 +1373,13 @@
           "fields": "",
           "values": false
         },
-        "textMode": "auto"
+        "textMode": "auto",
+        "dataLinks": [
+          {
+            "title": "Open 5. Silver Reject Explorer",
+            "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline&var-run_type=$run_type&from=${__from}&to=${__to}"
+          }
+        ]
       },
       "targets": [
         {
@@ -1476,7 +1536,13 @@
           "fields": "",
           "values": false
         },
-        "textMode": "auto"
+        "textMode": "auto",
+        "dataLinks": [
+          {
+            "title": "Open 5. Silver Reject Explorer",
+            "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline&var-run_type=$run_type&from=${__from}&to=${__to}"
+          }
+        ]
       },
       "targets": [
         {
@@ -1654,7 +1720,13 @@
         },
         "showPercentChange": false,
         "textMode": "auto",
-        "wideLayout": true
+        "wideLayout": true,
+        "dataLinks": [
+          {
+            "title": "Open 5. Silver Reject Explorer",
+            "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline&var-run_type=$run_type&from=${__from}&to=${__to}"
+          }
+        ]
       },
       "targets": [
         {

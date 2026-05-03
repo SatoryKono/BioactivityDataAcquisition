@@ -667,7 +667,13 @@
           ],
           "show": false
         },
-        "showHeader": true
+        "showHeader": true,
+        "dataLinks": [
+          {
+            "title": "Open Control Plane v1",
+            "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&from=${__from}&to=${__to}"
+          }
+        ]
       },
       "pluginVersion": "10.4.0",
       "targets": [
@@ -871,7 +877,13 @@
           ],
           "show": false
         },
-        "showHeader": true
+        "showHeader": true,
+        "dataLinks": [
+          {
+            "title": "Open Control Plane v1",
+            "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&from=${__from}&to=${__to}"
+          }
+        ]
       },
       "pluginVersion": "10.4.0",
       "targets": [
@@ -2155,7 +2167,13 @@
           },
           "id": 224,
           "options": {
-            "showHeader": true
+            "showHeader": true,
+            "dataLinks": [
+              {
+                "title": "Open Control Plane v1",
+                "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&from=${__from}&to=${__to}"
+              }
+            ]
           },
           "targets": [
             {
