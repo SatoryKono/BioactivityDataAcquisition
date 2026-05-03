@@ -2376,7 +2376,8 @@
         "tags": [],
         "tagsQuery": "",
         "type": "query",
-        "useTags": false
+        "useTags": false,
+        "description": "Core scope: pipeline selector for pipeline-centric dashboards; fallback: All pipelines when not passed by source dashboard."
       },
       {
         "allValue": null,
@@ -2401,7 +2402,8 @@
         "tags": [],
         "tagsQuery": "",
         "type": "query",
-        "useTags": false
+        "useTags": false,
+        "description": "Core scope: run_type selector bounded by pipeline; fallback: All run types for selected pipeline."
       }
     ]
   },

@@ -51,10 +51,14 @@ filters, provider deep diagnostics, DQ cause breakdowns, and control-plane
 replay/audit detail out of Overview.
 
 `bioetl-control-plane-v1` is the Control Plane / Replay Safety surface. It
-answers whether manifest, ledger, checkpoint, replay, and lineage state are
-trustworthy enough to allow replay/resume. GLOBAL read panels are diagnostic,
-not pipeline-scoped, and missing checkpoint-age / replay-duplicate metrics are
-documented as blind spots until instrumentation exists.
+now starts with an answer-first **Trust Summary** block: replay safety state,
+checkpoint freshness proxy, and ledger/manifest consistency for the selected
+pipeline scope. A visible **Known Blind Spots** list is part of this top block
+and documents currently non-instrumented signals.
+
+Global lookup/read-path panels stay separated in a dedicated
+**Global diagnostics (non-pipeline scoped)** block and MUST remain unfiltered by
+`$pipeline` / `$run_type`.
 
 ## Legacy-документы
 

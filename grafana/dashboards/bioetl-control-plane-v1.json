@@ -17,7 +17,7 @@
   "gnetId": null,
   "graphTooltip": 1,
   "id": null,
-  "iteration": 1,
+  "iteration": 2,
   "links": [
     {
       "asDropdown": false,
@@ -95,6 +95,253 @@
       "type": "row"
     },
     {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 1
+      },
+      "id": 890,
+      "panels": [],
+      "title": "Trust Summary (Answer-First)",
+      "type": "row"
+    },
+    {
+      "datasource": "Prometheus",
+      "description": "Replay safety state for selected pipeline/run_type. Zero means no blockers detected in selected range.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 2
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 0,
+        "y": 2
+      },
+      "id": 891,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.5.0",
+      "targets": [
+        {
+          "expr": "round((sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", status=\"failed\"}[$__range])) or vector(0)) + (sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range])) or vector(0)) + (sum(increase(bioetl_checkpoint_compatibility_events_total{pipeline=~\"$pipeline\", disposition=~\".*_incompatible\"}[$__range])) or vector(0)) + (sum(increase(bioetl_replay_reconstructability_events_total{pipeline=~\"$pipeline\", status=\"not_reconstructable\"}[$__range])) or vector(0)) + (sum(increase(bioetl_replay_drift_events_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])) or vector(0)) + (sum(increase(bioetl_lineage_refs_missing_total{pipeline=~\"$pipeline\"}[$__range])) or vector(0)))",
+          "instant": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Replay Safety State",
+      "type": "stat"
+    },
+    {
+      "datasource": "Prometheus",
+      "description": "Checkpoint freshness proxy for selected pipeline. Shows hours since most recent checkpoint operation event.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 6
+              },
+              {
+                "color": "red",
+                "value": 24
+              }
+            ]
+          },
+          "unit": "h"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 6,
+        "y": 2
+      },
+      "id": 892,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.5.0",
+      "targets": [
+        {
+          "expr": "clamp_min((time() - max(max_over_time(bioetl_checkpoint_operator_duration_seconds_count{pipeline=~\"$pipeline\"}[$__range]))) / 3600, 0)",
+          "instant": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Checkpoint Freshness (hours since last op)",
+      "type": "stat"
+    },
+    {
+      "datasource": "Prometheus",
+      "description": "Ledger/manifest consistency proxy for selected pipeline/run_type. Non-zero means either manifest write or ledger append failures were observed.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 2
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 12,
+        "y": 2
+      },
+      "id": 893,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.5.0",
+      "targets": [
+        {
+          "expr": "round((sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", status=\"failed\"}[$__range])) or vector(0)) + (sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range])) or vector(0)))",
+          "instant": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Ledger / Manifest Consistency",
+      "type": "stat"
+    },
+    {
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 18,
+        "y": 2
+      },
+      "id": 894,
+      "options": {
+        "content": "### Known blind spots\n- Checkpoint freshness by expected schedule/RPO is not instrumented yet.\n- Replay duplicate/overwrite risk signal is not instrumented yet.\n- Manifest-to-ledger referential integrity ratio is not instrumented yet.",
+        "mode": "markdown"
+      },
+      "title": "Known Blind Spots",
+      "type": "text"
+    },
+    {
       "datasource": "Prometheus",
       "description": "Non-zero means replay/resume is not safe without investigation. Derived from manifest, ledger, checkpoint compatibility, replay reconstructability, replay drift, and lineage reference signals. Alerts: BioETLControlPlaneManifestWriteFailed, BioETLRunLedgerAppendFailed, BioETLCheckpointCompatibilityBlocked, BioETLReplayNotReconstructable, BioETLReplayDriftDetected, BioETLLineageRefsMissing.",
       "fieldConfig": {
@@ -156,7 +403,7 @@
         "h": 6,
         "w": 4,
         "x": 0,
-        "y": 1
+        "y": 15
       },
       "id": 130,
       "options": {
@@ -236,7 +483,7 @@
         "h": 6,
         "w": 3,
         "x": 4,
-        "y": 1
+        "y": 8
       },
       "id": 1,
       "options": {
@@ -316,7 +563,7 @@
         "h": 6,
         "w": 3,
         "x": 7,
-        "y": 1
+        "y": 8
       },
       "id": 2,
       "options": {
@@ -396,7 +643,7 @@
         "h": 6,
         "w": 4,
         "x": 10,
-        "y": 1
+        "y": 8
       },
       "id": 3,
       "options": {
@@ -476,7 +723,7 @@
         "h": 6,
         "w": 3,
         "x": 14,
-        "y": 1
+        "y": 8
       },
       "id": 104,
       "options": {
@@ -556,7 +803,7 @@
         "h": 6,
         "w": 3,
         "x": 17,
-        "y": 1
+        "y": 8
       },
       "id": 120,
       "options": {
@@ -636,7 +883,7 @@
         "h": 6,
         "w": 4,
         "x": 20,
-        "y": 1
+        "y": 8
       },
       "id": 122,
       "options": {
@@ -670,7 +917,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 8
+        "y": 15
       },
       "id": 901,
       "panels": [],
@@ -701,7 +948,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 9
+        "y": 16
       },
       "id": 131,
       "options": {
@@ -749,7 +996,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 9
+        "y": 16
       },
       "id": 7,
       "options": {
@@ -825,7 +1072,7 @@
         "h": 6,
         "w": 12,
         "x": 0,
-        "y": 17
+        "y": 24
       },
       "id": 132,
       "options": {
@@ -905,7 +1152,7 @@
         "h": 6,
         "w": 12,
         "x": 12,
-        "y": 17
+        "y": 24
       },
       "id": 133,
       "options": {
@@ -939,7 +1186,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 24
+        "y": 31
       },
       "id": 902,
       "panels": [],
@@ -998,7 +1245,7 @@
         "h": 6,
         "w": 6,
         "x": 0,
-        "y": 25
+        "y": 32
       },
       "id": 101,
       "options": {
@@ -1078,7 +1325,7 @@
         "h": 6,
         "w": 6,
         "x": 6,
-        "y": 25
+        "y": 32
       },
       "id": 102,
       "options": {
@@ -1158,7 +1405,7 @@
         "h": 6,
         "w": 6,
         "x": 12,
-        "y": 25
+        "y": 32
       },
       "id": 103,
       "options": {
@@ -1238,7 +1485,7 @@
         "h": 6,
         "w": 6,
         "x": 18,
-        "y": 25
+        "y": 32
       },
       "id": 121,
       "options": {
@@ -1290,7 +1537,7 @@
         "h": 8,
         "w": 8,
         "x": 0,
-        "y": 31
+        "y": 38
       },
       "id": 5,
       "options": {
@@ -1351,7 +1598,7 @@
         "h": 8,
         "w": 8,
         "x": 8,
-        "y": 31
+        "y": 38
       },
       "id": 134,
       "options": {
@@ -1416,7 +1663,7 @@
         "h": 8,
         "w": 8,
         "x": 16,
-        "y": 31
+        "y": 38
       },
       "id": 135,
       "options": {
@@ -1481,7 +1728,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 39
+        "y": 46
       },
       "id": 105,
       "options": {
@@ -1556,7 +1803,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 39
+        "y": 46
       },
       "id": 106,
       "options": {
@@ -1596,11 +1843,11 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 48
+        "y": 55
       },
       "id": 903,
       "panels": [],
-      "title": "GLOBAL Control-Plane Reads",
+      "title": "Global diagnostics (non-pipeline scoped)",
       "type": "row"
     },
     {
@@ -1655,7 +1902,7 @@
         "h": 6,
         "w": 6,
         "x": 0,
-        "y": 49
+        "y": 56
       },
       "id": 4,
       "options": {
@@ -1735,7 +1982,7 @@
         "h": 6,
         "w": 6,
         "x": 6,
-        "y": 49
+        "y": 56
       },
       "id": 136,
       "options": {
@@ -1787,7 +2034,7 @@
         "h": 6,
         "w": 12,
         "x": 12,
-        "y": 49
+        "y": 56
       },
       "id": 6,
       "options": {
@@ -1852,7 +2099,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 55
+        "y": 62
       },
       "id": 111,
       "options": {
@@ -1892,7 +2139,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 64
+        "y": 71
       },
       "id": 904,
       "panels": [],
@@ -1923,7 +2170,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 65
+        "y": 72
       },
       "id": 107,
       "options": {
@@ -1971,7 +2218,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 65
+        "y": 72
       },
       "id": 108,
       "options": {
@@ -2036,7 +2283,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 73
+        "y": 80
       },
       "id": 109,
       "options": {
@@ -2111,7 +2358,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 73
+        "y": 80
       },
       "id": 110,
       "options": {
@@ -2197,7 +2444,7 @@
         "h": 6,
         "w": 8,
         "x": 0,
-        "y": 81
+        "y": 88
       },
       "id": 137,
       "options": {
@@ -2249,7 +2496,7 @@
         "h": 6,
         "w": 8,
         "x": 8,
-        "y": 81
+        "y": 88
       },
       "id": 112,
       "options": {
@@ -2314,7 +2561,7 @@
         "h": 6,
         "w": 8,
         "x": 16,
-        "y": 81
+        "y": 88
       },
       "id": 138,
       "options": {
@@ -2337,7 +2584,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 88
+        "y": 95
       },
       "id": 905,
       "panels": [
@@ -2396,7 +2643,8 @@
         "tags": [],
         "tagsQuery": "",
         "type": "query",
-        "useTags": false
+        "useTags": false,
+        "description": "Core scope: pipeline selector for pipeline-centric dashboards; fallback: All pipelines when not passed by source dashboard."
       },
       {
         "allValue": null,
@@ -2421,7 +2669,8 @@
         "tags": [],
         "tagsQuery": "",
         "type": "query",
-        "useTags": false
+        "useTags": false,
+        "description": "Core scope: run_type selector bounded by pipeline; fallback: All run types for selected pipeline."
       }
     ]
   },

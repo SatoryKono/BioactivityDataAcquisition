@@ -106,12 +106,14 @@ culprit stage. Deep DQ/provider/control-plane/forensic диагностика о
 соответствующих L1/L2 dashboards и explorer surfaces.
 
 `bioetl-control-plane-v1` теперь является `Control Plane / Replay Safety`
-surface. Он отвечает на один вопрос: можно ли доверять manifest/ledger/
-checkpoint/replay/lineage state и безопасно выполнять replay/resume. Первый
-ряд показывает только replay/resume blockers; GLOBAL read-path panels вынесены
-в diagnostic row, явно помечены `GLOBAL` и не фильтруются по `$pipeline` /
-`$run_type`. Missing checkpoint-age/RPO и replay-duplicate signals
-документируются как blind spots, а не подменяются fake PromQL.
+surface с answer-first `Trust Summary` в самом верху: replay safety state,
+checkpoint freshness proxy и ledger/manifest consistency. В этом же верхнем
+блоке явно отображается список `Known Blind Spots` (что пока не
+инструментировано), чтобы оператор не трактовал отсутствие сигнала как `OK`.
+
+GLOBAL read-path panels остаются отдельно в блоке
+`Global diagnostics (non-pipeline scoped)` и не фильтруются по `$pipeline` /
+`$run_type`.
 
 `bioetl-runtime` считается канонической triage-точкой для runtime hygiene:
 warnings, unstructured logs, adaptive-memory signals и Prometheus-backed alert
