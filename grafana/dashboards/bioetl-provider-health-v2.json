@@ -1329,7 +1329,8 @@
         "tags": [],
         "tagsQuery": "",
         "type": "query",
-        "useTags": false
+        "useTags": false,
+        "description": "Provider scope: provider selector for provider health dashboards; fallback: All providers when source has no provider context."
       },
       {
         "allValue": null,
@@ -1354,7 +1355,8 @@
         "tags": [],
         "tagsQuery": "",
         "type": "query",
-        "useTags": false
+        "useTags": false,
+        "description": "Provider scope: adapter selector for provider health dashboards; fallback: All adapters when source has no adapter context."
       }
     ]
   },

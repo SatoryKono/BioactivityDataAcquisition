@@ -30,6 +30,17 @@ _ALLOWED_DASHBOARD_LINK_VARS = {
 }
 
 
+
+_REQUIRED_LINK_VARS_BY_TARGET_UID = {
+    "bioetl-overview-v2": frozenset({"pipeline", "run_type"}),
+    "bioetl-control-plane-v1": frozenset({"pipeline", "run_type"}),
+    "bioetl-runtime": frozenset({"pipeline", "run_type"}),
+    "bioetl-dq-v2": frozenset({"pipeline", "run_type"}),
+    "bioetl-provider-health-v2": frozenset(),
+    "bioetl-silver-reject-explorer": frozenset({"pipeline", "run_type"}),
+    "bioetl-workflow-overview": frozenset(),
+}
+
 _REQUIRED_TOP_LEVEL_LINKS_BY_UID = {
     "bioetl-overview-v2": frozenset(
         {
@@ -901,3 +912,35 @@ def test_control_plane_dashboard_exposes_working_runbook_link() -> None:
     assert runbook_link.get("targetBlank") is True, (
         "External runbook link should open in a new tab"
     )
+
+
+def test_cross_dashboard_links_enforce_required_handoff_or_explicit_fallback() -> None:
+    """Top-level links must pass required target vars or rely on explicit fallback."""
+    for dashboard_path in get_dashboard_files():
+        dashboard = load_dashboard(dashboard_path)
+
+        for link in dashboard.get("links", []):
+            url = link.get("url", "")
+            if not isinstance(url, str) or not url.startswith("/d/"):
+                continue
+
+            target_uid = _extract_dashboard_uid(url)
+            assert target_uid is not None, f"Could not parse dashboard UID from {url}"
+
+            required_vars = _REQUIRED_LINK_VARS_BY_TARGET_UID.get(target_uid)
+            assert required_vars is not None, (
+                f"Link target {target_uid} must be declared in required vars map"
+            )
+            passed_vars = _extract_link_vars(url)
+
+            source_vars = {
+                var.get("name")
+                for var in dashboard.get("templating", {}).get("list", [])
+                if var.get("name")
+            }
+            required_from_source = {var for var in required_vars if var in source_vars}
+            missing = required_from_source - passed_vars
+            assert not missing, (
+                f"{dashboard_path.name} top-level link to {target_uid} must pass available "
+                f"required vars {sorted(missing)}. URL: {url}"
+            )

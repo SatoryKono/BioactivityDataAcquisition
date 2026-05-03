@@ -1,85 +1,65 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-29'
+  Last verified: '2026-05-03'
 
 ______________________________________________________________________
 
 # Variables Guide (Grafana Dashboards)
 
-Дата сверки: **2026-03-29**
+Дата сверки: **2026-05-03**  
 Источник истины: `grafana/dashboards/*.json`
 
-## Переменные по дашбордам
+## Unified Variable Contract
 
-| Dashboard UID                    | Переменные                                             |
-| -------------------------------- | ------------------------------------------------------ |
-| `bioetl-overview-v2`             | `$pipeline`, `$run_type`                               |
-| `bioetl-control-plane-v1`        | `$pipeline`, `$run_type`                               |
-| `bioetl-dq-v2`                   | `$pipeline`, `$run_type`, `$stage`                     |
-| `bioetl-runtime`                 | `$pipeline`, `$run_type`, `$stage`                     |
-| `bioetl-provider-health-v2`      | `$provider`, `$adapter`                                |
-| `bioetl-silver-reject-explorer`  | `$pipeline`, `$run_type`, `$reason_code`, `$field`, `$run_id`, `$payload_hash` |
-| `bioetl-workflow-overview`       | `$workflow`, `$status`                                 |
+### Scope groups
 
-## Определения переменных
+- **Core scope**: `pipeline`, `run_type`, `stage` (где есть stage-level панели).
+- **Provider scope**: `provider`, `adapter` (только provider health dashboards).
+- **Forensic-only**: `run_id`, `payload_hash` (только `bioetl-silver-reject-explorer`).
 
-| Variable    | Query                                                                                           | Multi | Include All | Refresh                 |
-| ----------- | ----------------------------------------------------------------------------------------------- | ----- | ----------- | ----------------------- |
-| `$pipeline` | `label_values(bioetl_records_processed_total, pipeline)`                                        | Yes   | Yes         | On dashboard load (`1`) |
-| `$run_type` | `label_values(bioetl_records_processed_total{pipeline=~"$pipeline"}, run_type)`                 | Yes   | Yes         | On dashboard load (`1`) |
-| `$stage`    | `label_values(bioetl_records_processed_total{pipeline=~"$pipeline",run_type=~"$run_type"}, stage)` | Yes | Yes | On dashboard load (`1`) |
-| `$provider` | `label_values({__name__=~"bioetl_health_check_(success\|degraded\|failures)_total"}, provider)` | Yes   | Yes         | On dashboard load (`1`) |
-| `$adapter`  | `label_values(bioetl_circuit_breaker_state, adapter)`                                           | Yes   | Yes         | On dashboard load (`1`) |
-| `control_plane.$pipeline` | `label_values(bioetl_control_plane_manifest_writes_total, pipeline)`             | Yes   | Yes         | On dashboard load (`1`) |
-| `workflow.$workflow` | `label_values(bioetl_workflow_runs_total, workflow)`                               | Yes   | Yes         | On dashboard load (`1`) |
-| `workflow.$status` | `label_values(bioetl_workflow_runs_total, status)`                                   | Yes   | Yes         | On dashboard load (`1`) |
-| `explorer.$pipeline` | `label_values(bioetl_records_processed_total, pipeline)` | No | No | On dashboard load (`1`) |
-| `explorer.$run_id` | `/ops/quarantine/filter-options?dimension=run_id&pipeline=${pipeline}...` | No | No | On dashboard load (`1`) |
-| `explorer.$payload_hash` | textbox | No | No | Manual |
+### Dashboard → scope contract
 
-## Важно
+| Dashboard UID | Contract |
+| --- | --- |
+| `bioetl-overview-v2` | Core: `pipeline`, `run_type` |
+| `bioetl-control-plane-v1` | Core: `pipeline`, `run_type` |
+| `bioetl-runtime` | Core: `pipeline`, `run_type`, `stage` |
+| `bioetl-dq-v2` | Core: `pipeline`, `run_type`, `stage` |
+| `bioetl-provider-health-v2` | Provider: `provider`, `adapter` |
+| `bioetl-silver-reject-explorer` | Core: `pipeline`, `run_type` + explorer fields `reason_code`, `field` + Forensic-only `run_id`, `payload_hash` |
+| `bioetl-workflow-overview` | Workflow-local: `workflow`, `status` |
 
-- В Prometheus-backed dashboards **нет** переменных `$run_id` и `execution`.
-- `bioetl-silver-reject-explorer` остаётся forensic exception:
-  `$run_id` и `$payload_hash` используются только в quarantine-backed Explorer,
-  а не в Prometheus labels или PromQL.
-- В `bioetl-dq-v2` и `bioetl-runtime` дополнительный bounded scope даёт `$stage`.
-- В `bioetl-provider-health-v2` используются `$provider` и `$adapter`.
-- В `bioetl-workflow-overview` используются только `$workflow` и `$status`.
-- Cross-dashboard links должны передавать только target-scoped `var-*`
-  параметры; generic `includeVars=true` не считается безопасным handoff.
+## Variable meanings and fallback semantics
 
-## Примеры PromQL с переменными
+| Variable | Scope | Meaning | Fallback when source dashboard does not pass it |
+| --- | --- | --- | --- |
+| `pipeline` | Core | Pipeline selection baseline | Target dashboard uses default **All pipelines** |
+| `run_type` | Core | Run mode within selected pipeline | Target dashboard uses **All run types** |
+| `stage` | Core | Stage breakdown filter (`bronze/silver/gold`) | Target uses **All stages** |
+| `provider` | Provider | Provider selection for provider health panels | Target uses **All providers** |
+| `adapter` | Provider | Adapter selection for provider health panels | Target uses **All adapters** |
+| `run_id` | Forensic-only | Exact run narrowing in reject explorer | No run_id filter (all runs in selected pipeline/run_type scope) |
+| `payload_hash` | Forensic-only | Exact record lookup in reject explorer textbox | Empty textbox disables payload filter |
 
-```promql
-# Overview/Data Quality/Runtime
-sum(bioetl_records_processed_total{pipeline=~"$pipeline", run_type=~"$run_type", stage="bronze"})
+## Cross-dashboard handoff rules (explicit)
 
-# Provider Health p95
-histogram_quantile(0.95, sum by (le, provider) (rate(bioetl_health_check_latency_seconds_bucket{provider=~"$provider"}[5m])))
+1. Передавать только `var-*`, которые входят в target contract.
+1. `includeVars=true` не используется для dashboard-to-dashboard ссылок.
+1. **Core → Core**: передавать `pipeline`, `run_type`; `stage` передаётся только если target поддерживает `stage`.
+1. **Core ↔ Provider**: provider dashboards не получают core variables; fallback через default provider/adapter selection.
+1. **Any → Forensic (Reject Explorer)**: допускаются только `pipeline`, `run_type`; forensic filters (`run_id`, `payload_hash`) всегда вводятся оператором вручную в explorer.
+1. **Forensic → Core**: передавать обратно только `pipeline`, `run_type`; не передавать `run_id`, `payload_hash`, `reason_code`, `field`.
+1. **Workflow dashboards** (`workflow`, `status`) изолированы; при переходах в runtime/control-plane действует fallback на defaults target dashboards.
 
-# Provider latency panel (ID 102)
-histogram_quantile(0.95, sum by (le, provider) (rate(bioetl_health_check_latency_seconds_bucket{provider=~"$provider"}[5m])))
-```
+## Test coverage expectations
 
-## Зависимости
-
-- Для `overview/dq/runtime`: `$run_type` зависит от `$pipeline`.
-- Для `dq/runtime`: `$stage` зависит от `$pipeline/$run_type` и остаётся bounded
-  stage breakdown filter, а не high-cardinality forensic selector.
-- Для `control-plane-v1`: `$run_type` зависит от `$pipeline`, но global
-  read-panels intentionally не фильтруют underlying metrics по `$pipeline`.
-- Для `provider-health-v2`: `$provider` и `$adapter` управляют timeseries и
-  summary/gauge панелями; pipeline filter не используется.
-- Для `bioetl-workflow-overview`: `$status` и `$workflow` зависят от
-  `bioetl_workflow_runs_total`; эти переменные не leaking в non-workflow dashboards.
-- Для `bioetl-silver-reject-explorer`: `$pipeline` всегда single-select/no-All.
-  Это fail-closed Quarantine Explorer contract; `${pipeline:csv}` здесь не
-  допускается.
+- Links contract: `tests/integration/test_grafana_dashboard_links.py`
+- Variable contract checks: `tests/integration/test_grafana_config.py` + `tests/integration/_grafana_test_support.py`
+- Forensic isolation checks: `run_id`/`payload_hash` запрещены вне reject explorer.

@@ -519,7 +519,8 @@
         "tags": [],
         "tagsQuery": "",
         "type": "query",
-        "useTags": false
+        "useTags": false,
+        "description": "Core scope: pipeline selector for pipeline-centric dashboards; fallback: All pipelines when not passed by source dashboard."
       },
       {
         "allValue": null,
@@ -547,7 +548,8 @@
         "tags": [],
         "tagsQuery": "",
         "type": "query",
-        "useTags": false
+        "useTags": false,
+        "description": "Core scope: run_type selector bounded by pipeline; fallback: All run types for selected pipeline."
       },
       {
         "allValue": null,
@@ -575,7 +577,8 @@
         "tags": [],
         "tagsQuery": "",
         "type": "query",
-        "useTags": false
+        "useTags": false,
+        "description": "Explorer scope: reject reason selector for quarantine triage; fallback: All reason codes for selected pipeline/run_type."
       },
       {
         "allValue": null,
@@ -603,7 +606,8 @@
         "tags": [],
         "tagsQuery": "",
         "type": "query",
-        "useTags": false
+        "useTags": false,
+        "description": "Explorer scope: rejected field selector for quarantine triage; fallback: All fields for selected pipeline/run_type."
       },
       {
         "allValue": null,
@@ -631,7 +635,8 @@
         "tags": [],
         "tagsQuery": "",
         "type": "query",
-        "useTags": false
+        "useTags": false,
+        "description": "Forensic-only: exact run identifier for reject explorer; fallback: no run_id filter (all runs in current scope)."
       },
       {
         "current": {
@@ -645,7 +650,8 @@
         "options": [],
         "query": "",
         "skipUrlSync": false,
-        "type": "textbox"
+        "type": "textbox",
+        "description": "Forensic-only: exact payload hash textbox for reject explorer; fallback: empty value disables record details filter."
       }
     ]
   },
