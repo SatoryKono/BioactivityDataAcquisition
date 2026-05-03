@@ -218,7 +218,14 @@
           "fields": "",
           "values": false
         },
-        "textMode": "value_and_name"
+        "textMode": "value_and_name",
+        "dataLinks": [
+          {
+            "title": "Open bioetl-runtime",
+            "url": "/d/bioetl-runtime/bioetl-runtime",
+            "targetBlank": false
+          }
+        ]
       },
       "targets": [
         {
@@ -496,7 +503,14 @@
           ],
           "show": false
         },
-        "showHeader": true
+        "showHeader": true,
+        "dataLinks": [
+          {
+            "title": "Open bioetl-runtime",
+            "url": "/d/bioetl-runtime/bioetl-runtime",
+            "targetBlank": false
+          }
+        ]
       },
       "pluginVersion": "10.4.0",
       "targets": [
@@ -562,7 +576,14 @@
           ],
           "show": false
         },
-        "showHeader": true
+        "showHeader": true,
+        "dataLinks": [
+          {
+            "title": "Open bioetl-runtime",
+            "url": "/d/bioetl-runtime/bioetl-runtime",
+            "targetBlank": false
+          }
+        ]
       },
       "pluginVersion": "10.4.0",
       "targets": [
@@ -1029,7 +1050,14 @@
               "fields": "",
               "values": false
             },
-            "textMode": "value_and_name"
+            "textMode": "value_and_name",
+            "dataLinks": [
+              {
+                "title": "Open bioetl-runtime",
+                "url": "/d/bioetl-runtime/bioetl-runtime",
+                "targetBlank": false
+              }
+            ]
           },
           "targets": [
             {
@@ -1133,7 +1161,14 @@
               "fields": "",
               "values": false
             },
-            "textMode": "value_and_name"
+            "textMode": "value_and_name",
+            "dataLinks": [
+              {
+                "title": "Open bioetl-dq-v2",
+                "url": "/d/bioetl-dq-v2/bioetl-dq-v2",
+                "targetBlank": false
+              }
+            ]
           },
           "targets": [
             {
@@ -1238,7 +1273,14 @@
               "fields": "",
               "values": false
             },
-            "textMode": "value_and_name"
+            "textMode": "value_and_name",
+            "dataLinks": [
+              {
+                "title": "Open bioetl-control-plane-v1",
+                "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1",
+                "targetBlank": false
+              }
+            ]
           },
           "targets": [
             {
@@ -1342,7 +1384,14 @@
               "fields": "",
               "values": false
             },
-            "textMode": "value_and_name"
+            "textMode": "value_and_name",
+            "dataLinks": [
+              {
+                "title": "Open bioetl-provider-health-v2",
+                "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2",
+                "targetBlank": false
+              }
+            ]
           },
           "targets": [
             {
@@ -1446,7 +1495,14 @@
               "fields": "",
               "values": false
             },
-            "textMode": "value_and_name"
+            "textMode": "value_and_name",
+            "dataLinks": [
+              {
+                "title": "Open bioetl-workflow-overview",
+                "url": "/d/bioetl-workflow-overview/bioetl-workflow-overview",
+                "targetBlank": false
+              }
+            ]
           },
           "targets": [
             {
