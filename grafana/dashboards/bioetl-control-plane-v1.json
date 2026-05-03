@@ -144,7 +144,24 @@
               }
             ]
           },
-          "unit": "short"
+          "unit": "short",
+          "links": [
+            {
+              "targetBlank": true,
+              "title": "Open Replay & Resume Runbook",
+              "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/replay-resume.md?pipeline=${pipeline:queryparam}&run_type=${run_type:queryparam}&${__url_time_range}"
+            },
+            {
+              "targetBlank": true,
+              "title": "Open Runtime Dependencies",
+              "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
+            },
+            {
+              "targetBlank": true,
+              "title": "Open DQ Dependencies",
+              "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
+            }
+          ]
         },
         "overrides": []
       },
@@ -217,7 +234,24 @@
               }
             ]
           },
-          "unit": "h"
+          "unit": "h",
+          "links": [
+            {
+              "targetBlank": true,
+              "title": "Open Replay & Resume Runbook",
+              "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/replay-resume.md?pipeline=${pipeline:queryparam}&run_type=${run_type:queryparam}&${__url_time_range}"
+            },
+            {
+              "targetBlank": true,
+              "title": "Open Runtime Dependencies",
+              "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
+            },
+            {
+              "targetBlank": true,
+              "title": "Open DQ Dependencies",
+              "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
+            }
+          ]
         },
         "overrides": []
       },
@@ -290,7 +324,24 @@
               }
             ]
           },
-          "unit": "short"
+          "unit": "short",
+          "links": [
+            {
+              "targetBlank": true,
+              "title": "Open Replay & Resume Runbook",
+              "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/replay-resume.md?pipeline=${pipeline:queryparam}&run_type=${run_type:queryparam}&${__url_time_range}"
+            },
+            {
+              "targetBlank": true,
+              "title": "Open Runtime Dependencies",
+              "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
+            },
+            {
+              "targetBlank": true,
+              "title": "Open DQ Dependencies",
+              "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
+            }
+          ]
         },
         "overrides": []
       },
@@ -337,18 +388,18 @@
           "links": [
             {
               "targetBlank": true,
-              "title": "Run Manifest Inspection",
-              "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/run-manifest-inspection.md"
+              "title": "Open Replay & Resume Runbook",
+              "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/replay-resume.md?pipeline=${pipeline:queryparam}&run_type=${run_type:queryparam}&${__url_time_range}"
             },
             {
               "targetBlank": true,
-              "title": "Checkpoint Debugging",
-              "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/checkpoint-debugging.md"
+              "title": "Open Runtime Dependencies",
+              "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
             },
             {
               "targetBlank": true,
-              "title": "Traceability Signal Ownership",
-              "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/traceability-signal-ownership.md"
+              "title": "Open DQ Dependencies",
+              "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
             }
           ],
           "mappings": [
