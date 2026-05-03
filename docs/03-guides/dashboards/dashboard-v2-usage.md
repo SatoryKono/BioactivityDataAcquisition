@@ -44,12 +44,11 @@ ______________________________________________________________________
 
 ## Что смотреть в первую очередь
 
-1. `bioetl-overview-v2`, top answer row:
-   `System Status`, `Next Action`, `Failed Runs in Range`,
-   `Recent Activity`, `Worst Backlog Stage` и `Worst Lag Stage` отвечают на
-   L0 вопрос: что broken/degraded и куда открыть drilldown первым. `OK`
-   считается здоровым только при recent activity; отсутствие samples остаётся
-   `UNKNOWN`, а не зелёным нулём.
+1. `bioetl-overview-v2`, first-screen KPI row (no scroll):
+   `System Status`, `Next Action`, `Failed Runs in Range`, `Worst Backlog Stage`,
+   `Worst Lag Stage` и `Flow Balance` отвечают на L0 вопрос: что broken/degraded
+   и куда открыть drilldown первым. `OK` считается здоровым только при recent
+   activity; отсутствие samples остаётся `UNKNOWN`, а не зелёным нулём.
 1. `bioetl-runtime`, top answer row:
    `Runtime Blockers / 15m`, `Failed Runs / 15m`, `No-Records Runs / 30m`,
    `Runtime Error Rate / 30m`, `Worst Stage Lag / 15m`,
@@ -88,6 +87,29 @@ ______________________________________________________________________
    используйте его, когда pipeline summary выглядит здоровым, но orchestration
    path показывает `failed/skipped/blocked` status.
 
+
+
+### Screenshot map: `bioetl-overview-v2` (новая структура первого экрана)
+
+```text
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ L0 Overview Scope                                                           │
+├──────────────┬──────────────┬──────────────────┬──────────────────┬──────────┤
+│ System Status│ Next Action  │ Failed Runs      │ Worst Backlog    │ Worst Lag│
+│              │              │ in Range         │ Stage            │ Stage    │
+├──────────────┴──────────────┴──────────────────┴──────────────────┴──────────┤
+│ Flow Balance (Bronze/Gold/loss denominator context)                         │
+├──────────────────────────────────────────────────────────────────────────────┤
+│ ▾ Throughput details (collapsed row by default)                              │
+│ ▾ Freshness breakdown (collapsed row by default)                             │
+│ ▾ Extended distributions (collapsed row by default)                          │
+└──────────────────────────────────────────────────────────────────────────────┘
+```
+
+Первый экран без скролла должен отвечать на вопрос **«что сломано и куда идти дальше»**:
+- что сломано: `System Status` + `Failed Runs in Range` + `Worst Backlog/Lag Stage`;
+- куда идти дальше: `Next Action` + drilldown links в KPI/reason panels;
+- баланс потока: `Flow Balance` (вход/выход/потери), без скрытия деградации в single-rate KPI.
 ## Silver Filter Rejects workflow
 
 - Для быстрых summary используйте `Silver Rejects Count + Rate` в

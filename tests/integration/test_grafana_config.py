@@ -682,9 +682,9 @@ def test_overview_answer_row_has_max_seven_panels() -> None:
         "System Status",
         "Next Action",
         "Failed Runs in Range",
-        "Recent Activity",
         "Worst Backlog Stage",
         "Worst Lag Stage",
+        "Flow Balance",
     }
 
 
