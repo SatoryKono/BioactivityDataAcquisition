@@ -80,8 +80,9 @@
         "content": "<center><h2>Pipeline: $pipeline | Run Type: $run_type | Reason: $reason_code | Field: $field | Run ID: $run_id</h2><div><strong style='color:#ffb347'>default 24h forensic window</strong></div><div><small>Select exactly one pipeline. Quarantine Explorer is fail-closed and forensic filters like run_id/payload_hash stay explorer-only, not Prometheus labels.</small></div></center>",
         "mode": "html"
       },
-      "title": "Scope",
-      "type": "text"
+      "title": "Inspect Explorer Scope",
+      "type": "text",
+      "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
     },
     {
       "datasource": "Quarantine Explorer",
@@ -142,8 +143,9 @@
           "expr": ""
         }
       ],
-      "title": "Filtered Records Total",
-      "type": "table"
+      "title": "Monitor Filtered Records Total",
+      "type": "table",
+      "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
     },
     {
       "datasource": "Quarantine Explorer",
@@ -221,8 +223,9 @@
           "expr": ""
         }
       ],
-      "title": "Reject Rate vs Bronze",
-      "type": "table"
+      "title": "Track Reject Rate vs Bronze",
+      "type": "table",
+      "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
     },
     {
       "datasource": "Quarantine Explorer",
@@ -263,8 +266,9 @@
           "expr": ""
         }
       ],
-      "title": "Run Scope Summary",
-      "type": "table"
+      "title": "Inspect Run Scope Summary",
+      "type": "table",
+      "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
     },
     {
       "datasource": "Quarantine Explorer",
@@ -302,8 +306,9 @@
           "expr": ""
         }
       ],
-      "title": "Top Reject Reasons",
-      "type": "table"
+      "title": "Inspect Top Reject Reasons",
+      "type": "table",
+      "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
     },
     {
       "datasource": "Quarantine Explorer",
@@ -341,8 +346,9 @@
           "expr": ""
         }
       ],
-      "title": "Top Reject Fields",
-      "type": "table"
+      "title": "Inspect Top Reject Fields",
+      "type": "table",
+      "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
     },
     {
       "datasource": "Quarantine Explorer",
@@ -380,8 +386,9 @@
           "expr": ""
         }
       ],
-      "title": "Top Reason Signatures",
-      "type": "table"
+      "title": "Inspect Top Reason Signatures",
+      "type": "table",
+      "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
     },
     {
       "datasource": "Quarantine Explorer",
@@ -439,8 +446,8 @@
           "expr": ""
         }
       ],
-      "description": "Shows latest 100 records for selected scope, sorted by ingestion_ts descending.",
-      "title": "Filtered Records Table",
+      "description": "Shows latest 100 records for selected scope, sorted by ingestion_ts descending. Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data.",
+      "title": "Inspect Filtered Records Table",
       "type": "table"
     },
     {
@@ -479,8 +486,8 @@
           "expr": ""
         }
       ],
-      "description": "Select a row or set payload_hash to inspect one specific record.",
-      "title": "Selected Record Details",
+      "description": "Select a row or set payload_hash to inspect one specific record. Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data.",
+      "title": "Inspect Selected Record Details",
       "type": "table"
     }
   ],
