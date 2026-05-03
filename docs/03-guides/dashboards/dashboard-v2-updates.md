@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.0.1
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-29'
+  Last verified: '2026-05-03'
 
 ______________________________________________________________________
 
@@ -134,3 +134,47 @@ histogram_quantile(0.95, sum by (le, provider) (rate(bioetl_health_check_latency
 ## Примечание по старым гайдам
 
 Документы в `docs/03-guides/dashboards/`, где фигурируют `$run_id`, `execution` или "latest run only", относятся к устаревшей версии и не описывают текущее состояние JSON.
+
+## Lightweight Manual Validation Process (Dashboard UX)
+
+Применяется после любых изменений dashboard UX, навигации, panel copy,
+dashboard links или Explore handoff.
+
+### Incident scenario checklist (3–5 обязательных сценариев)
+
+1. **Runtime деградация**: оператор из `1. Overview` должен корректно перейти в
+   `2. Runtime`/Explore и зафиксировать первую action.
+2. **Provider latency/health инцидент**: оператор из `1. Overview` должен
+   перейти в `3. Provider Health` и получить root-cause signal.
+3. **DQ regression**: оператор из `1. Overview` должен перейти в
+   `4. Data Quality` и найти failing dimension/pipeline.
+4. **Replay safety/blocker**: оператор из `1. Overview` должен перейти в
+   `Control Plane / Replay Safety` и подтвердить blocker state.
+5. **Workflow failure/skip** (если затронут workflow surface): оператор должен
+   перейти в `6. Workflow Overview` и локализовать failing step/status.
+
+### KPI фиксация по каждому сценарию
+
+Для каждого сценария зафиксировать в changelog:
+
+- `time-to-first-action` (сек);
+- `click-depth to root cause` (кол-во кликов);
+- `first-hop accuracy from Overview` (`yes/no` + короткое пояснение).
+
+Рекомендуемый шаблон записи:
+
+```md
+- Scenario: <name>
+  - time-to-first-action: <N sec>
+  - click-depth to root cause: <N>
+  - first-hop accuracy from Overview: <yes/no> (<note>)
+```
+
+## Merge Gate: KPI Checklist Required
+
+Dashboard change считается **complete** только если:
+
+1. обновлён этот changelog (`dashboard-v2-updates.md`) с результатами
+   lightweight manual validation;
+2. заполнен KPI-чеклист минимум по 3 и максимум по 5 инцидентным сценариям;
+3. для каждого сценария явно зафиксирован `first-hop accuracy from Overview`.
