@@ -342,3 +342,15 @@ def test_pipeline_duration_has_explicit_no_value_message() -> None:
     assert "terminal" in no_value.lower() or "samples" in no_value.lower(), (
         f"Pipeline Duration noValue must explain missing terminal metric, got: {no_value!r}"
     )
+
+def test_runtime_row_sequence_is_fixed_detect_localize_escalate() -> None:
+    """Runtime row lanes must keep canonical Detect -> Localize -> Escalate order."""
+    row_panels = [
+        panel for panel in _dashboard().get("panels", []) if panel.get("type") == "row"
+    ]
+    row_pairs = [(panel.get("id"), panel.get("title")) for panel in row_panels]
+    assert row_pairs[:3] == [
+        (252, "Detect (collapsed)"),
+        (253, "Localize (collapsed)"),
+        (254, "Escalate (collapsed)"),
+    ], f"Runtime row order/title drifted: {row_pairs}"

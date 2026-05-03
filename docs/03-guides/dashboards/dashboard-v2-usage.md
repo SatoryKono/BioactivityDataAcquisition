@@ -300,6 +300,12 @@ Variable handoff policy for dashboard links remains strict and bounded:
    `/ops/quarantine/filter-options?pipeline=<pipeline_name>`.
 
 
-### Runtime dashboard layout note (Incident Summary-first)
+### Runtime dashboard layout note (Detect → Localize → Escalate)
 
-`bioetl-runtime` теперь использует компактный first screen: сверху фиксированный блок `Incident Summary` из 4 ключевых KPI (blockers, failed runs, worst lag, error rate), ниже текстовый блок `Recommended Next Drilldown` с 3 маршрутами, а остальные diagnostic panels перенесены в свернутые row-группы (`Backlog Trends`, `Durations`, `Shutdown Diagnostics`, `Tracing-only`).
+`bioetl-runtime` использует фиксированный triage-order по трём свернутым полосам: `Detect`, `Localize`, `Escalate`.
+
+- **Detect**: быстрый сигнал «есть ли инцидент» (blockers/failed runs/error rate/lag) и первичный выбор направления.
+- **Localize**: локализация culprit stage/phase и проверка latency/backlog breakdown.
+- **Escalate**: shutdown/terminal-state диагностика и handoff в tracing/log drilldown для подтверждения причины.
+
+На first screen оставлена ровно одна рекомендация drilldown — panel `id=9991` (`Recommended Drilldown (Current Blocker)`). Оператор сначала читает `Active Runtime Blocker Detail`, выбирает текущий blocker type, затем идёт по тем же трём полосам в фиксированном порядке.

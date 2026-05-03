@@ -569,7 +569,7 @@
     {
       "id": 9991,
       "type": "text",
-      "title": "Recommended Next Drilldown",
+      "title": "Recommended Drilldown (Current Blocker)",
       "gridPos": {
         "h": 4,
         "w": 24,
@@ -577,7 +577,7 @@
         "y": 39
       },
       "options": {
-        "content": "<div style=\"padding:0.3rem 0.6rem;line-height:1.6\"><ol><li><strong>Runtime blockers > 0 or failed runs > 0</strong> → open <a href=\"/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}\">1. Overview</a> for incident routing, then inspect blocker detail here.</li><li><strong>Worst lag ≥ 300s</strong> → expand <em>Backlog Trends</em> and <em>Durations</em> rows to isolate culprit stage and runtime phase latency.</li><li><strong>Error rate elevated</strong> → expand <em>Tracing-only</em> row and open Loki/Tempo drilldowns for correlated logs/traces.</li></ol></div>",
+        "content": "<div style=\"padding:0.3rem 0.6rem;line-height:1.6\"><strong>Current blocker type:</strong> inspect <em>Active Runtime Blocker Detail</em> and route by blocker label (<code>preflight_failed</code>, <code>runs_failed</code>, <code>stage_backlog_active</code>, <code>stage_lag_high</code>, <code>gold_write_missing</code>, <code>no_terminal_run</code>, <code>flow_invariant_violated</code>). Next action: expand <em>Detect</em> for first signal, <em>Localize</em> for culprit stage/phase, and <em>Escalate</em> for shutdown/tracing handoff.</div>",
         "mode": "html"
       },
       "pluginVersion": "12.2.0",
@@ -586,7 +586,7 @@
     {
       "id": 252,
       "type": "row",
-      "title": "Backlog Trends (collapsed)",
+      "title": "Detect (collapsed)",
       "collapsed": true,
       "gridPos": {
         "h": 1,
@@ -838,7 +838,7 @@
     {
       "id": 253,
       "type": "row",
-      "title": "Durations (collapsed)",
+      "title": "Localize (collapsed)",
       "collapsed": true,
       "gridPos": {
         "h": 1,
@@ -1077,7 +1077,7 @@
     {
       "id": 254,
       "type": "row",
-      "title": "Shutdown Diagnostics (collapsed)",
+      "title": "Escalate (collapsed)",
       "collapsed": true,
       "gridPos": {
         "h": 1,
