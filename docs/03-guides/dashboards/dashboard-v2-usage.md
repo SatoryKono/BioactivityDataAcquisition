@@ -158,6 +158,12 @@ ______________________________________________________________________
 - `bioetl-workflow-overview`: dashboard links `Back to Overview`, `2. Runtime`, `Control Plane / Replay Safety`; cross-dashboard handoffs не leaking `$workflow/$status` into non-workflow targets. Prometheus panels use only bounded workflow labels (`workflow`, `status`, `step_kind`) and never require `run_id`/`step_id` labels.
 - Loki drilldown использует безопасный low-cardinality entrypoint `{job="bioetl"}` без dashboard-variable interpolation внутри encoded Explore payload. Это сознательный baseline: Grafana надёжно не подставляет `$pipeline/$provider` в `left=...`, поэтому дополнительное сужение оператор делает уже в самом Explore. Tempo drilldown открывает trace search в том же временном окне; детальная correlation идёт через `trace_id` / `span_id`, а не через Prometheus labels.
 - Tempo drilldown теперь тоже открывается contextual: dashboards с `$pipeline/$run_type` предварительно фильтруют TraceQL по `span."bioetl.pipeline"` и `span."bioetl.run_type"`, а provider dashboard — по `span."bioetl.provider"`. Это не заменяет correlation по `trace_id` / `span_id`, но убирает пустой `{}` и делает handoff полезнее уже на первом клике.
+- `bioetl-runtime` row `Tracing-only Log Hygiene` теперь включает table panel `Alert-to-Action Map` как runbook-lite:
+  - `warning_spike` -> вероятная причина: provider instability или DQ threshold drift; следующий шаг: `docs/05-operations/runbooks/dq-failure-investigation.md`.
+  - `unstructured_logs_growth` -> вероятная причина: parser/schema drift или не-JSON logger output; следующий шаг: `docs/05-operations/runbooks/incident-response.md` (provider triage).
+  - `hygiene_anomaly` -> вероятная причина: runtime-control mismatch/checkpoint lag/stale state; следующий шаг: `docs/05-operations/runbooks/run-manifest-inspection.md`.
+  Семантика окна для карты: сигналы читаются в том же active Grafana time range (`$__range`), а trend panel в этом ряду использует `$__interval`; это согласовано с rule-pack потому что condition-summary panels в runtime остаются на `increase(...[$__range])` и не смешивают fixed 30m window с log-hygiene triage.
+
 - Runtime condition-summary triage path:
   `Pipeline Alert Conditions` -> `pipeline-failure-critical.md`,
   `DQ Alert Conditions` / `Freshness Alert Conditions` -> `dq-failure-investigation.md`,

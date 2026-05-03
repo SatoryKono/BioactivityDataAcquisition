@@ -2015,7 +2015,7 @@
           },
           "gridPos": {
             "h": 6,
-            "w": 12,
+            "w": 6,
             "x": 12,
             "y": 0
           },
@@ -2128,6 +2128,94 @@
           ],
           "title": "Log Hygiene Trend",
           "type": "timeseries"
+        },
+        {
+          "datasource": "Prometheus",
+          "description": "Alert-to-action map for warning spikes, unstructured log growth, and hygiene anomalies. Uses $__range for spike/anomaly detection to align triage with current dashboard time window and rule-pack context.",
+          "fieldConfig": {
+            "defaults": {
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "custom": {
+                "align": "left"
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 6,
+            "x": 18,
+            "y": 0
+          },
+          "id": 224,
+          "options": {
+            "showHeader": true
+          },
+          "targets": [
+            {
+              "expr": "label_replace(label_replace(label_replace(vector(1), \"signal\", \"warning_spike\", \"\", \"\"), \"probable_cause\", \"Provider instability or DQ threshold drift\", \"\", \"\"), \"next_step\", \"Open DQ guide: docs/05-operations/runbooks/dq-failure-investigation.md\", \"\", \"\")",
+              "format": "table",
+              "instant": true,
+              "legendFormat": "",
+              "refId": "A"
+            },
+            {
+              "expr": "label_replace(label_replace(label_replace(vector(1), \"signal\", \"unstructured_logs_growth\", \"\", \"\"), \"probable_cause\", \"Parser/schema drift or non-JSON logger output\", \"\", \"\"), \"next_step\", \"Open Provider runbook: docs/05-operations/runbooks/incident-response.md\", \"\", \"\")",
+              "format": "table",
+              "instant": true,
+              "legendFormat": "",
+              "refId": "B"
+            },
+            {
+              "expr": "label_replace(label_replace(label_replace(vector(1), \"signal\", \"hygiene_anomaly\", \"\", \"\"), \"probable_cause\", \"Runtime-control mismatch, checkpoint lag, or stale state\", \"\", \"\"), \"next_step\", \"Open Control Plane runbook: docs/05-operations/runbooks/run-manifest-inspection.md\", \"\", \"\")",
+              "format": "table",
+              "instant": true,
+              "legendFormat": "",
+              "refId": "C"
+            }
+          ],
+          "title": "Alert-to-Action Map",
+          "transformations": [
+            {
+              "id": "labelsToFields",
+              "options": {
+                "mode": "columns"
+              }
+            },
+            {
+              "id": "merge",
+              "options": {}
+            },
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "Value": true
+                },
+                "indexByName": {
+                  "signal": 0,
+                  "probable_cause": 1,
+                  "next_step": 2
+                },
+                "renameByName": {
+                  "signal": "Signal",
+                  "probable_cause": "Probable Cause",
+                  "next_step": "Next Step"
+                }
+              }
+            }
+          ],
+          "type": "table"
         }
       ],
       "title": "Tracing-only Log Hygiene (requires optional tracing profile)",
