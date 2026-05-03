@@ -3,9 +3,7 @@
 from __future__ import annotations
 
 from bioetl.interfaces.cli.commands.run_all import (
-    _run_batch_with_policy,
     get_pipeline_runner_service,
-    resolve_context_registry,
     run_all,
 )
 

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from bioetl.interfaces.cli.commands.diagnostics import (
     COMMANDS,
+    _build_diagnostics_guide_lines,
     diagnostics,
     get_metrics_operator_profile,
     get_observability_diagnostics_bundle,
@@ -12,6 +13,7 @@ from bioetl.interfaces.cli.commands.diagnostics import (
 
 __all__ = [
     "COMMANDS",
+    "_build_diagnostics_guide_lines",
     "diagnostics",
     "get_metrics_operator_profile",
     "get_observability_diagnostics_bundle",

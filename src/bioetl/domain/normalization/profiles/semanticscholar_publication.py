@@ -14,6 +14,7 @@ from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_passthrough,
     normalize_profile_semantic_scholar_id,
     normalize_profile_semantic_scholar_ids,
+    normalize_profile_semantic_scholar_publication_type_raw,
 )
 from bioetl.domain.schemas.semanticscholar.publication import (
     SemanticScholarPublicationSchema,
@@ -119,6 +120,11 @@ _SPECIAL_RULES = {
     "oa_status": (
         normalize_profile_oa_status,
         "Normalize OA status against the shared publication OA-status registry.",
+    ),
+    "publication_type": (
+        normalize_profile_semantic_scholar_publication_type_raw,
+        "Canonicalize known Semantic Scholar raw publication-type spellings "
+        "while preserving unknown provider values unchanged.",
     ),
     "paper_id": (
         normalize_profile_semantic_scholar_id,

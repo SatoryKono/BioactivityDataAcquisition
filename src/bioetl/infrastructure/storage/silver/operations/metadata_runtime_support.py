@@ -5,20 +5,16 @@ from __future__ import annotations
 import asyncio
 import inspect
 from collections.abc import Awaitable, Callable, Sequence
-from datetime import datetime
 from typing import TYPE_CHECKING, Any, cast
 
 import orjson
 
 from bioetl.domain.behavior.dq_metrics_calculator import (
-    DQMetricsCalculator,
     DQMetricsInput,
 )
 from bioetl.domain.models.metadata import SilverMetadata
 from bioetl.domain.ports import (
     LoggerPort,
-    MetadataCoordinatorPort,
-    MetadataWriterPort,
 )
 from bioetl.domain.ports.noop import NoOpMetadataWriter
 from bioetl.domain.types import BronzeRecord

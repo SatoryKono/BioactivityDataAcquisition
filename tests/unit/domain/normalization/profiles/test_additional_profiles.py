@@ -437,6 +437,7 @@ def test_non_chembl_publication_raw_type_policy_is_fixture_backed() -> None:
         rule = profile.rule_for(case["field"])
 
         assert case["policy"] in {
+            "known_provider_value_canonicalized_without_closing_the_universe",
             "preserve_unknown_provider_value",
             "raw_sidecar_preserved",
         }

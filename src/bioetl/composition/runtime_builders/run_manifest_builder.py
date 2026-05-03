@@ -10,6 +10,9 @@ from bioetl.application.services.control_plane.run_ledger_service import (
 from bioetl.composition.runtime_builders import (
     _run_manifest_support as _manifest_support,
 )
+from bioetl.composition.runtime_builders._run_manifest_builder_policy import (
+    resolve_manifest_reproducibility_context,
+)
 from bioetl.composition.runtime_builders._run_manifest_creation_support import (
     _RunManifestCreateRequestInputs,
     build_manifest_create_request,
@@ -18,14 +21,13 @@ from bioetl.composition.runtime_builders._run_manifest_creation_support import (
     create_manifest_store,
     emit_replay_reconstructability_metric,
 )
-from bioetl.composition.runtime_builders._run_manifest_builder_policy import (
-    resolve_manifest_reproducibility_context,
-)
 from bioetl.composition.runtime_builders._runner_builder_support import (
     resolve_required_artifact_lineage_layers,
     validate_required_persistence_profile,
 )
-from bioetl.domain.control_plane import RunManifest
+from bioetl.domain.control_plane.reproducibility_policy import (
+    legacy_config_hash_from_resolved_config_hash,
+)
 
 if TYPE_CHECKING:
     from bioetl.composition.runtime_builders.inputs_resolver import (
@@ -80,6 +82,9 @@ def create_run_manifest(
             entity=entity,
             run_type_value=run_type_value,
             execution_context_value=execution_context_value,
+            config_hash=legacy_config_hash_from_resolved_config_hash(
+                resolved_config_hash
+            ),
             resolved_config_hash=resolved_config_hash,
             effective_config_hash=effective_config_hash,
             contract_ref=contract_ref,
@@ -130,5 +135,4 @@ def create_run_manifest(
         dq_policy_ref,
         rule_bundle_version,
     )
-
     return control_plane_refs, ledger_service

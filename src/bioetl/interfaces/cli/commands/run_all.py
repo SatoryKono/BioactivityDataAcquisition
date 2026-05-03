@@ -16,7 +16,10 @@ from bioetl.interfaces.cli.commands.domains.health.server_integration import (
     echo_health_server_info,
     health_server_context,
 )
-from bioetl.interfaces.cli.commands.domains.run.support import resolve_context_registry
+from bioetl.interfaces.cli.commands.domains.run.support import (
+    build_cli_registry,
+    resolve_context_registry,
+)
 from bioetl.interfaces.cli.commands.domains.run_all.command_entrypoint import (
     build_run_all_click_command,
 )
@@ -65,7 +68,6 @@ from bioetl.interfaces.cli.commands.domains.shared.callback_dispatch import (
     dispatch_cli_callback,
 )
 from bioetl.interfaces.cli.formatters import echo_error, echo_info
-from bioetl.interfaces.cli.registry_helpers import build_cli_registry
 
 if TYPE_CHECKING:
     from bioetl.application.services.execution.pipeline_runner_service import (

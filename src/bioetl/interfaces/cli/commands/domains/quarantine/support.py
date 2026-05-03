@@ -35,6 +35,7 @@ from bioetl.interfaces.cli.formatters import (
 _T = TypeVar("_T")
 
 __all__ = [
+    "RunManifestInspectionServiceProtocol",
     "_inspect_quarantine",
     "_purge_quarantine",
     "_replay_quarantine",

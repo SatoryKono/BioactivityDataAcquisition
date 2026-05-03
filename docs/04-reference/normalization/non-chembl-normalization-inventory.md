@@ -22,10 +22,10 @@ inventory that backs the generated normalization evidence matrix.
   [non_chembl_observed_values.yaml](../../../tests/fixtures/normalization/non_chembl_observed_values.yaml)
 - identifier and raw-type policy cases:
   [non_chembl_identifier_cases.yaml](../../../tests/fixtures/normalization/non_chembl_identifier_cases.yaml)
-- generated non-ChEMBL matrix slice:
-  [non_chembl_normalization_field_matrix.md](../../reports/generated/pipeline_normalization_field_matrix/non_chembl_normalization_field_matrix.md)
-- full generated matrix:
-  [pipeline_normalization_field_matrix.md](../../reports/generated/pipeline_normalization_field_matrix/pipeline_normalization_field_matrix.md)
+- generated non-ChEMBL matrix slice artifact:
+  `docs/reports/generated/pipeline_normalization_field_matrix/non_chembl_normalization_field_matrix.md`
+- full generated matrix artifact:
+  `docs/reports/generated/pipeline_normalization_field_matrix/pipeline_normalization_field_matrix.md`
 
 ## What The Inventory Records
 

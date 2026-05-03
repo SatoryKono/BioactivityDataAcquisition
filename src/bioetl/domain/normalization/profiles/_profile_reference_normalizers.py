@@ -43,11 +43,33 @@ __all__ = [
     "normalize_profile_reactome_references",
     "normalize_profile_semantic_scholar_id",
     "normalize_profile_semantic_scholar_ids",
+    "normalize_profile_semantic_scholar_publication_type_raw",
     "normalize_profile_uniprot_accession",
     "normalize_profile_uniprot_accessions",
     "normalize_profile_uniprot_go_references",
     "normalize_profile_uniprot_interpro_references",
 ]
+
+_SEMANTIC_SCHOLAR_PUBLICATION_TYPE_CANONICAL = {
+    value.casefold(): value
+    for value in (
+        "JournalArticle",
+        "Conference",
+        "CaseReport",
+        "ClinicalTrial",
+        "MetaAnalysis",
+        "Dataset",
+        "Book",
+        "BookSection",
+        "LettersAndComments",
+        "News",
+        "Study",
+        "Review",
+        "Editorial",
+        "Letter",
+        "Other",
+    )
+}
 
 
 def normalize_profile_uniprot_go_references(value: object) -> object:
@@ -232,3 +254,16 @@ def normalize_profile_publication_type_raw(value: object) -> object:
         return None
     cleaned = normalize_string(value)
     return cleaned.upper() if cleaned is not None else None
+
+
+def normalize_profile_semantic_scholar_publication_type_raw(value: object) -> object:
+    """Canonicalize known Semantic Scholar raw type spellings without closing the universe."""
+    if not isinstance(value, str):
+        return None
+    cleaned = normalize_string(value)
+    if cleaned is None:
+        return None
+    return _SEMANTIC_SCHOLAR_PUBLICATION_TYPE_CANONICAL.get(
+        cleaned.casefold(),
+        cleaned,
+    )

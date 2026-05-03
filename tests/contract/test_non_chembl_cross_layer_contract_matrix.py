@@ -154,8 +154,12 @@ def test_non_chembl_observed_value_fixture_has_cross_layer_field_coverage() -> N
                 f"{pipeline_name}.{field_name}: generated matrix"
             )
             row = rows_by_key[(pipeline_name, field_name)]
-            assert row["classification"], f"{pipeline_name}.{field_name}: classification"
-            assert row["observed_source"], f"{pipeline_name}.{field_name}: observed_source"
+            assert row["classification"], (
+                f"{pipeline_name}.{field_name}: classification"
+            )
+            assert row["observed_source"], (
+                f"{pipeline_name}.{field_name}: observed_source"
+            )
 
 
 def test_non_chembl_structured_inventory_fields_publish_sidecar_evidence() -> None:

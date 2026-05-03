@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
 from bioetl.interfaces.cli.commands.run_composite import (
     bootstrap_composite_runner,
     load_composite_config,
@@ -9,6 +10,7 @@ from bioetl.interfaces.cli.commands.run_composite import (
 )
 
 __all__ = [
+    "CompositeRuntimeConfig",
     "bootstrap_composite_runner",
     "load_composite_config",
     "run_composite",

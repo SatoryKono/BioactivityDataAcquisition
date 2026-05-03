@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-05-02T17:20:37.674901+00:00",
+  "generated_at": "2026-05-03T05:48:01.590062+00:00",
   "summary": {
     "total_scripts": 355,
     "status_counts": {
@@ -4958,19 +4958,19 @@
       "references": [
         {
           "path": "docs/05-engineering/normalization_plan_P0_P6.md",
-          "line": 231,
+          "line": 249,
           "source_group": "docs",
           "text": "| Matrix generation                  | [generate_pipeline_normalization_field_matrix.py](../../scripts/docs/generate_pipeline_normalization_field_matrix.py) | Deterministically emits multi-pipeline CS"
         },
         {
           "path": "docs/05-engineering/normalization_plan_P0_P6.md",
-          "line": 327,
+          "line": 345,
           "source_group": "docs",
           "text": "- [generate_pipeline_normalization_field_matrix.py](../../scripts/docs/generate_pipeline_normalization_field_matrix.py)"
         },
         {
           "path": "docs/05-engineering/normalization_plan_P0_P6.md",
-          "line": 709,
+          "line": 728,
           "source_group": "docs",
           "text": "- [generate_pipeline_normalization_field_matrix.py](../../scripts/docs/generate_pipeline_normalization_field_matrix.py) already generates deterministic multi-pipeline artifacts"
         },
@@ -4982,7 +4982,7 @@
         },
         {
           "path": "tests/unit/scripts/test_generate_pipeline_normalization_field_matrix.py",
-          "line": 284,
+          "line": 286,
           "source_group": "tests",
           "text": "\"scripts/docs/generate_pipeline_normalization_field_matrix.py\""
         }
@@ -7979,13 +7979,13 @@
       "references": [
         {
           "path": "docs/05-engineering/normalization_plan_P0_P6.md",
-          "line": 232,
+          "line": 250,
           "source_group": "docs",
           "text": "| Fallback inventory                 | [report_normalization_fallback_inventory.py](../../scripts/engineering/qa/report_normalization_fallback_inventory.py) | Reports `fallback_business` vs `fallback_"
         },
         {
           "path": "docs/05-engineering/normalization_plan_P0_P6.md",
-          "line": 354,
+          "line": 372,
           "source_group": "docs",
           "text": "- fallback inventory report: [report_normalization_fallback_inventory.py](../../scripts/engineering/qa/report_normalization_fallback_inventory.py)"
         },
@@ -8914,19 +8914,19 @@
         },
         {
           "path": "docs/02-architecture/07-compatibility-facade-inventory.md",
-          "line": 124,
+          "line": 123,
           "source_group": "docs",
           "text": "| `src/bioetl/interfaces/cli/commands/run.py` | Permanent public run command seam over the split internal owner module `bioetl.interfaces.cli.commands.domains.run.command`. | `bioetl.interfaces.cli.co"
         },
         {
           "path": "docs/02-architecture/07-compatibility-facade-snapshot.md",
-          "line": 55,
+          "line": 54,
           "source_group": "docs",
           "text": "- `src/bioetl/interfaces/cli/commands/run.py`"
         },
         {
           "path": "docs/02-architecture/07-compatibility-facade-snapshot.md",
-          "line": 64,
+          "line": 62,
           "source_group": "docs",
           "text": "- `src/bioetl/interfaces/cli/commands/run.py` — external breaking change required: `true`, internal callers zero: `false`"
         },
