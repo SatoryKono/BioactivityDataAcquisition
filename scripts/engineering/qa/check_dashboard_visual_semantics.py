@@ -16,6 +16,13 @@ EXPECTED_UNKNOWN_MAPPING = {
     "type": "special",
     "options": {"match": "null", "result": {"text": "UNKNOWN", "color": "gray"}},
 }
+L0_DASHBOARD_FILES = {
+    "bioetl-overview-v2.json",
+    "bioetl-runtime.json",
+    "bioetl-provider-health-v2.json",
+    "bioetl-dq-v2.json",
+}
+FORBIDDEN_L0_TERMS = {"DEGRADED", "BROKEN", "HEALTHY"}
 
 
 def iter_panels(panels: list[dict]) -> list[dict]:
@@ -47,6 +54,15 @@ def main() -> int:
             mappings = defaults.get("mappings", [])
             if EXPECTED_UNKNOWN_MAPPING not in mappings:
                 errors.append(f"{dashboard_path}: panel '{title}' must map null to UNKNOWN/gray")
+            dashboard_name = dashboard_path.name
+            if dashboard_name in L0_DASHBOARD_FILES:
+                text_fields = [str(title), str(panel.get("description", ""))]
+                for term in FORBIDDEN_L0_TERMS:
+                    if any(term in text.upper() for text in text_fields):
+                        errors.append(
+                            f"{dashboard_path}: panel '{title}' uses '{term}' in L0 dashboard; "
+                            "use OK/WARN/CRIT/UNKNOWN terminology"
+                        )
 
     if errors:
         print("Dashboard visual semantics check failed:")
