@@ -50,7 +50,7 @@
       "tags": [],
       "targetBlank": false,
       "title": "3. Provider Health",
-      "tooltip": "Provider health drilldown without var handoff",
+      "tooltip": "Cross-scope handoff: opens Provider Health with All provider/adapter scope (core filters do not transfer).",
       "type": "link",
       "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${__url_time_range}"
     },
@@ -74,7 +74,7 @@
       "tags": [],
       "targetBlank": false,
       "title": "6. Workflow Overview",
-      "tooltip": "Workflow drilldown without var handoff",
+      "tooltip": "Cross-scope handoff: opens Workflow Overview with All workflow/status scope (core filters do not transfer).",
       "type": "link",
       "url": "/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}"
     },
