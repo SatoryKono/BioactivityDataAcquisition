@@ -194,11 +194,13 @@ Variable handoff policy for these links is strict and bounded:
   target-scoped variables; forensic IDs в runtime dashboard запрещены.
 - `bioetl-control-plane-v1`: Control Plane v1 отвечает на один
   primary question: can we trust manifest/ledger/checkpoint/lineage state and
-  safely replay/resume? На первом экране оставлены только Trust Summary +
-  replay/resume blockers. Рекомендованный operator path: сначала проверить
-  blocker cards, затем открыть ровно один collapsed diagnostic row под
-  конкретный incident-pattern (Manifest/Ledger, Checkpoint/Replay, Global
-  Control Plane, Audit/Lineage, Missing Signals). GLOBAL read-path panels не
+  safely replay/resume? На первом экране оставлены только Trust/Blocker KPI: `id=891..893` и `id=130`.
+  Все остальные control-plane метрики перенесены в collapsed incident rows.
+  Рекомендованный operator path: сначала проверить blocker cards, затем открыть
+  ровно один collapsed diagnostic row под конкретный incident-pattern.
+  Порядок row-блоков стандартизирован по частоте инцидентов: `Checkpoint/Replay`
+  -> `Manifest/Ledger` -> `Global Control Plane` -> `Audit/Lineage` ->
+  `Known Missing Signals`. GLOBAL read-path panels не
   фильтруются по `$pipeline/$run_type`; это сознательно, потому что
   `bioetl_control_plane_reads_total` и
   `bioetl_control_plane_read_duration_seconds_bucket` глобальны по
