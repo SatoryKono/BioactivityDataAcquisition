@@ -294,6 +294,16 @@ def _record_flow_invariants(host: _PipelineRunnerFlowHostProtocol) -> None:
         status=silver_gold_monotonic,
     )
 
+    gold_expected = host._config.scd_config is not None or (
+        host._config.table.gold_write_mode is not None
+        and host._config.gold_schema is not None
+    )
+    pipeline_metrics.record_pipeline_stage_expected(stage="bronze", expected=True)
+    pipeline_metrics.record_pipeline_stage_expected(stage="silver", expected=True)
+    pipeline_metrics.record_pipeline_stage_expected(
+        stage="gold", expected=gold_expected
+    )
+
     pipeline_metrics.record_stage_backlog(
         run_type=run_type,
         stage="ingestion",
