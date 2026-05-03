@@ -59,3 +59,22 @@ documented as blind spots until instrumentation exists.
 Архивные материалы перемещены в `docs/03-guides/dashboards/legacy/`.
 
 Они могут содержать устаревшие переменные (`$run-id`, `execution`) и старые формулы.
+
+
+## Regenerate and verify parity
+
+Для регенерации инвентаризации dashboard metadata (UID/title/variables/links/tags):
+
+```bash
+uv run python -m scripts.engineering.qa report-dashboard-inventory --json
+```
+
+Для проверки parity с каноническими документами (`variables-guide.md`, `monitoring-index.md`)
+и mandatory links contract:
+
+```bash
+uv run python -m scripts.engineering.qa report-dashboard-inventory --check --json
+```
+
+CI gate запускает эту проверку в `docs.yml` и фейлит pipeline при расхождении
+канонических полей.
