@@ -77,7 +77,7 @@
       },
       "id": 1,
       "options": {
-        "content": "<center><h2>Pipeline: $pipeline | Run Type: $run_type | Reason: $reason_code | Field: $field | Run ID: $run_id</h2><div><small>Select exactly one pipeline. Quarantine Explorer is fail-closed and forensic filters like run_id/payload_hash stay explorer-only, not Prometheus labels.</small></div></center>",
+        "content": "<center><h2>Pipeline: $pipeline | Run Type: $run_type | Reason: $reason_code | Field: $field | Run ID: $run_id</h2><div><small>Select exactly one pipeline. Filter order: pipeline → run_type → reason/field → run_id → payload_hash. Quarantine Explorer is fail-closed and forensic filters like run_id/payload_hash stay explorer-only, not Prometheus labels.</small></div></center>",
         "mode": "html"
       },
       "title": "Scope",

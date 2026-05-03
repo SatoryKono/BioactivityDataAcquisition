@@ -128,6 +128,7 @@ ______________________________________________________________________
      `Top Silver Reject Fields`, чтобы сузить проблему до bounded cause summary.
   1. Откройте `5. Silver Reject Explorer` для record-level списка, выбора
      `reason_code/field/run_id` и detail по конкретному `payload_hash`.
+     Последовательность фильтров: `pipeline → run_type → reason/field → run_id → payload_hash`.
   1. Используйте quarantine CLI для action-операций (`replay/resolve/purge`) и
      финального подтверждения remediation.
 - Эти панели отвечают на вопросы:
