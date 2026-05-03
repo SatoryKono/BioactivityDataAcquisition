@@ -334,7 +334,8 @@
         "refresh": 1,
         "regex": "",
         "sort": 1,
-        "type": "query"
+        "type": "query",
+        "description": "Workflow scope: workflow selector for workflow dashboards; fallback: All workflows."
       },
       {
         "current": {
@@ -357,7 +358,8 @@
         "refresh": 1,
         "regex": "",
         "sort": 1,
-        "type": "query"
+        "type": "query",
+        "description": "Workflow scope: workflow status selector; fallback: All statuses."
       }
     ]
   },
