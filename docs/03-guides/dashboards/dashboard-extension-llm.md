@@ -154,3 +154,32 @@ uv run python -m pytest -q tests/integration/test_grafana_config.py
 ```bash
 uv run python -m scripts.engineering.qa check-dashboard-visual-semantics
 ```
+
+
+## 9. Panel naming and description policy
+
+For every new or modified panel title, use an action-first pattern:
+
+- `Monitor ...` for current state / health snapshots
+- `Inspect ...` for diagnostic drilldown detail
+- `Track ...` for trend, rate, or historical evolution
+
+Description for new/modified status panels MUST include the canonical mapping:
+
+- `0` = healthy/ok
+- `1` = warning/degraded
+- `>=2` = critical/failing
+- `null` = no data / unknown
+
+Good naming examples:
+
+- `Monitor Current Provider Health Status`
+- `Track Provider Failure Rate`
+- `Inspect Top Reject Reasons`
+
+Bad naming examples:
+
+- `Provider Health`
+- `Top Reject Reasons`
+- `Status`
+
