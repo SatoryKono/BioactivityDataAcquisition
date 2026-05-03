@@ -99,3 +99,13 @@ uv run python -m scripts.engineering.qa check-dashboard-visual-semantics
 - color mode = `thresholds`
 - стандартизованные threshold steps
 - обязательный `UNKNOWN` mapping для `null`
+
+## 7) UI-лексика навигации (обязательно)
+
+Источник фиксированного словаря для `links[].title`: `docs/03-guides/dashboards/navigation-contract.md`.
+
+Правила:
+- Названия top-level ссылок MUST совпадать с каноническими строками из navigation contract (например: `Back to Overview`, `2. Runtime`, `3. Provider Health`, `4. Data Quality`, `5. Silver Reject Explorer`, `Control Plane v1`, `6. Workflow Overview`).
+- Explore-ссылки MUST использовать полные названия: `Explore Logs (Loki, tracing profile)` и `Explore Traces (Tempo, tracing profile)`.
+- Формулировки вида `Explore Logs`, `Explore Traces`, `Next Recommended Drilldown` считаются legacy-лексикой и не допускаются в shipped dashboards.
+
