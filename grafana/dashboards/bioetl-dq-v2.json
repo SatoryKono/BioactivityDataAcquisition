@@ -81,7 +81,7 @@
     },
     {
       "datasource": "Prometheus",
-      "description": "Bounded reason summary only. Use quarantine CLI for exact record-level causes and stable reason signatures.",
+      "description": "Operational gating/flow counters (Bronze→Silver→Gold and invariants). Separate from quality score trend.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -964,8 +964,20 @@
           "refId": "A"
         }
       ],
-      "title": "Top Silver Reject Reasons",
-      "type": "bargauge"
+      "title": "Top Silver Reject Reasons (Pareto)",
+      "type": "bargauge",
+      "description": "Pareto ranking of rejection reasons. Use panel link to drill down into reject explorer.",
+      "links": [
+        {
+          "title": "Drilldown: Silver Reject Explorer",
+          "type": "dashboard",
+          "uid": "bioetl-silver-reject-explorer",
+          "keepTime": true,
+          "includeVars": false,
+          "targetBlank": false,
+          "params": "var-pipeline=${pipeline}&var-run_type=${run_type}"
+        }
+      ]
     },
     {
       "datasource": "Prometheus",
@@ -1412,7 +1424,7 @@
               }
             }
           ],
-          "unit": "dateTimeAsLocal",
+          "unit": "dateTimeAsIso",
           "decimals": 0,
           "thresholds": {
             "mode": "absolute",
@@ -1478,7 +1490,7 @@
         "h": 4,
         "w": 24,
         "x": 0,
-        "y": 60
+        "y": 68
       },
       "id": 150,
       "options": {
@@ -1532,7 +1544,7 @@
         "h": 8,
         "w": 8,
         "x": 0,
-        "y": 64
+        "y": 72
       },
       "id": 151,
       "options": {
@@ -1563,6 +1575,246 @@
       ],
       "title": "Gold Strict Validation Failures",
       "type": "stat"
+    },
+    {
+      "datasource": "Prometheus",
+      "description": "Share of records blocked by DQ filters within the selected scope/time range.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 2,
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 2
+              }
+            ]
+          },
+          "unit": "percent",
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 58
+      },
+      "id": 154,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "expr": "100 * ((sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__range])) or vector(0)) / clamp_min((sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=~\"raw|validated|enriched|filtered_out|deduplicated|final\"}[$__range])) or vector(0)), 1))",
+          "legendFormat": "blocked %",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "DQ Impact on Deliverability (Blocked Share)",
+      "type": "stat"
+    },
+    {
+      "datasource": "Prometheus",
+      "description": "Time trend of blocked share for the selected scope (pipeline/run_type/stage selector applies to dashboard scope).",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 2,
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 2
+              }
+            ]
+          },
+          "unit": "percent",
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 58
+      },
+      "id": 155,
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "expr": "100 * ((sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__interval])) or vector(0)) / clamp_min((sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=~\"raw|validated|enriched|filtered_out|deduplicated|final\"}[$__interval])) or vector(0)), 1))",
+          "legendFormat": "blocked %",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "DQ Impact on Deliverability Trend (Blocked Share %)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "description": "Quality score trend over selected time range. Kept separate from operational gating indicators.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 2,
+          "max": 1,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 2
+              }
+            ]
+          },
+          "unit": "percentunit",
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 58
+      },
+      "id": 153,
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "expr": "((sum((bioetl_dq_validation_score{pipeline=~\"$pipeline\"} * bioetl_dq_validation_record_count{pipeline=~\"$pipeline\"})) or vector(0)) / clamp_min((sum(bioetl_dq_validation_record_count{pipeline=~\"$pipeline\"}) or vector(0)), 1))",
+          "legendFormat": "DQ score",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Data Quality Score Trend (Volume-weighted)",
+      "type": "timeseries"
     }
   ],
   "refresh": "30s",
