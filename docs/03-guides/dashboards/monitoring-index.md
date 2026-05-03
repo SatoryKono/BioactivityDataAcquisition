@@ -72,7 +72,7 @@ For every navigation UX change, run and record this manual check:
 3. Validate **click-depth**: likely root-cause surface is reached in **<= 2 clicks** for common runtime/control-plane/dq incidents.
 4. Validate fallback path: less frequent actions are reachable via collapsed `Additional Navigation & Forensics` row without broken links or scope leakage.
 
-Record outcome in change notes as: `pass/fail`, measured time-to-first-action, measured click-depth, and incident pattern used.
+Record outcome in change notes as: `pass/fail`, measured time-to-first-action, measured click-depth, first-hop accuracy, and incident pattern used. Always include a direct link to `docs/reports/dashboard-ux-checks/YYYY-MM-DD.md` artifact for that PR.
 
 ## First 2 clicks scenario (overview-first)
 

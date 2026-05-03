@@ -1,5 +1,11 @@
 ______________________________________________________________________
 
+## UX report artifact requirement
+
+Для любого PR с изменениями `grafana/dashboards/*.json` change notes MUST содержать
+ссылку на UX artifact: `docs/reports/dashboard-ux-checks/YYYY-MM-DD.md`.
+
+
 Version: 1.0.1
 Status: active
 Class: published
