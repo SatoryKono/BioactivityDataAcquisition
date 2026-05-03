@@ -893,3 +893,45 @@ def test_cross_dashboard_links_enforce_required_handoff_or_explicit_fallback() -
                 f"{dashboard_path.name} top-level link to {target_uid} must pass available "
                 f"required vars {sorted(missing)}. URL: {url}"
             )
+
+
+def test_provider_dashboard_runtime_links_include_contextual_variant_next_to_reset() -> None:
+    """Provider Health must expose reset-to-All and contextual Runtime links together."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-provider-health-v2.json"))
+    links = dashboard.get("links", [])
+
+    reset_idx, reset_link = next(
+        (
+            (idx, link)
+            for idx, link in enumerate(links)
+            if link.get("title") == "2. Runtime"
+        ),
+        (-1, None),
+    )
+    assert reset_link is not None, "Provider Health must keep reset-to-All Runtime link"
+
+    contextual_idx, contextual_link = next(
+        (
+            (idx, link)
+            for idx, link in enumerate(links)
+            if link.get("title") == "2. Runtime (provider context)"
+        ),
+        (-1, None),
+    )
+    assert contextual_link is not None, (
+        "Provider Health must expose explicit provider-context Runtime variant link"
+    )
+    assert contextual_idx == reset_idx + 1, (
+        "Contextual Runtime variant must be placed immediately after reset-to-All link"
+    )
+
+    reset_url = str(reset_link.get("url", ""))
+    contextual_url = str(contextual_link.get("url", ""))
+
+    assert "var-pipeline=All" in reset_url and "var-run_type=All" in reset_url
+    assert "var-stage=All" in reset_url
+
+    assert "var-pipeline=${provider:queryparam}" in contextual_url
+    assert "var-run_type=${adapter:queryparam}" in contextual_url
+    assert "var-stage=All" in contextual_url
+
