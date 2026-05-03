@@ -2,6 +2,7 @@
 
 from pathlib import Path
 import re
+import yaml
 
 import pytest
 from tests.integration._grafana_test_support import (
@@ -17,90 +18,35 @@ pytestmark = pytest.mark.integration
 
 _DASHBOARD_UID_RE = re.compile(r"^/d/([^/?]+)")
 _LINK_VAR_RE = re.compile(r"(?:\?|&)var-([A-Za-z_]+)=")
-_ALLOWED_DASHBOARD_LINK_VARS = {
-    "bioetl-overview-v2": frozenset({"pipeline", "run_type"}),
-    "bioetl-dq-v2": frozenset({"pipeline", "run_type", "stage"}),
-    "bioetl-runtime": frozenset({"pipeline", "run_type", "stage"}),
-    "bioetl-provider-health-v2": frozenset({"provider", "adapter"}),
-    "bioetl-control-plane-v1": frozenset({"pipeline", "run_type"}),
-    "bioetl-workflow-overview": frozenset({"workflow", "status"}),
-    "bioetl-silver-reject-explorer": frozenset(
-        {"pipeline", "run_type", "reason_code", "field", "run_id", "payload_hash"}
-    ),
-}
+_NAV_LINK_CONTRACT_PATH = Path("docs/03-guides/dashboards/contracts/navigation-links.yaml")
 
 
+def _load_navigation_links_contract() -> dict[str, dict[str, frozenset[str]]]:
+    with _NAV_LINK_CONTRACT_PATH.open("r", encoding="utf-8") as stream:
+        raw_contract = yaml.safe_load(stream)
 
-_REQUIRED_LINK_VARS_BY_TARGET_UID = {
-    "bioetl-overview-v2": frozenset({"pipeline", "run_type"}),
-    "bioetl-control-plane-v1": frozenset({"pipeline", "run_type"}),
-    "bioetl-runtime": frozenset({"pipeline", "run_type"}),
-    "bioetl-dq-v2": frozenset({"pipeline", "run_type"}),
-    "bioetl-provider-health-v2": frozenset(),
-    "bioetl-silver-reject-explorer": frozenset({"pipeline", "run_type"}),
-    "bioetl-workflow-overview": frozenset(),
-}
+    def _as_frozenset_map(section_name: str) -> dict[str, frozenset[str]]:
+        raw_map = raw_contract.get(section_name, {})
+        assert isinstance(raw_map, dict), f"{section_name} must be a mapping"
+        result: dict[str, frozenset[str]] = {}
+        for uid, values in raw_map.items():
+            assert isinstance(uid, str), f"{section_name} keys must be strings"
+            assert isinstance(values, list), f"{section_name}.{uid} must be a list"
+            result[uid] = frozenset(str(v) for v in values)
+        return result
 
-_REQUIRED_TOP_LEVEL_LINKS_BY_UID = {
-    "bioetl-overview-v2": frozenset(
-        {
-            "2. Runtime",
-            "Control Plane v1",
-            "3. Provider Health",
-            "4. Data Quality",
-            "6. Workflow Overview",
-            "Explore Logs (Loki, tracing profile)",
-            "Explore Traces (Tempo, tracing profile)",
-        }
-    ),
-    "bioetl-runtime": frozenset(
-        {
-            "Back to Overview",
-            "Control Plane v1",
-            "3. Provider Health",
-            "4. Data Quality",
-            "Explore Logs (Loki, tracing profile)",
-            "Explore Traces (Tempo, tracing profile)",
-        }
-    ),
-    "bioetl-control-plane-v1": frozenset(
-        {
-            "Back to Overview",
-            "2. Runtime",
-            "4. Data Quality",
-            "Explore Logs (Loki, tracing profile)",
-            "Explore Traces (Tempo, tracing profile)",
-        }
-    ),
-    "bioetl-provider-health-v2": frozenset(
-        {
-            "Back to Overview",
-            "2. Runtime",
-            "Explore Logs (Loki, tracing profile)",
-            "Explore Traces (Tempo, tracing profile)",
-        }
-    ),
-    "bioetl-dq-v2": frozenset(
-        {
-            "Back to Overview",
-            "Control Plane v1",
-            "5. Silver Reject Explorer",
-            "Explore Logs (Loki, tracing profile)",
-            "Explore Traces (Tempo, tracing profile)",
-        }
-    ),
-    "bioetl-silver-reject-explorer": frozenset(
-        {
-            "Back to Overview",
-            "Back to Data Quality",
-            "Explore Logs (Loki, tracing profile)",
-            "Explore Traces (Tempo, tracing profile)",
-        }
-    ),
-    "bioetl-workflow-overview": frozenset(
-        {"Back to Overview", "2. Runtime", "Control Plane v1"}
-    ),
-}
+    return {
+        "allowed_dashboard_link_vars": _as_frozenset_map("allowed_dashboard_link_vars"),
+        "required_link_vars_by_target_uid": _as_frozenset_map("required_link_vars_by_target_uid"),
+        "required_top_level_links_by_uid": _as_frozenset_map("required_top_level_links_by_uid"),
+    }
+
+
+_NAV_LINK_CONTRACT = _load_navigation_links_contract()
+_ALLOWED_DASHBOARD_LINK_VARS = _NAV_LINK_CONTRACT["allowed_dashboard_link_vars"]
+_REQUIRED_LINK_VARS_BY_TARGET_UID = _NAV_LINK_CONTRACT["required_link_vars_by_target_uid"]
+_REQUIRED_TOP_LEVEL_LINKS_BY_UID = _NAV_LINK_CONTRACT["required_top_level_links_by_uid"]
+
 
 
 def _extract_dashboard_uid(url: str) -> str | None:
@@ -613,6 +559,9 @@ def test_data_quality_dashboard_exposes_silver_reject_explorer_handoff() -> None
     assert "var-pipeline=$pipeline" in url and "var-run_type=$run_type" in url, (
         "Data Quality handoff must pass only bounded explorer pipeline/run_type scope"
     )
+    assert "wider default time range for rare incidents" in str(
+        silver_link.get("tooltip", "")
+    ), "Data Quality handoff should explain 24h forensic default for rare incidents"
 
 
 def test_runtime_incident_panels_link_to_control_plane_dashboard() -> None:

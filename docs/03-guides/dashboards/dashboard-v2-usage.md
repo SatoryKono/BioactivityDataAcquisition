@@ -16,6 +16,8 @@ ______________________________________________________________________
 Дата сверки: **2026-04-13**
 Источник истины: `grafana/dashboards/*.json`
 
+Machine-readable navigation contract: `docs/03-guides/dashboards/contracts/navigation-links.yaml` (docs/tests должны соответствовать ему).
+
 ## Какие дашборды использовать
 
 | Dashboard                 | UID                             | Для чего                                                                                   |
@@ -121,15 +123,11 @@ ______________________________________________________________________
   он показывает только compact handoff conditions.
 - Для bounded cause summary используйте `Top Silver Reject Reasons` и
   `Top Silver Reject Fields` в `bioetl-dq-v2`.
-- Короткая triage sequence:
-  1. Начните с `1. BioETL Overview` или `2. Runtime`, чтобы подтвердить spike по
-     `Silver Rejects Count + Rate` / `Silver Filter Rejects` в текущем time range.
-  1. Перейдите в `4. Data Quality` и проверьте `Top Silver Reject Reasons` /
-     `Top Silver Reject Fields`, чтобы сузить проблему до bounded cause summary.
-  1. Откройте `5. Silver Reject Explorer` для record-level списка, выбора
-     `reason_code/field/run_id` и detail по конкретному `payload_hash`.
-  1. Используйте quarantine CLI для action-операций (`replay/resolve/purge`) и
-     финального подтверждения remediation.
+- Маршрут triage: **L1 summary -> L2 explorer**.
+  1. **L1 summary:** начните с `4. Data Quality` (first-screen KPI: score, blocked share, quarantined, freshness lag), чтобы подтвердить масштаб инцидента в выбранном time range.
+  1. **L1 cause narrowing:** раскройте collapsed rows `Reject / Pareto / Fields` и `Validation Diagnostics`, проверьте `Top Silver Reject Reasons` / `Top Silver Reject Fields` и связанные diagnostics.
+  1. **L2 explorer:** откройте `5. Silver Reject Explorer` по explicit panel data links для record-level списка, выбора `reason_code/field/run_id` и detail по `payload_hash`.
+  1. Используйте quarantine CLI для action-операций (`replay/resolve/purge`) и финального подтверждения remediation.
 - Эти панели отвечают на вопросы:
   - растёт ли объём `filtered_out`;
   - в каком `$pipeline` проблема сильнее;
@@ -149,14 +147,11 @@ ______________________________________________________________________
 
 ## Unified Top Navigation CTA (v2)
 
-All primary dashboards (`1. Overview`, `2. Runtime`, `3. Provider Health`, `4. Data Quality`, `6. Workflow Overview`) MUST expose the same top navigation block in this exact order:
+Primary dashboards (`1. Overview`, `2. Runtime`, `3. Provider Health`, `4. Data Quality`, `6. Workflow Overview`) MUST follow the canonical navigation contract in `navigation-contract.md`; top navigation is dashboard-specific and does **not** require a universal `Next Recommended Drilldown` link.
 
-1. `Back to Overview`
-2. `Next Recommended Drilldown`
-3. `Explore Logs (Loki, tracing profile)`
-4. `Explore Traces (Tempo, tracing profile)`
+For `bioetl-overview-v2`, mandatory top-level links are preserved per navigation contract. To reduce first-screen overload, less frequent actions are duplicated into one collapsed row `Additional Navigation & Forensics` via row-level `dataLinks`/links, so operators can use a compact first-pass path and still keep full one-click access.
 
-Variable handoff policy for these links is strict and bounded:
+Variable handoff policy for dashboard links remains strict and bounded:
 
 - `includeVars=false` for every link (no implicit variable leakage).
 - Pass only target-scoped variables directly in URL (`var-*`) when required by the destination dashboard.
@@ -177,16 +172,23 @@ Variable handoff policy for these links is strict and bounded:
 
 - `bioetl-overview-v2`: L0 Overview отвечает на один primary question:
   what is currently broken or degraded in BioETL, and where should the
-  operator drill down first? Dashboard links `2. Runtime`,
+  operator drill down first? Top-level dashboard links `2. Runtime`,
   `Control Plane v1`, `3. Provider Health`, `4. Data Quality`,
-  `6. Workflow Overview`,
-  `Explore Logs (Loki, tracing profile)` и `Explore Traces (Tempo, tracing profile)`
-  открывают соседние dashboards и Grafana Explore в текущем time range.
+  `6. Workflow Overview`, `Explore Logs` и `Explore Traces`
+  остаются на верхнем уровне по контракту; одновременно less-frequent actions
+  дублируются в collapsed row `Additional Navigation & Forensics`.
   Cross-dashboard URLs передают только target-scoped variables; provider/workflow
   dashboards не наследуют `$pipeline/$run_type` leakage. `System Status` and
   `Next Action` are the first operator answer; subsystem status cards show
   `Reason:` and `Next:` in legends. Panel `id=1`
   (`Processing Volume by Stage`) дублирует Explore handoff через data links.
+
+## First 2 clicks scenario (operator)
+
+1. **Click #1:** открыть `bioetl-overview-v2`, прочитать `System Status` + `Next Action`.
+2. **Click #2:** открыть рекомендуемый dashboard из top-level minimum (`2. Runtime`, `Control Plane v1`, `4. Data Quality`) или при forensic/pattern-specific нужде раскрыть `Additional Navigation & Forensics` и перейти в `Provider Health`/`Workflow`/`Explore`.
+
+Цель сценария: root-cause направление должно быть определено максимум за 2 клика без обязательной прокрутки по нечастым CTA.
 - `bioetl-runtime`: top-level links `Back to Overview`, `Control Plane v1`,
   `3. Provider Health`, `4. Data Quality`, `Explore Logs (Loki, tracing profile)`,
   `Explore Traces (Tempo, tracing profile)` и `Runtime Runbook` дают явный
@@ -207,7 +209,22 @@ Variable handoff policy for these links is strict and bounded:
   `store/operation/status`.
 - `bioetl-provider-health-v2`: dashboard links `Back to Overview`, `2. Runtime`, `Explore Logs (Loki, tracing profile)` и `Explore Traces (Tempo, tracing profile)` дают быстрый переход из provider health surface в runtime/overview и correlation flow без ложного pipeline scope в target dashboards. Panel `id=114` (`Current Provider Health Status`) показывает явный enum mapping `0=UNHEALTHY`, `1=DEGRADED`, `2=HEALTHY`, а panel `id=1` (`Health Check Latency by Provider (p95)`) дублирует Explore handoff через data links.
 - `bioetl-dq-v2`: dashboard link `Back to Overview` плюс `5. Silver Reject Explorer`, `Explore Logs (Loki, tracing profile)` и `Explore Traces (Tempo, tracing profile)` дают тот же переход для DQ incidents и freshness investigation. Handoff в Explorer передаёт только bounded `$pipeline/$run_type` scope, а не generic `includeVars` leakage. Panel `id=1` (`Data Flow in Range: Bronze -> Silver -> Gold`) дублирует Explore handoff через data links.
-- `bioetl-silver-reject-explorer`: dashboard links `Back to Overview`, `Back to Data Quality`, `Open Logs`, `Open Traces`; back-links возвращают только `$pipeline/$run_type`, не leaking `payload_hash` или other forensic filters. Main table поддерживает data links для self-drilldown по `payload_hash` и CLI handoff.
+- `bioetl-silver-reject-explorer`: dashboard links `Back to Overview`, `Back to Data Quality`, `Open Logs`, `Open Traces`; back-links возвращают только `$pipeline/$run_type`, не leaking `payload_hash` или other forensic filters. Main table поддерживает data links для self-drilldown по `payload_hash` и CLI handoff. Верхняя explanatory panel явно показывает banner `default 24h forensic window`, чтобы оператор не интерпретировал explorer как обычное `now-12h` окно.
+
+### Expected operator behavior for DQ -> Explorer handoff
+
+- Из `4. Data Quality` переход в `5. Silver Reject Explorer` передаёт только
+  `$pipeline/$run_type`, но intentionally открывает более широкое окно
+  `now-24h` (forensic default) для редких инцидентов и sparse reject events.
+- Оператор SHOULD сначала подтвердить, что текущий spike/аномалия видны в
+  summary-панелях DQ (`Top Silver Reject Reasons/Fields`) и только затем делать
+  record-level drilldown в Explorer.
+- После перехода оператор SHOULD проверить explanatory banner
+  `default 24h forensic window`; при шуме или слишком большом объёме данных
+  окно можно сузить вручную до operational range.
+- Для очень редких инцидентов оператор MAY оставить 24h окно и уточнить
+  контекст через `reason_code`, `field`, `run_id` и `payload_hash` перед
+  action-операциями в CLI.
 - `bioetl-workflow-overview`: dashboard links `Back to Overview`, `2. Runtime`, `Control Plane v1`; cross-dashboard handoffs не leaking `$workflow/$status` into non-workflow targets. Prometheus panels use only bounded workflow labels (`workflow`, `status`, `step_kind`) and never require `run_id`/`step_id` labels.
 - Loki drilldown использует безопасный low-cardinality entrypoint `{job="bioetl"}` без dashboard-variable interpolation внутри encoded Explore payload. Это сознательный baseline: Grafana надёжно не подставляет `$pipeline/$provider` в `left=...`, поэтому дополнительное сужение оператор делает уже в самом Explore. Tempo drilldown открывает trace search в том же временном окне; детальная correlation идёт через `trace_id` / `span_id`, а не через Prometheus labels.
 - Tempo drilldown теперь тоже открывается contextual: dashboards с `$pipeline/$run_type` предварительно фильтруют TraceQL по `span."bioetl.pipeline"` и `span."bioetl.run_type"`, а provider dashboard — по `span."bioetl.provider"`. Это не заменяет correlation по `trace_id` / `span_id`, но убирает пустой `{}` и делает handoff полезнее уже на первом клике.
@@ -229,6 +246,14 @@ Variable handoff policy for these links is strict and bounded:
   подтверждает bounded runtime metric family для этих решений.
 
 ## Важные пороги (из JSON)
+
+- `overview.id=214 (System Status)`: `BROKEN` при runtime blocker `>0`, DQ hard fail `>0` или control-plane blocker `>0`; `DEGRADED` при warning-only сигналах; `UNKNOWN` при no recent samples. Next action: follow `overview.id=215`.
+- `overview.id=215 (Next Action)`: priority order `Runtime > Control Plane > DQ > Provider > Workflow > Monitor`. Next action: open first non-OK surface with same `$pipeline/$run_type`.
+- `dq.id=2 (DQ Score Snapshot)`: no-data остается `UNKNOWN`, не `0`; hard-fail signals блокируют promotion, warning-only означает drift. Next action: hard-fail -> reject/quarantine diagnostics; warning-only -> trend + top reasons.
+- `dq.id=154 (Blocked Share Trend)`: sustained growth = filter pressure, spike = incident. Next action: `Top Silver Reject Reasons` + `Silver Reject Explorer`/quarantine CLI.
+- `runtime.id=16 (Failed Runs / 15m)`: non-zero = runtime blocker. Next action: runtime blockers table + culprit stage panels, затем logs/traces при необходимости.
+- `runtime.id=220 (Runtime Error Rate / 30m)`: elevated ratio with meaningful Bronze denominator = degradation risk. Next action: `Runtime Errors by Stage/Error Code` + failed runs/backlog/lag panels.
+- `control-plane.id=130 (Replay / Resume Blockers)`: green `0`, red `>=1`. Next action: stop replay/resume и investigate first failing signal (manifest/ledger/checkpoint/replay/lineage).
 
 - `overview.System Status`: `BROKEN` при failed runs `>0`, stage backlog `>0`,
   worst lag `>=300s`, DQ hard fail `>0` или control-plane blocker `>0`;

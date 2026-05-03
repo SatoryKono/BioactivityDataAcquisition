@@ -819,6 +819,48 @@ def test_overview_backlog_and_lag_panels_expose_stage() -> None:
         assert "[$__range]" in expr
 
 
+def test_critical_panels_expose_open_actionable_datalinks() -> None:
+    """Critical stat/gauge/table panels must expose at least one Open <target> data link."""
+    critical_panel_titles = {
+        "bioetl-overview-v2.json": {
+            "System Status",
+            "Runtime Status",
+            "Data Quality Status",
+            "Control Plane Status",
+            "Provider Status",
+            "Workflow Status",
+            "Worst Backlog Stage",
+            "Worst Lag Stage",
+        }
+    }
+
+    for dashboard_name, titles in critical_panel_titles.items():
+        dashboard = load_dashboard(Path(f"grafana/dashboards/{dashboard_name}"))
+        panels = {
+            panel.get("title"): panel
+            for panel in get_dashboard_panels(dashboard)
+            if panel.get("title")
+        }
+
+        for panel_title in titles:
+            panel = panels.get(panel_title)
+            assert panel is not None, (
+                f"Missing critical panel: {panel_title} in {dashboard_name}"
+            )
+            assert panel.get("type") in {"stat", "gauge", "table"}
+
+            data_links = panel.get("options", {}).get("dataLinks", [])
+            assert data_links, f"{panel_title} must define at least one data link"
+            assert any(
+                isinstance(link, dict)
+                and isinstance(link.get("title"), str)
+                and link["title"].startswith("Open ")
+                and isinstance(link.get("url"), str)
+                and link["url"].strip()
+                for link in data_links
+            ), f"{panel_title} must expose an actionable Open <target> link"
+
+
 def test_overview_handoff_cards_show_status_and_reason() -> None:
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
     panels = {
@@ -2220,6 +2262,31 @@ def test_replay_panels_are_split_by_semantics(dashboard_file: str) -> None:
     )
     assert "bioetl_replay_lag_seconds" in lag_expr
     assert lag.get("fieldConfig", {}).get("defaults", {}).get("unit") == "s"
+
+
+def test_dashboard_default_time_from_policy_by_uid() -> None:
+    """Shipped dashboards must keep canonical default time.from policy by UID."""
+    expected_time_from_by_uid = {
+        "bioetl-overview-v2": "now-12h",
+        "bioetl-runtime": "now-12h",
+        "bioetl-dq-v2": "now-12h",
+        "bioetl-provider-health-v2": "now-12h",
+        "bioetl-workflow-overview": "now-12h",
+        "bioetl-control-plane-v1": "now-12h",
+        "bioetl-silver-reject-explorer": "now-24h",
+    }
+
+    for uid, expected_time_from in expected_time_from_by_uid.items():
+        dashboard = load_dashboard(Path("grafana/dashboards") / f"{uid}.json")
+        actual_uid = dashboard.get("uid")
+        assert actual_uid == uid, f"Dashboard UID mismatch for {uid}.json"
+
+        time_cfg = dashboard.get("time", {})
+        assert isinstance(time_cfg, dict), f"{uid} time config must be an object"
+        assert time_cfg.get("from") == expected_time_from, (
+            f"{uid} must keep time.from={expected_time_from!r}, "
+            f"got {time_cfg.get('from')!r}"
+        )
 
 
 def test_provider_health_selected_provider_detail_row_is_collapsed() -> None:

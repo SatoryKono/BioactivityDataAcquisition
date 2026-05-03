@@ -44,15 +44,15 @@
     },
     {
       "asDropdown": false,
-      "icon": "dashboard",
+      "icon": "external link",
       "includeVars": false,
       "keepTime": true,
       "tags": [],
       "targetBlank": false,
       "title": "3. Provider Health",
-      "tooltip": "Cross-scope handoff: opens Provider Health with All provider/adapter scope (core filters do not transfer).",
-      "type": "link",
-      "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${__url_time_range}"
+      "tooltip": "Cross-scope handoff (opens with All provider scope): var-provider=All and var-adapter=All; pipeline/run_type do not transfer.",
+      "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=All&var-adapter=All&${__url_time_range}",
+      "type": "link"
     },
     {
       "asDropdown": false,
@@ -74,33 +74,24 @@
       "tags": [],
       "targetBlank": false,
       "title": "6. Workflow Overview",
-      "tooltip": "Cross-scope handoff: opens Workflow Overview with All workflow/status scope (core filters do not transfer).",
-      "type": "link",
-      "url": "/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}"
+      "url": "/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}",
+      "type": "link"
     },
     {
-      "asDropdown": false,
-      "icon": "logs",
-      "includeVars": false,
-      "keepTime": true,
-      "tags": [],
-      "targetBlank": false,
       "title": "Explore Logs (Loki, tracing profile)",
-      "tooltip": "Open Loki Explore with tracing profile and selected time range",
+      "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D",
       "type": "link",
-      "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D"
+      "asDropdown": false,
+      "keepTime": true,
+      "targetBlank": false
     },
     {
-      "asDropdown": false,
-      "icon": "search",
-      "includeVars": false,
-      "keepTime": true,
-      "tags": [],
-      "targetBlank": false,
       "title": "Explore Traces (Tempo, tracing profile)",
-      "tooltip": "Open Tempo Explore with tracing profile and selected time range",
+      "url": "/a/grafana-exploretraces-app/?from=${__from}&to=${__to}&queryType=traceqlSearch&query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline:regex}%22%20%26%26%20span.%22bioetl.run_type%22%20%3D~%20%22${run_type:regex}%22%20%7D",
       "type": "link",
-      "url": "/a/grafana-exploretraces-app/?from=${__from}&to=${__to}&queryType=traceqlSearch&query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline:regex}%22%20%26%26%20span.%22bioetl.run_type%22%20%3D~%20%22${run_type:regex}%22%20%7D"
+      "asDropdown": false,
+      "keepTime": true,
+      "targetBlank": false
     }
   ],
   "panels": [
@@ -218,7 +209,14 @@
           "fields": "",
           "values": false
         },
-        "textMode": "value_and_name"
+        "textMode": "value_and_name",
+        "dataLinks": [
+          {
+            "title": "Open bioetl-runtime",
+            "url": "/d/bioetl-runtime/bioetl-runtime",
+            "targetBlank": false
+          }
+        ]
       },
       "targets": [
         {
@@ -229,7 +227,7 @@
       ],
       "title": "System Status",
       "type": "stat",
-      "description": "L0 answer. BROKEN if any recording-rule runtime blocker (failed runs, stage backlog, stage lag, gold write missing), DQ hard fail, or control-plane blocker is active. DEGRADED for provider/DQ/freshness/workflow warnings. UNKNOWN means no recent activity. Uses same recording rules as Runtime dashboard for guaranteed L0/L2 consistency."
+      "description": "Thresholds: BROKEN when runtime blocker>0, DQ hard fail>0, or control-plane blocker>0; DEGRADED on warning-only signals; UNKNOWN when no recent samples. Next action: open dashboard indicated by Next Action (Runtime first, then Control Plane, DQ, Provider, Workflow)."
     },
     {
       "datasource": "Prometheus",
@@ -364,7 +362,7 @@
       ],
       "title": "Next Action",
       "type": "stat",
-      "description": "Explicit operator routing using recording rules. Priority: Runtime blockers > Control Plane > DQ > Provider > Workflow > Monitor. Uses same recording rules as Runtime dashboard for L0/L2 consistency."
+      "description": "Threshold semantics: Runtime blockers > Control Plane > DQ > Provider > Workflow > Monitor. Next action: follow this priority order; investigate first non-OK domain and keep the same pipeline/run_type scope."
     },
     {
       "datasource": "Prometheus",
@@ -496,7 +494,14 @@
           ],
           "show": false
         },
-        "showHeader": true
+        "showHeader": true,
+        "dataLinks": [
+          {
+            "title": "Open bioetl-runtime",
+            "url": "/d/bioetl-runtime/bioetl-runtime",
+            "targetBlank": false
+          }
+        ]
       },
       "pluginVersion": "10.4.0",
       "targets": [
@@ -562,7 +567,14 @@
           ],
           "show": false
         },
-        "showHeader": true
+        "showHeader": true,
+        "dataLinks": [
+          {
+            "title": "Open bioetl-runtime",
+            "url": "/d/bioetl-runtime/bioetl-runtime",
+            "targetBlank": false
+          }
+        ]
       },
       "pluginVersion": "10.4.0",
       "targets": [
@@ -1029,7 +1041,14 @@
               "fields": "",
               "values": false
             },
-            "textMode": "value_and_name"
+            "textMode": "value_and_name",
+            "dataLinks": [
+              {
+                "title": "Open bioetl-runtime",
+                "url": "/d/bioetl-runtime/bioetl-runtime",
+                "targetBlank": false
+              }
+            ]
           },
           "targets": [
             {
@@ -1133,7 +1152,14 @@
               "fields": "",
               "values": false
             },
-            "textMode": "value_and_name"
+            "textMode": "value_and_name",
+            "dataLinks": [
+              {
+                "title": "Open bioetl-dq-v2",
+                "url": "/d/bioetl-dq-v2/bioetl-dq-v2",
+                "targetBlank": false
+              }
+            ]
           },
           "targets": [
             {
@@ -1238,7 +1264,14 @@
               "fields": "",
               "values": false
             },
-            "textMode": "value_and_name"
+            "textMode": "value_and_name",
+            "dataLinks": [
+              {
+                "title": "Open bioetl-control-plane-v1",
+                "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1",
+                "targetBlank": false
+              }
+            ]
           },
           "targets": [
             {
@@ -1342,7 +1375,14 @@
               "fields": "",
               "values": false
             },
-            "textMode": "value_and_name"
+            "textMode": "value_and_name",
+            "dataLinks": [
+              {
+                "title": "Open bioetl-provider-health-v2",
+                "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2",
+                "targetBlank": false
+              }
+            ]
           },
           "targets": [
             {
@@ -1446,7 +1486,14 @@
               "fields": "",
               "values": false
             },
-            "textMode": "value_and_name"
+            "textMode": "value_and_name",
+            "dataLinks": [
+              {
+                "title": "Open bioetl-workflow-overview",
+                "url": "/d/bioetl-workflow-overview/bioetl-workflow-overview",
+                "targetBlank": false
+              }
+            ]
           },
           "targets": [
             {
@@ -2378,6 +2425,69 @@
       ],
       "title": "Extended distributions",
       "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 14
+      },
+      "id": 9001,
+      "panels": [],
+      "title": "Additional Navigation & Forensics",
+      "type": "row",
+      "links": [
+        {
+          "asDropdown": false,
+          "icon": "dashboard",
+          "includeVars": false,
+          "keepTime": true,
+          "tags": [],
+          "targetBlank": false,
+          "title": "3. Provider Health",
+          "tooltip": "Cross-scope handoff: opens Provider Health with All provider/adapter scope (core filters do not transfer).",
+          "type": "link",
+          "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${__url_time_range}"
+        },
+        {
+          "asDropdown": false,
+          "icon": "dashboard",
+          "includeVars": false,
+          "keepTime": true,
+          "tags": [],
+          "targetBlank": false,
+          "title": "6. Workflow Overview",
+          "tooltip": "Cross-scope handoff: opens Workflow Overview with All workflow/status scope (core filters do not transfer).",
+          "type": "link",
+          "url": "/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}"
+        },
+        {
+          "asDropdown": false,
+          "icon": "logs",
+          "includeVars": false,
+          "keepTime": true,
+          "tags": [],
+          "targetBlank": false,
+          "title": "Explore Logs (Loki, tracing profile)",
+          "tooltip": "Open Loki Explore with tracing profile and selected time range",
+          "type": "link",
+          "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D"
+        },
+        {
+          "asDropdown": false,
+          "icon": "search",
+          "includeVars": false,
+          "keepTime": true,
+          "tags": [],
+          "targetBlank": false,
+          "title": "Explore Traces (Tempo, tracing profile)",
+          "tooltip": "Open Tempo Explore with tracing profile and selected time range",
+          "type": "link",
+          "url": "/a/grafana-exploretraces-app/?from=${__from}&to=${__to}&queryType=traceqlSearch&query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline:regex}%22%20%26%26%20span.%22bioetl.run_type%22%20%3D~%20%22${run_type:regex}%22%20%7D"
+        }
+      ]
     }
   ],
   "refresh": "30s",

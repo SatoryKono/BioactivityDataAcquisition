@@ -2,6 +2,8 @@
 
 Канонический контракт навигации для shipped dashboard UIDs в `grafana/dashboards/*.json`.
 
+Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yaml`.
+
 ## Общие правила
 
 - Каждый dashboard (кроме overview-hub) **MUST** иметь top-level ссылку `Back to Overview` на UID `bioetl-overview-v2`.
@@ -9,6 +11,7 @@
 - `includeVars=true` и другие универсальные handoff-паттерны запрещены; используем только явные `var-*` и time-range по единому стандарту:
   - dashboard links (`/d/<uid>/<slug>?...`): `${__url_time_range}`
   - Explore links (`/explore` и `/a/grafana-*-explore-app/...`): `from=${__from}&to=${__to}`
+- Universal top-level link `Next Recommended Drilldown` is **optional**; when present, it MUST resolve to an existing shipped dashboard/Explore target and obey the same explicit `var-*` + time-range handoff rules.
 - Explore handoff для Loki/Tempo ведёт только через drilldown-приложения:
   - Logs: `/a/grafana-lokiexplore-app/explore?...`
   - Traces: `/a/grafana-exploretraces-app/?...`

@@ -15,6 +15,24 @@
 `UNKNOWN` обязателен как явное отображение no-data/null через mapping:
 - `null` → текст `UNKNOWN` + цвет `gray`.
 
+### 1.1 Canonical mapping: L0 vs diagnostic dashboards
+
+| Dashboard surface | Numeric range | Canonical status term | Visualization color |
+| --- | --- | --- | --- |
+| **L0 operator dashboards** (`1. Overview`, `2. Runtime`, `3. Provider Health`, `4. Data Quality`) | `0` | `OK` | `green` |
+| **L0 operator dashboards** (`1. Overview`, `2. Runtime`, `3. Provider Health`, `4. Data Quality`) | `1` | `WARN` | `orange` |
+| **L0 operator dashboards** (`1. Overview`, `2. Runtime`, `3. Provider Health`, `4. Data Quality`) | `>=2` | `CRIT` | `red` |
+| **L0 operator dashboards** (`1. Overview`, `2. Runtime`, `3. Provider Health`, `4. Data Quality`) | `null` | `UNKNOWN` | `gray` |
+| **Diagnostic dashboards only** (drilldown / deep-dive) | `<1` | `OK` *(alias `HEALTHY` optional)* | `green` |
+| **Diagnostic dashboards only** (drilldown / deep-dive) | `>=1 and <2` | `WARN` *(alias `DEGRADED` optional)* | `orange` |
+| **Diagnostic dashboards only** (drilldown / deep-dive) | `>=2` | `CRIT` *(alias `BROKEN` optional)* | `red` |
+| **Diagnostic dashboards only** (drilldown / deep-dive) | `null` / no data | `UNKNOWN` | `gray` |
+
+Норматив:
+- В **L0 operator dashboards** MUST использоваться только термины `OK/WARN/CRIT/UNKNOWN`.
+- Термины `DEGRADED/BROKEN/HEALTHY` допускаются только в диагностических deep-dive поверхностях и MUST быть явно привязаны к этой таблице.
+- Если в диагностическом UI используются alias-термины, в description MUST присутствовать строка вида `Alias mapping: DEGRADED=WARN, BROKEN=CRIT`.
+
 ## 2) Единые threshold ranges (обязательно)
 
 ### 2.1 Stat/Gauge
@@ -122,3 +140,28 @@ uv run python -m scripts.engineering.qa check-dashboard-visual-semantics
   "timezone": "browser"
 }
 ```
+
+
+## 9) Actionable links for critical panels (обязательно)
+
+Для критичных (`P1`/`P2`) operator panels типов `stat`/`gauge`/`table` MUST быть минимум один actionable `options.dataLinks` entry.
+
+Минимальный контракт:
+- `options.dataLinks` содержит хотя бы один объект;
+- `title` начинается с шаблона `Open <target>`;
+- `url` ведёт в целевой dashboard/runbook для drilldown.
+
+Пример:
+
+```json
+"options": {
+  "dataLinks": [
+    {
+      "title": "Open bioetl-runtime",
+      "url": "/d/bioetl-runtime/bioetl-runtime",
+      "targetBlank": false
+    }
+  ]
+}
+```
+

@@ -72,6 +72,27 @@ Cross-scope links MUST явно предупреждать оператора, �
 
 UX цель: убрать ложное ожидание, что source filters автоматически сохранятся при переходе между разными scope-контрактами.
 
+### Пример before/after (contract title preserved)
+
+```json
+// before
+{
+  "title": "3. Provider Health",
+  "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${__url_time_range}"
+}
+```
+
+```json
+// after
+{
+  "title": "3. Provider Health",
+  "tooltip": "Cross-scope handoff (opens with All provider scope): var-provider=All and var-adapter=All; pipeline/run_type do not transfer.",
+  "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=All&var-adapter=All&${__url_time_range}"
+}
+```
+
+Правило: каноническое `title` из navigation contract не меняем; пояснение о reset scope добавляем в `tooltip`.
+
 ## Navigation time-range policy
 
 - Для всех `links[].url` с dashboard route (`/d/...`) используем единый time handoff: `${__url_time_range}`.
@@ -84,7 +105,7 @@ UX цель: убрать ложное ожидание, что source filters �
   - `overview`: `time.from=now-12h`, `refresh=30s`
   - `runtime`: `time.from=now-12h`, `refresh=30s`
   - `dq`: `time.from=now-12h`, `refresh=30s`
-  - `control-plane`: `time.from=now-12h`, `refresh=30s`
+  - `control-plane` (`uid=bioetl-control-plane-v1`): `time.from=now-12h`, `refresh=30s`
 - **Forensic L2 exception (must include explicit justification in docs/PR):**
   - `explorer` (`bioetl-silver-reject-explorer`): `time.from=now-24h`, `refresh=1m`
   - Justification: forensic/reject investigation требует больше стартового горизонта для редких инцидентов и сниженной частоты auto-refresh, чтобы уменьшить шум и нагрузку при row-level анализе.
