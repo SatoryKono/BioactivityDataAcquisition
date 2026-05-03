@@ -2327,7 +2327,7 @@
       "1d"
     ]
   },
-  "timezone": "",
+  "timezone": "browser",
   "title": "2. Runtime",
   "uid": "bioetl-runtime",
   "version": 2

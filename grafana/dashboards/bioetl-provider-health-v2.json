@@ -1378,7 +1378,7 @@
       "1d"
     ]
   },
-  "timezone": "",
+  "timezone": "browser",
   "title": "3. Provider Health",
   "uid": "bioetl-provider-health-v2",
   "version": 6

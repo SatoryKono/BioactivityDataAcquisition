@@ -1939,7 +1939,7 @@
       "1d"
     ]
   },
-  "timezone": "",
+  "timezone": "browser",
   "title": "4. Data Quality",
   "uid": "bioetl-dq-v2",
   "version": 4

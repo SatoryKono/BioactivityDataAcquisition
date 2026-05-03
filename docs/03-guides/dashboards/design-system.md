@@ -109,3 +109,16 @@ uv run python -m scripts.engineering.qa check-dashboard-visual-semantics
 - Explore-ссылки MUST использовать полные названия: `Explore Logs (Loki, tracing profile)` и `Explore Traces (Tempo, tracing profile)`.
 - Формулировки вида `Explore Logs`, `Explore Traces`, `Next Recommended Drilldown` считаются legacy-лексикой и не допускаются в shipped dashboards.
 
+## 8) JSON invariant: timezone (обязательно)
+
+Для всех shipped dashboards в `grafana/dashboards/*.json` применяется единый JSON-invariant:
+
+- корневое поле `timezone` MUST быть `"browser"`.
+
+Пример:
+
+```json
+{
+  "timezone": "browser"
+}
+```
