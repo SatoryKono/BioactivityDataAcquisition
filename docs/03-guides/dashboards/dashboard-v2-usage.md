@@ -164,6 +164,15 @@ Variable handoff policy for these links is strict and bounded:
 - For provider flow pass only `$provider/$adapter` (or explicit `All` defaults when opening non-provider dashboards).
 - Workflow-specific variables (`$workflow`, `$status`) and forensic IDs (`$run_id`, `$payload_hash`) MUST NOT be propagated into non-target dashboards.
 
+## Default dashboard windows (L0/L1 baseline + L2 forensic exception)
+
+- Единый baseline для operator-facing L0/L1 dashboards:
+  - `overview`, `runtime`, `dq`, `control-plane`, `workflow-overview` -> `time.from=now-12h`, `refresh=30s`.
+- Forensic L2 exception:
+  - `silver-reject-explorer` -> `time.from=now-24h`, `refresh=1m`.
+  - Justification: forensic-поиск по reject payload обычно начинается с более широкого окна и не требует 30s polling; более медленный refresh снижает ненужные перезапросы при row-level drilldown.
+- Любое отклонение от baseline MUST сопровождаться явным обоснованием в документации и в PR (почему это не L0/L1 operator window).
+
 ## Drilldown
 
 - `bioetl-overview-v2`: L0 Overview отвечает на один primary question:
