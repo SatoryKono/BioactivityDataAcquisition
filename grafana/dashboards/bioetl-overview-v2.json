@@ -50,9 +50,10 @@
       "tags": [],
       "targetBlank": false,
       "title": "3. Provider Health",
-      "tooltip": "Cross-scope handoff: opens Provider Health with All provider/adapter scope (core filters do not transfer).",
+      "tooltip": "Cross-scope reset: opens Provider Health with var-provider=All and var-adapter=All; core vars pipeline/run_type do not transfer.",
       "type": "link",
-      "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${__url_time_range}"
+      "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${__url_time_range}",
+      "description": "Cross-scope reset: opens Provider Health with var-provider=All and var-adapter=All; core vars pipeline/run_type do not transfer."
     },
     {
       "asDropdown": false,
@@ -74,9 +75,10 @@
       "tags": [],
       "targetBlank": false,
       "title": "6. Workflow Overview",
-      "tooltip": "Cross-scope handoff: opens Workflow Overview with All workflow/status scope (core filters do not transfer).",
+      "tooltip": "Cross-scope reset: opens Workflow Overview with var-workflow=All and var-status=All; core vars pipeline/run_type do not transfer.",
       "type": "link",
-      "url": "/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}"
+      "url": "/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}",
+      "description": "Cross-scope reset: opens Workflow Overview with var-workflow=All and var-status=All; core vars pipeline/run_type do not transfer."
     },
     {
       "asDropdown": false,

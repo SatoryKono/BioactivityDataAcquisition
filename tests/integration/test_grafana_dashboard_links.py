@@ -41,6 +41,15 @@ _REQUIRED_LINK_VARS_BY_TARGET_UID = {
     "bioetl-workflow-overview": frozenset(),
 }
 
+
+
+_CROSS_SCOPE_RESET_LINK_TITLES_BY_UID = {
+    "bioetl-overview-v2": frozenset({"3. Provider Health", "6. Workflow Overview"}),
+    "bioetl-runtime": frozenset({"3. Provider Health"}),
+    "bioetl-provider-health-v2": frozenset({"Back to Overview", "2. Runtime"}),
+    "bioetl-workflow-overview": frozenset({"Back to Overview", "2. Runtime"}),
+}
+
 _REQUIRED_TOP_LEVEL_LINKS_BY_UID = {
     "bioetl-overview-v2": frozenset(
         {
@@ -226,6 +235,37 @@ def test_cross_dashboard_links_pass_only_target_scoped_variables() -> None:
                 )
 
 
+
+
+
+def test_cross_scope_links_expose_reset_scope_hint() -> None:
+    """Cross-scope links must disclose reset-to-All communication via tooltip/description."""
+    for dashboard_path in get_dashboard_files():
+        dashboard = load_dashboard(dashboard_path)
+        uid = dashboard.get("uid")
+        if not isinstance(uid, str):
+            continue
+
+        required_titles = _CROSS_SCOPE_RESET_LINK_TITLES_BY_UID.get(uid)
+        if not required_titles:
+            continue
+
+        top_links = {
+            link.get("title"): link
+            for link in dashboard.get("links", [])
+            if isinstance(link.get("title"), str)
+        }
+        for title in required_titles:
+            link = top_links.get(title)
+            assert link is not None, f"{dashboard_path.name} is missing cross-scope link {title}"
+            hint = str(link.get("tooltip") or link.get("description") or "")
+            hint_lc = hint.lower()
+            assert "all" in hint_lc, (
+                f"{dashboard_path.name} link '{title}' must disclose reset-to-All scope"
+            )
+            assert "do not transfer" in hint_lc or "не перено" in hint_lc, (
+                f"{dashboard_path.name} link '{title}' must disclose source-scope reset semantics"
+            )
 
 
 def test_dashboard_top_level_navigation_contract_by_uid() -> None:

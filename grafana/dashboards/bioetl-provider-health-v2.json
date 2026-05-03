@@ -26,9 +26,10 @@
       "tags": [],
       "targetBlank": false,
       "title": "Back to Overview",
-      "tooltip": "Cross-scope handoff: opens Overview with var-pipeline=All and var-run_type=All; provider/adapter do not transfer.",
+      "tooltip": "Cross-scope reset: opens Overview with var-pipeline=All and var-run_type=All; provider vars provider/adapter do not transfer.",
       "type": "dashboards",
-      "url": "/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=All&var-run_type=All&${__url_time_range}"
+      "url": "/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=All&var-run_type=All&${__url_time_range}",
+      "description": "Cross-scope reset: opens Overview with var-pipeline=All and var-run_type=All; provider vars provider/adapter do not transfer."
     },
     {
       "asDropdown": false,
@@ -38,9 +39,10 @@
       "tags": [],
       "targetBlank": false,
       "title": "2. Runtime",
-      "tooltip": "Cross-scope handoff: opens Runtime with var-pipeline=All, var-run_type=All, var-stage=All; provider/adapter do not transfer.",
+      "tooltip": "Cross-scope reset: opens Runtime with var-pipeline=All, var-run_type=All, var-stage=All; provider vars provider/adapter do not transfer.",
       "type": "link",
-      "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=All&var-run_type=All&var-stage=All&${__url_time_range}"
+      "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=All&var-run_type=All&var-stage=All&${__url_time_range}",
+      "description": "Cross-scope reset: opens Runtime with var-pipeline=All, var-run_type=All, var-stage=All; provider vars provider/adapter do not transfer."
     },
     {
       "asDropdown": false,

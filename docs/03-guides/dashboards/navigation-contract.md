@@ -6,6 +6,7 @@
 
 - Каждый dashboard (кроме overview-hub) **MUST** иметь top-level ссылку `Back to Overview` на UID `bioetl-overview-v2`.
 - Cross-dashboard handoff передаёт только target-scoped `var-*` параметры и **MUST** включать `${__url_time_range}` во всех dashboard URL (`/d/...`).
+- Каждый cross-scope link (Core↔Provider, Workflow→Core) **MUST** иметь reset-коммуникацию в `links[]` через `tooltip` или `description`: явно указать `var-*=All` reset и какие source-scope переменные не переносятся.
 - `includeVars=true` и другие универсальные handoff-паттерны запрещены; используем только явные `var-*` и time-range по единому стандарту:
   - dashboard links (`/d/<uid>/<slug>?...`): `${__url_time_range}`
   - Explore links (`/explore` и `/a/grafana-*-explore-app/...`): `from=${__from}&to=${__to}`
