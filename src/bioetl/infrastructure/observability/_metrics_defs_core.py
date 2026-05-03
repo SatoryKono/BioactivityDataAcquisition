@@ -49,6 +49,7 @@ __all__ = sorted(
         "RECORD_FLOW_INVARIANTS_TOTAL",
         "RECORDS_PROCESSED_TOTAL",
         "SILVER_FILTER_REJECTIONS_TOTAL",
+        "PIPELINE_STAGE_EXPECTED",
         "STAGE_BACKLOG_RECORDS",
         "STAGE_LAG_SECONDS",
         "STAGE_RECORDS_TOTAL",
@@ -84,6 +85,12 @@ STAGE_RECORDS_TOTAL = Counter(
     "bioetl_stage_records_total",
     "Total records observed in the canonical stage-model projection",
     ["pipeline", "run_type", "stage", "outcome"],
+)
+
+PIPELINE_STAGE_EXPECTED = Gauge(
+    "bioetl_pipeline_stage_expected",
+    "Whether a pipeline stage is expected (1) or disabled (0) per entity config",
+    ["pipeline", "stage"],
 )
 
 STAGE_BACKLOG_RECORDS = Gauge(

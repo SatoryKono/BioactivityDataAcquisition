@@ -121,7 +121,7 @@
     },
     {
       "datasource": "Prometheus",
-      "description": "Combined runtime blocker count from shipped 15m/30m recording rules plus no-record and memory-pressure signals.",
+      "description": "Combined runtime blocker count from shipped 15m/30m recording rules: preflight, infrastructure, failed runs, invariant violations, stage backlog (all stages incl. output), stage lag, gold write missing, no terminal run, no-record runs, and memory pressure. Stage filter is intentionally removed from aggregate blocker count to ensure output/gold stages are always visible.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -183,7 +183,7 @@
       },
       "targets": [
         {
-          "expr": "((sum(bioetl_runtime_alert_condition_pipeline_preflight_failed_15m{pipeline=~\"$pipeline\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_pipeline_infrastructure_failed_15m{pipeline=~\"$pipeline\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_pipeline_runs_failed_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_record_flow_invariant_violated_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_stage_backlog_active_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=~\"$stage\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_stage_lag_high_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=~\"$stage\"}) or vector(0)) + (sum(((sum by (pipeline, run_type) (increase(bioetl_pipeline_runs_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}[30m])) > 0) unless on (pipeline, run_type) (sum by (pipeline, run_type) (increase(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}[30m])) > 0))) or vector(0)) + (max(max_over_time(bioetl_memory_pressure_state{pipeline=~\"$pipeline\",stage=~\"$stage\"}[15m])) or vector(0)))",
+          "expr": "((sum(bioetl_runtime_alert_condition_pipeline_preflight_failed_15m{pipeline=~\"$pipeline\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_pipeline_infrastructure_failed_15m{pipeline=~\"$pipeline\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_pipeline_runs_failed_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_record_flow_invariant_violated_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_stage_backlog_active_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_stage_lag_high_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_gold_write_missing_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_no_terminal_run_30m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or vector(0)) + (sum(((sum by (pipeline, run_type) (increase(bioetl_pipeline_runs_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}[30m])) > 0) unless on (pipeline, run_type) (sum by (pipeline, run_type) (increase(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}[30m])) > 0))) or vector(0)) + (max(max_over_time(bioetl_memory_pressure_state{pipeline=~\"$pipeline\"}[15m])) or vector(0)))",
           "refId": "A"
         }
       ],
@@ -467,7 +467,7 @@
       },
       "targets": [
         {
-          "expr": "max(max_over_time(bioetl_stage_lag_seconds{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=~\"$stage\"}[15m])) or vector(0)",
+          "expr": "max(max_over_time(bioetl_stage_lag_seconds{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}[15m])) or vector(0)",
           "refId": "A"
         }
       ],
@@ -547,6 +547,120 @@
     },
     {
       "datasource": "Prometheus",
+      "description": "Shows each active runtime blocker recording rule with its current value. Empty table means no active blockers.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "short",
+          "noValue": "No active blockers"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 13
+      },
+      "id": 242,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "10.4.0",
+      "targets": [
+        {
+          "expr": "label_replace(bioetl_runtime_alert_condition_pipeline_preflight_failed_15m{pipeline=~\"$pipeline\"} > 0, \"blocker\", \"preflight_failed\", \"\", \"\")",
+          "legendFormat": "{{pipeline}} / {{blocker}}",
+          "refId": "A",
+          "instant": true,
+          "format": "table"
+        },
+        {
+          "expr": "label_replace(bioetl_runtime_alert_condition_pipeline_runs_failed_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} > 0, \"blocker\", \"runs_failed\", \"\", \"\")",
+          "legendFormat": "{{pipeline}} / {{blocker}}",
+          "refId": "B",
+          "instant": true,
+          "format": "table"
+        },
+        {
+          "expr": "label_replace(bioetl_runtime_alert_condition_stage_backlog_active_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} > 0, \"blocker\", \"stage_backlog_active\", \"\", \"\")",
+          "legendFormat": "{{pipeline}} / {{stage}} / {{blocker}}",
+          "refId": "C",
+          "instant": true,
+          "format": "table"
+        },
+        {
+          "expr": "label_replace(bioetl_runtime_alert_condition_stage_lag_high_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} > 0, \"blocker\", \"stage_lag_high\", \"\", \"\")",
+          "legendFormat": "{{pipeline}} / {{stage}} / {{blocker}}",
+          "refId": "D",
+          "instant": true,
+          "format": "table"
+        },
+        {
+          "expr": "label_replace(bioetl_runtime_alert_condition_gold_write_missing_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} > 0, \"blocker\", \"gold_write_missing\", \"\", \"\")",
+          "legendFormat": "{{pipeline}} / {{blocker}}",
+          "refId": "E",
+          "instant": true,
+          "format": "table"
+        },
+        {
+          "expr": "label_replace(bioetl_runtime_alert_condition_no_terminal_run_30m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} > 0, \"blocker\", \"no_terminal_run\", \"\", \"\")",
+          "legendFormat": "{{pipeline}} / {{blocker}}",
+          "refId": "F",
+          "instant": true,
+          "format": "table"
+        },
+        {
+          "expr": "label_replace(bioetl_runtime_alert_condition_record_flow_invariant_violated_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} > 0, \"blocker\", \"flow_invariant_violated\", \"\", \"\")",
+          "legendFormat": "{{pipeline}} / {{blocker}}",
+          "refId": "G",
+          "instant": true,
+          "format": "table"
+        }
+      ],
+      "title": "Active Runtime Blocker Detail",
+      "type": "table",
+      "transformations": [
+        {
+          "id": "merge",
+          "options": {}
+        }
+      ]
+    },
+    {
+      "datasource": "Prometheus",
       "description": "Sustained backlog accumulation by stage.",
       "fieldConfig": {
         "defaults": {
@@ -588,7 +702,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 13
+        "y": 21
       },
       "id": 238,
       "options": {
@@ -618,6 +732,101 @@
       ],
       "title": "Stage Backlog Trend",
       "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "description": "Shows expected vs observed stage status per entity config. Gold status is contextual: expected (scd2/append/overwrite config), disabled (gold_enabled=false), pending (run active, gold not yet written), or missing (run completed, gold=0).",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "color-text"
+            },
+            "inspect": false
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "1": {
+                  "color": "green",
+                  "index": 0,
+                  "text": "expected"
+                },
+                "0": {
+                  "color": "blue",
+                  "index": 1,
+                  "text": "disabled"
+                }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "short",
+          "noValue": "N/A"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 21
+      },
+      "id": 243,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "10.4.0",
+      "targets": [
+        {
+          "expr": "bioetl_pipeline_stage_expected{pipeline=~\"$pipeline\"}",
+          "legendFormat": "{{stage}}",
+          "refId": "A",
+          "instant": true,
+          "format": "table"
+        },
+        {
+          "expr": "max by (pipeline, stage) (max_over_time(bioetl_stage_records_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}[15m]))",
+          "legendFormat": "{{stage}} records",
+          "refId": "B",
+          "instant": true,
+          "format": "table"
+        }
+      ],
+      "title": "Stage Expectedness",
+      "type": "table",
+      "transformations": [
+        {
+          "id": "merge",
+          "options": {}
+        }
+      ]
     },
     {
       "datasource": "Prometheus",
@@ -774,7 +983,7 @@
     },
     {
       "datasource": "Prometheus",
-      "description": "Whole-pipeline and stage latency distribution across p50, p95, and p99.",
+      "description": "Pipeline duration percentiles by stage. \"No terminal pipeline duration samples\" means no completed pipeline runs emitted duration histogram buckets in the selected range. Possible causes: run still active, terminal metric not emitted, query label mismatch.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -807,7 +1016,8 @@
               }
             ]
           },
-          "unit": "s"
+          "unit": "s",
+          "noValue": "No terminal pipeline duration samples"
         },
         "overrides": []
       },
@@ -927,7 +1137,7 @@
           },
           "mappings": [],
           "min": 0,
-          "noValue": "0",
+          "noValue": "No phase duration samples",
           "thresholds": {
             "mode": "absolute",
             "steps": [

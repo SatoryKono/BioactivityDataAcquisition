@@ -76,6 +76,7 @@ PIPELINE_RUNTIME_REGISTRY = MetricRegistryFamily(
         "bioetl_memory_pressure_state": _metrics.MEMORY_PRESSURE_STATE,
         "bioetl_control_plane_lifecycle_delete_candidates": _metrics.CONTROL_PLANE_LIFECYCLE_DELETE_CANDIDATES,
         "bioetl_observability_runtime_status": _metrics.OBSERVABILITY_RUNTIME_STATUS,
+        "bioetl_pipeline_stage_expected": _metrics.PIPELINE_STAGE_EXPECTED,
         "bioetl_stage_backlog_records": _metrics.STAGE_BACKLOG_RECORDS,
         "bioetl_stage_lag_seconds": _metrics.STAGE_LAG_SECONDS,
         "bioetl_replay_lag_seconds": _metrics.REPLAY_LAG_SECONDS,
