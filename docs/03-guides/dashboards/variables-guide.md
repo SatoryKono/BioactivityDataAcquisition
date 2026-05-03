@@ -68,6 +68,7 @@ Cross-scope links MUST явно предупреждать оператора, �
 
 - **Core → Provider** (`Overview/Runtime` → `Provider Health`): link title/tooltip содержит `opens with All provider scope`; URL принудительно задаёт `var-provider=All&var-adapter=All`.
 - **Provider → Core** (`Provider Health` → `Overview/Runtime`): link title/tooltip содержит `opens with All core scope`; URL задаёт `var-pipeline=All&var-run_type=All` (и `var-stage=All` для Runtime).
+- **Provider → Core (contextual fallback allowed)**: допустима дополнительная ссылка-variant (рядом с reset-to-All) с provider-derived mapping policy: `provider -> pipeline`, `adapter -> run_type`; при отсутствии/невалидности mapping target MUST fallback к `All` (`var-pipeline=All&var-run_type=All`, и `var-stage=All` для Runtime).
 - **Workflow → Core** (`Workflow Overview` → `Overview/Runtime`): link title/tooltip содержит `opens with All core scope`; workflow variables (`workflow`, `status`) не передаются.
 
 UX цель: убрать ложное ожидание, что source filters автоматически сохранятся при переходе между разными scope-контрактами.

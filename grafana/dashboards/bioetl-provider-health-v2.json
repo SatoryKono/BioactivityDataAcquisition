@@ -44,6 +44,18 @@
     },
     {
       "asDropdown": false,
+      "icon": "external link",
+      "includeVars": false,
+      "keepTime": true,
+      "tags": [],
+      "targetBlank": false,
+      "title": "2. Runtime (provider context)",
+      "tooltip": "Cross-scope handoff (provider-derived context mapping): provider/adapter map to runtime pipeline/run_type when mapping exists; fallback var-pipeline=All&var-run_type=All&var-stage=All.",
+      "type": "link",
+      "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=${provider:queryparam}&var-run_type=${adapter:queryparam}&var-stage=All&${__url_time_range}"
+    },
+    {
+      "asDropdown": false,
       "icon": "logs",
       "includeVars": false,
       "keepTime": true,
