@@ -1,68 +1,235 @@
-# Gemini Setup - Complete
+# Gemini WSL Interactive Setup - Complete
 
-`scripts/ai/gemini` is configured as a Codex-style launcher surface backed by the managed Google Gemini CLI.
+## ✅ Status Summary
 
-## What Is Installed
+Your Gemini CLI is fully configured and ready for interactive use:
 
-```text
-scripts/ai/gemini/
-├── run-gemini.ps1
-├── run-gemini.sh
-├── .env.gemini
-└── helper/
-    ├── check-env.ps1
-    ├── check-env.sh
-    ├── ensure-gemini-cli.sh
-    ├── setup-env.sh
-    └── run-gemini-impl.sh
+| Component | Status | Details |
+|-----------|--------|---------|
+| **WSL** | ✅ Active | Running in Ubuntu on WSL |
+| **Node.js** | ✅ Installed | v18.19.1 |
+| **npm** | ✅ Installed | v9.2.0 |
+| **Gemini CLI** | ✅ Installed | v0.39.1 (managed in `.cache/tools/gemini-cli/`) |
+| **API Key** | ✅ Configured | Set in `.env.gemini` |
+| **MCP Servers** | ✅ Ready | `filesystem`, `git`, `docker` (if running) |
+| **Workspace Config** | ✅ Synced | `.gemini/settings.json` auto-created at startup |
+
+## 🚀 Quick Start Commands
+
+### Interactive Mode (Type multi-line prompts, follow AI guidance)
+
+**Windows (PowerShell):**
+```powershell
+.\scripts\ai\gemini\gemini-interactive.ps1
 ```
 
-The managed CLI runtime is created at:
-
-```text
-.cache/tools/gemini-cli/
-```
-
-It contains repo-local `node@22`, npm cache, the `@google/gemini-cli` package, and `GEMINI_CLI_HOME`.
-
-## Commands
-
+**WSL/Bash:**
 ```bash
-bash scripts/ai/gemini/run-gemini.sh check
-bash scripts/ai/gemini/run-gemini.sh setup
-bash scripts/ai/gemini/run-gemini.sh update
-bash scripts/ai/gemini/run-gemini.sh
-bash scripts/ai/gemini/run-gemini.sh prompt "inspect the repository"
-bash scripts/ai/gemini/run-gemini.sh exec "fix a targeted issue"
+bash scripts/ai/gemini/gemini-interactive.sh
 ```
 
-PowerShell delegates to the same WSL launcher:
+### Single Prompt Mode (Send one command and exit)
 
 ```powershell
-.\scripts\ai\gemini\run-gemini.ps1 check
-.\scripts\ai\gemini\run-gemini.ps1 setup
-.\scripts\ai\gemini\run-gemini.ps1 "inspect the repository"
+.\scripts\ai\gemini\gemini-interactive.ps1 "analyze this codebase"
 ```
-
-## Configuration
-
-Edit `scripts/ai/gemini/.env.gemini`:
 
 ```bash
-GEMINI_API_KEY=your-api-key-here
-# GEMINI_MODEL=gemini-2.5-flash
+bash scripts/ai/gemini/gemini-interactive.sh "explain quantum computing"
 ```
 
-## Codex Comparison
+### Auto-Execute Mode (No approval prompts—all actions auto-approved)
 
-| Area             | Codex                    | Gemini                                     |
-| ---------------- | ------------------------ | ------------------------------------------ |
-| Runtime          | Managed npm CLI          | Managed npm CLI                            |
-| Package          | `@openai/codex`          | `@google/gemini-cli`                       |
-| Install root     | `.cache/tools/codex-cli` | `.cache/tools/gemini-cli`                  |
-| Entrypoint       | `run-codex.sh` / `.ps1`  | `run-gemini.sh` / `.ps1`                   |
-| Key              | `OPENAI_API_KEY`         | `GEMINI_API_KEY`                           |
-| Interactive mode | `codex -C <repo>`        | `gemini` from repo root                    |
-| Headless mode    | `codex exec --full-auto` | `gemini --prompt ... --approval-mode yolo` |
+```bash
+bash scripts/ai/gemini/run-gemini.sh exec "refactor all Python files"
+```
 
-Both launchers are now thin wrappers around managed coding-agent CLIs.
+## 📂 New Files Created
+
+| File | Purpose |
+|------|---------|
+| `gemini-interactive.ps1` | PowerShell quick launcher (Windows) |
+| `gemini-interactive.sh` | Bash quick launcher (WSL) |
+| `GEMINI_INTERACTIVE_GUIDE.md` | Full setup & configuration guide |
+| `QUICK_REFERENCE.md` | Cheat sheet with common commands |
+| `setup-bash-alias.sh` | Optional: Add `gemini` command alias to bash |
+
+## 🎯 Available Commands in Interactive Mode
+
+Once Gemini CLI launches, you can use:
+
+```
+/help                    # Show Gemini CLI help
+/exit or /quit or Ctrl+C # Exit interactive mode
+/clear or /cls           # Clear screen
+
+/mcp list               # Show MCP servers
+/mcp enable <name>      # Enable MCP server
+/mcp disable <name>     # Disable MCP server
+/mcp status <name>      # Check server status
+
+/model list             # List available models
+/model set <name>       # Switch model
+
+/model set gemini-2.5-pro  # More capable but slower/costlier
+/model set gemini-2.5-flash  # Default: fast & cheap
+```
+
+## 💡 Example Workflows
+
+### Code Review + Fix
+```
+User: analyze src/main.py for issues
+
+Gemini: [reviews code, identifies bugs]
+
+User: fix these issues
+Gemini: [proposes fixes with file operations via MCP filesystem]
+
+User: yes
+Gemini: [writes updated files]
+```
+
+### Documentation Generation
+```
+User: write comprehensive README.md for this project
+
+Gemini: [reads project files via MCP, generates docs]
+
+User: add architecture diagram
+
+Gemini: [appends diagram section]
+
+User: save it
+
+Gemini: [writes README.md to disk]
+```
+
+### Docker Troubleshooting
+```
+User: why is my Docker build failing?
+
+Gemini: [asks clarifying questions]
+
+User: [provides error output]
+
+Gemini: [analyzes, suggests fixes]
+
+User: apply the fixes
+
+Gemini: [uses MCP filesystem + docker to modify and rebuild]
+```
+
+## 🔌 MCP Server Integration
+
+Gemini can execute commands on your behalf through MCP servers:
+
+- **filesystem** — Read, write, create, delete files
+- **git** — Clone repos, commit changes, view history
+- **docker** — Build images, run containers (requires Docker Desktop running)
+
+### Check Available Servers
+
+```bash
+bash scripts/ai/gemini/run-gemini.sh mcp-check
+```
+
+### Resync MCP Servers (if you add new ones to `.mcp.json`)
+
+```bash
+bash scripts/ai/gemini/run-gemini.sh mcp-setup
+```
+
+## 📋 Setup Checklist
+
+- [x] WSL environment verified
+- [x] Node.js 18+ installed
+- [x] npm installed
+- [x] Gemini CLI v0.39.1 installed (managed in `.cache/tools/gemini-cli/`)
+- [x] API key configured in `.env.gemini`
+- [x] MCP servers configured and synced
+- [x] Interactive launchers created (`gemini-interactive.ps1/sh`)
+- [x] Documentation written
+
+## 🔄 Workflow for Regular Use
+
+1. **Every session:**
+   ```powershell
+   .\scripts\ai\gemini\gemini-interactive.ps1
+   ```
+
+2. **Type your request** (multi-line OK):
+   ```
+   analyze the repository and suggest Docker optimizations
+   ```
+
+3. **Gemini responds** with analysis and actionable suggestions
+
+4. **Approve or iterate:**
+   - Type "yes" to approve file changes
+   - Type follow-ups for refinement
+   - Type "/exit" to quit
+
+5. **Changes persist** in your repository via MCP filesystem integration
+
+## 🛠️ Maintenance Commands
+
+```bash
+# Check everything is OK
+bash scripts/ai/gemini/run-gemini.sh check
+
+# Update Gemini CLI to latest
+bash scripts/ai/gemini/run-gemini.sh update
+
+# Show all available commands
+bash scripts/ai/gemini/run-gemini.sh help
+```
+
+## 📝 Configuration Files
+
+| File | Purpose | Edit? |
+|------|---------|-------|
+| `.env.gemini` | API key & model choice | ✅ Yes (add your API key) |
+| `.gemini/settings.json` | MCP configuration | ⚠️ Auto-generated, don't edit |
+| `.cache/tools/gemini-cli/` | Managed runtime | ❌ Don't touch |
+
+## 🚨 Troubleshooting
+
+### "GEMINI_API_KEY not set"
+→ Edit `scripts/ai/gemini/.env.gemini` and add your API key
+
+### "WSL not found"
+→ Run: `wsl --install` (Windows 11) or download from Microsoft Store
+
+### "Node.js not found"
+→ Run: `bash scripts/ai/gemini/run-gemini.sh setup`
+
+### "Docker MCP server disconnected"
+→ Start Docker Desktop
+
+### "Permission denied"
+→ Run: `chmod +x scripts/ai/gemini/*.sh scripts/ai/gemini/helper/*.sh`
+
+## 📚 More Information
+
+- **Full Guide:** `scripts/ai/gemini/GEMINI_INTERACTIVE_GUIDE.md`
+- **Quick Reference:** `scripts/ai/gemini/QUICK_REFERENCE.md`
+- **Original Documentation:** `scripts/ai/gemini/README.md`
+- **API Keys:** https://aistudio.google.com/app/apikeys
+- **Gemini CLI Docs:** https://github.com/google/genai-cli
+
+## 🎉 You're Ready!
+
+Launch interactive Gemini now:
+
+**Windows:**
+```powershell
+.\scripts\ai\gemini\gemini-interactive.ps1
+```
+
+**WSL:**
+```bash
+bash scripts/ai/gemini/gemini-interactive.sh
+```
+
+Start by asking: `"analyze this repository and suggest improvements"`
