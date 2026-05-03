@@ -388,7 +388,8 @@
               }
             ]
           },
-          "unit": "short"
+          "unit": "short",
+          "decimals": 0
         },
         "overrides": []
       },
@@ -628,7 +629,8 @@
               }
             ]
           },
-          "unit": "short"
+          "unit": "short",
+          "decimals": 0
         },
         "overrides": []
       },

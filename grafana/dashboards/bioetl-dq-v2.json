@@ -1428,7 +1428,7 @@
               }
             }
           ],
-          "unit": "dateTimeAsLocal",
+          "unit": "dateTimeAsIso",
           "decimals": 0,
           "thresholds": {
             "mode": "absolute",
