@@ -52,6 +52,8 @@ ______________________________________________________________________
 
 1. Передавать только `var-*`, которые входят в target contract.
 1. `includeVars=true` не используется для dashboard-to-dashboard ссылок.
+1. Для ссылок между dashboard (`/d/...`) time-range фиксируется как `${__url_time_range}`.
+1. Для Explore-ссылок (`/explore`, `/a/grafana-lokiexplore-app/explore`, `/a/grafana-exploretraces-app/`) time-range фиксируется как `from=${__from}&to=${__to}`.
 1. **Core → Core**: передавать `pipeline`, `run_type`; `stage` передаётся только если target поддерживает `stage`.
 1. **Core ↔ Provider**: provider dashboards не получают core variables; fallback через default provider/adapter selection.
 1. **Any → Forensic (Reject Explorer)**: допускаются только `pipeline`, `run_type`; forensic filters (`run_id`, `payload_hash`) всегда вводятся оператором вручную в explorer.

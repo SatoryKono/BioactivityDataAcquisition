@@ -6,7 +6,9 @@
 
 - Каждый dashboard (кроме overview-hub) **MUST** иметь top-level ссылку `Back to Overview` на UID `bioetl-overview-v2`.
 - Cross-dashboard handoff передаёт только target-scoped `var-*` параметры.
-- `includeVars=true` и другие универсальные handoff-паттерны запрещены; используем только явные `var-*` и time-range (`${__url_time_range}` либо `from=${__from}&to=${__to}`).
+- `includeVars=true` и другие универсальные handoff-паттерны запрещены; используем только явные `var-*`.
+- Для **cross-dashboard links** (URL c `/d/...`) time-range **MUST** передаваться через `${__url_time_range}`.
+- Для **Explore links** (URL c `/explore` и `/a/grafana-*-explore-app`) time-range **MUST** передаваться через `from=${__from}&to=${__to}`.
 - Explore handoff для Loki/Tempo ведёт только через drilldown-приложения:
   - Logs: `/a/grafana-lokiexplore-app/explore?...`
   - Traces: `/a/grafana-exploretraces-app/?...`
