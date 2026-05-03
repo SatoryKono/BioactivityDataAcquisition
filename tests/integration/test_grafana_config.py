@@ -1039,40 +1039,50 @@ def test_control_plane_dashboard_has_primary_question() -> None:
     assert "GLOBAL read-path panels are not pipeline-scoped" in description
 
 
-def test_control_plane_answer_row_has_max_seven_panels() -> None:
+def test_control_plane_l1_triage_row_has_3_to_5_kpis_and_one_next_step() -> None:
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
     panels = get_dashboard_panels(dashboard)
-    answer_row = next(
-        panel
-        for panel in panels
+    triage_row_index = next(
+        index
+        for index, panel in enumerate(panels)
         if panel.get("type") == "row"
-        and panel.get("title") == "Answer: Replay / Resume Safety"
+        and panel.get("title") == "Trust Summary (Answer-First)"
     )
-    next_row_y = min(
-        panel["gridPos"]["y"]
-        for panel in panels
-        if panel.get("type") == "row"
-        and panel["gridPos"]["y"] > answer_row["gridPos"]["y"]
-    )
-    answer_panels = [
-        panel
-        for panel in panels
-        if panel.get("type") != "row"
-        and answer_row["gridPos"]["y"]
-        < panel.get("gridPos", {}).get("y", -1)
-        < next_row_y
-    ]
+    triage_panels: list[dict[str, object]] = []
+    for panel in panels[triage_row_index + 1 :]:
+        if panel.get("type") == "row":
+            break
+        triage_panels.append(panel)
 
-    assert 3 <= len(answer_panels) <= 7
-    assert {panel.get("title") for panel in answer_panels} == {
+    kpi_titles = {
+        "Replay Safety State",
+        "Checkpoint Freshness (hours since last op)",
+        "Ledger / Manifest Consistency",
         "Replay / Resume Blockers",
-        "Manifest Write Failures",
-        "Ledger Append Failures",
-        "Checkpoint Incompatibilities",
-        "Replay Not Reconstructable",
-        "Replay Drift",
-        "Lineage Refs Missing",
     }
+    next_step_title = "Next Drilldown: Replay Safety Diagnostics"
+    triage_titles = {panel.get("title") for panel in triage_panels}
+
+    assert kpi_titles.issubset(triage_titles)
+    assert next_step_title in triage_titles
+    assert len([title for title in triage_titles if title in kpi_titles]) == 4
+    assert len(triage_panels) == 5
+
+
+def test_control_plane_l1_has_single_next_step_panel_with_expected_target() -> None:
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
+    panels = [
+        panel
+        for panel in get_dashboard_panels(dashboard)
+        if panel.get("title") == "Next Drilldown: Replay Safety Diagnostics"
+    ]
+    assert len(panels) == 1
+
+    links = panels[0].get("links", [])
+    assert len(links) == 1
+    url = str(links[0].get("url", ""))
+    assert "/d/bioetl-control-plane-v1/bioetl-control-plane-v1" in url
+    assert "viewPanel=130" in url
 
 
 def test_control_plane_has_replay_resume_blockers_panel() -> None:

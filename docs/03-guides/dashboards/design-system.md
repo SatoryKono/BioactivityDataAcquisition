@@ -127,6 +127,19 @@ uv run python -m scripts.engineering.qa check-dashboard-visual-semantics
 - Explore-ссылки MUST использовать полные названия: `Explore Logs (Loki, tracing profile)` и `Explore Traces (Tempo, tracing profile)`.
 - Формулировки вида `Explore Logs`, `Explore Traces`, `Next Recommended Drilldown` считаются legacy-лексикой и не допускаются в shipped dashboards.
 
+## 7.1) L1 layout rule: answer-first above fold (обязательно)
+
+Для L1 control-plane dashboards первый экран (above fold) MUST отвечать на
+вопрос оператора без прокрутки:
+
+- ровно один верхний triage-row с **3–5 KPI**;
+- в этом же ряду MUST быть **ровно одна** явная панель next-step/drilldown;
+- панели глубокой диагностики MUST быть вынесены в secondary collapsed rows с
+  заголовками по incident-сценариям (`Incident Drilldown: ...`).
+
+Нельзя дублировать next-step call-to-action в нескольких L1 панелях одного
+dashboard: для первичной навигации используется единая точка входа.
+
 ## 8) JSON invariant: timezone (обязательно)
 
 Для всех shipped dashboards в `grafana/dashboards/*.json` применяется единый JSON-invariant:
@@ -164,4 +177,3 @@ uv run python -m scripts.engineering.qa check-dashboard-visual-semantics
   ]
 }
 ```
-
