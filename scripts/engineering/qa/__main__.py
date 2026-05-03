@@ -34,6 +34,7 @@ Commands:
     run-tests            Run a named test-health lane and emit JUnit/JSON artifacts
     summarize-junit      Aggregate existing JUnit XML into test-health JSON
     test-health          Summarize recent test-health run JSON artifacts
+    check-dashboard-visual-semantics Validate Grafana status-panel visual semantic invariants
 """
 
 from __future__ import annotations
@@ -73,6 +74,7 @@ COMMAND_SPECS = {
     "run-tests": python_command(_TEST_HEALTH_SCRIPT, "run-tests"),
     "summarize-junit": python_command(_TEST_HEALTH_SCRIPT, "summarize-junit"),
     "test-health": python_command(_TEST_HEALTH_SCRIPT, "test-health"),
+    "check-dashboard-visual-semantics": "check_dashboard_visual_semantics.py",
 }
 COMMAND_SPECS = {
     name: spec if hasattr(spec, "runner") else python_command(spec)

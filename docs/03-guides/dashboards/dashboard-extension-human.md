@@ -112,3 +112,18 @@ uv run python -m pytest -q tests/integration/test_grafana_config.py
 - Панели не вводят оператора в заблуждение `No data`, если корректное состояние — `0`.
 - `tests/integration/test_grafana_config.py` проходит.
 - Документация синхронизирована, если operator surface изменился.
+
+## 8. Visual consistency gates
+
+Перед merge каждый изменённый dashboard MUST пройти чеклист:
+
+- [ ] Для всех `stat`/`gauge` панелей используется единый `color.mode=thresholds`.
+- [ ] Для всех `stat`/`gauge` панелей используется единый `thresholds.steps`: green/null, orange/1, red/2.
+- [ ] Для всех status-панелей задано единое no-data поведение: `null -> UNKNOWN (gray)`.
+- [ ] Семантика `OK/DEGRADED/BROKEN/UNKNOWN` совпадает с `docs/03-guides/dashboards/design-system.md`.
+- [ ] Заголовки и описания новых панелей соответствуют шаблонам из design system.
+- [ ] Пройдена автоматическая проверка:
+
+```bash
+uv run python -m scripts.engineering.qa check-dashboard-visual-semantics
+```
