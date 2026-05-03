@@ -22,7 +22,7 @@ ______________________________________________________________________
 | ------------------------- | ------------------------------- | ------------------------------------------------------------------------------------------ |
 | 1. BioETL Overview        | `bioetl-overview-v2`            | L0 answer-first dashboard: что сейчас сломано/degraded и куда drill down дальше |
 | 2. Runtime                | `bioetl-runtime`                | L2 diagnostic runtime triage: blockers, latency, backlog, error localization, handoffs     |
-| Control Plane / Replay Safety | `bioetl-control-plane-v1`       | L1/L2 replay/resume safety: manifest, ledger, checkpoint, replay, lineage, global reads    |
+| Control Plane v1 | `bioetl-control-plane-v1`       | L1/L2 replay/resume safety: manifest, ledger, checkpoint, replay, lineage, global reads    |
 | 3. Provider Health        | `bioetl-provider-health-v2`     | Incident triage по provider health: latency/failures/degraded/retries exhausted            |
 | 4. Data Quality           | `bioetl-dq-v2`                  | Качество данных, карантин, аномалии, freshness                                             |
 | 5. Silver Reject Explorer | `bioetl-silver-reject-explorer` | Record-level explorer для `filtered_out`/`FILTERED_OUT_SILVER` записей (quarantine-backed) |
@@ -153,8 +153,8 @@ All primary dashboards (`1. Overview`, `2. Runtime`, `3. Provider Health`, `4. D
 
 1. `Back to Overview`
 2. `Next Recommended Drilldown`
-3. `Explore Logs`
-4. `Explore Traces`
+3. `Explore Logs (Loki, tracing profile)`
+4. `Explore Traces (Tempo, tracing profile)`
 
 Variable handoff policy for these links is strict and bounded:
 
@@ -169,9 +169,9 @@ Variable handoff policy for these links is strict and bounded:
 - `bioetl-overview-v2`: L0 Overview отвечает на один primary question:
   what is currently broken or degraded in BioETL, and where should the
   operator drill down first? Dashboard links `2. Runtime`,
-  `Control Plane / Replay Safety`, `3. Provider Health`, `4. Data Quality`,
+  `Control Plane v1`, `3. Provider Health`, `4. Data Quality`,
   `6. Workflow Overview`,
-  `Explore Logs` и `Explore Traces`
+  `Explore Logs (Loki, tracing profile)` и `Explore Traces (Tempo, tracing profile)`
   открывают соседние dashboards и Grafana Explore в текущем time range.
   Cross-dashboard URLs передают только target-scoped variables; provider/workflow
   dashboards не наследуют `$pipeline/$run_type` leakage. `System Status` and
@@ -179,11 +179,11 @@ Variable handoff policy for these links is strict and bounded:
   `Reason:` and `Next:` in legends. Panel `id=1`
   (`Processing Volume by Stage`) дублирует Explore handoff через data links.
 - `bioetl-runtime`: top-level links `Back to Overview`, `Control Plane v1`,
-  `3. Provider Health`, `4. Data Quality`, `Explore Logs`,
-  `Explore Traces` и `Runtime Runbook` дают явный
+  `3. Provider Health`, `4. Data Quality`, `Explore Logs (Loki, tracing profile)`,
+  `Explore Traces (Tempo, tracing profile)` и `Runtime Runbook` дают явный
   routing path из L2 runtime triage. Cross-dashboard handoffs передают только
   target-scoped variables; forensic IDs в runtime dashboard запрещены.
-- `bioetl-control-plane-v1`: Control Plane / Replay Safety отвечает на один
+- `bioetl-control-plane-v1`: Control Plane v1 отвечает на один
   primary question: can we trust manifest/ledger/checkpoint/lineage state and
   safely replay/resume? Первый ряд содержит только replay/resume blockers.
   Manifest/ledger ratios, checkpoint/replay diagnostics, GLOBAL reads,
@@ -192,10 +192,10 @@ Variable handoff policy for these links is strict and bounded:
   потому что `bioetl_control_plane_reads_total` и
   `bioetl_control_plane_read_duration_seconds_bucket` глобальны по
   `store/operation/status`.
-- `bioetl-provider-health-v2`: dashboard links `Back to Overview`, `2. Runtime`, `Explore Logs` и `Explore Traces` дают быстрый переход из provider health surface в runtime/overview и correlation flow без ложного pipeline scope в target dashboards. Panel `id=114` (`Current Provider Health Status`) показывает явный enum mapping `0=UNHEALTHY`, `1=DEGRADED`, `2=HEALTHY`, а panel `id=1` (`Health Check Latency by Provider (p95)`) дублирует Explore handoff через data links.
-- `bioetl-dq-v2`: dashboard link `Back to Overview` плюс `5. Silver Reject Explorer`, `Explore Logs` и `Explore Traces` дают тот же переход для DQ incidents и freshness investigation. Handoff в Explorer передаёт только bounded `$pipeline/$run_type` scope, а не generic `includeVars` leakage. Panel `id=1` (`Data Flow in Range: Bronze -> Silver -> Gold`) дублирует Explore handoff через data links.
+- `bioetl-provider-health-v2`: dashboard links `Back to Overview`, `2. Runtime`, `Explore Logs (Loki, tracing profile)` и `Explore Traces (Tempo, tracing profile)` дают быстрый переход из provider health surface в runtime/overview и correlation flow без ложного pipeline scope в target dashboards. Panel `id=114` (`Current Provider Health Status`) показывает явный enum mapping `0=UNHEALTHY`, `1=DEGRADED`, `2=HEALTHY`, а panel `id=1` (`Health Check Latency by Provider (p95)`) дублирует Explore handoff через data links.
+- `bioetl-dq-v2`: dashboard link `Back to Overview` плюс `5. Silver Reject Explorer`, `Explore Logs (Loki, tracing profile)` и `Explore Traces (Tempo, tracing profile)` дают тот же переход для DQ incidents и freshness investigation. Handoff в Explorer передаёт только bounded `$pipeline/$run_type` scope, а не generic `includeVars` leakage. Panel `id=1` (`Data Flow in Range: Bronze -> Silver -> Gold`) дублирует Explore handoff через data links.
 - `bioetl-silver-reject-explorer`: dashboard links `Back to Overview`, `Back to Data Quality`, `Open Logs`, `Open Traces`; back-links возвращают только `$pipeline/$run_type`, не leaking `payload_hash` или other forensic filters. Main table поддерживает data links для self-drilldown по `payload_hash` и CLI handoff.
-- `bioetl-workflow-overview`: dashboard links `Back to Overview`, `2. Runtime`, `Control Plane / Replay Safety`; cross-dashboard handoffs не leaking `$workflow/$status` into non-workflow targets. Prometheus panels use only bounded workflow labels (`workflow`, `status`, `step_kind`) and never require `run_id`/`step_id` labels.
+- `bioetl-workflow-overview`: dashboard links `Back to Overview`, `2. Runtime`, `Control Plane v1`; cross-dashboard handoffs не leaking `$workflow/$status` into non-workflow targets. Prometheus panels use only bounded workflow labels (`workflow`, `status`, `step_kind`) and never require `run_id`/`step_id` labels.
 - Loki drilldown использует безопасный low-cardinality entrypoint `{job="bioetl"}` без dashboard-variable interpolation внутри encoded Explore payload. Это сознательный baseline: Grafana надёжно не подставляет `$pipeline/$provider` в `left=...`, поэтому дополнительное сужение оператор делает уже в самом Explore. Tempo drilldown открывает trace search в том же временном окне; детальная correlation идёт через `trace_id` / `span_id`, а не через Prometheus labels.
 - Tempo drilldown теперь тоже открывается contextual: dashboards с `$pipeline/$run_type` предварительно фильтруют TraceQL по `span."bioetl.pipeline"` и `span."bioetl.run_type"`, а provider dashboard — по `span."bioetl.provider"`. Это не заменяет correlation по `trace_id` / `span_id`, но убирает пустой `{}` и делает handoff полезнее уже на первом клике.
 - `bioetl-runtime` row `Tracing-only Log Hygiene` теперь включает table panel `Alert-to-Action Map` как runbook-lite:
