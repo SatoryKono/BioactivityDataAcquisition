@@ -60,6 +60,37 @@ Global lookup/read-path panels stay separated in a dedicated
 **Global diagnostics (non-pipeline scoped)** block and MUST remain unfiltered by
 `$pipeline` / `$run_type`.
 
+## KPI ownership (canonical vs mirrors)
+
+Правило: KPI имеет один canonical dashboard (источник ответа) и может иметь
+secondary mirrors только как shortcut для triage.
+
+| KPI | Canonical dashboard | Secondary mirrors (MUST show link `Open canonical KPI view`) |
+| --- | --- | --- |
+| System Status | `1. BioETL Overview` | `2. Runtime`, `BioETL Control Plane v1`, `6. Workflow Overview` |
+| Next Action | `1. BioETL Overview` | `2. Runtime`, `3. Provider Health` |
+| Failed Runs in Range | `1. BioETL Overview` | `2. Runtime`, `BioETL Control Plane v1` |
+| Worst Backlog Stage | `1. BioETL Overview` | `2. Runtime`, `6. Workflow Overview` |
+| Worst Lag Stage | `1. BioETL Overview` | `2. Runtime`, `6. Workflow Overview` |
+| Flow Balance | `1. BioETL Overview` | `2. Runtime`, `6. Workflow Overview` |
+| Replay Safety State | `BioETL Control Plane v1` | `1. BioETL Overview`, `2. Runtime` |
+| Checkpoint Freshness Proxy | `BioETL Control Plane v1` | `2. Runtime` |
+| Ledger/Manifest Consistency | `BioETL Control Plane v1` | `2. Runtime` |
+| Provider Health (aggregated) | `3. Provider Health` | `1. BioETL Overview`, `2. Runtime` |
+| DQ Status (Silver Reject / quality posture) | `4. Data Quality` | `1. BioETL Overview`, `2. Runtime` |
+
+### Mirror policy for KPI cards
+
+- Secondary dashboard cards, которые дублируют canonical KPI без нового
+  измерения (другая гранулярность, иной период, дополнительный action context),
+  MUST быть удалены или переименованы как navigational shortcut.
+- Для сохранённых mirror-карточек title/description MUST явно указывать, что
+  это mirror, а не primary source of truth.
+- Каждая secondary mirror-карточка MUST иметь explicit link с текстом
+  `Open canonical KPI view` на canonical dashboard KPI.
+- Если зеркало добавляет value (например, provider-scoped breakdown), укажи это
+  в description и оставь `Open canonical KPI view` как fallback к canonical answer.
+
 ## Legacy-документы
 
 Архивные материалы перемещены в `docs/03-guides/dashboards/legacy/`.
