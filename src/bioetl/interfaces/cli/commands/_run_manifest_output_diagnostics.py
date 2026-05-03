@@ -1,0 +1,192 @@
+"""Private diagnostics renderers for run-manifest CLI output."""
+
+from __future__ import annotations
+
+from bioetl.interfaces.cli.commands._run_manifest_output_support import (
+    _JsonRenderer,
+    _items_from_keys,
+    append_section,
+)
+
+
+def _diagnostics_core_items(
+    diagnostics: dict[str, object],
+) -> tuple[tuple[str, object], ...]:
+    return _items_from_keys(
+        diagnostics,
+        "latest_status",
+        "latest_event_type",
+        "total_events",
+        "execution_fingerprint",
+        "config_hash",
+        "resolved_config_hash",
+        "effective_config_hash",
+        "git_commit",
+        "source_revision_state",
+        "dependency_lock_state",
+        "dependency_lock_hash",
+        "code_provenance_state",
+        "contract_ref",
+        "contract_version",
+        "dq_policy_ref",
+        "rule_bundle_version",
+    )
+
+
+def _diagnostics_replay_items(
+    diagnostics: dict[str, object],
+) -> tuple[tuple[str, object], ...]:
+    return _items_from_keys(
+        diagnostics,
+        "effective_config_artifact_id",
+        "dq_contract_compatibility_hash",
+        "requested_exact_replay",
+        "exact_replay_support_boundary",
+        "replay_family_contract",
+        "replay_capability_reason",
+        "exact_replay_blockers",
+        "append_mode_semantic_sinks",
+        "input_snapshot_ids",
+        "input_snapshot_content_hashes",
+        "input_snapshot_identity_fingerprint",
+        "exact_replay_anchors",
+        "replay_mode",
+        "continuation_mode",
+        "replay_of_run_id",
+        "replay_of_manifest_id",
+        "replay_parentage",
+        "input_snapshot_count",
+        "input_snapshots",
+    )
+
+
+def _diagnostics_artifact_items(
+    diagnostics: dict[str, object],
+) -> tuple[tuple[str, object], ...]:
+    return _items_from_keys(
+        diagnostics,
+        "event_family_counts",
+        "event_type_counts",
+        "planned_artifact_count",
+        "published_artifact_count",
+        "missing_artifact_links",
+        "lineage_fragment_ids",
+        "artifact_refs",
+        "produced_artifact_trace",
+        "identity_graph_complete",
+    )
+
+
+def _diagnostics_dq_items(
+    diagnostics: dict[str, object],
+) -> tuple[tuple[str, object], ...]:
+    return _items_from_keys(
+        diagnostics,
+        "dq_rule_ids",
+        "dq_dispositions",
+        "dq_report_paths",
+        "dq_violation_kinds",
+        "cross_validation_rule_ids",
+        "cross_validation_config_paths",
+        "cross_validation_quarantine_policy",
+        "cross_validation_quarantine_replay_contract",
+        "occurrence_only_diagnostics",
+        "cross_validation_signal_present",
+        "correlation_anchor_gaps",
+    )
+
+
+def _diagnostics_section_items(
+    diagnostics: dict[str, object],
+) -> tuple[tuple[str, object], ...]:
+    return (
+        *_diagnostics_core_items(diagnostics),
+        *_diagnostics_replay_items(diagnostics),
+        *_diagnostics_artifact_items(diagnostics),
+        *_diagnostics_dq_items(diagnostics),
+        ("persistence_profile", diagnostics.get("persistence_profile")),
+        (
+            "reproducibility_policy_assessment",
+            diagnostics.get("reproducibility_policy_assessment"),
+        ),
+        (
+            "reproducibility_diagnostics",
+            diagnostics.get("reproducibility_diagnostics"),
+        ),
+        (
+            "reproducibility_audit_score",
+            diagnostics.get("reproducibility_audit_score"),
+        ),
+        ("alert_signals", diagnostics.get("alert_signals")),
+        ("next_steps", diagnostics.get("next_steps")),
+    )
+
+
+def render_diagnostics_section(
+    diagnostics: dict[str, object],
+    *,
+    json_renderer: _JsonRenderer,
+) -> list[str]:
+    """Render diagnostics section."""
+    lines: list[str] = []
+    append_section(
+        lines,
+        "Diagnostics",
+        _diagnostics_section_items(diagnostics),
+        json_renderer=json_renderer,
+    )
+    return lines
+
+
+def render_identity_graph_section(
+    identity_graph: dict[str, object],
+    *,
+    json_renderer: _JsonRenderer,
+) -> list[str]:
+    """Render one explicit identity-graph reconstruction section."""
+    lines: list[str] = []
+    append_section(
+        lines,
+        "Identity Graph",
+        _items_from_keys(
+            identity_graph,
+            "run_id",
+            "manifest_id",
+            "execution_fingerprint",
+            "config_hash",
+            "resolved_config_hash",
+            "effective_config_hash",
+            "git_commit",
+            "source_revision_state",
+            "dependency_lock_state",
+            "dependency_lock_hash",
+            "code_provenance_state",
+            "contract_ref",
+            "contract_version",
+            "replay_capability",
+            "requested_exact_replay",
+            "exact_replay_support_boundary",
+            "replay_family_contract",
+            "replay_capability_reason",
+            "exact_replay_eligible",
+            "exact_replay_blockers",
+            "append_mode_semantic_sinks",
+            "input_snapshot_ids",
+            "input_snapshot_content_hashes",
+            "input_snapshot_identity_fingerprint",
+            "exact_replay_anchors",
+            "replay_mode",
+            "continuation_mode",
+            "replay_of_run_id",
+            "replay_of_manifest_id",
+            "replay_parentage",
+            "input_snapshot_count",
+            "input_snapshots",
+            "planned_artifacts",
+            "published_artifacts",
+            "produced_artifact_trace",
+            "occurrence_only_diagnostics",
+        ),
+        json_renderer=json_renderer,
+    )
+    return lines
