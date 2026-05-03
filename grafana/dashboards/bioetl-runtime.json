@@ -26,7 +26,7 @@
       "targetBlank": false,
       "title": "Back to Overview",
       "type": "dashboards",
-      "url": "/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&var-run_type=$run_type"
+      "url": "/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
     },
     {
       "asDropdown": false,
@@ -37,7 +37,7 @@
       "targetBlank": false,
       "title": "3. Provider Health",
       "type": "link",
-      "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=All&var-adapter=All"
+      "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=All&var-adapter=All&${__url_time_range}"
     },
     {
       "asDropdown": false,
@@ -48,7 +48,7 @@
       "targetBlank": false,
       "title": "Explore Logs (Loki, tracing profile)",
       "type": "link",
-      "url": "/explore?schemaVersion=1&panes={\"67f\":{\"datasource\":\"loki\",\"queries\":[{\"expr\":\"{job=\\\"bioetl\\\"}\"}],\"range\":{\"from\":\"$__from\",\"to\":\"$__to\"}}}&orgId=1"
+      "url": "/explore?schemaVersion=1&panes={\"67f\":{\"datasource\":\"loki\",\"queries\":[{\"expr\":\"{job=\\\"bioetl\\\"}\"}],\"range\":{\"from\":\"$__from\",\"to\":\"$__to\"}}}&orgId=1&from=${__from}&to=${__to}"
     },
     {
       "asDropdown": false,
@@ -59,7 +59,7 @@
       "targetBlank": false,
       "title": "Explore Traces (Tempo, tracing profile)",
       "type": "link",
-      "url": "/explore?schemaVersion=1&panes={\"q9t\":{\"datasource\":\"tempo\",\"queries\":[{\"query\":\"{ span.\\\"bioetl.pipeline\\\" = \\\"$pipeline\\\" && span.\\\"bioetl.run_type\\\" = \\\"$run_type\\\" }\"}],\"range\":{\"from\":\"$__from\",\"to\":\"$__to\"}}}&orgId=1"
+      "url": "/explore?schemaVersion=1&panes={\"q9t\":{\"datasource\":\"tempo\",\"queries\":[{\"query\":\"{ span.\\\"bioetl.pipeline\\\" = \\\"$pipeline\\\" && span.\\\"bioetl.run_type\\\" = \\\"$run_type\\\" }\"}],\"range\":{\"from\":\"$__from\",\"to\":\"$__to\"}}}&orgId=1&from=${__from}&to=${__to}"
     }
   ],
   "panels": [
@@ -158,11 +158,11 @@
         "dataLinks": [
           {
             "title": "Open Control Plane v1 (manifest/checkpoint)",
-            "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&from=${__from}&to=${__to}"
+            "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
           },
           {
             "title": "Open Data Quality v2",
-            "url": "/d/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&from=${__from}&to=${__to}"
+            "url": "/d/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&${__url_time_range}"
           },
           {
             "title": "Open Runtime Troubleshooting Runbook",
@@ -330,7 +330,7 @@
         "dataLinks": [
           {
             "title": "Open Control Plane v1 (checkpoint/replay)",
-            "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&from=${__from}&to=${__to}"
+            "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
           },
           {
             "title": "Open Checkpoint Debugging Runbook",
@@ -1378,7 +1378,7 @@
         "dataLinks": [
           {
             "title": "Open Data Quality v2",
-            "url": "/d/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&from=${__from}&to=${__to}"
+            "url": "/d/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&${__url_time_range}"
           },
           {
             "title": "Open DQ Failure Runbook",
@@ -1460,7 +1460,7 @@
         "dataLinks": [
           {
             "title": "Open Control Plane v1 (manifest/checkpoint)",
-            "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&from=${__from}&to=${__to}"
+            "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
           },
           {
             "title": "Open Run Manifest Runbook",
@@ -1542,7 +1542,7 @@
         "dataLinks": [
           {
             "title": "Open Provider Health v2",
-            "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?from=${__from}&to=${__to}"
+            "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?from=${__from}&to=${__to}&${__url_time_range}"
           },
           {
             "title": "Open Provider Incident Runbook",
@@ -1624,7 +1624,7 @@
         "dataLinks": [
           {
             "title": "Open Data Quality v2",
-            "url": "/d/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&from=${__from}&to=${__to}"
+            "url": "/d/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&${__url_time_range}"
           },
           {
             "title": "Open DQ Freshness Runbook",
