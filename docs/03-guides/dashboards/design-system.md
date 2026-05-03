@@ -3,13 +3,13 @@
 Дата актуализации: **2026-05-03**
 Источник истины: `grafana/dashboards/*.json`
 
-## 1) Единая семантическая палитра статусов (обязательно)
+## 1) Единая семантика статусов OK/WARN/CRIT/UNKNOWN (обязательно)
 
 Для status-панелей (`stat`/`gauge`) применяется фиксированная палитра:
 
 - **OK** → `green`
-- **DEGRADED** → `orange`
-- **BROKEN** → `red`
+- **WARN** → `orange`
+- **CRIT** → `red`
 - **UNKNOWN** → `gray`
 
 `UNKNOWN` обязателен как явное отображение no-data/null через mapping:
@@ -31,8 +31,8 @@
 Нормативная интерпретация:
 
 - `0` → OK
-- `1` → DEGRADED
-- `>=2` → BROKEN
+- `1` → WARN
+- `>=2` → CRIT
 - `null` → UNKNOWN
 
 ### 2.2 Time-series
@@ -46,28 +46,31 @@
 
 ## 3) Единый стиль заголовков и описаний панелей (обязательно)
 
-### 3.1 Заголовок
+### 3.1 Заголовок (action-first)
 
 Шаблон:
 
-`<Субсистема>: <Метрика/Сигнал> [<Окно>]`
+`<Action Verb>: <Object/Signal> [<Window>]`
 
 Примеры:
-- `Runtime: Failure Rate [24h]`
-- `Provider Health: Retry Saturation [1h]`
+- `Monitor: Runtime Failure Rate [24h]`
+- `Inspect: Provider Retry Saturation [1h]`
+- `Track: Latest Successful Data Timestamp`
+
+Требование: все новые панели MUST использовать action-first заголовки с глаголом в начале (`Monitor`, `Inspect`, `Track`, `Compare`, `Review`).
 
 ### 3.2 Description
 
 Шаблон:
 
 1. Что измеряется (1 предложение)
-2. Как интерпретировать `OK/DEGRADED/BROKEN/UNKNOWN`
+2. Как интерпретировать `OK/WARN/CRIT/UNKNOWN`
 3. Если применимо — ссылка на runbook/drilldown
 
 Пример структуры:
 
 - `Measures ...`
-- `Status mapping: 0=OK, 1=DEGRADED, >=2=BROKEN, null=UNKNOWN.`
+- `Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN.`
 - `Use <dashboard/link> for drilldown.`
 
 ## 4) Правило no-data/unknown (обязательно)
@@ -76,7 +79,14 @@
 - Если no-data действительно эквивалентно нулевому событию, это должно быть отражено в query явно (`... or vector(0)`) и подтверждено в description.
 - Во всех остальных случаях no-data должен остаться `UNKNOWN`.
 
-## 5) QA Gate
+## 5) Единый unit/decimals для схожих KPI (обязательно)
+
+- Для счётчиков событий (`... Missing`, `... Incompatibilities`, `... Failures`) использовать `unit=short`, `decimals=0`.
+- Для timestamp KPI (`Latest Successful Data Timestamp` и аналогичные) использовать `unit=dateTimeAsIso`, `decimals=0`.
+- Для долей/процентов (`... Rate`, `... Ratio`) использовать единый unit внутри dashboard-семейства (`percentunit` или `percent`) и согласованный `decimals` (обычно `0` или `2`).
+- Схожий KPI в разных dashboards MUST иметь одинаковую пару `unit/decimals`.
+
+## 6) QA Gate
 
 Базовая автоматическая проверка:
 

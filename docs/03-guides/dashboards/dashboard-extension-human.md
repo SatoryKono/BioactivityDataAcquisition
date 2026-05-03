@@ -120,6 +120,9 @@ uv run python -m pytest -q tests/integration/test_grafana_config.py
 - [ ] Для всех `stat`/`gauge` панелей используется единый `color.mode=thresholds`.
 - [ ] Для всех `stat`/`gauge` панелей используется единый `thresholds.steps`: green/null, orange/1, red/2.
 - [ ] Для всех status-панелей задано единое no-data поведение: `null -> UNKNOWN (gray)`.
+- [ ] Для всех status-панелей используется единая терминология `OK/WARN/CRIT/UNKNOWN` (без смешения с `DEGRADED/BROKEN`).
+- [ ] Для схожих KPI в разных dashboards совпадают `unit` и `decimals` (например, event counts = `short/0`, timestamps = `dateTimeAsIso/0`).
+- [ ] Заголовки новых/переименованных панелей соответствуют action-first шаблону (`Monitor/Inspect/Track/...: ...`).
 - [ ] Семантика `OK/DEGRADED/BROKEN/UNKNOWN` совпадает с `docs/03-guides/dashboards/design-system.md`.
 - [ ] Заголовки и описания новых панелей соответствуют шаблонам из design system.
 - [ ] Пройдена автоматическая проверка:
