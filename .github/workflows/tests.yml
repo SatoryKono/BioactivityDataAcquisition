@@ -209,6 +209,14 @@ jobs:
             -   name: Observability metric inventory drift gate
                 run: uv run python -m scripts.engineering.qa report-observability-metric-inventory --check --json
 
+            -   name: Dashboard navigation contract sync gate
+                run: |
+                    uv run pytest \
+                      tests/integration/test_grafana_dashboard_links.py::test_cross_dashboard_links_pass_only_target_scoped_variables \
+                      tests/integration/test_grafana_dashboard_links.py::test_dashboard_top_level_navigation_contract_by_uid \
+                      tests/integration/test_dashboard_navigation_contract_sync.py \
+                      -q --tb=short
+
             -   name: Prometheus rules syntax + promtool test vectors
                 run: |
                     docker run --rm -v "$PWD:/workspace" -w /workspace prom/prometheus:v2.54.1 \
