@@ -229,7 +229,7 @@
       ],
       "title": "System Status",
       "type": "stat",
-      "description": "L0 answer. BROKEN if any recording-rule runtime blocker (failed runs, stage backlog, stage lag, gold write missing), DQ hard fail, or control-plane blocker is active. DEGRADED for provider/DQ/freshness/workflow warnings. UNKNOWN means no recent activity. Uses same recording rules as Runtime dashboard for guaranteed L0/L2 consistency."
+      "description": "Thresholds: BROKEN when runtime blocker>0, DQ hard fail>0, or control-plane blocker>0; DEGRADED on warning-only signals; UNKNOWN when no recent samples. Next action: open dashboard indicated by Next Action (Runtime first, then Control Plane, DQ, Provider, Workflow)."
     },
     {
       "datasource": "Prometheus",
@@ -364,7 +364,7 @@
       ],
       "title": "Next Action",
       "type": "stat",
-      "description": "Explicit operator routing using recording rules. Priority: Runtime blockers > Control Plane > DQ > Provider > Workflow > Monitor. Uses same recording rules as Runtime dashboard for L0/L2 consistency."
+      "description": "Threshold semantics: Runtime blockers > Control Plane > DQ > Provider > Workflow > Monitor. Next action: follow this priority order; investigate first non-OK domain and keep the same pipeline/run_type scope."
     },
     {
       "datasource": "Prometheus",
