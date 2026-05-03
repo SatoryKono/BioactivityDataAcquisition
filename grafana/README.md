@@ -1912,7 +1912,7 @@ ______________________________________________________________________
 | ------------------------- | ------------------------------- | ------------ | ------ | ------- | ---------- | --------------- | ------- |
 | 1. BioETL Overview        | `bioetl-overview-v2`            | 5            | 27     | 30s     | 12h        | Prometheus      | L0 broken/degraded answer and operational handoff |
 | 2. Runtime                | `bioetl-runtime`                | 2            | 26     | 30s     | 12h        | Prometheus + optional Loki/Tempo links | L2 runtime triage: blockers, latency, backlog, handoffs |
-| 3. Provider Health        | `bioetl-provider-health-v2`     | 6            | 25     | 30s     | 12h        | Prometheus      | Provider latency, health, retries, failure ratios, error taxonomy, circuit breaker |
+| 3. Provider Health        | `bioetl-provider-health-v2`     | 7            | 25     | 30s     | 12h        | Prometheus      | Provider latency, health, retries, failure ratios, error taxonomy, circuit breaker |
 | 4. Data Quality           | `bioetl-dq-v2`                  | 4            | 21     | 30s     | 12h        | Prometheus      | DQ score, quarantine, freshness, validation failures |
 | Control Plane / Replay Safety | `bioetl-control-plane-v1`       | 2            | 32     | 30s     | 6h         | Prometheus      | Replay/resume safety, GLOBAL read diagnostics, missing-signal markers |
 | 5. Silver Reject Explorer | `bioetl-silver-reject-explorer` | 1000         | 9      | 1m      | 24h        | Quarantine Explorer API | Record-level browsing for Silver rejects |
