@@ -16,6 +16,8 @@ ______________________________________________________________________
 Дата сверки: **2026-04-13**
 Источник истины: `grafana/dashboards/*.json`
 
+Machine-readable navigation contract: `docs/03-guides/dashboards/contracts/navigation-links.yaml` (docs/tests должны соответствовать ему).
+
 ## Какие дашборды использовать
 
 | Dashboard                 | UID                             | Для чего                                                                                   |
