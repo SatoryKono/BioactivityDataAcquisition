@@ -41,6 +41,17 @@
     },
     {
       "asDropdown": false,
+      "icon": "apps",
+      "includeVars": false,
+      "keepTime": true,
+      "tags": [],
+      "targetBlank": false,
+      "title": "Control Plane v1",
+      "type": "link",
+      "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?${__url_time_range}"
+    },
+    {
+      "asDropdown": false,
       "icon": "logs",
       "includeVars": false,
       "keepTime": true,
