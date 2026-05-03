@@ -36,7 +36,7 @@
       "keepTime": true,
       "tags": [],
       "targetBlank": false,
-      "title": "Next Recommended Drilldown",
+      "title": "2. Runtime",
       "type": "link",
       "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=All&var-run_type=All&var-stage=All"
     },
@@ -47,7 +47,7 @@
       "keepTime": true,
       "tags": [],
       "targetBlank": false,
-      "title": "Explore Logs",
+      "title": "Explore Logs (Loki, tracing profile)",
       "type": "link",
       "url": "/explore?schemaVersion=1&panes={\"67f\":{\"datasource\":\"loki\",\"queries\":[{\"expr\":\"{job=\\\"bioetl\\\"}\"}],\"range\":{\"from\":\"$__from\",\"to\":\"$__to\"}}}&orgId=1"
     },
@@ -58,7 +58,7 @@
       "keepTime": true,
       "tags": [],
       "targetBlank": false,
-      "title": "Explore Traces",
+      "title": "Explore Traces (Tempo, tracing profile)",
       "type": "link",
       "url": "/explore?schemaVersion=1&panes={\"q9t\":{\"datasource\":\"tempo\",\"queries\":[{\"query\":\"{ span.\\\"bioetl.provider\\\" = \\\"$provider\\\" }\"}],\"range\":{\"from\":\"$__from\",\"to\":\"$__to\"}}}&orgId=1"
     }

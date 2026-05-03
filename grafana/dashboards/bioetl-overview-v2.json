@@ -36,7 +36,7 @@
       "keepTime": true,
       "tags": [],
       "targetBlank": false,
-      "title": "Next Recommended Drilldown",
+      "title": "2. Runtime",
       "type": "link",
       "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type"
     },
@@ -47,7 +47,7 @@
       "keepTime": true,
       "tags": [],
       "targetBlank": false,
-      "title": "Explore Logs",
+      "title": "Control Plane v1",
       "type": "link",
       "url": "/explore?schemaVersion=1&panes={\"67f\":{\"datasource\":\"loki\",\"queries\":[{\"expr\":\"{job=\\\"bioetl\\\"}\"}],\"range\":{\"from\":\"$__from\",\"to\":\"$__to\"}}}&orgId=1"
     },
@@ -58,7 +58,7 @@
       "keepTime": true,
       "tags": [],
       "targetBlank": false,
-      "title": "Explore Traces",
+      "title": "3. Provider Health",
       "type": "link",
       "url": "/explore?schemaVersion=1&panes={\"q9t\":{\"datasource\":\"tempo\",\"queries\":[{\"query\":\"{ span.\\\"bioetl.pipeline\\\" = \\\"$pipeline\\\" && span.\\\"bioetl.run_type\\\" = \\\"$run_type\\\" }\"}],\"range\":{\"from\":\"$__from\",\"to\":\"$__to\"}}}&orgId=1"
     }

@@ -99,3 +99,23 @@ uv run python -m scripts.engineering.qa check-dashboard-visual-semantics
 - color mode = `thresholds`
 - стандартизованные threshold steps
 - обязательный `UNKNOWN` mapping для `null`
+
+
+## 7) UI-лексика навигации (source of truth)
+
+Для `grafana/dashboards/*.json` использовать фиксированные `links[].title` из `navigation-contract.md`.
+
+Обязательные title-лексемы:
+
+- `Back to Overview`
+- `2. Runtime`
+- `Control Plane v1`
+- `3. Provider Health`
+- `4. Data Quality`
+- `5. Silver Reject Explorer`
+- `6. Workflow Overview`
+- `Back to Data Quality`
+- `Explore Logs (Loki, tracing profile)`
+- `Explore Traces (Tempo, tracing profile)`
+
+Требование: все Explore-ссылки MUST явно содержать `tracing profile` в `title`.
