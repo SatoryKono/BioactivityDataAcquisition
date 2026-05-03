@@ -127,7 +127,18 @@
           "color": {
             "mode": "thresholds"
           },
-          "mappings": [],
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            }
+          ],
           "noValue": "0",
           "thresholds": {
             "mode": "absolute",
@@ -137,8 +148,12 @@
                 "value": null
               },
               {
-                "color": "red",
+                "color": "orange",
                 "value": 1
+              },
+              {
+                "color": "red",
+                "value": 2
               }
             ]
           },
@@ -198,7 +213,18 @@
           "color": {
             "mode": "thresholds"
           },
-          "mappings": [],
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            }
+          ],
           "noValue": "0",
           "thresholds": {
             "mode": "absolute",
@@ -208,8 +234,12 @@
                 "value": null
               },
               {
-                "color": "red",
+                "color": "orange",
                 "value": 1
+              },
+              {
+                "color": "red",
+                "value": 2
               }
             ]
           },
@@ -269,7 +299,18 @@
           "color": {
             "mode": "thresholds"
           },
-          "mappings": [],
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            }
+          ],
           "noValue": "0",
           "thresholds": {
             "mode": "absolute",
@@ -279,12 +320,12 @@
                 "value": null
               },
               {
-                "color": "yellow",
+                "color": "orange",
                 "value": 1
               },
               {
                 "color": "red",
-                "value": 3
+                "value": 2
               }
             ]
           },
@@ -340,7 +381,18 @@
           "color": {
             "mode": "thresholds"
           },
-          "mappings": [],
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            }
+          ],
           "noValue": "0",
           "thresholds": {
             "mode": "absolute",
@@ -350,12 +402,12 @@
                 "value": null
               },
               {
-                "color": "yellow",
-                "value": 0.05
+                "color": "orange",
+                "value": 1
               },
               {
                 "color": "red",
-                "value": 0.2
+                "value": 2
               }
             ]
           },
@@ -411,7 +463,18 @@
           "color": {
             "mode": "thresholds"
           },
-          "mappings": [],
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            }
+          ],
           "noValue": "0",
           "thresholds": {
             "mode": "absolute",
@@ -421,12 +484,12 @@
                 "value": null
               },
               {
-                "color": "yellow",
-                "value": 300
+                "color": "orange",
+                "value": 1
               },
               {
                 "color": "red",
-                "value": 1800
+                "value": 2
               }
             ]
           },
@@ -482,7 +545,18 @@
           "color": {
             "mode": "thresholds"
           },
-          "mappings": [],
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            }
+          ],
           "noValue": "0",
           "thresholds": {
             "mode": "absolute",
@@ -492,12 +566,12 @@
                 "value": null
               },
               {
-                "color": "yellow",
-                "value": 0.5
+                "color": "orange",
+                "value": 1
               },
               {
                 "color": "red",
-                "value": 1
+                "value": 2
               }
             ]
           },
@@ -1191,7 +1265,18 @@
           "color": {
             "mode": "thresholds"
           },
-          "mappings": [],
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            }
+          ],
           "noValue": "0",
           "thresholds": {
             "mode": "absolute",
@@ -1201,12 +1286,12 @@
                 "value": null
               },
               {
-                "color": "yellow",
+                "color": "orange",
                 "value": 1
               },
               {
                 "color": "red",
-                "value": 5
+                "value": 2
               }
             ]
           },
@@ -1262,7 +1347,18 @@
           "color": {
             "mode": "thresholds"
           },
-          "mappings": [],
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            }
+          ],
           "noValue": "0",
           "thresholds": {
             "mode": "absolute",
@@ -1272,12 +1368,12 @@
                 "value": null
               },
               {
-                "color": "yellow",
+                "color": "orange",
                 "value": 1
               },
               {
                 "color": "red",
-                "value": 5
+                "value": 2
               }
             ]
           },
@@ -1333,7 +1429,18 @@
           "color": {
             "mode": "thresholds"
           },
-          "mappings": [],
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            }
+          ],
           "noValue": "0",
           "thresholds": {
             "mode": "absolute",
@@ -1343,12 +1450,12 @@
                 "value": null
               },
               {
-                "color": "yellow",
+                "color": "orange",
                 "value": 1
               },
               {
                 "color": "red",
-                "value": 5
+                "value": 2
               }
             ]
           },
@@ -1404,7 +1511,18 @@
           "color": {
             "mode": "thresholds"
           },
-          "mappings": [],
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            }
+          ],
           "noValue": "0",
           "thresholds": {
             "mode": "absolute",
@@ -1414,12 +1532,12 @@
                 "value": null
               },
               {
-                "color": "yellow",
+                "color": "orange",
                 "value": 1
               },
               {
                 "color": "red",
-                "value": 5
+                "value": 2
               }
             ]
           },
@@ -1475,7 +1593,18 @@
           "color": {
             "mode": "thresholds"
           },
-          "mappings": [],
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            }
+          ],
           "noValue": "0",
           "thresholds": {
             "mode": "absolute",
@@ -1485,12 +1614,12 @@
                 "value": null
               },
               {
-                "color": "yellow",
+                "color": "orange",
                 "value": 1
               },
               {
                 "color": "red",
-                "value": 5
+                "value": 2
               }
             ]
           },
@@ -1712,7 +1841,18 @@
               "color": {
                 "mode": "thresholds"
               },
-              "mappings": [],
+              "mappings": [
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "text": "UNKNOWN",
+                      "color": "gray"
+                    }
+                  }
+                }
+              ],
               "noValue": "0",
               "thresholds": {
                 "mode": "absolute",
@@ -1722,12 +1862,12 @@
                     "value": null
                   },
                   {
-                    "color": "yellow",
+                    "color": "orange",
                     "value": 1
                   },
                   {
                     "color": "red",
-                    "value": 5
+                    "value": 2
                   }
                 ]
               },
@@ -1779,7 +1919,18 @@
               "color": {
                 "mode": "thresholds"
               },
-              "mappings": [],
+              "mappings": [
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "text": "UNKNOWN",
+                      "color": "gray"
+                    }
+                  }
+                }
+              ],
               "noValue": "0",
               "thresholds": {
                 "mode": "absolute",
@@ -1789,12 +1940,12 @@
                     "value": null
                   },
                   {
-                    "color": "yellow",
+                    "color": "orange",
                     "value": 1
                   },
                   {
                     "color": "red",
-                    "value": 5
+                    "value": 2
                   }
                 ]
               },
