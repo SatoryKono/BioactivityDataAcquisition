@@ -4,6 +4,10 @@
 
 Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yaml`.
 
+YAML также фиксирует time handoff policy в `time_handoff_requirements`:
+- `dashboard_links.required_tokens`: `${__url_time_range}`
+- `explore_links.required_tokens`: `from=${__from}`, `to=${__to}`
+
 ## Общие правила
 
 - Каждый dashboard (кроме overview-hub) **MUST** иметь top-level ссылку `Back to Overview` на UID `bioetl-overview-v2`.
