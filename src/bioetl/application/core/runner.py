@@ -87,7 +87,8 @@ class PipelineRunner(PipelineRunnerSupportMixin):
         self._tracer = tracer
 
         # Services injected directly via DI (created in composition layer)
-        self._lock_manager = dependencies.lock_manager
+        self._lock_runtime_service = dependencies.lock_runtime_service
+        self._lock_manager = self._lock_runtime_service
         self._preflight_service = dependencies.preflight
         self._postrun_service = dependencies.postrun
         self._lifecycle_service = dependencies.lifecycle_service
@@ -185,7 +186,7 @@ class PipelineRunner(PipelineRunnerSupportMixin):
         shutdown_recorded = False
         with self._pipeline_span(), self._observer:
             try:
-                async with self._services, self._lock_manager:
+                async with self._services, self._lock_runtime_service:
                     await self._run_managed_pipeline()
             except PipelineShutdownError:
                 self._record_terminal_shutdown()

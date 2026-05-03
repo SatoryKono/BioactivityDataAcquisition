@@ -176,6 +176,7 @@ def test_build_runtime_management_services_enables_quarantine_when_configured(
         expected_execution_fingerprint=None,
         expected_dq_contract_compatibility_hash=None,
         expected_effective_config_artifact_id=None,
+        expected_input_snapshot_fingerprint=None,
         run_ledger_port=None,
     )
     create_dq_report_service.assert_called_once_with(
@@ -319,12 +320,14 @@ def test_build_runtime_management_services_prefers_control_plane_effective_hash(
             dq_contract_compatibility_hash="dq-123",
             effective_config_artifact_id="artifact-123",
             effective_config_hash="f" * 64,
+            input_snapshot_fingerprint="snapshot-fp-123",
             run_ledger_service=None,
         ),
     )
 
     kwargs = cast(MagicMock, checkpoint_manager_cls).call_args.kwargs
     assert kwargs["expected_effective_config_hash"] == ("f" * 64)
+    assert kwargs["expected_input_snapshot_fingerprint"] == "snapshot-fp-123"
 
 
 @pytest.mark.unit

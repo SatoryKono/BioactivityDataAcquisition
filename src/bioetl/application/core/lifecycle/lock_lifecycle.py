@@ -8,7 +8,9 @@ from typing import TYPE_CHECKING
 from bioetl.application.core.lifecycle.shutdown import PipelineShutdownError
 
 if TYPE_CHECKING:
-    from bioetl.application.core.lifecycle.lock_manager import LockCoordinator
+    from bioetl.application.core.lifecycle.lock_runtime_service import (
+        LockRuntimeService,
+    )
     from bioetl.domain.locking import FencingToken
 
 __all__ = [
@@ -19,7 +21,7 @@ __all__ = [
 ]
 
 
-async def acquire_lock(host: LockCoordinator) -> FencingToken | None:
+async def acquire_lock(host: LockRuntimeService) -> FencingToken | None:
     """Acquire the runtime lock and update shared runtime state."""
     token = await host._lock.acquire(
         key=host._config.lock_key,
@@ -51,7 +53,7 @@ async def acquire_lock(host: LockCoordinator) -> FencingToken | None:
     return token
 
 
-async def release_lock(host: LockCoordinator) -> None:
+async def release_lock(host: LockRuntimeService) -> None:
     """Release the runtime lock, stop heartbeat, and clear context state."""
     if host._heartbeat:
         await host._heartbeat.stop()
@@ -69,7 +71,7 @@ async def release_lock(host: LockCoordinator) -> None:
     host._logger.info("Lock released", stage="cleanup")
 
 
-async def start_heartbeat(host: LockCoordinator) -> None:
+async def start_heartbeat(host: LockRuntimeService) -> None:
     """Start the background heartbeat task for the acquired lock."""
     host._heartbeat = host._heartbeat_factory(
         lock_port=host._lock,
@@ -83,7 +85,7 @@ async def start_heartbeat(host: LockCoordinator) -> None:
     await host._heartbeat.start()
 
 
-async def enter_lock_context(host: LockCoordinator) -> LockCoordinator:
+async def enter_lock_context(host: LockRuntimeService) -> LockRuntimeService:
     """Acquire the lock for async context-manager usage and start heartbeat."""
     token = await acquire_lock(host)
     if token is None:

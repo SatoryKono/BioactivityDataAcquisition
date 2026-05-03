@@ -6,7 +6,7 @@ from bioetl.application.core.base import BasePipeline
 from bioetl.application.core.batch_executor import BatchExecutor
 from bioetl.application.core.lifecycle import (
     CheckpointRuntimeService,
-    LockCoordinator,
+    LockRuntimeService,
     ShutdownSignal,
 )
 from bioetl.application.core.pipeline_services import PipelineService
@@ -18,7 +18,7 @@ __all__ = [
     "BasePipeline",
     "BatchExecutor",
     "CheckpointRuntimeService",
-    "LockCoordinator",
+    "LockRuntimeService",
     "PipelineRunner",
     "PipelineRunnerDependencies",
     "PipelineService",

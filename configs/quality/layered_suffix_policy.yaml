@@ -163,6 +163,54 @@ suffix_boundary_rules:
     allowed_symbol_exceptions:
 
 family_freeze_rules:
+  - rule_id: runtime_admin_lock_family
+    description: >
+      Lock lifecycle naming is role-driven: runtime collaborators use
+      *RuntimeService and operator/admin services use *Service. Legacy
+      LockCoordinator names are temporary compatibility aliases confined to the
+      lifecycle shim.
+    include_path_prefixes:
+      - src/bioetl/application/core/
+      - src/bioetl/application/services/
+      - src/bioetl/composition/
+    match_regex: ^(?:LockRuntimeService|LockRuntimeServiceCreateContext|LockService|LockCoordinator|LockCoordinatorCreateContext)$
+    allowed_symbols:
+      - symbol: LockRuntimeService
+        path: src/bioetl/application/core/lifecycle/lock_runtime_service.py
+        issue: "#3552"
+        owner: "@bioetl-platform"
+        expires_on: "2026-12-31"
+        removal_step: Remove family exception once lock runtime/admin naming freeze is retired by ADR-041 follow-up.
+        reason: Canonical runtime lock lifecycle collaborator.
+      - symbol: LockRuntimeServiceCreateContext
+        path: src/bioetl/application/core/lifecycle/lock_runtime_service.py
+        issue: "#3552"
+        owner: "@bioetl-platform"
+        expires_on: "2026-12-31"
+        removal_step: Remove family exception once lock runtime/admin naming freeze is retired by ADR-041 follow-up.
+        reason: Canonical runtime lock collaborator creation seam.
+      - symbol: LockService
+        path: src/bioetl/application/services/lock_service.py
+        issue: "#3552"
+        owner: "@bioetl-platform"
+        expires_on: "2026-12-31"
+        removal_step: Remove family exception once lock runtime/admin naming freeze is retired by ADR-041 follow-up.
+        reason: Canonical operator/admin lock service.
+      - symbol: LockCoordinator
+        path: src/bioetl/application/core/lifecycle/lock_manager.py
+        issue: "#3552"
+        owner: "@bioetl-platform"
+        expires_on: "2026-12-31"
+        removal_step: Remove after all remaining compatibility imports migrate to LockRuntimeService.
+        reason: Temporary legacy alias confined to the lifecycle shim.
+      - symbol: LockCoordinatorCreateContext
+        path: src/bioetl/application/core/lifecycle/lock_manager.py
+        issue: "#3552"
+        owner: "@bioetl-platform"
+        expires_on: "2026-12-31"
+        removal_step: Remove after all remaining compatibility imports migrate to LockRuntimeServiceCreateContext.
+        reason: Temporary legacy alias confined to the lifecycle shim.
+
   - rule_id: runtime_admin_checkpoint_quarantine_family
     description: >
       Checkpoint/quarantine runtime-admin naming is role-driven: runtime write

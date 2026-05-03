@@ -133,6 +133,21 @@ if TYPE_CHECKING:
 DEFAULT_OUT_DIR = Path("docs/reports/generated/pipeline_normalization_field_matrix")
 CSV_NAME = "pipeline_normalization_field_matrix.csv"
 MD_NAME = "pipeline_normalization_field_matrix.md"
+NON_CHEMBL_MD_NAME = "non_chembl_normalization_field_matrix.md"
+NON_CHEMBL_OBSERVED_VALUES_FIXTURE = Path(
+    "tests/fixtures/normalization/non_chembl_observed_values.yaml"
+)
+NON_CHEMBL_PIPELINES = frozenset(
+    {
+        "crossref_publication",
+        "openalex_publication",
+        "pubchem_compound",
+        "pubmed_publication",
+        "semanticscholar_publication",
+        "uniprot_idmapping",
+        "uniprot_protein",
+    }
+)
 
 CSV_COLUMNS = (
     "provider",
@@ -147,12 +162,20 @@ CSV_COLUMNS = (
     "controlled_vocabulary_source",
     "policy_scope",
     "semantic_category",
+    "classification",
+    "identifier_family",
+    "collection_semantics",
+    "raw_sidecar",
+    "canonical_sidecar",
     "include_in_content_hash",
     "set_like",
     "hash_ordering",
     "strictness",
     "schema_coverage",
     "dq_coverage",
+    "dq_rule",
+    "composite_usage",
+    "observed_source",
     "notes",
 )
 ENTITY_PIPELINE_KIND = "entity"
@@ -245,6 +268,9 @@ _CHEMBL_ENUM_CONFIG = "configs/enums/chembl.yaml"
 _PUBCHEM_ENUM_CONFIG = "configs/enums/pubchem.yaml"
 _UNIPROT_ENUM_CONFIG = "configs/enums/uniprot.yaml"
 _PUBLICATION_CONTROLLED_CONFIG = "configs/vocab/publication_controlled.yaml"
+_PUBLICATION_TYPE_CLASSIFICATION_SOURCE = (
+    "configs/enums/publication_type_classification.csv"
+)
 _CHEMBL_REFERENCE_SOURCES_CONFIG = "configs/vocab/chembl_reference_sources.yaml"
 _REFERENCE_ID_SOURCE = "domain.normalization.reference_ids"
 _OA_STATUS_SOURCE = "domain.schemas.common.publication_base.OA_STATUS_VALUES"
@@ -342,6 +368,57 @@ REFERENCE_ID_SOURCES: dict[tuple[str, str, str], str] = {
     ("uniprot", "protein", "reactome_xrefs"): _REFERENCE_ID_SOURCE,
     ("uniprot", "protein", "secondary_accessions"): _REFERENCE_ID_SOURCE,
 }
+
+_PUBLICATION_TAXONOMY_FIELDS = frozenset(
+    {"publication_type_unified", "publication_subclass", "publication_class"}
+)
+_NON_CHEMBL_IDENTIFIER_FAMILIES: dict[tuple[str, str, str], str] = {
+    ("crossref", "publication", "author_orcids"): "orcid",
+    ("crossref", "publication", "doi"): "doi",
+    ("crossref", "publication", "issn"): "issn",
+    ("openalex", "publication", "author_openalex_ids"): "openalex_author_id",
+    ("openalex", "publication", "author_orcids"): "orcid",
+    ("openalex", "publication", "doi"): "doi",
+    ("openalex", "publication", "institution_ids"): "openalex_institution_id",
+    ("openalex", "publication", "openalex_id"): "openalex_work_id",
+    ("openalex", "publication", "primary_topic"): "openalex_topic_id",
+    ("openalex", "publication", "ror_ids"): "ror",
+    ("openalex", "publication", "subject_topics"): "openalex_topic_id",
+    ("pubchem", "compound", "molecule_id"): "pubchem_cid",
+    ("pubmed", "publication", "author_orcids"): "orcid",
+    ("pubmed", "publication", "doi"): "doi",
+    ("pubmed", "publication", "issn"): "issn",
+    ("pubmed", "publication", "pmc_id"): "pmcid",
+    ("pubmed", "publication", "pmid"): "pmid",
+    ("semanticscholar", "publication", "author_orcids"): "orcid",
+    ("semanticscholar", "publication", "author_s2_ids"): "semanticscholar_author_id",
+    ("semanticscholar", "publication", "doi"): "doi",
+    ("semanticscholar", "publication", "paper_id"): "semanticscholar_paper_id",
+    ("semanticscholar", "publication", "pmc_id"): "pmcid",
+    ("semanticscholar", "publication", "pmid"): "pmid",
+    ("uniprot", "idmapping", "all_mappings"): "mixed_identifier_set",
+    ("uniprot", "idmapping", "target_id"): "chembl_target_id",
+    ("uniprot", "idmapping", "taxonomy_id"): "ncbi_taxonomy_id",
+    ("uniprot", "idmapping", "uniprot_accession"): "uniprot_accession",
+    ("uniprot", "protein", "accession"): "uniprot_accession",
+    ("uniprot", "protein", "cellular_component"): "go",
+    ("uniprot", "protein", "chembl_ids"): "chembl_id",
+    ("uniprot", "protein", "drugbank_ids"): "drugbank_id",
+    ("uniprot", "protein", "go_terms"): "go",
+    ("uniprot", "protein", "interpro_xrefs"): "interpro",
+    ("uniprot", "protein", "molecular_function"): "go",
+    ("uniprot", "protein", "pdb_xrefs"): "pdb",
+    ("uniprot", "protein", "pfam_xrefs"): "pfam",
+    ("uniprot", "protein", "reactome_xrefs"): "reactome",
+    ("uniprot", "protein", "secondary_accessions"): "uniprot_accession",
+    ("uniprot", "protein", "taxonomy_id"): "ncbi_taxonomy_id",
+}
+_NON_CHEMBL_INVENTORY_SECTIONS = (
+    "observed_values",
+    "observed_raw_values",
+    "expected_normalized_values",
+    "expected_controlled_values",
+)
 
 ENUM_REGISTRY_PATHS: dict[tuple[str, str, str], tuple[str, ...]] = {
     ("chembl", "activity", "assay_type"): ("assay", "types"),
@@ -593,6 +670,8 @@ def _registered_controlled_vocabulary_source(
     entity: str,
     field_name: str,
 ) -> str | None:
+    if entity == "publication" and _is_publication_taxonomy_field(field_name):
+        return _PUBLICATION_TYPE_CLASSIFICATION_SOURCE
     configured_source = ENUM_CONFIG_SOURCES.get((provider, entity, field_name))
     if configured_source is not None:
         return configured_source
@@ -673,6 +752,248 @@ def _load_entity_config(provider: str, entity: str) -> dict[str, object]:
     if not path.exists():
         return {}
     return _load_yaml(path)
+
+
+@cache
+def _load_non_chembl_observed_value_inventory() -> dict[str, object]:
+    return _load_yaml(NON_CHEMBL_OBSERVED_VALUES_FIXTURE)
+
+
+def _non_chembl_pipeline_inventory(pipeline_name: str) -> dict[str, object]:
+    payload = _load_non_chembl_observed_value_inventory()
+    pipelines = payload.get("pipelines")
+    if not isinstance(pipelines, dict):
+        return {}
+    pipeline_payload = pipelines.get(pipeline_name)
+    return pipeline_payload if isinstance(pipeline_payload, dict) else {}
+
+
+def _inventory_mapping(
+    pipeline_name: str,
+    section_name: str,
+) -> dict[str, object]:
+    payload = _non_chembl_pipeline_inventory(pipeline_name)
+    section = payload.get(section_name)
+    return section if isinstance(section, dict) else {}
+
+
+def _classification_spec(pipeline_name: str, field_name: str) -> dict[str, str]:
+    payload = _inventory_mapping(pipeline_name, "classification").get(field_name)
+    if isinstance(payload, dict):
+        return {str(key): str(value) for key, value in payload.items() if value is not None}
+    if payload is None:
+        return {}
+    return {"category": str(payload)}
+
+
+def _inventory_section_fragments(pipeline_name: str, field_name: str) -> list[str]:
+    fragments: list[str] = []
+    for section_name in _NON_CHEMBL_INVENTORY_SECTIONS:
+        if field_name in _inventory_mapping(pipeline_name, section_name):
+            fragments.append(
+                f"{NON_CHEMBL_OBSERVED_VALUES_FIXTURE.as_posix()}#pipelines."
+                f"{pipeline_name}.{section_name}.{field_name}"
+            )
+    if field_name in _inventory_mapping(pipeline_name, "structured_json_shapes"):
+        fragments.append(
+            f"{NON_CHEMBL_OBSERVED_VALUES_FIXTURE.as_posix()}#pipelines."
+            f"{pipeline_name}.structured_json_shapes.{field_name}"
+        )
+    if field_name in _inventory_mapping(pipeline_name, "classification"):
+        fragments.append(
+            f"{NON_CHEMBL_OBSERVED_VALUES_FIXTURE.as_posix()}#pipelines."
+            f"{pipeline_name}.classification.{field_name}"
+        )
+    return fragments
+
+
+def _default_observed_source(pipeline_name: str, field_name: str) -> str:
+    return ",".join(_inventory_section_fragments(pipeline_name, field_name))
+
+
+def _default_identifier_family(
+    *,
+    provider: str,
+    entity: str,
+    field_name: str,
+) -> str:
+    structured_policy = _publication_structured_policy(
+        provider=provider,
+        entity=entity,
+        field_name=field_name,
+    )
+    if structured_policy is not None and structured_policy.identifier_family:
+        return structured_policy.identifier_family
+    return _NON_CHEMBL_IDENTIFIER_FAMILIES.get((provider, entity, field_name), "")
+
+
+def _default_collection_semantics(
+    *,
+    provider: str,
+    entity: str,
+    field_name: str,
+) -> str:
+    semantic_policy = structured_payload_policy(f"{provider}.{entity}", field_name)
+    if semantic_policy is not None:
+        return semantic_policy.collection_semantics.value
+    structured_policy = _publication_structured_policy(
+        provider=provider,
+        entity=entity,
+        field_name=field_name,
+    )
+    if structured_policy is not None:
+        return structured_policy.collection_semantics.value
+    return "scalar"
+
+
+def _is_publication_taxonomy_field(field_name: str) -> bool:
+    return field_name in _PUBLICATION_TAXONOMY_FIELDS
+
+
+def _default_non_chembl_classification(
+    *,
+    provider: str,
+    entity: str,
+    field_name: str,
+    semantic_category: str,
+    strictness: str,
+) -> str:
+    if _is_publication_taxonomy_field(field_name):
+        return "derived_vocabulary"
+    if strictness in {"strict_boolean", "strict_flag"}:
+        return "strict_boolean"
+    if strictness == "strict_enum":
+        return "strict_enum"
+    if strictness == "controlled_unit" or semantic_category == "controlled_vocabulary":
+        return "controlled_vocabulary"
+    if _default_identifier_family(provider=provider, entity=entity, field_name=field_name):
+        return "identifier_namespace"
+    if structured_payload_policy(f"{provider}.{entity}", field_name) is not None:
+        return "structured_json_sidecar"
+    if _publication_structured_policy(
+        provider=provider,
+        entity=entity,
+        field_name=field_name,
+    ) is not None:
+        return "structured_json_collection"
+    return semantic_category
+
+
+def _non_chembl_row_metadata(row: dict[str, str]) -> dict[str, str]:
+    metadata = {
+        "classification": "",
+        "identifier_family": "",
+        "collection_semantics": "scalar",
+        "raw_sidecar": "",
+        "canonical_sidecar": "",
+        "dq_rule": row.get("dq_coverage", ""),
+        "composite_usage": "",
+        "observed_source": "",
+    }
+    if (
+        row.get("pipeline_kind") != ENTITY_PIPELINE_KIND
+        or row.get("pipeline_name") not in NON_CHEMBL_PIPELINES
+    ):
+        return metadata
+
+    pipeline_name = row["pipeline_name"]
+    provider = row["provider"]
+    entity = row["entity"]
+    field_name = row["field_name"]
+    classification = _classification_spec(pipeline_name, field_name)
+    semantic_policy = structured_payload_policy(f"{provider}.{entity}", field_name)
+    publication_policy = _publication_structured_policy(
+        provider=provider,
+        entity=entity,
+        field_name=field_name,
+    )
+    metadata["classification"] = classification.get("category", "") or (
+        _default_non_chembl_classification(
+            provider=provider,
+            entity=entity,
+            field_name=field_name,
+            semantic_category=row.get("semantic_category", ""),
+            strictness=row.get("strictness", ""),
+        )
+    )
+    metadata["identifier_family"] = classification.get("identifier_family", "") or (
+        _default_identifier_family(
+            provider=provider,
+            entity=entity,
+            field_name=field_name,
+        )
+    )
+    metadata["collection_semantics"] = classification.get(
+        "collection_semantics",
+        "",
+    ) or _default_collection_semantics(
+        provider=provider,
+        entity=entity,
+        field_name=field_name,
+    )
+    metadata["raw_sidecar"] = classification.get("raw_sidecar", "") or (
+        semantic_policy.raw_sidecar_field
+        if semantic_policy is not None and semantic_policy.raw_sidecar_field
+        else (
+            publication_policy.raw_sidecar_field
+            if publication_policy is not None and publication_policy.raw_sidecar_field
+            else ""
+        )
+    )
+    metadata["canonical_sidecar"] = classification.get("canonical_sidecar", "") or (
+        semantic_policy.canonical_sidecar_field if semantic_policy is not None else ""
+    )
+    metadata["composite_usage"] = classification.get("composite_usage", "")
+    metadata["observed_source"] = classification.get("observed_source", "") or (
+        _default_observed_source(pipeline_name, field_name)
+    )
+    return metadata
+
+
+def _augment_row_with_inventory_metadata(row: dict[str, str]) -> dict[str, str]:
+    augmented = dict(row)
+    augmented.update(_non_chembl_row_metadata(augmented))
+    return augmented
+
+
+def _inventory_fields_for_pipeline(pipeline_name: str) -> set[str]:
+    fields: set[str] = set()
+    for section_name in _NON_CHEMBL_INVENTORY_SECTIONS + (
+        "structured_json_shapes",
+        "classification",
+    ):
+        fields.update(_inventory_mapping(pipeline_name, section_name))
+    primary_key = _non_chembl_pipeline_inventory(pipeline_name).get("primary_key")
+    if isinstance(primary_key, str) and primary_key:
+        fields.add(primary_key)
+    return fields
+
+
+def _validate_non_chembl_inventory_rows(rows: list[dict[str, str]]) -> None:
+    rows_by_key = {(row["pipeline_name"], row["field_name"]): row for row in rows}
+    for pipeline_name in sorted(NON_CHEMBL_PIPELINES):
+        structured_fields = set(_inventory_mapping(pipeline_name, "structured_json_shapes"))
+        for field_name in sorted(_inventory_fields_for_pipeline(pipeline_name)):
+            row = rows_by_key.get((pipeline_name, field_name))
+            if row is None:
+                raise ValueError(
+                    f"Missing non-ChEMBL normalization evidence row for "
+                    f"{pipeline_name}.{field_name}"
+                )
+            if not row.get("classification"):
+                raise ValueError(
+                    f"Missing classification evidence for {pipeline_name}.{field_name}"
+                )
+            if not row.get("observed_source"):
+                raise ValueError(
+                    f"Missing observed-source evidence for {pipeline_name}.{field_name}"
+                )
+            if field_name in structured_fields and (
+                not row.get("raw_sidecar") or not row.get("canonical_sidecar")
+            ):
+                raise ValueError(
+                    f"Missing structured sidecar evidence for {pipeline_name}.{field_name}"
+                )
 
 
 def _dq_allowed_values(
@@ -777,6 +1098,8 @@ def _semantic_category(
     field_name: str,
     strictness: str,
 ) -> str:
+    if entity == "publication" and _is_publication_taxonomy_field(field_name):
+        return "derived_vocabulary"
     if provider == "chembl":
         policy_surface = chembl_policy_surface(entity, field_name)
         if policy_surface is not None:
@@ -1523,7 +1846,9 @@ def build_field_matrix_rows() -> list[dict[str, str]]:
     rows: list[dict[str, str]] = []
     rows.extend(_entity_field_matrix_rows())
     rows.extend(_composite_field_matrix_rows())
-    return rows
+    augmented_rows = [_augment_row_with_inventory_metadata(row) for row in rows]
+    _validate_non_chembl_inventory_rows(augmented_rows)
+    return augmented_rows
 
 
 def _entity_field_matrix_rows() -> list[dict[str, str]]:
@@ -2179,9 +2504,16 @@ def _markdown_table_row(row: dict[str, str], headers: list[str]) -> str:
 
 def build_artifacts() -> dict[str, str]:
     rows = build_field_matrix_rows()
+    non_chembl_rows = [
+        row
+        for row in rows
+        if row["pipeline_kind"] == ENTITY_PIPELINE_KIND
+        and row["pipeline_name"] in NON_CHEMBL_PIPELINES
+    ]
     return {
         CSV_NAME: render_csv(rows),
         MD_NAME: render_markdown(rows),
+        NON_CHEMBL_MD_NAME: render_markdown(non_chembl_rows),
     }
 
 

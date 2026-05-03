@@ -89,14 +89,31 @@ def _iter_inventory_cells(text: str) -> dict[str, dict[str, str]]:
     return rows
 
 
-def _iter_cli_alias_entrypoint_paths() -> set[str]:
+def _iter_cli_public_entrypoint_paths() -> set[str]:
     paths: set[str] = set()
+    domains_root = (
+        ROOT / "src" / "bioetl" / "interfaces" / "cli" / "commands" / "domains"
+    )
     commands_root = ROOT / "src" / "bioetl" / "interfaces" / "cli" / "commands"
-    for path in commands_root.rglob("*.py"):
+    for path in domains_root.rglob("*.py"):
         text = path.read_text(encoding="utf-8")
-        if 'alias_module(__name__, "bioetl.interfaces.cli.commands.' not in text:
+        if '"""Internal wrapper for the public ' not in text:
             continue
-        paths.add(path.relative_to(ROOT).as_posix())
+        if "from bioetl.interfaces.cli.commands." not in text:
+            continue
+        if "from bioetl.interfaces.cli.commands.domains.shared." in text:
+            continue
+        for line in text.splitlines():
+            stripped = line.strip()
+            prefix = "from bioetl.interfaces.cli.commands."
+            if not stripped.startswith(prefix):
+                continue
+            if ".domains." in stripped:
+                continue
+            module_name = stripped.removeprefix(prefix).split(" import ", 1)[0].strip()
+            public_path = commands_root / f"{module_name.replace('.', '/')}.py"
+            if public_path.exists():
+                paths.add(public_path.relative_to(ROOT).as_posix())
     return paths
 
 
@@ -288,14 +305,14 @@ def test_generated_snapshot_companion_is_present_and_in_sync() -> None:
 
 
 @pytest.mark.architecture
-def test_cli_alias_entrypoint_modules_are_curated_rows() -> None:
-    """Every retained top-level CLI alias seam must be explicitly inventoried."""
+def test_cli_public_entrypoint_modules_are_curated_rows() -> None:
+    """Every retained top-level CLI public seam must be explicitly inventoried."""
     mod = _load_registry_module()
     registry = mod.load_compatibility_registry(REGISTRY_YAML)
 
-    missing = sorted(_iter_cli_alias_entrypoint_paths() - registry.curated_paths)
+    missing = sorted(_iter_cli_public_entrypoint_paths() - registry.curated_paths)
     assert not missing, (
-        "CLI alias entrypoint modules are missing from the curated compatibility "
+        "CLI public entrypoint modules are missing from the curated compatibility "
         "ledger.\n" + "\n".join(missing)
     )
 
@@ -322,44 +339,35 @@ def test_public_symbol_alias_surfaces_are_curated_rows() -> None:
 
 @pytest.mark.architecture
 def test_deprecated_module_alias_surfaces_remain_in_transition_debt() -> None:
-    """Only live deprecated alias helpers should remain in transition-debt review."""
+    """Retired CLI alias helpers must not linger in transition-debt review."""
     mod = _load_registry_module()
     registry = mod.load_compatibility_registry(REGISTRY_YAML)
 
-    expected = {
-        "src/bioetl/interfaces/cli/commands/_compat.py",
-    }
     transition_paths = {row.path for row in registry.transition_debt}
-    missing = sorted(expected - transition_paths)
-    assert not missing, (
-        "Deprecated naming alias surfaces dropped out of transition debt.\n"
-        + "\n".join(missing)
+    assert "src/bioetl/interfaces/cli/commands/_compat.py" not in transition_paths, (
+        "CLI compatibility alias helper should be retired from transition debt."
     )
 
 
 @pytest.mark.architecture
-def test_cli_compat_helper_is_confined_to_curated_public_seams() -> None:
-    """CLI `_compat.py` helper must stay confined to reviewed top-level seams."""
-    mod = _load_registry_module()
-    registry = mod.load_compatibility_registry(REGISTRY_YAML)
+def test_cli_sys_modules_alias_helper_is_retired() -> None:
+    """CLI command wrappers must not rely on runtime `sys.modules` aliasing."""
+    helper_path = (
+        ROOT / "src" / "bioetl" / "interfaces" / "cli" / "commands" / "_compat.py"
+    )
+    assert not helper_path.exists()
 
-    helper_path = "src/bioetl/interfaces/cli/commands/_compat.py"
-    assert helper_path in registry.curated_paths
-
-    allowed_importers = _iter_cli_alias_entrypoint_paths()
-    observed_importers: set[str] = set()
-    for path in (ROOT / "src" / "bioetl").rglob("*.py"):
-        rel_path = path.relative_to(ROOT).as_posix()
-        if rel_path == helper_path:
-            continue
+    offenders: list[str] = []
+    for path in (ROOT / "src" / "bioetl" / "interfaces" / "cli" / "commands").rglob(
+        "*.py"
+    ):
         text = path.read_text(encoding="utf-8")
-        if "from bioetl.interfaces.cli.commands._compat import alias_module" in text:
-            observed_importers.add(rel_path)
+        if "alias_module(" in text:
+            offenders.append(path.relative_to(ROOT).as_posix())
 
-    assert observed_importers == allowed_importers, (
-        "CLI compatibility helper leaked beyond the reviewed public seam set.\n"
-        f"Observed: {sorted(observed_importers)}\n"
-        f"Allowed: {sorted(allowed_importers)}"
+    assert not offenders, (
+        "CLI command wrappers must use direct re-export seams instead of "
+        "runtime module aliasing.\n" + "\n".join(sorted(offenders))
     )
 
 

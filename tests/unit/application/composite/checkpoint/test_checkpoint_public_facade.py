@@ -21,6 +21,7 @@ def test_public_facade_exports_anchor_context_helpers() -> None:
         effective_config_artifact_id=" artifact-123 ",
         execution_fingerprint=" fingerprint-123 ",
         dq_contract_compatibility_hash=" dq-hash-123 ",
+        input_snapshot_fingerprint=" SNAPSHOT-HASH-123 ",
         contract_ref=" ChemBL.Activity ",
         contract_version=" v2 ",
         manifest_id=" manifest-123 ",
@@ -34,6 +35,7 @@ def test_public_facade_exports_anchor_context_helpers() -> None:
     assert anchors.effective_config_artifact_id == "artifact-123"
     assert anchors.execution_fingerprint == "fingerprint-123"
     assert anchors.dq_contract_compatibility_hash == "dq-hash-123"
+    assert anchors.input_snapshot_fingerprint == "snapshot-hash-123"
     assert anchors.contract_ref == "chembl.activity"
     assert anchors.contract_version == "2.0.0"
 
@@ -44,6 +46,7 @@ def test_public_facade_merges_runtime_anchors_into_checkpoint_state() -> None:
         effective_config_artifact_id=" artifact-123 ",
         execution_fingerprint=" fingerprint-123 ",
         dq_contract_compatibility_hash=" dq-hash-123 ",
+        input_snapshot_fingerprint=" snapshot-hash-123 ",
         contract_ref=" ChemBL.Activity ",
         contract_version=" v2 ",
         manifest_id=" manifest-123 ",
@@ -68,6 +71,7 @@ def test_public_facade_merges_runtime_anchors_into_checkpoint_state() -> None:
     assert (
         merged.dq_contract_compatibility_hash == anchors.dq_contract_compatibility_hash
     )
+    assert merged.input_snapshot_fingerprint == anchors.input_snapshot_fingerprint
     assert merged.contract_ref == anchors.contract_ref
     assert merged.contract_version == anchors.contract_version
     assert merged.manifest_id == "manifest-123"
@@ -78,6 +82,7 @@ def test_public_facade_merges_runtime_anchors_into_checkpoint_state() -> None:
     assert (
         fresh.dq_contract_compatibility_hash == anchors.dq_contract_compatibility_hash
     )
+    assert fresh.input_snapshot_fingerprint == anchors.input_snapshot_fingerprint
     assert fresh.contract_ref == anchors.contract_ref
     assert fresh.state == CompositePipelineState.NOT_STARTED
 

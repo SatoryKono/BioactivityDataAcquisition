@@ -10,7 +10,9 @@ if TYPE_CHECKING:
     from bioetl.application.core.lifecycle.checkpoint_manager import (
         CheckpointRuntimeService,
     )
-    from bioetl.application.core.lifecycle.lock_manager import LockCoordinator
+    from bioetl.application.core.lifecycle.lock_runtime_service import (
+        LockRuntimeService,
+    )
     from bioetl.application.core.lifecycle.shutdown import ShutdownSignal
     from bioetl.application.core.postrun.service import PostrunService
     from bioetl.application.core.preflight.service import PreflightService
@@ -27,12 +29,17 @@ class PipelineRunnerDependencies:
 
     executor: BatchExecutor
     checkpoint_manager: CheckpointRuntimeService
-    lock_manager: LockCoordinator
+    lock_runtime_service: LockRuntimeService
     preflight: PreflightService
     postrun: PostrunService
     lifecycle_service: MedallionLifecycleService
     observer: PipelineObserver
     shutdown_signal: ShutdownSignal
+
+    @property
+    def lock_manager(self) -> LockRuntimeService:
+        """Legacy alias retained while callers migrate to runtime-service naming."""
+        return self.lock_runtime_service
 
 
 def resolve_legacy_runner_dependencies(
@@ -43,7 +50,8 @@ def resolve_legacy_runner_dependencies(
         "executor": legacy_kwargs.get("executor"),
         "checkpoint_manager": legacy_kwargs.get("checkpoint_manager"),
         "shutdown_signal": legacy_kwargs.get("shutdown_signal"),
-        "lock_manager": legacy_kwargs.get("lock_manager"),
+        "lock_runtime_service": legacy_kwargs.get("lock_runtime_service")
+        or legacy_kwargs.get("lock_manager"),
         "preflight": legacy_kwargs.get("preflight"),
         "postrun": legacy_kwargs.get("postrun"),
         "lifecycle_service": legacy_kwargs.get("lifecycle_service"),
@@ -57,7 +65,9 @@ def resolve_legacy_runner_dependencies(
         checkpoint_manager=cast(
             "CheckpointRuntimeService", values["checkpoint_manager"]
         ),
-        lock_manager=cast("LockCoordinator", values["lock_manager"]),
+        lock_runtime_service=cast(
+            "LockRuntimeService", values["lock_runtime_service"]
+        ),
         preflight=cast("PreflightService", values["preflight"]),
         postrun=cast("PostrunService", values["postrun"]),
         lifecycle_service=cast(

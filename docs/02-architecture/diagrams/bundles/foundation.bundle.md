@@ -515,7 +515,7 @@
 
 ### Описание
 
-Диаграмма «MemoryLock Class Diagram» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: RULES.md §3.3 (Locking), ADR-010. Схема имеет плотность порядка 7 узлов и 5 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: LockPort, MemoryLock, LockEntry, LockResult, LockNotHeldError, LockCoordinator.
+Диаграмма «MemoryLock Class Diagram» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: RULES.md §3.3 (Locking), ADR-010. Схема имеет плотность порядка 7 узлов и 5 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: LockPort, MemoryLock, LockEntry, LockResult, LockNotHeldError, LockRuntimeService.
 
 ### Метаданные
 
@@ -1061,7 +1061,7 @@
 
 ### Описание
 
-Диаграмма «PipelineRunner Collaborator Diagram» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Component / Class». В комментариях исходника зафиксирован фокус диаграммы: application/core/runner.py, application/core/pipeline_services.py, composition/factories/pipeline/runner_assembly.py. Схема имеет плотность порядка 11 узлов и 10 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: PipelineRunner, PipelineRunnerDependencies, PipelineService, BatchExecutor, LockCoordinator, PreflightService.
+Диаграмма «PipelineRunner Collaborator Diagram» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Component / Class». В комментариях исходника зафиксирован фокус диаграммы: application/core/runner.py, application/core/pipeline_services.py, composition/factories/pipeline/runner_assembly.py. Схема имеет плотность порядка 11 узлов и 10 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: PipelineRunner, PipelineRunnerDependencies, PipelineService, BatchExecutor, LockRuntimeService, PreflightService.
 
 ### Метаданные
 

@@ -15,7 +15,7 @@ from bioetl.application.core.lifecycle.cleanup_service import (
     LayerInfo,
 )
 from bioetl.application.core.lifecycle.heartbeat import HeartbeatTask
-from bioetl.application.core.lifecycle.lock_manager import LockCoordinator
+from bioetl.application.core.lifecycle.lock_runtime_service import LockRuntimeService
 from bioetl.application.core.lifecycle.shutdown import (
     ShutdownSignal,
     create_shutdown_service,
@@ -29,7 +29,7 @@ __all__ = [
     "CleanupService",
     "HeartbeatTask",
     "LayerInfo",
-    "LockCoordinator",
+    "LockRuntimeService",
     "ShutdownSignal",
     "create_shutdown_service",
 ]

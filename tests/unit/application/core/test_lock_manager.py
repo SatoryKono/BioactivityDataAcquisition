@@ -6,9 +6,9 @@ from uuid import UUID
 import pytest
 
 from bioetl.application.core.config import LockConfig
-from bioetl.application.core.lifecycle.lock_manager import (
-    LockCoordinator,
-    LockCoordinatorCreateContext,
+from bioetl.application.core.lifecycle.lock_runtime_service import (
+    LockRuntimeService,
+    LockRuntimeServiceCreateContext,
 )
 from bioetl.application.core.lifecycle.shutdown import (
     PipelineShutdownError,
@@ -59,8 +59,8 @@ def lock_config() -> LockConfig:
 @pytest.fixture
 def lock_manager(
     mock_lock_port: AsyncMock, mock_shutdown_signal: Mock, lock_config: LockConfig
-) -> LockCoordinator:
-    return LockCoordinator(
+) -> LockRuntimeService:
+    return LockRuntimeService(
         lock_port=mock_lock_port,
         run_id=TEST_RUN_ID,
         config=lock_config,
@@ -69,9 +69,9 @@ def lock_manager(
     )
 
 
-class TestLockCoordinator:
+class TestLockRuntimeService:
     async def test_acquire_lock_success(
-        self, lock_manager: LockCoordinator, mock_lock_port: AsyncMock
+        self, lock_manager: LockRuntimeService, mock_lock_port: AsyncMock
     ) -> None:
         """Test successful lock acquisition returns FencingToken."""
         mock_lock_port.acquire.return_value = _TEST_TOKEN
@@ -91,7 +91,7 @@ class TestLockCoordinator:
         )
 
     async def test_acquire_lock_failure(
-        self, lock_manager: LockCoordinator, mock_lock_port: AsyncMock
+        self, lock_manager: LockRuntimeService, mock_lock_port: AsyncMock
     ) -> None:
         """Test failure to acquire lock returns None."""
         mock_lock_port.acquire.return_value = None
@@ -101,7 +101,7 @@ class TestLockCoordinator:
         assert result is None
 
     async def test_release_lock_success(
-        self, lock_manager: LockCoordinator, mock_lock_port: AsyncMock
+        self, lock_manager: LockRuntimeService, mock_lock_port: AsyncMock
     ) -> None:
         """Test successful lock release."""
         mock_lock_port.release.return_value = True
@@ -114,7 +114,7 @@ class TestLockCoordinator:
 
     async def test_heartbeat_loop_loss(
         self,
-        lock_manager: LockCoordinator,
+        lock_manager: LockRuntimeService,
         mock_lock_port: AsyncMock,
         mock_shutdown_signal: Mock,
     ) -> None:
@@ -135,7 +135,7 @@ class TestLockCoordinator:
         await lock_manager._heartbeat.stop()
 
     async def test_context_manager_success(
-        self, lock_manager: LockCoordinator, mock_lock_port: AsyncMock
+        self, lock_manager: LockRuntimeService, mock_lock_port: AsyncMock
     ) -> None:
         """Test usage as async context manager."""
         mock_lock_port.acquire.return_value = _TEST_TOKEN
@@ -153,7 +153,7 @@ class TestLockCoordinator:
 
     async def test_start_heartbeat_failure(
         self,
-        lock_manager: LockCoordinator,
+        lock_manager: LockRuntimeService,
         mock_lock_port: AsyncMock,
         mock_shutdown_signal: Mock,
     ) -> None:
@@ -167,7 +167,7 @@ class TestLockCoordinator:
         mock_shutdown_signal.request.assert_called_once()
 
     async def test_context_manager_failure(
-        self, lock_manager: LockCoordinator, mock_lock_port: AsyncMock
+        self, lock_manager: LockRuntimeService, mock_lock_port: AsyncMock
     ) -> None:
         """Test context manager raises if lock not acquired."""
         mock_lock_port.acquire.return_value = None
@@ -179,7 +179,7 @@ class TestLockCoordinator:
         assert entered is False
 
     async def test_validate_uses_fencing_token(
-        self, lock_manager: LockCoordinator, mock_lock_port: AsyncMock
+        self, lock_manager: LockRuntimeService, mock_lock_port: AsyncMock
     ) -> None:
         """Test validate uses fencing token when available."""
         lock_manager._fencing_token = _TEST_TOKEN
@@ -240,8 +240,8 @@ class TestLockConfig:
 def test_lock_key_format_incremental(
     mock_lock_port: AsyncMock, mock_shutdown_signal: Mock
 ) -> None:
-    manager = LockCoordinator.create(
-        LockCoordinatorCreateContext(
+    manager = LockRuntimeService.create(
+        LockRuntimeServiceCreateContext(
             lock_port=mock_lock_port,
             run_id=TEST_RUN_ID,
             provider="chembl",
@@ -263,8 +263,8 @@ def test_lock_key_format_incremental(
 def test_lock_key_format_exclusive(
     mock_lock_port: AsyncMock, mock_shutdown_signal: Mock
 ) -> None:
-    manager = LockCoordinator.create(
-        LockCoordinatorCreateContext(
+    manager = LockRuntimeService.create(
+        LockRuntimeServiceCreateContext(
             lock_port=mock_lock_port,
             run_id=TEST_RUN_ID,
             provider="chembl",

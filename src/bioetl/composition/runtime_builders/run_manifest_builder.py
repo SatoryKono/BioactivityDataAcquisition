@@ -4,7 +4,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from bioetl.application.services.control_plane.run_ledger_service import RunLedgerService
+from bioetl.application.services.control_plane.run_ledger_service import (
+    RunLedgerService,
+)
 from bioetl.composition.runtime_builders import (
     _run_manifest_support as _manifest_support,
 )

@@ -41,6 +41,7 @@ class CompositeCheckpointServiceContext:
     expected_effective_config_artifact_id: str | None = None
     expected_execution_fingerprint: str | None = None
     expected_dq_contract_compatibility_hash: str | None = None
+    expected_input_snapshot_fingerprint: str | None = None
     expected_contract_ref: str | None = None
     expected_contract_version: str | None = None
     expected_manifest_id: str | None = None
@@ -63,6 +64,7 @@ _CHECKPOINT_INIT_OPTIONAL_DEFAULTS: dict[str, object] = {
     "expected_effective_config_artifact_id": None,
     "expected_execution_fingerprint": None,
     "expected_dq_contract_compatibility_hash": None,
+    "expected_input_snapshot_fingerprint": None,
     "expected_contract_ref": None,
     "expected_contract_version": None,
     "expected_manifest_id": None,
@@ -88,6 +90,7 @@ class _CompositeCheckpointServiceContextKwargs(TypedDict):
     expected_effective_config_artifact_id: str | None
     expected_execution_fingerprint: str | None
     expected_dq_contract_compatibility_hash: str | None
+    expected_input_snapshot_fingerprint: str | None
     expected_contract_ref: str | None
     expected_contract_version: str | None
     expected_manifest_id: str | None
@@ -171,6 +174,7 @@ class CompositeCheckpointService:
             dq_contract_compatibility_hash=(
                 params.expected_dq_contract_compatibility_hash
             ),
+            input_snapshot_fingerprint=params.expected_input_snapshot_fingerprint,
             contract_ref=params.expected_contract_ref,
             contract_version=params.expected_contract_version,
             manifest_id=params.expected_manifest_id,
@@ -225,6 +229,11 @@ class CompositeCheckpointService:
     def expected_dq_contract_compatibility_hash(self) -> str:
         """Expose the configured DQ compatibility anchor."""
         return self._expected_checkpoint_context.dq_contract_compatibility_hash
+
+    @property
+    def expected_input_snapshot_fingerprint(self) -> str:
+        """Expose the configured input-snapshot fingerprint anchor."""
+        return self._expected_checkpoint_context.input_snapshot_fingerprint
 
     @property
     def expected_contract_ref(self) -> str:

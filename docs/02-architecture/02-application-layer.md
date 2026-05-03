@@ -78,7 +78,7 @@ ______________________________________________________________________
 **Сервисы ядра:**
 
 - **`PipelineService`** (`pipeline_services.py`) — Frozen DI bundle портов и optional DQ/metadata collaborators для pipeline execution и `PipelineRunner`
-- **`LockCoordinator`** (`lifecycle/lock_manager.py`) — Координация блокировок
+- **`LockRuntimeService`** (`lifecycle/lock_runtime_service.py`) — runtime-координация блокировок
 - **`PreflightService`** (`preflight/service.py`) — Pre-run health checks
 - **`PostrunService`** (`postrun/service.py`) — Post-run операции (DQ, VACUUM, cleanup)
 - **`CheckpointRuntimeService`** (`lifecycle/checkpoint_manager.py`) — runtime checkpoint I/O и resume policy
@@ -181,7 +181,7 @@ factory = GenericPipelineFactory(
 
 **`PipelineRunner`** — координатор исполнения:
 
-- Делегирует блокировку через `LockCoordinator`
+- Делегирует блокировку через `LockRuntimeService`
 - Запускает preflight-валидацию через `PreflightService`
 - Исполняет пайплайн через `BatchExecutor`
 - Управляет postrun-операциями через `PostrunService`

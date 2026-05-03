@@ -42,6 +42,7 @@ class CompositeCheckpointState:
     effective_config_artifact_id: str = ""
     execution_fingerprint: str = ""
     dq_contract_compatibility_hash: str = ""
+    input_snapshot_fingerprint: str = ""
     contract_ref: str = ""
     contract_version: str = ""
     manifest_id: str = ""
@@ -121,6 +122,7 @@ class CompositeCheckpointState:
                 "effective_config_artifact_id": self.effective_config_artifact_id,
                 "execution_fingerprint": self.execution_fingerprint,
                 "dq_contract_compatibility_hash": self.dq_contract_compatibility_hash,
+                "input_snapshot_fingerprint": self.input_snapshot_fingerprint,
                 "contract_ref": self.contract_ref,
                 "contract_version": self.contract_version,
                 "manifest_id": self.manifest_id,
@@ -152,6 +154,9 @@ class CompositeCheckpointState:
             "dq_contract_compatibility_hash": normalized_anchors[
                 "dq_contract_compatibility_hash"
             ],
+            "input_snapshot_fingerprint": normalized_anchors[
+                "input_snapshot_fingerprint"
+            ],
             "contract_ref": normalized_anchors["contract_ref"],
             "contract_version": normalized_anchors["contract_version"],
             "manifest_id": normalized_anchors["manifest_id"],
@@ -182,6 +187,7 @@ class CompositeCheckpointState:
                 "dq_contract_compatibility_hash": data.get(
                     "dq_contract_compatibility_hash"
                 ),
+                "input_snapshot_fingerprint": data.get("input_snapshot_fingerprint"),
                 "contract_ref": data.get("contract_ref"),
                 "contract_version": data.get("contract_version"),
                 "manifest_id": data.get("manifest_id"),
@@ -212,6 +218,9 @@ class CompositeCheckpointState:
             execution_fingerprint=normalized_anchors["execution_fingerprint"] or "",
             dq_contract_compatibility_hash=(
                 normalized_anchors["dq_contract_compatibility_hash"] or ""
+            ),
+            input_snapshot_fingerprint=(
+                normalized_anchors["input_snapshot_fingerprint"] or ""
             ),
             contract_ref=normalized_anchors["contract_ref"] or "",
             contract_version=normalized_anchors["contract_version"] or "",

@@ -9,7 +9,7 @@ from bioetl.application.core.wiring.factory import (
     BasePipeline,
     BatchExecutor,
     CheckpointRuntimeService,
-    LockCoordinator,
+    LockRuntimeService,
     PipelineRunner,
     PipelineRunnerDependencies,
     PostrunService,
@@ -27,7 +27,7 @@ class RunnerAssemblyParts:
 
     checkpoint_manager: CheckpointRuntimeService
     lifecycle_service: MedallionLifecycleService
-    lock_manager: LockCoordinator
+    lock_runtime_service: LockRuntimeService
     preflight_service: PreflightService
     postrun_service: PostrunService
     observer: PipelineObserver
@@ -49,7 +49,7 @@ def create_pipeline_runner(
     observability: ObservabilityBundle,
     executor: BatchExecutor,
     checkpoint_manager: CheckpointRuntimeService,
-    lock_manager: LockCoordinator,
+    lock_runtime_service: LockRuntimeService,
     preflight_service: PreflightService,
     postrun_service: PostrunService,
     lifecycle_service: MedallionLifecycleService,
@@ -60,7 +60,7 @@ def create_pipeline_runner(
     dependencies = PipelineRunnerDependencies(
         executor=executor,
         checkpoint_manager=checkpoint_manager,
-        lock_manager=lock_manager,
+        lock_runtime_service=lock_runtime_service,
         preflight=preflight_service,
         postrun=postrun_service,
         lifecycle_service=lifecycle_service,
@@ -87,7 +87,7 @@ def create_pipeline_runner_from_payload(
         observability=payload.observability,
         executor=payload.parts.batch_executor,
         checkpoint_manager=payload.parts.checkpoint_manager,
-        lock_manager=payload.parts.lock_manager,
+        lock_runtime_service=payload.parts.lock_runtime_service,
         preflight_service=payload.parts.preflight_service,
         postrun_service=payload.parts.postrun_service,
         lifecycle_service=payload.parts.lifecycle_service,

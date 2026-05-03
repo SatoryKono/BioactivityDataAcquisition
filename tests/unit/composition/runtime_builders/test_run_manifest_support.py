@@ -15,8 +15,8 @@ import pytest
 from bioetl.application.services.control_plane.run_manifest_service import (
     RunManifestCreateSpec,
 )
-from bioetl.composition.runtime_builders.run_manifest_builder import (
-    _emit_replay_reconstructability_metric,
+from bioetl.composition.runtime_builders._run_manifest_creation_support import (
+    emit_replay_reconstructability_metric,
 )
 from bioetl.composition.runtime_builders._cached_bronze_snapshot_support import (
     build_cached_bronze_input_snapshot_refs,
@@ -76,6 +76,15 @@ def _make_manifest_request(
         runtime_config={},
         resolved_config={},
         replay_capability=replay_capability,
+    )
+
+
+@pytest.mark.unit
+def test_emit_replay_reconstructability_metric_is_owned_by_creation_support() -> (
+    None
+):
+    assert emit_replay_reconstructability_metric.__module__.endswith(
+        "_run_manifest_creation_support"
     )
 
 
@@ -340,7 +349,7 @@ def test_replay_reconstructability_metric_is_reconstructable_for_non_strict_runs
 ):
     metrics = MagicMock()
 
-    _emit_replay_reconstructability_metric(
+    emit_replay_reconstructability_metric(
         request=_make_manifest_request(
             exact_replay=False,
             required_persistence_profile="degraded_observable",
@@ -378,7 +387,7 @@ def test_replay_reconstructability_metric_marks_strict_runs_not_reconstructable(
 ):
     metrics = MagicMock()
 
-    _emit_replay_reconstructability_metric(
+    emit_replay_reconstructability_metric(
         request=_make_manifest_request(
             exact_replay=True,
             required_persistence_profile="forensic_grade",
@@ -431,7 +440,7 @@ def test_replay_reconstructability_metric_marks_strict_runs_reconstructable_when
 ):
     metrics = MagicMock()
 
-    _emit_replay_reconstructability_metric(
+    emit_replay_reconstructability_metric(
         request=_make_manifest_request(
             exact_replay=False,
             required_persistence_profile="replay_ready",

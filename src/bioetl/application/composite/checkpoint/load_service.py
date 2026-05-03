@@ -101,6 +101,20 @@ def _exact_anchor_mismatch(
     return None
 
 
+def _optional_exact_anchor_mismatch(
+    *,
+    state_value: str,
+    expected_value: str,
+    anchor_name: str,
+) -> str | None:
+    """Return mismatch only when both old checkpoint and runtime carry the anchor."""
+    if not state_value or not expected_value:
+        return None
+    if state_value != expected_value:
+        return f"{anchor_name} {state_value!r} != {expected_value!r}"
+    return None
+
+
 def _manifest_id_mismatch(
     *,
     state: CompositeCheckpointState,
@@ -180,6 +194,11 @@ def validate_resume_compatibility(
                 expected_value=anchors.dq_contract_compatibility_hash,
                 anchor_name="dq_contract_compatibility_hash",
             ),
+            _optional_exact_anchor_mismatch(
+                state_value=state.input_snapshot_fingerprint,
+                expected_value=anchors.input_snapshot_fingerprint,
+                anchor_name="input_snapshot_fingerprint",
+            ),
             _manifest_id_mismatch(
                 state=state,
                 expected_manifest_id=anchors.manifest_id,
@@ -209,6 +228,7 @@ def validate_resume_compatibility(
         expected_dq_contract_compatibility_hash=(
             anchors.dq_contract_compatibility_hash
         ),
+        expected_input_snapshot_fingerprint=anchors.input_snapshot_fingerprint,
         expected_composite_run_identity=anchors.composite_run_identity,
         checkpoint_contract_ref=state.contract_ref,
         checkpoint_contract_version=state.contract_version,
@@ -218,6 +238,7 @@ def validate_resume_compatibility(
         checkpoint_dq_contract_compatibility_hash=(
             state.dq_contract_compatibility_hash
         ),
+        checkpoint_input_snapshot_fingerprint=state.input_snapshot_fingerprint,
         checkpoint_composite_run_identity=state.composite_run_identity,
         reason_code="checkpoint_resume_incompatible",
         incompatibility=detail,

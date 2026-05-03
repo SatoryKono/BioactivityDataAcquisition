@@ -14,33 +14,8 @@ policy:
     - expires_on
     - removal_step
 registries:
-  file_size_limits:
-    src/bioetl/composition/runtime_builders/run_manifest_builder.py:
-      value: 363
-      owner: "@bioetl-architecture"
-      reason: "Run-manifest composition builder remains above the composition LOC budget while manifest creation and replay metric orchestration are split into smaller runtime-builder helpers."
-      classification: "technical_debt"
-      linked_rf: "RF-000"
-      expires_on: "2026-09-30"
-      removal_step: "Move manifest request construction and replay metric emission into focused composition runtime-builder modules, then remove this file-size exemption."
-    src/bioetl/infrastructure/storage/silver/operations/metadata_operations.py:
-      value: 822
-      owner: "@bioetl-platform"
-      reason: "Silver metadata operations still host canonical write, audit, DQ, and compatibility method binding paths during the storage operations split."
-      classification: "technical_debt"
-      linked_rf: "RF-000"
-      expires_on: "2026-09-30"
-      removal_step: "Extract metadata write/audit/finalization method bindings into focused infrastructure helpers, then remove this file-size exemption."
-    src/bioetl/interfaces/cli/commands/_run_manifest_output_support.py:
-      value: 421
-      owner: "@bioetl-data-model"
-      reason: "Run-manifest CLI output support is one line over the interfaces LOC budget while compact, diagnostics, and identity-graph renderers share private formatting helpers."
-      classification: "technical_debt"
-      linked_rf: "RF-000"
-      expires_on: "2026-09-30"
-      removal_step: "Move diagnostics or identity-graph rendering helpers into a sibling CLI output module, then remove this file-size exemption."
-  function_complexity:
-    {}
+  file_size_limits: {}
+  function_complexity: {}
   function_length:
     {}
   class_size: {}

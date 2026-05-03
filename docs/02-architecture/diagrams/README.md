@@ -130,7 +130,7 @@ classes that was not already covered by the curated set.
 | 5   | Types & Enums                 | `class-diagrams/04-types-enums.mmd`                             | RunType, PublicationType, HealthStatus, NewTypes                            |
 | 6   | Exceptions                    | `class-diagrams/05-exceptions.mmd`                              | BioETLError hierarchy: Critical, Recoverable, DataQuality                   |
 | 7   | Configuration                 | `class-diagrams/06-config-classes.mmd`                          | PipelineConfig, RuntimeConfig, CompositeConfig                              |
-| 8   | Application Core              | `class-diagrams/07-application-core-services.mmd`               | PipelineRunner, BatchExecutor, LockCoordinator                              |
+| 8   | Application Core              | `class-diagrams/07-application-core-services.mmd`               | PipelineRunner, BatchExecutor, LockRuntimeService                           |
 | 9   | Application Services          | `class-diagrams/08-application-services.mmd`                    | DQ, Health, Export, Vacuum, Quarantine services                             |
 | 10  | Application Services (L2 Ops) | `class-diagrams/08a-application-services-operation-catalog.mmd` | Operation-level catalog for application services                            |
 | 11  | Transformers                  | `class-diagrams/09-transformers.mmd`                            | BaseTransformer → ChEMBL/Publication/UniProt/PubChem                        |

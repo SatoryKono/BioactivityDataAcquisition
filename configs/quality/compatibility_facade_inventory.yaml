@@ -9,27 +9,6 @@ tracked_docstring_prefixes:
 - Pipeline factory compatibility-only facade
 - Storage compatibility-only facade
 transition_debt:
-- path: src/bioetl/interfaces/cli/commands/_compat.py
-  compatibility_role: Internal CLI compatibility shim helper that powers retained
-    top-level command alias modules.
-  canonical_target: bioetl.interfaces.cli.commands
-  status: compat-shim
-  owner: bioetl.interfaces.cli.commands
-  introduced_in: 2026-03 RF-024
-  review_date: '2026-09-30'
-  external_breaking_change_required: true
-  internal_callers_zero: false
-  allowed_call_sites: >-
-    `src`: only retained top-level CLI public seam modules under
-    `src/bioetl/interfaces/cli/commands/` may import `alias_module`; `tests`:
-    dedicated CLI boundary coverage may exercise the helper indirectly through
-    those public seam modules
-  migration_path: >-
-    Keep top-level CLI public seams as the sanctioned import targets; do not
-    import `_compat.py` outside the retained command-seam modules.
-  exit_criteria: >-
-    `_compat.py` remains confined to the reviewed top-level command seams and
-    can be removed once those seams no longer need helper-based alias forwarding.
 - path: src/bioetl/composition/factories/storage/adapter.py
   compatibility_role: Deprecated compatibility shim for the storage bundle module
     after the canonical implementation moved to

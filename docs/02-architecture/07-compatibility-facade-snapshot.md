@@ -5,18 +5,18 @@
 ## Summary
 
 - Registry YAML: `configs/quality/compatibility_facade_inventory.yaml`
-- Curated inventory rows: `23`
-- Transition debt rows: `2`
+- Curated inventory rows: `22`
+- Transition debt rows: `1`
 - Sanctioned public entrypoint rows: `21`
 - Retained review entrypoints: `3`
 - Permanent public entrypoints: `18`
-- Measured tracked modules: `23`
+- Measured tracked modules: `22`
 - Measured-only modules outside curated inventory: `0`
 - Discovered docstring-tracked modules: `3`
 - Unexpected docstring-tracked modules: `0`
 - Missing allowlisted measured-only modules: `0`
 - First-party src imports targeting measured-only modules: `0`
-- Curated rows requiring external breaking change process: `23`
+- Curated rows requiring external breaking change process: `22`
 - Curated rows marked internal-callers-zero: `4`
 - First-party src imports targeting internal-callers-zero rows: `0`
 - Ratchet violations: `0`
@@ -44,7 +44,6 @@
 - `src/bioetl/domain/value_objects/publication_field_groups.py`
 - `src/bioetl/infrastructure/adapters/pubmed/client.py`
 - `src/bioetl/infrastructure/adapters/semanticscholar/client.py`
-- `src/bioetl/interfaces/cli/commands/_compat.py`
 - `src/bioetl/interfaces/cli/commands/archive.py`
 - `src/bioetl/interfaces/cli/commands/cleanup.py`
 - `src/bioetl/interfaces/cli/commands/diagnostics.py`
@@ -59,7 +58,6 @@
 
 ## Curated Row Governance Metadata
 
-- `src/bioetl/interfaces/cli/commands/_compat.py` — external breaking change required: `true`, internal callers zero: `false`
 - `src/bioetl/composition/factories/storage/adapter.py` — external breaking change required: `true`, internal callers zero: `true`
 - `src/bioetl/interfaces/cli/commands/run.py` — external breaking change required: `true`, internal callers zero: `false`
 - `src/bioetl/interfaces/cli/commands/run_all.py` — external breaking change required: `true`, internal callers zero: `false`

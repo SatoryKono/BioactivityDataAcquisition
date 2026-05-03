@@ -4,8 +4,8 @@ Thin CLI wrappers should use the shared boundary-test families before adding a
 dedicated suite.
 
 - `test_runtime_compat_aliases.py`
-  Use for top-level compat modules that alias to a canonical domain module via
-  `alias_module(...)`.
+  Use for top-level public wrapper modules that re-export canonical command
+  symbols from their owning domain module.
 - `test_boundary_families.py`
   Use for command-layer lazy delegation into composition/interface facades and
   for `bioetl.interfaces.cli.main` lazy registration checks.
