@@ -17,7 +17,7 @@ from bioetl.composition.factories.pipeline._runner_assembly_support import (
     build_batch_executor as _build_batch_executor_impl,
 )
 from bioetl.composition.factories.pipeline._runner_assembly_support import (
-    build_lock_manager as _build_lock_manager_impl,
+    build_lock_runtime_service as _build_lock_runtime_service_impl,
 )
 from bioetl.composition.factories.pipeline._runner_assembly_support import (
     build_observer as _build_observer_impl,
@@ -51,7 +51,7 @@ if TYPE_CHECKING:
     from bioetl.application.core.batch_executor import BatchExecutor
     from bioetl.application.core.lifecycle import (
         CheckpointRuntimeService,
-        LockCoordinator,
+        LockRuntimeService,
     )
     from bioetl.application.core.postrun import PostrunService
     from bioetl.application.core.preflight import PreflightService
@@ -101,13 +101,13 @@ def _build_current_checkpoint_metadata(pipeline: BasePipeline) -> CheckpointMeta
     return build_current_checkpoint_metadata(pipeline)
 
 
-def _build_lock_manager(
+def _build_lock_runtime_service(
     context: _RunnerAssemblyContext,
     *,
     checkpoint_manager: CheckpointRuntimeService,
     context_holder: LockContextHolder,
-) -> LockCoordinator:
-    return _build_lock_manager_impl(
+) -> LockRuntimeService:
+    return _build_lock_runtime_service_impl(
         context,
         checkpoint_manager=checkpoint_manager,
         context_holder=context_holder,
@@ -130,13 +130,13 @@ def _build_batch_executor(
     context: _RunnerAssemblyContext,
     *,
     checkpoint_manager: CheckpointRuntimeService,
-    lock_manager: LockCoordinator,
+    lock_runtime_service: LockRuntimeService,
     observer: PipelineObserver,
 ) -> BatchExecutor:
     return _build_batch_executor_impl(
         context,
         checkpoint_manager=checkpoint_manager,
-        lock_manager=lock_manager,
+        lock_runtime_service=lock_runtime_service,
         observer=observer,
     )
 
@@ -185,7 +185,7 @@ def _assemble_runner_parts(
         storage=context.pipeline.services.storage,
         logger=context.logger_port,
     )
-    lock_manager = _build_lock_manager(
+    lock_runtime_service = _build_lock_runtime_service(
         context,
         checkpoint_manager=checkpoint_manager,
         context_holder=LockContextHolder(),
@@ -199,13 +199,13 @@ def _assemble_runner_parts(
     batch_executor = _build_batch_executor(
         context,
         checkpoint_manager=checkpoint_manager,
-        lock_manager=lock_manager,
+        lock_runtime_service=lock_runtime_service,
         observer=observer,
     )
     return RunnerAssemblyParts(
         checkpoint_manager=checkpoint_manager,
         lifecycle_service=lifecycle_service,
-        lock_manager=lock_manager,
+        lock_runtime_service=lock_runtime_service,
         preflight_service=preflight_service,
         postrun_service=postrun_service,
         observer=observer,

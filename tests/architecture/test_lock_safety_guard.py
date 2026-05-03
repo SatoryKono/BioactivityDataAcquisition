@@ -243,14 +243,16 @@ class TestFencingTokenContract:
         await lock.aclose()
 
 
-class TestLockCoordinatorSafetyGuard:
-    """Tests for LockCoordinator.validate() method."""
+class TestLockRuntimeServiceSafetyGuard:
+    """Tests for LockRuntimeService.validate() method."""
 
     def test_lock_manager_has_validate_method(self):
-        """LockCoordinator MUST expose validate() method for Safety Guard."""
-        from bioetl.application.core.lifecycle.lock_manager import LockCoordinator
+        """LockRuntimeService MUST expose validate() method for Safety Guard."""
+        from bioetl.application.core.lifecycle.lock_runtime_service import (
+            LockRuntimeService,
+        )
 
-        assert hasattr(LockCoordinator, "validate"), (
-            "LockCoordinator MUST have validate() method for Safety Guard. "
+        assert hasattr(LockRuntimeService, "validate"), (
+            "LockRuntimeService MUST have validate() method for Safety Guard. "
             "This method wraps fencing token validation for use in pipelines."
         )

@@ -369,8 +369,10 @@ class TestShutdownWithCheckpointManager:
 
     @pytest.mark.asyncio
     async def test_shutdown_signal_in_lock_manager(self):
-        """Test that LockCoordinator uses shutdown_signal correctly."""
-        from bioetl.application.core.lifecycle.lock_manager import LockCoordinator
+        """Test that LockRuntimeService uses shutdown_signal correctly."""
+        from bioetl.application.core.lifecycle.lock_runtime_service import (
+            LockRuntimeService,
+        )
 
         mock_lock = MagicMock()
         mock_lock.acquire = AsyncMock(return_value=_MOCK_TOKEN)
@@ -393,7 +395,7 @@ class TestShutdownWithCheckpointManager:
             wait_timeout=10,
             heartbeat_interval=60,
         )
-        manager = LockCoordinator(
+        manager = LockRuntimeService(
             lock_port=mock_lock,
             run_id=uuid4(),
             config=lock_config,
@@ -424,7 +426,9 @@ class TestShutdownWithCheckpointManager:
     @pytest.mark.asyncio
     async def test_heartbeat_failure_triggers_shutdown(self):
         """Test that heartbeat failure triggers shutdown signal."""
-        from bioetl.application.core.lifecycle.lock_manager import LockCoordinator
+        from bioetl.application.core.lifecycle.lock_runtime_service import (
+            LockRuntimeService,
+        )
 
         mock_lock = MagicMock()
         mock_lock.acquire = AsyncMock(return_value=_MOCK_TOKEN)
@@ -447,7 +451,7 @@ class TestShutdownWithCheckpointManager:
             wait_timeout=10,
             heartbeat_interval=0,  # Immediate for testing
         )
-        manager = LockCoordinator(
+        manager = LockRuntimeService(
             lock_port=mock_lock,
             run_id=uuid4(),
             config=lock_config,

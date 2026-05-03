@@ -155,6 +155,7 @@ def test_build_uses_canonical_composite_checkpoint_port(
         config_hash="hash-123",
         dq_contract_compatibility_hash="dq-hash-123",
         effective_config_artifact_id="artifact-123",
+        input_snapshot_fingerprint="snapshot-fingerprint-123",
         contract_ref="composite_publication",
         contract_version="1.0.0",
     )
@@ -188,6 +189,7 @@ def test_build_uses_canonical_composite_checkpoint_port(
         expected_execution_fingerprint="fingerprint-123",
         expected_dq_contract_compatibility_hash="dq-hash-123",
         expected_effective_config_artifact_id="artifact-123",
+        expected_input_snapshot_fingerprint="snapshot-fingerprint-123",
         run_ledger_port=(
             mock_build_control_plane_bundle.return_value.run_ledger_service.ledger_port
         ),

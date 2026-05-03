@@ -53,7 +53,7 @@ def mock_registry():
             return_value=mock,
         ),
         patch(
-            "bioetl.interfaces.cli.commands.domains.run_all.command.resolve_context_registry",
+            "bioetl.interfaces.cli.commands.run_all.resolve_context_registry",
             return_value=mock,
         ),
     ):
@@ -78,7 +78,7 @@ def mock_registry_main():
             return_value=mock,
         ),
         patch(
-            "bioetl.interfaces.cli.commands.domains.run_all.command.resolve_context_registry",
+            "bioetl.interfaces.cli.commands.run_all.resolve_context_registry",
             return_value=mock,
         ),
     ):

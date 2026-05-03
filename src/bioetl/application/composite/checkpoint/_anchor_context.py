@@ -22,6 +22,7 @@ class ExpectedCheckpointContext:
     effective_config_artifact_id: str = ""
     execution_fingerprint: str = ""
     dq_contract_compatibility_hash: str = ""
+    input_snapshot_fingerprint: str = ""
     contract_ref: str = ""
     contract_version: str = ""
     manifest_id: str = ""
@@ -34,6 +35,7 @@ def create_expected_checkpoint_context(
     effective_config_artifact_id: str | None = None,
     execution_fingerprint: str | None = None,
     dq_contract_compatibility_hash: str | None = None,
+    input_snapshot_fingerprint: str | None = None,
     contract_ref: str | None,
     contract_version: str | None,
     manifest_id: str | None,
@@ -46,6 +48,7 @@ def create_expected_checkpoint_context(
             "effective_config_artifact_id": effective_config_artifact_id,
             "execution_fingerprint": execution_fingerprint,
             "dq_contract_compatibility_hash": dq_contract_compatibility_hash,
+            "input_snapshot_fingerprint": input_snapshot_fingerprint,
             "contract_ref": contract_ref,
             "contract_version": contract_version,
             "manifest_id": manifest_id,
@@ -59,6 +62,7 @@ def create_expected_checkpoint_context(
         dq_contract_compatibility_hash=(
             normalized["dq_contract_compatibility_hash"] or ""
         ),
+        input_snapshot_fingerprint=normalized["input_snapshot_fingerprint"] or "",
         contract_ref=normalized["contract_ref"] or "",
         contract_version=normalized["contract_version"] or "",
         manifest_id=normalized["manifest_id"] or "",
@@ -94,6 +98,10 @@ def _build_merged_anchor_payload(
             state.dq_contract_compatibility_hash,
             anchors.dq_contract_compatibility_hash,
         ),
+        "input_snapshot_fingerprint": _coalesce_expected_anchor(
+            state.input_snapshot_fingerprint,
+            anchors.input_snapshot_fingerprint,
+        ),
         "contract_ref": _coalesce_expected_anchor(
             state.contract_ref,
             anchors.contract_ref,
@@ -127,6 +135,7 @@ def merge_expected_anchors(
         effective_config_artifact_id=(merged["effective_config_artifact_id"] or ""),
         execution_fingerprint=merged["execution_fingerprint"] or "",
         dq_contract_compatibility_hash=(merged["dq_contract_compatibility_hash"] or ""),
+        input_snapshot_fingerprint=merged["input_snapshot_fingerprint"] or "",
         contract_ref=merged["contract_ref"] or "",
         contract_version=merged["contract_version"] or "",
         manifest_id=merged["manifest_id"] or "",
@@ -155,6 +164,7 @@ def fresh_checkpoint_state(
         effective_config_artifact_id=anchors.effective_config_artifact_id,
         execution_fingerprint=anchors.execution_fingerprint,
         dq_contract_compatibility_hash=anchors.dq_contract_compatibility_hash,
+        input_snapshot_fingerprint=anchors.input_snapshot_fingerprint,
         contract_ref=anchors.contract_ref,
         contract_version=anchors.contract_version,
         manifest_id=anchors.manifest_id,

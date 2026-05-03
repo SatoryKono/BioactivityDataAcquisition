@@ -13,7 +13,7 @@ directly from their defining submodules:
 - ``bioetl.application.core.field_transforms``    — Field specs, dict transforms, entity IDs
 - ``bioetl.application.core.lifecycle.checkpoint_manager``  — CheckpointRuntimeService
 - ``bioetl.application.core.lifecycle.cleanup_service``     — CleanupService, CleanupResult
-- ``bioetl.application.core.lifecycle.lock_manager``        — LockCoordinator
+- ``bioetl.application.core.lifecycle.lock_runtime_service`` — LockRuntimeService
 - ``bioetl.application.core.lifecycle.shutdown``            — ShutdownService, ShutdownSignal
 - ``bioetl.application.core.wiring``                        — composition-facing
   wiring seams for internal DI assembly; flat ``*_wiring_api`` modules remain

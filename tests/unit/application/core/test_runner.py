@@ -11,7 +11,9 @@ import pytest
 from bioetl.application.core.lifecycle.checkpoint_manager import (
     CheckpointRuntimeService,
 )
-from bioetl.application.core.lifecycle.lock_manager import LockCoordinator
+from bioetl.application.core.lifecycle.lock_runtime_service import (
+    LockRuntimeService,
+)
 from bioetl.application.core.pipeline_services import PipelineService
 from bioetl.application.core.postrun.service import PostrunService
 from bioetl.application.core.preflight.service import PreflightService
@@ -157,8 +159,8 @@ def shutdown_signal():
 
 @pytest.fixture
 def mock_lock_manager():
-    """Create a mock LockCoordinator instance (injected via DI)."""
-    lock_manager = MagicMock(spec=LockCoordinator)
+    """Create a mock LockRuntimeService instance (injected via DI)."""
+    lock_manager = MagicMock(spec=LockRuntimeService)
     lock_manager.__aenter__ = AsyncMock(return_value=lock_manager)
     lock_manager.__aexit__ = AsyncMock(return_value=None)
     return lock_manager

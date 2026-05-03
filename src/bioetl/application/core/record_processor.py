@@ -4,7 +4,7 @@ Observability: Nested spans for transform → write_bronze → write_silver → 
 
 Safety Guard (RULES.md §4.6):
     Lock validation is performed at BatchWriter level BEFORE any write operation.
-    RecordProcessor passes a lock_validator callback from LockCoordinator.validate().
+    RecordProcessor passes a lock_validator callback from LockRuntimeService.validate().
 """
 
 from __future__ import annotations

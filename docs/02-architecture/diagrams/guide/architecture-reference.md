@@ -469,7 +469,7 @@ ______________________________________________________________________
 
 **Supporting Managers:**
 
-- LockCoordinator, CheckpointRuntimeService, QuarantineRuntimeService, MemoryMonitor
+- LockRuntimeService, CheckpointRuntimeService, QuarantineRuntimeService, MemoryMonitor
 
 **Services:**
 

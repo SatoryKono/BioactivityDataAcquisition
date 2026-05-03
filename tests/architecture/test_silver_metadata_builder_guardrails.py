@@ -22,6 +22,14 @@ LEGACY_TARGET_MODULE = (
 )
 ACTIVE_SILVER_METADATA_PATHS = (
     ROOT
+    / "src/bioetl/infrastructure/storage/silver/operations/metadata_audit_operations.py",
+    ROOT
+    / "src/bioetl/infrastructure/storage/silver/operations/metadata_dq_operations.py",
+    ROOT
+    / "src/bioetl/infrastructure/storage/silver/operations/metadata_finalization_operations.py",
+    ROOT
+    / "src/bioetl/infrastructure/storage/silver/operations/metadata_write_operations.py",
+    ROOT
     / "src/bioetl/infrastructure/storage/silver/operations/metadata_write_support.py",
     ROOT
     / "src/bioetl/infrastructure/storage/silver/operations/metadata_finalization_support.py",

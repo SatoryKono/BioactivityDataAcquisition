@@ -61,6 +61,7 @@ def test_layer_aware_suffix_policy_registers_expected_rule_ids() -> None:
 
     family_rule_ids = {rule.rule_id for rule in policy.family_freeze_rules}
     assert {
+        "runtime_admin_lock_family",
         "runtime_admin_checkpoint_quarantine_family",
         "column_ordering_family",
         "composite_canonical_alias_family",
@@ -124,6 +125,38 @@ def test_checkpoint_quarantine_runtime_admin_family_is_role_driven() -> None:
         (
             "QuarantineService",
             "src/bioetl/application/services/quarantine_service.py",
+        ),
+    }
+
+
+def test_lock_runtime_admin_family_is_role_driven() -> None:
+    """Lock naming must encode runtime versus admin responsibility."""
+    module = _load_gate_module()
+    policy = module._load_layer_aware_suffix_policy(ROOT)
+    family_rules = {rule.rule_id: rule for rule in policy.family_freeze_rules}
+    rule = family_rules["runtime_admin_lock_family"]
+
+    allowed = {(item.symbol, item.path) for item in rule.allowed_symbols}
+    assert allowed == {
+        (
+            "LockRuntimeService",
+            "src/bioetl/application/core/lifecycle/lock_runtime_service.py",
+        ),
+        (
+            "LockRuntimeServiceCreateContext",
+            "src/bioetl/application/core/lifecycle/lock_runtime_service.py",
+        ),
+        (
+            "LockService",
+            "src/bioetl/application/services/lock_service.py",
+        ),
+        (
+            "LockCoordinator",
+            "src/bioetl/application/core/lifecycle/lock_manager.py",
+        ),
+        (
+            "LockCoordinatorCreateContext",
+            "src/bioetl/application/core/lifecycle/lock_manager.py",
         ),
     }
 

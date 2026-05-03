@@ -183,6 +183,7 @@ def _replace_checkpoint_state[TCheckpointState: "CompositeCheckpointState"](
         dq_contract_compatibility_hash=(
             checkpoint_state.dq_contract_compatibility_hash
         ),
+        input_snapshot_fingerprint=checkpoint_state.input_snapshot_fingerprint,
         contract_ref=checkpoint_state.contract_ref,
         contract_version=checkpoint_state.contract_version,
         manifest_id=checkpoint_state.manifest_id,

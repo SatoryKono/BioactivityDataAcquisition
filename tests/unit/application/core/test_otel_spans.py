@@ -84,7 +84,9 @@ class TestPipelineRunnerSpan:
 
     def _build_runner(self, tracer: object | None) -> PipelineRunner:
         """Build a fully-mocked PipelineRunner with the given tracer."""
-        from bioetl.application.core.lifecycle.lock_manager import LockCoordinator
+        from bioetl.application.core.lifecycle.lock_runtime_service import (
+            LockRuntimeService,
+        )
         from bioetl.application.core.preflight.service import PreflightService
         from bioetl.application.core.postrun.service import PostrunService
         from bioetl.application.services.medallion_lifecycle import (
@@ -163,7 +165,7 @@ class TestPipelineRunnerSpan:
         shutdown_signal = MagicMock()
         shutdown_signal.is_requested = False
 
-        lock_manager = MagicMock(spec=LockCoordinator)
+        lock_manager = MagicMock(spec=LockRuntimeService)
         lock_manager.__aenter__ = AsyncMock(return_value=lock_manager)
         lock_manager.__aexit__ = AsyncMock(return_value=None)
 

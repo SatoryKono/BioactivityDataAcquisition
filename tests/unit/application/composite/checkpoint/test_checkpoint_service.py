@@ -43,6 +43,7 @@ class _ExpectedCheckpointAnchors:
     effective_config_artifact_id: str | None = None
     execution_fingerprint: str | None = None
     dq_contract_compatibility_hash: str | None = None
+    input_snapshot_fingerprint: str | None = None
     contract_ref: str | None = None
     contract_version: str | None = None
     manifest_id: str | None = None
@@ -54,6 +55,7 @@ def _anchors(
     effective_config_artifact_id: str | None = None,
     execution_fingerprint: str | None = None,
     dq_contract_compatibility_hash: str | None = None,
+    input_snapshot_fingerprint: str | None = None,
     contract_ref: str | None = None,
     contract_version: str | None = None,
     manifest_id: str | None = None,
@@ -63,6 +65,7 @@ def _anchors(
         effective_config_artifact_id=effective_config_artifact_id,
         execution_fingerprint=execution_fingerprint,
         dq_contract_compatibility_hash=dq_contract_compatibility_hash,
+        input_snapshot_fingerprint=input_snapshot_fingerprint,
         contract_ref=contract_ref,
         contract_version=contract_version,
         manifest_id=manifest_id,
@@ -134,6 +137,7 @@ def _make_service(
         expected_dq_contract_compatibility_hash=(
             anchors.dq_contract_compatibility_hash
         ),
+        expected_input_snapshot_fingerprint=anchors.input_snapshot_fingerprint,
         expected_contract_ref=anchors.contract_ref,
         expected_contract_version=anchors.contract_version,
         expected_manifest_id=anchors.manifest_id,
@@ -272,6 +276,7 @@ class TestFilenameFormat:
                 effective_config_artifact_id="artifact-123",
                 execution_fingerprint="fingerprint-123",
                 dq_contract_compatibility_hash="dq-hash-123",
+                input_snapshot_fingerprint="snapshot-fp-123",
                 contract_ref="composite_publication",
                 contract_version="2.1.0",
                 manifest_id="manifest-123",
@@ -282,6 +287,7 @@ class TestFilenameFormat:
         assert svc.expected_effective_config_artifact_id == "artifact-123"
         assert svc.expected_execution_fingerprint == "fingerprint-123"
         assert svc.expected_dq_contract_compatibility_hash == "dq-hash-123"
+        assert svc.expected_input_snapshot_fingerprint == "snapshot-fp-123"
         assert svc.expected_contract_ref == "composite_publication"
         assert svc.expected_contract_version == "2.1.0"
         assert svc.expected_manifest_id == "manifest-123"
@@ -294,6 +300,7 @@ class TestFilenameFormat:
                 effective_config_artifact_id=" artifact-123 ",
                 execution_fingerprint=" fingerprint-123 ",
                 dq_contract_compatibility_hash=" DQ-HASH-123 ",
+                input_snapshot_fingerprint=" SNAPSHOT-FP-123 ",
                 contract_ref=" Composite_Publication ",
                 contract_version=" v2 ",
                 manifest_id=" manifest-123 ",
@@ -304,6 +311,7 @@ class TestFilenameFormat:
         assert svc.expected_effective_config_artifact_id == "artifact-123"
         assert svc.expected_execution_fingerprint == "fingerprint-123"
         assert svc.expected_dq_contract_compatibility_hash == "dq-hash-123"
+        assert svc.expected_input_snapshot_fingerprint == "snapshot-fp-123"
         assert svc.expected_contract_ref == "composite_publication"
         assert svc.expected_contract_version == "2.0.0"
         assert svc.expected_manifest_id == "manifest-123"
@@ -642,6 +650,7 @@ class TestLoadResume:
                 execution_fingerprint="fingerprint-current",
                 effective_config_artifact_id="artifact-current",
                 dq_contract_compatibility_hash="dq-current",
+                input_snapshot_fingerprint="snapshot-current",
             ),
         )
         state_data = CompositeCheckpointState(
@@ -652,6 +661,7 @@ class TestLoadResume:
             execution_fingerprint="fingerprint-old",
             effective_config_artifact_id="artifact-old",
             dq_contract_compatibility_hash="dq-old",
+            input_snapshot_fingerprint="snapshot-old",
             composite_run_identity="run-old",
         )
         storage.exists.return_value = True
@@ -659,6 +669,58 @@ class TestLoadResume:
 
         with pytest.raises(CheckpointConflictError):
             await svc.load()
+
+    @pytest.mark.asyncio
+    async def test_resume_blocks_on_input_snapshot_fingerprint_mismatch(self) -> None:
+        """Resume is blocked when both sides carry different input snapshot anchors."""
+        svc, storage, _ = _make_service(
+            resume=True,
+            run_id="run-old",
+            expected_anchors=_anchors(
+                input_snapshot_fingerprint="snapshot-current",
+            ),
+        )
+        state_data = CompositeCheckpointState(
+            composite_name="my_composite",
+            run_id="run-old",
+            state=CompositePipelineState.ENRICHING,
+            seed_completed=True,
+            input_snapshot_fingerprint="snapshot-old",
+            composite_run_identity="run-old",
+        )
+        storage.exists.return_value = True
+        storage.read.return_value = json.dumps(state_data.to_dict())
+
+        with pytest.raises(CheckpointConflictError, match="input_snapshot_fingerprint"):
+            await svc.load()
+
+    @pytest.mark.asyncio
+    async def test_resume_merges_missing_input_snapshot_fingerprint_for_old_checkpoint(
+        self,
+    ) -> None:
+        """Old checkpoints without input snapshot anchors remain resumable."""
+        svc, storage, _ = _make_service(
+            resume=True,
+            run_id="run-old",
+            expected_anchors=_anchors(
+                input_snapshot_fingerprint="snapshot-current",
+            ),
+        )
+        state_data = CompositeCheckpointState(
+            composite_name="my_composite",
+            run_id="run-old",
+            state=CompositePipelineState.ENRICHING,
+            seed_completed=True,
+            composite_run_identity="run-old",
+        )
+        payload = state_data.to_dict()
+        payload.pop("input_snapshot_fingerprint")
+        storage.exists.return_value = True
+        storage.read.return_value = json.dumps(payload)
+
+        state = await svc.load()
+
+        assert state.input_snapshot_fingerprint == "snapshot-current"
 
     @pytest.mark.asyncio
     async def test_resume_replays_only_ledger_entries_after_checkpoint_watermark(
@@ -1027,6 +1089,7 @@ class TestLoadWarnOnOverwrite:
                 effective_config_artifact_id="artifact-123",
                 execution_fingerprint="fingerprint-123",
                 dq_contract_compatibility_hash="dq-hash-123",
+                input_snapshot_fingerprint="snapshot-fp-123",
                 contract_ref="composite_publication",
                 contract_version="2.1.0",
             ),
@@ -1039,6 +1102,7 @@ class TestLoadWarnOnOverwrite:
         assert state.effective_config_artifact_id == "artifact-123"
         assert state.execution_fingerprint == "fingerprint-123"
         assert state.dq_contract_compatibility_hash == "dq-hash-123"
+        assert state.input_snapshot_fingerprint == "snapshot-fp-123"
         assert state.contract_ref == "composite_publication"
         assert state.contract_version == "2.1.0"
         assert state.composite_run_identity == "run-001"

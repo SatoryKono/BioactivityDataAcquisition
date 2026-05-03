@@ -6,9 +6,9 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from bioetl.application.core.lifecycle import LockCoordinator
-from bioetl.application.core.lifecycle.lock_manager import (
-    LockCoordinatorCreateContext,
+from bioetl.application.core.lifecycle import LockRuntimeService
+from bioetl.application.core.lifecycle.lock_runtime_service import (
+    LockRuntimeServiceCreateContext,
 )
 from bioetl.application.core.preflight import (
     HealthAggregator,
@@ -60,16 +60,16 @@ class RunnerAssemblyContext:
     dq_configs_extractor: Callable[[PipelineYamlConfig | None], DQConfigsContext]
 
 
-def build_lock_manager(
+def build_lock_runtime_service(
     context: RunnerAssemblyContext,
     *,
     checkpoint_manager: CheckpointRuntimeService,
     context_holder: LockContextHolder,
-) -> LockCoordinator:
-    """Build the lock coordinator for one assembled runner."""
+) -> LockRuntimeService:
+    """Build the runtime lock collaborator for one assembled runner."""
     pipeline = context.pipeline
-    return LockCoordinator.create(
-        LockCoordinatorCreateContext(
+    return LockRuntimeService.create(
+        LockRuntimeServiceCreateContext(
             lock_port=pipeline.services.lock,
             run_id=pipeline.context.run_id,
             provider=pipeline.config.provider,
@@ -135,7 +135,7 @@ def build_batch_executor(
     context: RunnerAssemblyContext,
     *,
     checkpoint_manager: CheckpointRuntimeService,
-    lock_manager: LockCoordinator,
+    lock_runtime_service: LockRuntimeService,
     observer: PipelineObserver,
 ) -> BatchExecutor:
     """Build the batch executor with YAML-derived DQ output paths."""
@@ -152,7 +152,7 @@ def build_batch_executor(
                 ServicesBuilder.create_batch_processing_components
             ),
             strict_gold_validation=context.strict_gold_validation,
-            lock_validator=lock_manager.validate,
+            lock_validator=lock_runtime_service.validate,
             tracer=context.observability.tracer,
             bronze_output_path=dq_output_paths.bronze_path,
             silver_output_path=dq_output_paths.silver_path,
@@ -197,7 +197,7 @@ def assemble_runner_parts(
     context: RunnerAssemblyContext,
     *,
     checkpoint_manager_builder: Callable[..., CheckpointRuntimeService],
-    lock_manager_builder: Callable[..., LockCoordinator],
+    lock_runtime_service_builder: Callable[..., LockRuntimeService],
     preflight_service_builder: Callable[[RunnerAssemblyContext], PreflightService],
     observer_builder: Callable[[RunnerAssemblyContext], PipelineObserver],
     postrun_service_builder: Callable[..., PostrunService],
@@ -212,7 +212,7 @@ def assemble_runner_parts(
         storage=context.pipeline.services.storage,
         logger=context.logger_port,
     )
-    lock_manager = lock_manager_builder(
+    lock_runtime_service = lock_runtime_service_builder(
         context,
         checkpoint_manager=checkpoint_manager,
         context_holder=LockContextHolder(),
@@ -226,13 +226,13 @@ def assemble_runner_parts(
     batch_executor = batch_executor_builder(
         context,
         checkpoint_manager=checkpoint_manager,
-        lock_manager=lock_manager,
+        lock_runtime_service=lock_runtime_service,
         observer=observer,
     )
     return RunnerAssemblyParts(
         checkpoint_manager=checkpoint_manager,
         lifecycle_service=lifecycle_service,
-        lock_manager=lock_manager,
+        lock_runtime_service=lock_runtime_service,
         preflight_service=preflight_service,
         postrun_service=postrun_service,
         observer=observer,

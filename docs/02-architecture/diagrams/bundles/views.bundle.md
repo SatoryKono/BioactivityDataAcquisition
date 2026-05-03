@@ -755,7 +755,7 @@
 
 ### Описание
 
-Диаграмма «06 Application Layer Class Diagram» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Infrastructure-Mapping. Родительская диаграмма: `06-application-layer-class-diagram-full.mermaid`. Схема имеет плотность порядка 12 узлов и 11 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Runner Orchestration, Lifecycle / Support Services, Execution Support. Показательные узлы для быстрого чтения: PipelineRunner, RunnerDependencies, PipelineService, LockCoordinator, CheckpointManagerService, PreflightService.
+Диаграмма «06 Application Layer Class Diagram» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Infrastructure-Mapping. Родительская диаграмма: `06-application-layer-class-diagram-full.mermaid`. Схема имеет плотность порядка 12 узлов и 11 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Runner Orchestration, Lifecycle / Support Services, Execution Support. Показательные узлы для быстрого чтения: PipelineRunner, RunnerDependencies, PipelineService, LockRuntimeService, CheckpointManagerService, PreflightService.
 
 ### Метаданные
 

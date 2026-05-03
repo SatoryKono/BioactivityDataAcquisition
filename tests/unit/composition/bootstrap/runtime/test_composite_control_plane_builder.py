@@ -25,6 +25,7 @@ from bioetl.domain.control_plane import (
     RunManifest,
     RunSourceRef,
 )
+from bioetl.domain.normalization import compute_input_snapshot_identity_fingerprint
 
 _VALID_RUN_ID = "12345678-1234-5678-1234-567812345678"
 
@@ -298,6 +299,14 @@ def test_build_composite_control_plane_bundle_can_disable_ledger_while_keeping_m
     assert manifest.code_provenance.resolved_config_hash == bundle.resolved_config_hash
     assert (
         manifest.code_provenance.effective_config_hash == bundle.effective_config_hash
+    )
+    snapshot_ids = sorted(
+        snapshot.snapshot_id
+        for source_ref in manifest.source_refs
+        for snapshot in source_ref.input_snapshots
+    )
+    assert bundle.input_snapshot_fingerprint == (
+        compute_input_snapshot_identity_fingerprint(snapshot_ids)
     )
     assert (
         manifest.launch_context["exact_replay_support_boundary"]

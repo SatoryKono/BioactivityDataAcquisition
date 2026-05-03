@@ -19,6 +19,7 @@ _RUNTIME_ANCHOR_SHA256_FIELDS = frozenset(
         "dq_contract_compatibility_hash",
         "resolved_config_hash",
         "effective_config_hash",
+        "input_snapshot_fingerprint",
     }
 )
 _SEMVER_PARTS = 3

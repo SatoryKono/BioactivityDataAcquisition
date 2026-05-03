@@ -490,6 +490,7 @@ class TestToDict:
             "effective_config_artifact_id",
             "execution_fingerprint",
             "dq_contract_compatibility_hash",
+            "input_snapshot_fingerprint",
             "contract_ref",
             "contract_version",
             "manifest_id",
@@ -642,6 +643,7 @@ class TestFromDict:
             effective_config_artifact_id="artifact-123",
             execution_fingerprint="fingerprint-123",
             dq_contract_compatibility_hash="dq-hash-123",
+            input_snapshot_fingerprint="snapshot-fp-123",
             manifest_id="manifest-123",
             last_event_id="evt-123",
             last_event_occurred_at=updated,
@@ -664,6 +666,7 @@ class TestFromDict:
         assert restored.effective_config_artifact_id == "artifact-123"
         assert restored.execution_fingerprint == "fingerprint-123"
         assert restored.dq_contract_compatibility_hash == "dq-hash-123"
+        assert restored.input_snapshot_fingerprint == "snapshot-fp-123"
         assert restored.manifest_id == "manifest-123"
         assert restored.last_event_id == "evt-123"
         assert restored.last_event_occurred_at == updated
@@ -684,6 +687,7 @@ class TestFromDict:
         assert state.completed_enrichers == frozenset()
         assert state.last_event_id is None
         assert state.last_event_occurred_at is None
+        assert state.input_snapshot_fingerprint == ""
         assert state.contract_version == ""
 
     def test_runtime_anchors_are_normalized_during_round_trip(self) -> None:
@@ -696,6 +700,7 @@ class TestFromDict:
             effective_config_artifact_id=" artifact-123 ",
             execution_fingerprint=" fp-123 ",
             dq_contract_compatibility_hash=" DQ-HASH-123 ",
+            input_snapshot_fingerprint=" SNAPSHOT-FP-123 ",
             contract_ref=" ChemBL.Activity ",
             contract_version=" v2 ",
             manifest_id=" manifest-123 ",
@@ -709,6 +714,7 @@ class TestFromDict:
         assert payload["effective_config_artifact_id"] == "artifact-123"
         assert payload["execution_fingerprint"] == "fp-123"
         assert payload["dq_contract_compatibility_hash"] == "dq-hash-123"
+        assert payload["input_snapshot_fingerprint"] == "snapshot-fp-123"
         assert payload["contract_ref"] == "chembl.activity"
         assert payload["contract_version"] == "2.0.0"
         assert payload["manifest_id"] == "manifest-123"
@@ -717,6 +723,7 @@ class TestFromDict:
         assert restored.effective_config_artifact_id == "artifact-123"
         assert restored.execution_fingerprint == "fp-123"
         assert restored.dq_contract_compatibility_hash == "dq-hash-123"
+        assert restored.input_snapshot_fingerprint == "snapshot-fp-123"
         assert restored.contract_ref == "chembl.activity"
         assert restored.contract_version == "2.0.0"
         assert restored.manifest_id == "manifest-123"

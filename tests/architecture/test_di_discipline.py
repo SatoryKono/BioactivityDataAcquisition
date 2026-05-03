@@ -2,7 +2,7 @@
 
 REQ-ARCH-DI-010: Application layer MUST NOT create infrastructure services.
 
-Application services (LockCoordinator, PreflightService, PostrunService,
+Application services (LockRuntimeService, PreflightService, PostrunService,
 MedallionLifecycleService, PipelineObserver) should be created in the composition
 layer and injected via constructors.
 
@@ -21,7 +21,7 @@ APPLICATION_DIR = Path("src/bioetl/application")
 # Forbidden patterns: service creation in application layer.
 # These services MUST be injected, not created directly.
 FORBIDDEN_IN_APPLICATION = [
-    "LockCoordinator.create",
+    "LockRuntimeService.create",
     "PreflightService(",
     "PostrunService(",
     "MedallionLifecycleService(",
@@ -97,7 +97,7 @@ class TestDIDiscipline:
     ) -> None:
         """Application layer must not create infrastructure services.
 
-        REQ-ARCH-DI-010: Services like LockCoordinator, PreflightService,
+        REQ-ARCH-DI-010: Services like LockRuntimeService, PreflightService,
         PostrunService, MedallionLifecycleService, and PipelineObserver must be
         injected, not created directly in application layer.
 

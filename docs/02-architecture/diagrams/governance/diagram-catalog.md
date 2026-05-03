@@ -233,7 +233,7 @@ ______________________________________________________________________
 156. **Lock Acquisition Flow** - Sequence - acquire() → heartbeat → release()
 001. **Lock States** - State - Unlocked → Locked → Released
 001. **Heartbeat Mechanism** - Sequence - Periodic TTL refresh
-001. **Lock Manager** - Component - LockCoordinator orchestration
+001. **Lock Runtime Service** - Component - LockRuntimeService orchestration
 001. **MemoryLock Implementation** - Class - In-memory locking
 001. **Exclusive Lock Flow** - Sequence - Rebuild/backfill locking
 001. **Lock Validation** - Activity - Owner validation
@@ -306,7 +306,7 @@ ______________________________________________________________________
 001. **BatchMetricsRecorderService** - Class - Metrics recording
 001. **BaseTransformer** - Class - Abstract transformer
 001. **BasePipeline** - Class - Abstract pipeline
-001. **LockCoordinator** - Class - Lock orchestration
+001. **LockRuntimeService** - Class - Lock orchestration
 001. **CheckpointRuntimeService** - Class - Checkpoint handling
 001. **PipelineService** - Class - Services bundle
 001. **QuarantineRuntimeService** - Class - Quarantine management
@@ -420,7 +420,7 @@ ______________________________________________________________________
 001. **Adapter ↔ HTTPClient** - Sequence - API request
 001. **HTTPClient ↔ RateLimiter** - Sequence - Rate limiting
 001. **HTTPClient ↔ CircuitBreaker** - Sequence - Fault tolerance
-001. **LockCoordinator ↔ LockPort** - Sequence - Lock lifecycle
+001. **LockRuntimeService ↔ LockPort** - Sequence - Lock lifecycle
 001. **CheckpointRuntimeService ↔ CheckpointPort** - Sequence - State persistence
 001. **QuarantineRuntimeService ↔ QuarantinePort** - Sequence - Quarantine ops
 001. **Observer ↔ Services** - Sequence - Observability integration
@@ -428,7 +428,7 @@ ______________________________________________________________________
 001. **Postrun ↔ DQAnalyzers** - Sequence - DQ analysis
 001. **Postrun ↔ VacuumService** - Sequence - Cleanup
 001. **MemoryMonitor ↔ BatchExecutor** - Sequence - Adaptive sizing
-001. **Heartbeat ↔ LockCoordinator** - Sequence - TTL refresh
+001. **Heartbeat ↔ LockRuntimeService** - Sequence - TTL refresh
 001. **Shutdown ↔ Runner** - Sequence - Graceful stop
 001. **Factory ↔ Registry** - Sequence - Component creation
 001. **CLI ↔ Entrypoints** - Sequence - Command execution

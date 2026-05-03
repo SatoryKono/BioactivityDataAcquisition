@@ -114,11 +114,11 @@ class TestCliExitCodeMatrix:
         batch_run_result = _get_batch_run_result_type()
         with (
             patch(
-                "bioetl.interfaces.cli.commands.domains.run_all.command.resolve_context_registry",
+                "bioetl.interfaces.cli.commands.run_all.resolve_context_registry",
                 return_value=_mock_registry,
             ),
             patch(
-                "bioetl.interfaces.cli.commands.domains.run_all.command._run_batch_with_policy"
+                "bioetl.interfaces.cli.commands.run_all._run_batch_with_policy"
             ) as mock_execute_batch,
         ):
             mock_execute_batch.return_value = batch_run_result(

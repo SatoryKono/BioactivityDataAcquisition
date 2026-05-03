@@ -125,7 +125,7 @@ ContentHashPolicyByVersion = ContentHashPolicyGroup
 
 @dataclass(frozen=True, slots=True)
 class LockConfig:
-    """Configuration for LockCoordinator.
+    """Configuration for LockRuntimeService.
 
     Bundles locking configuration to reduce __init__ parameters.
 

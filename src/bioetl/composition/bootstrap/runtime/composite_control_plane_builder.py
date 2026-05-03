@@ -47,6 +47,7 @@ from bioetl.domain.control_plane.reproducibility_policy import (
     resolve_effective_required_persistence_profile,
     resolve_replay_capability,
 )
+from bioetl.domain.normalization import compute_input_snapshot_identity_fingerprint
 from bioetl.domain.types import RunID, RunType
 from bioetl.infrastructure.control_plane import FileRunLedgerStore, FileRunManifestStore
 from bioetl.infrastructure.time import SystemClock
@@ -205,6 +206,9 @@ def build_composite_control_plane_bundle(
         effective_config_hash=effective_config_hash or None,
         dq_contract_compatibility_hash=dq_contract_compatibility_hash or None,
         effective_config_artifact_id=effective_config_artifact_id or None,
+        input_snapshot_fingerprint=_compute_composite_input_snapshot_fingerprint(
+            manifest.source_refs
+        ),
         contract_ref=contract_ref,
         contract_version=contract_version or None,
     )
@@ -265,6 +269,18 @@ def _build_composite_manifest_create_request(
         effective_config_artifact_id=effective_config_artifact_id or None,
         replay_capability=replay_capability,
     )
+
+
+def _compute_composite_input_snapshot_fingerprint(
+    source_refs: tuple[RunSourceRef, ...],
+) -> str | None:
+    """Return a deterministic fingerprint for composite cached-Bronze inputs."""
+    snapshot_ids = sorted(
+        snapshot.snapshot_id
+        for source_ref in source_refs
+        for snapshot in source_ref.input_snapshots
+    )
+    return compute_input_snapshot_identity_fingerprint(snapshot_ids)
 
 
 def _resolve_composite_replay_capability(

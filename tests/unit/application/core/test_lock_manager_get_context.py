@@ -1,4 +1,4 @@
-"""Application-layer tests for LockCoordinator.get_context()."""
+"""Application-layer tests for LockRuntimeService.get_context()."""
 
 from __future__ import annotations
 
@@ -8,9 +8,9 @@ from uuid import uuid4
 
 import pytest
 
-from bioetl.application.core.lifecycle.lock_manager import (
-    LockCoordinator,
-    LockCoordinatorCreateContext,
+from bioetl.application.core.lifecycle.lock_runtime_service import (
+    LockRuntimeService,
+    LockRuntimeServiceCreateContext,
 )
 from bioetl.domain.locking import FencingToken
 from bioetl.domain.types import RunID, RunType
@@ -59,9 +59,9 @@ def _build_lock_manager(
     mock_logger: MagicMock,
     run_id: RunID,
     run_type: RunType,
-) -> LockCoordinator:
-    return LockCoordinator.create(
-        LockCoordinatorCreateContext(
+) -> LockRuntimeService:
+    return LockRuntimeService.create(
+        LockRuntimeServiceCreateContext(
             lock_port=mock_lock_port,
             run_id=run_id,
             provider="chembl",
