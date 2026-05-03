@@ -27,7 +27,7 @@
       "targetBlank": false,
       "title": "Back to Overview",
       "type": "dashboards",
-      "url": "/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&var-run_type=$run_type"
+      "url": "/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=All&var-run_type=All"
     },
     {
       "asDropdown": false,
