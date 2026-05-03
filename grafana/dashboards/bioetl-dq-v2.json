@@ -36,8 +36,19 @@
       "keepTime": true,
       "tags": [],
       "targetBlank": false,
-      "title": "Next Recommended Drilldown",
-      "type": "link",
+      "title": "Control Plane v1",
+      "type": "dashboards",
+      "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type"
+    },
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": false,
+      "keepTime": true,
+      "tags": [],
+      "targetBlank": false,
+      "title": "5. Silver Reject Explorer",
+      "type": "dashboards",
       "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline&var-run_type=$run_type"
     },
     {

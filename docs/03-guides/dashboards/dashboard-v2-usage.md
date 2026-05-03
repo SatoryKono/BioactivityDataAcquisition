@@ -126,8 +126,11 @@ ______________________________________________________________________
      `Silver Rejects Count + Rate` / `Silver Filter Rejects` в текущем time range.
   1. Перейдите в `4. Data Quality` и проверьте `Top Silver Reject Reasons` /
      `Top Silver Reject Fields`, чтобы сузить проблему до bounded cause summary.
-  1. Откройте `5. Silver Reject Explorer` для record-level списка, выбора
-     `reason_code/field/run_id` и detail по конкретному `payload_hash`.
+  1. При необходимости L1/L2 операционного контекста откройте top-level ссылку
+     `Control Plane v1` (handoff только с bounded vars `$pipeline/$run_type` и
+     тем же time range).
+  1. Для record-level разбора откройте отдельный CTA `5. Silver Reject Explorer`
+     и выберите `reason_code/field/run_id` с detail по конкретному `payload_hash`.
   1. Используйте quarantine CLI для action-операций (`replay/resolve/purge`) и
      финального подтверждения remediation.
 - Эти панели отвечают на вопросы:
