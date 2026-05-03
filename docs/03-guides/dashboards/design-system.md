@@ -122,3 +122,28 @@ uv run python -m scripts.engineering.qa check-dashboard-visual-semantics
   "timezone": "browser"
 }
 ```
+
+
+## 9) Actionable links for critical panels (обязательно)
+
+Для критичных (`P1`/`P2`) operator panels типов `stat`/`gauge`/`table` MUST быть минимум один actionable `options.dataLinks` entry.
+
+Минимальный контракт:
+- `options.dataLinks` содержит хотя бы один объект;
+- `title` начинается с шаблона `Open <target>`;
+- `url` ведёт в целевой dashboard/runbook для drilldown.
+
+Пример:
+
+```json
+"options": {
+  "dataLinks": [
+    {
+      "title": "Open bioetl-runtime",
+      "url": "/d/bioetl-runtime/bioetl-runtime",
+      "targetBlank": false
+    }
+  ]
+}
+```
+
