@@ -24,6 +24,7 @@ ______________________________________________________________________
 - **Deterministic Writes**: Reproducible outputs and deterministic retries ([ADR-014](docs/02-architecture/decisions/ADR-014-deterministic-writes.md)).
 - **Run Control Plane**: Immutable run manifests and append-only ledgers for provenance, replay analysis, and artifact linkage ([ADR-044](docs/02-architecture/decisions/ADR-044-run-manifest-ledger-control-plane.md)).
 - **Observability by Design**: Metrics, tracing, and logging ports ([ADR-017](docs/02-architecture/decisions/ADR-017-observability-architecture.md)).
+- **Operator Dashboards**: Unified L0/L1 Grafana default window `time.from=now-12h` (`time.to=now`, `refresh=30s`) including `bioetl-control-plane-v1`; `bioetl-silver-reject-explorer` is the explicit `time.from=now-24h` forensic exception (see `docs/03-guides/dashboards/variables-guide.md`).
 - **Unified HTTP Client**: Standardized rate limiting, retry, and telemetry ([ADR-032](docs/02-architecture/decisions/ADR-032-unified-http-client.md)).
 - **Strict Governance**: Comprehensive rules for schema evolution, data contracts, and operational procedures.
 

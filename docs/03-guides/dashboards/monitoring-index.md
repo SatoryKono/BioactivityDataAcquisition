@@ -126,6 +126,8 @@ surface с answer-first `Trust Summary` в самом верху: replay safety 
 checkpoint freshness proxy и ledger/manifest consistency. В этом же верхнем
 блоке явно отображается список `Known Blind Spots` (что пока не
 инструментировано), чтобы оператор не трактовал отсутствие сигнала как `OK`.
+По умолчанию этот dashboard открывается с окном `time.from=now-12h`
+(`time.to=now`, `refresh=30s`) — наравне с другими L0/L1 operator dashboards.
 
 GLOBAL read-path panels остаются отдельно в блоке
 `Global diagnostics (non-pipeline scoped)` и не фильтруются по `$pipeline` /

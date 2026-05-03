@@ -84,7 +84,7 @@ UX цель: убрать ложное ожидание, что source filters �
   - `overview`: `time.from=now-12h`, `refresh=30s`
   - `runtime`: `time.from=now-12h`, `refresh=30s`
   - `dq`: `time.from=now-12h`, `refresh=30s`
-  - `control-plane`: `time.from=now-12h`, `refresh=30s`
+  - `control-plane` (`uid=bioetl-control-plane-v1`): `time.from=now-12h`, `refresh=30s`
 - **Forensic L2 exception (must include explicit justification in docs/PR):**
   - `explorer` (`bioetl-silver-reject-explorer`): `time.from=now-24h`, `refresh=1m`
   - Justification: forensic/reject investigation требует больше стартового горизонта для редких инцидентов и сниженной частоты auto-refresh, чтобы уменьшить шум и нагрузку при row-level анализе.
