@@ -33,11 +33,16 @@ ______________________________________________________________________
 
 Текущая навигационная модель:
 
-- `1. Overview` -> `2. Runtime` / `Control Plane v1` / `3. Provider Health` / `4. Data Quality` / `6. Workflow Overview`
+- `1. BioETL Overview` -> `2. Runtime` / `Control Plane v1` / `3. Provider Health` / `4. Data Quality` / `6. Workflow Overview`
 - `2. Runtime` -> `Back to Overview` / `Control Plane v1` / `4. Data Quality`
 - `3. Provider Health` -> `Back to Overview` / `2. Runtime`
 - `4. Data Quality` -> `Back to Overview` / `5. Silver Reject Explorer`
 - `6. Workflow Overview` -> `Back to Overview` / `2. Runtime` / `Control Plane v1`
+
+`bioetl-overview-v2` is the L0 answer-first surface. It answers one question:
+what is currently broken or degraded in BioETL, and where should the operator
+drill down first? Keep record-level filters, provider deep diagnostics, DQ
+cause breakdowns, and control-plane replay/audit detail out of Overview.
 
 ## Legacy-документы
 

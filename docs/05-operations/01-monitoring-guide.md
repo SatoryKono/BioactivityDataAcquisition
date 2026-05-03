@@ -78,7 +78,7 @@ Pushgateway publication на завершении run. Это позволяет
 
 В верхней части каждого дашборда расположены выпадающие списки:
 
-- **1. Overview / Control Plane v1**: `$pipeline`, `$run_type`
+- **1. BioETL Overview / Control Plane v1**: `$pipeline`, `$run_type`
 - **2. Runtime / 4. Data Quality**: `$pipeline`, `$run_type`, `$stage`
 - **3. Provider Health**: `$provider`, `$adapter`
 - **5. Silver Reject Explorer**: `$pipeline`, `$run_type`, `$reason_code`, `$field`, `$run_id`, `$payload_hash`
@@ -90,29 +90,28 @@ Pushgateway publication на завершении run. Это позволяет
 
 ### Основные Дашборды
 
-#### 1. 1. Overview
+#### 1. 1. BioETL Overview
 
-Центральный дашборд для контроля за выполнением пайплайнов.
+L0 дашборд для одного operator question: что сейчас broken/degraded в BioETL и
+куда drill down первым.
 
-- **Processing Volume by Stage**: stage-volume trend за активное окно Grafana.
-- **Stage Distribution in Range / Pipeline Distribution in Range**: selected-range срезы распределения.
-- **Overall Yield (Selected Range)**: `gold[$__range] / clamp-min(bronze[$__range], 1)`.
-- **Control Plane Summary**: компактная строка для `Manifest / Ledger Failures`,
-  `Checkpoint Incompatibilities (24h)`, `Lineage Refs Missing (24h)` и
-  явного handoff в `Control Plane v1`.
-- **Composite Source Selections (24h)**: informational counter по
-  `bioetl_composite_source_selection_total`, который показывает bounded
-  composite arbitration activity в выбранном `$pipeline`. Это не alert-state
-  signal, а operator context для случаев, когда composite path неожиданно
-  меняет источник данных или перестаёт выбирать expected source.
-- **Control Plane v1 Handoff**: если incident требует global read / replay /
-  lineage detail, используйте явный переход в `bioetl-control-plane-v1`, а не
-  пытайтесь расследовать это только из overview.
-- **Drilldown**: dashboard links `Explore Logs (Loki, tracing profile)` / `Explore Traces (Tempo, tracing profile)`
-  и data links у `Processing Volume by Stage` переводят оператора в Grafana Explore с тем
-  же временным окном. Overview теперь также даёт явный handoff в
-  `6. Workflow Overview`, если расследование уходит в declarative DAG/status
-  surface. Tempo handoff уже предфильтрован по текущим `$pipeline/$run_type`.
+- **Answer row**: `Failed Pipeline Runs`, `Overall Yield`,
+  `Active Stage Backlog`, `Worst Stage Lag`, `DQ Blocking`,
+  `Control Plane Unsafe`, `Provider Degraded`.
+- **Trend row**: `Processing Volume by Stage`, `Pipeline Run Outcomes`,
+  `Stage Backlog Trend`, `Stage Lag Trend`; это context для L0 решения, а не
+  forensic/debugging surface.
+- **Operational handoff**: `Runtime Handoff`, `Data Quality Handoff`,
+  `Control Plane Handoff`, `Provider Handoff`, `Workflow Handoff` открывают
+  соответствующие L1/L2 dashboards.
+- **Failure summary**: только compact selected-range summaries по manifest /
+  ledger, checkpoint, lineage и Silver rejects. Distribution pie panels и
+  composite source-selection detail не входят в L0 flow.
+- **Drilldown**: dashboard links `Explore Logs (Loki, tracing profile)` /
+  `Explore Traces (Tempo, tracing profile)` и data links у
+  `Processing Volume by Stage` переводят оператора в Grafana Explore с тем же
+  временным окном. Provider/workflow links не наследуют `$pipeline/$run_type`;
+  Runtime/DQ/Control Plane links передают только target-scoped variables.
 
 #### 2. 2. Runtime
 
@@ -281,7 +280,7 @@ operator-facing checkpoint store latency outside ordinary runtime resume paths.
 
 #### Silver Filter Rejects Handoff
 
-- Используйте `1. Overview` или `2. Runtime` как summary surface, чтобы
+- Используйте `1. BioETL Overview` или `2. Runtime` как summary surface, чтобы
   подтвердить spike по `Silver Filter Rejects` в активном Grafana time range.
 - После подтверждения переходите в `4. Data Quality`, где
   `Top Silver Reject Reasons` и `Top Silver Reject Fields` дают bounded cause
@@ -359,7 +358,7 @@ uv run python -m pytest -q tests/integration/test_prometheus_rules_config.py
 
 - **График "Error Rate" покраснел**: Используйте `structlog` для получения деталей исключений.
 - **Вырос `Silver Filter Rejects`**:
-  1. Подтвердите spike в `1. Overview` или `2. Runtime`.
+  1. Подтвердите spike в `1. BioETL Overview` или `2. Runtime`.
   1. Перейдите в `4. Data Quality` и проверьте `Top Silver Reject Reasons` /
      `Top Silver Reject Fields`.
   1. Перейдите в `5. Silver Reject Explorer` для списка записей и detail по `payload_hash`.

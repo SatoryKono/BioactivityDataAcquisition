@@ -155,6 +155,7 @@ def build_crossref_publication_fields() -> list[pa.Field]:
         pa.field("content_domain_crossmark_restriction", pa.bool_()),
         pa.field("content_domain_domains", pa.string()),
         pa.field("doi", pa.string(), nullable=False),
+        pa.field("is_oa", pa.bool_()),
         pa.field("issn", pa.string()),
         pa.field("issn_electronic", pa.string()),
         pa.field("issn_list", pa.string()),

@@ -21,7 +21,7 @@ the linked owner docs.
 
 | Question / symptom | Open first | Then use | Owner doc |
 | ------------------ | ---------- | -------- | --------- |
-| Is the pipeline broadly healthy? | `bioetl-overview-v2` | `bioetl diagnostics metrics --json`; `bioetl diagnostics health --json` | [Dashboard v2 Usage](dashboard-v2-usage.md) |
+| What is currently broken or degraded, and where should I drill down first? | `bioetl-overview-v2` | `2. Runtime`, `4. Data Quality`, `3. Provider Health`, `Control Plane v1`, or `6. Workflow Overview` based on the answer row | [Dashboard v2 Usage](dashboard-v2-usage.md) |
 | Did runtime health, logs, memory, or alert-condition panels regress? | `bioetl-runtime` | `bioetl diagnostics guide`; [Observability Checklist](../../05-operations/runbooks/observability-checklist.md) | [Monitoring Guide](../../05-operations/01-monitoring-guide.md) |
 | Is a provider slow, degraded, or exhausting retries? | `bioetl-provider-health-v2` | `bioetl diagnostics health --json`; provider incident runbook | [Incident Response](../../05-operations/runbooks/incident-response.md) |
 | Is DQ quality/freshness/quarantine unhealthy? | `bioetl-dq-v2` | `bioetl diagnostics quarantine --pipeline <pipeline>` | [DQ Failure Investigation](../../05-operations/runbooks/dq-failure-investigation.md) |
@@ -70,10 +70,11 @@ in manifest/ledger/CLI/explorer surfaces, not Prometheus labels.
 
 Архивные файлы перенесены в `docs/03-guides/dashboards/legacy/` и могут описывать устаревшие переменные (`$run-id`, `execution`) или старые метрики.
 
-Текущий `bioetl-overview-v2` остаётся первой точкой входа для operator summary,
-но больше не несёт весь control-plane/detail surface. Он показывает компактные
-selected-range summary сигналы и направляет в `bioetl-control-plane-v1` для
-global read telemetry, replay/lineage detail и deeper control-plane triage.
+Текущий `bioetl-overview-v2` является L0 answer-first точкой входа. Он отвечает
+только на вопрос, что сейчас broken/degraded и какой drilldown открыть первым:
+`2. Runtime`, `4. Data Quality`, `3. Provider Health`, `Control Plane v1` или
+`6. Workflow Overview`. Deep DQ/provider/control-plane/forensic диагностика
+остаётся в соответствующих L1/L2 dashboards и explorer surfaces.
 
 Новый `bioetl-control-plane-v1` собирает агрегированные панели по manifest
 writes, ledger appends, checkpoint compatibility, global read telemetry и

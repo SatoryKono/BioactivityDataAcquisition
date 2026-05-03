@@ -16,7 +16,7 @@ ______________________________________________________________________
 1. [Полный каталог метрик BioETL](#5-%D0%BF%D0%BE%D0%BB%D0%BD%D1%8B%D0%B9-%D0%BA%D0%B0%D1%82%D0%B0%D0%BB%D0%BE%D0%B3-%D0%BC%D0%B5%D1%82%D1%80%D0%B8%D0%BA-bioetl)
 1. [Переменные фильтрации (Template Variables)](#6-%D0%BF%D0%B5%D1%80%D0%B5%D0%BC%D0%B5%D0%BD%D0%BD%D1%8B%D0%B5-%D1%84%D0%B8%D0%BB%D1%8C%D1%82%D1%80%D0%B0%D1%86%D0%B8%D0%B8-template-variables)
 1. [Архивная заметка: legacy v1 dashboard surfaces](#8-%D0%B0%D1%80%D1%85%D0%B8%D0%B2%D0%BD%D0%B0%D1%8F-%D0%B7%D0%B0%D0%BC%D0%B5%D1%82%D0%BA%D0%B0-legacy-v1-dashboard-surfaces)
-1. [Дашборд: 1. Overview](#9-%D0%B4%D0%B0%D1%88%D0%B1%D0%BE%D1%80%D0%B4-1-overview)
+1. [Дашборд: 1. BioETL Overview](#9-%D0%B4%D0%B0%D1%88%D0%B1%D0%BE%D1%80%D0%B4-1-bioetl-overview)
    13.1. [Дашборд: 2. Runtime](#131-%D0%B4%D0%B0%D1%88%D0%B1%D0%BE%D1%80%D0%B4-2-runtime)
 1. [Дашборд: 3. Provider Health](#13-%D0%B4%D0%B0%D1%88%D0%B1%D0%BE%D1%80%D0%B4-3-provider-health)
 1. [Дашборд: 4. Data Quality](#11-%D0%B4%D0%B0%D1%88%D0%B1%D0%BE%D1%80%D0%B4-4-data-quality)
@@ -115,7 +115,7 @@ ______________________________________________________________________
 │  └──────────────────────────────────────────────────────────┘    │
 │                                                                   │
 │  Дашборды (shipped):                                             │
-│  - 1. Overview (bioetl-overview-v2)                              │
+│  - 1. BioETL Overview (bioetl-overview-v2)                       │
 │  - 2. Runtime (bioetl-runtime)                                   │
 │  - 3. Provider Health (bioetl-provider-health-v2)                │
 │  - 4. Data Quality (bioetl-dq-v2)                                │
@@ -717,29 +717,37 @@ shipped pack. Active operator routing starts at
 
 ______________________________________________________________________
 
-## 9. Дашборд: 1. Overview
+## 9. Дашборд: 1. BioETL Overview
 
 **Файл:** `grafana/dashboards/bioetl-overview-v2.json`
 **UID:** `bioetl-overview-v2`
 **Refresh:** 30 секунд
 **Time range:** Последние 12 часов
-**Назначение:** Overview hub для operator-facing selected-range сигналов: stage volume, distribution, yield и короткого handoff в Runtime / Control Plane / DQ / Provider / Workflow surfaces.
+**Назначение:** L0 answer-first surface. Primary question: what is currently broken or degraded in BioETL, and where should the operator drill down first?
 
 ### Панели
 
 | ID  | Название                       | Тип        | PromQL                                                                                                                       | Описание                                                                                                                                                                         |
 | --- | ------------------------------ | ---------- | ---------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 99  | Pipeline                       | Stat       | `max(label_values(bioetl_records_processed_total{...}, pipeline)) or vector(0)`                                              | Информационная панель с именем текущего пайплайна.                                                                                                                               |
-| 100 | Run Type                       | Stat       | `max(label_values(bioetl_records_processed_total{..., run_type=~"$run_type"}, run_type)) or vector(0)`                       | Информационная панель с текущим типом запуска.                                                                                                                                   |
-| 1   | Processing Volume by Stage     | Timeseries | `sum by (stage) (last_over_time(bioetl_records_processed_total{pipeline=~"$pipeline", run_type=~"$run_type"}[$__interval]))` | Latest observed stage totals внутри активного окна Grafana; для batch-style exporter это устойчивее, чем `increase(...)` на sparse scrapes.                                      |
-| 2   | Stage Distribution in Range    | Piechart   | `sum by (stage) (last_over_time(...[$__range]))`                                                                             | Распределение последних observed stage totals внутри выбранного временного окна.                                                                                                 |
-| 3   | Pipeline Distribution in Range | Piechart   | `sum by (pipeline) (last_over_time(...[$__range]))`                                                                          | Распределение последних observed totals по пайплайнам внутри выбранного временного окна.                                                                                         |
-| 4   | Overall Yield (Selected Range) | Gauge      | `gold_last[$__range] / clamp_min(bronze_last[$__range], 1)`                                                                  | Yield по последним observed Bronze/Gold totals внутри выбранного временного окна.                                                                                                |
-| 101 | Latest Successful Data Timestamp | Stat     | `max(bioetl_data_freshness_seconds{pipeline=~"$pipeline"})`                                                                  | Последний observed ingestion timestamp из доменной freshness-метрики.                                                                                                            |
-| 118 | Silver Filter Rejects          | Stat       | `round(sum(increase(bioetl_records_processed_total{...stage="filtered_out"}[$__range])) or vector(0))`                       | Отдельный shipped signal для Silver filter rejection внутри выбранного временного окна Grafana; показывает selected-range increase.                                         |
-| 119 | Silver Filter Reject Rate      | Gauge      | `filtered_out_last[$__range] / clamp_min(bronze_last[$__range], 1)`                                                          | Доля intentionally excluded Silver filters относительно Bronze input по последним observed totals внутри выбранного временного окна.                                             |
+| 99  | L0 Overview Scope              | Text       | n/a                                                                                                                          | Primary question, scope, owner, audience.                                                                                                                                       |
+| 201 | Failed Pipeline Runs           | Stat       | `round(sum(increase(bioetl_pipeline_runs_total{...status="failed"}[$__range])) or vector(0))`                               | Red `>=1`; open `2. Runtime`.                                                                                                                                                   |
+| 4   | Overall Yield                  | Gauge      | `sum(increase(gold[$__range])) / clamp_min(sum(increase(bronze[$__range])), 1)`                                             | Red `<0.8`, yellow `>=0.8`, green `>=0.9`; open `4. Data Quality`.                                                                                                              |
+| 202 | Active Stage Backlog           | Stat       | `max(max_over_time(bioetl_stage_backlog_records{...}[$__range])) or vector(0)`                                              | Non-zero backlog; open `2. Runtime`.                                                                                                                                            |
+| 203 | Worst Stage Lag                | Stat       | `max(max_over_time(bioetl_stage_lag_seconds{...}[$__range])) or vector(0)`                                                  | Yellow `>=300s`; open `2. Runtime`.                                                                                                                                             |
+| 204 | DQ Blocking                    | Stat       | `round(sum(increase(bioetl_dq_validation_failures_total{severity="hard_fail"}[$__range])) or vector(0))`                    | Red `>=1`; open `4. Data Quality`.                                                                                                                                              |
+| 205 | Control Plane Unsafe           | Stat       | manifest + ledger + checkpoint + lineage selected-range failures                                                             | Red `>=1`; open `Control Plane v1`.                                                                                                                                             |
+| 206 | Provider Degraded              | Stat       | degraded/failure health checks + retry exhaustion selected-range counts                                                      | Yellow/red non-zero; open `3. Provider Health`.                                                                                                                                 |
+| 1   | Processing Volume by Stage     | Timeseries | `sum by (stage) (increase(bioetl_records_processed_total{...}[$__interval]))`                                                | Throughput trend supporting the L0 answer.                                                                                                                                      |
+| 207 | Pipeline Run Outcomes          | Timeseries | `sum by (status) (increase(bioetl_pipeline_runs_total{...}[$__interval]))`                                                   | Run status trend.                                                                                                                                                               |
+| 1210 | Stage Backlog Trend           | Timeseries | `max by (stage) (max_over_time(bioetl_stage_backlog_records{...}[$__interval])) or vector(0)`                               | Gauge trend for backlog context.                                                                                                                                                |
+| 1211 | Stage Lag Trend               | Timeseries | `max by (stage) (max_over_time(bioetl_stage_lag_seconds{...}[$__interval])) or vector(0)`                                   | Gauge trend for lag context.                                                                                                                                                    |
+| 208-212 | Operational Handoffs       | Stat       | Runtime / DQ / Control Plane / Provider / Workflow summary counts                                                            | Compact links to target dashboards.                                                                                                                                             |
+| 111/113/114/118/119 | Failure Summary | Stat/Gauge | Manifest/ledger, checkpoint, lineage, Silver reject count/rate                                                               | Compact L0 summaries only; deep diagnostics live in target dashboards.                                                                                                          |
 
-**Используемые метрики:** `records_processed_total`, `data_freshness_seconds`.
+**Используемые метрики:** `bioetl_pipeline_runs_total`, `bioetl_records_processed_total`,
+`bioetl_stage_backlog_records`, `bioetl_stage_lag_seconds`,
+`bioetl_dq_validation_failures_total`, control-plane metrics, provider health
+metrics и `bioetl_workflow_runs_total`.
 
 **Drilldown:** dashboard links `2. Runtime`, `Control Plane v1`, `3. Provider Health`,
 `4. Data Quality`, `6. Workflow Overview`, `Explore Logs (Loki, tracing profile)` и `Explore Traces (Tempo, tracing profile)` используют
@@ -750,7 +758,7 @@ pipeline dashboards использует TraceQL filter по `span."bioetl.pipel
 
 **Silver Rejects triage sequence:**
 
-1. Начните с `1. Overview` или `2. Runtime`, чтобы увидеть summary spike по
+1. Начните с `1. BioETL Overview` или `2. Runtime`, чтобы увидеть summary spike по
    `Silver Filter Rejects`.
 1. Перейдите в `4. Data Quality`, чтобы проверить bounded breakdown через
    `Top Silver Reject Reasons` и `Top Silver Reject Fields`.
@@ -885,7 +893,7 @@ ______________________________________________________________________
 **UID:** `bioetl-runtime`
 **Refresh:** 30 секунд
 **Time range:** Последние 12 часов
-**Назначение:** Отдельный runtime/ops surface для triage log hygiene, adaptive-memory и alert-condition сигналов. Не заменяет `1. Overview`, а собирает Prometheus-first summary, adaptive-memory bounded diagnostics и tracing-backed log hygiene в одном месте.
+**Назначение:** Отдельный runtime/ops surface для triage log hygiene, adaptive-memory и alert-condition сигналов. Не заменяет `1. BioETL Overview`, а собирает Prometheus-first summary, adaptive-memory bounded diagnostics и tracing-backed log hygiene в одном месте.
 
 ### Панели
 
@@ -1839,7 +1847,7 @@ ______________________________________________________________________
 
 | Dashboard                 | UID                             | JSON version | Panels | Refresh | Time Range | Primary surface | Purpose |
 | ------------------------- | ------------------------------- | ------------ | ------ | ------- | ---------- | --------------- | ------- |
-| 1. Overview               | `bioetl-overview-v2`            | 5            | 18     | 30s     | 12h        | Prometheus      | Pipeline, control-plane, lineage overview |
+| 1. BioETL Overview        | `bioetl-overview-v2`            | 5            | 23     | 30s     | 12h        | Prometheus      | L0 broken/degraded answer and operational handoff |
 | 2. Runtime                | `bioetl-runtime`                | 2            | 31     | 30s     | 12h        | Prometheus + optional Loki/Tempo links | Runtime hygiene, warnings, alert conditions |
 | 3. Provider Health        | `bioetl-provider-health-v2`     | 6            | 17     | 30s     | 12h        | Prometheus      | Provider latency, health, retries, failure ratios |
 | 4. Data Quality           | `bioetl-dq-v2`                  | 4            | 21     | 30s     | 12h        | Prometheus      | DQ score, quarantine, freshness, validation failures |
