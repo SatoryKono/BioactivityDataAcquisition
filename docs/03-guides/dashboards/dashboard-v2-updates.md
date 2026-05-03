@@ -30,7 +30,7 @@ ______________________________________________________________________
 - Все shipped dashboards, кроме `bioetl-silver-reject-explorer`, используют `refresh: 30s`.
 - `bioetl-silver-reject-explorer` использует `refresh: 1m` и `time.from: now-24h`.
 - `time.from` для `overview/runtime/provider-health/dq/workflow` = `now-12h`.
-- `time.from` для `control-plane-v1` = `now-6h`.
+- `time.from` для `control-plane-v1` = `now-12h`.
 - Переменные `overview`: `$pipeline`, `$run_type`.
 - Переменные `control-plane-v1`: `$pipeline`, `$run_type`.
 - Переменные `dq/runtime`: `$pipeline`, `$run_type`, `$stage`.
@@ -139,6 +139,22 @@ histogram_quantile(0.95, sum by (le, provider) (rate(bioetl_health_check_latency
 - `bioetl-provider-health-v2`: row `id=91` + панели `1,2,104,7,102`
 - `bioetl-runtime`: `id=1..9`, `Back to Overview`, links в `Explore`
 - `bioetl-workflow-overview`: `id=1..5` с `$workflow/$status` scope
+
+## Canonical decision: default time windows (single source for docs sync)
+
+- Decision ID: `DASH-TIMEWINDOW-2026-05-03`
+- Canonical source: `grafana/dashboards/*.json` (dashboard-as-code), validated by
+  `tests/integration/test_grafana_config.py`.
+- Rule:
+  - L0/L1 operator dashboards (`bioetl-overview-v2`, `bioetl-runtime`,
+    `bioetl-dq-v2`, `bioetl-provider-health-v2`, `bioetl-workflow-overview`,
+    `bioetl-control-plane-v1`) MUST keep `time.from=now-12h`, `time.to=now`,
+    `refresh=30s`.
+  - Forensic dashboard `bioetl-silver-reject-explorer` is the explicit
+    exception with `time.from=now-24h`, `time.to=now`, `refresh=1m`.
+- Rationale: единый операторский baseline снижает когнитивный drift между
+  дашбордами и уменьшает риск ложной интерпретации при cross-dashboard triage;
+  forensic surface сохраняет более длинный горизонт для редких reject-инцидентов.
 
 ## Примечание по старым гайдам
 
