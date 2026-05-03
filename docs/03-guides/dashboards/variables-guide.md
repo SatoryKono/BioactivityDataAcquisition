@@ -65,6 +65,19 @@ ______________________________________________________________________
 - Для всех `links[].url` с Explore route (`/explore`, `/a/grafana-lokiexplore-app/explore`, `/a/grafana-exploretraces-app/`) используем `from=${__from}&to=${__to}`.
 - Смешанные/legacy варианты (`from=$__from`, отсутствие time-range, `includeVars=true`) не допускаются.
 
+## Default time window policy by dashboard class
+
+- **L0/L1 baseline (must be unified unless justified):**
+  - `overview`: `time.from=now-12h`, `refresh=30s`
+  - `runtime`: `time.from=now-12h`, `refresh=30s`
+  - `dq`: `time.from=now-12h`, `refresh=30s`
+  - `control-plane`: `time.from=now-12h`, `refresh=30s`
+- **Forensic L2 exception (must include explicit justification in docs/PR):**
+  - `explorer` (`bioetl-silver-reject-explorer`): `time.from=now-24h`, `refresh=1m`
+  - Justification: forensic/reject investigation требует больше стартового горизонта для редких инцидентов и сниженной частоты auto-refresh, чтобы уменьшить шум и нагрузку при row-level анализе.
+- **Workflow dashboard class:**
+  - `workflow-overview`: `time.from=now-12h`, `refresh=30s` (align with L0/L1 operator baseline for run-step triage).
+
 ## Test coverage expectations
 
 - Links contract: `tests/integration/test_grafana_dashboard_links.py`
