@@ -283,7 +283,6 @@ def test_summary_queries_use_zero_fallbacks() -> None:
             "Circuit Breaker Trips by Provider": 'or label_replace(vector(0), "adapter",',
             "Retries Exhausted": "or vector(0)",
             "HTTP Error Rate": "or vector(0)",
-            "Rate Limiter Tokens Depleted": "or vector(0)",
             "Circuit Breaker Open": "or vector(0)",
             "Retries Exhausted by Provider / Operation": "or vector(0)",
             "HTTP Retry Budget Exhausted": "or vector(0)",

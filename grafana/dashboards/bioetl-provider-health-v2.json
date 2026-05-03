@@ -442,7 +442,7 @@
       },
       "targets": [
         {
-          "expr": "min by (provider) (min_over_time(bioetl_rate_limiter_tokens_available{provider=~\"$provider\"}[15m])) or vector(0)",
+          "expr": "min by (provider) (min_over_time(bioetl_rate_limiter_tokens_available{provider=~\"$provider\"}[15m]))",
           "legendFormat": "{{ provider }}",
           "refId": "A"
         }
