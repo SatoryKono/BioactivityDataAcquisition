@@ -102,7 +102,8 @@
         "mode": "html"
       },
       "title": "Runtime Scope",
-      "type": "text"
+      "type": "text",
+      "description": "[L0 answer] Runtime Scope"
     },
     {
       "gridPos": {
@@ -117,11 +118,12 @@
         "mode": "html"
       },
       "title": "Diagnostic Scope Note",
-      "type": "text"
+      "type": "text",
+      "description": "[L0 answer] Diagnostic Scope Note"
     },
     {
       "datasource": "Prometheus",
-      "description": "Combined runtime blocker count from shipped 15m/30m recording rules: preflight, infrastructure, failed runs, invariant violations, stage backlog (all stages incl. output), stage lag, gold write missing, no terminal run, no-record runs, and memory pressure. Stage filter is intentionally removed from aggregate blocker count to ensure output/gold stages are always visible.",
+      "description": "[L0 answer] Combined runtime blocker count from shipped 15m/30m recording rules: preflight, infrastructure, failed runs, invariant violations, stage backlog (all stages incl. output), stage lag, gold write missing, no terminal run, no-record runs, and memory pressure. Stage filter is intentionally removed from aggregate blocker count to ensure output/gold stages are always visible.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -192,7 +194,7 @@
     },
     {
       "datasource": "Prometheus",
-      "description": "Failed pipeline executions over the last 15 minutes.",
+      "description": "[L0 answer] Failed pipeline executions over the last 15 minutes.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -263,7 +265,7 @@
     },
     {
       "datasource": "Prometheus",
-      "description": "Pipelines that ran during the last 30 minutes but produced zero processed records.",
+      "description": "[L0 answer] Pipelines that ran during the last 30 minutes but produced zero processed records.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -334,7 +336,7 @@
     },
     {
       "datasource": "Prometheus",
-      "description": "Runtime errors normalized by bronze input over the last 30 minutes.",
+      "description": "[L0 answer] Runtime errors normalized by bronze input over the last 30 minutes.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -405,7 +407,7 @@
     },
     {
       "datasource": "Prometheus",
-      "description": "Worst observed stage lag over the last 15 minutes.",
+      "description": "[L0 answer] Worst observed stage lag over the last 15 minutes.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -476,7 +478,7 @@
     },
     {
       "datasource": "Prometheus",
-      "description": "Adaptive memory pressure state over the last 15 minutes.",
+      "description": "[L0 answer] Adaptive memory pressure state over the last 15 minutes.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -547,7 +549,7 @@
     },
     {
       "datasource": "Prometheus",
-      "description": "Shows each active runtime blocker recording rule with its current value. Empty table means no active blockers.",
+      "description": "[L2 diagnostic] Shows each active runtime blocker recording rule with its current value. Empty table means no active blockers.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -661,7 +663,7 @@
     },
     {
       "datasource": "Prometheus",
-      "description": "Sustained backlog accumulation by stage.",
+      "description": "[L2 diagnostic] Sustained backlog accumulation by stage.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -735,7 +737,7 @@
     },
     {
       "datasource": "Prometheus",
-      "description": "Shows expected vs observed stage status per entity config. Gold status is contextual: expected (scd2/append/overwrite config), disabled (gold_enabled=false), pending (run active, gold not yet written), or missing (run completed, gold=0).",
+      "description": "[L2 diagnostic] Shows expected vs observed stage status per entity config. Gold status is contextual: expected (scd2/append/overwrite config), disabled (gold_enabled=false), pending (run active, gold not yet written), or missing (run completed, gold=0).",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -830,7 +832,7 @@
     },
     {
       "datasource": "Prometheus",
-      "description": "Processed records by stage over the active Grafana interval.",
+      "description": "[L2 diagnostic] Processed records by stage over the active Grafana interval.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -899,7 +901,7 @@
     },
     {
       "datasource": "Prometheus",
-      "description": "Phase latency distribution across p50, p95, and p99.",
+      "description": "[L2 diagnostic] Phase latency distribution across p50, p95, and p99.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -983,7 +985,7 @@
     },
     {
       "datasource": "Prometheus",
-      "description": "Pipeline duration percentiles by stage. \"No terminal pipeline duration samples\" means no completed pipeline runs emitted duration histogram buckets in the selected range. Possible causes: run still active, terminal metric not emitted, query label mismatch.",
+      "description": "[L2 diagnostic] Pipeline duration percentiles by stage. \"No terminal pipeline duration samples\" means no completed pipeline runs emitted duration histogram buckets in the selected range. Possible causes: run still active, terminal metric not emitted, query label mismatch.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1068,7 +1070,7 @@
     },
     {
       "datasource": "Prometheus",
-      "description": "Runtime error totals over the active range, grouped by stage and error_code.",
+      "description": "[L2 diagnostic] Runtime error totals over the active range, grouped by stage and error_code.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1129,7 +1131,7 @@
     },
     {
       "datasource": "Prometheus",
-      "description": "Processed-record totals over the active range, grouped by stage and run_type.",
+      "description": "[L2 diagnostic] Processed-record totals over the active range, grouped by stage and run_type.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1185,7 +1187,7 @@
     },
     {
       "datasource": "Prometheus",
-      "description": "Uses shipped 15m/30m runtime recording rules for preflight, infrastructure, failed-run, and error-rate blockers.",
+      "description": "[Decision/Next Action] Uses shipped 15m/30m runtime recording rules for preflight, infrastructure, failed-run, and error-rate blockers.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1256,7 +1258,7 @@
     },
     {
       "datasource": "Prometheus",
-      "description": "Uses shipped 15m/30m DQ recording rules; hand off into DQ for record-level diagnostics.",
+      "description": "[Decision/Next Action] Uses shipped 15m/30m DQ recording rules; hand off into DQ for record-level diagnostics.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1327,7 +1329,7 @@
     },
     {
       "datasource": "Prometheus",
-      "description": "Uses shipped 15m/30m control-plane recording rules for manifest, checkpoint, replay, and lineage blockers.",
+      "description": "[Decision/Next Action] Uses shipped 15m/30m control-plane recording rules for manifest, checkpoint, replay, and lineage blockers.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1398,7 +1400,7 @@
     },
     {
       "datasource": "Prometheus",
-      "description": "Uses shipped 15m/30m/1h provider recording rules; provider deep-debug stays in Provider Health.",
+      "description": "[Decision/Next Action] Uses shipped 15m/30m/1h provider recording rules; provider deep-debug stays in Provider Health.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1469,7 +1471,7 @@
     },
     {
       "datasource": "Prometheus",
-      "description": "Counts entities older than 24h and hands off into DQ or source troubleshooting.",
+      "description": "[Decision/Next Action] Counts entities older than 24h and hands off into DQ or source troubleshooting.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1540,7 +1542,7 @@
     },
     {
       "datasource": "Prometheus",
-      "description": "Graceful-shutdown initiation events over the active Grafana interval.",
+      "description": "[L2 diagnostic] Graceful-shutdown initiation events over the active Grafana interval.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1618,7 +1620,7 @@
     },
     {
       "datasource": "Prometheus",
-      "description": "Graceful-shutdown completion events over the active Grafana interval.",
+      "description": "[L2 diagnostic] Graceful-shutdown completion events over the active Grafana interval.",
       "fieldConfig": {
         "defaults": {
           "color": {

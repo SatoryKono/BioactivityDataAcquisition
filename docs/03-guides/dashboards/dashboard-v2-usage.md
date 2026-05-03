@@ -42,6 +42,29 @@ ______________________________________________________________________
   используются только в `bioetl-silver-reject-explorer` как Explorer-only
   forensic filters, а не как Prometheus labels.
 
+## Единый reading pattern (для всех dashboard v2)
+
+Все дашборды `grafana/dashboards/*.json` теперь читаются по одинаковому шаблону
+строк:
+
+1. **Row A: Primary Answer** — 1–3 ключевые панели для первого ответа оператору.
+   Панели обязаны иметь маркировку в description: `L0 answer`.
+1. **Row B: Decision/Next Action** — панели маршрутизации действий:
+   куда идти дальше, какой runbook открыть, какой subsystem triage делать первым.
+   Панели обязаны иметь маркировку: `Decision/Next Action`.
+1. **Row C+: Diagnostic Details** — углублённая диагностика и forensic drilldown.
+   Этот блок по умолчанию collapsed там, где это уместно. Панели обязаны иметь
+   маркировку: `L2 diagnostic` или `forensic drilldown`.
+
+Операционный порядок чтения для любого инцидента:
+
+1. Откройте **Row A** и подтвердите факт инцидента/деградации.
+1. Перейдите в **Row B** и выберите ближайший action route (runtime/dq/provider/control-plane/workflow/runbook).
+1. Используйте **Row C+** только после маршрутизации, чтобы локализовать причину и собрать доказательства.
+
+Для `2. Runtime`, `4. Data Quality`, `3. Provider Health`, `Control Plane / Replay Safety`
+action routing в **Row B** размещён выше глубокой телеметрии (**Row C+**).
+
 ## Что смотреть в первую очередь
 
 1. `bioetl-overview-v2`, top answer row:
