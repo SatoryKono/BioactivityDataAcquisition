@@ -60,6 +60,22 @@ Use these UX KPIs as mandatory acceptance checks after any dashboard UX change.
   first selected link/action in `1. Overview` leads to the correct L1 dashboard
   or evidence surface without corrective backtracking.
 
+### Manual acceptance check (required)
+
+For every navigation UX change, run and record this manual check:
+
+1. Start on `bioetl-overview-v2` default window (`now-12h`, refresh `30s`).
+2. Validate **time-to-first-action**: operator identifies and executes the first correct handoff from `System Status`/`Next Action` within target SLA.
+3. Validate **click-depth**: likely root-cause surface is reached in **<= 2 clicks** for common runtime/control-plane/dq incidents.
+4. Validate fallback path: less frequent actions are reachable via collapsed `Additional Navigation & Forensics` row without broken links or scope leakage.
+
+Record outcome in change notes as: `pass/fail`, measured time-to-first-action, measured click-depth, and incident pattern used.
+
+## First 2 clicks scenario (overview-first)
+
+- Click 1: open `bioetl-overview-v2` and read `System Status` + `Next Action`.
+- Click 2: follow recommended top-level route (`2. Runtime`, `Control Plane v1`, `4. Data Quality`) or expand `Additional Navigation & Forensics` for `Provider Health`/`Workflow`/`Explore`.
+
 ## Architecture Map
 
 | Layer / surface | Responsibility | Source of truth |

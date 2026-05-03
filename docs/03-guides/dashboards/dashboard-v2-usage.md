@@ -151,6 +151,8 @@ ______________________________________________________________________
 
 Primary dashboards (`1. Overview`, `2. Runtime`, `3. Provider Health`, `4. Data Quality`, `6. Workflow Overview`) MUST follow the canonical navigation contract in `navigation-contract.md`; top navigation is dashboard-specific and does **not** require a universal `Next Recommended Drilldown` link.
 
+For `bioetl-overview-v2`, mandatory top-level links are preserved per navigation contract. To reduce first-screen overload, less frequent actions are duplicated into one collapsed row `Additional Navigation & Forensics` via row-level `dataLinks`/links, so operators can use a compact first-pass path and still keep full one-click access.
+
 Variable handoff policy for dashboard links remains strict and bounded:
 
 - `includeVars=false` for every link (no implicit variable leakage).
@@ -172,16 +174,23 @@ Variable handoff policy for dashboard links remains strict and bounded:
 
 - `bioetl-overview-v2`: L0 Overview отвечает на один primary question:
   what is currently broken or degraded in BioETL, and where should the
-  operator drill down first? Dashboard links `2. Runtime`,
+  operator drill down first? Top-level dashboard links `2. Runtime`,
   `Control Plane v1`, `3. Provider Health`, `4. Data Quality`,
-  `6. Workflow Overview`,
-  `Explore Logs (Loki, tracing profile)` и `Explore Traces (Tempo, tracing profile)`
-  открывают соседние dashboards и Grafana Explore в текущем time range.
+  `6. Workflow Overview`, `Explore Logs` и `Explore Traces`
+  остаются на верхнем уровне по контракту; одновременно less-frequent actions
+  дублируются в collapsed row `Additional Navigation & Forensics`.
   Cross-dashboard URLs передают только target-scoped variables; provider/workflow
   dashboards не наследуют `$pipeline/$run_type` leakage. `System Status` and
   `Next Action` are the first operator answer; subsystem status cards show
   `Reason:` and `Next:` in legends. Panel `id=1`
   (`Processing Volume by Stage`) дублирует Explore handoff через data links.
+
+## First 2 clicks scenario (operator)
+
+1. **Click #1:** открыть `bioetl-overview-v2`, прочитать `System Status` + `Next Action`.
+2. **Click #2:** открыть рекомендуемый dashboard из top-level minimum (`2. Runtime`, `Control Plane v1`, `4. Data Quality`) или при forensic/pattern-specific нужде раскрыть `Additional Navigation & Forensics` и перейти в `Provider Health`/`Workflow`/`Explore`.
+
+Цель сценария: root-cause направление должно быть определено максимум за 2 клика без обязательной прокрутки по нечастым CTA.
 - `bioetl-runtime`: top-level links `Back to Overview`, `Control Plane v1`,
   `3. Provider Health`, `4. Data Quality`, `Explore Logs (Loki, tracing profile)`,
   `Explore Traces (Tempo, tracing profile)` и `Runtime Runbook` дают явный
