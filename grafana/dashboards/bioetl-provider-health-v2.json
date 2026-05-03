@@ -330,7 +330,7 @@
         },
         {
             "datasource": "Prometheus",
-            "description": "HTTP error rate = errors / (errors + successful requests) in selected range. Red > 10%.",
+            "description": "HTTP error rate = errors / total requests in selected range. Red > 10%.",
             "fieldConfig": {
                 "defaults": {
                     "color": {
@@ -381,7 +381,7 @@
             },
             "targets": [
                 {
-                    "expr": "(sum(increase(bioetl_http_request_errors_total{provider=~\"$provider\"}[$__range])) or vector(0)) / clamp_min((sum(increase(bioetl_http_request_errors_total{provider=~\"$provider\"}[$__range])) or vector(0)) + (sum(increase(bioetl_adapter_requests_total{provider=~\"$provider\"}[$__range])) or vector(0)), 1)",
+                    "expr": "(sum(increase(bioetl_http_request_errors_total{provider=~\"$provider\"}[$__range])) or vector(0)) / clamp_min(sum(increase(bioetl_adapter_requests_total{provider=~\"$provider\"}[$__range])) or vector(0), 1)",
                     "legendFormat": "http_error_rate",
                     "refId": "A"
                 }
