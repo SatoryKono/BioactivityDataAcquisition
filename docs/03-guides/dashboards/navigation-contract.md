@@ -2,6 +2,8 @@
 
 Канонический контракт навигации для shipped dashboard UIDs в `grafana/dashboards/*.json`.
 
+Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yaml`.
+
 ## Общие правила
 
 - Каждый dashboard (кроме overview-hub) **MUST** иметь top-level ссылку `Back to Overview` на UID `bioetl-overview-v2`.

@@ -1,0 +1,59 @@
+version: 1
+required_top_level_links_by_uid:
+  bioetl-overview-v2:
+    - 2. Runtime
+    - Control Plane v1
+    - 3. Provider Health
+    - 4. Data Quality
+    - 6. Workflow Overview
+    - Explore Logs (Loki, tracing profile)
+    - Explore Traces (Tempo, tracing profile)
+  bioetl-runtime:
+    - Back to Overview
+    - Control Plane v1
+    - 3. Provider Health
+    - 4. Data Quality
+    - Explore Logs (Loki, tracing profile)
+    - Explore Traces (Tempo, tracing profile)
+  bioetl-control-plane-v1:
+    - Back to Overview
+    - 2. Runtime
+    - 4. Data Quality
+    - Explore Logs (Loki, tracing profile)
+    - Explore Traces (Tempo, tracing profile)
+  bioetl-provider-health-v2:
+    - Back to Overview
+    - 2. Runtime
+    - Explore Logs (Loki, tracing profile)
+    - Explore Traces (Tempo, tracing profile)
+  bioetl-dq-v2:
+    - Back to Overview
+    - Control Plane v1
+    - 5. Silver Reject Explorer
+    - Explore Logs (Loki, tracing profile)
+    - Explore Traces (Tempo, tracing profile)
+  bioetl-silver-reject-explorer:
+    - Back to Overview
+    - Back to Data Quality
+    - Explore Logs (Loki, tracing profile)
+    - Explore Traces (Tempo, tracing profile)
+  bioetl-workflow-overview:
+    - Back to Overview
+    - 2. Runtime
+    - Control Plane v1
+required_link_vars_by_target_uid:
+  bioetl-overview-v2: [pipeline, run_type]
+  bioetl-control-plane-v1: [pipeline, run_type]
+  bioetl-runtime: [pipeline, run_type]
+  bioetl-dq-v2: [pipeline, run_type]
+  bioetl-provider-health-v2: []
+  bioetl-silver-reject-explorer: [pipeline, run_type]
+  bioetl-workflow-overview: []
+allowed_dashboard_link_vars:
+  bioetl-overview-v2: [pipeline, run_type]
+  bioetl-dq-v2: [pipeline, run_type, stage]
+  bioetl-runtime: [pipeline, run_type, stage]
+  bioetl-provider-health-v2: [provider, adapter]
+  bioetl-control-plane-v1: [pipeline, run_type]
+  bioetl-workflow-overview: [workflow, status]
+  bioetl-silver-reject-explorer: [pipeline, run_type, reason_code, field, run_id, payload_hash]
