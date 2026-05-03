@@ -25,9 +25,9 @@
       "keepTime": true,
       "tags": [],
       "targetBlank": false,
-      "title": "Back to Overview",
-      "type": "dashboards",
-      "url": "/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&var-run_type=$run_type"
+      "title": "Open L1 Runtime Dashboard",
+      "type": "link",
+      "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
     },
     {
       "asDropdown": false,
