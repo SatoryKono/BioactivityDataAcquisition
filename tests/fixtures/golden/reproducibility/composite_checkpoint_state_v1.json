@@ -39,6 +39,7 @@
     }
   },
   "execution_fingerprint": "fp-golden-001",
+  "input_snapshot_fingerprint": null,
   "last_event_id": "entry-003",
   "last_event_occurred_at": "2025-01-01T12:00:06+00:00",
   "manifest_id": "manifest-golden-001",

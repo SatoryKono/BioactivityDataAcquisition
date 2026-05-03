@@ -3,11 +3,12 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING, Literal
+from typing import Literal
 
 from deltalake import DeltaTable, write_deltalake
 
-from bioetl.domain.medallion import SilverWriteMode
+from bioetl.domain.behavior.dq_metrics_calculator import DQMetricsCalculator
+from bioetl.domain.medallion import SilverWriteMode, WriteModePolicy
 from bioetl.domain.ports import (
     AuditPort,
     LineageStorePort,
@@ -41,22 +42,6 @@ from bioetl.infrastructure.storage.silver.writer_runtime_support import (
     _rewire_runtime_services,
 )
 
-if TYPE_CHECKING:
-    from bioetl.domain import ports as domain_ports
-    from bioetl.domain.behavior.dq_metrics_calculator import DQMetricsCalculator
-    from bioetl.domain.medallion import WriteModePolicy
-    from bioetl.domain.types import contract_rollout as contract_rollout_types
-    from bioetl.infrastructure.storage.silver.operations import (
-        arrow_operations,
-        delta_operations,
-        maintenance_operations,
-        merged_operations,
-        metadata_operations,
-        postwrite_operations,
-        validation_operations,
-    )
-
-
 __all__ = ["SilverWriteMode", "SilverWriter", "_SilverWriteExecutionContext"]
 
 # Keep Delta Lake dependency explicit in the root infrastructure adapter for
@@ -71,15 +56,15 @@ class SilverWriter(
 ):
     """Writer for Silver layer (normalized data in Delta Lake)."""
 
-    _tracing: domain_ports.TracingPort | None
-    _contract_rollout_policy: contract_rollout_types.ContractRolloutPolicy | None
-    _maintenance: maintenance_operations.SilverMaintenanceOperations | None
-    _metadata: metadata_operations.SilverMetadataOperations | None
-    _validation: validation_operations.SilverValidationOperations | None
-    _delta: delta_operations.SilverDeltaOperations | None
-    _arrow: arrow_operations.SilverArrowOperations | None
-    _merged: merged_operations.SilverMergedOperations | None
-    _postwrite: postwrite_operations.SilverPostwriteOperations | None
+    _tracing: TracingPort | None
+    _contract_rollout_policy: object | None
+    _maintenance: object | None
+    _metadata: object | None
+    _validation: object | None
+    _delta: object | None
+    _arrow: object | None
+    _merged: object | None
+    _postwrite: object | None
     _host: object | None
 
     def __setattr__(self, name: str, value: object) -> None:

@@ -771,7 +771,7 @@ def test_build_pipeline_runner_aborts_before_factory_create_when_manifest_persis
 
     with (
         patch(
-            "bioetl.composition.runtime_builders.run_manifest_builder.FileRunManifestStore.save",
+            "bioetl.composition.runtime_builders._run_manifest_creation_support.FileRunManifestStore.save",
             side_effect=OSError("manifest write failed"),
         ),
         pytest.raises(OSError, match="manifest write failed"),

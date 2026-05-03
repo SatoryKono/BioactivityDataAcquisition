@@ -247,14 +247,15 @@ def test_summary_queries_use_zero_fallbacks() -> None:
     """Runtime/provider summary panels should show zero instead of no-data."""
     expected_panel_snippets = {
         "bioetl-overview-v2.json": {
-            "Failed Pipeline Runs": "or vector(0)",
+            "Failed Runs in Range": "or vector(0)",
             "Manifest / Ledger Failures": "or vector(0)",
             "Checkpoint Incompatibilities": "or vector(0)",
             "Lineage Refs Missing": "or vector(0)",
-            "Silver Filter Rejects": "or vector(0)",
-            "DQ Blocking": "or vector(0)",
-            "Provider Degraded": "or vector(0)",
-            "Workflow Handoff": "or vector(0)",
+            "Silver Rejects Count + Rate": "or vector(0)",
+            "DQ Hard Blockers": "or vector(0)",
+            "Control-plane Blockers": "or vector(0)",
+            "Global Provider Degradation": "or vector(0)",
+            "Workflow Status": "or vector(0)",
         },
         "bioetl-runtime.json": {
             "Warnings": "or vector(0)",
@@ -391,15 +392,15 @@ def test_count_like_summary_panels_use_rounding_or_boolean_conditions() -> None:
     """Count-like summary panels should avoid fractional event semantics."""
     expected_panel_snippets = {
         "bioetl-overview-v2.json": {
-            "Failed Pipeline Runs": "round(",
+            "Failed Runs in Range": "round(",
             "Manifest / Ledger Failures": "round(",
             "Checkpoint Incompatibilities": "round(",
             "Lineage Refs Missing": "round(",
-            "Silver Filter Rejects": "round(",
-            "DQ Blocking": "round(",
-            "Control Plane Unsafe": "round(",
-            "Provider Degraded": "round(",
-            "Workflow Handoff": "round(",
+            "Silver Rejects Count + Rate": "round(",
+            "DQ Hard Blockers": "round(",
+            "Control-plane Blockers": "round(",
+            "Global Provider Degradation": "round(",
+            "Workflow Status": "round(",
         },
         "bioetl-provider-health-v2.json": {
             "Healthy Checks": "round(",
@@ -517,7 +518,7 @@ def test_selected_range_kpis_do_not_use_raw_counters() -> None:
         "bioetl-overview-v2.json": {
             "Processing Volume by Stage": ("increase(", "last_over_time("),
             "Pipeline Run Outcomes": ("increase(",),
-            "Overall Yield": ("increase(", "last_over_time("),
+            "Flow Balance": ("increase(",),
         },
         "bioetl-dq-v2.json": {
             "Data Flow in Range: Bronze -> Silver -> Gold": (
@@ -681,14 +682,185 @@ def test_overview_answer_row_has_max_seven_panels() -> None:
 
     assert 3 <= len(answer_panels) <= 7
     assert answer_titles == {
-        "Failed Pipeline Runs",
+        "System Status",
+        "Next Action",
+        "Failed Runs in Range",
+        "Recent Activity",
+        "Worst Backlog Stage",
+        "Worst Lag Stage",
+    }
+
+
+def test_overview_has_system_status_panel() -> None:
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
+    panels = {
+        panel.get("title"): panel
+        for panel in get_dashboard_panels(dashboard)
+        if panel.get("title")
+    }
+    panel = panels.get("System Status")
+
+    assert panel is not None
+    assert panel.get("type") == "stat"
+    mapping_text = json.dumps(
+        panel.get("fieldConfig", {}).get("defaults", {}).get("mappings", [])
+    )
+    for expected_status in ("OK", "DEGRADED", "BROKEN", "UNKNOWN"):
+        assert expected_status in mapping_text
+
+    expr = "\n".join(
+        target.get("expr", "")
+        for target in panel.get("targets", [])
+        if isinstance(target.get("expr"), str)
+    )
+    for metric_name in (
+        "bioetl_pipeline_runs_total",
+        "bioetl_stage_backlog_records",
+        "bioetl_stage_lag_seconds",
+        "bioetl_dq_validation_failures_total",
+        "bioetl_control_plane_manifest_writes_total",
+        "bioetl_checkpoint_compatibility_events_total",
+        "bioetl_lineage_refs_missing_total",
+    ):
+        assert metric_name in expr
+    assert "status=\"failed\"" in expr
+    assert "severity=\"hard_fail\"" in expr
+    assert "[$__range]" in expr
+    assert "or vector(0)" in expr
+
+
+def test_overview_has_next_action_panel() -> None:
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
+    panel = next(
+        (
+            item
+            for item in get_dashboard_panels(dashboard)
+            if item.get("title") == "Next Action"
+        ),
+        None,
+    )
+
+    assert panel is not None
+    assert panel.get("type") == "stat"
+    serialized_panel = json.dumps(panel)
+    for expected_target in (
+        "Open 2. Runtime",
+        "Open 4. Data Quality",
+        "Open 3. Provider Health",
+        "Open Control Plane v1",
+        "Open 6. Workflow Overview",
+    ):
+        assert expected_target in serialized_panel
+    assert "Runtime > DQ > Control Plane > Provider > Workflow" in serialized_panel
+
+
+def test_overview_does_not_render_yield_green_without_denominator() -> None:
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
+    panels = {
+        panel.get("title"): panel
+        for panel in get_dashboard_panels(dashboard)
+        if panel.get("title")
+    }
+
+    assert "Overall Yield" not in panels
+    panel = panels.get("Flow Balance")
+    assert panel is not None
+    assert panel.get("type") == "table"
+    assert "Bronze input is zero or missing" in panel.get("description", "")
+
+    expr = "\n".join(
+        target.get("expr", "")
+        for target in panel.get("targets", [])
+        if isinstance(target.get("expr"), str)
+    )
+    for expected_snippet in (
+        'stage="bronze"',
+        'stage="gold"',
+        'stage="filtered_out"',
+        "bioetl_dq_records_quarantined_total",
+        "clamp_min(",
+        "[$__range]",
+    ):
+        assert expected_snippet in expr
+
+
+def test_overview_backlog_and_lag_panels_expose_stage() -> None:
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
+    panels = {
+        panel.get("title"): panel
+        for panel in get_dashboard_panels(dashboard)
+        if panel.get("title")
+    }
+
+    expectations = {
+        "Worst Backlog Stage": "bioetl_stage_backlog_records",
+        "Worst Lag Stage": "bioetl_stage_lag_seconds",
+    }
+    for panel_title, metric_name in expectations.items():
+        panel = panels.get(panel_title)
+        assert panel is not None
+        assert panel.get("type") == "table"
+        expr = "\n".join(
+            target.get("expr", "")
+            for target in panel.get("targets", [])
+            if isinstance(target.get("expr"), str)
+        )
+        assert metric_name in expr
+        assert "topk(1" in expr
+        assert "by (stage)" in expr
+        assert "[$__range]" in expr
+
+
+def test_overview_handoff_cards_show_status_and_reason() -> None:
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
+    panels = {
+        panel.get("title"): panel
+        for panel in get_dashboard_panels(dashboard)
+        if panel.get("title")
+    }
+
+    expected_status_cards = {
+        "Runtime Status": "/d/bioetl-runtime/bioetl-runtime",
+        "Data Quality Status": "/d/bioetl-dq-v2",
+        "Control Plane Status": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1",
+        "Provider Status": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2",
+        "Workflow Status": "/d/bioetl-workflow-overview/bioetl-workflow-overview",
+    }
+    for panel_title, expected_url in expected_status_cards.items():
+        panel = panels.get(panel_title)
+        assert panel is not None
+        assert panel.get("type") == "stat"
+        serialized_panel = json.dumps(panel)
+        for expected_status in ("OK", "DEGRADED", "BROKEN", "UNKNOWN"):
+            assert expected_status in serialized_panel
+        assert "Reason:" in serialized_panel
+        assert "Next:" in serialized_panel
+        assert expected_url in serialized_panel
+
+
+def test_overview_no_duplicate_green_zero_cards() -> None:
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
+    titles = {
+        panel.get("title")
+        for panel in get_dashboard_panels(dashboard)
+        if panel.get("title")
+    }
+
+    removed_or_merged_titles = {
         "Overall Yield",
         "Active Stage Backlog",
         "Worst Stage Lag",
         "DQ Blocking",
         "Control Plane Unsafe",
         "Provider Degraded",
+        "Runtime Handoff",
+        "Data Quality Handoff",
+        "Control Plane Handoff",
+        "Provider Handoff",
+        "Workflow Handoff",
+        "Silver Filter Reject Rate",
     }
+    assert titles.isdisjoint(removed_or_merged_titles)
 
 
 def test_overview_does_not_use_forensic_variables() -> None:
@@ -712,9 +884,7 @@ def test_overview_no_distribution_pie_panels() -> None:
     panels = get_dashboard_panels(dashboard)
     titles = {panel.get("title") for panel in panels}
     pie_titles = {
-        panel.get("title")
-        for panel in panels
-        if panel.get("type") == "piechart"
+        panel.get("title") for panel in panels if panel.get("type") == "piechart"
     }
 
     assert "Stage Distribution in Range" not in titles
@@ -730,19 +900,22 @@ def test_overview_summary_queries_use_range_semantics() -> None:
         if panel.get("title")
     }
     count_panels = {
-        "Failed Pipeline Runs",
-        "DQ Blocking",
-        "Control Plane Unsafe",
-        "Provider Degraded",
-        "Runtime Handoff",
-        "Data Quality Handoff",
-        "Control Plane Handoff",
-        "Provider Handoff",
-        "Workflow Handoff",
+        "System Status",
+        "Next Action",
+        "Failed Runs in Range",
+        "Recent Activity",
+        "Runtime Status",
+        "Data Quality Status",
+        "Control Plane Status",
+        "Provider Status",
+        "Workflow Status",
+        "DQ Hard Blockers",
+        "Control-plane Blockers",
+        "Global Provider Degradation",
         "Manifest / Ledger Failures",
         "Checkpoint Incompatibilities",
         "Lineage Refs Missing",
-        "Silver Filter Rejects",
+        "Silver Rejects Count + Rate",
     }
 
     for panel_title in count_panels:
@@ -792,7 +965,7 @@ def test_overview_links_are_target_scoped() -> None:
         assert "${__url_time_range}" in url
 
 
-def test_overview_contains_runtime_dq_provider_control_workflow_handoffs() -> None:
+def test_overview_contains_runtime_dq_provider_control_workflow_status_cards() -> None:
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
     panels = {
         panel.get("title"): panel
@@ -801,11 +974,11 @@ def test_overview_contains_runtime_dq_provider_control_workflow_handoffs() -> No
     }
 
     expected = {
-        "Runtime Handoff": "/d/bioetl-runtime/bioetl-runtime",
-        "Data Quality Handoff": "/d/bioetl-dq-v2",
-        "Control Plane Handoff": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1",
-        "Provider Handoff": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2",
-        "Workflow Handoff": "/d/bioetl-workflow-overview/bioetl-workflow-overview",
+        "Runtime Status": "/d/bioetl-runtime/bioetl-runtime",
+        "Data Quality Status": "/d/bioetl-dq-v2",
+        "Control Plane Status": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1",
+        "Provider Status": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2",
+        "Workflow Status": "/d/bioetl-workflow-overview/bioetl-workflow-overview",
     }
     for title, expected_url in expected.items():
         panel = panels.get(title)
@@ -1289,7 +1462,7 @@ def test_dq_dashboard_contains_gold_specific_validation_surface() -> None:
     assert any('severity="hard_fail"' in expr for expr in expressions)
 
 
-def test_overview_failed_pipeline_runs_uses_run_metric_and_selected_time_range() -> (
+def test_overview_failed_runs_uses_run_metric_and_selected_time_range() -> (
     None
 ):
     """Overview failure indicator must use bounded failed-run events."""
@@ -1298,11 +1471,11 @@ def test_overview_failed_pipeline_runs_uses_run_metric_and_selected_time_range()
         (
             item
             for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Failed Pipeline Runs"
+            if item.get("title") == "Failed Runs in Range"
         ),
         None,
     )
-    assert panel is not None, "Panel 'Failed Pipeline Runs' not found"
+    assert panel is not None, "Panel 'Failed Runs in Range' not found"
 
     expressions = [
         target.get("expr", "")
@@ -1310,11 +1483,11 @@ def test_overview_failed_pipeline_runs_uses_run_metric_and_selected_time_range()
         if isinstance(target.get("expr"), str)
     ]
     assert any("bioetl_pipeline_runs_total" in expr for expr in expressions), (
-        "Failed Pipeline Runs must use bioetl_pipeline_runs_total"
+        "Failed Runs in Range must use bioetl_pipeline_runs_total"
     )
     assert any('status="failed"' in expr for expr in expressions)
     assert any("[$__range]" in expr for expr in expressions), (
-        "Failed Pipeline Runs must use the selected Grafana time range"
+        "Failed Runs in Range must use the selected Grafana time range"
     )
 
 
@@ -1505,10 +1678,11 @@ def test_runtime_and_control_plane_operator_panels_use_active_time_windows(
         ("bioetl-overview-v2.json", "Manifest / Ledger Failures"),
         ("bioetl-overview-v2.json", "Checkpoint Incompatibilities"),
         ("bioetl-overview-v2.json", "Lineage Refs Missing"),
-        ("bioetl-overview-v2.json", "Failed Pipeline Runs"),
-        ("bioetl-overview-v2.json", "DQ Blocking"),
-        ("bioetl-overview-v2.json", "Provider Degraded"),
-        ("bioetl-overview-v2.json", "Workflow Handoff"),
+        ("bioetl-overview-v2.json", "Failed Runs in Range"),
+        ("bioetl-overview-v2.json", "DQ Hard Blockers"),
+        ("bioetl-overview-v2.json", "Control-plane Blockers"),
+        ("bioetl-overview-v2.json", "Global Provider Degradation"),
+        ("bioetl-overview-v2.json", "Workflow Status"),
         ("bioetl-control-plane-v1.json", "GLOBAL Control-Plane Read Failures"),
         ("bioetl-control-plane-v1.json", "GLOBAL Control-Plane Read p95"),
         ("bioetl-dq-v2.json", "Records Quarantined"),
@@ -1765,15 +1939,17 @@ def test_overview_processing_volume_panel_splits_units() -> None:
     assert "bioetl_stage_backlog_records" not in processing_expr
     assert "bioetl_stage_lag_seconds" not in processing_expr
 
-    active_backlog = panels.get("Active Stage Backlog")
-    assert active_backlog is not None
-    active_backlog_expr = "\n".join(
+    worst_backlog = panels.get("Worst Backlog Stage")
+    assert worst_backlog is not None
+    worst_backlog_expr = "\n".join(
         target.get("expr", "")
-        for target in active_backlog.get("targets", [])
+        for target in worst_backlog.get("targets", [])
         if isinstance(target.get("expr"), str)
     )
-    assert "bioetl_stage_backlog_records" in active_backlog_expr
-    assert "[$__range]" in active_backlog_expr
+    assert "bioetl_stage_backlog_records" in worst_backlog_expr
+    assert "topk(1" in worst_backlog_expr
+    assert "by (stage)" in worst_backlog_expr
+    assert "[$__range]" in worst_backlog_expr
 
     backlog = panels.get("Stage Backlog Trend")
     assert backlog is not None
@@ -1785,7 +1961,7 @@ def test_overview_processing_volume_panel_splits_units() -> None:
     assert "bioetl_stage_backlog_records" in backlog_expr
     assert "[$__interval]" in backlog_expr
 
-    worst_lag = panels.get("Worst Stage Lag")
+    worst_lag = panels.get("Worst Lag Stage")
     assert worst_lag is not None
     worst_lag_expr = "\n".join(
         target.get("expr", "")
@@ -1793,6 +1969,8 @@ def test_overview_processing_volume_panel_splits_units() -> None:
         if isinstance(target.get("expr"), str)
     )
     assert "bioetl_stage_lag_seconds" in worst_lag_expr
+    assert "topk(1" in worst_lag_expr
+    assert "by (stage)" in worst_lag_expr
     assert "[$__range]" in worst_lag_expr
 
     lag = panels.get("Stage Lag Trend")

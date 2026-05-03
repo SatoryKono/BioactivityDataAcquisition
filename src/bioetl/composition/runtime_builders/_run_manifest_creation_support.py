@@ -24,7 +24,6 @@ from bioetl.composition.services.versioning import get_pipeline_version
 from bioetl.domain.control_plane import ReplayCapability, RunManifest
 from bioetl.domain.control_plane.reproducibility_policy import (
     STRICT_PERSISTENCE_PROFILES,
-    legacy_config_hash_from_resolved_config_hash,
 )
 from bioetl.infrastructure.control_plane import FileRunManifestStore
 from bioetl.infrastructure.time import SystemClock
@@ -42,6 +41,7 @@ class _RunManifestCreateRequestInputs:
     entity: str
     run_type_value: str
     execution_context_value: str
+    config_hash: str
     resolved_config_hash: str
     effective_config_hash: str
     contract_ref: str
@@ -136,9 +136,7 @@ def build_manifest_create_request(
         git_commit=code_revision.git_commit,
         source_revision_state=code_revision.source_revision_state,
         dependency_lock_hash=code_revision.dependency_lock_hash,
-        config_hash=legacy_config_hash_from_resolved_config_hash(
-            request_inputs.resolved_config_hash
-        ),
+        config_hash=request_inputs.config_hash,
         resolved_config_hash=request_inputs.resolved_config_hash,
         effective_config_hash=request_inputs.effective_config_hash,
         contract_ref=request_inputs.contract_ref,

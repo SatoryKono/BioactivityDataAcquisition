@@ -114,6 +114,20 @@ def _build_lock_runtime_service(
     )
 
 
+def _build_lock_manager(
+    context: _RunnerAssemblyContext,
+    *,
+    checkpoint_manager: CheckpointRuntimeService,
+    context_holder: LockContextHolder,
+) -> LockRuntimeService:
+    """Compatibility seam for tests still patching the legacy helper name."""
+    return _build_lock_runtime_service(
+        context,
+        checkpoint_manager=checkpoint_manager,
+        context_holder=context_holder,
+    )
+
+
 def _build_preflight_service(
     context: _RunnerAssemblyContext,
 ) -> PreflightService:

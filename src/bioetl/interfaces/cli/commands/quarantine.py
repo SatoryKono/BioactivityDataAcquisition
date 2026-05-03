@@ -10,10 +10,8 @@ from typing import cast
 
 import click
 
-from bioetl.interfaces.cli.commands.domains.quarantine._run_scope_stats import (
-    RunManifestInspectionServiceProtocol,
-)
 from bioetl.interfaces.cli.commands.domains.quarantine.support import (
+    RunManifestInspectionServiceProtocol,
     _QuarantineRuntimeService,
     _QuarantineService,
 )

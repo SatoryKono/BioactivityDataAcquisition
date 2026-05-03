@@ -2,13 +2,8 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-from typing import TYPE_CHECKING, cast
-from uuid import UUID
+from typing import TYPE_CHECKING
 
-from bioetl.application.services.control_plane.run_ledger_service import (
-    RunLedgerService,
-)
 from bioetl.application.services.control_plane.run_manifest_service import (
     RunManifestCreateSpec,
     RunManifestService,
@@ -23,40 +18,50 @@ from bioetl.composition.bootstrap.runtime._composite_control_plane_payloads impo
     build_composite_runtime_config_snapshot,
     build_composite_source_refs,
 )
+from bioetl.composition.bootstrap.runtime._composite_control_plane_support import (
+    bind_manifest_logger as _bind_manifest_logger,
+)
+from bioetl.composition.bootstrap.runtime._composite_control_plane_support import (
+    build_run_ledger_service as _build_run_ledger_service,
+)
+from bioetl.composition.bootstrap.runtime._composite_control_plane_support import (
+    coerce_run_id as _coerce_run_id,
+)
+from bioetl.composition.bootstrap.runtime._composite_control_plane_support import (
+    compute_composite_input_snapshot_fingerprint as _compute_composite_input_snapshot_fingerprint,
+)
+from bioetl.composition.bootstrap.runtime._composite_control_plane_support import (
+    control_plane_root as _control_plane_root,
+)
+from bioetl.composition.bootstrap.runtime._composite_control_plane_support import (
+    normalize_object as _support_normalize_object,
+)
+from bioetl.composition.bootstrap.runtime._composite_control_plane_support import (
+    resolve_composite_replay_capability as _resolve_composite_replay_capability,
+)
 from bioetl.composition.bootstrap.runtime.composite_support_service_bundles import (
     CompositeControlPlaneBundle,
 )
 from bioetl.composition.runtime_builders.effective_config_artifact_builder import (
     create_and_persist_composite_effective_config_artifact,
 )
-from bioetl.composition.runtime_builders.run_manifest_support import (
-    control_plane_root as _shared_control_plane_root,
-)
-from bioetl.composition.runtime_builders.run_manifest_support import (
-    to_serializable_mapping as _shared_to_serializable_mapping,
-)
 from bioetl.composition.runtime_builders.runner_builder_support import (
     validate_required_persistence_profile,
 )
 from bioetl.composition.services.versioning import get_code_revision_provenance
-from bioetl.domain.control_plane import ReplayCapability, RunSourceRef
 from bioetl.domain.control_plane.reproducibility_policy import (
-    assess_reproducibility_policy,
     is_critical_reproducibility_runtime,
     legacy_config_hash_from_resolved_config_hash,
     resolve_effective_required_persistence_profile,
-    resolve_replay_capability,
 )
-from bioetl.domain.normalization import compute_input_snapshot_identity_fingerprint
-from bioetl.domain.types import RunID, RunType
-from bioetl.infrastructure.control_plane import FileRunLedgerStore, FileRunManifestStore
+from bioetl.domain.types import RunType
+from bioetl.infrastructure.control_plane import FileRunManifestStore
 from bioetl.infrastructure.time import SystemClock
 
 if TYPE_CHECKING:
     from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
     from bioetl.domain.composite.config import CompositeConfig
     from bioetl.domain.ports import LoggerPort
-    from bioetl.infrastructure.config import Settings
 
 __all__ = [
     "bind_manifest_logger",
@@ -97,13 +102,7 @@ def resolve_composite_control_plane_flags(settings: object) -> tuple[bool, bool]
 
 def bind_manifest_logger(logger: LoggerPort, manifest_id: str | None) -> LoggerPort:
     """Bind ``manifest_id`` into logger context when supported."""
-    if manifest_id is None:
-        return logger
-    bind = getattr(logger, "bind", None)
-    if not callable(bind):
-        return logger
-    rebound = bind(manifest_id=manifest_id)
-    return cast("LoggerPort", rebound)
+    return _bind_manifest_logger(logger, manifest_id)
 
 
 def _resolve_composite_required_persistence_profile(
@@ -120,6 +119,11 @@ def _resolve_composite_required_persistence_profile(
             debug_mode=getattr(settings, "debug", False),
         ),
     )
+
+
+def _normalize_object(value: object) -> dict[str, object]:
+    """Convert dataclasses/models into stable JSON-safe mappings."""
+    return _support_normalize_object(value)
 
 
 def build_composite_control_plane_bundle(
@@ -229,9 +233,7 @@ def _build_composite_manifest_create_request(
 ) -> RunManifestCreateSpec:
     """Build the manifest creation payload for one composite execution."""
     source_refs = build_composite_source_refs(
-        config,
-        runtime=runtime,
-        settings=getattr(infra_context, "settings", None),
+        config, runtime=runtime, settings=getattr(infra_context, "settings", None)
     )
     replay_capability = _resolve_composite_replay_capability(
         source_refs=source_refs,
@@ -269,98 +271,3 @@ def _build_composite_manifest_create_request(
         effective_config_artifact_id=effective_config_artifact_id or None,
         replay_capability=replay_capability,
     )
-
-
-def _compute_composite_input_snapshot_fingerprint(
-    source_refs: tuple[RunSourceRef, ...],
-) -> str | None:
-    """Return a deterministic fingerprint for composite cached-Bronze inputs."""
-    snapshot_ids = sorted(
-        snapshot.snapshot_id
-        for source_ref in source_refs
-        for snapshot in source_ref.input_snapshots
-    )
-    return compute_input_snapshot_identity_fingerprint(snapshot_ids)
-
-
-def _resolve_composite_replay_capability(
-    *,
-    source_refs: tuple[RunSourceRef, ...],
-    required_persistence_profile: str,
-) -> ReplayCapability:
-    """Return exact capability only when every composite member has snapshots."""
-    replay_capability = resolve_replay_capability(
-        source_refs=source_refs,
-        resume_requested=False,
-        require_full_snapshot_envelope=True,
-    )
-    assessment = assess_reproducibility_policy(
-        source_refs=source_refs,
-        required_persistence_profile=required_persistence_profile,
-        strict_exact_replay_supported=True,
-        require_full_snapshot_envelope=True,
-        replay_capability=replay_capability,
-    )
-    if (
-        not assessment.required_profile_satisfied
-        and "exact_replay_capability" in assessment.blocking_gaps
-    ):
-        raise RuntimeError(
-            "Composite execution cannot satisfy required persistence profile "
-            f"'{required_persistence_profile}' because the full cached-Bronze "
-            "input snapshot envelope was not captured for every seed, "
-            "dependency, and enricher pipeline"
-        )
-    return replay_capability
-
-
-def _build_run_ledger_service(
-    *,
-    manifest_id: str,
-    ledger_enabled: bool,
-    infra_context: CompositeInfrastructureContext,
-    pipeline_name: str,
-    resolved_config_hash: str,
-    effective_config_hash: str,
-    dq_contract_compatibility_hash: str,
-    effective_config_artifact_id: str,
-    contract_ref: str,
-    contract_version: str,
-) -> RunLedgerService | None:
-    """Create composite run-ledger service when feature flag allows it."""
-    if not ledger_enabled:
-        return None
-    return RunLedgerService(
-        ledger_port=FileRunLedgerStore(
-            base_path=_control_plane_root(infra_context.settings, "run_ledger"),
-            metrics=infra_context.metrics,
-        ),
-        manifest_id=manifest_id,
-        run_id=_coerce_run_id(infra_context.run_id),
-        pipeline_name=pipeline_name,
-        provider="composite",
-        entity=pipeline_name,
-        run_type=RunType.INCREMENTAL.value,
-        resolved_config_hash=resolved_config_hash or None,
-        effective_config_hash=effective_config_hash or None,
-        contract_ref=contract_ref,
-        contract_version=contract_version or None,
-        dq_contract_compatibility_hash=dq_contract_compatibility_hash or None,
-        effective_config_artifact_id=effective_config_artifact_id or None,
-        composite_run_id=infra_context.run_id,
-    )
-
-
-def _coerce_run_id(run_id: str) -> RunID:
-    """Convert composite runtime run_id string into canonical RunID type."""
-    return RunID(UUID(run_id))
-
-
-def _control_plane_root(settings: Settings, leaf: str) -> Path:
-    """Return the canonical control-plane output root for one leaf namespace."""
-    return _shared_control_plane_root(settings, leaf)
-
-
-def _normalize_object(value: object) -> dict[str, object]:
-    """Convert dataclasses/models into stable JSON-safe mappings."""
-    return _shared_to_serializable_mapping(value)

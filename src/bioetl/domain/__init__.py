@@ -61,6 +61,10 @@ _LAZY_ATTRIBUTE_EXPORTS: dict[str, tuple[str, str]] = {
         "bioetl.domain.observability_metric_names",
         "observability_metric_names",
     ),
+    "pubchem_standardization_catalog": (
+        "bioetl.domain.pubchem_standardization_catalog",
+        "pubchem_standardization_catalog",
+    ),
     "runtime_observability_publication_contract": (
         _RUNTIME_OBSERVABILITY_PUBLICATION_CONTRACT_MODULE,
         "runtime_observability_publication_contract",
@@ -101,6 +105,7 @@ __all__ = [
     "observability_contract",
     "observability_event_mapping",
     "observability_metric_names",
+    "pubchem_standardization_catalog",
     "runtime_observability_publication_contract",
     "types_config_validation",
     "workflow",
@@ -131,6 +136,7 @@ def __getattr__(name: str) -> object:
         "observability_contract",
         "observability_event_mapping",
         "observability_metric_names",
+        "pubchem_standardization_catalog",
         "runtime_observability_publication_contract",
         "types_config_validation",
         "workflow",

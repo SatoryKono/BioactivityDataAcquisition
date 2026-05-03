@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from copy import deepcopy
 from dataclasses import asdict, is_dataclass
 from datetime import UTC, datetime
@@ -52,16 +52,43 @@ class _FrozenManifestMapping(dict[object, object]):
 
 def freeze_manifest_payload(value: object) -> object:
     """Deep-freeze manifest payload values while preserving dict-like access."""
-    if isinstance(value, Mapping):
-        return _FrozenManifestMapping(
-            (deepcopy(key), freeze_manifest_payload(item))
-            for key, item in value.items()
-        )
-    if isinstance(value, (list, tuple)):
-        return tuple(freeze_manifest_payload(item) for item in value)
-    if isinstance(value, (set, frozenset)):
-        return frozenset(freeze_manifest_payload(item) for item in value)
+    for freeze_value in _MANIFEST_PAYLOAD_FREEZERS:
+        frozen_value = freeze_value(value)
+        if frozen_value is not None:
+            return frozen_value
     return deepcopy(value)
+
+
+def _freeze_manifest_mapping(
+    value: object,
+) -> _FrozenManifestMapping | None:
+    """Deep-freeze mapping values when present."""
+    if not isinstance(value, Mapping):
+        return None
+    return _FrozenManifestMapping(
+        (deepcopy(key), freeze_manifest_payload(item)) for key, item in value.items()
+    )
+
+
+def _freeze_manifest_sequence(value: object) -> tuple[object, ...] | None:
+    """Deep-freeze ordered collection values when present."""
+    if not isinstance(value, (list, tuple)):
+        return None
+    return tuple(freeze_manifest_payload(item) for item in value)
+
+
+def _freeze_manifest_set_like(value: object) -> frozenset[object] | None:
+    """Deep-freeze set-like values when present."""
+    if not isinstance(value, (set, frozenset)):
+        return None
+    return frozenset(freeze_manifest_payload(item) for item in value)
+
+
+_MANIFEST_PAYLOAD_FREEZERS: tuple[Callable[[object], object | None], ...] = (
+    _freeze_manifest_mapping,
+    _freeze_manifest_sequence,
+    _freeze_manifest_set_like,
+)
 
 
 def normalize_manifest_serializable(value: object) -> object:

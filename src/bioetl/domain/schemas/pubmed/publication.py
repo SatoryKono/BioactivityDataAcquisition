@@ -25,7 +25,6 @@ else:
     )
 
 __all__ = ["LOOKUP_METHODS", "PubMedPublicationSchema"]
-
 PUBLICATION_STATUSES = ["ppublish", "epublish", "aheadofprint"]
 ISSN_TYPES = ["Print", "Electronic", "Linking"]
 

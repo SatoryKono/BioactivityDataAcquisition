@@ -173,7 +173,14 @@ def execute_run(
                 pipeline_name=pipeline_name,
             )
             return True
-        except Exception:
+        except (
+            OSError,
+            ConnectionError,
+            TimeoutError,
+            RuntimeError,
+            ValueError,
+            TypeError,
+        ):
             # Metrics publication must never turn a completed CLI run into failure.
             return False
 
