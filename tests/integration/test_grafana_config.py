@@ -344,10 +344,10 @@ def test_latency_p95_panels_preserve_no_data_state() -> None:
             "Pipeline Duration p50/p95/p99",
         },
         "bioetl-provider-health-v2.json": {
-            "Health Check Latency by Provider (p95)",
+            "Health Check Latency p50 / p95 / p99",
             "Provider Health Check Latency (p95) - $provider",
-            "Adapter Request Latency by Endpoint (p95)",
-            "Rate Limiter Wait by Provider (p95)",
+            "Adapter Request Latency p50 / p95 / p99",
+            "Rate Limiter Wait p50 / p95 / p99",
         },
         "bioetl-dq-v2.json": {"DQ Check Duration (p95)"},
         "bioetl-control-plane-v1.json": {
@@ -721,8 +721,8 @@ def test_overview_has_system_status_panel() -> None:
         "bioetl_lineage_refs_missing_total",
     ):
         assert metric_name in expr
-    assert "status=\"failed\"" in expr
-    assert "severity=\"hard_fail\"" in expr
+    assert 'status="failed"' in expr
+    assert 'severity="hard_fail"' in expr
     assert "[$__range]" in expr
     assert "or vector(0)" in expr
 
@@ -1013,7 +1013,9 @@ def test_control_plane_answer_row_has_max_seven_panels() -> None:
         panel
         for panel in panels
         if panel.get("type") != "row"
-        and answer_row["gridPos"]["y"] < panel.get("gridPos", {}).get("y", -1) < next_row_y
+        and answer_row["gridPos"]["y"]
+        < panel.get("gridPos", {}).get("y", -1)
+        < next_row_y
     ]
 
     assert 3 <= len(answer_panels) <= 7
@@ -1142,11 +1144,7 @@ def test_control_plane_global_panels_are_marked_global() -> None:
             for target in panel.get("targets", [])
             if isinstance(target.get("expr"), str)
         ]
-        if any(
-            token in expr
-            for expr in expressions
-            for token in global_metric_tokens
-        ):
+        if any(token in expr for expr in expressions for token in global_metric_tokens):
             assert "GLOBAL" in str(panel.get("title", ""))
 
 
@@ -1617,9 +1615,7 @@ def test_dq_dashboard_contains_gold_specific_validation_surface() -> None:
     assert any('severity="hard_fail"' in expr for expr in expressions)
 
 
-def test_overview_failed_runs_uses_run_metric_and_selected_time_range() -> (
-    None
-):
+def test_overview_failed_runs_uses_run_metric_and_selected_time_range() -> None:
     """Overview failure indicator must use bounded failed-run events."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
     panel = next(
@@ -1706,9 +1702,7 @@ def test_runtime_pipeline_error_code_breakdown_uses_bounded_runtime_error_metric
     assert any(
         "by(stage, error_code)" in expr or "by (stage, error_code)" in expr
         for expr in expressions
-    ), (
-        "Errors by Stage / Error Code / Range must group by stage and error_code"
-    )
+    ), "Errors by Stage / Error Code / Range must group by stage and error_code"
     assert any("[$__range]" in expr for expr in expressions), (
         "Errors by Stage / Error Code / Range must use the selected Grafana time range"
     )
@@ -1724,10 +1718,10 @@ def test_runtime_pipeline_error_code_breakdown_uses_bounded_runtime_error_metric
         ("Degraded Checks", "[$__range]"),
         ("Provider Failure Rate", "[$__range]"),
         ("Health Checks Total", "[$__range]"),
-        ("Adapter Request Latency by Endpoint (p95)", "[$__interval]"),
+        ("Adapter Request Latency p50 / p95 / p99", "[$__rate_interval]"),
         ("HTTP Errors by Method / Error Type", "[$__interval]"),
-        ("Rate Limiter Wait by Provider (p95)", "[$__interval]"),
-        ("Minimum Rate Limiter Tokens Available", "[$__range]"),
+        ("Rate Limiter Wait p50 / p95 / p99", "[$__rate_interval]"),
+        ("Minimum Rate Limiter Tokens Available", "[15m]"),
     ],
 )
 def test_provider_health_summary_panels_use_selected_time_range(
@@ -1793,14 +1787,34 @@ def test_provider_circuit_breaker_panels_use_adapter_variable() -> None:
 @pytest.mark.parametrize(
     ("dashboard_file", "panel_title", "expected_snippet"),
     [
-        ("bioetl-runtime.json", "Pipeline Phase Duration p50/p95/p99", "[$__rate_interval]"),
+        (
+            "bioetl-runtime.json",
+            "Pipeline Phase Duration p50/p95/p99",
+            "[$__rate_interval]",
+        ),
         ("bioetl-runtime.json", "Pipeline Duration p50/p95/p99", "[$__rate_interval]"),
-        ("bioetl-runtime.json", "Shutdown Initiated by Reason / Interval", "[$__interval]"),
-        ("bioetl-runtime.json", "Shutdown Completed by Reason / Interval", "[$__interval]"),
+        (
+            "bioetl-runtime.json",
+            "Shutdown Initiated by Reason / Interval",
+            "[$__interval]",
+        ),
+        (
+            "bioetl-runtime.json",
+            "Shutdown Completed by Reason / Interval",
+            "[$__interval]",
+        ),
         ("bioetl-control-plane-v1.json", "Audit Write Outcomes", "[$__interval]"),
         ("bioetl-control-plane-v1.json", "Audit Query Outcomes", "[$__interval]"),
-        ("bioetl-control-plane-v1.json", "Audit Write Latency p50/p95/p99", "[$__range]"),
-        ("bioetl-control-plane-v1.json", "Audit Query Latency p50/p95/p99", "[$__range]"),
+        (
+            "bioetl-control-plane-v1.json",
+            "Audit Write Latency p50/p95/p99",
+            "[$__range]",
+        ),
+        (
+            "bioetl-control-plane-v1.json",
+            "Audit Query Latency p50/p95/p99",
+            "[$__range]",
+        ),
     ],
 )
 def test_runtime_and_control_plane_operator_panels_use_active_time_windows(
@@ -1840,7 +1854,10 @@ def test_runtime_and_control_plane_operator_panels_use_active_time_windows(
         ("bioetl-overview-v2.json", "Global Provider Degradation"),
         ("bioetl-overview-v2.json", "Workflow Status"),
         ("bioetl-control-plane-v1.json", "GLOBAL Control-Plane Read Failures"),
-        ("bioetl-control-plane-v1.json", "GLOBAL Control-Plane Read Latency p50/p95/p99"),
+        (
+            "bioetl-control-plane-v1.json",
+            "GLOBAL Control-Plane Read Latency p50/p95/p99",
+        ),
         ("bioetl-dq-v2.json", "Records Quarantined"),
         ("bioetl-dq-v2.json", "Soft Threshold Exceeded"),
         ("bioetl-dq-v2.json", "Quarantine by Error Type"),
@@ -2152,9 +2169,7 @@ def test_runtime_alert_condition_breakdown_panels_exist() -> None:
         assert required_metric in expr
 
 
-@pytest.mark.parametrize(
-    "dashboard_file", ["bioetl-control-plane-v1.json"]
-)
+@pytest.mark.parametrize("dashboard_file", ["bioetl-control-plane-v1.json"])
 def test_replay_panels_are_split_by_semantics(dashboard_file: str) -> None:
     """Control-plane replay diagnostics must keep reconstructability, drift, and lag separate."""
     dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_file)
@@ -2223,3 +2238,160 @@ def test_provider_health_selected_provider_detail_row_is_collapsed() -> None:
     assert repeated_panel.get("gridPos", {}).get("y", 0) >= detail_row.get(
         "gridPos", {}
     ).get("y", 0)
+
+
+# ---------------------------------------------------------------------------
+# Provider Health L1 decision-first design tests
+# ---------------------------------------------------------------------------
+
+_PROVIDER_HEALTH_PATH = Path("grafana/dashboards/bioetl-provider-health-v2.json")
+
+
+def _load_provider_health_dashboard() -> dict:
+    return load_dashboard(_PROVIDER_HEALTH_PATH)
+
+
+def test_provider_health_dashboard_uses_existing_metric_names() -> None:
+    """All metrics referenced in Provider Health dashboard must exist in code."""
+    valid_metrics = get_all_valid_metric_names()
+    dashboard = _load_provider_health_dashboard()
+    panels = get_dashboard_panels(dashboard)
+
+    errors = []
+    for panel in panels:
+        for target in panel.get("targets", []):
+            query = target.get("expr", "")
+            if not query:
+                continue
+            for metric in _unknown_metrics_for_query(query, valid_metrics):
+                errors.append(
+                    f"Panel '{panel.get('title')}' uses unknown metric: {metric}"
+                )
+
+    assert not errors, "Provider Health dashboard metric drift:\n" + "\n".join(errors)
+
+
+def test_provider_health_latency_panels_include_p50_p95_p99() -> None:
+    """Latency panels must show p50, p95, and p99 quantiles."""
+    dashboard = _load_provider_health_dashboard()
+    panels = get_dashboard_panels(dashboard)
+
+    latency_panel_titles = [
+        "Health Check Latency p50 / p95 / p99",
+        "Adapter Request Latency p50 / p95 / p99",
+        "Rate Limiter Wait p50 / p95 / p99",
+    ]
+
+    for title in latency_panel_titles:
+        panel = next((p for p in panels if p.get("title") == title), None)
+        assert panel is not None, f"Missing latency panel: {title}"
+        expressions = [t.get("expr", "") for t in panel.get("targets", [])]
+        expr_text = "\n".join(expressions)
+        assert "histogram_quantile(0.50" in expr_text, (
+            f"Panel '{title}' missing p50 quantile"
+        )
+        assert "histogram_quantile(0.95" in expr_text, (
+            f"Panel '{title}' missing p95 quantile"
+        )
+        assert "histogram_quantile(0.99" in expr_text, (
+            f"Panel '{title}' missing p99 quantile"
+        )
+
+
+def test_provider_health_retry_panels_compare_retries_and_failures() -> None:
+    """Retry panel must show both retry attempts and exhaustion signals."""
+    dashboard = _load_provider_health_dashboard()
+    panels = get_dashboard_panels(dashboard)
+
+    panel = next(
+        (p for p in panels if p.get("title") == "Retry Attempts vs Failures"),
+        None,
+    )
+    assert panel is not None, "Missing 'Retry Attempts vs Failures' panel"
+    expressions = [t.get("expr", "") for t in panel.get("targets", [])]
+    expr_text = "\n".join(expressions)
+    assert "bioetl_data_source_retries_total" in expr_text
+    assert "bioetl_data_source_retry_exhausted_total" in expr_text
+    assert "bioetl_http_request_errors_total" in expr_text
+
+
+def test_provider_health_answer_row_max_six_panels() -> None:
+    """Answer row (y=0) must have at most 6 panels."""
+    dashboard = _load_provider_health_dashboard()
+    panels = get_dashboard_panels(dashboard)
+    answer_row_panels = [
+        p
+        for p in panels
+        if p.get("gridPos", {}).get("y", -1) == 0 and p.get("type") != "row"
+    ]
+    assert len(answer_row_panels) <= 6, (
+        f"Answer row has {len(answer_row_panels)} panels, max is 6"
+    )
+
+
+def test_provider_health_panels_have_units() -> None:
+    """All non-row panels must declare a unit in fieldConfig."""
+    dashboard = _load_provider_health_dashboard()
+    panels = get_dashboard_panels(dashboard)
+    errors = []
+    for panel in panels:
+        if panel.get("type") == "row":
+            continue
+        unit = panel.get("fieldConfig", {}).get("defaults", {}).get("unit")
+        if not unit:
+            errors.append(f"Panel '{panel.get('title')}' missing unit")
+    assert not errors, "Panels without units:\n" + "\n".join(errors)
+
+
+def test_provider_health_rate_queries_have_explicit_window() -> None:
+    """Rate/increase queries must use an explicit window ($__rate_interval, $__interval, $__range, or literal)."""
+    dashboard = _load_provider_health_dashboard()
+    panels = get_dashboard_panels(dashboard)
+    window_pattern = re.compile(
+        r"\[(?:\$__rate_interval|\$__interval|\$__range|\d+[smhd])\]"
+    )
+    errors = []
+    for panel in panels:
+        if panel.get("type") == "row":
+            continue
+        for target in panel.get("targets", []):
+            expr = target.get("expr", "")
+            if not expr:
+                continue
+            if "rate(" in expr or "increase(" in expr or "_over_time(" in expr:
+                if not window_pattern.search(expr):
+                    errors.append(
+                        f"Panel '{panel.get('title')}' query missing explicit window: {expr[:80]}"
+                    )
+    assert not errors, "Queries without explicit window:\n" + "\n".join(errors)
+
+
+def test_provider_health_links_are_scoped_without_include_vars() -> None:
+    """Dashboard links must not use blanket includeVars=true."""
+    dashboard = _load_provider_health_dashboard()
+    links = dashboard.get("links", [])
+    for link in links:
+        assert link.get("includeVars") is not True, (
+            f"Link '{link.get('title')}' uses includeVars=true"
+        )
+
+
+def test_provider_health_does_not_use_pipeline_variables() -> None:
+    """Provider Health panels must not reference pipeline-scoped variables."""
+    dashboard = _load_provider_health_dashboard()
+    panels = get_dashboard_panels(dashboard)
+    pipeline_pattern = re.compile(r'\$pipeline|\{pipeline=~"\$pipeline"\}')
+    errors = []
+    for panel in panels:
+        if panel.get("type") == "row":
+            continue
+        for target in panel.get("targets", []):
+            expr = target.get("expr", "")
+            if pipeline_pattern.search(expr):
+                errors.append(
+                    f"Panel '{panel.get('title')}' uses pipeline variable: {expr[:80]}"
+                )
+    assert not errors, (
+        "Provider-scoped dashboard must not use pipeline variables:\n"
+        + "\n".join(errors)
+    )

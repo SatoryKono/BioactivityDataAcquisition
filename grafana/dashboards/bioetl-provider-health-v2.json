@@ -12,7 +12,7 @@
             }
         ]
     },
-    "description": "Operational provider health incident dashboard for health-check latency, adapter/API pressure, retry exhaustion, circuit-breaker state, and provider-level failure share.",
+    "description": "L1 Domain — Primary question: Какие providers/adapters деградируют, лимитируют или возвращают ошибки? Decision supported: tune backoff/rate-limit, rotate credentials, pause provider, investigate external API, inspect circuit breaker.",
     "editable": true,
     "gnetId": null,
     "graphTooltip": 1,
@@ -65,92 +65,72 @@
             "tooltip": "",
             "type": "link",
             "url": "/a/grafana-exploretraces-app/?from=${__from}&to=${__to}&queryType=traceqlSearch&query=%7B%20span.%22bioetl.provider%22%20%3D~%20%22${provider:regex}%22%20%7D"
+        },
+        {
+            "asDropdown": false,
+            "icon": "doc",
+            "includeVars": false,
+            "keepTime": false,
+            "tags": [],
+            "targetBlank": true,
+            "title": "Runbook: Provider Health Incident",
+            "tooltip": "Provider unhealthy/degraded response",
+            "type": "link",
+            "url": "/docs/runbooks/provider-health-incident"
+        },
+        {
+            "asDropdown": false,
+            "icon": "doc",
+            "includeVars": false,
+            "keepTime": false,
+            "tags": [],
+            "targetBlank": true,
+            "title": "Runbook: Retry/Backoff",
+            "tooltip": "Retry exhaustion troubleshooting",
+            "type": "link",
+            "url": "/docs/runbooks/retry-backoff"
+        },
+        {
+            "asDropdown": false,
+            "icon": "doc",
+            "includeVars": false,
+            "keepTime": false,
+            "tags": [],
+            "targetBlank": true,
+            "title": "Runbook: Credentials/Secrets",
+            "tooltip": "HTTP auth errors",
+            "type": "link",
+            "url": "/docs/runbooks/credentials-secrets"
+        },
+        {
+            "asDropdown": false,
+            "icon": "doc",
+            "includeVars": false,
+            "keepTime": false,
+            "tags": [],
+            "targetBlank": true,
+            "title": "Runbook: Rate-Limit/Backpressure",
+            "tooltip": "Rate limiter depleted",
+            "type": "link",
+            "url": "/docs/runbooks/rate-limit-backpressure"
+        },
+        {
+            "asDropdown": false,
+            "icon": "doc",
+            "includeVars": false,
+            "keepTime": false,
+            "tags": [],
+            "targetBlank": true,
+            "title": "Runbook: Circuit Breaker/Provider Outage",
+            "tooltip": "Circuit breaker open",
+            "type": "link",
+            "url": "/docs/runbooks/circuit-breaker-provider-outage"
         }
     ],
     "panels": [
         {
             "datasource": "Prometheus",
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "palette-classic"
-                    },
-                    "custom": {
-                        "axisLabel": "Duration (seconds)",
-                        "axisPlacement": "auto",
-                        "drawStyle": "bars",
-                        "fillOpacity": 50,
-                        "gradientMode": "none",
-                        "lineInterpolation": "linear",
-                        "lineWidth": 1,
-                        "pointSize": 5,
-                        "showPoints": "auto",
-                        "spanNulls": false,
-                        "stacking": {
-                            "group": "A",
-                            "mode": "normal"
-                        },
-                        "thresholdsStyle": {
-                            "mode": "off"
-                        }
-                    },
-                    "mappings": [],
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "green",
-                                "value": null
-                            }
-                        ]
-                    },
-                    "unit": "s"
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 8,
-                "w": 12,
-                "x": 0,
-                "y": 0
-            },
-            "id": 1,
-            "options": {
-                "legend": {
-                    "calcs": [
-                        "sum",
-                        "mean"
-                    ],
-                    "displayMode": "table",
-                    "placement": "bottom"
-                },
-                "tooltip": {
-                    "mode": "multi",
-                    "sort": "desc"
-                },
-                "dataLinks": [
-                    {
-                        "title": "Open Logs in Loki Explore (tracing profile)",
-                        "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D"
-                    },
-                    {
-                        "title": "Open Traces in Tempo Explore (tracing profile)",
-                        "url": "/a/grafana-exploretraces-app/?from=${__from}&to=${__to}&queryType=traceqlSearch&query=%7B%20span.%22bioetl.provider%22%20%3D~%20%22${provider:regex}%22%20%7D"
-                    }
-                ]
-            },
-            "targets": [
-                {
-                    "expr": "histogram_quantile(0.95, sum by (le, provider) (increase(bioetl_health_check_latency_seconds_bucket{provider=~\"$provider\"}[$__interval])))",
-                    "legendFormat": "{{ provider }} p95",
-                    "refId": "A"
-                }
-            ],
-            "title": "Health Check Latency by Provider (p95)",
-            "type": "timeseries"
-        },
-        {
-            "datasource": "Prometheus",
+            "description": "Current health state per provider. 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY.",
             "fieldConfig": {
                 "defaults": {
                     "color": {
@@ -202,9 +182,9 @@
                 "overrides": []
             },
             "gridPos": {
-                "h": 8,
+                "h": 4,
                 "w": 4,
-                "x": 12,
+                "x": 0,
                 "y": 0
             },
             "id": 114,
@@ -232,61 +212,7 @@
         },
         {
             "datasource": "Prometheus",
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "thresholds"
-                    },
-                    "mappings": [],
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "red",
-                                "value": null
-                            },
-                            {
-                                "color": "green",
-                                "value": 1
-                            }
-                        ]
-                    }
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 8,
-                "w": 8,
-                "x": 16,
-                "y": 0
-            },
-            "id": 2,
-            "options": {
-                "colorMode": "background",
-                "graphMode": "area",
-                "justifyMode": "center",
-                "orientation": "auto",
-                "reduceOptions": {
-                    "calcs": [
-                        "lastNotNull"
-                    ],
-                    "fields": "",
-                    "values": false
-                },
-                "textMode": "auto"
-            },
-            "targets": [
-                {
-                    "expr": "round(sum(increase(bioetl_health_check_success_total{provider=~\"$provider\"}[$__range])) or vector(0))",
-                    "legendFormat": "{{ provider }}",
-                    "refId": "A"
-                }
-            ],
-            "title": "Healthy Checks",
-            "type": "stat"
-        },
-        {
-            "datasource": "Prometheus",
+            "description": "Failure rate = failures / total checks (selected range). Warning >=5%, critical >=20%.",
             "fieldConfig": {
                 "defaults": {
                     "color": {
@@ -317,10 +243,10 @@
                 "overrides": []
             },
             "gridPos": {
-                "h": 8,
-                "w": 8,
-                "x": 16,
-                "y": 8
+                "h": 4,
+                "w": 4,
+                "x": 4,
+                "y": 0
             },
             "id": 104,
             "options": {
@@ -347,58 +273,7 @@
         },
         {
             "datasource": "Prometheus",
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "thresholds"
-                    },
-                    "decimals": 0,
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "green",
-                                "value": null
-                            }
-                        ]
-                    },
-                    "unit": "short"
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 8,
-                "w": 8,
-                "x": 0,
-                "y": 8
-            },
-            "id": 7,
-            "options": {
-                "colorMode": "value",
-                "graphMode": "area",
-                "justifyMode": "auto",
-                "orientation": "auto",
-                "reduceOptions": {
-                    "calcs": [
-                        "lastNotNull"
-                    ],
-                    "fields": "",
-                    "values": false
-                },
-                "textMode": "auto"
-            },
-            "targets": [
-                {
-                    "expr": "round((sum(increase(bioetl_health_check_success_total{provider=~\"$provider\"}[$__range])) or vector(0)) + (sum(increase(bioetl_health_check_degraded_total{provider=~\"$provider\"}[$__range])) or vector(0)) + (sum(increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[$__range])) or vector(0)))",
-                    "legendFormat": "{{ provider }}",
-                    "refId": "A"
-                }
-            ],
-            "title": "Health Checks Total",
-            "type": "stat"
-        },
-        {
-            "datasource": "Prometheus",
+            "description": "Total retry exhaustions in selected range. Red >= 1 means at least one operation gave up.",
             "fieldConfig": {
                 "defaults": {
                     "color": {
@@ -413,7 +288,7 @@
                                 "value": null
                             },
                             {
-                                "color": "yellow",
+                                "color": "red",
                                 "value": 1
                             }
                         ]
@@ -423,15 +298,15 @@
                 "overrides": []
             },
             "gridPos": {
-                "h": 8,
-                "w": 8,
+                "h": 4,
+                "w": 4,
                 "x": 8,
-                "y": 8
+                "y": 0
             },
-            "id": 105,
+            "id": 200,
             "options": {
                 "colorMode": "background",
-                "graphMode": "area",
+                "graphMode": "none",
                 "justifyMode": "center",
                 "orientation": "auto",
                 "reduceOptions": {
@@ -445,16 +320,468 @@
             },
             "targets": [
                 {
-                    "expr": "round(sum(increase(bioetl_health_check_degraded_total{provider=~\"$provider\"}[$__range])) or vector(0))",
-                    "legendFormat": "{{ provider }}",
+                    "expr": "round(sum(increase(bioetl_data_source_retry_exhausted_total{provider=~\"$provider\"}[$__range])) or vector(0))",
+                    "legendFormat": "exhausted",
                     "refId": "A"
                 }
             ],
-            "title": "Degraded Checks",
+            "title": "Retries Exhausted",
             "type": "stat"
         },
         {
             "datasource": "Prometheus",
+            "description": "HTTP error rate = errors / (errors + successful requests) in selected range. Red > 10%.",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "decimals": 2,
+                    "max": 1,
+                    "min": 0,
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "yellow",
+                                "value": 0.05
+                            },
+                            {
+                                "color": "red",
+                                "value": 0.1
+                            }
+                        ]
+                    },
+                    "unit": "percentunit"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 4,
+                "w": 4,
+                "x": 12,
+                "y": 0
+            },
+            "id": 201,
+            "options": {
+                "orientation": "auto",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "showThresholdLabels": false,
+                "showThresholdMarkers": true
+            },
+            "targets": [
+                {
+                    "expr": "(sum(increase(bioetl_http_request_errors_total{provider=~\"$provider\"}[$__range])) or vector(0)) / clamp_min((sum(increase(bioetl_http_request_errors_total{provider=~\"$provider\"}[$__range])) or vector(0)) + (sum(increase(bioetl_adapter_requests_total{provider=~\"$provider\"}[$__range])) or vector(0)), 1)",
+                    "legendFormat": "http_error_rate",
+                    "refId": "A"
+                }
+            ],
+            "title": "HTTP Error Rate",
+            "type": "gauge"
+        },
+        {
+            "datasource": "Prometheus",
+            "description": "Minimum tokens available across providers in the last 15m. Red < 1 means rate limiter depleted.",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "decimals": 0,
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "red",
+                                "value": null
+                            },
+                            {
+                                "color": "yellow",
+                                "value": 1
+                            },
+                            {
+                                "color": "green",
+                                "value": 5
+                            }
+                        ]
+                    },
+                    "unit": "short"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 4,
+                "w": 4,
+                "x": 16,
+                "y": 0
+            },
+            "id": 202,
+            "options": {
+                "colorMode": "background",
+                "graphMode": "none",
+                "justifyMode": "center",
+                "orientation": "auto",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "textMode": "auto"
+            },
+            "targets": [
+                {
+                    "expr": "min by (provider) (min_over_time(bioetl_rate_limiter_tokens_available{provider=~\"$provider\"}[15m])) or vector(0)",
+                    "legendFormat": "{{ provider }}",
+                    "refId": "A"
+                }
+            ],
+            "title": "Rate Limiter Tokens Depleted",
+            "type": "stat"
+        },
+        {
+            "datasource": "Prometheus",
+            "description": "Circuit breaker state: 0=closed, 1=half-open, 2=open. Red when open.",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "decimals": 0,
+                    "mappings": [
+                        {
+                            "options": {
+                                "0": {
+                                    "color": "green",
+                                    "index": 0,
+                                    "text": "CLOSED"
+                                },
+                                "1": {
+                                    "color": "yellow",
+                                    "index": 1,
+                                    "text": "HALF-OPEN"
+                                },
+                                "2": {
+                                    "color": "red",
+                                    "index": 2,
+                                    "text": "OPEN"
+                                }
+                            },
+                            "type": "value"
+                        }
+                    ],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "yellow",
+                                "value": 1
+                            },
+                            {
+                                "color": "red",
+                                "value": 2
+                            }
+                        ]
+                    },
+                    "unit": "short"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 4,
+                "w": 4,
+                "x": 20,
+                "y": 0
+            },
+            "id": 203,
+            "options": {
+                "colorMode": "background",
+                "graphMode": "none",
+                "justifyMode": "center",
+                "orientation": "auto",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "textMode": "auto"
+            },
+            "targets": [
+                {
+                    "expr": "max(max_over_time(bioetl_circuit_breaker_state{adapter=~\"$adapter\"}[$__range])) or vector(0)",
+                    "legendFormat": "breaker_state",
+                    "refId": "A"
+                }
+            ],
+            "title": "Circuit Breaker Open",
+            "type": "stat"
+        },
+        {
+            "datasource": "Prometheus",
+            "description": "Health check latency quantiles (p50/p95/p99) per provider over rate interval.",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisLabel": "Latency (seconds)",
+                        "axisPlacement": "auto",
+                        "drawStyle": "line",
+                        "fillOpacity": 10,
+                        "gradientMode": "none",
+                        "lineInterpolation": "linear",
+                        "lineWidth": 2,
+                        "pointSize": 5,
+                        "showPoints": "auto",
+                        "spanNulls": false,
+                        "stacking": {
+                            "group": "A",
+                            "mode": "none"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            }
+                        ]
+                    },
+                    "unit": "s"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 8,
+                "x": 0,
+                "y": 4
+            },
+            "id": 1,
+            "options": {
+                "legend": {
+                    "calcs": [
+                        "mean",
+                        "max"
+                    ],
+                    "displayMode": "table",
+                    "placement": "bottom"
+                },
+                "tooltip": {
+                    "mode": "multi",
+                    "sort": "desc"
+                }
+            },
+            "targets": [
+                {
+                    "expr": "histogram_quantile(0.50, sum by (le, provider) (rate(bioetl_health_check_latency_seconds_bucket{provider=~\"$provider\"}[$__rate_interval])))",
+                    "legendFormat": "{{ provider }} p50",
+                    "refId": "A"
+                },
+                {
+                    "expr": "histogram_quantile(0.95, sum by (le, provider) (rate(bioetl_health_check_latency_seconds_bucket{provider=~\"$provider\"}[$__rate_interval])))",
+                    "legendFormat": "{{ provider }} p95",
+                    "refId": "B"
+                },
+                {
+                    "expr": "histogram_quantile(0.99, sum by (le, provider) (rate(bioetl_health_check_latency_seconds_bucket{provider=~\"$provider\"}[$__rate_interval])))",
+                    "legendFormat": "{{ provider }} p99",
+                    "refId": "C"
+                }
+            ],
+            "title": "Health Check Latency p50 / p95 / p99",
+            "type": "timeseries"
+        },
+        {
+            "datasource": "Prometheus",
+            "description": "Adapter request latency quantiles (p50/p95/p99) per provider and endpoint over rate interval.",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisLabel": "Latency (seconds)",
+                        "axisPlacement": "auto",
+                        "drawStyle": "line",
+                        "fillOpacity": 10,
+                        "gradientMode": "none",
+                        "lineInterpolation": "linear",
+                        "lineWidth": 2,
+                        "pointSize": 5,
+                        "showPoints": "auto",
+                        "spanNulls": false,
+                        "stacking": {
+                            "group": "A",
+                            "mode": "none"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            }
+                        ]
+                    },
+                    "unit": "s"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 8,
+                "x": 8,
+                "y": 4
+            },
+            "id": 110,
+            "options": {
+                "legend": {
+                    "calcs": [
+                        "mean",
+                        "max"
+                    ],
+                    "displayMode": "table",
+                    "placement": "bottom"
+                },
+                "tooltip": {
+                    "mode": "multi",
+                    "sort": "desc"
+                }
+            },
+            "targets": [
+                {
+                    "expr": "histogram_quantile(0.50, sum by (le, provider, endpoint) (rate(bioetl_adapter_request_duration_seconds_bucket{provider=~\"$provider\"}[$__rate_interval])))",
+                    "legendFormat": "{{ provider }} {{ endpoint }} p50",
+                    "refId": "A"
+                },
+                {
+                    "expr": "histogram_quantile(0.95, sum by (le, provider, endpoint) (rate(bioetl_adapter_request_duration_seconds_bucket{provider=~\"$provider\"}[$__rate_interval])))",
+                    "legendFormat": "{{ provider }} {{ endpoint }} p95",
+                    "refId": "B"
+                },
+                {
+                    "expr": "histogram_quantile(0.99, sum by (le, provider, endpoint) (rate(bioetl_adapter_request_duration_seconds_bucket{provider=~\"$provider\"}[$__rate_interval])))",
+                    "legendFormat": "{{ provider }} {{ endpoint }} p99",
+                    "refId": "C"
+                }
+            ],
+            "title": "Adapter Request Latency p50 / p95 / p99",
+            "type": "timeseries"
+        },
+        {
+            "datasource": "Prometheus",
+            "description": "Rate limiter wait quantiles (p50/p95/p99) per provider over rate interval.",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisLabel": "Wait (seconds)",
+                        "axisPlacement": "auto",
+                        "drawStyle": "line",
+                        "fillOpacity": 10,
+                        "gradientMode": "none",
+                        "lineInterpolation": "linear",
+                        "lineWidth": 2,
+                        "pointSize": 5,
+                        "showPoints": "auto",
+                        "spanNulls": false,
+                        "stacking": {
+                            "group": "A",
+                            "mode": "none"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            }
+                        ]
+                    },
+                    "unit": "s"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 8,
+                "x": 16,
+                "y": 4
+            },
+            "id": 112,
+            "options": {
+                "legend": {
+                    "calcs": [
+                        "mean",
+                        "max"
+                    ],
+                    "displayMode": "table",
+                    "placement": "bottom"
+                },
+                "tooltip": {
+                    "mode": "multi",
+                    "sort": "desc"
+                }
+            },
+            "targets": [
+                {
+                    "expr": "histogram_quantile(0.50, sum by (le, provider) (rate(bioetl_rate_limiter_wait_seconds_bucket{provider=~\"$provider\"}[$__rate_interval])))",
+                    "legendFormat": "{{ provider }} p50",
+                    "refId": "A"
+                },
+                {
+                    "expr": "histogram_quantile(0.95, sum by (le, provider) (rate(bioetl_rate_limiter_wait_seconds_bucket{provider=~\"$provider\"}[$__rate_interval])))",
+                    "legendFormat": "{{ provider }} p95",
+                    "refId": "B"
+                },
+                {
+                    "expr": "histogram_quantile(0.99, sum by (le, provider) (rate(bioetl_rate_limiter_wait_seconds_bucket{provider=~\"$provider\"}[$__rate_interval])))",
+                    "legendFormat": "{{ provider }} p99",
+                    "refId": "C"
+                }
+            ],
+            "title": "Rate Limiter Wait p50 / p95 / p99",
+            "type": "timeseries"
+        },
+        {
+            "datasource": "Prometheus",
+            "description": "Failure and degraded health check counts per interval by provider.",
             "fieldConfig": {
                 "defaults": {
                     "color": {
@@ -497,7 +824,7 @@
                 "h": 8,
                 "w": 12,
                 "x": 0,
-                "y": 16
+                "y": 12
             },
             "id": 106,
             "options": {
@@ -530,129 +857,7 @@
         },
         {
             "datasource": "Prometheus",
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "continuous-GrYlRd"
-                    },
-                    "decimals": 2,
-                    "mappings": [],
-                    "max": 100,
-                    "min": 0,
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "green",
-                                "value": null
-                            },
-                            {
-                                "color": "yellow",
-                                "value": 10
-                            },
-                            {
-                                "color": "red",
-                                "value": 30
-                            }
-                        ]
-                    },
-                    "unit": "percent"
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 8,
-                "w": 12,
-                "x": 12,
-                "y": 16
-            },
-            "id": 107,
-            "options": {
-                "displayMode": "gradient",
-                "orientation": "horizontal",
-                "reduceOptions": {
-                    "calcs": [
-                        "lastNotNull"
-                    ],
-                    "fields": "",
-                    "values": false
-                },
-                "showUnfilled": true
-            },
-            "targets": [
-                {
-                    "expr": "(100 * sum by (provider) (increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[$__range])) / clamp_min(sum(increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[$__range])), 1)) or vector(0)",
-                    "legendFormat": "{{ provider }}",
-                    "refId": "A"
-                }
-            ],
-            "title": "Provider Failure Share (Selected Range)",
-            "type": "bargauge"
-        },
-        {
-            "datasource": "Prometheus",
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "palette-classic"
-                    },
-                    "custom": {
-                        "align": "auto",
-                        "displayMode": "auto"
-                    },
-                    "mappings": [],
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "green",
-                                "value": null
-                            },
-                            {
-                                "color": "yellow",
-                                "value": 1
-                            },
-                            {
-                                "color": "red",
-                                "value": 3
-                            }
-                        ]
-                    },
-                    "unit": "short"
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 8,
-                "w": 12,
-                "x": 0,
-                "y": 24
-            },
-            "id": 108,
-            "options": {
-                "footer": {
-                    "fields": "",
-                    "reducer": [
-                        "sum"
-                    ],
-                    "show": true
-                },
-                "showHeader": true
-            },
-            "targets": [
-                {
-                    "expr": "round(sum by (provider, operation) (increase(bioetl_data_source_retry_exhausted_total{provider=~\"$provider\"}[$__range])) or vector(0))",
-                    "format": "table",
-                    "instant": true,
-                    "legendFormat": "{{ provider }} {{ operation }}",
-                    "refId": "A"
-                }
-            ],
-            "title": "Retries Exhausted by Provider / Operation",
-            "type": "table"
-        },
-        {
-            "datasource": "Prometheus",
+            "description": "Retry exhaustion trend per provider/operation over time.",
             "fieldConfig": {
                 "defaults": {
                     "color": {
@@ -703,7 +908,7 @@
                 "h": 8,
                 "w": 12,
                 "x": 12,
-                "y": 24
+                "y": 12
             },
             "id": 109,
             "options": {
@@ -730,148 +935,8 @@
             "type": "timeseries"
         },
         {
-            "collapsed": true,
-            "description": "Expand only after selecting one provider or a bounded provider subset.",
-            "gridPos": {
-                "h": 1,
-                "w": 24,
-                "x": 0,
-                "y": 32
-            },
-            "id": 91,
-            "panels": [],
-            "title": "Selected Provider Detail",
-            "type": "row"
-        },
-        {
             "datasource": "Prometheus",
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "thresholds"
-                    },
-                    "decimals": 3,
-                    "max": 10,
-                    "min": 0,
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "green",
-                                "value": null
-                            },
-                            {
-                                "color": "yellow",
-                                "value": 0.5
-                            },
-                            {
-                                "color": "orange",
-                                "value": 2
-                            },
-                            {
-                                "color": "red",
-                                "value": 5
-                            }
-                        ]
-                    },
-                    "unit": "s"
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 8,
-                "w": 6,
-                "x": 0,
-                "y": 33
-            },
-            "id": 102,
-            "options": {
-                "orientation": "auto",
-                "reduceOptions": {
-                    "calcs": [
-                        "lastNotNull"
-                    ],
-                    "fields": "",
-                    "values": false
-                },
-                "showThresholdLabels": false,
-                "showThresholdMarkers": true
-            },
-            "repeat": "provider",
-            "repeatDirection": "h",
-            "maxPerRow": 4,
-            "targets": [
-                {
-                    "expr": "histogram_quantile(0.95, sum by (le, provider) (increase(bioetl_health_check_latency_seconds_bucket{provider=~\"$provider\"}[$__range])))",
-                    "legendFormat": "{{ provider }}",
-                    "refId": "A"
-                }
-            ],
-            "title": "Provider Health Check Latency (p95) - $provider",
-            "type": "gauge"
-        },
-        {
-            "datasource": "Prometheus",
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "thresholds"
-                    },
-                    "decimals": 0,
-                    "mappings": [],
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "green",
-                                "value": null
-                            },
-                            {
-                                "color": "yellow",
-                                "value": 1
-                            },
-                            {
-                                "color": "red",
-                                "value": 2
-                            }
-                        ]
-                    },
-                    "unit": "short"
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 8,
-                "w": 12,
-                "x": 0,
-                "y": 41
-            },
-            "id": 110,
-            "options": {
-                "legend": {
-                    "calcs": [
-                        "max"
-                    ],
-                    "displayMode": "table",
-                    "placement": "bottom"
-                },
-                "tooltip": {
-                    "mode": "multi",
-                    "sort": "desc"
-                }
-            },
-            "targets": [
-                {
-                    "expr": "histogram_quantile(0.95, sum by (le, provider, endpoint) (increase(bioetl_adapter_request_duration_seconds_bucket{provider=~\"$provider\"}[$__interval])))",
-                    "legendFormat": "{{ provider }} {{ endpoint }} p95",
-                    "refId": "A"
-                }
-            ],
-            "title": "Adapter Request Latency by Endpoint (p95)",
-            "type": "timeseries"
-        },
-        {
-            "datasource": "Prometheus",
+            "description": "HTTP request errors by method and error type per interval.",
             "fieldConfig": {
                 "defaults": {
                     "color": {
@@ -920,9 +985,9 @@
             },
             "gridPos": {
                 "h": 8,
-                "w": 12,
-                "x": 12,
-                "y": 41
+                "w": 8,
+                "x": 0,
+                "y": 20
             },
             "id": 111,
             "options": {
@@ -950,29 +1015,15 @@
         },
         {
             "datasource": "Prometheus",
+            "description": "Adapter error taxonomy breakdown by provider, operation, error_category, and error_type (selected range).",
             "fieldConfig": {
                 "defaults": {
                     "color": {
                         "mode": "palette-classic"
                     },
                     "custom": {
-                        "axisLabel": "Wait (seconds)",
-                        "axisPlacement": "auto",
-                        "drawStyle": "line",
-                        "fillOpacity": 20,
-                        "gradientMode": "none",
-                        "lineInterpolation": "linear",
-                        "lineWidth": 2,
-                        "pointSize": 5,
-                        "showPoints": "auto",
-                        "spanNulls": false,
-                        "stacking": {
-                            "group": "A",
-                            "mode": "none"
-                        },
-                        "thresholdsStyle": {
-                            "mode": "off"
-                        }
+                        "align": "auto",
+                        "displayMode": "auto"
                     },
                     "mappings": [],
                     "thresholds": {
@@ -980,66 +1031,6 @@
                         "steps": [
                             {
                                 "color": "green",
-                                "value": null
-                            },
-                            {
-                                "color": "yellow",
-                                "value": 0.5
-                            },
-                            {
-                                "color": "red",
-                                "value": 2
-                            }
-                        ]
-                    },
-                    "unit": "s"
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 8,
-                "w": 12,
-                "x": 0,
-                "y": 49
-            },
-            "id": 112,
-            "options": {
-                "legend": {
-                    "calcs": [
-                        "max"
-                    ],
-                    "displayMode": "table",
-                    "placement": "bottom"
-                },
-                "tooltip": {
-                    "mode": "multi",
-                    "sort": "desc"
-                }
-            },
-            "targets": [
-                {
-                    "expr": "histogram_quantile(0.95, sum by (le, provider) (increase(bioetl_rate_limiter_wait_seconds_bucket{provider=~\"$provider\"}[$__interval])))",
-                    "legendFormat": "{{ provider }} p95",
-                    "refId": "A"
-                }
-            ],
-            "title": "Rate Limiter Wait by Provider (p95)",
-            "type": "timeseries"
-        },
-        {
-            "datasource": "Prometheus",
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "continuous-BlYlRd"
-                    },
-                    "decimals": 2,
-                    "mappings": [],
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "red",
                                 "value": null
                             },
                             {
@@ -1047,7 +1038,7 @@
                                 "value": 1
                             },
                             {
-                                "color": "green",
+                                "color": "red",
                                 "value": 5
                             }
                         ]
@@ -1058,11 +1049,164 @@
             },
             "gridPos": {
                 "h": 8,
-                "w": 12,
-                "x": 12,
-                "y": 49
+                "w": 8,
+                "x": 8,
+                "y": 20
             },
-            "id": 113,
+            "id": 204,
+            "options": {
+                "footer": {
+                    "fields": "",
+                    "reducer": [
+                        "sum"
+                    ],
+                    "show": true
+                },
+                "showHeader": true
+            },
+            "targets": [
+                {
+                    "expr": "round(sum by (provider, operation, error_category, error_type) (increase(bioetl_adapter_error_taxonomy_total{provider=~\"$provider\"}[$__range])) or vector(0))",
+                    "format": "table",
+                    "instant": true,
+                    "legendFormat": "",
+                    "refId": "A"
+                }
+            ],
+            "title": "Adapter Error Taxonomy",
+            "type": "table"
+        },
+        {
+            "datasource": "Prometheus",
+            "description": "Retries attempted vs retry exhaustions vs HTTP errors — compare retry policy behavior (selected range).",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "align": "auto",
+                        "displayMode": "auto"
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "yellow",
+                                "value": 1
+                            },
+                            {
+                                "color": "red",
+                                "value": 5
+                            }
+                        ]
+                    },
+                    "unit": "short"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 8,
+                "x": 16,
+                "y": 20
+            },
+            "id": 205,
+            "options": {
+                "footer": {
+                    "fields": "",
+                    "reducer": [
+                        "sum"
+                    ],
+                    "show": true
+                },
+                "showHeader": true
+            },
+            "targets": [
+                {
+                    "expr": "round(sum by (provider, operation) (increase(bioetl_data_source_retries_total{provider=~\"$provider\"}[$__range])) or vector(0))",
+                    "format": "table",
+                    "instant": true,
+                    "legendFormat": "",
+                    "refId": "A"
+                },
+                {
+                    "expr": "round(sum by (provider, operation) (increase(bioetl_data_source_retry_exhausted_total{provider=~\"$provider\"}[$__range])) or vector(0))",
+                    "format": "table",
+                    "instant": true,
+                    "legendFormat": "",
+                    "refId": "B"
+                },
+                {
+                    "expr": "round(sum by (provider, method, error_type) (increase(bioetl_http_request_errors_total{provider=~\"$provider\"}[$__range])) or vector(0))",
+                    "format": "table",
+                    "instant": true,
+                    "legendFormat": "",
+                    "refId": "C"
+                },
+                {
+                    "expr": "round(sum by (provider) (increase(bioetl_http_retries_total{provider=~\"$provider\"}[$__range])) or vector(0))",
+                    "format": "table",
+                    "instant": true,
+                    "legendFormat": "",
+                    "refId": "D"
+                },
+                {
+                    "expr": "round(sum by (provider, method) (increase(bioetl_http_retry_budget_exhausted_total{provider=~\"$provider\"}[$__range])) or vector(0))",
+                    "format": "table",
+                    "instant": true,
+                    "legendFormat": "",
+                    "refId": "E"
+                }
+            ],
+            "title": "Retry Attempts vs Failures",
+            "type": "table"
+        },
+        {
+            "datasource": "Prometheus",
+            "description": "Failure share by provider as percentage of total failures (selected range).",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "continuous-GrYlRd"
+                    },
+                    "decimals": 2,
+                    "mappings": [],
+                    "max": 100,
+                    "min": 0,
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "yellow",
+                                "value": 10
+                            },
+                            {
+                                "color": "red",
+                                "value": 30
+                            }
+                        ]
+                    },
+                    "unit": "percent"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 28
+            },
+            "id": 107,
             "options": {
                 "displayMode": "gradient",
                 "orientation": "horizontal",
@@ -1077,16 +1221,143 @@
             },
             "targets": [
                 {
-                    "expr": "min by (provider) (min_over_time(bioetl_rate_limiter_tokens_available{provider=~\"$provider\"}[$__range])) or vector(0)",
+                    "expr": "(100 * sum by (provider) (increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[$__range])) / clamp_min(sum(increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[$__range])), 1)) or vector(0)",
                     "legendFormat": "{{ provider }}",
                     "refId": "A"
                 }
             ],
-            "title": "Minimum Rate Limiter Tokens Available",
+            "title": "Provider Failure Share (Selected Range)",
             "type": "bargauge"
         },
         {
             "datasource": "Prometheus",
+            "description": "Retries exhausted by provider and operation (instant table, selected range).",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "align": "auto",
+                        "displayMode": "auto"
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "yellow",
+                                "value": 1
+                            },
+                            {
+                                "color": "red",
+                                "value": 3
+                            }
+                        ]
+                    },
+                    "unit": "short"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 12,
+                "y": 28
+            },
+            "id": 108,
+            "options": {
+                "footer": {
+                    "fields": "",
+                    "reducer": [
+                        "sum"
+                    ],
+                    "show": true
+                },
+                "showHeader": true
+            },
+            "targets": [
+                {
+                    "expr": "round(sum by (provider, operation) (increase(bioetl_data_source_retry_exhausted_total{provider=~\"$provider\"}[$__range])) or vector(0))",
+                    "format": "table",
+                    "instant": true,
+                    "legendFormat": "{{ provider }} {{ operation }}",
+                    "refId": "A"
+                }
+            ],
+            "title": "Retries Exhausted by Provider / Operation",
+            "type": "table"
+        },
+        {
+            "datasource": "Prometheus",
+            "description": "HTTP retry budget exhaustion count by provider and method (selected range).",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "custom": {
+                        "align": "auto",
+                        "displayMode": "auto"
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "yellow",
+                                "value": 1
+                            },
+                            {
+                                "color": "red",
+                                "value": 3
+                            }
+                        ]
+                    },
+                    "unit": "short"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 8,
+                "x": 0,
+                "y": 36
+            },
+            "id": 206,
+            "options": {
+                "footer": {
+                    "fields": "",
+                    "reducer": [
+                        "sum"
+                    ],
+                    "show": true
+                },
+                "showHeader": true
+            },
+            "targets": [
+                {
+                    "expr": "round(sum by (provider, method) (increase(bioetl_http_retry_budget_exhausted_total{provider=~\"$provider\"}[$__range])) or vector(0))",
+                    "format": "table",
+                    "instant": true,
+                    "legendFormat": "",
+                    "refId": "A"
+                }
+            ],
+            "title": "HTTP Retry Budget Exhausted",
+            "type": "table"
+        },
+        {
+            "datasource": "Prometheus",
+            "description": "Circuit breaker state (max) per adapter over selected range.",
             "fieldConfig": {
                 "defaults": {
                     "color": {
@@ -1117,9 +1388,9 @@
             },
             "gridPos": {
                 "h": 8,
-                "w": 12,
-                "x": 0,
-                "y": 57
+                "w": 8,
+                "x": 8,
+                "y": 36
             },
             "id": 31,
             "options": {
@@ -1147,6 +1418,7 @@
         },
         {
             "datasource": "Prometheus",
+            "description": "Circuit breaker trip count per adapter over time.",
             "fieldConfig": {
                 "defaults": {
                     "color": {
@@ -1187,9 +1459,9 @@
             },
             "gridPos": {
                 "h": 8,
-                "w": 12,
-                "x": 12,
-                "y": 57
+                "w": 8,
+                "x": 16,
+                "y": 36
             },
             "id": 32,
             "options": {
@@ -1215,6 +1487,315 @@
             ],
             "title": "Circuit Breaker Trips by Provider",
             "type": "timeseries"
+        },
+        {
+            "datasource": "Prometheus",
+            "description": "Minimum rate limiter tokens available per provider (15m window).",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "continuous-BlYlRd"
+                    },
+                    "decimals": 2,
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "red",
+                                "value": null
+                            },
+                            {
+                                "color": "yellow",
+                                "value": 1
+                            },
+                            {
+                                "color": "green",
+                                "value": 5
+                            }
+                        ]
+                    },
+                    "unit": "short"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 44
+            },
+            "id": 113,
+            "options": {
+                "displayMode": "gradient",
+                "orientation": "horizontal",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "showUnfilled": true
+            },
+            "targets": [
+                {
+                    "expr": "min by (provider) (min_over_time(bioetl_rate_limiter_tokens_available{provider=~\"$provider\"}[15m])) or vector(0)",
+                    "legendFormat": "{{ provider }}",
+                    "refId": "A"
+                }
+            ],
+            "title": "Minimum Rate Limiter Tokens Available",
+            "type": "bargauge"
+        },
+        {
+            "datasource": "Prometheus",
+            "description": "Context: total health checks in selected range (success + degraded + failure).",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "decimals": 0,
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            }
+                        ]
+                    },
+                    "unit": "short"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 4,
+                "w": 4,
+                "x": 12,
+                "y": 44
+            },
+            "id": 7,
+            "options": {
+                "colorMode": "value",
+                "graphMode": "area",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "textMode": "auto"
+            },
+            "targets": [
+                {
+                    "expr": "round((sum(increase(bioetl_health_check_success_total{provider=~\"$provider\"}[$__range])) or vector(0)) + (sum(increase(bioetl_health_check_degraded_total{provider=~\"$provider\"}[$__range])) or vector(0)) + (sum(increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[$__range])) or vector(0)))",
+                    "legendFormat": "{{ provider }}",
+                    "refId": "A"
+                }
+            ],
+            "title": "Health Checks Total",
+            "type": "stat"
+        },
+        {
+            "datasource": "Prometheus",
+            "description": "Context: successful health checks in selected range.",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "red",
+                                "value": null
+                            },
+                            {
+                                "color": "green",
+                                "value": 1
+                            }
+                        ]
+                    },
+                    "unit": "short"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 4,
+                "w": 4,
+                "x": 16,
+                "y": 44
+            },
+            "id": 2,
+            "options": {
+                "colorMode": "background",
+                "graphMode": "area",
+                "justifyMode": "center",
+                "orientation": "auto",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "textMode": "auto"
+            },
+            "targets": [
+                {
+                    "expr": "round(sum(increase(bioetl_health_check_success_total{provider=~\"$provider\"}[$__range])) or vector(0))",
+                    "legendFormat": "{{ provider }}",
+                    "refId": "A"
+                }
+            ],
+            "title": "Healthy Checks",
+            "type": "stat"
+        },
+        {
+            "datasource": "Prometheus",
+            "description": "Context: degraded health checks in selected range.",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "decimals": 0,
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "yellow",
+                                "value": 1
+                            }
+                        ]
+                    },
+                    "unit": "short"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 4,
+                "w": 4,
+                "x": 20,
+                "y": 44
+            },
+            "id": 105,
+            "options": {
+                "colorMode": "background",
+                "graphMode": "area",
+                "justifyMode": "center",
+                "orientation": "auto",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "textMode": "auto"
+            },
+            "targets": [
+                {
+                    "expr": "round(sum(increase(bioetl_health_check_degraded_total{provider=~\"$provider\"}[$__range])) or vector(0))",
+                    "legendFormat": "{{ provider }}",
+                    "refId": "A"
+                }
+            ],
+            "title": "Degraded Checks",
+            "type": "stat"
+        },
+        {
+            "collapsed": true,
+            "description": "Expand only after selecting one provider or a bounded provider subset.",
+            "gridPos": {
+                "h": 1,
+                "w": 24,
+                "x": 0,
+                "y": 48
+            },
+            "id": 91,
+            "panels": [],
+            "title": "Selected Provider Detail",
+            "type": "row"
+        },
+        {
+            "datasource": "Prometheus",
+            "description": "Per-provider health check latency p95 gauge (expanded detail).",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "decimals": 3,
+                    "max": 10,
+                    "min": 0,
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "yellow",
+                                "value": 0.5
+                            },
+                            {
+                                "color": "orange",
+                                "value": 2
+                            },
+                            {
+                                "color": "red",
+                                "value": 5
+                            }
+                        ]
+                    },
+                    "unit": "s"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 6,
+                "x": 0,
+                "y": 49
+            },
+            "id": 102,
+            "options": {
+                "orientation": "auto",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "showThresholdLabels": false,
+                "showThresholdMarkers": true
+            },
+            "repeat": "provider",
+            "repeatDirection": "h",
+            "maxPerRow": 4,
+            "targets": [
+                {
+                    "expr": "histogram_quantile(0.95, sum by (le, provider) (rate(bioetl_health_check_latency_seconds_bucket{provider=~\"$provider\"}[$__rate_interval])))",
+                    "legendFormat": "{{ provider }}",
+                    "refId": "A"
+                }
+            ],
+            "title": "Provider Health Check Latency (p95) - $provider",
+            "type": "gauge"
         }
     ],
     "refresh": "30s",
@@ -1301,5 +1882,5 @@
     "timezone": "",
     "title": "3. Provider Health",
     "uid": "bioetl-provider-health-v2",
-    "version": 6
+    "version": 7
 }

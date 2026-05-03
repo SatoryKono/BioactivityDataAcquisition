@@ -857,31 +857,70 @@ ______________________________________________________________________
 **UID:** `bioetl-provider-health-v2`
 **Refresh:** 30 секунд
 **Time range:** Последние 12 часов
-**Назначение:** Операционный incident dashboard по внешним провайдерам: current health status, p95 latency, failure/degraded trends, failure share и retry exhaustion.
+**Назначение:** L1 Domain — decision-first operational incident dashboard. Primary question: Какие providers/adapters деградируют, лимитируют или возвращают ошибки? Decisions supported: tune backoff/rate-limit, rotate credentials, pause provider, investigate external API, inspect circuit breaker.
 
 ### Панели
 
-| ID  | Название                                        | Тип            | PromQL                                                                                                               | Описание                                                  |
-| --- | ----------------------------------------------- | -------------- | -------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
-| 1   | Health Check Latency by Provider (p95)          | Timeseries     | `histogram_quantile(0.95, sum by (le, provider) (increase(...[$__interval])))`                                       | p95 latency trend по выбранным providers; `No data` сохраняется как diagnostic gap, не маскируется в `0s`. |
-| 114 | Current Provider Health Status                  | Table          | `max by (provider) (bioetl_provider_health_status{provider=~"$provider"})`                                           | Текущий статус по provider с mapping `0=UNHEALTHY`, `1=DEGRADED`, `2=HEALTHY`. |
-| 2   | Healthy Checks                                  | Stat           | `round(sum(increase(bioetl_health_check_success_total{provider=~"$provider"}[$__range])) or vector(0))`              | Completed probes со статусом `HEALTHY` в выбранном окне.  |
-| 105 | Degraded Checks                                 | Stat           | `round(sum(increase(bioetl_health_check_degraded_total{provider=~"$provider"}[$__range])) or vector(0))`             | Completed probes со статусом `DEGRADED` в выбранном окне. |
-| 104 | Provider Failure Rate                           | Gauge          | `failures_increase / clamp_min(total_increase, 1)`                                                                   | Failure-rate за выбранный range.                          |
-| 7   | Health Checks Total                             | Stat           | `round(sum(increase(success+degraded+failures[$__range])) or vector(0))`                                             | Общий completed health-check volume в выбранном окне.     |
-| 106 | Failure & Degraded Trend by Provider            | Timeseries     | \`round(sum by (provider) (increase(failures                                                                         | degraded[$\_\_interval])) or vector(0))\`                 |
-| 107 | Provider Failure Share (Selected Range)         | Bar gauge      | `100 * failures_by_provider / clamp_min(total_failures, 1)`                                                          | Ранжирование providers по доле failed probes.             |
-| 108 | Retries Exhausted by Provider / Operation       | Table          | `round(sum by (provider, operation) (increase(bioetl_data_source_retry_exhausted_total[$__range])) or vector(0))`    | Где retries чаще всего исчерпываются.                     |
-| 109 | Retries Exhausted Trend by Provider / Operation | Timeseries     | `round(sum by (provider, operation) (increase(bioetl_data_source_retry_exhausted_total[$__interval])) or vector(0))` | Тренд retry exhaustion incidents во времени.              |
-| 102 | Provider Health Check Latency (p95) - $provider | Repeated Gauge | `histogram_quantile(0.95, sum by (le, provider) (increase(...[$__range])))`                                          | Current p95 by provider для выбранного range; отсутствие samples остаётся `No data`. |
+**Answer Row (y=0):**
 
-**Используемые метрики:** `health_check_latency_seconds`, `provider_health_status`, `health_check_success_total`, `health_check_degraded_total`, `health_check_failures_total`.
+| ID  | Название                         | Тип   | Описание                                                    |
+| --- | -------------------------------- | ----- | ----------------------------------------------------------- |
+| 114 | Current Provider Health Status   | Table | `0=UNHEALTHY`, `1=DEGRADED`, `2=HEALTHY` mapping.           |
+| 104 | Provider Failure Rate            | Gauge | failures/total checks; warning ≥5%, critical ≥20%.          |
+| 200 | Retries Exhausted                | Stat  | Total retry exhaustions in range. Red ≥1.                   |
+| 201 | HTTP Error Rate                  | Gauge | HTTP errors / total requests. Red >10%.                     |
+| 202 | Rate Limiter Tokens Depleted     | Stat  | Min tokens available (15m). Red <1.                         |
+| 203 | Circuit Breaker Open             | Stat  | CB state max. Red when OPEN.                                |
 
-**Фильтрация:** только `$provider`. Health-check counters и histograms в текущем инструментировании являются provider-labeled, поэтому pipeline filter здесь намеренно не используется.
+**Trend Row:**
 
-**Drilldown:** dashboard links `Back to Overview`, `2. Runtime`, `Explore Logs (Loki, tracing profile)` и
-`Explore Traces (Tempo, tracing profile)` плюс data links у latency-панели открывают Grafana
-Explore в том же time range.
+| ID  | Название                                        | Тип        | Описание                                |
+| --- | ----------------------------------------------- | ---------- | --------------------------------------- |
+| 1   | Health Check Latency p50 / p95 / p99            | Timeseries | Quantile latency over `$__rate_interval`.|
+| 110 | Adapter Request Latency p50 / p95 / p99         | Timeseries | Quantile latency over `$__rate_interval`.|
+| 112 | Rate Limiter Wait p50 / p95 / p99               | Timeseries | Quantile wait over `$__rate_interval`.   |
+| 106 | Failure & Degraded Trend by Provider            | Timeseries | Failures + degraded per interval.        |
+| 109 | Retries Exhausted Trend by Provider / Operation | Timeseries | Retry exhaustion per interval.           |
+
+**Breakdown Row:**
+
+| ID  | Название                        | Тип        | Описание                                       |
+| --- | ------------------------------- | ---------- | ---------------------------------------------- |
+| 111 | HTTP Errors by Method / Error Type | Timeseries | Error class breakdown per interval.           |
+| 204 | Adapter Error Taxonomy          | Table      | `error_category`, `error_type`, `operation`.   |
+| 205 | Retry Attempts vs Failures      | Table      | Retries, exhaustions, HTTP errors combined.    |
+| 107 | Provider Failure Share          | Bar gauge  | Percentage of total failures per provider.     |
+
+**Failure Row:**
+
+| ID  | Название                                  | Тип        | Описание                                |
+| --- | ----------------------------------------- | ---------- | --------------------------------------- |
+| 108 | Retries Exhausted by Provider / Operation | Table      | Instant table of retry exhaustions.     |
+| 206 | HTTP Retry Budget Exhausted               | Table      | Budget exhaustion by provider/method.   |
+| 31  | Circuit Breaker State (max)               | Stat       | Max CB state per adapter.               |
+| 32  | Circuit Breaker Trips by Provider         | Timeseries | Trip count trend.                       |
+| 113 | Minimum Rate Limiter Tokens Available     | Bar gauge  | Token availability per provider.        |
+
+**Context Row:**
+
+| ID  | Название         | Тип  | Описание                            |
+| --- | ---------------- | ---- | ----------------------------------- |
+| 7   | Health Checks Total | Stat | Total checks (success+degraded+failure). |
+| 2   | Healthy Checks   | Stat | Successful checks in range.         |
+| 105 | Degraded Checks  | Stat | Degraded checks in range.           |
+
+**Collapsed Detail:**
+
+| ID  | Название                                        | Тип    | Описание                                      |
+| --- | ----------------------------------------------- | ------ | --------------------------------------------- |
+| 102 | Provider Health Check Latency (p95) - $provider | Gauge  | Per-provider p95 (repeated, collapsed).       |
+
+**Используемые метрики:** `health_check_latency_seconds`, `provider_health_status`, `health_check_success_total`, `health_check_degraded_total`, `health_check_failures_total`, `adapter_request_duration_seconds`, `adapter_requests_total`, `adapter_error_taxonomy_total`, `data_source_retries_total`, `data_source_retry_exhausted_total`, `http_request_errors_total`, `http_retries_total`, `http_retry_budget_exhausted_total`, `rate_limiter_tokens_available`, `rate_limiter_wait_seconds`, `circuit_breaker_state`, `circuit_breaker_trips_total`.
+
+**Фильтрация:** `$provider` и `$adapter`. Health-check counters и histograms в текущем инструментировании являются provider-labeled, поэтому pipeline filter здесь намеренно не используется.
+
+**Drilldown:** dashboard links `Back to Overview`, `2. Runtime`, `Explore Logs (Loki, tracing profile)`,
+`Explore Traces (Tempo, tracing profile)` плюс runbook links для provider health incident, retry/backoff, credentials/secrets, rate-limit/backpressure и circuit breaker/provider outage.
 Loki drilldown стартует с безопасного `{job="bioetl"}` entrypoint без encoded
 dashboard-variable interpolation. Дополнительное сужение по `provider` или
 `pipeline` оператор делает уже в Explore, а Tempo drilldown сразу фильтрует
@@ -1873,7 +1912,7 @@ ______________________________________________________________________
 | ------------------------- | ------------------------------- | ------------ | ------ | ------- | ---------- | --------------- | ------- |
 | 1. BioETL Overview        | `bioetl-overview-v2`            | 5            | 27     | 30s     | 12h        | Prometheus      | L0 broken/degraded answer and operational handoff |
 | 2. Runtime                | `bioetl-runtime`                | 2            | 26     | 30s     | 12h        | Prometheus + optional Loki/Tempo links | L2 runtime triage: blockers, latency, backlog, handoffs |
-| 3. Provider Health        | `bioetl-provider-health-v2`     | 6            | 17     | 30s     | 12h        | Prometheus      | Provider latency, health, retries, failure ratios |
+| 3. Provider Health        | `bioetl-provider-health-v2`     | 6            | 25     | 30s     | 12h        | Prometheus      | Provider latency, health, retries, failure ratios, error taxonomy, circuit breaker |
 | 4. Data Quality           | `bioetl-dq-v2`                  | 4            | 21     | 30s     | 12h        | Prometheus      | DQ score, quarantine, freshness, validation failures |
 | Control Plane / Replay Safety | `bioetl-control-plane-v1`       | 2            | 32     | 30s     | 6h         | Prometheus      | Replay/resume safety, GLOBAL read diagnostics, missing-signal markers |
 | 5. Silver Reject Explorer | `bioetl-silver-reject-explorer` | 1000         | 9      | 1m      | 24h        | Quarantine Explorer API | Record-level browsing for Silver rejects |
