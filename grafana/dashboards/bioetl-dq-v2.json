@@ -183,7 +183,7 @@
     },
     {
       "datasource": "Prometheus",
-      "description": "Bounded field summary only. Use quarantine CLI when you need exact record-level field failures and payload context.",
+      "description": "Threshold semantics: keep no-data as UNKNOWN (not score 0); warnings indicate drift, hard-fail signals block data promotion. Next action: if hard-fail>0 open reject/quarantine diagnostics; if warning-only, review trend and top reject causes.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1590,7 +1590,7 @@
     },
     {
       "datasource": "Prometheus",
-      "description": "Share of records blocked by DQ filters within the selected scope/time range.",
+      "description": "Threshold semantics: blocked-share trend should stay near baseline; sustained growth indicates DQ filter pressure, spikes indicate incident. Next action: open Top Silver Reject Reasons and Silver Reject Explorer (or quarantine CLI) for exact causes.",
       "fieldConfig": {
         "defaults": {
           "color": {

@@ -230,6 +230,14 @@ Variable handoff policy for these links is strict and bounded:
 
 ## Важные пороги (из JSON)
 
+- `overview.id=214 (System Status)`: `BROKEN` при runtime blocker `>0`, DQ hard fail `>0` или control-plane blocker `>0`; `DEGRADED` при warning-only сигналах; `UNKNOWN` при no recent samples. Next action: follow `overview.id=215`.
+- `overview.id=215 (Next Action)`: priority order `Runtime > Control Plane > DQ > Provider > Workflow > Monitor`. Next action: open first non-OK surface with same `$pipeline/$run_type`.
+- `dq.id=2 (DQ Score Snapshot)`: no-data остается `UNKNOWN`, не `0`; hard-fail signals блокируют promotion, warning-only означает drift. Next action: hard-fail -> reject/quarantine diagnostics; warning-only -> trend + top reasons.
+- `dq.id=154 (Blocked Share Trend)`: sustained growth = filter pressure, spike = incident. Next action: `Top Silver Reject Reasons` + `Silver Reject Explorer`/quarantine CLI.
+- `runtime.id=16 (Failed Runs / 15m)`: non-zero = runtime blocker. Next action: runtime blockers table + culprit stage panels, затем logs/traces при необходимости.
+- `runtime.id=220 (Runtime Error Rate / 30m)`: elevated ratio with meaningful Bronze denominator = degradation risk. Next action: `Runtime Errors by Stage/Error Code` + failed runs/backlog/lag panels.
+- `control-plane.id=130 (Replay / Resume Blockers)`: green `0`, red `>=1`. Next action: stop replay/resume и investigate first failing signal (manifest/ledger/checkpoint/replay/lineage).
+
 - `overview.System Status`: `BROKEN` при failed runs `>0`, stage backlog `>0`,
   worst lag `>=300s`, DQ hard fail `>0` или control-plane blocker `>0`;
   `DEGRADED` при warning-сигналах provider/DQ/freshness/workflow; `UNKNOWN`
