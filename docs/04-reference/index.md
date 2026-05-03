@@ -42,6 +42,7 @@ design rationale and layer structure.
 - [CLI Reference](cli.md)
 - [Gold Schemas](contracts/gold-schemas.md)
 - [Non-ChEMBL Normalization Overview](normalization/non-chembl-normalization-overview.md)
+- [Non-ChEMBL Normalization Inventory](normalization/non-chembl-normalization-inventory.md)
 - [Publication Normalization](normalization/publication-normalization.md)
 - [Publication Validation Index](publication-validation-index.md)
 

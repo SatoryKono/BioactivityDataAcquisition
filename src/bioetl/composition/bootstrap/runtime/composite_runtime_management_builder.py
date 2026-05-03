@@ -154,9 +154,7 @@ def _create_checkpoint_manager(
             expected_effective_config_artifact_id=(
                 expected_effective_config_artifact_id
             ),
-            expected_input_snapshot_fingerprint=(
-                expected_input_snapshot_fingerprint
-            ),
+            expected_input_snapshot_fingerprint=expected_input_snapshot_fingerprint,
             run_ledger_port=run_ledger_port,
         )
     return checkpoint_manager_cls(

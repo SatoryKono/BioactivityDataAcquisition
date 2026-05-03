@@ -1,6 +1,7 @@
 """Integration tests for Grafana dashboard configurations and observability contracts."""
 
 from collections import Counter
+import json
 from pathlib import Path
 import re
 
@@ -246,12 +247,14 @@ def test_summary_queries_use_zero_fallbacks() -> None:
     """Runtime/provider summary panels should show zero instead of no-data."""
     expected_panel_snippets = {
         "bioetl-overview-v2.json": {
+            "Failed Pipeline Runs": "or vector(0)",
             "Manifest / Ledger Failures": "or vector(0)",
             "Checkpoint Incompatibilities": "or vector(0)",
             "Lineage Refs Missing": "or vector(0)",
-            "Composite Source Selections": "or vector(0)",
             "Silver Filter Rejects": "or vector(0)",
-            "Pipeline Error Rate": "or vector(0)",
+            "DQ Blocking": "or vector(0)",
+            "Provider Degraded": "or vector(0)",
+            "Workflow Handoff": "or vector(0)",
         },
         "bioetl-runtime.json": {
             "Warnings": "or vector(0)",
@@ -388,11 +391,15 @@ def test_count_like_summary_panels_use_rounding_or_boolean_conditions() -> None:
     """Count-like summary panels should avoid fractional event semantics."""
     expected_panel_snippets = {
         "bioetl-overview-v2.json": {
+            "Failed Pipeline Runs": "round(",
             "Manifest / Ledger Failures": "round(",
             "Checkpoint Incompatibilities": "round(",
             "Lineage Refs Missing": "round(",
-            "Composite Source Selections": "round(",
             "Silver Filter Rejects": "round(",
+            "DQ Blocking": "round(",
+            "Control Plane Unsafe": "round(",
+            "Provider Degraded": "round(",
+            "Workflow Handoff": "round(",
         },
         "bioetl-provider-health-v2.json": {
             "Healthy Checks": "round(",
@@ -509,9 +516,8 @@ def test_selected_range_kpis_do_not_use_raw_counters() -> None:
     allowed_panel_snippets = {
         "bioetl-overview-v2.json": {
             "Processing Volume by Stage": ("increase(", "last_over_time("),
-            "Stage Distribution in Range": ("increase(", "last_over_time("),
-            "Pipeline Distribution in Range": ("increase(", "last_over_time("),
-            "Overall Yield (Selected Range)": ("increase(", "last_over_time("),
+            "Pipeline Run Outcomes": ("increase(",),
+            "Overall Yield": ("increase(", "last_over_time("),
         },
         "bioetl-dq-v2.json": {
             "Data Flow in Range: Bronze -> Silver -> Gold": (
@@ -603,7 +609,6 @@ def test_dq_freshness_panel_uses_age_from_timestamp_metric() -> None:
 @pytest.mark.parametrize(
     ("dashboard_file", "panel_title"),
     [
-        ("bioetl-overview-v2.json", "Latest Successful Data Timestamp"),
         ("bioetl-dq-v2.json", "Latest Successful Data Timestamp"),
     ],
 )
@@ -635,10 +640,178 @@ def test_overview_dashboard_contains_control_plane_and_lineage_metrics():
         "bioetl_control_plane_ledger_appends_total",
         "bioetl_checkpoint_compatibility_events_total",
         "bioetl_lineage_refs_missing_total",
-        "bioetl_composite_source_selection_total",
     ]
     missing = [metric for metric in required_metrics if metric not in all_expressions]
     assert not missing, f"Overview dashboard missing metrics: {missing}"
+
+
+def test_overview_dashboard_has_l0_primary_question() -> None:
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
+    description = dashboard.get("description", "")
+    scope_panel = next(
+        (
+            panel
+            for panel in get_dashboard_panels(dashboard)
+            if panel.get("title") == "L0 Overview Scope"
+        ),
+        None,
+    )
+    assert scope_panel is not None
+    content = scope_panel.get("options", {}).get("content", "")
+
+    expected_question = (
+        "what is currently broken or degraded in BioETL, and where should the "
+        "operator drill down first"
+    )
+    assert dashboard.get("title") == "1. BioETL Overview"
+    assert dashboard.get("uid") == "bioetl-overview-v2"
+    assert "L0 Overview" in description
+    assert expected_question.lower() in (description + content).lower()
+    assert "sre-data-platform" in description + content
+
+
+def test_overview_answer_row_has_max_seven_panels() -> None:
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
+    answer_panels = [
+        panel
+        for panel in get_dashboard_panels(dashboard)
+        if panel.get("gridPos", {}).get("y") == 4
+    ]
+    answer_titles = {panel.get("title") for panel in answer_panels}
+
+    assert 3 <= len(answer_panels) <= 7
+    assert answer_titles == {
+        "Failed Pipeline Runs",
+        "Overall Yield",
+        "Active Stage Backlog",
+        "Worst Stage Lag",
+        "DQ Blocking",
+        "Control Plane Unsafe",
+        "Provider Degraded",
+    }
+
+
+def test_overview_does_not_use_forensic_variables() -> None:
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
+    variables = {
+        var.get("name")
+        for var in dashboard.get("templating", {}).get("list", [])
+        if var.get("name")
+    }
+    serialized = json.dumps(dashboard)
+
+    assert variables == {"pipeline", "run_type"}
+    for forbidden in ("run_id", "payload_hash", "execution"):
+        assert forbidden not in variables
+        assert f"$${forbidden}" not in serialized
+        assert f"${forbidden}" not in serialized
+
+
+def test_overview_no_distribution_pie_panels() -> None:
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
+    panels = get_dashboard_panels(dashboard)
+    titles = {panel.get("title") for panel in panels}
+    pie_titles = {
+        panel.get("title")
+        for panel in panels
+        if panel.get("type") == "piechart"
+    }
+
+    assert "Stage Distribution in Range" not in titles
+    assert "Pipeline Distribution in Range" not in titles
+    assert not pie_titles
+
+
+def test_overview_summary_queries_use_range_semantics() -> None:
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
+    panels = {
+        panel.get("title"): panel
+        for panel in get_dashboard_panels(dashboard)
+        if panel.get("title")
+    }
+    count_panels = {
+        "Failed Pipeline Runs",
+        "DQ Blocking",
+        "Control Plane Unsafe",
+        "Provider Degraded",
+        "Runtime Handoff",
+        "Data Quality Handoff",
+        "Control Plane Handoff",
+        "Provider Handoff",
+        "Workflow Handoff",
+        "Manifest / Ledger Failures",
+        "Checkpoint Incompatibilities",
+        "Lineage Refs Missing",
+        "Silver Filter Rejects",
+    }
+
+    for panel_title in count_panels:
+        panel = panels.get(panel_title)
+        assert panel is not None, f"Overview dashboard missing {panel_title!r}"
+        expressions = [
+            target.get("expr", "")
+            for target in panel.get("targets", [])
+            if isinstance(target.get("expr"), str)
+        ]
+        assert expressions
+        assert any("increase(" in expr and "[$__range]" in expr for expr in expressions)
+
+    trend_panels = {
+        "Processing Volume by Stage",
+        "Pipeline Run Outcomes",
+        "Stage Backlog Trend",
+        "Stage Lag Trend",
+    }
+    for panel_title in trend_panels:
+        panel = panels.get(panel_title)
+        assert panel is not None, f"Overview dashboard missing {panel_title!r}"
+        expressions = [
+            target.get("expr", "")
+            for target in panel.get("targets", [])
+            if isinstance(target.get("expr"), str)
+        ]
+        assert any("[$__interval]" in expr for expr in expressions)
+
+
+def test_overview_links_are_target_scoped() -> None:
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
+    links = {link.get("title"): link for link in dashboard.get("links", [])}
+
+    assert links
+    assert all(link.get("includeVars") is False for link in links.values())
+    assert "includeVars=true" not in json.dumps(links)
+    for title in ("2. Runtime", "Control Plane v1", "4. Data Quality"):
+        url = str(links[title].get("url", ""))
+        assert "var-pipeline=$pipeline" in url
+        assert "var-run_type=$run_type" in url
+        assert "${__url_time_range}" in url
+    for title in ("3. Provider Health", "6. Workflow Overview"):
+        url = str(links[title].get("url", ""))
+        assert "var-pipeline=" not in url
+        assert "var-run_type=" not in url
+        assert "${__url_time_range}" in url
+
+
+def test_overview_contains_runtime_dq_provider_control_workflow_handoffs() -> None:
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
+    panels = {
+        panel.get("title"): panel
+        for panel in get_dashboard_panels(dashboard)
+        if panel.get("title")
+    }
+
+    expected = {
+        "Runtime Handoff": "/d/bioetl-runtime/bioetl-runtime",
+        "Data Quality Handoff": "/d/bioetl-dq-v2",
+        "Control Plane Handoff": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1",
+        "Provider Handoff": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2",
+        "Workflow Handoff": "/d/bioetl-workflow-overview/bioetl-workflow-overview",
+    }
+    for title, expected_url in expected.items():
+        panel = panels.get(title)
+        assert panel is not None, f"Overview dashboard missing {title!r}"
+        links = panel.get("fieldConfig", {}).get("defaults", {}).get("links", [])
+        assert any(expected_url in link.get("url", "") for link in links)
 
 
 def test_control_plane_lookup_panels_disclose_global_scope() -> None:
@@ -1116,34 +1289,32 @@ def test_dq_dashboard_contains_gold_specific_validation_surface() -> None:
     assert any('severity="hard_fail"' in expr for expr in expressions)
 
 
-def test_pipeline_error_rate_uses_runtime_error_metric_and_selected_time_range() -> (
+def test_overview_failed_pipeline_runs_uses_run_metric_and_selected_time_range() -> (
     None
 ):
-    """Pipeline error rate must use bounded runtime errors over the active range."""
+    """Overview failure indicator must use bounded failed-run events."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
     panel = next(
         (
             item
             for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Pipeline Error Rate"
+            if item.get("title") == "Failed Pipeline Runs"
         ),
         None,
     )
-    assert panel is not None, "Panel 'Pipeline Error Rate' not found"
+    assert panel is not None, "Panel 'Failed Pipeline Runs' not found"
 
     expressions = [
         target.get("expr", "")
         for target in panel.get("targets", [])
         if isinstance(target.get("expr"), str)
     ]
-    assert any("bioetl_errors_total" in expr for expr in expressions), (
-        "Pipeline Error Rate must use bioetl_errors_total"
+    assert any("bioetl_pipeline_runs_total" in expr for expr in expressions), (
+        "Failed Pipeline Runs must use bioetl_pipeline_runs_total"
     )
-    assert any('stage="bronze"' in expr for expr in expressions), (
-        "Pipeline Error Rate must normalize against bronze-stage processed volume"
-    )
+    assert any('status="failed"' in expr for expr in expressions)
     assert any("[$__range]" in expr for expr in expressions), (
-        "Pipeline Error Rate must use the selected Grafana time range"
+        "Failed Pipeline Runs must use the selected Grafana time range"
     )
 
 
@@ -1334,8 +1505,10 @@ def test_runtime_and_control_plane_operator_panels_use_active_time_windows(
         ("bioetl-overview-v2.json", "Manifest / Ledger Failures"),
         ("bioetl-overview-v2.json", "Checkpoint Incompatibilities"),
         ("bioetl-overview-v2.json", "Lineage Refs Missing"),
-        ("bioetl-overview-v2.json", "Composite Source Selections"),
-        ("bioetl-overview-v2.json", "Pipeline Error Rate"),
+        ("bioetl-overview-v2.json", "Failed Pipeline Runs"),
+        ("bioetl-overview-v2.json", "DQ Blocking"),
+        ("bioetl-overview-v2.json", "Provider Degraded"),
+        ("bioetl-overview-v2.json", "Workflow Handoff"),
         ("bioetl-control-plane-v1.json", "GLOBAL Control-Plane Read Failures"),
         ("bioetl-control-plane-v1.json", "GLOBAL Control-Plane Read p95"),
         ("bioetl-dq-v2.json", "Records Quarantined"),
@@ -1592,7 +1765,7 @@ def test_overview_processing_volume_panel_splits_units() -> None:
     assert "bioetl_stage_backlog_records" not in processing_expr
     assert "bioetl_stage_lag_seconds" not in processing_expr
 
-    backlog = panels.get("Stage Backlog Records")
+    backlog = panels.get("Stage Backlog Trend")
     assert backlog is not None
     backlog_expr = "\n".join(
         target.get("expr", "")
@@ -1602,7 +1775,7 @@ def test_overview_processing_volume_panel_splits_units() -> None:
     assert "bioetl_stage_backlog_records" in backlog_expr
     assert "[$__range]" in backlog_expr
 
-    lag = panels.get("Stage Lag Seconds")
+    lag = panels.get("Stage Lag Trend")
     assert lag is not None
     lag_expr = "\n".join(
         target.get("expr", "")

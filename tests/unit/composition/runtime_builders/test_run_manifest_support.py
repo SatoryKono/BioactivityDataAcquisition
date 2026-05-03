@@ -80,9 +80,7 @@ def _make_manifest_request(
 
 
 @pytest.mark.unit
-def test_emit_replay_reconstructability_metric_is_owned_by_creation_support() -> (
-    None
-):
+def test_emit_replay_reconstructability_metric_is_owned_by_creation_support() -> None:
     assert emit_replay_reconstructability_metric.__module__.endswith(
         "_run_manifest_creation_support"
     )

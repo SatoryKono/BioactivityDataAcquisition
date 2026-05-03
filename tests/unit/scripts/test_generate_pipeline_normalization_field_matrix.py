@@ -10,6 +10,7 @@ import yaml
 
 from scripts.docs.generate_pipeline_normalization_field_matrix import (
     CSV_NAME,
+    CSV_COLUMNS,
     COMPOSITE_JOIN_KEY_COVERAGE_KPI,
     COMPOSITE_SOURCE_FIELD_COVERAGE_KPI,
     CONTROL_PLANE_NORMALIZATION_COVERAGE_KPI,
@@ -17,6 +18,7 @@ from scripts.docs.generate_pipeline_normalization_field_matrix import (
     ENTITY_SILVER_SCHEMA_REGISTRY,
     ENTITY_RECORD_SURFACE,
     MD_NAME,
+    NON_CHEMBL_MD_NAME,
     PROFILE_META_PASSTHROUGH_KPI,
     PROFILE_NON_META_PASSTHROUGH_FREE_KPI,
     PROFILE_SET_LIKE_JSON_STRING_KPI,
@@ -924,6 +926,11 @@ def test_render_markdown_mentions_surface_scoped_coverage_kpis() -> None:
     assert "semantic_category" in markdown
     assert "schema_coverage" in markdown
     assert "dq_coverage" in markdown
+    assert "classification" in markdown
+    assert "identifier_family" in markdown
+    assert "raw_sidecar" in markdown
+    assert "composite_usage" in markdown
+    assert "observed_source" in markdown
     assert (
         "- entity_record / explicit_profile_coverage_pct: `50.00%` (`1` / `2`)"
         in markdown
@@ -980,6 +987,45 @@ def test_check_artifacts_returns_zero_for_fresh_outputs(tmp_path: Path) -> None:
         write_artifacts=write_artifacts,
         check_artifacts=check_artifacts,
     )
+
+
+def test_non_chembl_rows_include_inventory_evidence_columns() -> None:
+    rows = build_field_matrix_rows()
+
+    openalex_type = _row(rows, "openalex_publication", "publication_type")
+    assert openalex_type["classification"] == "raw_provider_value"
+    assert openalex_type["observed_source"]
+    assert openalex_type["dq_rule"] == openalex_type["dq_coverage"]
+
+    pubmed_taxonomy = _row(rows, "pubmed_publication", "publication_type_unified")
+    assert pubmed_taxonomy["classification"] == "derived_vocabulary"
+    assert pubmed_taxonomy["controlled_vocabulary_source"] == (
+        "configs/enums/publication_type_classification.csv"
+    )
+
+    uniprot_features = _row(rows, "uniprot_protein", "features_json")
+    assert uniprot_features["classification"] == "structured_json_sidecar"
+    assert uniprot_features["raw_sidecar"] == "features_raw_json"
+    assert uniprot_features["canonical_sidecar"] == "features_canonical_json"
+
+
+def test_build_artifacts_emits_non_chembl_slice() -> None:
+    artifacts = build_artifacts()
+
+    assert NON_CHEMBL_MD_NAME in artifacts
+    assert "openalex_publication" in artifacts[NON_CHEMBL_MD_NAME]
+    assert "chembl_activity" not in artifacts[NON_CHEMBL_MD_NAME]
+
+
+def test_csv_columns_include_non_chembl_inventory_evidence_fields() -> None:
+    assert "classification" in CSV_COLUMNS
+    assert "identifier_family" in CSV_COLUMNS
+    assert "collection_semantics" in CSV_COLUMNS
+    assert "raw_sidecar" in CSV_COLUMNS
+    assert "canonical_sidecar" in CSV_COLUMNS
+    assert "dq_rule" in CSV_COLUMNS
+    assert "composite_usage" in CSV_COLUMNS
+    assert "observed_source" in CSV_COLUMNS
 
 
 def test_committed_artifacts_match_generator_output() -> None:

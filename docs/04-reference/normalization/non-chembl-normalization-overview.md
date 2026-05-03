@@ -35,6 +35,8 @@ values, canonical normalized values, DQ expectations, and composite impact.
   `docs/reports/generated/pipeline_normalization_field_matrix/pipeline_normalization_field_matrix.md`
 - observed values:
   [non_chembl_observed_values.yaml](../../../tests/fixtures/normalization/non_chembl_observed_values.yaml)
+- published inventory page:
+  [non-chembl-normalization-inventory.md](non-chembl-normalization-inventory.md)
 - identifier cases:
   [non_chembl_identifier_cases.yaml](../../../tests/fixtures/normalization/non_chembl_identifier_cases.yaml)
 - shipped profile registry:
