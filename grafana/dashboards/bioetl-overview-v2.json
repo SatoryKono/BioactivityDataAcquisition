@@ -2465,7 +2465,7 @@
       "1d"
     ]
   },
-  "timezone": "",
+  "timezone": "browser",
   "title": "1. BioETL Overview",
   "uid": "bioetl-overview-v2",
   "version": 5
