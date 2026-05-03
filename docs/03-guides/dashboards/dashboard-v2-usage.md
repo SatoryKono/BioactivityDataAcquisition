@@ -149,14 +149,9 @@ ______________________________________________________________________
 
 ## Unified Top Navigation CTA (v2)
 
-All primary dashboards (`1. Overview`, `2. Runtime`, `3. Provider Health`, `4. Data Quality`, `6. Workflow Overview`) MUST expose the same top navigation block in this exact order:
+Primary dashboards (`1. Overview`, `2. Runtime`, `3. Provider Health`, `4. Data Quality`, `6. Workflow Overview`) MUST follow the canonical navigation contract in `navigation-contract.md`; top navigation is dashboard-specific and does **not** require a universal `Next Recommended Drilldown` link.
 
-1. `Back to Overview`
-2. `Next Recommended Drilldown`
-3. `Explore Logs (Loki, tracing profile)`
-4. `Explore Traces (Tempo, tracing profile)`
-
-Variable handoff policy for these links is strict and bounded:
+Variable handoff policy for dashboard links remains strict and bounded:
 
 - `includeVars=false` for every link (no implicit variable leakage).
 - Pass only target-scoped variables directly in URL (`var-*`) when required by the destination dashboard.
