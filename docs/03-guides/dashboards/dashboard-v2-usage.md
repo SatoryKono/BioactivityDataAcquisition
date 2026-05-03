@@ -194,11 +194,15 @@ Variable handoff policy for these links is strict and bounded:
   target-scoped variables; forensic IDs в runtime dashboard запрещены.
 - `bioetl-control-plane-v1`: Control Plane v1 отвечает на один
   primary question: can we trust manifest/ledger/checkpoint/lineage state and
-  safely replay/resume? Первый ряд содержит только replay/resume blockers.
-  Manifest/ledger ratios, checkpoint/replay diagnostics, GLOBAL reads,
-  audit/lineage diagnostics и missing-signal notes расположены ниже. GLOBAL
-  read-path panels не фильтруются по `$pipeline/$run_type`; это сознательно,
-  потому что `bioetl_control_plane_reads_total` и
+  safely replay/resume? На первом экране оставлены только Trust/Blocker KPI: `id=891..893` и `id=130`.
+  Все остальные control-plane метрики перенесены в collapsed incident rows.
+  Рекомендованный operator path: сначала проверить blocker cards, затем открыть
+  ровно один collapsed diagnostic row под конкретный incident-pattern.
+  Порядок row-блоков стандартизирован по частоте инцидентов: `Checkpoint/Replay`
+  -> `Manifest/Ledger` -> `Global Control Plane` -> `Audit/Lineage` ->
+  `Known Missing Signals`. GLOBAL read-path panels не
+  фильтруются по `$pipeline/$run_type`; это сознательно, потому что
+  `bioetl_control_plane_reads_total` и
   `bioetl_control_plane_read_duration_seconds_bucket` глобальны по
   `store/operation/status`.
 - `bioetl-provider-health-v2`: dashboard links `Back to Overview`, `2. Runtime`, `Explore Logs (Loki, tracing profile)` и `Explore Traces (Tempo, tracing profile)` дают быстрый переход из provider health surface в runtime/overview и correlation flow без ложного pipeline scope в target dashboards. Panel `id=114` (`Current Provider Health Status`) показывает явный enum mapping `0=UNHEALTHY`, `1=DEGRADED`, `2=HEALTHY`, а panel `id=1` (`Health Check Latency by Provider (p95)`) дублирует Explore handoff через data links.

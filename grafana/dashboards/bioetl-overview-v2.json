@@ -50,7 +50,7 @@
       "tags": [],
       "targetBlank": false,
       "title": "3. Provider Health",
-      "tooltip": "Provider health drilldown without var handoff",
+      "tooltip": "Cross-scope handoff: opens Provider Health with All provider/adapter scope (core filters do not transfer).",
       "type": "link",
       "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${__url_time_range}"
     },
@@ -64,7 +64,7 @@
       "title": "4. Data Quality",
       "tooltip": "Data quality drilldown with bounded scope handoff",
       "type": "link",
-      "url": "/d/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
+      "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
     },
     {
       "asDropdown": false,
@@ -74,7 +74,7 @@
       "tags": [],
       "targetBlank": false,
       "title": "6. Workflow Overview",
-      "tooltip": "Workflow drilldown without var handoff",
+      "tooltip": "Cross-scope handoff: opens Workflow Overview with All workflow/status scope (core filters do not transfer).",
       "type": "link",
       "url": "/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}"
     },
@@ -189,7 +189,7 @@
             },
             {
               "title": "Open 4. Data Quality",
-              "url": "/d/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
+              "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
             },
             {
               "title": "Open Control Plane v1",
@@ -316,7 +316,7 @@
             },
             {
               "title": "Open 4. Data Quality",
-              "url": "/d/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
+              "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
             },
             {
               "title": "Open 3. Provider Health",
@@ -605,7 +605,7 @@
           "links": [
             {
               "title": "Open 4. Data Quality",
-              "url": "/d/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
+              "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
             }
           ]
         },
@@ -1108,7 +1108,7 @@
               "links": [
                 {
                   "title": "Open 4. Data Quality",
-                  "url": "/d/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
+                  "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
                 }
               ]
             },
@@ -1676,7 +1676,7 @@
               "links": [
                 {
                   "title": "Open 4. Data Quality",
-                  "url": "/d/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
+                  "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
                 }
               ]
             },
@@ -1847,7 +1847,7 @@
               "links": [
                 {
                   "title": "Open 4. Data Quality",
-                  "url": "/d/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
+                  "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
                 }
               ]
             },
@@ -2322,7 +2322,7 @@
               "links": [
                 {
                   "title": "Open 4. Data Quality",
-                  "url": "/d/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
+                  "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
                 }
               ]
             },
@@ -2369,7 +2369,7 @@
           },
           "id": 213,
           "options": {
-            "content": "<div style=\"padding:0.4rem 0.6rem;line-height:1.6\"><strong>Next dashboard:</strong> <a href=\"/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}\">2. Runtime</a> for failed runs/backlog/lag; <a href=\"/d/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}\">4. Data Quality</a> for DQ blockers, flow balance and Silver rejects; <a href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${__url_time_range}\">3. Provider Health</a> for provider degradation; <a href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}\">Control Plane v1</a> for manifest/ledger/checkpoint/lineage; <a href=\"/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}\">6. Workflow Overview</a> for declarative workflow failures; <a href=\"/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D\">Loki Explore</a> and <a href=\"/a/grafana-exploretraces-app/?from=${__from}&to=${__to}&queryType=traceqlSearch&query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline:regex}%22%20%26%26%20span.%22bioetl.run_type%22%20%3D~%20%22${run_type:regex}%22%20%7D\">Tempo Explore</a> for tracing-profile correlation.</div>",
+            "content": "<div style=\"padding:0.4rem 0.6rem;line-height:1.6\"><strong>Next dashboard:</strong> <a href=\"/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}\">2. Runtime</a> for failed runs/backlog/lag; <a href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}\">4. Data Quality</a> for DQ blockers, flow balance and Silver rejects; <a href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${__url_time_range}\">3. Provider Health</a> for provider degradation; <a href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}\">Control Plane v1</a> for manifest/ledger/checkpoint/lineage; <a href=\"/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}\">6. Workflow Overview</a> for declarative workflow failures; <a href=\"/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D\">Loki Explore</a> and <a href=\"/a/grafana-exploretraces-app/?from=${__from}&to=${__to}&queryType=traceqlSearch&query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline:regex}%22%20%26%26%20span.%22bioetl.run_type%22%20%3D~%20%22${run_type:regex}%22%20%7D\">Tempo Explore</a> for tracing-profile correlation.</div>",
             "mode": "html"
           },
           "title": "Drilldown Links",
@@ -2465,7 +2465,7 @@
       "1d"
     ]
   },
-  "timezone": "",
+  "timezone": "browser",
   "title": "1. BioETL Overview",
   "uid": "bioetl-overview-v2",
   "version": 5

@@ -1508,6 +1508,7 @@
         "content": "### Control-plane aggregates available\n- Open `BioETL Control Plane v1` for aggregated manifest writes, ledger appends, checkpoint compatibility outcomes, and control-plane read failures.\n- Use the `Observability Checklist (runbook)` dashboard link when `BioETLControlPlaneReadFailureRate` or related aggregate signals require operator follow-up.\n",
         "mode": "markdown"
       },
+      "title": "Control-plane aggregates note",
       "type": "text"
     },
     {
@@ -1938,7 +1939,7 @@
       "1d"
     ]
   },
-  "timezone": "",
+  "timezone": "browser",
   "title": "4. Data Quality",
   "uid": "bioetl-dq-v2",
   "version": 4
