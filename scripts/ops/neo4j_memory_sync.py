@@ -23,6 +23,42 @@ import yaml
 JsonScalar: TypeAlias = str | int | float | bool | None
 JsonValue: TypeAlias = JsonScalar | list["JsonValue"] | dict[str, "JsonValue"]
 T = TypeVar("T")
+BIOETL_TEST_SURFACE_UNIT = "unit tests"
+BIOETL_TEST_SURFACE_INTEGRATION = "integration tests"
+BIOETL_TEST_SURFACE_E2E = "e2e tests"
+BIOETL_TEST_SURFACE_ARCHITECTURE = "architecture tests"
+BIOETL_TEST_SURFACE_CONTRACT = "contract tests"
+BIOETL_TEST_SURFACE_BENCHMARKS = "benchmarks"
+DOC_PATH_RULES = "docs/00-project/RULES.md"
+DOC_PATH_MEMORY_ENTRY = "docs/00-project/ai/memory/agent-memory.md"
+DOC_PATH_MEMORY_USAGE_GUIDE = "docs/00-project/ai/agents/guides/MEMORY_USAGE.md"
+DOC_PATH_POST_CHANGE_VALIDATION = "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md"
+DOC_PATH_TESTING_GUIDE = "docs/03-guides/testing.md"
+DOC_PATH_DOCS_VERIFICATION = "docs/03-guides/docs-verification.md"
+DOC_PATH_CLAUDE_EXCLUSION = ".claude/"
+DOC_PATH_ARCHITECTURE_DECISION_ADR040 = "docs/02-architecture/decisions/ADR-040-diagram-governance.md"
+DOC_PATH_DOCS_REPORTS_MAP = "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md"
+DOC_PATH_DIAGRAMS_README = "docs/02-architecture/diagrams/README.md"
+DOC_PATH_DASHBOARDS_GUIDE = "docs/03-guides/dashboards/dashboard-extension-llm.md"
+DOC_PATH_UNIPROT_PROVIDER_CONFIG = "configs/providers/uniprot.yaml"
+DOC_PATH_MAP = "docs/00-project/00-map.md"
+DOC_PATH_TEST_MATRIX = "configs/quality/test_matrix.yaml"
+DOC_PATH_INTEGRATION_VCR_POLICY = "configs/quality/integration_vcr_policy.yaml"
+DOC_PATH_HARDCODED_GRAFANA_DASHBOARDS = "grafana/dashboards"
+DOC_PATH_DOCS_VERIFICATION_GUIDE = DOC_PATH_DOCS_VERIFICATION
+DOC_PATH_GRAFANA_DASHBOARDS_SURFACE = "grafana dashboards json"
+DOC_PATH_DIAGRAMS_HUB = "architecture diagrams hub"
+DOC_PATH_DIAGRAM_TOOLING_README = "diagram tooling readme"
+QUALITY_GATE_PYTEST = "pytest"
+QUALITY_GATE_MYPY_STRICT = "mypy --strict"
+QUALITY_GATE_DOCS_VERIFICATION = "docs verification"
+QUALITY_GATE_CONFIG_VALIDATION = "config validation"
+QUALITY_GATE_PRETEST_GUARDRAILS = "pretest guardrails"
+QUALITY_GATE_DIAGRAM_QUALITY = "diagram quality gates"
+PATH_PYTHON_INIT_FILE = "__init__.py"
+PATH_PYTHON_INIT_SUFFIX = "/__init__.py"
+PY_YAML_GLOB = "*.yaml"
+PORT_MODULE_PREFIX = "bioetl.domain.ports"
 BIOETL_METRIC_PATTERN = re.compile(r"\bbioetl_[a-zA-Z0-9_:]+")
 
 DEFAULT_ROOT = Path(__file__).resolve().parents[2]
@@ -123,47 +159,47 @@ DEFAULT_FILE_STRUCTURE_EXCLUDED_PREFIXES: tuple[str, ...] = (
 DEFAULT_FILE_STRUCTURE_EXCLUDED_DIR_NAMES: tuple[str, ...] = ("__pycache__",)
 KNOWN_LAYERS = ("domain", "application", "infrastructure", "composition", "interfaces")
 TEST_SURFACES: dict[str, str] = {
-    "unit": "unit tests",
-    "integration": "integration tests",
-    "e2e": "e2e tests",
-    "architecture": "architecture tests",
-    "contract": "contract tests",
-    "benchmarks": "benchmarks",
+    "unit": BIOETL_TEST_SURFACE_UNIT,
+    "integration": BIOETL_TEST_SURFACE_INTEGRATION,
+    "e2e": BIOETL_TEST_SURFACE_E2E,
+    "architecture": BIOETL_TEST_SURFACE_ARCHITECTURE,
+    "contract": BIOETL_TEST_SURFACE_CONTRACT,
+    "benchmarks": BIOETL_TEST_SURFACE_BENCHMARKS,
 }
 CURATED_DOC_SOURCES: tuple[dict[str, str], ...] = (
     {
         "name": "Project Navigator",
-        "path": "docs/00-project/00-map.md",
+        "path": DOC_PATH_MAP,
         "summary": "Primary project navigator and active entrypoint map.",
     },
     {
         "name": "RULES.md",
-        "path": "docs/00-project/RULES.md",
+        "path": DOC_PATH_RULES,
         "summary": "Canonical governance and requirements surface for the project.",
     },
     {
         "name": "agent memory entry point",
-        "path": "docs/00-project/ai/memory/agent-memory.md",
+        "path": DOC_PATH_MEMORY_ENTRY,
         "summary": "Human-oriented project memory entry point for AI runtimes.",
     },
     {
         "name": "testing guide",
-        "path": "docs/03-guides/testing.md",
+        "path": DOC_PATH_TESTING_GUIDE,
         "summary": "Published testing strategy guide.",
     },
     {
         "name": "dashboard extension guide",
-        "path": "docs/03-guides/dashboards/dashboard-extension-llm.md",
+        "path": DOC_PATH_DASHBOARDS_GUIDE,
         "summary": "Canonical LLM playbook for shipped Grafana dashboards.",
     },
     {
-        "name": "architecture diagrams hub",
-        "path": "docs/02-architecture/diagrams/README.md",
+        "name": DOC_PATH_DIAGRAMS_HUB,
+        "path": DOC_PATH_DIAGRAMS_README,
         "summary": "Canonical hub for architecture, class, foundation, and view diagram sources and publication artifacts.",
     },
     {
         "name": "diagram governance ADR",
-        "path": "docs/02-architecture/decisions/ADR-040-diagram-governance.md",
+        "path": DOC_PATH_ARCHITECTURE_DECISION_ADR040,
         "summary": "Accepted ADR defining diagram governance, palette, decomposition rules, and CI validation expectations.",
     },
     {
@@ -182,13 +218,13 @@ CURATED_DOC_SOURCES: tuple[dict[str, str], ...] = (
         "summary": "Measured inventory of derived Mermaid review views and decomposition coverage.",
     },
     {
-        "name": "diagram tooling readme",
+        "name": DOC_PATH_DIAGRAM_TOOLING_README,
         "path": "scripts/diagrams/README.md",
         "summary": "Repository entrypoint for diagram lint, render, bundle, and regression tooling.",
     },
     {
         "name": "docs verification guide",
-        "path": "docs/03-guides/docs-verification.md",
+        "path": DOC_PATH_DOCS_VERIFICATION,
         "summary": "Published workflow for docs verification and drift control.",
     },
     {
@@ -202,34 +238,34 @@ CURATED_DOC_SOURCES: tuple[dict[str, str], ...] = (
         "summary": "Accepted governance decisions and risks.",
     },
     {
-        "name": "grafana dashboards json",
-        "path": "grafana/dashboards",
+        "name": DOC_PATH_GRAFANA_DASHBOARDS_SURFACE,
+        "path": DOC_PATH_HARDCODED_GRAFANA_DASHBOARDS,
         "summary": "Factual source of truth for shipped dashboard behavior.",
     },
 )
 CURATED_QUALITY_GATES: tuple[dict[str, object], ...] = (
     {
-        "name": "pytest",
+        "name": QUALITY_GATE_PYTEST,
         "summary": "Primary test runner for local and CI feedback.",
     },
     {
-        "name": "mypy --strict",
+        "name": QUALITY_GATE_MYPY_STRICT,
         "summary": "Static typing gate for public surfaces and repo strictness.",
     },
     {
-        "name": "docs verification",
+        "name": QUALITY_GATE_DOCS_VERIFICATION,
         "summary": "Published docs verification chain via scripts.docs verify and strict MkDocs build.",
     },
     {
-        "name": "config validation",
+        "name": QUALITY_GATE_CONFIG_VALIDATION,
         "summary": "Schema/config validation path for supported configs and invariants.",
     },
     {
-        "name": "pretest guardrails",
+        "name": QUALITY_GATE_PRETEST_GUARDRAILS,
         "summary": "Broad preflight for cleanup, docs, inventory, and architecture drift.",
     },
     {
-        "name": "diagram quality gates",
+        "name": QUALITY_GATE_DIAGRAM_QUALITY,
         "summary": "Diagram lint, syntax validation, artifact checks, visual smoke, and nightly regression gates for Mermaid publication surfaces.",
     },
 )
@@ -241,7 +277,7 @@ CURATED_POLICY_SURFACES: tuple[dict[str, object], ...] = (
             "infrastructure imports domain plus itself, composition can wire all layers except interfaces, "
             "and interfaces can depend on all layers."
         ),
-        "source_path": "docs/00-project/RULES.md",
+        "source_path": DOC_PATH_RULES,
         "artifact_label": "doc_artifact",
         "governs_layers": KNOWN_LAYERS,
     },
@@ -251,7 +287,7 @@ CURATED_POLICY_SURFACES: tuple[dict[str, object], ...] = (
             "BioETL follows Bronze to Silver to Gold medallion flow. Silver must use Delta Lake rather than raw "
             "Parquet, and Pandera remains the schema validation standard across dataframe boundaries."
         ),
-        "source_path": "docs/00-project/RULES.md",
+        "source_path": DOC_PATH_RULES,
         "artifact_label": "doc_artifact",
     },
     {
@@ -260,7 +296,7 @@ CURATED_POLICY_SURFACES: tuple[dict[str, object], ...] = (
             "Primary provider set includes ChEMBL, PubChem, PubMed, Semantic Scholar, CrossRef, OpenAlex, "
             "and UniProt for bioactivity acquisition and enrichment workflows."
         ),
-        "source_path": "docs/00-project/RULES.md",
+        "source_path": DOC_PATH_RULES,
         "artifact_label": "doc_artifact",
     },
     {
@@ -270,7 +306,7 @@ CURATED_POLICY_SURFACES: tuple[dict[str, object], ...] = (
             "Domain stays pure, composition owns wiring, interfaces expose CLI entrypoints, and architecture tests "
             "enforce cross-layer boundaries."
         ),
-        "source_path": "docs/00-project/RULES.md",
+        "source_path": DOC_PATH_RULES,
         "artifact_label": "doc_artifact",
         "governs_layers": KNOWN_LAYERS,
     },
@@ -281,7 +317,7 @@ CURATED_POLICY_SURFACES: tuple[dict[str, object], ...] = (
             "through composition-layer factories and config-driven pipeline definitions rather than hard-coded "
             "business wiring inside domain or application layers."
         ),
-        "source_path": "docs/00-project/RULES.md",
+        "source_path": DOC_PATH_RULES,
         "artifact_label": "doc_artifact",
         "governs_layers": ("composition", "application"),
     },
@@ -292,9 +328,9 @@ CURATED_POLICY_SURFACES: tuple[dict[str, object], ...] = (
             "with dashboard JSON in grafana/dashboards as the factual source of shipped behavior and dedicated "
             "guides for dashboard extension work."
         ),
-        "source_path": "docs/03-guides/dashboards/dashboard-extension-llm.md",
+        "source_path": DOC_PATH_DASHBOARDS_GUIDE,
         "artifact_label": "doc_artifact",
-        "governs_docs": ("grafana dashboards json",),
+            "governs_docs": (DOC_PATH_GRAFANA_DASHBOARDS_SURFACE,),
     },
     {
         "name": "testing strategy matrix",
@@ -305,7 +341,13 @@ CURATED_POLICY_SURFACES: tuple[dict[str, object], ...] = (
         ),
         "source_path": "docs/02-architecture/decisions/ADR-042-testing-strategy-matrix.md",
         "artifact_label": "doc_artifact",
-        "governs_test_surfaces": ("unit tests", "integration tests", "e2e tests", "architecture tests", "contract tests"),
+        "governs_test_surfaces": (
+            BIOETL_TEST_SURFACE_UNIT,
+            BIOETL_TEST_SURFACE_INTEGRATION,
+            BIOETL_TEST_SURFACE_E2E,
+            BIOETL_TEST_SURFACE_ARCHITECTURE,
+            BIOETL_TEST_SURFACE_CONTRACT,
+        ),
     },
     {
         "name": "quality gate stack",
@@ -313,9 +355,15 @@ CURATED_POLICY_SURFACES: tuple[dict[str, object], ...] = (
             "The main repository gate stack combines pytest, mypy --strict, VCR execution policy, docs verification, "
             "config validation, and pretest guardrails."
         ),
-        "source_path": "docs/03-guides/testing.md",
+        "source_path": DOC_PATH_TESTING_GUIDE,
         "artifact_label": "doc_artifact",
-        "governs_quality_gates": ("pytest", "mypy --strict", "docs verification", "config validation", "pretest guardrails"),
+        "governs_quality_gates": (
+            QUALITY_GATE_PYTEST,
+            QUALITY_GATE_MYPY_STRICT,
+            QUALITY_GATE_DOCS_VERIFICATION,
+            QUALITY_GATE_CONFIG_VALIDATION,
+            QUALITY_GATE_PRETEST_GUARDRAILS,
+        ),
     },
     {
         "name": "VCR replay discipline",
@@ -323,9 +371,9 @@ CURATED_POLICY_SURFACES: tuple[dict[str, object], ...] = (
             "Integration and e2e work is replay-first. VCR cassettes are refreshed in a targeted way rather than "
             "broad uncontrolled rewrites, and machine-readable policy keeps the replay contract synchronized with the test matrix."
         ),
-        "source_path": "docs/03-guides/testing.md",
+        "source_path": DOC_PATH_TESTING_GUIDE,
         "artifact_label": "doc_artifact",
-        "governs_test_surfaces": ("integration tests", "e2e tests"),
+        "governs_test_surfaces": (BIOETL_TEST_SURFACE_INTEGRATION, BIOETL_TEST_SURFACE_E2E),
     },
     {
         "name": "target enrichment bridge",
@@ -343,23 +391,26 @@ CURATED_POLICY_SURFACES: tuple[dict[str, object], ...] = (
             "while PubMed, CrossRef, OpenAlex, and Semantic Scholar enrich publication metadata through PMID, DOI, title, "
             "and citation-oriented resolution paths."
         ),
-        "source_path": "configs/quality/test_matrix.yaml",
+        "source_path": DOC_PATH_TEST_MATRIX,
         "artifact_label": "config_artifact",
     },
     {
         "name": "integration and VCR execution policy",
         "summary": "Tracked machine-readable policy for integration and VCR execution scope, replay modes, and suite inventory.",
-        "source_path": "configs/quality/integration_vcr_policy.yaml",
+        "source_path": DOC_PATH_INTEGRATION_VCR_POLICY,
         "artifact_label": "config_artifact",
-        "governs_test_surfaces": ("integration tests", "e2e tests"),
-        "governs_quality_gates": ("pytest",),
+        "governs_test_surfaces": (
+            BIOETL_TEST_SURFACE_INTEGRATION,
+            BIOETL_TEST_SURFACE_E2E,
+        ),
+        "governs_quality_gates": (QUALITY_GATE_PYTEST,),
     },
     {
         "name": "docs verification guide",
         "summary": "Published workflow defining the verification path for docs surface and repo-only supporting material boundaries.",
-        "source_path": "docs/03-guides/docs-verification.md",
+        "source_path": DOC_PATH_DOCS_VERIFICATION,
         "artifact_label": "doc_artifact",
-        "governs_quality_gates": ("docs verification",),
+        "governs_quality_gates": (QUALITY_GATE_DOCS_VERIFICATION,),
     },
     {
         "name": "diagram governance policy",
@@ -369,15 +420,15 @@ CURATED_POLICY_SURFACES: tuple[dict[str, object], ...] = (
         ),
         "source_path": "docs/02-architecture/diagrams/governance/policy.md",
         "artifact_label": "doc_artifact",
-        "governs_quality_gates": ("diagram quality gates",),
-        "governs_test_surfaces": ("architecture tests",),
+        "governs_quality_gates": (QUALITY_GATE_DIAGRAM_QUALITY,),
+        "governs_test_surfaces": (BIOETL_TEST_SURFACE_ARCHITECTURE,),
         "governs_docs": (
-            "architecture diagrams hub",
+            DOC_PATH_DIAGRAMS_HUB,
             "diagram governance ADR",
             "diagram governance workflow",
             "diagram measured inventory",
             "diagram views inventory",
-            "diagram tooling readme",
+            DOC_PATH_DIAGRAM_TOOLING_README,
         ),
     },
     {
@@ -388,27 +439,27 @@ CURATED_POLICY_SURFACES: tuple[dict[str, object], ...] = (
         ),
         "source_path": "docs/02-architecture/diagrams/README.md",
         "artifact_label": "doc_artifact",
-        "governs_docs": ("architecture diagrams hub", "diagram tooling readme"),
+        "governs_docs": (DOC_PATH_DIAGRAMS_HUB, DOC_PATH_DIAGRAM_TOOLING_README),
     },
     {
         "name": "published docs boundary",
         "summary": "Published docs in docs/00-05 and README define active supported behavior; repo-only material must not override them.",
-        "source_path": "docs/03-guides/docs-verification.md",
+        "source_path": DOC_PATH_DOCS_VERIFICATION,
         "artifact_label": "doc_artifact",
     },
     {
         "name": "default VCR record mode",
         "summary": "CI defaults to none; local defaults to once unless explicitly overridden.",
-        "source_path": "configs/quality/integration_vcr_policy.yaml",
+        "source_path": DOC_PATH_INTEGRATION_VCR_POLICY,
         "artifact_label": "config_artifact",
-        "governs_test_surfaces": ("integration tests", "e2e tests"),
+        "governs_test_surfaces": (BIOETL_TEST_SURFACE_INTEGRATION, BIOETL_TEST_SURFACE_E2E),
     },
     {
         "name": "targeted cassette refresh",
         "summary": "Targeted VCR refresh uses new_episodes; broad rewrites are not the supported default path.",
-        "source_path": "configs/quality/integration_vcr_policy.yaml",
+        "source_path": DOC_PATH_INTEGRATION_VCR_POLICY,
         "artifact_label": "config_artifact",
-        "governs_test_surfaces": ("integration tests", "e2e tests"),
+        "governs_test_surfaces": (BIOETL_TEST_SURFACE_INTEGRATION, BIOETL_TEST_SURFACE_E2E),
     },
 )
 CURATED_EXECUTION_PATHS: tuple[dict[str, object], ...] = (
