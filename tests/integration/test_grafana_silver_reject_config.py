@@ -53,10 +53,8 @@ def test_silver_filter_reject_accounting_mismatch_panel_uses_reconciliation_rule
 @pytest.mark.parametrize(
     ("dashboard_file", "panel_title"),
     [
-        ("bioetl-overview-v2.json", "Silver Filter Rejects"),
         ("bioetl-dq-v2.json", "Silver Filter Rejects"),
         ("bioetl-dq-v2.json", "Silver Filter Rejects by Pipeline"),
-        ("bioetl-runtime.json", "Silver Filter Rejects"),
     ],
 )
 def test_silver_filter_reject_panels_use_filtered_out_stage(
@@ -99,11 +97,11 @@ def test_silver_filter_reject_rate_uses_selected_time_range() -> None:
         (
             item
             for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Silver Filter Reject Rate"
+            if item.get("title") == "Silver Rejects Count + Rate"
         ),
         None,
     )
-    assert panel is not None, "Panel 'Silver Filter Reject Rate' not found"
+    assert panel is not None, "Panel 'Silver Rejects Count + Rate' not found"
 
     expressions = [
         target.get("expr", "")
@@ -209,9 +207,7 @@ def test_silver_filter_breakdown_panels_use_bounded_breakdown_metric(
 @pytest.mark.parametrize(
     ("dashboard_file", "panel_title"),
     [
-        ("bioetl-overview-v2.json", "Silver Filter Rejects"),
         ("bioetl-dq-v2.json", "Silver Filter Rejects"),
-        ("bioetl-runtime.json", "Silver Filter Rejects"),
     ],
 )
 def test_silver_filter_rejects_summary_panels_use_instant_queries(

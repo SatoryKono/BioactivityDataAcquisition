@@ -170,7 +170,7 @@
           "refId": "A"
         }
       ],
-      "title": "Monitor Health Check Latency by Provider (p95)",
+      "title": "Health Check Latency by Provider (p95)",
       "type": "timeseries",
       "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
     },
@@ -252,7 +252,7 @@
           "refId": "A"
         }
       ],
-      "title": "Monitor Current Provider Health Status",
+      "title": "Current Provider Health Status",
       "type": "table",
       "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
     },
@@ -323,7 +323,7 @@
           "refId": "A"
         }
       ],
-      "title": "Monitor Healthy Checks",
+      "title": "Healthy Checks",
       "type": "stat",
       "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
     },
@@ -396,7 +396,7 @@
           "refId": "A"
         }
       ],
-      "title": "Track Provider Failure Rate",
+      "title": "Provider Failure Rate",
       "type": "gauge",
       "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
     },
@@ -469,7 +469,7 @@
           "refId": "A"
         }
       ],
-      "title": "Track Health Checks Total",
+      "title": "Health Checks Total",
       "type": "stat",
       "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
     },
@@ -542,7 +542,7 @@
           "refId": "A"
         }
       ],
-      "title": "Track Degraded Checks",
+      "title": "Degraded Checks",
       "type": "stat",
       "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
     },
@@ -912,7 +912,7 @@
           "refId": "A"
         }
       ],
-      "title": "Inspect Provider Health Check Latency (p95) - $provider",
+      "title": "Provider Health Check Latency (p95) - $provider",
       "type": "gauge",
       "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
     },
@@ -973,7 +973,7 @@
           "refId": "A"
         }
       ],
-      "title": "Inspect Adapter Request Latency by Endpoint (p95)",
+      "title": "Adapter Request Latency by Endpoint (p95)",
       "type": "timeseries",
       "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
     },
@@ -1052,7 +1052,7 @@
           "refId": "A"
         }
       ],
-      "title": "Inspect HTTP Errors by Method/Error Type",
+      "title": "HTTP Errors by Method / Error Type",
       "type": "timeseries",
       "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
     },
@@ -1131,7 +1131,7 @@
           "refId": "A"
         }
       ],
-      "title": "Track Rate Limiter Wait by Provider (p95)",
+      "title": "Rate Limiter Wait by Provider (p95)",
       "type": "timeseries",
       "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
     },
@@ -1191,7 +1191,7 @@
           "refId": "A"
         }
       ],
-      "title": "Monitor Minimum Rate Limiter Tokens Available",
+      "title": "Minimum Rate Limiter Tokens Available",
       "type": "bargauge",
       "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
     },
@@ -1263,7 +1263,7 @@
           "refId": "A"
         }
       ],
-      "title": "Monitor Circuit Breaker State (max)",
+      "title": "Circuit Breaker State (max)",
       "type": "stat",
       "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
     },
@@ -1335,7 +1335,7 @@
           "refId": "A"
         }
       ],
-      "title": "Track Circuit Breaker Trips by Provider",
+      "title": "Circuit Breaker Trips by Provider",
       "type": "timeseries",
       "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
     }

@@ -90,7 +90,7 @@
         "content": "<center><h2>Workflow Overview / $workflow / $status</h2></center>",
         "mode": "html"
       },
-      "title": "Monitor Workflow Scope",
+      "title": "Workflow Scope",
       "type": "text",
       "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
     },
@@ -162,7 +162,7 @@
           "refId": "A"
         }
       ],
-      "title": "Monitor Workflow Runs",
+      "title": "Workflow Runs",
       "type": "stat",
       "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
     },
@@ -234,7 +234,7 @@
           "refId": "A"
         }
       ],
-      "title": "Inspect Failed Workflow Runs",
+      "title": "Failed Workflow Runs",
       "type": "stat",
       "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
     },
@@ -283,7 +283,7 @@
           "refId": "A"
         }
       ],
-      "title": "Track Step Outcomes by Kind",
+      "title": "Step Outcomes by Kind",
       "type": "timeseries",
       "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
     },
@@ -332,7 +332,7 @@
           "refId": "A"
         }
       ],
-      "title": "Track Step Duration p95",
+      "title": "Step Duration p95",
       "type": "timeseries",
       "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
     }

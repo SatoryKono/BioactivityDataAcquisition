@@ -1185,7 +1185,7 @@
               "refId": "A"
             }
           ],
-          "title": "Top Silver Reject Reasons (Pareto)",
+          "title": "Top Silver Reject Reasons",
           "type": "bargauge",
           "description": "Pareto ranking of rejection reasons. Use panel link to drill down into reject explorer.",
           "links": [
