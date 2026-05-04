@@ -1263,7 +1263,7 @@ def test_runtime_pipeline_errors_panel_uses_runtime_error_metric_and_selected_ti
         "Runtime Error Rate must use bioetl_errors_total"
     )
     assert any("[30m]" in expr for expr in expressions), (
-        "Runtime Error Rate / 30m must use the shipped 30-minute window"
+        "Runtime Error Rate must use the shipped 30-minute window"
     )
 
 
@@ -1814,7 +1814,7 @@ def test_provider_health_selected_provider_detail_row_is_collapsed() -> None:
 def test_runtime_dq_control_plane_expose_contextual_loki_explore_link() -> None:
     """Critical runtime/dq/control-plane panels must keep at least one contextual Loki Explore link."""
     dashboard_panels = {
-        "bioetl-runtime.json": "Failed Runs / 15m",
+        "bioetl-runtime.json": "Failed Runs",
         "bioetl-dq-v2.json": "Data Flow in Range: Bronze -> Silver -> Gold",
         "bioetl-control-plane-v1.json": "Replay / Resume Blockers",
     }
