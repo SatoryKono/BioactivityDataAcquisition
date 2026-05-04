@@ -64,3 +64,15 @@ YAML также фиксирует time handoff policy в `time_handoff_requirem
 | `bioetl-control-plane-v1` | `9001` | 3–4 CTA: `Back to Overview`, `2. Runtime`, `4. Data Quality`, optional Explore | `bioetl-overview-v2`, `bioetl-runtime`, `bioetl-dq-v2`, optional Explore app |
 | `bioetl-provider-health-v2` | `9002` | 3–4 CTA: `Back to Overview`, `2. Runtime (Primary)`, `2. Runtime (Contextual: provider mapping)`, `Control Plane v1`, optional Explore | `bioetl-overview-v2`, `bioetl-runtime`, `bioetl-control-plane-v1`, optional Explore app |
 | `bioetl-workflow-overview` | `9003` | 3–4 CTA: `Back to Overview`, `2. Runtime`, `Control Plane v1`, optional Explore | `bioetl-overview-v2`, `bioetl-runtime`, `bioetl-control-plane-v1`, optional Explore app |
+
+## Required inbound paths (discoverable first-screen CTA)
+
+L1-target dashboards MUST be discoverable from first-screen status/KPI area on `bioetl-overview-v2` via panel `Next Action` (id `215`), located on the first screen status row after the scope header panel matched by regex `^L0 Overview Scope$`.
+
+| Target UID | Source UID | Source panel id | Source panel title | First-screen row matcher |
+| --- | --- | ---: | --- | --- |
+| `bioetl-runtime` | `bioetl-overview-v2` | `215` | `Next Action` | `^L0 Overview Scope$` |
+| `bioetl-control-plane-v1` | `bioetl-overview-v2` | `215` | `Next Action` | `^L0 Overview Scope$` |
+| `bioetl-provider-health-v2` | `bioetl-overview-v2` | `215` | `Next Action` | `^L0 Overview Scope$` |
+| `bioetl-dq-v2` | `bioetl-overview-v2` | `215` | `Next Action` | `^L0 Overview Scope$` |
+| `bioetl-workflow-overview` | `bioetl-overview-v2` | `215` | `Next Action` | `^L0 Overview Scope$` |

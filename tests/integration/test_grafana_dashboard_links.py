@@ -163,23 +163,29 @@ def _is_traces_drilldown_url(url: str) -> bool:
     return "/a/grafana-exploretraces-app/" in url
 
 
-_OVERVIEW_STATUS_PANEL_IDS_BY_TARGET_UID: dict[int, str] = {
-    208: "bioetl-runtime",
-    209: "bioetl-dq-v2",
-    210: "bioetl-control-plane-v1",
-    211: "bioetl-provider-health-v2",
-    212: "bioetl-workflow-overview",
-}
+_OVERVIEW_STATUS_PANEL_IDS_BY_TARGET_UID: tuple[tuple[int, str], ...] = (
+    (215, "bioetl-runtime"),
+    (215, "bioetl-dq-v2"),
+    (215, "bioetl-control-plane-v1"),
+    (215, "bioetl-provider-health-v2"),
+    (215, "bioetl-workflow-overview"),
+)
 
 
 def _iter_panel_data_links(panel: dict[str, object]) -> list[dict[str, object]]:
+    result: list[dict[str, object]] = []
     options = panel.get("options")
-    if not isinstance(options, dict):
-        return []
-    links = options.get("dataLinks", [])
-    if not isinstance(links, list):
-        return []
-    return [link for link in links if isinstance(link, dict)]
+    if isinstance(options, dict):
+        links = options.get("dataLinks", [])
+        if isinstance(links, list):
+            result.extend(link for link in links if isinstance(link, dict))
+
+    defaults = panel.get("fieldConfig", {}).get("defaults", {})
+    if isinstance(defaults, dict):
+        field_links = defaults.get("links", [])
+        if isinstance(field_links, list):
+            result.extend(link for link in field_links if isinstance(link, dict))
+    return result
 
 
 def test_overview_status_cards_use_scoped_drilldown_urls() -> None:
@@ -191,32 +197,30 @@ def test_overview_status_cards_use_scoped_drilldown_urls() -> None:
         if isinstance(panel.get("id"), int)
     }
 
-    for panel_id, target_uid in _OVERVIEW_STATUS_PANEL_IDS_BY_TARGET_UID.items():
+    for panel_id, target_uid in _OVERVIEW_STATUS_PANEL_IDS_BY_TARGET_UID:
         panel = panels.get(panel_id)
         assert isinstance(panel, dict), f"Missing overview status panel id={panel_id}"
 
         data_links = _iter_panel_data_links(panel)
         assert data_links, f"Panel id={panel_id} must expose at least one data link"
 
-        for link in data_links:
-            url = link.get("url", "")
-            assert isinstance(url, str), (
-                f"Panel id={panel_id} data link URL must be string"
-            )
-            assert url.startswith(f"/d/{target_uid}/"), (
-                f"Panel id={panel_id} must point to /d/{target_uid}/: {url}"
-            )
-            assert "?" in url, (
-                f"Panel id={panel_id} must not use bare /d/<uid> URL: {url}"
-            )
-
+        matched_urls = [
+            str(link.get("url"))
+            for link in data_links
+            if isinstance(link.get("url"), str)
+            and str(link.get("url")).startswith(f"/d/{target_uid}/")
+        ]
+        assert matched_urls, (
+            f"Panel id={panel_id} must include at least one link to /d/{target_uid}/"
+        )
+        for url in matched_urls:
+            assert "?" in url, f"Panel id={panel_id} must not use bare /d/<uid> URL: {url}"
             passed_vars = _extract_link_vars(url)
             required_vars = _REQUIRED_LINK_VARS_BY_TARGET_UID[target_uid]
             assert required_vars <= passed_vars, (
                 f"Panel id={panel_id} link to {target_uid} missing required vars "
                 f"{sorted(required_vars - passed_vars)} via {url}"
             )
-
             _assert_required_time_tokens(
                 url,
                 tokens=_DASHBOARD_TIME_HANDOFF_TOKENS,
@@ -466,9 +470,17 @@ def test_required_discoverable_inbound_paths_have_panel_level_links_and_policy()
                 source_uid = route.get("source_uid")
                 panel_id = route.get("source_panel_id")
                 panel_title = route.get("source_panel_title")
+                status_row_title_matcher = route.get(
+                    "source_status_row_panel_title_matcher"
+                )
                 assert isinstance(source_uid, str)
                 assert isinstance(panel_id, int)
                 assert isinstance(panel_title, str) and panel_title
+                if level_name == "L1":
+                    assert (
+                        isinstance(status_row_title_matcher, str)
+                        and status_row_title_matcher
+                    )
 
                 source_dashboard = dashboards.get(source_uid)
                 assert isinstance(source_dashboard, dict), (
@@ -488,6 +500,28 @@ def test_required_discoverable_inbound_paths_have_panel_level_links_and_policy()
                 assert panel.get("title") == panel_title, (
                     f"Source panel id={panel_id} title mismatch: expected {panel_title!r}, got {panel.get('title')!r}"
                 )
+                if level_name == "L1":
+                    row_re = re.compile(status_row_title_matcher)
+                    status_header_panel = next(
+                        (
+                            candidate
+                            for candidate in get_dashboard_panels(source_dashboard)
+                            if isinstance(candidate.get("title"), str)
+                            and row_re.search(candidate["title"]) is not None
+                        ),
+                        None,
+                    )
+                    assert isinstance(status_header_panel, dict), (
+                        f"{source_uid}:{panel_id}->{target_uid} must resolve status-row matcher {status_row_title_matcher!r}"
+                    )
+                    row_y = status_header_panel.get("gridPos", {}).get("y")
+                    panel_y = panel.get("gridPos", {}).get("y")
+                    assert isinstance(row_y, int) and isinstance(panel_y, int), (
+                        f"{source_uid}:{panel_id}->{target_uid} row/panel y gridPos must be integers"
+                    )
+                    assert panel_y > row_y, (
+                        f"{source_uid}:{panel_id}->{target_uid} panel must be on first-screen status row below matched header panel {status_header_panel.get('title')!r}"
+                    )
 
                 target_links = [
                     link.get("url")
@@ -753,23 +787,28 @@ def _is_traces_drilldown_url(url: str) -> bool:
     return "/a/grafana-exploretraces-app/" in url
 
 
-_OVERVIEW_STATUS_PANEL_IDS_BY_TARGET_UID: dict[int, str] = {
-    208: "bioetl-runtime",
-    209: "bioetl-dq-v2",
-    210: "bioetl-control-plane-v1",
-    211: "bioetl-provider-health-v2",
-    212: "bioetl-workflow-overview",
-}
+_OVERVIEW_STATUS_PANEL_IDS_BY_TARGET_UID: tuple[tuple[int, str], ...] = (
+    (215, "bioetl-runtime"),
+    (215, "bioetl-dq-v2"),
+    (215, "bioetl-control-plane-v1"),
+    (215, "bioetl-provider-health-v2"),
+    (215, "bioetl-workflow-overview"),
+)
 
 
 def _iter_panel_data_links(panel: dict[str, object]) -> list[dict[str, object]]:
+    result: list[dict[str, object]] = []
     options = panel.get("options")
-    if not isinstance(options, dict):
-        return []
-    links = options.get("dataLinks", [])
-    if not isinstance(links, list):
-        return []
-    return [link for link in links if isinstance(link, dict)]
+    if isinstance(options, dict):
+        links = options.get("dataLinks", [])
+        if isinstance(links, list):
+            result.extend(link for link in links if isinstance(link, dict))
+    defaults = panel.get("fieldConfig", {}).get("defaults", {})
+    if isinstance(defaults, dict):
+        field_links = defaults.get("links", [])
+        if isinstance(field_links, list):
+            result.extend(link for link in field_links if isinstance(link, dict))
+    return result
 
 
 def test_overview_status_cards_use_scoped_drilldown_urls() -> None:
@@ -781,32 +820,29 @@ def test_overview_status_cards_use_scoped_drilldown_urls() -> None:
         if isinstance(panel.get("id"), int)
     }
 
-    for panel_id, target_uid in _OVERVIEW_STATUS_PANEL_IDS_BY_TARGET_UID.items():
+    for panel_id, target_uid in _OVERVIEW_STATUS_PANEL_IDS_BY_TARGET_UID:
         panel = panels.get(panel_id)
         assert isinstance(panel, dict), f"Missing overview status panel id={panel_id}"
 
         data_links = _iter_panel_data_links(panel)
         assert data_links, f"Panel id={panel_id} must expose at least one data link"
-
-        for link in data_links:
-            url = link.get("url", "")
-            assert isinstance(url, str), (
-                f"Panel id={panel_id} data link URL must be string"
-            )
-            assert url.startswith(f"/d/{target_uid}/"), (
-                f"Panel id={panel_id} must point to /d/{target_uid}/: {url}"
-            )
-            assert "?" in url, (
-                f"Panel id={panel_id} must not use bare /d/<uid> URL: {url}"
-            )
-
+        matched_urls = [
+            str(link.get("url"))
+            for link in data_links
+            if isinstance(link.get("url"), str)
+            and str(link.get("url")).startswith(f"/d/{target_uid}/")
+        ]
+        assert matched_urls, (
+            f"Panel id={panel_id} must include at least one link to /d/{target_uid}/"
+        )
+        for url in matched_urls:
+            assert "?" in url, f"Panel id={panel_id} must not use bare /d/<uid> URL: {url}"
             passed_vars = _extract_link_vars(url)
             required_vars = _REQUIRED_LINK_VARS_BY_TARGET_UID[target_uid]
             assert required_vars <= passed_vars, (
                 f"Panel id={panel_id} link to {target_uid} missing required vars "
                 f"{sorted(required_vars - passed_vars)} via {url}"
             )
-
             _assert_required_time_tokens(
                 url,
                 tokens=_DASHBOARD_TIME_HANDOFF_TOKENS,
