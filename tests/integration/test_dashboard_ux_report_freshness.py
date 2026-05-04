@@ -30,7 +30,10 @@ def _git_changed_files() -> list[str]:
 
 def test_dashboard_json_changes_require_fresh_ux_report_and_change_note_link() -> None:
     changed_files = _git_changed_files()
-    dashboard_changed = any(path.startswith("grafana/dashboards/") and path.endswith(".json") for path in changed_files)
+    dashboard_changed = any(
+        path.startswith("grafana/dashboards/") and path.endswith(".json")
+        for path in changed_files
+    )
 
     if not dashboard_changed:
         pytest.skip("No grafana/dashboards/*.json changes detected in git diff.")

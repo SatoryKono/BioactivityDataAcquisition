@@ -18,7 +18,9 @@ pytestmark = pytest.mark.integration
 
 _DASHBOARD_UID_RE = re.compile(r"^/d/([^/?]+)")
 _LINK_VAR_RE = re.compile(r"(?:\?|&)var-([A-Za-z_]+)=")
-_NAV_LINK_CONTRACT_PATH = Path("docs/03-guides/dashboards/contracts/navigation-links.yaml")
+_NAV_LINK_CONTRACT_PATH = Path(
+    "docs/03-guides/dashboards/contracts/navigation-links.yaml"
+)
 
 
 def _load_navigation_links_contract() -> dict[str, object]:
@@ -37,14 +39,20 @@ def _load_navigation_links_contract() -> dict[str, object]:
 
     return {
         "allowed_dashboard_link_vars": _as_frozenset_map("allowed_dashboard_link_vars"),
-        "required_link_vars_by_target_uid": _as_frozenset_map("required_link_vars_by_target_uid"),
-        "required_top_level_links_by_uid": _as_frozenset_map("required_top_level_links_by_uid"),
+        "required_link_vars_by_target_uid": _as_frozenset_map(
+            "required_link_vars_by_target_uid"
+        ),
+        "required_top_level_links_by_uid": _as_frozenset_map(
+            "required_top_level_links_by_uid"
+        ),
     }
 
 
 _NAV_LINK_CONTRACT = _load_navigation_links_contract()
 _ALLOWED_DASHBOARD_LINK_VARS = _NAV_LINK_CONTRACT["allowed_dashboard_link_vars"]
-_REQUIRED_LINK_VARS_BY_TARGET_UID = _NAV_LINK_CONTRACT["required_link_vars_by_target_uid"]
+_REQUIRED_LINK_VARS_BY_TARGET_UID = _NAV_LINK_CONTRACT[
+    "required_link_vars_by_target_uid"
+]
 _REQUIRED_TOP_LEVEL_LINKS_BY_UID = _NAV_LINK_CONTRACT["required_top_level_links_by_uid"]
 
 
@@ -52,13 +60,19 @@ def _extract_required_time_tokens(section: str) -> tuple[str, ...]:
     requirements = _NAV_LINK_CONTRACT.get("time_handoff_requirements", {})
     assert isinstance(requirements, dict), "time_handoff_requirements must be a mapping"
     section_payload = requirements.get(section, {})
-    assert isinstance(section_payload, dict), f"time_handoff_requirements.{section} must be a mapping"
+    assert isinstance(section_payload, dict), (
+        f"time_handoff_requirements.{section} must be a mapping"
+    )
     tokens = section_payload.get("required_tokens", [])
-    assert isinstance(tokens, list), f"time_handoff_requirements.{section}.required_tokens must be a list"
+    assert isinstance(tokens, list), (
+        f"time_handoff_requirements.{section}.required_tokens must be a list"
+    )
     return tuple(str(token) for token in tokens)
 
 
-def _assert_required_time_tokens(url: str, *, tokens: tuple[str, ...], context: str) -> None:
+def _assert_required_time_tokens(
+    url: str, *, tokens: tuple[str, ...], context: str
+) -> None:
     for token in tokens:
         assert token in url, f"{context} must include time token '{token}': {url}"
 
@@ -195,8 +209,6 @@ def test_cross_dashboard_links_pass_only_target_scoped_variables() -> None:
                 )
 
 
-
-
 def test_dashboard_top_level_navigation_contract_by_uid() -> None:
     """Each dashboard UID must expose required top-level navigation links."""
     for dashboard_path in get_dashboard_files():
@@ -235,6 +247,8 @@ def test_dashboard_links_forbid_universal_handoff_patterns() -> None:
                 assert link.get("includeVars") is False, (
                     f"{dashboard_path.name} top-level cross-dashboard link must pin includeVars=false: {url}"
                 )
+
+
 def test_overview_and_provider_dashboards_expose_explore_drilldown_links() -> None:
     """Operational dashboards should offer Loki and Tempo drilldown."""
     expectations = (
@@ -350,7 +364,11 @@ def test_tempo_drilldown_routes_to_traces_drilldown_app() -> None:
         )
         for link in tempo_links:
             url = link.get("url", "")
-            _assert_required_time_tokens(url, tokens=_EXPLORE_TIME_HANDOFF_TOKENS, context=f"{dashboard_name} traces drilldown link")
+            _assert_required_time_tokens(
+                url,
+                tokens=_EXPLORE_TIME_HANDOFF_TOKENS,
+                context=f"{dashboard_name} traces drilldown link",
+            )
 
 
 def test_loki_drilldown_links_use_safe_bioetl_baseline_query() -> None:
@@ -623,8 +641,13 @@ def test_runtime_incident_panels_link_to_control_plane_dashboard() -> None:
         assert url.startswith("/d/bioetl-control-plane-v1/bioetl-control-plane-v1"), (
             f"Panel '{panel_title}' must hand off into control-plane dashboard"
         )
-        _assert_required_time_tokens(url, tokens=_EXPLORE_TIME_HANDOFF_TOKENS, context=f"{dashboard_name} traces drilldown link"), (
-            f"Panel '{panel_title}' handoff must preserve current time range"
+        (
+            _assert_required_time_tokens(
+                url,
+                tokens=_EXPLORE_TIME_HANDOFF_TOKENS,
+                context=f"{dashboard_name} traces drilldown link",
+            ),
+            (f"Panel '{panel_title}' handoff must preserve current time range"),
         )
         assert "var-pipeline=$pipeline" in url and "var-run_type=$run_type" in url, (
             f"Panel '{panel_title}' handoff must preserve runtime pipeline scope"
@@ -722,8 +745,13 @@ def test_data_quality_incident_panels_link_to_control_plane_dashboard() -> None:
         assert url.startswith("/d/bioetl-control-plane-v1/bioetl-control-plane-v1"), (
             f"Panel '{panel_title}' must hand off into control-plane dashboard"
         )
-        _assert_required_time_tokens(url, tokens=_EXPLORE_TIME_HANDOFF_TOKENS, context=f"{dashboard_name} traces drilldown link"), (
-            f"Panel '{panel_title}' handoff must preserve current time range"
+        (
+            _assert_required_time_tokens(
+                url,
+                tokens=_EXPLORE_TIME_HANDOFF_TOKENS,
+                context=f"{dashboard_name} traces drilldown link",
+            ),
+            (f"Panel '{panel_title}' handoff must preserve current time range"),
         )
         assert "var-pipeline=$pipeline" in url and "var-run_type=$run_type" in url, (
             f"Panel '{panel_title}' handoff must preserve DQ pipeline scope"
@@ -922,9 +950,13 @@ def test_cross_dashboard_links_enforce_required_handoff_or_explicit_fallback() -
             )
 
 
-def test_provider_dashboard_runtime_links_include_contextual_variant_next_to_reset() -> None:
+def test_provider_dashboard_runtime_links_include_contextual_variant_next_to_reset() -> (
+    None
+):
     """Provider Health must expose reset-to-All and contextual Runtime links together."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-provider-health-v2.json"))
+    dashboard = load_dashboard(
+        Path("grafana/dashboards/bioetl-provider-health-v2.json")
+    )
     links = dashboard.get("links", [])
 
     reset_idx, reset_link = next(
@@ -961,4 +993,3 @@ def test_provider_dashboard_runtime_links_include_contextual_variant_next_to_res
     assert "var-pipeline=${provider:queryparam}" in contextual_url
     assert "var-run_type=${adapter:queryparam}" in contextual_url
     assert "var-stage=All" in contextual_url
-
