@@ -47,3 +47,12 @@ YAML также фиксирует time handoff policy в `time_handoff_requirem
 - `includeVars=true`
 - legacy Explore payload route: `/explore?left=`
 - перенос Explorer-only forensic scope (`var-run_id`, `var-payload_hash`) в non-explorer dashboards
+
+
+## First Action row contract (L1 dashboards)
+
+| Dashboard UID | First Action panel ID | Minimal CTA template | Expected targets |
+| --- | ---: | --- | --- |
+| `bioetl-control-plane-v1` | `9001` | 3–4 CTA: `Back to Overview`, `2. Runtime`, `4. Data Quality`, optional Explore | `bioetl-overview-v2`, `bioetl-runtime`, `bioetl-dq-v2`, optional Explore app |
+| `bioetl-provider-health-v2` | `9002` | 3–4 CTA: `Back to Overview`, `2. Runtime`, `Control Plane v1`, optional Explore | `bioetl-overview-v2`, `bioetl-runtime`, `bioetl-control-plane-v1`, optional Explore app |
+| `bioetl-workflow-overview` | `9003` | 3–4 CTA: `Back to Overview`, `2. Runtime`, `Control Plane v1`, optional Explore | `bioetl-overview-v2`, `bioetl-runtime`, `bioetl-control-plane-v1`, optional Explore app |
