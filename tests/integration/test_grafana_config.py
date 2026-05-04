@@ -813,7 +813,6 @@ def test_overview_backlog_and_lag_panels_expose_stage() -> None:
         assert "[$__range]" in expr
 
 
-
 def test_critical_panels_expose_open_actionable_datalinks() -> None:
     """Critical stat/gauge/table panels must expose at least one Open <target> data link."""
     critical_panel_titles = {
@@ -839,7 +838,9 @@ def test_critical_panels_expose_open_actionable_datalinks() -> None:
 
         for panel_title in titles:
             panel = panels.get(panel_title)
-            assert panel is not None, f"Missing critical panel: {panel_title} in {dashboard_name}"
+            assert panel is not None, (
+                f"Missing critical panel: {panel_title} in {dashboard_name}"
+            )
             assert panel.get("type") in {"stat", "gauge", "table"}
 
             data_links = panel.get("options", {}).get("dataLinks", [])
