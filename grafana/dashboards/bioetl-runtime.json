@@ -48,7 +48,7 @@
       "tags": [],
       "targetBlank": false,
       "title": "3. Provider Health",
-      "tooltip": "Cross-scope handoff (Reset scope): opens with All provider scope. var-provider=All and var-adapter=All; pipeline/run_type/stage do not transfer. Source-specific filters are intentionally reset.",
+      "tooltip": "Cross-scope handoff. Scope reset: opens with All provider scope. var-provider=All and var-adapter=All; pipeline/run_type/stage do not transfer. Source-specific filters are intentionally reset.",
       "type": "link",
       "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=All&var-adapter=All&${__url_time_range}"
     },
@@ -120,7 +120,7 @@
         "h": 4,
         "w": 12,
         "x": 0,
-        "y": 4
+        "y": 3
       },
       "id": 298,
       "options": {
@@ -135,7 +135,7 @@
         "h": 4,
         "w": 12,
         "x": 12,
-        "y": 4
+        "y": 3
       },
       "id": 222,
       "options": {
@@ -233,7 +233,7 @@
     },
     {
       "datasource": "Prometheus",
-      "description": "Failed pipeline executions over the last 15 minutes.",
+      "description": "Failed pipeline executions over the last 15m.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -329,7 +329,7 @@
     },
     {
       "datasource": "Prometheus",
-      "description": "Threshold semantics: error rate is normalized by Bronze input; elevated ratio with non-trivial denominator means runtime degradation/blocker risk. Next action: open Runtime Errors by Stage/Error Code and check failed runs/backlog/lag to isolate culprit stage.",
+      "description": "Runtime error rate over last 30m. Threshold semantics: normalized by Bronze input; elevated ratio with non-trivial denominator means runtime degradation/blocker risk. Next action: open Runtime Errors by Stage/Error Code and check failed runs/backlog/lag to isolate culprit stage.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -411,7 +411,7 @@
     },
     {
       "datasource": "Prometheus",
-      "description": "Worst observed stage lag over the last 15 minutes.",
+      "description": "Worst observed stage lag over the last 15m.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1796,10 +1796,10 @@
             },
             "textMode": "auto",
             "dataLinks": [
-              {
-                "title": "Open Data Quality v2 (freshness handoff)",
-                "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&${__url_time_range}"
-              },
+            {
+              "title": "Open Data Quality v2 (freshness handoff)",
+              "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
+            },
               {
                 "title": "Open DQ Freshness Runbook",
                 "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/dq-failure-investigation.md"
@@ -1894,12 +1894,12 @@
               "refId": "A"
             }
           ],
+          "description": "No-records runs detected over the last 30m (pipeline runs without records).",
           "title": "No-Records Runs",
           "type": "stat"
         },
         {
           "datasource": "Prometheus",
-          "description": "Adaptive memory pressure state over the last 15 minutes.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1970,6 +1970,7 @@
               }
             ]
           },
+          "description": "Adaptive memory pressure state over the last 15m.",
           "targets": [
             {
               "expr": "max(max_over_time(bioetl_memory_pressure_state{pipeline=~\"$pipeline\",stage=~\"$stage\"}[15m])) or vector(0)",

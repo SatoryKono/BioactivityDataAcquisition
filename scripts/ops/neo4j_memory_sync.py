@@ -1271,8 +1271,9 @@ def _signature_hash(node: ast.FunctionDef | ast.AsyncFunctionDef) -> str:
 
 
 class _ShapeNormalizer(ast.NodeTransformer):
-    def visit_arg(self, node: ast.arg) -> ast.arg:  # noqa: N802
-        return ast.copy_location(ast.arg(arg="ARG", annotation=None), node)
+    def visit_arg(self, node: ast.arg) -> ast.AST:  # noqa: N802
+        placeholder = ast.arg(arg="ARG", annotation=None)
+        return ast.copy_location(placeholder, node)
 
     def visit_Name(self, node: ast.Name) -> ast.AST:  # noqa: N802
         return ast.copy_location(ast.Name(id="VAR", ctx=node.ctx), node)
@@ -1649,11 +1650,15 @@ def _select_alert_targets(
         ]
 
     provider_targets: list[NodeKey] = []
-    if provider_mode == "all":
-        provider_targets = provider_nodes
-    elif provider_mode == "auto" and (
-        "provider" in dimensions or "provider_health" in normalized or "bioetl_health_check_" in normalized
-    ):
+    include_all_providers = provider_mode == "all" or (
+        provider_mode == "auto"
+        and (
+            "provider" in dimensions
+            or "provider_health" in normalized
+            or "bioetl_health_check_" in normalized
+        )
+    )
+    if include_all_providers:
         provider_targets = provider_nodes
 
     contract_targets: list[NodeKey] = []
@@ -2357,7 +2362,7 @@ def _add_impact_analysis_surfaces(snapshot: GraphSnapshot, root: Path, project: 
     contract_nodes = _add_contract_surfaces(snapshot, root, project, today, memory_mapping)
     pipeline_nodes = _add_pipeline_surfaces(snapshot, root, project, today, contract_nodes, adapter_nodes)
     _add_pipeline_normalization_edges(snapshot, pipeline_nodes, memory_mapping)
-    _add_pipeline_test_edges(snapshot, memory_mapping)
+    _add_pipeline_test_edges(snapshot, root, memory_mapping)
     _add_alert_surfaces(snapshot, root, project, today, pipeline_nodes, contract_nodes, memory_mapping)
     _add_governance_edges(snapshot, port_nodes, adapter_nodes, pipeline_nodes, contract_nodes)
     _add_pipeline_operational_edges(snapshot, pipeline_nodes, memory_mapping)
@@ -3488,7 +3493,6 @@ def _add_complexity_analysis_surfaces(
         }
 
     def resolve_ast_surface(node: GraphNode, tree: ast.AST) -> ast.AST | None:
-        source_path = str(node.properties.get("source_path") or "")
         if node.key.label == "module_surface":
             return tree if isinstance(tree, ast.Module) else None
         if node.key.label == "class_surface":
@@ -3515,12 +3519,23 @@ def _add_complexity_analysis_surfaces(
             return None
         return None
 
-    def complexity_marker_buckets(relative_path: str, symbol_name: str, source_text: str) -> tuple[list[str], list[str], list[str]]:
+    def complexity_marker_buckets(
+        relative_path: str,
+        symbol_name: str,
+        source_text: str,
+    ) -> tuple[list[str], list[str], list[str]]:
         normalized = f"{relative_path} {symbol_name}".casefold()
         indirection = sorted({marker for marker in config.indirection_markers if marker in normalized or marker in source_text})
         stateful = sorted({marker for marker in config.stateful_markers if marker in normalized or marker in source_text})
         deprecation = sorted({marker for marker in config.deprecation_markers if marker in normalized or marker in source_text})
         return indirection, stateful, deprecation
+
+    def score_from_threshold(value: int, *, low: int, high: int) -> int:
+        if value >= high:
+            return 2
+        if value >= low:
+            return 1
+        return 0
 
     for node in sorted(snapshot.nodes.values(), key=lambda item: (item.key.label, item.key.name)):
         if node.key.label not in analysis_labels:
@@ -3628,12 +3643,12 @@ def _add_complexity_analysis_surfaces(
             api_surface_to_logic_ratio = round(abstraction_fanout / max(1, branch_count + 1), 2)
 
         complexity_score = 0
-        branch_count_score = 2 if branch_count >= 6 else 1 if branch_count >= 3 else 0
-        nesting_depth_score = 2 if nesting_depth >= 4 else 1 if nesting_depth >= 3 else 0
-        helper_call_score = 2 if helper_call_count >= 4 else 1 if helper_call_count >= 2 else 0
+        branch_count_score = score_from_threshold(branch_count, low=3, high=6)
+        nesting_depth_score = score_from_threshold(nesting_depth, low=3, high=4)
+        helper_call_score = score_from_threshold(helper_call_count, low=2, high=4)
         indirection_score = 2 if len(indirection_markers) >= 2 else 1 if indirection_markers else 0
         stateful_score = 2 if len(stateful_markers) >= 2 else 1 if stateful_markers else 0
-        fanout_score = 2 if abstraction_fanout >= 6 else 1 if abstraction_fanout >= 3 else 0
+        fanout_score = score_from_threshold(abstraction_fanout, low=3, high=6)
         complexity_score += (
             branch_count_score
             + nesting_depth_score
