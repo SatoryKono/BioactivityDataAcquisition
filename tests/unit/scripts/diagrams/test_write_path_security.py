@@ -68,12 +68,16 @@ def test_uniform_sizes_rejects_write_outside_repo(tmp_path: Path) -> None:
         module._write_repo_text(safe_path, "content")
 
 
-def test_uniform_sizes_accepts_validated_repo_path(tmp_path: Path) -> None:
+def test_uniform_sizes_accepts_validated_repo_path(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     module = _load_module(
         _repo_root() / "scripts" / "diagrams" / "uniform_diagram_sizes.py",
         "uniform_diagram_sizes_security_module_absolute",
     )
-    target = module._ensure_repo_path(_repo_root() / "tmp_uniform_sizes_test.mmd")
+    monkeypatch.setattr(module, "SCRIPT_DIR", tmp_path)
+    target = module._ensure_repo_path(tmp_path / "tmp_uniform_sizes_test.mmd")
     try:
         module._write_repo_text(target, "content")
         assert target.read_text(encoding="utf-8") == "content"

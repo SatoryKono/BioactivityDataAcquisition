@@ -1299,7 +1299,7 @@ def test_provider_dashboard_runtime_links_include_contextual_variant_next_to_res
         (
             (idx, link)
             for idx, link in enumerate(links)
-            if link.get("title") == "2. Runtime"
+            if link.get("title") == "2. Runtime (Primary)"
         ),
         (-1, None),
     )
@@ -1309,7 +1309,7 @@ def test_provider_dashboard_runtime_links_include_contextual_variant_next_to_res
         (
             (idx, link)
             for idx, link in enumerate(links)
-            if link.get("title") == "2. Runtime (provider context)"
+            if link.get("title") == "2. Runtime (Contextual: provider mapping)"
         ),
         (-1, None),
     )
