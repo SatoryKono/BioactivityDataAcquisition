@@ -48,6 +48,9 @@ def _load_navigation_links_contract() -> dict[str, object]:
         "required_top_level_links_by_uid": _as_frozenset_map(
             "required_top_level_links_by_uid"
         ),
+        "required_discoverable_inbound_paths": raw_contract.get(
+            "required_discoverable_inbound_paths", {}
+        ),
     }
 
 
@@ -320,6 +323,74 @@ def test_dashboard_top_level_navigation_contract_by_uid() -> None:
         )
 
 
+def test_required_discoverable_inbound_paths_have_panel_level_links_and_policy() -> None:
+    """Contract inbound routes must exist via panel links and obey vars/time policy."""
+    inbound = _NAV_LINK_CONTRACT["required_discoverable_inbound_paths"]
+    assert isinstance(inbound, dict), "required_discoverable_inbound_paths must be a mapping"
+
+    dashboards = {load_dashboard(path).get("uid"): load_dashboard(path) for path in get_dashboard_files()}
+
+    for level_name, level_payload in inbound.items():
+        assert level_name in {"L1", "L2"}, f"Unexpected level in inbound contract: {level_name}"
+        assert isinstance(level_payload, dict), f"{level_name} payload must be mapping"
+
+        for target_uid, routes in level_payload.items():
+            assert isinstance(target_uid, str)
+            assert isinstance(routes, list) and routes, (
+                f"{level_name}.{target_uid} must declare at least one source panel route"
+            )
+
+            for route in routes:
+                assert isinstance(route, dict), f"{level_name}.{target_uid} route must be mapping"
+                source_uid = route.get("source_uid")
+                panel_id = route.get("source_panel_id")
+                panel_title = route.get("source_panel_title")
+                assert isinstance(source_uid, str)
+                assert isinstance(panel_id, int)
+                assert isinstance(panel_title, str) and panel_title
+
+                source_dashboard = dashboards.get(source_uid)
+                assert isinstance(source_dashboard, dict), (
+                    f"Source dashboard uid={source_uid} from inbound contract not found"
+                )
+                panel = next(
+                    (candidate for candidate in get_dashboard_panels(source_dashboard) if candidate.get("id") == panel_id),
+                    None,
+                )
+                assert isinstance(panel, dict), (
+                    f"Source panel id={panel_id} for {source_uid}->{target_uid} not found"
+                )
+                assert panel.get("title") == panel_title, (
+                    f"Source panel id={panel_id} title mismatch: expected {panel_title!r}, got {panel.get('title')!r}"
+                )
+
+                target_links = [
+                    link.get("url")
+                    for link in _iter_panel_data_links(panel)
+                    if isinstance(link.get("url"), str)
+                    and _extract_dashboard_uid(link["url"]) == target_uid
+                ]
+                assert target_links, (
+                    f"Panel id={panel_id} ({panel_title}) must contain data link to {target_uid}"
+                )
+
+                for url in target_links:
+                    passed_vars = _extract_link_vars(url)
+                    required_vars = _REQUIRED_LINK_VARS_BY_TARGET_UID[target_uid]
+                    forbidden_vars = _FORBIDDEN_DASHBOARD_LINK_VARS_BY_TARGET_UID[target_uid]
+                    assert required_vars <= passed_vars, (
+                        f"Inbound path {source_uid}:{panel_id}->{target_uid} missing vars "
+                        f"{sorted(required_vars - passed_vars)} via {url}"
+                    )
+                    assert not (passed_vars & forbidden_vars), (
+                        f"Inbound path {source_uid}:{panel_id}->{target_uid} leaks forbidden vars "
+                        f"{sorted(passed_vars & forbidden_vars)} via {url}"
+                    )
+                    _assert_required_time_tokens(
+                        url,
+                        tokens=_DASHBOARD_TIME_HANDOFF_TOKENS,
+                        context=f"Inbound path {source_uid}:{panel_id}->{target_uid}",
+                    )
 def test_critical_top_level_links_follow_title_allowlist_and_scope_reset_suffix() -> None:
     """Critical top-level links must follow title style-guide and scope-reset tooltip contract."""
     critical_dashboards = (
