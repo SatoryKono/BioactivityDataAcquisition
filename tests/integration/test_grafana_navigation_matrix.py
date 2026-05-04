@@ -57,6 +57,24 @@ def _iter_top_level_uid_links() -> list[tuple[str, str, str]]:
     return rows
 
 
+def _iter_top_level_uid_links_with_title() -> list[tuple[str, str, str, str]]:
+    rows: list[tuple[str, str, str, str]] = []
+    for path in _DASHBOARDS_DIR.glob("*.json"):
+        payload = load_dashboard(path)
+        source_uid = payload.get("uid")
+        assert isinstance(source_uid, str), f"{path.name} must define string uid"
+        for link in payload.get("links", []):
+            title = link.get("title")
+            url = link.get("url")
+            if not isinstance(title, str) or not isinstance(url, str):
+                continue
+            match = _DASHBOARD_UID_RE.match(url)
+            if match is None:
+                continue
+            rows.append((source_uid, title, match.group(1), url))
+    return rows
+
+
 def test_level_matrix_required_inbound_outbound_transitions_present() -> None:
     contract = _load_contract()["navigation_transition_contract"]
     assert isinstance(contract, dict)
@@ -139,3 +157,48 @@ def test_incident_critical_paths_are_reciprocal_and_non_terminal() -> None:
     assert not terminal_nodes, (
         f"Incident-critical dashboards must not be terminal nodes: {sorted(terminal_nodes)}"
     )
+
+
+def test_primary_priority_links_are_unique_per_target_uid_and_semantics() -> None:
+    contract = _load_contract()
+    priority_map = contract["top_level_link_priority_by_uid"]
+    assert isinstance(priority_map, dict)
+
+    links_by_source_and_title: dict[tuple[str, str], tuple[str, str]] = {}
+    for source_uid, title, target_uid, _url in _iter_top_level_uid_links_with_title():
+        links_by_source_and_title[(source_uid, title)] = (target_uid, title)
+
+    for source_uid, entries in priority_map.items():
+        assert isinstance(entries, list), f"{source_uid} priority entries must be list"
+        primary_by_target: dict[str, list[str]] = {}
+
+        for entry in entries:
+            assert isinstance(entry, dict), (
+                f"{source_uid} priority entry must be mapping"
+            )
+            title = entry["title"]
+            target_uid = entry["target_uid"]
+            priority = entry["priority"]
+            semantics = entry["semantics"]
+            assert isinstance(title, str)
+            assert isinstance(target_uid, str)
+            assert isinstance(priority, str)
+            assert isinstance(semantics, str) and semantics.strip(), (
+                f"{source_uid}:{title} must declare non-empty semantics"
+            )
+
+            assert (source_uid, title) in links_by_source_and_title, (
+                f"Missing top-level link in dashboard JSON for {source_uid}:{title}"
+            )
+            actual_target_uid, _ = links_by_source_and_title[(source_uid, title)]
+            assert actual_target_uid == target_uid, (
+                f"{source_uid}:{title} target mismatch: contract={target_uid}, dashboard={actual_target_uid}"
+            )
+
+            if priority == "primary":
+                primary_by_target.setdefault(target_uid, []).append(semantics)
+
+        for target_uid, semantics_list in primary_by_target.items():
+            assert len(semantics_list) <= 1, (
+                f"{source_uid}->{target_uid} has more than one primary link semantics: {semantics_list}"
+            )
