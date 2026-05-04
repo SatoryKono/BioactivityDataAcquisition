@@ -37,6 +37,9 @@ def _load_navigation_links_contract() -> dict[str, object]:
 
     return {
         "allowed_dashboard_link_vars": _as_frozenset_map("allowed_dashboard_link_vars"),
+        "forbidden_dashboard_link_vars_by_target_uid": _as_frozenset_map(
+            "forbidden_dashboard_link_vars_by_target_uid"
+        ),
         "required_link_vars_by_target_uid": _as_frozenset_map("required_link_vars_by_target_uid"),
         "required_top_level_links_by_uid": _as_frozenset_map("required_top_level_links_by_uid"),
     }
@@ -44,6 +47,9 @@ def _load_navigation_links_contract() -> dict[str, object]:
 
 _NAV_LINK_CONTRACT = _load_navigation_links_contract()
 _ALLOWED_DASHBOARD_LINK_VARS = _NAV_LINK_CONTRACT["allowed_dashboard_link_vars"]
+_FORBIDDEN_DASHBOARD_LINK_VARS_BY_TARGET_UID = _NAV_LINK_CONTRACT[
+    "forbidden_dashboard_link_vars_by_target_uid"
+]
 _REQUIRED_LINK_VARS_BY_TARGET_UID = _NAV_LINK_CONTRACT["required_link_vars_by_target_uid"]
 _REQUIRED_TOP_LEVEL_LINKS_BY_UID = _NAV_LINK_CONTRACT["required_top_level_links_by_uid"]
 
@@ -181,6 +187,14 @@ def test_cross_dashboard_links_pass_only_target_scoped_variables() -> None:
             assert passed_vars <= allowed_vars, (
                 f"{dashboard_path.name} link to {target_uid} passes unknown vars: "
                 f"{sorted(passed_vars - allowed_vars)} via {url}"
+            )
+            forbidden_vars = _FORBIDDEN_DASHBOARD_LINK_VARS_BY_TARGET_UID.get(target_uid)
+            assert forbidden_vars is not None, (
+                f"Link target {target_uid} must be declared in forbidden vars map"
+            )
+            assert not (passed_vars & forbidden_vars), (
+                f"{dashboard_path.name} link to {target_uid} leaks forbidden vars: "
+                f"{sorted(passed_vars & forbidden_vars)} via {url}"
             )
 
             if target_uid != current_uid and link in dashboard.get("links", []):
@@ -650,8 +664,10 @@ def test_runtime_incident_panels_link_to_control_plane_dashboard() -> None:
         assert url.startswith("/d/bioetl-control-plane-v1/bioetl-control-plane-v1"), (
             f"Panel '{panel_title}' must hand off into control-plane dashboard"
         )
-        _assert_required_time_tokens(url, tokens=_EXPLORE_TIME_HANDOFF_TOKENS, context=f"{dashboard_name} traces drilldown link"), (
-            f"Panel '{panel_title}' handoff must preserve current time range"
+        _assert_required_time_tokens(
+            url,
+            tokens=_EXPLORE_TIME_HANDOFF_TOKENS,
+            context=f"runtime incident panel '{panel_title}'",
         )
         assert "var-pipeline=$pipeline" in url and "var-run_type=$run_type" in url, (
             f"Panel '{panel_title}' handoff must preserve runtime pipeline scope"
@@ -788,8 +804,10 @@ def test_data_quality_incident_panels_link_to_control_plane_dashboard() -> None:
         assert url.startswith("/d/bioetl-control-plane-v1/bioetl-control-plane-v1"), (
             f"Panel '{panel_title}' must hand off into control-plane dashboard"
         )
-        _assert_required_time_tokens(url, tokens=_EXPLORE_TIME_HANDOFF_TOKENS, context=f"{dashboard_name} traces drilldown link"), (
-            f"Panel '{panel_title}' handoff must preserve current time range"
+        _assert_required_time_tokens(
+            url,
+            tokens=_EXPLORE_TIME_HANDOFF_TOKENS,
+            context=f"dq incident panel '{panel_title}'",
         )
         assert "var-pipeline=$pipeline" in url and "var-run_type=$run_type" in url, (
             f"Panel '{panel_title}' handoff must preserve DQ pipeline scope"
