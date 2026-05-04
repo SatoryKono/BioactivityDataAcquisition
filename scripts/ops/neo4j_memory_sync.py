@@ -352,8 +352,9 @@ CURATED_POLICY_SURFACES: tuple[dict[str, object], ...] = (
     {
         "name": "quality gate stack",
         "summary": (
-            "The main repository gate stack combines pytest, mypy --strict, VCR execution policy, docs verification, "
-            "config validation, and pretest guardrails."
+            f"The main repository gate stack combines {QUALITY_GATE_PYTEST}, "
+            f"{QUALITY_GATE_MYPY_STRICT}, VCR execution policy, {QUALITY_GATE_DOCS_VERIFICATION}, "
+            f"{QUALITY_GATE_CONFIG_VALIDATION}, and {QUALITY_GATE_PRETEST_GUARDRAILS}."
         ),
         "source_path": DOC_PATH_TESTING_GUIDE,
         "artifact_label": "doc_artifact",
@@ -381,7 +382,7 @@ CURATED_POLICY_SURFACES: tuple[dict[str, object], ...] = (
             "Target enrichment crosses provider boundaries: ChEMBL supplies target-centric seed records while UniProt "
             "contributes reviewed protein metadata and an idmapping surface that translates ChEMBL target identifiers into UniProt accessions."
         ),
-        "source_path": "configs/providers/uniprot.yaml",
+        "source_path": DOC_PATH_UNIPROT_PROVIDER_CONFIG,
         "artifact_label": "config_artifact",
     },
     {
@@ -482,61 +483,61 @@ CURATED_EXECUTION_PATHS: tuple[dict[str, object], ...] = (
         "name": "uv run python -m pytest",
         "platform": "ci_uv",
         "summary": "Canonical CI and single-OS pytest execution path.",
-        "gate": "pytest",
+        "gate": QUALITY_GATE_PYTEST,
     },
     {
         "name": "bash scripts/dev/run_pytest.sh",
         "platform": "wsl",
         "summary": "WSL/Linux wrapper with default coverage flags and plugin bootstrap.",
-        "gate": "pytest",
+        "gate": QUALITY_GATE_PYTEST,
         "script_path": "scripts/dev/run_pytest.sh",
     },
     {
         "name": ".\\scripts\\dev\\run_pytest.ps1",
         "platform": "windows",
         "summary": "PowerShell wrapper with default coverage flags for .venv-win.",
-        "gate": "pytest",
+        "gate": QUALITY_GATE_PYTEST,
         "script_path": "scripts/dev/run_pytest.ps1",
     },
     {
         "name": "uv run python -m mypy --strict src/bioetl/",
         "platform": "ci_uv",
         "summary": "Canonical CI and single-OS strict typing path.",
-        "gate": "mypy --strict",
+        "gate": QUALITY_GATE_MYPY_STRICT,
     },
     {
         "name": "bash scripts/dev/run_mypy.sh",
         "platform": "wsl",
         "summary": "WSL/Linux mypy wrapper for the stable WSL virtualenv.",
-        "gate": "mypy --strict",
+        "gate": QUALITY_GATE_MYPY_STRICT,
         "script_path": "scripts/dev/run_mypy.sh",
     },
     {
         "name": ".\\scripts\\dev\\run_mypy.ps1",
         "platform": "windows",
         "summary": "PowerShell mypy wrapper for .venv-win.",
-        "gate": "mypy --strict",
+        "gate": QUALITY_GATE_MYPY_STRICT,
         "script_path": "scripts/dev/run_mypy.ps1",
     },
     {
         "name": "uv run python -m scripts.docs verify",
         "platform": "ci_uv",
         "summary": "Canonical end-to-end published docs verification path.",
-        "gate": "docs verification",
+        "gate": QUALITY_GATE_DOCS_VERIFICATION,
         "script_path": "scripts/docs/verify_docs.py",
     },
     {
         "name": "uv run python -m scripts.schema validate-configs",
         "platform": "ci_uv",
         "summary": "Canonical config validation path for supported configs.",
-        "gate": "config validation",
+        "gate": QUALITY_GATE_CONFIG_VALIDATION,
         "script_path": "scripts/schema/validate_configs.py",
     },
     {
         "name": "bash scripts/dev/pretest_guardrails.sh",
         "platform": "wsl",
         "summary": "WSL pretest guardrail runner before broad pytest waves.",
-        "gate": "pretest guardrails",
+        "gate": QUALITY_GATE_PRETEST_GUARDRAILS,
         "script_path": "scripts/dev/pretest_guardrails.sh",
     },
 )
@@ -556,13 +557,13 @@ CURATED_SCRIPT_CLUSTERS: tuple[dict[str, object], ...] = (
                 "name": "uv run python -m scripts.diagrams lint",
                 "platform": "ci_uv",
                 "summary": "Canonical diagram lint path for Mermaid source validation.",
-                "gate": "diagram quality gates",
+                "gate": QUALITY_GATE_DIAGRAM_QUALITY,
             },
             {
                 "name": "uv run python -m scripts.diagrams check-quality-gates",
                 "platform": "ci_uv",
                 "summary": "Canonical diagram regression gate for tracked Mermaid and publication invariants.",
-                "gate": "diagram quality gates",
+                "gate": QUALITY_GATE_DIAGRAM_QUALITY,
             },
         ),
     },
@@ -581,13 +582,13 @@ CURATED_SCRIPT_CLUSTERS: tuple[dict[str, object], ...] = (
                 "name": "uv run python -m scripts.docs verify",
                 "platform": "ci_uv",
                 "summary": "Canonical end-to-end docs verification chain.",
-                "gate": "docs verification",
+                "gate": QUALITY_GATE_DOCS_VERIFICATION,
             },
             {
                 "name": "uv run python -m scripts.docs check-links --links --specs --configs",
                 "platform": "ci_uv",
                 "summary": "Canonical docs link/spec/config verification path.",
-                "gate": "docs verification",
+                "gate": QUALITY_GATE_DOCS_VERIFICATION,
             },
         ),
     },
@@ -606,13 +607,13 @@ CURATED_SCRIPT_CLUSTERS: tuple[dict[str, object], ...] = (
                 "name": "uv run python -m scripts.schema validate-configs",
                 "platform": "ci_uv",
                 "summary": "Maintained JSON Schema validation path for unified pipeline configs.",
-                "gate": "config validation",
+                "gate": QUALITY_GATE_CONFIG_VALIDATION,
             },
             {
                 "name": "uv run python -m scripts.schema check-invariants",
                 "platform": "ci_uv",
                 "summary": "Canonical config invariant check for naming, auth, keys, and config CI policy.",
-                "gate": "config validation",
+                "gate": QUALITY_GATE_CONFIG_VALIDATION,
             },
         ),
     },
@@ -1123,8 +1124,8 @@ def _module_dotted_name(relative_path: str) -> str:
 
 
 def _python_surface_name(relative_path: str) -> str:
-    if relative_path.endswith("/__init__.py"):
-        dotted = relative_path.removesuffix("/__init__.py").replace("/", ".")
+    if relative_path.endswith(PATH_PYTHON_INIT_SUFFIX):
+        dotted = relative_path.removesuffix(PATH_PYTHON_INIT_SUFFIX).replace("/", ".")
     else:
         dotted = _module_dotted_name(relative_path)
     return dotted.removeprefix("src.")
@@ -1271,7 +1272,7 @@ def _signature_hash(node: ast.FunctionDef | ast.AsyncFunctionDef) -> str:
 
 class _ShapeNormalizer(ast.NodeTransformer):
     def visit_arg(self, node: ast.arg) -> ast.arg:  # noqa: N802
-        return ast.copy_location(ast.arg(arg="ARG", annotation=None, type_comment=None), node)
+        return ast.copy_location(ast.arg(arg="ARG", annotation=None), node)
 
     def visit_Name(self, node: ast.Name) -> ast.AST:  # noqa: N802
         return ast.copy_location(ast.Name(id="VAR", ctx=node.ctx), node)
@@ -1477,7 +1478,7 @@ def _build_port_surface_catalog(
             continue
         relative_path = _rel_path(root, port_path)
         module_name = _python_surface_name(relative_path)
-        init_paths.append((module_name, port_path)) if port_path.name == "__init__.py" else None
+        init_paths.append((module_name, port_path)) if port_path.name == PATH_PYTHON_INIT_FILE else None
         for class_name in _protocol_class_names(port_path):
             surface_name = f"{module_name}.{class_name}"
             descriptors.append(
@@ -1498,7 +1499,7 @@ def _build_port_surface_catalog(
             exported_surfaces = module_surfaces.setdefault(module_name, set())
             exported_symbols = symbol_index.setdefault(module_name, {})
             for imported_module, imported_name, alias_name in _imported_symbols(init_path):
-                if not imported_module.startswith("bioetl.domain.ports"):
+                if not imported_module.startswith(PORT_MODULE_PREFIX):
                     continue
                 target = symbol_index.get(imported_module, {}).get(imported_name)
                 if target is None:
@@ -1526,10 +1527,10 @@ def _imported_port_surfaces(
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
             for alias in node.names:
-                if alias.name.startswith("bioetl.domain.ports"):
+                if alias.name.startswith(PORT_MODULE_PREFIX):
                     imported.update(port_module_surfaces.get(alias.name, set()))
         elif isinstance(node, ast.ImportFrom) and node.module is not None:
-            if node.module.startswith("bioetl.domain.ports"):
+            if node.module.startswith(PORT_MODULE_PREFIX):
                 if any(alias.name == "*" for alias in node.names):
                     imported.update(port_module_surfaces.get(node.module, set()))
                     continue
@@ -1545,7 +1546,7 @@ def _resolve_python_module_surface(root: Path, module_name: str) -> NodeKey | No
     file_candidate = root / relative_py.with_suffix(".py")
     if file_candidate.is_file():
         return NodeKey("module_surface", _rel_path(root, file_candidate))
-    init_candidate = root / relative_py / "__init__.py"
+    init_candidate = root / relative_py / PATH_PYTHON_INIT_FILE
     if init_candidate.is_file():
         return NodeKey("module_surface", _rel_path(root, init_candidate))
     return None
@@ -1683,7 +1684,6 @@ def _select_alert_dashboards(
     memory_mapping: dict[str, object],
 ) -> list[NodeKey]:
     alerts_config = memory_mapping.get("alerts")
-    groups = alerts_config.get("groups") if isinstance(alerts_config, dict) else {}
     rules = alerts_config.get("rules") if isinstance(alerts_config, dict) else {}
     dashboard_fallbacks = (
         alerts_config.get("dashboard_fallbacks")
@@ -1795,9 +1795,9 @@ def build_snapshot(root: Path, verified_at: str | None = None) -> GraphSnapshot:
     _add_layer_topology(snapshot, root, project, today)
     _add_provider_and_config_graph(snapshot, root, project, today)
     _add_dashboard_graph(snapshot, root, project, today)
-    _add_quality_and_scripts(snapshot, root, project, today)
+    _add_quality_and_scripts(snapshot, project, today)
     _add_test_graph(snapshot, root, project, today)
-    _add_policy_surfaces(snapshot, root, project, today)
+    _add_policy_surfaces(snapshot, project, today)
     _add_impact_analysis_surfaces(snapshot, root, project, today)
     _add_file_structure_surfaces(snapshot, root, project, today)
     _add_retirement_analysis_surfaces(snapshot, root, project, today, _load_memory_mapping(root))
@@ -1955,7 +1955,7 @@ def _add_layer_topology(snapshot: GraphSnapshot, root: Path, project: NodeKey, t
             )
             snapshot.add_relation(layer, "CONTAINS", family, provenance="source_tree")
         for module_path in sorted(layer_path.rglob("*.py")):
-            if module_path.name in {"__init__.py", "__main__.py"}:
+            if module_path.name in {PATH_PYTHON_INIT_FILE, "__main__.py"}:
                 continue
             if _is_ignored_repo_path(module_path):
                 continue
@@ -1992,7 +1992,7 @@ def _add_provider_and_config_graph(
     providers_root = root / "configs" / "providers"
     provider_nodes: dict[str, NodeKey] = {}
     entity_nodes: dict[str, NodeKey] = {}
-    for provider_path in sorted(providers_root.glob("*.yaml")):
+    for provider_path in sorted(providers_root.glob(PY_YAML_GLOB)):
         payload = _read_yaml(provider_path)
         provider_name = str(payload.get("provider", provider_path.stem))
         provider_config = payload.get("source", {})
@@ -2033,7 +2033,7 @@ def _add_provider_and_config_graph(
         snapshot.add_relation(provider, "DEFINED_BY", artifact, provenance="provider_config")
 
     entities_root = root / "configs" / "entities"
-    for entity_path in sorted(entities_root.rglob("*.yaml")):
+    for entity_path in sorted(entities_root.rglob(PY_YAML_GLOB)):
         payload = _read_yaml(entity_path)
         provider_name = str(payload.get("provider", entity_path.parent.name))
         entity_name = str(payload.get("entity", entity_path.stem))
@@ -2073,7 +2073,7 @@ def _add_provider_and_config_graph(
         snapshot.add_relation(entity, "DEFINED_BY", artifact, provenance="entity_config")
 
     composites_root = root / "configs" / "composites"
-    for composite_path in sorted(composites_root.glob("*.yaml")):
+    for composite_path in sorted(composites_root.glob(PY_YAML_GLOB)):
         payload = _read_yaml(composite_path)
         composite = payload.get("composite", {})
         composite_name = composite_path.stem
@@ -2126,7 +2126,7 @@ def _add_provider_and_config_graph(
 
 def _add_dashboard_graph(snapshot: GraphSnapshot, root: Path, project: NodeKey, today: str) -> None:
     dashboards_root = root / "grafana" / "dashboards"
-    source_surface = NodeKey("doc_source_surface", "grafana dashboards json")
+    source_surface = NodeKey("doc_source_surface", DOC_PATH_GRAFANA_DASHBOARDS_SURFACE)
     snapshot.add_relation(project, "HAS_DOC_SOURCE_SURFACE", source_surface, provenance="dashboard_graph")
     for dashboard_path in sorted(dashboards_root.glob("*.json")):
         name = dashboard_path.stem
@@ -2146,7 +2146,7 @@ def _add_dashboard_graph(snapshot: GraphSnapshot, root: Path, project: NodeKey, 
         snapshot.add_relation(source_surface, "IS_FACTUAL_SOURCE_FOR", dashboard, provenance="dashboard_graph")
 
 
-def _add_quality_and_scripts(snapshot: GraphSnapshot, root: Path, project: NodeKey, today: str) -> None:
+def _add_quality_and_scripts(snapshot: GraphSnapshot, project: NodeKey, today: str) -> None:
     for gate_payload in CURATED_QUALITY_GATES:
         gate = snapshot.add_node(
             "quality_gate",
@@ -2302,7 +2302,7 @@ def _add_test_graph(snapshot: GraphSnapshot, root: Path, project: NodeKey, today
                     )
 
 
-def _add_policy_surfaces(snapshot: GraphSnapshot, root: Path, project: NodeKey, today: str) -> None:
+def _add_policy_surfaces(snapshot: GraphSnapshot, project: NodeKey, today: str) -> None:
     for policy_payload in CURATED_POLICY_SURFACES:
         policy = snapshot.add_node(
             "policy_surface",
@@ -2357,7 +2357,7 @@ def _add_impact_analysis_surfaces(snapshot: GraphSnapshot, root: Path, project: 
     contract_nodes = _add_contract_surfaces(snapshot, root, project, today, memory_mapping)
     pipeline_nodes = _add_pipeline_surfaces(snapshot, root, project, today, contract_nodes, adapter_nodes)
     _add_pipeline_normalization_edges(snapshot, pipeline_nodes, memory_mapping)
-    _add_pipeline_test_edges(snapshot, root, pipeline_nodes, memory_mapping)
+    _add_pipeline_test_edges(snapshot, memory_mapping)
     _add_alert_surfaces(snapshot, root, project, today, pipeline_nodes, contract_nodes, memory_mapping)
     _add_governance_edges(snapshot, port_nodes, adapter_nodes, pipeline_nodes, contract_nodes)
     _add_pipeline_operational_edges(snapshot, pipeline_nodes, memory_mapping)
@@ -2438,7 +2438,7 @@ def _add_file_structure_surfaces(snapshot: GraphSnapshot, root: Path, project: N
         "contract_surface",
         "alert_surface",
     }
-    for node in list(snapshot.nodes.values()):
+    for node in tuple(snapshot.nodes.values()):
         if node.key.label not in source_backed_labels:
             continue
         source_path_value = node.properties.get("source_path")
@@ -2495,7 +2495,7 @@ def _add_file_structure_surfaces(snapshot: GraphSnapshot, root: Path, project: N
 
     relation_backed_types = {"BACKED_BY", "DESCRIBED_IN", "DEFINED_BY"}
     file_backed_labels = {"doc_artifact", "config_artifact", "module_surface", "script_surface", "test_artifact"}
-    for relation in list(snapshot.relations.values()):
+    for relation in tuple(snapshot.relations.values()):
         if relation.relation_type not in relation_backed_types:
             continue
         if relation.target.label not in file_backed_labels:
@@ -2540,9 +2540,9 @@ def _add_port_surfaces(
     port_nodes: set[NodeKey] = set()
     facade = snapshot.add_node(
         "port_surface",
-        "bioetl.domain.ports",
+        PORT_MODULE_PREFIX,
         summary="Canonical facade exporting stable domain port protocols.",
-        source_path="src/bioetl/domain/ports/__init__.py",
+        source_path=f"src/bioetl/domain/ports/{PATH_PYTHON_INIT_FILE}",
         source_kind="domain_port_facade",
         granularity="facade",
         last_verified=today,
@@ -2553,7 +2553,7 @@ def _add_port_surfaces(
     snapshot.add_relation(project, "HAS_PORT", facade, provenance="impact_ports")
     if family in snapshot.nodes:
         snapshot.add_relation(family, "CONTAINS", facade, provenance="impact_ports")
-    facade_module = NodeKey("module_surface", "src/bioetl/domain/ports/__init__.py")
+    facade_module = NodeKey("module_surface", f"src/bioetl/domain/ports/{PATH_PYTHON_INIT_FILE}")
     if facade_module in snapshot.nodes:
         snapshot.add_relation(facade, "BACKED_BY", facade_module, provenance="impact_ports")
 
@@ -2633,7 +2633,7 @@ def _add_adapter_surfaces(
             for module_path in sorted(child.rglob("*.py")):
                 if _is_ignored_repo_path(module_path):
                     continue
-                if fine_grained_enabled and module_path.name != "__init__.py":
+                if fine_grained_enabled and module_path.name != PATH_PYTHON_INIT_FILE:
                     impl_relative_path = _rel_path(root, module_path)
                     impl_surface_name = _python_surface_name(impl_relative_path)
                     impl_node = snapshot.add_node(
@@ -2675,7 +2675,7 @@ def _add_adapter_surfaces(
                     )
             continue
 
-        if child.suffix != ".py" or child.name == "__init__.py":
+        if child.suffix != ".py" or child.name == PATH_PYTHON_INIT_FILE:
             continue
         relative_path = _rel_path(root, child)
         surface_name = _python_surface_name(relative_path)
@@ -2961,7 +2961,7 @@ def _extract_code_duplication_surfaces(
     callable_descriptors: dict[NodeKey, CallableDescriptor] = {}
     class_name_index: dict[str, list[NodeKey]] = {}
 
-    for module in list(snapshot.nodes.values()):
+    for module in tuple(snapshot.nodes.values()):
         if module.key.label != "module_surface":
             continue
         relative_path = module.key.name
@@ -3166,7 +3166,6 @@ def _extract_code_duplication_surfaces(
             method_name = unique_members[0].callable_name
             if all(member.callable_name == method_name and member.parent_class for member in unique_members):
                 for member in unique_members:
-                    member_class = NodeKey("class_surface", member.node_key.name.rsplit(".", 1)[0])
                     candidate_set = {
                         relation.target
                         for relation in snapshot.relations.values()
@@ -3194,7 +3193,7 @@ def _extract_code_duplication_surfaces(
             snapshot.add_relation(cluster, "CAN_PROMOTE_TO", promotion_target, provenance="code_duplication")
 
         package_family = NodeKey("package_family", unique_members[0].package_family)
-        for relation in list(snapshot.relations.values()):
+        for relation in tuple(snapshot.relations.values()):
             if relation.relation_type != "TESTS_PACKAGE_FAMILY" or relation.target != package_family:
                 continue
             snapshot.add_relation(cluster, "COVERED_BY_TEST", relation.source, provenance="code_duplication")
@@ -3492,7 +3491,6 @@ def _add_complexity_analysis_surfaces(
         source_path = str(node.properties.get("source_path") or "")
         if node.key.label == "module_surface":
             return tree if isinstance(tree, ast.Module) else None
-        dotted_path = _module_dotted_name(source_path)
         if node.key.label == "class_surface":
             class_name = str(node.properties.get("class_name") or node.key.name.rsplit(".", 1)[-1])
             for child in getattr(tree, "body", ()):
@@ -3630,12 +3628,20 @@ def _add_complexity_analysis_surfaces(
             api_surface_to_logic_ratio = round(abstraction_fanout / max(1, branch_count + 1), 2)
 
         complexity_score = 0
-        complexity_score += 2 if branch_count >= 6 else 1 if branch_count >= 3 else 0
-        complexity_score += 2 if nesting_depth >= 4 else 1 if nesting_depth >= 3 else 0
-        complexity_score += 2 if helper_call_count >= 4 else 1 if helper_call_count >= 2 else 0
-        complexity_score += 2 if len(indirection_markers) >= 2 else 1 if indirection_markers else 0
-        complexity_score += 2 if len(stateful_markers) >= 2 else 1 if stateful_markers else 0
-        complexity_score += 2 if abstraction_fanout >= 6 else 1 if abstraction_fanout >= 3 else 0
+        branch_count_score = 2 if branch_count >= 6 else 1 if branch_count >= 3 else 0
+        nesting_depth_score = 2 if nesting_depth >= 4 else 1 if nesting_depth >= 3 else 0
+        helper_call_score = 2 if helper_call_count >= 4 else 1 if helper_call_count >= 2 else 0
+        indirection_score = 2 if len(indirection_markers) >= 2 else 1 if indirection_markers else 0
+        stateful_score = 2 if len(stateful_markers) >= 2 else 1 if stateful_markers else 0
+        fanout_score = 2 if abstraction_fanout >= 6 else 1 if abstraction_fanout >= 3 else 0
+        complexity_score += (
+            branch_count_score
+            + nesting_depth_score
+            + helper_call_score
+            + indirection_score
+            + stateful_score
+            + fanout_score
+        )
 
         simplification_score = complexity_score
         removable_score = complexity_score
@@ -3734,7 +3740,7 @@ def _add_pipeline_surfaces(
     pipeline_nodes: dict[str, NodeKey] = {}
 
     entities_root = root / "configs" / "entities"
-    for entity_path in sorted(entities_root.rglob("*.yaml")):
+    for entity_path in sorted(entities_root.rglob(PY_YAML_GLOB)):
         payload = _read_yaml(entity_path)
         provider_name = str(payload.get("provider", entity_path.parent.name))
         entity_name = str(payload.get("entity", entity_path.stem))
@@ -3774,7 +3780,7 @@ def _add_pipeline_surfaces(
             snapshot.add_relation(pipeline, "DEPENDS_ON", contract_key, provenance="impact_pipelines")
 
     composites_root = root / "configs" / "composites"
-    for composite_path in sorted(composites_root.glob("*.yaml")):
+    for composite_path in sorted(composites_root.glob(PY_YAML_GLOB)):
         payload = _read_yaml(composite_path)
         composite = payload.get("composite")
         composite_name = composite_path.stem
@@ -3878,15 +3884,14 @@ def _add_pipeline_normalization_edges(
 def _add_pipeline_test_edges(
     snapshot: GraphSnapshot,
     root: Path,
-    pipeline_nodes: dict[str, NodeKey],
     memory_mapping: dict[str, object],
 ) -> None:
     tests_mapping = memory_mapping.get("pipeline_tests")
     relation_type = str(tests_mapping.get("relation_type", "TESTED_BY")) if isinstance(tests_mapping, dict) else "TESTED_BY"
     ownership_config = (
-        str(tests_mapping.get("ownership_config", "configs/quality/test_matrix.yaml"))
+        str(tests_mapping.get("ownership_config", DOC_PATH_TEST_MATRIX))
         if isinstance(tests_mapping, dict)
-        else "configs/quality/test_matrix.yaml"
+        else DOC_PATH_TEST_MATRIX
     )
     ownership_path = root / ownership_config
     if not ownership_path.is_file():
@@ -4129,8 +4134,8 @@ def _add_pipeline_operational_edges(
             pipeline_ops.get("validation_gates") if isinstance(pipeline_ops, dict) else None
         )
     ] or [
-        NodeKey("quality_gate", "pytest"),
-        NodeKey("quality_gate", "config validation"),
+        NodeKey("quality_gate", QUALITY_GATE_PYTEST),
+        NodeKey("quality_gate", QUALITY_GATE_CONFIG_VALIDATION),
     ]
     dashboards_cfg = pipeline_ops.get("dashboards") if isinstance(pipeline_ops, dict) else {}
     common_dashboards = [
@@ -4680,7 +4685,7 @@ def snapshot_invariant_issues(snapshot: GraphSnapshot) -> list[str]:
         if int(stats["relation_types"].get(relation_type, 0)) <= 0:
             issues.append(f"missing required relation population: {relation_type}")
 
-    if NodeKey("port_surface", "bioetl.domain.ports") not in snapshot.nodes:
+    if NodeKey("port_surface", PORT_MODULE_PREFIX) not in snapshot.nodes:
         issues.append("missing bioetl.domain.ports facade port surface")
 
     protocol_ports = [
