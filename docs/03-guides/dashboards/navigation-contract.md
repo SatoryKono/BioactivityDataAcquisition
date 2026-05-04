@@ -19,6 +19,9 @@ YAML также фиксирует time handoff policy в `time_handoff_requirem
 - Explore handoff для Loki/Tempo ведёт только через drilldown-приложения:
   - Logs: `/a/grafana-lokiexplore-app/explore?...`
   - Traces: `/a/grafana-exploretraces-app/?...`
+- Optional contextual Explore links (`options.dataLinks`) разрешены только для operator-critical panel surfaces в `bioetl-runtime`, `bioetl-dq-v2`, `bioetl-control-plane-v1`; baseline link `Open Logs (Loki, tracing profile)` MUST сохраняться.
+- Contextual Loki Explore link MUST содержать безопасный scope marker `scope_marker="dashboard_context"` и может использовать только `${pipeline:regex}` и `${run_type:regex}` как дополнительные фильтры после `{job="bioetl"} | json`.
+- Contextual Explore links MUST NOT передавать/использовать forensic переменные (`run_id`, `payload_hash`) или любые другие `var-*` вне разрешённого набора.
 
 
 ## Примеры URL (нормализованный формат)
