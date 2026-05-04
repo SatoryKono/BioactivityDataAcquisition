@@ -473,7 +473,7 @@ def test_critical_top_level_links_follow_title_allowlist_and_scope_reset_suffix(
             )
             tooltip = str(link.get("tooltip", "") or "")
             if "Cross-scope handoff" in tooltip:
-                assert ("Scope reset:" in tooltip or "Reset scope:" in tooltip), (
+                assert "Scope reset:" in tooltip or "Reset scope:" in tooltip, (
                     f"{dashboard_name} link '{title}' must include 'Scope reset:' or 'Reset scope:' suffix"
                 )
 
