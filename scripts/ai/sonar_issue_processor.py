@@ -29,6 +29,7 @@ DEFAULT_OUTPUT_PATH: Final[Path] = Path("reports/quality/sonar_baseline_report.j
 DEFAULT_TOP_BUCKET_DEPTH: Final[int] = 4
 DEFAULT_TOP_BUCKET_LIMIT: Final[int] = 20
 DEFAULT_QUARANTINE_RATCHET_LIMIT: Final[int] = 159
+DEFAULT_ISSUE_PAGE_SIZE: Final[int] = 100
 SONAR_WAVE_DEFINITIONS: Final[tuple[dict[str, Any], ...]] = (
     {
         "issue_number": 3106,
@@ -408,47 +409,67 @@ def fetch_live_issue_summary(
             "reason": "missing_token",
         }
 
-    response: requests.Response
-    try:
-        response = requests.get(
-            f"{_normalize_url(sonar_url)}/api/issues/search",
-            params={
-                "componentKeys": project_key,
-                "resolved": "false",
-                "ps": 100,
-                "facets": "severities,types",
-            },
-            auth=(token, ""),
-            timeout=30,
-        )
-    except requests.RequestException as exc:
-        return {
-            "status": "error",
-            "reason": "request_failed",
-            "message": str(exc),
-        }
+    issues: list[dict[str, Any]] = []
+    severity_counts: dict[str, int] = {}
+    type_counts: dict[str, int] = {}
+    paging: dict[str, Any] = {"total": 0, "pageSize": DEFAULT_ISSUE_PAGE_SIZE}
 
-    if response.status_code != 200:
-        return {
-            "status": "error",
-            "reason": "http_error",
-            "status_code": response.status_code,
-            "message": response.text[:300],
-        }
+    page = 1
+    while True:
+        response: requests.Response
+        try:
+            response = requests.get(
+                f"{_normalize_url(sonar_url)}/api/issues/search",
+                params={
+                    "componentKeys": project_key,
+                    "resolved": "false",
+                    "ps": DEFAULT_ISSUE_PAGE_SIZE,
+                    "p": page,
+                    "facets": "severities,types",
+                },
+                auth=(token, ""),
+                timeout=30,
+            )
+        except requests.RequestException as exc:
+            return {
+                "status": "error",
+                "reason": "request_failed",
+                "message": str(exc),
+            }
 
-    payload = response.json()
-    paging = payload.get("paging", {})
+        if response.status_code != 200:
+            return {
+                "status": "error",
+                "reason": "http_error",
+                "status_code": response.status_code,
+                "message": response.text[:300],
+            }
+
+        payload = response.json()
+        if page == 1:
+            paging = payload.get("paging", {})
+            severity_counts = _facet_counts(payload, "severities")
+            type_counts = _facet_counts(payload, "types")
+
+        issues.extend(payload.get("issues", []))
+
+        if len(issues) >= int(paging.get("total", 0)):
+            break
+        if not payload.get("issues"):
+            break
+        page += 1
+
     classification = _classify_live_issues(
-        issues=payload.get("issues", []),
+        issues=issues,
         supported_sources=supported_sources,
         quarantine_patterns=quarantine_patterns,
     )
     return {
         "status": "ok",
-        "total": int(paging.get("total", 0)),
+        "total": len(issues),
         "page_size": int(paging.get("pageSize", 0) or 0),
-        "severity_counts": _facet_counts(payload, "severities"),
-        "type_counts": _facet_counts(payload, "types"),
+        "severity_counts": severity_counts,
+        "type_counts": type_counts,
         **classification,
     }
 

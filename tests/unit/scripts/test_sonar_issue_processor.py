@@ -318,6 +318,82 @@ def test_fetch_live_issue_summary_counts_active_supported_issues(monkeypatch) ->
         {"path_prefix": SUPPORTED_SCOPE_PATH, "count": 1}
     ]
     assert summary["out_of_scope_buckets"] == []
+
+
+def test_fetch_live_issue_summary_aggregates_multiple_pages(monkeypatch) -> None:
+    class _Response:
+        status_code = 200
+
+        def __init__(self, issues: list[dict[str, object]], total: int) -> None:
+            self._issues = issues
+            self._total = total
+
+        def json(self) -> dict[str, object]:
+            return {
+                "paging": {"total": self._total, "pageSize": 100},
+                "facets": [
+                    {"property": "severities", "values": [{"val": "MAJOR", "count": 1}]},
+                    {"property": "types", "values": [{"val": "CODE_SMELL", "count": 1}]},
+                ],
+                "issues": self._issues,
+            }
+
+    def _fake_get(*args, **kwargs):  # type: ignore[no-untyped-def]
+        page = kwargs["params"]["p"]
+        if page == 1:
+            return _Response(
+                issues=[
+                    {
+                        "key": "one",
+                        "component": SUPPORTED_SCOPE_COMPONENT,
+                        "rule": "python:S1",
+                        "severity": "MAJOR",
+                        "message": "page 1 first issue",
+                        "line": 11,
+                    },
+                ],
+                total=3,
+            )
+        if page == 2:
+            return _Response(
+                issues=[
+                    {
+                        "key": "two",
+                        "component": "repo:scripts/check.py",
+                        "rule": "python:S2",
+                        "severity": "CRITICAL",
+                        "message": "page 1 second issue",
+                        "line": 22,
+                    },
+                    {
+                        "key": "three",
+                        "component": SUPPORTED_SCOPE_COMPONENT,
+                        "rule": "python:S3",
+                        "severity": "MINOR",
+                        "message": "page 1 third issue",
+                        "line": 33,
+                    },
+                ],
+                total=3,
+            )
+
+        raise AssertionError(f"unexpected page {page}")
+
+    monkeypatch.setattr(processor.requests, "get", _fake_get)
+
+    summary = processor.fetch_live_issue_summary(
+        sonar_url=SONAR_URL,
+        project_key=SONAR_PROJECT_KEY,
+        token="good-token",
+        supported_sources=["src/bioetl"],
+        quarantine_patterns=[],
+    )
+
+    assert summary["status"] == "ok"
+    assert summary["total"] == 3
+    assert summary[SUPPORTED_SCOPE_TOTAL] == 2
+    assert summary["out_of_scope_total"] == 1
+    assert [issue["key"] for issue in summary["issues"]] == ["one", "two", "three"]
     assert summary["issues"][0][MATCHES_CURRENT_QUARANTINE] is False
 
 
