@@ -77,7 +77,7 @@ async def resolve_finalization_dq_metrics_operation(
     """Resolve DQ metrics via host override when present, otherwise compute them."""
     return await resolve_finalization_dq_metrics(
         metadata_ops,
-        table_name=table_name,
+        _table_name=table_name,
         records=records,
         quarantined_count=quarantined_count,
         validation_errors=validation_errors,
