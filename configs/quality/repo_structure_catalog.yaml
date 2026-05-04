@@ -106,6 +106,8 @@ plans:
       lifecycle: supporting_context
     - path: docs/plans/testing-support-migration-plan-2026-04-25.md
       lifecycle: supporting_context
+    - path: docs/plans/sonar-closeout-plan-2026-05-04.md
+      lifecycle: supporting_context
 
 src_sidecars:
   path_prefix: src/
@@ -130,6 +132,8 @@ root_tooling_roots:
   approved_roots:
     - path: .codex
       role: curated_shared_agent_runtime_surface
+    - path: .devin
+      role: curated_project_wiki_surface
     - path: .vibe
       role: curated_shared_vendor_runtime_surface
 
