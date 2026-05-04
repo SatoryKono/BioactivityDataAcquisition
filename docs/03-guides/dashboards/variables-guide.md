@@ -110,6 +110,8 @@ UX цель: убрать ложное ожидание, что source filters �
 - **Forensic L2 exception (must include explicit justification in docs/PR):**
   - `explorer` (`bioetl-silver-reject-explorer`): `time.from=now-24h`, `refresh=1m`
   - Justification: forensic/reject investigation требует больше стартового горизонта для редких инцидентов и сниженной частоты auto-refresh, чтобы уменьшить шум и нагрузку при row-level анализе.
+- Machine-readable contract source: `docs/03-guides/dashboards/contracts/navigation-links.yaml` -> `default_time_refresh_policy` + `default_time_refresh_policy_exceptions` (for explicit, justified deviations).
+
 - **Workflow dashboard class:**
   - `workflow-overview`: `time.from=now-12h`, `refresh=30s` (align with L0/L1 operator baseline for run-step triage).
 

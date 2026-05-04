@@ -34,6 +34,17 @@ GRAFANA_README_PATH = Path("grafana/README.md")
 _BIOETL_METRIC_TOKEN_RE = re.compile(r"\b(bioetl_[a-z0-9_]+)\b")
 
 
+NAVIGATION_CONTRACT_PATH = Path(
+    "docs/03-guides/dashboards/contracts/navigation-links.yaml"
+)
+
+
+def _load_navigation_contract() -> dict:
+    payload = yaml.safe_load(NAVIGATION_CONTRACT_PATH.read_text(encoding="utf-8"))
+    assert isinstance(payload, dict), "navigation-links contract must deserialize into a mapping"
+    return payload
+
+
 def _load_recording_rule_names() -> set[str]:
     payload = yaml.safe_load(RULES_PATH.read_text(encoding="utf-8"))
     assert isinstance(payload, dict)
@@ -2305,28 +2316,50 @@ def test_replay_panels_are_split_by_semantics(dashboard_file: str) -> None:
     assert lag.get("fieldConfig", {}).get("defaults", {}).get("unit") == "s"
 
 
-def test_dashboard_default_time_from_policy_by_uid() -> None:
-    """Shipped dashboards must keep canonical default time.from policy by UID."""
-    expected_time_from_by_uid = {
-        "bioetl-overview-v2": "now-12h",
-        "bioetl-runtime": "now-12h",
-        "bioetl-dq-v2": "now-12h",
-        "bioetl-provider-health-v2": "now-12h",
-        "bioetl-workflow-overview": "now-12h",
-        "bioetl-control-plane-v1": "now-12h",
-        "bioetl-silver-reject-explorer": "now-24h",
-    }
+def test_dashboard_default_time_and_refresh_policy_by_uid_class() -> None:
+    """Shipped dashboards must keep canonical time.from/refresh policy by UID class."""
+    contract = _load_navigation_contract()
+    policy = contract.get("default_time_refresh_policy", {})
+    exceptions = contract.get("default_time_refresh_policy_exceptions", {})
 
-    for uid, expected_time_from in expected_time_from_by_uid.items():
+    assert isinstance(policy, dict), "default_time_refresh_policy must be defined"
+    assert isinstance(exceptions, dict), "default_time_refresh_policy_exceptions must be a mapping"
+
+    l0_uids = policy.get("L0", {}).get("dashboards", [])
+    l1_uids = policy.get("L1", {}).get("dashboards", [])
+    l2_uids = policy.get("L2", {}).get("dashboards", [])
+
+    assert isinstance(l0_uids, list) and isinstance(l1_uids, list) and isinstance(l2_uids, list)
+
+    baseline = {"time_from": "now-12h", "refresh": "30s"}
+    explorer_baseline = {"time_from": "now-24h", "refresh": "1m"}
+
+    for uid in [*l0_uids, *l1_uids]:
+        expected = exceptions.get(uid, baseline)
         dashboard = load_dashboard(Path("grafana/dashboards") / f"{uid}.json")
-        actual_uid = dashboard.get("uid")
-        assert actual_uid == uid, f"Dashboard UID mismatch for {uid}.json"
+        assert dashboard.get("uid") == uid, f"Dashboard UID mismatch for {uid}.json"
 
         time_cfg = dashboard.get("time", {})
         assert isinstance(time_cfg, dict), f"{uid} time config must be an object"
-        assert time_cfg.get("from") == expected_time_from, (
-            f"{uid} must keep time.from={expected_time_from!r}, "
-            f"got {time_cfg.get('from')!r}"
+        assert time_cfg.get("from") == expected["time_from"], (
+            f"{uid} must keep time.from={expected['time_from']!r}, got {time_cfg.get('from')!r}"
+        )
+        assert dashboard.get("refresh") == expected["refresh"], (
+            f"{uid} must keep refresh={expected['refresh']!r}, got {dashboard.get('refresh')!r}"
+        )
+
+    for uid in l2_uids:
+        expected = exceptions.get(uid, explorer_baseline)
+        dashboard = load_dashboard(Path("grafana/dashboards") / f"{uid}.json")
+        assert dashboard.get("uid") == uid, f"Dashboard UID mismatch for {uid}.json"
+
+        time_cfg = dashboard.get("time", {})
+        assert isinstance(time_cfg, dict), f"{uid} time config must be an object"
+        assert time_cfg.get("from") == expected["time_from"], (
+            f"{uid} must keep time.from={expected['time_from']!r}, got {time_cfg.get('from')!r}"
+        )
+        assert dashboard.get("refresh") == expected["refresh"], (
+            f"{uid} must keep refresh={expected['refresh']!r}, got {dashboard.get('refresh')!r}"
         )
 
 
