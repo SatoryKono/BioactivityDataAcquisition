@@ -144,9 +144,14 @@ tracked_suite_inventory:
       - tests/integration/test_dq_report_integration.py
       grafana:
       - tests/integration/test_grafana_config.py
+      - tests/integration/test_grafana_config_timing.py
       - tests/integration/test_grafana_dashboard_links.py
       - tests/integration/test_grafana_datasource_provisioning.py
       - tests/integration/test_grafana_silver_reject_config.py
+      - tests/integration/test_pipeline_runtime_dashboard.py
+      - tests/integration/test_grafana_navigation_matrix.py
+      - tests/integration/test_dashboard_navigation_contract_sync.py
+      - tests/integration/test_dashboard_ux_report_freshness.py
       prometheus:
       - tests/integration/test_prometheus_rules_config.py
     composite_config_and_merge:

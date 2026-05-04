@@ -277,9 +277,6 @@ class PubMedPublicationSchema(_PublicationBaseSchema):
         description="Data source identifier",
     )
 
-    # Note: accepted_date, received_date, revised_date, epub_date excluded from
-    # transformer output per design (PubMed pipeline field exclusions)
-
     # Note: affiliation_list inherited from base (unified field name)
 
     # === Structured Author-Affiliation Mapping ===
