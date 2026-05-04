@@ -1318,6 +1318,243 @@
           "type": "bargauge"
         },
         {
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 0
+          },
+          "id": 299,
+          "title": "First Action",
+          "type": "row",
+          "collapsed": false,
+          "panels": []
+        },
+        {
+          "datasource": "-- Grafana --",
+          "description": "First action CTA. includeVars=false equivalent by explicit allowlisted vars and preserved time range.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 1
+                  },
+                  {
+                    "color": "red",
+                    "value": 2
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 0,
+            "y": 0
+          },
+          "id": 300,
+          "options": {
+            "content": "",
+            "mode": "markdown"
+          },
+          "targets": [],
+          "title": "Pipeline conditions",
+          "type": "text",
+          "links": [
+            {
+              "title": "Open Pipeline conditions",
+              "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
+              "targetBlank": false,
+              "includeVars": false,
+              "keepTime": true,
+              "type": "link",
+              "icon": "dashboard"
+            }
+          ]
+        },
+        {
+          "datasource": "-- Grafana --",
+          "description": "First action CTA. includeVars=false equivalent by explicit allowlisted vars and preserved time range.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 1
+                  },
+                  {
+                    "color": "red",
+                    "value": 2
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 6,
+            "y": 0
+          },
+          "id": 301,
+          "options": {
+            "content": "",
+            "mode": "markdown"
+          },
+          "targets": [],
+          "title": "DQ conditions",
+          "type": "text",
+          "links": [
+            {
+              "title": "Open DQ conditions",
+              "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&${__url_time_range}",
+              "targetBlank": false,
+              "includeVars": false,
+              "keepTime": true,
+              "type": "link",
+              "icon": "dashboard"
+            }
+          ]
+        },
+        {
+          "datasource": "-- Grafana --",
+          "description": "First action CTA. includeVars=false equivalent by explicit allowlisted vars and preserved time range.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 1
+                  },
+                  {
+                    "color": "red",
+                    "value": 2
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 12,
+            "y": 0
+          },
+          "id": 302,
+          "options": {
+            "content": "",
+            "mode": "markdown"
+          },
+          "targets": [],
+          "title": "Control Plane conditions",
+          "type": "text",
+          "links": [
+            {
+              "title": "Open Control Plane conditions",
+              "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
+              "targetBlank": false,
+              "includeVars": false,
+              "keepTime": true,
+              "type": "link",
+              "icon": "dashboard"
+            }
+          ]
+        },
+        {
+          "datasource": "-- Grafana --",
+          "description": "First action CTA. includeVars=false equivalent by explicit allowlisted vars and preserved time range.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 1
+                  },
+                  {
+                    "color": "red",
+                    "value": 2
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 18,
+            "y": 0
+          },
+          "id": 303,
+          "options": {
+            "content": "",
+            "mode": "markdown"
+          },
+          "targets": [],
+          "title": "Provider health checks",
+          "type": "text",
+          "links": [
+            {
+              "title": "Open Provider health checks",
+              "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=All&var-adapter=All&${__url_time_range}",
+              "targetBlank": false,
+              "includeVars": false,
+              "keepTime": true,
+              "type": "link",
+              "icon": "dashboard"
+            }
+          ]
+        },
+        {
           "datasource": "Prometheus",
           "description": "Uses shipped 15m/30m runtime recording rules for preflight, infrastructure, failed-run, and error-rate blockers.",
           "fieldConfig": {
