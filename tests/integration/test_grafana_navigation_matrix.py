@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 import re
+from collections import deque
 
 import pytest
 import yaml
@@ -156,6 +157,71 @@ def test_incident_critical_paths_are_reciprocal_and_non_terminal() -> None:
     terminal_nodes = [uid for uid in critical_nodes if not edges.get(uid)]
     assert not terminal_nodes, (
         f"Incident-critical dashboards must not be terminal nodes: {sorted(terminal_nodes)}"
+    )
+
+
+def _shortest_clicks_to_targets(
+    source_uid: str, edges: dict[str, set[str]], targets: set[str], max_clicks: int
+) -> tuple[bool, int | None]:
+    if source_uid in targets:
+        return True, 0
+
+    queue = deque([(source_uid, 0)])
+    visited = {source_uid}
+
+    while queue:
+        current_uid, clicks = queue.popleft()
+        if clicks >= max_clicks:
+            continue
+
+        for next_uid in edges.get(current_uid, ()):
+            if next_uid in targets:
+                return True, clicks + 1
+            if next_uid in visited:
+                continue
+            visited.add(next_uid)
+            queue.append((next_uid, clicks + 1))
+
+    return False, None
+
+
+def test_incident_remediation_path_is_within_two_clicks_for_l1_dashboards() -> None:
+    """Incident path should surface a remediation dashboard within two clicks from L1."""
+    contract = _load_contract()["navigation_transition_contract"]
+    assert isinstance(contract, dict), "navigation_transition_contract must be mapping"
+
+    dashboard_levels = contract.get("dashboard_levels")
+    assert isinstance(dashboard_levels, dict), "dashboard_levels must be mapping"
+    l1_dashboards = set(dashboard_levels.get("L1", {}).get("dashboards", []))
+    assert l1_dashboards, "L1 dashboard list must not be empty"
+
+    critical_pairs = contract.get("incident_critical_reciprocal_paths")
+    assert isinstance(critical_pairs, list) and critical_pairs, (
+        "incident_critical_reciprocal_paths must be non-empty list"
+    )
+    remediation_targets = {
+        str(uid)
+        for pair in critical_pairs
+        for uid in pair
+        if isinstance(pair, list) and len(pair) == 2
+    }
+
+    edges = _build_top_level_edges()
+    max_clicks = 2
+    missing = []
+    for uid in sorted(l1_dashboards):
+        found, actual_clicks = _shortest_clicks_to_targets(
+            uid, edges, remediation_targets, max_clicks
+        )
+        if not found:
+            missing.append(uid)
+            continue
+        assert actual_clicks is not None and actual_clicks <= max_clicks, (
+            f"{uid} requires too many clicks to reach a remediation dashboard"
+        )
+
+    assert not missing, (
+        f"L1 dashboards without remediation path <=2 clicks: {sorted(missing)}"
     )
 
 

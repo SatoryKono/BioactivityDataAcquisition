@@ -688,9 +688,7 @@ def test_cross_scope_links_use_explicit_reset_or_context_markers() -> None:
         )
 
         links = [
-            link
-            for link in source_dashboard.get("links", [])
-            if isinstance(link, dict)
+            link for link in source_dashboard.get("links", []) if isinstance(link, dict)
         ]
         matched_links = []
         for link in links:
@@ -745,7 +743,9 @@ def test_first_action_rows_match_navigation_contract() -> None:
     dashboards_by_uid = _load_dashboards_by_uid()
 
     for source_uid, spec in first_action_contract.items():
-        assert isinstance(spec, dict), f"first_action_contract.{source_uid} must be mapping"
+        assert isinstance(spec, dict), (
+            f"first_action_contract.{source_uid} must be mapping"
+        )
         panel_id = spec.get("panel_id")
         min_cta = spec.get("min_cta", 0)
         max_cta = spec.get("max_cta", 0)
@@ -1323,9 +1323,9 @@ def test_data_quality_dashboard_exposes_silver_reject_explorer_handoff() -> None
     assert "var-pipeline=$pipeline" in url and "var-run_type=$run_type" in url, (
         "Data Quality handoff must pass only bounded explorer pipeline/run_type scope"
     )
-    assert "wider default time range for rare incidents" in str(
-        silver_link.get("tooltip", "")
-    ), "Data Quality handoff should explain 24h forensic default for rare incidents"
+    assert "Cross-scope handoff" in str(silver_link.get("tooltip", "")), (
+        "Data Quality handoff tooltip should document cross-scope handoff policy"
+    )
 
 
 def test_runtime_incident_panels_link_to_control_plane_dashboard() -> None:
@@ -1426,6 +1426,43 @@ def test_runtime_alert_condition_panels_expose_direct_runbook_links() -> None:
         assert url.endswith(expected_suffix), (
             f"Panel '{panel_title}' runbook link must target {expected_suffix}"
         )
+
+
+def test_provider_health_critical_panels_expose_incident_runbook_links() -> None:
+    """Provider Health condition panels should point directly to incident-response runbook."""
+    dashboard = load_dashboard(
+        Path("grafana/dashboards/bioetl-provider-health-v2.json")
+    )
+    targets = {
+        104: "Open Provider Incident Runbook",
+        106: "Open Provider Incident Runbook",
+        114: "Open Provider Incident Runbook",
+    }
+
+    panels_by_id = {
+        panel.get("id"): panel
+        for panel in get_dashboard_panels(dashboard)
+        if isinstance(panel.get("id"), int)
+    }
+    for panel_id, expected_title in targets.items():
+        panel = panels_by_id.get(panel_id)
+        assert isinstance(panel, dict), f"Provider Health missing panel id={panel_id}"
+        data_links = panel.get("options", {}).get("dataLinks", [])
+        assert isinstance(data_links, list) and data_links, (
+            f"Provider Health panel id={panel_id} must define dataLinks"
+        )
+        link = next(
+            (item for item in data_links if item.get("title") == expected_title),
+            None,
+        )
+        assert link is not None, (
+            f"Provider Health panel id={panel_id} must expose '{expected_title}'"
+        )
+        url = str(link.get("url", ""))
+        assert url == (
+            "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/"
+            "docs/05-operations/runbooks/incident-response.md"
+        ), f"Provider Health panel id={panel_id} runbook URL must be canonical"
 
 
 @pytest.mark.skip("Expected panels do not exist in bioetl-runtime.json")

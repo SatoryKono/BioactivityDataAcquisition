@@ -5,6 +5,10 @@ Source: `reports/quality/sonar_baseline_report.json`
 
 - `in` = issue in supported scope (`src/bioetl`).
 - `out` = issue outside supported scope.
+- Current snapshot: 120 total = 2 in-scope, 118 out-of-scope.
+- Decision in this plan:
+  - `in`: in-scope fixes to be handled within this repo scope.
+  - `out`: out-of-scope debt, deferred to separate cleanup wave.
 
 |Scope|Key|Rule|Path|Line|Severity|Message|Closure Action|
 |---|---|---|---|---:|---|---|---|
@@ -108,3 +112,23 @@ Source: `reports/quality/sonar_baseline_report.json`
 |out|AZ3dUzaFwWGUYQg3whKr|python:S3776|scripts/ops/neo4j_memory_sync.py|4299|CRITICAL|Refactor this function to reduce its Cognitive Complexity from 28 to the 15 allowed.|extract helpers and reduce branching/loops to fit cognitive threshold|
 |out|AZ3dUzaFwWGUYQg3whKs|python:S3776|scripts/ops/neo4j_memory_sync.py|4375|CRITICAL|Refactor this function to reduce its Cognitive Complexity from 32 to the 15 allowed.|extract helpers and reduce branching/loops to fit cognitive threshold|
 |out|AZ3dUzaFwWGUYQg3whKt|python:S3776|scripts/ops/neo4j_memory_sync.py|4587|CRITICAL|Refactor this function to reduce its Cognitive Complexity from 65 to the 15 allowed.|extract helpers and reduce branching/loops to fit cognitive threshold|
+|out|AZ3dUzFUwWGUYQg3whJs|python:S3776|tests/architecture/test_layer_aware_suffix_policy.py|222|CRITICAL|Refactor this function to reduce its Cognitive Complexity from 28 to the 15 allowed.|extract helpers and reduce branching/loops to fit cognitive threshold|
+|out|AZ3c0Xh4HVK1qVJRfdNk|python:S7503|tests/integration/workflow/test_workflow_runner_service.py|66|MINOR|Use asynchronous features in this function or remove the `async` keyword.|replace async function with sync path or add async usage to avoid redundancy|
+|out|AZ3c0XSbHVK1qVJRfdNi|python:S7503|tests/unit/application/services/test_workflow_runner_service.py|65|MINOR|Use asynchronous features in this function or remove the `async` keyword.|replace async function with sync path or add async usage to avoid redundancy|
+|out|AZ3c0XTjHVK1qVJRfdNj|python:S1244|tests/unit/application/services/test_workflow_transform_service.py|97|MAJOR|Do not perform equality checks with floating point values.|replace direct float equality with tolerance-based comparison|
+|out|AZ3c0Xp2HVK1qVJRfdNl|python:S3776|scripts/engineering/qa/check_naming_package_consistency.py|560|CRITICAL|Refactor this function to reduce its Cognitive Complexity from 71 to the 15 allowed.|extract helpers and reduce branching/loops to fit cognitive threshold|
+|out|AZ3dUy1UwWGUYQg3whJr|python:S7503|tests/unit/application/services/test_workflow_runner_service.py|85|MINOR|Use asynchronous features in this function or remove the `async` keyword.|replace async function with sync path or add async usage to avoid redundancy|
+|out|AZ3cyoSwmxEoI7r3GYNf|python:S3776|tests/architecture/test_compatibility_freeze_guards.py|840|CRITICAL|Refactor this function to reduce its Cognitive Complexity from 16 to the 15 allowed.|extract helpers and reduce branching/loops to fit cognitive threshold|
+|out|AZ3arKlQ4kdqNzddqegi|python:S1192|scripts/docs/checks/check_drift.py|160|CRITICAL|Define a constant instead of duplicating this literal "docs/00-project/ai/memory/agent-memory.md" 22 times.|define a constant and reuse to remove duplicated path literals|
+|out|AZ3arKlQ4kdqNzddqegm|python:S1192|scripts/docs/checks/check_drift.py|176|CRITICAL|Define a constant instead of duplicating this literal "docs/00-project/ai/agents/guides/MEMORY_USAGE.md" 26 times.|define a constant and reuse to remove duplicated path literals|
+|out|AZ3arKlQ4kdqNzddqegj|python:S1192|scripts/docs/checks/check_drift.py|177|CRITICAL|Define a constant instead of duplicating this literal "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md" 21 times.|define a constant and reuse to remove duplicated path literals|
+|out|AZ3arKlQ4kdqNzddqegk|python:S1192|scripts/docs/checks/check_drift.py|178|CRITICAL|Define a constant instead of duplicating this literal ".codex/agents/CODEX-RUNTIME.md" 4 times.|define a constant and reuse to remove duplicated path literals|
+|out|AZ3arKlQ4kdqNzddqegn|python:S1192|scripts/docs/checks/check_drift.py|179|CRITICAL|Define a constant instead of duplicating this literal ".gemini/agents/GEMINI-RUNTIME.md" 4 times.|define a constant and reuse to remove duplicated path literals|
+|out|AZ3arKlQ4kdqNzddqegl|python:S1192|scripts/docs/checks/check_drift.py|460|CRITICAL|Define a constant instead of duplicating this literal r"\\.claude/" 14 times.|define a constant and reuse to remove duplicated path literals|
+|out|AZ3arKlQ4kdqNzddqego|python:S3776|scripts/docs/checks/check_drift.py|1469|CRITICAL|Refactor this function to reduce its Cognitive Complexity from 17 to the 15 allowed.|extract helpers and reduce branching/loops to fit cognitive threshold|
+|out|AZ3arKzJ4kdqNzddqegp|python:S3776|scripts/engineering/qa/naming_audit.py|791|CRITICAL|Refactor this function to reduce its Cognitive Complexity from 16 to the 15 allowed.|extract helpers and reduce branching/loops to fit cognitive threshold|
+|out|AZ3arI3N4kdqNzddqegf|python:S3776|src/memory/tooling/workflow.py|63|CRITICAL|Refactor this function to reduce its Cognitive Complexity from 18 to the 15 allowed.|extract helpers and reduce branching/loops to fit cognitive threshold|
+|out|AZ3arKh24kdqNzddqegg|python:S3776|tests/test_architecture.py|721|CRITICAL|Refactor this function to reduce its Cognitive Complexity from 25 to the 15 allowed.|extract helpers and reduce branching/loops to fit cognitive threshold|
+|out|AZ3arKh24kdqNzddqegh|python:S3776|tests/test_architecture.py|752|CRITICAL|Refactor this function to reduce its Cognitive Complexity from 17 to the 15 allowed.|extract helpers and reduce branching/loops to fit cognitive threshold|
+|out|AZ3Z0OeifvCeAV2DccBm|python:S3776|tests/integration/config/test_chembl_observed_value_fixtures.py|241|CRITICAL|Refactor this function to reduce its Cognitive Complexity from 18 to the 15 allowed.|extract helpers and reduce branching/loops to fit cognitive threshold|
+|out|AZ3Z0OuJfvCeAV2DccBn|python:S3776|scripts/engineering/repo/check_cleanup_governance.py|115|CRITICAL|Refactor this function to reduce its Cognitive Complexity from 16 to the 15 allowed.|extract helpers and reduce branching/loops to fit cognitive threshold|
