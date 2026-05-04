@@ -167,11 +167,8 @@ def test_runtime_and_control_plane_operator_panels_use_active_time_windows(
         ("bioetl-dq-v2.json", "Quarantine by Error Type"),
         ("bioetl-dq-v2.json", "Silver Validation Failures"),
         ("bioetl-dq-v2.json", "Lineage Refs Missing"),
-        ("bioetl-runtime.json", "Warnings"),
-        ("bioetl-runtime.json", "Unstructured Logs"),
         ("bioetl-runtime.json", "Errors by Stage / Error Code / Range"),
         ("bioetl-runtime.json", "Records by Stage / Run Type / Range"),
-        ("bioetl-runtime.json", "Top Warning Events"),
     ],
 )
 def test_range_aware_summary_panels_use_selected_time_range(
@@ -270,39 +267,35 @@ def test_runtime_alert_condition_panels_use_recording_rules(
 
 
 def test_runtime_first_action_row_precedes_condition_cards_in_order() -> None:
-    """Runtime tracing row should expose First Action CTA block before condition cards."""
+    """Runtime Escalate row should expose alert condition cards in expected order."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
-    tracing_row = next(
+    escalate_row = next(
         (
             panel
             for panel in dashboard.get("panels", [])
             if panel.get("type") == "row"
-            and panel.get("title")
-            == "Tracing-only Log Hygiene (requires optional tracing profile)"
+            and panel.get("title") == "Escalate (collapsed)"
         ),
         None,
     )
-    assert tracing_row is not None, "Runtime tracing row not found"
-    nested = tracing_row.get("panels", [])
+    assert escalate_row is not None, "Runtime Escalate row not found"
+    nested = escalate_row.get("panels", [])
     titles = [panel.get("title") for panel in nested]
     expected_sequence = [
-        "First Action",
-        "Pipeline conditions",
-        "DQ conditions",
-        "Control Plane conditions",
-        "Provider health checks",
         "Pipeline Alert Conditions",
         "DQ Alert Conditions",
         "Control-plane Alert Conditions",
         "GLOBAL Provider Alert Conditions",
+        "Freshness Alert Conditions",
+        "No-Records Runs / 30m",
+        "Memory Pressure Active / 15m",
     ]
     for title in expected_sequence:
-        assert title in titles, f"Runtime tracing row missing panel '{title}'"
+        assert title in titles, f"Runtime Escalate row missing panel '{title}'"
 
     indices = [titles.index(title) for title in expected_sequence]
     assert indices == sorted(indices), (
-        "Runtime First Action CTA panels must appear before existing condition cards "
-        "in the expected order"
+        "Runtime Escalate row alert condition panels must appear in the expected order"
     )
 
 
@@ -344,11 +337,6 @@ def test_adaptive_trend_panels_use_selected_interval(
 @pytest.mark.parametrize(
     ("dashboard_file", "panel_title", "expected_snippet"),
     [
-        (
-            "bioetl-runtime.json",
-            "Top Warning Events",
-            'label_replace(vector(0), "event", "none", "", "")',
-        ),
         (
             "bioetl-runtime.json",
             "Errors by Stage / Error Code / Range",

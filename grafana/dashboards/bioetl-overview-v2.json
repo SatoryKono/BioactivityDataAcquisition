@@ -82,6 +82,7 @@
       "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D",
       "type": "link",
       "asDropdown": false,
+      "includeVars": false,
       "keepTime": true,
       "targetBlank": false,
       "tooltip": "Open Loki Explore with tracing profile and selected time range."
@@ -91,6 +92,7 @@
       "url": "/a/grafana-exploretraces-app/?from=${__from}&to=${__to}&queryType=traceqlSearch&query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline:regex}%22%20%26%26%20span.%22bioetl.run_type%22%20%3D~%20%22${run_type:regex}%22%20%7D",
       "type": "link",
       "asDropdown": false,
+      "includeVars": false,
       "keepTime": true,
       "targetBlank": false,
       "tooltip": "Open Tempo Explore with tracing profile and selected time range."

@@ -307,8 +307,8 @@
             "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/pipeline-failure-critical.md"
           },
           {
-            "title": "Open Logs (Loki, contextual scope marker)",
-            "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D%20%7C%20json%20%7C%20scope_marker%3D%22dashboard_context%22%20%7C%20pipeline%3D~%22${pipeline:regex}%22%20%7C%20run_type%3D~%22${run_type:regex}%22",
+            "title": "Open Logs (Loki, contextual scope marker, tracing)",
+            "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D%20%7C%20json%20%7C%20scope_marker%3D%22dashboard_context%22",
             "targetBlank": true
           }
         ]
@@ -1052,6 +1052,79 @@
         },
         {
           "datasource": "Prometheus",
+          "description": "Error breakdown by stage and error code over the selected Grafana time range.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "drawStyle": "bars",
+                "fillOpacity": 80,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "tooltip": false,
+                  "viz": false,
+                  "legend": false
+                },
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": true
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 29
+          },
+          "id": 256,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom"
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "targets": [
+            {
+              "expr": "sum by(stage, error_code) (increase(bioetl_errors_total{pipeline=~\"$pipeline\",stage=~\"$stage\"}[$__range])) or label_replace(label_replace(vector(0), \"stage\", \"none\", \"\", \"\"), \"error_code\", \"none\", \"\", \"\")",
+              "instant": true,
+              "legendFormat": "{{stage}} / {{error_code}}",
+              "refId": "A"
+            }
+          ],
+          "title": "Errors by Stage / Error Code / Range",
+          "type": "timeseries"
+        },
+        {
+          "datasource": "Prometheus",
           "description": "Processed-record totals over the active range, grouped by stage and run_type.",
           "fieldConfig": {
             "defaults": {
@@ -1105,21 +1178,7 @@
           ],
           "title": "Records by Stage / Run Type / Range",
           "type": "bargauge"
-        }
-      ]
-    },
-    {
-      "id": 254,
-      "type": "row",
-      "title": "Escalate (collapsed)",
-      "collapsed": true,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 45
-      },
-      "panels": [
+        },
         {
           "datasource": "Prometheus",
           "description": "Graceful-shutdown initiation events over the active Grafana interval.",
@@ -1899,7 +1958,8 @@
                     "value": null
                   }
                 ]
-              }
+              },
+              "unit": "short"
             },
             "overrides": []
           },
@@ -1924,7 +1984,7 @@
         },
         {
           "datasource": "Loki",
-          "description": "Log events that failed JSON parsing or are missing expected fields.",
+          "description": "Log events that failed JSON parsing or are missing expected fields over the selected Range.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1943,7 +2003,8 @@
                     "value": null
                   }
                 ]
-              }
+              },
+              "unit": "short"
             },
             "overrides": []
           },
@@ -2004,7 +2065,8 @@
                     "value": null
                   }
                 ]
-              }
+              },
+              "unit": "short"
             },
             "overrides": []
           },
@@ -2037,7 +2099,7 @@
         },
         {
           "datasource": "Loki",
-          "description": "Trend of structured vs unstructured log events over time.",
+          "description": "Trend of structured vs unstructured log events over time by Interval.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2073,7 +2135,8 @@
                     "value": null
                   }
                 ]
-              }
+              },
+              "unit": "short"
             },
             "overrides": []
           },

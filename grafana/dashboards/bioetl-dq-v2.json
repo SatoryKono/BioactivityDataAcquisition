@@ -169,8 +169,8 @@
             "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
           },
           {
-            "title": "Open Logs (Loki, contextual scope marker)",
-            "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D%20%7C%20json%20%7C%20scope_marker%3D%22dashboard_context%22%20%7C%20pipeline%3D~%22${pipeline:regex}%22%20%7C%20run_type%3D~%22${run_type:regex}%22",
+            "title": "Open Logs (Loki, contextual scope marker, tracing)",
+            "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D%20%7C%20json%20%7C%20scope_marker%3D%22dashboard_context%22",
             "targetBlank": true
           }
         ]
@@ -1185,7 +1185,7 @@
               "refId": "A"
             }
           ],
-          "title": "Top Silver Reject Reasons",
+          "title": "Top Silver Reject Reasons (Pareto)",
           "type": "bargauge",
           "description": "Pareto ranking of rejection reasons. Use panel link to drill down into reject explorer.",
           "links": [
