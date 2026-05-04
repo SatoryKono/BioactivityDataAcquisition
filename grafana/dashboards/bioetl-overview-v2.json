@@ -1048,7 +1048,7 @@
             "textMode": "value_and_name",
             "dataLinks": [
               {
-                "title": "Open bioetl-runtime",
+                "title": "Open Runtime status",
                 "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
                 "targetBlank": false
               }
@@ -1159,7 +1159,7 @@
             "textMode": "value_and_name",
             "dataLinks": [
               {
-                "title": "Open bioetl-dq-v2",
+                "title": "Open Data Quality status",
                 "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
                 "targetBlank": false
               }
@@ -1271,7 +1271,7 @@
             "textMode": "value_and_name",
             "dataLinks": [
               {
-                "title": "Open bioetl-control-plane-v1",
+                "title": "Open Control Plane status",
                 "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
                 "targetBlank": false
               }
