@@ -37,6 +37,40 @@ def _load_navigation_links_contract() -> dict[str, object]:
             result[uid] = frozenset(str(v) for v in values)
         return result
 
+    raw_required_panel_links = raw_contract.get("required_panel_links_by_uid", {})
+    assert isinstance(
+        raw_required_panel_links, dict
+    ), "required_panel_links_by_uid must be a mapping"
+    required_panel_links_by_uid: dict[str, tuple[dict[str, object], ...]] = {}
+    for uid, entries in raw_required_panel_links.items():
+        assert isinstance(uid, str), "required_panel_links_by_uid keys must be strings"
+        assert isinstance(entries, list), f"required_panel_links_by_uid.{uid} must be a list"
+        normalized_entries: list[dict[str, object]] = []
+        for entry in entries:
+            assert isinstance(entry, dict), (
+                f"required_panel_links_by_uid.{uid} entries must be mappings"
+            )
+            panel_id = entry.get("panel_id")
+            target_uid = entry.get("target_uid")
+            link_titles = entry.get("link_titles", [])
+            assert isinstance(panel_id, int), (
+                f"required_panel_links_by_uid.{uid}.panel_id must be integer"
+            )
+            assert isinstance(target_uid, str), (
+                f"required_panel_links_by_uid.{uid}.target_uid must be string"
+            )
+            assert isinstance(link_titles, list), (
+                f"required_panel_links_by_uid.{uid}.link_titles must be a list"
+            )
+            normalized_entries.append(
+                {
+                    "panel_id": panel_id,
+                    "target_uid": target_uid,
+                    "link_titles": tuple(str(title) for title in link_titles),
+                }
+            )
+        required_panel_links_by_uid[uid] = tuple(normalized_entries)
+
     return {
         "allowed_dashboard_link_vars": _as_frozenset_map("allowed_dashboard_link_vars"),
         "forbidden_dashboard_link_vars_by_target_uid": _as_frozenset_map(
@@ -48,6 +82,7 @@ def _load_navigation_links_contract() -> dict[str, object]:
         "required_top_level_links_by_uid": _as_frozenset_map(
             "required_top_level_links_by_uid"
         ),
+        "required_panel_links_by_uid": required_panel_links_by_uid,
     }
 
 
@@ -60,6 +95,7 @@ _REQUIRED_LINK_VARS_BY_TARGET_UID = _NAV_LINK_CONTRACT[
     "required_link_vars_by_target_uid"
 ]
 _REQUIRED_TOP_LEVEL_LINKS_BY_UID = _NAV_LINK_CONTRACT["required_top_level_links_by_uid"]
+_REQUIRED_PANEL_LINKS_BY_UID = _NAV_LINK_CONTRACT["required_panel_links_by_uid"]
 
 
 def _extract_required_time_tokens(section: str) -> tuple[str, ...]:
@@ -306,6 +342,65 @@ def test_dashboard_top_level_navigation_contract_by_uid() -> None:
             f"{dashboard_path.name} ({uid}) is missing required top-level links: "
             f"{sorted(missing)}"
         )
+
+
+def test_required_critical_panel_links_by_uid_contract() -> None:
+    """Critical KPI panels must provide first-hop action links by contract."""
+    for dashboard_path in get_dashboard_files():
+        dashboard = load_dashboard(dashboard_path)
+        uid = dashboard.get("uid")
+        assert isinstance(uid, str), f"{dashboard_path.name} must declare string uid"
+        required_entries = _REQUIRED_PANEL_LINKS_BY_UID.get(uid, ())
+        if not required_entries:
+            continue
+
+        panels_by_id = {
+            panel.get("id"): panel
+            for panel in get_dashboard_panels(dashboard)
+            if isinstance(panel, dict) and isinstance(panel.get("id"), int)
+        }
+        for entry in required_entries:
+            panel_id = entry["panel_id"]
+            target_uid = entry["target_uid"]
+            expected_titles = set(entry["link_titles"])
+            panel = panels_by_id.get(panel_id)
+            assert isinstance(panel, dict), (
+                f"{dashboard_path.name} ({uid}) missing critical panel id={panel_id}"
+            )
+
+            data_links = _iter_panel_data_links(panel)
+            assert data_links, (
+                f"{dashboard_path.name} panel id={panel_id} must define dataLinks"
+            )
+
+            matching_links = []
+            for link in data_links:
+                title = str(link.get("title", ""))
+                url = str(link.get("url", ""))
+                if expected_titles and title not in expected_titles:
+                    continue
+                if url.startswith(f"/d/{target_uid}/"):
+                    matching_links.append(link)
+
+            assert matching_links, (
+                f"{dashboard_path.name} panel id={panel_id} must include at least one "
+                f"critical link to target_uid={target_uid} with title in "
+                f"{sorted(expected_titles)}"
+            )
+
+            allowed_vars = _ALLOWED_DASHBOARD_LINK_VARS[target_uid]
+            for link in matching_links:
+                url = str(link.get("url", ""))
+                _assert_required_time_tokens(
+                    url,
+                    tokens=_DASHBOARD_TIME_HANDOFF_TOKENS,
+                    context=f"{dashboard_path.name} panel id={panel_id}",
+                )
+                passed_vars = _extract_link_vars(url)
+                assert passed_vars <= allowed_vars, (
+                    f"{dashboard_path.name} panel id={panel_id} link to {target_uid} "
+                    f"passes non-allowlisted vars: {sorted(passed_vars - allowed_vars)}"
+                )
 
 
 def test_dashboard_links_forbid_universal_handoff_patterns() -> None:
