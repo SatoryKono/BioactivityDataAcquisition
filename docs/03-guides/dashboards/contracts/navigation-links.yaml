@@ -1,3 +1,12 @@
+normative_source:
+  scope: link_vars_time_semantics
+  authority: single_source_of_truth
+  narrative_minimal: |
+    This YAML is the only normative contract for dashboard link semantics,
+    allowed/required/forbidden var-* handoff, and time handoff policy.
+    Markdown guides are explanatory mirrors and MUST reference this file
+    instead of redefining normative rules.
+
 version: 1
 required_top_level_links_by_uid:
   bioetl-overview-v2:
