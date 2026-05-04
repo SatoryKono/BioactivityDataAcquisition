@@ -332,8 +332,14 @@ def test_fetch_live_issue_summary_aggregates_multiple_pages(monkeypatch) -> None
             return {
                 "paging": {"total": self._total, "pageSize": 100},
                 "facets": [
-                    {"property": "severities", "values": [{"val": "MAJOR", "count": 1}]},
-                    {"property": "types", "values": [{"val": "CODE_SMELL", "count": 1}]},
+                    {
+                        "property": "severities",
+                        "values": [{"val": "MAJOR", "count": 1}],
+                    },
+                    {
+                        "property": "types",
+                        "values": [{"val": "CODE_SMELL", "count": 1}],
+                    },
                 ],
                 "issues": self._issues,
             }

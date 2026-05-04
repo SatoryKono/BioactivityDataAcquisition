@@ -10,11 +10,24 @@ from tests.helpers import repo_root, run_repo_python
 
 
 EXPECTED_MCP_SERVERS = {
-    "memory","filesystem","fetch","github","docker","context7",
-    "prometheus","grafana","brave-search","sonarqube",
-    "neo4j-cypher","neo4j-memory",
-    "chembl","pubchem","pubmed",
-    "mermaid","ast-grep","mcp-code-interpreter"
+    "memory",
+    "filesystem",
+    "fetch",
+    "github",
+    "docker",
+    "context7",
+    "prometheus",
+    "grafana",
+    "brave-search",
+    "sonarqube",
+    "neo4j-cypher",
+    "neo4j-memory",
+    "chembl",
+    "pubchem",
+    "pubmed",
+    "mermaid",
+    "ast-grep",
+    "mcp-code-interpreter",
 }
 
 WRAPPER_SCRIPT_STEMS = {
