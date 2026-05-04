@@ -24,6 +24,7 @@ required_top_level_links_by_uid:
   bioetl-provider-health-v2:
     - Back to Overview
     - 2. Runtime
+    - Control Plane v1
     - Explore Logs (Loki, tracing profile)
     - Explore Traces (Tempo, tracing profile)
   bioetl-dq-v2:
@@ -57,6 +58,14 @@ allowed_dashboard_link_vars:
   bioetl-control-plane-v1: [pipeline, run_type]
   bioetl-workflow-overview: [workflow, status]
   bioetl-silver-reject-explorer: [pipeline, run_type, reason_code, field, run_id, payload_hash]
+forbidden_dashboard_link_vars_by_target_uid:
+  bioetl-overview-v2: [run_id, payload_hash]
+  bioetl-control-plane-v1: [run_id, payload_hash]
+  bioetl-runtime: [run_id, payload_hash]
+  bioetl-dq-v2: [run_id, payload_hash]
+  bioetl-provider-health-v2: [run_id, payload_hash]
+  bioetl-workflow-overview: [run_id, payload_hash]
+  bioetl-silver-reject-explorer: []
 
 time_handoff_requirements:
   dashboard_links:
@@ -66,4 +75,3 @@ time_handoff_requirements:
     required_tokens:
       - from=${__from}
       - to=${__to}
-
