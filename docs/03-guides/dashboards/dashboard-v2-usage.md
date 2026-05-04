@@ -174,6 +174,7 @@ Variable handoff policy for dashboard links remains strict and bounded:
 - For overview/runtime/dq flows pass only `$pipeline/$run_type` unless destination needs another explicit scope.
 - For provider flow pass only `$provider/$adapter` (or explicit `All` defaults when opening non-provider dashboards).
 - Workflow-specific variables (`$workflow`, `$status`) and forensic IDs (`$run_id`, `$payload_hash`) MUST NOT be propagated into non-target dashboards.
+- Top-level links дополнительно маркируются приоритетом (`primary`, `secondary`, `contextual`) через contract block `top_level_link_priority_by_uid`; приоритет должен быть виден в `title`/`tooltip` для неоднозначных маршрутов.
 
 ## Default dashboard windows (L0/L1 baseline + L2 forensic exception)
 
@@ -223,7 +224,7 @@ Variable handoff policy for dashboard links remains strict and bounded:
   `bioetl_control_plane_reads_total` и
   `bioetl_control_plane_read_duration_seconds_bucket` глобальны по
   `store/operation/status`.
-- `bioetl-provider-health-v2`: dashboard links `Back to Overview`, `2. Runtime`, `Explore Logs (Loki, tracing profile)` и `Explore Traces (Tempo, tracing profile)` дают быстрый переход из provider health surface в runtime/overview и correlation flow без ложного pipeline scope в target dashboards. Panel `id=114` (`Current Provider Health Status`) показывает явный enum mapping `0=UNHEALTHY`, `1=DEGRADED`, `2=HEALTHY`, а panel `id=1` (`Health Check Latency by Provider (p95)`) дублирует Explore handoff через data links.
+- `bioetl-provider-health-v2`: dashboard links `Back to Overview`, `2. Runtime (Primary)`, `2. Runtime (Contextual: provider mapping)`, `Explore Logs (Loki, tracing profile)` и `Explore Traces (Tempo, tracing profile)` дают быстрый переход из provider health surface в runtime/overview и correlation flow без ложного pipeline scope в target dashboards. Panel `id=114` (`Current Provider Health Status`) показывает явный enum mapping `0=UNHEALTHY`, `1=DEGRADED`, `2=HEALTHY`, а panel `id=1` (`Health Check Latency by Provider (p95)`) дублирует Explore handoff через data links.
 - `bioetl-dq-v2`: dashboard link `Back to Overview` плюс `5. Silver Reject Explorer`, `Explore Logs (Loki, tracing profile)` и `Explore Traces (Tempo, tracing profile)` дают тот же переход для DQ incidents и freshness investigation. Handoff в Explorer передаёт только bounded `$pipeline/$run_type` scope, а не generic `includeVars` leakage. Panel `id=1` (`Data Flow in Range: Bronze -> Silver -> Gold`) дублирует Explore handoff через data links.
 - `bioetl-silver-reject-explorer`: dashboard links `Back to Overview`, `Back to Data Quality`, `Open Logs`, `Open Traces`; back-links возвращают только `$pipeline/$run_type`, не leaking `payload_hash` или other forensic filters. Main table поддерживает data links для self-drilldown по `payload_hash` и CLI handoff. Верхняя explanatory panel явно показывает banner `default 24h forensic window`, чтобы оператор не интерпретировал explorer как обычное `now-12h` окно.
 
