@@ -26,7 +26,7 @@
       "tags": [],
       "targetBlank": false,
       "title": "Back to Overview",
-      "tooltip": "",
+      "tooltip": "Return to 1. Overview and preserve the selected time range.",
       "type": "link",
       "url": "/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
     },
@@ -38,7 +38,7 @@
       "tags": [],
       "targetBlank": false,
       "title": "Back to Data Quality",
-      "tooltip": "",
+      "tooltip": "Return to 4. Data Quality with current time range and dashboard scope.",
       "type": "link",
       "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
     },
@@ -50,7 +50,7 @@
       "tags": [],
       "targetBlank": false,
       "title": "Explore Logs (Loki, tracing profile)",
-      "tooltip": "",
+      "tooltip": "Open Loki Explore with tracing profile and selected time range.",
       "type": "link",
       "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D"
     },
@@ -62,7 +62,7 @@
       "tags": [],
       "targetBlank": false,
       "title": "Explore Traces (Tempo, tracing profile)",
-      "tooltip": "",
+      "tooltip": "Open Tempo Explore with tracing profile and selected time range.",
       "type": "link",
       "url": "/a/grafana-exploretraces-app/?from=${__from}&to=${__to}&queryType=traceqlSearch&query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline:regex}%22%20%26%26%20span.%22bioetl.run_type%22%20%3D~%20%22${run_type:regex}%22%20%7D"
     }
