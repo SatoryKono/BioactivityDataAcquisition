@@ -131,26 +131,6 @@ required_panel_links_by_uid:
     - panel_id: 210
       target_uid: bioetl-control-plane-v1
       link_titles: ["Open Control Plane Drilldown", "Open Control Plane status"]
-  bioetl-runtime:
-    - panel_id: 300
-      target_uid: bioetl-overview-v2
-      link_titles: ["Open Pipeline Conditions"]
-    - panel_id: 301
-      target_uid: bioetl-dq-v2
-      link_titles: ["Open DQ Conditions"]
-    - panel_id: 302
-      target_uid: bioetl-control-plane-v1
-      link_titles: ["Open Control Plane Conditions"]
-  bioetl-dq-v2:
-    - panel_id: 1
-      target_uid: bioetl-control-plane-v1
-      link_titles: ["Open Control Plane v1 (replay/checkpoint)"]
-    - panel_id: 116
-      target_uid: bioetl-control-plane-v1
-      link_titles: ["Open Control Plane v1 (lineage/traceability)"]
-    - panel_id: 151
-      target_uid: bioetl-control-plane-v1
-      link_titles: ["Open Control Plane v1 (gold hard-fail context)"]
 time_handoff_requirements:
   dashboard_links:
     required_tokens:
