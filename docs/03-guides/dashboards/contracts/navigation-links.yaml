@@ -67,6 +67,35 @@ forbidden_dashboard_link_vars_by_target_uid:
   bioetl-workflow-overview: [run_id, payload_hash]
   bioetl-silver-reject-explorer: []
 
+
+required_discoverable_inbound_paths:
+  L1:
+    bioetl-runtime:
+      - source_uid: bioetl-overview-v2
+        source_panel_id: 208
+        source_panel_title: Runtime Status
+    bioetl-control-plane-v1:
+      - source_uid: bioetl-overview-v2
+        source_panel_id: 210
+        source_panel_title: Control Plane Status
+    bioetl-provider-health-v2:
+      - source_uid: bioetl-overview-v2
+        source_panel_id: 211
+        source_panel_title: Provider Status
+    bioetl-dq-v2:
+      - source_uid: bioetl-overview-v2
+        source_panel_id: 209
+        source_panel_title: Data Quality Status
+    bioetl-workflow-overview:
+      - source_uid: bioetl-overview-v2
+        source_panel_id: 212
+        source_panel_title: Workflow Status
+  L2:
+    bioetl-silver-reject-explorer:
+      - source_uid: bioetl-dq-v2
+        source_panel_id: 121
+        source_panel_title: Top Silver Reject Reasons (Pareto)
+
 time_handoff_requirements:
   dashboard_links:
     required_tokens:

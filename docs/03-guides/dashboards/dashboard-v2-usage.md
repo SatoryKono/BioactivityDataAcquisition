@@ -30,6 +30,17 @@ Machine-readable navigation contract: `docs/03-guides/dashboards/contracts/navig
 | 5. Silver Reject Explorer | `bioetl-silver-reject-explorer` | Record-level explorer для `filtered_out`/`FILTERED_OUT_SILVER` записей (quarantine-backed) |
 | 6. Workflow Overview      | `bioetl-workflow-overview`      | Declarative workflow run/step outcomes and transform-step latency                          |
 
+## From where to enter each dashboard in 1 click
+
+| Target dashboard | 1-click entry source (dashboard -> panel id/title) |
+| --- | --- |
+| `bioetl-runtime` | `bioetl-overview-v2` -> `id=208` `Runtime Status` |
+| `bioetl-control-plane-v1` | `bioetl-overview-v2` -> `id=210` `Control Plane Status` |
+| `bioetl-provider-health-v2` | `bioetl-overview-v2` -> `id=211` `Provider Status` |
+| `bioetl-dq-v2` | `bioetl-overview-v2` -> `id=209` `Data Quality Status` |
+| `bioetl-workflow-overview` | `bioetl-overview-v2` -> `id=212` `Workflow Status` |
+| `bioetl-silver-reject-explorer` | `bioetl-dq-v2` -> `id=121` `Top Silver Reject Reasons (Pareto)` |
+
 ## Фильтрация
 
 - `bioetl-overview-v2`: `$pipeline`, `$run_type`
