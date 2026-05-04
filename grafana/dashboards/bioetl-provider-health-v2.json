@@ -25,8 +25,8 @@
       "keepTime": true,
       "tags": [],
       "targetBlank": false,
-      "title": "Back to Overview",
-      "tooltip": "Cross-scope handoff (opens with All core scope): var-pipeline=All and var-run_type=All; provider/adapter do not transfer.",
+      "title": "Back to Overview (Reset scope)",
+      "tooltip": "Reset scope: open Overview with var-pipeline=All and var-run_type=All. Context mapping is not applied for this link.",
       "type": "dashboards",
       "url": "/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=All&var-run_type=All&${__url_time_range}"
     },
@@ -37,8 +37,8 @@
       "keepTime": true,
       "tags": [],
       "targetBlank": false,
-      "title": "2. Runtime",
-      "tooltip": "Cross-scope handoff (opens with All core scope): var-pipeline=All, var-run_type=All, var-stage=All; provider/adapter do not transfer.",
+      "title": "2. Runtime (Reset scope)",
+      "tooltip": "Reset scope: open Runtime with var-pipeline=All, var-run_type=All, var-stage=All. Use contextual mapping via the dedicated secondary action.",
       "type": "link",
       "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=All&var-run_type=All&var-stage=All&${__url_time_range}"
     },
@@ -49,8 +49,8 @@
       "keepTime": true,
       "tags": [],
       "targetBlank": false,
-      "title": "2. Runtime (provider context)",
-      "tooltip": "Cross-scope handoff (provider-derived context mapping): provider/adapter map to runtime pipeline/run_type when mapping exists; fallback var-pipeline=All&var-run_type=All&var-stage=All.",
+      "title": "2. Runtime (Context mapping)",
+      "tooltip": "Context mapping: map provider/adapter into runtime var-pipeline/var-run_type when possible; fallback to All scope defaults and var-stage=All.",
       "type": "link",
       "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=${provider:queryparam}&var-run_type=${adapter:queryparam}&var-stage=All&${__url_time_range}"
     },
@@ -72,8 +72,8 @@
       "keepTime": true,
       "tags": [],
       "targetBlank": false,
-      "title": "Control Plane v1",
-      "tooltip": "Cross-scope handoff (opens with All core scope): var-pipeline=All and var-run_type=All; provider/adapter do not transfer.",
+      "title": "Control Plane v1 (Reset scope)",
+      "tooltip": "Reset scope: open Control Plane with var-pipeline=All and var-run_type=All. Context mapping is not applied for this link.",
       "type": "link",
       "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=All&var-run_type=All&${__url_time_range}"
     },

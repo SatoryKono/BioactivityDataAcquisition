@@ -48,6 +48,9 @@ def _load_navigation_links_contract() -> dict[str, object]:
         "required_top_level_links_by_uid": _as_frozenset_map(
             "required_top_level_links_by_uid"
         ),
+        "cross_scope_marker_contract": raw_contract.get(
+            "cross_scope_marker_contract", {}
+        ),
     }
 
 
@@ -60,6 +63,7 @@ _REQUIRED_LINK_VARS_BY_TARGET_UID = _NAV_LINK_CONTRACT[
     "required_link_vars_by_target_uid"
 ]
 _REQUIRED_TOP_LEVEL_LINKS_BY_UID = _NAV_LINK_CONTRACT["required_top_level_links_by_uid"]
+_CROSS_SCOPE_MARKER_CONTRACT = _NAV_LINK_CONTRACT["cross_scope_marker_contract"]
 
 
 def _extract_required_time_tokens(section: str) -> tuple[str, ...]:
@@ -306,6 +310,72 @@ def test_dashboard_top_level_navigation_contract_by_uid() -> None:
             f"{dashboard_path.name} ({uid}) is missing required top-level links: "
             f"{sorted(missing)}"
         )
+
+
+def test_cross_scope_links_use_explicit_reset_or_context_markers() -> None:
+    """Cross-scope links must expose explicit marker in title/tooltip."""
+    marker_contract = _CROSS_SCOPE_MARKER_CONTRACT
+    assert isinstance(marker_contract, dict), "cross_scope_marker_contract must be mapping"
+    required_markers = marker_contract.get("required_markers", {})
+    assert isinstance(required_markers, dict), "required_markers must be mapping"
+    required_titles_by_transition = marker_contract.get(
+        "required_titles_by_transition", {}
+    )
+    assert isinstance(
+        required_titles_by_transition, dict
+    ), "required_titles_by_transition must be mapping"
+    required_tooltip_tokens = marker_contract.get("required_tooltip_tokens", {})
+    assert isinstance(
+        required_tooltip_tokens, dict
+    ), "required_tooltip_tokens must be mapping"
+
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-provider-health-v2.json"))
+    links = [link for link in dashboard.get("links", []) if isinstance(link, dict)]
+
+    for transition, marker_key in required_titles_by_transition.items():
+        assert isinstance(marker_key, str), (
+            f"marker key for {transition} must be a string"
+        )
+        marker = required_markers.get(marker_key)
+        assert isinstance(marker, str) and marker, (
+            f"required marker '{marker_key}' must be declared for transition {transition}"
+        )
+        tooltip_tokens = required_tooltip_tokens.get(marker_key, [])
+        assert isinstance(tooltip_tokens, list), (
+            f"required_tooltip_tokens.{marker_key} must be list"
+        )
+
+        base_transition = transition.split("#", 1)[0]
+        from_uid, to_uid = base_transition.split("->", 1)
+        assert from_uid == "bioetl-provider-health-v2", (
+            f"this test currently validates provider-health transitions only, got {transition}"
+        )
+
+        matched_links = []
+        for link in links:
+            url = link.get("url", "")
+            if not isinstance(url, str):
+                continue
+            target_uid = _extract_dashboard_uid(url)
+            if target_uid != to_uid:
+                continue
+            title = str(link.get("title", ""))
+            if marker in title:
+                matched_links.append(link)
+
+        assert matched_links, (
+            f"Missing cross-scope link for {transition} with title marker '{marker}'"
+        )
+        for link in matched_links:
+            title = str(link.get("title", ""))
+            tooltip = str(link.get("tooltip", ""))
+            assert marker in title, (
+                f"Link title must include '{marker}' for transition {transition}: {title}"
+            )
+            for token in tooltip_tokens:
+                assert token in tooltip, (
+                    f"Link tooltip for transition {transition} must include '{token}': {tooltip}"
+                )
 
 
 def test_dashboard_links_forbid_universal_handoff_patterns() -> None:
