@@ -105,24 +105,29 @@ required_discoverable_inbound_paths:
   L1:
     bioetl-runtime:
       - source_uid: bioetl-overview-v2
-        source_panel_id: 208
-        source_panel_title: Runtime Status
+        source_panel_id: 215
+        source_panel_title: Next Action
+        source_status_row_panel_title_matcher: "^L0 Overview Scope$"
     bioetl-control-plane-v1:
       - source_uid: bioetl-overview-v2
-        source_panel_id: 210
-        source_panel_title: Control Plane Status
+        source_panel_id: 215
+        source_panel_title: Next Action
+        source_status_row_panel_title_matcher: "^L0 Overview Scope$"
     bioetl-provider-health-v2:
       - source_uid: bioetl-overview-v2
-        source_panel_id: 211
-        source_panel_title: Provider Status
+        source_panel_id: 215
+        source_panel_title: Next Action
+        source_status_row_panel_title_matcher: "^L0 Overview Scope$"
     bioetl-dq-v2:
       - source_uid: bioetl-overview-v2
-        source_panel_id: 209
-        source_panel_title: Data Quality Status
+        source_panel_id: 215
+        source_panel_title: Next Action
+        source_status_row_panel_title_matcher: "^L0 Overview Scope$"
     bioetl-workflow-overview:
       - source_uid: bioetl-overview-v2
-        source_panel_id: 212
-        source_panel_title: Workflow Status
+        source_panel_id: 215
+        source_panel_title: Next Action
+        source_status_row_panel_title_matcher: "^L0 Overview Scope$"
   L2:
     bioetl-silver-reject-explorer:
       - source_uid: bioetl-dq-v2
