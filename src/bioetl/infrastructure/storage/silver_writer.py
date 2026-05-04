@@ -3,8 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, cast
-from typing import Literal
+from typing import Any, Literal, cast
 
 from deltalake import DeltaTable, write_deltalake
 
@@ -88,6 +87,7 @@ class SilverWriter(
     ) -> None:
         """Initialize Silver writer."""
         self._pipeline_name = pipeline_name
+
         if runtime_request is not None and runtime_dependencies:
             unexpected_dependency = ", ".join(sorted(runtime_dependencies))
             raise TypeError(
@@ -109,9 +109,13 @@ class SilverWriter(
                     WriteModePolicy | None,
                     runtime_dependencies.pop("write_policy", None),
                 ),
-                metrics=cast(MetricsPort | None, runtime_dependencies.pop("metrics", None)),
+                metrics=cast(
+                    MetricsPort | None, runtime_dependencies.pop("metrics", None)
+                ),
                 audit=cast(AuditPort | None, runtime_dependencies.pop("audit", None)),
-                logger=cast(LoggerPort | None, runtime_dependencies.pop("logger", None)),
+                logger=cast(
+                    LoggerPort | None, runtime_dependencies.pop("logger", None)
+                ),
                 silver_validator=cast(
                     SilverValidatorPort | None,
                     runtime_dependencies.pop("silver_validator", None),
@@ -141,58 +145,15 @@ class SilverWriter(
                     runtime_dependencies.pop("contract_rollout_policy", None),
                 ),
             )
-        elif runtime_dependencies:
-            raise TypeError(
-                "Unexpected legacy runtime dependency kwargs: "
-                f\"{', '.join(sorted(runtime_dependencies))}\"
-            )
+            if runtime_dependencies:
+                unexpected_dependency = ", ".join(sorted(runtime_dependencies))
+                raise TypeError(
+                    "Unexpected legacy runtime dependency kwargs: "
+                    f"{unexpected_dependency}"
+                )
+        else:
+            runtime_request = cast(SilverWriterRuntimeServicesRequest, runtime_request)
 
-        runtime_request = cast(SilverWriterRuntimeServicesRequest, runtime_request)
-        # Ensure legacy logger key does not produce a divergent operation logger.
-        runtime_request = SilverWriterRuntimeServicesRequest(
-            csv_exporter=runtime_request.csv_exporter,
-            tracing=runtime_request.tracing,
-            write_policy=runtime_request.write_policy,
-            metrics=runtime_request.metrics,
-            audit=runtime_request.audit,
-            logger=runtime_request.logger,
-            silver_validator=runtime_request.silver_validator,
-            metadata_writer=runtime_request.metadata_writer,
-            metadata_coordinator=runtime_request.metadata_coordinator,
-            lineage_store=runtime_request.lineage_store,
-            dq_calculator=runtime_request.dq_calculator,
-            merge_resilience_policy=runtime_request.merge_resilience_policy,
-            contract_rollout_policy=runtime_request.contract_rollout_policy,
-        )
-        runtime_request = SilverWriterRuntimeServicesRequest(
-            csv_exporter=runtime_request.csv_exporter,
-            tracing=runtime_request.tracing,
-            write_policy=runtime_request.write_policy,
-            metrics=runtime_request.metrics,
-            audit=runtime_request.audit,
-            logger=runtime_request.logger,
-            silver_validator=runtime_request.silver_validator,
-            metadata_writer=runtime_request.metadata_writer,
-            metadata_coordinator=runtime_request.metadata_coordinator,
-            lineage_store=runtime_request.lineage_store,
-            dq_calculator=runtime_request.dq_calculator,
-            merge_resilience_policy=runtime_request.merge_resilience_policy,
-            contract_rollout_policy=runtime_request.contract_rollout_policy,
-        )
-        runtime_request = SilverWriterRuntimeServicesRequest(
-            csv_exporter=csv_exporter,
-            tracing=tracing,
-            write_policy=write_policy,
-            metrics=metrics,
-            audit=audit,
-            logger=None,
-            silver_validator=silver_validator,
-            metadata_writer=metadata_writer,
-            metadata_coordinator=metadata_coordinator,
-            lineage_store=lineage_store,
-            dq_calculator=dq_calculator,
-            merge_resilience_policy=merge_resilience_policy,
-        )
         super().__init__(base_path, logger, flat_structure=flat_structure)
         services = _resolve_runtime_services_for_writer(
             writer=self,

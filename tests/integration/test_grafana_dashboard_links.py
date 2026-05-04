@@ -214,7 +214,9 @@ def test_overview_status_cards_use_scoped_drilldown_urls() -> None:
             f"Panel id={panel_id} must include at least one link to /d/{target_uid}/"
         )
         for url in matched_urls:
-            assert "?" in url, f"Panel id={panel_id} must not use bare /d/<uid> URL: {url}"
+            assert "?" in url, (
+                f"Panel id={panel_id} must not use bare /d/<uid> URL: {url}"
+            )
             passed_vars = _extract_link_vars(url)
             required_vars = _REQUIRED_LINK_VARS_BY_TARGET_UID[target_uid]
             assert required_vars <= passed_vars, (
@@ -836,7 +838,9 @@ def test_overview_status_cards_use_scoped_drilldown_urls() -> None:
             f"Panel id={panel_id} must include at least one link to /d/{target_uid}/"
         )
         for url in matched_urls:
-            assert "?" in url, f"Panel id={panel_id} must not use bare /d/<uid> URL: {url}"
+            assert "?" in url, (
+                f"Panel id={panel_id} must not use bare /d/<uid> URL: {url}"
+            )
             passed_vars = _extract_link_vars(url)
             required_vars = _REQUIRED_LINK_VARS_BY_TARGET_UID[target_uid]
             assert required_vars <= passed_vars, (
