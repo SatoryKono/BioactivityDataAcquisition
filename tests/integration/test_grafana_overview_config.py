@@ -13,6 +13,7 @@ from tests.integration._grafana_test_support import (
 
 pytestmark = pytest.mark.integration
 
+
 def test_overview_dashboard_contains_control_plane_and_lineage_metrics():
     """Ensure overview dashboard keeps summary control-plane and lineage signals."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))

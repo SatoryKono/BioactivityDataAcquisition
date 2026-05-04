@@ -480,7 +480,22 @@
           "fields": "",
           "values": false
         },
-        "textMode": "auto"
+        "textMode": "auto",
+        "dataLinks": [
+          {
+            "title": "Open Logs (Loki, tracing profile)",
+            "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D"
+          },
+          {
+            "title": "Open Logs (Loki, contextual scope marker, tracing)",
+            "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D%20%7C%20json%20%7C%20scope_marker%3D%22dashboard_context%22",
+            "targetBlank": true
+          },
+          {
+            "title": "Open Replay Runbook",
+            "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/replay-debugging.md"
+          }
+        ]
       },
       "pluginVersion": "9.5.0",
       "targets": [

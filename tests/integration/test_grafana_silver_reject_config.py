@@ -162,7 +162,7 @@ def test_silver_reject_explorer_pipeline_scope_is_single_select_and_fail_closed(
 @pytest.mark.parametrize(
     ("panel_title", "label_name"),
     [
-        ("Top Silver Reject Reasons", "reason_code"),
+        ("Top Silver Reject Reasons (Pareto)", "reason_code"),
         ("Top Silver Reject Fields", "field"),
     ],
 )
@@ -271,7 +271,7 @@ def test_silver_reject_explorer_payload_link_preserves_time_scope() -> None:
 def test_dq_reject_breakdown_panels_link_to_silver_reject_explorer() -> None:
     """DQ reject breakdown panels should hand off to Silver Reject Explorer."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
-    for panel_title in ("Top Silver Reject Reasons", "Top Silver Reject Fields"):
+    for panel_title in ("Top Silver Reject Reasons (Pareto)", "Top Silver Reject Fields"):
         panel = next(
             (
                 item
