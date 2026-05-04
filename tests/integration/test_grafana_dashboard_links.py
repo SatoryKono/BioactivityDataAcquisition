@@ -91,6 +91,9 @@ def _load_navigation_links_contract() -> dict[str, object]:
         "cross_scope_marker_contract": raw_contract.get(
             "cross_scope_marker_contract", {}
         ),
+        "navigation_transition_contract": raw_contract.get(
+            "navigation_transition_contract", {}
+        ),
         "kpi_ownership": raw_contract.get("kpi_ownership", {}),
     }
 

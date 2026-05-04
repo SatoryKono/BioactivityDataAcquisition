@@ -1,22 +1,22 @@
 ---
 id: sonar-closeout-current
-title: Prepare final sonar closeout plan
+title: sonar closeout plan 2026-05-04
 task_id: sonar-closeout-current
-created_at: '2026-05-04T14:54:17Z'
+created_at: '2026-05-04T15:03:29Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
 - <add-source-ref>
 summary: Active task session context.
-query: sonar issues plan in-scope out-of-scope
+query: sonar closeout plan 2026-05-04
 ---
 
 # Session note
 
 ## Task
 
-- Title: Prepare final sonar closeout plan
-- Retrieval query: sonar issues plan in-scope out-of-scope
+- Title: sonar closeout plan 2026-05-04
+- Retrieval query: sonar closeout plan 2026-05-04
 
 ## Retrieved context
 

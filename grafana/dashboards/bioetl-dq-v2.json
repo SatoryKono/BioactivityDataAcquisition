@@ -51,7 +51,7 @@
       "title": "5. Silver Reject Explorer",
       "type": "link",
       "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
-      "tooltip": "Cross-scope handoff with current dashboard time range and explicit panel scope: var-pipeline=$pipeline and var-run_type=$run_type."
+      "tooltip": "Cross-scope handoff with current dashboard time range and explicit panel scope: var-pipeline=$pipeline and var-run_type=$run_type. Reset scope: target dashboard opens with explicit scope defaults; source-specific filters are not transferred."
     },
     {
       "asDropdown": false,
