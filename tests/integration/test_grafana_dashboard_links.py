@@ -88,6 +88,9 @@ def _load_navigation_links_contract() -> dict[str, object]:
             "required_discoverable_inbound_paths", {}
         ),
         "required_panel_links_by_uid": required_panel_links_by_uid,
+        "cross_scope_marker_contract": raw_contract.get(
+            "cross_scope_marker_contract", {}
+        ),
     }
 
 
@@ -113,6 +116,7 @@ _SCOPE_RESET_LINK_TITLES = frozenset(
     }
 )
 _REQUIRED_PANEL_LINKS_BY_UID = _NAV_LINK_CONTRACT["required_panel_links_by_uid"]
+_CROSS_SCOPE_MARKER_CONTRACT = _NAV_LINK_CONTRACT["cross_scope_marker_contract"]
 
 
 def _extract_required_time_tokens(section: str) -> tuple[str, ...]:
@@ -469,8 +473,8 @@ def test_critical_top_level_links_follow_title_allowlist_and_scope_reset_suffix(
             )
             tooltip = str(link.get("tooltip", "") or "")
             if "Cross-scope handoff" in tooltip:
-                assert "Scope reset:" in tooltip, (
-                    f"{dashboard_name} link '{title}' must include 'Scope reset:' suffix"
+                assert ("Scope reset:" in tooltip or "Reset scope:" in tooltip), (
+                    f"{dashboard_name} link '{title}' must include 'Scope reset:' or 'Reset scope:' suffix"
                 )
 
 
@@ -530,6 +534,78 @@ def test_required_critical_panel_links_by_uid_contract() -> None:
                 assert passed_vars <= allowed_vars, (
                     f"{dashboard_path.name} panel id={panel_id} link to {target_uid} "
                     f"passes non-allowlisted vars: {sorted(passed_vars - allowed_vars)}"
+                )
+
+
+def test_cross_scope_links_use_explicit_reset_or_context_markers() -> None:
+    """Cross-scope links must expose explicit marker in title/tooltip."""
+    marker_contract = _CROSS_SCOPE_MARKER_CONTRACT
+    assert isinstance(marker_contract, dict), (
+        "cross_scope_marker_contract must be mapping"
+    )
+    required_markers = marker_contract.get("required_markers", {})
+    assert isinstance(required_markers, dict), "required_markers must be mapping"
+    required_titles_by_transition = marker_contract.get(
+        "required_titles_by_transition", {}
+    )
+    assert isinstance(required_titles_by_transition, dict), (
+        "required_titles_by_transition must be mapping"
+    )
+    required_tooltip_tokens = marker_contract.get("required_tooltip_tokens", {})
+    assert isinstance(required_tooltip_tokens, dict), (
+        "required_tooltip_tokens must be mapping"
+    )
+
+    dashboard = load_dashboard(
+        Path("grafana/dashboards/bioetl-provider-health-v2.json")
+    )
+    links = [link for link in dashboard.get("links", []) if isinstance(link, dict)]
+
+    for transition, marker_key in required_titles_by_transition.items():
+        assert isinstance(marker_key, str), (
+            f"marker key for {transition} must be a string"
+        )
+        marker = required_markers.get(marker_key)
+        assert isinstance(marker, str) and marker, (
+            f"required marker '{marker_key}' must be declared for transition {transition}"
+        )
+        tooltip_tokens = required_tooltip_tokens.get(marker_key, [])
+        assert isinstance(tooltip_tokens, list), (
+            f"required_tooltip_tokens.{marker_key} must be list"
+        )
+
+        base_transition = transition.split("#", 1)[0]
+        from_uid, to_uid = base_transition.split("->", 1)
+        assert from_uid == "bioetl-provider-health-v2", (
+            f"this test currently validates provider-health transitions only, got {transition}"
+        )
+
+        matched_links = []
+        for link in links:
+            url = link.get("url", "")
+            if not isinstance(url, str):
+                continue
+            target_uid = _extract_dashboard_uid(url)
+            if target_uid != to_uid:
+                continue
+            title = str(link.get("title", ""))
+            tooltip = str(link.get("tooltip", ""))
+            if marker in title or marker in tooltip:
+                matched_links.append(link)
+
+        assert matched_links, (
+            f"Missing cross-scope link for {transition} with marker '{marker}'"
+        )
+        for link in matched_links:
+            title = str(link.get("title", ""))
+            tooltip = str(link.get("tooltip", ""))
+            assert marker in title or marker in tooltip, (
+                f"Link title/tooltip must include '{marker}' for transition {transition}: "
+                f"{title} {tooltip}"
+            )
+            for token in tooltip_tokens:
+                assert token in tooltip, (
+                    f"Link tooltip for transition {transition} must include '{token}': {tooltip}"
                 )
 
 
