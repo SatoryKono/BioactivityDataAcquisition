@@ -14,7 +14,6 @@ YAML также фиксирует time handoff policy в `time_handoff_requirem
 - Top-level dashboard links **MUST** иметь приоритет `primary | secondary | contextual`, заданный в `top_level_link_priority_by_uid` в `contracts/navigation-links.yaml`.
 - Для каждого source dashboard и каждого target UID допускается не более одной `primary` ссылки; `primary` ссылка **MUST** иметь однозначную `semantics` (непустой идентификатор смысла handoff).
 - Critical KPI панели **MUST** иметь first-hop action link (panel-level `dataLinks`) на целевой dashboard для первичного triage. Контракт хранится в `required_panel_links_by_uid` и валидирует `panel_id`, минимально допустимый `title`, `target_uid`, time handoff и allowlisted `var-*`.
-- Critical KPI панели **MUST** иметь first-hop action link (panel-level `dataLinks`) на целевой dashboard для первичного triage. Контракт хранится в `required_panel_links_by_uid` и валидирует `panel_id`, минимально допустимый `title`, `target_uid`, time handoff и allowlisted `var-*`.
 - Cross-dashboard handoff передаёт только target-scoped `var-*` параметры и **MUST** включать `${__url_time_range}` во всех dashboard URL (`/d/...`).
 - `includeVars=true` и другие универсальные handoff-паттерны запрещены; используем только явные `var-*` и time-range по единому стандарту:
   - dashboard links (`/d/<uid>/<slug>?...`): `${__url_time_range}`
@@ -26,7 +25,6 @@ YAML также фиксирует time handoff policy в `time_handoff_requirem
 - Optional contextual Explore links (`options.dataLinks`) разрешены только для operator-critical panel surfaces в `bioetl-runtime`, `bioetl-dq-v2`, `bioetl-control-plane-v1`; baseline link `Open Logs (Loki, tracing profile)` MUST сохраняться.
 - Contextual Loki Explore link MUST содержать безопасный scope marker `scope_marker="dashboard_context"` и может использовать только `${pipeline:regex}` и `${run_type:regex}` как дополнительные фильтры после `{job="bioetl"} | json`.
 - Contextual Explore links MUST NOT передавать/использовать forensic переменные (`run_id`, `payload_hash`) или любые другие `var-*` вне разрешённого набора.
-
 
 ## Примеры URL (нормализованный формат)
 
@@ -41,7 +39,7 @@ YAML также фиксирует time handoff policy в `time_handoff_requirem
 | `bioetl-overview-v2` | `2. Runtime`, `Control Plane v1`, `3. Provider Health`, `4. Data Quality`, `6. Workflow Overview`, `Explore Logs (Loki, tracing profile)`, `Explore Traces (Tempo, tracing profile)` | Runtime/ControlPlane/DQ: `var-pipeline`, `var-run_type`; Provider/Workflow: без `var-*` |
 | `bioetl-runtime` | `Back to Overview`, `Control Plane v1`, `3. Provider Health`, `4. Data Quality`, `Explore Logs (Loki, tracing profile)`, `Explore Traces (Tempo, tracing profile)` | Overview/ControlPlane: `var-pipeline`, `var-run_type`; DQ: `var-pipeline`, `var-run_type`, `var-stage`; Provider: без `var-*` |
 | `bioetl-control-plane-v1` | `Back to Overview`, `2. Runtime`, `4. Data Quality`, `Explore Logs (Loki, tracing profile)`, `Explore Traces (Tempo, tracing profile)` | Overview/Runtime/DQ: `var-pipeline`, `var-run_type` |
-| `bioetl-provider-health-v2` | `Back to Overview`, `2. Runtime`, `Explore Logs (Loki, tracing profile)`, `Explore Traces (Tempo, tracing profile)` | cross-dashboard `var-*` не передаются |
+| `bioetl-provider-health-v2` | `Back to Overview`, `2. Runtime (Primary)`, `2. Runtime (Contextual: provider mapping)`, `Control Plane v1`, `Explore Logs (Loki, tracing profile)`, `Explore Traces (Tempo, tracing profile)` | cross-dashboard `var-*` не передаются |
 | `bioetl-dq-v2` | `Back to Overview`, `Control Plane v1`, `5. Silver Reject Explorer`, `Explore Logs (Loki, tracing profile)`, `Explore Traces (Tempo, tracing profile)` | Overview/ControlPlane/Explorer: `var-pipeline`, `var-run_type` |
 | `bioetl-silver-reject-explorer` | `Back to Overview`, `Back to Data Quality`, `Explore Logs (Loki, tracing profile)`, `Explore Traces (Tempo, tracing profile)` | Overview/DQ: `var-pipeline`, `var-run_type` |
 | `bioetl-workflow-overview` | `Back to Overview`, `2. Runtime`, `Control Plane v1` | cross-dashboard `var-*` не передаются |
@@ -52,17 +50,17 @@ YAML также фиксирует time handoff policy в `time_handoff_requirem
 - legacy Explore payload route: `/explore?left=`
 - перенос Explorer-only forensic scope (`var-run_id`, `var-payload_hash`) в non-explorer dashboards
 
+## Приоритет и semantics (пример)
+
+- `bioetl-provider-health-v2` содержит два перехода в Runtime:
+  - `2. Runtime (Primary)` — `priority: primary`, semantics `runtime_cross_scope_all_defaults`;
+  - `2. Runtime (Contextual: provider mapping)` — `priority: contextual`, semantics `runtime_provider_context_mapping`.
+- Priority должна быть отражена в `title` и/или `tooltip` ссылки в dashboard JSON.
+
 ## First Action row contract (L1 dashboards)
 
 | Dashboard UID | First Action panel ID | Minimal CTA template | Expected targets |
 | --- | ---: | --- | --- |
 | `bioetl-control-plane-v1` | `9001` | 3–4 CTA: `Back to Overview`, `2. Runtime`, `4. Data Quality`, optional Explore | `bioetl-overview-v2`, `bioetl-runtime`, `bioetl-dq-v2`, optional Explore app |
-| `bioetl-provider-health-v2` | `9002` | 3–4 CTA: `Back to Overview`, `2. Runtime`, `Control Plane v1`, optional Explore | `bioetl-overview-v2`, `bioetl-runtime`, `bioetl-control-plane-v1`, optional Explore app |
+| `bioetl-provider-health-v2` | `9002` | 3–4 CTA: `Back to Overview`, `2. Runtime (Primary)`, `2. Runtime (Contextual: provider mapping)`, `Control Plane v1`, optional Explore | `bioetl-overview-v2`, `bioetl-runtime`, `bioetl-control-plane-v1`, optional Explore app |
 | `bioetl-workflow-overview` | `9003` | 3–4 CTA: `Back to Overview`, `2. Runtime`, `Control Plane v1`, optional Explore | `bioetl-overview-v2`, `bioetl-runtime`, `bioetl-control-plane-v1`, optional Explore app |
-
-## Приоритет и semantics (пример)
-
-- `bioetl-provider-health-v2` содержит два перехода в Runtime:
-  - `2. Runtime (Primary)` — `priority: primary`, semantics `runtime_cross_scope_all_defaults`.
-  - `2. Runtime (Contextual: provider mapping)` — `priority: contextual`, semantics `runtime_provider_context_mapping`.
-- Priority должна быть отражена в `title` и/или `tooltip` ссылки в dashboard JSON.
