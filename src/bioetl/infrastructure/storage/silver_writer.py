@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any, cast
 from typing import Literal
 
 from deltalake import DeltaTable, write_deltalake
@@ -82,20 +83,102 @@ class SilverWriter(
         runtime_services: SilverWriterRuntimeServices | None = None,
         flat_structure: bool = False,
         pipeline_name: str | None = None,
-        csv_exporter: CsvExporter | None = None,
-        tracing: TracingPort | None = None,
-        write_policy: WriteModePolicy | None = None,
-        metrics: MetricsPort | None = None,
-        audit: AuditPort | None = None,
-        silver_validator: SilverValidatorPort | None = None,
-        metadata_writer: MetadataWriterPort | None = None,
-        metadata_coordinator: MetadataCoordinatorPort | None = None,
-        lineage_store: LineageStorePort | None = None,
-        dq_calculator: DQMetricsCalculator | None = None,
-        merge_resilience_policy: SilverMergeResiliencePolicy | None = None,
+        runtime_request: SilverWriterRuntimeServicesRequest | None = None,
+        **runtime_dependencies: object,
     ) -> None:
         """Initialize Silver writer."""
         self._pipeline_name = pipeline_name
+        if runtime_request is not None and runtime_dependencies:
+            unexpected_dependency = ", ".join(sorted(runtime_dependencies))
+            raise TypeError(
+                "Cannot pass legacy runtime dependency kwargs when "
+                f"'runtime_request' is provided: {unexpected_dependency}"
+            )
+
+        if runtime_request is None:
+            runtime_request = SilverWriterRuntimeServicesRequest(
+                csv_exporter=cast(
+                    CsvExporter | None,
+                    runtime_dependencies.pop("csv_exporter", None),
+                ),
+                tracing=cast(
+                    TracingPort | None,
+                    runtime_dependencies.pop("tracing", None),
+                ),
+                write_policy=cast(
+                    WriteModePolicy | None,
+                    runtime_dependencies.pop("write_policy", None),
+                ),
+                metrics=cast(MetricsPort | None, runtime_dependencies.pop("metrics", None)),
+                audit=cast(AuditPort | None, runtime_dependencies.pop("audit", None)),
+                logger=cast(LoggerPort | None, runtime_dependencies.pop("logger", None)),
+                silver_validator=cast(
+                    SilverValidatorPort | None,
+                    runtime_dependencies.pop("silver_validator", None),
+                ),
+                metadata_writer=cast(
+                    MetadataWriterPort | None,
+                    runtime_dependencies.pop("metadata_writer", None),
+                ),
+                metadata_coordinator=cast(
+                    MetadataCoordinatorPort | None,
+                    runtime_dependencies.pop("metadata_coordinator", None),
+                ),
+                lineage_store=cast(
+                    LineageStorePort | None,
+                    runtime_dependencies.pop("lineage_store", None),
+                ),
+                dq_calculator=cast(
+                    DQMetricsCalculator | None,
+                    runtime_dependencies.pop("dq_calculator", None),
+                ),
+                merge_resilience_policy=cast(
+                    SilverMergeResiliencePolicy | None,
+                    runtime_dependencies.pop("merge_resilience_policy", None),
+                ),
+                contract_rollout_policy=cast(
+                    Any,
+                    runtime_dependencies.pop("contract_rollout_policy", None),
+                ),
+            )
+        elif runtime_dependencies:
+            raise TypeError(
+                "Unexpected legacy runtime dependency kwargs: "
+                f\"{', '.join(sorted(runtime_dependencies))}\"
+            )
+
+        runtime_request = cast(SilverWriterRuntimeServicesRequest, runtime_request)
+        # Ensure legacy logger key does not produce a divergent operation logger.
+        runtime_request = SilverWriterRuntimeServicesRequest(
+            csv_exporter=runtime_request.csv_exporter,
+            tracing=runtime_request.tracing,
+            write_policy=runtime_request.write_policy,
+            metrics=runtime_request.metrics,
+            audit=runtime_request.audit,
+            logger=runtime_request.logger,
+            silver_validator=runtime_request.silver_validator,
+            metadata_writer=runtime_request.metadata_writer,
+            metadata_coordinator=runtime_request.metadata_coordinator,
+            lineage_store=runtime_request.lineage_store,
+            dq_calculator=runtime_request.dq_calculator,
+            merge_resilience_policy=runtime_request.merge_resilience_policy,
+            contract_rollout_policy=runtime_request.contract_rollout_policy,
+        )
+        runtime_request = SilverWriterRuntimeServicesRequest(
+            csv_exporter=runtime_request.csv_exporter,
+            tracing=runtime_request.tracing,
+            write_policy=runtime_request.write_policy,
+            metrics=runtime_request.metrics,
+            audit=runtime_request.audit,
+            logger=runtime_request.logger,
+            silver_validator=runtime_request.silver_validator,
+            metadata_writer=runtime_request.metadata_writer,
+            metadata_coordinator=runtime_request.metadata_coordinator,
+            lineage_store=runtime_request.lineage_store,
+            dq_calculator=runtime_request.dq_calculator,
+            merge_resilience_policy=runtime_request.merge_resilience_policy,
+            contract_rollout_policy=runtime_request.contract_rollout_policy,
+        )
         runtime_request = SilverWriterRuntimeServicesRequest(
             csv_exporter=csv_exporter,
             tracing=tracing,
