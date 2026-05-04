@@ -136,7 +136,9 @@ def merge_expected_anchors(
             effective_config_hash=merged["effective_config_hash"] or "",
             effective_config_artifact_id=(merged["effective_config_artifact_id"] or ""),
             execution_fingerprint=merged["execution_fingerprint"] or "",
-            dq_contract_compatibility_hash=(merged["dq_contract_compatibility_hash"] or ""),
+            dq_contract_compatibility_hash=(
+                merged["dq_contract_compatibility_hash"] or ""
+            ),
             input_snapshot_fingerprint=merged["input_snapshot_fingerprint"] or "",
             contract_ref=merged["contract_ref"] or "",
             contract_version=merged["contract_version"] or "",

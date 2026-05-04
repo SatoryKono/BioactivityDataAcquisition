@@ -46,10 +46,7 @@ class SilverWriterMetadataFacade:
 
     _metadata: SilverMetadataOperations | None
 
-
-_SILVER_METADATA_OPERATIONS_REQUIRED = (
-    "Silver metadata operations are required"
-)
+    _SILVER_METADATA_OPERATIONS_REQUIRED = "Silver metadata operations are required"
 
     async def _get_table_schema(self, table_name: str) -> pa.Schema | None:
         """Get the schema of an existing Silver table."""
@@ -161,7 +158,7 @@ _SILVER_METADATA_OPERATIONS_REQUIRED = (
     ) -> None:
         """Publish canonical Silver metadata through metadata operations."""
         if self._metadata is None:
-            raise RuntimeError(_SILVER_METADATA_OPERATIONS_REQUIRED)
+            raise RuntimeError(self._SILVER_METADATA_OPERATIONS_REQUIRED)
         resolved_request = _coerce_silver_metadata_write_request(
             cast(_SilverMetadataWriteRequest | str | None, request),
             args=args,
@@ -186,7 +183,7 @@ _SILVER_METADATA_OPERATIONS_REQUIRED = (
     ) -> None:
         """Persist one Silver metadata sidecar through metadata operations."""
         if self._metadata is None:
-            raise RuntimeError(_SILVER_METADATA_OPERATIONS_REQUIRED)
+            raise RuntimeError(self._SILVER_METADATA_OPERATIONS_REQUIRED)
         await self._metadata._write_silver_metadata_file(
             table_path=table_path,
             metadata=metadata,
@@ -208,7 +205,7 @@ _SILVER_METADATA_OPERATIONS_REQUIRED = (
     ) -> None:
         """Log Silver audit events through metadata operations."""
         if self._metadata is None:
-            raise RuntimeError(_SILVER_METADATA_OPERATIONS_REQUIRED)
+            raise RuntimeError(self._SILVER_METADATA_OPERATIONS_REQUIRED)
         validated_mode = (
             mode if isinstance(mode, SilverWriteMode) else SilverWriteMode(mode)
         )

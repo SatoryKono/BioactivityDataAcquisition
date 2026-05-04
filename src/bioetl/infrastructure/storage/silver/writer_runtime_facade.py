@@ -61,13 +61,11 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.storage.silver.operations.postwrite_operations import (
         SilverPostwriteOperations,
     )
-        from bioetl.infrastructure.storage.silver.operations.validation_operations import (
-            SilverValidationOperations,
-        )
+    from bioetl.infrastructure.storage.silver.operations.validation_operations import (
+        SilverValidationOperations,
+    )
 
-_SILVER_VALIDATION_OPERATIONS_REQUIRED = (
-    "Silver validation operations are required"
-)
+_SILVER_VALIDATION_OPERATIONS_REQUIRED = "Silver validation operations are required"
 _SILVER_METADATA_OPERATIONS_REQUIRED = "Silver metadata operations are required"
 
 
