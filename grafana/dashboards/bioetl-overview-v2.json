@@ -213,7 +213,7 @@
         "dataLinks": [
           {
             "title": "Open bioetl-runtime",
-            "url": "/d/bioetl-runtime/bioetl-runtime",
+            "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
             "targetBlank": false
           }
         ]
@@ -498,7 +498,7 @@
         "dataLinks": [
           {
             "title": "Open bioetl-runtime",
-            "url": "/d/bioetl-runtime/bioetl-runtime",
+            "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
             "targetBlank": false
           }
         ]
@@ -571,7 +571,7 @@
         "dataLinks": [
           {
             "title": "Open bioetl-runtime",
-            "url": "/d/bioetl-runtime/bioetl-runtime",
+            "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
             "targetBlank": false
           }
         ]
@@ -1045,7 +1045,7 @@
             "dataLinks": [
               {
                 "title": "Open bioetl-runtime",
-                "url": "/d/bioetl-runtime/bioetl-runtime",
+                "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
                 "targetBlank": false
               }
             ]
@@ -1156,7 +1156,7 @@
             "dataLinks": [
               {
                 "title": "Open bioetl-dq-v2",
-                "url": "/d/bioetl-dq-v2/bioetl-dq-v2",
+                "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
                 "targetBlank": false
               }
             ]
@@ -1268,7 +1268,7 @@
             "dataLinks": [
               {
                 "title": "Open bioetl-control-plane-v1",
-                "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1",
+                "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
                 "targetBlank": false
               }
             ]
@@ -1379,7 +1379,7 @@
             "dataLinks": [
               {
                 "title": "Open bioetl-provider-health-v2",
-                "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2",
+                "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${__url_time_range}",
                 "targetBlank": false
               }
             ]
@@ -1490,7 +1490,7 @@
             "dataLinks": [
               {
                 "title": "Open bioetl-workflow-overview",
-                "url": "/d/bioetl-workflow-overview/bioetl-workflow-overview",
+                "url": "/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}",
                 "targetBlank": false
               }
             ]
