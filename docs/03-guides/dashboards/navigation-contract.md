@@ -13,6 +13,8 @@ YAML также фиксирует time handoff policy в `time_handoff_requirem
 - Каждый dashboard (кроме overview-hub) **MUST** иметь top-level ссылку `Back to Overview` на UID `bioetl-overview-v2`.
 - Top-level dashboard links **MUST** иметь приоритет `primary | secondary | contextual`, заданный в `top_level_link_priority_by_uid` в `contracts/navigation-links.yaml`.
 - Для каждого source dashboard и каждого target UID допускается не более одной `primary` ссылки; `primary` ссылка **MUST** иметь однозначную `semantics` (непустой идентификатор смысла handoff).
+- Critical KPI панели **MUST** иметь first-hop action link (panel-level `dataLinks`) на целевой dashboard для первичного triage. Контракт хранится в `required_panel_links_by_uid` и валидирует `panel_id`, минимально допустимый `title`, `target_uid`, time handoff и allowlisted `var-*`.
+- Critical KPI панели **MUST** иметь first-hop action link (panel-level `dataLinks`) на целевой dashboard для первичного triage. Контракт хранится в `required_panel_links_by_uid` и валидирует `panel_id`, минимально допустимый `title`, `target_uid`, time handoff и allowlisted `var-*`.
 - Cross-dashboard handoff передаёт только target-scoped `var-*` параметры и **MUST** включать `${__url_time_range}` во всех dashboard URL (`/d/...`).
 - `includeVars=true` и другие универсальные handoff-паттерны запрещены; используем только явные `var-*` и time-range по единому стандарту:
   - dashboard links (`/d/<uid>/<slug>?...`): `${__url_time_range}`
