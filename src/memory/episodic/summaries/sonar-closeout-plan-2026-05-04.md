@@ -1,26 +1,25 @@
 ---
 id: sonar-closeout-plan-2026-05-04
-title: sonar closeout plan + scope fixes
+title: Sonar closeout issue planning
 task_id: sonar-closeout-plan-2026-05-04
-created_at: '2026-05-04T14:45:53Z'
+created_at: '2026-05-04T15:16:50Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
-- <add-source-ref>
-summary: Prepared per-issue closure plan for all 100 Sonar findings and verified in-scope
-  fixes (metadata/writer/load_service + regex/fixture adjustments) with py_compile/ruff
-  checks.
+- docs/plans/sonar-closeout-plan-2026-05-04.md
+summary: Updated Sonar closeout plan to reflect 2026-05-04 live snapshot (108 out-of-scope,
+  0 in-scope).
 ---
 
 # Episodic summary
 
 ## Task
 
-- Title: sonar closeout plan + scope fixes
+- Title: Sonar closeout issue planning
 
 ## Outcome
 
-- Prepared per-issue closure plan for all 100 Sonar findings and verified in-scope fixes (metadata/writer/load_service + regex/fixture adjustments) with py_compile/ruff checks.
+- Updated Sonar closeout plan to reflect 2026-05-04 live snapshot (108 out-of-scope, 0 in-scope).
 
 ## Lessons learned
 
