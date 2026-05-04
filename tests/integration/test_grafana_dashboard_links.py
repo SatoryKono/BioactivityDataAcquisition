@@ -60,6 +60,18 @@ _REQUIRED_LINK_VARS_BY_TARGET_UID = _NAV_LINK_CONTRACT[
     "required_link_vars_by_target_uid"
 ]
 _REQUIRED_TOP_LEVEL_LINKS_BY_UID = _NAV_LINK_CONTRACT["required_top_level_links_by_uid"]
+_TOP_LEVEL_LINK_TITLE_RE = re.compile(
+    r"^(Back to .+|Open .+|Investigate .+|[1-6]\. .+|Control Plane v1|Explore (Logs|Traces) \(.*\)|Observability Checklist \(runbook\))$"
+)
+_SCOPE_RESET_LINK_TITLES = frozenset(
+    {
+        "2. Runtime (provider context)",
+        "3. Provider Health",
+        "Back to Overview",
+        "Control Plane v1",
+        "2. Runtime",
+    }
+)
 
 
 def _extract_required_time_tokens(section: str) -> tuple[str, ...]:
@@ -306,6 +318,30 @@ def test_dashboard_top_level_navigation_contract_by_uid() -> None:
             f"{dashboard_path.name} ({uid}) is missing required top-level links: "
             f"{sorted(missing)}"
         )
+
+
+def test_critical_top_level_links_follow_title_allowlist_and_scope_reset_suffix() -> None:
+    """Critical top-level links must follow title style-guide and scope-reset tooltip contract."""
+    critical_dashboards = (
+        "bioetl-overview-v2.json",
+        "bioetl-runtime.json",
+        "bioetl-provider-health-v2.json",
+        "bioetl-dq-v2.json",
+        "bioetl-control-plane-v1.json",
+        "bioetl-workflow-overview.json",
+    )
+    for dashboard_name in critical_dashboards:
+        dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
+        for link in dashboard.get("links", []):
+            title = str(link.get("title", ""))
+            assert _TOP_LEVEL_LINK_TITLE_RE.match(title), (
+                f"{dashboard_name} contains non-conforming top-level link title: {title}"
+            )
+            tooltip = str(link.get("tooltip", "") or "")
+            if "Cross-scope handoff" in tooltip:
+                assert "Scope reset:" in tooltip, (
+                    f"{dashboard_name} link '{title}' must include 'Scope reset:' suffix"
+                )
 
 
 def test_dashboard_links_forbid_universal_handoff_patterns() -> None:

@@ -127,6 +127,32 @@ uv run python -m scripts.engineering.qa check-dashboard-visual-semantics
 - Explore-ссылки MUST использовать полные названия: `Explore Logs (Loki, tracing profile)` и `Explore Traces (Tempo, tracing profile)`.
 - Формулировки вида `Explore Logs`, `Explore Traces`, `Next Recommended Drilldown` считаются legacy-лексикой и не допускаются в shipped dashboards.
 
+### 7.1) Link title style-guide: Back / Open / Investigate
+
+Используй единый шаблон для операторских ссылок:
+
+- `Back to <Dashboard>` — только для возврата на предыдущий L0 уровень.
+- `Open <Target>` — переход в соседний dashboard или внешний runbook без forensic-контекста.
+- `Investigate <Target>` — переход в forensic/deep-dive surface (например, reject explorer, incident drilldown).
+
+Норматив:
+- Для top-level `links[]` в `grafana/dashboards/*.json` MUST использоваться только эти глаголы для action-link лексики (`Back`, `Open`, `Investigate`), кроме канонических имен dashboard (`2. Runtime`, `3. Provider Health`, и т.д.).
+- Для `options.dataLinks` в критичных панелях предпочтителен `Open ...`; `Investigate ...` допустим для incident/deep-dive панелей.
+
+### 7.2) Scope reset suffix в tooltip (обязательно)
+
+Если link меняет scope (например, принудительно ставит `var-pipeline=All`, `var-run_type=All`, сбрасывает provider/adapter или stage), tooltip MUST содержать явный suffix:
+
+- `Scope reset: ...`
+
+Рекомендуемый шаблон:
+
+- `Cross-scope handoff ... Scope reset: pipeline=All, run_type=All; provider/adapter not transferred.`
+
+Если scope не меняется, используй нейтральный tooltip:
+
+- `Preserves selected scope and time range.`
+
 ## 7.1) L1 layout rule: answer-first above fold (обязательно)
 
 Для L1 control-plane dashboards первый экран (above fold) MUST отвечать на
