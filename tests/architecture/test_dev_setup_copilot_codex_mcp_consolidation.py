@@ -10,45 +10,25 @@ from tests.helpers import repo_root, run_repo_python
 
 
 EXPECTED_MCP_SERVERS = {
-    "memory",
-    "filesystem",
-    "sequential-thinking",
-    "fetch",
-    "pdf",
-    "github",
-    "docker",
-    "docker-docs",
-    "context7",
-    "paper-search",
-    "dockerhub",
-    "prometheus",
-    "grafana",
-    "brave-search",
-    "sonarqube",
-    "neo4j-cypher",
-    "neo4j-memory",
-    "needle",
-    "chembl",
-    "pubchem",
-    "pubmed",
-    "mermaid",
-    "openaiDeveloperDocs",
+    "memory","filesystem","fetch","github","docker","context7",
+    "prometheus","grafana","brave-search","sonarqube",
+    "neo4j-cypher","neo4j-memory",
+    "chembl","pubchem","pubmed",
+    "mermaid","ast-grep","mcp-code-interpreter"
 }
 
 WRAPPER_SCRIPT_STEMS = {
     "github": "github-mcp-wrapper",
     "docker": "mcp_docker_wrapper",
-    "docker-docs": "mcp_docker_docs_wrapper",
     "context7": "mcp_context7_wrapper",
-    "paper-search": "mcp_paper_search_wrapper",
-    "dockerhub": "mcp_dockerhub_wrapper",
+    "ast-grep": "mcp_ast_grep_wrapper",
+    "mcp-code-interpreter": "mcp_code_interpreter_wrapper",
     "prometheus": "mcp_prometheus_wrapper",
     "grafana": "mcp_grafana_wrapper",
     "brave-search": "mcp_brave_search_wrapper",
     "sonarqube": "mcp_sonarqube_wrapper",
     "neo4j-cypher": "mcp_neo4j_cypher_wrapper",
     "neo4j-memory": "mcp_neo4j_memory_wrapper",
-    "needle": "mcp_needle_wrapper",
     "chembl": "mcp_chembl_wrapper",
     "pubchem": "mcp_pubchem_wrapper",
     "pubmed": "mcp_pubmed_wrapper",
@@ -117,24 +97,13 @@ def test_setup_backend_writes_expected_vscode_mcp_config(tmp_path: Path) -> None
     filesystem_scope = Path(str(servers["filesystem"]["args"][-1]))
     assert filesystem_scope.exists()
     assert filesystem_scope.resolve().samefile(root.resolve())
-    assert servers["sequential-thinking"]["args"][1] == (
-        "@modelcontextprotocol/server-sequential-thinking@2025.12.18"
-    )
     assert servers["fetch"]["command"] == "uvx"
     assert servers["fetch"]["args"] == [
         "--from",
         "mcp-server-fetch==2025.4.7",
         "mcp-server-fetch",
     ]
-    assert servers["pdf"]["command"] == "npx"
-    assert servers["pdf"]["args"] == [
-        "-y",
-        "@modelcontextprotocol/server-pdf@1.3.1",
-        "--stdio",
-    ]
     _assert_platform_wrappers(servers)
-    assert servers["openaiDeveloperDocs"]["type"] == "http"
-    assert servers["openaiDeveloperDocs"]["url"] == "https://developers.openai.com/mcp"
 
 
 def test_setup_router_is_the_supported_public_entrypoint() -> None:

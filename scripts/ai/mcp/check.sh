@@ -7,17 +7,15 @@ PROJECT_MCP_CONFIG="${REPO_ROOT}/.mcp.json"
 EXPECTED_MEMORY_PATH="${REPO_ROOT}/docs/00-project/ai/memory/mcp-memory.json"
 EXPECTED_GITHUB_WRAPPER_PATH="${REPO_ROOT}/scripts/ai/mcp/github-mcp-wrapper.sh"
 EXPECTED_DOCKER_WRAPPER_PATH="${REPO_ROOT}/scripts/ai/mcp/mcp_docker_wrapper.sh"
-EXPECTED_DOCKER_DOCS_WRAPPER_PATH="${REPO_ROOT}/scripts/ai/mcp/mcp_docker_docs_wrapper.sh"
 EXPECTED_CONTEXT7_WRAPPER_PATH="${REPO_ROOT}/scripts/ai/mcp/mcp_context7_wrapper.sh"
-EXPECTED_PAPER_SEARCH_WRAPPER_PATH="${REPO_ROOT}/scripts/ai/mcp/mcp_paper_search_wrapper.sh"
-EXPECTED_DOCKERHUB_WRAPPER_PATH="${REPO_ROOT}/scripts/ai/mcp/mcp_dockerhub_wrapper.sh"
+EXPECTED_AST_GREP_WRAPPER_PATH="${REPO_ROOT}/scripts/ai/mcp/mcp_ast_grep_wrapper.sh"
+EXPECTED_CODE_INTERPRETER_WRAPPER_PATH="${REPO_ROOT}/scripts/ai/mcp/mcp_code_interpreter_wrapper.sh"
 EXPECTED_PROMETHEUS_WRAPPER_PATH="${REPO_ROOT}/scripts/ai/mcp/mcp_prometheus_wrapper.sh"
 EXPECTED_GRAFANA_WRAPPER_PATH="${REPO_ROOT}/scripts/ai/mcp/mcp_grafana_wrapper.sh"
 EXPECTED_BRAVE_WRAPPER_PATH="${REPO_ROOT}/scripts/ai/mcp/mcp_brave_search_wrapper.sh"
 EXPECTED_SONARQUBE_WRAPPER_PATH="${REPO_ROOT}/scripts/ai/mcp/mcp_sonarqube_wrapper.sh"
 EXPECTED_NEO4J_CYPHER_WRAPPER_PATH="${REPO_ROOT}/scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh"
 EXPECTED_NEO4J_MEMORY_WRAPPER_PATH="${REPO_ROOT}/scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh"
-EXPECTED_NEEDLE_WRAPPER_PATH="${REPO_ROOT}/scripts/ai/mcp/mcp_needle_wrapper.sh"
 EXPECTED_FILESYSTEM_SCOPE="${REPO_ROOT}"
 # shellcheck source=./support/load_repo_env.sh
 source "${SCRIPT_DIR}/support/load_repo_env.sh"
@@ -39,17 +37,15 @@ keys = [
     ("EXPECTED_MEMORY_PATH", ("memory", "env", "MEMORY_FILE_PATH")),
     ("EXPECTED_GITHUB_WRAPPER_PATH", ("github", "args", 0)),
     ("EXPECTED_DOCKER_WRAPPER_PATH", ("docker", "args", 0)),
-    ("EXPECTED_DOCKER_DOCS_WRAPPER_PATH", ("docker-docs", "args", 0)),
     ("EXPECTED_CONTEXT7_WRAPPER_PATH", ("context7", "args", 0)),
-    ("EXPECTED_PAPER_SEARCH_WRAPPER_PATH", ("paper-search", "args", 0)),
-    ("EXPECTED_DOCKERHUB_WRAPPER_PATH", ("dockerhub", "args", 0)),
+    ("EXPECTED_AST_GREP_WRAPPER_PATH", ("ast-grep", "args", 0)),
+    ("EXPECTED_CODE_INTERPRETER_WRAPPER_PATH", ("mcp-code-interpreter", "args", 0)),
     ("EXPECTED_PROMETHEUS_WRAPPER_PATH", ("prometheus", "args", 0)),
     ("EXPECTED_GRAFANA_WRAPPER_PATH", ("grafana", "args", 0)),
     ("EXPECTED_BRAVE_WRAPPER_PATH", ("brave-search", "args", 0)),
     ("EXPECTED_SONARQUBE_WRAPPER_PATH", ("sonarqube", "args", 0)),
     ("EXPECTED_NEO4J_CYPHER_WRAPPER_PATH", ("neo4j-cypher", "args", 0)),
     ("EXPECTED_NEO4J_MEMORY_WRAPPER_PATH", ("neo4j-memory", "args", 0)),
-    ("EXPECTED_NEEDLE_WRAPPER_PATH", ("needle", "args", 0)),
     ("EXPECTED_FILESYSTEM_SCOPE", ("filesystem", "args", 2)),
 ]
 
@@ -122,7 +118,7 @@ fi
 
 printf "=== MCP server list ===\n%s\n\n" "$list_out"
 
-for server in memory filesystem sequential-thinking fetch pdf github docker docker-docs context7 paper-search dockerhub prometheus grafana brave-search sonarqube neo4j-cypher neo4j-memory needle openaiDeveloperDocs; do
+for server in memory filesystem fetch github docker context7 ast-grep mcp-code-interpreter prometheus grafana brave-search sonarqube neo4j-cypher neo4j-memory chembl pubchem pubmed mermaid; do
   if grep -Eq "^${server}[[:space:]]" <<<"$list_out"; then
     ok "Server '${server}' is registered"
   else
@@ -133,43 +129,33 @@ done
 
 memory_out="$(codex mcp get memory 2>&1 || true)"
 filesystem_out="$(codex mcp get filesystem 2>&1 || true)"
-sequential_out="$(codex mcp get sequential-thinking 2>&1 || true)"
 fetch_out="$(codex mcp get fetch 2>&1 || true)"
-pdf_out="$(codex mcp get pdf 2>&1 || true)"
 github_out="$(codex mcp get github 2>&1 || true)"
 docker_out="$(codex mcp get docker 2>&1 || true)"
-docker_docs_out="$(codex mcp get docker-docs 2>&1 || true)"
 context7_out="$(codex mcp get context7 2>&1 || true)"
-paper_search_out="$(codex mcp get paper-search 2>&1 || true)"
-dockerhub_out="$(codex mcp get dockerhub 2>&1 || true)"
+ast_grep_out="$(codex mcp get ast-grep 2>&1 || true)"
+code_interpreter_out="$(codex mcp get mcp-code-interpreter 2>&1 || true)"
 prometheus_out="$(codex mcp get prometheus 2>&1 || true)"
 grafana_out="$(codex mcp get grafana 2>&1 || true)"
 brave_out="$(codex mcp get brave-search 2>&1 || true)"
 sonarqube_out="$(codex mcp get sonarqube 2>&1 || true)"
 neo4j_cypher_out="$(codex mcp get neo4j-cypher 2>&1 || true)"
 neo4j_memory_out="$(codex mcp get neo4j-memory 2>&1 || true)"
-needle_out="$(codex mcp get needle 2>&1 || true)"
-openai_docs_out="$(codex mcp get openaiDeveloperDocs 2>&1 || true)"
 
 require_contains "$memory_out" "@modelcontextprotocol/server-memory@2026.1.26" "memory is pinned to @2026.1.26" || status=1
 require_contains "$filesystem_out" "@modelcontextprotocol/server-filesystem@2026.1.14" "filesystem is pinned to @2026.1.14" || status=1
-require_contains "$sequential_out" "@modelcontextprotocol/server-sequential-thinking@2025.12.18" "sequential-thinking is pinned to @2025.12.18" || status=1
 require_contains "$fetch_out" "mcp-server-fetch==2025.4.7" "fetch is pinned to mcp-server-fetch==2025.4.7" || status=1
-require_contains "$pdf_out" "@modelcontextprotocol/server-pdf@1.3.1" "pdf is pinned to @1.3.1" || status=1
 require_wrapper_path "$github_out" "$EXPECTED_GITHUB_WRAPPER_PATH" "github is routed through the project wrapper" || status=1
 require_wrapper_path "$docker_out" "$EXPECTED_DOCKER_WRAPPER_PATH" "docker is routed through the project wrapper" || status=1
-require_wrapper_path "$docker_docs_out" "$EXPECTED_DOCKER_DOCS_WRAPPER_PATH" "docker-docs is routed through the project wrapper" || status=1
 require_wrapper_path "$context7_out" "$EXPECTED_CONTEXT7_WRAPPER_PATH" "context7 is routed through the project wrapper" || status=1
-require_wrapper_path "$paper_search_out" "$EXPECTED_PAPER_SEARCH_WRAPPER_PATH" "paper-search is routed through the project wrapper" || status=1
-require_wrapper_path "$dockerhub_out" "$EXPECTED_DOCKERHUB_WRAPPER_PATH" "dockerhub is routed through the project wrapper" || status=1
+require_wrapper_path "$ast_grep_out" "$EXPECTED_AST_GREP_WRAPPER_PATH" "ast-grep is routed through the project wrapper" || status=1
+require_wrapper_path "$code_interpreter_out" "$EXPECTED_CODE_INTERPRETER_WRAPPER_PATH" "mcp-code-interpreter is routed through the project wrapper" || status=1
 require_wrapper_path "$prometheus_out" "$EXPECTED_PROMETHEUS_WRAPPER_PATH" "prometheus is routed through the project wrapper" || status=1
 require_wrapper_path "$grafana_out" "$EXPECTED_GRAFANA_WRAPPER_PATH" "grafana is routed through the project wrapper" || status=1
 require_wrapper_path "$brave_out" "$EXPECTED_BRAVE_WRAPPER_PATH" "brave-search is routed through the project wrapper" || status=1
 require_wrapper_path "$sonarqube_out" "$EXPECTED_SONARQUBE_WRAPPER_PATH" "sonarqube is routed through the project wrapper" || status=1
 require_wrapper_path "$neo4j_cypher_out" "$EXPECTED_NEO4J_CYPHER_WRAPPER_PATH" "neo4j-cypher is routed through the project wrapper" || status=1
 require_wrapper_path "$neo4j_memory_out" "$EXPECTED_NEO4J_MEMORY_WRAPPER_PATH" "neo4j-memory is routed through the project wrapper" || status=1
-require_wrapper_path "$needle_out" "$EXPECTED_NEEDLE_WRAPPER_PATH" "needle is routed through the project wrapper" || status=1
-require_contains "$openai_docs_out" "https://developers.openai.com/mcp" "openaiDeveloperDocs points to official OpenAI MCP endpoint" || status=1
 
 if grep -Fq -- "${EXPECTED_FILESYSTEM_SCOPE}" <<<"$filesystem_out"; then
   ok "filesystem scope is restricted to repo root"
@@ -193,10 +179,5 @@ else
   warn "Neither GITHUB_PERSONAL_ACCESS_TOKEN nor GITHUB_TOKEN is set (GitHub MCP auth may fail)"
 fi
 
-if [[ -n "${NEEDLE_API_KEY:-}" ]]; then
-  ok "NEEDLE_API_KEY is set (shell or .env)"
-else
-  warn "NEEDLE_API_KEY is not set (Needle MCP auth will fail)"
-fi
 
 exit "$status"

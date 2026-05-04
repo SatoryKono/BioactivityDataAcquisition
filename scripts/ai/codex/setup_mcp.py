@@ -56,45 +56,26 @@ def _canonical_servers(workspace_root: Path) -> dict[str, dict[str, Any]]:
             ],
             "env": {"NPM_CONFIG_CACHE": npm_cache_dir},
         },
-        "sequential-thinking": {
-            "command": "npx",
-            "args": [
-                "-y",
-                "@modelcontextprotocol/server-sequential-thinking@2025.12.18",
-            ],
-            "env": {"NPM_CONFIG_CACHE": npm_cache_dir},
-        },
         "fetch": {
             "command": "uvx",
             "args": FETCH_SPEC,
             "env": {"UV_CACHE_DIR": uv_cache_dir, "UV_TOOL_DIR": uv_tool_dir},
         },
-        "pdf": {
-            "command": "npx",
-            "args": ["-y", "@modelcontextprotocol/server-pdf@1.3.1", "--stdio"],
-            "env": {"NPM_CONFIG_CACHE": npm_cache_dir},
-        },
         "github": _wrapper_command("github-mcp-wrapper", workspace_root),
         "docker": _wrapper_command("mcp_docker_wrapper", workspace_root),
-        "docker-docs": _wrapper_command("mcp_docker_docs_wrapper", workspace_root),
         "context7": _wrapper_command("mcp_context7_wrapper", workspace_root),
-        "paper-search": _wrapper_command("mcp_paper_search_wrapper", workspace_root),
-        "dockerhub": _wrapper_command("mcp_dockerhub_wrapper", workspace_root),
+        "ast-grep": _wrapper_command("mcp_ast_grep_wrapper", workspace_root),
+        "mcp-code-interpreter": _wrapper_command("mcp_code_interpreter_wrapper", workspace_root),
         "prometheus": _wrapper_command("mcp_prometheus_wrapper", workspace_root),
         "grafana": _wrapper_command("mcp_grafana_wrapper", workspace_root),
         "brave-search": _wrapper_command("mcp_brave_search_wrapper", workspace_root),
         "sonarqube": _wrapper_command("mcp_sonarqube_wrapper", workspace_root),
         "neo4j-cypher": _wrapper_command("mcp_neo4j_cypher_wrapper", workspace_root),
         "neo4j-memory": _wrapper_command("mcp_neo4j_memory_wrapper", workspace_root),
-        "needle": _wrapper_command("mcp_needle_wrapper", workspace_root),
         "chembl": _wrapper_command("mcp_chembl_wrapper", workspace_root),
         "pubchem": _wrapper_command("mcp_pubchem_wrapper", workspace_root),
         "pubmed": _wrapper_command("mcp_pubmed_wrapper", workspace_root),
         "mermaid": _wrapper_command("mcp_mermaid_wrapper", workspace_root),
-        "openaiDeveloperDocs": {
-            "type": "http",
-            "url": "https://developers.openai.com/mcp",
-        },
     }
 
     # Preserve the committed config shape where the GitHub wrapper receives npm cache.
