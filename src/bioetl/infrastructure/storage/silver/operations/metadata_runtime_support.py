@@ -130,7 +130,7 @@ async def persist_silver_metadata(
 async def resolve_finalization_dq_metrics(
     metadata_ops: SilverMetadataOperations,
     *,
-    table_name: str,
+    _table_name: str,
     records: list[BronzeRecord],
     quarantined_count: int | None = None,
     validation_errors: Sequence[str] | None = None,
@@ -139,7 +139,7 @@ async def resolve_finalization_dq_metrics(
     best_effort_log(
         metadata_ops._logger,
         "debug",
-        f"Resolving finalization DQ metrics for table {table_name}",
+        f"Resolving finalization DQ metrics for table {_table_name}",
     )
     import pyarrow as pa
 
