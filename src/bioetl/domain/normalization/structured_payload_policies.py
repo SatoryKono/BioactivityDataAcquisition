@@ -59,6 +59,8 @@ class StructuredPayloadPolicy:
         )
 
 
+_SEMANTICSCHOLAR_PROFILE = "semanticscholar.publication"
+
 _POLICIES: tuple[StructuredPayloadPolicy, ...] = (
     StructuredPayloadPolicy(
         profile_name="openalex.publication",
@@ -113,7 +115,7 @@ _POLICIES: tuple[StructuredPayloadPolicy, ...] = (
         ),
     ),
     StructuredPayloadPolicy(
-        profile_name="semanticscholar.publication",
+        profile_name=_SEMANTICSCHOLAR_PROFILE,
         field_name="author_h_indices",
         representation=StructuredPayloadRepresentation.CANONICAL_JSON_STRING,
         collection_semantics=StructuredPayloadCollectionSemantics.ORDERED_SEQUENCE,
@@ -126,7 +128,7 @@ _POLICIES: tuple[StructuredPayloadPolicy, ...] = (
         ),
     ),
     StructuredPayloadPolicy(
-        profile_name="semanticscholar.publication",
+        profile_name=_SEMANTICSCHOLAR_PROFILE,
         field_name="citation_contexts",
         representation=StructuredPayloadRepresentation.CANONICAL_JSON_STRING,
         collection_semantics=StructuredPayloadCollectionSemantics.ORDERED_SEQUENCE,
@@ -139,7 +141,7 @@ _POLICIES: tuple[StructuredPayloadPolicy, ...] = (
         ),
     ),
     StructuredPayloadPolicy(
-        profile_name="semanticscholar.publication",
+        profile_name=_SEMANTICSCHOLAR_PROFILE,
         field_name="publication_types",
         representation=StructuredPayloadRepresentation.CANONICAL_JSON_STRING,
         collection_semantics=StructuredPayloadCollectionSemantics.UNORDERED_SET,
@@ -152,7 +154,7 @@ _POLICIES: tuple[StructuredPayloadPolicy, ...] = (
         ),
     ),
     StructuredPayloadPolicy(
-        profile_name="semanticscholar.publication",
+        profile_name=_SEMANTICSCHOLAR_PROFILE,
         field_name="subject_fields",
         representation=StructuredPayloadRepresentation.CANONICAL_JSON_STRING,
         collection_semantics=StructuredPayloadCollectionSemantics.UNORDERED_SET,

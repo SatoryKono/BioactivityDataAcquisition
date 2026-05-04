@@ -74,26 +74,37 @@ __all__ = [
     "load_workflow_config",
 ]
 
+_BOOTSTRAP_CHECKPOINT_EXPORT_MODULE = (
+    "bioetl.composition.bootstrap.cli.checkpoint"
+)
+_BOOTSTRAP_STORAGE_EXPORT_MODULE = "bioetl.composition.bootstrap.cli.storage"
+
 _BOOTSTRAP_EXPORT_MODULES: dict[str, str] = {
     "bootstrap_adr_service": "bioetl.composition.bootstrap.cli.adr",
-    "bootstrap_audit_inspection_service": "bioetl.composition.bootstrap.cli.checkpoint",
-    "bootstrap_bronze_cleanup_service": "bioetl.composition.bootstrap.cli.storage",
-    "bootstrap_checkpoint_service": "bioetl.composition.bootstrap.cli.checkpoint",
+    "bootstrap_audit_inspection_service": _BOOTSTRAP_CHECKPOINT_EXPORT_MODULE,
+    "bootstrap_bronze_cleanup_service": _BOOTSTRAP_STORAGE_EXPORT_MODULE,
+    "bootstrap_checkpoint_service": _BOOTSTRAP_CHECKPOINT_EXPORT_MODULE,
     "bootstrap_config_service": "bioetl.composition.bootstrap.cli.config",
-    "bootstrap_contract_migration_service": "bioetl.composition.bootstrap.cli.storage",
-    "bootstrap_export_service": "bioetl.composition.bootstrap.cli.storage",
-    "bootstrap_forensic_run_diff_service": "bioetl.composition.bootstrap.cli.run_manifest",
-    "bootstrap_health_server_dependencies": "bioetl.composition.bootstrap.cli.health",
+    "bootstrap_contract_migration_service": _BOOTSTRAP_STORAGE_EXPORT_MODULE,
+    "bootstrap_export_service": _BOOTSTRAP_STORAGE_EXPORT_MODULE,
+    "bootstrap_forensic_run_diff_service": (
+        "bioetl.composition.bootstrap.cli.run_manifest"
+    ),
+    "bootstrap_health_server_dependencies": (
+        "bioetl.composition.bootstrap.cli.health"
+    ),
     "bootstrap_health_service": "bioetl.composition.bootstrap.cli.health",
-    "bootstrap_lineage_service": "bioetl.composition.bootstrap.cli.checkpoint",
+    "bootstrap_lineage_service": _BOOTSTRAP_CHECKPOINT_EXPORT_MODULE,
     "bootstrap_lock_service": "bioetl.composition.bootstrap.cli.lock",
     "bootstrap_metrics_service": "bioetl.composition.bootstrap.cli.metrics",
     "bootstrap_observability_workflow_service": "bioetl.composition.bootstrap.cli.checkpoint",
     "bootstrap_pipeline_runner_service": "bioetl.composition.bootstrap.runtime.runner",
-    "bootstrap_quarantine_port": "bioetl.composition.bootstrap.assembly.checkpoint",
-    "bootstrap_quarantine_service": "bioetl.composition.bootstrap.cli.checkpoint",
-    "bootstrap_run_manifest_service": "bioetl.composition.bootstrap.cli.checkpoint",
-    "bootstrap_vacuum_service": "bioetl.composition.bootstrap.cli.storage",
+    "bootstrap_quarantine_port": (
+        "bioetl.composition.bootstrap.assembly.checkpoint"
+    ),
+    "bootstrap_quarantine_service": _BOOTSTRAP_CHECKPOINT_EXPORT_MODULE,
+    "bootstrap_run_manifest_service": _BOOTSTRAP_CHECKPOINT_EXPORT_MODULE,
+    "bootstrap_vacuum_service": _BOOTSTRAP_STORAGE_EXPORT_MODULE,
 }
 
 

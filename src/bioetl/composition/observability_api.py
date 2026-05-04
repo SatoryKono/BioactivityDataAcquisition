@@ -15,6 +15,8 @@ from uuid import uuid4
 from bioetl.domain.exceptions import MetricsServerError
 from bioetl.domain.ports import LoggerPort
 
+_PUSHGATEWAY_FALLBACK = "localhost:9091"
+
 if TYPE_CHECKING:
     from bioetl.application.services.audit_inspection_service import (
         AuditInspectionService,
@@ -144,7 +146,7 @@ def push_metrics_to_gateway(
     from bioetl.infrastructure.config import get_settings
 
     settings = get_settings()
-    gateway = getattr(settings, "pushgateway_url", None) or "localhost:9091"
+    gateway = getattr(settings, "pushgateway_url", None) or _PUSHGATEWAY_FALLBACK
     grouping_key: dict[str, str] = {}
     if pipeline_name:
         grouping_key["pipeline"] = pipeline_name
@@ -176,7 +178,7 @@ def delete_metrics_from_gateway(
     from bioetl.infrastructure.config import get_settings
 
     settings = get_settings()
-    gateway = getattr(settings, "pushgateway_url", None) or "localhost:9091"
+    gateway = getattr(settings, "pushgateway_url", None) or _PUSHGATEWAY_FALLBACK
     grouping_key: dict[str, str] = {}
     if pipeline_name:
         grouping_key["pipeline"] = pipeline_name
@@ -250,7 +252,9 @@ def get_metrics_operator_profile() -> MetricsOperatorProfile:
     pushgateway_mode = (
         "best_effort_on_run_completion" if metrics_enabled else "disabled"
     )
-    pushgateway_gateway = getattr(settings, "pushgateway_url", None) or "localhost:9091"
+    pushgateway_gateway = (
+        getattr(settings, "pushgateway_url", None) or _PUSHGATEWAY_FALLBACK
+    )
     return MetricsOperatorProfile(
         metrics_enabled=metrics_enabled,
         metrics_server_enabled=metrics_server_enabled,
