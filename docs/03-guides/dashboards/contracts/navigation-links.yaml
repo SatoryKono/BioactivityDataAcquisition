@@ -124,3 +124,43 @@ navigation_transition_contract:
     - [bioetl-runtime, bioetl-control-plane-v1]
     - [bioetl-control-plane-v1, bioetl-dq-v2]
     - [bioetl-dq-v2, bioetl-silver-reject-explorer]
+
+
+first_action_contract:
+  bioetl-control-plane-v1:
+    panel_id: 9001
+    min_cta: 3
+    max_cta: 4
+    ctas:
+      - title: Back to Overview
+        expected_target_uid: bioetl-overview-v2
+      - title: 2. Runtime
+        expected_target_uid: bioetl-runtime
+      - title: 4. Data Quality
+        expected_target_uid: bioetl-dq-v2
+      - title: Explore Logs (Loki, tracing profile)
+        expected_target_uid: grafana-lokiexplore-app
+  bioetl-provider-health-v2:
+    panel_id: 9002
+    min_cta: 3
+    max_cta: 4
+    ctas:
+      - title: Back to Overview
+        expected_target_uid: bioetl-overview-v2
+      - title: 2. Runtime
+        expected_target_uid: bioetl-runtime
+      - title: Control Plane v1
+        expected_target_uid: bioetl-control-plane-v1
+      - title: Explore Traces (Tempo, tracing profile)
+        expected_target_uid: grafana-exploretraces-app
+  bioetl-workflow-overview:
+    panel_id: 9003
+    min_cta: 3
+    max_cta: 4
+    ctas:
+      - title: Back to Overview
+        expected_target_uid: bioetl-overview-v2
+      - title: 2. Runtime
+        expected_target_uid: bioetl-runtime
+      - title: Control Plane v1
+        expected_target_uid: bioetl-control-plane-v1
