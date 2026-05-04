@@ -2357,6 +2357,7 @@ def test_provider_health_selected_provider_detail_row_is_collapsed() -> None:
         "gridPos", {}
     ).get("y", 0)
 
+
 def test_runtime_dq_control_plane_expose_contextual_loki_explore_link() -> None:
     """Critical runtime/dq/control-plane panels must keep at least one contextual Loki Explore link."""
     dashboard_panels = {
@@ -2373,7 +2374,9 @@ def test_runtime_dq_control_plane_expose_contextual_loki_explore_link() -> None:
             if panel.get("title")
         }
         panel = panels.get(panel_title)
-        assert panel is not None, f"{dashboard_name} missing critical panel {panel_title!r}"
+        assert panel is not None, (
+            f"{dashboard_name} missing critical panel {panel_title!r}"
+        )
 
         links = panel.get("options", {}).get("dataLinks", [])
         assert links, f"{dashboard_name}:{panel_title} must include dataLinks"
@@ -2386,7 +2389,7 @@ def test_runtime_dq_control_plane_expose_contextual_loki_explore_link() -> None:
             and "query=%7Bjob%3D%22bioetl%22%7D" in str(link.get("url", ""))
         ]
         assert baseline, (
-            f"{dashboard_name}:{panel_title} must keep baseline Loki link with {{job=\"bioetl\"}}"
+            f'{dashboard_name}:{panel_title} must keep baseline Loki link with {{job="bioetl"}}'
         )
 
         contextual = [
@@ -2406,4 +2409,3 @@ def test_runtime_dq_control_plane_expose_contextual_loki_explore_link() -> None:
             assert "${run_type:regex}" in url
             assert "run_id" not in url
             assert "payload_hash" not in url
- 
