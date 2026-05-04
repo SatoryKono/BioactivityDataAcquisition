@@ -100,12 +100,12 @@ def test_pipeline_runtime_panels_have_units() -> None:
 
 def test_pipeline_runtime_count_panels_have_window_in_title_or_description() -> None:
     titles = {
-        "Runtime Blockers / 15m",
-        "Failed Runs / 15m",
-        "No-Records Runs / 30m",
-        "Runtime Error Rate / 30m",
-        "Worst Stage Lag / 15m",
-        "Memory Pressure Active / 15m",
+        "Runtime Blockers",
+        "Failed Runs",
+        "No-Records Runs",
+        "Runtime Error Rate",
+        "Worst Stage Lag",
+        "Memory Pressure Active",
         "Pipeline Alert Conditions",
         "DQ Alert Conditions",
         "Control-plane Alert Conditions",
@@ -257,8 +257,8 @@ def test_runtime_blockers_panel_does_not_filter_by_stage() -> None:
     saw output backlog but Runtime Blockers filtered it out via stage=~"$stage".
     """
     panels = {p.get("title"): p for p in _runtime_data_panels()}
-    blockers_panel = panels.get("Runtime Blockers / 15m")
-    assert blockers_panel is not None, "Runtime Blockers / 15m panel is missing"
+    blockers_panel = panels.get("Runtime Blockers")
+    assert blockers_panel is not None, "Runtime Blockers panel is missing"
     expr = blockers_panel["targets"][0]["expr"]
     backlog_term = "bioetl_runtime_alert_condition_stage_backlog_active_15m"
     lag_term = "bioetl_runtime_alert_condition_stage_lag_high_15m"
@@ -275,7 +275,7 @@ def test_runtime_blockers_panel_does_not_filter_by_stage() -> None:
 def test_runtime_blockers_includes_gold_write_missing() -> None:
     """Runtime Blockers must include gold_write_missing recording rule."""
     panels = {p.get("title"): p for p in _runtime_data_panels()}
-    blockers_panel = panels.get("Runtime Blockers / 15m")
+    blockers_panel = panels.get("Runtime Blockers")
     assert blockers_panel is not None
     expr = blockers_panel["targets"][0]["expr"]
     assert "bioetl_runtime_alert_condition_gold_write_missing_15m" in expr, (
@@ -286,7 +286,7 @@ def test_runtime_blockers_includes_gold_write_missing() -> None:
 def test_runtime_blockers_includes_no_terminal_run() -> None:
     """Runtime Blockers must include no_terminal_run recording rule."""
     panels = {p.get("title"): p for p in _runtime_data_panels()}
-    blockers_panel = panels.get("Runtime Blockers / 15m")
+    blockers_panel = panels.get("Runtime Blockers")
     assert blockers_panel is not None
     expr = blockers_panel["targets"][0]["expr"]
     assert "bioetl_runtime_alert_condition_no_terminal_run_30m" in expr, (

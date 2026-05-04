@@ -287,8 +287,8 @@ def test_runtime_first_action_row_precedes_condition_cards_in_order() -> None:
         "Control-plane Alert Conditions",
         "GLOBAL Provider Alert Conditions",
         "Freshness Alert Conditions",
-        "No-Records Runs / 30m",
-        "Memory Pressure Active / 15m",
+        "No-Records Runs",
+        "Memory Pressure Active",
     ]
     for title in expected_sequence:
         assert title in titles, f"Runtime Escalate row missing panel '{title}'"
