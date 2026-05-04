@@ -5671,7 +5671,12 @@ def _link_source_backed_node_structure(
         return
 
     source_path = root / source_path_value
-    if source_path.is_dir():
+    try:
+        is_directory = source_path.is_dir()
+    except OSError:
+        # File or directory is corrupted or unreadable, skip it
+        return
+    if is_directory:
         _link_source_backed_directory_structure(
             snapshot,
             node.key,
@@ -5679,7 +5684,12 @@ def _link_source_backed_node_structure(
             config=config,
         )
         return
-    if not source_path.is_file():
+    try:
+        is_file = source_path.is_file()
+    except OSError:
+        # File or directory is corrupted or unreadable, skip it
+        return
+    if not is_file:
         return
     _link_source_backed_file_node(
         snapshot,
@@ -9733,8 +9743,13 @@ def _docs_drift_sources(
             continue
         if _is_excluded_file_structure_path(source_path, config):
             continue
-        doc_path = root / source_path
-        if not doc_path.is_file():
+        try:
+            doc_path = root / source_path
+            is_file = doc_path.is_file()
+        except OSError:
+            # File or directory is corrupted or unreadable, skip it
+            continue
+        if not is_file:
             continue
         text = cached_text.get(source_path)
         if text is None:
