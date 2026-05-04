@@ -80,7 +80,7 @@
         "content": "<center><h2>Pipeline: $pipeline | Run Type: $run_type | Reason: $reason_code | Field: $field | Run ID: $run_id</h2><div><strong style='color:#ffb347'>default 24h forensic window</strong></div><div><small>Select exactly one pipeline. Quarantine Explorer is fail-closed and forensic filters like run_id/payload_hash stay explorer-only, not Prometheus labels.</small></div></center>",
         "mode": "html"
       },
-      "title": "Inspect Explorer Scope",
+      "title": "Scope",
       "type": "text",
       "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
     },
@@ -143,7 +143,7 @@
           "expr": ""
         }
       ],
-      "title": "Monitor Filtered Records Total",
+      "title": "Filtered Records Total",
       "type": "table",
       "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
     },
@@ -223,7 +223,7 @@
           "expr": ""
         }
       ],
-      "title": "Track Reject Rate vs Bronze",
+      "title": "Reject Rate vs Bronze",
       "type": "table",
       "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
     },
@@ -266,7 +266,7 @@
           "expr": ""
         }
       ],
-      "title": "Inspect Run Scope Summary",
+      "title": "Run Scope Summary",
       "type": "table",
       "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
     },
@@ -447,7 +447,7 @@
         }
       ],
       "description": "Shows latest 100 records for selected scope, sorted by ingestion_ts descending. Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data.",
-      "title": "Inspect Filtered Records Table",
+      "title": "Filtered Records Table",
       "type": "table"
     },
     {
@@ -487,7 +487,7 @@
         }
       ],
       "description": "Select a row or set payload_hash to inspect one specific record. Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data.",
-      "title": "Inspect Selected Record Details",
+      "title": "Selected Record Details",
       "type": "table"
     }
   ],
