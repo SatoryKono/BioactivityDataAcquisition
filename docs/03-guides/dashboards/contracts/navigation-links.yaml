@@ -67,3 +67,51 @@ time_handoff_requirements:
       - from=${__from}
       - to=${__to}
 
+
+navigation_transition_contract:
+  dashboard_levels:
+    L0:
+      dashboards: [bioetl-overview-v2]
+      required_outbound: [bioetl-runtime, bioetl-control-plane-v1, bioetl-provider-health-v2, bioetl-dq-v2, bioetl-workflow-overview]
+      required_inbound: []
+    L1:
+      dashboards: [bioetl-runtime, bioetl-control-plane-v1, bioetl-provider-health-v2, bioetl-dq-v2, bioetl-workflow-overview]
+      required_outbound: [bioetl-overview-v2]
+      required_inbound: [bioetl-overview-v2]
+    L2:
+      dashboards: [bioetl-silver-reject-explorer]
+      required_outbound: [bioetl-overview-v2, bioetl-dq-v2]
+      required_inbound: [bioetl-dq-v2]
+  default_semantics_by_route_class:
+    global_navigation:
+      allowed_default_values: [All]
+    scoped_handoff:
+      allowed_default_values: []
+      inherit_scoped_values: true
+  route_class_by_transition:
+    bioetl-overview-v2->bioetl-runtime: scoped_handoff
+    bioetl-overview-v2->bioetl-control-plane-v1: scoped_handoff
+    bioetl-overview-v2->bioetl-provider-health-v2: global_navigation
+    bioetl-overview-v2->bioetl-dq-v2: scoped_handoff
+    bioetl-overview-v2->bioetl-workflow-overview: global_navigation
+    bioetl-runtime->bioetl-overview-v2: scoped_handoff
+    bioetl-runtime->bioetl-control-plane-v1: scoped_handoff
+    bioetl-runtime->bioetl-provider-health-v2: global_navigation
+    bioetl-runtime->bioetl-dq-v2: scoped_handoff
+    bioetl-control-plane-v1->bioetl-overview-v2: scoped_handoff
+    bioetl-control-plane-v1->bioetl-runtime: scoped_handoff
+    bioetl-control-plane-v1->bioetl-dq-v2: scoped_handoff
+    bioetl-provider-health-v2->bioetl-overview-v2: global_navigation
+    bioetl-provider-health-v2->bioetl-runtime: global_navigation
+    bioetl-dq-v2->bioetl-overview-v2: scoped_handoff
+    bioetl-dq-v2->bioetl-control-plane-v1: scoped_handoff
+    bioetl-dq-v2->bioetl-silver-reject-explorer: scoped_handoff
+    bioetl-silver-reject-explorer->bioetl-overview-v2: scoped_handoff
+    bioetl-silver-reject-explorer->bioetl-dq-v2: scoped_handoff
+    bioetl-workflow-overview->bioetl-overview-v2: global_navigation
+    bioetl-workflow-overview->bioetl-runtime: global_navigation
+    bioetl-workflow-overview->bioetl-control-plane-v1: global_navigation
+  incident_critical_reciprocal_paths:
+    - [bioetl-runtime, bioetl-control-plane-v1]
+    - [bioetl-control-plane-v1, bioetl-dq-v2]
+    - [bioetl-dq-v2, bioetl-silver-reject-explorer]
