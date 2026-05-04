@@ -31,17 +31,6 @@
     },
     {
       "asDropdown": false,
-      "icon": "dashboard",
-      "includeVars": false,
-      "keepTime": true,
-      "tags": [],
-      "targetBlank": false,
-      "title": "Control Plane v1",
-      "type": "link",
-      "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
-    },
-    {
-      "asDropdown": false,
       "icon": "external link",
       "includeVars": false,
       "keepTime": true,
@@ -65,12 +54,23 @@
     },
     {
       "asDropdown": false,
+      "icon": "dashboard",
+      "includeVars": false,
+      "keepTime": true,
+      "tags": [],
+      "targetBlank": false,
+      "title": "Control Plane",
+      "type": "link",
+      "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
+    },
+    {
+      "asDropdown": false,
       "icon": "logs",
       "includeVars": false,
       "keepTime": true,
       "tags": [],
       "targetBlank": false,
-      "title": "Explore Logs (Loki, tracing profile)",
+      "title": "Explore Logs",
       "type": "link",
       "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D",
       "tooltip": "Open Loki Explore with tracing profile and selected time range."
@@ -82,7 +82,7 @@
       "keepTime": true,
       "tags": [],
       "targetBlank": false,
-      "title": "Explore Traces (Tempo, tracing profile)",
+      "title": "Explore Traces",
       "type": "link",
       "url": "/a/grafana-exploretraces-app/?from=${__from}&to=${__to}&queryType=traceqlSearch&query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline:regex}%22%20%26%26%20span.%22bioetl.run_type%22%20%3D~%20%22${run_type:regex}%22%20%7D",
       "tooltip": "Open Tempo Explore with tracing profile and selected time range."
@@ -643,17 +643,17 @@
           "includeVars": false
         },
         {
-          "title": "Control Plane v1",
+          "title": "Inspect Control Plane",
           "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
           "includeVars": false
         },
         {
-          "title": "3. Provider Health",
+          "title": "Inspect Provider Health",
           "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=All&var-adapter=All&${__url_time_range}",
           "includeVars": false
         },
         {
-          "title": "4. Data Quality",
+          "title": "Inspect Data Quality",
           "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
           "includeVars": false
         }
