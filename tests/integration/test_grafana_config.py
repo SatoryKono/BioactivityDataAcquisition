@@ -270,12 +270,12 @@ def test_summary_queries_use_zero_fallbacks() -> None:
             "Workflow Status": "or vector(0)",
         },
         "bioetl-runtime.json": {
-            "Runtime Blockers / 15m": "or vector(0)",
-            "Failed Runs / 15m": "or vector(0)",
-            "No-Records Runs / 30m": "or vector(0)",
-            "Runtime Error Rate / 30m": "or vector(0)",
-            "Worst Stage Lag / 15m": "or vector(0)",
-            "Memory Pressure Active / 15m": "or vector(0)",
+            "Runtime Blockers": "or vector(0)",
+            "Failed Runs": "or vector(0)",
+            "No-Records Runs": "or vector(0)",
+            "Runtime Error Rate": "or vector(0)",
+            "Worst Stage Lag": "or vector(0)",
+            "Memory Pressure Active": "or vector(0)",
             "Records by Stage / Interval": "or vector(0)",
             "Pipeline Alert Conditions": "or vector(0)",
             "DQ Alert Conditions": "or vector(0)",
@@ -1248,11 +1248,11 @@ def test_runtime_pipeline_errors_panel_uses_runtime_error_metric_and_selected_ti
         (
             item
             for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Runtime Error Rate / 30m"
+            if item.get("title") == "Runtime Error Rate"
         ),
         None,
     )
-    assert panel is not None, "Panel 'Runtime Error Rate / 30m' not found"
+    assert panel is not None, "Panel 'Runtime Error Rate' not found"
 
     expressions = [
         target.get("expr", "")
@@ -1260,7 +1260,7 @@ def test_runtime_pipeline_errors_panel_uses_runtime_error_metric_and_selected_ti
         if isinstance(target.get("expr"), str)
     ]
     assert any("bioetl_errors_total" in expr for expr in expressions), (
-        "Runtime Error Rate / 30m must use bioetl_errors_total"
+        "Runtime Error Rate must use bioetl_errors_total"
     )
     assert any("[30m]" in expr for expr in expressions), (
         "Runtime Error Rate / 30m must use the shipped 30-minute window"
