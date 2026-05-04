@@ -266,32 +266,16 @@ def _record_flow_invariants(host: _PipelineRunnerFlowHostProtocol) -> None:
     quarantined = max(0, int(metrics.get("records_quarantined", 0)))
     filtered_out = max(0, int(metrics.get("records_filtered_out", 0)))
 
-    fetched_equals_bronze = "unknown"
-    if fetched > 0 or bronze > 0:
-        fetched_equals_bronze = "passed" if fetched == bronze else "violated"
-    pipeline_metrics.record_flow_invariant(
+    _record_count_flow_invariants(
+        host=host,
+        pipeline_metrics=pipeline_metrics,
         run_type=run_type,
-        invariant="fetched_equals_bronze",
-        status=fetched_equals_bronze,
-    )
-
-    bronze_partitioned = "unknown"
-    partition_total = silver + quarantined + filtered_out
-    if bronze > 0 or partition_total > 0:
-        bronze_partitioned = "passed" if bronze == partition_total else "violated"
-    pipeline_metrics.record_flow_invariant(
-        run_type=run_type,
-        invariant="bronze_partitioned",
-        status=bronze_partitioned,
-    )
-
-    silver_gold_monotonic = "unknown"
-    if silver > 0 or gold > 0:
-        silver_gold_monotonic = "passed" if silver >= gold else "violated"
-    pipeline_metrics.record_flow_invariant(
-        run_type=run_type,
-        invariant="silver_gold_monotonic",
-        status=silver_gold_monotonic,
+        fetched=fetched,
+        bronze=bronze,
+        silver=silver,
+        gold=gold,
+        quarantined=quarantined,
+        filtered_out=filtered_out,
     )
 
     config = host._config
@@ -324,6 +308,51 @@ def _record_flow_invariants(host: _PipelineRunnerFlowHostProtocol) -> None:
         stage="output",
         count=max(silver - gold, 0),
     )
+
+
+def _record_count_flow_invariants(
+    *,
+    host: _PipelineRunnerFlowHostProtocol,
+    pipeline_metrics: object,
+    run_type: str,
+    fetched: int,
+    bronze: int,
+    silver: int,
+    gold: int,
+    quarantined: int,
+    filtered_out: int,
+) -> None:
+    """Record record-count invariant results for one completed run."""
+    typed_pipeline_metrics = cast("PipelineMetricsRecorder", pipeline_metrics)
+
+    fetched_equals_bronze = "unknown"
+    if fetched > 0 or bronze > 0:
+        fetched_equals_bronze = "passed" if fetched == bronze else "violated"
+    typed_pipeline_metrics.record_flow_invariant(
+        run_type=run_type,
+        invariant="fetched_equals_bronze",
+        status=fetched_equals_bronze,
+    )
+
+    bronze_partitioned = "unknown"
+    partition_total = silver + quarantined + filtered_out
+    if bronze > 0 or partition_total > 0:
+        bronze_partitioned = "passed" if bronze == partition_total else "violated"
+    typed_pipeline_metrics.record_flow_invariant(
+        run_type=run_type,
+        invariant="bronze_partitioned",
+        status=bronze_partitioned,
+    )
+
+    silver_gold_monotonic = "unknown"
+    if silver > 0 or gold > 0:
+        silver_gold_monotonic = "passed" if silver >= gold else "violated"
+    typed_pipeline_metrics.record_flow_invariant(
+        run_type=run_type,
+        invariant="silver_gold_monotonic",
+        status=silver_gold_monotonic,
+    )
+
     _record_stage_lag_gauges(
         host=host,
         pipeline_metrics=pipeline_metrics,
