@@ -136,6 +136,11 @@ async def resolve_finalization_dq_metrics(
     validation_errors: Sequence[str] | None = None,
 ) -> BatchDQMetrics:
     """Resolve DQ metrics through canonical metadata operations."""
+    best_effort_log(
+        metadata_ops._logger,
+        "debug",
+        f"Resolving finalization DQ metrics for table {table_name}",
+    )
     import pyarrow as pa
 
     normalized_records = _normalize_records_for_dq_metrics(records)
