@@ -87,6 +87,24 @@ Machine-readable navigation contract: `docs/03-guides/dashboards/contracts/navig
    используйте его, когда pipeline summary выглядит здоровым, но orchestration
    path показывает `failed/skipped/blocked` status.
 
+## Incident first steps (Runtime `First Action` row)
+
+В `2. Runtime` внутри collapsed row `Tracing-only Log Hygiene` добавлен
+верхний CTA-блок `First Action` с фиксированным операторским порядком:
+
+1. `Pipeline conditions`
+1. `DQ conditions`
+1. `Control Plane conditions`
+1. `Provider health checks`
+
+Правило handoff для каждого CTA остаётся bounded:
+- `includeVars=false`;
+- передаются только allowlisted `var-*` параметры для target dashboard;
+- временное окно сохраняется через `${__url_time_range}`.
+
+Это нужно для быстрого старта triage: сначала выбрать домен инцидента,
+потом переходить к детальным condition cards и runbook links ниже.
+
 
 
 ### Screenshot map: `bioetl-overview-v2` (новая структура первого экрана)

@@ -716,6 +716,45 @@ def test_runtime_alert_condition_panels_expose_direct_runbook_links() -> None:
         )
 
 
+def test_runtime_first_action_cta_links_preserve_scoped_vars_and_time() -> None:
+    """Runtime First Action row must use explicit allowlisted vars and preserve time."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
+    expected = {
+        "Pipeline conditions": ("var-pipeline=$pipeline", "var-run_type=$run_type"),
+        "DQ conditions": (
+            "var-pipeline=$pipeline",
+            "var-run_type=$run_type",
+            "var-stage=$stage",
+        ),
+        "Control Plane conditions": ("var-pipeline=$pipeline", "var-run_type=$run_type"),
+        "Provider health checks": ("var-provider=All", "var-adapter=All"),
+    }
+    forbidden = ("var-workflow=", "var-status=", "var-run_id=", "var-payload_hash=")
+
+    for panel_title, required_tokens in expected.items():
+        panel = next(
+            (item for item in get_dashboard_panels(dashboard) if item.get("title") == panel_title),
+            None,
+        )
+        assert panel is not None, f"Panel '{panel_title}' not found in bioetl-runtime.json"
+        links = panel.get("links", [])
+        assert links, f"Panel '{panel_title}' must expose a CTA link"
+        link = links[0]
+        assert link.get("includeVars") is False, (
+            f"Panel '{panel_title}' must keep includeVars=false"
+        )
+        url = str(link.get("url", ""))
+        _assert_required_time_tokens(
+            url,
+            tokens=_DASHBOARD_TIME_HANDOFF_TOKENS,
+            context=f"{panel_title} CTA link",
+        )
+        for token in required_tokens:
+            assert token in url, f"Panel '{panel_title}' must include token {token}"
+        for token in forbidden:
+            assert token not in url, f"Panel '{panel_title}' must not leak {token}"
+
+
 def test_data_quality_incident_panels_link_to_control_plane_dashboard() -> None:
     """DQ panels should link into control-plane investigation for replay/lineage paths."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
@@ -988,4 +1027,3 @@ def test_provider_dashboard_runtime_links_include_contextual_variant_next_to_res
     assert "var-pipeline=${provider:queryparam}" in contextual_url
     assert "var-run_type=${adapter:queryparam}" in contextual_url
     assert "var-stage=All" in contextual_url
-
