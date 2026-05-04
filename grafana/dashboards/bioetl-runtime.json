@@ -48,7 +48,7 @@
       "tags": [],
       "targetBlank": false,
       "title": "3. Provider Health",
-      "tooltip": "Cross-scope handoff (opens with All provider scope): var-provider=All and var-adapter=All; pipeline/run_type/stage do not transfer. Scope reset: target dashboard opens with explicit All/default scope; source-specific filters are not transferred.",
+      "tooltip": "Cross-scope handoff (Reset scope): opens with All provider scope. var-provider=All and var-adapter=All; pipeline/run_type/stage do not transfer. Source-specific filters are intentionally reset.",
       "type": "link",
       "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=All&var-adapter=All&${__url_time_range}"
     },
@@ -118,9 +118,9 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 24,
+        "w": 12,
         "x": 0,
-        "y": 3
+        "y": 4
       },
       "id": 298,
       "options": {
@@ -133,9 +133,9 @@
     {
       "gridPos": {
         "h": 4,
-        "w": 24,
-        "x": 0,
-        "y": 3
+        "w": 12,
+        "x": 12,
+        "y": 4
       },
       "id": 222,
       "options": {
@@ -212,10 +212,10 @@
             "title": "Open Control Plane v1 (manifest/checkpoint)",
             "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
           },
-          {
-            "title": "Open Data Quality v2",
-            "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&${__url_time_range}"
-          },
+            {
+              "title": "Open Data Quality v2 (Runtime blocker handoff)",
+              "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&${__url_time_range}"
+            },
           {
             "title": "Open Runtime Troubleshooting Runbook",
             "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/observability-checklist.md"
@@ -228,7 +228,7 @@
           "refId": "A"
         }
       ],
-      "title": "Runtime Blockers / 15m",
+      "title": "Runtime Blockers",
       "type": "stat"
     },
     {
@@ -324,7 +324,7 @@
           "refId": "A"
         }
       ],
-      "title": "Failed Runs / 15m",
+      "title": "Failed Runs",
       "type": "stat"
     },
     {
@@ -406,7 +406,7 @@
           "refId": "A"
         }
       ],
-      "title": "Runtime Error Rate / 30m",
+      "title": "Runtime Error Rate",
       "type": "stat"
     },
     {
@@ -493,7 +493,7 @@
           "refId": "A"
         }
       ],
-      "title": "Worst Stage Lag / 15m",
+      "title": "Worst Stage Lag",
       "type": "stat"
     },
     {
@@ -1510,9 +1510,9 @@
             "textMode": "auto",
             "dataLinks": [
               {
-                "title": "Open Data Quality v2",
-                "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&${__url_time_range}"
-              },
+              "title": "Open Data Quality v2 (pipeline handoff)",
+              "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&${__url_time_range}"
+            },
               {
                 "title": "Open DQ Failure Runbook",
                 "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/dq-failure-investigation.md"
