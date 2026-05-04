@@ -111,6 +111,63 @@
       "type": "row"
     },
     {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 2
+      },
+      "id": 9001,
+      "panels": [],
+      "title": "First Action",
+      "type": "row",
+      "links": [
+        {
+          "asDropdown": false,
+          "icon": "external link",
+          "includeVars": false,
+          "keepTime": true,
+          "targetBlank": false,
+          "title": "Back to Overview",
+          "type": "link",
+          "url": "/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
+          "tooltip": "Open first-response scope with current pipeline/run_type context."
+        },
+        {
+          "asDropdown": false,
+          "icon": "external link",
+          "includeVars": false,
+          "keepTime": true,
+          "targetBlank": false,
+          "title": "2. Runtime",
+          "type": "link",
+          "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
+        },
+        {
+          "asDropdown": false,
+          "icon": "external link",
+          "includeVars": false,
+          "keepTime": true,
+          "targetBlank": false,
+          "title": "4. Data Quality",
+          "type": "link",
+          "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
+        },
+        {
+          "asDropdown": false,
+          "icon": "logs",
+          "includeVars": false,
+          "keepTime": true,
+          "targetBlank": false,
+          "title": "Explore Logs (Loki, tracing profile)",
+          "type": "link",
+          "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D",
+          "tooltip": "Open Loki Explore with tracing profile and selected time range."
+        }
+      ]
+    },
+    {
       "datasource": "Prometheus",
       "description": "Replay safety state for selected pipeline/run_type. Zero means no blockers detected in selected range.",
       "fieldConfig": {

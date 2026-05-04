@@ -224,39 +224,41 @@ navigation_transition_contract:
       panel_id: 9001
       min_cta: 3
       max_cta: 4
-    ctas:
-      - title: Back to Overview
-        expected_target_uid: bioetl-overview-v2
-      - title: 2. Runtime
-        expected_target_uid: bioetl-runtime
-      - title: 4. Data Quality
-        expected_target_uid: bioetl-dq-v2
-      - title: Explore Logs (Loki, tracing profile)
-        expected_target_uid: grafana-lokiexplore-app
-  bioetl-provider-health-v2:
-    panel_id: 9002
-    min_cta: 3
-    max_cta: 4
-    ctas:
-      - title: Back to Overview
-        expected_target_uid: bioetl-overview-v2
-      - title: 2. Runtime (Primary)
-        expected_target_uid: bioetl-runtime
-      - title: Control Plane v1
-        expected_target_uid: bioetl-control-plane-v1
-      - title: Explore Traces (Tempo, tracing profile)
-        expected_target_uid: grafana-exploretraces-app
-  bioetl-workflow-overview:
-    panel_id: 9003
-    min_cta: 3
-    max_cta: 4
-    ctas:
-      - title: Back to Overview
-        expected_target_uid: bioetl-overview-v2
-      - title: 2. Runtime
-        expected_target_uid: bioetl-runtime
-      - title: Control Plane v1
-        expected_target_uid: bioetl-control-plane-v1
+      ctas:
+        - title: Back to Overview
+          expected_target_uid: bioetl-overview-v2
+        - title: 2. Runtime
+          expected_target_uid: bioetl-runtime
+        - title: 4. Data Quality
+          expected_target_uid: bioetl-dq-v2
+        - title: Explore Logs (Loki, tracing profile)
+          expected_target_uid: grafana-lokiexplore-app
+    bioetl-provider-health-v2:
+      panel_id: 9002
+      min_cta: 3
+      max_cta: 4
+      ctas:
+        - title: Back to Overview
+          expected_target_uid: bioetl-overview-v2
+        - title: 2. Runtime (Primary)
+          expected_target_uid: bioetl-runtime
+        - title: Control Plane v1
+          expected_target_uid: bioetl-control-plane-v1
+        - title: Explore Traces (Tempo, tracing profile)
+          expected_target_uid: grafana-exploretraces-app
+    bioetl-workflow-overview:
+      panel_id: 9003
+      min_cta: 3
+      max_cta: 4
+      ctas:
+        - title: Back to Overview
+          expected_target_uid: bioetl-overview-v2
+        - title: 2. Runtime
+          expected_target_uid: bioetl-runtime
+        - title: Control Plane v1
+          expected_target_uid: bioetl-control-plane-v1
+        - title: Explore Logs (Loki, tracing profile)
+          expected_target_uid: grafana-lokiexplore-app
   cross_scope_marker_contract:
     required_markers:
       reset_scope: "Reset scope"
@@ -266,6 +268,12 @@ navigation_transition_contract:
       bioetl-provider-health-v2->bioetl-runtime: reset_scope
       bioetl-provider-health-v2->bioetl-runtime#context: context_mapping
       bioetl-provider-health-v2->bioetl-control-plane-v1: reset_scope
+      bioetl-overview-v2->bioetl-provider-health-v2: reset_scope
+      bioetl-overview-v2->bioetl-workflow-overview: reset_scope
+      bioetl-runtime->bioetl-provider-health-v2: reset_scope
+      bioetl-workflow-overview->bioetl-overview-v2: reset_scope
+      bioetl-workflow-overview->bioetl-runtime: reset_scope
+      bioetl-workflow-overview->bioetl-control-plane-v1: reset_scope
     required_tooltip_tokens:
       reset_scope: ["Reset scope"]
       context_mapping: ["Context mapping"]

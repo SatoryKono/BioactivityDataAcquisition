@@ -17,7 +17,8 @@ if [[ -x "${GEMINI_SCRIPT}" ]]; then
     echo "[OK] Gemini alias installed: 'gemini' command is now available"
     echo "     Try: gemini"
     echo "     Or:  gemini \"your prompt here\""
+    return 0
 else
-    echo "[ERROR] Gemini launcher not found at ${GEMINI_SCRIPT}"
+    echo "[ERROR] Gemini launcher not found at ${GEMINI_SCRIPT}" >&2
     return 1
 fi

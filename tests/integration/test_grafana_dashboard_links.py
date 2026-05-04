@@ -660,10 +660,12 @@ def test_cross_scope_links_use_explicit_reset_or_context_markers() -> None:
         "required_tooltip_tokens must be mapping"
     )
 
-    dashboard = load_dashboard(
-        Path("grafana/dashboards/bioetl-provider-health-v2.json")
-    )
-    links = [link for link in dashboard.get("links", []) if isinstance(link, dict)]
+    dashboards = {
+        dashboard.get("uid"): dashboard
+        for dashboard_path in get_dashboard_files()
+        for dashboard in (load_dashboard(dashboard_path),)
+        if isinstance(dashboard.get("uid"), str)
+    }
 
     for transition, marker_key in required_titles_by_transition.items():
         assert isinstance(marker_key, str), (
@@ -680,10 +682,16 @@ def test_cross_scope_links_use_explicit_reset_or_context_markers() -> None:
 
         base_transition = transition.split("#", 1)[0]
         from_uid, to_uid = base_transition.split("->", 1)
-        assert from_uid == "bioetl-provider-health-v2", (
-            f"this test currently validates provider-health transitions only, got {transition}"
+        source_dashboard = dashboards.get(from_uid)
+        assert isinstance(source_dashboard, dict), (
+            f"source dashboard for transition {transition} must exist: {from_uid}"
         )
 
+        links = [
+            link
+            for link in source_dashboard.get("links", [])
+            if isinstance(link, dict)
+        ]
         matched_links = []
         for link in links:
             url = link.get("url", "")
@@ -711,6 +719,143 @@ def test_cross_scope_links_use_explicit_reset_or_context_markers() -> None:
                 assert token in tooltip, (
                     f"Link tooltip for transition {transition} must include '{token}': {tooltip}"
                 )
+
+
+def _load_dashboards_by_uid() -> dict[str, dict[str, object]]:
+    dashboards: dict[str, dict[str, object]] = {}
+    for dashboard_path in get_dashboard_files():
+        dashboard = load_dashboard(dashboard_path)
+        uid = dashboard.get("uid")
+        assert isinstance(uid, str), f"{dashboard_path.name} must declare string uid"
+        dashboards[uid] = dashboard
+    return dashboards
+
+
+def test_first_action_rows_match_navigation_contract() -> None:
+    """First Action rows must match contract-defined panel ids and outgoing CTAs."""
+    transition_contract = _NAV_LINK_CONTRACT.get("navigation_transition_contract")
+    assert isinstance(transition_contract, dict), (
+        "navigation_transition_contract must be mapping"
+    )
+    first_action_contract = transition_contract.get("first_action_contract")
+    assert isinstance(first_action_contract, dict), (
+        "first_action_contract must be mapping"
+    )
+
+    dashboards_by_uid = _load_dashboards_by_uid()
+
+    for source_uid, spec in first_action_contract.items():
+        assert isinstance(spec, dict), f"first_action_contract.{source_uid} must be mapping"
+        panel_id = spec.get("panel_id")
+        min_cta = spec.get("min_cta", 0)
+        max_cta = spec.get("max_cta", 0)
+        ctas = spec.get("ctas", [])
+        assert isinstance(panel_id, int), (
+            f"first_action_contract.{source_uid}.panel_id must be integer"
+        )
+        assert isinstance(min_cta, int), (
+            f"first_action_contract.{source_uid}.min_cta must be integer"
+        )
+        assert isinstance(max_cta, int), (
+            f"first_action_contract.{source_uid}.max_cta must be integer"
+        )
+        assert isinstance(ctas, list) and ctas, (
+            f"first_action_contract.{source_uid}.ctas must be a non-empty list"
+        )
+        assert min_cta <= max_cta, (
+            f"first_action_contract.{source_uid} has invalid CTA bounds: {min_cta}>{max_cta}"
+        )
+
+        dashboard = dashboards_by_uid.get(source_uid)
+        assert isinstance(dashboard, dict), (
+            f"first_action_contract references unknown uid {source_uid}"
+        )
+
+        panels_by_id = {
+            panel.get("id"): panel
+            for panel in get_dashboard_panels(dashboard)
+            if isinstance(panel.get("id"), int)
+        }
+        panel = panels_by_id.get(panel_id)
+        assert panel is not None, (
+            f"{source_uid} missing First Action panel with id={panel_id}"
+        )
+        assert panel.get("title") == "First Action", (
+            f"{source_uid} first action panel id={panel_id} must be titled 'First Action'"
+        )
+
+        links = panel.get("links")
+        assert isinstance(links, list) and links, (
+            f"{source_uid} first action panel id={panel_id} must define row links"
+        )
+        assert min_cta <= len(links) <= max_cta, (
+            f"{source_uid} first action panel id={panel_id} must include "
+            f"{min_cta}-{max_cta} links, got {len(links)}"
+        )
+
+        required_titles = {str(arrow.get("title")) for arrow in ctas}
+        actual_titles = {str(link.get("title", "")) for link in links}
+        assert required_titles.issubset(actual_titles), (
+            f"{source_uid} first action panel id={panel_id} missing CTAs: "
+            f"{sorted(required_titles - actual_titles)}"
+        )
+
+        for entry in ctas:
+            title = entry.get("title")
+            expected_target_uid = entry.get("expected_target_uid")
+            assert isinstance(title, str), (
+                f"first_action_contract.{source_uid}.ctas entry missing title"
+            )
+            assert isinstance(expected_target_uid, str), (
+                f"first_action_contract.{source_uid}.{title} missing expected_target_uid"
+            )
+            link = next(
+                (item for item in links if item.get("title") == title),
+                None,
+            )
+            assert link is not None, (
+                f"{source_uid} first action must define CTA link '{title}'"
+            )
+            assert link.get("includeVars") is False, (
+                f"{source_uid} First Action CTA '{title}' must keep includeVars=false"
+            )
+
+            url = str(link.get("url", ""))
+            assert url, f"{source_uid} First Action CTA '{title}' must define URL"
+
+            if expected_target_uid.startswith("grafana-"):
+                assert url.startswith(f"/a/{expected_target_uid}/"), (
+                    f"{source_uid} First Action CTA '{title}' must target app {expected_target_uid}"
+                )
+                _assert_required_time_tokens(
+                    url,
+                    tokens=_EXPLORE_TIME_HANDOFF_TOKENS,
+                    context=f"{source_uid} first action CTA '{title}'",
+                )
+                continue
+
+            assert url.startswith(f"/d/{expected_target_uid}/"), (
+                f"{source_uid} First Action CTA '{title}' must target /d/{expected_target_uid}/"
+            )
+            required_vars = _REQUIRED_LINK_VARS_BY_TARGET_UID.get(expected_target_uid)
+            assert required_vars is not None, (
+                f"Unknown target UID {expected_target_uid} in first_action_contract"
+            )
+            allowed_vars = _ALLOWED_DASHBOARD_LINK_VARS[expected_target_uid]
+            passed_vars = _extract_link_vars(url)
+            assert required_vars <= passed_vars, (
+                f"{source_uid} first action CTA '{title}' missing required vars "
+                f"{sorted(required_vars - passed_vars)}"
+            )
+            assert passed_vars <= allowed_vars, (
+                f"{source_uid} first action CTA '{title}' passes non-allowlisted vars "
+                f"{sorted(passed_vars - allowed_vars)}"
+            )
+            _assert_required_time_tokens(
+                url,
+                tokens=_DASHBOARD_TIME_HANDOFF_TOKENS,
+                context=f"{source_uid} first action CTA '{title}'",
+            )
 
 
 def test_dashboard_links_forbid_universal_handoff_patterns() -> None:
