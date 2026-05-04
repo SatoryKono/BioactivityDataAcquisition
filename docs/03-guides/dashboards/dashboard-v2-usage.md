@@ -242,8 +242,8 @@ Variable handoff policy for dashboard links remains strict and bounded:
   `bioetl_control_plane_reads_total` и
   `bioetl_control_plane_read_duration_seconds_bucket` глобальны по
   `store/operation/status`.
-- `bioetl-provider-health-v2`: dashboard links `Back to Overview`, `2. Runtime (Primary)`, `2. Runtime (Contextual: provider mapping)`, `Explore Logs (Loki, tracing profile)` и `Explore Traces (Tempo, tracing profile)` дают быстрый переход из provider health surface в runtime/overview и correlation flow без ложного pipeline scope в target dashboards. Минимальный `First Action` row шаблон: 3–4 CTA (`Back to Overview`, `2. Runtime`, `Control Plane v1`, optional Explore).
-
+- `bioetl-provider-health-v2`: dashboard links `Back to Overview`, `2. Runtime (Primary)`, `2. Runtime (Contextual: provider mapping)`, `Explore Logs (Loki, tracing profile)` и `Explore Traces (Tempo, tracing profile)` дают быстрый переход из provider health surface в runtime/overview и correlation flow без ложного pipeline scope в target dashboards. Минимальный `First Action` row шаблон: 3–4 CTA (`Back to Overview`, `2. Runtime`, `Control Plane v1`, optional Explore). Panel `id=114` (`Current Provider Health Status`) показывает явный enum mapping `0=UNHEALTHY`, `1=DEGRADED`, `2=HEALTHY`, а panel `id=1` (`Health Check Latency by Provider (p95)`) дублирует Explore handoff через data links.
+  
   **First 2 clicks (L1):**
   1. Click #1: открыть `bioetl-provider-health-v2`, проверить `Current Provider Health Status` (`id=114`) и `Health Check Latency by Provider (p95)` (`id=1`).
   2. Click #2: перейти в `2. Runtime (Primary)` при active degradation/failure trend, в `2. Runtime (Contextual: provider mapping)` для быстрого просмотра маппинга провайдеров, или в `Control Plane v1` при симптомах retry exhaustion/state inconsistency. Panel `id=114` (`Current Provider Health Status`) показывает явный enum mapping `0=UNHEALTHY`, `1=DEGRADED`, `2=HEALTHY`, а panel `id=1` (`Health Check Latency by Provider (p95)`) дублирует Explore handoff через data links.

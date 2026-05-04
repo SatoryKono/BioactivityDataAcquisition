@@ -315,11 +315,6 @@
             "title": "Open canonical KPI view",
             "url": "/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
             "targetBlank": false
-          },
-          {
-            "title": "Open Logs (Loki, contextual scope marker, tracing)",
-            "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D%20%7C%20json%20%7C%20scope_marker%3D%22dashboard_context%22",
-            "targetBlank": true
           }
         ]
       },
