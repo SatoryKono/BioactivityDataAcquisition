@@ -27,6 +27,19 @@ import yaml
 SRC_ROOT = Path("src/bioetl")
 CANONICAL_NAMING_AUDIT_PATH = Path("scripts/engineering/qa/naming_audit.py")
 LAYER_AWARE_SUFFIX_POLICY_PATH = Path("configs/quality/layered_suffix_policy.yaml")
+CHECKPOINT_ASSEMBLY_PATH = "src/bioetl/composition/bootstrap/assembly/checkpoint.py"
+OBSERVABILITY_RUNTIME_PATH = "src/bioetl/composition/bootstrap/runtime/observability.py"
+ARCHITECTURE_TRACKER_ISSUE = "#3442"
+ARCHITECTURE_OWNER = "@bioetl-architecture"
+OBSERVABILITY_OWNER = "@bioetl-observability"
+OBSERVABILITY_BOOTSTRAP_BEHIND_FACADE_REASON = (
+    "Reviewed observability bootstrap implementation retained behind "
+    "the runtime observability facade."
+)
+OBSERVABILITY_FACADE_REASON_TEMPLATE = (
+    "Reviewed public runtime observability facade retained as the "
+    "canonical bootstrap seam for {port} port wiring."
+)
 FORBIDDEN_FACTORY_LAYERS = (
     SRC_ROOT / "application",
     SRC_ROOT / "infrastructure",
@@ -115,133 +128,118 @@ class LayerAwareNamingPolicy:
 _CURATED_COMPOSITION_BOOTSTRAP_PORT_FACTORIES = (
     AllowedSymbol(
         symbol="bootstrap_checkpoint_port",
-        path="src/bioetl/composition/bootstrap/assembly/checkpoint.py",
-        issue="#3442",
+        path=CHECKPOINT_ASSEMBLY_PATH,
+        issue=ARCHITECTURE_TRACKER_ISSUE,
         reason=(
             "Reviewed bootstrap factory that constructs the checkpoint port "
             "implementation for CLI/runtime wiring."
         ),
-        owner="@bioetl-architecture",
+        owner=ARCHITECTURE_OWNER,
         expires_on="2026-12-31",
         removal_step="Remove after bootstrap port factories are consolidated to canonical runtime builders.",
     ),
     AllowedSymbol(
         symbol="bootstrap_composite_checkpoint_port",
-        path="src/bioetl/composition/bootstrap/assembly/checkpoint.py",
-        issue="#3442",
+        path=CHECKPOINT_ASSEMBLY_PATH,
+        issue=ARCHITECTURE_TRACKER_ISSUE,
         reason=(
             "Reviewed bootstrap factory that constructs the composite checkpoint "
             "port for runtime resume and repair flows."
         ),
-        owner="@bioetl-architecture",
+        owner=ARCHITECTURE_OWNER,
         expires_on="2026-12-31",
-        removal_step="Remove after composite checkpoint wiring no longer requires compatibility factory seams.",
+        removal_step=(
+            "Remove after composite checkpoint wiring no longer requires "
+            "compatibility factory seams."
+        ),
     ),
     AllowedSymbol(
         symbol="bootstrap_quarantine_port",
-        path="src/bioetl/composition/bootstrap/assembly/checkpoint.py",
-        issue="#3442",
+        path=CHECKPOINT_ASSEMBLY_PATH,
+        issue=ARCHITECTURE_TRACKER_ISSUE,
         reason=(
             "Reviewed bootstrap factory that constructs the quarantine port "
             "implementation for CLI/runtime wiring."
         ),
-        owner="@bioetl-architecture",
+        owner=ARCHITECTURE_OWNER,
         expires_on="2026-12-31",
         removal_step="Remove after quarantine port wiring is fully collapsed to canonical bootstrap composition APIs.",
     ),
     AllowedSymbol(
         symbol="bootstrap_dq_monitor_port",
         path="src/bioetl/composition/bootstrap/runtime/dq_bootstrap.py",
-        issue="#3442",
-        reason=(
-            "Reviewed observability bootstrap implementation retained behind "
-            "the runtime observability facade."
-        ),
-        owner="@bioetl-observability",
+        issue=ARCHITECTURE_TRACKER_ISSUE,
+        reason=OBSERVABILITY_BOOTSTRAP_BEHIND_FACADE_REASON,
+        owner=OBSERVABILITY_OWNER,
         expires_on="2026-12-31",
-        removal_step="Remove when runtime observability bootstrap internals are merged and no longer need port-suffixed compatibility wrappers.",
+        removal_step=(
+            "Remove when runtime observability bootstrap internals are merged "
+            "and no longer need port-suffixed compatibility wrappers."
+        ),
     ),
     AllowedSymbol(
         symbol="bootstrap_dq_monitor_port",
-        path="src/bioetl/composition/bootstrap/runtime/observability.py",
-        issue="#3442",
-        reason=(
-            "Reviewed public runtime observability facade retained as the "
-            "canonical bootstrap seam for DQ monitor port wiring."
-        ),
-        owner="@bioetl-observability",
+        path=OBSERVABILITY_RUNTIME_PATH,
+        issue=ARCHITECTURE_TRACKER_ISSUE,
+        reason=OBSERVABILITY_FACADE_REASON_TEMPLATE.format(port="DQ monitor"),
+        owner=OBSERVABILITY_OWNER,
         expires_on="2026-12-31",
-        removal_step="Remove after public observability bootstrap surface is stabilized without *_port compatibility factories.",
+        removal_step=(
+            "Remove after public observability bootstrap surface is stabilized "
+            "without *_port compatibility factories."
+        ),
     ),
     AllowedSymbol(
         symbol="bootstrap_logger_port",
         path="src/bioetl/composition/bootstrap/runtime/logger_bootstrap.py",
-        issue="#3442",
-        reason=(
-            "Reviewed observability bootstrap implementation retained behind "
-            "the runtime observability facade."
-        ),
-        owner="@bioetl-observability",
+        issue=ARCHITECTURE_TRACKER_ISSUE,
+        reason=OBSERVABILITY_BOOTSTRAP_BEHIND_FACADE_REASON,
+        owner=OBSERVABILITY_OWNER,
         expires_on="2026-12-31",
         removal_step="Remove when logger port bootstrap path is canonicalized and compatibility wrappers are deleted.",
     ),
     AllowedSymbol(
         symbol="bootstrap_logger_port",
-        path="src/bioetl/composition/bootstrap/runtime/observability.py",
-        issue="#3442",
-        reason=(
-            "Reviewed public runtime observability facade retained as the "
-            "canonical bootstrap seam for logger port wiring."
-        ),
-        owner="@bioetl-observability",
+        path=OBSERVABILITY_RUNTIME_PATH,
+        issue=ARCHITECTURE_TRACKER_ISSUE,
+        reason=OBSERVABILITY_FACADE_REASON_TEMPLATE.format(port="logger"),
+        owner=OBSERVABILITY_OWNER,
         expires_on="2026-12-31",
         removal_step="Remove after observability facade no longer exposes logger *_port bootstrap seam.",
     ),
     AllowedSymbol(
         symbol="bootstrap_metrics_port",
         path="src/bioetl/composition/bootstrap/runtime/metrics_bootstrap.py",
-        issue="#3442",
-        reason=(
-            "Reviewed observability bootstrap implementation retained behind "
-            "the runtime observability facade."
-        ),
-        owner="@bioetl-observability",
+        issue=ARCHITECTURE_TRACKER_ISSUE,
+        reason=OBSERVABILITY_BOOTSTRAP_BEHIND_FACADE_REASON,
+        owner=OBSERVABILITY_OWNER,
         expires_on="2026-12-31",
         removal_step="Remove when metrics port bootstrap path is canonicalized and compatibility wrappers are deleted.",
     ),
     AllowedSymbol(
         symbol="bootstrap_metrics_port",
-        path="src/bioetl/composition/bootstrap/runtime/observability.py",
-        issue="#3442",
-        reason=(
-            "Reviewed public runtime observability facade retained as the "
-            "canonical bootstrap seam for metrics port wiring."
-        ),
-        owner="@bioetl-observability",
+        path=OBSERVABILITY_RUNTIME_PATH,
+        issue=ARCHITECTURE_TRACKER_ISSUE,
+        reason=OBSERVABILITY_FACADE_REASON_TEMPLATE.format(port="metrics"),
+        owner=OBSERVABILITY_OWNER,
         expires_on="2026-12-31",
         removal_step="Remove after observability facade no longer exposes metrics *_port bootstrap seam.",
     ),
     AllowedSymbol(
         symbol="bootstrap_tracer_port",
         path="src/bioetl/composition/bootstrap/runtime/tracing_bootstrap.py",
-        issue="#3442",
-        reason=(
-            "Reviewed observability bootstrap implementation retained behind "
-            "the runtime observability facade."
-        ),
-        owner="@bioetl-observability",
+        issue=ARCHITECTURE_TRACKER_ISSUE,
+        reason=OBSERVABILITY_BOOTSTRAP_BEHIND_FACADE_REASON,
+        owner=OBSERVABILITY_OWNER,
         expires_on="2026-12-31",
         removal_step="Remove when tracer port bootstrap path is canonicalized and compatibility wrappers are deleted.",
     ),
     AllowedSymbol(
         symbol="bootstrap_tracer_port",
-        path="src/bioetl/composition/bootstrap/runtime/observability.py",
-        issue="#3442",
-        reason=(
-            "Reviewed public runtime observability facade retained as the "
-            "canonical bootstrap seam for tracer port wiring."
-        ),
-        owner="@bioetl-observability",
+        path=OBSERVABILITY_RUNTIME_PATH,
+        issue=ARCHITECTURE_TRACKER_ISSUE,
+        reason=OBSERVABILITY_FACADE_REASON_TEMPLATE.format(port="tracer"),
+        owner=OBSERVABILITY_OWNER,
         expires_on="2026-12-31",
         removal_step="Remove after observability facade no longer exposes tracer *_port bootstrap seam.",
     ),

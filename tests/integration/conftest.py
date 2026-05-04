@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Generator
 from typing import TYPE_CHECKING
 
 import pytest
@@ -36,7 +37,7 @@ def _clear_runtime_config_caches() -> None:
 
 
 @pytest.fixture
-def relaxed_dq_env(monkeypatch: pytest.MonkeyPatch) -> None:
+def relaxed_dq_env(monkeypatch: pytest.MonkeyPatch) -> Generator[None, None, None]:
     """Enable relaxed DQ thresholds explicitly for replay-heavy integration tests."""
     _clear_runtime_config_caches()
     monkeypatch.setenv("BIOETL_TEST_RELAXED_DQ", "1")
@@ -47,7 +48,7 @@ def relaxed_dq_env(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 @pytest.fixture
-def strict_dq_env(monkeypatch: pytest.MonkeyPatch) -> None:
+def strict_dq_env(monkeypatch: pytest.MonkeyPatch) -> Generator[None, None, None]:
     """Force strict DQ mode for integration tests that validate strict behavior."""
     _clear_runtime_config_caches()
     monkeypatch.delenv("BIOETL_TEST_RELAXED_DQ", raising=False)

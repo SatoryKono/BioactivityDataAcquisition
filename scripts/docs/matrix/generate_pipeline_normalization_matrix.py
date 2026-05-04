@@ -931,15 +931,14 @@ def _non_chembl_row_metadata(row: dict[str, str]) -> dict[str, str]:
         entity=entity,
         field_name=field_name,
     )
-    metadata["raw_sidecar"] = classification.get("raw_sidecar", "") or (
-        semantic_policy.raw_sidecar_field
-        if semantic_policy is not None and semantic_policy.raw_sidecar_field
-        else (
-            publication_policy.raw_sidecar_field
-            if publication_policy is not None and publication_policy.raw_sidecar_field
-            else ""
-        )
-    )
+    metadata["raw_sidecar"] = classification.get("raw_sidecar", "")
+    if not metadata["raw_sidecar"]:
+        if semantic_policy is not None and semantic_policy.raw_sidecar_field:
+            metadata["raw_sidecar"] = semantic_policy.raw_sidecar_field
+        elif publication_policy is not None and publication_policy.raw_sidecar_field:
+            metadata["raw_sidecar"] = publication_policy.raw_sidecar_field
+        else:
+            metadata["raw_sidecar"] = ""
     metadata["canonical_sidecar"] = classification.get("canonical_sidecar", "") or (
         semantic_policy.canonical_sidecar_field if semantic_policy is not None else ""
     )

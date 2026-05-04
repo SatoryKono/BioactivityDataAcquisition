@@ -51,7 +51,7 @@
       "title": "5. Silver Reject Explorer",
       "type": "link",
       "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
-      "tooltip": "Explorer opens with a wider default time range for rare incidents (24h)."
+      "tooltip": "Cross-scope handoff with current dashboard time range and explicit panel scope: var-pipeline=$pipeline and var-run_type=$run_type."
     },
     {
       "asDropdown": false,
