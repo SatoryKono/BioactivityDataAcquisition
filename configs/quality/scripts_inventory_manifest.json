@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-05-04T05:07:48.078137+00:00",
+  "generated_at": "2026-05-04T15:19:19.690001+00:00",
   "summary": {
     "total_scripts": 360,
     "status_counts": {
@@ -7992,7 +7992,7 @@
         },
         {
           "path": "scripts/engineering/qa/check_naming_package_consistency.py",
-          "line": 285,
+          "line": 283,
           "source_group": "scripts",
           "text": "location=\"scripts/engineering/qa/naming_audit.py --check\","
         }
