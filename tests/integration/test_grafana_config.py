@@ -2020,6 +2020,43 @@ def test_runtime_alert_condition_panels_use_recording_rules(
         )
 
 
+def test_runtime_first_action_row_precedes_condition_cards_in_order() -> None:
+    """Runtime tracing row should expose First Action CTA block before condition cards."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
+    tracing_row = next(
+        (
+            panel
+            for panel in dashboard.get("panels", [])
+            if panel.get("type") == "row"
+            and panel.get("title")
+            == "Tracing-only Log Hygiene (requires optional tracing profile)"
+        ),
+        None,
+    )
+    assert tracing_row is not None, "Runtime tracing row not found"
+    nested = tracing_row.get("panels", [])
+    titles = [panel.get("title") for panel in nested]
+    expected_sequence = [
+        "First Action",
+        "Pipeline conditions",
+        "DQ conditions",
+        "Control Plane conditions",
+        "Provider health checks",
+        "Pipeline Alert Conditions",
+        "DQ Alert Conditions",
+        "Control-plane Alert Conditions",
+        "GLOBAL Provider Alert Conditions",
+    ]
+    for title in expected_sequence:
+        assert title in titles, f"Runtime tracing row missing panel '{title}'"
+
+    indices = [titles.index(title) for title in expected_sequence]
+    assert indices == sorted(indices), (
+        "Runtime First Action CTA panels must appear before existing condition cards "
+        "in the expected order"
+    )
+
+
 @pytest.mark.parametrize(
     ("dashboard_file", "panel_title"),
     [

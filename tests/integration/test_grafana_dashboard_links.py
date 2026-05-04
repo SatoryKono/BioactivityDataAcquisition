@@ -258,6 +258,7 @@ def test_overview_and_provider_dashboards_expose_explore_drilldown_links() -> No
         "bioetl-control-plane-v1.json",
         "bioetl-provider-health-v2.json",
         "bioetl-silver-reject-explorer.json",
+        "bioetl-workflow-overview.json",
     )
 
     for dashboard_name in expectations:
@@ -315,6 +316,7 @@ def test_explore_links_use_drilldown_routes_and_time_range() -> None:
         "bioetl-control-plane-v1.json",
         "bioetl-provider-health-v2.json",
         "bioetl-silver-reject-explorer.json",
+        "bioetl-workflow-overview.json",
     )
 
     for dashboard_name in expectations:
@@ -350,6 +352,7 @@ def test_tempo_drilldown_routes_to_traces_drilldown_app() -> None:
         "bioetl-control-plane-v1.json",
         "bioetl-provider-health-v2.json",
         "bioetl-silver-reject-explorer.json",
+        "bioetl-workflow-overview.json",
     )
 
     for dashboard_name in expectations:
@@ -406,6 +409,7 @@ def test_tempo_drilldown_links_are_contextual() -> None:
         "bioetl-control-plane-v1.json",
         "bioetl-silver-reject-explorer.json",
     )
+    workflow_scoped = ("bioetl-workflow-overview.json",)
     provider_scoped = ("bioetl-provider-health-v2.json",)
 
     for dashboard_name in pipeline_scoped:
@@ -421,11 +425,33 @@ def test_tempo_drilldown_links_are_contextual() -> None:
             assert "queryType=traceqlSearch" in url, (
                 f"{dashboard_name} Tempo drilldown must declare TraceQL search mode"
             )
+            assert "query=%7B%7D" not in url and "query={}" not in url, (
+                f"{dashboard_name} Tempo drilldown must not use empty trace query payload"
+            )
             assert "bioetl.pipeline" in url and "bioetl.run_type" in url, (
                 f"{dashboard_name} Tempo drilldown must scope by pipeline/run_type"
             )
             assert "bioetl.provider" not in url, (
                 f"{dashboard_name} pipeline drilldown must not switch to provider-only scope"
+            )
+
+    for dashboard_name in workflow_scoped:
+        dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
+        tempo_links = [
+            link
+            for link in _collect_dashboard_links(dashboard)
+            if _is_traces_drilldown_url(link.get("url", ""))
+        ]
+        assert tempo_links, f"{dashboard_name} must expose Tempo drilldown links"
+        for link in tempo_links:
+            url = link.get("url", "")
+            assert "queryType=traceqlSearch" in url
+            assert "query=%7B%7D" not in url and "query={}" not in url
+            assert "bioetl.workflow" in url and "bioetl.status" in url, (
+                f"{dashboard_name} workflow drilldown must scope by workflow/status"
+            )
+            assert "bioetl.pipeline" not in url and "bioetl.run_type" not in url, (
+                f"{dashboard_name} workflow drilldown must not fake pipeline scope"
             )
 
     for dashboard_name in provider_scoped:
@@ -439,6 +465,7 @@ def test_tempo_drilldown_links_are_contextual() -> None:
         for link in tempo_links:
             url = link.get("url", "")
             assert "queryType=traceqlSearch" in url
+            assert "query=%7B%7D" not in url and "query={}" not in url
             assert "bioetl.provider" in url, (
                 f"{dashboard_name} provider drilldown must scope by provider"
             )
@@ -703,6 +730,45 @@ def test_runtime_alert_condition_panels_expose_direct_runbook_links() -> None:
         assert url.endswith(expected_suffix), (
             f"Panel '{panel_title}' runbook link must target {expected_suffix}"
         )
+
+
+def test_runtime_first_action_cta_links_preserve_scoped_vars_and_time() -> None:
+    """Runtime First Action row must use explicit allowlisted vars and preserve time."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
+    expected = {
+        "Pipeline conditions": ("var-pipeline=$pipeline", "var-run_type=$run_type"),
+        "DQ conditions": (
+            "var-pipeline=$pipeline",
+            "var-run_type=$run_type",
+            "var-stage=$stage",
+        ),
+        "Control Plane conditions": ("var-pipeline=$pipeline", "var-run_type=$run_type"),
+        "Provider health checks": ("var-provider=All", "var-adapter=All"),
+    }
+    forbidden = ("var-workflow=", "var-status=", "var-run_id=", "var-payload_hash=")
+
+    for panel_title, required_tokens in expected.items():
+        panel = next(
+            (item for item in get_dashboard_panels(dashboard) if item.get("title") == panel_title),
+            None,
+        )
+        assert panel is not None, f"Panel '{panel_title}' not found in bioetl-runtime.json"
+        links = panel.get("links", [])
+        assert links, f"Panel '{panel_title}' must expose a CTA link"
+        link = links[0]
+        assert link.get("includeVars") is False, (
+            f"Panel '{panel_title}' must keep includeVars=false"
+        )
+        url = str(link.get("url", ""))
+        _assert_required_time_tokens(
+            url,
+            tokens=_DASHBOARD_TIME_HANDOFF_TOKENS,
+            context=f"{panel_title} CTA link",
+        )
+        for token in required_tokens:
+            assert token in url, f"Panel '{panel_title}' must include token {token}"
+        for token in forbidden:
+            assert token not in url, f"Panel '{panel_title}' must not leak {token}"
 
 
 def test_data_quality_incident_panels_link_to_control_plane_dashboard() -> None:
