@@ -91,6 +91,7 @@ def _load_navigation_links_contract() -> dict[str, object]:
         "cross_scope_marker_contract": raw_contract.get(
             "cross_scope_marker_contract", {}
         ),
+        "kpi_ownership": raw_contract.get("kpi_ownership", {}),
     }
 
 
@@ -117,6 +118,7 @@ _SCOPE_RESET_LINK_TITLES = frozenset(
 )
 _REQUIRED_PANEL_LINKS_BY_UID = _NAV_LINK_CONTRACT["required_panel_links_by_uid"]
 _CROSS_SCOPE_MARKER_CONTRACT = _NAV_LINK_CONTRACT["cross_scope_marker_contract"]
+_KPI_OWNERSHIP = _NAV_LINK_CONTRACT["kpi_ownership"]
 
 
 def _extract_required_time_tokens(section: str) -> tuple[str, ...]:
@@ -219,6 +221,72 @@ def test_overview_status_cards_use_scoped_drilldown_urls() -> None:
                 url,
                 tokens=_DASHBOARD_TIME_HANDOFF_TOKENS,
                 context=f"Overview status panel id={panel_id} link to {target_uid}",
+            )
+
+
+def test_kpi_mirror_panels_link_to_canonical_kpi_view() -> None:
+    """Mirror KPI panels must include canonical fallback data link."""
+    assert isinstance(_KPI_OWNERSHIP, dict), "kpi_ownership must be a mapping"
+
+    dashboards_by_uid: dict[str, dict[str, object]] = {}
+    for dashboard_path in get_dashboard_files():
+        dashboard = load_dashboard(dashboard_path)
+        uid = dashboard.get("uid")
+        assert isinstance(uid, str), f"{dashboard_path.name} must define string uid"
+        dashboards_by_uid[uid] = dashboard
+
+    for kpi_name, spec in _KPI_OWNERSHIP.items():
+        assert isinstance(spec, dict), f"kpi_ownership.{kpi_name} must be a mapping"
+        canonical_uid = spec.get("canonical_uid")
+        assert isinstance(canonical_uid, str), (
+            f"kpi_ownership.{kpi_name}.canonical_uid must be string"
+        )
+
+        mirror_panels = spec.get("mirror_panels", [])
+        assert isinstance(mirror_panels, list), (
+            f"kpi_ownership.{kpi_name}.mirror_panels must be a list"
+        )
+        for mirror in mirror_panels:
+            assert isinstance(mirror, dict), (
+                f"kpi_ownership.{kpi_name}.mirror_panels entries must be mappings"
+            )
+            dashboard_uid = mirror.get("dashboard_uid")
+            panel_id = mirror.get("panel_id")
+            assert isinstance(dashboard_uid, str), "mirror dashboard_uid must be string"
+            assert isinstance(panel_id, int), "mirror panel_id must be integer"
+
+            dashboard = dashboards_by_uid.get(dashboard_uid)
+            assert dashboard is not None, (
+                f"kpi_ownership.{kpi_name} references unknown dashboard {dashboard_uid}"
+            )
+            panel = next(
+                (
+                    panel
+                    for panel in get_dashboard_panels(dashboard)
+                    if panel.get("id") == panel_id
+                ),
+                None,
+            )
+            assert isinstance(panel, dict), (
+                f"kpi_ownership.{kpi_name} panel id={panel_id} not found in {dashboard_uid}"
+            )
+            links = _iter_panel_data_links(panel)
+            canonical_link = next(
+                (
+                    link
+                    for link in links
+                    if link.get("title") == "Open canonical KPI view"
+                ),
+                None,
+            )
+            assert isinstance(canonical_link, dict), (
+                f"{dashboard_uid} panel id={panel_id} must define data link "
+                "'Open canonical KPI view'"
+            )
+            url = canonical_link.get("url", "")
+            assert isinstance(url, str) and url.startswith(f"/d/{canonical_uid}/"), (
+                f"{dashboard_uid} panel id={panel_id} canonical link must target "
+                f"/d/{canonical_uid}/, got {url!r}"
             )
 
 
