@@ -55,7 +55,7 @@ def build_test_transformer_dependencies(
     )
 
 
-def instantiate_test_transformer(
+def instantiate_test_transformer[TTransformer](
     transformer_class: type[TTransformer],
     /,
     **kwargs: Any,

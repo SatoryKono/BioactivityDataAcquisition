@@ -19,6 +19,9 @@ from tests.integration.adapters.pubmed_integration_support import (
     build_pubmed_search_ids,
 )
 
+# Required by pytest to use the imported fixtures
+__all__ = ["http_client", "mock_logger", "pubmed_adapter"]
+
 # VCR cassette directory for PubMed adapter tests
 # Note: cassette directory is resolved by conftest.py vcr_cassette_dir fixture
 # which looks for tests/fixtures/vcr/pubmed/ based on test filename

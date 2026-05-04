@@ -35,7 +35,10 @@ INFRASTRUCTURE_DIR = Path("src/bioetl/infrastructure")
 #
 # Path-based allowlist only. Basename matching can silently widen exemptions
 # when the same filename exists in multiple infrastructure subpackages.
-ALLOWED_PATHS: set[str] = set()
+ALLOWED_PATHS: set[str] = {
+    # Only allowed for real-time Prometheus metric export timestamps
+    "observability/server.py",
+}
 
 
 def _infrastructure_base() -> Path:
