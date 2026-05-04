@@ -26,7 +26,8 @@
       "targetBlank": false,
       "title": "Back to Overview",
       "type": "dashboards",
-      "url": "/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
+      "url": "/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
+      "tooltip": "Return to 1. Overview and preserve the selected time range."
     },
     {
       "asDropdown": false,
@@ -47,7 +48,7 @@
       "tags": [],
       "targetBlank": false,
       "title": "3. Provider Health",
-      "tooltip": "Cross-scope handoff (opens with All provider scope): var-provider=All and var-adapter=All; pipeline/run_type/stage do not transfer.",
+      "tooltip": "Cross-scope handoff (opens with All provider scope): var-provider=All and var-adapter=All; pipeline/run_type/stage do not transfer. Scope reset: target dashboard opens with explicit All/default scope; source-specific filters are not transferred.",
       "type": "link",
       "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=All&var-adapter=All&${__url_time_range}"
     },
@@ -71,7 +72,8 @@
       "targetBlank": false,
       "title": "Explore Logs (Loki, tracing profile)",
       "type": "link",
-      "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D"
+      "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D",
+      "tooltip": "Open Loki Explore with tracing profile and selected time range."
     },
     {
       "asDropdown": false,
@@ -82,7 +84,8 @@
       "targetBlank": false,
       "title": "Explore Traces (Tempo, tracing profile)",
       "type": "link",
-      "url": "/a/grafana-exploretraces-app/?from=${__from}&to=${__to}&queryType=traceqlSearch&query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline:regex}%22%20%26%26%20span.%22bioetl.run_type%22%20%3D~%20%22${run_type:regex}%22%20%7D"
+      "url": "/a/grafana-exploretraces-app/?from=${__from}&to=${__to}&queryType=traceqlSearch&query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline:regex}%22%20%26%26%20span.%22bioetl.run_type%22%20%3D~%20%22${run_type:regex}%22%20%7D",
+      "tooltip": "Open Tempo Explore with tracing profile and selected time range."
     }
   ],
   "panels": [
@@ -276,6 +279,11 @@
           {
             "title": "Open Pipeline Failure Runbook",
             "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/pipeline-failure-critical.md"
+          },
+          {
+            "title": "Open Logs (Loki, contextual scope marker)",
+            "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D%20%7C%20json%20%7C%20scope_marker%3D%22dashboard_context%22%20%7C%20pipeline%3D~%22${pipeline:regex}%22%20%7C%20run_type%3D~%22${run_type:regex}%22",
+            "targetBlank": true
           }
         ]
       },

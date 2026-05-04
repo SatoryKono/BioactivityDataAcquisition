@@ -1,10 +1,10 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-05-03T05:48:01.590062+00:00",
+  "generated_at": "2026-05-04T05:07:48.078137+00:00",
   "summary": {
-    "total_scripts": 355,
+    "total_scripts": 360,
     "status_counts": {
-      "active": 328,
+      "active": 333,
       "supporting": 27
     },
     "reference_group_coverage": {
@@ -12,7 +12,7 @@
       "build": 2,
       "ci": 50,
       "docs": 121,
-      "scripts": 299,
+      "scripts": 304,
       "skills": 8,
       "tests": 143
     }
@@ -788,7 +788,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 35,
+      "reference_count": 34,
       "references": [
         {
           "path": "scripts/ai/__main__.py",
@@ -967,6 +967,120 @@
       ]
     },
     {
+      "path": "scripts/ai/gemini/gemini-interactive.ps1",
+      "type": "ps1",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 14,
+      "references": [
+        {
+          "path": "scripts/ai/gemini/GEMINI_INTERACTIVE_GUIDE.md",
+          "line": 12,
+          "source_group": "scripts",
+          "text": ".\\scripts\\ai\\gemini\\gemini-interactive.ps1"
+        },
+        {
+          "path": "scripts/ai/gemini/GEMINI_INTERACTIVE_GUIDE.md",
+          "line": 15,
+          "source_group": "scripts",
+          "text": ".\\scripts\\ai\\gemini\\gemini-interactive.ps1 \"analyze this code\""
+        },
+        {
+          "path": "scripts/ai/gemini/GEMINI_INTERACTIVE_GUIDE.md",
+          "line": 106,
+          "source_group": "scripts",
+          "text": "GEMINI_MODEL=gemini-2.0-flash .\\scripts\\ai\\gemini\\gemini-interactive.ps1"
+        },
+        {
+          "path": "scripts/ai/gemini/GEMINI_INTERACTIVE_GUIDE.md",
+          "line": 121,
+          "source_group": "scripts",
+          "text": "├── gemini-interactive.ps1          # Quick PowerShell launcher"
+        },
+        {
+          "path": "scripts/ai/gemini/QUICK_REFERENCE.md",
+          "line": 7,
+          "source_group": "scripts",
+          "text": ".\\scripts\\ai\\gemini\\gemini-interactive.ps1"
+        },
+        {
+          "path": "scripts/ai/gemini/QUICK_REFERENCE.md",
+          "line": 19,
+          "source_group": "scripts",
+          "text": ".\\scripts\\ai\\gemini\\gemini-interactive.ps1 \"analyze the repository structure\""
+        },
+        {
+          "path": "scripts/ai/gemini/QUICK_REFERENCE.md",
+          "line": 76,
+          "source_group": "scripts",
+          "text": ".\\scripts\\ai\\gemini\\gemini-interactive.ps1"
+        },
+        {
+          "path": "scripts/ai/gemini/QUICK_REFERENCE.md",
+          "line": 120,
+          "source_group": "scripts",
+          "text": ".\\scripts\\ai\\gemini\\gemini-interactive.ps1 \"analyze the system architecture and suggest improvements\""
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/gemini/gemini-interactive.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 15,
+      "references": [
+        {
+          "path": "scripts/ai/gemini/GEMINI_INTERACTIVE_GUIDE.md",
+          "line": 25,
+          "source_group": "scripts",
+          "text": "bash scripts/ai/gemini/gemini-interactive.sh"
+        },
+        {
+          "path": "scripts/ai/gemini/GEMINI_INTERACTIVE_GUIDE.md",
+          "line": 28,
+          "source_group": "scripts",
+          "text": "bash scripts/ai/gemini/gemini-interactive.sh \"explain this repository\""
+        },
+        {
+          "path": "scripts/ai/gemini/GEMINI_INTERACTIVE_GUIDE.md",
+          "line": 122,
+          "source_group": "scripts",
+          "text": "├── gemini-interactive.sh           # Quick WSL launcher"
+        },
+        {
+          "path": "scripts/ai/gemini/QUICK_REFERENCE.md",
+          "line": 12,
+          "source_group": "scripts",
+          "text": "bash scripts/ai/gemini/gemini-interactive.sh"
+        },
+        {
+          "path": "scripts/ai/gemini/QUICK_REFERENCE.md",
+          "line": 24,
+          "source_group": "scripts",
+          "text": "bash scripts/ai/gemini/gemini-interactive.sh \"explain how Docker works\""
+        },
+        {
+          "path": "scripts/ai/gemini/QUICK_REFERENCE.md",
+          "line": 72,
+          "source_group": "scripts",
+          "text": "GEMINI_MODEL=gemini-2.5-pro bash scripts/ai/gemini/gemini-interactive.sh"
+        },
+        {
+          "path": "scripts/ai/gemini/QUICK_REFERENCE.md",
+          "line": 110,
+          "source_group": "scripts",
+          "text": "bash scripts/ai/gemini/gemini-interactive.sh \"review src/main.py for bugs\""
+        },
+        {
+          "path": "scripts/ai/gemini/QUICK_REFERENCE.md",
+          "line": 115,
+          "source_group": "scripts",
+          "text": "bash scripts/ai/gemini/gemini-interactive.sh \"write README.md for this project\""
+        }
+      ]
+    },
+    {
       "path": "scripts/ai/gemini/helper/check-env.ps1",
       "type": "ps1",
       "status": "active",
@@ -1004,6 +1118,12 @@
       "reference_count": 8,
       "references": [
         {
+          "path": "scripts/ai/gemini/GEMINI_INTERACTIVE_GUIDE.md",
+          "line": 128,
+          "source_group": "scripts",
+          "text": "│   ├── ensure-gemini-cli.sh        # Managed CLI bootstrap"
+        },
+        {
           "path": "scripts/ai/gemini/README.md",
           "line": 17,
           "source_group": "scripts",
@@ -1014,12 +1134,6 @@
           "line": 71,
           "source_group": "scripts",
           "text": "`helper/ensure-gemini-cli.sh` installs `node@22` and `@google/gemini-cli@latest` into the repo-local prefix. The local Node 22 is required because current Gemini CLI uses JavaScript features unsupport"
-        },
-        {
-          "path": "scripts/ai/gemini/SETUP_COMPLETE.md",
-          "line": 15,
-          "source_group": "scripts",
-          "text": "├── ensure-gemini-cli.sh"
         },
         {
           "path": "scripts/ai/gemini/helper/check-env.sh",
@@ -1088,16 +1202,16 @@
       "reference_count": 6,
       "references": [
         {
+          "path": "scripts/ai/gemini/GEMINI_INTERACTIVE_GUIDE.md",
+          "line": 125,
+          "source_group": "scripts",
+          "text": "│   ├── run-gemini-impl.sh          # Runtime launcher"
+        },
+        {
           "path": "scripts/ai/gemini/README.md",
           "line": 20,
           "source_group": "scripts",
           "text": "│   └── run-gemini-impl.sh         # Runtime launcher implementation"
-        },
-        {
-          "path": "scripts/ai/gemini/SETUP_COMPLETE.md",
-          "line": 17,
-          "source_group": "scripts",
-          "text": "└── run-gemini-impl.sh"
         },
         {
           "path": "scripts/ai/gemini/run-gemini.sh",
@@ -1145,8 +1259,26 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 9,
+      "reference_count": 8,
       "references": [
+        {
+          "path": "scripts/ai/gemini/GEMINI_INTERACTIVE_GUIDE.md",
+          "line": 8,
+          "source_group": "scripts",
+          "text": ".\\scripts\\ai\\gemini\\run-gemini.ps1 check"
+        },
+        {
+          "path": "scripts/ai/gemini/GEMINI_INTERACTIVE_GUIDE.md",
+          "line": 9,
+          "source_group": "scripts",
+          "text": ".\\scripts\\ai\\gemini\\run-gemini.ps1 setup"
+        },
+        {
+          "path": "scripts/ai/gemini/GEMINI_INTERACTIVE_GUIDE.md",
+          "line": 119,
+          "source_group": "scripts",
+          "text": "├── run-gemini.ps1                  # PowerShell delegator"
+        },
         {
           "path": "scripts/ai/gemini/README.md",
           "line": 11,
@@ -1172,28 +1304,10 @@
           "text": ".\\scripts\\ai\\gemini\\run-gemini.ps1"
         },
         {
-          "path": "scripts/ai/gemini/SETUP_COMPLETE.md",
-          "line": 9,
+          "path": "scripts/ai/gemini/helper/run-gemini-impl.sh",
+          "line": 3,
           "source_group": "scripts",
-          "text": "├── run-gemini.ps1"
-        },
-        {
-          "path": "scripts/ai/gemini/SETUP_COMPLETE.md",
-          "line": 42,
-          "source_group": "scripts",
-          "text": ".\\scripts\\ai\\gemini\\run-gemini.ps1 check"
-        },
-        {
-          "path": "scripts/ai/gemini/SETUP_COMPLETE.md",
-          "line": 43,
-          "source_group": "scripts",
-          "text": ".\\scripts\\ai\\gemini\\run-gemini.ps1 setup"
-        },
-        {
-          "path": "scripts/ai/gemini/SETUP_COMPLETE.md",
-          "line": 44,
-          "source_group": "scripts",
-          "text": ".\\scripts\\ai\\gemini\\run-gemini.ps1 \"inspect the repository\""
+          "text": "# Called by: run-gemini.sh/run-gemini.ps1"
         }
       ]
     },
@@ -1202,55 +1316,70 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 30,
+      "reference_count": 53,
       "references": [
         {
-          "path": "scripts/ai/gemini/README.md",
-          "line": 12,
-          "source_group": "scripts",
-          "text": "├── run-gemini.sh                  # WSL/Bash entrypoint"
-        },
-        {
-          "path": "scripts/ai/gemini/README.md",
-          "line": 38,
+          "path": "scripts/ai/gemini/GEMINI_INTERACTIVE_GUIDE.md",
+          "line": 21,
           "source_group": "scripts",
           "text": "bash scripts/ai/gemini/run-gemini.sh check"
         },
         {
-          "path": "scripts/ai/gemini/README.md",
-          "line": 39,
+          "path": "scripts/ai/gemini/GEMINI_INTERACTIVE_GUIDE.md",
+          "line": 22,
           "source_group": "scripts",
           "text": "bash scripts/ai/gemini/run-gemini.sh setup"
         },
         {
-          "path": "scripts/ai/gemini/README.md",
-          "line": 41,
+          "path": "scripts/ai/gemini/GEMINI_INTERACTIVE_GUIDE.md",
+          "line": 46,
           "source_group": "scripts",
-          "text": "bash scripts/ai/gemini/run-gemini.sh"
+          "text": "| `start` | `run-gemini.sh start` | Interactive CLI (default) |"
         },
         {
-          "path": "scripts/ai/gemini/README.md",
+          "path": "scripts/ai/gemini/GEMINI_INTERACTIVE_GUIDE.md",
           "line": 47,
           "source_group": "scripts",
-          "text": "bash scripts/ai/gemini/run-gemini.sh                # Interactive Gemini CLI"
+          "text": "| `prompt` | `run-gemini.sh prompt \"task\"` | Headless prompt execution |"
         },
         {
-          "path": "scripts/ai/gemini/README.md",
+          "path": "scripts/ai/gemini/GEMINI_INTERACTIVE_GUIDE.md",
           "line": 48,
           "source_group": "scripts",
-          "text": "bash scripts/ai/gemini/run-gemini.sh \"prompt\"      # Headless prompt mode"
+          "text": "| `exec` | `run-gemini.sh exec \"task\"` | Auto-approve all actions (YOLO mode) |"
         },
         {
-          "path": "scripts/ai/gemini/README.md",
+          "path": "scripts/ai/gemini/GEMINI_INTERACTIVE_GUIDE.md",
           "line": 49,
           "source_group": "scripts",
-          "text": "bash scripts/ai/gemini/run-gemini.sh prompt \"...\"  # Explicit headless prompt"
+          "text": "| `check` | `run-gemini.sh check` | Verify environment setup |"
         },
         {
-          "path": "scripts/ai/gemini/README.md",
+          "path": "scripts/ai/gemini/GEMINI_INTERACTIVE_GUIDE.md",
           "line": 50,
           "source_group": "scripts",
-          "text": "bash scripts/ai/gemini/run-gemini.sh exec \"...\"    # Headless YOLO approvals"
+          "text": "| `setup` | `run-gemini.sh setup` | Install/configure Gemini CLI |"
+        },
+        {
+          "path": "scripts/ai/gemini/GEMINI_INTERACTIVE_GUIDE.md",
+          "line": 51,
+          "source_group": "scripts",
+          "text": "| `mcp-check` | `run-gemini.sh mcp-check` | Verify MCP servers |"
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/gemini/setup-bash-alias.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/ai/gemini/SETUP_COMPLETE.md",
+          "line": 55,
+          "source_group": "scripts",
+          "text": "| `setup-bash-alias.sh` | Optional: Add `gemini` command alias to bash |"
         }
       ]
     },
@@ -2854,7 +2983,7 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 112,
+          "line": 115,
           "source_group": "ci",
           "text": "run: uv run python scripts/check_entity_config_parity.py"
         },
@@ -3091,7 +3220,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 220,
+          "line": 223,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check_diagram_artifacts.py \\"
         },
@@ -3148,7 +3277,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 240,
+          "line": 243,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check_diagram_quality_gates.py \\"
         },
@@ -3213,7 +3342,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 230,
+          "line": 233,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check_diagram_visual_smoke.py \\"
         },
@@ -3303,7 +3432,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 225,
+          "line": 228,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check_svg_text_visibility.py \\"
         },
@@ -3791,7 +3920,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 188,
+          "line": 191,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/lint_diagrams.py docs/02-architecture/diagrams --json > /tmp/diagram-lint.json || true"
         },
@@ -4157,7 +4286,7 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 189,
+          "line": 192,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/summarize_diagram_lint.py /tmp/diagram-lint.json"
         },
@@ -4294,7 +4423,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 183,
+          "line": 186,
           "source_group": "ci",
           "text": "bash scripts/diagrams/validate_mermaid_syntax.sh \\"
         },
@@ -4345,13 +4474,13 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 103,
+          "line": 106,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.docs check-links --links --specs --configs --report-json docs/reports/docs-link-check-report.json"
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 115,
+          "line": 118,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.docs verify"
         },
@@ -4363,13 +4492,13 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 305,
+          "line": 313,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.docs export-matrix-structural-contract --check"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 314,
+          "line": 322,
           "source_group": "ci",
           "text": "uv run python -m scripts.docs sync-matrix-structural-policy --check --input \"$workbook\" --output \"$workbook\""
         },
@@ -4610,7 +4739,7 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 103,
+          "line": 106,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.docs check-links --links --specs --configs --report-json docs/reports/docs-link-check-report.json"
         },
@@ -5446,7 +5575,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 271,
+          "line": 279,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.engineering.ci neo4j-memory-live"
         },
@@ -5782,7 +5911,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 682,
+          "line": 690,
           "source_group": "ci",
           "text": "scripts/engineering/ci/run_pytest_resilient.py \\"
         },
@@ -6118,7 +6247,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 32,
+      "reference_count": 33,
       "references": [
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
@@ -7194,13 +7323,19 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 116,
+      "reference_count": 122,
       "references": [
         {
           "path": ".github/workflows/docs.yml",
           "line": 83,
           "source_group": "ci",
           "text": "uv run python -m scripts.engineering.qa check-xwalk-missing-backlog \\"
+        },
+        {
+          "path": ".github/workflows/docs.yml",
+          "line": 88,
+          "source_group": "ci",
+          "text": "run: uv run python -m scripts.engineering.qa report-dashboard-inventory --check --json"
         },
         {
           "path": ".github/workflows/duplication-complexity.yml",
@@ -7237,12 +7372,6 @@
           "line": 73,
           "source_group": "ci",
           "text": "uv run python -m scripts.engineering.qa check-xwalk-missing-backlog"
-        },
-        {
-          "path": ".github/workflows/provider-contract-drift.yml",
-          "line": 78,
-          "source_group": "ci",
-          "text": "uv run python -m scripts.engineering.qa report-provider-contract-drift \\"
         }
       ]
     },
@@ -7261,7 +7390,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 71,
+          "line": 73,
           "source_group": "scripts",
           "text": "\"analyze-duplicate-functions\": \"analyze_duplicate_functions.py\","
         }
@@ -7282,7 +7411,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 72,
+          "line": 74,
           "source_group": "scripts",
           "text": "\"calibrate-hotspots\": \"calibrate_hotspot_budgets.py\","
         }
@@ -7303,7 +7432,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 50,
+          "line": 52,
           "source_group": "scripts",
           "text": "\"check-app-deps\": \"check_application_deps.py\","
         }
@@ -7324,7 +7453,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 49,
+          "line": 51,
           "source_group": "scripts",
           "text": "\"check-architecture\": \"check_architecture.py\","
         }
@@ -7402,9 +7531,24 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 51,
+          "line": 53,
           "source_group": "scripts",
           "text": "\"check-constructor-args\": \"check_constructor_args.py\","
+        }
+      ]
+    },
+    {
+      "path": "scripts/engineering/qa/check_dashboard_visual_semantics.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/engineering/qa/__main__.py",
+          "line": 78,
+          "source_group": "scripts",
+          "text": "\"check-dashboard-visual-semantics\": \"check_dashboard_visual_semantics.py\","
         }
       ]
     },
@@ -7417,7 +7561,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 55,
+          "line": 57,
           "source_group": "scripts",
           "text": "\"check-docs-drift\": \"check_docs_drift.py\","
         }
@@ -7456,7 +7600,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 53,
+          "line": 55,
           "source_group": "scripts",
           "text": "\"check-naming-pkg\": \"check_naming_package_consistency.py\","
         },
@@ -7507,7 +7651,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 54,
+          "line": 56,
           "source_group": "scripts",
           "text": "\"check-exemptions\": \"check_quality_exemptions.py\","
         }
@@ -7540,7 +7684,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 56,
+          "line": 58,
           "source_group": "scripts",
           "text": "\"check-xwalk-missing-backlog\": \"check_xwalk_missing_backlog.py\","
         }
@@ -7567,7 +7711,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 58,
+          "line": 60,
           "source_group": "scripts",
           "text": "\"generate-debt-tasks\": \"generate_architecture_debt_tasks.py\","
         },
@@ -7600,19 +7744,19 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 118,
+          "line": 121,
           "source_group": "ci",
           "text": "run: uv run python scripts/engineering/qa/generate_architecture_dependency_map.py --check"
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 122,
+          "line": 125,
           "source_group": "ci",
           "text": "run: uv run python scripts/engineering/qa/generate_architecture_dependency_map.py --update"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 320,
+          "line": 328,
           "source_group": "ci",
           "text": "run: uv run python scripts/engineering/qa/generate_architecture_dependency_map.py --check"
         },
@@ -7708,7 +7852,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 602,
+          "line": 610,
           "source_group": "ci",
           "text": "uv run python scripts/engineering/qa/generate_hotspot_degradation_report.py \\"
         },
@@ -7726,7 +7870,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 66,
+          "line": 68,
           "source_group": "scripts",
           "text": "\"report-hotspots\": \"generate_hotspot_degradation_report.py\","
         }
@@ -7830,7 +7974,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 48,
+          "line": 50,
           "source_group": "scripts",
           "text": "\"check-naming\": \"naming_audit.py\","
         },
@@ -7883,7 +8027,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 59,
+          "line": 61,
           "source_group": "scripts",
           "text": "\"reduce-architecture-debt\": \"reduce_architecture_debt.py\","
         },
@@ -7898,6 +8042,21 @@
           "line": 307,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"qa\" / \"reduce_architecture_debt.py\""
+        }
+      ]
+    },
+    {
+      "path": "scripts/engineering/qa/report_dashboard_inventory.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/engineering/qa/__main__.py",
+          "line": 79,
+          "source_group": "scripts",
+          "text": "\"report-dashboard-inventory\": \"report_dashboard_inventory.py\","
         }
       ]
     },
@@ -7928,7 +8087,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 67,
+          "line": 69,
           "source_group": "scripts",
           "text": "\"report-duplication-baseline\": \"report_duplication_baseline.py\","
         }
@@ -7943,7 +8102,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 68,
+          "line": 70,
           "source_group": "scripts",
           "text": "\"report-function-length-inventory\": \"report_function_length_inventory.py\","
         }
@@ -7964,7 +8123,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 65,
+          "line": 67,
           "source_group": "scripts",
           "text": "\"report-family-baseline\": \"report_hotspot_family_baseline.py\","
         }
@@ -7991,7 +8150,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 69,
+          "line": 71,
           "source_group": "scripts",
           "text": "\"report-normalization-fallback-inventory\": \"report_normalization_fallback_inventory.py\","
         },
@@ -8012,7 +8171,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 70,
+          "line": 72,
           "source_group": "scripts",
           "text": "\"report-observability-metric-inventory\": \"report_observability_metric_inventory.py\","
         },
@@ -8057,7 +8216,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 63,
+          "line": 65,
           "source_group": "scripts",
           "text": "\"report-provider-contract-drift\": \"report_provider_contract_drift.py\","
         }
@@ -8102,7 +8261,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 62,
+          "line": 64,
           "source_group": "scripts",
           "text": "\"report-vcr-metadata\": \"report_vcr_metadata_catalog.py\","
         },
@@ -8129,7 +8288,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 64,
+          "line": 66,
           "source_group": "scripts",
           "text": "\"sync-integration-vcr-policy\": \"sync_integration_vcr_policy.py\","
         }
@@ -8162,7 +8321,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 45,
+          "line": 47,
           "source_group": "scripts",
           "text": "_TEST_HEALTH_SCRIPT = \"test_health.py\""
         }
@@ -8177,7 +8336,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 57,
+          "line": 59,
           "source_group": "scripts",
           "text": "\"validate-dq-consistency\": \"validate_dq_consistency.py\","
         }
@@ -8441,7 +8600,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 100,
+          "line": 103,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.engineering.repo check-versions"
         },
@@ -10617,31 +10776,31 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 293,
+          "line": 301,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.schema validate-configs"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 296,
+          "line": 304,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.schema check-invariants"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 299,
+          "line": 307,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.schema check-required-fields --verbose"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 302,
+          "line": 310,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.schema audit-optionality --check"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 317,
+          "line": 325,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.schema generate-pipeline --check"
         },
@@ -11451,7 +11610,7 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 235,
+          "line": 238,
           "source_group": "ci",
           "text": "python3 src/tools/harmonize_link_styles.py --dry-run --fail-on-errors"
         }

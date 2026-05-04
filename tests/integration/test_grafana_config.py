@@ -2356,3 +2356,54 @@ def test_provider_health_selected_provider_detail_row_is_collapsed() -> None:
     assert repeated_panel.get("gridPos", {}).get("y", 0) >= detail_row.get(
         "gridPos", {}
     ).get("y", 0)
+
+def test_runtime_dq_control_plane_expose_contextual_loki_explore_link() -> None:
+    """Critical runtime/dq/control-plane panels must keep at least one contextual Loki Explore link."""
+    dashboard_panels = {
+        "bioetl-runtime.json": "Failed Runs / 15m",
+        "bioetl-dq-v2.json": "Data Flow in Range: Bronze -> Silver -> Gold",
+        "bioetl-control-plane-v1.json": "Replay / Resume Blockers",
+    }
+
+    for dashboard_name, panel_title in dashboard_panels.items():
+        dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
+        panels = {
+            panel.get("title"): panel
+            for panel in get_dashboard_panels(dashboard)
+            if panel.get("title")
+        }
+        panel = panels.get(panel_title)
+        assert panel is not None, f"{dashboard_name} missing critical panel {panel_title!r}"
+
+        links = panel.get("options", {}).get("dataLinks", [])
+        assert links, f"{dashboard_name}:{panel_title} must include dataLinks"
+
+        baseline = [
+            link
+            for link in links
+            if isinstance(link, dict)
+            and str(link.get("title", "")).startswith("Open Logs (Loki")
+            and "query=%7Bjob%3D%22bioetl%22%7D" in str(link.get("url", ""))
+        ]
+        assert baseline, (
+            f"{dashboard_name}:{panel_title} must keep baseline Loki link with {{job=\"bioetl\"}}"
+        )
+
+        contextual = [
+            link
+            for link in links
+            if isinstance(link, dict)
+            and link.get("title") == "Open Logs (Loki, contextual scope marker)"
+            and "scope_marker%3D%22dashboard_context%22" in str(link.get("url", ""))
+        ]
+        assert contextual, (
+            f"{dashboard_name}:{panel_title} must include contextual Loki link with scope marker"
+        )
+
+        for link in contextual:
+            url = str(link.get("url", ""))
+            assert "${pipeline:regex}" in url
+            assert "${run_type:regex}" in url
+            assert "run_id" not in url
+            assert "payload_hash" not in url
+ 
