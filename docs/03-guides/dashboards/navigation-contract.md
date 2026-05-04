@@ -11,6 +11,8 @@ YAML также фиксирует time handoff policy в `time_handoff_requirem
 ## Общие правила
 
 - Каждый dashboard (кроме overview-hub) **MUST** иметь top-level ссылку `Back to Overview` на UID `bioetl-overview-v2`.
+- Top-level dashboard links **MUST** иметь приоритет `primary | secondary | contextual`, заданный в `top_level_link_priority_by_uid` в `contracts/navigation-links.yaml`.
+- Для каждого source dashboard и каждого target UID допускается не более одной `primary` ссылки; `primary` ссылка **MUST** иметь однозначную `semantics` (непустой идентификатор смысла handoff).
 - Cross-dashboard handoff передаёт только target-scoped `var-*` параметры и **MUST** включать `${__url_time_range}` во всех dashboard URL (`/d/...`).
 - `includeVars=true` и другие универсальные handoff-паттерны запрещены; используем только явные `var-*` и time-range по единому стандарту:
   - dashboard links (`/d/<uid>/<slug>?...`): `${__url_time_range}`
@@ -44,3 +46,10 @@ YAML также фиксирует time handoff policy в `time_handoff_requirem
 - `includeVars=true`
 - legacy Explore payload route: `/explore?left=`
 - перенос Explorer-only forensic scope (`var-run_id`, `var-payload_hash`) в non-explorer dashboards
+
+## Приоритет и semantics (пример)
+
+- `bioetl-provider-health-v2` содержит два перехода в Runtime:
+  - `2. Runtime (Primary)` — `priority: primary`, semantics `runtime_cross_scope_all_defaults`;
+  - `2. Runtime (Contextual: provider mapping)` — `priority: contextual`, semantics `runtime_provider_context_mapping`.
+- Priority должна быть отражена в `title` и/или `tooltip` ссылки в dashboard JSON.

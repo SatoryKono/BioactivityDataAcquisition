@@ -37,8 +37,8 @@
       "keepTime": true,
       "tags": [],
       "targetBlank": false,
-      "title": "2. Runtime",
-      "tooltip": "Cross-scope handoff (opens with All core scope): var-pipeline=All, var-run_type=All, var-stage=All; provider/adapter do not transfer.",
+      "title": "2. Runtime (Primary)",
+      "tooltip": "Priority: primary. Cross-scope handoff (opens with All core scope): var-pipeline=All, var-run_type=All, var-stage=All; provider/adapter do not transfer.",
       "type": "link",
       "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=All&var-run_type=All&var-stage=All&${__url_time_range}"
     },
@@ -49,8 +49,8 @@
       "keepTime": true,
       "tags": [],
       "targetBlank": false,
-      "title": "2. Runtime (provider context)",
-      "tooltip": "Cross-scope handoff (provider-derived context mapping): provider/adapter map to runtime pipeline/run_type when mapping exists; fallback var-pipeline=All&var-run_type=All&var-stage=All.",
+      "title": "2. Runtime (Contextual: provider mapping)",
+      "tooltip": "Priority: contextual. Cross-scope handoff (provider-derived context mapping): provider/adapter map to runtime pipeline/run_type when mapping exists; fallback var-pipeline=All&var-run_type=All&var-stage=All.",
       "type": "link",
       "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=${provider:queryparam}&var-run_type=${adapter:queryparam}&var-stage=All&${__url_time_range}"
     },
