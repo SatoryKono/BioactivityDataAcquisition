@@ -18,7 +18,9 @@ pytestmark = pytest.mark.integration
 
 _DASHBOARD_UID_RE = re.compile(r"^/d/([^/?]+)")
 _LINK_VAR_RE = re.compile(r"(?:\?|&)var-([A-Za-z_]+)=")
-_NAV_LINK_CONTRACT_PATH = Path("docs/03-guides/dashboards/contracts/navigation-links.yaml")
+_NAV_LINK_CONTRACT_PATH = Path(
+    "docs/03-guides/dashboards/contracts/navigation-links.yaml"
+)
 
 
 def _load_navigation_links_contract() -> dict[str, object]:
@@ -40,8 +42,12 @@ def _load_navigation_links_contract() -> dict[str, object]:
         "forbidden_dashboard_link_vars_by_target_uid": _as_frozenset_map(
             "forbidden_dashboard_link_vars_by_target_uid"
         ),
-        "required_link_vars_by_target_uid": _as_frozenset_map("required_link_vars_by_target_uid"),
-        "required_top_level_links_by_uid": _as_frozenset_map("required_top_level_links_by_uid"),
+        "required_link_vars_by_target_uid": _as_frozenset_map(
+            "required_link_vars_by_target_uid"
+        ),
+        "required_top_level_links_by_uid": _as_frozenset_map(
+            "required_top_level_links_by_uid"
+        ),
     }
 
 
@@ -50,7 +56,9 @@ _ALLOWED_DASHBOARD_LINK_VARS = _NAV_LINK_CONTRACT["allowed_dashboard_link_vars"]
 _FORBIDDEN_DASHBOARD_LINK_VARS_BY_TARGET_UID = _NAV_LINK_CONTRACT[
     "forbidden_dashboard_link_vars_by_target_uid"
 ]
-_REQUIRED_LINK_VARS_BY_TARGET_UID = _NAV_LINK_CONTRACT["required_link_vars_by_target_uid"]
+_REQUIRED_LINK_VARS_BY_TARGET_UID = _NAV_LINK_CONTRACT[
+    "required_link_vars_by_target_uid"
+]
 _REQUIRED_TOP_LEVEL_LINKS_BY_UID = _NAV_LINK_CONTRACT["required_top_level_links_by_uid"]
 
 
@@ -58,13 +66,19 @@ def _extract_required_time_tokens(section: str) -> tuple[str, ...]:
     requirements = _NAV_LINK_CONTRACT.get("time_handoff_requirements", {})
     assert isinstance(requirements, dict), "time_handoff_requirements must be a mapping"
     section_payload = requirements.get(section, {})
-    assert isinstance(section_payload, dict), f"time_handoff_requirements.{section} must be a mapping"
+    assert isinstance(section_payload, dict), (
+        f"time_handoff_requirements.{section} must be a mapping"
+    )
     tokens = section_payload.get("required_tokens", [])
-    assert isinstance(tokens, list), f"time_handoff_requirements.{section}.required_tokens must be a list"
+    assert isinstance(tokens, list), (
+        f"time_handoff_requirements.{section}.required_tokens must be a list"
+    )
     return tuple(str(token) for token in tokens)
 
 
-def _assert_required_time_tokens(url: str, *, tokens: tuple[str, ...], context: str) -> None:
+def _assert_required_time_tokens(
+    url: str, *, tokens: tuple[str, ...], context: str
+) -> None:
     for token in tokens:
         assert token in url, f"{context} must include time token '{token}': {url}"
 
@@ -127,11 +141,15 @@ def test_overview_status_cards_use_scoped_drilldown_urls() -> None:
 
         for link in data_links:
             url = link.get("url", "")
-            assert isinstance(url, str), f"Panel id={panel_id} data link URL must be string"
+            assert isinstance(url, str), (
+                f"Panel id={panel_id} data link URL must be string"
+            )
             assert url.startswith(f"/d/{target_uid}/"), (
                 f"Panel id={panel_id} must point to /d/{target_uid}/: {url}"
             )
-            assert "?" in url, f"Panel id={panel_id} must not use bare /d/<uid> URL: {url}"
+            assert "?" in url, (
+                f"Panel id={panel_id} must not use bare /d/<uid> URL: {url}"
+            )
 
             passed_vars = _extract_link_vars(url)
             required_vars = _REQUIRED_LINK_VARS_BY_TARGET_UID[target_uid]
@@ -245,7 +263,9 @@ def test_cross_dashboard_links_pass_only_target_scoped_variables() -> None:
                 f"{dashboard_path.name} link to {target_uid} passes unknown vars: "
                 f"{sorted(passed_vars - allowed_vars)} via {url}"
             )
-            forbidden_vars = _FORBIDDEN_DASHBOARD_LINK_VARS_BY_TARGET_UID.get(target_uid)
+            forbidden_vars = _FORBIDDEN_DASHBOARD_LINK_VARS_BY_TARGET_UID.get(
+                target_uid
+            )
             assert forbidden_vars is not None, (
                 f"Link target {target_uid} must be declared in forbidden vars map"
             )
@@ -264,8 +284,6 @@ def test_cross_dashboard_links_pass_only_target_scoped_variables() -> None:
                     tokens=_DASHBOARD_TIME_HANDOFF_TOKENS,
                     context=f"{dashboard_path.name} top-level link to {target_uid}",
                 )
-
-
 
 
 def test_dashboard_top_level_navigation_contract_by_uid() -> None:
@@ -306,6 +324,8 @@ def test_dashboard_links_forbid_universal_handoff_patterns() -> None:
                 assert link.get("includeVars") is False, (
                     f"{dashboard_path.name} top-level cross-dashboard link must pin includeVars=false: {url}"
                 )
+
+
 def test_overview_and_provider_dashboards_expose_explore_drilldown_links() -> None:
     """Operational dashboards should offer Loki and Tempo drilldown."""
     expectations = (
@@ -401,11 +421,15 @@ def test_overview_status_cards_use_scoped_drilldown_urls() -> None:
 
         for link in data_links:
             url = link.get("url", "")
-            assert isinstance(url, str), f"Panel id={panel_id} data link URL must be string"
+            assert isinstance(url, str), (
+                f"Panel id={panel_id} data link URL must be string"
+            )
             assert url.startswith(f"/d/{target_uid}/"), (
                 f"Panel id={panel_id} must point to /d/{target_uid}/: {url}"
             )
-            assert "?" in url, f"Panel id={panel_id} must not use bare /d/<uid> URL: {url}"
+            assert "?" in url, (
+                f"Panel id={panel_id} must not use bare /d/<uid> URL: {url}"
+            )
 
             passed_vars = _extract_link_vars(url)
             required_vars = _REQUIRED_LINK_VARS_BY_TARGET_UID[target_uid]
@@ -481,7 +505,11 @@ def test_tempo_drilldown_routes_to_traces_drilldown_app() -> None:
         )
         for link in tempo_links:
             url = link.get("url", "")
-            _assert_required_time_tokens(url, tokens=_EXPLORE_TIME_HANDOFF_TOKENS, context=f"{dashboard_name} traces drilldown link")
+            _assert_required_time_tokens(
+                url,
+                tokens=_EXPLORE_TIME_HANDOFF_TOKENS,
+                context=f"{dashboard_name} traces drilldown link",
+            )
 
 
 def test_loki_drilldown_links_use_safe_bioetl_baseline_query() -> None:
@@ -856,17 +884,26 @@ def test_runtime_first_action_cta_links_preserve_scoped_vars_and_time() -> None:
             "var-run_type=$run_type",
             "var-stage=$stage",
         ),
-        "Control Plane conditions": ("var-pipeline=$pipeline", "var-run_type=$run_type"),
+        "Control Plane conditions": (
+            "var-pipeline=$pipeline",
+            "var-run_type=$run_type",
+        ),
         "Provider health checks": ("var-provider=All", "var-adapter=All"),
     }
     forbidden = ("var-workflow=", "var-status=", "var-run_id=", "var-payload_hash=")
 
     for panel_title, required_tokens in expected.items():
         panel = next(
-            (item for item in get_dashboard_panels(dashboard) if item.get("title") == panel_title),
+            (
+                item
+                for item in get_dashboard_panels(dashboard)
+                if item.get("title") == panel_title
+            ),
             None,
         )
-        assert panel is not None, f"Panel '{panel_title}' not found in bioetl-runtime.json"
+        assert panel is not None, (
+            f"Panel '{panel_title}' not found in bioetl-runtime.json"
+        )
         links = panel.get("links", [])
         assert links, f"Panel '{panel_title}' must expose a CTA link"
         link = links[0]
@@ -1120,9 +1157,13 @@ def test_cross_dashboard_links_enforce_required_handoff_or_explicit_fallback() -
             )
 
 
-def test_provider_dashboard_runtime_links_include_contextual_variant_next_to_reset() -> None:
+def test_provider_dashboard_runtime_links_include_contextual_variant_next_to_reset() -> (
+    None
+):
     """Provider Health must expose reset-to-All and contextual Runtime links together."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-provider-health-v2.json"))
+    dashboard = load_dashboard(
+        Path("grafana/dashboards/bioetl-provider-health-v2.json")
+    )
     links = dashboard.get("links", [])
 
     reset_idx, reset_link = next(

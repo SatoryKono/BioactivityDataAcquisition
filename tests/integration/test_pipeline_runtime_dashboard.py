@@ -343,6 +343,7 @@ def test_pipeline_duration_has_explicit_no_value_message() -> None:
         f"Pipeline Duration noValue must explain missing terminal metric, got: {no_value!r}"
     )
 
+
 def test_runtime_row_sequence_is_fixed_detect_localize_escalate() -> None:
     """Runtime row lanes must keep canonical Detect -> Localize -> Escalate order."""
     row_panels = [

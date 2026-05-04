@@ -294,9 +294,14 @@ def _record_flow_invariants(host: _PipelineRunnerFlowHostProtocol) -> None:
         status=silver_gold_monotonic,
     )
 
-    gold_expected = host._config.scd_config is not None or (
-        host._config.table.gold_write_mode is not None
-        and host._config.gold_schema is not None
+    config = host._config
+    scd_config = getattr(config, "scd_config", None)
+    table = getattr(config, "table", None)
+    gold_write_mode = getattr(table, "gold_write_mode", None)
+    gold_schema = getattr(config, "gold_schema", None)
+
+    gold_expected = scd_config is not None or (
+        gold_write_mode is not None and gold_schema is not None
     )
     pipeline_metrics.record_pipeline_stage_expected(stage="bronze", expected=True)
     pipeline_metrics.record_pipeline_stage_expected(stage="silver", expected=True)
