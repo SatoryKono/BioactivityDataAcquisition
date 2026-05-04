@@ -41,7 +41,9 @@ NAVIGATION_CONTRACT_PATH = Path(
 
 def _load_navigation_contract() -> dict:
     payload = yaml.safe_load(NAVIGATION_CONTRACT_PATH.read_text(encoding="utf-8"))
-    assert isinstance(payload, dict), "navigation-links contract must deserialize into a mapping"
+    assert isinstance(payload, dict), (
+        "navigation-links contract must deserialize into a mapping"
+    )
     return payload
 
 
@@ -1735,13 +1737,19 @@ def test_dashboard_default_time_and_refresh_policy_by_uid_class() -> None:
     exceptions = contract.get("default_time_refresh_policy_exceptions", {})
 
     assert isinstance(policy, dict), "default_time_refresh_policy must be defined"
-    assert isinstance(exceptions, dict), "default_time_refresh_policy_exceptions must be a mapping"
+    assert isinstance(exceptions, dict), (
+        "default_time_refresh_policy_exceptions must be a mapping"
+    )
 
     l0_uids = policy.get("L0", {}).get("dashboards", [])
     l1_uids = policy.get("L1", {}).get("dashboards", [])
     l2_uids = policy.get("L2", {}).get("dashboards", [])
 
-    assert isinstance(l0_uids, list) and isinstance(l1_uids, list) and isinstance(l2_uids, list)
+    assert (
+        isinstance(l0_uids, list)
+        and isinstance(l1_uids, list)
+        and isinstance(l2_uids, list)
+    )
 
     baseline = {"time_from": "now-12h", "refresh": "30s"}
     explorer_baseline = {"time_from": "now-24h", "refresh": "1m"}
