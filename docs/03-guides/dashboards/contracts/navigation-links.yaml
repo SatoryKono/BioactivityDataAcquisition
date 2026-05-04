@@ -131,6 +131,23 @@ required_panel_links_by_uid:
     - panel_id: 210
       target_uid: bioetl-control-plane-v1
       link_titles: ["Open Control Plane Drilldown", "Open Control Plane status"]
+
+default_time_refresh_policy:
+  L0:
+    dashboards: [bioetl-overview-v2]
+    time_from: now-12h
+    refresh: 30s
+  L1:
+    dashboards: [bioetl-runtime, bioetl-control-plane-v1, bioetl-provider-health-v2, bioetl-dq-v2, bioetl-workflow-overview]
+    time_from: now-12h
+    refresh: 30s
+  L2:
+    dashboards: [bioetl-silver-reject-explorer]
+    time_from: now-24h
+    refresh: 1m
+
+default_time_refresh_policy_exceptions: {}
+
 time_handoff_requirements:
   dashboard_links:
     required_tokens:

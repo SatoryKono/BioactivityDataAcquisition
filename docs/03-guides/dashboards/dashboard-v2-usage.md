@@ -195,6 +195,8 @@ Variable handoff policy for dashboard links remains strict and bounded:
   - `silver-reject-explorer` -> `time.from=now-24h`, `refresh=1m`.
   - Justification: forensic-поиск по reject payload обычно начинается с более широкого окна и не требует 30s polling; более медленный refresh снижает ненужные перезапросы при row-level drilldown.
 - Любое отклонение от baseline MUST сопровождаться явным обоснованием в документации и в PR (почему это не L0/L1 operator window).
+- Machine-readable contract source: `docs/03-guides/dashboards/contracts/navigation-links.yaml` -> `default_time_refresh_policy` + `default_time_refresh_policy_exceptions` (for explicit, justified deviations).
+
 
 ## Drilldown
 
