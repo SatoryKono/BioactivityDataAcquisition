@@ -2,6 +2,16 @@
 
 Generated from `grafana/dashboards/*.json`.
 
+## KPI ownership contract anchors
+
+Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yaml` (`kpi_ownership`).
+
+| KPI key | Canonical UID | Mirror panel(s) |
+|---|---|---|
+| `failed_runs_in_range` | `bioetl-overview-v2` | `bioetl-runtime#205` |
+| `worst_lag_stage` | `bioetl-overview-v2` | `bioetl-runtime#237` |
+| `worst_backlog_stage` | `bioetl-overview-v2` | `bioetl-runtime#238` |
+
 | Dashboard | Panel ID | Title |
 |---|---:|---|
 | bioetl-control-plane-v1.json | 1 | Manifest Write Failures |

@@ -124,3 +124,20 @@ navigation_transition_contract:
     - [bioetl-runtime, bioetl-control-plane-v1]
     - [bioetl-control-plane-v1, bioetl-dq-v2]
     - [bioetl-dq-v2, bioetl-silver-reject-explorer]
+
+kpi_ownership:
+  failed_runs_in_range:
+    canonical_uid: bioetl-overview-v2
+    mirror_panels:
+      - dashboard_uid: bioetl-runtime
+        panel_id: 205
+  worst_lag_stage:
+    canonical_uid: bioetl-overview-v2
+    mirror_panels:
+      - dashboard_uid: bioetl-runtime
+        panel_id: 237
+  worst_backlog_stage:
+    canonical_uid: bioetl-overview-v2
+    mirror_panels:
+      - dashboard_uid: bioetl-runtime
+        panel_id: 238
