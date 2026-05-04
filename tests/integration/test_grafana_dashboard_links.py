@@ -244,6 +244,7 @@ def test_overview_and_provider_dashboards_expose_explore_drilldown_links() -> No
         "bioetl-control-plane-v1.json",
         "bioetl-provider-health-v2.json",
         "bioetl-silver-reject-explorer.json",
+        "bioetl-workflow-overview.json",
     )
 
     for dashboard_name in expectations:
@@ -301,6 +302,7 @@ def test_explore_links_use_drilldown_routes_and_time_range() -> None:
         "bioetl-control-plane-v1.json",
         "bioetl-provider-health-v2.json",
         "bioetl-silver-reject-explorer.json",
+        "bioetl-workflow-overview.json",
     )
 
     for dashboard_name in expectations:
@@ -336,6 +338,7 @@ def test_tempo_drilldown_routes_to_traces_drilldown_app() -> None:
         "bioetl-control-plane-v1.json",
         "bioetl-provider-health-v2.json",
         "bioetl-silver-reject-explorer.json",
+        "bioetl-workflow-overview.json",
     )
 
     for dashboard_name in expectations:
@@ -392,6 +395,7 @@ def test_tempo_drilldown_links_are_contextual() -> None:
         "bioetl-control-plane-v1.json",
         "bioetl-silver-reject-explorer.json",
     )
+    workflow_scoped = ("bioetl-workflow-overview.json",)
     provider_scoped = ("bioetl-provider-health-v2.json",)
 
     for dashboard_name in pipeline_scoped:
@@ -407,11 +411,33 @@ def test_tempo_drilldown_links_are_contextual() -> None:
             assert "queryType=traceqlSearch" in url, (
                 f"{dashboard_name} Tempo drilldown must declare TraceQL search mode"
             )
+            assert "query=%7B%7D" not in url and "query={}" not in url, (
+                f"{dashboard_name} Tempo drilldown must not use empty trace query payload"
+            )
             assert "bioetl.pipeline" in url and "bioetl.run_type" in url, (
                 f"{dashboard_name} Tempo drilldown must scope by pipeline/run_type"
             )
             assert "bioetl.provider" not in url, (
                 f"{dashboard_name} pipeline drilldown must not switch to provider-only scope"
+            )
+
+    for dashboard_name in workflow_scoped:
+        dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
+        tempo_links = [
+            link
+            for link in _collect_dashboard_links(dashboard)
+            if _is_traces_drilldown_url(link.get("url", ""))
+        ]
+        assert tempo_links, f"{dashboard_name} must expose Tempo drilldown links"
+        for link in tempo_links:
+            url = link.get("url", "")
+            assert "queryType=traceqlSearch" in url
+            assert "query=%7B%7D" not in url and "query={}" not in url
+            assert "bioetl.workflow" in url and "bioetl.status" in url, (
+                f"{dashboard_name} workflow drilldown must scope by workflow/status"
+            )
+            assert "bioetl.pipeline" not in url and "bioetl.run_type" not in url, (
+                f"{dashboard_name} workflow drilldown must not fake pipeline scope"
             )
 
     for dashboard_name in provider_scoped:
@@ -425,6 +451,7 @@ def test_tempo_drilldown_links_are_contextual() -> None:
         for link in tempo_links:
             url = link.get("url", "")
             assert "queryType=traceqlSearch" in url
+            assert "query=%7B%7D" not in url and "query={}" not in url
             assert "bioetl.provider" in url, (
                 f"{dashboard_name} provider drilldown must scope by provider"
             )
