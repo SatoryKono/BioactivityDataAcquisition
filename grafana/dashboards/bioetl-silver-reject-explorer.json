@@ -410,7 +410,8 @@
               "title": "Open Logs",
               "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D"
             }
-          ]
+          ],
+          "noValue": "No rejected records for current filters."
         },
         "overrides": []
       },
@@ -446,7 +447,7 @@
           "expr": ""
         }
       ],
-      "description": "Shows latest 100 records for selected scope, sorted by ingestion_ts descending. Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data.",
+      "description": "Shows latest 100 records for selected scope, sorted by ingestion_ts descending. Empty-state copy: No rejected records for current filters. Backend/query failure copy: If data source query fails, treat this as an error state and inspect Grafana query error details. Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data.",
       "title": "Filtered Records Table",
       "type": "table"
     },
@@ -643,7 +644,7 @@
         "tagsQuery": "",
         "type": "query",
         "useTags": false,
-        "description": "Forensic-only: exact run identifier for reject explorer; fallback: no run_id filter (all runs in current scope)."
+        "description": "Forensic-only: exact run identifier for reject explorer; explore filter only (not a Prometheus label); fallback: no run_id filter (all runs in current scope)."
       },
       {
         "current": {
@@ -658,7 +659,7 @@
         "query": "",
         "skipUrlSync": false,
         "type": "textbox",
-        "description": "Forensic-only: exact payload hash textbox for reject explorer; fallback: empty value disables record details filter."
+        "description": "Forensic-only: exact payload hash textbox for reject explorer; explore filter only (not a Prometheus label); fallback: empty value disables record details filter."
       }
     ]
   },
