@@ -105,7 +105,7 @@ jobs:
                       --junitxml=reports/e2e/control-plane-completeness.xml
 
             -   name: Upload control-plane completeness artifacts
-                uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+                uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
                 if: always()
                 with:
                     name: control-plane-completeness
@@ -146,7 +146,7 @@ jobs:
 
             -   name: Upload contract confidence telemetry
                 if: always()
-                uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+                uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
                 with:
                     name: test-telemetry-contract-confidence
                     path: reports/test-telemetry/junit-contract-confidence.xml
@@ -366,7 +366,7 @@ jobs:
 
             -   name: Upload Track D telemetry
                 if: always()
-                uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+                uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
                 with:
                     name: test-telemetry-track-d
                     path: reports/test-telemetry/junit-track-d.xml
@@ -416,7 +416,7 @@ jobs:
 
             -   name: Upload quality metrics artifact
                 if: always()
-                uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+                uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
                 with:
                     name: ci-quality-metrics
                     path: reports/quality/ci-quality-metrics.json
@@ -454,7 +454,7 @@ jobs:
 
             -   name: Upload fast test telemetry
                 if: always()
-                uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+                uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
                 with:
                     name: test-telemetry-fast
                     path: reports/test-telemetry/junit-fast.xml
@@ -525,7 +525,7 @@ jobs:
 
             -   name: Upload coverage shard (${{ matrix.test-group.name }} on Python 3.12)
                 if: always() && matrix.python-version == '3.12'
-                uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+                uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
                 with:
                     name: coverage-data-${{ matrix.test-group.name }}
                     path: reports/coverage/.coverage.${{ matrix.test-group.name }}
@@ -534,7 +534,7 @@ jobs:
 
             -   name: Upload test telemetry (${{ matrix.test-group.name }} on Python 3.12)
                 if: always() && matrix.python-version == '3.12'
-                uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+                uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
                 with:
                     name: test-telemetry-${{ matrix.test-group.name }}
                     path: reports/test-telemetry/junit.${{ matrix.test-group.name }}.xml
@@ -569,7 +569,7 @@ jobs:
 
             -   name: Upload memory test telemetry
                 if: always()
-                uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+                uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
                 with:
                     name: test-telemetry-memory
                     path: reports/test-telemetry/junit-memory.xml
@@ -640,7 +640,7 @@ jobs:
                     fi
 
             -   name: Upload performance budget report
-                uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+                uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
                 if: always()
                 with:
                     name: performance-hotspot-budgets
@@ -676,7 +676,7 @@ jobs:
                     pytest-cache-fingerprint: ${{ hashFiles('tests/**/*.py', 'tests/conftest.py', 'pyproject.toml') }}
 
             -   name: Download coverage shards
-                uses: actions/download-artifact@v4
+                uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
                 with:
                     pattern: coverage-data-*
                     path: reports/coverage
@@ -701,7 +701,7 @@ jobs:
                     uv run python -m coverage xml -o reports/coverage/coverage.xml
 
             -   name: Upload Coverage Report
-                uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+                uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
                 if: always()
                 with:
                     name: coverage-report
@@ -729,7 +729,7 @@ jobs:
                     python-version: "3.12"
 
             -   name: Download JUnit telemetry shards
-                uses: actions/download-artifact@v4
+                uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
                 continue-on-error: true
                 with:
                     pattern: test-telemetry-*
@@ -892,7 +892,7 @@ jobs:
 
             -   name: Upload slow-test telemetry
                 if: always()
-                uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+                uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
                 with:
                     name: test-duration-telemetry
                     path: |
@@ -903,7 +903,7 @@ jobs:
 
             -   name: Upload test-health telemetry
                 if: always()
-                uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+                uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
                 with:
                     name: test-health-telemetry
                     path: reports/quality/test-runs/

@@ -11,49 +11,43 @@ ROOT = Path(__file__).resolve().parents[3]
 WORKFLOWS_DIR = ROOT / ".github/workflows"
 COMPOSITE_ACTIONS_DIR = ROOT / ".github/actions"
 
-# Canonical policy: pin to vetted SHAs for runtime-sensitive official actions.
 ALLOWED_USES: dict[str, set[str]] = {
-    "actions/checkout": {"de0fac2e4500dabe0009e67214ff5f5447ce83dd"},  # v6
-    "actions/setup-python": {"a26af69be951a213d495a4c3e4e4022e16d87065"},  # v5
-    "actions/cache": {"0057852bfaa89a56745cba8c7296529d2fc39830"},  # v4
-    "actions/upload-artifact": {"ea165f8d65b6e75b540449e92b4886f43607fa02"},  # v4
+    "actions/checkout": {"de0fac2e4500dabe0009e67214ff5f5447ce83dd"},  # v6.0.2
+    "actions/setup-python": {"a309ff8b426b58ec0e2a45f0f869d46889d02405"},  # v6.2.0
+    "actions/cache": {"27d5ce7f107fe9357f9df03efb73ab90386fccae"},  # v5.0.5
+    "actions/upload-artifact": {"043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"},  # v7.0.1
+    "actions/setup-node": {"48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e"},  # v6.4.0
+    "actions/download-artifact": {"3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c"},  # v8.0.1
 }
 
 USES_PATTERN = re.compile(r"^\s*uses:\s*([^\s#]+)")
 
 
 def iter_yaml_files() -> list[Path]:
-    workflow_files = sorted(WORKFLOWS_DIR.glob("*.yml"))
-    composite_files = sorted(COMPOSITE_ACTIONS_DIR.rglob("action.yml"))
-    return [*workflow_files, *composite_files]
+    return [*sorted(WORKFLOWS_DIR.glob("*.yml")), *sorted(COMPOSITE_ACTIONS_DIR.rglob("action.yml"))]
 
 
 def main() -> int:
     violations: list[str] = []
-
     for file_path in iter_yaml_files():
         rel_path = file_path.relative_to(ROOT)
         for line_no, line in enumerate(file_path.read_text(encoding="utf-8").splitlines(), 1):
-            match = USES_PATTERN.match(line)
-            if match is None:
+            m = USES_PATTERN.match(line)
+            if not m:
                 continue
-            uses_ref = match.group(1)
+            uses_ref = m.group(1)
             action, _, ref = uses_ref.partition("@")
             if action not in ALLOWED_USES:
                 continue
-            if not ref:
-                violations.append(f"{rel_path}:{line_no}: missing ref for {action}")
-                continue
-            if ref in ALLOWED_USES[action]:
-                continue
-            violations.append(
-                f"{rel_path}:{line_no}: disallowed {uses_ref}; expected one of {sorted(ALLOWED_USES[action])}"
-            )
+            if not ref or ref not in ALLOWED_USES[action]:
+                violations.append(
+                    f"{rel_path}:{line_no}: disallowed {uses_ref}; expected one of {sorted(ALLOWED_USES[action])}"
+                )
 
     if violations:
         sys.stderr.write("GitHub Actions runtime policy violations found:\n")
-        for violation in violations:
-            sys.stderr.write(f"- {violation}\n")
+        for v in violations:
+            sys.stderr.write(f"- {v}\n")
         return 1
 
     print("GitHub Actions runtime policy check passed.")

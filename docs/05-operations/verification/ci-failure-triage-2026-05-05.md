@@ -31,7 +31,7 @@
 - Решение: унифицировать policy на **pinned commit SHA** для runtime-sensitive actions во всех `.github/workflows/*.yml` и `.github/actions/setup-python-uv/action.yml`.
 - Целевые pinned refs:
   - `actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd` (v6)
-  - `actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065` (v5)
-  - `actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830` (v4)
-  - `actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02` (v4)
+  - `actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405` (v5)
+  - `actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae` (v4)
+  - `actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a` (v4)
 - Governance guardrail: добавить pre-merge проверку `python -m scripts.engineering.repo check-actions-runtime-policy`; блокировать непинованные или non-vetted refs.
