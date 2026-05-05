@@ -396,6 +396,32 @@ def _normalize_publication_metric_labels(
     name: str,
     labels: MetricLabels,
 ) -> MetricLabels | None:
+    phase_label_key_by_metric_group: tuple[
+        tuple[set[str], str, Callable[[str], str]],
+        ...,
+    ] = (
+        (
+            _COMPOSITE_PHASE_RECORDS_METRICS,
+            "outcome",
+            normalize_composite_phase_record_outcome,
+        ),
+        (
+            _COMPOSITE_PHASE_ERRORS_METRICS,
+            "error_kind",
+            normalize_composite_phase_error_kind,
+        ),
+        (
+            _COMPOSITE_PHASE_LOSS_METRICS,
+            "loss_kind",
+            normalize_composite_phase_loss_kind,
+        ),
+        (
+            _COMPOSITE_PHASE_RETRIES_METRICS,
+            "retry_kind",
+            normalize_composite_phase_retry_kind,
+        ),
+    )
+
     if name in _BATCH_LIFECYCLE_LABEL_METRICS:
         return {
             **labels,
@@ -428,11 +454,6 @@ def _normalize_publication_metric_labels(
             **labels,
             "stage": normalize_stage_model_stage(str(labels.get("stage", "other"))),
         }
-    if name in _STAGE_LAG_LABEL_METRICS:
-        return {
-            **labels,
-            "stage": normalize_stage_model_stage(str(labels.get("stage", "other"))),
-        }
     if name in _STAGE_MODEL_LABEL_METRICS:
         return {
             **labels,
@@ -441,38 +462,13 @@ def _normalize_publication_metric_labels(
                 str(labels.get("outcome", "other"))
             ),
         }
-    if name in _COMPOSITE_PHASE_RECORDS_METRICS:
-        return {
-            **labels,
-            "phase": normalize_runtime_phase(str(labels.get("phase", "other"))),
-            "outcome": normalize_composite_phase_record_outcome(
-                str(labels.get("outcome", "other"))
-            ),
-        }
-    if name in _COMPOSITE_PHASE_ERRORS_METRICS:
-        return {
-            **labels,
-            "phase": normalize_runtime_phase(str(labels.get("phase", "other"))),
-            "error_kind": normalize_composite_phase_error_kind(
-                str(labels.get("error_kind", "other"))
-            ),
-        }
-    if name in _COMPOSITE_PHASE_LOSS_METRICS:
-        return {
-            **labels,
-            "phase": normalize_runtime_phase(str(labels.get("phase", "other"))),
-            "loss_kind": normalize_composite_phase_loss_kind(
-                str(labels.get("loss_kind", "other"))
-            ),
-        }
-    if name in _COMPOSITE_PHASE_RETRIES_METRICS:
-        return {
-            **labels,
-            "phase": normalize_runtime_phase(str(labels.get("phase", "other"))),
-            "retry_kind": normalize_composite_phase_retry_kind(
-                str(labels.get("retry_kind", "other"))
-            ),
-        }
+    for metric_group, label_key, label_normalizer in phase_label_key_by_metric_group:
+        if name in metric_group:
+            return {
+                **labels,
+                "phase": normalize_runtime_phase(str(labels.get("phase", "other"))),
+                label_key: label_normalizer(str(labels.get(label_key, "other"))),
+            }
     return None
 
 
