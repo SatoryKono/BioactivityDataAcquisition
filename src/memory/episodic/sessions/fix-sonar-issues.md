@@ -1,22 +1,22 @@
 ---
-id: setup-mcp
-title: Configure MCP for BioETL workspace
-task_id: setup-mcp
+id: fix-sonar-issues
+title: Fix sonar issues plan and patch
+task_id: fix-sonar-issues
 created_at: '2026-05-05T04:53:30Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
-- README.md
+- <add-source-ref>
 summary: Active task session context.
-query: MCP setup codex copilot workspace config
+query: Fix sonar issues plan and patch
 ---
 
 # Session note
 
 ## Task
 
-- Title: Configure MCP for BioETL workspace
-- Retrieval query: MCP setup codex copilot workspace config
+- Title: Fix sonar issues plan and patch
+- Retrieval query: Fix sonar issues plan and patch
 
 ## Retrieved context
 
