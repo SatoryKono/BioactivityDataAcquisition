@@ -119,7 +119,7 @@ ______________________________________________________________________
 │  - 2. Runtime (bioetl-runtime)                                   │
 │  - 3. Provider Health (bioetl-provider-health-v2)                │
 │  - 4. Data Quality (bioetl-dq-v2)                                │
-│  - Control Plane / Replay Safety (bioetl-control-plane-v1)       │
+│  - 5. Control Plane (bioetl-control-plane-v1)                    │
 │  - 5. Silver Reject Explorer (bioetl-silver-reject-explorer)     │
 │  - 6. Workflow Overview (bioetl-workflow-overview)               │
 └──────────────────────────────────────────────────────────────────┘
@@ -677,7 +677,7 @@ Shipped dashboards используют несколько template variables в
   `label_values(bioetl_records_processed_total{pipeline=~"$pipeline",run_type=~"$run_type"}, stage)`.
   Это bounded stage breakdown filter, а не forensic selector.
 
-- **`Control Plane / Replay Safety`** использует собственные
+- **`5. Control Plane`** использует собственные
   `$pipeline/$run_type` queries для manifest/ledger/checkpoint/replay/lineage
   decision row. GLOBAL read-path и checkpoint-operator panels не несут
   pipeline/run_type labels, поэтому не фильтруются по этим переменным.
@@ -752,8 +752,8 @@ ______________________________________________________________________
 `bioetl_dq_validation_failures_total`, `bioetl_dq_records_quarantined_total`,
 control-plane metrics, provider health metrics и `bioetl_workflow_runs_total`.
 
-**Drilldown:** dashboard links `2. Runtime`, `Control Plane / Replay Safety`, `3. Provider Health`,
-`4. Data Quality`, `6. Workflow Overview`, `Explore Logs (Loki, tracing profile)` и `Explore Traces (Tempo, tracing profile)` используют
+**Drilldown:** dashboard links `2. Runtime`, `3. Provider Health`,
+`4. Data Quality`, `5. Control Plane`, `6. Workflow Overview`, `Explore Logs` и `Explore Traces` используют
 текущее временное окно. Panel `Processing Volume by Stage` дублирует Explore handoff
 через data links для быстрого перехода в Grafana Explore. Tempo handoff для
 pipeline dashboards использует TraceQL filter по `span."bioetl.pipeline"` и
@@ -809,9 +809,9 @@ ______________________________________________________________________
 - неизвестные значения схлопываются в `other`
 - raw `message` не используется как Prometheus label
 
-**Drilldown:** dashboard links `Back to Overview`, `Control Plane / Replay Safety`, `5. Silver Reject Explorer`, `Explore Logs (Loki, tracing profile)` и
-`Explore Traces (Tempo, tracing profile)` используют текущее временное окно. Panel `Data Flow in Range: Bronze -> Silver -> Gold` дублирует Explore handoff через data links для DQ
-incidents и freshness investigation, а также даёт прямой переход в `Control Plane / Replay Safety` для replay/checkpoint расследования. Панели `Lineage Refs Missing` и `Gold Strict Validation Failures` тоже ведут в `Control Plane / Replay Safety`, чтобы traceability и hard-fail incidents не требовали ручного поиска следующего dashboard. Tempo drilldown предфильтрован по
+**Drilldown:** dashboard links `Back to Overview`, `5. Control Plane`, `Explore Logs`,
+`Explore Traces` и `5. Silver Reject Explorer` используют текущее временное окно. Panel `Data Flow in Range: Bronze -> Silver -> Gold` дублирует Explore handoff через data links для DQ
+incidents и freshness investigation, а также даёт прямой переход в `5. Control Plane` для replay/checkpoint расследования. Панели `Lineage Refs Missing` и `Gold Strict Validation Failures` тоже ведут в `5. Control Plane`, чтобы traceability и hard-fail incidents не требовали ручного поиска следующего dashboard. Tempo drilldown предфильтрован по
 `span."bioetl.pipeline"` и `span."bioetl.run_type"`.
 
 ______________________________________________________________________
@@ -879,8 +879,8 @@ ______________________________________________________________________
 
 **Фильтрация:** только `$provider`. Health-check counters и histograms в текущем инструментировании являются provider-labeled, поэтому pipeline filter здесь намеренно не используется.
 
-**Drilldown:** dashboard links `Back to Overview`, `2. Runtime`, `Explore Logs (Loki, tracing profile)` и
-`Explore Traces (Tempo, tracing profile)` плюс data links у latency-панели открывают Grafana
+**Drilldown:** dashboard links `Back to Overview`, `2. Runtime`, `5. Control Plane`, `Explore Logs` и
+`Explore Traces` плюс data links у latency-панели открывают Grafana
 Explore в том же time range.
 Loki drilldown стартует с безопасного `{job="bioetl"}` entrypoint без encoded
 dashboard-variable interpolation. Дополнительное сужение по `provider` или
@@ -908,8 +908,8 @@ collapsed row `Tracing-only Log Hygiene (requires optional tracing profile)`.
 - **Primary question:** где runtime теряет время, падает, копит backlog или даёт warning/error signals
 - **Variables:** только bounded `$pipeline`, `$run_type`, `$stage`
 - **Forbidden variables:** `run_id`, `payload_hash`, `record_id`
-- **Top links:** `Back to Overview`, `Control Plane v1`, `3. Provider Health`,
-  `4. Data Quality`, `Explore Logs`, `Explore Traces`, `Runtime Runbook`
+- **Top links:** `Back to Overview`, `3. Provider Health`,
+  `4. Data Quality`, `5. Control Plane`, `Explore Logs`, `Explore Traces`, `Runtime Runbook`
 - **Known blocked panels:** `Retry vs Failure` и `Batch Size Distribution`
   сознательно не shipped, потому что в текущем metric surface нет подтверждённых
   bounded runtime metrics для этих решений
@@ -943,7 +943,7 @@ collapsed row `Tracing-only Log Hygiene (requires optional tracing profile)`.
 - `DQ Alert Conditions`: compact DQ handoff only; detailed DQ debugging lives in
   `4. Data Quality`
 - `Control-plane Alert Conditions`: manifest/checkpoint/replay/lineage handoff
-  into `Control Plane v1`
+  into `5. Control Plane`
 - `GLOBAL Provider Alert Conditions`: compact provider handoff only; provider
   deep-debug stays in `3. Provider Health`
 - `Freshness Alert Conditions`: stale-output handoff into DQ/source investigation
@@ -964,7 +964,7 @@ collapsed row `Tracing-only Log Hygiene (requires optional tracing profile)`.
 - Cross-dashboard links передают только target-scoped variables
 - Panel-level handoffs используют явные `from/to`, а не blanket `includeVars=true`
 - `Control-plane Alert Conditions` и `No-Records Runs / 30m` дают прямой handoff
-  в `Control Plane v1`
+  в `5. Control Plane`
 - `Pipeline/DQ/Control-plane/Provider/Freshness Alert Conditions` дополнительно
   ведут в canonical runbooks
 
@@ -1875,7 +1875,7 @@ ______________________________________________________________________
 | 2. Runtime                | `bioetl-runtime`                | 2            | 26     | 30s     | 12h        | Prometheus + optional Loki/Tempo links | L2 runtime triage: blockers, latency, backlog, handoffs |
 | 3. Provider Health        | `bioetl-provider-health-v2`     | 6            | 17     | 30s     | 12h        | Prometheus      | Provider latency, health, retries, failure ratios |
 | 4. Data Quality           | `bioetl-dq-v2`                  | 4            | 21     | 30s     | 12h        | Prometheus      | DQ score, quarantine, freshness, validation failures |
-| Control Plane / Replay Safety | `bioetl-control-plane-v1`       | 2            | 32     | 30s     | 6h         | Prometheus      | Replay/resume safety, GLOBAL read diagnostics, missing-signal markers |
+| 5. Control Plane          | `bioetl-control-plane-v1`       | 2            | 32     | 30s     | 6h         | Prometheus      | Replay/resume safety, GLOBAL read diagnostics, missing-signal markers |
 | 5. Silver Reject Explorer | `bioetl-silver-reject-explorer` | 1000         | 9      | 1m      | 24h        | Quarantine Explorer API | Record-level browsing for Silver rejects |
 | 6. Workflow Overview      | `bioetl-workflow-overview`      | 6            | 5      | 30s     | 12h        | Prometheus      | Declarative workflow run and step outcomes |
 
