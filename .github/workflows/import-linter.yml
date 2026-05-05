@@ -169,7 +169,9 @@ jobs:
                     C901_RESULT: ${{ needs['c901-governance'].result }}
                     ARCH_RESULT: ${{ needs['arch-tests'].result }}
                 run: |
-                    if [[ "$LINT_RESULT" != "success" || "$C901_RESULT" != "success" || "$ARCH_RESULT" != "success" ]]; then
+                    if [[ "$LINT_RESULT" != "success" || \
+                          "$C901_RESULT" != "success" || \
+                          "$ARCH_RESULT" != "success" ]]; then
                       echo "One or more checks failed"
                       exit 1
                     fi
