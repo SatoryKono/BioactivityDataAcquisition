@@ -38,7 +38,7 @@ ______________________________________________________________________
 фасадный `__init__.py`), и это число синхронизируется архитектурным тестом
 `test_ports_count_matches_docs`.
 
-- источники и хранение (`DataSourcePort`, `StoragePort`, `CheckpointPort`, `LockPort`);
+- источники и хранение (`DataSourcePort`, `PipelineStorageProtocol`, `CheckpointPort`, `LockPort`);
 - observability (`LoggerPort`, `MetricsPort`, `TracingPort`, `DQMonitorPort`);
 - качество данных (`BronzeDQAnalyzerPort`, `SilverDQAnalyzerPort`, `GoldDQAnalyzerPort`, валидаторы, quarantine/report);
 - runtime/resilience (`RunnerFactoryPort`, `PipelineFactoryPort`, `ExecutionObservabilityPort`, `RunnablePort`, `RateLimiterPort`, `CircuitBreakerPort`);
@@ -57,10 +57,10 @@ composition/runtime bundle types.
 
 ```python
 # ✅ из фасада
-from bioetl.domain.ports import StoragePort, LockPort
+from bioetl.domain.ports import BronzeStoragePort, SilverStoragePort, GoldStoragePort, LockPort
 
 # ❌ из внутренних модулей
-from bioetl.domain.ports.storage import StoragePort
+from bioetl.domain.ports.storage import BronzeStoragePort
 ```
 
 Проверка выполняется архитектурным тестом `test_ports_imported_only_from_facade`.

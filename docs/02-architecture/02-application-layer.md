@@ -23,7 +23,7 @@ ______________________________________________________________________
 
 **Ключевые характеристики:**
 
-- **Оркестрация:** Определяет *что* и *в каком порядке* делать. Например: "взять данные из `DataSourcePort`, преобразовать их и положить в `StoragePort`".
+- **Оркестрация:** Определяет *что* и *в каком порядке* делать. Например: "взять данные из `DataSourcePort`, преобразовать их и положить через storage ports (`BronzeStoragePort`/`SilverStoragePort`/`GoldStoragePort`)".
 - **Зависимости:** Зависит от `Domain`, но не от `Infrastructure`. Зависимости из `Infrastructure` (конкретные адаптеры) внедряются в него через Dependency Injection.
 - **Состояние:** Может управлять состоянием выполнения пайплайна (например, через `CheckpointPort`).
 
@@ -39,12 +39,12 @@ ______________________________________________________________________
 
 **Примерный жизненный цикл пайплайна:**
 
-1. **Инициализация:** Получает через конструктор `DataSourcePort`, `StoragePort`, `LockPort` и т.д.
+1. **Инициализация:** Получает через конструктор `DataSourcePort`, storage ports (`BronzeStoragePort`/`SilverStoragePort`/`GoldStoragePort`), `LockPort` и т.д.
 1. **Захват блокировки:** Использует `LockPort`, чтобы убедиться, что другой экземпляр этого пайплайна не запущен.
 1. **Загрузка чекпоинта:** Использует `CheckpointPort` для определения, с какого момента начинать загрузку данных.
 1. **Извлечение (Extract):** Вызывает `DataSourcePort.fetch()` для получения сырых данных.
 1. **Преобразование (Transform):** Применяет бизнес-логику из `Domain` для очистки и валидации данных.
-1. **Загрузка (Load):** Использует `StoragePort` для записи данных в Bronze, Silver и Gold слои.
+1. **Загрузка (Load):** Использует storage adapter (`PipelineStorageProtocol`) для записи данных в Bronze, Silver и Gold слои.
 1. **Обновление чекпоинта:** Сохраняет новое состояние через `CheckpointPort`.
 1. **Освобождение блокировки:** Снимает блокировку через `LockPort`.
 
@@ -193,7 +193,7 @@ factory = GenericPipelineFactory(
 @dataclass(frozen=True)
 class PipelineService:
     data_source: DataSourcePort
-    storage: StoragePort
+    storage: PipelineStorageProtocol
     lock: LockPort
     checkpoint: CheckpointPort
     quarantine: QuarantinePort
