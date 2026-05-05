@@ -150,7 +150,7 @@
           "includeVars": false,
           "keepTime": true,
           "targetBlank": false,
-          "title": "4. Data Quality",
+          "title": "Inspect Data Quality",
           "type": "link",
           "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
         },
@@ -160,7 +160,7 @@
           "includeVars": false,
           "keepTime": true,
           "targetBlank": false,
-          "title": "Explore Logs (Loki, tracing profile)",
+          "title": "Inspect Logs",
           "type": "link",
           "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D",
           "tooltip": "Open Loki Explore with tracing profile and selected time range."
