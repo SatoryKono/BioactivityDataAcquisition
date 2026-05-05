@@ -73,7 +73,7 @@ histogram_quantile(0.95, sum by (le, provider) (rate(bioetl_health_check_latency
 6. Добавлен operator drilldown surface:
 
 - `bioetl-overview-v2`, `bioetl-dq-v2`, `bioetl-provider-health-v2` теперь содержат
-  dashboard links `Explore Logs (Loki, tracing profile)` и `Explore Traces (Tempo, tracing profile)`;
+  dashboard links `Explore Logs` и `Explore Traces`;
 - `overview.id=1`, `dq.id=1`, `provider.id=1` дублируют этот handoff через data links;
 - Loki links используют low-cardinality entrypoint `{job="bioetl"}` без encoded
   interpolation dashboard variables внутри Explore payload;
@@ -122,8 +122,8 @@ histogram_quantile(0.95, sum by (le, provider) (rate(bioetl_health_check_latency
 8. Синхронизирована dashboard-навигация:
 
 - `1. Overview` содержит links `2. Runtime`, `3. Provider Health`,
-  `4. Data Quality`, `6. Workflow Overview`, `Explore Logs (Loki, tracing profile)`,
-  `Explore Traces (Tempo, tracing profile)`;
+  `4. Data Quality`, `5. Control Plane`, `6. Workflow Overview`, `Explore Logs`,
+  `Explore Traces`;
 - `2. Runtime`, `3. Provider Health`, `4. Data Quality` и
   `6. Workflow Overview` встроены в shipped operator flow и используют
   target-scoped handoffs без variable leakage.
@@ -180,7 +180,7 @@ dashboard links или Explore handoff.
 3. **DQ regression**: оператор из `1. Overview` должен перейти в
    `4. Data Quality` и найти failing dimension/pipeline.
 4. **Replay safety/blocker**: оператор из `1. Overview` должен перейти в
-   `Control Plane / Replay Safety` и подтвердить blocker state.
+   `5. Control Plane` и подтвердить blocker state.
 5. **Workflow failure/skip** (если затронут workflow surface): оператор должен
    перейти в `6. Workflow Overview` и локализовать failing step/status.
 

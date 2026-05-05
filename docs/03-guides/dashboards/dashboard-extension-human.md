@@ -21,9 +21,9 @@ ______________________________________________________________________
 
 ## 1. Текущая карта дашбордов
 
-- `1. Overview` (`bioetl-overview-v2`) — главный hub. Держит ссылки на `2. Runtime`, `Control Plane v1`, `3. Provider Health`, `4. Data Quality`, а также `Explore Logs (Loki, tracing profile)` и `Explore Traces (Tempo, tracing profile)`.
-- `2. Runtime` (`bioetl-runtime`) — runtime triage surface. Держит `Back to Overview`, `Control Plane v1`, `4. Data Quality` и Explore links.
-- `BioETL Control Plane v1` (`bioetl-control-plane-v1`) — deep-dive по reproducibility/control-plane paths. Держит `Back to Overview`, `2. Runtime`, `4. Data Quality` и Explore links.
+- `1. Overview` (`bioetl-overview-v2`) — главный hub. Держит ссылки на `2. Runtime`, `3. Provider Health`, `4. Data Quality`, `5. Control Plane`, `6. Workflow Overview`, `Explore Logs` и `Explore Traces`.
+- `2. Runtime` (`bioetl-runtime`) — runtime triage surface. Держит `Back to Overview`, `3. Provider Health`, `4. Data Quality`, `5. Control Plane` и Explore links.
+- `5. Control Plane` (`bioetl-control-plane-v1`) — deep-dive по reproducibility/control-plane paths. Держит `Back to Overview`, `2. Runtime`, `4. Data Quality` и Explore links.
 - `3. Provider Health` (`bioetl-provider-health-v2`) — provider incident surface по health checks/retries. Держит `Back to Overview`, `2. Runtime` и Explore links.
 - `4. Data Quality` (`bioetl-dq-v2`) — DQ surface. Держит `Back to Overview`, `5. Silver Reject Explorer` и Explore links.
 
@@ -45,9 +45,9 @@ ______________________________________________________________________
 
 ### Навигация
 
-- `1. Overview`: `2. Runtime` / `Control Plane v1` / `3. Provider Health` / `4. Data Quality`
-- `2. Runtime`: `Back to Overview` + `Control Plane v1` + `4. Data Quality`
-- `BioETL Control Plane v1`: `Back to Overview` + `2. Runtime` + `4. Data Quality`
+- `1. Overview`: `2. Runtime` / `3. Provider Health` / `4. Data Quality` / `5. Control Plane` / `6. Workflow Overview` / `Explore Logs` / `Explore Traces`
+- `2. Runtime`: `Back to Overview` + `3. Provider Health` + `4. Data Quality` + `5. Control Plane` + Explore links
+- `5. Control Plane`: `Back to Overview` + `2. Runtime` + `4. Data Quality` + Explore links
 - `3. Provider Health`: `Back to Overview` + `2. Runtime`
 - `4. Data Quality`: `Back to Overview` + `5. Silver Reject Explorer`
 - Explore links не заменяют dashboard links, а дополняют их

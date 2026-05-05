@@ -33,11 +33,11 @@ ______________________________________________________________________
 
 Текущая навигационная модель:
 
-- `1. BioETL Overview` -> `2. Runtime` / `Control Plane v1` / `3. Provider Health` / `4. Data Quality` / `6. Workflow Overview`
-- `2. Runtime` -> `Back to Overview` / `Control Plane v1` / `4. Data Quality`
+- `1. BioETL Overview` -> `2. Runtime` / `3. Provider Health` / `4. Data Quality` / `5. Control Plane` / `6. Workflow Overview` / `Explore Logs` / `Explore Traces`
+- `2. Runtime` -> `Back to Overview` / `3. Provider Health` / `4. Data Quality` / `5. Control Plane` / `Explore Logs` / `Explore Traces`
 - `3. Provider Health` -> `Back to Overview` / `2. Runtime`
-- `4. Data Quality` -> `Back to Overview` / `5. Silver Reject Explorer`
-- `6. Workflow Overview` -> `Back to Overview` / `2. Runtime` / `Control Plane v1`
+- `4. Data Quality` -> `Back to Overview` / `5. Control Plane` / `5. Silver Reject Explorer` / `Explore Logs` / `Explore Traces`
+- `6. Workflow Overview` -> `Back to Overview` / `2. Runtime` / `5. Control Plane` / `Explore Logs` / `Explore Traces`
 
 `bioetl-overview-v2` is the L0 answer-first surface. It answers one question:
 what is currently broken or degraded in BioETL, and where should the operator
@@ -50,7 +50,7 @@ first screen answers the operator question without scroll. Keep record-level
 filters, provider deep diagnostics, DQ cause breakdowns, and control-plane
 replay/audit detail out of Overview.
 
-`bioetl-control-plane-v1` is the Control Plane / Replay Safety surface. It
+`bioetl-control-plane-v1` is the `5. Control Plane` surface. It
 now starts with an answer-first **Trust Summary** block: replay safety state,
 checkpoint freshness proxy, and ledger/manifest consistency for the selected
 pipeline scope. A visible **Known Blind Spots** list is part of this top block
@@ -67,15 +67,15 @@ secondary mirrors только как shortcut для triage.
 
 | KPI | Canonical dashboard | Secondary mirrors (MUST show link `Open canonical KPI view`) |
 | --- | --- | --- |
-| System Status | `1. BioETL Overview` | `2. Runtime`, `BioETL Control Plane v1`, `6. Workflow Overview` |
+| System Status | `1. BioETL Overview` | `2. Runtime`, `5. Control Plane`, `6. Workflow Overview` |
 | Next Action | `1. BioETL Overview` | `2. Runtime`, `3. Provider Health` |
-| Failed Runs in Range | `1. BioETL Overview` | `2. Runtime`, `BioETL Control Plane v1` |
+| Failed Runs in Range | `1. BioETL Overview` | `2. Runtime`, `5. Control Plane` |
 | Worst Backlog Stage | `1. BioETL Overview` | `2. Runtime`, `6. Workflow Overview` |
 | Worst Lag Stage | `1. BioETL Overview` | `2. Runtime`, `6. Workflow Overview` |
 | Flow Balance | `1. BioETL Overview` | `2. Runtime`, `6. Workflow Overview` |
-| Replay Safety State | `BioETL Control Plane v1` | `1. BioETL Overview`, `2. Runtime` |
-| Checkpoint Freshness Proxy | `BioETL Control Plane v1` | `2. Runtime` |
-| Ledger/Manifest Consistency | `BioETL Control Plane v1` | `2. Runtime` |
+| Replay Safety State | `5. Control Plane` | `1. BioETL Overview`, `2. Runtime` |
+| Checkpoint Freshness Proxy | `5. Control Plane` | `2. Runtime` |
+| Ledger/Manifest Consistency | `5. Control Plane` | `2. Runtime` |
 | Provider Health (aggregated) | `3. Provider Health` | `1. BioETL Overview`, `2. Runtime` |
 | DQ Status (Silver Reject / quality posture) | `4. Data Quality` | `1. BioETL Overview`, `2. Runtime` |
 
