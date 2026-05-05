@@ -61,16 +61,24 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
       - name: Build Sonar baseline report
+        if: steps.sonar-token.outputs.available == 'true'
         env:
           SONARQUBE_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           python3 scripts/ai/sonar_issue_processor.py --write
 
       - name: Upload Sonar baseline artifact
+        if: steps.sonar-token.outputs.available == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: sonar-baseline-report
           path: reports/quality/sonar_baseline_report.json
+
+
+      - name: Note Sonar baseline intentionally skipped
+        if: steps.sonar-token.outputs.available == 'false'
+        run: |
+          echo "Sonar baseline report was intentionally skipped because SONAR_TOKEN is unavailable." >> "$GITHUB_STEP_SUMMARY"
 
       - name: Enforce Sonar baseline ratchet
         if: steps.sonar-token.outputs.available == 'true'
