@@ -116,6 +116,14 @@ them:
 These checks still reduce the risk of merging failing tests, lint errors, or
 secret leaks.
 
+### Triage rule for `checks-complete`
+
+- If `checks-complete` fails, **always** open job logs in this order first:
+  1. `lint`
+  2. `c901-governance`
+  3. `arch-tests`
+- `checks-complete` is an aggregate status and **must not be debugged separately**.
+
 ## Pull Request Checklist
 
 - [ ] `make lint` passes
