@@ -125,6 +125,28 @@ class AIDocsMirrorTarget:
     canonical_sources: tuple[Path, ...]
 
 
+AGENT_MEMORY_PATH = Path("docs/00-project/ai/memory/agent-memory.md")
+FILE_POLICY_PATH = Path("docs/00-project/governance/03-file-policy.md")
+RUNTIME_AGENT_GUIDE_PATH = "docs/00-project/ai/agents/guides/MEMORY_USAGE.md"
+RUNTIME_POST_CHANGE_PATH = "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md"
+RUNTIME_AGENT_MEMORY_PATH = "docs/00-project/ai/memory/agent-memory.md"
+CODEX_RUNTIME_DOC_PATH = ".codex/agents/CODEX-RUNTIME.md"
+GEMINI_RUNTIME_DOC_PATH = ".gemini/agents/GEMINI-RUNTIME.md"
+CODEX_RUNTIME_DOC_README_PATH = ".codex/agents/README.md"
+GEMINI_RUNTIME_DOC_README_PATH = ".gemini/agents/README.md"
+GEMINI_PY_CONFIG_BOT_DOC_PATH = ".gemini/agents/py-config-bot.md"
+GEMINI_PY_AUDIT_BOT_DOC_PATH = ".gemini/agents/py-audit-bot.md"
+GEMINI_PY_REVIEW_ORCHESTRATOR_DOC_PATH = ".gemini/agents/py-review-orchestrator.md"
+CODEX_PY_AUDIT_BOT_DOC_PATH = ".codex/agents/py-audit-bot.md"
+CODEX_PY_REVIEW_ORCHESTRATOR_DOC_PATH = ".codex/agents/py-review-orchestrator.md"
+CODEX_RUNTIME_DOC_TOKEN = CODEX_RUNTIME_DOC_PATH
+GEMINI_RUNTIME_DOC_TOKEN = GEMINI_RUNTIME_DOC_PATH
+AGENTS_DOC_TOKEN = "AGENTS.md"
+MEMORY_USAGE_TOKEN = "MEMORY_USAGE.md"
+POST_CHANGE_TOKEN = "POST_CHANGE_VALIDATION.md"
+POST_CHANGE_DOC_TOKEN = "../policy/POST_CHANGE_VALIDATION.md"
+MEMORY_DOC_TOKEN = "../memory/agent-memory.md"
+GEMINI_AUDIT_BOT_TOKEN = GEMINI_PY_AUDIT_BOT_DOC_PATH
 RUNTIME_VERSION_PATTERN = re.compile(r"(?m)^\*Версия:\s*(\d+(?:\.\d+)*)")
 AGENT_MEMORY_SYNC_PATTERN = re.compile(
     r"Синхронизировано с ORCHESTRATION\.md v(\d+(?:\.\d+)*)"
@@ -157,28 +179,6 @@ RUNTIME_MIRROR_RULES: tuple[RuntimeMirrorRule, ...] = (
     ),
 )
 
-AGENT_MEMORY_PATH = Path("docs/00-project/ai/memory/agent-memory.md")
-FILE_POLICY_PATH = Path("docs/00-project/governance/03-file-policy.md")
-RUNTIME_AGENT_GUIDE_PATH = "docs/00-project/ai/agents/guides/MEMORY_USAGE.md"
-RUNTIME_POST_CHANGE_PATH = "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md"
-RUNTIME_AGENT_MEMORY_PATH = "docs/00-project/ai/memory/agent-memory.md"
-CODEX_RUNTIME_DOC_PATH = ".codex/agents/CODEX-RUNTIME.md"
-GEMINI_RUNTIME_DOC_PATH = ".gemini/agents/GEMINI-RUNTIME.md"
-CODEX_RUNTIME_DOC_README_PATH = ".codex/agents/README.md"
-GEMINI_RUNTIME_DOC_README_PATH = ".gemini/agents/README.md"
-GEMINI_PY_CONFIG_BOT_DOC_PATH = ".gemini/agents/py-config-bot.md"
-GEMINI_PY_AUDIT_BOT_DOC_PATH = ".gemini/agents/py-audit-bot.md"
-GEMINI_PY_REVIEW_ORCHESTRATOR_DOC_PATH = ".gemini/agents/py-review-orchestrator.md"
-CODEX_PY_AUDIT_BOT_DOC_PATH = ".codex/agents/py-audit-bot.md"
-CODEX_PY_REVIEW_ORCHESTRATOR_DOC_PATH = ".codex/agents/py-review-orchestrator.md"
-CODEX_RUNTIME_DOC_TOKEN = CODEX_RUNTIME_DOC_PATH
-GEMINI_RUNTIME_DOC_TOKEN = GEMINI_RUNTIME_DOC_PATH
-AGENTS_DOC_TOKEN = "AGENTS.md"
-MEMORY_USAGE_TOKEN = "MEMORY_USAGE.md"
-POST_CHANGE_TOKEN = "POST_CHANGE_VALIDATION.md"
-POST_CHANGE_DOC_TOKEN = "../policy/POST_CHANGE_VALIDATION.md"
-MEMORY_DOC_TOKEN = "../memory/agent-memory.md"
-GEMINI_AUDIT_BOT_TOKEN = GEMINI_PY_AUDIT_BOT_DOC_PATH
 RUNTIME_DOC_TOKENS: tuple[str, ...] = (
     RUNTIME_AGENT_GUIDE_PATH,
     RUNTIME_POST_CHANGE_PATH,
@@ -229,7 +229,7 @@ ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS: tuple[str, ...] = (
 ROLE_PROFILE_MEMO_DOC_BY_RUNTIME: dict[Path, tuple[str, ...]] = {
     Path(GEMINI_PY_AUDIT_BOT_DOC_PATH): (RUNTIME_DOC_TOKENS + (RUNTIME_AGENT_MEMORY_PATH,)),
     Path(".gemini/agents/py-plan-bot.md"): (RUNTIME_DOC_TOKENS + (RUNTIME_AGENT_MEMORY_PATH,)),
-    Path(".gemini/agents/py-config-bot.md"): ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
+    Path(GEMINI_PY_CONFIG_BOT_DOC_PATH): ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
     Path(".gemini/agents/py-debug-bot.md"): ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
     Path(".gemini/agents/py-doc-bot.md"): ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
     Path(".gemini/agents/py-test-bot.md"): ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
@@ -338,7 +338,7 @@ AI_ROLE_PROFILE_REQUIRED_TOKENS: dict[Path, tuple[str, ...]] = {
         RUNTIME_AGENT_MEMORY_PATH,
         "docs/00-project/ai/memory/memory-py-plan-bot.md",
     ),
-    Path(".gemini/agents/py-config-bot.md"): (
+    Path(GEMINI_PY_CONFIG_BOT_DOC_PATH): (
         *ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
         "docs/00-project/ai/memory/memory-py-config-bot.md",
     ),
