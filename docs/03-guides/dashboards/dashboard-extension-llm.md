@@ -37,6 +37,11 @@ Grafana dashboards в BioETL.
 - `Explore Logs` и `Explore Traces` доступны только на `2. Runtime` и
   `4. Data Quality`.
 - `Silver Reject Explorer` доступен только на `4. Data Quality`.
+- `$pipeline` и `$provider` всегда single-select без `All`; explicit fallback
+  для неизвестного контекста — `unknown`.
+- Переходы в `3. Provider Health` из pipeline-scoped dashboards используют
+  context mapping: `provider=$pipeline` и hidden `pipeline_context=$pipeline`
+  для обратного перехода.
 
 Если правка меняет эту модель, синхронизируй docs в том же change set.
 

@@ -1370,7 +1370,7 @@ def test_runtime_first_action_cta_links_preserve_scoped_vars_and_time() -> None:
             "var-pipeline=$pipeline",
             "var-run_type=$run_type",
         ),
-        "Provider health checks": ("var-provider=All", "var-adapter=All"),
+        "Provider health checks": ("var-provider=$pipeline", "var-adapter=unknown"),
     }
     forbidden = ("var-workflow=", "var-status=", "var-run_id=", "var-payload_hash=")
 
@@ -1630,5 +1630,95 @@ def test_provider_dashboard_exposes_single_runtime_link() -> None:
     runtime_link = runtime_links[0]
     assert runtime_link.get("title") == "2. Runtime"
     runtime_url = str(runtime_link.get("url", ""))
-    assert "var-pipeline=All" in runtime_url and "var-run_type=All" in runtime_url
-    assert "var-stage=All" in runtime_url
+    assert "var-pipeline=$pipeline_context" in runtime_url
+    assert "var-run_type=unknown" in runtime_url
+    assert "var-stage=unknown" in runtime_url
+
+
+def test_pipeline_and_provider_variables_are_single_select_unknown_default() -> None:
+    """Pipeline and Provider selectors must be single-value fail-closed scopes."""
+    for dashboard_path in get_dashboard_files():
+        dashboard = load_dashboard(dashboard_path)
+        variables = {
+            var.get("name"): var
+            for var in dashboard.get("templating", {}).get("list", [])
+            if isinstance(var, dict) and var.get("name")
+        }
+        for variable_name in ("pipeline", "provider"):
+            variable = variables.get(variable_name)
+            if variable is None:
+                continue
+            assert variable.get("multi") is False, (
+                f"{dashboard_path.name} '{variable_name}' must be single-select"
+            )
+            assert variable.get("includeAll") is False, (
+                f"{dashboard_path.name} '{variable_name}' must disable All"
+            )
+            current = variable.get("current", {})
+            assert isinstance(current, dict)
+            assert current.get("value") == "unknown", (
+                f"{dashboard_path.name} '{variable_name}' must default to unknown"
+            )
+
+
+def test_provider_health_handoff_maps_pipeline_and_remembers_return_context() -> None:
+    """Pipeline-scoped dashboards map pipeline -> provider and preserve pipeline_context."""
+    pipeline_sources = {
+        "bioetl-control-plane-v1",
+        "bioetl-overview-v2",
+        "bioetl-runtime",
+        "bioetl-dq-v2",
+        "bioetl-silver-reject-explorer",
+    }
+    dashboards = _load_dashboards_by_uid()
+
+    for source_uid in pipeline_sources:
+        dashboard = dashboards[source_uid]
+        link = next(
+            item
+            for item in dashboard.get("links", [])
+            if _extract_dashboard_uid(str(item.get("url", "")))
+            == "bioetl-provider-health-v2"
+        )
+        url = str(link.get("url", ""))
+        tooltip = str(link.get("tooltip", ""))
+        assert "var-provider=$pipeline" in url
+        assert "var-pipeline_context=$pipeline" in url
+        assert "var-provider=All" not in url
+        assert "Context mapping" in tooltip
+
+    provider_dashboard = dashboards["bioetl-provider-health-v2"]
+    provider_vars = {
+        var.get("name"): var
+        for var in provider_dashboard.get("templating", {}).get("list", [])
+        if isinstance(var, dict)
+    }
+    pipeline_context = provider_vars.get("pipeline_context")
+    assert pipeline_context is not None
+    assert pipeline_context.get("hide") == 2
+    assert pipeline_context.get("current", {}).get("value") == "unknown"
+
+    for target_uid in {
+        "bioetl-control-plane-v1",
+        "bioetl-overview-v2",
+        "bioetl-runtime",
+        "bioetl-dq-v2",
+    }:
+        link = next(
+            item
+            for item in provider_dashboard.get("links", [])
+            if _extract_dashboard_uid(str(item.get("url", ""))) == target_uid
+        )
+        url = str(link.get("url", ""))
+        assert "var-pipeline=$pipeline_context" in url
+        assert "var-pipeline=All" not in url
+
+
+def test_dashboard_links_do_not_use_all_for_pipeline_or_provider() -> None:
+    """Unknown is the only explicit fallback for Pipeline/Provider handoff values."""
+    for dashboard_path in get_dashboard_files():
+        dashboard = load_dashboard(dashboard_path)
+        for link in _collect_dashboard_links(dashboard):
+            url = str(link.get("url", ""))
+            assert "var-pipeline=All" not in url
+            assert "var-provider=All" not in url

@@ -141,13 +141,13 @@ uv run python -m scripts.engineering.qa check-dashboard-visual-semantics
 
 ### 7.2) Scope reset suffix в tooltip (обязательно)
 
-Если link меняет scope (например, принудительно ставит `var-pipeline=All`, `var-run_type=All`, сбрасывает provider/adapter или stage), tooltip MUST содержать явный suffix:
+Если link меняет scope (например, принудительно ставит `var-pipeline=unknown`, `var-run_type=unknown`, сбрасывает provider/adapter или stage), tooltip MUST содержать явный suffix:
 
 - `Scope reset: ...`
 
 Рекомендуемый шаблон:
 
-- `Cross-scope handoff ... Scope reset: pipeline=All, run_type=All; provider/adapter not transferred.`
+- `Cross-scope handoff ... Scope reset: pipeline=unknown, run_type=unknown; provider/adapter not transferred.`
 
 Если scope не меняется, используй нейтральный tooltip:
 
