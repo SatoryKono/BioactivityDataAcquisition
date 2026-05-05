@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import asdict
+from dataclasses import replace
 
 from bioetl.application.composite.checkpoint._anchor_context import (
     ExpectedCheckpointContext,
@@ -385,28 +385,25 @@ class CompositeCheckpointLoadService:
             return state
 
         replay_projection = project_run_ledger_replay(replay_entries)
-        state_payload = asdict(state)
-        replayed_state: CompositeCheckpointState = CompositeCheckpointState(
-            **{
-                **state_payload,
-                "state": (
-                    replay_projection.state
-                    if replay_projection.state is not None
-                    else state.state
-                ),
-                "seed_completed": (
-                    replay_projection.seed_completed
-                    if replay_projection.seed_completed is not None
-                    else state.seed_completed
-                ),
-                "merge_completed": (
-                    replay_projection.merge_completed
-                    if replay_projection.merge_completed is not None
-                    else state.merge_completed
-                ),
-                "last_event_id": replay_projection.last_event_id,
-                "last_event_occurred_at": replay_projection.last_event_occurred_at,
-            }
+        replayed_state: CompositeCheckpointState = replace(
+            state,
+            state=(
+                replay_projection.state
+                if replay_projection.state is not None
+                else state.state
+            ),
+            seed_completed=(
+                replay_projection.seed_completed
+                if replay_projection.seed_completed is not None
+                else state.seed_completed
+            ),
+            merge_completed=(
+                replay_projection.merge_completed
+                if replay_projection.merge_completed is not None
+                else state.merge_completed
+            ),
+            last_event_id=replay_projection.last_event_id,
+            last_event_occurred_at=replay_projection.last_event_occurred_at,
         )
         self._logger.info(
             "Replayed checkpoint state from run ledger",
