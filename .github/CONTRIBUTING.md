@@ -118,11 +118,11 @@ secret leaks.
 
 ### Triage rule for `checks-complete`
 
-- Если падает `checks-complete`, **всегда** сначала открывайте логи в порядке:
+- If `checks-complete` fails, **always** open job logs in this order first:
   1. `lint`
   2. `c901-governance`
   3. `arch-tests`
-- `checks-complete` — агрегирующий статус, его **не дебажим отдельно**.
+- `checks-complete` is an aggregate status and **must not be debugged separately**.
 
 ## Pull Request Checklist
 
