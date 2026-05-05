@@ -42,7 +42,7 @@ ______________________________________________________________________
 | `bioetl-control-plane-v1` | `$pipeline`, `$run_type` |
 | `bioetl-dq-v2` | `$pipeline`, `$run_type`, `$stage` |
 | `bioetl-overview-v2` | `$pipeline`, `$run_type` |
-| `bioetl-provider-health-v2` | `$adapter`, `$provider` |
+| `bioetl-provider-health-v2` | `$adapter`, `$pipeline_context`, `$provider` |
 | `bioetl-runtime` | `$pipeline`, `$run_type`, `$stage` |
 | `bioetl-silver-reject-explorer` | `$field`, `$payload_hash`, `$pipeline`, `$reason_code`, `$run_id`, `$run_type` |
 | `bioetl-workflow-overview` | `$status`, `$workflow` |

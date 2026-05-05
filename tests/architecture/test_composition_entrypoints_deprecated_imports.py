@@ -27,40 +27,83 @@ def _entrypoint_aliases(tree: ast.Module) -> set[str]:
     aliases: set[str] = set()
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
-            for alias in node.names:
-                if alias.name == ENTRYPOINTS_MODULE:
-                    aliases.add(alias.asname or "entrypoints")
+            aliases.update(_entrypoint_aliases_from_import(node))
         elif isinstance(node, ast.ImportFrom):
-            if node.module == "bioetl.composition":
-                for alias in node.names:
-                    if alias.name == "entrypoints":
-                        aliases.add(alias.asname or alias.name)
+            aliases.update(_entrypoint_aliases_from_import_from(node))
     return aliases
+
+
+def _entrypoint_aliases_from_import(node: ast.Import) -> set[str]:
+    return {
+        alias.asname or "entrypoints"
+        for alias in node.names
+        if alias.name == ENTRYPOINTS_MODULE
+    }
+
+
+def _entrypoint_aliases_from_import_from(node: ast.ImportFrom) -> set[str]:
+    if node.module != "bioetl.composition":
+        return set()
+    return {
+        alias.asname or alias.name for alias in node.names if alias.name == "entrypoints"
+    }
+
+
+def _deprecated_import_from_violations(
+    path: Path, node: ast.ImportFrom, legacy_symbols: set[str]
+) -> list[str]:
+    if node.module != ENTRYPOINTS_MODULE:
+        return []
+    rel = path.relative_to(ROOT).as_posix()
+    return [
+        f"{rel}:{node.lineno}: {alias.name}"
+        for alias in node.names
+        if alias.name in legacy_symbols
+    ]
+
+
+def _deprecated_attribute_violation(
+    path: Path, node: ast.Attribute, legacy_symbols: set[str], entrypoint_aliases: set[str]
+) -> str | None:
+    if not isinstance(node.value, ast.Name):
+        return None
+    if node.value.id not in entrypoint_aliases or node.attr not in legacy_symbols:
+        return None
+    rel = path.relative_to(ROOT).as_posix()
+    return f"{rel}:{node.lineno}: {node.value.id}.{node.attr}"
+
+
+def _deprecated_entrypoint_violations_for_path(
+    path: Path, legacy_symbols: set[str]
+) -> list[str]:
+    tree = ast.parse(path.read_text(encoding="utf-8"))
+    entrypoint_aliases = _entrypoint_aliases(tree)
+    violations: list[str] = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ImportFrom):
+            violations.extend(
+                _deprecated_import_from_violations(path, node, legacy_symbols)
+            )
+        elif isinstance(node, ast.Attribute):
+            violation = _deprecated_attribute_violation(
+                path, node, legacy_symbols, entrypoint_aliases
+            )
+            if violation is not None:
+                violations.append(violation)
+    return violations
 
 
 @pytest.mark.architecture
 def test_first_party_src_does_not_import_deprecated_entrypoint_symbols() -> None:
     """Production code must use canonical services/resources APIs directly."""
     legacy_symbols = _legacy_entrypoint_symbols()
-    violations: list[str] = []
-
-    for path in _iter_python_files():
-        tree = ast.parse(path.read_text(encoding="utf-8"))
-        entrypoint_aliases = _entrypoint_aliases(tree)
-        for node in ast.walk(tree):
-            if isinstance(node, ast.ImportFrom) and node.module == ENTRYPOINTS_MODULE:
-                for alias in node.names:
-                    if alias.name in legacy_symbols:
-                        rel = path.relative_to(ROOT).as_posix()
-                        violations.append(f"{rel}:{node.lineno}: {alias.name}")
-            elif (
-                isinstance(node, ast.Attribute)
-                and isinstance(node.value, ast.Name)
-                and node.value.id in entrypoint_aliases
-                and node.attr in legacy_symbols
-            ):
-                rel = path.relative_to(ROOT).as_posix()
-                violations.append(f"{rel}:{node.lineno}: {node.value.id}.{node.attr}")
+    violations = [
+        violation
+        for path in _iter_python_files()
+        for violation in _deprecated_entrypoint_violations_for_path(
+            path, legacy_symbols
+        )
+    ]
 
     assert not violations, (
         "Deprecated bioetl.composition.entrypoints symbols leaked into first-party "

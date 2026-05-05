@@ -837,40 +837,49 @@ def _assert_no_violations(violations: list[str], failure_message: str) -> None:
     assert not violations, failure_message + "\n" + "\n".join(violations)
 
 
+def _literal_assignment_value(
+    node: ast.stmt, assignment_name: str
+) -> ast.expr | None:
+    if isinstance(node, ast.Assign):
+        if any(
+            isinstance(target, ast.Name) and target.id == assignment_name
+            for target in node.targets
+        ):
+            return node.value
+        return None
+    if (
+        isinstance(node, ast.AnnAssign)
+        and isinstance(node.target, ast.Name)
+        and node.target.id == assignment_name
+    ):
+        return node.value
+    return None
+
+
+def _literal_names_from_value(value: ast.expr) -> frozenset[str]:
+    if isinstance(value, ast.Dict):
+        return frozenset(
+            key.value
+            for key in value.keys
+            if isinstance(key, ast.Constant) and isinstance(key.value, str)
+        )
+    if isinstance(value, ast.List | ast.Tuple | ast.Set):
+        return frozenset(
+            item.value
+            for item in value.elts
+            if isinstance(item, ast.Constant) and isinstance(item.value, str)
+        )
+    return frozenset()
+
+
 def _literal_assignment_names(path: Path, assignment_name: str) -> frozenset[str]:
     """Return string keys/items assigned to a module-level literal."""
     tree = ast.parse(path.read_text(encoding="utf-8"))
     for node in tree.body:
-        if isinstance(node, ast.Assign):
-            matching_assignment = any(
-                isinstance(target, ast.Name) and target.id == assignment_name
-                for target in node.targets
-            )
-            value = node.value
-        elif isinstance(node, ast.AnnAssign):
-            matching_assignment = (
-                isinstance(node.target, ast.Name)
-                and node.target.id == assignment_name
-                and node.value is not None
-            )
-            value = node.value
-        else:
-            matching_assignment = False
-            value = None
-        if not matching_assignment or value is None:
+        value = _literal_assignment_value(node, assignment_name)
+        if value is None:
             continue
-        if isinstance(value, ast.Dict):
-            return frozenset(
-                key.value
-                for key in value.keys
-                if isinstance(key, ast.Constant) and isinstance(key.value, str)
-            )
-        if isinstance(value, ast.List | ast.Tuple | ast.Set):
-            return frozenset(
-                item.value
-                for item in value.elts
-                if isinstance(item, ast.Constant) and isinstance(item.value, str)
-            )
+        return _literal_names_from_value(value)
     raise AssertionError(f"{path} missing module-level {assignment_name}")
 
 

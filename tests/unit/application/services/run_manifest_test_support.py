@@ -369,6 +369,53 @@ def resolve_checkpoint_policy(
     return requested_policy or "soft_fail"
 
 
+def _manifest_loading_strategy_values(manifest: RunManifest) -> tuple[object, ...]:
+    runtime_pipeline = manifest.runtime_config.get("pipeline")
+    resolved_pipeline = manifest.resolved_config.get("pipeline")
+    return (
+        manifest.runtime_config.get("loading_strategy"),
+        runtime_pipeline.get("loading_strategy")
+        if isinstance(runtime_pipeline, dict)
+        else None,
+        manifest.resolved_config.get("loading_strategy"),
+        resolved_pipeline.get("loading_strategy")
+        if isinstance(resolved_pipeline, dict)
+        else None,
+    )
+
+
+def _manifest_requires_full_scan_rebuild(manifest: RunManifest) -> bool:
+    return any(
+        str(candidate or "").strip().lower() == "full_scan_only"
+        for candidate in _manifest_loading_strategy_values(manifest)
+    )
+
+
+def _expected_continuation_mode(
+    *,
+    manifest: RunManifest,
+    requested_exact_replay: bool,
+    is_composite: bool,
+) -> str:
+    if (
+        requested_exact_replay
+        and manifest.replay_capability == ReplayCapability.EXACT_REPLAY_SUPPORTED
+    ):
+        return "exact_replay"
+    if _manifest_requires_full_scan_rebuild(manifest):
+        return "full_scan_idempotent_rebuild"
+    if not (
+        bool(manifest.launch_context.get("resume"))
+        or manifest.replay_capability == ReplayCapability.RESUME_ONLY
+    ):
+        return "rebuild_only"
+    return (
+        "checkpoint_snapshot_plus_ledger_suffix_resume"
+        if is_composite
+        else "checkpoint_snapshot_only_resume"
+    )
+
+
 def expected_resume_contract(manifest: RunManifest) -> dict[str, object]:
     """Build resume-contract expectations for manifest diagnostics."""
     requested_exact_replay = bool(manifest.launch_context.get("exact_replay"))
@@ -396,35 +443,11 @@ def expected_resume_contract(manifest: RunManifest) -> dict[str, object]:
         "replay_ready",
         "forensic_grade",
     }
-    continuation_mode = "rebuild_only"
-    if (
-        requested_exact_replay
-        and manifest.replay_capability == ReplayCapability.EXACT_REPLAY_SUPPORTED
-    ):
-        continuation_mode = "exact_replay"
-    elif any(
-        str(candidate or "").strip().lower() == "full_scan_only"
-        for candidate in (
-            manifest.runtime_config.get("loading_strategy"),
-            manifest.runtime_config.get("pipeline", {}).get("loading_strategy")
-            if isinstance(manifest.runtime_config.get("pipeline"), dict)
-            else None,
-            manifest.resolved_config.get("loading_strategy"),
-            manifest.resolved_config.get("pipeline", {}).get("loading_strategy")
-            if isinstance(manifest.resolved_config.get("pipeline"), dict)
-            else None,
-        )
-    ):
-        continuation_mode = "full_scan_idempotent_rebuild"
-    elif (
-        bool(manifest.launch_context.get("resume"))
-        or manifest.replay_capability == ReplayCapability.RESUME_ONLY
-    ):
-        continuation_mode = (
-            "checkpoint_snapshot_plus_ledger_suffix_resume"
-            if is_composite
-            else "checkpoint_snapshot_only_resume"
-        )
+    continuation_mode = _expected_continuation_mode(
+        manifest=manifest,
+        requested_exact_replay=requested_exact_replay,
+        is_composite=is_composite,
+    )
     return {
         "resume_requested": bool(manifest.launch_context.get("resume")),
         "requested_exact_replay": requested_exact_replay,

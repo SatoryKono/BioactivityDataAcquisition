@@ -129,9 +129,8 @@ tracing-backed log hygiene живёт в collapsed row
 `Tracing-only Log Hygiene (requires optional tracing profile)`.
 
 - **Top answer row**:
-  `Runtime Blockers / 15m`, `Failed Runs / 15m`, `No-Records Runs / 30m`,
-  `Runtime Error Rate / 30m`, `Worst Stage Lag / 15m`,
-  `Memory Pressure Active / 15m`.
+  `First Action`, `Monitor Runtime Current Status`, `Runtime Blockers`,
+  `Inspect Top Runtime Blockers`.
   Это первый экран triage. Если здесь уже понятно, что runtime blocked,
   оператор не должен сначала прокручивать в logs/traces.
 
@@ -203,8 +202,12 @@ tracing-backed log hygiene живёт в collapsed row
 
 #### 4. 4. Data Quality
 
-Сфокусирован на чистоте данных и аномалиях.
+Сфокусирован на текущем DQ incident state и selected-range evidence.
 
+- **First answer row**: `Monitor DQ Current Status`,
+  `Monitor DQ Threshold State`, `Inspect DQ Current Reasons` и
+  `First Action / Invalid Record Policy` отвечают, является ли DQ сейчас
+  `OK`, `DEGRADED`, `FAILING` или `UNKNOWN`.
 - **Data Quality Score (Volume-weighted)**: volume-aware gauge на базе
   `bioetl_dq_validation_score` и `bioetl_dq_validation_record_count`.
 - **Worst-Entity DQ Score**: быстрый worst-case сигнал по сущностям в выбранном pipeline scope.

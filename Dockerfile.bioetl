@@ -64,4 +64,4 @@ HEALTHCHECK --interval=30s --timeout=10s --retries=3 --start-period=10s \
     CMD python -c "import sys; sys.exit(0)"
 
 # Default command (override via docker-compose)
-CMD ["health", "server", "--host", "0.0.0.0", "--port", "8081"]
+CMD ["health", "server", "--host", "0.0.0.0", "--port", "8000"]

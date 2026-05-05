@@ -788,23 +788,32 @@ def _normalize_surface_path(surface: str | Path) -> str:
     return _repo_relative_path(Path(surface))
 
 
+def _public_alias_assignment_names(node: ast.AST) -> tuple[str, str] | None:
+    if not isinstance(node, ast.Assign):
+        return None
+    if len(node.targets) != 1 or not isinstance(node.targets[0], ast.Name):
+        return None
+    if not isinstance(node.value, ast.Name):
+        return None
+
+    alias_name = node.targets[0].id
+    canonical_name = node.value.id
+    if alias_name == canonical_name:
+        return None
+    if alias_name.startswith("_") or canonical_name.startswith("_"):
+        return None
+    if not (is_pascal_case(alias_name) and is_pascal_case(canonical_name)):
+        return None
+    return alias_name, canonical_name
+
+
 def _iter_public_alias_assignments(tree: ast.Module) -> Iterator[tuple[int, str, str]]:
     """Yield top-level alias assignments of the form Alias = Canonical."""
     for node in tree.body:
-        if not isinstance(node, ast.Assign):
+        names = _public_alias_assignment_names(node)
+        if names is None:
             continue
-        if len(node.targets) != 1 or not isinstance(node.targets[0], ast.Name):
-            continue
-        if not isinstance(node.value, ast.Name):
-            continue
-        alias_name = node.targets[0].id
-        canonical_name = node.value.id
-        if alias_name == canonical_name:
-            continue
-        if alias_name.startswith("_") or canonical_name.startswith("_"):
-            continue
-        if not (is_pascal_case(alias_name) and is_pascal_case(canonical_name)):
-            continue
+        alias_name, canonical_name = names
         yield node.lineno, alias_name, canonical_name
 
 
