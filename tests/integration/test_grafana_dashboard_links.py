@@ -108,16 +108,7 @@ _REQUIRED_LINK_VARS_BY_TARGET_UID = _NAV_LINK_CONTRACT[
 ]
 _REQUIRED_TOP_LEVEL_LINKS_BY_UID = _NAV_LINK_CONTRACT["required_top_level_links_by_uid"]
 _TOP_LEVEL_LINK_TITLE_RE = re.compile(
-    r"^(Back to .+|Open .+|Investigate .+|[1-6]\. .+|5\. Control Plane|Explore (Logs|Traces)|Observability Checklist \(runbook\))$"
-)
-_SCOPE_RESET_LINK_TITLES = frozenset(
-    {
-        "2. Runtime (provider context)",
-        "3. Provider Health",
-        "Back to Overview",
-        "5. Control Plane",
-        "2. Runtime",
-    }
+    r"^([0-5]\. .+|Silver Reject Explorer|Explore (Logs|Traces)|Observability Checklist \(runbook\))$"
 )
 _REQUIRED_PANEL_LINKS_BY_UID = _NAV_LINK_CONTRACT["required_panel_links_by_uid"]
 _CROSS_SCOPE_MARKER_CONTRACT = _NAV_LINK_CONTRACT["cross_scope_marker_contract"]
@@ -147,6 +138,17 @@ def _assert_required_time_tokens(
 
 _DASHBOARD_TIME_HANDOFF_TOKENS = _extract_required_time_tokens("dashboard_links")
 _EXPLORE_TIME_HANDOFF_TOKENS = _extract_required_time_tokens("explore_links")
+_CANONICAL_PAGE_UIDS = frozenset(
+    {
+        "bioetl-control-plane-v1",
+        "bioetl-overview-v2",
+        "bioetl-runtime",
+        "bioetl-provider-health-v2",
+        "bioetl-dq-v2",
+        "bioetl-workflow-overview",
+    }
+)
+_EXPLORE_ALLOWED_UIDS = frozenset({"bioetl-runtime", "bioetl-dq-v2"})
 
 
 def _extract_dashboard_uid(url: str) -> str | None:
@@ -191,46 +193,30 @@ def _iter_panel_data_links(panel: dict[str, object]) -> list[dict[str, object]]:
     return result
 
 
-def test_overview_status_cards_use_scoped_drilldown_urls() -> None:
-    """Overview status cards must use scoped links and preserve time range."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
-    panels = {
-        panel.get("id"): panel
-        for panel in get_dashboard_panels(dashboard)
-        if isinstance(panel.get("id"), int)
-    }
+def test_dashboard_to_dashboard_links_are_not_duplicated() -> None:
+    """A dashboard may expose at most one link to any other dashboard UID."""
+    for dashboard_path in get_dashboard_files():
+        dashboard = load_dashboard(dashboard_path)
+        uid = dashboard.get("uid")
+        assert isinstance(uid, str), f"{dashboard_path.name} must declare string uid"
 
-    for panel_id, target_uid in _OVERVIEW_STATUS_PANEL_IDS_BY_TARGET_UID:
-        panel = panels.get(panel_id)
-        assert isinstance(panel, dict), f"Missing overview status panel id={panel_id}"
+        target_locations: dict[str, list[str]] = {}
+        for link in _collect_dashboard_links(dashboard):
+            url = str(link.get("url", ""))
+            target_uid = _extract_dashboard_uid(url)
+            if target_uid is None or target_uid == uid:
+                continue
+            title = str(link.get("title", ""))
+            target_locations.setdefault(target_uid, []).append(f"{title} -> {url}")
 
-        data_links = _iter_panel_data_links(panel)
-        assert data_links, f"Panel id={panel_id} must expose at least one data link"
-
-        matched_urls = [
-            str(link.get("url"))
-            for link in data_links
-            if isinstance(link.get("url"), str)
-            and str(link.get("url")).startswith(f"/d/{target_uid}/")
-        ]
-        assert matched_urls, (
-            f"Panel id={panel_id} must include at least one link to /d/{target_uid}/"
+        duplicates = {
+            target_uid: links
+            for target_uid, links in target_locations.items()
+            if len(links) > 1
+        }
+        assert not duplicates, (
+            f"{dashboard_path.name} duplicates dashboard links by target UID: {duplicates}"
         )
-        for url in matched_urls:
-            assert "?" in url, (
-                f"Panel id={panel_id} must not use bare /d/<uid> URL: {url}"
-            )
-            passed_vars = _extract_link_vars(url)
-            required_vars = _REQUIRED_LINK_VARS_BY_TARGET_UID[target_uid]
-            assert required_vars <= passed_vars, (
-                f"Panel id={panel_id} link to {target_uid} missing required vars "
-                f"{sorted(required_vars - passed_vars)} via {url}"
-            )
-            _assert_required_time_tokens(
-                url,
-                tokens=_DASHBOARD_TIME_HANDOFF_TOKENS,
-                context=f"Overview status panel id={panel_id} link to {target_uid}",
-            )
 
 
 def test_kpi_mirror_panels_link_to_canonical_kpi_view() -> None:

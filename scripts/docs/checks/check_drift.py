@@ -159,6 +159,82 @@ RUNTIME_MIRROR_RULES: tuple[RuntimeMirrorRule, ...] = (
 
 AGENT_MEMORY_PATH = Path("docs/00-project/ai/memory/agent-memory.md")
 FILE_POLICY_PATH = Path("docs/00-project/governance/03-file-policy.md")
+RUNTIME_AGENT_GUIDE_PATH = "docs/00-project/ai/agents/guides/MEMORY_USAGE.md"
+RUNTIME_POST_CHANGE_PATH = "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md"
+RUNTIME_AGENT_MEMORY_PATH = "docs/00-project/ai/memory/agent-memory.md"
+CODEX_RUNTIME_DOC_PATH = ".codex/agents/CODEX-RUNTIME.md"
+GEMINI_RUNTIME_DOC_PATH = ".gemini/agents/GEMINI-RUNTIME.md"
+AGENTS_DOC_TOKEN = "AGENTS.md"
+MEMORY_USAGE_TOKEN = "MEMORY_USAGE.md"
+POST_CHANGE_TOKEN = "POST_CHANGE_VALIDATION.md"
+GEMINI_AUDIT_BOT_TOKEN = ".gemini/agents/py-audit-bot.md"
+RUNTIME_DOC_TOKENS: tuple[str, ...] = (
+    RUNTIME_AGENT_GUIDE_PATH,
+    RUNTIME_POST_CHANGE_PATH,
+)
+RUNTIME_DOC_TOKENS_WITH_CANONICAL_RUNTIME: tuple[str, ...] = (
+    *RUNTIME_DOC_TOKENS,
+    CODEX_RUNTIME_DOC_PATH,
+    GEMINI_RUNTIME_DOC_PATH,
+)
+RUNTIME_DOC_TOKENS_WITH_MEMORY: tuple[str, ...] = (
+    *RUNTIME_DOC_TOKENS,
+    RUNTIME_AGENT_MEMORY_PATH,
+)
+SKILL_REQUIRED_TOKENS: tuple[str, ...] = (
+    AGENTS_DOC_TOKEN,
+    MEMORY_USAGE_TOKEN,
+    POST_CHANGE_TOKEN,
+)
+WRITE_CAPABLE_SKILL_PATHS = (
+    ".codex/skills/create-pr/SKILL.md",
+    ".codex/skills/repo-config/SKILL.md",
+    ".codex/skills/grafana-dashboard-extension/SKILL.md",
+    ".codex/skills/prometheus-alert-rule-editor/SKILL.md",
+    ".codex/skills/prometheus-metric-discovery/SKILL.md",
+    ".codex/skills/prometheus-query-debugger/SKILL.md",
+    ".codex/skills/prometheus-rule-testing/SKILL.md",
+    ".codex/skills/technical-designer-mermaid/SKILL.md",
+    ".codex/skills/vcr-record/SKILL.md",
+    ".gemini/skills/create-pr/SKILL.md",
+    ".gemini/skills/repo-config/SKILL.md",
+    ".gemini/skills/grafana-dashboard-extension/SKILL.md",
+    ".gemini/skills/prometheus-alert-rule-editor/SKILL.md",
+    ".gemini/skills/prometheus-metric-discovery/SKILL.md",
+    ".gemini/skills/prometheus-query-debugger/SKILL.md",
+    ".gemini/skills/prometheus-rule-testing/SKILL.md",
+    ".gemini/skills/technical-designer-mermaid/SKILL.md",
+    ".gemini/skills/vcr-record/SKILL.md",
+    ".gemini/skills/documentation-audit/SKILL.md",
+)
+ROLE_PROFILE_MEMO_DOC_TOKENS: tuple[str, ...] = (
+    RUNTIME_AGENT_GUIDE_PATH,
+    RUNTIME_AGENT_MEMORY_PATH,
+)
+ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS: tuple[str, ...] = (
+    *ROLE_PROFILE_MEMO_DOC_TOKENS,
+    RUNTIME_POST_CHANGE_PATH,
+)
+ROLE_PROFILE_MEMO_DOC_BY_RUNTIME: dict[Path, tuple[str, ...]] = {
+    Path(".gemini/agents/py-audit-bot.md"): (RUNTIME_DOC_TOKENS + (RUNTIME_AGENT_MEMORY_PATH,)),
+    Path(".gemini/agents/py-plan-bot.md"): (RUNTIME_DOC_TOKENS + (RUNTIME_AGENT_MEMORY_PATH,)),
+    Path(".gemini/agents/py-config-bot.md"): ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
+    Path(".gemini/agents/py-debug-bot.md"): ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
+    Path(".gemini/agents/py-doc-bot.md"): ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
+    Path(".gemini/agents/py-test-bot.md"): ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
+    Path(".gemini/agents/py-architecture-debt-bot.md"): ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
+    Path(".gemini/agents/py-review-orchestrator.md"): ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
+    Path(".gemini/agents/py-test-swarm.md"): ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
+    Path(".codex/agents/py-audit-bot.md"): (RUNTIME_DOC_TOKENS + (RUNTIME_AGENT_MEMORY_PATH,)),
+    Path(".codex/agents/py-plan-bot.md"): (RUNTIME_DOC_TOKENS + (RUNTIME_AGENT_MEMORY_PATH,)),
+    Path(".codex/agents/py-config-bot.md"): ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
+    Path(".codex/agents/py-debug-bot.md"): ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
+    Path(".codex/agents/py-doc-bot.md"): ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
+    Path(".codex/agents/py-test-bot.md"): ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
+    Path(".codex/agents/py-architecture-debt-bot.md"): ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
+    Path(".codex/agents/py-review-orchestrator.md"): ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
+    Path(".codex/agents/py-test-swarm.md"): ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
+}
 ACTIVE_NON_CANONICAL_EVIDENCE_SUMMARIES = (
     Path("docs/reports/evidence/project-test-health/SUMMARY.md"),
 )
@@ -172,252 +248,112 @@ REQUIRED_EVIDENCE_METADATA_FIELDS = frozenset(
     }
 )
 AI_SURFACE_REQUIRED_TOKENS: dict[Path, tuple[str, ...]] = {
-    Path("AGENTS.md"): (
-        "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
-        "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
-        ".codex/agents/CODEX-RUNTIME.md",
-        ".gemini/agents/GEMINI-RUNTIME.md",
-    ),
+    Path("AGENTS.md"): RUNTIME_DOC_TOKENS_WITH_CANONICAL_RUNTIME,
     Path("GEMINI.md"): (
-        "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
-        "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
-        "docs/00-project/ai/memory/agent-memory.md",
+        *RUNTIME_DOC_TOKENS,
+        RUNTIME_AGENT_MEMORY_PATH,
     ),
-    Path(".github/copilot-instructions.md"): (
-        "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
-        "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
-    ),
-    Path(".codex/agents/CODEX-RUNTIME.md"): (
-        "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
-        "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
-    ),
-    Path(".gemini/agents/GEMINI-RUNTIME.md"): (
-        "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
-        "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
-    ),
+    Path(".github/copilot-instructions.md"): RUNTIME_DOC_TOKENS,
+    Path(".codex/agents/CODEX-RUNTIME.md"): RUNTIME_DOC_TOKENS,
+    Path(".gemini/agents/GEMINI-RUNTIME.md"): RUNTIME_DOC_TOKENS,
     Path(".codex/agents/README.md"): (
-        "AGENTS.md",
-        ".codex/agents/CODEX-RUNTIME.md",
-        "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
-        "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
+        AGENTS_DOC_TOKEN,
+        CODEX_RUNTIME_DOC_PATH,
+        *RUNTIME_DOC_TOKENS,
     ),
     Path(".gemini/agents/README.md"): (
-        "AGENTS.md",
-        ".gemini/agents/GEMINI-RUNTIME.md",
-        "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
-        "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
+        AGENTS_DOC_TOKEN,
+        GEMINI_RUNTIME_DOC_PATH,
+        *RUNTIME_DOC_TOKENS,
     ),
     Path("docs/00-project/ai/agents/guides/CODEX.md"): (
-        "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
-        "docs/00-project/ai/memory/agent-memory.md",
+        *RUNTIME_DOC_TOKENS_WITH_MEMORY,
     ),
     Path("docs/00-project/ai/agents/guides/AGENT.md"): (
-        "MEMORY_USAGE.md",
+        MEMORY_USAGE_TOKEN,
         "../policy/POST_CHANGE_VALIDATION.md",
         "../memory/agent-memory.md",
     ),
 }
 AI_WRITE_CAPABLE_SKILL_REQUIRED_TOKENS: dict[Path, tuple[str, ...]] = {
-    Path(".codex/skills/create-pr/SKILL.md"): (
-        "AGENTS.md",
-        "MEMORY_USAGE.md",
-        "POST_CHANGE_VALIDATION.md",
-    ),
-    Path(".codex/skills/repo-config/SKILL.md"): (
-        "AGENTS.md",
-        "MEMORY_USAGE.md",
-        "POST_CHANGE_VALIDATION.md",
-    ),
-    Path(".codex/skills/grafana-dashboard-extension/SKILL.md"): (
-        "AGENTS.md",
-        "MEMORY_USAGE.md",
-        "POST_CHANGE_VALIDATION.md",
-    ),
-    Path(".codex/skills/prometheus-alert-rule-editor/SKILL.md"): (
-        "AGENTS.md",
-        "MEMORY_USAGE.md",
-        "POST_CHANGE_VALIDATION.md",
-    ),
-    Path(".codex/skills/prometheus-metric-discovery/SKILL.md"): (
-        "AGENTS.md",
-        "MEMORY_USAGE.md",
-        "POST_CHANGE_VALIDATION.md",
-    ),
-    Path(".codex/skills/prometheus-query-debugger/SKILL.md"): (
-        "AGENTS.md",
-        "MEMORY_USAGE.md",
-        "POST_CHANGE_VALIDATION.md",
-    ),
-    Path(".codex/skills/prometheus-rule-testing/SKILL.md"): (
-        "AGENTS.md",
-        "MEMORY_USAGE.md",
-        "POST_CHANGE_VALIDATION.md",
-    ),
-    Path(".codex/skills/technical-designer-mermaid/SKILL.md"): (
-        "AGENTS.md",
-        "MEMORY_USAGE.md",
-        "POST_CHANGE_VALIDATION.md",
-    ),
-    Path(".codex/skills/vcr-record/SKILL.md"): (
-        "AGENTS.md",
-        "MEMORY_USAGE.md",
-        "POST_CHANGE_VALIDATION.md",
-    ),
-    Path(".gemini/skills/create-pr/SKILL.md"): (
-        "AGENTS.md",
-        "MEMORY_USAGE.md",
-        "POST_CHANGE_VALIDATION.md",
-    ),
-    Path(".gemini/skills/repo-config/SKILL.md"): (
-        "AGENTS.md",
-        "MEMORY_USAGE.md",
-        "POST_CHANGE_VALIDATION.md",
-    ),
-    Path(".gemini/skills/grafana-dashboard-extension/SKILL.md"): (
-        "AGENTS.md",
-        "MEMORY_USAGE.md",
-        "POST_CHANGE_VALIDATION.md",
-    ),
-    Path(".gemini/skills/prometheus-alert-rule-editor/SKILL.md"): (
-        "AGENTS.md",
-        "MEMORY_USAGE.md",
-        "POST_CHANGE_VALIDATION.md",
-    ),
-    Path(".gemini/skills/prometheus-metric-discovery/SKILL.md"): (
-        "AGENTS.md",
-        "MEMORY_USAGE.md",
-        "POST_CHANGE_VALIDATION.md",
-    ),
-    Path(".gemini/skills/prometheus-query-debugger/SKILL.md"): (
-        "AGENTS.md",
-        "MEMORY_USAGE.md",
-        "POST_CHANGE_VALIDATION.md",
-    ),
-    Path(".gemini/skills/prometheus-rule-testing/SKILL.md"): (
-        "AGENTS.md",
-        "MEMORY_USAGE.md",
-        "POST_CHANGE_VALIDATION.md",
-    ),
-    Path(".gemini/skills/technical-designer-mermaid/SKILL.md"): (
-        "AGENTS.md",
-        "MEMORY_USAGE.md",
-        "POST_CHANGE_VALIDATION.md",
-    ),
-    Path(".gemini/skills/vcr-record/SKILL.md"): (
-        "AGENTS.md",
-        "MEMORY_USAGE.md",
-        "POST_CHANGE_VALIDATION.md",
-    ),
-    Path(".gemini/skills/documentation-audit/SKILL.md"): (
-        "AGENTS.md",
-        "MEMORY_USAGE.md",
-        "POST_CHANGE_VALIDATION.md",
-    ),
+    Path(skill_path): SKILL_REQUIRED_TOKENS for skill_path in WRITE_CAPABLE_SKILL_PATHS
 }
 AI_ROLE_PROFILE_REQUIRED_TOKENS: dict[Path, tuple[str, ...]] = {
     Path(".codex/agents/py-audit-bot.md"): (
-        "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
-        "docs/00-project/ai/memory/agent-memory.md",
+        *RUNTIME_DOC_TOKENS,
+        RUNTIME_AGENT_MEMORY_PATH,
         "docs/00-project/ai/memory/memory-py-audit-bot.md",
     ),
     Path(".codex/agents/py-plan-bot.md"): (
-        "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
-        "docs/00-project/ai/memory/agent-memory.md",
+        *RUNTIME_DOC_TOKENS,
+        RUNTIME_AGENT_MEMORY_PATH,
         "docs/00-project/ai/memory/memory-py-plan-bot.md",
     ),
     Path(".codex/agents/py-config-bot.md"): (
-        "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
-        "docs/00-project/ai/memory/agent-memory.md",
+        *ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
         "docs/00-project/ai/memory/memory-py-config-bot.md",
-        "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
     ),
     Path(".codex/agents/py-debug-bot.md"): (
-        "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
-        "docs/00-project/ai/memory/agent-memory.md",
+        *ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
         "docs/00-project/ai/memory/memory-py-debug-bot.md",
-        "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
     ),
     Path(".codex/agents/py-doc-bot.md"): (
-        "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
-        "docs/00-project/ai/memory/agent-memory.md",
+        *ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
         "docs/00-project/ai/memory/memory-py-doc-bot.md",
-        "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
     ),
     Path(".codex/agents/py-test-bot.md"): (
-        "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
-        "docs/00-project/ai/memory/agent-memory.md",
+        *ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
         "docs/00-project/ai/memory/memory-py-test-bot.md",
-        "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
     ),
     Path(".codex/agents/py-architecture-debt-bot.md"): (
-        "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
-        "docs/00-project/ai/memory/agent-memory.md",
+        *ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
         "docs/00-project/ai/memory/memory-py-architecture-debt-bot.md",
-        "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
     ),
     Path(".codex/agents/py-review-orchestrator.md"): (
-        "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
-        "docs/00-project/ai/memory/agent-memory.md",
+        *ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
         "docs/00-project/ai/memory/memory-py-review-orchestrator.md",
-        "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
     ),
     Path(".codex/agents/py-test-swarm.md"): (
-        "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
-        "docs/00-project/ai/memory/agent-memory.md",
+        *ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
         "docs/00-project/ai/memory/memory-py-test-swarm.md",
-        "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
     ),
     Path(".gemini/agents/py-audit-bot.md"): (
-        "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
-        "docs/00-project/ai/memory/agent-memory.md",
+        *RUNTIME_DOC_TOKENS,
+        RUNTIME_AGENT_MEMORY_PATH,
         "docs/00-project/ai/memory/memory-py-audit-bot.md",
     ),
     Path(".gemini/agents/py-plan-bot.md"): (
-        "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
-        "docs/00-project/ai/memory/agent-memory.md",
+        *RUNTIME_DOC_TOKENS,
+        RUNTIME_AGENT_MEMORY_PATH,
         "docs/00-project/ai/memory/memory-py-plan-bot.md",
     ),
     Path(".gemini/agents/py-config-bot.md"): (
-        "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
-        "docs/00-project/ai/memory/agent-memory.md",
+        *ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
         "docs/00-project/ai/memory/memory-py-config-bot.md",
-        "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
     ),
     Path(".gemini/agents/py-debug-bot.md"): (
-        "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
-        "docs/00-project/ai/memory/agent-memory.md",
+        *ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
         "docs/00-project/ai/memory/memory-py-debug-bot.md",
-        "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
     ),
     Path(".gemini/agents/py-doc-bot.md"): (
-        "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
-        "docs/00-project/ai/memory/agent-memory.md",
+        *ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
         "docs/00-project/ai/memory/memory-py-doc-bot.md",
-        "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
     ),
     Path(".gemini/agents/py-test-bot.md"): (
-        "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
-        "docs/00-project/ai/memory/agent-memory.md",
+        *ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
         "docs/00-project/ai/memory/memory-py-test-bot.md",
-        "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
     ),
     Path(".gemini/agents/py-architecture-debt-bot.md"): (
-        "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
-        "docs/00-project/ai/memory/agent-memory.md",
+        *ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
         "docs/00-project/ai/memory/memory-py-architecture-debt-bot.md",
-        "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
     ),
     Path(".gemini/agents/py-review-orchestrator.md"): (
-        "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
-        "docs/00-project/ai/memory/agent-memory.md",
+        *ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
         "docs/00-project/ai/memory/memory-py-review-orchestrator.md",
-        "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
     ),
     Path(".gemini/agents/py-test-swarm.md"): (
-        "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
-        "docs/00-project/ai/memory/agent-memory.md",
+        *ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
         "docs/00-project/ai/memory/memory-py-test-swarm.md",
-        "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
     ),
 }
 AI_ROLE_MEMORY_COVERAGE_REQUIRED_TOKENS: dict[Path, tuple[str, ...]] = {
