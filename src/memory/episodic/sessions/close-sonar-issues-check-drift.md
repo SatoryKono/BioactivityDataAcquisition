@@ -1,22 +1,22 @@
 ---
 id: close-sonar-issues-check-drift
-title: Fix sonar issues in check_drift and neo4j_memory_sync
+title: Close Sonar issues in check_drift and neo4j_memory_sync
 task_id: close-sonar-issues-check-drift
-created_at: '2026-05-05T05:34:14Z'
+created_at: '2026-05-05T05:37:43Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
 - <add-source-ref>
 summary: Active task session context.
-query: Fix sonar issues in check_drift and neo4j_memory_sync
+query: Close Sonar issues in check_drift and neo4j_memory_sync
 ---
 
 # Session note
 
 ## Task
 
-- Title: Fix sonar issues in check_drift and neo4j_memory_sync
-- Retrieval query: Fix sonar issues in check_drift and neo4j_memory_sync
+- Title: Close Sonar issues in check_drift and neo4j_memory_sync
+- Retrieval query: Close Sonar issues in check_drift and neo4j_memory_sync
 
 ## Retrieved context
 
