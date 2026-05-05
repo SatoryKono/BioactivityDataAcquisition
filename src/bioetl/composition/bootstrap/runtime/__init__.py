@@ -17,8 +17,14 @@ from __future__ import annotations
 from importlib import import_module
 from typing import Any
 
+from bioetl.infrastructure.compat.pandera_compat import (
+    apply_pandera_typing_compat_if_needed,
+)
+
 _RUNTIME_OBSERVABILITY_MODULE = "bioetl.composition.bootstrap.runtime.observability"
 _RUNTIME_ASSEMBLY_MODULE = "bioetl.composition.bootstrap.runtime.assembly"
+
+apply_pandera_typing_compat_if_needed()
 
 __all__ = [
     "MetricsServerError",

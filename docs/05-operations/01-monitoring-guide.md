@@ -186,10 +186,10 @@ tracing-backed log hygiene живёт в collapsed row
 - **Current Provider Health Status**: table panel по
   `bioetl_provider_health_status{provider}` с явным mapping:
   `0=UNHEALTHY`, `1=DEGRADED`, `2=HEALTHY`.
-- **Health Check Latency by Provider (p95)**: тренд латентности провайдеров.
-- **Healthy Checks / Degraded Checks / Health Checks Total**: разделяют completed probes по outcome и не маскируют `DEGRADED` как success.
+- **Track Health Check Latency by Provider (p95)**: selected-range тренд латентности провайдеров.
+- **Monitor Healthy Checks (Selected Range) / Monitor Degraded Checks (Selected Range) / Track Health Checks Total (Selected Range)**: selected-range evidence по completed probes; эти панели не являются current-health source.
 - **Failure & Degraded Trend by Provider**: показывает устойчивость деградации по каждому provider в выбранном time range.
-- **Provider Failure Share (Selected Range)**: ранжирует providers по доле failed probes внутри активного scope.
+- **Track Provider Failure Share (Selected Range)**: ранжирует providers по доле failed probes внутри активного scope.
 - **Retries Exhausted by Provider / Operation** и **Retries Exhausted Trend by Provider / Operation**:
   показывают, где и насколько часто исчерпываются retries (`bioetl_data_source_retry_exhausted_total`).
 - **Per-provider gauge (102)**: повторяемая p95-панель по `$provider`.

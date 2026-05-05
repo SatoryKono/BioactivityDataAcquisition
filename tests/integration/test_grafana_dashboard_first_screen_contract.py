@@ -3,6 +3,7 @@
 from pathlib import Path
 
 import pytest
+import yaml
 
 from tests.integration._grafana_test_support import (
     get_dashboard_panels,
@@ -11,6 +12,63 @@ from tests.integration._grafana_test_support import (
 
 
 pytestmark = pytest.mark.integration
+
+_DESIGN_SYSTEM_PATH = Path("docs/03-guides/dashboards/design-system.md")
+_OBSERVABILITY_RULES_PATH = Path("grafana/prometheus-rules/bioetl_observability.yml")
+
+
+def test_design_system_defines_first_screen_decision_matrix() -> None:
+    """#3700: design docs must define first-screen responsibility explicitly."""
+    text = _DESIGN_SYSTEM_PATH.read_text(encoding="utf-8")
+    required_tokens = {
+        "First-screen responsibility and panel decision matrix",
+        "`bioetl-runtime`",
+        "`bioetl-provider-health-v2`",
+        "`bioetl-dq-v2`",
+        "`bioetl_runtime_current_status`",
+        "`bioetl_provider_current_status`",
+        "`bioetl_dq_current_status`",
+        "Selected-range count/rate/trend",
+        "First-screen current-status panels MUST NOT use `$__range`",
+    }
+    missing = sorted(token for token in required_tokens if token not in text)
+    assert not missing, (
+        "dashboard design-system must preserve first-screen decision matrix; "
+        f"missing={missing}"
+    )
+
+
+def test_current_status_recording_rules_are_canonicalized() -> None:
+    """#3698: Runtime/Provider/DQ current status belongs in recording rules."""
+    payload = yaml.safe_load(_OBSERVABILITY_RULES_PATH.read_text(encoding="utf-8"))
+    records: dict[str, list[dict[str, object]]] = {}
+    for group in payload.get("groups", []):
+        for rule in group.get("rules", []):
+            record = rule.get("record")
+            if isinstance(record, str):
+                records.setdefault(record, []).append(rule)
+
+    required_records = {
+        "bioetl_runtime_current_status",
+        "bioetl_runtime_current_blocker_reason",
+        "bioetl_provider_current_status",
+        "bioetl_provider_current_cause",
+        "bioetl_dq_current_status",
+        "bioetl_dq_current_reason",
+    }
+    missing = sorted(record for record in required_records if record not in records)
+    assert not missing, f"missing canonical current-status records: {missing}"
+
+    for status_record in (
+        "bioetl_runtime_current_status",
+        "bioetl_provider_current_status",
+        "bioetl_dq_current_status",
+    ):
+        expressions = [str(rule.get("expr", "")) for rule in records[status_record]]
+        assert expressions
+        assert all("$__range" not in expression for expression in expressions), (
+            f"{status_record} must use fixed current windows/rules, not Grafana range"
+        )
 
 
 def test_runtime_provider_dq_first_screens_use_canonical_current_status() -> None:
@@ -65,10 +123,12 @@ def test_provider_and_dq_range_evidence_panels_are_below_first_screen() -> None:
         "bioetl-provider-health-v2.json": (
             provider,
             [
-                "Healthy Checks",
-                "Degraded Checks",
-                "Provider Failure Rate",
+                "Monitor Healthy Checks (Selected Range)",
+                "Monitor Degraded Checks (Selected Range)",
+                "Track Provider Failure Rate (Selected Range)",
+                "Track Health Checks Total (Selected Range)",
                 "Track Failure and Degraded Trend by Provider",
+                "Track Provider Failure Share (Selected Range)",
             ],
         ),
         "bioetl-dq-v2.json": (
@@ -91,4 +151,8 @@ def test_provider_and_dq_range_evidence_panels_are_below_first_screen() -> None:
             assert panel is not None, f"{dashboard_name} missing {panel_title!r}"
             assert panel.get("gridPos", {}).get("y", 0) >= 18, (
                 f"{dashboard_name}:{panel_title} must sit below first-screen current state"
+            )
+            description = str(panel.get("description", "")).lower()
+            assert "selected-range" in f"{panel_title.lower()} {description}", (
+                f"{dashboard_name}:{panel_title} must identify selected-range semantics"
             )

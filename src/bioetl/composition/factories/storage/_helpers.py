@@ -32,7 +32,7 @@ from ._resilience import (
     create_silver_atomic_retry_policy,
     create_silver_merge_resilience_policy,
 )
-from .adapter import StorageBundle
+from .bundle import StorageBundle
 
 if TYPE_CHECKING:
     from bioetl.application.services.lineage.metadata_coordinator import (

@@ -90,10 +90,12 @@ class _FakeRunManifestService:
                 "rule_bundle_version": "2026.03",
                 "effective_config_artifact_id": "eca-123",
                 "dq_contract_compatibility_hash": "compat-hash-1",
+                "operator_replay_mode": "Exact Replay",
                 "requested_exact_replay": True,
                 "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
                 "replay_capability_reason": "immutable_input_snapshots_present",
                 "exact_replay_blockers": [],
+                "snapshot_status": "full",
                 "input_snapshot_ids": ["snapshot-1"],
                 "input_snapshot_content_hashes": ["sha256:snapshot-1"],
                 "input_snapshot_identity_fingerprint": _SNAPSHOT_IDENTITY_FINGERPRINT,
@@ -149,11 +151,13 @@ class _FakeRunManifestService:
                     "contract_ref": "chembl_activity",
                     "contract_version": "1.2.0",
                     "replay_capability": "exact_replay_supported",
+                    "operator_replay_mode": "Exact Replay",
                     "requested_exact_replay": True,
                     "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
                     "replay_capability_reason": "immutable_input_snapshots_present",
                     "exact_replay_eligible": True,
                     "exact_replay_blockers": [],
+                    "snapshot_status": "full",
                     "input_snapshot_ids": ["snapshot-1"],
                     "input_snapshot_content_hashes": ["sha256:snapshot-1"],
                     "input_snapshot_identity_fingerprint": (
@@ -269,6 +273,11 @@ class _FakeRunManifestService:
                         "required_persistence_profile": "replay_ready",
                         "attained_profile": "forensic_grade",
                         "replay_capability": "exact_replay_supported",
+                        "operator_replay_mode": "Exact Replay",
+                        "continuation_mode": "exact_replay",
+                        "replay_capability_reason": (
+                            "immutable_input_snapshots_present"
+                        ),
                         "policy_assessment": {
                             "required_profile_satisfied": True,
                             "blocking_gaps": [],
@@ -375,13 +384,15 @@ class _FakeRunManifestService:
                 "execution_fingerprint": "fingerprint-1",
                 "effective_config_hash": "deadbeef",
                 "contract_ref": "chembl_activity",
-                "contract_version": "1.2.0",
-                "replay_capability": "exact_replay_supported",
-                "requested_exact_replay": True,
+                    "contract_version": "1.2.0",
+                    "replay_capability": "exact_replay_supported",
+                    "operator_replay_mode": "Exact Replay",
+                    "requested_exact_replay": True,
                 "replay_capability_reason": "immutable_input_snapshots_present",
                 "exact_replay_eligible": True,
-                "exact_replay_blockers": [],
-                "input_snapshot_ids": ["snapshot-1"],
+                    "exact_replay_blockers": [],
+                    "snapshot_status": "full",
+                    "input_snapshot_ids": ["snapshot-1"],
                 "input_snapshot_content_hashes": ["sha256:snapshot-1"],
                 "input_snapshot_identity_fingerprint": _SNAPSHOT_IDENTITY_FINGERPRINT,
                 "replay_mode": "exact_replay",
@@ -750,6 +761,8 @@ class TestRunManifestCommands:
         assert "contract_version: 1.2.0" in result.output
         assert "dq_policy_ref: chembl_activity.gold" in result.output
         assert "requested_exact_replay: true" in result.output
+        assert "mode: Exact Replay" in result.output
+        assert "snapshot_status: full" in result.output
         assert (
             "exact_replay_support_boundary: snapshot_backed_source_runs_only"
             in result.output

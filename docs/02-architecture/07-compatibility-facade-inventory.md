@@ -114,7 +114,12 @@ This inventory is split into two curated ledgers:
 
 | Path                                                        | Compatibility role | Canonical target | Status | Owner | Introduced in | Allowed call sites | Remove by / review date | Migration path | Exit criteria |
 | ----------------------------------------------------------- | ------------------ | ---------------- | ------ | ----- | ------------- | ------------------ | ----------------------- | -------------- | ------------- |
-| `src/bioetl/composition/factories/storage/adapter.py` | Deprecated compatibility shim for the storage bundle module after the canonical implementation moved to `bioetl.composition.factories.storage.bundle`. | `bioetl.composition.factories.storage.bundle` | `deprecated-warn` | `bioetl.composition.factories.storage` | `2026-04 storage factory naming cleanup` | `src`: no direct imports; use `bioetl.composition.factories.storage.bundle`; `tests`: dedicated storage bootstrap governance may inspect the shim to verify the deprecation warning and removal horizon | `2026-09-30` | Import `StorageBundle` from `bioetl.composition.factories.storage.bundle` in all first-party code. Keep this module only as a warning compatibility seam until the 2026-09-30 compatibility review. | First-party `src` imports remain at zero, governance tests confirm the shim stays warning-only, and the module is removed after the compatibility review or explicit breaking-change window. |
+
+Current baseline status: empty. The last reduction wave removed the deprecated
+storage adapter shim (`composition/factories/storage/adapter.py`) and the
+checkpoint anchor-context shim
+(`application/composite/checkpoint/anchor_context.py`), so any new row here is
+an immediate regression.
 
 ### Sanctioned Public Entrypoints
 

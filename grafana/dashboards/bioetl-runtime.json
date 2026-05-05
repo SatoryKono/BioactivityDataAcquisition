@@ -762,7 +762,32 @@
         "content": "<div style=\"padding:0.45rem 0.7rem;line-height:1.55\"><strong>First action:</strong> read <em>Monitor Runtime Current Status</em>, then inspect the top blocker reason. If status is FAILING, open the active blocker detail; if DEGRADED, inspect terminal-run/stage lag evidence; if UNKNOWN, verify scrape/runtime activity before treating zero as OK.</div>",
         "mode": "html"
       },
-      "links": [],
+      "links": [
+        {
+          "title": "Inspect active blocker",
+          "url": "/d/bioetl-runtime/bioetl-runtime?viewPanel=242&var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&${__url_time_range}",
+          "targetBlank": false,
+          "includeVars": false
+        },
+        {
+          "title": "Open Control Plane",
+          "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
+          "targetBlank": false,
+          "includeVars": false
+        },
+        {
+          "title": "Inspect DQ blockers",
+          "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&${__url_time_range}",
+          "targetBlank": false,
+          "includeVars": false
+        },
+        {
+          "title": "Correlate provider impact",
+          "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=$pipeline&var-pipeline_context=$pipeline&var-adapter=unknown&${__url_time_range}",
+          "targetBlank": false,
+          "includeVars": false
+        }
+      ],
       "pluginVersion": "12.2.0",
       "transparent": true
     },

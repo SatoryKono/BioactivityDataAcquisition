@@ -3,11 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from pathlib import Path
-from typing import TYPE_CHECKING, Literal, Protocol, runtime_checkable
-
-if TYPE_CHECKING:
-    import pyarrow as pa
+from typing import Literal, Protocol, runtime_checkable
 
 __all__ = ["ExportCatalogPort", "ExportFileFingerprint", "ExportWriterPort"]
 
@@ -18,7 +14,7 @@ ExportFormatLiteral = Literal["csv", "xlsx", "tsv"]
 class ExportFileFingerprint:
     """Stable fingerprint for an exported file artifact."""
 
-    path: Path
+    path: str
     size_bytes: int
     sha256: str
 
@@ -30,19 +26,19 @@ class ExportCatalogPort(Protocol):
     def list_tables(
         self,
         *,
-        base_path: Path,
+        base_path: str,
         layer: str,
-    ) -> list[tuple[str, Path]]:
+    ) -> list[tuple[str, str]]:
         """Return discovered `(table_name, table_path)` pairs for one layer."""
         ...
 
     def resolve_table_path(
         self,
         *,
-        base_path: Path,
+        base_path: str,
         table_name: str,
         layer: str,
-    ) -> Path:
+    ) -> str:
         """Resolve one table path or raise when it does not exist."""
         ...
 
@@ -54,12 +50,12 @@ class ExportWriterPort(Protocol):
     def write_export(
         self,
         *,
-        table: pa.Table,
+        table: object,
         table_name: str,
         layer: str,
         fmt: ExportFormatLiteral,
-        output_dir: Path,
-    ) -> Path:
+        output_dir: str,
+    ) -> str:
         """Write one exported table and return the created file path."""
         ...
 
@@ -68,11 +64,11 @@ class ExportWriterPort(Protocol):
         *,
         manifest_name: str,
         payload: dict[str, object],
-        output_dir: Path,
-    ) -> Path:
+        output_dir: str,
+    ) -> str:
         """Write one deterministic JSON export manifest and return its path."""
         ...
 
-    def fingerprint_file(self, *, path: Path) -> ExportFileFingerprint:
+    def fingerprint_file(self, *, path: str) -> ExportFileFingerprint:
         """Return deterministic size/checksum metadata for one export artifact."""
         ...

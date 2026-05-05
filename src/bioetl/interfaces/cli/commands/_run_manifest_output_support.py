@@ -184,6 +184,13 @@ def render_reproducibility_compact_section(
             ),
             ("attained_profile", policy.get("attained_profile")),
             ("replay_capability", policy.get("replay_capability")),
+            ("mode", policy.get("operator_replay_mode")),
+            ("continuation_mode", policy.get("continuation_mode")),
+            (
+                "replay_capability_reason",
+                policy.get("replay_capability_reason"),
+            ),
+            ("snapshot_status", _dict_value(reproducibility, "semantic_identity").get("snapshot_status")),
             (
                 "required_profile_satisfied",
                 policy.get(

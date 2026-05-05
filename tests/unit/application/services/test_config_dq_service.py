@@ -336,6 +336,7 @@ def test_get_effective_config_artifact_handles_present_and_missing_dq_config() -
     assert first_call["pipeline_name"] == "crossref_publication"
     assert first_call["pipeline_kind"] == "standard"
     assert first_call["dq_config"] is dq_config
+    assert first_call["resolution_policy"].strict_validation is False
     assert [src.source_path for src in first_call["source_refs"]] == [
         "configs/base/pipeline.yaml",
         "configs/providers/crossref.yaml",
@@ -353,6 +354,24 @@ def test_get_effective_config_artifact_handles_present_and_missing_dq_config() -
     missing_service.get_effective_config_artifact("crossref_publication")
     second_call = effective_service.create_calls[1]
     assert second_call["dq_config"] is None
+    assert second_call["resolution_policy"].strict_validation is False
+
+
+def test_get_effective_config_artifact_publishes_explicit_dq_strict_validation() -> None:
+    logger = MagicMock()
+    effective_service = _StubEffectiveConfigService(_sample_artifact_dict())
+    dq_config = DQConfig(contract_ref="dq.crossref", strict_validation=True)
+    service = ConfigDQService(
+        logger=logger,
+        _pipeline_yaml_getter=lambda pipeline_name: {"provider": "crossref"},
+        _dq_config_loader=lambda pipeline_name: dq_config,
+        _effective_config_service=effective_service,
+    )
+
+    service.get_effective_config_artifact("crossref_publication")
+
+    call = effective_service.create_calls[0]
+    assert call["resolution_policy"].strict_validation is True
 
 
 def test_get_effective_config_artifact_persists_semantic_and_raw_source_hashes(

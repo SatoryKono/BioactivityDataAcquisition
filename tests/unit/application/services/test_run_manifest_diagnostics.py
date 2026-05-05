@@ -433,12 +433,14 @@ def test_build_diagnostics_summary_distinguishes_resume_only_runs() -> None:
     assert summary["input_snapshot_content_hashes"] == []
     assert summary["input_snapshot_identity_fingerprint"] is None
     assert summary["replay_mode"] == "resume"
+    assert summary["operator_replay_mode"] == "Resume"
     assert summary["continuation_mode"] == "checkpoint_snapshot_only_resume"
     assert (
         summary["resume_contract"]["continuation_mode"]
         == "checkpoint_snapshot_only_resume"
     )
     assert summary["input_snapshot_count"] == 0
+    assert summary["snapshot_status"] == "none"
     assert summary["input_snapshots"] == []
 
 
@@ -519,8 +521,10 @@ def test_build_diagnostics_summary_distinguishes_snapshot_backed_runs_from_exact
     )
     assert summary["exact_replay_eligible"] is True
     assert summary["replay_mode"] == "same_data_state_recovery"
+    assert summary["operator_replay_mode"] == "Rebuild"
     assert summary["exact_replay_blockers"] == []
     assert summary["input_snapshot_ids"] == ["snapshot-1"]
+    assert summary["snapshot_status"] == "full"
     assert summary["input_snapshots"] == [
         {
             "provider": "chembl",
@@ -563,6 +567,8 @@ def test_build_diagnostics_summary_does_not_report_exact_replay_from_intent_alon
     )
     assert summary["exact_replay_eligible"] is False
     assert summary["replay_mode"] == "rebuild"
+    assert summary["operator_replay_mode"] == "Rebuild"
+    assert summary["snapshot_status"] == "none"
     assert summary["exact_replay_blockers"] == ["immutable_input_snapshots_missing"]
 
 

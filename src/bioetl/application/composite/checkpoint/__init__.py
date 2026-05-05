@@ -2,8 +2,7 @@
 
 This package root is the sanctioned public import surface for checkpoint
 governance consumers. New first-party imports should target
-``bioetl.application.composite.checkpoint`` rather than helper submodules such
-as ``checkpoint.anchor_context``.
+``bioetl.application.composite.checkpoint`` rather than helper submodules.
 
 Public API remains stable at:
 - bioetl.application.composite.checkpoint.CompositeCheckpointState

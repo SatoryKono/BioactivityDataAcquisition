@@ -385,9 +385,7 @@ Governance rules:
   `composite_join_key_policy_coverage_pct` for composite join-key coverage, and
   `control_plane_normalization_coverage_pct` for control-plane / reproducibility coverage
 - checkpoint governance consumers must import anchor helpers through the
-  sanctioned package facade `bioetl.application.composite.checkpoint`;
-  `bioetl.application.composite.checkpoint.anchor_context` remains a
-  compatibility-only shim and is not a sanctioned new first-party import style
+  sanctioned package facade `bioetl.application.composite.checkpoint`
 - join-key policies must remain part of the same normalization evidence story as entity profiles
 - drift between plan, registry, matrix, and fallback inventory is a governance defect
 

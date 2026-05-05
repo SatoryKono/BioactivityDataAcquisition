@@ -420,9 +420,9 @@
           "refId": "A"
         }
       ],
-      "title": "Health Check Latency by Provider (p95)",
+      "title": "Track Health Check Latency by Provider (p95)",
       "type": "timeseries",
-      "description": "Provider status enum: 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY; null=UNKNOWN."
+      "description": "Selected-range evidence: p95 provider health-check latency over the active Grafana interval. Current provider severity is owned by the GLOBAL Provider Severity Matrix."
     },
     {
       "datasource": "Prometheus",
@@ -580,9 +580,9 @@
           "refId": "A"
         }
       ],
-      "title": "Healthy Checks",
+      "title": "Monitor Healthy Checks (Selected Range)",
       "type": "stat",
-      "description": "Provider status enum: 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY; null=UNKNOWN."
+      "description": "Selected-range evidence: completed HEALTHY probes in the active Grafana range. This panel is not a current-health source."
     },
     {
       "datasource": "Prometheus",
@@ -660,9 +660,9 @@
           "refId": "A"
         }
       ],
-      "title": "Provider Failure Rate",
+      "title": "Track Provider Failure Rate (Selected Range)",
       "type": "gauge",
-      "description": "Provider status enum: 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY; null=UNKNOWN."
+      "description": "Selected-range evidence: failed probes divided by completed probes in the active Grafana range. Current status comes from bioetl_provider_current_status."
     },
     {
       "datasource": "Prometheus",
@@ -733,9 +733,9 @@
           "refId": "A"
         }
       ],
-      "title": "Health Checks Total",
+      "title": "Track Health Checks Total (Selected Range)",
       "type": "stat",
-      "description": "Provider status enum: 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY; null=UNKNOWN."
+      "description": "Selected-range evidence: total completed provider health checks in the active Grafana range."
     },
     {
       "datasource": "Prometheus",
@@ -806,9 +806,9 @@
           "refId": "A"
         }
       ],
-      "title": "Degraded Checks",
+      "title": "Monitor Degraded Checks (Selected Range)",
       "type": "stat",
-      "description": "Provider status enum: 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY; null=UNKNOWN."
+      "description": "Selected-range evidence: completed DEGRADED probes in the active Grafana range. This panel is not a current-health source."
     },
     {
       "datasource": "Prometheus",
@@ -891,7 +891,7 @@
       ],
       "title": "Track Failure and Degraded Trend by Provider",
       "type": "timeseries",
-      "description": "Provider status enum: 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY; null=UNKNOWN."
+      "description": "Selected-range evidence: failure/degraded probe trend over the active Grafana interval."
     },
     {
       "datasource": "Prometheus",
@@ -953,7 +953,7 @@
       ],
       "title": "Track Provider Failure Share (Selected Range)",
       "type": "bargauge",
-      "description": "Provider status enum: 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY; null=UNKNOWN."
+      "description": "Selected-range evidence: provider share of failed probes in the active Grafana range."
     },
     {
       "datasource": "Prometheus",

@@ -1,0 +1,44 @@
+version: 1
+policy_scope: deprecated_gold_contract_registry
+entries:
+  chembl.activity:
+    classification: gold_runtime_disabled
+    provider: chembl
+    entity: activity
+    replacement_contract_ref: null
+    entity_config_path: configs/entities/chembl/activity.yaml
+    rationale: Gold runtime is disabled; published artifact remains for historical contract governance.
+  chembl.assay_parameters:
+    classification: fixture_only_surface
+    provider: chembl
+    entity: assay_parameters
+    replacement_contract_ref: null
+    fixture_manifest_key: chembl/assay_parameters
+    rationale: Specialized fixture-backed contract surface retained for deterministic projection coverage only.
+  chembl.publication_similarity:
+    classification: fixture_only_surface
+    provider: chembl
+    entity: publication_similarity
+    replacement_contract_ref: null
+    fixture_manifest_key: chembl/publication_similarity
+    rationale: Specialized fixture-backed contract surface retained for deterministic projection coverage only.
+  chembl.publication_term:
+    classification: fixture_only_surface
+    provider: chembl
+    entity: publication_term
+    replacement_contract_ref: null
+    fixture_manifest_key: chembl/publication_term
+    rationale: Specialized fixture-backed contract surface retained for deterministic projection coverage only.
+  chembl.subcellular_fraction:
+    classification: fixture_only_surface
+    provider: chembl
+    entity: subcellular_fraction
+    replacement_contract_ref: null
+    fixture_manifest_key: chembl/subcellular_fraction
+    rationale: Specialized fixture-backed contract surface retained for deterministic projection coverage only.
+  crossref.works:
+    classification: compatibility_alias
+    provider: crossref
+    entity: works
+    replacement_contract_ref: crossref.publication
+    rationale: Legacy contract alias retained only to avoid competing with the canonical publication surface.

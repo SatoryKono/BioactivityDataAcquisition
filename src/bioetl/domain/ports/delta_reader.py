@@ -6,10 +6,7 @@ for export utilities and data inspection.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Protocol, runtime_checkable
-
-if TYPE_CHECKING:
-    import pyarrow as pa
+from typing import Protocol, runtime_checkable
 
 __all__ = [
     "DeltaReaderPort",
@@ -33,7 +30,7 @@ class DeltaReaderPort(Protocol):
         table_path: str,
         columns: list[str] | None = None,
         limit: int | None = None,
-    ) -> pa.Table:
+    ) -> object:
         """Read data from a Delta Lake table.
 
         Args:
@@ -44,7 +41,7 @@ class DeltaReaderPort(Protocol):
                   If None, reads all rows.
 
         Returns:
-            PyArrow Table with the requested data.
+            Opaque table payload with the requested data.
 
         Raises:
             FileNotFoundError: If table does not exist.
@@ -52,14 +49,14 @@ class DeltaReaderPort(Protocol):
         """
         ...
 
-    async def get_schema(self, table_path: str) -> pa.Schema:
+    async def get_schema(self, table_path: str) -> object:
         """Get the schema of a Delta Lake table.
 
         Args:
             table_path: Path to the Delta table directory.
 
         Returns:
-            PyArrow Schema describing the table structure.
+            Opaque schema payload describing the table structure.
 
         Raises:
             FileNotFoundError: If table does not exist.
