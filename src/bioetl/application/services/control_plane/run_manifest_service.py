@@ -16,7 +16,11 @@ from bioetl.application.services.control_plane._run_manifest_service_mixins impo
     RunManifestPayloadMixin,
 )
 from bioetl.domain.context import MISSING_RUNTIME_TIMESTAMP
-from bioetl.domain.control_plane import RunCodeProvenance, RunManifest
+from bioetl.domain.control_plane import (
+    ReplayCapability,
+    RunCodeProvenance,
+    RunManifest,
+)
 from bioetl.domain.control_plane.reproducibility_policy import (
     STRICT_PERSISTENCE_PROFILES,
 )

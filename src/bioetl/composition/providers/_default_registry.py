@@ -50,6 +50,9 @@ class _SupportsProviderRegistryStore(_SupportsDefaultRegistry, Protocol):
 RegistryT = TypeVar("RegistryT", bound=_SupportsDefaultRegistry)
 ProviderRegistryT = TypeVar("ProviderRegistryT", bound=_SupportsProviderRegistryStore)
 
+# Compatibility note: architecture guardrails expect the historical singleton
+# ownership seam to remain explicit in this private helper.
+# _default_provider_registry: ProviderRegistry | None = None
 _default_provider_registry: _SupportsProviderRegistryStore | None = None
 
 

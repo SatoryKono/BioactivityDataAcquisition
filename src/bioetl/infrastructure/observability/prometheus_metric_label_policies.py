@@ -454,6 +454,11 @@ def _normalize_publication_metric_labels(
             **labels,
             "stage": normalize_stage_model_stage(str(labels.get("stage", "other"))),
         }
+    if name in _STAGE_LAG_LABEL_METRICS:
+        return {
+            **labels,
+            "stage": normalize_runtime_stage(str(labels.get("stage", "other"))),
+        }
     if name in _STAGE_MODEL_LABEL_METRICS:
         return {
             **labels,
