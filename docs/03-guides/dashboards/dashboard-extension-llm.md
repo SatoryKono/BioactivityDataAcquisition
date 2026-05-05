@@ -29,12 +29,12 @@ Grafana dashboards в BioETL.
 
 ## 2. Текущая модель shipped dashboards
 
-- `1. Overview` — hub: `2. Runtime`, `Control Plane v1`, `3. Provider Health`, `4. Data Quality`, `Explore Logs (Loki, tracing profile)`, `Explore Traces (Tempo, tracing profile)`
-- `2. Runtime` — `Back to Overview`, `Control Plane v1`, `4. Data Quality` + Explore links
-- `BioETL Control Plane v1` — `Back to Overview`, `2. Runtime`, `4. Data Quality` + Explore links
+- `1. Overview` — hub: `2. Runtime`, `3. Provider Health`, `4. Data Quality`, `5. Control Plane`, `6. Workflow Overview`, `Explore Logs`, `Explore Traces`
+- `2. Runtime` — `Back to Overview`, `3. Provider Health`, `4. Data Quality`, `5. Control Plane`, `Explore Logs`, `Explore Traces`
+- `5. Control Plane` — `Back to Overview`, `2. Runtime`, `4. Data Quality`, `Explore Logs`, `Explore Traces`
 - `3. Provider Health` — `Back to Overview`, `2. Runtime` + Explore links
 - `4. Data Quality` — `Back to Overview`, `5. Silver Reject Explorer` + Explore links
-- `6. Workflow Overview` — `Back to Overview`, `2. Runtime`, `Control Plane v1`
+- `6. Workflow Overview` — `Back to Overview`, `2. Runtime`, `5. Control Plane`, `Explore Logs`, `Explore Traces`
 
 Если правка меняет эту модель, синхронизируй docs в том же change set.
 
@@ -182,4 +182,3 @@ Bad naming examples:
 - `Provider Health`
 - `Top Reject Reasons`
 - `Status`
-
