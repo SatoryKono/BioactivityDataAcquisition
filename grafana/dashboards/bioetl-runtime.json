@@ -59,7 +59,7 @@
       "keepTime": true,
       "tags": [],
       "targetBlank": false,
-      "title": "Control Plane",
+      "title": "5. Control Plane",
       "type": "link",
       "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
     },

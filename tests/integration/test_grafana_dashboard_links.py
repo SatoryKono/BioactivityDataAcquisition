@@ -108,7 +108,7 @@ _REQUIRED_LINK_VARS_BY_TARGET_UID = _NAV_LINK_CONTRACT[
 ]
 _REQUIRED_TOP_LEVEL_LINKS_BY_UID = _NAV_LINK_CONTRACT["required_top_level_links_by_uid"]
 _TOP_LEVEL_LINK_TITLE_RE = re.compile(
-    r"^(Back to .+|Open .+|Investigate .+|[1-6]\. .+|Control Plane v1|Explore (Logs|Traces) \(.*\)|Observability Checklist \(runbook\))$"
+    r"^(Back to .+|Open .+|Investigate .+|[1-6]\. .+|Control Plane v1|5\. Control Plane|Explore (Logs|Traces)( \(.*\))?|Observability Checklist \(runbook\))$"
 )
 _SCOPE_RESET_LINK_TITLES = frozenset(
     {
@@ -116,6 +116,7 @@ _SCOPE_RESET_LINK_TITLES = frozenset(
         "3. Provider Health",
         "Back to Overview",
         "Control Plane v1",
+        "5. Control Plane",
         "2. Runtime",
     }
 )
@@ -1277,7 +1278,7 @@ def test_runtime_and_dq_dashboards_expose_control_plane_handoff() -> None:
         }
         urls = [link.get("url", "") for link in dashboard.get("links", [])]
 
-        assert "Control Plane v1" in titles, (
+        assert {"5. Control Plane", "Control Plane v1"} & titles, (
             f"{dashboard_name} must expose a Control Plane dashboard handoff"
         )
         matching_urls = [
