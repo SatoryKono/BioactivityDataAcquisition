@@ -37,7 +37,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
@@ -45,7 +45,7 @@ jobs:
           uv-extras: "dev"
 
       - name: Cache mutmut
-        uses: actions/cache@v4
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v4
         with:
           path: .mutmut-cache
           key: ${{ runner.os }}-mutmut-${{ hashFiles('src/bioetl/domain/**', 'src/bioetl/application/**') }}
@@ -113,7 +113,7 @@ jobs:
           PY
 
       - name: Upload mutation reports
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
         if: always()
         with:
           name: mutation-reports

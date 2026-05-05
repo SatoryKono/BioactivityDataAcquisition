@@ -23,3 +23,15 @@
 - `bootstrap` (`setup-python-uv`/`uv sync`) — нет признаков первичного падения именно на bootstrap шаге в зафиксированных first failing steps.
 - `test assertion` — в first failing evidence нет stacktrace/assertion, только policy-deprecation annotation + `Process completed with exit code 1`.
 - `external service` — не видно сетевых/внешних API отказов в первом surfaced error.
+
+
+## RCA и remediation plan (updated 2026-05-05)
+
+- Корневая причина: workflows и composite action использовали `actions/*` refs на runtime Node 20-era (`upload-artifact@v4`, `setup-python@v5`, `cache@v4`, частично `checkout@v4`), что блокируется новой policy GitHub.
+- Решение: унифицировать policy на **pinned commit SHA** для runtime-sensitive actions во всех `.github/workflows/*.yml` и `.github/actions/setup-python-uv/action.yml`.
+- Целевые pinned refs:
+  - `actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd` (v6)
+  - `actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405` (v5)
+  - `actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae` (v4)
+  - `actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a` (v4)
+- Governance guardrail: добавить pre-merge проверку `python -m scripts.engineering.repo check-actions-runtime-policy`; блокировать непинованные или non-vetted refs.

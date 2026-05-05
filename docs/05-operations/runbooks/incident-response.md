@@ -92,6 +92,22 @@ ______________________________________________________________________
      ```
   1. Investigate why the job took so long (performance regression?).
 
+
+
+### 5. CI Policy Gate: Deprecated GitHub Actions Runtime
+
+- **Symptom**: GitHub Actions jobs fail with `Node.js 20 actions are deprecated` and `Process completed with exit code 1`.
+- **Severity**: P1 for blocking protected branches; P2 otherwise.
+- **Diagnosis**: Workflow/composite action references use non-vetted or non-pinned `actions/*` runtime versions.
+- **Action**:
+  1. Run repository policy gate locally:
+     ```bash
+     uv run python -m scripts.engineering.repo check-actions-runtime-policy
+     ```
+  2. Replace failing references with vetted pinned SHAs from CI runtime policy (see `scripts/engineering/repo/check_github_actions_runtime_policy.py`).
+  3. Re-run affected workflow(s) and verify no Node-runtime policy annotations remain.
+  4. If policy or SHAs must rotate, update checker allowlist and triage notes in `docs/05-operations/verification/ci-failure-triage-2026-05-05.md`.
+
 ### Escalation Policy
 
 - If an incident cannot be resolved within the Response SLA:

@@ -16,8 +16,8 @@ on:
       - "docs/00-project/ai/skills/_references/**"
       - "docs/00-project/ai/skills/README.md"
       - "docs/00-project/ai/skills/SKILLS-CATALOG.md"
-      - "scripts/ai/codex/check_skills_mirror.sh"
-      - "scripts/ai/codex/check_skills_layout.sh"
+      - "scripts/ops/support/skills/check_skills_mirror.sh"
+      - "scripts/ops/support/skills/check_ai_skills_layout.sh"
       - ".github/workflows/skills-consistency.yml"
   pull_request:
     branches: [ main ]
@@ -28,8 +28,8 @@ on:
       - "docs/00-project/ai/skills/_references/**"
       - "docs/00-project/ai/skills/README.md"
       - "docs/00-project/ai/skills/SKILLS-CATALOG.md"
-      - "scripts/ai/codex/check_skills_mirror.sh"
-      - "scripts/ai/codex/check_skills_layout.sh"
+      - "scripts/ops/support/skills/check_skills_mirror.sh"
+      - "scripts/ops/support/skills/check_ai_skills_layout.sh"
       - ".github/workflows/skills-consistency.yml"
 
 jobs:
@@ -38,10 +38,10 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: Verify docs/00-project/ai/skills/local mirror
-        run: bash scripts/ai/codex/check_skills_mirror.sh --check
+        run: bash scripts/ops/support/skills/check_skills_mirror.sh --check
 
       - name: Verify ai/skills canonical layout
-        run: bash scripts/ai/codex/check_skills_layout.sh
+        run: bash scripts/ops/support/skills/check_ai_skills_layout.sh

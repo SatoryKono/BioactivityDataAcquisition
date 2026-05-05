@@ -13,7 +13,7 @@ def _read_workflow(path: str) -> str:
 def test_coverage_job_combines_shard_coverage_and_runs_serial_pass() -> None:
     """Coverage workflow should combine shard coverage and run serial tests only once."""
     workflow = _read_workflow(".github/workflows/tests.yml")
-    assert "actions/download-artifact@v4" in workflow, (
+    assert "actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c" in workflow, (
         "coverage-verify job must download coverage shard artifacts"
     )
     assert "pattern: coverage-data-*" in workflow, (
