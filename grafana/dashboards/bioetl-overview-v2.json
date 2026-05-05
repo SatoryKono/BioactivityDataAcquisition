@@ -84,7 +84,7 @@
       },
       "id": 99,
       "options": {
-        "content": "<center><h2>BioETL Overview</h2><p><strong>Primary question:</strong> what is currently broken or degraded in BioETL, and where should the operator drill down first?</p><p><strong>Scope:</strong> pipeline=$pipeline, run_type=$run_type, selected Grafana time range. No green OK is shown without recent activity. Owner: sre-data-platform.</p></center>",
+        "content": "<div style=\"padding:10px 14px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);line-height:1.35;\"><div style=\"font-size:18px;font-weight:700;margin-bottom:6px;\">Primary question: what is broken now, and where should the operator drill down first?</div><div><strong>Scope</strong>: pipeline=$pipeline, run_type=$run_type, selected Grafana time range.</div><div><strong>Reading guide</strong>: empty tables mean no recent signal in the selected window, not necessarily OK.</div></div>",
         "mode": "html"
       },
       "title": "L0 Overview Scope",
@@ -155,7 +155,7 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 6,
+        "w": 5,
         "x": 0,
         "y": 4
       },
@@ -191,8 +191,8 @@
       "title": "Next Action",
       "gridPos": {
         "h": 6,
-        "w": 10,
-        "x": 6,
+        "w": 11,
+        "x": 5,
         "y": 4
       },
       "datasource": {
@@ -333,22 +333,22 @@
                     "type": "value",
                     "options": {
                       "control_plane_guardrail_active": {
-                        "text": "Control-plane guardrail active"
+                        "text": "Control-plane issue"
                       },
                       "dq_threshold_or_validation_signal": {
-                        "text": "DQ threshold or validation signal"
+                        "text": "DQ issue"
                       },
                       "no_recent_activity_or_unknown_state": {
-                        "text": "No recent activity or unknown state"
+                        "text": "No recent activity"
                       },
                       "provider_global_degradation": {
-                        "text": "Provider degradation"
+                        "text": "Provider issue"
                       },
                       "runtime_blockers_active": {
-                        "text": "Runtime blockers active"
+                        "text": "Runtime blocked"
                       },
                       "workflow_scope_requires_review": {
-                        "text": "Workflow review required"
+                        "text": "Workflow review"
                       }
                     }
                   }
@@ -396,9 +396,9 @@
               "bioetl_l0_next_action_route": true
             },
             "indexByName": {
-              "pipeline": 0,
-              "action_target": 1,
-              "action_reason": 2
+              "action_target": 0,
+              "action_reason": 1,
+              "pipeline": 2
             },
             "renameByName": {
               "pipeline": "Pipeline"
@@ -560,6 +560,12 @@
               {
                 "id": "displayName",
                 "value": "Status"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
               }
             ]
           },
@@ -572,6 +578,12 @@
               {
                 "id": "displayName",
                 "value": "Status"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
               }
             ]
           }
@@ -600,11 +612,11 @@
               "__name__": true
             },
             "indexByName": {
-              "pipeline": 0,
-              "input": 1,
-              "run_type": 2,
-              "Value": 3,
-              "bioetl_l0_input_status": 3
+              "input": 0,
+              "Value": 1,
+              "bioetl_l0_input_status": 1,
+              "pipeline": 2,
+              "run_type": 3
             },
             "renameByName": {
               "pipeline": "Pipeline",
@@ -621,10 +633,10 @@
     {
       "id": 9003,
       "type": "table",
-      "title": "Runtime Blockers Current",
+      "title": "Runtime Blockers",
       "gridPos": {
         "h": 5,
-        "w": 6,
+        "w": 5,
         "x": 0,
         "y": 10
       },
@@ -730,6 +742,12 @@
               {
                 "id": "displayName",
                 "value": "Status"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
               }
             ]
           },
@@ -742,6 +760,12 @@
               {
                 "id": "displayName",
                 "value": "Status"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
               }
             ]
           }
@@ -789,11 +813,11 @@
     {
       "id": 9004,
       "type": "table",
-      "title": "DQ Status Current",
+      "title": "DQ Status",
       "gridPos": {
         "h": 5,
-        "w": 6,
-        "x": 6,
+        "w": 5,
+        "x": 5,
         "y": 10
       },
       "datasource": {
@@ -886,6 +910,12 @@
               {
                 "id": "displayName",
                 "value": "Status"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
               }
             ]
           },
@@ -898,6 +928,12 @@
               {
                 "id": "displayName",
                 "value": "Status"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
               }
             ]
           }
@@ -943,11 +979,11 @@
     {
       "id": 9005,
       "type": "table",
-      "title": "Gold Lifecycle Current",
+      "title": "Gold Lifecycle",
       "gridPos": {
         "h": 5,
         "w": 8,
-        "x": 10,
+        "x": 16,
         "y": 10
       },
       "datasource": {
@@ -1036,19 +1072,19 @@
                     "type": "value",
                     "options": {
                       "disabled": {
-                        "text": "Gold stage disabled"
+                        "text": "Stage disabled"
                       },
                       "gold_missing_after_success": {
-                        "text": "Missing gold after upstream success"
+                        "text": "Gold missing"
                       },
                       "healthy_recent_gold": {
-                        "text": "Recent gold output healthy"
+                        "text": "Gold healthy"
                       },
                       "pending_no_recent_gold": {
-                        "text": "Pending gold output"
+                        "text": "Pending gold"
                       },
                       "runtime_failed_owner": {
-                        "text": "Runtime failed first"
+                        "text": "Runtime failed"
                       }
                     }
                   }
@@ -1129,9 +1165,9 @@
               "__name__": true
             },
             "indexByName": {
-              "pipeline": 0,
-              "run_type": 1,
-              "lifecycle_state": 2,
+              "lifecycle_state": 0,
+              "pipeline": 1,
+              "run_type": 2,
               "Value": 3,
               "bioetl_l1_gold_lifecycle_status": 3
             },
@@ -1150,11 +1186,11 @@
     {
       "id": 9006,
       "type": "table",
-      "title": "Control Plane Current",
+      "title": "Control Plane",
       "gridPos": {
         "h": 5,
         "w": 6,
-        "x": 18,
+        "x": 10,
         "y": 10
       },
       "datasource": {
@@ -1318,10 +1354,10 @@
     {
       "id": 9007,
       "type": "table",
-      "title": "Provider GLOBAL Scope",
+      "title": "Provider Global",
       "gridPos": {
         "h": 5,
-        "w": 12,
+        "w": 10,
         "x": 0,
         "y": 15
       },
@@ -1472,11 +1508,11 @@
     {
       "id": 9008,
       "type": "table",
-      "title": "Workflow Selected Scope",
+      "title": "Workflow Selected",
       "gridPos": {
         "h": 5,
-        "w": 6,
-        "x": 12,
+        "w": 7,
+        "x": 10,
         "y": 15
       },
       "datasource": {
@@ -1640,11 +1676,11 @@
     {
       "id": 9013,
       "type": "table",
-      "title": "Workflow GLOBAL Scope",
+      "title": "Workflow Global",
       "gridPos": {
         "h": 5,
-        "w": 6,
-        "x": 18,
+        "w": 7,
+        "x": 17,
         "y": 15
       },
       "datasource": {

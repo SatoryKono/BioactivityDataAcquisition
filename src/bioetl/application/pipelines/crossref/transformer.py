@@ -22,18 +22,20 @@ __all__ = ["CrossRefPublicationTransformer"]
 from typing import TYPE_CHECKING, Any
 
 from bioetl.application.core.base_transformer import TransformerDependencyContext
-from bioetl.application.pipelines.common import BasePublicationTransformer
+from bioetl.application.pipelines.common.base_publication_transformer import (
+    BasePublicationTransformer,
+)
+from bioetl.application.pipelines.common.publication_blocks import ExtractionBlock
+from bioetl.application.pipelines.crossref._business_data_builder import (
+    compute_publication_date,
+    hash_author_details,
+)
 from bioetl.application.pipelines.crossref.blocks import (
     _CrossRefAuthorBlock,
     _CrossRefCoreBlock,
     _CrossRefDateBlock,
     _CrossRefJournalBlock,
     _CrossRefMetadataBlock,
-)
-from bioetl.application.pipelines.common.publication_blocks import ExtractionBlock
-from bioetl.application.pipelines.crossref._business_data_builder import (
-    compute_publication_date,
-    hash_author_details,
 )
 from bioetl.domain.entities.crossref import CrossRefPublicationEntity
 from bioetl.domain.types import GoldRecord, JsonDict

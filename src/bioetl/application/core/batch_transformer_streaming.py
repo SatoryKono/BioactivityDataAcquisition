@@ -6,9 +6,9 @@ from collections.abc import AsyncIterator, Iterator
 from typing import TYPE_CHECKING, Protocol
 
 if TYPE_CHECKING:
+    from bioetl.application.core.transformer_runtime.state import TransformResult
     from bioetl.domain.ports import MemoryMonitorPort
     from bioetl.domain.types import BatchID, BronzeRecord
-    from bioetl.application.core.transformer_runtime.state import TransformResult
 
 
 class _StreamingTransformer(Protocol):

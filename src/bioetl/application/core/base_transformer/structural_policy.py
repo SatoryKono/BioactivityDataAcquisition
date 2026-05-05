@@ -14,7 +14,6 @@ from bioetl.application.core.base_transformer._structural_policy_types import (
     StructuralPolicySignal,
 )
 
-
 # Backward-compatible aliases retained for existing imports/tests.
 StructuralFieldContract = StructuralFieldSpec
 StructuralPolicyEvent = StructuralPolicySignal

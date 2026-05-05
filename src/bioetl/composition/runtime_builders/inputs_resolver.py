@@ -8,9 +8,6 @@ from typing import TYPE_CHECKING, Literal
 
 from bioetl.composition.builders import FilterConfigBuilder
 from bioetl.composition.observability import ObservabilityBundle
-from bioetl.composition.runtime_builders.inputs_runtime_models import (
-    ResolvedVacuumSettings,
-)
 from bioetl.composition.runtime_builders._inputs_resolution_support import (
     adjust_batch_size_for_filter_impl as _adjust_batch_size_for_filter_impl,
 )
@@ -50,6 +47,9 @@ from bioetl.composition.runtime_builders.inputs_runtime_helpers import (
 )
 from bioetl.composition.runtime_builders.inputs_runtime_helpers import (
     resolve_runtime_projection as _resolve_runtime_projection,
+)
+from bioetl.composition.runtime_builders.inputs_runtime_models import (
+    ResolvedVacuumSettings,
 )
 from bioetl.domain.config import RuntimeConfig
 
