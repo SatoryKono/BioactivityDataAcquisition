@@ -115,16 +115,84 @@ groups:
         labels:
           input: gold
         expr: (bioetl_runtime_alert_condition_gold_write_missing_15m > bool 0) * 3 + ((bioetl_runtime_alert_condition_gold_write_missing_15m == bool 0) * (sum by (pipeline, run_type) (increase(bioetl_records_processed_total{stage="gold"}[15m])) > bool 0))
+      - record: bioetl_l0_next_action_route
+        labels:
+          action_target: runtime
+          action_reason: runtime_blockers_active
+          action_dashboard_uid: bioetl-runtime
+        expr: (max by (pipeline) (bioetl_l0_input_status{input="runtime"}) >= bool 3) * 50
+      - record: bioetl_l0_next_action_route
+        labels:
+          action_target: control_plane
+          action_reason: control_plane_guardrail_active
+          action_dashboard_uid: bioetl-control-plane-v1
+        expr: (max by (pipeline) (bioetl_l0_input_status{input="control_plane"}) >= bool 3) * 40
+      - record: bioetl_l0_next_action_route
+        labels:
+          action_target: dq
+          action_reason: dq_threshold_or_validation_signal
+          action_dashboard_uid: bioetl-dq-v2
+        expr: (bioetl_l0_input_status{input="dq"} >= bool 2) * 30
+      - record: bioetl_l0_next_action_route
+        labels:
+          action_target: provider
+          action_reason: provider_global_degradation
+          action_dashboard_uid: bioetl-provider-health-v2
+        expr: >-
+          ((max by (pipeline) (sum by (pipeline, run_type) (increase(bioetl_pipeline_runs_total[15m])) > bool 0))
+          * scalar(max(bioetl_l0_input_status{input="provider"} >= bool 3))) * 20
+      - record: bioetl_l0_next_action_route
+        labels:
+          action_target: workflow
+          action_reason: workflow_scope_requires_review
+          action_dashboard_uid: bioetl-workflow-overview
+        expr: (max by (pipeline) (bioetl_l0_input_status{input="workflow"}) >= bool 1) * 10
+      - record: bioetl_l0_next_action_route
+        labels:
+          action_target: monitor
+          action_reason: no_recent_activity_or_unknown_state
+          action_dashboard_uid: bioetl-overview-v2
+        expr: (max by (pipeline) (sum by (pipeline, run_type) (increase(bioetl_pipeline_runs_total[15m])) > bool 0) == bool 0) * 5
       - record: bioetl_l1_runtime_blocker_status
         expr: bioetl_l0_input_status{input="runtime"}
       - record: bioetl_l1_dq_status
         expr: bioetl_l0_input_status{input="dq"}
       - record: bioetl_l1_gold_lifecycle_status
-        expr: bioetl_l0_input_status{input="gold"}
+        labels:
+          lifecycle_state: runtime_failed_owner
+        expr: (bioetl_l0_input_status{input="runtime"} >= bool 3) * 3
+      - record: bioetl_l1_gold_lifecycle_status
+        labels:
+          lifecycle_state: gold_missing_after_success
+        expr: (bioetl_runtime_alert_condition_gold_write_missing_15m > bool 0) * 3
+      - record: bioetl_l1_gold_lifecycle_status
+        labels:
+          lifecycle_state: pending_no_recent_gold
+        expr: >-
+          ((((sum by (pipeline, run_type) (increase(bioetl_pipeline_runs_total[15m])) > bool 0)
+          unless on (pipeline, run_type) (sum by (pipeline, run_type) (increase(bioetl_records_processed_total{stage="gold"}[15m])) > bool 0))
+          unless on (pipeline, run_type) (bioetl_runtime_alert_condition_gold_write_missing_15m > bool 0))
+          unless on (pipeline, run_type) (bioetl_l0_input_status{input="runtime"} >= bool 3))
+          * on (pipeline) group_left(run_type) (bioetl_pipeline_stage_expected{stage="gold"} == bool 1)) * 2
+      - record: bioetl_l1_gold_lifecycle_status
+        labels:
+          lifecycle_state: disabled
+        expr: >-
+          ((sum by (pipeline, run_type) (increase(bioetl_pipeline_runs_total[15m])) > bool 0)
+          * on (pipeline) group_left(run_type) (bioetl_pipeline_stage_expected{stage="gold"} == bool 0)) * 1
+      - record: bioetl_l1_gold_lifecycle_status
+        labels:
+          lifecycle_state: healthy_recent_gold
+        expr: >-
+          (((sum by (pipeline, run_type) (increase(bioetl_records_processed_total{stage="gold"}[15m])) > bool 0)
+          unless on (pipeline, run_type) (bioetl_runtime_alert_condition_gold_write_missing_15m > bool 0))
+          unless on (pipeline, run_type) (bioetl_l0_input_status{input="runtime"} >= bool 3)) * 1
       - record: bioetl_l1_control_plane_current_status
         expr: bioetl_l0_input_status{input="control_plane"}
       - record: bioetl_l1_provider_global_status
         expr: max by (provider) (bioetl_l0_input_status{input="provider"})
+      - record: bioetl_l1_workflow_selected_status
+        expr: bioetl_l0_input_status{input="workflow"}
       - record: bioetl_l1_workflow_global_status
         expr: max by (pipeline, run_type) (bioetl_l0_input_status{input="workflow"})
 

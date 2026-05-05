@@ -190,10 +190,18 @@ def get_dashboard_prometheus_queries(dashboard: dict) -> list[str]:
 
 
 def _collect_dashboard_links(dashboard: dict) -> list[dict]:
-    """Collect top-level dashboard links and panel data links."""
+    """Collect top-level, panel, data, and field links."""
     links = list(dashboard.get("links", []))
     for panel in get_dashboard_panels(dashboard):
+        links.extend(panel.get("links", []))
         links.extend(panel.get("options", {}).get("dataLinks", []))
+        defaults = panel.get("fieldConfig", {}).get("defaults", {})
+        if isinstance(defaults, dict):
+            links.extend(defaults.get("links", []))
+        for override in panel.get("fieldConfig", {}).get("overrides", []):
+            for prop in override.get("properties", []):
+                if prop.get("id") == "links":
+                    links.extend(prop.get("value", []))
     return links
 
 
