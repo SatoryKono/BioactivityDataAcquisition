@@ -63,7 +63,7 @@ top_level_link_priority_by_uid:
       target_uid: bioetl-runtime
       priority: primary
       semantics: scoped_runtime_handoff
-    - title: 5. Control Plane
+    - title: 0. Control Plane
       target_uid: bioetl-control-plane-v1
       priority: secondary
       semantics: scoped_control_plane_handoff
@@ -72,14 +72,10 @@ top_level_link_priority_by_uid:
       priority: contextual
       semantics: provider_health_cross_scope
   bioetl-provider-health-v2:
-    - title: 2. Runtime (Primary)
+    - title: 2. Runtime
       target_uid: bioetl-runtime
       priority: primary
       semantics: runtime_cross_scope_all_defaults
-    - title: "2. Runtime (Contextual: provider mapping)"
-      target_uid: bioetl-runtime
-      priority: contextual
-      semantics: runtime_provider_context_mapping
 
 required_link_vars_by_target_uid:
   bioetl-overview-v2: [pipeline, run_type]
@@ -106,50 +102,9 @@ forbidden_dashboard_link_vars_by_target_uid:
   bioetl-workflow-overview: [run_id, payload_hash]
   bioetl-silver-reject-explorer: []
 
-required_discoverable_inbound_paths:
-  L1:
-    bioetl-runtime:
-      - source_uid: bioetl-overview-v2
-        source_panel_id: 215
-        source_panel_title: Next Action
-        source_status_row_panel_title_matcher: "^L0 Overview Scope$"
-    bioetl-control-plane-v1:
-      - source_uid: bioetl-overview-v2
-        source_panel_id: 215
-        source_panel_title: Next Action
-        source_status_row_panel_title_matcher: "^L0 Overview Scope$"
-    bioetl-provider-health-v2:
-      - source_uid: bioetl-overview-v2
-        source_panel_id: 215
-        source_panel_title: Next Action
-        source_status_row_panel_title_matcher: "^L0 Overview Scope$"
-    bioetl-dq-v2:
-      - source_uid: bioetl-overview-v2
-        source_panel_id: 215
-        source_panel_title: Next Action
-        source_status_row_panel_title_matcher: "^L0 Overview Scope$"
-    bioetl-workflow-overview:
-      - source_uid: bioetl-overview-v2
-        source_panel_id: 215
-        source_panel_title: Next Action
-        source_status_row_panel_title_matcher: "^L0 Overview Scope$"
-  L2:
-    bioetl-silver-reject-explorer:
-      - source_uid: bioetl-dq-v2
-        source_panel_id: 121
-        source_panel_title: Top Silver Reject Reasons (Pareto)
+required_discoverable_inbound_paths: {}
 
-required_panel_links_by_uid:
-  bioetl-overview-v2:
-    - panel_id: 215
-      target_uid: bioetl-runtime
-      link_titles: ["Open 2. Runtime"]
-    - panel_id: 215
-      target_uid: bioetl-dq-v2
-      link_titles: ["Open 4. Data Quality"]
-    - panel_id: 215
-      target_uid: bioetl-control-plane-v1
-      link_titles: ["Open 5. Control Plane"]
+required_panel_links_by_uid: {}
 
 default_time_refresh_policy:
   L0:
@@ -198,116 +153,83 @@ navigation_transition_contract:
       allowed_default_values: []
       inherit_scoped_values: true
   route_class_by_transition:
-    bioetl-overview-v2->bioetl-runtime: scoped_handoff
+    bioetl-control-plane-v1->bioetl-overview-v2: scoped_handoff
+    bioetl-control-plane-v1->bioetl-runtime: scoped_handoff
+    bioetl-control-plane-v1->bioetl-provider-health-v2: global_navigation
+    bioetl-control-plane-v1->bioetl-dq-v2: scoped_handoff
+    bioetl-control-plane-v1->bioetl-workflow-overview: global_navigation
     bioetl-overview-v2->bioetl-control-plane-v1: scoped_handoff
+    bioetl-overview-v2->bioetl-runtime: scoped_handoff
     bioetl-overview-v2->bioetl-provider-health-v2: global_navigation
     bioetl-overview-v2->bioetl-dq-v2: scoped_handoff
     bioetl-overview-v2->bioetl-workflow-overview: global_navigation
-    bioetl-runtime->bioetl-overview-v2: scoped_handoff
     bioetl-runtime->bioetl-control-plane-v1: scoped_handoff
+    bioetl-runtime->bioetl-overview-v2: scoped_handoff
     bioetl-runtime->bioetl-provider-health-v2: global_navigation
     bioetl-runtime->bioetl-dq-v2: scoped_handoff
-    bioetl-control-plane-v1->bioetl-overview-v2: scoped_handoff
-    bioetl-control-plane-v1->bioetl-runtime: scoped_handoff
-    bioetl-control-plane-v1->bioetl-dq-v2: scoped_handoff
+    bioetl-runtime->bioetl-workflow-overview: global_navigation
+    bioetl-provider-health-v2->bioetl-control-plane-v1: global_navigation
     bioetl-provider-health-v2->bioetl-overview-v2: global_navigation
     bioetl-provider-health-v2->bioetl-runtime: global_navigation
-    bioetl-dq-v2->bioetl-overview-v2: scoped_handoff
+    bioetl-provider-health-v2->bioetl-dq-v2: global_navigation
+    bioetl-provider-health-v2->bioetl-workflow-overview: global_navigation
     bioetl-dq-v2->bioetl-control-plane-v1: scoped_handoff
+    bioetl-dq-v2->bioetl-overview-v2: scoped_handoff
+    bioetl-dq-v2->bioetl-runtime: scoped_handoff
+    bioetl-dq-v2->bioetl-provider-health-v2: global_navigation
+    bioetl-dq-v2->bioetl-workflow-overview: global_navigation
     bioetl-dq-v2->bioetl-silver-reject-explorer: scoped_handoff
+    bioetl-silver-reject-explorer->bioetl-control-plane-v1: scoped_handoff
     bioetl-silver-reject-explorer->bioetl-overview-v2: scoped_handoff
+    bioetl-silver-reject-explorer->bioetl-runtime: scoped_handoff
+    bioetl-silver-reject-explorer->bioetl-provider-health-v2: global_navigation
     bioetl-silver-reject-explorer->bioetl-dq-v2: scoped_handoff
+    bioetl-silver-reject-explorer->bioetl-workflow-overview: global_navigation
+    bioetl-workflow-overview->bioetl-control-plane-v1: global_navigation
     bioetl-workflow-overview->bioetl-overview-v2: global_navigation
     bioetl-workflow-overview->bioetl-runtime: global_navigation
-    bioetl-workflow-overview->bioetl-control-plane-v1: global_navigation
+    bioetl-workflow-overview->bioetl-provider-health-v2: global_navigation
+    bioetl-workflow-overview->bioetl-dq-v2: global_navigation
   incident_critical_reciprocal_paths:
     - [bioetl-runtime, bioetl-control-plane-v1]
     - [bioetl-control-plane-v1, bioetl-dq-v2]
     - [bioetl-dq-v2, bioetl-silver-reject-explorer]
-  first_action_contract:
-    bioetl-control-plane-v1:
-      panel_id: 9001
-      min_cta: 3
-      max_cta: 4
-      ctas:
-        - title: Back to Overview
-          expected_target_uid: bioetl-overview-v2
-        - title: 2. Runtime
-          expected_target_uid: bioetl-runtime
-        - title: Inspect Data Quality
-          expected_target_uid: bioetl-dq-v2
-        - title: Inspect Logs
-          expected_target_uid: grafana-lokiexplore-app
-    bioetl-provider-health-v2:
-      panel_id: 9002
-      min_cta: 3
-      max_cta: 4
-      ctas:
-        - title: Back to Overview
-          expected_target_uid: bioetl-overview-v2
-        - title: 2. Runtime (Primary)
-          expected_target_uid: bioetl-runtime
-        - title: Inspect Control Plane
-          expected_target_uid: bioetl-control-plane-v1
-        - title: Inspect Traces
-          expected_target_uid: grafana-exploretraces-app
-    bioetl-workflow-overview:
-      panel_id: 9003
-      min_cta: 3
-      max_cta: 4
-      ctas:
-        - title: Back to Overview
-          expected_target_uid: bioetl-overview-v2
-        - title: 2. Runtime
-          expected_target_uid: bioetl-runtime
-        - title: Inspect Control Plane
-          expected_target_uid: bioetl-control-plane-v1
-        - title: Inspect Logs
-          expected_target_uid: grafana-lokiexplore-app
-    bioetl-runtime:
-      panel_id: 9991
-      min_cta: 3
-      max_cta: 4
-      ctas:
-        - title: Back to Overview
-          expected_target_uid: bioetl-overview-v2
-        - title: Inspect Control Plane
-          expected_target_uid: bioetl-control-plane-v1
-        - title: Inspect Provider Health
-          expected_target_uid: bioetl-provider-health-v2
-        - title: Inspect Data Quality
-          expected_target_uid: bioetl-dq-v2
+  first_action_contract: {}
   cross_scope_marker_contract:
     required_markers:
       reset_scope: "Reset scope"
       context_mapping: "Context mapping"
     required_titles_by_transition:
+      bioetl-control-plane-v1->bioetl-provider-health-v2: reset_scope
+      bioetl-control-plane-v1->bioetl-workflow-overview: reset_scope
       bioetl-provider-health-v2->bioetl-overview-v2: reset_scope
       bioetl-provider-health-v2->bioetl-runtime: reset_scope
-      bioetl-provider-health-v2->bioetl-runtime#context: context_mapping
       bioetl-provider-health-v2->bioetl-control-plane-v1: reset_scope
+      bioetl-provider-health-v2->bioetl-dq-v2: reset_scope
+      bioetl-provider-health-v2->bioetl-workflow-overview: reset_scope
       bioetl-overview-v2->bioetl-provider-health-v2: reset_scope
       bioetl-overview-v2->bioetl-workflow-overview: reset_scope
       bioetl-runtime->bioetl-provider-health-v2: reset_scope
+      bioetl-runtime->bioetl-workflow-overview: reset_scope
+      bioetl-dq-v2->bioetl-provider-health-v2: reset_scope
+      bioetl-dq-v2->bioetl-workflow-overview: reset_scope
+      bioetl-silver-reject-explorer->bioetl-provider-health-v2: reset_scope
+      bioetl-silver-reject-explorer->bioetl-workflow-overview: reset_scope
+      bioetl-workflow-overview->bioetl-control-plane-v1: reset_scope
       bioetl-workflow-overview->bioetl-overview-v2: reset_scope
       bioetl-workflow-overview->bioetl-runtime: reset_scope
-      bioetl-workflow-overview->bioetl-control-plane-v1: reset_scope
+      bioetl-workflow-overview->bioetl-provider-health-v2: reset_scope
+      bioetl-workflow-overview->bioetl-dq-v2: reset_scope
     required_tooltip_tokens:
       reset_scope: ["Reset scope"]
       context_mapping: ["Context mapping"]
   kpi_ownership:
     failed_runs_in_range:
       canonical_uid: bioetl-overview-v2
-      mirror_panels:
-        - dashboard_uid: bioetl-runtime
-          panel_id: 205
+      mirror_panels: []
     worst_lag_stage:
       canonical_uid: bioetl-overview-v2
-      mirror_panels:
-        - dashboard_uid: bioetl-runtime
-          panel_id: 237
+      mirror_panels: []
     worst_backlog_stage:
       canonical_uid: bioetl-overview-v2
-      mirror_panels:
-        - dashboard_uid: bioetl-runtime
-          panel_id: 238
+      mirror_panels: []
