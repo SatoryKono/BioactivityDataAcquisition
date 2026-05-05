@@ -3542,6 +3542,13 @@ def _add_complexity_analysis_surfaces(
             return 1
         return 0
 
+    def marker_count_score(markers: list[str]) -> int:
+        if len(markers) >= 2:
+            return 2
+        if markers:
+            return 1
+        return 0
+
     for node in sorted(snapshot.nodes.values(), key=lambda item: (item.key.label, item.key.name)):
         if node.key.label not in analysis_labels:
             continue
@@ -3646,8 +3653,8 @@ def _add_complexity_analysis_surfaces(
         branch_count_score = score_from_threshold(branch_count, low=3, high=6)
         nesting_depth_score = score_from_threshold(nesting_depth, low=3, high=4)
         helper_call_score = score_from_threshold(helper_call_count, low=2, high=4)
-        indirection_score = 2 if len(indirection_markers) >= 2 else 1 if indirection_markers else 0
-        stateful_score = 2 if len(stateful_markers) >= 2 else 1 if stateful_markers else 0
+        indirection_score = marker_count_score(indirection_markers)
+        stateful_score = marker_count_score(stateful_markers)
         fanout_score = score_from_threshold(abstraction_fanout, low=3, high=6)
         complexity_score += (
             branch_count_score

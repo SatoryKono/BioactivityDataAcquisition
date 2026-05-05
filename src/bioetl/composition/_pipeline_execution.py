@@ -87,13 +87,30 @@ def push_metrics_to_gateway(
     Returns:
         True if push succeeded, False otherwise.
     """
-    from bioetl.composition.bootstrap.cli.metrics import bootstrap_metrics_service
+    from bioetl.composition.bootstrap.runtime.observability import (
+        bootstrap_logger_port,
+    )
+    from bioetl.composition.observability_api import get_metrics_service
+    from bioetl.infrastructure.config import get_settings
 
-    metrics_service = bootstrap_metrics_service()
+    settings = get_settings()
+    gateway = getattr(settings, "pushgateway_url", None) or "localhost:9091"
+    grouping_key: dict[str, str] = {}
+    if pipeline_name:
+        grouping_key["pipeline"] = pipeline_name
+    if run_type:
+        grouping_key["run_type"] = run_type
+
+    metrics_service = get_metrics_service()
+    metrics_service.logger = bootstrap_logger_port(
+        pipeline=pipeline_name or "metrics_publication",
+        run_id=uuid4(),
+        log_level="INFO",
+    )
     result = metrics_service.push_to_gateway(
+        gateway=gateway,
         run_label=run_label,
-        pipeline_name=pipeline_name,
-        run_type=run_type,
+        grouping_key=grouping_key,
     )
     return bool(result.success)
 

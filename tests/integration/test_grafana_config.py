@@ -32,7 +32,7 @@ GRAFANA_DASHBOARD_PROVISIONING_PATH = Path(
 )
 GRAFANA_README_PATH = Path("grafana/README.md")
 _BIOETL_METRIC_TOKEN_RE = re.compile(r"\b(bioetl_[a-z0-9_]+)\b")
-_GRAFANA_VAR_TOKEN_RE = re.compile(r"\$(\{)?([a-zA-Z_][a-zA-Z0-9_]*)(?(1)\})")
+_GRAFANA_VAR_TOKEN_RE = re.compile(r"\$(\{)?([\w]+)(?(1)\})")
 
 
 NAVIGATION_CONTRACT_PATH = Path(

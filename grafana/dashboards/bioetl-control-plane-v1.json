@@ -2735,7 +2735,7 @@
     ]
   },
   "timezone": "browser",
-  "title": "Control Plane / Replay Safety",
+  "title": "0. Control Plane",
   "uid": "bioetl-control-plane-v1",
   "version": 2
 }

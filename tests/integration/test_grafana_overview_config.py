@@ -51,7 +51,7 @@ def test_overview_dashboard_identity_and_primary_question() -> None:
     content = str(scope_panel.get("options", {}).get("content", ""))
     description = str(dashboard.get("description", ""))
 
-    assert dashboard.get("title") == "1. BioETL Overview"
+    assert dashboard.get("title") == "1. Overview"
     assert dashboard.get("uid") == "bioetl-overview-v2"
     assert "L0 Overview" in description
     assert "what is currently broken or degraded" in (description + content).lower()

@@ -78,7 +78,7 @@ Pushgateway publication на завершении run. Это позволяет
 
 В верхней части каждого дашборда расположены выпадающие списки:
 
-- **0. Control Plane / 1. BioETL Overview**: `$pipeline`, `$run_type`
+- **0. Control Plane / 1. Overview**: `$pipeline`, `$run_type`
 - **2. Runtime / 4. Data Quality**: `$pipeline`, `$run_type`, `$stage`
 - **3. Provider Health**: `$provider`, `$adapter`
 - **Silver Reject Explorer**: `$pipeline`, `$run_type`, `$reason_code`, `$field`, `$run_id`, `$payload_hash`
@@ -92,7 +92,7 @@ Pushgateway publication на завершении run. Это позволяет
 
 ### Основные Дашборды
 
-#### 1. 1. BioETL Overview
+#### 1. Overview
 
 L0 дашборд для одного operator question: что сейчас broken/degraded в BioETL и
 куда drill down первым.
@@ -272,7 +272,7 @@ operator-facing checkpoint store latency outside ordinary runtime resume paths.
 
 #### Silver Filter Rejects Handoff
 
-- Используйте `1. BioETL Overview` или `2. Runtime` как summary surface, чтобы
+- Используйте `1. Overview` или `2. Runtime` как summary surface, чтобы
   подтвердить spike по `Silver Filter Rejects` в активном Grafana time range.
 - После подтверждения переходите в `4. Data Quality`, где
   `Top Silver Reject Reasons` и `Top Silver Reject Fields` дают bounded cause
@@ -350,7 +350,7 @@ uv run python -m pytest -q tests/integration/test_prometheus_rules_config.py
 
 - **График "Error Rate" покраснел**: Используйте `structlog` для получения деталей исключений.
 - **Вырос `Silver Filter Rejects`**:
-  1. Подтвердите spike в `1. BioETL Overview` или `2. Runtime`.
+  1. Подтвердите spike в `1. Overview` или `2. Runtime`.
   1. Перейдите в `4. Data Quality` и проверьте `Top Silver Reject Reasons` /
      `Top Silver Reject Fields`.
   1. Перейдите в `Silver Reject Explorer` для списка записей и detail по `payload_hash`.
