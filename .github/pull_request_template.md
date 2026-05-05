@@ -49,3 +49,4 @@
 - [ ] No hardcoded secrets (AP-005)
 - [ ] Type annotations on all public functions (TYPE-001)
 - [ ] Tests added/updated for new code (TEST-002)
+- [ ] При падении `checks-complete` triage начинаю с логов `lint` → `c901-governance` → `arch-tests`; `checks-complete` отдельно не дебажу

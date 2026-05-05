@@ -116,6 +116,14 @@ them:
 These checks still reduce the risk of merging failing tests, lint errors, or
 secret leaks.
 
+### Triage rule for `checks-complete`
+
+- Если падает `checks-complete`, **всегда** сначала открывайте логи в порядке:
+  1. `lint`
+  2. `c901-governance`
+  3. `arch-tests`
+- `checks-complete` — агрегирующий статус, его **не дебажим отдельно**.
+
 ## Pull Request Checklist
 
 - [ ] `make lint` passes
