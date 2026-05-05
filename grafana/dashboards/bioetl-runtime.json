@@ -140,7 +140,7 @@
     },
     {
       "datasource": "Prometheus",
-      "description": "Current snapshot from canonical recording rules. Status mapping: 0=OK, 1=DEGRADED/WARN, >=2=FAILING/CRIT, null=UNKNOWN/no runtime status data. If UNKNOWN, check Monitor Runtime Telemetry Gap and Prometheus scrape/rule health before trusting zero count panels. Labels: pipeline, run_type. Next action: inspect top blocker reason, then active blocker detail or logs/traces.",
+      "description": "Current snapshot from canonical recording rules. Status mapping: 0=OK, 1=WARN, >=2=FAILING/CRIT, null=UNKNOWN/no runtime status data. If UNKNOWN, check Monitor Runtime Telemetry Gap and Prometheus scrape/rule health before trusting zero count panels. Labels: pipeline, run_type. Next action: inspect top blocker reason, then active blocker detail or logs/traces.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -860,7 +860,7 @@
         "y": 3
       },
       "options": {
-        "content": "<div style=\"padding:0.45rem 0.7rem;line-height:1.55\"><strong>First action:</strong> read <em>Monitor Runtime Current Status</em>, then inspect the top blocker reason. If status is FAILING, open the active blocker detail; if DEGRADED, inspect terminal-run/stage lag evidence; if UNKNOWN, verify <em>Monitor Runtime Telemetry Gap</em> before treating zero as OK.</div>",
+        "content": "<div style=\"padding:0.45rem 0.7rem;line-height:1.55\"><strong>First action:</strong> read <em>Monitor Runtime Current Status</em>, then inspect the top blocker reason. If status is FAILING, open the active blocker detail; if WARN, inspect terminal-run/stage lag evidence; if UNKNOWN, verify <em>Monitor Runtime Telemetry Gap</em> before treating zero as OK.</div>",
         "mode": "html"
       },
       "links": [
