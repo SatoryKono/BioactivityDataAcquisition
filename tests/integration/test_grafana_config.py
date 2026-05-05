@@ -486,8 +486,9 @@ def test_dq_score_uses_validation_metric(dashboard_file, panel_title):
         f"Panel '{panel_title}' in {dashboard_file} must use "
         "bioetl_dq_validation_record_count for volume-aware weighting"
     )
-    assert any("or vector(0)" in expr for expr in expressions), (
-        f"Panel '{panel_title}' in {dashboard_file} must stay zero-safe"
+    assert all("or vector(0)" not in expr for expr in expressions), (
+        f"Panel '{panel_title}' in {dashboard_file} must preserve no-data state "
+        "instead of coercing missing telemetry to zero"
     )
 
 
@@ -509,6 +510,41 @@ def test_worst_entity_dq_score_preserves_no_data_state() -> None:
     assert all("or vector(0)" not in expr for expr in expressions), (
         "Worst-Entity DQ Score must preserve no-data rather than rendering score 0"
     )
+
+
+def test_dq_blocked_share_panels_use_percentunit_domain_and_policy_thresholds() -> None:
+    """Blocked-share panels must share the same 0..1/percentunit DQ policy semantics."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
+    expected_panels = {
+        "DQ Impact on Deliverability (Blocked Share)",
+        "DQ Impact on Deliverability Trend (Blocked Share %)",
+    }
+    expected_threshold_steps = [
+        {"color": "green", "value": None},
+        {"color": "orange", "value": 0.05},
+        {"color": "red", "value": 0.2},
+    ]
+
+    panels = {
+        panel.get("title"): panel
+        for panel in get_dashboard_panels(dashboard)
+        if panel.get("title") in expected_panels
+    }
+    assert set(panels) == expected_panels, (
+        "DQ dashboard must expose both blocked-share summary and trend panels"
+    )
+
+    for panel_title, panel in panels.items():
+        defaults = panel.get("fieldConfig", {}).get("defaults", {})
+        assert defaults.get("unit") == "percentunit", (
+            f"Panel '{panel_title}' must use percentunit for ratio semantics"
+        )
+        assert defaults.get("min") == 0, f"Panel '{panel_title}' must use min=0"
+        assert defaults.get("max") == 1, f"Panel '{panel_title}' must use max=1"
+        assert defaults.get("thresholds", {}).get("steps") == expected_threshold_steps, (
+            f"Panel '{panel_title}' must use DQ policy thresholds "
+            "(warn=0.05, crit=0.20)"
+        )
 
 
 def test_dashboards_do_not_use_prometheus_created_timestamps() -> None:
