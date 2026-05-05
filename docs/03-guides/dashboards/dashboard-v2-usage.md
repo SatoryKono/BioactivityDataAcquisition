@@ -319,9 +319,12 @@ Variable handoff policy for dashboard links remains strict and bounded:
   при отсутствии recent activity/samples; `OK` только при recent activity и
   отсутствии blockers/warnings.
 - `overview.Next Action`: runtime имеет приоритет над DQ, control-plane,
-  provider и workflow, чтобы backlog/lag immediately route в `2. Runtime`.
-- `overview.Flow Balance`: не является health gauge; Bronze denominator `0`
-  означает `No recent input` / yield unavailable, а не зелёный `100%`.
+  provider и workflow; row `action_target/action_reason/action_dashboard_uid`
+  replaces the old opaque severity-only handoff.
+- `overview.Gold Lifecycle Current`: table now uses explicit
+  `lifecycle_state` rows (`runtime_failed_owner`, `gold_missing_after_success`,
+  `pending_no_recent_gold`, `disabled`, `healthy_recent_gold`) instead of a
+  single generic gold status number.
 - `control-plane.Replay / Resume Blockers`: green `0`, red `>=1`; non-zero
   означает block replay/resume до расследования manifest/ledger/checkpoint/
   replay/lineage signal.
