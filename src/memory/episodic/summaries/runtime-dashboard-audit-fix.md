@@ -2,15 +2,16 @@
 id: runtime-dashboard-audit-fix
 title: Fix Runtime dashboard audit findings
 task_id: runtime-dashboard-audit-fix
-created_at: '2026-05-05T17:08:44Z'
+created_at: '2026-05-05T17:10:32Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
 - grafana/dashboards/bioetl-runtime.json
-summary: Updated Runtime dashboard no-data semantics for memory pressure, telemetry
-  gap terminology, regression tests for UNKNOWN runtime telemetry, and Grafana README
-  runtime answer-row docs. Targeted Grafana tests pass; dashboard visual semantics
-  gate still has unrelated DQ/Overview/Provider failures.
+summary: Fixed Runtime dashboard no-data semantics by preserving UNKNOWN for runtime
+  diagnostic panels, added regression coverage for telemetry gap/no-data behavior
+  and infrastructure blocker detail, updated Grafana README. Targeted Grafana tests
+  passed; visual semantics gate still fails only on out-of-scope DQ/Overview/Provider
+  dashboard debt.
 ---
 
 # Episodic summary
@@ -21,7 +22,7 @@ summary: Updated Runtime dashboard no-data semantics for memory pressure, teleme
 
 ## Outcome
 
-- Updated Runtime dashboard no-data semantics for memory pressure, telemetry gap terminology, regression tests for UNKNOWN runtime telemetry, and Grafana README runtime answer-row docs. Targeted Grafana tests pass; dashboard visual semantics gate still has unrelated DQ/Overview/Provider failures.
+- Fixed Runtime dashboard no-data semantics by preserving UNKNOWN for runtime diagnostic panels, added regression coverage for telemetry gap/no-data behavior and infrastructure blocker detail, updated Grafana README. Targeted Grafana tests passed; visual semantics gate still fails only on out-of-scope DQ/Overview/Provider dashboard debt.
 
 ## Lessons learned
 

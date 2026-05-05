@@ -247,6 +247,154 @@ async def test_tracked_fixture_run_keeps_control_plane_stores_consistent(
 @pytest.mark.integration
 @pytest.mark.no_api
 @pytest.mark.asyncio
+async def test_tracked_fixture_strict_replay_uses_explicit_data_dir_for_control_plane_artifacts(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Strict replay must persist control-plane roots under the explicit data_dir only."""
+    fixture_entry = load_tracked_fixture_entry(pipeline_key=_PIPELINE_KEY)
+    fixture_path_raw = fixture_entry.get("fixture_path")
+    assert isinstance(fixture_path_raw, str) and fixture_path_raw
+
+    tracked_fixture_path = PROJECT_ROOT / fixture_path_raw
+    cached_root = tmp_path / "cached_bronze" / "chembl" / "activity"
+    materialize_cached_bronze_batch(
+        tracked_fixture_path=tracked_fixture_path,
+        cache_root=cached_root,
+        date="2026-03-25",
+    )
+
+    data_dir = tmp_path / "runtime_data"
+    monkeypatch.setenv("BIOETL_DATA_DIR", str(data_dir))
+    monkeypatch.setenv("BIOETL_TEST_MODE", "true")
+    monkeypatch.setenv("BIOETL_PIPELINE__HEALTH_CHECK_MODE", "probe")
+    monkeypatch.setenv(
+        "BIOETL_PIPELINE__CONTROL_PLANE__REQUIRED_PERSISTENCE_PROFILE",
+        "replay_ready",
+    )
+    patch_clean_code_revision(monkeypatch)
+    get_settings.cache_clear()
+    get_pipeline_config.cache_clear()
+
+    run_id = await run_cached_fixture_pipeline(
+        pipeline_name=_PIPELINE_NAME,
+        cached_bronze_path=cached_root,
+        date="2026-03-25",
+    )
+    bundle = load_control_plane_bundle(data_dir=data_dir, run_id=run_id)
+
+    manifest_payload = bundle["manifest_payload"]
+    assert isinstance(manifest_payload, dict)
+    effective_payload = bundle["effective_payload"]
+    assert isinstance(effective_payload, dict)
+    effective_occurrence = bundle["effective_occurrence"]
+    assert isinstance(effective_occurrence, dict)
+
+    settings_snapshot = effective_payload["semantic_artifact"]["runtime_overrides"][
+        "runtime"
+    ]["settings_snapshot"]
+    assert settings_snapshot["settings"]["data_dir"] == str(data_dir)
+    assert settings_snapshot["settings"]["data_root_mode"] == "explicit"
+    assert effective_occurrence["run_id"] == str(run_id)
+    assert all(
+        str(artifact["path"]).startswith(str(data_dir / "output"))
+        for artifact in manifest_payload["planned_artifacts"]
+    )
+    assert (
+        data_dir
+        / "output"
+        / "control"
+        / "run_manifest"
+        / "_by_run_id"
+        / f"{run_id}.txt"
+    ).exists()
+    assert (
+        data_dir
+        / "output"
+        / "control"
+        / "effective_config"
+        / "_occurrences"
+        / f"{run_id}.json"
+    ).exists()
+
+    get_settings.cache_clear()
+    get_pipeline_config.cache_clear()
+
+
+@pytest.mark.integration
+@pytest.mark.no_api
+@pytest.mark.asyncio
+async def test_tracked_fixture_forensic_grade_emits_artifact_publication_events_for_all_layers(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Forensic-grade tracked replay must emit artifact_published events for Bronze/Silver/Gold."""
+    fixture_entry = load_tracked_fixture_entry(pipeline_key=_PIPELINE_KEY)
+    fixture_path_raw = fixture_entry.get("fixture_path")
+    assert isinstance(fixture_path_raw, str) and fixture_path_raw
+
+    tracked_fixture_path = PROJECT_ROOT / fixture_path_raw
+    cached_root = tmp_path / "cached_bronze" / "chembl" / "activity"
+    materialize_cached_bronze_batch(
+        tracked_fixture_path=tracked_fixture_path,
+        cache_root=cached_root,
+        date="2026-03-25",
+    )
+
+    data_dir = tmp_path / "runtime_data"
+    monkeypatch.setenv("BIOETL_DATA_DIR", str(data_dir))
+    monkeypatch.setenv("BIOETL_TEST_MODE", "true")
+    monkeypatch.setenv("BIOETL_PIPELINE__HEALTH_CHECK_MODE", "probe")
+    monkeypatch.setenv(
+        "BIOETL_PIPELINE__CONTROL_PLANE__REQUIRED_PERSISTENCE_PROFILE",
+        "forensic_grade",
+    )
+    patch_clean_code_revision(monkeypatch)
+    get_settings.cache_clear()
+    get_pipeline_config.cache_clear()
+
+    run_id = await run_cached_fixture_pipeline(
+        pipeline_name=_PIPELINE_NAME,
+        cached_bronze_path=cached_root,
+        date="2026-03-25",
+    )
+    bundle = load_control_plane_bundle(data_dir=data_dir, run_id=run_id)
+    manifest_payload = bundle["manifest_payload"]
+    assert isinstance(manifest_payload, dict)
+    ledger_entries = bundle["ledger_entries"]
+    assert isinstance(ledger_entries, list) and ledger_entries
+
+    artifact_entries = [
+        entry
+        for entry in ledger_entries
+        if entry.get("event_type") == "artifact_published"
+    ]
+    assert artifact_entries
+    assert {entry.get("stage") for entry in artifact_entries} >= {
+        "bronze",
+        "silver",
+        "gold",
+    }
+    assert all(entry.get("manifest_id") == manifest_payload["manifest_id"] for entry in artifact_entries)
+    assert all(entry.get("run_id") == str(run_id) for entry in artifact_entries)
+    assert all(
+        entry.get("dataset_ref") or entry.get("lineage_fragment_id")
+        for entry in artifact_entries
+    )
+    assert all(
+        isinstance(entry.get("details"), dict)
+        and entry["details"].get("artifact_path")
+        and entry["details"].get("metadata_path")
+        for entry in artifact_entries
+    )
+
+    get_settings.cache_clear()
+    get_pipeline_config.cache_clear()
+
+
+@pytest.mark.integration
+@pytest.mark.no_api
+@pytest.mark.asyncio
 async def test_tracked_fixture_exact_replay_avoids_live_data_source_path(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,

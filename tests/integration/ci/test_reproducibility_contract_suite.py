@@ -19,6 +19,12 @@ from bioetl.application.composite.runner_pkg.runner_observability_mixin import (
     CompositeRunnerObservabilityMixin,
 )
 from bioetl.application.services.effective_config_service import EffectiveConfigService
+from bioetl.application.services.checkpoint_compatibility_service import (
+    CheckpointCompatibilityService,
+)
+from bioetl.application.services.control_plane.forensic_diff_service import (
+    ForensicRunDiffService,
+)
 from bioetl.application.services.lineage import MetadataCoordinator
 from bioetl.application.services.run_manifest_inspection_service import (
     RunManifestInspectionService,
@@ -67,9 +73,11 @@ from bioetl.domain.ports.metadata.coordinator import (
     SilverMetadataInput,
     SilverRef,
 )
+from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
 from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.domain.types.dq_contracts import DQDisposition
 from bioetl.domain.value_objects.run_context import RunContext
+from bioetl.infrastructure.control_plane import FileArtifactByteComparisonAdapter
 from bioetl.infrastructure.storage.silver.validation_operations import (
     _deduplicate_by_primary_keys_impl,
 )
@@ -359,6 +367,53 @@ def test_reproducibility_contract_manifest_diff_classifies_semantic_drift() -> N
     assert result.classification == "semantic_drift"
     assert result.semantic_equivalent is False
     assert "code_provenance" in result.semantic_difference_fields
+
+
+def test_reproducibility_contract_strict_resume_rejects_incomplete_legacy_checkpoint_metadata() -> (
+    None
+):
+    """Hydrated legacy checkpoint payloads must fail closed in strict resume."""
+    service = CheckpointCompatibilityService(logger=MagicMock())
+    current = CheckpointMetadata(
+        records_processed=1000,
+        dq_contract_compatibility_hash="same-hash",
+        pipeline_version="1.0.0",
+        execution_fingerprint="fp-current",
+        manifest_id="manifest-current",
+        effective_config_hash="a" * 64,
+        effective_config_artifact_id="eca-current",
+        contract_ref="chembl.activity",
+        contract_version="1.0.0",
+        git_commit="b" * 40,
+        exact_replay=True,
+        input_snapshot_ids=("snapshot-a",),
+    )
+    checkpoint = CheckpointMetadata.from_legacy_metadata(
+        {
+            "records_processed": 500,
+            "execution_fingerprint": "fp-current",
+            "manifest_id": "manifest-current",
+            "effective_config_hash": "a" * 64,
+            "effective_config_artifact_id": "eca-current",
+            "contract_ref": "chembl.activity",
+            "contract_version": "1.0.0",
+            "git_commit": "b" * 40,
+            "exact_replay": True,
+        }
+    )
+
+    result = service.validate_checkpoint_compatibility(current, checkpoint)
+
+    assert result.compatible is False
+    assert result.execution_identity_compatible is False
+    assert result.identity_continuity_proven is False
+    assert any(
+        "checkpoint_missing_required_execution_anchor" in message
+        for message in result.messages
+    )
+    assert any(
+        "checkpoint_missing_snapshot_anchor" in message for message in result.messages
+    )
 
 
 def test_reproducibility_contract_manifest_diff_exposes_exact_replay_parentage() -> (
@@ -1023,6 +1078,108 @@ def test_reproducibility_contract_composite_full_snapshot_envelope_exact_replay_
     evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
     assert evidence["case"] == "composite_full_snapshot_envelope_exact_replay"
     assert len(evidence["occurrences"]) == 2
+
+
+def test_reproducibility_contract_forensic_diff_exposes_byte_mismatch_inside_semantic_equivalence(
+    tmp_path: Path,
+) -> None:
+    """Forensic diff must distinguish semantic replay from byte-equivalent artifacts."""
+    manifest_store = _InMemoryRunManifestStore()
+    ledger_store = _InMemoryRunLedgerStore()
+    left_run_id = RunID(UUID("00000000-0000-0000-0000-000000000530"))
+    right_run_id = RunID(UUID("00000000-0000-0000-0000-000000000531"))
+    input_snapshots = (
+        RunInputSnapshotRef(
+            snapshot_id="snapshot-1",
+            content_hash="content-hash-1",
+            immutable_uri="file:///snapshots/bronze-1.jsonl.zst",
+            query_fingerprint="query-hash-1",
+            captured_at=datetime(2025, 1, 1, 0, 0, tzinfo=UTC),
+        ),
+    )
+    left_manifest = _make_manifest(
+        manifest_id="manifest-byte-left",
+        run_id=left_run_id,
+        execution_fingerprint="fp-byte-shared",
+        input_snapshots=input_snapshots,
+    )
+    right_manifest = _make_manifest(
+        manifest_id="manifest-byte-right",
+        run_id=right_run_id,
+        execution_fingerprint="fp-byte-shared",
+        input_snapshots=input_snapshots,
+    )
+    manifest_store.save(left_manifest)
+    manifest_store.save(right_manifest)
+
+    left_artifact = tmp_path / "left_metadata.yaml"
+    right_artifact = tmp_path / "right_metadata.yaml"
+    left_artifact.write_text("run_id: left\nvalue: stable\n", encoding="utf-8")
+    right_artifact.write_text("run_id: right\nvalue: stable\n", encoding="utf-8")
+
+    ledger_store.append(
+        RunLedgerEntry(
+            entry_id="entry-byte-left",
+            manifest_id=left_manifest.manifest_id,
+            run_id=left_run_id,
+            event_type="artifact_published",
+            occurred_at=datetime(2025, 1, 1, 0, 1, tzinfo=UTC),
+            event_family="artifact",
+            status="success",
+            stage="silver",
+            dataset_ref="silver:chembl.activity@1",
+            lineage_fragment_id="silver:chembl.activity@1#lineage",
+            details={
+                "artifact_path": str(left_artifact),
+                "metadata_path": str(left_artifact),
+                "artifact_kind": "metadata_sidecar",
+                "pipeline_name": "chembl_activity",
+                "provider": "chembl",
+                "entity": "activity",
+                "run_id": str(left_run_id),
+                "manifest_id": left_manifest.manifest_id,
+            },
+        )
+    )
+    ledger_store.append(
+        RunLedgerEntry(
+            entry_id="entry-byte-right",
+            manifest_id=right_manifest.manifest_id,
+            run_id=right_run_id,
+            event_type="artifact_published",
+            occurred_at=datetime(2025, 1, 1, 0, 2, tzinfo=UTC),
+            event_family="artifact",
+            status="success",
+            stage="silver",
+            dataset_ref="silver:chembl.activity@1",
+            lineage_fragment_id="silver:chembl.activity@1#lineage",
+            details={
+                "artifact_path": str(right_artifact),
+                "metadata_path": str(right_artifact),
+                "artifact_kind": "metadata_sidecar",
+                "pipeline_name": "chembl_activity",
+                "provider": "chembl",
+                "entity": "activity",
+                "run_id": str(right_run_id),
+                "manifest_id": right_manifest.manifest_id,
+            },
+        )
+    )
+
+    payload = ForensicRunDiffService(
+        manifest_port=manifest_store,
+        ledger_port=ledger_store,
+        artifact_byte_comparison_port=FileArtifactByteComparisonAdapter(),
+    ).compare(
+        left_manifest.manifest_id,
+        right_manifest.manifest_id,
+    ).to_dict()
+
+    assert payload["semantic_equivalent"] is True
+    assert payload["occurrence_only"] is True
+    assert payload["artifact_byte_equivalence"]["available"] is True
+    assert payload["artifact_byte_equivalence"]["equivalent"] is False
+    assert payload["artifact_byte_equivalence"]["mismatched_artifacts"]
 
 
 def test_reproducibility_contract_forensic_grade_is_blocked_outside_supported_lineage_family() -> (
