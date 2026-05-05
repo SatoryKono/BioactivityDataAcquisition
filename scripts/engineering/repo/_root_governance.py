@@ -29,8 +29,6 @@ BASE_ALLOWED_ROOT_DIRECTORIES: frozenset[str] = frozenset(
         ".vscode",
         "script-codex",
         "script-gemini",
-        "script-mistrall",
-        "script-mistrallvibe",
         "assets",
         "configs",
         "data",

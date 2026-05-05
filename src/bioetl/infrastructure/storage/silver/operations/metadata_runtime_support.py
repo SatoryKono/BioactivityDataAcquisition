@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 import inspect
 from collections.abc import Awaitable, Callable, Sequence
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any, Protocol, cast
 
 import orjson
 
@@ -25,9 +25,33 @@ from bioetl.infrastructure.storage.metadata.builder_base import _parse_table_nam
 if TYPE_CHECKING:
     import pyarrow as pa
 
-    from bioetl.infrastructure.storage.silver.operations.metadata_operations import (
-        SilverMetadataOperations,
-    )
+
+class _SilverMetadataWriterProtocol(Protocol):
+    """Structural protocol for canonical Silver metadata operations host."""
+
+    _host: object | None
+    _logger: LoggerPort
+    _metadata_coordinator: object | None
+    _metadata_writer: object | None
+    _dq_calculator: object | None
+
+    async def compute_dq_metrics(
+        self,
+        arrow_data: pa.Table,
+        *,
+        quarantined_count: int | None = None,
+        validation_errors: Sequence[str] | None = None,
+    ) -> BatchDQMetrics: ...
+
+    async def _write_silver_metadata_file(
+        self,
+        *,
+        table_path: str,
+        metadata: SilverMetadata,
+        table_name: str,
+        provider_name: str,
+        entity_name: str,
+    ) -> None: ...
 
 
 _GetDeltaVersion = Callable[[str], Awaitable[int | None]]
@@ -82,7 +106,7 @@ def best_effort_log(logger: LoggerPort, level: str, message: str) -> None:
 
 
 def resolve_manifest_id(
-    metadata_ops: SilverMetadataOperations,
+    metadata_ops: _SilverMetadataWriterProtocol,
     *,
     records: list[BronzeRecord],
 ) -> str | None:
@@ -109,7 +133,7 @@ def resolve_manifest_id(
 
 
 async def persist_silver_metadata(
-    metadata_ops: SilverMetadataOperations,
+    metadata_ops: _SilverMetadataWriterProtocol,
     *,
     metadata: SilverMetadata,
     table_name: str,
@@ -128,7 +152,7 @@ async def persist_silver_metadata(
 
 
 async def resolve_finalization_dq_metrics(
-    metadata_ops: SilverMetadataOperations,
+    metadata_ops: _SilverMetadataWriterProtocol,
     *,
     _table_name: str,
     records: list[BronzeRecord],
@@ -155,7 +179,7 @@ async def resolve_finalization_dq_metrics(
 
 
 async def resolve_version_after(
-    metadata_ops: SilverMetadataOperations, table_path: str
+    metadata_ops: _SilverMetadataWriterProtocol, table_path: str
 ) -> int | None:
     """Read Delta version via host helper when available."""
     if metadata_ops._host is not None and hasattr(
@@ -170,7 +194,7 @@ async def resolve_version_after(
 
 
 async def compute_dq_metrics_from_arrow_data(
-    metadata_ops: SilverMetadataOperations,
+    metadata_ops: _SilverMetadataWriterProtocol,
     arrow_data: pa.Table,
     *,
     quarantined_count: int | None = None,
@@ -202,7 +226,7 @@ async def compute_dq_metrics_from_arrow_data(
 
 
 def should_skip_silver_metadata_write(
-    metadata_ops: SilverMetadataOperations,
+    metadata_ops: _SilverMetadataWriterProtocol,
     *,
     records: list[BronzeRecord],
 ) -> bool:
@@ -220,7 +244,7 @@ def should_skip_silver_metadata_write(
 
 
 async def write_silver_metadata_file(
-    metadata_ops: SilverMetadataOperations,
+    metadata_ops: _SilverMetadataWriterProtocol,
     *,
     table_path: str,
     metadata: SilverMetadata,

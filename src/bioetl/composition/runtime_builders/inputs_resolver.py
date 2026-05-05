@@ -8,6 +8,9 @@ from typing import TYPE_CHECKING, Literal
 
 from bioetl.composition.builders import FilterConfigBuilder
 from bioetl.composition.observability import ObservabilityBundle
+from bioetl.composition.runtime_builders.inputs_runtime_models import (
+    ResolvedVacuumSettings,
+)
 from bioetl.composition.runtime_builders._inputs_resolution_support import (
     adjust_batch_size_for_filter_impl as _adjust_batch_size_for_filter_impl,
 )
@@ -65,12 +68,6 @@ if TYPE_CHECKING:
         MaintenanceConfig,
         PipelineYamlConfig,
     )
-
-
-@dataclass(frozen=True, slots=True)
-class ResolvedVacuumSettings:
-    enabled: bool
-    retention_days: int
 
 
 @dataclass(frozen=True, slots=True)

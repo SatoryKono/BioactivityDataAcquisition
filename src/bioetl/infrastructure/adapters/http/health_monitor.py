@@ -29,6 +29,9 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
 from bioetl.domain.types import HealthStatus
+from bioetl.infrastructure.adapters.http._health_monitor_models import (
+    HealthAdjustedConfig,
+)
 from bioetl.infrastructure.adapters.http._health_monitor_support import (
     emit_health_check_observability,
     emit_provider_health_metric,
@@ -38,61 +41,9 @@ from bioetl.infrastructure.adapters.http._health_monitor_support import (
     record_health_check_transition,
     record_success_transition,
 )
-from bioetl.infrastructure.adapters.http.health_tracker import ProviderHealthTracker
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import HealthCheckResult, LoggerPort, MetricsPort
-
-
-@dataclass(frozen=True, slots=True)
-class HealthAdjustedConfig:
-    """Configuration adjusted based on provider health status.
-
-    Per RULES.md §3.5:
-    - HEALTHY: Normal operation (multiplier=1.0, divisor=1)
-    - DEGRADED: Timeout ×2, batch_size ÷2
-    - UNHEALTHY: Timeout ×4, batch_size ÷4 (aggressive throttling)
-
-    Attributes:
-        timeout_multiplier: Factor to multiply base timeout by.
-        batch_size_divisor: Factor to divide base batch_size by.
-        status: Current health status.
-
-    Example:
-        >>> config = tracker.get_adjusted_config()
-        >>> effective_timeout = base_timeout * config.timeout_multiplier
-        >>> effective_batch_size = base_batch_size // config.batch_size_divisor
-
-    """
-
-    timeout_multiplier: float
-    batch_size_divisor: int
-    status: HealthStatus
-
-    def apply_timeout(self, base_timeout: float) -> float:
-        """Apply timeout multiplier to base timeout.
-
-        Args:
-            base_timeout: Base timeout in seconds.
-
-        Returns:
-            Adjusted timeout value.
-
-        """
-        return base_timeout * self.timeout_multiplier
-
-    def apply_batch_size(self, base_batch_size: int, minimum: int = 1) -> int:
-        """Apply batch size divisor to base batch size.
-
-        Args:
-            base_batch_size: Base batch size.
-            minimum: Minimum allowed batch size (default: 1).
-
-        Returns:
-            Adjusted batch size, at least `minimum`.
-
-        """
-        return max(minimum, base_batch_size // self.batch_size_divisor)
 
 
 @dataclass
@@ -288,3 +239,14 @@ class ProviderHealthMonitor:
             batch_size_divisor=batch_div,
             status=state.status,
         )
+
+
+def __getattr__(name: str) -> object:
+    """Resolve compatibility re-exports without eager tracker imports."""
+    if name != "ProviderHealthTracker":
+        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+    from bioetl.infrastructure.adapters.http.health_tracker import ProviderHealthTracker
+
+    globals()[name] = ProviderHealthTracker
+    return ProviderHealthTracker

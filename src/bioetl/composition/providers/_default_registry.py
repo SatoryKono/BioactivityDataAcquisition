@@ -10,6 +10,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from functools import wraps
+from importlib import import_module
 from typing import (
     TYPE_CHECKING,
     Protocol,
@@ -20,7 +21,6 @@ from typing import (
 
 if TYPE_CHECKING:
     from bioetl.composition.providers._models import ProviderConfig
-    from bioetl.composition.providers.provider_registry import ProviderRegistry
 
 R = TypeVar("R")
 
@@ -50,7 +50,7 @@ class _SupportsProviderRegistryStore(_SupportsDefaultRegistry, Protocol):
 RegistryT = TypeVar("RegistryT", bound=_SupportsDefaultRegistry)
 ProviderRegistryT = TypeVar("ProviderRegistryT", bound=_SupportsProviderRegistryStore)
 
-_default_provider_registry: ProviderRegistry | None = None
+_default_provider_registry: _SupportsProviderRegistryStore | None = None
 
 
 class DefaultRegistryMethod[R]:
@@ -108,11 +108,13 @@ class ProvidersDescriptor[ProviderRegistryT: _SupportsProviderRegistryStore]:
         return target._store._providers
 
 
-def get_default_provider_registry() -> ProviderRegistry:
+def get_default_provider_registry() -> _SupportsProviderRegistryStore:
     """Return the lazily-created default provider registry singleton."""
     global _default_provider_registry
     if _default_provider_registry is None:
-        from bioetl.composition.providers.provider_registry import ProviderRegistry
-
-        _default_provider_registry = ProviderRegistry()
+        provider_registry_cls = getattr(
+            import_module("bioetl.composition.providers.provider_registry"),
+            "ProviderRegistry",
+        )
+        _default_provider_registry = provider_registry_cls()
     return _default_provider_registry

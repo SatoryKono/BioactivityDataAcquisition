@@ -3,22 +3,26 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
-from typing import TYPE_CHECKING
+from typing import Protocol
 
 from bioetl.domain.normalization.text import normalize_string
 
-if TYPE_CHECKING:
-    from bioetl.domain.mapping.publication_type_classification import (
-        PublicationTypeEntry,
-    )
+
+class PublicationTypeEntryProtocol(Protocol):
+    """Structural publication-type entry used by helper routines."""
+
+    unified_type: str
+    subclass: str
+    class_code: str
+    specificity: int
 
 
 def classify_provider_type(
     *,
-    lookup: dict[str, PublicationTypeEntry] | None,
+    lookup: dict[str, PublicationTypeEntryProtocol] | None,
     raw_type: str | None,
     raw_types_list: list[str] | None,
-) -> PublicationTypeEntry | None:
+) -> PublicationTypeEntryProtocol | None:
     """Resolve a provider-specific publication type from scalar/list inputs."""
     if lookup is None:
         return None
@@ -33,8 +37,8 @@ def classify_chembl_type(
     *,
     raw_type: str | None,
     raw_types_list: list[str] | None,
-    entry_by_unified_type: dict[str, PublicationTypeEntry],
-) -> PublicationTypeEntry | None:
+    entry_by_unified_type: dict[str, PublicationTypeEntryProtocol],
+) -> PublicationTypeEntryProtocol | None:
     """Resolve a ChEMBL publication type using unified-type lookup keys."""
     if raw_type is not None:
         return classify_chembl_publication_type(entry_by_unified_type, raw_type)
@@ -47,7 +51,7 @@ def normalize_publication_classification_value(
     *,
     field_name: str,
     value: object,
-    entries: Sequence[PublicationTypeEntry],
+    entries: Sequence[PublicationTypeEntryProtocol],
 ) -> object:
     """Normalize a derived publication classification value against loaded entries."""
     if value is None or not isinstance(value, str):
@@ -72,9 +76,9 @@ def find_matching_classification_value(
 
 
 def best_match(
-    lookup: dict[str, PublicationTypeEntry],
+    lookup: dict[str, PublicationTypeEntryProtocol],
     raw_types: list[str],
-) -> PublicationTypeEntry | None:
+) -> PublicationTypeEntryProtocol | None:
     """Return the most specific entry among matching raw types."""
     matches = [
         entry
@@ -99,7 +103,7 @@ _CLASSIFICATION_FIELD_GETTERS = {
 
 def classification_values(
     field_name: str,
-    entries: Sequence[PublicationTypeEntry],
+    entries: Sequence[PublicationTypeEntryProtocol],
 ) -> frozenset[str]:
     getter = _CLASSIFICATION_FIELD_GETTERS.get(field_name)
     if getter is None:
@@ -143,16 +147,16 @@ def canonical_publication_type_key(value: str) -> str:
 
 
 def classify_chembl_publication_type(
-    entry_by_unified_type: dict[str, PublicationTypeEntry],
+    entry_by_unified_type: dict[str, PublicationTypeEntryProtocol],
     raw_type: str,
-) -> PublicationTypeEntry | None:
+) -> PublicationTypeEntryProtocol | None:
     return entry_by_unified_type.get(canonical_publication_type_key(raw_type))
 
 
 def best_chembl_match(
-    entry_by_unified_type: dict[str, PublicationTypeEntry],
+    entry_by_unified_type: dict[str, PublicationTypeEntryProtocol],
     raw_types: list[str],
-) -> PublicationTypeEntry | None:
+) -> PublicationTypeEntryProtocol | None:
     matches = [
         entry
         for raw in raw_types

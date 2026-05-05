@@ -8,18 +8,15 @@ from datetime import datetime
 from typing import Protocol
 from uuid import uuid4
 
+from bioetl.application.services.control_plane.run_manifest_models import (
+    RunManifestCreateSpec,
+)
 from bioetl.application.services.control_plane._run_manifest_service_mixins import (
     RunManifestHydrationMixin,
     RunManifestPayloadMixin,
 )
 from bioetl.domain.context import MISSING_RUNTIME_TIMESTAMP
-from bioetl.domain.control_plane import (
-    ReplayCapability,
-    RunArtifactRef,
-    RunCodeProvenance,
-    RunManifest,
-    RunSourceRef,
-)
+from bioetl.domain.control_plane import RunCodeProvenance, RunManifest
 from bioetl.domain.control_plane.reproducibility_policy import (
     STRICT_PERSISTENCE_PROFILES,
 )
@@ -42,39 +39,6 @@ class _ClockLike(Protocol):
     def now(self) -> datetime:
         """Return the current timestamp."""
         ...
-
-
-@dataclass(frozen=True, slots=True)
-class RunManifestCreateSpec:
-    """Normalized inputs required to build an immutable run manifest."""
-
-    run_id: RunID
-    run_type: RunType | str
-    pipeline_name: str
-    provider: str
-    entity: str
-    launch_context: dict[str, object]
-    runtime_config: dict[str, object]
-    resolved_config: dict[str, object]
-    replay_of_run_id: str | None = None
-    replay_of_manifest_id: str | None = None
-    source_refs: tuple[RunSourceRef, ...] = ()
-    planned_artifacts: tuple[RunArtifactRef, ...] = ()
-    pipeline_version: str | None = None
-    git_commit: str | None = None
-    source_revision_state: str | None = None
-    dependency_lock_hash: str | None = None
-    config_hash: str | None = None
-    resolved_config_hash: str | None = None
-    effective_config_hash: str | None = None
-    contract_ref: str | None = None
-    contract_version: str | None = None
-    contract_schema_hash: str | None = None
-    dq_policy_ref: str | None = None
-    rule_bundle_version: str | None = None
-    dq_contract_compatibility_hash: str | None = None
-    effective_config_artifact_id: str | None = None
-    replay_capability: ReplayCapability = ReplayCapability.REBUILD_ONLY
 
 
 def _validate_strict_code_provenance(

@@ -6,13 +6,13 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from bioetl.domain.types import HealthStatus
+from bioetl.infrastructure.adapters.http._health_monitor_models import (
+    HealthAdjustedConfig,
+    ProviderHealthMonitorProtocol,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import HealthCheckResult, LoggerPort
-    from bioetl.infrastructure.adapters.http.health_monitor import (
-        HealthAdjustedConfig,
-        ProviderHealthMonitor,
-    )
 
 
 @dataclass
@@ -20,7 +20,7 @@ class ProviderHealthTracker:
     """Per-provider health tracker wrapper around `ProviderHealthMonitor`."""
 
     provider: str
-    monitor: ProviderHealthMonitor
+    monitor: ProviderHealthMonitorProtocol
     logger: LoggerPort | None = None
 
     _base_timeout: float = 30.0

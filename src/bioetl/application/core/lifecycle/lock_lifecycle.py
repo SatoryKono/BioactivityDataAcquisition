@@ -3,14 +3,26 @@
 from __future__ import annotations
 
 import time
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Protocol
 
 from bioetl.application.core.lifecycle.shutdown import PipelineShutdownError
 
+
+class _LockRuntimeHostProtocol(Protocol):
+    _lock: object
+    _config: object
+    _run_id: object
+    _context_holder: object | None
+    _logger: object
+    _heartbeat_factory: object
+    _shutdown_signal: object
+    _heartbeat: object | None
+    _acquired_at: float | None
+    _fencing_token: FencingToken | None
+
+    def get_context(self) -> object | None: ...
+
 if TYPE_CHECKING:
-    from bioetl.application.core.lifecycle.lock_runtime_service import (
-        LockRuntimeService,
-    )
     from bioetl.domain.locking import FencingToken
 
 __all__ = [
@@ -21,7 +33,7 @@ __all__ = [
 ]
 
 
-async def acquire_lock(host: LockRuntimeService) -> FencingToken | None:
+async def acquire_lock(host: _LockRuntimeHostProtocol) -> FencingToken | None:
     """Acquire the runtime lock and update shared runtime state."""
     token = await host._lock.acquire(
         key=host._config.lock_key,
@@ -53,7 +65,7 @@ async def acquire_lock(host: LockRuntimeService) -> FencingToken | None:
     return token
 
 
-async def release_lock(host: LockRuntimeService) -> None:
+async def release_lock(host: _LockRuntimeHostProtocol) -> None:
     """Release the runtime lock, stop heartbeat, and clear context state."""
     if host._heartbeat:
         await host._heartbeat.stop()
@@ -71,7 +83,7 @@ async def release_lock(host: LockRuntimeService) -> None:
     host._logger.info("Lock released", stage="cleanup")
 
 
-async def start_heartbeat(host: LockRuntimeService) -> None:
+async def start_heartbeat(host: _LockRuntimeHostProtocol) -> None:
     """Start the background heartbeat task for the acquired lock."""
     host._heartbeat = host._heartbeat_factory(
         lock_port=host._lock,
@@ -85,7 +97,9 @@ async def start_heartbeat(host: LockRuntimeService) -> None:
     await host._heartbeat.start()
 
 
-async def enter_lock_context(host: LockRuntimeService) -> LockRuntimeService:
+async def enter_lock_context(
+    host: _LockRuntimeHostProtocol,
+) -> _LockRuntimeHostProtocol:
     """Acquire the lock for async context-manager usage and start heartbeat."""
     token = await acquire_lock(host)
     if token is None:

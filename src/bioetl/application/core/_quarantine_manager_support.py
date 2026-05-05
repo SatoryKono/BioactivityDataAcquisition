@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Protocol
 
 from bioetl.application.core._quarantine_support import (
     FILTERED_OUT_SILVER,
@@ -15,7 +15,6 @@ from bioetl.application.core._quarantine_support import (
 
 if TYPE_CHECKING:
     from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
-    from bioetl.application.core.quarantine_manager import FilteredQuarantineEntry
     from bioetl.application.observability.domain_event_emitter import (
         DomainEventEmitterProtocol,
     )
@@ -24,6 +23,14 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.ports import MetricsPort, QuarantinePort
     from bioetl.domain.types import BatchID, JsonDict, RunID
+
+
+class _FilteredQuarantineEntryProtocol(Protocol):
+    """Structural filtered-entry shape used by the support mixin."""
+
+    record: JsonDict
+    reason: str
+    details: JsonDict | None
 
 
 class QuarantineManagerSupportMixin:
@@ -74,7 +81,7 @@ class QuarantineManagerSupportMixin:
 
     async def quarantine_filtered_records(
         self,
-        records: list[FilteredQuarantineEntry],
+        records: list[_FilteredQuarantineEntryProtocol],
         batch_id: BatchID,
         run_id: RunID | None = None,
         *,

@@ -22,20 +22,20 @@ _DIR = Path(__file__).parent
 
 
 def _posix_command(args: list[str]) -> list[str]:
-    mistral_dir = _DIR.parent / "mistrallvibe" / "helper"
+    vibe_helper_dir = _DIR / "helper"
     if args[:1] == ["check"]:
-        return ["bash", str(mistral_dir / "check-env.sh")]
+        return ["bash", str(vibe_helper_dir / "check-env.sh")]
     if args[:1] == ["setup"]:
-        return ["bash", str(mistral_dir / "setup-env.sh")]
+        return ["bash", str(vibe_helper_dir / "setup-env.sh")]
     return ["bash", str(_DIR / "launch.sh"), *args]
 
 
 def _windows_command(args: list[str]) -> list[str]:
-    mistral_dir = _DIR.parent / "mistrallvibe" / "helper"
+    vibe_helper_dir = _DIR / "helper"
     if args[:1] == ["check"]:
-        target = mistral_dir / "check-env.ps1"
+        target = vibe_helper_dir / "check-env.ps1"
     elif args[:1] == ["setup"]:
-        target = mistral_dir / "setup-env.ps1"
+        target = vibe_helper_dir / "setup-env.ps1"
     else:
         target = _DIR / "launch.ps1"
         return [

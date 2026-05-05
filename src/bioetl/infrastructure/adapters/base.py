@@ -52,7 +52,12 @@ if TYPE_CHECKING:
 
     from bioetl.domain.ports import CircuitBreakerPort
     from bioetl.infrastructure.adapters.common import HttpAdapterDependencyContext
-    from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
+
+
+class _HttpClientWithCircuitBreaker(Protocol):
+    """Structural seam for the shared HTTP client used by adapters."""
+
+    circuit_breaker: CircuitBreakerPort
 
 
 def build_json_accept_headers(
@@ -104,7 +109,7 @@ class BaseHttpAdapter(HealthCheckProviderMixin, DataSourcePort):
 
     """
 
-    http_client: UnifiedHTTPClient
+    http_client: _HttpClientWithCircuitBreaker
     provider_name: str
     logger: LoggerPort
     metrics: MetricsPort | None
@@ -115,7 +120,7 @@ class BaseHttpAdapter(HealthCheckProviderMixin, DataSourcePort):
 
     def __init__(
         self,
-        http_client: UnifiedHTTPClient,
+        http_client: _HttpClientWithCircuitBreaker,
         logger: LoggerPort,
         metrics: MetricsPort | None = None,
         *,

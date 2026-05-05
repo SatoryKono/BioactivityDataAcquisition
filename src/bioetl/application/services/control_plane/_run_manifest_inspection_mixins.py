@@ -11,7 +11,7 @@ from bioetl.domain.normalization import (
 )
 
 if TYPE_CHECKING:
-    from .run_manifest_inspection_service import RunManifestDiffEntry
+    from .run_manifest_inspection_models import RunManifestDiffEntry
 
 _OCCURRENCE_ONLY_DIFF_FIELDS = frozenset({"manifest_id", "run_id", "created_at"})
 

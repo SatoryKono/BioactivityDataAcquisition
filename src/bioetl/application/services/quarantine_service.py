@@ -17,12 +17,12 @@ from __future__ import annotations
 __all__ = ["QuarantineRecord", "QuarantineService"]
 
 from dataclasses import dataclass
-from datetime import datetime
 from typing import TYPE_CHECKING
 
 from bioetl.application.observability.span_attribute_values import (
     coerce_span_attribute_value,
 )
+from bioetl.application.services._quarantine_models import QuarantineRecord
 from bioetl.application.services._quarantine_service_async_mixin import (
     QuarantineServiceAsyncMixin,
 )
@@ -36,7 +36,6 @@ from bioetl.application.services._quarantine_service_support import (
 from bioetl.application.services._quarantine_service_sync_mixin import (
     QuarantineServiceSyncMixin,
 )
-from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
     from opentelemetry.trace import Span
@@ -48,28 +47,6 @@ if TYPE_CHECKING:
         QuarantinePort,
         TracingPort,
     )
-
-
-@dataclass(frozen=True, slots=True)
-class QuarantineRecord:
-    """Representation of a quarantined record.
-
-    Attributes:
-        error_code: Error code that caused quarantine, or None if unknown.
-        payload: Original record data.
-        batch_id: Bronze batch ID.
-        pipeline: Pipeline name.
-        ingestion_ts: When record was quarantined.
-        metadata: Additional metadata.
-    """
-
-    error_code: str | None
-    payload: JsonDict  # Any: quarantine payload has heterogeneous values
-    batch_id: str | None
-    pipeline: str
-    ingestion_ts: datetime | None
-    metadata: JsonDict  # Any: metadata values are heterogeneous
-
 
 @dataclass
 class QuarantineService(

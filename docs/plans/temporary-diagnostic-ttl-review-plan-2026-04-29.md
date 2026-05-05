@@ -135,7 +135,7 @@ Recommended next review:
 
 Files:
 
-- `scripts/ai/mistrall/helper/download-image.ps1`
+- legacy Mistral image/bootstrap recovery helper under `scripts/ai/`
 
 Intent:
 

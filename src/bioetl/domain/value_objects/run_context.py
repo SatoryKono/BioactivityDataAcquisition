@@ -16,40 +16,12 @@ from bioetl.domain.types import RunID, RunType
 from bioetl.domain.value_objects._run_context_create_support import (
     coerce_run_context_create_input,
 )
+from bioetl.domain.value_objects._run_context_models import RunContextCreateInput
 
 __all__ = [
     "RunContext",
     "RunContextCreateInput",
 ]
-
-
-@dataclass(frozen=True, slots=True)
-class RunContextCreateInput:
-    """Typed input bundle for ``RunContext.create``."""
-
-    run_id: RunID
-    run_type: RunType
-    started_at: datetime
-    provider: str
-    entity: str
-    transform_version: str | None = None
-    transform_steps: tuple[str, ...] = ()
-    pipeline_version: str | None = None
-    git_commit: str | None = None
-    dependency_lock_hash: str | None = None
-    config_hash: str | None = None
-    resolved_config_hash: str | None = None
-    effective_config_hash: str | None = None
-    manifest_id: str | None = None
-    contract_ref: str | None = None
-    contract_version: str | None = None
-    contract_schema_hash: str | None = None
-    dq_policy_ref: str | None = None
-    rule_bundle_version: str | None = None
-    dq_contract_compatibility_hash: str | None = None
-    effective_config_artifact_id: str | None = None
-    execution_fingerprint: str | None = None
-
 
 @dataclass(frozen=True, slots=True)
 class RunContext:

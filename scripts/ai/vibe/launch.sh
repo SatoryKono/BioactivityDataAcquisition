@@ -24,7 +24,7 @@ fi
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
-COMPAT_ENV_FILE="${REPO_ROOT}/scripts/ai/mistrallvibe/.env.mistrallvibe"
+VIBE_ENV_FILE="${REPO_ROOT}/scripts/ai/vibe/.env.vibe"
 
 RED='\033[0;31m'
 BLUE='\033[0;34m'
@@ -59,12 +59,12 @@ if timeout 5 test -f "${REPO_ROOT}/.wsl_proxy_env.sh" 2>/dev/null \
     source "${REPO_ROOT}/.wsl_proxy_env.sh" 2>/dev/null || true
 fi
 
-# Load Mistral Vibe configuration with timeout protection
-if timeout 5 test -f "${COMPAT_ENV_FILE}" 2>/dev/null; then
+# Load local Vibe configuration with timeout protection
+if timeout 5 test -f "${VIBE_ENV_FILE}" 2>/dev/null; then
     set -a
     # shellcheck disable=SC1090
-    if timeout 5 bash -c "source '${COMPAT_ENV_FILE}'" 2>/dev/null; then
-        source "${COMPAT_ENV_FILE}" 2>/dev/null || true
+    if timeout 5 bash -c "source '${VIBE_ENV_FILE}'" 2>/dev/null; then
+        source "${VIBE_ENV_FILE}" 2>/dev/null || true
     fi
     set +a
 fi

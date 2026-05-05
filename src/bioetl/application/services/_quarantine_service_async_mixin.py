@@ -6,6 +6,7 @@ from time import perf_counter
 from typing import TYPE_CHECKING, Protocol
 
 from bioetl.application.observability.span_helpers import traced_async_operation
+from bioetl.application.services._quarantine_models import QuarantineRecord
 from bioetl.application.services._quarantine_service_support import (
     _QUARANTINE_OPERATOR_ERRORS,
 )
@@ -14,7 +15,6 @@ from bioetl.domain.types import JsonDict
 if TYPE_CHECKING:
     from opentelemetry.trace import Span
 
-    from bioetl.application.services.quarantine_service import QuarantineRecord
     from bioetl.domain.ports import LoggerPort, QuarantinePort, TracingPort
 
 
@@ -121,8 +121,6 @@ class QuarantineServiceAsyncMixin:
         start_time: float,
     ) -> list[QuarantineRecord]:
         """Implement quarantine inspection without tracing concerns."""
-        from bioetl.application.services.quarantine_service import QuarantineRecord
-
         self.logger.debug(
             "Inspecting quarantine",
             pipeline=pipeline,

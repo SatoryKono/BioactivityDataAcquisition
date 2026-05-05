@@ -21,6 +21,6 @@ pwsh -File scripts/ai/vibe/launch.ps1 --help
 
 Historical compatibility context remains under `scripts/ai/mistrallvibe/`, but
 the supported launch surface is `python -m scripts.ai vibe` plus the canonical
-`launch.sh` / `launch.ps1` entrypoints. The direct module entrypoint remains
-available only as a compatibility path and should not be used as the primary
-documented entrypoint.
+`launch.sh` / `launch.ps1` entrypoints and the local `helper/` setup/check
+helpers. The direct module entrypoint remains available only as a compatibility
+path and should not be used as the primary documented entrypoint.
