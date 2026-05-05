@@ -238,18 +238,35 @@ def _registry_values(
     return frozenset(str(value) for value in current)
 
 
+def _target_component_xref_source_values(component: Any) -> set[str]:
+    if not isinstance(component, dict):
+        return set()
+    return {
+        str(xref["xref_src_db"])
+        for xref in component.get("target_component_xrefs") or []
+        if isinstance(xref, dict) and xref.get("xref_src_db")
+    }
+
+
+def _target_payload_xref_source_values(payload: dict[str, Any]) -> set[str]:
+    observed: set[str] = set()
+    for component in payload.get("target_components") or []:
+        observed.update(_target_component_xref_source_values(component))
+    return observed
+
+
+def _target_bronze_fixture_payloads() -> list[dict[str, Any]]:
+    payloads: list[dict[str, Any]] = []
+    for line in TARGET_BRONZE_FIXTURE_PATH.read_text(encoding="utf-8").splitlines():
+        if line.strip():
+            payloads.append(json.loads(line))
+    return payloads
+
+
 def _nested_target_xref_source_values() -> frozenset[str]:
     observed: set[str] = set()
-    for line in TARGET_BRONZE_FIXTURE_PATH.read_text(encoding="utf-8").splitlines():
-        if not line.strip():
-            continue
-        payload = json.loads(line)
-        for component in payload.get("target_components") or []:
-            if not isinstance(component, dict):
-                continue
-            for xref in component.get("target_component_xrefs") or []:
-                if isinstance(xref, dict) and xref.get("xref_src_db"):
-                    observed.add(str(xref["xref_src_db"]))
+    for payload in _target_bronze_fixture_payloads():
+        observed.update(_target_payload_xref_source_values(payload))
     return frozenset(observed)
 
 

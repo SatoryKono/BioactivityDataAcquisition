@@ -12,6 +12,11 @@ import polars as pl
 
 from bioetl.application.composite.checkpoint import CompositeCheckpointState
 from bioetl.application.composite.fsm_helper import FSMStateHelperService
+from bioetl.application.composite.runner_pkg import (
+    CompositePipelineRunner,
+    CompositeRunnerDependencies,
+    CompositeRuntimeConfig,
+)
 from bioetl.domain.composite.result import EnrichmentResult, MergeResult
 from bioetl.domain.composite.state import CompositePipelineState
 from bioetl.domain.locking import FencingToken
@@ -418,3 +423,77 @@ def create_magic_enricher_runner_factory() -> object:
         return runner
 
     return factory
+
+
+def create_runner_dependencies(
+    *,
+    logger: MagicMock | None = None,
+    config: MockCompositeConfig | object | None = None,
+    checkpoint_manager: object | None = None,
+    seed_runner_factory: object | None = None,
+    enricher_runner_factory: object | None = None,
+    key_extractor: object | None = None,
+    coordinator: object | None = None,
+    merger: object | None = None,
+    lock: object | None = None,
+    run_id: str | None = None,
+) -> CompositeRunnerDependencies:
+    """Create CompositeRunnerDependencies with reusable test defaults."""
+    effective_logger = logger or create_mock_logger()
+    effective_config = config or MockCompositeConfig()
+    effective_run_id = run_id or str(uuid4())
+    return CompositeRunnerDependencies(
+        seed_runner_factory=seed_runner_factory or new_seed_runner_factory(),
+        enricher_runner_factory=(
+            enricher_runner_factory or new_enricher_runner_factory()
+        ),
+        key_extractor=key_extractor or create_mock_key_extractor(),
+        coordinator=coordinator or create_mock_coordinator(),
+        merger=merger or create_mock_merger(),
+        checkpoint_manager=checkpoint_manager or create_mock_checkpoint_manager(),
+        logger=effective_logger,
+        lock=lock or create_mock_lock(),
+        fsm_state_helper=create_mock_fsm_state_helper(
+            config=effective_config,
+            logger=effective_logger,
+            run_id=effective_run_id,
+        ),
+    )
+
+
+def create_runner(
+    *,
+    config: MockCompositeConfig | object | None = None,
+    runtime: CompositeRuntimeConfig | None = None,
+    deps: CompositeRunnerDependencies | None = None,
+    logger: MagicMock | None = None,
+    checkpoint_manager: object | None = None,
+    seed_runner_factory: object | None = None,
+    enricher_runner_factory: object | None = None,
+    key_extractor: object | None = None,
+    coordinator: object | None = None,
+    merger: object | None = None,
+    lock: object | None = None,
+    run_id: str | None = None,
+) -> CompositePipelineRunner:
+    """Create CompositePipelineRunner with reusable dependency defaults."""
+    effective_config = config or MockCompositeConfig()
+    effective_run_id = run_id or str(uuid4())
+    effective_deps = deps or create_runner_dependencies(
+        logger=logger,
+        config=effective_config,
+        checkpoint_manager=checkpoint_manager,
+        seed_runner_factory=seed_runner_factory,
+        enricher_runner_factory=enricher_runner_factory,
+        key_extractor=key_extractor,
+        coordinator=coordinator,
+        merger=merger,
+        lock=lock,
+        run_id=effective_run_id,
+    )
+    return CompositePipelineRunner(
+        config=effective_config,
+        runtime=runtime or CompositeRuntimeConfig(),
+        deps=effective_deps,
+        run_id=effective_run_id,
+    )

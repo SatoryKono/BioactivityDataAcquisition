@@ -23,6 +23,8 @@ from bioetl.domain.ports.noop import NoOpTracing
 from bioetl.domain.types import BatchID, RunType, ValidationResult
 from bioetl.infrastructure.config import get_pipeline_config
 
+pytest_plugins = ("tests.unit.application.core.transformer_test_support",)
+
 
 def _write_temp_pipeline_config(
     base_path: Path, pipeline_name: str, soft_threshold: float, hard_threshold: float
@@ -132,63 +134,6 @@ def mock_services(mock_storage, mock_metrics, mock_quarantine_port):
 
 
 @pytest.fixture
-def mock_error_classifier():
-    """Create mock error classifier."""
-    return ErrorClassifier()
-
-
-@pytest.fixture
-def mock_context():
-    """Create mock pipeline context."""
-    mock_logger = MagicMock()
-    mock_logger.bind = MagicMock(return_value=mock_logger)
-    return PipelineContext(
-        run_id=uuid4(),
-        run_type=RunType.INCREMENTAL,
-        logger=mock_logger,
-    )
-
-
-@pytest.fixture
-def transform_callback():
-    """Create mock transform callback with deterministic business payload.
-
-    Simulates what BaseTransformer.entity_to_silver_record returns on the
-    canonical path after transient runtime provenance is removed.
-    """
-
-    async def transform(ctx, record, index):
-        await asyncio.sleep(0)
-        return {
-            "entity_id": record.get("id", "unknown"),
-            "value": record.get("value"),
-        }
-
-    return transform
-
-
-@pytest.fixture
-def gold_filter_callback():
-    """Create mock gold filter callback."""
-
-    def filter_gold(ctx, record):
-        return record.get("value", 0) > 5
-
-    return filter_gold
-
-
-@pytest.fixture
-def gold_transform_callback():
-    """Create mock gold transform callback."""
-
-    def transform_gold(ctx, record):
-        # Simple pass-through for tests
-        return record
-
-    return transform_gold
-
-
-@pytest.fixture
 def mock_gold_validator():
     """Create mock gold validator."""
     validator = MagicMock()
@@ -233,6 +178,29 @@ def _create_record_processor(
     )
 
 
+def _create_record_processor_config(
+    *,
+    pipeline_name: str = "test_provider_test_entity",
+    provider: str = "test_provider",
+    entity_type: str = "test_entity",
+    table_config: TableConfig | None = None,
+    dq_config: object | None = None,
+) -> RecordProcessorConfig:
+    """Build a minimal RecordProcessorConfig with optional overrides."""
+    config_kwargs = {
+        "pipeline_name": pipeline_name,
+        "provider": provider,
+        "entity_type": entity_type,
+        "silver_schema": MagicMock(),
+        "gold_schema": MagicMock(),
+    }
+    if table_config is not None:
+        config_kwargs["table_config"] = table_config
+    if dq_config is not None:
+        config_kwargs["dq_config"] = dq_config
+    return RecordProcessorConfig(**config_kwargs)
+
+
 @pytest.fixture
 def record_processor(
     mock_services,
@@ -244,14 +212,7 @@ def record_processor(
     mock_gold_validator,
 ):
     """Create RecordProcessor instance."""
-    config = RecordProcessorConfig(
-        pipeline_name="test_provider_test_entity",
-        provider="test_provider",
-        entity_type="test_entity",
-        silver_schema=MagicMock(),
-        gold_schema=MagicMock(),
-        table_config=TableConfig(),
-    )
+    config = _create_record_processor_config(table_config=TableConfig())
     return _create_record_processor(
         services=mock_services,
         error_classifier=mock_error_classifier,
@@ -373,12 +334,10 @@ class TestRecordProcessorProcessBatch:
         def filter_gold(ctx, record):
             return True
 
-        config = RecordProcessorConfig(
+        config = _create_record_processor_config(
             pipeline_name="crossref_publication",
             provider="crossref",
             entity_type="publication",
-            silver_schema=MagicMock(),
-            gold_schema=MagicMock(),
             table_config=TableConfig(primary_keys=("publication_doi",)),
         )
         processor = _create_record_processor(
@@ -435,12 +394,10 @@ class TestRecordProcessorProcessBatch:
                 **business_data,
             }
 
-        config = RecordProcessorConfig(
+        config = _create_record_processor_config(
             pipeline_name="crossref_publication",
             provider="crossref",
             entity_type="publication",
-            silver_schema=MagicMock(),
-            gold_schema=MagicMock(),
             table_config=TableConfig(primary_keys=("publication_doi",)),
         )
         processor = _create_record_processor(
@@ -468,7 +425,11 @@ class TestRecordProcessorProcessBatch:
         assert silver_records[0]["content_hash"] == silver_records[1]["content_hash"]
 
     async def test_process_batch_handles_transform_error(
-        self, mock_services, mock_error_classifier, mock_context
+        self,
+        mock_services,
+        mock_error_classifier,
+        mock_context,
+        mock_gold_validator,
     ):
         """Test that transform errors result in quarantine."""
 
@@ -478,16 +439,11 @@ class TestRecordProcessorProcessBatch:
                 raise DataQualityError("Invalid data")
             return {"entity_id": record.get("id"), "value": record.get("value")}
 
-        config = RecordProcessorConfig(
+        config = _create_record_processor_config(
             pipeline_name="test",
             provider="test",
             entity_type="test",
-            silver_schema=MagicMock(),
-            gold_schema=MagicMock(),
         )
-
-        gold_validator = MagicMock()
-        gold_validator.validate = MagicMock(return_value=ValidationResult(valid=True))
 
         processor = _create_record_processor(
             services=mock_services,
@@ -497,7 +453,7 @@ class TestRecordProcessorProcessBatch:
             transform_callback=failing_transform,
             gold_filter_callback=lambda c, r: True,
             gold_transform_callback=lambda c, r: r,
-            gold_validator=gold_validator,
+            gold_validator=mock_gold_validator,
         )
 
         records = [
@@ -514,7 +470,11 @@ class TestRecordProcessorProcessBatch:
         mock_services.quarantine.write_many.assert_called_once()
 
     async def test_process_batch_raises_non_data_quality_errors(
-        self, mock_services, mock_error_classifier, mock_context
+        self,
+        mock_services,
+        mock_error_classifier,
+        mock_context,
+        mock_gold_validator,
     ):
         """Test that non-data-quality errors are re-raised."""
         from bioetl.domain.exceptions import LockLostError
@@ -523,16 +483,11 @@ class TestRecordProcessorProcessBatch:
             await asyncio.sleep(0)
             raise LockLostError("resource_key", "test_run_id")
 
-        config = RecordProcessorConfig(
+        config = _create_record_processor_config(
             pipeline_name="test",
             provider="test",
             entity_type="test",
-            silver_schema=MagicMock(),
-            gold_schema=MagicMock(),
         )
-
-        gold_validator = MagicMock()
-        gold_validator.validate = MagicMock(return_value=ValidationResult(valid=True))
 
         processor = _create_record_processor(
             services=mock_services,
@@ -542,7 +497,7 @@ class TestRecordProcessorProcessBatch:
             transform_callback=failing_transform,
             gold_filter_callback=lambda c, r: True,
             gold_transform_callback=lambda c, r: r,
-            gold_validator=gold_validator,
+            gold_validator=mock_gold_validator,
         )
 
         records = [{"id": "test", "value": 5}]
@@ -571,6 +526,7 @@ class TestRecordProcessorProcessBatch:
         mock_services,
         mock_error_classifier,
         mock_context,
+        mock_gold_validator,
     ):
         """DQ hard threshold берётся из YAML и вызывает ошибку при превышении."""
 
@@ -587,17 +543,12 @@ class TestRecordProcessorProcessBatch:
                 raise DataQualityError("invalid")
             return {"entity_id": record.get("id"), "value": record.get("value")}
 
-        processor_config = RecordProcessorConfig(
+        processor_config = _create_record_processor_config(
             pipeline_name="test",
             provider="test",
             entity_type="test",
-            silver_schema=MagicMock(),
-            gold_schema=MagicMock(),
             dq_config=config.dq,
         )
-
-        gold_validator = MagicMock()
-        gold_validator.validate = MagicMock(return_value=ValidationResult(valid=True))
 
         processor = _create_record_processor(
             services=mock_services,
@@ -607,7 +558,7 @@ class TestRecordProcessorProcessBatch:
             transform_callback=transform,
             gold_filter_callback=lambda c, r: True,
             gold_transform_callback=lambda c, r: r,
-            gold_validator=gold_validator,
+            gold_validator=mock_gold_validator,
         )
 
         records = [
@@ -627,6 +578,7 @@ class TestRecordProcessorProcessBatch:
         mock_services,
         mock_error_classifier,
         mock_context,
+        mock_gold_validator,
     ):
         """Высокий soft-порог из YAML отключает предупреждения при низкой доле ошибок."""
 
@@ -643,17 +595,12 @@ class TestRecordProcessorProcessBatch:
                 raise DataQualityError("invalid")
             return {"entity_id": record.get("id"), "value": record.get("value")}
 
-        processor_config = RecordProcessorConfig(
+        processor_config = _create_record_processor_config(
             pipeline_name="test",
             provider="test",
             entity_type="test",
-            silver_schema=MagicMock(),
-            gold_schema=MagicMock(),
             dq_config=config.dq,
         )
-
-        gold_validator = MagicMock()
-        gold_validator.validate = MagicMock(return_value=ValidationResult(valid=True))
 
         processor = _create_record_processor(
             services=mock_services,
@@ -663,7 +610,7 @@ class TestRecordProcessorProcessBatch:
             transform_callback=transform,
             gold_filter_callback=lambda c, r: True,
             gold_transform_callback=lambda c, r: r,
-            gold_validator=gold_validator,
+            gold_validator=mock_gold_validator,
         )
 
         records = [
@@ -715,14 +662,7 @@ class TestRecordProcessorTracing:
         mock_tracer,
     ):
         """Create RecordProcessor with tracing enabled."""
-        config = RecordProcessorConfig(
-            pipeline_name="test_provider_test_entity",
-            provider="test_provider",
-            entity_type="test_entity",
-            silver_schema=MagicMock(),
-            gold_schema=MagicMock(),
-            table_config=TableConfig(),
-        )
+        config = _create_record_processor_config(table_config=TableConfig())
         return _create_record_processor(
             services=mock_services,
             error_classifier=mock_error_classifier,
@@ -788,14 +728,7 @@ class TestRecordProcessorTracing:
         mock_services.storage.write_bronze = AsyncMock(
             side_effect=RuntimeError("write failed")
         )
-        config = RecordProcessorConfig(
-            pipeline_name="test_provider_test_entity",
-            provider="test_provider",
-            entity_type="test_entity",
-            silver_schema=MagicMock(),
-            gold_schema=MagicMock(),
-            table_config=TableConfig(),
-        )
+        config = _create_record_processor_config(table_config=TableConfig())
         processor = _create_record_processor(
             services=mock_services,
             error_classifier=mock_error_classifier,
@@ -832,14 +765,7 @@ class TestRecordProcessorTracing:
         write_error = RuntimeError("silver write failed")
         mock_services.storage.write_silver = AsyncMock(side_effect=write_error)
 
-        config = RecordProcessorConfig(
-            pipeline_name="test_provider_test_entity",
-            provider="test_provider",
-            entity_type="test_entity",
-            silver_schema=MagicMock(),
-            gold_schema=MagicMock(),
-            table_config=TableConfig(),
-        )
+        config = _create_record_processor_config(table_config=TableConfig())
         processor = _create_record_processor(
             services=mock_services,
             error_classifier=mock_error_classifier,

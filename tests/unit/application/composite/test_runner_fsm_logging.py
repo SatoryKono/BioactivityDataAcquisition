@@ -14,11 +14,7 @@ from unittest.mock import AsyncMock, MagicMock
 import polars as pl
 import pytest
 
-from bioetl.application.composite.runner_pkg import (
-    CompositePipelineRunner,
-    CompositeRunnerDependencies,
-    CompositeRuntimeConfig,
-)
+from bioetl.application.composite.runner_pkg import CompositePipelineRunner, CompositeRuntimeConfig
 from bioetl.domain.composite.result import (
     EnrichmentResult,
     MergeResult,
@@ -148,25 +144,17 @@ def runner(
     mock_lock,
 ) -> CompositePipelineRunner:
     """Create a CompositePipelineRunner instance for testing."""
-    deps = CompositeRunnerDependencies(
+    return support.create_runner(
+        config=sample_composite_config,
+        runtime=CompositeRuntimeConfig(resume=False, dry_run=False),
+        logger=mock_logger,
+        checkpoint_manager=mock_checkpoint_manager,
         seed_runner_factory=mock_seed_runner_factory,
         enricher_runner_factory=mock_enricher_runner_factory,
         key_extractor=mock_key_extractor,
         coordinator=mock_coordinator,
         merger=mock_merger,
-        checkpoint_manager=mock_checkpoint_manager,
-        logger=mock_logger,
         lock=mock_lock,
-        fsm_state_helper=support.create_mock_fsm_state_helper(
-            logger=mock_logger,
-            config=sample_composite_config,
-            run_id="00000000-0000-0000-0000-000000000123",
-        ),
-    )
-    return CompositePipelineRunner(
-        config=sample_composite_config,
-        runtime=CompositeRuntimeConfig(resume=False, dry_run=False),
-        deps=deps,
         run_id="00000000-0000-0000-0000-000000000123",
     )
 
@@ -419,25 +407,17 @@ class TestFSMFailureLogging:
         mock_merger.merge = merge_call
         mock_merger.execute_request = merge_call
 
-        deps = CompositeRunnerDependencies(
+        runner = support.create_runner(
+            config=sample_composite_config,
+            runtime=CompositeRuntimeConfig(resume=False, dry_run=False),
+            logger=mock_logger,
+            checkpoint_manager=mock_checkpoint_manager,
             seed_runner_factory=mock_seed_runner_factory,
             enricher_runner_factory=mock_enricher_runner_factory,
             key_extractor=mock_key_extractor,
             coordinator=mock_coordinator,
             merger=mock_merger,
-            checkpoint_manager=mock_checkpoint_manager,
-            logger=mock_logger,
             lock=mock_lock,
-            fsm_state_helper=support.create_mock_fsm_state_helper(
-                logger=mock_logger,
-                config=sample_composite_config,
-                run_id="00000000-0000-0000-0000-000000000123",
-            ),
-        )
-        runner = CompositePipelineRunner(
-            config=sample_composite_config,
-            runtime=CompositeRuntimeConfig(resume=False, dry_run=False),
-            deps=deps,
             run_id="00000000-0000-0000-0000-000000000123",
         )
 
@@ -477,25 +457,17 @@ class TestFSMFailureLogging:
             }
         )
 
-        deps = CompositeRunnerDependencies(
+        runner = support.create_runner(
+            config=sample_composite_config,
+            runtime=CompositeRuntimeConfig(resume=False, dry_run=False),
+            logger=mock_logger,
+            checkpoint_manager=mock_checkpoint_manager,
             seed_runner_factory=mock_seed_runner_factory,
             enricher_runner_factory=mock_enricher_runner_factory,
             key_extractor=mock_key_extractor,
             coordinator=mock_coordinator,
             merger=mock_merger,
-            checkpoint_manager=mock_checkpoint_manager,
-            logger=mock_logger,
             lock=mock_lock,
-            fsm_state_helper=support.create_mock_fsm_state_helper(
-                logger=mock_logger,
-                config=sample_composite_config,
-                run_id="00000000-0000-0000-0000-000000000123",
-            ),
-        )
-        runner = CompositePipelineRunner(
-            config=sample_composite_config,
-            runtime=CompositeRuntimeConfig(resume=False, dry_run=False),
-            deps=deps,
             run_id="00000000-0000-0000-0000-000000000123",
         )
 
@@ -535,25 +507,17 @@ class TestFSMFailureLogging:
             runner.run = AsyncMock(side_effect=RuntimeError("Seed failed: API error"))
             return runner
 
-        deps = CompositeRunnerDependencies(
+        runner = support.create_runner(
+            config=sample_composite_config,
+            runtime=CompositeRuntimeConfig(resume=False, dry_run=False),
+            logger=mock_logger,
+            checkpoint_manager=mock_checkpoint_manager,
             seed_runner_factory=failing_seed_factory,
             enricher_runner_factory=mock_enricher_runner_factory,
             key_extractor=mock_key_extractor,
             coordinator=mock_coordinator,
             merger=mock_merger,
-            checkpoint_manager=mock_checkpoint_manager,
-            logger=mock_logger,
             lock=mock_lock,
-            fsm_state_helper=support.create_mock_fsm_state_helper(
-                logger=mock_logger,
-                config=sample_composite_config,
-                run_id="00000000-0000-0000-0000-000000000123",
-            ),
-        )
-        runner = CompositePipelineRunner(
-            config=sample_composite_config,
-            runtime=CompositeRuntimeConfig(resume=False, dry_run=False),
-            deps=deps,
             run_id="00000000-0000-0000-0000-000000000123",
         )
 
@@ -593,25 +557,17 @@ class TestDryRunLogging:
         mock_lock,
     ) -> None:
         """Test dry run logs FSM transition directly to COMPLETED."""
-        deps = CompositeRunnerDependencies(
+        runner = support.create_runner(
+            config=sample_composite_config,
+            runtime=CompositeRuntimeConfig(resume=False, dry_run=True),
+            logger=mock_logger,
+            checkpoint_manager=mock_checkpoint_manager,
             seed_runner_factory=mock_seed_runner_factory,
             enricher_runner_factory=mock_enricher_runner_factory,
             key_extractor=mock_key_extractor,
             coordinator=mock_coordinator,
             merger=mock_merger,
-            checkpoint_manager=mock_checkpoint_manager,
-            logger=mock_logger,
             lock=mock_lock,
-            fsm_state_helper=support.create_mock_fsm_state_helper(
-                logger=mock_logger,
-                config=sample_composite_config,
-                run_id="00000000-0000-0000-0000-000000000123",
-            ),
-        )
-        runner = CompositePipelineRunner(
-            config=sample_composite_config,
-            runtime=CompositeRuntimeConfig(resume=False, dry_run=True),
-            deps=deps,
             run_id="00000000-0000-0000-0000-000000000123",
         )
 
@@ -653,25 +609,17 @@ class TestNoEnrichersLogging:
         sample_composite_config.enrichers = []
         sample_composite_config.required_enrichers = []
 
-        deps = CompositeRunnerDependencies(
+        runner = support.create_runner(
+            config=sample_composite_config,
+            runtime=CompositeRuntimeConfig(resume=False, dry_run=False),
+            logger=mock_logger,
+            checkpoint_manager=mock_checkpoint_manager,
             seed_runner_factory=mock_seed_runner_factory,
             enricher_runner_factory=mock_enricher_runner_factory,
             key_extractor=mock_key_extractor,
             coordinator=mock_coordinator,
             merger=mock_merger,
-            checkpoint_manager=mock_checkpoint_manager,
-            logger=mock_logger,
             lock=mock_lock,
-            fsm_state_helper=support.create_mock_fsm_state_helper(
-                logger=mock_logger,
-                config=sample_composite_config,
-                run_id="00000000-0000-0000-0000-000000000123",
-            ),
-        )
-        runner = CompositePipelineRunner(
-            config=sample_composite_config,
-            runtime=CompositeRuntimeConfig(resume=False, dry_run=False),
-            deps=deps,
             run_id="00000000-0000-0000-0000-000000000123",
         )
 
