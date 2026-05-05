@@ -32,8 +32,21 @@ if [[ ! -x "${ENSURE_SCRIPT}" ]]; then
     exit 1
 fi
 
-GEMINI_BIN="$("${ENSURE_SCRIPT}" --print-bin)"
-GEMINI_PREFIX="$("${ENSURE_SCRIPT}" --print-prefix)"
+GEMINI_BIN=""
+GEMINI_PREFIX=""
+if timeout 10 "${ENSURE_SCRIPT}" --no-install --print-bin >/dev/null 2>&1; then
+    GEMINI_BIN="$(timeout 10 "${ENSURE_SCRIPT}" --no-install --print-bin 2>/dev/null || echo "")"
+    GEMINI_PREFIX="$(timeout 10 "${ENSURE_SCRIPT}" --no-install --print-prefix 2>/dev/null || echo "")"
+fi
+
+if [[ -z "${GEMINI_BIN}" ]]; then
+    echo "[INFO] Gemini CLI not found, attempting installation..." >&2
+    if timeout 120 "${ENSURE_SCRIPT}" --ensure >/dev/null 2>&1; then
+        GEMINI_BIN="$(timeout 10 "${ENSURE_SCRIPT}" --print-bin 2>/dev/null || echo "")"
+        GEMINI_PREFIX="$(timeout 10 "${ENSURE_SCRIPT}" --print-prefix 2>/dev/null || echo "")"
+    fi
+fi
+
 GEMINI_HOME="$(cd "${GEMINI_PREFIX}/.." && pwd)/home"
 echo "[INFO] Using Gemini CLI from managed prefix: ${GEMINI_BIN}"
 
@@ -57,11 +70,14 @@ if [[ "${GEMINI_SKIP_MCP_SETUP:-0}" != "1" ]]; then
         echo "[ERROR] Gemini MCP setup helper not found: ${ENSURE_MCP_SCRIPT}" >&2
         exit 1
     fi
-    "${ENSURE_MCP_SCRIPT}" \
+    if ! timeout 60 "${ENSURE_MCP_SCRIPT}" \
         --ensure \
         --gemini-bin "${GEMINI_BIN}" \
-        --gemini-prefix "${GEMINI_PREFIX}" >/dev/null
-    echo "[INFO] MCP configuration synchronized"
+        --gemini-prefix "${GEMINI_PREFIX}" >/dev/null 2>&1; then
+        echo "[WARN] MCP setup timed out or failed, continuing anyway" >&2
+    else
+        echo "[INFO] MCP configuration synchronized"
+    fi
 fi
 
 cd "${REPO_ROOT}"

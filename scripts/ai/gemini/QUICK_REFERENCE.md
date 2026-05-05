@@ -4,24 +4,24 @@
 
 **From Windows (PowerShell):**
 ```powershell
-.\scripts\ai\gemini\gemini-interactive.ps1
+.\scripts\ai\gemini\run-gemini.ps1
 ```
 
 **From WSL/Bash:**
 ```bash
-bash scripts/ai/gemini/gemini-interactive.sh
+bash scripts/ai/gemini/run-gemini.sh
 ```
 
 ## 📝 Send a Single Prompt (No Interactive Loop)
 
 **PowerShell:**
 ```powershell
-.\scripts\ai\gemini\gemini-interactive.ps1 "analyze the repository structure"
+.\scripts\ai\gemini\run-gemini.ps1 "analyze the repository structure"
 ```
 
 **Bash:**
 ```bash
-bash scripts/ai/gemini/gemini-interactive.sh "explain how Docker works"
+bash scripts/ai/gemini/run-gemini.sh "explain how Docker works"
 ```
 
 ## ⚡ Auto-Execute Mode (YOLO - Auto-Approve All Actions)
@@ -52,6 +52,9 @@ bash scripts/ai/gemini/run-gemini.sh mcp-setup
 
 # Show help
 bash scripts/ai/gemini/run-gemini.sh help
+
+# Launch without MCP sync for one run
+bash scripts/ai/gemini/headless.sh
 ```
 
 ## 🔑 API Key Configuration
@@ -69,11 +72,11 @@ bash scripts/ai/gemini/run-gemini.sh help
 Override:
 ```bash
 # Bash
-GEMINI_MODEL=gemini-2.5-pro bash scripts/ai/gemini/gemini-interactive.sh
+GEMINI_MODEL=gemini-2.5-pro bash scripts/ai/gemini/run-gemini.sh
 
 # PowerShell
 $env:GEMINI_MODEL="gemini-2.5-pro"
-.\scripts\ai\gemini\gemini-interactive.ps1
+.\scripts\ai\gemini\run-gemini.ps1
 ```
 
 ## 🧠 MCP Servers
@@ -107,22 +110,22 @@ Commands in interactive mode:
 
 **Code Review:**
 ```
-bash scripts/ai/gemini/gemini-interactive.sh "review src/main.py for bugs"
+bash scripts/ai/gemini/run-gemini.sh "review src/main.py for bugs"
 ```
 
 **Generate Documentation:**
 ```
-bash scripts/ai/gemini/gemini-interactive.sh "write README.md for this project"
+bash scripts/ai/gemini/run-gemini.sh "write README.md for this project"
 ```
 
 **Architecture Analysis:**
 ```
-.\scripts\ai\gemini\gemini-interactive.ps1 "analyze the system architecture and suggest improvements"
+.\scripts\ai\gemini\run-gemini.ps1 "analyze the system architecture and suggest improvements"
 ```
 
 **Docker Troubleshooting:**
 ```
-bash scripts/ai/gemini/gemini-interactive.sh "why is my Docker build failing?"
+bash scripts/ai/gemini/run-gemini.sh "why is my Docker build failing?"
 ```
 
 ## 🐛 Troubleshooting

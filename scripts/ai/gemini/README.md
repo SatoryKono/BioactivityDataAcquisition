@@ -10,6 +10,8 @@ This surface mirrors the operational shape of `scripts/ai/codex`: one entrypoint
 scripts/ai/gemini/
 ├── run-gemini.ps1                 # PowerShell entrypoint, delegates to WSL
 ├── run-gemini.sh                  # WSL/Bash entrypoint
+├── headless.ps1                   # PowerShell transport that skips MCP sync
+├── headless.sh                    # WSL/Bash launcher without MCP sync
 ├── .env.gemini                    # Local API key config, git-ignored
 ├── helper/
 │   ├── check-env.ps1              # PowerShell compatibility check wrapper
@@ -39,6 +41,7 @@ bash scripts/ai/gemini/run-gemini.sh check
 bash scripts/ai/gemini/run-gemini.sh setup
 nano scripts/ai/gemini/.env.gemini
 bash scripts/ai/gemini/run-gemini.sh
+bash scripts/ai/gemini/headless.sh
 ```
 
 ## Commands
@@ -53,9 +56,13 @@ bash scripts/ai/gemini/run-gemini.sh setup         # Install managed CLI
 bash scripts/ai/gemini/run-gemini.sh mcp-check     # Check MCP configuration
 bash scripts/ai/gemini/run-gemini.sh mcp-setup     # Sync MCP configuration
 bash scripts/ai/gemini/run-gemini.sh update        # Reinstall/update CLI
+bash scripts/ai/gemini/headless.sh exec "..."      # Launch without MCP sync
 ```
 
 `exec` maps to Gemini CLI headless mode with `--approval-mode yolo`. Use it only for tasks where auto-approved file/tool actions are acceptable.
+
+`gemini-interactive.sh` remains as a thin compatibility wrapper over
+`run-gemini.sh`; it no longer owns setup or environment validation logic.
 
 ## Runtime Model
 
@@ -102,3 +109,4 @@ Docker-backed MCP servers require Docker Desktop or a working Docker CLI. If Doc
 - `.env.gemini` is local and git-ignored. Do not copy real keys into docs, logs, reports, or PRs.
 - `.wsl_proxy_env.sh` is sourced automatically when present before network/API operations.
 - PowerShell does not duplicate setup logic; it resolves the repository WSL path and delegates to `run-gemini.sh`.
+- `headless.sh` / `headless.ps1` set `GEMINI_SKIP_MCP_SETUP=1` for one launch and then delegate back to the canonical launcher.
