@@ -224,3 +224,24 @@ git push origin --delete <branch-name>
 - For branch consolidation, prefer selective cherry-pick over merging noisy automation branches.
 - In mixed Windows + WSL work, do not share the same `.venv`; use `.venv-win`
   in PowerShell and `${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}` in WSL.
+
+
+## GitHub Actions pinning standard
+
+All `uses:` references in `.github/workflows/*.yml` and `.github/actions/*/action.yml` must use:
+
+- full 40-char pinned commit SHA;
+- inline version comment (e.g. `# v6.0.2` or `# release/v1`).
+
+Disallowed patterns:
+
+- major or tag refs without SHA (`@v4`, `@v5`, `@main`, `@master`);
+- deprecated major aliases from denylist (e.g., `v0`..`v9`) instead of explicit pinned commit refs.
+
+Local validation command:
+
+```bash
+uv run python -m scripts.engineering.repo check-gh-actions-pins
+```
+
+This validation is also part of the CI `governance-preflight` lane.

@@ -43,6 +43,7 @@ COMMANDS = {
     "check-cleanliness": "audit_root_cleanliness.py",
     "check-cleanup-governance": "check_cleanup_governance.py",
     "check-root-review-registry": "check_root_hygiene_review_registry.py",
+    "check-gh-actions-pins": "check_github_action_pins.py",
     "preflight-cleanup": "preflight_cleanup.sh",
     "split-testing-roadmap": "split_testing_roadmap_issue.py",
     "sync-docs-issues": "sync_docs_issues.py",

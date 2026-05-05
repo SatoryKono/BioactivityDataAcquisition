@@ -47,7 +47,7 @@ jobs:
 
         steps:
             -   name: Checkout code
-                uses: actions/checkout@v6
+                uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
             -   name: Install uv + cache + dependencies
                 uses: ./.github/actions/setup-python-uv
@@ -88,7 +88,7 @@ jobs:
 
         steps:
             -   name: Checkout code
-                uses: actions/checkout@v6
+                uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
             -   name: Setup Python + uv
                 uses: ./.github/actions/setup-python-uv
@@ -105,7 +105,7 @@ jobs:
                       --junitxml=reports/e2e/control-plane-completeness.xml
 
             -   name: Upload control-plane completeness artifacts
-                uses: actions/upload-artifact@v4
+                uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
                 if: always()
                 with:
                     name: control-plane-completeness
@@ -125,7 +125,7 @@ jobs:
 
         steps:
             -   name: Checkout code
-                uses: actions/checkout@v6
+                uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
             -   name: Setup Python + uv
                 uses: ./.github/actions/setup-python-uv
@@ -146,7 +146,7 @@ jobs:
 
             -   name: Upload contract confidence telemetry
                 if: always()
-                uses: actions/upload-artifact@v4
+                uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
                 with:
                     name: test-telemetry-contract-confidence
                     path: reports/test-telemetry/junit-contract-confidence.xml
@@ -161,7 +161,7 @@ jobs:
 
         steps:
             -   name: Checkout code
-                uses: actions/checkout@v6
+                uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
             -   name: Setup Python + uv
                 uses: ./.github/actions/setup-python-uv
@@ -190,6 +190,9 @@ jobs:
 
             -   name: Validate scripts catalog governance policy
                 run: uv run python -m scripts.engineering.repo check-catalog --catalog scripts/engineering/repo/catalog.yaml
+
+            -   name: Validate GitHub Actions pinning policy
+                run: uv run python -m scripts.engineering.repo check-gh-actions-pins
 
             -   name: Validate deterministic Neo4j memory ontology invariants
                 run: uv run python -m scripts.engineering.ci neo4j-memory
@@ -254,7 +257,7 @@ jobs:
 
         steps:
             -   name: Checkout code
-                uses: actions/checkout@v6
+                uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
             -   name: Setup Python + uv
                 uses: ./.github/actions/setup-python-uv
@@ -290,7 +293,7 @@ jobs:
 
         steps:
             -   name: Checkout code
-                uses: actions/checkout@v6
+                uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
             -   name: Setup Python + uv
                 uses: ./.github/actions/setup-python-uv
@@ -349,7 +352,7 @@ jobs:
 
         steps:
             -   name: Checkout code
-                uses: actions/checkout@v6
+                uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
             -   name: Setup Python + uv
                 uses: ./.github/actions/setup-python-uv
@@ -366,7 +369,7 @@ jobs:
 
             -   name: Upload Track D telemetry
                 if: always()
-                uses: actions/upload-artifact@v4
+                uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
                 with:
                     name: test-telemetry-track-d
                     path: reports/test-telemetry/junit-track-d.xml
@@ -382,7 +385,7 @@ jobs:
 
         steps:
             -   name: Checkout code
-                uses: actions/checkout@v6
+                uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
             -   name: Setup Python + uv
                 uses: ./.github/actions/setup-python-uv
@@ -401,7 +404,7 @@ jobs:
 
         steps:
             -   name: Checkout code
-                uses: actions/checkout@v6
+                uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
             -   name: Setup Python + uv
                 uses: ./.github/actions/setup-python-uv
@@ -416,7 +419,7 @@ jobs:
 
             -   name: Upload quality metrics artifact
                 if: always()
-                uses: actions/upload-artifact@v4
+                uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
                 with:
                     name: ci-quality-metrics
                     path: reports/quality/ci-quality-metrics.json
@@ -431,7 +434,7 @@ jobs:
 
         steps:
             -   name: Checkout code
-                uses: actions/checkout@v6
+                uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
             -   name: Setup Python + uv
                 uses: ./.github/actions/setup-python-uv
@@ -454,7 +457,7 @@ jobs:
 
             -   name: Upload fast test telemetry
                 if: always()
-                uses: actions/upload-artifact@v4
+                uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
                 with:
                     name: test-telemetry-fast
                     path: reports/test-telemetry/junit-fast.xml
@@ -494,7 +497,7 @@ jobs:
 
         steps:
             -   name: Checkout code
-                uses: actions/checkout@v6
+                uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
             -   name: Setup Python + uv
                 uses: ./.github/actions/setup-python-uv
@@ -525,7 +528,7 @@ jobs:
 
             -   name: Upload coverage shard (${{ matrix.test-group.name }} on Python 3.12)
                 if: always() && matrix.python-version == '3.12'
-                uses: actions/upload-artifact@v4
+                uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
                 with:
                     name: coverage-data-${{ matrix.test-group.name }}
                     path: reports/coverage/.coverage.${{ matrix.test-group.name }}
@@ -534,7 +537,7 @@ jobs:
 
             -   name: Upload test telemetry (${{ matrix.test-group.name }} on Python 3.12)
                 if: always() && matrix.python-version == '3.12'
-                uses: actions/upload-artifact@v4
+                uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
                 with:
                     name: test-telemetry-${{ matrix.test-group.name }}
                     path: reports/test-telemetry/junit.${{ matrix.test-group.name }}.xml
@@ -550,7 +553,7 @@ jobs:
 
         steps:
             -   name: Checkout code
-                uses: actions/checkout@v6
+                uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
             -   name: Setup Python + uv
                 uses: ./.github/actions/setup-python-uv
@@ -569,7 +572,7 @@ jobs:
 
             -   name: Upload memory test telemetry
                 if: always()
-                uses: actions/upload-artifact@v4
+                uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
                 with:
                     name: test-telemetry-memory
                     path: reports/test-telemetry/junit-memory.xml
@@ -585,7 +588,7 @@ jobs:
 
         steps:
             -   name: Checkout code
-                uses: actions/checkout@v6
+                uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
             -   name: Setup Python + uv
                 uses: ./.github/actions/setup-python-uv
@@ -640,7 +643,7 @@ jobs:
                     fi
 
             -   name: Upload performance budget report
-                uses: actions/upload-artifact@v4
+                uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
                 if: always()
                 with:
                     name: performance-hotspot-budgets
@@ -666,7 +669,7 @@ jobs:
 
         steps:
             -   name: Checkout code
-                uses: actions/checkout@v6
+                uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
             -   name: Setup Python + uv
                 uses: ./.github/actions/setup-python-uv
@@ -676,7 +679,7 @@ jobs:
                     pytest-cache-fingerprint: ${{ hashFiles('tests/**/*.py', 'tests/conftest.py', 'pyproject.toml') }}
 
             -   name: Download coverage shards
-                uses: actions/download-artifact@v4
+                uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
                 with:
                     pattern: coverage-data-*
                     path: reports/coverage
@@ -701,7 +704,7 @@ jobs:
                     uv run python -m coverage xml -o reports/coverage/coverage.xml
 
             -   name: Upload Coverage Report
-                uses: actions/upload-artifact@v4
+                uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
                 if: always()
                 with:
                     name: coverage-report
@@ -721,7 +724,7 @@ jobs:
 
         steps:
             -   name: Checkout code
-                uses: actions/checkout@v6
+                uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
             -   name: Setup Python + uv
                 uses: ./.github/actions/setup-python-uv
@@ -729,7 +732,7 @@ jobs:
                     python-version: "3.12"
 
             -   name: Download JUnit telemetry shards
-                uses: actions/download-artifact@v4
+                uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
                 continue-on-error: true
                 with:
                     pattern: test-telemetry-*
@@ -892,7 +895,7 @@ jobs:
 
             -   name: Upload slow-test telemetry
                 if: always()
-                uses: actions/upload-artifact@v4
+                uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
                 with:
                     name: test-duration-telemetry
                     path: |
@@ -903,7 +906,7 @@ jobs:
 
             -   name: Upload test-health telemetry
                 if: always()
-                uses: actions/upload-artifact@v4
+                uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
                 with:
                     name: test-health-telemetry
                     path: reports/quality/test-runs/

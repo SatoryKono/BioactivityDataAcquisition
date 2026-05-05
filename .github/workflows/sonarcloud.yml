@@ -35,7 +35,7 @@ jobs:
           fi
 
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           fetch-depth: 0
 
@@ -52,7 +52,7 @@ jobs:
 
       - name: Run SonarCloud scan
         if: steps.sonar-token.outputs.available == 'true'
-        uses: SonarSource/sonarqube-scan-action@fd88b7d7ccbaefd23d8f36f73b59db7a3d246602
+        uses: SonarSource/sonarqube-scan-action@fd88b7d7ccbaefd23d8f36f73b59db7a3d246602 # pinned
         with:
           args: >
             -Dsonar.sources=src/bioetl
@@ -69,7 +69,7 @@ jobs:
 
       - name: Upload Sonar baseline artifact
         if: steps.sonar-token.outputs.available == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: sonar-baseline-report
           path: reports/quality/sonar_baseline_report.json
