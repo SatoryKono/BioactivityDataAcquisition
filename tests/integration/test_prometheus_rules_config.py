@@ -751,7 +751,13 @@ def test_canonical_current_status_recording_rules_exist() -> None:
     assert not missing, f"Missing canonical current-status records: {missing}"
 
     for record_name, expected_fragment in expected.items():
-        assert expected_fragment in record_map[record_name].get("expr", "")
+        expressions = [
+            str(rule.get("expr", ""))
+            for rule in _recording_rules_named(payload, record_name)
+        ]
+        assert any(expected_fragment in expr for expr in expressions), (
+            f"{record_name} must reference {expected_fragment}"
+        )
 
 
 def test_canonical_current_status_rules_do_not_use_grafana_range_or_zero_fallback() -> None:

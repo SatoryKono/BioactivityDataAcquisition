@@ -13,7 +13,11 @@ from bioetl.composition.bootstrap.cli.noop import create_noop_logger
 from bioetl.composition.factories.datasource.data_source_factory import (
     DataSourceFactory,
 )
+from bioetl.composition.providers._registration_contracts import (
+    create_provider_assembly_support,
+)
 from bioetl.domain.ports import MetricsPort
+from bioetl.infrastructure.config import get_settings
 from bioetl.infrastructure.adapters.http.health_monitor import ProviderHealthMonitor
 from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
 from bioetl.infrastructure.time import SystemClock
@@ -41,6 +45,34 @@ class HealthServerDependencies:
     metrics: MetricsPort
 
 
+@dataclass(frozen=True, slots=True)
+class _HealthCheckDataSourceFactory:
+    """Composition-aware factory wrapper for CLI/server health probes."""
+
+    logger: object
+    metrics: MetricsPort
+    settings: object
+
+    @staticmethod
+    def list_providers() -> list[str]:
+        return DataSourceFactory.list_providers()
+
+    def create(self, provider: str) -> object:
+        support = create_provider_assembly_support()
+        http_client = support.create_http_client(
+            provider,
+            self.settings,
+            metrics=self.metrics,
+        )
+        return DataSourceFactory.create(
+            provider,
+            http_client=http_client,
+            logger=self.logger,
+            settings=self.settings,
+            metrics=self.metrics,
+        )
+
+
 def bootstrap_health_service() -> HealthService:
     """Bootstrap HealthService for CLI health operations.
 
@@ -57,10 +89,16 @@ def bootstrap_health_service() -> HealthService:
         ...     logger.info("All providers healthy")
     """
     noop_logger = create_noop_logger()
+    metrics = PrometheusMetrics()
+    settings = get_settings()
 
     return HealthService(
         logger=noop_logger,
-        _factory=DataSourceFactory,
+        _factory=_HealthCheckDataSourceFactory(
+            logger=noop_logger,
+            metrics=metrics,
+            settings=settings,
+        ),
         clock=SystemClock(),
     )
 

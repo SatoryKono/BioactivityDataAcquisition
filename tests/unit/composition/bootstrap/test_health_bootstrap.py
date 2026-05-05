@@ -13,9 +13,6 @@ from bioetl.composition.bootstrap.cli.health import (
     bootstrap_health_server_dependencies,
     bootstrap_health_service,
 )
-from bioetl.composition.factories.datasource.data_source_factory import (
-    DataSourceFactory,
-)
 from bioetl.domain.ports import MetricsPort
 from bioetl.infrastructure.adapters.http.health_monitor import ProviderHealthMonitor
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
@@ -75,12 +72,15 @@ class TestBootstrapHealthService:
         # HealthService uses logger attribute (dataclass)
         assert isinstance(result.logger, NoOpLogger)
 
-    def test_bootstrap_health_service_wires_data_source_factory(self):
-        """Test that bootstrap_health_service wires DataSourceFactory."""
+    def test_bootstrap_health_service_wires_composition_aware_factory(self):
+        """Test that bootstrap_health_service wires provider-aware factory wrapper."""
         result = bootstrap_health_service()
 
-        # HealthService uses _factory attribute (private)
-        assert result._factory is DataSourceFactory
+        factory = result._factory
+        assert hasattr(factory, "create")
+        assert hasattr(factory, "list_providers")
+        assert callable(factory.create)
+        assert callable(factory.list_providers)
 
     def test_bootstrap_health_service_wires_system_clock(self):
         """Test that bootstrap_health_service wires SystemClock."""
