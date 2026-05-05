@@ -169,37 +169,10 @@ jobs:
                     C901_RESULT: ${{ needs['c901-governance'].result }}
                     ARCH_RESULT: ${{ needs['arch-tests'].result }}
                 run: |
-                    {
-                      echo "## checks-complete triage"
-                      echo ""
-                      echo "If this job fails, open logs in this strict order:"
-                      echo "1. lint"
-                      echo "2. c901-governance"
-                      echo "3. arch-tests"
-                    } >> "$GITHUB_STEP_SUMMARY"
-
-                    first_failure="none"
-                    for job in lint c901-governance arch-tests; do
-                      case "$job" in
-                        lint) result="$LINT_RESULT" ;;
-                        c901-governance) result="$C901_RESULT" ;;
-                        arch-tests) result="$ARCH_RESULT" ;;
-                      esac
-
-                      if [[ "$result" != "success" ]]; then
-                        first_failure="$job"
-                        break
-                      fi
-                    done
-
-                    echo "" >> "$GITHUB_STEP_SUMMARY"
-                    echo "- first-failure job: ${first_failure}" >> "$GITHUB_STEP_SUMMARY"
-
                     if [[ "$LINT_RESULT" != "success" || \
                           "$C901_RESULT" != "success" || \
                           "$ARCH_RESULT" != "success" ]]; then
-                      echo "One or more checks failed."
-                      echo "Triage order: lint -> c901-governance -> arch-tests."
+                      echo "One or more checks failed"
                       exit 1
                     fi
                     echo "All checks completed successfully."
