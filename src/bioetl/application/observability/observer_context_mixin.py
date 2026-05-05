@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 from typing import TYPE_CHECKING, Any, Self
 from uuid import UUID
 
+from bioetl.application.observability.observer_contract import LifecyclePhase
 from bioetl.application.runtime_timestamps import capture_runtime_timing_anchor
 from bioetl.domain.aggregates.events import (
     PipelineCompleted,
@@ -188,8 +189,6 @@ class _ObserverContextManagerMixin(_ObserverEventMixinBase):
         exc_val: BaseException | None,
     ) -> None:
         """Emit final pipeline lifecycle event."""
-        from bioetl.application.observability.observer import LifecyclePhase
-
         if status == "failed":
             self.emit_domain_event(
                 PipelineFailed(

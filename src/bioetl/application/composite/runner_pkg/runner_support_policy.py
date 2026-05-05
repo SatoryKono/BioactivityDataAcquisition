@@ -8,7 +8,7 @@ from datetime import datetime
 from bioetl.application.composite.preflight_validator import (
     CompositePreflightValidationService,
 )
-from bioetl.application.composite.runner_pkg.runner_completion_helpers import (
+from bioetl.application.composite.runner_pkg.runner_result_types import (
     CompositeResultBuildRequest,
 )
 from bioetl.application.composite.runner_pkg.runner_support_types import (

@@ -169,11 +169,11 @@ groups:
         labels:
           lifecycle_state: pending_no_recent_gold
         expr: >-
-          ((((sum by (pipeline, run_type) (increase(bioetl_pipeline_runs_total[15m])) > bool 0)
+          (((sum by (pipeline, run_type) (increase(bioetl_pipeline_runs_total[15m])) > bool 0)
           unless on (pipeline, run_type) (sum by (pipeline, run_type) (increase(bioetl_records_processed_total{stage="gold"}[15m])) > bool 0))
           unless on (pipeline, run_type) (bioetl_runtime_alert_condition_gold_write_missing_15m > bool 0))
-          unless on (pipeline, run_type) (bioetl_l0_input_status{input="runtime"} >= bool 3))
-          * on (pipeline) group_left(run_type) (bioetl_pipeline_stage_expected{stage="gold"} == bool 1)) * 2
+          unless on (pipeline, run_type) (bioetl_l0_input_status{input="runtime"} >= bool 3)
+          * on (pipeline) group_left(run_type) (bioetl_pipeline_stage_expected{stage="gold"} == bool 1) * 2
       - record: bioetl_l1_gold_lifecycle_status
         labels:
           lifecycle_state: disabled
@@ -184,9 +184,9 @@ groups:
         labels:
           lifecycle_state: healthy_recent_gold
         expr: >-
-          (((sum by (pipeline, run_type) (increase(bioetl_records_processed_total{stage="gold"}[15m])) > bool 0)
+          ((sum by (pipeline, run_type) (increase(bioetl_records_processed_total{stage="gold"}[15m])) > bool 0)
           unless on (pipeline, run_type) (bioetl_runtime_alert_condition_gold_write_missing_15m > bool 0))
-          unless on (pipeline, run_type) (bioetl_l0_input_status{input="runtime"} >= bool 3)) * 1
+          unless on (pipeline, run_type) (bioetl_l0_input_status{input="runtime"} >= bool 3) * 1
       - record: bioetl_l1_control_plane_current_status
         expr: bioetl_l0_input_status{input="control_plane"}
       - record: bioetl_l1_provider_global_status

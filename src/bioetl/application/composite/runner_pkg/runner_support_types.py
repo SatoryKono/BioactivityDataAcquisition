@@ -3,8 +3,6 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from dataclasses import dataclass
-from datetime import datetime
 from typing import TYPE_CHECKING, Protocol
 
 from bioetl.application.composite.checkpoint import (
@@ -17,6 +15,10 @@ from bioetl.application.composite.lifecycle_observer_service import (
 )
 from bioetl.application.composite.preflight_validator import (
     CompositePreflightValidationService,
+)
+from bioetl.application.composite.runner_pkg.runner_result_types import (
+    CompositeResultBuildContext,
+    _PreparedCompositeResultContext,
 )
 from bioetl.application.composite.runtime_models import (
     CompositeExecutionContext,
@@ -31,12 +33,6 @@ from bioetl.domain.ports import (
     MetricsPort,
     TracingPort,
 )
-
-if TYPE_CHECKING:
-    from bioetl.application.composite.runner_pkg.runner_completion_helpers import (
-        CompositeResultBuildContext,
-    )
-
 
 class _CompositeRunnerSupportHostProtocol(Protocol):
     _config: CompositeConfig
@@ -104,13 +100,3 @@ class _PreparedPreflightValidationContext:
 
     validator: CompositePreflightValidationService
     field_count: int
-
-
-@dataclass(frozen=True, slots=True)
-class _PreparedCompositeResultContext:
-    """Resolved completion metadata used for final result assembly."""
-
-    artifacts: CompositeExecutionContext
-    completed_at: datetime
-    total_duration: float
-    had_warnings: bool

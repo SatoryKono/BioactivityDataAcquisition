@@ -200,7 +200,11 @@ def test_dashboard_has_required_variables(dashboard_path):
         "bioetl-overview-v2.json": {"pipeline", "run_type"},
         "bioetl-dq-v2.json": {"pipeline", "run_type", "stage"},
         "bioetl-runtime.json": {"pipeline", "run_type", "stage"},
-        "bioetl-provider-health-v2.json": {"provider", "adapter"},
+        "bioetl-provider-health-v2.json": {
+            "provider",
+            "pipeline_context",
+            "adapter",
+        },
         "bioetl-control-plane-v1.json": {"pipeline", "run_type"},
         "bioetl-workflow-overview.json": {"workflow", "status"},
         "bioetl-silver-reject-explorer.json": {
