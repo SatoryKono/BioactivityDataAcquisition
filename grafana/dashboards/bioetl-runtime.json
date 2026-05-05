@@ -209,7 +209,7 @@
         "textMode": "auto",
         "dataLinks": [
           {
-            "title": "Open Control Plane v1 (manifest/checkpoint)",
+            "title": "Open 5. Control Plane (manifest/checkpoint)",
             "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
           },
           {
@@ -473,7 +473,7 @@
         "textMode": "auto",
         "dataLinks": [
           {
-            "title": "Open Control Plane v1 (checkpoint/replay)",
+            "title": "Open 5. Control Plane (checkpoint/replay)",
             "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
           },
           {
@@ -541,7 +541,7 @@
         "cellHeight": "sm",
         "dataLinks": [
           {
-            "title": "Open Control Plane v1 (runtime blocker handoff)",
+            "title": "Open 5. Control Plane (runtime blocker handoff)",
             "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
             "tooltip": "Open control-plane triage with blocker scope"
           },
@@ -732,7 +732,7 @@
             },
             "dataLinks": [
               {
-                "title": "Open Control Plane v1 (checkpoint/replay)",
+                "title": "Open 5. Control Plane (checkpoint/replay)",
                 "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
               },
               {
@@ -1633,7 +1633,7 @@
             "textMode": "auto",
             "dataLinks": [
               {
-                "title": "Open Control Plane v1 (manifest/checkpoint)",
+                "title": "Open 5. Control Plane (manifest/checkpoint)",
                 "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
               },
               {
@@ -1879,7 +1879,7 @@
             "textMode": "auto",
             "dataLinks": [
               {
-                "title": "Open Control Plane v1 (checkpoint/replay)",
+                "title": "Open 5. Control Plane (checkpoint/replay)",
                 "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
               },
               {
