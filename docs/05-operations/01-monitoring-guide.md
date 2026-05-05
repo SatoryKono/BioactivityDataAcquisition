@@ -233,6 +233,8 @@ Record-level dashboard для `FILTERED_OUT_SILVER` записей (quarantine-b
 - **Filtered Records Table**: полный список отфильтрованных записей с server-side filtering/pagination.
 - **Selected Record Details**: exact reject context по выбранному `payload_hash`.
 - **Top Reject Reasons / Fields / Signatures**: агрегаты в том же scoped контексте.
+- **First Action / No-Data Semantics**: поясняет, когда `0` rejects является OK,
+  а когда `No data`, `unknown` pipeline или `bronze_records=0` остаются UNKNOWN.
 - **Datasource**: `Quarantine Explorer` (JSON/Infinity), не Prometheus.
 - **Scope contract**: `$pipeline` всегда single-select/no-All; `run_id` и
   `payload_hash` остаются Explorer-only forensic filters.

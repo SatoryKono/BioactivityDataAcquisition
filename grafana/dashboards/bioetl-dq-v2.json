@@ -117,7 +117,7 @@
       },
       "id": 99,
       "options": {
-        "content": "<center><h2>4. Data Quality / $pipeline</h2><div><strong>Current window:</strong> 15m status. <strong>Run type:</strong> $run_type.</div></center>",
+        "content": "<center><h2>4. Data Quality / $pipeline</h2><div><strong>Current window:</strong> 15m pipeline-wide DQ status. <strong>Run type:</strong> $run_type shapes selected-range evidence below.</div></center>",
         "mode": "html"
       },
       "title": "Pipeline",
@@ -217,13 +217,30 @@
     },
     {
       "datasource": "Prometheus",
-      "description": "Status mapping: 0=OK, 1=DEGRADED, 2=FAILING; null=UNKNOWN. Current status uses fixed recording-rule windows, not selected range evidence. DQ answers: is quality OK, degraded, failing, or unknown now?",
+      "description": "Status mapping: 0=OK, 1=DEGRADED, 2=FAILING; null=UNKNOWN. Current status is a pipeline-wide 15m snapshot from canonical recording rules, not selected-range evidence. Use this panel to decide whether DQ is healthy, warning-only, blocking, or missing now.",
       "fieldConfig": {
         "defaults": {
           "color": {
             "mode": "thresholds"
           },
           "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "OK",
+                  "color": "green"
+                },
+                "1": {
+                  "text": "DEGRADED",
+                  "color": "orange"
+                },
+                "2": {
+                  "text": "FAILING",
+                  "color": "red"
+                }
+              }
+            },
             {
               "type": "special",
               "options": {
@@ -289,12 +306,30 @@
     },
     {
       "datasource": "Prometheus",
+      "description": "Status mapping: 0=OK, 1=DEGRADED, 2=FAILING; null=UNKNOWN. Threshold state stays bounded: hard-fail reasons map to FAILING, warning-only reasons map to DEGRADED, and explicit current OK stays OK. Current threshold state is pipeline-wide; use selected-range panels below for scoped evidence.",
       "fieldConfig": {
         "defaults": {
           "color": {
             "mode": "thresholds"
           },
           "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "OK",
+                  "color": "green"
+                },
+                "1": {
+                  "text": "DEGRADED",
+                  "color": "orange"
+                },
+                "2": {
+                  "text": "FAILING",
+                  "color": "red"
+                }
+              }
+            },
             {
               "type": "special",
               "options": {
@@ -351,13 +386,12 @@
       },
       "targets": [
         {
-          "expr": "(sum(bioetl_dq_current_reason{pipeline=~\"$pipeline\",severity=\"failing\"} > 0) * 2) or sum(bioetl_dq_current_reason{pipeline=~\"$pipeline\",severity=\"degraded\"} > 0)",
+          "expr": "((max(bioetl_dq_current_reason{pipeline=~\"$pipeline\",severity=\"failing\"} > 0) * 2) or (max(bioetl_dq_current_reason{pipeline=~\"$pipeline\",severity=\"degraded\"} > 0) * 1) or max(bioetl_dq_current_status{pipeline=~\"$pipeline\"} == 0))",
           "refId": "A"
         }
       ],
       "title": "Monitor DQ Threshold State",
-      "type": "stat",
-      "description": "Current DQ threshold state from canonical reason records. Missing reason samples stay UNKNOWN/NO DATA; zero-event rendering is allowed only in selected-range evidence panels."
+      "type": "stat"
     },
     {
       "datasource": "Prometheus",
@@ -450,7 +484,7 @@
         "y": 3
       },
       "options": {
-        "content": "<div style=\"padding:0.45rem 0.7rem;line-height:1.55\"><strong>First action:</strong> if FAILING, inspect DQ reasons and Gold/Silver validation diagnostics before replay. If DEGRADED, open Silver Reject Explorer for quarantine/filter evidence. <strong>invalid_record_policy:</strong> treat as pipeline config context; absent policy visibility is UNKNOWN, not OK.</div>",
+        "content": "<div style=\"padding:0.45rem 0.7rem;line-height:1.55\"><strong>First action:</strong> if FAILING, inspect DQ reasons and Gold/Silver validation diagnostics before replay. If DEGRADED, open Silver Reject Explorer for quarantine/filter evidence. <strong>Scope note:</strong> current status above is pipeline-wide; <strong>$run_type</strong> and stage filters shape the selected-range evidence below. <strong>invalid_record_policy:</strong> treat as pipeline config context; absent policy visibility is UNKNOWN, not OK.</div>",
         "mode": "html"
       },
       "links": [],
@@ -533,7 +567,7 @@
     },
     {
       "datasource": "Prometheus",
-      "description": "Preserve Grafana no-data when no DQ score samples exist for the selected scope; do not collapse missing validation output into score 0.",
+      "description": "Selected-range Bronze denominator for DQ triage. 0 means no Bronze records were observed inside the active window; it does not prove DQ metrics are missing. Compare with Gold output and blocked-share panels below.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -754,6 +788,7 @@
     },
     {
       "datasource": "Prometheus",
+      "description": "Selected-range quarantine count. Non-zero means records were withheld from normal promotion and require quarantine triage; 0 means no quarantined records were reported in the selected window.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -826,6 +861,7 @@
     },
     {
       "datasource": "Prometheus",
+      "description": "Selected-range soft-threshold events. Non-zero means warning-level DQ drift was detected without a hard block; use trends and top reject causes to decide whether drift is growing.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -898,6 +934,7 @@
     },
     {
       "datasource": "Prometheus",
+      "description": "Current worst freshness lag in seconds for the selected pipeline. Large values indicate stale data even if no DQ hard-fail is active; compare with latest-success timestamp to distinguish stale entities from total pipeline inactivity.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -968,7 +1005,7 @@
     },
     {
       "datasource": "Prometheus",
-      "description": "Threshold semantics: blocked-share trend should stay near baseline; sustained growth indicates DQ filter pressure, spikes indicate incident. Next action: open Top Silver Reject Reasons and Silver Reject Explorer (or quarantine CLI) for exact causes.",
+      "description": "Selected-range deliverability impact. Numerator = Silver filter rejects plus DQ quarantine records; denominator = Bronze input for the same pipeline/run_type window. 0 means no blocked records were observed in the selected window, not that DQ metrics are globally healthy. Sustained growth indicates filter/quarantine pressure; spikes indicate an incident.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1041,7 +1078,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "((sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__range])) or vector(0)) / clamp_min((sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=~\"raw|validated|enriched|filtered_out|deduplicated|final\"}[$__range])) or vector(0)), 1))",
+          "expr": "(((sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__range])) or vector(0)) + (sum(increase(bioetl_dq_records_quarantined_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])) or vector(0))) / clamp_min((sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"bronze\"}[$__range])) or vector(0)), 1))",
           "legendFormat": "blocked share",
           "range": true,
           "refId": "A"
@@ -1300,6 +1337,7 @@
         },
         {
           "datasource": "Prometheus",
+          "description": "Selected-range pipeline breakdown of Silver filter rejects. Use it to see which selected pipeline values dominate filtered_out volume before drilling into reason_code or field breakdowns.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1440,21 +1478,11 @@
           ],
           "title": "Top Silver Reject Reasons (Pareto)",
           "type": "bargauge",
-          "description": "Pareto ranking of rejection reasons. Use panel link to drill down into reject explorer.",
-          "links": [
-            {
-              "title": "Drilldown: Silver Reject Explorer",
-              "type": "dashboard",
-              "uid": "bioetl-silver-reject-explorer",
-              "keepTime": true,
-              "includeVars": false,
-              "targetBlank": false,
-              "params": "var-pipeline=${pipeline}&var-run_type=${run_type}"
-            }
-          ]
+          "description": "Pareto ranking of bounded Silver reject reasons across the selected range. Use the top-level Silver Reject Explorer handoff to investigate the selected pipeline/run_type in record-level detail and then narrow by reason_code inside the explorer."
         },
         {
           "datasource": "Prometheus",
+          "description": "Bounded schema-field summary for the selected range. Use the top-level Silver Reject Explorer handoff to investigate the selected pipeline/run_type in record-level detail and then narrow by field inside the explorer.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1522,18 +1550,6 @@
               "refId": "A"
             }
           ],
-          "description": "Bounded schema-field summary only; use panel link to drill down into Silver Reject Explorer for exact record context.",
-          "links": [
-            {
-              "title": "Drilldown: Silver Reject Explorer",
-              "type": "dashboard",
-              "uid": "bioetl-silver-reject-explorer",
-              "keepTime": true,
-              "includeVars": false,
-              "targetBlank": false,
-              "params": "var-pipeline=${pipeline}&var-run_type=${run_type}"
-            }
-          ],
           "title": "Top Silver Reject Fields",
           "type": "bargauge"
         }
@@ -1553,6 +1569,7 @@
       "panels": [
         {
           "datasource": "Prometheus",
+          "description": "Selected-range quarantine distribution by error type. 0/none means no quarantined records were observed in the active window; use this to decide whether triage belongs in quarantine, schema validation, or provider drift.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1603,6 +1620,7 @@
         },
         {
           "datasource": "Prometheus",
+          "description": "Selected-range anomaly counts by severity and anomaly type. Warning-only anomalies indicate drift; failing anomalies are blocking and should be correlated with current DQ reasons before replay or promotion.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1674,6 +1692,7 @@
         },
         {
           "datasource": "Prometheus",
+          "description": "Selected-range p95 duration of DQ checks. This is a diagnostics/performance surface, not a quality outcome; use it when DQ checks themselves look slow or noisy during an incident.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1745,6 +1764,7 @@
         },
         {
           "datasource": "Prometheus",
+          "description": "Selected-range count of canonical Silver validation failures. Non-zero means Silver validation blocked or degraded promotion and should be correlated with current DQ reasons and reject/quarantine evidence.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1817,6 +1837,7 @@
         },
         {
           "datasource": "Prometheus",
+          "description": "Selected-range lineage/control-plane correlation signal. Non-zero means traceability metadata was incomplete and replay/readiness may need Control Plane follow-up; this panel does not replace Control Plane diagnostics.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1968,7 +1989,7 @@
         },
         {
           "datasource": "Prometheus",
-          "description": "Time trend of blocked share for the selected scope (pipeline/run_type/stage selector applies to dashboard scope).",
+          "description": "Selected-range trend of deliverability impact. Numerator = Silver filter rejects plus DQ quarantine records; denominator = Bronze input for the same pipeline/run_type window. Use sustained elevation as DQ pressure evidence and sudden spikes as incident evidence.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2035,7 +2056,7 @@
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "((sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__interval])) or vector(0)) / clamp_min((sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=~\"raw|validated|enriched|filtered_out|deduplicated|final\"}[$__interval])) or vector(0)), 1))",
+              "expr": "(((sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__interval])) or vector(0)) + (sum(increase(bioetl_dq_records_quarantined_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__interval])) or vector(0))) / clamp_min((sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"bronze\"}[$__interval])) or vector(0)), 1))",
               "legendFormat": "blocked share",
               "range": true,
               "refId": "A"
@@ -2061,7 +2082,7 @@
           },
           "id": 150,
           "options": {
-            "content": "### Control-plane aggregates available\n- Open `5. Control Plane` for aggregated manifest writes, ledger appends, checkpoint compatibility outcomes, and control-plane read failures.\n- Use the `Observability Checklist (runbook)` dashboard link when `BioETLControlPlaneReadFailureRate` or related aggregate signals require operator follow-up.\n",
+            "content": "### Control-plane aggregates available\n- Open `0. Control Plane` for aggregated manifest writes, ledger appends, checkpoint compatibility outcomes, and control-plane read failures.\n- Use the `Observability Checklist (runbook)` dashboard link when `BioETLControlPlaneReadFailureRate` or related aggregate signals require operator follow-up.\n",
             "mode": "markdown"
           },
           "title": "Control-plane aggregates note",
@@ -2069,6 +2090,7 @@
         },
         {
           "datasource": "Prometheus",
+          "description": "Selected-range Gold strict-validation hard-fail count. Non-zero means Gold promotion was blocked. Zero means no hard-fail samples were observed in the selected window; it does not prove Gold validation ran or that Gold output exists.",
           "fieldConfig": {
             "defaults": {
               "color": {

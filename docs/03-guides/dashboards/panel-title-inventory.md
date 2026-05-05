@@ -144,6 +144,7 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-runtime.json | 243 | Stage Expectedness |
 | bioetl-runtime.json | 9991 | Recommended Next Drilldown |
 | bioetl-silver-reject-explorer.json | 1 | Inspect Explorer Scope |
+| bioetl-silver-reject-explorer.json | 10 | First Action / No-Data Semantics |
 | bioetl-silver-reject-explorer.json | 2 | Monitor Filtered Records Total |
 | bioetl-silver-reject-explorer.json | 3 | Track Reject Rate vs Bronze |
 | bioetl-silver-reject-explorer.json | 4 | Inspect Run Scope Summary |
@@ -152,8 +153,12 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-silver-reject-explorer.json | 7 | Inspect Top Reason Signatures |
 | bioetl-silver-reject-explorer.json | 8 | Inspect Filtered Records Table |
 | bioetl-silver-reject-explorer.json | 9 | Inspect Selected Record Details |
-| bioetl-workflow-overview.json | 1 | Monitor Workflow Scope |
-| bioetl-workflow-overview.json | 2 | Monitor Workflow Runs |
-| bioetl-workflow-overview.json | 3 | Inspect Failed Workflow Runs |
-| bioetl-workflow-overview.json | 4 | Track Step Outcomes by Kind |
-| bioetl-workflow-overview.json | 5 | Track Step Duration p95 |
+| bioetl-workflow-overview.json | 1 | Workflow Scope |
+| bioetl-workflow-overview.json | 2 | Failed Workflow Runs / Range |
+| bioetl-workflow-overview.json | 3 | Failed Pipeline Steps / Range |
+| bioetl-workflow-overview.json | 4 | Workflow Run Outcomes / Range |
+| bioetl-workflow-overview.json | 5 | Step Outcomes by Kind / Step Status / Range |
+| bioetl-workflow-overview.json | 6 | Failed Transform Steps / Range |
+| bioetl-workflow-overview.json | 7 | Skipped Step Events / Range |
+| bioetl-workflow-overview.json | 8 | Step Duration p95 by Kind / Step Status / Range |
+| bioetl-workflow-overview.json | 9 | Next Diagnostic Surface |

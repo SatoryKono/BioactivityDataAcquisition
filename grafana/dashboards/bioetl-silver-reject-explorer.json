@@ -12,7 +12,7 @@
       }
     ]
   },
-  "description": "Record-level explorer for Silver filtered_out rows (quarantine-backed, read-only, single-pipeline scoped)",
+  "description": "Record-level explorer for Silver filtered_out rows (quarantine-backed, read-only, single-pipeline scoped). Primary question: which records were rejected before/at Silver, why, how large is the impact, and what remediation path should the operator take next?",
   "editable": true,
   "gnetId": null,
   "graphTooltip": 1,
@@ -95,12 +95,28 @@
       },
       "id": 1,
       "options": {
-        "content": "<center><h2>Pipeline: $pipeline | Run Type: $run_type | Reason: $reason_code | Field: $field | Run ID: $run_id</h2><div><strong style='color:#ffb347'>default 24h forensic window</strong></div><div><small>Select exactly one pipeline. Quarantine Explorer is fail-closed and forensic filters like run_id/payload_hash stay explorer-only, not Prometheus labels.</small></div></center>",
+        "content": "<center><h2>Pipeline: $pipeline | Run Type: $run_type | Reason: $reason_code | Field: $field | Run ID: $run_id</h2><div><strong style='color:#ffb347'>default 24h forensic window</strong></div><div><small>Select exactly one pipeline. This explorer is read-only and scoped to Silver FILTERED_OUT_SILVER rows. Quarantine Explorer is fail-closed and forensic filters like run_id/payload_hash stay explorer-only, not Prometheus labels.</small></div></center>",
         "mode": "html"
       },
       "title": "Scope",
       "type": "text",
-      "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
+      "description": "Scope banner for the selected-range Silver reject explorer. This dashboard covers only Silver FILTERED_OUT_SILVER quarantine-backed rows; DQ quarantine, skipped records, warning/nullification, and Gold validation failures belong in Data Quality. If pipeline is unknown or Quarantine Explorer returns no data, choose one concrete pipeline before treating empty panels as OK."
+    },
+    {
+      "gridPos": {
+        "h": 4,
+        "w": 24,
+        "x": 0,
+        "y": 3
+      },
+      "id": 10,
+      "options": {
+        "content": "<div style='padding:0.6rem 0.8rem;line-height:1.55'><strong>First action:</strong> if total rejects are non-zero, inspect top reason/field/signature, open a payload_hash drilldown from the table, then decide whether to fix transformer logic, schema/DQ rule configuration, provider drift, or replay/resolve via quarantine CLI. <strong>No-data:</strong> 0 rejects is OK only when Quarantine Explorer responds, one concrete pipeline is selected, and Bronze records are present; datasource errors, unknown pipeline, or bronze_records=0 are UNKNOWN. <strong>Lineage:</strong> use run_id and batch/Bronze evidence where available before replay decisions.</div>",
+        "mode": "html"
+      },
+      "title": "First Action / No-Data Semantics",
+      "type": "text",
+      "description": "Operator CTA for selected-range Silver reject triage. It explains how to interpret 0 vs No data, which filters affect the view, and when to move next to Data Quality, Runtime, Provider Health, Control Plane, or quarantine CLI."
     },
     {
       "datasource": "Quarantine Explorer",
@@ -108,7 +124,8 @@
         "defaults": {
           "color": {
             "mode": "palette-classic"
-          }
+          },
+          "noValue": "No Silver reject count returned for current filters. Verify Quarantine Explorer before treating this as OK."
         },
         "overrides": []
       },
@@ -116,7 +133,7 @@
         "h": 7,
         "w": 8,
         "x": 0,
-        "y": 3
+        "y": 7
       },
       "id": 2,
       "options": {
@@ -163,7 +180,7 @@
       ],
       "title": "Filtered Records Total",
       "type": "table",
-      "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
+      "description": "Selected-range total Silver FILTERED_OUT_SILVER records from /ops/quarantine/filtered-stats for the current pipeline/run_type/reason_code/field/run_id filters. 0 is normal only when Quarantine Explorer responds and the selected pipeline has valid scope; No data or datasource errors are UNKNOWN and require checking the health server/quarantine datasource before declaring no rejects. Non-zero means inspect top reason/field/signature and row samples."
     },
     {
       "datasource": "Quarantine Explorer",
@@ -171,7 +188,8 @@
         "defaults": {
           "color": {
             "mode": "palette-classic"
-          }
+          },
+          "noValue": "No reject ratio returned. Treat as UNKNOWN until Bronze denominator and quarantine API are confirmed."
         },
         "overrides": [
           {
@@ -196,7 +214,7 @@
         "h": 7,
         "w": 8,
         "x": 8,
-        "y": 3
+        "y": 7
       },
       "id": 3,
       "options": {
@@ -243,7 +261,7 @@
       ],
       "title": "Reject Rate vs Bronze",
       "type": "table",
-      "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
+      "description": "Selected-range reject_ratio, bronze_records, and total from /ops/quarantine/filtered-stats. reject_ratio is filtered Silver rejects divided by Bronze records for the same scoped rows. 0 can mean no rejects, but bronze_records=0 means the denominator is missing/empty and the signal is UNKNOWN. Sustained non-zero ratio points to systemic DQ/schema/transformer/provider drift and should be narrowed by top reason and field."
     },
     {
       "datasource": "Quarantine Explorer",
@@ -251,7 +269,8 @@
         "defaults": {
           "color": {
             "mode": "palette-classic"
-          }
+          },
+          "noValue": "No scoped summary returned. Check pipeline selection and Quarantine Explorer availability."
         },
         "overrides": []
       },
@@ -259,7 +278,7 @@
         "h": 7,
         "w": 8,
         "x": 16,
-        "y": 3
+        "y": 7
       },
       "id": 4,
       "options": {
@@ -286,7 +305,7 @@
       ],
       "title": "Run Scope Summary",
       "type": "table",
-      "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
+      "description": "Full selected-range stats payload for the current explorer scope. Use total, bronze_records, reject_ratio, and by_reason_code/by_field/by_reason_signature together to decide whether the issue is isolated, systemic, or missing telemetry. No data or an empty summary is UNKNOWN until the API, pipeline, and Bronze denominator are confirmed. This panel is forensic context, not a replay approval signal; open Control Plane and CLI before replay/resolve actions."
     },
     {
       "datasource": "Quarantine Explorer",
@@ -294,7 +313,8 @@
         "defaults": {
           "color": {
             "mode": "palette-classic"
-          }
+          },
+          "noValue": "No reason_code breakdown returned for current filters."
         },
         "overrides": []
       },
@@ -302,7 +322,7 @@
         "h": 8,
         "w": 8,
         "x": 0,
-        "y": 10
+        "y": 14
       },
       "id": 5,
       "options": {
@@ -326,7 +346,7 @@
       ],
       "title": "Inspect Top Reject Reasons",
       "type": "table",
-      "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
+      "description": "Selected-range top Silver reject reason_code values for the current pipeline/run_type/field/run_id filters. A repeated reason_code usually indicates a systemic transformer, schema, DQ-rule, or provider drift issue. A new/unclassified reason_code is a triage risk; inspect row samples and update the rule taxonomy if the code is expected. Empty means no reasons for current filters only after the API and pipeline scope are confirmed."
     },
     {
       "datasource": "Quarantine Explorer",
@@ -334,7 +354,8 @@
         "defaults": {
           "color": {
             "mode": "palette-classic"
-          }
+          },
+          "noValue": "No rejected-field breakdown returned for current filters."
         },
         "overrides": []
       },
@@ -342,7 +363,7 @@
         "h": 8,
         "w": 8,
         "x": 8,
-        "y": 10
+        "y": 14
       },
       "id": 6,
       "options": {
@@ -366,7 +387,7 @@
       ],
       "title": "Inspect Top Reject Fields",
       "type": "table",
-      "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
+      "description": "Selected-range fields most often associated with Silver rejects. Use this to choose whether remediation belongs in source schema mapping, transformer normalization, or DQ rule configuration. Empty means no field-level evidence for current filters only after Quarantine Explorer and pipeline scope are confirmed."
     },
     {
       "datasource": "Quarantine Explorer",
@@ -374,7 +395,8 @@
         "defaults": {
           "color": {
             "mode": "palette-classic"
-          }
+          },
+          "noValue": "No reason signature breakdown returned for current filters."
         },
         "overrides": []
       },
@@ -382,7 +404,7 @@
         "h": 8,
         "w": 8,
         "x": 16,
-        "y": 10
+        "y": 14
       },
       "id": 7,
       "options": {
@@ -406,7 +428,7 @@
       ],
       "title": "Inspect Top Reason Signatures",
       "type": "table",
-      "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
+      "description": "Selected-range reason signature breakdown built from reason_code, rule_type, field, and operator where available. This is the closest shipped proxy for rule-level root cause; it is not a confirmed rule_id signal. Repeated signatures suggest systemic remediation, while new signatures should be checked against the DQ rule taxonomy. Empty means no signature evidence for current filters only after Quarantine Explorer and pipeline scope are confirmed."
     },
     {
       "datasource": "Quarantine Explorer",
@@ -423,6 +445,10 @@
             {
               "title": "Open quarantine CLI command",
               "url": "data:text/plain,bioetl%20quarantine%20inspect%20--pipeline%20${__data.fields.pipeline}%20--silver-filter-only%20--run-id%20${__data.fields.run_id}%20--limit%20200"
+            },
+            {
+              "title": "Copy quarantine resolve command for this payload_hash",
+              "url": "data:text/plain,bioetl%20quarantine%20resolve%20--pipeline%20${__data.fields.pipeline}%20--payload-hash%20${__data.fields.payload_hash}%20--status%20IGNORED"
             }
           ],
           "noValue": "No rejected records for current filters."
@@ -433,7 +459,7 @@
         "h": 12,
         "w": 24,
         "x": 0,
-        "y": 18
+        "y": 22
       },
       "id": 8,
       "options": {
@@ -461,7 +487,7 @@
           "expr": ""
         }
       ],
-      "description": "Shows latest 100 records for selected scope, sorted by ingestion_ts descending. Empty-state copy: No rejected records for current filters. Backend/query failure copy: If data source query fails, treat this as an error state and inspect Grafana query error details. Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data.",
+      "description": "Shows latest 100 Silver FILTERED_OUT_SILVER records for the selected pipeline/run_type/reason_code/field/run_id scope, sorted by ingestion_ts descending. Columns include payload_hash, run_id, run_type, reason_code, rule_type, field, operator, expected/actual, dq_status, and reason when the backend provides them; raw payload is intentionally not shown in this list. Empty-state copy: No rejected records for current filters. Backend/query failure copy: If data source query fails, treat this as an error state and inspect Grafana query error details. Use payload_hash self-drilldown for one-record focus and CLI handoff for inspect/resolve actions; verify Bronze/run/batch lineage before replay decisions.",
       "title": "Filtered Records Table",
       "type": "table"
     },
@@ -471,7 +497,8 @@
         "defaults": {
           "color": {
             "mode": "palette-classic"
-          }
+          },
+          "noValue": "Select a payload_hash from the table or clear filters that exclude the selected record."
         },
         "overrides": []
       },
@@ -479,7 +506,7 @@
         "h": 10,
         "w": 24,
         "x": 0,
-        "y": 30
+        "y": 34
       },
       "id": 9,
       "options": {
@@ -501,7 +528,7 @@
           "expr": ""
         }
       ],
-      "description": "Select a row or set payload_hash to inspect one specific record. Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data.",
+      "description": "Selected-range one-record projection filtered by payload_hash plus the active pipeline/run_type/reason_code/field/run_id scope. Blank payload_hash returns the latest matching record because this panel uses the safe list endpoint; set payload_hash from the table for exact focus. This view does not mutate payload and does not prove replay safety. If detail is empty, distinguish an excluded record from datasource failure before resolving; use run_id/Bronze linkage and Control Plane evidence for replay decisions.",
       "title": "Selected Record Details",
       "type": "table"
     }
@@ -546,7 +573,7 @@
         "tagsQuery": "",
         "type": "query",
         "useTags": false,
-        "description": "Core scope: pipeline selector for pipeline-centric dashboards; fallback: All pipelines when not passed by source dashboard. Single-select; no All scope. Unknown is the explicit fail-closed default."
+        "description": "Core scope: one concrete pipeline for quarantine API reads. Single-select; no All scope. Unknown is the explicit fail-closed default and should be treated as no selected pipeline, not as an empty healthy state."
       },
       {
         "allValue": null,
@@ -583,7 +610,11 @@
       },
       {
         "allValue": null,
-        "current": {},
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
         "datasource": "Quarantine Explorer",
         "definition": "/ops/quarantine/filter-options?dimension=reason_code&pipeline=${pipeline}&run_type=${run_type:csv}",
         "hide": 0,
@@ -608,11 +639,15 @@
         "tagsQuery": "",
         "type": "query",
         "useTags": false,
-        "description": "Explorer scope: reject reason selector for quarantine triage; fallback: All reason codes for selected pipeline/run_type."
+        "description": "Explorer scope: Silver reject reason_code selector for quarantine triage; fallback: All reason codes for selected pipeline/run_type. This is a bounded reason taxonomy value, not raw error_message text."
       },
       {
         "allValue": null,
-        "current": {},
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
         "datasource": "Quarantine Explorer",
         "definition": "/ops/quarantine/filter-options?dimension=field&pipeline=${pipeline}&run_type=${run_type:csv}&reason_code=${reason_code:csv}",
         "hide": 0,
@@ -637,7 +672,7 @@
         "tagsQuery": "",
         "type": "query",
         "useTags": false,
-        "description": "Explorer scope: rejected field selector for quarantine triage; fallback: All fields for selected pipeline/run_type."
+        "description": "Explorer scope: rejected field selector for quarantine triage; fallback: All fields for selected pipeline/run_type/reason_code. Field values are row-level evidence and should not be promoted to high-cardinality Prometheus labels."
       },
       {
         "allValue": null,
@@ -666,7 +701,7 @@
         "tagsQuery": "",
         "type": "query",
         "useTags": false,
-        "description": "Forensic-only: exact run identifier for reject explorer; explore filter only (not a Prometheus label); fallback: no run_id filter (all runs in current scope)."
+        "description": "Forensic-only: exact run identifier for reject explorer; explorer filter only (not a Prometheus label); fallback: blank means no run_id filter across current selected range. Use run_id to correlate with Control Plane/Runtime before replay decisions."
       },
       {
         "current": {
@@ -681,7 +716,7 @@
         "query": "",
         "skipUrlSync": false,
         "type": "textbox",
-        "description": "Forensic-only: exact payload hash textbox for reject explorer; explore filter only (not a Prometheus label); fallback: empty value disables record details filter."
+        "description": "Forensic-only: exact deterministic payload_hash textbox for reject explorer; explorer filter only (not a Prometheus label). Empty value disables exact record focus. Use payload_hash to verify immutable reject identity before resolve/replay actions."
       }
     ]
   },
@@ -706,5 +741,5 @@
   "timezone": "browser",
   "title": "Silver Reject Explorer",
   "uid": "bioetl-silver-reject-explorer",
-  "version": 1000
+  "version": 1001
 }
