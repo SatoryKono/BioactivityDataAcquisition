@@ -19,37 +19,37 @@
   "id": null,
   "links": [
     {
-      "title": "Runtime",
+      "title": "2. Runtime",
       "type": "dashboards",
       "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&var-current_window=$current_window&from=$__from&to=$__to"
     },
     {
-      "title": "DQ",
-      "type": "link",
-      "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-layer=gold&from=$__from&to=$__to"
-    },
-    {
-      "title": "Provider",
+      "title": "3. Provider Health",
       "type": "link",
       "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=$provider&var-scope=GLOBAL&var-pipeline=$pipeline&from=$__from&to=$__to"
     },
     {
-      "title": "Control Plane v1",
+      "title": "4. Data Quality",
+      "type": "link",
+      "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-layer=gold&from=$__from&to=$__to"
+    },
+    {
+      "title": "5. Control Plane",
       "type": "link",
       "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&var-profile=$profile&from=$__from&to=$__to"
     },
     {
-      "title": "Workflow",
+      "title": "6. Workflow Overview",
       "type": "link",
       "url": "/d/bioetl-workflow-overview/bioetl-workflow-overview?var-workflow=$workflow&var-pipeline=$pipeline&var-phase=$phase&from=$__from&to=$__to"
     },
     {
-      "title": "Logs",
+      "title": "Explore Logs",
       "type": "link",
       "url": "/a/grafana-lokiexplore-app/explore?var-pipeline=$pipeline&var-provider=$provider&var-stage=$stage&var-severity=$severity&from=$__from&to=$__to"
     },
     {
-      "title": "Traces",
+      "title": "Explore Traces",
       "type": "link",
       "url": "/a/grafana-exploretraces-app/explore?var-pipeline=$pipeline&var-stage=$stage&from=$__from&to=$__to"
     }

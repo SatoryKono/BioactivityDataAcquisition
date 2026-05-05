@@ -56,6 +56,18 @@
     },
     {
       "asDropdown": false,
+      "icon": "external link",
+      "includeVars": false,
+      "keepTime": true,
+      "tags": [],
+      "targetBlank": false,
+      "title": "5. Control Plane",
+      "tooltip": "Cross-scope handoff (opens with All core scope): var-pipeline=All and var-run_type=All; provider/adapter do not transfer. Reset scope: target dashboard opens with explicit All/default scope; source-specific filters are not transferred.",
+      "type": "link",
+      "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=All&var-run_type=All&${__url_time_range}"
+    },
+    {
+      "asDropdown": false,
       "icon": "logs",
       "includeVars": false,
       "keepTime": true,
@@ -65,18 +77,6 @@
       "type": "link",
       "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D",
       "tooltip": "Open Loki Explore with tracing profile and selected time range."
-    },
-    {
-      "asDropdown": false,
-      "icon": "external link",
-      "includeVars": false,
-      "keepTime": true,
-      "tags": [],
-      "targetBlank": false,
-      "title": "Control Plane",
-      "tooltip": "Cross-scope handoff (opens with All core scope): var-pipeline=All and var-run_type=All; provider/adapter do not transfer. Reset scope: target dashboard opens with explicit All/default scope; source-specific filters are not transferred.",
-      "type": "link",
-      "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=All&var-run_type=All&${__url_time_range}"
     },
     {
       "asDropdown": false,
