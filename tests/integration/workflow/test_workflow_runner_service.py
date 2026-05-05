@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from dataclasses import dataclass, field
 from uuid import uuid4
 
@@ -70,6 +71,7 @@ class _PipelineRunner:
         run_id: object | None = None,
         options: object | None = None,
     ) -> RunResult:
+        await asyncio.sleep(0)
         del dry_run, run_id, options
         return RunResult(
             status=PipelineRunResult.SUCCESS,

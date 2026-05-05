@@ -94,7 +94,7 @@ async def test_transform_step_executes_registered_transform() -> None:
         )
     ]
     assert metrics.histograms[0][0] == "bioetl_workflow_step_duration_seconds"
-    assert metrics.histograms[0][1] == 0.25
+    assert metrics.histograms[0][1] == pytest.approx(0.25)
 
 
 @pytest.mark.asyncio

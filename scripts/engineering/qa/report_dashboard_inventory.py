@@ -38,7 +38,7 @@ def _extract_link_uids(payload: dict) -> list[str]:
     discovered: set[str] = set()
     for link in links:
         url = str(link.get("url", ""))
-        matches = re.findall(r"/d/([A-Za-z0-9\-_]+)", url)
+        matches = re.findall(r"/d/([\w-]+)", url)
         discovered.update(matches)
     return sorted(discovered)
 

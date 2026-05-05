@@ -10,6 +10,7 @@ if [[ -x "${GEMINI_SCRIPT}" ]]; then
     # Create function
     gemini() {
         bash "${GEMINI_SCRIPT}" "$@"
+        return "$?"
     }
     
     export -f gemini
