@@ -46,6 +46,15 @@ Do not treat publication identifiers or author/source identifier families as
 closed enums. The canonical boundary is syntax and namespace, not a frozen list
 of known values.
 
+For identifier-backed scalar fields:
+
+- `pmid` is a canonical numeric string, not a numeric DQ range field
+- `issn` is a canonical single ISSN string or `null`
+- `issn_list` is a canonical JSON string array or `null`
+
+No native Python `list`/`dict` payload for these fields should survive into
+Silver/Gold hashing surfaces.
+
 ## Raw Publication Types Vs Derived Taxonomy
 
 Raw provider fields remain provider-native:
@@ -93,6 +102,24 @@ the raw provider labels.
 These payloads are semantic-sensitive evidence surfaces. Canonical JSON is not a
 drop-in replacement for the raw provider object/list when future semantic
 extraction happens.
+
+## Nested Vocabulary Inventories
+
+Nested publication sidecars now have explicit governance inventory in
+`configs/vocab/publication_nested.yaml`, backed by tracked Bronze edge fixtures
+and the extractor `scripts/engineering/qa/extract_publication_nested_vocab.py`.
+
+Tracked nested vocabulary families:
+
+- OpenAlex: `source.type`, `primary_location.raw_type`, `version`,
+  `indexed_in`, `license`, `open_access.oa_status`
+- Semantic Scholar: `publicationTypes`, citation-context key shapes,
+  `fieldsOfStudy`, author `externalIds` families
+- PubMed: `PublicationTypeList`, `MeshHeadingList` key shapes, `AuthorList`
+  affiliation-key shapes
+
+Rule: these inventories are for drift visibility, not for flattening raw sidecar
+data into convenience enums.
 
 ## Composite Publication Impact
 

@@ -111,7 +111,8 @@ def _undeclared_link_variables(url: str, declared_variables: set[str]) -> list[s
     return [
         variable_name
         for _, variable_name in _GRAFANA_VAR_TOKEN_RE.findall(url)
-        if not variable_name.startswith("__") and variable_name not in declared_variables
+        if not variable_name.startswith("__")
+        and variable_name not in declared_variables
     ]
 
 
@@ -319,7 +320,9 @@ def test_dashboard_links_only_reference_declared_variables(
         for panel in get_dashboard_panels(dashboard)
         for violation in _panel_link_variable_violations(panel, declared_variables)
     ]
-    violations.extend(_dashboard_link_variable_violations(dashboard, declared_variables))
+    violations.extend(
+        _dashboard_link_variable_violations(dashboard, declared_variables)
+    )
 
     assert not violations, (
         f"Dashboard {dashboard_path.name} has links with undeclared variables:\n"
@@ -1562,13 +1565,13 @@ def test_overview_current_panels_stay_out_of_selected_range_semantics() -> None:
         "System Status",
         "Next Action",
         "L0 Inputs",
-        "Runtime Blockers Current",
-        "DQ Status Current",
-        "Gold Lifecycle Current",
-        "Control Plane Current",
-        "Provider GLOBAL Scope",
-        "Workflow Selected Scope",
-        "Workflow GLOBAL Scope",
+        "Runtime Blockers",
+        "DQ Status",
+        "Gold Lifecycle",
+        "Control Plane",
+        "Provider Global",
+        "Workflow Selected",
+        "Workflow Global",
     ):
         panel = panels.get(panel_title)
         assert panel is not None

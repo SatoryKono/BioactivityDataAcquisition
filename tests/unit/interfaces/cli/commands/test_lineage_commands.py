@@ -39,7 +39,7 @@ class _FakeLineageService:
             fragment_id="silver:fragment-1",
             stored_fragment_id="silver:fragment-1:occurrence:abc123",
             nodes=(self._dataset_node, self._upstream_node),
-            created_at=datetime.now(UTC),
+            created_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         )
 
     def show_fragment(self, fragment_id: str) -> LineageFragmentInspectionResult:

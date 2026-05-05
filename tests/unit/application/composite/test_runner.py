@@ -466,7 +466,7 @@ class TestFSMSeedResume:
                 keys_generated=90,
                 duration_seconds=10.0,
             ),
-            created_at=datetime.now(tz=UTC),
+            created_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         )
         checkpoint_manager = create_mock_checkpoint_manager(initial_state)
         seed_runner = MockPipelineRunner()
@@ -497,7 +497,7 @@ class TestFSMSeedResume:
                 keys_generated=90,
                 duration_seconds=10.0,
             ),
-            created_at=datetime.now(tz=UTC),
+            created_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         )
         checkpoint_manager = create_mock_checkpoint_manager(initial_state)
 
@@ -528,7 +528,7 @@ class TestFSMSeedResume:
                 keys_generated=90,
                 duration_seconds=10.0,
             ),
-            created_at=datetime.now(tz=UTC),
+            created_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         )
         checkpoint_manager = create_mock_checkpoint_manager(initial_state)
         logger = create_mock_logger()
@@ -592,7 +592,7 @@ class TestFSMSeedResume:
                 keys_generated=90,
                 duration_seconds=10.0,
             ),
-            created_at=datetime.now(tz=UTC),
+            created_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         )
 
         next_state = runner._resume_seed_phase(state)
@@ -623,7 +623,7 @@ class TestFSMSeedResume:
                 duration_seconds=10.0,
             ),
             completed_enrichers=frozenset({"crossref"}),
-            created_at=datetime.now(tz=UTC),
+            created_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         )
         checkpoint_manager = create_mock_checkpoint_manager(failed_state)
         logger = create_mock_logger()
@@ -665,7 +665,7 @@ class TestFSMSeedResume:
         state = CompositeCheckpointState(
             composite_name="test_composite",
             run_id=str(uuid4()),
-            created_at=datetime.now(tz=UTC),
+            created_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         )
         seed_result = SeedResult(
             pipeline_name="chembl_activity",

@@ -60,7 +60,7 @@ def _prepare_records_for_delta(
     records: list[dict[str, Any]],
 ) -> list[dict[str, Any]]:
     """Add required metadata fields to records."""
-    now = datetime.now(UTC)
+    now = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
     run_id = str(uuid4())
     prepared = []
     for record in records:

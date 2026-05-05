@@ -29,7 +29,7 @@ class TestNoOpMetadataWriter:
             runtime=RuntimeMetadata(
                 run_id="test",
                 run_type=RunTypeEnum.INCREMENTAL,
-                started_at_utc=datetime.now(UTC),
+                started_at_utc=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
             ),
             pipeline=PipelineMetadata(name="test", provider="test", entity="test"),
             delta=DeltaMetrics(table_path="/test", operation="merge"),

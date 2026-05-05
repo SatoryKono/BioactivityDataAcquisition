@@ -31,7 +31,9 @@ from bioetl.composition.providers.registration_bio import (
 )
 
 __all__ = [
+    "ProviderAssemblySupport",
     "register_all_providers",
+    "resolve_provider_assembly_support",
 ]
 
 

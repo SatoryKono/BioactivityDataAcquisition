@@ -271,7 +271,7 @@ class InMemoryQuarantine:
         Convenience method for setting up test fixtures.
         """
         record = {
-            "ingestion_ts": datetime.now(UTC).isoformat(),
+            "ingestion_ts": datetime(2026, 1, 1, 12, 0, tzinfo=UTC).isoformat(),
             "pipeline": pipeline,
             "error_code": error_code,
             "payload": payload,

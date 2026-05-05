@@ -1125,6 +1125,12 @@
               {
                 "id": "displayName",
                 "value": "Status"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
               }
             ]
           },
@@ -1137,6 +1143,12 @@
               {
                 "id": "displayName",
                 "value": "Status"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
               }
             ]
           }
@@ -1295,6 +1307,12 @@
               {
                 "id": "displayName",
                 "value": "Status"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
               }
             ]
           },
@@ -1307,6 +1325,12 @@
               {
                 "id": "displayName",
                 "value": "Status"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
               }
             ]
           }
@@ -1451,6 +1475,12 @@
               {
                 "id": "displayName",
                 "value": "Status"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
               }
             ]
           },
@@ -1463,6 +1493,12 @@
               {
                 "id": "displayName",
                 "value": "Status"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
               }
             ]
           }
@@ -1859,7 +1895,7 @@
           "title": "Historical Failures (range evidence)",
           "gridPos": {
             "h": 5,
-            "w": 12,
+            "w": 8,
             "x": 0,
             "y": 21
           },
@@ -1926,8 +1962,8 @@
           "title": "Recent terminal runs (range evidence)",
           "gridPos": {
             "h": 5,
-            "w": 12,
-            "x": 12,
+            "w": 8,
+            "x": 8,
             "y": 21
           },
           "datasource": {
@@ -1988,6 +2024,106 @@
             }
           ],
           "description": "Historical terminal-run evidence only. Keeps `pipeline`, `run_type`, and `status` labels from the active Grafana window."
+        },
+        {
+          "id": 9015,
+          "type": "stat",
+          "title": "Silver Rejects Count + Rate",
+          "gridPos": {
+            "h": 5,
+            "w": 8,
+            "x": 16,
+            "y": 21
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "decimals": 2,
+              "mappings": [
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "text": "NO DATA / UNKNOWN",
+                      "color": "gray"
+                    }
+                  }
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 0.05
+                  },
+                  {
+                    "color": "red",
+                    "value": 0.2
+                  }
+                ]
+              },
+              "unit": "percentunit"
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Reject Count"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "short"
+                  },
+                  {
+                    "id": "decimals",
+                    "value": 0
+                  }
+                ]
+              }
+            ]
+          },
+          "targets": [
+            {
+              "expr": "round(sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=\"filtered_out\"}[$__range])) or vector(0))",
+              "refId": "A",
+              "legendFormat": "Reject Count",
+              "instant": true
+            },
+            {
+              "expr": "(sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=\"filtered_out\"}[$__range])) or vector(0)) / clamp_min(sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=\"bronze\"}[$__range])), 1)",
+              "refId": "B",
+              "legendFormat": "Reject Rate",
+              "instant": true
+            }
+          ],
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "description": "Selected-range Silver filter reject count and ratio against Bronze records. Evidence only; current DQ incident state lives in Data Quality."
         }
       ]
     },

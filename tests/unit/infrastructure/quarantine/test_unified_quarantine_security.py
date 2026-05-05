@@ -36,7 +36,7 @@ def test_purge_handles_malicious_pipeline_name(mock_delta_table):
     quarantine.purge(
         pipeline=malicious_name,
         older_than_days=30,
-        now=datetime.now(UTC),
+        now=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
     )
 
     # Verify that the predicate sent to Delta Lake is properly escaped

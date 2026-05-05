@@ -52,7 +52,7 @@ class TestGoldAnalyzerReferentialIntegrity:
     def test_referential_integrity_check_included(
         self, analyzer: GoldDQAnalyzer, sample_df: pl.DataFrame
     ) -> None:
-        ts = datetime.now(UTC)
+        ts = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
         ref_table = pl.DataFrame({"id": [1, 2, 3, 4, 5, 6]})
         config = _make_config(GoldDQCheckType.REFERENTIAL_INTEGRITY)
 
@@ -76,7 +76,7 @@ class TestGoldAnalyzerReferentialIntegrity:
         """Referential integrity delegates to check_referential_integrity."""
         df = pl.DataFrame({"cat_id": [1, 999, 998, 997]})  # 75% orphans
         ref = pl.DataFrame({"id": [1, 2, 3]})
-        ts = datetime.now(UTC)
+        ts = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
         config = _make_config(GoldDQCheckType.REFERENTIAL_INTEGRITY)
 
         report = analyzer.analyze(
@@ -100,7 +100,7 @@ class TestGoldAnalyzerStatisticalProfile:
     def test_statistical_profile_check_included(
         self, analyzer: GoldDQAnalyzer, sample_df: pl.DataFrame
     ) -> None:
-        ts = datetime.now(UTC)
+        ts = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
         config = _make_config(GoldDQCheckType.STATISTICAL_PROFILE)
         baseline_stats = {"null_rate_ma30": 0.0, "record_count_ma30": 5}
 
@@ -118,7 +118,7 @@ class TestGoldAnalyzerStatisticalProfile:
     def test_statistical_profile_no_baseline(
         self, analyzer: GoldDQAnalyzer, sample_df: pl.DataFrame
     ) -> None:
-        ts = datetime.now(UTC)
+        ts = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
         config = _make_config(GoldDQCheckType.STATISTICAL_PROFILE)
 
         report = analyzer.analyze(
@@ -141,7 +141,7 @@ class TestGoldAnalyzerAnomalyDetection:
     def test_anomaly_detection_check_included_cold_start(
         self, analyzer: GoldDQAnalyzer, sample_df: pl.DataFrame
     ) -> None:
-        ts = datetime.now(UTC)
+        ts = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
         config = _make_config(GoldDQCheckType.ANOMALY_DETECTION)
         baseline_stats = {"days_since_start": 5}  # Cold start
 
@@ -160,7 +160,7 @@ class TestGoldAnalyzerAnomalyDetection:
     def test_anomaly_detection_no_baseline(
         self, analyzer: GoldDQAnalyzer, sample_df: pl.DataFrame
     ) -> None:
-        ts = datetime.now(UTC)
+        ts = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
         config = _make_config(GoldDQCheckType.ANOMALY_DETECTION)
 
         report = analyzer.analyze(
@@ -180,7 +180,7 @@ class TestGoldAnalyzerSCDIntegrity:
     def test_scd_integrity_check_included_no_config(
         self, analyzer: GoldDQAnalyzer, sample_df: pl.DataFrame
     ) -> None:
-        ts = datetime.now(UTC)
+        ts = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
         config = _make_config(GoldDQCheckType.SCD_INTEGRITY)
 
         report = analyzer.analyze(
@@ -206,7 +206,7 @@ class TestGoldAnalyzerSCDIntegrity:
                 "_valid_to": [datetime(2024, 6, 30), None, None],
             }
         )
-        ts = datetime.now(UTC)
+        ts = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
         config = _make_config(GoldDQCheckType.SCD_INTEGRITY)
         scd_config = {"type": 2, "entity_key": "entity_id"}
 
@@ -229,7 +229,7 @@ class TestGoldAnalyzerAllChecks:
     def test_all_checks_enabled(
         self, analyzer: GoldDQAnalyzer, sample_df: pl.DataFrame
     ) -> None:
-        ts = datetime.now(UTC)
+        ts = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
         config = _make_config(*list(GoldDQCheckType))
         baseline_stats = {
             "null_rate_ma30": 0.0,

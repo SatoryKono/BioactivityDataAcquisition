@@ -282,7 +282,7 @@ class TestMockImplementations:
             run_id=RunID(uuid4()),
             run_type=RunType.INCREMENTAL,
             logger=noop_logger,
-            started_at=datetime.now(UTC),
+            started_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         )
 
         transformer = MockTransformer()
@@ -322,7 +322,7 @@ class TestMockImplementations:
             run_id=RunID(uuid4()),
             run_type=RunType.INCREMENTAL,
             logger=noop_logger,
-            started_at=datetime.now(UTC),
+            started_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         )
 
         transformer = MockTransformer()
@@ -346,7 +346,7 @@ class TestCallbackUsage:
             run_id=RunID(uuid4()),
             run_type=RunType.INCREMENTAL,
             logger=noop_logger,
-            started_at=datetime.now(UTC),
+            started_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         )
 
         def activity_filter(context: PipelineContext, record: dict[str, Any]) -> bool:
@@ -371,7 +371,7 @@ class TestCallbackUsage:
             run_id=RunID(uuid4()),
             run_type=RunType.INCREMENTAL,
             logger=noop_logger,
-            started_at=datetime.now(UTC),
+            started_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         )
 
         def remove_json_fields(

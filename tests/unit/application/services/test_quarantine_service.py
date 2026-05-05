@@ -107,7 +107,7 @@ class TestQuarantineRecord:
 
     def test_quarantine_record_creation(self):
         """Test QuarantineRecord can be created."""
-        now = datetime.now(UTC)
+        now = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
         record = QuarantineRecord(
             error_code="DQ_MISSING_FIELD",
             payload={"id": 123},
@@ -155,7 +155,7 @@ class TestQuarantineServiceInspect:
     @pytest.mark.asyncio
     async def test_inspect_with_records(self, quarantine_service, mock_quarantine_port):
         """Test inspecting quarantine with records."""
-        now = datetime.now(UTC)
+        now = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
         mock_quarantine_port.inspect.return_value = [
             {
                 "error_code": "DQ_MISSING_FIELD",

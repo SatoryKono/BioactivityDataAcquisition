@@ -52,7 +52,7 @@ def dq_context(bronze_records: list[bytes]) -> DQReportContext:
     return DQReportContext(
         run_id="test-run-001",
         pipeline_name="test_pipeline",
-        timestamp=datetime.now(UTC),
+        timestamp=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         bronze_source_file="bronze/v1/test/entity/2025-01-15/batch_001.jsonl.zst",
         bronze_batch_id="batch-001",
         bronze_records=bronze_records,

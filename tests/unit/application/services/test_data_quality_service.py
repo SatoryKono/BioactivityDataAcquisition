@@ -28,7 +28,7 @@ def _sample_anomaly(metric_name: str = "error_rate") -> DQAnomaly:
         anomaly_type=DQAnomalyType.THRESHOLD_EXCEEDED,
         severity=DQAnomalySeverity.HIGH,
         z_score=15.0,
-        timestamp=datetime.now(UTC),
+        timestamp=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         message=f"{metric_name} exceeded expected range",
     )
 
@@ -623,7 +623,7 @@ class TestDataQualityServiceAnomalyDetection:
             anomaly_type=AnomalyType.SPIKE,
             severity=AnomalySeverity.HIGH,
             z_score=5.0,
-            timestamp=datetime.now(UTC),
+            timestamp=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
             message="Error rate spike detected",
         )
 
@@ -672,7 +672,7 @@ class TestDataQualityServiceAnomalyDetection:
             anomaly_type=AnomalyType.THRESHOLD_EXCEEDED,
             severity=AnomalySeverity.CRITICAL,
             z_score=22.5,
-            timestamp=datetime.now(UTC),
+            timestamp=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
             message="Error rate critical",
         )
 
@@ -847,7 +847,7 @@ class TestDataQualityServiceBaselineUpdates:
             anomaly_type=AnomalyType.THRESHOLD_EXCEEDED,
             severity=AnomalySeverity.CRITICAL,
             z_score=22.5,
-            timestamp=datetime.now(UTC),
+            timestamp=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
             message="Error rate critical",
         )
 

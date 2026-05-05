@@ -226,7 +226,7 @@ class TestHealthService:
                 latency_ms=100.0,
                 provider="test",
                 endpoint="https://api.example.com/status",
-                checked_at=datetime.now(tz=UTC),
+                checked_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
             )
         )
         mock_factory.create.return_value = mock_adapter
@@ -249,7 +249,7 @@ class TestHealthService:
                 status=HealthStatus.HEALTHY,
                 latency_ms=50.0,
                 provider="chembl",
-                checked_at=datetime.now(tz=UTC),
+                checked_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
             )
         )
         mock_factory.create.return_value = mock_adapter
@@ -272,7 +272,7 @@ class TestHealthService:
                 latency_ms=0.0,
                 provider="uniprot",
                 last_error="Connection failed",
-                checked_at=datetime.now(tz=UTC),
+                checked_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
             )
         )
         mock_factory.create.return_value = mock_adapter
@@ -355,7 +355,7 @@ class TestHealthServiceEdgeCases:
                 status=HealthStatus.HEALTHY,
                 latency_ms=100.0,
                 provider="test",
-                checked_at=datetime.now(tz=UTC),
+                checked_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
             )
         )
         mock_factory.create.return_value = mock_adapter
@@ -387,7 +387,7 @@ class TestHealthServiceEdgeCases:
                 latency_ms=5000.0,
                 provider="test",
                 last_error="High latency",
-                checked_at=datetime.now(tz=UTC),
+                checked_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
             )
         )
         mock_factory.create.return_value = mock_adapter

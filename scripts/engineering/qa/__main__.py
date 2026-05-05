@@ -22,6 +22,8 @@ Commands:
     report-dep-map       Generate/check architecture dependency map
     report-vcr-metadata  Generate/check canonical VCR metadata catalog
     report-provider-contract-drift  Generate provider contract drift diagnostics from replay cassettes
+    report-pubchem-property-vocab Extract observed PubChem property-URN vocabulary
+    report-publication-nested-vocab Extract nested publication-sidecar vocabularies
     sync-integration-vcr-policy Sync tracked integration/e2e inventory in integration VCR policy
     report-family-baseline Generate/check RF-06 hotspot-family baseline artifacts
     report-hotspots      Generate hotspot degradation report
@@ -63,6 +65,8 @@ COMMAND_SPECS = {
     "report-dep-map": "generate_architecture_dependency_map.py",
     "report-vcr-metadata": "report_vcr_metadata_catalog.py",
     "report-provider-contract-drift": "report_provider_contract_drift.py",
+    "report-pubchem-property-vocab": "extract_pubchem_property_vocab.py",
+    "report-publication-nested-vocab": "extract_publication_nested_vocab.py",
     "sync-integration-vcr-policy": "sync_integration_vcr_policy.py",
     "report-family-baseline": "report_hotspot_family_baseline.py",
     "report-hotspots": "generate_hotspot_degradation_report.py",

@@ -53,6 +53,7 @@ def __getattr__(name: str) -> object:
         return getattr(_observability_api, name)
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
+
 __all__ = [
     "BaseServicesFactory",
     "ServicesBuilder",

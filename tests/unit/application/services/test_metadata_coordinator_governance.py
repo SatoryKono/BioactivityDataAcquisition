@@ -28,7 +28,7 @@ def run_context() -> RunContext:
     return RunContext.create(
         run_id=RunID(uuid4()),
         run_type=RunType.INCREMENTAL,
-        started_at=datetime.now(UTC),
+        started_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         provider="chembl",
         entity="activity",
     )
@@ -64,8 +64,8 @@ class TestGovernanceMetadata:
             record_count=100,
             compressed_size=5000,
             output_path="v1/chembl/activity/2024-01-15/batch.jsonl.zst",
-            started_at=datetime.now(UTC),
-            completed_at=datetime.now(UTC),
+            started_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
+            completed_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
             governance=governance,
         )
         metadata = coordinator.create_bronze_metadata(input_data)
@@ -88,8 +88,8 @@ class TestGovernanceMetadata:
             record_count=100,
             compressed_size=5000,
             output_path="v1/chembl/activity/2024-01-15/batch.jsonl.zst",
-            started_at=datetime.now(UTC),
-            completed_at=datetime.now(UTC),
+            started_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
+            completed_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         )
         metadata = coordinator.create_bronze_metadata(input_data)
         assert metadata.governance is None
@@ -163,7 +163,7 @@ class TestGovernanceMetadata:
         context = RunContext.create(
             run_id=RunID(uuid4()),
             run_type=RunType.REBUILD,
-            started_at=datetime.now(UTC),
+            started_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
             provider="composite",
             entity="publication",
             contract_version="3.0.0",
@@ -191,7 +191,7 @@ class TestGovernanceMetadata:
         context = RunContext.create(
             run_id=RunID(uuid4()),
             run_type=RunType.REBUILD,
-            started_at=datetime.now(UTC),
+            started_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
             provider="composite",
             entity="publication",
             contract_version="4.0.0",

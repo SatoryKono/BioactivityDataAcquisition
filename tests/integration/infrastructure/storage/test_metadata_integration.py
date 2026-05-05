@@ -41,7 +41,7 @@ class MockMetadataCoordinator:
         runtime = RuntimeMetadata(
             run_id=input_data.records[0].get("_run_id", "test-run-id"),
             run_type=RunTypeEnum.INCREMENTAL,
-            started_at_utc=datetime.now(UTC),
+            started_at_utc=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         )
         pipeline = PipelineMetadata(name="test", provider=provider, entity=entity)
         environment = EnvironmentMetadata(
@@ -70,7 +70,7 @@ class MockMetadataCoordinator:
         runtime = RuntimeMetadata(
             run_id="test-run-id",
             run_type=RunTypeEnum.INCREMENTAL,
-            started_at_utc=datetime.now(UTC),
+            started_at_utc=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         )
         pipeline = PipelineMetadata(name="test", provider=provider, entity=entity)
         environment = EnvironmentMetadata(
@@ -238,7 +238,7 @@ def sample_records() -> list[dict[str, Any]]:
             "_run_id": run_id,
             "_run_type": "incremental",
             "_source_batch_id": batch_id,
-            "_ingestion_ts": datetime.now(UTC).isoformat(),
+            "_ingestion_ts": datetime(2026, 1, 1, 12, 0, tzinfo=UTC).isoformat(),
         },
         {
             "id": "record2",
@@ -246,7 +246,7 @@ def sample_records() -> list[dict[str, Any]]:
             "_run_id": run_id,
             "_run_type": "incremental",
             "_source_batch_id": batch_id,
-            "_ingestion_ts": datetime.now(UTC).isoformat(),
+            "_ingestion_ts": datetime(2026, 1, 1, 12, 0, tzinfo=UTC).isoformat(),
         },
     ]
 
@@ -414,7 +414,7 @@ class TestGoldWriterMetadataIntegration:
             schema=schema,
             primary_keys=["id"],
             mode="overwrite",
-            ingestion_ts=datetime.now(UTC),
+            ingestion_ts=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
             run_id=RunID(uuid4()),
         )
 
@@ -452,7 +452,7 @@ class TestGoldWriterMetadataIntegration:
             schema=schema,
             primary_keys=["id"],
             mode="overwrite",
-            ingestion_ts=datetime.now(UTC),
+            ingestion_ts=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
             run_id=RunID(uuid4()),
         )
 

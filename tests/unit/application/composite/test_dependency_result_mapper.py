@@ -89,7 +89,7 @@ def test_build_failed_result_uses_error_log_for_required_dependency(
         join_keys=("document_chembl_id",),
         required=True,
     )
-    started_at = datetime.now(tz=UTC)
+    started_at = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
     completed_at = started_at
 
     result = mapper.build_failed_result(
@@ -116,7 +116,7 @@ def test_build_timeout_result_returns_timeout_status(
         timeout_seconds=12,
     )
 
-    started_at = datetime.now(tz=UTC)
+    started_at = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
     completed_at = started_at
 
     result = mapper.build_timeout_result(

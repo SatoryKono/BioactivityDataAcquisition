@@ -354,7 +354,7 @@ class TestQuarantineManagerBulkWrites:
             metrics=metrics,
         )
         await manager.quarantine_records(
-            [], BatchID(uuid4()), ingestion_ts=datetime.now(UTC)
+            [], BatchID(uuid4()), ingestion_ts=datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
         )
         quarantine_port.write_many.assert_not_awaited()
 
@@ -371,7 +371,7 @@ class TestQuarantineManagerBulkWrites:
             metrics=metrics,
         )
         await manager.quarantine_filtered_records(
-            [], BatchID(uuid4()), ingestion_ts=datetime.now(UTC)
+            [], BatchID(uuid4()), ingestion_ts=datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
         )
         quarantine_port.write_many.assert_not_awaited()
 
@@ -391,7 +391,7 @@ class TestQuarantineManagerBulkWrites:
             error_type=ErrorType.INVALID_DATA,
             batch_id=BatchID(uuid4()),
             error_details="bad",
-            ingestion_ts=datetime.now(UTC),
+            ingestion_ts=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         )
         quarantine_port.write.assert_awaited_once()
 
@@ -415,7 +415,9 @@ class TestQuarantineManagerBulkWrites:
             ),
         ]
         await manager.quarantine_records(
-            entries, BatchID(uuid4()), ingestion_ts=datetime.now(UTC)
+            entries,
+            BatchID(uuid4()),
+            ingestion_ts=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         )
         quarantine_port.write_many.assert_awaited_once()
         request = quarantine_port.write_many.call_args[0][0][0]

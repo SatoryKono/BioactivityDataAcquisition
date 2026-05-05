@@ -124,10 +124,7 @@ def normalize_publication_business_data(
     business_data: JsonDict,
 ) -> JsonDict:
     """Normalize publication business data before legacy hash finalization."""
-    normalized = transformer._record_normalizer.normalize_business_data(business_data)
-    if isinstance(business_data.get("issn"), list):
-        normalized["issn"] = list(business_data["issn"])
-    return normalized
+    return transformer._record_normalizer.normalize_business_data(business_data)
 
 
 def build_publication_silver_record(

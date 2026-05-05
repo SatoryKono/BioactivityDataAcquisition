@@ -22,7 +22,7 @@ def _make_run_context() -> RunContext:
     return RunContext.create(
         run_id=RunID(uuid4()),
         run_type=RunType.INCREMENTAL,
-        started_at=datetime.now(UTC),
+        started_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         provider="chembl",
         entity="activity",
     )
@@ -62,8 +62,8 @@ def test_source_request_node_exposes_snapshot_identity() -> None:
             record_count=10,
             compressed_size=512,
             output_path="v1/chembl/activity/2026-04-09/batch.jsonl.zst",
-            started_at=datetime.now(UTC),
-            completed_at=datetime.now(UTC),
+            started_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
+            completed_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
             source_metadata=source_metadata,
             query_string="assay_type=B",
         ),

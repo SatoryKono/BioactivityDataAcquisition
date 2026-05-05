@@ -314,7 +314,9 @@ class TestBootstrapVacuumConfig:
         settings = _create_bootstrap_settings()
         mock_get_settings.return_value = settings
 
-        mock_bootstrap_observability_bundle.return_value = _create_observability_bundle()
+        mock_bootstrap_observability_bundle.return_value = (
+            _create_observability_bundle()
+        )
         mock_assemble_filter.return_value = None
 
         mock_load_config.return_value = _create_pipeline_yaml_config(
@@ -356,7 +358,9 @@ class TestBootstrapVacuumConfig:
         settings = _create_bootstrap_settings()
         mock_get_settings.return_value = settings
 
-        mock_bootstrap_observability_bundle.return_value = _create_observability_bundle()
+        mock_bootstrap_observability_bundle.return_value = (
+            _create_observability_bundle()
+        )
         mock_assemble_filter.return_value = None
 
         mock_load_config.return_value = _create_pipeline_yaml_config(

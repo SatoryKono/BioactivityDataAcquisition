@@ -284,12 +284,16 @@ def test_dq_reject_breakdown_panels_link_to_silver_reject_explorer() -> None:
             None,
         )
         assert panel is not None
-        links = panel.get("options", {}).get("dataLinks", [])
+        links = [
+            *panel.get("links", []),
+            *panel.get("options", {}).get("dataLinks", []),
+        ]
         explorer_link = next(
             (
                 link
                 for link in links
-                if "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer"
+                if link.get("uid") == "bioetl-silver-reject-explorer"
+                or "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer"
                 in str(link.get("url", ""))
             ),
             None,
@@ -297,4 +301,6 @@ def test_dq_reject_breakdown_panels_link_to_silver_reject_explorer() -> None:
         assert explorer_link is not None, (
             f"{panel_title!r} must expose Explorer handoff"
         )
-        assert "${__url_time_range}" in str(explorer_link.get("url", ""))
+        assert explorer_link.get("keepTime") is True or "${__url_time_range}" in str(
+            explorer_link.get("url", "")
+        )

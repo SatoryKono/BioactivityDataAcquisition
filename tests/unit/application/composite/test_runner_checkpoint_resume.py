@@ -50,7 +50,7 @@ class TestResumeFromFailedState:
             run_id=str(uuid4()),
             state=CompositePipelineState.FAILED,
             seed_completed=False,  # Seed failed
-            created_at=datetime.now(tz=UTC),
+            created_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         )
 
         checkpoint_manager = create_mock_checkpoint_manager(failed_state)
@@ -108,7 +108,7 @@ class TestResumeFromFailedState:
                     duration_seconds=10.0,
                 ),
             },
-            created_at=datetime.now(tz=UTC),
+            created_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         )
 
         checkpoint_manager = create_mock_checkpoint_manager(failed_state)
@@ -173,7 +173,7 @@ class TestResumeFromFailedState:
                     duration_seconds=15.0,
                 ),
             },
-            created_at=datetime.now(tz=UTC),
+            created_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         )
 
         checkpoint_manager = create_mock_checkpoint_manager(failed_state)
@@ -246,7 +246,7 @@ class TestResumeContextLogging:
                     duration_seconds=15.0,
                 ),
             },
-            created_at=datetime.now(tz=UTC),
+            created_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         )
 
         checkpoint_manager = create_mock_checkpoint_manager(partial_state)
@@ -328,7 +328,7 @@ class TestCheckpointExistsWarning:
                     duration_seconds=10.0,
                 ),
             },
-            created_at=datetime.now(tz=UTC),
+            created_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         )
 
         # Save checkpoint directly to file
@@ -396,7 +396,7 @@ class TestCheckpointExistsWarning:
             run_id=run_id,
             state=CompositePipelineState.NOT_STARTED,
             seed_completed=False,
-            created_at=datetime.now(tz=UTC),
+            created_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         )
         await manager_setup.save(fresh_state)
 
@@ -438,7 +438,7 @@ class TestFSMStateTransitionOnResume:
                 duration_seconds=10.0,
             ),
             completed_enrichers=frozenset(),
-            created_at=datetime.now(tz=UTC),
+            created_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         )
 
         checkpoint_manager = create_mock_checkpoint_manager(failed_state)
@@ -489,7 +489,7 @@ class TestFSMStateTransitionOnResume:
                     duration_seconds=10.0,
                 ),
             },
-            created_at=datetime.now(tz=UTC),
+            created_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         )
 
         checkpoint_manager = create_mock_checkpoint_manager(failed_state)

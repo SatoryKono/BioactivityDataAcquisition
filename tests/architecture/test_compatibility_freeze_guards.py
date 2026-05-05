@@ -837,9 +837,7 @@ def _assert_no_violations(violations: list[str], failure_message: str) -> None:
     assert not violations, failure_message + "\n" + "\n".join(violations)
 
 
-def _literal_assignment_value(
-    node: ast.stmt, assignment_name: str
-) -> ast.expr | None:
+def _literal_assignment_value(node: ast.stmt, assignment_name: str) -> ast.expr | None:
     if isinstance(node, ast.Assign):
         if any(
             isinstance(target, ast.Name) and target.id == assignment_name

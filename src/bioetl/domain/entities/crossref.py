@@ -73,7 +73,14 @@ class PublicationRecord(BaseModel):
     journal: str | None = PydanticField(
         default=None, description="Container title (journal name)"
     )
-    issn: list[str] = PydanticField(default_factory=list, description="ISSN list")
+    issn: list[str] = PydanticField(
+        default_factory=list,
+        description="ISSN values from CrossRef",
+    )
+    issn_list: str | None = PydanticField(
+        default=None,
+        description="Canonical JSON array of ISSN values",
+    )
     publisher: str | None = PydanticField(default=None, description="Publisher name")
 
     # Publication details
@@ -132,13 +139,14 @@ class CrossRefPublicationEntity(PublicationEntityBase):
     - Business analysts can understand the model without knowing CrossRef API specifics
 
     Inherited from PublicationEntityBase (unified field names):
-        doi, pmid, title, abstract, authors, affiliation_list, journal, issn (str), publisher,
+        doi, pmid, title, abstract, authors, affiliation_list, journal, issn, publisher,
         page_first, page_last, publication_year, publication_date,
         citations_received, citations_made, publication_type, language, is_oa,
         oa_status, _lookup_method, _original_id.
 
     CrossRef-specific Attributes:
-        issn: List of ISSNs (overrides base str|None with list[str]).
+        issn: ISSN values from CrossRef.
+        issn_list: Canonical JSON array of all ISSNs.
         volume: Volume number.
         issue: Issue number.
         published_print: Print publication date (ISO format).
@@ -156,9 +164,10 @@ class CrossRefPublicationEntity(PublicationEntityBase):
     # Override: DOI is REQUIRED for CrossRef (base has Optional)
     doi: str
 
-    # Override: ISSN as list (base has str|None)
-    # CrossRef returns multiple ISSNs (print/electronic), other providers return single ISSN
-    issn: list[str] = field(default_factory=list)  # type: ignore[assignment]
+    # CrossRef domain entities preserve the native ISSN collection. Silver
+    # normalization derives scalar issn and JSON issn_list for storage schemas.
+    issn: list[str] = field(default_factory=list)
+    issn_list: str | None = None
 
     # CrossRef-specific publication details
     volume: str | None = None

@@ -1,0 +1,12 @@
+{
+  "content_hash": "93d54055c6e75d128f7a47c554b8c9e62571189a14f74c818e28a2a545b69e3f",
+  "normalized": {
+    "doi": "10.1000/xyz",
+    "issn": "2049-3630",
+    "issn_electronic": "2049-3630",
+    "issn_list": "[\"1234-567X\",\"2049-3630\"]",
+    "issn_print": "1234-567X",
+    "publication_type": "journal-article",
+    "title": "Example Crossref Title"
+  }
+}

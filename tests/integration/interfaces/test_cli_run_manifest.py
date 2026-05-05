@@ -25,7 +25,7 @@ pytestmark = pytest.mark.integration
 
 class _FakeRunManifestService:
     def __init__(self) -> None:
-        created_at = datetime.now(UTC)
+        created_at = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
         self.run_id = RunID(uuid4())
         self.manifest = RunManifest(
             manifest_id="manifest-integration",

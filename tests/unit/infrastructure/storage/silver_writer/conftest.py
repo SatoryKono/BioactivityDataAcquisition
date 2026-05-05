@@ -83,7 +83,7 @@ def mock_metadata_coordinator():
             runtime=RuntimeMetadata(
                 run_id="test-run-id",
                 run_type=RunTypeEnum.INCREMENTAL,
-                started_at_utc=datetime.now(UTC),
+                started_at_utc=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
             ),
             pipeline=PipelineMetadata(
                 name="test_pipeline",

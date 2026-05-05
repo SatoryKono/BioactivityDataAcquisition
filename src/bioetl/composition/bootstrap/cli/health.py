@@ -13,12 +13,12 @@ from bioetl.composition.bootstrap.cli.noop import create_noop_logger
 from bioetl.composition.factories.datasource.data_source_factory import (
     DataSourceFactory,
 )
-from bioetl.composition.providers._registration_contracts import (
-    create_provider_assembly_support,
+from bioetl.composition.providers.registration import (
+    resolve_provider_assembly_support,
 )
 from bioetl.domain.ports import MetricsPort
-from bioetl.infrastructure.config import get_settings
 from bioetl.infrastructure.adapters.http.health_monitor import ProviderHealthMonitor
+from bioetl.infrastructure.config import get_settings
 from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
 from bioetl.infrastructure.time import SystemClock
 
@@ -58,7 +58,7 @@ class _HealthCheckDataSourceFactory:
         return DataSourceFactory.list_providers()
 
     def create(self, provider: str) -> object:
-        support = create_provider_assembly_support()
+        support = resolve_provider_assembly_support(None)
         http_client = support.create_http_client(
             provider,
             self.settings,

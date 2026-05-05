@@ -45,7 +45,9 @@ def _entrypoint_aliases_from_import_from(node: ast.ImportFrom) -> set[str]:
     if node.module != "bioetl.composition":
         return set()
     return {
-        alias.asname or alias.name for alias in node.names if alias.name == "entrypoints"
+        alias.asname or alias.name
+        for alias in node.names
+        if alias.name == "entrypoints"
     }
 
 
@@ -63,7 +65,10 @@ def _deprecated_import_from_violations(
 
 
 def _deprecated_attribute_violation(
-    path: Path, node: ast.Attribute, legacy_symbols: set[str], entrypoint_aliases: set[str]
+    path: Path,
+    node: ast.Attribute,
+    legacy_symbols: set[str],
+    entrypoint_aliases: set[str],
 ) -> str | None:
     if not isinstance(node.value, ast.Name):
         return None

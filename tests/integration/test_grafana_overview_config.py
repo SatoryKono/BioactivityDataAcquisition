@@ -154,6 +154,26 @@ def test_current_tables_hide_prometheus_noise_and_use_human_column_names() -> No
             )
 
 
+def test_key_status_panels_render_status_as_colored_cells() -> None:
+    expected_titles = ("L0 Inputs", "Gold Lifecycle", "Provider Global")
+
+    for title in expected_titles:
+        panel = _panels_by_title()[title]
+        overrides = panel.get("fieldConfig", {}).get("overrides", [])
+        color_background_overrides = [
+            override
+            for override in overrides
+            if any(
+                prop.get("id") == "custom.cellOptions"
+                and prop.get("value", {}).get("type") == "color-background"
+                for prop in override.get("properties", [])
+            )
+        ]
+        assert color_background_overrides, (
+            f"Panel {title!r} must render status values as colored cells"
+        )
+
+
 def test_operator_panels_expand_compact_layout_for_readability() -> None:
     assert _panels_by_title()["System Status"].get("gridPos", {}).get("w") == 5
     assert _panels_by_title()["Next Action"].get("gridPos", {}).get("w") == 11

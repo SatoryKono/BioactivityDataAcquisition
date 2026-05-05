@@ -141,12 +141,14 @@ tracked_suite_inventory:
       - tests/integration/test_preflight_health_modes.py
       - tests/integration/test_runner_lifecycle.py
       data_quality:
+      - tests/integration/config/test_non_chembl_identifier_dq_parity.py
       - tests/integration/test_dq_monitor_integration.py
       - tests/integration/test_dq_report_integration.py
       grafana:
       - tests/integration/test_grafana_config.py
-      - tests/integration/test_grafana_config_timing.py
+      - tests/integration/test_grafana_dashboard_first_screen_contract.py
       - tests/integration/test_grafana_dashboard_links.py
+      - tests/integration/test_grafana_dashboard_metric_semantics.py
       - tests/integration/test_grafana_datasource_provisioning.py
       - tests/integration/test_grafana_silver_reject_config.py
       - tests/integration/test_grafana_overview_config.py

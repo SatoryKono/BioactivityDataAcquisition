@@ -78,8 +78,8 @@ def _create_run_result(
         records_silver=90,
         records_gold=85,
         records_quarantined=5,
-        started_at=datetime.now(tz=UTC),
-        completed_at=datetime.now(tz=UTC),
+        started_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
+        completed_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         error_message=error_message,
     )
 

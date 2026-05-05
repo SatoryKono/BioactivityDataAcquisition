@@ -252,9 +252,7 @@ def _forbidden_alias_violations_for_module(
                 violations.append(violation)
         if isinstance(node, ast.ImportFrom):
             violations.extend(
-                _forbidden_alias_import_violations(
-                    module_path, node, forbidden_aliases
-                )
+                _forbidden_alias_import_violations(module_path, node, forbidden_aliases)
             )
     return violations
 

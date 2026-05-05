@@ -153,11 +153,10 @@ quality:
     nullable: false
     error_message: paper_id is required and must be a 40-char hex string
   - field: pmid
-    type: range
-    min: 1
-    max: 10000000000
+    type: pattern
+    pattern: ^[1-9]\d{0,9}$
     nullable: true
-    error_message: PubMed ID must be a positive integer
+    error_message: PubMed ID must be a canonical positive numeric string
   - field: doi
     type: pattern
     pattern: ^10\.\d{4,}/\S+$

@@ -732,9 +732,7 @@ def _class_nodes_in_file(py_file: Path) -> list[ast.ClassDef]:
     return [node for node in ast.walk(tree) if isinstance(node, ast.ClassDef)]
 
 
-def _non_domain_port_suffix_violations(
-    py_file: Path, *, src_dir: Path
-) -> list[str]:
+def _non_domain_port_suffix_violations(py_file: Path, *, src_dir: Path) -> list[str]:
     relative = py_file.relative_to(src_dir)
     return [
         f"{relative}:{node.lineno}:{node.name}"

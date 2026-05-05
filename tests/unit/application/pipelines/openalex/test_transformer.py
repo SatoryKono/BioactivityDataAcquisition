@@ -36,7 +36,7 @@ def pipeline_context() -> PipelineContext:
     return PipelineContext(
         run_id=RunID(uuid4()),
         run_type=RunType.INCREMENTAL,
-        started_at=datetime.now(UTC),
+        started_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         logger=NoOpLogger(),
     )
 

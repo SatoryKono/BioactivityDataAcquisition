@@ -237,7 +237,8 @@ class TestExtractJournalInfo:
         result = extract_journal_info(publication)
         assert result == {
             "journal": "Nature",
-            "issn": ["0028-0836", "1476-4687"],
+            "issn": "0028-0836",
+            "issn_list": ["0028-0836", "1476-4687"],
             "publisher": "Springer Nature",
         }
 
@@ -246,13 +247,19 @@ class TestExtractJournalInfo:
         publication = {"container-title": ["Nature"]}
         result = extract_journal_info(publication)
         assert result["journal"] == "Nature"
-        assert result["issn"] == []
+        assert result["issn"] is None
+        assert result["issn_list"] is None
         assert result["publisher"] is None
 
     def test_extract_journal_info_empty(self) -> None:
         """Should return defaults for empty publication."""
         result = extract_journal_info({})
-        assert result == {"journal": None, "issn": [], "publisher": None}
+        assert result == {
+            "journal": None,
+            "issn": None,
+            "issn_list": None,
+            "publisher": None,
+        }
 
     def test_extract_journal_info_empty_container_title(self) -> None:
         """Should return None for empty container-title list."""

@@ -171,7 +171,7 @@ class TestStructuralAnalyzerIntegration:
             pipeline="test_pipeline",
             target_table="gold.test",
             config=config,
-            timestamp=datetime.now(UTC),
+            timestamp=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
             reference_tables={"cat_id -> categories.id": pl.DataFrame({"id": [1, 2]})},
             scd_config={
                 "type": 2,
@@ -205,7 +205,7 @@ class TestStructuralAnalyzerIntegration:
             target_table="silver.test",
             source_batch_ids=["batch-1"],
             config=config,
-            timestamp=datetime.now(UTC),
+            timestamp=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
             primary_keys=["entity_id"],
             key_nullability_rules=[
                 {"field": "entity_id", "key_type": "merge", "nullable": False},

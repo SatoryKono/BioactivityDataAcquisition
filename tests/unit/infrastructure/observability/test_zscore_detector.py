@@ -30,7 +30,9 @@ class TestZScoreDetector:
     ) -> None:
         """Test that detect returns None when baseline has < 2 samples."""
         baseline = [100.0]  # Only 1 sample
-        result = detector.detect("metric", 500.0, baseline, timestamp=datetime.now(UTC))
+        result = detector.detect(
+            "metric", 500.0, baseline, timestamp=datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
+        )
         assert result is None
 
     def test_detect_returns_none_without_timestamp(
@@ -47,7 +49,11 @@ class TestZScoreDetector:
         """Test that detect returns None when z-score is below threshold."""
         baseline = [100.0, 110.0, 120.0, 130.0, 140.0]
         result = detector.detect(
-            "metric", 125.0, baseline, threshold=2.0, timestamp=datetime.now(UTC)
+            "metric",
+            125.0,
+            baseline,
+            threshold=2.0,
+            timestamp=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         )
         assert result is None
 
@@ -55,7 +61,11 @@ class TestZScoreDetector:
         """Test detection of spike (value above mean)."""
         baseline = [100.0, 110.0, 120.0, 130.0, 140.0]
         result = detector.detect(
-            "metric", 300.0, baseline, threshold=2.0, timestamp=datetime.now(UTC)
+            "metric",
+            300.0,
+            baseline,
+            threshold=2.0,
+            timestamp=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         )
 
         assert result is not None
@@ -67,7 +77,11 @@ class TestZScoreDetector:
         """Test detection of drop (value below mean)."""
         baseline = [100.0, 110.0, 120.0, 130.0, 140.0]
         result = detector.detect(
-            "metric", -50.0, baseline, threshold=2.0, timestamp=datetime.now(UTC)
+            "metric",
+            -50.0,
+            baseline,
+            threshold=2.0,
+            timestamp=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         )
 
         assert result is not None
@@ -156,7 +170,7 @@ class TestZScoreAnomalyCreation:
 
     def test_create_anomaly_spike(self, detector: ZScoreDetector) -> None:
         """Test anomaly creation for spike (value > mean)."""
-        ts = datetime.now(UTC)
+        ts = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
         anomaly = detector._create_anomaly(
             metric_name="test_metric",
             current_value=200.0,
@@ -178,7 +192,7 @@ class TestZScoreAnomalyCreation:
 
     def test_create_anomaly_drop(self, detector: ZScoreDetector) -> None:
         """Test anomaly creation for drop (value < mean)."""
-        ts = datetime.now(UTC)
+        ts = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
         anomaly = detector._create_anomaly(
             metric_name="test_metric",
             current_value=50.0,
@@ -207,7 +221,11 @@ class TestZScoreMinSamples:
         detector = ZScoreDetector()
         baseline = [100.0, 200.0]  # Exactly 2 samples
         result = detector.detect(
-            "metric", 500.0, baseline, threshold=2.0, timestamp=datetime.now(UTC)
+            "metric",
+            500.0,
+            baseline,
+            threshold=2.0,
+            timestamp=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         )
         # Should work (not return None due to insufficient samples)
         # Whether it detects an anomaly depends on the z-score
@@ -228,7 +246,11 @@ class TestZScoreEdgeCases:
         """Test with negative baseline values."""
         baseline = [-100.0, -90.0, -80.0, -70.0, -60.0]
         result = detector.detect(
-            "metric", -200.0, baseline, threshold=2.0, timestamp=datetime.now(UTC)
+            "metric",
+            -200.0,
+            baseline,
+            threshold=2.0,
+            timestamp=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         )
         # Should detect as DROP (value below mean)
         if result is not None:
@@ -238,7 +260,11 @@ class TestZScoreEdgeCases:
         """Test with large baseline."""
         baseline = list(range(1, 101))  # 100 samples
         result = detector.detect(
-            "metric", 300.0, baseline, threshold=2.0, timestamp=datetime.now(UTC)
+            "metric",
+            300.0,
+            baseline,
+            threshold=2.0,
+            timestamp=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         )
         assert result is not None
         assert result.anomaly_type == AnomalyType.SPIKE
@@ -247,7 +273,11 @@ class TestZScoreEdgeCases:
         """Test with very small threshold."""
         baseline = [100.0, 101.0, 102.0, 103.0, 104.0]
         result = detector.detect(
-            "metric", 110.0, baseline, threshold=0.1, timestamp=datetime.now(UTC)
+            "metric",
+            110.0,
+            baseline,
+            threshold=0.1,
+            timestamp=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         )
         # With threshold 0.1, even small deviations should be detected
         assert result is not None
@@ -256,7 +286,11 @@ class TestZScoreEdgeCases:
         """Test when value equals mean."""
         baseline = [100.0, 100.0, 100.0, 100.0, 100.0]
         result = detector.detect(
-            "metric", 100.0, baseline, threshold=2.0, timestamp=datetime.now(UTC)
+            "metric",
+            100.0,
+            baseline,
+            threshold=2.0,
+            timestamp=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         )
         # Z-score should be 0, so no anomaly
         assert result is None

@@ -149,7 +149,7 @@ def mock_context():
     from datetime import UTC, datetime
 
     context = MagicMock()
-    context.started_at = datetime.now(UTC)
+    context.started_at = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
     return context
 
 

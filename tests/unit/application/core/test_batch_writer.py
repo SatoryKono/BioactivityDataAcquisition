@@ -96,7 +96,7 @@ class TestBatchWriterBronze:
         """Test that records are serialized to JSON."""
         records = [{"id": "1", "value": 10}, {"id": "2", "value": 20}]
         batch_id = BatchID(uuid4())
-        ingestion_ts = datetime.now(UTC)
+        ingestion_ts = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
 
         await batch_writer.write_bronze(records, batch_id, ingestion_ts)
 
@@ -127,7 +127,7 @@ class TestBatchWriterBronze:
         # Records in reverse order
         records = [{"z": "last", "a": "first"}, {"a": "first", "z": "last"}]
         batch_id = BatchID(uuid4())
-        ingestion_ts = datetime.now(UTC)
+        ingestion_ts = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
 
         await batch_writer.write_bronze(records, batch_id, ingestion_ts)
 
@@ -363,7 +363,7 @@ class TestBatchWriterTracing:
         """Test that write_bronze creates a tracing span."""
         records = [{"id": "1", "value": 10}]
         batch_id = BatchID(uuid4())
-        ingestion_ts = datetime.now(UTC)
+        ingestion_ts = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
 
         await batch_writer_with_tracer.write_bronze(records, batch_id, ingestion_ts)
 
@@ -445,7 +445,9 @@ class TestBatchWriterTracing:
         batch_id = BatchID(uuid4())
 
         with pytest.raises(RuntimeError):
-            await writer.write_bronze(records, batch_id, datetime.now(UTC))
+            await writer.write_bronze(
+                records, batch_id, datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
+            )
 
         span = mock_tracer.get_tracer.return_value.start_as_current_span.return_value
         span.set_attribute.assert_called_with("error", True)
@@ -455,7 +457,7 @@ class TestBatchWriterTracing:
         """Test that no span is created when tracer is None."""
         records = [{"id": "1", "value": 10}]
         batch_id = BatchID(uuid4())
-        ingestion_ts = datetime.now(UTC)
+        ingestion_ts = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
 
         # batch_writer fixture doesn't have tracer, should work without errors
         await batch_writer.write_bronze(records, batch_id, ingestion_ts)
@@ -518,7 +520,7 @@ class TestBatchWriterLockValidation:
         """Test that write_bronze validates lock before writing."""
         records = [{"id": "1", "value": 10}]
         batch_id = BatchID(uuid4())
-        ingestion_ts = datetime.now(UTC)
+        ingestion_ts = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
 
         await batch_writer_with_lock.write_bronze(records, batch_id, ingestion_ts)
 
@@ -579,7 +581,7 @@ class TestBatchWriterLockValidation:
 
         records = [{"id": "1", "value": 10}]
         batch_id = BatchID(uuid4())
-        ingestion_ts = datetime.now(UTC)
+        ingestion_ts = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
 
         with pytest.raises(LockNotHeldError) as exc_info:
             await writer.write_bronze(records, batch_id, ingestion_ts)
@@ -716,7 +718,7 @@ class TestBatchWriterLockValidation:
             await writer.write_bronze(
                 records,
                 BatchID(uuid4()),
-                datetime.now(UTC),
+                datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
             )
 
         mock_storage.write_bronze.assert_not_called()
@@ -807,7 +809,7 @@ class TestBatchWriterLockValidation:
         """
         records = [{"id": "1", "value": 10}]
         batch_id = BatchID(uuid4())
-        ingestion_ts = datetime.now(UTC)
+        ingestion_ts = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
 
         # batch_writer fixture doesn't have lock_validator
         await batch_writer.write_bronze(records, batch_id, ingestion_ts)
@@ -844,7 +846,7 @@ class TestBatchWriterLockValidation:
 
         records = [{"id": "1", "value": 10}]
         batch_id = BatchID(uuid4())
-        ingestion_ts = datetime.now(UTC)
+        ingestion_ts = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
 
         with pytest.raises(LockNotHeldError):
             await writer.write_bronze(records, batch_id, ingestion_ts)

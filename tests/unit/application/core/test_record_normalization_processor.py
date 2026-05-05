@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, cast
 from unittest.mock import MagicMock
 
 import pytest
-from hypothesis import given
+from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
 
 from bioetl.application.core.config import (
@@ -83,6 +83,26 @@ def test_normalize_record_leaves_invalid_json_like_strings_as_trimmed_text() -> 
     )
 
     assert normalized["raw_json"] == "{not json}"
+
+
+@pytest.mark.unit
+def test_normalize_business_data_serializes_crossref_issn_collection_to_canonical_json() -> (
+    None
+):
+    processor = RecordNormalizationProcessor(
+        provider="crossref", entity_type="publication"
+    )
+
+    normalized = processor.normalize_business_data(
+        {
+            "issn": " ISSN:1234567X ",
+            "issn_list": ["2049-3630", "ISSN:1234567X"],
+        }
+    )
+
+    assert normalized["issn"] == "1234-567X"
+    assert normalized["issn_list"] == '["1234-567X","2049-3630"]'
+    assert not isinstance(normalized["issn_list"], list)
 
 
 @pytest.mark.unit
@@ -923,6 +943,7 @@ def test_chembl_activity_profile_normalizes_canonical_smiles_via_smiles_value_ob
 
 
 @pytest.mark.unit
+@settings(suppress_health_check=[HealthCheck.too_slow])
 @given(
     activity_properties=st.permutations(
         (

@@ -425,11 +425,11 @@ async def test_bronze_writer_atomic_writes(e2e_data_dir: Path):
         records=iter(records),
         provider=provider,
         entity=entity,
-        date=datetime.now(UTC),
+        date=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         batch_id=uuid4(),
         run_id=run_id,
         run_type=RunType.INCREMENTAL,
-        ingestion_ts=datetime.now(UTC),
+        ingestion_ts=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
     )
 
     # write_bronze returns BronzeWriteResult with relative_path

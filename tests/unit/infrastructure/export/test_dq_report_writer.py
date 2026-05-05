@@ -50,7 +50,7 @@ def _build_bronze_report(
         batch_id=batch_id,
         source_file=source_file,
         config=config,
-        timestamp=datetime.now(UTC),
+        timestamp=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
     )
 
 
@@ -60,7 +60,7 @@ def _build_silver_report(
 ) -> SilverDQReport:
     return SilverDQReport(
         layer=MedallionLayer.SILVER,
-        timestamp=datetime.now(UTC),
+        timestamp=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         run_id=run_id,
         pipeline="chembl_activity",
         source_batch_ids=("batch-1", "batch-2"),
@@ -88,7 +88,7 @@ def _build_gold_report(
 ) -> GoldDQReport:
     return GoldDQReport(
         layer=MedallionLayer.GOLD,
-        timestamp=datetime.now(UTC),
+        timestamp=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         run_id=run_id,
         pipeline="chembl_activity",
         target_table=target_table,

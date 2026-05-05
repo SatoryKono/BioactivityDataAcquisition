@@ -86,7 +86,7 @@ class TestWithSeedCompleted:
 
     def test_preserves_other_fields(self):
         """with_seed_completed should preserve other fields."""
-        created_at = datetime.now(tz=UTC)
+        created_at = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
         initial = CompositeCheckpointState(
             composite_name="test_composite",
             run_id="run-123",
@@ -241,7 +241,7 @@ class TestWithState:
             records_not_found=5,
             duration_seconds=10.5,
         )
-        created_at = datetime.now(tz=UTC)
+        created_at = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
         initial = CompositeCheckpointState(
             composite_name="test_composite",
             run_id="run-123",

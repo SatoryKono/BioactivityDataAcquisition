@@ -172,7 +172,7 @@ class FakeCheckpointManager:
                 composite_name=composite_name,
                 run_id=self._run_id,
                 state=CompositePipelineState.NOT_STARTED,
-                created_at=datetime.now(tz=UTC),
+                created_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
             )
 
         self.current_state = initial_state
@@ -858,7 +858,7 @@ class TestResumePartialEnrichment:
                     records_enriched=90,
                 ),
             },
-            created_at=datetime.now(tz=UTC),
+            created_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         )
 
         checkpoint = FakeCheckpointManager(initial_state=initial_state)
@@ -925,7 +925,7 @@ class TestResumePartialEnrichment:
                     records_enriched=90,
                 ),
             },
-            created_at=datetime.now(tz=UTC),
+            created_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         )
 
         checkpoint = FakeCheckpointManager(initial_state=initial_state)

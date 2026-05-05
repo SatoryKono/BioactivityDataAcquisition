@@ -1091,7 +1091,7 @@ class TestFSMResumeFromFailed:
                     duration_seconds=10.0,
                 ),
             },
-            created_at=datetime.now(tz=UTC),
+            created_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         )
 
         # Write checkpoint to file

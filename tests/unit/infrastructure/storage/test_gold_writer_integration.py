@@ -115,7 +115,7 @@ async def test_write_scd2_missing_config(gold_writer, valid_records, strict_sche
 async def test_write_scd2_new_table(gold_writer, valid_records, strict_schema):
     """Test SCD2 write when table does not exist (creates new)."""
     scd_config = {"business_key": "id"}
-    ingestion_ts = datetime.now(UTC)
+    ingestion_ts = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
 
     with (
         patch("bioetl.infrastructure.storage.gold_writer.DeltaTable") as mock_dt,
@@ -155,7 +155,7 @@ async def test_write_scd2_new_table(gold_writer, valid_records, strict_schema):
 async def test_write_scd2_existing_table(gold_writer, valid_records, strict_schema):
     """Test SCD2 merge with existing table."""
     scd_config = {"business_key": "id"}
-    ingestion_ts = datetime.now(UTC)
+    ingestion_ts = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
 
     mock_dt_instance = MagicMock()
     mock_merge_builder = MagicMock()

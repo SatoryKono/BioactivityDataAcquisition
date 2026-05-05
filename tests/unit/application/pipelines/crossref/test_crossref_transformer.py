@@ -42,7 +42,7 @@ def pipeline_context(noop_logger):
         run_id=RunID(uuid4()),
         run_type=RunType.INCREMENTAL,
         logger=noop_logger,
-        started_at=datetime.now(UTC),
+        started_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
     )
 
 
@@ -423,7 +423,8 @@ def test_extract_business_data_issn_list(transformer):
     """Test ISSN list extraction at business data level (before entity conversion)."""
     publication = {"DOI": "10.1234/test", "ISSN": ["1234-5678", "8765-4321"]}
     data = transformer._extract_business_data(publication)
-    assert data["issn"] == ["1234-5678", "8765-4321"]
+    assert data["issn"] == "1234-5678"
+    assert data["issn_list"] == ["1234-5678", "8765-4321"]
 
 
 @pytest.mark.asyncio

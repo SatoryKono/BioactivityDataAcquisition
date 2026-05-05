@@ -42,8 +42,8 @@ def test_main_uses_workspace_root_for_generated_server_paths(tmp_path: Path) -> 
             workspace_root / f"scripts/ai/mcp/github-mcp-wrapper{wrapper_suffix}"
         ).resolve()
     )
-    assert servers["needle"]["args"][0] == str(
+    assert servers["mermaid"]["args"][0] == str(
         (
-            workspace_root / f"scripts/ai/mcp/mcp_needle_wrapper{wrapper_suffix}"
+            workspace_root / f"scripts/ai/mcp/mcp_mermaid_wrapper{wrapper_suffix}"
         ).resolve()
     )

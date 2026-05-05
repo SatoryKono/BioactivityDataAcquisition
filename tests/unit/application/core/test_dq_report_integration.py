@@ -99,7 +99,7 @@ def sample_dq_context(tmp_path: Path) -> DQReportContext:
     return DQReportContext(
         run_id="test-run-123",
         pipeline_name="chembl_activity",
-        timestamp=datetime.now(UTC),
+        timestamp=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         bronze_records=[b'{"id": 1}', b'{"id": 2}'],
         bronze_batch_id="batch-001",
         bronze_source_file=str(tmp_path / "bronze" / "file.jsonl.zst"),
@@ -156,7 +156,7 @@ def mock_context() -> MagicMock:
     from datetime import UTC, datetime
 
     context = MagicMock()
-    context.started_at = datetime.now(UTC)
+    context.started_at = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
     return context
 
 
@@ -503,7 +503,7 @@ class TestDQReportContext:
         context = DQReportContext(
             run_id="test-123",
             pipeline_name="chembl_activity",
-            timestamp=datetime.now(UTC),
+            timestamp=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
             bronze_records=[b'{"id": 1}'],
             bronze_batch_id="batch-001",
             silver_data=None,
@@ -522,7 +522,7 @@ class TestDQReportContext:
         context = DQReportContext(
             run_id="test-123",
             pipeline_name="chembl_activity",
-            timestamp=datetime.now(UTC),
+            timestamp=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
             dq_soft_threshold=0.10,
             dq_hard_threshold=0.30,
         )

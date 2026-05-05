@@ -16,6 +16,9 @@ from bioetl.interfaces.cli.commands.domains.health.rendering import (
     build_health_server_info_lines,
     render_health_results_json,
 )
+from bioetl.interfaces.cli.commands.domains.health.server_integration import (
+    DEFAULT_HEALTH_SERVER_PORT,
+)
 from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
     CLI_ENTRYPOINT_TYPED_ERRORS,
 )
@@ -347,7 +350,7 @@ def health() -> None:
 @click.option(
     "--port",
     "-p",
-    default=8000,
+    default=DEFAULT_HEALTH_SERVER_PORT,
     type=int,
     help="Port to listen on.",
     show_default=True,
@@ -368,7 +371,7 @@ def health_server_command(host: str, port: int) -> None:
     - GET /ops/quarantine/filter-options - Explorer variable options
 
     Example:
-        bioetl health server --port 8000
+        bioetl health server --port 8081
 
     Args:
         host: IP address to bind the server to (e.g., '127.0.0.1' or '0.0.0.0').

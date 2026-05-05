@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 
 import pytest
 
@@ -28,11 +28,15 @@ def test_system_clock_returns_utc_aware_datetime() -> None:
 
 
 @pytest.mark.unit
-def test_system_clock_now_is_current_time() -> None:
-    """SystemClock.now returns value close to current UTC time."""
+def test_system_clock_now_uses_system_timestamp(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """SystemClock.now converts the current POSIX timestamp to UTC."""
     clock = SystemClock()
-    before = datetime.now(UTC)
-    value = clock.now()
-    after = datetime.now(UTC)
+    expected = datetime(2024, 1, 15, 12, 0, tzinfo=UTC)
+    fixed_timestamp = expected.timestamp()
+    monkeypatch.setattr(
+        "bioetl.infrastructure.time.system_clock.time.time", lambda: fixed_timestamp
+    )
 
-    assert before - timedelta(seconds=1) <= value <= after + timedelta(seconds=1)
+    assert clock.now() == expected

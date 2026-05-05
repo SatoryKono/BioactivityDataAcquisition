@@ -48,7 +48,7 @@ def _make_manifest() -> RunManifest:
         manifest_id="manifest-diagnostics",
         execution_fingerprint="fingerprint-diagnostics",
         run_id=RunID(uuid4()),
-        created_at=datetime.now(UTC),
+        created_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
     )
 
 
@@ -882,7 +882,7 @@ def test_build_diagnostics_summary_surfaces_persisted_resume_diagnostics() -> No
             run_id=manifest.run_id,
             event_type="checkpoint_resume_rejected",
             event_family="pipeline.lifecycle",
-            occurred_at=datetime.now(UTC),
+            occurred_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
             status="rejected",
             details={
                 "compatibility_disposition": "hard_fail",
@@ -953,7 +953,7 @@ def test_build_diagnostics_summary_projects_composite_dossier_correlation() -> N
         run_id=manifest.run_id,
         event_type="composite_merge_completed",
         event_family="composite",
-        occurred_at=datetime.now(UTC),
+        occurred_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         status="success",
         details={
             "_diagnostic": {
@@ -1082,7 +1082,7 @@ def test_build_diagnostics_summary_accepts_legacy_data_contract_version_alias() 
         run_id=manifest.run_id,
         event_type="run_finished",
         event_family="pipeline.lifecycle",
-        occurred_at=datetime.now(UTC),
+        occurred_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         status="success",
         details={
             "_diagnostic": {

@@ -31,9 +31,7 @@ _ALLOWED_DASHBOARD_LINK_VARS = {
     "bioetl-overview-v2": frozenset({"pipeline", "run_type"}),
     "bioetl-dq-v2": frozenset({"pipeline", "run_type", "stage"}),
     "bioetl-runtime": frozenset({"pipeline", "run_type", "stage"}),
-    "bioetl-provider-health-v2": frozenset(
-        {"provider", "pipeline_context", "adapter"}
-    ),
+    "bioetl-provider-health-v2": frozenset({"provider", "pipeline_context", "adapter"}),
     "bioetl-control-plane-v1": frozenset({"pipeline", "run_type"}),
     "bioetl-workflow-overview": frozenset({"pipeline", "run_type"}),
 }

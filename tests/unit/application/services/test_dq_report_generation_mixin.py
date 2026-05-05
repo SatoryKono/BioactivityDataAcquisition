@@ -29,7 +29,7 @@ def _make_context(**overrides: object) -> DQReportContext:
     payload: dict[str, object] = {
         "run_id": "run-001",
         "pipeline_name": "test_pipeline",
-        "timestamp": datetime.now(UTC),
+        "timestamp": datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         "provider": "test_provider",
         "entity": "test_entity",
         "bronze_source_file": "bronze/source.jsonl",

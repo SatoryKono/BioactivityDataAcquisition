@@ -63,6 +63,28 @@ vocabularies. That means:
 - semantic grouping belongs in derived anchors such as
   `standardized_inchi_key` and `structure_parent_key`
 
+## Raw Property URN Governance
+
+PubChem Bronze also carries raw `props[].urn` metadata that behaves like a
+provider vocabulary surface, even though it is not promoted into strict Silver
+enums. The governed inventory now lives in
+`configs/vocab/pubchem_property_urn.yaml` and is extracted from tracked Bronze
+fixtures by `scripts/engineering/qa/extract_pubchem_property_vocab.py`.
+
+Current governed URN fields:
+
+- `datatype`
+- `label`
+- `name`
+- `implementation`
+- `software`
+- `source`
+- `release`
+
+Rule: newly observed `props[].urn.*` values require inventory review. They must
+not trigger Bronze mutation, ad hoc enum widening in domain code, or implicit
+flattening into Silver.
+
 ## Composite Molecule Impact
 
 `composite_molecule` does not re-classify PubChem compound fields into a new

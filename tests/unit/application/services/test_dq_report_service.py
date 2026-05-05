@@ -110,7 +110,7 @@ def dq_context() -> DQReportContext:
     return DQReportContext(
         run_id="run-001",
         pipeline_name="test_pipeline",
-        timestamp=datetime.now(UTC),
+        timestamp=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         bronze_source_file="bronze/test/batch_001.jsonl.zst",
         bronze_batch_id="batch-001",
         bronze_records=[b'{"id": 1}', b'{"id": 2}'],
@@ -194,7 +194,7 @@ class TestDQReportContext:
         context = DQReportContext(
             run_id="run-001",
             pipeline_name="test",
-            timestamp=datetime.now(UTC),
+            timestamp=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         )
 
         with pytest.raises(AttributeError):
@@ -205,7 +205,7 @@ class TestDQReportContext:
         context = DQReportContext(
             run_id="run-001",
             pipeline_name="test",
-            timestamp=datetime.now(UTC),
+            timestamp=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         )
 
         assert context.bronze_source_file is None
@@ -512,7 +512,7 @@ class TestDQReportService:
         context = DQReportContext(
             run_id="run-001",
             pipeline_name="test",
-            timestamp=datetime.now(UTC),
+            timestamp=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
             # No bronze data
         )
 
