@@ -1018,7 +1018,7 @@ class TestObserverContractSchema:
         )
 
         with patch(
-            "bioetl.application.observability.observer.build_observability_contract_payload",
+            "bioetl.application.observability.observer_contract.build_observability_contract_payload",
             return_value=payload,
         ) as build_mock:
             observer.emit_event("contract_event", LifecyclePhase.EXECUTION)

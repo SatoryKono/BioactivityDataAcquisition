@@ -1,22 +1,22 @@
 ---
 id: sonar-issues-fix-2026-05-05
-title: Fix Sonar issues in repo
+title: sonar issues fix
 task_id: sonar-issues-fix-2026-05-05
-created_at: '2026-05-05T06:17:12Z'
+created_at: '2026-05-05T06:24:49Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
 - <add-source-ref>
 summary: Active task session context.
-query: Fix Sonar issues in repo
+query: sonar issues S930 S1192 S6353 S3358
 ---
 
 # Session note
 
 ## Task
 
-- Title: Fix Sonar issues in repo
-- Retrieval query: Fix Sonar issues in repo
+- Title: sonar issues fix
+- Retrieval query: sonar issues S930 S1192 S6353 S3358
 
 ## Retrieved context
 

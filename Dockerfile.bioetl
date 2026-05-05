@@ -56,9 +56,12 @@ USER bioetl
 # Expose metrics ports
 EXPOSE 8000 8081
 
+# Canonical CLI entrypoint so docker-compose can pass subcommands only.
+ENTRYPOINT ["bioetl"]
+
 # Healthcheck
 HEALTHCHECK --interval=30s --timeout=10s --retries=3 --start-period=10s \
     CMD python -c "import sys; sys.exit(0)"
 
 # Default command (override via docker-compose)
-CMD ["bioetl", "health", "server", "--host", "0.0.0.0", "--port", "8081"]
+CMD ["health", "server", "--host", "0.0.0.0", "--port", "8081"]
