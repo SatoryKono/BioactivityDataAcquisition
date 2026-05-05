@@ -1,4 +1,4 @@
-"""Compatibility facade for schema-aware structural policy helpers."""
+"""Schema-aware structural policy public facade helpers."""
 
 from __future__ import annotations
 

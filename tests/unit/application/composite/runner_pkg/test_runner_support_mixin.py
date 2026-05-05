@@ -10,9 +10,6 @@ from unittest.mock import patch
 
 import pytest
 
-from bioetl.application.composite.lifecycle_observer_service import (
-    CompositeLifecycleObserverService,
-)
 from bioetl.application.composite.runner_pkg.runner import CompositeExecutionContext
 from bioetl.application.composite.runner_pkg.runner_support_mixin import (
     CompositeRunnerSupportMixin,
@@ -31,40 +28,16 @@ from bioetl.domain.exceptions import (
     InvalidStateError,
     StorageError,
 )
+from tests.unit.application.composite.runner_pkg.runner_pkg_test_support import (
+    initialize_runner_pkg_harness,
+    make_composite_config,
+    make_enricher_cfg,
+)
 
 
 # ---------------------------------------------------------------------------
 # Harness
 # ---------------------------------------------------------------------------
-
-
-def _make_enricher_cfg(
-    pipeline: str,
-    *,
-    required: bool = False,
-) -> SimpleNamespace:
-    return SimpleNamespace(pipeline=pipeline, required=required)
-
-
-def _make_composite_config(
-    name: str = "test_composite",
-    enrichers: list[Any] | None = None,
-    required_enrichers: list[str] | None = None,
-    required_dependencies: list[str] | None = None,
-) -> SimpleNamespace:
-    enricher_list = enrichers or []
-    return SimpleNamespace(
-        name=name,
-        enrichers=enricher_list,
-        required_enrichers=required_enrichers or [],
-        required_dependencies=required_dependencies or [],
-        seed=SimpleNamespace(pipeline="seed_pipeline"),
-        merge=SimpleNamespace(
-            field_priorities=[],
-        ),
-    )
-
-
 class _SupportMixinHarness(CompositeRunnerSupportMixin):
     """Minimal test harness providing all required host attributes."""
 
@@ -72,33 +45,23 @@ class _SupportMixinHarness(CompositeRunnerSupportMixin):
         self,
         config: SimpleNamespace | None = None,
     ) -> None:
-        self._config = config or _make_composite_config()
-        self._runtime = SimpleNamespace(
-            required_only=False,
-            enrich_only=None,
-            force_enricher=None,
+        initialize_runner_pkg_harness(
+            self,
+            config=config or make_composite_config(),
+            runtime=SimpleNamespace(
+                required_only=False,
+                enrich_only=None,
+                force_enricher=None,
+            ),
+            run_id_str="run-test-1",
+            with_metrics_and_tracing=True,
         )
-        self._logger = MagicMock()
-        self._metrics = MagicMock()
-        self._metrics.increment_counter = MagicMock()
-        self._metrics.observe_histogram = MagicMock()
-        self._tracing = MagicMock()
-        self._tracing.flush = MagicMock()
-        self._otel_tracer = MagicMock()
-        self._checkpoint_span = MagicMock()
-        self._otel_tracer.start_as_current_span.return_value = self._checkpoint_span
-        self._tracing.get_tracer.return_value = self._otel_tracer
-        self._observer_logger = MagicMock()
-        self._observer = CompositeLifecycleObserverService(logger=self._observer_logger)
-        self._run_id_str = "run-test-1"
         self._start_time: float | None = 100.0
         self._started_at: datetime | None = datetime(2026, 4, 12, 12, 0, tzinfo=UTC)
-        self._checkpoint_manager = AsyncMock()
         self._checkpoint_manager.save = AsyncMock()
         self._seed_runner_factory = MagicMock()
         self._original_run_id: str | None = None
         self._preflight_validator = None
-        self._fsm = MagicMock()
 
 
 def _build_execution_artifacts(
@@ -271,8 +234,8 @@ def test_build_composite_result_when_optional_failure_then_logs_warning_completi
     None
 ):
     harness = _SupportMixinHarness(
-        config=_make_composite_config(
-            enrichers=[_make_enricher_cfg("opt_a", required=False)],
+        config=make_composite_config(
+            enrichers=[make_enricher_cfg("opt_a", required=False)],
             required_enrichers=[],
         )
     )
@@ -300,10 +263,10 @@ def test_build_composite_result_when_optional_failure_then_logs_warning_completi
 @pytest.mark.unit
 def test_validate_config_consistency_when_consistent_then_no_warning() -> None:
     enrichers = [
-        _make_enricher_cfg("req_a", required=True),
-        _make_enricher_cfg("opt_b", required=False),
+        make_enricher_cfg("req_a", required=True),
+        make_enricher_cfg("opt_b", required=False),
     ]
-    config = _make_composite_config(
+    config = make_composite_config(
         enrichers=enrichers,
         required_enrichers=["req_a"],
     )
@@ -316,8 +279,8 @@ def test_validate_config_consistency_when_consistent_then_no_warning() -> None:
 
 @pytest.mark.unit
 def test_validate_config_consistency_when_mismatch_then_logs_warning() -> None:
-    enrichers = [_make_enricher_cfg("req_a", required=True)]
-    config = _make_composite_config(
+    enrichers = [make_enricher_cfg("req_a", required=True)]
+    config = make_composite_config(
         enrichers=enrichers,
         required_enrichers=["different_name"],  # mismatch!
     )
@@ -330,8 +293,8 @@ def test_validate_config_consistency_when_mismatch_then_logs_warning() -> None:
 
 @pytest.mark.unit
 def test_validate_config_consistency_when_all_optional_then_logs_info() -> None:
-    enrichers = [_make_enricher_cfg("opt_a", required=False)]
-    config = _make_composite_config(
+    enrichers = [make_enricher_cfg("opt_a", required=False)]
+    config = make_composite_config(
         enrichers=enrichers,
         required_enrichers=[],
     )
@@ -498,7 +461,7 @@ async def test_run_seed_uses_monotonic_derived_completion_timestamp() -> None:
 @pytest.mark.unit
 def test_should_run_enricher_when_already_completed_then_returns_false() -> None:
     harness = _SupportMixinHarness()
-    enricher = _make_enricher_cfg("enricher_a")
+    enricher = make_enricher_cfg("enricher_a")
     state = SimpleNamespace(completed_enrichers=frozenset({"enricher_a"}))
 
     assert harness._should_run_enricher(enricher, state) is False
@@ -508,7 +471,7 @@ def test_should_run_enricher_when_already_completed_then_returns_false() -> None
 def test_should_run_enricher_when_force_enricher_matches_then_returns_true() -> None:
     harness = _SupportMixinHarness()
     harness._runtime.force_enricher = "enricher_a"
-    enricher = _make_enricher_cfg("enricher_a")
+    enricher = make_enricher_cfg("enricher_a")
     state = SimpleNamespace(completed_enrichers=frozenset({"enricher_a"}))
 
     assert harness._should_run_enricher(enricher, state) is True
@@ -520,7 +483,7 @@ def test_should_run_enricher_when_required_only_and_optional_then_returns_false(
 ):
     harness = _SupportMixinHarness()
     harness._runtime.required_only = True
-    enricher = _make_enricher_cfg("opt_enricher", required=False)
+    enricher = make_enricher_cfg("opt_enricher", required=False)
     state = SimpleNamespace(completed_enrichers=frozenset())
 
     assert harness._should_run_enricher(enricher, state) is False
@@ -532,7 +495,7 @@ def test_should_run_enricher_when_required_only_and_required_then_returns_true()
 ):
     harness = _SupportMixinHarness()
     harness._runtime.required_only = True
-    enricher = _make_enricher_cfg("req_enricher", required=True)
+    enricher = make_enricher_cfg("req_enricher", required=True)
     state = SimpleNamespace(completed_enrichers=frozenset())
 
     assert harness._should_run_enricher(enricher, state) is True
@@ -544,7 +507,7 @@ def test_should_run_enricher_when_enrich_only_excludes_enricher_then_returns_fal
 ):
     harness = _SupportMixinHarness()
     harness._runtime.enrich_only = {"other_enricher"}
-    enricher = _make_enricher_cfg("enricher_a")
+    enricher = make_enricher_cfg("enricher_a")
     state = SimpleNamespace(completed_enrichers=frozenset())
 
     assert harness._should_run_enricher(enricher, state) is False
@@ -556,7 +519,7 @@ def test_should_run_enricher_when_enrich_only_includes_enricher_then_returns_tru
 ):
     harness = _SupportMixinHarness()
     harness._runtime.enrich_only = {"enricher_a"}
-    enricher = _make_enricher_cfg("enricher_a")
+    enricher = make_enricher_cfg("enricher_a")
     state = SimpleNamespace(completed_enrichers=frozenset())
 
     assert harness._should_run_enricher(enricher, state) is True
@@ -570,10 +533,10 @@ def test_should_run_enricher_when_enrich_only_includes_enricher_then_returns_tru
 @pytest.mark.unit
 def test_get_enrichers_to_run_when_none_completed_then_returns_all() -> None:
     enrichers = [
-        _make_enricher_cfg("a"),
-        _make_enricher_cfg("b"),
+        make_enricher_cfg("a"),
+        make_enricher_cfg("b"),
     ]
-    config = _make_composite_config(enrichers=enrichers)
+    config = make_composite_config(enrichers=enrichers)
     harness = _SupportMixinHarness(config=config)
     state = SimpleNamespace(completed_enrichers=frozenset())
 
@@ -585,10 +548,10 @@ def test_get_enrichers_to_run_when_none_completed_then_returns_all() -> None:
 @pytest.mark.unit
 def test_get_enrichers_to_run_when_one_completed_then_returns_remaining() -> None:
     enrichers = [
-        _make_enricher_cfg("a"),
-        _make_enricher_cfg("b"),
+        make_enricher_cfg("a"),
+        make_enricher_cfg("b"),
     ]
-    config = _make_composite_config(enrichers=enrichers)
+    config = make_composite_config(enrichers=enrichers)
     harness = _SupportMixinHarness(config=config)
     state = SimpleNamespace(completed_enrichers=frozenset({"a"}))
 
@@ -605,7 +568,7 @@ def test_get_enrichers_to_run_when_one_completed_then_returns_remaining() -> Non
 
 @pytest.mark.unit
 def test_get_required_enricher_failure_when_all_succeed_then_returns_none() -> None:
-    config = _make_composite_config(required_enrichers=["req_a"])
+    config = make_composite_config(required_enrichers=["req_a"])
     harness = _SupportMixinHarness(config=config)
     results = {
         "req_a": EnrichmentResult(
@@ -620,7 +583,7 @@ def test_get_required_enricher_failure_when_all_succeed_then_returns_none() -> N
 def test_get_required_enricher_failure_when_required_not_run_then_returns_message() -> (
     None
 ):
-    config = _make_composite_config(required_enrichers=["req_a"])
+    config = make_composite_config(required_enrichers=["req_a"])
     harness = _SupportMixinHarness(config=config)
 
     failure = harness._get_required_enricher_failure({})
@@ -634,7 +597,7 @@ def test_get_required_enricher_failure_when_required_not_run_then_returns_messag
 def test_get_required_enricher_failure_when_required_failed_then_returns_message() -> (
     None
 ):
-    config = _make_composite_config(required_enrichers=["req_a"])
+    config = make_composite_config(required_enrichers=["req_a"])
     harness = _SupportMixinHarness(config=config)
     results = {
         "req_a": EnrichmentResult(
@@ -654,7 +617,7 @@ def test_get_required_enricher_failure_when_required_failed_then_returns_message
 def test_check_required_enrichers_when_required_failed_then_raises_invalid_state() -> (
     None
 ):
-    config = _make_composite_config(required_enrichers=["req_a"])
+    config = make_composite_config(required_enrichers=["req_a"])
     harness = _SupportMixinHarness(config=config)
 
     with pytest.raises(InvalidStateError):
@@ -663,7 +626,7 @@ def test_check_required_enrichers_when_required_failed_then_raises_invalid_state
 
 @pytest.mark.unit
 def test_check_required_enrichers_when_all_pass_then_no_exception() -> None:
-    config = _make_composite_config(required_enrichers=["req_a"])
+    config = make_composite_config(required_enrichers=["req_a"])
     harness = _SupportMixinHarness(config=config)
     results = {
         "req_a": EnrichmentResult(

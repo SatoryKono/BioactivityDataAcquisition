@@ -9,9 +9,6 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from bioetl.application.composite.lifecycle_observer_service import (
-    CompositeLifecycleObserverService,
-)
 from bioetl.application.composite.runner_pkg.runner_stage_enrichment_mixin import (
     _CompositeRunnerStageEnrichmentMixin,
 )
@@ -21,43 +18,18 @@ from bioetl.domain.composite.result import (
 )
 from bioetl.domain.composite.state import CompositePipelineState
 from bioetl.domain.exceptions import InvalidStateError
+from tests.unit.application.composite.runner_pkg.runner_pkg_test_support import (
+    failed_enrichment,
+    initialize_runner_pkg_harness,
+    make_enricher_cfg,
+    make_runner_state,
+    success_enrichment,
+)
 
 
 # ---------------------------------------------------------------------------
 # Fakes / factories
 # ---------------------------------------------------------------------------
-
-
-def _make_enricher_cfg(pipeline: str, *, required: bool = False) -> SimpleNamespace:
-    return SimpleNamespace(pipeline=pipeline, required=required)
-
-
-def _success_enrichment(name: str) -> EnrichmentResult:
-    return EnrichmentResult(enricher_name=name, status=EnrichmentStatus.SUCCESS)
-
-
-def _failed_enrichment(name: str) -> EnrichmentResult:
-    return EnrichmentResult(
-        enricher_name=name,
-        status=EnrichmentStatus.FAILED,
-        error_message="test failure",
-    )
-
-
-def _make_state(
-    state: CompositePipelineState = CompositePipelineState.SEED_COMPLETED,
-    completed_enrichers: frozenset[str] | None = None,
-    enrichment_results: dict[str, EnrichmentResult] | None = None,
-) -> MagicMock:
-    mock = MagicMock()
-    mock.state = state
-    mock.completed_enrichers = completed_enrichers or frozenset()
-    mock.enrichment_results = enrichment_results or {}
-    mock.with_state = MagicMock(return_value=mock)
-    mock.with_enricher_completed = MagicMock(return_value=mock)
-    return mock
-
-
 # ---------------------------------------------------------------------------
 # Harness
 # ---------------------------------------------------------------------------
@@ -71,21 +43,20 @@ class _EnrichmentHarness(_CompositeRunnerStageEnrichmentMixin):
         config: Any | None = None,
         enricher_results: dict[str, EnrichmentResult] | None = None,
     ) -> None:
-        self._config = config or SimpleNamespace(
-            name="test_composite",
-            enrichers=[],
-            required_enrichers=[],
+        initialize_runner_pkg_harness(
+            self,
+            config=config
+            or SimpleNamespace(
+                name="test_composite",
+                enrichers=[],
+                required_enrichers=[],
+            ),
+            runtime=SimpleNamespace(required_only=False),
+            run_id_str="run-enrich-test",
         )
-        self._runtime = SimpleNamespace(required_only=False)
-        self._logger = MagicMock()
-        self._observer_logger = MagicMock()
-        self._observer = CompositeLifecycleObserverService(logger=self._observer_logger)
-        self._run_id_str = "run-enrich-test"
         self._coordinator = MagicMock()
         self._coordinator.run_enrichers = AsyncMock(return_value=enricher_results or {})
         self._enricher_runner_factory = MagicMock()
-        self._checkpoint_manager = AsyncMock()
-        self._fsm = MagicMock()
 
         # Seam implementations
         self._seam_enrichers_to_run: list[Any] = []
@@ -145,10 +116,10 @@ class _EnrichmentHarness(_CompositeRunnerStageEnrichmentMixin):
 def test_prepare_enrichment_run_context_when_enrichers_selected_then_returns_names() -> (
     None
 ):
-    enrichers = [_make_enricher_cfg("crossref"), _make_enricher_cfg("pubmed")]
+    enrichers = [make_enricher_cfg("crossref"), make_enricher_cfg("pubmed")]
     harness = _EnrichmentHarness()
     harness._seam_enrichers_to_run = enrichers
-    state = _make_state()
+    state = make_runner_state(state=CompositePipelineState.SEED_COMPLETED)
 
     context = harness._prepare_enrichment_run_context(state)
 
@@ -164,8 +135,8 @@ def test_prepare_enrichment_run_context_when_enrichers_selected_then_returns_nam
 @pytest.mark.unit
 def test_record_completed_enrichment_results_when_success_then_state_updated() -> None:
     harness = _EnrichmentHarness()
-    state = _make_state()
-    results = {"enricher_a": _success_enrichment("enricher_a")}
+    state = make_runner_state(state=CompositePipelineState.SEED_COMPLETED)
+    results = {"enricher_a": success_enrichment("enricher_a")}
 
     new_state = harness._record_completed_enrichment_results(state, results)
 
@@ -180,8 +151,8 @@ def test_record_completed_enrichment_results_when_failed_then_state_not_updated(
     None
 ):
     harness = _EnrichmentHarness()
-    state = _make_state()
-    results = {"enricher_a": _failed_enrichment("enricher_a")}
+    state = make_runner_state(state=CompositePipelineState.SEED_COMPLETED)
+    results = {"enricher_a": failed_enrichment("enricher_a")}
 
     harness._record_completed_enrichment_results(state, results)
 
@@ -191,7 +162,7 @@ def test_record_completed_enrichment_results_when_failed_then_state_not_updated(
 @pytest.mark.unit
 def test_record_completed_enrichment_results_when_skipped_then_state_updated() -> None:
     harness = _EnrichmentHarness()
-    state = _make_state()
+    state = make_runner_state(state=CompositePipelineState.SEED_COMPLETED)
     skipped = EnrichmentResult(
         enricher_name="enricher_a", status=EnrichmentStatus.SKIPPED
     )
@@ -211,7 +182,7 @@ def test_record_completed_enrichment_results_when_skipped_then_state_updated() -
 @pytest.mark.asyncio
 async def test_skip_enrichment_stage_when_called_then_logs_and_returns_empty() -> None:
     harness = _EnrichmentHarness()
-    state = _make_state()
+    state = make_runner_state(state=CompositePipelineState.SEED_COMPLETED)
 
     new_state, results = await harness._skip_enrichment_stage(state)
 
@@ -229,7 +200,7 @@ async def test_skip_enrichment_stage_when_called_then_logs_and_returns_empty() -
 def test_finalize_enrichment_results_when_required_only_false_then_no_not_run_added() -> (
     None
 ):
-    enrichers = [_make_enricher_cfg("opt_a", required=False)]
+    enrichers = [make_enricher_cfg("opt_a", required=False)]
     config = SimpleNamespace(
         name="composite",
         enrichers=enrichers,
@@ -237,7 +208,10 @@ def test_finalize_enrichment_results_when_required_only_false_then_no_not_run_ad
     )
     harness = _EnrichmentHarness(config=config)
     harness._runtime.required_only = False
-    state = _make_state(enrichment_results={})
+    state = make_runner_state(
+        state=CompositePipelineState.SEED_COMPLETED,
+        enrichment_results={},
+    )
     harness._seam_enrichers_to_run = enrichers
     context = harness._prepare_enrichment_run_context(state)
 
@@ -253,15 +227,16 @@ def test_finalize_enrichment_results_when_required_only_false_then_no_not_run_ad
 
 @pytest.mark.unit
 def test_finalize_enrichment_results_when_checkpoint_has_results_then_merged() -> None:
-    enrichers = [_make_enricher_cfg("enricher_a")]
+    enrichers = [make_enricher_cfg("enricher_a")]
     config = SimpleNamespace(
         name="composite",
         enrichers=enrichers,
         required_enrichers=[],
     )
     harness = _EnrichmentHarness(config=config)
-    completed_result = _success_enrichment("enricher_a")
-    state = _make_state(
+    completed_result = success_enrichment("enricher_a")
+    state = make_runner_state(
+        state=CompositePipelineState.SEED_COMPLETED,
         enrichment_results={"enricher_a": completed_result},
     )
     context = harness._prepare_enrichment_run_context(state)
@@ -286,7 +261,7 @@ async def test_transition_to_enrichment_completed_when_enriching_then_calls_comp
     None
 ):
     harness = _EnrichmentHarness()
-    state = _make_state(state=CompositePipelineState.ENRICHING)
+    state = make_runner_state(state=CompositePipelineState.ENRICHING)
     harness._call_save_checkpoint_safe = AsyncMock(return_value=True)  # type: ignore[method-assign]
 
     await harness._transition_to_enrichment_completed(state)
@@ -300,7 +275,7 @@ async def test_transition_to_enrichment_completed_when_seed_completed_then_trans
     None
 ):
     harness = _EnrichmentHarness()
-    state = _make_state(state=CompositePipelineState.SEED_COMPLETED)
+    state = make_runner_state(state=CompositePipelineState.SEED_COMPLETED)
     harness._call_save_checkpoint_safe = AsyncMock(return_value=True)  # type: ignore[method-assign]
 
     await harness._transition_to_enrichment_completed(state)
@@ -319,7 +294,7 @@ async def test_transition_to_enrichment_completed_when_seed_completed_then_trans
 @pytest.mark.asyncio
 async def test_save_failed_enrichment_state_when_called_then_logs_error() -> None:
     harness = _EnrichmentHarness()
-    state = _make_state()
+    state = make_runner_state(state=CompositePipelineState.SEED_COMPLETED)
     error = InvalidStateError("Required enricher failed")
 
     await harness._save_failed_enrichment_state(state, error)
@@ -341,7 +316,7 @@ async def test_validate_required_enrichment_results_when_all_ok_then_no_exceptio
 ):
     harness = _EnrichmentHarness()
     harness._seam_check_required_raises = False
-    state = _make_state()
+    state = make_runner_state(state=CompositePipelineState.SEED_COMPLETED)
 
     await harness._validate_required_enrichment_results(state, {})  # must not raise
 
@@ -353,7 +328,7 @@ async def test_validate_required_enrichment_results_when_required_failed_then_ra
 ):
     harness = _EnrichmentHarness()
     harness._seam_check_required_raises = True
-    state = _make_state()
+    state = make_runner_state(state=CompositePipelineState.SEED_COMPLETED)
 
     with pytest.raises(InvalidStateError):
         await harness._validate_required_enrichment_results(state, {})
