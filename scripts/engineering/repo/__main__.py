@@ -11,6 +11,7 @@ Commands:
     sync-wrapper-caller-matrix  Refresh scripts wrapper caller matrix
     check-catalog      Validate catalog governance policy
     check-versions     Check version consistency across project files
+    check-actions-runtime-policy  Validate GitHub Actions runtime-compatible refs
     check-cleanliness  Audit repository root layout allowlist
     check-cleanup-governance  Block unsafe broad cleanup instructions
     check-root-review-registry  Validate root-hygiene review registry
@@ -40,6 +41,7 @@ COMMANDS = {
     "sync-wrapper-caller-matrix": "generate_scripts_wrapper_caller_matrix.py",
     "check-catalog": "check_scripts_catalog.py",
     "check-versions": "check_version_consistency.py",
+    "check-actions-runtime-policy": "check_github_actions_runtime_policy.py",
     "check-cleanliness": "audit_root_cleanliness.py",
     "check-cleanup-governance": "check_cleanup_governance.py",
     "check-root-review-registry": "check_root_hygiene_review_registry.py",
