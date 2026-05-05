@@ -69,7 +69,7 @@ def _parse_variables_guide(text: str) -> dict[str, list[str]]:
         if len(parts) < 2:
             continue
         uid = parts[0].strip("`")
-        variables = sorted(re.findall(r"\$[A-Za-z0-9_]+", parts[1]))
+        variables = sorted(re.findall(r"\$\w+", parts[1]))
         mapping[uid] = variables
     return mapping
 
