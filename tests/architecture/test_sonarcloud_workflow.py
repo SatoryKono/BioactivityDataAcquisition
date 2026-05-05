@@ -26,3 +26,17 @@ def test_sonarcloud_config_declares_scope_contract() -> None:
 
     assert "sonar.sources=src/bioetl" in content
     assert "sonar.inclusions=src/bioetl/**/*.py" in content
+
+
+def test_sonarcloud_config_excludes_non_production_roots() -> None:
+    content = Path("sonar-project.properties").read_text(encoding="utf-8")
+
+    for excluded_root in (
+        "tests/**",
+        "scripts/**",
+        "docs/**",
+        "reports/**",
+        "grafana/**",
+        "configs/**",
+    ):
+        assert excluded_root in content
