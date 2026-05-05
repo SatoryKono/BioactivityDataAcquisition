@@ -4,7 +4,8 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Protocol
+from datetime import datetime
+from typing import Protocol
 
 from bioetl.application.composite.checkpoint import (
     CompositeCheckpointService,

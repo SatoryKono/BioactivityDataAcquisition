@@ -30,9 +30,6 @@ if TYPE_CHECKING:
         CompositeCheckpointService,
         CompositeCheckpointState,
     )
-    from bioetl.application.composite.runtime_models import (
-        CompositeExecutionContext,
-    )
     from bioetl.domain.ports import LoggerPort
 
 __all__ = [

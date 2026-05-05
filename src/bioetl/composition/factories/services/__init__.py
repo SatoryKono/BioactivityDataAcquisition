@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from importlib import import_module
+
 from bioetl.composition.factories.pipeline.creation_support import (
     _BuildPipelineServicesFn as _BuildPipelineServicesFn,
 )
@@ -35,11 +37,10 @@ _OBSERVABILITY_EXPORTS = frozenset(
 def __getattr__(name: str) -> object:
     """Expose service factory helpers lazily to avoid package import cycles."""
     if name in _PIPELINE_CREATION_EXPORTS:
-        from bioetl.composition.factories.pipeline import (
-            creation_support as _creation_support,
+        return getattr(
+            import_module("bioetl.composition.factories.pipeline.creation_support"),
+            name,
         )
-
-        return getattr(_creation_support, name)
     if name in _FACTORY_EXPORTS:
         from bioetl.composition.factories.services import factory as _factory
 

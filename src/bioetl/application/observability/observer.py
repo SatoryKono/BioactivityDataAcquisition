@@ -25,7 +25,6 @@ from bioetl.application.observability.observer_context_mixin import (
 )
 from bioetl.application.observability.observer_contract import (
     LifecyclePhase,
-    build_observability_contract_payload,
 )
 from bioetl.application.observability.observer_health_mixin import (
     _ObserverHealthEmissionMixin,
