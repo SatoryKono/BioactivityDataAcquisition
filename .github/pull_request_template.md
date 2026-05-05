@@ -49,4 +49,5 @@
 - [ ] No hardcoded secrets (AP-005)
 - [ ] Type annotations on all public functions (TYPE-001)
 - [ ] Tests added/updated for new code (TEST-002)
-- [ ] If `checks-complete` fails, I triage `lint` → `c901-governance` → `arch-tests` first and do not debug `checks-complete` separately
+- [ ] If `checks-complete` fails, I first triage `lint` → `c901-governance` →
+      `arch-tests` and do not debug `checks-complete` separately

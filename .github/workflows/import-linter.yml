@@ -195,8 +195,11 @@ jobs:
                     echo "" >> "$GITHUB_STEP_SUMMARY"
                     echo "- first-failure job: ${first_failure}" >> "$GITHUB_STEP_SUMMARY"
 
-                    if [[ "$LINT_RESULT" != "success" || "$C901_RESULT" != "success" || "$ARCH_RESULT" != "success" ]]; then
-                      echo "One or more checks failed. Triage lint -> c901-governance -> arch-tests."
+                    if [[ "$LINT_RESULT" != "success" || \
+                          "$C901_RESULT" != "success" || \
+                          "$ARCH_RESULT" != "success" ]]; then
+                      echo "One or more checks failed."
+                      echo "Triage order: lint -> c901-governance -> arch-tests."
                       exit 1
                     fi
                     echo "All checks completed successfully."
