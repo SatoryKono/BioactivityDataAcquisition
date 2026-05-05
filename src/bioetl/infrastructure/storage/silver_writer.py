@@ -20,7 +20,7 @@ from bioetl.domain.ports import (
     TracingPort,
 )
 from bioetl.domain.types import BronzeRecord
-from bioetl.infrastructure.export.csv_exporter import CsvExporter
+from bioetl.infrastructure.export.csv_exporter_contract import CsvExporterPort
 from bioetl.infrastructure.storage.base_delta_writer import BaseDeltaWriter
 from bioetl.infrastructure.storage.delta.resilience import SilverMergeResiliencePolicy
 from bioetl.infrastructure.storage.silver.maintenance_mixin import (
@@ -98,7 +98,7 @@ class SilverWriter(
         if runtime_request is None:
             runtime_request = SilverWriterRuntimeServicesRequest(
                 csv_exporter=cast(
-                    CsvExporter | None,
+                    CsvExporterPort | None,
                     runtime_dependencies.pop("csv_exporter", None),
                 ),
                 tracing=cast(

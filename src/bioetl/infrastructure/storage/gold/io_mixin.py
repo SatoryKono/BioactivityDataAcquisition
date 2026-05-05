@@ -34,7 +34,7 @@ if TYPE_CHECKING:
 
     from bioetl.domain.ports import LoggerPort
     from bioetl.domain.types import GoldRecord, ScdConfig
-    from bioetl.infrastructure.export.csv_exporter import CsvExporter
+    from bioetl.infrastructure.export.csv_exporter_contract import CsvExporterPort
 
 
 class _GoldMergedMetadataWriterProtocol(Protocol):
@@ -81,7 +81,7 @@ class _GoldMergedWriteHostProtocol(Protocol):
     """Structural host contract for merged Gold write helpers."""
 
     logger: LoggerPort
-    csv_exporter: CsvExporter | None
+    csv_exporter: CsvExporterPort | None
     _resolve_table_path: Callable[[str], str]
     _validate_records_against_schema: Callable[
         [list[GoldRecord], DataFrameSchema], Awaitable[None]
@@ -251,7 +251,7 @@ class _GoldWriterMergedDispatchMixin(_GoldWriterExecutorArrowMixin):
     """Merged-write orchestration and mode dispatch."""
 
     logger: LoggerPort
-    csv_exporter: CsvExporter | None
+    csv_exporter: CsvExporterPort | None
     _resolve_table_path: Callable[[str], str]
     _validate_records_against_schema: Callable[
         [list[GoldRecord], DataFrameSchema], Awaitable[None]

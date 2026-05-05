@@ -117,7 +117,7 @@
       },
       "id": 99,
       "options": {
-        "content": "<center><h2>$pipeline</h2></center>",
+        "content": "<center><h2>4. Data Quality / $pipeline</h2><div><strong>Current window:</strong> 15m status. <strong>Run type:</strong> $run_type.</div></center>",
         "mode": "html"
       },
       "title": "Pipeline",
@@ -125,7 +125,7 @@
     },
     {
       "datasource": "Prometheus",
-      "description": "Operational gating/flow counters (Bronze→Silver→Gold and invariants). Separate from quality score trend.",
+      "description": "Selected-range evidence only. This panel no longer drives current DQ status; use Monitor DQ Current Status for incident state.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -168,7 +168,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 3
+        "y": 21
       },
       "id": 1,
       "options": {
@@ -212,20 +212,30 @@
           "refId": "B"
         }
       ],
-      "title": "Data Flow in Range: Bronze -> Silver -> Gold",
+      "title": "Track Range Evidence: Bronze -> Silver -> Gold",
       "type": "timeseries"
     },
     {
       "datasource": "Prometheus",
-      "description": "Threshold semantics: keep no-data as UNKNOWN (not score 0); warnings indicate drift, hard-fail signals block data promotion. Next action: if hard-fail>0 open reject/quarantine diagnostics; if warning-only, review trend and top reject causes.",
+      "description": "Status mapping: 0=OK, 1=DEGRADED, 2=FAILING; null=UNKNOWN. Current status uses fixed recording-rule windows, not selected range evidence. DQ answers: is quality OK, degraded, failing, or unknown now?",
       "fieldConfig": {
         "defaults": {
           "color": {
             "mode": "thresholds"
           },
-          "decimals": 2,
-          "max": 1,
-          "min": 0,
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            }
+          ],
+          "noValue": "UNKNOWN",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -240,6 +250,238 @@
               {
                 "color": "red",
                 "value": 2
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 5,
+        "x": 0,
+        "y": 3
+      },
+      "id": 9100,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "max(bioetl_dq_current_status{pipeline=~\"$pipeline\"})",
+          "refId": "A"
+        }
+      ],
+      "title": "Monitor DQ Current Status",
+      "type": "stat"
+    },
+    {
+      "datasource": "Prometheus",
+      "description": "Threshold-state summary: 0=OK, 1=DEGRADED warning reasons, 2=FAILING hard reasons; null=UNKNOWN. This is current-window state, not selected-range evidence.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            }
+          ],
+          "noValue": "UNKNOWN",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 2
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 5,
+        "x": 5,
+        "y": 3
+      },
+      "id": 9101,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "(sum(bioetl_dq_current_reason{pipeline=~\"$pipeline\",severity=\"failing\"} > 0) * 2) or sum(bioetl_dq_current_reason{pipeline=~\"$pipeline\",severity=\"degraded\"} > 0) or vector(0)",
+          "refId": "A"
+        }
+      ],
+      "title": "Monitor DQ Threshold State",
+      "type": "stat"
+    },
+    {
+      "datasource": "Prometheus",
+      "description": "Current DQ reason chips with severity and action_target. Soft threshold/quarantine map to DEGRADED; hard validation/anomaly/silver validation map to FAILING.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 2
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 7,
+        "x": 10,
+        "y": 3
+      },
+      "id": 9102,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "10.4.0",
+      "targets": [
+        {
+          "expr": "topk(5, bioetl_dq_current_reason{pipeline=~\"$pipeline\"} > 0)",
+          "format": "table",
+          "instant": true,
+          "legendFormat": "{{pipeline}} {{provider}} {{reason}} {{cause}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Inspect DQ Current Reasons",
+      "type": "table"
+    },
+    {
+      "id": 9103,
+      "type": "text",
+      "title": "First Action / Invalid Record Policy",
+      "gridPos": {
+        "h": 6,
+        "w": 7,
+        "x": 17,
+        "y": 3
+      },
+      "options": {
+        "content": "<div style=\"padding:0.45rem 0.7rem;line-height:1.55\"><strong>First action:</strong> if FAILING, inspect DQ reasons and Gold/Silver validation diagnostics before replay. If DEGRADED, open Silver Reject Explorer for quarantine/filter evidence. <strong>invalid_record_policy:</strong> treat as pipeline config context; absent policy visibility is UNKNOWN, not OK.</div>",
+        "mode": "html"
+      },
+      "links": [],
+      "pluginVersion": "12.2.0",
+      "transparent": true
+    },
+    {
+      "datasource": "Prometheus",
+      "description": "Threshold semantics: keep no-data as UNKNOWN (not score 0); warnings indicate drift, hard-fail signals block data promotion. Next action: if hard-fail>0 open reject/quarantine diagnostics; if warning-only, review trend and top reject causes. Score thresholds: <0.80=FAILING, 0.80-0.95=DEGRADED, >=0.95=OK; null=UNKNOWN.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 2,
+          "max": 1,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 0.8
+              },
+              {
+                "color": "green",
+                "value": 0.95
               }
             ]
           },
@@ -263,7 +505,7 @@
         "h": 8,
         "w": 8,
         "x": 0,
-        "y": 11
+        "y": 29
       },
       "id": 2,
       "options": {
@@ -334,7 +576,7 @@
         "h": 8,
         "w": 8,
         "x": 8,
-        "y": 11
+        "y": 29
       },
       "id": 3,
       "options": {
@@ -407,7 +649,7 @@
         "h": 8,
         "w": 8,
         "x": 16,
-        "y": 11
+        "y": 29
       },
       "id": 4,
       "options": {
@@ -449,16 +691,16 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "red",
                 "value": null
               },
               {
                 "color": "orange",
-                "value": 1
+                "value": 0.8
               },
               {
-                "color": "red",
-                "value": 2
+                "color": "green",
+                "value": 0.95
               }
             ]
           },
@@ -482,7 +724,7 @@
         "h": 7,
         "w": 6,
         "x": 0,
-        "y": 19
+        "y": 37
       },
       "id": 5,
       "options": {
@@ -505,7 +747,8 @@
         }
       ],
       "title": "Worst-Entity DQ Score",
-      "type": "gauge"
+      "type": "gauge",
+      "description": "Score thresholds: <0.80=FAILING, 0.80-0.95=DEGRADED, >=0.95=OK; null=UNKNOWN."
     },
     {
       "datasource": "Prometheus",
@@ -552,7 +795,7 @@
         "h": 7,
         "w": 6,
         "x": 6,
-        "y": 19
+        "y": 37
       },
       "id": 6,
       "options": {
@@ -624,7 +867,7 @@
         "h": 7,
         "w": 6,
         "x": 12,
-        "y": 19
+        "y": 37
       },
       "id": 7,
       "options": {
@@ -696,7 +939,7 @@
         "h": 7,
         "w": 6,
         "x": 18,
-        "y": 19
+        "y": 37
       },
       "id": 8,
       "options": {
@@ -769,7 +1012,7 @@
         "h": 8,
         "w": 8,
         "x": 0,
-        "y": 58
+        "y": 76
       },
       "id": 154,
       "options": {
@@ -930,7 +1173,7 @@
         "h": 8,
         "w": 8,
         "x": 0,
-        "y": 26
+        "y": 44
       },
       "id": 117,
       "options": {
@@ -956,7 +1199,8 @@
         }
       ],
       "title": "Silver Filter Rejects",
-      "type": "stat"
+      "type": "stat",
+      "description": "Selected-range Silver reject count. Use first-screen DQ reasons for current incident state, then open Silver Reject Explorer for forensic records."
     },
     {
       "collapsed": true,
@@ -964,7 +1208,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 72
+        "y": 90
       },
       "id": 220,
       "panels": [
@@ -1265,7 +1509,7 @@
               "refId": "A"
             }
           ],
-              "description": "Bounded schema-field summary only; use Silver Reject Explorer or quarantine CLI for exact record context.",
+          "description": "Bounded schema-field summary only; use Silver Reject Explorer or quarantine CLI for exact record context.",
           "title": "Top Silver Reject Fields",
           "type": "bargauge"
         }
@@ -1279,7 +1523,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 73
+        "y": 91
       },
       "id": 221,
       "panels": [
@@ -1622,7 +1866,7 @@
         },
         {
           "datasource": "Prometheus",
-          "description": "Quality score trend over selected time range. Kept separate from operational gating indicators.",
+          "description": "Quality score trend over selected time range. Kept separate from operational gating indicators. Score thresholds: <0.80=FAILING, 0.80-0.95=DEGRADED, >=0.95=OK; null=UNKNOWN.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1635,16 +1879,16 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
+                    "color": "red",
                     "value": null
                   },
                   {
                     "color": "orange",
-                    "value": 1
+                    "value": 0.8
                   },
                   {
-                    "color": "red",
-                    "value": 2
+                    "color": "green",
+                    "value": 0.95
                   }
                 ]
               },

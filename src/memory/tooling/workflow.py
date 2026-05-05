@@ -60,6 +60,77 @@ def _summary_note_body(title: str, summary: str) -> str:
     )
 
 
+def _pre_task_surfaces(
+    *,
+    chunks_path: Path | None,
+    events_dir: Path | None,
+    output_root: Path | None,
+) -> tuple[Path, Path]:
+    if output_root is not None:
+        default_chunks_path = output_root / "rag" / "manifests" / "chunks.jsonl"
+        default_events_dir = output_root / "timeline" / "events"
+    else:
+        default_chunks_path = DEFAULT_RAG_CHUNKS
+        default_events_dir = DEFAULT_TIMELINE_DIR
+
+    return (
+        chunks_path or default_chunks_path,
+        events_dir or default_events_dir,
+    )
+
+
+def _refresh_pre_task_surfaces(
+    *,
+    output_root: Path | None,
+    refresh_repo_root: Path | None,
+) -> tuple[Path, Path, Path, dict[str, Any]]:
+    resolved_output_root = output_root or Path(
+        tempfile.mkdtemp(prefix="memory-pre-task-")
+    )
+    repo_root = (
+        refresh_repo_root or discover_repo_root() or Path(__file__).resolve().parents[3]
+    )
+    refresh_report = refresh_all(
+        repo_root.resolve(),
+        resolved_output_root.resolve(),
+        include_rag=True,
+        include_timeline=True,
+        include_graph_export=False,
+    )
+    return (
+        resolved_output_root,
+        resolved_output_root / "rag" / "manifests" / "chunks.jsonl",
+        resolved_output_root / "timeline" / "events",
+        refresh_report,
+    )
+
+
+def _resolve_pre_task_surfaces(
+    *,
+    chunks_path: Path | None,
+    events_dir: Path | None,
+    refresh_output_root: Path | None,
+    refresh_repo_root: Path | None,
+    run_refresh_if_missing: bool,
+) -> tuple[Path, Path, Path | None, dict[str, Any] | None]:
+    output_root = refresh_output_root
+    resolved_chunks_path, resolved_events_dir = _pre_task_surfaces(
+        chunks_path=chunks_path, events_dir=events_dir, output_root=output_root
+    )
+    if not run_refresh_if_missing:
+        return resolved_chunks_path, resolved_events_dir, output_root, None
+    if resolved_chunks_path.exists() and resolved_events_dir.exists():
+        return resolved_chunks_path, resolved_events_dir, output_root, None
+
+    output_root, resolved_chunks_path, resolved_events_dir, refresh_report = (
+        _refresh_pre_task_surfaces(
+            output_root=output_root,
+            refresh_repo_root=refresh_repo_root,
+        )
+    )
+    return resolved_chunks_path, resolved_events_dir, output_root, refresh_report
+
+
 def pre_task_workflow(
     *,
     task_id: str,
@@ -77,41 +148,15 @@ def pre_task_workflow(
 ) -> dict[str, Any]:
     """Run the standard pre-task memory flow."""
     retrieval_query = query or title
-    refresh_report: dict[str, Any] | None = None
-    output_root: Path | None = refresh_output_root
-    if chunks_path is not None:
-        resolved_chunks_path = chunks_path
-    elif output_root is not None:
-        resolved_chunks_path = output_root / "rag" / "manifests" / "chunks.jsonl"
-    else:
-        resolved_chunks_path = DEFAULT_RAG_CHUNKS
-
-    if events_dir is not None:
-        resolved_events_dir = events_dir
-    elif output_root is not None:
-        resolved_events_dir = output_root / "timeline" / "events"
-    else:
-        resolved_events_dir = DEFAULT_TIMELINE_DIR
-
-    if run_refresh_if_missing and (
-        not resolved_chunks_path.exists() or not resolved_events_dir.exists()
-    ):
-        if output_root is None:
-            output_root = Path(tempfile.mkdtemp(prefix="memory-pre-task-"))
-        repo_root = (
-            refresh_repo_root
-            or discover_repo_root()
-            or Path(__file__).resolve().parents[3]
+    resolved_chunks_path, resolved_events_dir, output_root, refresh_report = (
+        _resolve_pre_task_surfaces(
+            chunks_path=chunks_path,
+            events_dir=events_dir,
+            refresh_output_root=refresh_output_root,
+            refresh_repo_root=refresh_repo_root,
+            run_refresh_if_missing=run_refresh_if_missing,
         )
-        refresh_report = refresh_all(
-            repo_root.resolve(),
-            output_root.resolve(),
-            include_rag=True,
-            include_timeline=True,
-            include_graph_export=False,
-        )
-        resolved_chunks_path = output_root / "rag" / "manifests" / "chunks.jsonl"
-        resolved_events_dir = output_root / "timeline" / "events"
+    )
 
     retrieval = query_all(
         query=retrieval_query,

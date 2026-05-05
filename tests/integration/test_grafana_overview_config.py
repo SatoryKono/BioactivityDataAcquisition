@@ -203,6 +203,33 @@ def test_overview_uses_only_expected_variables_and_target_scoped_links() -> None
         assert "${__url_time_range}" in url
 
 
+def test_overview_pipeline_defaults_to_all_and_panels_use_resolved_prometheus_uid() -> (
+    None
+):
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
+    variables = {
+        variable.get("name"): variable
+        for variable in dashboard.get("templating", {}).get("list", [])
+        if variable.get("name")
+    }
+    pipeline = variables["pipeline"]
+
+    assert pipeline.get("includeAll") is True
+    assert pipeline.get("multi") is False
+    assert pipeline.get("current", {}).get("value") == "$__all"
+    assert pipeline.get("current", {}).get("text") == "All"
+
+    for panel in get_dashboard_panels(dashboard):
+        datasource = panel.get("datasource")
+        if not isinstance(datasource, dict):
+            continue
+        if datasource.get("type") != "prometheus":
+            continue
+        assert datasource.get("uid") == "prometheus", (
+            f"Panel {panel.get('title')!r} must use resolved Prometheus uid"
+        )
+
+
 def test_overview_queries_are_backed_by_recording_rules_and_runtime_metrics() -> None:
     all_expressions = "\n".join(
         get_panel_expressions(

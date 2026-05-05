@@ -35,9 +35,9 @@
       "keepTime": true,
       "targetBlank": false,
       "title": "1. Overview",
-      "tooltip": "Reset scope: no pipeline context is available; pipeline/run_type default to unknown. Preserve the selected time range.",
+      "tooltip": "Reset scope: no pipeline context is available; Overview falls back to its own All-pipelines landing scope. Preserve the selected time range.",
       "type": "link",
-      "url": "/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=unknown&var-run_type=unknown&${__url_time_range}"
+      "url": "/d/bioetl-overview-v2/bioetl-overview-v2?${__url_time_range}"
     },
     {
       "asDropdown": false,
