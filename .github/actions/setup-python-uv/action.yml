@@ -33,7 +33,7 @@ runs:
   using: composite
   steps:
     - name: Set up Python ${{ inputs.python-version }}
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
       with:
         python-version: ${{ inputs.python-version }}
 
@@ -41,7 +41,7 @@ runs:
       uses: astral-sh/setup-uv@v7
 
     - name: Cache uv and virtualenv
-      uses: actions/cache@v4
+      uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
       with:
         path: |
           ~/.cache/uv
@@ -78,7 +78,7 @@ runs:
 
     - name: Cache pytest and hypothesis
       if: inputs.enable-pytest-cache == 'true'
-      uses: actions/cache@v4
+      uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
       with:
         path: |
           .pytest_cache

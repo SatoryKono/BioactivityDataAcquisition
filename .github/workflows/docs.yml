@@ -42,7 +42,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
@@ -92,7 +92,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
@@ -106,7 +106,7 @@ jobs:
         run: uv run python -m scripts.docs check-links --links --specs --configs --report-json docs/reports/docs-link-check-report.json
 
       - name: Upload docs link-check report artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: docs-link-check-report
           path: docs/reports/docs-link-check-report.json
@@ -141,7 +141,7 @@ jobs:
       diagrams_changed: ${{ steps.filter.outputs.diagrams_changed }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           fetch-depth: 0
 
@@ -176,7 +176,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: Setup Mermaid CLI
         uses: ./.github/actions/setup-mermaid
@@ -192,7 +192,7 @@ jobs:
           python3 scripts/diagrams/summarize_diagram_lint.py /tmp/diagram-lint.json
 
       - name: Upload diagram lint report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: diagram-lint-report
           path: /tmp/diagram-lint.json
@@ -206,7 +206,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: Setup Mermaid CLI
         uses: ./.github/actions/setup-mermaid
@@ -246,21 +246,21 @@ jobs:
             --markdown-out reports/diagrams/diagram-quality-report.md
 
       - name: Upload SVG artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: diagrams-svg
           path: |
             docs/**/svg/*.svg
 
       - name: Upload PNG artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: diagrams-png
           path: |
             docs/**/png/*.png
 
       - name: Upload diagram quality report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: diagrams-quality-report
           path: |
@@ -285,7 +285,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: Check for source-vs-rendered drift
         run: |
