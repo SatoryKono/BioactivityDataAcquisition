@@ -357,7 +357,9 @@ def test_get_effective_config_artifact_handles_present_and_missing_dq_config() -
     assert second_call["resolution_policy"].strict_validation is False
 
 
-def test_get_effective_config_artifact_publishes_explicit_dq_strict_validation() -> None:
+def test_get_effective_config_artifact_publishes_explicit_dq_strict_validation() -> (
+    None
+):
     logger = MagicMock()
     effective_service = _StubEffectiveConfigService(_sample_artifact_dict())
     dq_config = DQConfig(contract_ref="dq.crossref", strict_validation=True)

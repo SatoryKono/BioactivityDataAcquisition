@@ -510,9 +510,7 @@ def test_build_pipeline_runner_persists_manifest_before_factory_create(
         effective_config_artifact_id
     )
     assert (
-        effective_payload["semantic_artifact"]["resolution_policy"][
-            "strict_validation"
-        ]
+        effective_payload["semantic_artifact"]["resolution_policy"]["strict_validation"]
         is False
     )
     assert "occurrence_envelope" not in effective_payload

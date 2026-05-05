@@ -264,7 +264,9 @@ class TestCheckpointCompatibilityService:
 
         assert result.compatible is True
         assert result.execution_identity_compatible is True
-        assert any("Checkpoint is compatible for resume" in msg for msg in result.messages)
+        assert any(
+            "Checkpoint is compatible for resume" in msg for msg in result.messages
+        )
 
     def test_validate_composite_run_identity_missing(self) -> None:
         """Missing legacy composite identity alone no longer blocks resume."""
@@ -284,7 +286,9 @@ class TestCheckpointCompatibilityService:
 
         assert result.compatible is True
         assert result.execution_identity_compatible is True
-        assert any("Checkpoint is compatible for resume" in msg for msg in result.messages)
+        assert any(
+            "Checkpoint is compatible for resume" in msg for msg in result.messages
+        )
 
     def test_validate_matching_execution_fingerprint_overrides_composite_drift(
         self,

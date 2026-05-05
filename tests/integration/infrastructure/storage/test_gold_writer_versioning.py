@@ -2,16 +2,22 @@
 
 from __future__ import annotations
 
+from datetime import datetime
 from pathlib import Path
 from typing import cast
 from unittest.mock import MagicMock
+from uuid import uuid4
 
 import pytest
 from deltalake import DeltaTable
 from pandera.pandas import Column, DataFrameSchema
 
 from bioetl.domain.ports import LoggerPort
-from bioetl.domain.types import GoldSchemaPolicyByVersion, GoldSchemaVersionPolicy
+from bioetl.domain.types import (
+    GoldSchemaPolicyByVersion,
+    GoldSchemaVersionPolicy,
+    RunID,
+)
 from bioetl.domain.types.contract_rollout import ContractRolloutPolicy
 from bioetl.infrastructure.storage.gold.runtime_helpers import (
     GoldWriterRuntimeServices,
@@ -67,6 +73,14 @@ def _build_runtime_services() -> GoldWriterRuntimeServices:
 def _versioned_table_path(base_path: Path, table_name: str) -> Path:
     provider, entity = table_name.split(".", 1)
     return base_path / provider / entity
+
+
+def _load_gold_rows(base_path: Path, table_name: str) -> list[dict[str, object]]:
+    return (
+        DeltaTable(str(_versioned_table_path(base_path, table_name)))
+        .to_pyarrow_table()
+        .to_pylist()
+    )
 
 
 @pytest.mark.integration
@@ -186,3 +200,47 @@ async def test_gold_writer_dual_write_fails_fast_when_shadow_target_errors(
         active_contract_version="2.0.0",
         write_versions=("1.0.0", "2.0.0"),
     )
+
+
+@pytest.mark.integration
+@pytest.mark.asyncio
+async def test_gold_writer_overwrite_is_idempotent_for_identical_records(
+    tmp_path: Path,
+    noop_logger: object,
+    strict_schema: DataFrameSchema,
+) -> None:
+    writer = GoldWriter(
+        base_path=tmp_path / "gold",
+        logger=cast(LoggerPort, noop_logger),
+        runtime_services=_build_runtime_services(),
+    )
+    records = [
+        {"entity_id": "CHEMBL123", "value": 5.5},
+        {"entity_id": "CHEMBL456", "value": 7.0},
+    ]
+
+    await writer.write_gold(
+        table_name="chembl.activity",
+        records=records,
+        schema=strict_schema,
+        mode="overwrite",
+        run_id=RunID(uuid4()),
+        ingestion_ts=datetime(2026, 5, 5, 12, 0, 0),
+    )
+    first_rows = _load_gold_rows(tmp_path / "gold", "chembl.activity")
+
+    await writer.write_gold(
+        table_name="chembl.activity",
+        records=records,
+        schema=strict_schema,
+        mode="overwrite",
+        run_id=RunID(uuid4()),
+        ingestion_ts=datetime(2026, 5, 5, 12, 5, 0),
+    )
+    second_rows = _load_gold_rows(tmp_path / "gold", "chembl.activity")
+
+    assert first_rows == [
+        {"entity_id": "CHEMBL123", "value": 5.5},
+        {"entity_id": "CHEMBL456", "value": 7.0},
+    ]
+    assert second_rows == first_rows
