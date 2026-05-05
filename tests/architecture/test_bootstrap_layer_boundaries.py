@@ -162,9 +162,9 @@ class TestBootstrapLayerBoundaries:
         content = observability_file.read_text(encoding="utf-8")
 
         required_functions = [
-            "bootstrap_logger_port",
-            "bootstrap_tracer_port",
-            "bootstrap_metrics_port",
+            "bootstrap_logger",
+            "bootstrap_tracer",
+            "bootstrap_metrics",
             "bootstrap_observability_bundle",
         ]
 
@@ -286,10 +286,10 @@ class TestBootstrapFunctionCategorization:
         expected_runtime_functions = [
             "bootstrap_pipeline_runner",
             "bootstrap_observability_bundle",
-            "bootstrap_logger_port",
-            "bootstrap_tracer_port",
-            "bootstrap_metrics_port",
-            "bootstrap_dq_monitor_port",
+            "bootstrap_logger",
+            "bootstrap_tracer",
+            "bootstrap_metrics",
+            "bootstrap_dq_monitor",
             "bootstrap_pipeline_runner_service",
             "bootstrap_composite_runner",
             "load_composite_config",
@@ -319,8 +319,8 @@ class TestBootstrapFunctionCategorization:
         content = assembly_init.read_text(encoding="utf-8")
 
         expected_assembly_functions = [
-            "bootstrap_checkpoint_port",
-            "bootstrap_quarantine_port",
+            "bootstrap_checkpoint_adapter",
+            "bootstrap_quarantine_adapter",
             "bootstrap_storage_adapter",
         ]
 

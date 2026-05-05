@@ -481,8 +481,8 @@ class TestGetAdrService:
 class TestGetQuarantinePort:
     """Tests for get_quarantine_port function."""
 
-    def test_calls_ensure_registrations_and_bootstrap_quarantine_port(self) -> None:
-        """Test that get_quarantine_port calls _ensure_registrations and bootstrap_quarantine_port."""
+    def test_calls_ensure_registrations_and_bootstrap_quarantine_adapter(self) -> None:
+        """Test that get_quarantine_port calls _ensure_registrations and bootstrap_quarantine_adapter."""
         mock_port = MagicMock(name="QuarantinePort")
 
         with (
@@ -497,7 +497,7 @@ class TestGetQuarantinePort:
             result = get_quarantine_port()
 
         mock_ensure.assert_called_once()
-        mock_bootstrap.assert_called_once_with("bootstrap_quarantine_port")
+        mock_bootstrap.assert_called_once_with("bootstrap_quarantine_adapter")
         assert result is mock_port
 
     def test_returns_shared_port_without_pipeline_context(self) -> None:

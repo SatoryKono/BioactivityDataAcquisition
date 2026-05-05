@@ -16,9 +16,9 @@ from typing import TYPE_CHECKING
 from uuid import UUID
 
 from bioetl.composition.bootstrap.assembly.checkpoint import (
+    bootstrap_checkpoint_adapter,
     bootstrap_checkpoint_compatibility_service,
-    bootstrap_checkpoint_port,
-    bootstrap_quarantine_port,
+    bootstrap_quarantine_adapter,
 )
 from bioetl.composition.bootstrap.cli.lineage import bootstrap_lineage_service
 from bioetl.composition.bootstrap.cli.noop import create_noop_logger
@@ -84,7 +84,7 @@ def bootstrap_quarantine_runtime_service(
         QuarantineRuntimeService configured for the specified pipeline.
     """
     return build_cli_quarantine_runtime_service(
-        quarantine_port_factory=bootstrap_quarantine_port,
+        quarantine_port_factory=bootstrap_quarantine_adapter,
         pipeline_name=pipeline_name,
     )
 
@@ -106,7 +106,7 @@ def bootstrap_checkpoint_runtime_service(
         CheckpointRuntimeService configured for CLI inspection.
     """
     return build_cli_checkpoint_runtime_service(
-        checkpoint_port_factory=bootstrap_checkpoint_port,
+        checkpoint_port_factory=bootstrap_checkpoint_adapter,
         logger_factory=create_noop_logger,
         pipeline_name=pipeline_name,
         run_id=CLI_INSPECTION_RUN_ID,
@@ -166,7 +166,7 @@ def bootstrap_quarantine_service() -> QuarantineService:
     """
     return build_cli_quarantine_service(
         settings=get_settings(),
-        quarantine_port_factory=bootstrap_quarantine_port,
+        quarantine_port_factory=bootstrap_quarantine_adapter,
         logger_factory=create_noop_logger,
         metrics_resolver=resolve_metrics_port,
         tracing_resolver=resolve_tracing_port,

@@ -74,6 +74,28 @@ def _emit_ledger_append_metric(
     )
 
 
+def _emit_ledger_append_duration_metric(
+    metrics: MetricsPort | None,
+    *,
+    pipeline: str,
+    event_type: str,
+    status: str,
+    duration_seconds: float,
+) -> None:
+    """Emit one run-ledger append duration metric when metrics are enabled."""
+    if metrics is None:
+        return
+    metrics.observe_histogram(
+        "bioetl_control_plane_ledger_append_duration_seconds",
+        duration_seconds,
+        {
+            "pipeline": pipeline,
+            "event_type": event_type,
+            "status": status,
+        },
+    )
+
+
 def _emit_terminal_event_metric(
     metrics: MetricsPort | None,
     *,
@@ -151,6 +173,27 @@ def _append_jsonl_payload(path: Path, payload: bytes) -> int:
         os.close(file_descriptor)
 
 
+def _ensure_entries_match_manifest_and_run_identity(
+    *,
+    entries: list[RunLedgerEntry],
+    manifest_id: str,
+) -> None:
+    """Fail closed when one manifest ledger contains mixed identity anchors."""
+    if not entries:
+        return
+    if any(entry.manifest_id != manifest_id for entry in entries):
+        raise _RunLedgerCorruptionError(
+            f"Run ledger file '{manifest_id}.jsonl' is corrupted: "
+            "entries contain a different manifest_id"
+        )
+    run_ids = {str(entry.run_id) for entry in entries}
+    if len(run_ids) > 1:
+        raise _RunLedgerCorruptionError(
+            f"Run ledger file '{manifest_id}.jsonl' is corrupted: "
+            "entries contain multiple run_id values"
+        )
+
+
 def _iter_jsonl_payloads_strict(
     *,
     ledger_path: Path,
@@ -193,6 +236,7 @@ class FileRunLedgerStore(RunLedgerPort):
 
     def append(self, entry: RunLedgerEntry) -> None:
         """Append one JSONL ledger entry and maintain run-id index."""
+        started_at = perf_counter()
         ledger_path = self.base_path / f"{entry.manifest_id}.jsonl"
         run_index_dir = self.base_path / "_by_run_id"
         run_index_path = run_index_dir / f"{entry.run_id}.txt"
@@ -202,6 +246,15 @@ class FileRunLedgerStore(RunLedgerPort):
         try:
             self.base_path.mkdir(parents=True, exist_ok=True)
             run_index_dir.mkdir(parents=True, exist_ok=True)
+            existing_manifest_id = self._load_manifest_id_for_run_id(entry.run_id)
+            if (
+                existing_manifest_id is not None
+                and existing_manifest_id != entry.manifest_id
+            ):
+                raise _RunLedgerCorruptionError(
+                    "run_id is already mapped to a different manifest_id: "
+                    f"{existing_manifest_id}"
+                )
             if _has_idempotent_duplicate(
                 self._load_entries(entry.manifest_id),
                 idempotency_key=entry.idempotency_key,
@@ -212,6 +265,13 @@ class FileRunLedgerStore(RunLedgerPort):
                     pipeline=pipeline,
                     event_type=entry.event_type,
                     status="duplicate",
+                )
+                _emit_ledger_append_duration_metric(
+                    self.metrics,
+                    pipeline=pipeline,
+                    event_type=entry.event_type,
+                    status="duplicate",
+                    duration_seconds=perf_counter() - started_at,
                 )
                 return
             append_checkpoint_size = _append_jsonl_payload(ledger_path, payload)
@@ -229,6 +289,13 @@ class FileRunLedgerStore(RunLedgerPort):
                 event_type=entry.event_type,
                 status="failed",
             )
+            _emit_ledger_append_duration_metric(
+                self.metrics,
+                pipeline=pipeline,
+                event_type=entry.event_type,
+                status="failed",
+                duration_seconds=perf_counter() - started_at,
+            )
             raise build_storage_error(
                 message_prefix=_RUN_LEDGER_MESSAGE_PREFIX,
                 operation="append",
@@ -243,6 +310,13 @@ class FileRunLedgerStore(RunLedgerPort):
             pipeline=pipeline,
             event_type=entry.event_type,
             status="success",
+        )
+        _emit_ledger_append_duration_metric(
+            self.metrics,
+            pipeline=pipeline,
+            event_type=entry.event_type,
+            status="success",
+            duration_seconds=perf_counter() - started_at,
         )
         _emit_terminal_event_metric(
             self.metrics,
@@ -293,6 +367,17 @@ class FileRunLedgerStore(RunLedgerPort):
             entries = self._load_entries(manifest_id)
             if not entries:
                 status = "miss"
+                return []
+            if any(entry.manifest_id != manifest_id for entry in entries):
+                raise _RunLedgerCorruptionError(
+                    "Run ledger index corruption: run-id index points to "
+                    f"manifest '{manifest_id}' whose ledger entries carry a different manifest_id"
+                )
+            if any(entry.run_id != run_id for entry in entries):
+                raise _RunLedgerCorruptionError(
+                    "Run ledger index corruption: run-id index points to "
+                    f"manifest '{manifest_id}' whose ledger entries belong to a different run_id"
+                )
             return entries
         except (OSError, TypeError, ValueError) as error:
             status = "failed"
@@ -364,10 +449,23 @@ class FileRunLedgerStore(RunLedgerPort):
         if not ledger_path.exists():
             return []
         raw_text = ledger_path.read_text(encoding="utf-8")
-        return [
+        entries = [
             RunLedgerEntry.from_dict(payload)
             for payload in _iter_jsonl_payloads_strict(
                 ledger_path=ledger_path,
                 raw_text=raw_text,
             )
         ]
+        _ensure_entries_match_manifest_and_run_identity(
+            entries=entries,
+            manifest_id=manifest_id,
+        )
+        return entries
+
+    def _load_manifest_id_for_run_id(self, run_id: RunID) -> str | None:
+        """Return the indexed manifest identifier for one run when present."""
+        run_index_path = self.base_path / "_by_run_id" / f"{run_id}.txt"
+        if not run_index_path.exists():
+            return None
+        manifest_id = run_index_path.read_text(encoding="utf-8").strip()
+        return manifest_id or None

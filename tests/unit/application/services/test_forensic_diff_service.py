@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+from tempfile import TemporaryDirectory
 from uuid import uuid4
 
 from bioetl.application.services.control_plane.forensic_diff_service import (
@@ -9,6 +11,7 @@ from bioetl.application.services.control_plane.forensic_diff_service import (
 )
 from bioetl.domain.control_plane import RunLedgerEntry
 from bioetl.domain.types import RunID, RunType
+from bioetl.infrastructure.control_plane import FileArtifactByteComparisonAdapter
 from tests.helpers.control_plane import InMemoryRunLedgerStore, InMemoryRunManifestStore
 from tests.unit.application.services.run_manifest_test_support import (
     FIXED_TIME,
@@ -212,3 +215,85 @@ def test_forensic_diff_reports_checkpoint_mismatch() -> None:
         "execution_fingerprint"
         in payload["checkpoint_compatibility"]["mismatched_fields"]
     )
+
+
+def test_forensic_diff_marks_byte_equivalence_unavailable_without_port() -> None:
+    manifest_store = InMemoryRunManifestStore()
+    run_id = RunID(uuid4())
+    manifest_store.save(make_run_manifest(manifest_id="manifest-left", run_id=run_id))
+    service = ForensicRunDiffService(manifest_port=manifest_store)
+
+    payload = service.compare("manifest-left", "manifest-left").to_dict()
+
+    assert payload["artifact_byte_equivalence"]["available"] is False
+    assert (
+        payload["artifact_byte_equivalence"]["comparison_scope"]
+        == "unavailable_no_port"
+    )
+
+
+def test_forensic_diff_reports_byte_mismatch_when_artifacts_differ() -> None:
+    manifest_store = InMemoryRunManifestStore()
+    ledger_store = InMemoryRunLedgerStore()
+    left_run_id = RunID(uuid4())
+    right_run_id = RunID(uuid4())
+    manifest_store.save(
+        make_run_manifest(manifest_id="manifest-left", run_id=left_run_id)
+    )
+    manifest_store.save(
+        make_run_manifest(manifest_id="manifest-right", run_id=right_run_id)
+    )
+
+    with TemporaryDirectory() as temp_dir:
+        root = Path(temp_dir)
+        left_artifact = root / "left.json"
+        right_artifact = root / "right.json"
+        left_artifact.write_text("left", encoding="utf-8")
+        right_artifact.write_text("right", encoding="utf-8")
+        left_meta = root / "left_metadata.yaml"
+        right_meta = root / "right_metadata.yaml"
+        left_meta.write_text("left-meta", encoding="utf-8")
+        right_meta.write_text("right-meta", encoding="utf-8")
+        ledger_store.append(
+            RunLedgerEntry(
+                entry_id="artifact-left",
+                manifest_id="manifest-left",
+                run_id=left_run_id,
+                event_type="artifact_published",
+                occurred_at=FIXED_TIME,
+                stage="silver",
+                dataset_ref="silver:chembl.activity@1",
+                lineage_fragment_id="silver:fragment-1",
+                details={
+                    "artifact_path": str(left_artifact),
+                    "metadata_path": str(left_meta),
+                },
+            )
+        )
+        ledger_store.append(
+            RunLedgerEntry(
+                entry_id="artifact-right",
+                manifest_id="manifest-right",
+                run_id=right_run_id,
+                event_type="artifact_published",
+                occurred_at=FIXED_TIME,
+                stage="silver",
+                dataset_ref="silver:chembl.activity@1",
+                lineage_fragment_id="silver:fragment-1",
+                details={
+                    "artifact_path": str(right_artifact),
+                    "metadata_path": str(right_meta),
+                },
+            )
+        )
+        service = ForensicRunDiffService(
+            manifest_port=manifest_store,
+            ledger_port=ledger_store,
+            artifact_byte_comparison_port=FileArtifactByteComparisonAdapter(),
+        )
+
+        payload = service.compare("manifest-left", "manifest-right").to_dict()
+
+    assert payload["artifact_byte_equivalence"]["available"] is True
+    assert payload["artifact_byte_equivalence"]["equivalent"] is False
+    assert payload["artifact_byte_equivalence"]["mismatched_artifacts"]

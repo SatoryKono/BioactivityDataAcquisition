@@ -878,14 +878,13 @@ class TestRequiredMetricsSmoke:
             )
 
     def test_required_adapter_operational_metrics_registered(self):
-        """Verify adapter p95/fallback/error taxonomy metrics are registered."""
+        """Verify canonical adapter fallback/error taxonomy metrics are registered."""
         required_counters = [
             "bioetl_adapter_fallback_attempts_total",
             "bioetl_adapter_fallback_hits_total",
             "bioetl_adapter_error_taxonomy_total",
         ]
         required_gauges = [
-            "bioetl_adapter_request_p95_seconds",
             "bioetl_adapter_fallback_hit_rate",
         ]
 

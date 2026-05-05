@@ -7,7 +7,7 @@ import tempfile
 from contextlib import suppress
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 from bioetl.domain.control_plane import RunArtifactRef
 from bioetl.domain.control_plane.reproducibility_policy import (
@@ -17,6 +17,30 @@ from bioetl.domain.control_plane.reproducibility_policy import (
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineRunContext
     from bioetl.infrastructure.config import Settings
+
+
+DataRootMode = Literal["explicit", "repo_default", "private_cache", "tmp"]
+
+
+def is_explicit_data_root_configured(settings: Settings) -> bool:
+    """Return ``True`` when settings declare an explicit non-empty data root."""
+    configured_root = getattr(settings, "data_dir", None)
+    return bool(str(configured_root or "").strip())
+
+
+def resolve_data_root_mode(settings: Settings) -> DataRootMode:
+    """Classify which data-root strategy would be used in the current runtime."""
+    if is_explicit_data_root_configured(settings):
+        return "explicit"
+
+    candidate = Path("data")
+    try:
+        candidate.mkdir(parents=True, exist_ok=True)
+    except OSError:
+        return _private_fallback_data_root_mode()
+    if not os.access(candidate, os.W_OK):
+        return _private_fallback_data_root_mode()
+    return "repo_default"
 
 
 def _resolve_data_root(settings: Settings) -> Path:
@@ -50,6 +74,16 @@ def _private_fallback_data_root() -> Path:
         runtime_user = getattr(os, "getuid", lambda: "user")()
         fallback = Path(tempfile.gettempdir()) / f"bioetl-data-{runtime_user}"
         return _prepare_private_runtime_dir(fallback)
+
+
+def _private_fallback_data_root_mode() -> DataRootMode:
+    """Classify which private fallback would be used when checkout is read-only."""
+    preferred = Path.home() / ".cache" / "bioetl-data"
+    try:
+        _prepare_private_runtime_dir(preferred)
+    except OSError:
+        return "tmp"
+    return "private_cache"
 
 
 def _prepare_private_runtime_dir(path: Path) -> Path:

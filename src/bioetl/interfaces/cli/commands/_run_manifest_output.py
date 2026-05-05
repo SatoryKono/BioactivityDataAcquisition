@@ -201,6 +201,7 @@ def render_forensic_diff_payload(payload: dict[str, object]) -> str:
     for label in (
         "replay_capability",
         "checkpoint_compatibility",
+        "artifact_byte_equivalence",
         "artifact_completeness",
         "lineage_closure",
         "missing_evidence",

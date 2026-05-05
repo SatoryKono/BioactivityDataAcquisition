@@ -14,7 +14,7 @@ from bioetl.infrastructure.adapters.crossref.fallback import (
     CrossRefTitleFallbackHandler,
 )
 from bioetl.infrastructure.adapters.crossref.fetch_flow import CrossRefFetchFlow
-from bioetl.infrastructure.adapters.crossref.query_builder import CrossRefQueryBuilder
+from bioetl.infrastructure.adapters.crossref.query_builder import CrossRefQueryPlanner
 from bioetl.infrastructure.adapters.crossref.response_mapper import (
     CrossRefResponseMapper,
 )
@@ -37,7 +37,7 @@ __all__ = [
 class CrossRefRuntimeServices:
     """Resolved CrossRef runtime collaborators after composition wiring."""
 
-    query_builder: CrossRefQueryBuilder
+    query_builder: CrossRefQueryPlanner
     response_mapper: CrossRefResponseMapper
     batch_fetcher: CrossRefBatchFetcher
     search_paginator: CrossRefSearchPaginator
@@ -57,7 +57,7 @@ def _require_runtime_service[_RuntimeService](
 
 def build_crossref_runtime_services(
     *,
-    query_builder: CrossRefQueryBuilder | None,
+    query_builder: CrossRefQueryPlanner | None,
     response_mapper: CrossRefResponseMapper | None,
     batch_fetcher: CrossRefBatchFetcher | None,
     search_paginator: CrossRefSearchPaginator | None,

@@ -12,9 +12,7 @@ from tests.helpers.compat_shim_guards import (
 )
 
 ROOT = Path(__file__).resolve().parents[2]
-COMPAT_MODULES = frozenset(
-    {"bioetl.application.composite.checkpoint.anchor_context"}
-)
+COMPAT_MODULES = frozenset({"bioetl.application.composite.checkpoint.anchor_context"})
 REMOVED_FILES = frozenset(
     {
         ROOT

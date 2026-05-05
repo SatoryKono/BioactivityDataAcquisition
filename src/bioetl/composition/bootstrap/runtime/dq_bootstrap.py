@@ -35,11 +35,11 @@ class _DQDetectorConfig(Protocol):
 
 
 __all__ = [
-    "bootstrap_dq_monitor_port",
+    "bootstrap_dq_monitor",
 ]
 
 
-def bootstrap_dq_monitor_port(
+def bootstrap_dq_monitor(
     settings: Settings,
     logger: LoggerPort | None = None,
     monitor_factory: Callable[..., DQMonitorPort] = DataQualityMonitor,

@@ -6,8 +6,8 @@ from typing import TYPE_CHECKING, cast
 
 from bioetl.application.composite.runtime_wiring_api import FSMStateHelperService
 from bioetl.composition.bootstrap.assembly.checkpoint import (
-    bootstrap_composite_checkpoint_port,
-    bootstrap_quarantine_port,
+    bootstrap_composite_checkpoint_writer,
+    bootstrap_quarantine_adapter,
 )
 from bioetl.composition.bootstrap.composite_infrastructure_context import (
     CompositeInfrastructureContext,
@@ -57,7 +57,7 @@ def build_runtime_management_services(
     control_plane_bundle: CompositeControlPlaneBundle | None = None,
 ) -> RuntimeManagementServicesBundle:
     """Build checkpoint, FSM, DQ, and quarantine runtime services."""
-    checkpoint_storage = bootstrap_composite_checkpoint_port()
+    checkpoint_storage = bootstrap_composite_checkpoint_writer()
     checkpoint_manager = _create_checkpoint_manager(
         config=config,
         runtime=runtime,
@@ -69,7 +69,7 @@ def build_runtime_management_services(
         checkpoint_clock=infra_context.clock,
     )
     quarantine_port = (
-        bootstrap_quarantine_port() if config.cross_validation.enabled else None
+        bootstrap_quarantine_adapter() if config.cross_validation.enabled else None
     )
 
     return RuntimeManagementServicesBundle(

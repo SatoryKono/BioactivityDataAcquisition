@@ -1,6 +1,6 @@
 """Unit tests for metrics bootstrap helpers.
 
-Tests bootstrap_metrics_port, maybe_start_metrics_server,
+Tests bootstrap_metrics, maybe_start_metrics_server,
 and their deprecated aliases.
 """
 
@@ -12,7 +12,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from bioetl.composition.bootstrap.runtime.metrics_bootstrap import (
-    bootstrap_metrics_port,
+    bootstrap_metrics,
     maybe_start_metrics_server,
     resolve_metrics_fail_fast,
 )
@@ -52,13 +52,13 @@ def _make_settings(
 
 @pytest.mark.unit
 class TestBootstrapMetricsPort:
-    """Tests for bootstrap_metrics_port."""
+    """Tests for bootstrap_metrics."""
 
     def test_returns_noop_when_disabled(self) -> None:
         """Should return NoOpMetrics when metrics_enabled is False."""
         settings = _make_settings(metrics_enabled=False)
 
-        result = bootstrap_metrics_port(settings=settings)
+        result = bootstrap_metrics(settings=settings)
 
         assert isinstance(result, NoOpMetrics)
 
@@ -68,7 +68,7 @@ class TestBootstrapMetricsPort:
         factory = MagicMock(return_value=mock_metrics)
         settings = _make_settings(metrics_enabled=True)
 
-        result = bootstrap_metrics_port(settings=settings, metrics_factory=factory)
+        result = bootstrap_metrics(settings=settings, metrics_factory=factory)
 
         assert result is mock_metrics
         factory.assert_called_once()
@@ -78,7 +78,7 @@ class TestBootstrapMetricsPort:
         settings = _make_settings(metrics_enabled=True)
 
         # Should not raise and return a MetricsPort
-        result = bootstrap_metrics_port(settings=settings, metrics_factory=None)
+        result = bootstrap_metrics(settings=settings, metrics_factory=None)
 
         assert isinstance(result, MetricsPort)
 
@@ -86,7 +86,7 @@ class TestBootstrapMetricsPort:
         """Disabled-metrics result should be a NoOpMetrics instance."""
         settings = _make_settings(metrics_enabled=False)
 
-        result = bootstrap_metrics_port(settings=settings)
+        result = bootstrap_metrics(settings=settings)
 
         assert isinstance(result, NoOpMetrics)
 
@@ -96,7 +96,7 @@ class TestBootstrapMetricsPort:
         factory = MagicMock(return_value=mock_metrics)
         settings = _make_settings(metrics_enabled=True)
 
-        bootstrap_metrics_port(settings=settings, metrics_factory=factory)
+        bootstrap_metrics(settings=settings, metrics_factory=factory)
 
         factory.assert_called_once_with()
 

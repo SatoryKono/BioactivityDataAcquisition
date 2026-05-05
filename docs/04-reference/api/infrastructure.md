@@ -67,8 +67,8 @@ ______________________________________________________________________
   (`bioetl.infrastructure.adapters.pubmed`,
   `bioetl.infrastructure.adapters.semanticscholar`).
 - `bioetl.infrastructure.adapters.pubmed.client` and
-  `bioetl.infrastructure.adapters.semanticscholar.client` are retained stable seams
-  for import compatibility.
+  `bioetl.infrastructure.adapters.semanticscholar.client` were retired. Use
+  provider package roots or `adapter.py` modules instead.
 - Legacy implementation-module paths
   (`bioetl.infrastructure.adapters.pubmed.pubmed_client`,
   `bioetl.infrastructure.adapters.semanticscholar.adapter`) are not sanctioned for
@@ -82,10 +82,11 @@ and lifecycle governance in
 
 ### Provider Package Contract
 
-- Every provider package keeps one explicit primary adapter entrypoint, usually
-  `client.py`, plus a package-root facade in `__init__.py`.
+- Every provider package keeps one explicit primary adapter entrypoint plus a
+  package-root facade in `__init__.py`. Depending on the provider family, the
+  primary module may be `adapter.py` or `client.py`.
 - New first-party code should import primary adapter classes from the provider package
-  root, not from `client.py` or older implementation modules.
+  root, not from older implementation modules or retired compatibility shims.
 - Optional package-local modules may cover transport exceptions, response/request
   models, query builders, response mapping/parsing, fetch flows, health/retry logic,
   and explicit `*_adapter_mixin.py` fragments.
@@ -94,8 +95,8 @@ and lifecycle governance in
   common adapter packages such as `infrastructure.adapters.common` or
   `infrastructure.adapters.http`.
 - Large packages such as `uniprot` are allowed to grow beyond a minimal
-  `client.py`-only shape, but the growth should follow stable themes rather than
-  anonymous helper sprawl.
+  single-entrypoint shape, but the growth should follow stable themes rather
+  than anonymous helper sprawl.
 
 ### Base Adapter
 

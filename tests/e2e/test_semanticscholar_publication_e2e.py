@@ -15,9 +15,7 @@ Recording cassettes:
 
 from __future__ import annotations
 
-import os
 from pathlib import Path
-from typing import Any
 
 import pytest
 
@@ -30,26 +28,12 @@ from .conftest import (
     get_silver_records,
 )
 
-# VCR cassette directory for Semantic Scholar E2E tests
-CASSETTE_DIR = Path(__file__).parent.parent / "fixtures" / "vcr" / "semanticscholar"
-
 # Stable DOIs for deterministic cassette playback.
 S2_TEST_DOIS = (
     "10.1038/s41586-020-2649-2",  # Nature 2020
     "10.1126/science.abc4765",  # Science 2020
     "10.1016/j.cell.2020.06.043",  # Cell 2020
 )
-
-
-@pytest.fixture(scope="module")
-def vcr_config() -> dict[str, Any]:
-    """Configure VCR for Semantic Scholar Publication E2E tests."""
-    return {
-        "cassette_library_dir": str(CASSETTE_DIR),
-        "record_mode": os.environ.get("VCR_RECORD_MODE", "none"),
-        "match_on": ["method", "scheme", "host", "port", "path", "query"],
-        "decode_compressed_response": True,
-    }
 
 
 @pytest.mark.e2e

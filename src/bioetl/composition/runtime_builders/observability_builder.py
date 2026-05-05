@@ -7,17 +7,17 @@ from typing import cast
 from uuid import UUID
 
 from bioetl.composition.bootstrap.runtime.dq_bootstrap import (
-    bootstrap_dq_monitor_port as _bootstrap_dq_monitor_port_impl,
+    bootstrap_dq_monitor as _bootstrap_dq_monitor_impl,
 )
 from bioetl.composition.bootstrap.runtime.metrics_bootstrap import (
-    bootstrap_metrics_port as _bootstrap_metrics_port_impl,
+    bootstrap_metrics as _bootstrap_metrics_impl,
 )
 from bioetl.composition.bootstrap.runtime.observability_bundle import (
     bootstrap_observability_bundle_impl,
     validate_observability_preflight_impl,
 )
 from bioetl.composition.bootstrap.runtime.tracing_bootstrap import (
-    bootstrap_tracer_port as _bootstrap_tracer_port_impl,
+    bootstrap_tracer as _bootstrap_tracer_impl,
 )
 from bioetl.composition.factories.storage.audit import create_audit_port
 from bioetl.composition.observability import ObservabilityBundle
@@ -69,7 +69,7 @@ def _resolve_tracer_port(
 ) -> TracingPort:
     """Resolve tracing port using explicit factories or canonical fallbacks."""
     if tracer_factory is None and noop_tracing_factory is None:
-        return _bootstrap_tracer_port_impl(
+        return _bootstrap_tracer_impl(
             settings=tracer_settings,
             service_name="bioetl",
         )
@@ -105,7 +105,7 @@ def _resolve_metrics_port(
 ) -> MetricsPort:
     """Resolve metrics port using explicit factories or canonical fallbacks."""
     if metrics_factory is None and noop_metrics_factory is None:
-        return _bootstrap_metrics_port_impl(
+        return _bootstrap_metrics_impl(
             settings=metrics_settings,
         )
     if metrics_settings.observability.metrics_enabled and metrics_factory is not None:
@@ -143,7 +143,7 @@ def _build_dq_monitor_bootstrapper(
         dq_settings: Settings,
         dq_logger: LoggerPort | None,
     ) -> DQMonitorPort | None:
-        return _bootstrap_dq_monitor_port_impl(
+        return _bootstrap_dq_monitor_impl(
             settings=dq_settings,
             logger=dq_logger,
             monitor_factory=dq_monitor_factory,

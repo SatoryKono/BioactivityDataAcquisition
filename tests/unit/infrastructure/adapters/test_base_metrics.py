@@ -170,8 +170,8 @@ class TestAdapterMetrics:
         assert calls[0][0][2]["provider"] == "chembl"
         assert calls[1][0][2]["provider"] == "uniprot"
 
-    def test_measure_request_updates_p95_gauge(self):
-        """Rolling request p95 should be updated after request completion."""
+    def test_measure_request_does_not_emit_process_local_p95_gauge(self):
+        """Canonical request timing should stay histogram-backed only."""
         mock_metrics = MagicMock()
         adapter_metrics = AdapterMetricsRecorder(
             metrics=mock_metrics, provider="chembl"
@@ -182,11 +182,7 @@ class TestAdapterMetrics:
             request_recorded = True
 
         assert request_recorded is True
-        mock_metrics.set_gauge.assert_called_once()
-        call_args = mock_metrics.set_gauge.call_args
-        assert call_args[0][0] == "bioetl_adapter_request_p95_seconds"
-        assert call_args[0][2] == {"provider": "chembl", "endpoint": "/activity"}
-        assert call_args[0][1] >= 0.0
+        mock_metrics.set_gauge.assert_not_called()
 
     def test_measure_request_normalizes_dynamic_endpoint_segments(self):
         """Dynamic path segments must collapse to bounded placeholders."""

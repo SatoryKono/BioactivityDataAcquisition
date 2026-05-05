@@ -549,19 +549,12 @@ class TestAdapterPortCompliance:
             / "adapters"
             / "pubmed"
             / "__init__.py",
-            src_dir / "bioetl" / "infrastructure" / "adapters" / "pubmed" / "client.py",
             src_dir
             / "bioetl"
             / "infrastructure"
             / "adapters"
             / "semanticscholar"
             / "__init__.py",
-            src_dir
-            / "bioetl"
-            / "infrastructure"
-            / "adapters"
-            / "semanticscholar"
-            / "client.py",
             src_dir
             / "bioetl"
             / "infrastructure"

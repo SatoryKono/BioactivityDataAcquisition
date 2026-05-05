@@ -128,10 +128,10 @@ def test_create_merge_service_wires_join_planner_field_alias_resolver(
     "bioetl.composition.bootstrap.runtime.composite_execution_support_builder.KeyExtractorService"
 )
 @patch(
-    "bioetl.composition.bootstrap.runtime.composite_runtime_management_builder.bootstrap_composite_checkpoint_port"
+    "bioetl.composition.bootstrap.runtime.composite_runtime_management_builder.bootstrap_composite_checkpoint_writer"
 )
 def test_build_uses_canonical_composite_checkpoint_port(
-    mock_bootstrap_checkpoint_port: MagicMock,
+    mock_bootstrap_checkpoint_adapter: MagicMock,
     mock_key_extractor_cls: MagicMock,
     mock_dependency_coordinator_cls: MagicMock,
     mock_enrichment_coordinator_cls: MagicMock,
@@ -147,7 +147,7 @@ def test_build_uses_canonical_composite_checkpoint_port(
     checkpoint_storage = MagicMock(name="checkpoint_storage")
     merger = MagicMock(name="merger")
 
-    mock_bootstrap_checkpoint_port.return_value = checkpoint_storage
+    mock_bootstrap_checkpoint_adapter.return_value = checkpoint_storage
     mock_build_control_plane_bundle.return_value = SimpleNamespace(
         manifest_id="manifest-123",
         execution_fingerprint="fingerprint-123",
@@ -174,7 +174,7 @@ def test_build_uses_canonical_composite_checkpoint_port(
     result = factory.build()
 
     assert result.checkpoint_manager is checkpoint_manager
-    mock_bootstrap_checkpoint_port.assert_called_once_with()
+    mock_bootstrap_checkpoint_adapter.assert_called_once_with()
     factory._infra.logger.bind.assert_called_once_with(manifest_id="manifest-123")
     cast(MagicMock, checkpoint_manager_cls).assert_called_once_with(
         composite_name="composite_publication",

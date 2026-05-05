@@ -55,6 +55,7 @@ def test_layer_aware_suffix_policy_registers_expected_rule_ids() -> None:
     assert {
         "non_domain_port_protocols",
         "non_infrastructure_adapter_aliases",
+        "non_composition_builder_suffix",
         "composition_infrastructure_service_suffix",
         "domain_service_suffix_conflict",
     } <= suffix_rule_ids
@@ -86,8 +87,9 @@ def test_layer_aware_suffix_gate_detects_alias_assignments() -> None:
     tree = ast.parse(
         "FooPort = BarProtocol\n"
         "StorageAdapter = StorageBundle\n"
+        "ResultBuilder = CallableAlias\n"
         "from somewhere import CompositePipelineRunnerService\n"
-        '__all__ = ["CompositePipelineRunnerService"]\n'
+        '__all__ = ["CompositePipelineRunnerService", "ResultBuilder"]\n'
         "class VisibleService: ...\n"
         "_PrivateAlias = VisibleService\n"
     )
@@ -96,8 +98,9 @@ def test_layer_aware_suffix_gate_detects_alias_assignments() -> None:
 
     assert ("FooPort", 1, "alias") in symbols
     assert ("StorageAdapter", 2, "alias") in symbols
-    assert ("CompositePipelineRunnerService", 3, "re-export") in symbols
-    assert ("VisibleService", 5, "class") in symbols
+    assert ("ResultBuilder", 3, "alias") in symbols
+    assert ("CompositePipelineRunnerService", 4, "re-export") in symbols
+    assert ("VisibleService", 6, "class") in symbols
     assert all(symbol[0] != "_PrivateAlias" for symbol in symbols)
 
 
@@ -155,61 +158,151 @@ def test_lock_runtime_admin_family_is_role_driven() -> None:
     assert "LockCoordinatorCreateContext" in rule.match_regex
 
 
-def test_composition_bootstrap_port_function_exceptions_are_explicit_and_bounded() -> (
-    None
-):
-    """Reviewed composition bootstrap `*_port` functions must stay exact."""
+def test_composition_bootstrap_port_function_exceptions_are_retired() -> None:
+    """Composition bootstrap must not retain allowed `*_port` functions."""
     module = _load_gate_module()
     policy = module._load_layer_aware_suffix_policy(ROOT)
     function_rules = {rule.rule_id: rule for rule in policy.function_suffix_rules}
     rule = function_rules["composition_bootstrap_port_factories"]
 
     allowed = {(item.symbol, item.path) for item in rule.allowed_symbols}
-    assert allowed == {
+    assert allowed == set()
+
+
+def test_non_composition_builder_suffix_policy_is_exception_free() -> None:
+    """Public *Builder symbols are reserved for composition-owned factories."""
+    module = _load_gate_module()
+    policy = module._load_layer_aware_suffix_policy(ROOT)
+    suffix_rules = {rule.rule_id: rule for rule in policy.suffix_boundary_rules}
+    rule = suffix_rules["non_composition_builder_suffix"]
+
+    assert rule.suffixes == ("Builder",)
+    assert rule.include_path_prefixes == ("src/bioetl/",)
+    assert rule.exclude_path_prefixes == ("src/bioetl/composition/",)
+    assert rule.allowed_symbols == ()
+    assert {item.path for item in rule.allowed_modules} == {
+        "src/bioetl/application/composite/dependency_join_context_builders.py",
+        "src/bioetl/application/services/dq/dq_report_builders.py",
+        "src/bioetl/application/services/lineage/metadata_lineage_node_builders.py",
+        "src/bioetl/domain/value_objects/dq_report_builder.py",
+        "src/bioetl/infrastructure/adapters/crossref/client_builders.py",
+        "src/bioetl/infrastructure/adapters/crossref/query_builder.py",
+        "src/bioetl/infrastructure/adapters/openalex/query_builder.py",
+        "src/bioetl/infrastructure/adapters/pubchem/client_builders.py",
+        "src/bioetl/infrastructure/adapters/pubchem/query_builder.py",
+        "src/bioetl/infrastructure/adapters/uniprot/query_builder.py",
+        "src/bioetl/infrastructure/storage/bronze/metadata_builders.py",
+    }
+
+
+def test_non_composition_builder_suffix_rejects_public_application_symbols() -> None:
+    """Application-layer public *Builder symbols must fail the naming gate."""
+    module = _load_gate_module()
+    policy = module._load_layer_aware_suffix_policy(ROOT)
+    tree = ast.parse(
+        "class ResultBuilder: ...\n"
+        "QueryBuilder = ResultBuilder\n"
+        "from elsewhere import ExportedBuilder\n"
+        '__all__ = ["ExportedBuilder"]\n'
+        "class _PrivateBuilder: ...\n"
+        "_PrivateAliasBuilder = ResultBuilder\n"
+    )
+
+    violations = module._layer_aware_public_symbol_violations(
+        relative_path="src/bioetl/application/services/result_builders.py",
+        tree=tree,
+        policy=policy,
+    )
+
+    assert {
+        (item.location, item.details)
+        for item in violations
+        if "[non_composition_builder_suffix]" in item.details
+    } == {
         (
-            "bootstrap_checkpoint_port",
-            "src/bioetl/composition/bootstrap/assembly/checkpoint.py",
+            "src/bioetl/application/services/result_builders.py:1",
+            "[non_composition_builder_suffix] class ResultBuilder violates the "
+            "reviewed suffix boundary for Builder",
         ),
         (
-            "bootstrap_composite_checkpoint_port",
-            "src/bioetl/composition/bootstrap/assembly/checkpoint.py",
+            "src/bioetl/application/services/result_builders.py:2",
+            "[non_composition_builder_suffix] alias QueryBuilder violates the "
+            "reviewed suffix boundary for Builder",
         ),
+    }
+
+
+def test_non_composition_builder_suffix_allows_composition_builder_symbols() -> None:
+    """Composition owns public *Builder construction vocabulary."""
+    module = _load_gate_module()
+    policy = module._load_layer_aware_suffix_policy(ROOT)
+    tree = ast.parse("class ResultBuilder: ...\nQueryBuilder = ResultBuilder\n")
+
+    violations = module._layer_aware_public_symbol_violations(
+        relative_path="src/bioetl/composition/runtime_builders/result_builder.py",
+        tree=tree,
+        policy=policy,
+    )
+
+    assert violations == []
+
+
+def test_non_composition_builder_suffix_rejects_unregistered_modules() -> None:
+    """Public non-composition *_builder(s).py modules must be registered."""
+    module = _load_gate_module()
+    policy = module._load_layer_aware_suffix_policy(ROOT)
+
+    violations = module._layer_aware_module_violations(
+        relative_path="src/bioetl/application/services/result_builder.py",
+        policy=policy,
+    )
+
+    assert [(item.location, item.details) for item in violations] == [
         (
-            "bootstrap_quarantine_port",
-            "src/bioetl/composition/bootstrap/assembly/checkpoint.py",
-        ),
+            "src/bioetl/application/services/result_builder.py",
+            "[non_composition_builder_suffix] module result_builder.py violates "
+            "the reviewed suffix boundary for Builder",
+        )
+    ]
+
+
+def test_non_composition_builder_suffix_allows_private_modules() -> None:
+    """Private helper *_builder(s).py modules remain exempt from public policy."""
+    module = _load_gate_module()
+    policy = module._load_layer_aware_suffix_policy(ROOT)
+
+    violations = module._layer_aware_module_violations(
+        relative_path="src/bioetl/application/services/_result_builder.py",
+        policy=policy,
+    )
+
+    assert violations == []
+
+
+def test_non_composition_builder_suffix_rejects_public_application_reexports() -> None:
+    """Public application facades must not re-export *Builder names."""
+    module = _load_gate_module()
+    policy = module._load_layer_aware_suffix_policy(ROOT)
+    tree = ast.parse(
+        'from elsewhere import ResultBuilder\n__all__ = ["ResultBuilder"]\n'
+    )
+
+    violations = module._layer_aware_public_symbol_violations(
+        relative_path="src/bioetl/application/services/__init__.py",
+        tree=tree,
+        policy=policy,
+    )
+
+    assert {
+        (item.location, item.details)
+        for item in violations
+        if "[non_composition_builder_suffix]" in item.details
+    } == {
         (
-            "bootstrap_dq_monitor_port",
-            "src/bioetl/composition/bootstrap/runtime/dq_bootstrap.py",
-        ),
-        (
-            "bootstrap_dq_monitor_port",
-            "src/bioetl/composition/bootstrap/runtime/observability.py",
-        ),
-        (
-            "bootstrap_logger_port",
-            "src/bioetl/composition/bootstrap/runtime/logger_bootstrap.py",
-        ),
-        (
-            "bootstrap_logger_port",
-            "src/bioetl/composition/bootstrap/runtime/observability.py",
-        ),
-        (
-            "bootstrap_metrics_port",
-            "src/bioetl/composition/bootstrap/runtime/metrics_bootstrap.py",
-        ),
-        (
-            "bootstrap_metrics_port",
-            "src/bioetl/composition/bootstrap/runtime/observability.py",
-        ),
-        (
-            "bootstrap_tracer_port",
-            "src/bioetl/composition/bootstrap/runtime/tracing_bootstrap.py",
-        ),
-        (
-            "bootstrap_tracer_port",
-            "src/bioetl/composition/bootstrap/runtime/observability.py",
-        ),
+            "src/bioetl/application/services/__init__.py:1",
+            "[non_composition_builder_suffix] re-export ResultBuilder violates the "
+            "reviewed suffix boundary for Builder",
+        )
     }
 
 
@@ -363,19 +456,6 @@ def test_provider_connector_adapter_family_is_owned_by_adapter_modules_only() ->
         / "semanticscholar"
         / "__init__.py"
     )
-    pubmed_client = (
-        ROOT / "src" / "bioetl" / "infrastructure" / "adapters" / "pubmed" / "client.py"
-    )
-    semanticscholar_client = (
-        ROOT
-        / "src"
-        / "bioetl"
-        / "infrastructure"
-        / "adapters"
-        / "semanticscholar"
-        / "client.py"
-    )
-
     assert (
         "from bioetl.infrastructure.adapters.pubmed.adapter import "
         in pubmed_package.read_text(encoding="utf-8")
@@ -384,8 +464,6 @@ def test_provider_connector_adapter_family_is_owned_by_adapter_modules_only() ->
         "from bioetl.infrastructure.adapters.semanticscholar.adapter import "
         in semanticscholar_package.read_text(encoding="utf-8")
     )
-    assert "deprecated" in pubmed_client.read_text(encoding="utf-8").lower()
-    assert "deprecated" in semanticscholar_client.read_text(encoding="utf-8").lower()
 
 
 def test_layer_aware_suffix_policy_stays_clean_on_current_baseline() -> None:
@@ -413,6 +491,9 @@ def test_layer_aware_suffix_policy_exceptions_require_structured_expiry_metadata
         allowed_symbols.extend(rule.allowed_symbols)
     for rule in policy.family_freeze_rules:
         allowed_symbols.extend(rule.allowed_symbols)
+    allowed_modules = [
+        item for rule in policy.suffix_boundary_rules for item in rule.allowed_modules
+    ]
 
     assert allowed_symbols, "Expected at least one reviewed naming exception symbol"
     today = date.today()
@@ -428,4 +509,15 @@ def test_layer_aware_suffix_policy_exceptions_require_structured_expiry_metadata
         assert date.fromisoformat(item.expires_on) >= today, (
             "Naming exception expiry is stale and must be refreshed or removed: "
             f"{item.symbol} ({item.path}) expires_on={item.expires_on}"
+        )
+    for item in allowed_modules:
+        assert item.owner.startswith("@"), (
+            f"Naming module exception owner must be an explicit handle: {item.path}"
+        )
+        assert item.removal_step.strip(), (
+            f"Naming module exception removal_step must be non-empty: {item.path}"
+        )
+        assert date.fromisoformat(item.expires_on) >= today, (
+            "Naming module exception expiry is stale and must be refreshed or "
+            f"removed: {item.path} expires_on={item.expires_on}"
         )

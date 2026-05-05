@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 TracerFactory = Callable[[str], TracingPort]
 
 __all__ = [
-    "bootstrap_tracer_port",
+    "bootstrap_tracer",
 ]
 
 
@@ -24,7 +24,7 @@ def _default_tracer_factory(service_name: str) -> TracingPort:
     return OpenTelemetryTracer(service_name=service_name)
 
 
-def bootstrap_tracer_port(
+def bootstrap_tracer(
     settings: Settings,
     service_name: str = "bioetl",
     tracer_factory: TracerFactory | None = None,

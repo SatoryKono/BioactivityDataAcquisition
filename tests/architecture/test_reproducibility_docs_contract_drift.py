@@ -3,9 +3,16 @@
 from __future__ import annotations
 
 import ast
+from dataclasses import fields
 from pathlib import Path
 
 import pytest
+
+from bioetl.domain.control_plane.run_manifest import (
+    DOCUMENTED_SOURCE_REVISION_STATES,
+    RunCodeProvenance,
+    RunManifest,
+)
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -96,6 +103,42 @@ def test_run_manifest_contract_documents_lifecycle_snapshot_and_scoring_surfaces
     assert "## Reproducibility Scoring Rubric" in text
     assert "|   100 | `forensic_grade`" in text
     assert "| Evidence surface" in text
+
+
+@pytest.mark.architecture
+def test_run_manifest_contract_doc_covers_runtime_manifest_schema() -> None:
+    text = _read("docs/04-reference/contracts/run-manifest-ledger.md")
+
+    missing_manifest_fields = [
+        field.name for field in fields(RunManifest) if field.name not in text
+    ]
+    assert not missing_manifest_fields, (
+        "Run manifest contract doc is missing manifest fields: "
+        f"{missing_manifest_fields}"
+    )
+
+    missing_provenance_fields = [
+        field.name for field in fields(RunCodeProvenance) if field.name not in text
+    ]
+    assert not missing_provenance_fields, (
+        "Run manifest contract doc is missing code provenance fields: "
+        f"{missing_provenance_fields}"
+    )
+
+
+@pytest.mark.architecture
+def test_run_manifest_contract_doc_freezes_documented_source_revision_states() -> None:
+    text = _read("docs/04-reference/contracts/run-manifest-ledger.md")
+
+    for state in sorted(DOCUMENTED_SOURCE_REVISION_STATES):
+        assert f"`{state}`" in text
+
+    assert "run_id` is the canonical occurrence anchor" in text
+    assert "manifest_id` is the immutable persisted manifest record key" in text
+    assert (
+        "execution_fingerprint` remains the canonical semantic execution identity"
+        in text
+    )
 
 
 @pytest.mark.architecture

@@ -26,12 +26,12 @@ EXPECTED_ASSERTIONS = [
     ("factories/datasource/data_source_factory.py", "create", "DataSourcePort"),
     (
         "bootstrap/assembly/checkpoint.py",
-        "bootstrap_quarantine_port",
+        "bootstrap_quarantine_adapter",
         "QuarantinePort",
     ),
     (
         "bootstrap/assembly/checkpoint.py",
-        "bootstrap_checkpoint_port",
+        "bootstrap_checkpoint_adapter",
         "CheckpointPort",
     ),
 ]

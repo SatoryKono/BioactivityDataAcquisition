@@ -108,6 +108,7 @@
         "content": "<center><h2>2. Runtime / $pipeline / $run_type</h2><div><strong>Current window:</strong> 15m status, 30m terminal-run evidence. <strong>Selected range:</strong> diagnostics only.</div></center>",
         "mode": "html"
       },
+      "description": "Runtime L2 scope. Current status panels use fixed recording-rule windows; selected-range panels below are evidence only. If current status is UNKNOWN, inspect telemetry gap before treating zero count cards as OK.",
       "title": "Runtime Scope",
       "type": "text"
     },
@@ -139,7 +140,7 @@
     },
     {
       "datasource": "Prometheus",
-      "description": "Status mapping: 0=OK, 1=DEGRADED, 2=FAILING; null=UNKNOWN. Current status uses fixed recording-rule windows, not selected range evidence. Runtime answers: what blocks execution now?",
+      "description": "Current snapshot from canonical recording rules. Status mapping: 0=OK, 1=DEGRADED/WARN, >=2=FAILING/CRIT, null=UNKNOWN/no runtime status data. If UNKNOWN, check Monitor Runtime Telemetry Gap and Prometheus scrape/rule health before trusting zero count panels. Labels: pipeline, run_type. Next action: inspect top blocker reason, then active blocker detail or logs/traces.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -210,6 +211,97 @@
       "type": "stat"
     },
     {
+      "datasource": "Prometheus",
+      "description": "Current scrape gap for BioETL runtime metrics over 10m. 0=OK/scraping, 1=WARN/no recent scrape, >=2=CRIT reserved, null=UNKNOWN/no scrape series. Time scope: current monitoring health, not selected-range runtime evidence. If this is 1 or UNKNOWN, treat zero count panels as inconclusive and open Prometheus Targets before debugging pipeline code.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            },
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "color": "green",
+                  "text": "SCRAPING"
+                },
+                "1": {
+                  "color": "orange",
+                  "text": "NO SCRAPE"
+                }
+              }
+            }
+          ],
+          "noValue": "UNKNOWN",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 2
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 0,
+        "y": 9
+      },
+      "id": 9102,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto",
+        "dataLinks": [
+          {
+            "title": "Open Prometheus Targets",
+            "url": "/targets"
+          }
+        ]
+      },
+      "targets": [
+        {
+          "expr": "1 - max_over_time(up{job=\"bioetl\"}[10m])",
+          "refId": "A"
+        }
+      ],
+      "title": "Monitor Runtime Telemetry Gap",
+      "type": "stat"
+    },
+    {
       "gridPos": {
         "h": 4,
         "w": 12,
@@ -217,6 +309,7 @@
         "y": 15
       },
       "id": 222,
+      "description": "Range-evidence summary note for the KPI cards below. The cards support runtime localization after the current-status answer row; they do not replace the current blocker recording rules. UNKNOWN means missing status telemetry or scrape/rule gap until proven otherwise.",
       "options": {
         "content": "<div style=\"padding:0.25rem 0.6rem;line-height:1.55\"><strong>Incident Summary</strong>: first-pass KPIs for blocker count, failed runs, worst stage lag, and runtime error rate. Use these before expanding deeper diagnostics.</div>",
         "mode": "html"
@@ -226,7 +319,7 @@
     },
     {
       "datasource": "Prometheus",
-      "description": "Top active blocker reasons with severity and action_target labels. Empty table means no current blocker reason; use status UNKNOWN handling before assuming OK.",
+      "description": "Top active pipeline-level runtime blocker reasons with severity and action_target labels. Time scope: current recording-rule snapshot. This intentionally aggregates across run_type because canonical blocker reasons are emitted as pipeline-level current state. Empty table means no current blocker reason only when Runtime status and telemetry gap are not UNKNOWN.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -306,7 +399,7 @@
     },
     {
       "datasource": "Prometheus",
-      "description": "15m current-window count of active canonical runtime blocker reasons. Uses recording rules for first-screen status; zero fallback is only for count rendering, while current status keeps UNKNOWN as null.",
+      "description": "15m current-window count of active canonical pipeline-level runtime blocker reasons. Uses recording rules for first-screen status and intentionally ignores stage/run_type to avoid filtering away output/gold blockers. 0 is normal only when Monitor Runtime Current Status and Monitor Runtime Telemetry Gap are not UNKNOWN. Next action: inspect top blocker detail.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -384,7 +477,7 @@
     },
     {
       "datasource": "Prometheus",
-      "description": "Failed pipeline executions over the last 15m.",
+      "description": "Failed pipeline executions over the last 15m for selected pipeline/run_type. 0 means no failed-run counter increase when runtime telemetry is available; UNKNOWN/No data or telemetry gap means the failure count is inconclusive. Next action: open logs/traces or the pipeline failure runbook.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -475,7 +568,7 @@
     },
     {
       "datasource": "Prometheus",
-      "description": "Runtime error rate over last 30m. Threshold semantics: normalized by Bronze input; elevated ratio with non-trivial denominator means runtime degradation/blocker risk. Next action: open Runtime Errors by Stage/Error Code and check failed runs/backlog/lag to isolate culprit stage.",
+      "description": "Pipeline-level runtime error rate over last 30m. bioetl_errors_total is scoped by pipeline/stage/error_code, so this panel intentionally ignores run_type in the numerator and uses Bronze input as denominator. No data is UNKNOWN/missing error or input telemetry, not 0. Next action: open Errors by Stage/Error Code and check failed runs/backlog/lag.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -493,7 +586,7 @@
               }
             }
           ],
-          "noValue": "0",
+          "noValue": "UNKNOWN",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -548,7 +641,7 @@
       },
       "targets": [
         {
-          "expr": "(sum(increase(bioetl_errors_total{pipeline=~\"$pipeline\",stage=~\"$stage\"}[30m])) / clamp_min(sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=\"bronze\"}[30m])), 1)) or vector(0)",
+          "expr": "sum(increase(bioetl_errors_total{pipeline=~\"$pipeline\",stage=~\"$stage\"}[30m])) / clamp_min(sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\",stage=\"bronze\"}[30m])), 1)",
           "refId": "A"
         }
       ],
@@ -557,7 +650,7 @@
     },
     {
       "datasource": "Prometheus",
-      "description": "Worst observed stage lag over the last 15m.",
+      "description": "Worst observed stage lag across stages over the last 15m for selected pipeline/run_type. This intentionally ignores the stage variable to surface the worst blocker. No data is UNKNOWN/missing lag telemetry; 0 is only valid when the metric is scraped and no lag is present. Next action: expand Stage Backlog Trend and logs.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -575,7 +668,7 @@
               }
             }
           ],
-          "noValue": "0",
+          "noValue": "UNKNOWN",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -626,7 +719,7 @@
       },
       "targets": [
         {
-          "expr": "max(max_over_time(bioetl_stage_lag_seconds{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}[15m])) or vector(0)",
+          "expr": "max(max_over_time(bioetl_stage_lag_seconds{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}[15m]))",
           "refId": "A"
         }
       ],
@@ -697,6 +790,13 @@
           "format": "table"
         },
         {
+          "expr": "label_replace(bioetl_runtime_alert_condition_pipeline_infrastructure_failed_15m{pipeline=~\"$pipeline\"} > 0, \"blocker\", \"infrastructure_failed\", \"\", \"\")",
+          "legendFormat": "{{pipeline}} / {{blocker}}",
+          "refId": "H",
+          "instant": true,
+          "format": "table"
+        },
+        {
           "expr": "label_replace(bioetl_runtime_alert_condition_pipeline_runs_failed_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} > 0, \"blocker\", \"runs_failed\", \"\", \"\")",
           "legendFormat": "{{pipeline}} / {{blocker}}",
           "refId": "B",
@@ -752,6 +852,7 @@
       "id": 9991,
       "type": "text",
       "title": "First Action",
+      "description": "First operator action for Runtime triage. Uses current snapshot panels before selected-range evidence. UNKNOWN means missing status telemetry or scrape/rule gap until proven otherwise.",
       "gridPos": {
         "h": 6,
         "w": 8,
@@ -759,31 +860,31 @@
         "y": 3
       },
       "options": {
-        "content": "<div style=\"padding:0.45rem 0.7rem;line-height:1.55\"><strong>First action:</strong> read <em>Monitor Runtime Current Status</em>, then inspect the top blocker reason. If status is FAILING, open the active blocker detail; if DEGRADED, inspect terminal-run/stage lag evidence; if UNKNOWN, verify scrape/runtime activity before treating zero as OK.</div>",
+        "content": "<div style=\"padding:0.45rem 0.7rem;line-height:1.55\"><strong>First action:</strong> read <em>Monitor Runtime Current Status</em>, then inspect the top blocker reason. If status is FAILING, open the active blocker detail; if DEGRADED, inspect terminal-run/stage lag evidence; if UNKNOWN, verify <em>Monitor Runtime Telemetry Gap</em> before treating zero as OK.</div>",
         "mode": "html"
       },
       "links": [
         {
+          "title": "Review current status",
+          "url": "/d/bioetl-runtime/bioetl-runtime?viewPanel=9100&var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&${__url_time_range}",
+          "targetBlank": false,
+          "includeVars": false
+        },
+        {
+          "title": "Review incident summary",
+          "url": "/d/bioetl-runtime/bioetl-runtime?viewPanel=222&var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&${__url_time_range}",
+          "targetBlank": false,
+          "includeVars": false
+        },
+        {
+          "title": "Inspect top blockers",
+          "url": "/d/bioetl-runtime/bioetl-runtime?viewPanel=9101&var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&${__url_time_range}",
+          "targetBlank": false,
+          "includeVars": false
+        },
+        {
           "title": "Inspect active blocker",
           "url": "/d/bioetl-runtime/bioetl-runtime?viewPanel=242&var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&${__url_time_range}",
-          "targetBlank": false,
-          "includeVars": false
-        },
-        {
-          "title": "Open Control Plane",
-          "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
-          "targetBlank": false,
-          "includeVars": false
-        },
-        {
-          "title": "Inspect DQ blockers",
-          "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&${__url_time_range}",
-          "targetBlank": false,
-          "includeVars": false
-        },
-        {
-          "title": "Correlate provider impact",
-          "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=$pipeline&var-pipeline_context=$pipeline&var-adapter=unknown&${__url_time_range}",
           "targetBlank": false,
           "includeVars": false
         }
@@ -1521,7 +1622,7 @@
       "panels": [
         {
           "datasource": "Prometheus",
-          "description": "Uses shipped 15m/30m runtime recording rules for preflight, infrastructure, failed-run, and error-rate blockers.",
+          "description": "Runtime-owned selected-window handoff summary from shipped 15m/30m recording rules for preflight, infrastructure, failed-run, and error-rate blockers. 0 means no condition rule is firing when telemetry is available; UNKNOWN or telemetry gap means inconclusive. Next action: use Active Runtime Blocker Detail or the pipeline failure runbook.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1539,7 +1640,7 @@
                   }
                 }
               ],
-              "noValue": "0",
+              "noValue": "UNKNOWN",
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -1603,7 +1704,7 @@
         },
         {
           "datasource": "Prometheus",
-          "description": "Uses shipped 15m/30m DQ recording rules; hand off into DQ for record-level diagnostics.",
+          "description": "DQ handoff only. Uses shipped 15m/30m DQ recording rules to show whether runtime symptoms may be downstream of data-quality failures. Runtime does not diagnose record-level DQ here; open Data Quality for reasons, thresholds, and Silver rejects. 0 is normal only when telemetry is available.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1681,7 +1782,7 @@
         },
         {
           "datasource": "Prometheus",
-          "description": "Uses shipped 15m/30m control-plane recording rules for manifest, checkpoint, replay, and lineage blockers.",
+          "description": "Control Plane / Replay Safety handoff only. Uses shipped 15m/30m recording rules for manifest, checkpoint, replay, and lineage blockers. Runtime does not decide replay/resume safety here; open Control Plane for manifest, checkpoint, and ledger evidence. 0 is normal only when telemetry is available.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1759,7 +1860,7 @@
         },
         {
           "datasource": "Prometheus",
-          "description": "Uses shipped 15m/30m/1h provider recording rules; provider deep-debug stays in Provider Health.",
+          "description": "GLOBAL Provider Health handoff only. Uses shipped 15m/30m/1h provider recording rules without pipeline filtering because provider failures can block multiple pipelines. Runtime does not diagnose provider root cause here; open Provider Health for provider/current-cause evidence. 0 is normal only when telemetry is available.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1837,7 +1938,7 @@
         },
         {
           "datasource": "Prometheus",
-          "description": "Counts entities older than 24h and hands off into DQ or source troubleshooting.",
+          "description": "Freshness handoff only. Counts selected-pipeline entities older than 24h using data freshness telemetry; this supports source/DQ escalation and is not a Runtime execution blocker by itself. 0 means no stale entity when telemetry is available; UNKNOWN means missing freshness telemetry.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1915,7 +2016,7 @@
         },
         {
           "datasource": "Prometheus",
-          "description": "No-records runs detected over the last 30m (pipeline runs without records).",
+          "description": "No-records runs detected over the last 30m for selected pipeline/run_type. This is a runtime blocker candidate when runs occurred but no records were processed. 0 is valid only when both run and records counters are scraped; telemetry gaps are inconclusive. Next action: inspect checkpoint/resume and stage expectedness.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2010,7 +2111,7 @@
                   }
                 }
               ],
-              "noValue": "0",
+              "noValue": "UNKNOWN",
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -2063,10 +2164,10 @@
               }
             ]
           },
-          "description": "Adaptive memory pressure state over the last 15m.",
+          "description": "Adaptive memory pressure state over the last 15m. 0=OK/no active pressure, 1=WARN/runtime memory pressure active, >=2=CRIT reserved for future severity recording rules, null=UNKNOWN/missing memory telemetry. This is stage-level and intentionally ignores run_type because the metric labels are pipeline/stage/reason/monitor_mode/status. Next action: open logs and inspect checkpoint/resume pressure before retrying.",
           "targets": [
             {
-              "expr": "max(max_over_time(bioetl_memory_pressure_state{pipeline=~\"$pipeline\",stage=~\"$stage\"}[15m])) or vector(0)",
+              "expr": "max(max_over_time(bioetl_memory_pressure_state{pipeline=~\"$pipeline\",stage=~\"$stage\"}[15m]))",
               "refId": "A"
             }
           ],
@@ -2371,7 +2472,11 @@
       },
       {
         "allValue": null,
-        "current": {},
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
         "datasource": "Prometheus",
         "definition": "label_values(bioetl_records_processed_total{pipeline=~\"$pipeline\"}, run_type)",
         "hide": 0,

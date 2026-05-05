@@ -26,24 +26,6 @@ modules:
       - tests/unit/interfaces/cli/commands/test_run_composite.py
       - tests/architecture/test_composite_cli_runtime_config_boundaries.py
 
-  - source: src/bioetl/infrastructure/adapters/pubmed/client.py
-    ownership: facade_contract
-    rationale: >
-      Retained canonical PubMed client entrypoint is a stable facade over the
-      legacy implementation and is governed by dedicated entrypoint tests.
-    owner_tests:
-      - tests/unit/infrastructure/adapters/test_provider_entrypoints.py
-      - tests/architecture/test_retained_adapter_entrypoint_policy.py
-
-  - source: src/bioetl/infrastructure/adapters/semanticscholar/client.py
-    ownership: facade_contract
-    rationale: >
-      Retained Semantic Scholar client entrypoint is a canonical facade over the
-      decomposed adapter surface and is governed by dedicated entrypoint tests.
-    owner_tests:
-      - tests/unit/infrastructure/adapters/test_provider_entrypoints.py
-      - tests/architecture/test_retained_adapter_entrypoint_policy.py
-
   - source: src/bioetl/infrastructure/adapters/pubmed/__init__.py
     ownership: facade_contract
     rationale: >

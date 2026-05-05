@@ -55,7 +55,6 @@ def test_pytest_shard_inventory_declares_canonical_schema_and_aliases() -> None:
         "S7-crosscutting-architecture-guardrails",
         "S8-crosscutting-governance",
         "S7-crosscutting-architecture-d",
-        "S9-failures",
     ]
 
     aliases = inventory["aliases"]

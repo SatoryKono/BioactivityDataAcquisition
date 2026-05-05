@@ -25,9 +25,9 @@
       "keepTime": true,
       "targetBlank": false,
       "title": "0. Control Plane",
-      "tooltip": "Context mapping: return to remembered pipeline_context; run_type defaults to unknown. Preserve the selected time range.",
+      "tooltip": "Context mapping: return to remembered pipeline_context; run_type defaults to All. Preserve the selected time range.",
       "type": "link",
-      "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline_context&var-run_type=unknown&${__url_time_range}"
+      "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline_context&var-run_type=All&${__url_time_range}"
     },
     {
       "asDropdown": false,
@@ -36,9 +36,9 @@
       "keepTime": true,
       "targetBlank": false,
       "title": "1. Overview",
-      "tooltip": "Context mapping: return to remembered pipeline_context; run_type defaults to unknown. Preserve the selected time range.",
+      "tooltip": "Context mapping: return to remembered pipeline_context; run_type defaults to All. Preserve the selected time range.",
       "type": "link",
-      "url": "/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline_context&var-run_type=unknown&${__url_time_range}"
+      "url": "/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline_context&var-run_type=All&${__url_time_range}"
     },
     {
       "asDropdown": false,
@@ -47,9 +47,9 @@
       "keepTime": true,
       "targetBlank": false,
       "title": "2. Runtime",
-      "tooltip": "Context mapping: return to remembered pipeline_context; run_type/stage default to unknown. Preserve the selected time range.",
+      "tooltip": "Context mapping: return to remembered pipeline_context; run_type defaults to All and stage defaults to unknown. Preserve the selected time range.",
       "type": "link",
-      "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline_context&var-run_type=unknown&var-stage=unknown&${__url_time_range}"
+      "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline_context&var-run_type=All&var-stage=unknown&${__url_time_range}"
     },
     {
       "asDropdown": false,
@@ -58,9 +58,9 @@
       "keepTime": true,
       "targetBlank": false,
       "title": "4. Data Quality",
-      "tooltip": "Context mapping: return to remembered pipeline_context; run_type/stage default to unknown. Preserve the selected time range.",
+      "tooltip": "Context mapping: return to remembered pipeline_context; run_type defaults to All and stage defaults to unknown. Preserve the selected time range.",
       "type": "link",
-      "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline_context&var-run_type=unknown&var-stage=unknown&${__url_time_range}"
+      "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline_context&var-run_type=All&var-stage=unknown&${__url_time_range}"
     },
     {
       "asDropdown": false,

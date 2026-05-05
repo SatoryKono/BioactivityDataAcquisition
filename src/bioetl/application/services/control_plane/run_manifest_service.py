@@ -23,6 +23,9 @@ from bioetl.domain.control_plane import (
 from bioetl.domain.control_plane.reproducibility_policy import (
     STRICT_PERSISTENCE_PROFILES,
 )
+from bioetl.domain.control_plane.run_manifest import (
+    DOCUMENTED_SOURCE_REVISION_STATES,
+)
 from bioetl.domain.normalization import (
     compute_execution_identity_fingerprint,
     normalize_run_manifest_spec,
@@ -68,6 +71,31 @@ def _validate_strict_code_provenance(
         raise RuntimeError(
             "Run manifest requires clean source_revision_state for exact "
             "replay, replay_ready, and forensic_grade contexts"
+        )
+
+
+def _validate_documented_code_provenance(
+    code_provenance: RunCodeProvenance,
+) -> None:
+    """Reject undocumented or internally inconsistent code provenance states."""
+    state = str(code_provenance.source_revision_state or "").strip().lower()
+    if not state or state not in DOCUMENTED_SOURCE_REVISION_STATES:
+        raise RuntimeError(
+            "Run manifest requires a documented source_revision_state "
+            f"(allowed: {sorted(DOCUMENTED_SOURCE_REVISION_STATES)})"
+        )
+    if not code_provenance.git_commit and state not in {
+        "git_unavailable",
+        "dirty_state_unknown",
+    }:
+        raise RuntimeError(
+            "Run manifest cannot persist missing git_commit unless "
+            "source_revision_state is git_unavailable or dirty_state_unknown"
+        )
+    if code_provenance.git_commit and state == "git_unavailable":
+        raise RuntimeError(
+            "Run manifest cannot persist source_revision_state=git_unavailable "
+            "when git_commit is present"
         )
 
 
@@ -147,6 +175,7 @@ class RunManifestService(
         normalized_run_type = self._normalize_run_type(request.run_type)
         code_provenance = self._build_code_provenance(request)
         _validate_strict_code_provenance(request, code_provenance)
+        _validate_documented_code_provenance(code_provenance)
         _validate_strict_input_snapshots(request)
         normalized_payload = normalize_run_manifest_spec(
             self._build_manifest_payload(

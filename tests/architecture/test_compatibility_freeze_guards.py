@@ -1325,12 +1325,12 @@ def test_package_level_lazy_proxy_surfaces_stay_frozen() -> None:
 
     expected_bootstrap_exports = {
         "bootstrap_composite_runner",
-        "bootstrap_dq_monitor_port",
-        "bootstrap_logger_port",
-        "bootstrap_metrics_port",
+        "bootstrap_dq_monitor",
+        "bootstrap_logger",
+        "bootstrap_metrics",
         "bootstrap_observability_bundle",
         "bootstrap_pipeline_runner",
-        "bootstrap_tracer_port",
+        "bootstrap_tracer",
         "load_composite_config",
         "load_pipeline_config",
         "maybe_start_metrics_server",

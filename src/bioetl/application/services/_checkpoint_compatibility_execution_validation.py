@@ -32,7 +32,20 @@ def validate_execution_identity_compatibility(
         execution_identity_result,
     )
     if execution_fingerprints_present(current_metadata, checkpoint_metadata):
-        return bool(execution_identity_result["compatible"]), True, reason_messages
+        fingerprint_messages: list[str] = []
+        compatible = _validate_exact_replay_and_snapshots(
+            current_metadata,
+            checkpoint_metadata,
+            fingerprint_messages,
+            bool(execution_identity_result["compatible"]),
+        )
+        final_messages = [
+            *reason_messages,
+            *fingerprint_messages,
+            *exact_replay_mismatch_messages(current_metadata, checkpoint_metadata),
+            *input_snapshot_mismatch_messages(current_metadata, checkpoint_metadata),
+        ]
+        return compatible and not fingerprint_messages, True, final_messages
 
     compatible, continuity_proven, messages = _initial_execution_identity_outcome(
         current_metadata,
@@ -239,6 +252,7 @@ def _validate_exact_replay_and_snapshots(
             messages.append(
                 "Exact replay requires checkpoint input snapshot anchors, but none were persisted"
             )
+            messages.append("checkpoint_missing_snapshot_anchor")
             compatible = False
         elif (
             current_metadata.input_snapshot_ids

@@ -87,6 +87,12 @@ PIPELINE_RUNTIME_REGISTRY = MetricRegistryFamily(
         "bioetl_phase_duration_seconds": _metrics.PHASE_DURATION_SECONDS,
         "bioetl_postrun_phase_duration_seconds": _metrics.POSTRUN_PHASE_DURATION_SECONDS,
         "bioetl_transform_duration_seconds": _metrics.TRANSFORM_DURATION_SECONDS,
+        "bioetl_control_plane_manifest_write_duration_seconds": (
+            _metrics.CONTROL_PLANE_MANIFEST_WRITE_DURATION_SECONDS
+        ),
+        "bioetl_control_plane_ledger_append_duration_seconds": (
+            _metrics.CONTROL_PLANE_LEDGER_APPEND_DURATION_SECONDS
+        ),
         "bioetl_control_plane_read_duration_seconds": _metrics.CONTROL_PLANE_READ_DURATION_SECONDS,
         "bioetl_checkpoint_operator_duration_seconds": _metrics.CHECKPOINT_OPERATOR_DURATION_SECONDS,
         "bioetl_checkpoint_save_duration_seconds": _metrics.CHECKPOINT_SAVE_DURATION_SECONDS,
@@ -117,6 +123,10 @@ STORAGE_MEDALLION_REGISTRY = MetricRegistryFamily(
         "bioetl_silver_merge_retries_total": _metrics.SILVER_MERGE_RETRIES_TOTAL,
         "bioetl_silver_merge_failures_total": _metrics.SILVER_MERGE_FAILURES_TOTAL,
         "bioetl_silver_validation_failures_total": _metrics.SILVER_VALIDATION_FAILURES_TOTAL,
+        "bioetl_gold_write_attempts_total": _metrics.GOLD_WRITE_ATTEMPTS_TOTAL,
+        "bioetl_gold_write_outcomes_total": _metrics.GOLD_WRITE_OUTCOMES_TOTAL,
+        "bioetl_gold_validation_failures_total": _metrics.GOLD_VALIDATION_FAILURES_TOTAL,
+        "bioetl_gold_lifecycle_state_total": _metrics.GOLD_LIFECYCLE_STATE_TOTAL,
         "bioetl_metadata_write_retries_total": _metrics.METADATA_WRITE_RETRIES_TOTAL,
         "bioetl_metadata_write_outcomes_total": _metrics.METADATA_WRITE_OUTCOMES_TOTAL,
         "bioetl_quarantine_records_total": _metrics.QUARANTINE_RECORDS_TOTAL,
@@ -137,6 +147,7 @@ STORAGE_MEDALLION_REGISTRY = MetricRegistryFamily(
         "bioetl_audit_query_duration_seconds": _metrics.AUDIT_QUERY_DURATION_SECONDS,
         "bioetl_bronze_write_duration_seconds": _metrics.BRONZE_WRITE_DURATION_SECONDS,
         "bioetl_bronze_write_total_duration_seconds": _metrics.BRONZE_WRITE_TOTAL_DURATION_SECONDS,
+        "bioetl_gold_write_duration_seconds": _metrics.GOLD_WRITE_DURATION_SECONDS,
         "bioetl_quarantine_operator_duration_seconds": _metrics.QUARANTINE_OPERATOR_DURATION_SECONDS,
     },
 )
@@ -157,7 +168,6 @@ HTTP_ADAPTER_REGISTRY = MetricRegistryFamily(
     },
     gauges={
         "bioetl_provider_health_status": _metrics.PROVIDER_HEALTH_STATUS,
-        "bioetl_adapter_request_p95_seconds": _metrics.ADAPTER_REQUEST_P95_SECONDS,
         "bioetl_adapter_fallback_hit_rate": _metrics.ADAPTER_FALLBACK_HIT_RATE,
         "bioetl_rate_limiter_tokens_available": _metrics.RATE_LIMITER_TOKENS_AVAILABLE,
     },

@@ -6,7 +6,7 @@ from uuid import uuid4
 
 from bioetl.composition.bootstrap.cli.metrics import bootstrap_metrics_service
 from bioetl.composition.bootstrap.runtime.observability import (
-    bootstrap_logger_port,
+    bootstrap_logger,
 )
 from bioetl.infrastructure.config import get_settings
 
@@ -31,7 +31,7 @@ def push_metrics_to_gateway(
         grouping_key["run_type"] = run_type
 
     metrics_service = bootstrap_metrics_service()
-    metrics_service.logger = bootstrap_logger_port(
+    metrics_service.logger = bootstrap_logger(
         pipeline=pipeline_name or "metrics_publication",
         run_id=uuid4(),
         log_level="INFO",

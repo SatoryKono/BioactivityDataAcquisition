@@ -8,7 +8,7 @@ from bioetl.infrastructure.adapters.base import build_mailto_user_agent_headers
 
 __all__ = [
     "CROSSREF_SUPPORTED_ENTITY_TYPES",
-    "CrossRefQueryBuilder",
+    "CrossRefQueryPlanner",
     "resolve_filter_field",
     "validate_crossref_entity_type",
 ]
@@ -45,7 +45,7 @@ def resolve_filter_field(filter_field: str | None) -> str:
 
 
 @dataclass(frozen=True, slots=True)
-class CrossRefQueryBuilder:
+class CrossRefQueryPlanner:
     """Build request headers and static query fragments for CrossRef."""
 
     api_base: str

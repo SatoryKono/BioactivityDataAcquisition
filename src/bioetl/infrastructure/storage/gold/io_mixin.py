@@ -4,11 +4,19 @@ from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
+from time import perf_counter
 from typing import TYPE_CHECKING, Protocol, cast
 
 import pyarrow as pa
 
 from bioetl.domain.medallion import GoldWriteMode
+from bioetl.domain.observability_contract import normalize_observability_pipeline_label
+from bioetl.infrastructure.observability.metrics import (
+    GOLD_VALIDATION_FAILURES_TOTAL,
+    GOLD_WRITE_ATTEMPTS_TOTAL,
+    GOLD_WRITE_DURATION_SECONDS,
+    GOLD_WRITE_OUTCOMES_TOTAL,
+)
 from bioetl.infrastructure.storage.delta.schema_ops import (
     drop_nondeterministic_persisted_fields,
 )
@@ -49,6 +57,58 @@ class _GoldMergedMetadataWriterProtocol(Protocol):
         run_id: str | None = None,
         schema: DataFrameSchema | None = None,
     ) -> None: ...
+
+
+_KNOWN_GOLD_MERGED_METRIC_STATUSES = frozenset(
+    {"success", "failure", "validation_failure"}
+)
+
+
+def _normalize_gold_merged_metric_status(status: str) -> str:
+    return status if status in _KNOWN_GOLD_MERGED_METRIC_STATUSES else "failure"
+
+
+def _split_gold_merged_table_label(table_name: str) -> tuple[str, str]:
+    normalized = table_name.replace("\\", "/").strip("/")
+    if not normalized:
+        return "unknown", "unknown"
+    parts = tuple(part for part in normalized.split("/") if part)
+    if len(parts) >= 2:
+        pipeline, table = parts[0], parts[-1]
+    elif "." in parts[0]:
+        pipeline, table = parts[0].split(".", maxsplit=1)
+    else:
+        pipeline = table = parts[0]
+    return (
+        normalize_observability_pipeline_label(pipeline),
+        normalize_observability_pipeline_label(table),
+    )
+
+
+def _gold_merged_metric_labels(
+    table_name: str,
+    *,
+    status: str | None = None,
+) -> dict[str, str]:
+    pipeline, table = _split_gold_merged_table_label(table_name)
+    labels = {
+        "pipeline": pipeline,
+        "table": table,
+        "mode": GoldWriteMode.OVERWRITE.value,
+    }
+    if status is not None:
+        labels["status"] = _normalize_gold_merged_metric_status(status)
+    return labels
+
+
+def _gold_merged_validation_metric_labels(
+    table_name: str,
+    error: Exception,
+) -> dict[str, str]:
+    return {
+        **_gold_merged_metric_labels(table_name),
+        "error_type": type(error).__name__,
+    }
 
 
 class _GoldWriteDispatchTargetProtocol(Protocol):
@@ -242,9 +302,35 @@ async def _execute_gold_merged_write(
     request: _GoldMergedWriteRequest,
 ) -> None:
     """Prepare, log, and execute one merged Gold write request."""
-    prepared = await _prepare_gold_merged_write(host, request)
-    _log_prepared_gold_merged_write(host, prepared)
-    await _complete_gold_merged_write(host, prepared)
+    started_at = perf_counter()
+    terminal_status = "failure"
+    GOLD_WRITE_ATTEMPTS_TOTAL.labels(
+        **_gold_merged_metric_labels(request.table_name)
+    ).inc()
+    try:
+        prepared = await _prepare_gold_merged_write(host, request)
+        _log_prepared_gold_merged_write(host, prepared)
+        await _complete_gold_merged_write(host, prepared)
+        terminal_status = "success"
+    except ValueError as error:
+        terminal_status = "validation_failure"
+        GOLD_VALIDATION_FAILURES_TOTAL.labels(
+            **_gold_merged_validation_metric_labels(request.table_name, error)
+        ).inc()
+        raise
+    finally:
+        GOLD_WRITE_OUTCOMES_TOTAL.labels(
+            **_gold_merged_metric_labels(
+                request.table_name,
+                status=terminal_status,
+            )
+        ).inc()
+        GOLD_WRITE_DURATION_SECONDS.labels(
+            **_gold_merged_metric_labels(
+                request.table_name,
+                status=terminal_status,
+            )
+        ).observe(perf_counter() - started_at)
 
 
 class _GoldWriterMergedDispatchMixin(_GoldWriterExecutorArrowMixin):

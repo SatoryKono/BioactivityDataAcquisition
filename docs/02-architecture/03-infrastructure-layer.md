@@ -58,8 +58,8 @@ ______________________________________________________________________
 - Для нового first-party кода предпочтителен import provider package root
   (например, `bioetl.infrastructure.adapters.pubmed`,
   `bioetl.infrastructure.adapters.semanticscholar`).
-- `pubmed/client.py` и `semanticscholar/client.py` остаются sanctioned public seams
-  для import stability.
+- `pubmed/client.py` и `semanticscholar/client.py` retired; package roots and
+  `adapter.py` are the sanctioned import seams.
 - Старые implementation-module paths (`pubmed.pubmed_client`,
   `semanticscholar.adapter`) не являются sanctioned import path для нового кода.
 
@@ -73,7 +73,7 @@ Package contract для `infrastructure/adapters/{provider}/` строится �
 
 - `__init__.py` как package-root facade.
 - Один явный adapter entrypoint для primary adapter surface. В текущем проекте это
-  обычно `client.py`.
+  обычно `adapter.py` или `client.py`, в зависимости от provider package.
 - Primary adapter class должен экспортироваться через provider package root; новый
   first-party код должен импортировать именно package root, а не implementation
   modules.
@@ -107,11 +107,14 @@ Package contract для `infrastructure/adapters/{provider}/` строится �
 
 **Sanctioned public adapter seams в текущем цикле:**
 
-- `pubmed/client.py` и `semanticscholar/client.py` остаются sanctioned public seams
-  для import stability.
-- `pubmed/pubmed_client.py` и `semanticscholar/adapter.py` считаются legacy
-  implementation-module paths и не являются sanctioned import path для нового
-  first-party кода.
+- PubMed: `bioetl.infrastructure.adapters.pubmed` and
+  `bioetl.infrastructure.adapters.pubmed.adapter`.
+- Semantic Scholar: `bioetl.infrastructure.adapters.semanticscholar` and
+  `bioetl.infrastructure.adapters.semanticscholar.adapter`.
+- `pubmed/client.py` и `semanticscholar/client.py` retired and must not be
+  reintroduced as compatibility shims.
+- `pubmed/pubmed_client.py` remains a legacy implementation-module path and is
+  not sanctioned for new first-party imports.
 
 Нормативные guardrails для этой политики закреплены в
 `tests/architecture/test_adapter_contracts.py`,

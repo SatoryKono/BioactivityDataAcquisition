@@ -8,12 +8,14 @@ Cassettes location: tests/fixtures/vcr/pubmed/
 
 from __future__ import annotations
 
-import os
 import re
 from pathlib import Path
-from typing import Any
 
 import pytest
+from tests.helpers.vcr_config import (
+    QUERY_IGNORE_EMAIL_MATCH_ON,
+    build_base_vcr_config,
+)
 
 from bioetl.composition.bootstrap import bootstrap_pipeline_runner
 
@@ -38,20 +40,15 @@ PUBMED_DATE_FIELDS = [
     "revised_date",
 ]
 
-# VCR cassette directory for PubMed E2E tests
-CASSETTE_DIR = Path(__file__).parent.parent / "fixtures" / "vcr" / "pubmed"
-
 
 @pytest.fixture(scope="module")
-def vcr_config() -> dict[str, Any]:
+def vcr_config(vcr_cassette_dir: Path) -> dict[str, object]:
     """Configure VCR for PubMed Publications E2E tests."""
-    return {
-        "cassette_library_dir": str(CASSETTE_DIR),
-        "record_mode": os.environ.get("VCR_RECORD_MODE", "none"),
-        # Use query_ignore_email to ignore email parameter variations between test runs
-        "match_on": ["method", "scheme", "host", "port", "path", "query_ignore_email"],
-        "decode_compressed_response": True,
-    }
+    return build_base_vcr_config(
+        cassette_library_dir=vcr_cassette_dir,
+        match_on=QUERY_IGNORE_EMAIL_MATCH_ON,
+        decode_compressed_response=True,
+    )
 
 
 @pytest.mark.e2e

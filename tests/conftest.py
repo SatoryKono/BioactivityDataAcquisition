@@ -10,6 +10,7 @@ import pytest
 from tests.helpers.vcr_config import (
     build_base_vcr_config,
     ensure_default_vcr_record_mode,
+    is_vcr_recording_mode,
     is_git_lfs_pointer,
     query_ignore_email,
     resolve_requested_cassette_path,
@@ -264,10 +265,13 @@ def _vcr_marker(request: pytest.FixtureRequest) -> None:
 
     cassette_path = resolve_requested_cassette_path(request)
     if cassette_path is not None and is_git_lfs_pointer(cassette_path):
-        pytest.skip(
-            "VCR cassette is a Git LFS pointer; run git lfs pull before replaying "
-            f"this cassette: {cassette_path}"
-        )
+        if is_vcr_recording_mode():
+            cassette_path.unlink(missing_ok=True)
+        else:
+            pytest.skip(
+                "VCR cassette is a Git LFS pointer; run git lfs pull before replaying "
+                f"this cassette: {cassette_path}"
+            )
 
     request.getfixturevalue("vcr_cassette")
 

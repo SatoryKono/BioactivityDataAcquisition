@@ -23,7 +23,7 @@ def test_overview_v2_semantics_contract():
     mapping = json.dumps(
         system.get("fieldConfig", {}).get("defaults", {}).get("mappings", [])
     )
-    for token in ["NO DATA / UNKNOWN", "OK", "DEGRADED", "FAILING / BROKEN"]:
+    for token in ["UNKNOWN", "OK", "WARN", "CRIT"]:
         assert token in mapping
 
     assert titles.count("Next Action") == 1

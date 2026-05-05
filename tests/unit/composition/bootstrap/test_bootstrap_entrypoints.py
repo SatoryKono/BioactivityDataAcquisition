@@ -217,7 +217,7 @@ class TestBootstrapPipeline:
     ) -> None:
         """Test that bootstrap_pipeline_runner creates runner without starting metrics server.
 
-        After refactoring, bootstrap_metrics_port() no longer starts the metrics server.
+        After refactoring, bootstrap_metrics() no longer starts the metrics server.
         Server startup is handled by entrypoints via maybe_start_metrics_server().
         This test verifies that bootstrap_pipeline_runner creates a runner successfully
         regardless of metrics server state.

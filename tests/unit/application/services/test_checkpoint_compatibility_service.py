@@ -349,6 +349,13 @@ class TestCheckpointCompatibilityService:
             records_processed=1000,
             dq_contract_compatibility_hash="same_hash",
             pipeline_version="1.0.0",
+            execution_fingerprint="fingerprint-current",
+            manifest_id="manifest-current",
+            effective_config_hash="a" * 64,
+            effective_config_artifact_id="effective-config-current",
+            contract_ref="chembl.activity",
+            contract_version="1.0.0",
+            git_commit="a" * 40,
             exact_replay=True,
             input_snapshot_ids=("snapshot-a",),
         )
@@ -356,6 +363,13 @@ class TestCheckpointCompatibilityService:
             records_processed=500,
             dq_contract_compatibility_hash="same_hash",
             pipeline_version="1.0.0",
+            execution_fingerprint="fingerprint-current",
+            manifest_id="manifest-current",
+            effective_config_hash="a" * 64,
+            effective_config_artifact_id="effective-config-current",
+            contract_ref="chembl.activity",
+            contract_version="1.0.0",
+            git_commit="a" * 40,
             exact_replay=True,
         )
 
@@ -374,6 +388,13 @@ class TestCheckpointCompatibilityService:
             records_processed=1000,
             dq_contract_compatibility_hash="same_hash",
             pipeline_version="1.0.0",
+            execution_fingerprint="fingerprint-current",
+            manifest_id="manifest-current",
+            effective_config_hash="a" * 64,
+            effective_config_artifact_id="effective-config-current",
+            contract_ref="chembl.activity",
+            contract_version="1.0.0",
+            git_commit="a" * 40,
             exact_replay=True,
             input_snapshot_ids=("snapshot-a",),
         )
@@ -381,6 +402,13 @@ class TestCheckpointCompatibilityService:
             records_processed=500,
             dq_contract_compatibility_hash="same_hash",
             pipeline_version="1.0.0",
+            execution_fingerprint="fingerprint-current",
+            manifest_id="manifest-current",
+            effective_config_hash="a" * 64,
+            effective_config_artifact_id="effective-config-current",
+            contract_ref="chembl.activity",
+            contract_version="1.0.0",
+            git_commit="a" * 40,
             exact_replay=True,
             input_snapshot_ids=("snapshot-b",),
         )
@@ -390,6 +418,72 @@ class TestCheckpointCompatibilityService:
         assert result.compatible is False
         assert result.execution_identity_compatible is False
         assert any("Input snapshot identity mismatch" in msg for msg in result.messages)
+
+    def test_validate_strict_resume_rejects_missing_dq_hash_anchor(self) -> None:
+        current = CheckpointMetadata(
+            records_processed=1000,
+            dq_contract_compatibility_hash="same-hash",
+            pipeline_version="1.0.0",
+            execution_fingerprint="fingerprint-current",
+            manifest_id="manifest-current",
+            effective_config_artifact_id="effective-config-current",
+            contract_ref="chembl.activity",
+            contract_version="1.0.0",
+            git_commit="a" * 40,
+        )
+        checkpoint = CheckpointMetadata(
+            records_processed=500,
+            pipeline_version="1.0.0",
+            execution_fingerprint="fingerprint-current",
+            manifest_id="manifest-current",
+            effective_config_artifact_id="effective-config-current",
+            contract_ref="chembl.activity",
+            contract_version="1.0.0",
+            git_commit="a" * 40,
+        )
+
+        result = self.service.validate_checkpoint_compatibility(current, checkpoint)
+
+        assert result.compatible is False
+        assert result.dq_compatible is False
+        assert any(
+            "checkpoint_missing_required_execution_anchor" in msg
+            for msg in result.messages
+        )
+
+    def test_validate_strict_resume_rejects_missing_pipeline_version_anchor(
+        self,
+    ) -> None:
+        current = CheckpointMetadata(
+            records_processed=1000,
+            dq_contract_compatibility_hash="same-hash",
+            pipeline_version="1.0.0",
+            execution_fingerprint="fingerprint-current",
+            manifest_id="manifest-current",
+            effective_config_artifact_id="effective-config-current",
+            contract_ref="chembl.activity",
+            contract_version="1.0.0",
+            git_commit="a" * 40,
+        )
+        checkpoint = CheckpointMetadata(
+            records_processed=500,
+            dq_contract_compatibility_hash="same-hash",
+            execution_fingerprint="fingerprint-current",
+            manifest_id="manifest-current",
+            effective_config_artifact_id="effective-config-current",
+            contract_ref="chembl.activity",
+            contract_version="1.0.0",
+            git_commit="a" * 40,
+        )
+
+        result = self.service.validate_checkpoint_compatibility(current, checkpoint)
+
+        assert result.compatible is False
+        assert result.pipeline_compatible is False
+        assert any(
+            "checkpoint_missing_required_execution_anchor" in msg
+            for msg in result.messages
+        )
 
     def test_strict_resume_blocks_missing_execution_identity_proof(self) -> None:
         """Strict mode should fail closed when identity continuity is unproven."""

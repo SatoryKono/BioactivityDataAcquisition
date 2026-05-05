@@ -90,7 +90,7 @@ def test_domain_config_resolver_exposes_only_expected_public_surface() -> None:
     assert top_level_defs == {
         "DomainConfigMapper",
         "PipelineConfigDQResolver",
-        "PipelineConfigDQResolverBuilder",
+        "PipelineConfigDQResolverProvider",
         "DomainConfigResolver",
         "resolve_domain_pipeline_config",
         "load_domain_pipeline_config",

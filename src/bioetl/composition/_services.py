@@ -101,7 +101,9 @@ _BOOTSTRAP_EXPORT_MODULES: dict[str, str] = {
     "bootstrap_metrics_service": "bioetl.composition.bootstrap.cli.metrics",
     "bootstrap_observability_workflow_service": "bioetl.composition.bootstrap.cli.checkpoint",
     "bootstrap_pipeline_runner_service": "bioetl.composition.bootstrap.runtime.runner",
-    "bootstrap_quarantine_port": ("bioetl.composition.bootstrap.assembly.checkpoint"),
+    "bootstrap_quarantine_adapter": (
+        "bioetl.composition.bootstrap.assembly.checkpoint"
+    ),
     "bootstrap_quarantine_service": _BOOTSTRAP_CHECKPOINT_EXPORT_MODULE,
     "bootstrap_run_manifest_service": _BOOTSTRAP_CHECKPOINT_EXPORT_MODULE,
     "bootstrap_vacuum_service": _BOOTSTRAP_STORAGE_EXPORT_MODULE,
@@ -295,4 +297,4 @@ def get_adr_service() -> object:
 def get_quarantine_port() -> QuarantinePort:
     """Get the shared low-level quarantine port."""
     _ensure_registrations()
-    return cast("QuarantinePort", _invoke_bootstrap("bootstrap_quarantine_port"))
+    return cast("QuarantinePort", _invoke_bootstrap("bootstrap_quarantine_adapter"))

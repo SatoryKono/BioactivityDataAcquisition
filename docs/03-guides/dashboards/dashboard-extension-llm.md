@@ -39,6 +39,8 @@ Grafana dashboards в BioETL.
 - `Silver Reject Explorer` доступен только на `4. Data Quality`.
 - `$pipeline` и `$provider` всегда single-select без `All`; explicit fallback
   для неизвестного контекста — `unknown`.
+- `$run_type` всегда использует include-all fallback; cross-dashboard links MUST
+  default missing run-type context to `All`, not `unknown`.
 - Переходы в `3. Provider Health` из pipeline-scoped dashboards используют
   context mapping: `provider=$pipeline` и hidden `pipeline_context=$pipeline`
   для обратного перехода.

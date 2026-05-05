@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-from typing import Protocol, runtime_checkable
-
 from datetime import datetime
+from typing import Protocol, runtime_checkable
 
 from bioetl.domain.types import BronzeRecord, GoldRecord
 

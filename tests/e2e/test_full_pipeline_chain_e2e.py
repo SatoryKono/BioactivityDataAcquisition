@@ -10,12 +10,11 @@ Cassettes location: tests/fixtures/vcr/chembl/
 
 from __future__ import annotations
 
-import os
 from pathlib import Path
-from typing import Any
 
 import pytest
 from deltalake.exceptions import DeltaError, TableNotFoundError
+from tests.helpers.vcr_config import build_cassette_dir
 
 from bioetl.composition.bootstrap import bootstrap_pipeline_runner
 from .conftest import (
@@ -24,22 +23,17 @@ from .conftest import (
     get_silver_records,
 )
 
-# VCR cassette directory for ChEMBL pipeline chain tests
-CASSETTE_DIR = Path(__file__).parent.parent / "fixtures" / "vcr" / "chembl"
-
 
 @pytest.fixture
-def vcr_config(request: pytest.FixtureRequest) -> dict[str, Any]:
-    """Configure VCR for ChEMBL multi-pipeline E2E tests."""
-    cassette_dir = CASSETTE_DIR
+def vcr_cassette_dir(request: pytest.FixtureRequest) -> Path:
+    """Route mixed-provider chain tests to the correct cassette directory."""
+    provider_dir = "chembl"
     if request.node.name == "test_parallel_independent_pipelines":
-        cassette_dir = Path(__file__).parent.parent / "fixtures" / "vcr" / "uniprot"
-    return {
-        "cassette_library_dir": str(cassette_dir),
-        "record_mode": os.environ.get("VCR_RECORD_MODE", "none"),
-        "match_on": ["method", "scheme", "host", "port", "path", "query"],
-        "decode_compressed_response": True,
-    }
+        provider_dir = "uniprot"
+    return build_cassette_dir(
+        fixtures_root=Path(__file__).resolve().parents[1] / "fixtures" / "vcr",
+        provider_dir=provider_dir,
+    )
 
 
 @pytest.fixture

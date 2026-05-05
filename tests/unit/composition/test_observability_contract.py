@@ -293,18 +293,18 @@ class TestBootstrapObservability:
 
 @pytest.mark.unit
 class TestBootstrapMetrics:
-    """Tests for bootstrap_metrics_port() function."""
+    """Tests for bootstrap_metrics() function."""
 
     def test_disabled_metrics_returns_noop_metrics(self) -> None:
         """Test that disabled metrics returns NoOpMetrics, not None."""
         from bioetl.composition.bootstrap.runtime.observability import (
-            bootstrap_metrics_port,
+            bootstrap_metrics,
         )
 
         settings = MagicMock()
         settings.observability.metrics_enabled = False
 
-        result = bootstrap_metrics_port(settings)
+        result = bootstrap_metrics(settings)
 
         assert result is not None
         assert isinstance(result, NoOpMetrics)
@@ -312,7 +312,7 @@ class TestBootstrapMetrics:
     def test_noop_metrics_no_warning_when_disabled(self) -> None:
         """Test that NoOpMetrics doesn't warn when explicitly disabled."""
         from bioetl.composition.bootstrap.runtime.observability import (
-            bootstrap_metrics_port,
+            bootstrap_metrics,
         )
 
         # Reset warning state
@@ -325,7 +325,7 @@ class TestBootstrapMetrics:
 
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
-            bootstrap_metrics_port(settings)
+            bootstrap_metrics(settings)
             # No warning should be raised
             assert len(w) == 0
 
@@ -336,7 +336,7 @@ class TestBootstrapMetrics:
     ) -> None:
         """Test that enabled metrics returns PrometheusMetrics."""
         from bioetl.composition.bootstrap.runtime.observability import (
-            bootstrap_metrics_port,
+            bootstrap_metrics,
         )
 
         mock_metrics = MagicMock()
@@ -347,7 +347,7 @@ class TestBootstrapMetrics:
         settings.observability.metrics_enabled = True
         settings.observability.metrics_server_enabled = False
 
-        result = bootstrap_metrics_port(settings)
+        result = bootstrap_metrics(settings)
 
         assert result is mock_metrics
         mock_prometheus.assert_called_once()

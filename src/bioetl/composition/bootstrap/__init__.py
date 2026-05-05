@@ -29,12 +29,12 @@ _BOOTSTRAP_OBSERVABILITY_MODULE = "bioetl.composition.bootstrap.runtime.observab
 
 __all__ = [
     "bootstrap_composite_runner",
-    "bootstrap_dq_monitor_port",
-    "bootstrap_logger_port",
-    "bootstrap_metrics_port",
+    "bootstrap_dq_monitor",
+    "bootstrap_logger",
+    "bootstrap_metrics",
     "bootstrap_observability_bundle",
     "bootstrap_pipeline_runner",
-    "bootstrap_tracer_port",
+    "bootstrap_tracer",
     "load_composite_config",
     "load_pipeline_config",
     "maybe_start_metrics_server",
@@ -42,12 +42,12 @@ __all__ = [
 
 _PUBLIC_EXPORTS: dict[str, str] = {
     "bootstrap_composite_runner": _BOOTSTRAP_RUNTIME_MODULE,
-    "bootstrap_dq_monitor_port": _BOOTSTRAP_OBSERVABILITY_MODULE,
-    "bootstrap_logger_port": _BOOTSTRAP_OBSERVABILITY_MODULE,
-    "bootstrap_metrics_port": _BOOTSTRAP_OBSERVABILITY_MODULE,
+    "bootstrap_dq_monitor": _BOOTSTRAP_OBSERVABILITY_MODULE,
+    "bootstrap_logger": _BOOTSTRAP_OBSERVABILITY_MODULE,
+    "bootstrap_metrics": _BOOTSTRAP_OBSERVABILITY_MODULE,
     "bootstrap_observability_bundle": _BOOTSTRAP_OBSERVABILITY_MODULE,
     "bootstrap_pipeline_runner": _BOOTSTRAP_RUNTIME_MODULE,
-    "bootstrap_tracer_port": _BOOTSTRAP_OBSERVABILITY_MODULE,
+    "bootstrap_tracer": _BOOTSTRAP_OBSERVABILITY_MODULE,
     "load_composite_config": _BOOTSTRAP_RUNTIME_MODULE,
     "load_pipeline_config": "bioetl.infrastructure.config.pipeline_config_api",
     "maybe_start_metrics_server": _BOOTSTRAP_OBSERVABILITY_MODULE,

@@ -8,6 +8,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from bioetl.composition.services import versioning
+from bioetl.domain.control_plane.run_manifest import DOCUMENTED_SOURCE_REVISION_STATES
 
 
 @pytest.fixture(autouse=True)
@@ -91,6 +92,20 @@ def test_get_code_revision_provenance_reports_dirty_state(
     assert provenance.git_commit == full_hash
     assert provenance.source_revision_state == "dirty"
     assert provenance.dependency_lock_hash is not None
+
+
+@pytest.mark.unit
+@patch("bioetl.composition.services.versioning.subprocess.run")
+def test_get_code_revision_provenance_reports_documented_git_unavailable_state(
+    mock_run: MagicMock,
+) -> None:
+    mock_run.side_effect = FileNotFoundError("git missing")
+
+    provenance = versioning.get_code_revision_provenance()
+
+    assert provenance.git_commit is None
+    assert provenance.source_revision_state == "git_unavailable"
+    assert provenance.source_revision_state in DOCUMENTED_SOURCE_REVISION_STATES
 
 
 @pytest.mark.unit

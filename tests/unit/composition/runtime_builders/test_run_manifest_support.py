@@ -26,6 +26,7 @@ from bioetl.composition.runtime_builders._run_manifest_support import (
     build_run_source_refs,
     resolve_contract_identity,
     resolve_replay_capability,
+    validate_reproducible_sink_modes,
 )
 from bioetl.domain.control_plane import ReplayCapability
 from bioetl.domain.context import PipelineRunContext
@@ -244,6 +245,43 @@ def test_resolve_replay_capability_requires_persisted_snapshots_for_exact_replay
             resume_requested=False,
         )
         is ReplayCapability.EXACT_REPLAY_SUPPORTED
+    )
+
+
+@pytest.mark.unit
+def test_validate_reproducible_sink_modes_rejects_append_without_contract() -> None:
+    with pytest.raises(RuntimeError, match="idempotency_contract"):
+        validate_reproducible_sink_modes(
+            yaml_config=SimpleNamespace(
+                sink={
+                    "silver": SimpleNamespace(enabled=True, mode="append"),
+                    "gold": SimpleNamespace(enabled=False, mode="scd2"),
+                }
+            ),
+            strict_replay_requested=False,
+        )
+
+
+@pytest.mark.unit
+def test_validate_reproducible_sink_modes_allows_non_strict_append_with_contract() -> (
+    None
+):
+    validate_reproducible_sink_modes(
+        yaml_config=SimpleNamespace(
+            sink={
+                "silver": SimpleNamespace(
+                    enabled=True,
+                    mode="append",
+                    idempotency_contract="append_log",
+                ),
+                "gold": SimpleNamespace(
+                    enabled=False,
+                    mode="scd2",
+                    idempotency_contract="scd2",
+                ),
+            }
+        ),
+        strict_replay_requested=False,
     )
 
 

@@ -11,7 +11,7 @@ from bioetl.application.pipelines.uniprot.extractors._crossref_common import (
 )
 from bioetl.domain.types import JsonDict
 
-EntryBuilder = Callable[[JsonDict], JsonDict | None]
+EntryMapper = Callable[[JsonDict], JsonDict | None]
 
 
 def extract_xref_ids(xrefs: list[JsonDict] | None, database: str) -> str | None:
@@ -36,14 +36,14 @@ def extract_structured_xrefs(
     xrefs: list[JsonDict] | None,
     *,
     database: str,
-    builder: EntryBuilder,
+    mapper: EntryMapper,
 ) -> str | None:
-    """Extract structured xrefs using a typed builder callback.
+    """Extract structured xrefs using a typed mapper callback.
 
     Args:
         xrefs: List of UniProt cross-reference dicts from the API response, or None.
         database: Database name string to filter on.
-        builder: Callable that converts a single cross-reference dict into a
+        mapper: Callable that converts a single cross-reference dict into a
             structured entry dict, or returns None to skip the entry.
 
     Returns:
@@ -53,7 +53,7 @@ def extract_structured_xrefs(
     entries = [
         entry
         for xref in filter_xrefs_by_database(xrefs, database)
-        if (entry := builder(xref)) is not None
+        if (entry := mapper(xref)) is not None
     ]
     return serialize_json_or_none(entries)
 

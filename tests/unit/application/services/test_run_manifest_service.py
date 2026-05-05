@@ -256,6 +256,43 @@ def test_create_manifest_requires_git_commit_for_explicit_exact_replay() -> None
     assert store.get("manifest-missing-git") is None
 
 
+def test_create_manifest_rejects_undocumented_source_revision_state() -> None:
+    store = _InMemoryRunManifestStore()
+    service = RunManifestService(
+        manifest_port=store,
+        _manifest_id_factory=lambda: "manifest-undocumented-state",
+    )
+
+    with pytest.raises(RuntimeError, match="documented source_revision_state"):
+        service.create_manifest(
+            replace(
+                _make_request(),
+                source_revision_state="some_new_unknown_state",
+            )
+        )
+
+    assert store.get("manifest-undocumented-state") is None
+
+
+def test_create_manifest_rejects_missing_git_commit_with_clean_state() -> None:
+    store = _InMemoryRunManifestStore()
+    service = RunManifestService(
+        manifest_port=store,
+        _manifest_id_factory=lambda: "manifest-missing-git-clean",
+    )
+
+    with pytest.raises(RuntimeError, match="missing git_commit"):
+        service.create_manifest(
+            replace(
+                _make_request(),
+                git_commit=None,
+                source_revision_state="clean",
+            )
+        )
+
+    assert store.get("manifest-missing-git-clean") is None
+
+
 def test_create_manifest_requires_input_snapshots_for_explicit_exact_replay() -> None:
     store = _InMemoryRunManifestStore()
     service = RunManifestService(

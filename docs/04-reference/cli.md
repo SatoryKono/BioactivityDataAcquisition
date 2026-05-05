@@ -177,6 +177,8 @@ Supported resume modes:
 - `execution_fingerprint` остаётся canonical semantic identity, а
   `composite_run_identity` используется как occurrence-scoped resume anchor для
   composite path.
+- `run_id` остаётся canonical occurrence anchor, а `manifest_id` — immutable
+  persisted manifest record key для этого occurrence.
 
 Checkpoint load telemetry uses bounded statuses. In particular:
 
@@ -458,6 +460,11 @@ bioetl run-manifest diff <left> <right> [--format text|json|yaml]
 
 По умолчанию diff печатается в компактном `text`-виде. Для автоматической
 обработки используй `--format json` или `--format yaml`.
+
+Forensic/cross-surface payloads также показывают `artifact_byte_equivalence`.
+Это отдельный verdict от `semantic_execution_equivalence`: semantic replay
+может быть `true`, даже если sidecars или occurrence-scoped artifacts
+побайтно различаются.
 
 **Примеры:**
 

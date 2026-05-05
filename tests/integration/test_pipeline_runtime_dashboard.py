@@ -304,6 +304,7 @@ def test_active_runtime_blocker_detail_panel_exists() -> None:
                 blocker_names.add(match)
     expected = {
         "preflight_failed",
+        "infrastructure_failed",
         "runs_failed",
         "stage_backlog_active",
         "stage_lag_high",

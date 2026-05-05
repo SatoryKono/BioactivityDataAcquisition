@@ -20,7 +20,7 @@ MetricsFactory = Callable[[], MetricsPort]
 MetricsServiceFactory = Callable[..., MetricsService]
 
 __all__ = [
-    "bootstrap_metrics_port",
+    "bootstrap_metrics",
     "maybe_start_metrics_server",
     "resolve_metrics_fail_fast",
 ]
@@ -68,7 +68,7 @@ def resolve_metrics_fail_fast(settings: Settings) -> bool:
     return configured_fail_fast
 
 
-def bootstrap_metrics_port(
+def bootstrap_metrics(
     settings: Settings,
     metrics_factory: MetricsFactory | None = None,
 ) -> MetricsPort:

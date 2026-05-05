@@ -22,9 +22,6 @@ def test_summary_queries_use_zero_fallbacks() -> None:
             "Runtime Blockers": "or vector(0)",
             "Failed Runs": "or vector(0)",
             "No-Records Runs": "or vector(0)",
-            "Runtime Error Rate": "or vector(0)",
-            "Worst Stage Lag": "or vector(0)",
-            "Memory Pressure Active": "or vector(0)",
             "Records by Stage / Interval": "or vector(0)",
             "Pipeline Alert Conditions": "or vector(0)",
             "DQ Alert Conditions": "or vector(0)",
@@ -281,6 +278,34 @@ def test_dq_current_status_panels_preserve_unknown_no_data_state() -> None:
         defaults = panel.get("fieldConfig", {}).get("defaults", {})
         assert defaults.get("noValue") == "UNKNOWN", (
             f"{panel_title} must render missing current status as UNKNOWN"
+        )
+
+
+def test_runtime_diagnostic_panels_preserve_unknown_no_data_state() -> None:
+    """Runtime diagnostic gauges must not convert missing telemetry to OK."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
+    expected_panels = {
+        "Monitor Runtime Current Status",
+        "Monitor Runtime Telemetry Gap",
+        "Runtime Error Rate",
+        "Worst Stage Lag",
+        "Memory Pressure Active",
+    }
+    panels = {
+        panel.get("title"): panel
+        for panel in get_dashboard_panels(dashboard)
+        if panel.get("title") in expected_panels
+    }
+    assert set(panels) == expected_panels
+
+    for panel_title, panel in panels.items():
+        expressions = [target.get("expr", "") for target in panel.get("targets", [])]
+        assert all("or vector(0)" not in expr for expr in expressions), (
+            f"{panel_title} must preserve UNKNOWN/NO DATA instead of synthetic OK"
+        )
+        defaults = panel.get("fieldConfig", {}).get("defaults", {})
+        assert defaults.get("noValue") == "UNKNOWN", (
+            f"{panel_title} must render missing runtime telemetry as UNKNOWN"
         )
 
 

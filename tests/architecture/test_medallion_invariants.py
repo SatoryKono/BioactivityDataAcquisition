@@ -90,7 +90,9 @@ class TestBronzeMetadataInvariants:
             "Metadata files ensure data lineage is preserved with data."
         )
 
-    def test_bronze_writer_validates_timestamps(self, bronze_writer_source: str) -> None:
+    def test_bronze_writer_validates_timestamps(
+        self, bronze_writer_source: str
+    ) -> None:
         """Bronze writer MUST validate UTC timestamps.
 
         Per ADR-014, timestamps must be timezone-aware and in UTC

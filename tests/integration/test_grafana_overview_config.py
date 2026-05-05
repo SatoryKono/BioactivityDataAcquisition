@@ -15,7 +15,7 @@ from tests.integration._grafana_test_support import (
 
 pytestmark = pytest.mark.integration
 
-_STATUS_TEXTS = ("NO DATA / UNKNOWN", "OK", "DEGRADED", "FAILING / BROKEN")
+_STATUS_TEXTS = ("UNKNOWN", "OK", "WARN", "CRIT")
 
 
 def _panels_by_title() -> dict[str, dict]:
@@ -98,7 +98,7 @@ def test_next_action_panel_exposes_action_route_details() -> None:
     assert "bioetl_l0_next_action_route" in expr
     assert "topk(1" in expr
     assert 'pipeline=~"$pipeline"' in expr
-    assert 'run_type=~"$run_type"' not in expr
+    assert 'run_type=~"$run_type"' in expr
     assert "$__range" not in expr
     assert panel.get("gridPos", {}).get("w") == 11
     assert transformations and transformations[0].get("id") == "organize"
@@ -154,8 +154,17 @@ def test_current_tables_hide_prometheus_noise_and_use_human_column_names() -> No
             )
 
 
-def test_key_status_panels_render_status_as_colored_cells() -> None:
-    expected_titles = ("L0 Inputs", "Gold Lifecycle", "Provider Global")
+def test_current_status_tables_apply_status_color_to_entire_row() -> None:
+    expected_titles = (
+        "L0 Inputs",
+        "Runtime Blockers",
+        "DQ Status",
+        "Gold Lifecycle",
+        "Control Plane",
+        "Provider Global",
+        "Workflow Selected",
+        "Workflow Global",
+    )
 
     for title in expected_titles:
         panel = _panels_by_title()[title]
@@ -166,11 +175,12 @@ def test_key_status_panels_render_status_as_colored_cells() -> None:
             if any(
                 prop.get("id") == "custom.cellOptions"
                 and prop.get("value", {}).get("type") == "color-background"
+                and prop.get("value", {}).get("applyToRow") is True
                 for prop in override.get("properties", [])
             )
         ]
         assert color_background_overrides, (
-            f"Panel {title!r} must render status values as colored cells"
+            f"Panel {title!r} must apply status color to the entire row"
         )
 
 
@@ -233,7 +243,7 @@ def test_gold_lifecycle_panel_uses_explicit_state_projection() -> None:
     description = str(panel.get("description", ""))
 
     assert "bioetl_l1_gold_lifecycle_status" in expr
-    assert "> 0" in expr
+    assert 'run_type=~"$run_type"' in expr
     assert "lifecycle_state" in description
 
 

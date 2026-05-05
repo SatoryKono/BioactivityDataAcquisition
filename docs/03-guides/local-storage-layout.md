@@ -229,6 +229,11 @@ print(settings.data_dir)  # Path("data")
 # - Gold: data/output/gold/
 ```
 
+Strict reproducibility contexts do not accept implicit fallback roots. When
+`--exact-replay` or a strict persistence profile is active, `settings.data_dir`
+must be configured explicitly; repo-default `data/`, private-cache, and `/tmp`
+resolution remain degraded-mode conveniences only.
+
 ### Convention-Based Path Resolution
 
 Pipeline configurations can omit explicit paths. The canonical config pipeline automatically

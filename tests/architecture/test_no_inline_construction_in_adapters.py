@@ -37,7 +37,7 @@ FORBIDDEN_HELPER_CONSTRUCTORS = {
     "PubMedTitleFallbackHandler",
     "OpenAlexFallbackOrchestrator",
     # CrossRef provider-specific helpers
-    "CrossRefQueryBuilder",
+    "CrossRefQueryPlanner",
     "CrossRefResponseMapper",
     "DoiBatchProcessor",
     "SearchPaginator",

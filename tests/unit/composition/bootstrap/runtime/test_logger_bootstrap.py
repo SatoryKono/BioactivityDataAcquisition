@@ -1,6 +1,6 @@
 """Unit tests for logger bootstrap helpers.
 
-Tests bootstrap_logger_port and its deprecated alias bootstrap_logger,
+Tests bootstrap_logger and its deprecated alias bootstrap_logger,
 verifying correct DI wiring and UUID generation.
 """
 
@@ -12,21 +12,21 @@ from uuid import UUID, uuid4
 import pytest
 
 from bioetl.composition.bootstrap.runtime.logger_bootstrap import (
-    bootstrap_logger_port,
+    bootstrap_logger,
 )
 from bioetl.domain.ports import LoggerPort
 
 
 @pytest.mark.unit
 class TestBootstrapLoggerPort:
-    """Tests for bootstrap_logger_port."""
+    """Tests for bootstrap_logger."""
 
     def test_returns_logger_port(self) -> None:
         """Should return an object implementing LoggerPort."""
         mock_logger = MagicMock(spec=LoggerPort)
         factory = MagicMock(return_value=mock_logger)
 
-        result = bootstrap_logger_port(
+        result = bootstrap_logger(
             pipeline="test_pipeline",
             logger_factory=factory,
         )
@@ -38,7 +38,7 @@ class TestBootstrapLoggerPort:
         mock_logger = MagicMock(spec=LoggerPort)
         factory = MagicMock(return_value=mock_logger)
 
-        bootstrap_logger_port(
+        bootstrap_logger(
             pipeline="chembl_activity",
             logger_factory=factory,
         )
@@ -54,7 +54,7 @@ class TestBootstrapLoggerPort:
             captured_run_ids.append(run_id)
             return MagicMock(spec=LoggerPort)
 
-        bootstrap_logger_port(
+        bootstrap_logger(
             pipeline="test",
             run_id=None,
             logger_factory=capture_factory,
@@ -72,7 +72,7 @@ class TestBootstrapLoggerPort:
             captured_run_ids.append(run_id)
             return MagicMock(spec=LoggerPort)
 
-        bootstrap_logger_port(
+        bootstrap_logger(
             pipeline="test",
             run_id=provided_run_id,
             logger_factory=capture_factory,
@@ -88,7 +88,7 @@ class TestBootstrapLoggerPort:
             captured_levels.append(log_level)
             return MagicMock(spec=LoggerPort)
 
-        bootstrap_logger_port(
+        bootstrap_logger(
             pipeline="test",
             log_level="DEBUG",
             logger_factory=capture_factory,
@@ -104,7 +104,7 @@ class TestBootstrapLoggerPort:
             captured_levels.append(log_level)
             return MagicMock(spec=LoggerPort)
 
-        bootstrap_logger_port(
+        bootstrap_logger(
             pipeline="test",
             logger_factory=capture_factory,
         )
@@ -119,11 +119,7 @@ class TestBootstrapLoggerPort:
             captured_run_ids.append(run_id)
             return MagicMock(spec=LoggerPort)
 
-        bootstrap_logger_port(
-            pipeline="test", run_id=None, logger_factory=capture_factory
-        )
-        bootstrap_logger_port(
-            pipeline="test", run_id=None, logger_factory=capture_factory
-        )
+        bootstrap_logger(pipeline="test", run_id=None, logger_factory=capture_factory)
+        bootstrap_logger(pipeline="test", run_id=None, logger_factory=capture_factory)
 
         assert captured_run_ids[0] != captured_run_ids[1]

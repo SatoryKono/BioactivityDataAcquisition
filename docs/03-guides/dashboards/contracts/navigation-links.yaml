@@ -148,12 +148,12 @@ navigation_transition_contract:
       required_inbound: [bioetl-dq-v2]
   default_semantics_by_route_class:
     global_navigation:
-      allowed_default_values: [unknown]
+      allowed_default_values: [unknown, All]
     scoped_handoff:
       allowed_default_values: []
       inherit_scoped_values: true
     context_mapping:
-      allowed_default_values: [unknown]
+      allowed_default_values: [unknown, All]
       inherit_scoped_values: true
   route_class_by_transition:
     bioetl-control-plane-v1->bioetl-overview-v2: scoped_handoff
@@ -203,14 +203,14 @@ navigation_transition_contract:
       min_cta: 4
       max_cta: 4
       ctas:
+        - title: Review current status
+          expected_target_uid: bioetl-runtime
+        - title: Review incident summary
+          expected_target_uid: bioetl-runtime
+        - title: Inspect top blockers
+          expected_target_uid: bioetl-runtime
         - title: Inspect active blocker
           expected_target_uid: bioetl-runtime
-        - title: Open Control Plane
-          expected_target_uid: bioetl-control-plane-v1
-        - title: Inspect DQ blockers
-          expected_target_uid: bioetl-dq-v2
-        - title: Correlate provider impact
-          expected_target_uid: bioetl-provider-health-v2
   cross_scope_marker_contract:
     required_markers:
       reset_scope: "Reset scope"

@@ -21,7 +21,7 @@ Correlation:
 
 Extension Point:
     To enable tracing, set ``BIOETL_OBSERVABILITY__TRACING_ENABLED=true``.
-    The composition layer (``bootstrap_tracer_port``) will return
+    The composition layer (``bootstrap_tracer``) will return
     ``OpenTelemetryTracer`` instead of ``NoOpTracing``.
 
 Implements TracingPort (OTel facade).

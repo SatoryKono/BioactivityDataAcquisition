@@ -30,12 +30,12 @@ def test_bootstrap_package_root_surface_stays_runtime_focused() -> None:
 
     assert set(bootstrap_module.__all__) == {
         "bootstrap_composite_runner",
-        "bootstrap_dq_monitor_port",
-        "bootstrap_logger_port",
-        "bootstrap_metrics_port",
+        "bootstrap_dq_monitor",
+        "bootstrap_logger",
+        "bootstrap_metrics",
         "bootstrap_observability_bundle",
         "bootstrap_pipeline_runner",
-        "bootstrap_tracer_port",
+        "bootstrap_tracer",
         "load_composite_config",
         "load_pipeline_config",
         "maybe_start_metrics_server",

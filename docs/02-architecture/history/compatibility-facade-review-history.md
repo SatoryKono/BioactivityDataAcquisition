@@ -37,12 +37,29 @@ Operational implication:
 - Any future module-level compatibility shim must be explicitly reintroduced in
   the curated inventory instead of silently reappearing in source.
 
+## Provider Client-Path Shim Removal (2026-05-05)
+
+Removal outcome:
+
+- `src/bioetl/infrastructure/adapters/pubmed/client.py`: `remove`
+- `src/bioetl/infrastructure/adapters/semanticscholar/client.py`: `remove`
+
+Rationale:
+
+- Provider package roots already expose the canonical adapter surfaces.
+- Dedicated architecture tests now assert that the removed client-path shim
+  files and import paths do not reappear.
+- `bioetl.infrastructure.adapters.pubmed.pubmed_client` remains a legacy
+  implementation path confined to compatibility coverage.
+
 ## RF-035 Retained Entrypoint Decision
 
-Decision for this cycle:
+Historical decision for this cycle:
 
 - `src/bioetl/infrastructure/adapters/pubmed/client.py`: `retain`
 - `src/bioetl/infrastructure/adapters/semanticscholar/client.py`: `retain`
+
+Superseded by the 2026-05-05 removal decision above.
 
 Measured evidence for `retain`:
 
@@ -89,15 +106,9 @@ Review outcome for the remaining curated inventory rows:
   because public field-group types are consumed through the root entrypoint while
   private `_publication_field_group_*` modules remain internal.
 - `src/bioetl/infrastructure/adapters/pubmed/client.py`: `retain`
-  because the package root and provider registration still use the canonical client
-  entrypoint while direct `client.py` imports are already confined to the package
-  root and dedicated compatibility coverage, and legacy `pubmed_client`
-  references stay confined to the retained entrypoint plus dedicated coverage.
+  superseded by the 2026-05-05 removal decision.
 - `src/bioetl/infrastructure/adapters/semanticscholar/client.py`: `retain`
-  because the package root still uses the canonical client entrypoint, direct
-  `client.py` imports are already confined to the package root plus dedicated
-  compatibility coverage, and legacy `adapter` references remain confined to the
-  retained entrypoint plus dedicated coverage.
+  superseded by the 2026-05-05 removal decision.
 
 Wave decision:
 

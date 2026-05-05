@@ -28,9 +28,6 @@ from bioetl.infrastructure.storage.gold.metadata_mixin import (
     GoldWriterMetadataMixin,
 )
 from bioetl.infrastructure.storage.gold.pipeline_helpers import (
-    GoldWriteDispatchContext as _GoldWriteDispatchContext,
-)
-from bioetl.infrastructure.storage.gold.pipeline_helpers import (
     GoldWritePostwriteContext as _GoldWritePostwriteContext,
 )
 from bioetl.infrastructure.storage.gold.pipeline_helpers import (
@@ -216,31 +213,7 @@ class GoldWriter(
             ):
                 await self._write_dual_targets(request=request, schema_policy=schema)
                 return
-            prepared = await self._prepare_write_gold(
-                table_name=request.table_name,
-                records=request.records,
-                mode=request.mode,
-                schema=request.schema,
-                scd_config=request.scd_config,
-                ingestion_ts=request.ingestion_ts,
-            )
-            await self._dispatch_write(
-                _GoldWriteDispatchContext(
-                    prepared=prepared,
-                    request=request,
-                )
-            )
-            await self._post_write_gold(
-                _GoldWritePostwriteContext(
-                    prepared=prepared,
-                    records=request.records,
-                    ingestion_ts=request.ingestion_ts,
-                    run_id=request.run_id,
-                    scd_config=request.scd_config,
-                    silver_refs=request.silver_refs,
-                    schema=request.schema,
-                )
-            )
+            await self._write_single_target(request=request)
 
     async def _write_dual_targets(
         self,

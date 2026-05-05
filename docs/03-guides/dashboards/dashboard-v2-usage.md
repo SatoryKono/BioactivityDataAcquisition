@@ -51,6 +51,8 @@ Machine-readable navigation contract: `docs/03-guides/dashboards/contracts/navig
 - `bioetl-silver-reject-explorer`: `$pipeline`, `$run_type`, `$reason_code`, `$field`, `$run_id`, `$payload_hash`
 - `$pipeline` и `$provider` всегда single-select без `All`; если исходного
   контекста нет, используется explicit fallback `unknown`.
+- `$run_type` всегда имеет include-all fallback; если исходного run-type
+  контекста нет, используйте `Run Type=All`, а не `unknown`.
 - Переходы в `3. Provider Health` из pipeline-scoped dashboards вычисляют
   `$provider` из текущего `$pipeline` и сохраняют `$pipeline_context` для
   обратного перехода.
@@ -100,7 +102,8 @@ Machine-readable navigation contract: `docs/03-guides/dashboards/contracts/navig
    `Runtime Blockers Current`, `DQ Status Current`, `Gold Lifecycle Current`,
    `Control Plane Current`, `Provider GLOBAL Scope`, `Workflow Selected Scope`,
    и `Workflow GLOBAL Scope` показывают current-only operator state с явным
-   scope. Исторические счётчики вынесены в collapsed row
+   scope. Status tables use row-wide threshold coloring, а не только окраску
+   ячейки `Status`. Исторические счётчики вынесены в collapsed row
    `Range Evidence (Historical / Recent History)`, а `Diagnostics & Docs`
    содержит routing по logs/traces/raw metrics.
 1. `bioetl-workflow-overview`, panel `id=2`, `id=3`, `id=4`, `id=5`:
@@ -218,13 +221,14 @@ Variable handoff policy for dashboard links remains strict and bounded:
 ## Drilldown
 
 - `bioetl-overview-v2`: L0 Overview отвечает на один primary question:
-  what is currently broken or degraded in BioETL, and where should the
+  what is currently broken, warning, or unknown in BioETL, and where should the
   operator drill down first? Top-level dashboard links follow the `0..5` bus
   and do not duplicate panel-level dashboard links.
   Cross-dashboard URLs передают только target-scoped variables; provider/workflow
   dashboards не наследуют `$pipeline/$run_type` leakage. `System Status` and
-  `Next Action` are the first operator answer; subsystem status cards show
-  `Reason:` and `Next:` in legends.
+  `Next Action` are the first operator answer and both stay in the selected
+  `$pipeline/$run_type` scope; subsystem status cards show `Reason:` and
+  `Next:` in legends.
 
 ## First 2 clicks scenario (operator)
 

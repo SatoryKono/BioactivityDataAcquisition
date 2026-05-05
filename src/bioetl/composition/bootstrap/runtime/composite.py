@@ -127,10 +127,10 @@ def _bootstrap_runtime_basics(
         bootstrap_runtime_basics as _bootstrap_runtime_basics_builder_impl,
     )
     from bioetl.composition.bootstrap.runtime.observability import (
-        bootstrap_logger_port,
+        bootstrap_logger,
     )
     from bioetl.composition.bootstrap.runtime.tracing_bootstrap import (
-        bootstrap_tracer_port,
+        bootstrap_tracer,
     )
     from bioetl.infrastructure.config import get_settings
     from bioetl.infrastructure.locking.memory_lock import MemoryLock
@@ -140,7 +140,7 @@ def _bootstrap_runtime_basics(
         run_uuid: UUID,
         level: str,
     ) -> LoggerPort:
-        return bootstrap_logger_port(
+        return bootstrap_logger(
             pipeline=pipeline_name,
             run_id=run_uuid,
             log_level=level,
@@ -152,7 +152,7 @@ def _bootstrap_runtime_basics(
         bootstrap_runtime_basics_builder_fn=_bootstrap_runtime_basics_builder_impl,
         settings_provider=get_settings,
         logger_bootstrapper=_bootstrap_logger,
-        tracer_bootstrapper=bootstrap_tracer_port,
+        tracer_bootstrapper=bootstrap_tracer,
         storage_bootstrapper=bootstrap_storage_adapter,
         lock_factory=MemoryLock,
         uuid_factory=uuid4,

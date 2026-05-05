@@ -27,19 +27,6 @@ import yaml
 SRC_ROOT = Path("src/bioetl")
 CANONICAL_NAMING_AUDIT_PATH = Path("scripts/engineering/qa/naming_audit.py")
 LAYER_AWARE_SUFFIX_POLICY_PATH = Path("configs/quality/layered_suffix_policy.yaml")
-CHECKPOINT_ASSEMBLY_PATH = "src/bioetl/composition/bootstrap/assembly/checkpoint.py"
-OBSERVABILITY_RUNTIME_PATH = "src/bioetl/composition/bootstrap/runtime/observability.py"
-ARCHITECTURE_TRACKER_ISSUE = "#3442"
-ARCHITECTURE_OWNER = "@bioetl-architecture"
-OBSERVABILITY_OWNER = "@bioetl-observability"
-OBSERVABILITY_BOOTSTRAP_BEHIND_FACADE_REASON = (
-    "Reviewed observability bootstrap implementation retained behind "
-    "the runtime observability facade."
-)
-OBSERVABILITY_FACADE_REASON_TEMPLATE = (
-    "Reviewed public runtime observability facade retained as the "
-    "canonical bootstrap seam for {port} port wiring."
-)
 FORBIDDEN_FACTORY_LAYERS = (
     SRC_ROOT / "application",
     SRC_ROOT / "infrastructure",
@@ -80,6 +67,18 @@ class AllowedSymbol:
 
 
 @dataclass(frozen=True)
+class AllowedModule:
+    """Machine-readable exception for a reviewed module path."""
+
+    path: str
+    issue: str
+    reason: str
+    owner: str
+    expires_on: str
+    removal_step: str
+
+
+@dataclass(frozen=True)
 class SuffixBoundaryRule:
     """Layer-aware suffix boundary rule."""
 
@@ -89,6 +88,7 @@ class SuffixBoundaryRule:
     include_path_prefixes: tuple[str, ...]
     exclude_path_prefixes: tuple[str, ...]
     allowed_symbols: tuple[AllowedSymbol, ...]
+    allowed_modules: tuple[AllowedModule, ...]
 
 
 @dataclass(frozen=True)
@@ -123,127 +123,6 @@ class LayerAwareNamingPolicy:
     function_suffix_rules: tuple[FunctionSuffixRule, ...]
     suffix_boundary_rules: tuple[SuffixBoundaryRule, ...]
     family_freeze_rules: tuple[FamilyFreezeRule, ...]
-
-
-_CURATED_COMPOSITION_BOOTSTRAP_PORT_FACTORIES = (
-    AllowedSymbol(
-        symbol="bootstrap_checkpoint_port",
-        path=CHECKPOINT_ASSEMBLY_PATH,
-        issue=ARCHITECTURE_TRACKER_ISSUE,
-        reason=(
-            "Reviewed bootstrap factory that constructs the checkpoint port "
-            "implementation for CLI/runtime wiring."
-        ),
-        owner=ARCHITECTURE_OWNER,
-        expires_on="2026-12-31",
-        removal_step="Remove after bootstrap port factories are consolidated to canonical runtime builders.",
-    ),
-    AllowedSymbol(
-        symbol="bootstrap_composite_checkpoint_port",
-        path=CHECKPOINT_ASSEMBLY_PATH,
-        issue=ARCHITECTURE_TRACKER_ISSUE,
-        reason=(
-            "Reviewed bootstrap factory that constructs the composite checkpoint "
-            "port for runtime resume and repair flows."
-        ),
-        owner=ARCHITECTURE_OWNER,
-        expires_on="2026-12-31",
-        removal_step=(
-            "Remove after composite checkpoint wiring no longer requires "
-            "compatibility factory seams."
-        ),
-    ),
-    AllowedSymbol(
-        symbol="bootstrap_quarantine_port",
-        path=CHECKPOINT_ASSEMBLY_PATH,
-        issue=ARCHITECTURE_TRACKER_ISSUE,
-        reason=(
-            "Reviewed bootstrap factory that constructs the quarantine port "
-            "implementation for CLI/runtime wiring."
-        ),
-        owner=ARCHITECTURE_OWNER,
-        expires_on="2026-12-31",
-        removal_step="Remove after quarantine port wiring is fully collapsed to canonical bootstrap composition APIs.",
-    ),
-    AllowedSymbol(
-        symbol="bootstrap_dq_monitor_port",
-        path="src/bioetl/composition/bootstrap/runtime/dq_bootstrap.py",
-        issue=ARCHITECTURE_TRACKER_ISSUE,
-        reason=OBSERVABILITY_BOOTSTRAP_BEHIND_FACADE_REASON,
-        owner=OBSERVABILITY_OWNER,
-        expires_on="2026-12-31",
-        removal_step=(
-            "Remove when runtime observability bootstrap internals are merged "
-            "and no longer need port-suffixed compatibility wrappers."
-        ),
-    ),
-    AllowedSymbol(
-        symbol="bootstrap_dq_monitor_port",
-        path=OBSERVABILITY_RUNTIME_PATH,
-        issue=ARCHITECTURE_TRACKER_ISSUE,
-        reason=OBSERVABILITY_FACADE_REASON_TEMPLATE.format(port="DQ monitor"),
-        owner=OBSERVABILITY_OWNER,
-        expires_on="2026-12-31",
-        removal_step=(
-            "Remove after public observability bootstrap surface is stabilized "
-            "without *_port compatibility factories."
-        ),
-    ),
-    AllowedSymbol(
-        symbol="bootstrap_logger_port",
-        path="src/bioetl/composition/bootstrap/runtime/logger_bootstrap.py",
-        issue=ARCHITECTURE_TRACKER_ISSUE,
-        reason=OBSERVABILITY_BOOTSTRAP_BEHIND_FACADE_REASON,
-        owner=OBSERVABILITY_OWNER,
-        expires_on="2026-12-31",
-        removal_step="Remove when logger port bootstrap path is canonicalized and compatibility wrappers are deleted.",
-    ),
-    AllowedSymbol(
-        symbol="bootstrap_logger_port",
-        path=OBSERVABILITY_RUNTIME_PATH,
-        issue=ARCHITECTURE_TRACKER_ISSUE,
-        reason=OBSERVABILITY_FACADE_REASON_TEMPLATE.format(port="logger"),
-        owner=OBSERVABILITY_OWNER,
-        expires_on="2026-12-31",
-        removal_step="Remove after observability facade no longer exposes logger *_port bootstrap seam.",
-    ),
-    AllowedSymbol(
-        symbol="bootstrap_metrics_port",
-        path="src/bioetl/composition/bootstrap/runtime/metrics_bootstrap.py",
-        issue=ARCHITECTURE_TRACKER_ISSUE,
-        reason=OBSERVABILITY_BOOTSTRAP_BEHIND_FACADE_REASON,
-        owner=OBSERVABILITY_OWNER,
-        expires_on="2026-12-31",
-        removal_step="Remove when metrics port bootstrap path is canonicalized and compatibility wrappers are deleted.",
-    ),
-    AllowedSymbol(
-        symbol="bootstrap_metrics_port",
-        path=OBSERVABILITY_RUNTIME_PATH,
-        issue=ARCHITECTURE_TRACKER_ISSUE,
-        reason=OBSERVABILITY_FACADE_REASON_TEMPLATE.format(port="metrics"),
-        owner=OBSERVABILITY_OWNER,
-        expires_on="2026-12-31",
-        removal_step="Remove after observability facade no longer exposes metrics *_port bootstrap seam.",
-    ),
-    AllowedSymbol(
-        symbol="bootstrap_tracer_port",
-        path="src/bioetl/composition/bootstrap/runtime/tracing_bootstrap.py",
-        issue=ARCHITECTURE_TRACKER_ISSUE,
-        reason=OBSERVABILITY_BOOTSTRAP_BEHIND_FACADE_REASON,
-        owner=OBSERVABILITY_OWNER,
-        expires_on="2026-12-31",
-        removal_step="Remove when tracer port bootstrap path is canonicalized and compatibility wrappers are deleted.",
-    ),
-    AllowedSymbol(
-        symbol="bootstrap_tracer_port",
-        path=OBSERVABILITY_RUNTIME_PATH,
-        issue=ARCHITECTURE_TRACKER_ISSUE,
-        reason=OBSERVABILITY_FACADE_REASON_TEMPLATE.format(port="tracer"),
-        owner=OBSERVABILITY_OWNER,
-        expires_on="2026-12-31",
-        removal_step="Remove after observability facade no longer exposes tracer *_port bootstrap seam.",
-    ),
-)
 
 
 def _run_suffix_policy_check(repo_root: Path) -> list[Violation]:
@@ -338,20 +217,36 @@ def _load_allowed_symbols(raw: object) -> tuple[AllowedSymbol, ...]:
     return tuple(allowed)
 
 
-def _merge_allowed_symbols(
-    *groups: tuple[AllowedSymbol, ...],
-) -> tuple[AllowedSymbol, ...]:
-    """Return a stable deduplicated allowlist preserving first-seen order."""
-    merged: list[AllowedSymbol] = []
-    seen: set[tuple[str, str]] = set()
-    for group in groups:
-        for item in group:
-            key = (item.symbol, item.path)
-            if key in seen:
+def _load_allowed_modules(raw: object) -> tuple[AllowedModule, ...]:
+    if not isinstance(raw, list):
+        return ()
+
+    allowed: list[AllowedModule] = []
+    for item in raw:
+        if not isinstance(item, dict):
+            continue
+        path = str(item.get("path", "")).strip()
+        issue = str(item.get("issue", "")).strip()
+        reason = str(item.get("reason", "")).strip()
+        owner = str(item.get("owner", "")).strip()
+        expires_on = str(item.get("expires_on", "")).strip()
+        removal_step = str(item.get("removal_step", "")).strip()
+        if path and issue and reason and owner and expires_on and removal_step:
+            try:
+                date.fromisoformat(expires_on)
+            except ValueError:
                 continue
-            merged.append(item)
-            seen.add(key)
-    return tuple(merged)
+            allowed.append(
+                AllowedModule(
+                    path=path,
+                    issue=issue,
+                    reason=reason,
+                    owner=owner,
+                    expires_on=expires_on,
+                    removal_step=removal_step,
+                )
+            )
+    return tuple(allowed)
 
 
 def _base_suffix_rule_parts(
@@ -383,17 +278,6 @@ def _rule_has_required_suffix_parts(
     return bool(rule_id and description and suffixes and include_path_prefixes)
 
 
-def _function_rule_allowed_symbols(
-    rule_id: str, allowed_symbols: tuple[AllowedSymbol, ...]
-) -> tuple[AllowedSymbol, ...]:
-    if rule_id != "composition_bootstrap_port_factories":
-        return allowed_symbols
-    return _merge_allowed_symbols(
-        allowed_symbols,
-        _CURATED_COMPOSITION_BOOTSTRAP_PORT_FACTORIES,
-    )
-
-
 def _function_suffix_rule_from_config(item: object) -> FunctionSuffixRule | None:
     if not isinstance(item, dict):
         return None
@@ -405,7 +289,6 @@ def _function_suffix_rule_from_config(item: object) -> FunctionSuffixRule | None
         exclude_path_prefixes,
         allowed_symbols,
     ) = _base_suffix_rule_parts(item, allowed_key="allowed_symbols")
-    allowed_symbols = _function_rule_allowed_symbols(rule_id, allowed_symbols)
     if not _rule_has_required_suffix_parts(
         rule_id, description, suffixes, include_path_prefixes
     ):
@@ -442,6 +325,9 @@ def _suffix_boundary_rule_from_config(item: object) -> SuffixBoundaryRule | None
         include_path_prefixes=include_path_prefixes,
         exclude_path_prefixes=exclude_path_prefixes,
         allowed_symbols=allowed_symbols,
+        allowed_modules=_load_allowed_modules(
+            item.get("allowed_module_exceptions", [])
+        ),
     )
 
 
@@ -520,6 +406,14 @@ def _is_allowed_symbol(
     return any(
         item.symbol == symbol and item.path == relative_path for item in allowed_symbols
     )
+
+
+def _is_allowed_module(
+    *,
+    relative_path: str,
+    allowed_modules: tuple[AllowedModule, ...],
+) -> bool:
+    return any(item.path == relative_path for item in allowed_modules)
 
 
 def _literal_assignment_names(
@@ -691,6 +585,45 @@ def _suffix_boundary_rule_violation(
     )
 
 
+def _module_name_matches_suffix(stem: str, suffixes: tuple[str, ...]) -> bool:
+    stem_lower = stem.lower()
+    return any(
+        stem_lower.endswith(f"_{suffix.lower()}")
+        or stem_lower.endswith(f"_{suffix.lower()}s")
+        for suffix in suffixes
+    )
+
+
+def _suffix_boundary_module_violation(
+    *,
+    relative_path: str,
+    rule: SuffixBoundaryRule,
+) -> Violation | None:
+    if rule.rule_id != "non_composition_builder_suffix":
+        return None
+    path = Path(relative_path)
+    if path.stem.startswith("_") or path.name == "__init__.py":
+        return None
+    if not (
+        _matches_any_prefix(relative_path, rule.include_path_prefixes)
+        and not _matches_any_prefix(relative_path, rule.exclude_path_prefixes)
+        and _module_name_matches_suffix(path.stem, rule.suffixes)
+    ):
+        return None
+    if _is_allowed_module(
+        relative_path=relative_path, allowed_modules=rule.allowed_modules
+    ):
+        return None
+    return Violation(
+        rule="layer-aware-suffix-policy",
+        location=relative_path,
+        details=(
+            f"[{rule.rule_id}] module {path.name} violates the reviewed "
+            f"suffix boundary for {', '.join(rule.suffixes)}"
+        ),
+    )
+
+
 def _family_freeze_rule_violation(
     *,
     relative_path: str,
@@ -783,6 +716,24 @@ def _layer_aware_public_symbol_violations(
     return violations
 
 
+def _layer_aware_module_violations(
+    *,
+    relative_path: str,
+    policy: LayerAwareNamingPolicy,
+) -> list[Violation]:
+    return [
+        violation
+        for rule in policy.suffix_boundary_rules
+        if (
+            violation := _suffix_boundary_module_violation(
+                relative_path=relative_path,
+                rule=rule,
+            )
+        )
+        is not None
+    ]
+
+
 def _parse_python_file(path: Path) -> ast.Module | None:
     try:
         return ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
@@ -798,10 +749,15 @@ def _layer_aware_suffix_violations(repo_root: Path) -> list[Violation]:
     for py_file in src_root.rglob("*.py"):
         if "__pycache__" in py_file.parts:
             continue
+        relative_path = py_file.relative_to(repo_root).as_posix()
+        violations.extend(
+            _layer_aware_module_violations(
+                relative_path=relative_path, policy=policy
+            )
+        )
         tree = _parse_python_file(py_file)
         if tree is None:
             continue
-        relative_path = py_file.relative_to(repo_root).as_posix()
         violations.extend(
             _layer_aware_function_violations(
                 relative_path=relative_path, tree=tree, policy=policy

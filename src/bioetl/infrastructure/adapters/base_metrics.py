@@ -14,11 +14,9 @@ __all__ = ["ADAPTER_REQUEST_ERRORS", "AdapterMetricsRecorder"]
 
 
 import time
-from collections import defaultdict, deque
 from collections.abc import Iterator
 from contextlib import contextmanager
-from dataclasses import dataclass, field
-from threading import Lock
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from bioetl.domain.exceptions import BioETLError
@@ -63,18 +61,6 @@ class AdapterMetricsRecorder:
 
     metrics: MetricsPort | None
     provider: str
-    _p95_window_size: int = 50
-    _request_duration_windows: dict[str, deque[float]] = field(
-        init=False,
-        repr=False,
-    )
-    _window_lock: Lock = field(default_factory=Lock, init=False, repr=False)
-
-    def __post_init__(self) -> None:
-        """Initialize bounded request-duration windows per endpoint."""
-        self._request_duration_windows = defaultdict(
-            lambda: deque(maxlen=self._p95_window_size)
-        )
 
     @contextmanager
     def measure_request(self, endpoint: str) -> Iterator[None]:
@@ -119,7 +105,6 @@ class AdapterMetricsRecorder:
                     1,
                     {**labels, "status": status},
                 )
-                self._record_request_p95(endpoint, duration)
 
     def record_batch_size(self, endpoint: str, size: int) -> None:
         """Record batch size for a request.
@@ -211,26 +196,3 @@ class AdapterMetricsRecorder:
 
         hit_rate = (total_hits / total_candidates) if total_candidates else 0.0
         self.metrics.set_gauge("bioetl_adapter_fallback_hit_rate", hit_rate, labels)
-
-    def _record_request_p95(self, endpoint: str, duration_seconds: float) -> None:
-        """Update rolling p95 latency gauge for provider+endpoint.
-
-        Args:
-            endpoint: API endpoint being tracked (e.g., "/activity").
-            duration_seconds: Request duration in seconds to add to the rolling window.
-        """
-        normalized_endpoint = normalize_adapter_endpoint_label(endpoint)
-        with self._window_lock:
-            samples = self._request_duration_windows[normalized_endpoint]
-            samples.append(duration_seconds)
-            sorted_samples = sorted(samples)
-
-        p95_index = int((len(sorted_samples) - 1) * 0.95)
-        p95_value = sorted_samples[p95_index]
-        if self.metrics is None:
-            return
-        self.metrics.set_gauge(
-            "bioetl_adapter_request_p95_seconds",
-            p95_value,
-            {"provider": self.provider, "endpoint": normalized_endpoint},
-        )

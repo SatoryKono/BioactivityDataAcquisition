@@ -13,7 +13,7 @@ from bioetl.infrastructure.adapters.crossref._batch_support import (
     CROSSREF_FALLBACK_ERRORS,
     CROSSREF_RUNTIME_ERRORS,
     BaseMetrics,
-    HeadersBuilder,
+    HeadersProvider,
     HttpTransport,
     record_response_timing,
 )
@@ -38,7 +38,7 @@ class DoiBatchProcessor:
         metrics: BaseMetrics,
         mailto: str,
         api_base: str,
-        headers_fn: HeadersBuilder,
+        headers_fn: HeadersProvider,
         request_collector: APIRequestCollector | None = None,
     ) -> None:
         self._http = http
