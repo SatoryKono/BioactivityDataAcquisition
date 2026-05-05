@@ -1277,7 +1277,7 @@ def test_runtime_and_dq_dashboards_expose_control_plane_handoff() -> None:
         }
         urls = [link.get("url", "") for link in dashboard.get("links", [])]
 
-        assert {"5. Control Plane", "Control Plane v1"} & titles, (
+        assert "5. Control Plane" in titles, (
             f"{dashboard_name} must expose a Control Plane dashboard handoff"
         )
         matching_urls = [
@@ -1335,8 +1335,8 @@ def test_runtime_incident_panels_link_to_control_plane_dashboard() -> None:
     """Runtime incident panels should hand off directly into control-plane triage."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
     expectations = {
-        "Control-plane Alert Conditions": "Open Control Plane v1 (manifest/checkpoint)",
-        "No-Records Runs": "Open Control Plane v1 (checkpoint/replay)",
+        "Control-plane Alert Conditions": "Open 5. Control Plane (manifest/checkpoint)",
+        "No-Records Runs": "Open 5. Control Plane (checkpoint/replay)",
     }
 
     for panel_title, expected_link_title in expectations.items():
@@ -1521,9 +1521,9 @@ def test_data_quality_incident_panels_link_to_control_plane_dashboard() -> None:
     """DQ panels should link into control-plane investigation for replay/lineage paths."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
     expectations = {
-        "Data Flow in Range: Bronze -> Silver -> Gold": "Open Control Plane v1 (replay/checkpoint)",
-        "Lineage Refs Missing": "Open Control Plane v1 (lineage/traceability)",
-        "Gold Strict Validation Failures": "Open Control Plane v1 (gold hard-fail context)",
+        "Data Flow in Range: Bronze -> Silver -> Gold": "Open 5. Control Plane (replay/checkpoint)",
+        "Lineage Refs Missing": "Open 5. Control Plane (lineage/traceability)",
+        "Gold Strict Validation Failures": "Open 5. Control Plane (gold hard-fail context)",
     }
 
     for panel_title, expected_link_title in expectations.items():

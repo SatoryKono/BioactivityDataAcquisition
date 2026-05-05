@@ -129,7 +129,7 @@
               "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
             },
             {
-              "title": "Open Control Plane v1",
+              "title": "Open 5. Control Plane",
               "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
             }
           ]
@@ -238,7 +238,7 @@
               "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${__url_time_range}"
             },
             {
-              "title": "Open Control Plane v1",
+              "title": "Open 5. Control Plane",
               "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
             },
             {

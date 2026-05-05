@@ -1,27 +1,24 @@
 ---
 id: sonar-audit-fix
-title: Sonar issues audit and remediation planning
+title: sonar issues plan update
 task_id: sonar-audit-fix
-created_at: '2026-05-05T05:04:26Z'
+created_at: '2026-05-05T05:07:52Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
-- scripts/docs/checks/check_drift.py
-summary: Implemented low-risk Sonar-related fixes for report_dashboard_inventory regex
-  shorthand, Grafana link variable regexes, and explicit return in Gemini alias function;
-  documented remaining high-complexity and bulk duplicate-literal issues as deferred
-  for next batch.
+- <add-source-ref>
+summary: Reviewed current Sonar report and prepared per-issue remediation plan
 ---
 
 # Episodic summary
 
 ## Task
 
-- Title: Sonar issues audit and remediation planning
+- Title: sonar issues plan update
 
 ## Outcome
 
-- Implemented low-risk Sonar-related fixes for report_dashboard_inventory regex shorthand, Grafana link variable regexes, and explicit return in Gemini alias function; documented remaining high-complexity and bulk duplicate-literal issues as deferred for next batch.
+- Reviewed current Sonar report and prepared per-issue remediation plan
 
 ## Lessons learned
 

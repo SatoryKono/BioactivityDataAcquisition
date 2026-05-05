@@ -165,7 +165,7 @@
             "url": "/a/grafana-exploretraces-app/?from=${__from}&to=${__to}&queryType=traceqlSearch&query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline:regex}%22%20%26%26%20span.%22bioetl.run_type%22%20%3D~%20%22${run_type:regex}%22%20%7D"
           },
           {
-            "title": "Open Control Plane v1 (replay/checkpoint)",
+            "title": "Open 5. Control Plane (replay/checkpoint)",
             "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
           },
           {
@@ -1625,7 +1625,7 @@
             "textMode": "auto",
             "dataLinks": [
               {
-                "title": "Open Control Plane v1 (lineage/traceability)",
+                "title": "Open 5. Control Plane (lineage/traceability)",
                 "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
               }
             ]
@@ -1813,7 +1813,7 @@
           },
           "id": 150,
           "options": {
-            "content": "### Control-plane aggregates available\n- Open `BioETL Control Plane v1` for aggregated manifest writes, ledger appends, checkpoint compatibility outcomes, and control-plane read failures.\n- Use the `Observability Checklist (runbook)` dashboard link when `BioETLControlPlaneReadFailureRate` or related aggregate signals require operator follow-up.\n",
+            "content": "### Control-plane aggregates available\n- Open `5. Control Plane` for aggregated manifest writes, ledger appends, checkpoint compatibility outcomes, and control-plane read failures.\n- Use the `Observability Checklist (runbook)` dashboard link when `BioETLControlPlaneReadFailureRate` or related aggregate signals require operator follow-up.\n",
             "mode": "markdown"
           },
           "title": "Control-plane aggregates note",
@@ -1882,7 +1882,7 @@
             "textMode": "auto",
             "dataLinks": [
               {
-                "title": "Open Control Plane v1 (gold hard-fail context)",
+                "title": "Open 5. Control Plane (gold hard-fail context)",
                 "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
               }
             ]
