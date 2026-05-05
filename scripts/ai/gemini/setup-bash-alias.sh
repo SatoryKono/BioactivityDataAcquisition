@@ -9,8 +9,10 @@ GEMINI_SCRIPT="${REPO_ROOT}/scripts/ai/gemini/gemini-interactive.sh"
 if [[ -x "${GEMINI_SCRIPT}" ]]; then
     # Create function
     gemini() {
+        local rc=0
         bash "${GEMINI_SCRIPT}" "$@"
-        return "$?"
+        rc=$?
+        return "${rc}"
     }
     
     export -f gemini
