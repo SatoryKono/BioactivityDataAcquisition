@@ -34,3 +34,15 @@ ______________________________________________________________________
 - Links contract: `tests/integration/test_grafana_dashboard_links.py`
 - Variable contract checks: `tests/integration/test_grafana_config.py` + `tests/integration/_grafana_test_support.py`
 - Forensic isolation checks: `run_id`/`payload_hash` запрещены вне reject explorer.
+
+## UID → Variables (inventory parity reference)
+
+| Dashboard UID | Variables |
+|---|---|
+| `bioetl-control-plane-v1` | `$pipeline`, `$run_type` |
+| `bioetl-dq-v2` | `$pipeline`, `$run_type`, `$stage` |
+| `bioetl-overview-v2` | `$pipeline`, `$run_type` |
+| `bioetl-provider-health-v2` | `$adapter`, `$provider` |
+| `bioetl-runtime` | `$pipeline`, `$run_type`, `$stage` |
+| `bioetl-silver-reject-explorer` | `$field`, `$payload_hash`, `$pipeline`, `$reason_code`, `$run_id`, `$run_type` |
+| `bioetl-workflow-overview` | `$status`, `$workflow` |
