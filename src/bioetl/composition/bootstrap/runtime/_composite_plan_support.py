@@ -124,6 +124,7 @@ def bootstrap_runtime_basics_impl(
     *,
     config: CompositeConfig,
     run_id: str | None,
+    bootstrap_runtime_basics_builder_fn: Callable[..., CompositeInfrastructureContext],
     settings_provider: Callable[[], Settings],
     logger_bootstrapper: Callable[[str, UUID, str], LoggerPort],
     tracer_bootstrapper: Callable[[Settings], TracingPort],
@@ -131,11 +132,7 @@ def bootstrap_runtime_basics_impl(
     lock_factory: Callable[[], LockPort],
     uuid_factory: Callable[[], UUID],
 ) -> CompositeInfrastructureContext:
-    from bioetl.composition.bootstrap.runtime.composite_bootstrap_builders import (
-        bootstrap_runtime_basics as _bootstrap_runtime_basics_builder_impl,
-    )
-
-    return _bootstrap_runtime_basics_builder_impl(
+    return bootstrap_runtime_basics_builder_fn(
         config=config,
         run_id=run_id,
         settings_provider=settings_provider,
@@ -152,6 +149,7 @@ def build_runner_factories_impl(
     config: CompositeConfig,
     runtime: CompositeRuntimeConfig,
     logger: LoggerPort,
+    build_runner_factories_builder_fn: Callable[..., RunnerFactoryBundle],
     runner_factory_builder_cls: type[RunnerFactoryBuilder[RunOptions]],
     filter_extraction_service_cls: type[CompositeFilterExtractor],
     pipeline_runner_builder: Callable[..., PipelineRunner],
@@ -160,11 +158,7 @@ def build_runner_factories_impl(
         BronzeRunOptions,
     ],
 ) -> RunnerFactoryBundle:
-    from bioetl.composition.bootstrap.runtime.composite_bootstrap_builders import (
-        build_runner_factories as _build_runner_factories_builder_impl,
-    )
-
-    runner_factories: RunnerFactoryBundle = _build_runner_factories_builder_impl(
+    runner_factories: RunnerFactoryBundle = build_runner_factories_builder_fn(
         config=config,
         runtime=runtime,
         logger=logger,
@@ -181,6 +175,7 @@ def build_support_services_impl(
     config: CompositeConfig,
     runtime: CompositeRuntimeConfig,
     infra_context: CompositeInfrastructureContext,
+    build_support_services_builder_fn: Callable[..., CompositeSupportServices],
     support_services_factory_cls: type[CompositeSupportServicesFactory],
     resolve_gold_schema_fn: Callable[[str], type | None],
     load_field_group_registry_fn: Callable[
@@ -191,11 +186,7 @@ def build_support_services_impl(
         DQReportService,
     ],
 ) -> CompositeSupportServices:
-    from bioetl.composition.bootstrap.runtime.composite_bootstrap_builders import (
-        build_support_services as _build_support_services_builder_impl,
-    )
-
-    return _build_support_services_builder_impl(
+    return build_support_services_builder_fn(
         config=config,
         runtime=runtime,
         infra_context=infra_context,
@@ -258,13 +249,10 @@ def create_composite_runner_from_plan_impl(
     config: CompositeConfig,
     runtime: CompositeRuntimeConfig,
     plan: CompositeBootstrapPlan,
+    create_composite_runner_builder_fn: Callable[..., CompositePipelineRunner],
     runner_factory: Callable[..., CompositePipelineRunner],
 ) -> CompositePipelineRunner:
-    from bioetl.composition.bootstrap.runtime.composite_bootstrap_builders import (
-        create_composite_runner as _create_composite_runner_builder_impl,
-    )
-
-    return _create_composite_runner_builder_impl(
+    return create_composite_runner_builder_fn(
         config=config,
         runtime=runtime,
         run_id=plan.run_id,

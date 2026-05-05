@@ -22,24 +22,25 @@ Machine-readable navigation contract: `docs/03-guides/dashboards/contracts/navig
 
 | Dashboard                 | UID                             | Для чего                                                                                   |
 | ------------------------- | ------------------------------- | ------------------------------------------------------------------------------------------ |
-| 1. BioETL Overview        | `bioetl-overview-v2`            | L0 answer-first dashboard: что сейчас сломано/degraded и куда drill down дальше |
+| 0. Control Plane          | `bioetl-control-plane-v1`       | L1/L2 replay/resume safety: manifest, ledger, checkpoint, replay, lineage, global reads    |
+| 1. BioETL Overview        | `bioetl-overview-v2`            | L0 answer-first dashboard: что сейчас сломано/degraded и куда drill down дальше            |
 | 2. Runtime                | `bioetl-runtime`                | L2 diagnostic runtime triage: blockers, latency, backlog, error localization, handoffs     |
-| 5. Control Plane | `bioetl-control-plane-v1`       | L1/L2 replay/resume safety: manifest, ledger, checkpoint, replay, lineage, global reads    |
 | 3. Provider Health        | `bioetl-provider-health-v2`     | Incident triage по provider health: latency/failures/degraded/retries exhausted            |
 | 4. Data Quality           | `bioetl-dq-v2`                  | Качество данных, карантин, аномалии, freshness                                             |
-| 5. Silver Reject Explorer | `bioetl-silver-reject-explorer` | Record-level explorer для `filtered_out`/`FILTERED_OUT_SILVER` записей (quarantine-backed) |
-| 6. Workflow Overview      | `bioetl-workflow-overview`      | Declarative workflow run/step outcomes and transform-step latency                          |
+| Silver Reject Explorer    | `bioetl-silver-reject-explorer` | Record-level explorer для `filtered_out`/`FILTERED_OUT_SILVER` записей (quarantine-backed) |
+| 5. Workflow               | `bioetl-workflow-overview`      | Declarative workflow run/step outcomes and transform-step latency                          |
 
 ## From where to enter each dashboard in 1 click
 
-| Target dashboard | 1-click entry source (dashboard -> panel id/title) |
+| Target dashboard | 1-click entry source |
 | --- | --- |
-| `bioetl-runtime` | `bioetl-overview-v2` -> `id=208` `Runtime Status` |
-| `bioetl-control-plane-v1` | `bioetl-overview-v2` -> `id=210` `Control Plane Status` |
-| `bioetl-provider-health-v2` | `bioetl-overview-v2` -> `id=211` `Provider Status` |
-| `bioetl-dq-v2` | `bioetl-overview-v2` -> `id=209` `Data Quality Status` |
-| `bioetl-workflow-overview` | `bioetl-overview-v2` -> `id=212` `Workflow Status` |
-| `bioetl-silver-reject-explorer` | `bioetl-dq-v2` -> `id=121` `Top Silver Reject Reasons (Pareto)` |
+| `bioetl-control-plane-v1` | top-level `0. Control Plane` from every primary dashboard except itself |
+| `bioetl-overview-v2` | top-level `1. Overview` from every primary dashboard except itself |
+| `bioetl-runtime` | top-level `2. Runtime` from every primary dashboard except itself |
+| `bioetl-provider-health-v2` | top-level `3. Provider Health` from every primary dashboard except itself |
+| `bioetl-dq-v2` | top-level `4. Data Quality` from every primary dashboard except itself |
+| `bioetl-workflow-overview` | top-level `5. Workflow` from every primary dashboard except itself |
+| `bioetl-silver-reject-explorer` | top-level `Silver Reject Explorer` from `4. Data Quality` only |
 
 ## Фильтрация
 
@@ -58,10 +59,10 @@ Machine-readable navigation contract: `docs/03-guides/dashboards/contracts/navig
 ## Что смотреть в первую очередь
 
 1. `bioetl-overview-v2`, first-screen KPI row (no scroll):
-   `System Status`, `Next Action`, `Failed Runs in Range`, `Worst Backlog Stage`,
-   `Worst Lag Stage` и `Flow Balance` отвечают на L0 вопрос: что broken/degraded
-   и куда открыть drilldown первым. `OK` считается здоровым только при recent
-   activity; отсутствие samples остаётся `UNKNOWN`, а не зелёным нулём.
+   `System Status`, `Next Action` и `L0 Inputs` отвечают на L0 вопрос: что
+   broken/degraded и куда открыть drilldown первым. `OK` считается здоровым
+   только при recent activity; отсутствие samples остаётся `UNKNOWN`, а не
+   зелёным нулём.
 1. `bioetl-runtime`, верхний блок `Incident Summary` (без скролла):
    `Runtime Blockers / 15m`, `Failed Runs / 15m`,
    `Runtime Error Rate / 30m`, `Worst Stage Lag / 15m` +
@@ -85,36 +86,27 @@ Machine-readable navigation contract: `docs/03-guides/dashboards/contracts/navig
 1. `bioetl-dq-v2`, panel `id=6`, `id=7`, `id=12`:
    range-based quarantine/threshold/failures for the active Grafana window.
 1. `bioetl-overview-v2`, routing and evidence rows:
-   `Runtime Status`, `Data Quality Status`, `Control Plane Status`,
-   `Provider Status` и `Workflow Status` показывают status + reason + next
-   dashboard вместо opaque numeric handoff. `Flow Balance` заменяет
-   misleading yield gauge и показывает Bronze denominator, Gold output,
-   filtered/quarantined counts и unaccounted loss. `Backlog Causality`
-   кладёт backlog, lag и throughput в одну таблицу, чтобы проверить
-   `backlog(t+1) = backlog(t) + ingestion - output`. Compact supporting checks
-   по manifest/ledger, checkpoint, lineage и Silver rejects остаются L0-only.
+   `Runtime Blockers Current`, `DQ Status Current`, `Gold Lifecycle Current`,
+   `Control Plane Current`, `Provider GLOBAL Scope`, `Workflow Selected Scope`,
+   и `Workflow GLOBAL Scope` показывают current-only operator state с явным
+   scope. Исторические счётчики вынесены в collapsed row
+   `Range Evidence (Historical / Recent History)`, а `Diagnostics & Docs`
+   содержит routing по logs/traces/raw metrics.
 1. `bioetl-workflow-overview`, panel `id=2`, `id=3`, `id=4`, `id=5`:
    declarative workflow runs, failed runs, step outcomes и step latency;
    используйте его, когда pipeline summary выглядит здоровым, но orchestration
    path показывает `failed/skipped/blocked` status.
 
-## Incident first steps (Runtime `First Action` row)
+## Incident first steps (Runtime top navigation)
 
-В `2. Runtime` внутри collapsed row `Tracing-only Log Hygiene` добавлен
-верхний CTA-блок `First Action` с фиксированным операторским порядком:
+В `2. Runtime` cross-dashboard routing выполняется только через top-level bus:
+`0. Control Plane`, `1. Overview`, `3. Provider Health`, `4. Data Quality`,
+`5. Workflow`, `Explore Logs`, `Explore Traces`.
 
-1. `Pipeline conditions`
-1. `DQ conditions`
-1. `Control Plane conditions`
-1. `Provider health checks`
-
-Правило handoff для каждого CTA остаётся bounded:
-- `includeVars=false`;
-- передаются только allowlisted `var-*` параметры для target dashboard;
-- временное окно сохраняется через `${__url_time_range}`.
-
-Это нужно для быстрого старта triage: сначала выбрать домен инцидента,
-потом переходить к детальным condition cards и runbook links ниже.
+Panel-level dashboard handoffs и `First Action` dashboard CTAs намеренно
+отсутствуют, чтобы не создавать второй путь в тот же target dashboard. Для
+быстрого старта triage сначала выберите домен инцидента через top-level bus,
+затем используйте detail/condition cards внутри выбранного dashboard.
 
 
 
@@ -123,22 +115,23 @@ Machine-readable navigation contract: `docs/03-guides/dashboards/contracts/navig
 ```text
 ┌──────────────────────────────────────────────────────────────────────────────┐
 │ L0 Overview Scope                                                           │
-├──────────────┬──────────────┬──────────────────┬──────────────────┬──────────┤
-│ System Status│ Next Action  │ Failed Runs      │ Worst Backlog    │ Worst Lag│
-│              │              │ in Range         │ Stage            │ Stage    │
-├──────────────┴──────────────┴──────────────────┴──────────────────┴──────────┤
-│ Flow Balance (Bronze/Gold/loss denominator context)                         │
+├──────────────┬──────────────────────┬────────────────────────────────────────┤
+│ System Status│ Next Action          │ L0 Inputs                              │
+├──────────────┼──────────────┬───────┼──────────────┬─────────────────────────┤
+│ Runtime      │ DQ Status    │ Gold  │ Control Plane│ Provider/Workflow scope │
+│ Blockers     │ Current      │ Life- │ Current      │ tables                  │
+│ Current      │              │ cycle │              │                         │
 ├──────────────────────────────────────────────────────────────────────────────┤
-│ ▾ Throughput details (collapsed row by default)                              │
-│ ▾ Freshness breakdown (collapsed row by default)                             │
-│ ▾ Extended distributions (collapsed row by default)                          │
+│ ▾ Range Evidence (collapsed row by default)                                  │
+│ ▾ Diagnostics & Docs (collapsed row by default)                              │
 └──────────────────────────────────────────────────────────────────────────────┘
 ```
 
 Первый экран без скролла должен отвечать на вопрос **«что сломано и куда идти дальше»**:
-- что сломано: `System Status` + `Failed Runs in Range` + `Worst Backlog/Lag Stage`;
-- куда идти дальше: `Next Action` + drilldown links в KPI/reason panels;
-- баланс потока: `Flow Balance` (вход/выход/потери), без скрытия деградации в single-rate KPI.
+- что сломано: `System Status` + `L0 Inputs` + L1 current tables;
+- куда идти дальше: `Next Action` с `action_target/action_reason/action_dashboard_uid`;
+- что было в окне времени: collapsed `Range Evidence`;
+- где искать сырые traces/logs/metrics: collapsed `Diagnostics & Docs`.
 ## Silver Filter Rejects workflow
 
 - Для быстрых summary используйте `Silver Rejects Count + Rate` в
@@ -153,7 +146,7 @@ Machine-readable navigation contract: `docs/03-guides/dashboards/contracts/navig
 - Маршрут triage: **L1 summary -> L2 explorer**.
   1. **L1 summary:** начните с `4. Data Quality` (first-screen KPI: score, blocked share, quarantined, freshness lag), чтобы подтвердить масштаб инцидента в выбранном time range.
   1. **L1 cause narrowing:** раскройте collapsed rows `Reject / Pareto / Fields` и `Validation Diagnostics`, проверьте `Top Silver Reject Reasons` / `Top Silver Reject Fields` и связанные diagnostics.
-  1. **L2 explorer:** откройте `5. Silver Reject Explorer` по explicit panel data links для record-level списка, выбора `reason_code/field/run_id` и detail по `payload_hash`.
+  1. **L2 explorer:** откройте `Silver Reject Explorer` через top-level link в `4. Data Quality` для record-level списка, выбора `reason_code/field/run_id` и detail по `payload_hash`.
   1. Используйте quarantine CLI для action-операций (`replay/resolve/purge`) и финального подтверждения remediation.
 - Эти панели отвечают на вопросы:
   - растёт ли объём `filtered_out`;
@@ -167,7 +160,7 @@ Machine-readable navigation contract: `docs/03-guides/dashboards/contracts/navig
   ```
 - Grafana в shipped конфигурации разделена по ролям:
   `1-4` dashboards дают summary/trend и bounded breakdown на Prometheus.
-  `5. Silver Reject Explorer` даёт row-level browsing через datasource `Quarantine Explorer`.
+  `Silver Reject Explorer` даёт row-level browsing через datasource `Quarantine Explorer`.
 - Record-level drilldown больше не ограничен только CLI.
   CLI остаётся execution surface для replay/resolve/purge.
 
@@ -237,7 +230,7 @@ Variable handoff policy for dashboard links remains strict and bounded:
 
   **First 2 clicks (L1):**
   1. Click #1: открыть `bioetl-control-plane-v1`, проверить `Replay Safety State` (`id=891`) и `Replay / Resume Blockers` (`id=130`).
-  2. Click #2: перейти через `First Action` CTA в `2. Runtime` (если есть активный blocker) или `4. Data Quality` (если blocker связан с downstream quality symptoms). На первом экране оставлены только Trust/Blocker KPI: `id=891..893` и `id=130`.
+  2. Click #2: перейти через top-level bus в `2. Runtime` (если есть активный blocker) или `4. Data Quality` (если blocker связан с downstream quality symptoms). На первом экране оставлены только Trust/Blocker KPI: `id=891..893` и `id=130`.
   Все остальные control-plane метрики перенесены в collapsed incident rows.
   Рекомендованный operator path: сначала проверить blocker cards, затем открыть
   ровно один collapsed diagnostic row под конкретный incident-pattern.

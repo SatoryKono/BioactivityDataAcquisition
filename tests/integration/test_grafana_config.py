@@ -359,16 +359,6 @@ def test_monitoring_readme_dashboard_inventory_matches_shipped_json() -> None:
 def test_summary_queries_use_zero_fallbacks() -> None:
     """Runtime/provider summary panels should show zero instead of no-data."""
     expected_panel_snippets = {
-        "bioetl-overview-v2.json": {
-            "Failed Runs in Range": "or vector(0)",
-            "Manifest / Ledger Failures": "or vector(0)",
-            "Checkpoint Incompatibilities": "or vector(0)",
-            "Lineage Refs Missing": "or vector(0)",
-            "Silver Rejects Count + Rate": "or vector(0)",
-            "DQ Hard Blockers": "or vector(0)",
-            "Control-plane Blockers": "or vector(0)",
-            "Workflow Status": "or vector(0)",
-        },
         "bioetl-runtime.json": {
             "Runtime Blockers": "or vector(0)",
             "Failed Runs": "or vector(0)",
@@ -503,17 +493,6 @@ def test_latency_p95_panels_preserve_no_data_state() -> None:
 def test_count_like_summary_panels_use_rounding_or_boolean_conditions() -> None:
     """Count-like summary panels should avoid fractional event semantics."""
     expected_panel_snippets = {
-        "bioetl-overview-v2.json": {
-            "Failed Runs in Range": "round(",
-            "Manifest / Ledger Failures": "round(",
-            "Checkpoint Incompatibilities": "round(",
-            "Lineage Refs Missing": "round(",
-            "Silver Rejects Count + Rate": "round(",
-            "DQ Hard Blockers": "round(",
-            "Control-plane Blockers": "round(",
-            "Global Provider Degradation": "round(",
-            "Workflow Status": "round(",
-        },
         "bioetl-provider-health-v2.json": {
             "Healthy Checks": "round(",
             "Degraded Checks": "round(",
@@ -661,9 +640,8 @@ def test_selected_range_kpis_do_not_use_raw_counters() -> None:
     """Selected-range KPI panels must use windowed counter semantics."""
     allowed_panel_snippets = {
         "bioetl-overview-v2.json": {
-            "Processing Volume by Stage": ("increase(", "last_over_time("),
-            "Pipeline Run Outcomes": ("increase(",),
-            "Flow Balance": ("increase(",),
+            "Historical Failures (range evidence)": ("increase(",),
+            "Recent terminal runs (range evidence)": ("increase(",),
         },
         "bioetl-dq-v2.json": {
             "Data Flow in Range: Bronze -> Silver -> Gold": (
@@ -1662,14 +1640,8 @@ def test_runtime_and_control_plane_operator_panels_use_active_time_windows(
 @pytest.mark.parametrize(
     ("dashboard_file", "panel_title"),
     [
-        ("bioetl-overview-v2.json", "Manifest / Ledger Failures"),
-        ("bioetl-overview-v2.json", "Checkpoint Incompatibilities"),
-        ("bioetl-overview-v2.json", "Lineage Refs Missing"),
-        ("bioetl-overview-v2.json", "Failed Runs in Range"),
-        ("bioetl-overview-v2.json", "DQ Hard Blockers"),
-        ("bioetl-overview-v2.json", "Control-plane Blockers"),
-        ("bioetl-overview-v2.json", "Global Provider Degradation"),
-        ("bioetl-overview-v2.json", "Workflow Status"),
+        ("bioetl-overview-v2.json", "Historical Failures (range evidence)"),
+        ("bioetl-overview-v2.json", "Recent terminal runs (range evidence)"),
         ("bioetl-control-plane-v1.json", "GLOBAL Control-Plane Read Failures"),
         (
             "bioetl-control-plane-v1.json",
