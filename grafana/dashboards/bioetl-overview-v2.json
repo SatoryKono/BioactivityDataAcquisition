@@ -12,90 +12,46 @@
       }
     ]
   },
-  "description": "L0 Overview. Primary question: What is currently broken or degraded in BioETL, why, and where should the operator drill down first? Owner: sre-data-platform. Audience: SRE, data engineer, product/project owner. Status semantics: BROKEN / DEGRADED / OK / UNKNOWN; zero events are not green unless recent activity proves the subsystem was observed.",
+  "description": "L0 Overview decision dashboard. Current status (L0/L1) separated from Range Evidence (historical).",
   "editable": true,
   "gnetId": null,
   "graphTooltip": 1,
   "id": null,
   "links": [
     {
-      "asDropdown": false,
-      "icon": "dashboard",
-      "includeVars": false,
-      "keepTime": true,
-      "tags": [],
-      "targetBlank": false,
-      "title": "2. Runtime",
-      "tooltip": "L2 runtime drilldown with bounded scope handoff",
+      "title": "Runtime",
+      "type": "dashboards",
+      "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&var-current_window=$current_window&from=$__from&to=$__to"
+    },
+    {
+      "title": "DQ",
       "type": "link",
-      "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
+      "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-layer=gold&from=$__from&to=$__to"
     },
     {
-      "asDropdown": false,
-      "icon": "external link",
-      "includeVars": false,
-      "keepTime": true,
-      "tags": [],
-      "targetBlank": false,
-      "title": "3. Provider Health",
-      "tooltip": "Cross-scope handoff (opens with All provider scope): var-provider=All and var-adapter=All; pipeline/run_type do not transfer. Scope reset: target dashboard opens with explicit All/default scope; source-specific filters are not transferred.",
-      "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=All&var-adapter=All&${__url_time_range}",
-      "type": "link"
-    },
-    {
-      "asDropdown": false,
-      "icon": "dashboard",
-      "includeVars": false,
-      "keepTime": true,
-      "tags": [],
-      "targetBlank": false,
-      "title": "4. Data Quality",
-      "tooltip": "Data quality drilldown with bounded scope handoff",
+      "title": "Provider",
       "type": "link",
-      "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
+      "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=$provider&var-scope=GLOBAL&var-pipeline=$pipeline&from=$__from&to=$__to"
     },
     {
-      "asDropdown": false,
-      "icon": "dashboard",
-      "includeVars": false,
-      "keepTime": true,
-      "tags": [],
-      "targetBlank": false,
-      "title": "Control Plane",
-      "tooltip": "Replay/resume safety drilldown with bounded scope handoff",
+      "title": "Control Plane v1",
       "type": "link",
-      "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
+      "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&var-profile=$profile&from=$__from&to=$__to"
     },
     {
-      "asDropdown": false,
-      "icon": "dashboard",
-      "includeVars": false,
-      "keepTime": true,
-      "tags": [],
-      "targetBlank": false,
-      "title": "6. Workflow Overview",
-      "url": "/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}",
-      "type": "link"
-    },
-    {
-      "title": "Explore Logs",
-      "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D",
+      "title": "Workflow",
       "type": "link",
-      "asDropdown": false,
-      "includeVars": false,
-      "keepTime": true,
-      "targetBlank": false,
-      "tooltip": "Open Loki Explore with tracing profile and selected time range."
+      "url": "/d/bioetl-workflow-overview/bioetl-workflow-overview?var-workflow=$workflow&var-pipeline=$pipeline&var-phase=$phase&from=$__from&to=$__to"
     },
     {
-      "title": "Explore Traces",
-      "url": "/a/grafana-exploretraces-app/?from=${__from}&to=${__to}&queryType=traceqlSearch&query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline:regex}%22%20%26%26%20span.%22bioetl.run_type%22%20%3D~%20%22${run_type:regex}%22%20%7D",
+      "title": "Logs",
       "type": "link",
-      "asDropdown": false,
-      "includeVars": false,
-      "keepTime": true,
-      "targetBlank": false,
-      "tooltip": "Open Tempo Explore with tracing profile and selected time range."
+      "url": "/a/grafana-lokiexplore-app/explore?var-pipeline=$pipeline&var-provider=$provider&var-stage=$stage&var-severity=$severity&from=$__from&to=$__to"
+    },
+    {
+      "title": "Traces",
+      "type": "link",
+      "url": "/a/grafana-exploretraces-app/explore?var-pipeline=$pipeline&var-stage=$stage&from=$__from&to=$__to"
     }
   ],
   "panels": [
@@ -127,34 +83,20 @@
               "type": "value",
               "options": {
                 "0": {
-                  "color": "gray",
-                  "index": 0,
-                  "text": "UNKNOWN"
+                  "text": "NO DATA / UNKNOWN",
+                  "color": "gray"
                 },
                 "1": {
-                  "color": "green",
-                  "index": 1,
-                  "text": "OK"
+                  "text": "OK",
+                  "color": "green"
                 },
                 "2": {
-                  "color": "yellow",
-                  "index": 2,
-                  "text": "DEGRADED"
+                  "text": "DEGRADED",
+                  "color": "orange"
                 },
                 "3": {
-                  "color": "red",
-                  "index": 3,
-                  "text": "BROKEN"
-                }
-              }
-            },
-            {
-              "type": "special",
-              "options": {
-                "match": "null",
-                "result": {
-                  "text": "UNKNOWN",
-                  "color": "gray"
+                  "text": "FAILING / BROKEN",
+                  "color": "red"
                 }
               }
             }
@@ -196,7 +138,7 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 4,
+        "w": 6,
         "x": 0,
         "y": 4
       },
@@ -246,34 +188,20 @@
               "type": "value",
               "options": {
                 "0": {
-                  "color": "gray",
-                  "index": 0,
-                  "text": "UNKNOWN"
+                  "text": "NO DATA / UNKNOWN",
+                  "color": "gray"
                 },
                 "1": {
-                  "color": "green",
-                  "index": 1,
-                  "text": "OK"
+                  "text": "OK",
+                  "color": "green"
                 },
                 "2": {
-                  "color": "yellow",
-                  "index": 2,
-                  "text": "DEGRADED"
+                  "text": "DEGRADED",
+                  "color": "orange"
                 },
                 "3": {
-                  "color": "red",
-                  "index": 3,
-                  "text": "BROKEN"
-                }
-              }
-            },
-            {
-              "type": "special",
-              "options": {
-                "match": "null",
-                "result": {
-                  "text": "UNKNOWN",
-                  "color": "gray"
+                  "text": "FAILING / BROKEN",
+                  "color": "red"
                 }
               }
             }
@@ -323,8 +251,8 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 4,
-        "x": 4,
+        "w": 9,
+        "x": 6,
         "y": 4
       },
       "id": 215,
@@ -354,2129 +282,301 @@
       "description": "Threshold semantics: Runtime blockers > Control Plane > DQ > Provider > Workflow > Monitor. Next action: follow this priority order; investigate first non-OK domain and keep the same pipeline/run_type scope."
     },
     {
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "decimals": 0,
-          "mappings": [
-            {
-              "type": "special",
-              "options": {
-                "match": "null",
-                "result": {
-                  "text": "UNKNOWN",
-                  "color": "gray"
-                }
-              }
-            }
-          ],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "orange",
-                "value": 1
-              },
-              {
-                "color": "red",
-                "value": 2
-              }
-            ]
-          },
-          "unit": "short",
-          "links": [
-            {
-              "title": "Open 2. Runtime",
-              "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
-            }
-          ]
-        },
-        "overrides": []
-      },
+      "id": 9002,
+      "type": "table",
+      "title": "L0 Inputs",
       "gridPos": {
         "h": 6,
-        "w": 4,
-        "x": 8,
+        "w": 9,
+        "x": 15,
         "y": 4
       },
-      "id": 201,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
       },
       "targets": [
         {
-          "expr": "round(sum(increase(bioetl_pipeline_runs_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", status=\"failed\"}[$__range])) or vector(0))",
-          "legendFormat": "Failed runs",
-          "refId": "A"
+          "expr": "bioetl_l0_input_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}",
+          "refId": "A",
+          "format": "table",
+          "instant": true
         }
       ],
-      "title": "Failed Runs in Range",
-      "type": "stat",
-      "description": "Failed pipeline runs in the selected range. Any non-zero value is a runtime blocker."
-    },
-    {
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "custom": {
-            "align": "auto",
-            "cellOptions": {
-              "type": "auto"
-            },
-            "inspect": false
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "short",
-          "links": [
-            {
-              "title": "Open 2. Runtime",
-              "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
-            }
-          ]
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 4,
-        "x": 12,
-        "y": 4
-      },
-      "id": 202,
       "options": {
-        "cellHeight": "sm",
-        "footer": {
-          "countRows": false,
-          "fields": "",
-          "reducer": [
-            "sum"
-          ],
-          "show": false
-        },
         "showHeader": true,
-        "dataLinks": [
-          {
-            "title": "Open bioetl-runtime",
-            "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
-            "targetBlank": false
-          }
-        ]
-      },
-      "pluginVersion": "10.4.0",
-      "targets": [
-        {
-          "expr": "topk(1, max by (stage) (max_over_time(bioetl_stage_backlog_records{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])))",
-          "legendFormat": "{{stage}} backlog",
-          "refId": "A",
-          "instant": true
-        }
-      ],
-      "title": "Worst Backlog Stage",
-      "type": "table",
-      "description": "Worst backlog stage in the selected range. The stage label is the culprit; non-zero means open Runtime."
-    },
-    {
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "custom": {
-            "align": "auto",
-            "cellOptions": {
-              "type": "auto"
-            },
-            "inspect": false
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "s",
-          "links": [
-            {
-              "title": "Open 2. Runtime",
-              "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
-            }
-          ]
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 4,
-        "x": 16,
-        "y": 4
-      },
-      "id": 203,
-      "options": {
-        "cellHeight": "sm",
         "footer": {
-          "countRows": false,
-          "fields": "",
-          "reducer": [
-            "sum"
-          ],
           "show": false
-        },
-        "showHeader": true,
-        "dataLinks": [
-          {
-            "title": "Open bioetl-runtime",
-            "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
-            "targetBlank": false
-          }
-        ]
-      },
-      "pluginVersion": "10.4.0",
-      "targets": [
-        {
-          "expr": "topk(1, max by (stage) (max_over_time(bioetl_stage_lag_seconds{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])))",
-          "legendFormat": "{{stage}} lag",
-          "refId": "A",
-          "instant": true
         }
-      ],
-      "title": "Worst Lag Stage",
-      "type": "table",
-      "description": "Worst lag stage in the selected range. The stage label is the culprit; >=300s is degraded, >=900s is broken."
+      },
+      "description": "Current L0 inputs (Runtime, DQ, Gold, Control Plane, Provider, Workflow)."
     },
     {
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "custom": {
-            "align": "auto",
-            "cellOptions": {
-              "type": "auto"
-            },
-            "inspect": false
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "short",
-          "links": [
-            {
-              "title": "Open 4. Data Quality",
-              "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
-            }
-          ]
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 4,
-        "x": 20,
-        "y": 4
-      },
-      "id": 4,
-      "options": {
-        "cellHeight": "sm",
-        "footer": {
-          "countRows": false,
-          "fields": "",
-          "reducer": [
-            "sum"
-          ],
-          "show": false
-        },
-        "showHeader": true
-      },
-      "pluginVersion": "10.4.0",
-      "targets": [
-        {
-          "expr": "round(sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"bronze\"}[$__range])) or vector(0))",
-          "legendFormat": "Bronze input denominator",
-          "refId": "A",
-          "instant": true
-        },
-        {
-          "expr": "round(sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"gold\"}[$__range])) or vector(0))",
-          "legendFormat": "Gold output",
-          "refId": "B",
-          "instant": true
-        },
-        {
-          "expr": "round(sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__range])) or vector(0))",
-          "legendFormat": "Filtered out",
-          "refId": "C",
-          "instant": true
-        },
-        {
-          "expr": "round(sum(increase(bioetl_dq_records_quarantined_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])) or vector(0))",
-          "legendFormat": "Quarantined",
-          "refId": "D",
-          "instant": true
-        },
-        {
-          "expr": "clamp_min((round(sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"bronze\"}[$__range])) or vector(0))) - (round(sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"gold\"}[$__range])) or vector(0))) - (round(sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__range])) or vector(0))) - (round(sum(increase(bioetl_dq_records_quarantined_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])) or vector(0))), 0)",
-          "legendFormat": "Unaccounted loss",
-          "refId": "E",
-          "instant": true
-        }
-      ],
-      "title": "Flow Balance",
+      "id": 9003,
       "type": "table",
-      "description": "If Bronze input is zero or missing, yield is unavailable/no recent input; the dashboard must not show green 100% health."
-    },
-    {
-      "collapsed": true,
+      "title": "Runtime Blockers Current",
       "gridPos": {
-        "h": 1,
-        "w": 24,
+        "h": 5,
+        "w": 6,
         "x": 0,
         "y": 10
       },
-      "id": 3001,
-      "panels": [
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "targets": [
         {
-          "datasource": "Prometheus",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "decimals": 0,
-              "mappings": [
-                {
-                  "type": "value",
-                  "options": {
-                    "0": {
-                      "color": "gray",
-                      "index": 0,
-                      "text": "NO RECENT ACTIVITY"
-                    },
-                    "1": {
-                      "color": "green",
-                      "index": 1,
-                      "text": "ACTIVE"
-                    },
-                    "2": {
-                      "color": "red",
-                      "index": 2,
-                      "text": "STALLED"
-                    }
-                  }
-                },
-                {
-                  "type": "special",
-                  "options": {
-                    "match": "null",
-                    "result": {
-                      "text": "UNKNOWN",
-                      "color": "gray"
-                    }
-                  }
-                }
-              ],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "orange",
-                    "value": 1
-                  },
-                  {
-                    "color": "red",
-                    "value": 2
-                  }
-                ]
-              },
-              "unit": "none",
-              "links": [
-                {
-                  "title": "Open 2. Runtime",
-                  "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
-                }
-              ]
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 6,
-            "w": 4,
-            "x": 12,
-            "y": 1
-          },
-          "id": 216,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "area",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "value_and_name"
-          },
-          "targets": [
-            {
-              "expr": "(((((max(max_over_time(bioetl_stage_backlog_records{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])) or vector(0)) > bool 0) * ((round(sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])) or vector(0))) == bool 0))) * 2) + (((((round(sum(increase(bioetl_pipeline_runs_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])) or vector(0))) + (round(sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])) or vector(0))))) > bool 0) * ((((max(max_over_time(bioetl_stage_backlog_records{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])) or vector(0)) > bool 0) * ((round(sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])) or vector(0))) == bool 0)) == bool 0) * 1)",
-              "legendFormat": "Activity state: records/runs/backlog",
-              "refId": "A"
-            }
-          ],
-          "title": "Recent Activity",
-          "type": "stat",
-          "description": "NO RECENT ACTIVITY when runs and records are zero. STALLED when backlog exists but selected-range records are zero."
-        },
-        {
-          "datasource": "Prometheus",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "drawStyle": "line",
-                "fillOpacity": 10,
-                "gradientMode": "none",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "lineInterpolation": "linear",
-                "lineWidth": 1,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "never",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  }
-                ]
-              },
-              "unit": "short"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 8,
-            "w": 6,
-            "x": 0,
-            "y": 7
-          },
-          "id": 1,
-          "options": {
-            "legend": {
-              "calcs": [],
-              "displayMode": "list",
-              "placement": "bottom",
-              "showLegend": true
-            },
-            "tooltip": {
-              "mode": "single",
-              "sort": "none"
-            }
-          },
-          "targets": [
-            {
-              "expr": "sum by (stage) (increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__interval]))",
-              "legendFormat": "{{stage}}",
-              "refId": "A"
-            }
-          ],
-          "title": "Processing Volume by Stage",
-          "type": "timeseries",
-          "description": "Selected-window throughput trend by stage; zero volume plus backlog means stalled."
-        },
-        {
-          "datasource": "Prometheus",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "drawStyle": "line",
-                "fillOpacity": 10,
-                "gradientMode": "none",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "lineInterpolation": "linear",
-                "lineWidth": 1,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "never",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  }
-                ]
-              },
-              "unit": "short"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 8,
-            "w": 6,
-            "x": 6,
-            "y": 15
-          },
-          "id": 207,
-          "options": {
-            "legend": {
-              "calcs": [],
-              "displayMode": "list",
-              "placement": "bottom",
-              "showLegend": true
-            },
-            "tooltip": {
-              "mode": "single",
-              "sort": "none"
-            }
-          },
-          "targets": [
-            {
-              "expr": "sum by (status) (increase(bioetl_pipeline_runs_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__interval]))",
-              "legendFormat": "{{status}}",
-              "refId": "A"
-            }
-          ],
-          "title": "Pipeline Run Outcomes",
-          "type": "timeseries",
-          "description": "Run status trend by selected interval."
-        },
-        {
-          "datasource": "Prometheus",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "decimals": 0,
-              "mappings": [
-                {
-                  "type": "value",
-                  "options": {
-                    "0": {
-                      "color": "gray",
-                      "index": 0,
-                      "text": "UNKNOWN"
-                    },
-                    "1": {
-                      "color": "green",
-                      "index": 1,
-                      "text": "OK"
-                    },
-                    "2": {
-                      "color": "yellow",
-                      "index": 2,
-                      "text": "DEGRADED"
-                    },
-                    "3": {
-                      "color": "red",
-                      "index": 3,
-                      "text": "BROKEN"
-                    }
-                  }
-                },
-                {
-                  "type": "special",
-                  "options": {
-                    "match": "null",
-                    "result": {
-                      "text": "UNKNOWN",
-                      "color": "gray"
-                    }
-                  }
-                }
-              ],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "orange",
-                    "value": 1
-                  },
-                  {
-                    "color": "red",
-                    "value": 2
-                  }
-                ]
-              },
-              "unit": "none",
-              "links": [
-                {
-                  "title": "Open 2. Runtime",
-                  "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
-                }
-              ]
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 6,
-            "w": 5,
-            "x": 0,
-            "y": 23
-          },
-          "id": 208,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "area",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "value_and_name",
-            "dataLinks": [
-              {
-                "title": "Open Runtime status",
-                "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
-                "targetBlank": false
-              }
-            ]
-          },
-          "targets": [
-            {
-              "expr": "((((sum(bioetl_runtime_alert_condition_pipeline_runs_failed_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_stage_backlog_active_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_stage_lag_high_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_gold_write_missing_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or vector(0))) > bool 0) * 3) + ((((sum(bioetl_runtime_alert_condition_pipeline_runs_failed_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_stage_backlog_active_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_stage_lag_high_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_gold_write_missing_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or vector(0))) == bool 0) * (((round(sum(increase(bioetl_pipeline_runs_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])) or vector(0))) + (round(sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])) or vector(0)))) > bool 0) * 1)",
-              "legendFormat": "Reason: failed_runs, stage_backlog_active, stage_lag_high, gold_write_missing. Next: 2. Runtime",
-              "refId": "A"
-            }
-          ],
-          "title": "Runtime Status",
-          "type": "stat",
-          "description": "BROKEN means at least one runtime blocker recording rule is active: failed runs, stage backlog, stage lag, or gold write missing. Uses same recording rules as Runtime dashboard for guaranteed consistency."
-        },
-        {
-          "datasource": "Prometheus",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "decimals": 0,
-              "mappings": [
-                {
-                  "type": "value",
-                  "options": {
-                    "0": {
-                      "color": "gray",
-                      "index": 0,
-                      "text": "UNKNOWN"
-                    },
-                    "1": {
-                      "color": "green",
-                      "index": 1,
-                      "text": "OK"
-                    },
-                    "2": {
-                      "color": "yellow",
-                      "index": 2,
-                      "text": "DEGRADED"
-                    },
-                    "3": {
-                      "color": "red",
-                      "index": 3,
-                      "text": "BROKEN"
-                    }
-                  }
-                },
-                {
-                  "type": "special",
-                  "options": {
-                    "match": "null",
-                    "result": {
-                      "text": "UNKNOWN",
-                      "color": "gray"
-                    }
-                  }
-                }
-              ],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "orange",
-                    "value": 1
-                  },
-                  {
-                    "color": "red",
-                    "value": 2
-                  }
-                ]
-              },
-              "unit": "none",
-              "links": [
-                {
-                  "title": "Open 4. Data Quality",
-                  "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
-                }
-              ]
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 6,
-            "w": 5,
-            "x": 5,
-            "y": 29
-          },
-          "id": 209,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "area",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "value_and_name",
-            "dataLinks": [
-              {
-                "title": "Open Data Quality status",
-                "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
-                "targetBlank": false
-              }
-            ]
-          },
-          "targets": [
-            {
-              "expr": "((round(sum(increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\", severity=\"hard_fail\"}[$__range])) or vector(0)) > bool 0) * 3) + ((round(sum(increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\", severity=\"hard_fail\"}[$__range])) or vector(0)) == bool 0) * (((round(sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__range])) or vector(0))) + (round(sum(increase(bioetl_dq_records_quarantined_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])) or vector(0))) + ((max(clamp_min(time() - max by (pipeline, entity) (bioetl_data_freshness_seconds{pipeline=~\"$pipeline\"}), 0)) or vector(0)) > bool 86400)) > bool 0) * 2) + ((round(sum(increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\", severity=\"hard_fail\"}[$__range])) or vector(0)) == bool 0) * (((round(sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__range])) or vector(0))) + (round(sum(increase(bioetl_dq_records_quarantined_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])) or vector(0))) + ((max(clamp_min(time() - max by (pipeline, entity) (bioetl_data_freshness_seconds{pipeline=~\"$pipeline\"}), 0)) or vector(0)) > bool 86400)) == bool 0) * (((round(sum(increase(bioetl_pipeline_runs_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])) or vector(0))) + (round(sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])) or vector(0)))) > bool 0) * 1)",
-              "legendFormat": "Reason: hard_fail, Silver rejects, quarantine, freshness lag. Next: 4. Data Quality",
-              "refId": "A"
-            }
-          ],
-          "title": "Data Quality Status",
-          "type": "stat",
-          "description": "BROKEN on DQ hard failures; DEGRADED on Silver rejects, quarantine, or freshness warnings."
-        },
-        {
-          "datasource": "Prometheus",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "decimals": 0,
-              "mappings": [
-                {
-                  "type": "value",
-                  "options": {
-                    "0": {
-                      "color": "gray",
-                      "index": 0,
-                      "text": "UNKNOWN"
-                    },
-                    "1": {
-                      "color": "green",
-                      "index": 1,
-                      "text": "OK"
-                    },
-                    "2": {
-                      "color": "yellow",
-                      "index": 2,
-                      "text": "DEGRADED"
-                    },
-                    "3": {
-                      "color": "red",
-                      "index": 3,
-                      "text": "BROKEN"
-                    }
-                  }
-                },
-                {
-                  "type": "special",
-                  "options": {
-                    "match": "null",
-                    "result": {
-                      "text": "UNKNOWN",
-                      "color": "gray"
-                    }
-                  }
-                }
-              ],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "orange",
-                    "value": 1
-                  },
-                  {
-                    "color": "red",
-                    "value": 2
-                  }
-                ]
-              },
-              "unit": "none",
-              "links": [
-                {
-                  "title": "Open Control Plane v1",
-                  "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
-                }
-              ],
-              "noValue": "UNKNOWN (no observed samples)"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 6,
-            "w": 5,
-            "x": 15,
-            "y": 35
-          },
-          "id": 210,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "area",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "value_and_name",
-            "dataLinks": [
-              {
-                "title": "Open Control Plane status",
-                "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
-                "targetBlank": false
-              }
-            ]
-          },
-          "targets": [
-            {
-              "expr": "(((round(sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", status=\"failed\"}[$__range])) or vector(0)) + round(sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range])) or vector(0)) + round(sum(increase(bioetl_checkpoint_compatibility_events_total{pipeline=~\"$pipeline\", disposition=~\".*_incompatible\"}[$__range])) or vector(0)) + round(sum(increase(bioetl_lineage_refs_missing_total{pipeline=~\"$pipeline\"}[$__range])) or vector(0))) > bool 0) * 3) + (((round(sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", status=\"failed\"}[$__range])) or vector(0)) + round(sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range])) or vector(0)) + round(sum(increase(bioetl_checkpoint_compatibility_events_total{pipeline=~\"$pipeline\", disposition=~\".*_incompatible\"}[$__range])) or vector(0)) + round(sum(increase(bioetl_lineage_refs_missing_total{pipeline=~\"$pipeline\"}[$__range])) or vector(0))) == bool 0) * (((round(sum(increase(bioetl_pipeline_runs_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])) or vector(0))) + (round(sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])) or vector(0)))) > bool 0) * 1)",
-              "legendFormat": "Reason: manifest, ledger, checkpoint, lineage blockers. Next: Control Plane v1",
-              "refId": "A"
-            }
-          ],
-          "title": "Control Plane Status",
-          "type": "stat",
-          "description": "Control Plane status. OK only when manifest/ledger/checkpoint samples were observed. UNKNOWN when no control plane metric activity detected in selected range."
-        },
-        {
-          "datasource": "Prometheus",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "decimals": 0,
-              "mappings": [
-                {
-                  "type": "value",
-                  "options": {
-                    "0": {
-                      "color": "gray",
-                      "index": 0,
-                      "text": "UNKNOWN"
-                    },
-                    "1": {
-                      "color": "green",
-                      "index": 1,
-                      "text": "OK"
-                    },
-                    "2": {
-                      "color": "yellow",
-                      "index": 2,
-                      "text": "DEGRADED"
-                    },
-                    "3": {
-                      "color": "red",
-                      "index": 3,
-                      "text": "BROKEN"
-                    }
-                  }
-                },
-                {
-                  "type": "special",
-                  "options": {
-                    "match": "null",
-                    "result": {
-                      "text": "UNKNOWN",
-                      "color": "gray"
-                    }
-                  }
-                }
-              ],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "orange",
-                    "value": 1
-                  },
-                  {
-                    "color": "red",
-                    "value": 2
-                  }
-                ]
-              },
-              "unit": "none",
-              "links": [
-                {
-                  "title": "Open 3. Provider Health",
-                  "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${__url_time_range}"
-                }
-              ]
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 6,
-            "w": 5,
-            "x": 10,
-            "y": 41
-          },
-          "id": 211,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "area",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "value_and_name",
-            "dataLinks": [
-              {
-                "title": "Open bioetl-provider-health-v2",
-                "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${__url_time_range}",
-                "targetBlank": false
-              }
-            ]
-          },
-          "targets": [
-            {
-              "expr": "(((round(sum(increase(bioetl_health_check_degraded_total[$__range])) or vector(0)) + round(sum(increase(bioetl_health_check_failures_total[$__range])) or vector(0)) + round(sum(increase(bioetl_data_source_retry_exhausted_total[$__range])) or vector(0))) >= bool 3) * 3) + (((round(sum(increase(bioetl_health_check_degraded_total[$__range])) or vector(0)) + round(sum(increase(bioetl_health_check_failures_total[$__range])) or vector(0)) + round(sum(increase(bioetl_data_source_retry_exhausted_total[$__range])) or vector(0))) > bool 0) * ((round(sum(increase(bioetl_health_check_degraded_total[$__range])) or vector(0)) + round(sum(increase(bioetl_health_check_failures_total[$__range])) or vector(0)) + round(sum(increase(bioetl_data_source_retry_exhausted_total[$__range])) or vector(0))) < bool 3) * 2) + (((round(sum(increase(bioetl_health_check_degraded_total[$__range])) or vector(0)) + round(sum(increase(bioetl_health_check_failures_total[$__range])) or vector(0)) + round(sum(increase(bioetl_data_source_retry_exhausted_total[$__range])) or vector(0))) == bool 0) * ((round(sum(increase(bioetl_health_check_success_total[$__range])) or vector(0)) + round(sum(increase(bioetl_health_check_degraded_total[$__range])) or vector(0)) + round(sum(increase(bioetl_health_check_failures_total[$__range])) or vector(0))) > bool 0) * 1)",
-              "legendFormat": "Reason: degraded/failed health checks or retry exhaustion. Next: 3. Provider Health",
-              "refId": "A"
-            }
-          ],
-          "title": "Provider Status",
-          "type": "stat",
-          "description": "UNKNOWN when provider health has no recent samples; zero provider failures alone is not rendered green."
-        },
-        {
-          "datasource": "Prometheus",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "decimals": 0,
-              "mappings": [
-                {
-                  "type": "value",
-                  "options": {
-                    "0": {
-                      "color": "gray",
-                      "index": 0,
-                      "text": "UNKNOWN"
-                    },
-                    "1": {
-                      "color": "green",
-                      "index": 1,
-                      "text": "OK"
-                    },
-                    "2": {
-                      "color": "yellow",
-                      "index": 2,
-                      "text": "DEGRADED"
-                    },
-                    "3": {
-                      "color": "red",
-                      "index": 3,
-                      "text": "BROKEN"
-                    }
-                  }
-                },
-                {
-                  "type": "special",
-                  "options": {
-                    "match": "null",
-                    "result": {
-                      "text": "UNKNOWN",
-                      "color": "gray"
-                    }
-                  }
-                }
-              ],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "orange",
-                    "value": 1
-                  },
-                  {
-                    "color": "red",
-                    "value": 2
-                  }
-                ]
-              },
-              "unit": "none",
-              "links": [
-                {
-                  "title": "Open 6. Workflow Overview",
-                  "url": "/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}"
-                }
-              ]
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 6,
-            "w": 4,
-            "x": 20,
-            "y": 47
-          },
-          "id": 212,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "area",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "value_and_name",
-            "dataLinks": [
-              {
-                "title": "Open bioetl-workflow-overview",
-                "url": "/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}",
-                "targetBlank": false
-              }
-            ]
-          },
-          "targets": [
-            {
-              "expr": "((round(sum(increase(bioetl_workflow_runs_total{status=\"failed\"}[$__range])) or vector(0)) > bool 0) * 3) + ((round(sum(increase(bioetl_workflow_runs_total{status=\"failed\"}[$__range])) or vector(0)) == bool 0) * (round(sum(increase(bioetl_workflow_runs_total[$__range])) or vector(0)) > bool 0) * 1)",
-              "legendFormat": "Reason: workflow failed runs. Next: 6. Workflow Overview",
-              "refId": "A"
-            }
-          ],
-          "title": "Workflow Status",
-          "type": "stat",
-          "description": "Declarative workflow status. UNKNOWN means no workflow samples in range."
+          "expr": "bioetl_l1_runtime_blocker_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}",
+          "refId": "A",
+          "format": "table",
+          "instant": true
         }
       ],
-      "title": "Throughput details",
-      "type": "row"
+      "options": {
+        "showHeader": true,
+        "footer": {
+          "show": false
+        }
+      },
+      "description": "Current status only; no $__range evidence."
     },
     {
-      "collapsed": true,
+      "id": 9004,
+      "type": "table",
+      "title": "DQ Status Current",
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 6,
+        "y": 10
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "targets": [
+        {
+          "expr": "bioetl_l1_dq_status{pipeline=~\"$pipeline\"}",
+          "refId": "A",
+          "format": "table",
+          "instant": true
+        }
+      ],
+      "options": {
+        "showHeader": true,
+        "footer": {
+          "show": false
+        }
+      },
+      "description": ""
+    },
+    {
+      "id": 9005,
+      "type": "table",
+      "title": "Gold Lifecycle Current",
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 12,
+        "y": 10
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "targets": [
+        {
+          "expr": "bioetl_l1_gold_lifecycle_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}",
+          "refId": "A",
+          "format": "table",
+          "instant": true
+        }
+      ],
+      "options": {
+        "showHeader": true,
+        "footer": {
+          "show": false
+        }
+      },
+      "description": ""
+    },
+    {
+      "id": 9006,
+      "type": "table",
+      "title": "Control Plane Current",
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 18,
+        "y": 10
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "targets": [
+        {
+          "expr": "bioetl_l1_control_plane_current_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}",
+          "refId": "A",
+          "format": "table",
+          "instant": true
+        }
+      ],
+      "options": {
+        "showHeader": true,
+        "footer": {
+          "show": false
+        }
+      },
+      "description": ""
+    },
+    {
+      "id": 9007,
+      "type": "table",
+      "title": "Provider GLOBAL Scope",
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 0,
+        "y": 15
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "targets": [
+        {
+          "expr": "bioetl_l1_provider_global_status",
+          "refId": "A",
+          "format": "table",
+          "instant": true
+        }
+      ],
+      "options": {
+        "showHeader": true,
+        "footer": {
+          "show": false
+        }
+      },
+      "description": "GLOBAL provider scope (not selected pipeline only)."
+    },
+    {
+      "id": 9008,
+      "type": "table",
+      "title": "Workflow GLOBAL / Selected Scope",
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 12,
+        "y": 15
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "targets": [
+        {
+          "expr": "bioetl_l1_workflow_global_status or bioetl_l0_input_status{input=\"workflow\",pipeline=~\"$pipeline\"}",
+          "refId": "A",
+          "format": "table",
+          "instant": true
+        }
+      ],
+      "options": {
+        "showHeader": true,
+        "footer": {
+          "show": false
+        }
+      },
+      "description": "GLOBAL workflow scope + selected scope context."
+    },
+    {
+      "id": 9009,
+      "type": "row",
+      "title": "Range Evidence (Historical / Recent History)",
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 11
+        "y": 20
       },
-      "id": 3002,
+      "collapsed": true,
       "panels": [
         {
-          "datasource": "Prometheus",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "drawStyle": "line",
-                "fillOpacity": 10,
-                "gradientMode": "none",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "lineInterpolation": "linear",
-                "lineWidth": 1,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "never",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  }
-                ]
-              },
-              "unit": "short"
-            },
-            "overrides": []
-          },
+          "id": 9010,
+          "type": "table",
+          "title": "Historical Failures (range evidence)",
           "gridPos": {
-            "h": 8,
-            "w": 6,
-            "x": 12,
-            "y": 1
-          },
-          "id": 1210,
-          "options": {
-            "legend": {
-              "calcs": [],
-              "displayMode": "list",
-              "placement": "bottom",
-              "showLegend": true
-            },
-            "tooltip": {
-              "mode": "single",
-              "sort": "none"
-            }
-          },
-          "targets": [
-            {
-              "expr": "max by (stage) (max_over_time(bioetl_stage_backlog_records{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__interval]))",
-              "legendFormat": "{{stage}}",
-              "refId": "A"
-            }
-          ],
-          "title": "Stage Backlog Trend",
-          "type": "timeseries",
-          "description": "Gauge trend for unresolved stage backlog."
-        },
-        {
-          "datasource": "Prometheus",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "drawStyle": "line",
-                "fillOpacity": 10,
-                "gradientMode": "none",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "lineInterpolation": "linear",
-                "lineWidth": 1,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "never",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  }
-                ]
-              },
-              "unit": "s"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 8,
-            "w": 6,
-            "x": 18,
-            "y": 9
-          },
-          "id": 1211,
-          "options": {
-            "legend": {
-              "calcs": [],
-              "displayMode": "list",
-              "placement": "bottom",
-              "showLegend": true
-            },
-            "tooltip": {
-              "mode": "single",
-              "sort": "none"
-            }
-          },
-          "targets": [
-            {
-              "expr": "max by (stage) (max_over_time(bioetl_stage_lag_seconds{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__interval]))",
-              "legendFormat": "{{stage}}",
-              "refId": "A"
-            }
-          ],
-          "title": "Stage Lag Trend",
-          "type": "timeseries",
-          "description": "Gauge trend for unresolved stage lag."
-        },
-        {
-          "datasource": "Prometheus",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "decimals": 0,
-              "mappings": [
-                {
-                  "type": "special",
-                  "options": {
-                    "match": "null",
-                    "result": {
-                      "text": "UNKNOWN",
-                      "color": "gray"
-                    }
-                  }
-                }
-              ],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "orange",
-                    "value": 1
-                  },
-                  {
-                    "color": "red",
-                    "value": 2
-                  }
-                ]
-              },
-              "unit": "dateTimeAsIso",
-              "links": [
-                {
-                  "title": "Open 4. Data Quality",
-                  "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
-                }
-              ]
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 6,
-            "w": 6,
-            "x": 12,
-            "y": 17
-          },
-          "id": 119,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "area",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "auto"
-          },
-          "targets": [
-            {
-              "expr": "max(bioetl_data_freshness_seconds{pipeline=~\"$pipeline\"}) * 1000",
-              "legendFormat": "Latest success timestamp",
-              "refId": "A"
-            }
-          ],
-          "title": "Latest Successful Data Timestamp",
-          "type": "stat",
-          "description": "Supporting freshness anchor. No data means no successful data timestamp is visible for the selected pipeline scope."
-        },
-        {
-          "datasource": "Prometheus",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "custom": {
-                "align": "auto",
-                "cellOptions": {
-                  "type": "auto"
-                },
-                "inspect": false
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  }
-                ]
-              },
-              "unit": "short",
-              "links": [
-                {
-                  "title": "Open 2. Runtime",
-                  "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
-                }
-              ]
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 8,
+            "h": 5,
             "w": 12,
             "x": 0,
-            "y": 23
+            "y": 21
           },
-          "id": 217,
-          "options": {
-            "cellHeight": "sm",
-            "footer": {
-              "countRows": false,
-              "fields": "",
-              "reducer": [
-                "sum"
-              ],
-              "show": false
-            },
-            "showHeader": true
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
           },
-          "pluginVersion": "10.4.0",
           "targets": [
             {
-              "expr": "max by (stage) (max_over_time(bioetl_stage_backlog_records{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range]))",
-              "legendFormat": "{{stage}} backlog",
+              "expr": "sum by (pipeline) (increase(bioetl_pipeline_runs_total{status=\"failed\",pipeline=~\"$pipeline\"}[$__range]))",
               "refId": "A",
-              "instant": true
-            },
-            {
-              "expr": "max by (stage) (max_over_time(bioetl_stage_lag_seconds{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range]))",
-              "legendFormat": "{{stage}} lag seconds",
-              "refId": "B",
-              "instant": true
-            },
-            {
-              "expr": "sum by (stage) (rate(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__rate_interval]))",
-              "legendFormat": "{{stage}} processed rate",
-              "refId": "C",
+              "format": "table",
               "instant": true
             }
           ],
-          "title": "Backlog Causality",
+          "options": {
+            "showHeader": true,
+            "footer": {
+              "show": false
+            }
+          },
+          "description": ""
+        },
+        {
+          "id": 9011,
           "type": "table",
-          "description": "Compact invariant support for backlog(t+1) = backlog(t) + ingestion - output. If backlog and lag are non-zero while processed rate is zero, treat as stalled backlog."
-        }
-      ],
-      "title": "Freshness breakdown",
-      "type": "row"
-    },
-    {
-      "collapsed": true,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 12
-      },
-      "id": 3003,
-      "panels": [
-        {
-          "datasource": "Prometheus",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "decimals": 0,
-              "mappings": [
-                {
-                  "type": "special",
-                  "options": {
-                    "match": "null",
-                    "result": {
-                      "text": "UNKNOWN",
-                      "color": "gray"
-                    }
-                  }
-                }
-              ],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "orange",
-                    "value": 1
-                  },
-                  {
-                    "color": "red",
-                    "value": 2
-                  }
-                ]
-              },
-              "unit": "short",
-              "links": [
-                {
-                  "title": "Open 4. Data Quality",
-                  "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
-                }
-              ]
-            },
-            "overrides": []
-          },
+          "title": "Recent terminal runs (range evidence)",
           "gridPos": {
-            "h": 6,
-            "w": 4,
-            "x": 0,
-            "y": 1
+            "h": 5,
+            "w": 12,
+            "x": 12,
+            "y": 21
           },
-          "id": 204,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "area",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "auto"
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
           },
           "targets": [
             {
-              "expr": "round(sum(increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\", severity=\"hard_fail\"}[$__range])) or vector(0))",
-              "legendFormat": "DQ hard blockers",
-              "refId": "A"
+              "expr": "sum by (status) (increase(bioetl_pipeline_runs_total{pipeline=~\"$pipeline\"}[$__range]))",
+              "refId": "A",
+              "format": "table",
+              "instant": true
             }
           ],
-          "title": "DQ Hard Blockers",
-          "type": "stat",
-          "description": "Supporting check: DQ hard-fail validation events in selected range."
-        },
-        {
-          "datasource": "Prometheus",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "decimals": 0,
-              "mappings": [
-                {
-                  "type": "special",
-                  "options": {
-                    "match": "null",
-                    "result": {
-                      "text": "UNKNOWN",
-                      "color": "gray"
-                    }
-                  }
-                }
-              ],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "orange",
-                    "value": 1
-                  },
-                  {
-                    "color": "red",
-                    "value": 2
-                  }
-                ]
-              },
-              "unit": "short",
-              "links": [
-                {
-                  "title": "Open Control Plane v1",
-                  "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
-                }
-              ]
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 6,
-            "w": 5,
-            "x": 4,
-            "y": 7
-          },
-          "id": 205,
           "options": {
-            "colorMode": "value",
-            "graphMode": "area",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "auto"
-          },
-          "targets": [
-            {
-              "expr": "(round(sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", status=\"failed\"}[$__range])) or vector(0)) + round(sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range])) or vector(0)) + round(sum(increase(bioetl_checkpoint_compatibility_events_total{pipeline=~\"$pipeline\", disposition=~\".*_incompatible\"}[$__range])) or vector(0)) + round(sum(increase(bioetl_lineage_refs_missing_total{pipeline=~\"$pipeline\"}[$__range])) or vector(0)))",
-              "legendFormat": "Control-plane blockers",
-              "refId": "A"
+            "showHeader": true,
+            "footer": {
+              "show": false
             }
-          ],
-          "title": "Control-plane Blockers",
-          "type": "stat",
-          "description": "Supporting check: manifest, ledger, checkpoint, or lineage blockers."
-        },
-        {
-          "datasource": "Prometheus",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "decimals": 0,
-              "mappings": [
-                {
-                  "type": "special",
-                  "options": {
-                    "match": "null",
-                    "result": {
-                      "text": "UNKNOWN",
-                      "color": "gray"
-                    }
-                  }
-                }
-              ],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "orange",
-                    "value": 1
-                  },
-                  {
-                    "color": "red",
-                    "value": 2
-                  }
-                ]
-              },
-              "unit": "short",
-              "links": [
-                {
-                  "title": "Open 3. Provider Health",
-                  "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${__url_time_range}"
-                }
-              ],
-              "noValue": "No observed samples"
-            },
-            "overrides": []
           },
-          "gridPos": {
-            "h": 6,
-            "w": 5,
-            "x": 9,
-            "y": 13
-          },
-          "id": 206,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "area",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "auto"
-          },
-          "targets": [
-            {
-              "expr": "(round(sum(increase(bioetl_health_check_degraded_total[$__range]))) + round(sum(increase(bioetl_health_check_failures_total[$__range]))) + round(sum(increase(bioetl_data_source_retry_exhausted_total[$__range]))))",
-              "legendFormat": "Provider degradation",
-              "refId": "A"
-            }
-          ],
-          "title": "Global Provider Degradation",
-          "type": "stat",
-          "description": "Provider degradation/failure events. Shows \"No observed samples\" instead of green 0 when no provider health check series exist in the selected range. Only displays green 0 when samples were observed and no degradation detected."
-        },
-        {
-          "datasource": "Prometheus",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "decimals": 0,
-              "mappings": [
-                {
-                  "type": "special",
-                  "options": {
-                    "match": "null",
-                    "result": {
-                      "text": "UNKNOWN",
-                      "color": "gray"
-                    }
-                  }
-                }
-              ],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "orange",
-                    "value": 1
-                  },
-                  {
-                    "color": "red",
-                    "value": 2
-                  }
-                ]
-              },
-              "unit": "short",
-              "links": [
-                {
-                  "title": "Open Control Plane v1",
-                  "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
-                }
-              ]
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 6,
-            "w": 5,
-            "x": 14,
-            "y": 19
-          },
-          "id": 111,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "area",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "auto"
-          },
-          "targets": [
-            {
-              "expr": "(round(sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", status=\"failed\"}[$__range])) or vector(0))) + (round(sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range])) or vector(0)))",
-              "legendFormat": "Manifest / ledger failures",
-              "refId": "A"
-            }
-          ],
-          "title": "Manifest / Ledger Failures",
-          "type": "stat",
-          "description": "Compact selected-range control-plane write failure summary."
-        },
-        {
-          "datasource": "Prometheus",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "decimals": 0,
-              "mappings": [
-                {
-                  "type": "special",
-                  "options": {
-                    "match": "null",
-                    "result": {
-                      "text": "UNKNOWN",
-                      "color": "gray"
-                    }
-                  }
-                }
-              ],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "orange",
-                    "value": 1
-                  },
-                  {
-                    "color": "red",
-                    "value": 2
-                  }
-                ]
-              },
-              "unit": "short",
-              "links": [
-                {
-                  "title": "Open Control Plane v1",
-                  "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
-                }
-              ]
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 6,
-            "w": 5,
-            "x": 19,
-            "y": 25
-          },
-          "id": 113,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "area",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "auto"
-          },
-          "targets": [
-            {
-              "expr": "round(sum(increase(bioetl_checkpoint_compatibility_events_total{pipeline=~\"$pipeline\", disposition=~\".*_incompatible\"}[$__range])) or vector(0))",
-              "legendFormat": "Checkpoint incompatibilities",
-              "refId": "A"
-            }
-          ],
-          "title": "Checkpoint Incompatibilities",
-          "type": "stat",
-          "description": "Resume/checkpoint compatibility blocks in selected range."
-        },
-        {
-          "datasource": "Prometheus",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "decimals": 0,
-              "mappings": [
-                {
-                  "type": "special",
-                  "options": {
-                    "match": "null",
-                    "result": {
-                      "text": "UNKNOWN",
-                      "color": "gray"
-                    }
-                  }
-                }
-              ],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "orange",
-                    "value": 1
-                  },
-                  {
-                    "color": "red",
-                    "value": 2
-                  }
-                ]
-              },
-              "unit": "short",
-              "links": [
-                {
-                  "title": "Open Control Plane v1",
-                  "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
-                }
-              ]
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 6,
-            "w": 5,
-            "x": 0,
-            "y": 31
-          },
-          "id": 114,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "area",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "auto"
-          },
-          "targets": [
-            {
-              "expr": "round(sum(increase(bioetl_lineage_refs_missing_total{pipeline=~\"$pipeline\"}[$__range])) or vector(0))",
-              "legendFormat": "Lineage refs missing",
-              "refId": "A"
-            }
-          ],
-          "title": "Lineage Refs Missing",
-          "type": "stat",
-          "description": "Missing upstream lineage references in selected range."
-        },
-        {
-          "datasource": "Prometheus",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "decimals": 2,
-              "mappings": [
-                {
-                  "type": "special",
-                  "options": {
-                    "match": "null",
-                    "result": {
-                      "text": "UNKNOWN",
-                      "color": "gray"
-                    }
-                  }
-                }
-              ],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "orange",
-                    "value": 1
-                  },
-                  {
-                    "color": "red",
-                    "value": 2
-                  }
-                ]
-              },
-              "unit": "short",
-              "links": [
-                {
-                  "title": "Open 4. Data Quality",
-                  "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
-                }
-              ]
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 6,
-            "w": 7,
-            "x": 5,
-            "y": 37
-          },
-          "id": 118,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "area",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "auto"
-          },
-          "targets": [
-            {
-              "expr": "(round(sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__range])) or vector(0))) + ((round(sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__range])) or vector(0))) / clamp_min((round(sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"bronze\"}[$__range])) or vector(0))), 1))",
-              "legendFormat": "Silver rejects count + reject-rate signal",
-              "refId": "A"
-            }
-          ],
-          "title": "Silver Rejects Count + Rate",
-          "type": "stat",
-          "description": "Merged count/rate supporting check. Count uses filtered_out records; rate is guarded by Bronze denominator and is not a standalone green health signal."
-        },
-        {
-          "gridPos": {
-            "h": 4,
-            "w": 24,
-            "x": 0,
-            "y": 43
-          },
-          "id": 213,
-          "options": {
-            "content": "<div style=\"padding:0.4rem 0.6rem;line-height:1.6\"><strong>Next dashboard:</strong> <a href=\"/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}\">2. Runtime</a> for failed runs/backlog/lag; <a href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}\">4. Data Quality</a> for DQ blockers, flow balance and Silver rejects; <a href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${__url_time_range}\">3. Provider Health</a> for provider degradation; <a href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}\">Control Plane v1</a> for manifest/ledger/checkpoint/lineage; <a href=\"/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}\">6. Workflow Overview</a> for declarative workflow failures; <a href=\"/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D\">Loki Explore</a> and <a href=\"/a/grafana-exploretraces-app/?from=${__from}&to=${__to}&queryType=traceqlSearch&query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline:regex}%22%20%26%26%20span.%22bioetl.run_type%22%20%3D~%20%22${run_type:regex}%22%20%7D\">Tempo Explore</a> for tracing-profile correlation.</div>",
-            "mode": "html"
-          },
-          "title": "Drilldown Links",
-          "type": "text"
-        }
-      ],
-      "title": "Extended distributions",
-      "type": "row"
-    },
-    {
-      "collapsed": true,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 14
-      },
-      "id": 9001,
-      "panels": [],
-      "title": "Additional Navigation & Forensics",
-      "type": "row",
-      "links": [
-        {
-          "asDropdown": false,
-          "icon": "dashboard",
-          "includeVars": false,
-          "keepTime": true,
-          "tags": [],
-          "targetBlank": false,
-          "title": "3. Provider Health",
-          "tooltip": "Cross-scope handoff: opens Provider Health with All provider/adapter scope (core filters do not transfer).",
-          "type": "link",
-          "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${__url_time_range}"
-        },
-        {
-          "asDropdown": false,
-          "icon": "dashboard",
-          "includeVars": false,
-          "keepTime": true,
-          "tags": [],
-          "targetBlank": false,
-          "title": "6. Workflow Overview",
-          "tooltip": "Cross-scope handoff: opens Workflow Overview with All workflow/status scope (core filters do not transfer).",
-          "type": "link",
-          "url": "/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}"
-        },
-        {
-          "asDropdown": false,
-          "icon": "logs",
-          "includeVars": false,
-          "keepTime": true,
-          "tags": [],
-          "targetBlank": false,
-          "title": "Explore Logs (Loki, tracing profile)",
-          "tooltip": "Open Loki Explore with tracing profile and selected time range",
-          "type": "link",
-          "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D"
-        },
-        {
-          "asDropdown": false,
-          "icon": "search",
-          "includeVars": false,
-          "keepTime": true,
-          "tags": [],
-          "targetBlank": false,
-          "title": "Explore Traces (Tempo, tracing profile)",
-          "tooltip": "Open Tempo Explore with tracing profile and selected time range",
-          "type": "link",
-          "url": "/a/grafana-exploretraces-app/?from=${__from}&to=${__to}&queryType=traceqlSearch&query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline:regex}%22%20%26%26%20span.%22bioetl.run_type%22%20%3D~%20%22${run_type:regex}%22%20%7D"
+          "description": ""
         }
       ]
+    },
+    {
+      "id": 9012,
+      "type": "row",
+      "title": "Diagnostics & Docs (Logs / Traces / Raw Metrics)",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 22
+      },
+      "collapsed": true,
+      "panels": []
     }
   ],
   "refresh": "30s",
