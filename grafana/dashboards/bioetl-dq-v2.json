@@ -1007,13 +1007,7 @@
                 ]
               },
               "unit": "short",
-              "links": [
-                {
-                  "title": "Open Silver Reject Explorer",
-                  "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=${pipeline}&var-run_type=${run_type}&${__url_time_range}",
-                  "targetBlank": false
-                }
-              ]
+              "links": []
             },
             "overrides": []
           },
@@ -1084,13 +1078,7 @@
                 ]
               },
               "unit": "short",
-              "links": [
-                {
-                  "title": "Open Silver Reject Explorer",
-                  "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=${pipeline}&var-run_type=${run_type}&${__url_time_range}",
-                  "targetBlank": false
-                }
-              ]
+              "links": []
             },
             "overrides": []
           },
@@ -1161,13 +1149,7 @@
                 ]
               },
               "unit": "short",
-              "links": [
-                {
-                  "title": "Open Silver Reject Explorer",
-                  "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=${pipeline}&var-run_type=${run_type}&${__url_time_range}",
-                  "targetBlank": false
-                }
-              ]
+              "links": []
             },
             "overrides": []
           },
@@ -1181,12 +1163,7 @@
           "options": {
             "displayMode": "gradient",
             "orientation": "horizontal",
-            "dataLinks": [
-              {
-                "title": "Open Silver Reject Explorer",
-                "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
-              }
-            ],
+            "dataLinks": [],
             "reduceOptions": {
               "calcs": [
                 "lastNotNull"
@@ -1256,13 +1233,7 @@
                 ]
               },
               "unit": "short",
-              "links": [
-                {
-                  "title": "Open Silver Reject Explorer",
-                  "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=${pipeline}&var-run_type=${run_type}&${__url_time_range}",
-                  "targetBlank": false
-                }
-              ]
+              "links": []
             },
             "overrides": []
           },
@@ -1276,12 +1247,7 @@
           "options": {
             "displayMode": "gradient",
             "orientation": "horizontal",
-            "dataLinks": [
-              {
-                "title": "Open Silver Reject Explorer",
-                "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
-              }
-            ],
+            "dataLinks": [],
             "reduceOptions": {
               "calcs": [
                 "lastNotNull"
@@ -1642,12 +1608,7 @@
               "values": false
             },
             "textMode": "auto",
-            "dataLinks": [
-              {
-                "title": "Open 5. Control Plane (lineage/traceability)",
-                "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
-              }
-            ]
+            "dataLinks": []
           },
           "targets": [
             {
@@ -1899,12 +1860,7 @@
               "values": false
             },
             "textMode": "auto",
-            "dataLinks": [
-              {
-                "title": "Open 5. Control Plane (gold hard-fail context)",
-                "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
-              }
-            ]
+            "dataLinks": []
           },
           "targets": [
             {

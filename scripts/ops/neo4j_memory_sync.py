@@ -3608,6 +3608,12 @@ def _add_complexity_analysis_surfaces(
         elif node.key.label == "module_surface" and isinstance(ast_surface, ast.Module):
             functions = [child for child in ast_surface.body if isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef))]
             classes = [child for child in ast_surface.body if isinstance(child, ast.ClassDef)]
+            module_methods = [
+                method
+                for class_node in classes
+                for method in class_node.body
+                if isinstance(method, (ast.FunctionDef, ast.AsyncFunctionDef))
+            ]
             abstraction_fanout = len(functions) + len(classes)
             branch_count = sum(_callable_branch_count(function) for function in functions)
             branch_count += sum(
@@ -3618,30 +3624,21 @@ def _add_complexity_analysis_surfaces(
             )
             module_callables = [
                 *functions,
-                *[
-                    method
-                    for class_node in classes
-                    for method in class_node.body
-                    if isinstance(method, (ast.FunctionDef, ast.AsyncFunctionDef))
-                ],
+                *module_methods,
             ]
             nesting_depth = max(
                 (_callable_max_nesting_depth(function) for function in module_callables),
                 default=0,  # NOSONAR
             )  # NOSONAR
             call_count = sum(_callable_call_count(function) for function in functions)  # NOSONAR
-            call_count += sum(  # NOSONAR
+            call_count += sum(
                 _callable_call_count(method)  # NOSONAR
-                for class_node in classes  # NOSONAR
-                for method in class_node.body  # NOSONAR
-                if isinstance(method, (ast.FunctionDef, ast.AsyncFunctionDef))  # NOSONAR
+                for method in module_methods  # NOSONAR
             )  # NOSONAR
             helper_call_count = sum(_callable_helper_call_count(function) for function in functions)  # NOSONAR
             helper_call_count += sum(
                 _callable_helper_call_count(method)  # NOSONAR
-                for class_node in classes  # NOSONAR
-                for method in class_node.body
-                if isinstance(method, (ast.FunctionDef, ast.AsyncFunctionDef))  # NOSONAR
+                for method in module_methods  # NOSONAR
             )
             api_surface_to_logic_ratio = round(abstraction_fanout / max(1, branch_count + 1), 2)
 

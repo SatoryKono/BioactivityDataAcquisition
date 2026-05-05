@@ -21,11 +21,12 @@ ______________________________________________________________________
 
 ## 1. Текущая карта дашбордов
 
-- `1. Overview` (`bioetl-overview-v2`) — главный hub. Держит ссылки на `2. Runtime`, `3. Provider Health`, `4. Data Quality`, `5. Control Plane`, `6. Workflow Overview`, `Explore Logs` и `Explore Traces`.
-- `2. Runtime` (`bioetl-runtime`) — runtime triage surface. Держит `Back to Overview`, `3. Provider Health`, `4. Data Quality`, `5. Control Plane` и Explore links.
-- `5. Control Plane` (`bioetl-control-plane-v1`) — deep-dive по reproducibility/control-plane paths. Держит `Back to Overview`, `2. Runtime`, `4. Data Quality` и Explore links.
-- `3. Provider Health` (`bioetl-provider-health-v2`) — provider incident surface по health checks/retries. Держит `Back to Overview`, `2. Runtime` и Explore links.
-- `4. Data Quality` (`bioetl-dq-v2`) — DQ surface. Держит `Back to Overview`, `5. Silver Reject Explorer` и Explore links.
+- `0. Control Plane` (`bioetl-control-plane-v1`) — deep-dive по reproducibility/control-plane paths.
+- `1. Overview` (`bioetl-overview-v2`) — L0 answer-first hub.
+- `2. Runtime` (`bioetl-runtime`) — runtime triage surface.
+- `3. Provider Health` (`bioetl-provider-health-v2`) — provider incident surface по health checks/retries.
+- `4. Data Quality` (`bioetl-dq-v2`) — DQ surface.
+- `5. Workflow` (`bioetl-workflow-overview`) — workflow run/step outcomes.
 
 ## 2. Когда расширять существующий дашборд, а когда создавать новый
 
@@ -45,12 +46,14 @@ ______________________________________________________________________
 
 ### Навигация
 
-- `1. Overview`: `2. Runtime` / `3. Provider Health` / `4. Data Quality` / `5. Control Plane` / `6. Workflow Overview` / `Explore Logs` / `Explore Traces`
-- `2. Runtime`: `Back to Overview` + `3. Provider Health` + `4. Data Quality` + `5. Control Plane` + Explore links
-- `5. Control Plane`: `Back to Overview` + `2. Runtime` + `4. Data Quality` + Explore links
-- `3. Provider Health`: `Back to Overview` + `2. Runtime`
-- `4. Data Quality`: `Back to Overview` + `5. Silver Reject Explorer`
-- Explore links не заменяют dashboard links, а дополняют их
+- Top-level шина: `0. Control Plane` / `1. Overview` / `2. Runtime` /
+  `3. Provider Health` / `4. Data Quality` / `5. Workflow`.
+- На текущей странице ссылка на саму себя отсутствует.
+- Любые дубли dashboard-to-dashboard links из одного dashboard в один target
+  dashboard запрещены.
+- `Explore Logs` и `Explore Traces` доступны только на `2. Runtime` и
+  `4. Data Quality`.
+- `Silver Reject Explorer` доступен только на `4. Data Quality`.
 
 ### Prometheus
 

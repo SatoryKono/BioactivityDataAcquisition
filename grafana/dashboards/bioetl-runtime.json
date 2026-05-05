@@ -683,17 +683,7 @@
               "mode": "multi",
               "sort": "desc"
             },
-            "dataLinks": [
-              {
-                "title": "Open 5. Control Plane (checkpoint/replay)",
-                "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
-              },
-              {
-                "title": "Open canonical KPI view",
-                "url": "/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
-                "targetBlank": false
-              }
-            ]
+            "dataLinks": []
           },
           "targets": [
             {
@@ -764,13 +754,7 @@
           "id": 243,
           "options": {
             "cellHeight": "sm",
-            "dataLinks": [
-              {
-                "title": "Open Data Quality v2 (expectedness handoff)",
-                "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
-                "tooltip": "Open DQ to validate expectedness anomalies"
-              }
-            ],
+            "dataLinks": [],
             "footer": {
               "countRows": false,
               "fields": "",
@@ -1504,10 +1488,6 @@
             "textMode": "auto",
             "dataLinks": [
               {
-                "title": "Open Data Quality v2 (pipeline handoff)",
-                "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
-              },
-              {
                 "title": "Open DQ Failure Runbook",
                 "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/dq-failure-investigation.md"
               }
@@ -1585,10 +1565,6 @@
             },
             "textMode": "auto",
             "dataLinks": [
-              {
-                "title": "Open 5. Control Plane (manifest/checkpoint)",
-                "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
-              },
               {
                 "title": "Open Run Manifest Runbook",
                 "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/run-manifest-inspection.md"
@@ -1668,10 +1644,6 @@
             "textMode": "auto",
             "dataLinks": [
               {
-                "title": "Open Provider Health v2",
-                "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=All&var-adapter=All&${__url_time_range}"
-              },
-              {
                 "title": "Open Provider Incident Runbook",
                 "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/incident-response.md"
               }
@@ -1750,10 +1722,6 @@
             "textMode": "auto",
             "dataLinks": [
               {
-                "title": "Open Data Quality v2 (freshness handoff)",
-                "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
-              },
-              {
                 "title": "Open DQ Freshness Runbook",
                 "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/dq-failure-investigation.md"
               }
@@ -1831,10 +1799,6 @@
             },
             "textMode": "auto",
             "dataLinks": [
-              {
-                "title": "Open 5. Control Plane (checkpoint/replay)",
-                "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
-              },
               {
                 "title": "Open Checkpoint Debugging Runbook",
                 "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/checkpoint-debugging.md"

@@ -33,11 +33,14 @@ ______________________________________________________________________
 
 Текущая навигационная модель:
 
-- `1. BioETL Overview` -> `2. Runtime` / `3. Provider Health` / `4. Data Quality` / `5. Control Plane` / `6. Workflow Overview` / `Explore Logs` / `Explore Traces`
-- `2. Runtime` -> `Back to Overview` / `3. Provider Health` / `4. Data Quality` / `5. Control Plane` / `Explore Logs` / `Explore Traces`
-- `3. Provider Health` -> `Back to Overview` / `2. Runtime`
-- `4. Data Quality` -> `Back to Overview` / `5. Control Plane` / `5. Silver Reject Explorer` / `Explore Logs` / `Explore Traces`
-- `6. Workflow Overview` -> `Back to Overview` / `2. Runtime` / `5. Control Plane` / `Explore Logs` / `Explore Traces`
+- `0. Control Plane`, `1. Overview`, `2. Runtime`, `3. Provider Health`,
+  `4. Data Quality`, `5. Workflow` образуют единую top-level шину.
+- На каждой странице шина показывает все пункты `0..5`, кроме текущей страницы.
+- Любые дублирующие dashboard-to-dashboard ссылки из одного dashboard в один
+  target dashboard запрещены: переход должен быть ровно один.
+- `Explore Logs` и `Explore Traces` доступны только на `2. Runtime` и
+  `4. Data Quality`.
+- `Silver Reject Explorer` доступен только на `4. Data Quality`.
 
 `bioetl-overview-v2` is the L0 answer-first surface. It answers one question:
 what is currently broken or degraded in BioETL, and where should the operator
@@ -50,7 +53,7 @@ first screen answers the operator question without scroll. Keep record-level
 filters, provider deep diagnostics, DQ cause breakdowns, and control-plane
 replay/audit detail out of Overview.
 
-`bioetl-control-plane-v1` is the `5. Control Plane` surface. It
+`bioetl-control-plane-v1` is the `0. Control Plane` surface. It
 now starts with an answer-first **Trust Summary** block: replay safety state,
 checkpoint freshness proxy, and ledger/manifest consistency for the selected
 pipeline scope. A visible **Known Blind Spots** list is part of this top block
@@ -63,19 +66,21 @@ Global lookup/read-path panels stay separated in a dedicated
 ## KPI ownership (canonical vs mirrors)
 
 Правило: KPI имеет один canonical dashboard (источник ответа) и может иметь
-secondary mirrors только как shortcut для triage.
+secondary mirrors только как локальный контекст. Mirror-карточки не должны
+добавлять dashboard-to-dashboard links, если такой target уже есть в top-level
+шине.
 
-| KPI | Canonical dashboard | Secondary mirrors (MUST show link `Open canonical KPI view`) |
+| KPI | Canonical dashboard | Secondary mirrors |
 | --- | --- | --- |
-| System Status | `1. BioETL Overview` | `2. Runtime`, `5. Control Plane`, `6. Workflow Overview` |
+| System Status | `1. BioETL Overview` | `2. Runtime`, `0. Control Plane`, `5. Workflow` |
 | Next Action | `1. BioETL Overview` | `2. Runtime`, `3. Provider Health` |
-| Failed Runs in Range | `1. BioETL Overview` | `2. Runtime`, `5. Control Plane` |
-| Worst Backlog Stage | `1. BioETL Overview` | `2. Runtime`, `6. Workflow Overview` |
-| Worst Lag Stage | `1. BioETL Overview` | `2. Runtime`, `6. Workflow Overview` |
-| Flow Balance | `1. BioETL Overview` | `2. Runtime`, `6. Workflow Overview` |
-| Replay Safety State | `5. Control Plane` | `1. BioETL Overview`, `2. Runtime` |
-| Checkpoint Freshness Proxy | `5. Control Plane` | `2. Runtime` |
-| Ledger/Manifest Consistency | `5. Control Plane` | `2. Runtime` |
+| Failed Runs in Range | `1. BioETL Overview` | `2. Runtime`, `0. Control Plane` |
+| Worst Backlog Stage | `1. BioETL Overview` | `2. Runtime`, `5. Workflow` |
+| Worst Lag Stage | `1. BioETL Overview` | `2. Runtime`, `5. Workflow` |
+| Flow Balance | `1. BioETL Overview` | `2. Runtime`, `5. Workflow` |
+| Replay Safety State | `0. Control Plane` | `1. BioETL Overview`, `2. Runtime` |
+| Checkpoint Freshness Proxy | `0. Control Plane` | `2. Runtime` |
+| Ledger/Manifest Consistency | `0. Control Plane` | `2. Runtime` |
 | Provider Health (aggregated) | `3. Provider Health` | `1. BioETL Overview`, `2. Runtime` |
 | DQ Status (Silver Reject / quality posture) | `4. Data Quality` | `1. BioETL Overview`, `2. Runtime` |
 
@@ -86,10 +91,10 @@ secondary mirrors только как shortcut для triage.
   MUST быть удалены или переименованы как navigational shortcut.
 - Для сохранённых mirror-карточек title/description MUST явно указывать, что
   это mirror, а не primary source of truth.
-- Каждая secondary mirror-карточка MUST иметь explicit link с текстом
-  `Open canonical KPI view` на canonical dashboard KPI.
+- Secondary mirror-карточки MUST NOT добавлять dashboard-to-dashboard links,
+  если такой target уже доступен через top-level шину.
 - Если зеркало добавляет value (например, provider-scoped breakdown), укажи это
-  в description и оставь `Open canonical KPI view` как fallback к canonical answer.
+  в description без дублирования navigation link.
 
 ## Legacy-документы
 
