@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from dataclasses import replace
-
 from bioetl.application.composite.checkpoint._anchor_context import (
     ExpectedCheckpointContext,
     fresh_checkpoint_state,
@@ -385,8 +383,9 @@ class CompositeCheckpointLoadService:
             return state
 
         replay_projection = project_run_ledger_replay(replay_entries)
-        replayed_state: CompositeCheckpointState = replace(
-            state,
+        replayed_state = CompositeCheckpointState(
+            composite_name=state.composite_name,
+            run_id=state.run_id,
             state=(
                 replay_projection.state
                 if replay_projection.state is not None
@@ -397,13 +396,31 @@ class CompositeCheckpointLoadService:
                 if replay_projection.seed_completed is not None
                 else state.seed_completed
             ),
+            seed_result=state.seed_result,
+            completed_dependencies=state.completed_dependencies,
+            dependency_results=state.dependency_results,
+            completed_enrichers=state.completed_enrichers,
+            enrichment_results=state.enrichment_results,
             merge_completed=(
                 replay_projection.merge_completed
                 if replay_projection.merge_completed is not None
                 else state.merge_completed
             ),
+            merge_result=state.merge_result,
+            checkpoint_schema_version=state.checkpoint_schema_version,
+            effective_config_hash=state.effective_config_hash,
+            effective_config_artifact_id=state.effective_config_artifact_id,
+            execution_fingerprint=state.execution_fingerprint,
+            dq_contract_compatibility_hash=state.dq_contract_compatibility_hash,
+            input_snapshot_fingerprint=state.input_snapshot_fingerprint,
+            contract_ref=state.contract_ref,
+            contract_version=state.contract_version,
+            manifest_id=state.manifest_id,
+            composite_run_identity=state.composite_run_identity,
             last_event_id=replay_projection.last_event_id,
             last_event_occurred_at=replay_projection.last_event_occurred_at,
+            created_at=state.created_at,
+            updated_at=state.updated_at,
         )
         self._logger.info(
             "Replayed checkpoint state from run ledger",

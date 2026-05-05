@@ -20,6 +20,7 @@ class _PostrunResultProtocol(Protocol):
     vacuum: VacuumResult
     compaction: CompactionResult
 
+
 PostrunLogLevel = Literal["info", "warning", "error"]
 
 

@@ -23,7 +23,7 @@ from typing import TYPE_CHECKING, Any
 
 from bioetl.application.core.base_transformer import TransformerDependencyContext
 from bioetl.application.pipelines.common import BasePublicationTransformer
-from bioetl.application.pipelines.common.blocks import (
+from bioetl.application.pipelines.crossref.blocks import (
     _CrossRefAuthorBlock,
     _CrossRefCoreBlock,
     _CrossRefDateBlock,

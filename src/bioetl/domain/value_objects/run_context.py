@@ -23,6 +23,7 @@ __all__ = [
     "RunContextCreateInput",
 ]
 
+
 @dataclass(frozen=True, slots=True)
 class RunContext:
     """Immutable context for a pipeline run.

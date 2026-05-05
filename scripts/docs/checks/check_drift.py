@@ -125,11 +125,13 @@ class AIDocsMirrorTarget:
     canonical_sources: tuple[Path, ...]
 
 
-AGENT_MEMORY_PATH = Path("docs/00-project/ai/memory/agent-memory.md")
+AI_MEMORY_DOCS_DIR = "docs/00-project/ai/memory"
+AGENT_MEMORY_DOC = "agent-memory.md"
+AGENT_MEMORY_PATH = Path(AI_MEMORY_DOCS_DIR) / AGENT_MEMORY_DOC
 FILE_POLICY_PATH = Path("docs/00-project/governance/03-file-policy.md")
 RUNTIME_AGENT_GUIDE_PATH = "docs/00-project/ai/agents/guides/MEMORY_USAGE.md"
 RUNTIME_POST_CHANGE_PATH = "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md"
-RUNTIME_AGENT_MEMORY_PATH = "docs/00-project/ai/memory/agent-memory.md"
+RUNTIME_AGENT_MEMORY_PATH = f"{AI_MEMORY_DOCS_DIR}/{AGENT_MEMORY_DOC}"
 CODEX_RUNTIME_DOC_PATH = ".codex/agents/CODEX-RUNTIME.md"
 GEMINI_RUNTIME_DOC_PATH = ".gemini/agents/GEMINI-RUNTIME.md"
 CODEX_RUNTIME_DOC_README_PATH = ".codex/agents/README.md"
@@ -373,7 +375,7 @@ AI_ROLE_MEMORY_COVERAGE_REQUIRED_TOKENS: dict[Path, tuple[str, ...]] = {
         "memory-py-review-orchestrator.md",
         "memory-py-test-swarm.md",
     ),
-    Path("docs/00-project/ai/memory/agent-memory.md"): (
+    AGENT_MEMORY_PATH: (
         "memory-py-architecture-debt-bot.md",
         "memory-py-review-orchestrator.md",
         "memory-py-test-swarm.md",

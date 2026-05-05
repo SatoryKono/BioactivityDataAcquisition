@@ -48,6 +48,7 @@ if TYPE_CHECKING:
         TracingPort,
     )
 
+
 @dataclass
 class QuarantineService(
     QuarantineServiceFilteredMixin,

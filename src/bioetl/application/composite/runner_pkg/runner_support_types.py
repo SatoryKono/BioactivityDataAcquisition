@@ -35,6 +35,7 @@ from bioetl.domain.ports import (
     TracingPort,
 )
 
+
 class _CompositeRunnerSupportHostProtocol(Protocol):
     _config: CompositeConfig
     _runtime: CompositeRuntimeConfig
