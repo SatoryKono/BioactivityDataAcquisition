@@ -150,15 +150,9 @@ def test_lock_runtime_admin_family_is_role_driven() -> None:
             "LockService",
             "src/bioetl/application/services/lock_service.py",
         ),
-        (
-            "LockCoordinator",
-            "src/bioetl/application/core/lifecycle/lock_manager.py",
-        ),
-        (
-            "LockCoordinatorCreateContext",
-            "src/bioetl/application/core/lifecycle/lock_manager.py",
-        ),
     }
+    assert "LockCoordinator" in rule.match_regex
+    assert "LockCoordinatorCreateContext" in rule.match_regex
 
 
 def test_composition_bootstrap_port_function_exceptions_are_explicit_and_bounded() -> (

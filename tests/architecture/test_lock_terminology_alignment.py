@@ -12,7 +12,6 @@ _LOCK_SURFACE_FILES = (
     "src/bioetl/domain/ports/runtime/locking.py",
     "src/bioetl/infrastructure/locking/memory_lock.py",
     "src/bioetl/application/core/lifecycle/lock_runtime_service.py",
-    "src/bioetl/application/core/lifecycle/lock_manager.py",
     "src/bioetl/application/core/lifecycle/lock_lifecycle.py",
     "src/bioetl/application/core/lifecycle/heartbeat.py",
     "src/bioetl/application/core/pipeline_services.py",

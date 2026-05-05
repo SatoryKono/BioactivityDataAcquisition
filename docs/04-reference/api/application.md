@@ -72,7 +72,7 @@ ______________________________________________________________________
 | Class                      | Description                                   |
 | -------------------------- | --------------------------------------------- |
 | `CheckpointRuntimeService` | Checkpoint save/load coordination             |
-| `LockCoordinator`          | Runtime lock acquisition and release          |
+| `LockRuntimeService`       | Runtime lock acquisition and release          |
 | `HeartbeatTask`            | Periodic heartbeat for long-running pipelines |
 | `ShutdownSignal`           | Graceful shutdown signal handling             |
 

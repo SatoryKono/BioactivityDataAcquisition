@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import inspect
 import types
-from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, get_args, get_origin
 

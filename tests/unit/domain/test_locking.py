@@ -6,7 +6,7 @@ Note:
     Lock validation during writes is now performed at Application layer
     (BatchWriter) per RULES.md §4.6 Safety Guard. See test_batch_writer.py
     for those tests.
-    Application orchestration checks for LockCoordinator are covered in
+    Application orchestration checks for LockRuntimeService are covered in
     tests/unit/application/core/test_lock_manager_get_context.py.
 """
 

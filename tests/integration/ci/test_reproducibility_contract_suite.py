@@ -207,7 +207,6 @@ def _make_manifest(
     exact_replay: bool = True,
     execution_context: str = "ordinary",
 ) -> RunManifest:
-    is_composite = execution_context == "composite" or identity.provider == "composite"
     replay_capability = (
         ReplayCapability.REBUILD_ONLY
         if not input_snapshots

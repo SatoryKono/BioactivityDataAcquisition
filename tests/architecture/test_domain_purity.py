@@ -281,7 +281,6 @@ class TestDomainImmutability:
 
     def test_no_mutable_defaults_in_frozen_dataclasses(
         self,
-        src_dir: Path,
         source_ast_cache: dict,
     ) -> None:
         """Frozen dataclasses should not have mutable default arguments.

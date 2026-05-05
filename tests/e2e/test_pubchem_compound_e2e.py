@@ -8,11 +8,11 @@ Cassettes location: tests/fixtures/vcr/pubchem/
 
 from __future__ import annotations
 
-import os
 from pathlib import Path
 from typing import Any
 
 import pytest
+from tests.helpers.vcr_config import build_base_vcr_config
 
 from bioetl.composition.bootstrap import bootstrap_pipeline_runner
 
@@ -25,19 +25,14 @@ from .conftest import (
     get_silver_records,
 )
 
-# VCR cassette directory for PubChem E2E tests
-CASSETTE_DIR = Path(__file__).parent.parent / "fixtures" / "vcr" / "pubchem"
-
 
 @pytest.fixture(scope="module")
-def vcr_config() -> dict[str, Any]:
+def vcr_config(vcr_cassette_dir) -> dict[str, Any]:
     """Configure VCR for PubChem Compound E2E tests."""
-    return {
-        "cassette_library_dir": str(CASSETTE_DIR),
-        "record_mode": os.environ.get("VCR_RECORD_MODE", "none"),
-        "match_on": ["method", "scheme", "host", "port", "path", "query"],
-        "decode_compressed_response": True,
-    }
+    return build_base_vcr_config(
+        cassette_library_dir=vcr_cassette_dir,
+        decode_compressed_response=True,
+    )
 
 
 @pytest.mark.e2e
@@ -145,5 +140,18 @@ async def test_pubchem_compound_query_filter(e2e_data_dir: Path):
     # Get records - should be related to ibuprofen
     records = get_silver_records(e2e_data_dir, "pubchem_compound")
 
-    # At least one record should exist
     assert len(records) >= 1
+
+    ibuprofen_matches = [
+        record
+        for record in records
+        if record.get("molecule_id") == "3672"
+        or "ibuprofen" in str(record.get("iupac_name") or "").lower()
+    ]
+    assert ibuprofen_matches, (
+        "PubChem query-filter replay must include the ibuprofen record identity "
+        "(CID 3672 or ibuprofen-correlated IUPAC name)"
+    )
+
+    ibuprofen_record = ibuprofen_matches[0]
+    assert ibuprofen_record.get("molecular_formula") == "C13H18O2"

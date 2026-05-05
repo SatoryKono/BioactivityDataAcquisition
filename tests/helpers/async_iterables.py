@@ -4,12 +4,9 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import AsyncIterator, Iterator
-from typing import Generic, TypeVar
-
-T = TypeVar("T")
 
 
-class _StaticAsyncIterator(AsyncIterator[T], Generic[T]):
+class _StaticAsyncIterator[T](AsyncIterator[T]):
     """Async iterator wrapper around an in-memory iterator."""
 
     def __init__(self, items: Iterator[T]) -> None:
@@ -26,13 +23,13 @@ class _StaticAsyncIterator(AsyncIterator[T], Generic[T]):
             raise StopAsyncIteration from exc
 
 
-def async_iterable(*items: T) -> AsyncIterator[T]:
+def async_iterable[T](*items: T) -> AsyncIterator[T]:
     """Return an async iterator that yields the provided items."""
 
     return _StaticAsyncIterator(iter(items))
 
 
-class _FailingAsyncIterator(AsyncIterator[T]):
+class _FailingAsyncIterator[T](AsyncIterator[T]):
     """Async iterator that raises the provided error on first iteration."""
 
     def __init__(self, error: BaseException) -> None:
@@ -46,7 +43,7 @@ class _FailingAsyncIterator(AsyncIterator[T]):
         raise self._error
 
 
-def failing_async_iterable(error: BaseException) -> AsyncIterator[T]:
+def failing_async_iterable[T](error: BaseException) -> AsyncIterator[T]:
     """Return an async iterator that raises ``error`` when iterated."""
 
     return _FailingAsyncIterator(error)

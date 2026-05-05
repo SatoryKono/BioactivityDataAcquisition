@@ -25,9 +25,9 @@ from bioetl.domain.ports import (
     DataSourcePort,
     GoldStoragePort,
     LockPort,
-    SilverStoragePort,
     MetricsPort,
     QuarantinePort,
+    SilverStoragePort,
     StorageLifecyclePort,
     StorageMaintenancePort,
 )
@@ -246,16 +246,19 @@ def _iter_public_method_docstring_violations(py_file: Path, src_dir: Path) -> li
         if not isinstance(node, ast.ClassDef):
             continue
         for item in node.body:
-            if isinstance(item, ast.FunctionDef) and not item.name.startswith("_"):
-                if not ast.get_docstring(item):
-                    violations.append(
-                        format_violation(
-                            py_file,
-                            item.lineno,
-                            f"Public method '{item.name}' missing docstring",
-                            src_dir,
-                        )
+            if (
+                isinstance(item, ast.FunctionDef)
+                and not item.name.startswith("_")
+                and not ast.get_docstring(item)
+            ):
+                violations.append(
+                    format_violation(
+                        py_file,
+                        item.lineno,
+                        f"Public method '{item.name}' missing docstring",
+                        src_dir,
                     )
+                )
     return violations
 
 
@@ -282,15 +285,13 @@ def _should_validate_pipeline_yaml(yaml_file: Path, config_dir: Path) -> bool:
     relative_parts = yaml_file.relative_to(config_dir).parts
     if any(part.startswith("_") for part in relative_parts[:-1]):
         return False
-    if "sources" in yaml_file.parts or "composite" in yaml_file.parts:
-        return False
-    return True
+    return "sources" not in yaml_file.parts and "composite" not in yaml_file.parts
 
 
 def _is_observability_prometheus_exempt(py_file: Path) -> bool:
-    if "observability" in py_file.parts and "infrastructure" in py_file.parts:
-        return True
-    return "interfaces" in py_file.parts and py_file.name == "observability.py"
+    return (
+        "observability" in py_file.parts and "infrastructure" in py_file.parts
+    ) or ("interfaces" in py_file.parts and py_file.name == "observability.py")
 
 
 def _iter_metrics_protocol_violations(py_file: Path) -> list[str]:
@@ -658,7 +659,7 @@ def test_domain_no_infrastructure_imports(src_dir: Path):
     )
 
 
-def test_silver_schemas_match_domain_entities(src_dir: Path):
+def test_silver_schemas_match_domain_entities():
     """Silver schemas (PyArrow) must match Domain Entities."""
     from dataclasses import fields
 
@@ -712,10 +713,9 @@ def test_ports_are_protocols(src_dir: Path):
 
 
 def _class_inherits_protocol(node: ast.ClassDef) -> bool:
-    for base in node.bases:
-        if isinstance(base, ast.Name) and base.id == "Protocol":
-            return True
-    return False
+    return any(
+        isinstance(base, ast.Name) and base.id == "Protocol" for base in node.bases
+    )
 
 
 def _iter_python_files_without_pycache(layer_roots: tuple[Path, ...]) -> list[Path]:
@@ -921,7 +921,7 @@ def test_observability_library_isolation(src_dir: Path):
     )
 
 
-def test_adapters_implement_protocols(src_dir: Path):
+def test_adapters_implement_protocols():
     """Infrastructure adapters must implement Domain Protocols."""
     try:
         expectations = _load_adapter_protocol_expectations()
@@ -939,7 +939,7 @@ def test_adapters_implement_protocols(src_dir: Path):
     assert not violations, "\n".join(violations)
 
 
-def test_http_adapters_inherit_base(src_dir: Path):
+def test_http_adapters_inherit_base():
     """All HTTP adapters in infrastructure must inherit from BaseHttpAdapter.
 
     This ensures consistent lifecycle management and HTTP client usage.

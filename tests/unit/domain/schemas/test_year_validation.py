@@ -6,7 +6,7 @@ Tests unified year validation range (1950-CURRENT_YEAR+1) per RULES.md §2.3.2.
 from __future__ import annotations
 
 import sys
-from datetime import UTC, date, datetime
+from datetime import date
 from uuid import uuid4
 
 import pandas as pd

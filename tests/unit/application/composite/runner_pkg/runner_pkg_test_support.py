@@ -125,22 +125,18 @@ def initialize_runner_pkg_harness(
     with_metrics_and_tracing: bool = False,
 ) -> None:
     """Attach common runner_pkg harness collaborators to a test double."""
-    setattr(harness, "_config", config)
-    setattr(harness, "_runtime", runtime)
+    harness._config = config
+    harness._runtime = runtime
 
     logger = MagicMock()
-    setattr(harness, "_logger", logger)
+    harness._logger = logger
 
     observer_logger = MagicMock()
-    setattr(harness, "_observer_logger", observer_logger)
-    setattr(
-        harness,
-        "_observer",
-        CompositeLifecycleObserverService(logger=observer_logger),
-    )
-    setattr(harness, "_run_id_str", run_id_str)
-    setattr(harness, "_checkpoint_manager", AsyncMock())
-    setattr(harness, "_fsm", MagicMock())
+    harness._observer_logger = observer_logger
+    harness._observer = CompositeLifecycleObserverService(logger=observer_logger)
+    harness._run_id_str = run_id_str
+    harness._checkpoint_manager = AsyncMock()
+    harness._fsm = MagicMock()
 
     if with_metrics_and_tracing:
         metrics = MagicMock()
@@ -152,7 +148,7 @@ def initialize_runner_pkg_harness(
         checkpoint_span = MagicMock()
         otel_tracer.start_as_current_span.return_value = checkpoint_span
         tracing.get_tracer.return_value = otel_tracer
-        setattr(harness, "_metrics", metrics)
-        setattr(harness, "_tracing", tracing)
-        setattr(harness, "_otel_tracer", otel_tracer)
-        setattr(harness, "_checkpoint_span", checkpoint_span)
+        harness._metrics = metrics
+        harness._tracing = tracing
+        harness._otel_tracer = otel_tracer
+        harness._checkpoint_span = checkpoint_span

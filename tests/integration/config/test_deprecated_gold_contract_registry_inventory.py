@@ -104,7 +104,7 @@ def test_gold_runtime_disabled_deprecated_contracts_have_disabled_entity_configs
 ):
     inventory = _inventory_entries()
 
-    for contract_ref, entry in sorted(inventory.items()):
+    for _contract_ref, entry in sorted(inventory.items()):
         if entry.get("classification") != "gold_runtime_disabled":
             continue
         entity_config_path = entry.get("entity_config_path")

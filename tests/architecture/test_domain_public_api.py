@@ -7,11 +7,10 @@ exposes only subpackages and events; consumers import from sub-facades.
 
 from __future__ import annotations
 
-from pathlib import Path
 from typing import get_type_hints
 
 
-def test_domain_all_is_complete(src_dir: Path) -> None:
+def test_domain_all_is_complete() -> None:
     """Verify domain/__init__.py __all__ contains all public symbols.
 
     REQ-ARCH-027: The slim domain facade should only export subpackages

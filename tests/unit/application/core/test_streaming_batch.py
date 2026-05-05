@@ -9,7 +9,6 @@ from uuid import uuid4
 
 import pytest
 
-from bioetl.application.core.batch_metrics import BatchMetricsRecorder
 from bioetl.application.core.batch_transformer import (
     BatchTransformer,
     StreamingBatchProcessor,
@@ -21,11 +20,8 @@ from bioetl.application.core.transformer_runtime import (
 from bioetl.application.core.config import RecordProcessorConfig
 from bioetl.domain.config import MemoryConfig
 from bioetl.infrastructure.system.memory_monitor import MemoryMonitor
-from bioetl.application.core.quarantine_manager import QuarantineRuntimeService
-from bioetl.domain.context import PipelineContext
-from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.exceptions import DataQualityError
-from bioetl.domain.types import BatchID, RunType
+from bioetl.domain.types import BatchID
 
 pytest_plugins = ("tests.unit.application.core.transformer_test_support",)
 

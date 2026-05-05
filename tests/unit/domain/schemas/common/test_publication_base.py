@@ -7,7 +7,6 @@ publication_year, publication_date, citations_received, is_oa, lookup_method, so
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
 
 import pandas as pd
 import pandera as pa

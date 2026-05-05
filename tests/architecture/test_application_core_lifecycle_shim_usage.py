@@ -18,6 +18,7 @@ COMPAT_MODULES = frozenset(
         "bioetl.application.core.cleanup_service",
         "bioetl.application.core.heartbeat",
         "bioetl.application.core.lock_manager",
+        "bioetl.application.core.lifecycle.lock_manager",
         "bioetl.application.core.shutdown",
     }
 )
@@ -27,6 +28,13 @@ REMOVED_FILES = frozenset(
         ROOT / "src" / "bioetl" / "application" / "core" / "cleanup_service.py",
         ROOT / "src" / "bioetl" / "application" / "core" / "heartbeat.py",
         ROOT / "src" / "bioetl" / "application" / "core" / "lock_manager.py",
+        ROOT
+        / "src"
+        / "bioetl"
+        / "application"
+        / "core"
+        / "lifecycle"
+        / "lock_manager.py",
         ROOT / "src" / "bioetl" / "application" / "core" / "shutdown.py",
     }
 )
@@ -40,6 +48,7 @@ COMPAT_PARENT_IMPORTS = {
             "shutdown",
         }
     ),
+    "bioetl.application.core.lifecycle": frozenset({"lock_manager"}),
 }
 
 

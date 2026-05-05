@@ -5,9 +5,15 @@ import sys
 from functools import cache
 from pathlib import Path
 from typing import Any
-from urllib.parse import parse_qsl, urlparse
 
 import pytest
+from tests.helpers.vcr_config import (
+    build_base_vcr_config,
+    ensure_default_vcr_record_mode,
+    is_git_lfs_pointer,
+    query_ignore_email,
+    resolve_requested_cassette_path,
+)
 
 
 def pytest_addoption(parser: pytest.Parser) -> None:
@@ -208,10 +214,7 @@ def default_vcr_record_mode() -> None:
     - Local runs also default to strict replay (`none`).
     - Explicit VCR_RECORD_MODE always has priority.
     """
-    if "VCR_RECORD_MODE" in os.environ:
-        return
-
-    os.environ["VCR_RECORD_MODE"] = "none"
+    ensure_default_vcr_record_mode()
 
 
 @pytest.fixture(scope="session")
@@ -252,39 +255,6 @@ def populated_isolated_registry(isolated_registry: Any) -> Any:
     return isolated_registry
 
 
-# --- VCR Configuration ---
-_GIT_LFS_POINTER_PREFIX = b"version https://git-lfs.github.com/spec/v1"
-
-
-def _is_git_lfs_pointer(path: Path) -> bool:
-    """Return whether a file is a Git LFS pointer instead of cassette YAML."""
-    try:
-        with path.open("rb") as handle:
-            return handle.read(len(_GIT_LFS_POINTER_PREFIX)) == _GIT_LFS_POINTER_PREFIX
-    except OSError:
-        return False
-
-
-def _vcr_cassette_path(request: pytest.FixtureRequest) -> Path | None:
-    """Resolve the cassette path without opening it through vcrpy."""
-    try:
-        vcr_config_value = request.getfixturevalue("vcr_config")
-        cassette_dir = vcr_config_value.get("cassette_library_dir")
-        if cassette_dir is None:
-            cassette_dir = request.getfixturevalue("vcr_cassette_dir")
-        cassette_name = str(request.getfixturevalue("vcr_cassette_name"))
-    except pytest.FixtureLookupError:
-        return None
-
-    if not cassette_name.endswith(".yaml"):
-        cassette_name = f"{cassette_name}.yaml"
-
-    cassette_path = Path(cassette_name)
-    if cassette_path.is_absolute():
-        return cassette_path
-    return Path(str(cassette_dir)) / cassette_path
-
-
 @pytest.fixture(autouse=True)
 def _vcr_marker(request: pytest.FixtureRequest) -> None:
     """Open pytest-vcr cassettes, skipping unresolved Git LFS pointers safely."""
@@ -292,8 +262,8 @@ def _vcr_marker(request: pytest.FixtureRequest) -> None:
     if marker is None:
         return
 
-    cassette_path = _vcr_cassette_path(request)
-    if cassette_path is not None and _is_git_lfs_pointer(cassette_path):
+    cassette_path = resolve_requested_cassette_path(request)
+    if cassette_path is not None and is_git_lfs_pointer(cassette_path):
         pytest.skip(
             "VCR cassette is a Git LFS pointer; run git lfs pull before replaying "
             f"this cassette: {cassette_path}"
@@ -305,31 +275,11 @@ def _vcr_marker(request: pytest.FixtureRequest) -> None:
 @pytest.fixture(scope="module")
 def vcr_config() -> dict[str, object]:
     """VCR configuration for integration tests."""
-    return {
-        "filter_headers": ["authorization", "x-api-key", "cookie"],
-        "filter_query_parameters": ["api_key", "key"],
-        "ignore_localhost": True,
-        "record_mode": "once",
-    }
-
-
-_VCR_IGNORED_QUERY_KEYS = {"email", "api_key", "key"}
-
-
-def _strip_credential_query(uri: str) -> list[tuple[str, str]]:
-    """Return query params excluding credentials for VCR matching."""
-    query_params = parse_qsl(urlparse(uri).query, keep_blank_values=True)
-    return [
-        (key, value)
-        for key, value in query_params
-        if key.lower() not in _VCR_IGNORED_QUERY_KEYS
-    ]
-
-
-def query_ignore_email(request_1: Any, request_2: Any) -> bool:
-    """Custom VCR matcher that ignores email and api_key query parameters."""
-    return _strip_credential_query(request_1.uri) == _strip_credential_query(
-        request_2.uri
+    return build_base_vcr_config(
+        filter_headers=["authorization", "x-api-key", "cookie"],
+        filter_query_parameters=["api_key", "key"],
+        ignore_localhost=True,
+        record_mode="once",
     )
 
 
