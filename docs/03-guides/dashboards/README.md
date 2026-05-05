@@ -44,14 +44,14 @@ ______________________________________________________________________
 
 `bioetl-overview-v2` is the L0 answer-first surface. It answers one question:
 what is currently broken or degraded in BioETL, and where should the operator
-drill down first? The first visible answer is now a compact KPI-first row: `System Status`,
-`Next Action`, `Failed Runs in Range`, `Worst Backlog Stage`, `Worst Lag Stage`,
-and `Flow Balance`. `OK` requires recent activity, while missing samples/no
-denominator remain `UNKNOWN`. Detail panels are moved to collapsed rows
-(`Throughput details`, `Freshness breakdown`, `Extended distributions`) so the
-first screen answers the operator question without scroll. Keep record-level
-filters, provider deep diagnostics, DQ cause breakdowns, and control-plane
-replay/audit detail out of Overview.
+drill down first? The first visible answer is now a compact L0/L1 row:
+`System Status`, `Next Action`, and `L0 Inputs`. The next visible row keeps
+current subsystem summaries (`Runtime Blockers Current`, `DQ Status Current`,
+`Gold Lifecycle Current`, `Control Plane Current`), while provider/workflow
+scope is explicit via `Provider GLOBAL Scope`, `Workflow Selected Scope`, and
+`Workflow GLOBAL Scope`. Historical evidence is isolated under the collapsed
+`Range Evidence` row, and diagnostics routing lives under the collapsed
+`Diagnostics & Docs` row.
 
 `bioetl-control-plane-v1` is the `0. Control Plane` surface. It
 now starts with an answer-first **Trust Summary** block: replay safety state,
@@ -74,10 +74,11 @@ secondary mirrors только как локальный контекст. Mirro
 | --- | --- | --- |
 | System Status | `1. BioETL Overview` | `2. Runtime`, `0. Control Plane`, `5. Workflow` |
 | Next Action | `1. BioETL Overview` | `2. Runtime`, `3. Provider Health` |
-| Failed Runs in Range | `1. BioETL Overview` | `2. Runtime`, `0. Control Plane` |
-| Worst Backlog Stage | `1. BioETL Overview` | `2. Runtime`, `5. Workflow` |
-| Worst Lag Stage | `1. BioETL Overview` | `2. Runtime`, `5. Workflow` |
-| Flow Balance | `1. BioETL Overview` | `2. Runtime`, `5. Workflow` |
+| L0 Inputs | `1. BioETL Overview` | `2. Runtime`, `4. Data Quality`, `0. Control Plane` |
+| Gold Lifecycle Current | `1. BioETL Overview` | `2. Runtime`, `0. Control Plane` |
+| Provider GLOBAL Scope | `1. BioETL Overview` | `3. Provider Health` |
+| Workflow Selected Scope | `1. BioETL Overview` | `5. Workflow` |
+| Workflow GLOBAL Scope | `1. BioETL Overview` | `5. Workflow` |
 | Replay Safety State | `0. Control Plane` | `1. BioETL Overview`, `2. Runtime` |
 | Checkpoint Freshness Proxy | `0. Control Plane` | `2. Runtime` |
 | Ledger/Manifest Consistency | `0. Control Plane` | `2. Runtime` |

@@ -3,16 +3,22 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Literal, Protocol
 
 if TYPE_CHECKING:
     from opentelemetry.trace import Span
 
     from bioetl.application.core.postrun.compact_orchestrator import CompactionResult
-    from bioetl.application.core.postrun.service import PostrunResult
     from bioetl.application.services.dq_report_service import DQReportResult
     from bioetl.application.services.medallion_types import VacuumResult
     from bioetl.domain.value_objects.dq_result import DQResult
+
+
+class _PostrunResultProtocol(Protocol):
+    dq: DQResult
+    dq_reports: DQReportResult | None
+    vacuum: VacuumResult
+    compaction: CompactionResult
 
 PostrunLogLevel = Literal["info", "warning", "error"]
 
@@ -27,7 +33,10 @@ class PostrunPhaseCompletion:
     level: PostrunLogLevel | None = None
 
 
-def record_run_span_attributes(span: Span, result: PostrunResult) -> None:
+def record_run_span_attributes(
+    span: Span,
+    result: _PostrunResultProtocol,
+) -> None:
     """Attach postrun outcome attributes to the active tracing span."""
     span.set_attribute("bioetl.dq_status", result.dq.status.value)
     span.set_attribute("bioetl.dq_anomalies_count", result.dq.anomalies_count)

@@ -36,10 +36,16 @@ if TYPE_CHECKING:
     )
     from bioetl.application.services.quarantine_service import QuarantineService
     from bioetl.application.services.vacuum_service import VacuumService
-    from bioetl.composition.health_api import HealthServerDependenciesProtocol
     from bioetl.composition.registry_api import PipelineRegistry
-    from bioetl.domain.ports import QuarantinePort
+    from bioetl.domain.ports import HealthMonitorPort, MetricsPort, QuarantinePort
     from bioetl.domain.workflow import WorkflowConfig
+
+
+class HealthServerDependenciesProtocol(Protocol):
+    """Typed view of health-server dependencies returned by bootstrap."""
+
+    health_monitor: HealthMonitorPort
+    metrics: MetricsPort
 
 
 class _BronzeCleanupServiceProtocol(Protocol):

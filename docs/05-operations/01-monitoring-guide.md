@@ -220,7 +220,7 @@ tracing-backed log hygiene живёт в collapsed row
   top-level шине.
   Tempo handoff уже ограничен текущими `$pipeline/$run_type`.
 
-#### 5. Silver Reject Explorer
+#### Silver Reject Explorer
 
 Record-level dashboard для `FILTERED_OUT_SILVER` записей (quarantine-backed, read-only datasource).
 
@@ -234,7 +234,7 @@ Record-level dashboard для `FILTERED_OUT_SILVER` записей (quarantine-b
   `2. Runtime`, `3. Provider Health`, `4. Data Quality`, `5. Workflow`;
   row-level link в CLI-команду остаётся для action handoff.
 
-#### 6. 5. Workflow
+#### 5. Workflow
 
 Prometheus dashboard для declarative workflow orchestration. Используйте его,
 когда pipeline-level панели зелёные, но workflow DAG показывает failed/skipped
@@ -275,7 +275,7 @@ operator-facing checkpoint store latency outside ordinary runtime resume paths.
 - После подтверждения переходите в `4. Data Quality`, где
   `Top Silver Reject Reasons` и `Top Silver Reject Fields` дают bounded cause
   summary без raw quarantine text.
-- Для row-level browsing переходите в `5. Silver Reject Explorer`.
+- Для row-level browsing переходите в `Silver Reject Explorer`.
 - CLI остаётся execution surface для replay/resolve:
   `bioetl quarantine inspect --pipeline <pipeline> --silver-filter-only --run-id <run-id> --limit 200` и
   `bioetl quarantine resolve --pipeline <pipeline> --payload-hash <payload-hash> --status IGNORED`.
@@ -351,9 +351,9 @@ uv run python -m pytest -q tests/integration/test_prometheus_rules_config.py
   1. Подтвердите spike в `1. BioETL Overview` или `2. Runtime`.
   1. Перейдите в `4. Data Quality` и проверьте `Top Silver Reject Reasons` /
      `Top Silver Reject Fields`.
-  1. Перейдите в `5. Silver Reject Explorer` для списка записей и detail по `payload_hash`.
+  1. Перейдите в `Silver Reject Explorer` для списка записей и detail по `payload_hash`.
   1. Если нужны action-операции, используйте quarantine CLI (`inspect/resolve/replay`).
-- **`5. Silver Reject Explorer` показывает `No data` во всех панелях**:
+- **`Silver Reject Explorer` показывает `No data` во всех панелях**:
   1. Проверьте, что backend доступен и `pipeline` явно задан:
      `curl "http://127.0.0.1:8081/ops/quarantine/filter-options?pipeline=<pipeline_name>"`.
   1. Убедитесь, что в dashboard выбран конкретный `$pipeline` (single-select),

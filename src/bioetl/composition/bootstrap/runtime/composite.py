@@ -123,6 +123,9 @@ def _bootstrap_runtime_basics(
     from uuid import UUID, uuid4
 
     from bioetl.composition.bootstrap.assembly.storage import bootstrap_storage_adapter
+    from bioetl.composition.bootstrap.runtime.composite_bootstrap_builders import (
+        bootstrap_runtime_basics as _bootstrap_runtime_basics_builder_impl,
+    )
     from bioetl.composition.bootstrap.runtime.observability import (
         bootstrap_logger_port,
     )
@@ -146,6 +149,7 @@ def _bootstrap_runtime_basics(
     return _bootstrap_runtime_basics_impl(
         config=config,
         run_id=run_id,
+        bootstrap_runtime_basics_builder_fn=_bootstrap_runtime_basics_builder_impl,
         settings_provider=get_settings,
         logger_bootstrapper=_bootstrap_logger,
         tracer_bootstrapper=bootstrap_tracer_port,
@@ -169,6 +173,9 @@ def _build_runner_factories(
     from bioetl.composition.bootstrap.runtime.composite_filter_extraction_service import (
         CompositeFilterExtractor,
     )
+    from bioetl.composition.bootstrap.runtime.composite_bootstrap_builders import (
+        build_runner_factories as _build_runner_factories_builder_impl,
+    )
     from bioetl.composition.bootstrap.runtime.pipeline import (
         bootstrap_pipeline_runner as bootstrap_pipeline_runner_impl,
     )
@@ -185,6 +192,7 @@ def _build_runner_factories(
         config=config,
         runtime=runtime,
         logger=logger,
+        build_runner_factories_builder_fn=_build_runner_factories_builder_impl,
         runner_factory_builder_cls=RunnerFactoryBuilder,
         filter_extraction_service_cls=CompositeFilterExtractor,
         pipeline_runner_builder=bootstrap_pipeline_runner_impl,
@@ -200,6 +208,9 @@ def _build_support_services(
     infra_context: CompositeInfrastructureContext,
 ) -> CompositeSupportServices:
     """Build composite support service bundle consumed by runner facade."""
+    from bioetl.composition.bootstrap.runtime.composite_bootstrap_builders import (
+        build_support_services as _build_support_services_builder_impl,
+    )
     from bioetl.composition.bootstrap.runtime.composite_support_helpers import (
         _create_dq_report_service,
         _load_field_group_registry,
@@ -212,6 +223,7 @@ def _build_support_services(
         config=config,
         runtime=runtime,
         infra_context=infra_context,
+        build_support_services_builder_fn=_build_support_services_builder_impl,
         support_services_factory_cls=CompositeSupportServicesFactory,
         resolve_gold_schema_fn=_resolve_composite_gold_schema,
         load_field_group_registry_fn=_load_field_group_registry,
@@ -255,6 +267,9 @@ def _create_composite_runner_from_plan(
     plan: _CompositeBootstrapPlan,
 ) -> CompositePipelineRunner:
     """Create the final composite runner from the resolved bootstrap plan."""
+    from bioetl.composition.bootstrap.runtime.composite_bootstrap_builders import (
+        create_composite_runner as _create_composite_runner_builder_impl,
+    )
     from bioetl.composition.bootstrap.runtime.runner_assembly import (
         create_composite_runner_service,
     )
@@ -263,6 +278,7 @@ def _create_composite_runner_from_plan(
         config=config,
         runtime=runtime,
         plan=plan,
+        create_composite_runner_builder_fn=_create_composite_runner_builder_impl,
         runner_factory=create_composite_runner_service,
     )
 
