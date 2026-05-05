@@ -196,6 +196,172 @@ groups:
       - record: bioetl_l1_workflow_global_status
         expr: max by (pipeline, run_type) (bioetl_l0_input_status{input="workflow"})
 
+      - record: bioetl_runtime_current_activity_15m
+        expr: sum by (pipeline, run_type) (increase(bioetl_pipeline_runs_total[15m])) > bool 0
+
+      - record: bioetl_runtime_current_failure_signals_15m
+        expr: >-
+          (
+            max by (pipeline, run_type) (bioetl_runtime_alert_condition_pipeline_runs_failed_15m or bioetl_runtime_alert_condition_stage_backlog_active_15m or bioetl_runtime_alert_condition_stage_lag_high_15m or bioetl_runtime_alert_condition_gold_write_missing_15m)
+            or
+            (max by (pipeline) (bioetl_runtime_alert_condition_pipeline_preflight_failed_15m or bioetl_runtime_alert_condition_pipeline_infrastructure_failed_15m)
+            * on (pipeline) group_left(run_type) bioetl_runtime_current_activity_15m)
+          ) > bool 0
+
+      - record: bioetl_runtime_current_degraded_signals_15m
+        expr: max by (pipeline, run_type) (bioetl_runtime_alert_condition_no_terminal_run_30m or bioetl_runtime_alert_condition_ingestion_throughput_degraded_15m or bioetl_runtime_alert_condition_record_flow_invariant_violated_15m) > bool 0
+
+      - record: bioetl_runtime_current_status
+        expr: (bioetl_runtime_current_failure_signals_15m * 2) or (bioetl_runtime_current_degraded_signals_15m unless on (pipeline, run_type) bioetl_runtime_current_failure_signals_15m) or (((bioetl_runtime_current_activity_15m * 0) unless on (pipeline, run_type) bioetl_runtime_current_failure_signals_15m) unless on (pipeline, run_type) bioetl_runtime_current_degraded_signals_15m)
+
+      - record: bioetl_runtime_current_blocker_reason
+        labels:
+          reason: preflight_failed
+          severity: failing
+          action_target: runtime
+        expr: bioetl_runtime_alert_condition_pipeline_preflight_failed_15m
+      - record: bioetl_runtime_current_blocker_reason
+        labels:
+          reason: infrastructure_failed
+          severity: failing
+          action_target: control_plane
+        expr: bioetl_runtime_alert_condition_pipeline_infrastructure_failed_15m
+      - record: bioetl_runtime_current_blocker_reason
+        labels:
+          reason: failed_run
+          severity: failing
+          action_target: runtime
+        expr: bioetl_runtime_alert_condition_pipeline_runs_failed_15m
+      - record: bioetl_runtime_current_blocker_reason
+        labels:
+          reason: stage_backlog
+          severity: failing
+          action_target: runtime
+        expr: bioetl_runtime_alert_condition_stage_backlog_active_15m
+      - record: bioetl_runtime_current_blocker_reason
+        labels:
+          reason: stage_lag
+          severity: failing
+          action_target: runtime
+        expr: bioetl_runtime_alert_condition_stage_lag_high_15m
+      - record: bioetl_runtime_current_blocker_reason
+        labels:
+          reason: gold_write_missing
+          severity: failing
+          action_target: data_quality
+        expr: bioetl_runtime_alert_condition_gold_write_missing_15m
+      - record: bioetl_runtime_current_blocker_reason
+        labels:
+          reason: no_terminal_run
+          severity: degraded
+          action_target: workflow
+        expr: bioetl_runtime_alert_condition_no_terminal_run_30m
+      - record: bioetl_runtime_current_blocker_reason
+        labels:
+          reason: ingestion_throughput_degraded
+          severity: degraded
+          action_target: runtime
+        expr: bioetl_runtime_alert_condition_ingestion_throughput_degraded_15m
+      - record: bioetl_runtime_current_blocker_reason
+        labels:
+          reason: record_flow_invariant
+          severity: degraded
+          action_target: runtime
+        expr: bioetl_runtime_alert_condition_record_flow_invariant_violated_15m
+
+      - record: bioetl_provider_current_status
+        expr: (max by (provider) (bioetl_provider_health_status == bool 0) * 2) + max by (provider) (bioetl_provider_health_status == bool 1) + (max by (provider) (bioetl_provider_health_status == bool 2) * 0)
+
+      - record: bioetl_provider_current_cause
+        labels:
+          cause: health_status_unhealthy
+          severity: failing
+        expr: max by (provider) (bioetl_provider_health_status == bool 0)
+      - record: bioetl_provider_current_cause
+        labels:
+          cause: health_status_degraded
+          severity: degraded
+        expr: max by (provider) (bioetl_provider_health_status == bool 1)
+      - record: bioetl_provider_current_cause
+        labels:
+          cause: failure_rate_high
+          severity: failing
+        expr: bioetl_runtime_alert_condition_provider_failure_rate_high_15m
+      - record: bioetl_provider_current_cause
+        labels:
+          cause: retries_exhausted
+          severity: failing
+        expr: max by (provider) (bioetl_runtime_alert_condition_provider_retries_exhausted_1h)
+      - record: bioetl_provider_current_cause
+        labels:
+          cause: adapter_latency_high
+          severity: degraded
+        expr: bioetl_runtime_alert_condition_provider_adapter_latency_high_30m
+      - record: bioetl_provider_current_cause
+        labels:
+          cause: http_error_rate_high
+          severity: degraded
+        expr: bioetl_runtime_alert_condition_provider_http_error_rate_high_15m
+      - record: bioetl_provider_current_cause
+        labels:
+          cause: rate_limiter_wait_high
+          severity: degraded
+        expr: bioetl_runtime_alert_condition_provider_rate_limiter_wait_high_30m
+      - record: bioetl_provider_current_cause
+        labels:
+          cause: rate_limiter_tokens_depleted
+          severity: degraded
+        expr: bioetl_runtime_alert_condition_provider_rate_limiter_tokens_depleted_15m
+
+      - record: bioetl_dq_current_activity_15m
+        expr: sum by (pipeline) (increase(bioetl_records_processed_total{stage="bronze"}[15m])) > bool 0
+
+      - record: bioetl_dq_current_failure_signals_15m
+        expr: max by (pipeline) (bioetl_runtime_alert_condition_dq_hard_fail_15m or bioetl_runtime_alert_condition_dq_critical_anomaly_30m or bioetl_runtime_alert_condition_silver_validation_failures_30m) > bool 0
+
+      - record: bioetl_dq_current_degraded_signals_15m
+        expr: max by (pipeline) (bioetl_runtime_alert_condition_dq_soft_threshold_15m or (sum by (pipeline) (increase(bioetl_dq_records_quarantined_total[15m])) > bool 0) or (sum by (pipeline) (increase(bioetl_silver_filter_rejections_total[15m])) > bool 0)) > bool 0
+
+      - record: bioetl_dq_current_status
+        expr: (bioetl_dq_current_failure_signals_15m * 2) or (bioetl_dq_current_degraded_signals_15m unless on (pipeline) bioetl_dq_current_failure_signals_15m) or (((bioetl_dq_current_activity_15m * 0) unless on (pipeline) bioetl_dq_current_failure_signals_15m) unless on (pipeline) bioetl_dq_current_degraded_signals_15m)
+
+      - record: bioetl_dq_current_reason
+        labels:
+          reason: hard_validation_failure
+          severity: failing
+          action_target: data_quality
+        expr: bioetl_runtime_alert_condition_dq_hard_fail_15m
+      - record: bioetl_dq_current_reason
+        labels:
+          reason: critical_anomaly
+          severity: failing
+          action_target: data_quality
+        expr: bioetl_runtime_alert_condition_dq_critical_anomaly_30m
+      - record: bioetl_dq_current_reason
+        labels:
+          reason: silver_validation_failure
+          severity: failing
+          action_target: data_quality
+        expr: bioetl_runtime_alert_condition_silver_validation_failures_30m
+      - record: bioetl_dq_current_reason
+        labels:
+          reason: soft_threshold
+          severity: degraded
+          action_target: data_quality
+        expr: bioetl_runtime_alert_condition_dq_soft_threshold_15m
+      - record: bioetl_dq_current_reason
+        labels:
+          reason: quarantined_records
+          severity: degraded
+          action_target: silver_reject_explorer
+        expr: sum by (pipeline) (increase(bioetl_dq_records_quarantined_total[15m])) > bool 0
+      - record: bioetl_dq_current_reason
+        labels:
+          reason: silver_filter_rejects
+          severity: degraded
+          action_target: silver_reject_explorer
+        expr: sum by (pipeline) (increase(bioetl_silver_filter_rejections_total[15m])) > bool 0
+
       - record: bioetl_provider_health_check_provider_universe_15m
         expr: (sum by (provider) (increase(bioetl_health_check_success_total[15m]))) or (sum by (provider) (increase(bioetl_health_check_degraded_total[15m]))) or (sum by (provider) (increase(bioetl_health_check_failures_total[15m])))
 

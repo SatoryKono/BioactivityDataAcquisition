@@ -27,31 +27,43 @@ def iter_yaml_files() -> list[Path]:
     return [*sorted(WORKFLOWS_DIR.glob("*.yml")), *sorted(COMPOSITE_ACTIONS_DIR.rglob("action.yml"))]
 
 
-def main() -> int:
+def _uses_violations_in_file(file_path: Path) -> list[str]:
+    violations: list[str] = []
+    rel_path = file_path.relative_to(ROOT)
+    for line_no, line in enumerate(file_path.read_text(encoding="utf-8").splitlines(), 1):
+        m = USES_PATTERN.match(line)
+        if not m:
+            continue
+        uses_ref = m.group(1)
+        action, _, ref = uses_ref.partition("@")
+        if action not in ALLOWED_USES:
+            continue
+        if not ref or ref not in ALLOWED_USES[action]:
+            violations.append(
+                f"{rel_path}:{line_no}: disallowed {uses_ref}; expected one of {sorted(ALLOWED_USES[action])}"
+            )
+    return violations
+
+
+def _collect_uses_violations() -> list[str]:
     violations: list[str] = []
     for file_path in iter_yaml_files():
-        rel_path = file_path.relative_to(ROOT)
-        for line_no, line in enumerate(file_path.read_text(encoding="utf-8").splitlines(), 1):
-            m = USES_PATTERN.match(line)
-            if not m:
-                continue
-            uses_ref = m.group(1)
-            action, _, ref = uses_ref.partition("@")
-            if action not in ALLOWED_USES:
-                continue
-            if not ref or ref not in ALLOWED_USES[action]:
-                violations.append(
-                    f"{rel_path}:{line_no}: disallowed {uses_ref}; expected one of {sorted(ALLOWED_USES[action])}"
-                )
+        violations.extend(_uses_violations_in_file(file_path))
+    return violations
 
-    if violations:
-        sys.stderr.write("GitHub Actions runtime policy violations found:\n")
-        for v in violations:
-            sys.stderr.write(f"- {v}\n")
-        return 1
 
-    print("GitHub Actions runtime policy check passed.")
-    return 0
+def _report_violations(violations: list[str]) -> int:
+    if not violations:
+        print("GitHub Actions runtime policy check passed.")
+        return 0
+    sys.stderr.write("GitHub Actions runtime policy violations found:\n")
+    for violation in violations:
+        sys.stderr.write(f"- {violation}\n")
+    return 1
+
+
+def main() -> int:
+    return _report_violations(_collect_uses_violations())
 
 
 if __name__ == "__main__":

@@ -64,6 +64,15 @@ def _build_record_map(payload: dict) -> dict[str, dict]:
     return record_map
 
 
+def _recording_rules_named(payload: dict, record_name: str) -> list[dict]:
+    rules: list[dict] = []
+    for group in payload.get("groups", []):
+        for rule in group.get("rules", []):
+            if rule.get("record") == record_name:
+                rules.append(rule)
+    return rules
+
+
 def _infer_recording_rule_labels(expr: str) -> frozenset[str]:
     match = re.search(r"\b(?:sum|max|min|avg|count)\s+by\s*\(([^)]*)\)", expr)
     if not match:
@@ -717,6 +726,95 @@ def test_runtime_dashboard_recording_rules_exist_and_reference_source_metrics() 
         assert source_metric in expr, (
             f"{record_name} must reference {source_metric} to avoid semantic drift"
         )
+
+
+def test_canonical_current_status_recording_rules_exist() -> None:
+    """Dashboard first screens must consume canonical current-status records."""
+    payload = _load_rules()
+    record_map = _build_record_map(payload)
+
+    expected = {
+        "bioetl_runtime_current_activity_15m": "bioetl_pipeline_runs_total",
+        "bioetl_runtime_current_failure_signals_15m": "bioetl_runtime_alert_condition_pipeline_runs_failed_15m",
+        "bioetl_runtime_current_degraded_signals_15m": "bioetl_runtime_alert_condition_no_terminal_run_30m",
+        "bioetl_runtime_current_status": "bioetl_runtime_current_failure_signals_15m",
+        "bioetl_provider_current_status": "bioetl_provider_health_status",
+        "bioetl_provider_current_cause": "bioetl_provider_health_status",
+        "bioetl_dq_current_activity_15m": "bioetl_records_processed_total",
+        "bioetl_dq_current_failure_signals_15m": "bioetl_runtime_alert_condition_dq_hard_fail_15m",
+        "bioetl_dq_current_degraded_signals_15m": "bioetl_runtime_alert_condition_dq_soft_threshold_15m",
+        "bioetl_dq_current_status": "bioetl_dq_current_failure_signals_15m",
+        "bioetl_dq_current_reason": "bioetl_runtime_alert_condition_dq_hard_fail_15m",
+    }
+
+    missing = [name for name in expected if name not in record_map]
+    assert not missing, f"Missing canonical current-status records: {missing}"
+
+    for record_name, expected_fragment in expected.items():
+        assert expected_fragment in record_map[record_name].get("expr", "")
+
+
+def test_canonical_current_status_rules_do_not_use_grafana_range_or_zero_fallback() -> None:
+    """Current status must not be calculated from selected range evidence."""
+    payload = _load_rules()
+    record_map = _build_record_map(payload)
+
+    current_status_records = (
+        "bioetl_runtime_current_status",
+        "bioetl_provider_current_status",
+        "bioetl_dq_current_status",
+    )
+    for record_name in current_status_records:
+        expr = record_map[record_name].get("expr", "")
+        assert "$__range" not in expr
+        assert "or vector(0)" not in expr
+
+
+def test_canonical_reason_records_expose_operator_routing_labels() -> None:
+    payload = _load_rules()
+
+    reason_expectations = {
+        "bioetl_runtime_current_blocker_reason": {"reason", "severity", "action_target"},
+        "bioetl_provider_current_cause": {"cause", "severity"},
+        "bioetl_dq_current_reason": {"reason", "severity", "action_target"},
+    }
+
+    for record_name, expected_labels in reason_expectations.items():
+        rules = _recording_rules_named(payload, record_name)
+        assert rules, f"Missing reason record {record_name}"
+        for rule in rules:
+            labels = rule.get("labels", {})
+            assert expected_labels <= set(labels), (
+                f"{record_name} must expose {sorted(expected_labels)} labels"
+            )
+
+
+def test_provider_current_status_preserves_provider_health_status_mapping() -> None:
+    payload = _load_rules()
+    record_map = _build_record_map(payload)
+    expr = record_map["bioetl_provider_current_status"].get("expr", "")
+
+    assert "bioetl_provider_health_status == bool 0" in expr
+    assert "* 2" in expr
+    assert "bioetl_provider_health_status == bool 1" in expr
+    assert "bioetl_provider_health_status == bool 2" in expr
+    assert "* 0" in expr
+    assert "max by (provider)" in expr
+
+
+def test_dq_current_status_splits_hard_failures_from_degraded_warnings() -> None:
+    payload = _load_rules()
+    record_map = _build_record_map(payload)
+
+    failure_expr = record_map["bioetl_dq_current_failure_signals_15m"].get("expr", "")
+    degraded_expr = record_map["bioetl_dq_current_degraded_signals_15m"].get("expr", "")
+    status_expr = record_map["bioetl_dq_current_status"].get("expr", "")
+
+    assert "bioetl_runtime_alert_condition_dq_hard_fail_15m" in failure_expr
+    assert "bioetl_runtime_alert_condition_dq_critical_anomaly_30m" in failure_expr
+    assert "bioetl_runtime_alert_condition_dq_soft_threshold_15m" in degraded_expr
+    assert "* 2" in status_expr
+    assert "* 0" in status_expr
 
 
 def test_rule_expressions_use_real_metric_label_schemas() -> None:

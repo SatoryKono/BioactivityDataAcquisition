@@ -194,24 +194,32 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def _load_violations_from_args(args: argparse.Namespace) -> list[BroadCleanupViolation]:
+    repo_root = _discover_repo_root(args.path)
+    return collect_broad_cleanup_violations(repo_root)
+
+
+def _report_broad_cleanup_violations(violations: list[BroadCleanupViolation]) -> int:
+    if not violations:
+        sys.stdout.write("OK: cleanup governance guardrails passed.\n")
+        return 0
+    sys.stderr.write("ERROR: broad cleanup instructions are not allowed:\n")
+    for violation in violations:
+        sys.stderr.write(
+            f"  - {violation.path}:{violation.line_number}: "
+            f"{violation.pattern} :: {violation.line}\n"
+        )
+    return 1
+
+
 def main() -> int:
     args = parse_args()
     try:
-        repo_root = _discover_repo_root(args.path)
-        violations = collect_broad_cleanup_violations(repo_root)
+        violations = _load_violations_from_args(args)
     except (OSError, RuntimeError, yaml.YAMLError) as exc:
         sys.stderr.write(f"ERROR: cleanup governance check failed: {exc}\n")
         return 2
-    if violations:
-        sys.stderr.write("ERROR: broad cleanup instructions are not allowed:\n")
-        for violation in violations:
-            sys.stderr.write(
-                f"  - {violation.path}:{violation.line_number}: "
-                f"{violation.pattern} :: {violation.line}\n"
-            )
-        return 1
-    sys.stdout.write("OK: cleanup governance guardrails passed.\n")
-    return 0
+    return _report_broad_cleanup_violations(violations)
 
 
 if __name__ == "__main__":
