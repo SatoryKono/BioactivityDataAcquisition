@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 from uuid import uuid4
 
@@ -12,10 +13,140 @@ from bioetl.domain.context import PipelineRunContext, VacuumSettings
 from bioetl.domain.types import RunType
 
 
+def _create_bootstrap_settings(
+    *,
+    metrics_enabled: bool = False,
+    metrics_server_enabled: bool = False,
+    tracing_enabled: bool = False,
+    dq_monitor_enabled: bool = False,
+) -> MagicMock:
+    """Create settings mock with the runtime attributes bootstrap expects."""
+    settings = MagicMock()
+    settings.metrics_port = 8000
+    settings.env = "test"
+    settings.debug = False
+    settings.test_mode = False
+    settings.data_dir = ""
+    settings.strict_error_handling = False
+    settings.strict_medallion = False
+    settings.silver_dedup_timeout_seconds = None
+    settings.pii_salt_rotation_active = False
+    settings.json_encoder = None
+    settings.default_email = None
+    settings.bio_api_key = None
+    settings.chembl_api_key = None
+    settings.pubchem_api_key = None
+    settings.crossref_email = None
+    settings.crossref_mailto = None
+    settings.crossref_plus_token = None
+    settings.pubmed_api_key = None
+    settings.uniprot_api_key = None
+    settings.openalex_api_key = None
+    settings.semanticscholar_api_key = None
+    settings.pipeline = SimpleNamespace()
+    settings.pipeline.heartbeat_interval = 30
+    settings.pipeline.vacuum_retention_days = 7
+    settings.pipeline.batch_size = None
+    settings.pipeline.checkpoint_interval = None
+    settings.pipeline.relaxed_dq = False
+    settings.pipeline.max_concurrent_batches = None
+    settings.pipeline.health_check_mode = None
+    settings.pipeline.control_plane = SimpleNamespace(
+        required_persistence_profile=None,
+        run_manifest_enabled=True,
+        run_ledger_enabled=True,
+        checkpoint_compatibility_policy=None,
+    )
+    settings.observability = SimpleNamespace()
+    settings.observability.metrics_enabled = metrics_enabled
+    settings.observability.metrics_server_enabled = metrics_server_enabled
+    settings.observability.metrics_fail_fast = False
+    settings.observability.metrics_retry_count = 3
+    settings.observability.metrics_retry_delay = 1.0
+    settings.observability.tracing_enabled = tracing_enabled
+    settings.observability.dq_monitor_enabled = dq_monitor_enabled
+    settings.observability.dq_baseline_window = 7
+    settings.observability.dq_z_score_threshold = 2.5
+    settings.observability.dq_min_baseline_samples = 3
+    settings.observability.dq_error_rate_max = 0.10
+    settings.observability.dq_quality_score_min = 0.80
+    settings.observability.audit_enabled = False
+    return settings
+
+
+def _create_observability_bundle(logger: MagicMock | None = None) -> MagicMock:
+    """Create observability bundle mock with a bind-capable logger."""
+    effective_logger = logger or MagicMock()
+    effective_logger.bind = MagicMock(return_value=effective_logger)
+    effective_logger.info = MagicMock()
+    effective_logger.warning = MagicMock()
+    bundle = MagicMock()
+    bundle.logger = effective_logger
+    return bundle
+
+
+def _create_pipeline_yaml_config(
+    *,
+    auto_vacuum: bool = False,
+    retention_days: int = 7,
+    input_filter_enabled: bool = False,
+) -> MagicMock:
+    """Create a minimal pipeline config mock for bootstrap tests."""
+    config = MagicMock()
+    config.business_primary_keys = ["activity_id"]
+    config.primary_keys = None
+    config.technical_primary_key = "entity_id"
+    config.maintenance.auto_vacuum = auto_vacuum
+    config.maintenance.vacuum_retention_days = retention_days
+    config.input_filter = MagicMock()
+    config.input_filter.enabled = input_filter_enabled
+    config.input_filter.source_path = ""
+    config.input_filter.column_name = ""
+    config.input_filter.filter_field = ""
+    return config
+
+
+def _configure_registry_with_runner(
+    mock_create_registry: MagicMock,
+    *,
+    runner: object | None = None,
+) -> tuple[MagicMock, MagicMock, object]:
+    """Wire registry.get(...).factory.create_runner(...) to a provided runner."""
+    effective_runner = runner or MagicMock(spec=PipelineRunner)
+    factory = MagicMock()
+    factory.create_runner.return_value = effective_runner
+    registry = MagicMock()
+    registry.list_pipelines.return_value = []
+    registry.get.return_value.factory = factory
+    mock_create_registry.return_value = registry
+    return registry, factory, effective_runner
+
+
+def _create_pipeline_context(
+    *,
+    pipeline_name: str = "chembl_activity",
+    limit: int | None = None,
+    vacuum: VacuumSettings | None = None,
+) -> PipelineRunContext:
+    """Create a standard pipeline run context for bootstrap tests."""
+    context_kwargs = {
+        "pipeline_name": pipeline_name,
+        "run_id": uuid4(),
+        "run_type": RunType.INCREMENTAL,
+        "resume": False,
+        "limit": limit,
+    }
+    if vacuum is not None:
+        context_kwargs["vacuum"] = vacuum
+    return PipelineRunContext(
+        **context_kwargs,
+    )
+
+
 @pytest.fixture
 def mock_settings():
     """Create mock settings."""
-    settings = MagicMock()
+    settings = _create_bootstrap_settings()
     settings.env = "staging"
     settings.strict_error_handling = False
     settings.aws = MagicMock()
@@ -30,20 +161,13 @@ def mock_settings():
     settings.s3.bucket_checkpoints = "checkpoints"
     settings.storage_options = {}
     settings.metrics = None
-    # Pipeline settings for RuntimeConfig
-    settings.pipeline = MagicMock()
-    settings.pipeline.heartbeat_interval = 30
     return settings
 
 
 @pytest.fixture
 def mock_logger():
     """Create mock logger."""
-    logger = MagicMock()
-    logger.bind = MagicMock(return_value=logger)
-    logger.info = MagicMock()
-    logger.warning = MagicMock()
-    return logger
+    return _create_observability_bundle().logger
 
 
 @pytest.mark.unit
@@ -64,32 +188,14 @@ class TestBootstrapPipeline:
         """Test that unknown pipeline name raises ValueError."""
         from bioetl.composition.bootstrap import bootstrap_pipeline_runner
 
-        # Configure settings with required observability attributes
-        mock_settings.metrics_port = 8000
-        mock_settings.test_mode = False
-        mock_settings.observability = MagicMock()
-        mock_settings.observability.metrics_enabled = True
-        mock_settings.observability.metrics_server_enabled = True
-        mock_settings.observability.metrics_fail_fast = False
-        mock_settings.observability.metrics_retry_count = 3
-        mock_settings.observability.metrics_retry_delay = 1.0
-        mock_settings.observability.tracing_enabled = False
-        mock_settings.observability.dq_baseline_window = 7
-        mock_settings.observability.dq_z_score_threshold = 2.5
-        mock_settings.observability.dq_min_baseline_samples = 3
-        mock_settings.observability.dq_error_rate_max = 0.10
-        mock_settings.observability.dq_quality_score_min = 0.80
-
-        mock_get_settings.return_value = mock_settings
+        settings = _create_bootstrap_settings(
+            metrics_enabled=True,
+            metrics_server_enabled=True,
+        )
+        mock_get_settings.return_value = settings
 
         # Now raises "Configuration file not found" because load_pipeline_config is called first
-        ctx = PipelineRunContext(
-            pipeline_name="unknown_pipeline",
-            run_id=uuid4(),
-            run_type=RunType.INCREMENTAL,
-            resume=False,
-            limit=None,
-        )
+        ctx = _create_pipeline_context(pipeline_name="unknown_pipeline")
         with pytest.raises(ValueError, match="Configuration file not found"):
             bootstrap_pipeline_runner(ctx)
 
@@ -118,55 +224,20 @@ class TestBootstrapPipeline:
         """
         from bioetl.composition.bootstrap import bootstrap_pipeline_runner
 
-        # Create proper mock settings with required attributes
-        test_settings = MagicMock()
-        test_settings.metrics_port = 8000
-        test_settings.test_mode = False
-        test_settings.pipeline = MagicMock()
-        test_settings.pipeline.heartbeat_interval = 30
-        test_settings.pipeline.vacuum_retention_days = 7
-        # Add observability settings for bootstrap_metrics_port()
-        test_settings.observability = MagicMock()
-        test_settings.observability.metrics_enabled = True
-        test_settings.observability.metrics_server_enabled = True
-        test_settings.observability.metrics_fail_fast = False
-        test_settings.observability.metrics_retry_count = 3
-        test_settings.observability.metrics_retry_delay = 1.0
-        test_settings.observability.tracing_enabled = False
-        test_settings.observability.dq_monitor_enabled = False
-
-        mock_get_settings.return_value = test_settings
-
-        # Mock observability bundle
-        mock_obs = MagicMock()
-        mock_obs.logger = mock_logger
-        mock_bootstrap_observability_bundle.return_value = mock_obs
+        mock_get_settings.return_value = _create_bootstrap_settings(
+            metrics_enabled=True,
+            metrics_server_enabled=True,
+        )
+        mock_bootstrap_observability_bundle.return_value = _create_observability_bundle(
+            mock_logger
+        )
 
         mock_assemble_filter.return_value = None
 
-        # Setup pipeline registry mock
-        mock_config = MagicMock()
-        mock_config.business_primary_keys = ["activity_id"]
-        mock_config.primary_keys = None
-        mock_config.technical_primary_key = "entity_id"
-        mock_config.maintenance.auto_vacuum = False
-        mock_config.maintenance.vacuum_retention_days = 7
-        mock_config.input_filter = MagicMock()
-        mock_load_config.return_value = mock_config
-        mock_factory = MagicMock()
-        mock_runner = MagicMock()
-        mock_factory.create_runner.return_value = mock_runner
-        mock_registry = MagicMock()
-        mock_registry.get.return_value.factory = mock_factory
-        mock_create_registry.return_value = mock_registry
+        mock_load_config.return_value = _create_pipeline_yaml_config()
+        _, _, mock_runner = _configure_registry_with_runner(mock_create_registry)
 
-        ctx = PipelineRunContext(
-            pipeline_name="chembl_activity",
-            run_id=uuid4(),
-            run_type=RunType.INCREMENTAL,
-            resume=False,
-            limit=None,
-        )
+        ctx = _create_pipeline_context()
 
         # Should return runner - bootstrap no longer starts metrics server
         result = bootstrap_pipeline_runner(ctx)
@@ -197,42 +268,17 @@ class TestBootstrapPipeline:
         """Test bootstrap_pipeline_runner creates chembl_activity pipeline."""
         from bioetl.composition.bootstrap import bootstrap_pipeline_runner
 
-        mock_settings.test_mode = False
         mock_get_settings.return_value = mock_settings
 
-        # Mock YAML config with maintenance settings
-        mock_yaml_config = MagicMock()
-        mock_yaml_config.business_primary_keys = ["activity_id"]
-        mock_yaml_config.primary_keys = None
-        mock_yaml_config.technical_primary_key = "entity_id"
-        mock_yaml_config.maintenance.auto_vacuum = False
-        mock_yaml_config.maintenance.vacuum_retention_days = 7
-        # Input filter with disabled state (source_path empty means disabled)
-        mock_yaml_config.input_filter.enabled = False
-        mock_yaml_config.input_filter.source_path = ""
-        mock_yaml_config.input_filter.column_name = ""
-        mock_yaml_config.input_filter.filter_field = ""
-        mock_load_config.return_value = mock_yaml_config
-
-        # Mock observability with logger
-        mock_obs = MagicMock()
-        mock_obs.logger = mock_logger
-        mock_observability_bundle.return_value = mock_obs
-
-        # Mock factory and runner
-        mock_runner = MagicMock(spec=PipelineRunner)
-        mock_factory = MagicMock()
-        mock_factory.create_runner.return_value = mock_runner
-        mock_create_registry.return_value.list_pipelines.return_value = []
-        mock_create_registry.return_value.get.return_value.factory = mock_factory
-
-        ctx = PipelineRunContext(
-            pipeline_name="chembl_activity",
-            run_id=uuid4(),
-            run_type=RunType.INCREMENTAL,
-            resume=False,
-            limit=100,
+        mock_load_config.return_value = _create_pipeline_yaml_config()
+        mock_observability_bundle.return_value = _create_observability_bundle(
+            mock_logger
         )
+        _, mock_factory, mock_runner = _configure_registry_with_runner(
+            mock_create_registry
+        )
+
+        ctx = _create_pipeline_context(limit=100)
         result = bootstrap_pipeline_runner(ctx)
 
         assert result is mock_runner
@@ -265,49 +311,21 @@ class TestBootstrapVacuumConfig:
         """Test that YAML auto_vacuum config is used when CLI doesn't override."""
         from bioetl.composition.bootstrap import bootstrap_pipeline_runner
 
-        # Create settings with all required observability attributes
-        settings = MagicMock()
-        settings.metrics_port = 8000
-        settings.test_mode = False
-        settings.pipeline.heartbeat_interval = 30
-        settings.observability.metrics_enabled = False
-        settings.observability.metrics_server_enabled = False
-        settings.observability.dq_monitor_enabled = False
+        settings = _create_bootstrap_settings()
         mock_get_settings.return_value = settings
 
-        # Create logger
-        logger = MagicMock()
-        logger.bind.return_value = logger
-        mock_obs = MagicMock()
-        mock_obs.logger = logger
-        mock_bootstrap_observability_bundle.return_value = mock_obs
+        mock_bootstrap_observability_bundle.return_value = _create_observability_bundle()
         mock_assemble_filter.return_value = None
 
-        # Setup YAML config with auto_vacuum enabled
-        yaml_config = MagicMock()
-        yaml_config.business_primary_keys = ["activity_id"]
-        yaml_config.primary_keys = None
-        yaml_config.technical_primary_key = "entity_id"
-        yaml_config.maintenance.auto_vacuum = True
-        yaml_config.maintenance.vacuum_retention_days = 14
-        yaml_config.input_filter = MagicMock()
-        mock_load_config.return_value = yaml_config
+        mock_load_config.return_value = _create_pipeline_yaml_config(
+            auto_vacuum=True,
+            retention_days=14,
+        )
 
-        # Setup pipeline registry
-        mock_factory = MagicMock()
-        mock_runner = MagicMock()
-        mock_factory.create_runner.return_value = mock_runner
-        mock_registry = MagicMock()
-        mock_registry.get.return_value.factory = mock_factory
-        mock_create_registry.return_value = mock_registry
+        _, mock_factory, _ = _configure_registry_with_runner(mock_create_registry)
 
         # Context without CLI vacuum options (disabled VacuumSettings)
-        ctx = PipelineRunContext(
-            pipeline_name="chembl_activity",
-            run_id=uuid4(),
-            run_type=RunType.INCREMENTAL,
-            # vacuum defaults to VacuumSettings(enabled=False)
-        )
+        ctx = _create_pipeline_context()
 
         bootstrap_pipeline_runner(ctx)
 
@@ -335,49 +353,23 @@ class TestBootstrapVacuumConfig:
         """Test that CLI vacuum options override YAML config."""
         from bioetl.composition.bootstrap import bootstrap_pipeline_runner
 
-        # Create settings with all required observability attributes
-        settings = MagicMock()
-        settings.metrics_port = 8000
-        settings.test_mode = False
-        settings.pipeline.heartbeat_interval = 30
-        settings.observability.metrics_enabled = False
-        settings.observability.metrics_server_enabled = False
-        settings.observability.dq_monitor_enabled = False
+        settings = _create_bootstrap_settings()
         mock_get_settings.return_value = settings
 
-        # Create logger
-        logger = MagicMock()
-        logger.bind.return_value = logger
-        mock_obs = MagicMock()
-        mock_obs.logger = logger
-        mock_bootstrap_observability_bundle.return_value = mock_obs
+        mock_bootstrap_observability_bundle.return_value = _create_observability_bundle()
         mock_assemble_filter.return_value = None
 
-        # Setup YAML config with auto_vacuum enabled
-        yaml_config = MagicMock()
-        yaml_config.business_primary_keys = ["activity_id"]
-        yaml_config.primary_keys = None
-        yaml_config.technical_primary_key = "entity_id"
-        yaml_config.maintenance.auto_vacuum = True
-        yaml_config.maintenance.vacuum_retention_days = 14
-        yaml_config.input_filter = MagicMock()
-        mock_load_config.return_value = yaml_config
+        mock_load_config.return_value = _create_pipeline_yaml_config(
+            auto_vacuum=True,
+            retention_days=14,
+        )
 
-        # Setup pipeline registry
-        mock_factory = MagicMock()
-        mock_runner = MagicMock()
-        mock_factory.create_runner.return_value = mock_runner
-        mock_registry = MagicMock()
-        mock_registry.get.return_value.factory = mock_factory
-        mock_create_registry.return_value = mock_registry
+        _, mock_factory, _ = _configure_registry_with_runner(mock_create_registry)
 
         # Context with CLI overrides (explicit enabled=True and 30 days)
         # Note: enabled=True means CLI is overriding, so its retention_days is used
-        ctx = PipelineRunContext(
-            pipeline_name="chembl_activity",
-            run_id=uuid4(),
-            run_type=RunType.INCREMENTAL,
-            vacuum=VacuumSettings(enabled=True, retention_days=30),  # CLI override
+        ctx = _create_pipeline_context(
+            vacuum=VacuumSettings(enabled=True, retention_days=30)
         )
 
         bootstrap_pipeline_runner(ctx)

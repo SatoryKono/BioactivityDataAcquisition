@@ -9,7 +9,7 @@ if TYPE_CHECKING:
     import pyarrow as pa
 
 
-class CsvExporterPort(Protocol):
+class CsvExporterProtocol(Protocol):
     """Minimal CSV exporter surface used by storage-layer helpers."""
 
     async def export(

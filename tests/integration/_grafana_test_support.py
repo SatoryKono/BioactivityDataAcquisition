@@ -82,16 +82,33 @@ def _register_runtime_metric_label_sets(
         HISTOGRAMS,
     )
 
-    for name, metric in COUNTERS.items():
+    _register_simple_metric_label_sets(label_sets, COUNTERS)
+    _register_simple_metric_label_sets(label_sets, GAUGES)
+    _register_histogram_label_sets(label_sets, HISTOGRAMS)
+
+
+def _register_simple_metric_label_sets(
+    label_sets: dict[str, frozenset[str]], metrics: dict[str, Any]
+) -> None:
+    for name, metric in metrics.items():
         label_sets[name] = frozenset(metric._labelnames)
-    for name, metric in GAUGES.items():
-        label_sets[name] = frozenset(metric._labelnames)
-    for name, metric in HISTOGRAMS.items():
-        base_labels = frozenset(metric._labelnames)
-        label_sets[name] = base_labels
-        label_sets[f"{name}_bucket"] = base_labels | {"le"}
-        label_sets[f"{name}_sum"] = base_labels
-        label_sets[f"{name}_count"] = base_labels
+
+
+def _register_histogram_label_sets(
+    label_sets: dict[str, frozenset[str]], histograms: dict[str, Any]
+) -> None:
+    for name, metric in histograms.items():
+        _register_histogram_label_set(label_sets, name=name, label_names=metric._labelnames)
+
+
+def _register_histogram_label_set(
+    label_sets: dict[str, frozenset[str]], *, name: str, label_names: tuple[str, ...]
+) -> None:
+    base_labels = frozenset(label_names)
+    label_sets[name] = base_labels
+    label_sets[f"{name}_bucket"] = base_labels | {"le"}
+    label_sets[f"{name}_sum"] = base_labels
+    label_sets[f"{name}_count"] = base_labels
 
 
 def _fallback_recording_rule_labels(

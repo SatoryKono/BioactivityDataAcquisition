@@ -354,21 +354,61 @@ def _merge_allowed_symbols(
     return tuple(merged)
 
 
+def _base_suffix_rule_parts(
+    item: dict[str, object], *, allowed_key: str
+) -> tuple[
+    str,
+    str,
+    tuple[str, ...],
+    tuple[str, ...],
+    tuple[str, ...],
+    tuple[AllowedSymbol, ...],
+]:
+    return (
+        str(item.get("rule_id", "")).strip(),
+        str(item.get("description", "")).strip(),
+        _flatten_string_sequence(item.get("suffixes", [])),
+        _flatten_string_sequence(item.get("include_path_prefixes", [])),
+        _flatten_string_sequence(item.get("exclude_path_prefixes", [])),
+        _load_allowed_symbols(item.get(allowed_key, [])),
+    )
+
+
+def _rule_has_required_suffix_parts(
+    rule_id: str,
+    description: str,
+    suffixes: tuple[str, ...],
+    include_path_prefixes: tuple[str, ...],
+) -> bool:
+    return bool(rule_id and description and suffixes and include_path_prefixes)
+
+
+def _function_rule_allowed_symbols(
+    rule_id: str, allowed_symbols: tuple[AllowedSymbol, ...]
+) -> tuple[AllowedSymbol, ...]:
+    if rule_id != "composition_bootstrap_port_factories":
+        return allowed_symbols
+    return _merge_allowed_symbols(
+        allowed_symbols,
+        _CURATED_COMPOSITION_BOOTSTRAP_PORT_FACTORIES,
+    )
+
+
 def _function_suffix_rule_from_config(item: object) -> FunctionSuffixRule | None:
     if not isinstance(item, dict):
         return None
-    rule_id = str(item.get("rule_id", "")).strip()
-    description = str(item.get("description", "")).strip()
-    suffixes = _flatten_string_sequence(item.get("suffixes", []))
-    include_path_prefixes = _flatten_string_sequence(item.get("include_path_prefixes", []))
-    exclude_path_prefixes = _flatten_string_sequence(item.get("exclude_path_prefixes", []))
-    allowed_symbols = _load_allowed_symbols(item.get("allowed_symbols", []))
-    if rule_id == "composition_bootstrap_port_factories":
-        allowed_symbols = _merge_allowed_symbols(
-            allowed_symbols,
-            _CURATED_COMPOSITION_BOOTSTRAP_PORT_FACTORIES,
-        )
-    if not (rule_id and description and suffixes and include_path_prefixes):
+    (
+        rule_id,
+        description,
+        suffixes,
+        include_path_prefixes,
+        exclude_path_prefixes,
+        allowed_symbols,
+    ) = _base_suffix_rule_parts(item, allowed_key="allowed_symbols")
+    allowed_symbols = _function_rule_allowed_symbols(rule_id, allowed_symbols)
+    if not _rule_has_required_suffix_parts(
+        rule_id, description, suffixes, include_path_prefixes
+    ):
         return None
     return FunctionSuffixRule(
         rule_id=rule_id,
@@ -383,13 +423,17 @@ def _function_suffix_rule_from_config(item: object) -> FunctionSuffixRule | None
 def _suffix_boundary_rule_from_config(item: object) -> SuffixBoundaryRule | None:
     if not isinstance(item, dict):
         return None
-    rule_id = str(item.get("rule_id", "")).strip()
-    description = str(item.get("description", "")).strip()
-    suffixes = _flatten_string_sequence(item.get("suffixes", []))
-    include_path_prefixes = _flatten_string_sequence(item.get("include_path_prefixes", []))
-    exclude_path_prefixes = _flatten_string_sequence(item.get("exclude_path_prefixes", []))
-    allowed_symbols = _load_allowed_symbols(item.get("allowed_symbol_exceptions", []))
-    if not (rule_id and description and suffixes and include_path_prefixes):
+    (
+        rule_id,
+        description,
+        suffixes,
+        include_path_prefixes,
+        exclude_path_prefixes,
+        allowed_symbols,
+    ) = _base_suffix_rule_parts(item, allowed_key="allowed_symbol_exceptions")
+    if not _rule_has_required_suffix_parts(
+        rule_id, description, suffixes, include_path_prefixes
+    ):
         return None
     return SuffixBoundaryRule(
         rule_id=rule_id,
@@ -406,7 +450,9 @@ def _family_freeze_rule_from_config(item: object) -> FamilyFreezeRule | None:
         return None
     rule_id = str(item.get("rule_id", "")).strip()
     description = str(item.get("description", "")).strip()
-    include_path_prefixes = _flatten_string_sequence(item.get("include_path_prefixes", []))
+    include_path_prefixes = _flatten_string_sequence(
+        item.get("include_path_prefixes", [])
+    )
     match_regex = str(item.get("match_regex", "")).strip()
     allowed_symbols = _load_allowed_symbols(item.get("allowed_symbols", []))
     if not (rule_id and description and include_path_prefixes and match_regex):
@@ -484,20 +530,27 @@ def _literal_assignment_names(
     for node in tree.body:
         if not isinstance(node, ast.Assign):
             continue
-        if not any(
-            isinstance(target, ast.Name) and target.id == assignment_name
-            for target in node.targets
-        ):
+        if not _is_named_assignment(node, assignment_name):
             continue
-        value = node.value
-        if not isinstance(value, (ast.List, ast.Tuple, ast.Set)):
-            return set()
-        return {
-            element.value
-            for element in value.elts
-            if isinstance(element, ast.Constant) and isinstance(element.value, str)
-        }
+        return _string_literals_from_sequence(node.value)
     return set()
+
+
+def _is_named_assignment(node: ast.Assign, assignment_name: str) -> bool:
+    return any(
+        isinstance(target, ast.Name) and target.id == assignment_name
+        for target in node.targets
+    )
+
+
+def _string_literals_from_sequence(value: ast.expr) -> set[str]:
+    if not isinstance(value, (ast.List, ast.Tuple, ast.Set)):
+        return set()
+    return {
+        element.value
+        for element in value.elts
+        if isinstance(element, ast.Constant) and isinstance(element.value, str)
+    }
 
 
 def _class_symbol(node: ast.AST) -> tuple[str, int, str] | None:

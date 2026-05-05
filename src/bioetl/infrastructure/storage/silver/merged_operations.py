@@ -13,7 +13,7 @@ from deltalake import write_deltalake
 
 from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types import BronzeRecord
-from bioetl.infrastructure.export.csv_exporter_contract import CsvExporterPort
+from bioetl.infrastructure.export.csv_exporter_contract import CsvExporterProtocol
 from bioetl.infrastructure.storage.delta.arrow_converter import ArrowDataConverter
 from bioetl.infrastructure.storage.delta.schema_ops import (
     drop_nondeterministic_persisted_fields,
@@ -95,7 +95,7 @@ class _SilverWriterMergedHostProtocol(Protocol):
     """Structural type for merged-write helper dependencies."""
 
     logger: LoggerPort
-    csv_exporter: CsvExporterPort | None
+    csv_exporter: CsvExporterProtocol | None
     _arrow_converter: ArrowDataConverter
 
     def _resolve_table_path(self, table_name: str) -> str: ...

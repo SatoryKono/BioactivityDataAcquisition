@@ -34,7 +34,7 @@ if TYPE_CHECKING:
 
     from bioetl.domain.ports import LoggerPort
     from bioetl.domain.types import GoldRecord, ScdConfig
-    from bioetl.infrastructure.export.csv_exporter_contract import CsvExporterPort
+    from bioetl.infrastructure.export.csv_exporter_contract import CsvExporterProtocol
 
 
 class _GoldWriterExecutorArrowMixin:
@@ -70,7 +70,7 @@ class _GoldWriterExecutorArrowMixin:
 class _GoldWriterSimpleDeltaMixin(_GoldWriterExecutorArrowMixin):
     """Simple append/overwrite Delta write logic with retry policy."""
 
-    csv_exporter: CsvExporterPort | None
+    csv_exporter: CsvExporterProtocol | None
 
     async def _write_simple(
         self,

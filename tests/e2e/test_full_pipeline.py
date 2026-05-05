@@ -24,6 +24,59 @@ from bioetl.infrastructure.storage.silver_writer import SilverWriter
 from tests.e2e.conftest import create_test_context
 
 
+def _create_test_storage_context(storage_paths: dict[str, object]) -> StorageContext:
+    """Create a real storage context bound to the temporary E2E paths."""
+    import structlog
+
+    logger = structlog.get_logger()
+    bronze_path = storage_paths["bronze"]
+    silver_path = storage_paths["silver"]
+    gold_path = storage_paths["gold"]
+    checkpoints_path = storage_paths["checkpoints"]
+
+    storage_adapter = StorageBundle(
+        bronze_writer=BronzeWriter(
+            base_path=str(bronze_path),
+            logger=logger,
+            metrics=NoOpMetrics(),
+            save_json=True,
+            json_path=str(bronze_path / "json"),
+        ),
+        silver_writer=SilverWriter(
+            base_path=str(silver_path),
+            logger=logger,
+        ),
+        gold_writer=GoldWriter(
+            base_path=str(gold_path),
+            logger=logger,
+        ),
+    )
+    return StorageContext(
+        adapter=storage_adapter,
+        bronze_path=str(bronze_path),
+        silver_path=str(silver_path),
+        gold_path=str(gold_path),
+        checkpoints_path=str(checkpoints_path),
+    )
+
+
+async def _run_pipeline_with_test_storage(
+    storage_context: StorageContext,
+    pipeline_name: str,
+    *,
+    limit: int | None = None,
+    query: str | None = None,
+) -> None:
+    """Bootstrap and execute a pipeline against the provided E2E storage context."""
+    with patch(
+        "bioetl.composition.factories.storage.StorageFactory.create",
+        return_value=storage_context,
+    ):
+        ctx = create_test_context(pipeline_name, limit=limit, query=query)
+        runner = bootstrap_pipeline_runner(ctx)
+        await runner.run()
+
+
 @pytest.mark.e2e
 @pytest.mark.slow
 class TestChEMBLPipelineE2E:
@@ -35,40 +88,14 @@ class TestChEMBLPipelineE2E:
         return e2e_temp_storage
 
     @pytest.fixture
-    def storage_adapter(self, storage_paths):
-        """Create storage adapter with real writers pointing to temp paths."""
-        import structlog
-
-        logger = structlog.get_logger()
-
-        bronze_writer = BronzeWriter(
-            base_path=str(storage_paths["bronze"]),
-            logger=logger,
-            metrics=NoOpMetrics(),
-            save_json=True,
-            json_path=str(storage_paths["bronze"] / "json"),
-        )
-
-        silver_writer = SilverWriter(
-            base_path=str(storage_paths["silver"]),
-            logger=logger,
-        )
-
-        gold_writer = GoldWriter(
-            base_path=str(storage_paths["gold"]),
-            logger=logger,
-        )
-
-        return StorageBundle(
-            bronze_writer=bronze_writer,
-            silver_writer=silver_writer,
-            gold_writer=gold_writer,
-        )
+    def storage_context(self, storage_paths):
+        """Create storage context with real writers pointing to temp paths."""
+        return _create_test_storage_context(storage_paths)
 
     @pytest.mark.vcr(allow_playback_repeats=True)
     async def test_chembl_activity_full_run(
         self,
-        storage_adapter,
+        storage_context,
         storage_paths,
         e2e_redis_client,
         e2e_minio_client,
@@ -83,24 +110,11 @@ class TestChEMBLPipelineE2E:
         - Checkpoint saved
         - Redis locks released
         """
-        storage_context = StorageContext(
-            adapter=storage_adapter,
-            bronze_path=str(storage_paths["bronze"]),
-            silver_path=str(storage_paths["silver"]),
-            gold_path=str(storage_paths["gold"]),
-            checkpoints_path=str(storage_paths["checkpoints"]),
+        await _run_pipeline_with_test_storage(
+            storage_context,
+            "chembl_activity",
+            limit=e2e_pipeline_limit,
         )
-
-        # Patch StorageFactory to return our test storage context
-        with patch(
-            "bioetl.composition.factories.storage.StorageFactory.create",
-            return_value=storage_context,
-        ):
-            ctx = create_test_context("chembl_activity", limit=e2e_pipeline_limit)
-            runner = bootstrap_pipeline_runner(ctx)
-
-            # Execute pipeline
-            await runner.run()
 
         # Verify Bronze: Check for JSONL files
         bronze_files = list(storage_paths["bronze"].rglob("*.jsonl*"))
@@ -136,57 +150,13 @@ async def test_pubchem_compound_pipeline(
     - Write to Bronze layer
     - Transform to Silver layer
     """
-    import structlog
-
-    logger = structlog.get_logger()
-
-    # Create storage adapter for tests (lock validation is now at Application layer)
-    bronze_writer = BronzeWriter(
-        base_path=str(e2e_temp_storage["bronze"]),
-        logger=logger,
-        metrics=NoOpMetrics(),
-        save_json=True,
-        json_path=str(e2e_temp_storage["bronze"] / "json"),
+    storage_context = _create_test_storage_context(e2e_temp_storage)
+    await _run_pipeline_with_test_storage(
+        storage_context,
+        "pubchem_compound",
+        limit=e2e_pipeline_limit,
+        query="aspirin",
     )
-
-    silver_writer = SilverWriter(
-        base_path=str(e2e_temp_storage["silver"]),
-        logger=logger,
-    )
-
-    gold_writer = GoldWriter(
-        base_path=str(e2e_temp_storage["gold"]),
-        logger=logger,
-    )
-
-    storage_adapter = StorageBundle(
-        bronze_writer=bronze_writer,
-        silver_writer=silver_writer,
-        gold_writer=gold_writer,
-    )
-
-    storage_context = StorageContext(
-        adapter=storage_adapter,
-        bronze_path=str(e2e_temp_storage["bronze"]),
-        silver_path=str(e2e_temp_storage["silver"]),
-        gold_path=str(e2e_temp_storage["gold"]),
-        checkpoints_path=str(e2e_temp_storage["checkpoints"]),
-    )
-
-    # Patch StorageFactory
-    with patch(
-        "bioetl.composition.factories.storage.StorageFactory.create",
-        return_value=storage_context,
-    ):
-        ctx = create_test_context(
-            "pubchem_compound",
-            limit=e2e_pipeline_limit,
-            query="aspirin",
-        )
-        runner = bootstrap_pipeline_runner(ctx)
-
-        # Execute pipeline
-        await runner.run()
 
     # Verify Bronze files created
     bronze_files = list(e2e_temp_storage["bronze"].rglob("*.jsonl*"))
@@ -216,52 +186,14 @@ async def test_pipeline_resume_after_failure(
     - Pipeline can resume from checkpoint
     - No duplicate records in Silver layer
     """
-    import structlog
-
-    logger = structlog.get_logger()
-
-    # Create storage adapter for tests (lock validation is now at Application layer)
-    bronze_writer = BronzeWriter(
-        base_path=str(e2e_temp_storage["bronze"]),
-        logger=logger,
-        metrics=NoOpMetrics(),
-        save_json=True,
-        json_path=str(e2e_temp_storage["bronze"] / "json"),
-    )
-
-    silver_writer = SilverWriter(
-        base_path=str(e2e_temp_storage["silver"]),
-        logger=logger,
-    )
-
-    gold_writer = GoldWriter(
-        base_path=str(e2e_temp_storage["gold"]),
-        logger=logger,
-    )
-
-    storage_adapter = StorageBundle(
-        bronze_writer=bronze_writer,
-        silver_writer=silver_writer,
-        gold_writer=gold_writer,
-    )
-
-    storage_context = StorageContext(
-        adapter=storage_adapter,
-        bronze_path=str(e2e_temp_storage["bronze"]),
-        silver_path=str(e2e_temp_storage["silver"]),
-        gold_path=str(e2e_temp_storage["gold"]),
-        checkpoints_path=str(e2e_temp_storage["checkpoints"]),
-    )
+    storage_context = _create_test_storage_context(e2e_temp_storage)
 
     # First run: Process 5 records
-    with patch(
-        "bioetl.composition.factories.storage.StorageFactory.create",
-        return_value=storage_context,
-    ):
-        ctx = create_test_context("chembl_activity", limit=5)
-        runner = bootstrap_pipeline_runner(ctx)
-
-        await runner.run()
+    await _run_pipeline_with_test_storage(
+        storage_context,
+        "chembl_activity",
+        limit=5,
+    )
 
     # Verify first run created files
     silver_files_first = list(e2e_temp_storage["silver"].rglob("*.parquet"))
@@ -274,14 +206,11 @@ async def test_pipeline_resume_after_failure(
 
     # Second run: Resume with same run_id (would typically continue from checkpoint)
     # For this E2E test, we verify that running again doesn't cause errors
-    with patch(
-        "bioetl.composition.factories.storage.StorageFactory.create",
-        return_value=storage_context,
-    ):
-        ctx = create_test_context("chembl_activity", limit=5)
-        runner = bootstrap_pipeline_runner(ctx)
-
-        await runner.run()
+    await _run_pipeline_with_test_storage(
+        storage_context,
+        "chembl_activity",
+        limit=5,
+    )
 
     # Verify second run also created files
     silver_files_second = list(e2e_temp_storage["silver"].rglob("*.parquet"))
@@ -307,52 +236,14 @@ async def test_pipeline_idempotency(
     strict merge-idempotency check. It verifies that a second run completes and
     does not grow beyond the expected two-batch envelope.
     """
-    import structlog
-
-    logger = structlog.get_logger()
-
-    # Create storage adapter for tests (lock validation is now at Application layer)
-    bronze_writer = BronzeWriter(
-        base_path=str(e2e_temp_storage["bronze"]),
-        logger=logger,
-        metrics=NoOpMetrics(),
-        save_json=True,
-        json_path=str(e2e_temp_storage["bronze"] / "json"),
-    )
-
-    silver_writer = SilverWriter(
-        base_path=str(e2e_temp_storage["silver"]),
-        logger=logger,
-    )
-
-    gold_writer = GoldWriter(
-        base_path=str(e2e_temp_storage["gold"]),
-        logger=logger,
-    )
-
-    storage_adapter = StorageBundle(
-        bronze_writer=bronze_writer,
-        silver_writer=silver_writer,
-        gold_writer=gold_writer,
-    )
-
-    storage_context = StorageContext(
-        adapter=storage_adapter,
-        bronze_path=str(e2e_temp_storage["bronze"]),
-        silver_path=str(e2e_temp_storage["silver"]),
-        gold_path=str(e2e_temp_storage["gold"]),
-        checkpoints_path=str(e2e_temp_storage["checkpoints"]),
-    )
+    storage_context = _create_test_storage_context(e2e_temp_storage)
 
     # Run 1: Initial load
-    with patch(
-        "bioetl.composition.factories.storage.StorageFactory.create",
-        return_value=storage_context,
-    ):
-        ctx = create_test_context("chembl_activity", limit=5)
-        runner = bootstrap_pipeline_runner(ctx)
-
-        await runner.run()
+    await _run_pipeline_with_test_storage(
+        storage_context,
+        "chembl_activity",
+        limit=5,
+    )
 
     # Count records after first run
     import polars as pl
@@ -366,14 +257,11 @@ async def test_pipeline_idempotency(
         count_first = len(df_first)
 
         # Run 2: Same data on append-mode pipeline
-        with patch(
-            "bioetl.composition.factories.storage.StorageFactory.create",
-            return_value=storage_context,
-        ):
-            ctx = create_test_context("chembl_activity", limit=5)
-            runner = bootstrap_pipeline_runner(ctx)
-
-            await runner.run()
+        await _run_pipeline_with_test_storage(
+            storage_context,
+            "chembl_activity",
+            limit=5,
+        )
 
         # Count records after second run
         df_second = pl.read_delta(str(delta_tables[0]))

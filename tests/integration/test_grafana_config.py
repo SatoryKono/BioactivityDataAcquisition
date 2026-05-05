@@ -38,6 +38,26 @@ _GRAFANA_VAR_TOKEN_RE = re.compile(r"\$(\{)?([\w]+)(?(1)\})")
 NAVIGATION_CONTRACT_PATH = Path(
     "docs/03-guides/dashboards/contracts/navigation-links.yaml"
 )
+EXPECTED_VARS_BY_DASHBOARD = {
+    "bioetl-overview-v2.json": {"pipeline", "run_type"},
+    "bioetl-dq-v2.json": {"pipeline", "run_type", "stage"},
+    "bioetl-runtime.json": {"pipeline", "run_type", "stage"},
+    "bioetl-provider-health-v2.json": {
+        "provider",
+        "pipeline_context",
+        "adapter",
+    },
+    "bioetl-control-plane-v1.json": {"pipeline", "run_type"},
+    "bioetl-workflow-overview.json": {"workflow", "status"},
+    "bioetl-silver-reject-explorer.json": {
+        "pipeline",
+        "run_type",
+        "reason_code",
+        "field",
+        "run_id",
+        "payload_hash",
+    },
+}
 
 
 def _json_load_without_duplicate_keys(path: Path) -> dict:
@@ -76,6 +96,14 @@ def _load_recording_rule_names() -> set[str]:
         for group in payload.get("groups", [])
         for rule in group.get("rules", [])
         if isinstance(record_name := rule.get("record"), str)
+    }
+
+
+def _dashboard_variable_names(dashboard: dict) -> set[object]:
+    return {
+        variable.get("name")
+        for variable in dashboard.get("templating", {}).get("list", [])
+        if variable.get("name")
     }
 
 
@@ -246,33 +274,9 @@ def test_dashboard_recording_rule_queries_are_backed_by_shipped_rules_config() -
 @pytest.mark.parametrize("dashboard_path", get_dashboard_files(), ids=lambda p: p.name)
 def test_dashboard_has_required_variables(dashboard_path):
     """Check dashboard variables match the current contract."""
-    expected_vars_by_dashboard = {
-        "bioetl-overview-v2.json": {"pipeline", "run_type"},
-        "bioetl-dq-v2.json": {"pipeline", "run_type", "stage"},
-        "bioetl-runtime.json": {"pipeline", "run_type", "stage"},
-        "bioetl-provider-health-v2.json": {
-            "provider",
-            "pipeline_context",
-            "adapter",
-        },
-        "bioetl-control-plane-v1.json": {"pipeline", "run_type"},
-        "bioetl-workflow-overview.json": {"workflow", "status"},
-        "bioetl-silver-reject-explorer.json": {
-            "pipeline",
-            "run_type",
-            "reason_code",
-            "field",
-            "run_id",
-            "payload_hash",
-        },
-    }
     dashboard = load_dashboard(dashboard_path)
-    variables = {
-        v.get("name")
-        for v in dashboard.get("templating", {}).get("list", [])
-        if v.get("name")
-    }
-    expected_vars = expected_vars_by_dashboard.get(dashboard_path.name)
+    variables = _dashboard_variable_names(dashboard)
+    expected_vars = EXPECTED_VARS_BY_DASHBOARD.get(dashboard_path.name)
 
     assert expected_vars is not None, (
         f"Unexpected dashboard file: {dashboard_path.name}"

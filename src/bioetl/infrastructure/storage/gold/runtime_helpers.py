@@ -17,14 +17,14 @@ if TYPE_CHECKING:
         TracingPort,
     )
     from bioetl.domain.types.contract_rollout import ContractRolloutPolicy
-    from bioetl.infrastructure.export.csv_exporter_contract import CsvExporterPort
+    from bioetl.infrastructure.export.csv_exporter_contract import CsvExporterProtocol
 
 
 @dataclass(frozen=True, slots=True)
 class GoldWriterRuntimeServices:
     """Grouped runtime collaborators for ``GoldWriter``."""
 
-    csv_exporter: CsvExporterPort | None
+    csv_exporter: CsvExporterProtocol | None
     tracing: TracingPort | None
     metrics: MetricsPort | None
     audit: AuditPort | None
@@ -36,7 +36,7 @@ class GoldWriterRuntimeServices:
 
 def build_gold_writer_runtime_services(
     *,
-    csv_exporter: CsvExporterPort | None,
+    csv_exporter: CsvExporterProtocol | None,
     tracing: TracingPort | None,
     metrics: MetricsPort | None,
     audit: AuditPort | None,
