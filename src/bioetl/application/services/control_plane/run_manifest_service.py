@@ -29,7 +29,7 @@ from bioetl.domain.normalization import (
     normalize_run_manifest_spec,
 )
 from bioetl.domain.ports import RunManifestPort
-from bioetl.domain.types import RunID, RunType
+from bioetl.domain.types import RunType
 
 __all__ = [
     "RunManifestCreateSpec",

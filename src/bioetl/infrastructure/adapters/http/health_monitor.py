@@ -44,6 +44,7 @@ from bioetl.infrastructure.adapters.http._health_monitor_support import (
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import HealthCheckResult, LoggerPort, MetricsPort
+    from bioetl.infrastructure.adapters.http.health_tracker import ProviderHealthTracker
 
 
 @dataclass

@@ -115,9 +115,6 @@ def get_default_provider_registry() -> _SupportsProviderRegistryStore:
     """Return the lazily-created default provider registry singleton."""
     global _default_provider_registry
     if _default_provider_registry is None:
-        provider_registry_cls = getattr(
-            import_module("bioetl.composition.providers.provider_registry"),
-            "ProviderRegistry",
-        )
-        _default_provider_registry = provider_registry_cls()
+        module = import_module("bioetl.composition.providers.provider_registry")
+        _default_provider_registry = module.ProviderRegistry()
     return _default_provider_registry

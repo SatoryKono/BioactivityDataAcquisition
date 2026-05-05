@@ -87,47 +87,22 @@ def push_metrics_to_gateway(
     Returns:
         True if push succeeded, False otherwise.
     """
-    from bioetl.composition.bootstrap.runtime.observability import (
-        bootstrap_logger_port,
+    from bioetl.composition._metrics_publication import (
+        push_metrics_to_gateway as push_metrics_to_gateway_impl,
     )
-    from bioetl.composition.observability_api import get_metrics_service
-    from bioetl.infrastructure.config import get_settings
 
-    settings = get_settings()
-    gateway = getattr(settings, "pushgateway_url", None) or "localhost:9091"
-    grouping_key: dict[str, str] = {}
-    if pipeline_name:
-        grouping_key["pipeline"] = pipeline_name
-    if run_type:
-        grouping_key["run_type"] = run_type
-
-    metrics_service = get_metrics_service()
-    metrics_service.logger = bootstrap_logger_port(
-        pipeline=pipeline_name or "metrics_publication",
-        run_id=uuid4(),
-        log_level="INFO",
-    )
-    result = metrics_service.push_to_gateway(
-        gateway=gateway,
+    return push_metrics_to_gateway_impl(
         run_label=run_label,
-        grouping_key=grouping_key,
+        pipeline_name=pipeline_name,
+        run_type=run_type,
     )
-    return bool(result.success)
 
 
 def ensure_metrics_server_started() -> bool:
     """Ensure metrics server is started if enabled in settings.
 
-    This function should be called at the start of pipeline execution
-    to start the Prometheus HTTP server. It's idempotent - calling it
-    multiple times is safe.
-
     Returns:
         True if server was started or already running, False if disabled.
-
-    Example:
-        >>> ensure_metrics_server_started()
-        True  # Server started on configured port
     """
     settings = get_settings()
     return bool(maybe_start_metrics_server(settings))
