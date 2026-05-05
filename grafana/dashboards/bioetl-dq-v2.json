@@ -255,7 +255,7 @@
       },
       "targets": [
         {
-          "expr": "((sum((bioetl_dq_validation_score{pipeline=~\"$pipeline\"} * bioetl_dq_validation_record_count{pipeline=~\"$pipeline\"})) or vector(0)) / clamp_min((sum(bioetl_dq_validation_record_count{pipeline=~\"$pipeline\"}) or vector(0)), 1))",
+          "expr": "((sum((bioetl_dq_validation_score{pipeline=~\"$pipeline\"} * bioetl_dq_validation_record_count{pipeline=~\"$pipeline\"}))) / clamp_min(sum(bioetl_dq_validation_record_count{pipeline=~\"$pipeline\"}), 1))",
           "legendFormat": "Quality",
           "refId": "A"
         }
@@ -705,7 +705,7 @@
             "mode": "thresholds"
           },
           "decimals": 2,
-          "max": 100,
+          "max": 1,
           "min": 0,
           "thresholds": {
             "mode": "absolute",
@@ -716,15 +716,15 @@
               },
               {
                 "color": "orange",
-                "value": 1
+                "value": 0.05
               },
               {
                 "color": "red",
-                "value": 2
+                "value": 0.2
               }
             ]
           },
-          "unit": "percent",
+          "unit": "percentunit",
           "mappings": [
             {
               "type": "special",
@@ -771,8 +771,8 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "100 * ((sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__range])) or vector(0)) / clamp_min((sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=~\"raw|validated|enriched|filtered_out|deduplicated|final\"}[$__range])) or vector(0)), 1))",
-          "legendFormat": "blocked %",
+          "expr": "((sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__range])) or vector(0)) / clamp_min((sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=~\"raw|validated|enriched|filtered_out|deduplicated|final\"}[$__range])) or vector(0)), 1))",
+          "legendFormat": "blocked share",
           "range": true,
           "refId": "A"
         }
@@ -1709,7 +1709,7 @@
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "((sum((bioetl_dq_validation_score{pipeline=~\"$pipeline\"} * bioetl_dq_validation_record_count{pipeline=~\"$pipeline\"})) or vector(0)) / clamp_min((sum(bioetl_dq_validation_record_count{pipeline=~\"$pipeline\"}) or vector(0)), 1))",
+              "expr": "((sum((bioetl_dq_validation_score{pipeline=~\"$pipeline\"} * bioetl_dq_validation_record_count{pipeline=~\"$pipeline\"}))) / clamp_min(sum(bioetl_dq_validation_record_count{pipeline=~\"$pipeline\"}), 1))",
               "legendFormat": "DQ score",
               "range": true,
               "refId": "A"
@@ -1727,7 +1727,7 @@
                 "mode": "thresholds"
               },
               "decimals": 2,
-              "max": 100,
+              "max": 1,
               "min": 0,
               "thresholds": {
                 "mode": "absolute",
@@ -1738,15 +1738,15 @@
                   },
                   {
                     "color": "orange",
-                    "value": 1
+                    "value": 0.05
                   },
                   {
                     "color": "red",
-                    "value": 2
+                    "value": 0.2
                   }
                 ]
               },
-              "unit": "percent",
+              "unit": "percentunit",
               "mappings": [
                 {
                   "type": "special",
@@ -1787,8 +1787,8 @@
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "100 * ((sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__interval])) or vector(0)) / clamp_min((sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=~\"raw|validated|enriched|filtered_out|deduplicated|final\"}[$__interval])) or vector(0)), 1))",
-              "legendFormat": "blocked %",
+              "expr": "((sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__interval])) or vector(0)) / clamp_min((sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=~\"raw|validated|enriched|filtered_out|deduplicated|final\"}[$__interval])) or vector(0)), 1))",
+              "legendFormat": "blocked share",
               "range": true,
               "refId": "A"
             }
