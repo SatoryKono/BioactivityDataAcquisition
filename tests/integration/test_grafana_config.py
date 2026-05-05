@@ -790,18 +790,6 @@ def test_control_plane_dashboard_has_primary_question() -> None:
 def test_control_plane_l1_triage_row_has_3_to_5_kpis_and_one_next_step() -> None:
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
     panels = get_dashboard_panels(dashboard)
-    triage_row_index = next(
-        index
-        for index, panel in enumerate(panels)
-        if panel.get("type") == "row"
-        and panel.get("title") == "Trust Summary (Answer-First)"
-    )
-    triage_panels: list[dict[str, object]] = []
-    for panel in panels[triage_row_index + 1 :]:
-        if panel.get("type") == "row":
-            break
-        triage_panels.append(panel)
-
     kpi_titles = {
         "Replay Safety State",
         "Checkpoint Freshness (hours since last op)",
@@ -809,12 +797,15 @@ def test_control_plane_l1_triage_row_has_3_to_5_kpis_and_one_next_step() -> None
         "Replay / Resume Blockers",
     }
     next_step_title = "Next Drilldown: Replay Safety Diagnostics"
-    triage_titles = {panel.get("title") for panel in triage_panels}
+    first_screen_titles = {
+        panel.get("title")
+        for panel in panels[:8]
+        if panel.get("type") != "row"
+    }
 
-    assert kpi_titles.issubset(triage_titles)
-    assert next_step_title in triage_titles
-    assert len([title for title in triage_titles if title in kpi_titles]) == 4
-    assert len(triage_panels) == 5
+    assert kpi_titles.issubset(first_screen_titles)
+    assert next_step_title in first_screen_titles
+    assert len(first_screen_titles & kpi_titles) == 4
 
 
 def test_control_plane_l1_has_single_next_step_panel_with_expected_target() -> None:
@@ -1018,7 +1009,9 @@ def test_control_plane_dashboard_links_are_scoped() -> None:
     assert links
     assert all(link.get("includeVars") is False for link in links.values())
     assert "includeVars=true" not in json.dumps(links)
-    for title in ("Back to Overview", "2. Runtime", "4. Data Quality"):
+    assert "Back to Overview" not in links
+    assert "0. Control Plane" not in links
+    for title in ("1. Overview", "2. Runtime", "4. Data Quality"):
         url = str(links[title].get("url", ""))
         assert "var-pipeline=$pipeline" in url
         assert "var-run_type=$run_type" in url
@@ -2004,11 +1997,10 @@ def test_provider_health_selected_provider_detail_row_is_collapsed() -> None:
 
 
 def test_runtime_dq_control_plane_expose_contextual_loki_explore_link() -> None:
-    """Critical runtime/dq/control-plane panels must keep at least one contextual Loki Explore link."""
+    """Only Runtime/DQ critical panels expose contextual Loki Explore links."""
     dashboard_panels = {
         "bioetl-runtime.json": "Failed Runs",
         "bioetl-dq-v2.json": "Data Flow in Range: Bronze -> Silver -> Gold",
-        "bioetl-control-plane-v1.json": "Replay / Resume Blockers",
     }
 
     for dashboard_name, panel_title in dashboard_panels.items():
@@ -2056,3 +2048,12 @@ def test_runtime_dq_control_plane_expose_contextual_loki_explore_link() -> None:
             url = str(link.get("url", ""))
             assert "run_id" not in url
             assert "payload_hash" not in url
+
+
+def test_control_plane_does_not_expose_explore_links() -> None:
+    """Control Plane uses the dashboard bus and runbooks, not direct Explore links."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
+    serialized = json.dumps(dashboard.get("panels", []))
+
+    assert "grafana-lokiexplore-app" not in serialized
+    assert "grafana-exploretraces-app" not in serialized
