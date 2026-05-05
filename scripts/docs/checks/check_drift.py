@@ -1332,7 +1332,7 @@ def _check_ai_surface_forbidden_patterns(
             "ai-surfaces",
             "ERROR",
             _display_relative_path(relative_path),
-            "AI surface file missing",
+            AI_SURFACE_FILE_MISSING_MESSAGE,
         )
         return
 
@@ -1416,7 +1416,7 @@ def _check_ai_docs_runtime_mirror_headers(
                 "ai-surfaces",
                 "ERROR",
                 _display_relative_path(target.relative_path),
-                "AI surface file missing",
+                AI_SURFACE_FILE_MISSING_MESSAGE,
             )
             continue
 

@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import TYPE_CHECKING
+from typing import Protocol
 
 from bioetl.domain.composite.config_parsing import (
     optional_bool,
@@ -18,13 +18,50 @@ from bioetl.domain.composite.config_parsing import (
 )
 from bioetl.domain.composite.strategy import ConflictResolution, MergeStrategy
 
-if TYPE_CHECKING:
-    from bioetl.domain.composite.config import CompositeConfig
-
 __all__ = [
     "composite_from_dict",
     "composite_to_dict",
 ]
+
+
+class _SeedConfigProtocol(Protocol):
+    pipeline: str
+    output_keys: tuple[str, ...]
+    silver_table: str
+
+
+class _DependencyConfigProtocol(Protocol):
+    pipeline: str
+    join_keys: tuple[str, ...]
+    required: bool
+    timeout_seconds: int
+    silver_table: str | None
+    filter_fields: tuple[str, ...] | None
+
+
+class _EnricherConfigProtocol(Protocol):
+    pipeline: str
+    join_keys: tuple[str, ...]
+    required: bool
+    timeout_seconds: int
+
+
+class _MergeConfigProtocol(Protocol):
+    strategy: MergeStrategy
+    conflict_resolution: ConflictResolution
+    output_silver_path: str
+    output_gold_path: str
+    sort_by_silver: tuple[str, ...]
+    sort_by_gold: tuple[str, ...]
+
+
+class CompositeConfigProtocol(Protocol):
+    name: str
+    version: str
+    seed: _SeedConfigProtocol
+    dependencies: tuple[_DependencyConfigProtocol, ...]
+    enrichers: tuple[_EnricherConfigProtocol, ...]
+    merge: _MergeConfigProtocol
 
 
 def _build_seed_config[_ConfigT](
@@ -133,7 +170,7 @@ def _build_merge_config[_ConfigT](
     )
 
 
-def composite_to_dict(config: CompositeConfig) -> dict[str, object]:
+def composite_to_dict(config: CompositeConfigProtocol) -> dict[str, object]:
     """Convert CompositeConfig to serializable dictionary.
 
     Args:
@@ -185,7 +222,21 @@ def composite_to_dict(config: CompositeConfig) -> dict[str, object]:
     }
 
 
-def composite_from_dict(data: dict[str, object]) -> CompositeConfig:
+def composite_from_dict[
+    _CompositeConfigT,
+    _SeedConfigT,
+    _DependencyConfigT,
+    _EnricherConfigT,
+    _MergeConfigT,
+](
+    data: dict[str, object],
+    *,
+    composite_cls: Callable[..., _CompositeConfigT],
+    seed_cls: Callable[..., _SeedConfigT],
+    dependency_cls: Callable[..., _DependencyConfigT],
+    enricher_cls: Callable[..., _EnricherConfigT],
+    merge_cls: Callable[..., _MergeConfigT],
+) -> _CompositeConfigT:
     """Construct CompositeConfig from serialized dictionary.
 
     Args:
@@ -194,15 +245,6 @@ def composite_from_dict(data: dict[str, object]) -> CompositeConfig:
     Returns:
         CompositeConfig instance reconstructed from the input dictionary.
     """
-    # Local imports avoid runtime circular dependency with config.py facade.
-    from bioetl.domain.composite.config import (
-        CompositeConfig,
-        DependencyConfig,
-        EnricherConfig,
-        MergeConfig,
-        SeedConfig,
-    )
-
     seed_data = require_object_dict(data.get("seed"), "seed")
     dependency_data = require_object_dict_sequence(
         data.get("dependencies", []), "dependencies"
@@ -210,18 +252,18 @@ def composite_from_dict(data: dict[str, object]) -> CompositeConfig:
     enricher_data = require_object_dict_sequence(data.get("enrichers", []), "enrichers")
     merge_data = require_object_dict(data.get("merge"), "merge")
 
-    seed = _build_seed_config(seed_data, SeedConfig)
+    seed = _build_seed_config(seed_data, seed_cls)
     dependencies = _build_dependency_configs(
         dependency_data=list(dependency_data),
-        dependency_cls=DependencyConfig,
+        dependency_cls=dependency_cls,
     )
     enrichers = _build_enricher_configs(
         enricher_data=list(enricher_data),
-        enricher_cls=EnricherConfig,
+        enricher_cls=enricher_cls,
     )
-    merge = _build_merge_config(merge_data, MergeConfig)
+    merge = _build_merge_config(merge_data, merge_cls)
 
-    return CompositeConfig(
+    return composite_cls(
         name=require_str(data.get("name"), "name"),
         version=require_str(data.get("version"), "version"),
         seed=seed,

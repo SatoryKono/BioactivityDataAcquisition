@@ -1287,16 +1287,15 @@ class _ShapeNormalizer(ast.NodeTransformer):
         value = node.value
         if value is None or isinstance(value, bool):
             return node
-        replacement: JsonScalar
         if isinstance(value, str):
-            replacement = "STR"
+            node.value = "STR"
         elif isinstance(value, (int, float, complex)):
-            replacement = 0
+            node.value = 0
         elif isinstance(value, bytes):
-            replacement = "BYTES"
+            node.value = b"BYTES"
         else:
-            replacement = "CONST"
-        return ast.copy_location(ast.Constant(value=replacement), node)
+            node.value = "CONST"
+        return node
 
 
 def _normalized_callable_hash(node: ast.FunctionDef | ast.AsyncFunctionDef) -> str:
@@ -1648,15 +1647,15 @@ def _select_alert_targets(  # NOSONAR
         ]
 
     provider_targets: list[NodeKey] = []
-    provider_mode_auto = (
-        provider_mode == "auto"
-        and (
-            "provider" in dimensions
-            or "provider_health" in normalized
-            or "bioetl_health_check_" in normalized
-        )
+    provider_mode_is_auto = provider_mode == "auto"
+    provider_matches_dimensions = (
+        "provider" in dimensions
+        or "provider_health" in normalized
+        or "bioetl_health_check_" in normalized
     )
-    include_all_providers = provider_mode == "all" or provider_mode_auto
+    include_all_providers = provider_mode == "all" or (
+        provider_mode_is_auto and provider_matches_dimensions
+    )
     if include_all_providers:
         provider_targets = provider_nodes
 
@@ -3617,19 +3616,17 @@ def _add_complexity_analysis_surfaces(
                 for method in class_node.body
                 if isinstance(method, (ast.FunctionDef, ast.AsyncFunctionDef))  # NOSONAR
             )
+            module_callables = [
+                *functions,
+                *[
+                    method
+                    for class_node in classes
+                    for method in class_node.body
+                    if isinstance(method, (ast.FunctionDef, ast.AsyncFunctionDef))
+                ],
+            ]
             nesting_depth = max(
-                (
-                    _callable_max_nesting_depth(function)
-                    for function in [
-                        *functions,
-                        *[
-                            method
-                            for class_node in classes
-                            for method in class_node.body
-                            if isinstance(method, (ast.FunctionDef, ast.AsyncFunctionDef))
-                        ],
-                    ]
-                ),
+                (_callable_max_nesting_depth(function) for function in module_callables),
                 default=0,  # NOSONAR
             )  # NOSONAR
             call_count = sum(_callable_call_count(function) for function in functions)  # NOSONAR
