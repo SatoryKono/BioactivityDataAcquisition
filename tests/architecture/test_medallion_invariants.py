@@ -90,9 +90,7 @@ class TestBronzeMetadataInvariants:
             "Metadata files ensure data lineage is preserved with data."
         )
 
-    def test_bronze_writer_validates_timestamps(
-        self, bronze_writer_source: str
-    ) -> None:
+    def test_bronze_writer_validates_timestamps(self, bronze_writer_source: str) -> None:
         """Bronze writer MUST validate UTC timestamps.
 
         Per ADR-014, timestamps must be timezone-aware and in UTC
@@ -103,9 +101,7 @@ class TestBronzeMetadataInvariants:
             "Timestamps must be timezone-aware and in UTC per ADR-014."
         )
 
-    def test_bronze_path_includes_date_partition(
-        self, bronze_writer_source: str
-    ) -> None:
+    def test_bronze_path_includes_date_partition(self) -> None:
         """Bronze paths MUST include date partitioning.
 
         Path format: bronze/{provider}/{entity}/{date}/

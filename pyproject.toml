@@ -387,12 +387,19 @@ max-line-length = 120
 known-first-party = ["bioetl", "tests"]
 
 [tool.ruff.lint.per-file-ignores]
-# Tests may have unused arguments, ignore import order (handled by isort)
-# C901: Architecture tests perform complex static analysis checks
-# E402: Allow imports after future imports and docstrings
-# RUF012: Mutable class attributes for parametrize test data are intentional
-# RUF059: Unused unpacked variables are common in test fixtures
-"tests/**/*.py" = ["ARG001", "ARG002", "ARG005", "PTH", "SIM", "B017", "I001", "C901", "E402", "RUF012", "RUF059", "T201"]
+# Test lint governance is directory-scoped rather than suite-wide so new debt
+# stays localized to the test families that actually need each waiver.
+"tests/conftest.py" = ["E402", "I001"]
+"tests/unit/**/*.py" = ["ARG001", "ARG002", "ARG005", "B017", "E402", "I001", "PTH", "RUF012", "RUF059", "SIM", "T201"]
+"tests/integration/**/*.py" = ["ARG001", "ARG002", "ARG005", "B017", "E402", "I001", "PTH", "SIM", "T201"]
+"tests/e2e/**/*.py" = ["ARG001", "ARG002", "ARG005", "I001", "SIM"]
+"tests/architecture/**/*.py" = ["ARG005", "B017", "C901", "E402", "I001", "PTH", "RUF012", "RUF059", "SIM", "T201"]
+"tests/contract/**/*.py" = ["ARG002", "I001", "RUF012", "SIM"]
+"tests/helpers/**/*.py" = ["C901", "I001"]
+"tests/smoke/**/*.py" = ["I001"]
+"tests/security/**/*.py" = ["I001", "SIM"]
+"tests/performance/**/*.py" = ["ARG002", "I001"]
+"tests/benchmarks/**/*.py" = ["ARG002"]
 # Domain __init__.py uses semantic grouping with comments in __all__ (not alphabetical)
 # I001: Import order handled by isort (semantic grouping with comments)
 "src/bioetl/domain/__init__.py" = ["RUF022", "I001"]

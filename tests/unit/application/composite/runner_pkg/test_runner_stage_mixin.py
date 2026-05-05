@@ -13,8 +13,6 @@ from bioetl.application.composite.runner_pkg.runner_stage_mixin import (
     CompositeRunnerStageMixin,
 )
 from bioetl.domain.composite.result import (
-    DependencyResult,
-    DependencyStatus,
     SeedResult,
 )
 from bioetl.domain.composite.state import CompositePipelineState

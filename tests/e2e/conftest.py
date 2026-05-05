@@ -28,6 +28,11 @@ from uuid import UUID, uuid4, uuid5
 
 import pytest
 from tests.helpers.clock import FIXED_TEST_TIME
+from tests.helpers.vcr_config import (
+    build_cassette_dir,
+    infer_provider_cassette_dir,
+    resolve_cassette_name,
+)
 
 if TYPE_CHECKING:
     import httpx
@@ -115,30 +120,25 @@ def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
 def vcr_cassette_dir(request: pytest.FixtureRequest) -> Path:
     """Return provider-specific cassette directory for E2E tests."""
     test_name = request.node.name
-    provider_dir = _E2E_VCR_CASSETTE_DIR_BY_TEST.get(test_name, "chembl")
-    cassette_dir = (
-        Path(__file__).resolve().parents[1] / "fixtures" / "vcr" / provider_dir
+    provider_dir = infer_provider_cassette_dir(
+        node_name=test_name,
+        module_path=str(request.node.fspath),
+        overrides=_E2E_VCR_CASSETTE_DIR_BY_TEST,
     )
-    cassette_dir.mkdir(parents=True, exist_ok=True)
-    return cassette_dir
+    return build_cassette_dir(
+        fixtures_root=Path(__file__).resolve().parents[1] / "fixtures" / "vcr",
+        provider_dir=provider_dir,
+    )
 
 
 @pytest.fixture
 def vcr_cassette_name(request: pytest.FixtureRequest) -> str:
     """Return normalized cassette file name in snake_case format."""
-    node_name = request.node.name
-    if node_name is None:
-        msg = "pytest node name must be defined for VCR cassette resolution"
-        raise RuntimeError(msg)
-    qualified_name = (
-        f"{request.node.cls.__name__}.{node_name}" if request.node.cls else node_name
+    return resolve_cassette_name(
+        node_name=request.node.name,
+        class_name=request.node.cls.__name__ if request.node.cls else None,
+        overrides=_E2E_VCR_CASSETTE_NAME_OVERRIDES,
     )
-    qualified_override = _E2E_VCR_CASSETTE_NAME_OVERRIDES.get(qualified_name)
-    if qualified_override is not None:
-        return qualified_override
-    if node_name in _E2E_VCR_CASSETTE_NAME_OVERRIDES:
-        return _E2E_VCR_CASSETTE_NAME_OVERRIDES[node_name]
-    return node_name
 
 
 @pytest.fixture(scope="session", autouse=True)

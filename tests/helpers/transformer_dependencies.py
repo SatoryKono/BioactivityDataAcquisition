@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import dataclasses
-from typing import TYPE_CHECKING, Any, TypeVar
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from bioetl.application.core.base_transformer.structural_policy import (
@@ -20,8 +20,6 @@ if TYPE_CHECKING:
         TracingPort,
     )
     from bioetl.domain.behavior import EntityIdentityGenerator
-
-TTransformer = TypeVar("TTransformer")
 
 __all__ = [
     "build_test_transformer_dependencies",
@@ -55,7 +53,7 @@ def build_test_transformer_dependencies(
     )
 
 
-def instantiate_test_transformer(
+def instantiate_test_transformer[TTransformer](
     transformer_class: type[TTransformer],
     /,
     **kwargs: Any,

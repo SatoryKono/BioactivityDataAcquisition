@@ -6,7 +6,6 @@ Tests the OpenAlexPublicationSchema validation.
 from __future__ import annotations
 
 import sys
-from datetime import UTC, datetime
 from uuid import uuid4
 
 import pandas as pd

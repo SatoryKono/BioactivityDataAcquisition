@@ -184,7 +184,7 @@ def test_loader_fails_fast_when_registry_entry_is_missing(tmp_path: Path) -> Non
     )
 
     loader = DQContractConfigLoader(tmp_path)
-    with pytest.raises(KeyError, match="chembl.activity"):
+    with pytest.raises(KeyError, match=r"chembl\.activity"):
         _ = loader.load_dq_config_for_pipeline("chembl_activity")
 
 

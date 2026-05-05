@@ -33,8 +33,6 @@ from tests.unit.application.composite.runner_test_support import (
     create_mock_logger,
     create_mock_merger,
     create_runner,
-    new_enricher_runner_factory,
-    new_seed_runner_factory,
     seed_runner_factory,
 )
 

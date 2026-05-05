@@ -20,7 +20,7 @@ from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.exceptions import DataQualityError, DataQualityThresholdError
 from bioetl.domain.ports import MetricsPort
 from bioetl.domain.ports.noop import NoOpTracing
-from bioetl.domain.types import BatchID, RunType, ValidationResult
+from bioetl.domain.types import BatchID, ValidationResult
 from bioetl.infrastructure.config import get_pipeline_config
 
 pytest_plugins = ("tests.unit.application.core.transformer_test_support",)

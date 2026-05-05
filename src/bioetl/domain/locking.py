@@ -69,7 +69,7 @@ class LockNotHeldError(Exception):
         self.expected_key = expected_key
         super().__init__(
             f"Cannot perform {operation}: lock '{expected_key}' not held. "
-            "Acquire lock via LockCoordinator before write operations."
+            "Acquire a runtime lock before write operations."
         )
 
 
@@ -163,14 +163,14 @@ class LockContext:
 class LockContextHolder:
     """Mutable holder for sharing lock context between components.
 
-    Used to pass lock context from LockCoordinator (which acquires lock)
+    Used to pass lock context from the runtime lock owner
     to writers (which need to verify lock is held).
 
     Thread-safe for single-writer, multiple-reader scenarios.
 
     Example:
         >>> holder = LockContextHolder()
-        >>> # LockCoordinator sets context after acquiring lock
+        >>> # Runtime lock owner sets context after acquiring lock
         >>> holder.set(LockContext.create("chembl", "activity", run_id))
         >>> # Writers retrieve context when writing
         >>> context = holder.get()
@@ -187,7 +187,7 @@ class LockContextHolder:
     def set(self, context: LockContext) -> None:
         """Set the current lock context.
 
-        Called by LockCoordinator after successfully acquiring a lock.
+        Called by the runtime lock owner after successfully acquiring a lock.
 
         Args:
             context: The acquired lock context.
@@ -207,6 +207,6 @@ class LockContextHolder:
     def clear(self) -> None:
         """Clear the lock context.
 
-        Called by LockCoordinator after releasing the lock.
+        Called by the runtime lock owner after releasing the lock.
         """
         self._context = None
