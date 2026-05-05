@@ -24,9 +24,9 @@
       "keepTime": true,
       "targetBlank": false,
       "title": "0. Control Plane",
-      "tooltip": "Reset scope: open pipeline/run_type=All and preserve the selected time range.",
+      "tooltip": "Reset scope: no pipeline context is available; pipeline/run_type default to unknown. Preserve the selected time range.",
       "type": "link",
-      "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=All&var-run_type=All&${__url_time_range}"
+      "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=unknown&var-run_type=unknown&${__url_time_range}"
     },
     {
       "asDropdown": false,
@@ -35,9 +35,9 @@
       "keepTime": true,
       "targetBlank": false,
       "title": "1. Overview",
-      "tooltip": "Reset scope: open pipeline/run_type=All and preserve the selected time range.",
+      "tooltip": "Reset scope: no pipeline context is available; pipeline/run_type default to unknown. Preserve the selected time range.",
       "type": "link",
-      "url": "/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=All&var-run_type=All&${__url_time_range}"
+      "url": "/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=unknown&var-run_type=unknown&${__url_time_range}"
     },
     {
       "asDropdown": false,
@@ -46,9 +46,9 @@
       "keepTime": true,
       "targetBlank": false,
       "title": "2. Runtime",
-      "tooltip": "Reset scope: open pipeline/run_type=All and preserve the selected time range.",
+      "tooltip": "Reset scope: no pipeline context is available; pipeline/run_type/stage default to unknown. Preserve the selected time range.",
       "type": "link",
-      "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=All&var-run_type=All&var-stage=All&${__url_time_range}"
+      "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=unknown&var-run_type=unknown&var-stage=unknown&${__url_time_range}"
     },
     {
       "asDropdown": false,
@@ -57,9 +57,9 @@
       "keepTime": true,
       "targetBlank": false,
       "title": "3. Provider Health",
-      "tooltip": "Reset scope: open global target scope and preserve the selected time range.",
+      "tooltip": "Reset scope: no pipeline context is available; provider/pipeline_context default to unknown. Preserve the selected time range.",
       "type": "link",
-      "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=All&var-adapter=All&${__url_time_range}"
+      "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&var-pipeline_context=unknown&var-adapter=unknown&${__url_time_range}"
     },
     {
       "asDropdown": false,
@@ -68,9 +68,9 @@
       "keepTime": true,
       "targetBlank": false,
       "title": "4. Data Quality",
-      "tooltip": "Reset scope: open pipeline/run_type=All and preserve the selected time range.",
+      "tooltip": "Reset scope: no pipeline context is available; pipeline/run_type/stage default to unknown. Preserve the selected time range.",
       "type": "link",
-      "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=All&var-run_type=All&var-stage=All&${__url_time_range}"
+      "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=unknown&var-run_type=unknown&var-stage=unknown&${__url_time_range}"
     }
   ],
   "panels": [

@@ -47,9 +47,9 @@
       "keepTime": true,
       "targetBlank": false,
       "title": "2. Runtime",
-      "tooltip": "Open with current pipeline/run_type, reset stage to All, and preserve the selected time range.",
+      "tooltip": "Open with current pipeline/run_type, reset stage to unknown, and preserve the selected time range.",
       "type": "link",
-      "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=All&${__url_time_range}"
+      "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=unknown&${__url_time_range}"
     },
     {
       "asDropdown": false,
@@ -58,9 +58,9 @@
       "keepTime": true,
       "targetBlank": false,
       "title": "3. Provider Health",
-      "tooltip": "Reset scope: open global target scope and preserve the selected time range.",
+      "tooltip": "Context mapping: derive provider from current pipeline and remember pipeline_context for return links. Preserve the selected time range.",
       "type": "link",
-      "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=All&var-adapter=All&${__url_time_range}"
+      "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=$pipeline&var-pipeline_context=$pipeline&var-adapter=unknown&${__url_time_range}"
     },
     {
       "asDropdown": false,
@@ -69,9 +69,9 @@
       "keepTime": true,
       "targetBlank": false,
       "title": "4. Data Quality",
-      "tooltip": "Open with current pipeline/run_type, reset stage to All, and preserve the selected time range.",
+      "tooltip": "Open with current pipeline/run_type, reset stage to unknown, and preserve the selected time range.",
       "type": "link",
-      "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=All&${__url_time_range}"
+      "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=unknown&${__url_time_range}"
     },
     {
       "asDropdown": false,
@@ -80,7 +80,7 @@
       "keepTime": true,
       "targetBlank": false,
       "title": "5. Workflow",
-      "tooltip": "Reset scope: open global target scope and preserve the selected time range.",
+      "tooltip": "Reset scope: open workflow target scope and preserve the selected time range.",
       "type": "link",
       "url": "/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}"
     }
@@ -520,7 +520,11 @@
     "list": [
       {
         "allValue": null,
-        "current": {},
+        "current": {
+          "selected": false,
+          "text": "unknown",
+          "value": "unknown"
+        },
         "datasource": "Prometheus",
         "definition": "label_values(bioetl_records_processed_total, pipeline)",
         "hide": 0,
@@ -542,7 +546,7 @@
         "tagsQuery": "",
         "type": "query",
         "useTags": false,
-        "description": "Core scope: pipeline selector for pipeline-centric dashboards; fallback: All pipelines when not passed by source dashboard."
+        "description": "Core scope: pipeline selector for pipeline-centric dashboards; fallback: All pipelines when not passed by source dashboard. Single-select; no All scope. Unknown is the explicit fail-closed default."
       },
       {
         "allValue": null,

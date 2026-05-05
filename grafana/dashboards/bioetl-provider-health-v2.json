@@ -25,9 +25,9 @@
       "keepTime": true,
       "targetBlank": false,
       "title": "0. Control Plane",
-      "tooltip": "Reset scope: open pipeline/run_type=All and preserve the selected time range.",
+      "tooltip": "Context mapping: return to remembered pipeline_context; run_type defaults to unknown. Preserve the selected time range.",
       "type": "link",
-      "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=All&var-run_type=All&${__url_time_range}"
+      "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline_context&var-run_type=unknown&${__url_time_range}"
     },
     {
       "asDropdown": false,
@@ -36,9 +36,9 @@
       "keepTime": true,
       "targetBlank": false,
       "title": "1. Overview",
-      "tooltip": "Reset scope: open pipeline/run_type=All and preserve the selected time range.",
+      "tooltip": "Context mapping: return to remembered pipeline_context; run_type defaults to unknown. Preserve the selected time range.",
       "type": "link",
-      "url": "/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=All&var-run_type=All&${__url_time_range}"
+      "url": "/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline_context&var-run_type=unknown&${__url_time_range}"
     },
     {
       "asDropdown": false,
@@ -47,9 +47,9 @@
       "keepTime": true,
       "targetBlank": false,
       "title": "2. Runtime",
-      "tooltip": "Reset scope: open pipeline/run_type=All and preserve the selected time range.",
+      "tooltip": "Context mapping: return to remembered pipeline_context; run_type/stage default to unknown. Preserve the selected time range.",
       "type": "link",
-      "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=All&var-run_type=All&var-stage=All&${__url_time_range}"
+      "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline_context&var-run_type=unknown&var-stage=unknown&${__url_time_range}"
     },
     {
       "asDropdown": false,
@@ -58,9 +58,9 @@
       "keepTime": true,
       "targetBlank": false,
       "title": "4. Data Quality",
-      "tooltip": "Reset scope: open pipeline/run_type=All and preserve the selected time range.",
+      "tooltip": "Context mapping: return to remembered pipeline_context; run_type/stage default to unknown. Preserve the selected time range.",
       "type": "link",
-      "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=All&var-run_type=All&var-stage=All&${__url_time_range}"
+      "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline_context&var-run_type=unknown&var-stage=unknown&${__url_time_range}"
     },
     {
       "asDropdown": false,
@@ -69,7 +69,7 @@
       "keepTime": true,
       "targetBlank": false,
       "title": "5. Workflow",
-      "tooltip": "Reset scope: open global target scope and preserve the selected time range.",
+      "tooltip": "Reset scope: open workflow target scope and preserve the selected time range.",
       "type": "link",
       "url": "/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}"
     }
@@ -1362,13 +1362,17 @@
     "list": [
       {
         "allValue": null,
-        "current": {},
+        "current": {
+          "selected": false,
+          "text": "unknown",
+          "value": "unknown"
+        },
         "datasource": "Prometheus",
         "definition": "label_values({__name__=~\"bioetl_health_check_(success|degraded|failures)_total\"}, provider)",
         "hide": 0,
-        "includeAll": true,
+        "includeAll": false,
         "label": "Provider",
-        "multi": true,
+        "multi": false,
         "name": "provider",
         "options": [],
         "query": {
@@ -1384,7 +1388,22 @@
         "tagsQuery": "",
         "type": "query",
         "useTags": false,
-        "description": "Provider scope: provider selector for provider health dashboards; fallback: All providers when source has no provider context."
+        "description": "Provider scope: single-select provider. Unknown is the explicit fail-closed default; pipeline-scoped handoffs derive provider from the source pipeline."
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "unknown",
+          "value": "unknown"
+        },
+        "description": "Hidden return context: remembers the source pipeline when Provider Health derives provider from pipeline.",
+        "hide": 2,
+        "label": "Pipeline context",
+        "name": "pipeline_context",
+        "options": [],
+        "query": "unknown",
+        "skipUrlSync": false,
+        "type": "textbox"
       },
       {
         "allValue": null,
