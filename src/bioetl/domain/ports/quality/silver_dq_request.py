@@ -13,9 +13,7 @@ if TYPE_CHECKING:
 
     from bioetl.domain.ports.quality.dq_config import SilverDQConfigPort
 
-DataContainer = (
-    Any  # Any: polars.DataFrame | pyarrow.Table (avoids infra import in domain)
-)
+DataContainer = Any
 
 
 @dataclass(frozen=True, slots=True)

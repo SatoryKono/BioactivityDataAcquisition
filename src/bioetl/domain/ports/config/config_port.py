@@ -6,7 +6,6 @@ Migrated from application/services/config_service.py per RF-040 (ARCH-008).
 
 from __future__ import annotations
 
-from pathlib import Path
 from typing import Protocol, runtime_checkable
 
 from bioetl.domain.types import JsonDict
@@ -43,8 +42,8 @@ class SettingsPort(Protocol):
         ...
 
     @property
-    def data_dir(self) -> str | Path:
-        """Base data directory."""
+    def data_dir(self) -> str:
+        """Base data location reference."""
         ...
 
     @property
@@ -73,28 +72,28 @@ class SettingsPort(Protocol):
         ...
 
     @property
-    def bronze_path(self) -> str | Path:
-        """Path for Bronze layer storage."""
+    def bronze_path(self) -> str:
+        """Location reference for Bronze layer storage."""
         ...
 
     @property
-    def silver_path(self) -> str | Path:
-        """Path for Silver layer storage."""
+    def silver_path(self) -> str:
+        """Location reference for Silver layer storage."""
         ...
 
     @property
-    def gold_path(self) -> str | Path:
-        """Path for Gold layer storage."""
+    def gold_path(self) -> str:
+        """Location reference for Gold layer storage."""
         ...
 
     @property
-    def checkpoint_path(self) -> str | Path:
-        """Path for checkpoint storage."""
+    def checkpoint_path(self) -> str:
+        """Location reference for checkpoint storage."""
         ...
 
     @property
-    def quarantine_path(self) -> str | Path:
-        """Path for quarantine storage."""
+    def quarantine_path(self) -> str:
+        """Location reference for quarantine storage."""
         ...
 
     def model_dump(self) -> JsonDict:  # Any: YAML config has heterogeneous values

@@ -17,6 +17,7 @@ from tests.helpers.control_plane_replay import (
     PROJECT_ROOT,
     build_cached_fixture_run_context,
     build_tracked_fixture_exact_replay_matrix_payload,
+    load_control_plane_bundle,
     load_control_plane_payloads,
     load_tracked_fixture_entry,
     materialize_cached_bronze_batch,
@@ -171,6 +172,73 @@ async def test_tracked_fixture_run_persists_linked_control_plane_artifacts(
         snapshots_first[0]["snapshot_id"]
     ]
     assert len(evidence_payload["occurrences"]) == 2
+
+    get_settings.cache_clear()
+    get_pipeline_config.cache_clear()
+
+
+@pytest.mark.integration
+@pytest.mark.no_api
+@pytest.mark.asyncio
+async def test_tracked_fixture_run_keeps_control_plane_stores_consistent(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Tracked fixture replay must keep manifest/effective-config/ledger aligned."""
+    fixture_entry = load_tracked_fixture_entry(pipeline_key=_PIPELINE_KEY)
+    fixture_path_raw = fixture_entry.get("fixture_path")
+    assert isinstance(fixture_path_raw, str) and fixture_path_raw
+
+    tracked_fixture_path = PROJECT_ROOT / fixture_path_raw
+    cached_root = tmp_path / "cached_bronze" / "chembl" / "activity"
+    materialize_cached_bronze_batch(
+        tracked_fixture_path=tracked_fixture_path,
+        cache_root=cached_root,
+        date="2026-03-25",
+    )
+
+    data_dir = tmp_path / "runtime_data"
+    monkeypatch.setenv("BIOETL_DATA_DIR", str(data_dir))
+    monkeypatch.setenv("BIOETL_TEST_MODE", "true")
+    monkeypatch.setenv("BIOETL_PIPELINE__HEALTH_CHECK_MODE", "probe")
+    patch_clean_code_revision(monkeypatch)
+    get_settings.cache_clear()
+    get_pipeline_config.cache_clear()
+
+    run_id = await run_cached_fixture_pipeline(
+        pipeline_name=_PIPELINE_NAME,
+        cached_bronze_path=cached_root,
+        date="2026-03-25",
+    )
+    bundle = load_control_plane_bundle(data_dir=data_dir, run_id=run_id)
+
+    manifest_payload = bundle["manifest_payload"]
+    assert isinstance(manifest_payload, dict)
+    effective_payload = bundle["effective_payload"]
+    assert isinstance(effective_payload, dict)
+    effective_occurrence = bundle["effective_occurrence"]
+    assert isinstance(effective_occurrence, dict)
+    ledger_entries = bundle["ledger_entries"]
+    assert isinstance(ledger_entries, list) and ledger_entries
+    lineage_fragments = bundle["lineage_fragments"]
+    assert isinstance(lineage_fragments, list)
+
+    code_provenance = manifest_payload.get("code_provenance")
+    assert isinstance(code_provenance, dict)
+    manifest_id = str(manifest_payload["manifest_id"])
+    effective_artifact_id = str(code_provenance["effective_config_artifact_id"])
+
+    assert effective_payload["artifact_id"] == effective_artifact_id
+    assert effective_occurrence["artifact_id"] == effective_artifact_id
+    assert effective_occurrence["run_id"] == str(run_id)
+    assert any(entry["event_type"] == "run_finished" for entry in ledger_entries)
+    assert all(entry["manifest_id"] == manifest_id for entry in ledger_entries)
+    assert all(entry["run_id"] == str(run_id) for entry in ledger_entries)
+    if lineage_fragments:
+        assert all(
+            fragment["manifest_id"] == manifest_id for fragment in lineage_fragments
+        )
+        assert all(fragment["run_id"] == str(run_id) for fragment in lineage_fragments)
 
     get_settings.cache_clear()
     get_pipeline_config.cache_clear()

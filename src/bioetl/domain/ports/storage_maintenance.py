@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from pathlib import Path
 from typing import Literal, Protocol, runtime_checkable
 
 from bioetl.domain.types import MetaDict
@@ -16,15 +15,15 @@ class StorageMaintenancePort(Protocol):
         self,
         table_name: str,
         layer: Literal["silver", "gold"] = "silver",
-    ) -> Path:
-        """Resolve the full path to a Delta table.
+    ) -> str:
+        """Resolve the concrete storage reference for a Delta table.
 
         Args:
             table_name: Logical table name or entity path.
             layer: Medallion layer to resolve the path for. Defaults to 'silver'.
 
         Returns:
-            Absolute Path to the Delta table directory.
+            Concrete storage location reference for the table.
         """
         ...
 
@@ -165,7 +164,7 @@ class StorageMaintenancePort(Protocol):
         """Return the current Delta table version for lineage metadata.
 
         Args:
-            table_path: Filesystem path to the Delta table directory.
+            table_path: Concrete table storage reference.
             layer: Medallion layer name used for diagnostic context. Defaults to ``"silver"``.
 
         Returns:

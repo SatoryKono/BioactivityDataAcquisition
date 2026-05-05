@@ -15,7 +15,6 @@ from typing import TYPE_CHECKING, Any, Protocol, runtime_checkable
 if TYPE_CHECKING:
     from collections.abc import Iterator
     from datetime import datetime
-    from pathlib import Path
 
     from bioetl.domain.ports.quality.dq_config import (
         BronzeDQConfigPort,
@@ -33,22 +32,11 @@ from bioetl.domain.ports.quality.silver_dq_request import (
 )
 from bioetl.domain.types import GoldBusinessRuleSpec, ScdConfig
 
-DataContainer = (
-    Any  # Any: polars.DataFrame | pyarrow.Table (avoids infra import in domain)
-)
-"""Type alias for data containers (polars.DataFrame or pyarrow.Table).
+DataContainer = Any
+"""Opaque tabular payload used at the domain port boundary."""
 
-Uses Any to avoid infrastructure imports in domain layer per Ports & Adapters.
-"""
-
-DataContainerDict = dict[
-    str, Any  # Any: port contract allows heterogeneous values
-]  # Any: polars.DataFrame | pyarrow.Table (avoids infra import)
-"""Type alias for dictionary of named data containers.
-
-Maps table names to polars.DataFrame or pyarrow.Table instances.
-Uses Any to avoid infrastructure imports in domain layer.
-"""
+DataContainerDict = dict[str, Any]  # Any: port contract allows heterogeneous values
+"""Dictionary of named opaque tabular payloads."""
 
 
 @runtime_checkable
@@ -77,7 +65,7 @@ class BronzeDQAnalyzerPort(Protocol):
             run_id: Pipeline run identifier.
             pipeline: Pipeline name.
             batch_id: Batch identifier.
-            source_file: Path to the Bronze file.
+            source_file: Source object reference for the Bronze payload.
             config: DQ report configuration.
             timestamp: Report generation timestamp (UTC).
 
@@ -104,10 +92,10 @@ class SilverDQAnalyzerPort(Protocol):
         """Analyze Silver data and generate DQ report.
 
         Args:
-            data: Polars DataFrame or PyArrow Table with Silver data.
+            data: Opaque tabular payload with Silver data.
             run_id: Pipeline run identifier.
             pipeline: Pipeline name.
-            target_table: Silver table path.
+            target_table: Silver target table reference.
             source_batch_ids: List of Bronze batch IDs processed.
             config: DQ report configuration.
             timestamp: Report generation timestamp (UTC).
@@ -156,10 +144,10 @@ class GoldDQAnalyzerPort(Protocol):
         """Analyze Gold data and generate DQ report.
 
         Args:
-            data: Polars DataFrame or PyArrow Table with Gold data.
+            data: Opaque tabular payload with Gold data.
             run_id: Pipeline run identifier.
             pipeline: Pipeline name.
-            target_table: Gold table path.
+            target_table: Gold target table reference.
             config: DQ report configuration.
             timestamp: Report generation timestamp (UTC).
             required_fields: List of required fields for completeness.
@@ -180,75 +168,75 @@ class DQReportWriterPort(Protocol):
     """Port for writing DQ reports to storage.
 
     Handles serialization of DQ reports to various formats
-    (JSON, YAML, HTML) and writing to file system.
+    (JSON, YAML, HTML) and writing to storage.
     """
 
     async def write_bronze_report(
         self,
         report: BronzeDQReport,
-        output_path: Path | None = None,
+        output_path: str | None = None,
         report_format: DQReportFormat | None = None,
         *,
         provider: str | None = None,
         entity: str | None = None,
-    ) -> Path:
-        """Write Bronze DQ report to file.
+    ) -> str:
+        """Write Bronze DQ report to storage.
 
         Args:
             report: Bronze DQ report to write.
-            output_path: Output path (None = alongside data).
+            output_path: Optional target storage location (None = alongside data).
             report_format: Output format (None = JSON).
             provider: Provider name for filename generation.
             entity: Entity name for filename generation.
 
         Returns:
-            Path to the written report file.
+            Storage location reference for the written report.
         """
         ...
 
     async def write_silver_report(
         self,
         report: SilverDQReport,
-        output_path: Path | None = None,
+        output_path: str | None = None,
         report_format: DQReportFormat | None = None,
         *,
         provider: str | None = None,
         entity: str | None = None,
-    ) -> Path:
-        """Write Silver DQ report to file.
+    ) -> str:
+        """Write Silver DQ report to storage.
 
         Args:
             report: Silver DQ report to write.
-            output_path: Output path (None = alongside data).
+            output_path: Optional target storage location (None = alongside data).
             report_format: Output format (None = JSON).
             provider: Provider name for path generation.
             entity: Entity name for path generation.
 
         Returns:
-            Path to the written report file.
+            Storage location reference for the written report.
         """
         ...
 
     async def write_gold_report(
         self,
         report: GoldDQReport,
-        output_path: Path | None = None,
+        output_path: str | None = None,
         report_format: DQReportFormat | None = None,
         *,
         provider: str | None = None,
         entity: str | None = None,
-    ) -> Path:
-        """Write Gold DQ report to file.
+    ) -> str:
+        """Write Gold DQ report to storage.
 
         Args:
             report: Gold DQ report to write.
-            output_path: Output path (None = alongside data).
+            output_path: Optional target storage location (None = alongside data).
             report_format: Output format (None = JSON).
             provider: Provider name for path generation.
             entity: Entity name for path generation.
 
         Returns:
-            Path to the written report file.
+            Storage location reference for the written report.
         """
         ...
 

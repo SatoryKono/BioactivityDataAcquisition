@@ -34,7 +34,7 @@ class DeltaReaderPort(Protocol):
         """Read data from a Delta Lake table.
 
         Args:
-            table_path: Path to the Delta table directory.
+            table_path: Concrete table storage reference.
             columns: Optional list of columns to read (projection pushdown).
                     If None, reads all columns.
             limit: Optional maximum number of rows to read.
@@ -44,8 +44,8 @@ class DeltaReaderPort(Protocol):
             Opaque table payload with the requested data.
 
         Raises:
-            FileNotFoundError: If table does not exist.
-            StorageError: If read operation fails.
+            An adapter-defined read error when the table reference is invalid or
+            unreadable.
         """
         ...
 
@@ -53,13 +53,14 @@ class DeltaReaderPort(Protocol):
         """Get the schema of a Delta Lake table.
 
         Args:
-            table_path: Path to the Delta table directory.
+            table_path: Concrete table storage reference.
 
         Returns:
             Opaque schema payload describing the table structure.
 
         Raises:
-            FileNotFoundError: If table does not exist.
+            An adapter-defined read error when the table reference is invalid or
+            unreadable.
         """
         ...
 
@@ -69,13 +70,14 @@ class DeltaReaderPort(Protocol):
         Uses Delta Lake metadata when possible for efficiency.
 
         Args:
-            table_path: Path to the Delta table directory.
+            table_path: Concrete table storage reference.
 
         Returns:
             Total number of rows in the table.
 
         Raises:
-            FileNotFoundError: If table does not exist.
+            An adapter-defined read error when the table reference is invalid or
+            unreadable.
         """
         ...
 
@@ -83,7 +85,7 @@ class DeltaReaderPort(Protocol):
         """Check if a Delta Lake table exists at the given path.
 
         Args:
-            table_path: Path to check for Delta table.
+            table_path: Concrete table storage reference to probe.
 
         Returns:
             True if a valid Delta table exists, False otherwise.

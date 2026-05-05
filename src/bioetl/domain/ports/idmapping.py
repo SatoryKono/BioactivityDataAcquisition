@@ -94,7 +94,7 @@ class IDMappingSourceReaderPort(Protocol):
         """Read source identifiers from the given source path.
 
         Args:
-            source_path: Path or URI to source data.
+            source_path: Source location reference or URI.
             id_column: Column name containing source IDs.
 
         Returns:
@@ -110,7 +110,7 @@ class IDMappingSourceReaderPort(Protocol):
         """Check whether the source path exists.
 
         Args:
-            source_path: Path or URI to source data.
+            source_path: Source location reference or URI.
 
         Returns:
             True if source exists, otherwise False.

@@ -67,7 +67,7 @@ class InputFilterPort(Protocol):
         Includes metadata about duplicates found in the source.
 
         Args:
-            source_path: Path to the filter source (e.g., CSV file path).
+            source_path: Source location reference for the filter input.
             column_name: Name of the column containing filter IDs.
 
         Returns:
@@ -100,7 +100,7 @@ class InputFilterPort(Protocol):
         exact row-wise combinations for client-side filtering.
 
         Args:
-            source_path: Path to the filter source (e.g., CSV file path).
+            source_path: Source location reference for the filter input.
             columns: List of FilterColumn objects defining columns to load.
 
         Returns:
@@ -152,7 +152,7 @@ class InputFilterPort(Protocol):
         values for use when primary lookup fails (e.g., DOI -> title fallback).
 
         Args:
-            source_path: Path to the filter source (e.g., CSV file path).
+            source_path: Source location reference for the filter input.
             primary_column: Name of the primary filter column (e.g., 'doi').
             fallback_column: Name of the fallback column (e.g., 'title').
 
