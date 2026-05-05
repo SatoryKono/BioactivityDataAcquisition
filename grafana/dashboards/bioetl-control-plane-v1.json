@@ -118,7 +118,7 @@
     },
     {
       "datasource": "Prometheus",
-      "description": "Replay safety state for selected pipeline/run_type. Zero means no blockers detected in selected range.",
+      "description": "Selected-range replay/resume safety blockers for the selected pipeline/run_type. Status mapping: 0=OK only when Control-Plane Telemetry Missing is present, 1=WARN, >=2=CRIT, null=UNKNOWN. Missing data means the dashboard cannot prove replay safety; inspect telemetry presence and manifest/ledger rows before replay/resume.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -160,13 +160,14 @@
               "title": "Open Replay & Resume Runbook",
               "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/replay-resume.md?pipeline=${pipeline:queryparam}&run_type=${run_type:queryparam}&${__url_time_range}"
             }
-          ]
+          ],
+          "noValue": "UNKNOWN"
         },
         "overrides": []
       },
       "gridPos": {
         "h": 5,
-        "w": 6,
+        "w": 4,
         "x": 0,
         "y": 2
       },
@@ -188,7 +189,7 @@
       "pluginVersion": "9.5.0",
       "targets": [
         {
-          "expr": "round((sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", status=\"failed\"}[$__range])) or vector(0)) + (sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range])) or vector(0)) + (sum(increase(bioetl_checkpoint_compatibility_events_total{pipeline=~\"$pipeline\", disposition=~\".*_incompatible\"}[$__range])) or vector(0)) + (sum(increase(bioetl_replay_reconstructability_events_total{pipeline=~\"$pipeline\", status=\"not_reconstructable\"}[$__range])) or vector(0)) + (sum(increase(bioetl_replay_drift_events_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])) or vector(0)) + (sum(increase(bioetl_lineage_refs_missing_total{pipeline=~\"$pipeline\"}[$__range])) or vector(0)))",
+          "expr": "round(\n  sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", status=\"failed\"}[$__range]))\n+\n  sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range]))\n+\n  sum(increase(bioetl_checkpoint_compatibility_events_total{pipeline=~\"$pipeline\", disposition=~\".*_incompatible\"}[$__range]))\n+\n  sum(increase(bioetl_replay_reconstructability_events_total{pipeline=~\"$pipeline\", status=\"not_reconstructable\"}[$__range]))\n+\n  sum(increase(bioetl_replay_drift_events_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range]))\n+\n  sum(increase(bioetl_lineage_refs_missing_total{pipeline=~\"$pipeline\"}[$__range]))\n)",
           "instant": true,
           "refId": "A"
         }
@@ -197,7 +198,7 @@
       "type": "stat"
     },
     {
-      "description": "Checkpoint freshness proxy for selected pipeline. Shows hours since most recent checkpoint operation event.",
+      "description": "No checkpoint-age metric is currently shipped. Treat this as an explicit known gap: the dashboard cannot prove checkpoint freshness against RPO. Next action: use checkpoint artifacts/runbook outside Grafana until bioetl_checkpoint_age_seconds exists.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -245,23 +246,23 @@
       },
       "gridPos": {
         "h": 5,
-        "w": 6,
-        "x": 6,
+        "w": 4,
+        "x": 4,
         "y": 2
       },
       "id": 892,
       "options": {
-        "content": "Checkpoint age not instrumented",
+        "content": "### Known gap\nCheckpoint age is not instrumented. Do not interpret this card as healthy freshness evidence; inspect checkpoint artifacts/runbook for RPO-sensitive replay decisions.",
         "mode": "markdown"
       },
       "pluginVersion": "9.5.0",
-      "title": "Checkpoint Freshness (hours since last op)",
+      "title": "Known Gap: Checkpoint Freshness",
       "type": "text",
       "transparent": false
     },
     {
       "datasource": "Prometheus",
-      "description": "Ledger/manifest consistency proxy for selected pipeline/run_type. Non-zero means either manifest write or ledger append failures were observed.",
+      "description": "Selected-range manifest/ledger write failure proxy for selected pipeline/run_type. Status mapping: 0=OK only when manifest and ledger telemetry are present, 1=WARN, >=2=CRIT, null=UNKNOWN. This does not prove manifest identity or ledger ordering; use run manifest inspection for exact run/manifest evidence.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -303,14 +304,15 @@
               "title": "Open Replay & Resume Runbook",
               "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/replay-resume.md?pipeline=${pipeline:queryparam}&run_type=${run_type:queryparam}&${__url_time_range}"
             }
-          ]
+          ],
+          "noValue": "UNKNOWN"
         },
         "overrides": []
       },
       "gridPos": {
         "h": 5,
-        "w": 6,
-        "x": 12,
+        "w": 4,
+        "x": 8,
         "y": 2
       },
       "id": 893,
@@ -331,7 +333,7 @@
       "pluginVersion": "9.5.0",
       "targets": [
         {
-          "expr": "round((sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", status=\"failed\"}[$__range])) or vector(0)) + (sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range])) or vector(0)))",
+          "expr": "round(sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", status=\"failed\"}[$__range])) + sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range])))",
           "instant": true,
           "refId": "A"
         }
@@ -340,17 +342,165 @@
       "type": "stat"
     },
     {
+      "datasource": "Prometheus",
+      "description": "Selected-range missing-telemetry risk for manifest and ledger metrics. Status mapping: 0=OK/present, 1=WARN/one required family missing, >=2=CRIT/both required families missing, null=UNKNOWN. If non-zero or UNKNOWN, do not trust zero blocker cards: validate Prometheus scrape/rules and control-plane emitters before replay/resume.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            }
+          ],
+          "noValue": "UNKNOWN",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 2
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 12,
+        "y": 2
+      },
+      "id": 907,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.5.0",
+      "targets": [
+        {
+          "expr": "clamp_max(\n  (absent(sum(count_over_time(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range]))) or vector(0))\n+\n  (absent(sum(count_over_time(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\"}[$__range]))) or vector(0))\n, 2)",
+          "instant": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Control-Plane Telemetry Missing",
+      "type": "stat"
+    },
+    {
+      "datasource": "Prometheus",
+      "description": "Selected-range terminal run events mirrored from persisted ledger entries for the selected pipeline. 0 can mean no terminal event in the selected range, not necessarily failure. null=UNKNOWN means terminal telemetry missing. Use manifest/ledger inspection for exact run_id event ordering.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            }
+          ],
+          "noValue": "UNKNOWN",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 2
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 16,
+        "y": 2
+      },
+      "id": 908,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.5.0",
+      "targets": [
+        {
+          "expr": "sum(increase(bioetl_control_plane_terminal_events_total{pipeline=~\"$pipeline\"}[$__range]))",
+          "instant": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Terminal Run Events",
+      "type": "stat"
+    },
+    {
       "id": 906,
       "type": "text",
       "title": "Next Drilldown: Replay Safety Diagnostics",
       "gridPos": {
         "h": 5,
-        "w": 6,
-        "x": 18,
+        "w": 4,
+        "x": 20,
         "y": 2
       },
       "options": {
-        "content": "### Next step\nOpen Replay Safety diagnostics row for checkpoint/replay root-cause triage.",
+        "content": "### Next step\nIf blockers are non-zero, open Replay Safety diagnostics. If Control-Plane Telemetry Missing is non-zero or UNKNOWN, validate scrape/rules before replay/resume. Use the run manifest inspection runbook for run_id/manifest_id evidence.",
         "mode": "markdown"
       },
       "transparent": false,
@@ -360,11 +510,12 @@
           "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?viewPanel=130&var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
           "targetBlank": false
         }
-      ]
+      ],
+      "description": "Operator handoff text for the selected pipeline/run_type and selected time range. Use it after checking Replay Safety State and Control-Plane Telemetry Presence. It links to the replay/checkpoint diagnostic row; manifest/run identity still requires run manifest inspection outside Prometheus."
     },
     {
       "datasource": "Prometheus",
-      "description": "Threshold semantics: replay/resume blockers are binary—green at 0, red at >=1. Next action: stop replay/resume and investigate the first failing signal (manifest, ledger, checkpoint, replay drift, or lineage refs).",
+      "description": "Selected-range replay/resume blocker count across manifest writes, ledger appends, checkpoint compatibility, replay reconstructability, replay drift, and lineage refs. Status mapping: 0=OK only when telemetry is present, 1=WARN, >=2=CRIT, null=UNKNOWN. Next action: stop replay/resume and investigate the first failing signal; if null, validate control-plane metric scrape/rules first.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -406,7 +557,8 @@
               }
             ]
           },
-          "unit": "short"
+          "unit": "short",
+          "noValue": "UNKNOWN"
         },
         "overrides": []
       },
@@ -440,7 +592,7 @@
       "pluginVersion": "9.5.0",
       "targets": [
         {
-          "expr": "round(\n  (\n    sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", status=\"failed\"}[$__range])) or vector(0)\n  )\n+\n  (\n    sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range])) or vector(0)\n  )\n+\n  (\n    sum(increase(bioetl_checkpoint_compatibility_events_total{pipeline=~\"$pipeline\", disposition=~\".*_incompatible\"}[$__range])) or vector(0)\n  )\n+\n  (\n    sum(increase(bioetl_replay_reconstructability_events_total{pipeline=~\"$pipeline\", status=\"not_reconstructable\"}[$__range])) or vector(0)\n  )\n+\n  (\n    sum(increase(bioetl_replay_drift_events_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])) or vector(0)\n  )\n+\n  (\n    sum(increase(bioetl_lineage_refs_missing_total{pipeline=~\"$pipeline\"}[$__range])) or vector(0)\n  )\n)",
+          "expr": "round(\n  sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", status=\"failed\"}[$__range]))\n+\n  sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range]))\n+\n  sum(increase(bioetl_checkpoint_compatibility_events_total{pipeline=~\"$pipeline\", disposition=~\".*_incompatible\"}[$__range]))\n+\n  sum(increase(bioetl_replay_reconstructability_events_total{pipeline=~\"$pipeline\", status=\"not_reconstructable\"}[$__range]))\n+\n  sum(increase(bioetl_replay_drift_events_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range]))\n+\n  sum(increase(bioetl_lineage_refs_missing_total{pipeline=~\"$pipeline\"}[$__range]))\n)",
           "instant": true,
           "refId": "A"
         }
@@ -471,7 +623,8 @@
             "mode": "markdown"
           },
           "title": "Known Blind Spots",
-          "type": "text"
+          "type": "text",
+          "description": "Known replay-safety blind spots for the selected pipeline/run_type/time range. These are not healthy signals; they document control-plane invariants that cannot be proven from current Prometheus metrics."
         },
         {
           "datasource": "Prometheus",
@@ -518,7 +671,8 @@
                 ]
               },
               "unit": "short",
-              "decimals": 0
+              "decimals": 0,
+              "noValue": "UNKNOWN"
             },
             "overrides": []
           },
@@ -598,7 +752,8 @@
                   }
                 ]
               },
-              "unit": "short"
+              "unit": "short",
+              "noValue": "UNKNOWN"
             },
             "overrides": []
           },
@@ -678,7 +833,8 @@
                   }
                 ]
               },
-              "unit": "short"
+              "unit": "short",
+              "noValue": "UNKNOWN"
             },
             "overrides": []
           },
@@ -758,7 +914,8 @@
                   }
                 ]
               },
-              "unit": "short"
+              "unit": "short",
+              "noValue": "UNKNOWN"
             },
             "overrides": []
           },
@@ -838,7 +995,8 @@
                   }
                 ]
               },
-              "unit": "short"
+              "unit": "short",
+              "noValue": "UNKNOWN"
             },
             "overrides": []
           },
@@ -918,7 +1076,8 @@
                   }
                 ]
               },
-              "unit": "short"
+              "unit": "short",
+              "noValue": "UNKNOWN"
             },
             "overrides": []
           },
@@ -956,7 +1115,7 @@
         },
         {
           "datasource": "Prometheus",
-          "description": "Current replay lag seconds for selected pipeline/run_type. Alert: BioETLReplayLagHigh.",
+          "description": "Selected-range maximum replay lag seconds for selected pipeline/run_type. null=UNKNOWN means replay lag telemetry is missing; it is not 0s lag. Alert: BioETLReplayLagHigh.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -998,7 +1157,8 @@
                   }
                 ]
               },
-              "unit": "s"
+              "unit": "s",
+              "noValue": "UNKNOWN"
             },
             "overrides": []
           },
@@ -1026,7 +1186,7 @@
           "pluginVersion": "9.5.0",
           "targets": [
             {
-              "expr": "max(max_over_time(bioetl_replay_lag_seconds{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])) or vector(0)",
+              "expr": "max(max_over_time(bioetl_replay_lag_seconds{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range]))",
               "instant": true,
               "refId": "A"
             }
@@ -1416,7 +1576,8 @@
                   }
                 ]
               },
-              "unit": "short"
+              "unit": "short",
+              "noValue": "UNKNOWN"
             },
             "overrides": []
           },
@@ -1496,7 +1657,8 @@
                   }
                 ]
               },
-              "unit": "short"
+              "unit": "short",
+              "noValue": "UNKNOWN"
             },
             "overrides": []
           },
@@ -1630,7 +1792,7 @@
         },
         {
           "datasource": "Prometheus",
-          "description": "30m manifest write failure ratio. Alert: BioETLControlPlaneManifestWriteFailureRatioHigh. Ratio >0.10 is red.",
+          "description": "Fixed 30m manifest write failure ratio severity for the selected pipeline scope. Status mapping: 0=OK when telemetry is present, >0 maps to WARN=1, >0.10 maps to CRIT=2, null=UNKNOWN. The denominator is clamped to avoid divide-by-zero, so pair this with telemetry presence before interpreting 0 as healthy.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1672,7 +1834,8 @@
                   }
                 ]
               },
-              "unit": "percentunit"
+              "unit": "short",
+              "noValue": "UNKNOWN"
             },
             "overrides": []
           },
@@ -1700,7 +1863,7 @@
           "pluginVersion": "9.5.0",
           "targets": [
             {
-              "expr": "(sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", status=\"failed\"}[30m])) or vector(0)) / clamp_min((sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[30m])) or vector(0)), 1)",
+              "expr": "(((sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", status=\"failed\"}[30m])) or vector(0)) / clamp_min((sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[30m])) or vector(0)), 1)) > bool 0) + (((sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", status=\"failed\"}[30m])) or vector(0)) / clamp_min((sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[30m])) or vector(0)), 1)) > bool 0.1)",
               "instant": true,
               "refId": "A"
             }
@@ -1710,7 +1873,7 @@
         },
         {
           "datasource": "Prometheus",
-          "description": "30m ledger append failure ratio. Alert: BioETLRunLedgerAppendFailureRatioHigh. Ratio >0.10 is red.",
+          "description": "Fixed 30m ledger append failure ratio severity for the selected pipeline scope. Status mapping: 0=OK when telemetry is present, >0 maps to WARN=1, >0.10 maps to CRIT=2, null=UNKNOWN. The denominator is clamped to avoid divide-by-zero, so pair this with telemetry presence before interpreting 0 as healthy.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1752,7 +1915,8 @@
                   }
                 ]
               },
-              "unit": "percentunit"
+              "unit": "short",
+              "noValue": "UNKNOWN"
             },
             "overrides": []
           },
@@ -1780,7 +1944,7 @@
           "pluginVersion": "9.5.0",
           "targets": [
             {
-              "expr": "(sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\", status=\"failed\"}[30m])) or vector(0)) / clamp_min((sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\"}[30m])) or vector(0)), 1)",
+              "expr": "(((sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\", status=\"failed\"}[30m])) or vector(0)) / clamp_min((sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\"}[30m])) or vector(0)), 1)) > bool 0) + (((sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\", status=\"failed\"}[30m])) or vector(0)) / clamp_min((sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\"}[30m])) or vector(0)), 1)) > bool 0.1)",
               "instant": true,
               "refId": "A"
             }
@@ -1846,7 +2010,8 @@
                   }
                 ]
               },
-              "unit": "short"
+              "unit": "short",
+              "noValue": "UNKNOWN"
             },
             "overrides": []
           },
@@ -1926,7 +2091,8 @@
                   }
                 ]
               },
-              "unit": "percentunit"
+              "unit": "percentunit",
+              "noValue": "UNKNOWN"
             },
             "overrides": []
           },
@@ -2144,7 +2310,8 @@
                 ]
               },
               "unit": "short",
-              "decimals": 0
+              "decimals": 0,
+              "noValue": "UNKNOWN"
             },
             "overrides": []
           },
@@ -2224,7 +2391,8 @@
                   }
                 ]
               },
-              "unit": "short"
+              "unit": "short",
+              "noValue": "UNKNOWN"
             },
             "overrides": []
           },
@@ -2262,7 +2430,7 @@
         },
         {
           "datasource": "Prometheus",
-          "description": "Selected-range missing lineage refs by layer/ref_type. Alert: BioETLLineageRefsMissing.",
+          "description": "Selected-range missing lineage refs by layer/ref_type. Use as lineage risk triage only; it does not prove complete artifact identity graph or exact artifact refs. null/no rows can mean no missing refs or missing telemetry depending on lineage fragment activity.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2635,11 +2803,12 @@
           },
           "id": 139,
           "options": {
-            "content": "### Missing replay-safety signals\n\nThe dashboard cannot currently verify these invariants because no metric was found:\n\n- checkpoint_age <= recovery window / RPO\n- replay does not create unexplained duplicate records\n\nDo not add PromQL panels for these until metrics exist.\nOpen a separate instrumentation issue for:\n\n- bioetl_checkpoint_age_seconds\n- bioetl_replay_duplicate_records_total\n\n| Missing signal | Required future metric | Why it matters |\n| --- | --- | --- |\n| Checkpoint age vs recovery window | `bioetl_checkpoint_age_seconds` | Cannot visually prove checkpoint age is within RPO |\n| Replay duplicate records | `bioetl_replay_duplicate_records_total` | Cannot visually prove replay did not create unexplained duplicates |\n",
+            "content": "### Missing replay-safety signals\n\nThe dashboard cannot currently verify these invariants because no repo-confirmed metric was found:\n\n- manifest_id/run_id identity table in Grafana\n- execution_fingerprint, config_hash, contract_ref, contract_version\n- source_refs, planned artifacts, published artifacts\n- ledger ordering / duplicate entries / last_event_id watermark\n- checkpoint_age <= recovery window / RPO\n- replay does not create unexplained duplicate records\n- artifact identity graph completeness\n- occurrence-only vs semantic drift classification beyond bounded replay_drift labels\n\nDo not add PromQL panels for these until metrics or a non-Prometheus evidence surface exists.\nOpen instrumentation/workflow work for:\n\n- manifest/ledger evidence table or artifact explorer handoff\n- bioetl_checkpoint_age_seconds\n- bioetl_replay_duplicate_records_total\n- artifact/identity graph completeness evidence\n\n| Missing signal | Required future evidence | Why it matters |\n| --- | --- | --- |\n| Manifest/run identity | manifest/ledger table or artifact drilldown | Exact replay needs run_id/manifest_id evidence |\n| Contract/config compatibility | config_hash + contract_ref/version evidence | Replay eligibility depends on deterministic inputs |\n| Ledger ordering/duplicates | append-only event detail / watermark | Incomplete or duplicated ledger breaks trust |\n| Checkpoint age vs recovery window | `bioetl_checkpoint_age_seconds` | Cannot prove checkpoint age is within RPO |\n| Replay duplicate records | `bioetl_replay_duplicate_records_total` | Cannot prove replay did not create unexplained duplicates |\n| Identity graph completeness | artifact/lineage completeness evidence | Missing links weaken forensic traceability |\n",
             "mode": "markdown"
           },
           "title": "Known Missing Replay-Safety Signals",
-          "type": "text"
+          "type": "text",
+          "description": "Explicit documentation of replay-safety invariants not currently represented by repo-confirmed metrics. These gaps are limitations, not green health signals."
         }
       ],
       "title": "Known missing replay-safety signals",
@@ -2686,7 +2855,7 @@
         "tagsQuery": "",
         "type": "query",
         "useTags": false,
-        "description": "Core scope: pipeline selector for pipeline-centric dashboards; fallback: All pipelines when not passed by source dashboard. Single-select; no All scope. Unknown is the explicit fail-closed default."
+        "description": "Core scope: pipeline selector for pipeline-centric control-plane metrics. Single-select; no All scope. Default unknown is fail-closed until a source dashboard passes a pipeline or the operator selects one."
       },
       {
         "allValue": null,
@@ -2716,7 +2885,7 @@
         "tagsQuery": "",
         "type": "query",
         "useTags": false,
-        "description": "Core scope: run_type selector bounded by pipeline; fallback: All run types for selected pipeline."
+        "description": "Core scope: run_type selector bounded by pipeline. Default All is intentional; missing run-type context must be represented as All, not unknown."
       }
     ]
   },
