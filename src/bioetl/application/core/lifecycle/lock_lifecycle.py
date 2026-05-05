@@ -8,19 +8,40 @@ from typing import TYPE_CHECKING, Protocol
 from bioetl.application.core.lifecycle.shutdown import PipelineShutdownError
 
 
+class _HeartbeatTaskProtocol(Protocol):
+    async def start(self) -> None: ...
+
+    async def stop(self) -> None: ...
+
+
+class _HeartbeatFactoryProtocol(Protocol):
+    def __call__(
+        self,
+        *,
+        lock_port: object,
+        lock_key: object,
+        owner_id: object,
+        exclusive: object,
+        interval: object,
+        shutdown_signal: object,
+        logger: object,
+    ) -> _HeartbeatTaskProtocol: ...
+
+
 class _LockRuntimeHostProtocol(Protocol):
     _lock: object
     _config: object
     _run_id: object
     _context_holder: object | None
     _logger: object
-    _heartbeat_factory: object
+    _heartbeat_factory: _HeartbeatFactoryProtocol
     _shutdown_signal: object
-    _heartbeat: object | None
+    _heartbeat: _HeartbeatTaskProtocol | None
     _acquired_at: float | None
     _fencing_token: FencingToken | None
 
     def get_context(self) -> object | None: ...
+
 
 if TYPE_CHECKING:
     from bioetl.domain.locking import FencingToken

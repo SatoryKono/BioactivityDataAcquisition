@@ -30,7 +30,9 @@ class CompositeConfigProtocol(Protocol):
     version: str
     seed: _SeedConfigProtocol
     enrichers: tuple[_EnricherConfigProtocol, ...] | list[_EnricherConfigProtocol]
-    dependencies: tuple[_DependencyConfigProtocol, ...] | list[_DependencyConfigProtocol]
+    dependencies: (
+        tuple[_DependencyConfigProtocol, ...] | list[_DependencyConfigProtocol]
+    )
 
 
 def coerce_composite_collections(config: CompositeConfigProtocol) -> None:

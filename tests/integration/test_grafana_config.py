@@ -88,7 +88,9 @@ def test_dashboard_is_valid_json(dashboard_path):
 
 
 @pytest.mark.parametrize("dashboard_path", get_dashboard_files(), ids=lambda p: p.name)
-def test_panel_title_vocabulary_matches_group_by_vocabulary(dashboard_path: Path) -> None:
+def test_panel_title_vocabulary_matches_group_by_vocabulary(
+    dashboard_path: Path,
+) -> None:
     """Panel titles should describe aggregation vocabulary in PromQL group-by labels."""
     dashboard = load_dashboard(dashboard_path)
     errors: list[str] = []
@@ -249,7 +251,9 @@ def test_no_duplicate_variable_names(dashboard_path):
 
 
 @pytest.mark.parametrize("dashboard_path", get_dashboard_files(), ids=lambda p: p.name)
-def test_dashboard_links_only_reference_declared_variables(dashboard_path: Path) -> None:
+def test_dashboard_links_only_reference_declared_variables(
+    dashboard_path: Path,
+) -> None:
     """All $var tokens in dashboard links must be present in templating.list."""
     dashboard = load_dashboard(dashboard_path)
     declared_variables = {
@@ -624,10 +628,9 @@ def test_dq_blocked_share_panels_use_percentunit_domain_and_policy_thresholds() 
         )
         assert defaults.get("min") == 0, f"Panel '{panel_title}' must use min=0"
         assert defaults.get("max") == 1, f"Panel '{panel_title}' must use max=1"
-        assert defaults.get("thresholds", {}).get("steps") == expected_threshold_steps, (
-            f"Panel '{panel_title}' must use DQ policy thresholds "
-            "(warn=0.05, crit=0.20)"
-        )
+        assert (
+            defaults.get("thresholds", {}).get("steps") == expected_threshold_steps
+        ), f"Panel '{panel_title}' must use DQ policy thresholds (warn=0.05, crit=0.20)"
 
 
 def test_dashboards_do_not_use_prometheus_created_timestamps() -> None:
@@ -802,9 +805,7 @@ def test_control_plane_l1_triage_row_has_3_to_5_kpis_and_one_next_step() -> None
     }
     next_step_title = "Next Drilldown: Replay Safety Diagnostics"
     first_screen_titles = {
-        panel.get("title")
-        for panel in panels[:8]
-        if panel.get("type") != "row"
+        panel.get("title") for panel in panels[:8] if panel.get("type") != "row"
     }
 
     assert kpi_titles.issubset(first_screen_titles)
@@ -1087,7 +1088,9 @@ def test_provider_dashboard_surfaces_current_health_status_panel() -> None:
 
 def test_provider_health_panel_114_description_disallows_zero_as_healthy() -> None:
     """Panel 114 description must keep provider enum semantics for 0 state."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-provider-health-v2.json"))
+    dashboard = load_dashboard(
+        Path("grafana/dashboards/bioetl-provider-health-v2.json")
+    )
     panel = next(
         (item for item in get_dashboard_panels(dashboard) if item.get("id") == 114),
         None,
@@ -1105,7 +1108,9 @@ def test_provider_health_panel_114_description_disallows_zero_as_healthy() -> No
 
 def test_provider_health_status_mappings_match_description_enum() -> None:
     """Provider status panels must keep mapping texts and enum descriptions aligned."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-provider-health-v2.json"))
+    dashboard = load_dashboard(
+        Path("grafana/dashboards/bioetl-provider-health-v2.json")
+    )
     expected_pairs = {"0": "UNHEALTHY", "1": "DEGRADED", "2": "HEALTHY"}
     expected_null = "UNKNOWN"
 

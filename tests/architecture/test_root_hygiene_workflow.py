@@ -47,7 +47,9 @@ def test_root_hygiene_workflow_uploads_cleanup_classification_artifact() -> None
         "--report-json reports/quality/root-hygiene-cleanup-classification.json"
         in workflow
     )
-    assert "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a" in workflow
+    assert (
+        "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a" in workflow
+    )
     assert "root-hygiene-cleanup-classification" in workflow
 
 

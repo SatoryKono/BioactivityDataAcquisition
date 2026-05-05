@@ -35,6 +35,7 @@ class _BatchExecutorHostProtocol(Protocol):
         execution_context: BatchExecutionContext,
     ) -> None: ...
 
+
 __all__ = [
     "execute_batch_run",
     "prepare_batch_execution_context",

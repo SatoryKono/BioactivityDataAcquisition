@@ -1255,7 +1255,9 @@ def test_data_quality_dashboard_exposes_silver_reject_explorer_handoff() -> None
     )
 
 
-def test_runtime_incident_panels_do_not_duplicate_control_plane_dashboard_link() -> None:
+def test_runtime_incident_panels_do_not_duplicate_control_plane_dashboard_link() -> (
+    None
+):
     """Runtime incident panels must not duplicate the top-level Control Plane link."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
     panel_titles = {"Control-plane Alert Conditions", "No-Records Runs"}
@@ -1427,7 +1429,9 @@ def test_runtime_first_action_cta_links_preserve_scoped_vars_and_time() -> None:
             assert token not in url, f"Panel '{panel_title}' must not leak {token}"
 
 
-def test_data_quality_incident_panels_do_not_duplicate_control_plane_dashboard_link() -> None:
+def test_data_quality_incident_panels_do_not_duplicate_control_plane_dashboard_link() -> (
+    None
+):
     """DQ panels must not duplicate the top-level Control Plane link."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
     panel_titles = {
@@ -1599,10 +1603,9 @@ def test_control_plane_dashboard_does_not_expose_top_level_runbook_link() -> Non
     """Top navigation should contain only dashboard-bus links for Control Plane."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
     assert all(
-        str(link.get("url", "")).startswith("/d/") for link in dashboard.get("links", [])
-    ), (
-        "Control-plane top navigation must not mix dashboard bus links with runbooks"
-    )
+        str(link.get("url", "")).startswith("/d/")
+        for link in dashboard.get("links", [])
+    ), "Control-plane top navigation must not mix dashboard bus links with runbooks"
 
 
 def test_cross_dashboard_links_enforce_required_handoff_or_explicit_fallback() -> None:
@@ -1649,7 +1652,9 @@ def test_provider_dashboard_exposes_single_runtime_link() -> None:
         for link in links
         if _extract_dashboard_uid(str(link.get("url", ""))) == "bioetl-runtime"
     ]
-    assert len(runtime_links) == 1, "Provider Health must expose exactly one Runtime link"
+    assert len(runtime_links) == 1, (
+        "Provider Health must expose exactly one Runtime link"
+    )
     runtime_link = runtime_links[0]
     assert runtime_link.get("title") == "2. Runtime"
     runtime_url = str(runtime_link.get("url", ""))

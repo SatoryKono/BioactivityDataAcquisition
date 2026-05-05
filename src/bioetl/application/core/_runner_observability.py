@@ -12,6 +12,7 @@ class _RunnerObservabilityHostProtocol(Protocol):
     _runtime: object
     _observer: object
 
+
 if TYPE_CHECKING:
     from bioetl.application.core.postrun.service import PostrunResult
     from bioetl.domain.types import HealthReport

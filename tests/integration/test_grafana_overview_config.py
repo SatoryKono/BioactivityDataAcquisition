@@ -157,10 +157,10 @@ def test_range_evidence_panels_keep_run_type_scope() -> None:
     failures_expr = _panel_expr(failures)
     terminals_expr = _panel_expr(terminals)
 
-    assert 'sum by (pipeline, run_type)' in failures_expr
+    assert "sum by (pipeline, run_type)" in failures_expr
     assert 'run_type=~"$run_type"' in failures_expr
     assert "[$__range]" in failures_expr
-    assert 'sum by (pipeline, run_type, status)' in terminals_expr
+    assert "sum by (pipeline, run_type, status)" in terminals_expr
     assert 'run_type=~"$run_type"' in terminals_expr
     assert "[$__range]" in terminals_expr
 
