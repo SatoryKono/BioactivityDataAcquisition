@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Protocol
 
 from bioetl.application.core.batch_execution import prepare_execution_context
 from bioetl.application.core.batch_runtime_failure_policy import (
@@ -16,8 +16,24 @@ from bioetl.application.core.lifecycle.batch_fsm import (
 
 if TYPE_CHECKING:
     from bioetl.application.core.batch_execution import BatchExecutionContext
-    from bioetl.application.core.batch_executor import BatchExecutor, BatchResult
     from bioetl.domain.types import BronzeRecord
+
+
+class _BatchExecutorHostProtocol(Protocol):
+    _resume_offset: int
+    _query_string: str | None
+    _fsm: object
+    _fsm_state: BatchExecutionState
+    _execution_run_service: object
+    _processing_port: object
+    _execution_state_service: object
+    _memory: object
+    _batch_result_type: type[object]
+
+    async def _run_extraction_loop(
+        self,
+        execution_context: BatchExecutionContext,
+    ) -> None: ...
 
 __all__ = [
     "execute_batch_run",
@@ -28,7 +44,7 @@ __all__ = [
 
 
 def prepare_batch_execution_context(
-    host: BatchExecutor,
+    host: _BatchExecutorHostProtocol,
     *,
     limit: int | None,
     query: str | None,
@@ -46,7 +62,7 @@ def prepare_batch_execution_context(
 
 
 async def execute_batch_run(
-    host: BatchExecutor,
+    host: _BatchExecutorHostProtocol,
     *,
     limit: int | None,
     query: str | None,
@@ -72,7 +88,7 @@ async def execute_batch_run(
 
 
 async def process_explicit_batch(
-    host: BatchExecutor,
+    host: _BatchExecutorHostProtocol,
     records: list[BronzeRecord],
     start_index: int,
 ) -> BatchResult:
@@ -89,7 +105,7 @@ async def process_explicit_batch(
 
 
 async def process_stateful_batch(
-    host: BatchExecutor,
+    host: _BatchExecutorHostProtocol,
     records: list[BronzeRecord],
     start_index: int,
 ) -> None:

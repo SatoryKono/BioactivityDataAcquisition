@@ -24,7 +24,7 @@ ______________________________________________________________________
 - Project-local Vibe config: `.vibe/config.toml`
 - Canonical WSL launcher: `scripts/ai/vibe/launch.sh`
 - Canonical Windows PowerShell launcher: `scripts/ai/vibe/launch.ps1`
-- Compatibility setup helper: `scripts/ai/mistrallvibe/helper/setup-env.sh`
+- Vibe setup helper: `scripts/ai/vibe/helper/setup-env.sh`
 
 The project-local config is discovered automatically by Vibe before
 `~/.vibe/config.toml`, which keeps repository-specific defaults local to
@@ -47,10 +47,10 @@ Alternative:
 python3 -m pip install --user mistral-vibe
 ```
 
-Repository compatibility helper:
+Repository setup helper:
 
 ```bash
-bash scripts/ai/mistrallvibe/helper/setup-env.sh
+bash scripts/ai/vibe/helper/setup-env.sh
 ```
 
 Official references:

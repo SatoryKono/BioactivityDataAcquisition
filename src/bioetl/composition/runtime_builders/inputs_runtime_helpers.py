@@ -7,12 +7,12 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Literal, cast
 
 from bioetl.composition.observability import ObservabilityBundle
+from bioetl.composition.runtime_builders.inputs_runtime_models import (
+    ResolvedVacuumSettings,
+)
 from bioetl.domain.config import RuntimeConfig
 
 if TYPE_CHECKING:
-    from bioetl.composition.runtime_builders.inputs_resolver import (
-        ResolvedVacuumSettings,
-    )
     from bioetl.domain.context import CachedBronzeContext, PipelineRunContext
     from bioetl.domain.filtering import InputFilterConfig
     from bioetl.infrastructure.config import Settings

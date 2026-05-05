@@ -9,7 +9,7 @@ This note records the first bounded execution wave against the
 
 ### Deleted
 
-- `scripts/ai/mistrall/helper/download-image.ps1`
+- legacy Mistral image download helper under `scripts/ai/`
 - `scripts/engineering/dev/python/fix_neo4j_memory_sync_http_uris.py`
 
 Reason:

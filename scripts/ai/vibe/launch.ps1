@@ -17,7 +17,7 @@ $RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..\..")).Path
 
 $WSLRepoRoot = $RepoRoot -replace '\\', '/' -replace '^([A-Z]):', '/mnt/$1'
 $WSLRepoRoot = $WSLRepoRoot.ToLower()
-$CompatEnvWSL = "$WSLRepoRoot/scripts/ai/mistrallvibe/.env.mistrallvibe"
+$VibeEnvWSL = "$WSLRepoRoot/scripts/ai/vibe/.env.vibe"
 $ProxyEnvWSL = "$WSLRepoRoot/.wsl_proxy_env.sh"
 
 $Colors = @{ Error = "Red"; Warning = "Yellow"; Info = "Cyan" }
@@ -65,7 +65,7 @@ $EnvPrelude = @(
     'export PATH="$HOME/.local/bin:$PATH"',
     'source "$HOME/.local/bin/env" 2>/dev/null || true',
     "source '$ProxyEnvWSL' 2>/dev/null || true",
-    "if [ -f '$CompatEnvWSL' ]; then set -a; source '$CompatEnvWSL' 2>/dev/null || true; set +a; fi",
+    "if [ -f '$VibeEnvWSL' ]; then set -a; source '$VibeEnvWSL' 2>/dev/null || true; set +a; fi",
     'if [ -n "${VIBE_API_KEY:-}" ] && [ -z "${MISTRAL_API_KEY:-}" ]; then export MISTRAL_API_KEY="$VIBE_API_KEY"; fi'
 ) -join ' && '
 

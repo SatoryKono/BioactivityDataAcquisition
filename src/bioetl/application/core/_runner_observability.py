@@ -2,20 +2,23 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Protocol
 
 from bioetl.domain.types import HealthStatus
 
+
+class _RunnerObservabilityHostProtocol(Protocol):
+    _config: object
+    _runtime: object
+    _observer: object
+
 if TYPE_CHECKING:
     from bioetl.application.core.postrun.service import PostrunResult
-    from bioetl.application.core.runner_execution_flow import (
-        _PipelineRunnerExecutionHostProtocol,
-    )
     from bioetl.domain.types import HealthReport
 
 
 def emit_preflight_health_results(
-    host: _PipelineRunnerExecutionHostProtocol,
+    host: _RunnerObservabilityHostProtocol,
     report: HealthReport | None,
     *,
     runner_stage: str,
@@ -39,7 +42,7 @@ def emit_preflight_health_results(
 
 
 def emit_postrun_observability(
-    host: _PipelineRunnerExecutionHostProtocol,
+    host: _RunnerObservabilityHostProtocol,
     result: PostrunResult,
     *,
     runner_stage: str,

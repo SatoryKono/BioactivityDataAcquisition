@@ -20,7 +20,7 @@ from bioetl.domain.normalization import (
 from bioetl.domain.types import RunType
 
 if TYPE_CHECKING:
-    from .run_manifest_service import RunManifestCreateSpec
+    from .run_manifest_models import RunManifestCreateSpec
 
 
 def _optional_payload_string(

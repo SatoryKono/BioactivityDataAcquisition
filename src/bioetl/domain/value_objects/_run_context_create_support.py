@@ -3,12 +3,10 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING, cast
+from typing import cast
 
 from bioetl.domain.types import RunID, RunType
-
-if TYPE_CHECKING:
-    from bioetl.domain.value_objects.run_context import RunContextCreateInput
+from bioetl.domain.value_objects._run_context_models import RunContextCreateInput
 
 _RUN_CONTEXT_REQUIRED_FIELDS = (
     "run_id",
@@ -120,8 +118,6 @@ def coerce_run_context_create_input(
     inputs: RunContextCreateInput | None,
     overrides: dict[str, object],
 ) -> RunContextCreateInput:
-    from bioetl.domain.value_objects.run_context import RunContextCreateInput
-
     values = _collect_create_input_values(inputs, overrides)
     return RunContextCreateInput(
         run_id=cast("RunID", values["run_id"]),

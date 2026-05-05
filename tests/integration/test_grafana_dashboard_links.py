@@ -1173,8 +1173,8 @@ def test_tempo_drilldown_links_are_contextual() -> None:
             )
 
 
-def test_explore_drilldown_titles_disclose_tracing_profile_dependency() -> None:
-    """Loki/Tempo drilldown titles should warn that tracing profile is required."""
+def test_explore_drilldown_links_disclose_tracing_profile_dependency() -> None:
+    """Loki/Tempo drilldowns should warn that tracing profile is required."""
     expectations = (
         "bioetl-overview-v2.json",
         "bioetl-dq-v2.json",
@@ -1191,8 +1191,10 @@ def test_explore_drilldown_titles_disclose_tracing_profile_dependency() -> None:
             title = link.get("title", "")
             if not (_is_logs_drilldown_url(url) or _is_traces_drilldown_url(url)):
                 continue
-            assert "tracing" in title.lower(), (
-                f"{dashboard_name} Drilldown title must disclose tracing profile dependency"
+            tooltip = str(link.get("tooltip", ""))
+            description = " ".join((title, tooltip)).lower()
+            assert "tracing" in description, (
+                f"{dashboard_name} Drilldown link must disclose tracing profile dependency"
             )
 
 

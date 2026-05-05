@@ -3,15 +3,23 @@
 from __future__ import annotations
 
 from collections.abc import AsyncIterator, Iterator
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Protocol
 
 if TYPE_CHECKING:
-    from bioetl.application.core.batch_transformer import (
-        BatchTransformer,
-        TransformResult,
-    )
     from bioetl.domain.ports import MemoryMonitorPort
     from bioetl.domain.types import BatchID, BronzeRecord
+    from bioetl.application.core.transformer_runtime.state import TransformResult
+
+
+class _StreamingTransformer(Protocol):
+    """Structural transform contract required by the streaming helper."""
+
+    async def transform_stream(
+        self,
+        records: list[BronzeRecord],
+        batch_id: BatchID,
+        start_index: int = 0,
+    ) -> TransformResult: ...
 
 
 class StreamingBatchProcessor:
@@ -19,7 +27,7 @@ class StreamingBatchProcessor:
 
     def __init__(
         self,
-        transformer: BatchTransformer,
+        transformer: _StreamingTransformer,
         memory_monitor: MemoryMonitorPort | None = None,
     ) -> None:
         """Initialize streaming processor."""
