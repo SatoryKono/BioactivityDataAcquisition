@@ -164,7 +164,7 @@ histogram_quantile(0.95, sum by (le, provider) (rate(bioetl_health_check_latency
 - `bioetl-dq-v2`: `id=99`, `id=101`, `id=9100..9103`, `id=1..12`, `id=116`, `id=121`, `id=153..155`
 - `bioetl-provider-health-v2`: first-screen `id=9100..9103`, `id=9002`, row `id=91` + evidence panels `1,2,104,7,102`
 - `bioetl-runtime`: first-screen `id=1`, `id=9991`, `id=9100..9101`, `id=16`, links в `Explore`
-- `bioetl-workflow-overview`: `id=1..5` с `$workflow/$status` scope
+- `bioetl-workflow-overview`: `id=1..9` с `$workflow/$status/$step_status/$step_kind` scope
 
 ## Canonical decision: default time windows (single source for docs sync)
 

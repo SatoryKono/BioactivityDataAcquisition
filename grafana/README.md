@@ -686,8 +686,14 @@ Shipped dashboards используют несколько template variables в
 
 - **`0. Control Plane`** использует собственные
   `$pipeline/$run_type` queries для manifest/ledger/checkpoint/replay/lineage
-  decision row. GLOBAL read-path и checkpoint-operator panels не несут
-  pipeline/run_type labels, поэтому не фильтруются по этим переменным.
+  decision row. First-screen trust panels preserve `UNKNOWN` for missing
+  telemetry; `Control-Plane Telemetry Missing` must be `0` before operator
+  treats blocker value `0` as replay/resume-safe evidence. `Terminal Run Events`
+  shows selected-range terminal ledger evidence, while exact `run_id` /
+  `manifest_id`, config/contract hashes, artifact refs, and ledger ordering
+  remain run-manifest inspection evidence, not Prometheus labels. GLOBAL
+  read-path и checkpoint-operator panels не несут pipeline/run_type labels,
+  поэтому не фильтруются по этим переменным.
 
 - **`5. Workflow`** использует только `$workflow` и `$status` через
   `label_values(bioetl_workflow_runs_total, workflow|status)`.
@@ -791,8 +797,8 @@ DQ сейчас `OK`/`DEGRADED`/`FAILING`/`UNKNOWN`, какая threshold/reason
 | --- | -------------------------------------------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 99  | Pipeline                                     | Stat       | `max(label_values(..., pipeline)) or vector(0)`                                                                                        | Информационная панель пайплайна.                                                                                                                                           |
 | 100 | Run Type                                     | Stat       | `max(label_values(..., run_type)) or vector(0)`                                                                                        | Информационная панель типа запуска.                                                                                                                                        |
-| 9100 | Monitor DQ Current Status                   | Stat       | `max(bioetl_dq_current_status{pipeline=~"$pipeline"})`                                                                                | Current DQ state: `0=OK`, `1=DEGRADED`, `2=FAILING`, `null=UNKNOWN`; не зависит от selected range.                                                                          |
-| 9101 | Monitor DQ Threshold State                  | Stat       | `bioetl_dq_current_reason{severity=...}`                                                                                              | Current threshold summary: warning reasons map to DEGRADED, hard reasons map to FAILING.                                                                                  |
+| 9100 | Monitor DQ Current Status                   | Stat       | `max(bioetl_dq_current_status{pipeline=~"$pipeline"})`                                                                                | Pipeline-wide current DQ state: `0=OK`, `1=DEGRADED`, `2=FAILING`, `null=UNKNOWN`; selected-range evidence ниже не меняет этот first-screen статус.                         |
+| 9101 | Monitor DQ Threshold State                  | Stat       | `max(bioetl_dq_current_reason{severity=...})` + explicit `OK` fallback                                                                | Bounded current threshold summary: warning reasons map to DEGRADED, hard reasons map to FAILING, explicit current OK stays `0=OK`.                                         |
 | 9102 | Inspect DQ Current Reasons                  | Table      | `topk(5, bioetl_dq_current_reason{pipeline=~"$pipeline"} > 0)`                                                                        | Current DQ reason chips with `severity` and `action_target`.                                                                                                               |
 | 9103 | First Action / Invalid Record Policy        | Text       | n/a                                                                                                                                    | Operator CTA: inspect DQ reasons, Gold/Silver diagnostics, or Silver Reject Explorer; absent policy visibility is UNKNOWN, not OK.                                        |
 | 1   | Track Range Evidence: Bronze -> Silver -> Gold | Timeseries | `sum by (pipeline, stage) (increase(bioetl_records_processed_total{pipeline=~"$pipeline", run_type=~"$run_type"}[$__interval]))` | Selected-range evidence only; не определяет current DQ status.                                                                                                             |
@@ -802,8 +808,8 @@ DQ сейчас `OK`/`DEGRADED`/`FAILING`/`UNKNOWN`, какая threshold/reason
 | 5   | Worst-Entity DQ Score                        | Gauge      | `min(bioetl_dq_validation_score{pipeline=~"$pipeline"})`                                                                                | Худший observed DQ score по сущностям внутри выбранного pipeline scope. При отсутствии DQ samples panel должен оставаться в состоянии `No data`, а не показывать synthetic `0`. |
 | 117 | Silver Filter Rejects                        | Stat       | `round(sum(increase(bioetl_records_processed_total{...stage="filtered_out"}[$__range])) or vector(0))`                                  | Отдельный счётчик Silver filter rejects внутри выбранного временного окна; не заменяет `Records Quarantined`.                                                              |
 | 118 | Silver Filter Rejects by Pipeline            | Bar gauge  | `sum by (pipeline) (increase(bioetl_records_processed_total{...stage="filtered_out"}[$__range]))`                                       | Breakdown intentional Silver exclusions по выбранным pipeline values через selected-range increase.                                                                        |
-| 121 | Top Silver Reject Reasons                    | Bar gauge  | `topk(10, sum by (reason_code) (increase(bioetl_silver_filter_rejections_total{...}[$__range])))`                                      | Bounded top-10 summary по `reason_code` поверх shipped Silver reject breakdown metric.                                                                                       |
-| 122 | Top Silver Reject Fields                     | Bar gauge  | `topk(10, sum by (field) (increase(bioetl_silver_filter_rejections_total{...}[$__range])))`                                            | Bounded top-10 summary по `field`; exact field/root-cause drilldown делается в `Silver Reject Explorer`.                                                                  |
+| 121 | Top Silver Reject Reasons                    | Bar gauge  | `topk(10, sum by (reason_code) (increase(bioetl_silver_filter_rejections_total{...}[$__range])))`                                      | Bounded top-10 summary по `reason_code`; use the top-level `Silver Reject Explorer` handoff for record-level narrowing inside the explorer.                                  |
+| 122 | Top Silver Reject Fields                     | Bar gauge  | `topk(10, sum by (field) (increase(bioetl_silver_filter_rejections_total{...}[$__range])))`                                            | Bounded top-10 summary по `field`; use the top-level `Silver Reject Explorer` handoff for record-level narrowing inside the explorer.                                        |
 | 152 | Silver Filter Reject Accounting Mismatch     | Stat       | `round(sum(max_over_time(bioetl_silver_filter_reject_total_mismatch_15m{...}[$__range])))`                                              | Reconciliation guard между stage-total `filtered_out` surface и bounded breakdown metric. `0` = healthy, non-zero = расследовать drift, `No data` = recording rule не публикуется. |
 | 101 | Latest Successful Data Timestamp             | Stat       | `max(bioetl_data_freshness_seconds{pipeline=~"$pipeline"})`                                                                            | Последний observed ingestion timestamp внутри выбранного pipeline scope.                                                                                                   |
 
@@ -813,6 +819,8 @@ DQ сейчас `OK`/`DEGRADED`/`FAILING`/`UNKNOWN`, какая threshold/reason
 
 - DQ quarantine = `bioetl_dq_records_quarantined_total`
 - Silver filter rejects = `bioetl_records_processed_total{stage="filtered_out"}`
+- blocked-share impact = `(filtered_out + quarantined) / bronze` inside the
+  selected pipeline/run_type window
 
 Для bounded reason-level summary dashboard дополнительно использует:
 
@@ -841,6 +849,7 @@ ______________________________________________________________________
 
 | Название                                 | Тип               | Источник                                         |
 | ---------------------------------------- | ----------------- | ------------------------------------------------ |
+| First Action / No-Data Semantics         | Text              | Operator CTA / interpretation                   |
 | Filtered Records Total                   | Stat              | `/ops/quarantine/filtered-stats`                 |
 | Reject Rate vs Bronze                    | Gauge             | `/ops/quarantine/filtered-stats`                 |
 | Top Reject Reasons / Fields / Signatures | Bar gauge / Table | `/ops/quarantine/filtered-stats`                 |
@@ -858,6 +867,9 @@ Prometheus labels, summary dashboards или cross-dashboard handoffs.
 **Важно:** это не Prometheus dashboard для row-level таблиц.
 `1-4` dashboards остаются Prometheus summary/bounded-breakdown поверхностями;
 `Silver Reject Explorer` закрывает exact record-level drilldown gap.
+`0` rejects is OK only when the Quarantine Explorer API responds, one concrete
+`$pipeline` is selected, and Bronze denominator evidence is present; plugin
+errors, unknown pipeline, or `bronze_records=0` are treated as UNKNOWN.
 
 **Drilldown:** top-level bus links `0. Control Plane`, `1. Overview`,
 `2. Runtime`, `3. Provider Health`, `4. Data Quality`, `5. Workflow`;
@@ -1897,13 +1909,13 @@ ______________________________________________________________________
 
 | Dashboard                 | UID                             | JSON version | Panels | Refresh | Time Range | Primary surface | Purpose |
 | ------------------------- | ------------------------------- | ------------ | ------ | ------- | ---------- | --------------- | ------- |
-| 0. Control Plane          | `bioetl-control-plane-v1`       | 2            | 32     | 30s     | 6h         | Prometheus      | Replay/resume safety, GLOBAL read diagnostics, missing-signal markers |
+| 0. Control Plane          | `bioetl-control-plane-v1`       | 2            | 34     | 30s     | 12h        | Prometheus      | Replay/resume safety, telemetry gap detection, terminal ledger evidence, GLOBAL read diagnostics, missing-signal markers |
 | 1. Overview               | `bioetl-overview-v2`            | 5            | 27     | 30s     | 12h        | Prometheus      | L0 broken/degraded answer and operational handoff |
 | 2. Runtime                | `bioetl-runtime`                | 2            | 26     | 30s     | 12h        | Prometheus + optional Loki/Tempo links | L2 runtime triage: blockers, latency, backlog, handoffs |
 | 3. Provider Health        | `bioetl-provider-health-v2`     | 6            | 17     | 30s     | 12h        | Prometheus      | Provider latency, health, retries, failure ratios |
 | 4. Data Quality           | `bioetl-dq-v2`                  | 4            | 21     | 30s     | 12h        | Prometheus      | DQ score, quarantine, freshness, validation failures |
-| Silver Reject Explorer | `bioetl-silver-reject-explorer` | 1000         | 9      | 1m      | 24h        | Quarantine Explorer API | Record-level browsing for Silver rejects |
-| 5. Workflow      | `bioetl-workflow-overview`      | 6            | 5      | 30s     | 12h        | Prometheus      | Declarative workflow run and step outcomes |
+| Silver Reject Explorer | `bioetl-silver-reject-explorer` | 1001         | 10     | 1m      | 24h        | Quarantine Explorer API | Record-level browsing and action handoff for Silver rejects |
+| 5. Workflow      | `bioetl-workflow-overview`      | 2            | 8      | 30s     | 12h        | Prometheus      | Selected-range workflow run and step evidence with explicit diagnostic handoff |
 
 ______________________________________________________________________
 

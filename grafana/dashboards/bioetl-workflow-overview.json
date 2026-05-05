@@ -12,7 +12,7 @@
       }
     ]
   },
-  "description": "Declarative workflow overview for bounded workflow run and step outcomes.",
+  "description": "Prometheus-first selected-range workflow evidence for declarative workflow runs and step outcomes. Use this dashboard to answer whether a bounded workflow emitted failed or skipped run/step outcomes in the selected window, then hand off to Runtime, Data Quality, Provider Health, or Control Plane for deeper diagnostics. This dashboard does not provide current run state, run_id, stage, dependency, enricher, manifest, or trace-level evidence.",
   "editable": true,
   "graphTooltip": 1,
   "id": null,
@@ -24,7 +24,7 @@
       "keepTime": true,
       "targetBlank": false,
       "title": "0. Control Plane",
-      "tooltip": "Reset scope: no pipeline context is available; pipeline/run_type default to unknown. Preserve the selected time range.",
+      "tooltip": "Reset scope: workflow metrics do not carry pipeline context. Use Control Plane for manifest, ledger, replay/resume, and terminal run evidence. Preserve the selected time range.",
       "type": "link",
       "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=unknown&var-run_type=All&${__url_time_range}"
     },
@@ -35,7 +35,7 @@
       "keepTime": true,
       "targetBlank": false,
       "title": "1. Overview",
-      "tooltip": "Reset scope: no pipeline context is available; Overview falls back to its own All-pipelines landing scope. Preserve the selected time range.",
+      "tooltip": "Reset scope: return to the L0 fleet summary when workflow evidence needs incident prioritization. Preserve the selected time range.",
       "type": "link",
       "url": "/d/bioetl-overview-v2/bioetl-overview-v2?${__url_time_range}"
     },
@@ -46,7 +46,7 @@
       "keepTime": true,
       "targetBlank": false,
       "title": "2. Runtime",
-      "tooltip": "Reset scope: no pipeline context is available; pipeline/stage default to unknown and run_type defaults to All. Preserve the selected time range.",
+      "tooltip": "Reset scope: workflow metrics do not expose stage labels. Use Runtime for pipeline/stage blockers, backlog, and logs/traces handoff. Preserve the selected time range.",
       "type": "link",
       "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=unknown&var-run_type=All&var-stage=unknown&${__url_time_range}"
     },
@@ -57,7 +57,7 @@
       "keepTime": true,
       "targetBlank": false,
       "title": "3. Provider Health",
-      "tooltip": "Reset scope: no pipeline context is available; provider/pipeline_context default to unknown. Preserve the selected time range.",
+      "tooltip": "Reset scope: workflow metrics do not identify provider-specific failures. Use Provider Health when failures correlate with upstream API/provider incidents. Preserve the selected time range.",
       "type": "link",
       "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&var-pipeline_context=unknown&var-adapter=unknown&${__url_time_range}"
     },
@@ -68,41 +68,27 @@
       "keepTime": true,
       "targetBlank": false,
       "title": "4. Data Quality",
-      "tooltip": "Reset scope: no pipeline context is available; pipeline/stage default to unknown and run_type defaults to All. Preserve the selected time range.",
+      "tooltip": "Reset scope: workflow metrics do not explain validation rejects, quarantine, or threshold failures. Use Data Quality for DQ-specific triage. Preserve the selected time range.",
       "type": "link",
       "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=unknown&var-run_type=All&var-stage=unknown&${__url_time_range}"
     }
   ],
   "panels": [
     {
-      "collapsed": true,
       "gridPos": {
-        "h": 1,
+        "h": 4,
         "w": 24,
         "x": 0,
         "y": 0
       },
-      "id": 9003,
-      "panels": [],
-      "title": "First Action",
-      "type": "row",
-      "links": []
-    },
-    {
-      "gridPos": {
-        "h": 3,
-        "w": 24,
-        "x": 0,
-        "y": 1
-      },
       "id": 1,
       "options": {
-        "content": "<center><h2>Workflow Overview / $workflow / $status</h2></center>",
+        "content": "<center><h2>Workflow Evidence / $workflow</h2><div>Run status: $status · Step status: $step_status · Step kind: $step_kind</div></center>",
         "mode": "html"
       },
       "title": "Workflow Scope",
       "type": "text",
-      "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
+      "description": "Shows selected-range workflow evidence only, not current live run state. Variables: `Workflow` filters bounded workflow name; `Run Status` filters workflow run outcomes; `Step Status` and `Step Kind` filter step evidence panels. No run_id, stage, dependency, enricher, merge, cross-validation, or manifest-level labels exist on these Prometheus metrics. If selected-range failures are non-zero, continue in `2. Runtime` for stage/runtime blockers, `4. Data Quality` for validation/quarantine signals, `3. Provider Health` for upstream provider incidents, or `0. Control Plane` for replay/resume and ledger evidence."
     },
     {
       "datasource": "Prometheus",
@@ -111,18 +97,7 @@
           "color": {
             "mode": "thresholds"
           },
-          "mappings": [
-            {
-              "type": "special",
-              "options": {
-                "match": "null",
-                "result": {
-                  "text": "UNKNOWN",
-                  "color": "gray"
-                }
-              }
-            }
-          ],
+          "mappings": [],
           "noValue": "0",
           "thresholds": {
             "mode": "absolute",
@@ -137,7 +112,7 @@
               },
               {
                 "color": "red",
-                "value": 2
+                "value": 3
               }
             ]
           },
@@ -146,84 +121,12 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 6,
-        "w": 8,
+        "h": 5,
+        "w": 6,
         "x": 0,
-        "y": 3
+        "y": 4
       },
       "id": 2,
-      "options": {
-        "colorMode": "background",
-        "graphMode": "none",
-        "justifyMode": "center",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "targets": [
-        {
-          "expr": "round(sum(increase(bioetl_workflow_runs_total{workflow=~\"$workflow\",status=~\"$status\"}[$__range]))) or vector(0)",
-          "refId": "A"
-        }
-      ],
-      "title": "Workflow Runs",
-      "type": "stat",
-      "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
-    },
-    {
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [
-            {
-              "type": "special",
-              "options": {
-                "match": "null",
-                "result": {
-                  "text": "UNKNOWN",
-                  "color": "gray"
-                }
-              }
-            }
-          ],
-          "noValue": "0",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "orange",
-                "value": 1
-              },
-              {
-                "color": "red",
-                "value": 2
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 8,
-        "x": 8,
-        "y": 3
-      },
-      "id": 3,
       "options": {
         "colorMode": "background",
         "graphMode": "none",
@@ -244,9 +147,239 @@
           "refId": "A"
         }
       ],
-      "title": "Failed Workflow Runs",
+      "title": "Failed Workflow Runs / Range",
       "type": "stat",
-      "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
+      "description": "Counts failed workflow runs in the selected time range. `0` means no failed workflow runs were observed in the selected window; it does not prove a workflow is currently healthy or running. This panel intentionally uses selected-range evidence, not a current-state gauge. If this count is non-zero, inspect `Workflow Run Outcomes / Range`, then continue in `2. Runtime` for execution blockers or `0. Control Plane` for terminal run and replay evidence."
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 3
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 6,
+        "y": 4
+      },
+      "id": 3,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "round(sum(increase(bioetl_workflow_step_events_total{workflow=~\"$workflow\",step_kind=\"pipeline\",status=\"failed\"}[$__range]))) or vector(0)",
+          "refId": "A"
+        }
+      ],
+      "title": "Failed Pipeline Steps / Range",
+      "type": "stat",
+      "description": "Counts failed declarative workflow steps whose `step_kind=pipeline` in the selected time range. `0` means no failed pipeline step events were observed in the selected window; it does not prove stage-level success because the metric has no stage label. Use `2. Runtime` when this panel is non-zero to locate the blocking pipeline stage or runtime error path."
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 3
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 12,
+        "y": 4
+      },
+      "id": 6,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "round(sum(increase(bioetl_workflow_step_events_total{workflow=~\"$workflow\",step_kind=\"transform\",status=\"failed\"}[$__range]))) or vector(0)",
+          "refId": "A"
+        }
+      ],
+      "title": "Failed Transform Steps / Range",
+      "type": "stat",
+      "description": "Counts failed declarative workflow transform steps in the selected time range. `0` means no failed transform-step events were observed in the selected window. If this panel is non-zero, inspect `Step Outcomes by Kind / Step Status / Range`; if the transform failure originated from data validation or filtered outputs, continue in `4. Data Quality`."
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 5
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 18,
+        "y": 4
+      },
+      "id": 7,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "round(sum(increase(bioetl_workflow_step_events_total{workflow=~\"$workflow\",status=\"skipped\"}[$__range]))) or vector(0)",
+          "refId": "A"
+        }
+      ],
+      "title": "Skipped Step Events / Range",
+      "type": "stat",
+      "description": "Counts skipped workflow step events in the selected time range. `0` means no skipped step events were observed in the selected window. This panel is useful when orchestration completed without hard failure but optional or resumable steps were skipped. If skips are unexpected, continue in `2. Runtime`; if the skip reflects transform filtering or DQ gates, continue in `4. Data Quality`."
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "mappings": [],
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 9
+      },
+      "id": 4,
+      "options": {
+        "displayMode": "gradient",
+        "minVizHeight": 10,
+        "minVizWidth": 0,
+        "namePlacement": "left",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showUnfilled": true,
+        "sizing": "auto",
+        "valueMode": "color"
+      },
+      "targets": [
+        {
+          "expr": "sum by (status) (increase(bioetl_workflow_runs_total{workflow=~\"$workflow\",status=~\"$status\"}[$__range]))",
+          "legendFormat": "{{status}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Workflow Run Outcomes / Range",
+      "type": "bargauge",
+      "description": "Shows selected-range workflow run counts split by workflow run status. Use this panel to see whether the chosen window contains `success`, `failed`, or other bounded run outcomes for the selected workflow. `No data` means no matching workflow runs were observed for the selected filters or telemetry is absent; it is not equivalent to workflow success. If failures dominate, continue in `2. Runtime` or `0. Control Plane` depending on whether you need execution or replay/ledger evidence."
     },
     {
       "datasource": "Prometheus",
@@ -263,55 +396,6 @@
           },
           "mappings": [],
           "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 9
-      },
-      "id": 4,
-      "options": {
-        "legend": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "displayMode": "table",
-          "placement": "bottom"
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "none"
-        }
-      },
-      "targets": [
-        {
-          "expr": "sum by (step_kind, status) (increase(bioetl_workflow_step_events_total{workflow=~\"$workflow\",status=~\"$status\"}[$__interval])) or vector(0)",
-          "legendFormat": "{{step_kind}} / {{status}}",
-          "refId": "A"
-        }
-      ],
-      "title": "Step Outcomes by Kind",
-      "type": "timeseries",
-      "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
-    },
-    {
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "lineWidth": 2,
-            "showPoints": "never"
-          },
-          "mappings": [],
-          "unit": "s"
         },
         "overrides": []
       },
@@ -337,14 +421,79 @@
       },
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum by (le, step_kind, status) (rate(bioetl_workflow_step_duration_seconds_bucket{workflow=~\"$workflow\",status=~\"$status\"}[$__rate_interval])))",
+          "expr": "sum by (step_kind, status) (increase(bioetl_workflow_step_events_total{workflow=~\"$workflow\",step_kind=~\"$step_kind\",status=~\"$step_status\"}[$__interval]))",
+          "legendFormat": "{{step_kind}} / {{status}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Step Outcomes by Kind / Step Status / Range",
+      "type": "timeseries",
+      "description": "Shows selected-range step-event evidence split by `step_kind` and step `status`. Variables `Step Kind` and `Step Status` apply here. This panel does not identify the exact pipeline stage or transform step ID because the metric schema only exposes bounded `workflow`, `step_kind`, and `status` labels. If `pipeline / failed` dominates, continue in `2. Runtime`; if `transform / failed` or `skipped` dominates, inspect `4. Data Quality` when validation or filtering is suspected."
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineWidth": 2,
+            "showPoints": "never"
+          },
+          "mappings": [],
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 17
+      },
+      "id": 8,
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum by (le, step_kind, status) (rate(bioetl_workflow_step_duration_seconds_bucket{workflow=~\"$workflow\",step_kind=~\"$step_kind\",status=~\"$step_status\"}[$__rate_interval])))",
           "legendFormat": "p95 {{step_kind}} / {{status}}",
           "refId": "A"
         }
       ],
-      "title": "Step Duration p95",
+      "title": "Step Duration p95 by Kind / Step Status / Range",
       "type": "timeseries",
-      "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
+      "description": "Shows p95 step duration in seconds for the selected time range, filtered by `Workflow`, `Step Kind`, and `Step Status`. This is historical range evidence, not a current in-flight duration gauge. `No data` means no matching step events were observed for the selected filters or the histogram series is absent. Use this panel to spot which bounded step kind slowed down before handing off to `2. Runtime` for stage-level latency diagnostics."
+    },
+    {
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 17
+      },
+      "id": 9,
+      "options": {
+        "content": "<h3>Next Diagnostic Surface</h3><ul><li><strong>2. Runtime</strong>: locate blocking stage, backlog, error-code, or logs/traces when pipeline-step failures appear.</li><li><strong>4. Data Quality</strong>: investigate validation failures, quarantine, filtered-out paths, or transform-side rejects.</li><li><strong>3. Provider Health</strong>: use when workflow failure correlates with upstream provider degradation.</li><li><strong>0. Control Plane</strong>: inspect manifest, ledger, replay/resume, checkpoint, and terminal run evidence.</li><li><strong>1. Overview</strong>: return to L0 when workflow evidence must be prioritized against other incident domains.</li></ul>",
+        "mode": "html"
+      },
+      "title": "Next Diagnostic Surface",
+      "type": "text",
+      "description": "Static operator handoff guide for the selected-range workflow evidence above. This panel intentionally does not claim stage, run_id, dependency, enricher, merge, cross-validation, or Gold-write coverage because those dimensions are not present on `bioetl_workflow_*` metrics. Use the dashboard links in the header to preserve the selected time range while moving to the deeper diagnostic layer."
     }
   ],
   "refresh": "30s",
@@ -379,7 +528,7 @@
         "regex": "",
         "sort": 1,
         "type": "query",
-        "description": "Workflow scope: workflow selector for workflow dashboards; fallback: All workflows."
+        "description": "Workflow scope: bounded workflow selector for workflow dashboards; fallback: All workflows."
       },
       {
         "current": {
@@ -391,7 +540,7 @@
         "definition": "label_values(bioetl_workflow_runs_total, status)",
         "hide": 0,
         "includeAll": true,
-        "label": "Status",
+        "label": "Run Status",
         "multi": true,
         "name": "status",
         "options": [],
@@ -403,7 +552,55 @@
         "regex": "",
         "sort": 1,
         "type": "query",
-        "description": "Workflow scope: workflow status selector; fallback: All statuses."
+        "description": "Workflow scope: workflow-run status selector for run-outcome panels; fallback: All run statuses."
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": "Prometheus",
+        "definition": "label_values(bioetl_workflow_step_events_total, status)",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Step Status",
+        "multi": true,
+        "name": "step_status",
+        "options": [],
+        "query": {
+          "query": "label_values(bioetl_workflow_step_events_total, status)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "sort": 1,
+        "type": "query",
+        "description": "Workflow scope: workflow-step status selector for step-event and step-duration panels; fallback: All step statuses."
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": "Prometheus",
+        "definition": "label_values(bioetl_workflow_step_events_total, step_kind)",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Step Kind",
+        "multi": true,
+        "name": "step_kind",
+        "options": [],
+        "query": {
+          "query": "label_values(bioetl_workflow_step_events_total, step_kind)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "sort": 1,
+        "type": "query",
+        "description": "Workflow scope: bounded `step_kind` selector (`pipeline`, `transform`, or future bounded kinds) for step-event evidence panels; fallback: All step kinds."
       }
     ]
   },
@@ -414,5 +611,5 @@
   "timezone": "browser",
   "title": "5. Workflow",
   "uid": "bioetl-workflow-overview",
-  "version": 1
+  "version": 2
 }

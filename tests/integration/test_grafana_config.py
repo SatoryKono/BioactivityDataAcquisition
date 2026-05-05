@@ -48,7 +48,12 @@ EXPECTED_VARS_BY_DASHBOARD = {
         "adapter",
     },
     "bioetl-control-plane-v1.json": {"pipeline", "run_type"},
-    "bioetl-workflow-overview.json": {"workflow", "status"},
+    "bioetl-workflow-overview.json": {
+        "workflow",
+        "status",
+        "step_status",
+        "step_kind",
+    },
     "bioetl-silver-reject-explorer.json": {
         "pipeline",
         "run_type",
@@ -347,10 +352,20 @@ def test_variable_query_sources(dashboard_path):
     if dashboard_path.name == "bioetl-workflow-overview.json":
         workflow_query = variable_map["workflow"].get("query", {})
         status_query = variable_map["status"].get("query", {})
+        step_status_query = variable_map["step_status"].get("query", {})
+        step_kind_query = variable_map["step_kind"].get("query", {})
         assert isinstance(workflow_query, dict)
         assert isinstance(status_query, dict)
+        assert isinstance(step_status_query, dict)
+        assert isinstance(step_kind_query, dict)
         assert "bioetl_workflow_runs_total" in workflow_query.get("query", "")
         assert "bioetl_workflow_runs_total" in status_query.get("query", "")
+        assert "bioetl_workflow_step_events_total" in step_status_query.get(
+            "query", ""
+        )
+        assert "bioetl_workflow_step_events_total" in step_kind_query.get(
+            "query", ""
+        )
         return
 
     if dashboard_path.name == "bioetl-provider-health-v2.json":
@@ -495,18 +510,19 @@ def test_control_plane_l1_triage_row_has_3_to_5_kpis_and_one_next_step() -> None
     panels = get_dashboard_panels(dashboard)
     kpi_titles = {
         "Replay Safety State",
-        "Checkpoint Freshness (hours since last op)",
+        "Known Gap: Checkpoint Freshness",
         "Ledger / Manifest Consistency",
-        "Replay / Resume Blockers",
+        "Control-Plane Telemetry Missing",
+        "Terminal Run Events",
     }
     next_step_title = "Next Drilldown: Replay Safety Diagnostics"
     first_screen_titles = {
-        panel.get("title") for panel in panels[:8] if panel.get("type") != "row"
+        panel.get("title") for panel in panels[:9] if panel.get("type") != "row"
     }
 
     assert kpi_titles.issubset(first_screen_titles)
     assert next_step_title in first_screen_titles
-    assert len(first_screen_titles & kpi_titles) == 4
+    assert len(first_screen_titles & kpi_titles) == 5
 
 
 def test_control_plane_l1_has_single_next_step_panel_with_expected_target() -> None:
@@ -873,15 +889,21 @@ def test_runtime_provider_alert_conditions_do_not_filter_on_missing_pipeline_lab
 def test_workflow_step_panels_apply_status_variable() -> None:
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-workflow-overview.json"))
     expected = {
-        "Step Outcomes by Kind": 'status=~"$status"',
-        "Step Duration p95": 'status=~"$status"',
+        "Step Outcomes by Kind / Step Status / Range": (
+            'status=~"$step_status"',
+            'step_kind=~"$step_kind"',
+        ),
+        "Step Duration p95 by Kind / Step Status / Range": (
+            'status=~"$step_status"',
+            'step_kind=~"$step_kind"',
+        ),
     }
     panels = {
         panel.get("title"): panel
         for panel in get_dashboard_panels(dashboard)
         if panel.get("title")
     }
-    for title, required_snippet in expected.items():
+    for title, required_snippets in expected.items():
         panel = panels.get(title)
         assert panel is not None, f"Workflow dashboard missing panel {title!r}"
         expressions = [
@@ -889,9 +911,54 @@ def test_workflow_step_panels_apply_status_variable() -> None:
             for target in panel.get("targets", [])
             if isinstance(target.get("expr"), str)
         ]
-        assert any(required_snippet in expr for expr in expressions), (
-            f"{title!r} must apply the workflow status variable"
-        )
+        for required_snippet in required_snippets:
+            assert any(required_snippet in expr for expr in expressions), (
+                f"{title!r} must apply workflow selector {required_snippet!r}"
+            )
+
+
+def test_workflow_dashboard_descriptions_explain_selected_range_limits() -> None:
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-workflow-overview.json"))
+
+    description = str(dashboard.get("description", ""))
+    description_lower = description.lower()
+    assert "selected-range" in description_lower
+    assert "does not provide current run state" in description_lower
+    assert "run_id" in description_lower
+    assert "stage" in description_lower
+
+    panels = {
+        panel.get("title"): panel
+        for panel in get_dashboard_panels(dashboard)
+        if panel.get("title")
+    }
+    expected_tokens = {
+        "Workflow Scope": ("selected-range", "runtime", "data quality"),
+        "Failed Workflow Runs / Range": ("selected time range", "0. control plane"),
+        "Failed Pipeline Steps / Range": ("step_kind=pipeline", "2. runtime"),
+        "Failed Transform Steps / Range": ("transform", "4. data quality"),
+        "Skipped Step Events / Range": ("skipped", "selected time range"),
+        "Workflow Run Outcomes / Range": ("no data", "selected-range"),
+        "Step Outcomes by Kind / Step Status / Range": (
+            "step kind",
+            "step status",
+            "2. runtime",
+        ),
+        "Step Duration p95 by Kind / Step Status / Range": (
+            "p95",
+            "selected time range",
+            "2. runtime",
+        ),
+        "Next Diagnostic Surface": ("run_id", "dependency", "gold-write"),
+    }
+    for title, tokens in expected_tokens.items():
+        panel = panels.get(title)
+        assert panel is not None, f"Workflow dashboard missing panel {title!r}"
+        panel_description = str(panel.get("description", "")).lower()
+        for token in tokens:
+            assert token in panel_description, (
+                f"{title!r} description must mention {token!r}"
+            )
 
 
 @pytest.mark.parametrize(
@@ -1684,6 +1751,97 @@ def test_replay_panels_are_split_by_semantics(dashboard_file: str) -> None:
     )
     assert "bioetl_replay_lag_seconds" in lag_expr
     assert lag.get("fieldConfig", {}).get("defaults", {}).get("unit") == "s"
+
+
+def test_control_plane_trust_panels_preserve_missing_telemetry() -> None:
+    """Control-plane answer-row trust panels must not mask missing telemetry as zero."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
+    panels = {
+        panel.get("title"): panel
+        for panel in get_dashboard_panels(dashboard)
+        if panel.get("title")
+    }
+
+    for title in (
+        "Replay Safety State",
+        "Ledger / Manifest Consistency",
+        "Replay / Resume Blockers",
+        "Replay Lag Seconds",
+    ):
+        panel = panels.get(title)
+        assert panel is not None
+        expr = "\n".join(
+            target.get("expr", "")
+            for target in panel.get("targets", [])
+            if isinstance(target.get("expr"), str)
+        )
+        assert "or vector(0)" not in expr
+        assert panel.get("fieldConfig", {}).get("defaults", {}).get("noValue") == (
+            "UNKNOWN"
+        )
+
+
+def test_control_plane_exposes_terminal_events_and_telemetry_gap() -> None:
+    """Control-plane must expose terminal ledger evidence and missing telemetry risk."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
+    panels = {
+        panel.get("title"): panel
+        for panel in get_dashboard_panels(dashboard)
+        if panel.get("title")
+    }
+
+    expected = {
+        "Control-Plane Telemetry Missing": (
+            "bioetl_control_plane_manifest_writes_total",
+            "bioetl_control_plane_ledger_appends_total",
+            "absent(",
+        ),
+        "Terminal Run Events": ("bioetl_control_plane_terminal_events_total",),
+    }
+    for title, tokens in expected.items():
+        panel = panels.get(title)
+        assert panel is not None, f"Control Plane dashboard missing {title!r}"
+        expr = "\n".join(
+            target.get("expr", "")
+            for target in panel.get("targets", [])
+            if isinstance(target.get("expr"), str)
+        )
+        for token in tokens:
+            assert token in expr
+        assert panel.get("fieldConfig", {}).get("defaults", {}).get("noValue") == (
+            "UNKNOWN"
+        )
+
+
+def test_control_plane_failure_ratio_thresholds_match_descriptions() -> None:
+    """Manifest/ledger ratio panels should project >10% into CRIT severity."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
+    panels = {
+        panel.get("title"): panel
+        for panel in get_dashboard_panels(dashboard)
+        if panel.get("title")
+    }
+
+    for title in ("Manifest Write Failure Ratio", "Ledger Append Failure Ratio"):
+        panel = panels.get(title)
+        assert panel is not None
+        expr = "\n".join(
+            target.get("expr", "")
+            for target in panel.get("targets", [])
+            if isinstance(target.get("expr"), str)
+        )
+        assert "> bool 0.1" in expr
+        steps = (
+            panel.get("fieldConfig", {})
+            .get("defaults", {})
+            .get("thresholds", {})
+            .get("steps", [])
+        )
+        assert steps == [
+            {"color": "green", "value": None},
+            {"color": "orange", "value": 1},
+            {"color": "red", "value": 2},
+        ]
 
 
 def test_dashboard_default_time_and_refresh_policy_by_uid_class() -> None:

@@ -268,14 +268,69 @@ def test_silver_reject_explorer_payload_link_preserves_time_scope() -> None:
     assert "latest 100" in description.lower()
 
 
+def test_silver_reject_explorer_first_action_documents_no_data_semantics() -> None:
+    """Explorer must make 0-vs-no-data interpretation visible on first screen."""
+    dashboard = load_dashboard(
+        Path("grafana/dashboards/bioetl-silver-reject-explorer.json")
+    )
+    panel = next(
+        (
+            item
+            for item in get_dashboard_panels(dashboard)
+            if item.get("title") == "First Action / No-Data Semantics"
+        ),
+        None,
+    )
+    assert panel is not None
+    assert panel.get("gridPos", {}).get("y", 999) <= 3
+    content = str(panel.get("options", {}).get("content", ""))
+    assert "First action:" in content
+    assert "0 rejects is OK only when Quarantine Explorer responds" in content
+    assert "bronze_records=0" in content
+    assert "UNKNOWN" in content
+
+
+@pytest.mark.parametrize(
+    "panel_title",
+    [
+        "Filtered Records Total",
+        "Reject Rate vs Bronze",
+        "Run Scope Summary",
+        "Inspect Top Reject Reasons",
+        "Inspect Top Reject Fields",
+        "Inspect Top Reason Signatures",
+        "Selected Record Details",
+    ],
+)
+def test_silver_reject_explorer_panels_have_specific_triage_descriptions(
+    panel_title: str,
+) -> None:
+    """Panel descriptions should explain selected-range triage semantics, not generic status copy."""
+    dashboard = load_dashboard(
+        Path("grafana/dashboards/bioetl-silver-reject-explorer.json")
+    )
+    panel = next(
+        (
+            item
+            for item in get_dashboard_panels(dashboard)
+            if item.get("title") == panel_title
+        ),
+        None,
+    )
+    assert panel is not None
+    description = str(panel.get("description", ""))
+    assert "Selected-range" in description or "selected-range" in description
+    assert "Status mapping: 0 = healthy/ok" not in description
+    assert any(
+        token in description
+        for token in ("No data", "UNKNOWN", "Empty", "empty", "0")
+    )
+
+
 def test_dq_reject_panels_link_to_silver_reject_explorer() -> None:
-    """DQ reject count and breakdown panels should hand off to Silver Reject Explorer."""
+    """DQ reject count panel should hand off directly; breakdown panels should guide the same handoff."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
-    for panel_title in (
-        "Silver Filter Rejects",
-        "Top Silver Reject Reasons (Pareto)",
-        "Top Silver Reject Fields",
-    ):
+    for panel_title in ("Silver Filter Rejects",):
         panel = next(
             (
                 item
@@ -305,3 +360,29 @@ def test_dq_reject_panels_link_to_silver_reject_explorer() -> None:
         assert explorer_link.get("keepTime") is True or "${__url_time_range}" in str(
             explorer_link.get("url", "")
         )
+
+
+@pytest.mark.parametrize(
+    "panel_title",
+    [
+        "Top Silver Reject Reasons (Pareto)",
+        "Top Silver Reject Fields",
+    ],
+)
+def test_dq_breakdown_panels_reference_top_level_explorer_handoff(
+    panel_title: str,
+) -> None:
+    """Breakdown panels should direct operators to the top-level Explorer handoff."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
+    panel = next(
+        (
+            item
+            for item in get_dashboard_panels(dashboard)
+            if item.get("title") == panel_title
+        ),
+        None,
+    )
+    assert panel is not None
+    description = str(panel.get("description", ""))
+    assert "Silver Reject Explorer" in description
+    assert "top-level" in description

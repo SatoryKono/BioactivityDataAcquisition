@@ -281,6 +281,64 @@ def test_dq_current_status_panels_preserve_unknown_no_data_state() -> None:
         )
 
 
+def test_dq_current_status_panels_use_explicit_status_value_mappings() -> None:
+    """Current DQ status panels must render operator-facing status text, not raw enums."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
+    expected_panels = {
+        "Monitor DQ Current Status",
+        "Monitor DQ Threshold State",
+    }
+    panels = {
+        panel.get("title"): panel
+        for panel in get_dashboard_panels(dashboard)
+        if panel.get("title") in expected_panels
+    }
+    assert set(panels) == expected_panels
+
+    expected_mapping = {
+        "0": {"text": "OK", "color": "green"},
+        "1": {"text": "DEGRADED", "color": "orange"},
+        "2": {"text": "FAILING", "color": "red"},
+    }
+    for panel_title, panel in panels.items():
+        mappings = panel.get("fieldConfig", {}).get("defaults", {}).get("mappings", [])
+        value_mapping = next(
+            (mapping for mapping in mappings if mapping.get("type") == "value"),
+            None,
+        )
+        assert value_mapping is not None, (
+            f"{panel_title} must define explicit value mappings for 0/1/2"
+        )
+        assert value_mapping.get("options") == expected_mapping, (
+            f"{panel_title} must map 0/1/2 to OK/DEGRADED/FAILING"
+        )
+
+
+def test_dq_threshold_state_panel_uses_bounded_reason_severity_with_ok_fallback() -> None:
+    """Threshold-state summary must stay in a bounded enum and preserve explicit OK."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
+    panel = next(
+        (
+            item
+            for item in get_dashboard_panels(dashboard)
+            if item.get("title") == "Monitor DQ Threshold State"
+        ),
+        None,
+    )
+    assert panel is not None, "Panel 'Monitor DQ Threshold State' not found"
+
+    expressions = [target.get("expr", "") for target in panel.get("targets", [])]
+    assert any("max(bioetl_dq_current_reason" in expr for expr in expressions), (
+        "Threshold state must derive severity from canonical current reasons"
+    )
+    assert any("bioetl_dq_current_status" in expr for expr in expressions), (
+        "Threshold state must preserve explicit OK via bioetl_dq_current_status fallback"
+    )
+    assert all("sum(bioetl_dq_current_reason" not in expr for expr in expressions), (
+        "Threshold state must not sum current reasons into an unbounded severity value"
+    )
+
+
 def test_runtime_diagnostic_panels_preserve_unknown_no_data_state() -> None:
     """Runtime diagnostic gauges must not convert missing telemetry to OK."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
@@ -341,6 +399,24 @@ def test_dq_blocked_share_panels_use_percentunit_domain_and_policy_thresholds() 
         assert (
             defaults.get("thresholds", {}).get("steps") == expected_threshold_steps
         ), f"Panel '{panel_title}' must use DQ policy thresholds (warn=0.05, crit=0.20)"
+        expressions = [
+            target.get("expr", "")
+            for target in panel.get("targets", [])
+            if isinstance(target.get("expr"), str)
+        ]
+        assert any(
+            'stage="bronze"' in expr and "bioetl_records_processed_total" in expr
+            for expr in expressions
+        ), f"Panel '{panel_title}' must use Bronze input as the blocked-share denominator"
+        assert any(
+            "bioetl_dq_records_quarantined_total" in expr for expr in expressions
+        ), f"Panel '{panel_title}' must include quarantined records in blocked-share impact"
+        assert all(
+            "stage=~\"raw|validated|enriched|filtered_out|deduplicated|final\"" not in expr
+            for expr in expressions
+        ), (
+            f"Panel '{panel_title}' must not use legacy/unconfirmed stage regex in the denominator"
+        )
 
 
 def test_dashboards_do_not_use_prometheus_created_timestamps() -> None:
