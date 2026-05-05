@@ -12,7 +12,6 @@ Implements RULES.md 2.3 and 02-user-rules.md 2.4:
 from __future__ import annotations
 
 from datetime import datetime
-from pathlib import Path
 from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 if TYPE_CHECKING:
@@ -44,7 +43,7 @@ class MetadataWriterPort(Protocol):
 
     async def write_bronze_metadata(
         self,
-        base_path: str | Path,
+        base_path: str,
         metadata: BronzeMetadata,
         *,
         provider: str | None = None,
@@ -53,7 +52,7 @@ class MetadataWriterPort(Protocol):
         """Write Bronze layer metadata sidecar file.
 
         Args:
-            base_path: Base path where Bronze data is stored.
+            base_path: Base storage location reference where Bronze data is stored.
                       Metadata will be written to {base_path}/{provider}_{entity}_metadata.yaml
                       or {base_path}/_metadata.yaml if provider/entity not provided.
             metadata: Bronze metadata model with lineage and source info.
@@ -70,7 +69,7 @@ class MetadataWriterPort(Protocol):
 
     async def write_silver_metadata(
         self,
-        base_path: str | Path,
+        base_path: str,
         metadata: SilverMetadata,
         *,
         table_name: str | None = None,
@@ -81,7 +80,7 @@ class MetadataWriterPort(Protocol):
         """Write Silver layer metadata sidecar file.
 
         Args:
-            base_path: Base path where Silver Delta table is stored.
+            base_path: Base storage location reference where Silver data is stored.
                       Metadata will be written to {base_path}/{provider}_{entity}_metadata.yaml
                       or {base_path}/_metadata.yaml if provider/entity not provided.
             metadata: Silver metadata model with lineage, DQ metrics, and Delta info.
@@ -101,7 +100,7 @@ class MetadataWriterPort(Protocol):
 
     async def finalize_silver_metadata(
         self,
-        base_path: str | Path,
+        base_path: str,
         *,
         table_name: str | None = None,
         flat_structure: bool = False,
@@ -125,7 +124,7 @@ class MetadataWriterPort(Protocol):
 
     async def write_gold_metadata(
         self,
-        base_path: str | Path,
+        base_path: str,
         metadata: GoldMetadata,
         *,
         table_name: str | None = None,
@@ -136,7 +135,7 @@ class MetadataWriterPort(Protocol):
         """Write Gold layer metadata sidecar file.
 
         Args:
-            base_path: Base path where Gold Delta/Parquet table is stored.
+            base_path: Base storage location reference where Gold data is stored.
                       Metadata will be written to {base_path}/{provider}_{entity}_metadata.yaml
                       or {base_path}/_metadata.yaml if provider/entity not provided.
             metadata: Gold metadata model with lineage, schema contract, and SCD info.
@@ -156,7 +155,7 @@ class MetadataWriterPort(Protocol):
 
     async def finalize_gold_metadata(
         self,
-        base_path: str | Path,
+        base_path: str,
         *,
         table_name: str | None = None,
         flat_structure: bool = False,

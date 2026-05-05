@@ -9,8 +9,6 @@ from typing import TYPE_CHECKING
 from bioetl.domain.ports.noop._async_boundary import noop_async_boundary
 
 if TYPE_CHECKING:
-    from pathlib import Path
-
     from bioetl.domain.models.metadata import (
         BronzeMetadata,
         GoldMetadata,
@@ -90,7 +88,7 @@ class NoOpMetadataWriter:
 
     async def write_bronze_metadata(
         self,
-        base_path: str | Path,
+        base_path: str,
         metadata: BronzeMetadata,
         *,
         provider: str | None = None,
@@ -113,7 +111,7 @@ class NoOpMetadataWriter:
 
     async def write_silver_metadata(
         self,
-        base_path: str | Path,
+        base_path: str,
         metadata: SilverMetadata,
         *,
         table_name: str | None = None,
@@ -140,7 +138,7 @@ class NoOpMetadataWriter:
 
     async def finalize_silver_metadata(
         self,
-        base_path: str | Path,
+        base_path: str,
         *,
         table_name: str | None = None,
         flat_structure: bool = False,
@@ -158,7 +156,7 @@ class NoOpMetadataWriter:
 
     async def write_gold_metadata(
         self,
-        base_path: str | Path,
+        base_path: str,
         metadata: GoldMetadata,
         *,
         table_name: str | None = None,
@@ -185,7 +183,7 @@ class NoOpMetadataWriter:
 
     async def finalize_gold_metadata(
         self,
-        base_path: str | Path,
+        base_path: str,
         *,
         table_name: str | None = None,
         flat_structure: bool = False,
