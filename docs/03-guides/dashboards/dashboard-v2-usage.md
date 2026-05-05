@@ -47,11 +47,16 @@ Machine-readable navigation contract: `docs/03-guides/dashboards/contracts/navig
 - `bioetl-overview-v2`: `$pipeline`, `$run_type`
 - `bioetl-control-plane-v1`: `$pipeline`, `$run_type`
 - `bioetl-dq-v2`, `bioetl-runtime`: `$pipeline`, `$run_type`, `$stage`
-- `bioetl-provider-health-v2`: `$provider`, `$adapter`
+- `bioetl-provider-health-v2`: `$provider`, hidden `$pipeline_context`, `$adapter`
 - `bioetl-silver-reject-explorer`: `$pipeline`, `$run_type`, `$reason_code`, `$field`, `$run_id`, `$payload_hash`
-- Для `bioetl-silver-reject-explorer` `$pipeline` должен быть scoped
-  single-select (без `All`), потому что quarantine API fail-closed требует
-  явный `pipeline` параметр.
+- `$pipeline` и `$provider` всегда single-select без `All`; если исходного
+  контекста нет, используется explicit fallback `unknown`.
+- Переходы в `3. Provider Health` из pipeline-scoped dashboards вычисляют
+  `$provider` из текущего `$pipeline` и сохраняют `$pipeline_context` для
+  обратного перехода.
+- Для `bioetl-silver-reject-explorer` `$pipeline` также остаётся scoped
+  single-select, потому что quarantine API fail-closed требует явный
+  `pipeline` параметр.
 - Переменная `execution` не используется; `$run_id` и `$payload_hash`
   используются только в `bioetl-silver-reject-explorer` как Explorer-only
   forensic filters, а не как Prometheus labels.

@@ -654,8 +654,10 @@ Shipped dashboards используют несколько template variables в
 
 - **Определение:** `label_values(bioetl_records_processed_total, pipeline)`
 - **Тип:** Query (автоматическое обнаружение значений)
-- **Multi-select:** Да (можно выбрать несколько пайплайнов)
-- **Include All:** Да (`.*` — все пайплайны)
+- **Multi-select:** Нет
+- **Include All:** Нет
+- **Default:** `unknown` как explicit fail-closed fallback, если исходный
+  dashboard не имеет pipeline context.
 - **Refresh:** При загрузке дашборда
 - **Возможные значения:** `chembl`, `pubmed`, `pubchem`, `uniprot` и другие pipeline-идентификаторы, зарегистрированные в системе.
 - **Применение:** Фильтрует метрики по имени пайплайна. Используется практически во всех PromQL-запросах.
@@ -685,8 +687,10 @@ Shipped dashboards используют несколько template variables в
 - **`5. Workflow`** использует только `$workflow` и `$status` через
   `label_values(bioetl_workflow_runs_total, workflow|status)`.
 
-- **`Provider Health`** использует `$provider` и `$adapter`; pipeline scope там
-  intentionally отсутствует.
+- **`Provider Health`** использует single-select `$provider`, hidden
+  `$pipeline_context` и `$adapter`. Переходы из pipeline-scoped dashboards
+  задают `$provider=$pipeline` и сохраняют `$pipeline_context=$pipeline`; при
+  обратном переходе `$pipeline_context` восстанавливает исходный pipeline.
 
 **Каскадная зависимость:** Значения `$run_type` зависят от выбранного `$pipeline`. При смене пайплайна список доступных run types автоматически обновляется.
 
@@ -1601,8 +1605,8 @@ ______________________________________________________________________
                 "name": "pipeline",
                 "label": "Pipeline",
                 "type": "query",
-                "includeAll": true,
-                "multi": true,
+                "includeAll": false,
+                "multi": false,
                 "refresh": 1
             }
         ]

@@ -20,7 +20,8 @@ YAML также фиксирует time handoff policy в `time_handoff_requirem
 
 - Dashboard: `/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}`
 - Dashboard: `/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&${__url_time_range}`
-- Dashboard: `/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=All&var-run_type=All&${__url_time_range}`
+- Dashboard: `/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=unknown&var-run_type=unknown&${__url_time_range}`
+- Provider context mapping: `/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=$pipeline&var-pipeline_context=$pipeline&var-adapter=unknown&${__url_time_range}`
 
 ## Справка
 

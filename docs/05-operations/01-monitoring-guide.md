@@ -84,9 +84,11 @@ Pushgateway publication на завершении run. Это позволяет
 - **Silver Reject Explorer**: `$pipeline`, `$run_type`, `$reason_code`, `$field`, `$run_id`, `$payload_hash`
 - **5. Workflow**: `$workflow`, `$status`
 
-> **Важно**: для `1-4` dashboard допустим общий scope (`All`), но
-> `Silver Reject Explorer` требует **scoped pipeline** (single-select, без
-> `All`), иначе backend quarantine API возвращает fail-closed ошибку.
+> **Важно**: `$pipeline` и `$provider` single-select на всех shipped
+> dashboards, `All` запрещён. Если контекста нет, используется explicit
+> fallback `unknown`. Переход в `3. Provider Health` из pipeline-scoped
+> dashboards мапит `$pipeline` в `$provider` и сохраняет hidden
+> `$pipeline_context` для обратного перехода.
 
 ### Основные Дашборды
 
