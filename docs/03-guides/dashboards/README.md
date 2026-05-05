@@ -63,6 +63,14 @@ Global lookup/read-path panels stay separated in a dedicated
 **Global diagnostics (non-pipeline scoped)** block and MUST remain unfiltered by
 `$pipeline` / `$run_type`.
 
+`bioetl-runtime`, `bioetl-provider-health-v2`, and `bioetl-dq-v2` are now
+answer-first L2 incident surfaces. Their first visible rows use canonical
+current-status recording rules (`bioetl_runtime_current_status`,
+`bioetl_provider_current_status`, `bioetl_dq_current_status`) plus reason/cause
+tables before any selected-range evidence. Range counters, trends, raw tables,
+Silver reject breakdowns, logs, and traces stay below the first-screen answer
+row or in collapsed diagnostic rows.
+
 ## KPI ownership (canonical vs mirrors)
 
 Правило: KPI имеет один canonical dashboard (источник ответа) и может иметь

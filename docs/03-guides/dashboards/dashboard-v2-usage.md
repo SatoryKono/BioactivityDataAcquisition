@@ -68,10 +68,11 @@ Machine-readable navigation contract: `docs/03-guides/dashboards/contracts/navig
    broken/degraded и куда открыть drilldown первым. `OK` считается здоровым
    только при recent activity; отсутствие samples остаётся `UNKNOWN`, а не
    зелёным нулём.
-1. `bioetl-runtime`, верхний блок `Incident Summary` (без скролла):
-   `Runtime Blockers / 15m`, `Failed Runs / 15m`,
-   `Runtime Error Rate / 30m`, `Worst Stage Lag / 15m` +
-   `Active Runtime Blocker Detail` отвечают на L2 вопрос «есть ли инцидент и где первый culprit».
+1. `bioetl-runtime`, first-screen answer row (без скролла):
+   `First Action`, `Monitor Runtime Current Status`, `Runtime Blockers` и
+   `Inspect Top Runtime Blockers` отвечают на L2 вопрос «что блокирует
+   выполнение сейчас и куда идти дальше». Selected-range evidence начинается
+   ниже и не определяет current status.
 1. `bioetl-runtime`, collapsed row-группы по сценарию:
    `Backlog Trends`, `Durations`, `Shutdown Diagnostics`,
    `Tracing-only Log Hygiene`. Открывайте ровно одну нужную группу после
@@ -83,13 +84,18 @@ Machine-readable navigation contract: `docs/03-guides/dashboards/contracts/navig
    отвечают на L1/L2 вопрос: можно ли доверять manifest/ledger/checkpoint/
    lineage state и безопасно выполнять replay/resume. Любой non-zero blocker
    требует расследования до replay/resume.
-1. `bioetl-provider-health-v2`, panel `id=114`, `id=1`, `id=104`, `id=106`, `id=107`, `id=108`, `id=109`, `id=102`:
-   current provider status mapping (`UNHEALTHY`/`DEGRADED`/`HEALTHY`), p95 latency trend + current p95, failure/degraded trend, provider failure share и retries exhausted.
-1. `bioetl-dq-v2`, panel `id=2` (`Data Quality Score (Volume-weighted)`):
-   `sum(score * record_count) / clamp_min(sum(record_count), 1)` на базе
-   `bioetl_dq_validation_score` и `bioetl_dq_validation_record_count`
-1. `bioetl-dq-v2`, panel `id=6`, `id=7`, `id=12`:
-   range-based quarantine/threshold/failures for the active Grafana window.
+1. `bioetl-provider-health-v2`, first-screen GLOBAL answer row:
+   `GLOBAL Provider Scope`, `Monitor GLOBAL Provider Severity Matrix`,
+   `Inspect Critical Providers`, `Inspect Provider Top Causes` и `First Action`
+   отвечают на вопрос «какой provider degraded/failing и почему». Panel `id=114`
+   остаётся raw source enum (`0=UNHEALTHY`, `1=DEGRADED`, `2=HEALTHY`) ниже
+   first screen как evidence.
+1. `bioetl-dq-v2`, first-screen answer row:
+   `Monitor DQ Current Status`, `Monitor DQ Threshold State`,
+   `Inspect DQ Current Reasons` и `First Action / Invalid Record Policy`
+   отвечают на вопрос «DQ сейчас OK/DEGRADED/FAILING/UNKNOWN и какое действие
+   первое». `Data Quality Score (Volume-weighted)`, quarantine, Silver rejects
+   и flow остаются selected-range evidence ниже.
 1. `bioetl-overview-v2`, routing and evidence rows:
    `Runtime Blockers Current`, `DQ Status Current`, `Gold Lifecycle Current`,
    `Control Plane Current`, `Provider GLOBAL Scope`, `Workflow Selected Scope`,
@@ -146,10 +152,13 @@ Panel-level dashboard handoffs и `First Action` dashboard CTAs намеренн
 - `bioetl-overview-v2` и `bioetl-runtime` содержат явный handoff в
   `4. Data Quality`, но runtime dashboard больше не тащит в себя DQ internals:
   он показывает только compact handoff conditions.
-- Для bounded cause summary используйте `Top Silver Reject Reasons` и
-  `Top Silver Reject Fields` в `bioetl-dq-v2`.
+- Для current-state narrowing используйте `Inspect DQ Current Reasons`; для
+  bounded cause summary используйте `Top Silver Reject Reasons` и
+  `Top Silver Reject Fields` в collapsed rows `bioetl-dq-v2`.
 - Маршрут triage: **L1 summary -> L2 explorer**.
-  1. **L1 summary:** начните с `4. Data Quality` (first-screen KPI: score, blocked share, quarantined, freshness lag), чтобы подтвердить масштаб инцидента в выбранном time range.
+  1. **L1 summary:** начните с `4. Data Quality` (first-screen current status,
+     threshold state, reasons, invalid-record-policy note), чтобы определить
+     severity и первое действие.
   1. **L1 cause narrowing:** раскройте collapsed rows `Reject / Pareto / Fields` и `Validation Diagnostics`, проверьте `Top Silver Reject Reasons` / `Top Silver Reject Fields` и связанные diagnostics.
   1. **L2 explorer:** откройте `Silver Reject Explorer` через top-level link в `4. Data Quality` для record-level списка, выбора `reason_code/field/run_id` и detail по `payload_hash`.
   1. Используйте quarantine CLI для action-операций (`replay/resolve/purge`) и финального подтверждения remediation.
