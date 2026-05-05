@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
-from bioetl.application.composite.checkpoint import _state_support as state_support
+import bioetl.application.composite.checkpoint._state_support as state_support
 from bioetl.domain.composite.result import (
     DependencyResult,
     DependencyStatus,

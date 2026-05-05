@@ -115,13 +115,13 @@ ______________________________________________________________________
 │  └──────────────────────────────────────────────────────────┘    │
 │                                                                   │
 │  Дашборды (shipped):                                             │
+│  - 0. Control Plane (bioetl-control-plane-v1)                    │
 │  - 1. BioETL Overview (bioetl-overview-v2)                       │
 │  - 2. Runtime (bioetl-runtime)                                   │
 │  - 3. Provider Health (bioetl-provider-health-v2)                │
 │  - 4. Data Quality (bioetl-dq-v2)                                │
-│  - 5. Control Plane (bioetl-control-plane-v1)                    │
-│  - 5. Silver Reject Explorer (bioetl-silver-reject-explorer)     │
-│  - 6. Workflow Overview (bioetl-workflow-overview)               │
+│  - 5. Workflow (bioetl-workflow-overview)                        │
+│  - Silver Reject Explorer (bioetl-silver-reject-explorer)        │
 └──────────────────────────────────────────────────────────────────┘
 ```
 
@@ -745,19 +745,17 @@ ______________________________________________________________________
 | 1211 | Stage Lag Trend               | Timeseries | `max by (stage) (max_over_time(bioetl_stage_lag_seconds{...}[$__interval])) or vector(0)`                                   | Gauge trend for lag context.                                                                                                                                                    |
 | 204/205/206 | Supporting Blockers       | Stat       | DQ hard blockers, control-plane blockers, global provider degradation                                                        | Compact supporting checks; not duplicate handoff cards.                                                                                                                         |
 | 111/113/114/118/119 | Supporting Checks | Stat      | Manifest/ledger, checkpoint, lineage, Silver rejects count/rate, latest successful data timestamp                           | Compact L0 checks only; deep diagnostics live in target dashboards.                                                                                                             |
-| 213 | Drilldown Links                 | Text       | n/a                                                                                                                          | Scoped links to Runtime, DQ, Provider Health, Control Plane, Workflow, Loki and Tempo.                                                                                           |
+| 213 | Drilldown Links                 | Text       | n/a                                                                                                                          | Legacy panel-level drilldown removed; navigation is handled by the top-level dashboard bus.                                                                                       |
 
 **Используемые метрики:** `bioetl_pipeline_runs_total`, `bioetl_records_processed_total`,
 `bioetl_stage_backlog_records`, `bioetl_stage_lag_seconds`,
 `bioetl_dq_validation_failures_total`, `bioetl_dq_records_quarantined_total`,
 control-plane metrics, provider health metrics и `bioetl_workflow_runs_total`.
 
-**Drilldown:** dashboard links `2. Runtime`, `3. Provider Health`,
-`4. Data Quality`, `5. Control Plane`, `6. Workflow Overview`, `Explore Logs` и `Explore Traces` используют
-текущее временное окно. Panel `Processing Volume by Stage` дублирует Explore handoff
-через data links для быстрого перехода в Grafana Explore. Tempo handoff для
-pipeline dashboards использует TraceQL filter по `span."bioetl.pipeline"` и
-`span."bioetl.run_type"`.
+**Drilldown:** top-level dashboard bus links `0. Control Plane`, `2. Runtime`,
+`3. Provider Health`, `4. Data Quality`, `5. Workflow` используют текущее
+временное окно. Overview не содержит Explore links и не дублирует
+dashboard-to-dashboard links в panel/data links.
 
 **Silver Rejects triage sequence:**
 
@@ -765,7 +763,7 @@ pipeline dashboards использует TraceQL filter по `span."bioetl.pipel
    `Silver Rejects Count + Rate` / `Silver Filter Rejects`.
 1. Перейдите в `4. Data Quality`, чтобы проверить bounded breakdown через
    `Top Silver Reject Reasons` и `Top Silver Reject Fields`.
-1. Перейдите в `5. Silver Reject Explorer` для record-level browsing.
+1. Перейдите в `Silver Reject Explorer` для record-level browsing.
 1. Используйте quarantine CLI для execution (`resolve/replay`) и final action.
 
 ______________________________________________________________________
@@ -792,7 +790,7 @@ ______________________________________________________________________
 | 117 | Silver Filter Rejects                        | Stat       | `round(sum(increase(bioetl_records_processed_total{...stage="filtered_out"}[$__range])) or vector(0))`                                  | Отдельный счётчик Silver filter rejects внутри выбранного временного окна; не заменяет `Records Quarantined`.                                                              |
 | 118 | Silver Filter Rejects by Pipeline            | Bar gauge  | `sum by (pipeline) (increase(bioetl_records_processed_total{...stage="filtered_out"}[$__range]))`                                       | Breakdown intentional Silver exclusions по выбранным pipeline values через selected-range increase.                                                                        |
 | 121 | Top Silver Reject Reasons                    | Bar gauge  | `topk(10, sum by (reason_code) (increase(bioetl_silver_filter_rejections_total{...}[$__range])))`                                      | Bounded top-10 summary по `reason_code` поверх shipped Silver reject breakdown metric.                                                                                       |
-| 122 | Top Silver Reject Fields                     | Bar gauge  | `topk(10, sum by (field) (increase(bioetl_silver_filter_rejections_total{...}[$__range])))`                                            | Bounded top-10 summary по `field`; exact field/root-cause drilldown делается в `5. Silver Reject Explorer`.                                                                |
+| 122 | Top Silver Reject Fields                     | Bar gauge  | `topk(10, sum by (field) (increase(bioetl_silver_filter_rejections_total{...}[$__range])))`                                            | Bounded top-10 summary по `field`; exact field/root-cause drilldown делается в `Silver Reject Explorer`.                                                                  |
 | 152 | Silver Filter Reject Accounting Mismatch     | Stat       | `round(sum(max_over_time(bioetl_silver_filter_reject_total_mismatch_15m{...}[$__range])))`                                              | Reconciliation guard между stage-total `filtered_out` surface и bounded breakdown metric. `0` = healthy, non-zero = расследовать drift, `No data` = recording rule не публикуется. |
 | 101 | Latest Successful Data Timestamp             | Stat       | `max(bioetl_data_freshness_seconds{pipeline=~"$pipeline"})`                                                                            | Последний observed ingestion timestamp внутри выбранного pipeline scope.                                                                                                   |
 
@@ -809,14 +807,16 @@ ______________________________________________________________________
 - неизвестные значения схлопываются в `other`
 - raw `message` не используется как Prometheus label
 
-**Drilldown:** dashboard links `Back to Overview`, `5. Control Plane`, `Explore Logs`,
-`Explore Traces` и `5. Silver Reject Explorer` используют текущее временное окно. Panel `Data Flow in Range: Bronze -> Silver -> Gold` дублирует Explore handoff через data links для DQ
-incidents и freshness investigation, а также даёт прямой переход в `5. Control Plane` для replay/checkpoint расследования. Панели `Lineage Refs Missing` и `Gold Strict Validation Failures` тоже ведут в `5. Control Plane`, чтобы traceability и hard-fail incidents не требовали ручного поиска следующего dashboard. Tempo drilldown предфильтрован по
+**Drilldown:** dashboard links `0. Control Plane`, `1. Overview`, `2. Runtime`,
+`3. Provider Health`, `5. Workflow`, `Silver Reject Explorer`, `Explore Logs`,
+`Explore Traces` используют текущее временное окно. Panel-level
+dashboard-to-dashboard handoffs удалены; replay/checkpoint расследование
+открывается через `0. Control Plane` в top-level шине. Tempo drilldown предфильтрован по
 `span."bioetl.pipeline"` и `span."bioetl.run_type"`.
 
 ______________________________________________________________________
 
-## 12. Дашборд: 5. Silver Reject Explorer
+## 12. Дашборд: Silver Reject Explorer
 
 **Файл:** `grafana/dashboards/bioetl-silver-reject-explorer.json`
 **UID:** `bioetl-silver-reject-explorer`
@@ -844,9 +844,10 @@ Prometheus labels, summary dashboards или cross-dashboard handoffs.
 
 **Важно:** это не Prometheus dashboard для row-level таблиц.
 `1-4` dashboards остаются Prometheus summary/bounded-breakdown поверхностями;
-`5. Silver Reject Explorer` закрывает exact record-level drilldown gap.
+`Silver Reject Explorer` закрывает exact record-level drilldown gap.
 
-**Drilldown:** links `Back to Overview`, `Back to Data Quality`, `Open Logs`, `Open Traces`;
+**Drilldown:** top-level bus links `0. Control Plane`, `1. Overview`,
+`2. Runtime`, `3. Provider Health`, `4. Data Quality`, `5. Workflow`;
 table row links дают self-drilldown по `payload_hash` и CLI handoff.
 
 ______________________________________________________________________
@@ -879,14 +880,10 @@ ______________________________________________________________________
 
 **Фильтрация:** только `$provider`. Health-check counters и histograms в текущем инструментировании являются provider-labeled, поэтому pipeline filter здесь намеренно не используется.
 
-**Drilldown:** dashboard links `Back to Overview`, `2. Runtime`, `5. Control Plane`, `Explore Logs` и
-`Explore Traces` плюс data links у latency-панели открывают Grafana
-Explore в том же time range.
-Loki drilldown стартует с безопасного `{job="bioetl"}` entrypoint без encoded
-dashboard-variable interpolation. Дополнительное сужение по `provider` или
-`pipeline` оператор делает уже в Explore, а Tempo drilldown сразу фильтрует
-`span."bioetl.provider"` по текущему `$provider`; финальная correlation всё так
-же идёт через `trace_id` / `span_id`.
+**Drilldown:** dashboard links `0. Control Plane`, `1. Overview`,
+`2. Runtime`, `4. Data Quality`, `5. Workflow`. Explore links на Provider
+Health отсутствуют; correlation идёт через Runtime/Data Quality или runbook
+links без дублирования dashboard handoffs.
 
 ______________________________________________________________________
 
@@ -908,8 +905,8 @@ collapsed row `Tracing-only Log Hygiene (requires optional tracing profile)`.
 - **Primary question:** где runtime теряет время, падает, копит backlog или даёт warning/error signals
 - **Variables:** только bounded `$pipeline`, `$run_type`, `$stage`
 - **Forbidden variables:** `run_id`, `payload_hash`, `record_id`
-- **Top links:** `Back to Overview`, `3. Provider Health`,
-  `4. Data Quality`, `5. Control Plane`, `Explore Logs`, `Explore Traces`, `Runtime Runbook`
+- **Top links:** `0. Control Plane`, `1. Overview`, `3. Provider Health`,
+  `4. Data Quality`, `5. Workflow`, `Explore Logs`, `Explore Traces`
 - **Known blocked panels:** `Retry vs Failure` и `Batch Size Distribution`
   сознательно не shipped, потому что в текущем metric surface нет подтверждённых
   bounded runtime metrics для этих решений
@@ -1871,13 +1868,13 @@ ______________________________________________________________________
 
 | Dashboard                 | UID                             | JSON version | Panels | Refresh | Time Range | Primary surface | Purpose |
 | ------------------------- | ------------------------------- | ------------ | ------ | ------- | ---------- | --------------- | ------- |
+| 0. Control Plane          | `bioetl-control-plane-v1`       | 2            | 32     | 30s     | 6h         | Prometheus      | Replay/resume safety, GLOBAL read diagnostics, missing-signal markers |
 | 1. BioETL Overview        | `bioetl-overview-v2`            | 5            | 27     | 30s     | 12h        | Prometheus      | L0 broken/degraded answer and operational handoff |
 | 2. Runtime                | `bioetl-runtime`                | 2            | 26     | 30s     | 12h        | Prometheus + optional Loki/Tempo links | L2 runtime triage: blockers, latency, backlog, handoffs |
 | 3. Provider Health        | `bioetl-provider-health-v2`     | 6            | 17     | 30s     | 12h        | Prometheus      | Provider latency, health, retries, failure ratios |
 | 4. Data Quality           | `bioetl-dq-v2`                  | 4            | 21     | 30s     | 12h        | Prometheus      | DQ score, quarantine, freshness, validation failures |
-| 5. Control Plane          | `bioetl-control-plane-v1`       | 2            | 32     | 30s     | 6h         | Prometheus      | Replay/resume safety, GLOBAL read diagnostics, missing-signal markers |
-| 5. Silver Reject Explorer | `bioetl-silver-reject-explorer` | 1000         | 9      | 1m      | 24h        | Quarantine Explorer API | Record-level browsing for Silver rejects |
-| 6. Workflow Overview      | `bioetl-workflow-overview`      | 6            | 5      | 30s     | 12h        | Prometheus      | Declarative workflow run and step outcomes |
+| Silver Reject Explorer | `bioetl-silver-reject-explorer` | 1000         | 9      | 1m      | 24h        | Quarantine Explorer API | Record-level browsing for Silver rejects |
+| 5. Workflow      | `bioetl-workflow-overview`      | 6            | 5      | 30s     | 12h        | Prometheus      | Declarative workflow run and step outcomes |
 
 ______________________________________________________________________
 

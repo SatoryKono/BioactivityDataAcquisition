@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from bioetl.domain.aggregates import _batch_lifecycle as lifecycle
+import bioetl.domain.aggregates._batch_lifecycle as lifecycle
 from bioetl.domain.aggregates._batch_mixins import (
     _BatchLifecycleMixin,
     _BatchMutationMixin,

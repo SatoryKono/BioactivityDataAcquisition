@@ -174,9 +174,19 @@ Machine-readable navigation contract: `docs/03-guides/dashboards/contracts/navig
 
 ## Unified Top Navigation CTA (v2)
 
-Primary dashboards (`1. Overview`, `2. Runtime`, `3. Provider Health`, `4. Data Quality`, `6. Workflow Overview`) MUST follow the canonical navigation contract in `navigation-contract.md`; top navigation is dashboard-specific and does **not** require a universal `Next Recommended Drilldown` link.
+Primary dashboards MUST follow the canonical navigation contract in
+`navigation-contract.md` and the machine-readable
+`contracts/navigation-links.yaml`.
 
-For `bioetl-overview-v2`, mandatory top-level links are preserved per navigation contract. To reduce first-screen overload, less frequent actions are duplicated into one collapsed row `Additional Navigation & Forensics` via row-level `dataLinks`/links, so operators can use a compact first-pass path and still keep full one-click access.
+The top-level dashboard bus is:
+`0. Control Plane`, `1. Overview`, `2. Runtime`, `3. Provider Health`,
+`4. Data Quality`, `5. Workflow`. Each page shows all bus links except its own
+page. Any duplicate dashboard-to-dashboard link from one dashboard to the same
+target dashboard is forbidden.
+
+`Explore Logs` and `Explore Traces` are available only on `2. Runtime` and
+`4. Data Quality`. `Silver Reject Explorer` is available only on
+`4. Data Quality`.
 
 Variable handoff policy for dashboard links remains strict and bounded:
 
@@ -202,32 +212,28 @@ Variable handoff policy for dashboard links remains strict and bounded:
 
 - `bioetl-overview-v2`: L0 Overview отвечает на один primary question:
   what is currently broken or degraded in BioETL, and where should the
-  operator drill down first? Top-level dashboard links `2. Runtime`,
-  `3. Provider Health`, `4. Data Quality`, `5. Control Plane`,
-  `6. Workflow Overview`, `Explore Logs` и `Explore Traces`
-  остаются на верхнем уровне по контракту; одновременно less-frequent actions
-  дублируются в collapsed row `Additional Navigation & Forensics`.
+  operator drill down first? Top-level dashboard links follow the `0..5` bus
+  and do not duplicate panel-level dashboard links.
   Cross-dashboard URLs передают только target-scoped variables; provider/workflow
   dashboards не наследуют `$pipeline/$run_type` leakage. `System Status` and
   `Next Action` are the first operator answer; subsystem status cards show
-  `Reason:` and `Next:` in legends. Panel `id=1`
-  (`Processing Volume by Stage`) дублирует Explore handoff через data links.
+  `Reason:` and `Next:` in legends.
 
 ## First 2 clicks scenario (operator)
 
 1. **Click #1:** открыть `bioetl-overview-v2`, прочитать `System Status` + `Next Action`.
-2. **Click #2:** открыть рекомендуемый dashboard из top-level minimum (`2. Runtime`, `5. Control Plane`, `4. Data Quality`) или при forensic/pattern-specific нужде раскрыть `Additional Navigation & Forensics` и перейти в `Provider Health`/`Workflow`/`Explore`.
+2. **Click #2:** открыть рекомендуемый dashboard из top-level bus (`0. Control Plane`, `2. Runtime`, `3. Provider Health`, `4. Data Quality`, `5. Workflow`).
 
 Цель сценария: root-cause направление должно быть определено максимум за 2 клика без обязательной прокрутки по нечастым CTA.
-- `bioetl-runtime`: top-level links `Back to Overview`,
-  `3. Provider Health`, `4. Data Quality`, `5. Control Plane`,
-  `Explore Logs`, `Explore Traces` и `Runtime Runbook` дают явный
+- `bioetl-runtime`: top-level links `0. Control Plane`, `1. Overview`,
+  `3. Provider Health`, `4. Data Quality`, `5. Workflow`, `Explore Logs`,
+  `Explore Traces` дают явный
   routing path из L2 runtime triage. Cross-dashboard handoffs передают только
   target-scoped variables; forensic IDs в runtime dashboard запрещены.
-- `bioetl-control-plane-v1`: `5. Control Plane` отвечает на один
+- `bioetl-control-plane-v1`: `0. Control Plane` отвечает на один
   primary question: can we trust manifest/ledger/checkpoint/lineage state and
-  safely replay/resume? Минимальный `First Action` row шаблон: 3–4 CTA
-  (`Back to Overview`, `2. Runtime`, `4. Data Quality`, optional Explore).
+  safely replay/resume? Cross-dashboard routing is handled only by the top-level
+  bus; panel-level dashboard handoffs are intentionally absent.
 
   **First 2 clicks (L1):**
   1. Click #1: открыть `bioetl-control-plane-v1`, проверить `Replay Safety State` (`id=891`) и `Replay / Resume Blockers` (`id=130`).
@@ -242,17 +248,30 @@ Variable handoff policy for dashboard links remains strict and bounded:
   `bioetl_control_plane_reads_total` и
   `bioetl_control_plane_read_duration_seconds_bucket` глобальны по
   `store/operation/status`.
-- `bioetl-provider-health-v2`: dashboard links `Back to Overview`, `2. Runtime (Primary)`, `2. Runtime (Contextual: provider mapping)`, `5. Control Plane`, `Explore Logs` и `Explore Traces` дают быстрый переход из provider health surface в runtime/overview и correlation flow без ложного pipeline scope в target dashboards. Минимальный `First Action` row шаблон: 3–4 CTA (`Back to Overview`, `2. Runtime`, `5. Control Plane`, optional Explore). Panel `id=114` (`Current Provider Health Status`) показывает явный enum mapping `0=UNHEALTHY`, `1=DEGRADED`, `2=HEALTHY`, а panel `id=1` (`Health Check Latency by Provider (p95)`) дублирует Explore handoff через data links.
+- `bioetl-provider-health-v2`: dashboard links `0. Control Plane`,
+  `1. Overview`, `2. Runtime`, `4. Data Quality`, `5. Workflow` дают быстрый
+  переход из provider health surface без дублирования Runtime variants.
+  Panel `id=114` (`Current Provider Health Status`) показывает явный enum
+  mapping `0=UNHEALTHY`, `1=DEGRADED`, `2=HEALTHY`.
   
   **First 2 clicks (L1):**
   1. Click #1: открыть `bioetl-provider-health-v2`, проверить `Current Provider Health Status` (`id=114`) и `Health Check Latency by Provider (p95)` (`id=1`).
-  2. Click #2: перейти в `2. Runtime (Primary)` при active degradation/failure trend, в `2. Runtime (Contextual: provider mapping)` для быстрого просмотра маппинга провайдеров, или в `5. Control Plane` при симптомах retry exhaustion/state inconsistency. Panel `id=114` (`Current Provider Health Status`) показывает явный enum mapping `0=UNHEALTHY`, `1=DEGRADED`, `2=HEALTHY`, а panel `id=1` (`Health Check Latency by Provider (p95)`) дублирует Explore handoff через data links.
-- `bioetl-dq-v2`: dashboard link `Back to Overview` плюс `5. Control Plane`, `Explore Logs`, `Explore Traces` и `5. Silver Reject Explorer` дают тот же переход для DQ incidents и freshness investigation. Handoff в Explorer передаёт только bounded `$pipeline/$run_type` scope, а не generic `includeVars` leakage. Panel `id=1` (`Data Flow in Range: Bronze -> Silver -> Gold`) дублирует Explore handoff через data links.
-- `bioetl-silver-reject-explorer`: dashboard links `Back to Overview`, `Back to Data Quality`, `Open Logs`, `Open Traces`; back-links возвращают только `$pipeline/$run_type`, не leaking `payload_hash` или other forensic filters. Main table поддерживает data links для self-drilldown по `payload_hash` и CLI handoff. Верхняя explanatory panel явно показывает banner `default 24h forensic window`, чтобы оператор не интерпретировал explorer как обычное `now-12h` окно.
+  2. Click #2: перейти в `2. Runtime` при active degradation/failure trend или
+     в `0. Control Plane` при симптомах retry exhaustion/state inconsistency.
+- `bioetl-dq-v2`: dashboard links `0. Control Plane`, `1. Overview`,
+  `2. Runtime`, `3. Provider Health`, `5. Workflow`, `Silver Reject Explorer`,
+  `Explore Logs`, `Explore Traces` дают переходы для DQ incidents и freshness
+  investigation. Handoff в Explorer передаёт только bounded `$pipeline/$run_type`
+  scope, а не generic `includeVars` leakage.
+- `bioetl-silver-reject-explorer`: dashboard bus links `0..5`; no Explore links
+  and no self-link to Silver Reject Explorer. Main table поддерживает data links
+  для self-drilldown по `payload_hash` и CLI handoff. Верхняя explanatory panel
+  явно показывает banner `default 24h forensic window`, чтобы оператор не
+  интерпретировал explorer как обычное `now-12h` окно.
 
 ### Expected operator behavior for DQ -> Explorer handoff
 
-- Из `4. Data Quality` переход в `5. Silver Reject Explorer` передаёт только
+- Из `4. Data Quality` переход в `Silver Reject Explorer` передаёт только
   `$pipeline/$run_type`, но intentionally открывает более широкое окно
   `now-24h` (forensic default) для редких инцидентов и sparse reject events.
 - Оператор SHOULD сначала подтвердить, что текущий spike/аномалия видны в
@@ -264,11 +283,14 @@ Variable handoff policy for dashboard links remains strict and bounded:
 - Для очень редких инцидентов оператор MAY оставить 24h окно и уточнить
   контекст через `reason_code`, `field`, `run_id` и `payload_hash` перед
   action-операциями в CLI.
-- `bioetl-workflow-overview`: dashboard links `Back to Overview`, `2. Runtime`, `5. Control Plane`, `Explore Logs`, `Explore Traces`; cross-dashboard handoffs не leaking `$workflow/$status` into non-workflow targets. Минимальный `First Action` row шаблон: 3–4 CTA (`Back to Overview`, `2. Runtime`, `5. Control Plane`, optional Explore).
+- `bioetl-workflow-overview`: dashboard links `0. Control Plane`,
+  `1. Overview`, `2. Runtime`, `3. Provider Health`, `4. Data Quality`;
+  cross-dashboard handoffs не leaking `$workflow/$status` into non-workflow
+  targets.
 
   **First 2 clicks (L1):**
   1. Click #1: открыть `bioetl-workflow-overview`, проверить `Failed Workflow Runs` (`id=2`) и `Step Outcomes by Kind` (`id=3`).
-  2. Click #2: перейти в `2. Runtime` для incident triage по pipeline impact или в `5. Control Plane` для replay/resume trust verification. Prometheus panels use only bounded workflow labels (`workflow`, `status`, `step_kind`) and never require `run_id`/`step_id` labels.
+  2. Click #2: перейти в `2. Runtime` для incident triage по pipeline impact или в `0. Control Plane` для replay/resume trust verification. Prometheus panels use only bounded workflow labels (`workflow`, `status`, `step_kind`) and never require `run_id`/`step_id` labels.
 - Loki drilldown использует безопасный low-cardinality entrypoint `{job="bioetl"}` без dashboard-variable interpolation внутри encoded Explore payload. Это сознательный baseline: Grafana надёжно не подставляет `$pipeline/$provider` в `left=...`, поэтому дополнительное сужение оператор делает уже в самом Explore. Tempo drilldown открывает trace search в том же временном окне; детальная correlation идёт через `trace_id` / `span_id`, а не через Prometheus labels.
 - Tempo drilldown теперь тоже открывается contextual: dashboards с `$pipeline/$run_type` предварительно фильтруют TraceQL по `span."bioetl.pipeline"` и `span."bioetl.run_type"`, а provider dashboard — по `span."bioetl.provider"`. Это не заменяет correlation по `trace_id` / `span_id`, но убирает пустой `{}` и делает handoff полезнее уже на первом клике.
 - `bioetl-runtime` row `Tracing-only Log Hygiene` теперь включает table panel `Alert-to-Action Map` как runbook-lite:

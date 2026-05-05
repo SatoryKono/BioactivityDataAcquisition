@@ -78,14 +78,14 @@ Pushgateway publication на завершении run. Это позволяет
 
 В верхней части каждого дашборда расположены выпадающие списки:
 
-- **1. BioETL Overview / 5. Control Plane**: `$pipeline`, `$run_type`
+- **0. Control Plane / 1. BioETL Overview**: `$pipeline`, `$run_type`
 - **2. Runtime / 4. Data Quality**: `$pipeline`, `$run_type`, `$stage`
 - **3. Provider Health**: `$provider`, `$adapter`
-- **5. Silver Reject Explorer**: `$pipeline`, `$run_type`, `$reason_code`, `$field`, `$run_id`, `$payload_hash`
-- **6. Workflow Overview**: `$workflow`, `$status`
+- **Silver Reject Explorer**: `$pipeline`, `$run_type`, `$reason_code`, `$field`, `$run_id`, `$payload_hash`
+- **5. Workflow**: `$workflow`, `$status`
 
 > **Важно**: для `1-4` dashboard допустим общий scope (`All`), но
-> `5. Silver Reject Explorer` требует **scoped pipeline** (single-select, без
+> `Silver Reject Explorer` требует **scoped pipeline** (single-select, без
 > `All`), иначе backend quarantine API возвращает fail-closed ошибку.
 
 ### Основные Дашборды
@@ -112,11 +112,10 @@ L0 дашборд для одного operator question: что сейчас bro
   ledger, checkpoint, lineage и `Silver Rejects Count + Rate`. Distribution
   pie panels, standalone vanity yield/rate gauges и composite source-selection
   detail не входят в L0 flow.
-- **Drilldown**: dashboard links `Explore Logs` /
-  `Explore Traces` и data links у
-  `Processing Volume by Stage` переводят оператора в Grafana Explore с тем же
-  временным окном. Provider/workflow links не наследуют `$pipeline/$run_type`;
-  Runtime/DQ/Control Plane links передают только target-scoped variables.
+- **Drilldown**: top-level шина содержит `0. Control Plane`, `2. Runtime`,
+  `3. Provider Health`, `4. Data Quality`, `5. Workflow`. Explore links на
+  Overview отсутствуют; Runtime/DQ/Control Plane links передают только
+  target-scoped variables.
 
 #### 2. 2. Runtime
 
@@ -159,12 +158,11 @@ tracing-backed log hygiene живёт в collapsed row
   и Tempo.
 
 - **Drilldown contract**:
-  top-level links `Back to Overview`, `3. Provider Health`,
-  `4. Data Quality`, `5. Control Plane`, `Explore Logs`, `Explore Traces`,
-  `Runtime Runbook`.
-  Panel-level handoffs передают только target-scoped variables и не используют
-  blanket `includeVars=true`. `run_id`, `payload_hash`, `record_id` в runtime
-  dashboard запрещены.
+  top-level links `0. Control Plane`, `1. Overview`, `3. Provider Health`,
+  `4. Data Quality`, `5. Workflow`, `Explore Logs`, `Explore Traces`.
+  Panel-level dashboard handoffs запрещены, если target уже доступен в
+  top-level шине. `run_id`, `payload_hash`, `record_id` в runtime dashboard
+  запрещены.
 
 - **Runbook routing**:
   `Pipeline Alert Conditions` -> `pipeline-failure-critical.md`,
@@ -196,11 +194,10 @@ tracing-backed log hygiene живёт в collapsed row
 - **Per-provider gauge (102)**: повторяемая p95-панель по `$provider`.
 - Для provider/control-plane/runtime/DQ latency panels `No data` нужно читать
   как “в окне нет latency samples”, а не как нормализованный `0s`.
-- **Drilldown**: dashboard links `Back to Overview`, `2. Runtime`, `5. Control Plane`, `Explore Logs` /
-  `Explore Traces` и data links у latency-панели открывают correlation path. Для Loki shipped
-  baseline стартует с общего `{job="bioetl"}` stream, а дополнительное
-  сужение по `provider` оператор делает уже в Explore. Tempo handoff здесь сразу
-  использует `span."bioetl.provider"` для текущего `$provider`.
+- **Drilldown**: dashboard links `0. Control Plane`, `1. Overview`,
+  `2. Runtime`, `4. Data Quality`, `5. Workflow`. Explore links на Provider
+  Health отсутствуют; provider correlation идёт через top-level Runtime/DQ
+  переходы и runbook links.
 
 #### 4. 4. Data Quality
 
@@ -216,16 +213,14 @@ tracing-backed log hygiene живёт в collapsed row
   `Latest Successful Data Timestamp` остаётся отдельным latest-success anchor.
   Это intentionally разные сигналы: latest success не должен маскировать worst
   freshness lag.
-- **Drilldown**: dashboard links `Back to Overview`, `5. Control Plane`,
-  `Explore Logs` / `Explore Traces`
-  и data links у `Data Flow in Range: Bronze -> Silver -> Gold` переводят расследование
-  DQ incidents и freshness lag в Grafana Explore с тем же временным окном.
-  Для replay/checkpoint traceability panel `Data Flow in Range: Bronze -> Silver -> Gold`,
-  а также `Lineage Refs Missing` и `Gold Strict Validation Failures`, теперь
-  дают прямой handoff в `5. Control Plane`.
+- **Drilldown**: dashboard links `0. Control Plane`, `1. Overview`,
+  `2. Runtime`, `3. Provider Health`, `5. Workflow`, `Silver Reject Explorer`,
+  `Explore Logs`, `Explore Traces`. Panel-level dashboard handoffs запрещены:
+  replay/checkpoint traceability открывается через `0. Control Plane` в
+  top-level шине.
   Tempo handoff уже ограничен текущими `$pipeline/$run_type`.
 
-#### 5. 5. Silver Reject Explorer
+#### 5. Silver Reject Explorer
 
 Record-level dashboard для `FILTERED_OUT_SILVER` записей (quarantine-backed, read-only datasource).
 
@@ -235,9 +230,11 @@ Record-level dashboard для `FILTERED_OUT_SILVER` записей (quarantine-b
 - **Datasource**: `Quarantine Explorer` (JSON/Infinity), не Prometheus.
 - **Scope contract**: `$pipeline` всегда single-select/no-All; `run_id` и
   `payload_hash` остаются Explorer-only forensic filters.
-- **Drilldown**: links `Back to Overview`, `Back to Data Quality`, `Open Logs`, `Open Traces` и row-level link в CLI-команду.
+- **Drilldown**: top-level bus links `0. Control Plane`, `1. Overview`,
+  `2. Runtime`, `3. Provider Health`, `4. Data Quality`, `5. Workflow`;
+  row-level link в CLI-команду остаётся для action handoff.
 
-#### 6. 6. Workflow Overview
+#### 6. 5. Workflow
 
 Prometheus dashboard для declarative workflow orchestration. Используйте его,
 когда pipeline-level панели зелёные, но workflow DAG показывает failed/skipped
@@ -248,7 +245,8 @@ step outcomes.
   `run_id` или `step_id` labels; panel now respects selected `$status`.
 - **Step Duration p95**: latency по `bioetl_workflow_step_duration_seconds`;
   panel now also respects selected `$status`.
-- **Drilldown**: links `Back to Overview`, `2. Runtime`, `5. Control Plane`.
+- **Drilldown**: links `0. Control Plane`, `1. Overview`, `2. Runtime`,
+  `3. Provider Health`, `4. Data Quality`.
 
 #### Quarantine operator metrics
 

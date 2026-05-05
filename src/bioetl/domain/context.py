@@ -19,7 +19,7 @@ from typing import Any
 
 from bioetl.domain.context_cached_bronze import CachedBronzeContext
 from bioetl.domain.context_filtering import InputFilterContext, VacuumSettings
-from bioetl.domain.ports import LoggerPort
+from bioetl.domain.ports.observability.logging import LoggerPort
 from bioetl.domain.types import BatchID, ExecutionContext, RunID, RunType
 from bioetl.domain.types.contract_identity import (
     ContractIdentity,

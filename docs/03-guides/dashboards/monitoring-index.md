@@ -20,7 +20,7 @@ Use the linked dashboards and artifacts for deep setup, contracts, and extension
 
 | Question / symptom | Open first | Then use | Owner doc |
 | ------------------ | ---------- | -------- | --------- |
-| What is currently broken or degraded? | `bioetl-overview-v2` | `System Status`, `Next Action`, then `2. Runtime`, `3. Provider Health`, `4. Data Quality`, `6. Workflow Overview`, `Control Plane / Replay Safety` | [Dashboard v2 Usage](dashboard-v2-usage.md) |
+| What is currently broken or degraded? | `bioetl-overview-v2` | `System Status`, `Next Action`, then `0. Control Plane`, `2. Runtime`, `3. Provider Health`, `4. Data Quality`, `5. Workflow` | [Dashboard v2 Usage](dashboard-v2-usage.md) |
 | Runtime latency, logs, memory, or alert-condition concern? | `bioetl-runtime` | `bioetl diagnostics guide`; [Observability Checklist](../../05-operations/runbooks/observability-checklist.md) | [Monitoring Guide](../../05-operations/01-monitoring-guide.md) |
 | Provider retries, slowness, or failures? | `bioetl-provider-health-v2` | `bioetl diagnostics health --json`; provider incident runbook | [Incident Response](../../05-operations/runbooks/incident-response.md) |
 | DQ/freshness/quarantine signal concern? | `bioetl-dq-v2` | `bioetl diagnostics quarantine --pipeline <pipeline>` | [DQ Failure Investigation](../../05-operations/runbooks/dq-failure-investigation.md) |
@@ -55,4 +55,3 @@ Record-level forensics, exact replay evidence, and per-run identifiers belong in
 | Grafana dashboards | operator panels, links, variables, Explore handoffs | `grafana/dashboards/*.json` |
 | Prometheus rules | alert and recording rules | `grafana/prometheus-rules/bioetl_observability.yml` |
 | Contracts/docs | metric contracts and operator docs | `docs/04-reference/contracts/observability.md` |
-
