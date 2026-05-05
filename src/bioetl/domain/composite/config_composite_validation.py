@@ -2,10 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from bioetl.domain.composite.config import CompositeConfig
+from typing import Protocol
 
 __all__ = [
     "coerce_composite_collections",
@@ -13,7 +10,30 @@ __all__ = [
 ]
 
 
-def coerce_composite_collections(config: CompositeConfig) -> None:
+class _SeedConfigProtocol(Protocol):
+    output_keys: tuple[str, ...]
+
+
+class _DependencyConfigProtocol(Protocol):
+    pipeline: str
+    join_keys: tuple[str, ...]
+    uses_seed_keys: bool
+
+
+class _EnricherConfigProtocol(Protocol):
+    pipeline: str
+    join_keys: tuple[str, ...]
+
+
+class CompositeConfigProtocol(Protocol):
+    name: str
+    version: str
+    seed: _SeedConfigProtocol
+    enrichers: tuple[_EnricherConfigProtocol, ...] | list[_EnricherConfigProtocol]
+    dependencies: tuple[_DependencyConfigProtocol, ...] | list[_DependencyConfigProtocol]
+
+
+def coerce_composite_collections(config: CompositeConfigProtocol) -> None:
     """Coerce mutable list inputs to tuples for immutable dataclass fields.
 
     Args:
@@ -25,7 +45,7 @@ def coerce_composite_collections(config: CompositeConfig) -> None:
         object.__setattr__(config, "dependencies", tuple(config.dependencies))
 
 
-def validate_composite_config(config: CompositeConfig) -> None:
+def validate_composite_config(config: CompositeConfigProtocol) -> None:
     """Validate all CompositeConfig invariants.
 
     Args:
@@ -43,7 +63,7 @@ def validate_composite_config(config: CompositeConfig) -> None:
     _validate_unique_dependencies(config)
 
 
-def _validate_join_keys(config: CompositeConfig) -> None:
+def _validate_join_keys(config: CompositeConfigProtocol) -> None:
     """Validate that enricher join keys exist in seed output keys."""
     if not config.enrichers:
         return
@@ -57,7 +77,7 @@ def _validate_join_keys(config: CompositeConfig) -> None:
                 )
 
 
-def _validate_dependency_join_keys(config: CompositeConfig) -> None:
+def _validate_dependency_join_keys(config: CompositeConfigProtocol) -> None:
     """Validate dependency join keys for seed-key dependencies."""
     seed_keys = set(config.seed.output_keys)
     for dependency in config.dependencies:
@@ -71,7 +91,7 @@ def _validate_dependency_join_keys(config: CompositeConfig) -> None:
                 )
 
 
-def _validate_unique_enrichers(config: CompositeConfig) -> None:
+def _validate_unique_enrichers(config: CompositeConfigProtocol) -> None:
     """Validate that enricher pipeline names are unique."""
     if not config.enrichers:
         return
@@ -83,7 +103,7 @@ def _validate_unique_enrichers(config: CompositeConfig) -> None:
         raise ValueError(f"Duplicate enricher pipelines: {duplicates}")
 
 
-def _validate_unique_dependencies(config: CompositeConfig) -> None:
+def _validate_unique_dependencies(config: CompositeConfigProtocol) -> None:
     """Validate that dependency pipeline names are unique."""
     names = [dependency.pipeline for dependency in config.dependencies]
     if len(names) != len(set(names)):

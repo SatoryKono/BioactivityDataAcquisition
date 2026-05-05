@@ -28,7 +28,7 @@ __all__ = [
 ]
 
 from types import TracebackType
-from typing import TYPE_CHECKING, Self
+from typing import TYPE_CHECKING, Protocol, Self
 
 from bioetl.domain.ports import (
     DataSourcePort,

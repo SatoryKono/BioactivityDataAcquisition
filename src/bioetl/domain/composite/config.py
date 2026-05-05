@@ -175,4 +175,11 @@ class CompositeConfig:
         Returns:
             CompositeConfig instance reconstructed from the given dict.
         """
-        return _composite_from_dict(data)
+        return _composite_from_dict(
+            data,
+            composite_cls=cls,
+            seed_cls=SeedConfig,
+            dependency_cls=DependencyConfig,
+            enricher_cls=EnricherConfig,
+            merge_cls=MergeConfig,
+        )

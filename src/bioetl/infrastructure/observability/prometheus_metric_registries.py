@@ -7,7 +7,7 @@ from dataclasses import dataclass
 
 from prometheus_client.metrics import Counter, Gauge, Histogram
 
-from bioetl.infrastructure.observability import metrics_definitions as _metrics
+from . import metrics_definitions as _metrics
 
 type PrometheusCounter = Counter
 type PrometheusGauge = Gauge

@@ -64,8 +64,7 @@ roots include at least:
 - `scripts/ai`
 - `scripts/ai/codex`
 - `scripts/ai/gemini`
-- `scripts/ai/mistrall`
-- `scripts/ai/mistrallvibe`
+- `scripts/ai/vibe`
 - `scripts/engineering/ci`
 - `scripts/engineering/dev`
 - `scripts/engineering/qa`
