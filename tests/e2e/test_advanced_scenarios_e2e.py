@@ -12,15 +12,14 @@ Part of architecture review refactoring plan (R2).
 from __future__ import annotations
 
 import asyncio
-import os
 from collections.abc import Generator
 from datetime import UTC
 from pathlib import Path
-from typing import Any
 from uuid import uuid4
 
 import pytest
 from deltalake import DeltaTable
+from tests.helpers.vcr_config import build_cassette_dir
 
 from bioetl.domain.context import PipelineRunContext
 from bioetl.domain.types import BatchID, RunID, RunType
@@ -34,19 +33,14 @@ from .conftest import (
     run_pipeline_or_skip_transient,
 )
 
-# VCR cassette directory for ChEMBL multi-pipeline E2E tests
-CASSETTE_DIR = Path(__file__).parent.parent / "fixtures" / "vcr" / "chembl"
-
 
 @pytest.fixture(scope="module")
-def vcr_config() -> dict[str, Any]:
-    """Configure VCR for ChEMBL advanced E2E tests."""
-    return {
-        "cassette_library_dir": str(CASSETTE_DIR),
-        "record_mode": os.environ.get("VCR_RECORD_MODE", "none"),
-        "match_on": ["method", "scheme", "host", "port", "path", "query"],
-        "decode_compressed_response": True,
-    }
+def vcr_cassette_dir() -> Path:
+    """Route advanced scenario cassettes through the shared ChEMBL cassette root."""
+    return build_cassette_dir(
+        fixtures_root=Path(__file__).resolve().parents[1] / "fixtures" / "vcr",
+        provider_dir="chembl",
+    )
 
 
 @pytest.fixture(scope="module")

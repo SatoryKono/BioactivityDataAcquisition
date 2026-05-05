@@ -11,6 +11,9 @@ from typing import TYPE_CHECKING
 from bioetl.composition.runtime_builders._run_manifest_refs import (
     control_plane_root as _shared_control_plane_root,
 )
+from bioetl.composition.runtime_builders._run_manifest_refs import (
+    resolve_data_root_mode,
+)
 from bioetl.composition.runtime_builders._run_manifest_support import (
     to_serializable_mapping as _to_serializable_mapping,
 )
@@ -110,6 +113,7 @@ def build_execution_settings_snapshot(settings: Settings) -> dict[str, object]:
             "debug": _setting_attr(settings, "debug", False),
             "test_mode": _setting_attr(settings, "test_mode", False),
             "data_dir": str(_setting_attr(settings, "data_dir", "")),
+            "data_root_mode": resolve_data_root_mode(settings),
             "strict_error_handling": _setting_attr(
                 settings, "strict_error_handling", False
             ),

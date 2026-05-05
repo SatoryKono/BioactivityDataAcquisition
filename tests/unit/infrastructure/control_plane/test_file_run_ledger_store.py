@@ -89,6 +89,16 @@ def test_file_store_emits_ledger_append_metric(tmp_path) -> None:
             "terminal_status": "success",
         },
     )
+    metrics.observe_histogram.assert_called_once()
+    args, kwargs = metrics.observe_histogram.call_args
+    assert args[0] == "bioetl_control_plane_ledger_append_duration_seconds"
+    assert isinstance(args[1], float)
+    assert args[2] == {
+        "pipeline": "chembl_activity",
+        "event_type": "run_finished",
+        "status": "success",
+    }
+    assert kwargs == {}
 
 
 @pytest.mark.parametrize(
@@ -177,6 +187,16 @@ def test_file_store_noops_duplicate_idempotency_key_without_terminal_recount(
             "status": "duplicate",
         },
     )
+    metrics.observe_histogram.assert_called_once()
+    args, kwargs = metrics.observe_histogram.call_args
+    assert args[0] == "bioetl_control_plane_ledger_append_duration_seconds"
+    assert isinstance(args[1], float)
+    assert args[2] == {
+        "pipeline": "chembl_activity",
+        "event_type": "run_finished",
+        "status": "duplicate",
+    }
+    assert kwargs == {}
     metrics.reset_mock()
 
     ledger_path = tmp_path / "run_ledger" / "manifest-1.jsonl"
@@ -272,6 +292,52 @@ def test_file_store_emits_ledger_read_metric_on_miss(tmp_path) -> None:
         },
     )
     metrics.observe_histogram.assert_called_once()
+
+
+def test_file_store_emits_ledger_append_failure_metric(tmp_path, monkeypatch) -> None:
+    metrics = MagicMock()
+    run_id = RunID(uuid4())
+    store = FileRunLedgerStore(
+        base_path=tmp_path / "run_ledger",
+        metrics=metrics,
+    )
+    entry = RunLedgerEntry(
+        entry_id="entry-failed",
+        manifest_id="manifest-failed",
+        run_id=run_id,
+        event_type="stage_completed",
+        occurred_at=_FIXED_TIME,
+        status="completed",
+        details={"_diagnostic": {"pipeline": "chembl_activity"}},
+    )
+
+    monkeypatch.setattr(
+        "bioetl.infrastructure.control_plane.file_run_ledger_store.atomic_write_text",
+        lambda *args, **kwargs: (_ for _ in ()).throw(OSError("index write failed")),
+    )
+
+    with pytest.raises(StorageError, match="Run ledger append failed"):
+        store.append(entry)
+
+    metrics.increment_counter.assert_called_once_with(
+        "bioetl_control_plane_ledger_appends_total",
+        1,
+        {
+            "pipeline": "chembl_activity",
+            "event_type": "stage_completed",
+            "status": "failed",
+        },
+    )
+    metrics.observe_histogram.assert_called_once()
+    args, kwargs = metrics.observe_histogram.call_args
+    assert args[0] == "bioetl_control_plane_ledger_append_duration_seconds"
+    assert isinstance(args[1], float)
+    assert args[2] == {
+        "pipeline": "chembl_activity",
+        "event_type": "stage_completed",
+        "status": "failed",
+    }
+    assert kwargs == {}
 
 
 def test_file_store_preserves_append_only_jsonl_order(tmp_path) -> None:
@@ -386,6 +452,76 @@ def test_file_store_rolls_back_ledger_append_when_run_index_write_fails(
     assert "Run ledger append failed" in str(exc_info.value)
     assert store.list_entries("manifest-1") == []
     assert store.list_entries_by_run_id(run_id) == []
+
+
+def test_file_store_rejects_run_id_remap_to_different_manifest(tmp_path) -> None:
+    run_id = RunID(uuid4())
+    store = FileRunLedgerStore(base_path=tmp_path / "run_ledger")
+    first = RunLedgerEntry(
+        entry_id="entry-1",
+        manifest_id="manifest-original",
+        run_id=run_id,
+        event_type="manifest_created",
+        occurred_at=_FIXED_TIME,
+        status="created",
+    )
+    conflicting = RunLedgerEntry(
+        entry_id="entry-2",
+        manifest_id="manifest-conflicting",
+        run_id=run_id,
+        event_type="manifest_created",
+        occurred_at=_FIXED_TIME,
+        status="created",
+    )
+
+    store.append(first)
+
+    with pytest.raises(StorageError, match="already mapped to a different manifest_id"):
+        store.append(conflicting)
+
+    assert store.list_entries("manifest-original") == [first]
+    assert store.list_entries("manifest-conflicting") == []
+    assert store.list_entries_by_run_id(run_id) == [first]
+
+
+def test_file_store_fails_closed_when_manifest_ledger_contains_multiple_run_ids(
+    tmp_path,
+) -> None:
+    run_id = RunID(uuid4())
+    other_run_id = RunID(uuid4())
+    store = FileRunLedgerStore(base_path=tmp_path / "run_ledger")
+    first = RunLedgerEntry(
+        entry_id="entry-1",
+        manifest_id="manifest-1",
+        run_id=run_id,
+        event_type="manifest_created",
+        occurred_at=_FIXED_TIME,
+        status="created",
+    )
+
+    store.append(first)
+    ledger_path = tmp_path / "run_ledger" / "manifest-1.jsonl"
+    with ledger_path.open("a", encoding="utf-8") as handle:
+        handle.write(
+            json.dumps(
+                RunLedgerEntry(
+                    entry_id="entry-2",
+                    manifest_id="manifest-1",
+                    run_id=other_run_id,
+                    event_type="run_started",
+                    occurred_at=_FIXED_TIME,
+                    status="running",
+                ).to_dict(),
+                sort_keys=True,
+            )
+            + "\n"
+        )
+
+    with pytest.raises(StorageError, match="multiple run_id values"):
+        store.list_entries("manifest-1")
+
+    with pytest.raises(StorageError, match="multiple run_id values"):
+        store.list_entries_by_run_id(run_id)
 
 
 def test_file_store_fails_closed_on_truncated_tail_line_during_reads(tmp_path) -> None:

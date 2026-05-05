@@ -141,7 +141,7 @@ def test_metric_definition_exports_remain_stable() -> None:
 @pytest.mark.unit
 def test_grouped_registry_inventory_preserves_expected_size() -> None:
     # This ratchet intentionally changes only when we add/remove public metrics.
-    assert len(REGISTERED_PROMETHEUS_METRIC_NAMES) == 143
+    assert len(REGISTERED_PROMETHEUS_METRIC_NAMES) == 149
 
 
 @pytest.mark.unit
@@ -170,6 +170,34 @@ def test_bronze_runtime_write_metrics_are_registered() -> None:
 
 
 @pytest.mark.unit
+def test_gold_lifecycle_write_metrics_are_registered_with_bounded_labels() -> None:
+    expected_counters = {
+        "bioetl_gold_write_attempts_total": {"pipeline", "table", "mode"},
+        "bioetl_gold_write_outcomes_total": {
+            "pipeline",
+            "table",
+            "mode",
+            "status",
+        },
+        "bioetl_gold_validation_failures_total": {
+            "pipeline",
+            "table",
+            "mode",
+            "error_type",
+        },
+        "bioetl_gold_lifecycle_state_total": {"pipeline", "table", "state"},
+    }
+    for metric_name, labels in expected_counters.items():
+        actual_labels = set(COUNTERS[metric_name]._labelnames)
+        assert actual_labels == labels
+        assert _FORBIDDEN_LABELS.isdisjoint(actual_labels)
+
+    duration_labels = set(HISTOGRAMS["bioetl_gold_write_duration_seconds"]._labelnames)
+    assert duration_labels == {"pipeline", "table", "mode", "status"}
+    assert _FORBIDDEN_LABELS.isdisjoint(duration_labels)
+
+
+@pytest.mark.unit
 def test_control_plane_and_lineage_metrics_are_registered() -> None:
     assert "bioetl_health_check_degraded_total" in COUNTERS
     assert "bioetl_control_plane_manifest_writes_total" in COUNTERS
@@ -183,6 +211,8 @@ def test_control_plane_and_lineage_metrics_are_registered() -> None:
     assert "bioetl_structural_policy_events_total" in COUNTERS
     assert "bioetl_structural_policy_shadow_comparisons_total" in COUNTERS
     assert "bioetl_control_plane_read_duration_seconds" in HISTOGRAMS
+    assert "bioetl_control_plane_manifest_write_duration_seconds" in HISTOGRAMS
+    assert "bioetl_control_plane_ledger_append_duration_seconds" in HISTOGRAMS
     assert "bioetl_checkpoint_operator_duration_seconds" in HISTOGRAMS
     assert "bioetl_lineage_fragments_emitted_total" in COUNTERS
     assert "bioetl_lineage_refs_missing_total" in COUNTERS
@@ -336,6 +366,16 @@ def test_control_plane_and_lineage_metrics_avoid_high_cardinality_labels() -> No
     )
     assert checkpoint_operator_histogram_labels == {"operation", "status"}
     assert _FORBIDDEN_LABELS.isdisjoint(checkpoint_operator_histogram_labels)
+    manifest_write_histogram_labels = set(
+        HISTOGRAMS["bioetl_control_plane_manifest_write_duration_seconds"]._labelnames
+    )
+    assert manifest_write_histogram_labels == {"pipeline", "run_type", "status"}
+    assert _FORBIDDEN_LABELS.isdisjoint(manifest_write_histogram_labels)
+    ledger_append_histogram_labels = set(
+        HISTOGRAMS["bioetl_control_plane_ledger_append_duration_seconds"]._labelnames
+    )
+    assert ledger_append_histogram_labels == {"pipeline", "event_type", "status"}
+    assert _FORBIDDEN_LABELS.isdisjoint(ledger_append_histogram_labels)
 
 
 @pytest.mark.unit
@@ -393,7 +433,6 @@ def test_adapter_metrics_use_bounded_label_names_only() -> None:
         },
     }
     expected_adapter_gauge_labels = {
-        "bioetl_adapter_request_p95_seconds": {"provider", "endpoint"},
         "bioetl_adapter_fallback_hit_rate": {"provider", "operation"},
     }
 

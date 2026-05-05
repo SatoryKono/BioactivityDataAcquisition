@@ -18,7 +18,7 @@ from bioetl.infrastructure.adapters.crossref.client import (
     CrossRefFetchFlow as ClientCrossRefFetchFlow,
 )
 from bioetl.infrastructure.adapters.crossref.client import (
-    CrossRefQueryBuilder as ClientCrossRefQueryBuilder,
+    CrossRefQueryPlanner as ClientCrossRefQueryPlanner,
 )
 from bioetl.infrastructure.adapters.crossref.client import (
     CrossRefResponseMapper as ClientCrossRefResponseMapper,
@@ -55,7 +55,7 @@ def test_package_reexports_client_symbols_for_backward_compatibility() -> None:
 def test_client_reexports_new_decomposed_components() -> None:
     """Client facade should re-export decomposed flow/query/mapper components."""
     assert ClientCrossRefFetchFlow.__name__ == "CrossRefFetchFlow"
-    assert ClientCrossRefQueryBuilder.__name__ == "CrossRefQueryBuilder"
+    assert ClientCrossRefQueryPlanner.__name__ == "CrossRefQueryPlanner"
     assert ClientCrossRefResponseMapper.__name__ == "CrossRefResponseMapper"
 
 

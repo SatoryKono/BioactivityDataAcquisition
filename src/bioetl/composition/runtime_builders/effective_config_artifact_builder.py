@@ -22,10 +22,10 @@ from bioetl.composition.runtime_builders._run_manifest_builder_policy import (
 from bioetl.composition.runtime_builders._run_manifest_support import (
     to_serializable_mapping as _to_serializable_mapping,
 )
-from bioetl.infrastructure.control_plane import FileEffectiveConfigArtifactStore
 from bioetl.domain.control_plane.effective_config_artifact import (
     ConfigResolutionPolicy,
 )
+from bioetl.infrastructure.control_plane import FileEffectiveConfigArtifactStore
 
 if TYPE_CHECKING:
     from bioetl.composition.runtime_builders.inputs_resolver import (

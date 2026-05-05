@@ -1,5 +1,6 @@
 """Integration tests for Grafana dashboard links and drilldown handoffs."""
 
+import json
 from pathlib import Path
 import re
 import yaml
@@ -1533,24 +1534,25 @@ def test_runtime_first_action_cta_links_preserve_scoped_vars_and_time() -> None:
     """Runtime First Action row must use explicit allowlisted vars and preserve time."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
     expected = {
+        "Review current status": (
+            "var-pipeline=$pipeline",
+            "var-run_type=$run_type",
+            "var-stage=$stage",
+        ),
+        "Review incident summary": (
+            "var-pipeline=$pipeline",
+            "var-run_type=$run_type",
+            "var-stage=$stage",
+        ),
+        "Inspect top blockers": (
+            "var-pipeline=$pipeline",
+            "var-run_type=$run_type",
+            "var-stage=$stage",
+        ),
         "Inspect active blocker": (
             "var-pipeline=$pipeline",
             "var-run_type=$run_type",
             "var-stage=$stage",
-        ),
-        "Open Control Plane": (
-            "var-pipeline=$pipeline",
-            "var-run_type=$run_type",
-        ),
-        "Inspect DQ blockers": (
-            "var-pipeline=$pipeline",
-            "var-run_type=$run_type",
-            "var-stage=$stage",
-        ),
-        "Correlate provider impact": (
-            "var-provider=$pipeline",
-            "var-pipeline_context=$pipeline",
-            "var-adapter=unknown",
         ),
     }
     forbidden = ("var-workflow=", "var-status=", "var-run_id=", "var-payload_hash=")
@@ -1847,8 +1849,37 @@ def test_provider_dashboard_exposes_single_runtime_link() -> None:
     assert runtime_link.get("title") == "2. Runtime"
     runtime_url = str(runtime_link.get("url", ""))
     assert "var-pipeline=$pipeline_context" in runtime_url
-    assert "var-run_type=unknown" in runtime_url
+    assert "var-run_type=All" in runtime_url
     assert "var-stage=unknown" in runtime_url
+
+
+def test_dashboard_links_do_not_default_run_type_to_unknown() -> None:
+    """Missing run-type context must use Run Type=All, never unknown."""
+    for dashboard_path in get_dashboard_files():
+        dashboard = load_dashboard(dashboard_path)
+        links_json = json.dumps(dashboard.get("links", []))
+        assert "var-run_type=unknown" not in links_json, (
+            f"{dashboard_path.name} must not link with Run Type=unknown"
+        )
+
+
+def test_run_type_variables_default_to_all_not_unknown() -> None:
+    """Run Type dashboard variables must default to All."""
+    for dashboard_path in get_dashboard_files():
+        dashboard = load_dashboard(dashboard_path)
+        variables = dashboard.get("templating", {}).get("list", [])
+        assert isinstance(variables, list)
+
+        for variable in variables:
+            if not isinstance(variable, dict) or variable.get("name") != "run_type":
+                continue
+            current = variable.get("current", {})
+            assert current.get("text") == "All", (
+                f"{dashboard_path.name} run_type current text must be All"
+            )
+            assert current.get("value") == "$__all", (
+                f"{dashboard_path.name} run_type current value must be $__all"
+            )
 
 
 def test_pipeline_and_provider_variables_are_single_select_unknown_default() -> None:

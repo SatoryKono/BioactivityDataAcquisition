@@ -1,0 +1,27 @@
+from __future__ import annotations
+
+from tests.helpers.vcr_config import is_vcr_recording_mode
+
+
+def test_is_vcr_recording_mode_uses_env(monkeypatch) -> None:
+    monkeypatch.setenv("VCR_RECORD_MODE", "new_episodes")
+    monkeypatch.setattr("sys.argv", ["pytest"])
+
+    assert is_vcr_recording_mode() is True
+
+
+def test_is_vcr_recording_mode_detects_cli_flag(monkeypatch) -> None:
+    monkeypatch.delenv("VCR_RECORD_MODE", raising=False)
+    monkeypatch.setattr(
+        "sys.argv",
+        ["pytest", "tests/e2e/test_pubchem_compound_e2e.py", "--vcr-record=all"],
+    )
+
+    assert is_vcr_recording_mode() is True
+
+
+def test_is_vcr_recording_mode_defaults_to_replay(monkeypatch) -> None:
+    monkeypatch.delenv("VCR_RECORD_MODE", raising=False)
+    monkeypatch.setattr("sys.argv", ["pytest"])
+
+    assert is_vcr_recording_mode() is False

@@ -109,6 +109,16 @@ def test_file_store_emits_manifest_write_metric(tmp_path) -> None:
             "status": "success",
         },
     )
+    metrics.observe_histogram.assert_called_once()
+    args, kwargs = metrics.observe_histogram.call_args
+    assert args[0] == "bioetl_control_plane_manifest_write_duration_seconds"
+    assert isinstance(args[1], float)
+    assert args[2] == {
+        "pipeline": "chembl_activity",
+        "run_type": "incremental",
+        "status": "success",
+    }
+    assert kwargs == {}
 
 
 def test_file_store_emits_manifest_read_metric_on_get_success(tmp_path) -> None:
@@ -244,6 +254,20 @@ def test_file_store_rolls_back_manifest_when_run_index_write_fails(
             "status": "failed",
         },
     )
+    write_duration_calls = [
+        call
+        for call in metrics.observe_histogram.call_args_list
+        if call.args[0] == "bioetl_control_plane_manifest_write_duration_seconds"
+    ]
+    assert len(write_duration_calls) == 1
+    args, kwargs = write_duration_calls[0]
+    assert isinstance(args[1], float)
+    assert args[2] == {
+        "pipeline": "chembl_activity",
+        "run_type": "incremental",
+        "status": "failed",
+    }
+    assert kwargs == {}
 
 
 def test_file_store_reports_orphan_manifest_without_run_index(tmp_path) -> None:

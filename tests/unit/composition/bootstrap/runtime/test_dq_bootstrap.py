@@ -8,7 +8,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from bioetl.composition.bootstrap.runtime.dq_bootstrap import (
-    bootstrap_dq_monitor_port,
+    bootstrap_dq_monitor,
 )
 from bioetl.domain.ports import DQMonitorPort
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
@@ -38,15 +38,15 @@ def _make_settings(
 
 @pytest.mark.unit
 class TestBootstrapDqMonitorPort:
-    """Tests for bootstrap_dq_monitor_port."""
+    """Tests for bootstrap_dq_monitor."""
 
     def test_returns_none_when_disabled(self) -> None:
         settings = _make_settings(enabled=False)
-        assert bootstrap_dq_monitor_port(settings=settings) is None
+        assert bootstrap_dq_monitor(settings=settings) is None
 
     def test_returns_dq_monitor_port_when_enabled(self) -> None:
         settings = _make_settings(enabled=True)
-        result = bootstrap_dq_monitor_port(settings=settings)
+        result = bootstrap_dq_monitor(settings=settings)
         assert result is not None
         assert isinstance(result, DQMonitorPort)
 
@@ -57,7 +57,7 @@ class TestBootstrapDqMonitorPort:
         mock_monitor.detector = MagicMock()
         mock_monitor_factory.return_value = mock_monitor
 
-        bootstrap_dq_monitor_port(
+        bootstrap_dq_monitor(
             settings=_make_settings(enabled=True),
             logger=None,
             monitor_factory=mock_monitor_factory,
@@ -74,7 +74,7 @@ class TestBootstrapDqMonitorPort:
         mock_monitor_factory.return_value = mock_monitor
         provided_logger = MagicMock()
 
-        bootstrap_dq_monitor_port(
+        bootstrap_dq_monitor(
             settings=_make_settings(enabled=True),
             logger=provided_logger,
             monitor_factory=mock_monitor_factory,
@@ -89,7 +89,7 @@ class TestBootstrapDqMonitorPort:
         mock_monitor.detector = MagicMock()
         mock_monitor_factory = MagicMock(return_value=mock_monitor)
 
-        bootstrap_dq_monitor_port(
+        bootstrap_dq_monitor(
             settings=_make_settings(enabled=True, baseline_window=14),
             monitor_factory=mock_monitor_factory,
         )
@@ -101,7 +101,7 @@ class TestBootstrapDqMonitorPort:
         mock_monitor.detector = MagicMock()
         mock_monitor_factory = MagicMock(return_value=mock_monitor)
 
-        bootstrap_dq_monitor_port(
+        bootstrap_dq_monitor(
             settings=_make_settings(enabled=True, z_score_threshold=3.0),
             monitor_factory=mock_monitor_factory,
         )
@@ -116,7 +116,7 @@ class TestBootstrapDqMonitorPort:
         mock_monitor.detector = mock_detector
         mock_monitor_factory = MagicMock(return_value=mock_monitor)
 
-        bootstrap_dq_monitor_port(
+        bootstrap_dq_monitor(
             settings=_make_settings(enabled=True, min_baseline_samples=5),
             monitor_factory=mock_monitor_factory,
         )
@@ -129,7 +129,7 @@ class TestBootstrapDqMonitorPort:
         mock_monitor.detector = mock_detector
         mock_monitor_factory = MagicMock(return_value=mock_monitor)
 
-        bootstrap_dq_monitor_port(
+        bootstrap_dq_monitor(
             settings=_make_settings(enabled=True, error_rate_max=0.15),
             monitor_factory=mock_monitor_factory,
         )
@@ -146,7 +146,7 @@ class TestBootstrapDqMonitorPort:
         mock_monitor.detector = mock_detector
         mock_monitor_factory = MagicMock(return_value=mock_monitor)
 
-        bootstrap_dq_monitor_port(
+        bootstrap_dq_monitor(
             settings=_make_settings(enabled=True, quality_score_min=0.90),
             monitor_factory=mock_monitor_factory,
         )
@@ -162,7 +162,7 @@ class TestBootstrapDqMonitorPort:
         mock_monitor.detector = MagicMock()
         mock_monitor_factory = MagicMock(return_value=mock_monitor)
 
-        bootstrap_dq_monitor_port(
+        bootstrap_dq_monitor(
             settings=_make_settings(
                 enabled=True,
                 baseline_window=10,

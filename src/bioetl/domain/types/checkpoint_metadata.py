@@ -272,6 +272,18 @@ class CheckpointMetadata:
             return None
         return compute_execution_identity_fingerprint(payload)
 
+    def missing_required_anchors(
+        self,
+        required_fields: tuple[str, ...],
+    ) -> tuple[str, ...]:
+        """Return required checkpoint anchors that are absent on this metadata."""
+        missing: list[str] = []
+        for field_name in required_fields:
+            value = getattr(self, field_name, None)
+            if is_empty_checkpoint_metadata_value(value):
+                missing.append(field_name)
+        return tuple(missing)
+
 
 __all__ = [
     "CheckpointCompatibilityResult",

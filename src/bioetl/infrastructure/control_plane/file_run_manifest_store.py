@@ -50,6 +50,28 @@ def _emit_manifest_write_metric(
     )
 
 
+def _emit_manifest_write_duration_metric(
+    metrics: MetricsPort | None,
+    *,
+    pipeline: str,
+    run_type: str,
+    status: str,
+    duration_seconds: float,
+) -> None:
+    """Emit one control-plane manifest write duration metric when enabled."""
+    if metrics is None:
+        return
+    metrics.observe_histogram(
+        "bioetl_control_plane_manifest_write_duration_seconds",
+        duration_seconds,
+        {
+            "pipeline": pipeline,
+            "run_type": run_type,
+            "status": status,
+        },
+    )
+
+
 @dataclass(slots=True)
 class FileRunManifestStore(RunManifestPort):
     """Persist manifests as JSON files under the control-plane output tree."""
@@ -59,6 +81,7 @@ class FileRunManifestStore(RunManifestPort):
 
     def save(self, manifest: RunManifest) -> None:
         """Persist manifest JSON and run-id index."""
+        started_at = perf_counter()
         manifest_path = self.base_path / f"{manifest.manifest_id}.json"
         run_index_dir = self.base_path / "_by_run_id"
         run_index_path = run_index_dir / f"{manifest.run_id}.txt"
@@ -90,6 +113,13 @@ class FileRunManifestStore(RunManifestPort):
                 run_type=manifest.run_type.value,
                 status="failed",
             )
+            _emit_manifest_write_duration_metric(
+                self.metrics,
+                pipeline=manifest.pipeline_name,
+                run_type=manifest.run_type.value,
+                status="failed",
+                duration_seconds=perf_counter() - started_at,
+            )
             raise build_storage_error(
                 message_prefix="Run manifest",
                 operation="save",
@@ -103,6 +133,13 @@ class FileRunManifestStore(RunManifestPort):
             pipeline=manifest.pipeline_name,
             run_type=manifest.run_type.value,
             status="success",
+        )
+        _emit_manifest_write_duration_metric(
+            self.metrics,
+            pipeline=manifest.pipeline_name,
+            run_type=manifest.run_type.value,
+            status="success",
+            duration_seconds=perf_counter() - started_at,
         )
 
     def get(self, manifest_id: str) -> RunManifest | None:

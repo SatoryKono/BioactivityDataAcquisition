@@ -99,22 +99,33 @@ class TestCreateBatchExecutorFromPipeline:
         )
         expected = MagicMock(name="executor")
         mock_batch_executor.return_value = expected
+        metric = MagicMock(name="gold_lifecycle_state_metric")
 
-        result = create_batch_executor_from_pipeline(
-            BatchExecutorBuildRequest(
-                pipeline=pipeline,
-                callbacks=callbacks,
-                silver_schema=None,
-                gold_schema=MagicMock(),
-                checkpoint_manager=MagicMock(),
-                shutdown_signal=MagicMock(),
-                create_batch_processing_components_fn=MagicMock(),
+        with patch(
+            "bioetl.composition.factories.services.pipeline_batch_executor_builder.GOLD_LIFECYCLE_STATE_TOTAL",
+            metric,
+        ):
+            result = create_batch_executor_from_pipeline(
+                BatchExecutorBuildRequest(
+                    pipeline=pipeline,
+                    callbacks=callbacks,
+                    silver_schema=None,
+                    gold_schema=MagicMock(),
+                    checkpoint_manager=MagicMock(),
+                    shutdown_signal=MagicMock(),
+                    create_batch_processing_components_fn=MagicMock(),
+                )
             )
-        )
 
         gold_filter = mock_build_components.call_args.kwargs["gold_filter"]
         assert gold_filter(MagicMock(), {"id": "1"}) is False
         assert result is expected
+        metric.labels.assert_called_once_with(
+            pipeline="chembl_activity",
+            table="chembl_activity",
+            state="disabled",
+        )
+        metric.labels.return_value.inc.assert_called_once()
         mock_extraction_loop.assert_called_once()
 
     @patch(

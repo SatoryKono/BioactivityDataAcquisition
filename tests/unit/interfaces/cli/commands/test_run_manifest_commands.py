@@ -548,6 +548,14 @@ class _FakeForensicRunDiffResult:
                 "matching_fields": [],
                 "mismatched_fields": ["execution_fingerprint"],
             },
+            "artifact_byte_equivalence": {
+                "available": True,
+                "equivalent": False,
+                "compared_artifacts": ["left == right"],
+                "missing_artifacts": [],
+                "mismatched_artifacts": ["left == right"],
+                "comparison_scope": "artifact_and_metadata_paths",
+            },
             "artifact_completeness": {
                 "left": {"complete": True, "published_artifact_count": 1},
                 "right": {"complete": False, "published_artifact_count": 0},
@@ -1008,6 +1016,7 @@ class TestRunManifestCommands:
         payload = json.loads(result.output)
         assert payload["classification"] == "semantic_drift"
         assert payload["checkpoint_compatibility"]["compatible"] is False
+        assert payload["artifact_byte_equivalence"]["equivalent"] is False
         assert payload["artifact_completeness"]["right"]["complete"] is False
         assert payload["missing_evidence"]["right"] == [
             "run_ledger_entries_missing",
@@ -1030,5 +1039,6 @@ class TestRunManifestCommands:
         assert "Forensic Run Diff" in result.output
         assert "classification: semantic_drift" in result.output
         assert "checkpoint_compatibility:" in result.output
+        assert "artifact_byte_equivalence:" in result.output
         assert "artifact_completeness:" in result.output
         assert "missing_evidence:" in result.output

@@ -57,6 +57,17 @@ def test_manifest_and_ledger_emit_control_plane_counters(tmp_path: Path) -> None
 
     manifest = _make_manifest()
     manifest_store.save(manifest)
+    manifest_histogram_call = metrics.observe_histogram.call_args
+    assert manifest_histogram_call is not None
+    assert manifest_histogram_call.args[0] == (
+        "bioetl_control_plane_manifest_write_duration_seconds"
+    )
+    assert manifest_histogram_call.args[2] == {
+        "pipeline": manifest.pipeline_name,
+        "run_type": manifest.run_type.value,
+        "status": "success",
+    }
+    metrics.observe_histogram.reset_mock()
 
     ledger_entry = _make_ledger_entry(manifest)
     ledger_store.append(ledger_entry)
@@ -75,6 +86,16 @@ def test_manifest_and_ledger_emit_control_plane_counters(tmp_path: Path) -> None
     ledger_labels = ledger_call.args[2]
     assert ledger_call.args[0] == "bioetl_control_plane_ledger_appends_total"
     assert ledger_labels == {
+        "pipeline": manifest.pipeline_name,
+        "event_type": "manifest_created",
+        "status": "success",
+    }
+    ledger_histogram_call = metrics.observe_histogram.call_args
+    assert ledger_histogram_call is not None
+    assert ledger_histogram_call.args[0] == (
+        "bioetl_control_plane_ledger_append_duration_seconds"
+    )
+    assert ledger_histogram_call.args[2] == {
         "pipeline": manifest.pipeline_name,
         "event_type": "manifest_created",
         "status": "success",
@@ -156,7 +177,17 @@ def test_control_plane_metrics_never_emit_forbidden_labels_or_values(
             "run_type",
             "status",
         },
+        "bioetl_control_plane_manifest_write_duration_seconds": {
+            "pipeline",
+            "run_type",
+            "status",
+        },
         "bioetl_control_plane_ledger_appends_total": {
+            "pipeline",
+            "event_type",
+            "status",
+        },
+        "bioetl_control_plane_ledger_append_duration_seconds": {
             "pipeline",
             "event_type",
             "status",

@@ -64,6 +64,11 @@ class MetadataWriter:
         """Attach an optional callback for control-plane artifact publication."""
         self._artifact_recorder = recorder
 
+    @property
+    def artifact_recorder_attached(self) -> bool:
+        """Return ``True`` when control-plane artifact publication is wired."""
+        return self._artifact_recorder is not None
+
     def _build_metadata_write_request(
         self,
         *,

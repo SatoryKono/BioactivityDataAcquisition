@@ -13,8 +13,30 @@ CURRENT_TEST_FILE = Path(__file__).resolve()
 LEGACY_IMPLEMENTATION_PATHS = frozenset(
     {
         "bioetl.infrastructure.adapters.pubmed.pubmed_client",
+    }
+)
+REMOVED_CLIENT_SHIM_MODULES = frozenset(
+    {
         "bioetl.infrastructure.adapters.pubmed.client",
         "bioetl.infrastructure.adapters.semanticscholar.client",
+    }
+)
+REMOVED_CLIENT_SHIM_FILES = frozenset(
+    {
+        ROOT
+        / "src"
+        / "bioetl"
+        / "infrastructure"
+        / "adapters"
+        / "pubmed"
+        / "client.py",
+        ROOT
+        / "src"
+        / "bioetl"
+        / "infrastructure"
+        / "adapters"
+        / "semanticscholar"
+        / "client.py",
     }
 )
 RETAINED_ENTRYPOINT_MODULES = frozenset(
@@ -25,13 +47,6 @@ RETAINED_ENTRYPOINT_MODULES = frozenset(
 )
 ALLOWED_SRC_FILES = frozenset(
     {
-        ROOT
-        / "src"
-        / "bioetl"
-        / "infrastructure"
-        / "adapters"
-        / "pubmed"
-        / "client.py",
         ROOT
         / "src"
         / "bioetl"
@@ -70,13 +85,6 @@ ALLOWED_RETAINED_ENTRYPOINT_SRC_FILES = frozenset(
         / "infrastructure"
         / "adapters"
         / "pubmed"
-        / "client.py",
-        ROOT
-        / "src"
-        / "bioetl"
-        / "infrastructure"
-        / "adapters"
-        / "pubmed"
         / "adapter.py",
         ROOT
         / "src"
@@ -85,13 +93,6 @@ ALLOWED_RETAINED_ENTRYPOINT_SRC_FILES = frozenset(
         / "adapters"
         / "pubmed"
         / "pubmed_client.py",
-        ROOT
-        / "src"
-        / "bioetl"
-        / "infrastructure"
-        / "adapters"
-        / "semanticscholar"
-        / "client.py",
         ROOT
         / "src"
         / "bioetl"
@@ -157,6 +158,49 @@ def _iter_public_entrypoint_mentions(
                 if module_path in line:
                     violations.append(f"{rel_path}:{lineno} mentions {module_path}")
     return violations
+
+
+def _iter_removed_client_shim_mentions(
+    search_root: Path,
+    *,
+    allowed_files: frozenset[Path],
+) -> list[str]:
+    violations: list[str] = []
+    for py_file in search_root.rglob("*.py"):
+        if py_file in allowed_files or "__pycache__" in py_file.parts:
+            continue
+        rel_path = py_file.relative_to(ROOT).as_posix()
+        lines = py_file.read_text(encoding="utf-8").splitlines()
+        for lineno, line in enumerate(lines, start=1):
+            for module_path in REMOVED_CLIENT_SHIM_MODULES:
+                if module_path in line:
+                    violations.append(f"{rel_path}:{lineno} mentions {module_path}")
+    return violations
+
+
+@pytest.mark.architecture
+def test_provider_client_path_shim_files_are_removed() -> None:
+    """Retired provider client-path shims must not reappear."""
+    existing_files = sorted(
+        file_path.relative_to(ROOT).as_posix()
+        for file_path in REMOVED_CLIENT_SHIM_FILES
+        if file_path.exists()
+    )
+    assert existing_files == []
+
+
+@pytest.mark.architecture
+def test_provider_client_path_shim_imports_are_removed() -> None:
+    """First-party src and ordinary tests must not import retired client shims."""
+    allowed_files = ALLOWED_TEST_FILES | {CURRENT_TEST_FILE}
+    violations = _iter_removed_client_shim_mentions(
+        SRC_ROOT,
+        allowed_files=frozenset(),
+    ) + _iter_removed_client_shim_mentions(TESTS_ROOT, allowed_files=allowed_files)
+    assert not violations, (
+        "Retired provider client-path shims are still referenced:\n"
+        + "\n".join(violations)
+    )
 
 
 @pytest.mark.architecture

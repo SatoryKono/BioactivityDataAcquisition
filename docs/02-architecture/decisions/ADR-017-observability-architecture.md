@@ -298,13 +298,13 @@ src/bioetl/composition/observability_api.py
 
 ```python
 # composition/bootstrap/runtime/logger_bootstrap.py
-logger = bootstrap_logger_port(pipeline, run_id, log_level)
+logger = bootstrap_logger(pipeline, run_id, log_level)
 
 # composition/bootstrap/runtime/metrics_bootstrap.py
-metrics = bootstrap_metrics_port(settings)
+metrics = bootstrap_metrics(settings)
 
 # composition/bootstrap/runtime/tracing_bootstrap.py
-tracer = bootstrap_tracer_port(settings, service_name="bioetl")
+tracer = bootstrap_tracer(settings, service_name="bioetl")
 
 # composition/bootstrap/runtime/observability_bundle.py
 bundle = bootstrap_observability_bundle_impl(
@@ -312,9 +312,9 @@ bundle = bootstrap_observability_bundle_impl(
     run_id=run_id,
     settings=settings,
     log_level=log_level,
-    logger_bootstrapper=bootstrap_logger_port,
-    tracer_bootstrapper=bootstrap_tracer_port,
-    metrics_bootstrapper=bootstrap_metrics_port,
+    logger_bootstrapper=bootstrap_logger,
+    tracer_bootstrapper=bootstrap_tracer,
+    metrics_bootstrapper=bootstrap_metrics,
     dq_monitor_bootstrapper=bootstrap_dq_monitor,
     preflight_validator=validate_observability_preflight_impl,
 )

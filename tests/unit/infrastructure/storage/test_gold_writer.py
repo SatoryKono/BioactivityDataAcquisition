@@ -221,6 +221,108 @@ class TestGoldWriterPipelineHelpers:
         span.set_attribute.assert_any_call("table_name", "test.table")
         span.set_attribute.assert_any_call("mode", "append")
 
+    @pytest.mark.asyncio
+    async def test_write_gold_emits_lifecycle_metrics(
+        self, noop_logger, valid_records, strict_schema
+    ) -> None:
+        """Standard Gold writes must emit attempt, outcome, and duration metrics."""
+        writer = _build_gold_writer(base_path=GOLD_ROOT, logger=noop_logger)
+        writer._prepare_write_gold = AsyncMock(  # type: ignore[method-assign]
+            return_value=MagicMock()
+        )
+        writer._dispatch_write = AsyncMock()  # type: ignore[method-assign]
+        writer._post_write_gold = AsyncMock()  # type: ignore[method-assign]
+
+        with (
+            patch(
+                "bioetl.infrastructure.storage.gold.writer_support.GOLD_WRITE_ATTEMPTS_TOTAL"
+            ) as attempts,
+            patch(
+                "bioetl.infrastructure.storage.gold.writer_support.GOLD_WRITE_OUTCOMES_TOTAL"
+            ) as outcomes,
+            patch(
+                "bioetl.infrastructure.storage.gold.writer_support.GOLD_WRITE_DURATION_SECONDS"
+            ) as duration,
+        ):
+            await writer.write_gold(
+                table_name="chembl.activity",
+                records=valid_records,
+                schema=strict_schema,
+                mode="append",
+            )
+
+        attempts.labels.assert_called_once_with(
+            pipeline="chembl",
+            table="activity",
+            mode="append",
+        )
+        attempts.labels.return_value.inc.assert_called_once()
+        outcomes.labels.assert_called_once_with(
+            pipeline="chembl",
+            table="activity",
+            mode="append",
+            status="success",
+        )
+        outcomes.labels.return_value.inc.assert_called_once()
+        duration.labels.assert_called_once_with(
+            pipeline="chembl",
+            table="activity",
+            mode="append",
+            status="success",
+        )
+        duration.labels.return_value.observe.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_write_gold_emits_validation_failure_metric(
+        self, noop_logger, valid_records, strict_schema
+    ) -> None:
+        """Validation failures must be visible before storage dispatch."""
+        writer = _build_gold_writer(base_path=GOLD_ROOT, logger=noop_logger)
+        writer._prepare_write_gold = AsyncMock(  # type: ignore[method-assign]
+            side_effect=ValueError("schema validation failed")
+        )
+        writer._dispatch_write = AsyncMock()  # type: ignore[method-assign]
+        writer._post_write_gold = AsyncMock()  # type: ignore[method-assign]
+
+        with (
+            patch(
+                "bioetl.infrastructure.storage.gold.writer_support.GOLD_VALIDATION_FAILURES_TOTAL"
+            ) as validation_failures,
+            patch(
+                "bioetl.infrastructure.storage.gold.writer_support.GOLD_WRITE_OUTCOMES_TOTAL"
+            ) as outcomes,
+            patch(
+                "bioetl.infrastructure.storage.gold.writer_support.GOLD_WRITE_DURATION_SECONDS"
+            ) as duration,
+        ):
+            with pytest.raises(ValueError, match="schema validation failed"):
+                await writer.write_gold(
+                    table_name="chembl.activity",
+                    records=valid_records,
+                    schema=strict_schema,
+                    mode="append",
+                )
+
+        validation_failures.labels.assert_called_once_with(
+            pipeline="chembl",
+            table="activity",
+            mode="append",
+            error_type="ValueError",
+        )
+        validation_failures.labels.return_value.inc.assert_called_once()
+        outcomes.labels.assert_called_once_with(
+            pipeline="chembl",
+            table="activity",
+            mode="append",
+            status="validation_failure",
+        )
+        duration.labels.assert_called_once_with(
+            pipeline="chembl",
+            table="activity",
+            mode="append",
+            status="validation_failure",
+        )
+
 
 @pytest.mark.unit
 class TestGoldWriterValidation:
@@ -1376,3 +1478,84 @@ class TestGoldWriterMergedValidation:
             records=[],
             schema=strict_schema,
         )
+
+    @patch("bioetl.infrastructure.storage.gold.io_mixin.GOLD_WRITE_DURATION_SECONDS")
+    @patch("bioetl.infrastructure.storage.gold.io_mixin.GOLD_WRITE_OUTCOMES_TOTAL")
+    @patch("bioetl.infrastructure.storage.gold.io_mixin.GOLD_WRITE_ATTEMPTS_TOTAL")
+    @patch("bioetl.infrastructure.storage.gold_writer.write_deltalake")
+    async def test_write_gold_merged_emits_gold_write_metrics(
+        self,
+        mock_write_deltalake,
+        attempts_metric,
+        outcomes_metric,
+        duration_metric,
+        gold_writer,
+        strict_schema,
+        valid_records,
+    ):
+        """Merged Gold writes should emit attempts/outcomes/duration metrics."""
+        await gold_writer.write_gold_merged(
+            table_name="test.merged_table",
+            records=valid_records,
+            schema=strict_schema,
+        )
+
+        expected_attempt_labels = {
+            "pipeline": "test",
+            "table": "merged_table",
+            "mode": "overwrite",
+        }
+        expected_terminal_labels = {
+            **expected_attempt_labels,
+            "status": "success",
+        }
+        attempts_metric.labels.assert_called_once_with(**expected_attempt_labels)
+        attempts_metric.labels.return_value.inc.assert_called_once()
+        outcomes_metric.labels.assert_called_once_with(**expected_terminal_labels)
+        outcomes_metric.labels.return_value.inc.assert_called_once()
+        duration_metric.labels.assert_called_once_with(**expected_terminal_labels)
+        duration_metric.labels.return_value.observe.assert_called_once()
+        mock_write_deltalake.assert_called_once()
+
+    @patch("bioetl.infrastructure.storage.gold.io_mixin.GOLD_VALIDATION_FAILURES_TOTAL")
+    @patch("bioetl.infrastructure.storage.gold.io_mixin.GOLD_WRITE_DURATION_SECONDS")
+    @patch("bioetl.infrastructure.storage.gold.io_mixin.GOLD_WRITE_OUTCOMES_TOTAL")
+    @patch("bioetl.infrastructure.storage.gold.io_mixin.GOLD_WRITE_ATTEMPTS_TOTAL")
+    async def test_write_gold_merged_emits_validation_failure_metrics(
+        self,
+        attempts_metric,
+        outcomes_metric,
+        duration_metric,
+        validation_metric,
+        gold_writer,
+        strict_schema,
+    ):
+        """Merged Gold schema failures should emit validation-failure telemetry."""
+        invalid_records = [{"entity_id": "CHEMBL123"}]
+
+        with pytest.raises(ValueError, match="Schema validation failed"):
+            await gold_writer.write_gold_merged(
+                table_name="test.merged_table",
+                records=invalid_records,
+                schema=strict_schema,
+            )
+
+        base_labels = {
+            "pipeline": "test",
+            "table": "merged_table",
+            "mode": "overwrite",
+        }
+        attempts_metric.labels.assert_called_once_with(**base_labels)
+        attempts_metric.labels.return_value.inc.assert_called_once()
+        validation_metric.labels.assert_called_once_with(
+            **{
+                **base_labels,
+                "error_type": "ValueError",
+            }
+        )
+        validation_metric.labels.return_value.inc.assert_called_once()
+        terminal_labels = {**base_labels, "status": "validation_failure"}
+        outcomes_metric.labels.assert_called_once_with(**terminal_labels)
+        outcomes_metric.labels.return_value.inc.assert_called_once()
+        duration_metric.labels.assert_called_once_with(**terminal_labels)
+        duration_metric.labels.return_value.observe.assert_called_once()

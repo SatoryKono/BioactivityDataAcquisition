@@ -2690,7 +2690,11 @@
       },
       {
         "allValue": null,
-        "current": {},
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
         "datasource": "Prometheus",
         "definition": "label_values(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\"}, run_type)",
         "hide": 0,

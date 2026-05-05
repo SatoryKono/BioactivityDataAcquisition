@@ -671,6 +671,8 @@ Shipped dashboards используют несколько template variables в
 - **Тип:** Query (каскадная зависимость от `$pipeline`)
 - **Multi-select:** Да
 - **Include All:** Да
+- **Default:** `All`. Cross-dashboard links MUST NOT pass `run_type=unknown`;
+  missing run-type context is represented as `Run Type=All`.
 - **Refresh:** При загрузке дашборда
 - **Возможные значения:**
   - `incremental` — инкрементальное обновление данных (только новые записи).
@@ -936,6 +938,7 @@ collapsed row `Tracing-only Log Hygiene (requires optional tracing profile)`.
 | --- | --- | --- | --- |
 | `First Action` | text CTA | n/a | n/a |
 | `Monitor Runtime Current Status` | `bioetl_runtime_current_status` | status | `0=OK`, `1=DEGRADED`, `2=FAILING`, `null=UNKNOWN` |
+| `Monitor Runtime Telemetry Gap` | `up{job="bioetl"}` | status | `0=SCRAPING`, `1=NO SCRAPE`, `null=UNKNOWN` |
 | `Runtime Blockers` | `bioetl_runtime_current_blocker_reason` | count | red `>=1`; zero fallback only for count rendering |
 | `Inspect Top Runtime Blockers` | `topk(3, bioetl_runtime_current_blocker_reason > 0)` | table | reason/severity/action labels |
 
@@ -943,6 +946,8 @@ Range and localization evidence (`Failed Runs`, `Runtime Error Rate`,
 `Worst Stage Lag`, blocker detail, latency, records by stage, logs/traces) lives
 below the answer row or inside collapsed rows. It supports investigation but
 does not replace the canonical current status recording rule.
+`Runtime Error Rate`, `Worst Stage Lag`, and `Memory Pressure Active` preserve
+`UNKNOWN` when telemetry is absent instead of coercing missing metrics to `0`.
 
 ### Localization Row
 

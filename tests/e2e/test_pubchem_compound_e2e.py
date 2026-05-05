@@ -18,6 +18,7 @@ from bioetl.composition.bootstrap import bootstrap_pipeline_runner
 
 from .conftest import (
     assert_bronze_files_exist,
+    assert_bronze_metadata_files_exist,
     assert_run_ledger_has_events,
     assert_run_manifest_exists,
     assert_silver_table_has_records,
@@ -66,6 +67,12 @@ async def test_pubchem_compound_full_cycle(e2e_data_dir: Path):
     # Assert - Bronze layer
     bronze_files = assert_bronze_files_exist(e2e_data_dir, "pubchem", "compound")
     assert len(bronze_files) >= 1
+    bronze_metadata_files = assert_bronze_metadata_files_exist(
+        e2e_data_dir,
+        "pubchem",
+        "compound",
+    )
+    assert len(bronze_metadata_files) >= 1
 
     # Assert - Silver layer
     silver_count = assert_silver_table_has_records(

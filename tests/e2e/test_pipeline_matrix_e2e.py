@@ -13,11 +13,14 @@ import os
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
 
 import httpx
 import pytest
 from deltalake.exceptions import DeltaError, TableNotFoundError
+from tests.helpers.vcr_config import (
+    QUERY_IGNORE_EMAIL_MATCH_ON,
+    build_base_vcr_config,
+)
 from vcr.errors import (
     CannotOverwriteExistingCassetteException,
     UnhandledHTTPRequestError,
@@ -363,13 +366,13 @@ def vcr_cassette_name(pipeline_case: PipelineE2ECase) -> str:
 
 
 @pytest.fixture(scope="module")
-def vcr_config() -> dict[str, Any]:
+def vcr_config() -> dict[str, object]:
     record_mode = "new_episodes" if _is_vcr_recording_enabled() else "none"
-    return {
-        "record_mode": record_mode,
-        "match_on": ["method", "scheme", "host", "port", "path", "query_ignore_email"],
-        "decode_compressed_response": True,
-    }
+    return build_base_vcr_config(
+        match_on=QUERY_IGNORE_EMAIL_MATCH_ON,
+        decode_compressed_response=True,
+        record_mode=record_mode,
+    )
 
 
 def test_pipeline_matrix_declares_all_entity_pipelines() -> None:

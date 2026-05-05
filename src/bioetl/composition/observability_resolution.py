@@ -34,10 +34,10 @@ def resolve_metrics_port(
         return metrics
     if settings is not None:
         from bioetl.composition.bootstrap.runtime.metrics_bootstrap import (
-            bootstrap_metrics_port,
+            bootstrap_metrics,
         )
 
-        return bootstrap_metrics_port(settings)
+        return bootstrap_metrics(settings)
     return NoOpMetrics(warn_on_use=False)
 
 
@@ -58,8 +58,8 @@ def resolve_tracing_port(
         return tracer
     if settings is not None:
         from bioetl.composition.bootstrap.runtime.observability import (
-            bootstrap_tracer_port,
+            bootstrap_tracer,
         )
 
-        return bootstrap_tracer_port(settings, service_name=service_name)
+        return bootstrap_tracer(settings, service_name=service_name)
     return NoOpTracing()

@@ -37,8 +37,8 @@ class PipelineConfigDQResolver(Protocol):
         ...
 
 
-class PipelineConfigDQResolverBuilder(Protocol):
-    """Typed builder seam for creating pipeline DQ resolvers."""
+class PipelineConfigDQResolverProvider(Protocol):
+    """Typed provider seam for creating pipeline DQ resolvers."""
 
     def __call__(
         self,
@@ -53,7 +53,7 @@ class DomainConfigResolver:
     """Resolve domain config from validated YAML config plus hierarchical DQ config."""
 
     configs_root: Path = Path("configs")
-    loader_class: PipelineConfigDQResolverBuilder = PipelineConfigLoader
+    loader_class: PipelineConfigDQResolverProvider = PipelineConfigLoader
     domain_mapper: DomainConfigMapper = yaml_config_to_domain
 
     def resolve(
@@ -73,7 +73,7 @@ def resolve_domain_pipeline_config(
     *,
     configs_root: Path = Path("configs"),
     relaxed_dq: bool = False,
-    loader_class: PipelineConfigDQResolverBuilder = PipelineConfigLoader,
+    loader_class: PipelineConfigDQResolverProvider = PipelineConfigLoader,
     domain_mapper: DomainConfigMapper = yaml_config_to_domain,
 ) -> PipelineConfig:
     """Resolve domain config from an already validated YAML pipeline config."""
@@ -91,7 +91,7 @@ def load_domain_pipeline_config(
     configs_root: Path = Path("configs"),
     relaxed_dq: bool = False,
     yaml_loader: Callable[[str], PipelineYamlConfig] = load_pipeline_config,
-    loader_class: PipelineConfigDQResolverBuilder = PipelineConfigLoader,
+    loader_class: PipelineConfigDQResolverProvider = PipelineConfigLoader,
     domain_mapper: DomainConfigMapper = yaml_config_to_domain,
 ) -> PipelineConfig:
     """Load domain config through the canonical function-based config flow."""

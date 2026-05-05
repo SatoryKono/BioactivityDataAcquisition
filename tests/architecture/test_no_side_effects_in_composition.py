@@ -106,7 +106,7 @@ def test_bootstrap_uses_explicit_registration():
 def test_no_metrics_server_direct_call_in_bootstrap_pipeline():
     """bootstrap_pipeline_runner() MUST NOT call start_metrics_server() directly.
 
-    Metrics server startup should be handled by bootstrap_metrics_port() or
+    Metrics server startup should be handled by bootstrap_metrics() or
     bootstrap_observability_bundle() for proper opt-in control.
 
     Note: bootstrap_pipeline_runner() is the canonical name (bootstrap_pipeline() is
@@ -118,5 +118,5 @@ def test_no_metrics_server_direct_call_in_bootstrap_pipeline():
     if _function_calls_name(bootstrap_func, "start_metrics_server"):
         raise AssertionError(
             "bootstrap_pipeline_runner() must not call start_metrics_server() directly. "
-            "Use bootstrap_metrics_port() or bootstrap_observability_bundle() instead."
+            "Use bootstrap_metrics() or bootstrap_observability_bundle() instead."
         )

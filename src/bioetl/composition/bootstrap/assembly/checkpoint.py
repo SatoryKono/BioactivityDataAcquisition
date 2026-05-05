@@ -32,14 +32,14 @@ if TYPE_CHECKING:
     )
 
 __all__ = [
+    "bootstrap_checkpoint_adapter",
     "bootstrap_checkpoint_compatibility_service",
-    "bootstrap_checkpoint_port",
-    "bootstrap_composite_checkpoint_port",
-    "bootstrap_quarantine_port",
+    "bootstrap_composite_checkpoint_writer",
+    "bootstrap_quarantine_adapter",
 ]
 
 
-def bootstrap_quarantine_port() -> QuarantinePort:
+def bootstrap_quarantine_adapter() -> QuarantinePort:
     """Create a quarantine port implementation for record quarantine storage.
 
     Creates a UnifiedQuarantineAdapter adapter using centralized quarantine_path
@@ -59,7 +59,7 @@ def bootstrap_quarantine_port() -> QuarantinePort:
     return quarantine
 
 
-def bootstrap_checkpoint_port(pipeline_name: str) -> CheckpointPort:
+def bootstrap_checkpoint_adapter(pipeline_name: str) -> CheckpointPort:
     """Create a checkpoint port implementation for pipeline state persistence.
 
     Creates a LocalCheckpointAdapter adapter for the specified pipeline using
@@ -84,7 +84,7 @@ def bootstrap_checkpoint_port(pipeline_name: str) -> CheckpointPort:
     return checkpoint
 
 
-def bootstrap_composite_checkpoint_port() -> CompositeCheckpointPort:
+def bootstrap_composite_checkpoint_writer() -> CompositeCheckpointPort:
     """Create a composite checkpoint port implementation for runtime resume state.
 
     Composite checkpoints live under the canonical checkpoint root with a

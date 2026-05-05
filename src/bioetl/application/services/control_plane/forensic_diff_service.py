@@ -11,6 +11,7 @@ from bioetl.application.services.control_plane.run_manifest_inspection_service i
     RunManifestInspectionService,
 )
 from bioetl.domain.ports import RunLedgerPort, RunManifestPort
+from bioetl.domain.ports.control_plane import ArtifactByteComparisonPort
 
 __all__ = [
     "ForensicRunDiffResult",
@@ -248,6 +249,7 @@ class ForensicRunDiffResult:
     right_diagnostics: dict[str, object] = field(default_factory=dict)
     replay_capability: dict[str, object] = field(default_factory=dict)
     checkpoint_compatibility: dict[str, object] = field(default_factory=dict)
+    artifact_byte_equivalence: dict[str, object] = field(default_factory=dict)
     artifact_completeness: dict[str, dict[str, object]] = field(default_factory=dict)
     lineage_closure: dict[str, dict[str, object]] = field(default_factory=dict)
     missing_evidence: dict[str, tuple[str, ...]] = field(default_factory=dict)
@@ -278,6 +280,7 @@ class ForensicRunDiffResult:
             "right_diagnostics": self.right_diagnostics,
             "replay_capability": self.replay_capability,
             "checkpoint_compatibility": self.checkpoint_compatibility,
+            "artifact_byte_equivalence": self.artifact_byte_equivalence,
             "artifact_completeness": self.artifact_completeness,
             "lineage_closure": self.lineage_closure,
             "missing_evidence": {
@@ -294,6 +297,7 @@ class ForensicRunDiffService:
     manifest_port: RunManifestPort
     ledger_port: RunLedgerPort | None = None
     inspection_service_factory: Callable[[], RunManifestInspectionService] | None = None
+    artifact_byte_comparison_port: ArtifactByteComparisonPort | None = None
 
     def compare(
         self,
@@ -310,6 +314,10 @@ class ForensicRunDiffService:
         right = inspection.show(right_identifier)
         manifest_diff = inspection.diff(left_identifier, right_identifier)
         forensic_diff = _forensic_diff_payload(manifest_diff)
+        artifact_byte_equivalence = self._build_artifact_byte_equivalence(
+            left=left,
+            right=right,
+        )
         return ForensicRunDiffResult(
             left_manifest_id=left.manifest.manifest_id,
             right_manifest_id=right.manifest.manifest_id,
@@ -321,6 +329,7 @@ class ForensicRunDiffService:
             checkpoint_compatibility=_checkpoint_compatibility_payload(
                 forensic_diff,
             ),
+            artifact_byte_equivalence=artifact_byte_equivalence,
             artifact_completeness={
                 "left": _artifact_completeness(left),
                 "right": _artifact_completeness(right),
@@ -333,4 +342,35 @@ class ForensicRunDiffService:
                 "left": _missing_evidence(left),
                 "right": _missing_evidence(right),
             },
+        )
+
+    def _build_artifact_byte_equivalence(
+        self,
+        *,
+        left: RunManifestInspectionResult,
+        right: RunManifestInspectionResult,
+    ) -> dict[str, object]:
+        """Return byte-level artifact equivalence when a comparison port exists."""
+        left_refs = _artifact_refs(left.diagnostics)
+        right_refs = _artifact_refs(right.diagnostics)
+        if self.artifact_byte_comparison_port is None:
+            return {
+                "available": False,
+                "equivalent": None,
+                "compared_artifacts": [],
+                "missing_artifacts": [],
+                "mismatched_artifacts": [],
+                "comparison_scope": "unavailable_no_port",
+            }
+        if not left_refs or not right_refs:
+            return {
+                "available": False,
+                "equivalent": None,
+                "compared_artifacts": [],
+                "missing_artifacts": [],
+                "mismatched_artifacts": [],
+                "comparison_scope": "unavailable_missing_refs",
+            }
+        return dict(
+            self.artifact_byte_comparison_port.compare_artifacts(left_refs, right_refs)
         )

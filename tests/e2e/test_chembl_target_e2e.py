@@ -8,9 +8,7 @@ Cassettes location: tests/fixtures/vcr/chembl/
 
 from __future__ import annotations
 
-import os
 from pathlib import Path
-from typing import Any
 
 import pytest
 
@@ -21,20 +19,6 @@ from .conftest import (
     create_test_context,
     get_silver_records,
 )
-
-# VCR cassette directory for ChEMBL E2E tests
-CASSETTE_DIR = Path(__file__).parent.parent / "fixtures" / "vcr" / "chembl"
-
-
-@pytest.fixture(scope="module")
-def vcr_config() -> dict[str, Any]:
-    """Configure VCR for ChEMBL Target E2E tests."""
-    return {
-        "cassette_library_dir": str(CASSETTE_DIR),
-        "record_mode": os.environ.get("VCR_RECORD_MODE", "none"),
-        "match_on": ["method", "scheme", "host", "port", "path", "query"],
-        "decode_compressed_response": True,
-    }
 
 
 @pytest.mark.e2e

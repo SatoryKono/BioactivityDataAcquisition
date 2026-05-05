@@ -4,115 +4,15 @@ policy_scope: adr_041_layer_aware_naming
 function_suffix_rules:
   - rule_id: composition_bootstrap_port_factories
     description: >
-      Composition bootstrap may retain a narrow reviewed family of `*_port`
-      factory functions whose job is to construct implementations of domain port
-      contracts. This exception is limited to bootstrap factories and must not
-      expand to new composition functions without explicit governance review.
+      Composition bootstrap functions must not expose new `*_port` names.
+      Port-suffixed bootstrap factories were retired in favor of role-specific
+      adapter, writer, logger, metrics, tracer, and DQ monitor bootstrap names.
     suffixes:
       - _port
     include_path_prefixes:
       - src/bioetl/composition/bootstrap/
     exclude_path_prefixes: []
-    allowed_symbols:
-      - symbol: bootstrap_checkpoint_port
-        path: src/bioetl/composition/bootstrap/assembly/checkpoint.py
-        issue: "#3442"
-        owner: "@bioetl-architecture"
-        expires_on: "2026-12-31"
-        removal_step: Remove after bootstrap port factories are consolidated to canonical runtime builders.
-        reason: >
-          Reviewed bootstrap factory that constructs the checkpoint port
-          implementation for CLI/runtime wiring.
-      - symbol: bootstrap_composite_checkpoint_port
-        path: src/bioetl/composition/bootstrap/assembly/checkpoint.py
-        issue: "#3442"
-        owner: "@bioetl-architecture"
-        expires_on: "2026-12-31"
-        removal_step: Remove after composite checkpoint wiring no longer requires compatibility factory seams.
-        reason: >
-          Reviewed bootstrap factory that constructs the composite checkpoint
-          port for runtime resume and repair flows.
-      - symbol: bootstrap_quarantine_port
-        path: src/bioetl/composition/bootstrap/assembly/checkpoint.py
-        issue: "#3442"
-        owner: "@bioetl-architecture"
-        expires_on: "2026-12-31"
-        removal_step: Remove after quarantine port wiring is fully collapsed to canonical bootstrap composition APIs.
-        reason: >
-          Reviewed bootstrap factory that constructs the quarantine port
-          implementation for CLI/runtime wiring.
-      - symbol: bootstrap_dq_monitor_port
-        path: src/bioetl/composition/bootstrap/runtime/dq_bootstrap.py
-        issue: "#3442"
-        owner: "@bioetl-observability"
-        expires_on: "2026-12-31"
-        removal_step: Remove when runtime observability bootstrap internals are merged and no longer need port-suffixed compatibility wrappers.
-        reason: >
-          Reviewed observability bootstrap implementation retained behind the
-          runtime observability facade.
-      - symbol: bootstrap_dq_monitor_port
-        path: src/bioetl/composition/bootstrap/runtime/observability.py
-        issue: "#3442"
-        owner: "@bioetl-observability"
-        expires_on: "2026-12-31"
-        removal_step: Remove after public observability bootstrap surface is stabilized without *_port compatibility factories.
-        reason: >
-          Reviewed public runtime observability facade retained as the canonical
-          bootstrap seam for DQ monitor port wiring.
-      - symbol: bootstrap_logger_port
-        path: src/bioetl/composition/bootstrap/runtime/logger_bootstrap.py
-        issue: "#3442"
-        owner: "@bioetl-observability"
-        expires_on: "2026-12-31"
-        removal_step: Remove when logger port bootstrap path is canonicalized and compatibility wrappers are deleted.
-        reason: >
-          Reviewed observability bootstrap implementation retained behind the
-          runtime observability facade.
-      - symbol: bootstrap_logger_port
-        path: src/bioetl/composition/bootstrap/runtime/observability.py
-        issue: "#3442"
-        owner: "@bioetl-observability"
-        expires_on: "2026-12-31"
-        removal_step: Remove after observability facade no longer exposes logger *_port bootstrap seam.
-        reason: >
-          Reviewed public runtime observability facade retained as the canonical
-          bootstrap seam for logger port wiring.
-      - symbol: bootstrap_metrics_port
-        path: src/bioetl/composition/bootstrap/runtime/metrics_bootstrap.py
-        issue: "#3442"
-        owner: "@bioetl-observability"
-        expires_on: "2026-12-31"
-        removal_step: Remove when metrics port bootstrap path is canonicalized and compatibility wrappers are deleted.
-        reason: >
-          Reviewed observability bootstrap implementation retained behind the
-          runtime observability facade.
-      - symbol: bootstrap_metrics_port
-        path: src/bioetl/composition/bootstrap/runtime/observability.py
-        issue: "#3442"
-        owner: "@bioetl-observability"
-        expires_on: "2026-12-31"
-        removal_step: Remove after observability facade no longer exposes metrics *_port bootstrap seam.
-        reason: >
-          Reviewed public runtime observability facade retained as the canonical
-          bootstrap seam for metrics port wiring.
-      - symbol: bootstrap_tracer_port
-        path: src/bioetl/composition/bootstrap/runtime/tracing_bootstrap.py
-        issue: "#3442"
-        owner: "@bioetl-observability"
-        expires_on: "2026-12-31"
-        removal_step: Remove when tracer port bootstrap path is canonicalized and compatibility wrappers are deleted.
-        reason: >
-          Reviewed observability bootstrap implementation retained behind the
-          runtime observability facade.
-      - symbol: bootstrap_tracer_port
-        path: src/bioetl/composition/bootstrap/runtime/observability.py
-        issue: "#3442"
-        owner: "@bioetl-observability"
-        expires_on: "2026-12-31"
-        removal_step: Remove after observability facade no longer exposes tracer *_port bootstrap seam.
-        reason: >
-          Reviewed public runtime observability facade retained as the canonical
-          bootstrap seam for tracer port wiring.
+    allowed_symbols: []
 
 suffix_boundary_rules:
   - rule_id: non_domain_port_protocols
@@ -139,6 +39,86 @@ suffix_boundary_rules:
     exclude_path_prefixes:
       - src/bioetl/infrastructure/
     allowed_symbol_exceptions:
+
+  - rule_id: non_composition_builder_suffix
+    description: >
+      Public *Builder symbols are reserved for composition-owned construction
+      surfaces. Other layers may keep private helper builders, but public
+      Builder vocabulary must not leak outside composition.
+    suffixes:
+      - Builder
+    include_path_prefixes:
+      - src/bioetl/
+    exclude_path_prefixes:
+      - src/bioetl/composition/
+    allowed_symbol_exceptions: []
+    allowed_module_exceptions:
+      - path: src/bioetl/application/composite/dependency_join_context_builders.py
+        issue: "#3722"
+        owner: "@bioetl-architecture"
+        expires_on: "2026-12-31"
+        removal_step: Rename module when dependency-join helper API can move behind composition-owned construction vocabulary.
+        reason: Existing application helper module with no public *Builder symbol; retained as reviewed naming debt.
+      - path: src/bioetl/application/services/dq/dq_report_builders.py
+        issue: "#3722"
+        owner: "@bioetl-architecture"
+        expires_on: "2026-12-31"
+        removal_step: Rename module when DQ report assembly helpers are consolidated behind role-neutral service naming.
+        reason: Existing DQ helper module with no public *Builder symbol; retained as reviewed naming debt.
+      - path: src/bioetl/application/services/lineage/metadata_lineage_node_builders.py
+        issue: "#3722"
+        owner: "@bioetl-architecture"
+        expires_on: "2026-12-31"
+        removal_step: Rename module when lineage metadata node assembly helpers are consolidated behind role-neutral service naming.
+        reason: Existing lineage helper module with no public *Builder symbol; retained as reviewed naming debt.
+      - path: src/bioetl/domain/value_objects/dq_report_builder.py
+        issue: "#3722"
+        owner: "@bioetl-architecture"
+        expires_on: "2026-12-31"
+        removal_step: Rename module when DQ report value-object construction helpers are migrated to role-neutral naming.
+        reason: Existing domain helper module with no public *Builder symbol; retained as reviewed naming debt.
+      - path: src/bioetl/infrastructure/adapters/crossref/client_builders.py
+        issue: "#3722"
+        owner: "@bioetl-architecture"
+        expires_on: "2026-12-31"
+        removal_step: Rename module when CrossRef client component helpers move behind adapter-owned role-neutral naming.
+        reason: Existing adapter helper module with no public *Builder symbol; retained as reviewed naming debt.
+      - path: src/bioetl/infrastructure/adapters/crossref/query_builder.py
+        issue: "#3722"
+        owner: "@bioetl-architecture"
+        expires_on: "2026-12-31"
+        removal_step: Rename module when CrossRef query planning helpers move behind adapter-owned role-neutral naming.
+        reason: Existing adapter query helper module with no public *Builder symbol; retained as reviewed naming debt.
+      - path: src/bioetl/infrastructure/adapters/openalex/query_builder.py
+        issue: "#3722"
+        owner: "@bioetl-architecture"
+        expires_on: "2026-12-31"
+        removal_step: Rename module when OpenAlex query planning helpers move behind adapter-owned role-neutral naming.
+        reason: Existing adapter query helper module with no public *Builder symbol; retained as reviewed naming debt.
+      - path: src/bioetl/infrastructure/adapters/pubchem/client_builders.py
+        issue: "#3722"
+        owner: "@bioetl-architecture"
+        expires_on: "2026-12-31"
+        removal_step: Rename module when PubChem client component helpers move behind adapter-owned role-neutral naming.
+        reason: Existing adapter helper module with no public *Builder symbol; retained as reviewed naming debt.
+      - path: src/bioetl/infrastructure/adapters/pubchem/query_builder.py
+        issue: "#3722"
+        owner: "@bioetl-architecture"
+        expires_on: "2026-12-31"
+        removal_step: Rename module when PubChem query planning helpers move behind adapter-owned role-neutral naming.
+        reason: Existing adapter query helper module with no public *Builder symbol; retained as reviewed naming debt.
+      - path: src/bioetl/infrastructure/adapters/uniprot/query_builder.py
+        issue: "#3722"
+        owner: "@bioetl-architecture"
+        expires_on: "2026-12-31"
+        removal_step: Rename module when UniProt query planning helpers move behind adapter-owned role-neutral naming.
+        reason: Existing adapter query helper module with no public *Builder symbol; retained as reviewed naming debt.
+      - path: src/bioetl/infrastructure/storage/bronze/metadata_builders.py
+        issue: "#3722"
+        owner: "@bioetl-architecture"
+        expires_on: "2026-12-31"
+        removal_step: Rename module when Bronze metadata payload helpers move behind storage-owned role-neutral naming.
+        reason: Existing storage metadata helper module with no public *Builder symbol; retained as reviewed naming debt.
 
   - rule_id: composition_infrastructure_service_suffix
     description: >

@@ -245,6 +245,24 @@ class TestCheckpointMetadata:
         assert metadata1 == metadata2
         assert metadata1 != metadata3
 
+    def test_missing_required_anchors_reports_absent_fields(self) -> None:
+        metadata = CheckpointMetadata(
+            records_processed=100,
+            execution_fingerprint="fingerprint-1",
+            manifest_id="manifest-1",
+        )
+
+        missing = metadata.missing_required_anchors(
+            (
+                "execution_fingerprint",
+                "manifest_id",
+                "effective_config_hash",
+                "contract_ref",
+            )
+        )
+
+        assert missing == ("effective_config_hash", "contract_ref")
+
     def test_checkpoint_execution_identity_payload_fails_closed_on_malformed_contract_ref(
         self,
     ) -> None:

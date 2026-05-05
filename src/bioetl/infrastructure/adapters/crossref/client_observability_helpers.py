@@ -21,7 +21,7 @@ if TYPE_CHECKING:
         APIRequestCollector,
     )
     from bioetl.infrastructure.adapters.crossref.query_builder import (
-        CrossRefQueryBuilder,
+        CrossRefQueryPlanner,
     )
     from bioetl.infrastructure.adapters.crossref.response_mapper import (
         CrossRefResponseMapper,
@@ -40,7 +40,7 @@ __all__ = [
 async def probe_crossref_health(
     *,
     http_client: UnifiedHTTPClient,
-    query_builder: CrossRefQueryBuilder,
+    query_builder: CrossRefQueryPlanner,
     response_mapper: CrossRefResponseMapper,
     adapter_metrics: AdapterMetricsRecorder,
     headers_provider: Callable[[], dict[str, str]],

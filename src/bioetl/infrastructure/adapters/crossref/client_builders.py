@@ -15,7 +15,7 @@ from bioetl.infrastructure.adapters.crossref.fallback import (
     CrossRefTitleFallbackHandler,
 )
 from bioetl.infrastructure.adapters.crossref.fetch_flow import CrossRefFetchFlow
-from bioetl.infrastructure.adapters.crossref.query_builder import CrossRefQueryBuilder
+from bioetl.infrastructure.adapters.crossref.query_builder import CrossRefQueryPlanner
 from bioetl.infrastructure.adapters.crossref.response_mapper import (
     CrossRefResponseMapper,
 )
@@ -38,7 +38,7 @@ if TYPE_CHECKING:
 
 def _create_default_crossref_query_builder(
     *, api_base: str, mailto: str
-) -> CrossRefQueryBuilder:
+) -> CrossRefQueryPlanner:
     """Create default query builder for non-DI call sites.
 
     Args:
@@ -46,9 +46,9 @@ def _create_default_crossref_query_builder(
         mailto: Email address for polite pool identification.
 
     Returns:
-        CrossRefQueryBuilder instance configured with the given base URL and email.
+        CrossRefQueryPlanner instance configured with the given base URL and email.
     """
-    return CrossRefQueryBuilder(api_base=api_base, mailto=mailto)
+    return CrossRefQueryPlanner(api_base=api_base, mailto=mailto)
 
 
 def _create_default_crossref_response_mapper() -> CrossRefResponseMapper:

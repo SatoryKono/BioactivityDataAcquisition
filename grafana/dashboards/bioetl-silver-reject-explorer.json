@@ -550,7 +550,11 @@
       },
       {
         "allValue": null,
-        "current": {},
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
         "datasource": "Quarantine Explorer",
         "definition": "/ops/quarantine/filter-options?dimension=run_type&pipeline=${pipeline}",
         "hide": 0,

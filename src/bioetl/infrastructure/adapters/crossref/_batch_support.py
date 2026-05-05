@@ -40,7 +40,7 @@ class BaseMetrics(Protocol):
         raise NotImplementedError
 
 
-class HeadersBuilder(Protocol):
+class HeadersProvider(Protocol):
     """Callable wrapper for request headers construction."""
 
     def __call__(self) -> dict[str, str]: ...

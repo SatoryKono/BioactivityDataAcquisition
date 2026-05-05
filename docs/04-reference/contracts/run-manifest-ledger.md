@@ -84,6 +84,11 @@ File-backed control-plane persistence uses the following canonical paths:
 `Path(settings.data_dir) / "output" / "control" / <leaf>` and are therefore
 runtime-aligned with the current composition layer.
 
+Strict exact-replay, `replay_ready`, and `forensic_grade` contexts require this
+root to come from an explicit `settings.data_dir` configuration. Fallback
+resolution to repo-local `data/`, private-cache, or `/tmp` is degraded-only and
+must not be treated as a strict reproducibility anchor.
+
 ## Lifecycle Management
 
 File-backed control-plane lifecycle management is planner-driven:
@@ -454,6 +459,16 @@ degraded without inspecting the full checkpoint blob first.
 `RunManifest` is immutable and captures launch-time intent plus reproducibility
 provenance.
 
+Canonical identity roles are intentionally split:
+
+- `run_id` is the canonical occurrence anchor shared across manifest indexes,
+  ledger indexes, checkpoints, and sidecars;
+- `manifest_id` is the immutable persisted manifest record key for one
+  occurrence and must not drift for the same `run_id`;
+- `execution_fingerprint` remains the canonical semantic execution identity and
+  may be shared by multiple occurrence records when the same computation is
+  rerun.
+
 | Field                   | Type       | Required | Notes                                                                                                                                                                         |
 | ----------------------- | ---------- | -------: | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `manifest_id`           | `str`      |      yes | Stable identifier of the manifest record                                                                                                                                      |
@@ -574,6 +589,14 @@ separately.
 - `dq_contract_compatibility_hash`
 - `effective_config_artifact_id`
 
+`source_revision_state` is a documented allowlist field. New manifests must not
+persist any value outside this set:
+
+- `clean`
+- `dirty`
+- `dirty_state_unknown`
+- `git_unavailable`
+
 Hash semantics are deliberately split:
 
 - `config_hash` is a legacy compatibility anchor retained for older manifest
@@ -607,6 +630,11 @@ composition/runtime wiring. Diagnostics expose `dependency_lock_state` as
 `present` or `missing` so absent lockfile evidence remains operator-visible.
 Metadata sidecars and checkpoint metadata carry the same lock hash when it is
 available through the run context.
+
+In non-strict degraded contexts the current published contract still allows
+`git_commit` to be absent, but only when `source_revision_state` is
+`git_unavailable` or `dirty_state_unknown`. A missing `git_commit` paired with
+`clean` or `dirty` is considered invalid control-plane provenance.
 
 Checkpoint / resume compatibility may additionally rely on a narrower
 runtime-anchor contract derived from a subset of control-plane fields such as
@@ -757,6 +785,8 @@ non-pipeline vocabulary such as artifact layer names in `stage`.
 1. `RunLedgerEntry` is append-only.
 1. Sidecars and runtime diagnostics reference `manifest_id` instead of embedding the full manifest payload.
 1. `run_id` lookup resolves to one `manifest_id` through the file index.
+1. `run_id` lookup in both manifest and ledger stores must not be remapped to a different `manifest_id` after the first persisted occurrence anchor is established.
+1. One ledger file (`{manifest_id}.jsonl`) represents exactly one persisted `manifest_id` and one `run_id`; mixed identity anchors inside one file are corruption-visible.
 1. Composite resume reuses checkpoint snapshot data and only replays ledger
    events after the persisted watermark.
 

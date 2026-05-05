@@ -142,7 +142,7 @@ def push_metrics_to_gateway(
     logger: LoggerPort | None = None,
 ) -> bool:
     """Push metrics through the canonical composition-owned observability seam."""
-    from bioetl.composition.bootstrap.runtime.observability import bootstrap_logger_port
+    from bioetl.composition.bootstrap.runtime.observability import bootstrap_logger
     from bioetl.infrastructure.config import get_settings
 
     settings = get_settings()
@@ -153,7 +153,7 @@ def push_metrics_to_gateway(
     if run_type:
         grouping_key["run_type"] = run_type
     metrics_service = get_metrics_service()
-    metrics_service.logger = logger or bootstrap_logger_port(
+    metrics_service.logger = logger or bootstrap_logger(
         pipeline=pipeline_name or "metrics_publication",
         run_id=uuid4(),
         log_level="INFO",
@@ -174,7 +174,7 @@ def delete_metrics_from_gateway(
     logger: LoggerPort | None = None,
 ) -> bool:
     """Delete metrics through the canonical composition-owned observability seam."""
-    from bioetl.composition.bootstrap.runtime.observability import bootstrap_logger_port
+    from bioetl.composition.bootstrap.runtime.observability import bootstrap_logger
     from bioetl.infrastructure.config import get_settings
 
     settings = get_settings()
@@ -185,7 +185,7 @@ def delete_metrics_from_gateway(
     if run_type:
         grouping_key["run_type"] = run_type
     metrics_service = get_metrics_service()
-    metrics_service.logger = logger or bootstrap_logger_port(
+    metrics_service.logger = logger or bootstrap_logger(
         pipeline=pipeline_name or "metrics_cleanup",
         run_id=uuid4(),
         log_level="INFO",

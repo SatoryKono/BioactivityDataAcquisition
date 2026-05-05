@@ -59,7 +59,7 @@ def test_composite_runtime_does_not_expose_helper_only_symbols() -> None:
         "RunnerFactoryBuilder",
         "resolve_bronze_opts",
         "bootstrap_pipeline_runner",
-        "bootstrap_logger_port",
+        "bootstrap_logger",
         "bootstrap_storage_adapter",
         "get_settings",
         "uuid4",
@@ -108,11 +108,11 @@ def test_observability_runtime_public_exports_stable() -> None:
     """Observability runtime facade should preserve stable public __all__."""
     assert observability_runtime.__all__ == [
         "MetricsServerError",
-        "bootstrap_dq_monitor_port",
-        "bootstrap_logger_port",
-        "bootstrap_metrics_port",
+        "bootstrap_dq_monitor",
+        "bootstrap_logger",
+        "bootstrap_metrics",
         "bootstrap_observability_bundle",
-        "bootstrap_tracer_port",
+        "bootstrap_tracer",
         "maybe_start_metrics_server",
         "validate_observability_preflight",
     ]
@@ -120,10 +120,7 @@ def test_observability_runtime_public_exports_stable() -> None:
         runtime_facade.bootstrap_observability_bundle
         is observability_runtime.bootstrap_observability_bundle
     )
-    assert (
-        runtime_facade.bootstrap_logger_port
-        is observability_runtime.bootstrap_logger_port
-    )
+    assert runtime_facade.bootstrap_logger is observability_runtime.bootstrap_logger
     assert (
         runtime_facade.maybe_start_metrics_server
         is observability_runtime.maybe_start_metrics_server

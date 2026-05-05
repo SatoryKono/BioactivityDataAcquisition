@@ -19,6 +19,41 @@ if TYPE_CHECKING:
 
 DQ_CONTRACTS_COMPATIBLE_MESSAGE = "DQ contracts are compatible"
 PIPELINE_VERSIONS_COMPATIBLE_MESSAGE = "Pipeline versions are compatible"
+_STRICT_REQUIRED_CHECKPOINT_FIELDS: tuple[str, ...] = (
+    "execution_fingerprint",
+    "manifest_id",
+    "effective_config_hash",
+    "effective_config_artifact_id",
+    "contract_ref",
+    "contract_version",
+    "dq_contract_compatibility_hash",
+    "pipeline_version",
+    "git_commit",
+    "exact_replay",
+)
+
+
+def _strict_anchor_policy_requested(
+    current_metadata: CheckpointMetadata,
+    checkpoint_metadata: CheckpointMetadata,
+) -> bool:
+    """Return ``True`` when resume validation has enough strict context to fail closed."""
+    if bool(current_metadata.exact_replay):
+        return True
+    return any(
+        (
+            current_metadata.manifest_id,
+            checkpoint_metadata.manifest_id,
+            current_metadata.effective_config_artifact_id,
+            checkpoint_metadata.effective_config_artifact_id,
+            current_metadata.contract_ref,
+            checkpoint_metadata.contract_ref,
+            current_metadata.contract_version,
+            checkpoint_metadata.contract_version,
+            current_metadata.git_commit,
+            checkpoint_metadata.git_commit,
+        )
+    )
 
 
 def _emit_checkpoint_metric(
@@ -43,6 +78,8 @@ def _emit_checkpoint_metric(
 def _validate_dq_contract_compatibility(
     current_metadata: CheckpointMetadata,
     checkpoint_metadata: CheckpointMetadata,
+    *,
+    strict: bool,
 ) -> tuple[bool, list[str]]:
     messages: list[str] = []
     dq_compatible = True
@@ -62,6 +99,11 @@ def _validate_dq_contract_compatibility(
             )
         else:
             messages.append(DQ_CONTRACTS_COMPATIBLE_MESSAGE)
+    elif strict:
+        dq_compatible = False
+        messages.append(
+            "DQ contract compatibility: checkpoint_missing_required_execution_anchor"
+        )
     else:
         messages.append(
             "DQ contract compatibility: not enforced (missing contract info)"
@@ -72,6 +114,8 @@ def _validate_dq_contract_compatibility(
 def _validate_pipeline_version_compatibility(
     current_metadata: CheckpointMetadata,
     checkpoint_metadata: CheckpointMetadata,
+    *,
+    strict: bool,
 ) -> tuple[bool, list[str]]:
     messages: list[str] = []
     pipeline_compatible = True
@@ -85,11 +129,41 @@ def _validate_pipeline_version_compatibility(
             )
         else:
             messages.append(PIPELINE_VERSIONS_COMPATIBLE_MESSAGE)
+    elif strict:
+        pipeline_compatible = False
+        messages.append(
+            "Pipeline version compatibility: checkpoint_missing_required_execution_anchor"
+        )
     else:
         messages.append(
             "Pipeline version compatibility: not enforced (missing version info)"
         )
     return pipeline_compatible, messages
+
+
+def _validate_required_checkpoint_anchors(
+    current_metadata: CheckpointMetadata,
+    checkpoint_metadata: CheckpointMetadata,
+) -> tuple[bool, list[str]]:
+    """Reject strict resume when checkpoint metadata omits required anchors."""
+    required_fields = list(_STRICT_REQUIRED_CHECKPOINT_FIELDS)
+    if bool(current_metadata.exact_replay):
+        if current_metadata.input_snapshot_ids:
+            required_fields.append("input_snapshot_ids")
+        else:
+            required_fields.append("input_snapshot_fingerprint")
+    missing = checkpoint_metadata.missing_required_anchors(tuple(required_fields))
+    if not missing:
+        return True, []
+    messages = [
+        f"checkpoint_missing_required_execution_anchor: {field_name}"
+        for field_name in missing
+    ]
+    if "manifest_id" in missing:
+        messages.append("checkpoint_missing_manifest_anchor")
+    if "input_snapshot_ids" in missing or "input_snapshot_fingerprint" in missing:
+        messages.append("checkpoint_missing_snapshot_anchor")
+    return False, messages
 
 
 def _validate_rule_bundle_compatibility(
@@ -239,15 +313,26 @@ class CheckpointCompatibilityService:
         checkpoint_metadata: CheckpointMetadata,
     ) -> CheckpointCompatibilityResult:
         """Run strict checkpoint compatibility validation for resume safety."""
+        strict_required = _strict_anchor_policy_requested(
+            current_metadata,
+            checkpoint_metadata,
+        )
         dq_compatible, dq_messages = _validate_dq_contract_compatibility(
             current_metadata,
             checkpoint_metadata,
+            strict=strict_required,
         )
         pipeline_compatible, pipeline_messages = (
             _validate_pipeline_version_compatibility(
                 current_metadata,
                 checkpoint_metadata,
+                strict=strict_required,
             )
+        )
+        required_anchor_compatible, required_anchor_messages = (
+            _validate_required_checkpoint_anchors(current_metadata, checkpoint_metadata)
+            if strict_required
+            else (True, [])
         )
         rule_bundle_messages = _validate_rule_bundle_compatibility(
             current_metadata,
@@ -262,13 +347,17 @@ class CheckpointCompatibilityService:
             checkpoint_metadata,
         )
         messages = (
-            dq_messages
+            required_anchor_messages
+            + dq_messages
             + pipeline_messages
             + rule_bundle_messages
             + execution_identity_messages
         )
         compatible = (
-            dq_compatible and pipeline_compatible and execution_identity_compatible
+            required_anchor_compatible
+            and dq_compatible
+            and pipeline_compatible
+            and execution_identity_compatible
         )
         _log_result(self._logger, compatible=compatible, messages=messages)
         _emit_checkpoint_metric(
@@ -281,8 +370,12 @@ class CheckpointCompatibilityService:
         return CheckpointCompatibilityResult.incompatible_result(
             dq_compatible=dq_compatible,
             pipeline_compatible=pipeline_compatible,
-            execution_identity_compatible=execution_identity_compatible,
-            identity_continuity_proven=identity_continuity_proven,
+            execution_identity_compatible=(
+                execution_identity_compatible and required_anchor_compatible
+            ),
+            identity_continuity_proven=(
+                identity_continuity_proven and required_anchor_compatible
+            ),
             messages=messages,
         )
 

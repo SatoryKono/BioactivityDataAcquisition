@@ -118,10 +118,10 @@ def test_build_execution_support_services_wires_expected_collaborators(
     "bioetl.composition.bootstrap.runtime.composite_runtime_management_builder.FSMStateHelperService"
 )
 @patch(
-    "bioetl.composition.bootstrap.runtime.composite_runtime_management_builder.bootstrap_quarantine_port"
+    "bioetl.composition.bootstrap.runtime.composite_runtime_management_builder.bootstrap_quarantine_adapter"
 )
 @patch(
-    "bioetl.composition.bootstrap.runtime.composite_runtime_management_builder.bootstrap_composite_checkpoint_port"
+    "bioetl.composition.bootstrap.runtime.composite_runtime_management_builder.bootstrap_composite_checkpoint_writer"
 )
 def test_build_runtime_management_services_enables_quarantine_when_configured(
     mock_checkpoint_port: MagicMock,
@@ -191,10 +191,10 @@ def test_build_runtime_management_services_enables_quarantine_when_configured(
     "bioetl.composition.bootstrap.runtime.composite_runtime_management_builder.FSMStateHelperService"
 )
 @patch(
-    "bioetl.composition.bootstrap.runtime.composite_runtime_management_builder.bootstrap_quarantine_port"
+    "bioetl.composition.bootstrap.runtime.composite_runtime_management_builder.bootstrap_quarantine_adapter"
 )
 @patch(
-    "bioetl.composition.bootstrap.runtime.composite_runtime_management_builder.bootstrap_composite_checkpoint_port"
+    "bioetl.composition.bootstrap.runtime.composite_runtime_management_builder.bootstrap_composite_checkpoint_writer"
 )
 def test_build_runtime_management_services_skips_quarantine_when_disabled(
     mock_checkpoint_port: MagicMock,
@@ -228,10 +228,10 @@ def test_build_runtime_management_services_skips_quarantine_when_disabled(
     "bioetl.composition.bootstrap.runtime.composite_runtime_management_builder.FSMStateHelperService"
 )
 @patch(
-    "bioetl.composition.bootstrap.runtime.composite_runtime_management_builder.bootstrap_quarantine_port"
+    "bioetl.composition.bootstrap.runtime.composite_runtime_management_builder.bootstrap_quarantine_adapter"
 )
 @patch(
-    "bioetl.composition.bootstrap.runtime.composite_runtime_management_builder.bootstrap_composite_checkpoint_port"
+    "bioetl.composition.bootstrap.runtime.composite_runtime_management_builder.bootstrap_composite_checkpoint_writer"
 )
 def test_build_runtime_management_services_propagates_config_hash_when_available(
     mock_checkpoint_port: MagicMock,
@@ -283,10 +283,10 @@ def test_build_runtime_management_services_propagates_config_hash_when_available
     "bioetl.composition.bootstrap.runtime.composite_runtime_management_builder.FSMStateHelperService"
 )
 @patch(
-    "bioetl.composition.bootstrap.runtime.composite_runtime_management_builder.bootstrap_quarantine_port"
+    "bioetl.composition.bootstrap.runtime.composite_runtime_management_builder.bootstrap_quarantine_adapter"
 )
 @patch(
-    "bioetl.composition.bootstrap.runtime.composite_runtime_management_builder.bootstrap_composite_checkpoint_port"
+    "bioetl.composition.bootstrap.runtime.composite_runtime_management_builder.bootstrap_composite_checkpoint_writer"
 )
 def test_build_runtime_management_services_prefers_control_plane_effective_hash(
     mock_checkpoint_port: MagicMock,

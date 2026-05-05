@@ -134,6 +134,21 @@ class SinkLayerConfig(BaseModel):
     path: str | None = None
     format: Literal["jsonl", "delta", "parquet"] = "delta"
     mode: str | None = None
+    idempotency_contract: (
+        Literal[
+            "merge_upsert",
+            "scd2",
+            "overwrite_rebuild",
+            "append_log",
+            "partition_append_with_stable_partition_key",
+            "occurrence_only",
+            "disallowed",
+        ]
+        | None
+    ) = Field(
+        default=None,
+        description="Explicit idempotency classification for sink write-mode governance.",
+    )
     save_json: bool = False
     save_metadata: bool = Field(
         default=False,

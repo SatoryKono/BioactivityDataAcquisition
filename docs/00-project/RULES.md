@@ -218,6 +218,22 @@ uv run python -m pytest tests/architecture/test_regression_metrics.py -q
 - **APPEND**: Добавление новых партиций/батчей (фактовые потоки без требований к ретро-исправлению).
 - **SCD2**: Slowly Changing Dimensions Type 2 (историчность).
 
+Если для Silver/Gold явно задаётся `mode: append`, pipeline config **MUST**
+также явно задавать `idempotency_contract`. Допустимые machine-readable
+значения:
+
+- `merge_upsert`
+- `scd2`
+- `overwrite_rebuild`
+- `append_log`
+- `partition_append_with_stable_partition_key`
+- `occurrence_only`
+- `disallowed`
+
+Append без `idempotency_contract` считается invalid config. Для semantic
+Silver/Gold outputs append допускается только с явным append-safe contract и
+не считается strict replay-safe по умолчанию.
+
 **Классификация сущностей для историчности (MUST):**
 
 - **Reference dictionaries** -> `mode: scd2`

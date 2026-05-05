@@ -19,6 +19,12 @@ from bioetl.composition.runtime_builders._runner_builder_support import (
 from bioetl.composition.runtime_builders._runner_builder_support import (
     resolve_control_plane_flags as _resolve_control_plane_flags,
 )
+from bioetl.composition.runtime_builders._runner_builder_support import (
+    validate_artifact_recorder_attachment as _validate_artifact_recorder_attachment,
+)
+from bioetl.composition.runtime_builders._runner_builder_support import (
+    validate_strict_data_root_policy as _validate_strict_data_root_policy,
+)
 from bioetl.composition.runtime_builders.config_access import (
     get_settings,
     load_pipeline_config,
@@ -228,6 +234,18 @@ def _handle_control_plane_setup(
     inputs: _RunnerInputs,
 ) -> tuple[PipelineRunContext, _RunnerInputs, RunLedgerService | None]:
     """Handle control plane setup including manifest and ledger services."""
+    pipeline_settings = getattr(inputs.settings, "pipeline", None)
+    control_plane = getattr(pipeline_settings, "control_plane", None)
+    required_profile = getattr(
+        control_plane,
+        "required_persistence_profile",
+        "degraded_observable",
+    )
+    _validate_strict_data_root_policy(
+        settings=inputs.settings,
+        required_profile=required_profile,
+        exact_replay=bool(getattr(ctx, "exact_replay", False)),
+    )
     manifest_enabled, ledger_enabled = _resolve_control_plane_flags(
         inputs.settings,
         yaml_config=inputs.yaml_config,
@@ -338,5 +356,22 @@ def build_pipeline_runner(
         inputs=inputs,
     )
     if run_ledger_service is not None:
-        attach_control_plane_collaborators(runner, run_ledger_service)
+        pipeline_settings = getattr(inputs.settings, "pipeline", None)
+        control_plane = getattr(pipeline_settings, "control_plane", None)
+        required_profile = getattr(
+            control_plane,
+            "required_persistence_profile",
+            "degraded_observable",
+        )
+        attachment_result = attach_control_plane_collaborators(
+            runner,
+            run_ledger_service,
+        )
+        _validate_artifact_recorder_attachment(
+            required_profile=required_profile,
+            candidate_count=attachment_result.candidate_count,
+            attached_count=attachment_result.attached_count,
+            missing_attach_method_count=(attachment_result.missing_attach_method_count),
+            failed_count=attachment_result.failed_count,
+        )
     return runner

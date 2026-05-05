@@ -310,7 +310,7 @@ PY
 - **Решение:**
 - Фильтровать NULL PK в адаптере перед записью в Bronze:
   ```python
-  # src/bioetl/infrastructure/adapters/pubmed/client.py
+  # src/bioetl/infrastructure/adapters/pubmed/adapter.py
   def fetch-publications(self, query: Query) -> Iterator[RawRecord]:
       for record in self.-fetch-raw(query):
           if record.get("pmid") is None:

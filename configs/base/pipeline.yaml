@@ -30,6 +30,7 @@ sink:
     silver:
         format: delta
         mode: merge
+        idempotency_contract: merge_upsert
         sort_by:
             - entity_id
         on_schema_mismatch: evolve
@@ -47,6 +48,7 @@ sink:
         enabled: true
         format: delta
         mode: scd2
+        idempotency_contract: scd2
         sort_by:
             - entity_id
         scd_config:

@@ -115,21 +115,43 @@ def validate_reproducible_sink_modes(
     yaml_config: object,
     strict_replay_requested: bool,
 ) -> None:
-    """Reject append-mode semantic outputs for strict reproducibility contexts."""
-    if not strict_replay_requested:
-        return
+    """Validate append-mode semantic outputs against explicit idempotency policy."""
     sink = getattr(yaml_config, "sink", None)
     if not isinstance(sink, dict):
         return
-    blocked = [
-        f"sink.{layer_name}.mode=append"
+    append_layers = [
+        layer_name
         for layer_name in ("silver", "gold")
         if (layer_config := sink.get(layer_name)) is not None
         and _sink_layer_enabled(layer_config)
         and _sink_layer_mode(layer_config) == "append"
     ]
-    if blocked:
-        details = ", ".join(blocked)
+    for layer_name in append_layers:
+        layer_config = sink.get(layer_name)
+        contract = _sink_layer_idempotency_contract(layer_config)
+        if contract is None:
+            raise RuntimeError(
+                f"sink.{layer_name}.mode=append requires explicit "
+                f"sink.{layer_name}.idempotency_contract"
+            )
+        if contract == "disallowed":
+            raise RuntimeError(
+                f"sink.{layer_name}.mode=append is disallowed by "
+                f"sink.{layer_name}.idempotency_contract=disallowed"
+            )
+        if contract not in {
+            "append_log",
+            "partition_append_with_stable_partition_key",
+            "occurrence_only",
+        }:
+            raise RuntimeError(
+                f"sink.{layer_name}.mode=append is incompatible with "
+                f"sink.{layer_name}.idempotency_contract={contract}"
+            )
+    if strict_replay_requested and append_layers:
+        details = ", ".join(
+            f"sink.{layer_name}.mode=append" for layer_name in append_layers
+        )
         raise RuntimeError(
             "Strict reproducibility contexts cannot use append-mode Silver/Gold "
             f"semantic outputs ({details}); use merge/upsert, overwrite, or SCD2 "
@@ -178,3 +200,13 @@ def _sink_layer_mode(layer_config: object) -> str:
         else getattr(layer_config, "mode", "")
     )
     return str(raw_mode or "").strip().lower()
+
+
+def _sink_layer_idempotency_contract(layer_config: object | None) -> str | None:
+    raw_contract = (
+        layer_config.get("idempotency_contract", None)
+        if isinstance(layer_config, dict)
+        else getattr(layer_config, "idempotency_contract", None)
+    )
+    contract = str(raw_contract or "").strip().lower()
+    return contract or None

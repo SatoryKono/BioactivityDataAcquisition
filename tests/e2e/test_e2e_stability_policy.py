@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import httpx
@@ -15,6 +16,9 @@ from .conftest import (
     build_e2e_replay_context,
     create_test_context,
     _create_retry_run_context,
+    assert_bronze_files_exist,
+    assert_bronze_metadata_files_exist,
+    assert_bronze_payload_files_exist,
     run_pipeline_or_skip_transient,
 )
 from .test_pipeline_matrix_e2e import (
@@ -119,6 +123,25 @@ def test_non_empty_contract_covers_all_matrix_pipelines() -> None:
         _requires_non_empty_cassette_contract(name)
         for name in NON_EMPTY_CASSETTE_CONTRACT_PIPELINES
     )
+
+
+def test_bronze_payload_assertion_does_not_accept_metadata_only(
+    tmp_path: Path,
+) -> None:
+    """Metadata sidecars are not raw Bronze payload evidence."""
+    bronze_path = tmp_path / "output" / "bronze" / "pubchem" / "compound"
+    bronze_path.mkdir(parents=True)
+    metadata_file = bronze_path / "pubchem_compound_metadata.yaml"
+    metadata_file.write_text("records: 1\n", encoding="utf-8")
+
+    with pytest.raises(AssertionError, match="No raw Bronze payload files found"):
+        assert_bronze_payload_files_exist(tmp_path, "pubchem", "compound")
+
+    assert assert_bronze_metadata_files_exist(tmp_path, "pubchem", "compound") == [
+        metadata_file
+    ]
+    with pytest.raises(AssertionError, match="No raw Bronze payload files found"):
+        assert_bronze_files_exist(tmp_path, "pubchem", "compound")
 
 
 def test_build_e2e_fail_reason_is_deterministic() -> None:

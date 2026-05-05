@@ -39,7 +39,7 @@ from bioetl.infrastructure.adapters.crossref.fallback import (
     CrossRefTitleFallbackHandler,
 )
 from bioetl.infrastructure.adapters.crossref.fetch_flow import CrossRefFetchFlow
-from bioetl.infrastructure.adapters.crossref.query_builder import CrossRefQueryBuilder
+from bioetl.infrastructure.adapters.crossref.query_builder import CrossRefQueryPlanner
 from bioetl.infrastructure.adapters.crossref.response_mapper import (
     CrossRefResponseMapper,
 )
@@ -54,7 +54,7 @@ __all__ = [
     "CROSSREF_HEALTH_ERRORS",
     "CrossRefAdapter",
     "CrossRefFetchFlow",
-    "CrossRefQueryBuilder",
+    "CrossRefQueryPlanner",
     "CrossRefResponseMapper",
 ]
 if TYPE_CHECKING:
@@ -102,7 +102,7 @@ class CrossRefAdapter(
     request_collector: APIRequestCollector | None = None
     _: KW_ONLY
     fallback_fetch_service: FallbackFetchOrchestrator
-    query_builder: CrossRefQueryBuilder | None = None
+    query_builder: CrossRefQueryPlanner | None = None
     response_mapper: CrossRefResponseMapper | None = None
     batch_fetcher: CrossRefBatchFetcher | None = None
     search_paginator: CrossRefSearchPaginator | None = None
@@ -112,7 +112,7 @@ class CrossRefAdapter(
     provider_name: str = field(init=False, default="crossref")  # DataSourcePort ID
     _fallback_fetch_service: FallbackFetchOrchestrator = field(init=False, repr=False)
     _fallback_decorator: ComposableFallbackDecorator = field(init=False, repr=False)
-    _query_builder: CrossRefQueryBuilder = field(init=False, repr=False)
+    _query_builder: CrossRefQueryPlanner = field(init=False, repr=False)
     _response_mapper: CrossRefResponseMapper = field(init=False, repr=False)
     _fetch_flow: CrossRefFetchFlow = field(init=False, repr=False)
 

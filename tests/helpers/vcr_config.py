@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import sys
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 from urllib.parse import parse_qsl, urlparse
@@ -45,6 +46,25 @@ _PROVIDER_VCR_DIR_HINTS: tuple[str, ...] = (
 def ensure_default_vcr_record_mode() -> None:
     """Set deterministic replay-only VCR mode unless the caller overrides it."""
     os.environ.setdefault("VCR_RECORD_MODE", "none")
+
+
+def is_vcr_recording_mode(record_mode: str | None = None) -> bool:
+    """Return whether the effective VCR mode is allowed to refresh cassette data."""
+    effective_mode = (record_mode or os.environ.get("VCR_RECORD_MODE", "none")).lower()
+    if effective_mode in {"all", "new_episodes", "once"}:
+        return True
+    argv_text = " ".join(sys.argv).lower()
+    return any(
+        token in argv_text
+        for token in (
+            "--vcr-record=all",
+            "--vcr-record=new_episodes",
+            "--vcr-record=once",
+            "--vcr-record-mode=all",
+            "--vcr-record-mode=new_episodes",
+            "--vcr-record-mode=once",
+        )
+    )
 
 
 def is_git_lfs_pointer(path: Path) -> bool:

@@ -86,7 +86,8 @@ Pushgateway publication на завершении run. Это позволяет
 
 > **Важно**: `$pipeline` и `$provider` single-select на всех shipped
 > dashboards, `All` запрещён. Если контекста нет, используется explicit
-> fallback `unknown`. Переход в `3. Provider Health` из pipeline-scoped
+> fallback `unknown`. `$run_type` является include-all scope: если контекста
+> запуска нет, используйте `Run Type=All`, а не `unknown`. Переход в `3. Provider Health` из pipeline-scoped
 > dashboards мапит `$pipeline` в `$provider` и сохраняет hidden
 > `$pipeline_context` для обратного перехода.
 

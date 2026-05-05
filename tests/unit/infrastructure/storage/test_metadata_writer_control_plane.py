@@ -246,6 +246,18 @@ async def test_write_bronze_metadata_tracks_disabled_publication_when_no_recorde
     )
 
 
+def test_artifact_recorder_attached_property_tracks_wiring_state() -> None:
+    writer = MetadataWriter(logger=NoOpLogger())
+
+    assert writer.artifact_recorder_attached is False
+
+    writer.attach_artifact_recorder(lambda *_args, **_kwargs: None)
+    assert writer.artifact_recorder_attached is True
+
+    writer.attach_artifact_recorder(None)
+    assert writer.artifact_recorder_attached is False
+
+
 @pytest.mark.unit
 @pytest.mark.asyncio
 async def test_write_bronze_metadata_tracks_failed_publication_when_recorder_raises() -> (

@@ -26,6 +26,8 @@ from bioetl.composition.factories.services.runtime_managers import (
     build_runtime_managers,
 )
 from bioetl.domain.error_classifier import ErrorClassifier
+from bioetl.domain.observability_contract import normalize_observability_pipeline_label
+from bioetl.infrastructure.observability.metrics import GOLD_LIFECYCLE_STATE_TOTAL
 from bioetl.infrastructure.validation import PanderaGoldValidator
 
 if TYPE_CHECKING:
@@ -118,8 +120,39 @@ def _resolve_gold_filter(
 ) -> GoldFilterCallback:
     """Resolve the effective gold filter based on runtime skip configuration."""
     if pipeline.runtime.skip_gold:
+        _emit_gold_lifecycle_state(
+            pipeline_name=pipeline.config.pipeline_name,
+            table_name=_resolve_effective_gold_table(pipeline),
+            state="disabled",
+        )
         return cast(GoldFilterCallback, lambda _context, _record: False)
     return callbacks.gold_filter
+
+
+def _resolve_effective_gold_table(pipeline: BasePipeline) -> str:
+    """Resolve Gold table name without assuming test doubles implement properties."""
+    configured = getattr(pipeline.config, "effective_gold_table", None)
+    if configured:
+        return str(configured)
+    table_config = getattr(pipeline.config, "table", None)
+    gold_table = getattr(table_config, "gold_table", None)
+    if gold_table:
+        return str(gold_table)
+    return f"{pipeline.config.provider}.{pipeline.config.entity_type}"
+
+
+def _emit_gold_lifecycle_state(
+    *,
+    pipeline_name: str,
+    table_name: str,
+    state: str,
+) -> None:
+    """Emit bounded Gold lifecycle state at the composition decision seam."""
+    GOLD_LIFECYCLE_STATE_TOTAL.labels(
+        pipeline=normalize_observability_pipeline_label(pipeline_name),
+        table=normalize_observability_pipeline_label(table_name),
+        state=state,
+    ).inc()
 
 
 def _build_batch_executor_dependencies(

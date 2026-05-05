@@ -13,6 +13,7 @@ from bioetl.application.services.control_plane.run_manifest_inspection_service i
 from bioetl.composition.factories.services.port_factories import create_metrics
 from bioetl.infrastructure.config import get_settings
 from bioetl.infrastructure.control_plane import (
+    FileArtifactByteComparisonAdapter,
     FileEffectiveConfigArtifactStore,
     FileRunLedgerStore,
     FileRunManifestStore,
@@ -65,6 +66,7 @@ def bootstrap_forensic_run_diff_service() -> ForensicRunDiffService:
     return ForensicRunDiffService(
         manifest_port=manifest_store,
         ledger_port=ledger_store,
+        artifact_byte_comparison_port=FileArtifactByteComparisonAdapter(),
         inspection_service_factory=lambda: RunManifestInspectionService(
             manifest_port=manifest_store,
             ledger_port=ledger_store,

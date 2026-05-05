@@ -413,50 +413,6 @@ retained_entrypoints:
     seam with `collaborators=MergeCollaboratorGroup(...)`.
   exit_criteria: The merge module remains the sanctioned public seam and all composition
     paths use collaborator bundles with legacy keyword wiring fully removed.
-- path: src/bioetl/infrastructure/adapters/pubmed/client.py
-  compatibility_role: Permanent public client entrypoint that shields older `pubmed_client`
-    imports while exporting the current adapter surface and public `create_pubmed_adapter`
-    factory alias.
-  canonical_target: bioetl.infrastructure.adapters.pubmed.client
-  status: public-entrypoint
-  owner: bioetl.infrastructure.adapters.pubmed
-  introduced_in: 2026-03 pubmed entrypoint hardening
-  review_date: '2026-09-30'
-  external_breaking_change_required: true
-  internal_callers_zero: false
-  allowed_call_sites: '`src`: direct `bioetl.infrastructure.adapters.pubmed.client`
-    imports stay confined to `src/bioetl/infrastructure/adapters/pubmed/__init__.py`;
-    first-party code imports the provider package root; `tests`: `tests/unit/infrastructure/adapters/test_provider_entrypoints.py`,
-    `tests/architecture/test_adapter_contracts.py`, `tests/architecture/test_retained_adapter_entrypoint_policy.py`'
-  migration_path: Use the provider package root `bioetl.infrastructure.adapters.pubmed`
-    in new first-party code; keep `bioetl.infrastructure.adapters.pubmed.client`
-    as the sanctioned public adapter seam and do not import `bioetl.infrastructure.adapters.pubmed.pubmed_client`
-    directly.
-  exit_criteria: The public `client.py` seam remains sanctioned, direct `client.py`
-    imports stay confined to the provider package root plus dedicated compatibility
-    coverage, and private `_create_pubmed_adapter` remains unexported from the public
-    entrypoint.
-- path: src/bioetl/infrastructure/adapters/semanticscholar/client.py
-  compatibility_role: Permanent public client entrypoint that shields older `adapter`
-    imports.
-  canonical_target: bioetl.infrastructure.adapters.semanticscholar.client
-  status: public-entrypoint
-  owner: bioetl.infrastructure.adapters.semanticscholar
-  introduced_in: legacy-pre-2026-03
-  review_date: '2026-09-30'
-  external_breaking_change_required: true
-  internal_callers_zero: false
-  allowed_call_sites: '`src`: direct `bioetl.infrastructure.adapters.semanticscholar.client`
-    imports stay confined to `src/bioetl/infrastructure/adapters/semanticscholar/__init__.py`;
-    first-party code imports the provider package root; `tests`: `tests/unit/infrastructure/adapters/test_provider_entrypoints.py`,
-    `tests/architecture/test_adapter_contracts.py`, `tests/architecture/test_retained_adapter_entrypoint_policy.py`'
-  migration_path: Use the provider package root `bioetl.infrastructure.adapters.semanticscholar`
-    in new first-party code; keep `bioetl.infrastructure.adapters.semanticscholar.client`
-    as the sanctioned public adapter seam and do not import `bioetl.infrastructure.adapters.semanticscholar.adapter`
-    directly.
-  exit_criteria: The public `client.py` seam remains sanctioned, direct `client.py`
-    imports stay confined to the provider package root plus dedicated compatibility
-    coverage, and legacy-path references remain reduced to that public seam.
 measured_only_ratchet:
   max_total_modules: 0
   scoped_limits:

@@ -280,31 +280,43 @@ async def run_pipeline(name: str, options: RunOptions) -> RunResult:
         started_at=clock.now(),
         clock=clock,
     )
-    runner = _require_execution_metrics_runner(create_pipeline_runner(name, options))
 
     # Extract run context for result
-    run_id = runner.run_id
     run_type = options.run_type
+    run_id = str(uuid4())
 
     status = PipelineRunResult.SUCCESS
     error_message: str | None = None
     error_type: str | None = None
+    runner: ExecutionMetricsRunnerPort | None = None
 
     try:
-        await runner.run()
-    except PipelineShutdownError:
-        status = PipelineRunResult.SHUTDOWN
-    except (BioETLError, OSError, RuntimeError, ValueError, TypeError) as e:
+        runner = _require_execution_metrics_runner(
+            create_pipeline_runner(name, options)
+        )
+        run_id = str(runner.run_id)
+    except Exception as e:
         status = PipelineRunResult.FAILED
         error_message = str(e)
         error_type = type(e).__name__
+    else:
+        try:
+            await runner.run()
+        except PipelineShutdownError:
+            status = PipelineRunResult.SHUTDOWN
+        except (BioETLError, OSError, RuntimeError, ValueError, TypeError) as e:
+            status = PipelineRunResult.FAILED
+            error_message = str(e)
+            error_type = type(e).__name__
 
     completed_at, _ = derive_completion_timestamp(
         started_at=started_at,
         started_monotonic=started_monotonic,
     )
 
-    metrics = create_metrics_extractor().extract_metrics(runner)
+    metrics = (
+        create_metrics_extractor().extract_metrics(runner) if runner is not None else {}
+    )
     result = RunResult(
         status=status,
         pipeline_name=name,

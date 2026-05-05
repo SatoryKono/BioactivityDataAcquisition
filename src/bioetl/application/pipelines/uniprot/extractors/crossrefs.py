@@ -91,7 +91,7 @@ class CrossRefExtractor:
         return extract_structured_xrefs(
             xrefs,
             database="PDB",
-            builder=build_pdb_entry,
+            mapper=build_pdb_entry,
         )
 
     @classmethod
@@ -116,7 +116,7 @@ class CrossRefExtractor:
         return extract_structured_xrefs(
             xrefs,
             database="InterPro",
-            builder=build_interpro_entry,
+            mapper=build_interpro_entry,
         )
 
     @classmethod
@@ -141,7 +141,7 @@ class CrossRefExtractor:
         return extract_structured_xrefs(
             xrefs,
             database="Pfam",
-            builder=build_pfam_entry,
+            mapper=build_pfam_entry,
         )
 
     @classmethod
@@ -166,7 +166,7 @@ class CrossRefExtractor:
         return extract_structured_xrefs(
             xrefs,
             database="Reactome",
-            builder=build_reactome_entry,
+            mapper=build_reactome_entry,
         )
 
     @classmethod

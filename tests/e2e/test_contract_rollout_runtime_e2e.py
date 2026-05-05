@@ -12,25 +12,22 @@ from unittest.mock import patch
 import pyarrow as pa
 import pytest
 from deltalake import DeltaTable, write_deltalake
+from tests.helpers.vcr_config import build_cassette_dir
 
 if TYPE_CHECKING:
     from bioetl.infrastructure.schemas.pipeline_contract_policy import (
         PipelineContractPolicy,
     )
 
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
-CASSETTE_DIR = PROJECT_ROOT / "tests" / "fixtures" / "vcr" / "chembl"
 _PIPELINE_NAME = "chembl_activity"
 
 
 @pytest.fixture(scope="module")
-def vcr_config() -> dict[str, object]:
-    return {
-        "cassette_library_dir": str(CASSETTE_DIR),
-        "record_mode": "none",
-        "match_on": ["method", "scheme", "host", "port", "path", "query"],
-        "decode_compressed_response": True,
-    }
+def vcr_cassette_dir() -> Path:
+    return build_cassette_dir(
+        fixtures_root=Path(__file__).resolve().parents[1] / "fixtures" / "vcr",
+        provider_dir="chembl",
+    )
 
 
 @pytest.fixture

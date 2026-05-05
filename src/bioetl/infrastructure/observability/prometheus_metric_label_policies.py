@@ -70,7 +70,6 @@ FORBIDDEN_PROMETHEUS_LABEL_NAMES = frozenset(
 _ADAPTER_ENDPOINT_LABEL_METRICS = frozenset(
     {
         "bioetl_adapter_request_duration_seconds",
-        "bioetl_adapter_request_p95_seconds",
         "bioetl_adapter_requests_total",
         "bioetl_adapter_batch_size",
     }
@@ -94,6 +93,11 @@ _TABLE_LABEL_METRICS = frozenset(
         "bioetl_silver_csv_export_success_total",
         "bioetl_silver_csv_export_failures_total",
         "bioetl_silver_validation_failures_total",
+        "bioetl_gold_write_attempts_total",
+        "bioetl_gold_write_outcomes_total",
+        "bioetl_gold_write_duration_seconds",
+        "bioetl_gold_validation_failures_total",
+        "bioetl_gold_lifecycle_state_total",
         "bioetl_vacuum_files_removed_total",
     }
 )

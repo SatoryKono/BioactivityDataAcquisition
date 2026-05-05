@@ -29,7 +29,7 @@ from bioetl.infrastructure.adapters.crossref.client_builders import (
 from bioetl.infrastructure.adapters.crossref.fallback import (
     CrossRefTitleFallbackHandler,
 )
-from bioetl.infrastructure.adapters.crossref.query_builder import CrossRefQueryBuilder
+from bioetl.infrastructure.adapters.crossref.query_builder import CrossRefQueryPlanner
 from bioetl.infrastructure.adapters.crossref.response_mapper import (
     CrossRefResponseMapper,
 )
@@ -48,7 +48,7 @@ class CrossRefAdapterComponents:
     adapter_metrics: AdapterMetricsRecorder
     request_collector: APIRequestCollector
     fallback_fetch_service: FallbackFetchOrchestrator
-    query_builder: CrossRefQueryBuilder
+    query_builder: CrossRefQueryPlanner
     response_mapper: CrossRefResponseMapper
     batch_fetcher: CrossRefBatchFetcher
     search_paginator: CrossRefSearchPaginator
@@ -98,9 +98,9 @@ def _resolve_optional_components(
 def _create_query_builder(
     kwargs: dict[str, object],
     mailto: str,
-) -> CrossRefQueryBuilder:
+) -> CrossRefQueryPlanner:
     query_builder = cast(
-        "CrossRefQueryBuilder | None",
+        "CrossRefQueryPlanner | None",
         kwargs.get("query_builder"),
     )
     if query_builder is None:

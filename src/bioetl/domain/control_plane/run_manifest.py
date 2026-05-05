@@ -29,6 +29,16 @@ __all__ = [
     "RunSourceRef",
 ]
 
+DOCUMENTED_SOURCE_REVISION_STATES = frozenset(
+    {
+        "clean",
+        "dirty",
+        "dirty_state_unknown",
+        "git_unavailable",
+    }
+)
+"""Published control-plane allowlist for ``source_revision_state`` values."""
+
 
 class ReplayCapability(StrEnum):
     """Exact-replay capability classification for one manifested run."""

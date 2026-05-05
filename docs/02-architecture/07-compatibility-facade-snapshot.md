@@ -5,18 +5,18 @@
 ## Summary
 
 - Registry YAML: `configs/quality/compatibility_facade_inventory.yaml`
-- Curated inventory rows: `21`
+- Curated inventory rows: `19`
 - Transition debt rows: `0`
-- Sanctioned public entrypoint rows: `21`
+- Sanctioned public entrypoint rows: `19`
 - Retained review entrypoints: `3`
-- Permanent public entrypoints: `18`
-- Measured tracked modules: `21`
+- Permanent public entrypoints: `16`
+- Measured tracked modules: `19`
 - Measured-only modules outside curated inventory: `0`
-- Discovered docstring-tracked modules: `2`
+- Discovered docstring-tracked modules: `0`
 - Unexpected docstring-tracked modules: `0`
 - Missing allowlisted measured-only modules: `0`
 - First-party src imports targeting measured-only modules: `0`
-- Curated rows requiring external breaking change process: `21`
+- Curated rows requiring external breaking change process: `19`
 - Curated rows marked internal-callers-zero: `3`
 - First-party src imports targeting internal-callers-zero rows: `0`
 - Ratchet violations: `0`
@@ -41,8 +41,6 @@
 - `src/bioetl/domain/composite/config.py`
 - `src/bioetl/domain/value_objects/activity_values.py`
 - `src/bioetl/domain/value_objects/publication_field_groups.py`
-- `src/bioetl/infrastructure/adapters/pubmed/client.py`
-- `src/bioetl/infrastructure/adapters/semanticscholar/client.py`
 - `src/bioetl/interfaces/cli/commands/archive.py`
 - `src/bioetl/interfaces/cli/commands/cleanup.py`
 - `src/bioetl/interfaces/cli/commands/diagnostics.py`
@@ -76,8 +74,6 @@
 - `src/bioetl/domain/value_objects/activity_values.py` — external breaking change required: `true`, internal callers zero: `false`
 - `src/bioetl/domain/value_objects/publication_field_groups.py` — external breaking change required: `true`, internal callers zero: `false`
 - `src/bioetl/application/composite/merger.py` — external breaking change required: `true`, internal callers zero: `false`
-- `src/bioetl/infrastructure/adapters/pubmed/client.py` — external breaking change required: `true`, internal callers zero: `false`
-- `src/bioetl/infrastructure/adapters/semanticscholar/client.py` — external breaking change required: `true`, internal callers zero: `false`
 
 ## Measured-Only Allowlist
 
@@ -117,8 +113,7 @@
 
 ### Discovered Docstring-Tracked Modules
 
-- `src/bioetl/infrastructure/adapters/pubmed/client.py`
-- `src/bioetl/infrastructure/adapters/semanticscholar/client.py`
+- None.
 
 ### Unexpected Docstring-Tracked Modules
 

@@ -127,9 +127,7 @@ def load_control_plane_bundle(
     effective_root = data_dir / "output" / "control" / "effective_config"
     occurrence_path = effective_root / "_occurrences" / f"{run_id}.json"
     if not occurrence_path.exists():
-        raise AssertionError(
-            f"Missing effective-config occurrence for run_id={run_id}"
-        )
+        raise AssertionError(f"Missing effective-config occurrence for run_id={run_id}")
     effective_occurrence = json.loads(occurrence_path.read_text(encoding="utf-8"))
     if not isinstance(effective_occurrence, dict):
         raise AssertionError("Effective-config occurrence payload must be a mapping")

@@ -103,19 +103,15 @@
               "type": "value",
               "options": {
                 "0": {
-                  "text": "NO DATA / UNKNOWN",
-                  "color": "gray"
-                },
-                "1": {
                   "text": "OK",
                   "color": "green"
                 },
-                "2": {
-                  "text": "DEGRADED",
+                "1": {
+                  "text": "WARN",
                   "color": "orange"
                 },
-                "3": {
-                  "text": "FAILING / BROKEN",
+                "2": {
+                  "text": "CRIT",
                   "color": "red"
                 }
               }
@@ -125,7 +121,7 @@
               "options": {
                 "match": "null",
                 "result": {
-                  "text": "NO DATA / UNKNOWN",
+                  "text": "UNKNOWN",
                   "color": "gray"
                 }
               }
@@ -183,7 +179,7 @@
       ],
       "title": "System Status",
       "type": "stat",
-      "description": "Thresholds: BROKEN when runtime blocker>0, DQ hard fail>0, or control-plane blocker>0; DEGRADED on warning-only signals; UNKNOWN when no recent samples. Next action: open dashboard indicated by Next Action (Runtime first, then Control Plane, DQ, Provider, Workflow)."
+      "description": "Current L0 operator state. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. CRIT means runtime, DQ, control-plane, workflow, or gold signals are failing for the selected pipeline/run_type. WARN means non-fatal DQ or pending-gold conditions. Next action: follow the route shown in Next Action, then use the top-level dashboard bus."
     },
     {
       "id": 215,
@@ -246,7 +242,7 @@
               "options": {
                 "match": "null",
                 "result": {
-                  "text": "NO DATA / UNKNOWN",
+                  "text": "UNKNOWN",
                   "color": "gray"
                 }
               }
@@ -372,7 +368,7 @@
       },
       "targets": [
         {
-          "expr": "topk(1, bioetl_l0_next_action_route{pipeline=~\"$pipeline\"} > 0)",
+          "expr": "topk(1, bioetl_l0_next_action_route{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} > 0)",
           "refId": "A",
           "format": "table",
           "instant": true
@@ -406,7 +402,7 @@
           }
         }
       ],
-      "description": "Action route projection. The row exposes `action_target`, `action_reason`, and `action_dashboard_uid`; Runtime > Control Plane > DQ > Provider > Workflow > Monitor. Pipeline scope is explicit; DQ/provider routes remain broader than run_type when the underlying signal is global."
+      "description": "Action route projection for the selected pipeline/run_type. The row exposes `action_target`, `action_reason`, and `action_dashboard_uid`; Runtime > Control Plane > DQ > Provider > Workflow > Monitor. Provider route stays global in origin but is projected back onto the selected run_type scope for L0 consistency."
     },
     {
       "id": 9002,
@@ -439,19 +435,15 @@
               "type": "value",
               "options": {
                 "0": {
-                  "text": "NO DATA / UNKNOWN",
-                  "color": "gray"
-                },
-                "1": {
                   "text": "OK",
                   "color": "green"
                 },
-                "2": {
-                  "text": "DEGRADED",
+                "1": {
+                  "text": "WARN",
                   "color": "orange"
                 },
-                "3": {
-                  "text": "FAILING / BROKEN",
+                "2": {
+                  "text": "CRIT",
                   "color": "red"
                 }
               }
@@ -461,7 +453,7 @@
               "options": {
                 "match": "null",
                 "result": {
-                  "text": "NO DATA / UNKNOWN",
+                  "text": "UNKNOWN",
                   "color": "gray"
                 }
               }
@@ -476,11 +468,11 @@
               },
               {
                 "color": "orange",
-                "value": 2
+                "value": 1
               },
               {
                 "color": "red",
-                "value": 3
+                "value": 2
               }
             ]
           },
@@ -564,7 +556,8 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "color-background"
+                  "type": "color-background",
+                  "applyToRow": true
                 }
               }
             ]
@@ -582,7 +575,8 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "color-background"
+                  "type": "color-background",
+                  "applyToRow": true
                 }
               }
             ]
@@ -628,7 +622,7 @@
           }
         }
       ],
-      "description": "Current L0 inputs (Runtime, DQ, Gold, Control Plane, Provider, Workflow). Value mapping: 0/null=UNKNOWN, 1=OK, 2=DEGRADED, 3=BROKEN."
+      "description": "Current L0 inputs (Runtime, DQ, Gold, Control Plane, Provider, Workflow). Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN."
     },
     {
       "id": 9003,
@@ -661,19 +655,15 @@
               "type": "value",
               "options": {
                 "0": {
-                  "text": "NO DATA / UNKNOWN",
-                  "color": "gray"
-                },
-                "1": {
                   "text": "OK",
                   "color": "green"
                 },
-                "2": {
-                  "text": "DEGRADED",
+                "1": {
+                  "text": "WARN",
                   "color": "orange"
                 },
-                "3": {
-                  "text": "FAILING / BROKEN",
+                "2": {
+                  "text": "CRIT",
                   "color": "red"
                 }
               }
@@ -683,7 +673,7 @@
               "options": {
                 "match": "null",
                 "result": {
-                  "text": "NO DATA / UNKNOWN",
+                  "text": "UNKNOWN",
                   "color": "gray"
                 }
               }
@@ -698,11 +688,11 @@
               },
               {
                 "color": "orange",
-                "value": 2
+                "value": 1
               },
               {
                 "color": "red",
-                "value": 3
+                "value": 2
               }
             ]
           },
@@ -746,7 +736,8 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "color-background"
+                  "type": "color-background",
+                  "applyToRow": true
                 }
               }
             ]
@@ -764,7 +755,8 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "color-background"
+                  "type": "color-background",
+                  "applyToRow": true
                 }
               }
             ]
@@ -808,7 +800,7 @@
           }
         }
       ],
-      "description": "Current runtime blocker summary only; no $__range evidence. Open Runtime dashboard for the exact blocker condition rows."
+      "description": "Current runtime blocker summary only; no $__range evidence. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. Open Runtime from the top-level bus for exact blocker condition rows."
     },
     {
       "id": 9004,
@@ -841,19 +833,15 @@
               "type": "value",
               "options": {
                 "0": {
-                  "text": "NO DATA / UNKNOWN",
-                  "color": "gray"
-                },
-                "1": {
                   "text": "OK",
                   "color": "green"
                 },
-                "2": {
-                  "text": "DEGRADED",
+                "1": {
+                  "text": "WARN",
                   "color": "orange"
                 },
-                "3": {
-                  "text": "FAILING / BROKEN",
+                "2": {
+                  "text": "CRIT",
                   "color": "red"
                 }
               }
@@ -863,7 +851,7 @@
               "options": {
                 "match": "null",
                 "result": {
-                  "text": "NO DATA / UNKNOWN",
+                  "text": "UNKNOWN",
                   "color": "gray"
                 }
               }
@@ -878,11 +866,11 @@
               },
               {
                 "color": "orange",
-                "value": 2
+                "value": 1
               },
               {
                 "color": "red",
-                "value": 3
+                "value": 2
               }
             ]
           },
@@ -914,7 +902,8 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "color-background"
+                  "type": "color-background",
+                  "applyToRow": true
                 }
               }
             ]
@@ -932,7 +921,8 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "color-background"
+                  "type": "color-background",
+                  "applyToRow": true
                 }
               }
             ]
@@ -974,7 +964,7 @@
           }
         }
       ],
-      "description": "Pipeline-scoped DQ summary across run types for the selected pipeline. Value mapping: 0/null=UNKNOWN, 1=OK, 2=DEGRADED, 3=BROKEN."
+      "description": "Current DQ summary for the selected pipeline/run_type scope. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN."
     },
     {
       "id": 9005,
@@ -1007,19 +997,15 @@
               "type": "value",
               "options": {
                 "0": {
-                  "text": "NO DATA / UNKNOWN",
-                  "color": "gray"
-                },
-                "1": {
                   "text": "OK",
                   "color": "green"
                 },
-                "2": {
-                  "text": "DEGRADED",
+                "1": {
+                  "text": "WARN",
                   "color": "orange"
                 },
-                "3": {
-                  "text": "FAILING / BROKEN",
+                "2": {
+                  "text": "CRIT",
                   "color": "red"
                 }
               }
@@ -1029,7 +1015,7 @@
               "options": {
                 "match": "null",
                 "result": {
-                  "text": "NO DATA / UNKNOWN",
+                  "text": "UNKNOWN",
                   "color": "gray"
                 }
               }
@@ -1044,11 +1030,11 @@
               },
               {
                 "color": "orange",
-                "value": 2
+                "value": 1
               },
               {
                 "color": "red",
-                "value": 3
+                "value": 2
               }
             ]
           },
@@ -1129,7 +1115,8 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "color-background"
+                  "type": "color-background",
+                  "applyToRow": true
                 }
               }
             ]
@@ -1147,7 +1134,8 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "color-background"
+                  "type": "color-background",
+                  "applyToRow": true
                 }
               }
             ]
@@ -1156,7 +1144,7 @@
       },
       "targets": [
         {
-          "expr": "bioetl_l1_gold_lifecycle_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} > 0",
+          "expr": "bioetl_l1_gold_lifecycle_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}",
           "refId": "A",
           "format": "table",
           "instant": true
@@ -1193,7 +1181,7 @@
           }
         }
       ],
-      "description": "Lifecycle-state projection for gold output. `lifecycle_state` distinguishes runtime-owned failure, missing gold after success, pending, disabled, and healthy recent gold."
+      "description": "Lifecycle-state projection for gold output. `lifecycle_state` distinguishes runtime-owned failure, missing gold after success, pending, disabled, and healthy recent gold. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN."
     },
     {
       "id": 9006,
@@ -1226,19 +1214,15 @@
               "type": "value",
               "options": {
                 "0": {
-                  "text": "NO DATA / UNKNOWN",
-                  "color": "gray"
-                },
-                "1": {
                   "text": "OK",
                   "color": "green"
                 },
-                "2": {
-                  "text": "DEGRADED",
+                "1": {
+                  "text": "WARN",
                   "color": "orange"
                 },
-                "3": {
-                  "text": "FAILING / BROKEN",
+                "2": {
+                  "text": "CRIT",
                   "color": "red"
                 }
               }
@@ -1248,7 +1232,7 @@
               "options": {
                 "match": "null",
                 "result": {
-                  "text": "NO DATA / UNKNOWN",
+                  "text": "UNKNOWN",
                   "color": "gray"
                 }
               }
@@ -1263,11 +1247,11 @@
               },
               {
                 "color": "orange",
-                "value": 2
+                "value": 1
               },
               {
                 "color": "red",
-                "value": 3
+                "value": 2
               }
             ]
           },
@@ -1311,7 +1295,8 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "color-background"
+                  "type": "color-background",
+                  "applyToRow": true
                 }
               }
             ]
@@ -1329,7 +1314,8 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "color-background"
+                  "type": "color-background",
+                  "applyToRow": true
                 }
               }
             ]
@@ -1373,7 +1359,7 @@
           }
         }
       ],
-      "description": "Current control-plane summary for manifest, ledger, checkpoint, and lineage guardrails. Open Control Plane for the exact failing contract."
+      "description": "Current control-plane summary for manifest, ledger, checkpoint, and lineage guardrails. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. Open Control Plane from the top-level bus for the exact failing contract."
     },
     {
       "id": 9007,
@@ -1406,19 +1392,15 @@
               "type": "value",
               "options": {
                 "0": {
-                  "text": "NO DATA / UNKNOWN",
-                  "color": "gray"
-                },
-                "1": {
                   "text": "OK",
                   "color": "green"
                 },
-                "2": {
-                  "text": "DEGRADED",
+                "1": {
+                  "text": "WARN",
                   "color": "orange"
                 },
-                "3": {
-                  "text": "FAILING / BROKEN",
+                "2": {
+                  "text": "CRIT",
                   "color": "red"
                 }
               }
@@ -1428,7 +1410,7 @@
               "options": {
                 "match": "null",
                 "result": {
-                  "text": "NO DATA / UNKNOWN",
+                  "text": "UNKNOWN",
                   "color": "gray"
                 }
               }
@@ -1443,11 +1425,11 @@
               },
               {
                 "color": "orange",
-                "value": 2
+                "value": 1
               },
               {
                 "color": "red",
-                "value": 3
+                "value": 2
               }
             ]
           },
@@ -1479,7 +1461,8 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "color-background"
+                  "type": "color-background",
+                  "applyToRow": true
                 }
               }
             ]
@@ -1497,7 +1480,8 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "color-background"
+                  "type": "color-background",
+                  "applyToRow": true
                 }
               }
             ]
@@ -1539,7 +1523,7 @@
           }
         }
       ],
-      "description": "GLOBAL provider scope across pipelines. This panel intentionally ignores selected pipeline/run_type filters."
+      "description": "GLOBAL provider scope across pipelines. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. This panel intentionally ignores selected pipeline/run_type filters."
     },
     {
       "id": 9008,
@@ -1572,19 +1556,15 @@
               "type": "value",
               "options": {
                 "0": {
-                  "text": "NO DATA / UNKNOWN",
-                  "color": "gray"
-                },
-                "1": {
                   "text": "OK",
                   "color": "green"
                 },
-                "2": {
-                  "text": "DEGRADED",
+                "1": {
+                  "text": "WARN",
                   "color": "orange"
                 },
-                "3": {
-                  "text": "FAILING / BROKEN",
+                "2": {
+                  "text": "CRIT",
                   "color": "red"
                 }
               }
@@ -1594,7 +1574,7 @@
               "options": {
                 "match": "null",
                 "result": {
-                  "text": "NO DATA / UNKNOWN",
+                  "text": "UNKNOWN",
                   "color": "gray"
                 }
               }
@@ -1609,11 +1589,11 @@
               },
               {
                 "color": "orange",
-                "value": 2
+                "value": 1
               },
               {
                 "color": "red",
-                "value": 3
+                "value": 2
               }
             ]
           },
@@ -1653,6 +1633,13 @@
               {
                 "id": "displayName",
                 "value": "Status"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background",
+                  "applyToRow": true
+                }
               }
             ]
           },
@@ -1665,6 +1652,13 @@
               {
                 "id": "displayName",
                 "value": "Status"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background",
+                  "applyToRow": true
+                }
               }
             ]
           }
@@ -1707,7 +1701,7 @@
           }
         }
       ],
-      "description": "Selected pipeline/run_type workflow summary only."
+      "description": "Selected pipeline/run_type workflow summary only. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN."
     },
     {
       "id": 9013,
@@ -1740,19 +1734,15 @@
               "type": "value",
               "options": {
                 "0": {
-                  "text": "NO DATA / UNKNOWN",
-                  "color": "gray"
-                },
-                "1": {
                   "text": "OK",
                   "color": "green"
                 },
-                "2": {
-                  "text": "DEGRADED",
+                "1": {
+                  "text": "WARN",
                   "color": "orange"
                 },
-                "3": {
-                  "text": "FAILING / BROKEN",
+                "2": {
+                  "text": "CRIT",
                   "color": "red"
                 }
               }
@@ -1762,7 +1752,7 @@
               "options": {
                 "match": "null",
                 "result": {
-                  "text": "NO DATA / UNKNOWN",
+                  "text": "UNKNOWN",
                   "color": "gray"
                 }
               }
@@ -1777,11 +1767,11 @@
               },
               {
                 "color": "orange",
-                "value": 2
+                "value": 1
               },
               {
                 "color": "red",
-                "value": 3
+                "value": 2
               }
             ]
           },
@@ -1821,6 +1811,13 @@
               {
                 "id": "displayName",
                 "value": "Status"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background",
+                  "applyToRow": true
+                }
               }
             ]
           },
@@ -1833,6 +1830,13 @@
               {
                 "id": "displayName",
                 "value": "Status"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background",
+                  "applyToRow": true
+                }
               }
             ]
           }
@@ -1875,7 +1879,7 @@
           }
         }
       ],
-      "description": "GLOBAL workflow scope across pipeline/run_type combinations."
+      "description": "GLOBAL workflow scope across pipeline/run_type combinations. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN."
     },
     {
       "id": 9009,
@@ -2150,7 +2154,7 @@
             "y": 23
           },
           "options": {
-            "content": "<div style=\"padding:0.4rem 0.6rem;line-height:1.6\"><strong>Use top-level links for logs and traces.</strong> Raw metric starting points for this dashboard are <code>bioetl_l0_status{pipeline=~&quot;$pipeline&quot;,run_type=~&quot;$run_type&quot;}</code>, <code>bioetl_l0_next_action_route{pipeline=~&quot;$pipeline&quot;}</code>, and <code>bioetl_l0_input_status{pipeline=~&quot;$pipeline&quot;,run_type=~&quot;$run_type&quot;}</code>. Historical evidence stays in the row above; exact blocker reasons live in the Runtime, DQ, Provider Health, Control Plane, and Workflow dashboards.</div>",
+            "content": "<div style=\"padding:0.4rem 0.6rem;line-height:1.6\"><strong>Use top-level links for logs and traces.</strong> Raw metric starting points for this dashboard are <code>bioetl_l0_status{pipeline=~&quot;$pipeline&quot;,run_type=~&quot;$run_type&quot;}</code>, <code>bioetl_l0_next_action_route{pipeline=~&quot;$pipeline&quot;,run_type=~&quot;$run_type&quot;}</code>, and <code>bioetl_l0_input_status{pipeline=~&quot;$pipeline&quot;,run_type=~&quot;$run_type&quot;}</code>. Historical evidence stays in the row above; exact blocker reasons live in the Runtime, DQ, Provider Health, Control Plane, and Workflow dashboards.</div>",
             "mode": "html"
           },
           "links": [],
@@ -2204,7 +2208,11 @@
       },
       {
         "allValue": null,
-        "current": {},
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
         "datasource": "Prometheus",
         "definition": "label_values(bioetl_records_processed_total{pipeline=~\"$pipeline\"}, run_type)",
         "hide": 0,

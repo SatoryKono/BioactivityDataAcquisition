@@ -47,8 +47,6 @@ shards:
       - tests/unit/composition
       - tests/unit/interfaces
     extra_pytest_args:
-      - --ignore=tests/unit/interfaces/cli/test_registry_consistency.py
-      - --deselect=tests/unit/interfaces/cli/commands/test_quarantine_support.py::TestShowQuarantineStats::test_json_output_mode
       - --ignore=tests/unit/composition/runtime_builders/test_runner_builder.py
       - --ignore=tests/unit/composition/runtime_builders/test_run_manifest_support.py
   - name: S7-crosscutting-architecture-a
@@ -71,8 +69,6 @@ shards:
       - --ignore=tests/architecture/test_docs_governance_workflow.py
       - --ignore=tests/architecture/test_quality_debt_scorecard.py
       - --ignore=tests/architecture/test_quality_burndown_priorities.py
-      - --deselect=tests/architecture/test_provider_registry_decomposition.py::test_provider_registry_facade_does_not_grow
-      - --deselect=tests/architecture/test_rf014_composition_bootstrap_closeout.py::test_rf014_composition_bootstrap_surfaces_stay_bounded_and_helper_backed[src/bioetl/composition/factories/pipeline/assembler.py-280-required_modules0]
   - name: S3-app-foundation
     wave: 2
     paths:
@@ -105,8 +101,6 @@ shards:
       - --ignore=tests/architecture/test_docs_governance_workflow.py
       - --ignore=tests/architecture/test_quality_debt_scorecard.py
       - --ignore=tests/architecture/test_quality_burndown_priorities.py
-      - --deselect=tests/architecture/test_provider_registry_decomposition.py::test_provider_registry_facade_does_not_grow
-      - --deselect=tests/architecture/test_rf014_composition_bootstrap_closeout.py::test_rf014_composition_bootstrap_surfaces_stay_bounded_and_helper_backed[src/bioetl/composition/factories/pipeline/assembler.py-280-required_modules0]
   - name: S5-infra-adapters
     wave: 3
     paths:
@@ -142,8 +136,6 @@ shards:
       - --ignore=tests/architecture/test_docs_governance_workflow.py
       - --ignore=tests/architecture/test_quality_debt_scorecard.py
       - --ignore=tests/architecture/test_quality_burndown_priorities.py
-      - --deselect=tests/architecture/test_provider_registry_decomposition.py::test_provider_registry_facade_does_not_grow
-      - --deselect=tests/architecture/test_rf014_composition_bootstrap_closeout.py::test_rf014_composition_bootstrap_surfaces_stay_bounded_and_helper_backed[src/bioetl/composition/factories/pipeline/assembler.py-280-required_modules0]
   - name: S7-crosscutting-architecture-guardrails
     wave: 2
     paths:
@@ -162,8 +154,6 @@ shards:
     workers_override: 2
     extra_pytest_args:
       - --timeout=300
-      - --deselect=tests/architecture/test_docs_governance_workflow.py::test_docs_workflow_runs_lightweight_docs_governance_profile
-      - --deselect=tests/architecture/test_diagram_regression_workflow.py::test_docs_workflow_runs_doc_integrity_guardrails
   - name: S8-crosscutting-governance
     wave: 3
     paths:
@@ -194,17 +184,3 @@ shards:
       - --ignore=tests/architecture/test_docs_governance_workflow.py
       - --ignore=tests/architecture/test_quality_debt_scorecard.py
       - --ignore=tests/architecture/test_quality_burndown_priorities.py
-      - --deselect=tests/architecture/test_provider_registry_decomposition.py::test_provider_registry_facade_does_not_grow
-      - --deselect=tests/architecture/test_rf014_composition_bootstrap_closeout.py::test_rf014_composition_bootstrap_surfaces_stay_bounded_and_helper_backed[src/bioetl/composition/factories/pipeline/assembler.py-280-required_modules0]
-  - name: S9-failures
-    wave: 4
-    paths:
-      - tests/unit/interfaces/cli/test_registry_consistency.py::TestListPipelinesCommandSnapshot::test_list_pipelines_command_output
-      - tests/unit/interfaces/cli/commands/test_quarantine_support.py::TestShowQuarantineStats::test_json_output_mode
-      - tests/architecture/test_provider_registry_decomposition.py::test_provider_registry_facade_does_not_grow
-      - tests/architecture/test_docs_governance_workflow.py::test_docs_workflow_runs_lightweight_docs_governance_profile
-      - tests/architecture/test_diagram_regression_workflow.py::test_docs_workflow_runs_doc_integrity_guardrails
-      - tests/architecture/test_rf014_composition_bootstrap_closeout.py::test_rf014_composition_bootstrap_surfaces_stay_bounded_and_helper_backed[src/bioetl/composition/factories/pipeline/assembler.py-280-required_modules0]
-    workers_override: 0
-    extra_pytest_args:
-      - --timeout=300

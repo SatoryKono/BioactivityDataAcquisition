@@ -17,7 +17,6 @@ from __future__ import annotations
 import os
 import sys
 from pathlib import Path
-from typing import Any
 
 import pytest
 from deltalake.exceptions import DeltaError, TableNotFoundError
@@ -74,17 +73,6 @@ def _skip_if_term_payload_unavailable(test_name: str) -> None:
         pytest.skip(
             "VCR cassette sample has no mesh_terms/keywords payload for publication_term extraction."
         )
-
-
-@pytest.fixture(scope="module")
-def vcr_config() -> dict[str, Any]:
-    """Configure VCR for ChEMBL Publication Term E2E tests."""
-    return {
-        "cassette_library_dir": str(CASSETTE_DIR),
-        "record_mode": os.environ.get("VCR_RECORD_MODE", "none"),
-        "match_on": ["method", "scheme", "host", "port", "path", "query"],
-        "decode_compressed_response": True,
-    }
 
 
 @pytest.mark.e2e

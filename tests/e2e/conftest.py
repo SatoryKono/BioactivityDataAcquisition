@@ -18,7 +18,7 @@ import asyncio
 import json
 import os
 import shutil
-from collections.abc import Generator
+from collections.abc import Callable, Generator
 from contextlib import contextmanager
 from dataclasses import replace
 from functools import cache
@@ -573,8 +573,59 @@ async def run_pipeline_or_skip_transient(context: PipelineRunContext) -> Any:
 # ============================================================================
 
 
-def assert_bronze_files_exist(data_dir: Path, provider: str, entity: str) -> list[Path]:
-    """Проверка существования Bronze-файлов.
+def _bronze_candidate_roots(data_dir: Path) -> tuple[Path, ...]:
+    return (
+        data_dir / "bronze",
+        data_dir / "output" / "bronze",
+    )
+
+
+def _bronze_search_paths(data_dir: Path, provider: str, entity: str) -> list[Path]:
+    paths: list[Path] = []
+    for root in _bronze_candidate_roots(data_dir):
+        paths.append(root / provider / entity)
+        paths.append(root)
+    return paths
+
+
+def _find_bronze_payload_files(root: Path) -> list[Path]:
+    files = list(root.rglob("*.jsonl.zst"))
+    if files:
+        return files
+    return list(root.rglob("*.jsonl"))
+
+
+def _find_bronze_metadata_files(root: Path) -> list[Path]:
+    return list(root.rglob("*_metadata.yaml"))
+
+
+def _find_bronze_artifacts(
+    *,
+    data_dir: Path,
+    provider: str,
+    entity: str,
+    finder: Callable[[Path], list[Path]],
+) -> list[Path]:
+    for root in _bronze_candidate_roots(data_dir):
+        standard_path = root / provider / entity
+        if standard_path.exists():
+            files = finder(standard_path)
+            if files:
+                return files
+
+        if root.exists():
+            files = finder(root)
+            if files:
+                return files
+    return []
+
+
+def assert_bronze_payload_files_exist(
+    data_dir: Path,
+    provider: str,
+    entity: str,
+) -> list[Path]:
+    """Assert immutable raw Bronze payload files were materialized.
 
     Args:
         data_dir: Корневая директория данных
@@ -588,44 +639,58 @@ def assert_bronze_files_exist(data_dir: Path, provider: str, entity: str) -> lis
         AssertionError: Если файлы не найдены
 
     Note:
-        Handles both standard and flat_structure layouts. Prefers real Bronze
-        data files, but falls back to Bronze metadata sidecars when the runtime
-        path only materializes metadata for the current execution mode.
+        Handles both standard and flat_structure layouts. Metadata sidecars are
+        intentionally not accepted as raw Bronze payload evidence.
     """
-
-    def _find_artifacts(root: Path) -> list[Path]:
-        files = list(root.rglob("*.jsonl.zst"))
-        if files:
-            return files
-        files = list(root.rglob("*.jsonl"))
-        if files:
-            return files
-        return list(root.rglob("*_metadata.yaml"))
-
-    candidate_roots = (
-        data_dir / "bronze",
-        data_dir / "output" / "bronze",
-        Path("data") / "output" / "bronze",
+    files = _find_bronze_artifacts(
+        data_dir=data_dir,
+        provider=provider,
+        entity=entity,
+        finder=_find_bronze_payload_files,
     )
-    checked_paths: list[Path] = []
+    if files:
+        return files
 
-    for root in candidate_roots:
-        checked_paths.append(root / provider / entity)
-        checked_paths.append(root)
+    checked_payload_paths = "\n".join(
+        f"  - {path}" for path in _bronze_search_paths(data_dir, provider, entity)
+    )
+    checked_metadata_paths = "\n".join(
+        f"  - {path}" for path in _bronze_search_paths(data_dir, provider, entity)
+    )
+    raise AssertionError(
+        "No raw Bronze payload files found (*.jsonl.zst or *.jsonl).\n"
+        f"Checked payload paths:\n{checked_payload_paths}\n"
+        "Metadata sidecars are not accepted as payload evidence.\n"
+        f"Metadata search paths, for separate assertion only:\n{checked_metadata_paths}"
+    )
 
-        standard_path = root / provider / entity
-        if standard_path.exists():
-            files = _find_artifacts(standard_path)
-            if files:
-                return files
 
-        if root.exists():
-            files = _find_artifacts(root)
-            if files:
-                return files
+def assert_bronze_metadata_files_exist(
+    data_dir: Path,
+    provider: str,
+    entity: str,
+) -> list[Path]:
+    """Assert Bronze metadata sidecars were materialized."""
+    files = _find_bronze_artifacts(
+        data_dir=data_dir,
+        provider=provider,
+        entity=entity,
+        finder=_find_bronze_metadata_files,
+    )
+    if files:
+        return files
 
-    checked = "\n".join(f"  - {path}" for path in checked_paths)
-    raise AssertionError(f"No Bronze files found. Checked paths:\n{checked}")
+    checked = "\n".join(
+        f"  - {path}" for path in _bronze_search_paths(data_dir, provider, entity)
+    )
+    raise AssertionError(
+        f"No Bronze metadata sidecars found. Checked paths:\n{checked}"
+    )
+
+
+def assert_bronze_files_exist(data_dir: Path, provider: str, entity: str) -> list[Path]:
+    """Compatibility wrapper for raw Bronze payload assertions."""
+    return assert_bronze_payload_files_exist(data_dir, provider, entity)
 
 
 def assert_run_manifest_exists(data_dir: Path, run_id: RunID) -> dict[str, Any]:

@@ -547,7 +547,7 @@ class TestRunPipelineIntegration:
 
     @pytest.mark.asyncio
     async def test_run_pipeline_requires_metrics_readable_runner(self):
-        """Test run_pipeline fails clearly for runners without metrics contract."""
+        """Bootstrap contract failures return a structured failed run result."""
         from bioetl.composition.entrypoints import run_pipeline
 
         class MinimalRunner:
@@ -561,13 +561,53 @@ class TestRunPipelineIntegration:
                 return None
 
         runner = MinimalRunner()
-        with patch(
-            "bioetl.composition._pipeline_execution.create_pipeline_runner",
-            return_value=runner,
+        with (
+            patch(
+                "bioetl.composition._pipeline_execution.create_pipeline_runner",
+                return_value=runner,
+            ),
+            patch(
+                "bioetl.composition._pipeline_execution.push_metrics_to_gateway",
+                return_value=True,
+            ) as mock_push,
         ):
-            with pytest.raises(
-                TypeError,
-                match="ExecutionMetricsRunnerPort",
-            ):
-                await run_pipeline("test_pipeline", RunOptions())
+            result = await run_pipeline("test_pipeline", RunOptions(run_type="rebuild"))
+
+        assert result.status == PipelineRunResult.FAILED
+        assert result.error_type == "TypeError"
+        assert "ExecutionMetricsRunnerPort" in (result.error_message or "")
+        assert result.run_type == "rebuild"
+        assert result.records_fetched == 0
+        mock_push.assert_called_once_with(
+            run_label="bioetl",
+            pipeline_name="test_pipeline",
+            run_type="rebuild",
+        )
         assert runner.called is False
+
+    @pytest.mark.asyncio
+    async def test_run_pipeline_publishes_terminal_metrics_for_bootstrap_failure(self):
+        """Config/DI bootstrap failures still publish terminal metrics best-effort."""
+        from bioetl.composition.entrypoints import run_pipeline
+
+        with (
+            patch(
+                "bioetl.composition._pipeline_execution.create_pipeline_runner",
+                side_effect=ValueError("invalid pipeline config"),
+            ),
+            patch(
+                "bioetl.composition._pipeline_execution.push_metrics_to_gateway",
+                return_value=True,
+            ) as mock_push,
+        ):
+            result = await run_pipeline("test_pipeline", RunOptions(run_type="rebuild"))
+
+        assert result.status == PipelineRunResult.FAILED
+        assert result.error_message == "invalid pipeline config"
+        assert result.error_type == "ValueError"
+        assert UUID(result.run_id)
+        mock_push.assert_called_once_with(
+            run_label="bioetl",
+            pipeline_name="test_pipeline",
+            run_type="rebuild",
+        )

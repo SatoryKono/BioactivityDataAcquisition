@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 
 
 __all__ = [
-    "bootstrap_logger_port",
+    "bootstrap_logger",
 ]
 
 
@@ -28,7 +28,7 @@ def _default_logger_factory(pipeline: str, run_id: UUID, log_level: str) -> Logg
     )
 
 
-def bootstrap_logger_port(
+def bootstrap_logger(
     pipeline: str,
     run_id: UUID | None = None,
     log_level: str = "INFO",

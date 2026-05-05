@@ -52,7 +52,7 @@ def map_domain_event_to_observability_event(
     return handler(event)
 
 
-DomainEventBuilder = Callable[[DomainEvent], DomainEventObservabilityEnvelope]
+DomainEventMapper = Callable[[DomainEvent], DomainEventObservabilityEnvelope]
 
 
 def _build_envelope(
@@ -243,7 +243,7 @@ def _build_quarantine_entry_resolved(
     )
 
 
-_DOMAIN_EVENT_BUILDERS: dict[type[DomainEvent], DomainEventBuilder] = {
+_DOMAIN_EVENT_BUILDERS: dict[type[DomainEvent], DomainEventMapper] = {
     PipelineCompleted: _build_pipeline_completed,
     PipelineFailed: _build_pipeline_failed,
     PipelineShutdown: _build_pipeline_shutdown,

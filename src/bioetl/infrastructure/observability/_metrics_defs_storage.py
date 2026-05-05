@@ -16,6 +16,11 @@ __all__ = [
     "BRONZE_WRITE_ATTEMPTS_TOTAL",
     "BRONZE_WRITE_DURATION_SECONDS",
     "BRONZE_WRITE_TOTAL_DURATION_SECONDS",
+    "GOLD_LIFECYCLE_STATE_TOTAL",
+    "GOLD_VALIDATION_FAILURES_TOTAL",
+    "GOLD_WRITE_ATTEMPTS_TOTAL",
+    "GOLD_WRITE_DURATION_SECONDS",
+    "GOLD_WRITE_OUTCOMES_TOTAL",
     "METADATA_WRITE_OUTCOMES_TOTAL",
     "METADATA_WRITE_RETRIES_TOTAL",
     "POLICY_VIOLATIONS_TOTAL",
@@ -124,6 +129,37 @@ SILVER_VALIDATION_FAILURES_TOTAL = Counter(
     "bioetl_silver_validation_failures_total",
     "Total silver schema validation failures",
     ["table", "pipeline"],
+)
+
+GOLD_WRITE_ATTEMPTS_TOTAL = Counter(
+    "bioetl_gold_write_attempts_total",
+    "Total Gold write attempts entering the storage write pipeline",
+    ["pipeline", "table", "mode"],
+)
+
+GOLD_WRITE_OUTCOMES_TOTAL = Counter(
+    "bioetl_gold_write_outcomes_total",
+    "Total Gold write terminal outcomes emitted by the storage write pipeline",
+    ["pipeline", "table", "mode", "status"],
+)
+
+GOLD_WRITE_DURATION_SECONDS = Histogram(
+    "bioetl_gold_write_duration_seconds",
+    "Duration of Gold write operations in seconds",
+    ["pipeline", "table", "mode", "status"],
+    buckets=[0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1.0, 5.0, 10.0, 30.0],
+)
+
+GOLD_VALIDATION_FAILURES_TOTAL = Counter(
+    "bioetl_gold_validation_failures_total",
+    "Total Gold write validation failures before physical storage dispatch",
+    ["pipeline", "table", "mode", "error_type"],
+)
+
+GOLD_LIFECYCLE_STATE_TOTAL = Counter(
+    "bioetl_gold_lifecycle_state_total",
+    "Total application-owned Gold lifecycle state decisions",
+    ["pipeline", "table", "state"],
 )
 
 METADATA_WRITE_RETRIES_TOTAL = Counter(
