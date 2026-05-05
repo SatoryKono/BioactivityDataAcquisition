@@ -11,7 +11,7 @@ import pyarrow as pa
 
 from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types import BronzeRecord
-from bioetl.infrastructure.export.csv_exporter_contract import CsvExporterPort
+from bioetl.infrastructure.export.csv_exporter_contract import CsvExporterProtocol
 from bioetl.infrastructure.storage.delta.arrow_converter import ArrowDataConverter
 from bioetl.infrastructure.storage.silver.merged_operations import (
     _build_merged_silver_write_request,
@@ -35,7 +35,7 @@ class _MergedWriteFacade:
     """Shared merged-write facade used by mixin and composition service paths."""
 
     logger: LoggerPort
-    csv_exporter: CsvExporterPort | None
+    csv_exporter: CsvExporterProtocol | None
     _arrow_converter: ArrowDataConverter
     _resolve_table_path: Callable[[str], str]
     _write_silver_merged_metadata: _MergedSilverMetadataWriterProtocol
@@ -110,7 +110,7 @@ class SilverMergedOperations(_MergedWriteFacade):
     """
 
     logger: LoggerPort
-    csv_exporter: CsvExporterPort | None
+    csv_exporter: CsvExporterProtocol | None
     _arrow_converter: ArrowDataConverter
     _resolve_table_path: Callable[[str], str]
     _write_silver_merged_metadata: _MergedSilverMetadataWriterProtocol

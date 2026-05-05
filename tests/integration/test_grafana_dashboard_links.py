@@ -421,25 +421,38 @@ def _cross_scope_marker_sections() -> tuple[dict[object, object], dict[object, o
     return required_markers, required_titles_by_transition, required_tooltip_tokens
 
 
+def _cross_scope_marker_spec(
+    *,
+    transition: object,
+    marker_key: object,
+    required_markers: dict[object, object],
+    required_tooltip_tokens: dict[object, object],
+) -> tuple[str, str, str, list[object]]:
+    assert isinstance(marker_key, str), f"marker key for {transition} must be a string"
+    marker = required_markers.get(marker_key)
+    assert isinstance(marker, str) and marker, (
+        f"required marker '{marker_key}' must be declared for transition {transition}"
+    )
+    tooltip_tokens = required_tooltip_tokens.get(marker_key, [])
+    assert isinstance(tooltip_tokens, list), (
+        f"required_tooltip_tokens.{marker_key} must be list"
+    )
+    return str(transition), marker, marker_key, tooltip_tokens
+
+
 def _cross_scope_marker_specs() -> list[tuple[str, str, str, list[object]]]:
     required_markers, required_titles_by_transition, required_tooltip_tokens = (
         _cross_scope_marker_sections()
     )
-    specs: list[tuple[str, str, str, list[object]]] = []
-    for transition, marker_key in required_titles_by_transition.items():
-        assert isinstance(marker_key, str), (
-            f"marker key for {transition} must be a string"
+    return [
+        _cross_scope_marker_spec(
+            transition=transition,
+            marker_key=marker_key,
+            required_markers=required_markers,
+            required_tooltip_tokens=required_tooltip_tokens,
         )
-        marker = required_markers.get(marker_key)
-        assert isinstance(marker, str) and marker, (
-            f"required marker '{marker_key}' must be declared for transition {transition}"
-        )
-        tooltip_tokens = required_tooltip_tokens.get(marker_key, [])
-        assert isinstance(tooltip_tokens, list), (
-            f"required_tooltip_tokens.{marker_key} must be list"
-        )
-        specs.append((str(transition), marker, marker_key, tooltip_tokens))
-    return specs
+        for transition, marker_key in required_titles_by_transition.items()
+    ]
 
 
 def _matching_cross_scope_links(
@@ -457,6 +470,110 @@ def _matching_cross_scope_links(
         if marker in title or marker in tooltip:
             matched_links.append(link)
     return matched_links
+
+
+def _required_dashboard_variable_name(dashboard_name: str) -> str:
+    if dashboard_name == "bioetl-provider-health-v2.json":
+        return "provider"
+    if dashboard_name == "bioetl-workflow-overview.json":
+        return "workflow"
+    return "pipeline"
+
+
+def _assert_dashboard_has_required_scope_variable(
+    dashboard_path: Path, dashboard: dict[str, object]
+) -> None:
+    variables = [
+        var.get("name") for var in dashboard.get("templating", {}).get("list", [])
+    ]
+    required_variable = _required_dashboard_variable_name(dashboard_path.name)
+    assert required_variable in variables, (
+        f"Dashboard {dashboard_path.name} must define '{required_variable}' "
+        "template variable"
+    )
+
+
+def _assert_dashboard_link_vars_allowed(
+    *, dashboard_name: str, target_uid: str, url: str
+) -> set[str]:
+    allowed_vars = _ALLOWED_DASHBOARD_LINK_VARS.get(target_uid)
+    assert allowed_vars is not None, (
+        f"Link target {target_uid} must be declared in allowed vars map"
+    )
+    passed_vars = _extract_link_vars(url)
+    assert passed_vars <= allowed_vars, (
+        f"{dashboard_name} link to {target_uid} passes unknown vars: "
+        f"{sorted(passed_vars - allowed_vars)} via {url}"
+    )
+    return passed_vars
+
+
+def _assert_dashboard_link_vars_not_forbidden(
+    *, dashboard_name: str, target_uid: str, url: str, passed_vars: set[str]
+) -> None:
+    forbidden_vars = _FORBIDDEN_DASHBOARD_LINK_VARS_BY_TARGET_UID.get(target_uid)
+    assert forbidden_vars is not None, (
+        f"Link target {target_uid} must be declared in forbidden vars map"
+    )
+    assert not (passed_vars & forbidden_vars), (
+        f"{dashboard_name} link to {target_uid} leaks forbidden vars: "
+        f"{sorted(passed_vars & forbidden_vars)} via {url}"
+    )
+
+
+def _assert_top_level_cross_dashboard_handoff(
+    *,
+    dashboard_name: str,
+    current_uid: str,
+    target_uid: str,
+    link: dict[str, object],
+    url: str,
+    dashboard_links: object,
+) -> None:
+    if target_uid == current_uid or link not in dashboard_links:
+        return
+    assert link.get("includeVars") is False, (
+        f"{dashboard_name} top-level link to {target_uid} must not "
+        "use generic includeVars leakage"
+    )
+    _assert_required_time_tokens(
+        url,
+        tokens=_DASHBOARD_TIME_HANDOFF_TOKENS,
+        context=f"{dashboard_name} top-level link to {target_uid}",
+    )
+
+
+def _assert_cross_dashboard_link_policy(
+    *,
+    dashboard_name: str,
+    current_uid: str,
+    link: dict[str, object],
+    dashboard_links: object,
+) -> None:
+    url = link.get("url", "")
+    if not isinstance(url, str) or not url.startswith("/d/"):
+        return
+    target_uid = _extract_dashboard_uid(url)
+    assert target_uid is not None, f"Could not parse dashboard UID from {url}"
+    passed_vars = _assert_dashboard_link_vars_allowed(
+        dashboard_name=dashboard_name,
+        target_uid=target_uid,
+        url=url,
+    )
+    _assert_dashboard_link_vars_not_forbidden(
+        dashboard_name=dashboard_name,
+        target_uid=target_uid,
+        url=url,
+        passed_vars=passed_vars,
+    )
+    _assert_top_level_cross_dashboard_handoff(
+        dashboard_name=dashboard_name,
+        current_uid=current_uid,
+        target_uid=target_uid,
+        link=link,
+        url=url,
+        dashboard_links=dashboard_links,
+    )
 
 
 def _assert_cross_scope_matched_links(
@@ -590,21 +707,7 @@ def test_dashboard_queries_do_not_filter_by_run_id_label(dashboard_path):
         + "\n".join(offenders[:10])
     )
 
-    variables = [
-        var.get("name") for var in dashboard.get("templating", {}).get("list", [])
-    ]
-    if dashboard_path.name == "bioetl-provider-health-v2.json":
-        assert "provider" in variables, (
-            "Provider dashboard must define 'provider' template variable"
-        )
-    elif dashboard_path.name == "bioetl-workflow-overview.json":
-        assert "workflow" in variables, (
-            "Workflow dashboard must define 'workflow' template variable"
-        )
-    else:
-        assert "pipeline" in variables, (
-            f"Dashboard {dashboard_path.name} must define 'pipeline' template variable"
-        )
+    _assert_dashboard_has_required_scope_variable(dashboard_path, dashboard)
 
 
 @pytest.mark.parametrize("dashboard_path", get_dashboard_files(), ids=lambda p: p.name)
@@ -654,45 +757,15 @@ def test_cross_dashboard_links_pass_only_target_scoped_variables() -> None:
         assert isinstance(current_uid, str), (
             f"Dashboard {dashboard_path.name} must define a uid"
         )
+        dashboard_links = dashboard.get("links", [])
 
         for link in _collect_dashboard_links(dashboard):
-            url = link.get("url", "")
-            if not isinstance(url, str) or not url.startswith("/d/"):
-                continue
-
-            target_uid = _extract_dashboard_uid(url)
-            assert target_uid is not None, f"Could not parse dashboard UID from {url}"
-            allowed_vars = _ALLOWED_DASHBOARD_LINK_VARS.get(target_uid)
-            assert allowed_vars is not None, (
-                f"Link target {target_uid} must be declared in allowed vars map"
+            _assert_cross_dashboard_link_policy(
+                dashboard_name=dashboard_path.name,
+                current_uid=current_uid,
+                link=link,
+                dashboard_links=dashboard_links,
             )
-
-            passed_vars = _extract_link_vars(url)
-            assert passed_vars <= allowed_vars, (
-                f"{dashboard_path.name} link to {target_uid} passes unknown vars: "
-                f"{sorted(passed_vars - allowed_vars)} via {url}"
-            )
-            forbidden_vars = _FORBIDDEN_DASHBOARD_LINK_VARS_BY_TARGET_UID.get(
-                target_uid
-            )
-            assert forbidden_vars is not None, (
-                f"Link target {target_uid} must be declared in forbidden vars map"
-            )
-            assert not (passed_vars & forbidden_vars), (
-                f"{dashboard_path.name} link to {target_uid} leaks forbidden vars: "
-                f"{sorted(passed_vars & forbidden_vars)} via {url}"
-            )
-
-            if target_uid != current_uid and link in dashboard.get("links", []):
-                assert link.get("includeVars") is False, (
-                    f"{dashboard_path.name} top-level link to {target_uid} must not "
-                    "use generic includeVars leakage"
-                )
-                _assert_required_time_tokens(
-                    url,
-                    tokens=_DASHBOARD_TIME_HANDOFF_TOKENS,
-                    context=f"{dashboard_path.name} top-level link to {target_uid}",
-                )
 
 
 def test_dashboard_top_level_navigation_contract_by_uid() -> None:

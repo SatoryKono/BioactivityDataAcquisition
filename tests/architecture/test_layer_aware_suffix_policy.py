@@ -219,6 +219,46 @@ def test_composition_bootstrap_port_function_exceptions_are_explicit_and_bounded
     }
 
 
+def _forbidden_alias_assignment_violation(
+    module_path: Path, node: ast.Assign, forbidden_aliases: set[str]
+) -> str | None:
+    for target in node.targets:
+        if isinstance(target, ast.Name) and target.id in forbidden_aliases:
+            return f"{module_path.relative_to(ROOT)}:{node.lineno}"
+    return None
+
+
+def _forbidden_alias_import_violations(
+    module_path: Path, node: ast.ImportFrom, forbidden_aliases: set[str]
+) -> list[str]:
+    return [
+        f"{module_path.relative_to(ROOT)}:{node.lineno}"
+        for alias in node.names
+        if alias.name in forbidden_aliases
+    ]
+
+
+def _forbidden_alias_violations_for_module(
+    module_path: Path, forbidden_aliases: set[str]
+) -> list[str]:
+    tree = ast.parse(module_path.read_text(encoding="utf-8"))
+    violations: list[str] = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Assign):
+            violation = _forbidden_alias_assignment_violation(
+                module_path, node, forbidden_aliases
+            )
+            if violation is not None:
+                violations.append(violation)
+        if isinstance(node, ast.ImportFrom):
+            violations.extend(
+                _forbidden_alias_import_violations(
+                    module_path, node, forbidden_aliases
+                )
+            )
+    return violations
+
+
 def test_checkpoint_quarantine_manager_aliases_are_not_exported() -> None:
     """Runtime/admin modules must not retain manager-style compatibility aliases."""
     forbidden_aliases = {
@@ -238,23 +278,13 @@ def test_checkpoint_quarantine_manager_aliases_are_not_exported() -> None:
         ROOT / "src" / "bioetl" / "application" / "core" / "quarantine_manager.py",
         ROOT / "src" / "bioetl" / "application" / "services" / "admin_runtime_api.py",
     )
-    violations: list[str] = []
-
-    for module_path in module_paths:
-        tree = ast.parse(module_path.read_text(encoding="utf-8"))
-        for node in ast.walk(tree):
-            if isinstance(node, ast.Assign):
-                for target in node.targets:
-                    if isinstance(target, ast.Name) and target.id in forbidden_aliases:
-                        violations.append(
-                            f"{module_path.relative_to(ROOT)}:{node.lineno}"
-                        )
-            if isinstance(node, ast.ImportFrom):
-                for alias in node.names:
-                    if alias.name in forbidden_aliases:
-                        violations.append(
-                            f"{module_path.relative_to(ROOT)}:{node.lineno}"
-                        )
+    violations = [
+        violation
+        for module_path in module_paths
+        for violation in _forbidden_alias_violations_for_module(
+            module_path, forbidden_aliases
+        )
+    ]
 
     assert violations == [], (
         "Manager-style checkpoint/quarantine aliases must stay removed:\n"

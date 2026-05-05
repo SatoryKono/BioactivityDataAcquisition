@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, Any
 from bioetl.domain.context import current_utc_time
 from bioetl.domain.ports import AuditPort, MetricsPort
 from bioetl.domain.types import JsonDict
-from bioetl.infrastructure.export.csv_exporter_contract import CsvExporterPort
+from bioetl.infrastructure.export.csv_exporter_contract import CsvExporterProtocol
 from bioetl.infrastructure.storage.support.retention import RetentionPolicy
 
 if TYPE_CHECKING:
@@ -25,7 +25,7 @@ class SilverMaintenanceOperations:
 
     def __init__(
         self,
-        csv_exporter: CsvExporterPort | None,
+        csv_exporter: CsvExporterProtocol | None,
         retention_manager: RetentionPolicy,
         pipeline_name: str,
         metrics: MetricsPort | None = None,

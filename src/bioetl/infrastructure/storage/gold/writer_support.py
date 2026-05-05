@@ -43,7 +43,7 @@ if TYPE_CHECKING:
         TracingPort,
     )
     from bioetl.domain.types.contract_rollout import ContractRolloutPolicy
-    from bioetl.infrastructure.export.csv_exporter_contract import CsvExporterPort
+    from bioetl.infrastructure.export.csv_exporter_contract import CsvExporterProtocol
 
 __all__ = [
     "_build_gold_write_request",
@@ -145,7 +145,7 @@ def _resolve_runtime_services(
 ) -> GoldWriterRuntimeServices:
     """Normalize legacy constructor kwargs into grouped Gold runtime services."""
     csv_exporter = cast(
-        "CsvExporterPort | None",
+        "CsvExporterProtocol | None",
         legacy_kwargs.pop("csv_exporter", None),
     )
     tracing = cast(

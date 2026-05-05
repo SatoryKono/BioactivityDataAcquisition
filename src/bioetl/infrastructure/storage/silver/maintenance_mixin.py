@@ -15,7 +15,7 @@ from deltalake import DeltaTable
 from bioetl.domain.medallion import SilverWriteMode
 from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types import BronzeRecord, MetaDict
-from bioetl.infrastructure.export.csv_exporter_contract import CsvExporterPort
+from bioetl.infrastructure.export.csv_exporter_contract import CsvExporterProtocol
 from bioetl.infrastructure.storage.support.retention import RetentionPolicy
 
 
@@ -23,7 +23,7 @@ class SilverWriterMaintenanceMixin:
     """Mixin with CSV export, vacuum, optimize, and table read helpers."""
 
     logger: LoggerPort
-    csv_exporter: CsvExporterPort | None
+    csv_exporter: CsvExporterProtocol | None
     _retention_manager: RetentionPolicy
     get_table_path: Callable[[str], Path]
     read_table: Callable[..., Awaitable[list[BronzeRecord]]]

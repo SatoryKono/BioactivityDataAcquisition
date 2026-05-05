@@ -22,7 +22,7 @@ if TYPE_CHECKING:
     from datetime import datetime
 
     from bioetl.domain.types import GoldRecord, ScdConfig
-    from bioetl.infrastructure.export.csv_exporter_contract import CsvExporterPort
+    from bioetl.infrastructure.export.csv_exporter_contract import CsvExporterProtocol
 
 
 @dataclass(frozen=True, slots=True)
@@ -63,7 +63,7 @@ class _PreparedScd2GoldWrite:
 class _GoldWriterSimpleDeltaHostProtocol(Protocol):
     """Structural host contract for simple Gold Delta write helpers."""
 
-    csv_exporter: CsvExporterPort | None
+    csv_exporter: CsvExporterProtocol | None
 
     async def _run_in_executor(
         self,
