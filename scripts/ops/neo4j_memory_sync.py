@@ -1272,8 +1272,9 @@ def _signature_hash(node: ast.FunctionDef | ast.AsyncFunctionDef) -> str:
 
 class _ShapeNormalizer(ast.NodeTransformer):
     def visit_arg(self, node: ast.arg) -> ast.AST:  # noqa: N802
-        placeholder = ast.arg(arg="ARG", annotation=None)  # NOSONAR
-        return ast.copy_location(placeholder, node)
+        node.arg = "ARG"
+        node.annotation = None
+        return node
 
     def visit_Name(self, node: ast.Name) -> ast.AST:  # noqa: N802
         return ast.copy_location(ast.Name(id="VAR", ctx=node.ctx), node)
@@ -1647,14 +1648,15 @@ def _select_alert_targets(  # NOSONAR
         ]
 
     provider_targets: list[NodeKey] = []
-    include_all_providers = provider_mode == "all" or (  # NOSONAR
+    provider_mode_auto = (
         provider_mode == "auto"
         and (
             "provider" in dimensions
-            or "provider_health" in normalized  # NOSONAR
+            or "provider_health" in normalized
             or "bioetl_health_check_" in normalized
         )
     )
+    include_all_providers = provider_mode == "all" or provider_mode_auto
     if include_all_providers:
         provider_targets = provider_nodes
 
@@ -3460,6 +3462,18 @@ def _add_complexity_analysis_surfaces(
             "docs": set(),
             "tests": set(),
         }
+
+        def _relation_bucket_label(label: str) -> str | None:
+            if label in runtime_labels:
+                return "runtime"
+            if label in config_labels:
+                return "config"
+            if label in doc_labels:
+                return "docs"
+            if label in test_labels:
+                return "tests"
+            return None
+
         package_name: str | None = None
         module_node = snapshot.nodes.get(module_key)
         if module_node is not None:
@@ -3476,14 +3490,9 @@ def _add_complexity_analysis_surfaces(
                 if relation.relation_type in ignored_relation_types:
                     continue
                 other = relation.source if relation.target == key else relation.target
-                if other.label in runtime_labels:
-                    buckets["runtime"].add(other)
-                elif other.label in config_labels:
-                    buckets["config"].add(other)
-                elif other.label in doc_labels:
-                    buckets["docs"].add(other)  # NOSONAR
-                elif other.label in test_labels:
-                    buckets["tests"].add(other)
+                bucket_name = _relation_bucket_label(other.label)
+                if bucket_name is not None:
+                    buckets[bucket_name].add(other)
         return {
             name: sorted(values, key=lambda item: (item.label, item.name))  # NOSONAR
             for name, values in buckets.items()
