@@ -114,6 +114,7 @@
     "Review forensic-grade persistence requirements before using this run for full trace/debug reconstruction."
   ],
   "occurrence_only_diagnostics": [],
+  "operator_replay_mode": "Exact Replay",
   "persistence_profile": {
     "attained_profile": "degraded_observable",
     "claims": {
@@ -452,7 +453,7 @@
         "applied_checkpoint_compatibility_policy": "hard_fail",
         "continuation_mode": "exact_replay",
         "execution_context": "ordinary",
-        "occurrence_identity_anchor": null,
+        "occurrence_identity_anchor": "run_id",
         "requested_checkpoint_compatibility_policy": null,
         "requested_exact_replay": true,
         "resume_mode": "checkpoint_snapshot_only",
@@ -514,6 +515,7 @@
       "continuation_mode": "exact_replay",
       "exact_replay_blockers": [],
       "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
+      "operator_replay_mode": "Exact Replay",
       "policy_assessment": {
         "blocking_gaps": [],
         "replay_capability": "exact_replay_supported",
@@ -564,7 +566,8 @@
       "input_snapshot_ids": [
         "snapshot-golden-001"
       ],
-      "resolved_config_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      "resolved_config_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "snapshot_status": "full"
     }
   },
   "reproducibility_policy_assessment": {
@@ -589,7 +592,7 @@
     "applied_checkpoint_compatibility_policy": "hard_fail",
     "continuation_mode": "exact_replay",
     "execution_context": "ordinary",
-    "occurrence_identity_anchor": null,
+    "occurrence_identity_anchor": "run_id",
     "requested_checkpoint_compatibility_policy": null,
     "requested_exact_replay": true,
     "resume_mode": "checkpoint_snapshot_only",
@@ -600,5 +603,6 @@
   "resume_diagnostics": null,
   "rule_bundle_version": "2026.03",
   "run_id": "00000000-0000-0000-0000-000000000901",
+  "snapshot_status": "full",
   "source_revision_state": "clean"
 }

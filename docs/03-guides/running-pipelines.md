@@ -241,6 +241,11 @@ Supported resume modes:
 - composite `bioetl run-composite --resume` uses checkpoint snapshot state as
   the base and then replays ledger events strictly after `last_event_id`.
 
+For both modes, the canonical compatibility anchor is
+`execution_fingerprint`. Composite-specific occurrence metadata can still be
+diagnostic evidence, but it must not override a matching canonical execution
+identity.
+
 ### Debug логирование
 
 ```bash

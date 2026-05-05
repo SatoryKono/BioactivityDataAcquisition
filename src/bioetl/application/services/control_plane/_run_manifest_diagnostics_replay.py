@@ -297,9 +297,7 @@ def _build_resume_contract(
         ),
         "continuation_mode": continuation_mode,
         "semantic_identity_anchor": "execution_fingerprint",
-        "occurrence_identity_anchor": (
-            "composite_run_identity" if is_composite else None
-        ),
+        "occurrence_identity_anchor": "run_id",
     }
 
 

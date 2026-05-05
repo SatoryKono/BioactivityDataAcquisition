@@ -60,13 +60,6 @@ def check_execution_identity_compatibility(
     checkpoint: ExecutionIdentityCompatibilityContext,
 ) -> JsonDict:
     """Check execution identity using canonical manifest and fallback anchors."""
-    composite_identity_result = _check_composite_run_identity_compatibility(
-        current_composite_run_identity=current.composite_run_identity,
-        checkpoint_composite_run_identity=checkpoint.composite_run_identity,
-    )
-    if composite_identity_result is not None:
-        return composite_identity_result
-
     execution_fingerprint_result = _compare_optional_identity_fingerprints(
         current.execution_fingerprint,
         checkpoint.execution_fingerprint,
@@ -89,6 +82,13 @@ def check_execution_identity_compatibility(
     )
     if runtime_anchor_result is not None:
         return runtime_anchor_result
+
+    composite_identity_result = _check_composite_run_identity_compatibility(
+        current_composite_run_identity=current.composite_run_identity,
+        checkpoint_composite_run_identity=checkpoint.composite_run_identity,
+    )
+    if composite_identity_result is not None:
+        return composite_identity_result
     return {
         "compatible": False,
         "reason": "execution_identity_not_enforced",

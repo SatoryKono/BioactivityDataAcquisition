@@ -268,10 +268,11 @@ def test_silver_reject_explorer_payload_link_preserves_time_scope() -> None:
     assert "latest 100" in description.lower()
 
 
-def test_dq_reject_breakdown_panels_link_to_silver_reject_explorer() -> None:
-    """DQ reject breakdown panels should hand off to Silver Reject Explorer."""
+def test_dq_reject_panels_link_to_silver_reject_explorer() -> None:
+    """DQ reject count and breakdown panels should hand off to Silver Reject Explorer."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
     for panel_title in (
+        "Silver Filter Rejects",
         "Top Silver Reject Reasons (Pareto)",
         "Top Silver Reject Fields",
     ):

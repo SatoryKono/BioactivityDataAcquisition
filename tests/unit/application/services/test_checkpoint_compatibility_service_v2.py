@@ -534,7 +534,7 @@ def test_compatibility_details():
 
 
 def test_composite_run_identity_mismatch_is_enforced():
-    """Composite run identity drift must fail execution identity compatibility."""
+    """Legacy composite drift alone no longer overrides compatibility."""
     service = CheckpointCompatibilityServiceV2()
 
     current_identity = CheckpointIdentity(
@@ -553,15 +553,15 @@ def test_composite_run_identity_mismatch_is_enforced():
 
     result = service.check_compatibility(current_identity, checkpoint_identity)
 
-    assert result.verdict == CompatibilityVerdict.MAJOR_INCOMPATIBLE
+    assert result.verdict == CompatibilityVerdict.COMPATIBLE
     assert (
         result.details["execution_identity_compatibility"]["reason"]
-        == "composite_run_identity_mismatch"
+        == "identical_degraded_runtime_anchor_fingerprint"
     )
 
 
 def test_composite_run_identity_missing_is_enforced():
-    """Missing composite identity on one side must fail strict compatibility."""
+    """Missing legacy composite identity alone no longer fails compatibility."""
     service = CheckpointCompatibilityServiceV2()
 
     current_identity = CheckpointIdentity(
@@ -580,10 +580,39 @@ def test_composite_run_identity_missing_is_enforced():
 
     result = service.check_compatibility(current_identity, checkpoint_identity)
 
-    assert result.verdict == CompatibilityVerdict.MAJOR_INCOMPATIBLE
+    assert result.verdict == CompatibilityVerdict.COMPATIBLE
     assert (
         result.details["execution_identity_compatibility"]["reason"]
-        == "composite_run_identity_missing"
+        == "identical_degraded_runtime_anchor_fingerprint"
+    )
+
+
+def test_matching_execution_fingerprint_overrides_composite_run_identity_drift():
+    """Canonical execution identity should win over legacy composite drift."""
+    service = CheckpointCompatibilityServiceV2()
+
+    current_identity = CheckpointIdentity(
+        effective_config_hash=HASH_A,
+        execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
+        checkpoint_schema_version="1.0.0",
+        execution_fingerprint="fp-shared",
+        composite_run_identity="run-001",
+    )
+
+    checkpoint_identity = CheckpointIdentity(
+        effective_config_hash=HASH_A,
+        execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
+        checkpoint_schema_version="1.0.0",
+        execution_fingerprint="fp-shared",
+        composite_run_identity="run-002",
+    )
+
+    result = service.check_compatibility(current_identity, checkpoint_identity)
+
+    assert result.verdict == CompatibilityVerdict.COMPATIBLE
+    assert (
+        result.details["execution_identity_compatibility"]["reason"]
+        == "identical_execution_fingerprint"
     )
 
 

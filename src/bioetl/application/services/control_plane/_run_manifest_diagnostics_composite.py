@@ -65,7 +65,7 @@ def build_composite_dossier_projection(
             "required_anchor": "composite_run_id",
             "required_event_families": ["checkpoint", "composite"],
             "semantic_anchor": "execution_fingerprint",
-            "occurrence_anchor": "composite_run_identity",
+            "occurrence_anchor": "run_id",
             "status": "satisfied" if composite_gap_count == 0 else "gap",
         },
         "correlation_anchor_gaps": {"composite_run_id": composite_gap_count},
