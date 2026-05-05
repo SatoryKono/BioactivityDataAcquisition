@@ -7,9 +7,7 @@ from typing import TYPE_CHECKING
 from bioetl.application.services.control_plane.run_ledger_service import (
     RunLedgerService,
 )
-from bioetl.composition.runtime_builders import (
-    _run_manifest_support as _manifest_support,
-)
+import bioetl.composition.runtime_builders._run_manifest_support as _manifest_support
 from bioetl.composition.runtime_builders._run_manifest_builder_policy import (
     resolve_manifest_reproducibility_context,
 )

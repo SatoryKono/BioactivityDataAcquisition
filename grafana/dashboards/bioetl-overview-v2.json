@@ -119,6 +119,16 @@
                   "color": "red"
                 }
               }
+            },
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "NO DATA / UNKNOWN",
+                  "color": "gray"
+                }
+              }
             }
           ],
           "thresholds": {
@@ -177,13 +187,125 @@
       "description": "Thresholds: BROKEN when runtime blocker>0, DQ hard fail>0, or control-plane blocker>0; DEGRADED on warning-only signals; UNKNOWN when no recent samples. Next action: open dashboard indicated by Next Action (Runtime first, then Control Plane, DQ, Provider, Workflow)."
     },
     {
-      "datasource": "Prometheus",
+      "id": 215,
+      "type": "table",
+      "title": "Next Action",
+      "gridPos": {
+        "h": 6,
+        "w": 9,
+        "x": 6,
+        "y": 4
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
             "mode": "thresholds"
           },
-          "decimals": 0,
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "5": {
+                  "text": "MONITOR",
+                  "color": "gray"
+                },
+                "10": {
+                  "text": "WORKFLOW",
+                  "color": "green"
+                },
+                "20": {
+                  "text": "PROVIDER",
+                  "color": "orange"
+                },
+                "30": {
+                  "text": "DQ",
+                  "color": "orange"
+                },
+                "40": {
+                  "text": "CONTROL PLANE",
+                  "color": "red"
+                },
+                "50": {
+                  "text": "RUNTIME",
+                  "color": "red"
+                }
+              }
+            },
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "NO DATA / UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "gray",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 10
+              },
+              {
+                "color": "orange",
+                "value": 20
+              },
+              {
+                "color": "red",
+                "value": 40
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "topk(1, bioetl_l0_next_action_route{pipeline=~\"$pipeline\"} > 0)",
+          "refId": "A",
+          "format": "table",
+          "instant": true
+        }
+      ],
+      "options": {
+        "showHeader": true,
+        "footer": {
+          "show": false
+        }
+      },
+      "description": "Action route projection. The row exposes `action_target`, `action_reason`, and `action_dashboard_uid`; Runtime > Control Plane > DQ > Provider > Workflow > Monitor. Pipeline scope is explicit; DQ/provider routes remain broader than run_type when the underlying signal is global."
+    },
+    {
+      "id": 9002,
+      "type": "table",
+      "title": "L0 Inputs",
+      "gridPos": {
+        "h": 6,
+        "w": 9,
+        "x": 15,
+        "y": 4
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
           "mappings": [
             {
               "type": "value",
@@ -205,6 +327,16 @@
                   "color": "red"
                 }
               }
+            },
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "NO DATA / UNKNOWN",
+                  "color": "gray"
+                }
+              }
             }
           ],
           "thresholds": {
@@ -216,64 +348,17 @@
               },
               {
                 "color": "orange",
-                "value": 1
+                "value": 2
               },
               {
                 "color": "red",
-                "value": 2
+                "value": 3
               }
             ]
           },
-          "unit": "none",
-          "links": []
+          "unit": "none"
         },
         "overrides": []
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 9,
-        "x": 6,
-        "y": 4
-      },
-      "id": 215,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "value_and_name"
-      },
-      "targets": [
-        {
-          "expr": "max(bioetl_l0_next_action{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})",
-          "legendFormat": "Priority: Runtime > CP > DQ > Provider > Workflow",
-          "refId": "A"
-        }
-      ],
-      "title": "Next Action",
-      "type": "stat",
-      "description": "Threshold semantics: Runtime blockers > Control Plane > DQ > Provider > Workflow > Monitor. Next action: follow this priority order; investigate first non-OK domain and keep the same pipeline/run_type scope."
-    },
-    {
-      "id": 9002,
-      "type": "table",
-      "title": "L0 Inputs",
-      "gridPos": {
-        "h": 6,
-        "w": 9,
-        "x": 15,
-        "y": 4
-      },
-      "datasource": {
-        "type": "prometheus",
-        "uid": "${datasource}"
       },
       "targets": [
         {
@@ -289,7 +374,7 @@
           "show": false
         }
       },
-      "description": "Current L0 inputs (Runtime, DQ, Gold, Control Plane, Provider, Workflow)."
+      "description": "Current L0 inputs (Runtime, DQ, Gold, Control Plane, Provider, Workflow). Value mapping: 0/null=UNKNOWN, 1=OK, 2=DEGRADED, 3=BROKEN."
     },
     {
       "id": 9003,
@@ -305,6 +390,71 @@
         "type": "prometheus",
         "uid": "${datasource}"
       },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "NO DATA / UNKNOWN",
+                  "color": "gray"
+                },
+                "1": {
+                  "text": "OK",
+                  "color": "green"
+                },
+                "2": {
+                  "text": "DEGRADED",
+                  "color": "orange"
+                },
+                "3": {
+                  "text": "FAILING / BROKEN",
+                  "color": "red"
+                }
+              }
+            },
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "NO DATA / UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 2
+              },
+              {
+                "color": "red",
+                "value": 3
+              }
+            ]
+          },
+          "unit": "none",
+          "links": [
+            {
+              "title": "Open 2. Runtime",
+              "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
+            }
+          ]
+        },
+        "overrides": []
+      },
       "targets": [
         {
           "expr": "bioetl_l1_runtime_blocker_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}",
@@ -319,7 +469,7 @@
           "show": false
         }
       },
-      "description": "Current status only; no $__range evidence."
+      "description": "Current runtime blocker summary only; no $__range evidence. Open Runtime dashboard for the exact blocker condition rows."
     },
     {
       "id": 9004,
@@ -335,6 +485,71 @@
         "type": "prometheus",
         "uid": "${datasource}"
       },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "NO DATA / UNKNOWN",
+                  "color": "gray"
+                },
+                "1": {
+                  "text": "OK",
+                  "color": "green"
+                },
+                "2": {
+                  "text": "DEGRADED",
+                  "color": "orange"
+                },
+                "3": {
+                  "text": "FAILING / BROKEN",
+                  "color": "red"
+                }
+              }
+            },
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "NO DATA / UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 2
+              },
+              {
+                "color": "red",
+                "value": 3
+              }
+            ]
+          },
+          "unit": "none",
+          "links": [
+            {
+              "title": "Open 4. Data Quality",
+              "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&${__url_time_range}"
+            }
+          ]
+        },
+        "overrides": []
+      },
       "targets": [
         {
           "expr": "bioetl_l1_dq_status{pipeline=~\"$pipeline\"}",
@@ -349,7 +564,7 @@
           "show": false
         }
       },
-      "description": ""
+      "description": "Pipeline-scoped DQ summary across run types for the selected pipeline. Value mapping: 0/null=UNKNOWN, 1=OK, 2=DEGRADED, 3=BROKEN."
     },
     {
       "id": 9005,
@@ -365,9 +580,74 @@
         "type": "prometheus",
         "uid": "${datasource}"
       },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "NO DATA / UNKNOWN",
+                  "color": "gray"
+                },
+                "1": {
+                  "text": "OK",
+                  "color": "green"
+                },
+                "2": {
+                  "text": "DEGRADED",
+                  "color": "orange"
+                },
+                "3": {
+                  "text": "FAILING / BROKEN",
+                  "color": "red"
+                }
+              }
+            },
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "NO DATA / UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 2
+              },
+              {
+                "color": "red",
+                "value": 3
+              }
+            ]
+          },
+          "unit": "none",
+          "links": [
+            {
+              "title": "Open 2. Runtime",
+              "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
+            }
+          ]
+        },
+        "overrides": []
+      },
       "targets": [
         {
-          "expr": "bioetl_l1_gold_lifecycle_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}",
+          "expr": "bioetl_l1_gold_lifecycle_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} > 0",
           "refId": "A",
           "format": "table",
           "instant": true
@@ -379,7 +659,7 @@
           "show": false
         }
       },
-      "description": ""
+      "description": "Lifecycle-state projection for gold output. `lifecycle_state` distinguishes runtime-owned failure, missing gold after success, pending, disabled, and healthy recent gold."
     },
     {
       "id": 9006,
@@ -395,6 +675,71 @@
         "type": "prometheus",
         "uid": "${datasource}"
       },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "NO DATA / UNKNOWN",
+                  "color": "gray"
+                },
+                "1": {
+                  "text": "OK",
+                  "color": "green"
+                },
+                "2": {
+                  "text": "DEGRADED",
+                  "color": "orange"
+                },
+                "3": {
+                  "text": "FAILING / BROKEN",
+                  "color": "red"
+                }
+              }
+            },
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "NO DATA / UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 2
+              },
+              {
+                "color": "red",
+                "value": 3
+              }
+            ]
+          },
+          "unit": "none",
+          "links": [
+            {
+              "title": "Open 0. Control Plane",
+              "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
+            }
+          ]
+        },
+        "overrides": []
+      },
       "targets": [
         {
           "expr": "bioetl_l1_control_plane_current_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}",
@@ -409,7 +754,7 @@
           "show": false
         }
       },
-      "description": ""
+      "description": "Current control-plane summary for manifest, ledger, checkpoint, and lineage guardrails. Open Control Plane for the exact failing contract."
     },
     {
       "id": 9007,
@@ -425,6 +770,71 @@
         "type": "prometheus",
         "uid": "${datasource}"
       },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "NO DATA / UNKNOWN",
+                  "color": "gray"
+                },
+                "1": {
+                  "text": "OK",
+                  "color": "green"
+                },
+                "2": {
+                  "text": "DEGRADED",
+                  "color": "orange"
+                },
+                "3": {
+                  "text": "FAILING / BROKEN",
+                  "color": "red"
+                }
+              }
+            },
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "NO DATA / UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 2
+              },
+              {
+                "color": "red",
+                "value": 3
+              }
+            ]
+          },
+          "unit": "none",
+          "links": [
+            {
+              "title": "Open 3. Provider Health",
+              "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=All&var-adapter=All&${__url_time_range}"
+            }
+          ]
+        },
+        "overrides": []
+      },
       "targets": [
         {
           "expr": "bioetl_l1_provider_global_status",
@@ -439,15 +849,15 @@
           "show": false
         }
       },
-      "description": "GLOBAL provider scope (not selected pipeline only)."
+      "description": "GLOBAL provider scope across pipelines. This panel intentionally ignores selected pipeline/run_type filters."
     },
     {
       "id": 9008,
       "type": "table",
-      "title": "Workflow GLOBAL / Selected Scope",
+      "title": "Workflow Selected Scope",
       "gridPos": {
         "h": 5,
-        "w": 12,
+        "w": 6,
         "x": 12,
         "y": 15
       },
@@ -455,9 +865,74 @@
         "type": "prometheus",
         "uid": "${datasource}"
       },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "NO DATA / UNKNOWN",
+                  "color": "gray"
+                },
+                "1": {
+                  "text": "OK",
+                  "color": "green"
+                },
+                "2": {
+                  "text": "DEGRADED",
+                  "color": "orange"
+                },
+                "3": {
+                  "text": "FAILING / BROKEN",
+                  "color": "red"
+                }
+              }
+            },
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "NO DATA / UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 2
+              },
+              {
+                "color": "red",
+                "value": 3
+              }
+            ]
+          },
+          "unit": "none",
+          "links": [
+            {
+              "title": "Open 5. Workflow",
+              "url": "/d/bioetl-workflow-overview/bioetl-workflow-overview?var-workflow=All&var-status=All&${__url_time_range}"
+            }
+          ]
+        },
+        "overrides": []
+      },
       "targets": [
         {
-          "expr": "bioetl_l1_workflow_global_status or bioetl_l0_input_status{input=\"workflow\",pipeline=~\"$pipeline\"}",
+          "expr": "bioetl_l1_workflow_selected_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}",
           "refId": "A",
           "format": "table",
           "instant": true
@@ -469,7 +944,102 @@
           "show": false
         }
       },
-      "description": "GLOBAL workflow scope + selected scope context."
+      "description": "Selected pipeline/run_type workflow summary only."
+    },
+    {
+      "id": 9013,
+      "type": "table",
+      "title": "Workflow GLOBAL Scope",
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 18,
+        "y": 15
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "NO DATA / UNKNOWN",
+                  "color": "gray"
+                },
+                "1": {
+                  "text": "OK",
+                  "color": "green"
+                },
+                "2": {
+                  "text": "DEGRADED",
+                  "color": "orange"
+                },
+                "3": {
+                  "text": "FAILING / BROKEN",
+                  "color": "red"
+                }
+              }
+            },
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "NO DATA / UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 2
+              },
+              {
+                "color": "red",
+                "value": 3
+              }
+            ]
+          },
+          "unit": "none",
+          "links": [
+            {
+              "title": "Open 5. Workflow",
+              "url": "/d/bioetl-workflow-overview/bioetl-workflow-overview?var-workflow=All&var-status=All&${__url_time_range}"
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "bioetl_l1_workflow_global_status",
+          "refId": "A",
+          "format": "table",
+          "instant": true
+        }
+      ],
+      "options": {
+        "showHeader": true,
+        "footer": {
+          "show": false
+        }
+      },
+      "description": "GLOBAL workflow scope across pipeline/run_type combinations."
     },
     {
       "id": 9009,
@@ -497,9 +1067,18 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
           "targets": [
             {
-              "expr": "sum by (pipeline) (increase(bioetl_pipeline_runs_total{status=\"failed\",pipeline=~\"$pipeline\"}[$__range]))",
+              "expr": "sum by (pipeline, run_type) (increase(bioetl_pipeline_runs_total{status=\"failed\",pipeline=~\"$pipeline\",run_type=~\"$run_type\"}[$__range]))",
               "refId": "A",
               "format": "table",
               "instant": true
@@ -511,7 +1090,7 @@
               "show": false
             }
           },
-          "description": ""
+          "description": "Historical evidence only. Keeps `pipeline` and `run_type` labels from the active Grafana window."
         },
         {
           "id": 9011,
@@ -527,9 +1106,18 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
           "targets": [
             {
-              "expr": "sum by (status) (increase(bioetl_pipeline_runs_total{pipeline=~\"$pipeline\"}[$__range]))",
+              "expr": "sum by (pipeline, run_type, status) (increase(bioetl_pipeline_runs_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}[$__range]))",
               "refId": "A",
               "format": "table",
               "instant": true
@@ -541,7 +1129,7 @@
               "show": false
             }
           },
-          "description": ""
+          "description": "Historical terminal-run evidence only. Keeps `pipeline`, `run_type`, and `status` labels from the active Grafana window."
         }
       ]
     },
@@ -556,7 +1144,25 @@
         "y": 22
       },
       "collapsed": true,
-      "panels": []
+      "panels": [
+        {
+          "id": 9014,
+          "type": "text",
+          "title": "Diagnostics Navigation",
+          "gridPos": {
+            "h": 4,
+            "w": 24,
+            "x": 0,
+            "y": 23
+          },
+          "options": {
+            "content": "<div style=\"padding:0.4rem 0.6rem;line-height:1.6\"><strong>Use top-level links for logs and traces.</strong> Raw metric starting points for this dashboard are <code>bioetl_l0_status{pipeline=~&quot;$pipeline&quot;,run_type=~&quot;$run_type&quot;}</code>, <code>bioetl_l0_next_action_route{pipeline=~&quot;$pipeline&quot;}</code>, and <code>bioetl_l0_input_status{pipeline=~&quot;$pipeline&quot;,run_type=~&quot;$run_type&quot;}</code>. Historical evidence stays in the row above; exact blocker reasons live in the Runtime, DQ, Provider Health, Control Plane, and Workflow dashboards.</div>",
+            "mode": "html"
+          },
+          "links": [],
+          "transparent": true
+        }
+      ]
     }
   ],
   "refresh": "30s",

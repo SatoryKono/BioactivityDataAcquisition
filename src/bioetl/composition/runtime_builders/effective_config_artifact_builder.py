@@ -8,9 +8,7 @@ from typing import TYPE_CHECKING
 from bioetl.application.services.control_plane.effective_config_service import (
     create_effective_config_service,
 )
-from bioetl.composition.runtime_builders import (
-    _run_manifest_support as _manifest_support,
-)
+import bioetl.composition.runtime_builders._run_manifest_support as _manifest_support
 from bioetl.composition.runtime_builders._effective_config_artifact_builder_support import (
     build_composite_runtime_overrides_snapshot,
     build_effective_config_source_refs,

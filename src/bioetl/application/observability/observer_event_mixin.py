@@ -54,9 +54,11 @@ class _ObserverEventMixin:
         **context: Any,  # Any: structlog-compatible context kwargs
     ) -> None:
         """Validate contract once and emit log+metric payloads."""
-        from bioetl.application.observability import observer as observer_module
+        from bioetl.application.observability.observer import (
+            build_observability_contract_payload,
+        )
 
-        payload = observer_module.build_observability_contract_payload(
+        payload = build_observability_contract_payload(
             event_name=event_name,
             context=context,
             default_provider=self.provider_name,

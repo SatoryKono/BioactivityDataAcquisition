@@ -117,7 +117,7 @@ def get_required_field(
     allow_empty: bool = False,
 ) -> object:
     """Extract and validate a required field from the record."""
-    from bioetl.application.core.base_transformer import TransformationError
+    from bioetl.application.core.base_transformer.errors import TransformationError
 
     value = record.get(field)
     if value is None:
