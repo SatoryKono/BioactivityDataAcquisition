@@ -123,9 +123,9 @@ uv run python -m scripts.engineering.qa check-dashboard-visual-semantics
 Источник фиксированного словаря для `links[].title`: `docs/03-guides/dashboards/navigation-contract.md`.
 
 Правила:
-- Названия top-level ссылок MUST совпадать с каноническими строками из navigation contract (например: `Back to Overview`, `2. Runtime`, `3. Provider Health`, `4. Data Quality`, `5. Silver Reject Explorer`, `Control Plane v1`, `6. Workflow Overview`).
-- Explore-ссылки MUST использовать полные названия: `Explore Logs (Loki, tracing profile)` и `Explore Traces (Tempo, tracing profile)`.
-- Формулировки вида `Explore Logs`, `Explore Traces`, `Next Recommended Drilldown` считаются legacy-лексикой и не допускаются в shipped dashboards.
+- Названия top-level ссылок MUST совпадать с каноническими строками из navigation contract (например: `Back to Overview`, `2. Runtime`, `3. Provider Health`, `4. Data Quality`, `5. Silver Reject Explorer`, `5. Control Plane`, `6. Workflow Overview`).
+- Explore-ссылки MUST использовать короткие названия: `Explore Logs` и `Explore Traces`.
+- Формулировки вида `Explore Logs (Loki, tracing profile)`, `Explore Traces (Tempo, tracing profile)`, `Next Recommended Drilldown` считаются legacy-лексикой и не допускаются в shipped dashboards.
 
 ### 7.1) Link title style-guide: Back / Open / Investigate
 

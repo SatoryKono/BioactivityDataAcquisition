@@ -119,7 +119,7 @@
           "includeVars": false,
           "keepTime": true,
           "targetBlank": false,
-          "title": "Control Plane v1",
+          "title": "Inspect Control Plane",
           "type": "link",
           "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=All&var-run_type=All&${__url_time_range}",
           "tooltip": "Cross-scope handoff (opens with All core scope): var-pipeline=All and var-run_type=All; workflow/status do not transfer. Scope reset: target dashboard opens with explicit All/default scope; source-specific filters are not transferred."
@@ -130,7 +130,7 @@
           "includeVars": false,
           "keepTime": true,
           "targetBlank": false,
-          "title": "Explore Logs (Loki, tracing profile)",
+          "title": "Inspect Logs",
           "type": "link",
           "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D",
           "tooltip": "Open Loki Explore with tracing profile and selected time range."
