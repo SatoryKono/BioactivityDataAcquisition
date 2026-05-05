@@ -452,29 +452,32 @@ AI_DOCS_RUNTIME_MIRROR_REQUIRED_TOKENS = (
     "not a canonical runtime surface",
     "AI_RUNTIME_MIRROR_OWNERSHIP.md",
 )
+AI_SURFACE_CLAUDE_PATH_PATTERN: re.Pattern[str] = re.compile(r"\.claude/")
+AI_SURFACE_FILE_MISSING_MESSAGE = "AI surface file missing"
+SKILL_FILE_NAME = "SKILL.md"
 AI_SURFACE_STALE_PATTERNS: tuple[re.Pattern[str], ...] = (
     re.compile(r"docs/00-project/ai/agents/runtime/agent-memory\.md"),
     re.compile(r"(?<!\.)runtime/agent-memory\.md"),
 )
 AI_SURFACE_FORBIDDEN_PATTERNS: dict[Path, tuple[re.Pattern[str], ...]] = {
-    Path(".codex/agents/CODEX-RUNTIME.md"): (re.compile(r"\.claude/"),),
-    Path(".gemini/agents/GEMINI-RUNTIME.md"): (re.compile(r"\.claude/"),),
-    Path(".codex/agents/py-audit-bot.md"): (re.compile(r"\.claude/"),),
-    Path(".gemini/agents/py-audit-bot.md"): (re.compile(r"\.claude/"),),
-    Path(".codex/agents/py-review-orchestrator.md"): (re.compile(r"\.claude/"),),
-    Path(".gemini/agents/py-review-orchestrator.md"): (re.compile(r"\.claude/"),),
-    Path(".gemini/skills/new-pipeline/SKILL.md"): (re.compile(r"\.claude/"),),
-    Path(".gemini/skills/verify-architecture/SKILL.md"): (re.compile(r"\.claude/"),),
-    Path(".gemini/skills/vcr-record/SKILL.md"): (re.compile(r"\.claude/"),),
-    Path(".gemini/skills/py-review-orchestrator/SKILL.md"): (re.compile(r"\.claude/"),),
-    Path(".gemini/skills/py-test-swarm/SKILL.md"): (re.compile(r"\.claude/"),),
+    Path(".codex/agents/CODEX-RUNTIME.md"): (AI_SURFACE_CLAUDE_PATH_PATTERN,),
+    Path(".gemini/agents/GEMINI-RUNTIME.md"): (AI_SURFACE_CLAUDE_PATH_PATTERN,),
+    Path(".codex/agents/py-audit-bot.md"): (AI_SURFACE_CLAUDE_PATH_PATTERN,),
+    Path(".gemini/agents/py-audit-bot.md"): (AI_SURFACE_CLAUDE_PATH_PATTERN,),
+    Path(".codex/agents/py-review-orchestrator.md"): (AI_SURFACE_CLAUDE_PATH_PATTERN,),
+    Path(".gemini/agents/py-review-orchestrator.md"): (AI_SURFACE_CLAUDE_PATH_PATTERN,),
+    Path(".gemini/skills/new-pipeline/SKILL.md"): (AI_SURFACE_CLAUDE_PATH_PATTERN,),
+    Path(".gemini/skills/verify-architecture/SKILL.md"): (AI_SURFACE_CLAUDE_PATH_PATTERN,),
+    Path(".gemini/skills/vcr-record/SKILL.md"): (AI_SURFACE_CLAUDE_PATH_PATTERN,),
+    Path(".gemini/skills/py-review-orchestrator/SKILL.md"): (AI_SURFACE_CLAUDE_PATH_PATTERN,),
+    Path(".gemini/skills/py-test-swarm/SKILL.md"): (AI_SURFACE_CLAUDE_PATH_PATTERN,),
     Path(".gemini/skills/documentation-cascade-audit/SKILL.md"): (
-        re.compile(r"\.claude/"),
+        AI_SURFACE_CLAUDE_PATH_PATTERN,
     ),
     Path(".gemini/skills/py-architecture-debt-bot/SKILL.md"): (
-        re.compile(r"\.claude/"),
+        AI_SURFACE_CLAUDE_PATH_PATTERN,
     ),
-    Path(".gemini/skills/capability-discovery/SKILL.md"): (re.compile(r"\.claude/"),),
+    Path(".gemini/skills/capability-discovery/SKILL.md"): (AI_SURFACE_CLAUDE_PATH_PATTERN,),
 }
 
 
@@ -1279,7 +1282,7 @@ def _check_ai_surface_required_tokens(
             "ai-surfaces",
             "ERROR",
             _display_relative_path(relative_path),
-            "AI surface file missing",
+            AI_SURFACE_FILE_MISSING_MESSAGE,
         )
         return
 
@@ -1370,9 +1373,9 @@ def _iter_ai_docs_runtime_mirror_targets(
             )
 
     local_skills_root = project_root / "docs" / "00-project" / "ai" / "skills" / "local"
-    for path in sorted(local_skills_root.rglob("SKILL.md")):
+    for path in sorted(local_skills_root.rglob(SKILL_FILE_NAME)):
         relative_skill_path = path.parent.relative_to(local_skills_root)
-        canonical = Path(".codex/skills") / relative_skill_path / "SKILL.md"
+        canonical = Path(".codex/skills") / relative_skill_path / SKILL_FILE_NAME
         if (project_root / canonical).exists():
             targets.append(
                 AIDocsMirrorTarget(
@@ -1384,11 +1387,11 @@ def _iter_ai_docs_runtime_mirror_targets(
     global_skills_root = (
         project_root / "docs" / "00-project" / "ai" / "skills" / "global"
     )
-    for path in sorted(global_skills_root.rglob("SKILL.md")):
+    for path in sorted(global_skills_root.rglob(SKILL_FILE_NAME)):
         if ".system" in path.parts:
             continue
         relative_skill_path = path.parent.relative_to(global_skills_root)
-        canonical = Path(".gemini/skills") / relative_skill_path / "SKILL.md"
+        canonical = Path(".gemini/skills") / relative_skill_path / SKILL_FILE_NAME
         if (project_root / canonical).exists():
             targets.append(
                 AIDocsMirrorTarget(
