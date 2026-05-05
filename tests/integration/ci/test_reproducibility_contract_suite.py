@@ -25,6 +25,9 @@ from bioetl.application.services.checkpoint_compatibility_service import (
 from bioetl.application.services.control_plane.forensic_diff_service import (
     ForensicRunDiffService,
 )
+from bioetl.application.services.control_plane.run_ledger_service import (
+    RunLedgerService,
+)
 from bioetl.application.services.lineage import MetadataCoordinator
 from bioetl.application.services.run_manifest_inspection_service import (
     RunManifestInspectionService,
@@ -81,8 +84,15 @@ from bioetl.infrastructure.control_plane import FileArtifactByteComparisonAdapte
 from bioetl.infrastructure.storage.silver.validation_operations import (
     _deduplicate_by_primary_keys_impl,
 )
+from bioetl.infrastructure.observability.noop_logger import NoOpLogger
+from bioetl.infrastructure.storage.metadata_writer import MetadataWriter
 from bioetl.infrastructure.control_plane.file_lineage_store import FileLineageStore
 from bioetl.infrastructure.config import Settings
+from tests.unit.infrastructure.storage.test_metadata_writer_control_plane import (
+    _make_bronze_metadata,
+    _make_gold_metadata,
+    _make_silver_metadata,
+)
 
 
 pytestmark = pytest.mark.integration
@@ -724,6 +734,108 @@ def test_reproducibility_contract_supported_gold_trace_path_resolves_run_context
     ]
     assert result.manifest.run_id == run_id
     assert result.manifest.manifest_id == "manifest-gold-trace-1"
+
+
+@pytest.mark.asyncio
+async def test_reproducibility_contract_forensic_grade_artifact_publication_recorder_emits_bronze_silver_gold_entries(
+    tmp_path: Path,
+) -> None:
+    """Strict artifact-publication closure must emit ledger entries for active writer outputs."""
+    manifest_store = _InMemoryRunManifestStore()
+    ledger_store = _InMemoryRunLedgerStore()
+    run_id = RunID(UUID("00000000-0000-0000-0000-000000000418"))
+    manifest = _make_manifest(
+        manifest_id="manifest-forensic-artifact-publication",
+        run_id=run_id,
+        execution_fingerprint="fp-forensic-artifact-publication",
+        required_persistence_profile="forensic_grade",
+        input_snapshots=(
+            RunInputSnapshotRef(
+                snapshot_id="snapshot-1",
+                content_hash="content-hash-1",
+                immutable_uri="file:///snapshots/bronze-1.jsonl.zst",
+                query_fingerprint="query-hash-1",
+                captured_at=datetime(2025, 1, 1, 0, 0, tzinfo=UTC),
+            ),
+        ),
+    )
+    manifest_store.save(manifest)
+    ledger_service = RunLedgerService(
+        ledger_port=ledger_store,
+        manifest_id=manifest.manifest_id,
+        run_id=run_id,
+    )
+    ledger_service.record_manifest_created(manifest)
+
+    writer = MetadataWriter(logger=NoOpLogger())
+
+    def _record_artifact(
+        layer: str,
+        artifact_path: str,
+        details: dict[str, object] | None = None,
+    ) -> object:
+        payload = details or {}
+        return ledger_service.record_artifact_published(
+            layer=layer,
+            artifact_path=artifact_path,
+            dataset_ref=(
+                str(payload["dataset_ref"]) if payload.get("dataset_ref") else None
+            ),
+            lineage_fragment_id=(
+                str(payload["lineage_fragment_id"])
+                if payload.get("lineage_fragment_id")
+                else None
+            ),
+            details=payload,
+        )
+
+    writer.attach_artifact_recorder(_record_artifact)
+
+    bronze_metadata = _make_bronze_metadata()
+    bronze_metadata.runtime.run_id = str(run_id)
+    bronze_metadata.runtime.manifest_id = manifest.manifest_id
+    silver_metadata = _make_silver_metadata()
+    silver_metadata.runtime.run_id = str(run_id)
+    silver_metadata.runtime.manifest_id = manifest.manifest_id
+    gold_metadata = _make_gold_metadata()
+    gold_metadata.runtime.run_id = str(run_id)
+    gold_metadata.runtime.manifest_id = manifest.manifest_id
+
+    await writer.write_bronze_metadata(
+        base_path=tmp_path / "bronze" / "chembl" / "activity",
+        metadata=bronze_metadata,
+        provider="chembl",
+        entity="activity",
+    )
+    await writer.write_silver_metadata(
+        base_path=tmp_path / "silver" / "chembl" / "activity",
+        metadata=silver_metadata,
+        provider="chembl",
+        entity="activity",
+    )
+    await writer.write_gold_metadata(
+        base_path=tmp_path / "gold" / "chembl" / "activity",
+        metadata=gold_metadata,
+        provider="chembl",
+        entity="activity",
+    )
+
+    artifact_entries = [
+        entry
+        for entry in ledger_store.list_entries(manifest.manifest_id)
+        if entry.event_type == "artifact_published"
+    ]
+
+    assert {entry.stage for entry in artifact_entries} == {"bronze", "silver", "gold"}
+    assert all(entry.manifest_id == manifest.manifest_id for entry in artifact_entries)
+    assert all(entry.run_id == run_id for entry in artifact_entries)
+    assert all(entry.dataset_ref or entry.lineage_fragment_id for entry in artifact_entries)
+    assert all(
+        isinstance(entry.details, dict)
+        and entry.details.get("artifact_path")
+        and entry.details.get("metadata_path")
+        for entry in artifact_entries
+    )
 
 
 @pytest.mark.parametrize("family", _PUBLISHED_SUPPORTED_FAMILIES)
