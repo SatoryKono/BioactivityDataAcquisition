@@ -70,27 +70,22 @@ groups:
       - record: bioetl_runtime_alert_condition_lineage_refs_missing_15m
         expr: sum by (pipeline) (increase(bioetl_lineage_refs_missing_total[15m])) > bool 0
 
+      - record: bioetl_overview_pipeline_universe
+        expr: count by (pipeline) (bioetl_pipeline_stage_expected) > bool 0
+
+      - record: bioetl_overview_pipeline_run_type_universe
+        expr: count by (pipeline, run_type) (bioetl_records_processed_total) > bool 0
+
       - record: bioetl_l0_status
         expr: >-
-          ((bioetl_runtime_alert_condition_pipeline_runs_failed_15m + bioetl_runtime_alert_condition_stage_backlog_active_15m + bioetl_runtime_alert_condition_stage_lag_high_15m + bioetl_runtime_alert_condition_gold_write_missing_15m) > bool 0) * 3
-          + ((bioetl_runtime_alert_condition_pipeline_runs_failed_15m + bioetl_runtime_alert_condition_stage_backlog_active_15m + bioetl_runtime_alert_condition_stage_lag_high_15m + bioetl_runtime_alert_condition_gold_write_missing_15m) == bool 0)
-          * ((bioetl_runtime_alert_condition_manifest_write_failed_15m + bioetl_runtime_alert_condition_ledger_append_failed_15m + bioetl_runtime_alert_condition_checkpoint_incompatible_30m + bioetl_runtime_alert_condition_lineage_refs_missing_15m + bioetl_runtime_alert_condition_dq_hard_fail_15m + bioetl_runtime_alert_condition_dq_critical_anomaly_30m + bioetl_runtime_alert_condition_dq_soft_threshold_15m + bioetl_runtime_alert_condition_provider_failure_rate_high_15m) > bool 0) * 2
-          + ((bioetl_runtime_alert_condition_pipeline_runs_failed_15m + bioetl_runtime_alert_condition_stage_backlog_active_15m + bioetl_runtime_alert_condition_stage_lag_high_15m + bioetl_runtime_alert_condition_gold_write_missing_15m) == bool 0)
-          * ((bioetl_runtime_alert_condition_manifest_write_failed_15m + bioetl_runtime_alert_condition_ledger_append_failed_15m + bioetl_runtime_alert_condition_checkpoint_incompatible_30m + bioetl_runtime_alert_condition_lineage_refs_missing_15m + bioetl_runtime_alert_condition_dq_hard_fail_15m + bioetl_runtime_alert_condition_dq_critical_anomaly_30m + bioetl_runtime_alert_condition_dq_soft_threshold_15m + bioetl_runtime_alert_condition_provider_failure_rate_high_15m) == bool 0)
-          * ((sum by (pipeline, run_type) (increase(bioetl_pipeline_runs_total[15m])) > bool 0) * 1)
+          max by (pipeline, run_type) (
+            bioetl_l0_input_status{input=~"runtime|dq|control_plane|workflow|gold"}
+            or
+            (bioetl_overview_pipeline_run_type_universe * scalar(max(bioetl_l0_input_status{input="provider"}) or vector(0)))
+          )
 
       - record: bioetl_l0_next_action
-        expr: >-
-          ((bioetl_runtime_alert_condition_pipeline_runs_failed_15m + bioetl_runtime_alert_condition_stage_backlog_active_15m + bioetl_runtime_alert_condition_stage_lag_high_15m + bioetl_runtime_alert_condition_gold_write_missing_15m) > bool 0) * 3
-          + ((bioetl_runtime_alert_condition_pipeline_runs_failed_15m + bioetl_runtime_alert_condition_stage_backlog_active_15m + bioetl_runtime_alert_condition_stage_lag_high_15m + bioetl_runtime_alert_condition_gold_write_missing_15m) == bool 0)
-          * ((bioetl_runtime_alert_condition_manifest_write_failed_15m + bioetl_runtime_alert_condition_ledger_append_failed_15m + bioetl_runtime_alert_condition_checkpoint_incompatible_30m + bioetl_runtime_alert_condition_lineage_refs_missing_15m) > bool 0) * 2
-          + ((bioetl_runtime_alert_condition_pipeline_runs_failed_15m + bioetl_runtime_alert_condition_stage_backlog_active_15m + bioetl_runtime_alert_condition_stage_lag_high_15m + bioetl_runtime_alert_condition_gold_write_missing_15m) == bool 0)
-          * ((bioetl_runtime_alert_condition_manifest_write_failed_15m + bioetl_runtime_alert_condition_ledger_append_failed_15m + bioetl_runtime_alert_condition_checkpoint_incompatible_30m + bioetl_runtime_alert_condition_lineage_refs_missing_15m) == bool 0)
-          * ((bioetl_runtime_alert_condition_dq_hard_fail_15m + bioetl_runtime_alert_condition_dq_critical_anomaly_30m + bioetl_runtime_alert_condition_dq_soft_threshold_15m + bioetl_runtime_alert_condition_provider_failure_rate_high_15m) > bool 0) * 2
-          + ((bioetl_runtime_alert_condition_pipeline_runs_failed_15m + bioetl_runtime_alert_condition_stage_backlog_active_15m + bioetl_runtime_alert_condition_stage_lag_high_15m + bioetl_runtime_alert_condition_gold_write_missing_15m) == bool 0)
-          * ((bioetl_runtime_alert_condition_manifest_write_failed_15m + bioetl_runtime_alert_condition_ledger_append_failed_15m + bioetl_runtime_alert_condition_checkpoint_incompatible_30m + bioetl_runtime_alert_condition_lineage_refs_missing_15m) == bool 0)
-          * ((bioetl_runtime_alert_condition_dq_hard_fail_15m + bioetl_runtime_alert_condition_dq_critical_anomaly_30m + bioetl_runtime_alert_condition_dq_soft_threshold_15m + bioetl_runtime_alert_condition_provider_failure_rate_high_15m) == bool 0)
-          * ((sum by (pipeline, run_type) (increase(bioetl_pipeline_runs_total[15m])) > bool 0) * 1)
+        expr: bioetl_l0_status
       - record: bioetl_l0_input_status
         labels:
           input: runtime
@@ -98,11 +93,34 @@ groups:
       - record: bioetl_l0_input_status
         labels:
           input: dq
-        expr: (bioetl_runtime_alert_condition_dq_hard_fail_15m + bioetl_runtime_alert_condition_dq_critical_anomaly_30m > bool 0) * 3 + ((bioetl_runtime_alert_condition_dq_hard_fail_15m + bioetl_runtime_alert_condition_dq_critical_anomaly_30m == bool 0) * (bioetl_runtime_alert_condition_dq_soft_threshold_15m > bool 0) * 2) + ((bioetl_runtime_alert_condition_dq_hard_fail_15m + bioetl_runtime_alert_condition_dq_critical_anomaly_30m + bioetl_runtime_alert_condition_dq_soft_threshold_15m == bool 0) * (sum by (pipeline) (increase(bioetl_records_processed_total{stage="bronze"}[15m])) > bool 0))
+        expr: >-
+          (((bioetl_runtime_alert_condition_dq_hard_fail_15m + bioetl_runtime_alert_condition_dq_critical_anomaly_30m) > bool 0)
+          * on (pipeline) group_left(run_type) bioetl_overview_pipeline_run_type_universe) * 3
+          + ((((bioetl_runtime_alert_condition_dq_hard_fail_15m + bioetl_runtime_alert_condition_dq_critical_anomaly_30m) == bool 0)
+          * (bioetl_runtime_alert_condition_dq_soft_threshold_15m > bool 0))
+          * on (pipeline) group_left(run_type) bioetl_overview_pipeline_run_type_universe) * 2
+          + ((((bioetl_runtime_alert_condition_dq_hard_fail_15m + bioetl_runtime_alert_condition_dq_critical_anomaly_30m + bioetl_runtime_alert_condition_dq_soft_threshold_15m) == bool 0)
+          * (sum by (pipeline) (increase(bioetl_records_processed_total{stage="bronze"}[15m])) > bool 0))
+          * on (pipeline) group_left(run_type) bioetl_overview_pipeline_run_type_universe)
       - record: bioetl_l0_input_status
         labels:
           input: control_plane
-        expr: (bioetl_runtime_alert_condition_manifest_write_failed_15m + bioetl_runtime_alert_condition_ledger_append_failed_15m + bioetl_runtime_alert_condition_checkpoint_incompatible_30m + bioetl_runtime_alert_condition_lineage_refs_missing_15m > bool 0) * 3 + ((bioetl_runtime_alert_condition_manifest_write_failed_15m + bioetl_runtime_alert_condition_ledger_append_failed_15m + bioetl_runtime_alert_condition_checkpoint_incompatible_30m + bioetl_runtime_alert_condition_lineage_refs_missing_15m == bool 0) * (sum by (pipeline, run_type) (increase(bioetl_pipeline_runs_total[15m])) > bool 0))
+        expr: >-
+          ((max by (pipeline) (
+            bioetl_runtime_alert_condition_manifest_write_failed_15m
+            or bioetl_runtime_alert_condition_ledger_append_failed_15m
+            or bioetl_runtime_alert_condition_checkpoint_incompatible_30m
+            or bioetl_runtime_alert_condition_lineage_refs_missing_15m
+          ) > bool 0)
+          * on (pipeline) group_left(run_type) bioetl_overview_pipeline_run_type_universe) * 3
+          + (((max by (pipeline) (
+            bioetl_runtime_alert_condition_manifest_write_failed_15m
+            or bioetl_runtime_alert_condition_ledger_append_failed_15m
+            or bioetl_runtime_alert_condition_checkpoint_incompatible_30m
+            or bioetl_runtime_alert_condition_lineage_refs_missing_15m
+          ) == bool 0)
+          * (sum by (pipeline) (increase(bioetl_pipeline_runs_total[15m])) > bool 0))
+          * on (pipeline) group_left(run_type) bioetl_overview_pipeline_run_type_universe)
       - record: bioetl_l0_input_status
         labels:
           input: provider
@@ -139,8 +157,8 @@ groups:
           action_reason: provider_global_degradation
           action_dashboard_uid: bioetl-provider-health-v2
         expr: >-
-          ((max by (pipeline) (sum by (pipeline, run_type) (increase(bioetl_pipeline_runs_total[15m])) > bool 0))
-          * scalar(max(bioetl_l0_input_status{input="provider"} >= bool 3))) * 20
+          (bioetl_overview_pipeline_universe
+          * scalar((max(bioetl_l0_input_status{input="provider"} >= bool 3)) or vector(0))) * 20
       - record: bioetl_l0_next_action_route
         labels:
           action_target: workflow
@@ -152,7 +170,7 @@ groups:
           action_target: monitor
           action_reason: no_recent_activity_or_unknown_state
           action_dashboard_uid: bioetl-overview-v2
-        expr: (max by (pipeline) (sum by (pipeline, run_type) (increase(bioetl_pipeline_runs_total[15m])) > bool 0) == bool 0) * 5
+        expr: bioetl_overview_pipeline_universe * 5
       - record: bioetl_l1_runtime_blocker_status
         expr: bioetl_l0_input_status{input="runtime"}
       - record: bioetl_l1_dq_status

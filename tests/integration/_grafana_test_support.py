@@ -128,7 +128,16 @@ def _register_recording_rule_label_sets(
             record_name = rule.get("record")
             expr = rule.get("expr")
             if isinstance(record_name, str) and isinstance(expr, str):
-                label_sets[record_name] = _recording_rule_labels(expr, label_sets)
+                static_labels = frozenset(
+                    str(label_name)
+                    for label_name in rule.get("labels", {})
+                    if isinstance(label_name, str)
+                )
+                label_sets[record_name] = (
+                    label_sets.get(record_name, frozenset())
+                    | _recording_rule_labels(expr, label_sets)
+                    | static_labels
+                )
 
 
 @cache

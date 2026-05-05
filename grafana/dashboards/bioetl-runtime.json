@@ -306,7 +306,7 @@
     },
     {
       "datasource": "Prometheus",
-      "description": "Count of active canonical runtime blocker reasons. Uses recording rules for first-screen status; zero fallback is only for count rendering, while current status keeps UNKNOWN as null.",
+      "description": "15m current-window count of active canonical runtime blocker reasons. Uses recording rules for first-screen status; zero fallback is only for count rendering, while current status keeps UNKNOWN as null.",
       "fieldConfig": {
         "defaults": {
           "color": {

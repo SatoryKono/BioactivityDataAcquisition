@@ -31,8 +31,11 @@ _ALLOWED_DASHBOARD_LINK_VARS = {
     "bioetl-overview-v2": frozenset({"pipeline", "run_type"}),
     "bioetl-dq-v2": frozenset({"pipeline", "run_type", "stage"}),
     "bioetl-runtime": frozenset({"pipeline", "run_type", "stage"}),
-    "bioetl-provider-health-v2": frozenset({"provider", "adapter"}),
+    "bioetl-provider-health-v2": frozenset(
+        {"provider", "pipeline_context", "adapter"}
+    ),
     "bioetl-control-plane-v1": frozenset({"pipeline", "run_type"}),
+    "bioetl-workflow-overview": frozenset({"pipeline", "run_type"}),
 }
 
 
@@ -260,38 +263,32 @@ def test_runtime_blockers_panel_does_not_filter_by_stage() -> None:
     blockers_panel = panels.get("Runtime Blockers")
     assert blockers_panel is not None, "Runtime Blockers panel is missing"
     expr = blockers_panel["targets"][0]["expr"]
-    backlog_term = "bioetl_runtime_alert_condition_stage_backlog_active_15m"
-    lag_term = "bioetl_runtime_alert_condition_stage_lag_high_15m"
-    for term in (backlog_term, lag_term):
-        start = expr.find(term)
-        assert start != -1, f"Missing {term} in Runtime Blockers query"
-        brace_end = expr.find(")", start)
-        selector = expr[start:brace_end]
-        assert 'stage=~"$stage"' not in selector, (
-            f"{term} in Runtime Blockers must not filter by stage variable"
-        )
+    assert "bioetl_runtime_current_blocker_reason" in expr
+    assert 'stage=~"$stage"' not in expr, (
+        "Runtime Blockers must aggregate canonical blocker reasons without "
+        "stage-variable filtering"
+    )
 
 
 def test_runtime_blockers_includes_gold_write_missing() -> None:
-    """Runtime Blockers must include gold_write_missing recording rule."""
+    """Runtime Blockers must consume canonical runtime blocker reasons."""
     panels = {p.get("title"): p for p in _runtime_data_panels()}
     blockers_panel = panels.get("Runtime Blockers")
     assert blockers_panel is not None
     expr = blockers_panel["targets"][0]["expr"]
-    assert "bioetl_runtime_alert_condition_gold_write_missing_15m" in expr, (
-        "Runtime Blockers query must reference gold_write_missing recording rule"
+    assert "bioetl_runtime_current_blocker_reason" in expr, (
+        "Runtime Blockers query must reference canonical blocker reason rule"
     )
 
 
 def test_runtime_blockers_includes_no_terminal_run() -> None:
-    """Runtime Blockers must include no_terminal_run recording rule."""
+    """Runtime Blockers zero rendering must not reintroduce inline Grafana logic."""
     panels = {p.get("title"): p for p in _runtime_data_panels()}
     blockers_panel = panels.get("Runtime Blockers")
     assert blockers_panel is not None
     expr = blockers_panel["targets"][0]["expr"]
-    assert "bioetl_runtime_alert_condition_no_terminal_run_30m" in expr, (
-        "Runtime Blockers query must reference no_terminal_run recording rule"
-    )
+    assert "or vector(0)" in expr
+    assert "bioetl_runtime_alert_condition_" not in expr
 
 
 def test_active_runtime_blocker_detail_panel_exists() -> None:

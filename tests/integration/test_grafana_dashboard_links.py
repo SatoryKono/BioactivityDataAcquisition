@@ -1503,7 +1503,7 @@ def test_data_quality_incident_panels_do_not_duplicate_control_plane_dashboard_l
     """DQ panels must not duplicate the top-level Control Plane link."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
     panel_titles = {
-        "Data Flow in Range: Bronze -> Silver -> Gold",
+        "Track Range Evidence: Bronze -> Silver -> Gold",
         "Lineage Refs Missing",
         "Gold Strict Validation Failures",
     }
