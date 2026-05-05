@@ -655,8 +655,11 @@ Shipped dashboards используют несколько template variables в
 - **Определение:** `label_values(bioetl_records_processed_total, pipeline)`
 - **Тип:** Query (автоматическое обнаружение значений)
 - **Multi-select:** Нет
-- **Include All:** Нет
-- **Default:** `unknown` как explicit fail-closed fallback, если исходный
+- **Include All:** Да только для `bioetl-overview-v2`; в остальных
+  pipeline-scoped dashboards остаётся fail-closed single-select policy.
+- **Default:** для `bioetl-overview-v2` используется `All`, чтобы landing page
+  показывал актуальный L0 state без пустого `unknown` scope. Для остальных
+  pipeline-centric dashboards default остаётся `unknown`, если исходный
   dashboard не имеет pipeline context.
 - **Refresh:** При загрузке дашборда
 - **Возможные значения:** `chembl`, `pubmed`, `pubchem`, `uniprot` и другие pipeline-идентификаторы, зарегистрированные в системе.

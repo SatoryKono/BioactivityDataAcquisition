@@ -354,6 +354,72 @@ def _merge_allowed_symbols(
     return tuple(merged)
 
 
+def _function_suffix_rule_from_config(item: object) -> FunctionSuffixRule | None:
+    if not isinstance(item, dict):
+        return None
+    rule_id = str(item.get("rule_id", "")).strip()
+    description = str(item.get("description", "")).strip()
+    suffixes = _flatten_string_sequence(item.get("suffixes", []))
+    include_path_prefixes = _flatten_string_sequence(item.get("include_path_prefixes", []))
+    exclude_path_prefixes = _flatten_string_sequence(item.get("exclude_path_prefixes", []))
+    allowed_symbols = _load_allowed_symbols(item.get("allowed_symbols", []))
+    if rule_id == "composition_bootstrap_port_factories":
+        allowed_symbols = _merge_allowed_symbols(
+            allowed_symbols,
+            _CURATED_COMPOSITION_BOOTSTRAP_PORT_FACTORIES,
+        )
+    if not (rule_id and description and suffixes and include_path_prefixes):
+        return None
+    return FunctionSuffixRule(
+        rule_id=rule_id,
+        description=description,
+        suffixes=suffixes,
+        include_path_prefixes=include_path_prefixes,
+        exclude_path_prefixes=exclude_path_prefixes,
+        allowed_symbols=allowed_symbols,
+    )
+
+
+def _suffix_boundary_rule_from_config(item: object) -> SuffixBoundaryRule | None:
+    if not isinstance(item, dict):
+        return None
+    rule_id = str(item.get("rule_id", "")).strip()
+    description = str(item.get("description", "")).strip()
+    suffixes = _flatten_string_sequence(item.get("suffixes", []))
+    include_path_prefixes = _flatten_string_sequence(item.get("include_path_prefixes", []))
+    exclude_path_prefixes = _flatten_string_sequence(item.get("exclude_path_prefixes", []))
+    allowed_symbols = _load_allowed_symbols(item.get("allowed_symbol_exceptions", []))
+    if not (rule_id and description and suffixes and include_path_prefixes):
+        return None
+    return SuffixBoundaryRule(
+        rule_id=rule_id,
+        description=description,
+        suffixes=suffixes,
+        include_path_prefixes=include_path_prefixes,
+        exclude_path_prefixes=exclude_path_prefixes,
+        allowed_symbols=allowed_symbols,
+    )
+
+
+def _family_freeze_rule_from_config(item: object) -> FamilyFreezeRule | None:
+    if not isinstance(item, dict):
+        return None
+    rule_id = str(item.get("rule_id", "")).strip()
+    description = str(item.get("description", "")).strip()
+    include_path_prefixes = _flatten_string_sequence(item.get("include_path_prefixes", []))
+    match_regex = str(item.get("match_regex", "")).strip()
+    allowed_symbols = _load_allowed_symbols(item.get("allowed_symbols", []))
+    if not (rule_id and description and include_path_prefixes and match_regex):
+        return None
+    return FamilyFreezeRule(
+        rule_id=rule_id,
+        description=description,
+        include_path_prefixes=include_path_prefixes,
+        match_regex=match_regex,
+        allowed_symbols=allowed_symbols,
+    )
+
+
 def _load_layer_aware_suffix_policy(repo_root: Path) -> LayerAwareNamingPolicy:
     path = repo_root / LAYER_AWARE_SUFFIX_POLICY_PATH
     payload = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
@@ -365,84 +431,21 @@ def _load_layer_aware_suffix_policy(repo_root: Path) -> LayerAwareNamingPolicy:
     version = int(payload.get("version", 0))
     policy_scope = str(payload.get("policy_scope", "")).strip()
 
-    function_rules: list[FunctionSuffixRule] = []
-    for item in payload.get("function_suffix_rules", []):
-        if not isinstance(item, dict):
-            continue
-        rule_id = str(item.get("rule_id", "")).strip()
-        description = str(item.get("description", "")).strip()
-        suffixes = _flatten_string_sequence(item.get("suffixes", []))
-        include_path_prefixes = _flatten_string_sequence(
-            item.get("include_path_prefixes", [])
-        )
-        exclude_path_prefixes = _flatten_string_sequence(
-            item.get("exclude_path_prefixes", [])
-        )
-        allowed_symbols = _load_allowed_symbols(item.get("allowed_symbols", []))
-        if rule_id == "composition_bootstrap_port_factories":
-            allowed_symbols = _merge_allowed_symbols(
-                allowed_symbols,
-                _CURATED_COMPOSITION_BOOTSTRAP_PORT_FACTORIES,
-            )
-        if rule_id and description and suffixes and include_path_prefixes:
-            function_rules.append(
-                FunctionSuffixRule(
-                    rule_id=rule_id,
-                    description=description,
-                    suffixes=suffixes,
-                    include_path_prefixes=include_path_prefixes,
-                    exclude_path_prefixes=exclude_path_prefixes,
-                    allowed_symbols=allowed_symbols,
-                )
-            )
-
-    suffix_rules: list[SuffixBoundaryRule] = []
-    for item in payload.get("suffix_boundary_rules", []):
-        if not isinstance(item, dict):
-            continue
-        rule_id = str(item.get("rule_id", "")).strip()
-        description = str(item.get("description", "")).strip()
-        suffixes = _flatten_string_sequence(item.get("suffixes", []))
-        include_path_prefixes = _flatten_string_sequence(
-            item.get("include_path_prefixes", [])
-        )
-        exclude_path_prefixes = _flatten_string_sequence(
-            item.get("exclude_path_prefixes", [])
-        )
-        allowed_symbols = _load_allowed_symbols(item.get("allowed_symbol_exceptions", []))
-        if rule_id and description and suffixes and include_path_prefixes:
-            suffix_rules.append(
-                SuffixBoundaryRule(
-                    rule_id=rule_id,
-                    description=description,
-                    suffixes=suffixes,
-                    include_path_prefixes=include_path_prefixes,
-                    exclude_path_prefixes=exclude_path_prefixes,
-                    allowed_symbols=allowed_symbols,
-                )
-            )
-
-    family_rules: list[FamilyFreezeRule] = []
-    for item in payload.get("family_freeze_rules", []):
-        if not isinstance(item, dict):
-            continue
-        rule_id = str(item.get("rule_id", "")).strip()
-        description = str(item.get("description", "")).strip()
-        include_path_prefixes = _flatten_string_sequence(
-            item.get("include_path_prefixes", [])
-        )
-        match_regex = str(item.get("match_regex", "")).strip()
-        allowed_symbols = _load_allowed_symbols(item.get("allowed_symbols", []))
-        if rule_id and description and include_path_prefixes and match_regex:
-            family_rules.append(
-                FamilyFreezeRule(
-                    rule_id=rule_id,
-                    description=description,
-                    include_path_prefixes=include_path_prefixes,
-                    match_regex=match_regex,
-                    allowed_symbols=allowed_symbols,
-                )
-            )
+    function_rules = [
+        rule
+        for item in payload.get("function_suffix_rules", [])
+        if (rule := _function_suffix_rule_from_config(item)) is not None
+    ]
+    suffix_rules = [
+        rule
+        for item in payload.get("suffix_boundary_rules", [])
+        if (rule := _suffix_boundary_rule_from_config(item)) is not None
+    ]
+    family_rules = [
+        rule
+        for item in payload.get("family_freeze_rules", [])
+        if (rule := _family_freeze_rule_from_config(item)) is not None
+    ]
 
     return LayerAwareNamingPolicy(
         version=version,
@@ -497,50 +500,66 @@ def _literal_assignment_names(
     return set()
 
 
+def _class_symbol(node: ast.AST) -> tuple[str, int, str] | None:
+    if isinstance(node, ast.ClassDef) and not node.name.startswith("_"):
+        return node.name, node.lineno, "class"
+    return None
+
+
+def _reexport_symbols(
+    node: ast.AST, exported_names: set[str]
+) -> list[tuple[str, int, str]]:
+    if not isinstance(node, (ast.ImportFrom, ast.Import)):
+        return []
+
+    symbols: list[tuple[str, int, str]] = []
+    for alias in node.names:
+        if alias.name == "*":
+            continue
+        public_name = alias.asname or alias.name.rsplit(".", 1)[-1]
+        if public_name.startswith("_") or public_name not in exported_names:
+            continue
+        symbols.append((public_name, node.lineno, "re-export"))
+    return symbols
+
+
+def _alias_symbol(node: ast.AST) -> tuple[str, int, str] | None:
+    if not isinstance(node, ast.Assign):
+        return None
+    if len(node.targets) != 1 or not isinstance(node.targets[0], ast.Name):
+        return None
+    if not isinstance(node.value, (ast.Name, ast.Attribute)):
+        return None
+    target_name = node.targets[0].id
+    if target_name.startswith("_"):
+        return None
+    return target_name, node.lineno, "alias"
+
+
+def _node_layer_aware_symbols(
+    node: ast.AST, exported_names: set[str]
+) -> list[tuple[str, int, str]]:
+    class_symbol = _class_symbol(node)
+    if class_symbol is not None:
+        return [class_symbol]
+    reexport_symbols = _reexport_symbols(node, exported_names)
+    if reexport_symbols:
+        return reexport_symbols
+    alias_symbol = _alias_symbol(node)
+    return [] if alias_symbol is None else [alias_symbol]
+
+
 def _iter_layer_aware_symbols(tree: ast.Module) -> list[tuple[str, int, str]]:
     """Yield top-level class, alias, and public re-export symbols."""
-    symbols: list[tuple[str, int, str]] = []
     exported_names = _literal_assignment_names(tree, "__all__")
+    symbols: list[tuple[str, int, str]] = []
     seen_symbols: set[str] = set()
-
-    def record(name: str, lineno: int, kind: str) -> None:
-        if name in seen_symbols:
-            return
-        symbols.append((name, lineno, kind))
-        seen_symbols.add(name)
-
     for node in tree.body:
-        if isinstance(node, ast.ClassDef):
-            if node.name.startswith("_"):
+        for name, lineno, kind in _node_layer_aware_symbols(node, exported_names):
+            if name in seen_symbols:
                 continue
-            record(node.name, node.lineno, "class")
-            continue
-        if isinstance(node, ast.ImportFrom):
-            for alias in node.names:
-                if alias.name == "*":
-                    continue
-                public_name = alias.asname or alias.name.rsplit(".", 1)[-1]
-                if public_name.startswith("_") or public_name not in exported_names:
-                    continue
-                record(public_name, node.lineno, "re-export")
-            continue
-        if isinstance(node, ast.Import):
-            for alias in node.names:
-                public_name = alias.asname or alias.name.rsplit(".", 1)[-1]
-                if public_name.startswith("_") or public_name not in exported_names:
-                    continue
-                record(public_name, node.lineno, "re-export")
-            continue
-        if not isinstance(node, ast.Assign):
-            continue
-        if len(node.targets) != 1 or not isinstance(node.targets[0], ast.Name):
-            continue
-        if not isinstance(node.value, (ast.Name, ast.Attribute)):
-            continue
-        target_name = node.targets[0].id
-        if target_name.startswith("_"):
-            continue
-        record(target_name, node.lineno, "alias")
+            symbols.append((name, lineno, kind))
+            seen_symbols.add(name)
     return symbols
 
 
@@ -555,6 +574,169 @@ def _iter_public_function_symbols(tree: ast.Module) -> list[tuple[str, int, str]
     return symbols
 
 
+def _rule_matches_symbol_path(
+    *,
+    symbol_name: str,
+    relative_path: str,
+    rule: FunctionSuffixRule | SuffixBoundaryRule,
+) -> bool:
+    return (
+        _matches_any_prefix(relative_path, rule.include_path_prefixes)
+        and not _matches_any_prefix(relative_path, rule.exclude_path_prefixes)
+        and any(symbol_name.endswith(suffix) for suffix in rule.suffixes)
+        and not _is_allowed_symbol(
+            symbol=symbol_name,
+            relative_path=relative_path,
+            allowed_symbols=rule.allowed_symbols,
+        )
+    )
+
+
+def _function_suffix_rule_violation(
+    *,
+    relative_path: str,
+    symbol_name: str,
+    lineno: int,
+    symbol_kind: str,
+    rule: FunctionSuffixRule,
+) -> Violation | None:
+    if not _rule_matches_symbol_path(
+        symbol_name=symbol_name, relative_path=relative_path, rule=rule
+    ):
+        return None
+    return Violation(
+        rule="layer-aware-suffix-policy",
+        location=f"{relative_path}:{lineno}",
+        details=(
+            f"[{rule.rule_id}] {symbol_kind} {symbol_name} violates the "
+            f"reviewed function suffix boundary for {', '.join(rule.suffixes)}"
+        ),
+    )
+
+
+def _suffix_boundary_rule_violation(
+    *,
+    relative_path: str,
+    symbol_name: str,
+    lineno: int,
+    symbol_kind: str,
+    rule: SuffixBoundaryRule,
+) -> Violation | None:
+    if symbol_kind == "re-export" and not _is_public_facade_module(relative_path):
+        return None
+    if not _rule_matches_symbol_path(
+        symbol_name=symbol_name, relative_path=relative_path, rule=rule
+    ):
+        return None
+    return Violation(
+        rule="layer-aware-suffix-policy",
+        location=f"{relative_path}:{lineno}",
+        details=(
+            f"[{rule.rule_id}] {symbol_kind} {symbol_name} violates the "
+            f"reviewed suffix boundary for {', '.join(rule.suffixes)}"
+        ),
+    )
+
+
+def _family_freeze_rule_violation(
+    *,
+    relative_path: str,
+    symbol_name: str,
+    lineno: int,
+    symbol_kind: str,
+    rule: FamilyFreezeRule,
+) -> Violation | None:
+    if symbol_kind == "re-export":
+        return None
+    if not _matches_any_prefix(relative_path, rule.include_path_prefixes):
+        return None
+    if re.match(rule.match_regex, symbol_name) is None:
+        return None
+    if _is_allowed_symbol(
+        symbol=symbol_name,
+        relative_path=relative_path,
+        allowed_symbols=rule.allowed_symbols,
+    ):
+        return None
+    return Violation(
+        rule="layer-aware-suffix-policy",
+        location=f"{relative_path}:{lineno}",
+        details=(
+            f"[{rule.rule_id}] {symbol_kind} {symbol_name} is not registered "
+            "in the frozen naming family"
+        ),
+    )
+
+
+def _layer_aware_function_violations(
+    *,
+    relative_path: str,
+    tree: ast.Module,
+    policy: LayerAwareNamingPolicy,
+) -> list[Violation]:
+    return [
+        violation
+        for symbol_name, lineno, symbol_kind in _iter_public_function_symbols(tree)
+        for rule in policy.function_suffix_rules
+        if (
+            violation := _function_suffix_rule_violation(
+                relative_path=relative_path,
+                symbol_name=symbol_name,
+                lineno=lineno,
+                symbol_kind=symbol_kind,
+                rule=rule,
+            )
+        )
+        is not None
+    ]
+
+
+def _layer_aware_public_symbol_violations(
+    *,
+    relative_path: str,
+    tree: ast.Module,
+    policy: LayerAwareNamingPolicy,
+) -> list[Violation]:
+    violations: list[Violation] = []
+    for symbol_name, lineno, symbol_kind in _iter_layer_aware_symbols(tree):
+        violations.extend(
+            violation
+            for rule in policy.suffix_boundary_rules
+            if (
+                violation := _suffix_boundary_rule_violation(
+                    relative_path=relative_path,
+                    symbol_name=symbol_name,
+                    lineno=lineno,
+                    symbol_kind=symbol_kind,
+                    rule=rule,
+                )
+            )
+            is not None
+        )
+        violations.extend(
+            violation
+            for rule in policy.family_freeze_rules
+            if (
+                violation := _family_freeze_rule_violation(
+                    relative_path=relative_path,
+                    symbol_name=symbol_name,
+                    lineno=lineno,
+                    symbol_kind=symbol_kind,
+                    rule=rule,
+                )
+            )
+            is not None
+        )
+    return violations
+
+
+def _parse_python_file(path: Path) -> ast.Module | None:
+    try:
+        return ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+    except SyntaxError:
+        return None
+
+
 def _layer_aware_suffix_violations(repo_root: Path) -> list[Violation]:
     policy = _load_layer_aware_suffix_policy(repo_root)
     src_root = repo_root / SRC_ROOT
@@ -563,90 +745,20 @@ def _layer_aware_suffix_violations(repo_root: Path) -> list[Violation]:
     for py_file in src_root.rglob("*.py"):
         if "__pycache__" in py_file.parts:
             continue
-        try:
-            tree = ast.parse(py_file.read_text(encoding="utf-8"), filename=str(py_file))
-        except SyntaxError:
+        tree = _parse_python_file(py_file)
+        if tree is None:
             continue
         relative_path = py_file.relative_to(repo_root).as_posix()
-
-        for symbol_name, lineno, symbol_kind in _iter_public_function_symbols(tree):
-            for rule in policy.function_suffix_rules:
-                if not _matches_any_prefix(relative_path, rule.include_path_prefixes):
-                    continue
-                if _matches_any_prefix(relative_path, rule.exclude_path_prefixes):
-                    continue
-                if not any(symbol_name.endswith(suffix) for suffix in rule.suffixes):
-                    continue
-                if _is_allowed_symbol(
-                    symbol=symbol_name,
-                    relative_path=relative_path,
-                    allowed_symbols=rule.allowed_symbols,
-                ):
-                    continue
-                violations.append(
-                    Violation(
-                        rule="layer-aware-suffix-policy",
-                        location=f"{relative_path}:{lineno}",
-                        details=(
-                            f"[{rule.rule_id}] {symbol_kind} {symbol_name} violates the "
-                            f"reviewed function suffix boundary for {', '.join(rule.suffixes)}"
-                        ),
-                    )
-                )
-
-        for symbol_name, lineno, symbol_kind in _iter_layer_aware_symbols(tree):
-            for rule in policy.suffix_boundary_rules:
-                if symbol_kind == "re-export" and not _is_public_facade_module(
-                    relative_path
-                ):
-                    continue
-                if not _matches_any_prefix(relative_path, rule.include_path_prefixes):
-                    continue
-                if _matches_any_prefix(relative_path, rule.exclude_path_prefixes):
-                    continue
-                if not any(symbol_name.endswith(suffix) for suffix in rule.suffixes):
-                    continue
-                if _is_allowed_symbol(
-                    symbol=symbol_name,
-                    relative_path=relative_path,
-                    allowed_symbols=rule.allowed_symbols,
-                ):
-                    continue
-                violations.append(
-                    Violation(
-                        rule="layer-aware-suffix-policy",
-                        location=f"{relative_path}:{lineno}",
-                        details=(
-                            f"[{rule.rule_id}] {symbol_kind} {symbol_name} violates the "
-                            f"reviewed suffix boundary for {', '.join(rule.suffixes)}"
-                        ),
-                    )
-                )
-
-            for rule in policy.family_freeze_rules:
-                if symbol_kind == "re-export":
-                    continue
-                if not _matches_any_prefix(relative_path, rule.include_path_prefixes):
-                    continue
-                if re.match(rule.match_regex, symbol_name) is None:
-                    continue
-                if _is_allowed_symbol(
-                    symbol=symbol_name,
-                    relative_path=relative_path,
-                    allowed_symbols=rule.allowed_symbols,
-                ):
-                    continue
-                violations.append(
-                    Violation(
-                        rule="layer-aware-suffix-policy",
-                        location=f"{relative_path}:{lineno}",
-                        details=(
-                            f"[{rule.rule_id}] {symbol_kind} {symbol_name} is not "
-                            "registered "
-                            "in the frozen naming family"
-                        ),
-                    )
-                )
+        violations.extend(
+            _layer_aware_function_violations(
+                relative_path=relative_path, tree=tree, policy=policy
+            )
+        )
+        violations.extend(
+            _layer_aware_public_symbol_violations(
+                relative_path=relative_path, tree=tree, policy=policy
+            )
+        )
     return violations
 
 

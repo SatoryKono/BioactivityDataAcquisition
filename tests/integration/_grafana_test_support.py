@@ -73,18 +73,14 @@ def get_all_valid_metric_names() -> set[str]:
     return all_valid_names
 
 
-@cache
-def get_metric_label_sets() -> dict[str, frozenset[str]]:
-    """Return the effective label set for shipped metrics and recording rules."""
+def _register_runtime_metric_label_sets(
+    label_sets: dict[str, frozenset[str]],
+) -> None:
     from bioetl.infrastructure.observability.prometheus_metric_registries import (
         COUNTERS,
         GAUGES,
         HISTOGRAMS,
     )
-
-    label_sets: dict[str, frozenset[str]] = {
-        "up": frozenset({"job", "instance"}),
-    }
 
     for name, metric in COUNTERS.items():
         label_sets[name] = frozenset(metric._labelnames)
@@ -97,6 +93,34 @@ def get_metric_label_sets() -> dict[str, frozenset[str]]:
         label_sets[f"{name}_sum"] = base_labels
         label_sets[f"{name}_count"] = base_labels
 
+
+def _fallback_recording_rule_labels(
+    expr: str, label_sets: dict[str, frozenset[str]]
+) -> frozenset[str]:
+    referenced_label_sets = [
+        label_sets[metric_name]
+        for metric_name in re.findall(r"\b(bioetl_[a-z0-9_]+)\b", expr)
+        if metric_name in label_sets
+    ]
+    if not referenced_label_sets:
+        return frozenset()
+
+    shared_labels = set(referenced_label_sets[0])
+    for candidate in referenced_label_sets[1:]:
+        shared_labels &= set(candidate)
+    return frozenset(shared_labels)
+
+
+def _recording_rule_labels(
+    expr: str, label_sets: dict[str, frozenset[str]]
+) -> frozenset[str]:
+    inferred_labels = _infer_recording_rule_labels(expr)
+    return inferred_labels or _fallback_recording_rule_labels(expr, label_sets)
+
+
+def _register_recording_rule_label_sets(
+    label_sets: dict[str, frozenset[str]],
+) -> None:
     rules_path = Path("grafana/prometheus-rules/bioetl_observability.yml")
     rules_payload = yaml.safe_load(rules_path.read_text(encoding="utf-8"))
     for group in rules_payload.get("groups", []):
@@ -104,19 +128,18 @@ def get_metric_label_sets() -> dict[str, frozenset[str]]:
             record_name = rule.get("record")
             expr = rule.get("expr")
             if isinstance(record_name, str) and isinstance(expr, str):
-                inferred_labels = _infer_recording_rule_labels(expr)
-                if not inferred_labels:
-                    referenced_label_sets = [
-                        label_sets[metric_name]
-                        for metric_name in re.findall(r"\b(bioetl_[a-z0-9_]+)\b", expr)
-                        if metric_name in label_sets
-                    ]
-                    if referenced_label_sets:
-                        shared_labels = set(referenced_label_sets[0])
-                        for candidate in referenced_label_sets[1:]:
-                            shared_labels &= set(candidate)
-                        inferred_labels = frozenset(shared_labels)
-                label_sets[record_name] = inferred_labels
+                label_sets[record_name] = _recording_rule_labels(expr, label_sets)
+
+
+@cache
+def get_metric_label_sets() -> dict[str, frozenset[str]]:
+    """Return the effective label set for shipped metrics and recording rules."""
+    label_sets: dict[str, frozenset[str]] = {
+        "up": frozenset({"job", "instance"}),
+    }
+
+    _register_runtime_metric_label_sets(label_sets)
+    _register_recording_rule_label_sets(label_sets)
 
     return label_sets
 

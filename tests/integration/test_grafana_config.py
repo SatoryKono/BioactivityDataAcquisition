@@ -79,6 +79,54 @@ def _load_recording_rule_names() -> set[str]:
     }
 
 
+def _undeclared_link_variables(url: str, declared_variables: set[str]) -> list[str]:
+    return [
+        variable_name
+        for _, variable_name in _GRAFANA_VAR_TOKEN_RE.findall(url)
+        if not variable_name.startswith("__") and variable_name not in declared_variables
+    ]
+
+
+def _panel_link_variable_violations(
+    panel: dict, declared_variables: set[str]
+) -> list[str]:
+    links = panel.get("links", [])
+    if not isinstance(links, list):
+        return []
+
+    violations: list[str] = []
+    for link in links:
+        if not isinstance(link, dict):
+            continue
+        url = str(link.get("url", ""))
+        for variable_name in _undeclared_link_variables(url, declared_variables):
+            violations.append(
+                f"panel={panel.get('title', '<untitled>')} link={link.get('title', '<untitled>')} "
+                f"uses ${variable_name} not declared in templating.list"
+            )
+    return violations
+
+
+def _dashboard_link_variable_violations(
+    dashboard: dict, declared_variables: set[str]
+) -> list[str]:
+    links = dashboard.get("links", [])
+    if not isinstance(links, list):
+        return []
+
+    violations: list[str] = []
+    for link in links:
+        if not isinstance(link, dict):
+            continue
+        url = str(link.get("url", ""))
+        for variable_name in _undeclared_link_variables(url, declared_variables):
+            violations.append(
+                f"dashboard_link={link.get('title', '<untitled>')} "
+                f"uses ${variable_name} not declared in templating.list"
+            )
+    return violations
+
+
 @pytest.mark.parametrize("dashboard_path", get_dashboard_files(), ids=lambda p: p.name)
 def test_dashboard_is_valid_json(dashboard_path):
     """L1: Verify that the dashboard file is a valid JSON."""
@@ -262,39 +310,12 @@ def test_dashboard_links_only_reference_declared_variables(
         if variable.get("name")
     }
 
-    violations: list[str] = []
-
-    for panel in get_dashboard_panels(dashboard):
-        links = panel.get("links", [])
-        if not isinstance(links, list):
-            continue
-        for link in links:
-            if not isinstance(link, dict):
-                continue
-            url = str(link.get("url", ""))
-            for _, variable_name in _GRAFANA_VAR_TOKEN_RE.findall(url):
-                if variable_name.startswith("__"):
-                    continue
-                if variable_name not in declared_variables:
-                    violations.append(
-                        f"panel={panel.get('title', '<untitled>')} link={link.get('title', '<untitled>')} "
-                        f"uses ${variable_name} not declared in templating.list"
-                    )
-
-    dashboard_links = dashboard.get("links", [])
-    if isinstance(dashboard_links, list):
-        for link in dashboard_links:
-            if not isinstance(link, dict):
-                continue
-            url = str(link.get("url", ""))
-            for _, variable_name in _GRAFANA_VAR_TOKEN_RE.findall(url):
-                if variable_name.startswith("__"):
-                    continue
-                if variable_name not in declared_variables:
-                    violations.append(
-                        f"dashboard_link={link.get('title', '<untitled>')} "
-                        f"uses ${variable_name} not declared in templating.list"
-                    )
+    violations = [
+        violation
+        for panel in get_dashboard_panels(dashboard)
+        for violation in _panel_link_variable_violations(panel, declared_variables)
+    ]
+    violations.extend(_dashboard_link_variable_violations(dashboard, declared_variables))
 
     assert not violations, (
         f"Dashboard {dashboard_path.name} has links with undeclared variables:\n"

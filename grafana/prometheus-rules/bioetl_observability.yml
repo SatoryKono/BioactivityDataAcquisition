@@ -206,10 +206,10 @@ groups:
             or
             (max by (pipeline) (bioetl_runtime_alert_condition_pipeline_preflight_failed_15m or bioetl_runtime_alert_condition_pipeline_infrastructure_failed_15m)
             * on (pipeline) group_left(run_type) bioetl_runtime_current_activity_15m)
-          ) > bool 0
+          ) > 0
 
       - record: bioetl_runtime_current_degraded_signals_15m
-        expr: max by (pipeline, run_type) (bioetl_runtime_alert_condition_no_terminal_run_30m or bioetl_runtime_alert_condition_ingestion_throughput_degraded_15m or bioetl_runtime_alert_condition_record_flow_invariant_violated_15m) > bool 0
+        expr: max by (pipeline, run_type) (bioetl_runtime_alert_condition_no_terminal_run_30m or bioetl_runtime_alert_condition_ingestion_throughput_degraded_15m or bioetl_runtime_alert_condition_record_flow_invariant_violated_15m) > 0
 
       - record: bioetl_runtime_current_status
         expr: (bioetl_runtime_current_failure_signals_15m * 2) or (bioetl_runtime_current_degraded_signals_15m unless on (pipeline, run_type) bioetl_runtime_current_failure_signals_15m) or (((bioetl_runtime_current_activity_15m * 0) unless on (pipeline, run_type) bioetl_runtime_current_failure_signals_15m) unless on (pipeline, run_type) bioetl_runtime_current_degraded_signals_15m)
@@ -317,10 +317,10 @@ groups:
         expr: sum by (pipeline) (increase(bioetl_records_processed_total{stage="bronze"}[15m])) > bool 0
 
       - record: bioetl_dq_current_failure_signals_15m
-        expr: max by (pipeline) (bioetl_runtime_alert_condition_dq_hard_fail_15m or bioetl_runtime_alert_condition_dq_critical_anomaly_30m or bioetl_runtime_alert_condition_silver_validation_failures_30m) > bool 0
+        expr: max by (pipeline) (bioetl_runtime_alert_condition_dq_hard_fail_15m or bioetl_runtime_alert_condition_dq_critical_anomaly_30m or bioetl_runtime_alert_condition_silver_validation_failures_30m) > 0
 
       - record: bioetl_dq_current_degraded_signals_15m
-        expr: max by (pipeline) (bioetl_runtime_alert_condition_dq_soft_threshold_15m or (sum by (pipeline) (increase(bioetl_dq_records_quarantined_total[15m])) > bool 0) or (sum by (pipeline) (increase(bioetl_silver_filter_rejections_total[15m])) > bool 0)) > bool 0
+        expr: max by (pipeline) (bioetl_runtime_alert_condition_dq_soft_threshold_15m or (sum by (pipeline) (increase(bioetl_dq_records_quarantined_total[15m])) > bool 0) or (sum by (pipeline) (increase(bioetl_silver_filter_rejections_total[15m])) > bool 0)) > 0
 
       - record: bioetl_dq_current_status
         expr: (bioetl_dq_current_failure_signals_15m * 2) or (bioetl_dq_current_degraded_signals_15m unless on (pipeline) bioetl_dq_current_failure_signals_15m) or (((bioetl_dq_current_activity_15m * 0) unless on (pipeline) bioetl_dq_current_failure_signals_15m) unless on (pipeline) bioetl_dq_current_degraded_signals_15m)

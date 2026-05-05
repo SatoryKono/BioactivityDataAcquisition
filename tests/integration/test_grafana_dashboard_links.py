@@ -193,6 +193,295 @@ def _iter_panel_data_links(panel: dict[str, object]) -> list[dict[str, object]]:
     return result
 
 
+def _find_panel_by_id(
+    dashboard: dict[str, object], panel_id: int
+) -> dict[str, object] | None:
+    return next(
+        (
+            candidate
+            for candidate in get_dashboard_panels(dashboard)
+            if candidate.get("id") == panel_id
+        ),
+        None,
+    )
+
+
+def _find_status_header_panel(
+    dashboard: dict[str, object], title_matcher: str
+) -> dict[str, object] | None:
+    row_re = re.compile(title_matcher)
+    return next(
+        (
+            candidate
+            for candidate in get_dashboard_panels(dashboard)
+            if isinstance(candidate.get("title"), str)
+            and row_re.search(candidate["title"]) is not None
+        ),
+        None,
+    )
+
+
+def _assert_l1_inbound_status_policy(
+    *,
+    source_dashboard: dict[str, object],
+    panel: dict[str, object],
+    source_uid: str,
+    panel_id: int,
+    target_uid: str,
+    title_matcher: str,
+) -> None:
+    status_header_panel = _find_status_header_panel(source_dashboard, title_matcher)
+    assert isinstance(status_header_panel, dict), (
+        f"{source_uid}:{panel_id}->{target_uid} must resolve status-row matcher {title_matcher!r}"
+    )
+    row_y = status_header_panel.get("gridPos", {}).get("y")
+    panel_y = panel.get("gridPos", {}).get("y")
+    assert isinstance(row_y, int) and isinstance(panel_y, int), (
+        f"{source_uid}:{panel_id}->{target_uid} row/panel y gridPos must be integers"
+    )
+    assert panel_y > row_y, (
+        f"{source_uid}:{panel_id}->{target_uid} panel must be on first-screen status row "
+        f"below matched header panel {status_header_panel.get('title')!r}"
+    )
+
+
+def _target_panel_links(panel: dict[str, object], target_uid: str) -> list[str]:
+    return [
+        link["url"]
+        for link in _iter_panel_data_links(panel)
+        if isinstance(link.get("url"), str)
+        and _extract_dashboard_uid(link["url"]) == target_uid
+    ]
+
+
+def _assert_inbound_target_link_policy(
+    *, url: str, source_uid: str, panel_id: int, target_uid: str
+) -> None:
+    passed_vars = _extract_link_vars(url)
+    required_vars = _REQUIRED_LINK_VARS_BY_TARGET_UID[target_uid]
+    forbidden_vars = _FORBIDDEN_DASHBOARD_LINK_VARS_BY_TARGET_UID[target_uid]
+    assert required_vars <= passed_vars, (
+        f"Inbound path {source_uid}:{panel_id}->{target_uid} missing vars "
+        f"{sorted(required_vars - passed_vars)} via {url}"
+    )
+    assert not (passed_vars & forbidden_vars), (
+        f"Inbound path {source_uid}:{panel_id}->{target_uid} leaks forbidden vars "
+        f"{sorted(passed_vars & forbidden_vars)} via {url}"
+    )
+    _assert_required_time_tokens(
+        url,
+        tokens=_DASHBOARD_TIME_HANDOFF_TOKENS,
+        context=f"Inbound path {source_uid}:{panel_id}->{target_uid}",
+    )
+
+
+def _assert_inbound_route_policy(
+    *,
+    level_name: str,
+    target_uid: str,
+    route: object,
+    dashboards: dict[str, dict[str, object]],
+) -> None:
+    assert isinstance(route, dict), f"{level_name}.{target_uid} route must be mapping"
+    source_uid = route.get("source_uid")
+    panel_id = route.get("source_panel_id")
+    panel_title = route.get("source_panel_title")
+    status_row_title_matcher = route.get("source_status_row_panel_title_matcher")
+    assert isinstance(source_uid, str)
+    assert isinstance(panel_id, int)
+    assert isinstance(panel_title, str) and panel_title
+    if level_name == "L1":
+        assert isinstance(status_row_title_matcher, str) and status_row_title_matcher
+
+    source_dashboard = dashboards.get(source_uid)
+    assert isinstance(source_dashboard, dict), (
+        f"Source dashboard uid={source_uid} from inbound contract not found"
+    )
+    panel = _find_panel_by_id(source_dashboard, panel_id)
+    assert isinstance(panel, dict), (
+        f"Source panel id={panel_id} for {source_uid}->{target_uid} not found"
+    )
+    assert panel.get("title") == panel_title, (
+        f"Source panel id={panel_id} title mismatch: expected {panel_title!r}, got {panel.get('title')!r}"
+    )
+    if level_name == "L1":
+        _assert_l1_inbound_status_policy(
+            source_dashboard=source_dashboard,
+            panel=panel,
+            source_uid=source_uid,
+            panel_id=panel_id,
+            target_uid=target_uid,
+            title_matcher=str(status_row_title_matcher),
+        )
+
+    target_links = _target_panel_links(panel, target_uid)
+    assert target_links, (
+        f"Panel id={panel_id} ({panel_title}) must contain data link to {target_uid}"
+    )
+    for url in target_links:
+        _assert_inbound_target_link_policy(
+            url=url, source_uid=source_uid, panel_id=panel_id, target_uid=target_uid
+        )
+
+
+def _assert_inbound_level_payload(
+    *,
+    level_name: str,
+    level_payload: object,
+    dashboards: dict[str, dict[str, object]],
+) -> None:
+    assert level_name in {"L1", "L2"}, f"Unexpected level in inbound contract: {level_name}"
+    assert isinstance(level_payload, dict), f"{level_name} payload must be mapping"
+    for target_uid, routes in level_payload.items():
+        assert isinstance(target_uid, str)
+        assert isinstance(routes, list) and routes, (
+            f"{level_name}.{target_uid} must declare at least one source panel route"
+        )
+        for route in routes:
+            _assert_inbound_route_policy(
+                level_name=level_name,
+                target_uid=target_uid,
+                route=route,
+                dashboards=dashboards,
+            )
+
+
+def _matching_panel_links(
+    *,
+    data_links: list[dict[str, object]],
+    expected_titles: set[object],
+    target_uid: object,
+) -> list[dict[str, object]]:
+    return [
+        link
+        for link in data_links
+        if (not expected_titles or str(link.get("title", "")) in expected_titles)
+        and str(link.get("url", "")).startswith(f"/d/{target_uid}/")
+    ]
+
+
+def _assert_critical_panel_entry(
+    *,
+    dashboard_path: Path,
+    uid: str,
+    panels_by_id: dict[object, dict[str, object]],
+    entry: dict[str, object],
+) -> None:
+    panel_id = entry["panel_id"]
+    target_uid = entry["target_uid"]
+    expected_titles = set(entry["link_titles"])
+    panel = panels_by_id.get(panel_id)
+    assert isinstance(panel, dict), (
+        f"{dashboard_path.name} ({uid}) missing critical panel id={panel_id}"
+    )
+
+    data_links = _iter_panel_data_links(panel)
+    assert data_links, f"{dashboard_path.name} panel id={panel_id} must define dataLinks"
+
+    matching_links = _matching_panel_links(
+        data_links=data_links,
+        expected_titles=expected_titles,
+        target_uid=target_uid,
+    )
+    assert matching_links, (
+        f"{dashboard_path.name} panel id={panel_id} must include at least one "
+        f"critical link to target_uid={target_uid} with title in {sorted(expected_titles)}"
+    )
+
+    allowed_vars = _ALLOWED_DASHBOARD_LINK_VARS[target_uid]
+    for link in matching_links:
+        url = str(link.get("url", ""))
+        _assert_required_time_tokens(
+            url,
+            tokens=_DASHBOARD_TIME_HANDOFF_TOKENS,
+            context=f"{dashboard_path.name} panel id={panel_id}",
+        )
+        passed_vars = _extract_link_vars(url)
+        assert passed_vars <= allowed_vars, (
+            f"{dashboard_path.name} panel id={panel_id} link to {target_uid} "
+            f"passes non-allowlisted vars: {sorted(passed_vars - allowed_vars)}"
+        )
+
+
+def _cross_scope_marker_sections() -> tuple[dict[object, object], dict[object, object], dict[object, object]]:
+    marker_contract = _CROSS_SCOPE_MARKER_CONTRACT
+    assert isinstance(marker_contract, dict), "cross_scope_marker_contract must be mapping"
+    required_markers = marker_contract.get("required_markers", {})
+    assert isinstance(required_markers, dict), "required_markers must be mapping"
+    required_titles_by_transition = marker_contract.get(
+        "required_titles_by_transition", {}
+    )
+    assert isinstance(required_titles_by_transition, dict), (
+        "required_titles_by_transition must be mapping"
+    )
+    required_tooltip_tokens = marker_contract.get("required_tooltip_tokens", {})
+    assert isinstance(required_tooltip_tokens, dict), (
+        "required_tooltip_tokens must be mapping"
+    )
+    return required_markers, required_titles_by_transition, required_tooltip_tokens
+
+
+def _cross_scope_marker_specs() -> list[tuple[str, str, str, list[object]]]:
+    required_markers, required_titles_by_transition, required_tooltip_tokens = (
+        _cross_scope_marker_sections()
+    )
+    specs: list[tuple[str, str, str, list[object]]] = []
+    for transition, marker_key in required_titles_by_transition.items():
+        assert isinstance(marker_key, str), (
+            f"marker key for {transition} must be a string"
+        )
+        marker = required_markers.get(marker_key)
+        assert isinstance(marker, str) and marker, (
+            f"required marker '{marker_key}' must be declared for transition {transition}"
+        )
+        tooltip_tokens = required_tooltip_tokens.get(marker_key, [])
+        assert isinstance(tooltip_tokens, list), (
+            f"required_tooltip_tokens.{marker_key} must be list"
+        )
+        specs.append((str(transition), marker, marker_key, tooltip_tokens))
+    return specs
+
+
+def _matching_cross_scope_links(
+    source_dashboard: dict[str, object], *, to_uid: str, marker: str
+) -> list[dict[str, object]]:
+    matched_links: list[dict[str, object]] = []
+    for link in source_dashboard.get("links", []):
+        if not isinstance(link, dict):
+            continue
+        url = link.get("url", "")
+        if not isinstance(url, str) or _extract_dashboard_uid(url) != to_uid:
+            continue
+        title = str(link.get("title", ""))
+        tooltip = str(link.get("tooltip", ""))
+        if marker in title or marker in tooltip:
+            matched_links.append(link)
+    return matched_links
+
+
+def _assert_cross_scope_matched_links(
+    *,
+    transition: str,
+    marker: str,
+    tooltip_tokens: list[object],
+    matched_links: list[dict[str, object]],
+) -> None:
+    assert matched_links, (
+        f"Missing cross-scope link for {transition} with marker '{marker}'"
+    )
+    for link in matched_links:
+        title = str(link.get("title", ""))
+        tooltip = str(link.get("tooltip", ""))
+        assert marker in title or marker in tooltip, (
+            f"Link title/tooltip must include '{marker}' for transition {transition}: "
+            f"{title} {tooltip}"
+        )
+        for token in tooltip_tokens:
+            assert str(token) in tooltip, (
+                f"Link tooltip for transition {transition} must include '{token}': {tooltip}"
+            )
+
+
 def test_dashboard_to_dashboard_links_are_not_duplicated() -> None:
     """A dashboard may expose at most one link to any other dashboard UID."""
     for dashboard_path in get_dashboard_files():
@@ -437,112 +726,14 @@ def test_required_discoverable_inbound_paths_have_panel_level_links_and_policy()
         "required_discoverable_inbound_paths must be a mapping"
     )
 
-    dashboards = {
-        load_dashboard(path).get("uid"): load_dashboard(path)
-        for path in get_dashboard_files()
-    }
+    dashboards = _load_dashboards_by_uid()
 
     for level_name, level_payload in inbound.items():
-        assert level_name in {"L1", "L2"}, (
-            f"Unexpected level in inbound contract: {level_name}"
+        _assert_inbound_level_payload(
+            level_name=level_name,
+            level_payload=level_payload,
+            dashboards=dashboards,
         )
-        assert isinstance(level_payload, dict), f"{level_name} payload must be mapping"
-
-        for target_uid, routes in level_payload.items():
-            assert isinstance(target_uid, str)
-            assert isinstance(routes, list) and routes, (
-                f"{level_name}.{target_uid} must declare at least one source panel route"
-            )
-
-            for route in routes:
-                assert isinstance(route, dict), (
-                    f"{level_name}.{target_uid} route must be mapping"
-                )
-                source_uid = route.get("source_uid")
-                panel_id = route.get("source_panel_id")
-                panel_title = route.get("source_panel_title")
-                status_row_title_matcher = route.get(
-                    "source_status_row_panel_title_matcher"
-                )
-                assert isinstance(source_uid, str)
-                assert isinstance(panel_id, int)
-                assert isinstance(panel_title, str) and panel_title
-                if level_name == "L1":
-                    assert (
-                        isinstance(status_row_title_matcher, str)
-                        and status_row_title_matcher
-                    )
-
-                source_dashboard = dashboards.get(source_uid)
-                assert isinstance(source_dashboard, dict), (
-                    f"Source dashboard uid={source_uid} from inbound contract not found"
-                )
-                panel = next(
-                    (
-                        candidate
-                        for candidate in get_dashboard_panels(source_dashboard)
-                        if candidate.get("id") == panel_id
-                    ),
-                    None,
-                )
-                assert isinstance(panel, dict), (
-                    f"Source panel id={panel_id} for {source_uid}->{target_uid} not found"
-                )
-                assert panel.get("title") == panel_title, (
-                    f"Source panel id={panel_id} title mismatch: expected {panel_title!r}, got {panel.get('title')!r}"
-                )
-                if level_name == "L1":
-                    row_re = re.compile(status_row_title_matcher)
-                    status_header_panel = next(
-                        (
-                            candidate
-                            for candidate in get_dashboard_panels(source_dashboard)
-                            if isinstance(candidate.get("title"), str)
-                            and row_re.search(candidate["title"]) is not None
-                        ),
-                        None,
-                    )
-                    assert isinstance(status_header_panel, dict), (
-                        f"{source_uid}:{panel_id}->{target_uid} must resolve status-row matcher {status_row_title_matcher!r}"
-                    )
-                    row_y = status_header_panel.get("gridPos", {}).get("y")
-                    panel_y = panel.get("gridPos", {}).get("y")
-                    assert isinstance(row_y, int) and isinstance(panel_y, int), (
-                        f"{source_uid}:{panel_id}->{target_uid} row/panel y gridPos must be integers"
-                    )
-                    assert panel_y > row_y, (
-                        f"{source_uid}:{panel_id}->{target_uid} panel must be on first-screen status row below matched header panel {status_header_panel.get('title')!r}"
-                    )
-
-                target_links = [
-                    link.get("url")
-                    for link in _iter_panel_data_links(panel)
-                    if isinstance(link.get("url"), str)
-                    and _extract_dashboard_uid(link["url"]) == target_uid
-                ]
-                assert target_links, (
-                    f"Panel id={panel_id} ({panel_title}) must contain data link to {target_uid}"
-                )
-
-                for url in target_links:
-                    passed_vars = _extract_link_vars(url)
-                    required_vars = _REQUIRED_LINK_VARS_BY_TARGET_UID[target_uid]
-                    forbidden_vars = _FORBIDDEN_DASHBOARD_LINK_VARS_BY_TARGET_UID[
-                        target_uid
-                    ]
-                    assert required_vars <= passed_vars, (
-                        f"Inbound path {source_uid}:{panel_id}->{target_uid} missing vars "
-                        f"{sorted(required_vars - passed_vars)} via {url}"
-                    )
-                    assert not (passed_vars & forbidden_vars), (
-                        f"Inbound path {source_uid}:{panel_id}->{target_uid} leaks forbidden vars "
-                        f"{sorted(passed_vars & forbidden_vars)} via {url}"
-                    )
-                    _assert_required_time_tokens(
-                        url,
-                        tokens=_DASHBOARD_TIME_HANDOFF_TOKENS,
-                        context=f"Inbound path {source_uid}:{panel_id}->{target_uid}",
-                    )
 
 
 def test_critical_top_level_links_follow_title_allowlist_and_scope_reset_suffix() -> (
@@ -610,88 +801,18 @@ def test_required_critical_panel_links_by_uid_contract() -> None:
             if isinstance(panel, dict) and isinstance(panel.get("id"), int)
         }
         for entry in required_entries:
-            panel_id = entry["panel_id"]
-            target_uid = entry["target_uid"]
-            expected_titles = set(entry["link_titles"])
-            panel = panels_by_id.get(panel_id)
-            assert isinstance(panel, dict), (
-                f"{dashboard_path.name} ({uid}) missing critical panel id={panel_id}"
+            _assert_critical_panel_entry(
+                dashboard_path=dashboard_path,
+                uid=uid,
+                panels_by_id=panels_by_id,
+                entry=entry,
             )
-
-            data_links = _iter_panel_data_links(panel)
-            assert data_links, (
-                f"{dashboard_path.name} panel id={panel_id} must define dataLinks"
-            )
-
-            matching_links = []
-            for link in data_links:
-                title = str(link.get("title", ""))
-                url = str(link.get("url", ""))
-                if expected_titles and title not in expected_titles:
-                    continue
-                if url.startswith(f"/d/{target_uid}/"):
-                    matching_links.append(link)
-
-            assert matching_links, (
-                f"{dashboard_path.name} panel id={panel_id} must include at least one "
-                f"critical link to target_uid={target_uid} with title in "
-                f"{sorted(expected_titles)}"
-            )
-
-            allowed_vars = _ALLOWED_DASHBOARD_LINK_VARS[target_uid]
-            for link in matching_links:
-                url = str(link.get("url", ""))
-                _assert_required_time_tokens(
-                    url,
-                    tokens=_DASHBOARD_TIME_HANDOFF_TOKENS,
-                    context=f"{dashboard_path.name} panel id={panel_id}",
-                )
-                passed_vars = _extract_link_vars(url)
-                assert passed_vars <= allowed_vars, (
-                    f"{dashboard_path.name} panel id={panel_id} link to {target_uid} "
-                    f"passes non-allowlisted vars: {sorted(passed_vars - allowed_vars)}"
-                )
 
 
 def test_cross_scope_links_use_explicit_reset_or_context_markers() -> None:
     """Cross-scope links must expose explicit marker in title/tooltip."""
-    marker_contract = _CROSS_SCOPE_MARKER_CONTRACT
-    assert isinstance(marker_contract, dict), (
-        "cross_scope_marker_contract must be mapping"
-    )
-    required_markers = marker_contract.get("required_markers", {})
-    assert isinstance(required_markers, dict), "required_markers must be mapping"
-    required_titles_by_transition = marker_contract.get(
-        "required_titles_by_transition", {}
-    )
-    assert isinstance(required_titles_by_transition, dict), (
-        "required_titles_by_transition must be mapping"
-    )
-    required_tooltip_tokens = marker_contract.get("required_tooltip_tokens", {})
-    assert isinstance(required_tooltip_tokens, dict), (
-        "required_tooltip_tokens must be mapping"
-    )
-
-    dashboards = {
-        dashboard.get("uid"): dashboard
-        for dashboard_path in get_dashboard_files()
-        for dashboard in (load_dashboard(dashboard_path),)
-        if isinstance(dashboard.get("uid"), str)
-    }
-
-    for transition, marker_key in required_titles_by_transition.items():
-        assert isinstance(marker_key, str), (
-            f"marker key for {transition} must be a string"
-        )
-        marker = required_markers.get(marker_key)
-        assert isinstance(marker, str) and marker, (
-            f"required marker '{marker_key}' must be declared for transition {transition}"
-        )
-        tooltip_tokens = required_tooltip_tokens.get(marker_key, [])
-        assert isinstance(tooltip_tokens, list), (
-            f"required_tooltip_tokens.{marker_key} must be list"
-        )
-
+    dashboards = _load_dashboards_by_uid()
+    for transition, marker, _marker_key, tooltip_tokens in _cross_scope_marker_specs():
         base_transition = transition.split("#", 1)[0]
         from_uid, to_uid = base_transition.split("->", 1)
         source_dashboard = dashboards.get(from_uid)
@@ -699,36 +820,15 @@ def test_cross_scope_links_use_explicit_reset_or_context_markers() -> None:
             f"source dashboard for transition {transition} must exist: {from_uid}"
         )
 
-        links = [
-            link for link in source_dashboard.get("links", []) if isinstance(link, dict)
-        ]
-        matched_links = []
-        for link in links:
-            url = link.get("url", "")
-            if not isinstance(url, str):
-                continue
-            target_uid = _extract_dashboard_uid(url)
-            if target_uid != to_uid:
-                continue
-            title = str(link.get("title", ""))
-            tooltip = str(link.get("tooltip", ""))
-            if marker in title or marker in tooltip:
-                matched_links.append(link)
-
-        assert matched_links, (
-            f"Missing cross-scope link for {transition} with marker '{marker}'"
+        matched_links = _matching_cross_scope_links(
+            source_dashboard, to_uid=to_uid, marker=marker
         )
-        for link in matched_links:
-            title = str(link.get("title", ""))
-            tooltip = str(link.get("tooltip", ""))
-            assert marker in title or marker in tooltip, (
-                f"Link title/tooltip must include '{marker}' for transition {transition}: "
-                f"{title} {tooltip}"
-            )
-            for token in tooltip_tokens:
-                assert token in tooltip, (
-                    f"Link tooltip for transition {transition} must include '{token}': {tooltip}"
-                )
+        _assert_cross_scope_matched_links(
+            transition=transition,
+            marker=marker,
+            tooltip_tokens=tooltip_tokens,
+            matched_links=matched_links,
+        )
 
 
 def _load_dashboards_by_uid() -> dict[str, dict[str, object]]:
@@ -941,38 +1041,6 @@ def test_only_runtime_and_dq_dashboards_expose_explore_drilldown_links() -> None
             assert "/explore?left=" not in url, (
                 f"{dashboard_name} drilldown URL must not use legacy /explore payload links"
             )
-
-
-def _is_logs_drilldown_url(url: str) -> bool:
-    return "/a/grafana-lokiexplore-app/" in url
-
-
-def _is_traces_drilldown_url(url: str) -> bool:
-    return "/a/grafana-exploretraces-app/" in url
-
-
-_OVERVIEW_STATUS_PANEL_IDS_BY_TARGET_UID: tuple[tuple[int, str], ...] = (
-    (215, "bioetl-runtime"),
-    (215, "bioetl-dq-v2"),
-    (215, "bioetl-control-plane-v1"),
-    (215, "bioetl-provider-health-v2"),
-    (215, "bioetl-workflow-overview"),
-)
-
-
-def _iter_panel_data_links(panel: dict[str, object]) -> list[dict[str, object]]:
-    result: list[dict[str, object]] = []
-    options = panel.get("options")
-    if isinstance(options, dict):
-        links = options.get("dataLinks", [])
-        if isinstance(links, list):
-            result.extend(link for link in links if isinstance(link, dict))
-    defaults = panel.get("fieldConfig", {}).get("defaults", {})
-    if isinstance(defaults, dict):
-        field_links = defaults.get("links", [])
-        if isinstance(field_links, list):
-            result.extend(link for link in field_links if isinstance(link, dict))
-    return result
 
 
 def test_dashboard_bus_self_links_are_omitted() -> None:
@@ -1679,11 +1747,23 @@ def test_pipeline_and_provider_variables_are_single_select_unknown_default() -> 
             assert variable.get("multi") is False, (
                 f"{dashboard_path.name} '{variable_name}' must be single-select"
             )
+            current = variable.get("current", {})
+            assert isinstance(current, dict)
+            if (
+                dashboard_path.name == "bioetl-overview-v2.json"
+                and variable_name == "pipeline"
+            ):
+                assert variable.get("includeAll") is True, (
+                    "bioetl-overview-v2.json 'pipeline' must default to All so "
+                    "the overview landing page renders a meaningful scope"
+                )
+                assert current.get("value") == "$__all", (
+                    "bioetl-overview-v2.json 'pipeline' must default to All"
+                )
+                continue
             assert variable.get("includeAll") is False, (
                 f"{dashboard_path.name} '{variable_name}' must disable All"
             )
-            current = variable.get("current", {})
-            assert isinstance(current, dict)
             assert current.get("value") == "unknown", (
                 f"{dashboard_path.name} '{variable_name}' must default to unknown"
             )

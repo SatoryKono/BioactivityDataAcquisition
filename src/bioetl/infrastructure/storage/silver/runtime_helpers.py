@@ -24,7 +24,7 @@ from bioetl.domain.ports import (
 from bioetl.domain.ports.noop import NoOpMetadataWriter
 from bioetl.domain.types import BronzeRecord
 from bioetl.domain.types.contract_rollout import ContractRolloutPolicy
-from bioetl.infrastructure.export.csv_exporter import CsvExporter
+from bioetl.infrastructure.export.csv_exporter_contract import CsvExporterPort
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.storage.delta.resilience import (
     DEFAULT_SILVER_MERGE_POLICY,
@@ -68,7 +68,7 @@ if TYPE_CHECKING:
 class SilverWriterRuntimeServices:
     """Grouped runtime collaborators for ``SilverWriter``."""
 
-    csv_exporter: CsvExporter | None
+    csv_exporter: CsvExporterPort | None
     tracing: TracingPort | None
     write_policy: WriteModePolicy
     metrics: MetricsPort | None
@@ -94,7 +94,7 @@ class SilverWriterRuntimeServices:
 class SilverWriterRuntimeServicesRequest:
     """Inputs required to build grouped Silver runtime collaborators."""
 
-    csv_exporter: CsvExporter | None
+    csv_exporter: CsvExporterPort | None
     tracing: TracingPort | None
     write_policy: WriteModePolicy | None
     metrics: MetricsPort | None
