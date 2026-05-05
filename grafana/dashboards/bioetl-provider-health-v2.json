@@ -236,7 +236,7 @@
       ],
       "title": "Health Check Latency by Provider (p95)",
       "type": "timeseries",
-      "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
+      "description": "Provider status enum: 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY; null=UNKNOWN."
     },
     {
       "datasource": "Prometheus",
@@ -325,7 +325,7 @@
       ],
       "title": "Current Provider Health Status",
       "type": "table",
-      "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
+      "description": "Provider status enum: 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY; null=UNKNOWN."
     },
     {
       "datasource": "Prometheus",
@@ -396,7 +396,7 @@
       ],
       "title": "Healthy Checks",
       "type": "stat",
-      "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
+      "description": "Provider status enum: 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY; null=UNKNOWN."
     },
     {
       "datasource": "Prometheus",
@@ -476,7 +476,7 @@
       ],
       "title": "Provider Failure Rate",
       "type": "gauge",
-      "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
+      "description": "Provider status enum: 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY; null=UNKNOWN."
     },
     {
       "datasource": "Prometheus",
@@ -549,7 +549,7 @@
       ],
       "title": "Health Checks Total",
       "type": "stat",
-      "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
+      "description": "Provider status enum: 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY; null=UNKNOWN."
     },
     {
       "datasource": "Prometheus",
@@ -622,7 +622,7 @@
       ],
       "title": "Degraded Checks",
       "type": "stat",
-      "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
+      "description": "Provider status enum: 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY; null=UNKNOWN."
     },
     {
       "datasource": "Prometheus",
@@ -705,7 +705,7 @@
       ],
       "title": "Track Failure and Degraded Trend by Provider",
       "type": "timeseries",
-      "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
+      "description": "Provider status enum: 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY; null=UNKNOWN."
     },
     {
       "datasource": "Prometheus",
@@ -767,7 +767,7 @@
       ],
       "title": "Track Provider Failure Share (Selected Range)",
       "type": "bargauge",
-      "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
+      "description": "Provider status enum: 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY; null=UNKNOWN."
     },
     {
       "datasource": "Prometheus",
@@ -830,7 +830,7 @@
       ],
       "title": "Track Retries Exhausted by Provider/Operation",
       "type": "table",
-      "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
+      "description": "Provider status enum: 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY; null=UNKNOWN."
     },
     {
       "datasource": "Prometheus",
@@ -909,7 +909,7 @@
       ],
       "title": "Track Retries Exhausted Trend by Provider/Operation",
       "type": "timeseries",
-      "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
+      "description": "Provider status enum: 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY; null=UNKNOWN."
     },
     {
       "collapsed": true,
@@ -999,7 +999,7 @@
       ],
       "title": "Provider Health Check Latency (p95) - $provider",
       "type": "gauge",
-      "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
+      "description": "Provider status enum: 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY; null=UNKNOWN."
     },
     {
       "datasource": "Prometheus",
@@ -1060,7 +1060,7 @@
       ],
       "title": "Adapter Request Latency by Endpoint (p95)",
       "type": "timeseries",
-      "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
+      "description": "Provider status enum: 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY; null=UNKNOWN."
     },
     {
       "datasource": "Prometheus",
@@ -1139,7 +1139,7 @@
       ],
       "title": "HTTP Errors by Method / Error Type",
       "type": "timeseries",
-      "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
+      "description": "Provider status enum: 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY; null=UNKNOWN."
     },
     {
       "datasource": "Prometheus",
@@ -1218,7 +1218,7 @@
       ],
       "title": "Rate Limiter Wait by Provider (p95)",
       "type": "timeseries",
-      "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
+      "description": "Provider status enum: 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY; null=UNKNOWN."
     },
     {
       "datasource": "Prometheus",
@@ -1278,7 +1278,7 @@
       ],
       "title": "Minimum Rate Limiter Tokens Available",
       "type": "bargauge",
-      "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
+      "description": "Provider status enum: 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY; null=UNKNOWN."
     },
     {
       "datasource": "Prometheus",
@@ -1350,7 +1350,7 @@
       ],
       "title": "Circuit Breaker State (max)",
       "type": "stat",
-      "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
+      "description": "Provider status enum: 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY; null=UNKNOWN."
     },
     {
       "datasource": "Prometheus",
@@ -1422,7 +1422,7 @@
       ],
       "title": "Circuit Breaker Trips by Provider",
       "type": "timeseries",
-      "description": "Status mapping: 0 = healthy/ok, 1 = warning/degraded, >=2 = critical/failing, null = no data."
+      "description": "Provider status enum: 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY; null=UNKNOWN."
     }
   ],
   "refresh": "30s",
