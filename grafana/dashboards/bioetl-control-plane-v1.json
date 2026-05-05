@@ -258,7 +258,6 @@
       "type": "stat"
     },
     {
-      "datasource": "Prometheus",
       "description": "Checkpoint freshness proxy for selected pipeline. Shows hours since most recent checkpoint operation event.",
       "fieldConfig": {
         "defaults": {
@@ -323,29 +322,13 @@
       },
       "id": 892,
       "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
+        "content": "Checkpoint age not instrumented",
+        "mode": "markdown"
       },
       "pluginVersion": "9.5.0",
-      "targets": [
-        {
-          "expr": "clamp_min((time() - max(max_over_time(bioetl_checkpoint_operator_duration_seconds_count[$__range]))) / 3600, 0)",
-          "instant": true,
-          "refId": "A"
-        }
-      ],
       "title": "Checkpoint Freshness (hours since last op)",
-      "type": "stat"
+      "type": "text",
+      "transparent": false
     },
     {
       "datasource": "Prometheus",
