@@ -25,3 +25,5 @@ else
     echo "[ERROR] Gemini launcher not found at ${GEMINI_SCRIPT}" >&2
     return 1
 fi
+
+return 1

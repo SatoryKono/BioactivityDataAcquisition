@@ -64,15 +64,17 @@ class _RecordingMetrics:
 
 
 class _PipelineRunner:
-    async def run(
+    async def _fake_async_result(self, result: RunResult) -> RunResult:
+        await asyncio.sleep(0)
+        return result
+
+    def _make_result(
         self,
         pipeline_name: str,
-        dry_run: bool = False,
         run_id: object | None = None,
         options: object | None = None,
     ) -> RunResult:
-        await asyncio.sleep(0)
-        del dry_run, run_id, options
+        del run_id, options
         return RunResult(
             status=PipelineRunResult.SUCCESS,
             pipeline_name=pipeline_name,
@@ -82,6 +84,18 @@ class _PipelineRunner:
             records_silver=3,
             started_at=FIXED_TEST_TIME,
             completed_at=FIXED_TEST_TIME,
+        )
+
+    def run(
+        self,
+        pipeline_name: str,
+        dry_run: bool = False,
+        run_id: object | None = None,
+        options: object | None = None,
+    ) -> asyncio.Future | asyncio.Task:
+        del dry_run
+        return self._fake_async_result(
+            self._make_result(pipeline_name, run_id=run_id, options=options)
         )
 
 
