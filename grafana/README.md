@@ -20,7 +20,7 @@ ______________________________________________________________________
    13.1. [Дашборд: 2. Runtime](#131-%D0%B4%D0%B0%D1%88%D0%B1%D0%BE%D1%80%D0%B4-2-runtime)
 1. [Дашборд: 3. Provider Health](#13-%D0%B4%D0%B0%D1%88%D0%B1%D0%BE%D1%80%D0%B4-3-provider-health)
 1. [Дашборд: 4. Data Quality](#11-%D0%B4%D0%B0%D1%88%D0%B1%D0%BE%D1%80%D0%B4-4-data-quality)
-1. [Дашборд: 5. Silver Reject Explorer](#12-%D0%B4%D0%B0%D1%88%D0%B1%D0%BE%D1%80%D0%B4-5-silver-reject-explorer)
+1. [Дашборд: Silver Reject Explorer](#12-%D0%B4%D0%B0%D1%88%D0%B1%D0%BE%D1%80%D0%B4-silver-reject-explorer)
 1. [Справочник PromQL-паттернов](#14-%D1%81%D0%BF%D1%80%D0%B0%D0%B2%D0%BE%D1%87%D0%BD%D0%B8%D0%BA-promql-%D0%BF%D0%B0%D1%82%D1%82%D0%B5%D1%80%D0%BD%D0%BE%D0%B2)
 1. [Устранение неполадок](#15-%D1%83%D1%81%D1%82%D1%80%D0%B0%D0%BD%D0%B5%D0%BD%D0%B8%D0%B5-%D0%BD%D0%B5%D0%BF%D0%BE%D0%BB%D0%B0%D0%B4%D0%BE%D0%BA)
 1. [Архитектурные решения и обоснования](#16-%D0%B0%D1%80%D1%85%D0%B8%D1%82%D0%B5%D0%BA%D1%82%D1%83%D1%80%D0%BD%D1%8B%D0%B5-%D1%80%D0%B5%D1%88%D0%B5%D0%BD%D0%B8%D1%8F-%D0%B8-%D0%BE%D0%B1%D0%BE%D1%81%D0%BD%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D1%8F)
@@ -677,12 +677,12 @@ Shipped dashboards используют несколько template variables в
   `label_values(bioetl_records_processed_total{pipeline=~"$pipeline",run_type=~"$run_type"}, stage)`.
   Это bounded stage breakdown filter, а не forensic selector.
 
-- **`5. Control Plane`** использует собственные
+- **`0. Control Plane`** использует собственные
   `$pipeline/$run_type` queries для manifest/ledger/checkpoint/replay/lineage
   decision row. GLOBAL read-path и checkpoint-operator panels не несут
   pipeline/run_type labels, поэтому не фильтруются по этим переменным.
 
-- **`Workflow Overview`** использует только `$workflow` и `$status` через
+- **`5. Workflow`** использует только `$workflow` и `$status` через
   `label_values(bioetl_workflow_runs_total, workflow|status)`.
 
 - **`Provider Health`** использует `$provider` и `$adapter`; pipeline scope там
@@ -937,7 +937,7 @@ collapsed row `Tracing-only Log Hygiene (requires optional tracing profile)`.
 - `DQ Alert Conditions`: compact DQ handoff only; detailed DQ debugging lives in
   `4. Data Quality`
 - `Control-plane Alert Conditions`: manifest/checkpoint/replay/lineage handoff
-  into `5. Control Plane`
+  into `0. Control Plane`
 - `GLOBAL Provider Alert Conditions`: compact provider handoff only; provider
   deep-debug stays in `3. Provider Health`
 - `Freshness Alert Conditions`: stale-output handoff into DQ/source investigation
@@ -956,9 +956,11 @@ collapsed row `Tracing-only Log Hygiene (requires optional tracing profile)`.
 ### Drilldown
 
 - Cross-dashboard links передают только target-scoped variables
-- Panel-level handoffs используют явные `from/to`, а не blanket `includeVars=true`
-- `Control-plane Alert Conditions` и `No-Records Runs / 30m` дают прямой handoff
-  в `5. Control Plane`
+- Panel-level dashboard handoffs intentionally absent; only top-level bus links
+  route to other dashboards.
+- `Control-plane Alert Conditions` и `No-Records Runs / 30m` локализуют
+  symptoms; dashboard transition в control-plane идёт через `0. Control Plane`
+  в top-level bus.
 - `Pipeline/DQ/Control-plane/Provider/Freshness Alert Conditions` дополнительно
   ведут в canonical runbooks
 

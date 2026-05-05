@@ -75,33 +75,22 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-dq-v2.json | 153 | Data Quality Score Trend (Volume-weighted) |
 | bioetl-dq-v2.json | 154 | DQ Impact on Deliverability (Blocked Share) |
 | bioetl-dq-v2.json | 155 | DQ Impact on Deliverability Trend (Blocked Share %) |
-| bioetl-overview-v2.json | 1 | Processing Volume by Stage |
-| bioetl-overview-v2.json | 4 | Flow Balance |
 | bioetl-overview-v2.json | 99 | L0 Overview Scope |
-| bioetl-overview-v2.json | 111 | Manifest / Ledger Failures |
-| bioetl-overview-v2.json | 113 | Checkpoint Incompatibilities |
-| bioetl-overview-v2.json | 114 | Lineage Refs Missing |
-| bioetl-overview-v2.json | 118 | Silver Rejects Count + Rate |
-| bioetl-overview-v2.json | 119 | Latest Successful Data Timestamp |
-| bioetl-overview-v2.json | 201 | Failed Runs in Range |
-| bioetl-overview-v2.json | 202 | Worst Backlog Stage |
-| bioetl-overview-v2.json | 203 | Worst Lag Stage |
-| bioetl-overview-v2.json | 204 | DQ Hard Blockers |
-| bioetl-overview-v2.json | 205 | Control-plane Blockers |
-| bioetl-overview-v2.json | 206 | Global Provider Degradation |
-| bioetl-overview-v2.json | 207 | Pipeline Run Outcomes |
-| bioetl-overview-v2.json | 208 | Runtime Status |
-| bioetl-overview-v2.json | 209 | Data Quality Status |
-| bioetl-overview-v2.json | 210 | Control Plane Status |
-| bioetl-overview-v2.json | 211 | Provider Status |
-| bioetl-overview-v2.json | 212 | Workflow Status |
-| bioetl-overview-v2.json | 213 | Drilldown Links |
 | bioetl-overview-v2.json | 214 | System Status |
 | bioetl-overview-v2.json | 215 | Next Action |
-| bioetl-overview-v2.json | 216 | Recent Activity |
-| bioetl-overview-v2.json | 217 | Backlog Causality |
-| bioetl-overview-v2.json | 1210 | Stage Backlog Trend |
-| bioetl-overview-v2.json | 1211 | Stage Lag Trend |
+| bioetl-overview-v2.json | 9002 | L0 Inputs |
+| bioetl-overview-v2.json | 9003 | Runtime Blockers Current |
+| bioetl-overview-v2.json | 9004 | DQ Status Current |
+| bioetl-overview-v2.json | 9005 | Gold Lifecycle Current |
+| bioetl-overview-v2.json | 9006 | Control Plane Current |
+| bioetl-overview-v2.json | 9007 | Provider GLOBAL Scope |
+| bioetl-overview-v2.json | 9008 | Workflow Selected Scope |
+| bioetl-overview-v2.json | 9009 | Range Evidence (Historical / Recent History) |
+| bioetl-overview-v2.json | 9010 | Historical Failures (range evidence) |
+| bioetl-overview-v2.json | 9011 | Recent terminal runs (range evidence) |
+| bioetl-overview-v2.json | 9012 | Diagnostics & Docs (Logs / Traces / Raw Metrics) |
+| bioetl-overview-v2.json | 9013 | Workflow GLOBAL Scope |
+| bioetl-overview-v2.json | 9014 | Diagnostics Navigation |
 | bioetl-provider-health-v2.json | 1 | Monitor Health Check Latency by Provider (p95) |
 | bioetl-provider-health-v2.json | 2 | Monitor Healthy Checks |
 | bioetl-provider-health-v2.json | 7 | Track Health Checks Total |
