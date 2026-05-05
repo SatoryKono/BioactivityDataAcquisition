@@ -167,6 +167,8 @@ GEMINI_RUNTIME_DOC_PATH = ".gemini/agents/GEMINI-RUNTIME.md"
 AGENTS_DOC_TOKEN = "AGENTS.md"
 MEMORY_USAGE_TOKEN = "MEMORY_USAGE.md"
 POST_CHANGE_TOKEN = "POST_CHANGE_VALIDATION.md"
+POST_CHANGE_DOC_TOKEN = "../policy/POST_CHANGE_VALIDATION.md"
+MEMORY_DOC_TOKEN = "../memory/agent-memory.md"
 GEMINI_AUDIT_BOT_TOKEN = ".gemini/agents/py-audit-bot.md"
 RUNTIME_DOC_TOKENS: tuple[str, ...] = (
     RUNTIME_AGENT_GUIDE_PATH,
@@ -271,8 +273,8 @@ AI_SURFACE_REQUIRED_TOKENS: dict[Path, tuple[str, ...]] = {
     ),
     Path("docs/00-project/ai/agents/guides/AGENT.md"): (
         MEMORY_USAGE_TOKEN,
-        "../policy/POST_CHANGE_VALIDATION.md",
-        "../memory/agent-memory.md",
+        POST_CHANGE_DOC_TOKEN,
+        MEMORY_DOC_TOKEN,
     ),
 }
 AI_WRITE_CAPABLE_SKILL_REQUIRED_TOKENS: dict[Path, tuple[str, ...]] = {
@@ -1382,27 +1384,49 @@ def _check_ai_docs_runtime_mirror_headers(
 
 def print_report(report: DriftReport) -> None:
     """Print human-readable drift report."""
+    by_category = _issues_by_category(report)
+
     print("Documentation Drift Report")
     print("=" * 60)
 
-    if not report.issues:
+    if report.issues:
+        for category in sorted(by_category):
+            issues = by_category[category]
+            print(f"\n[{category.upper()}] ({len(issues)} issues)")
+            for issue in issues:
+                marker = "ERROR" if issue.severity == "ERROR" else "WARN "
+                print(f"  {marker}  {issue.doc_file}")
+                print(f"         {issue.detail}")
+    else:
         print("No drift detected. Documentation is in sync with code.")
-        return
-
-    by_category: dict[str, list[DriftIssue]] = {}
-    for issue in report.issues:
-        by_category.setdefault(issue.category, []).append(issue)
-
-    for category in sorted(by_category):
-        issues = by_category[category]
-        print(f"\n[{category.upper()}] ({len(issues)} issues)")
-        for issue in issues:
-            marker = "ERROR" if issue.severity == "ERROR" else "WARN "
-            print(f"  {marker}  {issue.doc_file}")
-            print(f"         {issue.detail}")
 
     print()
     print(f"Summary: {report.error_count} errors, {report.warning_count} warnings")
+
+
+def _issues_by_category(report: DriftReport) -> dict[str, list[DriftIssue]]:
+    by_category: dict[str, list[DriftIssue]] = {}
+    for issue in report.issues:
+        by_category.setdefault(issue.category, []).append(issue)
+    return by_category
+
+
+def _run_checks(report: DriftReport, *, args: argparse.Namespace, run_all: bool) -> None:
+    selected_checks = [
+        (run_all or args.ports, check_ports),
+        (run_all or args.classes, check_classes),
+        (run_all or args.modules, check_modules),
+        (run_all or args.runtime_mirrors, check_runtime_mirrors),
+        (run_all or args.freshness, check_freshness),
+        (run_all or args.ai_surfaces, check_ai_surfaces),
+    ]
+
+    for enabled, checker in selected_checks:
+        if enabled:
+            checker(report)
+    if run_all:
+        check_providers(report)
+        check_glossary(report)
 
 
 def main() -> int:
@@ -1449,21 +1473,7 @@ def main() -> int:
         or args.ai_surfaces
     )
 
-    if run_all or args.ports:
-        check_ports(report)
-    if run_all or args.classes:
-        check_classes(report)
-    if run_all or args.modules:
-        check_modules(report)
-    if run_all or args.runtime_mirrors:
-        check_runtime_mirrors(report)
-    if run_all or args.freshness:
-        check_freshness(report)
-    if run_all or args.ai_surfaces:
-        check_ai_surfaces(report)
-    if run_all:
-        check_providers(report)
-        check_glossary(report)
+    _run_checks(report, args=args, run_all=run_all)
 
     if args.json_output:
         json.dump(report.to_dict(), sys.stdout, indent=2)
