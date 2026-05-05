@@ -4,6 +4,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
+from bioetl.application.observability.observer_contract import (
+    build_observability_contract_payload,
+)
+
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort, MetricsPort
 
@@ -54,10 +58,6 @@ class _ObserverEventMixin:
         **context: Any,  # Any: structlog-compatible context kwargs
     ) -> None:
         """Validate contract once and emit log+metric payloads."""
-        from bioetl.application.observability.observer import (
-            build_observability_contract_payload,
-        )
-
         payload = build_observability_contract_payload(
             event_name=event_name,
             context=context,

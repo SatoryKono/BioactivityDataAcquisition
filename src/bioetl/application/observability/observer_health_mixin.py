@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import TYPE_CHECKING, Any
 
+from bioetl.application.observability.observer_contract import LifecyclePhase
 from bioetl.domain.events import PipelineEvent
 from bioetl.domain.types import HealthStatus
 
@@ -34,8 +35,6 @@ class _ObserverHealthEmissionMixin:
         **extra: Any,  # Any: observer events forward arbitrary structured diagnostics to emit_event.
     ) -> None:
         """Emit health check result for a component."""
-        from bioetl.application.observability.observer import LifecyclePhase
-
         resolved_status = self._resolve_health_status(
             health_status=health_status,
             healthy=healthy,
@@ -106,8 +105,6 @@ class _ObserverHealthEmissionMixin:
         **extra: Any,  # Any: summary emissions allow caller-defined observability payload fragments.
     ) -> None:
         """Emit summary preflight health observability through the observer contract."""
-        from bioetl.application.observability.observer import LifecyclePhase
-
         self.emit_event(
             PipelineEvent.HEALTH_CHECK_SUMMARY_RECORDED,
             LifecyclePhase.PREFLIGHT,

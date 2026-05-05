@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import time
-from dataclasses import dataclass
 from datetime import datetime
 from typing import TYPE_CHECKING, Protocol
 
@@ -16,7 +15,9 @@ from bioetl.application.composite.runner_pkg.runner_constants import (
 from bioetl.application.composite.runner_pkg.runner_helpers import (
     calculate_had_warnings,
 )
-from bioetl.application.composite.runner_pkg.runner_support_types import (
+from bioetl.application.composite.runner_pkg.runner_result_types import (
+    CompositeResultBuildContext,
+    CompositeResultBuildRequest,
     _PreparedCompositeResultContext,
 )
 from bioetl.application.runtime_timestamps import derive_completion_timestamp
@@ -75,20 +76,6 @@ class CompositePipelineFinalizationResult:
     """Terminal checkpoint state produced by finalization helpers."""
 
     completed_state: CompositeCheckpointState
-
-
-@dataclass(frozen=True, slots=True)
-class CompositeResultBuildContext:
-    """Explicit data required to assemble the final CompositeResult."""
-
-    artifacts: CompositeExecutionContext
-    composite_name: str
-    run_id: str
-    start_time: float | None
-    started_at: datetime | None
-    original_run_id: str | None
-    required_enrichers: frozenset[str]
-    required_dependencies: frozenset[str]
 
 
 def prepare_composite_result_context(
@@ -195,4 +182,3 @@ async def finalize_pipeline(
 
 
 CompositePipelineFinalizationRequest = CompositePipelineFinalizationContext
-CompositeResultBuildRequest = CompositeResultBuildContext

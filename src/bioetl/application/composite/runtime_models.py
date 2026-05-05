@@ -18,15 +18,29 @@ from bioetl.domain.constants import DEFAULT_LOCK_TTL_SECONDS
 if TYPE_CHECKING:
     import polars as pl
 
-    from bioetl.application.composite.runtime_wiring_api import (
+    from bioetl.application.composite.checkpoint import (
         CompositeCheckpointService,
-        CompositeLifecycleObserverService,
-        CompositePreflightValidationService,
-        DependencyCoordinatorService,
+    )
+    from bioetl.application.composite.coordinator import (
         EnrichmentCoordinatorService,
+    )
+    from bioetl.application.composite.dependency_coordinator import (
+        DependencyCoordinatorService,
+    )
+    from bioetl.application.composite.fsm_helper import (
         FSMStateHelperService,
+    )
+    from bioetl.application.composite.key_extractor import (
         KeyExtractorService,
+    )
+    from bioetl.application.composite.lifecycle_observer_service import (
+        CompositeLifecycleObserverService,
+    )
+    from bioetl.application.composite.merger import (
         MergeService,
+    )
+    from bioetl.application.composite.preflight_validator import (
+        CompositePreflightValidationService,
     )
     from bioetl.application.services.control_plane.run_ledger_service import (
         RunLedgerService,

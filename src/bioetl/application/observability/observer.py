@@ -18,11 +18,14 @@ __all__ = ["LifecyclePhase", "PipelineObserver"]
 
 import time
 from contextlib import AbstractContextManager
-from enum import StrEnum
 from typing import TYPE_CHECKING, Any
 
 from bioetl.application.observability.observer_context_mixin import (
     _ObserverContextManagerMixin,
+)
+from bioetl.application.observability.observer_contract import (
+    LifecyclePhase,
+    build_observability_contract_payload,
 )
 from bioetl.application.observability.observer_health_mixin import (
     _ObserverHealthEmissionMixin,
@@ -31,9 +34,6 @@ from bioetl.application.observability.observer_postrun_mixin import (
     _ObserverPostrunEmissionMixin,
 )
 from bioetl.domain.events import PipelineEvent
-from bioetl.domain.observability_contract import (
-    build_observability_contract_payload as _build_observability_contract_payload,
-)
 from bioetl.domain.runtime_observability_publication_contract import (
     CANONICAL_DOMAIN_EVENT_EMITTER,
     CANONICAL_LIFECYCLE_EMITTER,
@@ -66,24 +66,6 @@ else:
     )
 
 PROBE_MODE_FALLBACK_COUNTER = "bioetl_probe_mode_fallback_total"
-
-# Exposed as module attribute for compatibility with legacy patch points in tests.
-build_observability_contract_payload = _build_observability_contract_payload
-
-
-class LifecyclePhase(StrEnum):
-    """Pipeline lifecycle phases for structured observability.
-
-    Each phase represents a distinct stage in pipeline execution
-    that should be tracked for monitoring and debugging.
-    """
-
-    STARTUP = "startup"
-    PREFLIGHT = "preflight"
-    LIFECYCLE_CLEAR = "lifecycle_clear"
-    EXECUTION = "execution"
-    POSTRUN = "postrun"
-    CLEANUP = "cleanup"
 
 
 class _ObserverLifecycleEmissionMixin(
