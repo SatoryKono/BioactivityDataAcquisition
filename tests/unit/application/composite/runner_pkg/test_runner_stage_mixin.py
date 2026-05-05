@@ -9,9 +9,6 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from bioetl.application.composite.lifecycle_observer_service import (
-    CompositeLifecycleObserverService,
-)
 from bioetl.application.composite.runner_pkg.runner_stage_mixin import (
     CompositeRunnerStageMixin,
 )
@@ -22,47 +19,18 @@ from bioetl.domain.composite.result import (
 )
 from bioetl.domain.composite.state import CompositePipelineState
 from bioetl.domain.exceptions import InvalidStateError
+from tests.unit.application.composite.runner_pkg.runner_pkg_test_support import (
+    failed_dep,
+    initialize_runner_pkg_harness,
+    make_dependency_cfg,
+    make_runner_state,
+    success_dep,
+)
 
 
 # ---------------------------------------------------------------------------
 # Fakes / factories
 # ---------------------------------------------------------------------------
-
-
-def _make_state(
-    state: CompositePipelineState = CompositePipelineState.NOT_STARTED,
-    seed_completed: bool = False,
-    completed_dependencies: frozenset[str] | None = None,
-    completed_enrichers: frozenset[str] | None = None,
-    enrichment_results: dict[str, Any] | None = None,
-) -> MagicMock:
-    mock = MagicMock()
-    mock.state = state
-    mock.seed_completed = seed_completed
-    mock.completed_dependencies = completed_dependencies or frozenset()
-    mock.completed_enrichers = completed_enrichers or frozenset()
-    mock.enrichment_results = enrichment_results or {}
-    mock.with_state = MagicMock(return_value=mock)
-    mock.with_seed_completed = MagicMock(return_value=mock)
-    mock.with_dependency_completed = MagicMock(return_value=mock)
-    mock.with_enricher_completed = MagicMock(return_value=mock)
-    return mock
-
-
-def _make_dep_cfg(pipeline: str, *, required: bool = False) -> SimpleNamespace:
-    return SimpleNamespace(
-        pipeline=pipeline, required=required, silver_table="silver/t"
-    )
-
-
-def _success_dep(name: str) -> DependencyResult:
-    return DependencyResult(pipeline_name=name, status=DependencyStatus.SUCCESS)
-
-
-def _failed_dep(name: str) -> DependencyResult:
-    return DependencyResult(pipeline_name=name, status=DependencyStatus.FAILED)
-
-
 # ---------------------------------------------------------------------------
 # Harness
 # ---------------------------------------------------------------------------
@@ -77,25 +45,27 @@ class _StageMixinHarness(CompositeRunnerStageMixin):
         seed_result: SeedResult | None = None,
         seed_raises: Exception | None = None,
     ) -> None:
-        self._config = config or SimpleNamespace(
-            name="test_composite",
-            seed=SimpleNamespace(pipeline="seed_pipeline", silver_table="silver/seed"),
-            enrichers=[],
-            required_enrichers=[],
-            dependencies=[],
+        initialize_runner_pkg_harness(
+            self,
+            config=config
+            or SimpleNamespace(
+                name="test_composite",
+                seed=SimpleNamespace(
+                    pipeline="seed_pipeline",
+                    silver_table="silver/seed",
+                ),
+                enrichers=[],
+                required_enrichers=[],
+                dependencies=[],
+            ),
+            runtime=SimpleNamespace(
+                required_only=False,
+                enrich_only=None,
+                force_enricher=None,
+                dry_run=False,
+            ),
+            run_id_str="run-stage-test",
         )
-        self._runtime = SimpleNamespace(
-            required_only=False,
-            enrich_only=None,
-            force_enricher=None,
-            dry_run=False,
-        )
-        self._logger = MagicMock()
-        self._observer_logger = MagicMock()
-        self._observer = CompositeLifecycleObserverService(logger=self._observer_logger)
-        self._run_id_str = "run-stage-test"
-        self._fsm = MagicMock()
-        self._checkpoint_manager = AsyncMock()
 
         # Seed seam
         self._seed_result = seed_result or SeedResult(
@@ -152,7 +122,7 @@ async def test_execute_seed_phase_when_already_completed_then_resumes_without_ru
     None
 ):
     harness = _StageMixinHarness()
-    state = _make_state(
+    state = make_runner_state(
         state=CompositePipelineState.SEED_COMPLETED,
         seed_completed=True,
     )
@@ -172,7 +142,7 @@ async def test_execute_seed_phase_when_already_completed_then_resumes_without_ru
 @pytest.mark.asyncio
 async def test_execute_seed_phase_when_not_completed_then_runs_seed() -> None:
     harness = _StageMixinHarness()
-    state = _make_state(
+    state = make_runner_state(
         state=CompositePipelineState.NOT_STARTED,
         seed_completed=False,
     )
@@ -192,7 +162,7 @@ async def test_execute_seed_phase_when_not_completed_then_runs_seed() -> None:
 @pytest.mark.asyncio
 async def test_execute_seed_phase_when_seed_raises_then_propagates_error() -> None:
     harness = _StageMixinHarness(seed_raises=RuntimeError("seed failure"))
-    state = _make_state(
+    state = make_runner_state(
         state=CompositePipelineState.NOT_STARTED,
         seed_completed=False,
     )
@@ -211,7 +181,7 @@ def test_resume_seed_phase_when_state_already_seed_completed_then_no_fsm_transit
     None
 ):
     harness = _StageMixinHarness()
-    state = _make_state(state=CompositePipelineState.SEED_COMPLETED)
+    state = make_runner_state(state=CompositePipelineState.SEED_COMPLETED)
 
     result = harness._resume_seed_phase(state)
 
@@ -222,7 +192,7 @@ def test_resume_seed_phase_when_state_already_seed_completed_then_no_fsm_transit
 @pytest.mark.unit
 def test_resume_seed_phase_when_state_differs_then_fsm_transition_logged() -> None:
     harness = _StageMixinHarness()
-    state = _make_state(state=CompositePipelineState.NOT_STARTED)
+    state = make_runner_state(state=CompositePipelineState.NOT_STARTED)
 
     harness._resume_seed_phase(state)
 
@@ -238,7 +208,7 @@ def test_resume_seed_phase_when_state_differs_then_fsm_transition_logged() -> No
 @pytest.mark.asyncio
 async def test_skip_dependencies_phase_when_called_then_returns_empty_dict() -> None:
     harness = _StageMixinHarness()
-    state = _make_state()
+    state = make_runner_state()
 
     new_state, dep_results = await harness._skip_dependencies_phase(state)
 
@@ -258,7 +228,7 @@ async def test_execute_dependencies_phase_when_no_deps_configured_then_returns_e
 ):
     harness = _StageMixinHarness()
     harness._config.dependencies = []
-    state = _make_state()
+    state = make_runner_state()
 
     import polars as pl
 
@@ -322,8 +292,8 @@ def test_validate_dependency_preconditions_when_both_present_then_returns_pair()
 @pytest.mark.unit
 def test_collect_successful_dependencies_when_success_then_marks_completed() -> None:
     harness = _StageMixinHarness()
-    state = _make_state()
-    results = {"dep_a": _success_dep("dep_a")}
+    state = make_runner_state()
+    results = {"dep_a": success_dep("dep_a")}
 
     harness._collect_successful_dependencies(state, results)
 
@@ -333,8 +303,8 @@ def test_collect_successful_dependencies_when_success_then_marks_completed() -> 
 @pytest.mark.unit
 def test_collect_successful_dependencies_when_failed_then_not_marked() -> None:
     harness = _StageMixinHarness()
-    state = _make_state()
-    results = {"dep_a": _failed_dep("dep_a")}
+    state = make_runner_state()
+    results = {"dep_a": failed_dep("dep_a")}
 
     harness._collect_successful_dependencies(state, results)
 
@@ -352,17 +322,19 @@ async def test_postprocess_dependency_results_when_mixed_then_finalizes_with_cou
             seed=SimpleNamespace(pipeline="seed_pipeline", silver_table="silver/seed"),
             enrichers=[],
             required_enrichers=[],
-            dependencies=[_make_dep_cfg("dep_a"), _make_dep_cfg("dep_b")],
+            dependencies=[make_dependency_cfg("dep_a"), make_dependency_cfg("dep_b")],
             get_dependency=lambda name: {
-                "dep_a": _make_dep_cfg("dep_a"),
-                "dep_b": _make_dep_cfg("dep_b"),
+                "dep_a": make_dependency_cfg("dep_a"),
+                "dep_b": make_dependency_cfg("dep_b"),
             }.get(name),
         )
     )
-    state = _make_state()
-    completed_state = _make_state(state=CompositePipelineState.DEPENDENCIES_COMPLETED)
+    state = make_runner_state()
+    completed_state = make_runner_state(
+        state=CompositePipelineState.DEPENDENCIES_COMPLETED
+    )
     harness._complete_dependencies_phase = AsyncMock(return_value=completed_state)
-    results = {"dep_a": _success_dep("dep_a"), "dep_b": _failed_dep("dep_b")}
+    results = {"dep_a": success_dep("dep_a"), "dep_b": failed_dep("dep_b")}
 
     new_state, dep_results = await harness._postprocess_dependency_results(
         state, results
@@ -381,7 +353,7 @@ async def test_postprocess_dependency_results_when_mixed_then_finalizes_with_cou
 @pytest.mark.unit
 @pytest.mark.asyncio
 async def test_finalize_dependencies_phase_when_required_failure_then_raises() -> None:
-    dep_cfg = _make_dep_cfg("dep_a", required=True)
+    dep_cfg = make_dependency_cfg("dep_a", required=True)
     harness = _StageMixinHarness(
         config=SimpleNamespace(
             name="test_composite",
@@ -392,10 +364,10 @@ async def test_finalize_dependencies_phase_when_required_failure_then_raises() -
             get_dependency=lambda name: dep_cfg if name == "dep_a" else None,
         )
     )
-    state = _make_state()
+    state = make_runner_state()
     harness._persist_failed_state = AsyncMock(return_value=state)
     harness._complete_dependencies_phase = AsyncMock()
-    outcome = harness._build_dependency_phase_outcome({"dep_a": _failed_dep("dep_a")})
+    outcome = harness._build_dependency_phase_outcome({"dep_a": failed_dep("dep_a")})
 
     with pytest.raises(InvalidStateError, match="Required dependencies failed"):
         await harness._finalize_dependencies_phase(state, outcome)

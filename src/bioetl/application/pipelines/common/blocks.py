@@ -1,4 +1,4 @@
-"""Compatibility re-exports for provider-specific publication blocks."""
+"""Provider-specific publication block re-exports."""
 
 from __future__ import annotations
 

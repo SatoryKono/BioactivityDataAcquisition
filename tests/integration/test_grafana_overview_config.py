@@ -35,6 +35,10 @@ def _panel_expr(panel: dict) -> str:
     )
 
 
+def _panel_transformations(panel: dict) -> list[dict]:
+    return panel.get("transformations", [])
+
+
 def _assert_status_mapping(panel: dict) -> None:
     serialized = json.dumps(panel.get("fieldConfig", {}).get("defaults", {}))
     for status_text in _STATUS_TEXTS:
@@ -72,10 +76,13 @@ def test_overview_answer_row_is_compact_and_current_only() -> None:
 def test_system_status_panel_preserves_current_status_semantics() -> None:
     panel = _panels_by_title()["System Status"]
     expr = _panel_expr(panel)
+    options = panel.get("options", {})
 
     assert panel.get("type") == "stat"
     assert "bioetl_l0_status" in expr
     assert "$__range" not in expr
+    assert options.get("textMode") == "value"
+    assert options.get("graphMode") == "none"
     _assert_status_mapping(panel)
 
 
@@ -83,6 +90,7 @@ def test_next_action_panel_exposes_action_route_details() -> None:
     panel = _panels_by_title()["Next Action"]
     expr = _panel_expr(panel)
     description = str(panel.get("description", ""))
+    transformations = _panel_transformations(panel)
 
     assert panel.get("type") == "table"
     assert "bioetl_l0_next_action_route" in expr
@@ -90,6 +98,11 @@ def test_next_action_panel_exposes_action_route_details() -> None:
     assert 'pipeline=~"$pipeline"' in expr
     assert 'run_type=~"$run_type"' not in expr
     assert "$__range" not in expr
+    assert panel.get("gridPos", {}).get("w") == 10
+    assert transformations and transformations[0].get("id") == "organize"
+    excluded = transformations[0].get("options", {}).get("excludeByName", {})
+    for hidden_field in ("Time", "__name__", "Value", "action_dashboard_uid"):
+        assert excluded.get(hidden_field) is True
     for label_name in ("action_target", "action_reason", "action_dashboard_uid"):
         assert label_name in description
 
@@ -108,6 +121,41 @@ def test_current_l0_l1_tables_have_operator_mappings() -> None:
         panel = _panels_by_title()[title]
         assert panel.get("type") == "table"
         _assert_status_mapping(panel)
+
+
+def test_current_tables_hide_prometheus_noise_and_use_human_column_names() -> None:
+    expected_renames = {
+        "Next Action": ("Pipeline",),
+        "L0 Inputs": ("Pipeline", "Input", "Run Type", "Status"),
+        "Runtime Blockers Current": ("Pipeline", "Run Type", "Status"),
+        "DQ Status Current": ("Pipeline", "Status"),
+        "Gold Lifecycle Current": ("Pipeline", "Run Type", "Lifecycle", "Status"),
+        "Control Plane Current": ("Pipeline", "Run Type", "Status"),
+        "Provider GLOBAL Scope": ("Provider", "Status"),
+        "Workflow Selected Scope": ("Pipeline", "Run Type", "Status"),
+        "Workflow GLOBAL Scope": ("Pipeline", "Run Type", "Status"),
+    }
+
+    for title, renamed_fields in expected_renames.items():
+        panel = _panels_by_title()[title]
+        transformations = _panel_transformations(panel)
+
+        assert transformations and transformations[0].get("id") == "organize"
+        options = transformations[0].get("options", {})
+        excluded = options.get("excludeByName", {})
+        assert excluded.get("Time") is True
+        assert excluded.get("__name__") is True
+        rename_by_name = options.get("renameByName", {})
+        for renamed_field in renamed_fields:
+            assert renamed_field in rename_by_name.values(), (
+                f"Panel {title!r} must expose {renamed_field!r} as a human column name"
+            )
+
+
+def test_operator_panels_expand_compact_layout_for_readability() -> None:
+    assert _panels_by_title()["Next Action"].get("gridPos", {}).get("w") == 10
+    assert _panels_by_title()["L0 Inputs"].get("gridPos", {}).get("w") == 8
+    assert _panels_by_title()["Gold Lifecycle Current"].get("gridPos", {}).get("w") == 8
 
 
 def test_current_panels_do_not_mix_in_range_evidence() -> None:
@@ -163,6 +211,32 @@ def test_range_evidence_panels_keep_run_type_scope() -> None:
     assert "sum by (pipeline, run_type, status)" in terminals_expr
     assert 'run_type=~"$run_type"' in terminals_expr
     assert "[$__range]" in terminals_expr
+
+
+def test_range_evidence_tables_hide_raw_prometheus_columns() -> None:
+    expected = {
+        "Historical Failures (range evidence)": ("Pipeline", "Run Type", "Failures"),
+        "Recent terminal runs (range evidence)": (
+            "Pipeline",
+            "Run Type",
+            "Terminal Status",
+            "Runs",
+        ),
+    }
+
+    for title, renamed_fields in expected.items():
+        panel = _panels_by_title()[title]
+        transformations = _panel_transformations(panel)
+
+        assert panel.get("type") == "table"
+        assert transformations and transformations[0].get("id") == "organize"
+        options = transformations[0].get("options", {})
+        excluded = options.get("excludeByName", {})
+        assert excluded.get("Time") is True
+        assert excluded.get("__name__") is True
+        rename_by_name = options.get("renameByName", {})
+        for renamed_field in renamed_fields:
+            assert renamed_field in rename_by_name.values()
 
 
 def test_diagnostics_row_is_not_empty() -> None:

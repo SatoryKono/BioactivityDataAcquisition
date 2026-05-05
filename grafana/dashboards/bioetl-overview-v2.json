@@ -162,7 +162,7 @@
       "id": 214,
       "options": {
         "colorMode": "value",
-        "graphMode": "area",
+        "graphMode": "none",
         "justifyMode": "auto",
         "orientation": "auto",
         "reduceOptions": {
@@ -172,13 +172,12 @@
           "fields": "",
           "values": false
         },
-        "textMode": "value_and_name",
+        "textMode": "value",
         "dataLinks": []
       },
       "targets": [
         {
           "expr": "max(bioetl_l0_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})",
-          "legendFormat": "System status: recording-rule blockers > warnings > activity",
           "refId": "A"
         }
       ],
@@ -192,7 +191,7 @@
       "title": "Next Action",
       "gridPos": {
         "h": 6,
-        "w": 9,
+        "w": 10,
         "x": 6,
         "y": 4
       },
@@ -204,6 +203,13 @@
         "defaults": {
           "color": {
             "mode": "thresholds"
+          },
+          "custom": {
+            "align": "left",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
           },
           "mappings": [
             {
@@ -269,7 +275,100 @@
           },
           "unit": "none"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "action_target"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Action"
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "control_plane": {
+                        "text": "Open Control Plane"
+                      },
+                      "dq": {
+                        "text": "Open Data Quality"
+                      },
+                      "monitor": {
+                        "text": "Monitor Overview"
+                      },
+                      "provider": {
+                        "text": "Open Provider Health"
+                      },
+                      "runtime": {
+                        "text": "Open Runtime"
+                      },
+                      "workflow": {
+                        "text": "Open Workflow"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "action_reason"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Why"
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "control_plane_guardrail_active": {
+                        "text": "Control-plane guardrail active"
+                      },
+                      "dq_threshold_or_validation_signal": {
+                        "text": "DQ threshold or validation signal"
+                      },
+                      "no_recent_activity_or_unknown_state": {
+                        "text": "No recent activity or unknown state"
+                      },
+                      "provider_global_degradation": {
+                        "text": "Provider degradation"
+                      },
+                      "runtime_blockers_active": {
+                        "text": "Runtime blockers active"
+                      },
+                      "workflow_scope_requires_review": {
+                        "text": "Workflow review required"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "pipeline"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Pipeline"
+              }
+            ]
+          }
+        ]
       },
       "targets": [
         {
@@ -285,6 +384,28 @@
           "show": false
         }
       },
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "__name__": true,
+              "Value": true,
+              "action_dashboard_uid": true,
+              "bioetl_l0_next_action_route": true
+            },
+            "indexByName": {
+              "pipeline": 0,
+              "action_target": 1,
+              "action_reason": 2
+            },
+            "renameByName": {
+              "pipeline": "Pipeline"
+            }
+          }
+        }
+      ],
       "description": "Action route projection. The row exposes `action_target`, `action_reason`, and `action_dashboard_uid`; Runtime > Control Plane > DQ > Provider > Workflow > Monitor. Pipeline scope is explicit; DQ/provider routes remain broader than run_type when the underlying signal is global."
     },
     {
@@ -293,8 +414,8 @@
       "title": "L0 Inputs",
       "gridPos": {
         "h": 6,
-        "w": 9,
-        "x": 15,
+        "w": 8,
+        "x": 16,
         "y": 4
       },
       "datasource": {
@@ -305,6 +426,13 @@
         "defaults": {
           "color": {
             "mode": "thresholds"
+          },
+          "custom": {
+            "align": "left",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
           },
           "mappings": [
             {
@@ -358,7 +486,96 @@
           },
           "unit": "none"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "input"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Input"
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "control_plane": {
+                        "text": "Control Plane"
+                      },
+                      "dq": {
+                        "text": "Data Quality"
+                      },
+                      "gold": {
+                        "text": "Gold"
+                      },
+                      "provider": {
+                        "text": "Provider"
+                      },
+                      "runtime": {
+                        "text": "Runtime"
+                      },
+                      "workflow": {
+                        "text": "Workflow"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "pipeline"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Pipeline"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "run_type"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Run Type"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Value"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Status"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "bioetl_l0_input_status"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Status"
+              }
+            ]
+          }
+        ]
       },
       "targets": [
         {
@@ -374,6 +591,31 @@
           "show": false
         }
       },
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "__name__": true
+            },
+            "indexByName": {
+              "pipeline": 0,
+              "input": 1,
+              "run_type": 2,
+              "Value": 3,
+              "bioetl_l0_input_status": 3
+            },
+            "renameByName": {
+              "pipeline": "Pipeline",
+              "run_type": "Run Type",
+              "input": "Input",
+              "Value": "Status",
+              "bioetl_l0_input_status": "Status"
+            }
+          }
+        }
+      ],
       "description": "Current L0 inputs (Runtime, DQ, Gold, Control Plane, Provider, Workflow). Value mapping: 0/null=UNKNOWN, 1=OK, 2=DEGRADED, 3=BROKEN."
     },
     {
@@ -395,6 +637,13 @@
           "color": {
             "mode": "thresholds"
           },
+          "custom": {
+            "align": "left",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
           "mappings": [
             {
               "type": "value",
@@ -447,7 +696,56 @@
           },
           "unit": "none"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "pipeline"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Pipeline"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "run_type"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Run Type"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Value"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Status"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "bioetl_l1_runtime_blocker_status"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Status"
+              }
+            ]
+          }
+        ]
       },
       "targets": [
         {
@@ -463,6 +761,29 @@
           "show": false
         }
       },
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "__name__": true
+            },
+            "indexByName": {
+              "pipeline": 0,
+              "run_type": 1,
+              "Value": 2,
+              "bioetl_l1_runtime_blocker_status": 2
+            },
+            "renameByName": {
+              "pipeline": "Pipeline",
+              "run_type": "Run Type",
+              "Value": "Status",
+              "bioetl_l1_runtime_blocker_status": "Status"
+            }
+          }
+        }
+      ],
       "description": "Current runtime blocker summary only; no $__range evidence. Open Runtime dashboard for the exact blocker condition rows."
     },
     {
@@ -484,6 +805,13 @@
           "color": {
             "mode": "thresholds"
           },
+          "custom": {
+            "align": "left",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
           "mappings": [
             {
               "type": "value",
@@ -536,7 +864,44 @@
           },
           "unit": "none"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "pipeline"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Pipeline"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Value"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Status"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "bioetl_l1_dq_status"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Status"
+              }
+            ]
+          }
+        ]
       },
       "targets": [
         {
@@ -552,6 +917,27 @@
           "show": false
         }
       },
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "__name__": true
+            },
+            "indexByName": {
+              "pipeline": 0,
+              "Value": 1,
+              "bioetl_l1_dq_status": 1
+            },
+            "renameByName": {
+              "pipeline": "Pipeline",
+              "Value": "Status",
+              "bioetl_l1_dq_status": "Status"
+            }
+          }
+        }
+      ],
       "description": "Pipeline-scoped DQ summary across run types for the selected pipeline. Value mapping: 0/null=UNKNOWN, 1=OK, 2=DEGRADED, 3=BROKEN."
     },
     {
@@ -560,8 +946,8 @@
       "title": "Gold Lifecycle Current",
       "gridPos": {
         "h": 5,
-        "w": 6,
-        "x": 12,
+        "w": 8,
+        "x": 10,
         "y": 10
       },
       "datasource": {
@@ -572,6 +958,13 @@
         "defaults": {
           "color": {
             "mode": "thresholds"
+          },
+          "custom": {
+            "align": "left",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
           },
           "mappings": [
             {
@@ -625,7 +1018,93 @@
           },
           "unit": "none"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "lifecycle_state"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Lifecycle"
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "disabled": {
+                        "text": "Gold stage disabled"
+                      },
+                      "gold_missing_after_success": {
+                        "text": "Missing gold after upstream success"
+                      },
+                      "healthy_recent_gold": {
+                        "text": "Recent gold output healthy"
+                      },
+                      "pending_no_recent_gold": {
+                        "text": "Pending gold output"
+                      },
+                      "runtime_failed_owner": {
+                        "text": "Runtime failed first"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "pipeline"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Pipeline"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "run_type"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Run Type"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Value"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Status"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "bioetl_l1_gold_lifecycle_status"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Status"
+              }
+            ]
+          }
+        ]
       },
       "targets": [
         {
@@ -641,6 +1120,31 @@
           "show": false
         }
       },
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "__name__": true
+            },
+            "indexByName": {
+              "pipeline": 0,
+              "run_type": 1,
+              "lifecycle_state": 2,
+              "Value": 3,
+              "bioetl_l1_gold_lifecycle_status": 3
+            },
+            "renameByName": {
+              "pipeline": "Pipeline",
+              "run_type": "Run Type",
+              "lifecycle_state": "Lifecycle",
+              "Value": "Status",
+              "bioetl_l1_gold_lifecycle_status": "Status"
+            }
+          }
+        }
+      ],
       "description": "Lifecycle-state projection for gold output. `lifecycle_state` distinguishes runtime-owned failure, missing gold after success, pending, disabled, and healthy recent gold."
     },
     {
@@ -662,6 +1166,13 @@
           "color": {
             "mode": "thresholds"
           },
+          "custom": {
+            "align": "left",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
           "mappings": [
             {
               "type": "value",
@@ -714,7 +1225,56 @@
           },
           "unit": "none"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "pipeline"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Pipeline"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "run_type"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Run Type"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Value"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Status"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "bioetl_l1_control_plane_current_status"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Status"
+              }
+            ]
+          }
+        ]
       },
       "targets": [
         {
@@ -730,6 +1290,29 @@
           "show": false
         }
       },
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "__name__": true
+            },
+            "indexByName": {
+              "pipeline": 0,
+              "run_type": 1,
+              "Value": 2,
+              "bioetl_l1_control_plane_current_status": 2
+            },
+            "renameByName": {
+              "pipeline": "Pipeline",
+              "run_type": "Run Type",
+              "Value": "Status",
+              "bioetl_l1_control_plane_current_status": "Status"
+            }
+          }
+        }
+      ],
       "description": "Current control-plane summary for manifest, ledger, checkpoint, and lineage guardrails. Open Control Plane for the exact failing contract."
     },
     {
@@ -751,6 +1334,13 @@
           "color": {
             "mode": "thresholds"
           },
+          "custom": {
+            "align": "left",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
           "mappings": [
             {
               "type": "value",
@@ -803,7 +1393,44 @@
           },
           "unit": "none"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "provider"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Provider"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Value"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Status"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "bioetl_l1_provider_global_status"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Status"
+              }
+            ]
+          }
+        ]
       },
       "targets": [
         {
@@ -819,6 +1446,27 @@
           "show": false
         }
       },
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "__name__": true
+            },
+            "indexByName": {
+              "provider": 0,
+              "Value": 1,
+              "bioetl_l1_provider_global_status": 1
+            },
+            "renameByName": {
+              "provider": "Provider",
+              "Value": "Status",
+              "bioetl_l1_provider_global_status": "Status"
+            }
+          }
+        }
+      ],
       "description": "GLOBAL provider scope across pipelines. This panel intentionally ignores selected pipeline/run_type filters."
     },
     {
@@ -840,6 +1488,13 @@
           "color": {
             "mode": "thresholds"
           },
+          "custom": {
+            "align": "left",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
           "mappings": [
             {
               "type": "value",
@@ -892,7 +1547,56 @@
           },
           "unit": "none"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "pipeline"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Pipeline"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "run_type"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Run Type"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Value"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Status"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "bioetl_l1_workflow_selected_status"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Status"
+              }
+            ]
+          }
+        ]
       },
       "targets": [
         {
@@ -908,6 +1612,29 @@
           "show": false
         }
       },
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "__name__": true
+            },
+            "indexByName": {
+              "pipeline": 0,
+              "run_type": 1,
+              "Value": 2,
+              "bioetl_l1_workflow_selected_status": 2
+            },
+            "renameByName": {
+              "pipeline": "Pipeline",
+              "run_type": "Run Type",
+              "Value": "Status",
+              "bioetl_l1_workflow_selected_status": "Status"
+            }
+          }
+        }
+      ],
       "description": "Selected pipeline/run_type workflow summary only."
     },
     {
@@ -929,6 +1656,13 @@
           "color": {
             "mode": "thresholds"
           },
+          "custom": {
+            "align": "left",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
           "mappings": [
             {
               "type": "value",
@@ -981,7 +1715,56 @@
           },
           "unit": "none"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "pipeline"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Pipeline"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "run_type"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Run Type"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Value"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Status"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "bioetl_l1_workflow_global_status"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Status"
+              }
+            ]
+          }
+        ]
       },
       "targets": [
         {
@@ -997,6 +1780,29 @@
           "show": false
         }
       },
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "__name__": true
+            },
+            "indexByName": {
+              "pipeline": 0,
+              "run_type": 1,
+              "Value": 2,
+              "bioetl_l1_workflow_global_status": 2
+            },
+            "renameByName": {
+              "pipeline": "Pipeline",
+              "run_type": "Run Type",
+              "Value": "Status",
+              "bioetl_l1_workflow_global_status": "Status"
+            }
+          }
+        }
+      ],
       "description": "GLOBAL workflow scope across pipeline/run_type combinations."
     },
     {
@@ -1030,6 +1836,13 @@
               "color": {
                 "mode": "thresholds"
               },
+              "custom": {
+                "align": "left",
+                "cellOptions": {
+                  "type": "auto"
+                },
+                "inspect": false
+              },
               "unit": "none"
             },
             "overrides": []
@@ -1048,6 +1861,27 @@
               "show": false
             }
           },
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "__name__": true
+                },
+                "indexByName": {
+                  "pipeline": 0,
+                  "run_type": 1,
+                  "Value": 2
+                },
+                "renameByName": {
+                  "pipeline": "Pipeline",
+                  "run_type": "Run Type",
+                  "Value": "Failures"
+                }
+              }
+            }
+          ],
           "description": "Historical evidence only. Keeps `pipeline` and `run_type` labels from the active Grafana window."
         },
         {
@@ -1069,6 +1903,13 @@
               "color": {
                 "mode": "thresholds"
               },
+              "custom": {
+                "align": "left",
+                "cellOptions": {
+                  "type": "auto"
+                },
+                "inspect": false
+              },
               "unit": "none"
             },
             "overrides": []
@@ -1087,6 +1928,29 @@
               "show": false
             }
           },
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "__name__": true
+                },
+                "indexByName": {
+                  "pipeline": 0,
+                  "run_type": 1,
+                  "status": 2,
+                  "Value": 3
+                },
+                "renameByName": {
+                  "pipeline": "Pipeline",
+                  "run_type": "Run Type",
+                  "status": "Terminal Status",
+                  "Value": "Runs"
+                }
+              }
+            }
+          ],
           "description": "Historical terminal-run evidence only. Keeps `pipeline`, `run_type`, and `status` labels from the active Grafana window."
         }
       ]
