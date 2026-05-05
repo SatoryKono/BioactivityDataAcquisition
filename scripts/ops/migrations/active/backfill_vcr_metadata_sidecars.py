@@ -69,9 +69,17 @@ def _selected_cassettes(vcr_root: Path, provider: str) -> list[Path]:
     )
 
 
+def _is_binary_file(path: Path) -> bool:
+    """Best-effort binary-file detection for cassette candidates."""
+    chunk = path.read_bytes()[:1024]
+    return b"\x00" in chunk
+
+
 def _build_sidecar_payload(
     vcr_root: Path, cassette_path: Path, *, recorded_at: str
 ) -> dict[str, object]:
+    cassette_path = cassette_path.resolve()
+    vcr_root = vcr_root.resolve()
     provider = cassette_path.relative_to(vcr_root).parts[0]
     cassette_bytes = cassette_path.read_bytes()
     cassette_rel_path = cassette_path.relative_to(ROOT).as_posix()
@@ -89,7 +97,7 @@ def _build_sidecar_payload(
 
 def main() -> int:
     args = _parse_args()
-    vcr_root = Path(args.vcr_root)
+    vcr_root = Path(args.vcr_root).resolve()
     cassettes = _selected_cassettes(vcr_root, args.provider)
     if args.limit > 0:
         cassettes = cassettes[: args.limit]
@@ -111,6 +119,8 @@ def main() -> int:
 
     written = 0
     for cassette_path in cassettes:
+        if _is_binary_file(cassette_path):
+            continue
         metadata_path = _metadata_path_for(cassette_path)
         if metadata_path.exists() and not args.rewrite_existing:
             continue
