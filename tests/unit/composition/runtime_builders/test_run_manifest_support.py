@@ -286,6 +286,83 @@ def test_validate_reproducible_sink_modes_allows_non_strict_append_with_contract
 
 
 @pytest.mark.unit
+def test_validate_reproducible_sink_modes_rejects_disallowed_append_contract() -> None:
+    with pytest.raises(RuntimeError, match="idempotency_contract=disallowed"):
+        validate_reproducible_sink_modes(
+            yaml_config=SimpleNamespace(
+                sink={
+                    "silver": SimpleNamespace(
+                        enabled=True,
+                        mode="append",
+                        idempotency_contract="disallowed",
+                    ),
+                    "gold": SimpleNamespace(
+                        enabled=False,
+                        mode="scd2",
+                        idempotency_contract="scd2",
+                    ),
+                }
+            ),
+            strict_replay_requested=False,
+        )
+
+
+@pytest.mark.unit
+def test_validate_reproducible_sink_modes_rejects_incompatible_append_contract() -> (
+    None
+):
+    with pytest.raises(
+        RuntimeError,
+        match=r"sink\.silver\.mode=append is incompatible with "
+        r"sink\.silver\.idempotency_contract=merge_upsert",
+    ):
+        validate_reproducible_sink_modes(
+            yaml_config=SimpleNamespace(
+                sink={
+                    "silver": SimpleNamespace(
+                        enabled=True,
+                        mode="append",
+                        idempotency_contract="merge_upsert",
+                    ),
+                    "gold": SimpleNamespace(
+                        enabled=False,
+                        mode="scd2",
+                        idempotency_contract="scd2",
+                    ),
+                }
+            ),
+            strict_replay_requested=False,
+        )
+
+
+@pytest.mark.unit
+def test_validate_reproducible_sink_modes_rejects_append_in_strict_replay_context() -> (
+    None
+):
+    with pytest.raises(
+        RuntimeError,
+        match="Strict reproducibility contexts cannot use append-mode Silver/Gold",
+    ):
+        validate_reproducible_sink_modes(
+            yaml_config=SimpleNamespace(
+                sink={
+                    "silver": SimpleNamespace(
+                        enabled=True,
+                        mode="append",
+                        idempotency_contract="occurrence_only",
+                    ),
+                    "gold": SimpleNamespace(
+                        enabled=False,
+                        mode="scd2",
+                        idempotency_contract="scd2",
+                    ),
+                }
+            ),
+            strict_replay_requested=True,
+        )
+
+
+@pytest.mark.unit
 def test_build_launch_context_snapshot_marks_ordinary_source_boundary() -> None:
     ctx = _make_run_context(
         limit=10,

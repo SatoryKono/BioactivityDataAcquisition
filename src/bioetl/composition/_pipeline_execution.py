@@ -295,7 +295,15 @@ async def run_pipeline(name: str, options: RunOptions) -> RunResult:
             create_pipeline_runner(name, options)
         )
         run_id = str(runner.run_id)
-    except Exception as e:
+    except (
+        BioETLError,
+        ImportError,
+        LookupError,
+        OSError,
+        RuntimeError,
+        ValueError,
+        TypeError,
+    ) as e:
         status = PipelineRunResult.FAILED
         error_message = str(e)
         error_type = type(e).__name__

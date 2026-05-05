@@ -173,6 +173,25 @@ def _resolve_operator_replay_mode(
     return "Rebuild"
 
 
+def _is_exact_replay_eligible(
+    manifest: RunManifest,
+    replay_context: _BaseSummaryReplayContext,
+) -> bool:
+    """Return whether manifest identity has enough anchors for exact replay."""
+    return (
+        manifest.replay_capability.value == "exact_replay_supported"
+        and not replay_context.exact_replay_blockers
+    )
+
+
+def _build_planned_artifact_refs(manifest: RunManifest) -> list[dict[str, object]]:
+    """Return planned artifact refs in the summary payload shape."""
+    return [
+        {"layer": artifact.layer, "path": artifact.path}
+        for artifact in manifest.planned_artifacts
+    ]
+
+
 def _build_base_summary_payload(
     manifest: RunManifest,
     replay_context: _BaseSummaryReplayContext,
@@ -180,10 +199,7 @@ def _build_base_summary_payload(
     code_provenance = manifest.code_provenance
     code_provenance_state = _build_code_provenance_state(manifest)
     dependency_lock_state = code_provenance_state["dependency_lock_state"]
-    exact_replay_eligible = (
-        manifest.replay_capability.value == "exact_replay_supported"
-        and not replay_context.exact_replay_blockers
-    )
+    exact_replay_eligible = _is_exact_replay_eligible(manifest, replay_context)
     summary: dict[str, object] = {
         "manifest_id": manifest.manifest_id,
         "manifest_created_at": manifest.created_at.isoformat(),
@@ -254,10 +270,7 @@ def _build_base_summary_payload(
             replay_mode=replay_context.replay_mode,
         ),
         "input_snapshots": replay_context.input_snapshots,
-        "planned_artifacts": [
-            {"layer": artifact.layer, "path": artifact.path}
-            for artifact in manifest.planned_artifacts
-        ],
+        "planned_artifacts": _build_planned_artifact_refs(manifest),
         "occurrence_only_diagnostics": [],
     }
     if code_provenance.dependency_lock_hash is not None:

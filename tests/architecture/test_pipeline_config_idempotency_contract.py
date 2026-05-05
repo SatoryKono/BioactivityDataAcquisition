@@ -32,3 +32,23 @@ def test_append_mode_requires_explicit_idempotency_contract() -> None:
                 f"{config_path}: sink.{layer_name}.mode=append requires "
                 "sink.{layer_name}.idempotency_contract"
             )
+
+
+def test_base_pipeline_declares_semantic_output_idempotency_defaults() -> None:
+    payload = yaml.safe_load(
+        Path("configs/base/pipeline.yaml").read_text(encoding="utf-8")
+    ) or {}
+    pipeline = payload.get("pipeline")
+    assert isinstance(pipeline, dict)
+    sink = pipeline.get("sink")
+    assert isinstance(sink, dict)
+
+    silver = sink.get("silver")
+    gold = sink.get("gold")
+    assert isinstance(silver, dict)
+    assert isinstance(gold, dict)
+
+    assert silver.get("mode") == "merge"
+    assert silver.get("idempotency_contract") == "merge_upsert"
+    assert gold.get("mode") == "scd2"
+    assert gold.get("idempotency_contract") == "scd2"

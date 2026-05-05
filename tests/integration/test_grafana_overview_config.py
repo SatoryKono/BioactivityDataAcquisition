@@ -15,7 +15,7 @@ from tests.integration._grafana_test_support import (
 
 pytestmark = pytest.mark.integration
 
-_STATUS_TEXTS = ("UNKNOWN", "OK", "WARN", "CRIT")
+_STATUS_TEXTS = ("UNKNOWN", "OK", "WARNING", "CRITICAL")
 
 
 def _panels_by_title() -> dict[str, dict]:
@@ -107,6 +107,8 @@ def test_next_action_panel_exposes_action_route_details() -> None:
         assert excluded.get(hidden_field) is True
     for label_name in ("action_target", "action_reason", "action_dashboard_uid"):
         assert label_name in description
+    serialized = json.dumps(panel.get("fieldConfig", {}).get("overrides", []))
+    assert "gold_lifecycle_blocking" in serialized
 
 
 def test_current_l0_l1_tables_have_operator_mappings() -> None:
@@ -128,10 +130,10 @@ def test_current_l0_l1_tables_have_operator_mappings() -> None:
 def test_current_tables_hide_prometheus_noise_and_use_human_column_names() -> None:
     expected_renames = {
         "Next Action": ("Pipeline",),
-        "L0 Inputs": ("Pipeline", "Input", "Run Type", "Status"),
+        "L0 Inputs": ("Input", "Pipeline", "Run Type", "Status"),
         "Runtime Blockers": ("Pipeline", "Run Type", "Status"),
         "DQ Status": ("Pipeline", "Status"),
-        "Gold Lifecycle": ("Pipeline", "Run Type", "Lifecycle", "Status"),
+        "Gold Lifecycle": ("Lifecycle", "Pipeline", "Run Type", "Status"),
         "Control Plane": ("Pipeline", "Run Type", "Status"),
         "Provider Global": ("Provider", "Status"),
         "Workflow Selected": ("Pipeline", "Run Type", "Status"),
@@ -182,6 +184,30 @@ def test_current_status_tables_apply_status_color_to_entire_row() -> None:
         assert color_background_overrides, (
             f"Panel {title!r} must apply status color to the entire row"
         )
+
+
+def test_l0_inputs_and_gold_lifecycle_column_order_is_operator_first() -> None:
+    expected = {
+        "L0 Inputs": {
+            "input": 0,
+            "pipeline": 1,
+            "run_type": 2,
+        },
+        "Gold Lifecycle": {
+            "lifecycle_state": 0,
+            "pipeline": 1,
+            "run_type": 2,
+        },
+    }
+
+    for title, ordering in expected.items():
+        panel = _panels_by_title()[title]
+        transformations = _panel_transformations(panel)
+        organize = transformations[0].get("options", {}).get("indexByName", {})
+        for field_name, field_index in ordering.items():
+            assert organize.get(field_name) == field_index, (
+                f"Panel {title!r} must keep {field_name!r} at column index {field_index}"
+            )
 
 
 def test_operator_panels_expand_compact_layout_for_readability() -> None:
