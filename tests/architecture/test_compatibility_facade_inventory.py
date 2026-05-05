@@ -149,7 +149,6 @@ def test_registry_yaml_has_expected_shape() -> None:
     assert registry.version == 1
     assert registry.policy_scope == "compatibility_facades"
     assert registry.tracked_docstring_prefixes
-    assert registry.transition_debt
     assert registry.retained_entrypoints
 
     for row in registry.curated_rows:
@@ -370,6 +369,13 @@ def test_deprecated_module_alias_surfaces_remain_in_transition_debt() -> None:
     assert "src/bioetl/interfaces/cli/commands/_compat.py" not in transition_paths, (
         "CLI compatibility alias helper should be retired from transition debt."
     )
+    assert (
+        "src/bioetl/composition/factories/storage/adapter.py" not in transition_paths
+    ), "Retired storage adapter shim must not remain in transition debt."
+    assert (
+        "src/bioetl/application/composite/checkpoint/anchor_context.py"
+        not in transition_paths
+    ), "Retired checkpoint anchor-context shim must not remain in transition debt."
 
 
 @pytest.mark.architecture

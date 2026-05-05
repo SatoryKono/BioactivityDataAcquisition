@@ -352,12 +352,13 @@
       },
       "targets": [
         {
-          "expr": "(sum(bioetl_dq_current_reason{pipeline=~\"$pipeline\",severity=\"failing\"} > 0) * 2) or sum(bioetl_dq_current_reason{pipeline=~\"$pipeline\",severity=\"degraded\"} > 0) or vector(0)",
+          "expr": "(sum(bioetl_dq_current_reason{pipeline=~\"$pipeline\",severity=\"failing\"} > 0) * 2) or sum(bioetl_dq_current_reason{pipeline=~\"$pipeline\",severity=\"degraded\"} > 0)",
           "refId": "A"
         }
       ],
       "title": "Monitor DQ Threshold State",
-      "type": "stat"
+      "type": "stat",
+      "description": "Current DQ threshold state from canonical reason records. Missing reason samples stay UNKNOWN/NO DATA; zero-event rendering is allowed only in selected-range evidence panels."
     },
     {
       "datasource": "Prometheus",

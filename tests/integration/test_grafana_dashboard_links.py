@@ -1529,53 +1529,88 @@ def test_provider_health_critical_panels_expose_incident_runbook_links() -> None
         ), f"Provider Health panel id={panel_id} runbook URL must be canonical"
 
 
-@pytest.mark.skip("Expected panels do not exist in bioetl-runtime.json")
 def test_runtime_first_action_cta_links_preserve_scoped_vars_and_time() -> None:
     """Runtime First Action row must use explicit allowlisted vars and preserve time."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
     expected = {
-        "Pipeline conditions": ("var-pipeline=$pipeline", "var-run_type=$run_type"),
-        "DQ conditions": (
+        "Inspect active blocker": (
             "var-pipeline=$pipeline",
             "var-run_type=$run_type",
             "var-stage=$stage",
         ),
-        "Control Plane conditions": (
+        "Open Control Plane": (
             "var-pipeline=$pipeline",
             "var-run_type=$run_type",
         ),
-        "Provider health checks": ("var-provider=$pipeline", "var-adapter=unknown"),
+        "Inspect DQ blockers": (
+            "var-pipeline=$pipeline",
+            "var-run_type=$run_type",
+            "var-stage=$stage",
+        ),
+        "Correlate provider impact": (
+            "var-provider=$pipeline",
+            "var-pipeline_context=$pipeline",
+            "var-adapter=unknown",
+        ),
     }
     forbidden = ("var-workflow=", "var-status=", "var-run_id=", "var-payload_hash=")
 
-    for panel_title, required_tokens in expected.items():
-        panel = next(
-            (
-                item
-                for item in get_dashboard_panels(dashboard)
-                if item.get("title") == panel_title
-            ),
-            None,
-        )
-        assert panel is not None, (
-            f"Panel '{panel_title}' not found in bioetl-runtime.json"
-        )
-        links = panel.get("links", [])
-        assert links, f"Panel '{panel_title}' must expose a CTA link"
-        link = links[0]
+    panel = _find_panel_by_id(dashboard, 9991)
+    assert panel is not None, "Runtime First Action panel id=9991 must exist"
+    assert panel.get("title") == "First Action"
+    links = panel.get("links", [])
+    assert isinstance(links, list) and links, (
+        "Runtime First Action panel must expose CTA links"
+    )
+    links_by_title = {str(link.get("title")): link for link in links}
+
+    for title, required_tokens in expected.items():
+        link = links_by_title.get(title)
+        assert link is not None, f"Runtime First Action must expose CTA '{title}'"
         assert link.get("includeVars") is False, (
-            f"Panel '{panel_title}' must keep includeVars=false"
+            f"Runtime First Action CTA '{title}' must keep includeVars=false"
         )
         url = str(link.get("url", ""))
         _assert_required_time_tokens(
             url,
             tokens=_DASHBOARD_TIME_HANDOFF_TOKENS,
-            context=f"{panel_title} CTA link",
+            context=f"Runtime First Action CTA '{title}'",
         )
         for token in required_tokens:
-            assert token in url, f"Panel '{panel_title}' must include token {token}"
+            assert token in url, f"Runtime First Action CTA '{title}' must include {token}"
         for token in forbidden:
-            assert token not in url, f"Panel '{panel_title}' must not leak {token}"
+            assert token not in url, f"Runtime First Action CTA '{title}' must not leak {token}"
+
+
+def test_runtime_contextual_handoffs_do_not_duplicate_top_level_dq_provider_links() -> (
+    None
+):
+    """Runtime panel CTAs to DQ/Provider must be contextual, not duplicate nav labels."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
+    forbidden_panel_titles_by_target = {
+        "bioetl-dq-v2": {"4. Data Quality", "Open Data Quality", "Open DQ"},
+        "bioetl-provider-health-v2": {
+            "3. Provider Health",
+            "Open Provider Health",
+            "Check Provider Health",
+        },
+    }
+
+    offenders = []
+    for panel in get_dashboard_panels(dashboard):
+        for link in _iter_panel_data_links(panel) + list(panel.get("links") or []):
+            url = str(link.get("url", ""))
+            target_uid = _extract_dashboard_uid(url)
+            if target_uid not in forbidden_panel_titles_by_target:
+                continue
+            title = str(link.get("title", ""))
+            if title in forbidden_panel_titles_by_target[target_uid]:
+                offenders.append(f"{panel.get('id')}:{panel.get('title')}->{title}")
+
+    assert not offenders, (
+        "Runtime panel-level DQ/Provider links must encode contextual intent:\n"
+        + "\n".join(offenders)
+    )
 
 
 def test_data_quality_incident_panels_do_not_duplicate_control_plane_dashboard_link() -> (

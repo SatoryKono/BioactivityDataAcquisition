@@ -16,7 +16,7 @@ from ._helpers import (
     build_storage_creation_context,
     create_storage_adapter,
 )
-from .adapter import StorageBundle
+from .bundle import StorageBundle
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import (

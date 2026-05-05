@@ -18,7 +18,10 @@ import pytest
 from bioetl.application.composite.checkpoint import (
     _checkpoint_runtime as checkpoint_runtime,
 )
-from bioetl.application.composite.checkpoint.service import CompositeCheckpointService
+from bioetl.application.composite.checkpoint.service import (
+    CompositeCheckpointService,
+    CompositeCheckpointServiceContext,
+)
 from bioetl.application.composite.checkpoint.state import CompositeCheckpointState
 from bioetl.domain.composite.result import SeedResult
 from bioetl.domain.composite.state import CompositePipelineState
@@ -126,6 +129,7 @@ def _make_service(
     mt = metrics if metrics is not None else MagicMock()
     anchors = expected_anchors or _ExpectedCheckpointAnchors()
     svc = CompositeCheckpointService(
+        CompositeCheckpointServiceContext(
         composite_name=composite_name,
         run_id=run_id,
         storage=s,
@@ -144,6 +148,7 @@ def _make_service(
         run_ledger_port=run_ledger_port,
         metrics=mt,
         clock=clock,
+        )
     )
     return svc, s, lg
 
@@ -1334,11 +1339,13 @@ class TestListAll:
         storage.list_glob.return_value = ["composite_my_composite_run-001.json"]
 
         svc = CompositeCheckpointService(
-            composite_name="my_composite",
-            run_id="run-001",
-            storage=storage,
-            logger=logger,
-            resume=True,
+            CompositeCheckpointServiceContext(
+                composite_name="my_composite",
+                run_id="run-001",
+                storage=storage,
+                logger=logger,
+                resume=True,
+            )
         )
         await svc.load()
 
@@ -1369,11 +1376,13 @@ class TestListAll:
         storage.list_glob.return_value = ["composite_my_composite_run-001.json"]
 
         svc = CompositeCheckpointService(
-            composite_name="my_composite",
-            run_id="run-001",
-            storage=storage,
-            logger=logger,
-            resume=True,
+            CompositeCheckpointServiceContext(
+                composite_name="my_composite",
+                run_id="run-001",
+                storage=storage,
+                logger=logger,
+                resume=True,
+            )
         )
         await svc.load()
 
@@ -1404,12 +1413,14 @@ class TestListAll:
         storage.list_glob.return_value = ["composite_my_composite_run-001.json"]
 
         svc = CompositeCheckpointService(
-            composite_name="my_composite",
-            run_id="run-001",
-            storage=storage,
-            logger=logger,
-            resume=True,
-            stale_checkpoint_threshold_hours=0,
+            CompositeCheckpointServiceContext(
+                composite_name="my_composite",
+                run_id="run-001",
+                storage=storage,
+                logger=logger,
+                resume=True,
+                stale_checkpoint_threshold_hours=0,
+            )
         )
         await svc.load()
 

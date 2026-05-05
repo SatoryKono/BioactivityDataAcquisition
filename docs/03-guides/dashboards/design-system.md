@@ -97,6 +97,39 @@
 - Если no-data действительно эквивалентно нулевому событию, это должно быть отражено в query явно (`... or vector(0)`) и подтверждено в description.
 - Во всех остальных случаях no-data должен остаться `UNKNOWN`.
 
+## 4.1) First-screen responsibility and panel decision matrix (обязательно)
+
+Каждый shipped dashboard имеет ровно один основной операторский вопрос. Первый
+экран должен отвечать на этот вопрос через current-status сигналы, а не через
+выбранный Grafana range. Range evidence, raw counters и forensic details
+помещаются ниже первого экрана или в dedicated drilldown.
+
+| Dashboard | First-screen responsibility | Current-status rules | Selected-range evidence | Drilldown / forensic surface |
+| --- | --- | --- | --- | --- |
+| `bioetl-overview-v2` | Что сейчас broken/degraded и куда идти дальше? | `bioetl_l0_status`, `bioetl_l0_next_action_route`, `bioetl_l0_input_status` | collapsed `Range Evidence` row | linked L1 dashboards |
+| `bioetl-runtime` | Что прямо сейчас блокирует runtime execution? | `bioetl_runtime_current_status`, `bioetl_runtime_current_blocker_reason` | failed/no-record runs, stage lag/backlog trends, shutdown intervals | Runtime detail tables, Loki/Tempo handoff |
+| `bioetl-provider-health-v2` | Какой provider сейчас degraded/failing и почему? | `bioetl_provider_current_status`, `bioetl_provider_current_cause` | health-check counters, failure/degraded trends, latency/rate-limit history | provider detail panels and runbook links |
+| `bioetl-dq-v2` | Каково текущее DQ состояние и первое действие? | `bioetl_dq_current_status`, `bioetl_dq_current_reason` | Bronze→Silver→Gold range flow, reject counts/rates, validation histories | `bioetl-silver-reject-explorer`, DQ diagnostics |
+| `bioetl-control-plane-v1` | Можно ли доверять control plane и безопасно replay/resume? | replay/checkpoint/manifest trust summary rules | manifest/ledger/checkpoint/audit histories | replay safety diagnostics and runbooks |
+
+Decision matrix:
+
+| Panel class | Belongs on first screen? | Query contract | Naming contract |
+| --- | --- | --- | --- |
+| Current status / current reason | Yes | Fixed current windows or recording rules; MUST NOT use `$__range` | `Monitor ...` or `Inspect ...` |
+| Next action / route | Yes | Low-cardinality route/action rules; preserve `UNKNOWN` when data is missing | `Next Action`, `First Action`, or `Inspect ...` |
+| Selected-range count/rate/trend | No, except compact L0 context | MUST use `$__range`, `$__interval`, or explicit range wording | `Track ... in Range` or description says selected range |
+| Raw counter / histogram / latency evidence | No | Preserve no-data unless zero is semantically valid | `Track ...` |
+| Forensic row/table/details | No | May carry scoped IDs only in dedicated explorer surfaces | `Inspect ...` or `Investigate ...` |
+
+Normative rules:
+- First-screen current-status panels MUST NOT use `$__range`.
+- Range panels MUST include selected-range wording in title or description.
+- `or vector(0)` is allowed only for event-count panels where missing series
+  means zero events; status panels preserve `UNKNOWN`.
+- Deep details (`run_id`, `payload_hash`, record-level tables) MUST NOT appear
+  on first-screen status rows.
+
 ## 5) Единый unit/decimals для схожих KPI (обязательно)
 
 - Для счётчиков событий (`... Missing`, `... Incompatibilities`, `... Failures`) использовать `unit=short`, `decimals=0`.

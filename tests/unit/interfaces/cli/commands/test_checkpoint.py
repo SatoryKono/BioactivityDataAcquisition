@@ -59,11 +59,14 @@ class _FakeWorkflowService:
                         "pipeline_name": "chembl_activity",
                     },
                     "diagnostics": {
+                        "operator_replay_mode": "Exact Replay",
                         "replay_capability": "exact_replay_supported",
                         "requested_exact_replay": True,
+                        "continuation_mode": "exact_replay",
                         "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
                         "replay_capability_reason": "immutable_input_snapshots_present",
                         "exact_replay_blockers": [],
+                        "snapshot_status": "full",
                         "input_snapshot_ids": ["snapshot-1"],
                         "input_snapshot_identity_fingerprint": (
                             _SNAPSHOT_IDENTITY_FINGERPRINT
@@ -156,11 +159,14 @@ class _FakeWorkflowService:
                         "run_id": run_id or "00000000-0000-0000-0000-000000000123",
                     },
                     "diagnostics": {
+                        "operator_replay_mode": "Resume",
                         "replay_capability": "resume_only",
                         "requested_exact_replay": False,
+                        "continuation_mode": "checkpoint_snapshot_only_resume",
                         "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
                         "replay_capability_reason": "checkpoint_resume_without_exact_replay_request",
                         "exact_replay_blockers": ["exact_replay_not_requested"],
+                        "snapshot_status": "partial",
                         "input_snapshot_ids": ["snapshot-2"],
                         "input_snapshot_identity_fingerprint": "snapshot-fingerprint-2",
                         "persistence_profile": {
@@ -308,7 +314,9 @@ class TestCheckpointCommands:
         assert result.exit_code == 0
         assert "Audit Run Diagnostics" in result.output
         assert "manifest_id: manifest-1" in result.output
+        assert "mode: Exact Replay" in result.output
         assert "requested_exact_replay: True" in result.output
+        assert "continuation_mode: exact_replay" in result.output
         assert (
             "exact_replay_support_boundary: snapshot_backed_source_runs_only"
             in result.output
@@ -318,6 +326,7 @@ class TestCheckpointCommands:
             in result.output
         )
         assert "input_snapshot_ids: ['snapshot-1']" in result.output
+        assert "snapshot_status: full" in result.output
         assert _SNAPSHOT_IDENTITY_FINGERPRINT in result.output
         assert "persistence_profile: forensic_grade" in result.output
         assert "replay_ready_missing_requirements: []" in result.output

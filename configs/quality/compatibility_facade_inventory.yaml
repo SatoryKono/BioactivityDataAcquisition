@@ -8,27 +8,7 @@ tracked_docstring_prefixes:
 - Composition-level compatibility
 - Pipeline factory compatibility-only facade
 - Storage compatibility-only facade
-transition_debt:
-- path: src/bioetl/composition/factories/storage/adapter.py
-  compatibility_role: Deprecated compatibility shim for the storage bundle module
-    after the canonical implementation moved to
-    `bioetl.composition.factories.storage.bundle`.
-  canonical_target: bioetl.composition.factories.storage.bundle
-  status: deprecated-warn
-  owner: bioetl.composition.factories.storage
-  introduced_in: 2026-04 storage factory naming cleanup
-  review_date: '2026-09-30'
-  external_breaking_change_required: true
-  internal_callers_zero: true
-  allowed_call_sites: '`src`: no direct imports; use `bioetl.composition.factories.storage.bundle`;
-    `tests`: dedicated storage bootstrap governance may inspect the shim to verify
-    the deprecation warning and removal horizon'
-  migration_path: Import `StorageBundle` from `bioetl.composition.factories.storage.bundle`
-    in all first-party code. Keep this module only as a warning compatibility seam
-    until the 2026-09-30 compatibility review.
-  exit_criteria: First-party `src` imports remain at zero, governance tests confirm
-    the shim stays warning-only, and the module is removed after the compatibility
-    review or explicit breaking-change window.
+transition_debt: []
 retained_entrypoints:
 - path: src/bioetl/interfaces/cli/commands/run.py
   compatibility_role: Permanent public run command seam over the split internal owner

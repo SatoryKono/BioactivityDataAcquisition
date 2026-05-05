@@ -122,11 +122,14 @@ def _render_replay_view_lines(replay_view: dict[str, object]) -> list[str]:
         forensic_grade_missing_requirements,
     ) = _extract_persistence_profile_details(replay_view)
     return [
+        f"  mode: {replay_view.get('operator_replay_mode')}",
         f"  replay_capability: {replay_view.get('replay_capability')}",
         f"  requested_exact_replay: {replay_view.get('requested_exact_replay')}",
+        f"  continuation_mode: {replay_view.get('continuation_mode')}",
         f"  exact_replay_support_boundary: {replay_view.get('exact_replay_support_boundary')}",
         f"  replay_capability_reason: {replay_view.get('replay_capability_reason')}",
         f"  exact_replay_blockers: {replay_view.get('exact_replay_blockers')}",
+        f"  snapshot_status: {replay_view.get('snapshot_status')}",
         f"  input_snapshot_ids: {replay_view.get('input_snapshot_ids')}",
         f"  input_snapshot_identity_fingerprint: {replay_view.get('input_snapshot_identity_fingerprint')}",
         f"  persistence_profile: {attained_profile}",

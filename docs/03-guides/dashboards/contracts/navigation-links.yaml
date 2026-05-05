@@ -197,7 +197,20 @@ navigation_transition_contract:
     - [bioetl-runtime, bioetl-control-plane-v1]
     - [bioetl-control-plane-v1, bioetl-dq-v2]
     - [bioetl-dq-v2, bioetl-silver-reject-explorer]
-  first_action_contract: {}
+  first_action_contract:
+    bioetl-runtime:
+      panel_id: 9991
+      min_cta: 4
+      max_cta: 4
+      ctas:
+        - title: Inspect active blocker
+          expected_target_uid: bioetl-runtime
+        - title: Open Control Plane
+          expected_target_uid: bioetl-control-plane-v1
+        - title: Inspect DQ blockers
+          expected_target_uid: bioetl-dq-v2
+        - title: Correlate provider impact
+          expected_target_uid: bioetl-provider-health-v2
   cross_scope_marker_contract:
     required_markers:
       reset_scope: "Reset scope"

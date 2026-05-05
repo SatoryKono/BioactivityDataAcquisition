@@ -4,8 +4,7 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Callable
-from dataclasses import dataclass, fields
-from typing import TypedDict, cast
+from dataclasses import dataclass
 
 from bioetl.application.composite.checkpoint._anchor_context import (
     ExpectedCheckpointContext,
@@ -56,93 +55,6 @@ class CompositeCheckpointServiceContext:
     ] = CompositeCheckpointPersistenceService
 
 
-_CHECKPOINT_INIT_REQUIRED_FIELDS = ("composite_name", "run_id", "storage", "logger")
-_CHECKPOINT_INIT_OPTIONAL_DEFAULTS: dict[str, object] = {
-    "resume": False,
-    "stale_checkpoint_threshold_hours": None,
-    "expected_effective_config_hash": None,
-    "expected_effective_config_artifact_id": None,
-    "expected_execution_fingerprint": None,
-    "expected_dq_contract_compatibility_hash": None,
-    "expected_input_snapshot_fingerprint": None,
-    "expected_contract_ref": None,
-    "expected_contract_version": None,
-    "expected_manifest_id": None,
-    "run_ledger_port": None,
-    "metrics": None,
-    "clock": None,
-    "load_service_factory": CompositeCheckpointLoadService,
-    "persistence_service_factory": CompositeCheckpointPersistenceService,
-}
-_CHECKPOINT_CONTEXT_FIELD_NAMES = tuple(
-    field.name for field in fields(CompositeCheckpointServiceContext)
-)
-
-
-class _CompositeCheckpointServiceContextKwargs(TypedDict):
-    composite_name: str
-    run_id: str
-    storage: CompositeCheckpointPort
-    logger: LoggerPort
-    resume: bool
-    stale_checkpoint_threshold_hours: float | None
-    expected_effective_config_hash: str | None
-    expected_effective_config_artifact_id: str | None
-    expected_execution_fingerprint: str | None
-    expected_dq_contract_compatibility_hash: str | None
-    expected_input_snapshot_fingerprint: str | None
-    expected_contract_ref: str | None
-    expected_contract_version: str | None
-    expected_manifest_id: str | None
-    run_ledger_port: RunLedgerPort | None
-    metrics: MetricsPort | None
-    clock: ClockPort | None
-    load_service_factory: Callable[..., CompositeCheckpointLoadService]
-    persistence_service_factory: Callable[..., CompositeCheckpointPersistenceService]
-
-
-def _resolve_checkpoint_init_value(
-    *,
-    field_name: str,
-    init: CompositeCheckpointServiceContext | None,
-    overrides: dict[str, object],
-) -> object:
-    if field_name in overrides:
-        return overrides[field_name]
-    if field_name in _CHECKPOINT_INIT_OPTIONAL_DEFAULTS and init is None:
-        return _CHECKPOINT_INIT_OPTIONAL_DEFAULTS[field_name]
-    if init is None:
-        raise TypeError(
-            f"CompositeCheckpointService() missing required argument: '{field_name}'"
-        )
-    return getattr(init, field_name)
-
-
-def _coerce_checkpoint_service_context(
-    init: CompositeCheckpointServiceContext | None,
-    overrides: dict[str, object],
-) -> CompositeCheckpointServiceContext:
-    for field_name in _CHECKPOINT_INIT_REQUIRED_FIELDS:
-        _resolve_checkpoint_init_value(
-            field_name=field_name,
-            init=init,
-            overrides=overrides,
-        )
-    resolved_values: dict[str, object] = {
-        field_name: _resolve_checkpoint_init_value(
-            field_name=field_name,
-            init=init,
-            overrides=overrides,
-        )
-        for field_name in _CHECKPOINT_CONTEXT_FIELD_NAMES
-    }
-    resolved_values["composite_name"] = str(resolved_values["composite_name"])
-    resolved_values["run_id"] = str(resolved_values["run_id"])
-    return CompositeCheckpointServiceContext(
-        **cast(_CompositeCheckpointServiceContextKwargs, resolved_values)
-    )
-
-
 class CompositeCheckpointService:
     """Thin facade for composite checkpoint persistence workflows."""
 
@@ -151,12 +63,8 @@ class CompositeCheckpointService:
     _load_service: CompositeCheckpointLoadService
     _persistence_service: CompositeCheckpointPersistenceService
 
-    def __init__(
-        self,
-        init: CompositeCheckpointServiceContext | None = None,
-        **overrides: object,
-    ) -> None:
-        params = _coerce_checkpoint_service_context(init, overrides)
+    def __init__(self, context: CompositeCheckpointServiceContext) -> None:
+        params = context
         self._composite_name = params.composite_name
         self._run_id = params.run_id
         self._storage = params.storage

@@ -168,12 +168,7 @@ def _start_health_observability(logger: LoggerPort | None = None) -> None:
 
 
 async def _run_health_server(host: str, port: int) -> None:
-    """Start and keep the health server alive until interrupted.
-
-    Args:
-        host: IP address to bind the server to.
-        port: TCP port for the health server to listen on.
-    """
+    """Start and keep the health server alive until interrupted."""
     from bioetl.interfaces.http.health_server import HealthServer
 
     deps = get_health_server_dependencies()
@@ -203,12 +198,7 @@ async def _run_health_server(host: str, port: int) -> None:
 
 
 def _execute_health_server(host: str, port: int) -> None:
-    """Execute health server coroutine with CLI error policy.
-
-    Args:
-        host: IP address the server will bind to.
-        port: TCP port the server will listen on.
-    """
+    """Execute health server coroutine with CLI error policy."""
     coro = _run_health_server(host=host, port=port)
     try:
         asyncio.run(coro)
@@ -244,14 +234,7 @@ def _execute_health_server(host: str, port: int) -> None:
 
 
 async def _run_health_checks(provider: tuple[str, ...]) -> HealthResults:
-    """Execute health checks and return results as serializable dictionary.
-
-    Args:
-        provider: Tuple of provider names to check. Empty tuple checks all providers.
-
-    Returns:
-        Dict mapping provider names to their health check result dicts.
-    """
+    """Execute health checks and return results as serializable dictionary."""
     service = get_health_service()
     providers_list = list(provider) if provider else None
     summary = await service.check_providers(providers=providers_list)
@@ -262,15 +245,7 @@ async def _run_health_checks(provider: tuple[str, ...]) -> HealthResults:
 def _execute_health_checks(
     provider: tuple[str, ...],
 ) -> HealthResults | None:
-    """Execute health checks with CLI error policy and return results.
-
-    Args:
-        provider: Tuple of provider names to check. Empty tuple checks all providers.
-
-    Returns:
-        Dict mapping provider names to health check results, or None if an exception
-        was handled and the process will exit.
-    """
+    """Execute health checks with CLI error policy and return results."""
     providers_subject = _provider_subject(provider)
     coro = _run_health_checks(provider)
     try:
@@ -313,13 +288,7 @@ def _render_health_results(
     *,
     output_json: bool,
 ) -> None:
-    """Render health check output and exit with mapped status code.
-
-    Args:
-        results: Dict mapping provider names to health check result dicts.
-        output_json: When True, outputs results as JSON; otherwise uses a
-            human-readable text format.
-    """
+    """Render health check output and exit with mapped status code."""
     all_healthy = all_health_results_healthy(results)
     if output_json:
         click.echo(render_health_results_json(results))

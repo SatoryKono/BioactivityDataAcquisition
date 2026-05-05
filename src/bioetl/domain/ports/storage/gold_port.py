@@ -21,7 +21,7 @@ class GoldStoragePort(Protocol):
         self,
         table_name: str,
         records: list[GoldRecord],
-        schema: Any,  # Any: Pandera DataFrameModel which has no common base type
+        schema: Any,  # Any: strict schema payload stays opaque to the domain contract
         primary_keys: list[str] | None = None,
         mode: Literal["overwrite", "append", "scd2"] = "overwrite",
         *,
@@ -38,7 +38,7 @@ class GoldStoragePort(Protocol):
         Args:
             table_name: The name of the table to write to.
             records: A list of dictionaries, where each dictionary is a gold record.
-            schema: Pandera DataFrameSchema for strict validation (required).
+            schema: Opaque strict-schema payload required by the storage implementation.
             primary_keys: Optional list of column names for sorting/deduplication.
             mode: The write mode (e.g., 'overwrite', 'append', 'scd2').
             scd_config: Optional SCD2 configuration.

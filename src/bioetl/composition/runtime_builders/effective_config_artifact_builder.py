@@ -23,6 +23,9 @@ from bioetl.composition.runtime_builders._run_manifest_support import (
     to_serializable_mapping as _to_serializable_mapping,
 )
 from bioetl.infrastructure.control_plane import FileEffectiveConfigArtifactStore
+from bioetl.domain.control_plane.effective_config_artifact import (
+    ConfigResolutionPolicy,
+)
 
 if TYPE_CHECKING:
     from bioetl.composition.runtime_builders.inputs_resolver import (
@@ -42,6 +45,7 @@ def _create_and_persist_effective_config_artifact_payload(
     provider: str,
     entity: str,
     required_persistence_profile: str,
+    resolution_policy: ConfigResolutionPolicy | None,
     settings: Settings,
     logger: object,
     run_id: RunID,
@@ -57,6 +61,7 @@ def _create_and_persist_effective_config_artifact_payload(
             provider=provider,
             entity=resolve_effective_config_entity(provider, entity),
         ),
+        resolution_policy=resolution_policy,
         required_persistence_profile=required_persistence_profile,
     )
     serialized_payload = service.serialize_artifact(artifact)
@@ -130,6 +135,15 @@ def create_and_persist_effective_config_artifact(
         required_persistence_profile=(
             reproducibility_context.required_persistence_profile
         ),
+        resolution_policy=ConfigResolutionPolicy(
+            strict_validation=bool(
+                getattr(
+                    inputs.runtime_config,
+                    "strict_gold_validation",
+                    getattr(inputs.runtime_config, "strict_validation", False),
+                )
+            )
+        ),
         settings=inputs.settings,
         logger=inputs.observability.logger,
         run_id=ctx.run_id,
@@ -160,6 +174,15 @@ def create_and_persist_composite_effective_config_artifact(
         provider="composite",
         entity=pipeline_name,
         required_persistence_profile=required_persistence_profile,
+        resolution_policy=ConfigResolutionPolicy(
+            strict_validation=bool(
+                getattr(
+                    runtime_config,
+                    "strict_gold_validation",
+                    getattr(runtime_config, "strict_validation", False),
+                )
+            )
+        ),
         settings=settings,
         logger=logger,
         run_id=run_id,

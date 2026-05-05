@@ -356,6 +356,11 @@ class ConfigDQService:
             runtime_overrides=effective_runtime_overrides,
             source_refs=source_refs,
             dq_config=dq_config,
+            resolution_policy=ConfigResolutionPolicy(
+                strict_validation=bool(
+                    dq_config.strict_validation if dq_config is not None else False
+                )
+            ),
         )
         artifact_dict = json.loads(
             self._effective_config_service.serialize_artifact(artifact)

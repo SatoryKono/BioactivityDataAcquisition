@@ -13,6 +13,7 @@ import pytest
 
 from bioetl.application.composite.checkpoint import (
     CompositeCheckpointService,
+    CompositeCheckpointServiceContext,
     CompositeCheckpointState,
 )
 from bioetl.infrastructure.storage.support.checkpoint_writer import (
@@ -298,11 +299,13 @@ class TestCheckpointExistsWarning:
 
         # Create a real checkpoint manager and save a state with progress
         manager = CompositeCheckpointService(
-            composite_name="test_composite",
-            run_id=run_id,
-            storage=FileCompositeCheckpointWriter(tmp_path),
-            logger=logger,
-            resume=False,  # No resume
+            CompositeCheckpointServiceContext(
+                composite_name="test_composite",
+                run_id=run_id,
+                storage=FileCompositeCheckpointWriter(tmp_path),
+                logger=logger,
+                resume=False,
+            )
         )
 
         # Create and save a checkpoint with progress
@@ -336,11 +339,13 @@ class TestCheckpointExistsWarning:
 
         # Create new manager without resume flag (should warn)
         manager_no_resume = CompositeCheckpointService(
-            composite_name="test_composite",
-            run_id=str(uuid4()),  # New run
-            storage=FileCompositeCheckpointWriter(tmp_path),
-            logger=logger,
-            resume=False,
+            CompositeCheckpointServiceContext(
+                composite_name="test_composite",
+                run_id=str(uuid4()),
+                storage=FileCompositeCheckpointWriter(tmp_path),
+                logger=logger,
+                resume=False,
+            )
         )
 
         # Load should warn about existing checkpoint
@@ -360,11 +365,13 @@ class TestCheckpointExistsWarning:
         logger = create_mock_logger()
 
         manager = CompositeCheckpointService(
-            composite_name="test_composite",
-            run_id=str(uuid4()),
-            storage=FileCompositeCheckpointWriter(tmp_path),
-            logger=logger,
-            resume=False,
+            CompositeCheckpointServiceContext(
+                composite_name="test_composite",
+                run_id=str(uuid4()),
+                storage=FileCompositeCheckpointWriter(tmp_path),
+                logger=logger,
+                resume=False,
+            )
         )
 
         await manager.load()
@@ -384,11 +391,13 @@ class TestCheckpointExistsWarning:
 
         # Save a fresh checkpoint with no progress
         manager_setup = CompositeCheckpointService(
-            composite_name="test_composite",
-            run_id=run_id,
-            storage=FileCompositeCheckpointWriter(tmp_path),
-            logger=MagicMock(),
-            resume=False,
+            CompositeCheckpointServiceContext(
+                composite_name="test_composite",
+                run_id=run_id,
+                storage=FileCompositeCheckpointWriter(tmp_path),
+                logger=MagicMock(),
+                resume=False,
+            )
         )
 
         fresh_state = CompositeCheckpointState(
@@ -402,11 +411,13 @@ class TestCheckpointExistsWarning:
 
         # Create new manager without resume flag
         manager_no_resume = CompositeCheckpointService(
-            composite_name="test_composite",
-            run_id=str(uuid4()),
-            storage=FileCompositeCheckpointWriter(tmp_path),
-            logger=logger,
-            resume=False,
+            CompositeCheckpointServiceContext(
+                composite_name="test_composite",
+                run_id=str(uuid4()),
+                storage=FileCompositeCheckpointWriter(tmp_path),
+                logger=logger,
+                resume=False,
+            )
         )
 
         await manager_no_resume.load()

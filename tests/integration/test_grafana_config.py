@@ -1207,10 +1207,10 @@ def test_runtime_pipeline_error_code_breakdown_uses_bounded_runtime_error_metric
 @pytest.mark.parametrize(
     ("panel_title", "expected_snippet"),
     [
-        ("Healthy Checks", "[$__range]"),
-        ("Degraded Checks", "[$__range]"),
-        ("Provider Failure Rate", "[$__range]"),
-        ("Health Checks Total", "[$__range]"),
+        ("Monitor Healthy Checks (Selected Range)", "[$__range]"),
+        ("Monitor Degraded Checks (Selected Range)", "[$__range]"),
+        ("Track Provider Failure Rate (Selected Range)", "[$__range]"),
+        ("Track Health Checks Total (Selected Range)", "[$__range]"),
         ("Adapter Request Latency by Endpoint (p95)", "[$__interval]"),
         ("HTTP Errors by Method / Error Type", "[$__interval]"),
         ("Rate Limiter Wait by Provider (p95)", "[$__interval]"),
@@ -1546,10 +1546,41 @@ def test_dashboard_titles_do_not_expose_fixed_window_suffixes(
         for panel in get_dashboard_panels(dashboard)
         if isinstance(panel.get("title"), str)
     ]
-    offenders = [title for title in titles if re.search(r"\((24h|15m|1h|5m)\)$", title)]
+    fixed_window_suffix_re = re.compile(r"(?:\((24h|30m|15m|1h|5m)\)|/\s*(24h|30m|15m|1h|5m))$")
+    offenders = [title for title in titles if fixed_window_suffix_re.search(title)]
     assert not offenders, (
         f"Dashboard {dashboard_path.name} still contains fixed-window titles: {offenders}"
     )
+
+
+def test_runtime_top_fold_text_panels_do_not_overlap() -> None:
+    """Runtime first-fold text blocks must keep a readable, non-overlapping layout."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
+    text_panels = [
+        panel
+        for panel in dashboard.get("panels", [])
+        if panel.get("type") == "text" and panel.get("gridPos", {}).get("y", 999) <= 20
+    ]
+
+    overlaps = []
+    for index, left in enumerate(text_panels):
+        left_grid = left.get("gridPos", {})
+        left_x = left_grid.get("x", 0)
+        left_y = left_grid.get("y", 0)
+        left_w = left_grid.get("w", 0)
+        left_h = left_grid.get("h", 0)
+        for right in text_panels[index + 1 :]:
+            right_grid = right.get("gridPos", {})
+            right_x = right_grid.get("x", 0)
+            right_y = right_grid.get("y", 0)
+            right_w = right_grid.get("w", 0)
+            right_h = right_grid.get("h", 0)
+            x_overlap = left_x < right_x + right_w and right_x < left_x + left_w
+            y_overlap = left_y < right_y + right_h and right_y < left_y + left_h
+            if x_overlap and y_overlap:
+                overlaps.append(f"{left.get('id')}:{left.get('title')} overlaps {right.get('id')}:{right.get('title')}")
+
+    assert not overlaps, "Runtime top-fold text panels overlap:\n" + "\n".join(overlaps)
 
 
 def test_overview_current_panels_stay_out_of_selected_range_semantics() -> None:

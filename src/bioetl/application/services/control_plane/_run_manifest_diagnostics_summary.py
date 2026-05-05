@@ -264,6 +264,7 @@ def _build_identity_graph(
         "replay_of_manifest_id": request.base_summary.get("replay_of_manifest_id"),
         "replay_parentage": request.base_summary.get("replay_parentage"),
         "replay_capability": request.base_summary.get("replay_capability"),
+        "operator_replay_mode": request.base_summary.get("operator_replay_mode"),
         "requested_exact_replay": request.base_summary.get("requested_exact_replay"),
         "exact_replay_support_boundary": request.base_summary.get(
             "exact_replay_support_boundary"
@@ -284,6 +285,7 @@ def _build_identity_graph(
             "lineage_closure_boundary"
         ),
         "input_snapshot_ids": request.base_summary.get("input_snapshot_ids", []),
+        "snapshot_status": request.base_summary.get("snapshot_status"),
         "input_snapshot_content_hashes": request.base_summary.get(
             "input_snapshot_content_hashes",
             [],
@@ -320,6 +322,9 @@ def _build_identity_graph(
             "dependency_lock_hash"
         )
     if "replay_mode" in request.base_summary:
+        identity_graph["operator_replay_mode"] = request.base_summary.get(
+            "operator_replay_mode"
+        )
         identity_graph["replay_mode"] = request.base_summary["replay_mode"]
         identity_graph["continuation_mode"] = request.base_summary.get(
             "continuation_mode"
@@ -327,6 +332,9 @@ def _build_identity_graph(
         identity_graph["input_snapshot_count"] = request.base_summary[
             "input_snapshot_count"
         ]
+        identity_graph["snapshot_status"] = request.base_summary.get(
+            "snapshot_status"
+        )
         identity_graph["input_snapshots"] = request.base_summary["input_snapshots"]
     return identity_graph
 

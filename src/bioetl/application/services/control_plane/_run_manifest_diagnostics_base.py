@@ -143,6 +143,36 @@ def _build_code_provenance_state(manifest: RunManifest) -> dict[str, object]:
     return state
 
 
+def _resolve_snapshot_status(
+    *,
+    input_snapshots: list[dict[str, object]],
+    exact_replay_eligible: bool,
+    replay_mode: str,
+) -> str:
+    """Return operator-facing completeness of immutable input snapshots."""
+    if not input_snapshots:
+        return "none"
+    if exact_replay_eligible or replay_mode in {
+        "exact_replay",
+        "same_data_state_recovery",
+    }:
+        return "full"
+    return "partial"
+
+
+def _resolve_operator_replay_mode(
+    *,
+    replay_mode: str,
+    continuation_mode: str,
+) -> str:
+    """Return a compact CLI label for exact replay/resume/rebuild triage."""
+    if replay_mode == "exact_replay":
+        return "Exact Replay"
+    if replay_mode == "resume" or "resume" in continuation_mode:
+        return "Resume"
+    return "Rebuild"
+
+
 def _build_base_summary_payload(
     manifest: RunManifest,
     replay_context: _BaseSummaryReplayContext,
@@ -150,6 +180,10 @@ def _build_base_summary_payload(
     code_provenance = manifest.code_provenance
     code_provenance_state = _build_code_provenance_state(manifest)
     dependency_lock_state = code_provenance_state["dependency_lock_state"]
+    exact_replay_eligible = (
+        manifest.replay_capability.value == "exact_replay_supported"
+        and not replay_context.exact_replay_blockers
+    )
     summary: dict[str, object] = {
         "manifest_id": manifest.manifest_id,
         "manifest_created_at": manifest.created_at.isoformat(),
@@ -184,10 +218,7 @@ def _build_base_summary_payload(
         "requested_exact_replay": replay_context.requested_exact_replay,
         "exact_replay_support_boundary": replay_context.exact_replay_support_boundary,
         "replay_capability_reason": replay_context.replay_capability_reason,
-        "exact_replay_eligible": (
-            manifest.replay_capability.value == "exact_replay_supported"
-            and not replay_context.exact_replay_blockers
-        ),
+        "exact_replay_eligible": exact_replay_eligible,
         "exact_replay_blockers": replay_context.exact_replay_blockers,
         "append_mode_semantic_sinks": _collect_append_mode_semantic_sinks(manifest),
         "input_snapshot_ids": _collect_input_snapshot_ids(
@@ -200,6 +231,10 @@ def _build_base_summary_payload(
             _compute_input_snapshot_identity_fingerprint(replay_context.input_snapshots)
         ),
         "replay_mode": replay_context.replay_mode,
+        "operator_replay_mode": _resolve_operator_replay_mode(
+            replay_mode=replay_context.replay_mode,
+            continuation_mode=replay_context.continuation_mode,
+        ),
         "continuation_mode": replay_context.continuation_mode,
         "replay_family_contract": replay_context.replay_family_contract,
         "reproducibility_policy_assessment": (
@@ -213,6 +248,11 @@ def _build_base_summary_payload(
             contract_ref=code_provenance.contract_ref,
         ),
         "input_snapshot_count": len(replay_context.input_snapshots),
+        "snapshot_status": _resolve_snapshot_status(
+            input_snapshots=replay_context.input_snapshots,
+            exact_replay_eligible=exact_replay_eligible,
+            replay_mode=replay_context.replay_mode,
+        ),
         "input_snapshots": replay_context.input_snapshots,
         "planned_artifacts": [
             {"layer": artifact.layer, "path": artifact.path}

@@ -66,8 +66,6 @@ def __getattr__(
     module_name = _PUBLIC_EXPORTS.get(name)
     if module_name is None:
         raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-    compat_module = import_module("bioetl.infrastructure.compat.pandera_compat")
-    compat_module.apply_pandera_typing_compat_if_needed()
     value = getattr(import_module(module_name), name)
     globals()[name] = value
     return value

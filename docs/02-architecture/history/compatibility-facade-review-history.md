@@ -18,6 +18,25 @@ the operational compatibility registry. The canonical operational policy and
 curated ledgers now live in
 [`../07-compatibility-facade-inventory.md`](../07-compatibility-facade-inventory.md).
 
+## Reduction Wave (2026-05-05)
+
+Completed reductions in this cycle:
+
+- Removed `src/bioetl/composition/factories/storage/adapter.py`; canonical
+  storage bundle imports now resolve through `bundle.py`.
+- Removed `src/bioetl/application/composite/checkpoint/anchor_context.py`; the
+  checkpoint package root is now the single sanctioned public seam.
+- Moved Pandera compatibility activation out of
+  `bioetl.composition.bootstrap.__getattr__` and into
+  `bioetl.composition.bootstrap.runtime`, so lazy export resolution no longer
+  carries import-time compatibility side effects.
+
+Operational implication:
+
+- The transition-debt ledger is now empty on the current baseline.
+- Any future module-level compatibility shim must be explicitly reintroduced in
+  the curated inventory instead of silently reappearing in source.
+
 ## RF-035 Retained Entrypoint Decision
 
 Decision for this cycle:

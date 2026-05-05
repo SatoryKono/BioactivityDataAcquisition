@@ -124,12 +124,9 @@ def test_importing_bioetl_version_does_not_trigger_compat(monkeypatch) -> None:
     assert fake_dispatcher_cls.__call__ is original_dispatcher_call
 
 
-def test_bootstrap_lazy_exports_apply_compat_before_import(monkeypatch) -> None:
+def test_runtime_bootstrap_package_applies_compat_on_import(monkeypatch) -> None:
     compat_module = importlib.reload(
         importlib.import_module("bioetl.infrastructure.compat.pandera_compat")
-    )
-    bootstrap_module = importlib.reload(
-        importlib.import_module("bioetl.composition.bootstrap")
     )
 
     calls: list[str] = []
@@ -143,7 +140,10 @@ def test_bootstrap_lazy_exports_apply_compat_before_import(monkeypatch) -> None:
         apply_compat_and_record,
     )
 
-    assert bootstrap_module.load_pipeline_config
+    runtime_bootstrap = importlib.reload(
+        importlib.import_module("bioetl.composition.bootstrap.runtime")
+    )
+    assert runtime_bootstrap.load_composite_config
     assert calls == ["applied"]
 
 

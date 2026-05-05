@@ -35,10 +35,10 @@ def test_summary_queries_use_zero_fallbacks() -> None:
             "Shutdown Completed by Reason / Interval": "or vector(0)",
         },
         "bioetl-provider-health-v2.json": {
-            "Healthy Checks": "or vector(0)",
-            "Degraded Checks": "or vector(0)",
-            "Provider Failure Rate": "or vector(0)",
-            "Health Checks Total": "or vector(0)",
+            "Monitor Healthy Checks (Selected Range)": "or vector(0)",
+            "Monitor Degraded Checks (Selected Range)": "or vector(0)",
+            "Track Provider Failure Rate (Selected Range)": "or vector(0)",
+            "Track Health Checks Total (Selected Range)": "or vector(0)",
             "HTTP Errors by Method / Error Type": "or vector(0)",
             "Minimum Rate Limiter Tokens Available": "or vector(0)",
             "Circuit Breaker State (max)": "or vector(0)",
@@ -105,7 +105,7 @@ def test_latency_p95_panels_preserve_no_data_state() -> None:
             "Pipeline Duration p50/p95/p99",
         },
         "bioetl-provider-health-v2.json": {
-            "Health Check Latency by Provider (p95)",
+            "Track Health Check Latency by Provider (p95)",
             "Provider Health Check Latency (p95) - $provider",
             "Adapter Request Latency by Endpoint (p95)",
             "Rate Limiter Wait by Provider (p95)",
@@ -153,9 +153,9 @@ def test_count_like_summary_panels_use_rounding_or_boolean_conditions() -> None:
     """Count-like summary panels should avoid fractional event semantics."""
     expected_panel_snippets = {
         "bioetl-provider-health-v2.json": {
-            "Healthy Checks": "round(",
-            "Degraded Checks": "round(",
-            "Health Checks Total": "round(",
+            "Monitor Healthy Checks (Selected Range)": "round(",
+            "Monitor Degraded Checks (Selected Range)": "round(",
+            "Track Health Checks Total (Selected Range)": "round(",
         },
         "bioetl-dq-v2.json": {
             "Records Quarantined": "round(",
@@ -248,6 +248,31 @@ def test_worst_entity_dq_score_preserves_no_data_state() -> None:
     assert all("or vector(0)" not in expr for expr in expressions), (
         "Worst-Entity DQ Score must preserve no-data rather than rendering score 0"
     )
+
+
+def test_dq_current_status_panels_preserve_unknown_no_data_state() -> None:
+    """Current DQ status panels must not convert missing telemetry to OK."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
+    expected_panels = {
+        "Monitor DQ Current Status",
+        "Monitor DQ Threshold State",
+    }
+    panels = {
+        panel.get("title"): panel
+        for panel in get_dashboard_panels(dashboard)
+        if panel.get("title") in expected_panels
+    }
+    assert set(panels) == expected_panels
+
+    for panel_title, panel in panels.items():
+        expressions = [target.get("expr", "") for target in panel.get("targets", [])]
+        assert all("or vector(0)" not in expr for expr in expressions), (
+            f"{panel_title} must preserve UNKNOWN/NO DATA instead of synthetic OK"
+        )
+        defaults = panel.get("fieldConfig", {}).get("defaults", {})
+        assert defaults.get("noValue") == "UNKNOWN", (
+            f"{panel_title} must render missing current status as UNKNOWN"
+        )
 
 
 def test_dq_blocked_share_panels_use_percentunit_domain_and_policy_thresholds() -> None:

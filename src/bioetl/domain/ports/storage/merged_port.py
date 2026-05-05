@@ -2,14 +2,11 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Protocol, runtime_checkable
+from typing import Protocol, runtime_checkable
+
+from datetime import datetime
 
 from bioetl.domain.types import BronzeRecord, GoldRecord
-
-if TYPE_CHECKING:
-    from datetime import datetime
-
-    from pandera.api.dataframe.container import DataFrameSchema
 
 __all__ = ["MergedStoragePort"]
 
@@ -57,7 +54,7 @@ class MergedStoragePort(Protocol):
         records: list[GoldRecord],
         primary_keys: list[str] | None = None,
         *,
-        schema: DataFrameSchema[object],
+        schema: object,
         completed_at: datetime | None = None,
         run_id: str | None = None,
         sources_used: list[str] | None = None,
@@ -78,6 +75,6 @@ class MergedStoragePort(Protocol):
             preserve_column_order: If True, skip canonical_column_order()
                 and preserve the column order from records (e.g. semantic
                 ordering applied by ColumnOrderService in composite pipelines).
-            schema: Pandera schema used for strict contract validation.
+            schema: Opaque strict-schema payload used for contract validation.
         """
         ...

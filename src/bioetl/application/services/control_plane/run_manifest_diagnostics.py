@@ -112,6 +112,7 @@ def _build_unified_reproducibility_diagnostics(
                 [],
             ),
             "replay_capability": summary.get("replay_capability"),
+            "operator_replay_mode": summary.get("operator_replay_mode"),
             "replay_mode": summary.get("replay_mode"),
             "continuation_mode": summary.get("continuation_mode"),
             "replay_family_contract": summary.get("replay_family_contract"),
@@ -133,6 +134,7 @@ def _build_unified_reproducibility_diagnostics(
             "input_snapshot_identity_fingerprint": summary.get(
                 "input_snapshot_identity_fingerprint"
             ),
+            "snapshot_status": summary.get("snapshot_status"),
             "input_snapshot_ids": summary.get("input_snapshot_ids", []),
         },
         "effective_config": _build_effective_config_diagnostics(summary),
