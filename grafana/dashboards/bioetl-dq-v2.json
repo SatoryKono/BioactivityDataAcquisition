@@ -43,18 +43,6 @@
     },
     {
       "asDropdown": false,
-      "icon": "external link",
-      "includeVars": false,
-      "keepTime": true,
-      "tags": [],
-      "targetBlank": false,
-      "title": "5. Silver Reject Explorer",
-      "type": "link",
-      "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
-      "tooltip": "Cross-scope handoff with current dashboard time range and explicit panel scope: var-pipeline=$pipeline and var-run_type=$run_type. Reset scope: target dashboard opens with explicit scope defaults; source-specific filters are not transferred."
-    },
-    {
-      "asDropdown": false,
       "icon": "logs",
       "includeVars": false,
       "keepTime": true,
@@ -76,6 +64,18 @@
       "type": "link",
       "url": "/a/grafana-exploretraces-app/?from=${__from}&to=${__to}&queryType=traceqlSearch&query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline:regex}%22%20%26%26%20span.%22bioetl.run_type%22%20%3D~%20%22${run_type:regex}%22%20%7D",
       "tooltip": "Open Tempo Explore with tracing profile and selected time range."
+    },
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": false,
+      "keepTime": true,
+      "tags": [],
+      "targetBlank": false,
+      "title": "5. Silver Reject Explorer",
+      "type": "link",
+      "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
+      "tooltip": "Cross-scope handoff with current dashboard time range and explicit panel scope: var-pipeline=$pipeline and var-run_type=$run_type. Reset scope: target dashboard opens with explicit scope defaults; source-specific filters are not transferred."
     }
   ],
   "panels": [

@@ -1,27 +1,27 @@
 ---
 id: setup-mcp
-title: Configure MCP for BioETL workspace
+title: Setup MCP
 task_id: setup-mcp
-created_at: '2026-05-05T04:53:30Z'
+created_at: '2026-05-05T04:59:26Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
-- README.md
+- AGENTS.md
 summary: Active task session context.
-query: MCP setup codex copilot workspace config
+query: mcp
 ---
 
 # Session note
 
 ## Task
 
-- Title: Configure MCP for BioETL workspace
-- Retrieval query: MCP setup codex copilot workspace config
+- Title: Setup MCP
+- Retrieval query: mcp
 
 ## Retrieved context
 
 - Catalog hits: 0
-- RAG hits: 0
+- RAG hits: 10
 - Timeline hits: 0
 
 ## Working notes
