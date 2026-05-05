@@ -50,7 +50,7 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-control-plane-v1.json | 892 | Checkpoint Freshness (hours since last op) |
 | bioetl-control-plane-v1.json | 893 | Ledger / Manifest Consistency |
 | bioetl-control-plane-v1.json | 894 | Known Blind Spots |
-| bioetl-dq-v2.json | 1 | Data Flow in Range: Bronze -> Silver -> Gold |
+| bioetl-dq-v2.json | 1 | Track Range Evidence: Bronze -> Silver -> Gold |
 | bioetl-dq-v2.json | 2 | Data Quality Score (Volume-weighted) |
 | bioetl-dq-v2.json | 3 | Source Records in Range (Bronze) |
 | bioetl-dq-v2.json | 4 | Clean Records in Range (Gold) |
@@ -63,6 +63,10 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-dq-v2.json | 11 | DQ Check Duration (p95) |
 | bioetl-dq-v2.json | 12 | Silver Validation Failures |
 | bioetl-dq-v2.json | 99 | Pipeline |
+| bioetl-dq-v2.json | 9100 | Monitor DQ Current Status |
+| bioetl-dq-v2.json | 9101 | Monitor DQ Threshold State |
+| bioetl-dq-v2.json | 9102 | Inspect DQ Current Reasons |
+| bioetl-dq-v2.json | 9103 | First Action / Invalid Record Policy |
 | bioetl-dq-v2.json | 101 | Latest Successful Data Timestamp |
 | bioetl-dq-v2.json | 116 | Lineage Refs Missing |
 | bioetl-dq-v2.json | 117 | Silver Filter Rejects |
@@ -108,12 +112,19 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-provider-health-v2.json | 112 | Track Rate Limiter Wait by Provider (p95) |
 | bioetl-provider-health-v2.json | 113 | Monitor Minimum Rate Limiter Tokens Available |
 | bioetl-provider-health-v2.json | 114 | Monitor Current Provider Health Status |
+| bioetl-provider-health-v2.json | 9002 | First Action |
+| bioetl-provider-health-v2.json | 9100 | GLOBAL Provider Scope |
+| bioetl-provider-health-v2.json | 9101 | Monitor GLOBAL Provider Severity Matrix |
+| bioetl-provider-health-v2.json | 9102 | Inspect Critical Providers |
+| bioetl-provider-health-v2.json | 9103 | Inspect Provider Top Causes |
 | bioetl-runtime.json | 1 | Runtime Scope |
 | bioetl-runtime.json | 4 | DQ Alert Conditions |
 | bioetl-runtime.json | 5 | Control-plane Alert Conditions |
 | bioetl-runtime.json | 6 | GLOBAL Provider Alert Conditions |
 | bioetl-runtime.json | 7 | Freshness Alert Conditions |
-| bioetl-runtime.json | 16 | Runtime Blockers / 15m |
+| bioetl-runtime.json | 16 | Runtime Blockers |
+| bioetl-runtime.json | 9100 | Monitor Runtime Current Status |
+| bioetl-runtime.json | 9101 | Inspect Top Runtime Blockers |
 | bioetl-runtime.json | 21 | Memory Pressure Active / 15m |
 | bioetl-runtime.json | 205 | Failed Runs / 15m |
 | bioetl-runtime.json | 207 | Pipeline Phase Duration p50/p95/p99 |
