@@ -1,7 +1,7 @@
 {
   "summary": {
-    "scanned_modules": 1755,
-    "total_internal_imports": 6920,
+    "scanned_modules": 1760,
+    "total_internal_imports": 6914,
     "layer_edges": 13,
     "cross_layer_group_edges": 60,
     "cross_layer_group_edges_total": 310,
@@ -11,13 +11,13 @@
     {
       "source": "application",
       "target": "application",
-      "imports": 1156,
+      "imports": 1152,
       "allowed": true
     },
     {
       "source": "application",
       "target": "domain",
-      "imports": 1025,
+      "imports": 1026,
       "allowed": true
     },
     {
@@ -29,7 +29,7 @@
     {
       "source": "composition",
       "target": "composition",
-      "imports": 559,
+      "imports": 558,
       "allowed": true
     },
     {
@@ -47,19 +47,19 @@
     {
       "source": "domain",
       "target": "domain",
-      "imports": 1158,
+      "imports": 1155,
       "allowed": true
     },
     {
       "source": "infrastructure",
       "target": "domain",
-      "imports": 763,
+      "imports": 765,
       "allowed": true
     },
     {
       "source": "infrastructure",
       "target": "infrastructure",
-      "imports": 932,
+      "imports": 931,
       "allowed": true
     },
     {
@@ -96,17 +96,17 @@
     {
       "source": "infrastructure.adapters",
       "target": "domain.types",
-      "imports": 109
+      "imports": 110
     },
     {
       "source": "application.core",
       "target": "domain.types",
-      "imports": 104
+      "imports": 103
     },
     {
       "source": "infrastructure.adapters",
       "target": "domain.ports",
-      "imports": 86
+      "imports": 87
     },
     {
       "source": "application.pipelines",
@@ -151,7 +151,7 @@
     {
       "source": "application.services",
       "target": "domain.types",
-      "imports": 55
+      "imports": 56
     },
     {
       "source": "composition.bootstrap",
@@ -221,7 +221,7 @@
     {
       "source": "application.services",
       "target": "domain.control_plane",
-      "imports": 28
+      "imports": 29
     },
     {
       "source": "application.services",
