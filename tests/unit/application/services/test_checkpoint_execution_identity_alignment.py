@@ -186,13 +186,49 @@ def test_legacy_and_v2_align_when_composite_run_identity_mismatches() -> None:
     )
     v2_result = v2.check_compatibility(current_identity, checkpoint_identity)
 
-    assert legacy_result.compatible is False
-    assert legacy_result.execution_identity_compatible is False
-    assert any(
-        "Composite run identity mismatch" in msg for msg in legacy_result.messages
-    )
-    assert v2_result.verdict == CompatibilityVerdict.MAJOR_INCOMPATIBLE
+    assert legacy_result.compatible is True
+    assert legacy_result.execution_identity_compatible is True
+    assert any("Checkpoint is compatible for resume" in msg for msg in legacy_result.messages)
+    assert v2_result.verdict == CompatibilityVerdict.COMPATIBLE
     assert (
         v2_result.details["execution_identity_compatibility"]["reason"]
-        == "composite_run_identity_mismatch"
+        == "identical_degraded_runtime_anchor_fingerprint"
+    )
+
+
+def test_legacy_and_v2_align_when_fingerprint_matches_despite_composite_drift() -> (
+    None
+):
+    legacy = _legacy_service()
+    v2 = _v2_service()
+
+    current_metadata = _metadata(
+        execution_fingerprint="fp-shared",
+        composite_run_identity="run-a",
+    )
+    checkpoint_metadata = _metadata(
+        execution_fingerprint="fp-shared",
+        composite_run_identity="run-b",
+    )
+    current_identity = _identity(
+        execution_fingerprint="fp-shared",
+        composite_run_identity="run-a",
+    )
+    checkpoint_identity = _identity(
+        execution_fingerprint="fp-shared",
+        composite_run_identity="run-b",
+    )
+
+    legacy_result = legacy.validate_checkpoint_compatibility(
+        current_metadata,
+        checkpoint_metadata,
+    )
+    v2_result = v2.check_compatibility(current_identity, checkpoint_identity)
+
+    assert legacy_result.compatible is True
+    assert legacy_result.execution_identity_compatible is True
+    assert v2_result.verdict == CompatibilityVerdict.COMPATIBLE
+    assert (
+        v2_result.details["execution_identity_compatibility"]["reason"]
+        == "identical_execution_fingerprint"
     )

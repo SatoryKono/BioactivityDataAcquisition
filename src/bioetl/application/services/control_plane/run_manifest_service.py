@@ -71,6 +71,27 @@ def _validate_strict_code_provenance(
         )
 
 
+def _validate_strict_input_snapshots(request: RunManifestCreateSpec) -> None:
+    """Fail closed when strict replay contexts lack immutable input snapshots."""
+    required_profile = str(
+        request.launch_context.get("required_persistence_profile")
+        or "degraded_observable"
+    )
+    strict_context = (
+        bool(request.launch_context.get("exact_replay"))
+        or required_profile in STRICT_PERSISTENCE_PROFILES
+    )
+    if not strict_context:
+        return
+    if not request.source_refs or any(
+        not source_ref.input_snapshots for source_ref in request.source_refs
+    ):
+        raise RuntimeError(
+            "Run manifest requires immutable input snapshots for exact "
+            "replay, replay_ready, and forensic_grade contexts"
+        )
+
+
 @dataclass(slots=True)
 class RunManifestService(
     RunManifestHydrationMixin,
@@ -126,6 +147,7 @@ class RunManifestService(
         normalized_run_type = self._normalize_run_type(request.run_type)
         code_provenance = self._build_code_provenance(request)
         _validate_strict_code_provenance(request, code_provenance)
+        _validate_strict_input_snapshots(request)
         normalized_payload = normalize_run_manifest_spec(
             self._build_manifest_payload(
                 request=request,

@@ -256,6 +256,56 @@ def test_create_manifest_requires_git_commit_for_explicit_exact_replay() -> None
     assert store.get("manifest-missing-git") is None
 
 
+def test_create_manifest_requires_input_snapshots_for_explicit_exact_replay() -> None:
+    store = _InMemoryRunManifestStore()
+    service = RunManifestService(
+        manifest_port=store,
+        _manifest_id_factory=lambda: "manifest-missing-snapshots",
+    )
+
+    with pytest.raises(RuntimeError, match="requires immutable input snapshots"):
+        service.create_manifest(
+            replace(
+                _make_request(),
+                source_refs=(),
+                launch_context={"limit": 100, "resume": False, "exact_replay": True},
+            )
+        )
+
+    assert store.get("manifest-missing-snapshots") is None
+
+
+def test_create_manifest_requires_input_snapshots_for_replay_ready_profile() -> None:
+    store = _InMemoryRunManifestStore()
+    service = RunManifestService(
+        manifest_port=store,
+        _manifest_id_factory=lambda: "manifest-replay-ready-missing-snapshots",
+    )
+
+    with pytest.raises(RuntimeError, match="requires immutable input snapshots"):
+        service.create_manifest(
+            replace(
+                _make_request(),
+                source_refs=(
+                    RunSourceRef(
+                        provider="chembl",
+                        entity="activity",
+                        pipeline_name="chembl_activity",
+                        query="assay_type=B",
+                        input_snapshots=(),
+                    ),
+                ),
+                launch_context={
+                    "limit": 100,
+                    "resume": False,
+                    "required_persistence_profile": "replay_ready",
+                },
+            )
+        )
+
+    assert store.get("manifest-replay-ready-missing-snapshots") is None
+
+
 def test_create_manifest_persists_explicit_replay_parentage() -> None:
     store = _InMemoryRunManifestStore()
     service = RunManifestService(
@@ -548,6 +598,7 @@ def test_create_manifest_requires_clean_source_revision_state_for_strict_replay(
             replace(
                 _make_request(),
                 source_revision_state="dirty",
+                launch_context={"limit": 100, "resume": False, "exact_replay": True},
             )
         )
 

@@ -248,9 +248,9 @@ Interpretation:
 - replay consumes only ledger entries strictly after `last_event_id`;
 - replay is intentionally coarse-grained: it restores lifecycle milestones and
   watermark metadata, not rich checkpoint payloads;
-- composite resume additionally enforces `composite_run_identity`; a missing or
-  mismatched occurrence anchor is a resume blocker even when other semantic
-  anchors match;
+- `execution_fingerprint` remains the canonical compatibility anchor for both
+  ordinary and composite resume; composite occurrence metadata is diagnostic
+  evidence only and must not override a matching canonical execution identity;
 - a missing watermark entry for the current manifest indicates checkpoint
   incompatibility and should be treated as a resume blocker on the fail-closed
   path.

@@ -246,7 +246,7 @@ class TestCheckpointCompatibilityService:
         assert any("Manifest identity mismatch" in msg for msg in result.messages)
 
     def test_validate_composite_run_identity_mismatch(self) -> None:
-        """Composite run identity mismatch should block resume."""
+        """Legacy composite identity still blocks when no canonical anchor exists."""
         current = CheckpointMetadata(
             records_processed=1000,
             dq_contract_compatibility_hash="same_hash",
@@ -262,12 +262,12 @@ class TestCheckpointCompatibilityService:
 
         result = self.service.validate_checkpoint_compatibility(current, checkpoint)
 
-        assert result.compatible is False
-        assert result.execution_identity_compatible is False
-        assert any("Composite run identity mismatch" in msg for msg in result.messages)
+        assert result.compatible is True
+        assert result.execution_identity_compatible is True
+        assert any("Checkpoint is compatible for resume" in msg for msg in result.messages)
 
     def test_validate_composite_run_identity_missing(self) -> None:
-        """Missing composite run identity should block strict resume."""
+        """Missing legacy composite identity alone no longer blocks resume."""
         current = CheckpointMetadata(
             records_processed=1000,
             dq_contract_compatibility_hash="same_hash",
@@ -282,14 +282,14 @@ class TestCheckpointCompatibilityService:
 
         result = self.service.validate_checkpoint_compatibility(current, checkpoint)
 
-        assert result.compatible is False
-        assert result.execution_identity_compatible is False
-        assert any("Composite run identity missing" in msg for msg in result.messages)
+        assert result.compatible is True
+        assert result.execution_identity_compatible is True
+        assert any("Checkpoint is compatible for resume" in msg for msg in result.messages)
 
-    def test_validate_composite_run_identity_mismatch_overrides_matching_fingerprint(
+    def test_validate_matching_execution_fingerprint_overrides_composite_drift(
         self,
     ) -> None:
-        """Composite drift should not be misreported as a fingerprint mismatch."""
+        """Canonical execution identity should win over legacy composite drift."""
         current = CheckpointMetadata(
             records_processed=1000,
             dq_contract_compatibility_hash="same_hash",
@@ -307,9 +307,11 @@ class TestCheckpointCompatibilityService:
 
         result = self.service.validate_checkpoint_compatibility(current, checkpoint)
 
-        assert result.compatible is False
-        assert result.execution_identity_compatible is False
-        assert any("Composite run identity mismatch" in msg for msg in result.messages)
+        assert result.compatible is True
+        assert result.execution_identity_compatible is True
+        assert not any(
+            "Composite run identity mismatch" in msg for msg in result.messages
+        )
         assert not any(
             "Execution fingerprint mismatch" in msg for msg in result.messages
         )

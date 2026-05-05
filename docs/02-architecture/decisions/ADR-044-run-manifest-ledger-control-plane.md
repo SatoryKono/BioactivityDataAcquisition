@@ -192,8 +192,8 @@ The supported resume model is intentionally dual-mode:
 - composite resume uses checkpoint snapshot state as the base and then replays
   ledger entries strictly after `last_event_id`.
 - `execution_fingerprint` remains the canonical semantic execution identity,
-  while `composite_run_identity` is enforced as an occurrence-scoped resume
-  anchor for composite checkpoint safety.
+  while `composite_run_identity` remains occurrence-scoped auxiliary diagnostic
+  evidence and must not override a matching canonical execution identity.
 
 ADR-044 therefore does not require one universal replay algorithm across all
 runner families. The stability requirement is a shared control-plane contract,

@@ -289,7 +289,6 @@
     },
     {
       "datasource": "Prometheus",
-      "description": "Threshold-state summary: 0=OK, 1=DEGRADED warning reasons, 2=FAILING hard reasons; null=UNKNOWN. This is current-window state, not selected-range evidence.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -469,6 +468,7 @@
           "decimals": 2,
           "max": 1,
           "min": 0,
+          "noValue": "UNKNOWN",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -688,6 +688,7 @@
           "decimals": 2,
           "max": 1,
           "min": 0,
+          "noValue": "UNKNOWN",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -1201,6 +1202,17 @@
       ],
       "title": "Silver Filter Rejects",
       "type": "stat",
+      "links": [
+        {
+          "title": "Drilldown: Silver Reject Explorer",
+          "type": "dashboard",
+          "uid": "bioetl-silver-reject-explorer",
+          "keepTime": true,
+          "includeVars": false,
+          "targetBlank": false,
+          "params": "var-pipeline=${pipeline}&var-run_type=${run_type}"
+        }
+      ],
       "description": "Selected-range Silver reject count. Use first-screen DQ reasons for current incident state, then open Silver Reject Explorer for forensic records."
     },
     {

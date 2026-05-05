@@ -258,6 +258,8 @@ class RunManifestInspectionIdentityGraphMixin:
                 "input_snapshot_identity_fingerprint"
             ),
             "replay_mode": diagnostics.get("replay_mode", "rebuild"),
+            "operator_replay_mode": diagnostics.get("operator_replay_mode"),
+            "snapshot_status": diagnostics.get("snapshot_status"),
             "continuation_mode": diagnostics.get("continuation_mode"),
             "input_snapshot_count": diagnostics.get("input_snapshot_count", 0),
             "input_snapshots": diagnostics.get("input_snapshots", []),
