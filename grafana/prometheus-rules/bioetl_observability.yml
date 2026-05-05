@@ -70,6 +70,28 @@ groups:
       - record: bioetl_runtime_alert_condition_lineage_refs_missing_15m
         expr: sum by (pipeline) (increase(bioetl_lineage_refs_missing_total[15m])) > bool 0
 
+      - record: bioetl_l0_status
+        expr: >-
+          ((bioetl_runtime_alert_condition_pipeline_runs_failed_15m + bioetl_runtime_alert_condition_stage_backlog_active_15m + bioetl_runtime_alert_condition_stage_lag_high_15m + bioetl_runtime_alert_condition_gold_write_missing_15m) > bool 0) * 3
+          + ((bioetl_runtime_alert_condition_pipeline_runs_failed_15m + bioetl_runtime_alert_condition_stage_backlog_active_15m + bioetl_runtime_alert_condition_stage_lag_high_15m + bioetl_runtime_alert_condition_gold_write_missing_15m) == bool 0)
+          * ((bioetl_runtime_alert_condition_manifest_write_failed_15m + bioetl_runtime_alert_condition_ledger_append_failed_15m + bioetl_runtime_alert_condition_checkpoint_incompatible_30m + bioetl_runtime_alert_condition_lineage_refs_missing_15m + bioetl_runtime_alert_condition_dq_hard_fail_15m + bioetl_runtime_alert_condition_dq_critical_anomaly_30m + bioetl_runtime_alert_condition_dq_soft_threshold_15m + bioetl_runtime_alert_condition_provider_failure_rate_high_15m) > bool 0) * 2
+          + ((bioetl_runtime_alert_condition_pipeline_runs_failed_15m + bioetl_runtime_alert_condition_stage_backlog_active_15m + bioetl_runtime_alert_condition_stage_lag_high_15m + bioetl_runtime_alert_condition_gold_write_missing_15m) == bool 0)
+          * ((bioetl_runtime_alert_condition_manifest_write_failed_15m + bioetl_runtime_alert_condition_ledger_append_failed_15m + bioetl_runtime_alert_condition_checkpoint_incompatible_30m + bioetl_runtime_alert_condition_lineage_refs_missing_15m + bioetl_runtime_alert_condition_dq_hard_fail_15m + bioetl_runtime_alert_condition_dq_critical_anomaly_30m + bioetl_runtime_alert_condition_dq_soft_threshold_15m + bioetl_runtime_alert_condition_provider_failure_rate_high_15m) == bool 0)
+          * ((sum by (pipeline, run_type) (increase(bioetl_pipeline_runs_total[15m])) > bool 0) * 1)
+
+      - record: bioetl_l0_next_action
+        expr: >-
+          ((bioetl_runtime_alert_condition_pipeline_runs_failed_15m + bioetl_runtime_alert_condition_stage_backlog_active_15m + bioetl_runtime_alert_condition_stage_lag_high_15m + bioetl_runtime_alert_condition_gold_write_missing_15m) > bool 0) * 3
+          + ((bioetl_runtime_alert_condition_pipeline_runs_failed_15m + bioetl_runtime_alert_condition_stage_backlog_active_15m + bioetl_runtime_alert_condition_stage_lag_high_15m + bioetl_runtime_alert_condition_gold_write_missing_15m) == bool 0)
+          * ((bioetl_runtime_alert_condition_manifest_write_failed_15m + bioetl_runtime_alert_condition_ledger_append_failed_15m + bioetl_runtime_alert_condition_checkpoint_incompatible_30m + bioetl_runtime_alert_condition_lineage_refs_missing_15m) > bool 0) * 2
+          + ((bioetl_runtime_alert_condition_pipeline_runs_failed_15m + bioetl_runtime_alert_condition_stage_backlog_active_15m + bioetl_runtime_alert_condition_stage_lag_high_15m + bioetl_runtime_alert_condition_gold_write_missing_15m) == bool 0)
+          * ((bioetl_runtime_alert_condition_manifest_write_failed_15m + bioetl_runtime_alert_condition_ledger_append_failed_15m + bioetl_runtime_alert_condition_checkpoint_incompatible_30m + bioetl_runtime_alert_condition_lineage_refs_missing_15m) == bool 0)
+          * ((bioetl_runtime_alert_condition_dq_hard_fail_15m + bioetl_runtime_alert_condition_dq_critical_anomaly_30m + bioetl_runtime_alert_condition_dq_soft_threshold_15m + bioetl_runtime_alert_condition_provider_failure_rate_high_15m) > bool 0) * 2
+          + ((bioetl_runtime_alert_condition_pipeline_runs_failed_15m + bioetl_runtime_alert_condition_stage_backlog_active_15m + bioetl_runtime_alert_condition_stage_lag_high_15m + bioetl_runtime_alert_condition_gold_write_missing_15m) == bool 0)
+          * ((bioetl_runtime_alert_condition_manifest_write_failed_15m + bioetl_runtime_alert_condition_ledger_append_failed_15m + bioetl_runtime_alert_condition_checkpoint_incompatible_30m + bioetl_runtime_alert_condition_lineage_refs_missing_15m) == bool 0)
+          * ((bioetl_runtime_alert_condition_dq_hard_fail_15m + bioetl_runtime_alert_condition_dq_critical_anomaly_30m + bioetl_runtime_alert_condition_dq_soft_threshold_15m + bioetl_runtime_alert_condition_provider_failure_rate_high_15m) == bool 0)
+          * ((sum by (pipeline, run_type) (increase(bioetl_pipeline_runs_total[15m])) > bool 0) * 1)
+
       - record: bioetl_provider_health_check_provider_universe_15m
         expr: (sum by (provider) (increase(bioetl_health_check_success_total[15m]))) or (sum by (provider) (increase(bioetl_health_check_degraded_total[15m]))) or (sum by (provider) (increase(bioetl_health_check_failures_total[15m])))
 
