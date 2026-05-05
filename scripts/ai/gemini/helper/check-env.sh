@@ -6,6 +6,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
+REPO_ROOT="${REPO_ROOT:-$(timeout 5 git rev-parse --show-toplevel 2>/dev/null || echo "${SCRIPT_DIR}/../../../..")}"
 ENSURE_SCRIPT="${SCRIPT_DIR}/ensure-gemini-cli.sh"
 ENSURE_MCP_SCRIPT="${SCRIPT_DIR}/ensure-mcp.sh"
 
@@ -81,8 +82,8 @@ fi
 log_info "Checking Gemini CLI..."
 GEMINI_BIN=""
 if [[ -x "${ENSURE_SCRIPT}" ]]; then
-    GEMINI_BIN="$("${ENSURE_SCRIPT}" --no-install --print-bin 2>/dev/null || true)"
-    GEMINI_PREFIX="$("${ENSURE_SCRIPT}" --no-install --print-prefix 2>/dev/null || true)"
+    GEMINI_BIN="$(timeout 10 "${ENSURE_SCRIPT}" --no-install --print-bin 2>/dev/null || true)"
+    GEMINI_PREFIX="$(timeout 10 "${ENSURE_SCRIPT}" --no-install --print-prefix 2>/dev/null || true)"
 fi
 
 if [[ -x "${GEMINI_BIN}" ]]; then
@@ -109,23 +110,15 @@ else
     ALL_CHECKS=false
 fi
 
-# 6. Create .env.gemini template if missing
-if [[ ! -f "${ENV_FILE}" ]]; then
-    log_warn "Creating .env.gemini template..."
-    cat > "${ENV_FILE}" <<EOF
-# Google Gemini Configuration
-# Get your API key from: https://aistudio.google.com/app/apikeys
-GEMINI_API_KEY=your-api-key-here
-# Optional model override
-# GEMINI_MODEL=gemini-2.5-flash
-EOF
-    log_warn ".env.gemini created - please edit and add your API key"
+# 6. Load proxy if available
+if [[ -f "${REPO_ROOT}/.wsl_proxy_env.sh" ]]; then
+    source "${REPO_ROOT}/.wsl_proxy_env.sh" 2>/dev/null || true
 fi
 
 # 7. Check MCP configuration
 log_info "Checking MCP configuration..."
 if [[ -x "${ENSURE_MCP_SCRIPT}" ]]; then
-    if GEMINI_BIN="${GEMINI_BIN}" GEMINI_PREFIX="${GEMINI_PREFIX:-}" "${ENSURE_MCP_SCRIPT}" \
+    if timeout 30 env GEMINI_BIN="${GEMINI_BIN}" GEMINI_PREFIX="${GEMINI_PREFIX:-}" "${ENSURE_MCP_SCRIPT}" \
         --check \
         --gemini-bin "${GEMINI_BIN}" \
         --gemini-prefix "${GEMINI_PREFIX:-}" >/dev/null 2>&1; then
@@ -146,6 +139,6 @@ if [[ "${ALL_CHECKS}" == "true" ]]; then
     log_success "All checks passed"
     exit 0
 else
-    log_warn "Some checks failed"
+    log_warn "Some checks failed - will attempt to fix"
     exit 1
 fi

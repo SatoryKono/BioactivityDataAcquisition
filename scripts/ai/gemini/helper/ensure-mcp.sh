@@ -163,11 +163,12 @@ resolve_gemini_runtime
 
 case "${MODE}" in
     ensure)
-        python3 "${SETUP_MCP}" \
+        timeout 30 python3 "${SETUP_MCP}" \
             --root "${REPO_ROOT}" \
             --workspace-root "${REPO_ROOT}" \
             --skip-codex \
-            --skip-codex-config >/dev/null
+            --skip-codex-config >/dev/null 2>&1 || \
+        warn "MCP setup timed out; config may be incomplete"
         ;;
     check)
         ;;
@@ -177,7 +178,9 @@ case "${MODE}" in
 esac
 
 check_workspace_settings
-sync_required_server_enablement
+if [[ "${MODE}" == "ensure" ]]; then
+    sync_required_server_enablement
+fi
 validate_gemini_mcp_list
 
 echo "[mcp] Gemini MCP config is ready"

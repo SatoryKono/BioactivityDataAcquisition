@@ -6,7 +6,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 HELPER_DIR="${SCRIPT_DIR}/helper"
-REPO_ROOT="${REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || (cd "${SCRIPT_DIR}/../../.." && pwd))}"
+REPO_ROOT="${REPO_ROOT:-$(timeout 5 git rev-parse --show-toplevel 2>/dev/null || echo "${SCRIPT_DIR}/../../..")}"
 
 # Colors
 RED='\033[0;31m'
@@ -37,6 +37,31 @@ log_info() {
     local message="${1:-}"
     echo -e "${BLUE}[i]${NC} ${message}"
     return 0
+}
+
+ensure_env_template() {
+    local env_file="${SCRIPT_DIR}/.env.gemini"
+    local repo_env_file="${REPO_ROOT}/.env.gemini"
+
+    if [[ -f "${env_file}" ]]; then
+        return 0
+    fi
+
+    log_warn ".env.gemini not found, checking repo root..."
+    if [[ -f "${repo_env_file}" ]]; then
+        return 0
+    fi
+
+    log_warn "Creating .env.gemini in scripts/ai/gemini/..."
+    cat > "${env_file}" <<'ENVEOF'
+# Google Gemini CLI Configuration
+# Get your API key from: https://aistudio.google.com/app/apikeys
+GEMINI_API_KEY=your-api-key-here
+# Optional model override
+# GEMINI_MODEL=gemini-2.5-flash
+ENVEOF
+    log_error "Please edit ${env_file} and add your Gemini API key"
+    exit 1
 }
 
 echo ""
@@ -117,16 +142,39 @@ esac
 log_info "Checking environment setup..."
 echo ""
 
-if ! bash "${HELPER_DIR}/check-env.sh" 2>/dev/null; then
-    log_warn "Some components missing"
-    log_info "Running setup to install missing components..."
-    echo ""
+RETRY_COUNT=0
+MAX_RETRIES=2
 
-    if ! bash "${HELPER_DIR}/setup-env.sh"; then
-        log_error "Setup failed"
-        exit 1
+while [[ ${RETRY_COUNT} -lt ${MAX_RETRIES} ]]; do
+    if bash "${HELPER_DIR}/check-env.sh" 2>/dev/null; then
+        break
     fi
+
+    RETRY_COUNT=$((RETRY_COUNT + 1))
+
+    if [[ ${RETRY_COUNT} -lt ${MAX_RETRIES} ]]; then
+        log_warn "Some components missing (attempt ${RETRY_COUNT}/${MAX_RETRIES})"
+        log_info "Running setup to install missing components..."
+        echo ""
+
+        if ! bash "${HELPER_DIR}/setup-env.sh"; then
+            log_error "Setup failed on attempt ${RETRY_COUNT}"
+            exit 1
+        fi
+        echo ""
+    fi
+done
+
+if [[ ${RETRY_COUNT} -eq ${MAX_RETRIES} ]]; then
+    log_error "Environment check failed after ${MAX_RETRIES} attempts"
+    exit 1
 fi
+
+echo ""
+log_info "Environment ready - launching Gemini"
+echo ""
+
+ensure_env_template
 
 # Process command
 shift || true
@@ -162,7 +210,11 @@ case "$COMMAND" in
         # Treat first arg as prompt
         log_info "Launching Gemini with prompt..."
         echo ""
-        bash "${HELPER_DIR}/run-gemini-impl.sh" --prompt "$COMMAND $*"
+        if [[ $# -gt 0 ]]; then
+            bash "${HELPER_DIR}/run-gemini-impl.sh" --prompt "${COMMAND} $*"
+        else
+            bash "${HELPER_DIR}/run-gemini-impl.sh" --prompt "${COMMAND}"
+        fi
         ;;
 esac
 

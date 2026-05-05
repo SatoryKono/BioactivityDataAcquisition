@@ -9,10 +9,10 @@
 .\scripts\ai\gemini\run-gemini.ps1 setup
 
 # Interactive mode
-.\scripts\ai\gemini\gemini-interactive.ps1
+.\scripts\ai\gemini\run-gemini.ps1
 
 # With a prompt
-.\scripts\ai\gemini\gemini-interactive.ps1 "analyze this code"
+.\scripts\ai\gemini\run-gemini.ps1 "analyze this code"
 ```
 
 ### From WSL/Bash:
@@ -22,10 +22,10 @@ bash scripts/ai/gemini/run-gemini.sh check
 bash scripts/ai/gemini/run-gemini.sh setup
 
 # Interactive mode
-bash scripts/ai/gemini/gemini-interactive.sh
+bash scripts/ai/gemini/run-gemini.sh
 
 # With a prompt
-bash scripts/ai/gemini/gemini-interactive.sh "explain this repository"
+bash scripts/ai/gemini/run-gemini.sh "explain this repository"
 ```
 
 ## Configuration
@@ -101,9 +101,14 @@ bash scripts/ai/gemini/run-gemini.sh exec "fix all formatting issues"
 ```
 ⚠️ Use only for trusted tasks — all actions are auto-approved.
 
+### Skip MCP Sync For One Launch
+```bash
+bash scripts/ai/gemini/headless.sh
+```
+
 ### Custom Model
 ```bash
-GEMINI_MODEL=gemini-2.0-flash .\scripts\ai\gemini\gemini-interactive.ps1
+GEMINI_MODEL=gemini-2.0-flash .\scripts\ai\gemini\run-gemini.ps1
 ```
 
 ### Debug Mode
@@ -118,8 +123,10 @@ bash scripts/ai/gemini/run-gemini.sh check
 scripts/ai/gemini/
 ├── run-gemini.ps1                  # PowerShell delegator
 ├── run-gemini.sh                   # Main WSL entrypoint
-├── gemini-interactive.ps1          # Quick PowerShell launcher
-├── gemini-interactive.sh           # Quick WSL launcher
+├── headless.ps1                    # PowerShell transport without MCP sync
+├── headless.sh                     # WSL launcher without MCP sync
+├── gemini-interactive.ps1          # Thin compatibility launcher
+├── gemini-interactive.sh           # Thin compatibility launcher
 ├── .env.gemini                     # API key config (git-ignored)
 ├── helper/
 │   ├── run-gemini-impl.sh          # Runtime launcher
