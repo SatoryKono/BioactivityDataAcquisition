@@ -951,6 +951,67 @@ def test_provider_dashboard_surfaces_current_health_status_panel() -> None:
     )
 
 
+def test_provider_health_panel_114_description_disallows_zero_as_healthy() -> None:
+    """Panel 114 description must keep provider enum semantics for 0 state."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-provider-health-v2.json"))
+    panel = next(
+        (item for item in get_dashboard_panels(dashboard) if item.get("id") == 114),
+        None,
+    )
+    assert panel is not None, "Panel id=114 not found"
+
+    description = str(panel.get("description", ""))
+    assert "0=UNHEALTHY" in description, (
+        "Panel id=114 must explicitly document 0 as UNHEALTHY"
+    )
+    description_upper = description.upper()
+    assert "0=HEALTHY" not in description_upper
+    assert "0=OK" not in description_upper
+
+
+def test_provider_health_status_mappings_match_description_enum() -> None:
+    """Provider status panels must keep mapping texts and enum descriptions aligned."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-provider-health-v2.json"))
+    expected_pairs = {"0": "UNHEALTHY", "1": "DEGRADED", "2": "HEALTHY"}
+    expected_null = "UNKNOWN"
+
+    for panel in get_dashboard_panels(dashboard):
+        mappings = panel.get("fieldConfig", {}).get("defaults", {}).get("mappings", [])
+        value_mapping = next(
+            (
+                mapping
+                for mapping in mappings
+                if mapping.get("type") == "value"
+                and isinstance(mapping.get("options"), dict)
+            ),
+            None,
+        )
+        if value_mapping is None:
+            continue
+
+        options = value_mapping.get("options", {})
+        if not all(key in options for key in (*expected_pairs.keys(), "null")):
+            continue
+
+        description = str(panel.get("description", ""))
+        for status_code, label in expected_pairs.items():
+            text = str(options[status_code].get("text", "")).upper()
+            assert text == label, (
+                f"Panel id={panel.get('id')} status {status_code} text must be {label}"
+            )
+            assert f"{status_code}={label}" in description, (
+                f"Panel id={panel.get('id')} description must include {status_code}={label}"
+            )
+
+        null_text = str(options["null"].get("text", "")).upper()
+        assert null_text == expected_null, (
+            f"Panel id={panel.get('id')} null mapping must be {expected_null}"
+        )
+        assert f"null={expected_null}" in description, (
+            f"Panel id={panel.get('id')} description must include null={expected_null}"
+        )
+
+
 def test_runtime_provider_alert_conditions_do_not_filter_on_missing_pipeline_labels():
     """Provider runtime alert summaries are fleet-wide and must not filter on pipeline."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
