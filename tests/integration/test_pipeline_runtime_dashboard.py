@@ -21,7 +21,7 @@ from tests.integration._grafana_test_support import (
 pytestmark = pytest.mark.integration
 
 _DASHBOARD_PATH = Path("grafana/dashboards/bioetl-runtime.json")
-_DASHBOARD_UID_RE = re.compile(r"^/d/([^/?]+)")
+_DASHBOARD_UID_RE = re.compile(r"^/d/([^\\/?]+)")
 _LINK_VAR_RE = re.compile(r"[?&]var-(\w+)=")
 _WINDOW_TOKEN_RE = re.compile(r"\[(?:\$__[^]]+|\d+[smhdw])\]")
 _QUERY_WINDOW_FUNC_RE = re.compile(

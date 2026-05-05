@@ -16,7 +16,7 @@ from tests.integration._grafana_test_support import (
 
 pytestmark = pytest.mark.integration
 
-_DASHBOARD_UID_RE = re.compile(r"^/d/([^/?]+)")
+_DASHBOARD_UID_RE = re.compile(r"^/d/([^\\/?]+)")
 _LINK_VAR_RE = re.compile(r"[?&]var-(\w+)=")
 _NAV_LINK_CONTRACT_PATH = Path(
     "docs/03-guides/dashboards/contracts/navigation-links.yaml"
