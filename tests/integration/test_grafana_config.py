@@ -32,6 +32,7 @@ GRAFANA_DASHBOARD_PROVISIONING_PATH = Path(
 )
 GRAFANA_README_PATH = Path("grafana/README.md")
 _BIOETL_METRIC_TOKEN_RE = re.compile(r"\b(bioetl_[a-z0-9_]+)\b")
+_GRAFANA_VAR_TOKEN_RE = re.compile(r"\$(\{)?([a-zA-Z_][a-zA-Z0-9_]*)(?(1)\})")
 
 
 NAVIGATION_CONTRACT_PATH = Path(
@@ -191,6 +192,56 @@ def test_no_duplicate_variable_names(dashboard_path):
     duplicates = sorted(name for name, count in Counter(names).items() if count > 1)
     assert not duplicates, (
         f"Dashboard {dashboard_path.name} has duplicate variables: {duplicates}"
+    )
+
+
+@pytest.mark.parametrize("dashboard_path", get_dashboard_files(), ids=lambda p: p.name)
+def test_dashboard_links_only_reference_declared_variables(dashboard_path: Path) -> None:
+    """All $var tokens in dashboard links must be present in templating.list."""
+    dashboard = load_dashboard(dashboard_path)
+    declared_variables = {
+        str(variable.get("name"))
+        for variable in dashboard.get("templating", {}).get("list", [])
+        if variable.get("name")
+    }
+
+    violations: list[str] = []
+
+    for panel in get_dashboard_panels(dashboard):
+        links = panel.get("links", [])
+        if not isinstance(links, list):
+            continue
+        for link in links:
+            if not isinstance(link, dict):
+                continue
+            url = str(link.get("url", ""))
+            for _, variable_name in _GRAFANA_VAR_TOKEN_RE.findall(url):
+                if variable_name.startswith("__"):
+                    continue
+                if variable_name not in declared_variables:
+                    violations.append(
+                        f"panel={panel.get('title', '<untitled>')} link={link.get('title', '<untitled>')} "
+                        f"uses ${variable_name} not declared in templating.list"
+                    )
+
+    dashboard_links = dashboard.get("links", [])
+    if isinstance(dashboard_links, list):
+        for link in dashboard_links:
+            if not isinstance(link, dict):
+                continue
+            url = str(link.get("url", ""))
+            for _, variable_name in _GRAFANA_VAR_TOKEN_RE.findall(url):
+                if variable_name.startswith("__"):
+                    continue
+                if variable_name not in declared_variables:
+                    violations.append(
+                        f"dashboard_link={link.get('title', '<untitled>')} "
+                        f"uses ${variable_name} not declared in templating.list"
+                    )
+
+    assert not violations, (
+        f"Dashboard {dashboard_path.name} has links with undeclared variables:\n"
+        + "\n".join(violations)
     )
 
 
