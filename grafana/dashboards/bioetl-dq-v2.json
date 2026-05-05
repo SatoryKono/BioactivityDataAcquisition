@@ -1265,7 +1265,7 @@
               "refId": "A"
             }
           ],
-          "description": "Bounded schema-field summary only; use 5. Silver Reject Explorer or quarantine CLI for exact record context.",
+              "description": "Bounded schema-field summary only; use Silver Reject Explorer or quarantine CLI for exact record context.",
           "title": "Top Silver Reject Fields",
           "type": "bargauge"
         }

@@ -16,7 +16,7 @@ ______________________________________________________________________
 1. [Полный каталог метрик BioETL](#5-%D0%BF%D0%BE%D0%BB%D0%BD%D1%8B%D0%B9-%D0%BA%D0%B0%D1%82%D0%B0%D0%BB%D0%BE%D0%B3-%D0%BC%D0%B5%D1%82%D1%80%D0%B8%D0%BA-bioetl)
 1. [Переменные фильтрации (Template Variables)](#6-%D0%BF%D0%B5%D1%80%D0%B5%D0%BC%D0%B5%D0%BD%D0%BD%D1%8B%D0%B5-%D1%84%D0%B8%D0%BB%D1%8C%D1%82%D1%80%D0%B0%D1%86%D0%B8%D0%B8-template-variables)
 1. [Архивная заметка: legacy v1 dashboard surfaces](#8-%D0%B0%D1%80%D1%85%D0%B8%D0%B2%D0%BD%D0%B0%D1%8F-%D0%B7%D0%B0%D0%BC%D0%B5%D1%82%D0%BA%D0%B0-legacy-v1-dashboard-surfaces)
-1. [Дашборд: 1. BioETL Overview](#9-%D0%B4%D0%B0%D1%88%D0%B1%D0%BE%D1%80%D0%B4-1-bioetl-overview)
+1. [Дашборд: 1. Overview](#9-дашборд-1-overview)
    13.1. [Дашборд: 2. Runtime](#131-%D0%B4%D0%B0%D1%88%D0%B1%D0%BE%D1%80%D0%B4-2-runtime)
 1. [Дашборд: 3. Provider Health](#13-%D0%B4%D0%B0%D1%88%D0%B1%D0%BE%D1%80%D0%B4-3-provider-health)
 1. [Дашборд: 4. Data Quality](#11-%D0%B4%D0%B0%D1%88%D0%B1%D0%BE%D1%80%D0%B4-4-data-quality)
@@ -116,7 +116,7 @@ ______________________________________________________________________
 │                                                                   │
 │  Дашборды (shipped):                                             │
 │  - 0. Control Plane (bioetl-control-plane-v1)                    │
-│  - 1. BioETL Overview (bioetl-overview-v2)                       │
+│  - 1. Overview (bioetl-overview-v2)                               │
 │  - 2. Runtime (bioetl-runtime)                                   │
 │  - 3. Provider Health (bioetl-provider-health-v2)                │
 │  - 4. Data Quality (bioetl-dq-v2)                                │
@@ -721,7 +721,7 @@ shipped pack. Active operator routing starts at
 
 ______________________________________________________________________
 
-## 9. Дашборд: 1. BioETL Overview
+## 9. Дашборд: 1. Overview
 
 **Файл:** `grafana/dashboards/bioetl-overview-v2.json`
 **UID:** `bioetl-overview-v2`
@@ -760,7 +760,7 @@ dashboard-to-dashboard links в panel/data links.
 
 **Silver Rejects triage sequence:**
 
-1. Начните с `1. BioETL Overview` или `2. Runtime`, чтобы увидеть summary spike по
+1. Начните с `1. Overview` или `2. Runtime`, чтобы увидеть summary spike по
    `Silver Rejects Count + Rate` / `Silver Filter Rejects`.
 1. Перейдите в `4. Data Quality`, чтобы проверить bounded breakdown через
    `Top Silver Reject Reasons` и `Top Silver Reject Fields`.
@@ -1872,7 +1872,7 @@ ______________________________________________________________________
 | Dashboard                 | UID                             | JSON version | Panels | Refresh | Time Range | Primary surface | Purpose |
 | ------------------------- | ------------------------------- | ------------ | ------ | ------- | ---------- | --------------- | ------- |
 | 0. Control Plane          | `bioetl-control-plane-v1`       | 2            | 32     | 30s     | 6h         | Prometheus      | Replay/resume safety, GLOBAL read diagnostics, missing-signal markers |
-| 1. BioETL Overview        | `bioetl-overview-v2`            | 5            | 27     | 30s     | 12h        | Prometheus      | L0 broken/degraded answer and operational handoff |
+| 1. Overview               | `bioetl-overview-v2`            | 5            | 27     | 30s     | 12h        | Prometheus      | L0 broken/degraded answer and operational handoff |
 | 2. Runtime                | `bioetl-runtime`                | 2            | 26     | 30s     | 12h        | Prometheus + optional Loki/Tempo links | L2 runtime triage: blockers, latency, backlog, handoffs |
 | 3. Provider Health        | `bioetl-provider-health-v2`     | 6            | 17     | 30s     | 12h        | Prometheus      | Provider latency, health, retries, failure ratios |
 | 4. Data Quality           | `bioetl-dq-v2`                  | 4            | 21     | 30s     | 12h        | Prometheus      | DQ score, quarantine, freshness, validation failures |

@@ -72,18 +72,18 @@ secondary mirrors только как локальный контекст. Mirro
 
 | KPI | Canonical dashboard | Secondary mirrors |
 | --- | --- | --- |
-| System Status | `1. BioETL Overview` | `2. Runtime`, `0. Control Plane`, `5. Workflow` |
-| Next Action | `1. BioETL Overview` | `2. Runtime`, `3. Provider Health` |
-| L0 Inputs | `1. BioETL Overview` | `2. Runtime`, `4. Data Quality`, `0. Control Plane` |
-| Gold Lifecycle Current | `1. BioETL Overview` | `2. Runtime`, `0. Control Plane` |
-| Provider GLOBAL Scope | `1. BioETL Overview` | `3. Provider Health` |
-| Workflow Selected Scope | `1. BioETL Overview` | `5. Workflow` |
-| Workflow GLOBAL Scope | `1. BioETL Overview` | `5. Workflow` |
-| Replay Safety State | `0. Control Plane` | `1. BioETL Overview`, `2. Runtime` |
+| System Status | `1. Overview` | `2. Runtime`, `0. Control Plane`, `5. Workflow` |
+| Next Action | `1. Overview` | `2. Runtime`, `3. Provider Health` |
+| L0 Inputs | `1. Overview` | `2. Runtime`, `4. Data Quality`, `0. Control Plane` |
+| Gold Lifecycle Current | `1. Overview` | `2. Runtime`, `0. Control Plane` |
+| Provider GLOBAL Scope | `1. Overview` | `3. Provider Health` |
+| Workflow Selected Scope | `1. Overview` | `5. Workflow` |
+| Workflow GLOBAL Scope | `1. Overview` | `5. Workflow` |
+| Replay Safety State | `0. Control Plane` | `1. Overview`, `2. Runtime` |
 | Checkpoint Freshness Proxy | `0. Control Plane` | `2. Runtime` |
 | Ledger/Manifest Consistency | `0. Control Plane` | `2. Runtime` |
-| Provider Health (aggregated) | `3. Provider Health` | `1. BioETL Overview`, `2. Runtime` |
-| DQ Status (Silver Reject / quality posture) | `4. Data Quality` | `1. BioETL Overview`, `2. Runtime` |
+| Provider Health (aggregated) | `3. Provider Health` | `1. Overview`, `2. Runtime` |
+| DQ Status (Silver Reject / quality posture) | `4. Data Quality` | `1. Overview`, `2. Runtime` |
 
 ### Mirror policy for KPI cards
 

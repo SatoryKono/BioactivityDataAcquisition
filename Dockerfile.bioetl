@@ -15,8 +15,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Install uv for fast dependency resolution
 RUN pip install --no-cache-dir uv
 
-# Copy only dependency files for layer caching
+# Copy package metadata and source required by setuptools/uv build resolution.
 COPY pyproject.toml uv.lock ./
+COPY src/ ./src/
+RUN printf '# BioETL\n' > README.md
 
 # Sync production dependencies into venv
 RUN uv sync --no-dev --frozen --directory /app

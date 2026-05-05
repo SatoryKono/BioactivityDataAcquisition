@@ -412,7 +412,7 @@
     "to": "now"
   },
   "timezone": "browser",
-  "title": "6. Workflow Overview",
+  "title": "5. Workflow",
   "uid": "bioetl-workflow-overview",
   "version": 1
 }
