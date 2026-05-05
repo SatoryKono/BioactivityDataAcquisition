@@ -40,6 +40,26 @@ NAVIGATION_CONTRACT_PATH = Path(
 )
 
 
+def _json_load_without_duplicate_keys(path: Path) -> dict:
+    """Load JSON and fail fast when duplicate keys are present."""
+
+    def _reject_duplicates(pairs: list[tuple[str, object]]) -> dict[str, object]:
+        payload: dict[str, object] = {}
+        seen: set[str] = set()
+        for key, value in pairs:
+            if key in seen:
+                raise AssertionError(f"Duplicate JSON key '{key}' in {path}")
+            seen.add(key)
+            payload[key] = value
+        return payload
+
+    with path.open(encoding="utf-8") as source:
+        data = json.load(source, object_pairs_hook=_reject_duplicates)
+
+    assert isinstance(data, dict), "Dashboard JSON root must be an object"
+    return data
+
+
 def _load_navigation_contract() -> dict:
     payload = yaml.safe_load(NAVIGATION_CONTRACT_PATH.read_text(encoding="utf-8"))
     assert isinstance(payload, dict), (
@@ -62,9 +82,38 @@ def _load_recording_rule_names() -> set[str]:
 @pytest.mark.parametrize("dashboard_path", get_dashboard_files(), ids=lambda p: p.name)
 def test_dashboard_is_valid_json(dashboard_path):
     """L1: Verify that the dashboard file is a valid JSON."""
-    data = load_dashboard(dashboard_path)
+    data = _json_load_without_duplicate_keys(dashboard_path)
     assert isinstance(data, dict)
     assert "title" in data
+
+
+@pytest.mark.parametrize("dashboard_path", get_dashboard_files(), ids=lambda p: p.name)
+def test_panel_title_vocabulary_matches_group_by_vocabulary(dashboard_path: Path) -> None:
+    """Panel titles should describe aggregation vocabulary in PromQL group-by labels."""
+    dashboard = load_dashboard(dashboard_path)
+    errors: list[str] = []
+
+    for panel in get_dashboard_panels(dashboard):
+        title = panel.get("title", "")
+        if not isinstance(title, str):
+            continue
+
+        expressions = get_panel_expressions(panel)
+        grouped_by_provider = any("by (provider" in expr for expr in expressions)
+        grouped_by_adapter = any("by (adapter" in expr for expr in expressions)
+
+        if grouped_by_provider and "by Provider" not in title:
+            errors.append(
+                f"{dashboard_path.name}: panel '{title}' groups by provider but title "
+                "does not contain 'by Provider'"
+            )
+        if grouped_by_adapter and "by Adapter" not in title:
+            errors.append(
+                f"{dashboard_path.name}: panel '{title}' groups by adapter but title "
+                "does not contain 'by Adapter'"
+            )
+
+    assert not errors, "Panel title vocabulary drift detected:\n" + "\n".join(errors)
 
 
 @pytest.mark.parametrize("dashboard_path", get_dashboard_files(), ids=lambda p: p.name)

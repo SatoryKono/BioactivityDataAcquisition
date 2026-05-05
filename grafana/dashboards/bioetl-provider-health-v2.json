@@ -80,11 +80,6 @@
     },
     {
       "asDropdown": false,
-      "icon": "external link",
-      "includeVars": false,
-      "keepTime": true,
-      "tags": [],
-      "targetBlank": false,
       "icon": "bolt",
       "includeVars": false,
       "keepTime": true,
@@ -1420,7 +1415,7 @@
           "refId": "A"
         }
       ],
-      "title": "Circuit Breaker Trips by Provider",
+      "title": "Circuit Breaker Trips by Adapter",
       "type": "timeseries",
       "description": "Provider status enum: 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY; null=UNKNOWN."
     }
