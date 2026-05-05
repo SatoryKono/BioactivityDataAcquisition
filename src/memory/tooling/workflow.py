@@ -60,22 +60,27 @@ def _summary_note_body(title: str, summary: str) -> str:
     )
 
 
+def _default_pre_task_chunks_path(output_root: Path | None) -> Path:
+    if output_root is None:
+        return DEFAULT_RAG_CHUNKS
+    return output_root / "rag" / "manifests" / "chunks.jsonl"
+
+
+def _default_pre_task_events_dir(output_root: Path | None) -> Path:
+    if output_root is None:
+        return DEFAULT_TIMELINE_DIR
+    return output_root / "timeline" / "events"
+
+
 def _pre_task_surfaces(
     *,
     chunks_path: Path | None,
     events_dir: Path | None,
     output_root: Path | None,
 ) -> tuple[Path, Path]:
-    if output_root is not None:
-        default_chunks_path = output_root / "rag" / "manifests" / "chunks.jsonl"
-        default_events_dir = output_root / "timeline" / "events"
-    else:
-        default_chunks_path = DEFAULT_RAG_CHUNKS
-        default_events_dir = DEFAULT_TIMELINE_DIR
-
     return (
-        chunks_path or default_chunks_path,
-        events_dir or default_events_dir,
+        chunks_path or _default_pre_task_chunks_path(output_root),
+        events_dir or _default_pre_task_events_dir(output_root),
     )
 
 

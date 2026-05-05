@@ -718,6 +718,33 @@ def _class_inherits_protocol(node: ast.ClassDef) -> bool:
     return False
 
 
+def _iter_python_files_without_pycache(layer_roots: tuple[Path, ...]) -> list[Path]:
+    return [
+        py_file
+        for layer_root in layer_roots
+        for py_file in layer_root.rglob("*.py")
+        if "__pycache__" not in py_file.parts
+    ]
+
+
+def _class_nodes_in_file(py_file: Path) -> list[ast.ClassDef]:
+    tree = ast.parse(py_file.read_text(encoding="utf-8"), filename=str(py_file))
+    return [node for node in ast.walk(tree) if isinstance(node, ast.ClassDef)]
+
+
+def _non_domain_port_suffix_violations(
+    py_file: Path, *, src_dir: Path
+) -> list[str]:
+    relative = py_file.relative_to(src_dir)
+    return [
+        f"{relative}:{node.lineno}:{node.name}"
+        for node in _class_nodes_in_file(py_file)
+        if not node.name.startswith("_")
+        and node.name.endswith("Port")
+        and _class_inherits_protocol(node)
+    ]
+
+
 def test_non_domain_local_protocols_do_not_use_port_suffix(src_dir: Path) -> None:
     """Local Protocol contracts outside domain/ports must use *Protocol, not *Port."""
     layer_roots = (
@@ -726,23 +753,11 @@ def test_non_domain_local_protocols_do_not_use_port_suffix(src_dir: Path) -> Non
         src_dir / "bioetl" / "composition",
         src_dir / "bioetl" / "interfaces",
     )
-    violations: list[str] = []
-    for layer_root in layer_roots:
-        for py_file in layer_root.rglob("*.py"):
-            if "__pycache__" in py_file.parts:
-                continue
-            tree = ast.parse(py_file.read_text(encoding="utf-8"), filename=str(py_file))
-            for node in ast.walk(tree):
-                if not isinstance(node, ast.ClassDef):
-                    continue
-                if node.name.startswith("_"):
-                    continue
-                if not node.name.endswith("Port"):
-                    continue
-                if not _class_inherits_protocol(node):
-                    continue
-                relative = py_file.relative_to(src_dir)
-                violations.append(f"{relative}:{node.lineno}:{node.name}")
+    violations = [
+        violation
+        for py_file in _iter_python_files_without_pycache(layer_roots)
+        for violation in _non_domain_port_suffix_violations(py_file, src_dir=src_dir)
+    ]
     assert not violations, (
         "Local Protocol contracts outside domain/ports must use *Protocol:\n"
         + "\n".join(violations[:80])
@@ -756,18 +771,12 @@ def test_non_infrastructure_classes_do_not_use_adapter_suffix(src_dir: Path) -> 
         src_dir / "bioetl" / "composition",
         src_dir / "bioetl" / "interfaces",
     )
-    violations: list[str] = []
-    for layer_root in layer_roots:
-        for py_file in layer_root.rglob("*.py"):
-            if "__pycache__" in py_file.parts:
-                continue
-            tree = ast.parse(py_file.read_text(encoding="utf-8"), filename=str(py_file))
-            for node in ast.walk(tree):
-                if not isinstance(node, ast.ClassDef):
-                    continue
-                if node.name.endswith("Adapter"):
-                    relative = py_file.relative_to(src_dir)
-                    violations.append(f"{relative}:{node.lineno}:{node.name}")
+    violations = [
+        f"{py_file.relative_to(src_dir)}:{node.lineno}:{node.name}"
+        for py_file in _iter_python_files_without_pycache(layer_roots)
+        for node in _class_nodes_in_file(py_file)
+        if node.name.endswith("Adapter")
+    ]
     assert not violations, (
         "Only infrastructure may define classes with the *Adapter suffix:\n"
         + "\n".join(violations[:80])

@@ -112,23 +112,29 @@ def _is_skipped_dir(relative_path: Path) -> bool:
     return any(text == skipped or text.startswith(f"{skipped}/") for skipped in SKIPPED_DIRS)
 
 
+def _is_scanned_file(candidate: Path, *, repo_root: Path) -> bool:
+    if candidate.is_dir():
+        return False
+    relative = candidate.relative_to(repo_root)
+    return not _is_skipped_dir(relative.parent) and candidate.suffix in SCANNED_SUFFIXES
+
+
+def _scanned_files_for_root(path: Path, *, repo_root: Path) -> list[Path]:
+    if not path.exists():
+        return []
+    if path.is_file():
+        return [path]
+    return [
+        candidate
+        for candidate in path.rglob("*")
+        if _is_scanned_file(candidate, repo_root=repo_root)
+    ]
+
+
 def _iter_scanned_files(repo_root: Path) -> list[Path]:
     files: list[Path] = []
     for root in SCAN_ROOTS:
-        path = repo_root / root
-        if not path.exists():
-            continue
-        if path.is_file():
-            files.append(path)
-            continue
-        for candidate in path.rglob("*"):
-            relative = candidate.relative_to(repo_root)
-            if candidate.is_dir():
-                continue
-            if _is_skipped_dir(relative.parent):
-                continue
-            if candidate.suffix in SCANNED_SUFFIXES:
-                files.append(candidate)
+        files.extend(_scanned_files_for_root(repo_root / root, repo_root=repo_root))
     return sorted(files)
 
 

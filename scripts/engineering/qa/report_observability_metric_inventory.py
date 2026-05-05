@@ -1073,47 +1073,76 @@ def _render_text(report: dict[str, list[str] | dict[str, list[str]]]) -> str:
     return "\n".join(lines)
 
 
+MetricInventoryReport = dict[str, list[str] | dict[str, list[str]]]
+
+
+def _write_evidence_report(
+    report: MetricInventoryReport, *, repo_root: Path, evidence_path: Path | None
+) -> None:
+    if evidence_path is None:
+        return
+    resolved_path = evidence_path if evidence_path.is_absolute() else repo_root / evidence_path
+    resolved_path.parent.mkdir(parents=True, exist_ok=True)
+    resolved_path.write_text(
+        json.dumps(report, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+
+def _resolved_allowlist_path(repo_root: Path, allowlist_path: Path) -> Path:
+    return allowlist_path if allowlist_path.is_absolute() else repo_root / allowlist_path
+
+
+def _metric_inventory_violations(
+    report: MetricInventoryReport, *, args: argparse.Namespace
+) -> dict[str, list[str]]:
+    if not args.check:
+        return {}
+    return validate_metric_inventory(
+        report,
+        allowlist=_load_drift_allowlist(
+            _resolved_allowlist_path(args.repo_root, args.allowlist)
+        ),
+    )
+
+
+def _emit_json_report(
+    report: MetricInventoryReport, *, violations: dict[str, list[str]]
+) -> int:
+    if violations:
+        report["check_violations"] = violations
+    json.dump(report, sys.stdout, indent=2, sort_keys=True)
+    sys.stdout.write("\n")
+    return 1 if violations else 0
+
+
+def _emit_text_report(
+    report: MetricInventoryReport, *, violations: dict[str, list[str]]
+) -> int:
+    print(_render_text(report))
+    if not violations:
+        return 0
+    print("\nMetric inventory drift check failed:", file=sys.stderr)
+    for key, values in violations.items():
+        print(f"{key} ({len(values)}):", file=sys.stderr)
+        for value in values:
+            print(f"  - {value}", file=sys.stderr)
+    return 1
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = _build_parser()
     args = parser.parse_args(argv)
     report = collect_metric_inventory(args.repo_root)
-    if args.write_evidence is not None:
-        evidence_path = args.write_evidence
-        if not evidence_path.is_absolute():
-            evidence_path = args.repo_root / evidence_path
-        evidence_path.parent.mkdir(parents=True, exist_ok=True)
-        evidence_path.write_text(
-            json.dumps(report, indent=2, sort_keys=True) + "\n",
-            encoding="utf-8",
-        )
-    allowlist_path = args.allowlist
-    if not allowlist_path.is_absolute():
-        allowlist_path = args.repo_root / allowlist_path
-    violations = (
-        validate_metric_inventory(
-            report,
-            allowlist=_load_drift_allowlist(allowlist_path),
-        )
-        if args.check
-        else {}
+    _write_evidence_report(
+        report,
+        repo_root=args.repo_root,
+        evidence_path=args.write_evidence,
     )
+    violations = _metric_inventory_violations(report, args=args)
     if args.json:
-        if args.check:
-            report["check_violations"] = violations
-        json.dump(report, sys.stdout, indent=2, sort_keys=True)
-        sys.stdout.write("\n")
-        if violations:
-            return 1
-        return 0
-    print(_render_text(report))
-    if violations:
-        print("\nMetric inventory drift check failed:", file=sys.stderr)
-        for key, values in violations.items():
-            print(f"{key} ({len(values)}):", file=sys.stderr)
-            for value in values:
-                print(f"  - {value}", file=sys.stderr)
-        return 1
-    return 0
+        return _emit_json_report(report, violations=violations)
+    return _emit_text_report(report, violations=violations)
 
 
 if __name__ == "__main__":

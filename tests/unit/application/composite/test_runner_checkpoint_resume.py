@@ -18,11 +18,7 @@ from bioetl.application.composite.checkpoint import (
 from bioetl.infrastructure.storage.support.checkpoint_writer import (
     FileCompositeCheckpointWriter,
 )
-from bioetl.application.composite.runner_pkg import (
-    CompositePipelineRunner,
-    CompositeRunnerDependencies,
-    CompositeRuntimeConfig,
-)
+from bioetl.application.composite.runner_pkg import CompositeRuntimeConfig
 from bioetl.domain.composite.result import (
     EnrichmentResult,
     SeedResult,
@@ -33,12 +29,9 @@ from tests.unit.application.composite.runner_test_support import (
     MockEnricherConfig,
     MockPipelineRunner,
     create_mock_checkpoint_manager,
-    create_mock_coordinator,
-    create_mock_fsm_state_helper,
-    create_mock_key_extractor,
-    create_mock_lock,
     create_mock_logger,
     create_mock_merger,
+    create_runner,
     new_enricher_runner_factory,
     new_seed_runner_factory,
     seed_runner_factory,
@@ -64,21 +57,12 @@ class TestResumeFromFailedState:
         seed_runner = MockPipelineRunner()
         logger = create_mock_logger()
 
-        deps = CompositeRunnerDependencies(
-            seed_runner_factory=seed_runner_factory(seed_runner),
-            enricher_runner_factory=new_enricher_runner_factory(),
-            key_extractor=create_mock_key_extractor(),
-            coordinator=create_mock_coordinator(),
-            merger=create_mock_merger(),
-            checkpoint_manager=checkpoint_manager,
-            logger=logger,
-            lock=create_mock_lock(),
-            fsm_state_helper=create_mock_fsm_state_helper(logger=logger),
-        )
-        runner = CompositePipelineRunner(
+        runner = create_runner(
             config=MockCompositeConfig(),
             runtime=CompositeRuntimeConfig(resume=True),
-            deps=deps,
+            checkpoint_manager=checkpoint_manager,
+            logger=logger,
+            seed_runner_factory=seed_runner_factory(seed_runner),
         )
 
         await runner.run()
@@ -131,21 +115,12 @@ class TestResumeFromFailedState:
         seed_runner = MockPipelineRunner()
         logger = create_mock_logger()
 
-        deps = CompositeRunnerDependencies(
-            seed_runner_factory=seed_runner_factory(seed_runner),
-            enricher_runner_factory=new_enricher_runner_factory(),
-            key_extractor=create_mock_key_extractor(),
-            coordinator=create_mock_coordinator(),
-            merger=create_mock_merger(),
-            checkpoint_manager=checkpoint_manager,
-            logger=logger,
-            lock=create_mock_lock(),
-            fsm_state_helper=create_mock_fsm_state_helper(config=config, logger=logger),
-        )
-        runner = CompositePipelineRunner(
+        runner = create_runner(
             config=config,
             runtime=CompositeRuntimeConfig(resume=True),
-            deps=deps,
+            checkpoint_manager=checkpoint_manager,
+            logger=logger,
+            seed_runner_factory=seed_runner_factory(seed_runner),
         )
 
         await runner.run()
@@ -203,24 +178,15 @@ class TestResumeFromFailedState:
 
         checkpoint_manager = create_mock_checkpoint_manager(failed_state)
         seed_runner = MockPipelineRunner()
-        merger = create_mock_merger()
         logger = create_mock_logger()
-
-        deps = CompositeRunnerDependencies(
-            seed_runner_factory=seed_runner_factory(seed_runner),
-            enricher_runner_factory=new_enricher_runner_factory(),
-            key_extractor=create_mock_key_extractor(),
-            coordinator=create_mock_coordinator(),
-            merger=merger,
-            checkpoint_manager=checkpoint_manager,
-            logger=logger,
-            lock=create_mock_lock(),
-            fsm_state_helper=create_mock_fsm_state_helper(config=config, logger=logger),
-        )
-        runner = CompositePipelineRunner(
+        merger = create_mock_merger()
+        runner = create_runner(
             config=config,
             runtime=CompositeRuntimeConfig(resume=True),
-            deps=deps,
+            checkpoint_manager=checkpoint_manager,
+            logger=logger,
+            seed_runner_factory=seed_runner_factory(seed_runner),
+            merger=merger,
         )
 
         await runner.run()
@@ -286,21 +252,11 @@ class TestResumeContextLogging:
         checkpoint_manager = create_mock_checkpoint_manager(partial_state)
         logger = create_mock_logger()
 
-        deps = CompositeRunnerDependencies(
-            seed_runner_factory=new_seed_runner_factory(),
-            enricher_runner_factory=new_enricher_runner_factory(),
-            key_extractor=create_mock_key_extractor(),
-            coordinator=create_mock_coordinator(),
-            merger=create_mock_merger(),
-            checkpoint_manager=checkpoint_manager,
-            logger=logger,
-            lock=create_mock_lock(),
-            fsm_state_helper=create_mock_fsm_state_helper(config=config, logger=logger),
-        )
-        runner = CompositePipelineRunner(
+        runner = create_runner(
             config=config,
             runtime=CompositeRuntimeConfig(resume=True),
-            deps=deps,
+            checkpoint_manager=checkpoint_manager,
+            logger=logger,
         )
 
         await runner.run()
@@ -317,21 +273,11 @@ class TestResumeContextLogging:
         checkpoint_manager = create_mock_checkpoint_manager()
         logger = create_mock_logger()
 
-        deps = CompositeRunnerDependencies(
-            seed_runner_factory=new_seed_runner_factory(),
-            enricher_runner_factory=new_enricher_runner_factory(),
-            key_extractor=create_mock_key_extractor(),
-            coordinator=create_mock_coordinator(),
-            merger=create_mock_merger(),
-            checkpoint_manager=checkpoint_manager,
-            logger=logger,
-            lock=create_mock_lock(),
-            fsm_state_helper=create_mock_fsm_state_helper(logger=logger),
-        )
-        runner = CompositePipelineRunner(
+        runner = create_runner(
             config=MockCompositeConfig(),
             runtime=CompositeRuntimeConfig(resume=False),
-            deps=deps,
+            checkpoint_manager=checkpoint_manager,
+            logger=logger,
         )
 
         await runner.run()
@@ -498,21 +444,11 @@ class TestFSMStateTransitionOnResume:
         checkpoint_manager = create_mock_checkpoint_manager(failed_state)
         logger = create_mock_logger()
 
-        deps = CompositeRunnerDependencies(
-            seed_runner_factory=new_seed_runner_factory(),
-            enricher_runner_factory=new_enricher_runner_factory(),
-            key_extractor=create_mock_key_extractor(),
-            coordinator=create_mock_coordinator(),
-            merger=create_mock_merger(),
-            checkpoint_manager=checkpoint_manager,
-            logger=logger,
-            lock=create_mock_lock(),
-            fsm_state_helper=create_mock_fsm_state_helper(logger=logger),
-        )
-        runner = CompositePipelineRunner(
+        runner = create_runner(
             config=MockCompositeConfig(),
             runtime=CompositeRuntimeConfig(resume=True),
-            deps=deps,
+            checkpoint_manager=checkpoint_manager,
+            logger=logger,
         )
 
         await runner.run()
@@ -567,21 +503,11 @@ class TestFSMStateTransitionOnResume:
 
         checkpoint_manager.save = tracking_save  # type: ignore[method-assign]
 
-        deps = CompositeRunnerDependencies(
-            seed_runner_factory=new_seed_runner_factory(),
-            enricher_runner_factory=new_enricher_runner_factory(),
-            key_extractor=create_mock_key_extractor(),
-            coordinator=create_mock_coordinator(),
-            merger=create_mock_merger(),
-            checkpoint_manager=checkpoint_manager,
-            logger=logger,
-            lock=create_mock_lock(),
-            fsm_state_helper=create_mock_fsm_state_helper(config=config, logger=logger),
-        )
-        runner = CompositePipelineRunner(
+        runner = create_runner(
             config=config,
             runtime=CompositeRuntimeConfig(resume=True),
-            deps=deps,
+            checkpoint_manager=checkpoint_manager,
+            logger=logger,
         )
 
         await runner.run()
