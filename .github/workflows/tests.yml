@@ -38,8 +38,52 @@ env:
     QUALITY_EXEMPTIONS_SCORECARD: configs/quality/debt_scorecard.yaml
 
 jobs:
+
+    dependency-preflight:
+        runs-on: ubuntu-latest
+        timeout-minutes: 10
+        permissions:
+            contents: read
+        steps:
+            -   name: Checkout code
+                uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+            -   name: Setup Python + uv
+                uses: ./.github/actions/setup-python-uv
+                with:
+                    python-version: "3.12"
+
+            -   name: Check uv lock drift
+                run: |
+                    mkdir -p reports/ci
+                    set -o pipefail
+                    {
+                      echo "Dependency preflight diagnostics"
+                      echo "Timestamp (UTC): $(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+                      echo
+                      echo "Running: uv lock --check"
+                      uv lock --check
+                    } 2>&1 | tee reports/ci/dependency-preflight.log
+
+            -   name: Upload dependency preflight diagnostics
+                if: always()
+                uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+                with:
+                    name: dependency-preflight
+                    path: reports/ci/dependency-preflight.log
+                    if-no-files-found: error
+                    retention-days: 14
+
+            -   name: Publish dependency preflight summary
+                if: always()
+                run: |
+                    {
+                      echo "## Dependency preflight"
+                      echo "Diagnostic artifact: dependency-preflight/reports/ci/dependency-preflight.log"
+                    } >> "$GITHUB_STEP_SUMMARY"
     # Minimal dependency smoke: keep test lanes unblocked by unrelated governance checks
     smoke-check:
+        needs: dependency-preflight
         runs-on: ubuntu-latest
         timeout-minutes: 5
         permissions:
@@ -154,6 +198,7 @@ jobs:
                     retention-days: 14
 
     governance-preflight:
+        needs: dependency-preflight
         runs-on: ubuntu-latest
         timeout-minutes: 10
         permissions:
