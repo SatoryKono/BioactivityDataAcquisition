@@ -571,6 +571,29 @@ def test_critical_top_level_links_follow_title_allowlist_and_scope_reset_suffix(
                 )
 
 
+def test_dashboard_titles_match_home_dashboard_navigation_names() -> None:
+    """Grafana Home > Dashboards uses dashboard.title, so titles must match the navigation map."""
+    expected_titles_by_uid = {
+        "bioetl-control-plane-v1": "0. Control Plane",
+        "bioetl-overview-v2": "1. Overview",
+        "bioetl-runtime": "2. Runtime",
+        "bioetl-provider-health-v2": "3. Provider Health",
+        "bioetl-dq-v2": "4. Data Quality",
+        "bioetl-workflow-overview": "5. Workflow",
+        "bioetl-silver-reject-explorer": "Silver Reject Explorer",
+    }
+
+    for dashboard_path in get_dashboard_files():
+        dashboard = load_dashboard(dashboard_path)
+        uid = dashboard.get("uid")
+        assert uid in expected_titles_by_uid, (
+            f"{dashboard_path.name} has unexpected uid={uid!r}"
+        )
+        assert dashboard.get("title") == expected_titles_by_uid[uid], (
+            f"{dashboard_path.name} title must match Grafana Home navigation name"
+        )
+
+
 def test_required_critical_panel_links_by_uid_contract() -> None:
     """Critical KPI panels must provide first-hop action links by contract."""
     for dashboard_path in get_dashboard_files():
