@@ -109,7 +109,14 @@ def _build_metric_label_sets(payload: dict) -> dict[str, frozenset[str]]:
             record_name = rule.get("record")
             expr = rule.get("expr")
             if isinstance(record_name, str) and isinstance(expr, str):
-                label_sets[record_name] = _infer_recording_rule_labels(expr)
+                static_labels = frozenset(
+                    str(label_name)
+                    for label_name in rule.get("labels", {})
+                    if isinstance(label_name, str)
+                )
+                label_sets[record_name] = (
+                    _infer_recording_rule_labels(expr) | static_labels
+                )
 
     return label_sets
 

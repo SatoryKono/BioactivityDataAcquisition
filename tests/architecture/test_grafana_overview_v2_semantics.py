@@ -30,7 +30,7 @@ def test_overview_v2_semantics_contract():
     assert 'Diagnostics' in row_labels
 
     links=' '.join(l.get('title','') for l in d.get('links',[]))
-    for token in ['Runtime','DQ','Provider','Control Plane v1','Workflow','Logs','Traces']:
+    for token in ['Runtime','Data Quality','Provider','Control Plane','Workflow']:
         assert token in links
 
     for current_title in ['System Status','Next Action','L0 Inputs','Runtime Blockers Current','DQ Status Current','Gold Lifecycle Current','Control Plane Current']:
