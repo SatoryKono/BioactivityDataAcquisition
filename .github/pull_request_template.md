@@ -51,3 +51,5 @@
 - [ ] Tests added/updated for new code (TEST-002)
 - [ ] If `checks-complete` fails, I first triage `lint` → `c901-governance` →
       `arch-tests` and do not debug `checks-complete` separately
+
+- [ ] If many jobs fail quickly, I inspected `dependency-preflight` first (`reports/ci/dependency-preflight.log`)

@@ -116,6 +116,12 @@ them:
 These checks still reduce the risk of merging failing tests, lint errors, or
 secret leaks.
 
+
+### Dependency Preflight Triage
+
+If many jobs fail quickly, inspect `dependency-preflight` first.
+Download and review `reports/ci/dependency-preflight.log` from its artifact and summary before debugging downstream jobs.
+
 ### Triage rule for `checks-complete`
 
 - If `checks-complete` fails, **always** open job logs in this order first:
