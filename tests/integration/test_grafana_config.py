@@ -704,6 +704,29 @@ def test_dq_freshness_panel_uses_age_from_timestamp_metric() -> None:
     ), "Freshness lag must not collapse scope to the freshest entity"
 
 
+def test_freshness_panels_do_not_compute_age_from_counter_suffix_metrics() -> None:
+    """Freshness panels must never derive age from *_count metrics."""
+    dashboard_dir = Path("grafana/dashboards")
+    disallowed_pattern = re.compile(r"time\(\)\s*-\s*.*_count")
+
+    violations: list[str] = []
+    for dashboard_path in dashboard_dir.glob("*.json"):
+        dashboard = load_dashboard(dashboard_path)
+        for panel in get_dashboard_panels(dashboard):
+            panel_title = str(panel.get("title", ""))
+            if "freshness" not in panel_title.lower():
+                continue
+
+            for target in panel.get("targets", []):
+                expr = target.get("expr", "")
+                if isinstance(expr, str) and disallowed_pattern.search(expr):
+                    violations.append(
+                        f"{dashboard_path.name}::{panel_title} uses forbidden expr: {expr}"
+                    )
+
+    assert not violations, "\n".join(violations)
+
+
 @pytest.mark.parametrize(
     ("dashboard_file", "panel_title"),
     [
