@@ -332,9 +332,7 @@ def _build_identity_graph(
         identity_graph["input_snapshot_count"] = request.base_summary[
             "input_snapshot_count"
         ]
-        identity_graph["snapshot_status"] = request.base_summary.get(
-            "snapshot_status"
-        )
+        identity_graph["snapshot_status"] = request.base_summary.get("snapshot_status")
         identity_graph["input_snapshots"] = request.base_summary["input_snapshots"]
     return identity_graph
 

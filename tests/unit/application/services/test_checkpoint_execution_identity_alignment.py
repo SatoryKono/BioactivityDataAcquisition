@@ -188,7 +188,9 @@ def test_legacy_and_v2_align_when_composite_run_identity_mismatches() -> None:
 
     assert legacy_result.compatible is True
     assert legacy_result.execution_identity_compatible is True
-    assert any("Checkpoint is compatible for resume" in msg for msg in legacy_result.messages)
+    assert any(
+        "Checkpoint is compatible for resume" in msg for msg in legacy_result.messages
+    )
     assert v2_result.verdict == CompatibilityVerdict.COMPATIBLE
     assert (
         v2_result.details["execution_identity_compatibility"]["reason"]
@@ -196,9 +198,7 @@ def test_legacy_and_v2_align_when_composite_run_identity_mismatches() -> None:
     )
 
 
-def test_legacy_and_v2_align_when_fingerprint_matches_despite_composite_drift() -> (
-    None
-):
+def test_legacy_and_v2_align_when_fingerprint_matches_despite_composite_drift() -> None:
     legacy = _legacy_service()
     v2 = _v2_service()
 

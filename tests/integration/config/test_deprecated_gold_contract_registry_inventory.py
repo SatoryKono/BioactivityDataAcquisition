@@ -15,7 +15,15 @@ _INVENTORY_PATH = _ROOT / "quality" / "deprecated_gold_contract_registry_invento
 _ENTITY_CONFIGS_ROOT = _ROOT / "entities"
 _FIXTURE_MANIFEST_PATH = _ROOT / "base" / "bronze_fixture_manifest.yaml"
 _STANDARD_CONTRACT_PROVIDERS = frozenset(
-    {"chembl", "crossref", "openalex", "pubchem", "pubmed", "semanticscholar", "uniprot"}
+    {
+        "chembl",
+        "crossref",
+        "openalex",
+        "pubchem",
+        "pubmed",
+        "semanticscholar",
+        "uniprot",
+    }
 )
 _ALLOWED_CLASSIFICATIONS = frozenset(
     {"gold_runtime_disabled", "fixture_only_surface", "compatibility_alias"}
@@ -27,7 +35,9 @@ def _inventory_entries() -> dict[str, dict[str, object]]:
     assert isinstance(payload, dict)
     entries = payload.get("entries")
     assert isinstance(entries, dict)
-    return {str(key): value for key, value in entries.items() if isinstance(value, dict)}
+    return {
+        str(key): value for key, value in entries.items() if isinstance(value, dict)
+    }
 
 
 def _fixture_manifest() -> dict[str, object]:
@@ -89,7 +99,9 @@ def test_deprecated_gold_contract_inventory_has_known_classifications() -> None:
 
 
 @pytest.mark.integration
-def test_gold_runtime_disabled_deprecated_contracts_have_disabled_entity_configs() -> None:
+def test_gold_runtime_disabled_deprecated_contracts_have_disabled_entity_configs() -> (
+    None
+):
     inventory = _inventory_entries()
 
     for contract_ref, entry in sorted(inventory.items()):
@@ -123,7 +135,9 @@ def test_fixture_only_deprecated_contracts_are_manifest_backed() -> None:
 
 
 @pytest.mark.integration
-def test_compatibility_alias_deprecated_contracts_point_to_active_replacements() -> None:
+def test_compatibility_alias_deprecated_contracts_point_to_active_replacements() -> (
+    None
+):
     inventory = _inventory_entries()
     registry = FileContractRegistryStore(_REGISTRY_PATH).load()
 

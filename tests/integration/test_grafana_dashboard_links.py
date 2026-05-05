@@ -1577,9 +1577,13 @@ def test_runtime_first_action_cta_links_preserve_scoped_vars_and_time() -> None:
             context=f"Runtime First Action CTA '{title}'",
         )
         for token in required_tokens:
-            assert token in url, f"Runtime First Action CTA '{title}' must include {token}"
+            assert token in url, (
+                f"Runtime First Action CTA '{title}' must include {token}"
+            )
         for token in forbidden:
-            assert token not in url, f"Runtime First Action CTA '{title}' must not leak {token}"
+            assert token not in url, (
+                f"Runtime First Action CTA '{title}' must not leak {token}"
+            )
 
 
 def test_runtime_contextual_handoffs_do_not_duplicate_top_level_dq_provider_links() -> (

@@ -1546,7 +1546,9 @@ def test_dashboard_titles_do_not_expose_fixed_window_suffixes(
         for panel in get_dashboard_panels(dashboard)
         if isinstance(panel.get("title"), str)
     ]
-    fixed_window_suffix_re = re.compile(r"(?:\((24h|30m|15m|1h|5m)\)|/\s*(24h|30m|15m|1h|5m))$")
+    fixed_window_suffix_re = re.compile(
+        r"(?:\((24h|30m|15m|1h|5m)\)|/\s*(24h|30m|15m|1h|5m))$"
+    )
     offenders = [title for title in titles if fixed_window_suffix_re.search(title)]
     assert not offenders, (
         f"Dashboard {dashboard_path.name} still contains fixed-window titles: {offenders}"
@@ -1578,7 +1580,9 @@ def test_runtime_top_fold_text_panels_do_not_overlap() -> None:
             x_overlap = left_x < right_x + right_w and right_x < left_x + left_w
             y_overlap = left_y < right_y + right_h and right_y < left_y + left_h
             if x_overlap and y_overlap:
-                overlaps.append(f"{left.get('id')}:{left.get('title')} overlaps {right.get('id')}:{right.get('title')}")
+                overlaps.append(
+                    f"{left.get('id')}:{left.get('title')} overlaps {right.get('id')}:{right.get('title')}"
+                )
 
     assert not overlaps, "Runtime top-fold text panels overlap:\n" + "\n".join(overlaps)
 

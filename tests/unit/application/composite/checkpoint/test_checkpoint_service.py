@@ -130,24 +130,24 @@ def _make_service(
     anchors = expected_anchors or _ExpectedCheckpointAnchors()
     svc = CompositeCheckpointService(
         CompositeCheckpointServiceContext(
-        composite_name=composite_name,
-        run_id=run_id,
-        storage=s,
-        logger=lg,
-        resume=resume,
-        expected_effective_config_hash=anchors.effective_config_hash,
-        expected_effective_config_artifact_id=anchors.effective_config_artifact_id,
-        expected_execution_fingerprint=anchors.execution_fingerprint,
-        expected_dq_contract_compatibility_hash=(
-            anchors.dq_contract_compatibility_hash
-        ),
-        expected_input_snapshot_fingerprint=anchors.input_snapshot_fingerprint,
-        expected_contract_ref=anchors.contract_ref,
-        expected_contract_version=anchors.contract_version,
-        expected_manifest_id=anchors.manifest_id,
-        run_ledger_port=run_ledger_port,
-        metrics=mt,
-        clock=clock,
+            composite_name=composite_name,
+            run_id=run_id,
+            storage=s,
+            logger=lg,
+            resume=resume,
+            expected_effective_config_hash=anchors.effective_config_hash,
+            expected_effective_config_artifact_id=anchors.effective_config_artifact_id,
+            expected_execution_fingerprint=anchors.execution_fingerprint,
+            expected_dq_contract_compatibility_hash=(
+                anchors.dq_contract_compatibility_hash
+            ),
+            expected_input_snapshot_fingerprint=anchors.input_snapshot_fingerprint,
+            expected_contract_ref=anchors.contract_ref,
+            expected_contract_version=anchors.contract_version,
+            expected_manifest_id=anchors.manifest_id,
+            run_ledger_port=run_ledger_port,
+            metrics=mt,
+            clock=clock,
         )
     )
     return svc, s, lg

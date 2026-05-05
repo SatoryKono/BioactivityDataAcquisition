@@ -190,7 +190,12 @@ def render_reproducibility_compact_section(
                 "replay_capability_reason",
                 policy.get("replay_capability_reason"),
             ),
-            ("snapshot_status", _dict_value(reproducibility, "semantic_identity").get("snapshot_status")),
+            (
+                "snapshot_status",
+                _dict_value(reproducibility, "semantic_identity").get(
+                    "snapshot_status"
+                ),
+            ),
             (
                 "required_profile_satisfied",
                 policy.get(
