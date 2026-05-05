@@ -133,7 +133,7 @@
           "includeVars": false,
           "keepTime": true,
           "targetBlank": false,
-          "title": "Control Plane v1",
+          "title": "Inspect Control Plane",
           "type": "link",
           "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=All&var-run_type=All&${__url_time_range}",
           "tooltip": "Cross-scope handoff (opens with All core scope): var-pipeline=All and var-run_type=All; provider/adapter do not transfer. Reset scope: target dashboard opens with explicit All/default scope; source-specific filters are not transferred."
@@ -144,7 +144,7 @@
           "includeVars": false,
           "keepTime": true,
           "targetBlank": false,
-          "title": "Explore Traces (Tempo, tracing profile)",
+          "title": "Inspect Traces",
           "type": "link",
           "url": "/a/grafana-exploretraces-app/?from=${__from}&to=${__to}&queryType=traceqlSearch&query=%7B%20span.%22bioetl.provider%22%20%3D~%20%22${provider:regex}%22%20%7D",
           "tooltip": "Open Tempo Explore with tracing profile and selected time range."

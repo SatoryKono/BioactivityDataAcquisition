@@ -7,8 +7,8 @@
         "@modelcontextprotocol/server-memory@2026.1.26"
       ],
       "env": {
-        "MEMORY_FILE_PATH": "/workspace/BioactivityDataAcquisition/docs/00-project/ai/memory/mcp-memory.json",
-        "NPM_CONFIG_CACHE": "/workspace/BioactivityDataAcquisition/.cache/npm-cache"
+        "MEMORY_FILE_PATH": "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/00-project/ai/memory/mcp-memory.json",
+        "NPM_CONFIG_CACHE": "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/.cache/npm-cache"
       }
     },
     "filesystem": {
@@ -16,10 +16,10 @@
       "args": [
         "-y",
         "@modelcontextprotocol/server-filesystem@2026.1.14",
-        "/workspace/BioactivityDataAcquisition"
+        "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2"
       ],
       "env": {
-        "NPM_CONFIG_CACHE": "/workspace/BioactivityDataAcquisition/.cache/npm-cache"
+        "NPM_CONFIG_CACHE": "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/.cache/npm-cache"
       }
     },
     "fetch": {
@@ -30,101 +30,101 @@
         "mcp-server-fetch"
       ],
       "env": {
-        "UV_CACHE_DIR": "/workspace/BioactivityDataAcquisition/.cache/uv-cache",
-        "UV_TOOL_DIR": "/workspace/BioactivityDataAcquisition/.cache/uv-tools"
+        "UV_CACHE_DIR": "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/.cache/uv-cache",
+        "UV_TOOL_DIR": "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/.cache/uv-tools"
       }
     },
     "github": {
       "command": "bash",
       "args": [
-        "/workspace/BioactivityDataAcquisition/scripts/ai/mcp/github-mcp-wrapper.sh"
+        "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/github-mcp-wrapper.sh"
       ],
       "env": {
-        "NPM_CONFIG_CACHE": "/workspace/BioactivityDataAcquisition/.cache/npm-cache"
+        "NPM_CONFIG_CACHE": "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/.cache/npm-cache"
       }
     },
     "docker": {
       "command": "bash",
       "args": [
-        "/workspace/BioactivityDataAcquisition/scripts/ai/mcp/mcp_docker_wrapper.sh"
+        "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_docker_wrapper.sh"
       ]
     },
     "context7": {
       "command": "bash",
       "args": [
-        "/workspace/BioactivityDataAcquisition/scripts/ai/mcp/mcp_context7_wrapper.sh"
+        "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_context7_wrapper.sh"
       ]
     },
     "ast-grep": {
       "command": "bash",
       "args": [
-        "/workspace/BioactivityDataAcquisition/scripts/ai/mcp/mcp_ast_grep_wrapper.sh"
+        "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_ast_grep_wrapper.sh"
       ]
     },
     "mcp-code-interpreter": {
       "command": "bash",
       "args": [
-        "/workspace/BioactivityDataAcquisition/scripts/ai/mcp/mcp_code_interpreter_wrapper.sh"
+        "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_code_interpreter_wrapper.sh"
       ]
     },
     "prometheus": {
       "command": "bash",
       "args": [
-        "/workspace/BioactivityDataAcquisition/scripts/ai/mcp/mcp_prometheus_wrapper.sh"
+        "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_prometheus_wrapper.sh"
       ]
     },
     "grafana": {
       "command": "bash",
       "args": [
-        "/workspace/BioactivityDataAcquisition/scripts/ai/mcp/mcp_grafana_wrapper.sh"
+        "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_grafana_wrapper.sh"
       ]
     },
     "brave-search": {
       "command": "bash",
       "args": [
-        "/workspace/BioactivityDataAcquisition/scripts/ai/mcp/mcp_brave_search_wrapper.sh"
+        "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_brave_search_wrapper.sh"
       ]
     },
     "sonarqube": {
       "command": "bash",
       "args": [
-        "/workspace/BioactivityDataAcquisition/scripts/ai/mcp/mcp_sonarqube_wrapper.sh"
+        "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_sonarqube_wrapper.sh"
       ]
     },
     "neo4j-cypher": {
       "command": "bash",
       "args": [
-        "/workspace/BioactivityDataAcquisition/scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh"
+        "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh"
       ]
     },
     "neo4j-memory": {
       "command": "bash",
       "args": [
-        "/workspace/BioactivityDataAcquisition/scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh"
+        "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh"
       ]
     },
     "chembl": {
       "command": "bash",
       "args": [
-        "/workspace/BioactivityDataAcquisition/scripts/ai/mcp/mcp_chembl_wrapper.sh"
+        "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_chembl_wrapper.sh"
       ]
     },
     "pubchem": {
       "command": "bash",
       "args": [
-        "/workspace/BioactivityDataAcquisition/scripts/ai/mcp/mcp_pubchem_wrapper.sh"
+        "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_pubchem_wrapper.sh"
       ]
     },
     "pubmed": {
       "command": "bash",
       "args": [
-        "/workspace/BioactivityDataAcquisition/scripts/ai/mcp/mcp_pubmed_wrapper.sh"
+        "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_pubmed_wrapper.sh"
       ]
     },
     "mermaid": {
       "command": "bash",
       "args": [
-        "/workspace/BioactivityDataAcquisition/scripts/ai/mcp/mcp_mermaid_wrapper.sh"
+        "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_mermaid_wrapper.sh"
       ]
     }
   }
