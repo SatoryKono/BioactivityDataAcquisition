@@ -124,7 +124,7 @@ groups:
       - record: bioetl_l0_input_status
         labels:
           input: provider
-        expr: (bioetl_runtime_alert_condition_provider_failure_rate_high_15m > bool 0) * 3 + ((bioetl_runtime_alert_condition_provider_failure_rate_high_15m == bool 0) * (sum by (provider) (increase(bioetl_health_check_success_total[15m]) + increase(bioetl_health_check_degraded_total[15m]) + increase(bioetl_health_check_failures_total[15m])) > bool 0))
+        expr: (bioetl_runtime_alert_condition_provider_failure_rate_high_15m > bool 0) * 3 + ((bioetl_runtime_alert_condition_provider_failure_rate_high_15m == bool 0) * (bioetl_provider_health_check_total_15m > bool 0))
       - record: bioetl_l0_input_status
         labels:
           input: workflow

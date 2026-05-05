@@ -106,22 +106,7 @@ def _collect_imports(root: Path) -> dict[str, frozenset[str]]:
     collected: dict[str, set[str]] = {}
 
     for path in sorted(root.rglob("*.py")):
-        try:
-            tree = ast.parse(path.read_text(encoding="utf-8"))
-        except SyntaxError as exc:  # pragma: no cover - architecture scan safety
-            raise AssertionError(f"Unable to parse {path}: {exc}") from exc
-
-        imported_names: set[str] = set()
-        for node in ast.walk(tree):
-            if isinstance(node, ast.Import):
-                for alias in node.names:
-                    if alias.name == PACKAGE_ROOT_MODULE:
-                        imported_names.add(_DIRECT_MODULE_IMPORT_SENTINEL)
-            elif (
-                isinstance(node, ast.ImportFrom) and node.module == PACKAGE_ROOT_MODULE
-            ):
-                imported_names.update(alias.name for alias in node.names)
-
+        imported_names = _collect_imports_from_tree(_parse_import_tree(path))
         if imported_names:
             collected[path.relative_to(ROOT).as_posix()] = imported_names
 
@@ -129,6 +114,37 @@ def _collect_imports(root: Path) -> dict[str, frozenset[str]]:
         relative_path: frozenset(sorted(imported_names))
         for relative_path, imported_names in collected.items()
     }
+
+
+def _parse_import_tree(path: Path) -> ast.Module:
+    try:
+        return ast.parse(path.read_text(encoding="utf-8"))
+    except SyntaxError as exc:  # pragma: no cover - architecture scan safety
+        raise AssertionError(f"Unable to parse {path}: {exc}") from exc
+
+
+def _imported_names_from_import(node: ast.Import) -> set[str]:
+    return {
+        _DIRECT_MODULE_IMPORT_SENTINEL
+        for alias in node.names
+        if alias.name == PACKAGE_ROOT_MODULE
+    }
+
+
+def _imported_names_from_import_from(node: ast.ImportFrom) -> set[str]:
+    if node.module != PACKAGE_ROOT_MODULE:
+        return set()
+    return {alias.name for alias in node.names}
+
+
+def _collect_imports_from_tree(tree: ast.Module) -> set[str]:
+    imported_names: set[str] = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            imported_names.update(_imported_names_from_import(node))
+        elif isinstance(node, ast.ImportFrom):
+            imported_names.update(_imported_names_from_import_from(node))
+    return imported_names
 
 
 def test_application_services_package_root_has_zero_first_party_src_callers() -> None:

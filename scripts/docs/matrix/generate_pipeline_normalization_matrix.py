@@ -968,31 +968,76 @@ def _inventory_fields_for_pipeline(pipeline_name: str) -> set[str]:
     return fields
 
 
+def _non_chembl_inventory_row(
+    rows_by_key: dict[tuple[str, str], dict[str, str]],
+    *,
+    pipeline_name: str,
+    field_name: str,
+) -> dict[str, str]:
+    row = rows_by_key.get((pipeline_name, field_name))
+    if row is None:
+        raise ValueError(
+            f"Missing non-ChEMBL normalization evidence row for "
+            f"{pipeline_name}.{field_name}"
+        )
+    return row
+
+
+def _validate_non_chembl_row_required_evidence(
+    row: dict[str, str], *, pipeline_name: str, field_name: str
+) -> None:
+    if not row.get("classification"):
+        raise ValueError(
+            f"Missing classification evidence for {pipeline_name}.{field_name}"
+        )
+    if not row.get("observed_source"):
+        raise ValueError(
+            f"Missing observed-source evidence for {pipeline_name}.{field_name}"
+        )
+
+
+def _validate_non_chembl_row_structured_evidence(
+    row: dict[str, str], *, pipeline_name: str, field_name: str
+) -> None:
+    if row.get("raw_sidecar") and row.get("canonical_sidecar"):
+        return
+    raise ValueError(
+        f"Missing structured sidecar evidence for {pipeline_name}.{field_name}"
+    )
+
+
+def _validate_non_chembl_inventory_field(
+    rows_by_key: dict[tuple[str, str], dict[str, str]],
+    *,
+    pipeline_name: str,
+    field_name: str,
+    structured_fields: set[str],
+) -> None:
+    row = _non_chembl_inventory_row(
+        rows_by_key,
+        pipeline_name=pipeline_name,
+        field_name=field_name,
+    )
+    _validate_non_chembl_row_required_evidence(
+        row, pipeline_name=pipeline_name, field_name=field_name
+    )
+    if field_name in structured_fields:
+        _validate_non_chembl_row_structured_evidence(
+            row, pipeline_name=pipeline_name, field_name=field_name
+        )
+
+
 def _validate_non_chembl_inventory_rows(rows: list[dict[str, str]]) -> None:
     rows_by_key = {(row["pipeline_name"], row["field_name"]): row for row in rows}
     for pipeline_name in sorted(NON_CHEMBL_PIPELINES):
         structured_fields = set(_inventory_mapping(pipeline_name, "structured_json_shapes"))
         for field_name in sorted(_inventory_fields_for_pipeline(pipeline_name)):
-            row = rows_by_key.get((pipeline_name, field_name))
-            if row is None:
-                raise ValueError(
-                    f"Missing non-ChEMBL normalization evidence row for "
-                    f"{pipeline_name}.{field_name}"
-                )
-            if not row.get("classification"):
-                raise ValueError(
-                    f"Missing classification evidence for {pipeline_name}.{field_name}"
-                )
-            if not row.get("observed_source"):
-                raise ValueError(
-                    f"Missing observed-source evidence for {pipeline_name}.{field_name}"
-                )
-            if field_name in structured_fields and (
-                not row.get("raw_sidecar") or not row.get("canonical_sidecar")
-            ):
-                raise ValueError(
-                    f"Missing structured sidecar evidence for {pipeline_name}.{field_name}"
-                )
+            _validate_non_chembl_inventory_field(
+                rows_by_key,
+                pipeline_name=pipeline_name,
+                field_name=field_name,
+                structured_fields=structured_fields,
+            )
 
 
 def _dq_allowed_values(

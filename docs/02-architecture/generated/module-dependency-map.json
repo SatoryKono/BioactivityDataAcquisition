@@ -1,7 +1,7 @@
 {
   "summary": {
     "scanned_modules": 1764,
-    "total_internal_imports": 6923,
+    "total_internal_imports": 6925,
     "layer_edges": 13,
     "cross_layer_group_edges": 60,
     "cross_layer_group_edges_total": 310,
@@ -29,7 +29,7 @@
     {
       "source": "composition",
       "target": "composition",
-      "imports": 559,
+      "imports": 560,
       "allowed": true
     },
     {
@@ -41,7 +41,7 @@
     {
       "source": "composition",
       "target": "infrastructure",
-      "imports": 311,
+      "imports": 312,
       "allowed": true
     },
     {
@@ -181,7 +181,7 @@
     {
       "source": "composition.bootstrap",
       "target": "infrastructure.config",
-      "imports": 41
+      "imports": 42
     },
     {
       "source": "composition.factories",

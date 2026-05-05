@@ -6,7 +6,7 @@
 ## Summary
 
 - Scanned modules: `1764`
-- Internal import edges (raw): `6923`
+- Internal import edges (raw): `6925`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `310`
@@ -24,9 +24,9 @@ flowchart LR
     application -->|1159 OK| application
     application -->|1026 OK| domain
     composition -->|254 OK| application
-    composition -->|559 OK| composition
+    composition -->|560 OK| composition
     composition -->|394 OK| domain
-    composition -->|311 OK| infrastructure
+    composition -->|312 OK| infrastructure
     domain -->|1155 OK| domain
     infrastructure -->|765 OK| domain
     infrastructure -->|931 OK| infrastructure
@@ -43,9 +43,9 @@ flowchart LR
 | `application`    | `application`    |    1159 | allowed |
 | `application`    | `domain`         |    1026 | allowed |
 | `composition`    | `application`    |     254 | allowed |
-| `composition`    | `composition`    |     559 | allowed |
+| `composition`    | `composition`    |     560 | allowed |
 | `composition`    | `domain`         |     394 | allowed |
-| `composition`    | `infrastructure` |     311 | allowed |
+| `composition`    | `infrastructure` |     312 | allowed |
 | `domain`         | `domain`         |    1155 | allowed |
 | `infrastructure` | `domain`         |     765 | allowed |
 | `infrastructure` | `infrastructure` |     931 | allowed |
@@ -76,7 +76,7 @@ flowchart LR
 | `infrastructure.storage`       | `domain.value_objects`          |      48 |
 | `composition.bootstrap`        | `domain.ports`                  |      47 |
 | `composition.bootstrap`        | `application.composite`         |      42 |
-| `composition.bootstrap`        | `infrastructure.config`         |      41 |
+| `composition.bootstrap`        | `infrastructure.config`         |      42 |
 | `composition.factories`        | `infrastructure.storage`        |      38 |
 | `composition.factories`        | `infrastructure.config`         |      37 |
 | `composition.factories`        | `domain.types`                  |      36 |

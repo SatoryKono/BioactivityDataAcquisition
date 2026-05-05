@@ -778,7 +778,10 @@ ______________________________________________________________________
 **UID:** `bioetl-dq-v2`
 **Refresh:** 30 секунд
 **Time range:** Последние 12 часов
-**Назначение:** Data Quality мониторинг selected-range сигналов: flow volume, DQ score, quarantine, freshness и schema-validation failures.
+**Назначение:** L2 Data Quality incident dashboard. Первый экран отвечает:
+DQ сейчас `OK`/`DEGRADED`/`FAILING`/`UNKNOWN`, какая threshold/reason state
+активна и какое первое действие выполнить; selected-range flow/score/quarantine
+панели являются evidence ниже first screen.
 
 ### Панели
 
@@ -786,7 +789,11 @@ ______________________________________________________________________
 | --- | -------------------------------------------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 99  | Pipeline                                     | Stat       | `max(label_values(..., pipeline)) or vector(0)`                                                                                        | Информационная панель пайплайна.                                                                                                                                           |
 | 100 | Run Type                                     | Stat       | `max(label_values(..., run_type)) or vector(0)`                                                                                        | Информационная панель типа запуска.                                                                                                                                        |
-| 1   | Data Flow in Range: Bronze -> Silver -> Gold | Timeseries | `sum by (pipeline, stage) (last_over_time(bioetl_records_processed_total{pipeline=~"$pipeline", run_type=~"$run_type"}[$__interval]))` | Latest observed data-flow totals Bronze → Silver → Gold внутри активного Grafana окна; оптимизировано под sparse batch exporter.                                           |
+| 9100 | Monitor DQ Current Status                   | Stat       | `max(bioetl_dq_current_status{pipeline=~"$pipeline"})`                                                                                | Current DQ state: `0=OK`, `1=DEGRADED`, `2=FAILING`, `null=UNKNOWN`; не зависит от selected range.                                                                          |
+| 9101 | Monitor DQ Threshold State                  | Stat       | `bioetl_dq_current_reason{severity=...}`                                                                                              | Current threshold summary: warning reasons map to DEGRADED, hard reasons map to FAILING.                                                                                  |
+| 9102 | Inspect DQ Current Reasons                  | Table      | `topk(5, bioetl_dq_current_reason{pipeline=~"$pipeline"} > 0)`                                                                        | Current DQ reason chips with `severity` and `action_target`.                                                                                                               |
+| 9103 | First Action / Invalid Record Policy        | Text       | n/a                                                                                                                                    | Operator CTA: inspect DQ reasons, Gold/Silver diagnostics, or Silver Reject Explorer; absent policy visibility is UNKNOWN, not OK.                                        |
+| 1   | Track Range Evidence: Bronze -> Silver -> Gold | Timeseries | `sum by (pipeline, stage) (increase(bioetl_records_processed_total{pipeline=~"$pipeline", run_type=~"$run_type"}[$__interval]))` | Selected-range evidence only; не определяет current DQ status.                                                                                                             |
 | 2   | Data Quality Score (Volume-weighted)         | Gauge      | `sum(score * record_count) / clamp_min(sum(record_count), 1)`                                                                          | Канонический DQ gauge на базе `bioetl_dq_validation_score` и `bioetl_dq_validation_record_count`, чтобы крупные сущности не смешивались с малыми через простой `avg(...)`. |
 | 3   | Source Records in Range (Bronze)             | Stat       | `round(sum(last_over_time(bioetl_records_processed_total{...stage="bronze"}[$__range])) or vector(0))`                                 | Последний observed Bronze input внутри активного Grafana окна.                                                                                                             |
 | 4   | Clean Records in Range (Gold)                | Stat       | `round(sum(last_over_time(bioetl_records_processed_total{...stage="gold"}[$__range])) or vector(0))`                                   | Последний observed Gold output внутри активного Grafana окна.                                                                                                              |
@@ -862,12 +869,20 @@ ______________________________________________________________________
 **UID:** `bioetl-provider-health-v2`
 **Refresh:** 30 секунд
 **Time range:** Последние 12 часов
-**Назначение:** Операционный incident dashboard по внешним провайдерам: current health status, p95 latency, failure/degraded trends, failure share и retry exhaustion.
+**Назначение:** Операционный incident dashboard по внешним провайдерам. Первый
+экран отвечает: какой provider сейчас `DEGRADED`/`FAILING`/`UNKNOWN`, почему,
+и какое действие открыть дальше. Range counters/trends остаются evidence ниже
+first screen.
 
 ### Панели
 
 | ID  | Название                                        | Тип            | PromQL                                                                                                               | Описание                                                  |
 | --- | ----------------------------------------------- | -------------- | -------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| 9100 | GLOBAL Provider Scope                          | Text           | n/a                                                                                                                  | Явно показывает GLOBAL provider scope, selected `$provider` и сохранённый `$pipeline_context`. |
+| 9101 | Monitor GLOBAL Provider Severity Matrix        | Table          | `bioetl_provider_current_status`                                                                                     | Current provider severity: `0=OK`, `1=DEGRADED`, `2=FAILING`, `null=UNKNOWN`; не фильтруется по pipeline. |
+| 9102 | Inspect Critical Providers                     | Table          | `bioetl_provider_current_status >= 1`                                                                                | Только providers с current `DEGRADED`/`FAILING`. |
+| 9103 | Inspect Provider Top Causes                    | Table          | `topk(5, bioetl_provider_current_cause > 0)`                                                                         | Current cause chips: raw health status, failure rate, retry exhaustion, latency, HTTP errors, rate-limit pressure. |
+| 9002 | First Action                                   | Text           | n/a                                                                                                                  | CTA: start from GLOBAL matrix, inspect causes, then correlate Runtime/Control Plane if provider symptoms affect pipeline execution. |
 | 1   | Health Check Latency by Provider (p95)          | Timeseries     | `histogram_quantile(0.95, sum by (le, provider) (increase(...[$__interval])))`                                       | p95 latency trend по выбранным providers; `No data` сохраняется как diagnostic gap, не маскируется в `0s`. |
 | 114 | Current Provider Health Status                  | Table          | `max by (provider) (bioetl_provider_health_status{provider=~"$provider"})`                                           | Текущий статус по provider с mapping `0=UNHEALTHY`, `1=DEGRADED`, `2=HEALTHY`. |
 | 2   | Healthy Checks                                  | Stat           | `round(sum(increase(bioetl_health_check_success_total{provider=~"$provider"}[$__range])) or vector(0))`              | Completed probes со статусом `HEALTHY` в выбранном окне.  |
@@ -919,12 +934,15 @@ collapsed row `Tracing-only Log Hygiene (requires optional tracing profile)`.
 
 | Панель | Query family | Unit | Threshold |
 | --- | --- | --- | --- |
-| `Runtime Blockers / 15m` | shipped `bioetl_runtime_alert_condition_*` + no-record + memory-pressure signals | count | red `>=1` |
-| `Failed Runs / 15m` | `increase(bioetl_pipeline_runs_total{status="failed"}[15m])` | count | red `>=1` |
-| `No-Records Runs / 30m` | runtime no-record contract over `bioetl_pipeline_runs_total` vs `bioetl_records_processed_total` | count | yellow `>=1` |
-| `Runtime Error Rate / 30m` | `bioetl_errors_total / bronze records` | percent | yellow `>5%`, red `>20%` |
-| `Worst Stage Lag / 15m` | `bioetl_stage_lag_seconds` | seconds | yellow `>=300`, red `>=1800` |
-| `Memory Pressure Active / 15m` | `bioetl_memory_pressure_state` | boolean | yellow/red `>0` |
+| `First Action` | text CTA | n/a | n/a |
+| `Monitor Runtime Current Status` | `bioetl_runtime_current_status` | status | `0=OK`, `1=DEGRADED`, `2=FAILING`, `null=UNKNOWN` |
+| `Runtime Blockers` | `bioetl_runtime_current_blocker_reason` | count | red `>=1`; zero fallback only for count rendering |
+| `Inspect Top Runtime Blockers` | `topk(3, bioetl_runtime_current_blocker_reason > 0)` | table | reason/severity/action labels |
+
+Range and localization evidence (`Failed Runs`, `Runtime Error Rate`,
+`Worst Stage Lag`, blocker detail, latency, records by stage, logs/traces) lives
+below the answer row or inside collapsed rows. It supports investigation but
+does not replace the canonical current status recording rule.
 
 ### Localization Row
 

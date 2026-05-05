@@ -32,6 +32,28 @@ def _is_fixture_target(node: ast.expr) -> bool:
     return False
 
 
+def _fixture_keyword_metadata(keyword: ast.keyword) -> tuple[str | None, bool | None]:
+    if not isinstance(keyword.value, ast.Constant):
+        return None, None
+    if keyword.arg == "scope" and isinstance(keyword.value.value, str):
+        return keyword.value.value, None
+    if keyword.arg == "autouse":
+        return None, bool(keyword.value.value)
+    return None, None
+
+
+def _fixture_call_metadata(decorator: ast.Call) -> tuple[str | None, bool]:
+    scope: str | None = None
+    autouse = False
+    for keyword in decorator.keywords:
+        keyword_scope, keyword_autouse = _fixture_keyword_metadata(keyword)
+        if keyword_scope is not None:
+            scope = keyword_scope
+        if keyword_autouse is not None:
+            autouse = keyword_autouse
+    return scope, autouse
+
+
 def _fixture_metadata(
     function: ast.FunctionDef,
 ) -> tuple[bool, str | None, bool]:
@@ -44,12 +66,7 @@ def _fixture_metadata(
         is_fixture = True
         if not isinstance(decorator, ast.Call):
             continue
-        for keyword in decorator.keywords:
-            if keyword.arg == "scope" and isinstance(keyword.value, ast.Constant):
-                if isinstance(keyword.value.value, str):
-                    scope = keyword.value.value
-            if keyword.arg == "autouse" and isinstance(keyword.value, ast.Constant):
-                autouse = bool(keyword.value.value)
+        scope, autouse = _fixture_call_metadata(decorator)
     return is_fixture, scope, autouse
 
 

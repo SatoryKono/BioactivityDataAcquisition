@@ -347,7 +347,7 @@ def health() -> None:
 @click.option(
     "--port",
     "-p",
-    default=8081,
+    default=8000,
     type=int,
     help="Port to listen on.",
     show_default=True,
@@ -368,7 +368,7 @@ def health_server_command(host: str, port: int) -> None:
     - GET /ops/quarantine/filter-options - Explorer variable options
 
     Example:
-        bioetl health server --port 8081
+        bioetl health server --port 8000
 
     Args:
         host: IP address to bind the server to (e.g., '127.0.0.1' or '0.0.0.0').

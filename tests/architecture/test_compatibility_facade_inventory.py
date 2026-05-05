@@ -89,6 +89,46 @@ def _iter_inventory_cells(text: str) -> dict[str, dict[str, str]]:
     return rows
 
 
+def _public_cli_module_from_wrapper(line: str) -> str | None:
+    prefix = "from bioetl.interfaces.cli.commands."
+    stripped = line.strip()
+    if not stripped.startswith(prefix):
+        return None
+    if ".domains." in stripped:
+        return None
+    return stripped.removeprefix(prefix).split(" import ", 1)[0].strip()
+
+
+def _domain_wrapper_points_to_public_cli(text: str) -> bool:
+    return (
+        '"""Internal wrapper for the public ' in text
+        and "from bioetl.interfaces.cli.commands." in text
+        and "from bioetl.interfaces.cli.commands.domains.shared." not in text
+    )
+
+
+def _public_cli_path_for_module(module_name: str, commands_root: Path) -> Path:
+    return commands_root / f"{module_name.replace('.', '/')}.py"
+
+
+def _iter_public_cli_paths_for_wrapper(
+    path: Path, *, commands_root: Path
+) -> set[str]:
+    text = path.read_text(encoding="utf-8")
+    if not _domain_wrapper_points_to_public_cli(text):
+        return set()
+
+    paths: set[str] = set()
+    for line in text.splitlines():
+        module_name = _public_cli_module_from_wrapper(line)
+        if module_name is None:
+            continue
+        public_path = _public_cli_path_for_module(module_name, commands_root)
+        if public_path.exists():
+            paths.add(public_path.relative_to(ROOT).as_posix())
+    return paths
+
+
 def _iter_cli_public_entrypoint_paths() -> set[str]:
     paths: set[str] = set()
     domains_root = (
@@ -96,24 +136,7 @@ def _iter_cli_public_entrypoint_paths() -> set[str]:
     )
     commands_root = ROOT / "src" / "bioetl" / "interfaces" / "cli" / "commands"
     for path in domains_root.rglob("*.py"):
-        text = path.read_text(encoding="utf-8")
-        if '"""Internal wrapper for the public ' not in text:
-            continue
-        if "from bioetl.interfaces.cli.commands." not in text:
-            continue
-        if "from bioetl.interfaces.cli.commands.domains.shared." in text:
-            continue
-        for line in text.splitlines():
-            stripped = line.strip()
-            prefix = "from bioetl.interfaces.cli.commands."
-            if not stripped.startswith(prefix):
-                continue
-            if ".domains." in stripped:
-                continue
-            module_name = stripped.removeprefix(prefix).split(" import ", 1)[0].strip()
-            public_path = commands_root / f"{module_name.replace('.', '/')}.py"
-            if public_path.exists():
-                paths.add(public_path.relative_to(ROOT).as_posix())
+        paths.update(_iter_public_cli_paths_for_wrapper(path, commands_root=commands_root))
     return paths
 
 

@@ -1958,6 +1958,37 @@ def test_dashboard_titles_do_not_expose_fixed_window_suffixes(
     )
 
 
+def test_overview_current_panels_stay_out_of_selected_range_semantics() -> None:
+    """Overview L0/L1 current-answer panels must not use $__range windows."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
+    panels = {
+        panel.get("title"): panel
+        for panel in get_dashboard_panels(dashboard)
+        if panel.get("title")
+    }
+
+    for panel_title in (
+        "System Status",
+        "Next Action",
+        "L0 Inputs",
+        "Runtime Blockers Current",
+        "DQ Status Current",
+        "Gold Lifecycle Current",
+        "Control Plane Current",
+        "Provider GLOBAL Scope",
+        "Workflow Selected Scope",
+        "Workflow GLOBAL Scope",
+    ):
+        panel = panels.get(panel_title)
+        assert panel is not None
+        expr = "\n".join(
+            target.get("expr", "")
+            for target in panel.get("targets", [])
+            if isinstance(target.get("expr"), str)
+        )
+        assert "$__range" not in expr
+
+
 def test_runtime_alert_condition_breakdown_panels_exist() -> None:
     """Runtime must expose localization panels in addition to summary cards."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
