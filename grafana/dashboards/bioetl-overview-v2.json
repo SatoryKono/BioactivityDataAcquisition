@@ -198,7 +198,7 @@
       },
       "datasource": {
         "type": "prometheus",
-        "uid": "${datasource}"
+        "uid": "prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -299,7 +299,7 @@
       },
       "datasource": {
         "type": "prometheus",
-        "uid": "${datasource}"
+        "uid": "prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -388,7 +388,7 @@
       },
       "datasource": {
         "type": "prometheus",
-        "uid": "${datasource}"
+        "uid": "prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -477,7 +477,7 @@
       },
       "datasource": {
         "type": "prometheus",
-        "uid": "${datasource}"
+        "uid": "prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -566,7 +566,7 @@
       },
       "datasource": {
         "type": "prometheus",
-        "uid": "${datasource}"
+        "uid": "prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -655,7 +655,7 @@
       },
       "datasource": {
         "type": "prometheus",
-        "uid": "${datasource}"
+        "uid": "prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -744,7 +744,7 @@
       },
       "datasource": {
         "type": "prometheus",
-        "uid": "${datasource}"
+        "uid": "prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -833,7 +833,7 @@
       },
       "datasource": {
         "type": "prometheus",
-        "uid": "${datasource}"
+        "uid": "prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -922,7 +922,7 @@
       },
       "datasource": {
         "type": "prometheus",
-        "uid": "${datasource}"
+        "uid": "prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -1023,7 +1023,7 @@
           },
           "datasource": {
             "type": "prometheus",
-            "uid": "${datasource}"
+            "uid": "prometheus"
           },
           "fieldConfig": {
             "defaults": {
@@ -1062,7 +1062,7 @@
           },
           "datasource": {
             "type": "prometheus",
-            "uid": "${datasource}"
+            "uid": "prometheus"
           },
           "fieldConfig": {
             "defaults": {
@@ -1139,14 +1139,14 @@
       {
         "allValue": null,
         "current": {
-          "selected": false,
-          "text": "unknown",
-          "value": "unknown"
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
         },
         "datasource": "Prometheus",
         "definition": "label_values(bioetl_records_processed_total, pipeline)",
         "hide": 0,
-        "includeAll": false,
+        "includeAll": true,
         "label": "Pipeline",
         "multi": false,
         "name": "pipeline",
@@ -1164,7 +1164,7 @@
         "tagsQuery": "",
         "type": "query",
         "useTags": false,
-        "description": "Core scope: pipeline selector for pipeline-centric dashboards; fallback: All pipelines when not passed by source dashboard. Single-select; no All scope. Unknown is the explicit fail-closed default."
+        "description": "Core scope: pipeline selector for pipeline-centric dashboards; default is All pipelines on overview so the landing page renders meaningful L0 state instead of a fail-closed empty scope."
       },
       {
         "allValue": null,
