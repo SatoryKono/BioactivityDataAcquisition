@@ -107,11 +107,15 @@
                   "color": "green"
                 },
                 "1": {
-                  "text": "WARN",
+                  "text": "WARNING",
                   "color": "orange"
                 },
                 "2": {
-                  "text": "CRIT",
+                  "text": "CRITICAL",
+                  "color": "red"
+                },
+                "3": {
+                  "text": "CRITICAL",
                   "color": "red"
                 }
               }
@@ -179,7 +183,7 @@
       ],
       "title": "System Status",
       "type": "stat",
-      "description": "Current L0 operator state. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. CRIT means runtime, DQ, control-plane, workflow, or gold signals are failing for the selected pipeline/run_type. WARN means non-fatal DQ or pending-gold conditions. Next action: follow the route shown in Next Action, then use the top-level dashboard bus."
+      "description": "Current L0 operator state. Status values are OK, WARNING, CRITICAL, or UNKNOWN. CRITICAL means runtime, DQ, control-plane, workflow, or gold signals are failing for the selected pipeline/run_type. WARNING means non-fatal DQ or pending-gold conditions. Next action: follow the route shown in Next Action, then use the top-level dashboard bus."
     },
     {
       "id": 215,
@@ -340,6 +344,9 @@
                       "provider_global_degradation": {
                         "text": "Provider issue"
                       },
+                      "gold_lifecycle_blocking": {
+                        "text": "Gold lifecycle blocked"
+                      },
                       "runtime_blockers_active": {
                         "text": "Runtime blocked"
                       },
@@ -402,7 +409,7 @@
           }
         }
       ],
-      "description": "Action route projection for the selected pipeline/run_type. The row exposes `action_target`, `action_reason`, and `action_dashboard_uid`; Runtime > Control Plane > DQ > Provider > Workflow > Monitor. Provider route stays global in origin but is projected back onto the selected run_type scope for L0 consistency."
+      "description": "Action route projection for the selected pipeline/run_type. The row exposes `action_target`, `action_reason`, and `action_dashboard_uid`; Runtime > Control Plane > Gold Lifecycle > DQ > Provider > Workflow > Monitor. Provider route stays global in origin but is projected back onto the selected run_type scope for L0 consistency."
     },
     {
       "id": 9002,
@@ -439,11 +446,15 @@
                   "color": "green"
                 },
                 "1": {
-                  "text": "WARN",
+                  "text": "WARNING",
                   "color": "orange"
                 },
                 "2": {
-                  "text": "CRIT",
+                  "text": "CRITICAL",
+                  "color": "red"
+                },
+                "3": {
+                  "text": "CRITICAL",
                   "color": "red"
                 }
               }
@@ -607,10 +618,10 @@
             },
             "indexByName": {
               "input": 0,
-              "Value": 1,
-              "bioetl_l0_input_status": 1,
-              "pipeline": 2,
-              "run_type": 3
+              "pipeline": 1,
+              "run_type": 2,
+              "Value": 3,
+              "bioetl_l0_input_status": 3
             },
             "renameByName": {
               "pipeline": "Pipeline",
@@ -622,7 +633,7 @@
           }
         }
       ],
-      "description": "Current L0 inputs (Runtime, DQ, Gold, Control Plane, Provider, Workflow). Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN."
+      "description": "Current L0 inputs (Runtime, DQ, Gold, Control Plane, Provider, Workflow). Status values are OK, WARNING, CRITICAL, or UNKNOWN."
     },
     {
       "id": 9003,
@@ -659,11 +670,15 @@
                   "color": "green"
                 },
                 "1": {
-                  "text": "WARN",
+                  "text": "WARNING",
                   "color": "orange"
                 },
                 "2": {
-                  "text": "CRIT",
+                  "text": "CRITICAL",
+                  "color": "red"
+                },
+                "3": {
+                  "text": "CRITICAL",
                   "color": "red"
                 }
               }
@@ -800,7 +815,7 @@
           }
         }
       ],
-      "description": "Current runtime blocker summary only; no $__range evidence. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. Open Runtime from the top-level bus for exact blocker condition rows."
+      "description": "Current runtime blocker summary only; no $__range evidence. Status values are OK, WARNING, CRITICAL, or UNKNOWN. Open Runtime from the top-level bus for exact blocker condition rows."
     },
     {
       "id": 9004,
@@ -837,11 +852,11 @@
                   "color": "green"
                 },
                 "1": {
-                  "text": "WARN",
+                  "text": "WARNING",
                   "color": "orange"
                 },
                 "2": {
-                  "text": "CRIT",
+                  "text": "CRITICAL",
                   "color": "red"
                 }
               }
@@ -964,7 +979,7 @@
           }
         }
       ],
-      "description": "Current DQ summary for the selected pipeline/run_type scope. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN."
+      "description": "Current DQ summary for the selected pipeline/run_type scope. Status values are OK, WARNING, CRITICAL, or UNKNOWN."
     },
     {
       "id": 9005,
@@ -1001,11 +1016,11 @@
                   "color": "green"
                 },
                 "1": {
-                  "text": "WARN",
+                  "text": "WARNING",
                   "color": "orange"
                 },
                 "2": {
-                  "text": "CRIT",
+                  "text": "CRITICAL",
                   "color": "red"
                 }
               }
@@ -1181,7 +1196,7 @@
           }
         }
       ],
-      "description": "Lifecycle-state projection for gold output. `lifecycle_state` distinguishes runtime-owned failure, missing gold after success, pending, disabled, and healthy recent gold. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN."
+      "description": "Lifecycle-state projection for gold output. `lifecycle_state` distinguishes runtime-owned failure, missing gold after success, pending, disabled, and healthy recent gold. Status values are OK, WARNING, CRITICAL, or UNKNOWN."
     },
     {
       "id": 9006,
@@ -1218,11 +1233,11 @@
                   "color": "green"
                 },
                 "1": {
-                  "text": "WARN",
+                  "text": "WARNING",
                   "color": "orange"
                 },
                 "2": {
-                  "text": "CRIT",
+                  "text": "CRITICAL",
                   "color": "red"
                 }
               }
@@ -1359,7 +1374,7 @@
           }
         }
       ],
-      "description": "Current control-plane summary for manifest, ledger, checkpoint, and lineage guardrails. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. Open Control Plane from the top-level bus for the exact failing contract."
+      "description": "Current control-plane summary for manifest, ledger, checkpoint, and lineage guardrails. Status values are OK, WARNING, CRITICAL, or UNKNOWN. Open Control Plane from the top-level bus for the exact failing contract."
     },
     {
       "id": 9007,
@@ -1396,11 +1411,11 @@
                   "color": "green"
                 },
                 "1": {
-                  "text": "WARN",
+                  "text": "WARNING",
                   "color": "orange"
                 },
                 "2": {
-                  "text": "CRIT",
+                  "text": "CRITICAL",
                   "color": "red"
                 }
               }
@@ -1523,7 +1538,7 @@
           }
         }
       ],
-      "description": "GLOBAL provider scope across pipelines. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. This panel intentionally ignores selected pipeline/run_type filters."
+      "description": "GLOBAL provider scope across pipelines. Status values are OK, WARNING, CRITICAL, or UNKNOWN. This panel intentionally ignores selected pipeline/run_type filters."
     },
     {
       "id": 9008,
@@ -1560,11 +1575,11 @@
                   "color": "green"
                 },
                 "1": {
-                  "text": "WARN",
+                  "text": "WARNING",
                   "color": "orange"
                 },
                 "2": {
-                  "text": "CRIT",
+                  "text": "CRITICAL",
                   "color": "red"
                 }
               }
@@ -1701,7 +1716,7 @@
           }
         }
       ],
-      "description": "Selected pipeline/run_type workflow summary only. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN."
+      "description": "Selected pipeline/run_type workflow summary only. Status values are OK, WARNING, CRITICAL, or UNKNOWN."
     },
     {
       "id": 9013,
@@ -1738,11 +1753,11 @@
                   "color": "green"
                 },
                 "1": {
-                  "text": "WARN",
+                  "text": "WARNING",
                   "color": "orange"
                 },
                 "2": {
-                  "text": "CRIT",
+                  "text": "CRITICAL",
                   "color": "red"
                 }
               }
@@ -1879,7 +1894,7 @@
           }
         }
       ],
-      "description": "GLOBAL workflow scope across pipeline/run_type combinations. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN."
+      "description": "GLOBAL workflow scope across pipeline/run_type combinations. Status values are OK, WARNING, CRITICAL, or UNKNOWN."
     },
     {
       "id": 9009,

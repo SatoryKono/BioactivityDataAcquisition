@@ -332,8 +332,8 @@ Variable handoff policy for dashboard links remains strict and bounded:
 
 ## Важные пороги (из JSON)
 
-- `overview.id=214 (System Status)`: `BROKEN` при runtime blocker `>0`, DQ hard fail `>0` или control-plane blocker `>0`; `DEGRADED` при warning-only сигналах; `UNKNOWN` при no recent samples. Next action: follow `overview.id=215`.
-- `overview.id=215 (Next Action)`: priority order `Runtime > Control Plane > DQ > Provider > Workflow > Monitor`. Next action: open first non-OK surface with same `$pipeline/$run_type`.
+- `overview.id=214 (System Status)`: `CRITICAL` при runtime blocker `>0`, DQ hard fail `>0`, blocking gold lifecycle или control-plane blocker `>0`; `WARNING` при non-fatal warning-only сигналах; `UNKNOWN` при no recent samples. Next action: follow `overview.id=215`.
+- `overview.id=215 (Next Action)`: priority order `Runtime > Control Plane > Gold Lifecycle > DQ > Provider > Workflow > Monitor`. Next action: open first non-OK surface with same `$pipeline/$run_type`.
 - `dq.id=2 (DQ Score Snapshot)`: no-data остается `UNKNOWN`, не `0`; hard-fail signals блокируют promotion, warning-only означает drift. Next action: hard-fail -> reject/quarantine diagnostics; warning-only -> trend + top reasons.
 - `dq.id=154 (Blocked Share Trend)`: numerator = `filtered_out + quarantined`,
   denominator = Bronze input in the same window. Sustained growth = filter /
@@ -344,13 +344,15 @@ Variable handoff policy for dashboard links remains strict and bounded:
 - `control-plane.id=907 (Control-Plane Telemetry Missing)`: `0=OK`, `1=WARN`, `>=2=CRIT`, `null=UNKNOWN`; non-zero/UNKNOWN means validate scrape/rules before trusting blocker zeros.
 - `control-plane.id=130 (Replay / Resume Blockers)`: green `0`, red `>=1` only when telemetry is present. Next action: stop replay/resume и investigate first failing signal (manifest/ledger/checkpoint/replay/lineage).
 
-- `overview.System Status`: `BROKEN` при failed runs `>0`, stage backlog `>0`,
+- `overview.System Status`: `CRITICAL` при failed runs `>0`, stage backlog `>0`,
   worst lag `>=300s`, DQ hard fail `>0` или control-plane blocker `>0`;
-  `DEGRADED` при warning-сигналах provider/DQ/freshness/workflow; `UNKNOWN`
+  `WARNING` при warning-сигналах provider/DQ/freshness/workflow или
+  pending-gold conditions; `UNKNOWN`
   при отсутствии recent activity/samples; `OK` только при recent activity и
   отсутствии blockers/warnings.
-- `overview.Next Action`: runtime имеет приоритет над DQ, control-plane,
-  provider и workflow; row `action_target/action_reason/action_dashboard_uid`
+- `overview.Next Action`: runtime имеет приоритет над control-plane,
+  blocking gold lifecycle, DQ, provider и workflow; row
+  `action_target/action_reason/action_dashboard_uid`
   replaces the old opaque severity-only handoff.
 - `overview.Gold Lifecycle Current`: table now uses explicit
   `lifecycle_state` rows (`runtime_failed_owner`, `gold_missing_after_success`,

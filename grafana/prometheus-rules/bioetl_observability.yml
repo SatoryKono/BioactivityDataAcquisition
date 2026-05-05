@@ -147,6 +147,12 @@ groups:
         expr: (bioetl_l0_input_status{input="control_plane"} >= bool 2) * 40
       - record: bioetl_l0_next_action_route
         labels:
+          action_target: runtime
+          action_reason: gold_lifecycle_blocking
+          action_dashboard_uid: bioetl-runtime
+        expr: (bioetl_l0_input_status{input="gold"} >= bool 2) * 35
+      - record: bioetl_l0_next_action_route
+        labels:
           action_target: dq
           action_reason: dq_threshold_or_validation_signal
           action_dashboard_uid: bioetl-dq-v2

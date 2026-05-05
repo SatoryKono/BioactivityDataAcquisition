@@ -95,8 +95,8 @@ compatibility_debt_metrics:
   sunset_source: tests/architecture/test_compat_sunset.py
   metrics:
     retained_public_facade_count:
-      current_count: 21
-      max_count: 21
+      current_count: 19
+      max_count: 19
       owner: '@bioetl-architecture'
       linked_issue: '3354'
       rationale: Sanctioned public facades are retained compatibility obligations;
@@ -106,7 +106,7 @@ compatibility_debt_metrics:
         public-API consolidation PR updates the compatibility inventory.
       ratchet_schedule:
       - effective_on: '2026-04-30'
-        max_count: 21
+        max_count: 19
         milestone: freeze-baseline
       - effective_on: '2026-06-30'
         max_count: 15

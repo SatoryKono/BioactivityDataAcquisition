@@ -215,6 +215,8 @@ def default_vcr_record_mode() -> None:
     - Local runs also default to strict replay (`none`).
     - Explicit VCR_RECORD_MODE always has priority.
     """
+    if "VCR_RECORD_MODE" not in os.environ:
+        os.environ["VCR_RECORD_MODE"] = "none"
     ensure_default_vcr_record_mode()
 
 

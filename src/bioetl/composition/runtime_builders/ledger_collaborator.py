@@ -127,7 +127,7 @@ def attach_control_plane_collaborators(
                 attached_count += 1
             else:
                 missing_attach_method_count += 1
-        except Exception:
+        except (AttributeError, RuntimeError, TypeError, ValueError):
             failed_count += 1
     return ArtifactRecorderAttachmentResult(
         candidate_count=candidate_count,

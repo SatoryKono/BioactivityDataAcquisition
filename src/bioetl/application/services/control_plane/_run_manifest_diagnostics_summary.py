@@ -234,6 +234,31 @@ def _build_degraded_runtime_anchor_payload(
     }
 
 
+def _add_identity_graph_optional_fields(
+    identity_graph: dict[str, object],
+    request: _FinalSummaryRequest,
+) -> None:
+    """Add optional identity graph fields without changing historical shape."""
+    if request.base_summary.get("dependency_lock_hash") is not None:
+        identity_graph["dependency_lock_hash"] = request.base_summary.get(
+            "dependency_lock_hash"
+        )
+    if "replay_mode" not in request.base_summary:
+        return
+    identity_graph["operator_replay_mode"] = request.base_summary.get(
+        "operator_replay_mode"
+    )
+    identity_graph["replay_mode"] = request.base_summary["replay_mode"]
+    identity_graph["continuation_mode"] = request.base_summary.get(
+        "continuation_mode"
+    )
+    identity_graph["input_snapshot_count"] = request.base_summary[
+        "input_snapshot_count"
+    ]
+    identity_graph["snapshot_status"] = request.base_summary.get("snapshot_status")
+    identity_graph["input_snapshots"] = request.base_summary["input_snapshots"]
+
+
 def _build_identity_graph(
     request: _FinalSummaryRequest,
     *,
@@ -317,23 +342,7 @@ def _build_identity_graph(
             request.occurrence_only_diagnostic_scopes
         ),
     }
-    if request.base_summary.get("dependency_lock_hash") is not None:
-        identity_graph["dependency_lock_hash"] = request.base_summary.get(
-            "dependency_lock_hash"
-        )
-    if "replay_mode" in request.base_summary:
-        identity_graph["operator_replay_mode"] = request.base_summary.get(
-            "operator_replay_mode"
-        )
-        identity_graph["replay_mode"] = request.base_summary["replay_mode"]
-        identity_graph["continuation_mode"] = request.base_summary.get(
-            "continuation_mode"
-        )
-        identity_graph["input_snapshot_count"] = request.base_summary[
-            "input_snapshot_count"
-        ]
-        identity_graph["snapshot_status"] = request.base_summary.get("snapshot_status")
-        identity_graph["input_snapshots"] = request.base_summary["input_snapshots"]
+    _add_identity_graph_optional_fields(identity_graph, request)
     return identity_graph
 
 
