@@ -1,0 +1,72 @@
+version: 1
+description: >
+  Observed raw PubChem property URN vocabulary inventory used for governance-only
+  drift detection on Bronze fixture samples. Unknown values must be reviewed,
+  not silently normalized away.
+fields:
+  datatype:
+    values: ["1", "5", "7", "16"]
+  label:
+    values:
+      - Compound
+      - Compound Complexity
+      - Count
+      - Fingerprint
+      - IUPAC Name
+      - InChI
+      - InChIKey
+      - Log P
+      - Mass
+      - Molecular Formula
+      - Molecular Weight
+      - SMILES
+      - Topological
+      - Weight
+  name:
+    values:
+      - Absolute
+      - Allowed
+      - CAS-like Style
+      - Canonicalized
+      - Connectivity
+      - Exact
+      - Hydrogen Bond Acceptor
+      - Hydrogen Bond Donor
+      - Markup
+      - MonoIsotopic
+      - Polar Surface Area
+      - Preferred
+      - Rotatable Bond
+      - Standard
+      - SubStructure Keys
+      - Systematic
+      - Traditional
+      - XLogP3
+      - XLogP3-AA
+  implementation:
+    values:
+      - E_COMPLEXITY
+      - E_NHACCEPTORS
+      - E_NHDONORS
+      - E_NROTBONDS
+      - E_SCREEN
+      - E_TPSA
+  software:
+    values:
+      - Cactvs
+      - InChI
+      - Lexichem TK
+      - OEChem
+      - PubChem
+  source:
+    values:
+      - OpenEye Scientific Software
+      - Xemistry GmbH
+      - iupac.org
+      - ncbi.nlm.nih.gov
+      - sioc-ccbg.ac.cn
+  release:
+    values:
+      - "2025.04.14"
+      - "2025.06.30"
+      - "2025.09.15"

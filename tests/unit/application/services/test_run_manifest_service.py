@@ -213,7 +213,31 @@ def test_create_manifest_preserves_resume_only_replay_capability() -> None:
     assert manifest.to_dict()["replay_capability"] == "resume_only"
 
 
-def test_create_manifest_requires_git_commit_for_exact_replay_capability() -> None:
+def test_create_manifest_allows_exact_replay_capability_without_strict_request() -> (
+    None
+):
+    store = _InMemoryRunManifestStore()
+    service = RunManifestService(
+        manifest_port=store,
+        _manifest_id_factory=lambda: "manifest-capability-only",
+    )
+
+    manifest = service.create_manifest(
+        replace(
+            _make_request(),
+            git_commit=None,
+            source_revision_state="dirty_state_unknown",
+            replay_capability=ReplayCapability.EXACT_REPLAY_SUPPORTED,
+            launch_context={"limit": 100, "resume": False},
+        )
+    )
+
+    assert manifest.code_provenance.git_commit is None
+    assert manifest.code_provenance.source_revision_state == "dirty_state_unknown"
+    assert store.get("manifest-capability-only") == manifest
+
+
+def test_create_manifest_requires_git_commit_for_explicit_exact_replay() -> None:
     store = _InMemoryRunManifestStore()
     service = RunManifestService(
         manifest_port=store,
@@ -221,7 +245,13 @@ def test_create_manifest_requires_git_commit_for_exact_replay_capability() -> No
     )
 
     with pytest.raises(RuntimeError, match="requires git_commit code provenance"):
-        service.create_manifest(replace(_make_request(), git_commit=None))
+        service.create_manifest(
+            replace(
+                _make_request(),
+                git_commit=None,
+                launch_context={"limit": 100, "resume": False, "exact_replay": True},
+            )
+        )
 
     assert store.get("manifest-missing-git") is None
 

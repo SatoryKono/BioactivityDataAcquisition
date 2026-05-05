@@ -68,7 +68,7 @@ def context():
     return DQReportContext(
         run_id=str(uuid4()),
         pipeline_name="test_pipeline",
-        timestamp=datetime.now(UTC),
+        timestamp=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         provider="test",
         entity="test",
         bronze_records=[b"record"],

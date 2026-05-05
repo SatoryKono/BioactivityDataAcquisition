@@ -330,7 +330,9 @@ def _assert_inbound_level_payload(
     level_payload: object,
     dashboards: dict[str, dict[str, object]],
 ) -> None:
-    assert level_name in {"L1", "L2"}, f"Unexpected level in inbound contract: {level_name}"
+    assert level_name in {"L1", "L2"}, (
+        f"Unexpected level in inbound contract: {level_name}"
+    )
     assert isinstance(level_payload, dict), f"{level_name} payload must be mapping"
     for target_uid, routes in level_payload.items():
         assert isinstance(target_uid, str)
@@ -376,7 +378,9 @@ def _assert_critical_panel_entry(
     )
 
     data_links = _iter_panel_data_links(panel)
-    assert data_links, f"{dashboard_path.name} panel id={panel_id} must define dataLinks"
+    assert data_links, (
+        f"{dashboard_path.name} panel id={panel_id} must define dataLinks"
+    )
 
     matching_links = _matching_panel_links(
         data_links=data_links,
@@ -403,9 +407,13 @@ def _assert_critical_panel_entry(
         )
 
 
-def _cross_scope_marker_sections() -> tuple[dict[object, object], dict[object, object], dict[object, object]]:
+def _cross_scope_marker_sections() -> tuple[
+    dict[object, object], dict[object, object], dict[object, object]
+]:
     marker_contract = _CROSS_SCOPE_MARKER_CONTRACT
-    assert isinstance(marker_contract, dict), "cross_scope_marker_contract must be mapping"
+    assert isinstance(marker_contract, dict), (
+        "cross_scope_marker_contract must be mapping"
+    )
     required_markers = marker_contract.get("required_markers", {})
     assert isinstance(required_markers, dict), "required_markers must be mapping"
     required_titles_by_transition = marker_contract.get(

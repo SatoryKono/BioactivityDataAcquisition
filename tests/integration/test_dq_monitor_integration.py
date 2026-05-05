@@ -42,7 +42,7 @@ class TestDQMonitorAnomalyDetection:
 
         # Check with spike
         anomalies = monitor.check_quality(
-            {"record_count": 5000.0}, timestamp=datetime.now(UTC)
+            {"record_count": 5000.0}, timestamp=datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
         )
 
         assert len(anomalies) == 1
@@ -63,7 +63,7 @@ class TestDQMonitorAnomalyDetection:
 
         # Check with significant drop (z-score will be high)
         anomalies = monitor.check_quality(
-            {"record_count": 100.0}, timestamp=datetime.now(UTC)
+            {"record_count": 100.0}, timestamp=datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
         )
 
         assert len(anomalies) == 1
@@ -75,7 +75,7 @@ class TestDQMonitorAnomalyDetection:
         monitor.detector.set_threshold("error_rate", min_value=0.0, max_value=0.10)
 
         anomalies = monitor.check_quality(
-            {"error_rate": 0.25}, timestamp=datetime.now(UTC)
+            {"error_rate": 0.25}, timestamp=datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
         )
 
         assert len(anomalies) == 1
@@ -92,7 +92,7 @@ class TestDQMonitorAnomalyDetection:
 
         # Check with value close to baseline
         anomalies = monitor.check_quality(
-            {"record_count": 1050.0}, timestamp=datetime.now(UTC)
+            {"record_count": 1050.0}, timestamp=datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
         )
 
         assert len(anomalies) == 0
@@ -136,7 +136,7 @@ class TestDQMonitorSeverityLevels:
         # Value that gives z-score ~2.5 (between 2.0 and 3.0 for LOW severity)
         # z = |104 - 100| / 1.58 ≈ 2.53
         anomalies = monitor.check_quality(
-            {"metric": 104.0}, timestamp=datetime.now(UTC)
+            {"metric": 104.0}, timestamp=datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
         )
 
         assert len(anomalies) == 1
@@ -154,7 +154,7 @@ class TestDQMonitorSeverityLevels:
 
         # Extreme value (z-score > 5)
         anomalies = monitor.check_quality(
-            {"metric": 200.0}, timestamp=datetime.now(UTC)
+            {"metric": 200.0}, timestamp=datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
         )
 
         assert len(anomalies) == 1
@@ -182,7 +182,7 @@ class TestDQMonitorBaselineManagement:
 
         # Update with critical violation
         monitor.update_baseline_from_metrics(
-            {"error_rate": 0.50}, timestamp=datetime.now(UTC)
+            {"error_rate": 0.50}, timestamp=datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
         )
 
         # Baseline should not be updated

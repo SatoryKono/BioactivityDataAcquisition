@@ -49,12 +49,12 @@ def test_file_store_round_trips_fragments_by_id_run_manifest_and_node(tmp_path) 
                 target=run_node,
                 run_id=str(run_id),
                 manifest_id="manifest-1",
-                created_at=datetime.now(UTC),
+                created_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
             ),
         ),
         run_id=str(run_id),
         manifest_id="manifest-1",
-        created_at=datetime.now(UTC),
+        created_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
     )
 
     store.save(fragment)
@@ -103,12 +103,12 @@ def test_file_store_emits_lineage_read_metric_on_manifest_lookup(tmp_path) -> No
                 target=run_node,
                 run_id=str(run_id),
                 manifest_id="manifest-2",
-                created_at=datetime.now(UTC),
+                created_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
             ),
         ),
         run_id=str(run_id),
         manifest_id="manifest-2",
-        created_at=datetime.now(UTC),
+        created_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
     )
 
     store.save(fragment)
@@ -161,12 +161,12 @@ def test_file_store_preserves_occurrence_specific_history_for_semantically_equiv
                     target=run_node,
                     run_id=str(run_id),
                     manifest_id=manifest_id,
-                    created_at=datetime.now(UTC),
+                    created_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
                 ),
             ),
             run_id=str(run_id),
             manifest_id=manifest_id,
-            created_at=datetime.now(UTC),
+            created_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         )
 
     first_fragment = _build_fragment(run_id=first_run_id, manifest_id="manifest-1")
@@ -228,12 +228,12 @@ def test_file_store_rolls_back_fragment_and_indexes_when_index_append_fails(
                 target=run_node,
                 run_id=str(run_id),
                 manifest_id="manifest-rollback",
-                created_at=datetime.now(UTC),
+                created_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
             ),
         ),
         run_id=str(run_id),
         manifest_id="manifest-rollback",
-        created_at=datetime.now(UTC),
+        created_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
     )
     original_append = lineage_store_module._append_jsonl_payload
     call_count = {"value": 0}

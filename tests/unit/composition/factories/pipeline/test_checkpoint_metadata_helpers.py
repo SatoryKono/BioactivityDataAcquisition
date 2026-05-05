@@ -58,7 +58,7 @@ def test_build_current_checkpoint_metadata_includes_resume_anchors(tmp_path) -> 
     run_context = RunContext.create(
         run_id=uuid4(),
         run_type=RunType.INCREMENTAL,
-        started_at=datetime.now(UTC),
+        started_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         provider="chembl",
         entity="activity",
         pipeline_version="1.2.3",
@@ -113,7 +113,7 @@ def test_checkpoint_metadata_execution_fingerprint_matches_manifest_contract(
     run_context = RunContext.create(
         run_id=uuid4(),
         run_type=RunType.INCREMENTAL,
-        started_at=datetime.now(UTC),
+        started_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         provider="chembl",
         entity="activity",
         pipeline_version="1.2.3",

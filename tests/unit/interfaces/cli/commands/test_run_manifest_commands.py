@@ -41,7 +41,7 @@ class _FakeRunManifestService:
     def __init__(self) -> None:
         run_id = RunID(uuid4())
         self._run_id = run_id
-        created_at = datetime.now(UTC)
+        created_at = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
         self._manifest = RunManifest(
             manifest_id="manifest-1",
             execution_fingerprint="fingerprint-1",

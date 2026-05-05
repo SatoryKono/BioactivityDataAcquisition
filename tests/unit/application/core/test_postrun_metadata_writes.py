@@ -46,7 +46,7 @@ async def test_build_final_metadata_write_coroutines_builds_silver_only() -> Non
     )
     runtime = RuntimeConfig(run_type=RunType.INCREMENTAL, skip_gold=True)
     context = MagicMock()
-    context.started_at = datetime.now(UTC)
+    context.started_at = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
 
     coroutines = build_final_metadata_write_coroutines(
         metadata_coordinator=metadata_coordinator,
@@ -57,7 +57,7 @@ async def test_build_final_metadata_write_coroutines_builds_silver_only() -> Non
         context=context,
         stats={"records_silver": 5, "source_batch_ids": ["batch-1"]},
         dq_reports=None,
-        completed_at=datetime.now(UTC),
+        completed_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         resolve_delta_version=lambda _table_path, layer: 7,
     )
 

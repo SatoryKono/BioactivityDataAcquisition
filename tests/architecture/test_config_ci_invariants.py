@@ -316,12 +316,12 @@ def _validate_fixture_path(
         )
         return has_manifest_fixture
 
-    if fixture_kind == "tracked_ci_sample":
+    if fixture_kind in {"tracked_ci_sample", "tracked_edge_case_sample"}:
         if not fixture_path_raw.startswith("tests/fixtures/bronze/"):
             invalid_entries.append(
-                f"{key}: tracked_ci_sample must live under tests/fixtures/bronze/"
+                f"{key}: {fixture_kind} must live under tests/fixtures/bronze/"
             )
-        if records < min_tracked_sample_records:
+        if fixture_kind == "tracked_ci_sample" and records < min_tracked_sample_records:
             invalid_entries.append(
                 f"{key}: tracked_ci_sample requires at least "
                 f"{min_tracked_sample_records} records"
@@ -991,7 +991,11 @@ class TestBronzeFixtureCoverage:
     _ACTIVE_GAP_STATUS = {"open", "in_progress"}
     _MAX_BLOCKED_GAPS = 0
     _MAX_DECISION_RECORDED_GAPS = 0
-    _ALLOWED_FIXTURE_KINDS = {"tracked_ci_sample", "local_runtime_snapshot"}
+    _ALLOWED_FIXTURE_KINDS = {
+        "tracked_ci_sample",
+        "tracked_edge_case_sample",
+        "local_runtime_snapshot",
+    }
     _ALLOWED_VALIDATION_STATUSES = {"valid", "provisional", "stale"}
 
     def test_bronze_fixture_gap_registry_exists(self) -> None:

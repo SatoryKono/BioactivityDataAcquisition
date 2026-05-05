@@ -146,7 +146,7 @@ class TestPersistAndBuildResult:
             quarantine_payloads=[],
             metadata_timestamp=metadata_timestamp,
             run_id="run-1",
-            started_at=datetime.now(tz=UTC),
+            started_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
             started_monotonic=10.0,
         )
 

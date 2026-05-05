@@ -111,9 +111,7 @@ def _public_cli_path_for_module(module_name: str, commands_root: Path) -> Path:
     return commands_root / f"{module_name.replace('.', '/')}.py"
 
 
-def _iter_public_cli_paths_for_wrapper(
-    path: Path, *, commands_root: Path
-) -> set[str]:
+def _iter_public_cli_paths_for_wrapper(path: Path, *, commands_root: Path) -> set[str]:
     text = path.read_text(encoding="utf-8")
     if not _domain_wrapper_points_to_public_cli(text):
         return set()
@@ -136,7 +134,9 @@ def _iter_cli_public_entrypoint_paths() -> set[str]:
     )
     commands_root = ROOT / "src" / "bioetl" / "interfaces" / "cli" / "commands"
     for path in domains_root.rglob("*.py"):
-        paths.update(_iter_public_cli_paths_for_wrapper(path, commands_root=commands_root))
+        paths.update(
+            _iter_public_cli_paths_for_wrapper(path, commands_root=commands_root)
+        )
     return paths
 
 

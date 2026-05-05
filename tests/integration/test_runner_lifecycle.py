@@ -1001,7 +1001,7 @@ class TestPipelineRunnerLifecycle:
             z_score=23.0,
             anomaly_type=AnomalyType.THRESHOLD_EXCEEDED,
             severity=AnomalySeverity.CRITICAL,
-            timestamp=datetime.now(UTC),
+            timestamp=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
             message="Error rate 25% exceeds threshold 20%",
         )
 

@@ -312,7 +312,7 @@ class TestCheckpointMetadata:
 
         checkpoint_data = {
             "offset": 100,
-            "timestamp": datetime.now(UTC).isoformat(),
+            "timestamp": datetime(2026, 1, 1, 12, 0, tzinfo=UTC).isoformat(),
         }
 
         checkpoint_file = checkpoint_dir / "test.json"

@@ -17,7 +17,6 @@ from bioetl.application.services.control_plane.run_manifest_models import (
 )
 from bioetl.domain.context import MISSING_RUNTIME_TIMESTAMP
 from bioetl.domain.control_plane import (
-    ReplayCapability,
     RunCodeProvenance,
     RunManifest,
 )
@@ -57,7 +56,6 @@ def _validate_strict_code_provenance(
     strict_context = (
         bool(request.launch_context.get("exact_replay"))
         or required_profile in STRICT_PERSISTENCE_PROFILES
-        or request.replay_capability == ReplayCapability.EXACT_REPLAY_SUPPORTED
     )
     if not strict_context:
         return

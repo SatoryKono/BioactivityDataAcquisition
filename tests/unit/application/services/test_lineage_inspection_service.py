@@ -57,7 +57,7 @@ def _make_manifest(*, manifest_id: str, run_id: RunID) -> RunManifest:
         manifest_id=manifest_id,
         execution_fingerprint=f"fingerprint-{manifest_id}",
         schema_version="1.0",
-        created_at=datetime.now(UTC),
+        created_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         run_id=run_id,
         run_type=RunType.INCREMENTAL,
         pipeline_name="chembl_activity",
@@ -79,7 +79,7 @@ def test_show_fragment_returns_stored_fragment() -> None:
     fragment = LineageGraphFragment(
         fragment_id="silver:fragment-1",
         stored_fragment_id="silver:fragment-1:occurrence:abc123",
-        created_at=datetime.now(UTC),
+        created_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
     )
     store.save(fragment)
     service = LineageInspectionService(lineage_store=store)

@@ -25,7 +25,7 @@ def make_produced_artifact_fragment(
     artifact_node_type: LineageNodeType = LineageNodeType.DATASET,
 ) -> LineageGraphFragment:
     """Create one minimal lineage fragment with a valid produced artifact node."""
-    created_at = datetime.now(UTC)
+    created_at = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
     if artifact_node_type is LineageNodeType.BRONZE_BATCH:
         artifact_node = LineageNodeRef(
             node_type=LineageNodeType.BRONZE_BATCH,

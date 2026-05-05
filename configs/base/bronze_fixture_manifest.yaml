@@ -141,6 +141,14 @@ fixtures:
     owner: "data-platform"
     last_refresh: "2026-04-29"
     validation_status: valid
+    edge_fixtures:
+      - fixture_kind: tracked_edge_case_sample
+        fixture_path: tests/fixtures/bronze/openalex/publication/sample_edge_nested_vocab_2026-05-05.jsonl
+        records: 2
+        provenance: "Targeted edge-case OpenAlex nested-vocabulary Bronze sample for source.type/raw_type/version/indexed_in/license/oa_status governance."
+        owner: "data-platform"
+        last_refresh: "2026-05-05"
+        validation_status: valid
   pubchem/compound:
     fixture_kind: tracked_ci_sample
     fixture_path: tests/fixtures/bronze/pubchem/compound/sample_ci_2026-04-24.jsonl
@@ -149,6 +157,14 @@ fixtures:
     owner: "data-platform"
     last_refresh: "2026-04-24"
     validation_status: valid
+    edge_fixtures:
+      - fixture_kind: tracked_edge_case_sample
+        fixture_path: tests/fixtures/bronze/pubchem/compound/sample_edge_property_vocab_2026-05-05.jsonl
+        records: 2
+        provenance: "Targeted edge-case PubChem Bronze sample for raw property URN vocabulary governance."
+        owner: "data-platform"
+        last_refresh: "2026-05-05"
+        validation_status: valid
   pubmed/publication:
     fixture_kind: tracked_ci_sample
     fixture_path: tests/fixtures/bronze/pubmed/publication/sample_ci_2026-03-25.jsonl
@@ -157,6 +173,14 @@ fixtures:
     owner: "data-platform"
     last_refresh: "2026-03-25"
     validation_status: valid
+    edge_fixtures:
+      - fixture_kind: tracked_edge_case_sample
+        fixture_path: tests/fixtures/bronze/pubmed/publication/sample_edge_publication_types_mesh_2026-05-05.jsonl
+        records: 2
+        provenance: "Targeted edge-case PubMed Bronze sample for publication-type lists, MeSH-like structures, and affiliation-key governance."
+        owner: "data-platform"
+        last_refresh: "2026-05-05"
+        validation_status: valid
   semanticscholar/publication:
     fixture_kind: tracked_ci_sample
     fixture_path: tests/fixtures/bronze/semanticscholar/publication/sample_ci_2026-04-30.jsonl
@@ -168,6 +192,14 @@ fixtures:
     source_entity: semanticscholar/publication
     resolution_kind: smaller_factual_baseline
     extraction_contract: provider_compatible_doi_lookup_payload_shape
+    edge_fixtures:
+      - fixture_kind: tracked_edge_case_sample
+        fixture_path: tests/fixtures/bronze/semanticscholar/publication/sample_edge_publication_types_citations_2026-05-05.jsonl
+        records: 2
+        provenance: "Targeted edge-case Semantic Scholar Bronze sample for publicationTypes, citation contexts, subject fields, and author identifier-family governance."
+        owner: "data-platform"
+        last_refresh: "2026-05-05"
+        validation_status: valid
   uniprot/protein:
     fixture_kind: tracked_ci_sample
     fixture_path: tests/fixtures/bronze/uniprot/protein/sample_ci_2026-04-24.jsonl
@@ -184,3 +216,11 @@ fixtures:
     owner: "data-platform"
     last_refresh: "2026-04-29"
     validation_status: valid
+    edge_fixtures:
+      - fixture_kind: tracked_edge_case_sample
+        fixture_path: tests/fixtures/bronze/uniprot/idmapping/sample_edge_statuses_2026-05-05.jsonl
+        records: 4
+        provenance: "Targeted edge-case UniProt IDMapping Bronze sample covering found, multiple, not_found, and error statuses."
+        owner: "data-platform"
+        last_refresh: "2026-05-05"
+        validation_status: valid

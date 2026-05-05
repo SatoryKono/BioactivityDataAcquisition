@@ -25,7 +25,8 @@ def test_extract_journal_and_pagination_fields() -> None:
 
     assert extract_journal_info(publication) == {
         "journal": "Nature",
-        "issn": ["0028-0836", "1476-4687"],
+        "issn": "0028-0836",
+        "issn_list": ["0028-0836", "1476-4687"],
         "publisher": "Springer Nature",
     }
     assert extract_page_info(publication) == {

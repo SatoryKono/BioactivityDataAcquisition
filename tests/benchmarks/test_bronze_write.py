@@ -67,7 +67,7 @@ def test_bronze_write_small(benchmark, small_payload, bronze_output_dir):
 
     run_id = RunID(uuid4())
     batch_id = BatchID(uuid4())
-    now = datetime.now(UTC)
+    now = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
 
     async def write_batch():
         records_iter = _records_to_bytes_iterator(small_payload)
@@ -109,7 +109,7 @@ def test_bronze_write_medium(benchmark, medium_payload, bronze_output_dir):
 
     run_id = RunID(uuid4())
     batch_id = BatchID(uuid4())
-    now = datetime.now(UTC)
+    now = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
 
     async def write_batch():
         records_iter = _records_to_bytes_iterator(medium_payload)
@@ -149,7 +149,7 @@ def test_bronze_write_large(benchmark, large_payload, bronze_output_dir):
 
     run_id = RunID(uuid4())
     batch_id = BatchID(uuid4())
-    now = datetime.now(UTC)
+    now = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
 
     async def write_batch():
         records_iter = _records_to_bytes_iterator(large_payload)

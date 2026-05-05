@@ -15,8 +15,8 @@ from bioetl.application.core.lifecycle.batch_fsm import (
 )
 
 if TYPE_CHECKING:
-    from bioetl.application.core.batch_executor import BatchResult
     from bioetl.application.core.batch_execution import BatchExecutionContext
+    from bioetl.application.core.batch_executor import BatchResult
     from bioetl.domain.types import BronzeRecord
 
 

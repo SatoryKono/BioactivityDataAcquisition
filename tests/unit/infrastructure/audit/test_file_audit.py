@@ -125,7 +125,7 @@ class TestAuditEntry:
         """Test AuditEntry can be created with required fields."""
         entry = AuditEntry(
             run_id=run_id,
-            timestamp=datetime.now(UTC),
+            timestamp=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
             layer=AuditLayer.SILVER,
             table_name="chembl.activity",
             operation=AuditOperation.MERGE,
@@ -249,7 +249,7 @@ class TestFileAuditAdapter:
     ) -> None:
         """Test get_entries returns all entries."""
         adapter = FileAuditAdapter(tmp_path / "audit", noop_logger)
-        timestamp = datetime.now(UTC)
+        timestamp = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
 
         # Write entries
         for i in range(5):
@@ -273,7 +273,7 @@ class TestFileAuditAdapter:
     ) -> None:
         """Test get_entries filters by run_id."""
         adapter = FileAuditAdapter(tmp_path / "audit", noop_logger)
-        timestamp = datetime.now(UTC)
+        timestamp = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
 
         run_id_1 = RunID(uuid4())
         run_id_2 = RunID(uuid4())
@@ -311,7 +311,7 @@ class TestFileAuditAdapter:
     ) -> None:
         """Test get_entries filters by layer."""
         adapter = FileAuditAdapter(tmp_path / "audit", noop_logger)
-        timestamp = datetime.now(UTC)
+        timestamp = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
 
         # Write entries with different layers
         for layer in [AuditLayer.BRONZE, AuditLayer.SILVER, AuditLayer.GOLD]:
@@ -337,7 +337,7 @@ class TestFileAuditAdapter:
     ) -> None:
         """Test get_entries filters by table_name."""
         adapter = FileAuditAdapter(tmp_path / "audit", noop_logger)
-        timestamp = datetime.now(UTC)
+        timestamp = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
 
         # Write entries with different table names
         for table in ["chembl.activity", "pubchem.compound", "uniprot.protein"]:
@@ -391,7 +391,7 @@ class TestFileAuditAdapter:
     ) -> None:
         """Test get_entries respects limit parameter."""
         adapter = FileAuditAdapter(tmp_path / "audit", noop_logger)
-        timestamp = datetime.now(UTC)
+        timestamp = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
 
         # Write 10 entries
         for i in range(10):
@@ -560,7 +560,7 @@ class TestFileAuditAdapterEdgeCases:
         adapter = FileAuditAdapter(tmp_path / "audit", noop_logger)
         entry = AuditEntry(
             run_id=run_id,
-            timestamp=datetime.now(UTC),
+            timestamp=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
             layer=AuditLayer.BRONZE,
             table_name="test_table",
             operation=AuditOperation.WRITE,

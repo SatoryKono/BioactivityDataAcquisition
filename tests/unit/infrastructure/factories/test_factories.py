@@ -86,7 +86,7 @@ class TestStorageBundle:
         """Test write_silver delegates to silver writer."""
         run_id = uuid4()
         batch_id = BatchID(uuid4())
-        ts = datetime.now(UTC)
+        ts = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
 
         records = [
             {

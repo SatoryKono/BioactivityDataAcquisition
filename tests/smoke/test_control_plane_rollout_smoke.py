@@ -27,7 +27,7 @@ def _make_manifest(run_id: RunID) -> RunManifest:
         manifest_id="manifest-smoke",
         execution_fingerprint="fingerprint-smoke",
         schema_version="1.0",
-        created_at=datetime.now(UTC),
+        created_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         run_id=run_id,
         run_type=RunType.INCREMENTAL,
         pipeline_name="chembl_activity",

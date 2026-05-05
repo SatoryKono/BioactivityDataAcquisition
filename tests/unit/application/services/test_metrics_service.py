@@ -99,7 +99,7 @@ class TestMetricsServerStatus:
 
     def test_status_running(self) -> None:
         """Test MetricsServerStatus for running server."""
-        now = datetime.now(tz=UTC)
+        now = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
         status = MetricsServerStatus(running=True, port=8000, started_at=now)
         assert status.running is True
         assert status.port == 8000

@@ -27,9 +27,11 @@ def extract_journal_info(
     """Extract journal information from publication."""
     issn_values = publication.get("ISSN", [])
     issn_list = issn_values if isinstance(issn_values, list) else []
+    canonical_issn_list = issn_list or None
     return {
         "journal": extract_first_string(publication.get("container-title")),
-        "issn": issn_list,
+        "issn": extract_first_string(issn_list),
+        "issn_list": canonical_issn_list,
         "publisher": publication.get("publisher"),
     }
 

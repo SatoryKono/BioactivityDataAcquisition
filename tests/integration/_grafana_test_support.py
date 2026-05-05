@@ -98,7 +98,9 @@ def _register_histogram_label_sets(
     label_sets: dict[str, frozenset[str]], histograms: dict[str, Any]
 ) -> None:
     for name, metric in histograms.items():
-        _register_histogram_label_set(label_sets, name=name, label_names=metric._labelnames)
+        _register_histogram_label_set(
+            label_sets, name=name, label_names=metric._labelnames
+        )
 
 
 def _register_histogram_label_set(

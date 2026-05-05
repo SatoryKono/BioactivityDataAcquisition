@@ -149,7 +149,7 @@ class TestBatchingPerformance:
         records = [generate_bronze_record_bytes(i) for i in range(1000)]
         run_id = RunID(uuid4())
         batch_id = BatchID(uuid4())
-        now = datetime.now(tz=UTC)
+        now = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
 
         start = time.perf_counter()
         asyncio.run(
@@ -181,7 +181,7 @@ class TestBatchingPerformance:
         """
         run_id = str(uuid4())
         batch_id = str(uuid4())
-        now = datetime.now(tz=UTC).isoformat()
+        now = datetime(2026, 1, 1, 12, 0, tzinfo=UTC).isoformat()
 
         records = []
         for i in range(1000):
@@ -240,7 +240,7 @@ class TestBatchingPerformance:
         """
         run_id = str(uuid4())
         batch_id = str(uuid4())
-        now = datetime.now(tz=UTC).isoformat()
+        now = datetime(2026, 1, 1, 12, 0, tzinfo=UTC).isoformat()
 
         records = []
         for i in range(1000):
@@ -315,7 +315,7 @@ class TestBatchingPerformance:
 
         run_id = RunID(uuid4())
         batch_id = BatchID(uuid4())
-        now = datetime.now(tz=UTC)
+        now = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
 
         asyncio.run(
             bronze_writer.write_bronze(
@@ -360,7 +360,7 @@ class TestScalabilityPerformance:
         indicating no unexpected O(n^2) behavior.
         """
         run_id = RunID(uuid4())
-        now = datetime.now(tz=UTC)
+        now = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
 
         # Benchmark 1000 records
         records_1k = [generate_bronze_record_bytes(i) for i in range(1000)]

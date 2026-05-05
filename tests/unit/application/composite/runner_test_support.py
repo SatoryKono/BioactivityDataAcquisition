@@ -52,7 +52,7 @@ class InMemoryCheckpointManager:
         self._state = CompositeCheckpointState(
             composite_name=composite_name,
             run_id=run_id,
-            created_at=datetime.now(tz=UTC),
+            created_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         )
 
     async def load(self) -> CompositeCheckpointState:
@@ -202,7 +202,7 @@ def create_mock_checkpoint_manager(
         initial_state = CompositeCheckpointState(
             composite_name="test_composite",
             run_id=str(uuid4()),
-            created_at=datetime.now(tz=UTC),
+            created_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         )
     manager.load = AsyncMock(return_value=initial_state)
     manager.save = AsyncMock()
@@ -226,7 +226,7 @@ def create_tracking_checkpoint_manager(
             composite_name=composite_name,
             run_id=run_id,
             state=state,
-            created_at=datetime.now(tz=UTC),
+            created_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         )
 
     async def save_impl(checkpoint_state: CompositeCheckpointState) -> None:

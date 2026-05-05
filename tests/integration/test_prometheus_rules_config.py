@@ -760,7 +760,9 @@ def test_canonical_current_status_recording_rules_exist() -> None:
         )
 
 
-def test_canonical_current_status_rules_do_not_use_grafana_range_or_zero_fallback() -> None:
+def test_canonical_current_status_rules_do_not_use_grafana_range_or_zero_fallback() -> (
+    None
+):
     """Current status must not be calculated from selected range evidence."""
     payload = _load_rules()
     record_map = _build_record_map(payload)
@@ -780,7 +782,11 @@ def test_canonical_reason_records_expose_operator_routing_labels() -> None:
     payload = _load_rules()
 
     reason_expectations = {
-        "bioetl_runtime_current_blocker_reason": {"reason", "severity", "action_target"},
+        "bioetl_runtime_current_blocker_reason": {
+            "reason",
+            "severity",
+            "action_target",
+        },
         "bioetl_provider_current_cause": {"cause", "severity"},
         "bioetl_dq_current_reason": {"reason", "severity", "action_target"},
     }

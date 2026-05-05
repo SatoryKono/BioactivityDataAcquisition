@@ -157,7 +157,7 @@ def create_mock_checkpoint_manager(
         initial_state = CompositeCheckpointState(
             composite_name="test_composite",
             run_id=str(uuid4()),
-            created_at=datetime.now(tz=UTC),
+            created_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         )
     manager.load = AsyncMock(return_value=initial_state)
     manager.save = AsyncMock()
@@ -460,7 +460,7 @@ class TestRuntimeEnricherSelectionPolicy:
         state = CompositeCheckpointState(
             composite_name="test_composite",
             run_id=str(uuid4()),
-            created_at=datetime.now(tz=UTC),
+            created_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         )
 
         selected = [e.pipeline for e in runner._get_enrichers_to_run(state)]
@@ -473,7 +473,7 @@ class TestRuntimeEnricherSelectionPolicy:
         state = CompositeCheckpointState(
             composite_name="test_composite",
             run_id=str(uuid4()),
-            created_at=datetime.now(tz=UTC),
+            created_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
             completed_enrichers=frozenset({"pubmed"}),
         )
         pubmed_cfg = next(
@@ -564,7 +564,7 @@ class TestRuntimeEnricherSelectionPolicy:
         state = CompositeCheckpointState(
             composite_name="test_composite",
             run_id=str(uuid4()),
-            created_at=datetime.now(tz=UTC),
+            created_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         )
         context = runner._prepare_enrichment_run_context(state)
 
@@ -593,7 +593,7 @@ class TestRuntimeEnricherSelectionPolicy:
         state = CompositeCheckpointState(
             composite_name="test_composite",
             run_id=str(uuid4()),
-            created_at=datetime.now(tz=UTC),
+            created_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         )
 
         with pytest.raises(InvalidStateError, match="crossref"):

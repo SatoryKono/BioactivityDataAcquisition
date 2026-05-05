@@ -294,7 +294,11 @@ class TestBronzeWriter:
             metrics=NoOpMetrics(),
         )
 
-        batches = await writer.list_batches("nonexistent", "entity", datetime.now())
+        batches = await writer.list_batches(
+            "nonexistent",
+            "entity",
+            datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
+        )
 
         assert batches == []
 

@@ -59,7 +59,7 @@ class TestBronzeCleanupResult:
 
     def test_cleanup_result_creation(self):
         """Test BronzeCleanupResult can be created."""
-        now = datetime.now(UTC)
+        now = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
         result = BronzeCleanupResult(
             files_removed=10,
             bytes_freed=1024 * 1024,
@@ -76,7 +76,7 @@ class TestBronzeCleanupResult:
 
     def test_cleanup_result_dry_run(self):
         """Test BronzeCleanupResult with dry_run flag."""
-        now = datetime.now(UTC)
+        now = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
         result = BronzeCleanupResult(
             files_removed=10,
             bytes_freed=1024 * 1024,

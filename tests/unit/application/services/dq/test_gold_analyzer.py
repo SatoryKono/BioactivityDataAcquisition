@@ -609,7 +609,7 @@ class TestAnalyzeIntegration:
         mock_config: MagicMock,
     ) -> None:
         """Analyze Polars DataFrame."""
-        timestamp = datetime.now(UTC)
+        timestamp = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
 
         report = gold_analyzer.analyze(
             data=sample_dataframe,
@@ -632,7 +632,7 @@ class TestAnalyzeIntegration:
     ) -> None:
         """Analyze PyArrow Table (should be converted to Polars)."""
         table = pa.table({"id": [1, 2, 3], "name": ["a", "b", "c"]})
-        timestamp = datetime.now(UTC)
+        timestamp = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
 
         report = gold_analyzer.analyze(
             data=table,
@@ -652,7 +652,7 @@ class TestAnalyzeIntegration:
         """Overall status is FAIL when any check fails."""
         # DataFrame with all nulls in required field
         df = pl.DataFrame({"id": [None, None, None], "name": ["a", "b", "c"]})
-        timestamp = datetime.now(UTC)
+        timestamp = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
 
         report = gold_analyzer.analyze(
             data=df,

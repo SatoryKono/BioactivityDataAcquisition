@@ -155,7 +155,7 @@ class _ExecutionHost:
                         anomaly_type=DQAnomalyType.THRESHOLD_EXCEEDED,
                         severity=DQAnomalySeverity.HIGH,
                         z_score=20.0,
-                        timestamp=datetime.now(UTC),
+                        timestamp=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
                         message="Error rate exceeded expected range",
                     ),
                 ),

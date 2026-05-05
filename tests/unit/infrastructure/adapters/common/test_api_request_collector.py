@@ -152,7 +152,9 @@ class TestRecordRequest:
     def test_record_request_timestamp_default(self) -> None:
         """Request recording uses current UTC time if not provided."""
         collector = APIRequestCollector()
-        before = datetime.now(UTC)
+        fixed_now = datetime(2024, 1, 15, 12, 0, 0, tzinfo=UTC)
+        collector._clock = MagicMock()
+        collector._clock.now.return_value = fixed_now
 
         collector.record_request(
             url="https://api.example.com/data",
@@ -160,12 +162,10 @@ class TestRecordRequest:
             duration_ms=100.0,
         )
 
-        after = datetime.now(UTC)
         metadata = collector.to_source_metadata()
         request = metadata.api_requests[0]
 
-        assert request.timestamp is not None
-        assert before <= request.timestamp <= after
+        assert request.timestamp == fixed_now
 
     def test_record_request_explicit_timestamp(self) -> None:
         """Request recording uses provided timestamp."""

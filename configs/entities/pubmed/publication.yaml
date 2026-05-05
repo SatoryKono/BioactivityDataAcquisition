@@ -172,11 +172,10 @@ quality:
   entity: publication
   entity_field_validations:
   - field: pmid
-    type: range
-    min: 1
-    max: 10000000000
+    type: pattern
+    pattern: ^[1-9]\d{0,9}$
     nullable: false
-    error_message: PMID is required and must be a positive integer
+    error_message: PMID is required and must be a canonical positive numeric string
   - field: title
     type: max_length
     max_length: 2000

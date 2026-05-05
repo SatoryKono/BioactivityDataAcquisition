@@ -228,7 +228,7 @@ async def test_quarantine_records_are_persisted(e2e_data_dir: Path):
         error_type=ErrorType.DATA_QUALITY,
         batch_id=BatchID(uuid4()),
         error_details="Test DQ error",
-        ingestion_ts=datetime.now(UTC),
+        ingestion_ts=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
     )
 
     # Verify quarantine Delta table exists (base_path IS the table path)
@@ -266,7 +266,7 @@ async def test_quarantine_can_be_inspected(e2e_data_dir: Path):
             payload={"entity_id": f"entity_{i}"},
             bronze_batch_id=BatchID(uuid4()),
             metadata={"error_message": f"Error {i}"},
-            ingestion_ts=datetime.now(UTC),
+            ingestion_ts=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         )
 
     # List quarantine entries

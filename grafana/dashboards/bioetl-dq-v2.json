@@ -1509,7 +1509,18 @@
               "refId": "A"
             }
           ],
-          "description": "Bounded schema-field summary only; use Silver Reject Explorer or quarantine CLI for exact record context.",
+          "description": "Bounded schema-field summary only; use panel link to drill down into Silver Reject Explorer for exact record context.",
+          "links": [
+            {
+              "title": "Drilldown: Silver Reject Explorer",
+              "type": "dashboard",
+              "uid": "bioetl-silver-reject-explorer",
+              "keepTime": true,
+              "includeVars": false,
+              "targetBlank": false,
+              "params": "var-pipeline=${pipeline}&var-run_type=${run_type}"
+            }
+          ],
           "title": "Top Silver Reject Fields",
           "type": "bargauge"
         }

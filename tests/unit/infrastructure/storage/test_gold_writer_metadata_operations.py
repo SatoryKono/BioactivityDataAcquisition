@@ -245,7 +245,7 @@ class TestPersistGoldMetadataWrite:
         metadata = _make_bundle_safe_metadata()
         fragment = LineageGraphFragment(
             fragment_id="gold:fragment-2",
-            created_at=datetime.now(UTC),
+            created_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         )
 
         from bioetl.domain.medallion import GoldWriteMode

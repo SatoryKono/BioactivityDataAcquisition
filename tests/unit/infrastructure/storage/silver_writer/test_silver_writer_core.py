@@ -196,7 +196,7 @@ class TestSilverWriterValidation:
         tracer.start_as_current_span.return_value = span_cm
         span_cm.__enter__.return_value = span
         expected_result = MagicMock()
-        started_at = datetime.now(UTC)
+        started_at = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
         start_perf = 123.0
         invocation = _SilverWriteInvocation(
             table_name="test.table",
@@ -319,7 +319,7 @@ class TestSilverWriterValidation:
             tracing=tracing,
             module_name="bioetl.test",
             invocation=invocation,
-            started_at=datetime.now(UTC),
+            started_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
             start_perf=123.0,
             execute_pipeline=execute_pipeline,
         )
@@ -391,7 +391,7 @@ class TestSilverWriterValidation:
             tracing=tracing,
             module_name="bioetl.test",
             invocation=invocation,
-            started_at=datetime.now(UTC),
+            started_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
             start_perf=123.0,
             execute_pipeline=execute_pipeline,
         )
@@ -482,7 +482,7 @@ class TestSilverWriterValidation:
             run_type=None,
             source_batch_id=None,
             ingestion_ts=None,
-            started_at=datetime.now(UTC),
+            started_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
             start_perf=123.0,
             span=span,
         )
@@ -593,7 +593,7 @@ class TestSilverWriterValidation:
             run_type=None,
             source_batch_id=None,
             ingestion_ts=None,
-            started_at=datetime.now(UTC),
+            started_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
             start_perf=123.0,
             span=span,
         )

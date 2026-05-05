@@ -37,7 +37,7 @@ class TestBronzeDQAnalyzer:
             orjson.dumps({"id": 3, "name": "test3", "value": None}),
         ]
 
-        timestamp = datetime.now(UTC)
+        timestamp = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
 
         report = analyzer.analyze(
             records=iter(records),
@@ -80,7 +80,7 @@ class TestBronzeDQAnalyzer:
             checks=[BronzeDQCheckType.RECORD_COUNT.value],
         )
 
-        timestamp = datetime.now(UTC)
+        timestamp = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
 
         report = analyzer.analyze(
             records=iter([]),
@@ -109,7 +109,7 @@ class TestBronzeDQAnalyzer:
             b'{"name": "test2"}',
         ]
 
-        timestamp = datetime.now(UTC)
+        timestamp = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
 
         report = analyzer.analyze(
             records=iter(records),
@@ -140,7 +140,7 @@ class TestBronzeDQAnalyzer:
             orjson.dumps({"id": 2, "name": "test2"}),  # Missing optional
         ]
 
-        timestamp = datetime.now(UTC)
+        timestamp = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
 
         report = analyzer.analyze(
             records=iter(records),

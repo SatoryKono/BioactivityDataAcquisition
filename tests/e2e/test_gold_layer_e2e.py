@@ -124,7 +124,7 @@ class TestGoldAuditFields:
 
         gold_record = {
             "entity_id": "test_123",
-            "_ingestion_ts": datetime.now(UTC).isoformat(),
+            "_ingestion_ts": datetime(2026, 1, 1, 12, 0, tzinfo=UTC).isoformat(),
         }
 
         assert "_ingestion_ts" in gold_record

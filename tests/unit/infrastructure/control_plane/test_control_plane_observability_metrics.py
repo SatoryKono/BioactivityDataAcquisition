@@ -18,7 +18,7 @@ from bioetl.infrastructure.control_plane.file_run_manifest_store import (
 
 
 def _make_manifest(pipeline: str = "chembl_activity") -> RunManifest:
-    now = datetime.now(UTC)
+    now = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
     return RunManifest(
         manifest_id="manifest-obs",
         execution_fingerprint="fingerprint",
@@ -42,7 +42,7 @@ def _make_ledger_entry(manifest: RunManifest) -> RunLedgerEntry:
         manifest_id=manifest.manifest_id,
         run_id=manifest.run_id,
         event_type="manifest_created",
-        occurred_at=datetime.now(UTC),
+        occurred_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         status="success",
         details={"_diagnostic": {"pipeline": manifest.pipeline_name}},
     )
@@ -107,7 +107,7 @@ def test_control_plane_metrics_never_emit_forbidden_labels_or_values(
         manifest_id=manifest.manifest_id,
         run_id=manifest.run_id,
         event_type="artifact_published",
-        occurred_at=datetime.now(UTC),
+        occurred_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         status="published",
         dataset_ref="silver:chembl.activity@hash-123",
         lineage_fragment_id="silver:fragment-1",

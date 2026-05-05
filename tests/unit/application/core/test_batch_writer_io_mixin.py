@@ -123,7 +123,7 @@ class TestBatchWriterIOMixinBronze:
         """Storage receives correct provider, entity, batch_id."""
         records = [{"id": "1", "val": 10}]
         batch_id = BatchID(uuid4())
-        ts = datetime.now(UTC)
+        ts = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
 
         await batch_writer.write_bronze(records, batch_id, ts)
 
@@ -139,7 +139,7 @@ class TestBatchWriterIOMixinBronze:
         """Records are JSON-serialised and sorted before passing to storage."""
         records = [{"b": 2, "a": 1}, {"z": 3}]
         batch_id = BatchID(uuid4())
-        ts = datetime.now(UTC)
+        ts = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
 
         await batch_writer.write_bronze(records, batch_id, ts)
 
@@ -152,7 +152,7 @@ class TestBatchWriterIOMixinBronze:
         """run_id and run_type from context are forwarded to storage."""
         records = [{"x": 1}]
         batch_id = BatchID(uuid4())
-        ts = datetime.now(UTC)
+        ts = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
 
         await batch_writer.write_bronze(records, batch_id, ts)
 
@@ -166,7 +166,7 @@ class TestBatchWriterIOMixinBronze:
         """Optional source_metadata is forwarded to storage."""
         records = [{"id": "1"}]
         batch_id = BatchID(uuid4())
-        ts = datetime.now(UTC)
+        ts = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
         meta = MagicMock()
 
         await batch_writer.write_bronze(records, batch_id, ts, source_metadata=meta)
@@ -183,7 +183,7 @@ class TestBatchWriterIOMixinBronze:
 
         with pytest.raises(BioETLError):
             await writer.write_bronze(
-                [{"id": "1"}], BatchID(uuid4()), datetime.now(UTC)
+                [{"id": "1"}], BatchID(uuid4()), datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
             )
 
     async def test_write_bronze_reraises_runtime_error(
@@ -195,7 +195,7 @@ class TestBatchWriterIOMixinBronze:
 
         with pytest.raises(RuntimeError):
             await writer.write_bronze(
-                [{"id": "1"}], BatchID(uuid4()), datetime.now(UTC)
+                [{"id": "1"}], BatchID(uuid4()), datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
             )
 
     async def test_write_bronze_returns_storage_result(
@@ -207,7 +207,7 @@ class TestBatchWriterIOMixinBronze:
         writer = _make_writer(mock_storage, mock_context, mock_gold_validator)
 
         result = await writer.write_bronze(
-            [{"id": "1"}], BatchID(uuid4()), datetime.now(UTC)
+            [{"id": "1"}], BatchID(uuid4()), datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
         )
 
         assert result is expected

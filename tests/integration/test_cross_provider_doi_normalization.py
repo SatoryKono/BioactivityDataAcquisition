@@ -56,7 +56,7 @@ def mock_context() -> PipelineContext:
     return PipelineContext(
         run_id=uuid4(),
         run_type=RunType.INCREMENTAL,
-        started_at=datetime.now(UTC),
+        started_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         logger=mock_logger,
     )
 

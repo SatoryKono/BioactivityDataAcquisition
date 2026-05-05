@@ -212,7 +212,7 @@ class TestLogicalAnalyzerIntegration:
             pipeline="test_pipeline",
             target_table="gold.test",
             config=config,
-            timestamp=datetime.now(UTC),
+            timestamp=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
             business_rules=logical_rules,
         )
 
@@ -238,7 +238,7 @@ class TestLogicalAnalyzerIntegration:
             target_table="silver.test",
             source_batch_ids=["batch-1"],
             config=config,
-            timestamp=datetime.now(UTC),
+            timestamp=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
             primary_keys=["id"],
             input_record_count=100,
             quarantined_count=10,

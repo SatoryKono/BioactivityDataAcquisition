@@ -35,7 +35,7 @@ def _make_runtime() -> RuntimeConfig:
 
 def _make_context() -> MagicMock:
     context = MagicMock()
-    context.started_at = datetime.now(UTC)
+    context.started_at = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
     return context
 
 

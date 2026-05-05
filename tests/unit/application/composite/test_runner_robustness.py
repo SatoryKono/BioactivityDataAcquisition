@@ -348,7 +348,7 @@ class TestFSMTransitionValidation:
             ),
             completed_enrichers=frozenset(),
             enrichment_results={},
-            created_at=datetime.now(tz=UTC),
+            created_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         )
 
         checkpoint_manager = create_checkpoint_manager(
