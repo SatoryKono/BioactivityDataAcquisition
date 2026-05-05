@@ -8,12 +8,12 @@ from datetime import datetime
 from typing import Protocol
 from uuid import uuid4
 
-from bioetl.application.services.control_plane.run_manifest_models import (
-    RunManifestCreateSpec,
-)
 from bioetl.application.services.control_plane._run_manifest_service_mixins import (
     RunManifestHydrationMixin,
     RunManifestPayloadMixin,
+)
+from bioetl.application.services.control_plane.run_manifest_models import (
+    RunManifestCreateSpec,
 )
 from bioetl.domain.context import MISSING_RUNTIME_TIMESTAMP
 from bioetl.domain.control_plane import (

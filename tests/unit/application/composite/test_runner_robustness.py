@@ -12,7 +12,6 @@ from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
 
-import polars as pl
 import pytest
 
 from bioetl.application.composite.checkpoint import (
@@ -23,11 +22,7 @@ from bioetl.application.composite.runner_pkg import (
     CompositeRunnerDependencies,
     CompositeRuntimeConfig,
 )
-from bioetl.domain.composite.result import (
-    EnrichmentResult,
-    MergeResult,
-    SeedResult,
-)
+from bioetl.domain.composite.result import SeedResult
 from bioetl.domain.composite.state import CompositePipelineState
 from bioetl.domain.exceptions import RunnerAlreadyExecutedError
 from tests.unit.application.composite import runner_test_support as support
@@ -73,40 +68,19 @@ def mock_lock() -> AsyncMock:
 @pytest.fixture
 def mock_merger() -> AsyncMock:
     """Create a mock merger service."""
-    return support.create_mock_merger(
-        MergeResult(
-            records_from_seed=100,
-            records_merged=95,
-            records_enriched=80,
-            records_fully_enriched=70,
-            sources_used=("crossref", "pubmed"),
-            output_silver_path="silver/composite/test",
-            output_gold_path="gold/test_enriched",
-            duration_seconds=5.0,
-        )
-    )
+    return support.create_standard_fsm_merger()
 
 
 @pytest.fixture
 def mock_coordinator() -> AsyncMock:
     """Create a mock enrichment coordinator."""
-    return support.create_mock_coordinator(
-        {
-            "crossref": EnrichmentResult.success(
-                enricher_name="crossref",
-                records_input=100,
-                records_enriched=95,
-                records_not_found=5,
-                duration_seconds=10.0,
-            ),
-        }
-    )
+    return support.create_mock_coordinator()
 
 
 @pytest.fixture
 def mock_key_extractor() -> AsyncMock:
     """Create a mock key extractor service."""
-    return support.create_mock_key_extractor(pl.DataFrame({"doi": ["10.1234/test"]}))
+    return support.create_doi_key_extractor()
 
 
 @pytest.fixture

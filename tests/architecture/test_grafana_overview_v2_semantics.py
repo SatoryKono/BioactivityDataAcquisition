@@ -41,10 +41,10 @@ def test_overview_v2_semantics_contract():
         "System Status",
         "Next Action",
         "L0 Inputs",
-        "Runtime Blockers Current",
-        "DQ Status Current",
-        "Gold Lifecycle Current",
-        "Control Plane Current",
+        "Runtime Blockers",
+        "DQ Status",
+        "Gold Lifecycle",
+        "Control Plane",
     ]:
         p = next(x for x in panels if x.get("title") == current_title)
         expr = "\n".join(t.get("expr", "") for t in p.get("targets", []))

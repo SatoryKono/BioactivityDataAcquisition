@@ -58,7 +58,9 @@ def test_overview_dashboard_identity_and_primary_question() -> None:
     assert dashboard.get("title") == "1. Overview"
     assert dashboard.get("uid") == "bioetl-overview-v2"
     assert "L0 Overview" in description
-    assert "what is currently broken or degraded" in (description + content).lower()
+    assert "what is broken now" in (description + content).lower()
+    assert "what is broken now" in content.lower()
+    assert "empty tables mean no recent signal" in content.lower()
 
 
 def test_overview_answer_row_is_compact_and_current_only() -> None:
@@ -98,7 +100,7 @@ def test_next_action_panel_exposes_action_route_details() -> None:
     assert 'pipeline=~"$pipeline"' in expr
     assert 'run_type=~"$run_type"' not in expr
     assert "$__range" not in expr
-    assert panel.get("gridPos", {}).get("w") == 10
+    assert panel.get("gridPos", {}).get("w") == 11
     assert transformations and transformations[0].get("id") == "organize"
     excluded = transformations[0].get("options", {}).get("excludeByName", {})
     for hidden_field in ("Time", "__name__", "Value", "action_dashboard_uid"):
@@ -110,13 +112,13 @@ def test_next_action_panel_exposes_action_route_details() -> None:
 def test_current_l0_l1_tables_have_operator_mappings() -> None:
     for title in (
         "L0 Inputs",
-        "Runtime Blockers Current",
-        "DQ Status Current",
-        "Gold Lifecycle Current",
-        "Control Plane Current",
-        "Provider GLOBAL Scope",
-        "Workflow Selected Scope",
-        "Workflow GLOBAL Scope",
+        "Runtime Blockers",
+        "DQ Status",
+        "Gold Lifecycle",
+        "Control Plane",
+        "Provider Global",
+        "Workflow Selected",
+        "Workflow Global",
     ):
         panel = _panels_by_title()[title]
         assert panel.get("type") == "table"
@@ -127,13 +129,13 @@ def test_current_tables_hide_prometheus_noise_and_use_human_column_names() -> No
     expected_renames = {
         "Next Action": ("Pipeline",),
         "L0 Inputs": ("Pipeline", "Input", "Run Type", "Status"),
-        "Runtime Blockers Current": ("Pipeline", "Run Type", "Status"),
-        "DQ Status Current": ("Pipeline", "Status"),
-        "Gold Lifecycle Current": ("Pipeline", "Run Type", "Lifecycle", "Status"),
-        "Control Plane Current": ("Pipeline", "Run Type", "Status"),
-        "Provider GLOBAL Scope": ("Provider", "Status"),
-        "Workflow Selected Scope": ("Pipeline", "Run Type", "Status"),
-        "Workflow GLOBAL Scope": ("Pipeline", "Run Type", "Status"),
+        "Runtime Blockers": ("Pipeline", "Run Type", "Status"),
+        "DQ Status": ("Pipeline", "Status"),
+        "Gold Lifecycle": ("Pipeline", "Run Type", "Lifecycle", "Status"),
+        "Control Plane": ("Pipeline", "Run Type", "Status"),
+        "Provider Global": ("Provider", "Status"),
+        "Workflow Selected": ("Pipeline", "Run Type", "Status"),
+        "Workflow Global": ("Pipeline", "Run Type", "Status"),
     }
 
     for title, renamed_fields in expected_renames.items():
@@ -153,9 +155,39 @@ def test_current_tables_hide_prometheus_noise_and_use_human_column_names() -> No
 
 
 def test_operator_panels_expand_compact_layout_for_readability() -> None:
-    assert _panels_by_title()["Next Action"].get("gridPos", {}).get("w") == 10
+    assert _panels_by_title()["System Status"].get("gridPos", {}).get("w") == 5
+    assert _panels_by_title()["Next Action"].get("gridPos", {}).get("w") == 11
     assert _panels_by_title()["L0 Inputs"].get("gridPos", {}).get("w") == 8
-    assert _panels_by_title()["Gold Lifecycle Current"].get("gridPos", {}).get("w") == 8
+    assert _panels_by_title()["Gold Lifecycle"].get("gridPos", {}).get("w") == 8
+
+
+def test_triage_row_is_rebalanced_without_overlap() -> None:
+    expected = {
+        "Runtime Blockers": {"x": 0, "w": 5},
+        "DQ Status": {"x": 5, "w": 5},
+        "Control Plane": {"x": 10, "w": 6},
+        "Gold Lifecycle": {"x": 16, "w": 8},
+    }
+
+    for title, placement in expected.items():
+        grid_pos = _panels_by_title()[title].get("gridPos", {})
+        assert grid_pos.get("y") == 10
+        assert grid_pos.get("x") == placement["x"]
+        assert grid_pos.get("w") == placement["w"]
+
+
+def test_global_scope_row_gives_workflow_panels_more_room() -> None:
+    expected = {
+        "Provider Global": {"x": 0, "w": 10},
+        "Workflow Selected": {"x": 10, "w": 7},
+        "Workflow Global": {"x": 17, "w": 7},
+    }
+
+    for title, placement in expected.items():
+        grid_pos = _panels_by_title()[title].get("gridPos", {})
+        assert grid_pos.get("y") == 15
+        assert grid_pos.get("x") == placement["x"]
+        assert grid_pos.get("w") == placement["w"]
 
 
 def test_current_panels_do_not_mix_in_range_evidence() -> None:
@@ -163,20 +195,20 @@ def test_current_panels_do_not_mix_in_range_evidence() -> None:
         "System Status",
         "Next Action",
         "L0 Inputs",
-        "Runtime Blockers Current",
-        "DQ Status Current",
-        "Gold Lifecycle Current",
-        "Control Plane Current",
-        "Provider GLOBAL Scope",
-        "Workflow Selected Scope",
-        "Workflow GLOBAL Scope",
+        "Runtime Blockers",
+        "DQ Status",
+        "Gold Lifecycle",
+        "Control Plane",
+        "Provider Global",
+        "Workflow Selected",
+        "Workflow Global",
     ):
         expr = _panel_expr(_panels_by_title()[title])
         assert "$__range" not in expr
 
 
 def test_gold_lifecycle_panel_uses_explicit_state_projection() -> None:
-    panel = _panels_by_title()["Gold Lifecycle Current"]
+    panel = _panels_by_title()["Gold Lifecycle"]
     expr = _panel_expr(panel)
     description = str(panel.get("description", ""))
 
@@ -186,9 +218,9 @@ def test_gold_lifecycle_panel_uses_explicit_state_projection() -> None:
 
 
 def test_provider_and_workflow_scope_are_explicit() -> None:
-    provider = _panels_by_title()["Provider GLOBAL Scope"]
-    workflow_selected = _panels_by_title()["Workflow Selected Scope"]
-    workflow_global = _panels_by_title()["Workflow GLOBAL Scope"]
+    provider = _panels_by_title()["Provider Global"]
+    workflow_selected = _panels_by_title()["Workflow Selected"]
+    workflow_global = _panels_by_title()["Workflow Global"]
 
     assert _panel_expr(provider).strip() == "bioetl_l1_provider_global_status"
     assert "intentionally ignores selected pipeline/run_type" in str(

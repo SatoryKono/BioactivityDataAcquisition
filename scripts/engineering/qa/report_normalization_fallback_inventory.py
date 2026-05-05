@@ -15,7 +15,7 @@ if __package__ in {None, ""}:
     sys.path.insert(0, str(repo_root))
     sys.path.insert(0, str(repo_root / "src"))
 
-from scripts.docs.generate_pipeline_normalization_field_matrix import (
+from scripts.docs.matrix.generate_pipeline_normalization_matrix import (
     FALLBACK_BUSINESS,
     FALLBACK_TECHNICAL_PASSTHROUGH,
     build_entity_profile_coverage_kpi,

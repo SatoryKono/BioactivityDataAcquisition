@@ -8,23 +8,15 @@ Tests verify that:
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
 from unittest.mock import AsyncMock, MagicMock
 
-import polars as pl
 import pytest
 
 from bioetl.application.composite.runner_pkg import CompositePipelineRunner, CompositeRuntimeConfig
-from bioetl.domain.composite.result import (
-    EnrichmentResult,
-    MergeResult,
-)
+from bioetl.domain.composite.result import EnrichmentResult
 from bioetl.domain.exceptions import InvalidStateError
 from bioetl.domain.events import PipelineEvent
 from tests.unit.application.composite import runner_test_support as support
-
-if TYPE_CHECKING:
-    from collections.abc import Callable
 
 
 class TestPipelineEventPhaseHelpers:
@@ -58,44 +50,19 @@ def mock_lock() -> AsyncMock:
 @pytest.fixture
 def mock_key_extractor() -> AsyncMock:
     """Create a mock KeyExtractorService."""
-    return support.create_mock_key_extractor(
-        pl.DataFrame(
-            {
-                "chembl_id": ["CHEMBL1", "CHEMBL2"],
-                "doi": ["10.1000/abc", "10.1000/def"],
-            }
-        )
-    )
+    return support.create_crossref_key_extractor()
 
 
 @pytest.fixture
 def mock_coordinator() -> AsyncMock:
     """Create a mock EnrichmentCoordinatorService."""
-    return support.create_mock_coordinator(
-        {
-            "crossref": EnrichmentResult.success(
-                enricher_name="crossref",
-                records_input=2,
-                records_enriched=2,
-                records_not_found=0,
-                duration_seconds=5.0,
-            ),
-        }
-    )
+    return support.create_successful_crossref_coordinator()
 
 
 @pytest.fixture
 def mock_merger() -> AsyncMock:
     """Create a mock MergeService."""
-    return support.create_mock_merger(
-        MergeResult(
-            records_merged=2,
-            records_from_seed=2,
-            records_enriched=2,
-            records_fully_enriched=2,
-            sources_used=("seed", "crossref"),
-        )
-    )
+    return support.create_successful_crossref_merger()
 
 
 @pytest.fixture
@@ -105,13 +72,13 @@ def mock_checkpoint_manager() -> AsyncMock:
 
 
 @pytest.fixture
-def mock_seed_runner_factory() -> Callable[[], MagicMock]:
+def mock_seed_runner_factory() -> object:
     """Create a mock seed runner factory."""
     return support.create_magic_seed_runner_factory()
 
 
 @pytest.fixture
-def mock_enricher_runner_factory() -> Callable[[str, pl.DataFrame], MagicMock]:
+def mock_enricher_runner_factory() -> object:
     """Create a mock enricher runner factory."""
     return support.create_magic_enricher_runner_factory()
 
@@ -119,16 +86,7 @@ def mock_enricher_runner_factory() -> Callable[[str, pl.DataFrame], MagicMock]:
 @pytest.fixture
 def sample_composite_config() -> MagicMock:
     """Create a sample CompositeConfig."""
-    enricher = MagicMock()
-    enricher.pipeline = "crossref"
-    enricher.required = True
-    enricher.silver_table = "silver/crossref/publication"
-    return support.create_magic_composite_config(
-        output_keys=("chembl_id", "doi"),
-        enrichers=[enricher],
-        required_enrichers=["crossref"],
-        output_gold_path="gold/test_composite",
-    )
+    return support.create_required_crossref_composite_config()
 
 
 @pytest.fixture

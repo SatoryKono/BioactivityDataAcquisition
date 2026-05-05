@@ -254,6 +254,23 @@ def create_mock_key_extractor(
     return extractor
 
 
+def create_crossref_key_extractor() -> AsyncMock:
+    """Create the common two-key extractor used by crossref runner FSM tests."""
+    return create_mock_key_extractor(
+        pl.DataFrame(
+            {
+                "chembl_id": ["CHEMBL1", "CHEMBL2"],
+                "doi": ["10.1000/abc", "10.1000/def"],
+            }
+        )
+    )
+
+
+def create_doi_key_extractor() -> AsyncMock:
+    """Create the common DOI-only key extractor used by FSM tests."""
+    return create_mock_key_extractor(pl.DataFrame({"doi": ["10.1234/test"]}))
+
+
 def create_mock_coordinator(
     results: dict[str, EnrichmentResult] | None = None,
 ) -> AsyncMock:
@@ -277,6 +294,21 @@ def create_mock_coordinator(
     return coordinator
 
 
+def create_successful_crossref_coordinator() -> AsyncMock:
+    """Create the common successful crossref coordinator for FSM tests."""
+    return create_mock_coordinator(
+        {
+            "crossref": EnrichmentResult.success(
+                enricher_name="crossref",
+                records_input=2,
+                records_enriched=2,
+                records_not_found=0,
+                duration_seconds=5.0,
+            ),
+        }
+    )
+
+
 def create_mock_merger(
     result: MergeResult | None = None,
 ) -> AsyncMock:
@@ -297,6 +329,35 @@ def create_mock_merger(
     merger.merge = merge_call
     merger.execute_request = merge_call
     return merger
+
+
+def create_successful_crossref_merger() -> AsyncMock:
+    """Create the common successful crossref merge result for FSM tests."""
+    return create_mock_merger(
+        MergeResult(
+            records_merged=2,
+            records_from_seed=2,
+            records_enriched=2,
+            records_fully_enriched=2,
+            sources_used=("seed", "crossref"),
+        )
+    )
+
+
+def create_standard_fsm_merger() -> AsyncMock:
+    """Create the common multi-source merge result used by FSM test suites."""
+    return create_mock_merger(
+        MergeResult(
+            records_from_seed=100,
+            records_merged=95,
+            records_enriched=80,
+            records_fully_enriched=70,
+            sources_used=("crossref", "pubmed"),
+            output_silver_path="silver/composite/test",
+            output_gold_path="gold/test_enriched",
+            duration_seconds=5.0,
+        )
+    )
 
 
 def create_async_seed_runner(
@@ -381,6 +442,25 @@ def create_magic_composite_config(
     config.dq.soft_fail_threshold = 0.05
     config.dq.hard_fail_threshold = 0.20
     return config
+
+
+def create_required_crossref_enricher() -> MagicMock:
+    """Create the standard required crossref enricher config used by FSM tests."""
+    enricher = MagicMock()
+    enricher.pipeline = "crossref"
+    enricher.required = True
+    enricher.silver_table = "silver/crossref/publication"
+    return enricher
+
+
+def create_required_crossref_composite_config() -> MagicMock:
+    """Create the common crossref-enabled composite config for FSM tests."""
+    return create_magic_composite_config(
+        output_keys=("chembl_id", "doi"),
+        enrichers=[create_required_crossref_enricher()],
+        required_enrichers=["crossref"],
+        output_gold_path="gold/test_composite",
+    )
 
 
 def create_magic_seed_runner_factory(
