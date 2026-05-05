@@ -23,10 +23,20 @@
       "icon": "external link",
       "includeVars": false,
       "keepTime": true,
-      "tags": [],
       "targetBlank": false,
-      "title": "Back to Overview",
-      "tooltip": "Return to 1. Overview and preserve the selected time range.",
+      "title": "0. Control Plane",
+      "tooltip": "Open with current pipeline/run_type and preserve the selected time range.",
+      "type": "link",
+      "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
+    },
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": false,
+      "keepTime": true,
+      "targetBlank": false,
+      "title": "1. Overview",
+      "tooltip": "Open with current pipeline/run_type and preserve the selected time range.",
       "type": "link",
       "url": "/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
     },
@@ -35,36 +45,44 @@
       "icon": "external link",
       "includeVars": false,
       "keepTime": true,
-      "tags": [],
       "targetBlank": false,
-      "title": "Back to Data Quality",
-      "tooltip": "Return to 4. Data Quality with current time range and dashboard scope.",
+      "title": "2. Runtime",
+      "tooltip": "Open with current pipeline/run_type, reset stage to All, and preserve the selected time range.",
       "type": "link",
-      "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
+      "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=All&${__url_time_range}"
     },
     {
       "asDropdown": false,
-      "icon": "logs",
+      "icon": "external link",
       "includeVars": false,
       "keepTime": true,
-      "tags": [],
       "targetBlank": false,
-      "title": "Explore Logs",
-      "tooltip": "Open Loki Explore with tracing profile and selected time range.",
+      "title": "3. Provider Health",
+      "tooltip": "Reset scope: open global target scope and preserve the selected time range.",
       "type": "link",
-      "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D"
+      "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=All&var-adapter=All&${__url_time_range}"
     },
     {
       "asDropdown": false,
-      "icon": "share-alt",
+      "icon": "external link",
       "includeVars": false,
       "keepTime": true,
-      "tags": [],
       "targetBlank": false,
-      "title": "Explore Traces",
-      "tooltip": "Open Tempo Explore with tracing profile and selected time range.",
+      "title": "4. Data Quality",
+      "tooltip": "Open with current pipeline/run_type, reset stage to All, and preserve the selected time range.",
       "type": "link",
-      "url": "/a/grafana-exploretraces-app/?from=${__from}&to=${__to}&queryType=traceqlSearch&query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline:regex}%22%20%26%26%20span.%22bioetl.run_type%22%20%3D~%20%22${run_type:regex}%22%20%7D"
+      "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=All&${__url_time_range}"
+    },
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": false,
+      "keepTime": true,
+      "targetBlank": false,
+      "title": "5. Workflow",
+      "tooltip": "Reset scope: open global target scope and preserve the selected time range.",
+      "type": "link",
+      "url": "/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}"
     }
   ],
   "panels": [
@@ -405,10 +423,6 @@
             {
               "title": "Open quarantine CLI command",
               "url": "data:text/plain,bioetl%20quarantine%20inspect%20--pipeline%20${__data.fields.pipeline}%20--silver-filter-only%20--run-id%20${__data.fields.run_id}%20--limit%20200"
-            },
-            {
-              "title": "Open Logs",
-              "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D"
             }
           ],
           "noValue": "No rejected records for current filters."

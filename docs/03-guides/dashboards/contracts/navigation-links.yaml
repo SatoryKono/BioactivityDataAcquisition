@@ -10,48 +10,53 @@ normative_source:
 version: 1
 required_top_level_links_by_uid:
   bioetl-overview-v2:
+    - 0. Control Plane
     - 2. Runtime
     - 3. Provider Health
     - 4. Data Quality
-    - 5. Control Plane
-    - 6. Workflow Overview
-    - Explore Logs
-    - Explore Traces
+    - 5. Workflow
   bioetl-runtime:
-    - Back to Overview
+    - 0. Control Plane
+    - 1. Overview
     - 3. Provider Health
     - 4. Data Quality
-    - 5. Control Plane
+    - 5. Workflow
     - Explore Logs
     - Explore Traces
   bioetl-control-plane-v1:
-    - Back to Overview
+    - 1. Overview
+    - 2. Runtime
+    - 3. Provider Health
+    - 4. Data Quality
+    - 5. Workflow
+  bioetl-provider-health-v2:
+    - 0. Control Plane
+    - 1. Overview
     - 2. Runtime
     - 4. Data Quality
-    - Explore Logs
-    - Explore Traces
-  bioetl-provider-health-v2:
-    - Back to Overview
-    - 2. Runtime (Primary)
-    - "2. Runtime (Contextual: provider mapping)"
-    - 5. Control Plane
-    - Explore Logs
-    - Explore Traces
+    - 5. Workflow
   bioetl-dq-v2:
-    - Back to Overview
-    - 5. Control Plane
-    - 5. Silver Reject Explorer
+    - 0. Control Plane
+    - 1. Overview
+    - 2. Runtime
+    - 3. Provider Health
+    - 5. Workflow
+    - Silver Reject Explorer
     - Explore Logs
     - Explore Traces
   bioetl-silver-reject-explorer:
-    - Back to Overview
-    - Back to Data Quality
-    - Explore Logs
-    - Explore Traces
-  bioetl-workflow-overview:
-    - Back to Overview
+    - 0. Control Plane
+    - 1. Overview
     - 2. Runtime
-    - 5. Control Plane
+    - 3. Provider Health
+    - 4. Data Quality
+    - 5. Workflow
+  bioetl-workflow-overview:
+    - 0. Control Plane
+    - 1. Overview
+    - 2. Runtime
+    - 3. Provider Health
+    - 4. Data Quality
 top_level_link_priority_by_uid:
   bioetl-overview-v2:
     - title: 2. Runtime

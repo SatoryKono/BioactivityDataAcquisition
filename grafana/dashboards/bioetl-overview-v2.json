@@ -20,82 +20,58 @@
   "links": [
     {
       "asDropdown": false,
-      "icon": "dashboard",
+      "icon": "external link",
       "includeVars": false,
       "keepTime": true,
-      "tags": [],
       "targetBlank": false,
-      "title": "2. Runtime",
-      "type": "dashboards",
-      "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
-    },
-    {
-      "asDropdown": false,
-      "icon": "dashboard",
-      "includeVars": false,
-      "keepTime": true,
-      "tags": [],
-      "targetBlank": false,
-      "title": "3. Provider Health",
-      "type": "dashboards",
-      "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${__url_time_range}"
-    },
-    {
-      "asDropdown": false,
-      "icon": "dashboard",
-      "includeVars": false,
-      "keepTime": true,
-      "tags": [],
-      "targetBlank": false,
-      "title": "4. Data Quality",
-      "type": "dashboards",
-      "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
-    },
-    {
-      "asDropdown": false,
-      "icon": "dashboard",
-      "includeVars": false,
-      "keepTime": true,
-      "tags": [],
-      "targetBlank": false,
-      "title": "5. Control Plane",
-      "type": "dashboards",
+      "title": "0. Control Plane",
+      "tooltip": "Open with current pipeline/run_type and preserve the selected time range.",
+      "type": "link",
       "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
     },
     {
       "asDropdown": false,
-      "icon": "dashboard",
+      "icon": "external link",
       "includeVars": false,
       "keepTime": true,
-      "tags": [],
       "targetBlank": false,
-      "title": "6. Workflow Overview",
-      "type": "dashboards",
+      "title": "2. Runtime",
+      "tooltip": "Open with current pipeline/run_type, reset stage to All, and preserve the selected time range.",
+      "type": "link",
+      "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=All&${__url_time_range}"
+    },
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": false,
+      "keepTime": true,
+      "targetBlank": false,
+      "title": "3. Provider Health",
+      "tooltip": "Reset scope: open global target scope and preserve the selected time range.",
+      "type": "link",
+      "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=All&var-adapter=All&${__url_time_range}"
+    },
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": false,
+      "keepTime": true,
+      "targetBlank": false,
+      "title": "4. Data Quality",
+      "tooltip": "Open with current pipeline/run_type, reset stage to All, and preserve the selected time range.",
+      "type": "link",
+      "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=All&${__url_time_range}"
+    },
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": false,
+      "keepTime": true,
+      "targetBlank": false,
+      "title": "5. Workflow",
+      "tooltip": "Reset scope: open global target scope and preserve the selected time range.",
+      "type": "link",
       "url": "/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}"
-    },
-    {
-      "asDropdown": false,
-      "icon": "logs",
-      "includeVars": false,
-      "keepTime": true,
-      "tags": [],
-      "targetBlank": false,
-      "title": "Explore Logs",
-      "type": "link",
-      "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D",
-      "tooltip": "Open Loki Explore with tracing profile and selected time range."
-    },
-    {
-      "asDropdown": false,
-      "icon": "bolt",
-      "includeVars": false,
-      "keepTime": true,
-      "tags": [],
-      "targetBlank": false,
-      "title": "Explore Traces",
-      "type": "link",
-      "url": "/a/grafana-exploretraces-app/?from=${__from}&to=${__to}&queryType=traceqlSearch&query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline:regex}%22%20%26%26%20span.%22bioetl.run_type%22%20%3D~%20%22${run_type:regex}%22%20%7D",
-      "tooltip": "Open Tempo Explore with tracing profile and selected time range."
     }
   ],
   "panels": [
@@ -163,20 +139,7 @@
             ]
           },
           "unit": "none",
-          "links": [
-            {
-              "title": "Open 2. Runtime",
-              "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
-            },
-            {
-              "title": "Open 4. Data Quality",
-              "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
-            },
-            {
-              "title": "Open 5. Control Plane",
-              "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
-            }
-          ]
+          "links": []
         },
         "overrides": []
       },
@@ -200,13 +163,7 @@
           "values": false
         },
         "textMode": "value_and_name",
-        "dataLinks": [
-          {
-            "title": "Open bioetl-runtime",
-            "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
-            "targetBlank": false
-          }
-        ]
+        "dataLinks": []
       },
       "targets": [
         {
@@ -268,28 +225,7 @@
             ]
           },
           "unit": "none",
-          "links": [
-            {
-              "title": "Open 2. Runtime",
-              "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
-            },
-            {
-              "title": "Open 4. Data Quality",
-              "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
-            },
-            {
-              "title": "Open 3. Provider Health",
-              "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${__url_time_range}"
-            },
-            {
-              "title": "Open 5. Control Plane",
-              "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
-            },
-            {
-              "title": "Open 6. Workflow Overview",
-              "url": "/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}"
-            }
-          ]
+          "links": []
         },
         "overrides": []
       },
