@@ -22,6 +22,9 @@ _UNIPROT_ACCESSION_RE = re.compile(r"^[A-Z0-9]{6,10}(?:-\d+)?$", re.IGNORECASE)
 _CHEMBL_ID_RE = re.compile(r"^CHEMBL(\d+)$", re.IGNORECASE)
 _DRUGBANK_ID_RE = re.compile(r"^DB(\d{5})$", re.IGNORECASE)
 _S2_HEX_RE = re.compile(r"^[0-9a-f]{40}$", re.IGNORECASE)
+_NCBI_TAXONOMY_RE = re.compile(r"^\d{1,10}$")
+_PMCID_RE = re.compile(r"^(?:PMC)?(\d+)$", re.IGNORECASE)
+_MESH_RE = re.compile(r"^[A-Z]\d{6}$", re.IGNORECASE)
 
 
 def _legacy_transport_alias(secure_prefix: str) -> str:
@@ -58,6 +61,21 @@ _SEMANTIC_SCHOLAR_PREFIXES = _with_legacy_transport_aliases(
     "https://www.semanticscholar.org/paper/",
     "https://www.semanticscholar.org/author/",
 )
+_NCBI_TAXONOMY_PREFIXES = (
+    *_with_legacy_transport_aliases("https://www.ncbi.nlm.nih.gov/taxonomy/"),
+    "ncbitaxon:",
+    "ncbi:txid",
+    "taxonomy:",
+    "taxon:",
+    "txid",
+)
+_PMCID_PREFIXES = (
+    *_with_legacy_transport_aliases("https://www.ncbi.nlm.nih.gov/pmc/articles/"),
+    *_with_legacy_transport_aliases("https://pmc.ncbi.nlm.nih.gov/articles/"),
+    "pmcid:",
+    "pmc:",
+)
+_MESH_PREFIXES = ("mesh id:", "mesh_id:", "mesh:")
 
 
 def _normalized_text(value: object) -> str | None:

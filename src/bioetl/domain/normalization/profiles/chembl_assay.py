@@ -126,7 +126,8 @@ def create_case_normalizer(strategy: str = "uppercase") -> Callable[[str], str |
     return normalizer
 
 
-# Enum fields for strict validation
+# Strict assay enums canonicalize case-insensitively to the registry-defined
+# representation and fail closed on unknown values.
 _ENUM_FIELDS = {
     "assay_type": ASSAY_TYPES,
     "assay_test_type": ASSAY_TEST_TYPES,
@@ -209,11 +210,12 @@ _SPECIAL_RULE_COMPONENTS = {
             lambda value: normalize_profile_governed_vocabulary(
                 value,
                 allowed_values=CONFIDENCE_DESCRIPTIONS,
-                preserve_unknown=True,
+                preserve_unknown=False,
             ),
             "Normalize confidence_description against the governed ChEMBL "
-            "controlled vocabulary registry, preserving canonical observed-value "
-            "casing while retaining unknown provider lexemes for downstream DQ review.",
+            "controlled vocabulary registry, preserving canonical allowed-value "
+            "casing and failing closed on unknown values to stay aligned with DQ "
+            "enum governance.",
         ),
     ),
     **{

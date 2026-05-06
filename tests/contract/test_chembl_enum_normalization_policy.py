@@ -96,6 +96,14 @@ _FILTER_ENUM_POLICY = {
     ("target", "target_type"): TARGET_TYPES,
 }
 
+_STRICT_CHEMBL_ENUM_CASE_CANONICALIZATION = {
+    ("assay", "assay_type"): (" b ", "B"),
+    ("assay", "relationship_type"): ("d", "D"),
+    ("assay", "assay_group"): ("binding", "BINDING"),
+    ("assay", "assay_test_type"): ("EX VIVO", "Ex vivo"),
+    ("assay", "assay_category"): (" screening ", "screening"),
+}
+
 
 def _dq_enum_allowed(entity: str, field_name: str) -> frozenset[str]:
     dq_config = DQConfigLoader(Path("configs")).load("chembl", entity)
@@ -197,3 +205,22 @@ def test_chembl_filter_enum_values_are_canonical_operational_subsets(
         f"Filter values for chembl.{entity}.{field_name} must stay within the "
         f"canonical enum set: {sorted(filter_values - allowed_values)}"
     )
+
+
+@pytest.mark.parametrize(
+    ("entity", "field_name"),
+    sorted(_STRICT_CHEMBL_ENUM_CASE_CANONICALIZATION),
+)
+def test_chembl_assay_enum_profiles_canonicalize_case_variants(
+    entity: str,
+    field_name: str,
+) -> None:
+    """Assay enum-like fields must collapse mixed-case source lexemes to one canonical value."""
+    raw_value, expected = _STRICT_CHEMBL_ENUM_CASE_CANONICALIZATION[
+        (entity, field_name)
+    ]
+    _, profile, _ = _STRICT_CHEMBL_ENUM_POLICY[(entity, field_name)]
+
+    rule = profile.rule_for(field_name)
+    assert rule is not None
+    assert rule.normalizer(raw_value) == expected

@@ -94,7 +94,11 @@ class _BaseTransformerDependencyHelpersMixin:
     ) -> ContentHash:
         """Generate canonical content hash for record versioning."""
         owner = cast("_TransformerDependencyOwner", self)
-        hash_input = self._apply_hash_policy(owner._contract_policy, business_data)
+        hash_input = self._apply_hash_policy(
+            owner._identity,
+            owner._contract_policy,
+            business_data,
+        )
         return owner._identity.compute_content_hash(
             owner.provider,
             hash_input,
@@ -138,10 +142,20 @@ class _BaseTransformerDependencyHelpersMixin:
 
     @staticmethod
     def _apply_hash_policy(
+        identity_service: EntityIdentityGenerator,
         contract_policy: ContractPolicyProtocol,
         business_data: GoldRecord,
     ) -> GoldRecord:
-        """Apply include/exclude hash policy from contract config."""
+        """Apply legacy contract hash policy only when no explicit identity policy exists."""
+        identity_include = getattr(
+            identity_service, "_content_hash_include_fields", None
+        )
+        identity_exclude = getattr(
+            identity_service, "_content_hash_exclude_fields", None
+        )
+        if identity_include or identity_exclude:
+            return dict(business_data)
+
         include_fields = contract_policy.hash_include
         exclude_fields = set(contract_policy.hash_exclude)
 

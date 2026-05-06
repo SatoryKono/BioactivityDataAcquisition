@@ -17,29 +17,34 @@ from bioetl.domain.normalization.profiles._chembl_policy_registry_data import (
     ChemblControlledVocabularyFamily,
     ChemblOntologyPolicyFamily,
     ChemblPolicyRegistryData,
+    ChemblReferenceIdentifierFamily,
     ChemblStrictScalarFamily,
 )
 
 __all__ = [
     "CHEMBL_CONTROLLED_VOCAB_CONFIG",
     "CHEMBL_ONTOLOGY_POLICY_CONFIG",
+    "CHEMBL_REFERENCE_IDENTIFIER_CONFIG",
     "DEFAULT_CHEMBL_POLICY_REGISTRY_DATA",
     "PUBLICATION_CLASSIFICATION_CONFIG",
     "ChemblControlledVocabularyFamily",
     "ChemblOntologyPolicyFamily",
     "ChemblPolicyRegistryData",
     "ChemblPolicySurface",
+    "ChemblReferenceIdentifierFamily",
     "ChemblStrictScalarFamily",
     "chembl_boolean_family_fields",
     "chembl_controlled_family_fields",
     "chembl_flag_family_fields",
     "chembl_ontology_family_fields",
     "chembl_policy_surface",
+    "chembl_reference_identifier_family_fields",
     "initialize_chembl_policy_registry",
 ]
 
 CHEMBL_CONTROLLED_VOCAB_CONFIG = "configs/vocab/chembl_controlled.yaml"
 CHEMBL_ONTOLOGY_POLICY_CONFIG = "configs/vocab/chembl_ontology.yaml"
+CHEMBL_REFERENCE_IDENTIFIER_CONFIG = "configs/vocab/chembl_reference_identifiers.yaml"
 PUBLICATION_CLASSIFICATION_CONFIG = "configs/enums/publication_type_classification.csv"
 
 
@@ -58,6 +63,9 @@ _CONTROLLED_VOCABULARIES: Mapping[str, ChemblControlledVocabularyFamily] = (
 _STRICT_BOOLEAN_FAMILIES: Mapping[str, ChemblStrictScalarFamily] = MappingProxyType({})
 _STRICT_FLAG_FAMILIES: Mapping[str, ChemblStrictScalarFamily] = MappingProxyType({})
 _ONTOLOGY_FAMILIES: Mapping[str, ChemblOntologyPolicyFamily] = MappingProxyType({})
+_REFERENCE_IDENTIFIER_FAMILIES: Mapping[str, ChemblReferenceIdentifierFamily] = (
+    MappingProxyType({})
+)
 _POLICY_SURFACES: Mapping[tuple[str, str], ChemblPolicySurface] = MappingProxyType({})
 
 
@@ -81,6 +89,7 @@ def _build_policy_surfaces(
     _add_strict_scalar_surfaces(surfaces, data.strict_flag_families, "strict_flag")
     _add_controlled_vocabulary_surfaces(surfaces, data)
     _add_ontology_surfaces(surfaces, data)
+    _add_reference_identifier_surfaces(surfaces, data)
     _add_publication_classification_surfaces(surfaces, data)
     return MappingProxyType(surfaces)
 
@@ -179,10 +188,27 @@ def _add_publication_classification_surfaces(
         )
 
 
+def _add_reference_identifier_surfaces(
+    surfaces: dict[tuple[str, str], ChemblPolicySurface],
+    data: ChemblPolicyRegistryData,
+) -> None:
+    for reference_family in data.reference_identifier_families:
+        for field_ref in reference_family.fields:
+            entity, field_name = _parse_chembl_field_ref(str(field_ref))
+            surfaces[(entity, field_name)] = ChemblPolicySurface(
+                category="reference_identifier",
+                registry_source=CHEMBL_REFERENCE_IDENTIFIER_CONFIG,
+                invalid_value_mode=reference_family.invalid_value_mode,
+            )
+
+
 def initialize_chembl_policy_registry(data: ChemblPolicyRegistryData) -> None:
     """Inject immutable policy data into the domain registry runtime state."""
     global _CONTROLLED_VOCABULARIES, _ONTOLOGY_FAMILIES, _POLICY_SURFACES
-    global _STRICT_BOOLEAN_FAMILIES, _STRICT_FLAG_FAMILIES
+    global \
+        _REFERENCE_IDENTIFIER_FAMILIES, \
+        _STRICT_BOOLEAN_FAMILIES, \
+        _STRICT_FLAG_FAMILIES
 
     _STRICT_BOOLEAN_FAMILIES = MappingProxyType(
         {family.family_name: family for family in data.strict_boolean_families}
@@ -195,6 +221,9 @@ def initialize_chembl_policy_registry(data: ChemblPolicyRegistryData) -> None:
     )
     _ONTOLOGY_FAMILIES = MappingProxyType(
         {family.family_name: family for family in data.ontology_families}
+    )
+    _REFERENCE_IDENTIFIER_FAMILIES = MappingProxyType(
+        {family.family_name: family for family in data.reference_identifier_families}
     )
     _POLICY_SURFACES = _build_policy_surfaces(data)
 
@@ -260,6 +289,16 @@ def chembl_ontology_family_fields(
     if include_code_label_fields:
         fields.extend(payload.code_label_fields)
     return _family_fields(fields=fields, entity=entity)
+
+
+def chembl_reference_identifier_family_fields(
+    family: str,
+    *,
+    entity: str | None = None,
+) -> frozenset[str]:
+    """Return field names governed by one shared ChEMBL reference-ID family."""
+    payload = _REFERENCE_IDENTIFIER_FAMILIES[family]
+    return _family_fields(fields=list(payload.fields), entity=entity)
 
 
 initialize_chembl_policy_registry(DEFAULT_CHEMBL_POLICY_REGISTRY_DATA)

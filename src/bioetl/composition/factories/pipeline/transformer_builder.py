@@ -46,9 +46,18 @@ class TransformerBuilder:
         if transformer_class is None:
             return None
 
+        authoritative_hash_policy = yaml_config.content_hash_policy
         identity_service = EntityIdentityGenerator(
-            content_hash_include_fields=set(yaml_config.content_hash.include) or None,
-            content_hash_exclude_fields=set(yaml_config.content_hash.exclude),
+            content_hash_include_fields=(
+                set(authoritative_hash_policy.include_fields)
+                if authoritative_hash_policy is not None
+                else (set(yaml_config.content_hash.include) or None)
+            ),
+            content_hash_exclude_fields=(
+                set(authoritative_hash_policy.exclude_fields)
+                if authoritative_hash_policy is not None
+                else set(yaml_config.content_hash.exclude)
+            ),
         )
         entity_type = self.entity_type_extractor(self.pipeline_name)
         contract_policy = self._load_contract_policy(entity_type)

@@ -95,12 +95,14 @@ class TestGlobalPublicationTaxonomy:
         yaml_content = yaml_path.read_text(encoding="utf-8")
 
         assert (
-            "Global cross-provider" in yaml_content or "cross-provider" in yaml_content
+            "Canonical source of truth" in yaml_content
+            or "cross-provider" in yaml_content
         ), "Global publication enum config must document cross-provider scope"
 
         assert (
-            "configs/enums/chembl.yaml" in yaml_content
+            "provider-specific" in yaml_content
             or "individual providers" in yaml_content
+            or "source-specific" in yaml_content
         ), "Global publication enum config must reference provider-specific policies"
 
 

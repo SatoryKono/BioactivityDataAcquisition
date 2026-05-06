@@ -161,7 +161,24 @@ def test_chembl_activity_contract_is_registry_published_but_not_active_when_gold
 
 
 @pytest.mark.integration
-def test_specialized_chembl_fixture_surfaces_are_manifest_backed_and_not_active() -> (
+def test_deprecated_chembl_contract_registry_surfaces_have_migration_guides() -> None:
+    """Deprecated ChEMBL contract refs must document their replacement or shutdown path."""
+    store = FileContractRegistryStore(_REGISTRY_PATH)
+    registry = store.load()
+
+    missing_guides = [
+        contract_ref
+        for contract_ref, entry in sorted(registry.entries.items())
+        if contract_ref.startswith("chembl.")
+        and entry.status.value == "deprecated"
+        and not entry.migration_guides
+    ]
+
+    assert missing_guides == []
+
+
+@pytest.mark.integration
+def test_specialized_chembl_fixture_surfaces_are_manifest_backed_and_active() -> (
     None
 ):
     """Specialized ChEMBL fixture surfaces must resolve through tracked manifest evidence."""
@@ -191,7 +208,7 @@ def test_specialized_chembl_fixture_surfaces_are_manifest_backed_and_not_active(
         assert isinstance(entry.get("extraction_contract"), str)
 
     assert all(
-        registry.entries[contract_ref].status.value == "deprecated"
+        registry.entries[contract_ref].status.value == "active"
         for contract_ref in expected.values()
     )
 

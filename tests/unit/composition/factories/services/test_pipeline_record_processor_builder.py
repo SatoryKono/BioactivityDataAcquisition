@@ -97,9 +97,10 @@ def test_create_record_processor_from_pipeline_projects_pipeline_fields() -> Non
     assert request.entity_type == "activity"
     assert request.column_groups == ("system", "business")
     assert request.scd_config == {"type": 2}
-    assert request.content_hash_include_fields == frozenset({"doi"})
+    assert request.content_hash_policy_authoritative is True
+    assert request.content_hash_include_fields == frozenset({"doi", "title"})
     assert request.content_hash_exclude_fields == frozenset(
-        {"journal", "publisher", "entity_id", "content_hash"}
+        {"journal", "entity_id", "content_hash"}
     )
     assert request.content_hash_policy_by_version is not None
     assert request.content_hash_policy_by_version.active_version == "2.0.0"
@@ -142,9 +143,10 @@ def test_build_record_processor_config_and_validator_forwards_paths_and_strict()
     assert config.silver_output_path == SILVER_ROOT
     assert config.gold_output_path == GOLD_ROOT
     assert config.flat_structure is True
-    assert config.content_hash_include_fields == frozenset({"doi"})
+    assert config.content_hash_policy_authoritative is True
+    assert config.content_hash_include_fields == frozenset({"doi", "title"})
     assert config.content_hash_exclude_fields == frozenset(
-        {"journal", "publisher", "entity_id", "content_hash"}
+        {"journal", "entity_id", "content_hash"}
     )
     assert config.allow_compatibility_fallback is False
     assert config.content_hash_policy_by_version is not None

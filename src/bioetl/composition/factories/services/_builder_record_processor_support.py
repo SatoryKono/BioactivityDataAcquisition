@@ -63,6 +63,7 @@ class _RecordProcessorBuildRequest:
     lock_validator: Callable[[], Awaitable[bool]] | None
     column_groups: tuple[ColumnGroupConfig, ...]
     scd_config: ScdConfig | None
+    content_hash_policy_authoritative: bool
     content_hash_include_fields: frozenset[str]
     content_hash_exclude_fields: frozenset[str]
     content_hash_policy_by_version: ContentHashPolicyByVersion | None
@@ -101,6 +102,7 @@ def create_record_processor_impl(
         ),
         column_groups=request.column_groups,
         scd_config=request.scd_config,
+        content_hash_policy_authoritative=request.content_hash_policy_authoritative,
         content_hash_include_fields=request.content_hash_include_fields,
         content_hash_exclude_fields=request.content_hash_exclude_fields,
         content_hash_policy_by_version=request.content_hash_policy_by_version,

@@ -11,6 +11,7 @@ from bioetl.domain.normalization.profiles.chembl_pseudo_nulls import (
 from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_assay_parameter_type,
     normalize_profile_operator,
+    normalize_profile_standard_unit_enum,
     normalize_profile_text,
 )
 from bioetl.domain.schemas.chembl.assay_parameters import AssayParametersSchema
@@ -27,6 +28,7 @@ CHEMBL_ASSAY_PARAMETERS_SCHEMA_FIELDS = tuple(
     AssayParametersSchema.to_schema().columns.keys()
 )
 ASSAY_PARAMETER_STANDARD_TYPES = chembl_enum("assay_parameters", "standard_type")
+ASSAY_PARAMETER_STANDARD_UNITS = chembl_enum("activity", "standard_units")
 STANDARD_RELATIONS = chembl_enum("assay_parameters", "standard_relation")
 
 _META_FIELDS = frozenset(
@@ -47,11 +49,21 @@ _FLOAT_FIELDS = frozenset({"standard_value", "value"})
 _OPERATOR_FIELDS = chembl_controlled_family_fields(
     "operators", entity="assay_parameters"
 )
-_UNIT_FIELDS = chembl_controlled_family_fields("units", entity="assay_parameters")
+_RAW_UNIT_FIELDS = chembl_controlled_family_fields(
+    "raw_units", entity="assay_parameters"
+)
 _TYPE_FIELDS = chembl_controlled_family_fields(
     "assay_parameter_types",
     entity="assay_parameters",
 )
+
+
+def normalize_assay_parameter_standard_units(value: object) -> object:
+    """Normalize one assay-parameter standard-unit field against the strict enum."""
+    return normalize_profile_standard_unit_enum(
+        value,
+        allowed_values=ASSAY_PARAMETER_STANDARD_UNITS,
+    )
 
 
 def normalize_profile_assay_parameter_type_field(value: object) -> object:
@@ -88,6 +100,12 @@ _SPECIAL_RULE_COMPONENTS = {
         ),
         "Normalize standard_relation to a canonical ASCII operator enum.",
     ),
+    "standard_units": (
+        normalize_assay_parameter_standard_units,
+        "Normalize assay-parameter standard_units against the "
+        "published ChEMBL standard-unit enum after canonical unit "
+        "alias collapse; unknown values collapse to None.",
+    ),
     **dict.fromkeys(sorted(_TYPE_FIELDS), _TYPE_RULE),
 }
 
@@ -101,9 +119,10 @@ CHEMBL_ASSAY_PARAMETERS_PROFILE = build_standard_profile(
     operator_fields=_OPERATOR_FIELDS,
     enum_fields={
         "standard_type": ASSAY_PARAMETER_STANDARD_TYPES,
+        "standard_units": ASSAY_PARAMETER_STANDARD_UNITS,
     },
     special_rules=_SPECIAL_RULE_COMPONENTS,
-    unit_fields=_UNIT_FIELDS,
+    unit_fields=_RAW_UNIT_FIELDS,
     null_fields=chembl_pseudo_null_fields("assay_parameters"),
 )
 

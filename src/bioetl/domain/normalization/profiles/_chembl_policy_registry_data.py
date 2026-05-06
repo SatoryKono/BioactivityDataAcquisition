@@ -9,6 +9,7 @@ __all__ = [
     "ChemblControlledVocabularyFamily",
     "ChemblOntologyPolicyFamily",
     "ChemblPolicyRegistryData",
+    "ChemblReferenceIdentifierFamily",
     "ChemblStrictScalarFamily",
 ]
 
@@ -45,6 +46,16 @@ class ChemblOntologyPolicyFamily:
 
 
 @dataclass(frozen=True, slots=True)
+class ChemblReferenceIdentifierFamily:
+    """Immutable reference-identifier policy for one ChEMBL family."""
+
+    family_name: str
+    reference_family: str
+    invalid_value_mode: str
+    fields: tuple[str, ...]
+
+
+@dataclass(frozen=True, slots=True)
 class ChemblPolicyRegistryData:
     """Immutable semantic-policy payload consumed by domain normalization."""
 
@@ -53,6 +64,7 @@ class ChemblPolicyRegistryData:
     controlled_vocabularies: tuple[ChemblControlledVocabularyFamily, ...]
     ontology_families: tuple[ChemblOntologyPolicyFamily, ...]
     publication_classification_fields: tuple[str, ...]
+    reference_identifier_families: tuple[ChemblReferenceIdentifierFamily, ...] = ()
 
 
 DEFAULT_CHEMBL_POLICY_REGISTRY_DATA = ChemblPolicyRegistryData(
@@ -99,13 +111,18 @@ DEFAULT_CHEMBL_POLICY_REGISTRY_DATA = ChemblPolicyRegistryData(
     ),
     controlled_vocabularies=(
         ChemblControlledVocabularyFamily(
-            family_name="units",
+            family_name="raw_units",
             invalid_value_mode="preserve_unknown_lexeme",
             fields=(
                 "chembl_activity.units",
-                "chembl_activity.standard_units",
-                "chembl_activity.qudt_units",
                 "chembl_assay_parameters.units",
+            ),
+        ),
+        ChemblControlledVocabularyFamily(
+            family_name="standard_units",
+            invalid_value_mode="reject_unknown_lexeme",
+            fields=(
+                "chembl_activity.standard_units",
                 "chembl_assay_parameters.standard_units",
             ),
         ),
@@ -183,6 +200,13 @@ DEFAULT_CHEMBL_POLICY_REGISTRY_DATA = ChemblPolicyRegistryData(
             version_fields=("chembl_activity.uo_ontology_version",),
         ),
         ChemblOntologyPolicyFamily(
+            family_name="qudt",
+            fields=("chembl_activity.qudt_units",),
+            iri_fields=("chembl_activity.qudt_unit_iri",),
+            mapping_status_fields=("chembl_activity.qudt_unit_mapping_status",),
+            version_fields=("chembl_activity.qudt_ontology_version",),
+        ),
+        ChemblOntologyPolicyFamily(
             family_name="bto",
             fields=("chembl_tissue.bto_id",),
             iri_fields=("chembl_tissue.bto_iri",),
@@ -237,5 +261,99 @@ DEFAULT_CHEMBL_POLICY_REGISTRY_DATA = ChemblPolicyRegistryData(
         "publication_type_unified",
         "publication_subclass",
         "publication_class",
+    ),
+    reference_identifier_families=(
+        ChemblReferenceIdentifierFamily(
+            family_name="chembl",
+            reference_family="chembl",
+            invalid_value_mode="preserve_unknown_lexeme",
+            fields=(
+                "chembl_activity.assay_id",
+                "chembl_activity.molecule_id",
+                "chembl_activity.parent_molecule_id",
+                "chembl_activity.publication_id",
+                "chembl_activity.target_id",
+                "chembl_assay.assay_id",
+                "chembl_assay.cell_id",
+                "chembl_assay.publication_id",
+                "chembl_assay.target_id",
+                "chembl_assay.tissue_id",
+                "chembl_assay_parameters.assay_id",
+                "chembl_cell_line.cell_id",
+                "chembl_compound_record.molecule_id",
+                "chembl_compound_record.publication_id",
+                "chembl_molecule.hierarchy_active_chembl_id",
+                "chembl_molecule.hierarchy_child_chembl_id",
+                "chembl_molecule.hierarchy_parent_chembl_id",
+                "chembl_molecule.molecule_id",
+                "chembl_publication.publication_id",
+                "chembl_publication_term.publication_id",
+                "chembl_subcellular_fraction.example_assay_id",
+                "chembl_target.target_id",
+                "chembl_tissue.tissue_id",
+            ),
+        ),
+        ChemblReferenceIdentifierFamily(
+            family_name="ncbi_taxonomy",
+            reference_family="ncbi_taxonomy",
+            invalid_value_mode="preserve_numeric_range_for_dq_review",
+            fields=(
+                "chembl_activity.target_taxonomy_id",
+                "chembl_assay.assay_taxonomy_id",
+                "chembl_assay.variant_taxonomy_id",
+                "chembl_cell_line.cell_source_taxonomy_id",
+                "chembl_target.taxonomy_id",
+                "chembl_target_component.taxonomy_id",
+            ),
+        ),
+        ChemblReferenceIdentifierFamily(
+            family_name="uniprot_accession",
+            reference_family="uniprot_accession",
+            invalid_value_mode="preserve_unknown_lexeme",
+            fields=(
+                "chembl_activity.assay_variant_accession",
+                "chembl_assay.variant_accession",
+                "chembl_target.component_accessions",
+                "chembl_target_component.accession",
+            ),
+        ),
+        ChemblReferenceIdentifierFamily(
+            family_name="doi",
+            reference_family="doi",
+            invalid_value_mode="canonicalize_or_null_blank",
+            fields=(
+                "chembl_activity.publication_doi",
+                "chembl_publication.doi",
+                "chembl_publication.publication_doi",
+            ),
+        ),
+        ChemblReferenceIdentifierFamily(
+            family_name="pmid",
+            reference_family="pmid",
+            invalid_value_mode="reject_invalid_numeric_identifier",
+            fields=(
+                "chembl_activity.publication_pmid",
+                "chembl_publication.pmid",
+                "chembl_publication.publication_pmid",
+                "chembl_publication_similarity.pubmed_id1",
+                "chembl_publication_similarity.pubmed_id2",
+            ),
+        ),
+        ChemblReferenceIdentifierFamily(
+            family_name="pmcid",
+            reference_family="pmcid",
+            invalid_value_mode="preserve_unknown_lexeme",
+            fields=(
+                "chembl_activity.publication_pmc_id",
+                "chembl_publication.pmc_id",
+                "chembl_publication.publication_pmc_id",
+            ),
+        ),
+        ChemblReferenceIdentifierFamily(
+            family_name="mesh",
+            reference_family="mesh",
+            invalid_value_mode="preserve_unknown_lexeme",
+            fields=("chembl_publication_term.mesh_id",),
+        ),
     ),
 )

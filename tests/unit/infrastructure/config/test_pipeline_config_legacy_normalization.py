@@ -22,6 +22,7 @@ def _schema_signature(config: Any) -> dict[str, Any]:
         "column_groups": _normalize_column_groups(dumped.get("column_groups")),
         "data_schema": dumped.get("data_schema"),
         "content_hash": dumped.get("content_hash"),
+        "content_hash_policy": dumped.get("content_hash_policy"),
     }
 
 
@@ -44,6 +45,8 @@ def _write_unified_pipeline(
     entity: str,
     pipeline: dict[str, Any],
     schema: dict[str, Any] | None = None,
+    contracts: dict[str, Any] | None = None,
+    hash_policy: dict[str, Any] | None = None,
 ) -> None:
     entity_dir = entities_dir / provider
     entity_dir.mkdir(parents=True, exist_ok=True)
@@ -55,6 +58,10 @@ def _write_unified_pipeline(
     }
     if schema is not None:
         payload["schema"] = schema
+    if contracts is not None:
+        payload["contracts"] = contracts
+    if hash_policy is not None:
+        payload["hash_policy"] = hash_policy
     (entity_dir / f"{entity}.yaml").write_text(yaml.dump(payload), encoding="utf-8")
 
 
@@ -108,7 +115,134 @@ def test_pipeline_loader_uses_unified_schema_section(
         "column_groups": _normalize_column_groups(schema_payload["column_groups"]),
         "data_schema": None,
         "content_hash": schema_payload["content_hash"],
+        "content_hash_policy": None,
     }
+
+
+def test_pipeline_loader_projects_root_hash_policy_as_authoritative_runtime_object(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Root hash_policy should become the single typed runtime hash-policy object."""
+    load_pipeline_config.cache_clear()
+    entities_dir = tmp_path / "configs" / "entities"
+    _write_unified_pipeline(
+        entities_dir=entities_dir,
+        provider="chembl",
+        entity="activity",
+        pipeline={
+            "pipeline_name": "chembl_activity",
+            "entity_type": "activity",
+            "provider": "chembl",
+            "business_primary_keys": ["activity_id"],
+        },
+        schema={
+            "column_groups": [
+                {"name": "system", "fields": ["_etl_ts"]},
+                {"name": "business", "fields": ["activity_id"]},
+            ],
+            "content_hash": {"include": [], "exclude": []},
+            "silver": {"include_groups": ["system", "business"]},
+            "gold": {"include_groups": ["business"]},
+        },
+        contracts={
+            "primary_key": ["activity_id"],
+            "merge_keys": ["activity_id"],
+            "hash_include": [],
+        },
+        hash_policy={
+            "provider": "chembl",
+            "entity": "activity",
+            "contract": {
+                "version": "1.0.0",
+                "migration_note": "Introduce single authoritative hash policy.",
+            },
+            "hash_policy": {
+                "algorithm": "sha256",
+                "canonicalization": "provider + canonical_json_dumps(normalized_record)",
+                "include_fields": ["activity_id", "value"],
+                "exclude_fields": ["_run_id"],
+                "exclude_patterns": ["^_dq_"],
+                "field_ordering": {"activity_properties": "order_sensitive_json"},
+                "normalization": {
+                    "trim_strings": True,
+                    "round_floats": {"enabled": True, "precision": 10},
+                    "dates": {"enabled": True, "format": "YYYY-MM-DD"},
+                    "null_handling": {"nan_to_null": True, "inf_to_null": True},
+                },
+            },
+        },
+    )
+
+    monkeypatch.chdir(tmp_path)
+    loaded = load_pipeline_config("chembl_activity")
+
+    assert loaded.content_hash.include == []
+    assert loaded.content_hash.exclude == []
+    assert loaded.content_hash_policy is not None
+    assert loaded.content_hash_policy.provider == "chembl"
+    assert loaded.content_hash_policy.entity == "activity"
+    assert loaded.content_hash_policy.contract.version == "1.0.0"
+    assert loaded.content_hash_policy.include_fields == ["activity_id", "value"]
+    assert loaded.content_hash_policy.exclude_fields == ["_run_id"]
+
+
+def test_pipeline_loader_rejects_non_empty_legacy_hash_shims_when_root_policy_present(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Legacy schema/contract hash surfaces must stay empty compatibility shims."""
+    load_pipeline_config.cache_clear()
+    entities_dir = tmp_path / "configs" / "entities"
+    _write_unified_pipeline(
+        entities_dir=entities_dir,
+        provider="chembl",
+        entity="activity",
+        pipeline={
+            "pipeline_name": "chembl_activity",
+            "entity_type": "activity",
+            "provider": "chembl",
+            "business_primary_keys": ["activity_id"],
+        },
+        schema={
+            "column_groups": [
+                {"name": "system", "fields": ["_etl_ts"]},
+                {"name": "business", "fields": ["activity_id"]},
+            ],
+            "content_hash": {"include": ["activity_id"], "exclude": []},
+            "silver": {"include_groups": ["system", "business"]},
+            "gold": {"include_groups": ["business"]},
+        },
+        contracts={
+            "primary_key": ["activity_id"],
+            "merge_keys": ["activity_id"],
+            "hash_include": [],
+        },
+        hash_policy={
+            "provider": "chembl",
+            "entity": "activity",
+            "contract": {
+                "version": "1.0.0",
+                "migration_note": "Introduce single authoritative hash policy.",
+            },
+            "hash_policy": {
+                "algorithm": "sha256",
+                "canonicalization": "provider + canonical_json_dumps(normalized_record)",
+                "include_fields": ["activity_id"],
+                "exclude_fields": [],
+                "normalization": {
+                    "trim_strings": True,
+                    "round_floats": {"enabled": True, "precision": 10},
+                    "dates": {"enabled": True, "format": "YYYY-MM-DD"},
+                    "null_handling": {"nan_to_null": True, "inf_to_null": True},
+                },
+            },
+        },
+    )
+
+    monkeypatch.chdir(tmp_path)
+    with pytest.raises(ValueError, match="schema.content_hash.include must be empty"):
+        load_pipeline_config("chembl_activity")
 
 
 def test_pipeline_schema_normalizer_golden_vector(

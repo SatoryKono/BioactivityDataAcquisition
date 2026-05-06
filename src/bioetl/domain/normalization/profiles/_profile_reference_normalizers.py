@@ -3,6 +3,10 @@
 from __future__ import annotations
 
 from bioetl.domain.mapping.publication_type_mapping import normalize_publication_type
+from bioetl.domain.normalization.json import (
+    deserialize_json_value,
+    serialize_json_canonical,
+)
 from bioetl.domain.normalization.reference_ids import (
     normalize_chembl_reference_id,
     normalize_drugbank_reference_id,
@@ -12,6 +16,8 @@ from bioetl.domain.normalization.reference_ids import (
     normalize_json_array_reference_ids,
     normalize_json_object_reference_id,
     normalize_json_string_reference_ids,
+    normalize_mesh_reference_id,
+    normalize_ncbi_taxonomy_reference_id,
     normalize_openalex_reference_id,
     normalize_orcid_reference_id,
     normalize_pdb_reference_id,
@@ -29,6 +35,8 @@ __all__ = [
     "normalize_profile_drugbank_ids",
     "normalize_profile_issn_id",
     "normalize_profile_issn_ids",
+    "normalize_profile_mesh_id",
+    "normalize_profile_ncbi_taxonomy_id",
     "normalize_profile_openalex_author_ids",
     "normalize_profile_openalex_institution_ids",
     "normalize_profile_openalex_ror_ids",
@@ -46,6 +54,7 @@ __all__ = [
     "normalize_profile_semantic_scholar_publication_type_raw",
     "normalize_profile_uniprot_accession",
     "normalize_profile_uniprot_accessions",
+    "normalize_profile_uniprot_accessions_ordered",
     "normalize_profile_uniprot_go_references",
     "normalize_profile_uniprot_interpro_references",
 ]
@@ -178,6 +187,24 @@ def normalize_profile_uniprot_accession(value: object) -> object:
     return normalize_uniprot_accession_reference_id(value)
 
 
+def normalize_profile_uniprot_accessions_ordered(value: object) -> object:
+    """Canonicalize UniProt accession JSON arrays while preserving source order."""
+    if not isinstance(value, str):
+        return value
+    normalized = normalize_string(value)
+    if normalized is None:
+        return None
+    try:
+        parsed = deserialize_json_value(normalized)
+    except ValueError:
+        return None
+    if not isinstance(parsed, list):
+        return None
+    return serialize_json_canonical(
+        [normalize_uniprot_accession_reference_id(item) for item in parsed]
+    )
+
+
 def normalize_profile_uniprot_accessions(value: object) -> object:
     """Canonicalize UniProt accession JSON arrays."""
     return normalize_json_string_reference_ids(
@@ -189,6 +216,16 @@ def normalize_profile_uniprot_accessions(value: object) -> object:
 def normalize_profile_chembl_id(value: object) -> object:
     """Canonicalize one ChEMBL identifier value."""
     return normalize_chembl_reference_id(value)
+
+
+def normalize_profile_ncbi_taxonomy_id(value: object) -> object:
+    """Canonicalize one NCBI Taxonomy identifier value."""
+    return normalize_ncbi_taxonomy_reference_id(value)
+
+
+def normalize_profile_mesh_id(value: object) -> object:
+    """Canonicalize one MeSH descriptor identifier value."""
+    return normalize_mesh_reference_id(value)
 
 
 def normalize_profile_chembl_ids(value: object) -> object:

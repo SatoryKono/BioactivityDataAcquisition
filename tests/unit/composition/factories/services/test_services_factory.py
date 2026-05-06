@@ -383,6 +383,7 @@ def test_create_record_processor_builds_dependencies(
             lock_validator=None,
             column_groups=(),
             scd_config=None,
+            content_hash_policy_authoritative=False,
             content_hash_include_fields=frozenset(),
             content_hash_exclude_fields=frozenset(),
             content_hash_policy_by_version=None,

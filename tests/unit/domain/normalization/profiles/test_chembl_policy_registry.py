@@ -145,12 +145,18 @@ def test_chembl_policy_registry_exposes_profile_authoring_field_sets() -> None:
     assert chembl_flag_family_fields("binary_flags", entity="activity") == frozenset(
         {"standard_flag", "potential_duplicate", "manual_curation_flag"}
     )
-    assert chembl_controlled_family_fields("units", entity="activity") == frozenset(
-        {"units", "standard_units", "qudt_units"}
+    assert chembl_controlled_family_fields("raw_units", entity="activity") == frozenset(
+        {"units"}
     )
     assert chembl_controlled_family_fields(
-        "units", entity="assay_parameters"
-    ) == frozenset({"units", "standard_units"})
+        "standard_units", entity="activity"
+    ) == frozenset({"standard_units"})
+    assert chembl_controlled_family_fields(
+        "raw_units", entity="assay_parameters"
+    ) == frozenset({"units"})
+    assert chembl_controlled_family_fields(
+        "standard_units", entity="assay_parameters"
+    ) == frozenset({"standard_units"})
     assert chembl_flag_family_fields(
         "provider_code_flags",
         entity="molecule",
@@ -160,6 +166,9 @@ def test_chembl_policy_registry_exposes_profile_authoring_field_sets() -> None:
     ) == frozenset({"relation"})
     assert chembl_ontology_family_fields("bao", entity="activity") == frozenset(
         {"bao_endpoint", "bao_format"}
+    )
+    assert chembl_ontology_family_fields("qudt", entity="activity") == frozenset(
+        {"qudt_units"}
     )
     assert chembl_ontology_family_fields("clo", entity="cell_line") == frozenset(
         {"clo_id"}

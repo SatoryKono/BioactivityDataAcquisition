@@ -255,6 +255,59 @@ def test_entity_contract_values_override_base_defaults(
 
 
 @pytest.mark.unit
+def test_root_hash_policy_requires_empty_contract_hash_shims(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Root hash_policy must be the only non-empty entity-level hash selector."""
+    load_pipeline_contract_policy.cache_clear()
+    monkeypatch.chdir(tmp_path)
+
+    entity_dir = tmp_path / "configs" / "entities" / "chembl"
+    entity_dir.mkdir(parents=True)
+    (entity_dir / "activity.yaml").write_text(
+        yaml.safe_dump(
+            {
+                "contracts": {
+                    "primary_key": ["activity_id"],
+                    "merge_keys": ["activity_id"],
+                    "hash_include": ["activity_id"],
+                },
+                "hash_policy": {
+                    "provider": "chembl",
+                    "entity": "activity",
+                    "contract": {
+                        "version": "1.0.0",
+                        "migration_note": "Promote root hash_policy to authority.",
+                    },
+                    "hash_policy": {
+                        "algorithm": "sha256",
+                        "canonicalization": (
+                            "provider + canonical_json_dumps(normalized_record)"
+                        ),
+                        "include_fields": ["activity_id"],
+                        "exclude_fields": [],
+                        "normalization": {
+                            "trim_strings": True,
+                            "round_floats": {"enabled": True, "precision": 10},
+                            "dates": {"enabled": True, "format": "YYYY-MM-DD"},
+                            "null_handling": {
+                                "nan_to_null": True,
+                                "inf_to_null": True,
+                            },
+                        },
+                    },
+                },
+            },
+            sort_keys=False,
+        ),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="contracts.hash_include must be empty"):
+        load_pipeline_contract_policy("chembl", "activity")
+
+
+@pytest.mark.unit
 def test_rollout_defaults_and_registry_alignment(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

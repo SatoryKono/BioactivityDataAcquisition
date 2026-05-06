@@ -47,6 +47,7 @@ from bioetl.domain.normalization.profiles._chembl_profile_helpers import (
 )
 from bioetl.domain.normalization.profiles.chembl_json_ordering_policy import (
     CHEMBL_JSON_ORDERING_POLICY,
+    chembl_hash_config_field_ordering,
 )
 from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_canonical_smiles,
@@ -71,6 +72,14 @@ _NON_CHEMBL_PUBLICATION_PROFILES = {
     "openalex.publication": OPENALEX_PUBLICATION_PROFILE,
     "pubmed.publication": PUBMED_PUBLICATION_PROFILE,
     "semanticscholar.publication": SEMANTICSCHOLAR_PUBLICATION_PROFILE,
+}
+_CHEMBL_HASH_CONFIG_PATHS = {
+    "chembl_activity": Path("configs/entities/chembl/activity.yaml"),
+    "chembl_assay": Path("configs/entities/chembl/assay.yaml"),
+    "chembl_molecule": Path("configs/entities/chembl/molecule.yaml"),
+    "chembl_publication": Path("configs/entities/chembl/publication.yaml"),
+    "chembl_target": Path("configs/entities/chembl/target.yaml"),
+    "chembl_target_component": Path("configs/entities/chembl/target_component.yaml"),
 }
 
 
@@ -145,10 +154,14 @@ def test_chembl_json_ordering_policy_names_all_current_set_like_fields() -> None
     assert actual == expected
 
 
-def test_chembl_target_hash_config_does_not_override_set_like_component_vocab_lists() -> (
-    None
-):
-    config_path = Path("configs/entities/chembl/target.yaml")
+@pytest.mark.parametrize(
+    ("pipeline_name", "config_path"),
+    sorted(_CHEMBL_HASH_CONFIG_PATHS.items()),
+)
+def test_chembl_hash_config_field_ordering_matches_domain_policy(
+    pipeline_name: str,
+    config_path: Path,
+) -> None:
     config = yaml.safe_load(config_path.read_text(encoding="utf-8"))
     assert isinstance(config, dict)
 
@@ -157,8 +170,7 @@ def test_chembl_target_hash_config_does_not_override_set_like_component_vocab_li
     )
     assert isinstance(field_ordering, dict)
 
-    assert "component_types" not in field_ordering
-    assert "component_relationships" not in field_ordering
+    assert field_ordering == chembl_hash_config_field_ordering(pipeline_name)
 
 
 def test_pubchem_smiles_rules_use_domain_smiles_normalization() -> None:

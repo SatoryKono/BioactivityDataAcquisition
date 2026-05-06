@@ -198,6 +198,26 @@ def test_profile_backed_hash_policy_allows_explicit_technical_exclusions() -> No
 
 
 @pytest.mark.unit
+def test_authoritative_config_hash_policy_overrides_profile_field_selection() -> None:
+    processor = RecordNormalizationProcessor(
+        provider="chembl",
+        entity_type="activity",
+        content_hash_policy_authoritative=True,
+        content_hash_include_fields=frozenset({"activity_id"}),
+        content_hash_exclude_fields=frozenset(),
+    )
+
+    hash_a = processor.compute_content_hash(
+        {"activity_id": "CHEMBL1", "value": "10", "relation": "="}
+    )
+    hash_b = processor.compute_content_hash(
+        {"activity_id": "CHEMBL1", "value": "20", "relation": "<"}
+    )
+
+    assert hash_a == hash_b
+
+
+@pytest.mark.unit
 def test_finalize_pre_silver_attaches_active_and_versioned_content_hashes() -> None:
     processor = RecordNormalizationProcessor(
         provider="crossref",

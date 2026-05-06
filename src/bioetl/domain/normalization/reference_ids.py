@@ -35,6 +35,10 @@ from bioetl.domain.normalization._reference_id_support import (
     _INTERPRO_RE,
     _ISSN_PREFIXES,
     _ISSN_RE,
+    _MESH_PREFIXES,
+    _MESH_RE,
+    _NCBI_TAXONOMY_PREFIXES,
+    _NCBI_TAXONOMY_RE,
     _OBO_IRI_PREFIXES,
     _ORCID_PREFIXES,
     _ORCID_RE,
@@ -42,6 +46,8 @@ from bioetl.domain.normalization._reference_id_support import (
     _PDB_RE,
     _PFAM_PREFIXES,
     _PFAM_RE,
+    _PMCID_PREFIXES,
+    _PMCID_RE,
     _REACTOME_PREFIXES,
     _REACTOME_RE,
     _ROR_PREFIXES,
@@ -52,11 +58,13 @@ from bioetl.domain.normalization._reference_id_support import (
     _normalized_text,
     _strip_prefixes,
 )
+from bioetl.domain.normalization.identifiers import normalize_doi, normalize_pmid
 
 __all__ = [
     "ReferenceIdentifierFamily",
     "ReferenceNormalizer",
     "normalize_chembl_reference_id",
+    "normalize_doi_reference_id",
     "normalize_drugbank_reference_id",
     "normalize_go_reference_id",
     "normalize_interpro_reference_id",
@@ -64,10 +72,14 @@ __all__ = [
     "normalize_json_array_reference_ids",
     "normalize_json_object_reference_id",
     "normalize_json_string_reference_ids",
+    "normalize_mesh_reference_id",
+    "normalize_ncbi_taxonomy_reference_id",
     "normalize_openalex_reference_id",
     "normalize_orcid_reference_id",
     "normalize_pdb_reference_id",
     "normalize_pfam_reference_id",
+    "normalize_pmcid_reference_id",
+    "normalize_pmid_reference_id",
     "normalize_reactome_reference_id",
     "normalize_ror_reference_id",
     "normalize_semantic_scholar_reference_id",
@@ -173,6 +185,67 @@ def normalize_chembl_reference_id(value: object) -> object:
     return _canonical_or_text(value, normalizer=_normalize_chembl_text)
 
 
+def _normalize_ncbi_taxonomy_text(value: str) -> int | None:
+    candidate = _strip_prefixes(value, _NCBI_TAXONOMY_PREFIXES)
+    if not _NCBI_TAXONOMY_RE.fullmatch(candidate):
+        return None
+    taxonomy_id = int(candidate)
+    return taxonomy_id if taxonomy_id > 0 else None
+
+
+def normalize_ncbi_taxonomy_reference_id(value: object) -> object:
+    """Normalize NCBI Taxonomy identifiers to positive integer scalar form."""
+    if value is None or isinstance(value, bool):
+        return None
+    if isinstance(value, int):
+        return value if value > 0 else None
+    if isinstance(value, float):
+        return int(value) if value.is_integer() and value > 0 else value
+    text = _normalized_text(value)
+    if text is None:
+        return value
+    return _normalize_ncbi_taxonomy_text(text) or text
+
+
+def normalize_doi_reference_id(value: object) -> object:
+    """Normalize DOI references to lowercase bare DOI text."""
+    if value is None:
+        return None
+    if not isinstance(value, str):
+        return value
+    return normalize_doi(value)
+
+
+def normalize_pmid_reference_id(value: object) -> object:
+    """Normalize PubMed references to canonical digits-only PMID text."""
+    if value is None or isinstance(value, bool):
+        return None
+    if isinstance(value, str | int):
+        return normalize_pmid(value)
+    return value
+
+
+def _normalize_pmcid_text(value: str) -> str | None:
+    candidate = _strip_prefixes(value, _PMCID_PREFIXES)
+    match = _PMCID_RE.fullmatch(candidate)
+    return f"PMC{match.group(1)}" if match else None
+
+
+def normalize_pmcid_reference_id(value: object) -> object:
+    """Normalize PubMed Central references to uppercase ``PMC`` identifiers."""
+    return _canonical_or_text(value, normalizer=_normalize_pmcid_text)
+
+
+def _normalize_mesh_text(value: str) -> str | None:
+    candidate = _strip_prefixes(value, _MESH_PREFIXES).replace(" ", "").upper()
+    return candidate if _MESH_RE.fullmatch(candidate) else None
+
+
+def normalize_mesh_reference_id(value: object) -> object:
+    """Normalize MeSH descriptor references to uppercase descriptor IDs."""
+    return _canonical_or_text(value, normalizer=_normalize_mesh_text)
+
+
 def _normalize_drugbank_text(value: str) -> str | None:
     match = _DRUGBANK_ID_RE.fullmatch(value.strip())
     return f"DB{match.group(1)}" if match else None
@@ -213,6 +286,7 @@ _REFERENCE_IDENTIFIER_FAMILIES = build_reference_identifier_families(
         "openalex_work": _normalize_openalex_work_reference_id,
         "semantic_scholar_author": normalize_semantic_scholar_reference_id,
         "semantic_scholar_paper": normalize_semantic_scholar_reference_id,
+        "ncbi_taxonomy": normalize_ncbi_taxonomy_reference_id,
         "uniprot_accession": normalize_uniprot_accession_reference_id,
         "go": normalize_go_reference_id,
         "interpro": normalize_interpro_reference_id,
@@ -220,6 +294,10 @@ _REFERENCE_IDENTIFIER_FAMILIES = build_reference_identifier_families(
         "reactome": normalize_reactome_reference_id,
         "pdb": normalize_pdb_reference_id,
         "chembl": normalize_chembl_reference_id,
+        "doi": normalize_doi_reference_id,
+        "pmid": normalize_pmid_reference_id,
+        "pmcid": normalize_pmcid_reference_id,
+        "mesh": normalize_mesh_reference_id,
         "drugbank": normalize_drugbank_reference_id,
     }
 )
