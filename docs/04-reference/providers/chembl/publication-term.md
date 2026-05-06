@@ -58,15 +58,16 @@ ______________________________________________________________________
 
 ### Entity ID
 
-Entity ID вычисляется как SHA256-хэш композитного ключа:
+Entity ID вычисляется как 16-символьный SHA256 prefix от канонического композитного ключа:
 
 ```python
 composite = f"{publication_id}:{term_type}:{normalized_term}"
 entity_id = hashlib.sha256(composite.encode()).hexdigest()[:16]
 ```
 
-**Нормализация термина:** `term` проходит profile `normalize_profile_title`.
-`term_type` нормализуется через общий enum source `configs/enums/chembl.yaml`
+**Нормализация identity payload:** `publication_id` trim-only; `term` проходит
+canonical lower+strip seam для identity; `term_type` нормализуется через общий
+enum source `configs/enums/chembl.yaml`
 и schema constant `PUBLICATION_TERM_TYPES`; lowercase и пробельные варианты
 канонизируются к одному из `MESH_HEADING`, `MESH_QUALIFIER`, `KEYWORD`,
 `CONCEPT`, а неизвестные значения схлопываются в `None` и затем ловятся

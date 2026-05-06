@@ -1436,6 +1436,25 @@ class TestPublicationTermTransformer:
         assert "content_hash" not in result.business_data
 
     @pytest.mark.asyncio
+    async def test_transform_pre_silver_canonicalizes_term_type_before_entity_id(
+        self, transformer, mock_context
+    ):
+        """Staged publication-term identity must use canonical term_type semantics."""
+        record = {
+            "publication_id": "CHEMBL1135642",
+            "term": "Aspirin",
+            "term_type": " keyword ",
+        }
+
+        pre_silver = await transformer.transform_pre_silver(mock_context, record, index=0)
+        legacy_result = await transformer.transform(mock_context, record, index=0)
+
+        assert isinstance(pre_silver, PreSilverRecord)
+        assert legacy_result is not None
+        assert pre_silver.business_data["term_type"] == "KEYWORD"
+        assert pre_silver.entity_id == legacy_result["entity_id"]
+
+    @pytest.mark.asyncio
     async def test_transform_pre_silver_returns_none_when_no_terms_are_extracted(
         self, transformer, mock_context
     ):

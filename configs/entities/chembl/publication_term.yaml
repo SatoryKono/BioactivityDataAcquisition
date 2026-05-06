@@ -63,9 +63,9 @@ quality:
   entity_field_validations:
   - field: entity_id
     type: pattern
-    pattern: ^[a-f0-9]{64}$
+    pattern: ^[a-f0-9]{16}$
     nullable: false
-    error_message: entity_id must be a 64-char SHA256 hash
+    error_message: entity_id must be a 16-char SHA256 hash prefix
   - field: publication_id
     type: pattern
     pattern: ^CHEMBL\d+$
