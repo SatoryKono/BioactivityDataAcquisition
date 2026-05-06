@@ -78,3 +78,61 @@ def test_tests_workflow_runs_naming_package_consistency_gate() -> None:
     workflow = (repo_root / ".github/workflows/tests.yml").read_text(encoding="utf-8")
     assert "Pre-merge naming/package consistency gate" in workflow
     assert "python -m scripts.engineering.qa check-naming-pkg --check" in workflow
+
+
+def test_builder_outside_composition_fails_consistency_gate(tmp_path: Path) -> None:
+    module = _load_consistency_gate_module()
+    repo_root = tmp_path
+    target = (
+        repo_root / "src" / "bioetl" / "application" / "services" / "result_builder.py"
+    )
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text("class ResultBuilder: ...\n", encoding="utf-8")
+    policy_path = repo_root / module.LAYER_AWARE_SUFFIX_POLICY_PATH
+    policy_path.parent.mkdir(parents=True, exist_ok=True)
+    policy_path.write_text(
+        (
+            Path(__file__).resolve().parents[2] / module.LAYER_AWARE_SUFFIX_POLICY_PATH
+        ).read_text(encoding="utf-8"),
+        encoding="utf-8",
+    )
+
+    violations = module._builder_violations(repo_root)
+
+    assert [(item.rule, item.location, item.details) for item in violations] == [
+        (
+            "builder-only-in-composition",
+            "src/bioetl/application/services/result_builder.py",
+            "Builder module is outside src/bioetl/composition",
+        ),
+        (
+            "builder-only-in-composition",
+            "src/bioetl/application/services/result_builder.py:1",
+            "class ResultBuilder must live in composition layer",
+        ),
+    ]
+
+
+def test_builder_inside_composition_passes_consistency_gate(tmp_path: Path) -> None:
+    module = _load_consistency_gate_module()
+    repo_root = tmp_path
+    target = (
+        repo_root
+        / "src"
+        / "bioetl"
+        / "composition"
+        / "runtime_builders"
+        / "result_builder.py"
+    )
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text("class ResultBuilder: ...\n", encoding="utf-8")
+    policy_path = repo_root / module.LAYER_AWARE_SUFFIX_POLICY_PATH
+    policy_path.parent.mkdir(parents=True, exist_ok=True)
+    policy_path.write_text(
+        (
+            Path(__file__).resolve().parents[2] / module.LAYER_AWARE_SUFFIX_POLICY_PATH
+        ).read_text(encoding="utf-8"),
+        encoding="utf-8",
+    )
+
+    assert module._builder_violations(repo_root) == []

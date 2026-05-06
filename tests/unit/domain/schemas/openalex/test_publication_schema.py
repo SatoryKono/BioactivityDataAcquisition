@@ -57,6 +57,7 @@ def valid_record() -> dict:
         # Journal info
         "journal": "Nature",
         "issn": "0028-0836",
+        "issn_list": '["0028-0836"]',
         "publisher": "Springer Nature",
         # Open Access
         "is_oa": True,

@@ -38,6 +38,7 @@ from bioetl.domain.ports.config import (
     SettingsPort,
 )
 from bioetl.domain.ports.control_plane import (
+    ArtifactByteComparisonPort,
     EffectiveConfigArtifactStorePort,
     LineageStorePort,
     RunLedgerPort,
@@ -158,6 +159,7 @@ __all__ = [
     "AdrServicePort",
     "AdrValidationIssue",
     "AdrValidationReport",
+    "ArtifactByteComparisonPort",
     "AuditEntry",
     "AuditLayer",
     "AuditOperation",

@@ -24,12 +24,14 @@ from bioetl.domain.control_plane.effective_config_artifact import (
     SourceClassProvenance,
 )
 from bioetl.domain.control_plane.reproducibility_policy import (
+    ReplayReadinessVerdict,
     ReproducibilityPolicyAssessment,
     SnapshotEnvelopeStatus,
     assess_reproducibility_policy,
     build_snapshot_envelope_status,
     normalize_required_persistence_profile,
     resolve_replay_capability,
+    resolve_replay_readiness_verdict,
 )
 from bioetl.domain.control_plane.reproducibility_profiles import (
     ReproducibilityFamilyProfile,
@@ -65,6 +67,7 @@ __all__ = [
     "EffectiveExecutionConfig",
     "ExecutionEnvironmentSnapshot",
     "ReplayCapability",
+    "ReplayReadinessVerdict",
     "ReproducibilityFamilyProfile",
     "ReproducibilityPolicyAssessment",
     "ResolvedConfigSnapshot",
@@ -84,6 +87,7 @@ __all__ = [
     "normalize_required_persistence_profile",
     "published_supported_reproducibility_families",
     "resolve_replay_capability",
+    "resolve_replay_readiness_verdict",
     "resolve_reproducibility_family",
     "resolve_reproducibility_family_profile",
 ]

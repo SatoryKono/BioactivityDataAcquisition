@@ -112,6 +112,7 @@ def _build_unified_reproducibility_diagnostics(
                 [],
             ),
             "replay_capability": summary.get("replay_capability"),
+            "replay_readiness_verdict": summary.get("replay_readiness_verdict"),
             "operator_replay_mode": summary.get("operator_replay_mode"),
             "replay_mode": summary.get("replay_mode"),
             "continuation_mode": summary.get("continuation_mode"),
@@ -128,6 +129,7 @@ def _build_unified_reproducibility_diagnostics(
         "semantic_identity": {
             "execution_fingerprint": summary.get("execution_fingerprint"),
             "config_hash_compatibility_anchor": summary.get("config_hash"),
+            "config_hash_legacy_alias_of": "resolved_config_hash",
             "resolved_config_hash": summary.get("resolved_config_hash"),
             "effective_config_hash": summary.get("effective_config_hash"),
             "effective_config_artifact_id": summary.get("effective_config_artifact_id"),

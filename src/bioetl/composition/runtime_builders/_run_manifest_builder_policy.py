@@ -32,6 +32,12 @@ if TYPE_CHECKING:
 class ManifestReproducibilityContext:
     required_persistence_profile: str
     strict_exact_replay_supported: bool
+    family: str
+    replay_family_contract: str
+    strict_replay_runtime_verdict: str
+    exact_replay_support_boundary: str
+    support_scope: str
+    reason: str
 
 
 def resolve_code_revision_for_manifest(
@@ -46,6 +52,7 @@ def resolve_code_revision_for_manifest(
     return CodeRevisionProvenance(
         git_commit=f"test-{resolved_config_hash[:12]}",
         source_revision_state="clean",
+        dependency_lock_hash=f"sha256:test-lock-{resolved_config_hash[:12]}",
     )
 
 
@@ -91,6 +98,16 @@ def resolve_manifest_reproducibility_context(
         strict_exact_replay_supported=(
             reproducibility_profile.strict_exact_replay_supported
         ),
+        family=reproducibility_profile.family,
+        replay_family_contract=reproducibility_profile.replay_family_contract,
+        strict_replay_runtime_verdict=(
+            reproducibility_profile.strict_replay_runtime_verdict
+        ),
+        exact_replay_support_boundary=(
+            reproducibility_profile.exact_replay_support_boundary
+        ),
+        support_scope=reproducibility_profile.support_scope,
+        reason=reproducibility_profile.reason,
     )
 
 
@@ -108,6 +125,7 @@ def validate_required_runtime_persistence_profile(
         exact_replay_requested=bool(request.launch_context.get("exact_replay")),
         resume_requested=bool(request.launch_context.get("resume")),
         replay_capability=request.replay_capability,
+        run_type=request.run_type,
     )
     if not assessment.strict_requirement_requested:
         return

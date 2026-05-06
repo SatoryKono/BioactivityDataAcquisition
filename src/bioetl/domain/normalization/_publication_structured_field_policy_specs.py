@@ -44,6 +44,7 @@ PUBLICATION_STRUCTURED_FIELD_POLICY_SPECS: tuple[
         "openalex_institution",
         None,
     ),
+    (OPENALEX_PUBLICATION, "issn_list", UNORDERED_SET, "issn", None),
     (OPENALEX_PUBLICATION, "ror_ids", UNORDERED_SET, "ror", None),
     (
         OPENALEX_PUBLICATION,
@@ -99,6 +100,7 @@ PUBLICATION_STRUCTURED_FIELD_POLICY_SPECS: tuple[
     (PUBMED_PUBLICATION, "chemicals", UNORDERED_SET, None, None),
     (PUBMED_PUBLICATION, "databanks", UNORDERED_SET, None, None),
     (PUBMED_PUBLICATION, "gene_symbols", UNORDERED_SET, None, None),
+    (PUBMED_PUBLICATION, "issn_list", UNORDERED_SET, "issn", None),
     (
         PUBMED_PUBLICATION,
         "publication_types",
@@ -139,6 +141,7 @@ PUBLICATION_STRUCTURED_FIELD_POLICY_SPECS: tuple[
         None,
     ),
     (SEMANTICSCHOLAR_PUBLICATION, "authors", ORDERED_SEQUENCE, None, None),
+    (SEMANTICSCHOLAR_PUBLICATION, "issn_list", UNORDERED_SET, "issn", None),
     (
         SEMANTICSCHOLAR_PUBLICATION,
         "citation_contexts",

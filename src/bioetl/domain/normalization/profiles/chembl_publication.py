@@ -15,6 +15,8 @@ from bioetl.domain.normalization.profiles.chembl_pseudo_nulls import (
     chembl_pseudo_null_fields,
 )
 from bioetl.domain.normalization.profiles.profile_normalizers import (
+    normalize_profile_issn_id,
+    normalize_profile_issn_ids,
     normalize_profile_publication_type,
     normalize_profile_publication_type_raw,
 )
@@ -104,6 +106,14 @@ CHEMBL_PUBLICATION_PROFILE = build_standard_profile(
     boolean_fields=_BOOLEAN_FIELDS,
     special_rules={
         **publication_classification_rules(),
+        "issn": (
+            normalize_profile_issn_id,
+            "Canonicalize ISSN identifier to the shared publication identifier policy.",
+        ),
+        "issn_list": (
+            normalize_profile_issn_ids,
+            "Canonicalize ISSN identifiers inside a set-like canonical JSON array.",
+        ),
         "publication_type_raw": (
             normalize_profile_publication_type_raw,
             "Preserve the raw provider publication type as a provider-native "

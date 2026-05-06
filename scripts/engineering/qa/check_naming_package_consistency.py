@@ -7,7 +7,9 @@ Rules:
    ``configs/quality/layered_suffix_policy.yaml``.
 3) factory-only-in-composition: no ``Factory`` classes or ``*factory*.py`` modules
    outside ``src/bioetl/composition``.
-4) canonical role subpackage names: ``contracts/mappers/services/facades`` only
+4) builder-only-in-composition: no public ``Builder`` classes or unregistered
+   ``*builder*.py`` modules outside ``src/bioetl/composition``.
+5) canonical role subpackage names: ``contracts/mappers/services/facades`` only
    (singular forms are forbidden).
 """
 
@@ -33,6 +35,7 @@ FORBIDDEN_FACTORY_LAYERS = (
     SRC_ROOT / "domain",
     SRC_ROOT / "interfaces",
 )
+FORBIDDEN_BUILDER_LAYERS = FORBIDDEN_FACTORY_LAYERS
 SINGULAR_ROLE_TO_CANONICAL = {
     "contract": "contracts",
     "mapper": "mappers",
@@ -42,6 +45,7 @@ SINGULAR_ROLE_TO_CANONICAL = {
 ALLOWED_FACTORY_FACADES = {
     "src/bioetl/application/core/wiring/factory.py",
 }
+ALLOWED_BUILDER_FACADES: frozenset[str] = frozenset()
 
 
 @dataclass(frozen=True)
@@ -793,6 +797,33 @@ def _factory_module_violation(py_file: Path, *, repo_root: Path) -> Violation | 
     )
 
 
+def _builder_allowed_modules(repo_root: Path) -> frozenset[str]:
+    policy = _load_layer_aware_suffix_policy(repo_root)
+    for rule in policy.suffix_boundary_rules:
+        if rule.rule_id == "non_composition_builder_suffix":
+            return frozenset(item.path for item in rule.allowed_modules)
+    return frozenset()
+
+
+def _builder_module_violation(py_file: Path, *, repo_root: Path) -> Violation | None:
+    stem_lower = py_file.stem.lower()
+    if not (
+        stem_lower == "builder"
+        or stem_lower.endswith("_builder")
+        or stem_lower.endswith("_builders")
+    ):
+        return None
+
+    rel = py_file.relative_to(repo_root).as_posix()
+    if rel in ALLOWED_BUILDER_FACADES or rel in _builder_allowed_modules(repo_root):
+        return None
+    return Violation(
+        rule="builder-only-in-composition",
+        location=rel,
+        details="Builder module is outside src/bioetl/composition",
+    )
+
+
 def _load_python_ast(py_file: Path) -> ast.AST | None:
     try:
         return ast.parse(py_file.read_text(encoding="utf-8"))
@@ -816,6 +847,27 @@ def _factory_class_violations(py_file: Path, *, repo_root: Path) -> list[Violati
         if (
             isinstance(node, ast.ClassDef)
             and node.name.endswith("Factory")
+            and not node.name.startswith("_")
+        )
+    ]
+
+
+def _builder_class_violations(py_file: Path, *, repo_root: Path) -> list[Violation]:
+    tree = _load_python_ast(py_file)
+    if tree is None:
+        return []
+
+    rel = py_file.relative_to(repo_root).as_posix()
+    return [
+        Violation(
+            rule="builder-only-in-composition",
+            location=f"{rel}:{node.lineno}",
+            details=f"class {node.name} must live in composition layer",
+        )
+        for node in ast.walk(tree)
+        if (
+            isinstance(node, ast.ClassDef)
+            and node.name.endswith("Builder")
             and not node.name.startswith("_")
         )
     ]
@@ -848,6 +900,33 @@ def _factory_violations(repo_root: Path) -> list[Violation]:
     return violations
 
 
+def _violations_for_forbidden_builder_file(
+    py_file: Path, *, repo_root: Path
+) -> list[Violation]:
+    violations: list[Violation] = []
+    module_violation = _builder_module_violation(py_file, repo_root=repo_root)
+    if module_violation is not None:
+        violations.append(module_violation)
+    violations.extend(_builder_class_violations(py_file, repo_root=repo_root))
+    return violations
+
+
+def _builder_violations(repo_root: Path) -> list[Violation]:
+    violations: list[Violation] = []
+
+    for layer in FORBIDDEN_BUILDER_LAYERS:
+        layer_path = repo_root / layer
+        if not layer_path.exists():
+            continue
+        for py_file in layer_path.rglob("*.py"):
+            if "__pycache__" in py_file.parts:
+                continue
+            violations.extend(
+                _violations_for_forbidden_builder_file(py_file, repo_root=repo_root)
+            )
+    return violations
+
+
 def _package_template_violations(repo_root: Path) -> list[Violation]:
     violations: list[Violation] = []
     for directory in (repo_root / SRC_ROOT).rglob("*"):
@@ -876,6 +955,7 @@ def run_checks(repo_root: Path) -> list[Violation]:
     violations.extend(_run_suffix_policy_check(repo_root))
     violations.extend(_layer_aware_suffix_violations(repo_root))
     violations.extend(_factory_violations(repo_root))
+    violations.extend(_builder_violations(repo_root))
     violations.extend(_package_template_violations(repo_root))
     return violations
 
@@ -903,7 +983,8 @@ def main() -> int:
             "Naming/package consistency: OK "
             "("
             "suffix-policy, layer-aware-suffix-policy, "
-            "factory-only-in-composition, subpackage-template"
+            "factory-only-in-composition, builder-only-in-composition, "
+            "subpackage-template"
             ")"
         )
         return 0

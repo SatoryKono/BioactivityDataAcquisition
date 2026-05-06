@@ -23,6 +23,8 @@ def _publication_gold_frame(**overrides: object) -> pd.DataFrame:
         "authors": None,
         "affiliation_list": None,
         "journal": None,
+        "issn": None,
+        "issn_list": None,
         "volume": None,
         "issue": None,
         "page_first": None,

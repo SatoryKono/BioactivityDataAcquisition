@@ -3,11 +3,24 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from enum import StrEnum
 
 from bioetl.domain.control_plane.run_manifest import ReplayCapability, RunSourceRef
 
 DEFAULT_REQUIRED_PERSISTENCE_PROFILE = "degraded_observable"
 STRICT_PERSISTENCE_PROFILES = frozenset({"replay_ready", "forensic_grade"})
+
+
+class ReplayReadinessVerdict(StrEnum):
+    """Operator-facing replay readiness classification for one run identity."""
+
+    EXACT_REPLAY_READY = "exact_replay_ready"
+    EXACT_REPLAY_BLOCKED = "exact_replay_blocked"
+    RESUME_COMPATIBLE = "resume_compatible"
+    REBUILD_ONLY = "rebuild_only"
+    INCREMENTAL_NEW_RUN = "incremental_new_run"
+    DEBUG_ONLY = "debug_only"
+    LIFECYCLE_PROJECTION_ONLY = "lifecycle_projection_only"
 
 
 @dataclass(frozen=True, slots=True)
@@ -31,6 +44,7 @@ class ReproducibilityPolicyAssessment:
     strict_exact_replay_supported: bool
     snapshot_envelope: SnapshotEnvelopeStatus
     blocking_gaps: tuple[str, ...]
+    replay_readiness_verdict: ReplayReadinessVerdict
 
     @property
     def required_profile_satisfied(self) -> bool:
@@ -44,6 +58,7 @@ class ReproducibilityPolicyAssessment:
             "replay_capability": self.replay_capability.value,
             "strict_requirement_requested": self.strict_requirement_requested,
             "strict_exact_replay_supported": self.strict_exact_replay_supported,
+            "replay_readiness_verdict": self.replay_readiness_verdict.value,
             "required_profile_satisfied": self.required_profile_satisfied,
             "blocking_gaps": list(self.blocking_gaps),
             "snapshot_envelope": {
@@ -200,6 +215,46 @@ def _resolve_effective_replay_capability(
     )
 
 
+def _normalize_run_type_token(run_type: object) -> str:
+    """Return a lowercase run-type token from enums or strings."""
+    if run_type is None:
+        return ""
+    value = getattr(run_type, "value", run_type)
+    return str(value or "").strip().lower()
+
+
+def resolve_replay_readiness_verdict(
+    *,
+    replay_capability: ReplayCapability,
+    strict_requirement_requested: bool,
+    strict_exact_replay_supported: bool,
+    blocking_gaps: tuple[str, ...] = (),
+    exact_replay_requested: bool = False,
+    resume_requested: bool = False,
+    run_type: object = None,
+    debug_only: bool = False,
+    lifecycle_projection_only: bool = False,
+) -> ReplayReadinessVerdict:
+    """Classify replay/resume/rebuild readiness without conflating modes."""
+    if lifecycle_projection_only:
+        return ReplayReadinessVerdict.LIFECYCLE_PROJECTION_ONLY
+    if (strict_requirement_requested or exact_replay_requested) and (
+        blocking_gaps
+        or not strict_exact_replay_supported
+        or replay_capability != ReplayCapability.EXACT_REPLAY_SUPPORTED
+    ):
+        return ReplayReadinessVerdict.EXACT_REPLAY_BLOCKED
+    if replay_capability == ReplayCapability.EXACT_REPLAY_SUPPORTED:
+        return ReplayReadinessVerdict.EXACT_REPLAY_READY
+    if resume_requested or replay_capability == ReplayCapability.RESUME_ONLY:
+        return ReplayReadinessVerdict.RESUME_COMPATIBLE
+    if debug_only or not strict_exact_replay_supported:
+        return ReplayReadinessVerdict.DEBUG_ONLY
+    if _normalize_run_type_token(run_type) == "incremental":
+        return ReplayReadinessVerdict.INCREMENTAL_NEW_RUN
+    return ReplayReadinessVerdict.REBUILD_ONLY
+
+
 def assess_reproducibility_policy(
     *,
     source_refs: tuple[RunSourceRef, ...],
@@ -209,6 +264,9 @@ def assess_reproducibility_policy(
     resume_requested: bool = False,
     require_full_snapshot_envelope: bool = False,
     replay_capability: ReplayCapability | None = None,
+    run_type: object = None,
+    debug_only: bool = False,
+    lifecycle_projection_only: bool = False,
 ) -> ReproducibilityPolicyAssessment:
     """Evaluate snapshot-envelope and profile gates in one place."""
     profile = normalize_required_persistence_profile(required_persistence_profile)
@@ -226,16 +284,28 @@ def assess_reproducibility_policy(
         source_refs=source_refs,
         require_full_snapshot_envelope=require_full_snapshot_envelope,
     )
+    blocking_gaps = _resolve_blocking_gaps(
+        strict_requirement_requested=strict_requirement_requested,
+        strict_exact_replay_supported=strict_exact_replay_supported,
+        resolved_capability=resolved_capability,
+    )
     return ReproducibilityPolicyAssessment(
         required_persistence_profile=profile,
         replay_capability=resolved_capability,
         strict_requirement_requested=strict_requirement_requested,
         strict_exact_replay_supported=strict_exact_replay_supported,
         snapshot_envelope=snapshot_envelope,
-        blocking_gaps=_resolve_blocking_gaps(
+        blocking_gaps=blocking_gaps,
+        replay_readiness_verdict=resolve_replay_readiness_verdict(
+            replay_capability=resolved_capability,
             strict_requirement_requested=strict_requirement_requested,
             strict_exact_replay_supported=strict_exact_replay_supported,
-            resolved_capability=resolved_capability,
+            blocking_gaps=blocking_gaps,
+            exact_replay_requested=exact_replay_requested,
+            resume_requested=resume_requested,
+            run_type=run_type,
+            debug_only=debug_only,
+            lifecycle_projection_only=lifecycle_projection_only,
         ),
     )
 
@@ -243,6 +313,7 @@ def assess_reproducibility_policy(
 __all__ = [
     "DEFAULT_REQUIRED_PERSISTENCE_PROFILE",
     "STRICT_PERSISTENCE_PROFILES",
+    "ReplayReadinessVerdict",
     "ReproducibilityPolicyAssessment",
     "SnapshotEnvelopeStatus",
     "assess_reproducibility_policy",
@@ -252,4 +323,5 @@ __all__ = [
     "normalize_required_persistence_profile",
     "resolve_effective_required_persistence_profile",
     "resolve_replay_capability",
+    "resolve_replay_readiness_verdict",
 ]

@@ -6,7 +6,7 @@ import hashlib
 from collections.abc import Mapping
 from pathlib import Path
 
-from bioetl.domain.ports.control_plane import ArtifactByteComparisonPort
+from bioetl.domain.ports import ArtifactByteComparisonPort
 
 __all__ = ["FileArtifactByteComparisonAdapter"]
 
