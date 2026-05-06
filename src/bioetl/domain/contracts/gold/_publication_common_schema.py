@@ -42,6 +42,8 @@ class PublicationGoldCommonSchema(StrictGoldContractSchema):
     authors: Series[str] = pa.Field(nullable=True)
     affiliation_list: Series[str] = pa.Field(nullable=True)
     journal: Series[str] = pa.Field(nullable=True)
+    issn: Series[str] = pa.Field(nullable=True)
+    issn_list: Series[str] = pa.Field(nullable=True)
     volume: Series[str] = pa.Field(nullable=True)
     issue: Series[str] = pa.Field(nullable=True)
     page_first: Series[str] = pa.Field(nullable=True)

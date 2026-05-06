@@ -688,25 +688,6 @@ class TestPublicationStatusBaseValidation:
 
 
 @pytest.mark.unit
-class TestPublicationTypeListBaseValidation:
-    """Base validation tests for publication_type_list."""
-
-    def test_publication_type_list_valid(
-        self, minimal_pubmed_publication_df: pd.DataFrame
-    ) -> None:
-        """PASS: valid publication_type_list value."""
-        PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
-
-    def test_publication_type_list_null_allowed(
-        self, minimal_pubmed_publication_df: pd.DataFrame
-    ) -> None:
-        """SKIP: publication_type_list is nullable."""
-        df = minimal_pubmed_publication_df.copy()
-        df["publication_type_list"] = None
-        PubMedPublicationSchema.validate(df)
-
-
-@pytest.mark.unit
 class TestDateCompletedBaseValidation:
     """Base validation tests for date_completed."""
 

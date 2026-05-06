@@ -289,6 +289,7 @@ class TestPubMedPublicationTransformer:
         assert result["journal"] == "Journal of Test Science"
         assert result["journal_name_short"] == "J Test Sci"
         assert result["issn"] == "1234-5678"
+        assert result["issn_list"] == '["1234-5678"]'
         assert result["volume"] == "42"
         assert result["issue"] == "3"
         assert result["page_range"] == "123-145"
@@ -507,6 +508,7 @@ class TestPubMedTransformerJournalExtraction:
         assert result["journal"] is None
         assert result["journal_name_short"] is None
         assert result["issn"] is None
+        assert result["issn_list"] is None
         assert result["volume"] is None
         assert result["issue"] is None
 
@@ -1881,6 +1883,7 @@ class TestExtractBusinessData:
         assert result["journal"] == "Test Journal"
         assert result["journal_name_short"] == "Test J"
         assert result["issn"] == "1234-5678"
+        assert result["issn_list"] == '["1234-5678"]'
         assert result["volume"] == "10"
         assert result["issue"] == "5"
         assert result["pub_date"] == "2023-03-15"

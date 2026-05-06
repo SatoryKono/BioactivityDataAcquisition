@@ -67,6 +67,7 @@ schema:
     - journal_name_short
     - journal_iso_abbrev
     - issn
+    - issn_list
     - journal_issn_type
   - name: year
     fields:
@@ -98,7 +99,6 @@ schema:
     - subject_keywords
     - keyword_count
     - publication_types
-    - publication_type_list
   - name: funding
     fields:
     - grant_count

@@ -9,6 +9,8 @@ from bioetl.domain.normalization.profiles._standard_profile_builder import (
     build_standard_profile,
 )
 from bioetl.domain.normalization.profiles.profile_normalizers import (
+    normalize_profile_issn_id,
+    normalize_profile_issn_ids,
     normalize_profile_oa_status,
     normalize_profile_orcid_ids,
     normalize_profile_passthrough,
@@ -81,6 +83,7 @@ _SET_LIKE_FIELDS = frozenset(
         "affiliation_list",
         "author_orcids",
         "author_s2_ids",
+        "issn_list",
         "publication_types_canonical_json",
         "publication_types",
         "subject_fields_canonical_json",
@@ -99,6 +102,7 @@ _JSON_STRING_FIELDS = frozenset(
         "citation_contexts",
         "citation_contexts_canonical_json",
         "citation_contexts_raw_json",
+        "issn_list",
         "publication_types_canonical_json",
         "publication_types_raw_json",
         "publication_types",
@@ -116,6 +120,14 @@ _SPECIAL_RULES = {
     "author_s2_ids": (
         normalize_profile_semantic_scholar_ids,
         "Canonicalize Semantic Scholar author identifiers inside a set-like canonical JSON array.",
+    ),
+    "issn": (
+        normalize_profile_issn_id,
+        "Canonicalize ISSN identifier to the shared publication identifier policy.",
+    ),
+    "issn_list": (
+        normalize_profile_issn_ids,
+        "Canonicalize ISSN identifiers inside a set-like canonical JSON array.",
     ),
     "oa_status": (
         normalize_profile_oa_status,

@@ -101,13 +101,6 @@ PUBLICATION_STRUCTURED_FIELD_POLICY_SPECS: tuple[
     (PUBMED_PUBLICATION, "gene_symbols", UNORDERED_SET, None, None),
     (
         PUBMED_PUBLICATION,
-        "publication_type_list",
-        UNORDERED_SET,
-        None,
-        PUBLICATION_TYPE,
-    ),
-    (
-        PUBMED_PUBLICATION,
         "publication_types",
         UNORDERED_SET,
         None,

@@ -7,6 +7,7 @@ import xml.etree.ElementTree as ET  # nosec B405
 from collections.abc import Callable, Sequence
 from typing import TYPE_CHECKING, cast
 
+from bioetl.application.pipelines.common.publication_issn import build_issn_fields
 from bioetl.application.pipelines.pubmed._block_helpers import (
     build_authors_with_affiliations,
     extract_date_data,
@@ -202,6 +203,15 @@ class _PubMedAuthorBlock(_PubMedXmlBlock):
 class _PubMedJournalBlock(_PubMedXmlBlock):
     """Extract journal and Medline metadata fields."""
 
+    def __init__(
+        self,
+        *,
+        serialize_json_list: Callable[[Sequence[object] | None], str | None],
+        root_resolver: Callable[[], ET.Element | None],
+    ) -> None:
+        super().__init__(root_resolver)
+        self._serialize_json_list = serialize_json_list
+
     def _build_medline_fields(self, medline: ET.Element | None) -> JsonDict:
         if medline is None:
             return {
@@ -238,8 +248,13 @@ class _PubMedJournalBlock(_PubMedXmlBlock):
         if article is None:
             return {}
 
+        journal_data = extract_journal_data(article)
         return {
-            **extract_journal_data(article),
+            **journal_data,
+            **build_issn_fields(
+                journal_data.get("issn"),
+                serialize_json_list=self._serialize_json_list,
+            ),
             **self._build_medline_fields(medline),
             "publication_status": self._resolve_publication_status(pubmed_data),
         }
@@ -306,7 +321,6 @@ class _PubMedClassificationBlock(_PubMedXmlBlock):
         chemicals = ClassificationExtractor.parse_chemicals(medline)
         return {
             "publication_types": self._serialize_json_list(publication_types),
-            "publication_type_list": self._serialize_json_list(publication_types),
             "subject_keywords": self._serialize_json_list(subject_keywords),
             "keyword_count": len(subject_keywords) if subject_keywords else 0,
             "subject_mesh": self._serialize_json_list(subject_mesh),

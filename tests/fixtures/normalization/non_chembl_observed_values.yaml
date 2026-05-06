@@ -311,7 +311,7 @@ pipelines:
         - "12345"
       doi:
         - 10.1000/abc
-      publication_type_list:
+      publication_types:
         - Journal Article
         - Review
     expected_controlled_values:
@@ -357,11 +357,6 @@ pipelines:
       publication_type:
         category: raw_provider_value
         collection_semantics: scalar
-        composite_usage: composite_publication:upstream_inherited
-      publication_type_list:
-        category: structured_json_collection
-        collection_semantics: unordered_set
-        raw_sidecar: publication_type
         composite_usage: composite_publication:upstream_inherited
       publication_type_unified:
         category: derived_vocabulary

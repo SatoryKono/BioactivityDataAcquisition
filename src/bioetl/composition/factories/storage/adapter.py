@@ -1,8 +1,8 @@
-"""Deprecated compatibility shim for storage bundle imports.
+"""Legacy shim for storage bundle imports.
 
 Canonical code lives in ``bioetl.composition.factories.storage.bundle``.
-This reviewed shim is retained only for callers that still import the old
-``adapter`` path during the 2026-09-30 transition window.
+This module remains only for callers that still import the old ``adapter``
+path during the 2026-09-30 transition window.
 """
 
 from __future__ import annotations

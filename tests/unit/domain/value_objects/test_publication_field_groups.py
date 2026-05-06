@@ -255,7 +255,6 @@ class TestFieldToGroupMapping:
         """Publication Types group contains expected fields."""
         expected_fields = {
             "publication_types",
-            "publication_type_list",
         }
         actual_fields = {
             f
@@ -680,7 +679,6 @@ class TestFieldMappingCompleteness:
             "pub_month",
             "publication_date",
             "publication_year",
-            "publication_type_list",
             "publication_types",
             "abstract_structured",
             "content_hash",

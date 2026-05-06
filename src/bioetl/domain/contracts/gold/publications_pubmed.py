@@ -39,7 +39,6 @@ class PubMedPublicationGoldSchema(PublicationGoldCommonSchema):
     date_completed: Series[str] = pa.Field(nullable=True)
     date_revised: Series[str] = pa.Field(nullable=True)
     publication_status: Series[str] = pa.Field(nullable=True)
-    publication_type_list: Series[str] = pa.Field(nullable=True)
     publication_types: Series[str] = pa.Field(nullable=True)
     subject_keywords: Series[str] = pa.Field(nullable=True)
     subject_mesh: Series[str] = pa.Field(nullable=True)

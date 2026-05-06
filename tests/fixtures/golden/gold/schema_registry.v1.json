@@ -3120,11 +3120,6 @@
           "dtype": "str",
           "nullable": true
         },
-        "publication_type_list": {
-          "description": "",
-          "dtype": "str",
-          "nullable": true
-        },
         "publication_type_unified": {
           "description": "",
           "dtype": "str",

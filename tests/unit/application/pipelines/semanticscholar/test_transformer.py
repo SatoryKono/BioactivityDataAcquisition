@@ -106,6 +106,8 @@ class TestSemanticScholarPublicationTransformer:
         assert result["publication_year"] == 2024
         assert result["publication_date"] == "2024-05-15"
         assert result["journal"] == "Nature"
+        assert result["issn"] is None
+        assert result["issn_list"] is None
         assert result["volume"] == "629"
         assert result["page_range"] == "123-130"
         assert result["citations_received"] == 42

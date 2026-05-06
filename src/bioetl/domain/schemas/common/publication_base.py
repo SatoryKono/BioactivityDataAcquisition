@@ -11,7 +11,7 @@ import pandera.pandas as pa
 from pandera.typing import Series
 
 from bioetl.domain.schemas.base import ETLRecordSchema
-from bioetl.domain.schemas.constants import OA_STATUS_VALUES
+from bioetl.domain.schemas.constants import ISSN_PATTERN, OA_STATUS_VALUES
 from bioetl.domain.validation import (
     DOI_REGEX_PATTERN,
     MAX_PUBLICATION_YEAR,
@@ -90,6 +90,15 @@ class PublicationBaseSchema(ETLRecordSchema):
     journal: Series[str] = pa.Field(
         nullable=True,
         description="Journal name",
+    )
+    issn: Series[str] = pa.Field(
+        nullable=True,
+        str_matches=ISSN_PATTERN,
+        description="Primary ISSN (format: NNNN-NNNN)",
+    )
+    issn_list: Series[str] = pa.Field(
+        nullable=True,
+        description="Canonical JSON array of ISSN values",
     )
     publication_year: Series[pd.Int64Dtype] = pa.Field(
         nullable=True,

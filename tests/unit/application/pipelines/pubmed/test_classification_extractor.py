@@ -430,7 +430,7 @@ class TestParsePublicationTypes:
         types = ClassificationExtractor.parse_publication_types(node)
         assert types == ["Review"]
 
-    def test_empty_publication_type_list(self) -> None:
+    def test_empty_publication_type_xml_list(self) -> None:
         """Test empty PublicationTypeList."""
         xml = """
         <Article>
@@ -442,7 +442,7 @@ class TestParsePublicationTypes:
         types = ClassificationExtractor.parse_publication_types(node)
         assert types == []
 
-    def test_no_publication_type_list(self) -> None:
+    def test_no_publication_type_xml_list(self) -> None:
         """Test missing PublicationTypeList element."""
         xml = "<Article></Article>"
         node = ET.fromstring(xml)

@@ -49,6 +49,8 @@ def valid_base_record() -> dict:
         "affiliation_list": '["University of Testing"]',  # JSON array (unified)
         # === Publication metadata ===
         "journal": "Journal of Testing",
+        "issn": "0028-0836",
+        "issn_list": '["0028-0836"]',
         "publication_year": 2024,
         "publication_date": "2024-06-15",
         "publication_type": "journal-article",

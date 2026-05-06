@@ -43,7 +43,6 @@ pub_month,MISSING,MISSING,MISSING,transformer.py:690,pubmed.py:215,publications.
 publication_date,§3.2,MISSING,MISSING,transformer.py:692,MISSING (inherited base),publications.py:88,/efetch.fcgi,string,true,false,OK
 publication_status,MISSING,MISSING,MISSING,transformer.py:184,pubmed.py:221,publications.py:102,/efetch.fcgi,string,true,false,MISSING_DOC
 publication_type,MISSING,MISSING,MISSING,transformer.py:392,MISSING (inherited base),publications.py:108,/efetch.fcgi,object,true,false,MISSING_DOC
-publication_type_list,MISSING,MISSING,MISSING,transformer.py:228,pubmed.py:222,publications.py:105,/efetch.fcgi,string,true,false,MISSING_DOC
 publication_types,MISSING,MISSING,MISSING,transformer.py:227,pubmed.py:192,publications.py:109,/efetch.fcgi,object,true,false,MISSING_DOC
 publication_year,§3.2,MISSING,MISSING,transformer.py:693,MISSING (inherited base),publications.py:89,/efetch.fcgi,number,true,false,OK
 publisher_id,MISSING,MISSING,MISSING,transformer.py:313,pubmed.py:176,publications.py:83,/efetch.fcgi,string,true,false,MISSING_DOC

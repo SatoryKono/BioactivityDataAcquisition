@@ -231,6 +231,10 @@ The supported resume contract is intentionally dual-mode:
 Composite resume currently follows a checkpoint snapshot + ledger suffix replay
 model.
 
+ADR-046 clarifies the current architectural boundary: RunLedger is a published
+provenance/inspection surface and a bounded composite suffix-replay aid, but it
+is not the universal operational resume state for ordinary runs.
+
 Fast source-of-truth checks:
 
 ```bash

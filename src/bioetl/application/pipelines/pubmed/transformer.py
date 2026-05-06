@@ -159,7 +159,10 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
                 normalize_author_keys=self._data_normalizer.normalize_author_keys,
                 root_resolver=resolve_cached_root,
             ),
-            _PubMedJournalBlock(root_resolver=resolve_cached_root),
+            _PubMedJournalBlock(
+                serialize_json_list=self.serialize_json_list,
+                root_resolver=resolve_cached_root,
+            ),
             _PubMedDateBlock(
                 date_extractor=self._date_extractor,
                 data_normalizer=self._data_normalizer,

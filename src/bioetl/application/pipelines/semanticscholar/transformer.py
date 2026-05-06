@@ -239,6 +239,8 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             if citation_contexts
             else None,
             "journal": journal_info.get("journal"),
+            "issn": None,
+            "issn_list": None,
             "volume": journal_info.get("volume"),
             "issue": journal_info.get("issue"),
             "page_range": journal_info.get("page_range"),

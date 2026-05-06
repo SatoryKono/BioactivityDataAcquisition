@@ -30,6 +30,8 @@ BASE_PUBLICATION_COLUMNS = [
     "affiliation_list",
     "author_orcids",
     "journal",
+    "issn",
+    "issn_list",
     "publication_year",
     "publication_date",
     "publication_type",
@@ -54,7 +56,6 @@ PUBMED_SPECIFIC = [
     "abstract_structured",
     "journal_name_short",
     "journal_iso_abbrev",
-    "issn",
     "journal_issn_type",
     "nlm_unique_id",
     "country",
@@ -63,7 +64,6 @@ PUBMED_SPECIFIC = [
     "pub_month",
     "pub_day",
     "publication_status",
-    "publication_type_list",
     "date_completed",
     "date_revised",
     "citation_subset",
@@ -123,7 +123,6 @@ SEMANTIC_SCHOLAR_SPECIFIC = [
 OPENALEX_SPECIFIC = [
     "openalex_id",
     "type_crossref",
-    "issn",
     "publisher",
     "oa_status",
     "volume",
@@ -147,8 +146,6 @@ OPENALEX_SPECIFIC = [
 ]
 
 CROSSREF_SPECIFIC = [
-    "issn",
-    "issn_list",
     "publisher",
     "published_print",
     "published_online",

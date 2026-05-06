@@ -587,7 +587,6 @@ PIPELINE_SCHEMA_EXPECTATIONS: dict[str, list[tuple[str, pa.DataType]]] = {
         ("publication_status", pa.string()),
         ("publication_subclass", pa.string()),
         ("publication_type", pa.string()),
-        ("publication_type_list", pa.string()),
         ("publication_type_unified", pa.string()),
         ("publication_types", pa.string()),
         ("publication_year", pa.int64()),

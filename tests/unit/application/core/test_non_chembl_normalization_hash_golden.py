@@ -96,7 +96,7 @@ RAW_CASES: dict[str, tuple[str, str, dict[str, object]]] = {
             "doi": " HTTPS://doi.org/10.1000/PM ",
             "issn": "issn:20493630",
             "publication_type": " Review ",
-            "publication_type_list": ["Review", "Journal Article"],
+            "publication_types": ["Review", "Journal Article"],
             "title": "  Example Title  ",
         },
     ),
