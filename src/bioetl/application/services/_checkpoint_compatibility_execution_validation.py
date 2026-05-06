@@ -104,6 +104,7 @@ def _build_execution_identity_context(
             pipeline_name=metadata.pipeline_name,
             run_type=metadata.run_type,
             pipeline_version=metadata.pipeline_version,
+            dependency_lock_hash=metadata.dependency_lock_hash,
             effective_config_hash=metadata.effective_config_hash,
             dq_contract_compatibility_hash=metadata.dq_contract_compatibility_hash,
             contract_ref=metadata.contract_ref,

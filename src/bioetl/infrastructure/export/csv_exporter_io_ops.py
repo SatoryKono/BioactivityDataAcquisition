@@ -15,6 +15,12 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
 
 
+def _locked_csv_backup_path(path: Path) -> Path:
+    """Return an occurrence-only backup path for a locked CSV target."""
+    timestamp = int(time.time())
+    return path.with_suffix(f".{timestamp}.csv")
+
+
 def atomic_csv_write(
     data: pa.Table,
     target_path: Path,
@@ -35,8 +41,7 @@ def atomic_csv_write(
         try:
             temp_path.replace(target_path)
         except PermissionError:
-            timestamp = int(time.time())
-            backup_path = target_path.with_suffix(f".{timestamp}.csv")
+            backup_path = _locked_csv_backup_path(target_path)
             temp_path.replace(backup_path)
             logger.warning(
                 "Target CSV locked, wrote to backup", backup_path=str(backup_path)
@@ -69,8 +74,7 @@ def append_to_csv(
             with open(csv_path, "ab") as target, open(temp_path, "rb") as source:
                 target.write(source.read())
         except PermissionError:
-            timestamp = int(time.time())
-            backup_path = csv_path.with_suffix(f".{timestamp}.csv")
+            backup_path = _locked_csv_backup_path(csv_path)
             logger.warning(
                 "Target CSV locked during append, wrote batch to backup",
                 backup_path=str(backup_path),

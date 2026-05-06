@@ -194,7 +194,9 @@ def build_dq_report_context(
         ]
 
     replay_timestamp_anchor = getattr(context, "replay_timestamp_anchor", None)
-    started_at = getattr(context, "started_at", current_utc_time())
+    started_at = getattr(context, "started_at", None)
+    if started_at is None:
+        started_at = current_utc_time()
     dq_timestamp = replay_timestamp_anchor or started_at
     current_date_str = dq_timestamp.strftime("%Y-%m-%d")
     dq_entity = extract_dq_entity(config)

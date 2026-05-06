@@ -189,7 +189,7 @@
       "pluginVersion": "9.5.0",
       "targets": [
         {
-          "expr": "round(\n  (sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", status=\"failed\"}[$__range])) or vector(0))\n+\n  (sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range])) or vector(0))\n+\n  (sum(increase(bioetl_checkpoint_compatibility_events_total{pipeline=~\"$pipeline\", disposition=~\".*_incompatible\"}[$__range])) or vector(0))\n+\n  (sum(increase(bioetl_replay_reconstructability_events_total{pipeline=~\"$pipeline\", status=\"not_reconstructable\"}[$__range])) or vector(0))\n+\n  (sum(increase(bioetl_replay_drift_events_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])) or vector(0))\n+\n  (sum(increase(bioetl_lineage_refs_missing_total{pipeline=~\"$pipeline\"}[$__range])) or vector(0))\n)",
+          "expr": "round(\n  sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", status=\"failed\"}[$__range]))\n+\n  sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range]))\n+\n  sum(increase(bioetl_checkpoint_compatibility_events_total{pipeline=~\"$pipeline\", disposition=~\".*_incompatible\"}[$__range]))\n+\n  sum(increase(bioetl_replay_reconstructability_events_total{pipeline=~\"$pipeline\", status=\"not_reconstructable\"}[$__range]))\n+\n  sum(increase(bioetl_replay_drift_events_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range]))\n+\n  sum(increase(bioetl_lineage_refs_missing_total{pipeline=~\"$pipeline\"}[$__range]))\n)",
           "instant": true,
           "refId": "A"
         }
@@ -592,7 +592,7 @@
       "pluginVersion": "9.5.0",
       "targets": [
         {
-          "expr": "round(\n  (sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", status=\"failed\"}[$__range])) or vector(0))\n+\n  (sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range])) or vector(0))\n+\n  (sum(increase(bioetl_checkpoint_compatibility_events_total{pipeline=~\"$pipeline\", disposition=~\".*_incompatible\"}[$__range])) or vector(0))\n+\n  (sum(increase(bioetl_replay_reconstructability_events_total{pipeline=~\"$pipeline\", status=\"not_reconstructable\"}[$__range])) or vector(0))\n+\n  (sum(increase(bioetl_replay_drift_events_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])) or vector(0))\n+\n  (sum(increase(bioetl_lineage_refs_missing_total{pipeline=~\"$pipeline\"}[$__range])) or vector(0))\n)",
+          "expr": "round(\n  sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", status=\"failed\"}[$__range]))\n+\n  sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range]))\n+\n  sum(increase(bioetl_checkpoint_compatibility_events_total{pipeline=~\"$pipeline\", disposition=~\".*_incompatible\"}[$__range]))\n+\n  sum(increase(bioetl_replay_reconstructability_events_total{pipeline=~\"$pipeline\", status=\"not_reconstructable\"}[$__range]))\n+\n  sum(increase(bioetl_replay_drift_events_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range]))\n+\n  sum(increase(bioetl_lineage_refs_missing_total{pipeline=~\"$pipeline\"}[$__range]))\n)",
           "instant": true,
           "refId": "A"
         }
@@ -1115,7 +1115,7 @@
         },
         {
           "datasource": "Prometheus",
-          "description": "Selected-range maximum replay lag seconds for selected pipeline/run_type. No series renders as 0 because this summary panel treats no replay lag observations as no lag events in the selected range; use telemetry-presence panels before replay decisions. Alert: BioETLReplayLagHigh.",
+          "description": "Selected-range maximum replay lag seconds for selected pipeline/run_type. Status mapping: 0=OK only when replay lag telemetry is present, 1=WARN, >=2=CRIT, null=UNKNOWN. No series renders as UNKNOWN because missing replay lag telemetry is diagnostic; use telemetry-presence panels before replay decisions. Alert: BioETLReplayLagHigh.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1186,7 +1186,7 @@
           "pluginVersion": "9.5.0",
           "targets": [
             {
-              "expr": "max(max_over_time(bioetl_replay_lag_seconds{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])) or vector(0)",
+              "expr": "max(max_over_time(bioetl_replay_lag_seconds{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range]))",
               "instant": true,
               "refId": "A"
             }

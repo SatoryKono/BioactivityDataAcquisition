@@ -118,6 +118,7 @@ def test_checkpoint_metadata_execution_fingerprint_matches_manifest_contract(
         entity="activity",
         pipeline_version="1.2.3",
         git_commit="test-commit-hash",
+        dependency_lock_hash="sha256:deps-001",
         config_hash="a" * 64,
         effective_config_hash="a" * 64,
         manifest_id="manifest-1",
@@ -173,6 +174,7 @@ def test_checkpoint_metadata_execution_fingerprint_matches_manifest_contract(
             replay_capability=ReplayCapability.EXACT_REPLAY_SUPPORTED,
             git_commit="test-commit-hash",
             source_revision_state="clean",
+            dependency_lock_hash="sha256:deps-001",
         )
     )
 

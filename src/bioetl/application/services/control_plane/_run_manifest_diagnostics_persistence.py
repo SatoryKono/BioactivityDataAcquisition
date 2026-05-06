@@ -17,6 +17,7 @@ class _PersistenceInputs:
     lineage_closure_boundary: dict[str, object]
     lineage_closure_boundary_supported: bool
     effective_config_artifact_present: bool
+    dependency_lock_provenance_present: bool
     immutable_input_snapshots_present: bool
     reproducible_semantic_output_mode: bool
     exact_replay_supported: bool
@@ -108,6 +109,7 @@ def missing_replay_ready_requirements(
     *,
     strict_replay_execution_context_supported: bool,
     exact_replay_supported: bool,
+    dependency_lock_provenance_present: bool,
     immutable_input_snapshots_present: bool,
     effective_config_artifact_present: bool,
     reproducible_semantic_output_mode: bool,
@@ -120,6 +122,7 @@ def missing_replay_ready_requirements(
             strict_replay_execution_context_supported,
         ),
         ("exact_replay_capability", exact_replay_supported),
+        ("dependency_lock_provenance", dependency_lock_provenance_present),
         ("immutable_input_snapshots", immutable_input_snapshots_present),
         ("effective_config_artifact", effective_config_artifact_present),
         ("reproducible_semantic_output_mode", reproducible_semantic_output_mode),
@@ -193,6 +196,7 @@ def build_persistence_profile(
             inputs.strict_replay_execution_context_supported
         ),
         exact_replay_supported=inputs.exact_replay_supported,
+        dependency_lock_provenance_present=inputs.dependency_lock_provenance_present,
         immutable_input_snapshots_present=inputs.immutable_input_snapshots_present,
         effective_config_artifact_present=inputs.effective_config_artifact_present,
         reproducible_semantic_output_mode=inputs.reproducible_semantic_output_mode,
@@ -288,6 +292,9 @@ def _resolve_persistence_inputs(
         effective_config_artifact_present=bool(
             str(base_summary.get("effective_config_artifact_id") or "").strip()
         ),
+        dependency_lock_provenance_present=bool(
+            str(base_summary.get("dependency_lock_hash") or "").strip()
+        ),
         immutable_input_snapshots_present=bool(
             base_summary.get("input_snapshot_ids", [])
         ),
@@ -338,6 +345,7 @@ def _build_persistence_surfaces(
     return {
         "control_plane_manifest": True,
         "effective_config_artifact": inputs.effective_config_artifact_present,
+        "dependency_lock_provenance": inputs.dependency_lock_provenance_present,
         "reproducible_semantic_output_mode": inputs.reproducible_semantic_output_mode,
         "strict_replay_execution_context_support": (
             inputs.strict_replay_execution_context_supported

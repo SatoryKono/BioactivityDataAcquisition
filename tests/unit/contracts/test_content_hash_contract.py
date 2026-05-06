@@ -5,6 +5,11 @@ from __future__ import annotations
 from datetime import datetime
 
 from bioetl.domain.behavior import EntityIdentityGenerator
+from bioetl.domain.normalization.profiles import (
+    OPENALEX_PUBLICATION_PROFILE,
+    PUBMED_PUBLICATION_PROFILE,
+    SEMANTICSCHOLAR_PUBLICATION_PROFILE,
+)
 from bioetl.domain.transformations import generate_content_hash
 
 
@@ -119,3 +124,43 @@ def test_content_hash_schema_include_exclude_contract() -> None:
     assert service.compute_content_hash(
         "chembl", record_v1
     ) == service.compute_content_hash("chembl", record_v2)
+
+
+def test_openalex_grants_raw_json_sidecar_does_not_change_semantic_content_hash() -> None:
+    record_a = {
+        "openalex_id": "W1",
+        "title": "Example",
+        "grants": '[{"funder":"A"},{"funder":"B"}]',
+        "grants_canonical_json": '[{"funder":"A"},{"funder":"B"}]',
+        "grants_raw_json": '[{"funder":"A"},{"funder":"B"}]',
+    }
+    record_b = {
+        **record_a,
+        "grants_raw_json": '[{"funder":"B"},{"funder":"A"}]',
+    }
+
+    assert generate_content_hash(
+        record_a,
+        "openalex",
+        include_fields=set(OPENALEX_PUBLICATION_PROFILE.hash_included_fields),
+        exclude_fields=set(OPENALEX_PUBLICATION_PROFILE.hash_excluded_fields),
+        set_like_fields=set(OPENALEX_PUBLICATION_PROFILE.set_like_fields),
+    ) == generate_content_hash(
+        record_b,
+        "openalex",
+        include_fields=set(OPENALEX_PUBLICATION_PROFILE.hash_included_fields),
+        exclude_fields=set(OPENALEX_PUBLICATION_PROFILE.hash_excluded_fields),
+        set_like_fields=set(OPENALEX_PUBLICATION_PROFILE.set_like_fields),
+    )
+
+
+def test_unordered_publication_raw_json_sidecars_are_excluded_from_semantic_hash() -> (
+    None
+):
+    assert "affiliation_structured_raw_json" in PUBMED_PUBLICATION_PROFILE.hash_excluded_fields
+    assert "publication_types_raw_json" in (
+        SEMANTICSCHOLAR_PUBLICATION_PROFILE.hash_excluded_fields
+    )
+    assert "subject_fields_raw_json" in (
+        SEMANTICSCHOLAR_PUBLICATION_PROFILE.hash_excluded_fields
+    )

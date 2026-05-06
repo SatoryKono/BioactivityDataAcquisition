@@ -119,6 +119,15 @@ def _resolve_exact_replay_blockers(
         blockers.append("immutable_input_snapshots_missing")
     elif manifest.replay_capability != ReplayCapability.EXACT_REPLAY_SUPPORTED:
         blockers.append("exact_replay_capability_unavailable")
+    if (
+        profile.strict_exact_replay_supported
+        and (
+            policy_assessment.strict_requirement_requested
+            or manifest.replay_capability == ReplayCapability.EXACT_REPLAY_SUPPORTED
+        )
+        and not manifest.code_provenance.dependency_lock_hash
+    ):
+        blockers.append("dependency_lock_provenance_missing")
     return blockers
 
 
@@ -221,11 +230,21 @@ def _resolve_manifest_replay_readiness_verdict(
         and manifest.replay_capability != ReplayCapability.EXACT_REPLAY_SUPPORTED
     )
     profile = _resolve_reproducibility_profile(manifest)
+    runtime_blocking_gaps = list(policy_assessment.blocking_gaps)
+    if (
+        profile.strict_exact_replay_supported
+        and (
+            policy_assessment.strict_requirement_requested
+            or manifest.replay_capability == ReplayCapability.EXACT_REPLAY_SUPPORTED
+        )
+        and not manifest.code_provenance.dependency_lock_hash
+    ):
+        runtime_blocking_gaps.append("dependency_lock_provenance")
     return resolve_replay_readiness_verdict(
         replay_capability=manifest.replay_capability,
         strict_requirement_requested=policy_assessment.strict_requirement_requested,
         strict_exact_replay_supported=profile.strict_exact_replay_supported,
-        blocking_gaps=policy_assessment.blocking_gaps,
+        blocking_gaps=tuple(dict.fromkeys(runtime_blocking_gaps)),
         exact_replay_requested=requested_exact_replay,
         resume_requested=resume_requested,
         run_type=manifest.run_type,
@@ -319,6 +338,7 @@ def _build_resume_contract(
             and applied_policy == "hard_fail"
             and profile.strict_exact_replay_supported
             and manifest.replay_capability == ReplayCapability.EXACT_REPLAY_SUPPORTED
+            and bool(manifest.code_provenance.dependency_lock_hash)
         ),
         "execution_context": execution_context,
         "resume_mode": (

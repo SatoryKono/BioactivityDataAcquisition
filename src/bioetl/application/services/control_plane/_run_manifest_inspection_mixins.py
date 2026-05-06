@@ -102,6 +102,7 @@ class RunManifestInspectionIdentityGraphMixin:
             run_type=manifest.run_type.value,
             pipeline_version=code_provenance.pipeline_version,
             git_commit=code_provenance.git_commit,
+            dependency_lock_hash=code_provenance.dependency_lock_hash,
             effective_config_hash=code_provenance.effective_config_hash,
             dq_contract_compatibility_hash=(
                 code_provenance.dq_contract_compatibility_hash

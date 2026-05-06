@@ -163,9 +163,15 @@ The text and JSON payloads expose:
 - checkpoint anchors: `manifest_id`, `execution_fingerprint`,
   `effective_config_hash`, `effective_config_artifact_id`, contract refs, and
   DQ compatibility hash;
-- replay taxonomy: `exact_replay`, `resume_only`, `rebuild_only`,
-  `compatible_resume`, `blocked_resume`, `missing_checkpoint`,
-  `missing_run_manifest`, or `corrupted_checkpoint_payload`;
+- replay taxonomy: `exact_replay`, `checkpoint_snapshot_only_resume`,
+  `checkpoint_snapshot_plus_ledger_suffix_resume`,
+  `full_scan_idempotent_rebuild`, `rebuild_only`, `blocked_resume`,
+  `missing_checkpoint`, `missing_run_manifest`, or
+  `corrupted_checkpoint_payload`;
+- replay context details: `replay_mode`, `continuation_mode`,
+  `operator_replay_mode`, and `replay_readiness_verdict` so operators can see
+  whether a compatible checkpoint is ordinary resume, bounded composite
+  lifecycle reconstruction, or exact replay;
 - anchor diff lists: matched, mismatched, and missing checkpoint-vs-manifest
   anchors.
 
@@ -173,8 +179,16 @@ Examples:
 
 - `compatibility_taxonomy: exact_replay` means the checkpoint anchors match a
   manifest that is `exact_replay_supported` and exact replay was requested.
-- `compatibility_taxonomy: resume_only` means resume is compatible, but the run
-  must not be described as exact replay.
+- `compatibility_taxonomy: checkpoint_snapshot_only_resume` means resume is
+  compatible on the ordinary checkpoint path, but the run must not be described
+  as exact replay.
+- `compatibility_taxonomy: checkpoint_snapshot_plus_ledger_suffix_resume` means
+  the compatible path is the bounded composite checkpoint snapshot +
+  ledger-suffix reconstruction model; this is lifecycle-oriented reconstruction,
+  not rich checkpoint-state replay.
+- `compatibility_replay_readiness_verdict: lifecycle_projection_only` confirms
+  that the run is on the bounded composite lifecycle projection path rather than
+  a strict exact-replay path.
 - `compatibility_taxonomy: blocked_resume` means one or more execution identity
   anchors differ; do not resume until the mismatch is explained.
 - `compatibility_taxonomy: missing_run_manifest` or

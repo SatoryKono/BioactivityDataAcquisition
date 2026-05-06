@@ -218,6 +218,7 @@ def expected_canonical_execution_identity(
         run_type=manifest.run_type.value,
         pipeline_version=manifest.code_provenance.pipeline_version,
         git_commit=manifest.code_provenance.git_commit,
+        dependency_lock_hash=manifest.code_provenance.dependency_lock_hash,
         effective_config_hash=manifest.code_provenance.effective_config_hash,
         dq_contract_compatibility_hash=(
             manifest.code_provenance.dq_contract_compatibility_hash
@@ -458,6 +459,7 @@ def expected_resume_contract(manifest: RunManifest) -> dict[str, object]:
             and applied_policy == "hard_fail"
             and profile.strict_exact_replay_supported
             and manifest.replay_capability == ReplayCapability.EXACT_REPLAY_SUPPORTED
+            and bool(manifest.code_provenance.dependency_lock_hash)
         ),
         "execution_context": "composite" if is_composite else "ordinary",
         "resume_mode": (

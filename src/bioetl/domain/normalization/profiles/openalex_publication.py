@@ -86,6 +86,7 @@ _SET_LIKE_FIELDS = frozenset(
         "subject_topics",
     }
 )
+_HASH_EXCLUDED_FIELDS = frozenset({"grants_raw_json"})
 _JSON_STRING_FIELDS = frozenset(
     {
         "affiliation_list",
@@ -174,6 +175,7 @@ OPENALEX_PUBLICATION_PROFILE = build_standard_profile(
     float_fields=_FLOAT_FIELDS,
     boolean_fields=_BOOLEAN_FIELDS,
     set_like_fields=_SET_LIKE_FIELDS,
+    hash_excluded_fields=_HASH_EXCLUDED_FIELDS,
     json_string_fields=_JSON_STRING_FIELDS,
     special_rules=_SPECIAL_RULES,
 )

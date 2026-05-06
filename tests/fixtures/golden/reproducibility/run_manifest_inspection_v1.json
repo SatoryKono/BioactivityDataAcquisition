@@ -23,8 +23,10 @@
       "dependency_lock_state": "missing",
       "git_commit": "abc1234",
       "source_revision_state": "clean",
-      "strict_code_provenance_blockers": [],
-      "strict_code_provenance_ready": true
+      "strict_code_provenance_blockers": [
+        "dependency_lock_hash_missing"
+      ],
+      "strict_code_provenance_ready": false
     },
     "config_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
     "continuation_mode": "exact_replay",
@@ -87,8 +89,10 @@
         "dependency_lock_state": "missing",
         "git_commit": "abc1234",
         "source_revision_state": "clean",
-        "strict_code_provenance_blockers": [],
-        "strict_code_provenance_ready": true
+        "strict_code_provenance_blockers": [
+          "dependency_lock_hash_missing"
+        ],
+        "strict_code_provenance_ready": false
       },
       "config_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
       "continuation_mode": "exact_replay",
@@ -165,7 +169,7 @@
       ],
       "manifest_id": "manifest-golden-001",
       "occurrence_only_diagnostics": [],
-      "operator_replay_mode": "Exact Replay",
+      "operator_replay_mode": "Exact Replay Blocked",
       "planned_artifacts": [
         {
           "layer": "silver",
@@ -225,7 +229,7 @@
         "resume_mode": "checkpoint_snapshot_only",
         "resume_requested": false,
         "semantic_identity_anchor": "execution_fingerprint",
-        "strict_replay_safe": true
+        "strict_replay_safe": false
       },
       "resume_diagnostics": null,
       "run_id": "00000000-0000-0000-0000-000000000901",
@@ -282,7 +286,7 @@
       "Review forensic-grade persistence requirements before using this run for full trace/debug reconstruction."
     ],
     "occurrence_only_diagnostics": [],
-    "operator_replay_mode": "Exact Replay",
+    "operator_replay_mode": "Exact Replay Blocked",
     "persistence_profile": {
       "attained_profile": "degraded_observable",
       "claims": {
@@ -307,6 +311,7 @@
         "scope": "coarse_grained_composite_resume"
       },
       "forensic_grade_missing_requirements": [
+        "dependency_lock_provenance",
         "produced_artifact_trace",
         "run_ledger_history"
       ],
@@ -324,16 +329,19 @@
         ]
       },
       "replay_ready_missing_requirements": [
+        "dependency_lock_provenance",
         "produced_artifact_trace"
       ],
       "required_profile": "replay_ready",
       "required_profile_missing_requirements": [
+        "dependency_lock_provenance",
         "produced_artifact_trace"
       ],
       "required_profile_satisfied": false,
       "surfaces": {
         "artifact_lineage_links": true,
         "control_plane_manifest": true,
+        "dependency_lock_provenance": false,
         "effective_config_artifact": true,
         "exact_replay_capability": true,
         "immutable_input_snapshots": true,
@@ -394,8 +402,10 @@
       "replay_of_manifest_id": null,
       "replay_of_run_id": null
     },
+    "replay_readiness_verdict": "exact_replay_blocked",
     "reproducibility_audit_score": {
       "blockers": [
+        "dependency_lock_provenance",
         "identity_graph_incomplete",
         "produced_artifact_trace"
       ],
@@ -441,13 +451,15 @@
           "blockers": [],
           "confidence": "high",
           "evidence": [
-            "legacy_config_hash_alias_semantics_ambiguous",
+            "legacy_config_hash_exposed_as_compatibility_alias",
+            "resolved_config_hash_exposed",
+            "effective_config_hash_exposed",
             "resolved_and_effective_hashes_exposed"
           ],
           "evidence_refs": [
-            "diagnostics.config_hash",
             "diagnostics.resolved_config_hash",
             "diagnostics.effective_config_hash",
+            "diagnostics.reproducibility_diagnostics.effective_config.diff_policy",
             "diagnostics.occurrence_only_diagnostics"
           ],
           "score": 9
@@ -508,7 +520,6 @@
       "contract_version": "1.2.0",
       "evidence_refs": [
         "diagnostics.artifact_refs",
-        "diagnostics.config_hash",
         "diagnostics.contract_ref",
         "diagnostics.effective_config_artifact_id",
         "diagnostics.effective_config_hash",
@@ -523,6 +534,7 @@
         "diagnostics.manifest_id",
         "diagnostics.occurrence_only_diagnostics",
         "diagnostics.replay_mode",
+        "diagnostics.reproducibility_diagnostics.effective_config.diff_policy",
         "diagnostics.resolved_config_hash",
         "diagnostics.resume_contract",
         "diagnostics.source_revision_state"
@@ -531,7 +543,6 @@
         "claimed": false,
         "evidence_refs": [
           "diagnostics.artifact_refs",
-          "diagnostics.config_hash",
           "diagnostics.contract_ref",
           "diagnostics.effective_config_artifact_id",
           "diagnostics.effective_config_hash",
@@ -548,6 +559,7 @@
           "diagnostics.occurrence_only_diagnostics",
           "diagnostics.replay_family_contract",
           "diagnostics.replay_mode",
+          "diagnostics.reproducibility_diagnostics.effective_config.diff_policy",
           "diagnostics.resolved_config_hash",
           "diagnostics.resume_contract",
           "diagnostics.source_revision_state"
@@ -627,13 +639,15 @@
           "resume_mode": "checkpoint_snapshot_only",
           "resume_requested": false,
           "semantic_identity_anchor": "execution_fingerprint",
-          "strict_replay_safe": true
+          "strict_replay_safe": false
         },
         "resume_diagnostics": null
       },
       "effective_config": {
         "diff_policy": {
-          "config_hash_policy": "legacy_alias_for_resolved_config_hash",
+          "config_hash_policy": "deprecated_legacy_alias_for_resolved_config_hash",
+          "legacy_config_hash_display_only": true,
+          "legacy_config_hash_replay_identity_anchor": false,
           "occurrence_fields": [
             "run_id",
             "manifest_id",
@@ -648,8 +662,11 @@
         },
         "semantic": {
           "config_hash_compatibility_anchor": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "config_hash_legacy_alias_of": "resolved_config_hash",
           "effective_config_artifact_id": "eca-golden-001",
           "effective_config_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "legacy_config_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "legacy_config_hash_alias_of": "resolved_config_hash",
           "resolved_config_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
         }
       },
@@ -683,10 +700,11 @@
         "continuation_mode": "exact_replay",
         "exact_replay_blockers": [],
         "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
-        "operator_replay_mode": "Exact Replay",
+        "operator_replay_mode": "Exact Replay Blocked",
         "policy_assessment": {
           "blocking_gaps": [],
           "replay_capability": "exact_replay_supported",
+          "replay_readiness_verdict": "exact_replay_ready",
           "required_persistence_profile": "replay_ready",
           "required_profile_satisfied": true,
           "snapshot_envelope": {
@@ -719,14 +737,17 @@
           ]
         },
         "replay_mode": "exact_replay",
+        "replay_readiness_verdict": "exact_replay_blocked",
         "required_persistence_profile": "replay_ready",
         "required_profile_missing_requirements": [
+          "dependency_lock_provenance",
           "produced_artifact_trace"
         ],
         "required_profile_satisfied": false
       },
       "semantic_identity": {
         "config_hash_compatibility_anchor": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "config_hash_legacy_alias_of": "resolved_config_hash",
         "effective_config_artifact_id": "eca-golden-001",
         "effective_config_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
         "execution_fingerprint": "fp-golden-001",
@@ -734,6 +755,9 @@
         "input_snapshot_ids": [
           "snapshot-golden-001"
         ],
+        "legacy_config_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "legacy_config_hash_alias_of": "resolved_config_hash",
+        "legacy_config_hash_replay_identity_anchor": false,
         "resolved_config_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
         "snapshot_status": "full"
       }
@@ -741,6 +765,7 @@
     "reproducibility_policy_assessment": {
       "blocking_gaps": [],
       "replay_capability": "exact_replay_supported",
+      "replay_readiness_verdict": "exact_replay_ready",
       "required_persistence_profile": "replay_ready",
       "required_profile_satisfied": true,
       "snapshot_envelope": {
@@ -766,7 +791,7 @@
       "resume_mode": "checkpoint_snapshot_only",
       "resume_requested": false,
       "semantic_identity_anchor": "execution_fingerprint",
-      "strict_replay_safe": true
+      "strict_replay_safe": false
     },
     "resume_diagnostics": null,
     "rule_bundle_version": "2026.03",
@@ -796,8 +821,10 @@
       "dependency_lock_state": "missing",
       "git_commit": "abc1234",
       "source_revision_state": "clean",
-      "strict_code_provenance_blockers": [],
-      "strict_code_provenance_ready": true
+      "strict_code_provenance_blockers": [
+        "dependency_lock_hash_missing"
+      ],
+      "strict_code_provenance_ready": false
     },
     "config_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
     "continuation_mode": "exact_replay",
@@ -874,7 +901,7 @@
     ],
     "manifest_id": "manifest-golden-001",
     "occurrence_only_diagnostics": [],
-    "operator_replay_mode": "Exact Replay",
+    "operator_replay_mode": "Exact Replay Blocked",
     "planned_artifacts": [
       {
         "layer": "silver",
@@ -934,7 +961,7 @@
       "resume_mode": "checkpoint_snapshot_only",
       "resume_requested": false,
       "semantic_identity_anchor": "execution_fingerprint",
-      "strict_replay_safe": true
+      "strict_replay_safe": false
     },
     "resume_diagnostics": null,
     "run_id": "00000000-0000-0000-0000-000000000901",

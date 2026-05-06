@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from bioetl.domain.control_plane import (
     ReplayCapability,
+    ReplayReadinessVerdict,
     RunInputSnapshotRef,
     RunSourceRef,
 )
@@ -76,6 +77,60 @@ def test_replay_ready_assessment_reports_snapshot_gate_gaps() -> None:
         "immutable_input_snapshots",
         "exact_replay_capability",
     )
+    assert (
+        assessment.replay_readiness_verdict
+        == ReplayReadinessVerdict.EXACT_REPLAY_BLOCKED
+    )
+
+
+def test_replay_readiness_verdicts_keep_resume_rebuild_and_incremental_distinct() -> (
+    None
+):
+    resume_assessment = assess_reproducibility_policy(
+        source_refs=(_source_ref(),),
+        required_persistence_profile="degraded_observable",
+        strict_exact_replay_supported=True,
+        resume_requested=True,
+        run_type="incremental",
+    )
+    incremental_assessment = assess_reproducibility_policy(
+        source_refs=(_source_ref(),),
+        required_persistence_profile="degraded_observable",
+        strict_exact_replay_supported=True,
+        run_type="incremental",
+    )
+    rebuild_assessment = assess_reproducibility_policy(
+        source_refs=(_source_ref(),),
+        required_persistence_profile="degraded_observable",
+        strict_exact_replay_supported=True,
+        run_type="full",
+    )
+
+    assert (
+        resume_assessment.replay_readiness_verdict
+        == ReplayReadinessVerdict.RESUME_COMPATIBLE
+    )
+    assert (
+        incremental_assessment.replay_readiness_verdict
+        == ReplayReadinessVerdict.INCREMENTAL_NEW_RUN
+    )
+    assert (
+        rebuild_assessment.replay_readiness_verdict
+        == ReplayReadinessVerdict.REBUILD_ONLY
+    )
+
+
+def test_unsupported_family_verdict_is_debug_only_when_strict_replay_not_claimed() -> (
+    None
+):
+    assessment = assess_reproducibility_policy(
+        source_refs=(_source_ref(),),
+        required_persistence_profile="degraded_observable",
+        strict_exact_replay_supported=False,
+        run_type="incremental",
+    )
+
+    assert assessment.replay_readiness_verdict == ReplayReadinessVerdict.DEBUG_ONLY
 
 
 def test_supported_family_contract_publishes_replay_ready_default() -> None:

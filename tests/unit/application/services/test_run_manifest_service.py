@@ -77,6 +77,7 @@ def _make_request() -> RunManifestCreateRequest:
         pipeline_version="1.2.3",
         git_commit="abc1234",
         source_revision_state="clean",
+        dependency_lock_hash="sha256:test-lock",
         config_hash="a" * 64,
         resolved_config_hash="b" * 64,
         effective_config_hash="c" * 64,
@@ -237,6 +238,28 @@ def test_create_manifest_allows_exact_replay_capability_without_strict_request()
     assert store.get("manifest-capability-only") == manifest
 
 
+def test_create_manifest_rejects_exact_capability_claim_without_snapshot_envelope() -> (
+    None
+):
+    store = _InMemoryRunManifestStore()
+    service = RunManifestService(
+        manifest_port=store,
+        _manifest_id_factory=lambda: "manifest-exact-claim-missing-snapshot",
+    )
+
+    with pytest.raises(RuntimeError, match="cannot claim exact_replay_supported"):
+        service.create_manifest(
+            replace(
+                _make_request(),
+                source_refs=(),
+                launch_context={"limit": 100, "resume": False},
+                replay_capability=ReplayCapability.EXACT_REPLAY_SUPPORTED,
+            )
+        )
+
+    assert store.get("manifest-exact-claim-missing-snapshot") is None
+
+
 def test_create_manifest_requires_git_commit_for_explicit_exact_replay() -> None:
     store = _InMemoryRunManifestStore()
     service = RunManifestService(
@@ -254,6 +277,25 @@ def test_create_manifest_requires_git_commit_for_explicit_exact_replay() -> None
         )
 
     assert store.get("manifest-missing-git") is None
+
+
+def test_create_manifest_requires_dependency_lock_for_explicit_exact_replay() -> None:
+    store = _InMemoryRunManifestStore()
+    service = RunManifestService(
+        manifest_port=store,
+        _manifest_id_factory=lambda: "manifest-missing-lock",
+    )
+
+    with pytest.raises(RuntimeError, match="requires dependency_lock_hash"):
+        service.create_manifest(
+            replace(
+                _make_request(),
+                dependency_lock_hash=None,
+                launch_context={"limit": 100, "resume": False, "exact_replay": True},
+            )
+        )
+
+    assert store.get("manifest-missing-lock") is None
 
 
 def test_create_manifest_rejects_undocumented_source_revision_state() -> None:
@@ -300,7 +342,10 @@ def test_create_manifest_requires_input_snapshots_for_explicit_exact_replay() ->
         _manifest_id_factory=lambda: "manifest-missing-snapshots",
     )
 
-    with pytest.raises(RuntimeError, match="requires immutable input snapshots"):
+    with pytest.raises(
+        RuntimeError,
+        match="immutable input snapshot envelope",
+    ):
         service.create_manifest(
             replace(
                 _make_request(),
@@ -319,7 +364,10 @@ def test_create_manifest_requires_input_snapshots_for_replay_ready_profile() -> 
         _manifest_id_factory=lambda: "manifest-replay-ready-missing-snapshots",
     )
 
-    with pytest.raises(RuntimeError, match="requires immutable input snapshots"):
+    with pytest.raises(
+        RuntimeError,
+        match="immutable input snapshot envelope",
+    ):
         service.create_manifest(
             replace(
                 _make_request(),
@@ -479,7 +527,7 @@ def test_execution_fingerprint_matches_golden_value() -> None:
 
     assert (
         manifest.execution_fingerprint
-        == "a657e091cf6314a31b73f3dd33bc6f227439635e3c47fa46573b3d93f13659fd"
+        == "4beaf6d6134b76cb2dfdfee89cfa192b5b8d91d486dfcdc62e0087a58378bead"
     )
 
 

@@ -45,6 +45,7 @@ CHEMBL_PUBLICATION_SCHEMA = pa.schema(
         pa.field("affiliation_list", pa.string()),  # JSON array (None for ChEMBL)
         pa.field("author_keys", pa.string()),  # Pipe-delimited Surname_F keys
         pa.field("author_orcids", pa.string()),
+        pa.field("issn_list", pa.string()),  # Canonical JSON array of ISSN values
         pa.field(
             "publication_type", pa.string(), nullable=False
         ),  # Unified: from doc_type

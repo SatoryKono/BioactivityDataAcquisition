@@ -111,8 +111,7 @@ def build_execution_identity_payload(
     pipeline_name: str | None,
     run_type: str | None,
     pipeline_version: str | None,
-    git_commit: str | None = None,
-    dependency_lock_hash: str | None = None,
+    git_commit: str | None,
     effective_config_hash: str | None,
     dq_contract_compatibility_hash: str | None,
     contract_ref: str | None,
@@ -120,6 +119,7 @@ def build_execution_identity_payload(
     effective_config_artifact_id: str | None,
     exact_replay: bool | str | None,
     input_snapshot_fingerprint: str | None,
+    dependency_lock_hash: str | None = None,
 ) -> dict[str, str | None]:
     """Build the canonical execution-identity payload shared across layers."""
     payload: dict[str, object | None] = {

@@ -61,6 +61,16 @@ COMPOSITE_CV_REPORT_PATH = str(TEST_ROOT / "reports" / "composite_cv.json")
 
 
 def _expected_code_provenance_state(manifest: RunManifest) -> dict[str, object]:
+    blockers = []
+    if not manifest.code_provenance.git_commit:
+        blockers.append("git_commit_missing")
+    if (
+        str(manifest.code_provenance.source_revision_state or "").strip().lower()
+        != "clean"
+    ):
+        blockers.append("source_revision_state_not_clean")
+    if not manifest.code_provenance.dependency_lock_hash:
+        blockers.append("dependency_lock_hash_missing")
     return {
         "git_commit": manifest.code_provenance.git_commit,
         "source_revision_state": manifest.code_provenance.source_revision_state,
@@ -69,8 +79,8 @@ def _expected_code_provenance_state(manifest: RunManifest) -> dict[str, object]:
             if manifest.code_provenance.dependency_lock_hash is not None
             else "missing"
         ),
-        "strict_code_provenance_ready": bool(manifest.code_provenance.git_commit),
-        "strict_code_provenance_blockers": [],
+        "strict_code_provenance_ready": not blockers,
+        "strict_code_provenance_blockers": blockers,
     }
 
 
@@ -252,6 +262,7 @@ def test_show_resolves_manifest_by_run_id_and_includes_ledger_history() -> None:
         "replay_capability_reason": "immutable_input_snapshots_present",
         "exact_replay_eligible": True,
         "exact_replay_blockers": [],
+        "replay_readiness_verdict": "exact_replay_blocked",
         "append_mode_semantic_sinks": [],
         "resume_contract": _expected_resume_contract(manifest),
         "resume_diagnostics": None,
@@ -260,7 +271,7 @@ def test_show_resolves_manifest_by_run_id_and_includes_ledger_history() -> None:
         "input_snapshot_content_hashes": ["sha256:snapshot-1"],
         "input_snapshot_identity_fingerprint": _SNAPSHOT_IDENTITY_FINGERPRINT,
         "replay_mode": "exact_replay",
-        "operator_replay_mode": "Exact Replay",
+        "operator_replay_mode": "Exact Replay Blocked",
         "snapshot_status": "full",
         "continuation_mode": "exact_replay",
         "input_snapshot_count": 1,
@@ -395,7 +406,7 @@ def _expected_identity_graph_without_ledger(
         "input_snapshot_content_hashes": ["sha256:snapshot-1"],
         "input_snapshot_identity_fingerprint": _SNAPSHOT_IDENTITY_FINGERPRINT,
         "replay_mode": "exact_replay",
-        "operator_replay_mode": "Exact Replay",
+        "operator_replay_mode": "Exact Replay Blocked",
         "snapshot_status": "full",
         "continuation_mode": "exact_replay",
         "input_snapshot_count": 1,
@@ -446,6 +457,7 @@ def _expected_diagnostics_without_ledger(
         "replay_capability_reason": "immutable_input_snapshots_present",
         "exact_replay_eligible": True,
         "exact_replay_blockers": [],
+        "replay_readiness_verdict": "exact_replay_blocked",
         "append_mode_semantic_sinks": [],
         "resume_contract": _expected_resume_contract(manifest),
         "resume_diagnostics": None,
@@ -454,7 +466,7 @@ def _expected_diagnostics_without_ledger(
         "input_snapshot_content_hashes": ["sha256:snapshot-1"],
         "input_snapshot_identity_fingerprint": _SNAPSHOT_IDENTITY_FINGERPRINT,
         "replay_mode": "exact_replay",
-        "operator_replay_mode": "Exact Replay",
+        "operator_replay_mode": "Exact Replay Blocked",
         "snapshot_status": "full",
         "continuation_mode": "exact_replay",
         "input_snapshot_count": 1,
@@ -489,6 +501,7 @@ def _expected_diagnostics_without_ledger(
             "surfaces": {
                 "control_plane_manifest": True,
                 "effective_config_artifact": True,
+                "dependency_lock_provenance": False,
                 "strict_replay_execution_context_support": True,
                 "immutable_input_snapshots": True,
                 "exact_replay_capability": True,
@@ -499,8 +512,12 @@ def _expected_diagnostics_without_ledger(
                 "lineage_closure_boundary_support": True,
             },
             "required_profile_missing_requirements": [],
-            "replay_ready_missing_requirements": ["produced_artifact_trace"],
+            "replay_ready_missing_requirements": [
+                "dependency_lock_provenance",
+                "produced_artifact_trace",
+            ],
             "forensic_grade_missing_requirements": [
+                "dependency_lock_provenance",
                 "produced_artifact_trace",
                 "run_ledger_history",
             ],
@@ -568,7 +585,11 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
     assert result.diagnostics["persistence_profile"]["claims"]["replay_ready"] is False
     assert result.diagnostics["persistence_profile"][
         "forensic_grade_missing_requirements"
-    ] == ["produced_artifact_trace", "run_ledger_history"]
+    ] == [
+        "dependency_lock_provenance",
+        "produced_artifact_trace",
+        "run_ledger_history",
+    ]
     diagnostics_without_unified = {
         key: value
         for key, value in result.diagnostics.items()
@@ -583,6 +604,7 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
         "replay_capability": "exact_replay_supported",
         "strict_requirement_requested": True,
         "strict_exact_replay_supported": True,
+        "replay_readiness_verdict": "exact_replay_ready",
         "required_profile_satisfied": True,
         "blocking_gaps": [],
         "snapshot_envelope": {

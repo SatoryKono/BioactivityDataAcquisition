@@ -30,6 +30,7 @@ class StandardProfileSpec:
     int_fields: Collection[str] = field(default_factory=tuple)
     float_fields: Collection[str] = field(default_factory=tuple)
     set_like_fields: Collection[str] = field(default_factory=tuple)
+    hash_excluded_fields: Collection[str] = field(default_factory=tuple)
     json_string_fields: Collection[str] = field(default_factory=tuple)
     strict_json_fields: Collection[str] = field(default_factory=tuple)
     boolean_fields: Collection[str] = field(default_factory=tuple)
@@ -59,6 +60,7 @@ _STANDARD_PROFILE_OPTIONAL_DEFAULTS: dict[str, object] = {
     "int_fields": (),
     "float_fields": (),
     "set_like_fields": (),
+    "hash_excluded_fields": (),
     "json_string_fields": (),
     "strict_json_fields": (),
     "boolean_fields": (),
@@ -90,6 +92,7 @@ class _StandardProfileSpecKwargs(TypedDict):
     int_fields: Collection[str]
     float_fields: Collection[str]
     set_like_fields: Collection[str]
+    hash_excluded_fields: Collection[str]
     json_string_fields: Collection[str]
     strict_json_fields: Collection[str]
     boolean_fields: Collection[str]

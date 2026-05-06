@@ -326,6 +326,10 @@ Focus on:
   separate config provenance fields; `config_hash` is a legacy compatibility
   anchor, `resolved_config_hash` identifies the resolved declarative config,
   and `effective_config_hash` identifies the final effective execution config;
+- `dependency_lock_hash` and `code_provenance_state.strict_code_provenance_ready`
+  as part of strict replay provenance; manifests without dependency-lock
+  provenance must not be treated as strict replay ready even when immutable
+  input snapshots are present;
 - `effective_config_hash`, `contract_ref`, `contract_version`, and `effective_config_artifact_id` as runtime-anchor compatibility fields;
 - stable `source_refs[*].source_hash` values in the effective-config artifact
   when canonical config files are available;

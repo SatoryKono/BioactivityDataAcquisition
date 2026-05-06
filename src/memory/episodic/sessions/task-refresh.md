@@ -2,7 +2,7 @@
 id: task-refresh
 title: Refresh before retrieval
 task_id: task-refresh
-created_at: '2026-05-06T10:12:33Z'
+created_at: '2026-05-06T12:22:34Z'
 ttl_days: 14
 confidence: episodic
 source_refs:

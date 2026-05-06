@@ -171,6 +171,7 @@ def _score_run_identity(summary: JsonDict) -> _ScoreCard:
         "contract_ref",
         "git_commit",
         "source_revision_state",
+        "dependency_lock_hash",
     )
     for field_name in required:
         refs.append(f"diagnostics.{field_name}")
@@ -307,16 +308,18 @@ def _score_layer_consistency(summary: JsonDict) -> _ScoreCard:
     evidence = []
     blockers = []
     refs = [
-        "diagnostics.config_hash",
         "diagnostics.resolved_config_hash",
         "diagnostics.effective_config_hash",
+        "diagnostics.reproducibility_diagnostics.effective_config.diff_policy",
         "diagnostics.occurrence_only_diagnostics",
     ]
     score = 9
-    if summary.get("config_hash") == summary.get("resolved_config_hash"):
-        evidence.append("legacy_config_hash_alias_matches_resolved_hash")
-    elif summary.get("config_hash") and summary.get("resolved_config_hash"):
-        evidence.append("legacy_config_hash_alias_semantics_ambiguous")
+    if summary.get("config_hash"):
+        evidence.append("legacy_config_hash_exposed_as_compatibility_alias")
+    if summary.get("resolved_config_hash"):
+        evidence.append("resolved_config_hash_exposed")
+    if summary.get("effective_config_hash"):
+        evidence.append("effective_config_hash_exposed")
     if summary.get("resolved_config_hash") and summary.get("effective_config_hash"):
         evidence.append("resolved_and_effective_hashes_exposed")
     else:

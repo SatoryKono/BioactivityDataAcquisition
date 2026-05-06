@@ -21,18 +21,19 @@ class IdentityDetailsSpec:
     effective_config_hash: str
     execution_phase: ExecutionPhase
     checkpoint_schema_version: str
-    composite_run_identity: str | None
-    execution_fingerprint: str | None
-    pipeline_name: str | None
-    run_type: str | None
-    pipeline_version: str | None
-    manifest_id: str | None
-    dq_contract_compatibility_hash: str | None
-    contract_ref: str | None
-    contract_version: str | None
-    effective_config_artifact_id: str | None
-    exact_replay: bool | None
-    input_snapshot_fingerprint: str | None
+    composite_run_identity: str | None = None
+    execution_fingerprint: str | None = None
+    pipeline_name: str | None = None
+    run_type: str | None = None
+    pipeline_version: str | None = None
+    manifest_id: str | None = None
+    dq_contract_compatibility_hash: str | None = None
+    contract_ref: str | None = None
+    contract_version: str | None = None
+    effective_config_artifact_id: str | None = None
+    exact_replay: bool | None = None
+    input_snapshot_fingerprint: str | None = None
+    dependency_lock_hash: str | None = None
 
 
 def _identity_detail_value(value: str | None) -> str:
@@ -50,6 +51,7 @@ def _canonical_execution_identity_payload(
     pipeline_name: str | None,
     run_type: str | None,
     pipeline_version: str | None,
+    dependency_lock_hash: str | None,
     effective_config_hash: str,
     dq_contract_compatibility_hash: str | None,
     contract_ref: str | None,
@@ -65,6 +67,7 @@ def _canonical_execution_identity_payload(
             pipeline_name,
             run_type,
             pipeline_version,
+            dependency_lock_hash,
             dq_contract_compatibility_hash,
             exact_replay,
             input_snapshot_fingerprint,
@@ -78,6 +81,7 @@ def _canonical_execution_identity_payload(
             run_type=run_type,
             pipeline_version=pipeline_version,
             git_commit=None,
+            dependency_lock_hash=dependency_lock_hash,
             effective_config_hash=effective_config_hash,
             dq_contract_compatibility_hash=dq_contract_compatibility_hash,
             contract_ref=contract_ref,
@@ -131,6 +135,7 @@ def build_identity_details(request: IdentityDetailsSpec) -> JsonDict:
         pipeline_name=request.pipeline_name,
         run_type=request.run_type,
         pipeline_version=request.pipeline_version,
+        dependency_lock_hash=request.dependency_lock_hash,
         effective_config_hash=request.effective_config_hash,
         dq_contract_compatibility_hash=request.dq_contract_compatibility_hash,
         contract_ref=request.contract_ref,
@@ -150,6 +155,7 @@ def build_identity_details(request: IdentityDetailsSpec) -> JsonDict:
         "pipeline_name": _identity_detail_value(request.pipeline_name),
         "run_type": _identity_detail_value(request.run_type),
         "pipeline_version": _identity_detail_value(request.pipeline_version),
+        "dependency_lock_hash": _identity_detail_value(request.dependency_lock_hash),
         "manifest_id": _identity_detail_value(request.manifest_id),
         "dq_contract_compatibility_hash": _identity_detail_value(
             request.dq_contract_compatibility_hash

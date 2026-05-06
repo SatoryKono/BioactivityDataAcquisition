@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
+
 from bioetl.application.pipelines.common.publication_issn import build_issn_fields
 
 
-def _serialize(values: object) -> str | None:
+def _serialize(values: Iterable[str] | None) -> str | None:
     if values is None:
         return None
     return "[" + ",".join(f'"{value}"' for value in values) + "]"
