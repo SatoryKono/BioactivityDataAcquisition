@@ -10,7 +10,9 @@ pipeline:
     records
   loading_strategy: full_scan_only
   business_primary_keys:
-  - entity_id
+  - publication_id
+  - term_type
+  - term
   sink:
     silver:
       partition_by:
@@ -95,11 +97,14 @@ quality:
     error_message: All term fields are required
   entity_conditional_validations: []
   key_nullability:
-  - field: entity_id
+  - field: publication_id
     key_type: merge
     nullable: false
   - field: term_type
-    key_type: partition
+    key_type: merge
+    nullable: false
+  - field: term
+    key_type: merge
     nullable: false
 filters:
   version: 1.0.0
@@ -133,7 +138,11 @@ filters:
     - term_type
 contracts:
   primary_key:
-  - entity_id
+  - publication_id
+  - term_type
+  - term
   merge_keys:
-  - entity_id
+  - publication_id
+  - term_type
+  - term
   hash_include: []

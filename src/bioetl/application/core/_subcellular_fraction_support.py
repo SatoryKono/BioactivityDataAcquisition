@@ -2,10 +2,15 @@
 
 from __future__ import annotations
 
-import hashlib
 from collections.abc import AsyncIterator
 from typing import Any
 
+from bioetl.application.core.entity_id import compute_subcellular_fraction_entity_id
+from bioetl.domain.normalization.profiles.profile_normalizers import (
+    normalize_profile_governed_vocabulary,
+    normalize_profile_title,
+)
+from bioetl.domain.schemas.constants import SUBCELLULAR_FRACTIONS
 from bioetl.domain.types import JsonDict
 
 
@@ -15,15 +20,17 @@ def normalize_fraction(
     """Normalize a raw subcellular fraction string."""
     if raw_fraction is None:
         return None
-    fraction = str(raw_fraction).strip()
-    return fraction or None
+    normalized = normalize_profile_governed_vocabulary(
+        normalize_profile_title(str(raw_fraction)),
+        allowed_values=SUBCELLULAR_FRACTIONS,
+        preserve_unknown=True,
+    )
+    return normalized if isinstance(normalized, str) and normalized else None
 
 
 def compute_entity_id(subcellular_fraction: str) -> str:
     """Compute a deterministic entity ID for a subcellular fraction."""
-    normalized = subcellular_fraction.lower().strip() if subcellular_fraction else ""
-    composite = f"subcellular_fraction:{normalized}"
-    return hashlib.sha256(composite.encode()).hexdigest()[:16]
+    return compute_subcellular_fraction_entity_id(subcellular_fraction)
 
 
 def create_fraction_record(

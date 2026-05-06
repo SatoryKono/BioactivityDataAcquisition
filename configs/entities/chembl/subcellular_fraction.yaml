@@ -9,7 +9,7 @@ pipeline:
   description: Extract unique subcellular fractions from ChEMBL Assay records
   loading_strategy: full_scan_only
   business_primary_keys:
-  - entity_id
+  - subcellular_fraction
   sink:
     gold:
       mode: scd2
@@ -89,7 +89,7 @@ quality:
   entity_cross_field_validations: []
   entity_conditional_validations: []
   key_nullability:
-  - field: entity_id
+  - field: subcellular_fraction
     key_type: merge
     nullable: false
 filters:
@@ -107,7 +107,7 @@ filters:
     columns: {}
 contracts:
   primary_key:
-  - entity_id
+  - subcellular_fraction
   merge_keys:
-  - entity_id
+  - subcellular_fraction
   hash_include: []

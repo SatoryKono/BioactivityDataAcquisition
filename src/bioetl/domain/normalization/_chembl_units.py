@@ -21,6 +21,8 @@ _QUDT_UNIT_IDENTIFIER_BY_UNIT: dict[str, str] = {
 }
 _UNIT_ALIASES: dict[str, str] = {
     "um": "µM",
+    "μm": "µM",
+    "µm": "µM",
     "micromolar": "µM",
     "nm": "nM",
     "nanomolar": "nM",
@@ -35,12 +37,18 @@ _UNIT_ALIASES: dict[str, str] = {
 }
 
 
+def _normalize_unit_alias_key(value: str) -> str:
+    """Normalize unicode-variant unit tokens before alias lookup."""
+    return value.replace("μ", "µ").lower()
+
+
 def normalize_standard_unit(value: str | None) -> str | None:
     """Normalize standard unit names using shared activity-unit aliases."""
     normalized = normalize_string(value)
     if normalized is None:
         return None
-    return _UNIT_ALIASES.get(normalized.lower(), normalized)
+    canonical = _UNIT_ALIASES.get(_normalize_unit_alias_key(normalized))
+    return canonical if canonical is not None else normalized.replace("μ", "µ")
 
 
 def normalize_qudt_unit(value: str | None) -> str | None:

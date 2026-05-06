@@ -88,6 +88,22 @@
       "nullable": true,
       "description": ""
     },
+    "issn": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "issn_list": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
     "volume": {
       "type": [
         "string",
@@ -226,14 +242,6 @@
       "nullable": true,
       "description": ""
     },
-    "issn": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
     "nlm_unique_id": {
       "type": [
         "string",
@@ -274,7 +282,39 @@
       "nullable": true,
       "description": ""
     },
+    "authors_with_affiliations_raw_json": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "authors_with_affiliations_canonical_json": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
     "affiliation_structured": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "affiliation_structured_raw_json": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "affiliation_structured_canonical_json": {
       "type": [
         "string",
         "null"

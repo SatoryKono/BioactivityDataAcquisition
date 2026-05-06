@@ -10,12 +10,9 @@ from pandera.typing import Series
 
 from bioetl.domain.schemas.base import ETLRecordSchema
 from bioetl.domain.schemas.constants import (
-    BTO_ID_PATTERN,
     CALOHA_ID_PATTERN,
     CHEMBL_ID_PATTERN,
-    EFO_ID_PATTERN,
     ONTOLOGY_MAPPING_STATUSES,
-    UBERON_ID_PATTERN,
 )
 
 __all__ = [
@@ -23,6 +20,9 @@ __all__ = [
 ]
 
 HTTP_IRI_PATTERN = r"^https?://[^\s]+$"
+CANONICAL_BTO_ID_PATTERN = r"^BTO_\d+$"
+CANONICAL_EFO_ID_PATTERN = r"^EFO_\d+$"
+CANONICAL_UBERON_ID_PATTERN = r"^UBERON_\d+$"
 
 
 class TissueSchema(ETLRecordSchema):
@@ -41,7 +41,7 @@ class TissueSchema(ETLRecordSchema):
     )
     bto_id: Series[str] | None = pa.Field(
         nullable=True,
-        str_matches=BTO_ID_PATTERN,
+        str_matches=CANONICAL_BTO_ID_PATTERN,
         description="BRENDA Tissue Ontology identifier.",
     )
     bto_iri: Series[str] | None = pa.Field(
@@ -65,7 +65,7 @@ class TissueSchema(ETLRecordSchema):
     )
     efo_id: Series[str] | None = pa.Field(
         nullable=True,
-        str_matches=EFO_ID_PATTERN,
+        str_matches=CANONICAL_EFO_ID_PATTERN,
         description="Experimental Factor Ontology identifier.",
     )
     efo_iri: Series[str] | None = pa.Field(
@@ -84,7 +84,7 @@ class TissueSchema(ETLRecordSchema):
     )
     uberon_id: Series[str] | None = pa.Field(
         nullable=True,
-        str_matches=UBERON_ID_PATTERN,
+        str_matches=CANONICAL_UBERON_ID_PATTERN,
         description="Uberon anatomy ontology identifier.",
     )
     uberon_iri: Series[str] | None = pa.Field(

@@ -94,6 +94,22 @@
       "nullable": true,
       "description": ""
     },
+    "issn": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "issn_list": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
     "volume": {
       "type": [
         "string",
@@ -229,14 +245,6 @@
       "nullable": true,
       "description": ""
     },
-    "issn": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
     "publisher": {
       "type": [
         "string",
@@ -306,7 +314,39 @@
       "nullable": true,
       "description": ""
     },
+    "primary_topic_raw_json": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "primary_topic_canonical_json": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
     "grants": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "grants_raw_json": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "grants_canonical_json": {
       "type": [
         "string",
         "null"

@@ -111,7 +111,14 @@ ASSAY_CATEGORIES: frozenset[str] = frozenset(
 RELATIONSHIP_TYPES: frozenset[str] = frozenset(["D", "H", "M", "N", "S", "U"])
 ASSAY_GROUPS: frozenset[str] = frozenset(["FUNCTIONAL", "BINDING"])
 SUBCELLULAR_FRACTIONS: frozenset[str] = frozenset(
-    ["Membrane", "Nucleus", "Cytoplasm", "Mitochondria", "Endoplasmic reticulum"]
+    [
+        "Membrane",
+        "Nucleus",
+        "Cytoplasm",
+        "Mitochondria",
+        "Microsomes",
+        "Endoplasmic reticulum",
+    ]
 )
 CONFIDENCE_DESCRIPTIONS: frozenset[str] = frozenset(
     [

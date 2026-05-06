@@ -131,6 +131,22 @@
       "nullable": true,
       "description": ""
     },
+    "features_raw_json": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "features_canonical_json": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
     "glycosylation": {
       "type": [
         "string",

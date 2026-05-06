@@ -9,10 +9,10 @@ Uses declarative field_specs DSL for mapping.
 
 from __future__ import annotations
 
-import hashlib
 from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.core.base_transformer import TransformationError
+from bioetl.application.core.entity_id import compute_subcellular_fraction_entity_id
 from bioetl.application.core.pre_silver_record import PreSilverRecord
 from bioetl.application.core.record_normalization_processor import (
     RecordNormalizationProcessor,
@@ -57,11 +57,19 @@ class SubcellularFractionTransformer(BaseChemblTransformer):
         resolved = _resolve_subcellular_fraction_payload(self, record)
         if resolved is None:
             return None
-        primary_id, business_data = resolved
-        entity_id = _resolve_subcellular_fraction_entity_id(self, record, primary_id)
+        _, business_data = resolved
+        normalizer = RecordNormalizationProcessor(
+            provider=self.provider,
+            entity_type=self.entity_type,
+        )
+        normalized_business_data = normalizer.normalize_business_data(business_data)
+        entity_id = _resolve_subcellular_fraction_entity_id(
+            self,
+            normalized_business_data,
+        )
         return PreSilverRecord(
             entity_id=entity_id,
-            business_data=business_data,
+            business_data=normalized_business_data,
             build_silver_record=self._build_pre_silver_json_record,
             apply_structural_policy=self._apply_pre_silver_structural_policy,
             apply_silver_filter=self._apply_pre_silver_filter,
@@ -77,13 +85,16 @@ class SubcellularFractionTransformer(BaseChemblTransformer):
         resolved = _resolve_subcellular_fraction_payload(self, record)
         if resolved is None:
             return None
-        primary_id, business_data = resolved
+        _, business_data = resolved
         normalizer = RecordNormalizationProcessor(
             provider=self.provider,
             entity_type=self.entity_type,
         )
         normalized_business_data = normalizer.normalize_business_data(business_data)
-        entity_id = _resolve_subcellular_fraction_entity_id(self, record, primary_id)
+        entity_id = _resolve_subcellular_fraction_entity_id(
+            self,
+            normalized_business_data,
+        )
         content_hash = self.compute_content_hash(
             normalized_business_data,
             exclude_none=True,
@@ -206,11 +217,7 @@ class SubcellularFractionTransformer(BaseChemblTransformer):
             Entity ID string (first 16 chars of SHA256 hex digest).
 
         """
-        normalized = (
-            subcellular_fraction.lower().strip() if subcellular_fraction else ""
-        )
-        composite = f"subcellular_fraction:{normalized}"
-        return hashlib.sha256(composite.encode()).hexdigest()[:16]
+        return compute_subcellular_fraction_entity_id(subcellular_fraction)
 
     def extract_fraction_from_assay(
         self,
@@ -269,14 +276,12 @@ def _resolve_subcellular_fraction_payload(
 
 def _resolve_subcellular_fraction_entity_id(
     transformer: SubcellularFractionTransformer,
-    record: BronzeRecord,
-    primary_id: PrimaryId,
+    business_data: JsonDict,
 ) -> str:
-    """Resolve entity id from precomputed value or normalized fraction name."""
-    pre_computed_id = record.get("entity_id")
-    if pre_computed_id:
-        return str(pre_computed_id)
-    return transformer.compute_fraction_entity_id(str(primary_id))
+    """Resolve entity id from canonical normalized fraction business data."""
+    return transformer.compute_fraction_entity_id(
+        str(business_data.get("subcellular_fraction", ""))
+    )
 
 
 def _build_subcellular_fraction_silver_record(

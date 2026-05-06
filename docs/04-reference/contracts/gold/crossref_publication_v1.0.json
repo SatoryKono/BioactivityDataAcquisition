@@ -91,6 +91,22 @@
       "nullable": true,
       "description": ""
     },
+    "issn": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "issn_list": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
     "volume": {
       "type": [
         "string",
@@ -190,22 +206,6 @@
       "description": ""
     },
     "_original_id": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "issn": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "issn_list": {
       "type": [
         "string",
         "null"

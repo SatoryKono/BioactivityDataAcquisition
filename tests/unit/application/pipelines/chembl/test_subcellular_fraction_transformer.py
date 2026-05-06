@@ -54,7 +54,7 @@ class TestSubcellularFractionTransformer:
         transformer: SubcellularFractionTransformer,
         mock_context: PipelineContext,
     ) -> None:
-        """Test transformation of valid pre-extracted fraction record."""
+        """Transformer should recompute entity_id from canonical fraction semantics."""
         record = {
             "entity_id": "a1b2c3d4e5f67890",
             "subcellular_fraction": "Microsomes",
@@ -68,7 +68,9 @@ class TestSubcellularFractionTransformer:
         assert result["subcellular_fraction"] == "Microsomes"
         assert result["assay_count"] == 42
         assert result["example_assay_id"] == "CHEMBL123456"
-        assert result["entity_id"] == "a1b2c3d4e5f67890"
+        assert result["entity_id"] == transformer.compute_fraction_entity_id(
+            "Microsomes"
+        )
         assert "content_hash" in result
         assert result["_run_id"] == str(mock_context.run_id)
         assert result["_run_type"] == mock_context.run_type.value
@@ -250,6 +252,23 @@ class TestSubcellularFractionTransformer:
         assert "content_hash" not in result.business_data
 
     @pytest.mark.asyncio
+    async def test_transform_pre_silver_recomputes_entity_id_from_canonical_fraction(
+        self,
+        transformer: SubcellularFractionTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
+        """Staged identity should ignore stale upstream ids and use canonical fraction."""
+        record = {
+            "entity_id": "deadbeefdeadbeef",
+            "subcellular_fraction": "  MICROSOMES  ",
+        }
+
+        result = await transformer.transform_pre_silver(mock_context, record, index=0)
+
+        assert isinstance(result, PreSilverRecord)
+        assert result.entity_id == transformer.compute_fraction_entity_id("Microsomes")
+
+    @pytest.mark.asyncio
     async def test_transform_matches_staged_finalization_for_assay_input(
         self,
         transformer: SubcellularFractionTransformer,
@@ -319,7 +338,7 @@ class TestComputeFractionEntityId:
         self,
         transformer: SubcellularFractionTransformer,
     ) -> None:
-        """Test entity_id computation is case-insensitive."""
+        """Canonical governed vocabulary should keep ids stable across case variants."""
         id1 = transformer.compute_fraction_entity_id("Membrane")
         id2 = transformer.compute_fraction_entity_id("MEMBRANE")
         id3 = transformer.compute_fraction_entity_id("membrane")

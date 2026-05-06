@@ -41,10 +41,10 @@ ______________________________________________________________________
 
 | Поле        | Тип   | Описание                                              |
 | ----------- | ----- | ----------------------------------------------------- |
-| `bto_id`    | `str` | Brenda Tissue Ontology ID (формат: `BTO:0000000`)     |
+| `bto_id`    | `str` | Brenda Tissue Ontology ID (формат: `BTO_0000000`)     |
 | `caloha_id` | `str` | CALIPHO tissue ID (формат: `TS-0000`)                 |
-| `efo_id`    | `str` | EFO ontology ID (формат: `EFO:0000000`)               |
-| `uberon_id` | `str` | UBERON anatomy ontology ID (формат: `UBERON:0000000`) |
+| `efo_id`    | `str` | EFO ontology ID (формат: `EFO_0000000`)               |
+| `uberon_id` | `str` | UBERON anatomy ontology ID (формат: `UBERON_0000000`) |
 
 ______________________________________________________________________
 
@@ -54,15 +54,18 @@ ______________________________________________________________________
 
 ### Нормализация данных
 
-- **pref_name:** Строка нормализуется через `normalize_to_string()` (strip whitespace)
-- **Онтологические ID:** Пустые строки и whitespace преобразуются в `NULL`
-- **tissue_id:** Валидируется через regex `^CHEMBL\d+$`
+- **pref_name:** canonical text/title cleanup
+- **Онтологические ID:** входные alias формы вроде `bto:0000068` нормализуются к
+  canonical underscore form `BTO_0000068`
+- **Companion bundle:** `*_iri`, `*_mapping_status`, `*_ontology_version`
+  резолвятся из sibling normalized ontology IDs
+- **tissue_id:** валидируется через regex `^CHEMBL\d+$`
 
 ### Entity ID
 
-```python
-entity_id = f"chembl:{tissue_id}"
-```
+`entity_id` остаётся техническим runtime field. Governance-significant business
+identity для ткани задаётся `tissue_id`; ontology IDs влияют на content-hash и
+DQ, но не заменяют primary business key.
 
 ______________________________________________________________________
 
@@ -72,10 +75,10 @@ ______________________________________________________________________
 
 1. **`tissue_id`** — обязательное, формат `^CHEMBL\d+$`
 1. **`pref_name`** — обязательное, длина 1-200 символов
-1. **`bto_id`** — если указан, формат `^BTO:\d{7}$`
+1. **`bto_id`** — если указан, формат `^BTO_\d{7}$`
 1. **`caloha_id`** — если указан, формат `^TS-\d{4}$`
-1. **`efo_id`** — если указан, формат `^EFO:\d{7}$`
-1. **`uberon_id`** — если указан, формат `^UBERON:\d{7}$`
+1. **`efo_id`** — если указан, формат `^EFO_\d{7}$`
+1. **`uberon_id`** — если указан, формат `^UBERON_\d{7}$`
 
 ### Пороги ошибок
 
@@ -144,7 +147,7 @@ normalized contract publishes this field as `tissue_id`.
 
 | tissue_id     | pref_name | bto_id      | uberon_id      |
 | ------------- | --------- | ----------- | -------------- |
-| CHEMBL3638186 | Liver     | BTO:0000759 | UBERON:0002107 |
+| CHEMBL3638186 | Liver     | BTO_0000759 | UBERON_0002107 |
 
 ______________________________________________________________________
 

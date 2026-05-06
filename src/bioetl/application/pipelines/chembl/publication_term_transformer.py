@@ -63,9 +63,7 @@ class PublicationTermTransformer(BaseChemblTransformer):
             entity_type=self.entity_type,
         )
         normalized_business_data = normalizer.normalize_business_data(business_data)
-        entity_id = _resolve_publication_term_entity_id(
-            self, prepared_record, normalized_business_data
-        )
+        entity_id = _resolve_publication_term_entity_id(self, normalized_business_data)
         return PreSilverRecord(
             entity_id=entity_id,
             business_data=normalized_business_data,
@@ -98,7 +96,6 @@ class PublicationTermTransformer(BaseChemblTransformer):
         normalized_business_data = normalizer.normalize_business_data(business_data)
         entity_id = _resolve_publication_term_entity_id(
             self,
-            prepared_record,
             normalized_business_data,
         )
         content_hash = self.compute_content_hash(
@@ -251,13 +248,9 @@ def _prepare_publication_term_record(record: BronzeRecord) -> BronzeRecord:
 
 def _resolve_publication_term_entity_id(
     transformer: PublicationTermTransformer,
-    record: BronzeRecord,
     business_data: GoldRecord,
 ) -> str:
-    """Resolve publication-term entity id from precomputed or composite key data."""
-    pre_computed_id = record.get("entity_id")
-    if pre_computed_id:
-        return str(pre_computed_id)
+    """Resolve publication-term entity id from canonical normalized business data."""
     return transformer.compute_term_entity_id(
         publication_id=str(business_data.get("publication_id", "")),
         term_type=str(business_data.get("term_type", "")),

@@ -125,6 +125,7 @@ assay:
         - Nucleus
         - Cytoplasm
         - Mitochondria
+        - Microsomes
         - Endoplasmic reticulum
 
     # Parameter-specific types (merged with activity.standard_types at load time)
