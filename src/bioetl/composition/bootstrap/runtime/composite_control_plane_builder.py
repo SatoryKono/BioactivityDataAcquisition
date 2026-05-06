@@ -96,6 +96,7 @@ def resolve_composite_control_plane_flags(settings: object) -> tuple[bool, bool]
         required_profile=effective_required_profile,
         execution_label="Composite execution",
         exact_replay_execution_context_supported=True,
+        composite_resume_rich_replay_supported=False,
     )
     return True, ledger_enabled
 

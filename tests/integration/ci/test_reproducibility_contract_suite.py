@@ -1445,11 +1445,11 @@ def test_reproducibility_contract_inventory_profiles_all_production_families() -
     )
     assert (
         profile_by_family["openalex.publication"]["strict_exact_replay_supported"]
-        is False
+        is True
     )
     assert (
         profile_by_family["openalex.publication"]["strict_replay_runtime_verdict"]
-        == "blocked_outside_supported_boundary"
+        == "allowed_with_snapshot_backed_source_refs"
     )
     assert (
         profile_by_family["composite.publication"]["exact_replay_support_boundary"]

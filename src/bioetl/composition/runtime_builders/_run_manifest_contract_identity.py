@@ -12,14 +12,29 @@ def resolve_contract_identity(
     *,
     provider: str,
     entity: str,
+    strict: bool = False,
 ) -> tuple[str, str | None, str | None, str | None, str | None]:
     """Resolve contract identity fields from canonical registry when available."""
     contract_ref = f"{provider}.{entity}"
     registry_path = Path("configs/base/contract_registry.yaml")
     if not registry_path.exists():
+        if strict:
+            raise RuntimeError(
+                "Strict reproducibility contexts require configs/base/"
+                f"contract_registry.yaml to resolve contract identity for '{contract_ref}'"
+            )
         return contract_ref, None, None, None, None
-    entry = _load_contract_registry_entry(registry_path, contract_ref)
+    entry = _load_contract_registry_entry(
+        registry_path,
+        contract_ref,
+        strict=strict,
+    )
     if entry is None:
+        if strict:
+            raise RuntimeError(
+                "Strict reproducibility contexts require a contract registry entry "
+                f"for '{contract_ref}' in configs/base/contract_registry.yaml"
+            )
         return contract_ref, None, None, None, None
     return (contract_ref, *_extract_contract_identity_fields(entry))
 
@@ -27,12 +42,20 @@ def resolve_contract_identity(
 def _load_contract_registry_entry(
     registry_path: Path,
     contract_ref: str,
+    *,
+    strict: bool,
 ) -> dict[str, object] | None:
-    payload = _read_contract_registry_payload(registry_path)
+    payload = _read_contract_registry_payload(registry_path, strict=strict)
     if payload is None:
         return None
     entries = payload.get("entries")
     if not isinstance(entries, dict):
+        if strict:
+            raise RuntimeError(
+                "Strict reproducibility contexts require "
+                "configs/base/contract_registry.yaml to expose a top-level "
+                "'entries' mapping"
+            )
         return None
     entry = entries.get(contract_ref)
     if not isinstance(entry, dict):
@@ -42,12 +65,24 @@ def _load_contract_registry_entry(
 
 def _read_contract_registry_payload(
     registry_path: Path,
+    *,
+    strict: bool,
 ) -> dict[str, object] | None:
     try:
         payload = yaml.safe_load(registry_path.read_text(encoding="utf-8"))
-    except (OSError, yaml.YAMLError):
+    except (OSError, yaml.YAMLError) as exc:
+        if strict:
+            raise RuntimeError(
+                "Strict reproducibility contexts require a readable contract "
+                f"registry payload at '{registry_path}'"
+            ) from exc
         return None
     if not isinstance(payload, dict):
+        if strict:
+            raise RuntimeError(
+                "Strict reproducibility contexts require "
+                "configs/base/contract_registry.yaml to parse into a mapping"
+            )
         return None
     return payload
 

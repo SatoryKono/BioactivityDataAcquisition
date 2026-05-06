@@ -114,6 +114,7 @@ def missing_replay_ready_requirements(
     effective_config_artifact_present: bool,
     reproducible_semantic_output_mode: bool,
     produced_artifact_trace_present: bool,
+    artifact_lineage_links_complete: bool,
 ) -> list[str]:
     """Return replay-ready persistence requirements missing for this run."""
     requirements = (
@@ -127,6 +128,7 @@ def missing_replay_ready_requirements(
         ("effective_config_artifact", effective_config_artifact_present),
         ("reproducible_semantic_output_mode", reproducible_semantic_output_mode),
         ("produced_artifact_trace", produced_artifact_trace_present),
+        ("artifact_lineage_closure", artifact_lineage_links_complete),
     )
     return [name for name, present in requirements if not present]
 
@@ -201,6 +203,7 @@ def build_persistence_profile(
         effective_config_artifact_present=inputs.effective_config_artifact_present,
         reproducible_semantic_output_mode=inputs.reproducible_semantic_output_mode,
         produced_artifact_trace_present=inputs.produced_artifact_trace_present,
+        artifact_lineage_links_complete=inputs.artifact_lineage_links_complete,
     )
     forensic_grade_missing_requirements = _build_forensic_grade_missing_requirements(
         replay_ready_missing_requirements=replay_ready_missing_requirements,

@@ -108,8 +108,8 @@ def _diagnostics_section_items(
         *_diagnostics_dq_items(diagnostics),
         ("persistence_profile", diagnostics.get("persistence_profile")),
         (
-            "reproducibility_policy_assessment",
-            diagnostics.get("reproducibility_policy_assessment"),
+            "replay_capability_assessment",
+            diagnostics.get("replay_capability_assessment"),
         ),
         (
             "reproducibility_diagnostics",

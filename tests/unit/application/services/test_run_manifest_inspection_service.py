@@ -600,10 +600,10 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
         if key
         not in {
             "reproducibility_diagnostics",
-            "reproducibility_policy_assessment",
+            "replay_capability_assessment",
         }
     }
-    assert result.diagnostics["reproducibility_policy_assessment"] == {
+    assert result.diagnostics["replay_capability_assessment"] == {
         "required_persistence_profile": "degraded_observable",
         "replay_capability": "exact_replay_supported",
         "strict_requirement_requested": True,
@@ -624,8 +624,10 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
         == "exact_replay_supported"
     )
     assert (
-        result.diagnostics["reproducibility_diagnostics"]["policy"]["policy_assessment"]
-        == result.diagnostics["reproducibility_policy_assessment"]
+        result.diagnostics["reproducibility_diagnostics"]["policy"][
+            "capability_assessment"
+        ]
+        == result.diagnostics["replay_capability_assessment"]
     )
     assert (
         result.diagnostics["reproducibility_diagnostics"]["occurrence_identity"][

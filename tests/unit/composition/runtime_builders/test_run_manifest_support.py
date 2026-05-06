@@ -457,6 +457,25 @@ def test_resolve_contract_identity_falls_back_when_registry_invalid(
 
 
 @pytest.mark.unit
+def test_resolve_contract_identity_fails_closed_for_strict_context_when_registry_invalid(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    registry_dir = tmp_path / "configs" / "base"
+    registry_dir.mkdir(parents=True)
+    registry_path = registry_dir / "contract_registry.yaml"
+    registry_path.write_text("entries: [invalid", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    with pytest.raises(RuntimeError, match="Strict reproducibility contexts require"):
+        resolve_contract_identity(
+            provider="chembl",
+            entity="activity",
+            strict=True,
+        )
+
+
+@pytest.mark.unit
 def test_replay_reconstructability_metric_is_reconstructable_for_non_strict_runs() -> (
     None
 ):

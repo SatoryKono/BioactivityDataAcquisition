@@ -26,6 +26,7 @@ from bioetl.composition.runtime_builders._runner_builder_support import (
     validate_required_persistence_profile,
 )
 from bioetl.domain.control_plane.reproducibility_policy import (
+    STRICT_PERSISTENCE_PROFILES,
     legacy_config_hash_from_resolved_config_hash,
 )
 
@@ -54,19 +55,26 @@ def create_run_manifest(
         pipeline_name=ctx.pipeline_name,
         yaml_config=yaml_config,
     )
-    (
-        contract_ref,
-        contract_version,
-        contract_schema_hash,
-        dq_policy_ref,
-        rule_bundle_version,
-    ) = _manifest_support.resolve_contract_identity(provider=provider, entity=entity)
+    contract_ref = f"{provider}.{entity}"
     reproducibility_context = resolve_manifest_reproducibility_context(
         ctx=ctx,
         inputs=inputs,
         provider=provider,
         entity=entity,
         contract_ref=contract_ref,
+    )
+    (
+        contract_ref,
+        contract_version,
+        contract_schema_hash,
+        dq_policy_ref,
+        rule_bundle_version,
+    ) = _manifest_support.resolve_contract_identity(
+        provider=provider,
+        entity=entity,
+        strict=bool(getattr(ctx, "exact_replay", False))
+        or reproducibility_context.required_persistence_profile
+        in STRICT_PERSISTENCE_PROFILES,
     )
     _active_layers, missing_artifact_lineage_layers = (
         resolve_required_artifact_lineage_layers(
@@ -104,6 +112,7 @@ def create_run_manifest(
         exact_replay_execution_context_supported=(
             reproducibility_context.strict_exact_replay_supported
         ),
+        composite_resume_rich_replay_supported=True,
         missing_artifact_lineage_layers=missing_artifact_lineage_layers,
     )
     manifest_store = create_manifest_store(inputs)

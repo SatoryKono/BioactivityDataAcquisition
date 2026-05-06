@@ -94,6 +94,7 @@ def validate_required_persistence_profile(
     required_profile: object,
     execution_label: str,
     exact_replay_execution_context_supported: bool = True,
+    composite_resume_rich_replay_supported: bool = True,
     missing_artifact_lineage_layers: tuple[str, ...] = (),
 ) -> None:
     """Fail closed when static control-plane flags cannot satisfy required profile."""
@@ -112,6 +113,12 @@ def validate_required_persistence_profile(
             f"{execution_label} cannot satisfy required persistence profile "
             f"'{profile}' because this execution context is outside the strict "
             "exact-replay support boundary"
+        )
+    if profile == "forensic_grade" and not composite_resume_rich_replay_supported:
+        raise RuntimeError(
+            f"{execution_label} cannot satisfy required persistence profile "
+            f"'{profile}' because composite forensic replay requires rich "
+            "checkpoint evidence that is not persisted by the current resume model"
         )
     if profile in STRICT_PERSISTENCE_PROFILES and not ledger_enabled:
         raise RuntimeError(
@@ -166,6 +173,7 @@ def validate_strict_data_root_policy(
 def requires_artifact_publication_closure(required_profile: object) -> bool:
     """Return ``True`` when artifact publication must be fully wired."""
     return _normalize_required_persistence_profile(required_profile) in {
+        "replay_ready",
         "forensic_grade"
     }
 
