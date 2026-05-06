@@ -183,7 +183,7 @@
       ],
       "title": "System Status",
       "type": "stat",
-      "description": "Current L0 operator state. Status values are OK, WARNING, CRITICAL, or UNKNOWN. CRITICAL means runtime, DQ, control-plane, workflow, or gold signals are failing for the selected pipeline/run_type. WARNING means non-fatal DQ or pending-gold conditions. Next action: follow the route shown in Next Action, then use the top-level dashboard bus."
+      "description": "Current L0 operator state. Status values are OK (0), WARNING (1), CRITICAL (2 or 3), or UNKNOWN. CRITICAL means runtime, DQ, control-plane, workflow, or gold signals are failing for the selected pipeline/run_type. WARNING means non-fatal DQ or pending-gold conditions. Next action: follow the route shown in Next Action, then use the top-level dashboard bus."
     },
     {
       "id": 215,
@@ -215,6 +215,10 @@
             {
               "type": "value",
               "options": {
+                "0": {
+                  "text": "NO_ROUTE",
+                  "color": "gray"
+                },
                 "5": {
                   "text": "MONITOR",
                   "color": "gray"
@@ -293,22 +297,25 @@
                     "type": "value",
                     "options": {
                       "control_plane": {
-                        "text": "Open Control Plane"
+                        "text": "Evaluate Control Plane Dashboard"
                       },
                       "dq": {
-                        "text": "Open Data Quality"
+                        "text": "Evaluate Data Quality Dashboard"
                       },
                       "monitor": {
-                        "text": "Monitor Overview"
+                        "text": "Monitor System Overview"
+                      },
+                      "no_route": {
+                        "text": "No Action Route Available"
                       },
                       "provider": {
-                        "text": "Open Provider Health"
+                        "text": "Evaluate Provider Health Dashboard"
                       },
                       "runtime": {
-                        "text": "Open Runtime"
+                        "text": "Evaluate Runtime Dashboard"
                       },
                       "workflow": {
-                        "text": "Open Workflow"
+                        "text": "Evaluate Workflow Dashboard"
                       }
                     }
                   }
@@ -340,6 +347,9 @@
                       },
                       "no_recent_activity_or_unknown_state": {
                         "text": "No recent activity"
+                      },
+                      "selected_scope_not_present": {
+                        "text": "Selector not present"
                       },
                       "provider_global_degradation": {
                         "text": "Provider issue"
@@ -375,7 +385,7 @@
       },
       "targets": [
         {
-          "expr": "topk(1, bioetl_l0_next_action_route{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} > 0)",
+          "expr": "topk(1, bioetl_l0_next_action_route{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} or label_replace(label_replace(label_replace(label_replace(vector(0), \"action_target\", \"no_route\", \"\", \"\"), \"action_reason\", \"selected_scope_not_present\", \"\", \"\"), \"action_dashboard_uid\", \"bioetl-overview-v2\", \"\", \"\"), \"pipeline\", \"selected scope\", \"\", \"\"))",
           "refId": "A",
           "format": "table",
           "instant": true
@@ -409,7 +419,7 @@
           }
         }
       ],
-      "description": "Action route projection for the selected pipeline/run_type. The row exposes `action_target`, `action_reason`, and `action_dashboard_uid`; Runtime > Control Plane > Gold Lifecycle > DQ > Provider > Workflow > Monitor. Provider route stays global in origin but is projected back onto the selected run_type scope for L0 consistency."
+      "description": "Action route projection for the selected pipeline/run_type. If the panel resolves to `NO_ROUTE`, validate that `bioetl_overview_pipeline_run_type_universe` exists for the selected pipeline/run_type combination. The row exposes `action_target`, `action_reason`, and `action_dashboard_uid`; Runtime > Control Plane > Gold Lifecycle > DQ > Provider > Workflow > Monitor. Provider route stays global in origin but is projected back onto the selected run_type scope for L0 consistency."
     },
     {
       "id": 9002,
@@ -633,7 +643,7 @@
           }
         }
       ],
-      "description": "Current L0 inputs (Runtime, DQ, Gold, Control Plane, Provider, Workflow). Status values are OK, WARNING, CRITICAL, or UNKNOWN."
+      "description": "Current L0 inputs (Runtime, DQ, Gold, Control Plane, Provider, Workflow). Status values are OK (0), WARNING (1), CRITICAL (2 or 3), or UNKNOWN."
     },
     {
       "id": 9003,
@@ -815,7 +825,7 @@
           }
         }
       ],
-      "description": "Current runtime blocker summary only; no $__range evidence. Status values are OK, WARNING, CRITICAL, or UNKNOWN. Open Runtime from the top-level bus for exact blocker condition rows."
+      "description": "Current runtime blocker summary only; no $__range evidence. Status values are OK (0), WARNING (1), CRITICAL (2 or 3), or UNKNOWN. Open Runtime from the top-level bus for exact blocker condition rows."
     },
     {
       "id": 9004,
@@ -856,6 +866,10 @@
                   "color": "orange"
                 },
                 "2": {
+                  "text": "CRITICAL",
+                  "color": "red"
+                },
+                "3": {
                   "text": "CRITICAL",
                   "color": "red"
                 }
@@ -946,7 +960,7 @@
       },
       "targets": [
         {
-          "expr": "bioetl_l1_dq_status{pipeline=~\"$pipeline\"}",
+          "expr": "bioetl_l1_dq_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}",
           "refId": "A",
           "format": "table",
           "instant": true
@@ -979,7 +993,7 @@
           }
         }
       ],
-      "description": "Current DQ summary for the selected pipeline/run_type scope. Status values are OK, WARNING, CRITICAL, or UNKNOWN."
+      "description": "Current DQ summary for the selected pipeline/run_type scope. Status values are OK (0), WARNING (1), CRITICAL (2 or 3), or UNKNOWN."
     },
     {
       "id": 9005,
@@ -1020,6 +1034,10 @@
                   "color": "orange"
                 },
                 "2": {
+                  "text": "CRITICAL",
+                  "color": "red"
+                },
+                "3": {
                   "text": "CRITICAL",
                   "color": "red"
                 }
@@ -1196,7 +1214,7 @@
           }
         }
       ],
-      "description": "Lifecycle-state projection for gold output. `lifecycle_state` distinguishes runtime-owned failure, missing gold after success, pending, disabled, and healthy recent gold. Status values are OK, WARNING, CRITICAL, or UNKNOWN."
+      "description": "Lifecycle-state projection for gold output. `lifecycle_state` distinguishes runtime-owned failure, missing gold after success, pending, disabled, and healthy recent gold. Status values are OK (0), WARNING (1), CRITICAL (2 or 3), or UNKNOWN. Disabled Gold stage returns OK and is a valid non-error state."
     },
     {
       "id": 9006,
@@ -1897,6 +1915,341 @@
       "description": "GLOBAL workflow scope across pipeline/run_type combinations. Status values are OK, WARNING, CRITICAL, or UNKNOWN."
     },
     {
+      "id": 9014,
+      "type": "row",
+      "title": "L1 Historical Trends (24h)",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 20
+      },
+      "collapsed": false,
+      "panels": [
+        {
+          "id": 9015,
+          "type": "timeseries",
+          "title": "Runtime Blockers Trend",
+          "gridPos": {
+            "h": 8,
+            "w": 8,
+            "x": 0,
+            "y": 21
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "tooltip": false,
+                  "viz": false,
+                  "legend": false
+                },
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": true
+              },
+              "mappings": [
+                {
+                  "type": "value",
+                  "options": {
+                    "0": {
+                      "text": "OK",
+                      "color": "green"
+                    },
+                    "1": {
+                      "text": "WARNING",
+                      "color": "orange"
+                    },
+                    "2": {
+                      "text": "CRITICAL",
+                      "color": "red"
+                    },
+                    "3": {
+                      "text": "CRITICAL",
+                      "color": "red"
+                    }
+                  }
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 1
+                  },
+                  {
+                    "color": "red",
+                    "value": 2
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "expr": "bioetl_l1_runtime_blocker_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}",
+              "refId": "A",
+              "legendFormat": "{{pipeline}}/{{run_type}}"
+            }
+          ],
+          "description": "24-hour historical trend of runtime blocker status. Shows OK (0), WARNING (1), CRITICAL (2 or 3), or UNKNOWN. Click on Runtime dashboard for detailed blocker conditions."
+        },
+        {
+          "id": 9016,
+          "type": "timeseries",
+          "title": "DQ Status Trend",
+          "gridPos": {
+            "h": 8,
+            "w": 8,
+            "x": 8,
+            "y": 21
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "tooltip": false,
+                  "viz": false,
+                  "legend": false
+                },
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": true
+              },
+              "mappings": [
+                {
+                  "type": "value",
+                  "options": {
+                    "0": {
+                      "text": "OK",
+                      "color": "green"
+                    },
+                    "1": {
+                      "text": "WARNING",
+                      "color": "orange"
+                    },
+                    "2": {
+                      "text": "CRITICAL",
+                      "color": "red"
+                    },
+                    "3": {
+                      "text": "CRITICAL",
+                      "color": "red"
+                    }
+                  }
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 1
+                  },
+                  {
+                    "color": "red",
+                    "value": 2
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "expr": "bioetl_l1_dq_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}",
+              "refId": "A",
+              "legendFormat": "{{pipeline}}"
+            }
+          ],
+          "description": "24-hour historical trend of DQ status. Shows OK (0), WARNING (1), CRITICAL (2 or 3), or UNKNOWN. Click on Data Quality dashboard for detailed DQ conditions."
+        },
+        {
+          "id": 9017,
+          "type": "timeseries",
+          "title": "Gold Lifecycle Trend",
+          "gridPos": {
+            "h": 8,
+            "w": 8,
+            "x": 16,
+            "y": 21
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "tooltip": false,
+                  "viz": false,
+                  "legend": false
+                },
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": true
+              },
+              "mappings": [
+                {
+                  "type": "value",
+                  "options": {
+                    "0": {
+                      "text": "OK",
+                      "color": "green"
+                    },
+                    "1": {
+                      "text": "WARNING",
+                      "color": "orange"
+                    },
+                    "2": {
+                      "text": "CRITICAL",
+                      "color": "red"
+                    },
+                    "3": {
+                      "text": "CRITICAL",
+                      "color": "red"
+                    }
+                  }
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 1
+                  },
+                  {
+                    "color": "red",
+                    "value": 2
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "expr": "bioetl_l1_gold_lifecycle_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}",
+              "refId": "A",
+              "legendFormat": "{{pipeline}}/{{run_type}}/{{lifecycle_state}}"
+            }
+          ],
+          "description": "24-hour historical trend of gold lifecycle status. Shows OK (0), WARNING (1), CRITICAL (2 or 3), or UNKNOWN. Disabled Gold stage returns OK as a valid non-error state."
+        }
+      ]
+    },
+    {
       "id": 9009,
       "type": "row",
       "title": "Range Evidence (Historical / Recent History)",
@@ -1904,7 +2257,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 20
+        "y": 30
       },
       "collapsed": true,
       "panels": [

@@ -333,7 +333,7 @@ Variable handoff policy for dashboard links remains strict and bounded:
 ## Важные пороги (из JSON)
 
 - `overview.id=214 (System Status)`: `CRITICAL` при runtime blocker `>0`, DQ hard fail `>0`, blocking gold lifecycle или control-plane blocker `>0`; `WARNING` при non-fatal warning-only сигналах; `UNKNOWN` при no recent samples. Next action: follow `overview.id=215`.
-- `overview.id=215 (Next Action)`: priority order `Runtime > Control Plane > Gold Lifecycle > DQ > Provider > Workflow > Monitor`. Next action: open first non-OK surface with same `$pipeline/$run_type`.
+- `overview.id=215 (Next Action)`: priority order `Runtime > Control Plane > Gold Lifecycle > DQ > Provider > Workflow > Monitor`. If the selected scope is missing from `bioetl_overview_pipeline_run_type_universe`, the panel falls back to `NO_ROUTE` instead of rendering empty. Next action: open first non-OK surface with same `$pipeline/$run_type`.
 - `dq.id=2 (DQ Score Snapshot)`: no-data остается `UNKNOWN`, не `0`; hard-fail signals блокируют promotion, warning-only означает drift. Next action: hard-fail -> reject/quarantine diagnostics; warning-only -> trend + top reasons.
 - `dq.id=154 (Blocked Share Trend)`: numerator = `filtered_out + quarantined`,
   denominator = Bronze input in the same window. Sustained growth = filter /
@@ -353,7 +353,9 @@ Variable handoff policy for dashboard links remains strict and bounded:
 - `overview.Next Action`: runtime имеет приоритет над control-plane,
   blocking gold lifecycle, DQ, provider и workflow; row
   `action_target/action_reason/action_dashboard_uid`
-  replaces the old opaque severity-only handoff.
+  replaces the old opaque severity-only handoff. `NO_ROUTE` means the selected
+  `pipeline/run_type` scope is not present in the overview universe and should
+  be validated before deeper drilldown.
 - `overview.Gold Lifecycle Current`: table now uses explicit
   `lifecycle_state` rows (`runtime_failed_owner`, `gold_missing_after_success`,
   `pending_no_recent_gold`, `disabled`, `healthy_recent_gold`) instead of a

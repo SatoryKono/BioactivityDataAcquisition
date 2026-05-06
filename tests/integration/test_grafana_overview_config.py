@@ -99,16 +99,25 @@ def test_next_action_panel_exposes_action_route_details() -> None:
     assert "topk(1" in expr
     assert 'pipeline=~"$pipeline"' in expr
     assert 'run_type=~"$run_type"' in expr
+    assert "> 0" not in expr
+    assert "label_replace(vector(0)" in expr
+    assert "selected_scope_not_present" in expr
     assert "$__range" not in expr
     assert panel.get("gridPos", {}).get("w") == 11
     assert transformations and transformations[0].get("id") == "organize"
     excluded = transformations[0].get("options", {}).get("excludeByName", {})
     for hidden_field in ("Time", "__name__", "Value", "action_dashboard_uid"):
         assert excluded.get(hidden_field) is True
+    assert "NO_ROUTE" in description
+    assert "bioetl_overview_pipeline_run_type_universe" in description
     for label_name in ("action_target", "action_reason", "action_dashboard_uid"):
         assert label_name in description
-    serialized = json.dumps(panel.get("fieldConfig", {}).get("overrides", []))
-    assert "gold_lifecycle_blocking" in serialized
+    defaults_serialized = json.dumps(panel.get("fieldConfig", {}).get("defaults", {}))
+    assert "NO_ROUTE" in defaults_serialized
+    overrides_serialized = json.dumps(panel.get("fieldConfig", {}).get("overrides", []))
+    assert "gold_lifecycle_blocking" in overrides_serialized
+    assert "no_route" in overrides_serialized
+    assert "selected_scope_not_present" in overrides_serialized
 
 
 def test_current_l0_l1_tables_have_operator_mappings() -> None:

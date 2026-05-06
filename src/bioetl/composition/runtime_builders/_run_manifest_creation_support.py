@@ -9,9 +9,11 @@ import bioetl.composition.runtime_builders._run_manifest_support as _manifest_su
 from bioetl.application.services.control_plane.run_ledger_service import (
     RunLedgerService,
 )
+from bioetl.composition.runtime_builders._run_manifest_attr_support import (
+    read_attr as _read_attr,
+)
 from bioetl.application.services.control_plane.run_manifest_service import (
     RunManifestCreateSpec,
-    RunManifestService,
 )
 from bioetl.composition.runtime_builders._run_manifest_builder_policy import (
     resolve_code_revision_for_manifest,
@@ -19,13 +21,11 @@ from bioetl.composition.runtime_builders._run_manifest_builder_policy import (
     validate_required_runtime_persistence_profile,
 )
 from bioetl.composition.services.versioning import get_pipeline_version
-from bioetl.domain.control_plane import ReplayCapability, RunManifest
+from bioetl.domain.control_plane import ReplayCapability
 from bioetl.domain.control_plane.reproducibility_policy import (
     STRICT_PERSISTENCE_PROFILES,
     assess_reproducibility_policy,
 )
-from bioetl.infrastructure.control_plane import FileRunManifestStore
-from bioetl.infrastructure.time import SystemClock
 
 if TYPE_CHECKING:
     from bioetl.composition.runtime_builders.inputs_resolver import RunnerInputs
@@ -53,9 +53,9 @@ class _RunManifestCreateRequestInputs:
 
 
 def _validate_exact_replay_boundary(ctx: PipelineRunContext, context: object) -> None:
-    if not bool(getattr(ctx, "exact_replay", False)):
+    if not bool(_read_attr(ctx, "exact_replay", False)):
         return
-    if getattr(context, "strict_exact_replay_supported", False):
+    if bool(_read_attr(context, "strict_exact_replay_supported", False)):
         return
     raise RuntimeError(
         "Pipeline execution is outside the published strict exact-replay "
@@ -90,21 +90,21 @@ def _build_manifest_launch_context(
         request_inputs.ctx,
         run_type_value=request_inputs.run_type_value,
         execution_context_value=request_inputs.execution_context_value,
-        required_persistence_profile=getattr(
+        required_persistence_profile=_read_attr(
             reproducibility_context, "required_persistence_profile"
         ),
-        strict_exact_replay_supported=getattr(
+        strict_exact_replay_supported=_read_attr(
             reproducibility_context, "strict_exact_replay_supported"
         ),
-        reproducibility_family=getattr(reproducibility_context, "family"),
-        replay_family_contract=getattr(
+        reproducibility_family=_read_attr(reproducibility_context, "family"),
+        replay_family_contract=_read_attr(
             reproducibility_context, "replay_family_contract"
         ),
-        strict_replay_runtime_verdict=getattr(
+        strict_replay_runtime_verdict=_read_attr(
             reproducibility_context, "strict_replay_runtime_verdict"
         ),
-        replay_support_scope=getattr(reproducibility_context, "support_scope"),
-        replay_support_reason=getattr(reproducibility_context, "reason"),
+        replay_support_scope=_read_attr(reproducibility_context, "support_scope"),
+        replay_support_reason=_read_attr(reproducibility_context, "reason"),
     )
 
 
@@ -117,17 +117,19 @@ def _build_replay_assessment(
 ) -> object:
     return assess_reproducibility_policy(
         source_refs=source_refs,
-        required_persistence_profile=getattr(
+        required_persistence_profile=_read_attr(
             reproducibility_context, "required_persistence_profile"
         ),
-        strict_exact_replay_supported=getattr(
+        strict_exact_replay_supported=_read_attr(
             reproducibility_context, "strict_exact_replay_supported"
         ),
-        exact_replay_requested=bool(getattr(request_inputs.ctx, "exact_replay", False)),
-        resume_requested=bool(getattr(request_inputs.ctx, "resume", False)),
+        exact_replay_requested=bool(
+            _read_attr(request_inputs.ctx, "exact_replay", False)
+        ),
+        resume_requested=bool(_read_attr(request_inputs.ctx, "resume", False)),
         replay_capability=replay_capability,
         run_type=request_inputs.run_type_value,
-        debug_only=bool(getattr(request_inputs.inputs.settings, "debug", False)),
+        debug_only=bool(_read_attr(request_inputs.inputs.settings, "debug", False)),
     )
 
 
@@ -135,12 +137,12 @@ def _apply_replay_assessment(
     launch_context: dict[str, object],
     replay_assessment: object,
 ) -> None:
-    replay_verdict = getattr(replay_assessment, "replay_readiness_verdict").value
+    replay_verdict = _read_attr(replay_assessment, "replay_readiness_verdict").value
     launch_context.update(
         {
             "replay_readiness_verdict": replay_verdict,
             "exact_replay_ready": replay_verdict == "exact_replay_ready",
-            "replay_blockers": list(getattr(replay_assessment, "blocking_gaps")),
+            "replay_blockers": list(_read_attr(replay_assessment, "blocking_gaps")),
         }
     )
 
@@ -160,7 +162,7 @@ def _build_manifest_create_spec(
     yaml_config = inputs.yaml_config
     return RunManifestCreateSpec(
         run_id=ctx.run_id,
-        run_type=getattr(ctx, "run_type", "incremental"),
+        run_type=_read_attr(ctx, "run_type", "incremental"),
         pipeline_name=ctx.pipeline_name,
         provider=request_inputs.provider,
         entity=request_inputs.entity,
@@ -231,7 +233,7 @@ def build_manifest_create_request(
         inputs=inputs,
         provider=request_inputs.provider,
         entity=request_inputs.entity,
-        required_persistence_profile=getattr(
+        required_persistence_profile=_read_attr(
             reproducibility_context, "required_persistence_profile"
         ),
     )
@@ -243,11 +245,11 @@ def build_manifest_create_request(
     )
     code_revision = resolve_code_revision_for_manifest(
         resolved_config_hash=request_inputs.resolved_config_hash,
-        test_mode=bool(getattr(inputs.settings, "test_mode", False)),
+        test_mode=bool(_read_attr(inputs.settings, "test_mode", False)),
     )
     replay_capability = _manifest_support.resolve_replay_capability(
         source_refs=source_refs,
-        resume_requested=bool(getattr(ctx, "resume", False)),
+        resume_requested=bool(_read_attr(ctx, "resume", False)),
     )
     launch_context = _build_manifest_launch_context(
         request_inputs=request_inputs,
@@ -271,10 +273,10 @@ def build_manifest_create_request(
     )
     validate_required_runtime_persistence_profile(
         request=request,
-        required_persistence_profile=getattr(
+        required_persistence_profile=_read_attr(
             reproducibility_context, "required_persistence_profile"
         ),
-        strict_exact_replay_supported=getattr(
+        strict_exact_replay_supported=_read_attr(
             reproducibility_context, "strict_exact_replay_supported"
         ),
     )
@@ -288,10 +290,10 @@ def emit_replay_reconstructability_metric(
     metrics: object,
 ) -> None:
     """Emit replay reconstructability metrics for one manifest request."""
-    increment_counter = getattr(metrics, "increment_counter", None)
+    increment_counter = _read_attr(metrics, "increment_counter", None)
     if not callable(increment_counter):
         return
-    set_gauge = getattr(metrics, "set_gauge", None)
+    set_gauge = _read_attr(metrics, "set_gauge", None)
     strict_replay_requested = bool(request.launch_context.get("exact_replay"))
     required_persistence_profile = str(
         request.launch_context.get("required_persistence_profile")
@@ -307,7 +309,7 @@ def emit_replay_reconstructability_metric(
         or request.replay_capability != ReplayCapability.EXACT_REPLAY_SUPPORTED
     ):
         status = "not_reconstructable"
-    raw_run_type = getattr(request.run_type, "value", request.run_type)
+    raw_run_type = _read_attr(request.run_type, "value", request.run_type)
     run_type = str(raw_run_type or "unknown").strip().lower().replace(" ", "_")
     bounded_run_type = run_type or "unknown"
     increment_counter(
@@ -346,28 +348,3 @@ def emit_replay_reconstructability_metric(
                 "status": "detected",
             },
         )
-
-
-def create_manifest_store(inputs: RunnerInputs) -> FileRunManifestStore:
-    """Create the file-backed run-manifest store."""
-    return FileRunManifestStore(
-        base_path=_manifest_support.control_plane_root(inputs.settings, "run_manifest"),
-        metrics=inputs.observability.metrics,
-    )
-
-
-def create_manifest_record(
-    *,
-    manifest_store: FileRunManifestStore,
-    manifest_create_request: RunManifestCreateSpec,
-    ledger_service: RunLedgerService | None,
-) -> RunManifest:
-    """Create and optionally ledger-record one manifest."""
-    manifest = RunManifestService(
-        manifest_port=manifest_store,
-        clock=SystemClock(),
-    ).create_manifest(manifest_create_request)
-    if ledger_service is not None:
-        ledger_service.manifest_id = manifest.manifest_id
-        ledger_service.record_manifest_created(manifest)
-    return manifest
