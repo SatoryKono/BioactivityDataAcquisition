@@ -54,7 +54,7 @@ def test_replay_registry_and_workflows_keep_offline_and_live_modes_separate() ->
     live_env = cast(dict[str, str], live_workflow.get("env", {}))
 
     assert drift_env.get("VCR_RECORD_MODE") == "none"
-    assert drift_env.get("BIOETL_LIVE_API_TESTS") == "false"
-    assert drift_env.get("BIOETL_NETWORK_TESTS") == "false"
+    assert "BIOETL_LIVE_API_TESTS" not in drift_env
+    assert "BIOETL_NETWORK_TESTS" not in drift_env
     assert live_env.get("BIOETL_LIVE_API_TESTS") == "true"
     assert live_env.get("BIOETL_NETWORK_TESTS") == "true"

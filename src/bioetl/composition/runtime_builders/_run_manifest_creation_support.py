@@ -22,6 +22,7 @@ from bioetl.composition.services.versioning import get_pipeline_version
 from bioetl.domain.control_plane import ReplayCapability, RunManifest
 from bioetl.domain.control_plane.reproducibility_policy import (
     STRICT_PERSISTENCE_PROFILES,
+    assess_reproducibility_policy,
 )
 from bioetl.infrastructure.control_plane import FileRunManifestStore
 from bioetl.infrastructure.time import SystemClock
@@ -86,6 +87,14 @@ def build_manifest_create_request(
         entity=entity,
         contract_ref=request_inputs.contract_ref,
     )
+    if (
+        bool(getattr(ctx, "exact_replay", False))
+        and not reproducibility_context.strict_exact_replay_supported
+    ):
+        raise RuntimeError(
+            "Pipeline execution is outside the published strict exact-replay "
+            "support boundary for this run family"
+        )
     source_refs = _manifest_support.build_run_source_refs(
         ctx=ctx,
         cached_bronze=inputs.cached_bronze,
@@ -106,20 +115,61 @@ def build_manifest_create_request(
         resolved_config_hash=request_inputs.resolved_config_hash,
         test_mode=bool(getattr(inputs.settings, "test_mode", False)),
     )
+    replay_capability = _manifest_support.resolve_replay_capability(
+        source_refs=source_refs,
+        resume_requested=bool(getattr(ctx, "resume", False)),
+    )
+    launch_context = _manifest_support.build_launch_context_snapshot(
+        ctx,
+        run_type_value=request_inputs.run_type_value,
+        execution_context_value=request_inputs.execution_context_value,
+        required_persistence_profile=(
+            reproducibility_context.required_persistence_profile
+        ),
+        strict_exact_replay_supported=(
+            reproducibility_context.strict_exact_replay_supported
+        ),
+        reproducibility_family=reproducibility_context.family,
+        replay_family_contract=reproducibility_context.replay_family_contract,
+        strict_replay_runtime_verdict=(
+            reproducibility_context.strict_replay_runtime_verdict
+        ),
+        replay_support_scope=reproducibility_context.support_scope,
+        replay_support_reason=reproducibility_context.reason,
+    )
+    replay_assessment = assess_reproducibility_policy(
+        source_refs=source_refs,
+        required_persistence_profile=(
+            reproducibility_context.required_persistence_profile
+        ),
+        strict_exact_replay_supported=(
+            reproducibility_context.strict_exact_replay_supported
+        ),
+        exact_replay_requested=bool(getattr(ctx, "exact_replay", False)),
+        resume_requested=bool(getattr(ctx, "resume", False)),
+        replay_capability=replay_capability,
+        run_type=request_inputs.run_type_value,
+        debug_only=bool(getattr(inputs.settings, "debug", False)),
+    )
+    launch_context.update(
+        {
+            "replay_readiness_verdict": (
+                replay_assessment.replay_readiness_verdict.value
+            ),
+            "exact_replay_ready": (
+                replay_assessment.replay_readiness_verdict.value
+                == "exact_replay_ready"
+            ),
+            "replay_blockers": list(replay_assessment.blocking_gaps),
+        }
+    )
     request = RunManifestCreateSpec(
         run_id=ctx.run_id,
         run_type=getattr(ctx, "run_type", "incremental"),
         pipeline_name=ctx.pipeline_name,
         provider=provider,
         entity=entity,
-        launch_context=_manifest_support.build_launch_context_snapshot(
-            ctx,
-            run_type_value=request_inputs.run_type_value,
-            execution_context_value=request_inputs.execution_context_value,
-            required_persistence_profile=(
-                reproducibility_context.required_persistence_profile
-            ),
-        ),
+        launch_context=launch_context,
         runtime_config=_manifest_support.to_serializable_mapping(inputs.runtime_config),
         resolved_config=_manifest_support.to_serializable_mapping(yaml_config),
         replay_of_run_id=replay_of_run_id,
@@ -144,10 +194,7 @@ def build_manifest_create_request(
         rule_bundle_version=request_inputs.rule_bundle_version,
         dq_contract_compatibility_hash=request_inputs.dq_contract_compatibility_hash,
         effective_config_artifact_id=request_inputs.effective_config_artifact_id,
-        replay_capability=_manifest_support.resolve_replay_capability(
-            source_refs=source_refs,
-            resume_requested=bool(getattr(ctx, "resume", False)),
-        ),
+        replay_capability=replay_capability,
     )
     validate_required_runtime_persistence_profile(
         request=request,

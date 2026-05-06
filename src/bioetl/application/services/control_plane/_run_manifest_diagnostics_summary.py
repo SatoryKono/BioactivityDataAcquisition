@@ -189,6 +189,9 @@ def _build_canonical_execution_identity(
                 str | None, request.base_summary.get("pipeline_version")
             ),
             git_commit=cast(str | None, request.base_summary.get("git_commit")),
+            dependency_lock_hash=cast(
+                str | None, request.base_summary.get("dependency_lock_hash")
+            ),
             effective_config_hash=cast(
                 str | None, request.base_summary.get("effective_config_hash")
             ),
@@ -248,6 +251,9 @@ def _add_identity_graph_optional_fields(
     identity_graph["operator_replay_mode"] = request.base_summary.get(
         "operator_replay_mode"
     )
+    identity_graph["replay_readiness_verdict"] = request.base_summary.get(
+        "replay_readiness_verdict"
+    )
     identity_graph["replay_mode"] = request.base_summary["replay_mode"]
     identity_graph["continuation_mode"] = request.base_summary.get("continuation_mode")
     identity_graph["input_snapshot_count"] = request.base_summary[
@@ -287,6 +293,9 @@ def _build_identity_graph(
         "replay_of_manifest_id": request.base_summary.get("replay_of_manifest_id"),
         "replay_parentage": request.base_summary.get("replay_parentage"),
         "replay_capability": request.base_summary.get("replay_capability"),
+        "replay_readiness_verdict": request.base_summary.get(
+            "replay_readiness_verdict"
+        ),
         "operator_replay_mode": request.base_summary.get("operator_replay_mode"),
         "requested_exact_replay": request.base_summary.get("requested_exact_replay"),
         "exact_replay_support_boundary": request.base_summary.get(

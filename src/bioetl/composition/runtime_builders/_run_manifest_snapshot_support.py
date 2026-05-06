@@ -57,16 +57,32 @@ def build_launch_context_snapshot(
     run_type_value: str,
     execution_context_value: str,
     required_persistence_profile: str,
+    strict_exact_replay_supported: bool | None = None,
+    reproducibility_family: str | None = None,
+    replay_family_contract: str | None = None,
+    strict_replay_runtime_verdict: str | None = None,
+    replay_support_scope: str | None = None,
+    replay_support_reason: str | None = None,
 ) -> dict[str, object]:
     """Build a snapshot of the launch context."""
     snapshot = _build_base_snapshot(ctx, run_type_value, execution_context_value)
+    exact_replay_support_boundary = _determine_replay_support_boundary(
+        execution_context_value
+    )
     snapshot.update(
         {
             "required_persistence_profile": required_persistence_profile,
-            "exact_replay_support_boundary": _determine_replay_support_boundary(
-                execution_context_value
-            ),
+            "exact_replay_support_boundary": exact_replay_support_boundary,
         }
+    )
+    _add_reproducibility_profile_fields(
+        snapshot,
+        strict_exact_replay_supported=strict_exact_replay_supported,
+        reproducibility_family=reproducibility_family,
+        replay_family_contract=replay_family_contract,
+        strict_replay_runtime_verdict=strict_replay_runtime_verdict,
+        replay_support_scope=replay_support_scope,
+        replay_support_reason=replay_support_reason,
     )
     _add_optional_fields(snapshot, ctx)
     return snapshot
@@ -100,6 +116,31 @@ def _determine_replay_support_boundary(execution_context_value: str) -> str:
         "snapshot_backed_source_runs_only"
         if execution_context_value != "composite"
         else "composite_snapshot_backed_input_envelope"
+    )
+
+
+def _add_reproducibility_profile_fields(
+    snapshot: dict[str, object],
+    *,
+    strict_exact_replay_supported: bool | None,
+    reproducibility_family: str | None,
+    replay_family_contract: str | None,
+    strict_replay_runtime_verdict: str | None,
+    replay_support_scope: str | None,
+    replay_support_reason: str | None,
+) -> None:
+    """Attach explicit replay-support metadata when the profile is resolved."""
+    if strict_exact_replay_supported is not None:
+        snapshot["strict_exact_replay_supported"] = strict_exact_replay_supported
+    optional_fields = {
+        "reproducibility_family": reproducibility_family,
+        "replay_family_contract": replay_family_contract,
+        "strict_replay_runtime_verdict": strict_replay_runtime_verdict,
+        "replay_support_scope": replay_support_scope,
+        "replay_support_reason": replay_support_reason,
+    }
+    snapshot.update(
+        {key: value for key, value in optional_fields.items() if value is not None}
     )
 
 

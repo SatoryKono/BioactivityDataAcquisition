@@ -2496,6 +2496,11 @@
           "dtype": "str",
           "nullable": true
         },
+        "issn_list": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
         "issue": {
           "description": "",
           "dtype": "str",
@@ -2995,6 +3000,11 @@
           "dtype": "str",
           "nullable": true
         },
+        "issn_list": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
         "issue": {
           "description": "",
           "dtype": "str",
@@ -3300,6 +3310,16 @@
         "is_oa": {
           "description": "",
           "dtype": "bool",
+          "nullable": true
+        },
+        "issn": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "issn_list": {
+          "description": "",
+          "dtype": "str",
           "nullable": true
         },
         "issue": {

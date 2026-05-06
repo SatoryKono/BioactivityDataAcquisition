@@ -16,9 +16,6 @@ from bioetl.composition.runtime_builders._runner_builder_support import (
     bind_manifest_logger_context as _bind_manifest_logger_context,
 )
 from bioetl.composition.runtime_builders._runner_builder_support import (
-    create_runner_from_factory as _create_runner_from_factory,
-)
-from bioetl.composition.runtime_builders._runner_builder_support import (
     resolve_control_plane_flags as _resolve_control_plane_flags,
 )
 from bioetl.composition.runtime_builders._runner_builder_support import (
@@ -26,6 +23,9 @@ from bioetl.composition.runtime_builders._runner_builder_support import (
 )
 from bioetl.composition.runtime_builders._runner_builder_support import (
     validate_strict_data_root_policy as _validate_strict_data_root_policy,
+)
+from bioetl.composition.runtime_builders._runner_factory_compat import (
+    create_runner_from_factory as _create_runner_from_factory,
 )
 from bioetl.composition.runtime_builders.config_access import (
     get_settings,

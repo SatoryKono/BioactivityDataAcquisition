@@ -17,7 +17,7 @@ _RUN_EXECUTION_CONTEXT_REMOVAL_DATE = "2026-09-30"
 __all__ = [
     "CliRunOptionsInput",
     "CliRunPreparationInput",
-    "RunExecutionContext",
+    "RunExecutionContext",  # noqa: F822 - compatibility export resolved by __getattr__.
     "RunExecutionRequest",
     "RunPreparationResult",
     "StartOffsetValidationResult",

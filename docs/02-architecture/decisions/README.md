@@ -64,7 +64,7 @@ This directory contains Architecture Decision Records documenting significant ar
 | [ADR-043](ADR-043-documentation-knowledge-management.md) | Documentation & Knowledge Management       | Accepted                                | Documentation   | 2026-03-09 |
 | [ADR-044](ADR-044-run-manifest-ledger-control-plane.md)  | Run Manifest & Ledger Control Plane        | Accepted                                | Reproducibility | 2026-03-24 |
 | [ADR-045](ADR-045-dq-contract-system.md)                 | Data Quality Contract System               | Accepted                                | Data Quality    | 2026-03-26 |
-| [ADR-046](ADR-046-checkpoint-vs-ledger-resume.md)        | Checkpoint Versus Ledger-Based Resume      | Proposed                                | Reproducibility | 2026-05-06 |
+| [ADR-046](ADR-046-checkpoint-vs-ledger-resume.md)        | Checkpoint Versus Ledger-Based Resume      | Accepted                                | Reproducibility | 2026-05-06 |
 
 ## ADRs by Category
 
@@ -144,7 +144,7 @@ This directory contains Architecture Decision Records documenting significant ar
 
 - [ADR-014](ADR-014-deterministic-writes.md): Deterministic Writes and Retries
 - [ADR-044](ADR-044-run-manifest-ledger-control-plane.md): Run Manifest and Run Ledger Control Plane
-- [ADR-046](ADR-046-checkpoint-vs-ledger-resume.md): Checkpoint Versus Ledger-Based Resume (Proposed)
+- [ADR-046](ADR-046-checkpoint-vs-ledger-resume.md): Checkpoint Versus Ledger-Based Resume (Accepted)
 
 ### Configuration
 

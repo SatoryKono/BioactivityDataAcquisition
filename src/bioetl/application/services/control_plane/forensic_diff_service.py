@@ -10,8 +10,11 @@ from bioetl.application.services.control_plane.run_manifest_inspection_service i
     RunManifestInspectionResult,
     RunManifestInspectionService,
 )
-from bioetl.domain.ports import RunLedgerPort, RunManifestPort
-from bioetl.domain.ports.control_plane import ArtifactByteComparisonPort
+from bioetl.domain.ports import (
+    ArtifactByteComparisonPort,
+    RunLedgerPort,
+    RunManifestPort,
+)
 
 __all__ = [
     "ForensicRunDiffResult",

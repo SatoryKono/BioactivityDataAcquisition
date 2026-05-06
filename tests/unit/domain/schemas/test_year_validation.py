@@ -161,6 +161,8 @@ class TestSemanticScholarYearValidation:
             "publication_subclass": None,
             "publication_class": None,
             "language": None,
+            "issn": None,
+            "issn_list": None,
             # Metrics (unified field names)
             "citations_received": 100,
             # Open Access
@@ -259,6 +261,8 @@ class TestChemblYearValidation:
             "publication_subclass": None,
             "publication_class": None,
             "language": None,
+            "issn": None,
+            "issn_list": None,
             # Affiliations (unified field name)
             "affiliation_list": None,
             # Metrics (unified field names, always NULL for ChEMBL)
@@ -364,6 +368,7 @@ class TestPubMedYearValidation:
             "abstract_structured": None,
             "journal_iso_abbrev": "Nature",
             "issn": "0028-0836",
+            "issn_list": '["0028-0836"]',
             "journal_issn_type": "Print",
             "nlm_unique_id": None,
             "country": "United States",

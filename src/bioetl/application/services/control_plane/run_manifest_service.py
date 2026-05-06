@@ -17,6 +17,7 @@ from bioetl.application.services.control_plane.run_manifest_models import (
 )
 from bioetl.domain.context import MISSING_RUNTIME_TIMESTAMP
 from bioetl.domain.control_plane import (
+    ReplayCapability,
     RunCodeProvenance,
     RunManifest,
 )
@@ -72,6 +73,11 @@ def _validate_strict_code_provenance(
             "Run manifest requires clean source_revision_state for exact "
             "replay, replay_ready, and forensic_grade contexts"
         )
+    if not code_provenance.dependency_lock_hash:
+        raise RuntimeError(
+            "Run manifest requires dependency_lock_hash code provenance for "
+            "exact replay, replay_ready, and forensic_grade contexts"
+        )
 
 
 def _validate_documented_code_provenance(
@@ -117,6 +123,19 @@ def _validate_strict_input_snapshots(request: RunManifestCreateSpec) -> None:
         raise RuntimeError(
             "Run manifest requires immutable input snapshots for exact "
             "replay, replay_ready, and forensic_grade contexts"
+        )
+
+
+def _validate_exact_replay_snapshot_claim(request: RunManifestCreateSpec) -> None:
+    """Reject exact-replay capability claims without immutable input evidence."""
+    if request.replay_capability != ReplayCapability.EXACT_REPLAY_SUPPORTED:
+        return
+    if not request.source_refs or any(
+        not source_ref.input_snapshots for source_ref in request.source_refs
+    ):
+        raise RuntimeError(
+            "Run manifest cannot claim exact_replay_supported without an "
+            "immutable input snapshot envelope"
         )
 
 
@@ -176,6 +195,7 @@ class RunManifestService(
         code_provenance = self._build_code_provenance(request)
         _validate_strict_code_provenance(request, code_provenance)
         _validate_documented_code_provenance(code_provenance)
+        _validate_exact_replay_snapshot_claim(request)
         _validate_strict_input_snapshots(request)
         normalized_payload = normalize_run_manifest_spec(
             self._build_manifest_payload(

@@ -19,6 +19,7 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_replay 
     _resolve_continuation_mode,
     _resolve_exact_replay_blockers,
     _resolve_exact_replay_support_boundary,
+    _resolve_manifest_replay_readiness_verdict,
     _resolve_replay_capability_reason,
     _resolve_replay_family_contract,
     _resolve_replay_mode,
@@ -43,6 +44,7 @@ class _BaseSummaryReplayContext:
     replay_mode: str
     continuation_mode: str
     replay_capability_reason: str
+    replay_readiness_verdict: str
     exact_replay_support_boundary: str
     exact_replay_blockers: list[str]
     resume_contract: dict[str, object]
@@ -87,6 +89,11 @@ def _resolve_base_summary_replay_context(
         resume_requested=resume_requested,
         replay_family_contract=replay_family_contract,
     )
+    continuation_mode = _resolve_continuation_mode(
+        manifest=manifest,
+        requested_exact_replay=requested_exact_replay,
+        resume_requested=resume_requested,
+    )
     return _BaseSummaryReplayContext(
         requested_exact_replay=requested_exact_replay,
         resume_requested=resume_requested,
@@ -96,16 +103,19 @@ def _resolve_base_summary_replay_context(
             requested_exact_replay=requested_exact_replay,
             resume_requested=resume_requested,
         ),
-        continuation_mode=_resolve_continuation_mode(
-            manifest=manifest,
-            requested_exact_replay=requested_exact_replay,
-            resume_requested=resume_requested,
-        ),
+        continuation_mode=continuation_mode,
         replay_capability_reason=_resolve_replay_capability_reason(
             manifest=manifest,
             input_snapshots=input_snapshots,
             resume_requested=resume_requested,
         ),
+        replay_readiness_verdict=_resolve_manifest_replay_readiness_verdict(
+            manifest=manifest,
+            requested_exact_replay=requested_exact_replay,
+            resume_requested=resume_requested,
+            continuation_mode=continuation_mode,
+            policy_assessment=policy_assessment,
+        ).value,
         exact_replay_support_boundary=_resolve_exact_replay_support_boundary(manifest),
         exact_replay_blockers=_resolve_exact_replay_blockers(
             manifest=manifest,
@@ -164,8 +174,17 @@ def _resolve_operator_replay_mode(
     *,
     replay_mode: str,
     continuation_mode: str,
+    replay_readiness_verdict: str,
 ) -> str:
     """Return a compact CLI label for exact replay/resume/rebuild triage."""
+    if replay_readiness_verdict == "exact_replay_blocked":
+        return "Exact Replay Blocked"
+    if replay_readiness_verdict == "lifecycle_projection_only":
+        return "Lifecycle Projection"
+    if replay_readiness_verdict == "incremental_new_run":
+        return "Incremental New Run"
+    if replay_readiness_verdict == "debug_only":
+        return "Debug Only"
     if replay_mode == "exact_replay":
         return "Exact Replay"
     if replay_mode == "resume" or "resume" in continuation_mode:
@@ -236,6 +255,7 @@ def _build_base_summary_payload(
         "replay_capability_reason": replay_context.replay_capability_reason,
         "exact_replay_eligible": exact_replay_eligible,
         "exact_replay_blockers": replay_context.exact_replay_blockers,
+        "replay_readiness_verdict": replay_context.replay_readiness_verdict,
         "append_mode_semantic_sinks": _collect_append_mode_semantic_sinks(manifest),
         "input_snapshot_ids": _collect_input_snapshot_ids(
             replay_context.input_snapshots
@@ -250,6 +270,7 @@ def _build_base_summary_payload(
         "operator_replay_mode": _resolve_operator_replay_mode(
             replay_mode=replay_context.replay_mode,
             continuation_mode=replay_context.continuation_mode,
+            replay_readiness_verdict=replay_context.replay_readiness_verdict,
         ),
         "continuation_mode": replay_context.continuation_mode,
         "replay_family_contract": replay_context.replay_family_contract,
@@ -301,6 +322,7 @@ def _build_effective_config_diagnostics(
             "resolved_config_hash": summary.get("resolved_config_hash"),
             "effective_config_hash": summary.get("effective_config_hash"),
             "config_hash_compatibility_anchor": summary.get("config_hash"),
+            "config_hash_legacy_alias_of": "resolved_config_hash",
         },
         "occurrence": {
             "run_id": summary.get("run_id"),
@@ -310,7 +332,10 @@ def _build_effective_config_diagnostics(
         "diff_policy": {
             "semantic_anchor": "effective_config_hash",
             "occurrence_fields": ["run_id", "manifest_id", "manifest_created_at"],
-            "config_hash_policy": "legacy_alias_for_resolved_config_hash",
+            "config_hash_policy": (
+                "deprecated_legacy_alias_for_resolved_config_hash"
+            ),
+            "legacy_config_hash_replay_identity_anchor": False,
         },
     }
 

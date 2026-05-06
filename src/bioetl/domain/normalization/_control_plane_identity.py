@@ -7,6 +7,7 @@ from collections.abc import Callable, Mapping
 
 _EXECUTION_IDENTITY_SHA256_FIELDS = frozenset(
     {
+        "dependency_lock_hash",
         "dq_contract_compatibility_hash",
         "effective_config_hash",
         "input_snapshot_fingerprint",
@@ -16,6 +17,7 @@ _RUNTIME_ANCHOR_SHA256_FIELDS = frozenset(
     {
         "config_hash",
         "contract_schema_hash",
+        "dependency_lock_hash",
         "dq_contract_compatibility_hash",
         "resolved_config_hash",
         "effective_config_hash",
@@ -110,6 +112,7 @@ def build_execution_identity_payload(
     run_type: str | None,
     pipeline_version: str | None,
     git_commit: str | None = None,
+    dependency_lock_hash: str | None = None,
     effective_config_hash: str | None,
     dq_contract_compatibility_hash: str | None,
     contract_ref: str | None,
@@ -119,21 +122,22 @@ def build_execution_identity_payload(
     input_snapshot_fingerprint: str | None,
 ) -> dict[str, str | None]:
     """Build the canonical execution-identity payload shared across layers."""
-    return normalize_execution_identity_payload(
-        {
-            "pipeline_name": pipeline_name,
-            "run_type": run_type,
-            "pipeline_version": pipeline_version,
-            "git_commit": git_commit,
-            "effective_config_hash": effective_config_hash,
-            "dq_contract_compatibility_hash": dq_contract_compatibility_hash,
-            "contract_ref": contract_ref,
-            "contract_version": contract_version,
-            "effective_config_artifact_id": effective_config_artifact_id,
-            "exact_replay": exact_replay,
-            "input_snapshot_fingerprint": input_snapshot_fingerprint,
-        }
-    )
+    payload: dict[str, object | None] = {
+        "pipeline_name": pipeline_name,
+        "run_type": run_type,
+        "pipeline_version": pipeline_version,
+        "git_commit": git_commit,
+        "effective_config_hash": effective_config_hash,
+        "dq_contract_compatibility_hash": dq_contract_compatibility_hash,
+        "contract_ref": contract_ref,
+        "contract_version": contract_version,
+        "effective_config_artifact_id": effective_config_artifact_id,
+        "exact_replay": exact_replay,
+        "input_snapshot_fingerprint": input_snapshot_fingerprint,
+    }
+    if dependency_lock_hash is not None:
+        payload["dependency_lock_hash"] = dependency_lock_hash
+    return normalize_execution_identity_payload(payload)
 
 
 def _normalize_optional_text(value: object | None) -> str | None:

@@ -111,6 +111,12 @@ CHEMBL_JSON_ORDERING_POLICY: tuple[ChemblJsonOrderingPolicy, ...] = (
     ),
     ChemblJsonOrderingPolicy(
         pipeline_name="chembl_publication",
+        field_name="issn_list",
+        order_semantics="set_like",
+        rationale="ISSN collections are identifier sets and are order-insensitive for hash identity.",
+    ),
+    ChemblJsonOrderingPolicy(
+        pipeline_name="chembl_publication",
         field_name="authors",
         order_semantics="order_sensitive",
         rationale="Author order carries publication semantics and must remain order-sensitive.",

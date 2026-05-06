@@ -398,6 +398,15 @@
     "required": true,
     "unique": false
   },
+  "issn_list": {
+    "checks": [],
+    "coerce": false,
+    "description": "Canonical JSON array of ISSN values",
+    "dtype": "str",
+    "nullable": true,
+    "required": true,
+    "unique": false
+  },
   "journal": {
     "checks": [],
     "coerce": false,
