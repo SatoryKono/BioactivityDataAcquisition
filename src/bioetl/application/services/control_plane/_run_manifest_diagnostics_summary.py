@@ -249,9 +249,7 @@ def _add_identity_graph_optional_fields(
         "operator_replay_mode"
     )
     identity_graph["replay_mode"] = request.base_summary["replay_mode"]
-    identity_graph["continuation_mode"] = request.base_summary.get(
-        "continuation_mode"
-    )
+    identity_graph["continuation_mode"] = request.base_summary.get("continuation_mode")
     identity_graph["input_snapshot_count"] = request.base_summary[
         "input_snapshot_count"
     ]

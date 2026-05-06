@@ -21,7 +21,7 @@ class TestTableConfig:
         assert config.silver_table is None
         assert config.gold_table is None
         assert config.silver_write_mode == SilverWriteMode.MERGE
-        assert config.gold_write_mode == GoldWriteMode.APPEND
+        assert config.gold_write_mode == GoldWriteMode.SCD2
         assert config.partition_cols == ()
         assert config.on_schema_mismatch == "error"
 

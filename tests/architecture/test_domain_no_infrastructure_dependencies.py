@@ -62,6 +62,31 @@ def _string_literal_arg(node: ast.Call) -> str | None:
     return None
 
 
+def _import_violations(node: ast.Import, *, rel_path: Path) -> list[str]:
+    return [
+        f"{rel_path}:{node.lineno} imports {alias.name}"
+        for alias in node.names
+        if _matches_forbidden_module(alias.name)
+    ]
+
+
+def _import_from_violations(node: ast.ImportFrom, *, rel_path: Path) -> list[str]:
+    if not _matches_forbidden_module(node.module):
+        return []
+    module_name = node.module or "<relative>"
+    return [f"{rel_path}:{node.lineno} imports from {module_name}"]
+
+
+def _dynamic_import_violations(node: ast.Call, *, rel_path: Path) -> list[str]:
+    helper_name = _call_target_name(node)
+    if helper_name not in IMPORT_HELPER_NAMES:
+        return []
+    import_target = _string_literal_arg(node)
+    if not _matches_forbidden_module(import_target):
+        return []
+    return [f"{rel_path}:{node.lineno} dynamically imports {import_target}"]
+
+
 def _module_import_violations(
     *,
     py_file: Path,
@@ -73,29 +98,15 @@ def _module_import_violations(
 
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
-            for alias in node.names:
-                if _matches_forbidden_module(alias.name):
-                    violations.append(f"{rel_path}:{node.lineno} imports {alias.name}")
+            violations.extend(_import_violations(node, rel_path=rel_path))
             continue
 
         if isinstance(node, ast.ImportFrom):
-            if _matches_forbidden_module(node.module):
-                module_name = node.module or "<relative>"
-                violations.append(
-                    f"{rel_path}:{node.lineno} imports from {module_name}"
-                )
+            violations.extend(_import_from_violations(node, rel_path=rel_path))
             continue
 
-        if not isinstance(node, ast.Call):
-            continue
-        helper_name = _call_target_name(node)
-        if helper_name not in IMPORT_HELPER_NAMES:
-            continue
-        import_target = _string_literal_arg(node)
-        if _matches_forbidden_module(import_target):
-            violations.append(
-                f"{rel_path}:{node.lineno} dynamically imports {import_target}"
-            )
+        if isinstance(node, ast.Call):
+            violations.extend(_dynamic_import_violations(node, rel_path=rel_path))
 
     return violations
 

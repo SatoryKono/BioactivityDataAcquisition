@@ -98,6 +98,100 @@ def load_control_plane_payloads(
     return manifest_payload, effective_payload
 
 
+def _load_effective_occurrence(
+    *,
+    data_dir: Path,
+    run_id: RunID,
+    effective_artifact_id: str,
+) -> dict[str, object]:
+    effective_root = data_dir / "output" / "control" / "effective_config"
+    occurrence_path = effective_root / "_occurrences" / f"{run_id}.json"
+    if not occurrence_path.exists():
+        raise AssertionError(f"Missing effective-config occurrence for run_id={run_id}")
+    effective_occurrence = json.loads(occurrence_path.read_text(encoding="utf-8"))
+    if not isinstance(effective_occurrence, dict):
+        raise AssertionError("Effective-config occurrence payload must be a mapping")
+    if effective_occurrence.get("artifact_id") != effective_artifact_id:
+        raise AssertionError(
+            "Effective-config occurrence must resolve to the manifest-linked artifact"
+        )
+    if effective_occurrence.get("run_id") != str(run_id):
+        raise AssertionError(
+            "Effective-config occurrence must preserve the persisted run identifier"
+        )
+    return effective_occurrence
+
+
+def _load_ledger_entries(
+    *,
+    data_dir: Path,
+    run_id: RunID,
+    manifest_id: str,
+) -> list[dict[str, object]]:
+    ledger_root = data_dir / "output" / "control" / "run_ledger"
+    ledger_index = ledger_root / "_by_run_id" / f"{run_id}.txt"
+    if not ledger_index.exists():
+        raise AssertionError(f"Missing run-ledger index for run_id={run_id}")
+    if ledger_index.read_text(encoding="utf-8").strip() != manifest_id:
+        raise AssertionError(
+            "Run-ledger index must resolve to the persisted manifest identifier"
+        )
+    ledger_path = ledger_root / f"{manifest_id}.jsonl"
+    if not ledger_path.exists():
+        raise AssertionError(
+            f"Missing run-ledger payload for manifest_id={manifest_id}"
+        )
+    return _load_jsonl_mapping_entries(
+        ledger_path,
+        message="Run-ledger payload entries must be mappings",
+    )
+
+
+def _load_lineage_fragments(*, data_dir: Path, run_id: RunID) -> list[dict[str, object]]:
+    lineage_root = data_dir / "output" / "control" / "lineage"
+    lineage_index = (
+        lineage_root
+        / "_by_run_id"
+        / f"{hashlib.sha256(str(run_id).encode('utf-8')).hexdigest()}.jsonl"
+    )
+    if not lineage_index.exists():
+        return []
+
+    fragments_dir = lineage_root / "fragments"
+    lineage_fragments: list[dict[str, object]] = []
+    for index_payload in _load_jsonl_mapping_entries(
+        lineage_index,
+        message="Lineage index payload must be a mapping",
+    ):
+        fragment_id = index_payload.get("fragment_id")
+        if not isinstance(fragment_id, str) or not fragment_id:
+            raise AssertionError("Lineage index entry must contain fragment_id")
+        fragment_path = fragments_dir / f"{fragment_id}.json"
+        if not fragment_path.exists():
+            continue
+        fragment_payload = json.loads(fragment_path.read_text(encoding="utf-8"))
+        if not isinstance(fragment_payload, dict):
+            raise AssertionError("Lineage fragment payload must be a mapping")
+        lineage_fragments.append(fragment_payload)
+    return lineage_fragments
+
+
+def _load_jsonl_mapping_entries(
+    path: Path,
+    *,
+    message: str,
+) -> list[dict[str, object]]:
+    entries: list[dict[str, object]] = []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        payload = json.loads(line)
+        if not isinstance(payload, dict):
+            raise AssertionError(message)
+        entries.append(payload)
+    return entries
+
+
 def load_control_plane_bundle(
     *,
     data_dir: Path,
@@ -123,70 +217,20 @@ def load_control_plane_bundle(
         "effective_config_artifact_id",
         "Manifest must reference effective_config_artifact_id",
     )
-
-    effective_root = data_dir / "output" / "control" / "effective_config"
-    occurrence_path = effective_root / "_occurrences" / f"{run_id}.json"
-    if not occurrence_path.exists():
-        raise AssertionError(f"Missing effective-config occurrence for run_id={run_id}")
-    effective_occurrence = json.loads(occurrence_path.read_text(encoding="utf-8"))
-    if not isinstance(effective_occurrence, dict):
-        raise AssertionError("Effective-config occurrence payload must be a mapping")
-    if effective_occurrence.get("artifact_id") != effective_artifact_id:
-        raise AssertionError(
-            "Effective-config occurrence must resolve to the manifest-linked artifact"
-        )
-    if effective_occurrence.get("run_id") != str(run_id):
-        raise AssertionError(
-            "Effective-config occurrence must preserve the persisted run identifier"
-        )
-
-    ledger_root = data_dir / "output" / "control" / "run_ledger"
-    ledger_index = ledger_root / "_by_run_id" / f"{run_id}.txt"
-    if not ledger_index.exists():
-        raise AssertionError(f"Missing run-ledger index for run_id={run_id}")
-    if ledger_index.read_text(encoding="utf-8").strip() != manifest_id:
-        raise AssertionError(
-            "Run-ledger index must resolve to the persisted manifest identifier"
-        )
-    ledger_path = ledger_root / f"{manifest_id}.jsonl"
-    if not ledger_path.exists():
-        raise AssertionError(
-            f"Missing run-ledger payload for manifest_id={manifest_id}"
-        )
-    ledger_entries: list[dict[str, object]] = []
-    for line in ledger_path.read_text(encoding="utf-8").splitlines():
-        if not line.strip():
-            continue
-        payload = json.loads(line)
-        if not isinstance(payload, dict):
-            raise AssertionError("Run-ledger payload entries must be mappings")
-        ledger_entries.append(payload)
-
-    lineage_root = data_dir / "output" / "control" / "lineage"
-    lineage_index = (
-        lineage_root
-        / "_by_run_id"
-        / f"{hashlib.sha256(str(run_id).encode('utf-8')).hexdigest()}.jsonl"
+    effective_occurrence = _load_effective_occurrence(
+        data_dir=data_dir,
+        run_id=run_id,
+        effective_artifact_id=effective_artifact_id,
     )
-    lineage_fragments: list[dict[str, object]] = []
-    if lineage_index.exists():
-        fragments_dir = lineage_root / "fragments"
-        for line in lineage_index.read_text(encoding="utf-8").splitlines():
-            if not line.strip():
-                continue
-            index_payload = json.loads(line)
-            if not isinstance(index_payload, dict):
-                raise AssertionError("Lineage index payload must be a mapping")
-            fragment_id = index_payload.get("fragment_id")
-            if not isinstance(fragment_id, str) or not fragment_id:
-                raise AssertionError("Lineage index entry must contain fragment_id")
-            fragment_path = fragments_dir / f"{fragment_id}.json"
-            if not fragment_path.exists():
-                continue
-            fragment_payload = json.loads(fragment_path.read_text(encoding="utf-8"))
-            if not isinstance(fragment_payload, dict):
-                raise AssertionError("Lineage fragment payload must be a mapping")
-            lineage_fragments.append(fragment_payload)
+    ledger_entries = _load_ledger_entries(
+        data_dir=data_dir,
+        run_id=run_id,
+        manifest_id=manifest_id,
+    )
+    lineage_fragments = _load_lineage_fragments(
+        data_dir=data_dir,
+        run_id=run_id,
+    )
 
     return {
         "manifest_payload": manifest_payload,

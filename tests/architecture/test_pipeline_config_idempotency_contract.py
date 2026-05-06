@@ -3,45 +3,68 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import cast
 
 import yaml
 
-CONFIG_ROOT = Path("configs/entities")
+ROOT = Path(__file__).resolve().parents[2]
+CONFIG_ROOTS = (
+    ROOT / "configs" / "base",
+    ROOT / "configs" / "entities",
+    ROOT / "configs" / "composites",
+)
+APPEND_SAFE_CONTRACTS = {
+    "append_log",
+    "partition_append_with_stable_partition_key",
+    "occurrence_only",
+}
 
 
 def _iter_pipeline_configs() -> list[Path]:
-    return sorted(CONFIG_ROOT.rglob("*.yaml"))
+    return sorted(
+        config_path for root in CONFIG_ROOTS for config_path in root.rglob("*.yaml")
+    )
+
+
+def _load_yaml(config_path: Path) -> dict[str, object]:
+    return cast(
+        dict[str, object],
+        yaml.safe_load(config_path.read_text(encoding="utf-8")) or {},
+    )
+
+
+def _pipeline_sink(payload: dict[str, object]) -> dict[str, object]:
+    pipeline = payload.get("pipeline")
+    if isinstance(pipeline, dict) and isinstance(pipeline.get("sink"), dict):
+        return cast(dict[str, object], pipeline["sink"])
+    sink = payload.get("sink")
+    if isinstance(sink, dict):
+        return cast(dict[str, object], sink)
+    return {}
 
 
 def test_append_mode_requires_explicit_idempotency_contract() -> None:
     for config_path in _iter_pipeline_configs():
-        payload = yaml.safe_load(config_path.read_text(encoding="utf-8")) or {}
-        pipeline = payload.get("pipeline")
-        if not isinstance(pipeline, dict):
-            continue
-        sink = pipeline.get("sink")
-        if not isinstance(sink, dict):
-            continue
+        sink = _pipeline_sink(_load_yaml(config_path))
         for layer_name in ("silver", "gold"):
             layer = sink.get(layer_name)
             if not isinstance(layer, dict):
                 continue
             if str(layer.get("mode", "")).strip().lower() != "append":
                 continue
+            contract = str(layer.get("idempotency_contract") or "").strip().lower()
             assert layer.get("idempotency_contract"), (
-                f"{config_path}: sink.{layer_name}.mode=append requires "
-                "sink.{layer_name}.idempotency_contract"
+                f"{config_path.relative_to(ROOT)}: sink.{layer_name}.mode=append requires "
+                f"sink.{layer_name}.idempotency_contract"
+            )
+            assert contract in APPEND_SAFE_CONTRACTS, (
+                f"{config_path.relative_to(ROOT)}: sink.{layer_name}.mode=append "
+                f"requires append-safe idempotency_contract; got {contract!r}"
             )
 
 
 def test_base_pipeline_declares_semantic_output_idempotency_defaults() -> None:
-    payload = yaml.safe_load(
-        Path("configs/base/pipeline.yaml").read_text(encoding="utf-8")
-    ) or {}
-    pipeline = payload.get("pipeline")
-    assert isinstance(pipeline, dict)
-    sink = pipeline.get("sink")
-    assert isinstance(sink, dict)
+    sink = _pipeline_sink(_load_yaml(ROOT / "configs" / "base" / "pipeline.yaml"))
 
     silver = sink.get("silver")
     gold = sink.get("gold")

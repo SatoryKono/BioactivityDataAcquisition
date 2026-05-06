@@ -31,6 +31,15 @@ class ArtifactRecorderAttachmentResult:
     failed_count: int
 
 
+def _empty_attachment_result() -> ArtifactRecorderAttachmentResult:
+    return ArtifactRecorderAttachmentResult(
+        candidate_count=0,
+        attached_count=0,
+        missing_attach_method_count=0,
+        failed_count=0,
+    )
+
+
 def _record_artifact(
     service: RunLedgerService,
     *,
@@ -76,6 +85,55 @@ def _attach_artifact_recorder(
     return True
 
 
+def _collect_metadata_writer_candidates(services: object) -> list[object]:
+    candidates: list[object] = []
+    metadata_writer = getattr(services, "metadata_writer", None)
+    if metadata_writer is not None:
+        candidates.append(metadata_writer)
+
+    storage = getattr(services, "storage", None)
+    if storage is None:
+        return candidates
+
+    for writer_name in ("bronze", "silver", "gold"):
+        writer = getattr(storage, writer_name, None)
+        if writer is None:
+            continue
+        writer_metadata = getattr(writer, "_metadata_writer", None)
+        if writer_metadata is not None:
+            candidates.append(writer_metadata)
+    return candidates
+
+
+def _iter_unique_candidates(candidates: list[object]) -> list[object]:
+    unique_candidates: list[object] = []
+    seen: set[int] = set()
+    for candidate in candidates:
+        candidate_id = id(candidate)
+        if candidate_id in seen:
+            continue
+        seen.add(candidate_id)
+        unique_candidates.append(candidate)
+    return unique_candidates
+
+
+def _attach_candidate_artifact_recorder(
+    candidate: object,
+    run_ledger_service: RunLedgerService,
+) -> str:
+    attach = getattr(candidate, "attach_artifact_recorder", None)
+    if not callable(attach):
+        return "missing"
+    try:
+        return (
+            "attached"
+            if _attach_artifact_recorder(candidate, run_ledger_service)
+            else "missing"
+        )
+    except (AttributeError, RuntimeError, TypeError, ValueError):
+        return "failed"
+
+
 def attach_control_plane_collaborators(
     runner: PipelineRunnerProtocol,
     run_ledger_service: RunLedgerService,
@@ -85,52 +143,24 @@ def attach_control_plane_collaborators(
 
     services = getattr(runner, "services", None)
     if services is None:
-        return ArtifactRecorderAttachmentResult(
-            candidate_count=0,
-            attached_count=0,
-            missing_attach_method_count=0,
-            failed_count=0,
-        )
+        return _empty_attachment_result()
 
-    candidates: list[object] = []
-    metadata_writer = getattr(services, "metadata_writer", None)
-    if metadata_writer is not None:
-        candidates.append(metadata_writer)
-
-    storage = getattr(services, "storage", None)
-    if storage is not None:
-        for writer_name in ("bronze", "silver", "gold"):
-            writer = getattr(storage, writer_name, None)
-            if writer is None:
-                continue
-            writer_metadata = getattr(writer, "_metadata_writer", None)
-            if writer_metadata is not None:
-                candidates.append(writer_metadata)
-
-    seen: set[int] = set()
-    candidate_count = 0
+    unique_candidates = _iter_unique_candidates(
+        _collect_metadata_writer_candidates(services)
+    )
     attached_count = 0
     missing_attach_method_count = 0
     failed_count = 0
-    for candidate in candidates:
-        candidate_id = id(candidate)
-        if candidate_id in seen:
-            continue
-        seen.add(candidate_id)
-        candidate_count += 1
-        attach = getattr(candidate, "attach_artifact_recorder", None)
-        if not callable(attach):
+    for candidate in unique_candidates:
+        outcome = _attach_candidate_artifact_recorder(candidate, run_ledger_service)
+        if outcome == "attached":
+            attached_count += 1
+        elif outcome == "missing":
             missing_attach_method_count += 1
-            continue
-        try:
-            if _attach_artifact_recorder(candidate, run_ledger_service):
-                attached_count += 1
-            else:
-                missing_attach_method_count += 1
-        except (AttributeError, RuntimeError, TypeError, ValueError):
+        else:
             failed_count += 1
     return ArtifactRecorderAttachmentResult(
-        candidate_count=candidate_count,
+        candidate_count=len(unique_candidates),
         attached_count=attached_count,
         missing_attach_method_count=missing_attach_method_count,
         failed_count=failed_count,

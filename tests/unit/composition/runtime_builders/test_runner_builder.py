@@ -447,7 +447,7 @@ def test_build_pipeline_runner_persists_manifest_before_factory_create(
     tmp_path: Path,
 ) -> None:
     """Builder should persist a manifest and pass manifest_id to the factory."""
-    fake_factory, fake_registry = _build_factory_registry()
+    _, fake_registry = _build_factory_registry()
     context = _build_context(limit=25, query="assay_type=B")
 
     result = _call_build_pipeline_runner(

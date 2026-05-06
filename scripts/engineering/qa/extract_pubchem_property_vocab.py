@@ -17,21 +17,43 @@ URN_KEYS = (
 )
 
 
-def extract_pubchem_property_vocab(paths: list[Path]) -> dict[str, list[str]]:
-    observed = {key: set() for key in URN_KEYS}
+def _iter_jsonl_payloads(paths: list[Path]) -> list[dict[str, object]]:
+    payloads: list[dict[str, object]] = []
     for path in paths:
         for line in path.read_text(encoding="utf-8").splitlines():
             if not line.strip():
                 continue
-            payload = json.loads(line)
-            for prop in payload.get("props", []):
-                urn = prop.get("urn") or {}
-                if not isinstance(urn, dict):
-                    continue
-                for key in URN_KEYS:
-                    value = urn.get(key)
-                    if value is not None:
-                        observed[key].add(str(value))
+            payloads.append(json.loads(line))
+    return payloads
+
+
+def _iter_pubchem_urns(payload: dict[str, object]) -> list[dict[str, object]]:
+    urns: list[dict[str, object]] = []
+    for prop in payload.get("props", []):
+        if not isinstance(prop, dict):
+            continue
+        urn = prop.get("urn") or {}
+        if isinstance(urn, dict):
+            urns.append(urn)
+    return urns
+
+
+def _collect_urn_values(
+    observed: dict[str, set[str]],
+    *,
+    urn: dict[str, object],
+) -> None:
+    for key in URN_KEYS:
+        value = urn.get(key)
+        if value is not None:
+            observed[key].add(str(value))
+
+
+def extract_pubchem_property_vocab(paths: list[Path]) -> dict[str, list[str]]:
+    observed = {key: set() for key in URN_KEYS}
+    for payload in _iter_jsonl_payloads(paths):
+        for urn in _iter_pubchem_urns(payload):
+            _collect_urn_values(observed, urn=urn)
     return {key: sorted(values) for key, values in observed.items() if values}
 
 

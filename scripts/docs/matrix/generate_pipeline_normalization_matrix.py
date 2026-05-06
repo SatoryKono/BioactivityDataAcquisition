@@ -308,6 +308,11 @@ ENUM_CONFIG_SOURCES: dict[tuple[str, str, str], str] = {
     ("chembl", "target", "target_type"): _CHEMBL_ENUM_CONFIG,
     ("chembl", "target", "cross_references"): _CHEMBL_REFERENCE_SOURCES_CONFIG,
     ("chembl", "target_component", "component_type"): _CHEMBL_ENUM_CONFIG,
+    (
+        "chembl",
+        "target_component",
+        "target_component_xrefs",
+    ): _CHEMBL_REFERENCE_SOURCES_CONFIG,
     ("crossref", "publication", "publication_type"): _PUBLICATION_CONTROLLED_CONFIG,
     ("openalex", "publication", "publication_type"): _PUBLICATION_CONTROLLED_CONFIG,
     ("openalex", "publication", "type_crossref"): _PUBLICATION_CONTROLLED_CONFIG,
@@ -490,6 +495,11 @@ ENUM_REGISTRY_PATHS: dict[tuple[str, str, str], tuple[str, ...]] = {
         "chembl",
         "target",
         "cross_references",
+    ): ("nested_reference_vocabularies", "target_component_xref_src_db", "values"),
+    (
+        "chembl",
+        "target_component",
+        "target_component_xrefs",
     ): ("nested_reference_vocabularies", "target_component_xref_src_db", "values"),
     ("chembl", "target_component", "component_type"): (
         "target",

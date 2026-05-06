@@ -298,6 +298,13 @@ def test_chembl_target_cross_reference_sources_are_registry_subsets() -> None:
     """Tracked target Bronze xref_src_db values must stay inside the governed registry."""
     payload = yaml.safe_load(REFERENCE_SOURCES_PATH.read_text(encoding="utf-8"))
     assert isinstance(payload, dict)
+    source_fields = payload["nested_reference_vocabularies"][
+        "target_component_xref_src_db"
+    ]["source_fields"]
+    assert source_fields == [
+        "chembl_target.cross_references[].xref_src_db",
+        "chembl_target_component.target_component_xrefs[].xref_src_db",
+    ]
     registry_values = frozenset(
         str(value)
         for value in payload["nested_reference_vocabularies"][
