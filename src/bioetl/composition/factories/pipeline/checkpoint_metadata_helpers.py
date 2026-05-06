@@ -42,6 +42,7 @@ def _normalize_execution_identity_payload(
     run_type: str,
     pipeline_version: str | None,
     git_commit: str | None,
+    dependency_lock_hash: str | None,
     effective_config_hash: str | None,
     dq_contract_compatibility_hash: str | None,
     manifest_id: str | None,
@@ -58,6 +59,7 @@ def _normalize_execution_identity_payload(
         run_type=run_type,
         pipeline_version=pipeline_version,
         git_commit=git_commit,
+        dependency_lock_hash=dependency_lock_hash,
         effective_config_hash=effective_config_hash,
         dq_contract_compatibility_hash=dq_contract_compatibility_hash,
         contract_ref=contract_ref,
@@ -139,6 +141,7 @@ def build_current_checkpoint_metadata(pipeline: BasePipeline) -> CheckpointMetad
         run_type=run_type_value,
         pipeline_version=run_context_metadata["pipeline_version"],
         git_commit=run_context_metadata["git_commit"],
+        dependency_lock_hash=run_context_metadata["dependency_lock_hash"],
         effective_config_hash=run_context_metadata["effective_config_hash"],
         dq_contract_compatibility_hash=run_context_metadata[
             "dq_contract_compatibility_hash"

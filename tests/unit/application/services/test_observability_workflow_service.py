@@ -76,6 +76,11 @@ def _make_checkpoint_manifest_result(
     *,
     execution_fingerprint: str = "fingerprint-1",
     effective_config_hash: str = "effective-hash-1",
+    replay_capability: str = "exact_replay_supported",
+    replay_mode: str = "exact_replay",
+    continuation_mode: str = "exact_replay",
+    operator_replay_mode: str = "Exact Replay",
+    replay_readiness_verdict: str = "exact_replay_ready",
 ) -> SimpleNamespace:
     """Create a manifest stub with checkpoint compatibility anchors."""
     return SimpleNamespace(
@@ -98,10 +103,20 @@ def _make_checkpoint_manifest_result(
         ledger_entries=(),
         diagnostics={
             "requested_exact_replay": True,
-            "replay_capability": "exact_replay_supported",
+            "replay_capability": replay_capability,
+            "replay_mode": replay_mode,
+            "continuation_mode": continuation_mode,
+            "operator_replay_mode": operator_replay_mode,
+            "replay_readiness_verdict": replay_readiness_verdict,
             "input_snapshot_identity_fingerprint": "snapshot-fingerprint-1",
         },
-        identity_graph={"replay_capability": "exact_replay_supported"},
+        identity_graph={
+            "replay_capability": replay_capability,
+            "replay_mode": replay_mode,
+            "continuation_mode": continuation_mode,
+            "operator_replay_mode": operator_replay_mode,
+            "replay_readiness_verdict": replay_readiness_verdict,
+        },
         to_dict=lambda: {"manifest": {"pipeline_name": "chembl_activity"}},
     )
 
@@ -197,8 +212,67 @@ async def test_checkpoint_workflow_to_dict_includes_compatibility_taxonomy() -> 
     assert compatibility["status"] == "compatible"
     assert compatibility["taxonomy"] == "exact_replay"
     assert compatibility["replay_capability"] == "exact_replay_supported"
+    assert compatibility["continuation_mode"] == "exact_replay"
+    assert compatibility["replay_readiness_verdict"] == "exact_replay_ready"
     assert compatibility["mismatched_anchors"] == []
     assert "execution_fingerprint" in compatibility["matched_anchors"]
+
+
+@pytest.mark.asyncio
+async def test_checkpoint_workflow_to_dict_preserves_composite_suffix_resume_taxonomy() -> (
+    None
+):
+    checkpoint_service = mock.AsyncMock()
+    checkpoint_service.get_checkpoint.return_value = CheckpointInfo(
+        pipeline_name="composite_publication",
+        run_id="run-123",
+        metadata={
+            "records_processed": 5,
+            "manifest_id": "manifest-1",
+            "execution_fingerprint": "fingerprint-1",
+            "effective_config_hash": "effective-hash-1",
+            "effective_config_artifact_id": "effective-artifact-1",
+            "contract_ref": "chembl.activity",
+            "contract_version": "1.0.0",
+            "dq_contract_compatibility_hash": "dq-hash-1",
+            "exact_replay": True,
+            "input_snapshot_fingerprint": "snapshot-fingerprint-1",
+        },
+    )
+    audit_service = mock.AsyncMock()
+    audit_service.inspect_run.return_value = AuditInspectionResult(
+        query={"run_id": "run-123"},
+        entries=(),
+    )
+    run_manifest_service = mock.Mock()
+    run_manifest_service.show.return_value = _make_checkpoint_manifest_result(
+        replay_capability="resume_only",
+        replay_mode="resume",
+        continuation_mode="checkpoint_snapshot_plus_ledger_suffix_resume",
+        operator_replay_mode="Lifecycle Projection",
+        replay_readiness_verdict="lifecycle_projection_only",
+    )
+
+    service = ObservabilityWorkflowService(
+        audit_service=audit_service,
+        checkpoint_service=checkpoint_service,
+        run_manifest_service=run_manifest_service,
+    )
+
+    result = await service.inspect_checkpoint_workflow("composite_publication")
+    compatibility = result.to_dict()["compatibility"]
+
+    assert compatibility["status"] == "compatible"
+    assert compatibility["taxonomy"] == (
+        "checkpoint_snapshot_plus_ledger_suffix_resume"
+    )
+    assert compatibility["replay_capability"] == "resume_only"
+    assert compatibility["replay_mode"] == "resume"
+    assert compatibility["continuation_mode"] == (
+        "checkpoint_snapshot_plus_ledger_suffix_resume"
+    )
+    assert compatibility["operator_replay_mode"] == "Lifecycle Projection"
+    assert compatibility["replay_readiness_verdict"] == "lifecycle_projection_only"
 
 
 @pytest.mark.asyncio

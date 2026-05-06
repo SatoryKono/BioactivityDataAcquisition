@@ -1151,6 +1151,66 @@ def test_build_pipeline_runner_requires_git_commit_for_replay_ready_profile(
     assert fake_factory.kwargs is None
 
 
+def test_build_pipeline_runner_requires_dependency_lock_for_replay_ready_profile(
+    tmp_path: Path,
+) -> None:
+    """Strict replay readiness must pin dependency lock provenance."""
+    fake_factory, fake_registry = _build_factory_registry()
+    bronze_root = tmp_path / "bronze-cache"
+    bronze_day = bronze_root / "2026-01-01"
+    bronze_day.mkdir(parents=True)
+    (bronze_day / "batch_2026-01-01_demo.jsonl.zst").write_bytes(b"snapshot-bytes")
+
+    with (
+        patch(
+            "bioetl.composition.runtime_builders._run_manifest_builder_policy.get_code_revision_provenance",
+            return_value=SimpleNamespace(
+                git_commit="abc1234",
+                source_revision_state="clean",
+                dependency_lock_hash=None,
+            ),
+        ),
+        pytest.raises(RuntimeError, match="requires dependency_lock_hash"),
+    ):
+        _call_build_pipeline_runner(
+            _build_context(limit=25, exact_replay=True),
+            registry=fake_registry,
+            settings=_build_settings(
+                data_dir=str(tmp_path),
+                control_plane=SimpleNamespace(
+                    run_manifest_enabled=True,
+                    run_ledger_enabled=True,
+                    required_persistence_profile="replay_ready",
+                ),
+            ),
+            pipeline_config=_build_pipeline_config(
+                sink={
+                    "bronze": SimpleNamespace(enabled=True, save_metadata=True),
+                    "silver": SimpleNamespace(
+                        enabled=True,
+                        save_metadata=True,
+                        mode="merge",
+                    ),
+                    "gold": SimpleNamespace(
+                        enabled=True,
+                        save_metadata=True,
+                        mode="scd2",
+                    ),
+                },
+            ),
+            assemble_runtime_config_fn=lambda **_: SimpleNamespace(
+                run_type="incremental"
+            ),
+            assemble_cached_bronze_context_fn=lambda _: SimpleNamespace(
+                enabled=True,
+                bronze_path=str(bronze_root),
+                bronze_date="2026-01-01",
+            ),
+        )
+
+    assert fake_factory.kwargs is None
+
+
 def test_build_pipeline_runner_rejects_append_silver_for_replay_ready_profile(
     tmp_path: Path,
 ) -> None:
@@ -1196,7 +1256,7 @@ def test_build_pipeline_runner_rejects_append_silver_for_replay_ready_profile(
 
 def test_build_pipeline_runner_requires_explicit_data_dir_for_strict_profiles() -> None:
     """Strict reproducibility profiles must not derive control-plane roots from fallback."""
-    fake_factory, fake_registry = _build_factory_registry()
+    _, fake_registry = _build_factory_registry()
 
     with pytest.raises(RuntimeError, match=r"explicit settings\.data_dir"):
         _call_build_pipeline_runner(
@@ -1397,6 +1457,13 @@ def test_build_pipeline_runner_promotes_supported_exact_replay_to_family_default
     )
     payload = json.loads(manifest_path.read_text(encoding="utf-8"))
     assert payload["launch_context"]["required_persistence_profile"] == "replay_ready"
+    assert payload["launch_context"]["replay_readiness_verdict"] == (
+        "exact_replay_ready"
+    )
+    assert payload["launch_context"]["strict_exact_replay_supported"] is True
+    assert payload["launch_context"]["replay_family_contract"] == (
+        "snapshot_backed_exact_replay"
+    )
 
 
 def test_build_pipeline_runner_promoted_replay_ready_requires_ledger(

@@ -423,9 +423,15 @@ class CompositeCheckpointLoadService:
             updated_at=state.updated_at,
         )
         self._logger.info(
-            "Replayed checkpoint state from run ledger",
+            "Applied lifecycle-only checkpoint projection from run ledger",
             composite=self._composite_name,
             manifest_id=state.manifest_id,
+            projection_scope="lifecycle_only",
+            projection_contract="checkpoint_snapshot_plus_ledger_suffix_resume",
+            does_not_reconstruct=[
+                "per_provider_result_maps",
+                "rich_checkpoint_payloads",
+            ],
             replayed_event_count=replay_projection.replayed_entry_count,
             replay_start_event_id=state.last_event_id,
             replay_end_event_id=replayed_state.last_event_id,

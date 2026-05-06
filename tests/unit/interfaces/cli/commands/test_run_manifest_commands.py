@@ -285,10 +285,15 @@ class _FakeRunManifestService:
                     },
                     "semantic_identity": {
                         "execution_fingerprint": "fingerprint-1",
+                        "legacy_config_hash": "deadbeef",
+                        "legacy_config_hash_alias_of": "resolved_config_hash",
+                        "legacy_config_hash_replay_identity_anchor": False,
                         "config_hash_compatibility_anchor": "deadbeef",
                     },
                     "effective_config": {
                         "semantic": {
+                            "legacy_config_hash": "deadbeef",
+                            "legacy_config_hash_alias_of": "resolved_config_hash",
                             "effective_config_artifact_id": "eca-123",
                             "effective_config_hash": "deadbeef",
                         },
@@ -299,6 +304,7 @@ class _FakeRunManifestService:
                                 "manifest_id",
                                 "manifest_created_at",
                             ],
+                            "legacy_config_hash_display_only": True,
                         },
                     },
                     "checkpoint_anchors": {
@@ -805,9 +811,11 @@ class TestRunManifestCommands:
             "effective_config_semantic_anchor: effective_config_hash" in result.output
         )
         assert "effective_config_occurrence_fields" in result.output
+        assert "legacy_config_hash_display_only: true" in result.output
         assert "checkpoint_identity_present: true" in result.output
         assert "checkpoint_matching_fields" in result.output
         assert "checkpoint_missing_checkpoint_fields" in result.output
+        assert "legacy_config_hash_replay_identity_anchor: false" in result.output
         assert "config_hash_compatibility_anchor" in result.output
         assert "attained_profile" in result.output
         assert "forensic_grade" in result.output

@@ -41,6 +41,7 @@ def _build_field_rules(
     schema_fields: Collection[str],
     normalized_meta_fields: frozenset[str],
     normalized_set_like_fields: frozenset[str],
+    normalized_hash_excluded_fields: frozenset[str],
     rule_context: _RuleComponentContext,
 ) -> Mapping[str, FieldRule]:
     """Build field rules for all schema fields."""
@@ -50,6 +51,7 @@ def _build_field_rules(
             field_name=field_name,
             meta_fields=normalized_meta_fields,
             set_like_fields=normalized_set_like_fields,
+            hash_excluded_fields=normalized_hash_excluded_fields,
             rule_context=rule_context,
         )
     return field_rules
@@ -73,6 +75,7 @@ def build_standard_profile(
         normalized_int_fields,
         normalized_float_fields,
         normalized_set_like_fields,
+        normalized_hash_excluded_fields,
         normalized_json_string_fields,
         normalized_strict_json_fields,
         normalized_boolean_fields,
@@ -90,6 +93,7 @@ def build_standard_profile(
         profile_spec.int_fields,
         profile_spec.float_fields,
         profile_spec.set_like_fields,
+        profile_spec.hash_excluded_fields,
         profile_spec.json_string_fields,
         profile_spec.strict_json_fields,
         profile_spec.boolean_fields,
@@ -135,6 +139,7 @@ def build_standard_profile(
         schema_fields=profile_spec.schema_fields,
         normalized_meta_fields=normalized_meta_fields,
         normalized_set_like_fields=normalized_set_like_fields,
+        normalized_hash_excluded_fields=normalized_hash_excluded_fields,
         rule_context=rule_context,
     )
 
@@ -151,9 +156,12 @@ def _build_field_rule(
     field_name: str,
     meta_fields: frozenset[str],
     set_like_fields: frozenset[str],
+    hash_excluded_fields: frozenset[str],
     rule_context: _RuleComponentContext,
 ) -> FieldRule:
-    include_in_hash = field_name not in meta_fields
+    include_in_hash = (
+        field_name not in meta_fields and field_name not in hash_excluded_fields
+    )
     if field_name in meta_fields:
         notes = (
             "System/meta field is tracked by the normalization inventory and "

@@ -51,6 +51,7 @@ class CheckpointIdentityRecord:
     pipeline_name: str | None = None
     run_type: str | None = None
     pipeline_version: str | None = None
+    dependency_lock_hash: str | None = None
     source_freshness_markers: dict[str, object] | None = None
     composite_run_identity: str | None = None
     execution_fingerprint: str | None = None
@@ -206,6 +207,7 @@ class CheckpointCompatibilityV2Service:
                 pipeline_name=identity.pipeline_name,
                 run_type=identity.run_type,
                 pipeline_version=identity.pipeline_version,
+                dependency_lock_hash=identity.dependency_lock_hash,
                 effective_config_hash=identity.effective_config_hash,
                 dq_contract_compatibility_hash=identity.dq_contract_compatibility_hash,
                 contract_ref=identity.contract_ref,
@@ -229,6 +231,7 @@ class CheckpointCompatibilityV2Service:
                 pipeline_name=identity.pipeline_name,
                 run_type=identity.run_type,
                 pipeline_version=identity.pipeline_version,
+                dependency_lock_hash=identity.dependency_lock_hash,
                 manifest_id=identity.manifest_id,
                 dq_contract_compatibility_hash=identity.dq_contract_compatibility_hash,
                 contract_ref=identity.contract_ref,

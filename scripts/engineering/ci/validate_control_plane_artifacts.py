@@ -12,6 +12,7 @@ from typing import Any
 import yaml
 
 _GIT_LS_FILES_TIMEOUT_SECONDS = 5.0
+_JSON_SUFFIX = ".json"
 
 
 def validate_control_plane_artifacts(root: Path) -> list[str]:
@@ -32,14 +33,14 @@ def _validate_effective_config_artifacts(
     for path in _iter_artifact_files(
         root,
         Path("data/output/control/effective_config"),
-        suffix=".json",
+        suffix=_JSON_SUFFIX,
     ):
         _validate_semantic_effective_config_file(path, violations)
 
     for path in _iter_artifact_files(
         root,
         Path("data/output/control/effective_config/_occurrences"),
-        suffix=".json",
+        suffix=_JSON_SUFFIX,
     ):
         _validate_effective_config_occurrence_file(path, violations)
 
@@ -92,7 +93,7 @@ def _validate_run_manifests(
     for path in _iter_artifact_files(
         root,
         Path("data/output/control/run_manifest"),
-        suffix=".json",
+        suffix=_JSON_SUFFIX,
     ):
         _validate_run_manifest_file(path, violations)
 
@@ -205,7 +206,7 @@ def _validate_lineage_fragment_examples(root: Path, violations: list[str]) -> No
     for path in _iter_artifact_files(
         root,
         Path("data/output/bronze/chembl/control/lineage/fragments"),
-        suffix=".json",
+        suffix=_JSON_SUFFIX,
     ):
         payload = _load_json_object(path, violations)
         if payload is None:

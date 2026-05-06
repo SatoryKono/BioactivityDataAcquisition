@@ -102,8 +102,12 @@ class _FakeWorkflowService:
                 "compatibility": {
                     "status": "compatible",
                     "compatible": True,
-                    "taxonomy": "resume_only",
+                    "taxonomy": "exact_replay",
                     "replay_capability": "resume_only",
+                    "replay_mode": "exact_replay",
+                    "continuation_mode": "exact_replay",
+                    "operator_replay_mode": "Exact Replay",
+                    "replay_readiness_verdict": "exact_replay_ready",
                     "matched_anchors": [
                         "manifest_id",
                         "execution_fingerprint",
@@ -187,8 +191,12 @@ class _FakeWorkflowService:
                 "compatibility": {
                     "status": "compatible",
                     "compatible": True,
-                    "taxonomy": "resume_only",
+                    "taxonomy": "checkpoint_snapshot_only_resume",
                     "replay_capability": "resume_only",
+                    "replay_mode": "resume",
+                    "continuation_mode": "checkpoint_snapshot_only_resume",
+                    "operator_replay_mode": "Resume",
+                    "replay_readiness_verdict": "resume_only_ready",
                     "matched_anchors": [
                         "manifest_id",
                         "execution_fingerprint",
@@ -374,7 +382,18 @@ class TestCheckpointCommands:
         assert "checkpoint_dq_contract_compatibility_hash: dq-hash-2" in result.output
         assert "replay_capability: resume_only" in result.output
         assert "compatibility_status: compatible" in result.output
-        assert "compatibility_taxonomy: resume_only" in result.output
+        assert (
+            "compatibility_taxonomy: checkpoint_snapshot_only_resume" in result.output
+        )
+        assert "compatibility_replay_mode: resume" in result.output
+        assert (
+            "compatibility_continuation_mode: checkpoint_snapshot_only_resume"
+            in result.output
+        )
+        assert "compatibility_operator_replay_mode: Resume" in result.output
+        assert (
+            "compatibility_replay_readiness_verdict: resume_only_ready" in result.output
+        )
         assert "compatibility_mismatched_anchors: []" in result.output
         assert (
             "compatibility_missing_anchors: ['input_snapshot_fingerprint']"

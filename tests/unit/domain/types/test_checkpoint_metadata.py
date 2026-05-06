@@ -330,6 +330,41 @@ class TestCheckpointMetadata:
             != drifted.checkpoint_execution_identity_fingerprint()
         )
 
+    def test_checkpoint_execution_identity_payload_includes_dependency_lock_hash(
+        self,
+    ) -> None:
+        """dependency_lock_hash must drift strict checkpoint execution identity."""
+        metadata = CheckpointMetadata(
+            records_processed=100,
+            pipeline_name="chembl_activity",
+            run_type="incremental",
+            pipeline_version="1.0.0",
+            git_commit="abc1234",
+            dependency_lock_hash="sha256:deps-001",
+            contract_ref="chembl.activity",
+            contract_version="1.0.0",
+            effective_config_hash="a" * 64,
+        )
+        drifted = CheckpointMetadata(
+            records_processed=100,
+            pipeline_name="chembl_activity",
+            run_type="incremental",
+            pipeline_version="1.0.0",
+            git_commit="abc1234",
+            dependency_lock_hash="sha256:deps-002",
+            contract_ref="chembl.activity",
+            contract_version="1.0.0",
+            effective_config_hash="a" * 64,
+        )
+
+        payload = metadata.checkpoint_execution_identity_payload()
+
+        assert payload["dependency_lock_hash"] == "sha256:deps-001"
+        assert (
+            metadata.checkpoint_execution_identity_fingerprint()
+            != drifted.checkpoint_execution_identity_fingerprint()
+        )
+
 
 class TestCheckpointCompatibilityResult:
     """Test CheckpointCompatibilityResult domain type."""

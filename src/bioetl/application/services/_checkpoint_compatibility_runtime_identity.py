@@ -21,6 +21,7 @@ _CANONICAL_ONLY_IDENTITY_FIELDS: Final[frozenset[str]] = frozenset(
         "pipeline_name",
         "run_type",
         "pipeline_version",
+        "dependency_lock_hash",
         "dq_contract_compatibility_hash",
         "exact_replay",
         "input_snapshot_fingerprint",
@@ -42,6 +43,7 @@ class CheckpointExecutionIdentityFallbackContext:
     effective_config_artifact_id: str | None
     exact_replay: bool | None
     input_snapshot_fingerprint: str | None
+    dependency_lock_hash: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -161,6 +163,7 @@ def _build_checkpoint_execution_identity_payload(
     pipeline_name: str | None,
     run_type: str | None,
     pipeline_version: str | None,
+    dependency_lock_hash: str | None,
     effective_config_hash: str | None,
     dq_contract_compatibility_hash: str | None,
     contract_ref: str | None,
@@ -176,6 +179,7 @@ def _build_checkpoint_execution_identity_payload(
             pipeline_name,
             run_type,
             pipeline_version,
+            dependency_lock_hash,
             dq_contract_compatibility_hash,
             exact_replay,
             input_snapshot_fingerprint,
@@ -187,6 +191,7 @@ def _build_checkpoint_execution_identity_payload(
         run_type=run_type,
         pipeline_version=pipeline_version,
         git_commit=None,
+        dependency_lock_hash=dependency_lock_hash,
         effective_config_hash=effective_config_hash,
         dq_contract_compatibility_hash=dq_contract_compatibility_hash,
         contract_ref=contract_ref,
@@ -208,6 +213,7 @@ def _compute_checkpoint_execution_identity_fallback_fingerprint(
         pipeline_name=request.pipeline_name,
         run_type=request.run_type,
         pipeline_version=request.pipeline_version,
+        dependency_lock_hash=request.dependency_lock_hash,
         effective_config_hash=request.effective_config_hash,
         dq_contract_compatibility_hash=request.dq_contract_compatibility_hash,
         contract_ref=request.contract_ref,

@@ -259,7 +259,7 @@ class TestFieldCountConsistency:
         "pubmed": 52,
         "crossref": 37,
         "openalex": 39,
-        "semanticscholar": 35,
+        "semanticscholar": 37,
     }
 
     @pytest.mark.parametrize("provider,expected_count", EXPECTED_FIELD_COUNTS.items())

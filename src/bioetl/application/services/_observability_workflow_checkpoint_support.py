@@ -27,11 +27,11 @@ def build_checkpoint_compatibility_section(
     run_manifest: RunManifestInspectionResult | None,
 ) -> dict[str, object]:
     """Build a bounded CLI/API compatibility view for checkpoint diagnostics."""
-    replay_capability = _replay_capability(run_manifest)
+    replay_context = _replay_context(run_manifest)
     if checkpoint is None:
         return _checkpoint_compatibility_missing(
             taxonomy="missing_checkpoint",
-            replay_capability=replay_capability,
+            replay_context=replay_context,
             missing_anchor="checkpoint",
         )
     if _checkpoint_payload_is_corrupt(checkpoint):
@@ -39,7 +39,7 @@ def build_checkpoint_compatibility_section(
             "status": "corruption",
             "compatible": False,
             "taxonomy": "corrupted_checkpoint_payload",
-            "replay_capability": replay_capability,
+            **replay_context,
             "matched_anchors": [],
             "mismatched_anchors": [],
             "missing_anchors": [],
@@ -47,7 +47,7 @@ def build_checkpoint_compatibility_section(
     if run_manifest is None:
         return _checkpoint_compatibility_missing(
             taxonomy="missing_run_manifest",
-            replay_capability=replay_capability,
+            replay_context=replay_context,
             missing_anchor="run_manifest",
         )
 
@@ -60,7 +60,7 @@ def build_checkpoint_compatibility_section(
     compatible = not mismatched and not missing
     taxonomy = _checkpoint_taxonomy(
         compatible=compatible,
-        replay_capability=replay_capability,
+        replay_context=replay_context,
         checkpoint_anchors=checkpoint_anchors,
         run_manifest=run_manifest,
     )
@@ -68,7 +68,7 @@ def build_checkpoint_compatibility_section(
         "status": "compatible" if compatible else "incompatible",
         "compatible": compatible,
         "taxonomy": taxonomy,
-        "replay_capability": replay_capability,
+        **replay_context,
         "matched_anchors": matched,
         "mismatched_anchors": mismatched,
         "missing_anchors": missing,
@@ -80,14 +80,14 @@ def build_checkpoint_compatibility_section(
 def _checkpoint_compatibility_missing(
     *,
     taxonomy: str,
-    replay_capability: object,
+    replay_context: dict[str, object],
     missing_anchor: str,
 ) -> dict[str, object]:
     return {
         "status": "missing_evidence",
         "compatible": False,
         "taxonomy": taxonomy,
-        "replay_capability": replay_capability,
+        **replay_context,
         "matched_anchors": [],
         "mismatched_anchors": [],
         "missing_anchors": [missing_anchor],
@@ -178,12 +178,24 @@ def _compare_checkpoint_manifest_anchors(
 def _checkpoint_taxonomy(
     *,
     compatible: bool,
-    replay_capability: object,
+    replay_context: dict[str, object],
     checkpoint_anchors: dict[str, object],
     run_manifest: RunManifestInspectionResult,
 ) -> str:
     if not compatible:
         return "blocked_resume"
+    continuation_mode = replay_context.get("continuation_mode")
+    if isinstance(continuation_mode, str) and continuation_mode:
+        return continuation_mode
+    replay_mode = replay_context.get("replay_mode")
+    if isinstance(replay_mode, str) and replay_mode in {
+        "exact_replay",
+        "same_data_state_recovery",
+        "resume",
+        "rebuild",
+    }:
+        return replay_mode
+    replay_capability = replay_context.get("replay_capability")
     if replay_capability == "exact_replay_supported" and (
         checkpoint_anchors.get("exact_replay") is True
         or _requested_exact_replay(run_manifest) is True
@@ -202,6 +214,33 @@ def _replay_capability(run_manifest: RunManifestInspectionResult | None) -> obje
     return run_manifest.identity_graph.get(
         "replay_capability"
     ) or run_manifest.diagnostics.get("replay_capability")
+
+
+def _replay_context(
+    run_manifest: RunManifestInspectionResult | None,
+) -> dict[str, object]:
+    """Return replay taxonomy fields used by checkpoint compatibility views."""
+    if run_manifest is None:
+        return {
+            "replay_capability": None,
+            "replay_mode": None,
+            "continuation_mode": None,
+            "operator_replay_mode": None,
+            "replay_readiness_verdict": None,
+        }
+    diagnostics = run_manifest.diagnostics
+    identity_graph = run_manifest.identity_graph
+    return {
+        "replay_capability": _replay_capability(run_manifest),
+        "replay_mode": diagnostics.get("replay_mode")
+        or identity_graph.get("replay_mode"),
+        "continuation_mode": diagnostics.get("continuation_mode")
+        or identity_graph.get("continuation_mode"),
+        "operator_replay_mode": diagnostics.get("operator_replay_mode")
+        or identity_graph.get("operator_replay_mode"),
+        "replay_readiness_verdict": diagnostics.get("replay_readiness_verdict")
+        or identity_graph.get("replay_readiness_verdict"),
+    }
 
 
 def _requested_exact_replay(run_manifest: RunManifestInspectionResult) -> object:

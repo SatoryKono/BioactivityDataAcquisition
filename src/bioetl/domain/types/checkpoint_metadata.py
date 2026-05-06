@@ -251,6 +251,7 @@ class CheckpointMetadata:
                 "run_type": self.run_type,
                 "pipeline_version": self.pipeline_version,
                 "git_commit": self.git_commit,
+                "dependency_lock_hash": self.dependency_lock_hash,
                 "effective_config_hash": self.effective_config_hash,
                 "dq_contract_compatibility_hash": self.dq_contract_compatibility_hash,
                 "contract_ref": self.contract_ref,

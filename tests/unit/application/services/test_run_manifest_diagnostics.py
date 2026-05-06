@@ -128,7 +128,7 @@ def _assert_provenance_only_score(
     assert score["scale"] == "0-10"
     assert score["required_profile"] == "degraded_observable"
     assert score["score_scope"] == "supported_boundary_run"
-    assert score["overall_score"] == pytest.approx(7.4)
+    assert score["overall_score"] == pytest.approx(7.3)
     assert score["thresholds"] == {}
     assert score["threshold_failures"] == []
     assert score["thresholds_satisfied"] is True
@@ -147,6 +147,7 @@ def _assert_provenance_only_score(
     )
     assert score["blockers"] == [
         "exact_replay_not_eligible",
+        "dependency_lock_hash_missing",
         "identity_graph_incomplete",
         "immutable_input_snapshots_missing",
         "missing_immutable_input_snapshots",
@@ -154,7 +155,7 @@ def _assert_provenance_only_score(
     assert "diagnostics.git_commit" in score["evidence_refs"]
     assert "diagnostics.source_revision_state" in score["evidence_refs"]
     assert score["category_scores"]["run_identity"] == {
-        "score": 10,
+        "score": 9,
         "evidence": [
             "manifest_id_present",
             "execution_fingerprint_present",
@@ -164,8 +165,9 @@ def _assert_provenance_only_score(
             "contract_ref_present",
             "git_commit_present",
             "source_revision_state_present",
+            "dependency_lock_hash_missing",
         ],
-        "blockers": [],
+        "blockers": ["dependency_lock_hash_missing"],
         "evidence_refs": [
             "diagnostics.manifest_id",
             "diagnostics.execution_fingerprint",
@@ -175,6 +177,7 @@ def _assert_provenance_only_score(
             "diagnostics.contract_ref",
             "diagnostics.git_commit",
             "diagnostics.source_revision_state",
+            "diagnostics.dependency_lock_hash",
         ],
         "confidence": "high",
     }
@@ -202,8 +205,8 @@ def _expected_provenance_only_summary_without_score(
             "git_commit": "abc1234",
             "source_revision_state": "clean",
             "dependency_lock_state": "missing",
-            "strict_code_provenance_ready": True,
-            "strict_code_provenance_blockers": [],
+            "strict_code_provenance_ready": False,
+            "strict_code_provenance_blockers": ["dependency_lock_hash_missing"],
         },
         "contract_ref": "chembl.activity",
         "contract_version": "1.2.0",
@@ -222,12 +225,13 @@ def _expected_provenance_only_summary_without_score(
         "replay_capability_reason": "immutable_input_snapshots_missing",
         "exact_replay_eligible": False,
         "exact_replay_blockers": ["immutable_input_snapshots_missing"],
+        "replay_readiness_verdict": "incremental_new_run",
         "append_mode_semantic_sinks": [],
         "input_snapshot_ids": [],
         "input_snapshot_content_hashes": [],
         "input_snapshot_identity_fingerprint": None,
         "replay_mode": "rebuild",
-        "operator_replay_mode": "Rebuild",
+        "operator_replay_mode": "Incremental New Run",
         "snapshot_status": "none",
         "continuation_mode": "rebuild_only",
         "resume_contract": _expected_resume_contract(manifest),
@@ -253,6 +257,7 @@ def _expected_provenance_only_summary_without_score(
             },
             "surfaces": {
                 "control_plane_manifest": True,
+                "dependency_lock_provenance": False,
                 "effective_config_artifact": True,
                 "reproducible_semantic_output_mode": True,
                 "strict_replay_execution_context_support": True,
@@ -265,11 +270,13 @@ def _expected_provenance_only_summary_without_score(
             },
             "required_profile_missing_requirements": [],
             "replay_ready_missing_requirements": [
+                "dependency_lock_provenance",
                 "exact_replay_capability",
                 "immutable_input_snapshots",
                 "produced_artifact_trace",
             ],
             "forensic_grade_missing_requirements": [
+                "dependency_lock_provenance",
                 "exact_replay_capability",
                 "immutable_input_snapshots",
                 "produced_artifact_trace",
@@ -327,6 +334,7 @@ def _assert_provenance_only_policy(
         "replay_capability": "rebuild_only",
         "strict_requirement_requested": False,
         "strict_exact_replay_supported": True,
+        "replay_readiness_verdict": "incremental_new_run",
         "required_profile_satisfied": True,
         "blocking_gaps": [],
         "snapshot_envelope": {
@@ -352,6 +360,11 @@ def _assert_provenance_only_policy(
         == manifest.execution_fingerprint
     )
     effective_config_diag = summary["reproducibility_diagnostics"]["effective_config"]
+    assert effective_config_diag["semantic"]["legacy_config_hash"] == _VALID_CONFIG_HASH
+    assert (
+        effective_config_diag["semantic"]["legacy_config_hash_alias_of"]
+        == "resolved_config_hash"
+    )
     assert effective_config_diag["semantic"]["effective_config_hash"] == (
         _VALID_EFFECTIVE_CONFIG_HASH
     )
@@ -361,6 +374,11 @@ def _assert_provenance_only_policy(
         "manifest_id",
         "manifest_created_at",
     ]
+    assert effective_config_diag["diff_policy"]["legacy_config_hash_display_only"] is True
+    assert (
+        effective_config_diag["diff_policy"]["legacy_config_hash_replay_identity_anchor"]
+        is False
+    )
 
 
 def test_build_diagnostics_summary_without_ledger_returns_provenance_only() -> None:
@@ -399,6 +417,8 @@ def test_build_diagnostics_summary_classifies_dependency_lock_provenance() -> No
     assert summary["dependency_lock_state"] == "present"
     assert summary["dependency_lock_hash"] == "sha256:deps-present"
     assert summary["code_provenance_state"]["dependency_lock_state"] == "present"
+    assert summary["code_provenance_state"]["strict_code_provenance_ready"] is True
+    assert summary["code_provenance_state"]["strict_code_provenance_blockers"] == []
     assert (
         summary["code_provenance_state"]["dependency_lock_hash"]
         == "sha256:deps-present"
@@ -406,6 +426,10 @@ def test_build_diagnostics_summary_classifies_dependency_lock_provenance() -> No
     assert (
         summary["exact_replay_anchors"]["dependency_lock_hash"] == "sha256:deps-present"
     )
+    assert summary["persistence_profile"]["surfaces"]["dependency_lock_provenance"] is True
+    assert summary["reproducibility_audit_score"]["category_scores"]["run_identity"][
+        "score"
+    ] == 10
 
 
 def test_build_diagnostics_summary_distinguishes_resume_only_runs() -> None:
@@ -435,6 +459,7 @@ def test_build_diagnostics_summary_distinguishes_resume_only_runs() -> None:
     assert summary["input_snapshot_content_hashes"] == []
     assert summary["input_snapshot_identity_fingerprint"] is None
     assert summary["replay_mode"] == "resume"
+    assert summary["replay_readiness_verdict"] == "resume_compatible"
     assert summary["operator_replay_mode"] == "Resume"
     assert summary["continuation_mode"] == "checkpoint_snapshot_only_resume"
     assert (
@@ -509,6 +534,10 @@ def test_build_diagnostics_summary_distinguishes_snapshot_backed_runs_from_exact
             object_key="chembl/activity/batch_1.jsonl.zst",
             object_version_id="version-001",
         ),
+        code_provenance=replace(
+            _make_manifest().code_provenance,
+            dependency_lock_hash="sha256:deps-present",
+        ),
     )
 
     summary = build_diagnostics_summary(manifest, ())
@@ -523,6 +552,7 @@ def test_build_diagnostics_summary_distinguishes_snapshot_backed_runs_from_exact
     )
     assert summary["exact_replay_eligible"] is True
     assert summary["replay_mode"] == "same_data_state_recovery"
+    assert summary["replay_readiness_verdict"] == "exact_replay_ready"
     assert summary["operator_replay_mode"] == "Rebuild"
     assert summary["exact_replay_blockers"] == []
     assert summary["input_snapshot_ids"] == ["snapshot-1"]
@@ -569,7 +599,8 @@ def test_build_diagnostics_summary_does_not_report_exact_replay_from_intent_alon
     )
     assert summary["exact_replay_eligible"] is False
     assert summary["replay_mode"] == "rebuild"
-    assert summary["operator_replay_mode"] == "Rebuild"
+    assert summary["replay_readiness_verdict"] == "exact_replay_blocked"
+    assert summary["operator_replay_mode"] == "Exact Replay Blocked"
     assert summary["snapshot_status"] == "none"
     assert summary["exact_replay_blockers"] == ["immutable_input_snapshots_missing"]
 
@@ -600,6 +631,7 @@ def test_build_diagnostics_summary_does_not_mark_unsupported_family_strict_repla
     summary = build_diagnostics_summary(manifest, ())
 
     assert summary["replay_family_contract"]["strict_exact_replay_supported"] is False
+    assert summary["replay_readiness_verdict"] == "exact_replay_blocked"
     assert summary["resume_contract"]["applied_checkpoint_compatibility_policy"] == (
         "hard_fail"
     )
@@ -740,8 +772,8 @@ def test_build_diagnostics_summary_exposes_required_operator_fields(
             "git_commit": "abc1234",
             "source_revision_state": "clean",
             "dependency_lock_state": "missing",
-            "strict_code_provenance_ready": True,
-            "strict_code_provenance_blockers": [],
+            "strict_code_provenance_ready": False,
+            "strict_code_provenance_blockers": ["dependency_lock_hash_missing"],
         },
         "contract_ref": "chembl.activity",
         "contract_version": "1.2.0",
@@ -765,12 +797,13 @@ def test_build_diagnostics_summary_exposes_required_operator_fields(
         "replay_capability_reason": "immutable_input_snapshots_missing",
         "exact_replay_eligible": False,
         "exact_replay_blockers": ["immutable_input_snapshots_missing"],
+        "replay_readiness_verdict": "incremental_new_run",
         "append_mode_semantic_sinks": [],
         "input_snapshot_ids": [],
         "input_snapshot_content_hashes": [],
         "input_snapshot_identity_fingerprint": None,
         "replay_mode": "rebuild",
-        "operator_replay_mode": "Rebuild",
+        "operator_replay_mode": "Incremental New Run",
         "snapshot_status": "none",
         "continuation_mode": "rebuild_only",
         "resume_contract": _expected_resume_contract(manifest),
@@ -800,6 +833,7 @@ def test_build_diagnostics_summary_exposes_required_operator_fields(
         },
         "surfaces": {
             "control_plane_manifest": True,
+            "dependency_lock_provenance": False,
             "effective_config_artifact": True,
             "reproducible_semantic_output_mode": True,
             "strict_replay_execution_context_support": True,
@@ -812,10 +846,12 @@ def test_build_diagnostics_summary_exposes_required_operator_fields(
         },
         "required_profile_missing_requirements": [],
         "replay_ready_missing_requirements": [
+            "dependency_lock_provenance",
             "exact_replay_capability",
             "immutable_input_snapshots",
         ],
         "forensic_grade_missing_requirements": [
+            "dependency_lock_provenance",
             "exact_replay_capability",
             "immutable_input_snapshots",
         ],
@@ -1144,6 +1180,7 @@ def test_build_diagnostics_summary_formalizes_composite_exact_replay_boundary() 
     assert summary["exact_replay_blockers"] == ["immutable_input_snapshots_missing"]
     assert summary["persistence_profile"]["surfaces"] == {
         "control_plane_manifest": True,
+        "dependency_lock_provenance": False,
         "effective_config_artifact": True,
         "reproducible_semantic_output_mode": True,
         "strict_replay_execution_context_support": True,
@@ -1155,6 +1192,7 @@ def test_build_diagnostics_summary_formalizes_composite_exact_replay_boundary() 
         "lineage_closure_boundary_support": False,
     }
     assert summary["persistence_profile"]["replay_ready_missing_requirements"] == [
+        "dependency_lock_provenance",
         "exact_replay_capability",
         "immutable_input_snapshots",
         "produced_artifact_trace",

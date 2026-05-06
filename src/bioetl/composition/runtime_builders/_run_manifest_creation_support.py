@@ -157,8 +157,7 @@ def build_manifest_create_request(
                 replay_assessment.replay_readiness_verdict.value
             ),
             "exact_replay_ready": (
-                replay_assessment.replay_readiness_verdict.value
-                == "exact_replay_ready"
+                replay_assessment.replay_readiness_verdict.value == "exact_replay_ready"
             ),
             "replay_blockers": list(replay_assessment.blocking_gaps),
         }
