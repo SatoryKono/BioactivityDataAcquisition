@@ -21,8 +21,11 @@ Current coverage:
 Update path:
 
 - review intentional provider API contract changes first
-- then run the targeted drift tests with `UPDATE_SNAPSHOTS=1`
+- inspect the current drift report before changing snapshots:
+  `python -m scripts.engineering.qa report-provider-contract-drift`
+- update only the affected provider/probe snapshots with `UPDATE_SNAPSHOTS=1`
 - commit the updated snapshot files together with the contract test changes
+- document why the provider-facing shape change is acceptable before merging
 
 These snapshots are intentionally narrower than the Silver schema snapshots:
 they protect a minimal external provider payload shape, not the full transformed
@@ -33,8 +36,19 @@ Replay usage:
 - PR/CI replay gate reads the current snapshots via
   `tests/contract/_provider_contract_drift.py`
 - replay payloads come from curated VCR cassettes under `tests/fixtures/vcr/**`
+- replay mode is expected to run without live network and without default API
+  credentials
 - scheduled/manual live verification remains in `.github/workflows/contract-tests.yml`
   and revalidates the same provider-facing probes against the network
+
+Required env var and network policy:
+
+- snapshot refresh is opt-in via `UPDATE_SNAPSHOTS=1`
+- default provider-contract replay checks must remain offline
+- live provider contract verification is opt-in and stays isolated in
+  `.github/workflows/contract-tests.yml`
+- `.github/workflows/provider-contract-drift.yml` is the replay/snapshot gate and
+  must not become a second live-network workflow
 
 Recommended maintenance pattern:
 

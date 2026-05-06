@@ -5,8 +5,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from bioetl.application.services.lineage.metadata_assemblers_helpers import (
-    PipelineMetadataProtocol,
-    RuntimeMetadataProtocol,
+    PipelineMetadataBuilderProtocol,
+    RuntimeMetadataBuilderProtocol,
     _build_dataset_content_hash,
     _build_gold_dq_summary,
     _build_gold_lineage,
@@ -39,11 +39,11 @@ from bioetl.domain.value_objects.run_context import RunContext
 
 @dataclass(slots=True, frozen=True)
 class SilverMetadataService:
-    """Assemble Silver metadata from scenario inputs and shared context."""
+    """Assemble Silver metadata from inputs and injected metadata builders."""
 
     run_context: RunContext
-    runtime_metadata_factory: RuntimeMetadataProtocol
-    pipeline_metadata_factory: PipelineMetadataProtocol
+    runtime_metadata_builder: RuntimeMetadataBuilderProtocol
+    pipeline_metadata_builder: PipelineMetadataBuilderProtocol
     environment_metadata: EnvironmentMetadata
 
     def assemble(self, input_data: SilverMetadataInput) -> SilverMetadata:
@@ -110,12 +110,12 @@ class SilverMetadataService:
         )
 
         return SilverMetadata(
-            runtime=self.runtime_metadata_factory(
+            runtime=self.runtime_metadata_builder(
                 started_at=input_data.started_at,
                 completed_at=input_data.completed_at,
                 duration_seconds=duration_seconds,
             ),
-            pipeline=self.pipeline_metadata_factory(),
+            pipeline=self.pipeline_metadata_builder(),
             lineage=lineage,
             delta=delta,
             dq_summary=dq_summary,
@@ -129,11 +129,11 @@ class SilverMetadataService:
 
 @dataclass(slots=True, frozen=True)
 class GoldMetadataService:
-    """Assemble Gold metadata from scenario inputs and shared context."""
+    """Assemble Gold metadata from inputs and injected metadata builders."""
 
     run_context: RunContext
-    runtime_metadata_factory: RuntimeMetadataProtocol
-    pipeline_metadata_factory: PipelineMetadataProtocol
+    runtime_metadata_builder: RuntimeMetadataBuilderProtocol
+    pipeline_metadata_builder: PipelineMetadataBuilderProtocol
     environment_metadata: EnvironmentMetadata
 
     def assemble(self, input_data: GoldMetadataInput) -> GoldMetadata:
@@ -196,11 +196,11 @@ class GoldMetadataService:
 
         schema_info = extract_schema_metadata(input_data.gold_schema)
         return GoldMetadata(
-            runtime=self.runtime_metadata_factory(
+            runtime=self.runtime_metadata_builder(
                 completed_at=input_data.completed_at,
                 duration_seconds=0.0,
             ),
-            pipeline=self.pipeline_metadata_factory(),
+            pipeline=self.pipeline_metadata_builder(),
             lineage=lineage,
             schema=schema_info,
             dq_summary=dq_summary,
@@ -215,7 +215,7 @@ class GoldMetadataService:
 
 __all__ = [
     "GoldMetadataService",
-    "PipelineMetadataProtocol",
-    "RuntimeMetadataProtocol",
+    "PipelineMetadataBuilderProtocol",
+    "RuntimeMetadataBuilderProtocol",
     "SilverMetadataService",
 ]

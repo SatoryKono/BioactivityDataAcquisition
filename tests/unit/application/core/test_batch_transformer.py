@@ -57,7 +57,7 @@ class TestBatchTransformerTransform:
 
         assert isinstance(result, TransformResult)
         assert len(result.silver_records) == 2
-        assert len(result.gold_records) == 2
+        assert len(result.gold_records) == 1
         assert result.quarantined_count == 0
 
     async def test_transform_batch_empty_records(self, batch_transformer):

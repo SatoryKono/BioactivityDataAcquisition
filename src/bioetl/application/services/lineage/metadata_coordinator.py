@@ -184,8 +184,8 @@ class MetadataCoordinator(MetadataCoordinatorPort):
         """Build Silver metadata service once per coordinator instance."""
         return SilverMetadataService(
             run_context=self._context,
-            runtime_metadata_factory=self._build_runtime_metadata,
-            pipeline_metadata_factory=self._build_pipeline_metadata,
+            runtime_metadata_builder=self._build_runtime_metadata,
+            pipeline_metadata_builder=self._build_pipeline_metadata,
             environment_metadata=self._get_environment_metadata(),
         )
 
@@ -194,8 +194,8 @@ class MetadataCoordinator(MetadataCoordinatorPort):
         """Build Gold metadata service once per coordinator instance."""
         return GoldMetadataService(
             run_context=self._context,
-            runtime_metadata_factory=self._build_runtime_metadata,
-            pipeline_metadata_factory=self._build_pipeline_metadata,
+            runtime_metadata_builder=self._build_runtime_metadata,
+            pipeline_metadata_builder=self._build_pipeline_metadata,
             environment_metadata=self._get_environment_metadata(),
         )
 

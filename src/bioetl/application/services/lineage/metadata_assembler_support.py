@@ -32,8 +32,8 @@ if TYPE_CHECKING:
     from bioetl.domain.value_objects.run_context import RunContext
 
 
-class RuntimeMetadataProtocol(Protocol):
-    """Callable protocol for runtime metadata construction."""
+class RuntimeMetadataBuilderProtocol(Protocol):
+    """Callable protocol for runtime metadata building."""
 
     def __call__(
         self,
@@ -44,8 +44,8 @@ class RuntimeMetadataProtocol(Protocol):
     ) -> RuntimeMetadata: ...
 
 
-class PipelineMetadataProtocol(Protocol):
-    """Callable protocol for pipeline metadata construction."""
+class PipelineMetadataBuilderProtocol(Protocol):
+    """Callable protocol for pipeline metadata building."""
 
     def __call__(self) -> PipelineMetadata: ...
 
@@ -278,8 +278,8 @@ def build_runtime_duration(
 
 
 __all__ = [
-    "PipelineMetadataProtocol",
-    "RuntimeMetadataProtocol",
+    "PipelineMetadataBuilderProtocol",
+    "RuntimeMetadataBuilderProtocol",
     "augment_dq_summary_with_composite_cv",
     "build_dataset_content_hash",
     "build_gold_dq_summary",

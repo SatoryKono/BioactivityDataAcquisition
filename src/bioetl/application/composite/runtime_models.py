@@ -59,7 +59,6 @@ if TYPE_CHECKING:
 __all__ = [
     "CompositeExecutionContext",
     "CompositeRunnerDependencies",
-    "CompositeRunnerDependencyGroup",
     "CompositeRuntimeConfig",
 ]
 
@@ -89,7 +88,7 @@ class CompositeRuntimeConfig:
 
 
 @dataclass(frozen=True, slots=True)
-class CompositeRunnerDependencyGroup:
+class CompositeRunnerDependencies:
     """Grouped dependencies for ``CompositePipelineRunner`` construction."""
 
     seed_runner_factory: Callable[[], ExecutionMetricsRunnerPort]
@@ -114,9 +113,6 @@ class CompositeRunnerDependencyGroup:
     manifest_id: str | None = None
     run_ledger_service: RunLedgerService | None = None
     clock: ClockPort = field(default_factory=RuntimeClock)
-
-
-CompositeRunnerDependencies = CompositeRunnerDependencyGroup
 
 
 @dataclass(frozen=True, slots=True)

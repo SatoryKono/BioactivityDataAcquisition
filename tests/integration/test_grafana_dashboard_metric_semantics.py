@@ -314,7 +314,9 @@ def test_dq_current_status_panels_use_explicit_status_value_mappings() -> None:
         )
 
 
-def test_dq_threshold_state_panel_uses_bounded_reason_severity_with_ok_fallback() -> None:
+def test_dq_threshold_state_panel_uses_bounded_reason_severity_with_ok_fallback() -> (
+    None
+):
     """Threshold-state summary must stay in a bounded enum and preserve explicit OK."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
     panel = next(
@@ -407,12 +409,17 @@ def test_dq_blocked_share_panels_use_percentunit_domain_and_policy_thresholds() 
         assert any(
             'stage="bronze"' in expr and "bioetl_records_processed_total" in expr
             for expr in expressions
-        ), f"Panel '{panel_title}' must use Bronze input as the blocked-share denominator"
+        ), (
+            f"Panel '{panel_title}' must use Bronze input as the blocked-share denominator"
+        )
         assert any(
             "bioetl_dq_records_quarantined_total" in expr for expr in expressions
-        ), f"Panel '{panel_title}' must include quarantined records in blocked-share impact"
+        ), (
+            f"Panel '{panel_title}' must include quarantined records in blocked-share impact"
+        )
         assert all(
-            "stage=~\"raw|validated|enriched|filtered_out|deduplicated|final\"" not in expr
+            'stage=~"raw|validated|enriched|filtered_out|deduplicated|final"'
+            not in expr
             for expr in expressions
         ), (
             f"Panel '{panel_title}' must not use legacy/unconfirmed stage regex in the denominator"

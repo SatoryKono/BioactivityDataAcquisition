@@ -322,8 +322,7 @@ def test_silver_reject_explorer_panels_have_specific_triage_descriptions(
     assert "Selected-range" in description or "selected-range" in description
     assert "Status mapping: 0 = healthy/ok" not in description
     assert any(
-        token in description
-        for token in ("No data", "UNKNOWN", "Empty", "empty", "0")
+        token in description for token in ("No data", "UNKNOWN", "Empty", "empty", "0")
     )
 
 
