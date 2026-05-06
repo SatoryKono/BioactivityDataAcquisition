@@ -100,10 +100,26 @@
     "supported": true,
     "supported_families": [
       "chembl.activity",
+      "chembl.assay",
+      "chembl.assay_parameters",
+      "chembl.cell_line",
+      "chembl.compound_record",
       "chembl.molecule",
+      "chembl.protein_class",
+      "chembl.publication",
+      "chembl.publication_similarity",
+      "chembl.publication_term",
+      "chembl.subcellular_fraction",
+      "chembl.target",
+      "chembl.target_component",
+      "chembl.tissue",
       "crossref.publication",
+      "openalex.publication",
       "pubchem.compound",
-      "pubmed.publication"
+      "pubmed.publication",
+      "semanticscholar.publication",
+      "uniprot.idmapping",
+      "uniprot.protein"
     ]
   },
   "lineage_fragment_ids": [],
@@ -152,10 +168,26 @@
       "supported": true,
       "supported_families": [
         "chembl.activity",
+        "chembl.assay",
+        "chembl.assay_parameters",
+        "chembl.cell_line",
+        "chembl.compound_record",
         "chembl.molecule",
+        "chembl.protein_class",
+        "chembl.publication",
+        "chembl.publication_similarity",
+        "chembl.publication_term",
+        "chembl.subcellular_fraction",
+        "chembl.target",
+        "chembl.target_component",
+        "chembl.tissue",
         "crossref.publication",
+        "openalex.publication",
         "pubchem.compound",
-        "pubmed.publication"
+        "pubmed.publication",
+        "semanticscholar.publication",
+        "uniprot.idmapping",
+        "uniprot.protein"
       ]
     },
     "replay_ready_missing_requirements": [
@@ -205,6 +237,22 @@
   "provider": "chembl",
   "published_artifact_count": 0,
   "replay_capability": "exact_replay_supported",
+  "replay_capability_assessment": {
+    "blocking_gaps": [],
+    "replay_capability": "exact_replay_supported",
+    "replay_readiness_verdict": "exact_replay_ready",
+    "required_persistence_profile": "replay_ready",
+    "required_profile_satisfied": true,
+    "snapshot_envelope": {
+      "any_input_snapshots": true,
+      "full_snapshot_envelope": true,
+      "require_full_snapshot_envelope": false,
+      "source_count": 1,
+      "sources_with_snapshots": 1
+    },
+    "strict_exact_replay_supported": true,
+    "strict_requirement_requested": true
+  },
   "replay_capability_reason": "immutable_input_snapshots_present",
   "replay_family_contract": {
     "contract": "snapshot_backed_exact_replay",
@@ -218,10 +266,26 @@
     "support_scope": "operator_grade_trace_debug",
     "supported_families": [
       "chembl.activity",
+      "chembl.assay",
+      "chembl.assay_parameters",
+      "chembl.cell_line",
+      "chembl.compound_record",
       "chembl.molecule",
+      "chembl.protein_class",
+      "chembl.publication",
+      "chembl.publication_similarity",
+      "chembl.publication_term",
+      "chembl.subcellular_fraction",
+      "chembl.target",
+      "chembl.target_component",
+      "chembl.tissue",
       "crossref.publication",
+      "openalex.publication",
       "pubchem.compound",
-      "pubmed.publication"
+      "pubmed.publication",
+      "semanticscholar.publication",
+      "uniprot.idmapping",
+      "uniprot.protein"
     ]
   },
   "replay_mode": "exact_replay",
@@ -409,10 +473,26 @@
         "supported": true,
         "supported_families": [
           "chembl.activity",
+          "chembl.assay",
+          "chembl.assay_parameters",
+          "chembl.cell_line",
+          "chembl.compound_record",
           "chembl.molecule",
+          "chembl.protein_class",
+          "chembl.publication",
+          "chembl.publication_similarity",
+          "chembl.publication_term",
+          "chembl.subcellular_fraction",
+          "chembl.target",
+          "chembl.target_component",
+          "chembl.tissue",
           "crossref.publication",
+          "openalex.publication",
           "pubchem.compound",
-          "pubmed.publication"
+          "pubmed.publication",
+          "semanticscholar.publication",
+          "uniprot.idmapping",
+          "uniprot.protein"
         ]
       },
       "reason": "published_contract_limits_exact_replay_to_supported_boundary",
@@ -515,10 +595,26 @@
         "supported": true,
         "supported_families": [
           "chembl.activity",
+          "chembl.assay",
+          "chembl.assay_parameters",
+          "chembl.cell_line",
+          "chembl.compound_record",
           "chembl.molecule",
+          "chembl.protein_class",
+          "chembl.publication",
+          "chembl.publication_similarity",
+          "chembl.publication_term",
+          "chembl.subcellular_fraction",
+          "chembl.target",
+          "chembl.target_component",
+          "chembl.tissue",
           "crossref.publication",
+          "openalex.publication",
           "pubchem.compound",
-          "pubmed.publication"
+          "pubmed.publication",
+          "semanticscholar.publication",
+          "uniprot.idmapping",
+          "uniprot.protein"
         ]
       },
       "lineage_fragment_ids": [],
@@ -534,11 +630,7 @@
     },
     "policy": {
       "attained_profile": "degraded_observable",
-      "continuation_mode": "exact_replay",
-      "exact_replay_blockers": [],
-      "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
-      "operator_replay_mode": "Exact Replay Blocked",
-      "policy_assessment": {
+      "capability_assessment": {
         "blocking_gaps": [],
         "replay_capability": "exact_replay_supported",
         "replay_readiness_verdict": "exact_replay_ready",
@@ -554,6 +646,10 @@
         "strict_exact_replay_supported": true,
         "strict_requirement_requested": true
       },
+      "continuation_mode": "exact_replay",
+      "exact_replay_blockers": [],
+      "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
+      "operator_replay_mode": "Exact Replay Blocked",
       "replay_capability": "exact_replay_supported",
       "replay_family_contract": {
         "contract": "snapshot_backed_exact_replay",
@@ -567,10 +663,26 @@
         "support_scope": "operator_grade_trace_debug",
         "supported_families": [
           "chembl.activity",
+          "chembl.assay",
+          "chembl.assay_parameters",
+          "chembl.cell_line",
+          "chembl.compound_record",
           "chembl.molecule",
+          "chembl.protein_class",
+          "chembl.publication",
+          "chembl.publication_similarity",
+          "chembl.publication_term",
+          "chembl.subcellular_fraction",
+          "chembl.target",
+          "chembl.target_component",
+          "chembl.tissue",
           "crossref.publication",
+          "openalex.publication",
           "pubchem.compound",
-          "pubmed.publication"
+          "pubmed.publication",
+          "semanticscholar.publication",
+          "uniprot.idmapping",
+          "uniprot.protein"
         ]
       },
       "replay_mode": "exact_replay",
@@ -598,22 +710,6 @@
       "resolved_config_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
       "snapshot_status": "full"
     }
-  },
-  "reproducibility_policy_assessment": {
-    "blocking_gaps": [],
-    "replay_capability": "exact_replay_supported",
-    "replay_readiness_verdict": "exact_replay_ready",
-    "required_persistence_profile": "replay_ready",
-    "required_profile_satisfied": true,
-    "snapshot_envelope": {
-      "any_input_snapshots": true,
-      "full_snapshot_envelope": true,
-      "require_full_snapshot_envelope": false,
-      "source_count": 1,
-      "sources_with_snapshots": 1
-    },
-    "strict_exact_replay_supported": true,
-    "strict_requirement_requested": true
   },
   "requested_exact_replay": true,
   "required_persistence_profile": "replay_ready",

@@ -631,6 +631,7 @@ def test_build_diagnostics_summary_marks_published_source_family_strict_replay_s
             _make_manifest().code_provenance,
             contract_ref="openalex.publication",
             dq_policy_ref="openalex_publication.gold",
+            dependency_lock_hash="sha256:openalex-publication-lock",
         ),
         replay_capability=ReplayCapability.EXACT_REPLAY_SUPPORTED,
         source_refs=build_source_refs(

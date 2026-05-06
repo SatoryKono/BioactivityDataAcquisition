@@ -43,6 +43,11 @@ ReplayFamilyContractName = Literal[
     "composite_snapshot_backed_exact_replay",
     "rebuild_only",
 ]
+ReplaySupportState = Literal[
+    "exact_replay_supported",
+    "rebuild_only",
+    "debug_only",
+]
 StrictReplayRuntimeVerdict = Literal[
     "allowed_with_snapshot_backed_source_refs",
     "requires_full_composite_snapshot_envelope",
@@ -58,6 +63,7 @@ class ReproducibilityFamilyProfile:
     execution_context: ReproducibilityExecutionContext
     lineage_closure_supported: bool
     strict_exact_replay_supported: bool
+    support_state: ReplaySupportState
     strict_replay_runtime_verdict: StrictReplayRuntimeVerdict
     exact_replay_support_boundary: str
     replay_family_contract: ReplayFamilyContractName
@@ -147,6 +153,7 @@ def _build_composite_reproducibility_family_profile(
         execution_context=execution_context,
         lineage_closure_supported=False,
         strict_exact_replay_supported=True,
+        support_state="exact_replay_supported",
         strict_replay_runtime_verdict="requires_full_composite_snapshot_envelope",
         exact_replay_support_boundary="composite_snapshot_backed_input_envelope",
         replay_family_contract="composite_snapshot_backed_exact_replay",
@@ -168,6 +175,11 @@ def _build_source_reproducibility_family_profile(
         execution_context=execution_context,
         lineage_closure_supported=supported,
         strict_exact_replay_supported=supported,
+        support_state=(
+            "exact_replay_supported"
+            if supported
+            else ("rebuild_only" if published else "debug_only")
+        ),
         strict_replay_runtime_verdict=(
             "allowed_with_snapshot_backed_source_refs"
             if supported
@@ -256,6 +268,7 @@ def build_replay_family_contract(
         "default_required_persistence_profile": (
             profile.default_required_persistence_profile
         ),
+        "support_state": profile.support_state,
         "strict_exact_replay_supported": profile.strict_exact_replay_supported,
         "strict_replay_runtime_verdict": profile.strict_replay_runtime_verdict,
         "exact_replay_support_boundary": profile.exact_replay_support_boundary,

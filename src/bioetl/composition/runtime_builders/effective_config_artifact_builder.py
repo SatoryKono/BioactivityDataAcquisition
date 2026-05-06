@@ -22,11 +22,11 @@ from bioetl.composition.runtime_builders._run_manifest_builder_policy import (
 from bioetl.composition.runtime_builders._run_manifest_support import (
     to_serializable_mapping as _to_serializable_mapping,
 )
-from bioetl.domain.control_plane.reproducibility_policy import (
-    STRICT_PERSISTENCE_PROFILES,
-)
 from bioetl.domain.control_plane.effective_config_artifact import (
     ConfigResolutionPolicy,
+)
+from bioetl.domain.control_plane.reproducibility_policy import (
+    STRICT_PERSISTENCE_PROFILES,
 )
 from bioetl.infrastructure.control_plane import FileEffectiveConfigArtifactStore
 
