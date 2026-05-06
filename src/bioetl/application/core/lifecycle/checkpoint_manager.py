@@ -12,8 +12,10 @@ from bioetl.application.core.lifecycle.checkpoint_runtime import (
     CheckpointCompatibilityPolicy,
     enrich_metadata_with_execution_identity,
     handle_incompatible_checkpoint,
+    handle_missing_compatibility_context,
     resolve_current_metadata,
     resolve_incompatible_checkpoint_disposition,
+    resolve_missing_compatibility_context_disposition,
     validate_compatibility_policy,
 )
 from bioetl.domain.medallion import LoadingStrategy
@@ -114,9 +116,13 @@ class CheckpointRuntimeService:
         if self._compatibility_service is None:
             missing_context.append("checkpoint_compatibility_service")
         if missing_context:
-            raise ValueError(
-                "Checkpoint resume requires compatibility context; missing "
-                + ", ".join(missing_context)
+            return (
+                self._handle_missing_compatibility_context_result(
+                    checkpoint_metadata=checkpoint_metadata,
+                    current_metadata=effective_current_metadata,
+                    service_available=self._compatibility_service is not None,
+                ),
+                True,
             )
         compatibility_result = (
             self._compatibility_service.validate_checkpoint_compatibility(
@@ -192,6 +198,43 @@ class CheckpointRuntimeService:
         self._emit_checkpoint_load_status(
             "observe_loaded_degraded"
             if disposition == "observe_loaded_degraded"
+            else "loaded"
+        )
+        return result
+
+    def _handle_missing_compatibility_context_result(
+        self,
+        *,
+        checkpoint_metadata: CheckpointMetadata,
+        current_metadata: CheckpointMetadata | None,
+        service_available: bool,
+    ) -> CheckpointMetadata | None:
+        """Apply the configured disposition when resume validation is unavailable."""
+        disposition = resolve_missing_compatibility_context_disposition(
+            compatibility_policy=self._compatibility_policy,
+        )
+        try:
+            result = handle_missing_compatibility_context(
+                logger=self._logger,
+                pipeline_name=self._pipeline_name,
+                compatibility_policy=self._compatibility_policy,
+                current_metadata=current_metadata,
+                checkpoint_metadata=checkpoint_metadata,
+                service_available=service_available,
+            )
+        except _OPERATION_ERRORS:
+            self._emit_checkpoint_load_status(
+                "missing_compatibility_context_hard_fail"
+                if disposition == "missing_context_hard_fail_raised"
+                else "missing_compatibility_context"
+            )
+            raise
+        if result is None:
+            self._emit_checkpoint_load_status("missing_compatibility_context")
+            return None
+        self._emit_checkpoint_load_status(
+            "legacy_missing_compatibility_context_loaded"
+            if disposition == "legacy_missing_context_loaded_degraded"
             else "loaded"
         )
         return result
