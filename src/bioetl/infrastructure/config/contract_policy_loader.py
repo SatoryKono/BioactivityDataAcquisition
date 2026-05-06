@@ -20,6 +20,40 @@ from bioetl.infrastructure.schemas.pipeline_contract_policy import (
 _CONFIGS_ROOT = Path("configs")
 
 
+def _is_empty_hash_shim(value: object) -> bool:
+    """Return True when deprecated contract hash shims are absent or empty."""
+    if value is None:
+        return True
+    if not isinstance(value, list):
+        return False
+    return not any(str(item).strip() for item in value)
+
+
+def _validate_root_hash_policy_compatibility(
+    unified_raw: JsonDict,
+    *,
+    unified_entity_path: Path,
+) -> None:
+    """Ensure legacy contract hash surfaces stay empty when root hash_policy exists."""
+    root_hash_policy = unified_raw.get("hash_policy")
+    if not isinstance(root_hash_policy, dict):
+        return
+    contracts_section = unified_raw.get("contracts")
+    if not isinstance(contracts_section, dict):
+        return
+
+    if not _is_empty_hash_shim(contracts_section.get("hash_include")):
+        raise ValueError(
+            "contracts.hash_include must be empty when root hash_policy is present "
+            f"in {unified_entity_path}"
+        )
+    if not _is_empty_hash_shim(contracts_section.get("hash_exclude")):
+        raise ValueError(
+            "contracts.hash_exclude must be empty when root hash_policy is present "
+            f"in {unified_entity_path}"
+        )
+
+
 def _load_base_contract_defaults() -> dict[str, object]:
     """Load contract defaults from consolidated base config if present."""
     base_path = _CONFIGS_ROOT / "base" / "pipeline.yaml"
@@ -121,6 +155,10 @@ def load_pipeline_contract_policy(provider: str, entity: str) -> PipelineContrac
         raise ValueError(f"Contract policy file not found: {unified_entity_path}")
 
     unified_raw: JsonDict = _load_yaml_file(unified_entity_path)
+    _validate_root_hash_policy_compatibility(
+        unified_raw,
+        unified_entity_path=unified_entity_path,
+    )
     contracts_section = unified_raw.get("contracts")
     if not isinstance(contracts_section, dict):
         raise ValueError(

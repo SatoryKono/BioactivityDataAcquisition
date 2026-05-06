@@ -79,6 +79,13 @@ _REFERENCE_IDENTIFIER_FAMILY_SPECS: tuple[tuple[str, str, str, str, str], ...] =
         "Semantic Scholar corpusId is numeric, not a string-like reference ID.",
     ),
     (
+        "ncbi_taxonomy",
+        "numeric_scalar",
+        "scalar",
+        "ncbi_taxonomy",
+        "NCBI Taxonomy identifiers used by ChEMBL biological context fields.",
+    ),
+    (
         "uniprot_accession",
         "string",
         "scalar_or_set_like",
@@ -119,8 +126,12 @@ _REFERENCE_IDENTIFIER_FAMILY_SPECS: tuple[tuple[str, str, str, str, str], ...] =
         "string",
         "scalar_or_set_like",
         "chembl",
-        "ChEMBL identifiers used by non-ChEMBL provider references.",
+        "ChEMBL identifiers used by ChEMBL entities and non-ChEMBL provider references.",
     ),
+    ("doi", "string", "scalar", "doi", "Digital Object Identifiers."),
+    ("pmid", "numeric_string", "scalar", "pmid", "PubMed identifiers."),
+    ("pmcid", "string", "scalar", "pmcid", "PubMed Central identifiers."),
+    ("mesh", "string", "scalar", "mesh", "MeSH descriptor identifiers."),
     (
         "drugbank",
         "string",

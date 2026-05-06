@@ -38,6 +38,8 @@ class PipelineConfigReadPayload:
     entity_config: JsonDict  # Any: YAML config has heterogeneous values
     config_path: Path
     unified_schema: JsonDict | None = None  # Any: YAML values are heterogeneous
+    unified_contracts: JsonDict | None = None  # Any: YAML values are heterogeneous
+    unified_hash_policy: JsonDict | None = None  # Any: YAML values are heterogeneous
 
 
 def _apply_file_reference_defaults(
@@ -172,6 +174,8 @@ def normalize_pipeline_payload(
         entity_config=payload.entity_config,
         config_path=payload.config_path,
         unified_schema=payload.unified_schema,
+        unified_contracts=payload.unified_contracts,
+        unified_hash_policy=payload.unified_hash_policy,
     )
     load_source_section(config, payload.config_path)
 

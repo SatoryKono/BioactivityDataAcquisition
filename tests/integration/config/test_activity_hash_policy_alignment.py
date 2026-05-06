@@ -8,8 +8,8 @@ from typing import Any
 import pytest
 import yaml
 
+from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config
 from bioetl.domain.normalization.profiles import (
-    CHEMBL_ACTIVITY_PROFILE,
     CHEMBL_ACTIVITY_SCHEMA_FIELDS,
 )
 
@@ -33,15 +33,21 @@ def _business_schema_fields(config: dict[str, Any]) -> frozenset[str]:
 
 @pytest.mark.integration
 def test_chembl_activity_hash_policy_uses_normalized_business_fields() -> None:
-    """Hash policy include fields must stay aligned to runtime-normalized names."""
+    """Root hash_policy should be the runtime-authoritative ChEMBL hash selector."""
     config = _load_activity_config()
-    include_fields = frozenset(config["hash_policy"]["hash_policy"]["include_fields"])
+    load_pipeline_config.cache_clear()
+    loaded = load_pipeline_config("chembl_activity")
+
+    assert loaded.content_hash.include == []
+    assert loaded.content_hash.exclude == []
+    assert loaded.content_hash_policy is not None
+
+    include_fields = frozenset(loaded.content_hash_policy.include_fields)
     business_fields = _business_schema_fields(config)
     profile_fields = frozenset(CHEMBL_ACTIVITY_SCHEMA_FIELDS)
 
     assert include_fields <= business_fields
     assert include_fields <= profile_fields
-    assert include_fields <= CHEMBL_ACTIVITY_PROFILE.hash_included_fields
     assert not include_fields & {
         "activity_chembl_id",
         "assay_chembl_id",

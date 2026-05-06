@@ -114,6 +114,7 @@ class RecordProcessorConfig:
         default_factory=NormalizationRulesPolicy
     )
     allow_compatibility_fallback: bool = False
+    content_hash_policy_authoritative: bool = False
     content_hash_include_fields: frozenset[str] = field(default_factory=frozenset)
     content_hash_exclude_fields: frozenset[str] = field(default_factory=frozenset)
     content_hash_policy_by_version: ContentHashPolicyByVersion | None = None

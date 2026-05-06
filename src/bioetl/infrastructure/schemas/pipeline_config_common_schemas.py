@@ -22,6 +22,9 @@ from bioetl.infrastructure.schemas.pipeline_config_common import CsvExportConfig
 
 __all__ = [
     "SEMVER_PATTERN",
+    "AuthoritativeContentHashPolicyConfig",
+    "AuthoritativeContentHashPolicyContractConfig",
+    "AuthoritativeContentHashPolicyNormalizationConfig",
     "ContentHashConfig",
     "FilterColumnSchema",
     "GoldColumnFilterConfig",
@@ -262,3 +265,124 @@ class ContentHashConfig(BaseModel):
         default_factory=list,
         description="Optional denylist of fields excluded from content hash.",
     )
+
+
+class AuthoritativeContentHashPolicyContractConfig(BaseModel):
+    """Versioned contract metadata for root-level entity hash policy."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    version: str = Field(
+        description="Explicit version of the authoritative content-hash policy.",
+    )
+    migration_note: str = Field(
+        min_length=1,
+        description="Required change note when hash semantics are updated.",
+    )
+
+    @field_validator("version")
+    @classmethod
+    def validate_version(cls, value: str) -> str:
+        """Require semver-compatible hash-policy contract versions."""
+        if not SEMVER_PATTERN.match(value):
+            raise ValueError(
+                f"Invalid semver format '{value}'. "
+                "Expected format: MAJOR.MINOR.PATCH (e.g., '1.0.0', 'v2.1.0')"
+            )
+        return value
+
+    @field_validator("migration_note")
+    @classmethod
+    def validate_migration_note(cls, value: str) -> str:
+        """Require a non-blank migration note for hash policy revisions."""
+        note = value.strip()
+        if not note:
+            raise ValueError("migration_note must be a non-empty string")
+        return note
+
+
+class _AuthoritativeContentHashPolicyFloatNormalizationConfig(BaseModel):
+    """Float-normalization settings captured by the authoritative hash policy."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    enabled: bool = True
+    precision: int = Field(default=10, ge=0, le=32)
+
+
+class _AuthoritativeContentHashPolicyDateNormalizationConfig(BaseModel):
+    """Date-normalization settings captured by the authoritative hash policy."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    enabled: bool = True
+    format: str = Field(default="YYYY-MM-DD", min_length=1)
+
+
+class _AuthoritativeContentHashPolicyNullHandlingConfig(BaseModel):
+    """Null/NaN normalization settings captured by the authoritative hash policy."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    nan_to_null: bool = True
+    inf_to_null: bool = True
+
+
+class AuthoritativeContentHashPolicyNormalizationConfig(BaseModel):
+    """Typed normalization metadata co-located with the authoritative hash policy."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    trim_strings: bool = True
+    round_floats: _AuthoritativeContentHashPolicyFloatNormalizationConfig = Field(
+        default_factory=_AuthoritativeContentHashPolicyFloatNormalizationConfig
+    )
+    dates: _AuthoritativeContentHashPolicyDateNormalizationConfig = Field(
+        default_factory=_AuthoritativeContentHashPolicyDateNormalizationConfig
+    )
+    null_handling: _AuthoritativeContentHashPolicyNullHandlingConfig = Field(
+        default_factory=_AuthoritativeContentHashPolicyNullHandlingConfig
+    )
+
+
+class AuthoritativeContentHashPolicyConfig(BaseModel):
+    """Single runtime-authoritative content-hash policy loaded from entity YAML."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    provider: str = Field(min_length=1)
+    entity: str = Field(min_length=1)
+    contract: AuthoritativeContentHashPolicyContractConfig
+    algorithm: str = Field(default="sha256", min_length=1)
+    canonicalization: str = Field(min_length=1)
+    include_fields: list[str] = Field(min_length=1)
+    exclude_fields: list[str] = Field(default_factory=list)
+    exclude_patterns: list[str] = Field(default_factory=list)
+    field_ordering: dict[str, str] = Field(default_factory=dict)
+    normalization: AuthoritativeContentHashPolicyNormalizationConfig = Field(
+        default_factory=AuthoritativeContentHashPolicyNormalizationConfig
+    )
+
+    @field_validator("include_fields", "exclude_fields", "exclude_patterns")
+    @classmethod
+    def validate_string_lists(cls, value: list[str]) -> list[str]:
+        """Reject blank or duplicate string entries in policy collections."""
+        normalized = [item.strip() for item in value if item.strip()]
+        if len(normalized) != len(value):
+            raise ValueError("hash policy collections must not contain blank strings")
+        if len(normalized) != len(set(normalized)):
+            raise ValueError("hash policy collections must not contain duplicates")
+        return normalized
+
+    @field_validator("field_ordering")
+    @classmethod
+    def validate_field_ordering(cls, value: dict[str, str]) -> dict[str, str]:
+        """Reject blank field-ordering keys and values."""
+        normalized: dict[str, str] = {}
+        for field_name, ordering in value.items():
+            key = field_name.strip()
+            mode = ordering.strip()
+            if not key or not mode:
+                raise ValueError("field_ordering keys and values must be non-empty")
+            normalized[key] = mode
+        return normalized

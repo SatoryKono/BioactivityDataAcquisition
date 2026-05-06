@@ -2,12 +2,15 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import cast
 
 import pytest
+import yaml
 
 from bioetl.domain.normalization.profiles.chembl_json_ordering_policy import (
     CHEMBL_JSON_ORDERING_POLICY,
+    chembl_hash_config_field_ordering,
 )
 from scripts.docs.generate_pipeline_normalization_field_matrix import (
     PROFILE_META_PASSTHROUGH_KPI,
@@ -115,6 +118,37 @@ def _assert_chembl_json_ordering_policy_is_matrix_visible(
     )
 
 
+def _assert_chembl_json_ordering_policy_matches_hash_config_mirrors() -> None:
+    config_paths = {
+        "chembl_activity": Path("configs/entities/chembl/activity.yaml"),
+        "chembl_assay": Path("configs/entities/chembl/assay.yaml"),
+        "chembl_molecule": Path("configs/entities/chembl/molecule.yaml"),
+        "chembl_publication": Path("configs/entities/chembl/publication.yaml"),
+        "chembl_target": Path("configs/entities/chembl/target.yaml"),
+        "chembl_target_component": Path("configs/entities/chembl/target_component.yaml"),
+    }
+    regressions: list[str] = []
+    for pipeline_name, config_path in sorted(config_paths.items()):
+        config = yaml.safe_load(config_path.read_text(encoding="utf-8"))
+        assert isinstance(config, dict)
+        actual = (
+            config.get("hash_policy", {})
+            .get("hash_policy", {})
+            .get("field_ordering", {})
+        )
+        expected = chembl_hash_config_field_ordering(pipeline_name)
+        if actual != expected:
+            regressions.append(
+                f"{pipeline_name}: expected={expected!r}, actual={actual!r}"
+            )
+
+    assert not regressions, (
+        "ChEMBL JSON ordering config mirrors drifted from domain policy: "
+        + "; ".join(regressions)
+        + ". Keep entity hash config field_ordering in sync with chembl_json_ordering_policy.py."
+    )
+
+
 def test_normalization_surface_coverage_does_not_regress_below_reviewed_budgets() -> (
     None
 ):
@@ -146,6 +180,10 @@ def test_chembl_json_ordering_policy_does_not_drift_from_field_matrix() -> None:
     _assert_chembl_json_ordering_policy_is_matrix_visible(
         _field_matrix_rows_by_coordinate()
     )
+
+
+def test_chembl_json_ordering_policy_does_not_drift_from_hash_config_mirrors() -> None:
+    _assert_chembl_json_ordering_policy_matches_hash_config_mirrors()
 
 
 def test_profile_semantic_ratchet_reports_named_regression() -> None:

@@ -129,8 +129,58 @@ class TestChemblAssayEnumFields:
             confidence_rule.normalizer(" direct single protein target assigned ")
             == "Direct single protein target assigned"
         )
-        assert confidence_rule.normalizer("mystery confidence") == "mystery confidence"
+        assert confidence_rule.normalizer("mystery confidence") is None
         assert "controlled vocabulary" in (confidence_rule.notes or "").lower()
+
+    def test_case_normalization_for_single_letter_enums(self) -> None:
+        """Test case normalization for single-letter enum fields."""
+        assay_type_rule = CHEMBL_ASSAY_PROFILE.field_rules["assay_type"]
+        relationship_rule = CHEMBL_ASSAY_PROFILE.field_rules["relationship_type"]
+
+        # Test uppercase normalization for assay_type
+        assert assay_type_rule.normalizer("b") == "B"
+        assert assay_type_rule.normalizer("B") == "B"
+        assert assay_type_rule.normalizer(" f ") == "F"
+        assert assay_type_rule.normalizer("x") is None  # Invalid value
+
+        # Test uppercase normalization for relationship_type
+        assert relationship_rule.normalizer("d") == "D"
+        assert relationship_rule.normalizer("D") == "D"
+        assert relationship_rule.normalizer(" h ") == "H"
+        assert relationship_rule.normalizer("z") is None  # Invalid value
+
+    def test_case_preservation_for_multi_word_enums(self) -> None:
+        """Test case preservation for multi-word enum fields."""
+        assay_test_type_rule = CHEMBL_ASSAY_PROFILE.field_rules["assay_test_type"]
+        assay_group_rule = CHEMBL_ASSAY_PROFILE.field_rules["assay_group"]
+
+        # Test case preservation for assay_test_type
+        assert assay_test_type_rule.normalizer("In vivo") == "In vivo"
+        assert (
+            assay_test_type_rule.normalizer("in vitro") == "In vitro"
+        )  # Normalized by enum
+        assert (
+            assay_test_type_rule.normalizer("EX VIVO") == "Ex vivo"
+        )  # Normalized by enum
+
+        # Test case preservation for assay_group
+        assert assay_group_rule.normalizer("FUNCTIONAL") == "FUNCTIONAL"
+        assert assay_group_rule.normalizer("binding") == "BINDING"  # Normalized by enum
+        assert (
+            assay_group_rule.normalizer(" Binding ") == "BINDING"
+        )  # Trimmed and normalized
+
+    def test_assay_category_normalizes_to_canonical_registry_case(self) -> None:
+        """Controlled assay categories should normalize to one canonical casing."""
+        assay_category_rule = CHEMBL_ASSAY_PROFILE.field_rules["assay_category"]
+
+        assert assay_category_rule.normalizer(" screening ") == "screening"
+        assert assay_category_rule.normalizer("CONFIRMATORY") == "confirmatory"
+        assert (
+            assay_category_rule.normalizer(" affinity biochemical assay ")
+            == "Affinity biochemical assay"
+        )
+        assert assay_category_rule.normalizer("unknown category") is None
 
 
 class TestEnumValidation:

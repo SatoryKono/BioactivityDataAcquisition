@@ -44,6 +44,23 @@ families:
       - colon_form
     fields:
       - chembl_activity.uo_units
+  qudt:
+    canonical_prefix: https://qudt.org/vocab/unit/
+    iri_template: https://qudt.org/vocab/unit/{id}
+    ontology_version: 3.2.1
+    companion_fields:
+      iri:
+        - chembl_activity.qudt_unit_iri
+      mapping_status:
+        - chembl_activity.qudt_unit_mapping_status
+      version:
+        - chembl_activity.qudt_ontology_version
+    accepted_inputs:
+      - qudt_iri
+      - legacy_openphacts_unit_uri
+      - canonical_standard_unit_token
+    fields:
+      - chembl_activity.qudt_units
   bto:
     canonical_prefix: BTO_
     iri_template: http://purl.obolibrary.org/obo/{id}

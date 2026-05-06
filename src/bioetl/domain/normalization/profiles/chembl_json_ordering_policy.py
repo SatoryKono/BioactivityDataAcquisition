@@ -8,7 +8,9 @@ from dataclasses import dataclass
 __all__ = [
     "CHEMBL_JSON_ORDERING_POLICY",
     "ChemblJsonOrderingPolicy",
+    "chembl_hash_config_field_ordering",
     "chembl_json_fields",
+    "chembl_order_sensitive_json_fields",
     "chembl_set_like_json_fields",
 ]
 
@@ -218,6 +220,23 @@ def chembl_set_like_json_fields(pipeline_name: str) -> frozenset[str]:
         for policy in CHEMBL_JSON_ORDERING_POLICY
         if policy.pipeline_name == pipeline_name and policy.is_set_like
     )
+
+
+def chembl_order_sensitive_json_fields(pipeline_name: str) -> frozenset[str]:
+    """Return reviewed order-sensitive JSON fields for one ChEMBL pipeline."""
+    return _fields_for_policy(
+        policy
+        for policy in CHEMBL_JSON_ORDERING_POLICY
+        if policy.pipeline_name == pipeline_name and not policy.is_set_like
+    )
+
+
+def chembl_hash_config_field_ordering(pipeline_name: str) -> dict[str, str]:
+    """Return the reviewed hash-config mirror for ChEMBL JSON ordering."""
+    return {
+        field_name: "order_sensitive_json"
+        for field_name in sorted(chembl_order_sensitive_json_fields(pipeline_name))
+    }
 
 
 def _fields_for_policy(

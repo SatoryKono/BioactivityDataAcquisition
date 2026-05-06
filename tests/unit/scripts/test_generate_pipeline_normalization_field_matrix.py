@@ -106,9 +106,9 @@ def _assert_activity_governance_rows(rows: list[dict[str, str]]) -> None:
     )
 
     activity_standard_units = _row(rows, "chembl_activity", "standard_units")
-    assert activity_standard_units["normalizer"] == "normalize_profile_unit"
+    assert activity_standard_units["normalizer"] == "normalize_activity_standard_units"
     assert activity_standard_units["semantic_category"] == "controlled_vocabulary"
-    assert activity_standard_units["strictness"] == "controlled_unit"
+    assert activity_standard_units["strictness"] == "strict_enum"
     assert activity_standard_units["dq_coverage"] == "enum:error"
     assert activity_standard_units["controlled_vocabulary_source"] == (
         "configs/vocab/chembl_controlled.yaml"
@@ -125,11 +125,11 @@ def _assert_activity_ontology_rows(rows: list[dict[str, str]]) -> None:
     )
 
     activity_qudt_units = _row(rows, "chembl_activity", "qudt_units")
-    assert activity_qudt_units["semantic_category"] == "controlled_vocabulary"
+    assert activity_qudt_units["semantic_category"] == "ontology_reference_identifier"
     assert activity_qudt_units["strictness"] == "controlled_unit"
     assert activity_qudt_units["dq_coverage"] == "pattern:error"
     assert activity_qudt_units["controlled_vocabulary_source"] == (
-        "configs/vocab/chembl_controlled.yaml"
+        "configs/vocab/chembl_ontology.yaml"
     )
 
     bao_format = _row(rows, "chembl_activity", "bao_format")
@@ -167,6 +167,14 @@ def _assert_activity_ontology_rows(rows: list[dict[str, str]]) -> None:
 
 
 def _assert_assay_parameter_rows(rows: list[dict[str, str]]) -> None:
+    confidence_description = _row(rows, "chembl_assay", "confidence_description")
+    assert confidence_description["semantic_category"] == "controlled_vocabulary"
+    assert confidence_description["strictness"] == "strict_enum"
+    assert confidence_description["dq_coverage"] == "enum:error"
+    assert confidence_description["controlled_vocabulary_source"] == (
+        "configs/vocab/chembl_controlled.yaml"
+    )
+
     publication_term_type = _row(rows, "chembl_publication_term", "term_type")
     assert publication_term_type["controlled_vocabulary_source"] == (
         "configs/enums/chembl.yaml"

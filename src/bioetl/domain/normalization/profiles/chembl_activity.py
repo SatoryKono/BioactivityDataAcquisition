@@ -43,6 +43,8 @@ from .profile_normalizers import (
     normalize_profile_chembl_organism_name,
     normalize_profile_enum,
     normalize_profile_operator,
+    normalize_profile_qudt_unit_reference,
+    normalize_profile_standard_unit_enum,
 )
 
 __all__ = [
@@ -80,9 +82,17 @@ _ENUM_FIELDS = {
     "assay_type": ASSAY_TYPES,
 }
 _ONTOLOGY_ID_FIELDS = chembl_ontology_family_fields("uo", entity="activity")
-_UNIT_FIELDS = chembl_controlled_family_fields("units", entity="activity")
+_RAW_UNIT_FIELDS = chembl_controlled_family_fields("raw_units", entity="activity")
 _BAO_FIELDS = chembl_ontology_family_fields("bao", entity="activity")
 _STRICT_JSON_FIELDS = SET_LIKE_FIELDS
+
+
+def normalize_activity_standard_units(value: object) -> object:
+    """Normalize one activity standard-unit field against the strict enum."""
+    return normalize_profile_standard_unit_enum(
+        value,
+        allowed_values=ACTIVITY_STANDARD_UNITS,
+    )
 
 _SPECIAL_RULE_COMPONENTS = {
     "canonical_smiles": (
@@ -99,6 +109,18 @@ _SPECIAL_RULE_COMPONENTS = {
     "assay_type": (
         lambda value: normalize_profile_enum(value, allowed_values=ASSAY_TYPES),
         "Normalize assay_type to uppercase enum value and collapse unknown values to None.",
+    ),
+    "standard_units": (
+        normalize_activity_standard_units,
+        "Normalize standard_units against the published ChEMBL "
+        "standard-unit enum after canonical unit alias collapse; "
+        "unknown values collapse to None.",
+    ),
+    "qudt_units": (
+        normalize_profile_qudt_unit_reference,
+        "Normalize QUDT unit reference tokens and URIs while "
+        "preserving unknown unit lexemes for ontology review and "
+        "companion mapping-status resolution.",
     ),
     "target_organism": (
         normalize_profile_chembl_organism_name,
@@ -192,6 +214,7 @@ CHEMBL_ACTIVITY_PROFILE = build_standard_profile(
     enum_fields={
         "standard_relation": STANDARD_RELATIONS,
         "standard_type": ACTIVITY_STANDARD_TYPES,
+        "standard_units": ACTIVITY_STANDARD_UNITS,
         "assay_type": ASSAY_TYPES,
         "data_validity_comment": DATA_VALIDITY_COMMENTS,
         "bao_endpoint_mapping_status": ONTOLOGY_MAPPING_STATUSES,
@@ -200,7 +223,7 @@ CHEMBL_ACTIVITY_PROFILE = build_standard_profile(
         "qudt_unit_mapping_status": ONTOLOGY_MAPPING_STATUSES,
     },
     special_rules=_SPECIAL_RULE_COMPONENTS,
-    unit_fields=_UNIT_FIELDS,
+    unit_fields=_RAW_UNIT_FIELDS,
     null_fields=NULL_FIELDS,
 )
 

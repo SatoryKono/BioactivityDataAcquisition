@@ -169,8 +169,10 @@ def test_gold_disabled_standard_surface_can_stay_registry_published_but_not_acti
 
 
 @pytest.mark.integration
-def test_specialized_chembl_fixture_surfaces_are_not_active_contracts() -> None:
-    """Resolved specialized ChEMBL fixture surfaces stay registry-published, not active."""
+def test_specialized_chembl_fixture_surfaces_are_active_contracts_when_gold_runs() -> (
+    None
+):
+    """Specialized ChEMBL Gold surfaces must stay active while entity configs publish Gold."""
     registry = FileContractRegistryStore(_REGISTRY_PATH).load()
 
     statuses = {
@@ -179,10 +181,10 @@ def test_specialized_chembl_fixture_surfaces_are_not_active_contracts() -> None:
     }
 
     assert statuses == {
-        "chembl.assay_parameters": "deprecated",
-        "chembl.publication_similarity": "deprecated",
-        "chembl.publication_term": "deprecated",
-        "chembl.subcellular_fraction": "deprecated",
+        "chembl.assay_parameters": "active",
+        "chembl.publication_similarity": "active",
+        "chembl.publication_term": "active",
+        "chembl.subcellular_fraction": "active",
     }
 
 

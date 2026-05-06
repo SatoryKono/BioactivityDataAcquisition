@@ -95,17 +95,18 @@ def test_chembl_activity_qudt_units_has_explicit_unit_normalization_rule() -> No
     standard_units_rule = CHEMBL_ACTIVITY_PROFILE.rule_for("standard_units")
 
     assert qudt_rule is not None
-    assert qudt_rule.normalizer(" uM ") == "µM"
+    assert qudt_rule.normalizer(" uM ") == "uM"
     assert qudt_rule.normalizer("https://qudt.org/vocab/unit/NanoM") == (
         "https://qudt.org/vocab/unit/NanoM"
     )
-    assert "Canonicalize units" in (qudt_rule.notes or "")
+    assert "QUDT unit reference" in (qudt_rule.notes or "")
     assert units_rule is not None
     assert units_rule.normalizer(" μM ") == "µM"
     assert "Canonicalize units" in (units_rule.notes or "")
     assert standard_units_rule is not None
     assert standard_units_rule.normalizer(" uM ") == "µM"
-    assert "Canonicalize units" in (standard_units_rule.notes or "")
+    assert standard_units_rule.normalizer("unknown-unit") is None
+    assert "standard-unit enum" in (standard_units_rule.notes or "")
 
 
 def test_chembl_activity_target_organism_uses_curated_organism_normalizer() -> None:

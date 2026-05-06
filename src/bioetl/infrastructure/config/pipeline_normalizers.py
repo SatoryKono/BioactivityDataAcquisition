@@ -16,6 +16,82 @@ def _project_schema_fields_into_config(
         config["content_hash"] = data_schema["content_hash"]
 
 
+def _is_empty_string_collection(value: object) -> bool:
+    """Return True when a config collection is absent or contains no strings."""
+    if value is None:
+        return True
+    if not isinstance(value, list):
+        return False
+    return not any(str(item).strip() for item in value)
+
+
+def _project_authoritative_hash_policy_into_config(
+    config: JsonDict,
+    *,
+    entity_config: JsonDict,
+    unified_schema: JsonDict | None,
+    unified_contracts: JsonDict | None,
+    unified_hash_policy: JsonDict | None,
+) -> None:
+    """Project root hash_policy into the runtime config and guard legacy shims."""
+    if not unified_hash_policy:
+        return
+
+    provider = str(config.get("provider") or "").strip()
+    entity_type = str(config.get("entity_type") or "").strip()
+    policy_provider = str(unified_hash_policy.get("provider") or "").strip()
+    policy_entity = str(unified_hash_policy.get("entity") or "").strip()
+    if policy_provider and provider and policy_provider != provider:
+        raise ValueError(
+            "hash_policy.provider must match pipeline.provider; "
+            f"got {policy_provider!r} != {provider!r}"
+        )
+    if policy_entity and entity_type and policy_entity != entity_type:
+        raise ValueError(
+            "hash_policy.entity must match pipeline.entity_type; "
+            f"got {policy_entity!r} != {entity_type!r}"
+        )
+
+    schema_content_hash = (
+        unified_schema.get("content_hash") if isinstance(unified_schema, dict) else None
+    )
+    if isinstance(schema_content_hash, dict):
+        if not _is_empty_string_collection(schema_content_hash.get("include")):
+            raise ValueError(
+                "schema.content_hash.include must be empty when root hash_policy is "
+                "present; hash selection is runtime-authoritative only via hash_policy"
+            )
+        if not _is_empty_string_collection(schema_content_hash.get("exclude")):
+            raise ValueError(
+                "schema.content_hash.exclude must be empty when root hash_policy is "
+                "present; hash selection is runtime-authoritative only via hash_policy"
+            )
+
+    if isinstance(unified_contracts, dict):
+        if not _is_empty_string_collection(unified_contracts.get("hash_include")):
+            raise ValueError(
+                "contracts.hash_include must be empty when root hash_policy is "
+                "present; hash selection is runtime-authoritative only via hash_policy"
+            )
+        if not _is_empty_string_collection(unified_contracts.get("hash_exclude")):
+            raise ValueError(
+                "contracts.hash_exclude must be empty when root hash_policy is "
+                "present; hash selection is runtime-authoritative only via hash_policy"
+            )
+
+    nested_policy = unified_hash_policy.get("hash_policy")
+    if not isinstance(nested_policy, dict):
+        raise ValueError("hash_policy.hash_policy must be a mapping")
+
+    config["content_hash_policy"] = {
+        "provider": policy_provider or provider,
+        "entity": policy_entity or entity_type,
+        "contract": unified_hash_policy.get("contract", {}),
+        **nested_policy,
+    }
+    _ = entity_config
+
+
 def _validate_column_groups(
     groups: object,
     schema_source: str,
@@ -88,13 +164,22 @@ def apply_pipeline_schema_normalization(
     entity_config: JsonDict,  # Any: YAML config has heterogeneous values
     config_path: object,
     unified_schema: JsonDict | None = None,  # Any: YAML values are heterogeneous
+    unified_contracts: JsonDict | None = None,  # Any: YAML values are heterogeneous
+    unified_hash_policy: JsonDict | None = None,  # Any: YAML values are heterogeneous
 ) -> None:
     """Validate and project canonical `unified_schema` into pipeline config."""
-    _ = entity_config, config_path
+    _ = config_path
 
     if unified_schema:
         _validate_schema_config(unified_schema, "entities/*/*:schema")
         _project_schema_fields_into_config(config, unified_schema)
+    _project_authoritative_hash_policy_into_config(
+        config,
+        entity_config=entity_config,
+        unified_schema=unified_schema,
+        unified_contracts=unified_contracts,
+        unified_hash_policy=unified_hash_policy,
+    )
 
 
 __all__ = ["apply_pipeline_schema_normalization"]

@@ -148,17 +148,17 @@ tracked_suite_inventory:
       - tests/integration/test_dq_monitor_integration.py
       - tests/integration/test_dq_report_integration.py
       grafana:
+      - tests/integration/test_dashboard_navigation_contract_sync.py
+      - tests/integration/test_dashboard_ux_report_freshness.py
       - tests/integration/test_grafana_config.py
       - tests/integration/test_grafana_dashboard_first_screen_contract.py
       - tests/integration/test_grafana_dashboard_links.py
       - tests/integration/test_grafana_dashboard_metric_semantics.py
       - tests/integration/test_grafana_datasource_provisioning.py
-      - tests/integration/test_grafana_silver_reject_config.py
-      - tests/integration/test_grafana_overview_config.py
-      - tests/integration/test_pipeline_runtime_dashboard.py
       - tests/integration/test_grafana_navigation_matrix.py
-      - tests/integration/test_dashboard_navigation_contract_sync.py
-      - tests/integration/test_dashboard_ux_report_freshness.py
+      - tests/integration/test_grafana_overview_config.py
+      - tests/integration/test_grafana_silver_reject_config.py
+      - tests/integration/test_pipeline_runtime_dashboard.py
       prometheus:
       - tests/integration/test_prometheus_rules_config.py
     composite_config_and_merge:
@@ -169,6 +169,7 @@ tracked_suite_inventory:
     - tests/integration/config/test_chembl_contract_registry_coverage.py
     - tests/integration/config/test_chembl_enum_parity.py
     - tests/integration/config/test_chembl_observed_value_fixtures.py
+    - tests/integration/config/test_chembl_policy_surface_parity.py
     - tests/integration/config/test_contract_registry_active_surface_coverage.py
     - tests/integration/config/test_deprecated_gold_contract_registry_inventory.py
     - tests/integration/config/test_dq_config_loading.py

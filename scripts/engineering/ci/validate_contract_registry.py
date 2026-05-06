@@ -7,12 +7,27 @@ import sys
 from pathlib import Path
 from typing import Any
 
+import yaml
+
 from bioetl.domain.control_plane.contract_registry import (
     ContractRegistry,
     RegistryValidationIssue,
     RegistryValidationSeverity,
 )
 from bioetl.infrastructure.control_plane import FileContractRegistryStore
+
+_ENTITY_CONFIGS_ROOT = Path("configs/entities")
+_STANDARD_CONTRACT_PROVIDERS = frozenset(
+    {
+        "chembl",
+        "crossref",
+        "openalex",
+        "pubchem",
+        "pubmed",
+        "semanticscholar",
+        "uniprot",
+    }
+)
 
 
 def _issue_payload(issue: RegistryValidationIssue) -> dict[str, Any]:
@@ -80,6 +95,80 @@ def _issues_by_severity(
         if issue.severity == RegistryValidationSeverity.WARNING
     ]
     return blocking, warnings
+
+
+def _load_yaml_mapping(path: Path) -> dict[str, Any]:
+    payload = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    if not isinstance(payload, dict):
+        return {}
+    return payload
+
+
+def _gold_runtime_enabled(config_path: Path) -> bool:
+    """Return True when an entity config publishes a live Gold runtime surface."""
+    config = _load_yaml_mapping(config_path)
+    pipeline = config.get("pipeline")
+    if not isinstance(pipeline, dict):
+        return True
+    sink = pipeline.get("sink")
+    if not isinstance(sink, dict):
+        return True
+    gold = sink.get("gold")
+    if not isinstance(gold, dict):
+        return True
+    enabled = gold.get("enabled")
+    return True if enabled is None else bool(enabled)
+
+
+def _active_standard_contract_refs(repo_root: Path) -> dict[str, Path]:
+    """Return active standard contract refs mapped to their entity config path."""
+    entity_configs_root = repo_root / _ENTITY_CONFIGS_ROOT
+    refs: dict[str, Path] = {}
+    for config_path in sorted(entity_configs_root.glob("*/*.yaml")):
+        provider = config_path.parent.name
+        if provider not in _STANDARD_CONTRACT_PROVIDERS:
+            continue
+        if not _gold_runtime_enabled(config_path):
+            continue
+        refs[f"{provider}.{config_path.stem}"] = config_path
+    return refs
+
+
+def _active_gold_surface_issues(
+    repo_root: Path,
+    registry: ContractRegistry,
+) -> list[RegistryValidationIssue]:
+    """Validate that active Gold entity configs point to active registry refs."""
+    issues: list[RegistryValidationIssue] = []
+    for contract_ref, config_path in sorted(_active_standard_contract_refs(repo_root).items()):
+        entry = registry.entries.get(contract_ref)
+        if entry is None:
+            issues.append(
+                RegistryValidationIssue(
+                    message=(
+                        "Active Gold entity config is missing a matching contract "
+                        f"registry entry: {config_path.relative_to(repo_root)}"
+                    ),
+                    severity=RegistryValidationSeverity.BLOCKING,
+                    contract_ref=contract_ref,
+                    field="status",
+                )
+            )
+            continue
+        if entry.status.value == "active":
+            continue
+        issues.append(
+            RegistryValidationIssue(
+                message=(
+                    "Active Gold entity config requires an active registry status, "
+                    f"found {entry.status.value!r}: {config_path.relative_to(repo_root)}"
+                ),
+                severity=RegistryValidationSeverity.BLOCKING,
+                contract_ref=contract_ref,
+                field="status",
+            )
+        )
+    return issues
 
 
 def _print_issue_group(
@@ -171,7 +260,9 @@ def main() -> int:
         )
 
         validation_result = registry.validate_all()
-        _print_validation_issues(list(validation_result.issues))
+        validation_issues = list(validation_result.issues)
+        validation_issues.extend(_active_gold_surface_issues(repo_root, registry))
+        _print_validation_issues(validation_issues)
 
         fs_result = store.validate_filesystem_consistency(registry)
 
@@ -184,7 +275,7 @@ def main() -> int:
 
         return _finalize_validation(
             diagnostics_path=diagnostics_path,
-            validation_issues=list(validation_result.issues),
+            validation_issues=validation_issues,
             filesystem_issues=list(fs_result.issues),
             registry=registry,
         )

@@ -34,35 +34,17 @@ strict_flag_families:
       - chembl_molecule.prodrug
 
 controlled_vocabularies:
-  units:
+  raw_units:
     canonicalizer: normalize_unit
     invalid_value_mode: preserve_unknown_lexeme
-    qudt_iri_template: http://qudt.org/vocab/unit/{id}
-    qudt_ontology_version: 3.2.1
-    qudt_unit_identifiers:
-      nM: NanoMOL-PER-L
-      µM: MicroMOL-PER-L
-      mM: MilliMOL-PER-L
-      pM: PicoMOL-PER-L
-      fM: FemtoMOL-PER-L
-      M: MOL-PER-L
-      '%': PERCENT
-      ug.mL-1: MicroGM-PER-MilliL
-      mg.kg-1: MilliGM-PER-KiloGM
-    qudt_legacy_uri_mappings:
-      http://www.openphacts.org/units/nanomolar: NanoMOL-PER-L
-    companion_fields:
-      iri:
-        - chembl_activity.qudt_unit_iri
-      mapping_status:
-        - chembl_activity.qudt_unit_mapping_status
-      version:
-        - chembl_activity.qudt_ontology_version
     fields:
       - chembl_activity.units
-      - chembl_activity.standard_units
-      - chembl_activity.qudt_units
       - chembl_assay_parameters.units
+  standard_units:
+    canonicalizer: normalize_standard_unit
+    invalid_value_mode: reject_unknown_lexeme
+    fields:
+      - chembl_activity.standard_units
       - chembl_assay_parameters.standard_units
   operators:
     canonicalizer: normalize_operator

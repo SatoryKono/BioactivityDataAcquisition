@@ -43,6 +43,11 @@ def extract_hash_policy(
     identity_exclude = coerce_string_frozenset(
         getattr(identity, "_content_hash_exclude_fields", None)
     )
+    if identity_include or identity_exclude:
+        return identity_include, frozenset(
+            chain(identity_exclude, ("entity_id", "content_hash"))
+        )
+
     contract_include = coerce_string_frozenset(
         getattr(contract_policy, "hash_include", None)
     )

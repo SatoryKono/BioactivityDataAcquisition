@@ -7,6 +7,12 @@ from bioetl.domain.normalization.chembl import (
     normalize_cellosaurus_id,
     normalize_chembl_organism_name,
 )
+from bioetl.domain.normalization.chembl import (
+    normalize_qudt_unit as _normalize_qudt_unit,
+)
+from bioetl.domain.normalization.chembl import (
+    normalize_standard_unit as _normalize_standard_unit,
+)
 from bioetl.domain.normalization.identifiers import normalize_ontology_id
 from bioetl.domain.normalization.profiles._profile_activity_ontology_normalizers import (
     normalize_profile_activity_bao_endpoint_iri,
@@ -30,6 +36,8 @@ from bioetl.domain.normalization.profiles._profile_reference_normalizers import 
     normalize_profile_drugbank_ids,
     normalize_profile_issn_id,
     normalize_profile_issn_ids,
+    normalize_profile_mesh_id,
+    normalize_profile_ncbi_taxonomy_id,
     normalize_profile_openalex_author_ids,
     normalize_profile_openalex_institution_ids,
     normalize_profile_openalex_ror_ids,
@@ -47,6 +55,7 @@ from bioetl.domain.normalization.profiles._profile_reference_normalizers import 
     normalize_profile_semantic_scholar_publication_type_raw,
     normalize_profile_uniprot_accession,
     normalize_profile_uniprot_accessions,
+    normalize_profile_uniprot_accessions_ordered,
     normalize_profile_uniprot_go_references,
     normalize_profile_uniprot_interpro_references,
 )
@@ -124,6 +133,8 @@ __all__ = [
     "normalize_profile_json_string_list_vocabulary_strict",
     "normalize_profile_json_string_strict",
     "normalize_profile_mapping_status",
+    "normalize_profile_mesh_id",
+    "normalize_profile_ncbi_taxonomy_id",
     "normalize_profile_null",
     "normalize_profile_oa_status",
     "normalize_profile_ontology_id",
@@ -143,18 +154,21 @@ __all__ = [
     "normalize_profile_publication_type",
     "normalize_profile_publication_type_raw",
     "normalize_profile_quasi_enum_numeric",
+    "normalize_profile_qudt_unit_reference",
     "normalize_profile_reactome_references",
     "normalize_profile_reviewed_flag_code",
     "normalize_profile_semantic_scholar_id",
     "normalize_profile_semantic_scholar_ids",
     "normalize_profile_semantic_scholar_publication_type_raw",
     "normalize_profile_smiles",
+    "normalize_profile_standard_unit_enum",
     "normalize_profile_target_component_relationships",
     "normalize_profile_target_component_types",
     "normalize_profile_text",
     "normalize_profile_title",
     "normalize_profile_uniprot_accession",
     "normalize_profile_uniprot_accessions",
+    "normalize_profile_uniprot_accessions_ordered",
     "normalize_profile_uniprot_go_references",
     "normalize_profile_uniprot_interpro_references",
     "normalize_profile_unit",
@@ -220,6 +234,27 @@ def normalize_profile_cellosaurus_id(value: object) -> object:
 def normalize_profile_unit(value: object) -> object:
     """Canonicalize unit strings in profile fields."""
     return normalize_unit(value)
+
+
+def normalize_profile_standard_unit_enum(
+    value: object, *, allowed_values: frozenset[str]
+) -> object:
+    """Canonicalize one standard-unit field and fail closed outside the enum."""
+    if value is None or not isinstance(value, str):
+        return None
+    normalized = _normalize_standard_unit(value)
+    if normalized is None:
+        return None
+    return normalized if normalized in allowed_values else None
+
+
+def normalize_profile_qudt_unit_reference(value: object) -> object:
+    """Trim one QUDT unit reference token/URI while preserving unknown lexemes."""
+    if value is None:
+        return None
+    if not isinstance(value, str):
+        return value
+    return _normalize_qudt_unit(value)
 
 
 def normalize_profile_enum(value: object, *, allowed_values: frozenset[str]) -> object:

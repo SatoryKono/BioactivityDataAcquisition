@@ -3,12 +3,12 @@
 from __future__ import annotations
 
 from bioetl.domain.normalization.dates import normalize_partial_date
-from bioetl.domain.normalization.identifiers import (
-    normalize_doi,
-    normalize_pmc_id,
-    normalize_pmid,
-)
 from bioetl.domain.normalization.json import canonicalize_json_string
+from bioetl.domain.normalization.reference_ids import (
+    normalize_doi_reference_id,
+    normalize_pmcid_reference_id,
+    normalize_pmid_reference_id,
+)
 from bioetl.domain.normalization.text import normalize_abstract as _normalize_abstract
 from bioetl.domain.normalization.text import normalize_string
 from bioetl.domain.normalization.text import normalize_title as _normalize_title
@@ -71,38 +71,18 @@ def normalize_profile_date(value: object) -> object:
 
 
 def normalize_profile_doi(value: object) -> object:
-    """Normalize DOI-like profile values when the value is textual."""
-    if not isinstance(value, str):
-        return value
-    return normalize_doi(value)
+    """Normalize DOI-like profile values through the shared reference-ID policy."""
+    return normalize_doi_reference_id(value)
 
 
 def normalize_profile_pmid(value: object) -> object:
-    """Normalize PMID-like profile values with bool protection."""
-    if isinstance(value, bool):
-        return None
-    if isinstance(value, int):
-        return normalize_pmid(value)
-    if not isinstance(value, str):
-        return value
-    return _normalize_profile_pmid_text(value)
-
-
-def _normalize_profile_pmid_text(value: str) -> str | None:
-    """Normalize textual PMID payloads after generic string normalization."""
-    normalized = normalize_string(value)
-    if normalized is None:
-        return None
-    if normalized.lower().startswith("pmid:"):
-        return normalize_pmid(normalized[5:])
-    return normalize_pmid(normalized)
+    """Normalize PMID-like profile values through the shared reference-ID policy."""
+    return normalize_pmid_reference_id(value)
 
 
 def normalize_profile_pmc_id(value: object) -> object:
-    """Normalize PMC identifiers when the value is textual."""
-    if not isinstance(value, str):
-        return value
-    return normalize_pmc_id(value)
+    """Normalize PMC identifiers through the shared reference-ID policy."""
+    return normalize_pmcid_reference_id(value)
 
 
 def normalize_profile_smiles(value: object, *, is_canonical: bool) -> str | None:

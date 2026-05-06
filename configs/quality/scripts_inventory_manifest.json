@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-05-06T09:57:55.958178+00:00",
+  "generated_at": "2026-05-06T15:07:37.111584+00:00",
   "summary": {
     "total_scripts": 353,
     "status_counts": {
@@ -4801,7 +4801,7 @@
         },
         {
           "path": "tests/unit/scripts/test_generate_pipeline_normalization_field_matrix.py",
-          "line": 286,
+          "line": 294,
           "source_group": "tests",
           "text": "\"scripts/docs/generate_pipeline_normalization_field_matrix.py\""
         }

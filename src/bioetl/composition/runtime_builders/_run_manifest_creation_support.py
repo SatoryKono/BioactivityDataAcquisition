@@ -9,11 +9,11 @@ import bioetl.composition.runtime_builders._run_manifest_support as _manifest_su
 from bioetl.application.services.control_plane.run_ledger_service import (
     RunLedgerService,
 )
-from bioetl.composition.runtime_builders._run_manifest_attr_support import (
-    read_attr as _read_attr,
-)
 from bioetl.application.services.control_plane.run_manifest_service import (
     RunManifestCreateSpec,
+)
+from bioetl.composition.runtime_builders._run_manifest_attr_support import (
+    read_attr as _read_attr,
 )
 from bioetl.composition.runtime_builders._run_manifest_builder_policy import (
     resolve_code_revision_for_manifest,

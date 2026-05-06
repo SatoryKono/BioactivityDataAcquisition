@@ -704,7 +704,33 @@ def test_profile_matrix_distinguishes_provider_universe_from_project_policy_scop
 
     assert assay_type_row["policy_scope"] == "project_subset_of_provider_universe"
     assert publication_term_type_row["policy_scope"] == "provider_full_universe"
-    assert confidence_description_row["policy_scope"] == "provider_full_universe"
+    assert confidence_description_row["policy_scope"] == "not_applicable"
+    assert confidence_description_row["strictness"] == "strict_enum"
+
+
+def test_chembl_assay_confidence_description_fails_closed_on_unknown_lexemes() -> None:
+    """Controlled confidence-description vocabulary must reject unknown provider lexemes."""
+    processor = RecordNormalizationProcessor(
+        provider="chembl",
+        entity_type="assay",
+    )
+
+    normalized = processor.normalize_business_data(
+        {
+            "assay_id": "CHEMBL1",
+            "description": "Example assay",
+            "assay_type": "B",
+            "assay_type_description": "Binding",
+            "target_id": "CHEMBL2",
+            "relationship_type": "D",
+            "confidence_score": 9,
+            "publication_id": "CHEMBL3",
+            "bao_format": "BAO_0000218",
+            "confidence_description": "mystery confidence",
+        }
+    )
+
+    assert normalized["confidence_description"] is None
 
 
 def test_chembl_publication_identifier_sidecars_stay_aligned_with_canonical_fields() -> (
@@ -843,7 +869,7 @@ def test_chembl_activity_business_and_set_like_fields_follow_profile_family_cont
     )
 
 
-def test_chembl_activity_standard_units_uses_the_same_unit_family_as_units() -> None:
+def test_chembl_activity_standard_units_fail_closed_while_raw_units_remain_reviewable() -> None:
     processor = RecordNormalizationProcessor(provider="chembl", entity_type="activity")
 
     standard_units_rule = CHEMBL_ACTIVITY_PROFILE.rule_for("standard_units")
@@ -852,11 +878,19 @@ def test_chembl_activity_standard_units_uses_the_same_unit_family_as_units() -> 
     assert standard_units_rule is not None
     assert units_rule is not None
     assert standard_units_rule.normalizer(" uM ") == "µM"
+    assert standard_units_rule.normalizer("mystery-unit") is None
     assert units_rule.normalizer(" uM ") == "µM"
+    assert units_rule.normalizer("mystery-unit") == "mystery-unit"
 
     standard_units_row = _matrix_row("chembl_activity", "standard_units")
-    assert standard_units_row["normalizer"] == "normalize_profile_unit"
-    assert standard_units_row["strictness"] == "controlled_unit"
+    assert standard_units_row["normalizer"] == "normalize_activity_standard_units"
+    assert standard_units_row["strictness"] == "strict_enum"
+
+    normalized = processor.normalize_business_data(
+        {"standard_units": " mystery-unit ", "units": " mystery-unit "}
+    )
+    assert normalized["standard_units"] is None
+    assert normalized["units"] == "mystery-unit"
 
     normalized = processor.normalize_business_data({"standard_units": " uM "})
     assert normalized["standard_units"] == "µM"

@@ -14,6 +14,7 @@ from bioetl.infrastructure.schemas.pipeline_config_common import (
     CircuitBreakerYamlConfig,
 )
 from bioetl.infrastructure.schemas.pipeline_config_common_schemas import (
+    AuthoritativeContentHashPolicyConfig,
     ContentHashConfig,
     FilterColumnSchema,
     GoldColumnFilterConfig,
@@ -44,6 +45,7 @@ from bioetl.infrastructure.schemas.pipeline_config_provider import (
 
 __all__ = [
     "ApiConfig",
+    "AuthoritativeContentHashPolicyConfig",
     "CircuitBreakerYamlConfig",
     "ClientSourceConfig",
     "ConditionalValidationConfig",
@@ -218,6 +220,13 @@ class PipelineYamlConfig(BaseModel):
     content_hash: ContentHashConfig = Field(
         default_factory=ContentHashConfig,
         description="Content-hash include/exclude rules loaded from schema config.",
+    )
+    content_hash_policy: AuthoritativeContentHashPolicyConfig | None = Field(
+        default=None,
+        description=(
+            "Single runtime-authoritative content-hash policy loaded from the "
+            "entity root hash_policy section."
+        ),
     )
     extraction_params: dict[str, str | int | bool] = Field(
         default_factory=dict,

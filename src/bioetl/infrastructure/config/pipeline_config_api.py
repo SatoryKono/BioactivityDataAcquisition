@@ -89,6 +89,8 @@ def read_pipeline_config_payload(
     unified_raw = _load_unified_entity_raw(config_path)
     unified_pipeline = _get_unified_section(unified_raw, "pipeline")
     unified_schema = _get_unified_section(unified_raw, "schema")
+    unified_contracts = _get_unified_section(unified_raw, "contracts")
+    unified_hash_policy = _get_unified_section(unified_raw, "hash_policy")
 
     if not unified_pipeline:
         raise ValueError(
@@ -104,6 +106,8 @@ def read_pipeline_config_payload(
         entity_config=unified_pipeline,
         config_path=config_path,
         unified_schema=unified_schema,
+        unified_contracts=unified_contracts,
+        unified_hash_policy=unified_hash_policy,
     )
 
 

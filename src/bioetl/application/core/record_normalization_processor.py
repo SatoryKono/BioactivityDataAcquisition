@@ -65,6 +65,7 @@ class RecordNormalizationProcessor(RecordNormalizationHashSupportMixin):
     profile: _NormalizationProfileLike | None = None
     rule_set: NormalizationRulesPolicy = field(default_factory=NormalizationRulesPolicy)
     allow_compatibility_fallback: bool = False
+    content_hash_policy_authoritative: bool = False
     content_hash_include_fields: frozenset[str] = frozenset()
     content_hash_exclude_fields: frozenset[str] = frozenset()
     content_hash_policy_by_version: ContentHashPolicyByVersion | None = None

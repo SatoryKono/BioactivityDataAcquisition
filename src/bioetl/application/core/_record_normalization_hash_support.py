@@ -28,6 +28,7 @@ class RecordNormalizationHashSupportMixin:
     """Own rollout-aware content-hash policy resolution for normalized records."""
 
     content_hash_policy_by_version: ContentHashPolicyByVersion | None
+    content_hash_policy_authoritative: bool
     content_hash_include_fields: frozenset[str]
     content_hash_exclude_fields: frozenset[str]
     profile: _NormalizationProfileLike | None
@@ -80,6 +81,18 @@ class RecordNormalizationHashSupportMixin:
             return frozenset(), frozenset()
         return self.profile.hash_included_fields, self.profile.hash_excluded_fields
 
+    def _uses_authoritative_config_hash_policy(
+        self,
+        *,
+        policy: ContentHashVersionPolicy | None,
+    ) -> bool:
+        return bool(
+            self.content_hash_policy_authoritative
+            or self.content_hash_include_fields
+            or self.content_hash_exclude_fields
+            or (policy is not None and (policy.include_fields or policy.exclude_fields))
+        )
+
     def _select_hash_policy(
         self,
         *,
@@ -103,8 +116,10 @@ class RecordNormalizationHashSupportMixin:
     ) -> set[str] | None:
         if policy is not None and policy.include_fields:
             include_source = policy.include_fields
+        elif self._uses_authoritative_config_hash_policy(policy=policy):
+            include_source = self.content_hash_include_fields
         else:
-            include_source = profile_include or self.content_hash_include_fields
+            include_source = profile_include
         self._validate_hash_policy_fields(
             include_source,
             policy_kind="include_fields",
@@ -117,12 +132,12 @@ class RecordNormalizationHashSupportMixin:
         profile_exclude: frozenset[str],
         policy: ContentHashVersionPolicy | None,
     ) -> set[str]:
-        exclude_source = (
-            set(self.content_hash_exclude_fields)
-            | set(profile_exclude)
-            | (set(policy.exclude_fields) if policy is not None else set())
-            | {"entity_id", "content_hash", "_content_hashes_by_version"}
+        exclude_source = set(self.content_hash_exclude_fields) | (
+            set(policy.exclude_fields) if policy is not None else set()
         )
+        if not self._uses_authoritative_config_hash_policy(policy=policy):
+            exclude_source |= set(profile_exclude)
+        exclude_source |= {"entity_id", "content_hash", "_content_hashes_by_version"}
         self._validate_hash_policy_fields(
             exclude_source,
             policy_kind="exclude_fields",
