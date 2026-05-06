@@ -147,7 +147,9 @@ def _load_ledger_entries(
     )
 
 
-def _load_lineage_fragments(*, data_dir: Path, run_id: RunID) -> list[dict[str, object]]:
+def _load_lineage_fragments(
+    *, data_dir: Path, run_id: RunID
+) -> list[dict[str, object]]:
     lineage_root = data_dir / "output" / "control" / "lineage"
     lineage_index = (
         lineage_root

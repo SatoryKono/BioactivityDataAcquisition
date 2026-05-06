@@ -55,6 +55,7 @@ def test_mismatch_diagnostics_include_breaking_severity(
     assert "severity=breaking" in message
     assert "paths_checked=1" in message
     assert "mismatched_paths=1" in message
+    assert "severity_counts=breaking=1" in message
     assert "status: expected 'str', got 'int'" in message
     assert "remediation=update adapter/schema/config/docs" in message
 
@@ -90,6 +91,7 @@ def test_path_resolution_diagnostics_include_breaking_severity_and_remediation(
     assert "demo.probe: provider contract snapshot drift detected" in message
     assert "entity=unknown" in message
     assert "severity=breaking" in message
+    assert "severity_counts=breaking=1" in message
     assert "message.items: expected 'list', got None" in message
     assert "missing key 'items'" in message
     assert "remediation=update adapter/schema/config/docs" in message

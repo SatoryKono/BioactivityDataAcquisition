@@ -91,14 +91,26 @@ def assert_provider_probe_matches_snapshot(
     )
     difference_count = cast(int, report["difference_count"])
     if difference_count:
+        differences = sorted(
+            cast(list[dict[str, Any]], report["differences"]),
+            key=lambda difference: (
+                -_SEVERITY_RANK.get(cast(str, difference["severity"]), -1),
+                cast(str, difference["path"]),
+            ),
+        )
+        severity_counts = _summarize_difference_severities(differences)
         lines = [
             f"{provider}.{probe}: provider contract snapshot drift detected",
             f"entity={report['entity']}",
             f"severity={report['severity']}",
             f"paths_checked={report['paths_checked']}",
             f"mismatched_paths={difference_count}",
+            "severity_counts="
+            + ", ".join(
+                f"{severity}={count}" for severity, count in severity_counts.items()
+            ),
         ]
-        for difference in cast(list[dict[str, Any]], report["differences"]):
+        for difference in differences:
             path = cast(str, difference["path"])
             expected_type = cast(str | None, difference["expected_type"])
             actual_type = cast(str | None, difference["actual_type"])
@@ -362,3 +374,17 @@ def _max_severity(severities: list[str]) -> str:
     if not severities:
         return _BENIGN_SEVERITY
     return max(severities, key=lambda value: _SEVERITY_RANK.get(value, -1))
+
+
+def _summarize_difference_severities(
+    differences: list[dict[str, Any]],
+) -> dict[str, int]:
+    counts = {
+        _BREAKING_SEVERITY: 0,
+        _WARNING_SEVERITY: 0,
+        _BENIGN_SEVERITY: 0,
+    }
+    for difference in differences:
+        severity = cast(str, difference["severity"])
+        counts[severity] = counts.get(severity, 0) + 1
+    return {key: value for key, value in counts.items() if value > 0}

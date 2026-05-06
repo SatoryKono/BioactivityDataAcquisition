@@ -320,6 +320,7 @@ async def test_tracked_fixture_strict_replay_uses_explicit_data_dir_for_control_
     get_settings.cache_clear()
     get_pipeline_config.cache_clear()
 
+
 @pytest.mark.integration
 @pytest.mark.no_api
 @pytest.mark.asyncio

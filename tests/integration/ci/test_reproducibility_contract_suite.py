@@ -829,7 +829,9 @@ async def test_reproducibility_contract_forensic_grade_artifact_publication_reco
     assert {entry.stage for entry in artifact_entries} == {"bronze", "silver", "gold"}
     assert all(entry.manifest_id == manifest.manifest_id for entry in artifact_entries)
     assert all(entry.run_id == run_id for entry in artifact_entries)
-    assert all(entry.dataset_ref or entry.lineage_fragment_id for entry in artifact_entries)
+    assert all(
+        entry.dataset_ref or entry.lineage_fragment_id for entry in artifact_entries
+    )
     assert all(
         isinstance(entry.details, dict)
         and entry.details.get("artifact_path")
@@ -1278,14 +1280,18 @@ def test_reproducibility_contract_forensic_diff_exposes_byte_mismatch_inside_sem
         )
     )
 
-    payload = ForensicRunDiffService(
-        manifest_port=manifest_store,
-        ledger_port=ledger_store,
-        artifact_byte_comparison_port=FileArtifactByteComparisonAdapter(),
-    ).compare(
-        left_manifest.manifest_id,
-        right_manifest.manifest_id,
-    ).to_dict()
+    payload = (
+        ForensicRunDiffService(
+            manifest_port=manifest_store,
+            ledger_port=ledger_store,
+            artifact_byte_comparison_port=FileArtifactByteComparisonAdapter(),
+        )
+        .compare(
+            left_manifest.manifest_id,
+            right_manifest.manifest_id,
+        )
+        .to_dict()
+    )
 
     assert payload["semantic_equivalent"] is True
     assert payload["occurrence_only"] is True

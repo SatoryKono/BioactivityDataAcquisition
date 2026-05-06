@@ -3,24 +3,31 @@
 from __future__ import annotations
 
 import tempfile
+from dataclasses import fields
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
+from typing import cast
 from uuid import uuid4
 
 import pytest
 
 from bioetl.application.services.lineage.metadata_assemblers import (
     GoldMetadataService,
+    PipelineMetadataBuilderProtocol,
+    RuntimeMetadataBuilderProtocol,
     SilverMetadataService,
 )
 from bioetl.domain.medallion import GoldWriteMode, SilverWriteMode
 from bioetl.domain.models.metadata import (
+    CompositeOutputExt,
     EnvironmentMetadata,
     PipelineMetadata,
     RuntimeMetadata,
+    RunTypeEnum,
 )
 from bioetl.domain.ports import GoldMetadataInput, SilverMetadataInput, SilverRef
 from bioetl.domain.types import BatchID, RunID, RunType, ScdConfig
+from bioetl.domain.types.dq_contracts import DQRuleProvenance
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.domain.value_objects.run_context import RunContext
 
@@ -55,10 +62,12 @@ def _make_environment() -> EnvironmentMetadata:
     )
 
 
-def _make_runtime_factory(run_context: RunContext):
+def _make_runtime_builder(
+    run_context: RunContext,
+) -> tuple[RuntimeMetadataBuilderProtocol, list[dict[str, object | None]]]:
     calls: list[dict[str, object | None]] = []
 
-    def _factory(
+    def _builder(
         *,
         started_at: datetime | None = None,
         completed_at: datetime | None = None,
@@ -73,17 +82,17 @@ def _make_runtime_factory(run_context: RunContext):
         )
         return RuntimeMetadata(
             run_id=str(run_context.run_id),
-            run_type=run_context.run_type.value,
+            run_type=RunTypeEnum(run_context.run_type.value),
             started_at_utc=started_at or run_context.started_at,
             completed_at_utc=completed_at,
             duration_seconds=duration_seconds,
         )
 
-    return _factory, calls
+    return _builder, calls
 
 
-def _make_pipeline_factory(run_context: RunContext):
-    def _factory() -> PipelineMetadata:
+def _make_pipeline_builder(run_context: RunContext) -> PipelineMetadataBuilderProtocol:
+    def _builder() -> PipelineMetadata:
         return PipelineMetadata(
             name=run_context.pipeline_name,
             provider=run_context.provider,
@@ -93,7 +102,7 @@ def _make_pipeline_factory(run_context: RunContext):
             config_hash=run_context.config_hash,
         )
 
-    return _factory
+    return _builder
 
 
 def _make_bronze_ref(relative_path: str) -> BronzeWriteResult:
@@ -110,13 +119,20 @@ def _make_bronze_ref(relative_path: str) -> BronzeWriteResult:
 
 @pytest.mark.unit
 class TestSilverMetadataService:
+    def test_constructor_dependencies_use_builder_field_names(self) -> None:
+        field_names = {field.name for field in fields(SilverMetadataService)}
+
+        assert "runtime_metadata_builder" in field_names
+        assert "pipeline_metadata_builder" in field_names
+        assert all(not field_name.endswith("_factory") for field_name in field_names)
+
     def test_assemble_rejects_empty_payload_without_total_records(self) -> None:
         run_context = _make_run_context()
-        runtime_factory, _calls = _make_runtime_factory(run_context)
+        runtime_builder, _calls = _make_runtime_builder(run_context)
         service = SilverMetadataService(
             run_context=run_context,
-            runtime_metadata_factory=runtime_factory,
-            pipeline_metadata_factory=_make_pipeline_factory(run_context),
+            runtime_metadata_builder=runtime_builder,
+            pipeline_metadata_builder=_make_pipeline_builder(run_context),
             environment_metadata=_make_environment(),
         )
         input_data = SilverMetadataInput(
@@ -132,11 +148,11 @@ class TestSilverMetadataService:
 
     def test_assemble_builds_complete_metadata(self) -> None:
         run_context = _make_run_context()
-        runtime_factory, calls = _make_runtime_factory(run_context)
+        runtime_builder, calls = _make_runtime_builder(run_context)
         service = SilverMetadataService(
             run_context=run_context,
-            runtime_metadata_factory=runtime_factory,
-            pipeline_metadata_factory=_make_pipeline_factory(run_context),
+            runtime_metadata_builder=runtime_builder,
+            pipeline_metadata_builder=_make_pipeline_builder(run_context),
             environment_metadata=_make_environment(),
         )
         started_at = datetime(2026, 3, 19, 10, 5, tzinfo=UTC)
@@ -155,7 +171,10 @@ class TestSilverMetadataService:
             version_before=3,
             version_after=4,
             dq_report_path=SILVER_DQ_REPORT_PATH,
-            dq_rule_provenance=[{"rule_id": "DQ-1", "config_path": "configs/x.yaml"}],
+            dq_rule_provenance=cast(
+                "list[DQRuleProvenance]",
+                [{"rule_id": "DQ-1", "config_path": "configs/x.yaml"}],
+            ),
             governance=None,
             partition_by=["activity_id"],
             started_at=started_at,
@@ -189,13 +208,20 @@ class TestSilverMetadataService:
 
 @pytest.mark.unit
 class TestGoldMetadataService:
+    def test_constructor_dependencies_use_builder_field_names(self) -> None:
+        field_names = {field.name for field in fields(GoldMetadataService)}
+
+        assert "runtime_metadata_builder" in field_names
+        assert "pipeline_metadata_builder" in field_names
+        assert all(not field_name.endswith("_factory") for field_name in field_names)
+
     def test_assemble_rejects_empty_payload_without_total_records(self) -> None:
         run_context = _make_run_context()
-        runtime_factory, _calls = _make_runtime_factory(run_context)
+        runtime_builder, _calls = _make_runtime_builder(run_context)
         service = GoldMetadataService(
             run_context=run_context,
-            runtime_metadata_factory=runtime_factory,
-            pipeline_metadata_factory=_make_pipeline_factory(run_context),
+            runtime_metadata_builder=runtime_builder,
+            pipeline_metadata_builder=_make_pipeline_builder(run_context),
             environment_metadata=_make_environment(),
         )
         input_data = GoldMetadataInput(
@@ -211,11 +237,11 @@ class TestGoldMetadataService:
 
     def test_assemble_builds_composite_output_and_scd_metadata(self) -> None:
         run_context = _make_run_context()
-        runtime_factory, calls = _make_runtime_factory(run_context)
+        runtime_builder, calls = _make_runtime_builder(run_context)
         service = GoldMetadataService(
             run_context=run_context,
-            runtime_metadata_factory=runtime_factory,
-            pipeline_metadata_factory=_make_pipeline_factory(run_context),
+            runtime_metadata_builder=runtime_builder,
+            pipeline_metadata_builder=_make_pipeline_builder(run_context),
             environment_metadata=_make_environment(),
         )
         completed_at = datetime(2026, 3, 19, 11, 0, tzinfo=UTC)
@@ -259,6 +285,7 @@ class TestGoldMetadataService:
         assert result.output.record_count == 1
         assert result.output.total_bytes == 512
         assert result.output_ext.partition_count == 2
+        assert isinstance(result.output_ext, CompositeOutputExt)
         assert result.output_ext.composite_run_id == "cmp-001"
         assert result.output_ext.source_providers == ["chembl", "pubchem"]
         assert result.output_ext.schema_validation.status == "passed"

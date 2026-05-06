@@ -6,8 +6,8 @@ from datetime import datetime
 from typing import TYPE_CHECKING
 
 from bioetl.application.services.lineage.metadata_assembler_support import (
-    PipelineMetadataProtocol,
-    RuntimeMetadataProtocol,
+    PipelineMetadataBuilderProtocol,
+    RuntimeMetadataBuilderProtocol,
 )
 from bioetl.application.services.lineage.metadata_assembler_support import (
     augment_dq_summary_with_composite_cv as _augment_dq_summary_with_composite_cv_support,
@@ -337,8 +337,8 @@ def _build_gold_output(
 
 
 __all__ = [
-    "PipelineMetadataProtocol",
-    "RuntimeMetadataProtocol",
+    "PipelineMetadataBuilderProtocol",
+    "RuntimeMetadataBuilderProtocol",
     "_build_dataset_content_hash",
     "_build_gold_dq_summary",
     "_build_gold_lineage",

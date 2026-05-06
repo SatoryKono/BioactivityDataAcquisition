@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 
-from bioetl.application.services.cli_run_orchestration_models import (
-    RunExecutionContext,
+import bioetl.application.services.cli_run_orchestration_models as legacy_models
+from bioetl.application.services.execution.cli_run_orchestration_models import (
     RunExecutionRequest,
     RunPreparationResult,
     StartOffsetValidationResult,
@@ -25,13 +27,19 @@ class TestStartOffsetValidationResult:
 
 
 @pytest.mark.unit
-class TestRunExecutionContext:
-    """Direct tests for prepared execution context semantics."""
+class TestRunExecutionRequest:
+    """Direct tests for prepared execution request semantics."""
 
-    def test_request_alias_points_to_execution_context(self) -> None:
-        assert RunExecutionRequest is RunExecutionContext
+    def test_legacy_execution_context_alias_warns_and_resolves(self) -> None:
+        with pytest.warns(
+            DeprecationWarning,
+            match="RunExecutionContext is deprecated; use RunExecutionRequest instead",
+        ):
+            legacy_alias = legacy_models.RunExecutionContext
 
-    def test_execution_context_preserves_options_and_health_config(self) -> None:
+        assert legacy_alias is RunExecutionRequest
+
+    def test_execution_request_preserves_options_and_health_config(self) -> None:
         options = RunOptions(run_type="backfill", dry_run=True)
         request = RunExecutionRequest(
             pipeline="chembl_activity",
@@ -44,6 +52,21 @@ class TestRunExecutionContext:
         assert request.options is options
         assert request.health_server is False
         assert request.health_port == 9090
+
+    def test_first_party_src_does_not_import_deprecated_execution_context(self) -> None:
+        root = Path(__file__).resolve().parents[4] / "src" / "bioetl"
+        compatibility_facade = (
+            root / "application" / "services" / "cli_run_orchestration_models.py"
+        )
+        offenders: list[str] = []
+        for path in root.rglob("*.py"):
+            if path == compatibility_facade:
+                continue
+            text = path.read_text(encoding="utf-8")
+            if "RunExecutionContext" in text:
+                offenders.append(str(path.relative_to(root.parent.parent)))
+
+        assert offenders == []
 
 
 @pytest.mark.unit

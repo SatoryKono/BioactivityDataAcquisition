@@ -40,6 +40,9 @@ on:
 
 env:
   PYTHON_VERSION: "3.12"
+  VCR_RECORD_MODE: "none"
+  BIOETL_LIVE_API_TESTS: "false"
+  BIOETL_NETWORK_TESTS: "false"
 
 jobs:
   replay-gate:

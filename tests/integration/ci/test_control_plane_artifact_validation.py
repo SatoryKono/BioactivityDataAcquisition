@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pytest
 
+import scripts.engineering.ci.validate_control_plane_artifacts as validator
 from scripts.engineering.ci.validate_control_plane_artifacts import (
     validate_control_plane_artifacts,
 )
@@ -18,6 +19,24 @@ pytestmark = pytest.mark.integration
 def test_committed_control_plane_artifacts_match_published_contracts() -> None:
     """Committed examples must not drift from current control-plane contracts."""
     violations = validate_control_plane_artifacts(ROOT)
+    assert violations == []
+
+
+def test_control_plane_validator_ignores_untracked_runtime_outputs(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Git checkouts validate tracked examples, not local runtime output files."""
+    manifest_dir = tmp_path / "data/output/control/run_manifest"
+    manifest_dir.mkdir(parents=True)
+    (manifest_dir / "local-runtime-output.json").write_text(
+        "not-json", encoding="utf-8"
+    )
+
+    monkeypatch.setattr(validator, "_git_tracked_files", lambda *_args: [])
+
+    violations = validate_control_plane_artifacts(tmp_path)
+
     assert violations == []
 
 

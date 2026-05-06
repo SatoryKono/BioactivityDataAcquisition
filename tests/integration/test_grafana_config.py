@@ -360,12 +360,8 @@ def test_variable_query_sources(dashboard_path):
         assert isinstance(step_kind_query, dict)
         assert "bioetl_workflow_runs_total" in workflow_query.get("query", "")
         assert "bioetl_workflow_runs_total" in status_query.get("query", "")
-        assert "bioetl_workflow_step_events_total" in step_status_query.get(
-            "query", ""
-        )
-        assert "bioetl_workflow_step_events_total" in step_kind_query.get(
-            "query", ""
-        )
+        assert "bioetl_workflow_step_events_total" in step_status_query.get("query", "")
+        assert "bioetl_workflow_step_events_total" in step_kind_query.get("query", "")
         return
 
     if dashboard_path.name == "bioetl-provider-health-v2.json":

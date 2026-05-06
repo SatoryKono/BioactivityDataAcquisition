@@ -447,7 +447,7 @@ def test_build_pipeline_runner_persists_manifest_before_factory_create(
     tmp_path: Path,
 ) -> None:
     """Builder should persist a manifest and pass manifest_id to the factory."""
-    _, fake_registry = _build_factory_registry()
+    fake_factory, fake_registry = _build_factory_registry()
     context = _build_context(limit=25, query="assay_type=B")
 
     result = _call_build_pipeline_runner(
@@ -1198,7 +1198,7 @@ def test_build_pipeline_runner_requires_explicit_data_dir_for_strict_profiles() 
     """Strict reproducibility profiles must not derive control-plane roots from fallback."""
     fake_factory, fake_registry = _build_factory_registry()
 
-    with pytest.raises(RuntimeError, match="explicit settings.data_dir"):
+    with pytest.raises(RuntimeError, match=r"explicit settings\.data_dir"):
         _call_build_pipeline_runner(
             _build_context(limit=25, exact_replay=True),
             registry=fake_registry,
