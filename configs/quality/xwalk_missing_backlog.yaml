@@ -219,7 +219,6 @@ rules:
           - pub_month
           - publication_status
           - publication_type
-          - publication_type_list
           - publication_types
           - publisher_id
           - subject_keywords

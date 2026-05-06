@@ -161,10 +161,6 @@ class PubMedPublicationSchema(_PublicationBaseSchema):
         """Validate publication status values."""
         return cast(Series[bool], series.isna() | series.isin(PUBLICATION_STATUSES))
 
-    publication_type_list: Series[str] = pa.Field(
-        nullable=True, description="JSON array of publication types"
-    )
-
     # === Dates ===
     date_completed: Series[datetime] = pa.Field(
         nullable=True, description="MEDLINE processing completion date"

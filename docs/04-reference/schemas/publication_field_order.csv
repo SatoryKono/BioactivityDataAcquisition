@@ -161,7 +161,6 @@ order,ID,Full,DB,category,field
 160,162,openalex.publication.publication_type,openalex,publication,publication_type
 161,164,pubmed.publication.publication_type,pubmed,publication,publication_type
 162,167,semanticscholar.publication.publication_type,semanticscholar,publication,publication_type
-163,165,pubmed.publication.publication_type_list,pubmed,publication,publication_type_list
 164,166,pubmed.publication.publication_types,pubmed,publication,publication_types
 165,168,semanticscholar.publication.publication_types,semanticscholar,publication,publication_types
 166,127,crossref.publication.references,crossref,publication,references

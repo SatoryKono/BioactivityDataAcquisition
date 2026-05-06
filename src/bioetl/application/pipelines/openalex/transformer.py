@@ -23,6 +23,7 @@ from typing import TYPE_CHECKING
 
 from bioetl.application.core.base_transformer import TransformerDependencyContext
 from bioetl.application.pipelines.common import BasePublicationTransformer
+from bioetl.application.pipelines.common.publication_issn import build_issn_fields
 from bioetl.application.pipelines.openalex.extractors import (
     extract_affiliations,
     extract_author_ids,
@@ -237,6 +238,10 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
         """Extract publication metadata and quality indicator fields."""
         external_ids = extract_external_ids(rec.get("ids", {}))
         journal_info = extract_journal_info(rec.get("primary_location", {}))
+        issn_fields = build_issn_fields(
+            journal_info.get("issn"),
+            serialize_json_list=self.serialize_json_list,
+        )
         biblio_info = extract_biblio_info(rec.get("biblio", {}))
         oa_info = extract_open_access_info(rec.get("open_access", {}))
         raw_publication_type = rec.get("type")
@@ -251,7 +256,7 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             "pmc_id": None,
             "mag_id": external_ids.get("mag_id"),
             "journal": journal_info.get("journal"),
-            "issn": journal_info.get("issn"),
+            **issn_fields,
             "publisher": journal_info.get("publisher"),
             "publication_year": year,
             "publication_date": self._data_normalizer.normalize_partial_date(

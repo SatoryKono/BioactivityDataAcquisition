@@ -125,6 +125,12 @@ class LayerAwareNamingPolicy:
     family_freeze_rules: tuple[FamilyFreezeRule, ...]
 
 
+def _combine_subprocess_output(result: subprocess.CompletedProcess[str]) -> str:
+    stdout = result.stdout or ""
+    stderr = result.stderr or ""
+    return (stdout + "\n" + stderr).strip()
+
+
 def _run_suffix_policy_check(repo_root: Path) -> list[Violation]:
     script = repo_root / CANONICAL_NAMING_AUDIT_PATH
     docs_skip_path = repo_root / "docs" / "__naming_gate_skip__"
@@ -150,11 +156,13 @@ def _run_suffix_policy_check(repo_root: Path) -> list[Violation]:
         ],
         capture_output=True,
         text=True,
+        encoding="utf-8",
+        errors="replace",
         cwd=repo_root,
     )
     if result.returncode == 0:
         return []
-    output = (result.stdout + "\n" + result.stderr).strip()
+    output = _combine_subprocess_output(result)
     preview = "\n".join(output.splitlines()[:30])
     return [
         Violation(

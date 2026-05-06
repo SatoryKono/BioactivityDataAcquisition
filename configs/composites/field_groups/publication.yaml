@@ -147,10 +147,14 @@ groups:
           - crossref.publication.issn
           - openalex.publication.issn
           - pubmed.publication.issn
+          - semanticscholar.publication.issn
 
       - base_name: issn_list
         columns:
           - crossref.publication.issn_list
+          - openalex.publication.issn_list
+          - pubmed.publication.issn_list
+          - semanticscholar.publication.issn_list
 
       - base_name: issn_electronic
         columns:
@@ -544,10 +548,6 @@ groups:
           - openalex.publication.publication_class
           - pubmed.publication.publication_class
           - semanticscholar.publication.publication_class
-
-      - base_name: publication_type_list
-        columns:
-          - pubmed.publication.publication_type_list
 
       - base_name: publication_types
         columns:

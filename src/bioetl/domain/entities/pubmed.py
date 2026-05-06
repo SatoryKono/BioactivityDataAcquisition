@@ -220,7 +220,6 @@ class PubMedPublicationEntity(PublicationEntityBase):
 
     # Publication metadata
     publication_status: str | None = None  # ppublish/epublish/aheadofprint
-    publication_type_list: str | None = None  # JSON array of pub types
     citation_subset: str | None = None  # Citation subset codes (e.g., 'AIM')
 
     # Enhanced affiliation data (for institutional analysis)

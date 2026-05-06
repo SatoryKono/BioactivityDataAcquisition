@@ -58,6 +58,8 @@ schema:
   - name: journal
     fields:
     - journal
+    - issn
+    - issn_list
   - name: year
     fields:
     - publication_year

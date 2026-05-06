@@ -10,6 +10,7 @@ from bioetl.domain.normalization.profiles._standard_profile_builder import (
 )
 from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_issn_id,
+    normalize_profile_issn_ids,
     normalize_profile_oa_status,
     normalize_profile_openalex_author_ids,
     normalize_profile_openalex_institution_ids,
@@ -78,6 +79,7 @@ _SET_LIKE_FIELDS = frozenset(
         "grants_canonical_json",
         "institution_country_codes",
         "institution_ids",
+        "issn_list",
         "ror_ids",
         "subject_keywords",
         "subject_mesh",
@@ -93,6 +95,7 @@ _JSON_STRING_FIELDS = frozenset(
         "grants",
         "grants_canonical_json",
         "grants_raw_json",
+        "issn_list",
         "primary_topic",
         "primary_topic_canonical_json",
         "primary_topic_raw_json",
@@ -117,6 +120,10 @@ _SPECIAL_RULES = {
     "issn": (
         normalize_profile_issn_id,
         "Canonicalize ISSN identifier to the shared publication identifier policy.",
+    ),
+    "issn_list": (
+        normalize_profile_issn_ids,
+        "Canonicalize ISSN identifiers inside a set-like canonical JSON array.",
     ),
     "oa_status": (
         normalize_profile_oa_status,

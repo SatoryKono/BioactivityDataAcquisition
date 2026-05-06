@@ -503,7 +503,6 @@ composite:
                     - publication_status
                     - publication_subclass
                     - publication_type
-                    - publication_type_list
                     - publication_type_unified
                     - publication_types
                 provider_order: [ semanticscholar, pubmed, chembl, crossref, openalex ]

@@ -346,14 +346,6 @@
       "nullable": true,
       "description": ""
     },
-    "publication_type_list": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
     "publication_types": {
       "type": [
         "string",

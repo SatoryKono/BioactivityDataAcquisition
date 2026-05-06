@@ -107,6 +107,7 @@ class TestOpenAlexPublicationTransformer:
         assert result["abstract"] == "This is an abstract"
         assert result["journal"] == "Nature"
         assert result["issn"] == "0028-0836"
+        assert result["issn_list"] == '["0028-0836"]'
         assert result["publisher"] == "Springer Nature"
         assert result["is_oa"] is True
         assert result["oa_status"] == "gold"

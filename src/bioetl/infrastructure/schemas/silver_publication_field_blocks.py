@@ -74,7 +74,6 @@ def build_pubmed_publication_fields() -> list[pa.Field]:
         pa.field("publication_status", pa.string()),
         pa.field("publication_subclass", pa.string()),
         pa.field("publication_type", pa.string()),
-        pa.field("publication_type_list", pa.string()),
         pa.field("publication_type_unified", pa.string()),
         pa.field("publication_types", pa.string()),
         pa.field("publication_year", pa.int64()),

@@ -84,14 +84,6 @@ publication_oa_status_policy:
     expected: null
     policy: fail_closed_unknown
 publication_structured_field_policy:
-  pubmed_publication_type_list:
-    profile: pubmed.publication
-    field: publication_type_list
-    input: '["Review","Journal Article"]'
-    expected: '["Review","Journal Article"]'
-    collection_semantics: unordered_set
-    representation: canonical_json_string
-    raw_sidecar_field: publication_type
   semanticscholar_publication_types:
     profile: semanticscholar.publication
     field: publication_types

@@ -372,7 +372,6 @@ class TestPubMedYearValidation:
             "pub_month": 5,
             "pub_day": 15,
             "publication_status": "ppublish",
-            "publication_type_list": None,
             "date_completed": date(2020, 5, 20),
             "date_revised": date(2020, 5, 21),
             "citation_subset": None,

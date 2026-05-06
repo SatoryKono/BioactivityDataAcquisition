@@ -44,7 +44,8 @@ class PublicationEntityBase(BaseEntity):
         authors: JSON-serialized list of author names (hashed for PII compliance).
         affiliation_list: JSON-serialized list of unique affiliations (unified field name).
         journal: Journal/venue name.
-        issn: International Standard Serial Number.
+        issn: Primary International Standard Serial Number.
+        issn_list: Canonical JSON array of ISSN values.
         publisher: Publisher name.
         page_first: First page number (unified field name).
         page_last: Last page number (unified field name).
@@ -93,6 +94,7 @@ class PublicationEntityBase(BaseEntity):
     # Journal information
     journal: str | None = None
     issn: str | None = None
+    issn_list: str | None = None
     publisher: str | None = None
 
     # Pagination (unified field names)

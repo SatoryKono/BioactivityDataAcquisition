@@ -110,7 +110,6 @@ FIELD_TO_GROUP_VALUE_MAPPING: dict[str, str] = {
     "open_access_url": "id_and_status",
     "publication_status": "id_and_status",
     "publication_type": "publication_types",
-    "publication_type_list": "publication_types",
     "publication_types": "publication_types",
     "references": "citations_and_reference",
     "tldr": "terms_and_keywords_and_topics",

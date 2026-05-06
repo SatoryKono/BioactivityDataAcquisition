@@ -63,7 +63,7 @@ Raw provider fields remain provider-native:
 | --- | --- | --- |
 | `crossref_publication` | `publication_type` | unknown provider labels survive after text normalization |
 | `openalex_publication` | `publication_type`, `type_crossref` | provider-native type labels survive; `type_crossref` is still a raw sidecar |
-| `pubmed_publication` | `publication_type`, `publication_type_list` | provider labels survive; list payload stays canonical JSON evidence |
+| `pubmed_publication` | `publication_type`, `publication_types` | provider labels survive; list payload stays canonical JSON evidence |
 | `semanticscholar_publication` | `publication_type`, `publication_types` | provider labels survive; structured list remains canonical JSON evidence |
 
 Derived analytical fields are separate:

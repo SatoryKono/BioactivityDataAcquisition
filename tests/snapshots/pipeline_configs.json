@@ -1179,7 +1179,8 @@
       {
         "fields": [
           "journal",
-          "issn"
+          "issn",
+          "issn_list"
         ],
         "name": "journal",
         "pattern": null,
@@ -1743,6 +1744,7 @@
           "journal_name_short",
           "journal_iso_abbrev",
           "issn",
+          "issn_list",
           "journal_issn_type"
         ],
         "name": "journal",
@@ -1828,8 +1830,7 @@
           "mesh_heading_count",
           "subject_keywords",
           "keyword_count",
-          "publication_types",
-          "publication_type_list"
+          "publication_types"
         ],
         "name": "subjects",
         "pattern": null,
@@ -2118,7 +2119,9 @@
       },
       {
         "fields": [
-          "journal"
+          "journal",
+          "issn",
+          "issn_list"
         ],
         "name": "journal",
         "pattern": null,

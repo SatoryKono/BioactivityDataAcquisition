@@ -39,7 +39,7 @@ Related:
 | `pubmed_publication` | `chemicals` | `canonical JSON string` | set-like chemical list |
 | `pubmed_publication` | `databanks` | `canonical JSON string` | set-like databank list |
 | `pubmed_publication` | `gene_symbols` | `canonical JSON string` | set-like gene symbol list |
-| `pubmed_publication` | `publication_type_list` | `canonical JSON string` | set-like raw publication type list |
+| `pubmed_publication` | `publication_types` | `canonical JSON string` | set-like raw publication type list |
 | `pubmed_publication` | `subject_keywords` | `canonical JSON string` | set-like keyword list |
 | `pubmed_publication` | `subject_mesh` | `canonical JSON string` | set-like mesh list |
 | `pubmed_publication` | `affiliation_structured` | `canonical JSON string` | semantic-sensitive; persisted with `affiliation_structured_raw_json` and `affiliation_structured_canonical_json` companions |

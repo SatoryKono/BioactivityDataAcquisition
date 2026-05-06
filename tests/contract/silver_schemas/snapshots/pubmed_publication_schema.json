@@ -657,15 +657,6 @@
     "required": true,
     "unique": false
   },
-  "publication_type_list": {
-    "checks": [],
-    "coerce": false,
-    "description": "JSON array of publication types",
-    "dtype": "str",
-    "nullable": true,
-    "required": true,
-    "unique": false
-  },
   "publication_type_unified": {
     "checks": [],
     "coerce": false,
