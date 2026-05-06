@@ -7,6 +7,9 @@ from bioetl.domain.normalization._reference_id_json_normalizers import (
     normalize_json_object_reference_id,
     normalize_json_string_reference_ids,
 )
+from bioetl.domain.normalization._reference_id_ncbi_taxonomy import (
+    normalize_ncbi_taxonomy_reference_id,
+)
 from bioetl.domain.normalization._reference_id_openalex import (
     normalize_openalex_author_reference_id as _normalize_openalex_author_reference_id,
 )
@@ -37,8 +40,6 @@ from bioetl.domain.normalization._reference_id_support import (
     _ISSN_RE,
     _MESH_PREFIXES,
     _MESH_RE,
-    _NCBI_TAXONOMY_PREFIXES,
-    _NCBI_TAXONOMY_RE,
     _OBO_IRI_PREFIXES,
     _ORCID_PREFIXES,
     _ORCID_RE,
@@ -183,36 +184,6 @@ def _normalize_chembl_text(value: str) -> str | None:
 def normalize_chembl_reference_id(value: object) -> object:
     """Normalize ChEMBL identifiers to uppercase ``CHEMBL`` prefixed IDs."""
     return _canonical_or_text(value, normalizer=_normalize_chembl_text)
-
-
-def _normalize_ncbi_taxonomy_text(value: str) -> int | None:
-    candidate = _strip_prefixes(value, _NCBI_TAXONOMY_PREFIXES)
-    if not _NCBI_TAXONOMY_RE.fullmatch(candidate):
-        return None
-    taxonomy_id = int(candidate)
-    return taxonomy_id if taxonomy_id > 0 else None
-
-
-def normalize_ncbi_taxonomy_reference_id(value: object) -> object:
-    """Normalize NCBI Taxonomy identifiers to positive integer scalar form."""
-    if value is None or isinstance(value, bool):
-        return None
-    numeric_normalized = _normalize_ncbi_taxonomy_numeric(value)
-    if numeric_normalized is not None:
-        return numeric_normalized
-    text = _normalized_text(value)
-    if text is None:
-        return value
-    return _normalize_ncbi_taxonomy_text(text) or text
-
-
-def _normalize_ncbi_taxonomy_numeric(value: object) -> object | None:
-    """Normalize numeric NCBI taxonomy representations when possible."""
-    if isinstance(value, int):
-        return value if value > 0 else None
-    if isinstance(value, float):
-        return int(value) if value.is_integer() and value > 0 else value
-    return None
 
 
 def normalize_doi_reference_id(value: object) -> object:
