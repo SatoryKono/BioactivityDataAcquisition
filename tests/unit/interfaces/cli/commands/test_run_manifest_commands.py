@@ -677,7 +677,7 @@ class TestRunManifestCommands:
         assert payload["identity_graph"]["replay_mode"] == "exact_replay"
         assert payload["diagnostics"]["contract_version"] == "1.2.0"
         assert (
-            payload["diagnostics"]["reproducibility_policy_assessment"][
+            payload["diagnostics"]["replay_capability_assessment"][
                 "required_profile_satisfied"
             ]
             is True
@@ -803,7 +803,7 @@ class TestRunManifestCommands:
         assert "cross_validation_config_paths" in result.output
         assert "correlation_anchor_gaps" in result.output
         assert "persistence_profile" in result.output
-        assert "reproducibility_policy_assessment" in result.output
+        assert "replay_capability_assessment" in result.output
         assert "reproducibility_diagnostics" in result.output
         assert "Reproducibility" in result.output
         assert "required_profile_satisfied: true" in result.output
