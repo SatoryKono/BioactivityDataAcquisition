@@ -618,7 +618,7 @@ def test_build_diagnostics_summary_does_not_report_exact_replay_from_intent_alon
     ]
 
 
-def test_build_diagnostics_summary_does_not_mark_unsupported_family_strict_replay_safe() -> (
+def test_build_diagnostics_summary_marks_published_source_family_strict_replay_safe() -> (
     None
 ):
     manifest = replace(
@@ -643,16 +643,13 @@ def test_build_diagnostics_summary_does_not_mark_unsupported_family_strict_repla
 
     summary = build_diagnostics_summary(manifest, ())
 
-    assert summary["replay_family_contract"]["strict_exact_replay_supported"] is False
-    assert summary["replay_readiness_verdict"] == "exact_replay_blocked"
+    assert summary["replay_family_contract"]["strict_exact_replay_supported"] is True
+    assert summary["replay_readiness_verdict"] == "exact_replay_ready"
     assert summary["resume_contract"]["applied_checkpoint_compatibility_policy"] == (
         "hard_fail"
     )
-    assert summary["resume_contract"]["strict_replay_safe"] is False
-    assert (
-        "family_outside_supported_exact_replay_boundary"
-        in summary["exact_replay_blockers"]
-    )
+    assert summary["resume_contract"]["strict_replay_safe"] is True
+    assert summary["exact_replay_blockers"] == []
 
 
 def test_build_diagnostics_summary_flags_append_mode_semantic_sinks() -> None:
