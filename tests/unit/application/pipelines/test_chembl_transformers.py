@@ -1471,7 +1471,9 @@ class TestPublicationTermTransformer:
             "term_type": " keyword ",
         }
 
-        pre_silver = await transformer.transform_pre_silver(mock_context, record, index=0)
+        pre_silver = await transformer.transform_pre_silver(
+            mock_context, record, index=0
+        )
 
         assert isinstance(pre_silver, PreSilverRecord)
         assert str(pre_silver.business_data["term_type"]).upper() == "KEYWORD"
