@@ -3,11 +3,12 @@
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
-from typing import Protocol
+from typing import Protocol, runtime_checkable
 
 __all__ = ["ArtifactByteComparisonPort"]
 
 
+@runtime_checkable
 class ArtifactByteComparisonPort(Protocol):
     """Compare artifact references for byte-level forensic equivalence."""
 

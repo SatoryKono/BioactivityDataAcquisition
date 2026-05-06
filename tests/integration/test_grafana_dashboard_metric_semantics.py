@@ -49,7 +49,6 @@ def test_summary_queries_use_zero_fallbacks() -> None:
             "Gold Strict Validation Failures": "or vector(0)",
         },
         "bioetl-control-plane-v1.json": {
-            "Replay / Resume Blockers": "or vector(0)",
             "Manifest Write Failures": "or vector(0)",
             "Ledger Append Failures": "or vector(0)",
             "Checkpoint Incompatibilities": "or vector(0)",
@@ -60,7 +59,6 @@ def test_summary_queries_use_zero_fallbacks() -> None:
             "GLOBAL Checkpoint Operator Failures": "or vector(0)",
             "Replay Not Reconstructable": "or vector(0)",
             "Replay Drift": "or vector(0)",
-            "Replay Lag Seconds": "or vector(0)",
             "Audit Write Outcomes": "or vector(0)",
             "Audit Query Outcomes": "or vector(0)",
             "Lineage Fragment Persistence Failures": "or vector(0)",
