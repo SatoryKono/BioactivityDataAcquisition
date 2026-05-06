@@ -740,6 +740,14 @@ def test_build_field_matrix_rows_exposes_target_cross_reference_source_registry(
     )
     assert cross_references["strictness"] == "strict_json"
 
+    target_component_xrefs = _row(
+        rows, "chembl_target_component", "target_component_xrefs"
+    )
+    assert target_component_xrefs["controlled_vocabulary_source"] == (
+        "configs/vocab/chembl_reference_sources.yaml"
+    )
+    assert target_component_xrefs["strictness"] == "strict_json"
+
 
 def test_build_field_matrix_rows_explicitly_shows_no_governed_fields_for_audit_gap_pipelines() -> (
     None

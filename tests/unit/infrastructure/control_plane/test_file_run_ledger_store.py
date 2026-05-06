@@ -23,6 +23,10 @@ from bioetl.infrastructure.control_plane import FileRunLedgerStore
 _FIXED_TIME = datetime(2025, 1, 1, 12, 0, tzinfo=UTC)
 
 
+def _raise_index_write_error(*_args: object, **_kwargs: object) -> None:
+    raise OSError("index write failed")
+
+
 def test_file_store_round_trips_entries_by_manifest_and_run_id(tmp_path) -> None:
     run_id = RunID(uuid4())
     store = FileRunLedgerStore(base_path=tmp_path / "run_ledger")
@@ -313,7 +317,7 @@ def test_file_store_emits_ledger_append_failure_metric(tmp_path, monkeypatch) ->
 
     monkeypatch.setattr(
         "bioetl.infrastructure.control_plane.file_run_ledger_store.atomic_write_text",
-        lambda *args, **kwargs: (_ for _ in ()).throw(OSError("index write failed")),
+        _raise_index_write_error,
     )
 
     with pytest.raises(StorageError, match="Run ledger append failed"):

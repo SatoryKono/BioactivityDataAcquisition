@@ -6,6 +6,7 @@ nested_reference_vocabularies:
     invalid_value_mode: preserve_unknown_json_member
     source_fields:
       - chembl_target.cross_references[].xref_src_db
+      - chembl_target_component.target_component_xrefs[].xref_src_db
     values:
       - AlphaFoldDB
       - ChEBI

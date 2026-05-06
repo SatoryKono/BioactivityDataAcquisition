@@ -44,6 +44,10 @@ class _PublicationRecordNormalizer(Protocol):
     def normalize_business_data(self, business_data: JsonDict) -> JsonDict: ...
 
 
+class _SupportsPublicationBusinessNormalization(Protocol):
+    _record_normalizer: _PublicationRecordNormalizer
+
+
 class PublicationAssemblyTransformer(Protocol):
     """Structural protocol for publication assembly helper functions."""
 
@@ -120,7 +124,7 @@ def prepare_publication_payload(
 
 
 def normalize_publication_business_data(
-    transformer: PublicationAssemblyTransformer,
+    transformer: _SupportsPublicationBusinessNormalization,
     business_data: JsonDict,
 ) -> JsonDict:
     """Normalize publication business data before legacy hash finalization."""

@@ -51,7 +51,7 @@ def _extract_write_modes(
     if silver_config and silver_config.mode:
         silver_mode = SilverWriteMode.from_string(silver_config.mode)
 
-    gold_mode = GoldWriteMode.APPEND
+    gold_mode = GoldWriteMode.SCD2
     if gold_config and gold_config.mode:
         gold_mode = GoldWriteMode.from_string(gold_config.mode)
 
