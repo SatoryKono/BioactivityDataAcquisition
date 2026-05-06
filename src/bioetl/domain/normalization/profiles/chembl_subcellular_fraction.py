@@ -5,6 +5,9 @@ from __future__ import annotations
 from bioetl.domain.normalization.profiles._standard_profile_builder import (
     build_standard_profile,
 )
+from bioetl.domain.normalization.profiles._chembl_reference_identifier_rules import (
+    chembl_reference_identifier_rules,
+)
 from bioetl.domain.normalization.profiles.chembl_pseudo_nulls import (
     chembl_pseudo_null_fields,
 )
@@ -42,6 +45,7 @@ _META_FIELDS = frozenset(
 )
 _TITLE_FIELDS = frozenset({"subcellular_fraction"})
 _INT_FIELDS = frozenset({"assay_count"})
+_REFERENCE_IDENTIFIER_RULES = chembl_reference_identifier_rules("subcellular_fraction")
 
 CHEMBL_SUBCELLULAR_FRACTION_PROFILE = build_standard_profile(
     profile_name="chembl.subcellular_fraction",
@@ -51,6 +55,7 @@ CHEMBL_SUBCELLULAR_FRACTION_PROFILE = build_standard_profile(
     title_fields=_TITLE_FIELDS,
     int_fields=_INT_FIELDS,
     special_rules={
+        **_REFERENCE_IDENTIFIER_RULES,
         "subcellular_fraction_raw": (
             normalize_profile_text,
             "Preserve the raw subcellular_fraction provider lexeme as trimmed text "

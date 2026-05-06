@@ -69,6 +69,11 @@ _REFERENCE_IDENTIFIER_FAMILIES: Mapping[str, ChemblReferenceIdentifierFamily] = 
 _POLICY_SURFACES: Mapping[tuple[str, str], ChemblPolicySurface] = MappingProxyType({})
 
 
+def _family_mapping_by_name(families: tuple[object, ...]) -> Mapping[str, object]:
+    """Index immutable family payloads by family_name."""
+    return MappingProxyType({str(family.family_name): family for family in families})
+
+
 def _parse_chembl_field_ref(field_ref: str) -> tuple[str, str]:
     pipeline_name, field_name = field_ref.split(".", maxsplit=1)
     if not pipeline_name.startswith("chembl_"):
@@ -210,20 +215,12 @@ def initialize_chembl_policy_registry(data: ChemblPolicyRegistryData) -> None:
         _STRICT_BOOLEAN_FAMILIES, \
         _STRICT_FLAG_FAMILIES
 
-    _STRICT_BOOLEAN_FAMILIES = MappingProxyType(
-        {family.family_name: family for family in data.strict_boolean_families}
-    )
-    _STRICT_FLAG_FAMILIES = MappingProxyType(
-        {family.family_name: family for family in data.strict_flag_families}
-    )
-    _CONTROLLED_VOCABULARIES = MappingProxyType(
-        {family.family_name: family for family in data.controlled_vocabularies}
-    )
-    _ONTOLOGY_FAMILIES = MappingProxyType(
-        {family.family_name: family for family in data.ontology_families}
-    )
-    _REFERENCE_IDENTIFIER_FAMILIES = MappingProxyType(
-        {family.family_name: family for family in data.reference_identifier_families}
+    _STRICT_BOOLEAN_FAMILIES = _family_mapping_by_name(data.strict_boolean_families)
+    _STRICT_FLAG_FAMILIES = _family_mapping_by_name(data.strict_flag_families)
+    _CONTROLLED_VOCABULARIES = _family_mapping_by_name(data.controlled_vocabularies)
+    _ONTOLOGY_FAMILIES = _family_mapping_by_name(data.ontology_families)
+    _REFERENCE_IDENTIFIER_FAMILIES = _family_mapping_by_name(
+        data.reference_identifier_families
     )
     _POLICY_SURFACES = _build_policy_surfaces(data)
 

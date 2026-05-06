@@ -212,14 +212,6 @@ hash_policy:
             - _index
         exclude_patterns:
             - ^_dq_
-        field_ordering:
-            target_components: order_sensitive_json
-            cross_references: order_sensitive_json
-            pipeline_stages: order_sensitive_json
-            target_component_synonyms: order_sensitive_json
-            component_accessions: order_sensitive_json
-            component_descriptions: order_sensitive_json
-            component_ids: order_sensitive_json
         normalization:
             trim_strings: true
             round_floats:

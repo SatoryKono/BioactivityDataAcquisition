@@ -232,11 +232,9 @@ def chembl_order_sensitive_json_fields(pipeline_name: str) -> frozenset[str]:
 
 
 def chembl_hash_config_field_ordering(pipeline_name: str) -> dict[str, str]:
-    """Return the reviewed hash-config mirror for ChEMBL JSON ordering."""
-    return {
-        field_name: "order_sensitive_json"
-        for field_name in sorted(chembl_order_sensitive_json_fields(pipeline_name))
-    }
+    """Return the intentionally empty legacy hash-config ordering mirror."""
+    _ = pipeline_name
+    return {}
 
 
 def _fields_for_policy(

@@ -5,6 +5,9 @@ from __future__ import annotations
 from bioetl.domain.normalization.profiles._standard_profile_builder import (
     build_standard_profile,
 )
+from bioetl.domain.normalization.profiles._chembl_reference_identifier_rules import (
+    chembl_reference_identifier_rules,
+)
 from bioetl.domain.normalization.profiles.chembl_pseudo_nulls import (
     chembl_pseudo_null_fields,
 )
@@ -34,6 +37,7 @@ _META_FIELDS = frozenset(
 )
 _TITLE_FIELDS = frozenset({"compound_name"})
 _INT_FIELDS = frozenset({"record_id", "src_id"})
+_REFERENCE_IDENTIFIER_RULES = chembl_reference_identifier_rules("compound_record")
 
 CHEMBL_COMPOUND_RECORD_PROFILE = build_standard_profile(
     profile_name="chembl.compound_record",
@@ -42,6 +46,7 @@ CHEMBL_COMPOUND_RECORD_PROFILE = build_standard_profile(
     meta_fields=_META_FIELDS,
     title_fields=_TITLE_FIELDS,
     int_fields=_INT_FIELDS,
+    special_rules=_REFERENCE_IDENTIFIER_RULES,
     null_fields=chembl_pseudo_null_fields("compound_record"),
 )
 

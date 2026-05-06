@@ -41,6 +41,32 @@ def _project_authoritative_hash_policy_into_config(
     entity_type = str(config.get("entity_type") or "").strip()
     policy_provider = str(unified_hash_policy.get("provider") or "").strip()
     policy_entity = str(unified_hash_policy.get("entity") or "").strip()
+    _validate_hash_policy_identity(
+        provider=provider,
+        entity_type=entity_type,
+        policy_provider=policy_provider,
+        policy_entity=policy_entity,
+    )
+    _validate_schema_hash_policy_shims(unified_schema)
+    _validate_contract_hash_policy_shims(unified_contracts)
+    config["content_hash_policy"] = _build_content_hash_policy_projection(
+        unified_hash_policy=unified_hash_policy,
+        provider=provider,
+        entity_type=entity_type,
+        policy_provider=policy_provider,
+        policy_entity=policy_entity,
+    )
+    _ = entity_config
+
+
+def _validate_hash_policy_identity(
+    *,
+    provider: str,
+    entity_type: str,
+    policy_provider: str,
+    policy_entity: str,
+) -> None:
+    """Ensure root hash-policy identity matches the pipeline config identity."""
     if policy_provider and provider and policy_provider != provider:
         raise ValueError(
             "hash_policy.provider must match pipeline.provider; "
@@ -52,44 +78,81 @@ def _project_authoritative_hash_policy_into_config(
             f"got {policy_entity!r} != {entity_type!r}"
         )
 
+
+def _validate_schema_hash_policy_shims(unified_schema: JsonDict | None) -> None:
+    """Forbid legacy schema hash include/exclude shims when root policy exists."""
     schema_content_hash = (
         unified_schema.get("content_hash") if isinstance(unified_schema, dict) else None
     )
-    if isinstance(schema_content_hash, dict):
-        if not _is_empty_string_collection(schema_content_hash.get("include")):
-            raise ValueError(
-                "schema.content_hash.include must be empty when root hash_policy is "
-                "present; hash selection is runtime-authoritative only via hash_policy"
-            )
-        if not _is_empty_string_collection(schema_content_hash.get("exclude")):
-            raise ValueError(
-                "schema.content_hash.exclude must be empty when root hash_policy is "
-                "present; hash selection is runtime-authoritative only via hash_policy"
-            )
+    if not isinstance(schema_content_hash, dict):
+        return
+    if not _is_empty_string_collection(schema_content_hash.get("include")):
+        raise ValueError(
+            "schema.content_hash.include must be empty when root hash_policy is "
+            "present; hash selection is runtime-authoritative only via hash_policy"
+        )
+    if not _is_empty_string_collection(schema_content_hash.get("exclude")):
+        raise ValueError(
+            "schema.content_hash.exclude must be empty when root hash_policy is "
+            "present; hash selection is runtime-authoritative only via hash_policy"
+        )
 
-    if isinstance(unified_contracts, dict):
-        if not _is_empty_string_collection(unified_contracts.get("hash_include")):
-            raise ValueError(
-                "contracts.hash_include must be empty when root hash_policy is "
-                "present; hash selection is runtime-authoritative only via hash_policy"
-            )
-        if not _is_empty_string_collection(unified_contracts.get("hash_exclude")):
-            raise ValueError(
-                "contracts.hash_exclude must be empty when root hash_policy is "
-                "present; hash selection is runtime-authoritative only via hash_policy"
-            )
 
+def _validate_contract_hash_policy_shims(unified_contracts: JsonDict | None) -> None:
+    """Forbid legacy contract hash include/exclude shims when root policy exists."""
+    if not isinstance(unified_contracts, dict):
+        return
+    if not _is_empty_string_collection(unified_contracts.get("hash_include")):
+        raise ValueError(
+            "contracts.hash_include must be empty when root hash_policy is "
+            "present; hash selection is runtime-authoritative only via hash_policy"
+        )
+    if not _is_empty_string_collection(unified_contracts.get("hash_exclude")):
+        raise ValueError(
+            "contracts.hash_exclude must be empty when root hash_policy is "
+            "present; hash selection is runtime-authoritative only via hash_policy"
+        )
+
+
+def _build_content_hash_policy_projection(
+    *,
+    unified_hash_policy: JsonDict,
+    provider: str,
+    entity_type: str,
+    policy_provider: str,
+    policy_entity: str,
+) -> JsonDict:
+    """Build the runtime content-hash policy projection from root config."""
     nested_policy = unified_hash_policy.get("hash_policy")
     if not isinstance(nested_policy, dict):
         raise ValueError("hash_policy.hash_policy must be a mapping")
-
-    config["content_hash_policy"] = {
+    return {
         "provider": policy_provider or provider,
         "entity": policy_entity or entity_type,
         "contract": unified_hash_policy.get("contract", {}),
         **nested_policy,
     }
-    _ = entity_config
+
+
+def _validate_chembl_json_ordering_mirror_shim(
+    *,
+    provider: str,
+    unified_hash_policy: JsonDict | None,
+) -> None:
+    """Forbid duplicate JSON ordering policy surfaces for ChEMBL."""
+    if provider != "chembl" or not isinstance(unified_hash_policy, dict):
+        return
+    nested_policy = unified_hash_policy.get("hash_policy")
+    if not isinstance(nested_policy, dict):
+        return
+    field_ordering = nested_policy.get("field_ordering")
+    if not isinstance(field_ordering, dict) or not field_ordering:
+        return
+    raise ValueError(
+        "hash_policy.hash_policy.field_ordering must be empty for ChEMBL; "
+        "JSON ordering semantics are runtime-authoritative only via "
+        "src/bioetl/domain/normalization/profiles/chembl_json_ordering_policy.py"
+    )
 
 
 def _validate_column_groups(
@@ -173,6 +236,10 @@ def apply_pipeline_schema_normalization(
     if unified_schema:
         _validate_schema_config(unified_schema, "entities/*/*:schema")
         _project_schema_fields_into_config(config, unified_schema)
+    _validate_chembl_json_ordering_mirror_shim(
+        provider=str(config.get("provider") or "").strip(),
+        unified_hash_policy=unified_hash_policy,
+    )
     _project_authoritative_hash_policy_into_config(
         config,
         entity_config=entity_config,

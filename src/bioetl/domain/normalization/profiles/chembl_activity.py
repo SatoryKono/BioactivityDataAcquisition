@@ -24,6 +24,7 @@ from ._chembl_policy_registry import (
     chembl_flag_family_fields,
     chembl_ontology_family_fields,
 )
+from ._chembl_reference_identifier_rules import chembl_reference_identifier_rules
 from ._standard_profile_builder import build_standard_profile
 from .chembl_pseudo_nulls import chembl_pseudo_null_fields
 from .profile_normalizers import (
@@ -85,6 +86,7 @@ _ONTOLOGY_ID_FIELDS = chembl_ontology_family_fields("uo", entity="activity")
 _RAW_UNIT_FIELDS = chembl_controlled_family_fields("raw_units", entity="activity")
 _BAO_FIELDS = chembl_ontology_family_fields("bao", entity="activity")
 _STRICT_JSON_FIELDS = SET_LIKE_FIELDS
+_REFERENCE_IDENTIFIER_RULES = chembl_reference_identifier_rules("activity")
 
 
 def normalize_activity_standard_units(value: object) -> object:
@@ -94,7 +96,9 @@ def normalize_activity_standard_units(value: object) -> object:
         allowed_values=ACTIVITY_STANDARD_UNITS,
     )
 
+
 _SPECIAL_RULE_COMPONENTS = {
+    **_REFERENCE_IDENTIFIER_RULES,
     "canonical_smiles": (
         normalize_profile_canonical_smiles,
         "Normalize canonical SMILES via the domain SMILES Value Object; invalid values collapse to None.",

@@ -7,6 +7,7 @@ from bioetl.domain.normalization.profiles._chembl_policy_registry_data import (
     ChemblControlledVocabularyFamily,
     ChemblOntologyPolicyFamily,
     ChemblPolicyRegistryData,
+    ChemblReferenceIdentifierFamily,
     ChemblStrictScalarFamily,
 )
 
@@ -15,5 +16,6 @@ __all__ = [
     "ChemblControlledVocabularyFamily",
     "ChemblOntologyPolicyFamily",
     "ChemblPolicyRegistryData",
+    "ChemblReferenceIdentifierFamily",
     "ChemblStrictScalarFamily",
 ]

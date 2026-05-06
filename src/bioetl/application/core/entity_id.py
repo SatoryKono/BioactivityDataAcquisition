@@ -12,6 +12,17 @@ __all__ = ["compute_publication_term_entity_id"]
 
 import hashlib
 
+from bioetl.domain.schemas.constants import PUBLICATION_TERM_TYPES
+
+
+def _normalize_publication_term_identity_component(value: str) -> str:
+    """Canonicalize publication-term identity components before hashing."""
+    normalized = value.strip()
+    upper_value = normalized.upper()
+    if upper_value in PUBLICATION_TERM_TYPES:
+        return upper_value
+    return normalized
+
 
 def compute_publication_term_entity_id(
     publication_id: str,
@@ -31,6 +42,10 @@ def compute_publication_term_entity_id(
         Entity ID string (first 16 chars of SHA256 hex digest).
 
     """
+    normalized_publication_id = publication_id.strip() if publication_id else ""
+    normalized_term_type = _normalize_publication_term_identity_component(term_type)
     normalized_term = term.lower().strip() if term else ""
-    composite = f"{publication_id}:{term_type}:{normalized_term}"
+    composite = (
+        f"{normalized_publication_id}:{normalized_term_type}:{normalized_term}"
+    )
     return hashlib.sha256(composite.encode()).hexdigest()[:16]

@@ -5,6 +5,9 @@ from __future__ import annotations
 from bioetl.domain.normalization.profiles._standard_profile_builder import (
     build_standard_profile,
 )
+from bioetl.domain.normalization.profiles._chembl_reference_identifier_rules import (
+    chembl_reference_identifier_rules,
+)
 from bioetl.domain.normalization.profiles.chembl_pseudo_nulls import (
     chembl_pseudo_null_fields,
 )
@@ -42,11 +45,13 @@ _META_FIELDS = frozenset(
 _INT_FIELDS = frozenset({"component_id", "taxonomy_id", "protein_classification_id"})
 _STRICT_JSON_FIELDS = chembl_json_fields("chembl_target_component")
 _ENUM_FIELDS = {"component_type": TARGET_COMPONENT_TYPES}
+_REFERENCE_IDENTIFIER_RULES = chembl_reference_identifier_rules("target_component")
 _SPECIAL_RULES = {
+    **_REFERENCE_IDENTIFIER_RULES,
     "organism": (
         normalize_profile_chembl_organism_name,
         "Normalize target-component organism display name using the shared curated ChEMBL organism aliases.",
-    )
+    ),
 }
 
 CHEMBL_TARGET_COMPONENT_PROFILE = build_standard_profile(

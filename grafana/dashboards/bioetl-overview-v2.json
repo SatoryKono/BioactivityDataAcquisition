@@ -1917,7 +1917,7 @@
     {
       "id": 9014,
       "type": "row",
-      "title": "L1 Historical Trends (24h)",
+      "title": "L1 Historical Trends",
       "gridPos": {
         "h": 1,
         "w": 24,

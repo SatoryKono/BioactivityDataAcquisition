@@ -18,9 +18,12 @@ def test_reference_identifier_registry_covers_non_chembl_provider_families() -> 
     assert {
         "chembl",
         "drugbank",
+        "doi",
         "go",
         "interpro",
         "issn",
+        "mesh",
+        "ncbi_taxonomy",
         "openalex_author",
         "openalex_institution",
         "openalex_topic",
@@ -28,6 +31,8 @@ def test_reference_identifier_registry_covers_non_chembl_provider_families() -> 
         "orcid",
         "pdb",
         "pfam",
+        "pmcid",
+        "pmid",
         "reactome",
         "ror",
         "semantic_scholar_author",
@@ -115,6 +120,34 @@ def test_uniprot_reference_identifier_registry_canonicalizes_uppercase_accession
     assert normalizer is not None
     assert normalizer(" p12345 ") == "P12345"
     assert normalizer("q9y6k9") == "Q9Y6K9"
+
+
+def test_chembl_reference_identifier_registry_canonicalizes_shared_families() -> None:
+    taxonomy = reference_identifier_family("ncbi_taxonomy").normalizer
+    doi = reference_identifier_family("doi").normalizer
+    pmid = reference_identifier_family("pmid").normalizer
+    pmcid = reference_identifier_family("pmcid").normalizer
+    mesh = reference_identifier_family("mesh").normalizer
+
+    assert taxonomy is not None
+    assert taxonomy(" NCBITaxon:009606 ") == 9606
+    assert taxonomy("https://www.ncbi.nlm.nih.gov/taxonomy/9606") == 9606
+    assert taxonomy(True) is None
+
+    assert doi is not None
+    assert doi(" https://doi.org/10.1000/XYZ ") == "10.1000/xyz"
+
+    assert pmid is not None
+    assert pmid(" PMID:0012345 ") == "12345"
+    assert pmid("pmid:abc") is None
+
+    assert pmcid is not None
+    assert pmcid(" pmcid:pmc12345 ") == "PMC12345"
+    assert pmcid("not-a-pmcid") == "not-a-pmcid"
+
+    assert mesh is not None
+    assert mesh(" mesh:d012345 ") == "D012345"
+    assert mesh("bad-mesh") == "bad-mesh"
 
 
 def test_semantic_scholar_corpus_id_registry_preserves_numeric_scalar_contract() -> (

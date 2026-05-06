@@ -178,9 +178,7 @@ def test_deprecated_chembl_contract_registry_surfaces_have_migration_guides() ->
 
 
 @pytest.mark.integration
-def test_specialized_chembl_fixture_surfaces_are_manifest_backed_and_active() -> (
-    None
-):
+def test_specialized_chembl_fixture_surfaces_are_manifest_backed_and_active() -> None:
     """Specialized ChEMBL fixture surfaces must resolve through tracked manifest evidence."""
     manifest_payload = (
         yaml.safe_load(_FIXTURE_MANIFEST_PATH.read_text(encoding="utf-8")) or {}

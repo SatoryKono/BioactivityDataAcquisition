@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from pathlib import PurePosixPath
 from typing import Any
 
 import pytest
@@ -11,6 +12,7 @@ import yaml
 from bioetl.domain.normalization.profiles._chembl_policy_registry import (
     CHEMBL_CONTROLLED_VOCAB_CONFIG,
     CHEMBL_ONTOLOGY_POLICY_CONFIG,
+    CHEMBL_REFERENCE_IDENTIFIER_CONFIG,
     DEFAULT_CHEMBL_POLICY_REGISTRY_DATA,
 )
 from bioetl.domain.normalization.profiles.chembl_assay import CHEMBL_ASSAY_PROFILE
@@ -20,6 +22,7 @@ from bioetl.domain.normalization.profiles.chembl_json_ordering_policy import (
 from bioetl.domain.normalization.profiles.registry import (
     NORMALIZATION_PROFILE_REGISTRY,
 )
+from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config
 from bioetl.infrastructure.config.chembl_policy_registry_loader import (
     ChemblPolicyRegistryLoader,
 )
@@ -42,6 +45,7 @@ ALLOWED_FIELD_CLASSIFICATIONS = frozenset(
         "flag-like",
         "operator",
         "ontology/reference identifier",
+        "reference identifier",
         "unit-like",
     }
 )
@@ -56,6 +60,10 @@ def _load_yaml(path: Path | str) -> dict[str, Any]:
 def _parse_field_ref(field_ref: str) -> tuple[str, str]:
     pipeline_name, field_name = field_ref.split(".", maxsplit=1)
     return pipeline_name, field_name
+
+
+def _normalize_source_path(path: str) -> str:
+    return PurePosixPath(path.replace("\\", "/")).as_posix()
 
 
 def _matrix_row_lookup(rows: list[dict[str, str]]) -> dict[str, dict[str, str]]:
@@ -86,6 +94,8 @@ def _row_classification(row: dict[str, str]) -> str:
         return "unit-like"
     if semantic_category.startswith("ontology_reference"):
         return "ontology/reference identifier"
+    if semantic_category == "reference_identifier":
+        return "reference identifier"
     if semantic_category == "controlled_vocabulary":
         return "controlled vocabulary"
     raise AssertionError(
@@ -140,6 +150,13 @@ def _registry_governed_field_expectations() -> dict[str, tuple[str, str]]:
                 CHEMBL_ONTOLOGY_POLICY_CONFIG,
             )
 
+    for family in DEFAULT_CHEMBL_POLICY_REGISTRY_DATA.reference_identifier_families:
+        for field_ref in family.fields:
+            expectations[str(field_ref)] = (
+                "reference identifier",
+                CHEMBL_REFERENCE_IDENTIFIER_CONFIG,
+            )
+
     return expectations
 
 
@@ -166,7 +183,7 @@ def _config_enum_surface_expectations(
                 )
                 expectations[f"chembl_{entity}.{field_name}"] = (
                     classification,
-                    str(CHEMBL_ENUM_PATH),
+                    CHEMBL_ENUM_PATH.as_posix(),
                 )
 
         filters = config.get("filters", {})
@@ -186,7 +203,7 @@ def _config_enum_surface_expectations(
                 )
                 expectations[f"chembl_{entity}.{field_name}"] = (
                     classification,
-                    str(CHEMBL_ENUM_PATH),
+                    CHEMBL_ENUM_PATH.as_posix(),
                 )
 
         extraction_params = filters.get("extraction_params", {})
@@ -203,7 +220,7 @@ def _config_enum_surface_expectations(
             )
             expectations[f"chembl_{entity}.{field_name}"] = (
                 classification,
-                str(CHEMBL_ENUM_PATH),
+                CHEMBL_ENUM_PATH.as_posix(),
             )
 
     return expectations
@@ -241,8 +258,25 @@ def matrix_rows() -> list[dict[str, str]]:
 
 @pytest.mark.integration
 def test_chembl_policy_registry_loader_matches_default_payload() -> None:
-    assert ChemblPolicyRegistryLoader(CONFIGS_ROOT).load() == (
-        DEFAULT_CHEMBL_POLICY_REGISTRY_DATA
+    loaded = ChemblPolicyRegistryLoader(CONFIGS_ROOT).load()
+
+    assert loaded.strict_boolean_families == (
+        DEFAULT_CHEMBL_POLICY_REGISTRY_DATA.strict_boolean_families
+    )
+    assert loaded.strict_flag_families == (
+        DEFAULT_CHEMBL_POLICY_REGISTRY_DATA.strict_flag_families
+    )
+    assert loaded.controlled_vocabularies == (
+        DEFAULT_CHEMBL_POLICY_REGISTRY_DATA.controlled_vocabularies
+    )
+    assert loaded.ontology_families == (
+        DEFAULT_CHEMBL_POLICY_REGISTRY_DATA.ontology_families
+    )
+    assert loaded.publication_classification_fields == (
+        DEFAULT_CHEMBL_POLICY_REGISTRY_DATA.publication_classification_fields
+    )
+    assert loaded.reference_identifier_families == (
+        DEFAULT_CHEMBL_POLICY_REGISTRY_DATA.reference_identifier_families
     )
 
 
@@ -281,7 +315,8 @@ def test_chembl_governed_fields_have_explicit_profile_classification(
                 f"{field_ref}: expected classification {expected_classification!r}, "
                 f"got {actual_classification!r}"
             )
-        if row["controlled_vocabulary_source"] != expected_source:
+        actual_source = _normalize_source_path(row["controlled_vocabulary_source"])
+        if actual_source != _normalize_source_path(expected_source):
             mismatches.append(
                 f"{field_ref}: expected source {expected_source!r}, got "
                 f"{row['controlled_vocabulary_source']!r}"
@@ -293,7 +328,36 @@ def test_chembl_governed_fields_have_explicit_profile_classification(
 
 
 @pytest.mark.integration
-def test_chembl_units_and_controlled_json_lists_keep_structural_parity(
+def test_all_current_chembl_profiles_participate_in_parity_suite(
+    entity_configs: dict[str, dict[str, Any]],
+    matrix_rows: list[dict[str, str]],
+) -> None:
+    registered_profiles = {
+        entity
+        for provider, entity in NORMALIZATION_PROFILE_REGISTRY
+        if provider == "chembl"
+    }
+    matrix_profiles = {
+        row["pipeline_name"].removeprefix("chembl_")
+        for row in matrix_rows
+        if row["pipeline_name"].startswith("chembl_")
+    }
+
+    missing_entity_configs = sorted(registered_profiles - set(entity_configs))
+    missing_matrix_profiles = sorted(registered_profiles - matrix_profiles)
+
+    assert not missing_entity_configs, (
+        "ChEMBL parity suite is missing entity configs for registered profiles: "
+        f"{missing_entity_configs}"
+    )
+    assert not missing_matrix_profiles, (
+        "ChEMBL parity suite is missing matrix coverage for registered profiles: "
+        f"{missing_matrix_profiles}"
+    )
+
+
+@pytest.mark.integration
+def test_chembl_unit_policy_families_and_controlled_json_lists_keep_structural_parity(
     matrix_rows: list[dict[str, str]],
 ) -> None:
     row_lookup = _matrix_row_lookup(matrix_rows)
@@ -302,14 +366,26 @@ def test_chembl_units_and_controlled_json_lists_keep_structural_parity(
         for policy in CHEMBL_JSON_ORDERING_POLICY
     }
 
-    unit_fields = next(
+    raw_unit_fields = next(
         family.fields
         for family in DEFAULT_CHEMBL_POLICY_REGISTRY_DATA.controlled_vocabularies
-        if family.family_name == "units"
+        if family.family_name == "raw_units"
     )
-    for field_ref in sorted(unit_fields):
+    for field_ref in sorted(raw_unit_fields):
         row = row_lookup[field_ref]
         assert _row_classification(row) == "unit-like"
+        assert row["controlled_vocabulary_source"] == CHEMBL_CONTROLLED_VOCAB_CONFIG
+
+    standard_unit_fields = next(
+        family.fields
+        for family in DEFAULT_CHEMBL_POLICY_REGISTRY_DATA.controlled_vocabularies
+        if family.family_name == "standard_units"
+    )
+    for field_ref in sorted(standard_unit_fields):
+        row = row_lookup[field_ref]
+        assert _row_classification(row) == "strict enum"
+        assert row["strictness"] == "strict_enum"
+        assert row["dq_coverage"] == "enum:error"
         assert row["controlled_vocabulary_source"] == CHEMBL_CONTROLLED_VOCAB_CONFIG
 
     controlled_json_fields = {
@@ -323,6 +399,83 @@ def test_chembl_units_and_controlled_json_lists_keep_structural_parity(
         assert _row_classification(row) == "controlled vocabulary"
         assert row["set_like"] == "true"
         assert ordering_policy[field_ref].order_semantics == "set_like"
+
+
+@pytest.mark.integration
+def test_chembl_json_ordering_policy_is_not_redeclared_in_entity_hash_configs(
+    entity_configs: dict[str, dict[str, Any]],
+) -> None:
+    regressions: list[str] = []
+
+    for entity, config in sorted(entity_configs.items()):
+        hash_policy = config.get("hash_policy")
+        if not isinstance(hash_policy, dict):
+            continue
+        nested_policy = hash_policy.get("hash_policy")
+        if not isinstance(nested_policy, dict):
+            continue
+        field_ordering = nested_policy.get("field_ordering")
+        if isinstance(field_ordering, dict) and field_ordering:
+            regressions.append(
+                f"chembl_{entity}: unexpected hash_policy.hash_policy.field_ordering"
+            )
+
+    assert not regressions, (
+        "ChEMBL JSON ordering policy must stay domain-authoritative only: "
+        + "; ".join(regressions)
+    )
+
+
+@pytest.mark.integration
+def test_chembl_json_ordering_policy_matches_runtime_profile_set_like_semantics() -> (
+    None
+):
+    regressions: list[str] = []
+
+    for policy in CHEMBL_JSON_ORDERING_POLICY:
+        entity = policy.pipeline_name.removeprefix("chembl_")
+        profile = NORMALIZATION_PROFILE_REGISTRY.get(("chembl", entity))
+        if profile is None:
+            regressions.append(
+                f"{policy.pipeline_name}.{policy.field_name}: missing profile"
+            )
+            continue
+        if policy.field_name not in profile.fields:
+            regressions.append(
+                f"{policy.pipeline_name}.{policy.field_name}: missing profile field"
+            )
+            continue
+        is_set_like = policy.field_name in profile.set_like_fields
+        if is_set_like != policy.is_set_like:
+            regressions.append(
+                f"{policy.pipeline_name}.{policy.field_name}: "
+                f"policy_set_like={policy.is_set_like}, profile_set_like={is_set_like}"
+            )
+
+    assert not regressions, (
+        "ChEMBL JSON ordering runtime profile semantics drifted:\n"
+        + "\n".join(regressions)
+    )
+
+
+@pytest.mark.integration
+@pytest.mark.parametrize(
+    "pipeline_name",
+    [
+        "chembl_assay",
+        "chembl_molecule",
+        "chembl_publication",
+        "chembl_target",
+        "chembl_target_component",
+    ],
+)
+def test_chembl_pipeline_loader_projects_empty_field_ordering_shim(
+    pipeline_name: str,
+) -> None:
+    loaded = load_pipeline_config(pipeline_name)
+
+    assert loaded.content_hash_policy is not None
+    assert loaded.content_hash_policy.field_ordering == {}
 
 
 @pytest.mark.integration

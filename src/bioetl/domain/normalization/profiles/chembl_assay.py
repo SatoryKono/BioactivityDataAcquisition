@@ -30,6 +30,7 @@ from ._chembl_policy_registry import (
     chembl_controlled_family_fields,
     chembl_ontology_family_fields,
 )
+from ._chembl_reference_identifier_rules import chembl_reference_identifier_rules
 from ._chembl_vocab import chembl_enum
 from .chembl_json_ordering_policy import chembl_json_fields
 
@@ -89,6 +90,7 @@ _CONTROLLED_CONFIDENCE_FIELDS = chembl_controlled_family_fields(
     "assay_confidence_descriptions",
     entity="assay",
 )
+_REFERENCE_IDENTIFIER_RULES = chembl_reference_identifier_rules("assay")
 
 
 def _normalize_bao_label_with_profile_context(
@@ -136,6 +138,7 @@ _ENUM_FIELDS = {
     "bao_format_mapping_status": ONTOLOGY_MAPPING_STATUSES,
 }
 _SPECIAL_RULE_COMPONENTS = {
+    **_REFERENCE_IDENTIFIER_RULES,
     "assay_organism": (
         normalize_profile_chembl_organism_name,
         "Normalize ChEMBL assay organism display name using curated organism aliases.",

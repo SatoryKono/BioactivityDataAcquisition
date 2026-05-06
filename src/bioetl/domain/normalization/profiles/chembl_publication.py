@@ -8,6 +8,9 @@ from bioetl.domain.normalization.profiles._chembl_policy_registry import (
 from bioetl.domain.normalization.profiles._publication_classification_rules import (
     publication_classification_rules,
 )
+from bioetl.domain.normalization.profiles._chembl_reference_identifier_rules import (
+    chembl_reference_identifier_rules,
+)
 from bioetl.domain.normalization.profiles._standard_profile_builder import (
     build_standard_profile,
 )
@@ -80,6 +83,7 @@ _INT_FIELDS = frozenset(
 _SET_LIKE_FIELDS = chembl_set_like_json_fields("chembl_publication")
 _STRICT_JSON_FIELDS = chembl_json_fields("chembl_publication")
 _BOOLEAN_FIELDS = chembl_boolean_family_fields("bool_like", entity="publication")
+_REFERENCE_IDENTIFIER_RULES = chembl_reference_identifier_rules("publication")
 
 
 def normalize_profile_publication_type_field(value: object) -> object:
@@ -105,6 +109,7 @@ CHEMBL_PUBLICATION_PROFILE = build_standard_profile(
     strict_json_fields=_STRICT_JSON_FIELDS,
     boolean_fields=_BOOLEAN_FIELDS,
     special_rules={
+        **_REFERENCE_IDENTIFIER_RULES,
         **publication_classification_rules(),
         "issn": (
             normalize_profile_issn_id,

@@ -356,10 +356,6 @@ hash_policy:
             - _index
         exclude_patterns:
             - ^_dq_
-        field_ordering:
-            variant_sequence_json: order_sensitive_json
-            assay_classifications: order_sensitive_json
-            assay_parameters: order_sensitive_json
         normalization:
             trim_strings: true
             round_floats:

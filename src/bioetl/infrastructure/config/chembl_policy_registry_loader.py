@@ -11,6 +11,7 @@ from bioetl.domain.normalization.profiles.chembl_policy_registry_data import (
     ChemblControlledVocabularyFamily,
     ChemblOntologyPolicyFamily,
     ChemblPolicyRegistryData,
+    ChemblReferenceIdentifierFamily,
     ChemblStrictScalarFamily,
 )
 
@@ -21,11 +22,15 @@ class ChemblPolicyRegistryLoader:
     def __init__(self, configs_root: Path) -> None:
         self._controlled_vocab_path = configs_root / "vocab" / "chembl_controlled.yaml"
         self._ontology_path = configs_root / "vocab" / "chembl_ontology.yaml"
+        self._reference_identifier_path = (
+            configs_root / "vocab" / "chembl_reference_identifiers.yaml"
+        )
 
     def load(self) -> ChemblPolicyRegistryData:
         """Parse config-backed policy registries into immutable domain data."""
         controlled = self._load_yaml(self._controlled_vocab_path)
         ontology = self._load_yaml(self._ontology_path)
+        reference_identifiers = self._load_yaml(self._reference_identifier_path)
 
         return ChemblPolicyRegistryData(
             strict_boolean_families=self._load_strict_scalar_families(
@@ -82,6 +87,17 @@ class ChemblPolicyRegistryLoader:
                 "publication_type_unified",
                 "publication_subclass",
                 "publication_class",
+            ),
+            reference_identifier_families=tuple(
+                ChemblReferenceIdentifierFamily(
+                    family_name=str(family_name),
+                    reference_family=str(payload["reference_family"]),
+                    invalid_value_mode=str(payload["invalid_value_mode"]),
+                    fields=tuple(str(field_ref) for field_ref in payload["fields"]),
+                )
+                for family_name, payload in reference_identifiers[
+                    "reference_identifier_families"
+                ].items()
             ),
         )
 

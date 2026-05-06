@@ -1,4 +1,4 @@
-"""Tests for shared ChEMBL controlled-vocabulary and ontology policy surfaces."""
+"""Tests for shared ChEMBL policy registry surfaces."""
 
 from __future__ import annotations
 
@@ -12,17 +12,20 @@ import yaml
 from bioetl.domain.normalization.profiles._chembl_policy_registry import (
     CHEMBL_CONTROLLED_VOCAB_CONFIG,
     CHEMBL_ONTOLOGY_POLICY_CONFIG,
+    CHEMBL_REFERENCE_IDENTIFIER_CONFIG,
     DEFAULT_CHEMBL_POLICY_REGISTRY_DATA,
     PUBLICATION_CLASSIFICATION_CONFIG,
     ChemblControlledVocabularyFamily,
     ChemblOntologyPolicyFamily,
     ChemblPolicyRegistryData,
+    ChemblReferenceIdentifierFamily,
     ChemblStrictScalarFamily,
     chembl_boolean_family_fields,
     chembl_controlled_family_fields,
     chembl_flag_family_fields,
     chembl_ontology_family_fields,
     chembl_policy_surface,
+    chembl_reference_identifier_family_fields,
     initialize_chembl_policy_registry,
 )
 
@@ -54,6 +57,9 @@ def test_chembl_policy_surface_points_to_externalized_registry_sources() -> None
     )
     bao_version = chembl_policy_surface("activity", "bao_ontology_version")
     publication_class = chembl_policy_surface("publication", "publication_class")
+    publication_doi = chembl_policy_surface("publication", "doi")
+    publication_mesh_id = chembl_policy_surface("publication_term", "mesh_id")
+    target_taxonomy_id = chembl_policy_surface("target", "taxonomy_id")
 
     assert units is not None
     assert units.category == "controlled_vocabulary"
@@ -87,10 +93,23 @@ def test_chembl_policy_surface_points_to_externalized_registry_sources() -> None
     assert publication_class.category == "derived_vocabulary"
     assert publication_class.registry_source == PUBLICATION_CLASSIFICATION_CONFIG
 
+    assert publication_doi is not None
+    assert publication_doi.category == "reference_identifier"
+    assert publication_doi.registry_source == CHEMBL_REFERENCE_IDENTIFIER_CONFIG
+
+    assert publication_mesh_id is not None
+    assert publication_mesh_id.category == "reference_identifier"
+    assert publication_mesh_id.registry_source == CHEMBL_REFERENCE_IDENTIFIER_CONFIG
+
+    assert target_taxonomy_id is not None
+    assert target_taxonomy_id.category == "reference_identifier"
+    assert target_taxonomy_id.registry_source == CHEMBL_REFERENCE_IDENTIFIER_CONFIG
+
 
 def test_chembl_policy_registry_configs_cover_declared_policy_fields() -> None:
     controlled = _load_yaml(CHEMBL_CONTROLLED_VOCAB_CONFIG)
     ontology = _load_yaml(CHEMBL_ONTOLOGY_POLICY_CONFIG)
+    reference_identifiers = _load_yaml(CHEMBL_REFERENCE_IDENTIFIER_CONFIG)
 
     controlled_fields = {
         field
@@ -116,6 +135,11 @@ def test_chembl_policy_registry_configs_cover_declared_policy_fields() -> None:
         for companion_fields in policy.get("companion_fields", {}).values()
         for field in companion_fields
     }
+    reference_identifier_fields = {
+        field
+        for policy in reference_identifiers["reference_identifier_families"].values()
+        for field in policy["fields"]
+    }
 
     assert "chembl_activity.units" in controlled_fields
     assert "chembl_assay_parameters.type" in controlled_fields
@@ -128,6 +152,10 @@ def test_chembl_policy_registry_configs_cover_declared_policy_fields() -> None:
     assert "chembl_assay.bao_format_mapping_status" in ontology_companion_fields
     assert "chembl_tissue.bto_iri" in ontology_companion_fields
     assert "chembl_cell_line.clo_ontology_version" in ontology_companion_fields
+    assert "chembl_target.taxonomy_id" in reference_identifier_fields
+    assert "chembl_publication.doi" in reference_identifier_fields
+    assert "chembl_publication_term.mesh_id" in reference_identifier_fields
+    assert "chembl_target.component_accessions" in reference_identifier_fields
     assert (
         ontology["families"]["caloha"]["companion_governance"]
         == "identifier_only_no_companion_bundle"
@@ -173,6 +201,34 @@ def test_chembl_policy_registry_exposes_profile_authoring_field_sets() -> None:
     assert chembl_ontology_family_fields("clo", entity="cell_line") == frozenset(
         {"clo_id"}
     )
+    assert chembl_reference_identifier_family_fields(
+        "chembl",
+        entity="assay",
+    ) == frozenset({"assay_id", "cell_id", "publication_id", "target_id", "tissue_id"})
+    assert chembl_reference_identifier_family_fields(
+        "ncbi_taxonomy",
+        entity="target",
+    ) == frozenset({"taxonomy_id"})
+    assert chembl_reference_identifier_family_fields(
+        "uniprot_accession",
+        entity="target",
+    ) == frozenset({"component_accessions"})
+    assert chembl_reference_identifier_family_fields(
+        "doi",
+        entity="publication",
+    ) == frozenset({"doi", "publication_doi"})
+    assert chembl_reference_identifier_family_fields(
+        "pmid",
+        entity="publication",
+    ) == frozenset({"pmid", "publication_pmid"})
+    assert chembl_reference_identifier_family_fields(
+        "pmcid",
+        entity="publication",
+    ) == frozenset({"pmc_id", "publication_pmc_id"})
+    assert chembl_reference_identifier_family_fields(
+        "mesh",
+        entity="publication_term",
+    ) == frozenset({"mesh_id"})
 
 
 def test_chembl_policy_surface_returns_none_for_ungoverned_free_text_fields() -> None:
@@ -240,6 +296,14 @@ def test_chembl_policy_registry_can_be_reinitialized_from_in_memory_data() -> No
                 ),
             ),
             publication_classification_fields=("publication_class",),
+            reference_identifier_families=(
+                ChemblReferenceIdentifierFamily(
+                    family_name="mini_reference",
+                    reference_family="doi",
+                    invalid_value_mode="canonicalize_or_null_blank",
+                    fields=("chembl_publication.doi",),
+                ),
+            ),
         )
     )
 
@@ -266,4 +330,12 @@ def test_chembl_policy_registry_can_be_reinitialized_from_in_memory_data() -> No
     publication_class = chembl_policy_surface("publication", "publication_class")
     assert publication_class is not None
     assert publication_class.registry_source == PUBLICATION_CLASSIFICATION_CONFIG
+    doi_surface = chembl_policy_surface("publication", "doi")
+    assert doi_surface is not None
+    assert doi_surface.category == "reference_identifier"
+    assert doi_surface.registry_source == CHEMBL_REFERENCE_IDENTIFIER_CONFIG
+    assert chembl_reference_identifier_family_fields(
+        "mini_reference",
+        entity="publication",
+    ) == frozenset({"doi"})
     assert chembl_policy_surface("activity", "relation") is None
