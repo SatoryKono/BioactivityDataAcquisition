@@ -79,7 +79,11 @@ def normalize_profile_chembl_publication_classification_field(
     record: Mapping[str, object] | None = None,
 ) -> object:
     """Derive one ChEMBL publication classification field from raw provider type."""
-    source_value = _publication_type_source_value(value, record=record)
+    source_value = None
+    if record is not None:
+        raw_field_value = record.get("publication_type_raw")
+        if isinstance(raw_field_value, str):
+            source_value = normalize_string(raw_field_value)
     if source_value is not None:
         try:
             payload = build_publication_type_classification_payload(

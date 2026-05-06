@@ -1,5 +1,5 @@
 {
-  "artifact_id": "effective-config-8cf5a3faf38982ea",
+  "artifact_id": "effective-config-c891110b8a037882",
   "occurrence_envelope": {
     "created_at": "2025-01-01T12:00:00+00:00",
     "effective_execution_timestamp": "2025-01-01T12:00:00+00:00",
@@ -7,7 +7,7 @@
   },
   "schema_version": "1.0",
   "semantic_artifact": {
-    "artifact_id": "effective-config-8cf5a3faf38982ea",
+    "artifact_id": "effective-config-c891110b8a037882",
     "contract_refs": [],
     "dq_contract_compatibility_hash": "no_dq_policies",
     "dq_policy_refs": [],
@@ -31,10 +31,38 @@
     },
     "execution_environment": {
       "ambient_environment_policy": "excluded_unless_explicitly_materialized",
-      "environment_hash": "c277d3cf10c621b340bd924843c454083fab3d7ffdd2b9fec0ebef9398442907",
+      "environment_hash": "cd6edd25ec62f83dcf013a77ae7b41800aaf706b158ad3f1f8c47ba5f8936643",
       "materialized_env_keys": [],
       "materialized_env_overrides": {},
-      "non_materialized_semantic_env_dependencies": []
+      "non_materialized_semantic_env_dependencies": [
+        "settings.env",
+        "settings.debug",
+        "settings.test_mode",
+        "settings.data_dir",
+        "settings.strict_error_handling",
+        "settings.strict_medallion",
+        "settings.silver_dedup_timeout_seconds",
+        "settings.pii_salt_rotation_active",
+        "settings.json_encoder",
+        "settings.default_email",
+        "settings.pii_salt_current",
+        "settings.pii_salt_next",
+        "settings.pubmed_api_key",
+        "settings.uniprot_api_key",
+        "settings.openalex_api_key",
+        "settings.semanticscholar_api_key",
+        "settings.pipeline.batch_size",
+        "settings.pipeline.checkpoint_interval",
+        "settings.pipeline.relaxed_dq",
+        "settings.pipeline.health_check_mode",
+        "settings.pipeline.control_plane.required_persistence_profile",
+        "settings.pipeline.control_plane.run_manifest_enabled",
+        "settings.pipeline.control_plane.run_ledger_enabled",
+        "settings.pipeline.control_plane.checkpoint_compatibility_policy",
+        "settings.observability.metrics_enabled",
+        "settings.observability.tracing_enabled",
+        "settings.observability.audit_enabled"
+      ]
     },
     "pipeline_kind": "standard",
     "pipeline_name": "chembl_activity",

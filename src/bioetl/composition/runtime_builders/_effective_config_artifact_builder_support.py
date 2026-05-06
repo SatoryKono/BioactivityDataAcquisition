@@ -21,41 +21,16 @@ from bioetl.domain.control_plane.config_source_hashing import (
     ConfigSourceHashStrategy,
     compute_config_source_hashes,
 )
+from bioetl.domain.control_plane.effective_config_environment import (
+    semantic_runtime_env_dependencies,
+)
 from bioetl.domain.control_plane.effective_config_artifact import ConfigSourceRef
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineRunContext
     from bioetl.infrastructure.config import Settings
 
-_EXECUTION_AFFECTING_SETTINGS_SURFACES: tuple[str, ...] = (
-    "settings.env",
-    "settings.debug",
-    "settings.test_mode",
-    "settings.data_dir",
-    "settings.strict_error_handling",
-    "settings.strict_medallion",
-    "settings.silver_dedup_timeout_seconds",
-    "settings.pii_salt_rotation_active",
-    "settings.json_encoder",
-    "settings.default_email",
-    "settings.pii_salt_current",
-    "settings.pii_salt_next",
-    "settings.pubmed_api_key",
-    "settings.uniprot_api_key",
-    "settings.openalex_api_key",
-    "settings.semanticscholar_api_key",
-    "settings.pipeline.batch_size",
-    "settings.pipeline.checkpoint_interval",
-    "settings.pipeline.relaxed_dq",
-    "settings.pipeline.health_check_mode",
-    "settings.pipeline.control_plane.required_persistence_profile",
-    "settings.pipeline.control_plane.run_manifest_enabled",
-    "settings.pipeline.control_plane.run_ledger_enabled",
-    "settings.pipeline.control_plane.checkpoint_compatibility_policy",
-    "settings.observability.metrics_enabled",
-    "settings.observability.tracing_enabled",
-    "settings.observability.audit_enabled",
-)
+_EXECUTION_AFFECTING_SETTINGS_SURFACES = semantic_runtime_env_dependencies()
 
 _EXECUTION_SECRET_SETTING_SURFACES: tuple[tuple[str, str], ...] = (
     ("settings.pii_salt_current", "pii_salt_current"),
@@ -157,7 +132,9 @@ def build_execution_settings_snapshot(settings: Settings) -> dict[str, object]:
             "audit_enabled": _setting_attr(observability, "audit_enabled", False),
         },
         "secret_redaction": _build_secret_surface_inventory(settings),
-        "non_materialized_semantic_env_dependencies": [],
+        "non_materialized_semantic_env_dependencies": list(
+            _EXECUTION_AFFECTING_SETTINGS_SURFACES
+        ),
     }
     snapshot["snapshot_hash"] = _sha256_text(
         json.dumps(snapshot, sort_keys=True, separators=(",", ":"), default=str)

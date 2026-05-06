@@ -13,6 +13,9 @@ from bioetl.domain.control_plane.run_manifest import (
     RunCodeProvenance,
     RunManifest,
 )
+from scripts.engineering.qa.generate_reproducibility_support_matrix import (
+    build_reproducibility_support_matrix_markdown,
+)
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -158,6 +161,27 @@ def test_run_manifest_docs_define_replay_equivalence_levels() -> None:
 
     assert "not as a byte-identical artifact claim" in contract
     assert "semantically equivalent rather than byte-identical" in runbook
+
+
+@pytest.mark.architecture
+def test_reproducibility_support_matrix_matches_published_profiles() -> None:
+    """Generated support docs must drift-check against domain profiles."""
+    assert _read(
+        "docs/02-architecture/policies/reproducibility-support-matrix.md"
+    ) == build_reproducibility_support_matrix_markdown()
+
+
+@pytest.mark.architecture
+def test_content_hash_policy_classifies_ordered_and_set_like_fields() -> None:
+    """Content-hash docs must state list-order identity policy explicitly."""
+    policy = _read("docs/02-architecture/policies/content-hash-identity-policy.md")
+    implementation = _read("src/bioetl/domain/transformations/hashing.py")
+
+    assert "Ordered vs Set-Like Fields" in policy
+    assert "ordered identity fields by default" in policy
+    assert "`set_like_fields`" in policy
+    assert "canonical JSON string fields" in policy
+    assert "set_like_fields" in implementation
 
 
 @pytest.mark.architecture
