@@ -52,6 +52,147 @@ class _RunManifestCreateRequestInputs:
     effective_config_artifact_id: str
 
 
+def _validate_exact_replay_boundary(ctx: PipelineRunContext, context: object) -> None:
+    if not bool(getattr(ctx, "exact_replay", False)):
+        return
+    if getattr(context, "strict_exact_replay_supported", False):
+        return
+    raise RuntimeError(
+        "Pipeline execution is outside the published strict exact-replay "
+        "support boundary for this run family"
+    )
+
+
+def _build_manifest_source_refs(
+    *,
+    ctx: PipelineRunContext,
+    inputs: RunnerInputs,
+    provider: str,
+    entity: str,
+    required_persistence_profile: str,
+) -> tuple[object, ...]:
+    return _manifest_support.build_run_source_refs(
+        ctx=ctx,
+        cached_bronze=inputs.cached_bronze,
+        settings=inputs.settings,
+        provider=provider,
+        entity=entity,
+        required_persistence_profile=required_persistence_profile,
+    )
+
+
+def _build_manifest_launch_context(
+    *,
+    request_inputs: _RunManifestCreateRequestInputs,
+    reproducibility_context: object,
+) -> dict[str, object]:
+    return _manifest_support.build_launch_context_snapshot(
+        request_inputs.ctx,
+        run_type_value=request_inputs.run_type_value,
+        execution_context_value=request_inputs.execution_context_value,
+        required_persistence_profile=getattr(
+            reproducibility_context, "required_persistence_profile"
+        ),
+        strict_exact_replay_supported=getattr(
+            reproducibility_context, "strict_exact_replay_supported"
+        ),
+        reproducibility_family=getattr(reproducibility_context, "family"),
+        replay_family_contract=getattr(
+            reproducibility_context, "replay_family_contract"
+        ),
+        strict_replay_runtime_verdict=getattr(
+            reproducibility_context, "strict_replay_runtime_verdict"
+        ),
+        replay_support_scope=getattr(reproducibility_context, "support_scope"),
+        replay_support_reason=getattr(reproducibility_context, "reason"),
+    )
+
+
+def _build_replay_assessment(
+    *,
+    request_inputs: _RunManifestCreateRequestInputs,
+    reproducibility_context: object,
+    source_refs: tuple[object, ...],
+    replay_capability: ReplayCapability,
+) -> object:
+    return assess_reproducibility_policy(
+        source_refs=source_refs,
+        required_persistence_profile=getattr(
+            reproducibility_context, "required_persistence_profile"
+        ),
+        strict_exact_replay_supported=getattr(
+            reproducibility_context, "strict_exact_replay_supported"
+        ),
+        exact_replay_requested=bool(getattr(request_inputs.ctx, "exact_replay", False)),
+        resume_requested=bool(getattr(request_inputs.ctx, "resume", False)),
+        replay_capability=replay_capability,
+        run_type=request_inputs.run_type_value,
+        debug_only=bool(getattr(request_inputs.inputs.settings, "debug", False)),
+    )
+
+
+def _apply_replay_assessment(
+    launch_context: dict[str, object],
+    replay_assessment: object,
+) -> None:
+    replay_verdict = getattr(replay_assessment, "replay_readiness_verdict").value
+    launch_context.update(
+        {
+            "replay_readiness_verdict": replay_verdict,
+            "exact_replay_ready": replay_verdict == "exact_replay_ready",
+            "replay_blockers": list(getattr(replay_assessment, "blocking_gaps")),
+        }
+    )
+
+
+def _build_manifest_create_spec(
+    *,
+    request_inputs: _RunManifestCreateRequestInputs,
+    source_refs: tuple[object, ...],
+    replay_of_run_id: object,
+    replay_of_manifest_id: object,
+    code_revision: object,
+    replay_capability: ReplayCapability,
+    launch_context: dict[str, object],
+) -> RunManifestCreateSpec:
+    ctx = request_inputs.ctx
+    inputs = request_inputs.inputs
+    yaml_config = inputs.yaml_config
+    return RunManifestCreateSpec(
+        run_id=ctx.run_id,
+        run_type=getattr(ctx, "run_type", "incremental"),
+        pipeline_name=ctx.pipeline_name,
+        provider=request_inputs.provider,
+        entity=request_inputs.entity,
+        launch_context=launch_context,
+        runtime_config=_manifest_support.to_serializable_mapping(inputs.runtime_config),
+        resolved_config=_manifest_support.to_serializable_mapping(yaml_config),
+        replay_of_run_id=replay_of_run_id,
+        replay_of_manifest_id=replay_of_manifest_id,
+        source_refs=source_refs,
+        planned_artifacts=_manifest_support.build_planned_artifacts(
+            settings=inputs.settings,
+            provider=request_inputs.provider,
+            entity=request_inputs.entity,
+        ),
+        pipeline_version=get_pipeline_version(yaml_config),
+        git_commit=code_revision.git_commit,
+        source_revision_state=code_revision.source_revision_state,
+        dependency_lock_hash=code_revision.dependency_lock_hash,
+        config_hash=request_inputs.config_hash,
+        resolved_config_hash=request_inputs.resolved_config_hash,
+        effective_config_hash=request_inputs.effective_config_hash,
+        contract_ref=request_inputs.contract_ref,
+        contract_version=request_inputs.contract_version,
+        contract_schema_hash=request_inputs.contract_schema_hash,
+        dq_policy_ref=request_inputs.dq_policy_ref,
+        rule_bundle_version=request_inputs.rule_bundle_version,
+        dq_contract_compatibility_hash=request_inputs.dq_contract_compatibility_hash,
+        effective_config_artifact_id=request_inputs.effective_config_artifact_id,
+        replay_capability=replay_capability,
+    )
+
+
 def create_ledger_service(
     inputs: RunnerInputs,
     ctx: PipelineRunContext,
@@ -77,32 +218,21 @@ def build_manifest_create_request(
     """Build the canonical RunManifest create request."""
     ctx = request_inputs.ctx
     inputs = request_inputs.inputs
-    provider = request_inputs.provider
-    entity = request_inputs.entity
-    yaml_config = inputs.yaml_config
     reproducibility_context = resolve_manifest_reproducibility_context(
         ctx=ctx,
         inputs=inputs,
-        provider=provider,
-        entity=entity,
+        provider=request_inputs.provider,
+        entity=request_inputs.entity,
         contract_ref=request_inputs.contract_ref,
     )
-    if (
-        bool(getattr(ctx, "exact_replay", False))
-        and not reproducibility_context.strict_exact_replay_supported
-    ):
-        raise RuntimeError(
-            "Pipeline execution is outside the published strict exact-replay "
-            "support boundary for this run family"
-        )
-    source_refs = _manifest_support.build_run_source_refs(
+    _validate_exact_replay_boundary(ctx, reproducibility_context)
+    source_refs = _build_manifest_source_refs(
         ctx=ctx,
-        cached_bronze=inputs.cached_bronze,
-        settings=inputs.settings,
-        provider=provider,
-        entity=entity,
-        required_persistence_profile=(
-            reproducibility_context.required_persistence_profile
+        inputs=inputs,
+        provider=request_inputs.provider,
+        entity=request_inputs.entity,
+        required_persistence_profile=getattr(
+            reproducibility_context, "required_persistence_profile"
         ),
     )
     replay_of_run_id, replay_of_manifest_id = (
@@ -119,89 +249,33 @@ def build_manifest_create_request(
         source_refs=source_refs,
         resume_requested=bool(getattr(ctx, "resume", False)),
     )
-    launch_context = _manifest_support.build_launch_context_snapshot(
-        ctx,
-        run_type_value=request_inputs.run_type_value,
-        execution_context_value=request_inputs.execution_context_value,
-        required_persistence_profile=(
-            reproducibility_context.required_persistence_profile
-        ),
-        strict_exact_replay_supported=(
-            reproducibility_context.strict_exact_replay_supported
-        ),
-        reproducibility_family=reproducibility_context.family,
-        replay_family_contract=reproducibility_context.replay_family_contract,
-        strict_replay_runtime_verdict=(
-            reproducibility_context.strict_replay_runtime_verdict
-        ),
-        replay_support_scope=reproducibility_context.support_scope,
-        replay_support_reason=reproducibility_context.reason,
+    launch_context = _build_manifest_launch_context(
+        request_inputs=request_inputs,
+        reproducibility_context=reproducibility_context,
     )
-    replay_assessment = assess_reproducibility_policy(
+    replay_assessment = _build_replay_assessment(
+        request_inputs=request_inputs,
+        reproducibility_context=reproducibility_context,
         source_refs=source_refs,
-        required_persistence_profile=(
-            reproducibility_context.required_persistence_profile
-        ),
-        strict_exact_replay_supported=(
-            reproducibility_context.strict_exact_replay_supported
-        ),
-        exact_replay_requested=bool(getattr(ctx, "exact_replay", False)),
-        resume_requested=bool(getattr(ctx, "resume", False)),
         replay_capability=replay_capability,
-        run_type=request_inputs.run_type_value,
-        debug_only=bool(getattr(inputs.settings, "debug", False)),
     )
-    launch_context.update(
-        {
-            "replay_readiness_verdict": (
-                replay_assessment.replay_readiness_verdict.value
-            ),
-            "exact_replay_ready": (
-                replay_assessment.replay_readiness_verdict.value == "exact_replay_ready"
-            ),
-            "replay_blockers": list(replay_assessment.blocking_gaps),
-        }
-    )
-    request = RunManifestCreateSpec(
-        run_id=ctx.run_id,
-        run_type=getattr(ctx, "run_type", "incremental"),
-        pipeline_name=ctx.pipeline_name,
-        provider=provider,
-        entity=entity,
-        launch_context=launch_context,
-        runtime_config=_manifest_support.to_serializable_mapping(inputs.runtime_config),
-        resolved_config=_manifest_support.to_serializable_mapping(yaml_config),
+    _apply_replay_assessment(launch_context, replay_assessment)
+    request = _build_manifest_create_spec(
+        request_inputs=request_inputs,
+        source_refs=source_refs,
         replay_of_run_id=replay_of_run_id,
         replay_of_manifest_id=replay_of_manifest_id,
-        source_refs=source_refs,
-        planned_artifacts=_manifest_support.build_planned_artifacts(
-            settings=inputs.settings,
-            provider=provider,
-            entity=entity,
-        ),
-        pipeline_version=get_pipeline_version(yaml_config),
-        git_commit=code_revision.git_commit,
-        source_revision_state=code_revision.source_revision_state,
-        dependency_lock_hash=code_revision.dependency_lock_hash,
-        config_hash=request_inputs.config_hash,
-        resolved_config_hash=request_inputs.resolved_config_hash,
-        effective_config_hash=request_inputs.effective_config_hash,
-        contract_ref=request_inputs.contract_ref,
-        contract_version=request_inputs.contract_version,
-        contract_schema_hash=request_inputs.contract_schema_hash,
-        dq_policy_ref=request_inputs.dq_policy_ref,
-        rule_bundle_version=request_inputs.rule_bundle_version,
-        dq_contract_compatibility_hash=request_inputs.dq_contract_compatibility_hash,
-        effective_config_artifact_id=request_inputs.effective_config_artifact_id,
+        code_revision=code_revision,
         replay_capability=replay_capability,
+        launch_context=launch_context,
     )
     validate_required_runtime_persistence_profile(
         request=request,
-        required_persistence_profile=(
-            reproducibility_context.required_persistence_profile
+        required_persistence_profile=getattr(
+            reproducibility_context, "required_persistence_profile"
         ),
-        strict_exact_replay_supported=(
-            reproducibility_context.strict_exact_replay_supported
+        strict_exact_replay_supported=getattr(
+            reproducibility_context, "strict_exact_replay_supported"
         ),
     )
     return request

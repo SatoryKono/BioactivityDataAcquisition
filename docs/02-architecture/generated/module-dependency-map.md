@@ -5,8 +5,8 @@
 
 ## Summary
 
-- Scanned modules: `1765`
-- Internal import edges (raw): `6943`
+- Scanned modules: `1770`
+- Internal import edges (raw): `6959`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `314`
@@ -21,13 +21,13 @@ flowchart LR
     infrastructure[infrastructure]
     composition[composition]
     interfaces[interfaces]
-    application -->|1159 OK| application
-    application -->|1027 OK| domain
+    application -->|1167 OK| application
+    application -->|1029 OK| domain
     composition -->|254 OK| application
     composition -->|566 OK| composition
     composition -->|397 OK| domain
     composition -->|315 OK| infrastructure
-    domain -->|1156 OK| domain
+    domain -->|1162 OK| domain
     infrastructure -->|768 OK| domain
     infrastructure -->|931 OK| infrastructure
     interfaces -->|73 OK| application
@@ -40,13 +40,13 @@ flowchart LR
 
 | From             | To               | Imports | Policy  |
 | ---------------- | ---------------- | ------: | ------- |
-| `application`    | `application`    |    1159 | allowed |
-| `application`    | `domain`         |    1027 | allowed |
+| `application`    | `application`    |    1167 | allowed |
+| `application`    | `domain`         |    1029 | allowed |
 | `composition`    | `application`    |     254 | allowed |
 | `composition`    | `composition`    |     566 | allowed |
 | `composition`    | `domain`         |     397 | allowed |
 | `composition`    | `infrastructure` |     315 | allowed |
-| `domain`         | `domain`         |    1156 | allowed |
+| `domain`         | `domain`         |    1162 | allowed |
 | `infrastructure` | `domain`         |     768 | allowed |
 | `infrastructure` | `infrastructure` |     931 | allowed |
 | `interfaces`     | `application`    |      73 | allowed |
@@ -82,9 +82,9 @@ flowchart LR
 | `composition.factories`        | `domain.types`                  |      36 |
 | `application.core`             | `domain.context`                |      35 |
 | `infrastructure.adapters`      | `domain.exceptions`             |      34 |
+| `application.services`         | `domain.control_plane`          |      32 |
 | `infrastructure.storage`       | `domain.models`                 |      32 |
 | `composition.factories`        | `infrastructure.adapters`       |      31 |
-| `application.services`         | `domain.control_plane`          |      30 |
 | `application.services`         | `domain.value_objects`          |      28 |
 | `composition.factories`        | `infrastructure.schemas`        |      28 |
 | `infrastructure.storage`       | `domain.medallion`              |      27 |

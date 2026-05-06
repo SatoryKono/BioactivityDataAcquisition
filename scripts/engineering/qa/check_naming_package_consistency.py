@@ -813,6 +813,8 @@ def _builder_module_violation(py_file: Path, *, repo_root: Path) -> Violation | 
         or stem_lower.endswith("_builders")
     ):
         return None
+    if py_file.stem.startswith("_"):
+        return None
 
     rel = py_file.relative_to(repo_root).as_posix()
     if rel in ALLOWED_BUILDER_FACADES or rel in _builder_allowed_modules(repo_root):

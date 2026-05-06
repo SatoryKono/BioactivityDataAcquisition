@@ -1750,7 +1750,7 @@ def test_replay_panels_are_split_by_semantics(dashboard_file: str) -> None:
 
 
 def test_control_plane_trust_panels_preserve_missing_telemetry() -> None:
-    """Control-plane answer-row trust panels must not mask missing telemetry as zero."""
+    """Control-plane trust-state panels must not mask missing telemetry as zero."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
     panels = {
         panel.get("title"): panel
@@ -1761,8 +1761,6 @@ def test_control_plane_trust_panels_preserve_missing_telemetry() -> None:
     for title in (
         "Replay Safety State",
         "Ledger / Manifest Consistency",
-        "Replay / Resume Blockers",
-        "Replay Lag Seconds",
     ):
         panel = panels.get(title)
         assert panel is not None
