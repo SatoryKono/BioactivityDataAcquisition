@@ -6,6 +6,9 @@ from collections.abc import Collection, Mapping
 from dataclasses import dataclass
 from typing import Any
 
+from bioetl.domain.normalization.profiles._chembl_reference_identifier_rules import (
+    chembl_reference_identifier_rules,
+)
 from bioetl.domain.normalization.profiles._standard_profile_builder import (
     build_standard_profile,
 )
@@ -16,9 +19,6 @@ from bioetl.domain.normalization.profiles._standard_profile_spec import (
     StandardProfileSpec,
 )
 from bioetl.domain.normalization.profiles.base import NormalizationProfile
-from bioetl.domain.normalization.profiles._chembl_reference_identifier_rules import (
-    chembl_reference_identifier_rules,
-)
 
 __all__ = [
     "CHEMBL_META_FIELDS",
