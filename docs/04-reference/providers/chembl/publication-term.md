@@ -58,20 +58,31 @@ ______________________________________________________________________
 
 ### Entity ID
 
-Entity ID вычисляется как 16-символьный SHA256 prefix от канонического композитного ключа:
+`entity_id` вычисляется как 16-символьный SHA256 prefix от канонического
+композитного ключа:
 
 ```python
 composite = f"{publication_id}:{term_type}:{normalized_term}"
 entity_id = hashlib.sha256(composite.encode()).hexdigest()[:16]
 ```
 
-**Нормализация identity payload:** `publication_id` trim-only; `term` проходит
-canonical lower+strip seam для identity; `term_type` нормализуется через общий
-enum source `configs/enums/chembl.yaml`
-и schema constant `PUBLICATION_TERM_TYPES`; lowercase и пробельные варианты
-канонизируются к одному из `MESH_HEADING`, `MESH_QUALIFIER`, `KEYWORD`,
-`CONCEPT`, а неизвестные значения схлопываются в `None` и затем ловятся
-DQ/schema контрактом.
+`entity_id` является техническим digest-полем, а не бизнес-источником истины.
+Runtime-authoritative business identity для Gold/SCD/filtering:
+
+- `publication_id`
+- `term_type`
+- `term`
+
+Identity payload сначала проходит тот же canonicalization seam, что и профиль:
+
+- `publication_id` канонизируется через shared ChEMBL ID normalizer
+- `term_type` канонизируется к enum source `PUBLICATION_TERM_TYPES`
+- `term` нормализуется как title/text field с HTML/entity cleanup, unicode NFC
+  и collapsed whitespace
+
+Только после этого строится digest. Поэтому эквивалентные варианты вроде
+`chembl123`, ` CHEMBL123 ` и `<b>kinase   inhibitor</b>` не должны создавать
+разные `entity_id`.
 
 ### Извлечение терминов
 

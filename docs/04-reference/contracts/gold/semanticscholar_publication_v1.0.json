@@ -94,6 +94,22 @@
       "nullable": true,
       "description": ""
     },
+    "issn": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "issn_list": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
     "volume": {
       "type": [
         "string",
@@ -277,6 +293,22 @@
       "nullable": true,
       "description": ""
     },
+    "subject_fields_raw_json": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "subject_fields_canonical_json": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
     "publication_types": {
       "type": [
         "string",
@@ -285,7 +317,39 @@
       "nullable": true,
       "description": ""
     },
+    "publication_types_raw_json": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "publication_types_canonical_json": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
     "citation_contexts": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "citation_contexts_raw_json": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "citation_contexts_canonical_json": {
       "type": [
         "string",
         "null"
@@ -318,6 +382,22 @@
       "description": ""
     },
     "author_h_indices": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "author_h_indices_raw_json": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "author_h_indices_canonical_json": {
       "type": [
         "string",
         "null"

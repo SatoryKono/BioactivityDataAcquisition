@@ -57,6 +57,19 @@ ______________________________________________________________________
 1. Подсчёт количества ассеев для каждой фракции
 1. Выбор примера ассея для каждой фракции
 
+### Нормализация и identity
+
+Пайплайн публикует dual-field seam:
+
+- `subcellular_fraction_raw` сохраняет provider-native lexeme для аудита
+- `subcellular_fraction` хранит canonical governed-vocabulary value
+
+Business identity для active Gold config задаётся полем
+`subcellular_fraction`. `entity_id` является производным техническим digest и
+строится только из канонического `subcellular_fraction`, а не из raw lexeme.
+Это исключает drift между `Microsomes`, ` microsomes ` и другими
+канонически-эквивалентными вариантами.
+
 ______________________________________________________________________
 
 ## 4. Конфигурация

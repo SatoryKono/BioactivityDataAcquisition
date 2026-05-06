@@ -407,6 +407,37 @@ class TestPublicationTermDataSourceRecordFormat:
         assert ids1 == ids2
 
     @pytest.mark.asyncio
+    async def test_entity_id_uses_canonical_identity_sequence(self):
+        """Wrapper entity_id should stay stable across canonical-equivalent inputs."""
+        source_a = MockDataSource(
+            documents=[
+                {
+                    "publication_id": "CHEMBL1",
+                    "keywords": ["Kinase Inhibitor"],
+                    "mesh_terms": [],
+                }
+            ]
+        )
+        source_b = MockDataSource(
+            documents=[
+                {
+                    "publication_id": " chembl1 ",
+                    "keywords": ["  <b>Kinase   Inhibitor</b>  "],
+                    "mesh_terms": [],
+                }
+            ]
+        )
+        wrapper_a = PublicationTermDataSource(data_source=source_a)
+        wrapper_b = PublicationTermDataSource(data_source=source_b)
+
+        terms_a = [term async for term in wrapper_a.fetch("publication_term")]
+        terms_b = [term async for term in wrapper_b.fetch("publication_term")]
+
+        assert len(terms_a) == 1
+        assert len(terms_b) == 1
+        assert terms_a[0]["entity_id"] == terms_b[0]["entity_id"]
+
+    @pytest.mark.asyncio
     async def test_mesh_id_preserved(self):
         """Test that mesh_id is preserved in term records."""
         source = MockDataSource(documents=[SAMPLE_DOCUMENT_WITH_TERMS])

@@ -76,9 +76,9 @@ quality:
     error_message: pref_name is required and must not exceed 200 chars
   - field: bto_id
     type: pattern
-    pattern: ^BTO[_:]\d+$
+    pattern: ^BTO_\d+$
     nullable: true
-    error_message: bto_id must match BTO format (BTO_0000000 or BTO:0000000)
+    error_message: bto_id must match canonical BTO format (BTO_0000000)
   - field: bto_iri
     type: pattern
     pattern: '^https?://[^\s]+$'
@@ -99,9 +99,9 @@ quality:
     error_message: caloha_id must match CALIPHO format (TS-0000)
   - field: efo_id
     type: pattern
-    pattern: ^EFO[_:]\d+$
+    pattern: ^EFO_\d+$
     nullable: true
-    error_message: efo_id must match EFO format (EFO_0000000 or EFO:0000000)
+    error_message: efo_id must match canonical EFO format (EFO_0000000)
   - field: efo_iri
     type: pattern
     pattern: '^https?://[^\s]+$'
@@ -117,9 +117,9 @@ quality:
     error_message: Invalid EFO mapping status
   - field: uberon_id
     type: pattern
-    pattern: ^UBERON[_:]\d+$
+    pattern: ^UBERON_\d+$
     nullable: true
-    error_message: uberon_id must match UBERON format (UBERON_0000000 or UBERON:0000000)
+    error_message: uberon_id must match canonical UBERON format (UBERON_0000000)
   - field: uberon_iri
     type: pattern
     pattern: '^https?://[^\s]+$'

@@ -73,6 +73,14 @@ Rule of thumb:
 1. Use the canonical field for Silver/Gold comparability, hashing, and DQ.
 1. Do not silently collapse ontology/reference identifiers into strict enums.
 
+## Identity And Dual-Field Map
+
+| Pipeline | Runtime-authoritative business identity | Canonical seam | Raw/audit seam |
+| --- | --- | --- | --- |
+| `chembl_publication_term` | `publication_id + term_type + term` | `publication_id` through shared ChEMBL ID normalization, `term_type` through strict enum canonicalization, `term` through profile text/title cleanup before digesting `entity_id` | none beyond provider payload itself |
+| `chembl_subcellular_fraction` | `subcellular_fraction` | canonical governed-vocabulary value used for hashing and SCD identity | `subcellular_fraction_raw` preserves provider lexeme |
+| `chembl_tissue` | `tissue_id` | ontology IDs canonicalized to underscore forms and expanded into companion bundles before DQ/hash comparison | alias inputs such as `bto:...` are accepted only as source forms and must normalize away |
+
 ## ChEMBL-Specific Policy Notes
 
 - `configs/enums/chembl.yaml` remains the canonical source for strict reviewed

@@ -103,6 +103,7 @@ CANONICAL_SCHEMA_REGISTRY: tuple[CanonicalSchemaRegistryEntry, ...] = (
             "year",
             "pagination",
             "doc_type",
+            "citations",
             "provider_ids",
             "dq",
         ),
@@ -164,6 +165,51 @@ CANONICAL_SCHEMA_REGISTRY: tuple[CanonicalSchemaRegistryEntry, ...] = (
         column_groups=(
             "system",
             "identifiers",
+            "business",
+        ),
+    ),
+    CanonicalSchemaRegistryEntry(
+        provider="composite",
+        entity="activity",
+        yaml_path="composite/activity.yaml",
+        column_groups=(
+            "system",
+            "business",
+        ),
+    ),
+    CanonicalSchemaRegistryEntry(
+        provider="composite",
+        entity="assay",
+        yaml_path="composite/assay.yaml",
+        column_groups=(
+            "system",
+            "business",
+        ),
+    ),
+    CanonicalSchemaRegistryEntry(
+        provider="composite",
+        entity="molecule",
+        yaml_path="composite/molecule.yaml",
+        column_groups=(
+            "system",
+            "business",
+        ),
+    ),
+    CanonicalSchemaRegistryEntry(
+        provider="composite",
+        entity="publication",
+        yaml_path="composite/publication.yaml",
+        column_groups=(
+            "system",
+            "business",
+        ),
+    ),
+    CanonicalSchemaRegistryEntry(
+        provider="composite",
+        entity="target",
+        yaml_path="composite/target.yaml",
+        column_groups=(
+            "system",
             "business",
         ),
     ),

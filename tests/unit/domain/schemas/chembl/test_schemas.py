@@ -20,6 +20,7 @@ from bioetl.domain.schemas.chembl.publication_similarity import (
 from bioetl.domain.schemas.chembl.publication_term import PublicationTermSchema
 from bioetl.domain.schemas.chembl.target import TargetSchema
 from bioetl.domain.schemas.chembl.target_component import TargetComponentSchema
+from bioetl.domain.schemas.chembl.tissue import TissueSchema
 from tests.helpers.clock import FIXED_TEST_TIME
 
 
@@ -57,6 +58,7 @@ class TestChemblSchemas:
             PublicationTermSchema,
             TargetSchema,
             TargetComponentSchema,
+            TissueSchema,
         ],
     )
     def test_schema_definition(self, schema_cls):
@@ -234,3 +236,45 @@ class TestChemblSchemas:
 
         with pytest.raises(SchemaError, match=field_name):
             schema_cls.validate(pd.DataFrame([record]))
+
+    def test_tissue_schema_accepts_canonical_ontology_ids(
+        self,
+        base_etl_fields: dict[str, object],
+    ) -> None:
+        """Tissue schema should validate profile-canonical ontology IDs."""
+        record = {
+            **base_etl_fields,
+            "tissue_id": "CHEMBL3638177",
+            "pref_name": "Liver",
+            "bto_id": "BTO_0000759",
+            "caloha_id": "TS-1234",
+            "efo_id": "EFO_0000319",
+            "uberon_id": "UBERON_0002107",
+        }
+
+        TissueSchema.validate(pd.DataFrame([record]))
+
+    @pytest.mark.parametrize(
+        ("field_name", "invalid_value"),
+        [
+            ("bto_id", "BTO:0000759"),
+            ("efo_id", "EFO:0000319"),
+            ("uberon_id", "UBERON:0002107"),
+        ],
+    )
+    def test_tissue_schema_rejects_noncanonical_ontology_aliases(
+        self,
+        base_etl_fields: dict[str, object],
+        field_name: str,
+        invalid_value: str,
+    ) -> None:
+        """Gold strict validation should reject pre-normalization alias forms."""
+        record = {
+            **base_etl_fields,
+            "tissue_id": "CHEMBL3638177",
+            "pref_name": "Liver",
+            field_name: invalid_value,
+        }
+
+        with pytest.raises(SchemaError, match=field_name):
+            TissueSchema.validate(pd.DataFrame([record]))

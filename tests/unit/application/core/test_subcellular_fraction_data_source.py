@@ -88,6 +88,12 @@ ASSAY_DUPLICATE_FRACTION = {
     "assay_type": "B",
 }
 
+ASSAY_CANONICAL_VARIANT_FRACTION = {
+    "assay_id": "CHEMBL1003",
+    "assay_subcellular_fraction": "  microsomes  ",
+    "assay_type": "B",
+}
+
 ASSAY_WITHOUT_FRACTION = {
     "assay_id": "CHEMBL2000",
     "assay_subcellular_fraction": None,
@@ -192,7 +198,7 @@ class TestSubcellularFractionDataSourceFetch:
         source = MockDataSource(
             assays=[
                 ASSAY_WITH_FRACTION,
-                ASSAY_DUPLICATE_FRACTION,
+                ASSAY_CANONICAL_VARIANT_FRACTION,
                 ASSAY_WITH_FRACTION_2,
             ]
         )
@@ -206,6 +212,19 @@ class TestSubcellularFractionDataSourceFetch:
         fractions = [r["subcellular_fraction"] for r in records]
         assert "Microsomes" in fractions
         assert "Cytosol" in fractions
+
+    @pytest.mark.asyncio
+    async def test_fetch_deduplicates_canonical_fraction_variants(self) -> None:
+        source = MockDataSource(
+            assays=[ASSAY_WITH_FRACTION, ASSAY_CANONICAL_VARIANT_FRACTION]
+        )
+        wrapper = SubcellularFractionDataSource(data_source=source)
+
+        records = [record async for record in wrapper.fetch("subcellular_fraction")]
+
+        assert len(records) == 1
+        assert records[0]["subcellular_fraction"] == "Microsomes"
+        assert records[0]["assay_count"] == 2
 
     @pytest.mark.asyncio
     async def test_fetch_with_limit(self) -> None:

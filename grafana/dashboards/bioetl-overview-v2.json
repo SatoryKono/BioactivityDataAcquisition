@@ -149,7 +149,7 @@
             ]
           },
           "unit": "none",
-          "links": [],Raw metric starting points for this dashboard are
+          "links": []
         },
         "overrides": []
       },
@@ -1924,7 +1924,7 @@
         "x": 0,
         "y": 20
       },
-      "collapsed": false
+      "collapsed": true
     },
     {
       "id": 9018,
@@ -2500,7 +2500,7 @@
     {
       "id": 9012,
       "type": "row",
-      "title": "Diagnostics & Docs (Logs / Traces / Raw Metrics)",
+      "title": "Diagnostics & Docs",
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -2520,7 +2520,7 @@
             "y": 23
           },
           "options": {
-            "content": "<div style=\"padding:0.4rem 0.6rem;line-height:1.6\"><strong>Navigation</strong><br><br>Raw metric starting points for this dashboard are <br><strong>System Status:</strong> <code>bioetl_l0_status{pipeline=~&quot;chembl_assay&quot;,run_type=~&quot;incremental&quot;}</code>, <br><strong>Next Action:</strong> <code>bioetl_l0_next_action_route{pipeline=~&quot;chembl_assay&quot;,run_type=~&quot;incremental&quot;}</code>, <br><strong>Input Status:</strong> <code>bioetl_l0_input_status{pipeline=~&quot;chembl_assay&quot;,run_type=~&quot;incremental&quot;}</code>.<br><br>Exact blocker reasons live in the Control Plane, Runtime, Data Quality, Provider Health, and Workflow dashboards.<br><br>Historical evidence stays in the row above.</div>",
+            "content": "<div style=\"padding:0.4rem 0.6rem;line-height:1.6\">Raw metric starting points for this dashboard are<br><strong>System Status:</strong> <code>bioetl_l0_status{pipeline=~&quot;chembl_assay&quot;,run_type=~&quot;incremental&quot;}</code>,<br><strong>Next Action:</strong> <code>bioetl_l0_next_action_route{pipeline=~&quot;chembl_assay&quot;,run_type=~&quot;incremental&quot;}</code>,<br><strong>Input Status:</strong> <code>bioetl_l0_input_status{pipeline=~&quot;chembl_assay&quot;,run_type=~&quot;incremental&quot;}</code>.<br>Exact blocker reasons live in the Control Plane, Runtime, Data Quality, Provider Health, and Workflow dashboards.<br>Historical evidence stays in the row above.</div>",
             "mode": "html"
           },
           "links": [],

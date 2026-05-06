@@ -95,7 +95,7 @@ class ChEMBLTissueGoldSchema(StrictGoldContractSchema):
     # Ontology identifiers (optional)
     bto_id: Series[str] = pa.Field(
         nullable=True,
-        str_matches=r"^BTO:\d{7}$",
+        str_matches=r"^BTO_\d{7}$",
         description="BRENDA Tissue Ontology ID",
     )
     caloha_id: Series[str] = pa.Field(
@@ -105,12 +105,12 @@ class ChEMBLTissueGoldSchema(StrictGoldContractSchema):
     )
     efo_id: Series[str] = pa.Field(
         nullable=True,
-        str_matches=r"^EFO[:_]\d{7}$",
+        str_matches=r"^EFO_\d{7}$",
         description="Experimental Factor Ontology ID",
     )
     uberon_id: Series[str] = pa.Field(
         nullable=True,
-        str_matches=r"^UBERON[:_]\d{7}$",
+        str_matches=r"^UBERON_\d{7}$",
         description="Uberon Ontology ID",
     )
 

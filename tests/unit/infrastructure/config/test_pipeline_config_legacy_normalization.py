@@ -449,3 +449,27 @@ def test_load_pipeline_config_runs_read_normalize_validate_map_in_order(
     loaded = module.load_pipeline_config("demo_item")
     assert loaded is mapped_payload
     assert events == ["read", "normalize", "validate", "map"]
+
+
+def test_chembl_publication_term_business_primary_keys_follow_canonical_identity() -> (
+    None
+):
+    """Publication-term config should expose logical business identity, not digest id."""
+    load_pipeline_config.cache_clear()
+    loaded = load_pipeline_config("chembl_publication_term")
+
+    assert loaded.business_primary_keys == [
+        "publication_id",
+        "term_type",
+        "term",
+    ]
+
+
+def test_chembl_subcellular_fraction_business_primary_keys_follow_canonical_field() -> (
+    None
+):
+    """Subcellular-fraction config should use canonical fraction as business identity."""
+    load_pipeline_config.cache_clear()
+    loaded = load_pipeline_config("chembl_subcellular_fraction")
+
+    assert loaded.business_primary_keys == ["subcellular_fraction"]

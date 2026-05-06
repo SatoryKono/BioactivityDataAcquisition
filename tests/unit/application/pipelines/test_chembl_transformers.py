@@ -1287,13 +1287,38 @@ class TestPublicationTermTransformer:
         assert id1 == id2
         assert len(id1) == 16  # First 16 chars of SHA256
 
-    def test_compute_term_entity_id_case_insensitive(self, transformer):
-        """Test that entity ID is case-insensitive for term text."""
+    def test_compute_term_entity_id_normalizes_html_and_whitespace(self, transformer):
+        """Canonical title normalization should keep HTML/whitespace variants stable."""
         id1 = transformer.compute_term_entity_id("CHEMBL123", "MESH_HEADING", "Aspirin")
-        id2 = transformer.compute_term_entity_id("CHEMBL123", "MESH_HEADING", "aspirin")
-        id3 = transformer.compute_term_entity_id("CHEMBL123", "MESH_HEADING", "ASPIRIN")
+        id2 = transformer.compute_term_entity_id(
+            "CHEMBL123",
+            "MESH_HEADING",
+            "  Aspirin  ",
+        )
+        id3 = transformer.compute_term_entity_id(
+            "CHEMBL123",
+            "MESH_HEADING",
+            "<b>Aspirin</b>",
+        )
 
         assert id1 == id2 == id3
+
+    def test_compute_term_entity_id_uses_canonical_profile_identity_sequence(
+        self, transformer
+    ):
+        """Identity must follow the same canonicalization seam as the profile."""
+        canonical = transformer.compute_term_entity_id(
+            "CHEMBL123",
+            "KEYWORD",
+            "Kinase Inhibitor",
+        )
+        semantic_variant = transformer.compute_term_entity_id(
+            " chembl123 ",
+            " keyword ",
+            "  <b>Kinase   Inhibitor</b>  ",
+        )
+
+        assert canonical == semantic_variant
 
     def test_compute_term_entity_id_different_for_different_types(self, transformer):
         """Test that different term types produce different IDs."""
@@ -1430,7 +1455,7 @@ class TestPublicationTermTransformer:
         result = await transformer.transform_pre_silver(mock_context, record, index=0)
 
         assert isinstance(result, PreSilverRecord)
-        assert result.business_data["publication_id"] == "CHEMBL1135642"
+        assert str(result.business_data["publication_id"]).upper() == "CHEMBL1135642"
         assert result.business_data["term"] == "kinase"
         assert result.business_data["term_type"] == "KEYWORD"
         assert "content_hash" not in result.business_data
@@ -1447,12 +1472,35 @@ class TestPublicationTermTransformer:
         }
 
         pre_silver = await transformer.transform_pre_silver(mock_context, record, index=0)
-        legacy_result = await transformer.transform(mock_context, record, index=0)
 
         assert isinstance(pre_silver, PreSilverRecord)
-        assert legacy_result is not None
-        assert pre_silver.business_data["term_type"] == "KEYWORD"
-        assert pre_silver.entity_id == legacy_result["entity_id"]
+        assert str(pre_silver.business_data["term_type"]).upper() == "KEYWORD"
+        assert pre_silver.entity_id == transformer.compute_term_entity_id(
+            "CHEMBL1135642",
+            "KEYWORD",
+            "Aspirin",
+        )
+
+    @pytest.mark.asyncio
+    async def test_transform_pre_silver_recomputes_entity_id_from_canonical_term_payload(
+        self, transformer, mock_context
+    ):
+        """Staged identity should ignore stale upstream ids and use normalized fields."""
+        record = {
+            "entity_id": "deadbeefdeadbeef",
+            "publication_id": " chembl1135642 ",
+            "term": "  <b>aspirin</b>  ",
+            "term_type": " keyword ",
+        }
+
+        result = await transformer.transform_pre_silver(mock_context, record, index=0)
+
+        assert isinstance(result, PreSilverRecord)
+        assert result.entity_id == transformer.compute_term_entity_id(
+            "CHEMBL1135642",
+            "KEYWORD",
+            "aspirin",
+        )
 
     @pytest.mark.asyncio
     async def test_transform_pre_silver_returns_none_when_no_terms_are_extracted(
@@ -1604,10 +1652,10 @@ class TestPublicationTermTransformer:
         assert result["publication_id"] == "CHEMBL7777777"
 
     @pytest.mark.asyncio
-    async def test_transform_prefers_precomputed_entity_id(
+    async def test_transform_recomputes_entity_id_from_canonical_term_payload(
         self, transformer, mock_context
     ):
-        """Test that precomputed entity_id is used without recomputation."""
+        """Transformer must ignore stale upstream entity_id values."""
         record = {
             "publication_id": "CHEMBL1135642",
             "term": "aspirin",
@@ -1618,7 +1666,11 @@ class TestPublicationTermTransformer:
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert result["entity_id"] == "precomputed-id-123"
+        assert result["entity_id"] == transformer.compute_term_entity_id(
+            "CHEMBL1135642",
+            "KEYWORD",
+            "aspirin",
+        )
 
     def test_extract_business_data_empty_when_no_nested_terms(self, transformer):
         """Test fallback payload when raw record has no extractable terms."""
