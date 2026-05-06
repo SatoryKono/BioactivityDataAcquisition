@@ -197,14 +197,22 @@ def normalize_ncbi_taxonomy_reference_id(value: object) -> object:
     """Normalize NCBI Taxonomy identifiers to positive integer scalar form."""
     if value is None or isinstance(value, bool):
         return None
-    if isinstance(value, int):
-        return value if value > 0 else None
-    if isinstance(value, float):
-        return int(value) if value.is_integer() and value > 0 else value
+    numeric_normalized = _normalize_ncbi_taxonomy_numeric(value)
+    if numeric_normalized is not None:
+        return numeric_normalized
     text = _normalized_text(value)
     if text is None:
         return value
     return _normalize_ncbi_taxonomy_text(text) or text
+
+
+def _normalize_ncbi_taxonomy_numeric(value: object) -> object | None:
+    """Normalize numeric NCBI taxonomy representations when possible."""
+    if isinstance(value, int):
+        return value if value > 0 else None
+    if isinstance(value, float):
+        return int(value) if value.is_integer() and value > 0 else value
+    return None
 
 
 def normalize_doi_reference_id(value: object) -> object:

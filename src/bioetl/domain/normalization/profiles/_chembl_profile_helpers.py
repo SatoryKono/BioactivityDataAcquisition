@@ -16,6 +16,9 @@ from bioetl.domain.normalization.profiles._standard_profile_spec import (
     StandardProfileSpec,
 )
 from bioetl.domain.normalization.profiles.base import NormalizationProfile
+from bioetl.domain.normalization.profiles._chembl_reference_identifier_rules import (
+    chembl_reference_identifier_rules,
+)
 
 __all__ = [
     "CHEMBL_META_FIELDS",
@@ -82,6 +85,10 @@ def build_chembl_profile(
 ) -> NormalizationProfile:
     """Build a standard ChEMBL profile with shared metadata semantics."""
     groups = field_groups or ChemblProfileFieldGroups()
+    special_rules = {
+        **chembl_reference_identifier_rules(entity),
+        **(groups.special_rules or {}),
+    }
     return build_standard_profile(
         StandardProfileSpec(
             profile_name=f"chembl.{entity}",
@@ -110,6 +117,6 @@ def build_chembl_profile(
             case_fields=groups.case_fields,
             unit_fields=groups.unit_fields,
             null_fields=groups.null_fields,
-            special_rules=groups.special_rules,
+            special_rules=special_rules,
         )
     )

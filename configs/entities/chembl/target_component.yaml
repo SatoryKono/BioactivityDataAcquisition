@@ -164,11 +164,6 @@ hash_policy:
     - _index
     exclude_patterns:
     - ^_dq_
-    field_ordering:
-      target_component_synonyms: order_sensitive_json
-      target_component_xrefs: order_sensitive_json
-      protein_classifications: order_sensitive_json
-      protein_classification_ids: order_sensitive_json
     normalization:
       trim_strings: true
       round_floats:

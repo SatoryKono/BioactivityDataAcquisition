@@ -869,7 +869,9 @@ def test_chembl_activity_business_and_set_like_fields_follow_profile_family_cont
     )
 
 
-def test_chembl_activity_standard_units_fail_closed_while_raw_units_remain_reviewable() -> None:
+def test_chembl_activity_standard_units_fail_closed_while_raw_units_remain_reviewable() -> (
+    None
+):
     processor = RecordNormalizationProcessor(provider="chembl", entity_type="activity")
 
     standard_units_rule = CHEMBL_ACTIVITY_PROFILE.rule_for("standard_units")

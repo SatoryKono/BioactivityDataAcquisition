@@ -24,6 +24,7 @@ from bioetl.domain.schemas.chembl.cell_line import CellLineSchema
 from bioetl.domain.schemas.constants import ONTOLOGY_MAPPING_STATUSES
 
 from ._chembl_policy_registry import chembl_ontology_family_fields
+from ._chembl_reference_identifier_rules import chembl_reference_identifier_rules
 
 __all__ = [
     "CHEMBL_CELL_LINE_PROFILE",
@@ -58,7 +59,9 @@ _OBO_COMPANION_SPECS = {
     "clo": ("clo_id", "CLO_", CLO_ONTOLOGY_VERSION),
     "efo": ("efo_id", "EFO_", EFO_ONTOLOGY_VERSION),
 }
+_REFERENCE_IDENTIFIER_RULES = chembl_reference_identifier_rules("cell_line")
 _SPECIAL_RULES = {
+    **_REFERENCE_IDENTIFIER_RULES,
     "cellosaurus_id": (
         normalize_profile_cellosaurus_id,
         "Normalize Cellosaurus identifiers to canonical CVCL-prefixed form.",

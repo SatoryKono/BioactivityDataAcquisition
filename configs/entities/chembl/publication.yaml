@@ -116,6 +116,13 @@ quality:
     version: 1.0.0
     provider: chembl
     entity: publication
+    metadata:
+        publication_type_policy:
+            scope: source_specific
+            description: SOURCE-SPECIFIC ChEMBL publication typing policy. This pipeline accepts only the reviewed ChEMBL-native subset and maps it into the broader global publication taxonomy defined in configs/enums/chembl.yaml without redefining that global cross-provider taxonomy.
+            field_semantics:
+                publication_type_raw: Preserve the raw/native ChEMBL publication type token for traceability and provider-specific review.
+                publication_type: Store the canonical publication type mapped into the global taxonomy for normalized Silver/Gold behavior.
     # Source-specific DQ policy:
     # - publication_type uses a ChEMBL-only allowed subset and does not redefine
     #   the global taxonomy in configs/enums/chembl.yaml.
@@ -245,6 +252,10 @@ filters:
     version: 1.0.0
     provider: chembl
     entity: publication
+    metadata:
+        publication_filter_policy:
+            scope: source_specific
+            description: SOURCE-SPECIFIC ChEMBL publication filter policy. Silver and Gold filters intentionally constrain this pipeline to the reviewed ChEMBL publication subset and do not redefine the global publication taxonomy.
     # Source-specific filter policy:
     # - Silver and Gold are intentionally scoped to journal-article for the
     #   current ChEMBL publication pipeline.
@@ -340,8 +351,6 @@ hash_policy:
             - _source
         exclude_patterns:
             - ^_dq_
-        field_ordering:
-            authors: order_sensitive_json
         normalization:
             trim_strings: true
             round_floats:

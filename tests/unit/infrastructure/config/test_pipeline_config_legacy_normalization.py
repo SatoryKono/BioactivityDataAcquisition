@@ -163,7 +163,6 @@ def test_pipeline_loader_projects_root_hash_policy_as_authoritative_runtime_obje
                 "include_fields": ["activity_id", "value"],
                 "exclude_fields": ["_run_id"],
                 "exclude_patterns": ["^_dq_"],
-                "field_ordering": {"activity_properties": "order_sensitive_json"},
                 "normalization": {
                     "trim_strings": True,
                     "round_floats": {"enabled": True, "precision": 10},
@@ -185,6 +184,7 @@ def test_pipeline_loader_projects_root_hash_policy_as_authoritative_runtime_obje
     assert loaded.content_hash_policy.contract.version == "1.0.0"
     assert loaded.content_hash_policy.include_fields == ["activity_id", "value"]
     assert loaded.content_hash_policy.exclude_fields == ["_run_id"]
+    assert loaded.content_hash_policy.field_ordering == {}
 
 
 def test_pipeline_loader_rejects_non_empty_legacy_hash_shims_when_root_policy_present(
@@ -241,7 +241,69 @@ def test_pipeline_loader_rejects_non_empty_legacy_hash_shims_when_root_policy_pr
     )
 
     monkeypatch.chdir(tmp_path)
-    with pytest.raises(ValueError, match="schema.content_hash.include must be empty"):
+    with pytest.raises(
+        ValueError,
+        match=r"schema\.content_hash\.include must be empty",
+    ):
+        load_pipeline_config("chembl_activity")
+
+
+def test_pipeline_loader_rejects_chembl_field_ordering_hash_policy_mirrors(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """ChEMBL JSON ordering must stay authoritative only in domain policy/profile code."""
+    load_pipeline_config.cache_clear()
+    entities_dir = tmp_path / "configs" / "entities"
+    _write_unified_pipeline(
+        entities_dir=entities_dir,
+        provider="chembl",
+        entity="activity",
+        pipeline={
+            "pipeline_name": "chembl_activity",
+            "entity_type": "activity",
+            "provider": "chembl",
+            "business_primary_keys": ["activity_id"],
+        },
+        schema={
+            "column_groups": [
+                {"name": "system", "fields": ["_etl_ts"]},
+                {"name": "business", "fields": ["activity_id"]},
+            ],
+            "content_hash": {"include": [], "exclude": []},
+            "silver": {"include_groups": ["system", "business"]},
+            "gold": {"include_groups": ["business"]},
+        },
+        contracts={
+            "primary_key": ["activity_id"],
+            "merge_keys": ["activity_id"],
+            "hash_include": [],
+        },
+        hash_policy={
+            "provider": "chembl",
+            "entity": "activity",
+            "contract": {
+                "version": "1.0.0",
+                "migration_note": "Introduce single authoritative hash policy.",
+            },
+            "hash_policy": {
+                "algorithm": "sha256",
+                "canonicalization": "provider + canonical_json_dumps(normalized_record)",
+                "include_fields": ["activity_id"],
+                "exclude_fields": [],
+                "field_ordering": {"activity_properties": "order_sensitive_json"},
+                "normalization": {
+                    "trim_strings": True,
+                    "round_floats": {"enabled": True, "precision": 10},
+                    "dates": {"enabled": True, "format": "YYYY-MM-DD"},
+                    "null_handling": {"nan_to_null": True, "inf_to_null": True},
+                },
+            },
+        },
+    )
+
+    monkeypatch.chdir(tmp_path)
+    with pytest.raises(ValueError, match="field_ordering must be empty for ChEMBL"):
         load_pipeline_config("chembl_activity")
 
 

@@ -378,13 +378,6 @@ hash_policy:
             - _index
         exclude_patterns:
             - ^_dq_
-        field_ordering:
-            molecule_hierarchy: order_sensitive_json
-            molecule_properties: order_sensitive_json
-            molecule_structures: order_sensitive_json
-            molecule_synonyms: order_sensitive_json
-            cross_references: order_sensitive_json
-            atc_classifications: order_sensitive_json
         normalization:
             trim_strings: true
             round_floats:

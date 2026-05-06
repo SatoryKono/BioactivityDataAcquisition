@@ -5,6 +5,9 @@ from __future__ import annotations
 from bioetl.domain.normalization.profiles._chembl_policy_registry import (
     chembl_boolean_family_fields,
 )
+from bioetl.domain.normalization.profiles._chembl_reference_identifier_rules import (
+    chembl_reference_identifier_rules,
+)
 from bioetl.domain.normalization.profiles._standard_profile_builder import (
     build_standard_profile,
 )
@@ -51,12 +54,14 @@ _BOOLEAN_FIELDS = chembl_boolean_family_fields("bool_like", entity="target")
 _SET_LIKE_FIELDS = chembl_set_like_json_fields("chembl_target")
 _STRICT_JSON_FIELDS = chembl_json_fields("chembl_target")
 _NULL_FIELDS = chembl_pseudo_null_fields("target")
+_REFERENCE_IDENTIFIER_RULES = chembl_reference_identifier_rules("target")
 
 # Enum fields for strict validation
 _ENUM_FIELDS = {
     "target_type": TARGET_TYPES,
 }
 _SPECIAL_RULE_COMPONENTS = {
+    **_REFERENCE_IDENTIFIER_RULES,
     "organism": (
         normalize_profile_chembl_organism_name,
         "Normalize ChEMBL target organism display name using curated organism aliases.",

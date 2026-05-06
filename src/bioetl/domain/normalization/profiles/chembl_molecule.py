@@ -6,6 +6,9 @@ from bioetl.domain.normalization.profiles._chembl_policy_registry import (
     chembl_boolean_family_fields,
     chembl_flag_family_fields,
 )
+from bioetl.domain.normalization.profiles._chembl_reference_identifier_rules import (
+    chembl_reference_identifier_rules,
+)
 from bioetl.domain.normalization.profiles._standard_profile_builder import (
     build_standard_profile,
 )
@@ -79,8 +82,10 @@ _FLOAT_FIELDS = frozenset(
 )
 _STRICT_JSON_FIELDS = chembl_json_fields("chembl_molecule")
 _NULL_FIELDS = chembl_pseudo_null_fields("molecule")
+_REFERENCE_IDENTIFIER_RULES = chembl_reference_identifier_rules("molecule")
 
 _SPECIAL_RULES = {
+    **_REFERENCE_IDENTIFIER_RULES,
     "canonical_smiles": (
         normalize_profile_canonical_smiles,
         "Normalize canonical SMILES via the domain SMILES Value Object; invalid values collapse to None.",

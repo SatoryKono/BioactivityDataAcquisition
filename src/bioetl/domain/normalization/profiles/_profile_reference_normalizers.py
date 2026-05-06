@@ -189,8 +189,18 @@ def normalize_profile_uniprot_accession(value: object) -> object:
 
 def normalize_profile_uniprot_accessions_ordered(value: object) -> object:
     """Canonicalize UniProt accession JSON arrays while preserving source order."""
+    parsed = _deserialize_normalized_json_list(value)
+    if parsed is None:
+        return None if isinstance(value, str) else value
+    return serialize_json_canonical(
+        [normalize_uniprot_accession_reference_id(item) for item in parsed]
+    )
+
+
+def _deserialize_normalized_json_list(value: object) -> list[object] | None:
+    """Return one normalized JSON list payload or None when unavailable."""
     if not isinstance(value, str):
-        return value
+        return None
     normalized = normalize_string(value)
     if normalized is None:
         return None
@@ -198,11 +208,7 @@ def normalize_profile_uniprot_accessions_ordered(value: object) -> object:
         parsed = deserialize_json_value(normalized)
     except ValueError:
         return None
-    if not isinstance(parsed, list):
-        return None
-    return serialize_json_canonical(
-        [normalize_uniprot_accession_reference_id(item) for item in parsed]
-    )
+    return parsed if isinstance(parsed, list) else None
 
 
 def normalize_profile_uniprot_accessions(value: object) -> object:

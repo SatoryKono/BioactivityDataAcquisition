@@ -5,6 +5,9 @@ from __future__ import annotations
 from bioetl.domain.normalization.profiles._standard_profile_builder import (
     build_standard_profile,
 )
+from bioetl.domain.normalization.profiles._chembl_reference_identifier_rules import (
+    chembl_reference_identifier_rules,
+)
 from bioetl.domain.normalization.profiles.chembl_pseudo_nulls import (
     chembl_pseudo_null_fields,
 )
@@ -56,6 +59,7 @@ _TYPE_FIELDS = chembl_controlled_family_fields(
     "assay_parameter_types",
     entity="assay_parameters",
 )
+_REFERENCE_IDENTIFIER_RULES = chembl_reference_identifier_rules("assay_parameters")
 
 
 def normalize_assay_parameter_standard_units(value: object) -> object:
@@ -84,6 +88,7 @@ _TYPE_RULE = (
 
 
 _SPECIAL_RULE_COMPONENTS = {
+    **_REFERENCE_IDENTIFIER_RULES,
     "type_raw": (
         normalize_profile_text,
         "Preserve the raw assay-parameter type provider lexeme as trimmed text "

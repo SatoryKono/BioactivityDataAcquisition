@@ -22,6 +22,7 @@ from bioetl.domain.schemas.chembl.tissue import TissueSchema
 from bioetl.domain.schemas.constants import ONTOLOGY_MAPPING_STATUSES
 
 from ._chembl_policy_registry import chembl_ontology_family_fields
+from ._chembl_reference_identifier_rules import chembl_reference_identifier_rules
 
 __all__ = [
     "CHEMBL_TISSUE_PROFILE",
@@ -60,8 +61,10 @@ _OBO_COMPANION_SPECS = {
     "efo": ("efo_id", "EFO_", EFO_ONTOLOGY_VERSION),
     "uberon": ("uberon_id", "UBERON_", UBERON_ONTOLOGY_VERSION),
 }
+_REFERENCE_IDENTIFIER_RULES = chembl_reference_identifier_rules("tissue")
 _SPECIAL_RULES = (
-    {
+    _REFERENCE_IDENTIFIER_RULES
+    | {
         f"{family}_iri": (
             build_obo_companion_iri_normalizer(
                 source_field=source_field,

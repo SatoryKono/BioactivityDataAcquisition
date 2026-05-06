@@ -58,12 +58,17 @@ class PublicationTermTransformer(BaseChemblTransformer):
             business_data
         ):
             return None
+        normalizer = RecordNormalizationProcessor(
+            provider=self.provider,
+            entity_type=self.entity_type,
+        )
+        normalized_business_data = normalizer.normalize_business_data(business_data)
         entity_id = _resolve_publication_term_entity_id(
-            self, prepared_record, business_data
+            self, prepared_record, normalized_business_data
         )
         return PreSilverRecord(
             entity_id=entity_id,
-            business_data=business_data,
+            business_data=normalized_business_data,
             build_silver_record=partial(_build_publication_term_silver_record, self),
             apply_structural_policy=self._apply_structural_policy,
             apply_silver_filter=self._apply_silver_filter,

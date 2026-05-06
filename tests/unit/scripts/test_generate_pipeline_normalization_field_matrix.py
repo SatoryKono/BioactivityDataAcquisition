@@ -232,6 +232,12 @@ def _assert_publication_and_target_rows(rows: list[dict[str, str]]) -> None:
     )
 
     publication_doi = _row(rows, "chembl_publication", "publication_doi")
+    assert publication_doi["semantic_category"] == "reference_identifier"
+    assert publication_doi["controlled_vocabulary_source"] == (
+        "configs/vocab/chembl_reference_identifiers.yaml"
+    )
+    assert publication_doi["normalizer"] == "normalize_profile_doi"
+    assert publication_doi["strictness"] == "canonical_identifier"
     assert "domain_schema:present" in publication_doi["schema_coverage"]
 
     publication_type_raw = _row(rows, "chembl_publication", "publication_type_raw")
@@ -264,6 +270,16 @@ def _assert_publication_and_target_rows(rows: list[dict[str, str]]) -> None:
     assert component_type["controlled_vocabulary_source"] == (
         "configs/enums/chembl.yaml"
     )
+
+    component_accessions = _row(rows, "chembl_target", "component_accessions")
+    assert component_accessions["semantic_category"] == "reference_identifier"
+    assert component_accessions["controlled_vocabulary_source"] == (
+        "configs/vocab/chembl_reference_identifiers.yaml"
+    )
+    assert component_accessions["normalizer"] == (
+        "normalize_profile_uniprot_accessions_ordered"
+    )
+    assert component_accessions["hash_ordering"] == "order_sensitive"
 
 
 def _assert_molecule_rows(rows: list[dict[str, str]]) -> None:
@@ -333,6 +349,10 @@ def test_build_field_matrix_rows_covers_entity_profile_and_generic_rules() -> No
     assert chembl_activity_doi["normalizer"] == "normalize_profile_doi"
     assert chembl_activity_doi["include_in_content_hash"] == "true"
     assert chembl_activity_doi["hash_ordering"] == "order_sensitive"
+    assert chembl_activity_doi["semantic_category"] == "reference_identifier"
+    assert chembl_activity_doi["controlled_vocabulary_source"] == (
+        "configs/vocab/chembl_reference_identifiers.yaml"
+    )
     assert chembl_activity_doi["strictness"] == "canonical_identifier"
 
     crossref_title = _row(rows, "crossref_publication", "title")
@@ -498,7 +518,11 @@ def test_build_field_matrix_rows_exposes_reviewed_chembl_json_ordering(
     rows = build_field_matrix_rows()
     row = _row(rows, policy.pipeline_name, policy.field_name)
 
-    assert row["semantic_category"] in {"structured_json", "controlled_vocabulary"}
+    assert row["semantic_category"] in {
+        "structured_json",
+        "controlled_vocabulary",
+        "reference_identifier",
+    }
     assert row["set_like"] == ("true" if policy.is_set_like else "false")
     assert row["hash_ordering"] == policy.order_semantics
 
@@ -769,7 +793,8 @@ def test_build_field_matrix_rows_explicitly_shows_no_governed_fields_for_audit_g
     }
 
     assert governed_sources == {
-        "chembl_protein_class": "configs/vocab/chembl_controlled.yaml"
+        "chembl_compound_record": "configs/vocab/chembl_reference_identifiers.yaml",
+        "chembl_protein_class": "configs/vocab/chembl_controlled.yaml",
     }
 
 
@@ -788,7 +813,12 @@ def test_build_field_matrix_rows_aligns_chembl_taxonomy_fields_to_integer_contra
     ]:
         row = _row(rows, pipeline_name, field_name)
         assert row["normalization_source"] == "profile"
-        assert row["normalizer"] == "normalize_profile_int"
+        assert row["normalizer"] == "normalize_profile_ncbi_taxonomy_id"
+        assert row["semantic_category"] == "reference_identifier"
+        assert row["controlled_vocabulary_source"] == (
+            "configs/vocab/chembl_reference_identifiers.yaml"
+        )
+        assert row["strictness"] == "canonical_identifier"
         assert row["field_type"] == "int64"
 
 
