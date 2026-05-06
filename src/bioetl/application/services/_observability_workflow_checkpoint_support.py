@@ -184,6 +184,22 @@ def _checkpoint_taxonomy(
 ) -> str:
     if not compatible:
         return "blocked_resume"
+    configured_taxonomy = _configured_checkpoint_taxonomy(replay_context)
+    if configured_taxonomy is not None:
+        return configured_taxonomy
+    capability_taxonomy = _checkpoint_capability_taxonomy(
+        replay_capability=replay_context.get("replay_capability"),
+        exact_replay_requested=_checkpoint_exact_replay_requested(
+            checkpoint_anchors=checkpoint_anchors,
+            run_manifest=run_manifest,
+        ),
+    )
+    return capability_taxonomy or "compatible_resume"
+
+
+def _configured_checkpoint_taxonomy(
+    replay_context: dict[str, object],
+) -> str | None:
     continuation_mode = replay_context.get("continuation_mode")
     if isinstance(continuation_mode, str) and continuation_mode:
         return continuation_mode
@@ -195,17 +211,31 @@ def _checkpoint_taxonomy(
         "rebuild",
     }:
         return replay_mode
-    replay_capability = replay_context.get("replay_capability")
-    if replay_capability == "exact_replay_supported" and (
-        checkpoint_anchors.get("exact_replay") is True
-        or _requested_exact_replay(run_manifest) is True
-    ):
+    return None
+
+
+def _checkpoint_exact_replay_requested(
+    *,
+    checkpoint_anchors: dict[str, object],
+    run_manifest: RunManifestInspectionResult,
+) -> bool:
+    return checkpoint_anchors.get("exact_replay") is True or (
+        _requested_exact_replay(run_manifest) is True
+    )
+
+
+def _checkpoint_capability_taxonomy(
+    *,
+    replay_capability: object,
+    exact_replay_requested: bool,
+) -> str | None:
+    if replay_capability == "exact_replay_supported" and exact_replay_requested:
         return "exact_replay"
     if replay_capability == "resume_only":
         return "resume_only"
     if replay_capability == "rebuild_only":
         return "rebuild_only"
-    return "compatible_resume"
+    return None
 
 
 def _replay_capability(run_manifest: RunManifestInspectionResult | None) -> object:

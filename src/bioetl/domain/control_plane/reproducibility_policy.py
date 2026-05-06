@@ -3,24 +3,27 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from enum import StrEnum
 
+from bioetl.domain.control_plane._reproducibility_policy_profiles import (
+    DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
+    is_critical_reproducibility_runtime,
+    legacy_config_hash_from_resolved_config_hash,
+    normalize_required_persistence_profile,
+    resolve_replay_capability,
+)
+from bioetl.domain.control_plane._reproducibility_policy_profiles import (
+    build_snapshot_envelope_status as _raw_snapshot_envelope_status,
+)
+from bioetl.domain.control_plane._reproducibility_policy_profiles import (
+    resolve_effective_required_persistence_profile as _resolve_effective_required_persistence_profile,
+)
+from bioetl.domain.control_plane._reproducibility_policy_verdicts import (
+    ReplayReadinessVerdict,
+    resolve_replay_readiness_verdict,
+)
 from bioetl.domain.control_plane.run_manifest import ReplayCapability, RunSourceRef
 
-DEFAULT_REQUIRED_PERSISTENCE_PROFILE = "degraded_observable"
 STRICT_PERSISTENCE_PROFILES = frozenset({"replay_ready", "forensic_grade"})
-
-
-class ReplayReadinessVerdict(StrEnum):
-    """Operator-facing replay readiness classification for one run identity."""
-
-    EXACT_REPLAY_READY = "exact_replay_ready"
-    EXACT_REPLAY_BLOCKED = "exact_replay_blocked"
-    RESUME_COMPATIBLE = "resume_compatible"
-    REBUILD_ONLY = "rebuild_only"
-    INCREMENTAL_NEW_RUN = "incremental_new_run"
-    DEBUG_ONLY = "debug_only"
-    LIFECYCLE_PROJECTION_ONLY = "lifecycle_projection_only"
 
 
 @dataclass(frozen=True, slots=True)
@@ -77,14 +80,29 @@ class ReproducibilityPolicyAssessment:
         }
 
 
-def normalize_required_persistence_profile(required_profile: object) -> str:
-    """Return the canonical required persistence profile."""
-    profile = (
-        str(required_profile).strip()
-        if required_profile is not None
-        else DEFAULT_REQUIRED_PERSISTENCE_PROFILE
+def build_snapshot_envelope_status(
+    *,
+    source_refs: tuple[RunSourceRef, ...],
+    require_full_snapshot_envelope: bool = False,
+) -> SnapshotEnvelopeStatus:
+    """Return immutable snapshot evidence completeness for a run."""
+    (
+        source_count,
+        sources_with_snapshots,
+        any_input_snapshots,
+        full_snapshot_envelope,
+        require_full_snapshot_envelope,
+    ) = _raw_snapshot_envelope_status(
+        source_refs=source_refs,
+        require_full_snapshot_envelope=require_full_snapshot_envelope,
     )
-    return profile or DEFAULT_REQUIRED_PERSISTENCE_PROFILE
+    return SnapshotEnvelopeStatus(
+        source_count=source_count,
+        sources_with_snapshots=sources_with_snapshots,
+        any_input_snapshots=any_input_snapshots,
+        full_snapshot_envelope=full_snapshot_envelope,
+        require_full_snapshot_envelope=require_full_snapshot_envelope,
+    )
 
 
 def resolve_effective_required_persistence_profile(
@@ -94,84 +112,14 @@ def resolve_effective_required_persistence_profile(
     exact_replay_requested: bool = False,
     critical_runtime: bool = False,
 ) -> str:
-    """Resolve the effective policy profile for one run launch.
-
-    Default/development launches remain degraded-observable unless explicitly
-    tightened. Exact-replay and production/debug-critical launches for
-    supported families inherit the family default so the pre-run gate cannot
-    silently run below the published support boundary.
-    """
-    configured = normalize_required_persistence_profile(configured_required_profile)
-    family_default = normalize_required_persistence_profile(family_default_profile)
-    if (
-        (exact_replay_requested or critical_runtime)
-        and configured == DEFAULT_REQUIRED_PERSISTENCE_PROFILE
-        and family_default in STRICT_PERSISTENCE_PROFILES
-    ):
-        return family_default
-    return configured
-
-
-def is_critical_reproducibility_runtime(
-    *,
-    runtime_environment: object,
-    debug_mode: object = False,
-) -> bool:
-    """Return whether runtime should inherit published strict family defaults."""
-    return str(runtime_environment or "").strip().lower() == "prod" or bool(debug_mode)
-
-
-def legacy_config_hash_from_resolved_config_hash(
-    resolved_config_hash: str | None,
-) -> str | None:
-    """Return the documented legacy config_hash compatibility alias.
-
-    New control-plane surfaces carry both resolved_config_hash and
-    effective_config_hash. The legacy config_hash field is intentionally the
-    resolved-config identity while downstream consumers are migrated.
-    """
-    return resolved_config_hash
-
-
-def build_snapshot_envelope_status(
-    *,
-    source_refs: tuple[RunSourceRef, ...],
-    require_full_snapshot_envelope: bool = False,
-) -> SnapshotEnvelopeStatus:
-    """Return immutable snapshot evidence completeness for a run."""
-    source_count = len(source_refs)
-    sources_with_snapshots = sum(1 for ref in source_refs if ref.input_snapshots)
-    return SnapshotEnvelopeStatus(
-        source_count=source_count,
-        sources_with_snapshots=sources_with_snapshots,
-        any_input_snapshots=sources_with_snapshots > 0,
-        full_snapshot_envelope=source_count > 0
-        and sources_with_snapshots == source_count,
-        require_full_snapshot_envelope=require_full_snapshot_envelope,
+    """Resolve the effective policy profile against the central strict set."""
+    return _resolve_effective_required_persistence_profile(
+        configured_required_profile=configured_required_profile,
+        family_default_profile=family_default_profile,
+        strict_persistence_profiles=STRICT_PERSISTENCE_PROFILES,
+        exact_replay_requested=exact_replay_requested,
+        critical_runtime=critical_runtime,
     )
-
-
-def resolve_replay_capability(
-    *,
-    source_refs: tuple[RunSourceRef, ...],
-    resume_requested: bool,
-    require_full_snapshot_envelope: bool = False,
-) -> ReplayCapability:
-    """Classify exact replay capability from immutable source evidence."""
-    snapshot_envelope = build_snapshot_envelope_status(
-        source_refs=source_refs,
-        require_full_snapshot_envelope=require_full_snapshot_envelope,
-    )
-    exact_supported = (
-        snapshot_envelope.full_snapshot_envelope
-        if require_full_snapshot_envelope
-        else snapshot_envelope.any_input_snapshots
-    )
-    if exact_supported:
-        return ReplayCapability.EXACT_REPLAY_SUPPORTED
-    if resume_requested:
-        return ReplayCapability.RESUME_ONLY
-    return ReplayCapability.REBUILD_ONLY
 
 
 def _resolve_blocking_gaps(
@@ -213,46 +161,6 @@ def _resolve_effective_replay_capability(
         resume_requested=resume_requested,
         require_full_snapshot_envelope=require_full_snapshot_envelope,
     )
-
-
-def _normalize_run_type_token(run_type: object) -> str:
-    """Return a lowercase run-type token from enums or strings."""
-    if run_type is None:
-        return ""
-    value = getattr(run_type, "value", run_type)
-    return str(value or "").strip().lower()
-
-
-def resolve_replay_readiness_verdict(
-    *,
-    replay_capability: ReplayCapability,
-    strict_requirement_requested: bool,
-    strict_exact_replay_supported: bool,
-    blocking_gaps: tuple[str, ...] = (),
-    exact_replay_requested: bool = False,
-    resume_requested: bool = False,
-    run_type: object = None,
-    debug_only: bool = False,
-    lifecycle_projection_only: bool = False,
-) -> ReplayReadinessVerdict:
-    """Classify replay/resume/rebuild readiness without conflating modes."""
-    if lifecycle_projection_only:
-        return ReplayReadinessVerdict.LIFECYCLE_PROJECTION_ONLY
-    if (strict_requirement_requested or exact_replay_requested) and (
-        blocking_gaps
-        or not strict_exact_replay_supported
-        or replay_capability != ReplayCapability.EXACT_REPLAY_SUPPORTED
-    ):
-        return ReplayReadinessVerdict.EXACT_REPLAY_BLOCKED
-    if replay_capability == ReplayCapability.EXACT_REPLAY_SUPPORTED:
-        return ReplayReadinessVerdict.EXACT_REPLAY_READY
-    if resume_requested or replay_capability == ReplayCapability.RESUME_ONLY:
-        return ReplayReadinessVerdict.RESUME_COMPATIBLE
-    if debug_only or not strict_exact_replay_supported:
-        return ReplayReadinessVerdict.DEBUG_ONLY
-    if _normalize_run_type_token(run_type) == "incremental":
-        return ReplayReadinessVerdict.INCREMENTAL_NEW_RUN
-    return ReplayReadinessVerdict.REBUILD_ONLY
 
 
 def assess_reproducibility_policy(

@@ -4,6 +4,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from bioetl.application.services.control_plane._run_manifest_diagnostics_artifact_support import (
+    build_produced_artifact_trace as _build_produced_artifact_trace,
+)
 from bioetl.application.services.control_plane._run_manifest_diagnostics_persistence import (
     build_lineage_closure_boundary,
 )
@@ -12,10 +15,6 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_replay 
     _build_replay_parentage,
     _build_resume_contract,
     _collect_append_mode_semantic_sinks,
-    _collect_input_snapshot_content_hashes,
-    _collect_input_snapshot_ids,
-    _collect_input_snapshot_refs,
-    _compute_input_snapshot_identity_fingerprint,
     _resolve_continuation_mode,
     _resolve_exact_replay_blockers,
     _resolve_exact_replay_support_boundary,
@@ -24,9 +23,20 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_replay 
     _resolve_replay_family_contract,
     _resolve_replay_mode,
 )
+from bioetl.application.services.control_plane._run_manifest_diagnostics_snapshot_support import (
+    collect_input_snapshot_content_hashes as _collect_input_snapshot_content_hashes,
+)
+from bioetl.application.services.control_plane._run_manifest_diagnostics_snapshot_support import (
+    collect_input_snapshot_ids as _collect_input_snapshot_ids,
+)
+from bioetl.application.services.control_plane._run_manifest_diagnostics_snapshot_support import (
+    collect_input_snapshot_refs as _collect_input_snapshot_refs,
+)
+from bioetl.application.services.control_plane._run_manifest_diagnostics_snapshot_support import (
+    compute_input_snapshot_identity_fingerprint as _compute_input_snapshot_identity_fingerprint,
+)
 from bioetl.application.services.control_plane._run_manifest_diagnostics_summary import (
     _build_exact_replay_anchors,
-    _build_produced_artifact_trace,
 )
 from bioetl.domain.control_plane import RunManifest
 from bioetl.domain.control_plane.reproducibility_policy import (

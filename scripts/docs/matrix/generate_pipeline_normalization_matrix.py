@@ -56,6 +56,9 @@ from bioetl.domain.normalization.profiles import (
     NORMALIZATION_PROFILE_REGISTRY,
     resolve_normalization_profile,
 )
+from bioetl.domain.normalization.profiles.chembl_json_ordering_policy import (
+    chembl_json_fields,
+)
 from bioetl.domain.normalization.profiles._chembl_policy_registry import (
     chembl_policy_surface,
 )
@@ -1158,6 +1161,8 @@ def _semantic_category(
         policy_surface = chembl_policy_surface(entity, field_name)
         if policy_surface is not None:
             return policy_surface.category
+        if field_name in chembl_json_fields(f"{provider}_{entity}"):
+            return "structured_json"
     if REFERENCE_ID_SOURCES.get((provider, entity, field_name)) is not None:
         return "ontology_reference_identifier"
     structured_policy = _publication_structured_policy(
@@ -1188,7 +1193,43 @@ def _semantic_category(
     return strictness
 
 
-def _hash_ordering(*, include_in_hash: bool | None, set_like: bool) -> str:
+def _governed_hash_ordering(
+    *,
+    provider: str,
+    entity: str,
+    field_name: str,
+) -> str | None:
+    semantic_policy = structured_payload_policy(f"{provider}.{entity}", field_name)
+    if semantic_policy is not None:
+        if semantic_policy.collection_semantics.value == "unordered_set":
+            return "set_like"
+        return "order_sensitive"
+
+    publication_policy = _publication_structured_policy(
+        provider=provider,
+        entity=entity,
+        field_name=field_name,
+    )
+    if publication_policy is not None:
+        return publication_policy.hash_ordering
+    return None
+
+
+def _hash_ordering(
+    *,
+    provider: str,
+    entity: str,
+    field_name: str,
+    include_in_hash: bool | None,
+    set_like: bool,
+) -> str:
+    governed_ordering = _governed_hash_ordering(
+        provider=provider,
+        entity=entity,
+        field_name=field_name,
+    )
+    if governed_ordering is not None:
+        return governed_ordering
     if include_in_hash is False:
         return "not_hashed"
     if set_like:
@@ -1652,6 +1693,9 @@ def _entity_profile_row(
         "include_in_content_hash": _render_bool(profile_rule.include_in_hash),
         "set_like": _render_bool(profile_rule.set_like),
         "hash_ordering": _hash_ordering(
+            provider=provider,
+            entity=entity,
+            field_name=field_name,
             include_in_hash=profile_rule.include_in_hash,
             set_like=profile_rule.set_like,
         ),

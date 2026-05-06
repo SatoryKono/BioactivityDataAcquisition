@@ -6,6 +6,10 @@ from collections import Counter
 from dataclasses import dataclass
 from typing import cast
 
+from bioetl.application.services.control_plane._run_manifest_diagnostics_artifact_support import (
+    build_produced_artifact_trace,
+    sorted_text_items,
+)
 from bioetl.application.services.control_plane._run_manifest_diagnostics_composite import (
     build_composite_dossier_projection,
 )
@@ -57,79 +61,6 @@ class _FinalSummaryRequest:
     resume_diagnostics: dict[str, object] | None
 
 
-def _sorted_text_items(value: object) -> list[str]:
-    """Return unique text items in stable content order."""
-    if not isinstance(value, (list, tuple, set, frozenset)):
-        return []
-    return sorted({text for item in value if (text := str(item).strip())})
-
-
-def _artifact_ref_sort_key(artifact_ref: dict[str, object]) -> tuple[str, ...]:
-    """Return a stable ordering key for concrete produced artifacts."""
-    return (
-        str(artifact_ref.get("stage") or ""),
-        str(artifact_ref.get("dataset_ref") or artifact_ref.get("artifact_id") or ""),
-        str(artifact_ref.get("lineage_fragment_id") or ""),
-        str(artifact_ref.get("artifact_path") or ""),
-        str(artifact_ref.get("event_type") or ""),
-    )
-
-
-def _build_trace_artifact_ref(
-    artifact_ref: dict[str, object],
-) -> dict[str, object]:
-    """Return the concrete produced-artifact shape used by replay trace output."""
-    ordered_keys = (
-        "event_type",
-        "stage",
-        "artifact_id",
-        "dataset_ref",
-        "lineage_fragment_id",
-        "artifact_path",
-        "metadata_path",
-        "artifact_kind",
-        "record_count",
-        "total_bytes",
-        "pipeline_name",
-        "provider",
-        "entity",
-        "run_id",
-        "manifest_id",
-    )
-    return {
-        key: artifact_ref[key]
-        for key in ordered_keys
-        if key in artifact_ref and artifact_ref[key] is not None
-    }
-
-
-def _build_produced_artifact_trace(
-    *,
-    manifest: RunManifest,
-    ledger_entries_present: bool,
-    artifact_refs: list[dict[str, object]],
-) -> dict[str, object]:
-    """Return the manifest-id rooted concrete produced-artifact trace."""
-    artifacts = [
-        _build_trace_artifact_ref(artifact_ref)
-        for artifact_ref in sorted(artifact_refs, key=_artifact_ref_sort_key)
-    ]
-    missing_requirements: list[str] = []
-    if not ledger_entries_present:
-        missing_requirements.append("run_ledger_history")
-    if not artifacts:
-        missing_requirements.append("artifact_publication_event")
-    return {
-        "lookup": "run_ledger_by_manifest_id",
-        "lookup_key": manifest.manifest_id,
-        "manifest_id": manifest.manifest_id,
-        "complete": not missing_requirements,
-        "artifact_count": len(artifacts),
-        "artifacts": artifacts,
-        "missing_requirements": missing_requirements,
-    }
-
-
 def _build_exact_replay_anchors(
     *,
     manifest: RunManifest,
@@ -138,13 +69,13 @@ def _build_exact_replay_anchors(
     lineage_fragment_ids: set[str] | frozenset[str],
 ) -> dict[str, object]:
     """Return semantic replay anchors separately from occurrence diagnostics."""
-    published_artifact_ids = _sorted_text_items(
+    published_artifact_ids = sorted_text_items(
         [
             artifact_ref.get("dataset_ref") or artifact_ref.get("artifact_id")
             for artifact_ref in artifact_refs
         ]
     )
-    published_artifact_paths = _sorted_text_items(
+    published_artifact_paths = sorted_text_items(
         [artifact_ref.get("artifact_path") for artifact_ref in artifact_refs]
     )
     anchors: dict[str, object] = {
@@ -163,8 +94,8 @@ def _build_exact_replay_anchors(
         "input_snapshot_identity_fingerprint": summary.get(
             "input_snapshot_identity_fingerprint"
         ),
-        "input_snapshot_ids": _sorted_text_items(summary.get("input_snapshot_ids", [])),
-        "input_snapshot_content_hashes": _sorted_text_items(
+        "input_snapshot_ids": sorted_text_items(summary.get("input_snapshot_ids", [])),
+        "input_snapshot_content_hashes": sorted_text_items(
             summary.get("input_snapshot_content_hashes", [])
         ),
         "published_artifact_ids": published_artifact_ids,
@@ -452,7 +383,7 @@ def _build_final_summary(
         artifact_refs=request.artifact_refs,
         lineage_fragment_ids=request.lineage_fragment_ids,
     )
-    produced_artifact_trace = _build_produced_artifact_trace(
+    produced_artifact_trace = build_produced_artifact_trace(
         manifest=request.manifest,
         ledger_entries_present=bool(request.ledger_entries),
         artifact_refs=request.artifact_refs,

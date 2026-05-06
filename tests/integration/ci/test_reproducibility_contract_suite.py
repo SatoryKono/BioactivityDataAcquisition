@@ -264,6 +264,7 @@ def _make_manifest(
             pipeline_version="1.0.0",
             git_commit="abc1234",
             source_revision_state="clean",
+            dependency_lock_hash="sha256:test-lock-hash",
             config_hash=config_hash,
             resolved_config_hash="b" * 64,
             effective_config_hash="c" * 64,

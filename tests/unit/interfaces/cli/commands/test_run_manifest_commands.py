@@ -811,11 +811,11 @@ class TestRunManifestCommands:
             "effective_config_semantic_anchor: effective_config_hash" in result.output
         )
         assert "effective_config_occurrence_fields" in result.output
-        assert "legacy_config_hash_display_only: true" in result.output
+        assert '"legacy_config_hash_display_only": true' in result.output
         assert "checkpoint_identity_present: true" in result.output
         assert "checkpoint_matching_fields" in result.output
         assert "checkpoint_missing_checkpoint_fields" in result.output
-        assert "legacy_config_hash_replay_identity_anchor: false" in result.output
+        assert '"legacy_config_hash_replay_identity_anchor": false' in result.output
         assert "config_hash_compatibility_anchor" in result.output
         assert "attained_profile" in result.output
         assert "forensic_grade" in result.output

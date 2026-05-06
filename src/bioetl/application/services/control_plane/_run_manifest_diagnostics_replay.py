@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
-import hashlib
 from collections.abc import Mapping
 from typing import Literal
 
+from bioetl.application.services.control_plane._run_manifest_diagnostics_snapshot_support import (
+    lookup_mapping_path,
+)
 from bioetl.domain.control_plane import ReplayCapability, RunManifest
 from bioetl.domain.control_plane.reproducibility_policy import (
     DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
@@ -21,7 +23,6 @@ from bioetl.domain.control_plane.reproducibility_profiles import (
     build_replay_family_contract,
     resolve_reproducibility_family_profile,
 )
-from bioetl.domain.normalization import serialize_json_canonical
 
 
 def _resolve_replay_mode(
@@ -100,35 +101,100 @@ def _resolve_exact_replay_blockers(
     """Return explicit blockers preventing exact replay eligibility."""
     profile = _resolve_reproducibility_profile(manifest)
     append_mode_sinks = _collect_append_mode_semantic_sinks(manifest)
-    if (
+    if _exact_replay_is_unblocked(
+        manifest=manifest,
+        profile=profile,
+        append_mode_sinks=append_mode_sinks,
+    ):
+        return []
+    blockers = [
+        *_profile_exact_replay_blockers(profile),
+        *_append_mode_exact_replay_blockers(append_mode_sinks),
+        *_snapshot_exact_replay_blockers(
+            manifest=manifest,
+            policy_assessment=policy_assessment,
+        ),
+        *_dependency_lock_exact_replay_blockers(
+            manifest=manifest,
+            profile=profile,
+            policy_assessment=policy_assessment,
+        ),
+    ]
+    return blockers
+
+
+def _exact_replay_is_unblocked(
+    *,
+    manifest: RunManifest,
+    profile: ReproducibilityFamilyProfile,
+    append_mode_sinks: list[str],
+) -> bool:
+    return (
         profile.strict_exact_replay_supported
         and manifest.replay_capability == ReplayCapability.EXACT_REPLAY_SUPPORTED
         and not append_mode_sinks
-    ):
+    )
+
+
+def _profile_exact_replay_blockers(
+    profile: ReproducibilityFamilyProfile,
+) -> list[str]:
+    if profile.strict_exact_replay_supported:
         return []
-    blockers: list[str] = []
-    if not profile.strict_exact_replay_supported:
-        blockers.append("family_outside_supported_exact_replay_boundary")
-    if append_mode_sinks:
-        blockers.append("append_mode_semantic_outputs")
+    return ["family_outside_supported_exact_replay_boundary"]
+
+
+def _append_mode_exact_replay_blockers(append_mode_sinks: list[str]) -> list[str]:
+    if not append_mode_sinks:
+        return []
+    return ["append_mode_semantic_outputs"]
+
+
+def _snapshot_exact_replay_blockers(
+    *,
+    manifest: RunManifest,
+    policy_assessment: ReproducibilityPolicyAssessment,
+) -> list[str]:
     snapshot_envelope = policy_assessment.snapshot_envelope
     if not snapshot_envelope.any_input_snapshots or (
         snapshot_envelope.require_full_snapshot_envelope
         and not snapshot_envelope.full_snapshot_envelope
     ):
-        blockers.append("immutable_input_snapshots_missing")
-    elif manifest.replay_capability != ReplayCapability.EXACT_REPLAY_SUPPORTED:
-        blockers.append("exact_replay_capability_unavailable")
-    if (
-        profile.strict_exact_replay_supported
-        and (
-            policy_assessment.strict_requirement_requested
-            or manifest.replay_capability == ReplayCapability.EXACT_REPLAY_SUPPORTED
-        )
-        and not manifest.code_provenance.dependency_lock_hash
+        return ["immutable_input_snapshots_missing"]
+    if manifest.replay_capability != ReplayCapability.EXACT_REPLAY_SUPPORTED:
+        return ["exact_replay_capability_unavailable"]
+    return []
+
+
+def _dependency_lock_exact_replay_blockers(
+    *,
+    manifest: RunManifest,
+    profile: ReproducibilityFamilyProfile,
+    policy_assessment: ReproducibilityPolicyAssessment,
+) -> list[str]:
+    if not _requires_dependency_lock_provenance(
+        manifest=manifest,
+        profile=profile,
+        policy_assessment=policy_assessment,
     ):
-        blockers.append("dependency_lock_provenance_missing")
-    return blockers
+        return []
+    return ["dependency_lock_provenance_missing"]
+
+
+def _requires_dependency_lock_provenance(
+    *,
+    manifest: RunManifest,
+    profile: ReproducibilityFamilyProfile,
+    policy_assessment: ReproducibilityPolicyAssessment,
+) -> bool:
+    if not profile.strict_exact_replay_supported:
+        return False
+    if (
+        not policy_assessment.strict_requirement_requested
+        and manifest.replay_capability != ReplayCapability.EXACT_REPLAY_SUPPORTED
+    ):
+        return False
+    return not manifest.code_provenance.dependency_lock_hash
 
 
 def _collect_append_mode_semantic_sinks(manifest: RunManifest) -> list[str]:
@@ -264,9 +330,9 @@ def _is_full_scan_idempotent_rebuild(manifest: RunManifest) -> bool:
     for payload in (manifest.runtime_config, manifest.resolved_config):
         for candidate in (
             payload.get("loading_strategy"),
-            _lookup_mapping_path(payload, "loading", "strategy"),
-            _lookup_mapping_path(payload, "pipeline", "loading_strategy"),
-            _lookup_mapping_path(payload, "pipeline", "loading", "strategy"),
+            lookup_mapping_path(payload, "loading", "strategy"),
+            lookup_mapping_path(payload, "pipeline", "loading_strategy"),
+            lookup_mapping_path(payload, "pipeline", "loading", "strategy"),
         ):
             if str(candidate or "").strip().lower() == "full_scan_only":
                 return True
@@ -356,18 +422,18 @@ def _resolve_required_persistence_profile(manifest: RunManifest) -> str:
     """Resolve the declared minimum persistence profile from manifest context."""
     candidates = (
         manifest.launch_context.get("required_persistence_profile"),
-        _lookup_mapping_path(
+        lookup_mapping_path(
             manifest.runtime_config,
             "pipeline",
             "control_plane",
             "required_persistence_profile",
         ),
-        _lookup_mapping_path(
+        lookup_mapping_path(
             manifest.runtime_config,
             "control_plane",
             "required_persistence_profile",
         ),
-        _lookup_mapping_path(
+        lookup_mapping_path(
             manifest.runtime_config,
             "required_persistence_profile",
         ),
@@ -405,18 +471,18 @@ def _resolve_requested_checkpoint_compatibility_policy(
     """Resolve requested checkpoint compatibility policy from manifest context."""
     candidates = (
         manifest.launch_context.get("checkpoint_compatibility_policy"),
-        _lookup_mapping_path(
+        lookup_mapping_path(
             manifest.runtime_config,
             "pipeline",
             "control_plane",
             "checkpoint_compatibility_policy",
         ),
-        _lookup_mapping_path(
+        lookup_mapping_path(
             manifest.runtime_config,
             "control_plane",
             "checkpoint_compatibility_policy",
         ),
-        _lookup_mapping_path(
+        lookup_mapping_path(
             manifest.runtime_config,
             "checkpoint_compatibility_policy",
         ),
@@ -427,86 +493,3 @@ def _resolve_requested_checkpoint_compatibility_policy(
             if normalized in {"observe", "legacy_observe", "soft_fail", "hard_fail"}:
                 return normalized
     return None
-
-
-def _lookup_mapping_path(
-    mapping: Mapping[str, object],
-    *path: str,
-) -> object | None:
-    """Read one nested mapping path using only mapping-shaped objects."""
-    current: object = mapping
-    for component in path:
-        if not isinstance(current, Mapping):
-            return None
-        current = current.get(component)
-    return current
-
-
-def _collect_input_snapshot_refs(manifest: RunManifest) -> list[dict[str, object]]:
-    """Return deterministic flattened snapshot provenance extracted from source refs."""
-    refs: list[dict[str, object]] = []
-    for source_ref in manifest.source_refs:
-        for snapshot in source_ref.input_snapshots:
-            refs.append(
-                {
-                    "provider": source_ref.provider,
-                    "entity": source_ref.entity,
-                    "pipeline_name": source_ref.pipeline_name,
-                    "query": source_ref.query,
-                    "snapshot_id": snapshot.snapshot_id,
-                    "content_hash": snapshot.content_hash,
-                    "immutable_uri": snapshot.immutable_uri,
-                    "query_fingerprint": snapshot.query_fingerprint,
-                    "storage_provider": snapshot.storage_provider,
-                    "object_bucket": snapshot.object_bucket,
-                    "object_key": snapshot.object_key,
-                    "object_version_id": snapshot.object_version_id,
-                    "etag": snapshot.etag,
-                    "last_modified": snapshot.last_modified,
-                    "captured_at": snapshot.captured_at.isoformat()
-                    if snapshot.captured_at is not None
-                    else None,
-                }
-            )
-    refs.sort(
-        key=lambda item: (
-            str(item.get("provider") or ""),
-            str(item.get("entity") or ""),
-            str(item.get("pipeline_name") or ""),
-            str(item.get("snapshot_id") or ""),
-        )
-    )
-    return refs
-
-
-def _collect_input_snapshot_ids(input_snapshots: list[dict[str, object]]) -> list[str]:
-    """Return deterministic snapshot identities for resume/exact-replay anchors."""
-    return [
-        str(snapshot_id)
-        for snapshot_id in (snapshot.get("snapshot_id") for snapshot in input_snapshots)
-        if snapshot_id is not None
-    ]
-
-
-def _collect_input_snapshot_content_hashes(
-    input_snapshots: list[dict[str, object]],
-) -> list[str]:
-    """Return deterministic snapshot content hashes for operator inspection."""
-    return [
-        str(content_hash)
-        for content_hash in (
-            snapshot.get("content_hash") for snapshot in input_snapshots
-        )
-        if content_hash is not None
-    ]
-
-
-def _compute_input_snapshot_identity_fingerprint(
-    input_snapshots: list[dict[str, object]],
-) -> str | None:
-    """Compute the same stable replay-anchor fingerprint shape used by checkpoints."""
-    snapshot_ids = _collect_input_snapshot_ids(input_snapshots)
-    if not snapshot_ids:
-        return None
-    encoded = serialize_json_canonical(snapshot_ids)
-    return hashlib.sha256(encoded.encode("utf-8")).hexdigest()

@@ -4,6 +4,11 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from bioetl.application.services.control_plane.run_manifest_reproducibility_scoring_support import (
+    bounded,
+    string_items,
+    supported_boundary_block_reason,
+)
 from bioetl.domain.control_plane.reproducibility_policy import (
     STRICT_PERSISTENCE_PROFILES,
 )
@@ -122,11 +127,11 @@ def _score_determinism(summary: JsonDict) -> _ScoreCard:
     if summary.get("exact_replay_blockers"):
         score -= 2
         evidence.append("exact_replay_blockers_present")
-        blockers.extend(_string_items(summary.get("exact_replay_blockers")))
+        blockers.extend(string_items(summary.get("exact_replay_blockers")))
         refs.append("diagnostics.exact_replay_blockers")
     return _ScoreCard(
         "determinism",
-        _bounded(score),
+        bounded(score),
         tuple(evidence),
         tuple(dict.fromkeys(blockers)),
         tuple(dict.fromkeys(refs)),
@@ -150,7 +155,7 @@ def _score_idempotency(summary: JsonDict) -> _ScoreCard:
         blockers.append("missing_artifact_links_present")
     return _ScoreCard(
         "idempotency",
-        _bounded(score),
+        bounded(score),
         tuple(evidence),
         tuple(blockers),
         tuple(refs),
@@ -183,7 +188,7 @@ def _score_run_identity(summary: JsonDict) -> _ScoreCard:
             blockers.append(f"{field_name}_missing")
     return _ScoreCard(
         "run_identity",
-        _bounded(score),
+        bounded(score),
         tuple(evidence),
         tuple(blockers),
         tuple(refs),
@@ -226,7 +231,7 @@ def _score_checkpoint_safety(summary: JsonDict) -> _ScoreCard:
         blockers.append("resume_contract_missing")
     return _ScoreCard(
         "checkpoint_safety",
-        _bounded(score),
+        bounded(score),
         tuple(evidence),
         tuple(blockers),
         tuple(refs),
@@ -262,7 +267,7 @@ def _score_lineage_completeness(summary: JsonDict) -> _ScoreCard:
         evidence.append("no_lineage_fragments_observed")
     return _ScoreCard(
         "lineage_completeness",
-        _bounded(score),
+        bounded(score),
         tuple(evidence),
         tuple(blockers),
         tuple(refs),
@@ -290,14 +295,14 @@ def _score_replay_readiness(summary: JsonDict) -> _ScoreCard:
             else 2
         )
         evidence.append("exact_replay_blockers_present")
-        blocker_items.extend(_string_items(exact_replay_blockers))
+        blocker_items.extend(string_items(exact_replay_blockers))
     if summary.get("replay_mode") == "rebuild_only":
         score -= 2
         evidence.append("rebuild_only_replay_mode")
         blocker_items.append("rebuild_only_replay_mode")
     return _ScoreCard(
         "replay_readiness",
-        _bounded(score),
+        bounded(score),
         tuple(evidence),
         tuple(dict.fromkeys(blocker_items)),
         tuple(refs),
@@ -330,21 +335,11 @@ def _score_layer_consistency(summary: JsonDict) -> _ScoreCard:
         evidence.append("occurrence_only_diagnostics_exposed")
     return _ScoreCard(
         "layer_consistency",
-        _bounded(score),
+        bounded(score),
         tuple(evidence),
         tuple(blockers),
         tuple(refs),
     )
-
-
-def _bounded(score: int) -> int:
-    return max(0, min(10, score))
-
-
-def _string_items(value: object) -> tuple[str, ...]:
-    if not isinstance(value, list):
-        return ()
-    return tuple(str(item) for item in value if item is not None)
 
 
 def _evaluate_threshold_failures(
@@ -386,11 +381,11 @@ def _overall_blockers(
     score_cards: tuple[_ScoreCard, ...],
 ) -> list[str]:
     blockers: list[str] = []
-    blockers.extend(_string_items(summary.get("exact_replay_blockers")))
+    blockers.extend(string_items(summary.get("exact_replay_blockers")))
     persistence_profile = summary.get("persistence_profile")
     if isinstance(persistence_profile, dict):
         blockers.extend(
-            _string_items(
+            string_items(
                 persistence_profile.get("required_profile_missing_requirements")
             )
         )
@@ -444,7 +439,7 @@ def _build_supported_boundary_verdict(
     if blocked_outside_supported_boundary:
         verdict = "blocked_outside_supported_boundary"
         supported_boundary_satisfied = False
-        reason = _supported_boundary_block_reason(lineage_boundary)
+        reason = supported_boundary_block_reason(lineage_boundary)
     elif has_supported_boundary_gaps:
         verdict = "supported_boundary_gaps_present"
         supported_boundary_satisfied = False
@@ -464,12 +459,6 @@ def _build_supported_boundary_verdict(
         "exact_replay_support_boundary": summary.get("exact_replay_support_boundary"),
         "lineage_closure_supported": lineage_supported,
     }
-
-
-def _supported_boundary_block_reason(lineage_boundary: object) -> str:
-    if isinstance(lineage_boundary, dict) and lineage_boundary.get("reason"):
-        return str(lineage_boundary.get("reason"))
-    return "blocked_outside_supported_boundary"
 
 
 def _build_global_reproducibility_claim(

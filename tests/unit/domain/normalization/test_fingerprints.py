@@ -16,6 +16,7 @@ def _build_payload() -> dict[str, str | None]:
         pipeline_name="chembl_activity",
         run_type="incremental",
         pipeline_version=None,
+        git_commit="abc1234",
         effective_config_hash=normalize_control_plane_sha256("a" * 64),
         dq_contract_compatibility_hash=None,
         contract_ref=normalize_contract_ref(" ChemBL.Activity "),
@@ -41,6 +42,7 @@ def test_execution_identity_fingerprint_is_deterministic_for_equivalent_payloads
         "dq_contract_compatibility_hash": payload["dq_contract_compatibility_hash"],
         "effective_config_hash": payload["effective_config_hash"],
         "pipeline_version": payload["pipeline_version"],
+        "git_commit": payload["git_commit"],
         "run_type": payload["run_type"],
         "pipeline_name": payload["pipeline_name"],
     }
@@ -55,7 +57,7 @@ def test_execution_identity_fingerprint_matches_golden_value() -> None:
 
     assert (
         compute_execution_identity_fingerprint(payload)
-        == "fd2ede3ebbd45baed981cd76fc869fde41b97722b1245c59b81eb82a265b4406"
+        == "ac852d4296c8862ab1e6a8f082c9a0be63223176b597efd7ab7a1f548bb78879"
     )
 
 

@@ -235,6 +235,7 @@
   "replay_readiness_verdict": "exact_replay_blocked",
   "reproducibility_audit_score": {
     "blockers": [
+      "dependency_lock_hash_missing",
       "dependency_lock_provenance",
       "identity_graph_incomplete",
       "produced_artifact_trace"
@@ -322,7 +323,9 @@
         "score": 10
       },
       "run_identity": {
-        "blockers": [],
+        "blockers": [
+          "dependency_lock_hash_missing"
+        ],
         "confidence": "high",
         "evidence": [
           "manifest_id_present",
@@ -332,7 +335,8 @@
           "effective_config_artifact_id_present",
           "contract_ref_present",
           "git_commit_present",
-          "source_revision_state_present"
+          "source_revision_state_present",
+          "dependency_lock_hash_missing"
         ],
         "evidence_refs": [
           "diagnostics.manifest_id",
@@ -342,15 +346,17 @@
           "diagnostics.effective_config_artifact_id",
           "diagnostics.contract_ref",
           "diagnostics.git_commit",
-          "diagnostics.source_revision_state"
+          "diagnostics.source_revision_state",
+          "diagnostics.dependency_lock_hash"
         ],
-        "score": 10
+        "score": 9
       }
     },
     "contract_version": "1.2.0",
     "evidence_refs": [
       "diagnostics.artifact_refs",
       "diagnostics.contract_ref",
+      "diagnostics.dependency_lock_hash",
       "diagnostics.effective_config_artifact_id",
       "diagnostics.effective_config_hash",
       "diagnostics.exact_replay_blockers",
@@ -374,6 +380,7 @@
       "evidence_refs": [
         "diagnostics.artifact_refs",
         "diagnostics.contract_ref",
+        "diagnostics.dependency_lock_hash",
         "diagnostics.effective_config_artifact_id",
         "diagnostics.effective_config_hash",
         "diagnostics.exact_replay_blockers",
@@ -412,7 +419,7 @@
       "scope": "project_wide_exact_replay",
       "verdict": "universal_exact_replay_not_claimed"
     },
-    "overall_score": 9.0,
+    "overall_score": 8.9,
     "required_profile": "replay_ready",
     "scale": "0-10",
     "schema_version": "2.0",

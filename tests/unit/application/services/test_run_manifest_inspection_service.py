@@ -71,7 +71,7 @@ def _expected_code_provenance_state(manifest: RunManifest) -> dict[str, object]:
         blockers.append("source_revision_state_not_clean")
     if not manifest.code_provenance.dependency_lock_hash:
         blockers.append("dependency_lock_hash_missing")
-    return {
+    state: dict[str, object] = {
         "git_commit": manifest.code_provenance.git_commit,
         "source_revision_state": manifest.code_provenance.source_revision_state,
         "dependency_lock_state": (
@@ -82,6 +82,9 @@ def _expected_code_provenance_state(manifest: RunManifest) -> dict[str, object]:
         "strict_code_provenance_ready": not blockers,
         "strict_code_provenance_blockers": blockers,
     }
+    if manifest.code_provenance.dependency_lock_hash is not None:
+        state["dependency_lock_hash"] = manifest.code_provenance.dependency_lock_hash
+    return state
 
 
 _InMemoryRunManifestStore = InMemoryRunManifestStore
@@ -184,6 +187,7 @@ def _make_manifest(
         overrides=RunManifestOverrides(
             resolved_config_hash=resolved_config_hash,
             effective_config_hash=effective_config_hash,
+            dependency_lock_hash="sha256:deps-inspection",
             launch_context={"limit": limit, "exact_replay": True},
             runtime_config={
                 "run_type": run_type.value,
@@ -238,7 +242,8 @@ def test_show_resolves_manifest_by_run_id_and_includes_ledger_history() -> None:
         "effective_config_hash": _VALID_EFFECTIVE_CONFIG_HASH,
         "git_commit": "abc1234",
         "source_revision_state": "clean",
-        "dependency_lock_state": "missing",
+        "dependency_lock_state": "present",
+        "dependency_lock_hash": "sha256:deps-inspection",
         "code_provenance_state": _expected_code_provenance_state(manifest),
         "contract_ref": "chembl.activity",
         "contract_version": "1.2.0",
@@ -262,7 +267,7 @@ def test_show_resolves_manifest_by_run_id_and_includes_ledger_history() -> None:
         "replay_capability_reason": "immutable_input_snapshots_present",
         "exact_replay_eligible": True,
         "exact_replay_blockers": [],
-        "replay_readiness_verdict": "exact_replay_blocked",
+        "replay_readiness_verdict": "exact_replay_ready",
         "append_mode_semantic_sinks": [],
         "resume_contract": _expected_resume_contract(manifest),
         "resume_diagnostics": None,
@@ -271,7 +276,7 @@ def test_show_resolves_manifest_by_run_id_and_includes_ledger_history() -> None:
         "input_snapshot_content_hashes": ["sha256:snapshot-1"],
         "input_snapshot_identity_fingerprint": _SNAPSHOT_IDENTITY_FINGERPRINT,
         "replay_mode": "exact_replay",
-        "operator_replay_mode": "Exact Replay Blocked",
+        "operator_replay_mode": "Exact Replay",
         "snapshot_status": "full",
         "continuation_mode": "exact_replay",
         "input_snapshot_count": 1,
@@ -375,7 +380,8 @@ def _expected_identity_graph_without_ledger(
         "effective_config_hash": _VALID_EFFECTIVE_CONFIG_HASH,
         "git_commit": "abc1234",
         "source_revision_state": "clean",
-        "dependency_lock_state": "missing",
+        "dependency_lock_state": "present",
+        "dependency_lock_hash": "sha256:deps-inspection",
         "code_provenance_state": _expected_code_provenance_state(manifest),
         "contract_ref": "chembl.activity",
         "contract_version": "1.2.0",
@@ -406,7 +412,7 @@ def _expected_identity_graph_without_ledger(
         "input_snapshot_content_hashes": ["sha256:snapshot-1"],
         "input_snapshot_identity_fingerprint": _SNAPSHOT_IDENTITY_FINGERPRINT,
         "replay_mode": "exact_replay",
-        "operator_replay_mode": "Exact Replay Blocked",
+        "operator_replay_mode": "Exact Replay",
         "snapshot_status": "full",
         "continuation_mode": "exact_replay",
         "input_snapshot_count": 1,
@@ -442,7 +448,8 @@ def _expected_diagnostics_without_ledger(
         "pipeline_version": "1.0.0",
         "git_commit": "abc1234",
         "source_revision_state": "clean",
-        "dependency_lock_state": "missing",
+        "dependency_lock_state": "present",
+        "dependency_lock_hash": "sha256:deps-inspection",
         "code_provenance_state": _expected_code_provenance_state(manifest),
         "contract_ref": "chembl.activity",
         "contract_version": "1.2.0",
@@ -457,7 +464,7 @@ def _expected_diagnostics_without_ledger(
         "replay_capability_reason": "immutable_input_snapshots_present",
         "exact_replay_eligible": True,
         "exact_replay_blockers": [],
-        "replay_readiness_verdict": "exact_replay_blocked",
+        "replay_readiness_verdict": "exact_replay_ready",
         "append_mode_semantic_sinks": [],
         "resume_contract": _expected_resume_contract(manifest),
         "resume_diagnostics": None,
@@ -466,7 +473,7 @@ def _expected_diagnostics_without_ledger(
         "input_snapshot_content_hashes": ["sha256:snapshot-1"],
         "input_snapshot_identity_fingerprint": _SNAPSHOT_IDENTITY_FINGERPRINT,
         "replay_mode": "exact_replay",
-        "operator_replay_mode": "Exact Replay Blocked",
+        "operator_replay_mode": "Exact Replay",
         "snapshot_status": "full",
         "continuation_mode": "exact_replay",
         "input_snapshot_count": 1,
@@ -501,7 +508,7 @@ def _expected_diagnostics_without_ledger(
             "surfaces": {
                 "control_plane_manifest": True,
                 "effective_config_artifact": True,
-                "dependency_lock_provenance": False,
+                "dependency_lock_provenance": True,
                 "strict_replay_execution_context_support": True,
                 "immutable_input_snapshots": True,
                 "exact_replay_capability": True,
@@ -513,11 +520,9 @@ def _expected_diagnostics_without_ledger(
             },
             "required_profile_missing_requirements": [],
             "replay_ready_missing_requirements": [
-                "dependency_lock_provenance",
                 "produced_artifact_trace",
             ],
             "forensic_grade_missing_requirements": [
-                "dependency_lock_provenance",
                 "produced_artifact_trace",
                 "run_ledger_history",
             ],
@@ -586,7 +591,6 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
     assert result.diagnostics["persistence_profile"][
         "forensic_grade_missing_requirements"
     ] == [
-        "dependency_lock_provenance",
         "produced_artifact_trace",
         "run_ledger_history",
     ]
