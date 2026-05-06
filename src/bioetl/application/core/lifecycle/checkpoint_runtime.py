@@ -17,6 +17,11 @@ CheckpointCompatibilityDisposition = Literal[
     "soft_fail_blocked",
     "hard_fail_raised",
 ]
+CheckpointMissingContextDisposition = Literal[
+    "missing_context_blocked",
+    "legacy_missing_context_loaded_degraded",
+    "missing_context_hard_fail_raised",
+]
 
 
 def validate_compatibility_policy(
@@ -44,6 +49,20 @@ def resolve_current_metadata(
 ) -> CheckpointMetadata | None:
     """Return explicit metadata when provided, otherwise fall back to default."""
     return current_metadata if current_metadata is not None else default_metadata
+
+
+def missing_compatibility_context_messages(
+    *,
+    current_metadata: CheckpointMetadata | None,
+    service_available: bool,
+) -> list[str]:
+    """Return deterministic reasons why checkpoint compatibility cannot run."""
+    messages: list[str] = []
+    if current_metadata is None:
+        messages.append("Missing current checkpoint metadata for resume validation")
+    if not service_available:
+        messages.append("Missing checkpoint compatibility service for resume validation")
+    return messages or ["Missing checkpoint compatibility context"]
 
 
 def _prefer_identity_value(
@@ -222,6 +241,57 @@ def handle_incompatible_checkpoint(
     )
 
 
+def handle_missing_compatibility_context(
+    *,
+    logger: LoggerPort,
+    pipeline_name: str,
+    compatibility_policy: CheckpointCompatibilityPolicy,
+    current_metadata: CheckpointMetadata | None,
+    checkpoint_metadata: CheckpointMetadata,
+    service_available: bool,
+) -> CheckpointMetadata | None:
+    """Apply configured policy when resume compatibility cannot be validated."""
+    disposition = resolve_missing_compatibility_context_disposition(
+        compatibility_policy=compatibility_policy,
+    )
+    messages = missing_compatibility_context_messages(
+        current_metadata=current_metadata,
+        service_available=service_available,
+    )
+    degraded_resume_loaded = disposition == (
+        "legacy_missing_context_loaded_degraded"
+    )
+    payload = {
+        "pipeline": pipeline_name,
+        "compatibility_policy": compatibility_policy,
+        "compatibility_disposition": disposition,
+        "resume_rejected": not degraded_resume_loaded,
+        "messages": messages,
+        "checkpoint_metadata": checkpoint_metadata.to_dict(),
+        "current_identity": _checkpoint_identity_payload(current_metadata),
+        "checkpoint_identity": _checkpoint_identity_payload(checkpoint_metadata),
+        "compatibility_service_available": service_available,
+    }
+    if disposition == "legacy_missing_context_loaded_degraded":
+        logger.warning(
+            "Checkpoint compatibility context missing; "
+            "legacy degraded resume continues.",
+            **payload,
+        )
+        return checkpoint_metadata
+    if disposition == "missing_context_blocked":
+        logger.warning(
+            "Checkpoint compatibility context missing; resume blocked.",
+            **payload,
+        )
+        return None
+    raise ValueError(
+        "Checkpoint resume requires compatibility context and hard_fail policy "
+        "is enabled: "
+        + "; ".join(messages)
+    )
+
+
 def _checkpoint_identity_payload(
     metadata: CheckpointMetadata | None,
 ) -> dict[str, object | None]:
@@ -271,12 +341,28 @@ def resolve_incompatible_checkpoint_disposition(
     return "hard_fail_raised"
 
 
+def resolve_missing_compatibility_context_disposition(
+    *,
+    compatibility_policy: CheckpointCompatibilityPolicy,
+) -> CheckpointMissingContextDisposition:
+    """Return bounded disposition for missing resume compatibility context."""
+    if compatibility_policy == "legacy_observe":
+        return "legacy_missing_context_loaded_degraded"
+    if compatibility_policy == "hard_fail":
+        return "missing_context_hard_fail_raised"
+    return "missing_context_blocked"
+
+
 __all__ = [
     "CheckpointCompatibilityDisposition",
+    "CheckpointMissingContextDisposition",
     "CheckpointCompatibilityPolicy",
     "enrich_metadata_with_execution_identity",
     "handle_incompatible_checkpoint",
+    "handle_missing_compatibility_context",
+    "missing_compatibility_context_messages",
     "resolve_current_metadata",
     "resolve_incompatible_checkpoint_disposition",
+    "resolve_missing_compatibility_context_disposition",
     "validate_compatibility_policy",
 ]
