@@ -50,6 +50,27 @@ Before hashing:
    `src/bioetl/domain/serialization.py` /
    `src/bioetl/domain/normalization/json.py`.
 
+## Ordered vs Set-Like Fields
+
+All list-like fields are **ordered identity fields by default**. Changing item
+order changes `content_hash` unless the caller explicitly classifies a field as
+set-like through `set_like_fields`.
+
+Field-order classes:
+
+1. Ordered list fields: default policy; used when order is semantically material.
+1. Set-like list fields: caller must pass the field path/name through
+   `set_like_fields`; hashing sorts canonicalized elements before serialization.
+1. Canonical JSON string fields: strings that contain JSON are decoded,
+   normalized, and serialized canonically before hashing.
+1. Excluded metadata fields: any field whose name starts with `_` is ignored
+   regardless of value or ordering.
+
+The set-like override is implemented in
+`src/bioetl/domain/transformations/hashing.py` and is part of the public hash
+contract: new unordered business fields must be added deliberately, with tests,
+rather than relying on accidental list ordering.
+
 ### Metadata exclusion policy (MUST)
 
 A field **MUST NOT** affect identity/hash if its name starts with `_`.

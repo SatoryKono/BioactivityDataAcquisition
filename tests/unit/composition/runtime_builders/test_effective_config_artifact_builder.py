@@ -22,6 +22,9 @@ from bioetl.composition.runtime_builders.effective_config_artifact_builder impor
     create_and_persist_composite_effective_config_artifact,
     create_and_persist_effective_config_artifact,
 )
+from bioetl.domain.control_plane.effective_config_environment import (
+    SEMANTIC_RUNTIME_ENV_DEPENDENCIES,
+)
 from bioetl.composition.runtime_builders.inputs_resolver import RunnerInputs
 from bioetl.domain.control_plane.config_source_hashing import (
     compute_canonical_yaml_sha256,
@@ -140,6 +143,34 @@ def test_execution_settings_snapshot_redacts_secret_values_and_hashes_surfaces()
     assert semantic_scholar_surface["present"] is True
     assert str(pubmed_surface["value_hash"]).startswith("sha256:")
     assert str(semantic_scholar_surface["value_hash"]).startswith("sha256:")
+    assert snapshot["non_materialized_semantic_env_dependencies"] == list(
+        SEMANTIC_RUNTIME_ENV_DEPENDENCIES
+    )
+
+
+def test_effective_config_artifact_publishes_semantic_runtime_env_dependencies() -> (
+    None
+):
+    service = create_effective_config_service()
+
+    artifact = service.create_effective_config_artifact(
+        pipeline_name="chembl_activity",
+        pipeline_kind="standard",
+        resolved_config={"pipeline": {"name": "chembl_activity"}},
+        runtime_overrides={
+            "cli": {"limit": 25},
+            "runtime": {"exact_replay": True},
+        },
+        source_refs=[],
+    )
+
+    assert artifact.execution_environment.materialized_env_keys == ()
+    assert artifact.execution_environment.ambient_environment_policy == (
+        "excluded_unless_explicitly_materialized"
+    )
+    assert artifact.execution_environment.non_materialized_semantic_env_dependencies == (
+        SEMANTIC_RUNTIME_ENV_DEPENDENCIES
+    )
 
 
 def test_build_effective_config_source_refs_is_stable_across_equivalent_calls(

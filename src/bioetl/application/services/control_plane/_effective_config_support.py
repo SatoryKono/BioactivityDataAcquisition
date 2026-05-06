@@ -22,6 +22,10 @@ from bioetl.domain.control_plane.effective_config_artifact import (
     RuntimeOverrideSnapshot,
     SourceClassProvenance,
 )
+from bioetl.domain.control_plane.effective_config_environment import (
+    AMBIENT_ENVIRONMENT_POLICY,
+    semantic_runtime_env_dependencies,
+)
 from bioetl.domain.control_plane.reproducibility_policy import (
     STRICT_PERSISTENCE_PROFILES,
     normalize_required_persistence_profile,
@@ -219,16 +223,16 @@ def build_execution_environment_snapshot(
         str(key): to_jsonable(value)
         for key, value in sorted(env_overrides.items(), key=lambda item: str(item[0]))
     }
-    semantic_dependencies: tuple[str, ...] = ()
+    semantic_dependencies = semantic_runtime_env_dependencies()
     snapshot_payload = {
         "materialized_env_overrides": materialized_env_overrides,
         "non_materialized_semantic_env_dependencies": semantic_dependencies,
-        "ambient_environment_policy": "excluded_unless_explicitly_materialized",
+        "ambient_environment_policy": AMBIENT_ENVIRONMENT_POLICY,
     }
     return ExecutionEnvironmentSnapshot(
         materialized_env_keys=tuple(materialized_env_overrides),
         materialized_env_overrides=materialized_env_overrides,
-        ambient_environment_policy="excluded_unless_explicitly_materialized",
+        ambient_environment_policy=AMBIENT_ENVIRONMENT_POLICY,
         non_materialized_semantic_env_dependencies=semantic_dependencies,
         environment_hash=stable_hash(snapshot_payload),
     )

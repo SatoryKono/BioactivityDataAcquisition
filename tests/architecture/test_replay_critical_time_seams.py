@@ -14,8 +14,10 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 TARGETS: tuple[Path, ...] = (
+    Path("src/bioetl/domain/transformations"),
     Path("src/bioetl/application/runtime_timestamps.py"),
     Path("src/bioetl/application/composite/checkpoint"),
+    Path("src/bioetl/application/services/control_plane"),
     Path("src/bioetl/application/services/control_plane/run_manifest_service.py"),
     Path("src/bioetl/composition/_pipeline_execution.py"),
 )
