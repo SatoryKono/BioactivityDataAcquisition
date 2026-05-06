@@ -1924,330 +1924,328 @@
         "x": 0,
         "y": 20
       },
-      "collapsed": false,
-      "panels": [
-        {
-          "id": 9015,
-          "type": "timeseries",
-          "title": "Runtime Blockers Trend",
-          "gridPos": {
-            "h": 8,
-            "w": 8,
-            "x": 0,
-            "y": 21
+      "collapsed": false
+    },
+    {
+      "id": 9018,
+      "type": "timeseries",
+      "title": "Runtime Blockers Trend",
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 21
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
           },
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "custom": {
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "drawStyle": "line",
-                "fillOpacity": 10,
-                "gradientMode": "none",
-                "hideFrom": {
-                  "tooltip": false,
-                  "viz": false,
-                  "legend": false
-                },
-                "lineInterpolation": "linear",
-                "lineWidth": 1,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "never",
-                "spanNulls": true
-              },
-              "mappings": [
-                {
-                  "type": "value",
-                  "options": {
-                    "0": {
-                      "text": "OK",
-                      "color": "green"
-                    },
-                    "1": {
-                      "text": "WARNING",
-                      "color": "orange"
-                    },
-                    "2": {
-                      "text": "CRITICAL",
-                      "color": "red"
-                    },
-                    "3": {
-                      "text": "CRITICAL",
-                      "color": "red"
-                    }
-                  }
-                }
-              ],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "orange",
-                    "value": 1
-                  },
-                  {
-                    "color": "red",
-                    "value": 2
-                  }
-                ]
-              },
-              "unit": "none"
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "tooltip": false,
+              "viz": false,
+              "legend": false
             },
-            "overrides": []
-          },
-          "options": {
-            "legend": {
-              "calcs": [],
-              "displayMode": "list",
-              "placement": "bottom",
-              "showLegend": true
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
             },
-            "tooltip": {
-              "mode": "single",
-              "sort": "none"
-            }
+            "showPoints": "never",
+            "spanNulls": true
           },
-          "targets": [
+          "mappings": [
             {
-              "expr": "bioetl_l1_runtime_blocker_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}",
-              "refId": "A",
-              "legendFormat": "{{pipeline}}/{{run_type}}"
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "OK",
+                  "color": "green"
+                },
+                "1": {
+                  "text": "WARNING",
+                  "color": "orange"
+                },
+                "2": {
+                  "text": "CRITICAL",
+                  "color": "red"
+                },
+                "3": {
+                  "text": "CRITICAL",
+                  "color": "red"
+                }
+              }
             }
           ],
-          "description": "24-hour historical trend of runtime blocker status. Shows OK (0), WARNING (1), CRITICAL (2 or 3), or UNKNOWN. Click on Runtime dashboard for detailed blocker conditions."
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 2
+              }
+            ]
+          },
+          "unit": "none"
         },
-        {
-          "id": 9016,
-          "type": "timeseries",
-          "title": "DQ Status Trend",
-          "gridPos": {
-            "h": 8,
-            "w": 8,
-            "x": 8,
-            "y": 21
-          },
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "custom": {
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "drawStyle": "line",
-                "fillOpacity": 10,
-                "gradientMode": "none",
-                "hideFrom": {
-                  "tooltip": false,
-                  "viz": false,
-                  "legend": false
-                },
-                "lineInterpolation": "linear",
-                "lineWidth": 1,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "never",
-                "spanNulls": true
-              },
-              "mappings": [
-                {
-                  "type": "value",
-                  "options": {
-                    "0": {
-                      "text": "OK",
-                      "color": "green"
-                    },
-                    "1": {
-                      "text": "WARNING",
-                      "color": "orange"
-                    },
-                    "2": {
-                      "text": "CRITICAL",
-                      "color": "red"
-                    },
-                    "3": {
-                      "text": "CRITICAL",
-                      "color": "red"
-                    }
-                  }
-                }
-              ],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "orange",
-                    "value": 1
-                  },
-                  {
-                    "color": "red",
-                    "value": 2
-                  }
-                ]
-              },
-              "unit": "none"
-            },
-            "overrides": []
-          },
-          "options": {
-            "legend": {
-              "calcs": [],
-              "displayMode": "list",
-              "placement": "bottom",
-              "showLegend": true
-            },
-            "tooltip": {
-              "mode": "single",
-              "sort": "none"
-            }
-          },
-          "targets": [
-            {
-              "expr": "bioetl_l1_dq_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}",
-              "refId": "A",
-              "legendFormat": "{{pipeline}}"
-            }
-          ],
-          "description": "24-hour historical trend of DQ status. Shows OK (0), WARNING (1), CRITICAL (2 or 3), or UNKNOWN. Click on Data Quality dashboard for detailed DQ conditions."
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
         },
-        {
-          "id": 9017,
-          "type": "timeseries",
-          "title": "Gold Lifecycle Trend",
-          "gridPos": {
-            "h": 8,
-            "w": 8,
-            "x": 16,
-            "y": 21
-          },
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "custom": {
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "drawStyle": "line",
-                "fillOpacity": 10,
-                "gradientMode": "none",
-                "hideFrom": {
-                  "tooltip": false,
-                  "viz": false,
-                  "legend": false
-                },
-                "lineInterpolation": "linear",
-                "lineWidth": 1,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "never",
-                "spanNulls": true
-              },
-              "mappings": [
-                {
-                  "type": "value",
-                  "options": {
-                    "0": {
-                      "text": "OK",
-                      "color": "green"
-                    },
-                    "1": {
-                      "text": "WARNING",
-                      "color": "orange"
-                    },
-                    "2": {
-                      "text": "CRITICAL",
-                      "color": "red"
-                    },
-                    "3": {
-                      "text": "CRITICAL",
-                      "color": "red"
-                    }
-                  }
-                }
-              ],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "orange",
-                    "value": 1
-                  },
-                  {
-                    "color": "red",
-                    "value": 2
-                  }
-                ]
-              },
-              "unit": "none"
-            },
-            "overrides": []
-          },
-          "options": {
-            "legend": {
-              "calcs": [],
-              "displayMode": "list",
-              "placement": "bottom",
-              "showLegend": true
-            },
-            "tooltip": {
-              "mode": "single",
-              "sort": "none"
-            }
-          },
-          "targets": [
-            {
-              "expr": "bioetl_l1_gold_lifecycle_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}",
-              "refId": "A",
-              "legendFormat": "{{pipeline}}/{{run_type}}/{{lifecycle_state}}"
-            }
-          ],
-          "description": "24-hour historical trend of gold lifecycle status. Shows OK (0), WARNING (1), CRITICAL (2 or 3), or UNKNOWN. Disabled Gold stage returns OK as a valid non-error state."
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
         }
-      ]
+      },
+      "targets": [
+        {
+          "expr": "bioetl_l1_runtime_blocker_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}",
+          "refId": "A",
+          "legendFormat": "{{pipeline}}/{{run_type}}"
+        }
+      ],
+      "description": "24-hour historical trend of runtime blocker status. Shows OK (0), WARNING (1), CRITICAL (2 or 3), or UNKNOWN. Click on Runtime dashboard for detailed blocker conditions."
+    },
+    {
+      "id": 9019,
+      "type": "timeseries",
+      "title": "DQ Status Trend",
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 21
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "tooltip": false,
+              "viz": false,
+              "legend": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "OK",
+                  "color": "green"
+                },
+                "1": {
+                  "text": "WARNING",
+                  "color": "orange"
+                },
+                "2": {
+                  "text": "CRITICAL",
+                  "color": "red"
+                },
+                "3": {
+                  "text": "CRITICAL",
+                  "color": "red"
+                }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 2
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "expr": "bioetl_l1_dq_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}",
+          "refId": "A",
+          "legendFormat": "{{pipeline}}"
+        }
+      ],
+      "description": "24-hour historical trend of DQ status. Shows OK (0), WARNING (1), CRITICAL (2 or 3), or UNKNOWN. Click on Data Quality dashboard for detailed DQ conditions."
+    },
+    {
+      "id": 9020,
+      "type": "timeseries",
+      "title": "Gold Lifecycle Trend",
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 21
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "tooltip": false,
+              "viz": false,
+              "legend": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "OK",
+                  "color": "green"
+                },
+                "1": {
+                  "text": "WARNING",
+                  "color": "orange"
+                },
+                "2": {
+                  "text": "CRITICAL",
+                  "color": "red"
+                },
+                "3": {
+                  "text": "CRITICAL",
+                  "color": "red"
+                }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 2
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "expr": "bioetl_l1_gold_lifecycle_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}",
+          "refId": "A",
+          "legendFormat": "{{pipeline}}/{{run_type}}/{{lifecycle_state}}"
+        }
+      ],
+      "description": "24-hour historical trend of gold lifecycle status. Shows OK (0), WARNING (1), CRITICAL (2 or 3), or UNKNOWN. Disabled Gold stage returns OK as a valid non-error state."
     },
     {
       "id": 9009,
@@ -2512,7 +2510,7 @@
       "collapsed": true,
       "panels": [
         {
-          "id": 9014,
+          "id": 9021,
           "type": "text",
           "title": "Diagnostics Navigation",
           "gridPos": {
@@ -2522,7 +2520,7 @@
             "y": 23
           },
           "options": {
-            "content": "<div style=\"padding:0.4rem 0.6rem;line-height:1.6\"><strong>Use top-level links for logs and traces.</strong> Raw metric starting points for this dashboard are <code>bioetl_l0_status{pipeline=~&quot;$pipeline&quot;,run_type=~&quot;$run_type&quot;}</code>, <code>bioetl_l0_next_action_route{pipeline=~&quot;$pipeline&quot;,run_type=~&quot;$run_type&quot;}</code>, and <code>bioetl_l0_input_status{pipeline=~&quot;$pipeline&quot;,run_type=~&quot;$run_type&quot;}</code>. Historical evidence stays in the row above; exact blocker reasons live in the Runtime, DQ, Provider Health, Control Plane, and Workflow dashboards.</div>",
+            "content": "<div style=\"padding:0.4rem 0.6rem;line-height:1.6\"><strong>Navigation</strong><br><br>Raw metric starting points for this dashboard are <br><strong>System Status:</strong> <code>bioetl_l0_status{pipeline=~&quot;chembl_assay&quot;,run_type=~&quot;incremental&quot;}</code>, <br><strong>Next Action:</strong> <code>bioetl_l0_next_action_route{pipeline=~&quot;chembl_assay&quot;,run_type=~&quot;incremental&quot;}</code>, <br><strong>Input Status:</strong> <code>bioetl_l0_input_status{pipeline=~&quot;chembl_assay&quot;,run_type=~&quot;incremental&quot;}</code>.<br><br>Exact blocker reasons live in the Control Plane, Runtime, Data Quality, Provider Health, and Workflow dashboards.<br><br>Historical evidence stays in the row above.</div>",
             "mode": "html"
           },
           "links": [],
