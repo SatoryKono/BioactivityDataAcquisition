@@ -329,7 +329,7 @@ def _expected_provenance_only_summary_without_score(
 def _assert_provenance_only_policy(
     summary: dict[str, object], manifest: RunManifest
 ) -> None:
-    assert summary["reproducibility_policy_assessment"] == {
+    assert summary["replay_capability_assessment"] == {
         "required_persistence_profile": "degraded_observable",
         "replay_capability": "rebuild_only",
         "strict_requirement_requested": False,
@@ -350,8 +350,8 @@ def _assert_provenance_only_policy(
         == "degraded_observable"
     )
     assert (
-        summary["reproducibility_diagnostics"]["policy"]["policy_assessment"]
-        == summary["reproducibility_policy_assessment"]
+        summary["reproducibility_diagnostics"]["policy"]["capability_assessment"]
+        == summary["replay_capability_assessment"]
     )
     assert (
         summary["reproducibility_diagnostics"]["semantic_identity"][
@@ -400,7 +400,7 @@ def test_build_diagnostics_summary_without_ledger_returns_provenance_only() -> N
         not in {
             "reproducibility_audit_score",
             "reproducibility_diagnostics",
-            "reproducibility_policy_assessment",
+            "replay_capability_assessment",
         }
     }
     assert summary_without_score == _expected_provenance_only_summary_without_score(

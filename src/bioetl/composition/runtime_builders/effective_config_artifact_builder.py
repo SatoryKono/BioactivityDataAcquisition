@@ -22,6 +22,9 @@ from bioetl.composition.runtime_builders._run_manifest_builder_policy import (
 from bioetl.composition.runtime_builders._run_manifest_support import (
     to_serializable_mapping as _to_serializable_mapping,
 )
+from bioetl.domain.control_plane.reproducibility_policy import (
+    STRICT_PERSISTENCE_PROFILES,
+)
 from bioetl.domain.control_plane.effective_config_artifact import (
     ConfigResolutionPolicy,
 )
@@ -115,15 +118,20 @@ def create_and_persist_effective_config_artifact(
     entity: str,
 ) -> tuple[str, str, str, str]:
     """Create effective config artifact, persist it, and return provenance fields."""
-    contract_ref, _contract_version, _contract_schema_hash, _dq_policy_ref, _rules = (
-        _manifest_support.resolve_contract_identity(provider=provider, entity=entity)
-    )
+    contract_ref = f"{provider}.{entity}"
     reproducibility_context = resolve_manifest_reproducibility_context(
         ctx=ctx,
         inputs=inputs,
         provider=provider,
         entity=entity,
         contract_ref=contract_ref,
+    )
+    _manifest_support.resolve_contract_identity(
+        provider=provider,
+        entity=entity,
+        strict=bool(getattr(ctx, "exact_replay", False))
+        or reproducibility_context.required_persistence_profile
+        in STRICT_PERSISTENCE_PROFILES,
     )
     return _create_and_persist_effective_config_artifact_payload(
         pipeline_name=ctx.pipeline_name,

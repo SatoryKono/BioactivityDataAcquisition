@@ -101,6 +101,10 @@ class TestCheckpointManagerLoadCheckpoint:
             pipeline_name="test_pipeline",
             run_id=run_id,
             resume=True,
+            checkpoint_compatibility_service=CheckpointCompatibilityService(
+                logger=mock_logger
+            ),
+            current_metadata=CheckpointMetadata(records_processed=0),
         )
 
         result = await manager.load_checkpoint()
@@ -144,6 +148,10 @@ class TestCheckpointManagerLoadCheckpoint:
             pipeline_name="test_pipeline",
             run_id=uuid4(),
             resume=True,
+            checkpoint_compatibility_service=CheckpointCompatibilityService(
+                logger=mock_logger
+            ),
+            current_metadata=CheckpointMetadata(records_processed=0),
         )
 
         result = await manager.load_checkpoint()
@@ -173,6 +181,10 @@ class TestCheckpointManagerLoadCheckpoint:
             run_id=uuid4(),
             resume=True,
             metrics=mock_metrics,
+            checkpoint_compatibility_service=CheckpointCompatibilityService(
+                logger=mock_logger
+            ),
+            current_metadata=CheckpointMetadata(records_processed=0),
         )
 
         result = await manager.load_checkpoint()
@@ -203,6 +215,29 @@ class TestCheckpointManagerLoadCheckpoint:
 
         assert result is None
         mock_checkpoint_port.load.assert_called_once()
+
+    async def test_load_checkpoint_fails_closed_without_compatibility_context(
+        self, mock_checkpoint_port, mock_logger
+    ) -> None:
+        saved_run_id = uuid4()
+        mock_checkpoint_port.load.return_value = (
+            saved_run_id,
+            {"records_processed": 1000},
+        )
+
+        manager = CheckpointRuntimeService(
+            checkpoint_port=mock_checkpoint_port,
+            logger=mock_logger,
+            pipeline_name="test_pipeline",
+            run_id=uuid4(),
+            resume=True,
+        )
+
+        with pytest.raises(
+            ValueError,
+            match="Checkpoint resume requires compatibility context",
+        ):
+            await manager.load_checkpoint()
 
     async def test_load_checkpoint_emits_missing_metric_when_not_found(
         self, mock_checkpoint_port, mock_logger, mock_metrics

@@ -35,13 +35,7 @@ _PUBLISHED_COMPOSITE_FAMILIES = (
     "composite.publication",
     "composite.target",
 )
-_PUBLISHED_SUPPORTED_SOURCE_FAMILIES = (
-    "chembl.activity",
-    "chembl.molecule",
-    "crossref.publication",
-    "pubchem.compound",
-    "pubmed.publication",
-)
+_PUBLISHED_SUPPORTED_SOURCE_FAMILIES = _PUBLISHED_SOURCE_FAMILIES
 
 ReproducibilityExecutionContext = Literal["source", "composite"]
 ReplayFamilyContractName = Literal[

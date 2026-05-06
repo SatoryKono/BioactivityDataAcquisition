@@ -108,8 +108,16 @@ class CheckpointRuntimeService:
             current_metadata,
             default_metadata=self._current_metadata,
         )
-        if effective_current_metadata is None or self._compatibility_service is None:
-            return checkpoint_metadata, False
+        missing_context: list[str] = []
+        if effective_current_metadata is None:
+            missing_context.append("current_metadata")
+        if self._compatibility_service is None:
+            missing_context.append("checkpoint_compatibility_service")
+        if missing_context:
+            raise ValueError(
+                "Checkpoint resume requires compatibility context; missing "
+                + ", ".join(missing_context)
+            )
         compatibility_result = (
             self._compatibility_service.validate_checkpoint_compatibility(
                 effective_current_metadata,

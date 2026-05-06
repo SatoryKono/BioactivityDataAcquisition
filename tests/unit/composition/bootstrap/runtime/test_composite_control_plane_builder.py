@@ -354,6 +354,59 @@ def test_build_composite_control_plane_bundle_requires_ledger_for_forensic_grade
     assert not (tmp_path / "output" / "control" / "run_ledger").exists()
 
 
+def test_build_composite_control_plane_bundle_rejects_forensic_grade_without_rich_checkpoint_evidence(
+    tmp_path: Path,
+) -> None:
+    config = cast(Any, _RichMockCompositeConfig())
+    bronze_root = tmp_path / "cached-bronze"
+    for provider, entity in (
+        ("pubmed", "publication"),
+        ("crossref", "publication"),
+        ("openalex", "publication"),
+    ):
+        bronze_day = bronze_root / provider / entity / "2026-01-01"
+        bronze_day.mkdir(parents=True)
+        (bronze_day / f"batch_{provider}.jsonl.zst").write_bytes(
+            f"{provider}-snapshot".encode()
+        )
+    runtime = CompositeRuntimeConfig(
+        resume=True,
+        use_cached_bronze=True,
+        cached_bronze_path=str(bronze_root),
+        cached_bronze_date="2026-01-01",
+    )
+    infra_context = cast(
+        Any,
+        SimpleNamespace(
+            run_id=_VALID_RUN_ID,
+            settings=SimpleNamespace(
+                data_dir=str(tmp_path),
+                pipeline=SimpleNamespace(
+                    control_plane=SimpleNamespace(
+                        run_manifest_enabled=True,
+                        run_ledger_enabled=True,
+                        required_persistence_profile="forensic_grade",
+                    )
+                ),
+            ),
+            logger=MagicMock(),
+            metrics=MagicMock(),
+            storage=MagicMock(),
+            lock=MagicMock(),
+        ),
+    )
+
+    with pytest.raises(RuntimeError, match="rich checkpoint evidence"):
+        build_composite_control_plane_bundle(
+            config=config,
+            runtime=runtime,
+            infra_context=infra_context,
+        )
+
+    assert not (tmp_path / "output" / "control" / "run_manifest").exists()
+    assert not (tmp_path / "output" / "control" / "run_ledger").exists()
+
+
 def test_build_composite_control_plane_bundle_rejects_replay_ready_profile(
     tmp_path: Path,
 ) -> None:

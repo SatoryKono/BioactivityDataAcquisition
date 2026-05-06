@@ -1342,6 +1342,59 @@ def test_build_pipeline_runner_forensic_grade_fails_when_recorder_attachment_mis
         )
 
 
+def test_build_pipeline_runner_replay_ready_fails_when_recorder_attachment_missing(
+    tmp_path: Path,
+) -> None:
+    """Replay-ready runs must fail closed when artifact publication is not wired."""
+    fake_factory, fake_registry = _build_factory_registry()
+    fake_factory.runner.services = SimpleNamespace(
+        metadata_writer=object(), storage=None
+    )
+    bronze_root = tmp_path / "bronze-cache"
+    bronze_day = bronze_root / "2026-01-01"
+    bronze_day.mkdir(parents=True)
+    (bronze_day / "batch_2026-01-01_demo.jsonl.zst").write_bytes(b"snapshot-bytes")
+
+    with (
+        patch(
+            "bioetl.composition.runtime_builders._run_manifest_builder_policy.get_code_revision_provenance",
+            return_value=SimpleNamespace(
+                git_commit="deadbeef" * 5,
+                source_revision_state="clean",
+                dependency_lock_hash="sha256:test-lock",
+            ),
+        ),
+        pytest.raises(RuntimeError, match="artifact publication closure"),
+    ):
+        _call_build_pipeline_runner(
+            _build_context(limit=25, exact_replay=True),
+            registry=fake_registry,
+            settings=_build_settings(
+                data_dir=str(tmp_path),
+                control_plane=SimpleNamespace(
+                    run_manifest_enabled=True,
+                    run_ledger_enabled=True,
+                    required_persistence_profile="replay_ready",
+                ),
+            ),
+            pipeline_config=_build_pipeline_config(
+                sink={
+                    "bronze": SimpleNamespace(enabled=True, save_metadata=True),
+                    "silver": SimpleNamespace(enabled=True, save_metadata=True),
+                    "gold": SimpleNamespace(enabled=True, save_metadata=True),
+                },
+            ),
+            assemble_runtime_config_fn=lambda **_: SimpleNamespace(
+                run_type="incremental"
+            ),
+            assemble_cached_bronze_context_fn=lambda _: SimpleNamespace(
+                enabled=True,
+                bronze_path=str(bronze_root),
+                bronze_date="2026-01-01",
+            ),
+        )
+
+
 def test_build_pipeline_runner_allows_forensic_grade_with_exact_replay_and_sidecars(
     tmp_path: Path,
 ) -> None:

@@ -163,7 +163,7 @@ def render_reproducibility_compact_section(
         return []
 
     policy = _dict_value(reproducibility, "policy")
-    policy_assessment = _dict_value(policy, "policy_assessment")
+    capability_assessment = _dict_value(policy, "capability_assessment")
     effective_config = _dict_value(reproducibility, "effective_config")
     effective_semantic = _dict_value(effective_config, "semantic")
     effective_diff_policy = _dict_value(effective_config, "diff_policy")
@@ -200,13 +200,13 @@ def render_reproducibility_compact_section(
                 "required_profile_satisfied",
                 policy.get(
                     "required_profile_satisfied",
-                    policy_assessment.get("required_profile_satisfied"),
+                    capability_assessment.get("required_profile_satisfied"),
                 ),
             ),
             (
                 "blocking_gaps",
                 policy.get("exact_replay_blockers")
-                or policy_assessment.get("blocking_gaps"),
+                or capability_assessment.get("blocking_gaps"),
             ),
             (
                 "effective_config_artifact_id",

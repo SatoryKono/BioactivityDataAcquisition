@@ -253,7 +253,7 @@ class _FakeRunManifestService:
                         ],
                     },
                 },
-                "reproducibility_policy_assessment": {
+                "replay_capability_assessment": {
                     "required_persistence_profile": "replay_ready",
                     "replay_capability": "exact_replay_supported",
                     "strict_requirement_requested": True,
@@ -278,7 +278,7 @@ class _FakeRunManifestService:
                         "replay_capability_reason": (
                             "immutable_input_snapshots_present"
                         ),
-                        "policy_assessment": {
+                        "capability_assessment": {
                             "required_profile_satisfied": True,
                             "blocking_gaps": [],
                         },

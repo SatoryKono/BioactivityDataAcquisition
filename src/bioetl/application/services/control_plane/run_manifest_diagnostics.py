@@ -121,8 +121,8 @@ def _build_unified_reproducibility_diagnostics(
                 "exact_replay_support_boundary"
             ),
             "exact_replay_blockers": summary.get("exact_replay_blockers", []),
-            "policy_assessment": summary.get(
-                "reproducibility_policy_assessment",
+            "capability_assessment": summary.get(
+                "replay_capability_assessment",
                 {},
             ),
         },

@@ -149,7 +149,7 @@ def test_supported_family_contract_publishes_replay_ready_default() -> None:
     )
 
 
-def test_unsupported_family_contract_publishes_strict_profile_block() -> None:
+def test_published_source_family_contract_publishes_strict_profile_support() -> None:
     contract = build_replay_family_contract(
         provider="openalex",
         entity="publication",
@@ -157,12 +157,12 @@ def test_unsupported_family_contract_publishes_strict_profile_block() -> None:
         execution_context="source",
     )
 
-    assert contract["strict_exact_replay_supported"] is False
-    assert contract["contract"] == "rebuild_only"
-    assert contract["default_required_persistence_profile"] == "degraded_observable"
+    assert contract["strict_exact_replay_supported"] is True
+    assert contract["contract"] == "snapshot_backed_exact_replay"
+    assert contract["default_required_persistence_profile"] == "replay_ready"
     assert (
         contract["strict_replay_runtime_verdict"]
-        == "blocked_outside_supported_boundary"
+        == "allowed_with_snapshot_backed_source_refs"
     )
 
 

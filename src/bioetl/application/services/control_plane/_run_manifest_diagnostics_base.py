@@ -286,7 +286,7 @@ def _build_base_summary_payload(
         ),
         "continuation_mode": replay_context.continuation_mode,
         "replay_family_contract": replay_context.replay_family_contract,
-        "reproducibility_policy_assessment": (
+        "replay_capability_assessment": (
             replay_context.policy_assessment.to_dict()
         ),
         "resume_contract": replay_context.resume_contract,
