@@ -4,36 +4,43 @@ from __future__ import annotations
 
 import argparse
 import json
+import subprocess
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
 import yaml
 
-_JSON_GLOB = "*.json"
+_GIT_LS_FILES_TIMEOUT_SECONDS = 5.0
 
 
 def validate_control_plane_artifacts(root: Path) -> list[str]:
     """Return contract violations for committed control-plane artifacts."""
-    control_root = root / "data" / "output" / "control"
     violations: list[str] = []
-    _validate_effective_config_artifacts(control_root, violations)
-    _validate_run_manifests(control_root, violations)
-    _validate_run_ledgers(control_root, violations)
+    _validate_effective_config_artifacts(root, violations)
+    _validate_run_manifests(root, violations)
+    _validate_run_ledgers(root, violations)
     _validate_metadata_sidecar_examples(root, violations)
     _validate_lineage_fragment_examples(root, violations)
     return violations
 
 
 def _validate_effective_config_artifacts(
-    control_root: Path,
+    root: Path,
     violations: list[str],
 ) -> None:
-    effective_root = control_root / "effective_config"
-    for path in sorted(effective_root.glob(_JSON_GLOB)):
+    for path in _iter_artifact_files(
+        root,
+        Path("data/output/control/effective_config"),
+        suffix=".json",
+    ):
         _validate_semantic_effective_config_file(path, violations)
 
-    occurrence_root = effective_root / "_occurrences"
-    for path in sorted(occurrence_root.glob(_JSON_GLOB)):
+    for path in _iter_artifact_files(
+        root,
+        Path("data/output/control/effective_config/_occurrences"),
+        suffix=".json",
+    ):
         _validate_effective_config_occurrence_file(path, violations)
 
 
@@ -78,8 +85,15 @@ def _validate_effective_config_occurrence_file(
         violations.append(f"{path}: occurrence file lacks occurrence_envelope")
 
 
-def _validate_run_manifests(control_root: Path, violations: list[str]) -> None:
-    for path in sorted((control_root / "run_manifest").glob(_JSON_GLOB)):
+def _validate_run_manifests(
+    root: Path,
+    violations: list[str],
+) -> None:
+    for path in _iter_artifact_files(
+        root,
+        Path("data/output/control/run_manifest"),
+        suffix=".json",
+    ):
         _validate_run_manifest_file(path, violations)
 
 
@@ -119,8 +133,12 @@ def _validate_run_manifest_file(path: Path, violations: list[str]) -> None:
         )
 
 
-def _validate_run_ledgers(control_root: Path, violations: list[str]) -> None:
-    for path in sorted((control_root / "run_ledger").glob("*.jsonl")):
+def _validate_run_ledgers(root: Path, violations: list[str]) -> None:
+    for path in _iter_artifact_files(
+        root,
+        Path("data/output/control/run_ledger"),
+        suffix=".jsonl",
+    ):
         seen_entries = False
         for line_number, line in enumerate(
             path.read_text(encoding="utf-8").splitlines(), 1
@@ -149,8 +167,11 @@ def _validate_run_ledgers(control_root: Path, violations: list[str]) -> None:
 
 def _validate_metadata_sidecar_examples(root: Path, violations: list[str]) -> None:
     """Validate bounded committed sidecar examples against control-plane anchors."""
-    for path in sorted(
-        (root / "data" / "output" / "bronze").glob("*/*/*_metadata.yaml")
+    for path in _iter_artifact_files(
+        root,
+        Path("data/output/bronze"),
+        suffix="_metadata.yaml",
+        recursive=True,
     ):
         payload = _load_yaml_object(path, violations)
         if payload is None:
@@ -181,8 +202,11 @@ def _validate_metadata_sidecar_examples(root: Path, violations: list[str]) -> No
 
 def _validate_lineage_fragment_examples(root: Path, violations: list[str]) -> None:
     """Validate committed lineage fragments expose manifest/run identity anchors."""
-    fragment_root = root / "data" / "output" / "bronze" / "chembl" / "control"
-    for path in sorted((fragment_root / "lineage" / "fragments").glob("*.json")):
+    for path in _iter_artifact_files(
+        root,
+        Path("data/output/bronze/chembl/control/lineage/fragments"),
+        suffix=".json",
+    ):
         payload = _load_json_object(path, violations)
         if payload is None:
             continue
@@ -207,6 +231,58 @@ def _load_json_object(path: Path, violations: list[str]) -> dict[str, Any] | Non
         violations.append(f"{path}: JSON payload is not an object")
         return None
     return payload
+
+
+def _iter_artifact_files(
+    root: Path,
+    relative_dir: Path,
+    *,
+    suffix: str,
+    recursive: bool = False,
+    predicate: Callable[[Path], bool] | None = None,
+) -> list[Path]:
+    """Iterate committed files in Git checkouts, with filesystem fallback.
+
+    The validator is a committed-artifact contract check. In developer
+    worktrees, ``data/output`` can contain large local runtime outputs that
+    should not be read by this test.
+    """
+    base_dir = root / relative_dir
+    tracked_files = _git_tracked_files(root, relative_dir)
+    if tracked_files is None:
+        candidates = base_dir.rglob("*") if recursive else base_dir.glob(f"*{suffix}")
+    else:
+        candidates = tracked_files
+
+    paths: list[Path] = []
+    for path in candidates:
+        if not path.name.endswith(suffix):
+            continue
+        if not recursive and path.parent != base_dir:
+            continue
+        if predicate is not None and not predicate(path):
+            continue
+        paths.append(path)
+    return sorted(paths)
+
+
+def _git_tracked_files(root: Path, relative_dir: Path) -> list[Path] | None:
+    """Return tracked files for ``relative_dir`` when ``root`` is a Git checkout."""
+    if not (root / ".git").exists():
+        return None
+    try:
+        completed = subprocess.run(
+            ["git", "-C", str(root), "ls-files", "--", relative_dir.as_posix()],
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=_GIT_LS_FILES_TIMEOUT_SECONDS,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    if completed.returncode != 0:
+        return None
+    return [root / line for line in completed.stdout.splitlines() if line.strip()]
 
 
 def _load_yaml_object(path: Path, violations: list[str]) -> dict[str, Any] | None:
