@@ -325,6 +325,7 @@ nav:
             -   "Reference Index": 04-reference/index.md
             -   CLI: 04-reference/cli.md
             -   Normalization:
+                    -   "ChEMBL": 04-reference/normalization/chembl-normalization-overview.md
                     -   Overview: 04-reference/normalization/non-chembl-normalization-overview.md
                     -   Inventory: 04-reference/normalization/non-chembl-normalization-inventory.md
                     -   "Publication": 04-reference/normalization/publication-normalization.md
