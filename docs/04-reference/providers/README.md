@@ -74,6 +74,7 @@ configs/entities/
 - [RULES.md](../../00-project/RULES.md) Appendix A - Provider rate limits and libraries
 - [03-guides/add-new-source.md](../../03-guides/add-new-source.md) - Adding new providers
 - [02-architecture/03-infrastructure-layer.md](../../02-architecture/03-infrastructure-layer.md) - Adapter architecture
+- [../normalization/chembl-normalization-overview.md](../normalization/chembl-normalization-overview.md) - Shared ChEMBL normalization governance entrypoint
 - [../normalization/non-chembl-normalization-overview.md](../normalization/non-chembl-normalization-overview.md) - Shared non-ChEMBL normalization governance entrypoint
 - [../normalization/publication-normalization.md](../normalization/publication-normalization.md) - Raw provider publication types vs derived harmonized taxonomy
 - [../normalization/reference-identifiers.md](../normalization/reference-identifiers.md) - Shared identifier-family normalization policy
