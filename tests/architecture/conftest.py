@@ -98,7 +98,15 @@ def _load_disk_cache(
     try:
         with cache_path.open("rb") as handle:
             return pickle.load(handle)
-    except (OSError, EOFError, pickle.PickleError, AttributeError, ValueError):
+    except (
+        OSError,
+        EOFError,
+        pickle.PickleError,
+        AttributeError,
+        ImportError,
+        ModuleNotFoundError,
+        ValueError,
+    ):
         return None
 
 

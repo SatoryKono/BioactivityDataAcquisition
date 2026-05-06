@@ -215,9 +215,18 @@ target:
 # =============================================================================
 # Publication
 # =============================================================================
-# Unified publication types (kebab-case, cross-provider taxonomy).
-# ChEMBL-native types (PUBLICATION, PATENT, DATASET, BOOK) are mapped
-# to these canonical values by normalize_publication_type().
+# Global cross-provider publication taxonomy (kebab-case).
+#
+# IMPORTANT: This is the GLOBAL enum registry for publication types across
+# all providers (ChEMBL, Crossref, OpenAlex, PubMed, Semantic Scholar).
+# Individual providers may define source-specific DQ/filter subsets for their
+# own ingestion constraints, but those subsets MUST NOT redefine this global
+# taxonomy. See provider-specific entity configs for source-specific policies.
+#
+# ChEMBL-native types (PUBLICATION, PATENT, DATASET, BOOK) are mapped to these
+# canonical values by normalize_publication_type(). The global taxonomy includes
+# all valid cross-provider publication types, not just those currently observed
+# in ChEMBL fixtures.
 publication:
     native_doc_types:
         - PUBLICATION

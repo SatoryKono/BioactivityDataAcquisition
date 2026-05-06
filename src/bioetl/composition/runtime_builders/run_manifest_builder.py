@@ -15,9 +15,11 @@ from bioetl.composition.runtime_builders._run_manifest_creation_support import (
     _RunManifestCreateRequestInputs,
     build_manifest_create_request,
     create_ledger_service,
+    emit_replay_reconstructability_metric,
+)
+from bioetl.composition.runtime_builders._run_manifest_publication_support import (
     create_manifest_record,
     create_manifest_store,
-    emit_replay_reconstructability_metric,
 )
 from bioetl.composition.runtime_builders._runner_builder_support import (
     resolve_required_artifact_lineage_layers,

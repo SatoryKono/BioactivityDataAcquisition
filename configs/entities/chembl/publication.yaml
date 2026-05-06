@@ -116,6 +116,32 @@ quality:
     version: 1.0.0
     provider: chembl
     entity: publication
+    # Source-specific DQ policy metadata
+    metadata:
+        publication_type_policy:
+            scope: source_specific
+            description: |
+                ChEMBL-specific allowed subset for publication_type field.
+                This is a SOURCE-SPECIFIC DQ constraint, not a redefinition of the
+                global publication type taxonomy in configs/enums/chembl.yaml.
+                The global taxonomy includes all cross-provider publication types.
+                ChEMBL source currently only produces: journal-article, book, dataset, patent.
+                Other providers may use additional global types (review, preprint, etc.).
+                Gold contracts for other providers MUST NOT reject valid global types
+                based on this ChEMBL-specific subset.
+            global_enum_reference: configs/enums/chembl.yaml -> publication.types
+            field_semantics:
+                publication_type_raw: |
+                    Preserved provider-native publication type token (e.g., PUBLICATION,
+                    PATENT, DATASET, BOOK). This field retains the raw ChEMBL API value
+                    for traceability and debugging. It is NOT subject to strict enum
+                    validation beyond pattern matching.
+                publication_type: |
+                    Canonical publication type mapped from publication_type_raw to the
+                    global publication type taxonomy. This field uses the source-specific
+                    allowed subset (journal-article, book, dataset, patent) which is a
+                    subset of the global taxonomy. The mapping is performed by
+                    normalize_publication_type() in the ChEMBL publication profile.
     entity_field_validations:
         -   field: publication_id
             type: pattern
@@ -130,6 +156,8 @@ quality:
                 - dataset
                 - patent
             nullable: false
+            # Source-specific constraint: ChEMBL source only produces these 4 types
+            # This is NOT the global publication type taxonomy
         -   field: publication_year
             type: range
             min: 1500
@@ -238,6 +266,18 @@ filters:
     version: 1.0.0
     provider: chembl
     entity: publication
+    # Source-specific filter policy metadata
+    metadata:
+        publication_filter_policy:
+            scope: source_specific
+            description: |
+                ChEMBL-specific publication type filters for Silver and Gold stages.
+                These are SOURCE-SPECIC pipeline constraints, not global publication
+                type truth. Silver accepts only journal-article for the current ChEMBL
+                publication pipeline scope. Gold further restricts to journal-article
+                for the canonical ChEMBL publication dataset. Other providers may have
+                different filter policies based on their source characteristics.
+            global_enum_reference: configs/enums/chembl.yaml -> publication.types
     input_filter:
         enabled: false
         source_path: data/input/publication.csv
@@ -249,6 +289,8 @@ filters:
         year__gte: 1950
         year__lte: 2050
     silver_filters:
+        # Source-specific filter: ChEMBL publication pipeline currently scoped
+        # to journal-article only. This is NOT a global publication type constraint.
         columns:
             publication_type:
                 - journal-article
@@ -261,6 +303,8 @@ filters:
             - publication_type
             - title
     gold_filters:
+        # Source-specific filter: ChEMBL Gold dataset restricted to journal-article
+        # for canonical publication scope. This is NOT a global publication type constraint.
         columns:
             publication_type:
                 - journal-article
