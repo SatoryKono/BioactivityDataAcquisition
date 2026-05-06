@@ -48,6 +48,16 @@ def mock_metrics():
 
 
 @pytest.fixture
+def compatible_checkpoint_compatibility_service():
+    """Create checkpoint compatibility service that accepts loaded checkpoints."""
+    service = MagicMock()
+    service.validate_checkpoint_compatibility.return_value = (
+        CheckpointCompatibilityResult.compatible_result()
+    )
+    return service
+
+
+@pytest.fixture
 def checkpoint_manager(mock_checkpoint_port, mock_logger):
     """Create CheckpointRuntimeService instance."""
     run_id = uuid4()
@@ -85,7 +95,10 @@ class TestCheckpointManagerLoadCheckpoint:
     """Tests for CheckpointRuntimeService.load_checkpoint method."""
 
     async def test_load_checkpoint_when_resume_true_and_exists(
-        self, mock_checkpoint_port, mock_logger
+        self,
+        mock_checkpoint_port,
+        mock_logger,
+        compatible_checkpoint_compatibility_service,
     ):
         """Test load_checkpoint when resuming and checkpoint exists."""
         saved_run_id = uuid4()
@@ -101,8 +114,8 @@ class TestCheckpointManagerLoadCheckpoint:
             pipeline_name="test_pipeline",
             run_id=run_id,
             resume=True,
-            checkpoint_compatibility_service=CheckpointCompatibilityService(
-                logger=mock_logger
+            checkpoint_compatibility_service=(
+                compatible_checkpoint_compatibility_service
             ),
             current_metadata=CheckpointMetadata(records_processed=0),
         )
@@ -114,7 +127,10 @@ class TestCheckpointManagerLoadCheckpoint:
         mock_logger.info.assert_called()
 
     async def test_load_checkpoint_preserves_memory_decision_trace(
-        self, mock_checkpoint_port, mock_logger
+        self,
+        mock_checkpoint_port,
+        mock_logger,
+        compatible_checkpoint_compatibility_service,
     ) -> None:
         """Typed resume metadata keeps adaptive-memory trace entries for replay."""
         saved_run_id = uuid4()
@@ -148,8 +164,8 @@ class TestCheckpointManagerLoadCheckpoint:
             pipeline_name="test_pipeline",
             run_id=uuid4(),
             resume=True,
-            checkpoint_compatibility_service=CheckpointCompatibilityService(
-                logger=mock_logger
+            checkpoint_compatibility_service=(
+                compatible_checkpoint_compatibility_service
             ),
             current_metadata=CheckpointMetadata(records_processed=0),
         )
@@ -165,7 +181,11 @@ class TestCheckpointManagerLoadCheckpoint:
         )
 
     async def test_load_checkpoint_emits_loaded_metric(
-        self, mock_checkpoint_port, mock_logger, mock_metrics
+        self,
+        mock_checkpoint_port,
+        mock_logger,
+        mock_metrics,
+        compatible_checkpoint_compatibility_service,
     ):
         """Successful resume emits bounded checkpoint load status."""
         saved_run_id = uuid4()
@@ -181,8 +201,8 @@ class TestCheckpointManagerLoadCheckpoint:
             run_id=uuid4(),
             resume=True,
             metrics=mock_metrics,
-            checkpoint_compatibility_service=CheckpointCompatibilityService(
-                logger=mock_logger
+            checkpoint_compatibility_service=(
+                compatible_checkpoint_compatibility_service
             ),
             current_metadata=CheckpointMetadata(records_processed=0),
         )
@@ -217,7 +237,7 @@ class TestCheckpointManagerLoadCheckpoint:
         mock_checkpoint_port.load.assert_called_once()
 
     async def test_load_checkpoint_fails_closed_without_compatibility_context(
-        self, mock_checkpoint_port, mock_logger
+        self, mock_checkpoint_port, mock_logger, mock_metrics
     ) -> None:
         saved_run_id = uuid4()
         mock_checkpoint_port.load.return_value = (
@@ -231,13 +251,33 @@ class TestCheckpointManagerLoadCheckpoint:
             pipeline_name="test_pipeline",
             run_id=uuid4(),
             resume=True,
+            metrics=mock_metrics,
         )
 
-        with pytest.raises(
-            ValueError,
-            match="Checkpoint resume requires compatibility context",
-        ):
-            await manager.load_checkpoint()
+        result = await manager.load_checkpoint()
+
+        assert result is None
+        warning_extra = mock_logger.warning.call_args.kwargs
+        assert warning_extra["resume_rejected"] is True
+        assert warning_extra["compatibility_disposition"] == ("missing_context_blocked")
+        assert warning_extra["compatibility_service_available"] is False
+        assert warning_extra["current_identity"]["manifest_id"] is None
+        assert any(
+            "Missing current checkpoint metadata" in message
+            for message in warning_extra["messages"]
+        )
+        assert any(
+            "Missing checkpoint compatibility service" in message
+            for message in warning_extra["messages"]
+        )
+        mock_metrics.increment_counter.assert_called_once_with(
+            "bioetl_checkpoint_load_events_total",
+            1,
+            {
+                "pipeline": "test_pipeline",
+                "status": "missing_compatibility_context",
+            },
+        )
 
     async def test_load_checkpoint_emits_missing_metric_when_not_found(
         self, mock_checkpoint_port, mock_logger, mock_metrics
@@ -406,7 +446,10 @@ class TestCheckpointManagerFullScanOnly:
         assert warning_call.kwargs["pipeline"] == "pubmed_publication"
 
     async def test_load_checkpoint_works_normally_without_strategy(
-        self, mock_checkpoint_port, mock_logger
+        self,
+        mock_checkpoint_port,
+        mock_logger,
+        compatible_checkpoint_compatibility_service,
     ):
         """Test load_checkpoint works normally when no loading_strategy set."""
         saved_run_id = uuid4()
@@ -422,6 +465,10 @@ class TestCheckpointManagerFullScanOnly:
             pipeline_name="chembl_activity",
             run_id=run_id,
             resume=True,
+            checkpoint_compatibility_service=(
+                compatible_checkpoint_compatibility_service
+            ),
+            current_metadata=CheckpointMetadata(records_processed=0),
         )
 
         result = await manager.load_checkpoint()
@@ -453,7 +500,10 @@ class TestCheckpointManagerFullScanOnly:
         assert result is None
 
     async def test_default_loading_strategy_is_none(
-        self, mock_checkpoint_port, mock_logger
+        self,
+        mock_checkpoint_port,
+        mock_logger,
+        compatible_checkpoint_compatibility_service,
     ):
         """Test that loading_strategy defaults to None (allows resume)."""
         saved_run_id = uuid4()
@@ -469,6 +519,10 @@ class TestCheckpointManagerFullScanOnly:
             pipeline_name="test_pipeline",
             run_id=run_id,
             resume=True,
+            checkpoint_compatibility_service=(
+                compatible_checkpoint_compatibility_service
+            ),
+            current_metadata=CheckpointMetadata(records_processed=0),
         )
 
         result = await manager.load_checkpoint()
@@ -511,7 +565,10 @@ class TestCheckpointManagerLoadingStrategy:
         mock_logger.warning.assert_called_once()
 
     async def test_loading_strategy_none_allows_checkpoint_resume(
-        self, mock_checkpoint_port, mock_logger
+        self,
+        mock_checkpoint_port,
+        mock_logger,
+        compatible_checkpoint_compatibility_service,
     ):
         """Test loading_strategy=None allows normal checkpoint resume."""
 
@@ -529,6 +586,10 @@ class TestCheckpointManagerLoadingStrategy:
             run_id=run_id,
             resume=True,
             loading_strategy=None,
+            checkpoint_compatibility_service=(
+                compatible_checkpoint_compatibility_service
+            ),
+            current_metadata=CheckpointMetadata(records_processed=0),
         )
 
         assert manager._loading_strategy is None
@@ -888,6 +949,119 @@ class TestCheckpointManagerCompatibilityPolicy:
         )
         assert warning_extra["checkpoint_identity"]["manifest_id"] == "manifest-old"
         assert warning_extra["checkpoint_identity"]["exact_replay"] is True
+
+    async def test_soft_fail_resume_blocks_when_current_metadata_is_missing(
+        self, mock_checkpoint_port, mock_logger, mock_metrics
+    ) -> None:
+        saved_run_id = uuid4()
+        mock_checkpoint_port.load.return_value = (
+            saved_run_id,
+            {"records_processed": 42, "manifest_id": "manifest-old"},
+        )
+        compatibility_service = MagicMock()
+
+        manager = CheckpointRuntimeService(
+            checkpoint_port=mock_checkpoint_port,
+            logger=mock_logger,
+            pipeline_name="chembl_activity",
+            run_id=uuid4(),
+            resume=True,
+            metrics=mock_metrics,
+            checkpoint_compatibility_service=compatibility_service,
+            compatibility_policy="soft_fail",
+        )
+
+        result = await manager.load_checkpoint()
+
+        assert result is None
+        compatibility_service.validate_checkpoint_compatibility.assert_not_called()
+        warning_extra = mock_logger.warning.call_args.kwargs
+        assert warning_extra["resume_rejected"] is True
+        assert warning_extra["compatibility_disposition"] == ("missing_context_blocked")
+        assert warning_extra["compatibility_service_available"] is True
+        assert any(
+            "Missing current checkpoint metadata" in message
+            for message in warning_extra["messages"]
+        )
+        mock_metrics.increment_counter.assert_called_once_with(
+            "bioetl_checkpoint_load_events_total",
+            1,
+            {
+                "pipeline": "chembl_activity",
+                "status": "missing_compatibility_context",
+            },
+        )
+
+    async def test_legacy_observe_resume_continues_when_context_missing(
+        self, mock_checkpoint_port, mock_logger, mock_metrics
+    ) -> None:
+        saved_run_id = uuid4()
+        mock_checkpoint_port.load.return_value = (
+            saved_run_id,
+            {"records_processed": 42},
+        )
+
+        manager = CheckpointRuntimeService(
+            checkpoint_port=mock_checkpoint_port,
+            logger=mock_logger,
+            pipeline_name="chembl_activity",
+            run_id=uuid4(),
+            resume=True,
+            metrics=mock_metrics,
+            compatibility_policy="legacy_observe",
+        )
+
+        result = await manager.load_checkpoint()
+
+        assert result is not None
+        assert result.records_processed == 42
+        warning_extra = mock_logger.warning.call_args.kwargs
+        assert warning_extra["resume_rejected"] is False
+        assert warning_extra["compatibility_disposition"] == (
+            "legacy_missing_context_loaded_degraded"
+        )
+        mock_metrics.increment_counter.assert_called_once_with(
+            "bioetl_checkpoint_load_events_total",
+            1,
+            {
+                "pipeline": "chembl_activity",
+                "status": "legacy_missing_compatibility_context_loaded",
+            },
+        )
+
+    async def test_hard_fail_resume_raises_when_context_missing(
+        self, mock_checkpoint_port, mock_logger, mock_metrics
+    ) -> None:
+        saved_run_id = uuid4()
+        mock_checkpoint_port.load.return_value = (
+            saved_run_id,
+            {"records_processed": 42},
+        )
+
+        manager = CheckpointRuntimeService(
+            checkpoint_port=mock_checkpoint_port,
+            logger=mock_logger,
+            pipeline_name="chembl_activity",
+            run_id=uuid4(),
+            resume=True,
+            metrics=mock_metrics,
+            compatibility_policy="hard_fail",
+        )
+
+        with pytest.raises(
+            ValueError,
+            match="requires compatibility context",
+        ):
+            await manager.load_checkpoint()
+        mock_logger.warning.assert_not_called()
+        mock_metrics.increment_counter.assert_called_once_with(
+            "bioetl_checkpoint_load_events_total",
+            1,
+            {
+                "pipeline": "chembl_activity",
+                "status": "missing_compatibility_context_hard_fail",
+            },
+        )
 
     async def test_observe_resume_blocks_unproven_identity_with_diagnostic(
         self, mock_checkpoint_port, mock_logger, mock_metrics

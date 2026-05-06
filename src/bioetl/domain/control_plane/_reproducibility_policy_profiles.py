@@ -80,19 +80,14 @@ def resolve_replay_capability(
     (
         _source_count,
         _sources_with_snapshots,
-        any_input_snapshots,
+        _any_input_snapshots,
         full_snapshot_envelope,
-        require_full_snapshot_envelope,
+        _require_full_snapshot_envelope,
     ) = build_snapshot_envelope_status(
         source_refs=source_refs,
         require_full_snapshot_envelope=require_full_snapshot_envelope,
     )
-    exact_supported = (
-        full_snapshot_envelope
-        if require_full_snapshot_envelope
-        else any_input_snapshots
-    )
-    if exact_supported:
+    if full_snapshot_envelope:
         return ReplayCapability.EXACT_REPLAY_SUPPORTED
     if resume_requested:
         return ReplayCapability.RESUME_ONLY

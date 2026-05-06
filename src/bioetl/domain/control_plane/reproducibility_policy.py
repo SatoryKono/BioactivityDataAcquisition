@@ -35,6 +35,7 @@ class SnapshotEnvelopeStatus:
     any_input_snapshots: bool
     full_snapshot_envelope: bool
     require_full_snapshot_envelope: bool
+    missing_snapshot_source_refs: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -76,6 +77,9 @@ class ReproducibilityPolicyAssessment:
                 "require_full_snapshot_envelope": (
                     self.snapshot_envelope.require_full_snapshot_envelope
                 ),
+                "missing_snapshot_source_refs": list(
+                    self.snapshot_envelope.missing_snapshot_source_refs
+                ),
             },
         }
 
@@ -96,13 +100,26 @@ def build_snapshot_envelope_status(
         source_refs=source_refs,
         require_full_snapshot_envelope=require_full_snapshot_envelope,
     )
+    missing_snapshot_source_refs = tuple(
+        _source_ref_label(ref) for ref in source_refs if not ref.input_snapshots
+    )
     return SnapshotEnvelopeStatus(
         source_count=source_count,
         sources_with_snapshots=sources_with_snapshots,
         any_input_snapshots=any_input_snapshots,
         full_snapshot_envelope=full_snapshot_envelope,
         require_full_snapshot_envelope=require_full_snapshot_envelope,
+        missing_snapshot_source_refs=missing_snapshot_source_refs,
     )
+
+
+def _source_ref_label(ref: RunSourceRef) -> str:
+    """Return a stable operator-facing source-ref label."""
+    provider = str(ref.provider or "").strip()
+    entity = str(ref.entity or "").strip()
+    pipeline_name = str(ref.pipeline_name or "").strip()
+    family = ".".join(part for part in (provider, entity) if part)
+    return family or pipeline_name or "unknown"
 
 
 def resolve_effective_required_persistence_profile(
@@ -127,10 +144,17 @@ def _resolve_blocking_gaps(
     strict_requirement_requested: bool,
     strict_exact_replay_supported: bool,
     resolved_capability: ReplayCapability,
+    snapshot_envelope: SnapshotEnvelopeStatus,
 ) -> tuple[str, ...]:
     blocking_gaps: list[str] = []
     if strict_requirement_requested and not strict_exact_replay_supported:
         blocking_gaps.append("strict_replay_execution_context_support")
+    if (
+        strict_requirement_requested
+        and snapshot_envelope.any_input_snapshots
+        and not snapshot_envelope.full_snapshot_envelope
+    ):
+        blocking_gaps.append("partial_input_snapshot_envelope")
     if (
         strict_requirement_requested
         and resolved_capability != ReplayCapability.EXACT_REPLAY_SUPPORTED
@@ -196,6 +220,7 @@ def assess_reproducibility_policy(
         strict_requirement_requested=strict_requirement_requested,
         strict_exact_replay_supported=strict_exact_replay_supported,
         resolved_capability=resolved_capability,
+        snapshot_envelope=snapshot_envelope,
     )
     return ReproducibilityPolicyAssessment(
         required_persistence_profile=profile,

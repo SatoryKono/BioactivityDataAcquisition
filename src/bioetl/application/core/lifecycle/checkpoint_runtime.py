@@ -61,7 +61,9 @@ def missing_compatibility_context_messages(
     if current_metadata is None:
         messages.append("Missing current checkpoint metadata for resume validation")
     if not service_available:
-        messages.append("Missing checkpoint compatibility service for resume validation")
+        messages.append(
+            "Missing checkpoint compatibility service for resume validation"
+        )
     return messages or ["Missing checkpoint compatibility context"]
 
 
@@ -258,9 +260,7 @@ def handle_missing_compatibility_context(
         current_metadata=current_metadata,
         service_available=service_available,
     )
-    degraded_resume_loaded = disposition == (
-        "legacy_missing_context_loaded_degraded"
-    )
+    degraded_resume_loaded = disposition == ("legacy_missing_context_loaded_degraded")
     payload = {
         "pipeline": pipeline_name,
         "compatibility_policy": compatibility_policy,
@@ -287,8 +287,7 @@ def handle_missing_compatibility_context(
         return None
     raise ValueError(
         "Checkpoint resume requires compatibility context and hard_fail policy "
-        "is enabled: "
-        + "; ".join(messages)
+        "is enabled: " + "; ".join(messages)
     )
 
 
@@ -355,8 +354,8 @@ def resolve_missing_compatibility_context_disposition(
 
 __all__ = [
     "CheckpointCompatibilityDisposition",
-    "CheckpointMissingContextDisposition",
     "CheckpointCompatibilityPolicy",
+    "CheckpointMissingContextDisposition",
     "enrich_metadata_with_execution_identity",
     "handle_incompatible_checkpoint",
     "handle_missing_compatibility_context",

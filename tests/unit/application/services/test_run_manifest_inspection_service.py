@@ -1025,8 +1025,10 @@ def test_show_marks_artifact_linkage_gap_signal() -> None:
 
     assert result.diagnostics["missing_artifact_links"] == 1
     assert (
-        result.diagnostics["persistence_profile"]["attained_profile"] == "replay_ready"
+        result.diagnostics["persistence_profile"]["attained_profile"]
+        == "degraded_observable"
     )
+    assert result.diagnostics["persistence_profile"]["claims"]["replay_ready"] is False
     assert (
         result.diagnostics["persistence_profile"]["claims"]["forensic_grade"] is False
     )
@@ -1034,6 +1036,7 @@ def test_show_marks_artifact_linkage_gap_signal() -> None:
     assert result.diagnostics["next_steps"] == [
         "Validate artifact publication metadata and repair dataset/lineage links.",
         "Investigate lineage persistence for published artifacts before restart.",
+        "Review replay-ready persistence requirements before treating this run as exact-replay capable.",
         "Review forensic-grade persistence requirements before using this run for full trace/debug reconstruction.",
     ]
 
