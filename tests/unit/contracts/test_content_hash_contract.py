@@ -126,7 +126,9 @@ def test_content_hash_schema_include_exclude_contract() -> None:
     ) == service.compute_content_hash("chembl", record_v2)
 
 
-def test_openalex_grants_raw_json_sidecar_does_not_change_semantic_content_hash() -> None:
+def test_openalex_grants_raw_json_sidecar_does_not_change_semantic_content_hash() -> (
+    None
+):
     record_a = {
         "openalex_id": "W1",
         "title": "Example",
@@ -157,7 +159,10 @@ def test_openalex_grants_raw_json_sidecar_does_not_change_semantic_content_hash(
 def test_unordered_publication_raw_json_sidecars_are_excluded_from_semantic_hash() -> (
     None
 ):
-    assert "affiliation_structured_raw_json" in PUBMED_PUBLICATION_PROFILE.hash_excluded_fields
+    assert (
+        "affiliation_structured_raw_json"
+        in PUBMED_PUBLICATION_PROFILE.hash_excluded_fields
+    )
     assert "publication_types_raw_json" in (
         SEMANTICSCHOLAR_PUBLICATION_PROFILE.hash_excluded_fields
     )

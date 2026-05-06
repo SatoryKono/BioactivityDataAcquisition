@@ -146,8 +146,8 @@ def _assert_provenance_only_score(
         "universal_exact_replay_not_claimed"
     )
     assert score["blockers"] == [
-        "exact_replay_not_eligible",
         "dependency_lock_hash_missing",
+        "exact_replay_not_eligible",
         "identity_graph_incomplete",
         "immutable_input_snapshots_missing",
         "missing_immutable_input_snapshots",
@@ -270,14 +270,14 @@ def _expected_provenance_only_summary_without_score(
             },
             "required_profile_missing_requirements": [],
             "replay_ready_missing_requirements": [
-                "dependency_lock_provenance",
                 "exact_replay_capability",
+                "dependency_lock_provenance",
                 "immutable_input_snapshots",
                 "produced_artifact_trace",
             ],
             "forensic_grade_missing_requirements": [
-                "dependency_lock_provenance",
                 "exact_replay_capability",
+                "dependency_lock_provenance",
                 "immutable_input_snapshots",
                 "produced_artifact_trace",
                 "run_ledger_history",
@@ -374,9 +374,13 @@ def _assert_provenance_only_policy(
         "manifest_id",
         "manifest_created_at",
     ]
-    assert effective_config_diag["diff_policy"]["legacy_config_hash_display_only"] is True
     assert (
-        effective_config_diag["diff_policy"]["legacy_config_hash_replay_identity_anchor"]
+        effective_config_diag["diff_policy"]["legacy_config_hash_display_only"] is True
+    )
+    assert (
+        effective_config_diag["diff_policy"][
+            "legacy_config_hash_replay_identity_anchor"
+        ]
         is False
     )
 
@@ -426,10 +430,15 @@ def test_build_diagnostics_summary_classifies_dependency_lock_provenance() -> No
     assert (
         summary["exact_replay_anchors"]["dependency_lock_hash"] == "sha256:deps-present"
     )
-    assert summary["persistence_profile"]["surfaces"]["dependency_lock_provenance"] is True
-    assert summary["reproducibility_audit_score"]["category_scores"]["run_identity"][
-        "score"
-    ] == 10
+    assert (
+        summary["persistence_profile"]["surfaces"]["dependency_lock_provenance"] is True
+    )
+    assert (
+        summary["reproducibility_audit_score"]["category_scores"]["run_identity"][
+            "score"
+        ]
+        == 10
+    )
 
 
 def test_build_diagnostics_summary_distinguishes_resume_only_runs() -> None:
@@ -506,6 +515,7 @@ def test_build_diagnostics_summary_surfaces_required_profile_gap() -> None:
     assert summary["persistence_profile"]["required_profile_satisfied"] is False
     assert summary["persistence_profile"]["required_profile_missing_requirements"] == [
         "exact_replay_capability",
+        "dependency_lock_provenance",
         "immutable_input_snapshots",
         "produced_artifact_trace",
     ]
@@ -602,7 +612,10 @@ def test_build_diagnostics_summary_does_not_report_exact_replay_from_intent_alon
     assert summary["replay_readiness_verdict"] == "exact_replay_blocked"
     assert summary["operator_replay_mode"] == "Exact Replay Blocked"
     assert summary["snapshot_status"] == "none"
-    assert summary["exact_replay_blockers"] == ["immutable_input_snapshots_missing"]
+    assert summary["exact_replay_blockers"] == [
+        "immutable_input_snapshots_missing",
+        "dependency_lock_provenance_missing",
+    ]
 
 
 def test_build_diagnostics_summary_does_not_mark_unsupported_family_strict_replay_safe() -> (
@@ -846,13 +859,13 @@ def test_build_diagnostics_summary_exposes_required_operator_fields(
         },
         "required_profile_missing_requirements": [],
         "replay_ready_missing_requirements": [
-            "dependency_lock_provenance",
             "exact_replay_capability",
+            "dependency_lock_provenance",
             "immutable_input_snapshots",
         ],
         "forensic_grade_missing_requirements": [
-            "dependency_lock_provenance",
             "exact_replay_capability",
+            "dependency_lock_provenance",
             "immutable_input_snapshots",
         ],
         "composite_resume_reconstructability": {
@@ -1192,13 +1205,14 @@ def test_build_diagnostics_summary_formalizes_composite_exact_replay_boundary() 
         "lineage_closure_boundary_support": False,
     }
     assert summary["persistence_profile"]["replay_ready_missing_requirements"] == [
-        "dependency_lock_provenance",
         "exact_replay_capability",
+        "dependency_lock_provenance",
         "immutable_input_snapshots",
         "produced_artifact_trace",
     ]
     assert summary["persistence_profile"]["forensic_grade_missing_requirements"] == [
         "exact_replay_capability",
+        "dependency_lock_provenance",
         "immutable_input_snapshots",
         "produced_artifact_trace",
         "run_ledger_history",

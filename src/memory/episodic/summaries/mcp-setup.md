@@ -1,25 +1,25 @@
 ---
 id: mcp-setup
-title: Setup MCP runtime
+title: Set up MCP runtime
 task_id: mcp-setup
-created_at: '2026-05-02T16:51:15Z'
+created_at: '2026-05-06T13:02:35Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
 - scripts/ai/codex/setup_mcp.py
-summary: Ran the canonical setup-mcp entry point, refreshed workspace and user MCP
-  configs, and verified JSON/TOML syntax plus codex mcp list.
+summary: Verified BioETL MCP configuration is already synchronized for the current
+  repo and Codex runtime; no repo file changes were required.
 ---
 
 # Episodic summary
 
 ## Task
 
-- Title: Setup MCP runtime
+- Title: Set up MCP runtime
 
 ## Outcome
 
-- Ran the canonical setup-mcp entry point, refreshed workspace and user MCP configs, and verified JSON/TOML syntax plus codex mcp list.
+- Verified BioETL MCP configuration is already synchronized for the current repo and Codex runtime; no repo file changes were required.
 
 ## Lessons learned
 
