@@ -99,20 +99,6 @@ def _exact_anchor_mismatch(
     return None
 
 
-def _optional_exact_anchor_mismatch(
-    *,
-    state_value: str,
-    expected_value: str,
-    anchor_name: str,
-) -> str | None:
-    """Return mismatch only when both old checkpoint and runtime carry the anchor."""
-    if not state_value or not expected_value:
-        return None
-    if state_value != expected_value:
-        return f"{anchor_name} {state_value!r} != {expected_value!r}"
-    return None
-
-
 def _manifest_id_mismatch(
     *,
     state: CompositeCheckpointState,
@@ -192,7 +178,7 @@ def validate_resume_compatibility(
                 expected_value=anchors.dq_contract_compatibility_hash,
                 anchor_name="dq_contract_compatibility_hash",
             ),
-            _optional_exact_anchor_mismatch(
+            _exact_anchor_mismatch(
                 state_value=state.input_snapshot_fingerprint,
                 expected_value=anchors.input_snapshot_fingerprint,
                 anchor_name="input_snapshot_fingerprint",

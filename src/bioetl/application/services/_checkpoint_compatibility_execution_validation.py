@@ -249,14 +249,28 @@ def _validate_exact_replay_and_snapshots(
                 "checkpoint was not captured in exact replay mode"
             )
             compatible = False
-        elif not checkpoint_metadata.input_snapshot_ids:
+        elif not checkpoint_metadata.input_snapshot_fingerprint:
             messages.append(
-                "Exact replay requires checkpoint input snapshot anchors, but none were persisted"
+                "Exact replay requires checkpoint input snapshot fingerprint, "
+                "but none was persisted"
             )
             messages.append("checkpoint_missing_snapshot_anchor")
             compatible = False
         elif (
+            current_metadata.input_snapshot_fingerprint
+            and checkpoint_metadata.input_snapshot_fingerprint
+            and current_metadata.input_snapshot_fingerprint
+            != checkpoint_metadata.input_snapshot_fingerprint
+        ):
+            messages.append(
+                "Input snapshot fingerprint mismatch: "
+                f"current={current_metadata.input_snapshot_fingerprint}, "
+                f"checkpoint={checkpoint_metadata.input_snapshot_fingerprint}"
+            )
+            compatible = False
+        elif (
             current_metadata.input_snapshot_ids
+            and checkpoint_metadata.input_snapshot_ids
             and current_metadata.input_snapshot_ids
             != checkpoint_metadata.input_snapshot_ids
         ):

@@ -145,16 +145,23 @@ def _build_artifact_publication_details(
     metadata: BronzeMetadata | SilverMetadata | GoldMetadata,
     manifest_id: str,
     artifact_id: str,
+    layer: str,
 ) -> dict[str, object]:
     """Build callback payload for one published output artifact."""
     lineage_context = _resolve_lineage_log_context(metadata)
+    execution_fingerprint = getattr(metadata.runtime, "execution_fingerprint", None)
     details: dict[str, object] = {
         "artifact_kind": "layer_output",
+        "artifact_semantics": _resolve_artifact_semantics(
+            metadata=metadata,
+            layer=layer,
+        ),
         "artifact_id": artifact_id,
         "metadata_path": metadata_path,
         "record_count": int(metadata.output.record_count),
         "total_bytes": int(metadata.output.total_bytes),
         "content_hash": metadata.output.content_hash,
+        "hash_algorithm": "sha256",
         "run_id": str(metadata.runtime.run_id),
         "manifest_id": manifest_id,
         "pipeline_name": metadata.pipeline.name,
@@ -163,8 +170,28 @@ def _build_artifact_publication_details(
         "dataset_ref": lineage_context["dataset_ref"],
         "lineage_fragment_id": lineage_context["lineage_fragment_id"],
     }
+    if execution_fingerprint is not None:
+        details["execution_fingerprint"] = str(execution_fingerprint)
     _attach_input_snapshot_details(details=details, metadata=metadata)
     return details
+
+
+def _resolve_artifact_semantics(
+    *,
+    metadata: BronzeMetadata | SilverMetadata | GoldMetadata,
+    layer: str,
+) -> str:
+    """Return the replay semantics for one published layer artifact."""
+    if isinstance(metadata, BronzeMetadata):
+        input_snapshots = getattr(metadata.source, "input_snapshots", [])
+        if input_snapshots:
+            return "immutable_input_snapshot"
+        return "occurrence_append"
+    if layer == "silver":
+        return "semantic_table"
+    if layer == "gold":
+        return "derived_dataset"
+    return "unknown"
 
 
 def _attach_input_snapshot_details(
@@ -389,6 +416,7 @@ def _record_artifact_publication(
         metadata=metadata,
         manifest_id=manifest_id,
         artifact_id=artifact_id,
+        layer=layer,
     )
     try:
         recorder(layer, str(Path(base_path).resolve()), details)

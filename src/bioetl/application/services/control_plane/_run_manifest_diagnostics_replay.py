@@ -74,18 +74,24 @@ def _resolve_replay_capability_reason(
     manifest: RunManifest,
     input_snapshots: list[dict[str, object]],
     resume_requested: bool,
+    policy_assessment: ReproducibilityPolicyAssessment,
 ) -> str:
     """Return one operator-facing explanation for replay capability."""
     profile = _resolve_reproducibility_profile(manifest)
+    snapshot_envelope = policy_assessment.snapshot_envelope
     if not profile.strict_exact_replay_supported:
         return "family_outside_supported_exact_replay_boundary"
     if _collect_append_mode_semantic_sinks(manifest):
         return "append_mode_semantic_outputs_block_exact_replay"
+    if snapshot_envelope.any_input_snapshots and not (
+        snapshot_envelope.full_snapshot_envelope
+    ):
+        return "partial_input_snapshot_envelope"
     if (
         manifest.replay_capability == ReplayCapability.EXACT_REPLAY_SUPPORTED
-        and input_snapshots
+        and snapshot_envelope.full_snapshot_envelope
     ):
-        return "immutable_input_snapshots_present"
+        return "full_immutable_input_snapshot_envelope_present"
     if manifest.replay_capability == ReplayCapability.RESUME_ONLY or resume_requested:
         return "resume_requested_without_snapshot_backed_inputs"
     if _is_composite_execution_context(manifest):
@@ -101,12 +107,6 @@ def _resolve_exact_replay_blockers(
     """Return explicit blockers preventing exact replay eligibility."""
     profile = _resolve_reproducibility_profile(manifest)
     append_mode_sinks = _collect_append_mode_semantic_sinks(manifest)
-    if _exact_replay_is_unblocked(
-        manifest=manifest,
-        profile=profile,
-        append_mode_sinks=append_mode_sinks,
-    ):
-        return []
     blockers = [
         *_profile_exact_replay_blockers(profile),
         *_append_mode_exact_replay_blockers(append_mode_sinks),
@@ -121,19 +121,6 @@ def _resolve_exact_replay_blockers(
         ),
     ]
     return blockers
-
-
-def _exact_replay_is_unblocked(
-    *,
-    manifest: RunManifest,
-    profile: ReproducibilityFamilyProfile,
-    append_mode_sinks: list[str],
-) -> bool:
-    return (
-        profile.strict_exact_replay_supported
-        and manifest.replay_capability == ReplayCapability.EXACT_REPLAY_SUPPORTED
-        and not append_mode_sinks
-    )
 
 
 def _profile_exact_replay_blockers(
@@ -156,11 +143,16 @@ def _snapshot_exact_replay_blockers(
     policy_assessment: ReproducibilityPolicyAssessment,
 ) -> list[str]:
     snapshot_envelope = policy_assessment.snapshot_envelope
-    if not snapshot_envelope.any_input_snapshots or (
-        snapshot_envelope.require_full_snapshot_envelope
-        and not snapshot_envelope.full_snapshot_envelope
-    ):
+    if not snapshot_envelope.any_input_snapshots:
         return ["immutable_input_snapshots_missing"]
+    if not snapshot_envelope.full_snapshot_envelope:
+        return [
+            "partial_input_snapshot_envelope",
+            *(
+                f"input_snapshot_missing:{source_ref}"
+                for source_ref in snapshot_envelope.missing_snapshot_source_refs
+            ),
+        ]
     if manifest.replay_capability != ReplayCapability.EXACT_REPLAY_SUPPORTED:
         return ["exact_replay_capability_unavailable"]
     return []

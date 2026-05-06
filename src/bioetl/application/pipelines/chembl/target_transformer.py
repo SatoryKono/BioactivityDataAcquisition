@@ -176,12 +176,6 @@ class TargetTransformer(BaseChemblTransformer):
         component_ids = flattened_components.get("component_ids")
         primary_component_id = component_ids[0] if component_ids else None
 
-        # Handle downgraded field: convert to bool if it's 0/1
-        # Use safe_int to handle "0"/"1" strings correctly
-        downgraded_val = safe_int(record.get("downgraded"))
-        # Default to False if missing or invalid, to ensure boolean dtype for Gold schema
-        downgraded = bool(downgraded_val) if downgraded_val is not None else False
-
         # Validate taxonomy_id using TaxonomyId Value Object
         raw_tax_id = record.get("tax_id")
         taxonomy_id_vo = TaxonomyId.from_raw(
@@ -214,7 +208,9 @@ class TargetTransformer(BaseChemblTransformer):
             "species_group_flag": record.get("species_group_flag"),
             "description": record.get("target_description")
             or record.get("description"),
-            "downgraded": downgraded,
+            # Keep provider raw value here; shared bool coercion lives in the
+            # domain normalization profile and must preserve null semantics.
+            "downgraded": record.get("downgraded"),
             "pipeline_stages": self.serialize_json(record.get("pipeline_stages")),
             # Complex fields (JSON serialized)
             "target_components": self.serialize_json(target_components),

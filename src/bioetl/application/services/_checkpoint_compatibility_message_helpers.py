@@ -167,10 +167,12 @@ def exact_replay_mismatch_messages(
             "Exact replay mismatch: current run requires exact replay but "
             "checkpoint was not captured in exact replay mode"
         ]
+    if checkpoint_metadata.input_snapshot_fingerprint:
+        return []
     if checkpoint_metadata.input_snapshot_ids:
         return []
     return [
-        "Exact replay requires checkpoint input snapshot anchors, but none were persisted"
+        "Exact replay requires checkpoint input snapshot fingerprint, but none was persisted"
     ]
 
 
@@ -179,6 +181,24 @@ def input_snapshot_mismatch_messages(
     checkpoint_metadata: CheckpointMetadata,
 ) -> list[str]:
     """Return persisted input snapshot mismatch messages."""
+    if (
+        current_metadata.input_snapshot_fingerprint
+        and checkpoint_metadata.input_snapshot_fingerprint
+        and current_metadata.input_snapshot_fingerprint
+        != checkpoint_metadata.input_snapshot_fingerprint
+    ):
+        return [
+            "Input snapshot fingerprint mismatch: "
+            f"current={current_metadata.input_snapshot_fingerprint}, "
+            f"checkpoint={checkpoint_metadata.input_snapshot_fingerprint}"
+        ]
+    if current_metadata.input_snapshot_fingerprint and not (
+        checkpoint_metadata.input_snapshot_fingerprint
+    ):
+        return [
+            "Input snapshot fingerprint missing from checkpoint: "
+            f"current={current_metadata.input_snapshot_fingerprint}"
+        ]
     if (
         not current_metadata.input_snapshot_ids
         or not checkpoint_metadata.input_snapshot_ids

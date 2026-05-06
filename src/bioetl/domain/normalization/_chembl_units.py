@@ -35,6 +35,9 @@ _UNIT_ALIASES: dict[str, str] = {
     "m": "M",
     "molar": "M",
 }
+CHEMBL_STANDARD_UNIT_CANONICALS: frozenset[str] = frozenset(
+    _QUDT_UNIT_IDENTIFIER_BY_UNIT.keys()
+)
 
 
 def _normalize_unit_alias_key(value: str) -> str:
