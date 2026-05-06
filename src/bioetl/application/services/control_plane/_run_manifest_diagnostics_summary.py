@@ -191,6 +191,10 @@ def _add_identity_graph_optional_fields(
         "input_snapshot_count"
     ]
     identity_graph["snapshot_status"] = request.base_summary.get("snapshot_status")
+    identity_graph["source_posture"] = request.base_summary.get("source_posture")
+    identity_graph["input_snapshot_missing_source_refs"] = (
+        request.base_summary.get("input_snapshot_missing_source_refs", [])
+    )
     identity_graph["input_snapshots"] = request.base_summary["input_snapshots"]
 
 
@@ -233,6 +237,12 @@ def _build_identity_graph(
             "exact_replay_support_boundary"
         ),
         "replay_family_contract": request.base_summary.get("replay_family_contract"),
+        "replay_support_state": request.base_summary.get("replay_support_state"),
+        "source_posture": request.base_summary.get("source_posture"),
+        "input_snapshot_missing_source_refs": request.base_summary.get(
+            "input_snapshot_missing_source_refs",
+            [],
+        ),
         "replay_capability_reason": request.base_summary.get(
             "replay_capability_reason"
         ),

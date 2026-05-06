@@ -4,6 +4,12 @@ from __future__ import annotations
 
 from typing import Any
 
+from bioetl.domain.normalization._chembl_units import (
+    CHEMBL_STANDARD_UNIT_CANONICALS,
+)
+from bioetl.domain.normalization._chembl_units import (
+    normalize_standard_unit as normalize_chembl_standard_unit,
+)
 from bioetl.domain.normalization.text import normalize_string
 
 __all__ = [
@@ -68,21 +74,6 @@ UNIT_MAPPING: dict[str, str] = {
     "ml": "mL",
     "L": "L",
     "l": "L",
-    "nM": "nM",
-    "NM": "nM",
-    "nm": "nM",
-    "uM": "µM",
-    "UM": "µM",
-    "µM": "µM",
-    "μM": "µM",
-    "mM": "mM",
-    "MM": "mM",
-    "mm": "mM",
-    "M": "M",
-    "m": "M",
-    "pM": "pM",
-    "PM": "pM",
-    "pm": "pM",
     "g": "g",
     "G": "g",
     "mg": "mg",
@@ -95,9 +86,6 @@ UNIT_MAPPING: dict[str, str] = {
     "NG": "ng",
     "pg": "pg",
     "PG": "pg",
-    "%": "%",
-    "percent": "%",
-    "PERCENT": "%",
     "U": "U",
     "u": "U",
     "units": "U",
@@ -172,6 +160,9 @@ def normalize_unit(
     normalized = normalize_string(value)
     if normalized is None:
         return None
+    chembl_standard_unit = normalize_chembl_standard_unit(normalized)
+    if chembl_standard_unit in CHEMBL_STANDARD_UNIT_CANONICALS:
+        return chembl_standard_unit
     return UNIT_MAPPING.get(normalized, normalized)
 
 

@@ -118,6 +118,7 @@ def _resolve_base_summary_replay_context(
             manifest=manifest,
             input_snapshots=input_snapshots,
             resume_requested=resume_requested,
+            policy_assessment=policy_assessment,
         ),
         replay_readiness_verdict=_resolve_manifest_replay_readiness_verdict(
             manifest=manifest,
@@ -180,6 +181,18 @@ def _resolve_snapshot_status(
     }:
         return "full"
     return "partial"
+
+
+def _resolve_source_posture(
+    policy_assessment: ReproducibilityPolicyAssessment,
+) -> str:
+    """Return whether manifested sources are snapshot-backed or live/unknown."""
+    snapshot_envelope = policy_assessment.snapshot_envelope
+    if snapshot_envelope.full_snapshot_envelope:
+        return "immutable_snapshot_envelope"
+    if snapshot_envelope.any_input_snapshots:
+        return "partial_snapshot_envelope"
+    return "live_or_unknown_inputs"
 
 
 def _resolve_operator_replay_mode(
@@ -265,6 +278,9 @@ def _build_base_summary_payload(
         "requested_exact_replay": replay_context.requested_exact_replay,
         "exact_replay_support_boundary": replay_context.exact_replay_support_boundary,
         "replay_capability_reason": replay_context.replay_capability_reason,
+        "replay_support_state": replay_context.replay_family_contract.get(
+            "support_state"
+        ),
         "exact_replay_eligible": exact_replay_eligible,
         "exact_replay_blockers": replay_context.exact_replay_blockers,
         "replay_readiness_verdict": replay_context.replay_readiness_verdict,
@@ -286,6 +302,12 @@ def _build_base_summary_payload(
         ),
         "continuation_mode": replay_context.continuation_mode,
         "replay_family_contract": replay_context.replay_family_contract,
+        "source_posture": _resolve_source_posture(
+            replay_context.policy_assessment
+        ),
+        "input_snapshot_missing_source_refs": list(
+            replay_context.policy_assessment.snapshot_envelope.missing_snapshot_source_refs
+        ),
         "replay_capability_assessment": (
             replay_context.policy_assessment.to_dict()
         ),

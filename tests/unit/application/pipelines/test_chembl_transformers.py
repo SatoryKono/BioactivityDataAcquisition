@@ -366,7 +366,7 @@ class TestPublicationTransformer:
             raise RuntimeError("classification data not initialized")
 
         monkeypatch.setattr(
-            "bioetl.application.pipelines.chembl.publication_transformer.build_publication_type_classification_payload",
+            "bioetl.domain.normalization.profiles._profile_publication_normalizers.build_publication_type_classification_payload",
             _raise_runtime_error,
         )
 
@@ -826,7 +826,7 @@ class TestTargetTransformer:
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert result["downgraded"] is False  # Default value
+        assert result["downgraded"] is None
         assert result["pipeline_stages"] is None
 
     @pytest.mark.asyncio

@@ -148,10 +148,7 @@ def _validate_required_checkpoint_anchors(
     """Reject strict resume when checkpoint metadata omits required anchors."""
     required_fields = list(_STRICT_REQUIRED_CHECKPOINT_FIELDS)
     if bool(current_metadata.exact_replay):
-        if current_metadata.input_snapshot_ids:
-            required_fields.append("input_snapshot_ids")
-        else:
-            required_fields.append("input_snapshot_fingerprint")
+        required_fields.append("input_snapshot_fingerprint")
     missing = checkpoint_metadata.missing_required_anchors(tuple(required_fields))
     if not missing:
         return True, []

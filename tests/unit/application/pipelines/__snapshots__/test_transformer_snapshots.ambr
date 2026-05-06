@@ -470,7 +470,7 @@
     'content_hash': '<content_hash>',
     'cross_references': '{"xref_id":"P35354","xref_src_db":"UniProt"}',
     'description': 'Prostaglandin G/H synthase 2',
-    'downgraded': False,
+    'downgraded': None,
     'entity_id': '<entity_id>',
     'organism': 'Homo sapiens',
     'organism_class': 'multicellular',

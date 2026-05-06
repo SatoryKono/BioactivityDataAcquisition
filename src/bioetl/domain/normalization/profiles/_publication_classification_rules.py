@@ -11,8 +11,8 @@ as strict enums merely because current fixtures have low cardinality.
 
 from __future__ import annotations
 
-from bioetl.domain.mapping.publication_type_classification import (
-    normalize_publication_classification_field,
+from bioetl.domain.normalization.profiles._profile_publication_normalizers import (
+    normalize_profile_chembl_publication_classification_field,
 )
 
 __all__ = ["publication_classification_rules"]
@@ -22,15 +22,17 @@ def publication_classification_rules() -> dict[str, tuple[object, str]]:
     """Return strict taxonomy-backed rules for derived publication fields only."""
     return {
         field_name: (
-            lambda value, field_name=field_name: (
-                normalize_publication_classification_field(
-                    field_name,
+            lambda value, field_name=field_name, record=None: (
+                normalize_profile_chembl_publication_classification_field(
                     value,
+                    field_name=field_name,
+                    record=record,
                 )
             ),
             (
                 f"Normalize derived {field_name} against the unified "
-                "publication type classification taxonomy."
+                "publication type classification taxonomy using the raw "
+                "provider publication type as the authoritative input seam."
             ),
         )
         for field_name in (

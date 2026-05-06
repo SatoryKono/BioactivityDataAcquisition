@@ -34,12 +34,6 @@ from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
 )
 from bioetl.domain.entities import ChemblPublication
-from bioetl.domain.mapping.publication_type_classification import (
-    build_publication_type_classification_payload,
-)
-from bioetl.domain.mapping.publication_type_mapping import (
-    normalize_publication_type,
-)
 from bioetl.domain.types import BronzeRecord, GoldRecord
 from bioetl.domain.value_objects import PublicationYear
 from bioetl.domain.value_objects.publications import DOI
@@ -142,9 +136,10 @@ class PublicationTransformer(BaseChemblTransformer):
             dependencies: Explicit collaborator bundle.
 
         """
+        resolved_entity_type = entity_type or "publication"
         super().__init__(
             provider=provider,
-            entity_type=entity_type,
+            entity_type=resolved_entity_type,
             silver_filters=silver_filters,
             gold_filters=gold_filters,
             tracer=tracer,
@@ -207,22 +202,16 @@ class PublicationTransformer(BaseChemblTransformer):
         raw_publication_type_value = (
             str(raw_publication_type) if raw_publication_type is not None else None
         )
-        try:
-            classification_payload = build_publication_type_classification_payload(
-                "chembl",
-                raw_type=raw_publication_type_value,
-            )
-        except RuntimeError:
-            classification_payload = {
-                "publication_type_raw": raw_publication_type_value,
-                "publication_type_unified": None,
-                "publication_subclass": None,
-                "publication_class": None,
-            }
-        data.update(classification_payload)
-        data["publication_type"] = normalize_publication_type(
-            raw_publication_type_value
-        )
+        # Preserve provider-native type surfaces here; domain normalization owns
+        # canonical publication taxonomy mapping and derived classifications.
+        data["publication_type_raw"] = raw_publication_type_value
+        data["publication_type"] = raw_publication_type_value
+        # Seed derived classification fields with the same raw token so the
+        # domain profile can derive canonical taxonomy fields on its own
+        # record-aware path without application-layer semantic mapping.
+        data["publication_type_unified"] = raw_publication_type_value
+        data["publication_subclass"] = raw_publication_type_value
+        data["publication_class"] = raw_publication_type_value
         data["publication_pmid"] = data.get("publication_pmid") or PMID(
             record.get("pmid")
         )

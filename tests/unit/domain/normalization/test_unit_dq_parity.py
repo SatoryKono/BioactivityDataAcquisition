@@ -7,6 +7,7 @@ from typing import Any
 
 import yaml
 
+from bioetl.domain.normalization.chembl import normalize_standard_unit
 from bioetl.domain.normalization.rules import normalize_unit
 
 ACTIVITY_CONFIG_PATH = Path("configs/entities/chembl/activity.yaml")
@@ -41,3 +42,8 @@ def test_activity_dq_allowed_units_are_stable_under_unit_normalization() -> None
     assert "uM" not in allowed_units
     assert "µM" in allowed_units
     assert {normalize_unit(unit) for unit in allowed_units} == set(allowed_units)
+
+
+def test_generic_unit_normalizer_delegates_chembl_standard_unit_aliases() -> None:
+    for raw_value in ("uM", "UM", "μM", "µM", "nM", "percent"):
+        assert normalize_unit(raw_value) == normalize_standard_unit(raw_value)
