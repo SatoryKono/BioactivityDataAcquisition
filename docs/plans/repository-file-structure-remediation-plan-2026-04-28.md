@@ -371,16 +371,15 @@ call-sites.
 - `test_*.js`
 - `test_*.json`
 - `test_neo4j_memory.py`
-- `tinyproxy.conf`
 
 Evidence commands:
 
 ```bash
 git ls-files AGENT.md .codex_tmp_issue_*.md QUICK_START.md \
   query_test_docs_memory.js seed_test_docs_memory.js test_*.js test_*.json \
-  test_neo4j_memory.py tinyproxy.conf
+  test_neo4j_memory.py
 
-rg -n "AGENT\.md|QUICK_START\.md|query_test_docs_memory|seed_test_docs_memory|test_neo4j_memory|tinyproxy\.conf" \
+rg -n "AGENT\.md|QUICK_START\.md|query_test_docs_memory|seed_test_docs_memory|test_neo4j_memory" \
   .github docs scripts tests configs README.md Makefile pyproject.toml package.json
 ```
 
@@ -390,7 +389,6 @@ Decision rules:
 - Active engineering plan/note -> `docs/plans/**` only if cataloged, otherwise
   `docs/99-archive/**`.
 - Active tests -> `tests/**` with normal pytest/node test discovery.
-- Active support config -> `configs/**`.
 - Historical-only notes -> `docs/99-archive/**`.
 - No call-site and generated/ad-hoc -> `git rm`.
 

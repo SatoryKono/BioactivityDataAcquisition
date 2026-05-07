@@ -17,6 +17,9 @@ from bioetl.application.core.base_transformer import (
     BaseTransformer,
     TransformerDependencyContext,
 )
+from bioetl.application.core.pre_silver_adapter_mixin import (
+    PreSilverAdapterMixin,
+)
 from bioetl.application.core.pre_silver_record import PreSilverRecord
 from bioetl.application.core.record_normalization_processor import (
     RecordNormalizationProcessor,
@@ -35,7 +38,7 @@ if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord, SilverRecord
 
 
-class PubChemCompoundTransformer(BaseTransformer):
+class PubChemCompoundTransformer(PreSilverAdapterMixin, BaseTransformer):
     """Transformer for PubChem compound records.
 
     Uses PubchemMolecule domain entity (canonical name) for validation
@@ -188,52 +191,3 @@ class PubChemCompoundTransformer(BaseTransformer):
         )
 
         return cast("SilverRecord", self.entity_to_silver_record(entity))
-
-    def _build_pre_silver_json_record(
-        self,
-        context: PipelineContext,
-        entity_id: str,
-        content_hash: str,
-        index: int,
-        business_data: JsonDict,
-    ) -> JsonDict:
-        """Adapt finalized Silver-record construction to the PreSilverRecord protocol."""
-        return cast(
-            JsonDict,
-            self._build_pre_silver_record(
-                context,
-                entity_id,
-                content_hash,
-                index,
-                business_data,
-            ),
-        )
-
-    def _apply_pre_silver_structural_policy(
-        self,
-        context: PipelineContext,
-        record: JsonDict,
-        index: int,
-    ) -> JsonDict | None:
-        """Adapt structural policy application to the PreSilverRecord protocol."""
-        return cast(
-            JsonDict | None,
-            self._apply_structural_policy(
-                context,
-                cast("SilverRecord", record),
-                index,
-            ),
-        )
-
-    def _apply_pre_silver_filter(
-        self,
-        context: PipelineContext,
-        record: JsonDict,
-        index: int,
-    ) -> None:
-        """Adapt silver-filter application to the PreSilverRecord protocol."""
-        self._apply_silver_filter(
-            context,
-            cast("SilverRecord", record),
-            index,
-        )
