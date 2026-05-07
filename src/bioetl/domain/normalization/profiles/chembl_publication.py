@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
+
 from bioetl.domain.normalization.profiles._chembl_policy_registry import (
     chembl_boolean_family_fields,
 )
@@ -86,10 +88,15 @@ _BOOLEAN_FIELDS = chembl_boolean_family_fields("bool_like", entity="publication"
 _REFERENCE_IDENTIFIER_RULES = chembl_reference_identifier_rules("publication")
 
 
-def normalize_profile_publication_type_field(value: object) -> object:
+def normalize_profile_publication_type_field(
+    value: object,
+    *,
+    record: Mapping[str, object] | None = None,
+) -> object:
     return normalize_profile_publication_type(
         value,
         allowed_values=PUBLICATION_TYPES,
+        record=record,
     )
 
 

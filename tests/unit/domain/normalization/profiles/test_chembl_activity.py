@@ -13,6 +13,22 @@ from bioetl.domain.normalization.profiles.profile_normalizers import (
 
 EXPECTED_BAO_ENDPOINT_IRI = "https://purl.obolibrary.org/obo/BAO_0000357"
 EXPECTED_QUDT_UNIT_IRI = "https://qudt.org/vocab/unit/MicroMOL-PER-L"
+CHEMBL_STANDARD_UNIT_ALIAS_CASES = (
+    ("uM", "µM"),
+    ("UM", "µM"),
+    ("μM", "µM"),
+    ("micromolar", "µM"),
+    ("nM", "nM"),
+    ("nanomolar", "nM"),
+    ("pM", "pM"),
+    ("picomolar", "pM"),
+    ("mM", "mM"),
+    ("millimolar", "mM"),
+    ("M", "M"),
+    ("molar", "M"),
+    ("percent", "%"),
+    ("PERCENT", "%"),
+)
 
 
 def test_chembl_activity_profile_covers_schema_exactly() -> None:
@@ -104,7 +120,8 @@ def test_chembl_activity_qudt_units_has_explicit_unit_normalization_rule() -> No
     assert units_rule.normalizer(" μM ") == "µM"
     assert "Canonicalize units" in (units_rule.notes or "")
     assert standard_units_rule is not None
-    assert standard_units_rule.normalizer(" uM ") == "µM"
+    for raw_value, expected in CHEMBL_STANDARD_UNIT_ALIAS_CASES:
+        assert standard_units_rule.normalizer(f" {raw_value} ") == expected
     assert standard_units_rule.normalizer("unknown-unit") is None
     assert "standard-unit enum" in (standard_units_rule.notes or "")
 

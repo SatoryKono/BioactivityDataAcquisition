@@ -351,6 +351,24 @@ class TestPublicationTransformer:
         assert result["src_id"] == 1
         assert result["_source"] == "chembl"  # System field
 
+    def test_extract_business_data_preserves_raw_publication_type_for_domain_profile(
+        self, transformer
+    ):
+        """Application extraction must not own ChEMBL publication taxonomy mapping."""
+        record = {
+            "publication_id": "CHEMBL1234567",
+            "doc_type": "PUBLICATION",
+            "title": "Raw provider type seam",
+        }
+
+        result = transformer._extract_business_data(record, "CHEMBL1234567")
+
+        assert result["publication_type_raw"] == "PUBLICATION"
+        assert result["publication_type"] == "PUBLICATION"
+        assert result["publication_type_unified"] == "PUBLICATION"
+        assert result["publication_subclass"] == "PUBLICATION"
+        assert result["publication_class"] == "PUBLICATION"
+
     @pytest.mark.asyncio
     async def test_transform_survives_uninitialized_publication_classification(
         self, transformer, mock_context, monkeypatch
@@ -792,6 +810,20 @@ class TestTargetTransformer:
 
         assert result is not None
         assert result["downgraded"] is False
+
+    def test_extract_business_data_preserves_raw_downgraded_for_domain_profile(
+        self, transformer
+    ):
+        """Application extraction must not collapse invalid or missing bool lexemes."""
+        for raw_value in ("0", "1", True, False, None, "not-a-bool"):
+            record = {
+                "target_id": "CHEMBL1862",
+                "downgraded": raw_value,
+            }
+
+            result = transformer._extract_business_data(record, "CHEMBL1862")
+
+            assert result["downgraded"] is raw_value
 
     @pytest.mark.asyncio
     async def test_transform_with_pipeline_stages(self, transformer, mock_context):

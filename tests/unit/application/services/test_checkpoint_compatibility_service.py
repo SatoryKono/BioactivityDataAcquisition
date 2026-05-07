@@ -358,6 +358,7 @@ class TestCheckpointCompatibilityService:
             git_commit="a" * 40,
             exact_replay=True,
             input_snapshot_ids=("snapshot-a",),
+            input_snapshot_fingerprint="snapshot-fp-a",
         )
         checkpoint = CheckpointMetadata(
             records_processed=500,
@@ -378,7 +379,7 @@ class TestCheckpointCompatibilityService:
         assert result.compatible is False
         assert result.execution_identity_compatible is False
         assert any(
-            "requires checkpoint input snapshot anchors" in msg
+            "requires checkpoint input snapshot fingerprint" in msg
             for msg in result.messages
         )
 
@@ -397,6 +398,7 @@ class TestCheckpointCompatibilityService:
             git_commit="a" * 40,
             exact_replay=True,
             input_snapshot_ids=("snapshot-a",),
+            input_snapshot_fingerprint="snapshot-fp-a",
         )
         checkpoint = CheckpointMetadata(
             records_processed=500,
@@ -411,13 +413,16 @@ class TestCheckpointCompatibilityService:
             git_commit="a" * 40,
             exact_replay=True,
             input_snapshot_ids=("snapshot-b",),
+            input_snapshot_fingerprint="snapshot-fp-b",
         )
 
         result = self.service.validate_checkpoint_compatibility(current, checkpoint)
 
         assert result.compatible is False
         assert result.execution_identity_compatible is False
-        assert any("Input snapshot identity mismatch" in msg for msg in result.messages)
+        assert any(
+            "Input snapshot fingerprint mismatch" in msg for msg in result.messages
+        )
 
     def test_validate_strict_resume_rejects_missing_dq_hash_anchor(self) -> None:
         current = CheckpointMetadata(

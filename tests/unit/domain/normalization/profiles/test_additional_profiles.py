@@ -612,6 +612,35 @@ def test_chembl_publication_profile_normalizes_publication_type_and_open_access(
     assert authors_rule.apply("not-json") is None
 
 
+def test_chembl_publication_profile_derives_classification_from_raw_type() -> None:
+    publication_type_rule = CHEMBL_PUBLICATION_PROFILE.rule_for("publication_type")
+    unified_rule = CHEMBL_PUBLICATION_PROFILE.rule_for("publication_type_unified")
+    subclass_rule = CHEMBL_PUBLICATION_PROFILE.rule_for("publication_subclass")
+    class_rule = CHEMBL_PUBLICATION_PROFILE.rule_for("publication_class")
+    record = {"publication_type_raw": "PUBLICATION"}
+
+    assert publication_type_rule is not None
+    assert publication_type_rule.apply("BOOK", record=record) == "journal-article"
+    assert unified_rule is not None
+    assert unified_rule.apply("ignored", record=record) == "Journal Article"
+    assert subclass_rule is not None
+    assert subclass_rule.apply("ignored", record=record) == "Original Experimental Data"
+    assert class_rule is not None
+    assert class_rule.apply("ignored", record=record) == "EXP"
+
+
+def test_chembl_target_profile_owns_downgraded_boolean_canonicalization() -> None:
+    downgraded_rule = CHEMBL_TARGET_PROFILE.rule_for("downgraded")
+
+    assert downgraded_rule is not None
+    assert downgraded_rule.apply("1") is True
+    assert downgraded_rule.apply("0") is False
+    assert downgraded_rule.apply(True) is True
+    assert downgraded_rule.apply(False) is False
+    assert downgraded_rule.apply(None) is None
+    assert downgraded_rule.apply("not-a-bool") is None
+
+
 def test_chembl_assay_parameter_type_preserves_unknown_for_raw_review() -> None:
     assay_parameter_type_rule = CHEMBL_ASSAY_PARAMETERS_PROFILE.rule_for("type")
     assay_parameter_type_raw_rule = CHEMBL_ASSAY_PARAMETERS_PROFILE.rule_for("type_raw")

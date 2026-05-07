@@ -61,7 +61,7 @@ Field-order classes:
 1. Ordered list fields: default policy; used when order is semantically material.
 1. Set-like list fields: caller must pass the field path/name through
    `set_like_fields`; hashing sorts canonicalized elements before serialization.
-1. Canonical JSON string fields: strings that contain JSON are decoded,
+1. canonical JSON string fields: strings that contain JSON are decoded,
    normalized, and serialized canonically before hashing.
 1. Excluded metadata fields: any field whose name starts with `_` is ignored
    regardless of value or ordering.

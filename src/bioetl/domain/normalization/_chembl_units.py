@@ -34,6 +34,8 @@ _UNIT_ALIASES: dict[str, str] = {
     "millimolar": "mM",
     "m": "M",
     "molar": "M",
+    "percent": "%",
+    "percentage": "%",
 }
 CHEMBL_STANDARD_UNIT_CANONICALS: frozenset[str] = frozenset(
     _QUDT_UNIT_IDENTIFIER_BY_UNIT.keys()
