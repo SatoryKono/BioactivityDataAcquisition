@@ -78,6 +78,45 @@ class PreSilverAdapterMixin:
             business_data=business_data,
         )
 
+    def _transform_prepared_business_data(
+        self,
+        *,
+        context: PipelineContext,
+        source_id: str,
+        identity_record: JsonDict,
+        index: int,
+        business_data: JsonDict,
+    ) -> SilverRecord:
+        """Finalize one prepared payload and return it as a Silver record."""
+        return cast(
+            "SilverRecord",
+            self._finalize_prepared_business_data(
+                context=context,
+                source_id=source_id,
+                identity_record=identity_record,
+                index=index,
+                business_data=business_data,
+            ),
+        )
+
+    def _transform_identity_business_data(
+        self,
+        *,
+        context: PipelineContext,
+        source_id: str,
+        identity_field: str,
+        index: int,
+        business_data: JsonDict,
+    ) -> SilverRecord:
+        """Finalize one prepared payload with a single identity field."""
+        return self._transform_prepared_business_data(
+            context=context,
+            source_id=source_id,
+            identity_record={identity_field: source_id},
+            index=index,
+            business_data=business_data,
+        )
+
     def _finalize_normalized_business_data(
         self,
         *,
@@ -113,6 +152,27 @@ class PreSilverAdapterMixin:
             ),
         )
 
+    def _transform_optional_normalized_business_data(
+        self,
+        *,
+        context: PipelineContext,
+        index: int,
+        business_data: JsonDict | None,
+        resolve_entity_id: Callable[[JsonDict], str],
+    ) -> SilverRecord | None:
+        """Finalize optional business data with a normalized custom entity id."""
+        if business_data is None:
+            return None
+        return cast(
+            "SilverRecord",
+            self._finalize_normalized_business_data(
+                context=context,
+                index=index,
+                business_data=business_data,
+                resolve_entity_id=resolve_entity_id,
+            ),
+        )
+
     def _build_pre_silver_payload(
         self,
         *,
@@ -145,6 +205,34 @@ class PreSilverAdapterMixin:
             business_data=business_data,
         )
 
+    def _stage_prepared_business_data(
+        self,
+        *,
+        source_id: str,
+        identity_record: JsonDict,
+        business_data: JsonDict,
+    ) -> PreSilverRecord:
+        """Stage one prepared payload as a PreSilver record."""
+        return self._build_pre_silver_from_business_data(
+            source_id=source_id,
+            identity_record=identity_record,
+            business_data=business_data,
+        )
+
+    def _stage_identity_business_data(
+        self,
+        *,
+        source_id: str,
+        identity_field: str,
+        business_data: JsonDict,
+    ) -> PreSilverRecord:
+        """Stage one prepared payload with a single identity field."""
+        return self._stage_prepared_business_data(
+            source_id=source_id,
+            identity_record={identity_field: source_id},
+            business_data=business_data,
+        )
+
     def _build_pre_silver_from_normalized_business_data(
         self,
         *,
@@ -161,6 +249,20 @@ class PreSilverAdapterMixin:
         return self._build_pre_silver_payload(
             entity_id=entity_id,
             business_data=normalized_business_data,
+        )
+
+    def _stage_optional_normalized_business_data(
+        self,
+        *,
+        business_data: JsonDict | None,
+        resolve_entity_id: Callable[[JsonDict], str],
+    ) -> PreSilverRecord | None:
+        """Stage optional business data after normalized custom entity-id resolution."""
+        if business_data is None:
+            return None
+        return self._build_pre_silver_from_normalized_business_data(
+            business_data=business_data,
+            resolve_entity_id=resolve_entity_id,
         )
 
     def _build_entity_backed_silver_record(

@@ -112,42 +112,7 @@ class PublicationTransformer(BaseChemblTransformer):
 
     entity_class = ChemblPublication
     primary_id_field = "publication_id"
-
-    def __init__(
-        self,
-        provider: str = "chembl",
-        entity_type: str | None = None,
-        silver_filters: SilverFilterConfig | None = None,
-        gold_filters: GoldFilterConfig | None = None,
-        tracer: TracingPort | None = None,
-        metrics: MetricsPort | None = None,
-        identity_service: EntityIdentityGenerator | None = None,
-        pii_hasher: PiiHasherPort | None = None,
-        dependencies: TransformerDependencyContext | None = None,
-    ) -> None:
-        """Initialize ChEMBL Publication transformer.
-
-        Args:
-            provider: Data provider identifier. Defaults to 'chembl'.
-            entity_type: Entity type for metrics labels. If None, derived from
-                entity_class name.
-            silver_filters: Optional filter configuration for Silver layer.
-            gold_filters: Optional filter configuration for Gold layer.
-            dependencies: Explicit collaborator bundle.
-
-        """
-        resolved_entity_type = entity_type or "publication"
-        super().__init__(
-            provider=provider,
-            entity_type=resolved_entity_type,
-            silver_filters=silver_filters,
-            gold_filters=gold_filters,
-            tracer=tracer,
-            metrics=metrics,
-            identity_service=identity_service,
-            pii_hasher=pii_hasher,
-            dependencies=dependencies,
-        )
+    default_entity_type = "publication"
 
     def _resolve_primary_id(self, record: BronzeRecord) -> PrimaryId:
         """Handle legacy and unified publication ID fields."""

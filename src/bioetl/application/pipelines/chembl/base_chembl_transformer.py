@@ -64,6 +64,7 @@ class BaseChemblTransformer(PreSilverAdapterMixin, BaseTransformer):
     # Class variables that subclasses must override
     entity_class: ClassVar[type[BaseEntity]]
     primary_id_field: ClassVar[str]
+    default_entity_type: ClassVar[str | None] = None
 
     def __init__(
         self,
@@ -97,6 +98,8 @@ class BaseChemblTransformer(PreSilverAdapterMixin, BaseTransformer):
         """
         # Derive entity_type from entity_class if not provided
         resolved_entity_type = entity_type
+        if resolved_entity_type is None and self.default_entity_type is not None:
+            resolved_entity_type = self.default_entity_type
         if resolved_entity_type is None and hasattr(self, "entity_class"):
             resolved_entity_type = self.entity_class.__name__.lower()
 
@@ -137,9 +140,9 @@ class BaseChemblTransformer(PreSilverAdapterMixin, BaseTransformer):
         record = self._prepare_record(record)
         primary_id = self._resolve_primary_id(record)
         business_data = self._extract_business_data(record, primary_id)
-        return self._build_pre_silver_from_business_data(
+        return self._stage_identity_business_data(
             source_id=str(primary_id),
-            identity_record={self.primary_id_field: str(primary_id)},
+            identity_field=self.primary_id_field,
             business_data=business_data,
         )
 
@@ -153,15 +156,12 @@ class BaseChemblTransformer(PreSilverAdapterMixin, BaseTransformer):
         record = self._prepare_record(record)
         primary_id = self._resolve_primary_id(record)
         business_data = self._extract_business_data(record, primary_id)
-        return cast(
-            "SilverRecord",
-            self._finalize_prepared_business_data(
-                context=context,
-                source_id=str(primary_id),
-                identity_record={self.primary_id_field: str(primary_id)},
-                index=index,
-                business_data=business_data,
-            ),
+        return self._transform_identity_business_data(
+            context=context,
+            source_id=str(primary_id),
+            identity_field=self.primary_id_field,
+            index=index,
+            business_data=business_data,
         )
 
     @abstractmethod

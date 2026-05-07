@@ -55,7 +55,7 @@ class SubcellularFractionTransformer(BaseChemblTransformer):
         if resolved is None:
             return None
         _, business_data = resolved
-        return self._build_pre_silver_from_normalized_business_data(
+        return self._stage_optional_normalized_business_data(
             business_data=business_data,
             resolve_entity_id=lambda data: _resolve_subcellular_fraction_entity_id(
                 self, data
@@ -73,15 +73,12 @@ class SubcellularFractionTransformer(BaseChemblTransformer):
         if resolved is None:
             return None
         _, business_data = resolved
-        return cast(
-            "SilverRecord",
-            self._finalize_normalized_business_data(
-                context=context,
-                index=index,
-                business_data=business_data,
-                resolve_entity_id=lambda data: _resolve_subcellular_fraction_entity_id(
-                    self, data
-                ),
+        return self._transform_optional_normalized_business_data(
+            context=context,
+            index=index,
+            business_data=business_data,
+            resolve_entity_id=lambda data: _resolve_subcellular_fraction_entity_id(
+                self, data
             ),
         )
 
