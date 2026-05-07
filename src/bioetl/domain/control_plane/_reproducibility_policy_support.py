@@ -2,12 +2,18 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
+
 from bioetl.domain.control_plane.run_manifest import ReplayCapability, RunSourceRef
 
 
-def missing_snapshot_source_labels(source_refs: tuple[RunSourceRef, ...]) -> tuple[str, ...]:
+def missing_snapshot_source_labels(
+    source_refs: tuple[RunSourceRef, ...],
+) -> tuple[str, ...]:
     """Return stable operator-facing labels for sources missing snapshots."""
-    return tuple(_source_ref_label(ref) for ref in source_refs if not ref.input_snapshots)
+    return tuple(
+        _source_ref_label(ref) for ref in source_refs if not ref.input_snapshots
+    )
 
 
 def resolve_blocking_gaps(
@@ -20,17 +26,20 @@ def resolve_blocking_gaps(
 ) -> tuple[str, ...]:
     """Return de-duplicated blocking gaps for the current reproducibility state."""
     blocking_gaps: list[str] = []
-    if strict_requirement_requested and not strict_exact_replay_supported:
+    if _requires_execution_context_support_gap(
+        strict_requirement_requested=strict_requirement_requested,
+        strict_exact_replay_supported=strict_exact_replay_supported,
+    ):
         blocking_gaps.append("strict_replay_execution_context_support")
-    if (
-        strict_requirement_requested
-        and any_input_snapshots
-        and not full_snapshot_envelope
+    if _requires_partial_snapshot_envelope_gap(
+        strict_requirement_requested=strict_requirement_requested,
+        any_input_snapshots=any_input_snapshots,
+        full_snapshot_envelope=full_snapshot_envelope,
     ):
         blocking_gaps.append("partial_input_snapshot_envelope")
-    if (
-        strict_requirement_requested
-        and resolved_capability != ReplayCapability.EXACT_REPLAY_SUPPORTED
+    if _requires_exact_replay_capability_gaps(
+        strict_requirement_requested=strict_requirement_requested,
+        resolved_capability=resolved_capability,
     ):
         blocking_gaps.extend(("immutable_input_snapshots", "exact_replay_capability"))
     return tuple(dict.fromkeys(blocking_gaps))
@@ -52,7 +61,7 @@ def resolve_effective_replay_capability(
     source_refs: tuple[RunSourceRef, ...],
     resume_requested: bool,
     require_full_snapshot_envelope: bool,
-    replay_capability_resolver: callable,
+    replay_capability_resolver: Callable[..., ReplayCapability],
 ) -> ReplayCapability:
     """Return explicit capability override or derive one from source evidence."""
     if replay_capability is not None:
@@ -61,6 +70,38 @@ def resolve_effective_replay_capability(
         source_refs=source_refs,
         resume_requested=resume_requested,
         require_full_snapshot_envelope=require_full_snapshot_envelope,
+    )
+
+
+def _requires_execution_context_support_gap(
+    *,
+    strict_requirement_requested: bool,
+    strict_exact_replay_supported: bool,
+) -> bool:
+    return strict_requirement_requested and not strict_exact_replay_supported
+
+
+def _requires_partial_snapshot_envelope_gap(
+    *,
+    strict_requirement_requested: bool,
+    any_input_snapshots: bool,
+    full_snapshot_envelope: bool,
+) -> bool:
+    return (
+        strict_requirement_requested
+        and any_input_snapshots
+        and not full_snapshot_envelope
+    )
+
+
+def _requires_exact_replay_capability_gaps(
+    *,
+    strict_requirement_requested: bool,
+    resolved_capability: ReplayCapability,
+) -> bool:
+    return (
+        strict_requirement_requested
+        and resolved_capability != ReplayCapability.EXACT_REPLAY_SUPPORTED
     )
 
 

@@ -2328,7 +2328,14 @@ def _parser() -> argparse.ArgumentParser:
 
 
 def _read_text(path: Path) -> str:
-    return path.read_text(encoding="utf-8")
+    chunks: list[str] = []
+    with path.open(encoding="utf-8") as handle:
+        while True:
+            chunk = handle.read(1024 * 1024)
+            if not chunk:
+                break
+            chunks.append(chunk)
+    return "".join(chunks)
 
 
 def _read_yaml(path: Path) -> dict[str, object]:
@@ -9753,7 +9760,13 @@ def _docs_drift_sources(
             continue
         text = cached_text.get(source_path)
         if text is None:
-            text = _read_text(doc_path)
+            try:
+                text = _read_text(doc_path)
+            except OSError:
+                # Some tracked doc paths can exist in the graph but still be
+                # unreadable on a given checkout or platform mount. Skip them
+                # instead of failing the entire snapshot build.
+                continue
             cached_text[source_path] = text
         yield node.key, source_path, text
 
