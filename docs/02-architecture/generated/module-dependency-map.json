@@ -1,7 +1,7 @@
 {
   "summary": {
-    "scanned_modules": 1777,
-    "total_internal_imports": 6994,
+    "scanned_modules": 1778,
+    "total_internal_imports": 7003,
     "layer_edges": 13,
     "cross_layer_group_edges": 60,
     "cross_layer_group_edges_total": 314,
@@ -11,13 +11,13 @@
     {
       "source": "application",
       "target": "application",
-      "imports": 1167,
+      "imports": 1169,
       "allowed": true
     },
     {
       "source": "application",
       "target": "domain",
-      "imports": 1030,
+      "imports": 1032,
       "allowed": true
     },
     {
@@ -35,7 +35,7 @@
     {
       "source": "composition",
       "target": "domain",
-      "imports": 398,
+      "imports": 400,
       "allowed": true
     },
     {
@@ -47,7 +47,7 @@
     {
       "source": "domain",
       "target": "domain",
-      "imports": 1189,
+      "imports": 1192,
       "allowed": true
     },
     {
@@ -211,7 +211,7 @@
     {
       "source": "application.services",
       "target": "domain.control_plane",
-      "imports": 32
+      "imports": 33
     },
     {
       "source": "infrastructure.storage",
@@ -289,6 +289,11 @@
       "imports": 18
     },
     {
+      "source": "composition.runtime_builders",
+      "target": "domain.control_plane",
+      "imports": 18
+    },
+    {
       "source": "application.core",
       "target": "domain.config",
       "imports": 17
@@ -301,11 +306,6 @@
     {
       "source": "composition.factories",
       "target": "domain.config",
-      "imports": 16
-    },
-    {
-      "source": "composition.runtime_builders",
-      "target": "domain.control_plane",
       "imports": 16
     },
     {
@@ -342,6 +342,11 @@
       "source": "infrastructure.schemas",
       "target": "domain.config",
       "imports": 14
+    },
+    {
+      "source": "application.core",
+      "target": "domain.normalization",
+      "imports": 13
     },
     {
       "source": "application.pipelines",
@@ -381,11 +386,6 @@
     {
       "source": "infrastructure.adapters",
       "target": "domain.models",
-      "imports": 12
-    },
-    {
-      "source": "interfaces.cli",
-      "target": "composition.control_plane_api",
       "imports": 12
     }
   ],

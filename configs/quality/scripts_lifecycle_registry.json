@@ -134,6 +134,12 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as an internal bootstrap helper for scripts.docs.matrix modules while matrix-generation internals still share repo-root/path setup; fold it into a broader canonical scripts bootstrap layer if that consolidation lands."
     },
+    "scripts/engineering/qa/generate_reproducibility_support_matrix.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as the canonical reproducibility support-matrix generator while architecture/docs drift tests and operator policy docs depend on this generated surface; only fold it into broader docs tooling if the reproducibility policy generator layer is consolidated."
+    },
     "scripts/engineering/qa/hotspot_family_metrics.py": {
       "owner": "@bioetl-platform",
       "decision": "shared_helper_module",
