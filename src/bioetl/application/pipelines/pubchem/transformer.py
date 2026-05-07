@@ -21,9 +21,6 @@ from bioetl.application.core.pre_silver_adapter_mixin import (
     PreSilverAdapterMixin,
 )
 from bioetl.application.core.pre_silver_record import PreSilverRecord
-from bioetl.application.core.record_normalization_processor import (
-    RecordNormalizationProcessor,
-)
 from bioetl.application.pipelines.pubchem._compound_business_data import (
     build_compound_business_data,
 )
@@ -101,32 +98,16 @@ class PubChemCompoundTransformer(PreSilverAdapterMixin, BaseTransformer):
         if prepared is None:
             return None
         cid, business_data = prepared
-        normalizer = RecordNormalizationProcessor(
-            provider=self.provider,
-            entity_type=self.entity_type,
-        )
-        normalized_business_data = normalizer.normalize_business_data(business_data)
         entity_id = self.compute_entity_id(
             source_id=str(cid), record={"molecule_id": cid}
         )
-        content_hash = self.compute_content_hash(
-            normalized_business_data,
-            exclude_none=True,
-        )
-
-        silver_record = self._build_pre_silver_record(
-            context,
-            entity_id,
-            content_hash,
-            index,
-            normalized_business_data,
-        )
         return cast(
             "SilverRecord",
-            normalizer.project_normalization_findings(
-                cast(JsonDict, silver_record),
+            self._finalize_staged_business_data(
                 context=context,
+                entity_id=entity_id,
                 index=index,
+                business_data=cast(JsonDict, business_data),
             ),
         )
 
@@ -144,12 +125,9 @@ class PubChemCompoundTransformer(PreSilverAdapterMixin, BaseTransformer):
         entity_id = self.compute_entity_id(
             source_id=str(cid), record={"molecule_id": cid}
         )
-        return PreSilverRecord(
-            entity_id=entity_id,
-            business_data=business_data,
-            build_silver_record=self._build_pre_silver_json_record,
-            apply_structural_policy=self._apply_pre_silver_structural_policy,
-            apply_silver_filter=self._apply_pre_silver_filter,
+        return self._build_pre_silver_payload(
+            entity_id,
+            business_data=cast(JsonDict, business_data),
         )
 
     def _build_compound_business_data(

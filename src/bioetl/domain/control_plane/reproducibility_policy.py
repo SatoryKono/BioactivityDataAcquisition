@@ -17,6 +17,12 @@ from bioetl.domain.control_plane._reproducibility_policy_profiles import (
 from bioetl.domain.control_plane._reproducibility_policy_profiles import (
     resolve_effective_required_persistence_profile as _resolve_effective_required_persistence_profile,
 )
+from bioetl.domain.control_plane._reproducibility_policy_support import (
+    is_strict_requirement_requested,
+    missing_snapshot_source_labels,
+    resolve_blocking_gaps,
+    resolve_effective_replay_capability,
+)
 from bioetl.domain.control_plane._reproducibility_policy_verdicts import (
     ReplayReadinessVerdict,
     resolve_replay_readiness_verdict,
@@ -100,9 +106,7 @@ def build_snapshot_envelope_status(
         source_refs=source_refs,
         require_full_snapshot_envelope=require_full_snapshot_envelope,
     )
-    missing_snapshot_source_refs = tuple(
-        _source_ref_label(ref) for ref in source_refs if not ref.input_snapshots
-    )
+    missing_snapshot_source_refs = missing_snapshot_source_labels(source_refs)
     return SnapshotEnvelopeStatus(
         source_count=source_count,
         sources_with_snapshots=sources_with_snapshots,
@@ -111,32 +115,6 @@ def build_snapshot_envelope_status(
         require_full_snapshot_envelope=require_full_snapshot_envelope,
         missing_snapshot_source_refs=missing_snapshot_source_refs,
     )
-
-
-def _source_ref_label(ref: RunSourceRef) -> str:
-    """Return a stable operator-facing source-ref label."""
-    family = _source_ref_family_label(ref)
-    if family is not None:
-        return family
-    return _normalized_source_ref_value(ref.pipeline_name) or "unknown"
-
-
-def _normalized_source_ref_value(value: object) -> str:
-    return str(value or "").strip()
-
-
-def _source_ref_family_label(ref: RunSourceRef) -> str | None:
-    family_parts = tuple(
-        part
-        for part in (
-            _normalized_source_ref_value(ref.provider),
-            _normalized_source_ref_value(ref.entity),
-        )
-        if part
-    )
-    if not family_parts:
-        return None
-    return ".".join(family_parts)
 
 
 def resolve_effective_required_persistence_profile(
@@ -156,96 +134,6 @@ def resolve_effective_required_persistence_profile(
     )
 
 
-def _resolve_blocking_gaps(
-    *,
-    strict_requirement_requested: bool,
-    strict_exact_replay_supported: bool,
-    resolved_capability: ReplayCapability,
-    snapshot_envelope: SnapshotEnvelopeStatus,
-) -> tuple[str, ...]:
-    blocking_gaps: list[str] = []
-    blocking_gaps.extend(
-        _strict_support_blocking_gaps(
-            strict_requirement_requested=strict_requirement_requested,
-            strict_exact_replay_supported=strict_exact_replay_supported,
-        )
-    )
-    blocking_gaps.extend(
-        _strict_snapshot_blocking_gaps(
-            strict_requirement_requested=strict_requirement_requested,
-            snapshot_envelope=snapshot_envelope,
-        )
-    )
-    blocking_gaps.extend(
-        _strict_capability_blocking_gaps(
-            strict_requirement_requested=strict_requirement_requested,
-            resolved_capability=resolved_capability,
-        )
-    )
-    return tuple(dict.fromkeys(blocking_gaps))
-
-
-def _strict_support_blocking_gaps(
-    *,
-    strict_requirement_requested: bool,
-    strict_exact_replay_supported: bool,
-) -> tuple[str, ...]:
-    if strict_requirement_requested and not strict_exact_replay_supported:
-        return ("strict_replay_execution_context_support",)
-    return ()
-
-
-def _strict_snapshot_blocking_gaps(
-    *,
-    strict_requirement_requested: bool,
-    snapshot_envelope: SnapshotEnvelopeStatus,
-) -> tuple[str, ...]:
-    if not strict_requirement_requested:
-        return ()
-    if not snapshot_envelope.any_input_snapshots:
-        return ()
-    if snapshot_envelope.full_snapshot_envelope:
-        return ()
-    return ("partial_input_snapshot_envelope",)
-
-
-def _strict_capability_blocking_gaps(
-    *,
-    strict_requirement_requested: bool,
-    resolved_capability: ReplayCapability,
-) -> tuple[str, ...]:
-    if (
-        not strict_requirement_requested
-        or resolved_capability == ReplayCapability.EXACT_REPLAY_SUPPORTED
-    ):
-        return ()
-    return ("immutable_input_snapshots", "exact_replay_capability")
-
-
-def _is_strict_requirement_requested(
-    *,
-    profile: str,
-    exact_replay_requested: bool,
-) -> bool:
-    return profile in STRICT_PERSISTENCE_PROFILES or exact_replay_requested
-
-
-def _resolve_effective_replay_capability(
-    *,
-    replay_capability: ReplayCapability | None,
-    source_refs: tuple[RunSourceRef, ...],
-    resume_requested: bool,
-    require_full_snapshot_envelope: bool,
-) -> ReplayCapability:
-    if replay_capability is not None:
-        return replay_capability
-    return resolve_replay_capability(
-        source_refs=source_refs,
-        resume_requested=resume_requested,
-        require_full_snapshot_envelope=require_full_snapshot_envelope,
-    )
-
-
 def assess_reproducibility_policy(
     *,
     source_refs: tuple[RunSourceRef, ...],
@@ -261,25 +149,28 @@ def assess_reproducibility_policy(
 ) -> ReproducibilityPolicyAssessment:
     """Evaluate snapshot-envelope and profile gates in one place."""
     profile = normalize_required_persistence_profile(required_persistence_profile)
-    strict_requirement_requested = _is_strict_requirement_requested(
+    strict_requirement_requested = is_strict_requirement_requested(
         profile=profile,
+        strict_persistence_profiles=STRICT_PERSISTENCE_PROFILES,
         exact_replay_requested=exact_replay_requested,
     )
-    resolved_capability = _resolve_effective_replay_capability(
+    resolved_capability = resolve_effective_replay_capability(
         replay_capability=replay_capability,
         source_refs=source_refs,
         resume_requested=resume_requested,
         require_full_snapshot_envelope=require_full_snapshot_envelope,
+        replay_capability_resolver=resolve_replay_capability,
     )
     snapshot_envelope = build_snapshot_envelope_status(
         source_refs=source_refs,
         require_full_snapshot_envelope=require_full_snapshot_envelope,
     )
-    blocking_gaps = _resolve_blocking_gaps(
+    blocking_gaps = resolve_blocking_gaps(
         strict_requirement_requested=strict_requirement_requested,
         strict_exact_replay_supported=strict_exact_replay_supported,
         resolved_capability=resolved_capability,
-        snapshot_envelope=snapshot_envelope,
+        any_input_snapshots=snapshot_envelope.any_input_snapshots,
+        full_snapshot_envelope=snapshot_envelope.full_snapshot_envelope,
     )
     return ReproducibilityPolicyAssessment(
         required_persistence_profile=profile,

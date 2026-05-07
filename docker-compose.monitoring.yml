@@ -106,12 +106,11 @@ services:
       - BIOETL_QUARANTINE_EXPLORER_URL=${BIOETL_QUARANTINE_EXPLORER_URL:-http://host.docker.internal:8081}
     volumes:
       - grafana-data:/var/lib/grafana
-      - ./grafana/provisioning/datasources-core:/etc/bioetl-grafana/datasources-core:ro
-      - ./grafana/provisioning/datasources-tracing:/etc/bioetl-grafana/datasources-tracing:ro
+      - ./grafana/provisioning/datasources-core:/etc/grafana/provisioning/datasources:ro
       - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
       - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
-      - ./grafana/scripts/bootstrap-datasources.sh:/usr/local/bin/bioetl-bootstrap-grafana.sh:ro
-    entrypoint: ["/bin/sh", "/usr/local/bin/bioetl-bootstrap-grafana.sh"]
+    # Bootstrap script runs during container startup; use standard entrypoint
+    # entrypoint: ["/bin/sh", "/usr/local/bin/bioetl-bootstrap-grafana.sh"]
     depends_on:
       prometheus:
         condition: service_healthy
