@@ -93,7 +93,7 @@
     },
     "downgraded": {
       "type": [
-        "object",
+        "boolean",
         "null"
       ],
       "nullable": true,
