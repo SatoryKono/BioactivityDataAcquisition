@@ -169,7 +169,7 @@ python -m scripts.engineering.dev <command> [args...]
 | `mock-metrics`       | `scripts/engineering/dev/metrics_mock_server.py`             | Start mock metrics server                                        |
 | `mock-quarantine`    | `scripts/engineering/dev/quarantine_explorer_mock_server.py` | Start mock quarantine explorer API server                        |
 | `test-changed`       | `scripts/engineering/dev/run_tests.py changed`               | Run tests for changed files only                                 |
-| `setup-mcp`          | `python -m scripts.ai.codex.setup_mcp`                       | Public dev-router command for canonical Codex MCP setup          |
+| `setup-mcp`          | `python -m scripts.ai.codex.setup_mcp`                       | Public dev-router command for canonical Codex MCP/workspace setup |
 
 ## When to Use
 
@@ -185,7 +185,7 @@ python -m scripts.engineering.dev <command> [args...]
 | `mock-metrics`       | When developing or testing Grafana dashboards locally; starts Prometheus mock server with sample data                        | Manual, during dashboard development                   |
 | `mock-quarantine`    | When validating `5. Silver Reject Explorer` against `/ops/quarantine/*` without real Delta data                              | Manual, during dashboard/API smoke checks              |
 | `test-changed`       | Quick feedback during development; canonical changed-file runner with fast unit fallback                                     | Manual, during development                             |
-| `setup-mcp`          | One-time AI tooling setup through the public dev router; dispatches to canonical `scripts.ai.codex` MCP setup               | Manual, initial setup                                  |
+| `setup-mcp`          | One-time AI tooling setup through the public dev router; synchronizes tracked workspace MCP settings plus Codex runtime config | Manual, initial setup                                  |
 
 ## Other Files
 

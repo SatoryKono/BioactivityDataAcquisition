@@ -55,7 +55,7 @@ def _posix(path_str: str) -> str:
 
 def _load_workspace_mcp_config(
     root: Path, tmp_path: Path
-) -> tuple[dict[str, object], Path]:
+) -> tuple[dict[str, object], dict[str, object], Path]:
     """Load generated config when backend works, else fall back to committed artifact."""
     result = run_repo_python(
         "-m",
@@ -67,13 +67,25 @@ def _load_workspace_mcp_config(
         cwd=root,
     )
     if result.returncode == 0:
-        mcp_path = tmp_path / ".vscode" / "mcp.json"
-        assert mcp_path.exists()
-        return json.loads(mcp_path.read_text(encoding="utf-8")), tmp_path
+        vscode_path = tmp_path / ".vscode" / "mcp.json"
+        codex_settings_path = tmp_path / ".codex" / "settings.json"
+        assert vscode_path.exists()
+        assert codex_settings_path.exists()
+        return (
+            json.loads(vscode_path.read_text(encoding="utf-8")),
+            json.loads(codex_settings_path.read_text(encoding="utf-8")),
+            tmp_path,
+        )
 
-    committed_path = root / ".vscode" / "mcp.json"
-    assert committed_path.exists(), result.stderr
-    return json.loads(committed_path.read_text(encoding="utf-8")), root
+    committed_vscode_path = root / ".vscode" / "mcp.json"
+    committed_codex_settings_path = root / ".codex" / "settings.json"
+    assert committed_vscode_path.exists(), result.stderr
+    assert committed_codex_settings_path.exists(), result.stderr
+    return (
+        json.loads(committed_vscode_path.read_text(encoding="utf-8")),
+        json.loads(committed_codex_settings_path.read_text(encoding="utf-8")),
+        root,
+    )
 
 
 def _assert_shell_wrapper(
@@ -100,8 +112,9 @@ def _assert_platform_wrappers(servers: dict[str, object]) -> None:
 def test_setup_backend_writes_expected_vscode_mcp_config(tmp_path: Path) -> None:
     """Workspace MCP config should match the canonical server layout."""
     root = repo_root()
-    payload, _config_root = _load_workspace_mcp_config(root, tmp_path)
+    payload, codex_settings, _config_root = _load_workspace_mcp_config(root, tmp_path)
     servers = payload["servers"]
+    assert codex_settings["mcpServers"] == servers
     assert set(servers) == EXPECTED_MCP_SERVERS
     assert servers["memory"]["command"] == "npx"
     assert _posix(servers["memory"]["env"]["MEMORY_FILE_PATH"]).endswith(

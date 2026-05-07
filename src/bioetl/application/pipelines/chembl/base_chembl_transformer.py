@@ -24,10 +24,10 @@ from bioetl.application.core.base_transformer import (
     BaseTransformer,
     TransformerDependencyContext,
 )
-from bioetl.application.core.pre_silver_record import PreSilverRecord
-from bioetl.application.core.record_normalization_processor import (
-    RecordNormalizationProcessor,
+from bioetl.application.core.pre_silver_adapter_mixin import (
+    PreSilverAdapterMixin,
 )
+from bioetl.application.core.pre_silver_record import PreSilverRecord
 
 if TYPE_CHECKING:
     from bioetl.domain.behavior import EntityIdentityGenerator
@@ -38,7 +38,7 @@ if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord, PrimaryId, SilverRecord
 
 
-class BaseChemblTransformer(BaseTransformer):
+class BaseChemblTransformer(PreSilverAdapterMixin, BaseTransformer):
     """Base class for all ChEMBL transformers.
 
     Provides common field extraction and mapping logic.
@@ -133,19 +133,14 @@ class BaseChemblTransformer(BaseTransformer):
         index: int,
     ) -> PreSilverRecord | None:
         """Build an intermediate ChEMBL payload for application finalization."""
+        del context, index
         record = self._prepare_record(record)
         primary_id = self._resolve_primary_id(record)
-        entity_id = self.compute_entity_id(
-            source_id=str(primary_id),
-            record={self.primary_id_field: str(primary_id)},
-        )
         business_data = self._extract_business_data(record, primary_id)
-        return PreSilverRecord(
-            entity_id=entity_id,
+        return self._build_pre_silver_from_business_data(
+            source_id=str(primary_id),
+            identity_record={self.primary_id_field: str(primary_id)},
             business_data=business_data,
-            build_silver_record=self._build_pre_silver_json_record,
-            apply_structural_policy=self._apply_pre_silver_structural_policy,
-            apply_silver_filter=self._apply_pre_silver_filter,
         )
 
     async def _transform_impl(
@@ -157,85 +152,16 @@ class BaseChemblTransformer(BaseTransformer):
         """Template method implementing common ChEMBL transformation flow."""
         record = self._prepare_record(record)
         primary_id = self._resolve_primary_id(record)
-        entity_id = self.compute_entity_id(
-            source_id=str(primary_id),
-            record={self.primary_id_field: str(primary_id)},
-        )
         business_data = self._extract_business_data(record, primary_id)
-        normalizer = RecordNormalizationProcessor(
-            provider=self.provider,
-            entity_type=self.entity_type,
-        )
-        normalized_business_data = normalizer.normalize_business_data(business_data)
-        content_hash = self.compute_content_hash(
-            normalized_business_data,
-            exclude_none=True,
-        )
-        silver_record = _build_chembl_silver_record(
-            self,
-            context,
-            entity_id,
-            content_hash,
-            index,
-            normalized_business_data,
-        )
         return cast(
             "SilverRecord",
-            normalizer.project_normalization_findings(
-                cast(JsonDict, silver_record),
+            self._finalize_prepared_business_data(
                 context=context,
+                source_id=str(primary_id),
+                identity_record={self.primary_id_field: str(primary_id)},
                 index=index,
+                business_data=business_data,
             ),
-        )
-
-    def _build_pre_silver_json_record(
-        self,
-        context: PipelineContext,
-        entity_id: str,
-        content_hash: str,
-        index: int,
-        business_data: JsonDict,
-    ) -> JsonDict:
-        """Adapt finalized Silver-record construction to the PreSilverRecord protocol."""
-        return cast(
-            JsonDict,
-            _build_chembl_silver_record(
-                self,
-                context,
-                entity_id,
-                content_hash,
-                index,
-                business_data,
-            ),
-        )
-
-    def _apply_pre_silver_structural_policy(
-        self,
-        context: PipelineContext,
-        record: JsonDict,
-        index: int,
-    ) -> JsonDict | None:
-        """Adapt structural policy application to the PreSilverRecord protocol."""
-        return cast(
-            JsonDict | None,
-            self._apply_structural_policy(
-                context,
-                cast("SilverRecord", record),
-                index,
-            ),
-        )
-
-    def _apply_pre_silver_filter(
-        self,
-        context: PipelineContext,
-        record: JsonDict,
-        index: int,
-    ) -> None:
-        """Adapt silver-filter application to the PreSilverRecord protocol."""
-        self._apply_silver_filter(
-            context,
-            cast("SilverRecord", record),
-            index,
         )
 
     @abstractmethod
@@ -266,23 +192,3 @@ class BaseChemblTransformer(BaseTransformer):
 
         """
         ...
-
-
-def _build_chembl_silver_record(
-    transformer: BaseChemblTransformer,
-    context: PipelineContext,
-    entity_id: str,
-    content_hash: str,
-    index: int,
-    business_data: JsonDict,
-) -> SilverRecord:
-    """Build a finalized Silver record from normalized ChEMBL business data."""
-    entity = transformer._create_entity(
-        transformer.entity_class,
-        context,
-        entity_id=entity_id,
-        content_hash=content_hash,
-        index=index,
-        **business_data,
-    )
-    return cast("SilverRecord", transformer.entity_to_silver_record(entity))

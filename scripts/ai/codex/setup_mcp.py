@@ -89,16 +89,35 @@ def _write_json(path: Path, payload: dict[str, Any]) -> None:
     path.write_text(rendered, encoding="utf-8")
 
 
-def _write_configs(output_root: Path, workspace_root: Path) -> tuple[Path, Path]:
+def _write_workspace_codex_settings(output_root: Path, workspace_root: Path) -> Path:
+    settings_path = output_root / ".codex" / "settings.json"
+    settings_path.parent.mkdir(parents=True, exist_ok=True)
+
+    if settings_path.exists():
+        existing = json.loads(settings_path.read_text(encoding="utf-8"))
+        if not isinstance(existing, dict):
+            raise ValueError(
+                f"Codex workspace settings must be a JSON object: {settings_path}"
+            )
+    else:
+        existing = {}
+
+    existing["mcpServers"] = deepcopy(_canonical_servers(workspace_root))
+    _write_json(settings_path, existing)
+    return settings_path
+
+
+def _write_configs(output_root: Path, workspace_root: Path) -> tuple[Path, Path, Path]:
     servers = _canonical_servers(workspace_root)
     codex_payload = {"mcpServers": deepcopy(servers)}
     vscode_payload = {"servers": deepcopy(servers)}
 
     mcp_path = output_root / ".mcp.json"
     vscode_path = output_root / ".vscode" / "mcp.json"
+    codex_settings_path = _write_workspace_codex_settings(output_root, workspace_root)
     _write_json(mcp_path, codex_payload)
     _write_json(vscode_path, vscode_payload)
-    return mcp_path, vscode_path
+    return mcp_path, vscode_path, codex_settings_path
 
 
 def _gemini_server_config(server: dict[str, Any]) -> dict[str, Any]:
@@ -258,7 +277,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         "--root",
         type=Path,
         default=REPO_ROOT,
-        help="Directory where .mcp.json and .vscode/mcp.json should be written.",
+        help=(
+            "Directory where .mcp.json, .vscode/mcp.json, and "
+            ".codex/settings.json should be written."
+        ),
     )
     parser.add_argument(
         "--workspace-root",
@@ -285,9 +307,12 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     output_root = args.root.resolve()
     workspace_root = args.workspace_root.resolve()
-    mcp_path, vscode_path = _write_configs(output_root, workspace_root)
+    mcp_path, vscode_path, codex_settings_path = _write_configs(
+        output_root, workspace_root
+    )
     print(f"Wrote {mcp_path}")
     print(f"Wrote {vscode_path}")
+    print(f"Wrote {codex_settings_path}")
     if not args.skip_codex_config:
         codex_config_path = _write_codex_config(workspace_root)
         print(f"Wrote {codex_config_path}")

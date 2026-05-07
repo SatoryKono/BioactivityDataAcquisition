@@ -30,9 +30,13 @@ def test_main_uses_workspace_root_for_generated_server_paths(tmp_path: Path) -> 
     assert exit_code == 0
 
     payload = json.loads((output_root / ".mcp.json").read_text(encoding="utf-8"))
+    codex_settings = json.loads(
+        (output_root / ".codex" / "settings.json").read_text(encoding="utf-8")
+    )
     servers = payload["mcpServers"]
     wrapper_suffix = ".ps1" if os.name == "nt" else ".sh"
 
+    assert codex_settings["mcpServers"] == servers
     assert servers["filesystem"]["args"][-1] == str(workspace_root.resolve())
     assert servers["memory"]["env"]["MEMORY_FILE_PATH"] == str(
         (workspace_root / "docs/00-project/ai/memory/mcp-memory.json").resolve()

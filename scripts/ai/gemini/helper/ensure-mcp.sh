@@ -143,7 +143,7 @@ if path.exists():
 else:
     payload = {}
 
-for name in ("memory", "filesystem", "sequential-thinking", "openaiDeveloperDocs"):
+for name in ("memory", "filesystem"):
     entry = payload.get(name)
     if not isinstance(entry, dict):
         entry = {}
