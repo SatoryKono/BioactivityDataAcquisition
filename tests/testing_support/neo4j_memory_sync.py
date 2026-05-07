@@ -19,6 +19,7 @@ from scripts.memory.sync import (
     _add_complexity_analysis_surfaces,
     _build_diff_entries,
     _critical_analysis_audit_issues,
+    _docs_drift_sources,
     _delete_managed_wave_nodes_statement,
     _duplication_analysis_config,
     _ensure_targeted_apply_prerequisites,
@@ -2317,6 +2318,32 @@ def test_development_cycle_surface_filter_is_now_a_clean_noop() -> None:
     assert stats["relation_count"] == 0
     assert stats["labels"] == {}
     assert stats["relation_types"] == {}
+
+
+def test_docs_drift_sources_skips_unreadable_doc_artifacts(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    relative_path = "docs/unreadable.md"
+    doc_path = tmp_path / relative_path
+    doc_path.parent.mkdir(parents=True)
+    doc_path.write_text("# placeholder\n", encoding="utf-8")
+
+    snapshot = GraphSnapshot()
+    doc_key = snapshot.add_node(
+        "doc_artifact",
+        relative_path,
+        source_path=relative_path,
+    )
+
+    def _raise_read_error(path: Path) -> str:
+        if path == doc_path:
+            raise OSError("Invalid argument")
+        return path.read_text(encoding="utf-8")
+
+    monkeypatch.setattr("scripts.memory.sync._read_text", _raise_read_error)
+
+    assert list(_docs_drift_sources(snapshot, tmp_path, {})) == []
+    assert doc_key in snapshot.nodes
 
 
 def test_targeted_apply_required_anchor_labels_identifies_missing_base_labels() -> None:
