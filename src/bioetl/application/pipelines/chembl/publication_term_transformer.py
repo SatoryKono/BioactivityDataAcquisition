@@ -15,14 +15,10 @@ from __future__ import annotations
 
 __all__ = ["PublicationTermTransformer"]
 
-from functools import partial
 from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.core.entity_id import compute_publication_term_entity_id
 from bioetl.application.core.pre_silver_record import PreSilverRecord
-from bioetl.application.core.record_normalization_processor import (
-    RecordNormalizationProcessor,
-)
 from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
 )
@@ -48,28 +44,14 @@ class PublicationTermTransformer(BaseChemblTransformer):
     ) -> PreSilverRecord | None:
         """Build an intermediate publication-term payload for application finalization."""
         del context, index
-        prepared_record = _prepare_publication_term_record(record)
-        primary_id = cast(
-            "PrimaryId",
-            self._get_required_field(prepared_record, self.primary_id_field),
-        )
-        business_data = self._extract_business_data(prepared_record, primary_id)
-        if business_data is None or not _has_extractable_publication_term(
-            business_data
-        ):
+        business_data = self._prepare_term_business_data(record)
+        if business_data is None:
             return None
-        normalizer = RecordNormalizationProcessor(
-            provider=self.provider,
-            entity_type=self.entity_type,
-        )
-        normalized_business_data = normalizer.normalize_business_data(business_data)
-        entity_id = _resolve_publication_term_entity_id(self, normalized_business_data)
-        return PreSilverRecord(
-            entity_id=entity_id,
-            business_data=normalized_business_data,
-            build_silver_record=partial(_build_publication_term_silver_record, self),
-            apply_structural_policy=self._apply_structural_policy,
-            apply_silver_filter=self._apply_silver_filter,
+        return self._build_pre_silver_from_normalized_business_data(
+            business_data=cast("JsonDict", business_data),
+            resolve_entity_id=lambda data: _resolve_publication_term_entity_id(
+                self, data
+            ),
         )
 
     async def _transform_impl(
@@ -79,6 +61,26 @@ class PublicationTermTransformer(BaseChemblTransformer):
         index: int,
     ) -> SilverRecord | None:
         """Override base implementation to use composite entity_id."""
+        business_data = self._prepare_term_business_data(record)
+        if business_data is None:
+            return None
+        return cast(
+            "SilverRecord",
+            self._finalize_normalized_business_data(
+                context=context,
+                index=index,
+                business_data=cast("JsonDict", business_data),
+                resolve_entity_id=lambda data: _resolve_publication_term_entity_id(
+                    self, data
+                ),
+            ),
+        )
+
+    def _prepare_term_business_data(
+        self,
+        record: BronzeRecord,
+    ) -> GoldRecord | None:
+        """Extract one publication-term payload when a meaningful term row exists."""
         prepared_record = _prepare_publication_term_record(record)
         primary_id = cast(
             "PrimaryId",
@@ -89,35 +91,7 @@ class PublicationTermTransformer(BaseChemblTransformer):
             business_data
         ):
             return None
-        normalizer = RecordNormalizationProcessor(
-            provider=self.provider,
-            entity_type=self.entity_type,
-        )
-        normalized_business_data = normalizer.normalize_business_data(business_data)
-        entity_id = _resolve_publication_term_entity_id(
-            self,
-            normalized_business_data,
-        )
-        content_hash = self.compute_content_hash(
-            normalized_business_data,
-            exclude_none=True,
-        )
-        silver_record = _build_publication_term_silver_record(
-            self,
-            context,
-            entity_id,
-            content_hash,
-            index,
-            normalized_business_data,
-        )
-        return cast(
-            "SilverRecord",
-            normalizer.project_normalization_findings(
-                silver_record,
-                context=context,
-                index=index,
-            ),
-        )
+        return business_data
 
     def _extract_business_data(
         self,
@@ -263,23 +237,3 @@ def _has_extractable_publication_term(business_data: GoldRecord) -> bool:
     term = str(business_data.get("term", "")).strip()
     term_type = str(business_data.get("term_type", "")).strip()
     return bool(term and term_type)
-
-
-def _build_publication_term_silver_record(
-    transformer: PublicationTermTransformer,
-    context: PipelineContext,
-    entity_id: str,
-    content_hash: str,
-    index: int,
-    business_data: GoldRecord,
-) -> SilverRecord:
-    """Build a finalized Silver record from normalized publication-term data."""
-    entity = transformer._create_entity(
-        transformer.entity_class,
-        context,
-        entity_id=entity_id,
-        content_hash=content_hash,
-        index=index,
-        **business_data,
-    )
-    return cast("SilverRecord", transformer.entity_to_silver_record(entity))
