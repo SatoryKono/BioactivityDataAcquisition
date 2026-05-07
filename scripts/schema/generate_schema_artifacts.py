@@ -96,18 +96,30 @@ def _build_registry(entries: list[CanonicalSchemaEntry]) -> str:
     lines.append("")
     lines.append("")
     lines.append(
-        "CANONICAL_SCHEMA_REGISTRY: tuple[CanonicalSchemaRegistryEntry, ...] = ("
+        "_RAW_CANONICAL_SCHEMA_REGISTRY: tuple[tuple[str, str, str, tuple[str, ...]], ...] = ("
     )
     for entry in entries:
-        lines.append("    CanonicalSchemaRegistryEntry(")
-        lines.append(f'        provider="{entry.provider}",')
-        lines.append(f'        entity="{entry.entity}",')
-        lines.append(f'        yaml_path="{entry.yaml_path}",')
-        lines.append("        column_groups=(")
-        for g in entry.column_groups:
-            lines.append(f'            "{g}",')
-        lines.append("        ),")
-        lines.append("    ),")
+        group_values = ", ".join(f'"{group}"' for group in entry.column_groups)
+        group_suffix = "," if len(entry.column_groups) == 1 else ""
+        lines.append(
+            f'    ("{entry.provider}", "{entry.entity}", "{entry.yaml_path}", ({group_values}{group_suffix})),'
+        )
+    lines.append(")")
+    lines.append("")
+    lines.append(
+        "CANONICAL_SCHEMA_REGISTRY: tuple[CanonicalSchemaRegistryEntry, ...] = ("
+    )
+    lines.append("    tuple(")
+    lines.append("        CanonicalSchemaRegistryEntry(")
+    lines.append("            provider=provider,")
+    lines.append("            entity=entity,")
+    lines.append("            yaml_path=yaml_path,")
+    lines.append("            column_groups=column_groups,")
+    lines.append("        )")
+    lines.append(
+        "        for provider, entity, yaml_path, column_groups in _RAW_CANONICAL_SCHEMA_REGISTRY"
+    )
+    lines.append("    )")
     lines.append(")")
     lines.append("")
     lines.append(

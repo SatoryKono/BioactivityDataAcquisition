@@ -166,9 +166,10 @@ def test_run_manifest_docs_define_replay_equivalence_levels() -> None:
 @pytest.mark.architecture
 def test_reproducibility_support_matrix_matches_published_profiles() -> None:
     """Generated support docs must drift-check against domain profiles."""
-    assert _read(
-        "docs/02-architecture/policies/reproducibility-support-matrix.md"
-    ) == build_reproducibility_support_matrix_markdown()
+    assert (
+        _read("docs/02-architecture/policies/reproducibility-support-matrix.md")
+        == build_reproducibility_support_matrix_markdown()
+    )
 
 
 @pytest.mark.architecture

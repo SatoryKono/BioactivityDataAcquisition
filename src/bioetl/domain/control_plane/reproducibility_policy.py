@@ -115,11 +115,28 @@ def build_snapshot_envelope_status(
 
 def _source_ref_label(ref: RunSourceRef) -> str:
     """Return a stable operator-facing source-ref label."""
-    provider = str(ref.provider or "").strip()
-    entity = str(ref.entity or "").strip()
-    pipeline_name = str(ref.pipeline_name or "").strip()
-    family = ".".join(part for part in (provider, entity) if part)
-    return family or pipeline_name or "unknown"
+    family = _source_ref_family_label(ref)
+    if family is not None:
+        return family
+    return _normalized_source_ref_value(ref.pipeline_name) or "unknown"
+
+
+def _normalized_source_ref_value(value: object) -> str:
+    return str(value or "").strip()
+
+
+def _source_ref_family_label(ref: RunSourceRef) -> str | None:
+    family_parts = tuple(
+        part
+        for part in (
+            _normalized_source_ref_value(ref.provider),
+            _normalized_source_ref_value(ref.entity),
+        )
+        if part
+    )
+    if not family_parts:
+        return None
+    return ".".join(family_parts)
 
 
 def resolve_effective_required_persistence_profile(
@@ -147,20 +164,62 @@ def _resolve_blocking_gaps(
     snapshot_envelope: SnapshotEnvelopeStatus,
 ) -> tuple[str, ...]:
     blocking_gaps: list[str] = []
-    if strict_requirement_requested and not strict_exact_replay_supported:
-        blocking_gaps.append("strict_replay_execution_context_support")
-    if (
-        strict_requirement_requested
-        and snapshot_envelope.any_input_snapshots
-        and not snapshot_envelope.full_snapshot_envelope
-    ):
-        blocking_gaps.append("partial_input_snapshot_envelope")
-    if (
-        strict_requirement_requested
-        and resolved_capability != ReplayCapability.EXACT_REPLAY_SUPPORTED
-    ):
-        blocking_gaps.extend(("immutable_input_snapshots", "exact_replay_capability"))
+    blocking_gaps.extend(
+        _strict_support_blocking_gaps(
+            strict_requirement_requested=strict_requirement_requested,
+            strict_exact_replay_supported=strict_exact_replay_supported,
+        )
+    )
+    blocking_gaps.extend(
+        _strict_snapshot_blocking_gaps(
+            strict_requirement_requested=strict_requirement_requested,
+            snapshot_envelope=snapshot_envelope,
+        )
+    )
+    blocking_gaps.extend(
+        _strict_capability_blocking_gaps(
+            strict_requirement_requested=strict_requirement_requested,
+            resolved_capability=resolved_capability,
+        )
+    )
     return tuple(dict.fromkeys(blocking_gaps))
+
+
+def _strict_support_blocking_gaps(
+    *,
+    strict_requirement_requested: bool,
+    strict_exact_replay_supported: bool,
+) -> tuple[str, ...]:
+    if strict_requirement_requested and not strict_exact_replay_supported:
+        return ("strict_replay_execution_context_support",)
+    return ()
+
+
+def _strict_snapshot_blocking_gaps(
+    *,
+    strict_requirement_requested: bool,
+    snapshot_envelope: SnapshotEnvelopeStatus,
+) -> tuple[str, ...]:
+    if not strict_requirement_requested:
+        return ()
+    if not snapshot_envelope.any_input_snapshots:
+        return ()
+    if snapshot_envelope.full_snapshot_envelope:
+        return ()
+    return ("partial_input_snapshot_envelope",)
+
+
+def _strict_capability_blocking_gaps(
+    *,
+    strict_requirement_requested: bool,
+    resolved_capability: ReplayCapability,
+) -> tuple[str, ...]:
+    if (
+        not strict_requirement_requested
+        or resolved_capability == ReplayCapability.EXACT_REPLAY_SUPPORTED
+    ):
+        return ()
+    return ("immutable_input_snapshots", "exact_replay_capability")
 
 
 def _is_strict_requirement_requested(

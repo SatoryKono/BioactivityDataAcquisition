@@ -267,9 +267,7 @@ def test_show_resolves_manifest_by_run_id_and_includes_ledger_history() -> None:
         "replay_support_state": "exact_replay_supported",
         "source_posture": "immutable_snapshot_envelope",
         "input_snapshot_missing_source_refs": [],
-        "replay_capability_reason": (
-            "full_immutable_input_snapshot_envelope_present"
-        ),
+        "replay_capability_reason": ("full_immutable_input_snapshot_envelope_present"),
         "exact_replay_eligible": True,
         "exact_replay_blockers": [],
         "replay_readiness_verdict": "exact_replay_ready",
@@ -410,9 +408,7 @@ def _expected_identity_graph_without_ledger(
         "replay_support_state": "exact_replay_supported",
         "source_posture": "immutable_snapshot_envelope",
         "input_snapshot_missing_source_refs": [],
-        "replay_capability_reason": (
-            "full_immutable_input_snapshot_envelope_present"
-        ),
+        "replay_capability_reason": ("full_immutable_input_snapshot_envelope_present"),
         "exact_replay_eligible": True,
         "exact_replay_blockers": [],
         "append_mode_semantic_sinks": [],
@@ -471,7 +467,10 @@ def _expected_diagnostics_without_ledger(
         "requested_exact_replay": True,
         "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
         "replay_family_contract": _expected_replay_family_contract(manifest),
-        "replay_capability_reason": "immutable_input_snapshots_present",
+        "replay_support_state": "exact_replay_supported",
+        "source_posture": "immutable_snapshot_envelope",
+        "input_snapshot_missing_source_refs": [],
+        "replay_capability_reason": ("full_immutable_input_snapshot_envelope_present"),
         "exact_replay_eligible": True,
         "exact_replay_blockers": [],
         "replay_readiness_verdict": "exact_replay_ready",
@@ -627,6 +626,7 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
             "any_input_snapshots": True,
             "full_snapshot_envelope": True,
             "require_full_snapshot_envelope": False,
+            "missing_snapshot_source_refs": [],
         },
     }
     assert (

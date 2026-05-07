@@ -168,6 +168,34 @@ class TestGenerateContentHash:
         hash2 = generate_content_hash(record2, "test")
         assert hash1 == hash2
 
+    def test_occurrence_metadata_and_wall_clock_fields_ignored(self):
+        """Occurrence/runtime timestamps should not affect semantic identity."""
+        record1 = {
+            "id": "123",
+            "_lineage_created_at": "2026-05-06T10:00:00Z",
+            "_composite_run_id": "run-a",
+        }
+        record2 = {
+            "id": "123",
+            "_lineage_created_at": "2026-05-06T11:00:00Z",
+            "_composite_run_id": "run-b",
+        }
+
+        assert generate_content_hash(record1, "test") == generate_content_hash(
+            record2,
+            "test",
+        )
+
+    def test_ordered_list_fields_change_hash_by_default(self):
+        """List order remains identity-bearing unless explicitly classified set-like."""
+        record1 = {"steps": ["extract", "normalize", "load"]}
+        record2 = {"steps": ["load", "normalize", "extract"]}
+
+        assert generate_content_hash(record1, "test") != generate_content_hash(
+            record2,
+            "test",
+        )
+
     def test_set_like_json_string_fields_ignore_array_order(self):
         """JSON array strings can participate in order-insensitive hashing."""
         record1 = {"activity_properties": '[{"name":"a"},{"name":"b"}]'}

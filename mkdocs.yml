@@ -435,6 +435,7 @@ nav:
                     -   "Module Consolidation Requirements": 02-architecture/module-consolidation-migration-requirements.md
                     -   "Compatibility Facade Review History": 02-architecture/history/compatibility-facade-review-history.md
                     -   "Content Hash Policy": 02-architecture/policies/content-hash-identity-policy.md
+                    -   "Reproducibility Support Matrix": 02-architecture/policies/reproducibility-support-matrix.md
             -   "Guide Extras":
                     -   "Silver Schema Testing Guide": 03-guides/silver-schema-testing-guide.md
             -   "Reference Extras":

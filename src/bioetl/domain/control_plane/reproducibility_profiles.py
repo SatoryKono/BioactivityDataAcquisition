@@ -175,22 +175,12 @@ def _build_source_reproducibility_family_profile(
         execution_context=execution_context,
         lineage_closure_supported=supported,
         strict_exact_replay_supported=supported,
-        support_state=(
-            "exact_replay_supported"
-            if supported
-            else ("rebuild_only" if published else "debug_only")
-        ),
-        strict_replay_runtime_verdict=(
-            "allowed_with_snapshot_backed_source_refs"
-            if supported
-            else "blocked_outside_supported_boundary"
-        ),
+        support_state=_source_support_state(supported=supported, published=published),
+        strict_replay_runtime_verdict=_source_runtime_verdict(supported=supported),
         exact_replay_support_boundary="snapshot_backed_source_runs_only",
-        replay_family_contract=(
-            "snapshot_backed_exact_replay" if supported else "rebuild_only"
-        ),
-        default_required_persistence_profile=(
-            "replay_ready" if supported else "degraded_observable"
+        replay_family_contract=_source_replay_family_contract(supported=supported),
+        default_required_persistence_profile=_source_default_required_profile(
+            supported=supported
         ),
         support_scope="operator_grade_trace_debug",
         reason=_resolve_source_profile_reason(
@@ -198,6 +188,42 @@ def _build_source_reproducibility_family_profile(
             published=published,
         ),
     )
+
+
+def _source_support_state(
+    *,
+    supported: bool,
+    published: bool,
+) -> ReplaySupportState:
+    if supported:
+        return "exact_replay_supported"
+    if published:
+        return "rebuild_only"
+    return "debug_only"
+
+
+def _source_runtime_verdict(
+    *,
+    supported: bool,
+) -> StrictReplayRuntimeVerdict:
+    if supported:
+        return "allowed_with_snapshot_backed_source_refs"
+    return "blocked_outside_supported_boundary"
+
+
+def _source_replay_family_contract(
+    *,
+    supported: bool,
+) -> ReplayFamilyContractName:
+    if supported:
+        return "snapshot_backed_exact_replay"
+    return "rebuild_only"
+
+
+def _source_default_required_profile(*, supported: bool) -> str:
+    if supported:
+        return "replay_ready"
+    return "degraded_observable"
 
 
 def resolve_reproducibility_family_profile(

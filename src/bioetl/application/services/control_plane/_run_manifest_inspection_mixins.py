@@ -223,6 +223,12 @@ class RunManifestInspectionIdentityGraphMixin:
                 "snapshot_backed_source_runs_only",
             ),
             "replay_family_contract": diagnostics.get("replay_family_contract"),
+            "replay_support_state": diagnostics.get("replay_support_state"),
+            "source_posture": diagnostics.get("source_posture"),
+            "input_snapshot_missing_source_refs": diagnostics.get(
+                "input_snapshot_missing_source_refs",
+                [],
+            ),
             "replay_capability_reason": diagnostics.get("replay_capability_reason"),
             "continuation_mode": diagnostics.get("continuation_mode"),
             "exact_replay_eligible": diagnostics.get(

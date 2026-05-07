@@ -244,7 +244,31 @@ def _build_base_summary_payload(
     code_provenance_state = _build_code_provenance_state(manifest)
     dependency_lock_state = code_provenance_state["dependency_lock_state"]
     exact_replay_eligible = _is_exact_replay_eligible(manifest, replay_context)
-    summary: dict[str, object] = {
+    summary = _build_base_summary_core_payload(
+        manifest=manifest,
+        replay_context=replay_context,
+        exact_replay_eligible=exact_replay_eligible,
+        code_provenance_state=code_provenance_state,
+        dependency_lock_state=dependency_lock_state,
+    )
+    if code_provenance.dependency_lock_hash is not None:
+        summary["dependency_lock_hash"] = code_provenance.dependency_lock_hash
+    return _attach_base_summary_artifact_defaults(
+        manifest=manifest,
+        summary=summary,
+    )
+
+
+def _build_base_summary_core_payload(
+    *,
+    manifest: RunManifest,
+    replay_context: _BaseSummaryReplayContext,
+    exact_replay_eligible: bool,
+    code_provenance_state: dict[str, object],
+    dependency_lock_state: object,
+) -> dict[str, object]:
+    code_provenance = manifest.code_provenance
+    return {
         "manifest_id": manifest.manifest_id,
         "manifest_created_at": manifest.created_at.isoformat(),
         "run_id": str(manifest.run_id),
@@ -302,15 +326,11 @@ def _build_base_summary_payload(
         ),
         "continuation_mode": replay_context.continuation_mode,
         "replay_family_contract": replay_context.replay_family_contract,
-        "source_posture": _resolve_source_posture(
-            replay_context.policy_assessment
-        ),
+        "source_posture": _resolve_source_posture(replay_context.policy_assessment),
         "input_snapshot_missing_source_refs": list(
             replay_context.policy_assessment.snapshot_envelope.missing_snapshot_source_refs
         ),
-        "replay_capability_assessment": (
-            replay_context.policy_assessment.to_dict()
-        ),
+        "replay_capability_assessment": (replay_context.policy_assessment.to_dict()),
         "resume_contract": replay_context.resume_contract,
         "resume_diagnostics": None,
         "lineage_closure_boundary": build_lineage_closure_boundary(
@@ -328,8 +348,13 @@ def _build_base_summary_payload(
         "planned_artifacts": _build_planned_artifact_refs(manifest),
         "occurrence_only_diagnostics": [],
     }
-    if code_provenance.dependency_lock_hash is not None:
-        summary["dependency_lock_hash"] = code_provenance.dependency_lock_hash
+
+
+def _attach_base_summary_artifact_defaults(
+    *,
+    manifest: RunManifest,
+    summary: dict[str, object],
+) -> dict[str, object]:
     summary["artifact_refs"] = []
     summary["lineage_fragment_ids"] = []
     summary["published_artifact_count"] = 0

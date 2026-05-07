@@ -168,8 +168,9 @@ def test_effective_config_artifact_publishes_semantic_runtime_env_dependencies()
     assert artifact.execution_environment.ambient_environment_policy == (
         "excluded_unless_explicitly_materialized"
     )
-    assert artifact.execution_environment.non_materialized_semantic_env_dependencies == (
-        SEMANTIC_RUNTIME_ENV_DEPENDENCIES
+    assert (
+        artifact.execution_environment.non_materialized_semantic_env_dependencies
+        == (SEMANTIC_RUNTIME_ENV_DEPENDENCIES)
     )
 
 
