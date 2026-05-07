@@ -14,9 +14,6 @@ from typing import TYPE_CHECKING, Any, cast
 from bioetl.application.core.base_transformer import TransformationError
 from bioetl.application.core.entity_id import compute_subcellular_fraction_entity_id
 from bioetl.application.core.pre_silver_record import PreSilverRecord
-from bioetl.application.core.record_normalization_processor import (
-    RecordNormalizationProcessor,
-)
 from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
 )
@@ -58,21 +55,11 @@ class SubcellularFractionTransformer(BaseChemblTransformer):
         if resolved is None:
             return None
         _, business_data = resolved
-        normalizer = RecordNormalizationProcessor(
-            provider=self.provider,
-            entity_type=self.entity_type,
-        )
-        normalized_business_data = normalizer.normalize_business_data(business_data)
-        entity_id = _resolve_subcellular_fraction_entity_id(
-            self,
-            normalized_business_data,
-        )
-        return PreSilverRecord(
-            entity_id=entity_id,
-            business_data=normalized_business_data,
-            build_silver_record=self._build_pre_silver_json_record,
-            apply_structural_policy=self._apply_pre_silver_structural_policy,
-            apply_silver_filter=self._apply_pre_silver_filter,
+        return self._build_pre_silver_from_normalized_business_data(
+            business_data=business_data,
+            resolve_entity_id=lambda data: _resolve_subcellular_fraction_entity_id(
+                self, data
+            ),
         )
 
     async def _transform_impl(
@@ -86,84 +73,16 @@ class SubcellularFractionTransformer(BaseChemblTransformer):
         if resolved is None:
             return None
         _, business_data = resolved
-        normalizer = RecordNormalizationProcessor(
-            provider=self.provider,
-            entity_type=self.entity_type,
-        )
-        normalized_business_data = normalizer.normalize_business_data(business_data)
-        entity_id = _resolve_subcellular_fraction_entity_id(
-            self,
-            normalized_business_data,
-        )
-        content_hash = self.compute_content_hash(
-            normalized_business_data,
-            exclude_none=True,
-        )
-        silver_record = _build_subcellular_fraction_silver_record(
-            self,
-            context,
-            entity_id,
-            content_hash,
-            index,
-            normalized_business_data,
-        )
         return cast(
             "SilverRecord",
-            normalizer.project_normalization_findings(
-                cast(JsonDict, silver_record),
+            self._finalize_normalized_business_data(
                 context=context,
                 index=index,
+                business_data=business_data,
+                resolve_entity_id=lambda data: _resolve_subcellular_fraction_entity_id(
+                    self, data
+                ),
             ),
-        )
-
-    def _build_pre_silver_json_record(
-        self,
-        context: PipelineContext,
-        entity_id: str,
-        content_hash: str,
-        index: int,
-        business_data: JsonDict,
-    ) -> JsonDict:
-        """Adapt finalized Silver-record construction to the PreSilverRecord protocol."""
-        return cast(
-            JsonDict,
-            _build_subcellular_fraction_silver_record(
-                self,
-                context,
-                entity_id,
-                content_hash,
-                index,
-                business_data,
-            ),
-        )
-
-    def _apply_pre_silver_structural_policy(
-        self,
-        context: PipelineContext,
-        record: JsonDict,
-        index: int,
-    ) -> JsonDict | None:
-        """Adapt structural policy application to the PreSilverRecord protocol."""
-        return cast(
-            JsonDict | None,
-            self._apply_structural_policy(
-                context,
-                cast("SilverRecord", record),
-                index,
-            ),
-        )
-
-    def _apply_pre_silver_filter(
-        self,
-        context: PipelineContext,
-        record: JsonDict,
-        index: int,
-    ) -> None:
-        """Adapt silver-filter application to the PreSilverRecord protocol."""
-        self._apply_silver_filter(
-            context,
-            cast("SilverRecord", record),
-            index,
         )
 
     def _extract_business_data(
@@ -282,26 +201,4 @@ def _resolve_subcellular_fraction_entity_id(
     return transformer.compute_fraction_entity_id(
         str(business_data.get("subcellular_fraction", ""))
     )
-
-
-def _build_subcellular_fraction_silver_record(
-    transformer: SubcellularFractionTransformer,
-    context: PipelineContext,
-    entity_id: str,
-    content_hash: str,
-    index: int,
-    business_data: JsonDict,
-) -> SilverRecord:
-    """Build a finalized Silver record from normalized fraction business data."""
-    entity = transformer._create_entity(
-        transformer.entity_class,
-        context,
-        entity_id=entity_id,
-        content_hash=content_hash,
-        index=index,
-        **business_data,
-    )
-    return cast("SilverRecord", transformer.entity_to_silver_record(entity))
-
-
 __all__ = ["SubcellularFractionTransformer"]

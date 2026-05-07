@@ -51,7 +51,7 @@ def _load_pipeline_registry_type() -> type[PipelineRegistry]:
     """Resolve PipelineRegistry lazily so command imports stay lightweight."""
     from bioetl.composition.registry_api import PipelineRegistry
 
-    return PipelineRegistry
+    return cast("type[PipelineRegistry]", PipelineRegistry)
 
 
 def build_cli_registry() -> PipelineRegistry:
