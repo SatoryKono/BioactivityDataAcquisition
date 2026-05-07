@@ -515,7 +515,7 @@ def test_dq_freshness_panel_uses_age_from_timestamp_metric() -> None:
         (
             item
             for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Worst Data Freshness Lag (seconds)"
+            if item.get("title") == "Monitor: Worst Data Freshness Lag (seconds)"
         ),
         None,
     )
@@ -557,7 +557,7 @@ def test_freshness_panels_do_not_compute_age_from_counter_suffix_metrics() -> No
 @pytest.mark.parametrize(
     ("dashboard_file", "panel_title"),
     [
-        ("bioetl-dq-v2.json", "Latest Successful Data Timestamp"),
+        ("bioetl-dq-v2.json", "Review: Latest Successful Data Timestamp"),
     ],
 )
 def test_latest_timestamp_panels_are_explicitly_success_timestamp_panels(
@@ -592,11 +592,11 @@ def test_control_plane_l1_triage_row_has_3_to_5_kpis_and_one_next_step() -> None
     panels = get_dashboard_panels(dashboard)
     kpi_titles = {
         "Monitor: Replay Safety State",
-        "Inspect: Known Gap - Checkpoint Freshness",
-        "Monitor: Ledger / Manifest Consistency",
-        "Inspect: Control-Plane Telemetry Missing",
+        "Inspect: Checkpoint Freshness Gap",
+        "Monitor: Manifest / Ledger Integrity",
+        "Inspect: Telemetry Missing",
     }
-    next_step_title = "Next Action: Replay Safety Diagnostics"
+    next_step_title = "Next Action: Replay Diagnostics"
     first_screen_titles = {
         panel.get("title") for panel in panels[:9] if panel.get("type") != "row"
     }
@@ -611,7 +611,7 @@ def test_control_plane_l1_has_single_next_step_panel_with_expected_target() -> N
     panels = [
         panel
         for panel in get_dashboard_panels(dashboard)
-        if panel.get("title") == "Next Action: Replay Safety Diagnostics"
+        if panel.get("title") == "Next Action: Replay Diagnostics"
     ]
     assert len(panels) == 1
 
@@ -751,8 +751,8 @@ def test_control_plane_latency_panels_have_p50_p95_p99() -> None:
         "Track: Checkpoint Save Latency p50/p95/p99",
         "Track: GLOBAL Checkpoint Operator Latency p50/p95/p99",
         "Track: GLOBAL Control-Plane Read Latency p50/p95/p99",
-        "Track: Audit Write Latency p50/p95/p99",
-        "Track: Audit Query Latency p50/p95/p99",
+        "Track: GLOBAL Audit Write Latency p50/p95/p99",
+        "Track: GLOBAL Audit Query Latency p50/p95/p99",
     )
 
     for panel_title in latency_panels:
@@ -823,11 +823,11 @@ def test_silver_validation_panels_use_explicit_pipeline_label() -> None:
         (
             item
             for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Silver Validation Failures"
+            if item.get("title") == "Monitor: Silver Validation Failures"
         ),
         None,
     )
-    assert panel is not None, "DQ dashboard missing 'Silver Validation Failures' panel"
+    assert panel is not None, "DQ dashboard missing 'Monitor: Silver Validation Failures' panel"
 
     expressions = [
         target.get("expr", "")
@@ -835,10 +835,10 @@ def test_silver_validation_panels_use_explicit_pipeline_label() -> None:
         if isinstance(target.get("expr"), str)
     ]
     assert any('{pipeline=~"$pipeline"}' in expr for expr in expressions), (
-        "Silver Validation Failures must filter on the explicit pipeline label"
+        "Monitor: Silver Validation Failures must filter on the explicit pipeline label"
     )
     assert all('{table=~"$pipeline"}' not in expr for expr in expressions), (
-        "Silver Validation Failures must not rely on the table-to-pipeline naming convention"
+        "Monitor: Silver Validation Failures must not rely on the table-to-pipeline naming convention"
     )
 
 
@@ -874,6 +874,10 @@ def test_provider_dashboard_surfaces_current_health_status_panel() -> None:
         if isinstance(target.get("expr"), str)
     ]
     assert any("bioetl_provider_health_status" in expr for expr in expressions)
+    assert any(
+        "bioetl_provider_health_check_provider_universe_15m" in expr
+        for expr in expressions
+    ), "Provider health status panel must fail closed to UNKNOWN for known providers"
     assert all('{pipeline=~"$pipeline"}' not in expr for expr in expressions), (
         "Provider health status panel must stay provider-scoped only"
     )
@@ -893,6 +897,9 @@ def test_provider_health_panel_114_description_disallows_zero_as_healthy() -> No
     description = str(panel.get("description", ""))
     assert "0=UNHEALTHY" in description, (
         "Panel id=114 must explicitly document 0 as UNHEALTHY"
+    )
+    assert "UNKNOWN" in description, (
+        "Panel id=114 must document UNKNOWN fallback when raw status is absent"
     )
     description_upper = description.upper()
     assert "0=HEALTHY" not in description_upper
@@ -1062,7 +1069,12 @@ def test_stage_drilldown_variable_is_available_for_runtime_and_dq_dashboards(
     assert stage_var is not None, f"{dashboard_file} must expose stage drill-down"
     query = stage_var.get("query", {})
     query_text = query.get("query", "") if isinstance(query, dict) else ""
-    assert "label_values(bioetl_records_processed_total" in query_text
+    expected_source = (
+        "bioetl_pipeline_stage_expected"
+        if dashboard_file == "bioetl-runtime.json"
+        else "bioetl_records_processed_total"
+    )
+    assert f"label_values({expected_source}" in query_text
     assert "stage" in query_text
 
 
@@ -1088,8 +1100,10 @@ def test_control_plane_dashboard_uses_control_plane_native_variable_sources() ->
         run_type_query.get("query", "") if isinstance(run_type_query, dict) else ""
     )
 
-    assert "bioetl_control_plane_manifest_writes_total" in pipeline_query_text
-    assert "bioetl_control_plane_manifest_writes_total" in run_type_query_text
+    assert "bioetl_control_plane_run_type_universe" in pipeline_query_text
+    assert "bioetl_control_plane_run_type_universe" in run_type_query_text
+    assert "bioetl_control_plane_manifest_writes_total" not in pipeline_query_text
+    assert "bioetl_control_plane_manifest_writes_total" not in run_type_query_text
     assert "bioetl_records_processed_total" not in pipeline_query_text
     assert "bioetl_records_processed_total" not in run_type_query_text
 
@@ -1190,9 +1204,9 @@ def test_runtime_dashboard_keeps_loki_log_hygiene_in_collapsed_tracing_row() -> 
     }
     assert nested_titles == {
         "Inspect Warning Logs",
-        "Inspect Unstructured Logs",
-        "Track Top Warning Events",
-        "Track Log Hygiene Trend",
+        "Inspect GLOBAL Unstructured Logs",
+        "Inspect Top Warning Events by Message / Range",
+        "Track GLOBAL Log Hygiene Trend",
     }
 
 
@@ -1211,15 +1225,26 @@ def test_runtime_warning_loki_queries_filter_parsed_fields_after_json() -> None:
     assert '{job="bioetl", level="warning"}' not in warning_expr
     assert "| json" in warning_expr
     assert '__error__=""' in warning_expr
+    assert '| pipeline=~"$pipeline"' in warning_expr
     assert '| level="warning"' in warning_expr
 
-    top_warning_panel = panels["Track Top Warning Events"]
+    top_warning_panel = panels["Inspect Top Warning Events by Message / Range"]
     top_warning_expr = top_warning_panel["targets"][0]["expr"]
     assert '{job="bioetl"}' in top_warning_expr
     assert '{job="bioetl", level="warning"}' not in top_warning_expr
+    assert '| pipeline=~"$pipeline"' in top_warning_expr
     assert "count_over_time(" in top_warning_expr
     assert "sum by (message)" in top_warning_expr
     assert "topk(10" in top_warning_expr
+    assert top_warning_panel["type"] == "bargauge"
+
+    unstructured_panel = panels["Inspect GLOBAL Unstructured Logs"]
+    unstructured_expr = unstructured_panel["targets"][0]["expr"]
+    assert '{job="bioetl"}' in unstructured_expr
+    assert "| json" in unstructured_expr
+    assert '__error__!=""' in unstructured_expr
+    assert "{{.__error__}}" in unstructured_expr
+    assert "{{__error__}}" not in unstructured_expr
 
 
 def test_runtime_dashboard_describes_tracing_optional_mode() -> None:
@@ -1295,7 +1320,7 @@ def test_dq_dashboard_contains_gold_specific_validation_surface() -> None:
         (
             item
             for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Gold Strict Validation Failures"
+            if item.get("title") == "Monitor: Gold Strict Validation Failures"
         ),
         None,
     )
@@ -1334,6 +1359,9 @@ def test_runtime_pipeline_errors_panel_uses_runtime_error_metric_and_selected_ti
     )
     assert any("[30m]" in expr for expr in expressions), (
         "Monitor Runtime Error Rate must use the shipped 30-minute window"
+    )
+    assert any(">= 20" in expr for expr in expressions), (
+        "Monitor Runtime Error Rate must preserve the shipped Bronze denominator gate"
     )
 
 
@@ -1427,8 +1455,8 @@ def test_provider_circuit_breaker_panels_use_adapter_variable() -> None:
     )
 
     for panel_title in (
-        "Monitor Circuit Breaker State (max)",
-        "Track Circuit Breaker Trips by Adapter",
+        "Monitor Cross-Scope Adapter Circuit Breaker State (max)",
+        "Track Cross-Scope Adapter Circuit Breaker Trips",
     ):
         panel = next(
             (
@@ -1468,32 +1496,32 @@ def test_provider_circuit_breaker_panels_use_adapter_variable() -> None:
         ),
         (
             "bioetl-runtime.json",
-            "Track Shutdown Initiated by Reason / Interval",
+            "Track GLOBAL Shutdown Initiated by Reason / Interval",
             "[$__interval]",
         ),
         (
             "bioetl-runtime.json",
-            "Track Shutdown Completed by Reason / Interval",
+            "Track GLOBAL Shutdown Completed by Reason / Interval",
             "[$__interval]",
         ),
         (
             "bioetl-control-plane-v1.json",
-            "Track: Audit Write Outcomes",
+            "Track: GLOBAL Audit Write Outcomes",
             "[$__interval]",
         ),
         (
             "bioetl-control-plane-v1.json",
-            "Track: Audit Query Outcomes",
+            "Track: GLOBAL Audit Query Outcomes",
             "[$__interval]",
         ),
         (
             "bioetl-control-plane-v1.json",
-            "Track: Audit Write Latency p50/p95/p99",
+            "Track: GLOBAL Audit Write Latency p50/p95/p99",
             "[$__range]",
         ),
         (
             "bioetl-control-plane-v1.json",
-            "Track: Audit Query Latency p50/p95/p99",
+            "Track: GLOBAL Audit Query Latency p50/p95/p99",
             "[$__range]",
         ),
     ],
@@ -1526,18 +1554,18 @@ def test_runtime_and_control_plane_operator_panels_use_active_time_windows(
 @pytest.mark.parametrize(
     ("dashboard_file", "panel_title"),
     [
-        ("bioetl-overview-v2.json", "Historical Failures (range evidence)"),
-        ("bioetl-overview-v2.json", "Recent terminal runs (range evidence)"),
+        ("bioetl-overview-v2.json", "Historical Failures"),
+        ("bioetl-overview-v2.json", "Recent Terminal Runs"),
         ("bioetl-control-plane-v1.json", "Monitor: GLOBAL Control-Plane Read Failures"),
         (
             "bioetl-control-plane-v1.json",
             "Track: GLOBAL Control-Plane Read Latency p50/p95/p99",
         ),
-        ("bioetl-dq-v2.json", "Records Quarantined"),
-        ("bioetl-dq-v2.json", "Soft Threshold Exceeded"),
-        ("bioetl-dq-v2.json", "Quarantine by Error Type"),
-        ("bioetl-dq-v2.json", "Silver Validation Failures"),
-        ("bioetl-dq-v2.json", "Lineage Refs Missing"),
+        ("bioetl-dq-v2.json", "Track: Records Quarantined in Range"),
+        ("bioetl-dq-v2.json", "Track: Soft Threshold Exceeded in Range"),
+        ("bioetl-dq-v2.json", "Inspect: Quarantine by Error Type"),
+        ("bioetl-dq-v2.json", "Monitor: Silver Validation Failures"),
+        ("bioetl-dq-v2.json", "Monitor: Lineage Refs Missing"),
         ("bioetl-runtime.json", "Track Records by Stage / Run Type / Range"),
     ],
 )
@@ -1636,10 +1664,10 @@ def test_runtime_first_action_row_precedes_condition_cards_in_order() -> None:
     ("dashboard_file", "panel_title"),
     [
         ("bioetl-control-plane-v1.json", "Track: Lineage Fragment Outcomes"),
-        ("bioetl-dq-v2.json", "DQ Check Duration (p95)"),
-        ("bioetl-dq-v2.json", "Anomalies Detected"),
+        ("bioetl-dq-v2.json", "Track: DQ Check Duration (p95)"),
+        ("bioetl-dq-v2.json", "Track: Anomalies Detected"),
         ("bioetl-runtime.json", "Track Records by Stage / Interval"),
-        ("bioetl-runtime.json", "Track Log Hygiene Trend"),
+        ("bioetl-runtime.json", "Track GLOBAL Log Hygiene Trend"),
     ],
 )
 def test_adaptive_trend_panels_use_selected_interval(
@@ -1676,23 +1704,28 @@ def test_adaptive_trend_panels_use_selected_interval(
             'label_replace(label_replace(vector(0), "stage", "none", "", ""), "error_code", "none", "", "")',
         ),
         (
+            "bioetl-runtime.json",
+            "Track Records by Stage / Run Type / Range",
+            'label_replace(label_replace(vector(0), "stage", "none", "", ""), "run_type", "none", "", "")',
+        ),
+        (
             "bioetl-control-plane-v1.json",
             "Track: Checkpoint Compatibility Outcomes",
             'label_replace(vector(0), "disposition", "no_events", "", "")',
         ),
         (
             "bioetl-dq-v2.json",
-            "Quarantine by Error Type",
+            "Inspect: Quarantine by Error Type",
             'label_replace(vector(0), "error_type", "none", "", "")',
         ),
         (
             "bioetl-dq-v2.json",
-            "Anomalies Detected",
+            "Track: Anomalies Detected",
             'label_replace(label_replace(vector(0), "severity", "none", "", ""), "anomaly_type", "none", "", "")',
         ),
         (
             "bioetl-dq-v2.json",
-            "Silver Filter Rejects by Pipeline",
+            "Inspect: Silver Filter Rejects by Pipeline",
             'label_replace(vector(0), "pipeline", "no_events", "", "")',
         ),
     ],
@@ -1773,6 +1806,185 @@ def test_runtime_top_fold_text_panels_do_not_overlap() -> None:
                 )
 
     assert not overlaps, "Runtime top-fold text panels overlap:\n" + "\n".join(overlaps)
+
+
+def test_control_plane_root_layout_keeps_range_evidence_and_rows_non_overlapping() -> None:
+    """Control Plane root layout must not overlap the selected-range blocker panel with collapsed incident rows."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
+    root_panels = dashboard.get("panels", [])
+
+    overlaps = []
+    for index, left in enumerate(root_panels):
+        left_grid = left.get("gridPos", {})
+        left_x = left_grid.get("x", 0)
+        left_y = left_grid.get("y", 0)
+        left_w = left_grid.get("w", 0)
+        left_h = left_grid.get("h", 0)
+        for right in root_panels[index + 1 :]:
+            right_grid = right.get("gridPos", {})
+            right_x = right_grid.get("x", 0)
+            right_y = right_grid.get("y", 0)
+            right_w = right_grid.get("w", 0)
+            right_h = right_grid.get("h", 0)
+            x_overlap = left_x < right_x + right_w and right_x < left_x + left_w
+            y_overlap = left_y < right_y + right_h and right_y < left_y + left_h
+            if x_overlap and y_overlap:
+                overlaps.append(
+                    f"{left.get('id')}:{left.get('title')} overlaps {right.get('id')}:{right.get('title')}"
+                )
+
+    assert not overlaps, "Control Plane root panels overlap:\n" + "\n".join(overlaps)
+
+
+def test_control_plane_collapsed_row_sequence_matches_operator_flow() -> None:
+    """Control Plane collapsed row headers must preserve replay -> manifest -> global -> audit -> missing-signals order."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
+    row_panels = [
+        panel
+        for panel in dashboard.get("panels", [])
+        if panel.get("type") == "row" and panel.get("collapsed") is True
+    ]
+    row_pairs = [
+        (panel.get("id"), panel.get("title"), panel.get("gridPos", {}).get("y"))
+        for panel in sorted(row_panels, key=lambda panel: panel.get("gridPos", {}).get("y", 0))
+    ]
+    assert row_pairs == [
+        (902, "Incident Drilldown: Replay Safety (Checkpoint / Replay)", 8),
+        (901, "Incident Drilldown: Manifest / Ledger Integrity", 9),
+        (903, "Incident Drilldown: Global Control-Plane Store Reliability", 10),
+        (904, "Incident Drilldown: Audit / Lineage Completeness", 11),
+        (905, "Known missing replay-safety signals", 12),
+    ], f"Control Plane row order/title drifted: {row_pairs}"
+
+
+def test_control_plane_first_evidence_panel_stays_close_to_answer_row() -> None:
+    """Selected-range blocker evidence should live in the first replay drilldown row, not compete with the trust answer row."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
+    panels = {
+        panel.get("title"): panel
+        for panel in get_dashboard_panels(dashboard)
+        if panel.get("title")
+    }
+    panel = panels.get("Track: Replay / Resume Blockers in Range")
+    assert panel is not None
+    grid_pos = panel.get("gridPos", {})
+    assert grid_pos.get("y") == 8
+    assert grid_pos.get("w", 0) == 24
+    root_titles = {
+        panel.get("title")
+        for panel in dashboard.get("panels", [])
+        if panel.get("title")
+    }
+    assert "Track: Replay / Resume Blockers in Range" not in root_titles
+
+
+def test_control_plane_long_first_screen_titles_keep_extra_width() -> None:
+    """Long first-screen title cards must keep enough width to avoid avoidable truncation risk."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
+    panels = {
+        panel.get("title"): panel
+        for panel in get_dashboard_panels(dashboard)
+        if panel.get("title")
+    }
+
+    for panel_title in (
+        "Monitor: Manifest / Ledger Integrity",
+        "Inspect: Telemetry Missing",
+        "Next Action: Replay Diagnostics",
+    ):
+        panel = panels.get(panel_title)
+        assert panel is not None
+        grid_pos = panel.get("gridPos", {})
+        assert grid_pos.get("w", 0) >= 5, f"{panel_title} needs extra width for stable title/text rendering"
+
+
+def test_control_plane_terminal_events_table_has_readable_width() -> None:
+    """Terminal event evidence table should keep enough width for practical status visibility."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
+    panels = {
+        panel.get("title"): panel
+        for panel in get_dashboard_panels(dashboard)
+        if panel.get("title")
+    }
+    panel = panels.get("Inspect: Terminal Run Events by Status in Range")
+    assert panel is not None
+    grid_pos = panel.get("gridPos", {})
+    assert grid_pos.get("w", 0) >= 12
+
+
+def test_control_plane_manifest_evidence_top_band_uses_full_row_width() -> None:
+    """Manifest/ledger evidence top band should use the full row width to avoid avoidable dead space."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
+    panels = {
+        panel.get("title"): panel
+        for panel in get_dashboard_panels(dashboard)
+        if panel.get("title")
+    }
+    top_band_titles = (
+        "Inspect: Terminal Run Events by Status in Range",
+        "Monitor: Manifest Write Failures",
+        "Monitor: Ledger Append Failures",
+    )
+    widths = []
+    xs = []
+    ys = set()
+    heights = set()
+    for panel_title in top_band_titles:
+        panel = panels.get(panel_title)
+        assert panel is not None
+        grid_pos = panel.get("gridPos", {})
+        widths.append(grid_pos.get("w", 0))
+        xs.append(grid_pos.get("x", 0))
+        ys.add(grid_pos.get("y", 0))
+        heights.add(grid_pos.get("h", 0))
+
+    assert ys == {8}
+    assert heights == {6}
+    assert sum(widths) == 24, f"Manifest/ledger top band should fill the row, got widths={widths}"
+    assert sorted(xs) == [0, 12, 18], f"Unexpected manifest/ledger top band placement: xs={xs}"
+
+
+def test_control_plane_replay_safety_detail_top_bands_use_full_row_width() -> None:
+    """Replay-safety detail row should not leave dead horizontal space in its visible top bands."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
+    row_panel = next(
+        panel
+        for panel in dashboard.get("panels", [])
+        if panel.get("type") == "row"
+        and panel.get("title") == "Incident Drilldown: Replay Safety (Checkpoint / Replay)"
+    )
+    panels = {panel.get("id"): panel for panel in row_panel.get("panels", [])}
+
+    known_blind_spots = panels[894]
+    blind_spots_grid = known_blind_spots.get("gridPos", {})
+    assert blind_spots_grid.get("x") == 0
+    assert blind_spots_grid.get("w") == 24
+    assert blind_spots_grid.get("y") == 2
+
+    trio = [panels[3], panels[104], panels[120]]
+    trio_widths = [panel.get("gridPos", {}).get("w", 0) for panel in trio]
+    trio_xs = sorted(panel.get("gridPos", {}).get("x", 0) for panel in trio)
+    trio_ys = {panel.get("gridPos", {}).get("y", 0) for panel in trio}
+    assert sum(trio_widths) == 24, f"Replay-safety KPI trio should fill the row, got widths={trio_widths}"
+    assert trio_xs == [0, 8, 16], f"Unexpected replay-safety KPI placement: xs={trio_xs}"
+    assert trio_ys == {16}
+
+
+def test_control_plane_lineage_top_band_uses_full_row_width() -> None:
+    """Audit/lineage top singleton should fill the row instead of leaving avoidable dead space."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
+    row_panel = next(
+        panel
+        for panel in dashboard.get("panels", [])
+        if panel.get("type") == "row"
+        and panel.get("title") == "Incident Drilldown: Audit / Lineage Completeness"
+    )
+    panels = {panel.get("id"): panel for panel in row_panel.get("panels", [])}
+    panel = panels[122]
+    grid_pos = panel.get("gridPos", {})
+    assert grid_pos.get("x") == 0
+    assert grid_pos.get("y") == 8
+    assert grid_pos.get("w") == 24
 
 
 def test_overview_current_panels_stay_out_of_selected_range_semantics() -> None:
@@ -1885,7 +2097,7 @@ def test_control_plane_trust_panels_preserve_missing_telemetry() -> None:
 
     for title in (
         "Monitor: Replay Safety State",
-        "Monitor: Ledger / Manifest Consistency",
+        "Monitor: Manifest / Ledger Integrity",
     ):
         panel = panels.get(title)
         assert panel is not None
@@ -1900,6 +2112,39 @@ def test_control_plane_trust_panels_preserve_missing_telemetry() -> None:
         )
 
 
+def test_control_plane_run_type_noop_panels_disclose_scope_limit() -> None:
+    """Panels backed by metric families without run_type must disclose that the selector is a no-op."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
+    expected_titles = (
+        "Monitor: Checkpoint Incompatibilities",
+        "Monitor: Replay Not Reconstructable",
+        "Monitor: Checkpoint Load Failures",
+        "Monitor: Checkpoint Save Failures",
+        "Track: Checkpoint Compatibility Outcomes",
+        "Track: Checkpoint Save Latency p50/p95/p99",
+        "Monitor: Ledger Append Failures",
+        "Track: Ledger Appends by Event Type / Status",
+        "Monitor: Ledger Append Failure Ratio",
+        "Monitor: Lineage Refs Missing",
+        "Monitor: Lineage Fragment Persistence Failures",
+        "Inspect: Missing Lineage Refs by Layer / Type",
+        "Track: Lineage Fragment Outcomes",
+    )
+    panels = {
+        panel.get("title"): panel
+        for panel in get_dashboard_panels(dashboard)
+        if panel.get("title")
+    }
+
+    for title in expected_titles:
+        panel = panels.get(title)
+        assert panel is not None, f"Control Plane missing {title!r}"
+        description = str(panel.get("description", ""))
+        assert "run_type selector does not change this panel" in description, (
+            f"Control Plane panel {title!r} must disclose that run_type is a no-op"
+        )
+
+
 def test_control_plane_exposes_terminal_events_and_telemetry_gap() -> None:
     """Control-plane must expose terminal ledger evidence and missing telemetry risk."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
@@ -1910,7 +2155,7 @@ def test_control_plane_exposes_terminal_events_and_telemetry_gap() -> None:
     }
 
     expected = {
-        "Inspect: Control-Plane Telemetry Missing": (
+        "Inspect: Telemetry Missing": (
             "bioetl_control_plane_telemetry_missing_5m",
         ),
         "Inspect: Terminal Run Events by Status in Range": (
@@ -1928,7 +2173,7 @@ def test_control_plane_exposes_terminal_events_and_telemetry_gap() -> None:
         for token in tokens:
             assert token in expr
 
-    telemetry = panels["Inspect: Control-Plane Telemetry Missing"]
+    telemetry = panels["Inspect: Telemetry Missing"]
     assert telemetry.get("fieldConfig", {}).get("defaults", {}).get("noValue") == (
         "UNKNOWN"
     )
@@ -2044,12 +2289,16 @@ def test_provider_health_selected_provider_detail_row_is_collapsed() -> None:
     assert detail_row is not None
     assert detail_row.get("collapsed") is True
 
-    repeated_panel = next(
-        (panel for panel in panels if panel.get("repeat") == "provider"),
+    detail_panel = next(
+        (
+            panel
+            for panel in panels
+            if panel.get("title") == "Inspect Provider Health Check Latency (p95) - $provider"
+        ),
         None,
     )
-    assert repeated_panel is not None
-    assert repeated_panel.get("gridPos", {}).get("y", 0) >= detail_row.get(
+    assert detail_panel is not None
+    assert detail_panel.get("gridPos", {}).get("y", 0) >= detail_row.get(
         "gridPos", {}
     ).get("y", 0)
 

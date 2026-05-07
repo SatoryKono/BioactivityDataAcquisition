@@ -104,7 +104,78 @@ forbidden_dashboard_link_vars_by_target_uid:
 
 required_discoverable_inbound_paths: {}
 
-required_panel_links_by_uid: {}
+required_panel_links_by_uid:
+  bioetl-overview-v2:
+    - panel_id: 214
+      target_uid: bioetl-runtime
+      link_titles: [Open Runtime]
+    - panel_id: 214
+      target_uid: bioetl-control-plane-v1
+      link_titles: [Open Control Plane]
+    - panel_id: 214
+      target_uid: bioetl-dq-v2
+      link_titles: [Open Data Quality]
+    - panel_id: 214
+      target_uid: bioetl-provider-health-v2
+      link_titles: [Open Provider Health]
+    - panel_id: 214
+      target_uid: bioetl-workflow-overview
+      link_titles: [Open Workflow (Reset Scope)]
+    - panel_id: 215
+      target_uid: bioetl-runtime
+      link_titles: [Open Runtime]
+    - panel_id: 215
+      target_uid: bioetl-control-plane-v1
+      link_titles: [Open Control Plane]
+    - panel_id: 215
+      target_uid: bioetl-dq-v2
+      link_titles: [Open Data Quality]
+    - panel_id: 215
+      target_uid: bioetl-provider-health-v2
+      link_titles: [Open Provider Health]
+    - panel_id: 215
+      target_uid: bioetl-workflow-overview
+      link_titles: [Open Workflow (Reset Scope)]
+    - panel_id: 9002
+      target_uid: bioetl-runtime
+      link_titles: [Open Runtime]
+    - panel_id: 9002
+      target_uid: bioetl-control-plane-v1
+      link_titles: [Open Control Plane]
+    - panel_id: 9002
+      target_uid: bioetl-dq-v2
+      link_titles: [Open Data Quality]
+    - panel_id: 9002
+      target_uid: bioetl-provider-health-v2
+      link_titles: [Open Provider Health]
+    - panel_id: 9002
+      target_uid: bioetl-workflow-overview
+      link_titles: [Open Workflow (Reset Scope)]
+    - panel_id: 9003
+      target_uid: bioetl-runtime
+      link_titles: [Open Runtime]
+    - panel_id: 9004
+      target_uid: bioetl-dq-v2
+      link_titles: [Open Data Quality]
+    - panel_id: 9005
+      target_uid: bioetl-runtime
+      link_titles: [Open Runtime]
+    - panel_id: 9006
+      target_uid: bioetl-control-plane-v1
+      link_titles: [Open Control Plane]
+    - panel_id: 9007
+      target_uid: bioetl-provider-health-v2
+      link_titles: [Open Provider Health]
+    - panel_id: 9008
+      target_uid: bioetl-workflow-overview
+      link_titles: [Open Workflow (Reset Scope)]
+    - panel_id: 9013
+      target_uid: bioetl-workflow-overview
+      link_titles: [Open Workflow]
+  bioetl-dq-v2:
+    - panel_id: 9102
+      target_uid: bioetl-silver-reject-explorer
+      link_titles: [Open Silver Reject Explorer]
 
 default_time_refresh_policy:
   L0:
@@ -230,6 +301,23 @@ navigation_transition_contract:
       bioetl-dq-v2->bioetl-provider-health-v2: context_mapping
       bioetl-dq-v2->bioetl-workflow-overview: reset_scope
       bioetl-silver-reject-explorer->bioetl-provider-health-v2: context_mapping
+  provider_context_mapping_contract:
+    source_dashboards:
+      bioetl-control-plane-v1:
+        provider_value: unknown
+        adapter_value: null
+      bioetl-overview-v2:
+        provider_value: unknown
+        adapter_value: unknown
+      bioetl-runtime:
+        provider_value: unknown
+        adapter_value: unknown
+      bioetl-dq-v2:
+        provider_value: unknown
+        adapter_value: unknown
+      bioetl-silver-reject-explorer:
+        provider_value: unknown
+        adapter_value: unknown
       bioetl-silver-reject-explorer->bioetl-workflow-overview: reset_scope
       bioetl-workflow-overview->bioetl-control-plane-v1: reset_scope
       bioetl-workflow-overview->bioetl-overview-v2: reset_scope

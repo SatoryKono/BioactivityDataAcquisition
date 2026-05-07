@@ -1,22 +1,22 @@
 ---
 id: runtime-dashboard-audit
-title: Audit BioETL Runtime dashboard
+title: Audit BioETL 2 Runtime Grafana dashboard
 task_id: runtime-dashboard-audit
-created_at: '2026-05-07T13:05:46Z'
+created_at: '2026-05-07T15:10:10Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
 - grafana/dashboards
 summary: Active task session context.
-query: BioETL Runtime dashboard Grafana Prometheus panels
+query: BioETL 2 Runtime dashboard Grafana Prometheus Loki
 ---
 
 # Session note
 
 ## Task
 
-- Title: Audit BioETL Runtime dashboard
-- Retrieval query: BioETL Runtime dashboard Grafana Prometheus panels
+- Title: Audit BioETL 2 Runtime Grafana dashboard
+- Retrieval query: BioETL 2 Runtime dashboard Grafana Prometheus Loki
 
 ## Retrieved context
 

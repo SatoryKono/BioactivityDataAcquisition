@@ -8,17 +8,18 @@ pipeline:
   description: ChEMBL Target Components (protein sequences, etc.)
   business_primary_keys:
   - component_id
-  sink:
-    silver:
-      partition_by:
-      - organism
-    gold:
-      mode: scd2
-      scd_config:
-        valid_from_col: _valid_from
-        valid_to_col: _valid_to
-        current_flag_col: _is_current
-        version_col: _version
+
+sink:
+  silver:
+    partition_by:
+    - organism
+  gold:
+    mode: scd2
+    scd_config:
+      valid_from_col: _valid_from
+      valid_to_col: _valid_to
+      current_flag_col: _is_current
+      version_col: _version
 schema:
   content_hash:
     include: []

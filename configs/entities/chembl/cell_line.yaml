@@ -8,14 +8,15 @@ pipeline:
   description: Extract cell lines from ChEMBL API
   business_primary_keys:
   - cell_id
-  sink:
-    gold:
-      mode: scd2
-      scd_config:
-        valid_from_col: _valid_from
-        valid_to_col: _valid_to
-        current_flag_col: _is_current
-        version_col: _version
+
+sink:
+  gold:
+    mode: scd2
+    scd_config:
+      valid_from_col: _valid_from
+      valid_to_col: _valid_to
+      current_flag_col: _is_current
+      version_col: _version
 schema:
   content_hash:
     include: []

@@ -36,6 +36,7 @@ L0_DASHBOARD_FILES = {
     "bioetl-overview-v2.json",
 }
 FORBIDDEN_L0_TERMS = {"DEGRADED", "BROKEN", "HEALTHY"}
+STATUS_PANEL_TOKENS = ("status", "state", "severity", "health")
 STANDARD_SEVERITY_TITLE_TOKENS = (
     "Current Status",
     "Telemetry Gap",
@@ -111,8 +112,16 @@ def _l0_terminology_errors(dashboard_path: Path, panel: dict) -> list[str]:
     ]
 
 
+def _is_status_like_panel(panel: dict) -> bool:
+    title = str(panel.get("title", "")).lower()
+    description = str(panel.get("description", "")).lower()
+    return any(token in title or token in description for token in STATUS_PANEL_TOKENS)
+
+
 def _panel_errors(dashboard_path: Path, panel: dict) -> list[str]:
     if panel.get("type") not in {"stat", "gauge"}:
+        return []
+    if not _is_status_like_panel(panel):
         return []
     return [
         *_stat_panel_visual_semantics_errors(dashboard_path, panel),

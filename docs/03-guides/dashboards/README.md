@@ -30,6 +30,11 @@ ______________________________________________________________________
 - Loki использует безопасный baseline `{job="bioetl"}`.
 - Tempo использует contextual TraceQL filters по текущему dashboard scope (`pipeline/run_type` или `provider`).
 - `bioetl-runtime` остаётся Prometheus-first в tracing-off режиме: Loki log-hygiene panels теперь живут в collapsed row `Tracing-only Log Hygiene`, а базовый triage path не требует Loki/Tempo datasource.
+- Runtime zero-count cards fail closed: selected pipeline/run_type cards anchor
+  `0` to `bioetl_runtime_pipeline_run_type_universe`, GLOBAL provider handoff
+  anchors `0` to `bioetl_provider_current_status`, and missing scope remains
+  `UNKNOWN`. Unstructured Loki hygiene renders parsed `.__error__`, not the
+  template function form.
 
 Текущая навигационная модель:
 
@@ -41,18 +46,19 @@ ______________________________________________________________________
 - `Explore Logs` и `Explore Traces` доступны только на `2. Runtime` и
   `4. Data Quality`.
 - `Silver Reject Explorer` доступен только на `4. Data Quality`.
-- Переход `0. Control Plane` -> `3. Provider Health` передаёт
-  `provider=$pipeline` и `pipeline_context=$pipeline`, но не передаёт `adapter`,
-  чтобы target dashboard мог корректно раскрыть fallback `All adapters`.
+- Переходы pipeline-scoped dashboards -> `3. Provider Health` сохраняют
+  `pipeline_context=$pipeline`, но fail-close'ятся к `provider=unknown`; если у
+  source dashboard нет adapter context, `adapter` не передаётся, а target
+  dashboard раскрывает собственный fallback `All adapters`.
 
 `bioetl-overview-v2` is the L0 answer-first surface. It answers one question:
 what is currently broken or degraded in BioETL, and where should the operator
 drill down first? The first visible answer is now a compact L0/L1 row:
 `System Status`, `Next Action`, and `L0 Inputs`. The next visible row keeps
-current subsystem summaries (`Runtime Blockers Current`, `DQ Status Current`,
-`Gold Lifecycle Current`, `Control Plane Current`), while provider/workflow
-scope is explicit via `Provider GLOBAL Scope`, `Workflow Selected Scope`, and
-`Workflow GLOBAL Scope`. Historical evidence is isolated under the collapsed
+current subsystem summaries (`Runtime Blockers`, `DQ Status`,
+`Gold Lifecycle`, `Control Plane`), while provider/workflow
+scope is explicit via `Provider Global`, `Workflow Selected`, and
+`Workflow Global`. Historical evidence is isolated under the collapsed
 `Range Evidence` row, and diagnostics routing lives under the collapsed
 `Diagnostics & Docs (Logs / Traces / Raw Metrics)` row.
 
@@ -89,10 +95,10 @@ secondary mirrors только как локальный контекст. Mirro
 | System Status | `1. Overview` | `2. Runtime`, `0. Control Plane`, `5. Workflow` |
 | Next Action | `1. Overview` | `2. Runtime`, `3. Provider Health` |
 | L0 Inputs | `1. Overview` | `2. Runtime`, `4. Data Quality`, `0. Control Plane` |
-| Gold Lifecycle Current | `1. Overview` | `2. Runtime`, `0. Control Plane` |
-| Provider GLOBAL Scope | `1. Overview` | `3. Provider Health` |
-| Workflow Selected Scope | `1. Overview` | `5. Workflow` |
-| Workflow GLOBAL Scope | `1. Overview` | `5. Workflow` |
+| Gold Lifecycle | `1. Overview` | `2. Runtime`, `0. Control Plane` |
+| Provider Global | `1. Overview` | `3. Provider Health` |
+| Workflow Selected | `1. Overview` | `5. Workflow` |
+| Workflow Global | `1. Overview` | `5. Workflow` |
 | Replay Safety State | `0. Control Plane` | `1. Overview`, `2. Runtime` |
 | Checkpoint Freshness Proxy | `0. Control Plane` | `2. Runtime` |
 | Ledger/Manifest Consistency | `0. Control Plane` | `2. Runtime` |

@@ -28,8 +28,14 @@ groups:
       - record: bioetl_overview_pipeline_universe
         expr: count by (pipeline) (bioetl_pipeline_stage_expected) > bool 0
 
+      - record: bioetl_runtime_pipeline_run_type_universe
+        expr: >-
+          (count by (pipeline, run_type) (bioetl_pipeline_runs_total) > bool 0)
+          or
+          (count by (pipeline, run_type) (bioetl_records_processed_total) > bool 0)
+
       - record: bioetl_overview_pipeline_run_type_universe
-        expr: count by (pipeline, run_type) (bioetl_records_processed_total) > bool 0
+        expr: bioetl_runtime_pipeline_run_type_universe
 
       - record: bioetl_runtime_alert_condition_gold_write_missing_15m
         expr: >-
@@ -80,10 +86,26 @@ groups:
 
       - record: bioetl_l0_status
         expr: >-
-          max by (pipeline, run_type) (
-            bioetl_l0_input_status{input=~"runtime|dq|control_plane|workflow|gold"}
-            or
-            (bioetl_overview_pipeline_run_type_universe * scalar(max(bioetl_l0_input_status{input="provider"}) or vector(0)))
+          max by (pipeline, run_type) (bioetl_l0_input_status_selected == 2)
+          or (
+            max by (pipeline, run_type) (bioetl_l0_input_status_selected == 1)
+            unless on (pipeline, run_type)
+            max by (pipeline, run_type) (bioetl_l0_input_status_selected == 2)
+          )
+          or (
+            max by (pipeline, run_type) (bioetl_l0_input_status_selected == 3)
+            unless on (pipeline, run_type) (
+              max by (pipeline, run_type) (bioetl_l0_input_status_selected == 2)
+              or max by (pipeline, run_type) (bioetl_l0_input_status_selected == 1)
+            )
+          )
+          or (
+            max by (pipeline, run_type) (bioetl_l0_input_status_selected == 0)
+            unless on (pipeline, run_type) (
+              max by (pipeline, run_type) (bioetl_l0_input_status_selected == 2)
+              or max by (pipeline, run_type) (bioetl_l0_input_status_selected == 1)
+              or max by (pipeline, run_type) (bioetl_l0_input_status_selected == 3)
+            )
           )
 
       - record: bioetl_l0_next_action
@@ -91,19 +113,29 @@ groups:
       - record: bioetl_l0_input_status
         labels:
           input: runtime
-        expr: (bioetl_runtime_alert_condition_pipeline_runs_failed_15m + bioetl_runtime_alert_condition_stage_backlog_active_15m + bioetl_runtime_alert_condition_stage_lag_high_15m + bioetl_runtime_alert_condition_gold_write_missing_15m > bool 0) * 2 + ((bioetl_runtime_alert_condition_pipeline_runs_failed_15m + bioetl_runtime_alert_condition_stage_backlog_active_15m + bioetl_runtime_alert_condition_stage_lag_high_15m + bioetl_runtime_alert_condition_gold_write_missing_15m == bool 0) * (sum by (pipeline, run_type) (increase(bioetl_pipeline_runs_total[15m])) > bool 0)) * 0
+        expr: >-
+          (max by (pipeline, run_type) (
+            bioetl_runtime_alert_condition_pipeline_runs_failed_15m
+            or bioetl_runtime_alert_condition_stage_backlog_active_15m
+            or bioetl_runtime_alert_condition_stage_lag_high_15m
+            or bioetl_runtime_alert_condition_gold_write_missing_15m
+          ) * 2)
+          or (
+            ((sum by (pipeline, run_type) (increase(bioetl_pipeline_runs_total[15m])) > bool 0) * 0)
+            unless on (pipeline, run_type)
+            max by (pipeline, run_type) (
+              bioetl_runtime_alert_condition_pipeline_runs_failed_15m
+              or bioetl_runtime_alert_condition_stage_backlog_active_15m
+              or bioetl_runtime_alert_condition_stage_lag_high_15m
+              or bioetl_runtime_alert_condition_gold_write_missing_15m
+            )
+          )
       - record: bioetl_l0_input_status
         labels:
           input: dq
         expr: >-
-          (((bioetl_runtime_alert_condition_dq_hard_fail_15m + bioetl_runtime_alert_condition_dq_critical_anomaly_30m) > bool 0)
-          * on (pipeline) group_left(run_type) bioetl_overview_pipeline_run_type_universe) * 2
-          + ((((bioetl_runtime_alert_condition_dq_hard_fail_15m + bioetl_runtime_alert_condition_dq_critical_anomaly_30m) == bool 0)
-          * (bioetl_runtime_alert_condition_dq_soft_threshold_15m > bool 0))
-          * on (pipeline) group_left(run_type) bioetl_overview_pipeline_run_type_universe) * 1
-          + ((((bioetl_runtime_alert_condition_dq_hard_fail_15m + bioetl_runtime_alert_condition_dq_critical_anomaly_30m + bioetl_runtime_alert_condition_dq_soft_threshold_15m) == bool 0)
-          * (sum by (pipeline) (increase(bioetl_records_processed_total{stage="bronze"}[15m])) > bool 0))
-          * on (pipeline) group_left(run_type) bioetl_overview_pipeline_run_type_universe) * 0
+          bioetl_dq_current_status
+          * on (pipeline) group_left(run_type) bioetl_overview_pipeline_run_type_universe
       - record: bioetl_l0_input_status
         labels:
           input: control_plane
@@ -227,25 +259,25 @@ groups:
           action_target: runtime
           action_reason: runtime_blockers_active
           action_dashboard_uid: bioetl-runtime
-        expr: (bioetl_l0_input_status{input="runtime"} >= bool 2) * 50
+        expr: (bioetl_l0_input_status_selected{input="runtime"} >= bool 2) * 50
       - record: bioetl_l0_next_action_route
         labels:
           action_target: control_plane
           action_reason: control_plane_guardrail_active
           action_dashboard_uid: bioetl-control-plane-v1
-        expr: (bioetl_l0_input_status{input="control_plane"} >= bool 2) * 40
+        expr: (bioetl_l0_input_status_selected{input="control_plane"} >= bool 2) * 40
       - record: bioetl_l0_next_action_route
         labels:
           action_target: runtime
           action_reason: gold_lifecycle_blocking
           action_dashboard_uid: bioetl-runtime
-        expr: (bioetl_l0_input_status{input="gold"} >= bool 2) * 35
+        expr: (bioetl_l0_input_status_selected{input="gold"} >= bool 2) * 35
       - record: bioetl_l0_next_action_route
         labels:
           action_target: dq
           action_reason: dq_threshold_or_validation_signal
           action_dashboard_uid: bioetl-dq-v2
-        expr: (bioetl_l0_input_status{input="dq"} >= bool 1) * 30
+        expr: (bioetl_l0_input_status_selected{input="dq"} >= bool 1) * 30
       - record: bioetl_l0_next_action_route
         labels:
           action_target: provider
@@ -253,13 +285,13 @@ groups:
           action_dashboard_uid: bioetl-provider-health-v2
         expr: >-
           (bioetl_overview_pipeline_run_type_universe
-          * scalar((max(bioetl_l0_input_status{input="provider"} >= bool 2)) or vector(0))) * 20
+          * scalar((max(bioetl_l0_input_status_selected{input="provider"} >= bool 2)) or vector(0))) * 20
       - record: bioetl_l0_next_action_route
         labels:
           action_target: workflow
           action_reason: workflow_scope_requires_review
           action_dashboard_uid: bioetl-workflow-overview
-        expr: (bioetl_l0_input_status{input="workflow"} >= bool 1) * 10
+        expr: (bioetl_l0_input_status_selected{input="workflow"} >= bool 1) * 10
       - record: bioetl_l0_next_action_route
         labels:
           action_target: monitor
@@ -300,8 +332,8 @@ groups:
         labels:
           lifecycle_state: disabled
         expr: >-
-          (bioetl_overview_pipeline_run_type_universe
-          * on (pipeline) group_left(run_type) (bioetl_pipeline_stage_expected{stage="gold"} == bool 0)) * 0
+          (bioetl_overview_pipeline_run_type_universe * 0)
+          and on (pipeline) (bioetl_pipeline_stage_expected{stage="gold"} == bool 0)
       - record: bioetl_l1_gold_lifecycle_status
         labels:
           lifecycle_state: healthy_recent_gold
@@ -327,7 +359,7 @@ groups:
             max by (pipeline, run_type) (bioetl_runtime_alert_condition_pipeline_runs_failed_15m or bioetl_runtime_alert_condition_stage_backlog_active_15m or bioetl_runtime_alert_condition_stage_lag_high_15m or bioetl_runtime_alert_condition_gold_write_missing_15m)
             or
             (max by (pipeline) (bioetl_runtime_alert_condition_pipeline_preflight_failed_15m or bioetl_runtime_alert_condition_pipeline_infrastructure_failed_15m)
-            * on (pipeline) group_left(run_type) bioetl_runtime_current_activity_15m)
+            * on (pipeline) group_left(run_type) bioetl_runtime_pipeline_run_type_universe)
           ) > 0
 
       - record: bioetl_runtime_current_degraded_signals_15m
@@ -341,13 +373,13 @@ groups:
           reason: preflight_failed
           severity: failing
           action_target: runtime
-        expr: bioetl_runtime_alert_condition_pipeline_preflight_failed_15m * on (pipeline) group_left(run_type) bioetl_runtime_current_activity_15m
+        expr: bioetl_runtime_alert_condition_pipeline_preflight_failed_15m * on (pipeline) group_left(run_type) bioetl_runtime_pipeline_run_type_universe
       - record: bioetl_runtime_current_blocker_reason
         labels:
           reason: infrastructure_failed
           severity: failing
           action_target: control_plane
-        expr: bioetl_runtime_alert_condition_pipeline_infrastructure_failed_15m * on (pipeline) group_left(run_type) bioetl_runtime_current_activity_15m
+        expr: bioetl_runtime_alert_condition_pipeline_infrastructure_failed_15m * on (pipeline) group_left(run_type) bioetl_runtime_pipeline_run_type_universe
       - record: bioetl_runtime_current_blocker_reason
         labels:
           reason: failed_run
@@ -450,37 +482,37 @@ groups:
       - record: bioetl_dq_current_reason
         labels:
           reason: hard_validation_failure
-          severity: failing
+          severity: crit
           action_target: data_quality
         expr: bioetl_runtime_alert_condition_dq_hard_fail_15m
       - record: bioetl_dq_current_reason
         labels:
           reason: critical_anomaly
-          severity: failing
+          severity: crit
           action_target: data_quality
         expr: bioetl_runtime_alert_condition_dq_critical_anomaly_30m
       - record: bioetl_dq_current_reason
         labels:
           reason: silver_validation_failure
-          severity: failing
+          severity: crit
           action_target: data_quality
         expr: bioetl_runtime_alert_condition_silver_validation_failures_30m
       - record: bioetl_dq_current_reason
         labels:
           reason: soft_threshold
-          severity: degraded
+          severity: warn
           action_target: data_quality
         expr: bioetl_runtime_alert_condition_dq_soft_threshold_15m
       - record: bioetl_dq_current_reason
         labels:
           reason: quarantined_records
-          severity: degraded
+          severity: warn
           action_target: silver_reject_explorer
         expr: sum by (pipeline) (increase(bioetl_dq_records_quarantined_total[15m])) > bool 0
       - record: bioetl_dq_current_reason
         labels:
           reason: silver_filter_rejects
-          severity: degraded
+          severity: warn
           action_target: silver_reject_explorer
         expr: sum by (pipeline) (increase(bioetl_silver_filter_rejections_total[15m])) > bool 0
 

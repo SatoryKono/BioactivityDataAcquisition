@@ -230,7 +230,12 @@ def get_dashboard_prometheus_queries(dashboard: dict) -> list[str]:
     queries = get_panel_expressions(dashboard)
 
     for variable in dashboard.get("templating", {}).get("list", []):
-        if variable.get("datasource") != "Prometheus":
+        datasource = variable.get("datasource")
+        is_prometheus = datasource == "Prometheus" or datasource == {
+            "type": "prometheus",
+            "uid": "prometheus",
+        }
+        if not is_prometheus:
             continue
         query = variable.get("query", {})
         if isinstance(query, dict):
@@ -260,7 +265,8 @@ def _collect_dashboard_links(dashboard: dict) -> list[dict]:
 def _unknown_metrics_for_query(query: str, valid_metrics: set[str]) -> list[str]:
     """Return metric-like tokens that are not present in the known metric set."""
     unknown_metrics: list[str] = []
-    for metric in re.findall(r"(bioetl_[a-z0-9_]+)", query):
+    query_without_strings = re.sub(r'"[^"]*"', '""', query)
+    for metric in re.findall(r"(bioetl_[a-z0-9_]+)", query_without_strings):
         if metric in valid_metrics:
             continue
         base = re.sub(r"(_total|_bucket|_sum|_count|_created)$", "", metric)
@@ -304,10 +310,14 @@ def _assert_standard_variable_contract(
     pipeline_query_text = (
         pipeline_query.get("query", "") if isinstance(pipeline_query, dict) else ""
     )
-    if dashboard_path.name == "bioetl-control-plane-v1.json":
-        expected_pipeline_metric = "bioetl_control_plane_manifest_writes_total"
-    else:
-        expected_pipeline_metric = "bioetl_records_processed_total"
+    expected_pipeline_metric_by_dashboard = {
+        "bioetl-control-plane-v1.json": "bioetl_control_plane_manifest_writes_total",
+        "bioetl-runtime.json": "bioetl_runtime_pipeline_run_type_universe",
+    }
+    expected_pipeline_metric = expected_pipeline_metric_by_dashboard.get(
+        dashboard_path.name,
+        "bioetl_records_processed_total",
+    )
     assert expected_pipeline_metric in pipeline_query_text, (
         f"Dashboard {dashboard_path.name} 'pipeline' query must use "
         f"{expected_pipeline_metric}"
@@ -342,6 +352,13 @@ def _assert_provider_health_variable_contract(
     assert provider_var is not None, (
         f"Dashboard {dashboard_path.name} must define 'provider' variable"
     )
+    assert provider_var.get("datasource") == {
+        "type": "prometheus",
+        "uid": "prometheus",
+    }, (
+        f"Dashboard {dashboard_path.name} 'provider' must use canonical "
+        "Prometheus datasource object"
+    )
     provider_query = provider_var.get("query", {})
     provider_query_text = (
         provider_query.get("query", "") if isinstance(provider_query, dict) else ""
@@ -356,6 +373,13 @@ def _assert_provider_health_variable_contract(
     assert adapter_var is not None, (
         f"Dashboard {dashboard_path.name} must define 'adapter' variable for "
         "circuit-breaker metrics"
+    )
+    assert adapter_var.get("datasource") == {
+        "type": "prometheus",
+        "uid": "prometheus",
+    }, (
+        f"Dashboard {dashboard_path.name} 'adapter' must use canonical "
+        "Prometheus datasource object"
     )
     adapter_query = adapter_var.get("query", {})
     adapter_query_text = (

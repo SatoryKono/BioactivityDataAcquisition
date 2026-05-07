@@ -18,76 +18,21 @@
   "graphTooltip": 1,
   "id": null,
   "iteration": 2,
-  "links": [
-    {
-      "asDropdown": false,
-      "icon": "external link",
-      "includeVars": false,
-      "keepTime": true,
-      "targetBlank": false,
-      "title": "1. Overview",
-      "tooltip": "Open with current pipeline/run_type and preserve the selected time range.",
-      "type": "link",
-      "url": "/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
-    },
-    {
-      "asDropdown": false,
-      "icon": "external link",
-      "includeVars": false,
-      "keepTime": true,
-      "targetBlank": false,
-      "title": "2. Runtime",
-      "tooltip": "Open with current pipeline/run_type and preserve the selected time range. Scope reset: stage=unknown.",
-      "type": "link",
-      "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=unknown&${__url_time_range}"
-    },
-    {
-      "asDropdown": false,
-      "icon": "external link",
-      "includeVars": false,
-      "keepTime": true,
-      "targetBlank": false,
-      "title": "3. Provider Health",
-      "tooltip": "Context mapping: derive provider from current pipeline and remember pipeline_context for return links. Preserve the selected time range.",
-      "type": "link",
-      "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=$pipeline&var-pipeline_context=$pipeline&${__url_time_range}"
-    },
-    {
-      "asDropdown": false,
-      "icon": "external link",
-      "includeVars": false,
-      "keepTime": true,
-      "targetBlank": false,
-      "title": "4. Data Quality",
-      "tooltip": "Open with current pipeline/run_type and preserve the selected time range. Scope reset: stage=unknown.",
-      "type": "link",
-      "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=unknown&${__url_time_range}"
-    },
-    {
-      "asDropdown": false,
-      "icon": "external link",
-      "includeVars": false,
-      "keepTime": true,
-      "targetBlank": false,
-      "title": "5. Workflow",
-      "tooltip": "Reset scope: open workflow target scope and preserve the selected time range.",
-      "type": "link",
-      "url": "/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}"
-    }
-  ],
   "panels": [
     {
-      "collapsed": false,
       "gridPos": {
-        "h": 1,
+        "h": 2,
         "w": 24,
         "x": 0,
         "y": 0
       },
-      "id": 900,
-      "panels": [],
-      "title": "Answer: Replay / Resume Safety",
-      "type": "row"
+      "id": 1000,
+      "options": {
+        "content": "<div style=\"display:flex;gap:10px;flex-wrap:wrap;padding:10px;\"><a href=\"/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}\" target=\"_blank\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">1. Overview</a><a href=\"/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=unknown&${__url_time_range}\" target=\"_blank\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">2. Runtime</a><a href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&var-pipeline_context=$pipeline&${__url_time_range}\" target=\"_blank\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">3. Provider Health</a><a href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=unknown&${__url_time_range}\" target=\"_blank\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">4. Data Quality</a><a href=\"/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}\" target=\"_blank\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">5. Workflow</a></div>",
+        "mode": "html"
+      },
+      "title": "",
+      "type": "text"
     },
     {
       "collapsed": false,
@@ -95,7 +40,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 1
+        "y": 2
       },
       "id": 890,
       "panels": [],
@@ -107,7 +52,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Current 15m replay/resume safety blockers for the selected pipeline/run_type. Status mapping: 0=OK when Inspect: Control-Plane Telemetry Missing = 0; if telemetry is non-zero or UNKNOWN, validate scrape/rules before trusting zero blockers. 1=WARN, >=2=CRIT, null=UNKNOWN. This is a current-status panel using a 15m recording rule window. Missing data means the dashboard cannot prove replay safety; inspect telemetry presence and manifest/ledger rows before replay/resume.",
+      "description": "Current 15m replay/resume safety blockers for the selected pipeline/run_type. Status mapping: 0=OK when Inspect: Telemetry Missing = 0; if telemetry is non-zero or UNKNOWN, validate scrape/rules before trusting zero blockers. 1=WARN, >=2=CRIT, null=UNKNOWN. This is a current-status panel using a 15m recording rule window. Missing data means the dashboard cannot prove replay safety; inspect telemetry presence and manifest/ledger rows before replay/resume.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -151,7 +96,7 @@
         "h": 5,
         "w": 4,
         "x": 0,
-        "y": 2
+        "y": 1
       },
       "id": 891,
       "options": {
@@ -202,17 +147,17 @@
       },
       "gridPos": {
         "h": 5,
-        "w": 4,
+        "w": 5,
         "x": 4,
-        "y": 2
+        "y": 1
       },
       "id": 892,
       "options": {
-        "content": "### Known gap\nCheckpoint age is not instrumented. Do not interpret this card as healthy freshness evidence; inspect checkpoint artifacts/runbook for RPO-sensitive replay decisions.",
+        "content": "### Known gap\nCheckpoint age is not instrumented. Do not treat this card as freshness evidence; inspect checkpoint artifacts/runbook for RPO-sensitive replay decisions.",
         "mode": "markdown"
       },
       "pluginVersion": "9.5.0",
-      "title": "Inspect: Known Gap - Checkpoint Freshness",
+      "title": "Inspect: Checkpoint Freshness Gap",
       "type": "text",
       "transparent": false
     },
@@ -263,9 +208,9 @@
       },
       "gridPos": {
         "h": 5,
-        "w": 4,
-        "x": 8,
-        "y": 2
+        "w": 5,
+        "x": 9,
+        "y": 1
       },
       "id": 893,
       "options": {
@@ -297,7 +242,7 @@
           "refId": "A"
         }
       ],
-      "title": "Monitor: Ledger / Manifest Consistency",
+      "title": "Monitor: Manifest / Ledger Integrity",
       "type": "stat"
     },
     {
@@ -347,9 +292,9 @@
       },
       "gridPos": {
         "h": 5,
-        "w": 4,
-        "x": 12,
-        "y": 2
+        "w": 5,
+        "x": 14,
+        "y": 1
       },
       "id": 907,
       "options": {
@@ -381,21 +326,21 @@
           "refId": "A"
         }
       ],
-      "title": "Inspect: Control-Plane Telemetry Missing",
+      "title": "Inspect: Telemetry Missing",
       "type": "stat"
     },
     {
       "id": 906,
       "type": "text",
-      "title": "Next Action: Replay Safety Diagnostics",
+      "title": "Next Action: Replay Diagnostics",
       "gridPos": {
         "h": 5,
-        "w": 8,
-        "x": 16,
-        "y": 2
+        "w": 5,
+        "x": 19,
+        "y": 1
       },
       "options": {
-        "content": "### Next step\nIf blockers are non-zero, open Replay Safety diagnostics. If Control-Plane Telemetry Missing is non-zero or UNKNOWN, validate scrape/rules before replay/resume. Use the run manifest inspection runbook for run_id/manifest_id evidence.",
+        "content": "### Next step\nOpen Replay diagnostics for blockers. If telemetry is non-zero or UNKNOWN, validate scrape/rules before replay/resume. Use Manifest Inspection for proof.",
         "mode": "markdown",
         "dataLinks": [
           {
@@ -406,90 +351,7 @@
         ]
       },
       "transparent": false,
-      "description": "Operator handoff text for the selected pipeline/run_type and selected time range. Use it after checking Replay Safety State and Inspect: Control-Plane Telemetry Missing. It links to the replay/checkpoint diagnostic row; manifest/run identity still requires run manifest inspection outside Prometheus."
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "description": "Selected-range replay/resume blocker count across manifest writes, ledger appends, checkpoint compatibility, replay reconstructability, replay drift, and lineage refs. Status mapping: 0=OK when Inspect: Control-Plane Telemetry Missing = 0; if telemetry is non-zero or UNKNOWN, validate control-plane metric scrape/rules before trusting zero blockers. 1=WARN, >=2=CRIT, null=UNKNOWN. Next action: stop replay/resume and investigate the first failing signal; if null, validate control-plane metric scrape/rules first.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [
-            {
-              "type": "special",
-              "options": {
-                "match": "null",
-                "result": {
-                  "text": "UNKNOWN",
-                  "color": "gray"
-                }
-              }
-            }
-          ],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "orange",
-                "value": 1
-              },
-              {
-                "color": "red",
-                "value": 2
-              }
-            ]
-          },
-          "unit": "short",
-          "noValue": "UNKNOWN"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 4,
-        "x": 0,
-        "y": 15
-      },
-      "id": 130,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto",
-        "dataLinks": [
-          {
-            "title": "Open Checkpoint Debugging Runbook",
-            "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/checkpoint-debugging.md"
-          }
-        ]
-      },
-      "pluginVersion": "9.5.0",
-      "targets": [
-        {
-          "expr": "round((\n  sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", status=\"failed\"}[$__range]))\n+\n  sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range]))\n+\n  sum(increase(bioetl_checkpoint_compatibility_events_total{pipeline=~\"$pipeline\", disposition=~\".*_incompatible\"}[$__range]))\n+\n  sum(increase(bioetl_replay_reconstructability_events_total{pipeline=~\"$pipeline\", status=\"not_reconstructable\"}[$__range]))\n+\n  sum(increase(bioetl_replay_drift_events_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range]))\n+\n  sum(increase(bioetl_lineage_refs_missing_total{pipeline=~\"$pipeline\"}[$__range]))\n))",
-          "instant": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Track: Replay / Resume Blockers in Range",
-      "type": "stat"
+      "description": "Operator handoff text for the selected pipeline/run_type and selected time range. Use it after checking Replay Safety State and Inspect: Telemetry Missing. It links to the replay/checkpoint diagnostic row; manifest/run identity still requires run manifest inspection outside Prometheus."
     },
     {
       "collapsed": true,
@@ -497,15 +359,15 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 31
+        "y": 8
       },
       "id": 902,
       "panels": [
         {
           "gridPos": {
             "h": 5,
-            "w": 6,
-            "x": 18,
+            "w": 24,
+            "x": 0,
             "y": 2
           },
           "id": 894,
@@ -530,10 +392,93 @@
         },
         {
           "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "description": "Selected-range replay/resume blocker count across manifest writes, ledger appends, checkpoint compatibility, replay reconstructability, replay drift, and lineage refs. Status mapping: 0=OK when Inspect: Telemetry Missing = 0; if telemetry is non-zero or UNKNOWN, validate control-plane metric scrape/rules before trusting zero blockers. 1=WARN, >=2=CRIT, null=UNKNOWN. Next action: stop replay/resume and investigate the first failing signal; if null, validate control-plane metric scrape/rules first. Empty selected-range series must collapse to 0, not UNKNOWN.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "text": "UNKNOWN",
+                      "color": "gray"
+                    }
+                  }
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 1
+                  },
+                  {
+                    "color": "red",
+                    "value": 2
+                  }
+                ]
+              },
+              "unit": "short",
+              "noValue": "UNKNOWN"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 24,
+            "x": 0,
+            "y": 8
+          },
+          "id": 130,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto",
+            "dataLinks": [
+              {
+                "title": "Open Checkpoint Debugging Runbook",
+                "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/checkpoint-debugging.md"
+              }
+            ]
+          },
+          "pluginVersion": "9.5.0",
+          "targets": [
+            {
+              "expr": "round((\n  (sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", status=\"failed\"}[$__range])) or vector(0))\n+\n  (sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range])) or vector(0))\n+\n  (sum(increase(bioetl_checkpoint_compatibility_events_total{pipeline=~\"$pipeline\", disposition=~\".*_incompatible\"}[$__range])) or vector(0))\n+\n  (sum(increase(bioetl_replay_reconstructability_events_total{pipeline=~\"$pipeline\", status=\"not_reconstructable\"}[$__range])) or vector(0))\n+\n  (sum(increase(bioetl_replay_drift_events_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])) or vector(0))\n+\n  (sum(increase(bioetl_lineage_refs_missing_total{pipeline=~\"$pipeline\"}[$__range])) or vector(0))\n))",
+              "instant": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Track: Replay / Resume Blockers in Range",
+          "type": "stat"
+        },
+        {
+          "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
       },
-          "description": "Selected-range incompatible checkpoint compatibility decisions. Alert: BioETLCheckpointCompatibilityBlocked. Non-zero blocks resume.",
+          "description": "Selected-range incompatible checkpoint compatibility decisions. Alert: BioETLCheckpointCompatibilityBlocked. Non-zero blocks resume. The metric contract has no run_type label, so the run_type selector does not change this panel.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -583,9 +528,9 @@
           },
           "gridPos": {
             "h": 6,
-            "w": 4,
-            "x": 10,
-            "y": 8
+            "w": 8,
+            "x": 0,
+            "y": 16
           },
           "id": 3,
           "options": {
@@ -625,7 +570,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-          "description": "Selected-range not_reconstructable replay observations. Alert: BioETLReplayNotReconstructable. Non-zero blocks replay.",
+          "description": "Selected-range not_reconstructable replay observations. Alert: BioETLReplayNotReconstructable. Non-zero blocks replay. The metric contract has no run_type label, so the run_type selector does not change this panel.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -674,9 +619,9 @@
           },
           "gridPos": {
             "h": 6,
-            "w": 3,
-            "x": 14,
-            "y": 8
+            "w": 8,
+            "x": 8,
+            "y": 16
           },
           "id": 104,
           "options": {
@@ -765,9 +710,9 @@
           },
           "gridPos": {
             "h": 6,
-            "w": 3,
-            "x": 17,
-            "y": 8
+            "w": 8,
+            "x": 16,
+            "y": 16
           },
           "id": 120,
           "options": {
@@ -807,7 +752,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-          "description": "Selected-range checkpoint load failures. Alert: BioETLCheckpointLoadFailed.",
+          "description": "Selected-range checkpoint load failures. Alert: BioETLCheckpointLoadFailed. The metric contract has no run_type label, so the run_type selector does not change this panel.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -858,7 +803,7 @@
             "h": 6,
             "w": 6,
             "x": 0,
-            "y": 32
+            "y": 40
           },
           "id": 101,
           "options": {
@@ -898,7 +843,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-          "description": "Selected-range checkpoint save failures. Alert: BioETLCheckpointSaveFailed.",
+          "description": "Selected-range checkpoint save failures. Alert: BioETLCheckpointSaveFailed. The metric contract has no run_type label, so the run_type selector does not change this panel.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -949,7 +894,7 @@
             "h": 6,
             "w": 6,
             "x": 6,
-            "y": 32
+            "y": 40
           },
           "id": 102,
           "options": {
@@ -1040,7 +985,7 @@
             "h": 6,
             "w": 6,
             "x": 12,
-            "y": 32
+            "y": 40
           },
           "id": 103,
           "options": {
@@ -1080,7 +1025,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-          "description": "Selected-range maximum replay lag seconds for the selected pipeline/run_type. Threshold guidance: <300s is normal context, 300-899s is elevated, >=900s is critical backlog. No series renders as UNKNOWN because missing replay lag telemetry is diagnostic; use telemetry-presence panels before replay decisions. Alert alignment: replay lag becomes actionable from 300s.",
+          "description": "Selected-range maximum replay lag seconds for the selected pipeline/run_type. Threshold guidance: <300s is normal context, 300-899s is elevated, >=900s is critical backlog. No series renders as UNKNOWN because missing replay lag telemetry is diagnostic; use telemetry-presence panels before replay decisions. Alert alignment: replay lag becomes actionable from 300s. Replay/checkpoint investigation for this panel stays on the checkpoint-debugging runbook path.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1089,8 +1034,8 @@
               "links": [
                 {
                   "targetBlank": true,
-                  "title": "Run Manifest Inspection",
-                  "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/run-manifest-inspection.md"
+                  "title": "Checkpoint Debugging",
+                  "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/checkpoint-debugging.md"
                 }
               ],
               "mappings": [
@@ -1131,7 +1076,7 @@
             "h": 6,
             "w": 6,
             "x": 18,
-            "y": 32
+            "y": 40
           },
           "id": 121,
           "options": {
@@ -1171,7 +1116,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-          "description": "Selected-range checkpoint compatibility outcomes grouped by disposition.",
+          "description": "Selected-range checkpoint compatibility outcomes grouped by disposition. The metric contract has no run_type label, so the run_type selector does not change this panel.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1193,7 +1138,7 @@
             "h": 8,
             "w": 8,
             "x": 0,
-            "y": 38
+            "y": 46
           },
           "id": 5,
           "options": {
@@ -1231,8 +1176,8 @@
               "links": [
                 {
                   "targetBlank": true,
-                  "title": "Run Manifest Inspection",
-                  "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/run-manifest-inspection.md"
+                  "title": "Checkpoint Debugging",
+                  "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/checkpoint-debugging.md"
                 }
               ],
               "mappings": [],
@@ -1257,7 +1202,7 @@
             "h": 8,
             "w": 8,
             "x": 8,
-            "y": 38
+            "y": 46
           },
           "id": 134,
           "options": {
@@ -1295,8 +1240,8 @@
               "links": [
                 {
                   "targetBlank": true,
-                  "title": "Run Manifest Inspection",
-                  "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/run-manifest-inspection.md"
+                  "title": "Checkpoint Debugging",
+                  "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/checkpoint-debugging.md"
                 }
               ],
               "mappings": [],
@@ -1325,7 +1270,7 @@
             "h": 8,
             "w": 8,
             "x": 16,
-            "y": 38
+            "y": 46
           },
           "id": 135,
           "options": {
@@ -1354,7 +1299,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-          "description": "Selected-range checkpoint save latency quantiles. No data means no latency samples, not zero latency. Alerts: BioETLCheckpointSaveLatencyHigh.",
+          "description": "Selected-range checkpoint save latency quantiles. No data means no latency samples, not zero latency. Alerts: BioETLCheckpointSaveLatencyHigh. The metric contract has no run_type label, so the run_type selector does not change this panel.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1393,7 +1338,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 46
+            "y": 54
           },
           "id": 105,
           "options": {
@@ -1471,7 +1416,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 46
+            "y": 54
           },
           "id": 106,
           "options": {
@@ -1515,7 +1460,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 15
+        "y": 9
       },
       "id": 901,
       "panels": [
@@ -1544,7 +1489,7 @@
           },
           "gridPos": {
             "h": 6,
-            "w": 4,
+            "w": 12,
             "x": 0,
             "y": 8
           },
@@ -1624,8 +1569,8 @@
           },
           "gridPos": {
             "h": 6,
-            "w": 3,
-            "x": 4,
+            "w": 6,
+            "x": 12,
             "y": 8
           },
           "id": 1,
@@ -1666,7 +1611,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-          "description": "Selected-range run-ledger append failures. Alert: BioETLRunLedgerAppendFailed. Action: inspect run ledger before replay/resume.",
+          "description": "Selected-range run-ledger append failures. Alert: BioETLRunLedgerAppendFailed. Action: inspect run ledger before replay/resume. The metric contract has no run_type label, so the run_type selector does not change this panel.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1715,8 +1660,8 @@
           },
           "gridPos": {
             "h": 6,
-            "w": 3,
-            "x": 7,
+            "w": 6,
+            "x": 18,
             "y": 8
           },
           "id": 2,
@@ -1757,7 +1702,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-          "description": "Selected-range manifest write attempts grouped by status/run_type for the selected pipeline/run_type. This panel uses $__range and shows historical evidence. For current-status information, use Monitor: Ledger / Manifest Consistency on the first screen. Status mapping: success=OK, failed=CRIT, null=UNKNOWN. Use Run Manifest Inspection runbook for detailed manifest analysis.",
+          "description": "Selected-range manifest write attempts grouped by status/run_type for the selected pipeline/run_type. This panel uses $__range and shows historical evidence. For current-status information, use Monitor: Manifest / Ledger Integrity on the first screen. Status mapping: success=OK, failed=CRIT, null=UNKNOWN. Use Run Manifest Inspection runbook for detailed manifest analysis.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1808,7 +1753,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-          "description": "Selected-range run-ledger append attempts grouped by event type and status. This panel uses $__interval historical evidence; use Monitor: Ledger / Manifest Consistency for first-screen current status.",
+          "description": "Selected-range run-ledger append attempts grouped by event type and status. This panel uses $__interval historical evidence; use Monitor: Manifest / Ledger Integrity for first-screen current status. The metric contract has no run_type label, so the run_type selector does not change this panel.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1950,7 +1895,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-          "description": "Fixed 30m ledger append failure ratio severity for the selected pipeline scope. Status mapping: 0=OK when telemetry is present, >0 maps to WARN=1, >0.10 maps to CRIT=2, null=UNKNOWN. The denominator is clamped to avoid divide-by-zero, so pair this with telemetry presence before interpreting 0 as healthy.",
+          "description": "Fixed 30m ledger append failure ratio severity for the selected pipeline scope. Status mapping: 0=OK when telemetry is present, >0 maps to WARN=1, >0.10 maps to CRIT=2, null=UNKNOWN. The denominator is clamped to avoid divide-by-zero, so pair this with telemetry presence before interpreting 0 as healthy. The metric contract has no run_type label, so the run_type selector does not change this panel.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2046,7 +1991,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 55
+        "y": 10
       },
       "id": 903,
       "panels": [
@@ -2371,7 +2316,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 71
+        "y": 11
       },
       "id": 904,
       "panels": [
@@ -2380,7 +2325,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-          "description": "Selected-range missing upstream lineage references. Alert: BioETLLineageRefsMissing. Missing lineage can make replay evidence incomplete.",
+          "description": "Selected-range missing upstream lineage references. Alert: BioETLLineageRefsMissing. Missing lineage can make replay evidence incomplete. The metric contract has no run_type label, so the run_type selector does not change this panel.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2430,8 +2375,8 @@
           },
           "gridPos": {
             "h": 6,
-            "w": 4,
-            "x": 20,
+            "w": 24,
+            "x": 0,
             "y": 8
           },
           "id": 122,
@@ -2472,7 +2417,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-          "description": "Selected-range lineage fragment persistence failures. Alert: BioETLLineageFragmentPersistenceFailed.",
+          "description": "Selected-range lineage fragment persistence failures. Alert: BioETLLineageFragmentPersistenceFailed. The metric contract has no run_type label, so the run_type selector does not change this panel.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2521,7 +2466,7 @@
           },
           "gridPos": {
             "h": 6,
-            "w": 8,
+            "w": 6,
             "x": 0,
             "y": 88
           },
@@ -2563,7 +2508,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-          "description": "Selected-range missing lineage refs by layer/ref_type. Use as lineage risk triage only; it does not prove complete artifact identity graph or exact artifact refs. null/no rows can mean no missing refs or missing telemetry depending on lineage fragment activity.",
+          "description": "Selected-range missing lineage refs by layer/ref_type. Use as lineage risk triage only; it does not prove complete artifact identity graph or exact artifact refs. null/no rows can mean no missing refs or missing telemetry depending on lineage fragment activity. The metric contract has no run_type label, so the run_type selector does not change this panel.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2600,8 +2545,8 @@
           },
           "gridPos": {
             "h": 6,
-            "w": 8,
-            "x": 16,
+            "w": 12,
+            "x": 12,
             "y": 88
           },
           "id": 138,
@@ -2623,7 +2568,7 @@
               "refId": "A"
             }
           ],
-          "title": "Inspect: Lineage Refs Missing by Layer / Ref Type",
+          "title": "Inspect: Missing Lineage Refs by Layer / Type",
           "type": "table"
         },
         {
@@ -2631,7 +2576,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-          "description": "Selected-range audit write outcomes by layer, operation, and status. Supporting evidence for replay safety, not answer-row decision.",
+          "description": "Selected-range GLOBAL audit write outcomes by layer, operation, and status. This panel is not filtered by $pipeline or $run_type because the audit metric family is global. Supporting evidence for replay safety, not answer-row decision.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2674,7 +2619,7 @@
               "refId": "A"
             }
           ],
-          "title": "Track: Audit Write Outcomes",
+          "title": "Track: GLOBAL Audit Write Outcomes",
           "type": "timeseries"
         },
         {
@@ -2682,7 +2627,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-          "description": "Selected-range audit query outcomes by layer filter and status. Supporting evidence for replay safety, not answer-row decision.",
+          "description": "Selected-range GLOBAL audit query outcomes by layer filter and status. This panel is not filtered by $pipeline or $run_type because the audit metric family is global. Supporting evidence for replay safety, not answer-row decision.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2725,7 +2670,7 @@
               "refId": "A"
             }
           ],
-          "title": "Track: Audit Query Outcomes",
+          "title": "Track: GLOBAL Audit Query Outcomes",
           "type": "timeseries"
         },
         {
@@ -2733,7 +2678,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-          "description": "Selected-range audit write latency quantiles. No data means no latency samples, not zero latency.",
+          "description": "Selected-range GLOBAL audit write latency quantiles. This panel is not filtered by $pipeline or $run_type because the audit metric family is global. No data means no latency samples, not zero latency.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2803,7 +2748,7 @@
               "refId": "C"
             }
           ],
-          "title": "Track: Audit Write Latency p50/p95/p99",
+          "title": "Track: GLOBAL Audit Write Latency p50/p95/p99",
           "type": "timeseries"
         },
         {
@@ -2811,7 +2756,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-          "description": "Selected-range audit query latency quantiles. No data means no latency samples, not zero latency.",
+          "description": "Selected-range GLOBAL audit query latency quantiles. This panel is not filtered by $pipeline or $run_type because the audit metric family is global. No data means no latency samples, not zero latency.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2881,7 +2826,7 @@
               "refId": "C"
             }
           ],
-          "title": "Track: Audit Query Latency p50/p95/p99",
+          "title": "Track: GLOBAL Audit Query Latency p50/p95/p99",
           "type": "timeseries"
         },
         {
@@ -2889,7 +2834,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-          "description": "Selected-range lineage fragment persistence outcomes by layer/status.",
+          "description": "Selected-range lineage fragment persistence outcomes by layer/status. The metric contract has no run_type label, so the run_type selector does not change this panel.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2909,8 +2854,8 @@
           },
           "gridPos": {
             "h": 6,
-            "w": 8,
-            "x": 8,
+            "w": 6,
+            "x": 6,
             "y": 88
           },
           "id": 112,
@@ -2945,7 +2890,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 95
+        "y": 12
       },
       "id": 905,
       "panels": [
@@ -2990,7 +2935,7 @@
           "value": "unknown"
         },
         "datasource": "Prometheus",
-        "definition": "label_values(bioetl_control_plane_manifest_writes_total, pipeline)",
+        "definition": "label_values(bioetl_control_plane_run_type_universe, pipeline)",
         "hide": 0,
         "includeAll": false,
         "label": "Pipeline",
@@ -2998,7 +2943,7 @@
         "name": "pipeline",
         "options": [],
         "query": {
-          "query": "label_values(bioetl_control_plane_manifest_writes_total, pipeline)",
+          "query": "label_values(bioetl_control_plane_run_type_universe, pipeline)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 1,
@@ -3010,7 +2955,7 @@
         "tagsQuery": "",
         "type": "query",
         "useTags": false,
-        "description": "Core scope: pipeline selector for pipeline-centric control-plane metrics. Single-select; no All scope. Default unknown is fail-closed until a source dashboard passes a pipeline or the operator selects one."
+        "description": "Core scope: pipeline selector for pipeline-centric control-plane metrics. Values come from the active control-plane pipeline/run_type universe so stale historical pipelines do not appear as selectable trust scopes. Single-select; no All scope. Default unknown is fail-closed until a source dashboard passes a pipeline or the operator selects one."
       },
       {
         "allValue": null,
@@ -3020,7 +2965,7 @@
           "value": "$__all"
         },
         "datasource": "Prometheus",
-        "definition": "label_values(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\"}, run_type)",
+        "definition": "label_values(bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\"}, run_type)",
         "hide": 0,
         "includeAll": true,
         "label": "Run Type",
@@ -3028,7 +2973,7 @@
         "name": "run_type",
         "options": [],
         "query": {
-          "query": "label_values(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\"}, run_type)",
+          "query": "label_values(bioetl_control_plane_run_type_universe{pipeline=~\"$pipeline\"}, run_type)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 1,
@@ -3040,7 +2985,7 @@
         "tagsQuery": "",
         "type": "query",
         "useTags": false,
-        "description": "Core scope: run_type selector bounded by pipeline. Default All is intentional; missing run-type context must be represented as All, not unknown."
+        "description": "Core scope: run_type selector bounded by the active control-plane pipeline universe. Default All is intentional; missing run-type context must be represented as All, not unknown."
       }
     ]
   },

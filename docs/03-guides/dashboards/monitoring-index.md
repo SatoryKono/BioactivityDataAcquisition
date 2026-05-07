@@ -38,7 +38,7 @@ Record-level forensics, exact replay evidence, and per-run identifiers belong in
 | Symptom (X) | Dashboard (Y) | Panel (Z) |
 | --- | --- | --- |
 | "What is broken or degraded now?" | `bioetl-overview-v2` | `System Status`, then `Next Action` |
-| Runtime failures / lag / blocker drift | `bioetl-runtime` | `Monitor Runtime Current Status`, `Monitor Runtime Blockers`, `Inspect Top Runtime Blockers` |
+| Runtime failures / lag / blocker drift | `bioetl-runtime` | `Monitor Runtime Current Status`, `Monitor Runtime Telemetry Gap`, `Monitor Runtime Blockers`, `Inspect Top Runtime Blockers` |
 | Provider degradation or retry exhaustion | `bioetl-provider-health-v2` | `Monitor GLOBAL Provider Severity Matrix`, `Inspect Provider Top Causes` |
 | DQ quality or quarantine increase | `bioetl-dq-v2` | `Monitor DQ Current Status`, `Monitor DQ Threshold State`, `Inspect DQ Current Reasons` |
 | Replay confidence / checkpoint issues | `bioetl-control-plane-v1` | `Track: Replay / Resume Blockers in Range` |
