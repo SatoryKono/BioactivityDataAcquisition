@@ -49,6 +49,17 @@ def _load_prometheus_config() -> dict:
     return payload
 
 
+def test_prometheus_rules_directory_has_no_duplicate_fixed_rule_files() -> None:
+    """Wildcard rule loading must not pick up scratch/fixed copies of rule files."""
+    duplicate_candidates = sorted(
+        path.name for path in Path("grafana/prometheus-rules").glob("*fixed*.yml")
+    )
+    assert not duplicate_candidates, (
+        "Prometheus rule_files uses /etc/prometheus/rules/*.yml, so fixed/scratch "
+        f"copies would be loaded as duplicate rules: {duplicate_candidates}"
+    )
+
+
 def _load_monitoring_compose() -> dict:
     payload = yaml.safe_load(MONITORING_COMPOSE_PATH.read_text(encoding="utf-8"))
     assert isinstance(payload, dict)
@@ -776,6 +787,7 @@ def test_canonical_current_status_recording_rules_exist() -> None:
     record_map = _build_record_map(payload)
 
     expected = {
+        "bioetl_runtime_pipeline_run_type_universe": "bioetl_pipeline_runs_total",
         "bioetl_runtime_current_activity_15m": "bioetl_pipeline_runs_total",
         "bioetl_runtime_current_failure_signals_15m": "bioetl_runtime_alert_condition_pipeline_runs_failed_15m",
         "bioetl_runtime_current_degraded_signals_15m": "bioetl_runtime_alert_condition_no_terminal_run_30m",
@@ -844,7 +856,7 @@ def test_canonical_reason_records_expose_operator_routing_labels() -> None:
 
 
 def test_runtime_pipeline_level_blocker_reasons_are_projected_to_run_type() -> None:
-    """Pipeline-level runtime blockers must stay visible after dashboard run_type filtering."""
+    """Pipeline-level runtime blockers must stay visible after run_type filtering."""
     payload = _load_rules()
     rules = _recording_rules_named(payload, "bioetl_runtime_current_blocker_reason")
 
@@ -862,7 +874,7 @@ def test_runtime_pipeline_level_blocker_reasons_are_projected_to_run_type() -> N
         expr = str(rule.get("expr", ""))
         assert expectations[reason] in expr
         assert "* on (pipeline) group_left(run_type)" in expr
-        assert "bioetl_runtime_current_activity_15m" in expr
+        assert "bioetl_runtime_pipeline_run_type_universe" in expr
 
     assert seen_reasons == set(expectations)
 
@@ -891,6 +903,57 @@ def test_provider_current_status_fails_closed_on_missing_raw_status_series() -> 
     assert "bioetl_provider_health_check_provider_universe_15m" in expr
     assert "(bioetl_provider_health_check_provider_universe_15m * 0)" in expr
     assert "bioetl_provider_health_status" in expr
+
+
+def test_overview_l0_status_aggregates_selected_scope_rows() -> None:
+    payload = _load_rules()
+    record_map = _build_record_map(payload)
+    expr = record_map["bioetl_l0_status"].get("expr", "")
+
+    assert "bioetl_l0_input_status_selected" in expr
+    assert 'input=~"runtime|dq|control_plane|workflow|gold"' not in expr
+    assert "bioetl_l0_input_status_selected == 2" in expr
+    assert "bioetl_l0_input_status_selected == 1" in expr
+    assert "bioetl_l0_input_status_selected == 3" in expr
+    assert "bioetl_l0_input_status_selected == 0" in expr
+    assert "max by (pipeline, run_type) (\n            bioetl_l0_input_status_selected\n          )" not in expr
+
+
+def test_overview_next_action_routes_use_selected_scope_rows() -> None:
+    payload = _load_rules()
+    route_rules = _recording_rules_named(payload, "bioetl_l0_next_action_route")
+    expressions = "\n".join(str(rule.get("expr", "")) for rule in route_rules)
+
+    assert "bioetl_l0_input_status_selected{input=\"runtime\"}" in expressions
+    assert "bioetl_l0_input_status_selected{input=\"control_plane\"}" in expressions
+    assert "bioetl_l0_input_status_selected{input=\"gold\"}" in expressions
+    assert "bioetl_l0_input_status_selected{input=\"dq\"}" in expressions
+    assert "bioetl_l0_input_status_selected{input=\"provider\"}" in expressions
+    assert "bioetl_l0_input_status_selected{input=\"workflow\"}" in expressions
+
+
+def test_overview_runtime_and_dq_inputs_materialize_from_stable_projected_shapes() -> None:
+    payload = _load_rules()
+    runtime_rule = next(
+        rule
+        for rule in _recording_rules_named(payload, "bioetl_l0_input_status")
+        if rule.get("labels", {}).get("input") == "runtime"
+    )
+    dq_rule = next(
+        rule
+        for rule in _recording_rules_named(payload, "bioetl_l0_input_status")
+        if rule.get("labels", {}).get("input") == "dq"
+    )
+
+    runtime_expr = str(runtime_rule.get("expr", ""))
+    dq_expr = str(dq_rule.get("expr", ""))
+
+    assert "max by (pipeline, run_type)" in runtime_expr
+    assert "bioetl_runtime_alert_condition_stage_backlog_active_15m" in runtime_expr
+    assert "bioetl_runtime_alert_condition_stage_lag_high_15m" in runtime_expr
+    assert "unless on (pipeline, run_type)" in runtime_expr
+    assert "bioetl_dq_current_status" in dq_expr
+    assert "* on (pipeline) group_left(run_type) bioetl_overview_pipeline_run_type_universe" in dq_expr
 
 
 def test_dq_current_status_splits_hard_failures_from_degraded_warnings() -> None:

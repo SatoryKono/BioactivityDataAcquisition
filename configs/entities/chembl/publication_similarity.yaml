@@ -11,9 +11,10 @@ pipeline:
   loading_strategy: full_scan_only
   business_primary_keys:
   - sim_id
-  sink:
-    gold:
-      mode: overwrite
+
+sink:
+  gold:
+    mode: overwrite
 schema:
   content_hash:
     include: []

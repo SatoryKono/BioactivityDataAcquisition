@@ -22,12 +22,12 @@ def test_silver_filter_reject_accounting_mismatch_panel_uses_reconciliation_rule
         (
             item
             for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Silver Filter Reject Accounting Mismatch"
+            if item.get("title") == "Monitor: Silver Filter Reject Accounting Mismatch"
         ),
         None,
     )
     assert panel is not None, (
-        "Panel 'Silver Filter Reject Accounting Mismatch' not found"
+        "Panel 'Monitor: Silver Filter Reject Accounting Mismatch' not found"
     )
 
     expressions = [
@@ -36,16 +36,16 @@ def test_silver_filter_reject_accounting_mismatch_panel_uses_reconciliation_rule
         if isinstance(target.get("expr"), str)
     ]
     assert expressions, (
-        "Panel 'Silver Filter Reject Accounting Mismatch' must define a query target"
+        "Panel 'Monitor: Silver Filter Reject Accounting Mismatch' must define a query target"
     )
     assert any(
         "bioetl_silver_filter_reject_total_mismatch_15m" in expr for expr in expressions
     ), (
-        "Silver Filter Reject Accounting Mismatch must use the shipped "
+        "Monitor: Silver Filter Reject Accounting Mismatch must use the shipped "
         "bioetl_silver_filter_reject_total_mismatch_15m recording rule"
     )
     assert any("[$__range]" in expr for expr in expressions), (
-        "Silver Filter Reject Accounting Mismatch must respect the selected "
+        "Monitor: Silver Filter Reject Accounting Mismatch must respect the selected "
         "Grafana time range"
     )
 
@@ -53,8 +53,8 @@ def test_silver_filter_reject_accounting_mismatch_panel_uses_reconciliation_rule
 @pytest.mark.parametrize(
     ("dashboard_file", "panel_title"),
     [
-        ("bioetl-dq-v2.json", "Silver Filter Rejects"),
-        ("bioetl-dq-v2.json", "Silver Filter Rejects by Pipeline"),
+        ("bioetl-dq-v2.json", "Track: Silver Filter Rejects in Range"),
+        ("bioetl-dq-v2.json", "Inspect: Silver Filter Rejects by Pipeline"),
     ],
 )
 def test_silver_filter_reject_panels_use_filtered_out_stage(
@@ -97,11 +97,11 @@ def test_silver_filter_reject_rate_uses_selected_time_range() -> None:
         (
             item
             for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Silver Rejects Count + Rate"
+            if item.get("title") == "Silver Rejects + Rate"
         ),
         None,
     )
-    assert panel is not None, "Panel 'Silver Rejects Count + Rate' not found"
+    assert panel is not None, "Panel 'Silver Rejects + Rate' not found"
 
     expressions = [
         target.get("expr", "")
@@ -162,8 +162,8 @@ def test_silver_reject_explorer_pipeline_scope_is_single_select_and_fail_closed(
 @pytest.mark.parametrize(
     ("panel_title", "label_name"),
     [
-        ("Top Silver Reject Reasons (Pareto)", "reason_code"),
-        ("Top Silver Reject Fields", "field"),
+        ("Inspect: Top Silver Reject Reasons (Pareto)", "reason_code"),
+        ("Inspect: Top Silver Reject Fields", "field"),
     ],
 )
 def test_silver_filter_breakdown_panels_use_bounded_breakdown_metric(
@@ -207,7 +207,7 @@ def test_silver_filter_breakdown_panels_use_bounded_breakdown_metric(
 @pytest.mark.parametrize(
     ("dashboard_file", "panel_title"),
     [
-        ("bioetl-dq-v2.json", "Silver Filter Rejects"),
+        ("bioetl-dq-v2.json", "Track: Silver Filter Rejects in Range"),
     ],
 )
 def test_silver_filter_rejects_summary_panels_use_instant_queries(
@@ -329,7 +329,7 @@ def test_silver_reject_explorer_panels_have_specific_triage_descriptions(
 def test_dq_reject_panels_link_to_silver_reject_explorer() -> None:
     """DQ reject count panel should hand off directly; breakdown panels should guide the same handoff."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
-    for panel_title in ("Silver Filter Rejects",):
+    for panel_title in ("Track: Silver Filter Rejects in Range",):
         panel = next(
             (
                 item
@@ -364,8 +364,8 @@ def test_dq_reject_panels_link_to_silver_reject_explorer() -> None:
 @pytest.mark.parametrize(
     "panel_title",
     [
-        "Top Silver Reject Reasons (Pareto)",
-        "Top Silver Reject Fields",
+        "Inspect: Top Silver Reject Reasons (Pareto)",
+        "Inspect: Top Silver Reject Fields",
     ],
 )
 def test_dq_breakdown_panels_reference_top_level_explorer_handoff(

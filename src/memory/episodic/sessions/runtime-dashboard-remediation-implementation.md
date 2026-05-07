@@ -1,23 +1,22 @@
 ---
 id: runtime-dashboard-remediation-implementation
-title: Implement Runtime dashboard GitHub issue remediation
+title: Implement BioETL 2 Runtime dashboard remediation
 task_id: runtime-dashboard-remediation-implementation
-created_at: '2026-05-07T13:55:03Z'
+created_at: '2026-05-07T16:08:35Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
 - grafana/dashboards/bioetl-runtime.json
 summary: Active task session context.
-query: BioETL Runtime dashboard Grafana Loki Prometheus blocker threshold docs tests
-  remediation
+query: BioETL Runtime dashboard Loki __error__ false zero telemetry gap handoff panels
 ---
 
 # Session note
 
 ## Task
 
-- Title: Implement Runtime dashboard GitHub issue remediation
-- Retrieval query: BioETL Runtime dashboard Grafana Loki Prometheus blocker threshold docs tests remediation
+- Title: Implement BioETL 2 Runtime dashboard remediation
+- Retrieval query: BioETL Runtime dashboard Loki __error__ false zero telemetry gap handoff panels
 
 ## Retrieved context
 

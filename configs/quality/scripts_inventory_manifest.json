@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-05-07T14:10:16.137290+00:00",
+  "generated_at": "2026-05-07T14:14:34.092429+00:00",
   "summary": {
     "total_scripts": 354,
     "status_counts": {
@@ -9943,11 +9943,11 @@
           "path": "tests/architecture/test_test_structural_debt.py",
           "line": 13,
           "source_group": "tests",
-          "text": "\"tests/testing_support/neo4j_memory_sync.py\": 3175,"
+          "text": "\"tests/testing_support/neo4j_memory_sync.py\": 3250,"
         },
         {
           "path": "tests/architecture/test_test_structural_debt.py",
-          "line": 17,
+          "line": 19,
           "source_group": "tests",
           "text": "\"tests/testing_support/neo4j_memory_sync.py::test_snapshot_contains_core_repo_surfaces\": 295,"
         }

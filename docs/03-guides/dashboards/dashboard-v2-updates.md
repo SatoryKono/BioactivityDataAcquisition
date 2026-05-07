@@ -5,6 +5,9 @@ ______________________________________________________________________
 Для любого PR с изменениями `grafana/dashboards/*.json` change notes MUST содержать
 ссылку на UX artifact: `docs/reports/dashboard-ux-checks/YYYY-MM-DD.md`.
 
+Latest dashboard UX artifact for current shipped JSON changes:
+`docs/reports/dashboard-ux-checks/2026-05-07.md`
+
 
 Version: 1.0.1
 Status: active
@@ -83,14 +86,17 @@ histogram_quantile(0.95, sum by (le, provider) (rate(bioetl_health_check_latency
 
 7. Добавлен отдельный runtime dashboard:
 
-- `bioetl-runtime` собирает Loki-backed `Inspect Warning Logs` и
-  `Inspect Unstructured Logs` за выбранный Grafana time range;
-- panel `Track Log Hygiene Trend` теперь действительно является timeseries и
+- `bioetl-runtime` собирает Loki-backed `Inspect Warning Logs`,
+  `Inspect GLOBAL Unstructured Logs` и `Inspect Top Warning Events by Message / Range`
+  за выбранный Grafana time range;
+- panel `Track GLOBAL Log Hygiene Trend` является GLOBAL timeseries и
   использует adaptive bucket size через `$__interval`;
 - Prometheus-backed панели `Alert Conditions` привязаны к тем же fixed windows, что и
   shipped rule pack, но по-прежнему не являются real firing-state alert engine;
-- runtime dashboard содержит `Back to Overview` и Explore surfaces; переходы
-  к `3. Provider Health` и `4. Data Quality` идут через `1. Overview`.
+- runtime dashboard содержит top-level bus links
+  `0. Control Plane`, `1. Overview`, `3. Provider Health`,
+  `4. Data Quality`, `5. Workflow` и Explore surfaces; переходы к соседним
+  dashboards выполняются напрямую через эту шину с сохранением scope/time.
 
 8. Исправлена selected-range семантика counter-панелей:
 
@@ -150,12 +156,23 @@ histogram_quantile(0.95, sum by (le, provider) (rate(bioetl_health_check_latency
   перенесены ниже first screen.
 - `4. Data Quality`: первый экран начинается с `Monitor DQ Current Status`,
   `Monitor DQ Threshold State`, `Inspect DQ Current Reasons` и
-  `First Action / Invalid Record Policy`; `Data Flow in Range` переименован в
+  `Review: First Action`; `Data Flow in Range` переименован в
   `Track Range Evidence: Bronze -> Silver -> Gold` и больше не является L0/L1
   status source.
 - Добавлены canonical current-status recording rules:
   `bioetl_runtime_current_status`, `bioetl_provider_current_status`,
   `bioetl_dq_current_status` и соответствующие reason/cause records.
+
+14. Уточнён Runtime false-zero contract:
+
+- `Monitor Runtime Telemetry Gap` теперь проверяет не только scrape и
+  evaluation failures, но также наличие и свежесть rule group
+  `bioetl_observability.yml;bioetl_runtime_dashboard_recording`.
+- `Monitor Failed Runs`, `Monitor No-Records Runs` и Runtime handoff cards
+  показывают `0` только при подтверждённом selected runtime universe или GLOBAL
+  provider current-status telemetry; missing scope остаётся `UNKNOWN`.
+- `Inspect GLOBAL Unstructured Logs` использует корректное LogQL поле
+  `{{.__error__}}` после `| json`.
 
 ## Актуальные ключевые панели
 

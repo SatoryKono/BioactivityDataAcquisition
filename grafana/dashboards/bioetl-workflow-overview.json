@@ -16,70 +16,28 @@
   "editable": true,
   "graphTooltip": 1,
   "id": null,
-  "links": [
-    {
-      "asDropdown": false,
-      "icon": "external link",
-      "includeVars": false,
-      "keepTime": true,
-      "targetBlank": false,
-      "title": "0. Control Plane",
-      "tooltip": "Reset scope: workflow metrics do not carry pipeline context. Use Control Plane for manifest, ledger, replay/resume, and terminal run evidence. Preserve the selected time range.",
-      "type": "link",
-      "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=unknown&var-run_type=All&${__url_time_range}"
-    },
-    {
-      "asDropdown": false,
-      "icon": "external link",
-      "includeVars": false,
-      "keepTime": true,
-      "targetBlank": false,
-      "title": "1. Overview",
-      "tooltip": "Reset scope: return to the L0 fleet summary when workflow evidence needs incident prioritization. Preserve the selected time range.",
-      "type": "link",
-      "url": "/d/bioetl-overview-v2/bioetl-overview-v2?${__url_time_range}"
-    },
-    {
-      "asDropdown": false,
-      "icon": "external link",
-      "includeVars": false,
-      "keepTime": true,
-      "targetBlank": false,
-      "title": "2. Runtime",
-      "tooltip": "Reset scope: workflow metrics do not expose stage labels. Use Runtime for pipeline/stage blockers, backlog, and logs/traces handoff. Preserve the selected time range.",
-      "type": "link",
-      "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=unknown&var-run_type=All&var-stage=unknown&${__url_time_range}"
-    },
-    {
-      "asDropdown": false,
-      "icon": "external link",
-      "includeVars": false,
-      "keepTime": true,
-      "targetBlank": false,
-      "title": "3. Provider Health",
-      "tooltip": "Reset scope: workflow metrics do not identify provider-specific failures. Use Provider Health when failures correlate with upstream API/provider incidents. Preserve the selected time range.",
-      "type": "link",
-      "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&var-pipeline_context=unknown&var-adapter=unknown&${__url_time_range}"
-    },
-    {
-      "asDropdown": false,
-      "icon": "external link",
-      "includeVars": false,
-      "keepTime": true,
-      "targetBlank": false,
-      "title": "4. Data Quality",
-      "tooltip": "Reset scope: workflow metrics do not explain validation rejects, quarantine, or threshold failures. Use Data Quality for DQ-specific triage. Preserve the selected time range.",
-      "type": "link",
-      "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=unknown&var-run_type=All&var-stage=unknown&${__url_time_range}"
-    }
-  ],
   "panels": [
+    {
+      "gridPos": {
+        "h": 2,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1000,
+      "options": {
+        "content": "<div style=\"display:flex;gap:10px;flex-wrap:wrap;padding:10px;\"><a href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=unknown&var-run_type=All&${__url_time_range}\" target=\"_blank\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">0. Control Plane</a><a href=\"/d/bioetl-overview-v2/bioetl-overview-v2?${__url_time_range}\" target=\"_blank\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">1. Overview</a><a href=\"/d/bioetl-runtime/bioetl-runtime?var-pipeline=unknown&var-run_type=All&var-stage=unknown&${__url_time_range}\" target=\"_blank\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">2. Runtime</a><a href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&var-pipeline_context=unknown&var-adapter=unknown&${__url_time_range}\" target=\"_blank\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">3. Provider Health</a><a href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=unknown&var-run_type=All&var-stage=unknown&${__url_time_range}\" target=\"_blank\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">4. Data Quality</a></div>",
+        "mode": "html"
+      },
+      "title": "",
+      "type": "text"
+    },
     {
       "gridPos": {
         "h": 4,
         "w": 24,
         "x": 0,
-        "y": 0
+        "y": 2
       },
       "id": 1,
       "options": {

@@ -80,16 +80,20 @@ Pushgateway publication на завершении run. Это позволяет
 
 - **0. Control Plane / 1. Overview**: `$pipeline`, `$run_type`
 - **2. Runtime / 4. Data Quality**: `$pipeline`, `$run_type`, `$stage`
-- **3. Provider Health**: `$provider`, `$adapter`
+- **3. Provider Health**: `$provider` visible; `$adapter` hidden detail-only for
+  cross-scope circuit-breaker diagnostics
 - **Silver Reject Explorer**: `$pipeline`, `$run_type`, `$reason_code`, `$field`, `$run_id`, `$payload_hash`
 - **5. Workflow**: `$workflow`, `$status`
 
-> **Важно**: `$pipeline` и `$provider` single-select на всех shipped
-> dashboards, `All` запрещён. Если контекста нет, используется explicit
-> fallback `unknown`. `$run_type` является include-all scope: если контекста
-> запуска нет, используйте `Run Type=All`, а не `unknown`. Переход в `3. Provider Health` из pipeline-scoped
-> dashboards мапит `$pipeline` в `$provider` и сохраняет hidden
-> `$pipeline_context` для обратного перехода.
+> **Важно**: shipped dashboards не используют единый variable contract.
+> `1. Overview` допускает `Pipeline=All` и `Run Type=All` как shipped default
+> entry scope. Pipeline-scoped L1 dashboards сохраняют scoped handoff через
+> `$pipeline`/`$run_type`, а `3. Provider Health` получает hidden
+> `$pipeline_context` для обратного перехода и fail-closed `provider=unknown`,
+> если source dashboard не может доказать валидный provider label. Если
+> реального scoped значения нет, используйте только те
+> fallback-значения, которые разрешены
+> `docs/03-guides/dashboards/contracts/navigation-links.yaml`.
 
 ### Основные Дашборды
 
@@ -98,27 +102,37 @@ Pushgateway publication на завершении run. Это позволяет
 L0 дашборд для одного operator question: что сейчас broken/degraded в BioETL и
 куда drill down первым.
 
-- **Answer row**: `System Status`, `Next Action`, `Failed Runs in Range`,
-  `Recent Activity`, `Worst Backlog Stage`, `Worst Lag Stage`. `OK` requires
-  recent activity; no samples/no denominator stays `UNKNOWN`, not green.
-- **Flow evidence**: `Flow Balance` replaces the old yield gauge and shows
-  Bronze denominator, Gold output, filtered/quarantined counts and unaccounted
-  loss. `Backlog Causality` places backlog, lag and throughput together for the
-  runtime invariant `backlog(t+1) = backlog(t) + ingestion - output`.
-- **Trend row**: `Processing Volume by Stage`, `Pipeline Run Outcomes`,
-  `Stage Backlog Trend`, `Stage Lag Trend`; это context для L0 решения, а не
-  forensic/debugging surface.
-- **Subsystem routing**: `Runtime Status`, `Data Quality Status`,
-  `Control Plane Status`, `Provider Status`, `Workflow Status` показывают
-  status + reason + next dashboard вместо numeric handoff cards.
+- **Answer row**: `System Status`, `Next Action`, `L0 Inputs`,
+  `Runtime Blockers`, `DQ Status`, `Gold Lifecycle`, `Control Plane`,
+  `Provider GLOBAL`, `Workflow Selected`, `Workflow GLOBAL`. `OK` requires
+  recent signal; no recent samples stay `UNKNOWN`, not green.
+- **Above-the-fold layout**: first screen without scroll contains the scope
+  header, the answer row (`System Status`, `Next Action`, `L0 Inputs`) and the
+  first-screen subsystem current-status tables (`Runtime Blockers`, `DQ Status`,
+  `Gold Lifecycle`, `Control Plane`, `Provider GLOBAL`, `Workflow Selected`,
+  `Workflow GLOBAL`).
+- **L1 historical context**: immediately below the first screen lives the
+  `L1 Historical Trends` row with `Runtime Blockers Trend`, `DQ Status Trend`,
+  and `Gold Lifecycle Trend`. Эти графики дают recent-history context и не
+  заменяют current-status verdict.
+- **Subsystem routing**: first-screen current-status panels показывают
+  status-first verdict и panel-level drilldowns в canonical dashboards
+  (`Runtime`, `Control Plane`, `Data Quality`, `Provider Health`,
+  `Workflow`), а `System Status` / `Next Action` дают общий triage order.
+  Provider handoff fail-close'ится к `provider=unknown` с сохранением
+  `pipeline_context`; workflow handoff явно reset-scope.
 - **Failure summary**: только compact selected-range summaries по manifest /
-  ledger, checkpoint, lineage и `Silver Rejects Count + Rate`. Distribution
+  ledger, checkpoint, lineage и `Silver Rejects + Rate`. Distribution
   pie panels, standalone vanity yield/rate gauges и composite source-selection
   detail не входят в L0 flow.
+- **Collapsed rows**: `Range Evidence (Historical / Recent History)` содержит
+  `Historical Failures`, `Recent Terminal Runs` и `Silver Rejects + Rate`;
+  `Diagnostics & Docs (Logs / Traces / Raw Metrics)` остаётся отдельной
+  collapsed navigation/support surface.
 - **Drilldown**: top-level шина содержит `0. Control Plane`, `2. Runtime`,
-  `3. Provider Health`, `4. Data Quality`, `5. Workflow`. Explore links на
-  Overview отсутствуют; Runtime/DQ/Control Plane links передают только
-  target-scoped variables.
+  `3. Provider Health`, `4. Data Quality`, `5. Workflow`, и ключевые
+  current-status panels дублируют этот handoff через panel `dataLinks`.
+  Overview intentionally не содержит Explore links.
 
 #### 2. 2. Runtime
 
@@ -130,10 +144,14 @@ tracing-backed log hygiene живёт в collapsed row
 `Tracing-only Log Hygiene (requires optional tracing profile)`.
 
 - **Top answer row**:
-  `First Action`, `Monitor Runtime Current Status`, `Runtime Blockers`,
+  `First Action`, `Monitor Runtime Current Status`,
+  `Monitor Runtime Telemetry Gap`, `Monitor Runtime Blockers`,
   `Inspect Top Runtime Blockers`.
   Это первый экран triage. Если здесь уже понятно, что runtime blocked,
   оператор не должен сначала прокручивать в logs/traces.
+  `Monitor Runtime Telemetry Gap` проверяет scrape plus runtime dashboard
+  recording-rule evaluation failures, rule-group presence and evaluation
+  freshness; non-zero/UNKNOWN делает zero-count panels inconclusive.
 
 - **Localization row**:
   `Stage Backlog Trend`, `Records by Stage / Interval`,
@@ -142,22 +160,28 @@ tracing-backed log hygiene живёт в collapsed row
   `Errors by Stage / Error Code / Range`,
   `Records by Stage / Run Type / Range`.
   Эти панели отвечают на вопрос, в каком stage/phase runtime теряет время,
-  поток записей или стабильность.
+  поток записей или стабильность. Synthetic `none=0` series в distribution
+  panels являются empty-state placeholders, а не реальными telemetry labels.
 
 - **Handoff row**:
   `Pipeline Alert Conditions`, `DQ Alert Conditions`,
   `Control-plane Alert Conditions`, `GLOBAL Provider Alert Conditions`,
   `Freshness Alert Conditions`,
-  `Shutdown Initiated by Reason / Interval`,
-  `Shutdown Completed by Reason / Interval`.
+  `Track GLOBAL Shutdown Initiated by Reason / Interval`,
+  `Track GLOBAL Shutdown Completed by Reason / Interval`.
   Это именно compact handoff surfaces, а не попытка дублировать DQ,
-  Provider Health или Control Plane dashboards.
+  Provider Health или Control Plane dashboards. `0` на handoff cards допустим
+  только когда selected runtime universe или GLOBAL provider current-status
+  telemetry подтверждает scope; отсутствующий scope остаётся `UNKNOWN`.
 
 - **Logs/traces row**:
-  `Warnings`, `Unstructured Logs`, `Top Warning Events`, `Log Hygiene Trend`
+  `Warnings`, `GLOBAL Unstructured Logs`, `Top Warning Events by Message / Range`,
+  `GLOBAL Log Hygiene Trend`
   остаются shipped, но спрятаны в collapsed tracing-only row. Если tracing
   profile выключен, оператор всё равно получает usable runtime triage без Loki
-  и Tempo.
+  и Tempo. `Inspect GLOBAL Unstructured Logs` показывает parsed `.__error__`
+  из Loki pipeline после `| json`; эти rows intentionally GLOBAL, потому что
+  parser failures нельзя безопасно scoped by `$pipeline`.
 
 - **Drilldown contract**:
   top-level links `0. Control Plane`, `1. Overview`, `3. Provider Health`,
@@ -188,10 +212,15 @@ tracing-backed log hygiene живёт в collapsed row
   first-screen triage для fleet-wide provider состояния. Matrix intentionally
   остаётся GLOBAL и читает canonical `bioetl_provider_current_status`;
   missing current-status telemetry должно оставаться `UNKNOWN`, а не
-  маскироваться под `OK`.
+  маскироваться под `OK`. Panel `Inspect Critical Providers` intentionally
+  показывает только active `DEGRADED`/`FAILING`; providers с missing telemetry
+  остаются в severity matrix как `UNKNOWN`. `Inspect Critical Providers` и
+  `Inspect Provider Top Causes` дают direct handoff в canonical provider
+  incident runbook.
 - **Monitor Current Provider Health Status**: table panel по
-  `bioetl_provider_health_status{provider}` с явным mapping:
-  `0=UNHEALTHY`, `1=DEGRADED`, `2=HEALTHY`.
+  `bioetl_provider_health_status{provider}` с fail-closed fallback через
+  provider universe и явным mapping: `0=UNHEALTHY`, `1=DEGRADED`,
+  `2=HEALTHY`, `null/NaN=UNKNOWN`.
 - **Track Health Check Latency by Provider (p95)**: selected-range тренд латентности провайдеров.
 - **Monitor Healthy Checks (Selected Range) / Monitor Degraded Checks (Selected Range) / Track Health Checks Total (Selected Range)**: selected-range evidence по completed probes; эти панели не являются current-health source.
 - **Track Provider Failure Rate (Selected Range)**: selected-range failure ratio
@@ -207,11 +236,14 @@ tracing-backed log hygiene живёт в collapsed row
 - **Track Rate Limiter Wait by Provider (p95)** и
   **Monitor Minimum Rate Limiter Tokens Available**: selected-range evidence
   для rate-limit pressure. Wait panel keeps an earlier-warning yellow band below
-  the degraded-rule threshold `>1s`.
-- **Monitor Circuit Breaker State (max)** и
-  **Track Circuit Breaker Trips by Adapter**: intentionally adapter-scoped,
-  потому что shipped circuit-breaker metric family маркируется label `adapter`,
-  а не `provider`.
+  the degraded-rule threshold `>1s`. Token panel preserves `No data` as a
+  telemetry gap instead of synthesizing token depletion.
+- **Monitor Cross-Scope Adapter Circuit Breaker State (max)** и
+  **Track Cross-Scope Adapter Circuit Breaker Trips**: intentionally
+  cross-scope adapter diagnostics, потому что shipped circuit-breaker metric
+  family маркируется label `adapter`, а не `provider`. Missing trip/state
+  samples remain diagnostic and do not create synthetic `adapter=none` or
+  implicit `CLOSED` evidence.
 - Для provider/control-plane/runtime/DQ latency panels `No data` нужно читать
   как “в окне нет latency samples”, а не как нормализованный `0s`.
 - **Drilldown**: dashboard links `0. Control Plane`, `1. Overview`,
@@ -225,16 +257,21 @@ tracing-backed log hygiene живёт в collapsed row
 
 - **First answer row**: `Monitor DQ Current Status`,
   `Monitor DQ Threshold State`, `Inspect DQ Current Reasons` и
-  `First Action / Invalid Record Policy` отвечают, является ли DQ сейчас
-  `OK`, `DEGRADED`, `FAILING` или `UNKNOWN`.
-- **Data Quality Score (Volume-weighted)**: volume-aware gauge на базе
-  `bioetl_dq_validation_score` и `bioetl_dq_validation_record_count`.
-- **Worst-Entity DQ Score**: быстрый worst-case сигнал по сущностям в выбранном pipeline scope.
-- **Quarantine / Soft Threshold / Validation Failures**: контроль деградаций по окнам времени.
+  `Review: First Action` отвечают, является ли DQ сейчас
+  `OK`, `WARN`, `CRIT` или `UNKNOWN`.
+- **Current-context row below the answer row**: `Monitor: Data Quality Score
+  (Volume-weighted)`, `Monitor: Worst-Entity DQ Score`,
+  `Monitor: Worst Data Freshness Lag (seconds)`, `Track: Records Quarantined in Range`,
+  `Track: Soft Threshold Exceeded in Range` и `Track: Silver Filter Rejects in Range`
+  дают compact supporting context до перехода к full-width historical evidence.
+- **Track Range Evidence: Bronze -> Silver -> Gold**: полноширинный
+  selected-range flow panel ниже current-context row.
+- **Monitor: Silver Validation Failures / Gold Strict Validation Failures / DQ Impact on Deliverability**:
+  контроль hard-failure и operator impact surfaces ниже first-screen band.
 - **Anomalies / DQ p95 / Data Freshness**: детальные DQ-сигналы. `Worst Data
   Freshness Lag (seconds)` теперь показывает самый stale entity в выбранном
   scope через `max(time() - bioetl_data_freshness_seconds)`, а
-  `Latest Successful Data Timestamp` остаётся отдельным latest-success anchor.
+  `Review: Latest Successful Data Timestamp` остаётся отдельным latest-success anchor.
   Это intentionally разные сигналы: latest success не должен маскировать worst
   freshness lag.
 - **Drilldown**: dashboard links `0. Control Plane`, `1. Overview`,
@@ -297,9 +334,9 @@ operator-facing checkpoint store latency outside ordinary runtime resume paths.
 #### Silver Filter Rejects Handoff
 
 - Используйте `1. Overview` или `2. Runtime` как summary surface, чтобы
-  подтвердить spike по `Silver Filter Rejects` в активном Grafana time range.
+  подтвердить spike по `Track: Silver Filter Rejects in Range` в активном Grafana time range.
 - После подтверждения переходите в `4. Data Quality`, где
-  `Top Silver Reject Reasons` и `Top Silver Reject Fields` дают bounded cause
+  `Inspect: Top Silver Reject Reasons (Pareto)` и `Inspect: Top Silver Reject Fields` дают bounded cause
   summary без raw quarantine text.
 - Для row-level browsing переходите в `Silver Reject Explorer`.
 - CLI остаётся execution surface для replay/resolve:
@@ -373,10 +410,10 @@ uv run python -m pytest -q tests/integration/test_prometheus_rules_config.py
 ## 5. Что делать если... (Runbook Lite)
 
 - **График "Error Rate" покраснел**: Используйте `structlog` для получения деталей исключений.
-- **Вырос `Silver Filter Rejects`**:
+- **Вырос `Track: Silver Filter Rejects in Range`**:
   1. Подтвердите spike в `1. Overview` или `2. Runtime`.
-  1. Перейдите в `4. Data Quality` и проверьте `Top Silver Reject Reasons` /
-     `Top Silver Reject Fields`.
+  1. Перейдите в `4. Data Quality` и проверьте `Inspect: Top Silver Reject Reasons (Pareto)` /
+     `Inspect: Top Silver Reject Fields`.
   1. Перейдите в `Silver Reject Explorer` для списка записей и detail по `payload_hash`.
   1. Если нужны action-операции, используйте quarantine CLI (`inspect/resolve/replay`).
 - **`Silver Reject Explorer` показывает `No data` во всех панелях**:

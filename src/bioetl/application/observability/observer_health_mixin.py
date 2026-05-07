@@ -64,6 +64,12 @@ class _ObserverHealthEmissionMixin:
             metric_value,
             {"component": component},
         )
+        if provider is not None:
+            self._metrics.set_gauge(
+                "bioetl_provider_health_status",
+                metric_value,
+                {"provider": provider},
+            )
         if health_check_mode is not None:
             self._metrics.set_gauge(
                 "bioetl_health_check_mode_status",

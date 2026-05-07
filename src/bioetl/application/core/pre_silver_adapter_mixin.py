@@ -372,4 +372,3 @@ class PreSilverAdapterMixin(
     _PreSilverRecordAdapterMixin,
 ):
     """Adapt finalized Silver-record flows to the ``PreSilverRecord`` protocol."""
-

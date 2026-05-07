@@ -17,64 +17,22 @@
   "gnetId": null,
   "graphTooltip": 1,
   "id": null,
-  "links": [
-    {
-      "asDropdown": false,
-      "icon": "external link",
-      "includeVars": false,
-      "keepTime": true,
-      "targetBlank": false,
-      "title": "0. Control Plane",
-      "tooltip": "Context mapping: return to remembered pipeline_context; run_type defaults to All. Preserve the selected time range.",
-      "type": "link",
-      "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline_context&var-run_type=All&${__url_time_range}"
-    },
-    {
-      "asDropdown": false,
-      "icon": "external link",
-      "includeVars": false,
-      "keepTime": true,
-      "targetBlank": false,
-      "title": "1. Overview",
-      "tooltip": "Context mapping: return to remembered pipeline_context; run_type defaults to All. Preserve the selected time range.",
-      "type": "link",
-      "url": "/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline_context&var-run_type=All&${__url_time_range}"
-    },
-    {
-      "asDropdown": false,
-      "icon": "external link",
-      "includeVars": false,
-      "keepTime": true,
-      "targetBlank": false,
-      "title": "2. Runtime",
-      "tooltip": "Context mapping: return to remembered pipeline_context; run_type defaults to All and stage defaults to unknown. Preserve the selected time range.",
-      "type": "link",
-      "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline_context&var-run_type=All&var-stage=unknown&${__url_time_range}"
-    },
-    {
-      "asDropdown": false,
-      "icon": "external link",
-      "includeVars": false,
-      "keepTime": true,
-      "targetBlank": false,
-      "title": "4. Data Quality",
-      "tooltip": "Context mapping: return to remembered pipeline_context; run_type defaults to All and stage defaults to unknown. Preserve the selected time range.",
-      "type": "link",
-      "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline_context&var-run_type=All&var-stage=unknown&${__url_time_range}"
-    },
-    {
-      "asDropdown": false,
-      "icon": "external link",
-      "includeVars": false,
-      "keepTime": true,
-      "targetBlank": false,
-      "title": "5. Workflow",
-      "tooltip": "Reset scope: open workflow target scope and preserve the selected time range.",
-      "type": "link",
-      "url": "/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}"
-    }
-  ],
   "panels": [
+    {
+      "gridPos": {
+        "h": 2,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1000,
+      "options": {
+        "content": "<div style=\"display:flex;gap:10px;flex-wrap:wrap;padding:10px;\"><a href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline_context&var-run_type=All&${__url_time_range}\" target=\"_blank\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">0. Control Plane</a><a href=\"/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline_context&var-run_type=All&${__url_time_range}\" target=\"_blank\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">1. Overview</a><a href=\"/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline_context&var-run_type=All&var-stage=unknown&${__url_time_range}\" target=\"_blank\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">2. Runtime</a><a href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline_context&var-run_type=All&var-stage=unknown&${__url_time_range}\" target=\"_blank\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">4. Data Quality</a><a href=\"/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}\" target=\"_blank\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">5. Workflow</a></div>",
+        "mode": "html"
+      },
+      "title": "",
+      "type": "text"
+    },
     {
       "id": 9100,
       "type": "text",
@@ -83,7 +41,7 @@
         "h": 3,
         "w": 24,
         "x": 0,
-        "y": 0
+        "y": 2
       },
       "options": {
         "content": "<center><h2>3. Provider Health / GLOBAL</h2><div><strong>Current window:</strong> provider status from fixed recording-rule windows. <strong>Selected provider:</strong> $provider. <strong>Pipeline context:</strong> $pipeline_context.</div></center>",
@@ -156,7 +114,7 @@
       },
       "gridPos": {
         "h": 7,
-        "w": 8,
+        "w": 7,
         "x": 0,
         "y": 3
       },
@@ -191,7 +149,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Only providers currently DEGRADED or FAILING. Empty table means no provider currently above OK; null remains UNKNOWN when provider status is absent.",
+      "description": "Only providers currently DEGRADED or FAILING. Empty table means no provider currently above OK; providers with missing current-status telemetry remain visible as UNKNOWN in the GLOBAL severity matrix.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -239,13 +197,20 @@
       },
       "gridPos": {
         "h": 7,
-        "w": 8,
-        "x": 8,
+        "w": 7,
+        "x": 7,
         "y": 3
       },
       "id": 9102,
       "options": {
         "cellHeight": "sm",
+        "dataLinks": [
+          {
+            "targetBlank": true,
+            "title": "Open Provider Incident Runbook",
+            "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/incident-response.md"
+          }
+        ],
         "footer": {
           "countRows": false,
           "fields": "",
@@ -322,13 +287,20 @@
       },
       "gridPos": {
         "h": 7,
-        "w": 8,
-        "x": 16,
+        "w": 10,
+        "x": 14,
         "y": 3
       },
       "id": 9103,
       "options": {
         "cellHeight": "sm",
+        "dataLinks": [
+          {
+            "targetBlank": true,
+            "title": "Open Provider Incident Runbook",
+            "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/incident-response.md"
+          }
+        ],
         "footer": {
           "countRows": false,
           "fields": "",
@@ -458,6 +430,26 @@
           },
           "mappings": [
             {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            },
+            {
+              "type": "special",
+              "options": {
+                "match": "nan",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            },
+            {
               "options": {
                 "0": {
                   "color": "red",
@@ -503,7 +495,7 @@
       },
       "gridPos": {
         "h": 8,
-        "w": 4,
+        "w": 8,
         "x": 12,
         "y": 18
       },
@@ -527,7 +519,7 @@
       },
       "targets": [
         {
-          "expr": "max by (provider) (bioetl_provider_health_status{provider=~\"$provider\"})",
+          "expr": "max by (provider) (bioetl_provider_health_status{provider=~\"$provider\"}) or ((bioetl_provider_health_check_provider_universe_15m{provider=~\"$provider\"} * 0) / (bioetl_provider_health_check_provider_universe_15m{provider=~\"$provider\"} * 0))",
           "format": "table",
           "instant": true,
           "legendFormat": "{{ provider }}",
@@ -536,7 +528,7 @@
       ],
       "title": "Monitor Current Provider Health Status",
       "type": "table",
-      "description": "Provider raw enum: 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY; null=UNKNOWN. First-screen severity uses bioetl_provider_current_status to avoid inverting raw enum colors."
+      "description": "Provider raw enum: 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY; null/NaN=UNKNOWN when the provider exists but raw status is absent. First-screen severity uses bioetl_provider_current_status to avoid inverting raw enum colors."
     },
     {
       "datasource": {
@@ -574,8 +566,8 @@
       },
       "gridPos": {
         "h": 8,
-        "w": 8,
-        "x": 16,
+        "w": 4,
+        "x": 20,
         "y": 18
       },
       "id": 2,
@@ -772,14 +764,6 @@
               {
                 "color": "green",
                 "value": null
-              },
-              {
-                "color": "orange",
-                "value": 1
-              },
-              {
-                "color": "red",
-                "value": 2
               }
             ]
           },
@@ -829,7 +813,7 @@
       ],
       "title": "Monitor Degraded Checks (Selected Range)",
       "type": "stat",
-      "description": "Selected-range evidence: completed DEGRADED probes in the active Grafana range. This panel is not a current-health source."
+      "description": "Selected-range evidence: completed DEGRADED probes in the active Grafana range. This panel is not a current-health source, so non-zero counts remain neutral evidence rather than WARN/CRIT by themselves."
     },
     {
       "datasource": {
@@ -1019,7 +1003,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
+        "h": 14,
         "w": 12,
         "x": 0,
         "y": 42
@@ -1031,7 +1015,7 @@
           "reducer": [
             "sum"
           ],
-          "show": true
+          "show": false
         },
         "showHeader": true
       },
@@ -1100,7 +1084,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
+        "h": 14,
         "w": 12,
         "x": 12,
         "y": 42
@@ -1111,7 +1095,7 @@
           "calcs": [
             "sum"
           ],
-          "displayMode": "table",
+          "displayMode": "list",
           "placement": "bottom"
         },
         "tooltip": {
@@ -1137,7 +1121,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 50
+        "y": 56
       },
       "id": 91,
       "panels": [],
@@ -1196,9 +1180,9 @@
       },
       "gridPos": {
         "h": 8,
-        "w": 6,
+        "w": 24,
         "x": 0,
-        "y": 51
+        "y": 57
       },
       "id": 102,
       "options": {
@@ -1213,9 +1197,6 @@
         "showThresholdLabels": false,
         "showThresholdMarkers": true
       },
-      "repeat": "provider",
-      "repeatDirection": "h",
-      "maxPerRow": 4,
       "targets": [
         {
           "expr": "histogram_quantile(0.95, sum by (le, provider) (increase(bioetl_health_check_latency_seconds_bucket{provider=~\"$provider\"}[$__range])))",
@@ -1225,7 +1206,7 @@
       ],
       "title": "Inspect Provider Health Check Latency (p95) - $provider",
       "type": "gauge",
-      "description": "Selected-range evidence: repeated per-provider p95 health-check latency over the active Grafana range. No data means no latency samples or no probe activity in range, not 0s latency."
+      "description": "Selected-range evidence: per-provider p95 health-check latency over the active Grafana range. No data means no latency samples or no probe activity in range, not 0s latency."
     },
     {
       "datasource": {
@@ -1265,10 +1246,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
+        "h": 14,
         "w": 12,
         "x": 0,
-        "y": 59
+        "y": 65
       },
       "id": 110,
       "options": {
@@ -1276,7 +1257,7 @@
           "calcs": [
             "max"
           ],
-          "displayMode": "table",
+          "displayMode": "list",
           "placement": "bottom"
         },
         "tooltip": {
@@ -1347,10 +1328,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
+        "h": 14,
         "w": 12,
         "x": 12,
-        "y": 59
+        "y": 65
       },
       "id": 111,
       "options": {
@@ -1358,7 +1339,7 @@
           "calcs": [
             "sum"
           ],
-          "displayMode": "table",
+          "displayMode": "list",
           "placement": "bottom"
         },
         "tooltip": {
@@ -1436,7 +1417,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 67
+        "y": 79
       },
       "id": 112,
       "options": {
@@ -1474,7 +1455,18 @@
             "mode": "continuous-BlYlRd"
           },
           "decimals": 2,
-          "mappings": [],
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            }
+          ],
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -1500,7 +1492,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 67
+        "y": 79
       },
       "id": 113,
       "options": {
@@ -1517,14 +1509,14 @@
       },
       "targets": [
         {
-          "expr": "min by (provider) (min_over_time(bioetl_rate_limiter_tokens_available{provider=~\"$provider\"}[$__range])) or vector(0)",
+          "expr": "min by (provider) (min_over_time(bioetl_rate_limiter_tokens_available{provider=~\"$provider\"}[$__range]))",
           "legendFormat": "{{ provider }}",
           "refId": "A"
         }
       ],
       "title": "Monitor Minimum Rate Limiter Tokens Available",
       "type": "bargauge",
-      "description": "Selected-range evidence: minimum provider tokens available in the active Grafana range. Lower values indicate higher rate-limit pressure; 0 means requests can be blocked."
+      "description": "Selected-range evidence: minimum provider tokens available in the active Grafana range. Lower values indicate higher rate-limit pressure; 0 means requests can be blocked. No data remains diagnostic and means no token samples were observed in range."
     },
     {
       "datasource": {
@@ -1574,7 +1566,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 75
+        "y": 87
       },
       "id": 31,
       "options": {
@@ -1593,13 +1585,13 @@
       },
       "targets": [
         {
-          "expr": "max(max_over_time(bioetl_circuit_breaker_state{adapter=~\"$adapter\"}[$__range])) or vector(0)",
+          "expr": "max(max_over_time(bioetl_circuit_breaker_state{adapter=~\"$adapter\"}[$__range]))",
           "refId": "A"
         }
       ],
-      "title": "Monitor Circuit Breaker State (max)",
+      "title": "Monitor Cross-Scope Adapter Circuit Breaker State (max)",
       "type": "stat",
-      "description": "Adapter-scoped circuit-breaker state over the active Grafana range: 0=CLOSED, 1=HALF_OPEN, 2=OPEN. Uses the adapter selector because the metric is adapter-labelled."
+      "description": "Cross-scope adapter diagnostics over the active Grafana range: 0=CLOSED, 1=HALF_OPEN, 2=OPEN. Uses the adapter selector because the shipped metric family is adapter-labelled rather than provider-labelled. No data remains diagnostic and does not imply a synthetic CLOSED state."
     },
     {
       "datasource": {
@@ -1648,7 +1640,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 75
+        "y": 87
       },
       "id": 32,
       "options": {
@@ -1657,7 +1649,7 @@
             "sum",
             "max"
           ],
-          "displayMode": "table",
+          "displayMode": "list",
           "placement": "bottom"
         },
         "tooltip": {
@@ -1667,14 +1659,14 @@
       },
       "targets": [
         {
-          "expr": "sum by (adapter) (increase(bioetl_circuit_breaker_trips_total{adapter=~\"$adapter\"}[$__interval])) or label_replace(vector(0), \"adapter\", \"none\", \"\", \"\")",
+          "expr": "sum by (adapter) (increase(bioetl_circuit_breaker_trips_total{adapter=~\"$adapter\"}[$__interval]))",
           "legendFormat": "{{adapter}}",
           "refId": "A"
         }
       ],
-      "title": "Track Circuit Breaker Trips by Adapter",
+      "title": "Track Cross-Scope Adapter Circuit Breaker Trips",
       "type": "timeseries",
-      "description": "Selected-range evidence: circuit-breaker trip count by adapter over the active Grafana interval. This panel is intentionally adapter-scoped because the shipped metric family is adapter-labelled."
+      "description": "Cross-scope adapter diagnostics: selected-range circuit-breaker trip count by adapter over the active Grafana interval. This panel is intentionally adapter-scoped because the shipped metric family is adapter-labelled rather than provider-labelled. No data remains diagnostic and does not create synthetic adapter rows."
     }
   ],
   "refresh": "30s",
@@ -1695,7 +1687,10 @@
           "text": "unknown",
           "value": "unknown"
         },
-        "datasource": "Prometheus",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
         "definition": "label_values({__name__=~\"bioetl_health_check_(success|degraded|failures)_total\"}, provider)",
         "hide": 0,
         "includeAll": false,
@@ -1716,7 +1711,7 @@
         "tagsQuery": "",
         "type": "query",
         "useTags": false,
-        "description": "Provider scope: single-select provider. Unknown is the explicit fail-closed default; pipeline-scoped handoffs derive provider from the source pipeline."
+        "description": "Provider scope: single-select provider. Unknown is the explicit fail-closed default; pipeline-scoped handoffs preserve pipeline_context and must either pass a valid provider value or leave provider=unknown."
       },
       {
         "current": {
@@ -1736,9 +1731,12 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "Prometheus",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
         "definition": "label_values(bioetl_circuit_breaker_state, adapter)",
-        "hide": 0,
+        "hide": 2,
         "includeAll": true,
         "label": "Adapter",
         "multi": true,

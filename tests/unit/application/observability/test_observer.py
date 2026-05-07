@@ -741,6 +741,11 @@ class TestObserverHealthCheckEvents:
             1.0,
             {"component": "data_source", "mode": "probe"},
         )
+        metrics_mock.set_gauge.assert_any_call(
+            "bioetl_provider_health_status",
+            1.0,
+            {"provider": "chembl"},
+        )
         metrics_mock.observe_histogram.assert_any_call(
             "bioetl_health_check_latency_seconds",
             0.042,

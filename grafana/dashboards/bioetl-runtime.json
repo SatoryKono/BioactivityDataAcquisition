@@ -16,92 +16,28 @@
   "editable": true,
   "graphTooltip": 1,
   "id": null,
-  "links": [
-    {
-      "asDropdown": false,
-      "icon": "external link",
-      "includeVars": false,
-      "keepTime": true,
-      "targetBlank": false,
-      "title": "0. Control Plane",
-      "tooltip": "Open with current pipeline/run_type and preserve the selected time range.",
-      "type": "link",
-      "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
-    },
-    {
-      "asDropdown": false,
-      "icon": "external link",
-      "includeVars": false,
-      "keepTime": true,
-      "targetBlank": false,
-      "title": "1. Overview",
-      "tooltip": "Open with current pipeline/run_type and preserve the selected time range.",
-      "type": "link",
-      "url": "/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
-    },
-    {
-      "asDropdown": false,
-      "icon": "external link",
-      "includeVars": false,
-      "keepTime": true,
-      "targetBlank": false,
-      "title": "3. Provider Health",
-      "tooltip": "Context mapping: derive provider from current pipeline and remember pipeline_context for return links. Preserve the selected time range.",
-      "type": "link",
-      "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=$pipeline&var-pipeline_context=$pipeline&var-adapter=unknown&${__url_time_range}"
-    },
-    {
-      "asDropdown": false,
-      "icon": "external link",
-      "includeVars": false,
-      "keepTime": true,
-      "targetBlank": false,
-      "title": "4. Data Quality",
-      "tooltip": "Open with current pipeline/run_type/stage and preserve the selected time range.",
-      "type": "link",
-      "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&${__url_time_range}"
-    },
-    {
-      "asDropdown": false,
-      "icon": "external link",
-      "includeVars": false,
-      "keepTime": true,
-      "targetBlank": false,
-      "title": "5. Workflow",
-      "tooltip": "Reset scope: open workflow target scope and preserve the selected time range.",
-      "type": "link",
-      "url": "/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}"
-    },
-    {
-      "asDropdown": false,
-      "icon": "logs",
-      "includeVars": false,
-      "keepTime": true,
-      "targetBlank": false,
-      "title": "Explore Logs",
-      "tooltip": "Open Loki Explore with tracing profile and selected time range.",
-      "type": "link",
-      "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D"
-    },
-    {
-      "asDropdown": false,
-      "icon": "search",
-      "includeVars": false,
-      "keepTime": true,
-      "targetBlank": false,
-      "title": "Explore Traces",
-      "tooltip": "Open Tempo Explore with tracing profile and selected time range.",
-      "type": "link",
-      "url": "/a/grafana-exploretraces-app/?from=${__from}&to=${__to}&queryType=traceqlSearch&query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline:regex}%22%20%26%26%20span.%22bioetl.run_type%22%20%3D~%20%22${run_type:regex}%22%20%7D"
-    }
-  ],
   "panels": [
+    {
+      "gridPos": {
+        "h": 2,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1000,
+      "options": {
+        "content": "<div style=\"display:flex;gap:10px;flex-wrap:wrap;padding:10px;\"><a href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}\" target=\"_blank\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">0. Control Plane</a><a href=\"/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}\" target=\"_blank\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">1. Overview</a><a href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&var-pipeline_context=$pipeline&var-adapter=unknown&${__url_time_range}\" target=\"_blank\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">3. Provider Health</a><a href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&${__url_time_range}\" target=\"_blank\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">4. Data Quality</a><a href=\"/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}\" target=\"_blank\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">5. Workflow</a><a href=\"/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D\" target=\"_blank\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Explore Logs</a><a href=\"/a/grafana-exploretraces-app/?from=${__from}&to=${__to}&queryType=traceqlSearch&query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline:regex}%22%20%26%26%20span.%22bioetl.run_type%22%20%3D~%20%22${run_type:regex}%22%20%7D\" target=\"_blank\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Explore Traces</a></div>",
+        "mode": "html"
+      },
+      "title": "",
+      "type": "text"
+    },
     {
       "gridPos": {
         "h": 3,
         "w": 24,
         "x": 0,
-        "y": 0
+        "y": 2
       },
       "id": 1,
       "options": {
@@ -125,10 +61,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 4,
-        "w": 12,
-        "x": 0,
-        "y": 15
+        "h": 6,
+        "w": 8,
+        "x": 8,
+        "y": 9
       },
       "id": 298,
       "options": {
@@ -202,8 +138,8 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 4,
-        "x": 8,
+        "w": 6,
+        "x": 6,
         "y": 3
       },
       "id": 9100,
@@ -252,7 +188,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Current scrape gap for BioETL runtime metrics over 10m. 0=OK/scraping, 1=WARN/no recent scrape, >=2=CRIT reserved, null=UNKNOWN/no scrape series. Time scope: current monitoring health, not selected-range runtime evidence. If this is 1 or UNKNOWN, treat zero count panels as inconclusive and open Prometheus Targets before debugging pipeline code.",
+      "description": "Current scrape/rule-health gap for BioETL runtime metrics over 10m. 0=OK/scraping and runtime dashboard recording rules evaluated recently, 1=WARN/no recent scrape, rule-evaluation failures, missing rule group, or stale rule group evaluation, >=2=CRIT/scrape plus rule-health gap, null=UNKNOWN/no scrape series. Time scope: current monitoring health, not selected-range runtime evidence. If this is non-zero or UNKNOWN, treat zero count panels as inconclusive and open Prometheus Targets before debugging pipeline code.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -278,7 +214,11 @@
                 },
                 "1": {
                   "color": "orange",
-                  "text": "NO SCRAPE"
+                  "text": "SCRAPE/RULE GAP"
+                },
+                "2": {
+                  "color": "red",
+                  "text": "SCRAPE+RULE GAP"
                 }
               }
             }
@@ -328,13 +268,14 @@
         "dataLinks": [
           {
             "title": "Open Prometheus Targets",
-            "url": "/targets"
+            "url": "http://localhost:9090/targets",
+            "targetBlank": true
           }
         ]
       },
       "targets": [
         {
-          "expr": "1 - max_over_time(up{job=\"bioetl\"}[10m])",
+          "expr": "clamp_max(max(1 - max_over_time(up{job=\"bioetl\"}[10m])) + on() group_left() ((sum(increase(prometheus_rule_evaluation_failures_total{rule_group=~\".*bioetl_observability[.]yml;bioetl_runtime_dashboard_recording$\"}[10m])) > bool 0) or ((time() - max(prometheus_rule_group_last_evaluation_timestamp_seconds{rule_group=~\".*bioetl_observability[.]yml;bioetl_runtime_dashboard_recording$\"})) > bool 60) or absent(prometheus_rule_group_last_evaluation_timestamp_seconds{rule_group=~\".*bioetl_observability[.]yml;bioetl_runtime_dashboard_recording$\"})), 2)",
           "refId": "A"
         }
       ],
@@ -343,10 +284,10 @@
     },
     {
       "gridPos": {
-        "h": 4,
-        "w": 12,
-        "x": 12,
-        "y": 15
+        "h": 6,
+        "w": 8,
+        "x": 16,
+        "y": 9
       },
       "id": 222,
       "description": "Range-evidence summary note for the KPI cards below. The cards support runtime localization after the current-status answer row; they do not replace the current blocker recording rules. UNKNOWN means missing status telemetry or scrape/rule gap until proven otherwise.",
@@ -410,8 +351,8 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 8,
-        "x": 16,
+        "w": 7,
+        "x": 17,
         "y": 3
       },
       "id": 9101,
@@ -475,7 +416,7 @@
               }
             }
           ],
-          "noValue": "0",
+          "noValue": "UNKNOWN",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -495,7 +436,7 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 4,
+        "w": 5,
         "x": 12,
         "y": 3
       },
@@ -522,7 +463,7 @@
       },
       "targets": [
         {
-          "expr": "sum(bioetl_runtime_current_blocker_reason{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} > 0) or vector(0)",
+          "expr": "sum(bioetl_runtime_current_blocker_reason{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} > 0) or ((max(bioetl_runtime_current_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) == 0) * 0)",
           "refId": "A"
         }
       ],
@@ -534,7 +475,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Failed pipeline executions over the last 15m for selected pipeline/run_type. 0 means no failed-run counter increase when runtime telemetry is available; UNKNOWN/No data or telemetry gap means the failure count is inconclusive. Next action: open logs/traces or the pipeline failure runbook.",
+      "description": "Failed pipeline executions over the last 15m for selected pipeline/run_type. 0 means no failed-run counter increase only when the selected runtime pipeline/run_type universe exists; UNKNOWN/No data or telemetry gap means the failure count is inconclusive. Next action: open logs/traces or the pipeline failure runbook.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -552,7 +493,7 @@
               }
             }
           ],
-          "noValue": "0",
+          "noValue": "UNKNOWN",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -576,9 +517,9 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 4,
-        "x": 4,
-        "y": 25
+        "w": 8,
+        "x": 0,
+        "y": 15
       },
       "id": 205,
       "options": {
@@ -616,7 +557,7 @@
       },
       "targets": [
         {
-          "expr": "sum(increase(bioetl_pipeline_runs_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",status=\"failed\"}[15m])) or vector(0)",
+          "expr": "sum(increase(bioetl_pipeline_runs_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",status=\"failed\"}[15m])) or ((count(bioetl_runtime_pipeline_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) > bool 0) * 0)",
           "refId": "A"
         }
       ],
@@ -628,7 +569,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Pipeline-level runtime error rate over last 30m. bioetl_errors_total is scoped by pipeline/stage/error_code, so this panel intentionally ignores run_type in the numerator and uses Bronze input as denominator. Thresholds align with the shipped alert rule: >=5% is WARN when Bronze denominator is meaningful, >=20% is CRIT/dashboard escalation. No data is UNKNOWN/missing error or input telemetry, not 0. Next action: open Errors by Stage/Error Code and check failed runs/backlog/lag.",
+      "description": "Pipeline-level runtime error rate over last 30m. bioetl_errors_total is scoped by pipeline/stage/error_code, so this panel intentionally ignores run_type in the numerator and uses Bronze input as denominator. Thresholds align with the shipped alert rule: >=5% is WARN when the 30m Bronze denominator is >=20, >=20% is CRIT/dashboard escalation; denominator <20 or missing input telemetry renders UNKNOWN instead of false OK/CRIT. Next action: open Errors by Stage/Error Code and check failed runs/backlog/lag.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -672,9 +613,9 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 4,
-        "x": 12,
-        "y": 31
+        "w": 8,
+        "x": 8,
+        "y": 15
       },
       "id": 220,
       "options": {
@@ -703,7 +644,7 @@
       },
       "targets": [
         {
-          "expr": "sum(increase(bioetl_errors_total{pipeline=~\"$pipeline\",stage=~\"$stage\"}[30m])) / clamp_min(sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\",stage=\"bronze\"}[30m])), 1)",
+          "expr": "(sum(increase(bioetl_errors_total{pipeline=~\"$pipeline\",stage=~\"$stage\"}[30m])) / clamp_min(sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\",stage=\"bronze\"}[30m])), 1)) and (sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\",stage=\"bronze\"}[30m])) >= 20)",
           "refId": "A"
         }
       ],
@@ -757,9 +698,9 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 4,
+        "w": 8,
         "x": 16,
-        "y": 37
+        "y": 15
       },
       "id": 237,
       "options": {
@@ -832,12 +773,33 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 43
+        "y": 21
       },
       "id": 242,
       "options": {
         "cellHeight": "sm",
-        "dataLinks": [],
+        "dataLinks": [
+          {
+            "title": "Open Runtime Troubleshooting Runbook",
+            "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/observability-checklist.md",
+            "targetBlank": true
+          },
+          {
+            "title": "Open Pipeline Failure Runbook",
+            "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/pipeline-failure-critical.md",
+            "targetBlank": true
+          },
+          {
+            "title": "Open Checkpoint Debugging Runbook",
+            "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/checkpoint-debugging.md",
+            "targetBlank": true
+          },
+          {
+            "title": "Open Run Manifest Runbook",
+            "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/run-manifest-inspection.md",
+            "targetBlank": true
+          }
+        ],
         "footer": {
           "countRows": false,
           "fields": "",
@@ -930,7 +892,7 @@
       "description": "First operator action for Runtime triage. Uses current snapshot panels before selected-range evidence. UNKNOWN means missing status telemetry or scrape/rule gap until proven otherwise.",
       "gridPos": {
         "h": 6,
-        "w": 8,
+        "w": 6,
         "x": 0,
         "y": 3
       },
@@ -976,7 +938,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 55
+        "y": 30
       },
       "panels": [
         {
@@ -1233,7 +1195,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 56
+        "y": 31
       },
       "panels": [
         {
@@ -1416,7 +1378,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-          "description": "Error breakdown by stage and error code over the selected Grafana time range.",
+          "description": "Error breakdown by stage and error code over the selected Grafana time range. If no selected-range error samples exist, the synthetic none/none=0 series is an empty-state placeholder, not real telemetry evidence.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1492,7 +1454,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-          "description": "Processed-record totals over the active range, grouped by stage and run_type.",
+          "description": "Processed-record totals over the active range, grouped by stage and run_type. If no selected-range processed-record samples exist, the synthetic none/none=0 series is an empty-state placeholder, not real telemetry evidence.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1500,7 +1462,7 @@
               },
               "mappings": [],
               "min": 0,
-              "noValue": "No phase duration samples",
+              "noValue": "No processed-record samples",
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -1551,7 +1513,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-          "description": "Graceful-shutdown initiation events over the active Grafana interval.",
+          "description": "GLOBAL graceful-shutdown initiation events over the active Grafana interval, grouped by reason and not filtered by $pipeline/$run_type because the source metric has only reason. Use this as process-level shutdown context, not pipeline-scoped runtime evidence.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1624,7 +1586,7 @@
               "refId": "A"
             }
           ],
-          "title": "Track Shutdown Initiated by Reason / Interval",
+          "title": "Track GLOBAL Shutdown Initiated by Reason / Interval",
           "type": "timeseries"
         },
         {
@@ -1632,7 +1594,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-          "description": "Graceful-shutdown completion events over the active Grafana interval.",
+          "description": "GLOBAL graceful-shutdown completion events over the active Grafana interval, grouped by reason and not filtered by $pipeline/$run_type because the source metric has only reason. Compare with initiated events for process-level shutdown completion context.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1705,7 +1667,7 @@
               "refId": "A"
             }
           ],
-          "title": "Track Shutdown Completed by Reason / Interval",
+          "title": "Track GLOBAL Shutdown Completed by Reason / Interval",
           "type": "timeseries"
         }
       ]
@@ -1719,7 +1681,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 57
+        "y": 32
       },
       "panels": [
         {
@@ -1727,7 +1689,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-          "description": "Runtime-owned selected-window handoff summary from shipped 15m/30m recording rules for preflight, infrastructure, failed-run, and error-rate blockers. 0 means no condition rule is firing when telemetry is available; UNKNOWN or telemetry gap means inconclusive. Next action: use Inspect Active Runtime Blocker Detail or the pipeline failure runbook.",
+          "description": "Runtime-owned selected-window handoff summary from shipped 15m/30m recording rules for preflight, infrastructure, failed-run, and error-rate blockers. 0 means no condition rule is firing only when the selected runtime pipeline/run_type universe exists; UNKNOWN or telemetry gap means inconclusive. Next action: use Inspect Active Runtime Blocker Detail or the pipeline failure runbook.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1800,7 +1762,7 @@
           },
           "targets": [
             {
-              "expr": "((sum(bioetl_runtime_alert_condition_pipeline_preflight_failed_15m{pipeline=~\"$pipeline\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_pipeline_infrastructure_failed_15m{pipeline=~\"$pipeline\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_pipeline_runs_failed_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_runtime_error_rate_high_30m{pipeline=~\"$pipeline\"}) or vector(0)))",
+              "expr": "(((sum(bioetl_runtime_alert_condition_pipeline_preflight_failed_15m{pipeline=~\"$pipeline\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_pipeline_infrastructure_failed_15m{pipeline=~\"$pipeline\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_pipeline_runs_failed_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_runtime_error_rate_high_30m{pipeline=~\"$pipeline\"}) or vector(0))) and on() (count(bioetl_runtime_pipeline_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) > bool 0))",
               "refId": "A"
             }
           ],
@@ -1812,7 +1774,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-          "description": "DQ handoff only. Uses shipped 15m/30m DQ recording rules to show whether runtime symptoms may be downstream of data-quality failures. Runtime does not diagnose record-level DQ here; open Data Quality for reasons, thresholds, and Silver rejects. 0 is normal only when telemetry is available.",
+          "description": "DQ handoff only. Uses shipped 15m/30m DQ recording rules to show whether runtime symptoms may be downstream of data-quality failures. Runtime does not diagnose record-level DQ here; open Data Quality for reasons, thresholds, and Silver rejects. 0 is normal only when the selected runtime pipeline universe exists; UNKNOWN or telemetry gap means inconclusive.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1830,7 +1792,7 @@
                   }
                 }
               ],
-              "noValue": "0",
+              "noValue": "UNKNOWN",
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -1881,7 +1843,7 @@
           },
           "targets": [
             {
-              "expr": "((sum(bioetl_runtime_alert_condition_dq_soft_threshold_15m{pipeline=~\"$pipeline\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_dq_hard_fail_15m{pipeline=~\"$pipeline\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_dq_critical_anomaly_30m{pipeline=~\"$pipeline\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_silver_validation_failures_30m{pipeline=~\"$pipeline\"}) or vector(0)))",
+              "expr": "(((sum(bioetl_runtime_alert_condition_dq_soft_threshold_15m{pipeline=~\"$pipeline\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_dq_hard_fail_15m{pipeline=~\"$pipeline\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_dq_critical_anomaly_30m{pipeline=~\"$pipeline\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_silver_validation_failures_30m{pipeline=~\"$pipeline\"}) or vector(0))) and on() (count(bioetl_runtime_pipeline_run_type_universe{pipeline=~\"$pipeline\"}) > bool 0))",
               "refId": "A"
             }
           ],
@@ -1893,7 +1855,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-          "description": "Control Plane / Replay Safety handoff only. Uses shipped 15m/30m recording rules for manifest, checkpoint, replay, and lineage blockers. Runtime does not decide replay/resume safety here; open Control Plane for manifest, checkpoint, and ledger evidence. 0 is normal only when telemetry is available.",
+          "description": "Control Plane / Replay Safety handoff only. Uses shipped 15m/30m recording rules for manifest, checkpoint, replay, and lineage blockers. Runtime does not decide replay/resume safety here; open Control Plane for manifest, checkpoint, and ledger evidence. 0 is normal only when the selected runtime pipeline/run_type universe exists; UNKNOWN or telemetry gap means inconclusive.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1911,7 +1873,7 @@
                   }
                 }
               ],
-              "noValue": "0",
+              "noValue": "UNKNOWN",
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -1962,7 +1924,7 @@
           },
           "targets": [
             {
-              "expr": "((sum(bioetl_runtime_alert_condition_manifest_write_failed_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_ledger_append_failed_15m{pipeline=~\"$pipeline\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_checkpoint_incompatible_30m{pipeline=~\"$pipeline\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_replay_lag_high_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_replay_drift_detected_30m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_lineage_refs_missing_15m{pipeline=~\"$pipeline\"}) or vector(0)))",
+              "expr": "(((sum(bioetl_runtime_alert_condition_manifest_write_failed_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_ledger_append_failed_15m{pipeline=~\"$pipeline\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_checkpoint_incompatible_30m{pipeline=~\"$pipeline\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_replay_lag_high_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_replay_drift_detected_30m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_lineage_refs_missing_15m{pipeline=~\"$pipeline\"}) or vector(0))) and on() (count(bioetl_runtime_pipeline_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) > bool 0))",
               "refId": "A"
             }
           ],
@@ -1974,7 +1936,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-          "description": "GLOBAL Provider Health handoff only. Uses shipped 15m/30m/1h provider recording rules without pipeline filtering because provider failures can block multiple pipelines. Runtime does not diagnose provider root cause here; open Provider Health for provider/current-cause evidence. 0 is normal only when telemetry is available.",
+          "description": "GLOBAL Provider Health handoff only. Uses shipped 15m/30m/1h provider recording rules without pipeline filtering because provider failures can block multiple pipelines. Runtime does not diagnose provider root cause here; open Provider Health for provider/current-cause evidence. 0 is normal only when provider current-status telemetry exists; UNKNOWN or telemetry gap means inconclusive.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1992,7 +1954,7 @@
                   }
                 }
               ],
-              "noValue": "0",
+              "noValue": "UNKNOWN",
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -2043,7 +2005,7 @@
           },
           "targets": [
             {
-              "expr": "((sum(bioetl_runtime_alert_condition_provider_failure_rate_high_15m) or vector(0)) + (sum(bioetl_runtime_alert_condition_provider_retries_exhausted_1h) or vector(0)) + (sum(bioetl_runtime_alert_condition_provider_adapter_latency_high_30m) or vector(0)) + (sum(bioetl_runtime_alert_condition_provider_http_error_rate_high_15m) or vector(0)) + (sum(bioetl_runtime_alert_condition_provider_rate_limiter_wait_high_30m) or vector(0)) + (sum(bioetl_runtime_alert_condition_provider_rate_limiter_tokens_depleted_15m) or vector(0)))",
+              "expr": "(((sum(bioetl_runtime_alert_condition_provider_failure_rate_high_15m) or vector(0)) + (sum(bioetl_runtime_alert_condition_provider_retries_exhausted_1h) or vector(0)) + (sum(bioetl_runtime_alert_condition_provider_adapter_latency_high_30m) or vector(0)) + (sum(bioetl_runtime_alert_condition_provider_http_error_rate_high_15m) or vector(0)) + (sum(bioetl_runtime_alert_condition_provider_rate_limiter_wait_high_30m) or vector(0)) + (sum(bioetl_runtime_alert_condition_provider_rate_limiter_tokens_depleted_15m) or vector(0))) and on() (count(bioetl_provider_current_status) > bool 0))",
               "refId": "A"
             }
           ],
@@ -2055,7 +2017,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-          "description": "Freshness handoff only. Counts selected-pipeline entities older than 24h using data freshness telemetry; this supports source/DQ escalation and is not a Runtime execution blocker by itself. 0 means no stale entity when telemetry is available; UNKNOWN means missing freshness telemetry.",
+          "description": "Freshness handoff only. Counts selected-pipeline entities older than 24h using data freshness telemetry; this supports source/DQ escalation and is not a Runtime execution blocker by itself. 0 means no stale entity when freshness telemetry is available; UNKNOWN means missing freshness telemetry.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2073,7 +2035,7 @@
                   }
                 }
               ],
-              "noValue": "0",
+              "noValue": "UNKNOWN",
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -2124,7 +2086,7 @@
           },
           "targets": [
             {
-              "expr": "sum(clamp_min(time() - max by (pipeline, entity) (bioetl_data_freshness_seconds{pipeline=~\"$pipeline\"}), 0) > 86400) or vector(0)",
+              "expr": "sum(clamp_min(time() - max by (pipeline, entity) (bioetl_data_freshness_seconds{pipeline=~\"$pipeline\"}), 0) > 86400) or (count(bioetl_data_freshness_seconds{pipeline=~\"$pipeline\"}) * 0)",
               "refId": "A"
             }
           ],
@@ -2136,7 +2098,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-          "description": "No-records runs detected over the last 30m for selected pipeline/run_type. This is a runtime blocker candidate when runs occurred but no records were processed. 0 is valid only when both run and records counters are scraped; telemetry gaps are inconclusive. Next action: inspect checkpoint/resume and stage expectedness.",
+          "description": "No-records runs detected over the last 30m for selected pipeline/run_type. This is a runtime blocker candidate when runs occurred but no records were processed. 0 is valid only when the selected runtime pipeline/run_type universe exists; telemetry gaps are inconclusive. Next action: inspect checkpoint/resume and stage expectedness.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2154,7 +2116,7 @@
                   }
                 }
               ],
-              "noValue": "0",
+              "noValue": "UNKNOWN",
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -2205,7 +2167,7 @@
           },
           "targets": [
             {
-              "expr": "sum(((sum by (pipeline, run_type) (increase(bioetl_pipeline_runs_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}[30m])) > 0) unless on (pipeline, run_type) (sum by (pipeline, run_type) (increase(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}[30m])) > 0))) or vector(0)",
+              "expr": "sum(((sum by (pipeline, run_type) (increase(bioetl_pipeline_runs_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}[30m])) > 0) unless on (pipeline, run_type) (sum by (pipeline, run_type) (increase(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}[30m])) > 0))) or ((count(bioetl_runtime_pipeline_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) > bool 0) * 0)",
               "refId": "A"
             }
           ],
@@ -2308,12 +2270,12 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 59
+        "y": 34
       },
       "panels": [
         {
           "datasource": "Loki",
-          "description": "Structured warning-level log events over the selected time range. Uses the safe {job=\"bioetl\"} Loki entrypoint, parses JSON, drops parser errors, then filters the extracted level field.",
+          "description": "Structured warning-level log events for the selected pipeline over the selected time range. Uses the safe {job=\"bioetl\"} Loki entrypoint, parses JSON, drops parser errors, filters extracted pipeline and level fields, and intentionally does not filter by run_type because structured logs do not guarantee a run_type field.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2349,7 +2311,7 @@
           },
           "targets": [
             {
-              "expr": "{job=\"bioetl\"} | json | __error__=\"\" | level=\"warning\" | line_format \"{{.timestamp}} {{.message}}\"",
+              "expr": "{job=\"bioetl\"} | json | __error__=\"\" | pipeline=~\"$pipeline\" | level=\"warning\" | line_format \"{{.timestamp}} {{.message}}\"",
               "refId": "A"
             }
           ],
@@ -2358,7 +2320,7 @@
         },
         {
           "datasource": "Loki",
-          "description": "Log events that failed JSON parsing or are missing expected fields over the selected Range.",
+          "description": "GLOBAL log events that failed JSON parsing or are missing expected fields over the selected Range. These cannot be safely filtered by $pipeline because parsing failed, so use them as log hygiene evidence rather than pipeline-scoped runtime evidence.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2394,16 +2356,16 @@
           },
           "targets": [
             {
-              "expr": "{job=\"bioetl\"} | json | __error__!=\"\" | line_format \"{{.timestamp}} {{__error__}}\"",
+              "expr": "{job=\"bioetl\"} | json | __error__!=\"\" | line_format \"{{.timestamp}} {{.__error__}}\"",
               "refId": "A"
             }
           ],
-          "title": "Inspect Unstructured Logs",
+          "title": "Inspect GLOBAL Unstructured Logs",
           "type": "table"
         },
         {
           "datasource": "Loki",
-          "description": "Top warning events by message over the selected time range.",
+          "description": "Top structured warning events by message for the selected pipeline over the selected time range. This is a selected-range summary, not a time trend; run_type is intentionally not filtered because structured logs do not guarantee a run_type field.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2464,16 +2426,17 @@
           },
           "targets": [
             {
-              "expr": "topk(10, sum by (message) (count_over_time({job=\"bioetl\"} | json | __error__=\"\" | level=\"warning\" [$__range])))",
+              "expr": "topk(10, sum by (message) (count_over_time({job=\"bioetl\"} | json | __error__=\"\" | pipeline=~\"$pipeline\" | level=\"warning\" [$__range])))",
+              "instant": true,
               "refId": "A"
             }
           ],
-          "title": "Track Top Warning Events",
-          "type": "timeseries"
+          "title": "Inspect Top Warning Events by Message / Range",
+          "type": "bargauge"
         },
         {
           "datasource": "Loki",
-          "description": "Trend of structured vs unstructured log events over time by Interval.",
+          "description": "GLOBAL trend of structured vs unstructured log events over time by Interval. Unstructured parser-error events cannot be safely pipeline-filtered, so this panel is process-level log hygiene evidence and not selected-pipeline runtime status.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2546,7 +2509,7 @@
               "refId": "B"
             }
           ],
-          "title": "Track Log Hygiene Trend",
+          "title": "Track GLOBAL Log Hygiene Trend",
           "type": "timeseries"
         }
       ]
@@ -2571,7 +2534,7 @@
           "value": "unknown"
         },
         "datasource": "Prometheus",
-        "definition": "label_values(bioetl_records_processed_total, pipeline)",
+        "definition": "label_values(bioetl_runtime_pipeline_run_type_universe, pipeline)",
         "hide": 0,
         "includeAll": false,
         "label": "Pipeline",
@@ -2579,7 +2542,7 @@
         "name": "pipeline",
         "options": [],
         "query": {
-          "query": "label_values(bioetl_records_processed_total, pipeline)",
+          "query": "label_values(bioetl_runtime_pipeline_run_type_universe, pipeline)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 1,
@@ -2591,7 +2554,7 @@
         "tagsQuery": "",
         "type": "query",
         "useTags": false,
-        "description": "Core scope: pipeline selector for pipeline-centric dashboards; fallback: All pipelines when not passed by source dashboard. Single-select; no All scope. Unknown is the explicit fail-closed default."
+        "description": "Core scope: pipeline selector from canonical runtime pipeline/run_type universe, including runs that emitted no records. Single-select; no All scope. Unknown is the explicit fail-closed default."
       },
       {
         "allValue": null,
@@ -2601,7 +2564,7 @@
           "value": "$__all"
         },
         "datasource": "Prometheus",
-        "definition": "label_values(bioetl_records_processed_total{pipeline=~\"$pipeline\"}, run_type)",
+        "definition": "label_values(bioetl_runtime_pipeline_run_type_universe{pipeline=~\"$pipeline\"}, run_type)",
         "hide": 0,
         "includeAll": true,
         "label": "Run Type",
@@ -2609,7 +2572,7 @@
         "name": "run_type",
         "options": [],
         "query": {
-          "query": "label_values(bioetl_records_processed_total{pipeline=~\"$pipeline\"}, run_type)",
+          "query": "label_values(bioetl_runtime_pipeline_run_type_universe{pipeline=~\"$pipeline\"}, run_type)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 1,
@@ -2621,13 +2584,13 @@
         "tagsQuery": "",
         "type": "query",
         "useTags": false,
-        "description": "Core scope: run_type selector bounded by pipeline; fallback: All run types for selected pipeline."
+        "description": "Core scope: run_type selector bounded by canonical runtime pipeline/run_type universe; fallback: All run types for selected pipeline."
       },
       {
         "allValue": null,
         "current": {},
         "datasource": "Prometheus",
-        "definition": "label_values(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}, stage)",
+        "definition": "label_values(bioetl_pipeline_stage_expected{pipeline=~\"$pipeline\"}, stage)",
         "hide": 0,
         "includeAll": true,
         "label": "Stage",
@@ -2635,7 +2598,7 @@
         "name": "stage",
         "options": [],
         "query": {
-          "query": "label_values(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}, stage)",
+          "query": "label_values(bioetl_pipeline_stage_expected{pipeline=~\"$pipeline\"}, stage)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 1,
@@ -2647,7 +2610,7 @@
         "tagsQuery": "",
         "type": "query",
         "useTags": false,
-        "description": "Core scope: stage selector (only where stage-level analysis exists); fallback: All stages for selected pipeline/run_type."
+        "description": "Core scope: stage selector from expected-stage config so no-record runs still expose stage choices; fallback: All stages for selected pipeline."
       }
     ]
   },

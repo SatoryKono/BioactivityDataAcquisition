@@ -620,7 +620,7 @@ def _assert_cross_scope_matched_links(
 
 
 def test_dashboard_to_dashboard_links_are_not_duplicated() -> None:
-    """A dashboard may expose at most one link to any other dashboard UID."""
+    """Dashboards should not duplicate target UIDs outside explicit panel CTAs."""
     for dashboard_path in get_dashboard_files():
         dashboard = load_dashboard(dashboard_path)
         uid = dashboard.get("uid")
@@ -635,10 +635,14 @@ def test_dashboard_to_dashboard_links_are_not_duplicated() -> None:
             title = str(link.get("title", ""))
             target_locations.setdefault(target_uid, []).append(f"{title} -> {url}")
 
+        allowed_duplicate_targets = {
+            str(entry["target_uid"])
+            for entry in _REQUIRED_PANEL_LINKS_BY_UID.get(uid, ())
+        }
         duplicates = {
             target_uid: links
             for target_uid, links in target_locations.items()
-            if len(links) > 1
+            if len(links) > 1 and target_uid not in allowed_duplicate_targets
         }
         assert not duplicates, (
             f"{dashboard_path.name} duplicates dashboard links by target UID: {duplicates}"
@@ -1442,7 +1446,8 @@ def test_runtime_incident_panels_do_not_duplicate_control_plane_dashboard_link()
         dashboard_links = [
             link
             for link in data_links
-            if _extract_dashboard_uid(str(link.get("url", ""))) is not None
+            if _extract_dashboard_uid(str(link.get("url", "")))
+            == "bioetl-control-plane-v1"
         ]
         assert not dashboard_links, (
             f"Panel '{panel_title}' must not duplicate dashboard handoff links"
@@ -1480,6 +1485,30 @@ def test_runtime_first_screen_status_panels_expose_actionable_drilldowns() -> No
         "docs/05-operations/runbooks/observability-checklist.md"
         in top_blocker_urls["Open Runtime Troubleshooting Runbook"]
     )
+
+    telemetry_links = _iter_panel_data_links(panels_by_id[9102])
+    telemetry_urls = {
+        str(link.get("title")): str(link.get("url")) for link in telemetry_links
+    }
+    assert telemetry_urls["Open Prometheus Targets"] == "http://localhost:9090/targets"
+    prometheus_targets_link = next(
+        link
+        for link in telemetry_links
+        if link.get("title") == "Open Prometheus Targets"
+    )
+    assert prometheus_targets_link.get("targetBlank") is True
+
+    detail_links = _iter_panel_data_links(panels_by_id[242])
+    detail_urls = {
+        str(link.get("title")): str(link.get("url")) for link in detail_links
+    }
+    for link_title, expected_suffix in {
+        "Open Runtime Troubleshooting Runbook": "docs/05-operations/runbooks/observability-checklist.md",
+        "Open Pipeline Failure Runbook": "docs/05-operations/runbooks/pipeline-failure-critical.md",
+        "Open Checkpoint Debugging Runbook": "docs/05-operations/runbooks/checkpoint-debugging.md",
+        "Open Run Manifest Runbook": "docs/05-operations/runbooks/run-manifest-inspection.md",
+    }.items():
+        assert detail_urls[link_title].endswith(expected_suffix)
 
 
 def test_runtime_alert_condition_panels_expose_direct_runbook_links() -> None:
@@ -1546,6 +1575,8 @@ def test_provider_health_critical_panels_expose_incident_runbook_links() -> None
         Path("grafana/dashboards/bioetl-provider-health-v2.json")
     )
     targets = {
+        9102: "Open Provider Incident Runbook",
+        9103: "Open Provider Incident Runbook",
         104: "Open Provider Incident Runbook",
         106: "Open Provider Incident Runbook",
         114: "Open Provider Incident Runbook",
@@ -1621,7 +1652,7 @@ def test_control_plane_replay_and_manifest_panels_route_to_expected_runbooks() -
             "Open Checkpoint Debugging Runbook",
             "docs/05-operations/runbooks/checkpoint-debugging.md",
         ),
-        "Monitor: Ledger / Manifest Consistency": (
+        "Monitor: Manifest / Ledger Integrity": (
             "Open Run Manifest Inspection",
             "docs/05-operations/runbooks/run-manifest-inspection.md",
         ),
@@ -1639,6 +1670,14 @@ def test_control_plane_replay_and_manifest_panels_route_to_expected_runbooks() -
         ),
         "Track: Replay Lag Seconds": (
             "Open Checkpoint Debugging",
+            "docs/05-operations/runbooks/checkpoint-debugging.md",
+        ),
+        "Track: Replay Drift by Type": (
+            "Checkpoint Debugging",
+            "docs/05-operations/runbooks/checkpoint-debugging.md",
+        ),
+        "Track: Replay Lag Trend": (
+            "Checkpoint Debugging",
             "docs/05-operations/runbooks/checkpoint-debugging.md",
         ),
     }
@@ -1669,6 +1708,30 @@ def test_control_plane_replay_and_manifest_panels_route_to_expected_runbooks() -
         )
 
 
+def test_control_plane_panels_do_not_mix_runbook_families_within_one_panel() -> None:
+    """A single Control Plane panel must not expose conflicting runbook families across link surfaces."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
+    allowed_suffixes = (
+        "docs/05-operations/runbooks/checkpoint-debugging.md",
+        "docs/05-operations/runbooks/run-manifest-inspection.md",
+        "docs/05-operations/runbooks/observability-checklist.md",
+        "docs/05-operations/runbooks/traceability-signal-ownership.md",
+    )
+
+    for panel in get_dashboard_panels(dashboard):
+        panel_ref = f"id={panel.get('id')} title={panel.get('title')!r}"
+        suffixes = set()
+        for link in _iter_panel_data_links(panel):
+            url = str(link.get("url", ""))
+            for suffix in allowed_suffixes:
+                if suffix in url:
+                    suffixes.add(suffix)
+        assert len(suffixes) <= 1, (
+            f"Control Plane panel {panel_ref} mixes multiple runbook families: "
+            f"{sorted(suffixes)}"
+        )
+
+
 def test_control_plane_provider_health_handoff_omits_adapter_fallback() -> None:
     """Control Plane -> Provider Health handoff must let target dashboard use its own adapter fallback."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
@@ -1682,7 +1745,7 @@ def test_control_plane_provider_health_handoff_omits_adapter_fallback() -> None:
     )
     assert link is not None, "Control Plane must expose top-level Provider Health link"
     url = str(link.get("url", ""))
-    assert "var-provider=$pipeline" in url
+    assert "var-provider=unknown" in url
     assert "var-pipeline_context=$pipeline" in url
     assert "var-adapter=" not in url, (
         "Control Plane -> Provider Health handoff must omit adapter when source has no adapter context"
@@ -1694,7 +1757,7 @@ def test_control_plane_first_screen_stat_panels_do_not_duplicate_runbook_ctas() 
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
     expected_titles = {
         "Monitor: Replay Safety State",
-        "Monitor: Ledger / Manifest Consistency",
+        "Monitor: Manifest / Ledger Integrity",
     }
 
     for panel_title in expected_titles:
@@ -1809,8 +1872,8 @@ def test_data_quality_incident_panels_do_not_duplicate_control_plane_dashboard_l
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
     panel_titles = {
         "Track Range Evidence: Bronze -> Silver -> Gold",
-        "Lineage Refs Missing",
-        "Gold Strict Validation Failures",
+        "Monitor: Lineage Refs Missing",
+        "Monitor: Gold Strict Validation Failures",
     }
 
     for panel_title in panel_titles:
@@ -1829,7 +1892,8 @@ def test_data_quality_incident_panels_do_not_duplicate_control_plane_dashboard_l
         dashboard_links = [
             link
             for link in data_links
-            if _extract_dashboard_uid(str(link.get("url", ""))) is not None
+            if _extract_dashboard_uid(str(link.get("url", "")))
+            == "bioetl-control-plane-v1"
         ]
         assert not dashboard_links, (
             f"Panel '{panel_title}' must not duplicate dashboard handoff links"
@@ -2103,8 +2167,8 @@ def test_pipeline_and_provider_variables_are_single_select_unknown_default() -> 
             )
 
 
-def test_provider_health_handoff_maps_pipeline_and_remembers_return_context() -> None:
-    """Pipeline-scoped dashboards map pipeline -> provider and preserve pipeline_context."""
+def test_provider_health_handoff_fail_closes_and_remembers_return_context() -> None:
+    """Pipeline-scoped dashboards preserve pipeline_context and fail-close provider scope."""
     pipeline_sources = {
         "bioetl-control-plane-v1",
         "bioetl-overview-v2",
@@ -2124,10 +2188,11 @@ def test_provider_health_handoff_maps_pipeline_and_remembers_return_context() ->
         )
         url = str(link.get("url", ""))
         tooltip = str(link.get("tooltip", ""))
-        assert "var-provider=$pipeline" in url
+        assert "var-provider=unknown" in url
         assert "var-pipeline_context=$pipeline" in url
         assert "var-provider=All" not in url
         assert "Context mapping" in tooltip
+        assert "provider=unknown" in tooltip
 
     provider_dashboard = dashboards["bioetl-provider-health-v2"]
     provider_vars = {

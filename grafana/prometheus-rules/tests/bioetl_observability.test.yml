@@ -290,11 +290,11 @@ tests:
       - series: 'bioetl_health_check_success_total{provider="chembl"}'
         values: '0+0x20'
     promql_expr_test:
-      - expr: bioetl_provider_current_status
+      - expr: count by (provider) (bioetl_provider_current_status)
         eval_time: 16m
         exp_samples:
           - labels: '{provider="chembl"}'
-            value: .nan
+            value: 1
 
   - name: pipeline-runs-without-processed-records
     interval: 1m

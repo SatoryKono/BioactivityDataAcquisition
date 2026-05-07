@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+import importlib
 import json
+import subprocess
+import sys
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -152,3 +155,31 @@ def test_prune_episodic_notes_apply_removes_expired_files(tmp_path: Path) -> Non
     )
     assert report["removed_count"] == 1
     assert not note.exists()
+
+
+def test_memory_tooling_package_exports_submodules_lazily() -> None:
+    tooling = importlib.import_module("memory.tooling")
+
+    assert "workflow" not in tooling.__dict__
+
+    workflow_module = tooling.workflow
+    refresh_module = tooling.refresh_all
+
+    assert workflow_module.__name__ == "memory.tooling.workflow"
+    assert refresh_module.__name__ == "memory.tooling.refresh_all"
+
+    query_module = importlib.import_module("memory.query")
+    assert callable(query_module.query_all)
+
+
+def test_memory_workflow_module_help_does_not_emit_runpy_warning() -> None:
+    result = subprocess.run(
+        [sys.executable, "-m", "memory.tooling.workflow", "--help"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0
+    assert "RuntimeWarning" not in result.stderr
+    assert "pre-task" in result.stdout

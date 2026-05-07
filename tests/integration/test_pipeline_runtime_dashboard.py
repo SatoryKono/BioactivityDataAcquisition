@@ -77,6 +77,24 @@ def test_pipeline_runtime_has_required_variables() -> None:
     assert variables == {"pipeline", "run_type", "stage"}
 
 
+def test_pipeline_runtime_variables_use_runtime_universe() -> None:
+    variables = {
+        variable.get("name"): variable
+        for variable in _dashboard().get("templating", {}).get("list", [])
+        if variable.get("name")
+    }
+
+    pipeline_query = variables["pipeline"].get("query", {}).get("query", "")
+    run_type_query = variables["run_type"].get("query", {}).get("query", "")
+    stage_query = variables["stage"].get("query", {}).get("query", "")
+
+    assert "bioetl_runtime_pipeline_run_type_universe" in pipeline_query
+    assert "bioetl_runtime_pipeline_run_type_universe" in run_type_query
+    assert "bioetl_records_processed_total" not in pipeline_query
+    assert "bioetl_records_processed_total" not in run_type_query
+    assert "bioetl_pipeline_stage_expected" in stage_query
+
+
 def test_pipeline_runtime_does_not_have_forensic_variables() -> None:
     variables = {
         variable.get("name")
@@ -97,6 +115,23 @@ def test_pipeline_runtime_panels_have_units() -> None:
     assert not missing_units, (
         "Runtime dashboard panels missing explicit units:\n" + "\n".join(missing_units)
     )
+
+
+def test_pipeline_runtime_localization_empty_states_are_explicit() -> None:
+    panels = {panel.get("title"): panel for panel in _runtime_data_panels()}
+
+    errors_panel = panels["Inspect Errors by Stage / Error Code / Range"]
+    errors_description = errors_panel.get("description", "")
+    assert "synthetic none/none=0 series" in errors_description
+    assert "empty-state placeholder" in errors_description
+
+    records_panel = panels["Track Records by Stage / Run Type / Range"]
+    records_description = records_panel.get("description", "")
+    records_defaults = records_panel.get("fieldConfig", {}).get("defaults", {})
+    assert "synthetic none/none=0 series" in records_description
+    assert "empty-state placeholder" in records_description
+    assert records_defaults.get("noValue") == "No processed-record samples"
+    assert "phase duration" not in f"{records_description} {records_defaults.get('noValue', '')}"
 
 
 def test_pipeline_runtime_data_panel_titles_are_action_first() -> None:
@@ -134,12 +169,12 @@ def test_pipeline_runtime_count_panels_have_window_in_title_or_description() -> 
         "Inspect GLOBAL Provider Alert Conditions",
         "Inspect Freshness Alert Conditions",
         "Inspect Warning Logs",
-        "Inspect Unstructured Logs",
-        "Track Top Warning Events",
+        "Inspect GLOBAL Unstructured Logs",
+        "Inspect Top Warning Events by Message / Range",
         "Inspect Errors by Stage / Error Code / Range",
         "Track Records by Stage / Run Type / Range",
-        "Track Shutdown Initiated by Reason / Interval",
-        "Track Shutdown Completed by Reason / Interval",
+        "Track GLOBAL Shutdown Initiated by Reason / Interval",
+        "Track GLOBAL Shutdown Completed by Reason / Interval",
     }
     offenders = []
     for panel in _runtime_data_panels():
@@ -300,14 +335,18 @@ def test_runtime_blockers_includes_gold_write_missing() -> None:
     )
 
 
-def test_runtime_blockers_includes_no_terminal_run() -> None:
-    """Runtime Blockers zero rendering must not reintroduce inline Grafana logic."""
+def test_runtime_blockers_preserves_unknown_without_inline_conditions() -> None:
+    """Runtime Blockers must not turn missing current telemetry into false OK."""
     panels = {p.get("title"): p for p in _runtime_data_panels()}
     blockers_panel = panels.get("Monitor Runtime Blockers")
     assert blockers_panel is not None
     expr = blockers_panel["targets"][0]["expr"]
-    assert "or vector(0)" in expr
+    assert "or vector(0)" not in expr
+    assert "bioetl_runtime_current_status" in expr
+    assert "== 0" in expr
     assert "bioetl_runtime_alert_condition_" not in expr
+    defaults = blockers_panel.get("fieldConfig", {}).get("defaults", {})
+    assert defaults.get("noValue") == "UNKNOWN"
 
 
 def test_active_runtime_blocker_detail_panel_exists() -> None:

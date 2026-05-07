@@ -112,6 +112,8 @@ class _ExecutionHost:
                     component="data_source",
                     status=HealthStatus.DEGRADED,
                     duration_seconds=0.02,
+                    provider="chembl",
+                    latency_ms=250.0,
                 ),
             ]
         )
@@ -274,8 +276,8 @@ async def test_run_managed_pipeline_preserves_canonical_stage_order() -> None:
             "component": "data_source",
             "healthy": True,
             "duration_ms": 20.0,
-            "provider": None,
-            "latency_ms": None,
+            "provider": "chembl",
+            "latency_ms": 250.0,
             "health_check_mode": "strict",
             "fallback_reason": None,
             "health_status": "DEGRADED",

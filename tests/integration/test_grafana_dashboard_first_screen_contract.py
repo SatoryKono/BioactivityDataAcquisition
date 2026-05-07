@@ -135,7 +135,7 @@ def test_provider_and_dq_range_evidence_panels_are_below_first_screen() -> None:
             dq,
             [
                 "Track Range Evidence: Bronze -> Silver -> Gold",
-                "Silver Filter Rejects",
+                "Track: Silver Filter Rejects in Range",
             ],
         ),
     }

@@ -17,70 +17,28 @@
   "gnetId": null,
   "graphTooltip": 1,
   "id": null,
-  "links": [
-    {
-      "asDropdown": false,
-      "icon": "external link",
-      "includeVars": false,
-      "keepTime": true,
-      "targetBlank": false,
-      "title": "0. Control Plane",
-      "tooltip": "Open with current pipeline/run_type and preserve the selected time range.",
-      "type": "link",
-      "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
-    },
-    {
-      "asDropdown": false,
-      "icon": "external link",
-      "includeVars": false,
-      "keepTime": true,
-      "targetBlank": false,
-      "title": "2. Runtime",
-      "tooltip": "Open with current pipeline/run_type, reset stage to unknown, and preserve the selected time range.",
-      "type": "link",
-      "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=unknown&${__url_time_range}"
-    },
-    {
-      "asDropdown": false,
-      "icon": "external link",
-      "includeVars": false,
-      "keepTime": true,
-      "targetBlank": false,
-      "title": "3. Provider Health",
-      "tooltip": "Context mapping: derive provider from current pipeline and remember pipeline_context for return links. Preserve the selected time range.",
-      "type": "link",
-      "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=$pipeline&var-pipeline_context=$pipeline&var-adapter=unknown&${__url_time_range}"
-    },
-    {
-      "asDropdown": false,
-      "icon": "external link",
-      "includeVars": false,
-      "keepTime": true,
-      "targetBlank": false,
-      "title": "4. Data Quality",
-      "tooltip": "Open with current pipeline/run_type, reset stage to unknown, and preserve the selected time range.",
-      "type": "link",
-      "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=unknown&${__url_time_range}"
-    },
-    {
-      "asDropdown": false,
-      "icon": "external link",
-      "includeVars": false,
-      "keepTime": true,
-      "targetBlank": false,
-      "title": "5. Workflow",
-      "tooltip": "Reset scope: open workflow target scope and preserve the selected time range.",
-      "type": "link",
-      "url": "/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}"
-    }
-  ],
   "panels": [
+    {
+      "gridPos": {
+        "h": 2,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1000,
+      "options": {
+        "content": "<div style=\"display:flex;gap:10px;flex-wrap:wrap;padding:10px;\"><a href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}\" target=\"_blank\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">0. Control Plane</a><a href=\"/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=unknown&${__url_time_range}\" target=\"_blank\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">2. Runtime</a><a href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&var-pipeline_context=$pipeline&var-adapter=unknown&${__url_time_range}\" target=\"_blank\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">3. Provider Health</a><a href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=unknown&${__url_time_range}\" target=\"_blank\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">4. Data Quality</a><a href=\"/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}\" target=\"_blank\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">5. Workflow</a></div>",
+        "mode": "html"
+      },
+      "title": "",
+      "type": "text"
+    },
     {
       "gridPos": {
         "h": 4,
         "w": 24,
         "x": 0,
-        "y": 0
+        "y": 2
       },
       "id": 99,
       "options": {
@@ -157,7 +115,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 6,
+        "h": 8,
         "w": 5,
         "x": 0,
         "y": 4
@@ -194,11 +152,11 @@
           },
           {
             "title": "Open Provider Health",
-            "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=$pipeline&var-pipeline_context=$pipeline&var-adapter=unknown&${__url_time_range}",
+            "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&var-pipeline_context=$pipeline&var-adapter=unknown&${__url_time_range}",
             "targetBlank": false
           },
           {
-            "title": "Open Workflow",
+            "title": "Open Workflow (Reset Scope)",
             "url": "/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}",
             "targetBlank": false
           }
@@ -219,7 +177,7 @@
       "type": "table",
       "title": "Next Action",
       "gridPos": {
-        "h": 6,
+        "h": 8,
         "w": 11,
         "x": 5,
         "y": 4
@@ -443,11 +401,11 @@
           },
           {
             "title": "Open Provider Health",
-            "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=$pipeline&var-pipeline_context=$pipeline&var-adapter=unknown&${__url_time_range}",
+            "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&var-pipeline_context=$pipeline&var-adapter=unknown&${__url_time_range}",
             "targetBlank": false
           },
           {
-            "title": "Open Workflow",
+            "title": "Open Workflow (Reset Scope)",
             "url": "/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}",
             "targetBlank": false
           }
@@ -475,14 +433,14 @@
           }
         }
       ],
-      "description": "Action route projection for the selected pipeline/run_type. If the panel resolves to `NO_ROUTE`, validate that `bioetl_overview_pipeline_run_type_universe` exists for the selected pipeline/run_type combination. The row exposes `action_target`, `action_reason`, and `action_dashboard_uid`; Runtime > Control Plane > Gold Lifecycle > DQ > Provider > Workflow > Monitor. Use the panel link whose title matches the routed target. Provider route stays global in origin but is projected back onto the selected run_type scope for L0 consistency."
+      "description": "Action route projection for the selected pipeline/run_type. If the panel resolves to `NO_ROUTE`, validate that `bioetl_overview_pipeline_run_type_universe` exists for the selected pipeline/run_type combination. The row exposes `action_target`, `action_reason`, and `action_dashboard_uid`; Runtime > Control Plane > Gold Lifecycle > DQ > Provider > Workflow > Monitor. Use the panel link whose title matches the routed target. Provider route fail-closes to `provider=unknown` while preserving `pipeline_context`; workflow handoff resets scope because the workflow dashboard does not accept pipeline/run_type variables."
     },
     {
       "id": 9002,
       "type": "table",
       "title": "L0 Inputs",
       "gridPos": {
-        "h": 6,
+        "h": 8,
         "w": 8,
         "x": 16,
         "y": 4
@@ -599,30 +557,6 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "pipeline"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Pipeline"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "run_type"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Run Type"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
               "options": "Value"
             },
             "properties": [
@@ -662,7 +596,7 @@
       },
       "targets": [
         {
-          "expr": "bioetl_l0_input_status_selected{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}",
+          "expr": "max by (input) (bioetl_l0_input_status_selected{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})",
           "refId": "A",
           "format": "table",
           "instant": true
@@ -672,7 +606,34 @@
         "showHeader": true,
         "footer": {
           "show": false
-        }
+        },
+        "dataLinks": [
+          {
+            "title": "Open Runtime",
+            "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=unknown&${__url_time_range}",
+            "targetBlank": false
+          },
+          {
+            "title": "Open Control Plane",
+            "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
+            "targetBlank": false
+          },
+          {
+            "title": "Open Data Quality",
+            "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=unknown&${__url_time_range}",
+            "targetBlank": false
+          },
+          {
+            "title": "Open Provider Health",
+            "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&var-pipeline_context=$pipeline&var-adapter=unknown&${__url_time_range}",
+            "targetBlank": false
+          },
+          {
+            "title": "Open Workflow (Reset Scope)",
+            "url": "/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}",
+            "targetBlank": false
+          }
+        ]
       },
       "transformations": [
         {
@@ -684,14 +645,10 @@
             },
             "indexByName": {
               "input": 0,
-              "pipeline": 1,
-              "run_type": 2,
-              "Value": 3,
-              "bioetl_l0_input_status_selected": 3
+              "Value": 1,
+              "bioetl_l0_input_status_selected": 1
             },
             "renameByName": {
-              "pipeline": "Pipeline",
-              "run_type": "Run Type",
               "input": "Input",
               "Value": "Status",
               "bioetl_l0_input_status_selected": "Status"
@@ -699,17 +656,17 @@
           }
         }
       ],
-      "description": "Current L0 inputs (Runtime, DQ, Gold, Control Plane, Provider, Workflow) projected onto the selected pipeline/run_type scope. Status values are OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null)."
+      "description": "Compact L0 input summary for the selected pipeline/run_type scope. Each row keeps the worst current status for one operator input (Runtime, DQ, Gold, Control Plane, Provider, Workflow) so the landing row fits without scroll. Status values are OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null). Use the panel links to open the matching drilldown; Workflow resets scope on handoff."
     },
     {
       "id": 9003,
       "type": "table",
       "title": "Runtime Blockers",
       "gridPos": {
-        "h": 5,
-        "w": 5,
+        "h": 7,
+        "w": 6,
         "x": 0,
-        "y": 10
+        "y": 12
       },
       "datasource": {
         "type": "prometheus",
@@ -789,18 +746,6 @@
               {
                 "id": "displayName",
                 "value": "Pipeline"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "run_type"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Run Type"
               }
             ]
           },
@@ -846,7 +791,7 @@
       },
       "targets": [
         {
-          "expr": "bioetl_l1_runtime_blocker_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}",
+          "expr": "max by (pipeline) (bioetl_l1_runtime_blocker_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})",
           "refId": "A",
           "format": "table",
           "instant": true
@@ -875,30 +820,28 @@
             },
             "indexByName": {
               "pipeline": 0,
-              "run_type": 1,
-              "Value": 2,
-              "bioetl_l1_runtime_blocker_status": 2
+              "Value": 1,
+              "bioetl_l1_runtime_blocker_status": 1
             },
             "renameByName": {
               "pipeline": "Pipeline",
-              "run_type": "Run Type",
               "Value": "Status",
               "bioetl_l1_runtime_blocker_status": "Status"
             }
           }
         }
       ],
-      "description": "Current runtime blocker summary only; no $__range evidence. Status values are OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null). Open Runtime for exact blocker condition rows."
+      "description": "Compact current runtime blocker summary. Each row keeps the worst current status per pipeline across the selected run_type scope so the first-screen table stays readable without scroll. Status values are OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null). Open Runtime for exact blocker condition rows."
     },
     {
       "id": 9004,
       "type": "table",
       "title": "DQ Status",
       "gridPos": {
-        "h": 5,
-        "w": 5,
-        "x": 5,
-        "y": 10
+        "h": 7,
+        "w": 6,
+        "x": 6,
+        "y": 12
       },
       "datasource": {
         "type": "prometheus",
@@ -978,18 +921,6 @@
               {
                 "id": "displayName",
                 "value": "Pipeline"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "run_type"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Run Type"
               }
             ]
           },
@@ -1035,7 +966,7 @@
       },
       "targets": [
         {
-          "expr": "bioetl_l1_dq_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}",
+          "expr": "max by (pipeline) (bioetl_l1_dq_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})",
           "refId": "A",
           "format": "table",
           "instant": true
@@ -1064,30 +995,28 @@
             },
             "indexByName": {
               "pipeline": 0,
-              "run_type": 1,
-              "Value": 2,
-              "bioetl_l1_dq_status": 2
+              "Value": 1,
+              "bioetl_l1_dq_status": 1
             },
             "renameByName": {
               "pipeline": "Pipeline",
-              "run_type": "Run Type",
               "Value": "Status",
               "bioetl_l1_dq_status": "Status"
             }
           }
         }
       ],
-      "description": "Current DQ summary for the selected pipeline/run_type scope. Status values are OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null)."
+      "description": "Compact current DQ summary. Each row keeps the worst current status per pipeline across the selected run_type scope so the first-screen table stays readable without scroll. Status values are OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null)."
     },
     {
       "id": 9005,
       "type": "table",
       "title": "Gold Lifecycle",
       "gridPos": {
-        "h": 5,
-        "w": 8,
-        "x": 16,
-        "y": 10
+        "h": 7,
+        "w": 6,
+        "x": 18,
+        "y": 12
       },
       "datasource": {
         "type": "prometheus",
@@ -1161,61 +1090,12 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "lifecycle_state"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Lifecycle"
-              },
-              {
-                "id": "mappings",
-                "value": [
-                  {
-                    "type": "value",
-                    "options": {
-                      "disabled": {
-                        "text": "Stage disabled"
-                      },
-                      "gold_missing_after_success": {
-                        "text": "Gold missing"
-                      },
-                      "healthy_recent_gold": {
-                        "text": "Gold healthy"
-                      },
-                      "pending_no_recent_gold": {
-                        "text": "Pending gold"
-                      },
-                      "runtime_failed_owner": {
-                        "text": "Runtime failed"
-                      }
-                    }
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
               "options": "pipeline"
             },
             "properties": [
               {
                 "id": "displayName",
                 "value": "Pipeline"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "run_type"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Run Type"
               }
             ]
           },
@@ -1261,7 +1141,7 @@
       },
       "targets": [
         {
-          "expr": "bioetl_l1_gold_lifecycle_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}",
+          "expr": "max by (pipeline) (bioetl_l1_gold_lifecycle_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})",
           "refId": "A",
           "format": "table",
           "instant": true
@@ -1289,33 +1169,29 @@
               "__name__": true
             },
             "indexByName": {
-              "lifecycle_state": 0,
-              "pipeline": 1,
-              "run_type": 2,
-              "Value": 3,
-              "bioetl_l1_gold_lifecycle_status": 3
+              "pipeline": 0,
+              "Value": 1,
+              "bioetl_l1_gold_lifecycle_status": 1
             },
             "renameByName": {
               "pipeline": "Pipeline",
-              "run_type": "Run Type",
-              "lifecycle_state": "Lifecycle",
               "Value": "Status",
               "bioetl_l1_gold_lifecycle_status": "Status"
             }
           }
         }
       ],
-      "description": "Lifecycle-state projection for gold output. `lifecycle_state` distinguishes runtime-owned failure, missing gold after success, pending, disabled, and healthy recent gold. Status values are OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null). Disabled Gold stage returns OK and is a valid non-error state."
+      "description": "Compact current gold lifecycle summary. Each row keeps the worst lifecycle status per pipeline across the selected run_type scope so the first-screen table stays readable without scroll. Status values are OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null). Open Runtime for the exact lifecycle-state breakdown."
     },
     {
       "id": 9006,
       "type": "table",
       "title": "Control Plane",
       "gridPos": {
-        "h": 5,
+        "h": 7,
         "w": 6,
-        "x": 10,
-        "y": 10
+        "x": 12,
+        "y": 12
       },
       "datasource": {
         "type": "prometheus",
@@ -1401,18 +1277,6 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "run_type"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Run Type"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
               "options": "Value"
             },
             "properties": [
@@ -1452,7 +1316,7 @@
       },
       "targets": [
         {
-          "expr": "bioetl_l1_control_plane_current_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}",
+          "expr": "max by (pipeline) (bioetl_l1_control_plane_current_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})",
           "refId": "A",
           "format": "table",
           "instant": true
@@ -1481,30 +1345,28 @@
             },
             "indexByName": {
               "pipeline": 0,
-              "run_type": 1,
-              "Value": 2,
-              "bioetl_l1_control_plane_current_status": 2
+              "Value": 1,
+              "bioetl_l1_control_plane_current_status": 1
             },
             "renameByName": {
               "pipeline": "Pipeline",
-              "run_type": "Run Type",
               "Value": "Status",
               "bioetl_l1_control_plane_current_status": "Status"
             }
           }
         }
       ],
-      "description": "Current control-plane summary for manifest, ledger, checkpoint, and lineage guardrails. Status values are OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null). Open Control Plane for the exact failing contract."
+      "description": "Compact current control-plane summary for manifest, ledger, checkpoint, and lineage guardrails. Each row keeps the worst current status per pipeline across the selected run_type scope. Status values are OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null). Open Control Plane for the exact failing contract."
     },
     {
       "id": 9007,
       "type": "table",
       "title": "Provider Global",
       "gridPos": {
-        "h": 5,
-        "w": 10,
+        "h": 7,
+        "w": 8,
         "x": 0,
-        "y": 15
+        "y": 19
       },
       "datasource": {
         "type": "prometheus",
@@ -1643,7 +1505,7 @@
         "dataLinks": [
           {
             "title": "Open Provider Health",
-            "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=$pipeline&var-pipeline_context=$pipeline&var-adapter=unknown&${__url_time_range}",
+            "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&var-pipeline_context=$pipeline&var-adapter=unknown&${__url_time_range}",
             "targetBlank": false
           }
         ]
@@ -1669,17 +1531,17 @@
           }
         }
       ],
-      "description": "GLOBAL provider scope across pipelines. Status values are OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null). This panel intentionally ignores selected pipeline/run_type filters."
+      "description": "GLOBAL provider scope across pipelines. Status values are OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null). This panel intentionally ignores selected pipeline/run_type filters. Open Provider Health fail-closes to provider=unknown and preserves pipeline_context for return navigation."
     },
     {
       "id": 9008,
       "type": "table",
       "title": "Workflow Selected",
       "gridPos": {
-        "h": 5,
-        "w": 7,
-        "x": 10,
-        "y": 15
+        "h": 7,
+        "w": 8,
+        "x": 8,
+        "y": 19
       },
       "datasource": {
         "type": "prometheus",
@@ -1759,18 +1621,6 @@
               {
                 "id": "displayName",
                 "value": "Pipeline"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "run_type"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Run Type"
               }
             ]
           },
@@ -1816,7 +1666,7 @@
       },
       "targets": [
         {
-          "expr": "bioetl_l1_workflow_selected_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}",
+          "expr": "max by (pipeline) (bioetl_l1_workflow_selected_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})",
           "refId": "A",
           "format": "table",
           "instant": true
@@ -1829,7 +1679,7 @@
         },
         "dataLinks": [
           {
-            "title": "Open Workflow",
+            "title": "Open Workflow (Reset Scope)",
             "url": "/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}",
             "targetBlank": false
           }
@@ -1845,30 +1695,28 @@
             },
             "indexByName": {
               "pipeline": 0,
-              "run_type": 1,
-              "Value": 2,
-              "bioetl_l1_workflow_selected_status": 2
+              "Value": 1,
+              "bioetl_l1_workflow_selected_status": 1
             },
             "renameByName": {
               "pipeline": "Pipeline",
-              "run_type": "Run Type",
               "Value": "Status",
               "bioetl_l1_workflow_selected_status": "Status"
             }
           }
         }
       ],
-      "description": "Selected pipeline/run_type workflow summary only. Status values are OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null)."
+      "description": "Compact selected-scope workflow summary. Each row keeps the worst current workflow status per pipeline across the selected run_type scope so the first-screen table stays readable without scroll. Status values are OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null). Open Workflow resets scope because the workflow dashboard does not accept pipeline/run_type variables."
     },
     {
       "id": 9013,
       "type": "table",
       "title": "Workflow Global",
       "gridPos": {
-        "h": 5,
-        "w": 7,
-        "x": 17,
-        "y": 15
+        "h": 7,
+        "w": 8,
+        "x": 16,
+        "y": 19
       },
       "datasource": {
         "type": "prometheus",
@@ -1954,18 +1802,6 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "run_type"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Run Type"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
               "options": "Value"
             },
             "properties": [
@@ -2005,7 +1841,7 @@
       },
       "targets": [
         {
-          "expr": "bioetl_l1_workflow_global_status",
+          "expr": "max by (pipeline) (bioetl_l1_workflow_global_status)",
           "refId": "A",
           "format": "table",
           "instant": true
@@ -2034,20 +1870,18 @@
             },
             "indexByName": {
               "pipeline": 0,
-              "run_type": 1,
-              "Value": 2,
-              "bioetl_l1_workflow_global_status": 2
+              "Value": 1,
+              "bioetl_l1_workflow_global_status": 1
             },
             "renameByName": {
               "pipeline": "Pipeline",
-              "run_type": "Run Type",
               "Value": "Status",
               "bioetl_l1_workflow_global_status": "Status"
             }
           }
         }
       ],
-      "description": "GLOBAL workflow scope across pipeline/run_type combinations. Status values are OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null)."
+      "description": "Compact GLOBAL workflow scope across pipelines. Each row keeps the worst current workflow status per pipeline so the first-screen table stays readable without scroll. Status values are OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null)."
     },
     {
       "id": 9014,
@@ -2057,7 +1891,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 20
+        "y": 26
       },
       "collapsed": false
     },
@@ -2069,7 +1903,7 @@
         "h": 8,
         "w": 8,
         "x": 0,
-        "y": 21
+        "y": 27
       },
       "datasource": {
         "type": "prometheus",
@@ -2149,8 +1983,10 @@
       },
       "options": {
         "legend": {
-          "calcs": [],
-          "displayMode": "list",
+          "calcs": [
+            "lastNotNull"
+          ],
+          "displayMode": "table",
           "placement": "bottom",
           "showLegend": true
         },
@@ -2176,7 +2012,7 @@
         "h": 8,
         "w": 8,
         "x": 8,
-        "y": 21
+        "y": 27
       },
       "datasource": {
         "type": "prometheus",
@@ -2283,7 +2119,7 @@
         "h": 8,
         "w": 8,
         "x": 16,
-        "y": 21
+        "y": 27
       },
       "datasource": {
         "type": "prometheus",
@@ -2390,19 +2226,19 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 30
+        "y": 35
       },
       "collapsed": true,
       "panels": [
         {
           "id": 9010,
           "type": "table",
-          "title": "Historical Failures (range evidence)",
+          "title": "Historical Failures",
           "gridPos": {
-            "h": 5,
+            "h": 6,
             "w": 8,
             "x": 0,
-            "y": 21
+            "y": 27
           },
           "datasource": {
             "type": "prometheus",
@@ -2464,12 +2300,12 @@
         {
           "id": 9011,
           "type": "table",
-          "title": "Recent terminal runs (range evidence)",
+          "title": "Recent Terminal Runs",
           "gridPos": {
-            "h": 5,
+            "h": 6,
             "w": 8,
             "x": 8,
-            "y": 21
+            "y": 27
           },
           "datasource": {
             "type": "prometheus",
@@ -2493,7 +2329,7 @@
           },
           "targets": [
             {
-              "expr": "sum by (pipeline, run_type, status) (increase(bioetl_pipeline_runs_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}[$__range]))",
+              "expr": "sum by (pipeline, status) (increase(bioetl_pipeline_runs_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",status!=\"success\"}[$__range]))",
               "refId": "A",
               "format": "table",
               "instant": true
@@ -2515,30 +2351,28 @@
                 },
                 "indexByName": {
                   "pipeline": 0,
-                  "run_type": 1,
-                  "status": 2,
-                  "Value": 3
+                  "status": 1,
+                  "Value": 2
                 },
                 "renameByName": {
                   "pipeline": "Pipeline",
-                  "run_type": "Run Type",
                   "status": "Terminal Status",
                   "Value": "Runs"
                 }
               }
             }
           ],
-          "description": "Historical terminal-run evidence only. Keeps `pipeline`, `run_type`, and `status` labels from the active Grafana window."
+          "description": "Historical terminal-run evidence only. Shows non-success terminal statuses grouped by pipeline so the evidence table stays readable without scroll while preserving the active Grafana time window."
         },
         {
           "id": 9015,
           "type": "stat",
-          "title": "Silver Rejects Count + Rate",
+          "title": "Silver Rejects + Rate",
           "gridPos": {
-            "h": 5,
+            "h": 6,
             "w": 8,
             "x": 16,
-            "y": 21
+            "y": 27
           },
           "datasource": {
             "type": "prometheus",
@@ -2640,7 +2474,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 22
+        "y": 36
       },
       "collapsed": true,
       "panels": [
