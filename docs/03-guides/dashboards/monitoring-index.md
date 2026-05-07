@@ -25,7 +25,7 @@ Use the linked dashboards and artifacts for deep setup, contracts, and extension
 | Provider retries, slowness, or failures? | `bioetl-provider-health-v2` | `bioetl diagnostics health --json`; provider incident runbook | [Incident Response](../../05-operations/runbooks/incident-response.md) |
 | DQ/freshness/quarantine signal concern? | `bioetl-dq-v2` | `bioetl diagnostics quarantine --pipeline <pipeline>` | [DQ Failure Investigation](../../05-operations/runbooks/dq-failure-investigation.md) |
 | Need exact rejected record evidence? | `bioetl-silver-reject-explorer` | `bioetl quarantine inspect --pipeline <pipeline> --silver-filter-only ...` | [Quarantine Management](../../05-operations/runbooks/quarantine-management.md) |
-| Replay/recovery trust question for run family? | `bioetl-control-plane-v1` | `Replay / Resume Blockers`, `bioetl checkpoint inspect`, `bioetl checkpoint audit-run` | [Run Manifest Inspection](../../05-operations/runbooks/run-manifest-inspection.md) |
+| Replay/recovery trust question for run family? | `bioetl-control-plane-v1` | `Track: Replay / Resume Blockers in Range`, `bioetl checkpoint inspect`, `bioetl checkpoint audit-run`, then `bioetl run-manifest show <run-id|manifest-id>` for exact manifest/ledger evidence | [Checkpoint Debugging](../../05-operations/runbooks/checkpoint-debugging.md) |
 | Declarative workflow step failed or skipped? | `bioetl-workflow-overview` | `bioetl_workflow_*` metrics | [Dashboard v2 Usage](dashboard-v2-usage.md) |
 | Metrics/dashboard vocabulary drift check? | inventory helper | `python -m scripts.engineering.qa report-observability-metric-inventory --json` | [Observability Metrics Contract](../../04-reference/contracts/observability.md) |
 
@@ -38,10 +38,10 @@ Record-level forensics, exact replay evidence, and per-run identifiers belong in
 | Symptom (X) | Dashboard (Y) | Panel (Z) |
 | --- | --- | --- |
 | "What is broken or degraded now?" | `bioetl-overview-v2` | `System Status`, then `Next Action` |
-| Runtime failures / lag / blocker drift | `bioetl-runtime` | `Monitor Runtime Current Status`, `Runtime Blockers`, `Inspect Top Runtime Blockers` |
+| Runtime failures / lag / blocker drift | `bioetl-runtime` | `Monitor Runtime Current Status`, `Monitor Runtime Blockers`, `Inspect Top Runtime Blockers` |
 | Provider degradation or retry exhaustion | `bioetl-provider-health-v2` | `Monitor GLOBAL Provider Severity Matrix`, `Inspect Provider Top Causes` |
 | DQ quality or quarantine increase | `bioetl-dq-v2` | `Monitor DQ Current Status`, `Monitor DQ Threshold State`, `Inspect DQ Current Reasons` |
-| Replay confidence / checkpoint issues | `bioetl-control-plane-v1` | `Replay / Resume Blockers` |
+| Replay confidence / checkpoint issues | `bioetl-control-plane-v1` | `Track: Replay / Resume Blockers in Range` |
 | Exact rejected record evidence | `bioetl-silver-reject-explorer` | `Main records table` (by `payload_hash`) |
 
 ## Architecture Map

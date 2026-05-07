@@ -35,7 +35,7 @@ ______________________________________________________________________
 
 Реализует CLI для взаимодействия с пользователем. Использует библиотеку **Click** для определения команд.
 
-**Доступные команды и support/compat модули в `commands/` (снимок синхронизирован на 2026-03-24):**
+**Доступные top-level команды и support/compat модули в `commands/` (снимок синхронизирован на 2026-05-07):**
 
 | Команда         | Модуль             | Описание                                                                            |
 | --------------- | ------------------ | ----------------------------------------------------------------------------------- |
@@ -48,11 +48,11 @@ ______________________________________________________________________
 | `health`        | `health.py`        | Public CLI seam; canonical implementation lives in `domains/health/command.py`      |
 | `config`        | `config.py`        | Просмотр и валидация конфигураций                                                   |
 | `checkpoint`    | `checkpoint.py`    | Управление checkpoint-ами                                                           |
+| `dq`            | `config_dq.py`     | Команды конфигурации data quality                                                   |
+| `diagnostics`   | `diagnostics.py`   | Unified operator diagnostics across metrics, health, checkpoints, manifests, and quarantine |
+| `lineage`       | `lineage.py`       | Inspect pipeline lineage                                                            |
 | `lock`          | `lock.py`          | Управление блокировками                                                             |
-| `vacuum`        | `vacuum.py`        | Public CLI seam; canonical implementation lives in `domains/maintenance/vacuum.py`  |
-| `cleanup`       | `cleanup.py`       | Public CLI seam; canonical implementation lives in `domains/maintenance/cleanup.py` |
 | `maintenance`   | `maintenance.py`   | Public CLI seam; canonical implementation lives in `domains/maintenance/command.py` |
-| `archive`       | `archive.py`       | Public CLI seam; canonical implementation lives in `domains/maintenance/archive.py` |
 | `adr`           | `adr.py`           | Управление ADR (Architecture Decisions)                                             |
 | `debug`         | `debug.py`         | Диагностические утилиты                                                             |
 

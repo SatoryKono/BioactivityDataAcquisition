@@ -83,10 +83,10 @@ histogram_quantile(0.95, sum by (le, provider) (rate(bioetl_health_check_latency
 
 7. Добавлен отдельный runtime dashboard:
 
-- `bioetl-runtime` собирает Loki-backed `Warnings` и `Unstructured Logs` за выбранный
-  Grafana time range;
-- panel `Log Hygiene Trend` теперь действительно является timeseries и использует
-  adaptive bucket size через `$__interval`;
+- `bioetl-runtime` собирает Loki-backed `Inspect Warning Logs` и
+  `Inspect Unstructured Logs` за выбранный Grafana time range;
+- panel `Track Log Hygiene Trend` теперь действительно является timeseries и
+  использует adaptive bucket size через `$__interval`;
 - Prometheus-backed панели `Alert Conditions` привязаны к тем же fixed windows, что и
   shipped rule pack, но по-прежнему не являются real firing-state alert engine;
 - runtime dashboard содержит `Back to Overview` и Explore surfaces; переходы
@@ -140,10 +140,10 @@ histogram_quantile(0.95, sum by (le, provider) (rate(bioetl_health_check_latency
 13. Внедрён first-screen responsibility contract для L2 dashboards:
 
 - `2. Runtime`: первый экран теперь содержит `First Action`,
-  `Monitor Runtime Current Status`, `Runtime Blockers` и
+  `Monitor Runtime Current Status`, `Monitor Runtime Blockers` и
   `Inspect Top Runtime Blockers`; aggregate blockers потребляют
-  `bioetl_runtime_current_blocker_reason`, а inline PromQL aggregation вынесена
-  в recording rules.
+  `bioetl_runtime_current_blocker_reason` в selected `pipeline/run_type` scope,
+  а inline PromQL aggregation вынесена в recording rules.
 - `3. Provider Health`: первый экран начинается с `GLOBAL Provider Scope`,
   `Monitor GLOBAL Provider Severity Matrix`, `Inspect Critical Providers`,
   `Inspect Provider Top Causes` и `First Action`; range counters/trends
@@ -163,7 +163,7 @@ histogram_quantile(0.95, sum by (le, provider) (rate(bioetl_health_check_latency
 - `bioetl-control-plane-v1`: checkpoint/replay/audit/global-read + lineage detail
 - `bioetl-dq-v2`: `id=99`, `id=101`, `id=9100..9103`, `id=1..12`, `id=116`, `id=121`, `id=153..155`
 - `bioetl-provider-health-v2`: first-screen `id=9100..9103`, `id=9002`, row `id=91` + evidence panels `1,2,104,7,102`
-- `bioetl-runtime`: first-screen `id=1`, `id=9991`, `id=9100..9101`, `id=16`, links в `Explore`
+- `bioetl-runtime`: first-screen `id=1`, `id=9991`, `id=9100..9102`, `id=16`, links в `Explore`
 - `bioetl-workflow-overview`: `id=1..9` с `$workflow/$status/$step_status/$step_kind` scope
 
 ## Canonical decision: default time windows (single source for docs sync)

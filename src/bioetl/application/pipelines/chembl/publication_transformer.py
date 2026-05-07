@@ -17,10 +17,7 @@ __all__ = ["PublicationTransformer"]
 
 from typing import TYPE_CHECKING, Any, cast
 
-from bioetl.application.core.base_transformer import (
-    TransformationError,
-    TransformerDependencyContext,
-)
+from bioetl.application.core.base_transformer import TransformationError
 from bioetl.application.core.field_specs import (
     INT,
     PMID,
@@ -39,9 +36,6 @@ from bioetl.domain.value_objects import PublicationYear
 from bioetl.domain.value_objects.publications import DOI
 
 if TYPE_CHECKING:
-    from bioetl.domain.behavior import EntityIdentityGenerator
-    from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
-    from bioetl.domain.ports import MetricsPort, PiiHasherPort, TracingPort
     from bioetl.domain.types import PrimaryId
 
 

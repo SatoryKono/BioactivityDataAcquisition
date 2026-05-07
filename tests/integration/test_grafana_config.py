@@ -27,6 +27,7 @@ from tests.integration._grafana_test_support import (
 pytestmark = pytest.mark.integration
 
 RULES_PATH = Path("grafana/prometheus-rules/bioetl_observability.yml")
+PROMETHEUS_RULE_FILES = tuple(Path("grafana/prometheus-rules").glob("*.yml"))
 GRAFANA_DASHBOARD_PROVISIONING_PATH = Path(
     "grafana/provisioning/dashboards/bioetl.yaml"
 )
@@ -94,14 +95,17 @@ def _load_navigation_contract() -> dict:
 
 
 def _load_recording_rule_names() -> set[str]:
-    payload = yaml.safe_load(RULES_PATH.read_text(encoding="utf-8"))
-    assert isinstance(payload, dict)
-    return {
-        record_name
-        for group in payload.get("groups", [])
-        for rule in group.get("rules", [])
-        if isinstance(record_name := rule.get("record"), str)
-    }
+    names: set[str] = set()
+    for rules_path in PROMETHEUS_RULE_FILES:
+        payload = yaml.safe_load(rules_path.read_text(encoding="utf-8"))
+        assert isinstance(payload, dict)
+        names.update(
+            record_name
+            for group in payload.get("groups", [])
+            for rule in group.get("rules", [])
+            if isinstance(record_name := rule.get("record"), str)
+        )
+    return names
 
 
 def _dashboard_variable_names(dashboard: dict) -> set[object]:
@@ -167,6 +171,88 @@ def test_dashboard_is_valid_json(dashboard_path):
     data = _json_load_without_duplicate_keys(dashboard_path)
     assert isinstance(data, dict)
     assert "title" in data
+
+
+@pytest.mark.parametrize("dashboard_path", get_dashboard_files(), ids=lambda p: p.name)
+def test_dashboard_panel_ids_are_unique(dashboard_path: Path) -> None:
+    """Panel IDs must stay unique across root and collapsed-row panels."""
+    dashboard = load_dashboard(dashboard_path)
+    panel_refs = [
+        (panel.get("id"), panel.get("title", "<untitled>"))
+        for panel in get_dashboard_panels(dashboard)
+        if panel.get("id") is not None
+    ]
+    counts = Counter(panel_id for panel_id, _title in panel_refs)
+    duplicates = {
+        panel_id: [
+            title for candidate_id, title in panel_refs if candidate_id == panel_id
+        ]
+        for panel_id, count in counts.items()
+        if count > 1
+    }
+    assert not duplicates, (
+        f"Dashboard {dashboard_path.name} has duplicate panel IDs: {duplicates}"
+    )
+
+
+@pytest.mark.parametrize("dashboard_path", get_dashboard_files(), ids=lambda p: p.name)
+def test_dashboard_prometheus_datasource_contract(dashboard_path: Path) -> None:
+    """Prometheus panel and target datasources must use explicit provisioned UID."""
+    dashboard = load_dashboard(dashboard_path)
+    errors: list[str] = []
+
+    for panel in get_dashboard_panels(dashboard):
+        panel_id = panel.get("id", "<unknown>")
+        panel_title = panel.get("title", "<untitled>")
+        datasource = panel.get("datasource")
+
+        if datasource == "Prometheus":
+            errors.append(
+                f"panel id={panel_id} title={panel_title!r} uses string "
+                "datasource 'Prometheus'; use explicit object format"
+            )
+        elif isinstance(datasource, dict):
+            is_prometheus = (
+                datasource.get("type") == "prometheus"
+                or datasource.get("uid") == "prometheus"
+            )
+            if is_prometheus and datasource != {
+                "type": "prometheus",
+                "uid": "prometheus",
+            }:
+                errors.append(
+                    f"panel id={panel_id} title={panel_title!r} has non-canonical "
+                    f"Prometheus datasource object: {datasource}"
+                )
+
+        for target in panel.get("targets", []):
+            target_ref = target.get("refId", "<unknown>")
+            target_datasource = target.get("datasource")
+            if not isinstance(target_datasource, dict):
+                continue
+            if target_datasource.get("uid") == "${DS_PROMETHEUS}":
+                errors.append(
+                    f"panel id={panel_id} title={panel_title!r} target={target_ref} "
+                    "still uses ${DS_PROMETHEUS}"
+                )
+            is_prometheus_target = (
+                target_datasource.get("type") == "prometheus"
+                or target_datasource.get("uid") == "prometheus"
+            )
+            if is_prometheus_target and target_datasource != {
+                "type": "prometheus",
+                "uid": "prometheus",
+            }:
+                errors.append(
+                    f"panel id={panel_id} title={panel_title!r} target={target_ref} "
+                    f"has non-canonical Prometheus datasource object: "
+                    f"{target_datasource}"
+                )
+
+    assert not errors, (
+        f"Dashboard {dashboard_path.name} violates Prometheus datasource "
+        f"contract:\n" + "\n".join(errors)
+    )
 
 
 @pytest.mark.parametrize("dashboard_path", get_dashboard_files(), ids=lambda p: p.name)
@@ -505,20 +591,19 @@ def test_control_plane_l1_triage_row_has_3_to_5_kpis_and_one_next_step() -> None
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
     panels = get_dashboard_panels(dashboard)
     kpi_titles = {
-        "Replay Safety State",
-        "Known Gap: Checkpoint Freshness",
-        "Ledger / Manifest Consistency",
-        "Control-Plane Telemetry Missing",
-        "Terminal Run Events",
+        "Monitor: Replay Safety State",
+        "Inspect: Known Gap - Checkpoint Freshness",
+        "Monitor: Ledger / Manifest Consistency",
+        "Inspect: Control-Plane Telemetry Missing",
     }
-    next_step_title = "Next Drilldown: Replay Safety Diagnostics"
+    next_step_title = "Next Action: Replay Safety Diagnostics"
     first_screen_titles = {
         panel.get("title") for panel in panels[:9] if panel.get("type") != "row"
     }
 
     assert kpi_titles.issubset(first_screen_titles)
     assert next_step_title in first_screen_titles
-    assert len(first_screen_titles & kpi_titles) == 5
+    assert len(first_screen_titles & kpi_titles) == 4
 
 
 def test_control_plane_l1_has_single_next_step_panel_with_expected_target() -> None:
@@ -526,11 +611,11 @@ def test_control_plane_l1_has_single_next_step_panel_with_expected_target() -> N
     panels = [
         panel
         for panel in get_dashboard_panels(dashboard)
-        if panel.get("title") == "Next Drilldown: Replay Safety Diagnostics"
+        if panel.get("title") == "Next Action: Replay Safety Diagnostics"
     ]
     assert len(panels) == 1
 
-    links = panels[0].get("links", [])
+    links = panels[0].get("options", {}).get("dataLinks", [])
     assert len(links) == 1
     url = str(links[0].get("url", ""))
     assert "/d/bioetl-control-plane-v1/bioetl-control-plane-v1" in url
@@ -544,7 +629,7 @@ def test_control_plane_has_replay_resume_blockers_panel() -> None:
         for panel in get_dashboard_panels(dashboard)
         if panel.get("title")
     }
-    panel = panels.get("Replay / Resume Blockers")
+    panel = panels.get("Track: Replay / Resume Blockers in Range")
 
     assert panel is not None
     expr = "\n".join(
@@ -567,12 +652,12 @@ def test_control_plane_lookup_panels_disclose_global_scope() -> None:
     """Control-plane read panels must disclose that they are global, not pipeline-scoped."""
     expectations = {
         "bioetl-control-plane-v1.json": (
-            "GLOBAL Control-Plane Read Failures",
-            "GLOBAL Control-Plane Read Failure Ratio",
-            "GLOBAL Control-Plane Read Latency p50/p95/p99",
-            "GLOBAL Control-Plane Reads by Store / Operation / Status",
-            "GLOBAL Checkpoint Operator Failures",
-            "GLOBAL Checkpoint Operator Latency p50/p95/p99",
+            "Monitor: GLOBAL Control-Plane Read Failures",
+            "Monitor: GLOBAL Control-Plane Read Failure Ratio",
+            "Track: GLOBAL Control-Plane Read Latency p50/p95/p99",
+            "Track: GLOBAL Control-Plane Reads by Store / Operation / Status",
+            "Monitor: GLOBAL Checkpoint Operator Failures",
+            "Track: GLOBAL Checkpoint Operator Latency p50/p95/p99",
         ),
     }
 
@@ -593,10 +678,10 @@ def test_control_plane_read_panels_do_not_filter_on_missing_pipeline_label() -> 
     """Control-plane read panels must not filter global metrics by pipeline."""
     expectations = {
         "bioetl-control-plane-v1.json": (
-            "GLOBAL Control-Plane Read Failures",
-            "GLOBAL Control-Plane Read Failure Ratio",
-            "GLOBAL Control-Plane Read Latency p50/p95/p99",
-            "GLOBAL Control-Plane Reads by Store / Operation / Status",
+            "Monitor: GLOBAL Control-Plane Read Failures",
+            "Monitor: GLOBAL Control-Plane Read Failure Ratio",
+            "Track: GLOBAL Control-Plane Read Latency p50/p95/p99",
+            "Track: GLOBAL Control-Plane Reads by Store / Operation / Status",
         ),
     }
 
@@ -663,11 +748,11 @@ def test_control_plane_latency_panels_have_p50_p95_p99() -> None:
         if panel.get("title")
     }
     latency_panels = (
-        "Checkpoint Save Latency p50/p95/p99",
-        "GLOBAL Checkpoint Operator Latency p50/p95/p99",
-        "GLOBAL Control-Plane Read Latency p50/p95/p99",
-        "Audit Write Latency p50/p95/p99",
-        "Audit Query Latency p50/p95/p99",
+        "Track: Checkpoint Save Latency p50/p95/p99",
+        "Track: GLOBAL Checkpoint Operator Latency p50/p95/p99",
+        "Track: GLOBAL Control-Plane Read Latency p50/p95/p99",
+        "Track: Audit Write Latency p50/p95/p99",
+        "Track: Audit Query Latency p50/p95/p99",
     )
 
     for panel_title in latency_panels:
@@ -698,7 +783,7 @@ def test_control_plane_missing_signals_text_panel_exists() -> None:
         (
             panel
             for panel in get_dashboard_panels(dashboard)
-            if panel.get("title") == "Known Missing Replay-Safety Signals"
+            if panel.get("title") == "Review: Known Missing Replay-Safety Signals"
         ),
         None,
     )
@@ -776,7 +861,7 @@ def test_provider_dashboard_surfaces_current_health_status_panel() -> None:
         (
             item
             for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Current Provider Health Status"
+            if item.get("title") == "Monitor Current Provider Health Status"
         ),
         None,
     )
@@ -866,7 +951,7 @@ def test_runtime_provider_alert_conditions_do_not_filter_on_missing_pipeline_lab
         (
             item
             for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "GLOBAL Provider Alert Conditions"
+            if item.get("title") == "Inspect GLOBAL Provider Alert Conditions"
         ),
         None,
     )
@@ -878,7 +963,7 @@ def test_runtime_provider_alert_conditions_do_not_filter_on_missing_pipeline_lab
     ]
     assert expressions
     assert all('{pipeline=~"$pipeline"}' not in expr for expr in expressions), (
-        "GLOBAL Provider Alert Conditions must not filter provider-only recording rules by pipeline."
+        "Inspect GLOBAL Provider Alert Conditions must not filter provider-only recording rules by pipeline."
     )
 
 
@@ -1104,11 +1189,37 @@ def test_runtime_dashboard_keeps_loki_log_hygiene_in_collapsed_tracing_row() -> 
         if isinstance(panel.get("title"), str)
     }
     assert nested_titles == {
-        "Warnings",
-        "Unstructured Logs",
-        "Top Warning Events",
-        "Log Hygiene Trend",
+        "Inspect Warning Logs",
+        "Inspect Unstructured Logs",
+        "Track Top Warning Events",
+        "Track Log Hygiene Trend",
     }
+
+
+def test_runtime_warning_loki_queries_filter_parsed_fields_after_json() -> None:
+    """Warning log panels must not filter parsed JSON fields in the Loki selector."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
+    panels = {
+        panel.get("title"): panel
+        for panel in get_dashboard_panels(dashboard)
+        if panel.get("title")
+    }
+
+    warning_panel = panels["Inspect Warning Logs"]
+    warning_expr = warning_panel["targets"][0]["expr"]
+    assert '{job="bioetl"}' in warning_expr
+    assert '{job="bioetl", level="warning"}' not in warning_expr
+    assert "| json" in warning_expr
+    assert '__error__=""' in warning_expr
+    assert '| level="warning"' in warning_expr
+
+    top_warning_panel = panels["Track Top Warning Events"]
+    top_warning_expr = top_warning_panel["targets"][0]["expr"]
+    assert '{job="bioetl"}' in top_warning_expr
+    assert '{job="bioetl", level="warning"}' not in top_warning_expr
+    assert "count_over_time(" in top_warning_expr
+    assert "sum by (message)" in top_warning_expr
+    assert "topk(10" in top_warning_expr
 
 
 def test_runtime_dashboard_describes_tracing_optional_mode() -> None:
@@ -1122,7 +1233,7 @@ def test_runtime_dashboard_describes_tracing_optional_mode() -> None:
         (
             panel
             for panel in dashboard.get("panels", [])
-            if panel.get("title") == "Diagnostic Scope Note"
+            if panel.get("title") == "Review Diagnostic Scope Note"
         ),
         None,
     )
@@ -1207,11 +1318,11 @@ def test_runtime_pipeline_errors_panel_uses_runtime_error_metric_and_selected_ti
         (
             item
             for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Runtime Error Rate"
+            if item.get("title") == "Monitor Runtime Error Rate"
         ),
         None,
     )
-    assert panel is not None, "Panel 'Runtime Error Rate' not found"
+    assert panel is not None, "Panel 'Monitor Runtime Error Rate' not found"
 
     expressions = [
         target.get("expr", "")
@@ -1219,10 +1330,10 @@ def test_runtime_pipeline_errors_panel_uses_runtime_error_metric_and_selected_ti
         if isinstance(target.get("expr"), str)
     ]
     assert any("bioetl_errors_total" in expr for expr in expressions), (
-        "Runtime Error Rate must use bioetl_errors_total"
+        "Monitor Runtime Error Rate must use bioetl_errors_total"
     )
     assert any("[30m]" in expr for expr in expressions), (
-        "Runtime Error Rate must use the shipped 30-minute window"
+        "Monitor Runtime Error Rate must use the shipped 30-minute window"
     )
 
 
@@ -1235,17 +1346,19 @@ def test_runtime_pipeline_error_code_breakdown_uses_bounded_runtime_error_metric
         (
             item
             for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Errors by Stage / Error Code / Range"
+            if item.get("title") == "Inspect Errors by Stage / Error Code / Range"
         ),
         None,
     )
-    assert panel is not None, "Panel 'Errors by Stage / Error Code / Range' not found"
+    assert panel is not None, (
+        "Panel 'Inspect Errors by Stage / Error Code / Range' not found"
+    )
 
     targets = [
         target for target in panel.get("targets", []) if isinstance(target, dict)
     ]
     assert targets, (
-        "Panel 'Errors by Stage / Error Code / Range' must define a query target"
+        "Panel 'Inspect Errors by Stage / Error Code / Range' must define a query target"
     )
     expressions = [
         target.get("expr", "")
@@ -1253,17 +1366,17 @@ def test_runtime_pipeline_error_code_breakdown_uses_bounded_runtime_error_metric
         if isinstance(target.get("expr"), str)
     ]
     assert any("bioetl_errors_total" in expr for expr in expressions), (
-        "Errors by Stage / Error Code / Range must use bioetl_errors_total"
+        "Inspect Errors by Stage / Error Code / Range must use bioetl_errors_total"
     )
     assert any(
         "by(stage, error_code)" in expr or "by (stage, error_code)" in expr
         for expr in expressions
-    ), "Errors by Stage / Error Code / Range must group by stage and error_code"
+    ), "Inspect Errors by Stage / Error Code / Range must group by stage and error_code"
     assert any("[$__range]" in expr for expr in expressions), (
-        "Errors by Stage / Error Code / Range must use the selected Grafana time range"
+        "Inspect Errors by Stage / Error Code / Range must use the selected Grafana time range"
     )
     assert all(target.get("instant") is True for target in targets), (
-        "Errors by Stage / Error Code / Range must use instant Prometheus queries"
+        "Inspect Errors by Stage / Error Code / Range must use instant Prometheus queries"
     )
 
 
@@ -1274,10 +1387,10 @@ def test_runtime_pipeline_error_code_breakdown_uses_bounded_runtime_error_metric
         ("Monitor Degraded Checks (Selected Range)", "[$__range]"),
         ("Track Provider Failure Rate (Selected Range)", "[$__range]"),
         ("Track Health Checks Total (Selected Range)", "[$__range]"),
-        ("Adapter Request Latency by Endpoint (p95)", "[$__interval]"),
-        ("HTTP Errors by Method / Error Type", "[$__interval]"),
-        ("Rate Limiter Wait by Provider (p95)", "[$__interval]"),
-        ("Minimum Rate Limiter Tokens Available", "[$__range]"),
+        ("Inspect Adapter Request Latency by Endpoint (p95)", "[$__interval]"),
+        ("Inspect HTTP Errors by Method/Error Type", "[$__interval]"),
+        ("Track Rate Limiter Wait by Provider (p95)", "[$__interval]"),
+        ("Monitor Minimum Rate Limiter Tokens Available", "[$__range]"),
     ],
 )
 def test_provider_health_summary_panels_use_selected_time_range(
@@ -1314,8 +1427,8 @@ def test_provider_circuit_breaker_panels_use_adapter_variable() -> None:
     )
 
     for panel_title in (
-        "Circuit Breaker State (max)",
-        "Circuit Breaker Trips by Provider",
+        "Monitor Circuit Breaker State (max)",
+        "Track Circuit Breaker Trips by Adapter",
     ):
         panel = next(
             (
@@ -1345,30 +1458,42 @@ def test_provider_circuit_breaker_panels_use_adapter_variable() -> None:
     [
         (
             "bioetl-runtime.json",
-            "Pipeline Phase Duration p50/p95/p99",
+            "Track Pipeline Phase Duration p50/p95/p99",
             "[$__rate_interval]",
         ),
-        ("bioetl-runtime.json", "Pipeline Duration p50/p95/p99", "[$__rate_interval]"),
         (
             "bioetl-runtime.json",
-            "Shutdown Initiated by Reason / Interval",
+            "Track Pipeline Duration p50/p95/p99",
+            "[$__rate_interval]",
+        ),
+        (
+            "bioetl-runtime.json",
+            "Track Shutdown Initiated by Reason / Interval",
             "[$__interval]",
         ),
         (
             "bioetl-runtime.json",
-            "Shutdown Completed by Reason / Interval",
+            "Track Shutdown Completed by Reason / Interval",
             "[$__interval]",
         ),
-        ("bioetl-control-plane-v1.json", "Audit Write Outcomes", "[$__interval]"),
-        ("bioetl-control-plane-v1.json", "Audit Query Outcomes", "[$__interval]"),
         (
             "bioetl-control-plane-v1.json",
-            "Audit Write Latency p50/p95/p99",
+            "Track: Audit Write Outcomes",
+            "[$__interval]",
+        ),
+        (
+            "bioetl-control-plane-v1.json",
+            "Track: Audit Query Outcomes",
+            "[$__interval]",
+        ),
+        (
+            "bioetl-control-plane-v1.json",
+            "Track: Audit Write Latency p50/p95/p99",
             "[$__range]",
         ),
         (
             "bioetl-control-plane-v1.json",
-            "Audit Query Latency p50/p95/p99",
+            "Track: Audit Query Latency p50/p95/p99",
             "[$__range]",
         ),
     ],
@@ -1403,17 +1528,17 @@ def test_runtime_and_control_plane_operator_panels_use_active_time_windows(
     [
         ("bioetl-overview-v2.json", "Historical Failures (range evidence)"),
         ("bioetl-overview-v2.json", "Recent terminal runs (range evidence)"),
-        ("bioetl-control-plane-v1.json", "GLOBAL Control-Plane Read Failures"),
+        ("bioetl-control-plane-v1.json", "Monitor: GLOBAL Control-Plane Read Failures"),
         (
             "bioetl-control-plane-v1.json",
-            "GLOBAL Control-Plane Read Latency p50/p95/p99",
+            "Track: GLOBAL Control-Plane Read Latency p50/p95/p99",
         ),
         ("bioetl-dq-v2.json", "Records Quarantined"),
         ("bioetl-dq-v2.json", "Soft Threshold Exceeded"),
         ("bioetl-dq-v2.json", "Quarantine by Error Type"),
         ("bioetl-dq-v2.json", "Silver Validation Failures"),
         ("bioetl-dq-v2.json", "Lineage Refs Missing"),
-        ("bioetl-runtime.json", "Records by Stage / Run Type / Range"),
+        ("bioetl-runtime.json", "Track Records by Stage / Run Type / Range"),
     ],
 )
 def test_range_aware_summary_panels_use_selected_time_range(
@@ -1510,11 +1635,11 @@ def test_runtime_first_action_row_precedes_condition_cards_in_order() -> None:
 @pytest.mark.parametrize(
     ("dashboard_file", "panel_title"),
     [
-        ("bioetl-control-plane-v1.json", "Lineage Fragment Outcomes"),
+        ("bioetl-control-plane-v1.json", "Track: Lineage Fragment Outcomes"),
         ("bioetl-dq-v2.json", "DQ Check Duration (p95)"),
         ("bioetl-dq-v2.json", "Anomalies Detected"),
-        ("bioetl-runtime.json", "Records by Stage / Interval"),
-        ("bioetl-runtime.json", "Log Hygiene Trend"),
+        ("bioetl-runtime.json", "Track Records by Stage / Interval"),
+        ("bioetl-runtime.json", "Track Log Hygiene Trend"),
     ],
 )
 def test_adaptive_trend_panels_use_selected_interval(
@@ -1547,12 +1672,12 @@ def test_adaptive_trend_panels_use_selected_interval(
     [
         (
             "bioetl-runtime.json",
-            "Errors by Stage / Error Code / Range",
+            "Inspect Errors by Stage / Error Code / Range",
             'label_replace(label_replace(vector(0), "stage", "none", "", ""), "error_code", "none", "", "")',
         ),
         (
             "bioetl-control-plane-v1.json",
-            "Checkpoint Compatibility Outcomes",
+            "Track: Checkpoint Compatibility Outcomes",
             'label_replace(vector(0), "disposition", "no_events", "", "")',
         ),
         (
@@ -1685,10 +1810,10 @@ def test_runtime_alert_condition_breakdown_panels_exist() -> None:
     """Runtime must expose localization panels in addition to summary cards."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
     expected = {
-        "Stage Backlog Trend": "bioetl_stage_backlog_records",
-        "Errors by Stage / Error Code / Range": "bioetl_errors_total",
-        "Records by Stage / Run Type / Range": "bioetl_records_processed_total",
-        "Pipeline Phase Duration p50/p95/p99": "bioetl_phase_duration_seconds_bucket",
+        "Track Stage Backlog Trend": "bioetl_stage_backlog_records",
+        "Inspect Errors by Stage / Error Code / Range": "bioetl_errors_total",
+        "Track Records by Stage / Run Type / Range": "bioetl_records_processed_total",
+        "Track Pipeline Phase Duration p50/p95/p99": "bioetl_phase_duration_seconds_bucket",
     }
     panels = {
         panel.get("title"): panel
@@ -1716,7 +1841,7 @@ def test_replay_panels_are_split_by_semantics(dashboard_file: str) -> None:
         if panel.get("title")
     }
 
-    reconstruct = panels.get("Replay Not Reconstructable")
+    reconstruct = panels.get("Monitor: Replay Not Reconstructable")
     assert reconstruct is not None
     reconstruct_expr = "\n".join(
         target.get("expr", "")
@@ -1729,7 +1854,7 @@ def test_replay_panels_are_split_by_semantics(dashboard_file: str) -> None:
 
     drift = panels.get("Replay Drift Events")
     if dashboard_file == "bioetl-control-plane-v1.json":
-        drift = panels.get("Replay Drift")
+        drift = panels.get("Monitor: Replay Drift")
     assert drift is not None
     drift_expr = "\n".join(
         target.get("expr", "")
@@ -1738,7 +1863,7 @@ def test_replay_panels_are_split_by_semantics(dashboard_file: str) -> None:
     )
     assert "bioetl_replay_drift_events_total" in drift_expr
 
-    lag = panels.get("Replay Lag Seconds")
+    lag = panels.get("Track: Replay Lag Seconds")
     assert lag is not None
     lag_expr = "\n".join(
         target.get("expr", "")
@@ -1759,8 +1884,8 @@ def test_control_plane_trust_panels_preserve_missing_telemetry() -> None:
     }
 
     for title in (
-        "Replay Safety State",
-        "Ledger / Manifest Consistency",
+        "Monitor: Replay Safety State",
+        "Monitor: Ledger / Manifest Consistency",
     ):
         panel = panels.get(title)
         assert panel is not None
@@ -1785,12 +1910,12 @@ def test_control_plane_exposes_terminal_events_and_telemetry_gap() -> None:
     }
 
     expected = {
-        "Control-Plane Telemetry Missing": (
-            "bioetl_control_plane_manifest_writes_total",
-            "bioetl_control_plane_ledger_appends_total",
-            "absent(",
+        "Inspect: Control-Plane Telemetry Missing": (
+            "bioetl_control_plane_telemetry_missing_5m",
         ),
-        "Terminal Run Events": ("bioetl_control_plane_terminal_events_total",),
+        "Inspect: Terminal Run Events by Status in Range": (
+            "bioetl_control_plane_terminal_events_total",
+        ),
     }
     for title, tokens in expected.items():
         panel = panels.get(title)
@@ -1802,9 +1927,11 @@ def test_control_plane_exposes_terminal_events_and_telemetry_gap() -> None:
         )
         for token in tokens:
             assert token in expr
-        assert panel.get("fieldConfig", {}).get("defaults", {}).get("noValue") == (
-            "UNKNOWN"
-        )
+
+    telemetry = panels["Inspect: Control-Plane Telemetry Missing"]
+    assert telemetry.get("fieldConfig", {}).get("defaults", {}).get("noValue") == (
+        "UNKNOWN"
+    )
 
 
 def test_control_plane_failure_ratio_thresholds_match_descriptions() -> None:
@@ -1816,7 +1943,11 @@ def test_control_plane_failure_ratio_thresholds_match_descriptions() -> None:
         if panel.get("title")
     }
 
-    for title in ("Manifest Write Failure Ratio", "Ledger Append Failure Ratio"):
+    for title in (
+        "Monitor: Manifest Write Failure Ratio",
+        "Monitor: Ledger Append Failure Ratio",
+        "Monitor: GLOBAL Control-Plane Read Failure Ratio",
+    ):
         panel = panels.get(title)
         assert panel is not None
         expr = "\n".join(
@@ -1824,7 +1955,11 @@ def test_control_plane_failure_ratio_thresholds_match_descriptions() -> None:
             for target in panel.get("targets", [])
             if isinstance(target.get("expr"), str)
         )
-        assert "> bool 0.1" in expr
+        if title == "Monitor: GLOBAL Control-Plane Read Failure Ratio":
+            assert "> bool 0.05" in expr
+            assert "> bool 0.10" in expr
+        else:
+            assert "> bool 0.1" in expr
         steps = (
             panel.get("fieldConfig", {})
             .get("defaults", {})
@@ -1922,7 +2057,7 @@ def test_provider_health_selected_provider_detail_row_is_collapsed() -> None:
 def test_runtime_dq_control_plane_expose_contextual_loki_explore_link() -> None:
     """Only Runtime/DQ critical panels expose contextual Loki Explore links."""
     dashboard_panels = {
-        "bioetl-runtime.json": "Failed Runs",
+        "bioetl-runtime.json": "Monitor Failed Runs",
         "bioetl-dq-v2.json": "Track Range Evidence: Bronze -> Silver -> Gold",
     }
 

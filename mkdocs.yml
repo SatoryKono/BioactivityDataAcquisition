@@ -210,6 +210,7 @@ nav:
                     -   "ADR-043 Documentation Knowledge Management": 02-architecture/decisions/ADR-043-documentation-knowledge-management.md
                     -   "ADR-044 Run Manifest and Run Ledger": 02-architecture/decisions/ADR-044-run-manifest-ledger-control-plane.md
                     -   "ADR-045 Data Quality Contract System": 02-architecture/decisions/ADR-045-dq-contract-system.md
+                    -   "ADR-046 Checkpoint Versus Ledger-Based Resume": 02-architecture/decisions/ADR-046-checkpoint-vs-ledger-resume.md
                     -   "Quality Gates Stabilization Notes": 02-architecture/decisions/notes/2026-03-04-quality-gates-stabilization.md
     -   Guides:
             -   "Overview": 03-guides/index.md
@@ -218,6 +219,7 @@ nav:
             -   "Docs Verification": 03-guides/docs-verification.md
             -   "Docs Parity Gate": 03-guides/docs-parity-gate.md
             -   "Running Pipelines": 03-guides/running-pipelines.md
+            -   "Workflows": 03-guides/workflows.md
             -   "GitHub Local Workflow": 03-guides/github-local-workflow.md
             -   "Pipeline Configuration": 03-guides/pipeline-configuration.md
             -   "Pipeline Lifecycle": 03-guides/pipeline-lifecycle.md
@@ -412,7 +414,6 @@ nav:
             -   "Architecture Extras":
                     -   "Compatibility Facade Inventory": 02-architecture/07-compatibility-facade-inventory.md
                     -   "Compatibility Facade Snapshot": 02-architecture/07-compatibility-facade-snapshot.md
-                    -   "Diagram Policy (Canonical)": 02-architecture/diagrams/governance/policy.md
                     -   "Diagram Policy (Historical)": 02-architecture/diagrams/governance/00-diagramming-policy.md
                     -   "Architecture Diagrams (Legacy Index)": 02-architecture/diagrams/guide/architecture-reference.md
                     -   "Diagram Root README": 02-architecture/diagrams/README.md
@@ -451,8 +452,6 @@ nav:
                     -   "Pipeline Review Checklist": 04-reference/templates/pipeline-review-checklist.md
                     -   "Pipeline Legacy: ChEMBL Activity": 04-reference/pipelines/chembl-activity.md
                     -   "Pipeline Legacy: ChEMBL Assay": 04-reference/pipelines/chembl-assay.md
-                    -   "Pipeline Legacy: OpenAlex Publication": 04-reference/pipelines/openalex/01-publication-spec.md
-                    -   "Pipeline Legacy: SemanticScholar Publication": 04-reference/pipelines/semanticscholar/01-publication-spec.md
             -   "Operations Extras":
                     -   "Monitoring Guide": 05-operations/01-monitoring-guide.md
                     -   "Deployment & Tooling Extras":

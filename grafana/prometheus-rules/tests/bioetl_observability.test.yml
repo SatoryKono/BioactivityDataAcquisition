@@ -31,6 +31,7 @@ tests:
         exp_alerts:
           - exp_labels:
               severity: critical
+              job: bioetl
             exp_annotations:
               summary: BioETL metrics endpoint has stopped emitting scrape samples
               description: No up{job="bioetl"} samples were observed for 10m; monitoring blind spots may be silent.
@@ -283,6 +284,18 @@ tests:
               description: Rate-limiter tokens dropped below 1 for provider=pubchem within the last 15m.
               runbook: docs/05-operations/runbooks/incident-response.md
 
+  - name: provider-current-status-fallback-materializes-unknown
+    interval: 1m
+    input_series:
+      - series: 'bioetl_health_check_success_total{provider="chembl"}'
+        values: '0+0x20'
+    promql_expr_test:
+      - expr: bioetl_provider_current_status
+        eval_time: 16m
+        exp_samples:
+          - labels: '{provider="chembl"}'
+            value: .nan
+
   - name: pipeline-runs-without-processed-records
     interval: 1m
     input_series:
@@ -460,7 +473,7 @@ tests:
     interval: 1m
     input_series:
       - series: 'bioetl_data_source_retry_exhausted_total{provider="crossref",operation="fetch_page"}'
-        values: '0+1x70'
+        values: '0+0x59 1+0x10'
     alert_rule_test:
       - eval_time: 65m
         alertname: BioETLProviderRetriesExhausted

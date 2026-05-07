@@ -23,7 +23,7 @@ from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
 )
 from bioetl.domain.entities import ChemblPublicationTerm
-from bioetl.domain.types import GoldRecord
+from bioetl.domain.types import GoldRecord, JsonDict
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
@@ -46,7 +46,7 @@ class PublicationTermTransformer(BaseChemblTransformer):
         del context, index
         business_data = self._prepare_term_business_data(record)
         return self._stage_optional_normalized_business_data(
-            business_data=cast("JsonDict | None", business_data),
+            business_data=cast(JsonDict | None, business_data),
             resolve_entity_id=lambda data: _resolve_publication_term_entity_id(
                 self, data
             ),
@@ -63,7 +63,7 @@ class PublicationTermTransformer(BaseChemblTransformer):
         return self._transform_optional_normalized_business_data(
             context=context,
             index=index,
-            business_data=cast("JsonDict | None", business_data),
+            business_data=cast(JsonDict | None, business_data),
             resolve_entity_id=lambda data: _resolve_publication_term_entity_id(
                 self, data
             ),

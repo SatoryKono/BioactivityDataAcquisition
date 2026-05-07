@@ -6,11 +6,14 @@ the UniprotTarget domain entity for validation and invariant checking.
 
 from __future__ import annotations
 
+__all__ = ["UniProtProteinTransformer"]
+
 from typing import TYPE_CHECKING, cast
 
 from bioetl.application.core.base_transformer import (
     BaseTransformer,
     TransformationError,
+    TransformerDependencyContext,
 )
 from bioetl.application.core.pre_silver_adapter_mixin import (
     PreSilverAdapterMixin,
@@ -23,10 +26,11 @@ from bioetl.domain.entities import UniprotTarget
 from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
+    from bioetl.domain.behavior import EntityIdentityGenerator
     from bioetl.domain.context import PipelineContext
+    from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
+    from bioetl.domain.ports import MetricsPort, PiiHasherPort, TracingPort
     from bioetl.domain.types import BronzeRecord, SilverRecord
-
-__all__ = ["UniProtProteinTransformer"]
 
 
 class UniProtProteinTransformer(
@@ -35,6 +39,31 @@ class UniProtProteinTransformer(
     """Transformer for UniProt protein records."""
 
     entity_class = UniprotTarget
+
+    def __init__(
+        self,
+        provider: str = "uniprot",
+        entity_type: str = "protein",
+        silver_filters: SilverFilterConfig | None = None,
+        gold_filters: GoldFilterConfig | None = None,
+        tracer: TracingPort | None = None,
+        metrics: MetricsPort | None = None,
+        identity_service: EntityIdentityGenerator | None = None,
+        pii_hasher: PiiHasherPort | None = None,
+        dependencies: TransformerDependencyContext | None = None,
+    ) -> None:
+        """Initialize UniProt protein transformer with provider defaults."""
+        super().__init__(
+            provider,
+            entity_type=entity_type,
+            silver_filters=silver_filters,
+            gold_filters=gold_filters,
+            tracer=tracer,
+            metrics=metrics,
+            identity_service=identity_service,
+            pii_hasher=pii_hasher,
+            dependencies=dependencies,
+        )
 
     async def _transform_impl(
         self,

@@ -83,7 +83,7 @@ The domain layer implements Domain-Driven Design patterns:
 | Document                                                                    | Description                                                          |
 | --------------------------------------------------------------------------- | -------------------------------------------------------------------- |
 | [API Reference](docs/04-reference/api/index.md)                             | Full API documentation with mkdocstrings                             |
-| [Architecture Decisions](docs/02-architecture/decisions/)                   | 45 ADRs explaining design choices                                    |
+| [Architecture Decisions](docs/02-architecture/decisions/)                   | 46 ADRs explaining design choices                                    |
 | [Ubiquitous Language](docs/00-project/glossary.md)                          | Domain terminology and canonical naming                              |
 | [RULES.md](docs/00-project/RULES.md)                                        | Canonical active governance and requirements                         |
 | [Project Map](docs/00-project/00-map.md)                                    | Primary navigator for active project docs                            |

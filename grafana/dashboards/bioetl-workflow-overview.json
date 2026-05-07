@@ -91,7 +91,10 @@
       "description": "Shows selected-range workflow evidence only, not current live run state. Variables: `Workflow` filters bounded workflow name; `Run Status` filters workflow run outcomes; `Step Status` and `Step Kind` filter step evidence panels. No run_id, stage, dependency, enricher, merge, cross-validation, or manifest-level labels exist on these Prometheus metrics. If selected-range failures are non-zero, continue in `2. Runtime` for stage/runtime blockers, `4. Data Quality` for validation/quarantine signals, `3. Provider Health` for upstream provider incidents, or `0. Control Plane` for replay/resume and ledger evidence."
     },
     {
-      "datasource": "Prometheus",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -152,7 +155,10 @@
       "description": "Counts failed workflow runs in the selected time range. `0` means no failed workflow runs were observed in the selected window; it does not prove a workflow is currently healthy or running. This panel intentionally uses selected-range evidence, not a current-state gauge. If this count is non-zero, inspect `Workflow Run Outcomes / Range`, then continue in `2. Runtime` for execution blockers or `0. Control Plane` for terminal run and replay evidence."
     },
     {
-      "datasource": "Prometheus",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -213,7 +219,10 @@
       "description": "Counts failed declarative workflow steps whose `step_kind=pipeline` in the selected time range. `0` means no failed pipeline step events were observed in the selected window; it does not prove stage-level success because the metric has no stage label. Use `2. Runtime` when this panel is non-zero to locate the blocking pipeline stage or runtime error path."
     },
     {
-      "datasource": "Prometheus",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -274,7 +283,10 @@
       "description": "Counts failed declarative workflow transform steps in the selected time range. `0` means no failed transform-step events were observed in the selected window. If this panel is non-zero, inspect `Step Outcomes by Kind / Step Status / Range`; if the transform failure originated from data validation or filtered outputs, continue in `4. Data Quality`."
     },
     {
-      "datasource": "Prometheus",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -335,7 +347,10 @@
       "description": "Counts skipped workflow step events in the selected time range. `0` means no skipped step events were observed in the selected window. This panel is useful when orchestration completed without hard failure but optional or resumable steps were skipped. If skips are unexpected, continue in `2. Runtime`; if the skip reflects transform filtering or DQ gates, continue in `4. Data Quality`."
     },
     {
-      "datasource": "Prometheus",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -382,7 +397,10 @@
       "description": "Shows selected-range workflow run counts split by workflow run status. Use this panel to see whether the chosen window contains `success`, `failed`, or other bounded run outcomes for the selected workflow. `No data` means no matching workflow runs were observed for the selected filters or telemetry is absent; it is not equivalent to workflow success. If failures dominate, continue in `2. Runtime` or `0. Control Plane` depending on whether you need execution or replay/ledger evidence."
     },
     {
-      "datasource": "Prometheus",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -431,7 +449,10 @@
       "description": "Shows selected-range step-event evidence split by `step_kind` and step `status`. Variables `Step Kind` and `Step Status` apply here. This panel does not identify the exact pipeline stage or transform step ID because the metric schema only exposes bounded `workflow`, `step_kind`, and `status` labels. If `pipeline / failed` dominates, continue in `2. Runtime`; if `transform / failed` or `skipped` dominates, inspect `4. Data Quality` when validation or filtering is suspected."
     },
     {
-      "datasource": "Prometheus",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {

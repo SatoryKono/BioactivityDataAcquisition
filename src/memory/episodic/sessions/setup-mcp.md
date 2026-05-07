@@ -1,8 +1,8 @@
 ---
 id: setup-mcp
-title: Setup MCP
+title: Configure MCP for BioETL
 task_id: setup-mcp
-created_at: '2026-05-05T04:59:26Z'
+created_at: '2026-05-07T11:54:01Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
@@ -15,7 +15,7 @@ query: mcp
 
 ## Task
 
-- Title: Setup MCP
+- Title: Configure MCP for BioETL
 - Retrieval query: mcp
 
 ## Retrieved context

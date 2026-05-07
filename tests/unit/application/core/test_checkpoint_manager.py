@@ -1319,6 +1319,7 @@ class TestCheckpointManagerCompatibilityPolicy:
                 "git_commit": "abc1234",
                 "exact_replay": True,
                 "input_snapshot_ids": ["bronze:chembl.activity:2025-01-01"],
+                "input_snapshot_fingerprint": "snapshot-fingerprint-stable",
                 "memory_decision_trace": decision_trace,
             },
         )
@@ -1345,6 +1346,7 @@ class TestCheckpointManagerCompatibilityPolicy:
                 git_commit="abc1234",
                 exact_replay=True,
                 input_snapshot_ids=("bronze:chembl.activity:2025-01-01",),
+                input_snapshot_fingerprint="snapshot-fingerprint-stable",
             ),
             compatibility_policy="hard_fail",
         )

@@ -14,42 +14,43 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 
 | Dashboard | Panel ID | Title |
 |---|---:|---|
-| bioetl-control-plane-v1.json | 1 | Manifest Write Failures |
-| bioetl-control-plane-v1.json | 2 | Ledger Append Failures |
-| bioetl-control-plane-v1.json | 3 | Checkpoint Incompatibilities |
-| bioetl-control-plane-v1.json | 4 | GLOBAL Control-Plane Read Failures |
-| bioetl-control-plane-v1.json | 5 | Checkpoint Compatibility Outcomes |
-| bioetl-control-plane-v1.json | 6 | GLOBAL Control-Plane Reads by Store / Operation / Status |
-| bioetl-control-plane-v1.json | 7 | Ledger Appends by Event Type / Status |
-| bioetl-control-plane-v1.json | 101 | Checkpoint Load Failures |
-| bioetl-control-plane-v1.json | 102 | Checkpoint Save Failures |
-| bioetl-control-plane-v1.json | 103 | GLOBAL Checkpoint Operator Failures |
-| bioetl-control-plane-v1.json | 104 | Replay Not Reconstructable |
-| bioetl-control-plane-v1.json | 105 | Checkpoint Save Latency p50/p95/p99 |
-| bioetl-control-plane-v1.json | 106 | GLOBAL Checkpoint Operator Latency p50/p95/p99 |
-| bioetl-control-plane-v1.json | 107 | Audit Write Outcomes |
-| bioetl-control-plane-v1.json | 108 | Audit Query Outcomes |
-| bioetl-control-plane-v1.json | 109 | Audit Write Latency p50/p95/p99 |
-| bioetl-control-plane-v1.json | 110 | Audit Query Latency p50/p95/p99 |
-| bioetl-control-plane-v1.json | 111 | GLOBAL Control-Plane Read Latency p50/p95/p99 |
-| bioetl-control-plane-v1.json | 112 | Lineage Fragment Outcomes |
-| bioetl-control-plane-v1.json | 120 | Replay Drift |
-| bioetl-control-plane-v1.json | 121 | Replay Lag Seconds |
-| bioetl-control-plane-v1.json | 122 | Lineage Refs Missing |
-| bioetl-control-plane-v1.json | 130 | Replay / Resume Blockers |
-| bioetl-control-plane-v1.json | 131 | Manifest Writes by Status |
-| bioetl-control-plane-v1.json | 132 | Manifest Write Failure Ratio |
-| bioetl-control-plane-v1.json | 133 | Ledger Append Failure Ratio |
-| bioetl-control-plane-v1.json | 134 | Replay Drift by Type |
-| bioetl-control-plane-v1.json | 135 | Replay Lag Trend |
-| bioetl-control-plane-v1.json | 136 | GLOBAL Control-Plane Read Failure Ratio |
-| bioetl-control-plane-v1.json | 137 | Lineage Fragment Persistence Failures |
-| bioetl-control-plane-v1.json | 138 | Lineage Refs Missing by Layer / Ref Type |
-| bioetl-control-plane-v1.json | 139 | Known Missing Replay-Safety Signals |
-| bioetl-control-plane-v1.json | 891 | Replay Safety State |
-| bioetl-control-plane-v1.json | 892 | Checkpoint Freshness (hours since last op) |
-| bioetl-control-plane-v1.json | 893 | Ledger / Manifest Consistency |
-| bioetl-control-plane-v1.json | 894 | Known Blind Spots |
+| bioetl-control-plane-v1.json | 1 | Monitor: Manifest Write Failures |
+| bioetl-control-plane-v1.json | 2 | Monitor: Ledger Append Failures |
+| bioetl-control-plane-v1.json | 3 | Monitor: Checkpoint Incompatibilities |
+| bioetl-control-plane-v1.json | 4 | Monitor: GLOBAL Control-Plane Read Failures |
+| bioetl-control-plane-v1.json | 5 | Track: Checkpoint Compatibility Outcomes |
+| bioetl-control-plane-v1.json | 6 | Track: GLOBAL Control-Plane Reads by Store / Operation / Status |
+| bioetl-control-plane-v1.json | 7 | Track: Ledger Appends by Event Type / Status |
+| bioetl-control-plane-v1.json | 101 | Monitor: Checkpoint Load Failures |
+| bioetl-control-plane-v1.json | 102 | Monitor: Checkpoint Save Failures |
+| bioetl-control-plane-v1.json | 103 | Monitor: GLOBAL Checkpoint Operator Failures |
+| bioetl-control-plane-v1.json | 104 | Monitor: Replay Not Reconstructable |
+| bioetl-control-plane-v1.json | 105 | Track: Checkpoint Save Latency p50/p95/p99 |
+| bioetl-control-plane-v1.json | 106 | Track: GLOBAL Checkpoint Operator Latency p50/p95/p99 |
+| bioetl-control-plane-v1.json | 107 | Track: Audit Write Outcomes |
+| bioetl-control-plane-v1.json | 108 | Track: Audit Query Outcomes |
+| bioetl-control-plane-v1.json | 109 | Track: Audit Write Latency p50/p95/p99 |
+| bioetl-control-plane-v1.json | 110 | Track: Audit Query Latency p50/p95/p99 |
+| bioetl-control-plane-v1.json | 111 | Track: GLOBAL Control-Plane Read Latency p50/p95/p99 |
+| bioetl-control-plane-v1.json | 112 | Track: Lineage Fragment Outcomes |
+| bioetl-control-plane-v1.json | 120 | Monitor: Replay Drift |
+| bioetl-control-plane-v1.json | 121 | Track: Replay Lag Seconds |
+| bioetl-control-plane-v1.json | 122 | Monitor: Lineage Refs Missing |
+| bioetl-control-plane-v1.json | 130 | Track: Replay / Resume Blockers in Range |
+| bioetl-control-plane-v1.json | 131 | Track: Manifest Writes by Status |
+| bioetl-control-plane-v1.json | 132 | Monitor: Manifest Write Failure Ratio |
+| bioetl-control-plane-v1.json | 133 | Monitor: Ledger Append Failure Ratio |
+| bioetl-control-plane-v1.json | 134 | Track: Replay Drift by Type |
+| bioetl-control-plane-v1.json | 135 | Track: Replay Lag Trend |
+| bioetl-control-plane-v1.json | 136 | Monitor: GLOBAL Control-Plane Read Failure Ratio |
+| bioetl-control-plane-v1.json | 137 | Monitor: Lineage Fragment Persistence Failures |
+| bioetl-control-plane-v1.json | 138 | Inspect: Lineage Refs Missing by Layer / Ref Type |
+| bioetl-control-plane-v1.json | 139 | Review: Known Missing Replay-Safety Signals |
+| bioetl-control-plane-v1.json | 891 | Monitor: Replay Safety State |
+| bioetl-control-plane-v1.json | 892 | Inspect: Known Gap - Checkpoint Freshness |
+| bioetl-control-plane-v1.json | 893 | Monitor: Ledger / Manifest Consistency |
+| bioetl-control-plane-v1.json | 894 | Inspect: Known Blind Spots |
+| bioetl-control-plane-v1.json | 908 | Inspect: Terminal Run Events by Status in Range |
 | bioetl-dq-v2.json | 1 | Track Range Evidence: Bronze -> Silver -> Gold |
 | bioetl-dq-v2.json | 2 | Data Quality Score (Volume-weighted) |
 | bioetl-dq-v2.json | 3 | Source Records in Range (Bronze) |
@@ -95,14 +96,14 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-overview-v2.json | 9012 | Diagnostics & Docs (Logs / Traces / Raw Metrics) |
 | bioetl-overview-v2.json | 9013 | Workflow GLOBAL Scope |
 | bioetl-overview-v2.json | 9014 | Diagnostics Navigation |
-| bioetl-provider-health-v2.json | 1 | Monitor Health Check Latency by Provider (p95) |
-| bioetl-provider-health-v2.json | 2 | Monitor Healthy Checks |
-| bioetl-provider-health-v2.json | 7 | Track Health Checks Total |
+| bioetl-provider-health-v2.json | 1 | Track Health Check Latency by Provider (p95) |
+| bioetl-provider-health-v2.json | 2 | Monitor Healthy Checks (Selected Range) |
+| bioetl-provider-health-v2.json | 7 | Track Health Checks Total (Selected Range) |
 | bioetl-provider-health-v2.json | 31 | Monitor Circuit Breaker State (max) |
-| bioetl-provider-health-v2.json | 32 | Track Circuit Breaker Trips by Provider |
+| bioetl-provider-health-v2.json | 32 | Track Circuit Breaker Trips by Adapter |
 | bioetl-provider-health-v2.json | 102 | Inspect Provider Health Check Latency (p95) - $provider |
-| bioetl-provider-health-v2.json | 104 | Track Provider Failure Rate |
-| bioetl-provider-health-v2.json | 105 | Track Degraded Checks |
+| bioetl-provider-health-v2.json | 104 | Track Provider Failure Rate (Selected Range) |
+| bioetl-provider-health-v2.json | 105 | Monitor Degraded Checks (Selected Range) |
 | bioetl-provider-health-v2.json | 106 | Track Failure and Degraded Trend by Provider |
 | bioetl-provider-health-v2.json | 107 | Track Provider Failure Share (Selected Range) |
 | bioetl-provider-health-v2.json | 108 | Track Retries Exhausted by Provider/Operation |
@@ -117,32 +118,38 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-provider-health-v2.json | 9101 | Monitor GLOBAL Provider Severity Matrix |
 | bioetl-provider-health-v2.json | 9102 | Inspect Critical Providers |
 | bioetl-provider-health-v2.json | 9103 | Inspect Provider Top Causes |
-| bioetl-runtime.json | 1 | Runtime Scope |
-| bioetl-runtime.json | 4 | DQ Alert Conditions |
-| bioetl-runtime.json | 5 | Control-plane Alert Conditions |
-| bioetl-runtime.json | 6 | GLOBAL Provider Alert Conditions |
-| bioetl-runtime.json | 7 | Freshness Alert Conditions |
-| bioetl-runtime.json | 16 | Runtime Blockers |
+| bioetl-runtime.json | 1 | Inspect Runtime Scope |
+| bioetl-runtime.json | 4 | Inspect DQ Alert Conditions |
+| bioetl-runtime.json | 5 | Inspect Control-plane Alert Conditions |
+| bioetl-runtime.json | 6 | Inspect GLOBAL Provider Alert Conditions |
+| bioetl-runtime.json | 7 | Inspect Freshness Alert Conditions |
+| bioetl-runtime.json | 16 | Monitor Runtime Blockers |
 | bioetl-runtime.json | 9100 | Monitor Runtime Current Status |
 | bioetl-runtime.json | 9101 | Inspect Top Runtime Blockers |
-| bioetl-runtime.json | 21 | Memory Pressure Active / 15m |
-| bioetl-runtime.json | 205 | Failed Runs / 15m |
-| bioetl-runtime.json | 207 | Pipeline Phase Duration p50/p95/p99 |
-| bioetl-runtime.json | 209 | Shutdown Initiated by Reason / Interval |
-| bioetl-runtime.json | 210 | Shutdown Completed by Reason / Interval |
-| bioetl-runtime.json | 220 | Runtime Error Rate / 30m |
-| bioetl-runtime.json | 221 | Errors by Stage / Error Code / Range |
-| bioetl-runtime.json | 222 | Incident Summary |
-| bioetl-runtime.json | 230 | Pipeline Alert Conditions |
-| bioetl-runtime.json | 236 | No-Records Runs / 30m |
-| bioetl-runtime.json | 237 | Worst Stage Lag / 15m |
-| bioetl-runtime.json | 238 | Stage Backlog Trend |
-| bioetl-runtime.json | 239 | Pipeline Duration p50/p95/p99 |
-| bioetl-runtime.json | 240 | Records by Stage / Interval |
-| bioetl-runtime.json | 241 | Records by Stage / Run Type / Range |
-| bioetl-runtime.json | 242 | Active Runtime Blocker Detail |
-| bioetl-runtime.json | 243 | Stage Expectedness |
-| bioetl-runtime.json | 9991 | Recommended Next Drilldown |
+| bioetl-runtime.json | 9102 | Monitor Runtime Telemetry Gap |
+| bioetl-runtime.json | 21 | Monitor Memory Pressure Active |
+| bioetl-runtime.json | 205 | Monitor Failed Runs |
+| bioetl-runtime.json | 207 | Track Pipeline Phase Duration p50/p95/p99 |
+| bioetl-runtime.json | 209 | Track Shutdown Initiated by Reason / Interval |
+| bioetl-runtime.json | 210 | Track Shutdown Completed by Reason / Interval |
+| bioetl-runtime.json | 220 | Monitor Runtime Error Rate |
+| bioetl-runtime.json | 222 | Review Incident Summary |
+| bioetl-runtime.json | 230 | Monitor Pipeline Alert Conditions |
+| bioetl-runtime.json | 236 | Monitor No-Records Runs |
+| bioetl-runtime.json | 237 | Monitor Worst Stage Lag |
+| bioetl-runtime.json | 238 | Track Stage Backlog Trend |
+| bioetl-runtime.json | 239 | Track Pipeline Duration p50/p95/p99 |
+| bioetl-runtime.json | 240 | Track Records by Stage / Interval |
+| bioetl-runtime.json | 241 | Track Records by Stage / Run Type / Range |
+| bioetl-runtime.json | 242 | Inspect Active Runtime Blocker Detail |
+| bioetl-runtime.json | 243 | Inspect Stage Expectedness |
+| bioetl-runtime.json | 250 | Inspect Warning Logs |
+| bioetl-runtime.json | 251 | Inspect Unstructured Logs |
+| bioetl-runtime.json | 256 | Inspect Errors by Stage / Error Code / Range |
+| bioetl-runtime.json | 257 | Track Top Warning Events |
+| bioetl-runtime.json | 258 | Track Log Hygiene Trend |
+| bioetl-runtime.json | 298 | Review Diagnostic Scope Note |
+| bioetl-runtime.json | 9991 | First Action |
 | bioetl-silver-reject-explorer.json | 1 | Inspect Explorer Scope |
 | bioetl-silver-reject-explorer.json | 10 | First Action / No-Data Semantics |
 | bioetl-silver-reject-explorer.json | 2 | Monitor Filtered Records Total |

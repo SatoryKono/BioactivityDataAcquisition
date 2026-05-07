@@ -111,6 +111,9 @@ _REQUIRED_TOP_LEVEL_LINKS_BY_UID = _NAV_LINK_CONTRACT["required_top_level_links_
 _TOP_LEVEL_LINK_TITLE_RE = re.compile(
     r"^([0-5]\. .+|Silver Reject Explorer|Explore (Logs|Traces)|Observability Checklist \(runbook\))$"
 )
+_CANONICAL_GITHUB_BLOB_PREFIX = (
+    "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/"
+)
 _REQUIRED_PANEL_LINKS_BY_UID = _NAV_LINK_CONTRACT["required_panel_links_by_uid"]
 _CROSS_SCOPE_MARKER_CONTRACT = _NAV_LINK_CONTRACT["cross_scope_marker_contract"]
 _KPI_OWNERSHIP = _NAV_LINK_CONTRACT["kpi_ownership"]
@@ -220,6 +223,14 @@ def _find_status_header_panel(
         ),
         None,
     )
+
+
+def _local_repo_path_from_canonical_github_blob_url(url: str) -> Path | None:
+    if not url.startswith(_CANONICAL_GITHUB_BLOB_PREFIX):
+        return None
+    relative_path = url.removeprefix(_CANONICAL_GITHUB_BLOB_PREFIX).split("?", 1)[0]
+    relative_path = relative_path.split("#", 1)[0]
+    return Path(relative_path)
 
 
 def _assert_l1_inbound_status_policy(
@@ -1410,7 +1421,10 @@ def test_runtime_incident_panels_do_not_duplicate_control_plane_dashboard_link()
 ):
     """Runtime incident panels must not duplicate the top-level Control Plane link."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
-    panel_titles = {"Control-plane Alert Conditions", "No-Records Runs"}
+    panel_titles = {
+        "Inspect Control-plane Alert Conditions",
+        "Monitor No-Records Runs",
+    }
 
     for panel_title in panel_titles:
         panel = next(
@@ -1435,31 +1449,64 @@ def test_runtime_incident_panels_do_not_duplicate_control_plane_dashboard_link()
         )
 
 
+def test_runtime_first_screen_status_panels_expose_actionable_drilldowns() -> None:
+    """Runtime current-status panels should link directly to blocker drilldowns."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
+    panels_by_id = {
+        panel.get("id"): panel
+        for panel in get_dashboard_panels(dashboard)
+        if panel.get("id") is not None
+    }
+
+    current_status_links = _iter_panel_data_links(panels_by_id[9100])
+    current_status_urls = {
+        str(link.get("title")): str(link.get("url")) for link in current_status_links
+    }
+    assert "viewPanel=9101" in current_status_urls["Inspect Top Runtime Blockers"]
+    assert (
+        "viewPanel=242" in current_status_urls["Inspect Active Runtime Blocker Detail"]
+    )
+    assert (
+        "docs/05-operations/runbooks/observability-checklist.md"
+        in current_status_urls["Open Runtime Troubleshooting Runbook"]
+    )
+
+    top_blocker_links = _iter_panel_data_links(panels_by_id[9101])
+    top_blocker_urls = {
+        str(link.get("title")): str(link.get("url")) for link in top_blocker_links
+    }
+    assert "viewPanel=242" in top_blocker_urls["Inspect Active Runtime Blocker Detail"]
+    assert (
+        "docs/05-operations/runbooks/observability-checklist.md"
+        in top_blocker_urls["Open Runtime Troubleshooting Runbook"]
+    )
+
+
 def test_runtime_alert_condition_panels_expose_direct_runbook_links() -> None:
     """Runtime condition-summary panels should route operators directly to runbooks."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
     expectations = {
-        "Pipeline Alert Conditions": (
+        "Monitor Pipeline Alert Conditions": (
             "Open Pipeline Failure Runbook",
             "docs/05-operations/runbooks/pipeline-failure-critical.md",
         ),
-        "DQ Alert Conditions": (
+        "Inspect DQ Alert Conditions": (
             "Open DQ Failure Runbook",
             "docs/05-operations/runbooks/dq-failure-investigation.md",
         ),
-        "Control-plane Alert Conditions": (
+        "Inspect Control-plane Alert Conditions": (
             "Open Run Manifest Runbook",
             "docs/05-operations/runbooks/run-manifest-inspection.md",
         ),
-        "GLOBAL Provider Alert Conditions": (
+        "Inspect GLOBAL Provider Alert Conditions": (
             "Open Provider Incident Runbook",
             "docs/05-operations/runbooks/incident-response.md",
         ),
-        "Freshness Alert Conditions": (
+        "Inspect Freshness Alert Conditions": (
             "Open DQ Freshness Runbook",
             "docs/05-operations/runbooks/dq-failure-investigation.md",
         ),
-        "No-Records Runs": (
+        "Monitor No-Records Runs": (
             "Open Checkpoint Debugging Runbook",
             "docs/05-operations/runbooks/checkpoint-debugging.md",
         ),
@@ -1525,9 +1572,145 @@ def test_provider_health_critical_panels_expose_incident_runbook_links() -> None
         )
         url = str(link.get("url", ""))
         assert url == (
-            "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/"
-            "docs/05-operations/runbooks/incident-response.md"
+            _CANONICAL_GITHUB_BLOB_PREFIX
+            + "docs/05-operations/runbooks/incident-response.md"
         ), f"Provider Health panel id={panel_id} runbook URL must be canonical"
+
+
+def test_control_plane_runbook_links_target_existing_local_runbooks() -> None:
+    """Control Plane runbook links must target maintained local runbooks."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
+    legacy_targets: list[str] = []
+    missing_targets: list[str] = []
+    noncanonical_targets: list[str] = []
+
+    for panel in get_dashboard_panels(dashboard):
+        panel_ref = f"id={panel.get('id')} title={panel.get('title')!r}"
+        for link in _iter_panel_data_links(panel):
+            url = str(link.get("url", ""))
+            if "docs/05-operations/runbooks/" not in url:
+                continue
+            if "replay-resume.md" in url or "replay-debugging.md" in url:
+                legacy_targets.append(f"{panel_ref} -> {url}")
+            local_path = _local_repo_path_from_canonical_github_blob_url(url)
+            if local_path is None:
+                noncanonical_targets.append(f"{panel_ref} -> {url}")
+                continue
+            if not local_path.is_file():
+                missing_targets.append(f"{panel_ref} -> {local_path}")
+
+    assert not legacy_targets, (
+        "Control Plane must retire legacy replay runbook targets:\n"
+        + "\n".join(legacy_targets)
+    )
+    assert not noncanonical_targets, (
+        "Control Plane runbook links must target canonical GitHub docs URLs:\n"
+        + "\n".join(noncanonical_targets)
+    )
+    assert not missing_targets, (
+        "Control Plane runbook links must resolve to existing local runbooks:\n"
+        + "\n".join(missing_targets)
+    )
+
+
+def test_control_plane_replay_and_manifest_panels_route_to_expected_runbooks() -> None:
+    """Control Plane replay-family and manifest-family panels must use stable runbook routing."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
+    expectations = {
+        "Monitor: Replay Safety State": (
+            "Open Checkpoint Debugging Runbook",
+            "docs/05-operations/runbooks/checkpoint-debugging.md",
+        ),
+        "Monitor: Ledger / Manifest Consistency": (
+            "Open Run Manifest Inspection",
+            "docs/05-operations/runbooks/run-manifest-inspection.md",
+        ),
+        "Track: Replay / Resume Blockers in Range": (
+            "Open Checkpoint Debugging Runbook",
+            "docs/05-operations/runbooks/checkpoint-debugging.md",
+        ),
+        "Monitor: Replay Not Reconstructable": (
+            "Open Checkpoint Debugging",
+            "docs/05-operations/runbooks/checkpoint-debugging.md",
+        ),
+        "Monitor: Replay Drift": (
+            "Open Checkpoint Debugging",
+            "docs/05-operations/runbooks/checkpoint-debugging.md",
+        ),
+        "Track: Replay Lag Seconds": (
+            "Open Checkpoint Debugging",
+            "docs/05-operations/runbooks/checkpoint-debugging.md",
+        ),
+    }
+
+    for panel_title, (expected_title, expected_suffix) in expectations.items():
+        panel = next(
+            (
+                item
+                for item in get_dashboard_panels(dashboard)
+                if item.get("title") == panel_title
+            ),
+            None,
+        )
+        assert panel is not None, f"Control Plane missing panel {panel_title!r}"
+        links = _iter_panel_data_links(panel)
+        assert links, f"Control Plane panel {panel_title!r} must expose a runbook CTA"
+        titles = {str(link.get("title", "")) for link in links}
+        assert expected_title in titles, (
+            f"Control Plane panel {panel_title!r} must expose {expected_title!r}. "
+            f"Actual titles: {sorted(titles)}"
+        )
+        urls = {str(link.get("url", "")) for link in links}
+        assert all(url.startswith(_CANONICAL_GITHUB_BLOB_PREFIX) for url in urls), (
+            f"Control Plane panel {panel_title!r} must target canonical GitHub docs"
+        )
+        assert any(expected_suffix in url for url in urls), (
+            f"Control Plane panel {panel_title!r} must target {expected_suffix}"
+        )
+
+
+def test_control_plane_provider_health_handoff_omits_adapter_fallback() -> None:
+    """Control Plane -> Provider Health handoff must let target dashboard use its own adapter fallback."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
+    link = next(
+        (
+            item
+            for item in dashboard.get("links", [])
+            if item.get("title") == "3. Provider Health"
+        ),
+        None,
+    )
+    assert link is not None, "Control Plane must expose top-level Provider Health link"
+    url = str(link.get("url", ""))
+    assert "var-provider=$pipeline" in url
+    assert "var-pipeline_context=$pipeline" in url
+    assert "var-adapter=" not in url, (
+        "Control Plane -> Provider Health handoff must omit adapter when source has no adapter context"
+    )
+
+
+def test_control_plane_first_screen_stat_panels_do_not_duplicate_runbook_ctas() -> None:
+    """First-screen trust KPI panels should expose one clear runbook CTA each."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
+    expected_titles = {
+        "Monitor: Replay Safety State",
+        "Monitor: Ledger / Manifest Consistency",
+    }
+
+    for panel_title in expected_titles:
+        panel = next(
+            (
+                item
+                for item in get_dashboard_panels(dashboard)
+                if item.get("title") == panel_title
+            ),
+            None,
+        )
+        assert panel is not None, f"Control Plane missing panel {panel_title!r}"
+        links = _iter_panel_data_links(panel)
+        assert len(links) == 1, (
+            f"Control Plane first-screen panel {panel_title!r} must expose exactly one runbook CTA"
+        )
 
 
 def test_runtime_first_action_cta_links_preserve_scoped_vars_and_time() -> None:

@@ -84,14 +84,17 @@
       },
       "id": 99,
       "options": {
-        "content": "<div style=\"padding:10px 14px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);line-height:1.35;\"><div style=\"font-size:18px;font-weight:700;margin-bottom:6px;\">Primary question: what is broken now, and where should the operator drill down first?</div><div><strong>Scope</strong>: pipeline=$pipeline, run_type=$run_type, selected Grafana time range.</div><div><strong>Reading guide</strong>: empty tables mean no recent signal in the selected window, not necessarily OK.</div></div>",
+        "content": "<div style=\"padding:10px 14px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);line-height:1.35;\"><div style=\"font-size:18px;font-weight:700;margin-bottom:6px;\">Primary question: what is broken now, and where should the operator drill down first?</div><div><strong>Scope</strong>: pipeline=$pipeline, run_type=$run_type, selected Grafana time range.</div><div><strong>Reading guide</strong>: current-status rows marked <strong>UNKNOWN</strong> mean no recent signal in the selected scope; unexpected blank current-status tables indicate a projection regression, not healthy state.</div></div>",
         "mode": "html"
       },
       "title": "L0 Overview Scope",
       "type": "text"
     },
     {
-      "datasource": "Prometheus",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -107,16 +110,16 @@
                   "color": "green"
                 },
                 "1": {
-                  "text": "WARNING",
+                  "text": "WARN",
                   "color": "orange"
                 },
                 "2": {
-                  "text": "CRITICAL",
+                  "text": "CRIT",
                   "color": "red"
                 },
                 "3": {
-                  "text": "CRITICAL",
-                  "color": "red"
+                  "text": "UNKNOWN",
+                  "color": "gray"
                 }
               }
             },
@@ -173,7 +176,33 @@
           "values": false
         },
         "textMode": "value",
-        "dataLinks": []
+        "dataLinks": [
+          {
+            "title": "Open Runtime",
+            "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=unknown&${__url_time_range}",
+            "targetBlank": false
+          },
+          {
+            "title": "Open Control Plane",
+            "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
+            "targetBlank": false
+          },
+          {
+            "title": "Open Data Quality",
+            "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=unknown&${__url_time_range}",
+            "targetBlank": false
+          },
+          {
+            "title": "Open Provider Health",
+            "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=$pipeline&var-pipeline_context=$pipeline&var-adapter=unknown&${__url_time_range}",
+            "targetBlank": false
+          },
+          {
+            "title": "Open Workflow",
+            "url": "/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}",
+            "targetBlank": false
+          }
+        ]
       },
       "targets": [
         {
@@ -183,7 +212,7 @@
       ],
       "title": "System Status",
       "type": "stat",
-      "description": "Current L0 operator state. Status values are OK (0), WARNING (1), CRITICAL (2 or 3), or UNKNOWN. CRITICAL means runtime, DQ, control-plane, workflow, or gold signals are failing for the selected pipeline/run_type. WARNING means non-fatal DQ or pending-gold conditions. Next action: follow the route shown in Next Action, then use the top-level dashboard bus."
+      "description": "Current L0 operator state. Status values are OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null). CRIT means runtime, DQ, control-plane, workflow, or gold signals are failing for the selected pipeline/run_type. WARN means non-fatal DQ or pending-gold conditions. Next action: follow the route shown in Next Action, then open the matching panel-level drilldown."
     },
     {
       "id": 215,
@@ -395,7 +424,34 @@
         "showHeader": true,
         "footer": {
           "show": false
-        }
+        },
+        "dataLinks": [
+          {
+            "title": "Open Runtime",
+            "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=unknown&${__url_time_range}",
+            "targetBlank": false
+          },
+          {
+            "title": "Open Control Plane",
+            "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
+            "targetBlank": false
+          },
+          {
+            "title": "Open Data Quality",
+            "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=unknown&${__url_time_range}",
+            "targetBlank": false
+          },
+          {
+            "title": "Open Provider Health",
+            "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=$pipeline&var-pipeline_context=$pipeline&var-adapter=unknown&${__url_time_range}",
+            "targetBlank": false
+          },
+          {
+            "title": "Open Workflow",
+            "url": "/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}",
+            "targetBlank": false
+          }
+        ]
       },
       "transformations": [
         {
@@ -419,7 +475,7 @@
           }
         }
       ],
-      "description": "Action route projection for the selected pipeline/run_type. If the panel resolves to `NO_ROUTE`, validate that `bioetl_overview_pipeline_run_type_universe` exists for the selected pipeline/run_type combination. The row exposes `action_target`, `action_reason`, and `action_dashboard_uid`; Runtime > Control Plane > Gold Lifecycle > DQ > Provider > Workflow > Monitor. Provider route stays global in origin but is projected back onto the selected run_type scope for L0 consistency."
+      "description": "Action route projection for the selected pipeline/run_type. If the panel resolves to `NO_ROUTE`, validate that `bioetl_overview_pipeline_run_type_universe` exists for the selected pipeline/run_type combination. The row exposes `action_target`, `action_reason`, and `action_dashboard_uid`; Runtime > Control Plane > Gold Lifecycle > DQ > Provider > Workflow > Monitor. Use the panel link whose title matches the routed target. Provider route stays global in origin but is projected back onto the selected run_type scope for L0 consistency."
     },
     {
       "id": 9002,
@@ -456,16 +512,16 @@
                   "color": "green"
                 },
                 "1": {
-                  "text": "WARNING",
+                  "text": "WARN",
                   "color": "orange"
                 },
                 "2": {
-                  "text": "CRITICAL",
+                  "text": "CRIT",
                   "color": "red"
                 },
                 "3": {
-                  "text": "CRITICAL",
-                  "color": "red"
+                  "text": "UNKNOWN",
+                  "color": "gray"
                 }
               }
             },
@@ -586,7 +642,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "bioetl_l0_input_status"
+              "options": "bioetl_l0_input_status_selected"
             },
             "properties": [
               {
@@ -606,7 +662,7 @@
       },
       "targets": [
         {
-          "expr": "bioetl_l0_input_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}",
+          "expr": "bioetl_l0_input_status_selected{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}",
           "refId": "A",
           "format": "table",
           "instant": true
@@ -631,19 +687,19 @@
               "pipeline": 1,
               "run_type": 2,
               "Value": 3,
-              "bioetl_l0_input_status": 3
+              "bioetl_l0_input_status_selected": 3
             },
             "renameByName": {
               "pipeline": "Pipeline",
               "run_type": "Run Type",
               "input": "Input",
               "Value": "Status",
-              "bioetl_l0_input_status": "Status"
+              "bioetl_l0_input_status_selected": "Status"
             }
           }
         }
       ],
-      "description": "Current L0 inputs (Runtime, DQ, Gold, Control Plane, Provider, Workflow). Status values are OK (0), WARNING (1), CRITICAL (2 or 3), or UNKNOWN."
+      "description": "Current L0 inputs (Runtime, DQ, Gold, Control Plane, Provider, Workflow) projected onto the selected pipeline/run_type scope. Status values are OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null)."
     },
     {
       "id": 9003,
@@ -680,16 +736,16 @@
                   "color": "green"
                 },
                 "1": {
-                  "text": "WARNING",
+                  "text": "WARN",
                   "color": "orange"
                 },
                 "2": {
-                  "text": "CRITICAL",
+                  "text": "CRIT",
                   "color": "red"
                 },
                 "3": {
-                  "text": "CRITICAL",
-                  "color": "red"
+                  "text": "UNKNOWN",
+                  "color": "gray"
                 }
               }
             },
@@ -800,7 +856,14 @@
         "showHeader": true,
         "footer": {
           "show": false
-        }
+        },
+        "dataLinks": [
+          {
+            "title": "Open Runtime",
+            "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=unknown&${__url_time_range}",
+            "targetBlank": false
+          }
+        ]
       },
       "transformations": [
         {
@@ -825,7 +888,7 @@
           }
         }
       ],
-      "description": "Current runtime blocker summary only; no $__range evidence. Status values are OK (0), WARNING (1), CRITICAL (2 or 3), or UNKNOWN. Open Runtime from the top-level bus for exact blocker condition rows."
+      "description": "Current runtime blocker summary only; no $__range evidence. Status values are OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null). Open Runtime for exact blocker condition rows."
     },
     {
       "id": 9004,
@@ -862,16 +925,16 @@
                   "color": "green"
                 },
                 "1": {
-                  "text": "WARNING",
+                  "text": "WARN",
                   "color": "orange"
                 },
                 "2": {
-                  "text": "CRITICAL",
+                  "text": "CRIT",
                   "color": "red"
                 },
                 "3": {
-                  "text": "CRITICAL",
-                  "color": "red"
+                  "text": "UNKNOWN",
+                  "color": "gray"
                 }
               }
             },
@@ -915,6 +978,18 @@
               {
                 "id": "displayName",
                 "value": "Pipeline"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "run_type"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Run Type"
               }
             ]
           },
@@ -970,7 +1045,14 @@
         "showHeader": true,
         "footer": {
           "show": false
-        }
+        },
+        "dataLinks": [
+          {
+            "title": "Open Data Quality",
+            "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=unknown&${__url_time_range}",
+            "targetBlank": false
+          }
+        ]
       },
       "transformations": [
         {
@@ -982,18 +1064,20 @@
             },
             "indexByName": {
               "pipeline": 0,
-              "Value": 1,
-              "bioetl_l1_dq_status": 1
+              "run_type": 1,
+              "Value": 2,
+              "bioetl_l1_dq_status": 2
             },
             "renameByName": {
               "pipeline": "Pipeline",
+              "run_type": "Run Type",
               "Value": "Status",
               "bioetl_l1_dq_status": "Status"
             }
           }
         }
       ],
-      "description": "Current DQ summary for the selected pipeline/run_type scope. Status values are OK (0), WARNING (1), CRITICAL (2 or 3), or UNKNOWN."
+      "description": "Current DQ summary for the selected pipeline/run_type scope. Status values are OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null)."
     },
     {
       "id": 9005,
@@ -1030,16 +1114,16 @@
                   "color": "green"
                 },
                 "1": {
-                  "text": "WARNING",
+                  "text": "WARN",
                   "color": "orange"
                 },
                 "2": {
-                  "text": "CRITICAL",
+                  "text": "CRIT",
                   "color": "red"
                 },
                 "3": {
-                  "text": "CRITICAL",
-                  "color": "red"
+                  "text": "UNKNOWN",
+                  "color": "gray"
                 }
               }
             },
@@ -1187,7 +1271,14 @@
         "showHeader": true,
         "footer": {
           "show": false
-        }
+        },
+        "dataLinks": [
+          {
+            "title": "Open Runtime",
+            "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=unknown&${__url_time_range}",
+            "targetBlank": false
+          }
+        ]
       },
       "transformations": [
         {
@@ -1214,7 +1305,7 @@
           }
         }
       ],
-      "description": "Lifecycle-state projection for gold output. `lifecycle_state` distinguishes runtime-owned failure, missing gold after success, pending, disabled, and healthy recent gold. Status values are OK (0), WARNING (1), CRITICAL (2 or 3), or UNKNOWN. Disabled Gold stage returns OK and is a valid non-error state."
+      "description": "Lifecycle-state projection for gold output. `lifecycle_state` distinguishes runtime-owned failure, missing gold after success, pending, disabled, and healthy recent gold. Status values are OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null). Disabled Gold stage returns OK and is a valid non-error state."
     },
     {
       "id": 9006,
@@ -1251,12 +1342,16 @@
                   "color": "green"
                 },
                 "1": {
-                  "text": "WARNING",
+                  "text": "WARN",
                   "color": "orange"
                 },
                 "2": {
-                  "text": "CRITICAL",
+                  "text": "CRIT",
                   "color": "red"
+                },
+                "3": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
                 }
               }
             },
@@ -1367,7 +1462,14 @@
         "showHeader": true,
         "footer": {
           "show": false
-        }
+        },
+        "dataLinks": [
+          {
+            "title": "Open Control Plane",
+            "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
+            "targetBlank": false
+          }
+        ]
       },
       "transformations": [
         {
@@ -1392,7 +1494,7 @@
           }
         }
       ],
-      "description": "Current control-plane summary for manifest, ledger, checkpoint, and lineage guardrails. Status values are OK, WARNING, CRITICAL, or UNKNOWN. Open Control Plane from the top-level bus for the exact failing contract."
+      "description": "Current control-plane summary for manifest, ledger, checkpoint, and lineage guardrails. Status values are OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null). Open Control Plane for the exact failing contract."
     },
     {
       "id": 9007,
@@ -1429,12 +1531,16 @@
                   "color": "green"
                 },
                 "1": {
-                  "text": "WARNING",
+                  "text": "WARN",
                   "color": "orange"
                 },
                 "2": {
-                  "text": "CRITICAL",
+                  "text": "CRIT",
                   "color": "red"
+                },
+                "3": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
                 }
               }
             },
@@ -1533,7 +1639,14 @@
         "showHeader": true,
         "footer": {
           "show": false
-        }
+        },
+        "dataLinks": [
+          {
+            "title": "Open Provider Health",
+            "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=$pipeline&var-pipeline_context=$pipeline&var-adapter=unknown&${__url_time_range}",
+            "targetBlank": false
+          }
+        ]
       },
       "transformations": [
         {
@@ -1556,7 +1669,7 @@
           }
         }
       ],
-      "description": "GLOBAL provider scope across pipelines. Status values are OK, WARNING, CRITICAL, or UNKNOWN. This panel intentionally ignores selected pipeline/run_type filters."
+      "description": "GLOBAL provider scope across pipelines. Status values are OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null). This panel intentionally ignores selected pipeline/run_type filters."
     },
     {
       "id": 9008,
@@ -1593,12 +1706,16 @@
                   "color": "green"
                 },
                 "1": {
-                  "text": "WARNING",
+                  "text": "WARN",
                   "color": "orange"
                 },
                 "2": {
-                  "text": "CRITICAL",
+                  "text": "CRIT",
                   "color": "red"
+                },
+                "3": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
                 }
               }
             },
@@ -1709,7 +1826,14 @@
         "showHeader": true,
         "footer": {
           "show": false
-        }
+        },
+        "dataLinks": [
+          {
+            "title": "Open Workflow",
+            "url": "/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}",
+            "targetBlank": false
+          }
+        ]
       },
       "transformations": [
         {
@@ -1734,7 +1858,7 @@
           }
         }
       ],
-      "description": "Selected pipeline/run_type workflow summary only. Status values are OK, WARNING, CRITICAL, or UNKNOWN."
+      "description": "Selected pipeline/run_type workflow summary only. Status values are OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null)."
     },
     {
       "id": 9013,
@@ -1771,12 +1895,16 @@
                   "color": "green"
                 },
                 "1": {
-                  "text": "WARNING",
+                  "text": "WARN",
                   "color": "orange"
                 },
                 "2": {
-                  "text": "CRITICAL",
+                  "text": "CRIT",
                   "color": "red"
+                },
+                "3": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
                 }
               }
             },
@@ -1887,7 +2015,14 @@
         "showHeader": true,
         "footer": {
           "show": false
-        }
+        },
+        "dataLinks": [
+          {
+            "title": "Open Workflow",
+            "url": "/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}",
+            "targetBlank": false
+          }
+        ]
       },
       "transformations": [
         {
@@ -1912,7 +2047,7 @@
           }
         }
       ],
-      "description": "GLOBAL workflow scope across pipeline/run_type combinations. Status values are OK, WARNING, CRITICAL, or UNKNOWN."
+      "description": "GLOBAL workflow scope across pipeline/run_type combinations. Status values are OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null)."
     },
     {
       "id": 9014,
@@ -1966,7 +2101,7 @@
               "type": "linear"
             },
             "showPoints": "never",
-            "spanNulls": true
+            "spanNulls": false
           },
           "mappings": [
             {
@@ -1977,16 +2112,16 @@
                   "color": "green"
                 },
                 "1": {
-                  "text": "WARNING",
+                  "text": "WARN",
                   "color": "orange"
                 },
                 "2": {
-                  "text": "CRITICAL",
+                  "text": "CRIT",
                   "color": "red"
                 },
                 "3": {
-                  "text": "CRITICAL",
-                  "color": "red"
+                  "text": "UNKNOWN",
+                  "color": "gray"
                 }
               }
             }
@@ -2031,7 +2166,7 @@
           "legendFormat": "{{pipeline}}/{{run_type}}"
         }
       ],
-      "description": "24-hour historical trend of runtime blocker status. Shows OK (0), WARNING (1), CRITICAL (2 or 3), or UNKNOWN. Click on Runtime dashboard for detailed blocker conditions."
+      "description": "24-hour historical trend of runtime blocker status. Shows OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null). Click on Runtime for detailed blocker conditions."
     },
     {
       "id": 9019,
@@ -2073,7 +2208,7 @@
               "type": "linear"
             },
             "showPoints": "never",
-            "spanNulls": true
+            "spanNulls": false
           },
           "mappings": [
             {
@@ -2084,16 +2219,16 @@
                   "color": "green"
                 },
                 "1": {
-                  "text": "WARNING",
+                  "text": "WARN",
                   "color": "orange"
                 },
                 "2": {
-                  "text": "CRITICAL",
+                  "text": "CRIT",
                   "color": "red"
                 },
                 "3": {
-                  "text": "CRITICAL",
-                  "color": "red"
+                  "text": "UNKNOWN",
+                  "color": "gray"
                 }
               }
             }
@@ -2135,10 +2270,10 @@
         {
           "expr": "bioetl_l1_dq_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}",
           "refId": "A",
-          "legendFormat": "{{pipeline}}"
+          "legendFormat": "{{pipeline}}/{{run_type}}"
         }
       ],
-      "description": "24-hour historical trend of DQ status. Shows OK (0), WARNING (1), CRITICAL (2 or 3), or UNKNOWN. Click on Data Quality dashboard for detailed DQ conditions."
+      "description": "24-hour historical trend of DQ status. Shows OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null). Click on Data Quality for detailed DQ conditions."
     },
     {
       "id": 9020,
@@ -2180,7 +2315,7 @@
               "type": "linear"
             },
             "showPoints": "never",
-            "spanNulls": true
+            "spanNulls": false
           },
           "mappings": [
             {
@@ -2191,16 +2326,16 @@
                   "color": "green"
                 },
                 "1": {
-                  "text": "WARNING",
+                  "text": "WARN",
                   "color": "orange"
                 },
                 "2": {
-                  "text": "CRITICAL",
+                  "text": "CRIT",
                   "color": "red"
                 },
                 "3": {
-                  "text": "CRITICAL",
-                  "color": "red"
+                  "text": "UNKNOWN",
+                  "color": "gray"
                 }
               }
             }
@@ -2245,7 +2380,7 @@
           "legendFormat": "{{pipeline}}/{{run_type}}/{{lifecycle_state}}"
         }
       ],
-      "description": "24-hour historical trend of gold lifecycle status. Shows OK (0), WARNING (1), CRITICAL (2 or 3), or UNKNOWN. Disabled Gold stage returns OK as a valid non-error state."
+      "description": "24-hour historical trend of gold lifecycle status. Shows OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null). Disabled Gold stage returns OK as a valid non-error state."
     },
     {
       "id": 9009,
@@ -2421,7 +2556,7 @@
                   "options": {
                     "match": "null",
                     "result": {
-                      "text": "NO DATA / UNKNOWN",
+                      "text": "UNKNOWN",
                       "color": "gray"
                     }
                   }
@@ -2520,7 +2655,7 @@
             "y": 23
           },
           "options": {
-            "content": "<div style=\"padding:0.4rem 0.6rem;line-height:1.6\">Raw metric starting points for this dashboard are<br><strong>System Status:</strong> <code>bioetl_l0_status{pipeline=~&quot;chembl_assay&quot;,run_type=~&quot;incremental&quot;}</code>,<br><strong>Next Action:</strong> <code>bioetl_l0_next_action_route{pipeline=~&quot;chembl_assay&quot;,run_type=~&quot;incremental&quot;}</code>,<br><strong>Input Status:</strong> <code>bioetl_l0_input_status{pipeline=~&quot;chembl_assay&quot;,run_type=~&quot;incremental&quot;}</code>.<br>Exact blocker reasons live in the Control Plane, Runtime, Data Quality, Provider Health, and Workflow dashboards.<br>Historical evidence stays in the row above.</div>",
+            "content": "<div style=\"padding:0.4rem 0.6rem;line-height:1.6\">Raw metric starting points for this dashboard are<br><strong>System Status:</strong> <code>bioetl_l0_status{pipeline=~&quot;chembl_assay&quot;,run_type=~&quot;incremental&quot;}</code>,<br><strong>Next Action:</strong> <code>bioetl_l0_next_action_route{pipeline=~&quot;chembl_assay&quot;,run_type=~&quot;incremental&quot;}</code>,<br><strong>Input Status:</strong> <code>bioetl_l0_input_status_selected{pipeline=~&quot;chembl_assay&quot;,run_type=~&quot;incremental&quot;}</code>.<br>Exact blocker reasons live in the Control Plane, Runtime, Data Quality, Provider Health, and Workflow dashboards.<br>Historical evidence stays in the row above.</div>",
             "mode": "html"
           },
           "links": [],

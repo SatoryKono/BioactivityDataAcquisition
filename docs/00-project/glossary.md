@@ -137,6 +137,8 @@ ______________________________________________________________________
 | **PipelineRunContext**          | Launch/execution descriptor used during runtime assembly before a runner starts; carries launch options, resume flags, and identity/config anchors | `global run manifest`, `runtime payload object`            |
 | **PipelineContext**             | Immutable in-run processing context carrying `run_id`, `run_type`, `LoggerPort`, and deterministic `started_at` for batch/write flows              | `run state`, `infra context object`                        |
 | **RunManifest (control-plane)** | Immutable provenance/control-plane artifact describing what was launched and with which reproducibility anchors                                    | `universal runtime context`, `one manifest for everything` |
+| **RunLedger (control-plane)**   | Append-only event ledger linked to a run/manifest for provenance, diagnostics, and replay inspection, but not the mutable runtime resume object | `resume state store`, `checkpoint ledger`                  |
+| **Control Plane**               | Artifact family around manifests, ledgers, effective config, and related provenance/inspection surfaces                                           | `runtime context`, `execution state`                       |
 
 ### Composite Pipeline Services
 

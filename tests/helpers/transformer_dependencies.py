@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import dataclasses
+import inspect
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
@@ -60,6 +61,17 @@ def instantiate_test_transformer[TTransformer](
 ) -> TTransformer:
     """Instantiate a transformer using composition-owned default collaborators."""
     dependencies = build_test_transformer_dependencies()
+
+    # Preserve constructor defaults for required context fields like `provider`
+    # when tests intentionally omit them.
+    init_signature = inspect.signature(transformer_class)
+    provider_parameter = init_signature.parameters.get("provider")
+    if (
+        "provider" not in kwargs
+        and provider_parameter is not None
+        and provider_parameter.default is not inspect.Signature.empty
+    ):
+        kwargs["provider"] = provider_parameter.default
 
     # Route context-specific kwargs to the dependency bundle
     context_keys = {

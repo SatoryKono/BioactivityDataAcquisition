@@ -62,8 +62,10 @@
       "run_type": "incremental",
       "semantic_identity_anchor": "execution_fingerprint"
     },
-    "exact_replay_blockers": [],
-    "exact_replay_eligible": true,
+    "exact_replay_blockers": [
+      "dependency_lock_provenance_missing"
+    ],
+    "exact_replay_eligible": false,
     "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
     "execution_fingerprint": "fp-golden-001",
     "git_commit": "abc1234",
@@ -135,8 +137,10 @@
         "run_type": "incremental",
         "semantic_identity_anchor": "execution_fingerprint"
       },
-      "exact_replay_blockers": [],
-      "exact_replay_eligible": true,
+      "exact_replay_blockers": [
+        "dependency_lock_provenance_missing"
+      ],
+      "exact_replay_eligible": false,
       "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
       "execution_fingerprint": "fp-golden-001",
       "git_commit": "abc1234",
@@ -148,6 +152,7 @@
       "input_snapshot_ids": [
         "snapshot-golden-001"
       ],
+      "input_snapshot_missing_source_refs": [],
       "input_snapshots": [
         {
           "captured_at": "2025-01-01T11:55:00+00:00",
@@ -190,7 +195,7 @@
       },
       "published_artifacts": [],
       "replay_capability": "exact_replay_supported",
-      "replay_capability_reason": "immutable_input_snapshots_present",
+      "replay_capability_reason": "full_immutable_input_snapshot_envelope_present",
       "replay_family_contract": {
         "contract": "snapshot_backed_exact_replay",
         "default_required_persistence_profile": "replay_ready",
@@ -201,6 +206,7 @@
         "strict_exact_replay_supported": true,
         "strict_replay_runtime_verdict": "allowed_with_snapshot_backed_source_refs",
         "support_scope": "operator_grade_trace_debug",
+        "support_state": "exact_replay_supported",
         "supported_families": [
           "chembl.activity",
           "chembl.assay",
@@ -233,6 +239,7 @@
         "replay_of_manifest_id": null,
         "replay_of_run_id": null
       },
+      "replay_support_state": "exact_replay_supported",
       "requested_exact_replay": true,
       "resolved_config_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
       "resume_contract": {
@@ -250,6 +257,7 @@
       "resume_diagnostics": null,
       "run_id": "00000000-0000-0000-0000-000000000901",
       "snapshot_status": "full",
+      "source_posture": "immutable_snapshot_envelope",
       "source_revision_state": "clean"
     },
     "input_snapshot_content_hashes": [
@@ -260,6 +268,7 @@
     "input_snapshot_ids": [
       "snapshot-golden-001"
     ],
+    "input_snapshot_missing_source_refs": [],
     "input_snapshots": [
       {
         "captured_at": "2025-01-01T11:55:00+00:00",
@@ -343,6 +352,7 @@
         "scope": "coarse_grained_composite_resume"
       },
       "forensic_grade_missing_requirements": [
+        "exact_replay_capability",
         "dependency_lock_provenance",
         "produced_artifact_trace",
         "run_ledger_history"
@@ -377,11 +387,13 @@
         ]
       },
       "replay_ready_missing_requirements": [
+        "exact_replay_capability",
         "dependency_lock_provenance",
         "produced_artifact_trace"
       ],
       "required_profile": "replay_ready",
       "required_profile_missing_requirements": [
+        "exact_replay_capability",
         "dependency_lock_provenance",
         "produced_artifact_trace"
       ],
@@ -391,7 +403,7 @@
         "control_plane_manifest": true,
         "dependency_lock_provenance": false,
         "effective_config_artifact": true,
-        "exact_replay_capability": true,
+        "exact_replay_capability": false,
         "immutable_input_snapshots": true,
         "lineage_closure_boundary_support": true,
         "produced_artifact_trace": false,
@@ -432,6 +444,7 @@
       "snapshot_envelope": {
         "any_input_snapshots": true,
         "full_snapshot_envelope": true,
+        "missing_snapshot_source_refs": [],
         "require_full_snapshot_envelope": false,
         "source_count": 1,
         "sources_with_snapshots": 1
@@ -439,7 +452,7 @@
       "strict_exact_replay_supported": true,
       "strict_requirement_requested": true
     },
-    "replay_capability_reason": "immutable_input_snapshots_present",
+    "replay_capability_reason": "full_immutable_input_snapshot_envelope_present",
     "replay_family_contract": {
       "contract": "snapshot_backed_exact_replay",
       "default_required_persistence_profile": "replay_ready",
@@ -450,6 +463,7 @@
       "strict_exact_replay_supported": true,
       "strict_replay_runtime_verdict": "allowed_with_snapshot_backed_source_refs",
       "support_scope": "operator_grade_trace_debug",
+      "support_state": "exact_replay_supported",
       "supported_families": [
         "chembl.activity",
         "chembl.assay",
@@ -483,10 +497,14 @@
       "replay_of_run_id": null
     },
     "replay_readiness_verdict": "exact_replay_blocked",
+    "replay_support_state": "exact_replay_supported",
     "reproducibility_audit_score": {
       "blockers": [
         "dependency_lock_hash_missing",
         "dependency_lock_provenance",
+        "dependency_lock_provenance_missing",
+        "exact_replay_capability",
+        "exact_replay_not_eligible",
         "identity_graph_incomplete",
         "produced_artifact_trace"
       ],
@@ -503,30 +521,33 @@
           "score": 9
         },
         "determinism": {
-          "blockers": [],
+          "blockers": [
+            "dependency_lock_provenance_missing"
+          ],
           "confidence": "high",
           "evidence": [
             "effective_config_hash_present",
-            "immutable_input_snapshots_present"
+            "immutable_input_snapshots_present",
+            "exact_replay_blockers_present"
           ],
           "evidence_refs": [
             "diagnostics.effective_config_hash",
-            "diagnostics.input_snapshot_ids"
+            "diagnostics.input_snapshot_ids",
+            "diagnostics.exact_replay_blockers"
           ],
-          "score": 10
+          "score": 8
         },
         "idempotency": {
           "blockers": [],
           "confidence": "high",
           "evidence": [
-            "exact_replay_eligible",
             "no_published_artifacts_observed"
           ],
           "evidence_refs": [
             "diagnostics.exact_replay_eligible",
             "diagnostics.artifact_refs"
           ],
-          "score": 8
+          "score": 6
         },
         "layer_consistency": {
           "blockers": [],
@@ -562,15 +583,21 @@
           "score": 7
         },
         "replay_readiness": {
-          "blockers": [],
+          "blockers": [
+            "exact_replay_not_eligible",
+            "dependency_lock_provenance_missing"
+          ],
           "confidence": "high",
-          "evidence": [],
+          "evidence": [
+            "exact_replay_not_eligible",
+            "exact_replay_blockers_present"
+          ],
           "evidence_refs": [
             "diagnostics.exact_replay_eligible",
             "diagnostics.exact_replay_blockers",
             "diagnostics.replay_mode"
           ],
-          "score": 10
+          "score": 6
         },
         "run_identity": {
           "blockers": [
@@ -685,7 +712,7 @@
         "scope": "project_wide_exact_replay",
         "verdict": "universal_exact_replay_not_claimed"
       },
-      "overall_score": 8.9,
+      "overall_score": 7.7,
       "required_profile": "replay_ready",
       "scale": "0-10",
       "schema_version": "2.0",
@@ -702,7 +729,14 @@
         "supported_boundary_satisfied": false,
         "verdict": "supported_boundary_gaps_present"
       },
-      "threshold_failures": [],
+      "threshold_failures": [
+        {
+          "actual": 6,
+          "category": "replay_readiness",
+          "reason": "below_required_threshold",
+          "required": 7
+        }
+      ],
       "thresholds": {
         "checkpoint_safety": 7,
         "determinism": 7,
@@ -710,7 +744,7 @@
         "replay_readiness": 7,
         "run_identity": 8
       },
-      "thresholds_satisfied": true
+      "thresholds_satisfied": false
     },
     "reproducibility_diagnostics": {
       "checkpoint_anchors": {
@@ -825,6 +859,7 @@
           "snapshot_envelope": {
             "any_input_snapshots": true,
             "full_snapshot_envelope": true,
+            "missing_snapshot_source_refs": [],
             "require_full_snapshot_envelope": false,
             "source_count": 1,
             "sources_with_snapshots": 1
@@ -833,7 +868,9 @@
           "strict_requirement_requested": true
         },
         "continuation_mode": "exact_replay",
-        "exact_replay_blockers": [],
+        "exact_replay_blockers": [
+          "dependency_lock_provenance_missing"
+        ],
         "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
         "operator_replay_mode": "Exact Replay Blocked",
         "replay_capability": "exact_replay_supported",
@@ -847,6 +884,7 @@
           "strict_exact_replay_supported": true,
           "strict_replay_runtime_verdict": "allowed_with_snapshot_backed_source_refs",
           "support_scope": "operator_grade_trace_debug",
+          "support_state": "exact_replay_supported",
           "supported_families": [
             "chembl.activity",
             "chembl.assay",
@@ -875,6 +913,7 @@
         "replay_readiness_verdict": "exact_replay_blocked",
         "required_persistence_profile": "replay_ready",
         "required_profile_missing_requirements": [
+          "exact_replay_capability",
           "dependency_lock_provenance",
           "produced_artifact_trace"
         ],
@@ -916,6 +955,7 @@
     "rule_bundle_version": "2026.03",
     "run_id": "00000000-0000-0000-0000-000000000901",
     "snapshot_status": "full",
+    "source_posture": "immutable_snapshot_envelope",
     "source_revision_state": "clean"
   },
   "identity_graph": {
@@ -986,8 +1026,10 @@
       "run_type": "incremental",
       "semantic_identity_anchor": "execution_fingerprint"
     },
-    "exact_replay_blockers": [],
-    "exact_replay_eligible": true,
+    "exact_replay_blockers": [
+      "dependency_lock_provenance_missing"
+    ],
+    "exact_replay_eligible": false,
     "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
     "execution_fingerprint": "fp-golden-001",
     "git_commit": "abc1234",
@@ -999,6 +1041,7 @@
     "input_snapshot_ids": [
       "snapshot-golden-001"
     ],
+    "input_snapshot_missing_source_refs": [],
     "input_snapshots": [
       {
         "captured_at": "2025-01-01T11:55:00+00:00",
@@ -1041,7 +1084,7 @@
     },
     "published_artifacts": [],
     "replay_capability": "exact_replay_supported",
-    "replay_capability_reason": "immutable_input_snapshots_present",
+    "replay_capability_reason": "full_immutable_input_snapshot_envelope_present",
     "replay_family_contract": {
       "contract": "snapshot_backed_exact_replay",
       "default_required_persistence_profile": "replay_ready",
@@ -1052,6 +1095,7 @@
       "strict_exact_replay_supported": true,
       "strict_replay_runtime_verdict": "allowed_with_snapshot_backed_source_refs",
       "support_scope": "operator_grade_trace_debug",
+      "support_state": "exact_replay_supported",
       "supported_families": [
         "chembl.activity",
         "chembl.assay",
@@ -1084,6 +1128,7 @@
       "replay_of_manifest_id": null,
       "replay_of_run_id": null
     },
+    "replay_support_state": "exact_replay_supported",
     "requested_exact_replay": true,
     "resolved_config_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
     "resume_contract": {
@@ -1101,6 +1146,7 @@
     "resume_diagnostics": null,
     "run_id": "00000000-0000-0000-0000-000000000901",
     "snapshot_status": "full",
+    "source_posture": "immutable_snapshot_envelope",
     "source_revision_state": "clean"
   },
   "ledger_entries": [],

@@ -37,7 +37,7 @@
       "keepTime": true,
       "targetBlank": false,
       "title": "2. Runtime",
-      "tooltip": "Open with current pipeline/run_type, reset stage to unknown, and preserve the selected time range.",
+      "tooltip": "Open with current pipeline/run_type and preserve the selected time range. Scope reset: stage=unknown.",
       "type": "link",
       "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=unknown&${__url_time_range}"
     },
@@ -50,7 +50,7 @@
       "title": "3. Provider Health",
       "tooltip": "Context mapping: derive provider from current pipeline and remember pipeline_context for return links. Preserve the selected time range.",
       "type": "link",
-      "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=$pipeline&var-pipeline_context=$pipeline&var-adapter=unknown&${__url_time_range}"
+      "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=$pipeline&var-pipeline_context=$pipeline&${__url_time_range}"
     },
     {
       "asDropdown": false,
@@ -59,7 +59,7 @@
       "keepTime": true,
       "targetBlank": false,
       "title": "4. Data Quality",
-      "tooltip": "Open with current pipeline/run_type, reset stage to unknown, and preserve the selected time range.",
+      "tooltip": "Open with current pipeline/run_type and preserve the selected time range. Scope reset: stage=unknown.",
       "type": "link",
       "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=unknown&${__url_time_range}"
     },
@@ -103,22 +103,11 @@
       "type": "row"
     },
     {
-      "collapsed": true,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 2
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
       },
-      "id": 9001,
-      "panels": [],
-      "title": "First Action",
-      "type": "row",
-      "links": []
-    },
-    {
-      "datasource": "Prometheus",
-      "description": "Selected-range replay/resume safety blockers for the selected pipeline/run_type. Status mapping: 0=OK only when Control-Plane Telemetry Missing is present, 1=WARN, >=2=CRIT, null=UNKNOWN. Missing data means the dashboard cannot prove replay safety; inspect telemetry presence and manifest/ledger rows before replay/resume.",
+      "description": "Current 15m replay/resume safety blockers for the selected pipeline/run_type. Status mapping: 0=OK when Inspect: Control-Plane Telemetry Missing = 0; if telemetry is non-zero or UNKNOWN, validate scrape/rules before trusting zero blockers. 1=WARN, >=2=CRIT, null=UNKNOWN. This is a current-status panel using a 15m recording rule window. Missing data means the dashboard cannot prove replay safety; inspect telemetry presence and manifest/ledger rows before replay/resume.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -154,13 +143,6 @@
             ]
           },
           "unit": "short",
-          "links": [
-            {
-              "targetBlank": true,
-              "title": "Open Replay & Resume Runbook",
-              "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/replay-resume.md?pipeline=${pipeline:queryparam}&run_type=${run_type:queryparam}&${__url_time_range}"
-            }
-          ],
           "noValue": "UNKNOWN"
         },
         "overrides": []
@@ -174,6 +156,13 @@
       "id": 891,
       "options": {
         "colorMode": "value",
+        "dataLinks": [
+          {
+            "targetBlank": true,
+            "title": "Open Checkpoint Debugging Runbook",
+            "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/checkpoint-debugging.md?pipeline=${pipeline:queryparam}&run_type=${run_type:queryparam}&${__url_time_range}"
+          }
+        ],
         "graphMode": "area",
         "justifyMode": "auto",
         "orientation": "auto",
@@ -189,56 +178,23 @@
       "pluginVersion": "9.5.0",
       "targets": [
         {
-          "expr": "round((\n  sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", status=\"failed\"}[$__range]))\n+\n  sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range]))\n+\n  sum(increase(bioetl_checkpoint_compatibility_events_total{pipeline=~\"$pipeline\", disposition=~\".*_incompatible\"}[$__range]))\n+\n  sum(increase(bioetl_replay_reconstructability_events_total{pipeline=~\"$pipeline\", status=\"not_reconstructable\"}[$__range]))\n+\n  sum(increase(bioetl_replay_drift_events_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range]))\n+\n  sum(increase(bioetl_lineage_refs_missing_total{pipeline=~\"$pipeline\"}[$__range]))\n))",
+          "expr": "bioetl_replay_safety_blockers_15m{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}",
           "instant": true,
           "refId": "A"
         }
       ],
-      "title": "Replay Safety State",
+      "title": "Monitor: Replay Safety State",
       "type": "stat"
     },
     {
       "description": "No checkpoint-age metric is currently shipped. Treat this as an explicit known gap: the dashboard cannot prove checkpoint freshness against RPO. Next action: use checkpoint artifacts/runbook outside Grafana until bioetl_checkpoint_age_seconds exists.",
       "fieldConfig": {
         "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [
-            {
-              "type": "special",
-              "options": {
-                "match": "null",
-                "result": {
-                  "text": "UNKNOWN",
-                  "color": "gray"
-                }
-              }
-            }
-          ],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 6
-              },
-              {
-                "color": "red",
-                "value": 24
-              }
-            ]
-          },
-          "unit": "h",
           "links": [
             {
               "targetBlank": true,
-              "title": "Open Replay & Resume Runbook",
-              "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/replay-resume.md?pipeline=${pipeline:queryparam}&run_type=${run_type:queryparam}&${__url_time_range}"
+              "title": "Open Checkpoint Debugging Runbook",
+              "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/checkpoint-debugging.md"
             }
           ]
         },
@@ -256,13 +212,16 @@
         "mode": "markdown"
       },
       "pluginVersion": "9.5.0",
-      "title": "Known Gap: Checkpoint Freshness",
+      "title": "Inspect: Known Gap - Checkpoint Freshness",
       "type": "text",
       "transparent": false
     },
     {
-      "datasource": "Prometheus",
-      "description": "Selected-range manifest/ledger write failure proxy for selected pipeline/run_type. Status mapping: 0=OK only when manifest and ledger telemetry are present, 1=WARN, >=2=CRIT, null=UNKNOWN. This does not prove manifest identity or ledger ordering; use run manifest inspection for exact run/manifest evidence.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "Current 15m manifest/ledger write failure count for selected pipeline/run_type. Status mapping: 0=OK only when manifest and ledger telemetry are present, 1=WARN, >=2=CRIT, null=UNKNOWN. This is a current-status panel using a 15m recording rule window. This does not prove manifest identity or ledger ordering; use run manifest inspection for exact run/manifest evidence.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -298,13 +257,6 @@
             ]
           },
           "unit": "short",
-          "links": [
-            {
-              "targetBlank": true,
-              "title": "Open Replay & Resume Runbook",
-              "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/replay-resume.md?pipeline=${pipeline:queryparam}&run_type=${run_type:queryparam}&${__url_time_range}"
-            }
-          ],
           "noValue": "UNKNOWN"
         },
         "overrides": []
@@ -318,6 +270,13 @@
       "id": 893,
       "options": {
         "colorMode": "value",
+        "dataLinks": [
+          {
+            "targetBlank": true,
+            "title": "Open Run Manifest Inspection",
+            "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/run-manifest-inspection.md?pipeline=${pipeline:queryparam}&run_type=${run_type:queryparam}&${__url_time_range}"
+          }
+        ],
         "graphMode": "area",
         "justifyMode": "auto",
         "orientation": "auto",
@@ -333,17 +292,20 @@
       "pluginVersion": "9.5.0",
       "targets": [
         {
-          "expr": "round(sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", status=\"failed\"}[$__range])) + sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range])))",
+          "expr": "bioetl_manifest_ledger_failures_15m{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}",
           "instant": true,
           "refId": "A"
         }
       ],
-      "title": "Ledger / Manifest Consistency",
+      "title": "Monitor: Ledger / Manifest Consistency",
       "type": "stat"
     },
     {
-      "datasource": "Prometheus",
-      "description": "Selected-range missing-telemetry risk for manifest and ledger metrics. Status mapping: 0=OK/present, 1=WARN/one required family missing, >=2=CRIT/both required families missing, null=UNKNOWN. If non-zero or UNKNOWN, do not trust zero blocker cards: validate Prometheus scrape/rules and control-plane emitters before replay/resume.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "Current 5m missing-telemetry risk for manifest and ledger metrics. Status mapping: 0=OK/present, 1=WARN/one required family missing, >=2=CRIT/both required families missing, null=UNKNOWN. This is a current-status panel using a 5m recording rule window. If non-zero or UNKNOWN, do not trust zero blocker cards: validate Prometheus scrape/rules and control-plane emitters before replay/resume.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -392,6 +354,13 @@
       "id": 907,
       "options": {
         "colorMode": "value",
+        "dataLinks": [
+          {
+            "targetBlank": true,
+            "title": "Open Control-Plane Observability Checklist",
+            "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/observability-checklist.md?pipeline=${pipeline:queryparam}&run_type=${run_type:queryparam}&${__url_time_range}"
+          }
+        ],
         "graphMode": "area",
         "justifyMode": "auto",
         "orientation": "auto",
@@ -407,127 +376,49 @@
       "pluginVersion": "9.5.0",
       "targets": [
         {
-          "expr": "clamp_max(\n  (absent(sum(count_over_time(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range]))) or vector(0))\n+\n  (absent(sum(count_over_time(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\"}[$__range]))) or vector(0))\n, 2)",
+          "expr": "bioetl_control_plane_telemetry_missing_5m{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}",
           "instant": true,
           "refId": "A"
         }
       ],
-      "title": "Control-Plane Telemetry Missing",
-      "type": "stat"
-    },
-    {
-      "datasource": "Prometheus",
-      "description": "Selected-range terminal run events mirrored from persisted ledger entries for the selected pipeline. 0 can mean no terminal event in the selected range, not necessarily failure. null=UNKNOWN means terminal telemetry missing. Use manifest/ledger inspection for exact run_id event ordering.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [
-            {
-              "type": "special",
-              "options": {
-                "match": "null",
-                "result": {
-                  "text": "UNKNOWN",
-                  "color": "gray"
-                }
-              }
-            }
-          ],
-          "noValue": "UNKNOWN",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "orange",
-                "value": 1
-              },
-              {
-                "color": "red",
-                "value": 2
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 5,
-        "w": 4,
-        "x": 16,
-        "y": 2
-      },
-      "id": 908,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "pluginVersion": "9.5.0",
-      "targets": [
-        {
-          "expr": "sum(increase(bioetl_control_plane_terminal_events_total{pipeline=~\"$pipeline\"}[$__range]))",
-          "instant": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Terminal Run Events",
+      "title": "Inspect: Control-Plane Telemetry Missing",
       "type": "stat"
     },
     {
       "id": 906,
       "type": "text",
-      "title": "Next Drilldown: Replay Safety Diagnostics",
+      "title": "Next Action: Replay Safety Diagnostics",
       "gridPos": {
         "h": 5,
-        "w": 4,
-        "x": 20,
+        "w": 8,
+        "x": 16,
         "y": 2
       },
       "options": {
         "content": "### Next step\nIf blockers are non-zero, open Replay Safety diagnostics. If Control-Plane Telemetry Missing is non-zero or UNKNOWN, validate scrape/rules before replay/resume. Use the run manifest inspection runbook for run_id/manifest_id evidence.",
-        "mode": "markdown"
+        "mode": "markdown",
+        "dataLinks": [
+          {
+            "title": "Open Replay Safety Diagnostics",
+            "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?viewPanel=130&var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
+            "targetBlank": false
+          }
+        ]
       },
       "transparent": false,
-      "links": [
-        {
-          "title": "Open Replay Safety diagnostics",
-          "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?viewPanel=130&var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
-          "targetBlank": false
-        }
-      ],
-      "description": "Operator handoff text for the selected pipeline/run_type and selected time range. Use it after checking Replay Safety State and Control-Plane Telemetry Presence. It links to the replay/checkpoint diagnostic row; manifest/run identity still requires run manifest inspection outside Prometheus."
+      "description": "Operator handoff text for the selected pipeline/run_type and selected time range. Use it after checking Replay Safety State and Inspect: Control-Plane Telemetry Missing. It links to the replay/checkpoint diagnostic row; manifest/run identity still requires run manifest inspection outside Prometheus."
     },
     {
-      "datasource": "Prometheus",
-      "description": "Selected-range replay/resume blocker count across manifest writes, ledger appends, checkpoint compatibility, replay reconstructability, replay drift, and lineage refs. Status mapping: 0=OK only when telemetry is present, 1=WARN, >=2=CRIT, null=UNKNOWN. Next action: stop replay/resume and investigate the first failing signal; if null, validate control-plane metric scrape/rules first.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "Selected-range replay/resume blocker count across manifest writes, ledger appends, checkpoint compatibility, replay reconstructability, replay drift, and lineage refs. Status mapping: 0=OK when Inspect: Control-Plane Telemetry Missing = 0; if telemetry is non-zero or UNKNOWN, validate control-plane metric scrape/rules before trusting zero blockers. 1=WARN, >=2=CRIT, null=UNKNOWN. Next action: stop replay/resume and investigate the first failing signal; if null, validate control-plane metric scrape/rules first.",
       "fieldConfig": {
         "defaults": {
           "color": {
             "mode": "thresholds"
           },
-          "links": [
-            {
-              "targetBlank": true,
-              "title": "Open Replay & Resume Runbook",
-              "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/replay-resume.md?pipeline=${pipeline:queryparam}&run_type=${run_type:queryparam}&${__url_time_range}"
-            }
-          ],
           "mappings": [
             {
               "type": "special",
@@ -584,8 +475,8 @@
         "textMode": "auto",
         "dataLinks": [
           {
-            "title": "Open Replay Runbook",
-            "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/replay-debugging.md"
+            "title": "Open Checkpoint Debugging Runbook",
+            "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/checkpoint-debugging.md"
           }
         ]
       },
@@ -597,7 +488,7 @@
           "refId": "A"
         }
       ],
-      "title": "Replay / Resume Blockers",
+      "title": "Track: Replay / Resume Blockers in Range",
       "type": "stat"
     },
     {
@@ -622,12 +513,26 @@
             "content": "### Known blind spots\n- Checkpoint freshness by expected schedule/RPO is not instrumented yet.\n- Replay duplicate/overwrite risk signal is not instrumented yet.\n- Manifest-to-ledger referential integrity ratio is not instrumented yet.",
             "mode": "markdown"
           },
-          "title": "Known Blind Spots",
+          "title": "Inspect: Known Blind Spots",
           "type": "text",
-          "description": "Known replay-safety blind spots for the selected pipeline/run_type/time range. These are not healthy signals; they document control-plane invariants that cannot be proven from current Prometheus metrics."
+          "description": "Known replay-safety blind spots for the selected pipeline/run_type/time range. These are not healthy signals; they document control-plane invariants that cannot be proven from current Prometheus metrics.",
+          "fieldConfig": {
+            "defaults": {
+              "links": [
+                {
+                  "targetBlank": true,
+                  "title": "Open Instrumentation Plan",
+                  "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/observability-checklist.md"
+                }
+              ]
+            }
+          }
         },
         {
-          "datasource": "Prometheus",
+          "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
           "description": "Selected-range incompatible checkpoint compatibility decisions. Alert: BioETLCheckpointCompatibilityBlocked. Non-zero blocks resume.",
           "fieldConfig": {
             "defaults": {
@@ -685,6 +590,13 @@
           "id": 3,
           "options": {
             "colorMode": "value",
+            "dataLinks": [
+              {
+                "targetBlank": true,
+                "title": "Open Checkpoint Debugging",
+                "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/checkpoint-debugging.md?pipeline=${pipeline:queryparam}&run_type=${run_type:queryparam}&${__url_time_range}"
+              }
+            ],
             "graphMode": "area",
             "justifyMode": "auto",
             "orientation": "auto",
@@ -705,11 +617,14 @@
               "refId": "A"
             }
           ],
-          "title": "Checkpoint Incompatibilities",
+          "title": "Monitor: Checkpoint Incompatibilities",
           "type": "stat"
         },
         {
-          "datasource": "Prometheus",
+          "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
           "description": "Selected-range not_reconstructable replay observations. Alert: BioETLReplayNotReconstructable. Non-zero blocks replay.",
           "fieldConfig": {
             "defaults": {
@@ -719,8 +634,8 @@
               "links": [
                 {
                   "targetBlank": true,
-                  "title": "Run Manifest Inspection",
-                  "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/run-manifest-inspection.md"
+                  "title": "Checkpoint Debugging",
+                  "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/checkpoint-debugging.md"
                 }
               ],
               "mappings": [
@@ -766,6 +681,13 @@
           "id": 104,
           "options": {
             "colorMode": "value",
+            "dataLinks": [
+              {
+                "targetBlank": true,
+                "title": "Open Checkpoint Debugging",
+                "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/checkpoint-debugging.md?pipeline=${pipeline:queryparam}&run_type=${run_type:queryparam}&${__url_time_range}"
+              }
+            ],
             "graphMode": "area",
             "justifyMode": "auto",
             "orientation": "auto",
@@ -786,11 +708,14 @@
               "refId": "A"
             }
           ],
-          "title": "Replay Not Reconstructable",
+          "title": "Monitor: Replay Not Reconstructable",
           "type": "stat"
         },
         {
-          "datasource": "Prometheus",
+          "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
           "description": "Selected-range replay drift events. Alert: BioETLReplayDriftDetected. Non-zero means stop replay and inspect drift type.",
           "fieldConfig": {
             "defaults": {
@@ -800,8 +725,8 @@
               "links": [
                 {
                   "targetBlank": true,
-                  "title": "Run Manifest Inspection",
-                  "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/run-manifest-inspection.md"
+                  "title": "Checkpoint Debugging",
+                  "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/checkpoint-debugging.md"
                 }
               ],
               "mappings": [
@@ -847,6 +772,13 @@
           "id": 120,
           "options": {
             "colorMode": "value",
+            "dataLinks": [
+              {
+                "targetBlank": true,
+                "title": "Open Checkpoint Debugging",
+                "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/checkpoint-debugging.md"
+              }
+            ],
             "graphMode": "area",
             "justifyMode": "auto",
             "orientation": "auto",
@@ -867,11 +799,14 @@
               "refId": "A"
             }
           ],
-          "title": "Replay Drift",
+          "title": "Monitor: Replay Drift",
           "type": "stat"
         },
         {
-          "datasource": "Prometheus",
+          "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
           "description": "Selected-range checkpoint load failures. Alert: BioETLCheckpointLoadFailed.",
           "fieldConfig": {
             "defaults": {
@@ -928,6 +863,13 @@
           "id": 101,
           "options": {
             "colorMode": "value",
+            "dataLinks": [
+              {
+                "targetBlank": true,
+                "title": "Open Checkpoint Debugging",
+                "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/checkpoint-debugging.md"
+              }
+            ],
             "graphMode": "area",
             "justifyMode": "auto",
             "orientation": "auto",
@@ -948,11 +890,14 @@
               "refId": "A"
             }
           ],
-          "title": "Checkpoint Load Failures",
+          "title": "Monitor: Checkpoint Load Failures",
           "type": "stat"
         },
         {
-          "datasource": "Prometheus",
+          "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
           "description": "Selected-range checkpoint save failures. Alert: BioETLCheckpointSaveFailed.",
           "fieldConfig": {
             "defaults": {
@@ -1009,6 +954,13 @@
           "id": 102,
           "options": {
             "colorMode": "value",
+            "dataLinks": [
+              {
+                "targetBlank": true,
+                "title": "Open Checkpoint Debugging",
+                "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/checkpoint-debugging.md"
+              }
+            ],
             "graphMode": "area",
             "justifyMode": "auto",
             "orientation": "auto",
@@ -1029,12 +981,15 @@
               "refId": "A"
             }
           ],
-          "title": "Checkpoint Save Failures",
+          "title": "Monitor: Checkpoint Save Failures",
           "type": "stat"
         },
         {
-          "datasource": "Prometheus",
-          "description": "GLOBAL operator/admin checkpoint failures. Alert: BioETLCheckpointOperatorFailed. Not filtered by $pipeline or $run_type.",
+          "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+          "description": "Selected-range GLOBAL operator/admin checkpoint failures not filtered by $pipeline or $run_type. Alert: BioETLCheckpointOperatorFailed. This panel shows aggregate failures across all pipelines. Use pipeline-scoped checkpoint panels for specific pipeline analysis.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1090,6 +1045,13 @@
           "id": 103,
           "options": {
             "colorMode": "value",
+            "dataLinks": [
+              {
+                "targetBlank": true,
+                "title": "Open Checkpoint Debugging",
+                "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/checkpoint-debugging.md"
+              }
+            ],
             "graphMode": "area",
             "justifyMode": "auto",
             "orientation": "auto",
@@ -1110,12 +1072,15 @@
               "refId": "A"
             }
           ],
-          "title": "GLOBAL Checkpoint Operator Failures",
+          "title": "Monitor: GLOBAL Checkpoint Operator Failures",
           "type": "stat"
         },
         {
-          "datasource": "Prometheus",
-          "description": "Selected-range maximum replay lag seconds for selected pipeline/run_type. Status mapping: 0=OK only when replay lag telemetry is present, 1=WARN, >=2=CRIT, null=UNKNOWN. No series renders as UNKNOWN because missing replay lag telemetry is diagnostic; use telemetry-presence panels before replay decisions. Alert: BioETLReplayLagHigh.",
+          "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+          "description": "Selected-range maximum replay lag seconds for the selected pipeline/run_type. Threshold guidance: <300s is normal context, 300-899s is elevated, >=900s is critical backlog. No series renders as UNKNOWN because missing replay lag telemetry is diagnostic; use telemetry-presence panels before replay decisions. Alert alignment: replay lag becomes actionable from 300s.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1149,11 +1114,11 @@
                   },
                   {
                     "color": "orange",
-                    "value": 1
+                    "value": 300
                   },
                   {
                     "color": "red",
-                    "value": 2
+                    "value": 900
                   }
                 ]
               },
@@ -1171,6 +1136,13 @@
           "id": 121,
           "options": {
             "colorMode": "value",
+            "dataLinks": [
+              {
+                "targetBlank": true,
+                "title": "Open Checkpoint Debugging",
+                "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/checkpoint-debugging.md?pipeline=${pipeline:queryparam}&run_type=${run_type:queryparam}&${__url_time_range}"
+              }
+            ],
             "graphMode": "area",
             "justifyMode": "auto",
             "orientation": "auto",
@@ -1191,12 +1163,15 @@
               "refId": "A"
             }
           ],
-          "title": "Replay Lag Seconds",
+          "title": "Track: Replay Lag Seconds",
           "type": "stat"
         },
         {
-          "datasource": "Prometheus",
-          "description": "Checkpoint compatibility outcomes grouped by disposition.",
+          "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+          "description": "Selected-range checkpoint compatibility outcomes grouped by disposition.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1239,12 +1214,15 @@
               "refId": "A"
             }
           ],
-          "title": "Checkpoint Compatibility Outcomes",
+          "title": "Track: Checkpoint Compatibility Outcomes",
           "type": "timeseries"
         },
         {
-          "datasource": "Prometheus",
-          "description": "Replay drift trend by capability, drift type, and status. Alert: BioETLReplayDriftDetected.",
+          "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+          "description": "Selected-range replay drift trend by capability, drift type, and status. Alert: BioETLReplayDriftDetected.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1300,11 +1278,14 @@
               "refId": "A"
             }
           ],
-          "title": "Replay Drift by Type",
+          "title": "Track: Replay Drift by Type",
           "type": "timeseries"
         },
         {
-          "datasource": "Prometheus",
+          "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
           "description": "Replay lag trend by replay capability and status.",
           "fieldConfig": {
             "defaults": {
@@ -1365,12 +1346,15 @@
               "refId": "A"
             }
           ],
-          "title": "Replay Lag Trend",
+          "title": "Track: Replay Lag Trend",
           "type": "timeseries"
         },
         {
-          "datasource": "Prometheus",
-          "description": "Checkpoint save latency quantiles. No data means no latency samples, not zero latency. Alerts: BioETLCheckpointSaveLatencyHigh.",
+          "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+          "description": "Selected-range checkpoint save latency quantiles. No data means no latency samples, not zero latency. Alerts: BioETLCheckpointSaveLatencyHigh.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1440,12 +1424,15 @@
               "refId": "C"
             }
           ],
-          "title": "Checkpoint Save Latency p50/p95/p99",
+          "title": "Track: Checkpoint Save Latency p50/p95/p99",
           "type": "timeseries"
         },
         {
-          "datasource": "Prometheus",
-          "description": "GLOBAL checkpoint operator/admin latency quantiles. Not filtered by $pipeline or $run_type. Alerts: BioETLCheckpointOperatorLatencyHigh.",
+          "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+          "description": "Selected-range GLOBAL checkpoint operator/admin latency quantiles. Not filtered by $pipeline or $run_type. Alerts: BioETLCheckpointOperatorLatencyHigh.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1515,7 +1502,7 @@
               "refId": "C"
             }
           ],
-          "title": "GLOBAL Checkpoint Operator Latency p50/p95/p99",
+          "title": "Track: GLOBAL Checkpoint Operator Latency p50/p95/p99",
           "type": "timeseries"
         }
       ],
@@ -1533,7 +1520,61 @@
       "id": 901,
       "panels": [
         {
-          "datasource": "Prometheus",
+          "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+          "description": "Selected-range terminal run events grouped by terminal_status for the selected pipeline. This is pipeline-scoped evidence only: the metric contract has no run_type label, so the run_type selector does not change this panel. Use Run Manifest Inspection for exact run_id/manifest_id ordering evidence.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "links": [
+                {
+                  "targetBlank": true,
+                  "title": "Open Run Manifest Inspection",
+                  "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/run-manifest-inspection.md"
+                }
+              ],
+              "mappings": [],
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 4,
+            "x": 0,
+            "y": 8
+          },
+          "id": 908,
+          "options": {
+            "showHeader": true,
+            "dataLinks": [
+              {
+                "targetBlank": true,
+                "title": "Open Run Manifest Inspection",
+                "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/run-manifest-inspection.md?pipeline=${pipeline:queryparam}&run_type=${run_type:queryparam}&${__url_time_range}"
+              }
+            ]
+          },
+          "targets": [
+            {
+              "expr": "sum by (terminal_status) (increase(bioetl_control_plane_terminal_events_total{pipeline=~\"$pipeline\"}[$__range]))",
+              "instant": true,
+              "legendFormat": "{{terminal_status}}",
+              "refId": "A"
+            }
+          ],
+          "title": "Inspect: Terminal Run Events by Status in Range",
+          "type": "table"
+        },
+        {
+          "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
           "description": "Selected-range manifest persistence failures. Alert: BioETLControlPlaneManifestWriteFailed. Action: inspect manifest persistence before replay/resume.",
           "fieldConfig": {
             "defaults": {
@@ -1590,6 +1631,13 @@
           "id": 1,
           "options": {
             "colorMode": "value",
+            "dataLinks": [
+              {
+                "targetBlank": true,
+                "title": "Open Run Manifest Inspection",
+                "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/run-manifest-inspection.md?pipeline=${pipeline:queryparam}&run_type=${run_type:queryparam}&${__url_time_range}"
+              }
+            ],
             "graphMode": "area",
             "justifyMode": "auto",
             "orientation": "auto",
@@ -1610,11 +1658,14 @@
               "refId": "A"
             }
           ],
-          "title": "Manifest Write Failures",
+          "title": "Monitor: Manifest Write Failures",
           "type": "stat"
         },
         {
-          "datasource": "Prometheus",
+          "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
           "description": "Selected-range run-ledger append failures. Alert: BioETLRunLedgerAppendFailed. Action: inspect run ledger before replay/resume.",
           "fieldConfig": {
             "defaults": {
@@ -1671,6 +1722,13 @@
           "id": 2,
           "options": {
             "colorMode": "value",
+            "dataLinks": [
+              {
+                "targetBlank": true,
+                "title": "Open Run Manifest Inspection",
+                "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/run-manifest-inspection.md?pipeline=${pipeline:queryparam}&run_type=${run_type:queryparam}&${__url_time_range}"
+              }
+            ],
             "graphMode": "area",
             "justifyMode": "auto",
             "orientation": "auto",
@@ -1691,12 +1749,15 @@
               "refId": "A"
             }
           ],
-          "title": "Ledger Append Failures",
+          "title": "Monitor: Ledger Append Failures",
           "type": "stat"
         },
         {
-          "datasource": "Prometheus",
-          "description": "Manifest write attempts grouped by status/run_type for the active pipeline/run_type scope.",
+          "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+          "description": "Selected-range manifest write attempts grouped by status/run_type for the selected pipeline/run_type. This panel uses $__range and shows historical evidence. For current-status information, use Monitor: Ledger / Manifest Consistency on the first screen. Status mapping: success=OK, failed=CRIT, null=UNKNOWN. Use Run Manifest Inspection runbook for detailed manifest analysis.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1739,12 +1800,15 @@
               "refId": "A"
             }
           ],
-          "title": "Manifest Writes by Status",
+          "title": "Track: Manifest Writes by Status",
           "type": "timeseries"
         },
         {
-          "datasource": "Prometheus",
-          "description": "Run-ledger append attempts grouped by event type and status.",
+          "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+          "description": "Selected-range run-ledger append attempts grouped by event type and status. This panel uses $__interval historical evidence; use Monitor: Ledger / Manifest Consistency for first-screen current status.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1787,11 +1851,14 @@
               "refId": "A"
             }
           ],
-          "title": "Ledger Appends by Event Type / Status",
+          "title": "Track: Ledger Appends by Event Type / Status",
           "type": "timeseries"
         },
         {
-          "datasource": "Prometheus",
+          "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
           "description": "Fixed 30m manifest write failure ratio severity for the selected pipeline scope. Status mapping: 0=OK when telemetry is present, >0 maps to WARN=1, >0.10 maps to CRIT=2, null=UNKNOWN. The denominator is clamped to avoid divide-by-zero, so pair this with telemetry presence before interpreting 0 as healthy.",
           "fieldConfig": {
             "defaults": {
@@ -1848,6 +1915,13 @@
           "id": 132,
           "options": {
             "colorMode": "value",
+            "dataLinks": [
+              {
+                "targetBlank": true,
+                "title": "Open Run Manifest Inspection",
+                "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/run-manifest-inspection.md?pipeline=${pipeline:queryparam}&run_type=${run_type:queryparam}&${__url_time_range}"
+              }
+            ],
             "graphMode": "area",
             "justifyMode": "auto",
             "orientation": "auto",
@@ -1868,11 +1942,14 @@
               "refId": "A"
             }
           ],
-          "title": "Manifest Write Failure Ratio",
+          "title": "Monitor: Manifest Write Failure Ratio",
           "type": "stat"
         },
         {
-          "datasource": "Prometheus",
+          "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
           "description": "Fixed 30m ledger append failure ratio severity for the selected pipeline scope. Status mapping: 0=OK when telemetry is present, >0 maps to WARN=1, >0.10 maps to CRIT=2, null=UNKNOWN. The denominator is clamped to avoid divide-by-zero, so pair this with telemetry presence before interpreting 0 as healthy.",
           "fieldConfig": {
             "defaults": {
@@ -1929,6 +2006,13 @@
           "id": 133,
           "options": {
             "colorMode": "value",
+            "dataLinks": [
+              {
+                "targetBlank": true,
+                "title": "Open Run Manifest Inspection",
+                "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/run-manifest-inspection.md?pipeline=${pipeline:queryparam}&run_type=${run_type:queryparam}&${__url_time_range}"
+              }
+            ],
             "graphMode": "area",
             "justifyMode": "auto",
             "orientation": "auto",
@@ -1949,7 +2033,7 @@
               "refId": "A"
             }
           ],
-          "title": "Ledger Append Failure Ratio",
+          "title": "Monitor: Ledger Append Failure Ratio",
           "type": "stat"
         }
       ],
@@ -1967,8 +2051,11 @@
       "id": 903,
       "panels": [
         {
-          "datasource": "Prometheus",
-          "description": "Read-path metric is global by store/operation/status and is not filtered by $pipeline or $run_type. Alert: BioETLControlPlaneReadFailureRate.",
+          "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+          "description": "Selected-range GLOBAL read-path failures, not filtered by $pipeline or $run_type. Alert: BioETLControlPlaneReadFailureRate. This panel shows aggregate read failures across all control-plane stores. Use pipeline-scoped panels for specific pipeline analysis.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2024,6 +2111,13 @@
           "id": 4,
           "options": {
             "colorMode": "value",
+            "dataLinks": [
+              {
+                "targetBlank": true,
+                "title": "Open Observability Checklist",
+                "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/observability-checklist.md"
+              }
+            ],
             "graphMode": "area",
             "justifyMode": "auto",
             "orientation": "auto",
@@ -2044,12 +2138,15 @@
               "refId": "A"
             }
           ],
-          "title": "GLOBAL Control-Plane Read Failures",
+          "title": "Monitor: GLOBAL Control-Plane Read Failures",
           "type": "stat"
         },
         {
-          "datasource": "Prometheus",
-          "description": "Read-path metric is global by store/operation/status and is not filtered by $pipeline or $run_type. 30m failure ratio by global read path. Alert: BioETLControlPlaneReadFailureRate.",
+          "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+          "description": "Fixed 30m GLOBAL read failure ratio severity, not filtered by $pipeline or $run_type. Status mapping: <=5%=OK, >5%=WARN=1, >10%=CRIT=2, null=UNKNOWN. This panel shows aggregate read failure ratio severity across all control-plane stores; use per-store evidence panels and the observability checklist for deeper analysis.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2091,7 +2188,7 @@
                   }
                 ]
               },
-              "unit": "percentunit",
+              "unit": "short",
               "noValue": "UNKNOWN"
             },
             "overrides": []
@@ -2105,6 +2202,13 @@
           "id": 136,
           "options": {
             "colorMode": "value",
+            "dataLinks": [
+              {
+                "targetBlank": true,
+                "title": "Open Observability Checklist",
+                "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/observability-checklist.md"
+              }
+            ],
             "graphMode": "area",
             "justifyMode": "auto",
             "orientation": "auto",
@@ -2120,17 +2224,20 @@
           "pluginVersion": "9.5.0",
           "targets": [
             {
-              "expr": "(sum(increase(bioetl_control_plane_reads_total{status=\"failed\"}[30m])) or vector(0)) / clamp_min((sum(increase(bioetl_control_plane_reads_total[30m])) or vector(0)), 1)",
+              "expr": "(((sum(increase(bioetl_control_plane_reads_total{status=\"failed\"}[30m])) or vector(0)) / clamp_min((sum(increase(bioetl_control_plane_reads_total[30m])) or vector(0)), 1)) > bool 0.05) + (((sum(increase(bioetl_control_plane_reads_total{status=\"failed\"}[30m])) or vector(0)) / clamp_min((sum(increase(bioetl_control_plane_reads_total[30m])) or vector(0)), 1)) > bool 0.10)",
               "instant": true,
               "refId": "A"
             }
           ],
-          "title": "GLOBAL Control-Plane Read Failure Ratio",
+          "title": "Monitor: GLOBAL Control-Plane Read Failure Ratio",
           "type": "stat"
         },
         {
-          "datasource": "Prometheus",
-          "description": "Read-path metric is global by store/operation/status and is not filtered by $pipeline or $run_type.",
+          "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+          "description": "Selected-range GLOBAL read-path operations by store/operation/status, not filtered by $pipeline or $run_type. This panel shows aggregate read operations across all control-plane stores. Use pipeline-scoped panels for specific pipeline analysis.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2173,12 +2280,15 @@
               "refId": "A"
             }
           ],
-          "title": "GLOBAL Control-Plane Reads by Store / Operation / Status",
+          "title": "Track: GLOBAL Control-Plane Reads by Store / Operation / Status",
           "type": "timeseries"
         },
         {
-          "datasource": "Prometheus",
-          "description": "Read-path metric is global by store/operation/status and is not filtered by $pipeline or $run_type. No data means no latency samples, not zero latency.",
+          "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+          "description": "Selected-range GLOBAL read-path latency quantiles, not filtered by $pipeline or $run_type. No data means no latency samples, not zero latency. This panel shows aggregate latency across all control-plane stores. Use pipeline-scoped panels for specific pipeline analysis.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2248,7 +2358,7 @@
               "refId": "C"
             }
           ],
-          "title": "GLOBAL Control-Plane Read Latency p50/p95/p99",
+          "title": "Track: GLOBAL Control-Plane Read Latency p50/p95/p99",
           "type": "timeseries"
         }
       ],
@@ -2266,7 +2376,10 @@
       "id": 904,
       "panels": [
         {
-          "datasource": "Prometheus",
+          "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
           "description": "Selected-range missing upstream lineage references. Alert: BioETLLineageRefsMissing. Missing lineage can make replay evidence incomplete.",
           "fieldConfig": {
             "defaults": {
@@ -2324,6 +2437,13 @@
           "id": 122,
           "options": {
             "colorMode": "value",
+            "dataLinks": [
+              {
+                "targetBlank": true,
+                "title": "Open Traceability Signal Ownership",
+                "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/traceability-signal-ownership.md"
+              }
+            ],
             "graphMode": "area",
             "justifyMode": "auto",
             "orientation": "auto",
@@ -2344,11 +2464,14 @@
               "refId": "A"
             }
           ],
-          "title": "Lineage Refs Missing",
+          "title": "Monitor: Lineage Refs Missing",
           "type": "stat"
         },
         {
-          "datasource": "Prometheus",
+          "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
           "description": "Selected-range lineage fragment persistence failures. Alert: BioETLLineageFragmentPersistenceFailed.",
           "fieldConfig": {
             "defaults": {
@@ -2405,6 +2528,13 @@
           "id": 137,
           "options": {
             "colorMode": "value",
+            "dataLinks": [
+              {
+                "targetBlank": true,
+                "title": "Open Traceability Signal Ownership",
+                "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/traceability-signal-ownership.md"
+              }
+            ],
             "graphMode": "area",
             "justifyMode": "auto",
             "orientation": "auto",
@@ -2425,11 +2555,14 @@
               "refId": "A"
             }
           ],
-          "title": "Lineage Fragment Persistence Failures",
+          "title": "Monitor: Lineage Fragment Persistence Failures",
           "type": "stat"
         },
         {
-          "datasource": "Prometheus",
+          "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
           "description": "Selected-range missing lineage refs by layer/ref_type. Use as lineage risk triage only; it does not prove complete artifact identity graph or exact artifact refs. null/no rows can mean no missing refs or missing telemetry depending on lineage fragment activity.",
           "fieldConfig": {
             "defaults": {
@@ -2473,7 +2606,14 @@
           },
           "id": 138,
           "options": {
-            "showHeader": true
+            "showHeader": true,
+            "dataLinks": [
+              {
+                "targetBlank": true,
+                "title": "Open Traceability Signal Ownership",
+                "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/traceability-signal-ownership.md"
+              }
+            ]
           },
           "targets": [
             {
@@ -2483,12 +2623,15 @@
               "refId": "A"
             }
           ],
-          "title": "Lineage Refs Missing by Layer / Ref Type",
+          "title": "Inspect: Lineage Refs Missing by Layer / Ref Type",
           "type": "table"
         },
         {
-          "datasource": "Prometheus",
-          "description": "Audit write outcomes by layer, operation, and status. Supporting evidence for replay safety, not answer-row decision.",
+          "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+          "description": "Selected-range audit write outcomes by layer, operation, and status. Supporting evidence for replay safety, not answer-row decision.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2531,12 +2674,15 @@
               "refId": "A"
             }
           ],
-          "title": "Audit Write Outcomes",
+          "title": "Track: Audit Write Outcomes",
           "type": "timeseries"
         },
         {
-          "datasource": "Prometheus",
-          "description": "Audit query outcomes by layer filter and status. Supporting evidence for replay safety, not answer-row decision.",
+          "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+          "description": "Selected-range audit query outcomes by layer filter and status. Supporting evidence for replay safety, not answer-row decision.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2579,12 +2725,15 @@
               "refId": "A"
             }
           ],
-          "title": "Audit Query Outcomes",
+          "title": "Track: Audit Query Outcomes",
           "type": "timeseries"
         },
         {
-          "datasource": "Prometheus",
-          "description": "Audit write latency quantiles. No data means no latency samples, not zero latency.",
+          "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+          "description": "Selected-range audit write latency quantiles. No data means no latency samples, not zero latency.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2654,12 +2803,15 @@
               "refId": "C"
             }
           ],
-          "title": "Audit Write Latency p50/p95/p99",
+          "title": "Track: Audit Write Latency p50/p95/p99",
           "type": "timeseries"
         },
         {
-          "datasource": "Prometheus",
-          "description": "Audit query latency quantiles. No data means no latency samples, not zero latency.",
+          "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+          "description": "Selected-range audit query latency quantiles. No data means no latency samples, not zero latency.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2729,12 +2881,15 @@
               "refId": "C"
             }
           ],
-          "title": "Audit Query Latency p50/p95/p99",
+          "title": "Track: Audit Query Latency p50/p95/p99",
           "type": "timeseries"
         },
         {
-          "datasource": "Prometheus",
-          "description": "Lineage fragment persistence outcomes by layer/status.",
+          "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+          "description": "Selected-range lineage fragment persistence outcomes by layer/status.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2777,7 +2932,7 @@
               "refId": "A"
             }
           ],
-          "title": "Lineage Fragment Outcomes",
+          "title": "Track: Lineage Fragment Outcomes",
           "type": "timeseries"
         }
       ],
@@ -2806,7 +2961,7 @@
             "content": "### Missing replay-safety signals\n\nThe dashboard cannot currently verify these invariants because no repo-confirmed metric was found:\n\n- manifest_id/run_id identity table in Grafana\n- execution_fingerprint, config_hash, contract_ref, contract_version\n- source_refs, planned artifacts, published artifacts\n- ledger ordering / duplicate entries / last_event_id watermark\n- checkpoint_age <= recovery window / RPO\n- replay does not create unexplained duplicate records\n- artifact identity graph completeness\n- occurrence-only vs semantic drift classification beyond bounded replay_drift labels\n\nDo not add PromQL panels for these until metrics or a non-Prometheus evidence surface exists.\nOpen instrumentation/workflow work for:\n\n- manifest/ledger evidence table or artifact explorer handoff\n- bioetl_checkpoint_age_seconds\n- bioetl_replay_duplicate_records_total\n- artifact/identity graph completeness evidence\n\n| Missing signal | Required future evidence | Why it matters |\n| --- | --- | --- |\n| Manifest/run identity | manifest/ledger table or artifact drilldown | Exact replay needs run_id/manifest_id evidence |\n| Contract/config compatibility | config_hash + contract_ref/version evidence | Replay eligibility depends on deterministic inputs |\n| Ledger ordering/duplicates | append-only event detail / watermark | Incomplete or duplicated ledger breaks trust |\n| Checkpoint age vs recovery window | `bioetl_checkpoint_age_seconds` | Cannot prove checkpoint age is within RPO |\n| Replay duplicate records | `bioetl_replay_duplicate_records_total` | Cannot prove replay did not create unexplained duplicates |\n| Identity graph completeness | artifact/lineage completeness evidence | Missing links weaken forensic traceability |\n",
             "mode": "markdown"
           },
-          "title": "Known Missing Replay-Safety Signals",
+          "title": "Review: Known Missing Replay-Safety Signals",
           "type": "text",
           "description": "Explicit documentation of replay-safety invariants not currently represented by repo-confirmed metrics. These gaps are limitations, not green health signals."
         }

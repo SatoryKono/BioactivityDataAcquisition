@@ -192,11 +192,20 @@ groups:
       - record: bioetl_l1_gold_lifecycle_status
         labels:
           lifecycle_state: pending_no_recent_gold
-        expr: >-
-          (((sum by (pipeline, run_type) (increase(bioetl_pipeline_runs_total[15m])) > bool 0)
-          unless on (pipeline, run_type) (sum by (pipeline, run_type) (increase(bioetl_records_processed_total{stage="gold"}[15m])) > bool 0))
-          unless on (pipeline, run_type) (bioetl_runtime_alert_condition_gold_write_missing_15m > bool 0))
-          unless on (pipeline, run_type) (bioetl_l0_input_status{input="runtime"} >= bool 2))
+        expr: |
+          (
+            (
+              (
+                sum by (pipeline, run_type) (increase(bioetl_pipeline_runs_total[15m])) > bool 0
+              )
+              unless on (pipeline, run_type)
+              (sum by (pipeline, run_type) (increase(bioetl_records_processed_total{stage="gold"}[15m])) > bool 0)
+            )
+            unless on (pipeline, run_type)
+            (bioetl_runtime_alert_condition_gold_write_missing_15m > bool 0)
+          )
+          unless on (pipeline, run_type)
+          (bioetl_l0_input_status{input="runtime"} >= bool 2)
           * on (pipeline) group_left(run_type) (bioetl_pipeline_stage_expected{stage="gold"} == bool 1) * 1
       - record: bioetl_l1_gold_lifecycle_status
         labels:
@@ -243,13 +252,13 @@ groups:
           reason: preflight_failed
           severity: failing
           action_target: runtime
-        expr: bioetl_runtime_alert_condition_pipeline_preflight_failed_15m
+        expr: bioetl_runtime_alert_condition_pipeline_preflight_failed_15m * on (pipeline) group_left(run_type) bioetl_runtime_current_activity_15m
       - record: bioetl_runtime_current_blocker_reason
         labels:
           reason: infrastructure_failed
           severity: failing
           action_target: control_plane
-        expr: bioetl_runtime_alert_condition_pipeline_infrastructure_failed_15m
+        expr: bioetl_runtime_alert_condition_pipeline_infrastructure_failed_15m * on (pipeline) group_left(run_type) bioetl_runtime_current_activity_15m
       - record: bioetl_runtime_current_blocker_reason
         labels:
           reason: failed_run

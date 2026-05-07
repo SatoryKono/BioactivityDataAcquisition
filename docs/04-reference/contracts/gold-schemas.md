@@ -694,7 +694,7 @@ Composite-схемы объединяют данные из нескольких
 
 #### Примечание по composite-схемам
 
-Composite-схемы используют `strict=False` — бизнес-поля (например, `molecule_id`, `canonical_smiles`, `standard_value` для activity) берутся из соответствующих провайдерных схем и присутствуют в DataFrame, но не декларируются явно в composite-схеме. Валидируются только persisted semantic/system поля. Occurrence-scoped lineage anchors (`run_id`, `composite_run_id`, wall-clock timestamps) публикуются через sidecar/control-plane artifacts, а не через физические Gold rows.
+Composite-схемы используют `strict=True` — бизнес-поля (например, `molecule_id`, `canonical_smiles`, `standard_value` для activity) берутся из соответствующих провайдерных схем и присутствуют в DataFrame, но не декларируются явно в composite-схеме. Валидируются только persisted semantic/system поля. Occurrence-scoped lineage anchors (`run_id`, `composite_run_id`, wall-clock timestamps) публикуются через sidecar/control-plane artifacts, а не через физические Gold rows.
 
 ______________________________________________________________________
 

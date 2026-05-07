@@ -343,6 +343,31 @@ datasources:
       timeInterval: 15s
 ```
 
+### Datasource configuration standard for shipped dashboards
+
+Для shipped Prometheus **panel** datasource references в
+`grafana/dashboards/*.json` используйте только явный object format:
+
+```json
+"datasource": {
+  "type": "prometheus",
+  "uid": "prometheus"
+}
+```
+
+Правила для текущего repo contract:
+
+- не использовать `${DS_PROMETHEUS}` в shipped dashboard JSON
+- не полагаться на string panel datasource `"Prometheus"` там, где панель
+  обращается к provisioned Prometheus datasource
+- считать `grafana/provisioning/datasources-core/prometheus.yml` источником
+  истины для provisioned UID (`prometheus`)
+- не распространять это правило автоматически на template-variable datasource
+  fields или non-Prometheus datasources без отдельного change set
+
+Валидация этого контракта выполняется существующим Grafana integration suite,
+включая `tests/integration/test_grafana_config.py`.
+
 Дашборды провизионируются автоматически при старте Grafana:
 
 ```yaml
@@ -687,9 +712,9 @@ Shipped dashboards используют несколько template variables в
 - **`0. Control Plane`** использует собственные
   `$pipeline/$run_type` queries для manifest/ledger/checkpoint/replay/lineage
   decision row. First-screen trust panels preserve `UNKNOWN` for missing
-  telemetry; `Control-Plane Telemetry Missing` must be `0` before operator
-  treats blocker value `0` as replay/resume-safe evidence. `Terminal Run Events`
-  shows selected-range terminal ledger evidence, while exact `run_id` /
+  telemetry; `Inspect: Control-Plane Telemetry Missing` must be `0` before operator
+  treats current trust cards as replay/resume-safe evidence. `Inspect: Terminal Run Events by Status in Range`
+  stays below fold as selected-range terminal ledger evidence, while exact `run_id` /
   `manifest_id`, config/contract hashes, artifact refs, and ledger ordering
   remain run-manifest inspection evidence, not Prometheus labels. GLOBAL
   read-path и checkpoint-operator panels не несут pipeline/run_type labels,
@@ -702,6 +727,8 @@ Shipped dashboards используют несколько template variables в
   `$pipeline_context` и `$adapter`. Переходы из pipeline-scoped dashboards
   задают `$provider=$pipeline` и сохраняют `$pipeline_context=$pipeline`; при
   обратном переходе `$pipeline_context` восстанавливает исходный pipeline.
+  Если source dashboard не имеет adapter context, handoff не передаёт `adapter`,
+  и target dashboard сам раскрывает fallback `All adapters`.
 
 **Каскадная зависимость:** Значения `$run_type` зависят от выбранного `$pipeline`. При смене пайплайна список доступных run types автоматически обновляется.
 
@@ -901,7 +928,7 @@ first screen.
 | 9103 | Inspect Provider Top Causes                    | Table          | `topk(5, bioetl_provider_current_cause > 0)`                                                                         | Current cause chips: raw health status, failure rate, retry exhaustion, latency, HTTP errors, rate-limit pressure. |
 | 9002 | First Action                                   | Text           | n/a                                                                                                                  | CTA: start from GLOBAL matrix, inspect causes, then correlate Runtime/Control Plane if provider symptoms affect pipeline execution. |
 | 1   | Track Health Check Latency by Provider (p95)    | Timeseries     | `histogram_quantile(0.95, sum by (le, provider) (increase(...[$__interval])))`                                       | Selected-range evidence: p95 latency trend по выбранным providers; `No data` сохраняется как diagnostic gap, не маскируется в `0s`. |
-| 114 | Current Provider Health Status                  | Table          | `max by (provider) (bioetl_provider_health_status{provider=~"$provider"})`                                           | Текущий статус по provider с mapping `0=UNHEALTHY`, `1=DEGRADED`, `2=HEALTHY`. |
+| 114 | Monitor Current Provider Health Status          | Table          | `max by (provider) (bioetl_provider_health_status{provider=~"$provider"})`                                           | Текущий статус по provider с mapping `0=UNHEALTHY`, `1=DEGRADED`, `2=HEALTHY`. |
 | 2   | Monitor Healthy Checks (Selected Range)         | Stat           | `round(sum(increase(bioetl_health_check_success_total{provider=~"$provider"}[$__range])) or vector(0))`              | Selected-range evidence: completed probes со статусом `HEALTHY` в выбранном окне.  |
 | 105 | Monitor Degraded Checks (Selected Range)        | Stat           | `round(sum(increase(bioetl_health_check_degraded_total{provider=~"$provider"}[$__range])) or vector(0))`             | Selected-range evidence: completed probes со статусом `DEGRADED` в выбранном окне. |
 | 104 | Track Provider Failure Rate (Selected Range)    | Gauge          | `failures_increase / clamp_min(total_increase, 1)`                                                                   | Selected-range evidence: failure-rate за выбранный range. |
@@ -910,7 +937,7 @@ first screen.
 | 107 | Track Provider Failure Share (Selected Range)   | Bar gauge      | `100 * failures_by_provider / clamp_min(total_failures, 1)`                                                          | Selected-range evidence: ранжирование providers по доле failed probes. |
 | 108 | Retries Exhausted by Provider / Operation       | Table          | `round(sum by (provider, operation) (increase(bioetl_data_source_retry_exhausted_total[$__range])) or vector(0))`    | Где retries чаще всего исчерпываются.                     |
 | 109 | Retries Exhausted Trend by Provider / Operation | Timeseries     | `round(sum by (provider, operation) (increase(bioetl_data_source_retry_exhausted_total[$__interval])) or vector(0))` | Тренд retry exhaustion incidents во времени.              |
-| 102 | Provider Health Check Latency (p95) - $provider | Repeated Gauge | `histogram_quantile(0.95, sum by (le, provider) (increase(...[$__range])))`                                          | Current p95 by provider для выбранного range; отсутствие samples остаётся `No data`. |
+| 102 | Inspect Provider Health Check Latency (p95) - $provider | Repeated Gauge | `histogram_quantile(0.95, sum by (le, provider) (increase(...[$__range])))`                                          | Current p95 by provider для выбранного range; отсутствие samples остаётся `No data`. |
 
 **Используемые метрики:** `health_check_latency_seconds`, `provider_health_status`, `health_check_success_total`, `health_check_degraded_total`, `health_check_failures_total`.
 
@@ -952,62 +979,68 @@ collapsed row `Tracing-only Log Hygiene (requires optional tracing profile)`.
 | Панель | Query family | Unit | Threshold |
 | --- | --- | --- | --- |
 | `First Action` | text CTA | n/a | n/a |
-| `Monitor Runtime Current Status` | `bioetl_runtime_current_status` | status | `0=OK`, `1=DEGRADED`, `2=FAILING`, `null=UNKNOWN` |
+| `Monitor Runtime Current Status` | `bioetl_runtime_current_status` | status | `0=OK`, `1=WARN`, `2=CRIT`, `null=UNKNOWN` |
 | `Monitor Runtime Telemetry Gap` | `up{job="bioetl"}` | status | `0=SCRAPING`, `1=NO SCRAPE`, `null=UNKNOWN` |
-| `Runtime Blockers` | `bioetl_runtime_current_blocker_reason` | count | red `>=1`; zero fallback only for count rendering |
-| `Inspect Top Runtime Blockers` | `topk(3, bioetl_runtime_current_blocker_reason > 0)` | table | reason/severity/action labels |
+| `Monitor Runtime Blockers` | `bioetl_runtime_current_blocker_reason{pipeline=~"$pipeline",run_type=~"$run_type"}` | count | red `>=1`; zero fallback only for count rendering |
+| `Inspect Top Runtime Blockers` | `topk(3, bioetl_runtime_current_blocker_reason{pipeline=~"$pipeline",run_type=~"$run_type"} > 0)` | table | reason/severity/action labels |
 
-Range and localization evidence (`Failed Runs`, `Runtime Error Rate`,
-`Worst Stage Lag`, blocker detail, latency, records by stage, logs/traces) lives
-below the answer row or inside collapsed rows. It supports investigation but
-does not replace the canonical current status recording rule.
-`Runtime Error Rate`, `Worst Stage Lag`, and `Memory Pressure Active` preserve
+Range and localization evidence (`Monitor Failed Runs`,
+`Monitor Runtime Error Rate`, `Monitor Worst Stage Lag`, blocker detail,
+latency, records by stage, logs/traces) lives below the answer row or inside
+collapsed rows. It supports investigation but does not replace the canonical
+current status recording rule. `Monitor Runtime Error Rate`,
+`Monitor Worst Stage Lag`, and `Monitor Memory Pressure Active` preserve
 `UNKNOWN` when telemetry is absent instead of coercing missing metrics to `0`.
+Runtime error-rate thresholds follow the shipped alert policy (`WARN >=5%`,
+`CRIT >=20%` dashboard escalation); stage lag uses `WARN >=300s` and
+`CRIT >=900s` dashboard escalation.
 
 ### Localization Row
 
-- `Stage Backlog Trend`: sustained backlog by `stage`
-- `Records by Stage / Interval`: throughput by `stage`
-- `Pipeline Phase Duration p50/p95/p99`: phase latency distribution over
+- `Track Stage Backlog Trend`: sustained backlog by `stage`
+- `Track Records by Stage / Interval`: throughput by `stage`
+- `Track Pipeline Phase Duration p50/p95/p99`: phase latency distribution over
   `bioetl_phase_duration_seconds_bucket`
-- `Pipeline Duration p50/p95/p99`: runtime/stage latency distribution over
+- `Track Pipeline Duration p50/p95/p99`: runtime/stage latency distribution over
   `bioetl_pipeline_duration_seconds_bucket`
-- `Errors by Stage / Error Code / Range`: bounded runtime error localization
-- `Records by Stage / Run Type / Range`: dropped/stalled stage localization
+- `Inspect Errors by Stage / Error Code / Range`: bounded runtime error localization
+- `Track Records by Stage / Run Type / Range`: dropped/stalled stage localization
 
 ### Handoff Row
 
-- `Pipeline Alert Conditions`: runtime failure family using shipped `15m/30m`
+- `Monitor Pipeline Alert Conditions`: runtime failure family using shipped `15m/30m`
   recording rules; links to `pipeline-failure-critical.md`
-- `DQ Alert Conditions`: compact DQ handoff only; detailed DQ debugging lives in
+- `Inspect DQ Alert Conditions`: compact DQ handoff only; detailed DQ debugging lives in
   `4. Data Quality`
-- `Control-plane Alert Conditions`: manifest/checkpoint/replay/lineage handoff
+- `Inspect Control-plane Alert Conditions`: manifest/checkpoint/replay/lineage handoff
   into `0. Control Plane`
-- `GLOBAL Provider Alert Conditions`: compact provider handoff only; provider
+- `Inspect GLOBAL Provider Alert Conditions`: compact provider handoff only; provider
   deep-debug stays in `3. Provider Health`
-- `Freshness Alert Conditions`: stale-output handoff into DQ/source investigation
-- `Shutdown Initiated by Reason / Interval` and
-  `Shutdown Completed by Reason / Interval`: graceful shutdown visibility
+- `Inspect Freshness Alert Conditions`: stale-output handoff into DQ/source investigation
+- `Track Shutdown Initiated by Reason / Interval` and
+  `Track Shutdown Completed by Reason / Interval`: graceful shutdown visibility
 
 ### Logs And Traces
 
-- `Warnings`, `Unstructured Logs`, `Top Warning Events`, `Log Hygiene Trend`
+- `Inspect Warning Logs`, `Inspect Unstructured Logs`,
+  `Track Top Warning Events`, `Track Log Hygiene Trend`
   живут в collapsed tracing-only row и не ломают base runtime surface в
   окружениях без Loki/Tempo
-- Loki handoff стартует с безопасного `{job="bioetl"}` entrypoint
+- Loki handoff стартует с безопасного `{job="bioetl"}` entrypoint; warning
+  panels parse JSON first, drop parser errors, then filter `level="warning"`
 - Tempo handoff остаётся bounded по `pipeline/run_type`; forensic IDs в runtime
   dashboard не протаскиваются
 
 ### Drilldown
 
 - Cross-dashboard links передают только target-scoped variables
-- Panel-level dashboard handoffs intentionally absent; only top-level bus links
-  route to other dashboards.
-- `Control-plane Alert Conditions` и `No-Records Runs / 30m` локализуют
+- Cross-dashboard panel-level handoffs intentionally absent; only top-level bus
+  links route to other dashboards. Same-dashboard first-screen drilldowns are
+  allowed for blocker inspection.
+- `Inspect Control-plane Alert Conditions` и `Monitor No-Records Runs` локализуют
   symptoms; dashboard transition в control-plane идёт через `0. Control Plane`
   в top-level bus.
-- `Pipeline/DQ/Control-plane/Provider/Freshness Alert Conditions` дополнительно
-  ведут в canonical runbooks
+- action-first Runtime condition panels дополнительно ведут в canonical runbooks
 
 ### Instrumentation Debt
 
@@ -1529,16 +1562,40 @@ sum(rate(bioetl_circuit_breaker_success_total{adapter="chembl"}[5m]))
 
 ### 19.2 Provider Health Dashboard: как читать
 
-Дашборд `3. Provider Health` предоставляет четыре gauge-панели для отдельных провайдеров (UniProt, PubMed, PubChem, ChemBL). Каждая панель показывает P95-латентность API-запросов в секундах за последние 5 минут.
+Дашборд `3. Provider Health` теперь строится как answer-first incident surface.
+Первый экран отвечает на три вопроса без прокрутки:
 
-Пороговые значения gauge:
+1. какой provider сейчас `DEGRADED`/`FAILING`/`UNKNOWN`;
+2. какие providers уже вышли из нормального состояния;
+3. какая причина сейчас доминирует.
 
-- **< 0.5 сек (зелёный):** Нормальная латентность. API отвечает быстро.
-- **0.5-1.0 сек (жёлтый):** Повышенная латентность. Может указывать на нагрузку на стороне провайдера.
-- **1.0-2.0 сек (оранжевый):** Высокая латентность. Рекомендуется проверить rate limiting и сетевые условия.
-- **> 2.0 сек (красный):** Критическая латентность. Провайдер деградирует. Возможно срабатывание circuit breaker.
+Практический порядок чтения:
 
-Панель "Error Rate by Provider" показывает процент HTTP-ошибок. Нормальное значение — 0%. Любое ненулевое значение требует исследования. Источник данных — метрика `bioetl_http_request_errors_total`, которая инкрементируется при каждом неуспешном HTTP-запросе. Типы ошибок фиксируются в label `error_type`: timeout, connection_error, http_4xx, http_5xx.
+- `Monitor GLOBAL Provider Severity Matrix` — canonical first-screen severity.
+  `0=OK`, `1=DEGRADED`, `2=FAILING`, `null/NaN=UNKNOWN`.
+- `Inspect Critical Providers` — только providers с текущим severity `>=1`.
+- `Inspect Provider Top Causes` — active cause chips из canonical recording
+  rules: raw health-status degradation, failure rate, retry exhaustion, adapter
+  latency, HTTP errors, rate-limit pressure.
+- Ниже первого экрана идут только selected-range evidence panels:
+  health-check counters, failure/degraded trends, retry exhaustion, repeated
+  per-provider p95 gauge, adapter endpoint latency, HTTP error volume,
+  rate-limiter wait/tokens, circuit-breaker state/trips.
+
+Ключевые operator semantics:
+
+- `Track Provider Failure Rate (Selected Range)` использует policy thresholds
+  `5%` warning / `20%` critical.
+- `Inspect Adapter Request Latency by Endpoint (p95)` uses seconds; its `>5s`
+  red band aligns with the degraded provider rule, while lower bands are
+  earlier-warning diagnostics.
+- `Track Rate Limiter Wait by Provider (p95)` keeps a yellow early-warning band
+  below the degraded rule threshold `>1s`.
+- Circuit-breaker panels intentionally остаются adapter-scoped:
+  `bioetl_circuit_breaker_state` и `bioetl_circuit_breaker_trips_total`
+  маркируются label `adapter`, не `provider`.
+- Для latency panels `No data` означает отсутствие samples или probe activity,
+  а не `0s latency`.
 
 ______________________________________________________________________
 
