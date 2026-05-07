@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -26,6 +27,10 @@ if TYPE_CHECKING:
         SilverDQAnalyzerPort,
         SilverDQConfigPort,
     )
+
+_SkippedMetricEmitter = Callable[[str, str, str], None]
+_GeneratedMetricEmitter = Callable[[str, str], None]
+_CheckFailureMetricEmitter = Callable[[str, str, str, str], None]
 
 
 class DQReportGenerationMixin:
@@ -103,6 +108,34 @@ class DQReportGenerationMixin:
             },
         )
 
+    def _dq_report_metric_emitters(
+        self,
+    ) -> tuple[
+        _SkippedMetricEmitter,
+        _GeneratedMetricEmitter,
+        _CheckFailureMetricEmitter,
+    ]:
+        """Build reusable metric emitters for one DQ report generation call."""
+        return (
+            lambda pipeline, stage, reason: self._emit_dq_report_skipped_metric(
+                pipeline=pipeline,
+                stage=stage,
+                reason=reason,
+            ),
+            lambda pipeline, stage: self._emit_dq_report_generated_metric(
+                pipeline=pipeline,
+                stage=stage,
+            ),
+            lambda pipeline, stage, check_type, severity: (
+                self._emit_dq_check_failure_metric(
+                    pipeline=pipeline,
+                    stage=stage,
+                    check_type=check_type,
+                    severity=severity,
+                )
+            ),
+        )
+
     async def _try_generate_bronze(
         self,
         context: DQReportContext,
@@ -142,33 +175,18 @@ class DQReportGenerationMixin:
         config: BronzeDQConfigPort,
     ) -> Path | None:
         """Generate Bronze DQ report."""
+        skipped_metric, generated_metric, check_failure_metric = (
+            self._dq_report_metric_emitters()
+        )
         return await generate_bronze_report(
             context=context,
             config=config,
             analyzer=self._bronze_analyzer,
             report_writer=self._report_writer,
             logger=self._logger,
-            emit_skipped_metric=lambda pipeline, stage, reason: (
-                self._emit_dq_report_skipped_metric(
-                    pipeline=pipeline,
-                    stage=stage,
-                    reason=reason,
-                )
-            ),
-            emit_generated_metric=lambda pipeline, stage: (
-                self._emit_dq_report_generated_metric(
-                    pipeline=pipeline,
-                    stage=stage,
-                )
-            ),
-            emit_check_failure_metric=lambda pipeline, stage, check_type, severity: (
-                self._emit_dq_check_failure_metric(
-                    pipeline=pipeline,
-                    stage=stage,
-                    check_type=check_type,
-                    severity=severity,
-                )
-            ),
+            emit_skipped_metric=skipped_metric,
+            emit_generated_metric=generated_metric,
+            emit_check_failure_metric=check_failure_metric,
         )
 
     async def _generate_silver_report(
@@ -177,33 +195,18 @@ class DQReportGenerationMixin:
         config: SilverDQConfigPort,
     ) -> Path | None:
         """Generate Silver DQ report."""
+        skipped_metric, generated_metric, check_failure_metric = (
+            self._dq_report_metric_emitters()
+        )
         return await generate_silver_report(
             context=context,
             config=config,
             analyzer=self._silver_analyzer,
             report_writer=self._report_writer,
             logger=self._logger,
-            emit_skipped_metric=lambda pipeline, stage, reason: (
-                self._emit_dq_report_skipped_metric(
-                    pipeline=pipeline,
-                    stage=stage,
-                    reason=reason,
-                )
-            ),
-            emit_generated_metric=lambda pipeline, stage: (
-                self._emit_dq_report_generated_metric(
-                    pipeline=pipeline,
-                    stage=stage,
-                )
-            ),
-            emit_check_failure_metric=lambda pipeline, stage, check_type, severity: (
-                self._emit_dq_check_failure_metric(
-                    pipeline=pipeline,
-                    stage=stage,
-                    check_type=check_type,
-                    severity=severity,
-                )
-            ),
+            emit_skipped_metric=skipped_metric,
+            emit_generated_metric=generated_metric,
+            emit_check_failure_metric=check_failure_metric,
         )
 
     async def _generate_gold_report(
@@ -212,33 +215,18 @@ class DQReportGenerationMixin:
         config: GoldDQConfigPort,
     ) -> Path | None:
         """Generate Gold DQ report."""
+        skipped_metric, generated_metric, check_failure_metric = (
+            self._dq_report_metric_emitters()
+        )
         return await generate_gold_report(
             context=context,
             config=config,
             analyzer=self._gold_analyzer,
             report_writer=self._report_writer,
             logger=self._logger,
-            emit_skipped_metric=lambda pipeline, stage, reason: (
-                self._emit_dq_report_skipped_metric(
-                    pipeline=pipeline,
-                    stage=stage,
-                    reason=reason,
-                )
-            ),
-            emit_generated_metric=lambda pipeline, stage: (
-                self._emit_dq_report_generated_metric(
-                    pipeline=pipeline,
-                    stage=stage,
-                )
-            ),
-            emit_check_failure_metric=lambda pipeline, stage, check_type, severity: (
-                self._emit_dq_check_failure_metric(
-                    pipeline=pipeline,
-                    stage=stage,
-                    check_type=check_type,
-                    severity=severity,
-                )
-            ),
+            emit_skipped_metric=skipped_metric,
+            emit_generated_metric=generated_metric,
+            emit_check_failure_metric=check_failure_metric,
         )
 
 

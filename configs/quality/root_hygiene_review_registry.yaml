@@ -121,8 +121,8 @@ review_lanes:
     classification: review_required
     scope: non-canonical root notes, diagnostics, and ad-hoc tests
     verification:
-      - git ls-files AGENT.md QUICK_START.md query_test_docs_memory.js seed_test_docs_memory.js test_neo4j_memory.py tinyproxy.conf Dockerfile entrypoint.sh requirements.txt
-      - rg -n "AGENT\\.md|QUICK_START\\.md|query_test_docs_memory|seed_test_docs_memory|test_neo4j_memory|tinyproxy\\.conf|Dockerfile|requirements\\.txt" .github docs scripts tests configs README.md Makefile pyproject.toml package.json
+      - git ls-files AGENT.md QUICK_START.md query_test_docs_memory.js seed_test_docs_memory.js test_neo4j_memory.py Dockerfile entrypoint.sh requirements.txt
+      - rg -n "AGENT\\.md|QUICK_START\\.md|query_test_docs_memory|seed_test_docs_memory|test_neo4j_memory|Dockerfile|requirements\\.txt" .github docs scripts tests configs README.md Makefile pyproject.toml package.json
     candidates:
       - path: AGENT.md
         current_live_state: absent_from_root_baseline
@@ -144,10 +144,6 @@ review_lanes:
         current_live_state: absent_from_root_baseline
         canonical_path: tests
         action_if_reintroduced: move_to_tests_or_remove
-      - path: tinyproxy.conf
-        current_live_state: absent_from_root_baseline
-        canonical_path: docs/05-operations
-        action_if_reintroduced: move_to_ops_docs_or_remove
       - path: Dockerfile
         current_live_state: absent_from_root_baseline
         canonical_path: Dockerfile.bioetl
