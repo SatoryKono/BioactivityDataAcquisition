@@ -141,27 +141,30 @@ def _validate_run_ledgers(root: Path, violations: list[str]) -> None:
         suffix=".jsonl",
     ):
         seen_entries = False
-        for line_number, line in enumerate(
-            path.read_text(encoding="utf-8").splitlines(), 1
-        ):
-            if not line.strip():
-                continue
-            seen_entries = True
-            try:
-                payload = json.loads(line)
-            except json.JSONDecodeError as exc:
-                violations.append(f"{path}:{line_number}: invalid JSONL entry: {exc}")
-                continue
-            if not isinstance(payload, dict):
-                violations.append(f"{path}:{line_number}: ledger entry is not object")
-                continue
-            _require_fields(
-                path,
-                payload,
-                violations,
-                ("entry_id", "manifest_id", "run_id", "event_type", "event_family"),
-                line_number=line_number,
-            )
+        with path.open(encoding="utf-8") as handle:
+            for line_number, line in enumerate(handle, 1):
+                if not line.strip():
+                    continue
+                seen_entries = True
+                try:
+                    payload = json.loads(line)
+                except json.JSONDecodeError as exc:
+                    violations.append(
+                        f"{path}:{line_number}: invalid JSONL entry: {exc}"
+                    )
+                    continue
+                if not isinstance(payload, dict):
+                    violations.append(
+                        f"{path}:{line_number}: ledger entry is not object"
+                    )
+                    continue
+                _require_fields(
+                    path,
+                    payload,
+                    violations,
+                    ("entry_id", "manifest_id", "run_id", "event_type", "event_family"),
+                    line_number=line_number,
+                )
         if not seen_entries:
             violations.append(f"{path}: empty run ledger")
 
