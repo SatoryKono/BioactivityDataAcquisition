@@ -192,8 +192,8 @@ def _add_identity_graph_optional_fields(
     ]
     identity_graph["snapshot_status"] = request.base_summary.get("snapshot_status")
     identity_graph["source_posture"] = request.base_summary.get("source_posture")
-    identity_graph["input_snapshot_missing_source_refs"] = (
-        request.base_summary.get("input_snapshot_missing_source_refs", [])
+    identity_graph["input_snapshot_missing_source_refs"] = request.base_summary.get(
+        "input_snapshot_missing_source_refs", []
     )
     identity_graph["input_snapshots"] = request.base_summary["input_snapshots"]
 

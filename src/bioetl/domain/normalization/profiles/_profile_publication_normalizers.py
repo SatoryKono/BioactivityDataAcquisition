@@ -79,23 +79,26 @@ def normalize_profile_chembl_publication_classification_field(
     record: Mapping[str, object] | None = None,
 ) -> object:
     """Derive one ChEMBL publication classification field from raw provider type."""
-    source_value = None
-    if record is not None:
-        raw_field_value = record.get("publication_type_raw")
-        if isinstance(raw_field_value, str):
-            source_value = normalize_string(raw_field_value)
-    if source_value is not None:
-        try:
-            payload = build_publication_type_classification_payload(
-                "chembl",
-                raw_type=source_value,
-            )
-        except RuntimeError:
-            payload = None
-        if payload is not None:
-            derived = payload.get(field_name)
-            return normalize_publication_classification_field(field_name, derived)
+    payload = _chembl_publication_classification_payload(record)
+    if payload is not None:
+        derived = payload.get(field_name)
+        return normalize_publication_classification_field(field_name, derived)
     return normalize_publication_classification_field(field_name, value)
+
+
+def _chembl_publication_classification_payload(
+    record: Mapping[str, object] | None,
+) -> Mapping[str, object] | None:
+    source_value = _publication_type_source_value(None, record=record)
+    if source_value is None:
+        return None
+    try:
+        return build_publication_type_classification_payload(
+            "chembl",
+            raw_type=source_value,
+        )
+    except RuntimeError:
+        return None
 
 
 def normalize_profile_publication_type_raw(value: object) -> object:
