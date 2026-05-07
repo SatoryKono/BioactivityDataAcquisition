@@ -62,7 +62,7 @@ At minimum a workflow owns:
 - in later phases, its own workflow-level control-plane artifacts.
 
 In the current codebase the canonical configuration root is
-`WorkflowConfig` from [src/bioetl/domain/workflow/config.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/domain/workflow/config.py:156).
+`WorkflowConfig` from `src/bioetl/domain/workflow/config.py`.
 
 ## Object Boundary
 
@@ -95,9 +95,9 @@ The currently shipped root fields are:
 - `version`
 
 Source:
-- [WorkflowConfig](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/domain/workflow/config.py:156)
-- [WorkflowConfigSchema](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/infrastructure/schemas/workflow_config.py:152)
-- [WorkflowConfigFileSchema](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/infrastructure/schemas/workflow_config.py:190)
+- `WorkflowConfig` in `src/bioetl/domain/workflow/config.py`
+- `WorkflowConfigSchema` in `src/bioetl/infrastructure/schemas/workflow_config.py`
+- `WorkflowConfigFileSchema` in `src/bioetl/infrastructure/schemas/workflow_config.py`
 
 Semantic interpretation:
 
@@ -135,7 +135,7 @@ dependency model.
 ### 3. DAG Invariants
 
 Workflow DAG validity is currently enforced by
-[src/bioetl/domain/workflow/dag.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/domain/workflow/dag.py:18).
+`src/bioetl/domain/workflow/dag.py`.
 
 The canonical invariants are:
 
@@ -205,7 +205,7 @@ Canonical implication:
 ### 4. Transform Fingerprint Identity
 
 Transform steps already have a shipped deterministic identity primitive via
-[WorkflowTransformSpec](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/domain/workflow/transform_spec.py:20).
+`WorkflowTransformSpec` in `src/bioetl/domain/workflow/transform_spec.py`.
 
 Its fingerprint is a canonical `sha256` over:
 
@@ -222,7 +222,7 @@ implementation.
 
 The currently shipped runtime projection is
 `WorkflowRunExecutionResult` from
-[src/bioetl/application/services/workflow_runner_service.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/application/services/workflow_runner_service.py:47).
+`src/bioetl/application/services/workflow_runner_service.py`.
 
 Current runtime result fields:
 
@@ -392,7 +392,7 @@ The most accurate short definition today is:
 
 - [ADR-044: Run Manifest and Run Ledger Control Plane](../02-architecture/decisions/ADR-044-run-manifest-ledger-control-plane.md)
 - [Run Manifest and Run Ledger Contract](../04-reference/contracts/run-manifest-ledger.md)
-- [WorkflowConfig domain model](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/domain/workflow/config.py:156)
-- [Workflow DAG validation](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/domain/workflow/dag.py:18)
-- [Workflow transform fingerprinting](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/domain/workflow/transform_spec.py:20)
-- [Workflow runner MVP](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/application/services/workflow_runner_service.py:59)
+- `WorkflowConfig` domain model in `src/bioetl/domain/workflow/config.py`
+- Workflow DAG validation in `src/bioetl/domain/workflow/dag.py`
+- `WorkflowTransformSpec` fingerprinting in `src/bioetl/domain/workflow/transform_spec.py`
+- Workflow runner MVP in `src/bioetl/application/services/workflow_runner_service.py`

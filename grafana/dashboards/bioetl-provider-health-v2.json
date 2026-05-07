@@ -94,8 +94,11 @@
       "transparent": true
     },
     {
-      "datasource": "Prometheus",
-      "description": "Provider severity mapping: 0=OK, 1=DEGRADED, 2=FAILING; null=UNKNOWN. Raw provider health status remains panel id=114 with 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY. This matrix intentionally stays GLOBAL and does not filter by pipeline.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "Provider severity mapping: 0=OK, 1=DEGRADED, 2=FAILING; null/NaN=UNKNOWN. Raw provider health status remains panel id=114 with 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY. This matrix intentionally stays GLOBAL and does not filter by pipeline.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -113,6 +116,16 @@
               "type": "special",
               "options": {
                 "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            },
+            {
+              "type": "special",
+              "options": {
+                "match": "nan",
                 "result": {
                   "text": "UNKNOWN",
                   "color": "gray"
@@ -174,7 +187,10 @@
       "type": "table"
     },
     {
-      "datasource": "Prometheus",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "description": "Only providers currently DEGRADED or FAILING. Empty table means no provider currently above OK; null remains UNKNOWN when provider status is absent.",
       "fieldConfig": {
         "defaults": {
@@ -254,7 +270,10 @@
       "type": "table"
     },
     {
-      "datasource": "Prometheus",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "description": "Current top provider causes from canonical cause recording rules: raw status, failure rate, retry exhaustion, latency, HTTP errors, or rate-limit pressure.",
       "fieldConfig": {
         "defaults": {
@@ -352,7 +371,10 @@
       "transparent": true
     },
     {
-      "datasource": "Prometheus",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -425,7 +447,10 @@
       "description": "Selected-range evidence: p95 provider health-check latency over the active Grafana interval. Current provider severity is owned by the GLOBAL Provider Severity Matrix."
     },
     {
-      "datasource": "Prometheus",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -509,12 +534,15 @@
           "refId": "A"
         }
       ],
-      "title": "Current Provider Health Status",
+      "title": "Monitor Current Provider Health Status",
       "type": "table",
       "description": "Provider raw enum: 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY; null=UNKNOWN. First-screen severity uses bioetl_provider_current_status to avoid inverting raw enum colors."
     },
     {
-      "datasource": "Prometheus",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -538,14 +566,6 @@
               {
                 "color": "green",
                 "value": null
-              },
-              {
-                "color": "orange",
-                "value": 1
-              },
-              {
-                "color": "red",
-                "value": 2
               }
             ]
           }
@@ -585,7 +605,10 @@
       "description": "Selected-range evidence: completed HEALTHY probes in the active Grafana range. This panel is not a current-health source."
     },
     {
-      "datasource": "Prometheus",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -603,11 +626,11 @@
               },
               {
                 "color": "orange",
-                "value": 1
+                "value": 0.05
               },
               {
                 "color": "red",
-                "value": 2
+                "value": 0.2
               }
             ]
           },
@@ -662,10 +685,13 @@
       ],
       "title": "Track Provider Failure Rate (Selected Range)",
       "type": "gauge",
-      "description": "Selected-range evidence: failed probes divided by completed probes in the active Grafana range. Current status comes from bioetl_provider_current_status."
+      "description": "Selected-range evidence: failed probes divided by completed probes in the active Grafana range. Current status comes from bioetl_provider_current_status. Gauge thresholds follow the provider policy contract: warning at 5%, critical at 20%."
     },
     {
-      "datasource": "Prometheus",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -678,14 +704,6 @@
               {
                 "color": "green",
                 "value": null
-              },
-              {
-                "color": "orange",
-                "value": 1
-              },
-              {
-                "color": "red",
-                "value": 2
               }
             ]
           },
@@ -738,7 +756,10 @@
       "description": "Selected-range evidence: total completed provider health checks in the active Grafana range."
     },
     {
-      "datasource": "Prometheus",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -811,7 +832,10 @@
       "description": "Selected-range evidence: completed DEGRADED probes in the active Grafana range. This panel is not a current-health source."
     },
     {
-      "datasource": "Prometheus",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -894,7 +918,10 @@
       "description": "Selected-range evidence: failure/degraded probe trend over the active Grafana interval."
     },
     {
-      "datasource": "Prometheus",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -956,7 +983,10 @@
       "description": "Selected-range evidence: provider share of failed probes in the active Grafana range."
     },
     {
-      "datasource": "Prometheus",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1016,10 +1046,13 @@
       ],
       "title": "Track Retries Exhausted by Provider/Operation",
       "type": "table",
-      "description": "Provider status enum: 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY; null=UNKNOWN."
+      "description": "Selected-range evidence: retries exhausted by provider and operation in the active Grafana range. Non-zero rows identify where retry budgets were consumed, not raw provider-health enum state."
     },
     {
-      "datasource": "Prometheus",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1095,7 +1128,7 @@
       ],
       "title": "Track Retries Exhausted Trend by Provider/Operation",
       "type": "timeseries",
-      "description": "Provider status enum: 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY; null=UNKNOWN."
+      "description": "Selected-range evidence: retry exhaustion trend by provider and operation over the active Grafana interval. Rising non-zero series point to persistent retry-budget pressure."
     },
     {
       "collapsed": true,
@@ -1112,7 +1145,10 @@
       "type": "row"
     },
     {
-      "datasource": "Prometheus",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1129,12 +1165,16 @@
                 "value": null
               },
               {
+                "color": "yellow",
+                "value": 0.5
+              },
+              {
                 "color": "orange",
-                "value": 1
+                "value": 2
               },
               {
                 "color": "red",
-                "value": 2
+                "value": 5
               }
             ]
           },
@@ -1183,12 +1223,15 @@
           "refId": "A"
         }
       ],
-      "title": "Provider Health Check Latency (p95) - $provider",
+      "title": "Inspect Provider Health Check Latency (p95) - $provider",
       "type": "gauge",
-      "description": "Provider status enum: 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY; null=UNKNOWN."
+      "description": "Selected-range evidence: repeated per-provider p95 health-check latency over the active Grafana range. No data means no latency samples or no probe activity in range, not 0s latency."
     },
     {
-      "datasource": "Prometheus",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1205,15 +1248,19 @@
               },
               {
                 "color": "yellow",
-                "value": 1
+                "value": 0.5
+              },
+              {
+                "color": "orange",
+                "value": 2
               },
               {
                 "color": "red",
-                "value": 2
+                "value": 5
               }
             ]
           },
-          "unit": "short"
+          "unit": "s"
         },
         "overrides": []
       },
@@ -1244,12 +1291,15 @@
           "refId": "A"
         }
       ],
-      "title": "Adapter Request Latency by Endpoint (p95)",
+      "title": "Inspect Adapter Request Latency by Endpoint (p95)",
       "type": "timeseries",
-      "description": "Provider status enum: 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY; null=UNKNOWN."
+      "description": "Selected-range evidence: p95 adapter request latency by endpoint for the selected provider scope. No data remains diagnostic and means no endpoint latency samples in range. The provider degraded-rule surface fires at p95 > 5s; lower bands here are earlier-warning inspect thresholds."
     },
     {
-      "datasource": "Prometheus",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1323,12 +1373,15 @@
           "refId": "A"
         }
       ],
-      "title": "HTTP Errors by Method / Error Type",
+      "title": "Inspect HTTP Errors by Method/Error Type",
       "type": "timeseries",
-      "description": "Provider status enum: 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY; null=UNKNOWN."
+      "description": "Selected-range evidence: HTTP error volume grouped by provider, method, and error_type for the active Grafana interval."
     },
     {
-      "datasource": "Prometheus",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1364,6 +1417,10 @@
               {
                 "color": "yellow",
                 "value": 0.5
+              },
+              {
+                "color": "orange",
+                "value": 1
               },
               {
                 "color": "red",
@@ -1402,12 +1459,15 @@
           "refId": "A"
         }
       ],
-      "title": "Rate Limiter Wait by Provider (p95)",
+      "title": "Track Rate Limiter Wait by Provider (p95)",
       "type": "timeseries",
-      "description": "Provider status enum: 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY; null=UNKNOWN."
+      "description": "Selected-range evidence: p95 wait time imposed by provider rate limiting. No data means no observed wait samples in range. The provider degraded-rule surface starts at p95 > 1s; this panel keeps a lower yellow band for earlier-warning inspection."
     },
     {
-      "datasource": "Prometheus",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1462,12 +1522,15 @@
           "refId": "A"
         }
       ],
-      "title": "Minimum Rate Limiter Tokens Available",
+      "title": "Monitor Minimum Rate Limiter Tokens Available",
       "type": "bargauge",
-      "description": "Provider status enum: 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY; null=UNKNOWN."
+      "description": "Selected-range evidence: minimum provider tokens available in the active Grafana range. Lower values indicate higher rate-limit pressure; 0 means requests can be blocked."
     },
     {
-      "datasource": "Prometheus",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1534,12 +1597,15 @@
           "refId": "A"
         }
       ],
-      "title": "Circuit Breaker State (max)",
+      "title": "Monitor Circuit Breaker State (max)",
       "type": "stat",
-      "description": "Provider status enum: 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY; null=UNKNOWN."
+      "description": "Adapter-scoped circuit-breaker state over the active Grafana range: 0=CLOSED, 1=HALF_OPEN, 2=OPEN. Uses the adapter selector because the metric is adapter-labelled."
     },
     {
-      "datasource": "Prometheus",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1606,9 +1672,9 @@
           "refId": "A"
         }
       ],
-      "title": "Circuit Breaker Trips by Provider",
+      "title": "Track Circuit Breaker Trips by Adapter",
       "type": "timeseries",
-      "description": "Circuit-breaker metrics are adapter-labelled; this panel keeps adapter filtering while grouping trips as provider-facing evidence."
+      "description": "Selected-range evidence: circuit-breaker trip count by adapter over the active Grafana interval. This panel is intentionally adapter-scoped because the shipped metric family is adapter-labelled."
     }
   ],
   "refresh": "30s",

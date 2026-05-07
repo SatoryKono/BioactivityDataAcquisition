@@ -109,12 +109,12 @@
         "mode": "html"
       },
       "description": "Runtime L2 scope. Current status panels use fixed recording-rule windows; selected-range panels below are evidence only. If current status is UNKNOWN, inspect telemetry gap before treating zero count cards as OK.",
-      "title": "Runtime Scope",
+      "title": "Inspect Runtime Scope",
       "type": "text"
     },
     {
       "datasource": "-- Grafana --",
-      "description": "Diagnostic Scope Note",
+      "description": "Review Diagnostic Scope Note",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -132,15 +132,18 @@
       },
       "id": 298,
       "options": {
-        "content": "<strong>Diagnostic Scope Note</strong>: This dashboard uses L2 diagnostic flow with Prometheus-first mode. Core triage panels use Prometheus metrics shipped with BioETL. Tracing-only Log Hygiene panels (below, collapsed) require optional tracing profile and use Loki for log-level diagnostics. For deeper investigation, drill down to DQ / Control Plane / Provider Health dashboards.",
+        "content": "<strong>Review Diagnostic Scope Note</strong>: This dashboard uses L2 diagnostic flow with Prometheus-first mode. Core triage panels use Prometheus metrics shipped with BioETL. Tracing-only Log Hygiene panels (below, collapsed) require optional tracing profile and use Loki for log-level diagnostics. For deeper investigation, drill down to DQ / Control Plane / Provider Health dashboards.",
         "mode": "html"
       },
-      "title": "Diagnostic Scope Note",
+      "title": "Review Diagnostic Scope Note",
       "type": "text"
     },
     {
-      "datasource": "Prometheus",
-      "description": "Current snapshot from canonical recording rules. Status mapping: 0=OK, 1=WARN, >=2=FAILING/CRIT, null=UNKNOWN/no runtime status data. If UNKNOWN, check Monitor Runtime Telemetry Gap and Prometheus scrape/rule health before trusting zero count panels. Labels: pipeline, run_type. Next action: inspect top blocker reason, then active blocker detail or logs/traces.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "Current snapshot from canonical recording rules. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN/no runtime status data. If UNKNOWN, check Monitor Runtime Telemetry Gap and Prometheus scrape/rule health before trusting zero count panels. Labels: pipeline, run_type. Next action: inspect top blocker reason, then active blocker detail or logs/traces.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -154,6 +157,23 @@
                 "result": {
                   "text": "UNKNOWN",
                   "color": "gray"
+                }
+              }
+            },
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "color": "green",
+                  "text": "OK"
+                },
+                "1": {
+                  "color": "orange",
+                  "text": "WARN"
+                },
+                "2": {
+                  "color": "red",
+                  "text": "CRIT"
                 }
               }
             }
@@ -199,7 +219,24 @@
           "fields": "",
           "values": false
         },
-        "textMode": "auto"
+        "textMode": "auto",
+        "dataLinks": [
+          {
+            "title": "Inspect Top Runtime Blockers",
+            "url": "/d/bioetl-runtime/bioetl-runtime?viewPanel=9101&var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&${__url_time_range}",
+            "targetBlank": false
+          },
+          {
+            "title": "Inspect Active Runtime Blocker Detail",
+            "url": "/d/bioetl-runtime/bioetl-runtime?viewPanel=242&var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&${__url_time_range}",
+            "targetBlank": false
+          },
+          {
+            "title": "Open Runtime Troubleshooting Runbook",
+            "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/observability-checklist.md",
+            "targetBlank": true
+          }
+        ]
       },
       "targets": [
         {
@@ -211,7 +248,10 @@
       "type": "stat"
     },
     {
-      "datasource": "Prometheus",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "description": "Current scrape gap for BioETL runtime metrics over 10m. 0=OK/scraping, 1=WARN/no recent scrape, >=2=CRIT reserved, null=UNKNOWN/no scrape series. Time scope: current monitoring health, not selected-range runtime evidence. If this is 1 or UNKNOWN, treat zero count panels as inconclusive and open Prometheus Targets before debugging pipeline code.",
       "fieldConfig": {
         "defaults": {
@@ -311,15 +351,18 @@
       "id": 222,
       "description": "Range-evidence summary note for the KPI cards below. The cards support runtime localization after the current-status answer row; they do not replace the current blocker recording rules. UNKNOWN means missing status telemetry or scrape/rule gap until proven otherwise.",
       "options": {
-        "content": "<div style=\"padding:0.25rem 0.6rem;line-height:1.55\"><strong>Incident Summary</strong>: first-pass KPIs for blocker count, failed runs, worst stage lag, and runtime error rate. Use these before expanding deeper diagnostics.</div>",
+        "content": "<div style=\"padding:0.25rem 0.6rem;line-height:1.55\"><strong>Review Incident Summary</strong>: first-pass KPIs for blocker count, failed runs, worst stage lag, and runtime error rate. Use these before expanding deeper diagnostics.</div>",
         "mode": "html"
       },
-      "title": "Incident Summary",
+      "title": "Review Incident Summary",
       "type": "text"
     },
     {
-      "datasource": "Prometheus",
-      "description": "Top active pipeline-level runtime blocker reasons with severity and action_target labels. Time scope: current recording-rule snapshot. This intentionally aggregates across run_type because canonical blocker reasons are emitted as pipeline-level current state. Empty table means no current blocker reason only when Runtime status and telemetry gap are not UNKNOWN.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "Top active runtime blocker reasons for the selected pipeline/run_type with severity and action_target labels. Time scope: current recording-rule snapshot. Empty table means no current blocker reason only when Monitor Runtime Current Status and Monitor Runtime Telemetry Gap are not UNKNOWN. Use the Inspect Active Runtime Blocker Detail drilldown for complete reason evidence.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -382,15 +425,27 @@
           ],
           "show": false
         },
-        "showHeader": true
+        "showHeader": true,
+        "dataLinks": [
+          {
+            "title": "Inspect Active Runtime Blocker Detail",
+            "url": "/d/bioetl-runtime/bioetl-runtime?viewPanel=242&var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&${__url_time_range}",
+            "targetBlank": false
+          },
+          {
+            "title": "Open Runtime Troubleshooting Runbook",
+            "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/observability-checklist.md",
+            "targetBlank": true
+          }
+        ]
       },
       "pluginVersion": "10.4.0",
       "targets": [
         {
-          "expr": "topk(3, bioetl_runtime_current_blocker_reason{pipeline=~\"$pipeline\"} > 0)",
+          "expr": "topk(3, bioetl_runtime_current_blocker_reason{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} > 0)",
           "format": "table",
           "instant": true,
-          "legendFormat": "{{pipeline}} {{provider}} {{reason}} {{cause}}",
+          "legendFormat": "{{pipeline}} {{run_type}} {{reason}} {{severity}} {{action_target}}",
           "refId": "A"
         }
       ],
@@ -398,8 +453,11 @@
       "type": "table"
     },
     {
-      "datasource": "Prometheus",
-      "description": "15m current-window count of active canonical pipeline-level runtime blocker reasons. Uses recording rules for first-screen status and intentionally ignores stage/run_type to avoid filtering away output/gold blockers. 0 is normal only when Monitor Runtime Current Status and Monitor Runtime Telemetry Gap are not UNKNOWN. Next action: inspect top blocker detail.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "15m current-window count of active canonical runtime blocker reasons for the selected pipeline/run_type. This is a blocker count, not a severity value: 0=OK only when status and telemetry are present, >=1=CRIT/action required, null=UNKNOWN. The query intentionally ignores $stage to avoid filtering away output/gold blockers. Next action: inspect top blocker detail.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -426,12 +484,8 @@
                 "value": null
               },
               {
-                "color": "orange",
-                "value": 1
-              },
-              {
                 "color": "red",
-                "value": 2
+                "value": 1
               }
             ]
           },
@@ -468,15 +522,18 @@
       },
       "targets": [
         {
-          "expr": "sum(bioetl_runtime_current_blocker_reason{pipeline=~\"$pipeline\"} > 0) or vector(0)",
+          "expr": "sum(bioetl_runtime_current_blocker_reason{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} > 0) or vector(0)",
           "refId": "A"
         }
       ],
-      "title": "Runtime Blockers",
+      "title": "Monitor Runtime Blockers",
       "type": "stat"
     },
     {
-      "datasource": "Prometheus",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "description": "Failed pipeline executions over the last 15m for selected pipeline/run_type. 0 means no failed-run counter increase when runtime telemetry is available; UNKNOWN/No data or telemetry gap means the failure count is inconclusive. Next action: open logs/traces or the pipeline failure runbook.",
       "fieldConfig": {
         "defaults": {
@@ -563,12 +620,15 @@
           "refId": "A"
         }
       ],
-      "title": "Failed Runs",
+      "title": "Monitor Failed Runs",
       "type": "stat"
     },
     {
-      "datasource": "Prometheus",
-      "description": "Pipeline-level runtime error rate over last 30m. bioetl_errors_total is scoped by pipeline/stage/error_code, so this panel intentionally ignores run_type in the numerator and uses Bronze input as denominator. No data is UNKNOWN/missing error or input telemetry, not 0. Next action: open Errors by Stage/Error Code and check failed runs/backlog/lag.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "Pipeline-level runtime error rate over last 30m. bioetl_errors_total is scoped by pipeline/stage/error_code, so this panel intentionally ignores run_type in the numerator and uses Bronze input as denominator. Thresholds align with the shipped alert rule: >=5% is WARN when Bronze denominator is meaningful, >=20% is CRIT/dashboard escalation. No data is UNKNOWN/missing error or input telemetry, not 0. Next action: open Errors by Stage/Error Code and check failed runs/backlog/lag.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -586,6 +646,8 @@
               }
             }
           ],
+          "min": 0,
+          "max": 1,
           "noValue": "UNKNOWN",
           "thresholds": {
             "mode": "absolute",
@@ -596,11 +658,11 @@
               },
               {
                 "color": "orange",
-                "value": 1
+                "value": 0.05
               },
               {
                 "color": "red",
-                "value": 2
+                "value": 0.2
               }
             ]
           },
@@ -645,12 +707,15 @@
           "refId": "A"
         }
       ],
-      "title": "Runtime Error Rate",
+      "title": "Monitor Runtime Error Rate",
       "type": "stat"
     },
     {
-      "datasource": "Prometheus",
-      "description": "Worst observed stage lag across stages over the last 15m for selected pipeline/run_type. This intentionally ignores the stage variable to surface the worst blocker. No data is UNKNOWN/missing lag telemetry; 0 is only valid when the metric is scraped and no lag is present. Next action: expand Stage Backlog Trend and logs.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "Worst observed stage lag across stages over the last 15m for selected pipeline/run_type. This intentionally ignores the stage variable to surface the worst blocker. Thresholds align with the shipped alert rule: >=300s is WARN, >=900s is CRIT/dashboard escalation. No data is UNKNOWN/missing lag telemetry; 0 is only valid when the metric is scraped and no lag is present. Next action: expand Track Stage Backlog Trend and logs.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -678,11 +743,11 @@
               },
               {
                 "color": "orange",
-                "value": 1
+                "value": 300
               },
               {
                 "color": "red",
-                "value": 2
+                "value": 900
               }
             ]
           },
@@ -723,12 +788,15 @@
           "refId": "A"
         }
       ],
-      "title": "Worst Stage Lag",
+      "title": "Monitor Worst Stage Lag",
       "type": "stat"
     },
     {
-      "datasource": "Prometheus",
-      "description": "Shows each active runtime blocker recording rule with its current value. Empty table means no active blockers.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "Shows each active runtime blocker recording rule with its current value for the selected pipeline/run_type where the source metric exposes run_type. Empty table means no active blockers only when Monitor Runtime Current Status and Monitor Runtime Telemetry Gap are not UNKNOWN.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -832,6 +900,13 @@
           "format": "table"
         },
         {
+          "expr": "label_replace(bioetl_runtime_alert_condition_ingestion_throughput_degraded_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} > 0, \"blocker\", \"ingestion_throughput_degraded\", \"\", \"\")",
+          "legendFormat": "{{pipeline}} / {{blocker}}",
+          "refId": "I",
+          "instant": true,
+          "format": "table"
+        },
+        {
           "expr": "label_replace(bioetl_runtime_alert_condition_record_flow_invariant_violated_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} > 0, \"blocker\", \"flow_invariant_violated\", \"\", \"\")",
           "legendFormat": "{{pipeline}} / {{blocker}}",
           "refId": "G",
@@ -839,7 +914,7 @@
           "format": "table"
         }
       ],
-      "title": "Active Runtime Blocker Detail",
+      "title": "Inspect Active Runtime Blocker Detail",
       "type": "table",
       "transformations": [
         {
@@ -860,7 +935,7 @@
         "y": 3
       },
       "options": {
-        "content": "<div style=\"padding:0.45rem 0.7rem;line-height:1.55\"><strong>First action:</strong> read <em>Monitor Runtime Current Status</em>, then inspect the top blocker reason. If status is FAILING, open the active blocker detail; if WARN, inspect terminal-run/stage lag evidence; if UNKNOWN, verify <em>Monitor Runtime Telemetry Gap</em> before treating zero as OK.</div>",
+        "content": "<div style=\"padding:0.45rem 0.7rem;line-height:1.55\"><strong>First action:</strong> read <em>Monitor Runtime Current Status</em>, then inspect the top blocker reason. If status is CRIT, open <em>Inspect Active Runtime Blocker Detail</em>; if WARN, inspect terminal-run/stage lag evidence; if UNKNOWN, verify <em>Monitor Runtime Telemetry Gap</em> before treating zero as OK.</div>",
         "mode": "html"
       },
       "links": [
@@ -905,7 +980,10 @@
       },
       "panels": [
         {
-          "datasource": "Prometheus",
+          "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
           "description": "Sustained backlog accumulation by stage.",
           "fieldConfig": {
             "defaults": {
@@ -970,11 +1048,14 @@
               "refId": "A"
             }
           ],
-          "title": "Stage Backlog Trend",
+          "title": "Track Stage Backlog Trend",
           "type": "timeseries"
         },
         {
-          "datasource": "Prometheus",
+          "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
           "description": "Shows expected vs observed stage status per entity config. Gold status is contextual: expected (scd2/append/overwrite config), disabled (gold_enabled=false), pending (run active, gold not yet written), or missing (run completed, gold=0).",
           "fieldConfig": {
             "defaults": {
@@ -1060,7 +1141,7 @@
               "format": "table"
             }
           ],
-          "title": "Stage Expectedness",
+          "title": "Inspect Stage Expectedness",
           "type": "table",
           "transformations": [
             {
@@ -1070,7 +1151,10 @@
           ]
         },
         {
-          "datasource": "Prometheus",
+          "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
           "description": "Processed records by stage over the active Grafana interval.",
           "fieldConfig": {
             "defaults": {
@@ -1135,7 +1219,7 @@
               "refId": "A"
             }
           ],
-          "title": "Records by Stage / Interval",
+          "title": "Track Records by Stage / Interval",
           "type": "timeseries"
         }
       ]
@@ -1153,7 +1237,10 @@
       },
       "panels": [
         {
-          "datasource": "Prometheus",
+          "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
           "description": "Phase latency distribution across p50, p95, and p99.",
           "fieldConfig": {
             "defaults": {
@@ -1233,11 +1320,14 @@
               "refId": "C"
             }
           ],
-          "title": "Pipeline Phase Duration p50/p95/p99",
+          "title": "Track Pipeline Phase Duration p50/p95/p99",
           "type": "timeseries"
         },
         {
-          "datasource": "Prometheus",
+          "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
           "description": "Pipeline duration percentiles by stage. \"No terminal pipeline duration samples\" means no completed pipeline runs emitted duration histogram buckets in the selected range. Possible causes: run still active, terminal metric not emitted, query label mismatch.",
           "fieldConfig": {
             "defaults": {
@@ -1318,11 +1408,14 @@
               "refId": "C"
             }
           ],
-          "title": "Pipeline Duration p50/p95/p99",
+          "title": "Track Pipeline Duration p50/p95/p99",
           "type": "timeseries"
         },
         {
-          "datasource": "Prometheus",
+          "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
           "description": "Error breakdown by stage and error code over the selected Grafana time range.",
           "fieldConfig": {
             "defaults": {
@@ -1391,11 +1484,14 @@
               "refId": "A"
             }
           ],
-          "title": "Errors by Stage / Error Code / Range",
+          "title": "Inspect Errors by Stage / Error Code / Range",
           "type": "timeseries"
         },
         {
-          "datasource": "Prometheus",
+          "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
           "description": "Processed-record totals over the active range, grouped by stage and run_type.",
           "fieldConfig": {
             "defaults": {
@@ -1447,11 +1543,14 @@
               "refId": "A"
             }
           ],
-          "title": "Records by Stage / Run Type / Range",
+          "title": "Track Records by Stage / Run Type / Range",
           "type": "bargauge"
         },
         {
-          "datasource": "Prometheus",
+          "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
           "description": "Graceful-shutdown initiation events over the active Grafana interval.",
           "fieldConfig": {
             "defaults": {
@@ -1525,11 +1624,14 @@
               "refId": "A"
             }
           ],
-          "title": "Shutdown Initiated by Reason / Interval",
+          "title": "Track Shutdown Initiated by Reason / Interval",
           "type": "timeseries"
         },
         {
-          "datasource": "Prometheus",
+          "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
           "description": "Graceful-shutdown completion events over the active Grafana interval.",
           "fieldConfig": {
             "defaults": {
@@ -1603,7 +1705,7 @@
               "refId": "A"
             }
           ],
-          "title": "Shutdown Completed by Reason / Interval",
+          "title": "Track Shutdown Completed by Reason / Interval",
           "type": "timeseries"
         }
       ]
@@ -1621,8 +1723,11 @@
       },
       "panels": [
         {
-          "datasource": "Prometheus",
-          "description": "Runtime-owned selected-window handoff summary from shipped 15m/30m recording rules for preflight, infrastructure, failed-run, and error-rate blockers. 0 means no condition rule is firing when telemetry is available; UNKNOWN or telemetry gap means inconclusive. Next action: use Active Runtime Blocker Detail or the pipeline failure runbook.",
+          "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+          "description": "Runtime-owned selected-window handoff summary from shipped 15m/30m recording rules for preflight, infrastructure, failed-run, and error-rate blockers. 0 means no condition rule is firing when telemetry is available; UNKNOWN or telemetry gap means inconclusive. Next action: use Inspect Active Runtime Blocker Detail or the pipeline failure runbook.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1699,11 +1804,14 @@
               "refId": "A"
             }
           ],
-          "title": "Pipeline Alert Conditions",
+          "title": "Monitor Pipeline Alert Conditions",
           "type": "stat"
         },
         {
-          "datasource": "Prometheus",
+          "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
           "description": "DQ handoff only. Uses shipped 15m/30m DQ recording rules to show whether runtime symptoms may be downstream of data-quality failures. Runtime does not diagnose record-level DQ here; open Data Quality for reasons, thresholds, and Silver rejects. 0 is normal only when telemetry is available.",
           "fieldConfig": {
             "defaults": {
@@ -1777,11 +1885,14 @@
               "refId": "A"
             }
           ],
-          "title": "DQ Alert Conditions",
+          "title": "Inspect DQ Alert Conditions",
           "type": "stat"
         },
         {
-          "datasource": "Prometheus",
+          "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
           "description": "Control Plane / Replay Safety handoff only. Uses shipped 15m/30m recording rules for manifest, checkpoint, replay, and lineage blockers. Runtime does not decide replay/resume safety here; open Control Plane for manifest, checkpoint, and ledger evidence. 0 is normal only when telemetry is available.",
           "fieldConfig": {
             "defaults": {
@@ -1855,11 +1966,14 @@
               "refId": "A"
             }
           ],
-          "title": "Control-plane Alert Conditions",
+          "title": "Inspect Control-plane Alert Conditions",
           "type": "stat"
         },
         {
-          "datasource": "Prometheus",
+          "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
           "description": "GLOBAL Provider Health handoff only. Uses shipped 15m/30m/1h provider recording rules without pipeline filtering because provider failures can block multiple pipelines. Runtime does not diagnose provider root cause here; open Provider Health for provider/current-cause evidence. 0 is normal only when telemetry is available.",
           "fieldConfig": {
             "defaults": {
@@ -1933,11 +2047,14 @@
               "refId": "A"
             }
           ],
-          "title": "GLOBAL Provider Alert Conditions",
+          "title": "Inspect GLOBAL Provider Alert Conditions",
           "type": "stat"
         },
         {
-          "datasource": "Prometheus",
+          "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
           "description": "Freshness handoff only. Counts selected-pipeline entities older than 24h using data freshness telemetry; this supports source/DQ escalation and is not a Runtime execution blocker by itself. 0 means no stale entity when telemetry is available; UNKNOWN means missing freshness telemetry.",
           "fieldConfig": {
             "defaults": {
@@ -2011,11 +2128,14 @@
               "refId": "A"
             }
           ],
-          "title": "Freshness Alert Conditions",
+          "title": "Inspect Freshness Alert Conditions",
           "type": "stat"
         },
         {
-          "datasource": "Prometheus",
+          "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
           "description": "No-records runs detected over the last 30m for selected pipeline/run_type. This is a runtime blocker candidate when runs occurred but no records were processed. 0 is valid only when both run and records counters are scraped; telemetry gaps are inconclusive. Next action: inspect checkpoint/resume and stage expectedness.",
           "fieldConfig": {
             "defaults": {
@@ -2089,11 +2209,14 @@
               "refId": "A"
             }
           ],
-          "title": "No-Records Runs",
+          "title": "Monitor No-Records Runs",
           "type": "stat"
         },
         {
-          "datasource": "Prometheus",
+          "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2171,7 +2294,7 @@
               "refId": "A"
             }
           ],
-          "title": "Memory Pressure Active",
+          "title": "Monitor Memory Pressure Active",
           "type": "stat"
         }
       ]
@@ -2190,7 +2313,7 @@
       "panels": [
         {
           "datasource": "Loki",
-          "description": "Structured warning-level log events over the selected time range.",
+          "description": "Structured warning-level log events over the selected time range. Uses the safe {job=\"bioetl\"} Loki entrypoint, parses JSON, drops parser errors, then filters the extracted level field.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2226,11 +2349,11 @@
           },
           "targets": [
             {
-              "expr": "{job=\"bioetl\", level=\"warning\"} | json | line_format \"{{.timestamp}} {{.message}}\"",
+              "expr": "{job=\"bioetl\"} | json | __error__=\"\" | level=\"warning\" | line_format \"{{.timestamp}} {{.message}}\"",
               "refId": "A"
             }
           ],
-          "title": "Warnings",
+          "title": "Inspect Warning Logs",
           "type": "table"
         },
         {
@@ -2275,7 +2398,7 @@
               "refId": "A"
             }
           ],
-          "title": "Unstructured Logs",
+          "title": "Inspect Unstructured Logs",
           "type": "table"
         },
         {
@@ -2327,7 +2450,7 @@
             "x": 0,
             "y": 55
           },
-          "id": 252,
+          "id": 257,
           "options": {
             "legend": {
               "calcs": [],
@@ -2341,11 +2464,11 @@
           },
           "targets": [
             {
-              "expr": "topk(10, count by (message) ({job=\"bioetl\", level=\"warning\"} | json))",
+              "expr": "topk(10, sum by (message) (count_over_time({job=\"bioetl\"} | json | __error__=\"\" | level=\"warning\" [$__range])))",
               "refId": "A"
             }
           ],
-          "title": "Top Warning Events",
+          "title": "Track Top Warning Events",
           "type": "timeseries"
         },
         {
@@ -2397,7 +2520,7 @@
             "x": 12,
             "y": 55
           },
-          "id": 253,
+          "id": 258,
           "options": {
             "legend": {
               "calcs": [
@@ -2423,7 +2546,7 @@
               "refId": "B"
             }
           ],
-          "title": "Log Hygiene Trend",
+          "title": "Track Log Hygiene Trend",
           "type": "timeseries"
         }
       ]

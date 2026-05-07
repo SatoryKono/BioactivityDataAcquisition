@@ -198,4 +198,6 @@ def _resolve_subcellular_fraction_entity_id(
     return transformer.compute_fraction_entity_id(
         str(business_data.get("subcellular_fraction", ""))
     )
+
+
 __all__ = ["SubcellularFractionTransformer"]

@@ -16,12 +16,36 @@ if TYPE_CHECKING:
     from bioetl.domain.types import SilverRecord
 
 
-class PreSilverAdapterMixin:
-    """Adapt finalized Silver-record flows to the ``PreSilverRecord`` protocol."""
+class _PreSilverFinalizationFlowMixin:
+    """Finalize staged business payloads into Silver-compatible records."""
 
-    entity_class: type[object]
     provider: str
     entity_type: str
+
+    def _build_record_normalizer(self) -> RecordNormalizationProcessor:
+        return RecordNormalizationProcessor(
+            provider=self.provider,
+            entity_type=self.entity_type,
+        )
+
+    def _normalize_business_data(self, business_data: JsonDict) -> JsonDict:
+        return self._build_record_normalizer().normalize_business_data(business_data)
+
+    def _project_pre_silver_findings(
+        self,
+        silver_record: JsonDict,
+        *,
+        context: PipelineContext,
+        index: int,
+    ) -> JsonDict:
+        return cast(
+            JsonDict,
+            self._build_record_normalizer().project_normalization_findings(
+                silver_record,
+                context=context,
+                index=index,
+            ),
+        )
 
     def _finalize_staged_business_data(
         self,
@@ -31,12 +55,7 @@ class PreSilverAdapterMixin:
         index: int,
         business_data: JsonDict,
     ) -> JsonDict:
-        """Normalize business data, compute hash, and project findings."""
-        normalizer = RecordNormalizationProcessor(
-            provider=self.provider,
-            entity_type=self.entity_type,
-        )
-        normalized_business_data = normalizer.normalize_business_data(business_data)
+        normalized_business_data = self._normalize_business_data(business_data)
         content_hash = self.compute_content_hash(
             normalized_business_data,
             exclude_none=True,
@@ -48,13 +67,10 @@ class PreSilverAdapterMixin:
             index,
             normalized_business_data,
         )
-        return cast(
-            JsonDict,
-            normalizer.project_normalization_findings(
-                cast(JsonDict, silver_record),
-                context=context,
-                index=index,
-            ),
+        return self._project_pre_silver_findings(
+            cast(JsonDict, silver_record),
+            context=context,
+            index=index,
         )
 
     def _finalize_prepared_business_data(
@@ -66,7 +82,6 @@ class PreSilverAdapterMixin:
         index: int,
         business_data: JsonDict,
     ) -> JsonDict:
-        """Compute the entity id and finalize one prepared staged payload."""
         entity_id = self.compute_entity_id(
             source_id=source_id,
             record=identity_record,
@@ -87,7 +102,6 @@ class PreSilverAdapterMixin:
         index: int,
         business_data: JsonDict,
     ) -> SilverRecord:
-        """Finalize one prepared payload and return it as a Silver record."""
         return cast(
             "SilverRecord",
             self._finalize_prepared_business_data(
@@ -108,7 +122,6 @@ class PreSilverAdapterMixin:
         index: int,
         business_data: JsonDict,
     ) -> SilverRecord:
-        """Finalize one prepared payload with a single identity field."""
         return self._transform_prepared_business_data(
             context=context,
             source_id=source_id,
@@ -125,12 +138,7 @@ class PreSilverAdapterMixin:
         business_data: JsonDict,
         resolve_entity_id: Callable[[JsonDict], str],
     ) -> JsonDict:
-        """Normalize business data, derive a custom entity id, and finalize it."""
-        normalizer = RecordNormalizationProcessor(
-            provider=self.provider,
-            entity_type=self.entity_type,
-        )
-        normalized_business_data = normalizer.normalize_business_data(business_data)
+        normalized_business_data = self._normalize_business_data(business_data)
         entity_id = resolve_entity_id(normalized_business_data)
         content_hash = self.compute_content_hash(
             normalized_business_data,
@@ -143,13 +151,10 @@ class PreSilverAdapterMixin:
             index,
             normalized_business_data,
         )
-        return cast(
-            JsonDict,
-            normalizer.project_normalization_findings(
-                cast(JsonDict, silver_record),
-                context=context,
-                index=index,
-            ),
+        return self._project_pre_silver_findings(
+            cast(JsonDict, silver_record),
+            context=context,
+            index=index,
         )
 
     def _transform_optional_normalized_business_data(
@@ -160,7 +165,6 @@ class PreSilverAdapterMixin:
         business_data: JsonDict | None,
         resolve_entity_id: Callable[[JsonDict], str],
     ) -> SilverRecord | None:
-        """Finalize optional business data with a normalized custom entity id."""
         if business_data is None:
             return None
         return cast(
@@ -173,13 +177,16 @@ class PreSilverAdapterMixin:
             ),
         )
 
+
+class _PreSilverStagingFlowMixin:
+    """Stage business payloads behind the ``PreSilverRecord`` protocol."""
+
     def _build_pre_silver_payload(
         self,
         *,
         entity_id: str,
         business_data: JsonDict,
     ) -> PreSilverRecord:
-        """Build the staged ``PreSilverRecord`` payload from business data."""
         return PreSilverRecord(
             entity_id=entity_id,
             business_data=business_data,
@@ -195,7 +202,6 @@ class PreSilverAdapterMixin:
         identity_record: JsonDict,
         business_data: JsonDict,
     ) -> PreSilverRecord:
-        """Compute the entity id and package one prepared staged payload."""
         entity_id = self.compute_entity_id(
             source_id=source_id,
             record=identity_record,
@@ -212,7 +218,6 @@ class PreSilverAdapterMixin:
         identity_record: JsonDict,
         business_data: JsonDict,
     ) -> PreSilverRecord:
-        """Stage one prepared payload as a PreSilver record."""
         return self._build_pre_silver_from_business_data(
             source_id=source_id,
             identity_record=identity_record,
@@ -226,7 +231,6 @@ class PreSilverAdapterMixin:
         identity_field: str,
         business_data: JsonDict,
     ) -> PreSilverRecord:
-        """Stage one prepared payload with a single identity field."""
         return self._stage_prepared_business_data(
             source_id=source_id,
             identity_record={identity_field: source_id},
@@ -239,12 +243,7 @@ class PreSilverAdapterMixin:
         business_data: JsonDict,
         resolve_entity_id: Callable[[JsonDict], str],
     ) -> PreSilverRecord:
-        """Normalize business data first, then stage it with a custom entity id."""
-        normalizer = RecordNormalizationProcessor(
-            provider=self.provider,
-            entity_type=self.entity_type,
-        )
-        normalized_business_data = normalizer.normalize_business_data(business_data)
+        normalized_business_data = self._normalize_business_data(business_data)
         entity_id = resolve_entity_id(normalized_business_data)
         return self._build_pre_silver_payload(
             entity_id=entity_id,
@@ -257,13 +256,18 @@ class PreSilverAdapterMixin:
         business_data: JsonDict | None,
         resolve_entity_id: Callable[[JsonDict], str],
     ) -> PreSilverRecord | None:
-        """Stage optional business data after normalized custom entity-id resolution."""
         if business_data is None:
             return None
         return self._build_pre_silver_from_normalized_business_data(
             business_data=business_data,
             resolve_entity_id=resolve_entity_id,
         )
+
+
+class _PreSilverRecordAdapterMixin:
+    """Build entity-backed records and adapt Silver hooks to JSON payloads."""
+
+    entity_class: type[object]
 
     def _build_entity_backed_silver_record(
         self,
@@ -275,7 +279,6 @@ class PreSilverAdapterMixin:
         index: int,
         business_data: JsonDict,
     ) -> SilverRecord:
-        """Create one entity-backed Silver record from normalized business data."""
         entity = self._create_entity(
             entity_class,
             context,
@@ -294,7 +297,6 @@ class PreSilverAdapterMixin:
         index: int,
         business_data: JsonDict,
     ) -> SilverRecord:
-        """Build one default entity-backed finalized record for staged output."""
         silver_record = self._build_entity_backed_silver_record(
             entity_class=self.entity_class,
             context=context,
@@ -314,7 +316,6 @@ class PreSilverAdapterMixin:
         *,
         business_data: JsonDict,
     ) -> SilverRecord:
-        """Apply optional subclass post-processing to one finalized record."""
         del business_data
         return silver_record
 
@@ -326,7 +327,6 @@ class PreSilverAdapterMixin:
         index: int,
         business_data: JsonDict,
     ) -> JsonDict:
-        """Build a JSON-compatible finalized record for staged normalization."""
         return cast(
             JsonDict,
             self._build_pre_silver_record(
@@ -344,7 +344,6 @@ class PreSilverAdapterMixin:
         record: JsonDict,
         index: int,
     ) -> JsonDict | None:
-        """Adapt structural policy application to the ``PreSilverRecord`` protocol."""
         return cast(
             JsonDict | None,
             self._apply_structural_policy(
@@ -360,9 +359,17 @@ class PreSilverAdapterMixin:
         record: JsonDict,
         index: int,
     ) -> None:
-        """Adapt Silver-filter application to the ``PreSilverRecord`` protocol."""
         self._apply_silver_filter(
             context,
             cast("SilverRecord", record),
             index,
         )
+
+
+class PreSilverAdapterMixin(
+    _PreSilverFinalizationFlowMixin,
+    _PreSilverStagingFlowMixin,
+    _PreSilverRecordAdapterMixin,
+):
+    """Adapt finalized Silver-record flows to the ``PreSilverRecord`` protocol."""
+

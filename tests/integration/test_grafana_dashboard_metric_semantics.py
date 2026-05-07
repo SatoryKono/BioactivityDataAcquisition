@@ -19,27 +19,27 @@ def test_summary_queries_use_zero_fallbacks() -> None:
     """Runtime/provider summary panels should show zero instead of no-data."""
     expected_panel_snippets = {
         "bioetl-runtime.json": {
-            "Runtime Blockers": "or vector(0)",
-            "Failed Runs": "or vector(0)",
-            "No-Records Runs": "or vector(0)",
-            "Records by Stage / Interval": "or vector(0)",
-            "Pipeline Alert Conditions": "or vector(0)",
-            "DQ Alert Conditions": "or vector(0)",
-            "Control-plane Alert Conditions": "or vector(0)",
-            "GLOBAL Provider Alert Conditions": "or vector(0)",
-            "Freshness Alert Conditions": "or vector(0)",
-            "Shutdown Initiated by Reason / Interval": "or vector(0)",
-            "Shutdown Completed by Reason / Interval": "or vector(0)",
+            "Monitor Runtime Blockers": "or vector(0)",
+            "Monitor Failed Runs": "or vector(0)",
+            "Monitor No-Records Runs": "or vector(0)",
+            "Track Records by Stage / Interval": "or vector(0)",
+            "Monitor Pipeline Alert Conditions": "or vector(0)",
+            "Inspect DQ Alert Conditions": "or vector(0)",
+            "Inspect Control-plane Alert Conditions": "or vector(0)",
+            "Inspect GLOBAL Provider Alert Conditions": "or vector(0)",
+            "Inspect Freshness Alert Conditions": "or vector(0)",
+            "Track Shutdown Initiated by Reason / Interval": "or vector(0)",
+            "Track Shutdown Completed by Reason / Interval": "or vector(0)",
         },
         "bioetl-provider-health-v2.json": {
             "Monitor Healthy Checks (Selected Range)": "or vector(0)",
             "Monitor Degraded Checks (Selected Range)": "or vector(0)",
             "Track Provider Failure Rate (Selected Range)": "or vector(0)",
             "Track Health Checks Total (Selected Range)": "or vector(0)",
-            "HTTP Errors by Method / Error Type": "or vector(0)",
-            "Minimum Rate Limiter Tokens Available": "or vector(0)",
-            "Circuit Breaker State (max)": "or vector(0)",
-            "Circuit Breaker Trips by Provider": 'or label_replace(vector(0), "adapter",',
+            "Inspect HTTP Errors by Method/Error Type": "or vector(0)",
+            "Monitor Minimum Rate Limiter Tokens Available": "or vector(0)",
+            "Monitor Circuit Breaker State (max)": "or vector(0)",
+            "Track Circuit Breaker Trips by Adapter": 'or label_replace(vector(0), "adapter",',
         },
         "bioetl-dq-v2.json": {
             "Records Quarantined": "or vector(0)",
@@ -49,20 +49,20 @@ def test_summary_queries_use_zero_fallbacks() -> None:
             "Gold Strict Validation Failures": "or vector(0)",
         },
         "bioetl-control-plane-v1.json": {
-            "Manifest Write Failures": "or vector(0)",
-            "Ledger Append Failures": "or vector(0)",
-            "Checkpoint Incompatibilities": "or vector(0)",
-            "GLOBAL Control-Plane Read Failures": "or vector(0)",
-            "GLOBAL Control-Plane Read Failure Ratio": "or vector(0)",
-            "Checkpoint Load Failures": "or vector(0)",
-            "Checkpoint Save Failures": "or vector(0)",
-            "GLOBAL Checkpoint Operator Failures": "or vector(0)",
-            "Replay Not Reconstructable": "or vector(0)",
-            "Replay Drift": "or vector(0)",
-            "Audit Write Outcomes": "or vector(0)",
-            "Audit Query Outcomes": "or vector(0)",
-            "Lineage Fragment Persistence Failures": "or vector(0)",
-            "Lineage Refs Missing": "or vector(0)",
+            "Monitor: Manifest Write Failures": "or vector(0)",
+            "Monitor: Ledger Append Failures": "or vector(0)",
+            "Monitor: Checkpoint Incompatibilities": "or vector(0)",
+            "Monitor: GLOBAL Control-Plane Read Failures": "or vector(0)",
+            "Monitor: GLOBAL Control-Plane Read Failure Ratio": "or vector(0)",
+            "Monitor: Checkpoint Load Failures": "or vector(0)",
+            "Monitor: Checkpoint Save Failures": "or vector(0)",
+            "Monitor: GLOBAL Checkpoint Operator Failures": "or vector(0)",
+            "Monitor: Replay Not Reconstructable": "or vector(0)",
+            "Monitor: Replay Drift": "or vector(0)",
+            "Track: Audit Write Outcomes": "or vector(0)",
+            "Track: Audit Query Outcomes": "or vector(0)",
+            "Monitor: Lineage Fragment Persistence Failures": "or vector(0)",
+            "Monitor: Lineage Refs Missing": "or vector(0)",
         },
     }
 
@@ -96,22 +96,22 @@ def test_latency_p95_panels_preserve_no_data_state() -> None:
     """Latency p95 panels must not collapse missing samples into zero."""
     expected_latency_panels = {
         "bioetl-runtime.json": {
-            "Pipeline Phase Duration p50/p95/p99",
-            "Pipeline Duration p50/p95/p99",
+            "Track Pipeline Phase Duration p50/p95/p99",
+            "Track Pipeline Duration p50/p95/p99",
         },
         "bioetl-provider-health-v2.json": {
             "Track Health Check Latency by Provider (p95)",
-            "Provider Health Check Latency (p95) - $provider",
-            "Adapter Request Latency by Endpoint (p95)",
-            "Rate Limiter Wait by Provider (p95)",
+            "Inspect Provider Health Check Latency (p95) - $provider",
+            "Inspect Adapter Request Latency by Endpoint (p95)",
+            "Track Rate Limiter Wait by Provider (p95)",
         },
         "bioetl-dq-v2.json": {"DQ Check Duration (p95)"},
         "bioetl-control-plane-v1.json": {
-            "GLOBAL Control-Plane Read Latency p50/p95/p99",
-            "Checkpoint Save Latency p50/p95/p99",
-            "GLOBAL Checkpoint Operator Latency p50/p95/p99",
-            "Audit Write Latency p50/p95/p99",
-            "Audit Query Latency p50/p95/p99",
+            "Track: GLOBAL Control-Plane Read Latency p50/p95/p99",
+            "Track: Checkpoint Save Latency p50/p95/p99",
+            "Track: GLOBAL Checkpoint Operator Latency p50/p95/p99",
+            "Track: Audit Write Latency p50/p95/p99",
+            "Track: Audit Query Latency p50/p95/p99",
         },
     }
 
@@ -160,12 +160,12 @@ def test_count_like_summary_panels_use_rounding_or_boolean_conditions() -> None:
             "Lineage Refs Missing": "round(",
         },
         "bioetl-runtime.json": {
-            "Pipeline Alert Conditions": "bioetl_runtime_alert_condition_pipeline_preflight_failed_15m",
-            "DQ Alert Conditions": "bioetl_runtime_alert_condition_dq_soft_threshold_15m",
-            "Control-plane Alert Conditions": "bioetl_runtime_alert_condition_manifest_write_failed_15m",
-            "GLOBAL Provider Alert Conditions": "bioetl_runtime_alert_condition_provider_failure_rate_high_15m",
-            "Shutdown Initiated by Reason / Interval": "round(",
-            "Shutdown Completed by Reason / Interval": "round(",
+            "Monitor Pipeline Alert Conditions": "bioetl_runtime_alert_condition_pipeline_preflight_failed_15m",
+            "Inspect DQ Alert Conditions": "bioetl_runtime_alert_condition_dq_soft_threshold_15m",
+            "Inspect Control-plane Alert Conditions": "bioetl_runtime_alert_condition_manifest_write_failed_15m",
+            "Inspect GLOBAL Provider Alert Conditions": "bioetl_runtime_alert_condition_provider_failure_rate_high_15m",
+            "Track Shutdown Initiated by Reason / Interval": "round(",
+            "Track Shutdown Completed by Reason / Interval": "round(",
         },
     }
 
@@ -345,9 +345,9 @@ def test_runtime_diagnostic_panels_preserve_unknown_no_data_state() -> None:
     expected_panels = {
         "Monitor Runtime Current Status",
         "Monitor Runtime Telemetry Gap",
-        "Runtime Error Rate",
-        "Worst Stage Lag",
-        "Memory Pressure Active",
+        "Monitor Runtime Error Rate",
+        "Monitor Worst Stage Lag",
+        "Monitor Memory Pressure Active",
     }
     panels = {
         panel.get("title"): panel
@@ -365,6 +365,110 @@ def test_runtime_diagnostic_panels_preserve_unknown_no_data_state() -> None:
         assert defaults.get("noValue") == "UNKNOWN", (
             f"{panel_title} must render missing runtime telemetry as UNKNOWN"
         )
+
+
+def test_runtime_domain_thresholds_match_alert_rule_policy() -> None:
+    """Runtime domain gauges should use real alert units, not generic 1/2 severity steps."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
+    expected_steps = {
+        "Monitor Runtime Error Rate": [
+            {"color": "green", "value": None},
+            {"color": "orange", "value": 0.05},
+            {"color": "red", "value": 0.2},
+        ],
+        "Monitor Worst Stage Lag": [
+            {"color": "green", "value": None},
+            {"color": "orange", "value": 300},
+            {"color": "red", "value": 900},
+        ],
+        "Monitor Runtime Blockers": [
+            {"color": "green", "value": None},
+            {"color": "red", "value": 1},
+        ],
+    }
+    panels = {
+        panel.get("title"): panel
+        for panel in get_dashboard_panels(dashboard)
+        if panel.get("title") in expected_steps
+    }
+    assert set(panels) == set(expected_steps)
+    for panel_title, steps in expected_steps.items():
+        defaults = panels[panel_title].get("fieldConfig", {}).get("defaults", {})
+        assert defaults.get("thresholds", {}).get("steps") == steps
+
+    error_defaults = (
+        panels["Monitor Runtime Error Rate"].get("fieldConfig", {}).get("defaults", {})
+    )
+    assert error_defaults.get("min") == 0
+    assert error_defaults.get("max") == 1
+
+
+def test_provider_failure_rate_panel_uses_percentunit_domain_and_policy_thresholds() -> (
+    None
+):
+    """Provider failure-rate gauge must use ratio semantics and policy thresholds."""
+    dashboard = load_dashboard(
+        Path("grafana/dashboards/bioetl-provider-health-v2.json")
+    )
+    panel = next(
+        (
+            item
+            for item in get_dashboard_panels(dashboard)
+            if item.get("title") == "Track Provider Failure Rate (Selected Range)"
+        ),
+        None,
+    )
+    assert panel is not None, (
+        "Panel 'Track Provider Failure Rate (Selected Range)' not found"
+    )
+
+    defaults = panel.get("fieldConfig", {}).get("defaults", {})
+    assert defaults.get("unit") == "percentunit"
+    assert defaults.get("min") == 0
+    assert defaults.get("max") == 1
+    assert defaults.get("thresholds", {}).get("steps") == [
+        {"color": "green", "value": None},
+        {"color": "orange", "value": 0.05},
+        {"color": "red", "value": 0.2},
+    ]
+
+
+def test_provider_severity_matrix_preserves_unknown_and_critical_mapping() -> None:
+    """Provider first-screen severity matrix must fail closed and color CRIT correctly."""
+    dashboard = load_dashboard(
+        Path("grafana/dashboards/bioetl-provider-health-v2.json")
+    )
+    panel = next(
+        (
+            item
+            for item in get_dashboard_panels(dashboard)
+            if item.get("title") == "Monitor GLOBAL Provider Severity Matrix"
+        ),
+        None,
+    )
+    assert panel is not None, (
+        "Panel 'Monitor GLOBAL Provider Severity Matrix' not found"
+    )
+
+    expressions = [target.get("expr", "") for target in panel.get("targets", [])]
+    assert any("bioetl_provider_current_status" in expr for expr in expressions)
+    assert all("or vector(0)" not in expr for expr in expressions), (
+        "Provider severity matrix must preserve UNKNOWN/NO DATA instead of synthetic OK"
+    )
+
+    defaults = panel.get("fieldConfig", {}).get("defaults", {})
+    assert defaults.get("thresholds", {}).get("steps") == [
+        {"color": "green", "value": None},
+        {"color": "orange", "value": 1},
+        {"color": "red", "value": 2},
+    ]
+    special_mappings = [
+        mapping.get("options", {})
+        for mapping in defaults.get("mappings", [])
+        if mapping.get("type") == "special"
+    ]
+    matches = {mapping.get("match") for mapping in special_mappings}
+    assert {"null", "nan"} <= matches
 
 
 def test_dq_blocked_share_panels_use_percentunit_domain_and_policy_thresholds() -> None:
@@ -450,10 +554,10 @@ def test_selected_range_kpis_do_not_use_raw_counters() -> None:
             "Clean Records in Range (Gold)": ("increase(", "last_over_time("),
         },
         "bioetl-runtime.json": {
-            "Errors by Stage / Error Code / Range": ("increase(",),
-            "Records by Stage / Run Type / Range": ("increase(",),
-            "Shutdown Initiated by Reason / Interval": ("increase(",),
-            "Shutdown Completed by Reason / Interval": ("increase(",),
+            "Inspect Errors by Stage / Error Code / Range": ("increase(",),
+            "Track Records by Stage / Run Type / Range": ("increase(",),
+            "Track Shutdown Initiated by Reason / Interval": ("increase(",),
+            "Track Shutdown Completed by Reason / Interval": ("increase(",),
         },
     }
 

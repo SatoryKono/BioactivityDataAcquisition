@@ -184,16 +184,34 @@ tracing-backed log hygiene живёт в collapsed row
 
 Технический мониторинг состояния внешних API (ChEMBL, UniProt и др.).
 
-- **Current Provider Health Status**: table panel по
+- **Monitor GLOBAL Provider Severity Matrix / Inspect Critical Providers / Inspect Provider Top Causes**:
+  first-screen triage для fleet-wide provider состояния. Matrix intentionally
+  остаётся GLOBAL и читает canonical `bioetl_provider_current_status`;
+  missing current-status telemetry должно оставаться `UNKNOWN`, а не
+  маскироваться под `OK`.
+- **Monitor Current Provider Health Status**: table panel по
   `bioetl_provider_health_status{provider}` с явным mapping:
   `0=UNHEALTHY`, `1=DEGRADED`, `2=HEALTHY`.
 - **Track Health Check Latency by Provider (p95)**: selected-range тренд латентности провайдеров.
 - **Monitor Healthy Checks (Selected Range) / Monitor Degraded Checks (Selected Range) / Track Health Checks Total (Selected Range)**: selected-range evidence по completed probes; эти панели не являются current-health source.
+- **Track Provider Failure Rate (Selected Range)**: selected-range failure ratio
+  uses the policy thresholds `5%` warning / `20%` critical.
 - **Failure & Degraded Trend by Provider**: показывает устойчивость деградации по каждому provider в выбранном time range.
 - **Track Provider Failure Share (Selected Range)**: ранжирует providers по доле failed probes внутри активного scope.
 - **Retries Exhausted by Provider / Operation** и **Retries Exhausted Trend by Provider / Operation**:
   показывают, где и насколько часто исчерпываются retries (`bioetl_data_source_retry_exhausted_total`).
 - **Per-provider gauge (102)**: повторяемая p95-панель по `$provider`.
+- **Inspect Adapter Request Latency by Endpoint (p95)**: endpoint-level inspect
+  panel в секундах; red band matches the degraded provider rule at `>5s`, lower
+  bands are earlier-warning diagnostics.
+- **Track Rate Limiter Wait by Provider (p95)** и
+  **Monitor Minimum Rate Limiter Tokens Available**: selected-range evidence
+  для rate-limit pressure. Wait panel keeps an earlier-warning yellow band below
+  the degraded-rule threshold `>1s`.
+- **Monitor Circuit Breaker State (max)** и
+  **Track Circuit Breaker Trips by Adapter**: intentionally adapter-scoped,
+  потому что shipped circuit-breaker metric family маркируется label `adapter`,
+  а не `provider`.
 - Для provider/control-plane/runtime/DQ latency panels `No data` нужно читать
   как “в окне нет latency samples”, а не как нормализованный `0s`.
 - **Drilldown**: dashboard links `0. Control Plane`, `1. Overview`,
@@ -392,8 +410,9 @@ uv run python -m pytest -q tests/integration/test_prometheus_rules_config.py
   1. Проверьте `diagnostics.alert_signals`, `artifact_refs`,
      `artifact_refs[*].artifact_id`, `lineage_fragment_ids`,
      `missing_artifact_links`.
-  1. Если проблема связана с resume, откройте runbook
-     `checkpoint-debugging.md`.
+  1. Если проблема связана с replay/checkpoint/resume, откройте
+     `checkpoint-debugging.md`; exact manifest/ledger identity evidence
+     подтверждайте через `run-manifest-inspection.md`.
 
 ## 6. Ссылки
 

@@ -41,6 +41,9 @@ ______________________________________________________________________
 - `Explore Logs` и `Explore Traces` доступны только на `2. Runtime` и
   `4. Data Quality`.
 - `Silver Reject Explorer` доступен только на `4. Data Quality`.
+- Переход `0. Control Plane` -> `3. Provider Health` передаёт
+  `provider=$pipeline` и `pipeline_context=$pipeline`, но не передаёт `adapter`,
+  чтобы target dashboard мог корректно раскрыть fallback `All adapters`.
 
 `bioetl-overview-v2` is the L0 answer-first surface. It answers one question:
 what is currently broken or degraded in BioETL, and where should the operator
@@ -55,9 +58,12 @@ scope is explicit via `Provider GLOBAL Scope`, `Workflow Selected Scope`, and
 
 `bioetl-control-plane-v1` is the `0. Control Plane` surface. It
 now starts with an answer-first **Trust Summary** block: replay safety state,
-checkpoint freshness proxy, and ledger/manifest consistency for the selected
-pipeline scope. A visible **Known Blind Spots** list is part of this top block
-and documents currently non-instrumented signals.
+checkpoint freshness gap, ledger/manifest consistency, and telemetry presence
+for the selected pipeline scope. Replay/checkpoint panels route to
+`checkpoint-debugging.md`, while manifest/ledger evidence panels route to
+`run-manifest-inspection.md`. **Known Blind Spots** and terminal-event
+evidence live below fold in collapsed incident rows, not in the first-screen
+trust block.
 
 Global lookup/read-path panels stay separated in a dedicated
 **Global diagnostics (non-pipeline scoped)** block and MUST remain unfiltered by

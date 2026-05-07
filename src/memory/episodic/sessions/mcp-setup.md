@@ -1,8 +1,8 @@
 ---
 id: mcp-setup
-title: Configure MCP runtime
+title: Set up MCP runtime
 task_id: mcp-setup
-created_at: '2026-05-07T09:45:19Z'
+created_at: '2026-05-07T11:54:01Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
@@ -15,7 +15,7 @@ query: mcp
 
 ## Task
 
-- Title: Configure MCP runtime
+- Title: Set up MCP runtime
 - Retrieval query: mcp
 
 ## Retrieved context

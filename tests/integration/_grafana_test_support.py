@@ -14,6 +14,7 @@ import yaml
 
 _PROMQL_METRIC_SELECTOR_RE = re.compile(r"([a-zA-Z_:][a-zA-Z0-9_:]*)\{([^{}]*)\}")
 _PROMQL_LABEL_MATCHER_RE = re.compile(r'([a-zA-Z_]\w*)\s*(=~|=|!=|!~)\s*"')
+_PROMETHEUS_RULE_FILES = tuple(Path("grafana/prometheus-rules").glob("*.yml"))
 
 __all__ = [
     "_PROMQL_METRIC_SELECTOR_RE",
@@ -62,13 +63,13 @@ def get_all_valid_metric_names() -> set[str]:
         elif "Counter" in class_name:
             all_valid_names.add(f"{base_name}_total")
 
-    rules_path = Path("grafana/prometheus-rules/bioetl_observability.yml")
-    rules_payload = yaml.safe_load(rules_path.read_text(encoding="utf-8"))
-    for group in rules_payload.get("groups", []):
-        for rule in group.get("rules", []):
-            record_name = rule.get("record")
-            if isinstance(record_name, str):
-                all_valid_names.add(record_name)
+    for rules_path in _PROMETHEUS_RULE_FILES:
+        rules_payload = yaml.safe_load(rules_path.read_text(encoding="utf-8"))
+        for group in rules_payload.get("groups", []):
+            for rule in group.get("rules", []):
+                record_name = rule.get("record")
+                if isinstance(record_name, str):
+                    all_valid_names.add(record_name)
 
     return all_valid_names
 
@@ -140,23 +141,23 @@ def _recording_rule_labels(
 def _register_recording_rule_label_sets(
     label_sets: dict[str, frozenset[str]],
 ) -> None:
-    rules_path = Path("grafana/prometheus-rules/bioetl_observability.yml")
-    rules_payload = yaml.safe_load(rules_path.read_text(encoding="utf-8"))
-    for group in rules_payload.get("groups", []):
-        for rule in group.get("rules", []):
-            record_name = rule.get("record")
-            expr = rule.get("expr")
-            if isinstance(record_name, str) and isinstance(expr, str):
-                static_labels = frozenset(
-                    str(label_name)
-                    for label_name in rule.get("labels", {})
-                    if isinstance(label_name, str)
-                )
-                label_sets[record_name] = (
-                    label_sets.get(record_name, frozenset())
-                    | _recording_rule_labels(expr, label_sets)
-                    | static_labels
-                )
+    for rules_path in _PROMETHEUS_RULE_FILES:
+        rules_payload = yaml.safe_load(rules_path.read_text(encoding="utf-8"))
+        for group in rules_payload.get("groups", []):
+            for rule in group.get("rules", []):
+                record_name = rule.get("record")
+                expr = rule.get("expr")
+                if isinstance(record_name, str) and isinstance(expr, str):
+                    static_labels = frozenset(
+                        str(label_name)
+                        for label_name in rule.get("labels", {})
+                        if isinstance(label_name, str)
+                    )
+                    label_sets[record_name] = (
+                        label_sets.get(record_name, frozenset())
+                        | _recording_rule_labels(expr, label_sets)
+                        | static_labels
+                    )
 
 
 @cache

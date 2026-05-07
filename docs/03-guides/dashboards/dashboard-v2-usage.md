@@ -71,7 +71,7 @@ Machine-readable navigation contract: `docs/03-guides/dashboards/contracts/navig
    только при recent activity; отсутствие samples остаётся `UNKNOWN`, а не
    зелёным нулём.
 1. `bioetl-runtime`, first-screen answer row (без скролла):
-   `First Action`, `Monitor Runtime Current Status`, `Runtime Blockers` и
+   `First Action`, `Monitor Runtime Current Status`, `Monitor Runtime Blockers` и
    `Inspect Top Runtime Blockers` отвечают на L2 вопрос «что блокирует
    выполнение сейчас и куда идти дальше». Selected-range evidence начинается
    ниже и не определяет current status.
@@ -80,13 +80,17 @@ Machine-readable navigation contract: `docs/03-guides/dashboards/contracts/navig
    `Tracing-only Log Hygiene`. Открывайте ровно одну нужную группу после
    чтения summary KPI, чтобы сократить шум первого экрана.
 1. `bioetl-control-plane-v1`, answer row:
-   `Replay Safety State`, `Ledger / Manifest Consistency`,
-   `Control-Plane Telemetry Missing`, `Terminal Run Events` и
-   `Replay / Resume Blockers` отвечают на L1/L2 вопрос: можно ли доверять
+   `Monitor: Replay Safety State`, `Inspect: Known Gap - Checkpoint Freshness`,
+   `Monitor: Ledger / Manifest Consistency` и `Inspect: Control-Plane Telemetry Missing`
+   отвечают на L1/L2 вопрос: можно ли доверять
    manifest/ledger/checkpoint/lineage state и безопасно выполнять
-   replay/resume. Любой non-zero blocker требует расследования до
-   replay/resume; non-zero/UNKNOWN telemetry-missing risk означает, что зелёные
-   нули нельзя считать доказательством безопасности.
+   replay/resume прямо сейчас. Любой non-zero current-signal требует расследования
+   до replay/resume; non-zero/UNKNOWN telemetry-missing risk означает, что зелёные
+   нули нельзя считать доказательством безопасности. `Track: Replay / Resume Blockers in Range`
+   и `Inspect: Terminal Run Events by Status in Range` вынесены ниже как
+   selected-range evidence, а не first-screen verdict. Replay/checkpoint
+   runbook path здесь canonical через `checkpoint-debugging.md`; exact
+   manifest/ledger identity evidence остаётся surface `run-manifest-inspection.md`.
 1. `bioetl-provider-health-v2`, first-screen GLOBAL answer row:
    `GLOBAL Provider Scope`, `Monitor GLOBAL Provider Severity Matrix`,
    `Inspect Critical Providers`, `Inspect Provider Top Causes` и `First Action`
@@ -251,10 +255,13 @@ Variable handoff policy for dashboard links remains strict and bounded:
   primary question: can we trust manifest/ledger/checkpoint/lineage state and
   safely replay/resume? Cross-dashboard routing is handled only by the top-level
   bus; panel-level dashboard handoffs are intentionally absent.
+  Переход в `3. Provider Health` передаёт `provider=$pipeline` и
+  `pipeline_context=$pipeline`, но не передаёт `adapter`, чтобы target dashboard
+  использовал собственный fallback `All adapters`.
 
   **First 2 clicks (L1):**
-  1. Click #1: открыть `bioetl-control-plane-v1`, проверить `Replay Safety State` (`id=891`), `Control-Plane Telemetry Missing` (`id=907`), `Terminal Run Events` (`id=908`) и `Replay / Resume Blockers` (`id=130`).
-  2. Click #2: перейти через top-level bus в `2. Runtime` (если есть активный blocker) или `4. Data Quality` (если blocker связан с downstream quality symptoms). На первом экране оставлены только Trust/Blocker KPI: `id=891..893`, `id=907..908` и `id=130`.
+  1. Click #1: открыть `bioetl-control-plane-v1`, проверить `Monitor: Replay Safety State` (`id=891`), `Inspect: Control-Plane Telemetry Missing` (`id=907`) и `Next Action: Replay Safety Diagnostics` (`id=906`).
+  2. Click #2: перейти через top-level bus в `2. Runtime` (если есть активный blocker) или `4. Data Quality` (если blocker связан с downstream quality symptoms). На первом экране оставлены только current-status Trust KPI: `id=891..893`, `id=907` и единый CTA `id=906`; `Track: Replay / Resume Blockers in Range` (`id=130`) и `Inspect: Terminal Run Events by Status in Range` (`id=908`) остаются below-fold range evidence.
   Все остальные control-plane метрики перенесены в collapsed incident rows.
   Рекомендованный operator path: сначала проверить blocker cards, затем открыть
   ровно один collapsed diagnostic row под конкретный incident-pattern.
@@ -268,11 +275,11 @@ Variable handoff policy for dashboard links remains strict and bounded:
 - `bioetl-provider-health-v2`: dashboard links `0. Control Plane`,
   `1. Overview`, `2. Runtime`, `4. Data Quality`, `5. Workflow` дают быстрый
   переход из provider health surface без дублирования Runtime variants.
-  Panel `id=114` (`Current Provider Health Status`) показывает явный enum
+  Panel `id=114` (`Monitor Current Provider Health Status`) показывает явный enum
   mapping `0=UNHEALTHY`, `1=DEGRADED`, `2=HEALTHY`.
   
   **First 2 clicks (L1):**
-  1. Click #1: открыть `bioetl-provider-health-v2`, проверить `Current Provider Health Status` (`id=114`) и `Health Check Latency by Provider (p95)` (`id=1`).
+  1. Click #1: открыть `bioetl-provider-health-v2`, проверить `Monitor Current Provider Health Status` (`id=114`) и `Health Check Latency by Provider (p95)` (`id=1`).
   2. Click #2: перейти в `2. Runtime` при active degradation/failure trend или
      в `0. Control Plane` при симптомах retry exhaustion/state inconsistency.
 - `bioetl-dq-v2`: dashboard links `0. Control Plane`, `1. Overview`,
@@ -320,11 +327,11 @@ Variable handoff policy for dashboard links remains strict and bounded:
   Семантика окна для карты: сигналы читаются в том же active Grafana time range (`$__range`), а trend panel в этом ряду использует `$__interval`; это согласовано с rule-pack потому что condition-summary panels в runtime остаются на `increase(...[$__range])` и не смешивают fixed 30m window с log-hygiene triage.
 
 - Runtime condition-summary triage path:
-  `Pipeline Alert Conditions` -> `pipeline-failure-critical.md`,
-  `DQ Alert Conditions` / `Freshness Alert Conditions` -> `dq-failure-investigation.md`,
-  `Control-plane Alert Conditions` -> `run-manifest-inspection.md`,
-  `GLOBAL Provider Alert Conditions` -> `incident-response.md`,
-  `No-Records Runs / 30m` -> `checkpoint-debugging.md`.
+  `Monitor Pipeline Alert Conditions` -> `pipeline-failure-critical.md`,
+  `Inspect DQ Alert Conditions` / `Inspect Freshness Alert Conditions` -> `dq-failure-investigation.md`,
+  `Inspect Control-plane Alert Conditions` -> `run-manifest-inspection.md`,
+  `Inspect GLOBAL Provider Alert Conditions` -> `incident-response.md`,
+  `Monitor No-Records Runs` -> `checkpoint-debugging.md`.
 
 - Known missing runtime panels:
   `Retry vs Failure` и `Batch Size Distribution` не shipped, пока repo не
@@ -339,10 +346,10 @@ Variable handoff policy for dashboard links remains strict and bounded:
   denominator = Bronze input in the same window. Sustained growth = filter /
   quarantine pressure, spike = incident. Next action: `Top Silver Reject
   Reasons` + `Silver Reject Explorer`/quarantine CLI.
-- `runtime.id=16 (Failed Runs / 15m)`: non-zero = runtime blocker. Next action: runtime blockers table + culprit stage panels, затем logs/traces при необходимости.
-- `runtime.id=220 (Runtime Error Rate / 30m)`: elevated ratio with meaningful Bronze denominator = degradation risk. Next action: `Runtime Errors by Stage/Error Code` + failed runs/backlog/lag panels.
-- `control-plane.id=907 (Control-Plane Telemetry Missing)`: `0=OK`, `1=WARN`, `>=2=CRIT`, `null=UNKNOWN`; non-zero/UNKNOWN means validate scrape/rules before trusting blocker zeros.
-- `control-plane.id=130 (Replay / Resume Blockers)`: green `0`, red `>=1` only when telemetry is present. Next action: stop replay/resume и investigate first failing signal (manifest/ledger/checkpoint/replay/lineage).
+- `runtime.id=16 (Monitor Runtime Blockers)`: non-zero = active blocker count. Next action: runtime blockers table + culprit stage panels, затем logs/traces при необходимости.
+- `runtime.id=220 (Monitor Runtime Error Rate)`: elevated ratio with meaningful Bronze denominator = degradation risk; WARN starts at 5%, dashboard CRIT escalation at 20%. Next action: `Inspect Errors by Stage / Error Code / Range` + failed runs/backlog/lag panels.
+- `control-plane.id=907 (Inspect: Control-Plane Telemetry Missing)`: `0=OK`, `1=WARN`, `>=2=CRIT`, `null=UNKNOWN`; non-zero/UNKNOWN means validate scrape/rules before trusting blocker zeros.
+- `control-plane.id=130 (Track: Replay / Resume Blockers in Range)`: selected-range blocker count across manifest writes, ledger appends, checkpoint compatibility, replay reconstructability, replay drift, and lineage refs. Любой non-zero value означает investigate before replay/resume, но это historical range evidence, а не first-screen current-status verdict.
 
 - `overview.System Status`: `CRITICAL` при failed runs `>0`, stage backlog `>0`,
   worst lag `>=300s`, DQ hard fail `>0` или control-plane blocker `>0`;
@@ -360,20 +367,21 @@ Variable handoff policy for dashboard links remains strict and bounded:
   `lifecycle_state` rows (`runtime_failed_owner`, `gold_missing_after_success`,
   `pending_no_recent_gold`, `disabled`, `healthy_recent_gold`) instead of a
   single generic gold status number.
-- `control-plane.Replay / Resume Blockers`: green `0`, red `>=1`; zero is
-  safe only when `Control-Plane Telemetry Missing` is `0`. Non-zero означает
-  block replay/resume до расследования manifest/ledger/checkpoint/replay/
-  lineage signal.
-- `control-plane.Terminal Run Events`: selected-range terminal events mirrored
-  from persisted ledger entries; `0` can mean no terminal event in range, while
-  `UNKNOWN` means terminal telemetry missing.
+- `control-plane.Track: Replay / Resume Blockers in Range`: selected-range blocker
+  count. Нулевое значение само по себе не доказывает safety; его нужно читать
+  вместе с current trust cards и `Inspect: Control-Plane Telemetry Missing = 0`.
+- `control-plane.Inspect: Terminal Run Events by Status in Range`: selected-range
+  terminal evidence grouped by `terminal_status`. Эта панель pipeline-scoped only:
+  metric contract не несёт `run_type`, поэтому `run_type` selector здесь не
+  влияет на breakdown.
 - `control-plane.Manifest/Ledger Failure Ratio`: severity projection за
   фиксированное окно `30m`: `0=OK`, `1=WARN` при `>0`, `2=CRIT` при `>0.10`.
-- `control-plane.GLOBAL Control-Plane Read Failure Ratio`: green `0`,
-  yellow `>0`, red `>0.05` за фиксированное окно `30m`.
+- `control-plane.Monitor: GLOBAL Control-Plane Read Failure Ratio`: severity
+  projection за фиксированное окно `30m`: `0=OK` при `<=5%`, `1=WARN` при `>5%`,
+  `2=CRIT` при `>10%`.
 - `control-plane latency p50/p95/p99`: histogram-backed panels сохраняют
   `No data` как diagnostic signal; отсутствие samples не превращается в `0s`.
-- `control-plane.Known Missing Replay-Safety Signals`: manifest/run identity,
+- `control-plane.Review: Known Missing Replay-Safety Signals`: manifest/run identity,
   config/contract hashes, ledger ordering, checkpoint age vs RPO, replay
   duplicate detection и identity graph completeness документируются как
   отсутствующие evidence surfaces/метрики, а не подменяются fake PromQL.
@@ -411,4 +419,4 @@ Variable handoff policy for dashboard links remains strict and bounded:
 - **Localize**: локализация culprit stage/phase и проверка latency/backlog breakdown.
 - **Escalate**: shutdown/terminal-state диагностика и handoff в tracing/log drilldown для подтверждения причины.
 
-На first screen оставлена ровно одна рекомендация drilldown — panel `id=9991` (`Recommended Drilldown (Current Blocker)`). Оператор сначала читает `Active Runtime Blocker Detail`, выбирает текущий blocker type, затем идёт по тем же трём полосам в фиксированном порядке.
+На first screen оставлена ровно одна рекомендация drilldown — panel `id=9991` (`First Action`). Оператор сначала читает `Inspect Active Runtime Blocker Detail`, выбирает текущий blocker type, затем идёт по тем же трём полосам в фиксированном порядке.

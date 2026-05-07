@@ -36,10 +36,6 @@ from bioetl.domain.types import GoldRecord, JsonDict
 from bioetl.domain.value_objects.taxonomy_id import validate_taxonomy_id
 
 if TYPE_CHECKING:
-    from bioetl.application.core.base_transformer import TransformerDependencyContext
-    from bioetl.domain.behavior import EntityIdentityGenerator
-    from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
-    from bioetl.domain.ports import MetricsPort, PiiHasherPort, TracingPort
     from bioetl.domain.types import BronzeRecord, PrimaryId
 
 OptionalString = str | None

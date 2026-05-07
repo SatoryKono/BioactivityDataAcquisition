@@ -17,6 +17,14 @@ Before invoking a logical profile:
 - for write-capable work, follow
   `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
 
+## Response Language
+
+- By default, answer the user in Russian when the user writes in Russian.
+- Keep code, commands, file paths, identifiers, API field names, and other
+  technical literals in their valid original form.
+- Switch away from Russian only when the user explicitly requests another
+  language.
+
 `docs/00-project/ai/**` remains a mirror/guidance layer and must not override
 runtime behavior defined in `.codex/**`.
 

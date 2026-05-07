@@ -31,6 +31,14 @@ Before planning, auditing, or editing:
    through `python -m memory.tooling.workflow pre-task ...` and
    `python -m memory.tooling.workflow post-task ...`.
 
+## Response Language
+
+- By default, answer the user in Russian when the user writes in Russian.
+- Keep code, commands, file paths, identifiers, API field names, and other
+  technical literals in their valid original form.
+- Switch away from Russian only when the user explicitly requests another
+  language.
+
 ## Post-Change Validation
 
 For any write-capable task, follow

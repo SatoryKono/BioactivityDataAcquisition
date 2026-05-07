@@ -9,6 +9,9 @@ import pytest
 import yaml
 
 RULES_PATH = Path("grafana/prometheus-rules/bioetl_observability.yml")
+CONTROL_PLANE_CURRENT_STATUS_RULES_PATH = Path(
+    "grafana/prometheus-rules/bioetl_control_plane_current_status.yml"
+)
 SLO_ALERT_CONTRACT_PATH = Path("configs/quality/observability_slo_alert_contract.yaml")
 PROMETHEUS_CONFIG_PATH = Path("grafana/prometheus.yml")
 MONITORING_COMPOSE_PATH = Path("docker-compose.monitoring.yml")
@@ -22,6 +25,14 @@ _PROMQL_BIOETL_METRIC_TOKEN_RE = re.compile(r"\b(bioetl_[a-z0-9_]+)\b")
 
 def _load_rules() -> dict:
     payload = yaml.safe_load(RULES_PATH.read_text(encoding="utf-8"))
+    assert isinstance(payload, dict)
+    return payload
+
+
+def _load_control_plane_current_status_rules() -> dict:
+    payload = yaml.safe_load(
+        CONTROL_PLANE_CURRENT_STATUS_RULES_PATH.read_text(encoding="utf-8")
+    )
     assert isinstance(payload, dict)
     return payload
 
@@ -620,6 +631,13 @@ def test_monitoring_stack_scrape_jobs_and_grafana_metrics_are_enabled() -> None:
     )
 
 
+def test_prometheus_config_loads_repo_rule_directory() -> None:
+    prometheus_config = _load_prometheus_config()
+    rule_files = prometheus_config.get("rule_files", [])
+
+    assert "/etc/prometheus/rules/*.yml" in rule_files
+
+
 def test_pushgateway_default_target_has_bounded_replace_and_cleanup_lifecycle() -> None:
     """Default Pushgateway must be backed by bounded replace/delete semantics."""
     prometheus_config = _load_prometheus_config()
@@ -728,6 +746,30 @@ def test_runtime_dashboard_recording_rules_exist_and_reference_source_metrics() 
         )
 
 
+def test_control_plane_current_status_recording_rules_exist_and_reference_source_metrics() -> (
+    None
+):
+    payload = _load_control_plane_current_status_rules()
+    record_map = _build_record_map(payload)
+
+    expected = {
+        "bioetl_control_plane_run_type_universe": "bioetl_control_plane_manifest_writes_total",
+        "bioetl_replay_safety_blockers_15m": "bioetl_replay_drift_events_total",
+        "bioetl_manifest_ledger_failures_15m": "bioetl_control_plane_ledger_appends_total",
+        "bioetl_control_plane_telemetry_missing_5m": "bioetl_control_plane_manifest_writes_total",
+        "bioetl_terminal_events_15m": "bioetl_control_plane_terminal_events_total",
+    }
+
+    missing = [name for name in expected if name not in record_map]
+    assert not missing, f"Missing expected control-plane recording rules: {missing}"
+
+    for record_name, source_metric in expected.items():
+        expr = record_map[record_name].get("expr", "")
+        assert source_metric in expr, (
+            f"{record_name} must reference {source_metric} to avoid semantic drift"
+        )
+
+
 def test_canonical_current_status_recording_rules_exist() -> None:
     """Dashboard first screens must consume canonical current-status records."""
     payload = _load_rules()
@@ -801,6 +843,30 @@ def test_canonical_reason_records_expose_operator_routing_labels() -> None:
             )
 
 
+def test_runtime_pipeline_level_blocker_reasons_are_projected_to_run_type() -> None:
+    """Pipeline-level runtime blockers must stay visible after dashboard run_type filtering."""
+    payload = _load_rules()
+    rules = _recording_rules_named(payload, "bioetl_runtime_current_blocker_reason")
+
+    expectations = {
+        "preflight_failed": "bioetl_runtime_alert_condition_pipeline_preflight_failed_15m",
+        "infrastructure_failed": "bioetl_runtime_alert_condition_pipeline_infrastructure_failed_15m",
+    }
+    seen_reasons: set[str] = set()
+    for rule in rules:
+        labels = rule.get("labels", {})
+        reason = labels.get("reason")
+        if reason not in expectations:
+            continue
+        seen_reasons.add(reason)
+        expr = str(rule.get("expr", ""))
+        assert expectations[reason] in expr
+        assert "* on (pipeline) group_left(run_type)" in expr
+        assert "bioetl_runtime_current_activity_15m" in expr
+
+    assert seen_reasons == set(expectations)
+
+
 def test_provider_current_status_preserves_provider_health_status_mapping() -> None:
     payload = _load_rules()
     record_map = _build_record_map(payload)
@@ -812,6 +878,19 @@ def test_provider_current_status_preserves_provider_health_status_mapping() -> N
     assert "bioetl_provider_health_status == bool 2" in expr
     assert "* 0" in expr
     assert "max by (provider)" in expr
+    assert "bioetl_provider_health_check_provider_universe_15m * 0" in expr
+    assert "/" in expr
+    assert " or " in expr
+
+
+def test_provider_current_status_fails_closed_on_missing_raw_status_series() -> None:
+    payload = _load_rules()
+    record_map = _build_record_map(payload)
+    expr = record_map["bioetl_provider_current_status"].get("expr", "")
+
+    assert "bioetl_provider_health_check_provider_universe_15m" in expr
+    assert "(bioetl_provider_health_check_provider_universe_15m * 0)" in expr
+    assert "bioetl_provider_health_status" in expr
 
 
 def test_dq_current_status_splits_hard_failures_from_degraded_warnings() -> None:

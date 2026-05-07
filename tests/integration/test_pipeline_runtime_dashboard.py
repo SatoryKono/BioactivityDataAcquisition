@@ -99,26 +99,47 @@ def test_pipeline_runtime_panels_have_units() -> None:
     )
 
 
+def test_pipeline_runtime_data_panel_titles_are_action_first() -> None:
+    allowed_prefixes = (
+        "Monitor ",
+        "Inspect ",
+        "Track ",
+        "Review ",
+        "First Action",
+    )
+    offenders = [
+        panel.get("title", "<untitled>")
+        for panel in get_dashboard_panels(_dashboard())
+        if panel.get("type") != "row"
+        and isinstance(panel.get("title"), str)
+        and not panel["title"].startswith(allowed_prefixes)
+    ]
+    assert not offenders, (
+        "Runtime dashboard data panels must use action-first titles:\n"
+        + "\n".join(offenders)
+    )
+
+
 def test_pipeline_runtime_count_panels_have_window_in_title_or_description() -> None:
     titles = {
-        "Runtime Blockers",
-        "Failed Runs",
-        "No-Records Runs",
-        "Runtime Error Rate",
-        "Worst Stage Lag",
-        "Memory Pressure Active",
-        "Pipeline Alert Conditions",
-        "DQ Alert Conditions",
-        "Control-plane Alert Conditions",
-        "GLOBAL Provider Alert Conditions",
-        "Freshness Alert Conditions",
-        "Warnings",
-        "Unstructured Logs",
-        "Top Warning Events",
-        "Errors by Stage / Error Code / Range",
-        "Records by Stage / Run Type / Range",
-        "Shutdown Initiated by Reason / Interval",
-        "Shutdown Completed by Reason / Interval",
+        "Monitor Runtime Blockers",
+        "Monitor Failed Runs",
+        "Monitor No-Records Runs",
+        "Monitor Runtime Error Rate",
+        "Monitor Worst Stage Lag",
+        "Monitor Memory Pressure Active",
+        "Monitor Pipeline Alert Conditions",
+        "Inspect DQ Alert Conditions",
+        "Inspect Control-plane Alert Conditions",
+        "Inspect GLOBAL Provider Alert Conditions",
+        "Inspect Freshness Alert Conditions",
+        "Inspect Warning Logs",
+        "Inspect Unstructured Logs",
+        "Track Top Warning Events",
+        "Inspect Errors by Stage / Error Code / Range",
+        "Track Records by Stage / Run Type / Range",
+        "Track Shutdown Initiated by Reason / Interval",
+        "Track Shutdown Completed by Reason / Interval",
     }
     offenders = []
     for panel in _runtime_data_panels():
@@ -160,8 +181,8 @@ def test_pipeline_runtime_latency_panels_have_p50_p95_p99() -> None:
         if panel.get("title")
     }
     for title in (
-        "Pipeline Phase Duration p50/p95/p99",
-        "Pipeline Duration p50/p95/p99",
+        "Track Pipeline Phase Duration p50/p95/p99",
+        "Track Pipeline Duration p50/p95/p99",
     ):
         panel = panels.get(title)
         assert panel is not None, f"Missing latency panel: {title}"
@@ -258,8 +279,8 @@ def test_runtime_blockers_panel_does_not_filter_by_stage() -> None:
     saw output backlog but Runtime Blockers filtered it out via stage=~"$stage".
     """
     panels = {p.get("title"): p for p in _runtime_data_panels()}
-    blockers_panel = panels.get("Runtime Blockers")
-    assert blockers_panel is not None, "Runtime Blockers panel is missing"
+    blockers_panel = panels.get("Monitor Runtime Blockers")
+    assert blockers_panel is not None, "Monitor Runtime Blockers panel is missing"
     expr = blockers_panel["targets"][0]["expr"]
     assert "bioetl_runtime_current_blocker_reason" in expr
     assert 'stage=~"$stage"' not in expr, (
@@ -271,7 +292,7 @@ def test_runtime_blockers_panel_does_not_filter_by_stage() -> None:
 def test_runtime_blockers_includes_gold_write_missing() -> None:
     """Runtime Blockers must consume canonical runtime blocker reasons."""
     panels = {p.get("title"): p for p in _runtime_data_panels()}
-    blockers_panel = panels.get("Runtime Blockers")
+    blockers_panel = panels.get("Monitor Runtime Blockers")
     assert blockers_panel is not None
     expr = blockers_panel["targets"][0]["expr"]
     assert "bioetl_runtime_current_blocker_reason" in expr, (
@@ -282,7 +303,7 @@ def test_runtime_blockers_includes_gold_write_missing() -> None:
 def test_runtime_blockers_includes_no_terminal_run() -> None:
     """Runtime Blockers zero rendering must not reintroduce inline Grafana logic."""
     panels = {p.get("title"): p for p in _runtime_data_panels()}
-    blockers_panel = panels.get("Runtime Blockers")
+    blockers_panel = panels.get("Monitor Runtime Blockers")
     assert blockers_panel is not None
     expr = blockers_panel["targets"][0]["expr"]
     assert "or vector(0)" in expr
@@ -290,10 +311,12 @@ def test_runtime_blockers_includes_no_terminal_run() -> None:
 
 
 def test_active_runtime_blocker_detail_panel_exists() -> None:
-    """Active Runtime Blocker Detail table panel must be present."""
+    """Inspect Active Runtime Blocker Detail table panel must be present."""
     panels = {p.get("title"): p for p in _runtime_data_panels()}
-    detail_panel = panels.get("Active Runtime Blocker Detail")
-    assert detail_panel is not None, "Active Runtime Blocker Detail panel is missing"
+    detail_panel = panels.get("Inspect Active Runtime Blocker Detail")
+    assert detail_panel is not None, (
+        "Inspect Active Runtime Blocker Detail panel is missing"
+    )
     assert detail_panel["type"] == "table"
     targets = detail_panel.get("targets", [])
     blocker_names = set()
@@ -310,29 +333,31 @@ def test_active_runtime_blocker_detail_panel_exists() -> None:
         "stage_lag_high",
         "gold_write_missing",
         "no_terminal_run",
+        "ingestion_throughput_degraded",
         "flow_invariant_violated",
     }
     assert expected <= blocker_names, (
-        f"Active Runtime Blocker Detail missing blockers: {expected - blocker_names}"
+        "Inspect Active Runtime Blocker Detail missing blockers: "
+        f"{expected - blocker_names}"
     )
 
 
 def test_stage_expectedness_panel_exists() -> None:
-    """Stage Expectedness panel must be present on Runtime dashboard."""
+    """Inspect Stage Expectedness panel must be present on Runtime dashboard."""
     panels = {p.get("title"): p for p in _runtime_data_panels()}
-    panel = panels.get("Stage Expectedness")
-    assert panel is not None, "Stage Expectedness panel is missing"
+    panel = panels.get("Inspect Stage Expectedness")
+    assert panel is not None, "Inspect Stage Expectedness panel is missing"
     assert panel["type"] == "table"
     expr_texts = [t.get("expr", "") for t in panel.get("targets", [])]
     assert any("bioetl_pipeline_stage_expected" in e for e in expr_texts), (
-        "Stage Expectedness panel must query bioetl_pipeline_stage_expected"
+        "Inspect Stage Expectedness panel must query bioetl_pipeline_stage_expected"
     )
 
 
 def test_pipeline_duration_has_explicit_no_value_message() -> None:
     """Pipeline Duration panel must show explicit message instead of bare No data."""
     panels = {p.get("title"): p for p in _runtime_data_panels()}
-    panel = panels.get("Pipeline Duration p50/p95/p99")
+    panel = panels.get("Track Pipeline Duration p50/p95/p99")
     assert panel is not None
     no_value = panel.get("fieldConfig", {}).get("defaults", {}).get("noValue", "")
     assert "terminal" in no_value.lower() or "samples" in no_value.lower(), (

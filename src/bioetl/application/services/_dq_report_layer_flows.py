@@ -47,8 +47,9 @@ def _skip_report_generation(
         if reason_key == "analyzer_or_writer_unavailable"
         else _NO_DATA_REASON_BY_STAGE[stage]
     )
+    event_name = f"{stage}_dq_report_skipped"
     logger.warning(
-        f"{stage}_dq_report_skipped",
+        event_name,
         reason=reason,
         run_id=context.run_id,
     )
@@ -66,8 +67,9 @@ async def _finalize_generated_report(
 ) -> Path:
     """Write one generated report and emit shared logging/metric side effects."""
     path = await write_report(report)
+    event_name = f"{stage}_dq_report_generated"
     logger.debug(
-        f"{stage}_dq_report_generated",
+        event_name,
         run_id=context.run_id,
         path=str(path),
         status=report.summary.overall_status.value,
@@ -147,8 +149,9 @@ def _log_report_generation_failure(
     logger: LoggerPort,
 ) -> None:
     """Log one shared DQ report generation failure surface."""
+    event_name = f"{stage}_dq_report_failed"
     logger.error(
-        f"{stage}_dq_report_failed",
+        event_name,
         run_id=context.run_id,
         error=str(error),
     )
