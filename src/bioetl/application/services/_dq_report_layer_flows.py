@@ -166,6 +166,7 @@ async def generate_bronze_report(
     emit_check_failure_metric: Callable[[str, str, str, str], None],
 ) -> Path | None:
     """Generate Bronze DQ report when analyzer and data are available."""
+
     def _analyze_report() -> object:
         assert analyzer is not None
         return analyzer.analyze(
@@ -220,6 +221,7 @@ async def generate_silver_report(
     emit_check_failure_metric: Callable[[str, str, str, str], None],
 ) -> Path | None:
     """Generate Silver DQ report when analyzer and data are available."""
+
     def _analyze_report() -> object:
         assert analyzer is not None
         analyze_request = SilverDQAnalyzeRequest(
@@ -258,8 +260,7 @@ async def generate_silver_report(
         analyzer_available=analyzer is not None,
         report_writer_available=report_writer is not None,
         data_available=(
-            context.silver_data is not None
-            and context.silver_target_table is not None
+            context.silver_data is not None and context.silver_target_table is not None
         ),
         missing_data_reason_key="no_silver_data",
         analyze_report=_analyze_report,
@@ -283,6 +284,7 @@ async def generate_gold_report(
     emit_check_failure_metric: Callable[[str, str, str, str], None],
 ) -> Path | None:
     """Generate Gold DQ report when analyzer and data are available."""
+
     def _analyze_report() -> object:
         assert analyzer is not None
         return analyzer.analyze(

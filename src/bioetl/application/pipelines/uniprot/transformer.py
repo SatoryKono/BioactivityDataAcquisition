@@ -38,6 +38,8 @@ class UniProtProteinTransformer(
 ):
     """Transformer for UniProt protein records."""
 
+    entity_class = UniprotTarget
+
     def __init__(
         self,
         provider: str = "uniprot",
@@ -73,15 +75,12 @@ class UniProtProteinTransformer(
         accession = str(self._get_required_field(record, "primaryAccession"))
         entry_name = self._get_entry_name(record)
         business_data = self._build_business_data(record, accession, entry_name)
-        entity_id = self.compute_entity_id(
-            source_id=accession,
-            record={"accession": accession},
-        )
         return cast(
             "SilverRecord",
-            self._finalize_staged_business_data(
+            self._finalize_prepared_business_data(
                 context=context,
-                entity_id=entity_id,
+                source_id=accession,
+                identity_record={"accession": accession},
                 index=index,
                 business_data=cast(JsonDict, business_data),
             ),
@@ -97,33 +96,11 @@ class UniProtProteinTransformer(
         accession = str(self._get_required_field(record, "primaryAccession"))
         entry_name = self._get_entry_name(record)
         business_data = self._build_business_data(record, accession, entry_name)
-        entity_id = self.compute_entity_id(
+        return self._build_pre_silver_from_business_data(
             source_id=accession,
-            record={"accession": accession},
-        )
-        return self._build_pre_silver_payload(
-            entity_id=entity_id,
+            identity_record={"accession": accession},
             business_data=cast(JsonDict, business_data),
         )
-
-    def _build_pre_silver_record(
-        self,
-        context: PipelineContext,
-        entity_id: str,
-        content_hash: str,
-        index: int,
-        business_data: JsonDict,
-    ) -> SilverRecord:
-        """Build a finalized Silver record from normalized business data."""
-        entity = self._create_entity(
-            UniprotTarget,
-            context,
-            entity_id=entity_id,
-            content_hash=content_hash,
-            index=index,
-            **business_data,
-        )
-        return cast("SilverRecord", self.entity_to_silver_record(entity))
 
     def _get_entry_name(self, record: BronzeRecord) -> str:
         """Extract entry name (uniProtkbId) as required field."""

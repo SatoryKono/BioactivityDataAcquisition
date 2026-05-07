@@ -29,6 +29,7 @@ for published contracts, CLI surfaces, and specs.
 | Bootstrap quickly                  | [quick-start.md](quick-start.md)                       |
 | Full local setup walkthrough       | [getting-started.md](getting-started.md)               |
 | Run and resume pipelines           | [running-pipelines.md](running-pipelines.md)           |
+| Understand the workflow object     | [workflows.md](workflows.md)                           |
 | Verify docs and strict site build  | [docs-verification.md](docs-verification.md)           |
 | Understand pipeline lifecycle      | [pipeline-lifecycle.md](pipeline-lifecycle.md)         |
 | Configure pipelines                | [pipeline-configuration.md](pipeline-configuration.md) |
@@ -46,6 +47,8 @@ for published contracts, CLI surfaces, and specs.
   prerequisites, environment setup, configuration, and initial troubleshooting.
 - [Running Pipelines](running-pipelines.md): execution, run types, resume,
   cached bronze, and control-plane inspection commands.
+- [Workflows](workflows.md): declarative workflow object model, step identity,
+  DAG semantics, and planned workflow control-plane split.
 - [Docs Verification](docs-verification.md): published docs checks, strict
   build flow, mixed-environment notes, and recurring documentation audit
   checklist.

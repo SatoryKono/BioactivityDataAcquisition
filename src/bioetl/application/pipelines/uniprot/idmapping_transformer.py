@@ -44,6 +44,8 @@ class IDMappingTransformer(PreSilverAdapterMixin, BaseTransformer):
     Output (Silver): Full entity with lineage metadata and DQ flags.
     """
 
+    entity_class = IDMappingResult
+
     def __init__(
         self,
         provider: str = "uniprot",
@@ -124,14 +126,12 @@ class IDMappingTransformer(PreSilverAdapterMixin, BaseTransformer):
             ValueError: If IDMappingResult entity validation fails.
         """
         target_id, business_data = self._build_mapping_business_data(record)
-        entity_id = self.compute_entity_id(
-            source_id=target_id, record={"target_id": target_id}
-        )
         return cast(
             "SilverRecord",
-            self._finalize_staged_business_data(
+            self._finalize_prepared_business_data(
                 context=context,
-                entity_id=entity_id,
+                source_id=target_id,
+                identity_record={"target_id": target_id},
                 index=index,
                 business_data=cast(JsonDict, business_data),
             ),
@@ -146,11 +146,9 @@ class IDMappingTransformer(PreSilverAdapterMixin, BaseTransformer):
         """Build an intermediate ID mapping payload for application finalization."""
         del context, index
         target_id, business_data = self._build_mapping_business_data(record)
-        entity_id = self.compute_entity_id(
-            source_id=target_id, record={"target_id": target_id}
-        )
-        return self._build_pre_silver_payload(
-            entity_id=entity_id,
+        return self._build_pre_silver_from_business_data(
+            source_id=target_id,
+            identity_record={"target_id": target_id},
             business_data=cast(JsonDict, business_data),
         )
 
@@ -188,23 +186,12 @@ class IDMappingTransformer(PreSilverAdapterMixin, BaseTransformer):
         }
         return target_id, business_data
 
-    def _build_pre_silver_record(
+    def _postprocess_pre_silver_record(
         self,
-        context: PipelineContext,
-        entity_id: str,
-        content_hash: str,
-        index: int,
+        silver_record: SilverRecord,
+        *,
         business_data: JsonDict,
     ) -> SilverRecord:
-        """Build a finalized Silver record from normalized ID mapping data."""
-        entity = self._create_entity(
-            IDMappingResult,
-            context,
-            entity_id=entity_id,
-            content_hash=content_hash,
-            index=index,
-            **business_data,
-        )
-        silver_record = self.entity_to_silver_record(entity)
+        """Mark unmapped ID-mapping results with the staged DQ warning flag."""
         silver_record["_dq_warn"] = business_data.get("mapping_status") == "not_found"
         return cast("SilverRecord", silver_record)

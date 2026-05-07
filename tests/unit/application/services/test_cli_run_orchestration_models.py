@@ -7,6 +7,7 @@ from pathlib import Path
 import pytest
 
 import bioetl.application.services.cli_run_orchestration_models as legacy_models
+import bioetl.application.services.execution.cli_run_orchestration_models as canonical_models
 from bioetl.application.services.execution.cli_run_orchestration_models import (
     RunExecutionRequest,
     RunPreparationResult,
@@ -29,6 +30,11 @@ class TestStartOffsetValidationResult:
 @pytest.mark.unit
 class TestRunExecutionRequest:
     """Direct tests for prepared execution request semantics."""
+
+    def test_canonical_module_exports_only_run_execution_request(self) -> None:
+        assert "RunExecutionRequest" in canonical_models.__all__
+        assert "RunExecutionSpec" not in canonical_models.__all__
+        assert not hasattr(canonical_models, "RunExecutionSpec")
 
     def test_legacy_execution_context_alias_warns_and_resolves(self) -> None:
         with pytest.warns(

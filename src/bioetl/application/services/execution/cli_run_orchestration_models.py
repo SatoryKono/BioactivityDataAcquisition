@@ -12,7 +12,6 @@ __all__ = [
     "CliRunPreparationInput",
     "CliRunPreparationSpec",
     "RunExecutionRequest",
-    "RunExecutionSpec",
     "RunPreparationResult",
     "StartOffsetValidationResult",
 ]
@@ -61,16 +60,13 @@ class CliRunPreparationSpec:
 
 
 @dataclass(frozen=True, slots=True)
-class RunExecutionSpec:
+class RunExecutionRequest:
     """Prepared run request passed across CLI orchestration boundaries."""
 
     pipeline: str
     options: RunOptions
     health_server: bool
     health_port: int
-
-
-RunExecutionRequest = RunExecutionSpec
 
 
 @dataclass(frozen=True, slots=True)
