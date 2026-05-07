@@ -78,7 +78,27 @@
       "diff": {
         "added_properties": [],
         "removed_properties": [],
-        "changed_properties": [],
+        "changed_properties": [
+          {
+            "property": "is_oa",
+            "before": {
+              "type": [
+                "object",
+                "null"
+              ],
+              "nullable": true,
+              "description": ""
+            },
+            "after": {
+              "type": [
+                "boolean",
+                "null"
+              ],
+              "nullable": true,
+              "description": ""
+            }
+          }
+        ],
         "required_changed": false
       }
     },
@@ -128,7 +148,27 @@
       "diff": {
         "added_properties": [],
         "removed_properties": [],
-        "changed_properties": [],
+        "changed_properties": [
+          {
+            "property": "downgraded",
+            "before": {
+              "type": [
+                "object",
+                "null"
+              ],
+              "nullable": true,
+              "description": ""
+            },
+            "after": {
+              "type": [
+                "boolean",
+                "null"
+              ],
+              "nullable": true,
+              "description": ""
+            }
+          }
+        ],
         "required_changed": false
       }
     },
@@ -198,7 +238,27 @@
       "diff": {
         "added_properties": [],
         "removed_properties": [],
-        "changed_properties": [],
+        "changed_properties": [
+          {
+            "property": "content_domain_crossmark_restriction",
+            "before": {
+              "type": [
+                "object",
+                "null"
+              ],
+              "nullable": true,
+              "description": ""
+            },
+            "after": {
+              "type": [
+                "boolean",
+                "null"
+              ],
+              "nullable": true,
+              "description": ""
+            }
+          }
+        ],
         "required_changed": false
       }
     },
@@ -206,15 +266,29 @@
       "file": "docs/04-reference/contracts/gold/openalex_publication_v1.0.json",
       "status": "updated",
       "diff": {
-        "added_properties": [
-          "grants_canonical_json",
-          "grants_raw_json",
-          "issn_list",
-          "primary_topic_canonical_json",
-          "primary_topic_raw_json"
-        ],
+        "added_properties": [],
         "removed_properties": [],
-        "changed_properties": [],
+        "changed_properties": [
+          {
+            "property": "is_oa",
+            "before": {
+              "type": [
+                "object",
+                "null"
+              ],
+              "nullable": true,
+              "description": ""
+            },
+            "after": {
+              "type": [
+                "boolean",
+                "null"
+              ],
+              "nullable": true,
+              "description": ""
+            }
+          }
+        ],
         "required_changed": false
       }
     },
@@ -232,13 +306,7 @@
       "file": "docs/04-reference/contracts/gold/pubmed_publication_v1.0.json",
       "status": "updated",
       "diff": {
-        "added_properties": [
-          "affiliation_structured_canonical_json",
-          "affiliation_structured_raw_json",
-          "authors_with_affiliations_canonical_json",
-          "authors_with_affiliations_raw_json",
-          "issn_list"
-        ],
+        "added_properties": [],
         "removed_properties": [],
         "changed_properties": [],
         "required_changed": false
@@ -248,20 +316,29 @@
       "file": "docs/04-reference/contracts/gold/semanticscholar_publication_v1.0.json",
       "status": "updated",
       "diff": {
-        "added_properties": [
-          "author_h_indices_canonical_json",
-          "author_h_indices_raw_json",
-          "citation_contexts_canonical_json",
-          "citation_contexts_raw_json",
-          "issn",
-          "issn_list",
-          "publication_types_canonical_json",
-          "publication_types_raw_json",
-          "subject_fields_canonical_json",
-          "subject_fields_raw_json"
-        ],
+        "added_properties": [],
         "removed_properties": [],
-        "changed_properties": [],
+        "changed_properties": [
+          {
+            "property": "is_oa",
+            "before": {
+              "type": [
+                "object",
+                "null"
+              ],
+              "nullable": true,
+              "description": ""
+            },
+            "after": {
+              "type": [
+                "boolean",
+                "null"
+              ],
+              "nullable": true,
+              "description": ""
+            }
+          }
+        ],
         "required_changed": false
       }
     },
@@ -271,7 +348,27 @@
       "diff": {
         "added_properties": [],
         "removed_properties": [],
-        "changed_properties": [],
+        "changed_properties": [
+          {
+            "property": "reviewed",
+            "before": {
+              "type": [
+                "object",
+                "null"
+              ],
+              "nullable": true,
+              "description": ""
+            },
+            "after": {
+              "type": [
+                "boolean",
+                "null"
+              ],
+              "nullable": true,
+              "description": ""
+            }
+          }
+        ],
         "required_changed": false
       }
     },
@@ -279,12 +376,29 @@
       "file": "docs/04-reference/contracts/gold/uniprot_protein_v1.0.json",
       "status": "updated",
       "diff": {
-        "added_properties": [
-          "features_canonical_json",
-          "features_raw_json"
-        ],
+        "added_properties": [],
         "removed_properties": [],
-        "changed_properties": [],
+        "changed_properties": [
+          {
+            "property": "reviewed",
+            "before": {
+              "type": [
+                "object",
+                "null"
+              ],
+              "nullable": true,
+              "description": ""
+            },
+            "after": {
+              "type": [
+                "boolean",
+                "null"
+              ],
+              "nullable": true,
+              "description": ""
+            }
+          }
+        ],
         "required_changed": false
       }
     }

@@ -255,7 +255,7 @@
     },
     "is_oa": {
       "type": [
-        "object",
+        "boolean",
         "null"
       ],
       "nullable": true,
