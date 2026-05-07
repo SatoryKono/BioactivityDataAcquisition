@@ -18,82 +18,34 @@ class CanonicalSchemaRegistryEntry:
     column_groups: tuple[str, ...]
 
 
-CANONICAL_SCHEMA_REGISTRY: tuple[CanonicalSchemaRegistryEntry, ...] = (
-    CanonicalSchemaRegistryEntry(
-        provider="chembl",
-        entity="activity",
-        yaml_path="chembl/activity.yaml",
-        column_groups=(
-            "system",
-            "business",
-            "dq",
-        ),
+_RAW_CANONICAL_SCHEMA_REGISTRY: tuple[tuple[str, str, str, tuple[str, ...]], ...] = (
+    ("chembl", "activity", "chembl/activity.yaml", ("system", "business", "dq")),
+    ("chembl", "assay", "chembl/assay.yaml", ("system", "business", "dq")),
+    (
+        "chembl",
+        "assay_parameters",
+        "chembl/assay_parameters.yaml",
+        ("system", "business", "dq"),
     ),
-    CanonicalSchemaRegistryEntry(
-        provider="chembl",
-        entity="assay",
-        yaml_path="chembl/assay.yaml",
-        column_groups=(
-            "system",
-            "business",
-            "dq",
-        ),
+    ("chembl", "cell_line", "chembl/cell_line.yaml", ("system", "business", "dq")),
+    (
+        "chembl",
+        "compound_record",
+        "chembl/compound_record.yaml",
+        ("system", "business", "dq"),
     ),
-    CanonicalSchemaRegistryEntry(
-        provider="chembl",
-        entity="assay_parameters",
-        yaml_path="chembl/assay_parameters.yaml",
-        column_groups=(
-            "system",
-            "business",
-            "dq",
-        ),
+    ("chembl", "molecule", "chembl/molecule.yaml", ("system", "business", "dq")),
+    (
+        "chembl",
+        "protein_class",
+        "chembl/protein_class.yaml",
+        ("system", "business", "dq"),
     ),
-    CanonicalSchemaRegistryEntry(
-        provider="chembl",
-        entity="cell_line",
-        yaml_path="chembl/cell_line.yaml",
-        column_groups=(
-            "system",
-            "business",
-            "dq",
-        ),
-    ),
-    CanonicalSchemaRegistryEntry(
-        provider="chembl",
-        entity="compound_record",
-        yaml_path="chembl/compound_record.yaml",
-        column_groups=(
-            "system",
-            "business",
-            "dq",
-        ),
-    ),
-    CanonicalSchemaRegistryEntry(
-        provider="chembl",
-        entity="molecule",
-        yaml_path="chembl/molecule.yaml",
-        column_groups=(
-            "system",
-            "business",
-            "dq",
-        ),
-    ),
-    CanonicalSchemaRegistryEntry(
-        provider="chembl",
-        entity="protein_class",
-        yaml_path="chembl/protein_class.yaml",
-        column_groups=(
-            "system",
-            "business",
-            "dq",
-        ),
-    ),
-    CanonicalSchemaRegistryEntry(
-        provider="chembl",
-        entity="publication",
-        yaml_path="chembl/publication.yaml",
-        column_groups=(
+    (
+        "chembl",
+        "publication",
+        "chembl/publication.yaml",
+        (
             "system",
             "identifiers",
             "title",
@@ -108,116 +60,42 @@ CANONICAL_SCHEMA_REGISTRY: tuple[CanonicalSchemaRegistryEntry, ...] = (
             "dq",
         ),
     ),
-    CanonicalSchemaRegistryEntry(
-        provider="chembl",
-        entity="publication_similarity",
-        yaml_path="chembl/publication_similarity.yaml",
-        column_groups=(
-            "system",
-            "business",
-            "dq",
-        ),
+    (
+        "chembl",
+        "publication_similarity",
+        "chembl/publication_similarity.yaml",
+        ("system", "business", "dq"),
     ),
-    CanonicalSchemaRegistryEntry(
-        provider="chembl",
-        entity="publication_term",
-        yaml_path="chembl/publication_term.yaml",
-        column_groups=(
-            "system",
-            "business",
-            "dq",
-        ),
+    (
+        "chembl",
+        "publication_term",
+        "chembl/publication_term.yaml",
+        ("system", "business", "dq"),
     ),
-    CanonicalSchemaRegistryEntry(
-        provider="chembl",
-        entity="subcellular_fraction",
-        yaml_path="chembl/subcellular_fraction.yaml",
-        column_groups=(
-            "system",
-            "business",
-            "dq",
-        ),
+    (
+        "chembl",
+        "subcellular_fraction",
+        "chembl/subcellular_fraction.yaml",
+        ("system", "business", "dq"),
     ),
-    CanonicalSchemaRegistryEntry(
-        provider="chembl",
-        entity="target",
-        yaml_path="chembl/target.yaml",
-        column_groups=(
-            "system",
-            "business",
-            "dq",
-        ),
+    ("chembl", "target", "chembl/target.yaml", ("system", "business", "dq")),
+    (
+        "chembl",
+        "target_component",
+        "chembl/target_component.yaml",
+        ("system", "business", "dq"),
     ),
-    CanonicalSchemaRegistryEntry(
-        provider="chembl",
-        entity="target_component",
-        yaml_path="chembl/target_component.yaml",
-        column_groups=(
-            "system",
-            "business",
-            "dq",
-        ),
-    ),
-    CanonicalSchemaRegistryEntry(
-        provider="chembl",
-        entity="tissue",
-        yaml_path="chembl/tissue.yaml",
-        column_groups=(
-            "system",
-            "identifiers",
-            "business",
-        ),
-    ),
-    CanonicalSchemaRegistryEntry(
-        provider="composite",
-        entity="activity",
-        yaml_path="composite/activity.yaml",
-        column_groups=(
-            "system",
-            "business",
-        ),
-    ),
-    CanonicalSchemaRegistryEntry(
-        provider="composite",
-        entity="assay",
-        yaml_path="composite/assay.yaml",
-        column_groups=(
-            "system",
-            "business",
-        ),
-    ),
-    CanonicalSchemaRegistryEntry(
-        provider="composite",
-        entity="molecule",
-        yaml_path="composite/molecule.yaml",
-        column_groups=(
-            "system",
-            "business",
-        ),
-    ),
-    CanonicalSchemaRegistryEntry(
-        provider="composite",
-        entity="publication",
-        yaml_path="composite/publication.yaml",
-        column_groups=(
-            "system",
-            "business",
-        ),
-    ),
-    CanonicalSchemaRegistryEntry(
-        provider="composite",
-        entity="target",
-        yaml_path="composite/target.yaml",
-        column_groups=(
-            "system",
-            "business",
-        ),
-    ),
-    CanonicalSchemaRegistryEntry(
-        provider="crossref",
-        entity="publication",
-        yaml_path="crossref/publication.yaml",
-        column_groups=(
+    ("chembl", "tissue", "chembl/tissue.yaml", ("system", "identifiers", "business")),
+    ("composite", "activity", "composite/activity.yaml", ("system", "business")),
+    ("composite", "assay", "composite/assay.yaml", ("system", "business")),
+    ("composite", "molecule", "composite/molecule.yaml", ("system", "business")),
+    ("composite", "publication", "composite/publication.yaml", ("system", "business")),
+    ("composite", "target", "composite/target.yaml", ("system", "business")),
+    (
+        "crossref",
+        "publication",
+        "crossref/publication.yaml",
+        (
             "system",
             "identifiers",
             "title",
@@ -237,11 +115,11 @@ CANONICAL_SCHEMA_REGISTRY: tuple[CanonicalSchemaRegistryEntry, ...] = (
             "dq",
         ),
     ),
-    CanonicalSchemaRegistryEntry(
-        provider="openalex",
-        entity="publication",
-        yaml_path="openalex/publication.yaml",
-        column_groups=(
+    (
+        "openalex",
+        "publication",
+        "openalex/publication.yaml",
+        (
             "system",
             "identifiers",
             "title",
@@ -264,21 +142,12 @@ CANONICAL_SCHEMA_REGISTRY: tuple[CanonicalSchemaRegistryEntry, ...] = (
             "dq",
         ),
     ),
-    CanonicalSchemaRegistryEntry(
-        provider="pubchem",
-        entity="compound",
-        yaml_path="pubchem/compound.yaml",
-        column_groups=(
-            "system",
-            "business",
-            "dq",
-        ),
-    ),
-    CanonicalSchemaRegistryEntry(
-        provider="pubmed",
-        entity="publication",
-        yaml_path="pubmed/publication.yaml",
-        column_groups=(
+    ("pubchem", "compound", "pubchem/compound.yaml", ("system", "business", "dq")),
+    (
+        "pubmed",
+        "publication",
+        "pubmed/publication.yaml",
+        (
             "system",
             "identifiers",
             "title",
@@ -299,11 +168,11 @@ CANONICAL_SCHEMA_REGISTRY: tuple[CanonicalSchemaRegistryEntry, ...] = (
             "dq",
         ),
     ),
-    CanonicalSchemaRegistryEntry(
-        provider="semanticscholar",
-        entity="publication",
-        yaml_path="semanticscholar/publication.yaml",
-        column_groups=(
+    (
+        "semanticscholar",
+        "publication",
+        "semanticscholar/publication.yaml",
+        (
             "system",
             "identifiers",
             "title",
@@ -321,26 +190,18 @@ CANONICAL_SCHEMA_REGISTRY: tuple[CanonicalSchemaRegistryEntry, ...] = (
             "dq",
         ),
     ),
+    ("uniprot", "idmapping", "uniprot/idmapping.yaml", ("system", "business", "dq")),
+    ("uniprot", "protein", "uniprot/protein.yaml", ("system", "business", "dq")),
+)
+
+CANONICAL_SCHEMA_REGISTRY: tuple[CanonicalSchemaRegistryEntry, ...] = tuple(
     CanonicalSchemaRegistryEntry(
-        provider="uniprot",
-        entity="idmapping",
-        yaml_path="uniprot/idmapping.yaml",
-        column_groups=(
-            "system",
-            "business",
-            "dq",
-        ),
-    ),
-    CanonicalSchemaRegistryEntry(
-        provider="uniprot",
-        entity="protein",
-        yaml_path="uniprot/protein.yaml",
-        column_groups=(
-            "system",
-            "business",
-            "dq",
-        ),
-    ),
+        provider=provider,
+        entity=entity,
+        yaml_path=yaml_path,
+        column_groups=column_groups,
+    )
+    for provider, entity, yaml_path, column_groups in _RAW_CANONICAL_SCHEMA_REGISTRY
 )
 
 __all__ = ["CANONICAL_SCHEMA_REGISTRY", "CanonicalSchemaRegistryEntry"]

@@ -677,7 +677,11 @@
     "pipeline_name": "chembl_publication_term",
     "provider": "chembl",
     "scd_config": {
-      "business_key": "entity_id",
+      "business_key": [
+        "publication_id",
+        "term_type",
+        "term"
+      ],
       "current_flag_col": "_is_current",
       "scd_type": 2,
       "valid_from_col": "_valid_from",
@@ -702,7 +706,9 @@
       "on_schema_mismatch": "evolve",
       "partition_cols": [],
       "primary_keys": [
-        "entity_id"
+        "publication_id",
+        "term_type",
+        "term"
       ],
       "silver_table": "chembl.publication_term",
       "silver_write_mode": "merge"
