@@ -51,7 +51,7 @@ current subsystem summaries (`Runtime Blockers Current`, `DQ Status Current`,
 scope is explicit via `Provider GLOBAL Scope`, `Workflow Selected Scope`, and
 `Workflow GLOBAL Scope`. Historical evidence is isolated under the collapsed
 `Range Evidence` row, and diagnostics routing lives under the collapsed
-`Diagnostics & Docs` row.
+`Diagnostics & Docs (Logs / Traces / Raw Metrics)` row.
 
 `bioetl-control-plane-v1` is the `0. Control Plane` surface. It
 now starts with an answer-first **Trust Summary** block: replay safety state,

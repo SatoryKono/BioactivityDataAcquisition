@@ -45,10 +45,8 @@ class PublicationTermTransformer(BaseChemblTransformer):
         """Build an intermediate publication-term payload for application finalization."""
         del context, index
         business_data = self._prepare_term_business_data(record)
-        if business_data is None:
-            return None
-        return self._build_pre_silver_from_normalized_business_data(
-            business_data=cast("JsonDict", business_data),
+        return self._stage_optional_normalized_business_data(
+            business_data=cast("JsonDict | None", business_data),
             resolve_entity_id=lambda data: _resolve_publication_term_entity_id(
                 self, data
             ),
@@ -62,17 +60,12 @@ class PublicationTermTransformer(BaseChemblTransformer):
     ) -> SilverRecord | None:
         """Override base implementation to use composite entity_id."""
         business_data = self._prepare_term_business_data(record)
-        if business_data is None:
-            return None
-        return cast(
-            "SilverRecord",
-            self._finalize_normalized_business_data(
-                context=context,
-                index=index,
-                business_data=cast("JsonDict", business_data),
-                resolve_entity_id=lambda data: _resolve_publication_term_entity_id(
-                    self, data
-                ),
+        return self._transform_optional_normalized_business_data(
+            context=context,
+            index=index,
+            business_data=cast("JsonDict | None", business_data),
+            resolve_entity_id=lambda data: _resolve_publication_term_entity_id(
+                self, data
             ),
         )
 

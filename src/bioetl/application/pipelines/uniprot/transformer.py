@@ -11,7 +11,6 @@ from typing import TYPE_CHECKING, cast
 from bioetl.application.core.base_transformer import (
     BaseTransformer,
     TransformationError,
-    TransformerDependencyContext,
 )
 from bioetl.application.core.pre_silver_adapter_mixin import (
     PreSilverAdapterMixin,
@@ -24,10 +23,7 @@ from bioetl.domain.entities import UniprotTarget
 from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
-    from bioetl.domain.behavior import EntityIdentityGenerator
     from bioetl.domain.context import PipelineContext
-    from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
-    from bioetl.domain.ports import MetricsPort, PiiHasherPort, TracingPort
     from bioetl.domain.types import BronzeRecord, SilverRecord
 
 __all__ = ["UniProtProteinTransformer"]
@@ -40,31 +36,6 @@ class UniProtProteinTransformer(
 
     entity_class = UniprotTarget
 
-    def __init__(
-        self,
-        provider: str = "uniprot",
-        entity_type: str = "protein",
-        silver_filters: SilverFilterConfig | None = None,
-        gold_filters: GoldFilterConfig | None = None,
-        tracer: TracingPort | None = None,
-        metrics: MetricsPort | None = None,
-        identity_service: EntityIdentityGenerator | None = None,
-        pii_hasher: PiiHasherPort | None = None,
-        dependencies: TransformerDependencyContext | None = None,
-    ) -> None:
-        """Initialize UniProt protein transformer."""
-        super().__init__(
-            provider,
-            entity_type=entity_type,
-            silver_filters=silver_filters,
-            gold_filters=gold_filters,
-            tracer=tracer,
-            metrics=metrics,
-            identity_service=identity_service,
-            pii_hasher=pii_hasher,
-            dependencies=dependencies,
-        )
-
     async def _transform_impl(
         self,
         context: PipelineContext,
@@ -75,15 +46,12 @@ class UniProtProteinTransformer(
         accession = str(self._get_required_field(record, "primaryAccession"))
         entry_name = self._get_entry_name(record)
         business_data = self._build_business_data(record, accession, entry_name)
-        return cast(
-            "SilverRecord",
-            self._finalize_prepared_business_data(
-                context=context,
-                source_id=accession,
-                identity_record={"accession": accession},
-                index=index,
-                business_data=cast(JsonDict, business_data),
-            ),
+        return self._transform_identity_business_data(
+            context=context,
+            source_id=accession,
+            identity_field="accession",
+            index=index,
+            business_data=cast(JsonDict, business_data),
         )
 
     async def transform_pre_silver(
@@ -96,9 +64,9 @@ class UniProtProteinTransformer(
         accession = str(self._get_required_field(record, "primaryAccession"))
         entry_name = self._get_entry_name(record)
         business_data = self._build_business_data(record, accession, entry_name)
-        return self._build_pre_silver_from_business_data(
+        return self._stage_identity_business_data(
             source_id=accession,
-            identity_record={"accession": accession},
+            identity_field="accession",
             business_data=cast(JsonDict, business_data),
         )
 

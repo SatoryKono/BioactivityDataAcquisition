@@ -178,31 +178,7 @@ class ActivityTransformer(BaseChemblTransformer):
 
     entity_class = Bioactivity
     primary_id_field = "activity_id"
-
-    def __init__(
-        self,
-        provider: str = "chembl",
-        entity_type: str | None = None,
-        silver_filters: SilverFilterConfig | None = None,
-        gold_filters: GoldFilterConfig | None = None,
-        tracer: TracingPort | None = None,
-        metrics: MetricsPort | None = None,
-        identity_service: EntityIdentityGenerator | None = None,
-        pii_hasher: PiiHasherPort | None = None,
-        dependencies: TransformerDependencyContext | None = None,
-    ) -> None:
-        """Bind the unified Bioactivity entity to the canonical activity profile."""
-        super().__init__(
-            provider=provider,
-            entity_type=entity_type or "activity",
-            silver_filters=silver_filters,
-            gold_filters=gold_filters,
-            tracer=tracer,
-            metrics=metrics,
-            identity_service=identity_service,
-            pii_hasher=pii_hasher,
-            dependencies=dependencies,
-        )
+    default_entity_type = "activity"
 
     @staticmethod
     def _extract_ligand_efficiency(

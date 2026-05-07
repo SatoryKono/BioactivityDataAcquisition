@@ -2500,7 +2500,7 @@
     {
       "id": 9012,
       "type": "row",
-      "title": "Diagnostics & Docs",
+      "title": "Diagnostics & Docs (Logs / Traces / Raw Metrics)",
       "gridPos": {
         "h": 1,
         "w": 24,

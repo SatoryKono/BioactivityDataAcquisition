@@ -126,15 +126,12 @@ class IDMappingTransformer(PreSilverAdapterMixin, BaseTransformer):
             ValueError: If IDMappingResult entity validation fails.
         """
         target_id, business_data = self._build_mapping_business_data(record)
-        return cast(
-            "SilverRecord",
-            self._finalize_prepared_business_data(
-                context=context,
-                source_id=target_id,
-                identity_record={"target_id": target_id},
-                index=index,
-                business_data=cast(JsonDict, business_data),
-            ),
+        return self._transform_identity_business_data(
+            context=context,
+            source_id=target_id,
+            identity_field="target_id",
+            index=index,
+            business_data=cast(JsonDict, business_data),
         )
 
     async def transform_pre_silver(
@@ -146,9 +143,9 @@ class IDMappingTransformer(PreSilverAdapterMixin, BaseTransformer):
         """Build an intermediate ID mapping payload for application finalization."""
         del context, index
         target_id, business_data = self._build_mapping_business_data(record)
-        return self._build_pre_silver_from_business_data(
+        return self._stage_identity_business_data(
             source_id=target_id,
-            identity_record={"target_id": target_id},
+            identity_field="target_id",
             business_data=cast(JsonDict, business_data),
         )
 

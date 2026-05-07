@@ -107,7 +107,7 @@ Machine-readable navigation contract: `docs/03-guides/dashboards/contracts/navig
    и `Workflow GLOBAL Scope` показывают current-only operator state с явным
    scope. Status tables use row-wide threshold coloring, а не только окраску
    ячейки `Status`. Исторические счётчики вынесены в collapsed row
-   `Range Evidence (Historical / Recent History)`, а `Diagnostics & Docs`
+   `Range Evidence (Historical / Recent History)`, а `Diagnostics & Docs (Logs / Traces / Raw Metrics)`
    содержит routing по logs/traces/raw metrics.
 1. `bioetl-workflow-overview`, panels `id=2`, `id=3`, `id=6`, `id=7`, `id=4`,
    `id=5`, `id=8`:
@@ -142,7 +142,7 @@ Panel-level dashboard handoffs и `First Action` dashboard CTAs намеренн
 │ Current      │              │ cycle │              │                         │
 ├──────────────────────────────────────────────────────────────────────────────┤
 │ ▾ Range Evidence (collapsed row by default)                                  │
-│ ▾ Diagnostics & Docs (collapsed row by default)                              │
+│ ▾ Diagnostics & Docs (Logs / Traces / Raw Metrics) (collapsed row by default)│
 └──────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -150,7 +150,7 @@ Panel-level dashboard handoffs и `First Action` dashboard CTAs намеренн
 - что сломано: `System Status` + `L0 Inputs` + L1 current tables;
 - куда идти дальше: `Next Action` с `action_target/action_reason/action_dashboard_uid`;
 - что было в окне времени: collapsed `Range Evidence`;
-- где искать сырые traces/logs/metrics: collapsed `Diagnostics & Docs`.
+- где искать сырые traces/logs/metrics: collapsed `Diagnostics & Docs (Logs / Traces / Raw Metrics)`.
 ## Silver Filter Rejects workflow
 
 - Для быстрых summary используйте `Silver Rejects Count + Rate` в
