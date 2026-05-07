@@ -21,10 +21,10 @@ from bioetl.domain.control_plane.config_source_hashing import (
     ConfigSourceHashStrategy,
     compute_config_source_hashes,
 )
+from bioetl.domain.control_plane.effective_config_artifact import ConfigSourceRef
 from bioetl.domain.control_plane.effective_config_environment import (
     semantic_runtime_env_dependencies,
 )
-from bioetl.domain.control_plane.effective_config_artifact import ConfigSourceRef
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineRunContext

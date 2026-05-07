@@ -700,10 +700,10 @@ class TestLoadResume:
             await svc.load()
 
     @pytest.mark.asyncio
-    async def test_resume_merges_missing_input_snapshot_fingerprint_for_old_checkpoint(
+    async def test_resume_blocks_missing_input_snapshot_fingerprint_for_strict_checkpoint(
         self,
     ) -> None:
-        """Old checkpoints without input snapshot anchors remain resumable."""
+        """Strict replay resume is blocked when old checkpoints omit snapshot anchors."""
         svc, storage, _ = _make_service(
             resume=True,
             run_id="run-old",
@@ -723,9 +723,8 @@ class TestLoadResume:
         storage.exists.return_value = True
         storage.read.return_value = json.dumps(payload)
 
-        state = await svc.load()
-
-        assert state.input_snapshot_fingerprint == "snapshot-current"
+        with pytest.raises(CheckpointConflictError, match="input_snapshot_fingerprint"):
+            await svc.load()
 
     @pytest.mark.asyncio
     async def test_resume_replays_only_ledger_entries_after_checkpoint_watermark(

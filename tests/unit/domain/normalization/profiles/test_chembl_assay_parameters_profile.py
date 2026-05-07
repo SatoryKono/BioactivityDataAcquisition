@@ -10,6 +10,23 @@ from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_json_string,
 )
 
+CHEMBL_STANDARD_UNIT_ALIAS_CASES = (
+    ("uM", "µM"),
+    ("UM", "µM"),
+    ("μM", "µM"),
+    ("micromolar", "µM"),
+    ("nM", "nM"),
+    ("nanomolar", "nM"),
+    ("pM", "pM"),
+    ("picomolar", "pM"),
+    ("mM", "mM"),
+    ("millimolar", "mM"),
+    ("M", "M"),
+    ("molar", "M"),
+    ("percent", "%"),
+    ("PERCENT", "%"),
+)
+
 
 def test_chembl_assay_parameters_profile_covers_schema_exactly() -> None:
     missing, extra = CHEMBL_ASSAY_PARAMETERS_PROFILE.coverage_gaps(
@@ -49,7 +66,8 @@ def test_chembl_assay_parameters_profile_centralizes_business_canonicalization()
     assert "Canonicalize units" in (units_rule.notes or "")
 
     assert standard_units_rule is not None
-    assert standard_units_rule.normalizer("μM") == "µM"
+    for raw_value, expected in CHEMBL_STANDARD_UNIT_ALIAS_CASES:
+        assert standard_units_rule.normalizer(raw_value) == expected
 
     assert standard_type_rule is not None
     assert standard_type_rule.normalizer(" conc ") == "CONC"
