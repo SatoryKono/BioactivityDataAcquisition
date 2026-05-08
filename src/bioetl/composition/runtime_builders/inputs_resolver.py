@@ -8,6 +8,12 @@ from typing import TYPE_CHECKING, Literal
 
 from bioetl.composition.builders import FilterConfigBuilder
 from bioetl.composition.observability import ObservabilityBundle
+from bioetl.composition.runtime_builders._exact_replay_cached_bronze_context import (
+    bind_cached_bronze_context as _bind_cached_bronze_context,
+)
+from bioetl.composition.runtime_builders._exact_replay_cached_bronze_context import (
+    resolve_exact_replay_cached_bronze_context as _resolve_exact_replay_cached_bronze_context,
+)
 from bioetl.composition.runtime_builders._inputs_resolution_support import (
     adjust_batch_size_for_filter_impl as _adjust_batch_size_for_filter_impl,
 )
@@ -210,21 +216,27 @@ def prepare_runner_inputs(
         settings=get_settings_fn(),
         enabled=getattr(ctx, "tracing_enabled_override", None),
     )
+    cached_bronze = _resolve_exact_replay_cached_bronze_context(
+        ctx=ctx,
+        settings=settings,
+        cached_bronze=assemble_cached_bronze_context_fn(ctx),
+    )
+    effective_ctx = _bind_cached_bronze_context(ctx, cached_bronze)
     yaml_config = load_pipeline_config_fn(ctx.pipeline_name)
     validate_pk_contract(yaml_config)
     observability = build_observability_bundle_fn(
-        pipeline=ctx.pipeline_name,
-        run_id=ctx.run_id,
+        pipeline=effective_ctx.pipeline_name,
+        run_id=effective_ctx.run_id,
         settings=settings,
-        log_level=ctx.log_level,
+        log_level=effective_ctx.log_level,
         yaml_config=yaml_config,
-        skip_gold=bool(getattr(ctx, "skip_gold", False)),
+        skip_gold=bool(getattr(effective_ctx, "skip_gold", False)),
     )
     vacuum = assemble_vacuum_settings_fn(
-        cli_vacuum=ctx.vacuum, yaml_maintenance=yaml_config.maintenance
+        cli_vacuum=effective_ctx.vacuum, yaml_maintenance=yaml_config.maintenance
     )
     runtime_projection = _resolve_runtime_projection(
-        ctx=ctx,
+        ctx=effective_ctx,
         settings=settings,
         yaml_config=yaml_config,
         observability=observability,
@@ -232,19 +244,19 @@ def prepare_runner_inputs(
     )
     runtime_config = _build_runtime_config(
         assemble_runtime_config_fn=assemble_runtime_config_fn,
-        ctx=ctx,
+        ctx=effective_ctx,
         vacuum=vacuum,
         runtime_projection=runtime_projection,
     )
     filter_config = assemble_filter_config_fn(
         yaml_filter=yaml_config.input_filter,
-        ctx=ctx,
+        ctx=effective_ctx,
         test_mode=settings.test_mode,
     )
     _log_filter_config(
         observability=observability,
         filter_config=filter_config,
-        from_cli=ctx.input_filter.enabled,
+        from_cli=effective_ctx.input_filter.enabled,
     )
     adjust_batch_size_for_filter(
         yaml_config=yaml_config,
@@ -252,7 +264,6 @@ def prepare_runner_inputs(
         observability=observability,
         load_source_config_fn=load_source_config_fn,
     )
-    cached_bronze = assemble_cached_bronze_context_fn(ctx)
     _log_cached_bronze(observability=observability, cached_bronze=cached_bronze)
     return RunnerInputs(
         settings=settings,

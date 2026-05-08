@@ -984,6 +984,27 @@ def test_overview_runtime_and_dq_inputs_materialize_from_stable_projected_shapes
     assert "* on (pipeline) group_left() bioetl_dq_current_status" in dq_expr
 
 
+def test_overview_control_plane_input_coalesces_absent_alert_series_to_zero() -> (
+    None
+):
+    payload = _load_rules()
+    control_plane_rule = next(
+        rule
+        for rule in _recording_rules_named(payload, "bioetl_l0_input_status")
+        if rule.get("labels", {}).get("input") == "control_plane"
+    )
+
+    expr = str(control_plane_rule.get("expr", ""))
+
+    assert "bioetl_runtime_alert_condition_manifest_write_failed_15m" in expr
+    assert "bioetl_runtime_alert_condition_ledger_append_failed_15m" in expr
+    assert "bioetl_runtime_alert_condition_checkpoint_incompatible_30m" in expr
+    assert "bioetl_runtime_alert_condition_lineage_refs_missing_15m" in expr
+    assert "bioetl_overview_pipeline_run_type_universe * 0" in expr
+    assert "(max by (pipeline) (" in expr
+    assert "== bool 0" in expr
+
+
 def test_runtime_no_terminal_run_treats_success_as_terminal() -> None:
     payload = _load_rules()
     record_map = _build_record_map(payload)

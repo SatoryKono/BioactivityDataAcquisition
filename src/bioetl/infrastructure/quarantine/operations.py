@@ -42,7 +42,6 @@ from bioetl.infrastructure.quarantine.record_encoding import quote_literal
 from bioetl.infrastructure.quarantine.statistics_support import (
     _build_reason_signature_from_row,
     _build_statistics_response,
-    _count_bronze_records,
     _get_time_statistics,
     _process_quarantine_records,
     _sorted_counter_items,
@@ -172,29 +171,26 @@ def get_filtered_stats(
         if signature:
             by_reason_signature[signature] = by_reason_signature.get(signature, 0) + 1
 
-    pipeline_filter = _normalize_filter_values(pipeline)
-    run_id_single = _single_filter_value(run_id)
-    bronze_records = _count_bronze_records(
-        rows,
-        pipeline_filter=pipeline_filter,
-        run_id_single=run_id_single,
-        pipeline_stats_loader=lambda pipeline_name, scoped_run_id: get_statistics(
-            base_path,
-            storage_options,
-            pipeline_name,
-            error_code=None,
-            run_id=scoped_run_id,
-        ),
-    )
     total = len(rows)
-    reject_ratio = float(total / bronze_records) if bronze_records > 0 else 0.0
+    scoped_run_ids = sorted(
+        {
+            candidate
+            for candidate in (row.get("run_id") for row in rows)
+            if isinstance(candidate, str) and candidate.strip()
+        }
+    )
+    if not scoped_run_ids:
+        run_id_single = _single_filter_value(run_id)
+        if run_id_single is not None:
+            scoped_run_ids = [run_id_single]
     return {
         "total": total,
         "by_reason_code": _sorted_counter_items(by_reason_code),
         "by_field": _sorted_counter_items(by_field),
         "by_reason_signature": _sorted_counter_items(by_reason_signature),
-        "bronze_records": bronze_records,
-        "reject_ratio": reject_ratio,
+        "bronze_records": 0,
+        "reject_ratio": 0.0,
+        "run_ids": scoped_run_ids,
     }
 
 

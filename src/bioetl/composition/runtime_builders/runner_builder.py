@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from dataclasses import is_dataclass, replace
+from types import SimpleNamespace
 from typing import TYPE_CHECKING
 
 from bioetl.application.services.control_plane.run_ledger_service import (
@@ -210,6 +212,22 @@ def _handle_control_plane_setup(
     return ctx, inputs, run_ledger_service
 
 
+def _bind_resolved_cached_bronze_context(
+    ctx: PipelineRunContext,
+    inputs: _RunnerInputs,
+) -> PipelineRunContext:
+    """Propagate resolved cached Bronze replay context back into the run context."""
+    current = getattr(ctx, "cached_bronze", None)
+    resolved = getattr(inputs, "cached_bronze", None)
+    if current == resolved:
+        return ctx
+    if is_dataclass(ctx):
+        return replace(ctx, cached_bronze=resolved)
+    payload = dict(vars(ctx))
+    payload["cached_bronze"] = resolved
+    return SimpleNamespace(**payload)
+
+
 def build_pipeline_runner(
     ctx: PipelineRunContext,
     registry: PipelineRegistry | None = None,
@@ -275,6 +293,7 @@ def build_pipeline_runner(
         load_source_config_fn=load_source_config_fn,
         resolved_functions=resolved_functions,
     )
+    ctx = _bind_resolved_cached_bronze_context(ctx, inputs)
     ctx, inputs, run_ledger_service = _handle_control_plane_setup(ctx, inputs)
     runner = _create_runner_from_factory(
         factory=effective_registry.get(ctx.pipeline_name).factory,

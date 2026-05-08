@@ -115,9 +115,16 @@ class PipelineRunContextService:
 
     def _build_cached_bronze(self, options: RunOptions) -> CachedBronzeContext:
         """Resolve cached Bronze context from options."""
-        if options.exact_replay and not options.use_cached_bronze:
+        if (
+            options.exact_replay
+            and not options.use_cached_bronze
+            and options.replay_of_run_id is None
+            and options.replay_of_manifest_id is None
+        ):
             raise ValueError(
-                "exact replay currently requires --use-cached-bronze with snapshot-backed Bronze inputs"
+                "exact replay currently requires --use-cached-bronze or "
+                "replay_of_run_id/replay_of_manifest_id with published "
+                "snapshot-backed Bronze inputs"
             )
         if options.use_cached_bronze:
             return CachedBronzeContext.from_options(

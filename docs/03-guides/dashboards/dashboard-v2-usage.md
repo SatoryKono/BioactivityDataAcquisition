@@ -114,9 +114,10 @@ Human-readable selector references:
    отвечают на вопрос «какой provider degraded/failing и почему». Panel `id=114`
    остаётся raw source enum (`0=UNHEALTHY`, `1=DEGRADED`, `2=HEALTHY`) ниже
    first screen как evidence. Если status остаётся non-OK, а canonical cause
-   projection пуста, `Inspect Provider Top Causes` теперь показывает synthetic
-   `status_without_projected_cause` вместо silent empty table; это telemetry/rule
-   gap, а не healthy state.
+   projection пуста, `Inspect Provider Top Causes` остаётся empty table; это
+   explainability gap, а не healthy state. В таком случае расследование нужно
+   продолжать по severity matrix и optional provider diagnostics, а не
+   трактовать пустую таблицу как отсутствие инцидента.
    `First Action` is the bounded CTA surface for this dashboard: review the
    severity matrix, inspect critical providers, or inspect provider top causes
    before leaving the page.

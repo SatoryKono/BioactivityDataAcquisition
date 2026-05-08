@@ -1640,7 +1640,9 @@ sum(rate(bioetl_circuit_breaker_success_total{adapter="chembl"}[5m]))
 - `Inspect Critical Providers` — только providers с текущим severity `>=1`.
 - `Inspect Provider Top Causes` — active cause chips из canonical recording
   rules: raw health-status degradation, failure rate, retry exhaustion, adapter
-  latency, HTTP errors, rate-limit pressure.
+  latency, HTTP errors, rate-limit pressure. Empty table means no canonical
+  provider cause is currently above zero; if severity is still non-OK, treat
+  that as an explainability gap and continue triage from the severity matrix.
 - Ниже первого экрана идут только selected-range evidence panels:
   health-check counters, failure/degraded trends, retry exhaustion, repeated
   per-provider p95 gauge, adapter endpoint latency, HTTP error volume,

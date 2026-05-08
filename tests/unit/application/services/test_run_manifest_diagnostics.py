@@ -146,11 +146,18 @@ def test_build_diagnostics_summary_merges_ledger_derived_input_snapshots() -> No
     assert summary["input_snapshot_materialization_mode"] == (
         "live_capture_snapshot_materialized"
     )
-    assert summary["source_posture"] == "live_capture_snapshot_materialized"
-    assert summary["snapshot_status"] == "ledger_derived"
+    assert summary["source_posture"] == "immutable_snapshot_envelope"
+    assert summary["snapshot_status"] == "full"
     assert summary["input_snapshot_count"] == 1
     assert summary["input_snapshot_ids"] == ["snapshot-1"]
     assert summary["input_snapshot_content_hashes"] == ["sha256:snapshot-1"]
+    assert summary["replay_capability"] == "exact_replay_supported"
+    assert summary["replay_capability_reason"] == (
+        "full_immutable_input_snapshot_envelope_present"
+    )
+    assert summary["exact_replay_eligible"] is False
+    assert summary["exact_replay_blockers"] == ["dependency_lock_provenance_missing"]
+    assert summary["replay_mode"] == "same_data_state_recovery"
     assert summary["input_snapshots"] == [
         {
             "provider": "chembl",

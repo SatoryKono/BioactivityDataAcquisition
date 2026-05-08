@@ -177,12 +177,14 @@ class TestBuildContext:
         assert context.replay_of_run_id == "run-parent"
         assert context.replay_of_manifest_id == "manifest-parent"
 
-    def test_build_context_rejects_exact_replay_without_cached_bronze(self) -> None:
+    def test_build_context_rejects_exact_replay_without_cached_bronze_or_parentage(
+        self,
+    ) -> None:
         service = PipelineRunContextService()
 
         with pytest.raises(
             ValueError,
-            match="exact replay currently requires --use-cached-bronze",
+            match="exact replay currently requires --use-cached-bronze or",
         ):
             service.build_context(
                 pipeline_name="chembl_activity",
@@ -190,3 +192,23 @@ class TestBuildContext:
                 options=RunOptions(exact_replay=True),
                 started_at=FIXED_STARTED_AT,
             )
+
+    def test_build_context_allows_exact_replay_with_replay_parentage_only(
+        self,
+    ) -> None:
+        service = PipelineRunContextService()
+
+        context = service.build_context(
+            pipeline_name="chembl_activity",
+            run_id=RunID(uuid4()),
+            options=RunOptions(
+                replay_of_run_id=str(uuid4()),
+                replay_of_manifest_id="manifest-parent",
+                exact_replay=True,
+            ),
+            started_at=FIXED_STARTED_AT,
+        )
+
+        assert context.exact_replay is True
+        assert context.has_cached_bronze is False
+        assert context.replay_of_manifest_id == "manifest-parent"

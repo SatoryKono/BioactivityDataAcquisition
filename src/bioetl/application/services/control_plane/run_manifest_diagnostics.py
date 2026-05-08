@@ -2,14 +2,19 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
+from datetime import datetime
 from typing import cast
 
 from bioetl.application.services.control_plane._run_manifest_diagnostics_base import (
     _build_base_summary_payload,
     _build_current_checkpoint_anchor_payload,
     _build_effective_config_diagnostics,
+    _resolve_operator_replay_mode,
     _build_resume_anchor_comparison,
     _resolve_base_summary_replay_context,
+    _resolve_snapshot_status,
+    _resolve_source_posture,
 )
 from bioetl.application.services.control_plane._run_manifest_diagnostics_ledger import (
     _process_ledger_entries,
@@ -20,7 +25,12 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_persist
     build_persistence_profile,
 )
 from bioetl.application.services.control_plane._run_manifest_diagnostics_replay import (
+    _build_resume_contract,
     _is_composite_execution_context,
+    _resolve_continuation_mode,
+    _resolve_exact_replay_blockers,
+    _resolve_replay_capability_reason,
+    _resolve_replay_mode,
 )
 from bioetl.application.services.control_plane._run_manifest_diagnostics_snapshot_support import (
     merge_ledger_input_snapshots_into_summary,
@@ -32,7 +42,15 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_summary
 from bioetl.application.services.control_plane.run_manifest_reproducibility_scoring import (
     build_reproducibility_audit_scoring,
 )
-from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
+from bioetl.domain.control_plane import (
+    RunInputSnapshotRef,
+    RunLedgerEntry,
+    RunManifest,
+    RunSourceRef,
+)
+from bioetl.domain.control_plane.reproducibility_policy import (
+    assess_reproducibility_policy,
+)
 from bioetl.domain.control_plane.run_ledger import (
     COMPOSITE_DEPENDENCY_COMPLETED_EVENT,
     COMPOSITE_ENRICHER_COMPLETED_EVENT,
@@ -191,6 +209,10 @@ def build_diagnostics_summary(
         base_summary,
         ledger_entries,
     )
+    base_summary = _refresh_replay_summary_from_materialized_snapshots(
+        manifest=manifest,
+        summary=base_summary,
+    )
     base_summary = _attach_rich_composite_replay_support(
         base_summary,
         ledger_entries,
@@ -246,6 +268,179 @@ def build_diagnostics_summary(
         _build_unified_reproducibility_diagnostics(final_summary)
     )
     return final_summary
+
+
+def _refresh_replay_summary_from_materialized_snapshots(
+    *,
+    manifest: RunManifest,
+    summary: dict[str, object],
+) -> dict[str, object]:
+    """Recompute replay policy after ledger-derived snapshots are merged."""
+    input_snapshots = summary.get("input_snapshots")
+    if not isinstance(input_snapshots, list) or not input_snapshots:
+        return summary
+    source_refs = _build_effective_source_refs(
+        manifest=manifest,
+        input_snapshots=input_snapshots,
+    )
+    replay_assessment_seed = cast(
+        "dict[str, object]",
+        summary.get("replay_capability_assessment", {}),
+    )
+    strict_exact_replay_supported = bool(
+        replay_assessment_seed.get("strict_exact_replay_supported", False)
+    )
+    requested_exact_replay = bool(summary.get("requested_exact_replay", False))
+    resume_requested = bool(manifest.launch_context.get("resume"))
+    policy_assessment = assess_reproducibility_policy(
+        source_refs=source_refs,
+        required_persistence_profile=summary.get(
+            "required_persistence_profile",
+            "degraded_observable",
+        ),
+        strict_exact_replay_supported=strict_exact_replay_supported,
+        exact_replay_requested=requested_exact_replay,
+        resume_requested=resume_requested,
+        replay_capability=None,
+        run_type=manifest.run_type.value,
+        debug_only=False,
+        lifecycle_projection_only=False,
+    )
+    effective_manifest = replace(
+        manifest,
+        replay_capability=policy_assessment.replay_capability,
+        source_refs=source_refs,
+    )
+    updated = dict(summary)
+    updated["replay_capability"] = policy_assessment.replay_capability.value
+    updated["replay_capability_assessment"] = policy_assessment.to_dict()
+    updated["replay_capability_reason"] = _resolve_replay_capability_reason(
+        manifest=effective_manifest,
+        input_snapshots=cast("list[dict[str, object]]", input_snapshots),
+        resume_requested=resume_requested,
+        policy_assessment=policy_assessment,
+    )
+    updated["exact_replay_blockers"] = _resolve_exact_replay_blockers(
+        manifest=effective_manifest,
+        policy_assessment=policy_assessment,
+    )
+    exact_replay_eligible = (
+        effective_manifest.replay_capability.value == "exact_replay_supported"
+        and not updated["exact_replay_blockers"]
+    )
+    updated["exact_replay_eligible"] = exact_replay_eligible
+    updated["replay_readiness_verdict"] = (
+        policy_assessment.replay_readiness_verdict.value
+    )
+    replay_mode = _resolve_replay_mode(
+        manifest=effective_manifest,
+        requested_exact_replay=requested_exact_replay,
+        resume_requested=resume_requested,
+    )
+    continuation_mode = _resolve_continuation_mode(
+        manifest=effective_manifest,
+        requested_exact_replay=requested_exact_replay,
+        resume_requested=resume_requested,
+    )
+    updated["replay_mode"] = replay_mode
+    updated["continuation_mode"] = continuation_mode
+    updated["operator_replay_mode"] = _resolve_operator_replay_mode(
+        replay_mode=replay_mode,
+        continuation_mode=continuation_mode,
+        replay_readiness_verdict=policy_assessment.replay_readiness_verdict.value,
+    )
+    updated["source_posture"] = _resolve_source_posture(policy_assessment)
+    updated["input_snapshot_missing_source_refs"] = list(
+        policy_assessment.snapshot_envelope.missing_snapshot_source_refs
+    )
+    updated["snapshot_status"] = _resolve_snapshot_status(
+        input_snapshots=cast("list[dict[str, object]]", input_snapshots),
+        exact_replay_eligible=exact_replay_eligible,
+        replay_mode=replay_mode,
+    )
+    updated["resume_contract"] = _build_resume_contract(
+        manifest=effective_manifest,
+        requested_exact_replay=requested_exact_replay,
+        resume_requested=resume_requested,
+        policy_assessment=policy_assessment,
+    )
+    return updated
+
+
+def _build_effective_source_refs(
+    *,
+    manifest: RunManifest,
+    input_snapshots: list[object],
+) -> tuple[RunSourceRef, ...]:
+    snapshots_by_source: dict[
+        tuple[str, str, str, str | None],
+        list[RunInputSnapshotRef],
+    ] = {}
+    for item in input_snapshots:
+        if not isinstance(item, dict):
+            continue
+        provider = str(item.get("provider") or manifest.provider).strip()
+        entity = str(item.get("entity") or manifest.entity).strip()
+        pipeline_name = str(item.get("pipeline_name") or manifest.pipeline_name).strip()
+        query_value = item.get("query")
+        query = str(query_value).strip() if query_value is not None else None
+        snapshots_by_source.setdefault(
+            (provider, entity, pipeline_name, query),
+            [],
+        ).append(_build_snapshot_ref(item))
+    if not snapshots_by_source:
+        return manifest.source_refs
+    effective_refs: list[RunSourceRef] = []
+    if manifest.source_refs:
+        for source_ref in manifest.source_refs:
+            key = (
+                source_ref.provider,
+                source_ref.entity,
+                source_ref.pipeline_name,
+                source_ref.query,
+            )
+            effective_refs.append(
+                RunSourceRef(
+                    provider=source_ref.provider,
+                    entity=source_ref.entity,
+                    pipeline_name=source_ref.pipeline_name,
+                    query=source_ref.query,
+                    input_snapshots=tuple(snapshots_by_source.pop(key, [])),
+                )
+            )
+    for (provider, entity, pipeline_name, query), snapshots in sorted(
+        snapshots_by_source.items()
+    ):
+        effective_refs.append(
+            RunSourceRef(
+                provider=provider,
+                entity=entity,
+                pipeline_name=pipeline_name,
+                query=query,
+                input_snapshots=tuple(snapshots),
+            )
+        )
+    return tuple(effective_refs)
+
+
+def _build_snapshot_ref(snapshot: dict[str, object]) -> RunInputSnapshotRef:
+    captured_at_value = snapshot.get("captured_at")
+    captured_at = None
+    if isinstance(captured_at_value, str) and captured_at_value.strip():
+        captured_at = datetime.fromisoformat(captured_at_value)
+    return RunInputSnapshotRef(
+        snapshot_id=str(snapshot.get("snapshot_id") or ""),
+        content_hash=str(snapshot.get("content_hash") or ""),
+        immutable_uri=cast("str | None", snapshot.get("immutable_uri")),
+        query_fingerprint=cast("str | None", snapshot.get("query_fingerprint")),
+        storage_provider=cast("str | None", snapshot.get("storage_provider")),
+        object_bucket=cast("str | None", snapshot.get("object_bucket")),
+        object_key=cast("str | None", snapshot.get("object_key")),
+        object_version_id=cast("str | None", snapshot.get("object_version_id")),
+        etag=cast("str | None", snapshot.get("etag")),
+        last_modified=cast("str | None", snapshot.get("last_modified")),
+        captured_at=captured_at,
+    )
 
 
 __all__ = ["build_diagnostics_summary"]

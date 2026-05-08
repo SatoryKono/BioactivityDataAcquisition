@@ -304,7 +304,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Current top provider causes from canonical cause recording rules: raw status, failure rate, retry exhaustion, latency, HTTP errors, or rate-limit pressure. If provider severity is DEGRADED/FAILING but no positive cause projection exists, this panel emits a synthetic status_without_projected_cause row so operator triage does not go blank. Treat that synthetic row as a telemetry/rule gap and inspect raw provider status plus optional rate-limit/circuit-breaker evidence before leaving the dashboard.",
+      "description": "Current top provider causes from canonical cause recording rules: raw status, failure rate, retry exhaustion, latency, HTTP errors, or rate-limit pressure. Empty table means no canonical provider cause is currently above zero for any provider. If the GLOBAL severity matrix is non-OK while this table stays empty, treat that as a provider explainability gap and inspect the raw status matrix plus optional rate-limit/circuit-breaker evidence before leaving the dashboard.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -329,7 +329,7 @@
               }
             }
           ],
-          "noValue": "No provider causes projected. If critical providers remain visible, treat this as a cause-projection gap and inspect raw provider status plus optional telemetry.",
+          "noValue": "No canonical provider causes projected. If critical providers remain visible, treat this as an explainability gap and inspect raw provider status plus optional telemetry.",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -380,7 +380,7 @@
       "pluginVersion": "10.4.0",
       "targets": [
         {
-          "expr": "topk(5, (bioetl_provider_current_cause > 0) or label_replace(label_replace(((bioetl_provider_current_status >= 1) unless on (provider) max by (provider) (bioetl_provider_current_cause > bool 0)), \"cause\", \"status_without_projected_cause\", \"__name__\", \".*\"), \"severity\", \"unknown\", \"__name__\", \".*\"))",
+          "expr": "topk(5, bioetl_provider_current_cause > 0)",
           "format": "table",
           "instant": true,
           "legendFormat": "{{pipeline}} {{provider}} {{reason}} {{cause}}",
@@ -402,7 +402,7 @@
         "y": 13
       },
       "options": {
-        "content": "<div style=\"padding:0.45rem 0.7rem;line-height:1.55\"><strong>First action:</strong> start with the GLOBAL severity matrix, then open top causes for the degraded provider. If the top-cause table shows <code>status_without_projected_cause</code>, treat that as a provider explainability gap: confirm raw provider status, then inspect optional rate-limit/circuit-breaker panels before leaving the page. If cause is retry/rate-limit/circuit-breaker, inspect control-plane safety before replay. If cause is latency/errors, correlate with Runtime impact, then logs/traces from the runtime or DQ dashboards.</div>",
+        "content": "<div style=\"padding:0.45rem 0.7rem;line-height:1.55\"><strong>First action:</strong> start with the GLOBAL severity matrix, then open top causes for the degraded provider. If the top-cause table stays empty while severity is non-OK, treat that as a provider explainability gap: confirm raw provider status, then inspect optional rate-limit/circuit-breaker panels before leaving the page. If cause is retry/rate-limit/circuit-breaker, inspect control-plane safety before replay. If cause is latency/errors, correlate with Runtime impact, then logs/traces from the runtime or DQ dashboards.</div>",
         "mode": "html"
       },
       "links": [
