@@ -24,6 +24,9 @@ ______________________________________________________________________
 - datasource/query family
 - cross-dashboard propagation rules
 
+Machine-readable selector SSOT:
+`docs/03-guides/dashboards/contracts/selector-contracts.yaml`
+
 ## Core rules
 
 - Все variables MUST иметь `description` в shipped JSON.
@@ -55,7 +58,7 @@ ______________________________________________________________________
 | `$reason_code` | `bioetl-silver-reject-explorer` | Multi-select with Include All | `All` / `$__all` | Explorer-only forensic narrowing for bounded reject causes. |
 | `$field` | `bioetl-silver-reject-explorer` | Multi-select with Include All | `All` / `$__all` | Explorer-only forensic narrowing for rejected fields. |
 | `$run_id` | `bioetl-silver-reject-explorer` | Single-select | Empty until selected | Explorer-only forensic selector; MUST NOT appear in Prometheus queries or cross-dashboard links. |
-| `$payload_hash` | `bioetl-silver-reject-explorer` | Hidden detail selector | Empty string | Self-drilldown/detail selector only. |
+| `$payload_hash` | `bioetl-silver-reject-explorer` | Visible textbox | Empty string | Forensic exact-record selector; visible only in the explorer and MUST NOT propagate into other dashboards. |
 | `$workflow` | `bioetl-workflow-overview` | Multi-select with Include All | `All` / `$__all` | Workflow-level selected-range scope, not pipeline scope. |
 | `$status` | `bioetl-workflow-overview` | Multi-select with Include All | `All` / `$__all` | Workflow run-status filter. |
 | `$step_status` | `bioetl-workflow-overview` | Multi-select with Include All | `All` / `$__all` | Workflow step-status filter for step evidence panels. |

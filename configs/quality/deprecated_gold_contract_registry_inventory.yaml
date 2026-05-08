@@ -1,13 +1,6 @@
 version: 1
 policy_scope: deprecated_gold_contract_registry
 entries:
-  chembl.activity:
-    classification: gold_runtime_disabled
-    provider: chembl
-    entity: activity
-    replacement_contract_ref: null
-    entity_config_path: configs/entities/chembl/activity.yaml
-    rationale: Gold runtime is disabled; published artifact remains for historical contract governance.
   crossref.works:
     classification: compatibility_alias
     provider: crossref

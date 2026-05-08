@@ -71,7 +71,7 @@
           "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
           "targetBlank": false,
           "includeVars": false,
-          "tooltip": "Cross-scope handoff: bounded pipeline/run_type explorer scope. Opens in the same tab."
+          "tooltip": "Cross-scope handoff: bounded pipeline/run_type explorer scope. Reset scope: Silver Reject Explorer owns its own record-level filters. Opens in the same tab."
         },
         {
           "title": "Explore Logs",

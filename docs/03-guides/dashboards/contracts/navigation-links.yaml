@@ -38,8 +38,6 @@ required_top_level_links_by_uid:
     - 3. Provider Health
     - 4. Data Quality
     - 5. Workflow
-    - Explore Logs
-    - Explore Traces
     - Silver Reject Explorer
   bioetl-provider-health-v2:
     - 0. Control Plane
@@ -196,6 +194,22 @@ required_panel_links_by_uid:
     - panel_id: 9102
       target_uid: bioetl-silver-reject-explorer
       link_titles: [Open Silver Reject Explorer]
+  bioetl-workflow-overview:
+    - panel_id: 9
+      target_uid: bioetl-runtime
+      link_titles: [Open 2. Runtime]
+    - panel_id: 9
+      target_uid: bioetl-dq-v2
+      link_titles: [Open 4. Data Quality]
+    - panel_id: 9
+      target_uid: bioetl-provider-health-v2
+      link_titles: [Open 3. Provider Health]
+    - panel_id: 9
+      target_uid: bioetl-control-plane-v1
+      link_titles: [Open 0. Control Plane]
+    - panel_id: 9
+      target_uid: bioetl-overview-v2
+      link_titles: [Open 1. Overview]
 
 default_time_refresh_policy:
   L0:
@@ -296,6 +310,7 @@ navigation_transition_contract:
   first_action_contract:
     bioetl-runtime:
       panel_id: 9991
+      panel_title: First Action
       min_cta: 4
       max_cta: 4
       ctas:
@@ -307,6 +322,40 @@ navigation_transition_contract:
           expected_target_uid: bioetl-runtime
         - title: Inspect active blocker
           expected_target_uid: bioetl-runtime
+    bioetl-provider-health-v2:
+      panel_id: 9002
+      panel_title: First Action
+      min_cta: 3
+      max_cta: 3
+      ctas:
+        - title: Review severity matrix
+          expected_target_uid: bioetl-provider-health-v2
+        - title: Inspect critical providers
+          expected_target_uid: bioetl-provider-health-v2
+        - title: Inspect provider top causes
+          expected_target_uid: bioetl-provider-health-v2
+    bioetl-dq-v2:
+      panel_id: 9103
+      panel_title: "Review: First Action"
+      min_cta: 3
+      max_cta: 3
+      ctas:
+        - title: Review current status
+          expected_target_uid: bioetl-dq-v2
+        - title: Inspect current reasons
+          expected_target_uid: bioetl-dq-v2
+        - title: Open Silver Reject Explorer
+          expected_target_uid: bioetl-silver-reject-explorer
+    bioetl-silver-reject-explorer:
+      panel_id: 10
+      panel_title: "Review: First Action / No-Data Semantics"
+      min_cta: 2
+      max_cta: 2
+      ctas:
+        - title: Review total rejects
+          expected_target_uid: bioetl-silver-reject-explorer
+        - title: Review scoped summary
+          expected_target_uid: bioetl-silver-reject-explorer
   cross_scope_marker_contract:
     required_markers:
       reset_scope: "Reset scope"

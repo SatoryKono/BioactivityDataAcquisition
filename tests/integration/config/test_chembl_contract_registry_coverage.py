@@ -147,17 +147,17 @@ def test_chembl_contract_registry_paths_are_filesystem_consistent() -> None:
 
 
 @pytest.mark.integration
-def test_chembl_activity_contract_is_registry_published_but_not_active_when_gold_disabled() -> (
+def test_chembl_activity_contract_is_registry_published_and_active_when_gold_enabled() -> (
     None
 ):
-    """chembl.activity stays published in the registry but must not advertise an active Gold runtime."""
+    """chembl.activity must stay registry-published and active while the Gold runtime is enabled."""
     activity_config = _CONFIGS_ROOT / "entities" / "chembl" / "activity.yaml"
     config = yaml.safe_load(activity_config.read_text(encoding="utf-8"))
     store = FileContractRegistryStore(_REGISTRY_PATH)
     registry = store.load()
 
-    assert config["pipeline"]["sink"]["gold"]["enabled"] is False
-    assert registry.entries["chembl.activity"].status.value == "deprecated"
+    assert config["pipeline"]["sink"]["gold"]["enabled"] is True
+    assert registry.entries["chembl.activity"].status.value == "active"
 
 
 @pytest.mark.integration

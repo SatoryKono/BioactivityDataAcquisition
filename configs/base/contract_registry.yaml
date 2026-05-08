@@ -28,14 +28,13 @@ entries:
       schema_hash: "324651bc17fbcdae6688f2aed5bb1e80f70e3b4bc00eee70d1ee86af0e818f36"
       dq_policy_ref: "chembl.dq.v1"
       rule_bundle_version: "dq-rules.v1.0"
-    status: "deprecated"
+    status: "active"
     source_path: "../../src/bioetl/domain/contracts/gold/_chembl_activity_assay_schemas.py"
     published_artifacts:
       - "../../docs/04-reference/contracts/gold/chembl_activity_v1.0.json"
     supported_versions: ["1.0.0"]
-    migration_guides:
-      1.0.0->gold-runtime-disabled: "docs/plans/chembl-activity-gold-contract-deprecation.md"
-    last_updated: "2026-05-06T00:00:00Z"
+    migration_guides: {}
+    last_updated: "2026-05-08T00:00:00Z"
     owners: ["chembl-team"]
     dq_policy_ref: "chembl.dq.v1"
     rule_bundle_version: "dq-rules.v1.0"

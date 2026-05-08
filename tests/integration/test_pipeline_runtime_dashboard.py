@@ -34,6 +34,7 @@ _ALLOWED_DASHBOARD_LINK_VARS = {
     "bioetl-provider-health-v2": frozenset({"provider", "pipeline_context", "adapter"}),
     "bioetl-control-plane-v1": frozenset({"pipeline", "run_type"}),
     "bioetl-workflow-overview": frozenset({"pipeline", "run_type"}),
+    "bioetl-silver-reject-explorer": frozenset({"pipeline", "run_type"}),
 }
 
 

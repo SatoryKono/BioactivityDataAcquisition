@@ -181,6 +181,49 @@ def test_runtime_provider_dq_first_screens_use_canonical_current_status() -> Non
             )
 
 
+def test_overview_and_control_plane_first_screens_use_role_appropriate_queries() -> None:
+    """Overview/Control Plane answer rows must stay on projected current-state or fixed-window evidence."""
+    expectations = {
+        "bioetl-overview-v2.json": {
+            "System Status": "bioetl_l0_status",
+            "Next Action": "bioetl_l0_next_action_route",
+            "L0 Inputs": "bioetl_l0_input_status_selected",
+        },
+        "bioetl-control-plane-v1.json": {
+            "Monitor: Replay Safety State": "bioetl_replay_safety_blockers_15m",
+            "Monitor: Manifest / Ledger Integrity": "bioetl_manifest_ledger_failures_15m",
+            "Inspect: Telemetry Missing": "bioetl_control_plane_telemetry_missing_5m",
+        },
+    }
+
+    for dashboard_name, panel_expectations in expectations.items():
+        dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
+        panels = {
+            panel.get("title"): panel
+            for panel in get_dashboard_panels(dashboard)
+            if panel.get("title")
+        }
+        for panel_title, expected_metric in panel_expectations.items():
+            panel = panels.get(panel_title)
+            assert panel is not None, (
+                f"{dashboard_name} must expose first-screen panel {panel_title!r}"
+            )
+            assert panel.get("gridPos", {}).get("y", 999) <= 10, (
+                f"{dashboard_name}:{panel_title} must stay in the answer row"
+            )
+            expressions = [
+                target.get("expr", "")
+                for target in panel.get("targets", [])
+                if isinstance(target.get("expr"), str)
+            ]
+            assert any(expected_metric in expr for expr in expressions), (
+                f"{dashboard_name}:{panel_title} must consume {expected_metric}"
+            )
+            assert all("$__range" not in expr for expr in expressions), (
+                f"{dashboard_name}:{panel_title} must not use selected-range semantics"
+            )
+
+
 def test_current_status_and_current_cause_panels_do_not_use_zero_fallback() -> None:
     """Fail-closed current-status surfaces must not hide missing telemetry behind or vector(0)."""
     expectations = {
