@@ -6,6 +6,7 @@ Extracted to reduce code duplication per refactoring analysis 2026-01-25.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import fields, is_dataclass
 from datetime import datetime
 from enum import Enum
@@ -69,6 +70,31 @@ def update_counts(
     return passed, failed, warnings + 1
 
 
+def run_serialized_checks(
+    *,
+    enabled_checks: set[object],
+    dispatch: list[tuple[object, str, Callable[[], Any]]],
+    checks: dict[str, Any],  # Any: DQ payloads are heterogeneous
+    serialize_result: Callable[[Any], Any],  # Any: check result types vary
+    passed: int,
+    failed: int,
+    warnings: int,
+) -> tuple[int, int, int]:
+    """Execute enabled checks with shared serialization/count aggregation."""
+    for check_type, key, handler in dispatch:
+        if check_type not in enabled_checks:
+            continue
+        result = handler()
+        checks[key] = serialize_result(result)
+        passed, failed, warnings = update_counts(
+            result.status,
+            passed,
+            failed,
+            warnings,
+        )
+    return passed, failed, warnings
+
+
 def build_summary(
     passed: int,
     failed: int,
@@ -106,5 +132,6 @@ def build_summary(
 __all__ = [
     "build_summary",
     "convert_value",
+    "run_serialized_checks",
     "update_counts",
 ]

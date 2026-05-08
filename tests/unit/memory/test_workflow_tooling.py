@@ -60,6 +60,7 @@ def test_pre_task_workflow_creates_session_note_and_uses_local_surfaces(
         events_dir=events_dir,
         run_refresh_if_missing=False,
         limit=5,
+        profile="audit",
     )
 
     assert payload["kind"] == "pre-task"
@@ -67,6 +68,7 @@ def test_pre_task_workflow_creates_session_note_and_uses_local_surfaces(
     assert session_note_path.exists()
     assert len(payload["retrieval"]["results"]["rag"]) == 1
     assert len(payload["retrieval"]["results"]["timeline"]) == 1
+    assert payload["retrieval"]["profile"] == "audit"
 
     note = parse_markdown_note(session_note_path)
     assert note.metadata["task_id"] == "task-chembl-memory"
@@ -149,6 +151,82 @@ def test_pre_task_workflow_refreshes_if_manifests_are_missing(
     assert payload["refresh_output_root"] == str(tmp_path / "refresh")
     assert payload["refresh_report"] == {"ok": True, "artifacts": []}
     assert len(payload["retrieval"]["results"]["rag"]) == 1
+
+
+def test_pre_task_workflow_refreshes_if_event_projection_dir_is_empty(
+    tmp_path: Path, monkeypatch
+) -> None:
+    refresh_calls: list[Path] = []
+    chunks_path = tmp_path / "chunks.jsonl"
+    chunks_path.write_text(
+        json.dumps(
+            {
+                "id": "chunk-1",
+                "title": "Local chunk",
+                "content": "workflow memory",
+                "source_path": "src/memory/query.py",
+                "source_type": "code",
+                "domain": "memory",
+                "repo_zone": "canonical_runtime",
+                "symbol_kind": "function",
+            },
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    events_dir = tmp_path / "events"
+    events_dir.mkdir()
+    (events_dir / "README.md").write_text("Timeline projections live here.\n")
+
+    def _fake_refresh_all(
+        root: Path,
+        output_root: Path,
+        *,
+        include_rag: bool = True,
+        include_timeline: bool = True,
+        include_graph_export: bool = False,
+    ) -> dict[str, object]:
+        refresh_calls.append(output_root)
+        rag_dir = output_root / "rag" / "manifests"
+        rag_dir.mkdir(parents=True, exist_ok=True)
+        (rag_dir / "chunks.jsonl").write_text(chunks_path.read_text(encoding="utf-8"))
+        refreshed_events = output_root / "timeline" / "events"
+        refreshed_events.mkdir(parents=True, exist_ok=True)
+        (refreshed_events / "runs.jsonl").write_text(
+            json.dumps(
+                {
+                    "id": "run-1",
+                    "event_type": "run.completed",
+                    "event_family": "run",
+                    "severity": "info",
+                    "occurred_at": "2026-04-20T00:00:00Z",
+                    "source_refs": ["data/output/control/run_manifest/m1.json"],
+                    "payload": {"pipeline_name": "workflow memory"},
+                },
+                sort_keys=True,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+        return {"ok": True, "artifacts": []}
+
+    monkeypatch.setattr(workflow, "refresh_all", _fake_refresh_all)
+
+    payload = workflow.pre_task_workflow(
+        task_id="task-empty-events",
+        title="Refresh empty events",
+        query="workflow memory",
+        source_refs=["src/memory/README.md"],
+        refresh_output_root=tmp_path / "refresh",
+        chunks_path=chunks_path,
+        events_dir=events_dir,
+        limit=5,
+    )
+
+    assert refresh_calls == [tmp_path / "refresh"]
+    assert payload["refresh_output_root"] == str(tmp_path / "refresh")
+    assert len(payload["retrieval"]["results"]["timeline"]) == 1
 
 
 def test_post_task_workflow_writes_summary_and_promotes_note(

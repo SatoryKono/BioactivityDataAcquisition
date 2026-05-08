@@ -5,22 +5,19 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING
 
+from bioetl.application.services.lineage._fragment_assembly import (
+    build_dataset_fragment_nodes,
+)
 from bioetl.application.services.lineage._fragment_finalization import (
     finalize_lineage_fragment,
-)
-from bioetl.application.services.lineage.metadata_lineage_composite import (
-    _build_dataset_composite_lineage_components,
 )
 from bioetl.application.services.lineage.metadata_lineage_nodes import (
     bronze_batch_nodes_for_silver,
     fragment_timestamp,
     manifest_edges,
     manifest_node,
-    resolve_transform_metadata,
-    run_node,
     silver_dataset_node,
     transform_edges,
-    transform_nodes,
 )
 from bioetl.domain.lineage import (
     LineageEdge,
@@ -79,48 +76,23 @@ def _build_silver_nodes(
     created_at: datetime,
 ) -> tuple[list[LineageNodeRef], list[LineageEdge]]:
     """Build all nodes for the silver lineage fragment."""
-    run = run_node(run_context)
-    manifest = manifest_node(run_context)
-    silver_dataset, composite_source_nodes, composite_source_edges = (
-        _build_dataset_composite_lineage_components(
-            run_context=run_context,
-            dataset_node=silver_dataset_node(
-                run_context=run_context, input_data=input_data
-            ),
-            records=input_data.records,
-            composite_name=f"{run_context.provider}.{run_context.entity}",
-            created_at=created_at,
-            composite_run_id=input_data.composite_run_id,
-            lineage_created_at=input_data.lineage_created_at,
-        )
-    )
     bronze_nodes = bronze_batch_nodes_for_silver(
         run_context=run_context,
         input_data=input_data,
     )
-    transform_version, transform_steps = resolve_transform_metadata(
+    return build_dataset_fragment_nodes(
         run_context=run_context,
+        dataset_node=silver_dataset_node(run_context=run_context, input_data=input_data),
+        records=input_data.records,
+        composite_name=f"{run_context.provider}.{run_context.entity}",
+        created_at=created_at,
+        composite_run_id=input_data.composite_run_id,
+        lineage_created_at=input_data.lineage_created_at,
+        source_nodes=bronze_nodes,
         transform_version=input_data.transform_version,
         transform_steps=input_data.transform_steps,
+        extra_nodes=[],
     )
-    lineage_transform_nodes = transform_nodes(
-        run_context=run_context,
-        transform_version=transform_version,
-        transform_steps=transform_steps,
-    )
-
-    nodes = [
-        run,
-        silver_dataset,
-        *bronze_nodes,
-        *lineage_transform_nodes,
-        *composite_source_nodes,
-    ]
-
-    if manifest is not None:
-        nodes.append(manifest)
-
-    return nodes, composite_source_edges
 
 
 def _build_silver_edges(

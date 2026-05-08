@@ -147,6 +147,12 @@ async def test_workflow_runner_roundtrips_pipeline_transform_and_metrics() -> No
     assert isinstance(transform_payload, WorkflowTransformExecutionResult)
     assert transform_payload.status == "success"
     assert any(name == "bioetl_workflow_runs_total" for name, _, _ in metrics.counters)
+    assert any(
+        name == "bioetl_workflow_step_duration_seconds"
+        and labels["step_kind"] == "pipeline"
+        and labels["status"] == "success"
+        for name, _value, labels in metrics.histograms
+    )
 
 
 @pytest.mark.asyncio
@@ -171,3 +177,42 @@ async def test_workflow_runner_skips_completed_transform_by_fingerprint() -> Non
 
     assert result.status == "success"
     assert result.steps[1].status == "skipped"
+
+
+@pytest.mark.asyncio
+async def test_workflow_runner_preserves_topological_order_for_dependency_graph() -> (
+    None
+):
+    metrics = _RecordingMetrics()
+    pipeline_runner = _PipelineRunner()
+    registry = WorkflowTransformRegistry()
+    registry.register("normalize_activity", lambda _spec, upstream: sorted(upstream))
+    service = WorkflowRunnerService(
+        pipeline_runner=pipeline_runner,  # type: ignore[arg-type]
+        transform_service=WorkflowTransformService(
+            registry=registry,
+            metrics=metrics,
+            monotonic=iter([2.0, 2.2]).__next__,
+        ),
+        metrics=metrics,
+    )
+    config = WorkflowConfig(
+        name="activity_workflow",
+        steps=(
+            TransformStepConfig(
+                step_id="normalize",
+                transform_name="normalize_activity",
+                depends_on=("extract",),
+            ),
+            WorkflowStepConfig(
+                step_id="extract",
+                pipeline_name="chembl_activity",
+                run_options=WorkflowRunOptionsConfig(limit=3),
+            ),
+        ),
+    )
+
+    result = await service.run_workflow(config)
+
+    assert result.status == "success"
+    assert [step.step_id for step in result.steps] == ["extract", "normalize"]

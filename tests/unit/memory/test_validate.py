@@ -194,3 +194,22 @@ def test_generated_memory_artifact_classifier_blocks_rebuild_only_outputs() -> N
         "src/memory/rag/manifests/README.md"
     )
     assert not _is_tracked_generated_memory_artifact("src/memory/README.md")
+
+
+def test_memory_scaffold_validation_can_flag_working_tree_python_cache(
+    tmp_path: Path,
+) -> None:
+    memory_root = tmp_path / "memory"
+    shutil.copytree(MEMORY_ROOT, memory_root)
+    cache_file = memory_root / "__pycache__" / "query.cpython-312.pyc"
+    cache_file.parent.mkdir(parents=True, exist_ok=True)
+    cache_file.write_bytes(b"cache")
+
+    issues = validate_memory_scaffold(memory_root, include_working_tree_junk=True)
+
+    assert any(
+        issue.path == str(cache_file)
+        and issue.message
+        == "working-tree Python cache should not live under src/memory"
+        for issue in issues
+    )

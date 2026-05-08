@@ -34,13 +34,13 @@ Machine-readable navigation contract: `docs/03-guides/dashboards/contracts/navig
 
 | Target dashboard | 1-click entry source |
 | --- | --- |
-| `bioetl-control-plane-v1` | top-level `0. Control Plane` from every primary dashboard except itself |
-| `bioetl-overview-v2` | top-level `1. Overview` from every primary dashboard except itself |
-| `bioetl-runtime` | top-level `2. Runtime` from every primary dashboard except itself |
-| `bioetl-provider-health-v2` | top-level `3. Provider Health` from every primary dashboard except itself |
-| `bioetl-dq-v2` | top-level `4. Data Quality` from every primary dashboard except itself |
-| `bioetl-workflow-overview` | top-level `5. Workflow` from every primary dashboard except itself |
-| `bioetl-silver-reject-explorer` | top-level `Silver Reject Explorer` from `4. Data Quality` only |
+| `bioetl-control-plane-v1` | canonical navigation bus `0. Control Plane` from every primary dashboard except itself |
+| `bioetl-overview-v2` | canonical navigation bus `1. Overview` from every primary dashboard except itself |
+| `bioetl-runtime` | canonical navigation bus `2. Runtime` from every primary dashboard except itself |
+| `bioetl-provider-health-v2` | canonical navigation bus `3. Provider Health` from every primary dashboard except itself |
+| `bioetl-dq-v2` | canonical navigation bus `4. Data Quality` from every primary dashboard except itself |
+| `bioetl-workflow-overview` | canonical navigation bus `5. Workflow` from every primary dashboard except itself |
+| `bioetl-silver-reject-explorer` | canonical navigation bus `Silver Reject Explorer` from `4. Data Quality` only |
 
 ## Фильтрация
 
@@ -183,7 +183,7 @@ Panel-level dashboard handoffs и `First Action` dashboard CTAs намеренн
      severity и первое действие.
   1. **L1 cause narrowing:** раскройте collapsed rows `Reject / Pareto / Fields` и `Validation Diagnostics`, проверьте `Inspect: Top Silver Reject Reasons (Pareto)` / `Inspect: Top Silver Reject Fields` и связанные diagnostics.
   1. **L2 explorer:** откройте `Silver Reject Explorer` через top-level link в `4. Data Quality` для record-level списка, выбора `reason_code/field/run_id` и detail по `payload_hash`.
-  1. **L2 no-data gate:** считайте `0` rejects нормой только когда `First Action / No-Data Semantics` подтверждает конкретный pipeline, доступный Quarantine Explorer и ненулевой Bronze denominator; plugin errors, `unknown` pipeline или `bronze_records=0` остаются UNKNOWN.
+  1. **L2 no-data gate:** считайте `0` rejects нормой только когда `Review: First Action / No-Data Semantics` подтверждает конкретный pipeline, доступный Quarantine Explorer и ненулевой Bronze denominator; plugin errors, `unknown` pipeline или `bronze_records=0` остаются UNKNOWN.
   1. Используйте quarantine CLI для action-операций (`replay/resolve/purge`) и финального подтверждения remediation.
 - Эти панели отвечают на вопросы:
   - растёт ли объём `filtered_out`;
@@ -210,13 +210,18 @@ Primary dashboards MUST follow the canonical navigation contract in
 
 The top-level dashboard bus is:
 `0. Control Plane`, `1. Overview`, `2. Runtime`, `3. Provider Health`,
-`4. Data Quality`, `5. Workflow`. Each page shows all bus links except its own
-page. Any duplicate dashboard-to-dashboard link from one dashboard to the same
-target dashboard is forbidden.
+`4. Data Quality`, `5. Workflow`. Each page follows the usual omit-self rule
+for bus `0..5`, but sticky shortcuts `4. Data Quality` and
+`Silver Reject Explorer` may intentionally remain available on their own pages.
+The canonical shipped surface is navigation panel `id=1000`, so
+`dashboard.links[]` does not need to duplicate the same bus next to Grafana
+variables. Any duplicate dashboard-to-dashboard link from one dashboard to the
+same target dashboard is forbidden.
 
-`Explore Logs` and `Explore Traces` are available only on `2. Runtime` and
-`4. Data Quality`. `Silver Reject Explorer` is available only on
-`4. Data Quality`.
+Every shipped navigation panel `id=1000` also exposes sticky shortcuts
+`4. Data Quality`, `Explore Logs`, `Explore Traces`, and
+`Silver Reject Explorer`. These navigation-panel links open in the same window,
+not in a new tab.
 
 Variable handoff policy for dashboard links remains strict and bounded:
 

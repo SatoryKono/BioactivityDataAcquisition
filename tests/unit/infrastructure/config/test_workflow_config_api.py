@@ -65,11 +65,9 @@ def _write_yaml(path: Path, payload: dict[str, Any]) -> None:
 def test_resolve_workflow_config_path_uses_config_dir() -> None:
     config_dir = Path("configs/workflows")
 
-    result = resolve_workflow_config_path(
-        "example_activity_refresh", config_dir=config_dir
-    )
+    result = resolve_workflow_config_path("chembl_core", config_dir=config_dir)
 
-    assert result == config_dir / "example_activity_refresh.yaml"
+    assert result == config_dir / "chembl_core.yaml"
 
 
 @pytest.mark.unit

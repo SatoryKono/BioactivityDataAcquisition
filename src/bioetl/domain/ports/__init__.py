@@ -43,6 +43,9 @@ from bioetl.domain.ports.control_plane import (
     LineageStorePort,
     RunLedgerPort,
     RunManifestPort,
+    WorkflowExecutionStatePort,
+    WorkflowLedgerPort,
+    WorkflowManifestPort,
 )
 from bioetl.domain.ports.data_normalization import DataNormalizationPort
 from bioetl.domain.ports.data_source import (
@@ -57,6 +60,11 @@ from bioetl.domain.ports.export import (
     ExportWriterPort,
 )
 from bioetl.domain.ports.filtering import InputFilterPort
+from bioetl.domain.ports.workflow_foreign_key_reconciliation import (
+    ForeignKeyReconciliationPort,
+    ForeignKeyReconciliationRequest,
+    ForeignKeyReconciliationResult,
+)
 from bioetl.domain.ports.health_check import (
     HealthCheckPort,
     HealthCheckResult,
@@ -210,6 +218,9 @@ __all__ = [
     "IDMappingSourceReaderPort",
     "IdentifierResolverStrategy",
     "InputFilterPort",
+    "ForeignKeyReconciliationPort",
+    "ForeignKeyReconciliationRequest",
+    "ForeignKeyReconciliationResult",
     "JsonEncoderPort",
     "LineageStorePort",
     "LockPort",
@@ -244,6 +255,9 @@ __all__ = [
     "RegistryAccessorPort",
     "RunLedgerPort",
     "RunManifestPort",
+    "WorkflowExecutionStatePort",
+    "WorkflowLedgerPort",
+    "WorkflowManifestPort",
     "RunnablePort",
     "RunnerFactoryPort",
     "SettingsLoaderPort",

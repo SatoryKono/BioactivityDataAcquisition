@@ -34,6 +34,7 @@ _PUBLIC_COMMAND_MODULES = frozenset(
         "run_composite",
         "run_manifest",
         "vacuum",
+        "workflow",
     }
 )
 

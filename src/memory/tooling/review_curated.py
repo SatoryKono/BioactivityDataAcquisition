@@ -144,7 +144,10 @@ def _quality_reasons(metadata: dict[str, Any]) -> tuple[int, list[str]]:
 def _review_recommendation(current: str, reasons: list[str]) -> str:
     if "verification:stale" in reasons:
         return "review_or_archive"
-    if current == "keep" and any(reason.startswith("duplicate:") for reason in reasons):
+    review_prefixes = ("duplicate:", "source_refs:", "summary:")
+    if current == "keep" and any(
+        reason.startswith(review_prefixes) for reason in reasons
+    ):
         return "review"
     return current
 

@@ -87,7 +87,6 @@ def build_rag_manifests(root: Path) -> tuple[dict[str, Any], list[dict[str, Any]
     chunk_records: list[dict[str, Any]] = []
 
     for path in sources:
-        print(f"DEBUG: Processing file: {path.relative_to(root)}")
         rel_path = path.relative_to(root)
         rel_path_str = rel_path.as_posix()
         text = path.read_text(encoding="utf-8")

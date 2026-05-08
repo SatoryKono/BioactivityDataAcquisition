@@ -9,6 +9,7 @@ import pytest
 from tests.integration._grafana_test_support import (
     _collect_dashboard_links,
     _emit_sample_structured_log,
+    get_dashboard_navigation_links,
     get_dashboard_files,
     get_dashboard_panels,
     get_panel_expressions,
@@ -479,7 +480,7 @@ def _matching_cross_scope_links(
     source_dashboard: dict[str, object], *, to_uid: str, marker: str
 ) -> list[dict[str, object]]:
     matched_links: list[dict[str, object]] = []
-    for link in source_dashboard.get("links", []):
+    for link in get_dashboard_navigation_links(source_dashboard):
         if not isinstance(link, dict):
             continue
         url = link.get("url", "")
@@ -781,7 +782,7 @@ def test_cross_dashboard_links_pass_only_target_scoped_variables() -> None:
         assert isinstance(current_uid, str), (
             f"Dashboard {dashboard_path.name} must define a uid"
         )
-        dashboard_links = dashboard.get("links", [])
+        dashboard_links = get_dashboard_navigation_links(dashboard)
 
         for link in _collect_dashboard_links(dashboard):
             _assert_cross_dashboard_link_policy(
@@ -804,7 +805,7 @@ def test_dashboard_top_level_navigation_contract_by_uid() -> None:
 
         titles = {
             link.get("title")
-            for link in dashboard.get("links", [])
+            for link in get_dashboard_navigation_links(dashboard)
             if isinstance(link.get("title"), str)
         }
         missing = required_links - titles
@@ -847,7 +848,7 @@ def test_critical_top_level_links_follow_title_allowlist_and_scope_reset_suffix(
     )
     for dashboard_name in critical_dashboards:
         dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
-        for link in dashboard.get("links", []):
+        for link in get_dashboard_navigation_links(dashboard):
             title = str(link.get("title", ""))
             assert _TOP_LEVEL_LINK_TITLE_RE.match(title), (
                 f"{dashboard_name} contains non-conforming top-level link title: {title}"
@@ -1073,39 +1074,26 @@ def test_dashboard_links_forbid_universal_handoff_patterns() -> None:
 
     for dashboard_path in get_dashboard_files():
         dashboard = load_dashboard(dashboard_path)
+        navigation_links = get_dashboard_navigation_links(dashboard)
         for link in _collect_dashboard_links(dashboard):
             url = str(link.get("url", ""))
             assert not any(token in url for token in forbidden_tokens), (
                 f"{dashboard_path.name} link uses forbidden universal handoff pattern: {url}"
             )
 
-            if url.startswith("/d/") and link in dashboard.get("links", []):
+            if url.startswith("/d/") and link in navigation_links:
                 assert link.get("includeVars") is False, (
                     f"{dashboard_path.name} top-level cross-dashboard link must pin includeVars=false: {url}"
                 )
 
 
-def test_only_runtime_and_dq_dashboards_expose_explore_drilldown_links() -> None:
-    """Explore handoffs are intentionally limited to Runtime and Data Quality."""
-    expectations = {
-        "bioetl-dq-v2.json",
-        "bioetl-runtime.json",
-    }
-
+def test_navigation_dashboards_expose_explore_drilldown_links() -> None:
+    """Every shipped navigation panel should expose Logs and Traces drilldowns."""
     for dashboard_path in get_dashboard_files():
         dashboard_name = dashboard_path.name
         dashboard = load_dashboard(dashboard_path)
-        links = _collect_dashboard_links(dashboard)
+        links = get_dashboard_navigation_links(dashboard)
         urls = [link.get("url", "") for link in links]
-
-        if dashboard_name not in expectations:
-            assert not any("/a/grafana-lokiexplore-app/" in url for url in urls), (
-                f"{dashboard_name} must not expose Logs drilldown"
-            )
-            assert not any("/a/grafana-exploretraces-app/" in url for url in urls), (
-                f"{dashboard_name} must not expose Traces drilldown"
-            )
-            continue
 
         titles = {link.get("title") for link in links if link.get("title")}
         assert any("Logs" in title for title in titles), (
@@ -1141,31 +1129,48 @@ def test_only_runtime_and_dq_dashboards_expose_explore_drilldown_links() -> None
 
 
 def test_dashboard_bus_self_links_are_omitted() -> None:
-    """Canonical page dashboards must not link to themselves in top navigation."""
+    """Only sticky DQ/Silver shortcuts may self-link in canonical navigation."""
+    allowed_self_links = {
+        ("bioetl-dq-v2", "4. Data Quality"),
+        ("bioetl-silver-reject-explorer", "Silver Reject Explorer"),
+    }
     for dashboard_path in get_dashboard_files():
         dashboard = load_dashboard(dashboard_path)
         uid = dashboard.get("uid")
         assert isinstance(uid, str), f"{dashboard_path.name} must declare string uid"
 
-        for link in dashboard.get("links", []):
+        for link in get_dashboard_navigation_links(dashboard):
             url = str(link.get("url", ""))
-            assert _extract_dashboard_uid(url) != uid, (
-                f"{dashboard_path.name} must not expose top-level self-link: {url}"
+            title = str(link.get("title", ""))
+            if _extract_dashboard_uid(url) != uid:
+                continue
+            assert (uid, title) in allowed_self_links, (
+                f"{dashboard_path.name} must not expose unexpected top-level self-link: {url}"
             )
+
+
+def test_navigation_panel_html_links_open_in_same_window() -> None:
+    """Navigation panel id=1000 should not force a new browser tab."""
+    for dashboard_path in get_dashboard_files():
+        dashboard = load_dashboard(dashboard_path)
+        panel = next(
+            (item for item in dashboard.get("panels", []) if item.get("id") == 1000),
+            None,
+        )
+        assert panel is not None, f"{dashboard_path.name} must define navigation panel id=1000"
+        content = str((panel.get("options") or {}).get("content", ""))
+        assert 'target="_blank"' not in content, (
+            f"{dashboard_path.name} navigation panel must open links in the same window"
+        )
 
 
 def test_explore_links_use_drilldown_routes_and_time_range() -> None:
     """Explore links should target Drilldown apps and preserve current time range."""
-    expectations = (
-        "bioetl-dq-v2.json",
-        "bioetl-runtime.json",
-    )
-
-    for dashboard_name in expectations:
+    for dashboard_name in (path.name for path in get_dashboard_files()):
         dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
         drilldown_links = [
             link
-            for link in _collect_dashboard_links(dashboard)
+            for link in get_dashboard_navigation_links(dashboard)
             if _is_logs_drilldown_url(link.get("url", ""))
             or _is_traces_drilldown_url(link.get("url", ""))
         ]
@@ -1187,16 +1192,11 @@ def test_explore_links_use_drilldown_routes_and_time_range() -> None:
 
 def test_tempo_drilldown_routes_to_traces_drilldown_app() -> None:
     """Tempo drilldown links should route to Grafana Traces Drilldown app."""
-    expectations = (
-        "bioetl-dq-v2.json",
-        "bioetl-runtime.json",
-    )
-
-    for dashboard_name in expectations:
+    for dashboard_name in (path.name for path in get_dashboard_files()):
         dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
         tempo_links = [
             link
-            for link in _collect_dashboard_links(dashboard)
+            for link in get_dashboard_navigation_links(dashboard)
             if _is_traces_drilldown_url(link.get("url", ""))
         ]
         assert tempo_links, (
@@ -1213,16 +1213,11 @@ def test_tempo_drilldown_routes_to_traces_drilldown_app() -> None:
 
 def test_loki_drilldown_links_use_safe_bioetl_baseline_query() -> None:
     """Loki drilldown links should start from a low-cardinality baseline query."""
-    expectations = (
-        "bioetl-dq-v2.json",
-        "bioetl-runtime.json",
-    )
-
-    for dashboard_name in expectations:
+    for dashboard_name in (path.name for path in get_dashboard_files()):
         dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
         loki_links = [
             link
-            for link in _collect_dashboard_links(dashboard)
+            for link in get_dashboard_navigation_links(dashboard)
             if _is_logs_drilldown_url(link.get("url", ""))
         ]
         assert loki_links, f"{dashboard_name} must expose Loki drilldown links"
@@ -1240,15 +1235,18 @@ def test_loki_drilldown_links_use_safe_bioetl_baseline_query() -> None:
 def test_tempo_drilldown_links_are_contextual() -> None:
     """Tempo drilldown links should carry explicit TraceQL context."""
     pipeline_scoped = (
+        "bioetl-control-plane-v1.json",
         "bioetl-dq-v2.json",
+        "bioetl-overview-v2.json",
         "bioetl-runtime.json",
+        "bioetl-silver-reject-explorer.json",
     )
 
     for dashboard_name in pipeline_scoped:
         dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
         tempo_links = [
             link
-            for link in _collect_dashboard_links(dashboard)
+            for link in get_dashboard_navigation_links(dashboard)
             if _is_traces_drilldown_url(link.get("url", ""))
         ]
         assert tempo_links, f"{dashboard_name} must expose Tempo drilldown links"
@@ -1267,17 +1265,47 @@ def test_tempo_drilldown_links_are_contextual() -> None:
                 f"{dashboard_name} pipeline drilldown must not switch to provider-only scope"
             )
 
+    provider_dashboard = load_dashboard(
+        Path("grafana/dashboards/bioetl-provider-health-v2.json")
+    )
+    provider_links = [
+        link
+        for link in get_dashboard_navigation_links(provider_dashboard)
+        if _is_traces_drilldown_url(link.get("url", ""))
+    ]
+    assert provider_links, "bioetl-provider-health-v2.json must expose Tempo drilldown links"
+    for link in provider_links:
+        url = str(link.get("url", ""))
+        assert "queryType=traceqlSearch" in url
+        assert "bioetl.provider" in url, (
+            "bioetl-provider-health-v2.json Tempo drilldown must scope by provider"
+        )
+        assert "bioetl.pipeline" not in url and "bioetl.run_type" not in url, (
+            "bioetl-provider-health-v2.json Tempo drilldown must not use pipeline/run_type scope"
+        )
+
+    workflow_dashboard = load_dashboard(
+        Path("grafana/dashboards/bioetl-workflow-overview.json")
+    )
+    workflow_links = [
+        link
+        for link in get_dashboard_navigation_links(workflow_dashboard)
+        if _is_traces_drilldown_url(link.get("url", ""))
+    ]
+    assert workflow_links, "bioetl-workflow-overview.json must expose Tempo drilldown links"
+    for link in workflow_links:
+        url = str(link.get("url", ""))
+        assert "queryType=traceqlSearch" in url
+        assert "query=%7B%7D" in url or "query={}" in url, (
+            "bioetl-workflow-overview.json Tempo drilldown should use generic TraceQL scope"
+        )
+
 
 def test_explore_drilldown_links_disclose_tracing_profile_dependency() -> None:
     """Loki/Tempo drilldowns should warn that tracing profile is required."""
-    expectations = (
-        "bioetl-dq-v2.json",
-        "bioetl-runtime.json",
-    )
-
-    for dashboard_name in expectations:
+    for dashboard_name in (path.name for path in get_dashboard_files()):
         dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
-        for link in _collect_dashboard_links(dashboard):
+        for link in get_dashboard_navigation_links(dashboard):
             url = link.get("url", "")
             title = link.get("title", "")
             if not (_is_logs_drilldown_url(url) or _is_traces_drilldown_url(url)):
@@ -1299,16 +1327,11 @@ def test_loki_drilldown_uses_grafana_logs_drilldown_entrypoint() -> None:
     assert re.search(r'"provider"\s*:\s*"chembl"', sample_line)
     assert re.search(r'"stage"\s*:\s*"extract"', sample_line)
 
-    expectations = (
-        "bioetl-dq-v2.json",
-        "bioetl-runtime.json",
-    )
-
-    for dashboard_name in expectations:
+    for dashboard_name in (path.name for path in get_dashboard_files()):
         dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
         loki_links = [
             link
-            for link in _collect_dashboard_links(dashboard)
+            for link in get_dashboard_navigation_links(dashboard)
             if _is_logs_drilldown_url(link.get("url", ""))
         ]
         assert loki_links, (
@@ -1328,12 +1351,13 @@ def test_overview_and_runtime_dashboards_expose_data_quality_handoff() -> None:
 
     for dashboard_name in expectations:
         dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
+        navigation_links = get_dashboard_navigation_links(dashboard)
         titles = {
             link.get("title")
-            for link in dashboard.get("links", [])
+            for link in navigation_links
             if link.get("title")
         }
-        urls = [link.get("url", "") for link in dashboard.get("links", [])]
+        urls = [link.get("url", "") for link in navigation_links]
 
         assert "4. Data Quality" in titles, (
             f"{dashboard_name} must expose a Data Quality dashboard handoff"
@@ -1359,12 +1383,13 @@ def test_runtime_and_dq_dashboards_expose_control_plane_handoff() -> None:
 
     for dashboard_name in expectations:
         dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
+        navigation_links = get_dashboard_navigation_links(dashboard)
         titles = {
             link.get("title")
-            for link in dashboard.get("links", [])
+            for link in navigation_links
             if link.get("title")
         }
-        urls = [link.get("url", "") for link in dashboard.get("links", [])]
+        urls = [link.get("url", "") for link in navigation_links]
 
         assert "0. Control Plane" in titles, (
             f"{dashboard_name} must expose a Control Plane dashboard handoff"
@@ -1385,33 +1410,37 @@ def test_runtime_and_dq_dashboards_expose_control_plane_handoff() -> None:
         )
 
 
-def test_data_quality_dashboard_exposes_silver_reject_explorer_handoff() -> None:
-    """Data Quality dashboard should expose an explicit handoff to Silver explorer."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
-    links = dashboard.get("links", [])
-    titles = {link.get("title") for link in links if link.get("title")}
-    urls = [link.get("url", "") for link in links]
+def test_navigation_dashboards_expose_silver_reject_explorer_handoff() -> None:
+    """Every navigation panel should expose a Silver Reject Explorer handoff."""
+    for dashboard_name in (path.name for path in get_dashboard_files()):
+        dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
+        links = get_dashboard_navigation_links(dashboard)
+        titles = {link.get("title") for link in links if link.get("title")}
+        urls = [link.get("url", "") for link in links]
 
-    assert "Silver Reject Explorer" in titles, (
-        "Data Quality dashboard must expose a Silver Reject Explorer handoff"
-    )
-    assert any(url.startswith("/d/bioetl-silver-reject-explorer") for url in urls), (
-        "Data Quality handoff must target /d/bioetl-silver-reject-explorer"
-    )
+        assert "Silver Reject Explorer" in titles, (
+            f"{dashboard_name} must expose a Silver Reject Explorer handoff"
+        )
+        assert any(
+            url.startswith("/d/bioetl-silver-reject-explorer") for url in urls
+        ), f"{dashboard_name} handoff must target /d/bioetl-silver-reject-explorer"
+
+    dq_dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
+    dq_links = get_dashboard_navigation_links(dq_dashboard)
     silver_link = next(
         (
             link
-            for link in links
+            for link in dq_links
             if str(link.get("url", "")).startswith("/d/bioetl-silver-reject-explorer")
         ),
         None,
     )
-    assert silver_link is not None, "Silver Reject Explorer link must exist"
+    assert silver_link is not None, "Silver Reject Explorer link must exist on DQ"
     assert silver_link.get("includeVars") is False, (
         "Data Quality handoff must not pass Prometheus variables into "
         "Silver Reject Explorer"
     )
-    url = silver_link.get("url", "")
+    url = str(silver_link.get("url", ""))
     assert "var-pipeline=$pipeline" in url and "var-run_type=$run_type" in url, (
         "Data Quality handoff must pass only bounded explorer pipeline/run_type scope"
     )
@@ -1738,7 +1767,7 @@ def test_control_plane_provider_health_handoff_omits_adapter_fallback() -> None:
     link = next(
         (
             item
-            for item in dashboard.get("links", [])
+            for item in get_dashboard_navigation_links(dashboard)
             if item.get("title") == "3. Provider Health"
         ),
         None,
@@ -1850,6 +1879,8 @@ def test_runtime_contextual_handoffs_do_not_duplicate_top_level_dq_provider_link
 
     offenders = []
     for panel in get_dashboard_panels(dashboard):
+        if panel.get("id") == 1000:
+            continue
         for link in _iter_panel_data_links(panel) + list(panel.get("links") or []):
             url = str(link.get("url", ""))
             target_uid = _extract_dashboard_uid(url)
@@ -1905,7 +1936,10 @@ def test_silver_reject_explorer_record_level_panels_do_not_use_prometheus() -> N
     dashboard = load_dashboard(
         Path("grafana/dashboards/bioetl-silver-reject-explorer.json")
     )
-    expected_titles = {"Filtered Records Table", "Selected Record Details"}
+    expected_titles = {
+        "Inspect Filtered Records Table",
+        "Inspect Selected Record Details",
+    }
     panels = {
         panel.get("title"): panel
         for panel in get_dashboard_panels(dashboard)
@@ -1931,18 +1965,18 @@ def test_silver_reject_explorer_summary_panels_use_distinct_projections() -> Non
         for panel in get_dashboard_panels(dashboard)
         if panel.get("title")
         in {
-            "Filtered Records Total",
-            "Reject Rate vs Bronze",
-            "Run Scope Summary",
+            "Monitor Filtered Records Total",
+            "Track Reject Rate vs Bronze",
+            "Inspect Run Scope Summary",
         }
     }
     assert panel_map.keys() == {
-        "Filtered Records Total",
-        "Reject Rate vs Bronze",
-        "Run Scope Summary",
+        "Monitor Filtered Records Total",
+        "Track Reject Rate vs Bronze",
+        "Inspect Run Scope Summary",
     }, "Silver Reject Explorer must define all three scoped summary panels"
 
-    total_panel = panel_map["Filtered Records Total"]
+    total_panel = panel_map["Monitor Filtered Records Total"]
     total_transformations = total_panel.get("transformations", [])
     assert total_transformations, (
         "Filtered Records Total must project only total field, not full raw payload"
@@ -1964,7 +1998,7 @@ def test_silver_reject_explorer_summary_panels_use_distinct_projections() -> Non
     )
     assert total_options.get("excludeByName", {}).get("reject_ratio") is True
 
-    ratio_panel = panel_map["Reject Rate vs Bronze"]
+    ratio_panel = panel_map["Track Reject Rate vs Bronze"]
     ratio_transformations = ratio_panel.get("transformations", [])
     ratio_organize = next(
         (
@@ -1991,7 +2025,7 @@ def test_silver_reject_explorer_summary_panels_use_distinct_projections() -> Non
         if isinstance(override, dict)
     ), "Reject Rate vs Bronze must format reject_ratio as percentage"
 
-    summary_panel = panel_map["Run Scope Summary"]
+    summary_panel = panel_map["Inspect Run Scope Summary"]
     assert not summary_panel.get("transformations"), (
         "Run Scope Summary must remain full payload panel for forensic context"
     )
@@ -2008,7 +2042,7 @@ def test_silver_reject_explorer_selected_record_details_uses_safe_payload_filter
         (
             candidate
             for candidate in get_dashboard_panels(dashboard)
-            if candidate.get("title") == "Selected Record Details"
+            if candidate.get("title") == "Inspect Selected Record Details"
         ),
         None,
     )
@@ -2041,7 +2075,7 @@ def test_control_plane_dashboard_does_not_expose_top_level_runbook_link() -> Non
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
     assert all(
         str(link.get("url", "")).startswith("/d/")
-        for link in dashboard.get("links", [])
+        for link in get_dashboard_navigation_links(dashboard)
     ), "Control-plane top navigation must not mix dashboard bus links with runbooks"
 
 
@@ -2050,7 +2084,7 @@ def test_cross_dashboard_links_enforce_required_handoff_or_explicit_fallback() -
     for dashboard_path in get_dashboard_files():
         dashboard = load_dashboard(dashboard_path)
 
-        for link in dashboard.get("links", []):
+        for link in get_dashboard_navigation_links(dashboard):
             url = link.get("url", "")
             if not isinstance(url, str) or not url.startswith("/d/"):
                 continue
@@ -2082,7 +2116,7 @@ def test_provider_dashboard_exposes_single_runtime_link() -> None:
     dashboard = load_dashboard(
         Path("grafana/dashboards/bioetl-provider-health-v2.json")
     )
-    links = dashboard.get("links", [])
+    links = get_dashboard_navigation_links(dashboard)
 
     runtime_links = [
         link
@@ -2104,7 +2138,7 @@ def test_dashboard_links_do_not_default_run_type_to_unknown() -> None:
     """Missing run-type context must use Run Type=All, never unknown."""
     for dashboard_path in get_dashboard_files():
         dashboard = load_dashboard(dashboard_path)
-        links_json = json.dumps(dashboard.get("links", []))
+        links_json = json.dumps(get_dashboard_navigation_links(dashboard))
         assert "var-run_type=unknown" not in links_json, (
             f"{dashboard_path.name} must not link with Run Type=unknown"
         )
@@ -2182,7 +2216,7 @@ def test_provider_health_handoff_fail_closes_and_remembers_return_context() -> N
         dashboard = dashboards[source_uid]
         link = next(
             item
-            for item in dashboard.get("links", [])
+            for item in get_dashboard_navigation_links(dashboard)
             if _extract_dashboard_uid(str(item.get("url", "")))
             == "bioetl-provider-health-v2"
         )
@@ -2213,7 +2247,7 @@ def test_provider_health_handoff_fail_closes_and_remembers_return_context() -> N
     }:
         link = next(
             item
-            for item in provider_dashboard.get("links", [])
+            for item in get_dashboard_navigation_links(provider_dashboard)
             if _extract_dashboard_uid(str(item.get("url", ""))) == target_uid
         )
         url = str(link.get("url", ""))

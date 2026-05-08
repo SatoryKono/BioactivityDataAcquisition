@@ -18,6 +18,11 @@ def _build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Emit validation results as JSON.",
     )
+    parser.add_argument(
+        "--include-working-tree-junk",
+        action="store_true",
+        help="Also fail on untracked Python cache files below src/memory.",
+    )
     return parser
 
 
@@ -28,7 +33,9 @@ def _format_issue(issue: ValidationIssue) -> dict[str, str]:
 def main(argv: list[str] | None = None) -> int:
     parser = _build_parser()
     args = parser.parse_args(argv)
-    issues = validate_memory_scaffold()
+    issues = validate_memory_scaffold(
+        include_working_tree_junk=args.include_working_tree_junk
+    )
 
     if args.json:
         payload: dict[str, Any] = {

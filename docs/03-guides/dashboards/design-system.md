@@ -46,6 +46,20 @@
   2. `{ "color": "orange", "value": 1 }`
   3. `{ "color": "red", "value": 2 }`
 
+Для current-status `stat`-панелей на first screen:
+
+- `options.colorMode = background`
+- explicit value mapping MUST exist for operator-facing enums:
+  - `0 -> OK`
+  - `1 -> WARN`
+  - `2 -> CRIT`
+  - `null -> UNKNOWN`
+
+Это правило применяется к severity-adapter поверхностям, которые отвечают на
+главный operator question dashboard-а. Оно не распространяется автоматически на
+raw-state diagnostic surfaces с собственной доменной семантикой (`HEALTHY /
+DEGRADED / FAILING`, `CLOSED / HALF-OPEN / OPEN`) или на range-evidence cards.
+
 Нормативная интерпретация:
 
 - `0` → OK
@@ -125,6 +139,9 @@ Decision matrix:
 Normative rules:
 - First-screen current-status panels MUST NOT use `$__range`.
 - Range panels MUST include selected-range wording in title or description.
+- Top-level `gridPos` rectangles in a shipped dashboard MUST NOT overlap;
+  navigation, scope, first-action, current-status, range evidence, and collapsed
+  rows must occupy explicit non-overlapping grid bands.
 - `or vector(0)` is allowed only for event-count panels where missing series
   means zero events; status panels preserve `UNKNOWN`.
 - Deep details (`run_id`, `payload_hash`, record-level tables) MUST NOT appear
@@ -150,6 +167,10 @@ uv run python -m scripts.engineering.qa check-dashboard-visual-semantics
 - color mode = `thresholds`
 - стандартизованные threshold steps
 - обязательный `UNKNOWN` mapping для `null`
+- отсутствие top-level `gridPos` overlaps в
+  `tests/integration/test_grafana_dashboard_first_screen_contract.py`
+- `background` colorMode + explicit `OK/WARN/CRIT` value mappings для
+  designated current-status severity stat panels
 
 ## 7) UI-лексика навигации (обязательно)
 

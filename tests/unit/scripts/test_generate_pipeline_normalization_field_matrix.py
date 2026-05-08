@@ -209,7 +209,7 @@ def _assert_assay_parameter_rows(rows: list[dict[str, str]]) -> None:
         "configs/vocab/chembl_controlled.yaml"
     )
     assert assay_parameter_type["strictness"] == "normalization_only"
-    assert assay_parameter_type["dq_coverage"] == "pattern:error"
+    assert assay_parameter_type["dq_coverage"] == "enum:error"
 
     assay_parameter_type_raw = _row(rows, "chembl_assay_parameters", "type_raw")
     assert assay_parameter_type_raw["normalizer"] == "normalize_profile_text"

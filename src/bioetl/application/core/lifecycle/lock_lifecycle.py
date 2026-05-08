@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import time
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING, Protocol, cast
 
 from bioetl.application.core.lifecycle.shutdown import PipelineShutdownError
 
@@ -28,11 +28,17 @@ class _HeartbeatFactoryProtocol(Protocol):
     ) -> _HeartbeatTaskProtocol: ...
 
 
+class _LockContextHolderProtocol(Protocol):
+    def set(self, context: object) -> None: ...
+
+    def clear(self) -> None: ...
+
+
 class _LockRuntimeHostProtocol(Protocol):
     _lock: object
     _config: object
     _run_id: object
-    _context_holder: object | None
+    _context_holder: _LockContextHolderProtocol | None
     _logger: object
     _heartbeat_factory: _HeartbeatFactoryProtocol
     _shutdown_signal: object
@@ -106,7 +112,8 @@ async def release_lock(host: _LockRuntimeHostProtocol) -> None:
 
 async def start_heartbeat(host: _LockRuntimeHostProtocol) -> None:
     """Start the background heartbeat task for the acquired lock."""
-    host._heartbeat = host._heartbeat_factory(
+    heartbeat_factory = cast(_HeartbeatFactoryProtocol, host._heartbeat_factory)
+    host._heartbeat = heartbeat_factory(
         lock_port=host._lock,
         lock_key=host._config.lock_key,
         owner_id=host._run_id,

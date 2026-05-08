@@ -34,7 +34,13 @@ def _extract_variables(payload: dict) -> list[str]:
 
 
 def _extract_link_uids(payload: dict) -> list[str]:
-    links = payload.get("links", [])
+    links = list(payload.get("links", []))
+    for panel in payload.get("panels", []):
+        if panel.get("id") != 1000:
+            continue
+        panel_links = panel.get("links", [])
+        if isinstance(panel_links, list):
+            links.extend(link for link in panel_links if isinstance(link, dict))
     discovered: set[str] = set()
     for link in links:
         url = str(link.get("url", ""))

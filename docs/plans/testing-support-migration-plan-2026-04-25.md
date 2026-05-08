@@ -1,6 +1,6 @@
 Этап 1
 Изучи правила работы с Grafana dashboards в этом репозитории и проведи исчерпывающий аудит дашборда 
-“ BioETL 4. provider-health ”.
+Silver Reject Explorer, Explore Logs и Explore Traces,.
 
   Перед аудитом:
   1. Выполни обязательный runtime-контекст из AGENTS.md: прочитай memory/docs policy и запусти pre-task workflow.

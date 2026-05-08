@@ -2,13 +2,18 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable, Mapping
+from collections.abc import Awaitable, Callable, Mapping
 from dataclasses import dataclass
-from inspect import isawaitable
+from inspect import isawaitable, signature
 from time import perf_counter
 from typing import TYPE_CHECKING
 
-from bioetl.application.workflow.transforms import WorkflowTransformRegistry
+from bioetl.application.workflow.transforms import (
+    WorkflowTransformCallable,
+    WorkflowTransformDestructiveCommit,
+    WorkflowTransformRegistry,
+    WorkflowTransformRuntimeContext,
+)
 from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.workflow import TransformStepConfig, WorkflowTransformSpec
 
@@ -62,6 +67,9 @@ class WorkflowTransformService:
         step: TransformStepConfig,
         upstream_outputs: Mapping[str, object] | None = None,
         completed_fingerprints: Mapping[str, str] | None = None,
+        destructive_commit_callback: (
+            Callable[[WorkflowTransformDestructiveCommit], None] | None
+        ) = None,
     ) -> WorkflowTransformExecutionResult:
         """Execute or skip a transform step according to its fingerprint."""
         spec = WorkflowTransformSpec.from_step(step)
@@ -85,7 +93,15 @@ class WorkflowTransformService:
         started = self.monotonic()
         try:
             executor = self.registry.get(step.transform_name)
-            output = executor(spec, upstream_outputs or {})
+            runtime_context = WorkflowTransformRuntimeContext(
+                destructive_commit_callback=destructive_commit_callback
+            )
+            output = _invoke_transform_executor(
+                executor,
+                spec=spec,
+                upstream_outputs=upstream_outputs or {},
+                runtime_context=runtime_context,
+            )
             if isawaitable(output):
                 output = await output
         except _WORKFLOW_TRANSFORM_FAILURES as exc:
@@ -145,3 +161,15 @@ def should_skip_transform_step(
     if not completed_fingerprints:
         return False
     return completed_fingerprints.get(spec.step_id) == spec.fingerprint
+
+
+def _invoke_transform_executor(
+    executor: WorkflowTransformCallable,
+    *,
+    spec: WorkflowTransformSpec,
+    upstream_outputs: Mapping[str, object],
+    runtime_context: WorkflowTransformRuntimeContext,
+) -> object | Awaitable[object]:
+    if len(signature(executor).parameters) >= 3:
+        return executor(spec, upstream_outputs, runtime_context)
+    return executor(spec, upstream_outputs)

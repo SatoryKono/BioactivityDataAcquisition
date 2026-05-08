@@ -48,7 +48,7 @@ for published contracts, CLI surfaces, and specs.
 - [Running Pipelines](running-pipelines.md): execution, run types, resume,
   cached bronze, and control-plane inspection commands.
 - [Workflows](workflows.md): declarative workflow object model, step identity,
-  DAG semantics, and planned workflow control-plane split.
+  DAG semantics, built-in transforms, and shipped workflow control-plane split.
 - [Docs Verification](docs-verification.md): published docs checks, strict
   build flow, mixed-environment notes, and recurring documentation audit
   checklist.

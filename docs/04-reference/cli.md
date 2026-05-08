@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-04-28'
+  Last verified: '2026-05-08'
 
 ______________________________________________________________________
 
@@ -17,7 +17,7 @@ BioETL command-line interface (CLI) - основной способ взаимо
 Построен на фреймворке **Click** для стабильности и расширяемости.
 
 **Версия:** 6.1.2
-**Дата обновления:** 2026-04-29
+**Дата обновления:** 2026-05-08
 **Статус покрытия:** published command and operator surface
 
 ______________________________________________________________________
@@ -45,6 +45,68 @@ bioetl run --help
 ______________________________________________________________________
 
 ## Команды
+
+### `workflow` — Декларативные workflow DAG
+
+Bounded Phase1 surface для workflow YAML из `configs/workflows/`.
+
+**Синтаксис:**
+
+```bash
+bioetl workflow run <NAME> [OPTIONS]
+bioetl workflow status <NAME> [OPTIONS]
+```
+
+**Подкоманды:**
+
+| Подкоманда | Назначение |
+| --- | --- |
+| `run` | Последовательно выполняет declarative workflow через workflow manifest / ledger / execution-state control plane |
+| `status` | Показывает durable workflow status when persisted state exists, otherwise falls back to bounded topology |
+
+**`workflow run` опции:**
+
+| Опция | Описание |
+| --- | --- |
+| `--dry-run` | Включить dry-run для pipeline steps |
+| `--only-steps a,b` | Выполнить только указанные шаги и их обязательные зависимости |
+| `--run-type` | Override для `incremental`, `backfill`, `rebuild` |
+| `--resume-last` | Возобновить последний `failed` или `incomplete` workflow run с тем же execution fingerprint |
+| `--force-steps a,b` | Явно форсировать указанные шаги при resume вместо обычного skip поведения |
+| `--repair-steps a,b` | Явно пометить шаги как repair path для destructive ambiguity recovery |
+
+**`workflow status` опции:**
+
+| Опция | Описание |
+| --- | --- |
+| `--only-steps a,b` | Показать только указанные шаги и их обязательные зависимости |
+| `--format text|json|yaml` | Формат вывода |
+| `--run-id` | Показать persisted status для конкретного `workflow_run_id` |
+
+**Published поведение:**
+
+- `workflow run` создаёт immutable workflow manifest до начала исполнения.
+- `workflow run` пишет append-only workflow ledger events and mutable
+  workflow execution state.
+- `workflow status` использует persisted workflow state, если он существует;
+  если нет, команда честно возвращает bounded topology-only surface.
+- `--resume-last` использует semantic `execution_fingerprint`, а не только имя workflow.
+- destructive ambiguity recovery не делает silent replay: при `repair_required`
+  оператор должен использовать `--repair-steps` или `--force-steps`.
+
+**Примеры:**
+
+```bash
+bioetl workflow run chembl_core --dry-run
+bioetl workflow run chembl_core --only-steps summarize_core_extracts
+bioetl workflow run chembl_core --resume-last
+bioetl workflow run chembl_core --resume-last --repair-steps reconcile_assay_target_orphans
+bioetl workflow status chembl_core
+bioetl workflow status chembl_core --run-id 00000000-0000-0000-0000-000000000111
+bioetl workflow status chembl_core --format json
+```
+
+______________________________________________________________________
 
 ### `run` — Запуск одного пайплайна
 

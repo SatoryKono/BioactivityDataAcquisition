@@ -138,6 +138,16 @@ async def test_workflow_runner_executes_pipeline_then_transform() -> None:
         1,
         {"workflow": "activity_workflow", "status": "success"},
     )
+    assert any(
+        name == "bioetl_workflow_step_duration_seconds"
+        and labels
+        == {
+            "workflow": "activity_workflow",
+            "step_kind": "pipeline",
+            "status": "success",
+        }
+        for name, _value, labels in metrics.histograms
+    )
 
 
 @pytest.mark.asyncio
@@ -174,3 +184,89 @@ async def test_workflow_runner_returns_failed_step_result_for_pipeline_error() -
         1,
         {"workflow": "activity_workflow", "status": "failed"},
     )
+
+
+@pytest.mark.asyncio
+async def test_workflow_runner_marks_downstream_steps_skipped_after_failure() -> None:
+    metrics = _RecordingMetrics()
+    service = WorkflowRunnerService(
+        pipeline_runner=_FailingPipelineRunner(),  # type: ignore[arg-type]
+        transform_service=WorkflowTransformService(
+            registry=WorkflowTransformRegistry(),
+            metrics=metrics,
+            monotonic=iter([1.0, 1.2]).__next__,
+        ),
+        metrics=metrics,
+        monotonic=iter([5.0, 5.3]).__next__,
+    )
+    config = WorkflowConfig(
+        name="activity_workflow",
+        steps=(
+            WorkflowStepConfig(
+                step_id="extract",
+                pipeline_name="chembl_activity",
+                run_options=WorkflowRunOptionsConfig(limit=25),
+            ),
+            TransformStepConfig(
+                step_id="normalize",
+                transform_name="normalize_activity",
+                depends_on=("extract",),
+            ),
+        ),
+    )
+
+    result = await service.run_workflow(config)
+
+    assert result.status == "failed"
+    assert [step.status for step in result.steps] == ["failed", "skipped"]
+    assert result.steps[1].error_type == "UpstreamStepFailed"
+    assert "extract" in (result.steps[1].error_message or "")
+    assert (
+        "bioetl_workflow_step_events_total",
+        1,
+        {
+            "workflow": "activity_workflow",
+            "step_kind": "transform",
+            "status": "skipped",
+        },
+    ) in metrics.counters
+
+
+@pytest.mark.asyncio
+async def test_workflow_runner_skips_completed_steps_on_resume() -> None:
+    metrics = _RecordingMetrics()
+    pipeline_runner = _PipelineRunner()
+    service = WorkflowRunnerService(
+        pipeline_runner=pipeline_runner,  # type: ignore[arg-type]
+        transform_service=WorkflowTransformService(
+            registry=WorkflowTransformRegistry(),
+            metrics=metrics,
+        ),
+        metrics=metrics,
+    )
+    config = WorkflowConfig(
+        name="activity_workflow",
+        steps=(
+            WorkflowStepConfig(
+                step_id="extract",
+                pipeline_name="chembl_activity",
+                run_options=WorkflowRunOptionsConfig(limit=25),
+            ),
+            WorkflowStepConfig(
+                step_id="enrich",
+                pipeline_name="chembl_assay",
+                depends_on=("extract",),
+            ),
+        ),
+    )
+
+    result = await service.run_workflow(
+        config,
+        completed_step_ids=frozenset({"extract"}),
+    )
+
+    assert result.status == "success"
+    assert [step.status for step in result.steps] == ["skipped", "success"]
+    assert result.steps[0].error_type == "AlreadyCompletedOnResume"
+    assert len(pipeline_runner.calls) == 1
+    assert pipeline_runner.calls[0][0] == "chembl_assay"

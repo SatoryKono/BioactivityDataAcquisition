@@ -31,14 +31,22 @@ Grafana dashboards в BioETL.
 
 - `0. Control Plane`, `1. Overview`, `2. Runtime`, `3. Provider Health`,
   `4. Data Quality`, `5. Workflow` — единая top-level шина.
-- На каждой странице шина показывает все пункты `0..5`, кроме текущей страницы.
+- На каждой странице шина показывает bus `0..5` с обычным omit-self правилом,
+  но sticky shortcuts `4. Data Quality` и `Silver Reject Explorer` могут
+  intentionally оставаться доступны даже на своих own pages.
+- Каноническая surface этой шины — navigation panel `id=1000`. Root
+  `dashboard.links[]` MAY be empty, если те же handoff already shipped через
+  panel `id=1000` и header row рядом с Grafana variables не должен дублировать
+  bus links.
 - Любые дубли dashboard-to-dashboard links из одного dashboard в один target
   dashboard запрещены, если только machine-readable contract в
   `contracts/navigation-links.yaml` явно не требует repeated panel-level CTAs
   для critical surfaces.
-- `Explore Logs` и `Explore Traces` доступны только на `2. Runtime` и
-  `4. Data Quality`.
-- `Silver Reject Explorer` доступен только на `4. Data Quality`.
+- Во всех shipped navigation panels `id=1000` должны присутствовать sticky
+  shortcuts `4. Data Quality`, `Explore Logs`, `Explore Traces`,
+  `Silver Reject Explorer`, even when some of them are self-links.
+- Navigation panel links MUST open in the same window; do not ship
+  `target="_blank"` in panel `id=1000` HTML.
 - `1. Overview` intentionally ships with `Pipeline=All` / `Run Type=All` as its
   default entry scope.
 - Во всех остальных pipeline/provider dashboards `$pipeline` и `$provider`
@@ -161,6 +169,8 @@ uv run python -m pytest -q tests/integration/test_grafana_config.py
 - [ ] Для всех `stat`/`gauge` панелей используется единый `color.mode=thresholds`.
 - [ ] Для enum/status-панелей `stat`/`gauge` используется canonical `thresholds.steps`: green/null, orange/1, red/2; domain/policy gauges MAY use real-unit thresholds (`seconds`, ratios, tokens) when they match operator semantics.
 - [ ] Для всех status-панелей задано единое no-data поведение: `null -> UNKNOWN (gray)`.
+- [ ] Для first-screen current-status severity `stat` panels используется `options.colorMode=background`; range evidence и raw-state diagnostic panels не форсируются в этот стиль автоматически.
+- [ ] Для first-screen current-status severity `stat` panels заданы explicit value mappings `0=OK`, `1=WARN`, `2=CRIT`, `null=UNKNOWN`.
 - [ ] Для терминов статусов применяется единая таблица mapping из `docs/03-guides/dashboards/design-system.md` (раздел **1.1 Canonical mapping: L0 vs diagnostic dashboards**).
 - [ ] В L0 dashboards используется только `OK/WARN/CRIT/UNKNOWN`; alias-термины (`DEGRADED/BROKEN/HEALTHY`) допустимы только в диагностических deep-dive поверхностях и с явным alias mapping в description.
 - [ ] Заголовки и описания новых панелей соответствуют шаблонам из design system.

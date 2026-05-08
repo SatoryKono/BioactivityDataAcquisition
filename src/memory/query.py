@@ -10,6 +10,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from memory.artifact_readiness import rag_chunks_ready, timeline_events_ready
 from memory.graph import query as graph_query
 from memory.graph.importers.expanded_json import (
     default_expanded_graph_path,
@@ -275,14 +276,14 @@ def _resolve_query_paths(
     require_chunks: bool = True,
     require_events: bool = True,
 ) -> tuple[Path, Path, Path | None, dict[str, Any] | None]:
-    chunks_ready = chunks_path.exists() or not require_chunks
-    events_ready = events_dir.exists() or not require_events
+    chunks_ready = not require_chunks or rag_chunks_ready(chunks_path)
+    events_ready = not require_events or timeline_events_ready(events_dir)
     if chunks_ready and events_ready:
         return chunks_path, events_dir, None, None
     if not auto_refresh:
-        if require_chunks and not chunks_path.exists():
+        if require_chunks and not rag_chunks_ready(chunks_path):
             raise _missing_manifest_error(chunks_path, "RAG chunk manifest")
-        raise _missing_manifest_error(events_dir, "timeline events directory")
+        raise _missing_manifest_error(events_dir, "timeline event projections")
 
     output_root, report = _refresh_query_artifacts(
         refresh_output_root=refresh_output_root,

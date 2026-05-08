@@ -5,6 +5,9 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
+
+import memory.query as query_module
 from memory.query import (
     RagQueryOptions,
     _emit,
@@ -428,6 +431,105 @@ def test_query_all_auto_refreshes_missing_rebuild_only_artifacts(
     assert payload["refresh_report"]["ok"] is True
     assert len(payload["results"]["rag"]) >= 1
     assert any(item["source_type"] == "workflow" for item in payload["results"]["rag"])
+
+
+def test_query_timeline_auto_refreshes_empty_event_projection_dir(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    events_dir = tmp_path / "events"
+    events_dir.mkdir()
+    (events_dir / "README.md").write_text("Timeline projections live here.\n")
+    refresh_calls: list[Path] = []
+
+    def _fake_refresh_all(
+        root: Path,
+        output_root: Path,
+        *,
+        include_rag: bool = True,
+        include_timeline: bool = True,
+        include_graph_export: bool = False,
+    ) -> dict[str, object]:
+        refresh_calls.append(output_root)
+        refreshed_events = output_root / "timeline" / "events"
+        refreshed_events.mkdir(parents=True, exist_ok=True)
+        (refreshed_events / "runs.jsonl").write_text(
+            json.dumps(
+                {
+                    "id": "run-1",
+                    "event_type": "run.completed",
+                    "event_family": "run",
+                    "severity": "info",
+                    "occurred_at": "2026-04-20T00:00:00Z",
+                    "source_refs": ["data/output/control/run_manifest/m1.json"],
+                    "payload": {"pipeline_name": "memory"},
+                },
+                sort_keys=True,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+        return {"ok": True, "artifacts": [{"kind": "timeline"}]}
+
+    monkeypatch.setattr(query_module, "refresh_all", _fake_refresh_all)
+
+    payload = query_timeline(
+        query="memory",
+        event_family=None,
+        event_type=None,
+        events_dir=events_dir,
+        limit=5,
+        auto_refresh=True,
+        refresh_output_root=tmp_path / "refresh",
+        refresh_repo_root=tmp_path,
+    )
+
+    assert refresh_calls == [tmp_path / "refresh"]
+    assert payload["refresh_output_root"] == str(tmp_path / "refresh")
+    assert len(payload["results"]) == 1
+
+
+def test_query_timeline_reports_empty_event_projection_dir_without_auto_refresh(
+    tmp_path: Path,
+) -> None:
+    events_dir = tmp_path / "events"
+    events_dir.mkdir()
+    (events_dir / "README.md").write_text("Timeline projections live here.\n")
+
+    with pytest.raises(FileNotFoundError, match="timeline event projections"):
+        query_timeline(
+            query="memory",
+            event_family=None,
+            event_type=None,
+            events_dir=events_dir,
+        )
+
+
+def test_query_all_auto_refresh_json_mode_keeps_stdout_clean(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    (tmp_path / "docs/00-project").mkdir(parents=True)
+    (tmp_path / "docs/00-project/overview.md").write_text(
+        "# Memory Overview\nMemory retrieval context.\n",
+        encoding="utf-8",
+    )
+    (tmp_path / ".github/workflows").mkdir(parents=True)
+    (tmp_path / ".github/workflows/tests.yml").write_text(
+        "name: Tests\njobs:\n  memory-tests:\n    runs-on: ubuntu-latest\n",
+        encoding="utf-8",
+    )
+
+    payload = query_all(
+        query="memory",
+        chunks_path=tmp_path / "missing" / "chunks.jsonl",
+        events_dir=tmp_path / "missing" / "events",
+        limit=5,
+        auto_refresh=True,
+        refresh_output_root=tmp_path / "memory-refresh",
+        refresh_repo_root=tmp_path,
+    )
+
+    assert payload["refresh_report"]["ok"] is True
+    assert capsys.readouterr().out == ""
 
 
 def test_query_file_refs_reads_generated_relation_index(tmp_path: Path) -> None:

@@ -48,6 +48,9 @@ _LAZY_EXPORTS = {
     "GoldWriter": "bioetl.infrastructure.storage.gold_writer",
     "RetentionPolicy": "bioetl.infrastructure.storage.support.retention",
     "SilverWriter": "bioetl.infrastructure.storage.silver_writer",
+    "SilverForeignKeyReconciliationAdapter": (
+        "bioetl.infrastructure.storage.workflow_foreign_key_reconciliation"
+    ),
 }
 
 
@@ -72,6 +75,7 @@ __all__ = [
     "MergeConflictError",
     "RetentionPolicy",
     "SchemaViolationError",
+    "SilverForeignKeyReconciliationAdapter",
     "SilverWriter",
     "StorageError",
     "TableNotFoundError",

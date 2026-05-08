@@ -8,8 +8,15 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
+from memory.artifact_readiness import rag_chunks_ready, timeline_events_ready
 from memory.notes import slugify, utc_now_iso, write_markdown_note
-from memory.query import DEFAULT_RAG_CHUNKS, DEFAULT_TIMELINE_DIR, query_all
+from memory.query import (
+    DEFAULT_PROFILE,
+    DEFAULT_RAG_CHUNKS,
+    DEFAULT_TIMELINE_DIR,
+    TASK_PROFILES,
+    query_all,
+)
 from memory.resources import discover_memory_root, discover_repo_root
 from memory.tooling.promote_note import promote_note
 from memory.tooling.prune import prune_episodic_notes
@@ -124,7 +131,9 @@ def _resolve_pre_task_surfaces(
     )
     if not run_refresh_if_missing:
         return resolved_chunks_path, resolved_events_dir, output_root, None
-    if resolved_chunks_path.exists() and resolved_events_dir.exists():
+    if rag_chunks_ready(resolved_chunks_path) and timeline_events_ready(
+        resolved_events_dir
+    ):
         return resolved_chunks_path, resolved_events_dir, output_root, None
 
     output_root, resolved_chunks_path, resolved_events_dir, refresh_report = (
@@ -150,6 +159,7 @@ def pre_task_workflow(
     refresh_repo_root: Path | None = None,
     run_refresh_if_missing: bool = True,
     limit: int = 10,
+    profile: str = DEFAULT_PROFILE,
 ) -> dict[str, Any]:
     """Run the standard pre-task memory flow."""
     retrieval_query = query or title
@@ -168,6 +178,7 @@ def pre_task_workflow(
         chunks_path=resolved_chunks_path,
         events_dir=resolved_events_dir,
         limit=limit,
+        profile=profile,
     )
     session_path: Path | None = None
     if create_session_note:
@@ -326,6 +337,9 @@ def _build_parser() -> argparse.ArgumentParser:
     pre_parser.add_argument("--refresh-output-root", type=Path, default=None)
     pre_parser.add_argument("--skip-refresh-if-missing", action="store_true")
     pre_parser.add_argument("--limit", type=int, default=10)
+    pre_parser.add_argument(
+        "--profile", choices=tuple(TASK_PROFILES.keys()), default=DEFAULT_PROFILE
+    )
     pre_parser.add_argument("--skip-session-note", action="store_true")
     pre_parser.add_argument("--json", action="store_true")
 
@@ -400,6 +414,7 @@ def main(argv: list[str] | None = None) -> int:
             refresh_output_root=args.refresh_output_root,
             run_refresh_if_missing=not args.skip_refresh_if_missing,
             limit=args.limit,
+            profile=args.profile,
         )
         return _emit(payload, as_json=args.json)
 

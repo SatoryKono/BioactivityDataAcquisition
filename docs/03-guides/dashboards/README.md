@@ -40,12 +40,19 @@ ______________________________________________________________________
 
 - `0. Control Plane`, `1. Overview`, `2. Runtime`, `3. Provider Health`,
   `4. Data Quality`, `5. Workflow` образуют единую top-level шину.
-- На каждой странице шина показывает все пункты `0..5`, кроме текущей страницы.
+- На каждой странице шина показывает bus `0..5` с обычным omit-self правилом,
+  но sticky shortcuts `4. Data Quality` и `Silver Reject Explorer` могут
+  intentionally оставаться доступны даже на своих own pages.
+- Каноническая shipped surface этой шины — text navigation panel `id=1000`;
+  root `dashboard.links[]` не обязаны дублировать те же handoff в header row
+  рядом с Grafana variables.
 - Любые дублирующие dashboard-to-dashboard ссылки из одного dashboard в один
   target dashboard запрещены: переход должен быть ровно один.
-- `Explore Logs` и `Explore Traces` доступны только на `2. Runtime` и
-  `4. Data Quality`.
-- `Silver Reject Explorer` доступен только на `4. Data Quality`.
+- Во всех shipped navigation panels `id=1000` закреплены sticky shortcuts:
+  `4. Data Quality`, `Explore Logs`, `Explore Traces`,
+  `Silver Reject Explorer`.
+- Navigation panel links intentionally открываются в том же окне, а не в новой
+  вкладке.
 - Переходы pipeline-scoped dashboards -> `3. Provider Health` сохраняют
   `pipeline_context=$pipeline`, но fail-close'ятся к `provider=unknown`; если у
   source dashboard нет adapter context, `adapter` не передаётся, а target

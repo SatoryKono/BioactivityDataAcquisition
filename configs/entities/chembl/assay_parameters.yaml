@@ -84,10 +84,36 @@ quality:
     nullable: false
     error_message: assay_id must match CHEMBL format
   - field: type
-    type: pattern
-    pattern: ^.{1,100}$
+    type: enum
+    allowed:
+    - IC50
+    - EC50
+    - Ki
+    - Kd
+    - AC50
+    - GI50
+    - Potency
+    - Inhibition
+    - '% Inhibition'
+    - Activity
+    - Ratio
+    - ED50
+    - ID50
+    - CONC
+    - PH
+    - TEMP
+    - TIME
+    - DOSE
+    - VOLUME
+    - WAVELENGTH
+    - PERCENT
+    - PRESSURE
+    - HUMIDITY
+    - CELL_COUNT
+    - CELL_DENSITY
+    - SERUM
     nullable: false
-    error_message: Parameter type is required
+    error_message: Invalid assay parameter type value
   - field: type_raw
     type: pattern
     pattern: ^.{1,100}$

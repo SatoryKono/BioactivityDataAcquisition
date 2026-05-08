@@ -39,6 +39,7 @@ python -m memory.tooling.workflow pre-task \
   --task-id chembl-memory-audit \
   --title "Audit chembl activity ownership" \
   --query chembl_activity \
+  --profile audit \
   --source-ref docs/plans/project-memory-layer-implementation-plan-2026-04-20.md \
   --json
 ```
@@ -47,8 +48,11 @@ What it does:
 
 - runs local retrieval through `memory.query all`
 - auto-refreshes rebuild-only RAG and timeline artifacts if manifests are
-  missing
+  missing or if the timeline directory has no generated `*.jsonl` projections
 - creates an episodic session note in `src/memory/episodic/sessions/`
+
+Use `--profile` to align ranking with the task type: `general`,
+`architecture`, `implementation`, `operations`, or `audit`.
 
 Use `--skip-session-note` if the task should not create a working note.
 
@@ -86,7 +90,9 @@ python -m memory.query all chembl_activity --profile architecture --auto-refresh
 
 Use `--auto-refresh` when rebuild-only RAG, timeline, or file-relation artifacts
 are absent and you want a temporary query-local refresh instead of writing
-generated manifests under `src/memory/`.
+generated manifests under `src/memory/`. Timeline directories that contain only
+placeholder files are treated as not ready and will refresh when
+`--auto-refresh` is enabled.
 
 Use `module-impact` or `module-neighborhood` when the useful boundary is a
 Python module import relationship; use `impact` or `neighborhood` when the
@@ -112,6 +118,11 @@ What it does:
 - validates the memory subsystem
 - refreshes rebuild-only RAG and timeline artifacts into a temporary output root
 - optionally runs episodic prune in dry-run mode
+
+Use `python -m memory.tooling.prune --max-active <N> --json` when you need an
+explicit density report for active episodic notes. Use
+`python -m memory.tooling.validate --include-working-tree-junk` when local
+Python cache files under `src/memory/` should fail validation.
 
 If the outcome is durable, promote the summary:
 

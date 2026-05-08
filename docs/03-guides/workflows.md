@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-05-07'
+  Last verified: '2026-05-08'
 
 ______________________________________________________________________
 
@@ -31,17 +31,17 @@ it is not, and which fields/identities are already shipped versus still planned.
 
 ## Backlog Scope
 
-The current open Workflow Control Plane issues are:
+The workflow control-plane rollout centered on these issues:
 
 - `WF-02` [#2691](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/2691): `WorkflowRunnerService` MVP
 - `WF-03` [#2692](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/2692): workflow CLI
 - `WF-04` [#2693](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/2693): example workflow config + smoke dry-run
 - `WF-05` [#2694](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/2694): workflow manifest/ledger control plane
 - `WF-06` [#2695](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/2695): resume/retry projection
-- `WF-07` [#2696](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/2696): workflow manifest inspection CLI
-- `WF-08` [#2697](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/2697): workflow locking
-- `WF-10` [#2699](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/2699): first-class transform step
-- `WF-11` [#2700](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/2700): destructive transform safety
+- `WF-07` [#2696](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/2696): workflow inspection CLI aligned with control-plane taxonomy
+- `WF-08` [#2697](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/2697): local single-runtime workflow locking
+- `WF-10` [#2699](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/2699): built-in destructive transform `reconcile_foreign_keys`
+- `WF-11` [#2700](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/2700): destructive ambiguity recovery with explicit repair/force events
 - `WF-15` [#2704](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/2704): docs, runbooks, and ADR
 
 The guide below intentionally describes one coherent object model across those
@@ -59,7 +59,7 @@ At minimum a workflow owns:
 - workflow-level default run options;
 - one or more ordered steps with explicit dependency edges;
 - a runtime execution result at step granularity;
-- in later phases, its own workflow-level control-plane artifacts.
+- its own workflow-level control-plane artifacts.
 
 In the current codebase the canonical configuration root is
 `WorkflowConfig` from `src/bioetl/domain/workflow/config.py`.
@@ -184,8 +184,7 @@ status, blocking, skipping, and resume projection.
 Execution identity answers: "Is this rerun semantically the same workflow
 execution intent as a previous run?"
 
-This layer is only partially shipped today, but it is already visible in the
-backlog:
+This layer is now shipped as a first-class workflow control-plane concern:
 
 - `WF-05` requires a workflow manifest with canonical `sha256` fingerprint
   semantics;
@@ -197,8 +196,8 @@ backlog:
 Canonical implication:
 
 - `workflow.name` alone is not a safe resume key;
-- a future workflow control plane must publish a workflow-level execution
-  fingerprint derived from resolved workflow intent;
+- the workflow control plane publishes a workflow-level execution fingerprint
+  derived from resolved workflow intent;
 - child pipeline `run_id` values remain occurrence-level evidence, not the
   semantic identity of the parent workflow.
 
@@ -259,18 +258,12 @@ The backlog defines the target workflow step status vocabulary in `WF-02`:
 
 Current code-state note:
 
-- the shipped `WorkflowRunnerService` currently emits simplified statuses such
+- the shipped workflow runner still emits compact terminal step outcomes such
   as `success`, `failed`, and `skipped`;
-- `blocked`, `pending`, `running`, and workflow-level ledger projection are not
-  fully materialized yet;
-- `incomplete` is currently a planned projection state, not a stable persisted
-  domain enum.
-
-So the correct interpretation today is:
-
-- the status model is broader in the backlog than in the current MVP code;
-- any published workflow object description must keep both the shipped state and
-  the target state visible.
+- durable workflow control-plane state now persists workflow-level statuses such
+  as `created`, `running`, `success`, `failed`, and `incomplete`;
+- operator surfaces also publish `repair_required` and `ambiguous_step_ids`
+  instead of silently replaying destructive ambiguity.
 
 ## Relationship To Pipelines
 
@@ -294,13 +287,13 @@ Implications:
 
 `WF-05` extends ADR-044 from run-level provenance to workflow-level provenance.
 
-The planned workflow control-plane split is:
+The shipped workflow control-plane split is:
 
 - `WorkflowManifest` is immutable and captures intended workflow execution;
 - `WorkflowLedger` is append-only and captures lifecycle events;
-- inspection services and CLI resolve workflow state from those artifacts;
-- resume/retry projections derive state from ledger history, not from mutable
-  in-memory process state.
+- inspection services and CLI resolve workflow state from those artifacts plus
+  the dedicated workflow execution-state owner;
+- resume/retry projections do not rely on ledger as the mutable owner.
 
 By analogy with ADR-044, the workflow object should split into these seams:
 
@@ -319,33 +312,31 @@ Append-only event stream for what actually happened.
 That separation is the most important architectural boundary in the whole
 Workflow Control Plane program.
 
-## Planned Artifact Model
+## Durable Artifact Model
 
-Based on `WF-05`, `WF-06`, `WF-07`, and `WF-11`, the workflow object is
-expected to gain these first-class durable projections:
+The workflow object now ships with these first-class durable projections:
 
 | Projection | Role | Mutability |
 | ---------- | ---- | ---------- |
 | `WorkflowConfig` | Declares intended DAG and defaults | immutable input |
 | `WorkflowManifest` | Captures one resolved workflow execution intent | immutable after persist |
 | `WorkflowLedger` | Records workflow lifecycle and operator intent | append-only |
-| Workflow projection | Computes last-known step state for resume/status | derived/read model |
+| `WorkflowExecutionState` | Owns last-known mutable state for resume/status | mutable owner |
 
-Expected future storage shape:
+Current storage shape:
 
 - `data/output/control/workflow_manifest/*`
 - `data/output/control/workflow_ledger/*`
+- `data/output/control/workflow_state/*`
 
-Expected future operator surface:
+Current operator surface:
 
 - `bioetl workflow run ...`
 - `bioetl workflow status ...`
-- `bioetl workflow-manifest show ...`
-- `bioetl workflow-manifest diff ...`
 
 ## Resume And Retry Semantics
 
-The linked issues define the intended object behavior on rerun:
+The linked issues now define the shipped object behavior on rerun:
 
 - succeeded steps should normally be skipped on resume;
 - failed steps should be retried;
@@ -366,18 +357,24 @@ Present in the current tree:
 - workflow config loading from `configs/workflows`;
 - `WorkflowRunnerService` MVP;
 - transform-step fingerprinting and skip support;
+- workflow-level manifest, ledger, and execution-state persistence;
+- workflow CLI with `bioetl workflow run`, `--resume-last`,
+  `--repair-steps`, `--force-steps`, and persisted `workflow status`;
+- workflow inspection by workflow name or explicit `--run-id`;
+- local single-runtime workflow locking through `MemoryLock`;
+- canonical example workflow config in `configs/workflows/chembl_core.yaml`;
+- baseline built-in transform `summarize_upstream_outputs` for local workflow
+  transform-step coverage;
+- built-in `reconcile_foreign_keys` for idempotent ChEMBL orphan cleanup;
+- destructive ambiguity detection with explicit repair / force intent surfaces;
 - workflow observability metrics for run and step outcomes.
 
 Not yet fully shipped from the open backlog:
 
-- workflow CLI command family;
-- workflow example config in `configs/workflows/chembl_core.yaml`;
-- workflow-level manifest and ledger artifacts;
-- workflow inspection CLI;
-- workflow-level resume/retry projector;
-- workflow locking and heartbeat behavior;
-- destructive transform repair semantics;
-- dedicated workflow control-plane ADR and runbook.
+- multi-runtime or distributed workflow coordination;
+- separate workflow-manifest diff/show namespace beyond the published
+  `workflow status` / `workflow run` surface;
+- richer live step taxonomy such as `blocked` on every runner result.
 
 ## Canonical Summary
 
@@ -385,8 +382,10 @@ The most accurate short definition today is:
 
 > A BioETL workflow is a named, versioned, declarative DAG that orchestrates
 > pipeline and transform steps as one operator-level unit, with step-local
-> identity and dependency semantics already shipped, and with workflow-level
-> manifest/ledger provenance planned as a separate control-plane layer.
+> identity and dependency semantics already shipped, and with a workflow-level
+> manifest, append-only ledger, mutable execution-state owner, local-only
+> locking, and explicit destructive recovery semantics as a separate
+> control-plane layer.
 
 ## Related Sources
 
@@ -396,3 +395,5 @@ The most accurate short definition today is:
 - Workflow DAG validation in `src/bioetl/domain/workflow/dag.py`
 - `WorkflowTransformSpec` fingerprinting in `src/bioetl/domain/workflow/transform_spec.py`
 - Workflow runner MVP in `src/bioetl/application/services/workflow_runner_service.py`
+- [ADR-047: Workflow Control Plane for Declarative Workflows](../02-architecture/decisions/ADR-047-workflow-control-plane.md)
+- [Workflow Control-Plane Recovery](../05-operations/runbooks/workflow-control-plane.md)

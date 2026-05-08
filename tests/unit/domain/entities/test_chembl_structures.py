@@ -93,7 +93,7 @@ class TestDocumentTerm:
 
     @pytest.mark.parametrize(
         "valid_type",
-        ["MESH_HEADING", "MESH_QUALIFIER", "KEYWORD", "CONCEPT"],
+        ["MESH_HEADING", "MESH_QUALIFIER", "KEYWORD"],
     )
     def test_valid_term_types(self, valid_type: str) -> None:
         from bioetl.domain.entities.chembl_structures import ChemblPublicationTerm

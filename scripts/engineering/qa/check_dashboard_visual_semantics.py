@@ -42,6 +42,63 @@ STANDARD_SEVERITY_TITLE_TOKENS = (
     "Telemetry Gap",
     "Threshold State",
 )
+BACKGROUND_SEVERITY_STAT_PANELS = {
+    ("bioetl-overview-v2.json", "System Status"),
+    ("bioetl-runtime.json", "Monitor Runtime Current Status"),
+    ("bioetl-runtime.json", "Monitor Runtime Telemetry Gap"),
+    ("bioetl-runtime.json", "Monitor Runtime Blockers"),
+    ("bioetl-runtime.json", "Monitor Failed Runs"),
+    ("bioetl-runtime.json", "Monitor Runtime Error Rate"),
+    ("bioetl-runtime.json", "Monitor Worst Stage Lag"),
+    ("bioetl-dq-v2.json", "Monitor DQ Current Status"),
+    ("bioetl-dq-v2.json", "Monitor DQ Threshold State"),
+    ("bioetl-control-plane-v1.json", "Monitor: Replay Safety State"),
+    ("bioetl-control-plane-v1.json", "Monitor: Manifest / Ledger Integrity"),
+    ("bioetl-control-plane-v1.json", "Inspect: Telemetry Missing"),
+}
+EXPLICIT_VALUE_MAPPING_STAT_PANELS = {
+    ("bioetl-overview-v2.json", "System Status"): {
+        "0": {"text": "OK", "color": "green"},
+        "1": {"text": "WARN", "color": "orange"},
+        "2": {"text": "CRIT", "color": "red"},
+        "3": {"text": "UNKNOWN", "color": "gray"},
+    },
+    ("bioetl-runtime.json", "Monitor Runtime Current Status"): {
+        "0": {"text": "OK", "color": "green"},
+        "1": {"text": "WARN", "color": "orange"},
+        "2": {"text": "CRIT", "color": "red"},
+    },
+    ("bioetl-runtime.json", "Monitor Runtime Telemetry Gap"): {
+        "0": {"text": "SCRAPING", "color": "green"},
+        "1": {"text": "SCRAPE/RULE GAP", "color": "orange"},
+        "2": {"text": "SCRAPE+RULE GAP", "color": "red"},
+    },
+    ("bioetl-dq-v2.json", "Monitor DQ Current Status"): {
+        "0": {"text": "OK", "color": "green"},
+        "1": {"text": "WARN", "color": "orange"},
+        "2": {"text": "CRIT", "color": "red"},
+    },
+    ("bioetl-dq-v2.json", "Monitor DQ Threshold State"): {
+        "0": {"text": "OK", "color": "green"},
+        "1": {"text": "WARN", "color": "orange"},
+        "2": {"text": "CRIT", "color": "red"},
+    },
+    ("bioetl-control-plane-v1.json", "Monitor: Replay Safety State"): {
+        "0": {"text": "OK", "color": "green"},
+        "1": {"text": "WARN", "color": "orange"},
+        "2": {"text": "CRIT", "color": "red"},
+    },
+    ("bioetl-control-plane-v1.json", "Monitor: Manifest / Ledger Integrity"): {
+        "0": {"text": "OK", "color": "green"},
+        "1": {"text": "WARN", "color": "orange"},
+        "2": {"text": "CRIT", "color": "red"},
+    },
+    ("bioetl-control-plane-v1.json", "Inspect: Telemetry Missing"): {
+        "0": {"text": "OK", "color": "green"},
+        "1": {"text": "WARN", "color": "orange"},
+        "2": {"text": "CRIT", "color": "red"},
+    },
+}
 
 
 def iter_panels(panels: list[dict]) -> list[dict]:
@@ -77,6 +134,26 @@ def _stat_panel_visual_semantics_errors(dashboard_path: Path, panel: dict) -> li
         errors.append(
             f"{dashboard_path}: panel '{title}' must map null to UNKNOWN/gray"
         )
+
+    if (dashboard_path.name, str(title)) in BACKGROUND_SEVERITY_STAT_PANELS:
+        panel_color_mode = panel.get("options", {}).get("colorMode")
+        if panel_color_mode != "background":
+            errors.append(
+                f"{dashboard_path}: panel '{title}' must use options.colorMode=background"
+            )
+
+    expected_value_mapping = EXPLICIT_VALUE_MAPPING_STAT_PANELS.get(
+        (dashboard_path.name, str(title))
+    )
+    if expected_value_mapping is not None:
+        value_mapping = next(
+            (mapping for mapping in mappings if mapping.get("type") == "value"),
+            None,
+        )
+        if value_mapping is None or value_mapping.get("options") != expected_value_mapping:
+            errors.append(
+                f"{dashboard_path}: panel '{title}' must use explicit canonical value mappings"
+            )
 
     return errors
 

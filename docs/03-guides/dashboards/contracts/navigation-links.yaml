@@ -6,6 +6,10 @@ normative_source:
     allowed/required/forbidden var-* handoff, and time handoff policy.
     Markdown guides are explanatory mirrors and MUST reference this file
     instead of redefining normative rules.
+    Required "top-level" link titles refer to the canonical navigation bus
+    surface and do not require dashboard root `links[]` specifically; shipped
+    dashboards MAY surface the bus through panel `id=1000` links to avoid
+    duplicating header-row links next to Grafana variables.
 
 version: 1
 required_top_level_links_by_uid:
@@ -15,6 +19,9 @@ required_top_level_links_by_uid:
     - 3. Provider Health
     - 4. Data Quality
     - 5. Workflow
+    - Explore Logs
+    - Explore Traces
+    - Silver Reject Explorer
   bioetl-runtime:
     - 0. Control Plane
     - 1. Overview
@@ -23,23 +30,31 @@ required_top_level_links_by_uid:
     - 5. Workflow
     - Explore Logs
     - Explore Traces
+    - Silver Reject Explorer
   bioetl-control-plane-v1:
     - 1. Overview
     - 2. Runtime
     - 3. Provider Health
     - 4. Data Quality
     - 5. Workflow
+    - Explore Logs
+    - Explore Traces
+    - Silver Reject Explorer
   bioetl-provider-health-v2:
     - 0. Control Plane
     - 1. Overview
     - 2. Runtime
     - 4. Data Quality
     - 5. Workflow
+    - Explore Logs
+    - Explore Traces
+    - Silver Reject Explorer
   bioetl-dq-v2:
     - 0. Control Plane
     - 1. Overview
     - 2. Runtime
     - 3. Provider Health
+    - 4. Data Quality
     - 5. Workflow
     - Silver Reject Explorer
     - Explore Logs
@@ -51,12 +66,18 @@ required_top_level_links_by_uid:
     - 3. Provider Health
     - 4. Data Quality
     - 5. Workflow
+    - Explore Logs
+    - Explore Traces
+    - Silver Reject Explorer
   bioetl-workflow-overview:
     - 0. Control Plane
     - 1. Overview
     - 2. Runtime
     - 3. Provider Health
     - 4. Data Quality
+    - Explore Logs
+    - Explore Traces
+    - Silver Reject Explorer
 top_level_link_priority_by_uid:
   bioetl-overview-v2:
     - title: 2. Runtime

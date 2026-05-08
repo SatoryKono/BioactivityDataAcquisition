@@ -157,8 +157,31 @@ def test_prune_episodic_notes_apply_removes_expired_files(tmp_path: Path) -> Non
     assert not note.exists()
 
 
+def test_prune_episodic_notes_reports_density_review(tmp_path: Path) -> None:
+    for index in range(2):
+        note = tmp_path / f"active-{index}.yaml"
+        note.write_text(
+            "task_id: t-active\ncreated_at: 2026-04-19T00:00:00Z\nttl_days: 14\n",
+            encoding="utf-8",
+        )
+
+    report = prune_episodic_notes(
+        tmp_path,
+        max_active=1,
+        now=datetime(2026, 4, 20, tzinfo=UTC),
+    )
+
+    assert report["candidate_count"] == 0
+    assert report["total_count"] == 2
+    assert report["active_count"] == 2
+    assert report["density_status"] == "review"
+    assert report["density_excess"] == 1
+
+
 def test_memory_tooling_package_exports_submodules_lazily() -> None:
-    tooling = importlib.import_module("memory.tooling")
+    tooling = importlib.reload(importlib.import_module("memory.tooling"))
+    for name in ("workflow", "refresh_all"):
+        tooling.__dict__.pop(name, None)
 
     assert "workflow" not in tooling.__dict__
 

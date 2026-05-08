@@ -146,7 +146,7 @@ bioetl quarantine purge --pipeline {pipeline-name}
    is actually spiking in the active Grafana time window.
 1. Pivot to `4. Data Quality` and inspect `Top Silver Reject Reasons` plus
    `Top Silver Reject Fields` to reduce the issue to a bounded cause summary.
-1. Open `5. Silver Reject Explorer` for exact record-level evidence and selected-record context.
+1. Open `Silver Reject Explorer` for exact record-level evidence and selected-record context.
 1. Run `bioetl quarantine inspect ... --silver-filter-only` /
    `bioetl quarantine resolve ...` when you need operator action in CLI.
 
