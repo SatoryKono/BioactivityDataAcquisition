@@ -151,6 +151,9 @@ async def test_workflow_runner_roundtrips_pipeline_transform_and_metrics() -> No
         name == "bioetl_workflow_step_duration_seconds"
         and labels["step_kind"] == "pipeline"
         and labels["status"] == "success"
+        and labels["pipeline_context"] == "chembl_activity"
+        and labels["run_type_context"] == "incremental"
+        and labels["provider_context"] == "chembl"
         for name, _value, labels in metrics.histograms
     )
 

@@ -8,6 +8,7 @@ from bioetl.domain.normalization.rules import normalize_cross_pipeline_case
 from bioetl.domain.schemas.constants import ONTOLOGY_MAPPING_STATUSES
 
 from ._chembl_activity_fields import (
+    ACTIVITY_ACTION_TYPES,
     ACTIVITY_STANDARD_TYPES,
     ACTIVITY_STANDARD_UNITS,
     ASSAY_TYPES,
@@ -43,6 +44,7 @@ from .profile_normalizers import (
     normalize_profile_canonical_smiles,
     normalize_profile_chembl_organism_name,
     normalize_profile_enum,
+    normalize_profile_governed_uppercase_vocabulary,
     normalize_profile_operator,
     normalize_profile_qudt_unit_reference,
     normalize_profile_standard_unit_enum,
@@ -83,6 +85,10 @@ _ENUM_FIELDS = {
     "assay_type": ASSAY_TYPES,
 }
 _ONTOLOGY_ID_FIELDS = chembl_ontology_family_fields("uo", entity="activity")
+_CONTROLLED_ACTION_TYPE_FIELDS = chembl_controlled_family_fields(
+    "activity_action_types",
+    entity="activity",
+)
 _RAW_UNIT_FIELDS = chembl_controlled_family_fields("raw_units", entity="activity")
 _BAO_FIELDS = chembl_ontology_family_fields("bao", entity="activity")
 _STRICT_JSON_FIELDS = SET_LIKE_FIELDS
@@ -97,11 +103,30 @@ def normalize_activity_standard_units(value: object) -> object:
     )
 
 
+def normalize_activity_action_type(value: object) -> object:
+    """Normalize one activity action-type label against the governed registry."""
+    return normalize_profile_governed_uppercase_vocabulary(
+        value,
+        allowed_values=ACTIVITY_ACTION_TYPES,
+        preserve_unknown=True,
+    )
+
+
 _SPECIAL_RULE_COMPONENTS = {
     **_REFERENCE_IDENTIFIER_RULES,
     "canonical_smiles": (
         normalize_profile_canonical_smiles,
         "Normalize canonical SMILES via the domain SMILES Value Object; invalid values collapse to None.",
+    ),
+    **dict.fromkeys(
+        sorted(_CONTROLLED_ACTION_TYPE_FIELDS),
+        (
+            normalize_activity_action_type,
+            "Normalize action_type against the observed ChEMBL activity-action "
+            "vocabulary while preserving unknown uppercase lexemes for review; "
+            "the field remains governed as allowed-or-unknown rather than a "
+            "fail-closed closed-set validator.",
+        ),
     ),
     "standard_relation": (
         lambda value: normalize_profile_operator(

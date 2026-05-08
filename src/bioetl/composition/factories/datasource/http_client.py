@@ -9,7 +9,7 @@ from bioetl.composition.factories.datasource.provider_registry_resolution import
     resolve_datasource_provider_registry as _resolve_provider_registry,
 )
 from bioetl.composition.providers.provider_registry import (
-    ProviderDataSourceRegistryProtocol,
+    ProviderDataSourceAccessProtocol,
 )
 from bioetl.composition.source_config_access import load_source_config
 from bioetl.domain.resilience import RetryConfig
@@ -58,7 +58,7 @@ class HttpClientFactory:
         tracer: TracingPort | None = None,
         metrics: MetricsPort | None = None,
         logger: LoggerPort | None = None,
-        provider_registry: ProviderDataSourceRegistryProtocol | None = None,
+        provider_registry: ProviderDataSourceAccessProtocol | None = None,
     ) -> UnifiedHTTPClient:
         """Create a configured client for ``provider``."""
         registry = _resolve_provider_registry(provider_registry)
@@ -82,7 +82,7 @@ class HttpClientFactory:
         provider: str,
         settings: Settings | None,
         *,
-        provider_registry: ProviderDataSourceRegistryProtocol | None = None,
+        provider_registry: ProviderDataSourceAccessProtocol | None = None,
     ) -> ResolvedHttpConfig:
         """Resolve scalar config from source YAML, registry, and overrides."""
         registry = _resolve_provider_registry(provider_registry)
@@ -159,7 +159,7 @@ class HttpClientFactory:
         tracer: TracingPort | None = None,
         metrics: MetricsPort | None = None,
         logger: LoggerPort | None = None,
-        provider_registry: ProviderDataSourceRegistryProtocol | None = None,
+        provider_registry: ProviderDataSourceAccessProtocol | None = None,
     ) -> UnifiedHTTPClient:
         """Resolve config and assemble a ``UnifiedHTTPClient``."""
         cfg = cls._resolve_config(

@@ -45,6 +45,8 @@ ______________________________________________________________________
 
 - Links contract: `tests/integration/test_grafana_dashboard_links.py`
 - Variable contract checks: `tests/integration/test_grafana_config.py` + `tests/integration/_grafana_test_support.py`
+- Selector taxonomy / registry checks: `tests/integration/test_grafana_selector_contract.py`
+- Variable reference mirror checks: `tests/integration/test_grafana_variable_reference.py`
 - Forensic isolation checks: `run_id`/`payload_hash` запрещены вне reject explorer.
 
 ## UID → Variables (inventory parity reference)
@@ -57,4 +59,4 @@ ______________________________________________________________________
 | `bioetl-provider-health-v2` | `$adapter`, `$pipeline_context`, `$provider` |
 | `bioetl-runtime` | `$pipeline`, `$run_type`, `$stage` |
 | `bioetl-silver-reject-explorer` | `$field`, `$payload_hash`, `$pipeline`, `$reason_code`, `$run_id`, `$run_type` |
-| `bioetl-workflow-overview` | `$status`, `$step_kind`, `$step_status`, `$workflow` |
+| `bioetl-workflow-overview` | `$pipeline_context`, `$provider_context`, `$run_type_context`, `$status`, `$step_kind`, `$step_status`, `$workflow` |

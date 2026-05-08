@@ -61,6 +61,9 @@ Machine-readable selector SSOT:
 | `$payload_hash` | `bioetl-silver-reject-explorer` | Visible textbox | Empty string | Forensic exact-record selector; visible only in the explorer and MUST NOT propagate into other dashboards. |
 | `$workflow` | `bioetl-workflow-overview` | Multi-select with Include All | `All` / `$__all` | Workflow-level selected-range scope, not pipeline scope. |
 | `$status` | `bioetl-workflow-overview` | Multi-select with Include All | `All` / `$__all` | Workflow run-status filter. |
+| `$pipeline_context` | `bioetl-workflow-overview` | Hidden context var | `unknown` | Preserves single-pipeline handoff scope for downstream dashboards; multi-pipeline workflows fail-close to `unknown`. |
+| `$run_type_context` | `bioetl-workflow-overview` | Hidden context var | `All` | Preserves effective run_type for single-pipeline workflows; multi-pipeline workflows fail-close to `All`. |
+| `$provider_context` | `bioetl-workflow-overview` | Hidden context var | `unknown` | Preserves inferred provider for downstream Provider Health handoff; multi-pipeline workflows fail-close to `unknown`. |
 | `$step_status` | `bioetl-workflow-overview` | Multi-select with Include All | `All` / `$__all` | Workflow step-status filter for step evidence panels. |
 | `$step_kind` | `bioetl-workflow-overview` | Multi-select with Include All | `All` / `$__all` | Bounded step-kind filter, e.g. `pipeline`, `transform`. |
 
@@ -80,6 +83,7 @@ Machine-readable selector SSOT:
   - `$reason_code`, `$field`, `$run_id`, `$payload_hash` are explorer-only narrowing filters
 - `bioetl-workflow-overview`
   - `$workflow`, `$status`, `$step_status`, `$step_kind` are local to workflow evidence
+  - `$pipeline_context`, `$run_type_context`, `$provider_context` are hidden handoff selectors derived from workflow metrics
   - these variables MUST NOT be propagated into non-workflow dashboards
 
 ## Role-specific defaults
@@ -99,10 +103,12 @@ Machine-readable selector SSOT:
 
 ### Workflow evidence
 
-- `bioetl-workflow-overview` does not use `$pipeline` / `$run_type`.
+- `bioetl-workflow-overview` does not expose visible `$pipeline` / `$run_type` selectors.
 - It intentionally uses `$workflow`, `$status`, `$step_status`, and
   `$step_kind` because the dashboard is selected-range workflow evidence rather
   than pipeline runtime current-state triage.
+- Hidden `$pipeline_context`, `$run_type_context`, and `$provider_context`
+  preserve single-pipeline handoff scope for downstream dashboards.
 
 ### Explorer forensics
 

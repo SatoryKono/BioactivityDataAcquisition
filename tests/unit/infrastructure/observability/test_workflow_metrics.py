@@ -29,6 +29,9 @@ def test_workflow_step_metrics_use_bounded_label_surface() -> None:
             "workflow": "activity_workflow",
             "step_kind": "transform",
             "status": "success",
+            "pipeline_context": "chembl_activity",
+            "run_type_context": "incremental",
+            "provider_context": "chembl",
         }
 
         metrics.increment_counter("bioetl_workflow_step_events_total", 1, labels)
@@ -52,6 +55,9 @@ def test_workflow_metrics_reject_run_id_label() -> None:
                 {
                     "workflow": "activity_workflow",
                     "status": "success",
+                    "pipeline_context": "chembl_activity",
+                    "run_type_context": "incremental",
+                    "provider_context": "chembl",
                     "run_id": "run-1",
                 },
             )

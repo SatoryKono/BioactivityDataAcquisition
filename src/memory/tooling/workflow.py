@@ -260,10 +260,12 @@ def pre_task_workflow(
             },
             body=_session_note_body(title, retrieval_query, retrieval),
         )
+    degraded = bool(retrieval.get("degraded", False))
     return {
         "kind": "pre-task",
         "task_id": task_id,
         "title": title,
+        "ok": not degraded,
         "query": retrieval_query,
         "session_note": str(session_path) if session_path else None,
         "refresh_output_root": str(output_root) if output_root else None,

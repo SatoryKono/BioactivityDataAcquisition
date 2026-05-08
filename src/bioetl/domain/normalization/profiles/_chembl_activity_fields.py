@@ -9,6 +9,7 @@ from .chembl_json_ordering_policy import chembl_set_like_json_fields
 
 CHEMBL_ACTIVITY_SCHEMA_FIELDS = tuple(ActivitySchema.to_schema().columns.keys())
 
+ACTIVITY_ACTION_TYPES = chembl_enum("activity", "action_type")
 ACTIVITY_STANDARD_TYPES = chembl_enum("activity", "standard_type")
 ACTIVITY_STANDARD_UNITS = chembl_enum("activity", "standard_units")
 ASSAY_TYPES = chembl_enum("activity", "assay_type")
@@ -60,6 +61,7 @@ SET_LIKE_FIELDS = chembl_set_like_json_fields("chembl_activity")
 
 # Export enum constants for use in normalization
 __all__ = [
+    "ACTIVITY_ACTION_TYPES",
     "ACTIVITY_STANDARD_TYPES",
     "ACTIVITY_STANDARD_UNITS",
     "ASSAY_TYPES",

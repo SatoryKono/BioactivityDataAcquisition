@@ -63,6 +63,7 @@ services:
     volumes:
       - ./grafana/promtail-config.yml:/etc/promtail/config.yml:ro
       - ./logs:/workspace-logs:ro
+      - ./reports/logs:/workspace-report-logs:ro
     depends_on:
       - loki
     networks:

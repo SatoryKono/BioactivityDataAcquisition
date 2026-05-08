@@ -262,12 +262,29 @@ def test_silver_reject_explorer_payload_link_preserves_time_scope() -> None:
         None,
     )
     assert payload_link is not None
+    assert payload_link.get("targetBlank") is False, (
+        "Payload drilldown link must stay in the same tab to preserve forensic flow"
+    )
     url = str(payload_link.get("url", ""))
     assert "${__url_time_range}" in url or ("${__from}" in url and "${__to}" in url), (
         "Payload drilldown link must preserve forensic time scope"
     )
     description = str(panel.get("description", ""))
     assert "latest 100" in description.lower()
+
+    cli_titles = {
+        "Open quarantine CLI command",
+        "Copy quarantine resolve command for this payload_hash",
+    }
+    cli_links = [link for link in links if link.get("title") in cli_titles]
+    assert {link.get("title") for link in cli_links} == cli_titles
+    for link in cli_links:
+        assert str(link.get("url", "")).startswith("data:text/plain,"), (
+            "CLI handoff links must remain data:text/plain payloads"
+        )
+        assert link.get("targetBlank") is True, (
+            "CLI handoff links must open in a new tab instead of replacing the explorer"
+        )
 
 
 def test_silver_reject_explorer_first_action_documents_no_data_semantics() -> None:

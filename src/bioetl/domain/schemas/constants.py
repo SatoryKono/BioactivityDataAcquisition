@@ -8,6 +8,7 @@ from bioetl.domain.pubchem_standardization_catalog import (
     PUBCHEM_STANDARDIZATION_ENUM_CATALOG,
 )
 from bioetl.domain.schemas._chembl_enum_catalog import (
+    ACTIVITY_ACTION_TYPES,
     ACTIVITY_STANDARD_TYPES,
     ACTIVITY_STANDARD_UNITS,
     ASSAY_CATEGORIES,
@@ -76,6 +77,7 @@ CANONICAL_SMILES_MAX_LENGTH: int = 20_000
 # =============================================================================
 
 __all__ = [
+    "ACTIVITY_ACTION_TYPES",
     "ACTIVITY_STANDARD_TYPES",
     "ACTIVITY_STANDARD_UNITS",
     "ASSAY_CATEGORIES",

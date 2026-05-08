@@ -32,6 +32,7 @@
         "mode": "html"
       },
       "title": "Review Dashboard Navigation",
+      "description": "Top navigation bus for the dashboard suite. Uses same-tab handoffs, preserves the current time range, resets unsupported dashboard-specific scope where needed, and exposes Explore Logs / Explore Traces links that require the optional tracing profile.",
       "type": "text",
       "links": [
         {
@@ -103,6 +104,7 @@
         "content": "<center><h2>3. Provider Health / GLOBAL</h2><div><strong>Current window:</strong> provider status from fixed recording-rule windows. <strong>Selected provider:</strong> $provider. <strong>Pipeline context:</strong> $pipeline_context.</div></center>",
         "mode": "html"
       },
+      "description": "Global scope banner for Provider Health. The answer row below shows current provider severity from fixed recording-rule windows rather than selected-range evidence. Selected provider narrows provider-specific detail, while pipeline_context is preserved only for bounded cross-dashboard return flow.",
       "links": [],
       "pluginVersion": "12.2.0",
       "transparent": true
@@ -391,6 +393,7 @@
       "id": 9002,
       "type": "text",
       "title": "First Action",
+      "description": "First operator CTA for global provider incidents. Start with the current severity matrix, then inspect critical providers and top causes. Use this after the current answer row; selected-range latency/error evidence stays below and downstream Runtime or Control Plane follow-up depends on the diagnosed cause.",
       "gridPos": {
         "h": 5,
         "w": 24,
@@ -486,8 +489,7 @@
         "tooltip": {
           "mode": "multi",
           "sort": "desc"
-        },
-        "dataLinks": []
+        }
       },
       "targets": [
         {

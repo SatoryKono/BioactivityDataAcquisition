@@ -26,8 +26,9 @@ This plan addresses naming inconsistencies where "Factory" aliases exist for Pro
 
 ### 4. RunExecutionRequest/RunExecutionContext
 
-- **Problem:** Both classes exist with confusing naming
-- **Issue:** `RunExecutionRequest` is alias for `RunExecutionContext`
+- **Status:** Completed on `2026-05-08`
+- **Resolution:** `RunExecutionRequest` is the sole canonical execution request
+  type; the temporary `RunExecutionContext` compatibility export has been removed
 - **Location:** `src/bioetl/application/services/execution/cli_run_orchestration_models.py`
 
 ## Refactoring Plan
@@ -74,6 +75,8 @@ This plan addresses naming inconsistencies where "Factory" aliases exist for Pro
 
 **Objective:** Standardize on single, semantically accurate name
 
+**Status:** Completed on `2026-05-08`
+
 **Files to modify:**
 
 - `src/bioetl/application/services/execution/cli_run_orchestration_models.py`
@@ -112,11 +115,11 @@ This plan addresses naming inconsistencies where "Factory" aliases exist for Pro
   - [ ] Verify no alias exists
   - [ ] Ensure consistent usage of DomainEventEmitterPort
 
-- [ ] Phase 3: RunExecutionRequest/RunExecutionContext unification
-  - [ ] Remove RunExecutionRequest alias
-  - [ ] Rename RunExecutionContext → RunExecutionRequest
-  - [ ] Update all imports and usage
-  - [ ] Update __all__ exports
+- [x] Phase 3: RunExecutionRequest/RunExecutionContext unification
+  - [x] Remove RunExecutionRequest alias
+  - [x] Rename RunExecutionContext → RunExecutionRequest
+  - [x] Update all imports and usage
+  - [x] Update __all__ exports
 
 - [ ] Phase 4: Additional consistency fixes
   - [ ] Standardize CompositeRunnerDependencies naming

@@ -6,6 +6,7 @@ import pytest
 import yaml
 
 from tests.integration._grafana_test_support import (
+    get_dashboard_files,
     get_dashboard_panels,
     load_dashboard,
 )
@@ -181,7 +182,9 @@ def test_runtime_provider_dq_first_screens_use_canonical_current_status() -> Non
             )
 
 
-def test_overview_and_control_plane_first_screens_use_role_appropriate_queries() -> None:
+def test_overview_and_control_plane_first_screens_use_role_appropriate_queries() -> (
+    None
+):
     """Overview/Control Plane answer rows must stay on projected current-state or fixed-window evidence."""
     expectations = {
         "bioetl-overview-v2.json": {
@@ -381,4 +384,101 @@ def test_provider_and_dq_range_evidence_panels_are_below_first_screen() -> None:
             description = str(panel.get("description", "")).lower()
             assert "selected-range" in f"{panel_title.lower()} {description}", (
                 f"{dashboard_name}:{panel_title} must identify selected-range semantics"
+            )
+
+
+def test_first_screen_scope_and_cta_panels_document_role_and_scope() -> None:
+    """Text/CTA first-screen panels should expose machine-readable operator guidance."""
+    expectations = {
+        "bioetl-overview-v2.json": {
+            "L0 Overview Scope": {
+                "tokens": ("primary question", "scope", "unknown"),
+                "max_y": 12,
+            },
+        },
+        "bioetl-dq-v2.json": {
+            "Review: Pipeline Scope": {
+                "tokens": ("current", "selected-range", "pipeline-wide"),
+                "max_y": 12,
+            },
+            "Review: First Action": {
+                "tokens": ("crit", "warn", "selected-range"),
+                "max_y": 12,
+            },
+            "Review: Latest Successful Data Timestamp": {
+                "tokens": ("current freshness", "selected-range", "unknown"),
+                "max_y": 12,
+            },
+        },
+        "bioetl-provider-health-v2.json": {
+            "GLOBAL Provider Scope": {
+                "tokens": ("global", "current", "pipeline_context"),
+                "max_y": 12,
+            },
+            "First Action": {
+                "tokens": ("current", "top causes", "selected-range"),
+                "max_y": 13,
+            },
+        },
+    }
+
+    for dashboard_name, panel_expectations in expectations.items():
+        dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
+        panels = {
+            panel.get("title"): panel
+            for panel in get_dashboard_panels(dashboard)
+            if panel.get("title")
+        }
+        for panel_title, spec in panel_expectations.items():
+            panel = panels.get(panel_title)
+            assert panel is not None, (
+                f"{dashboard_name} missing first-screen guidance panel {panel_title!r}"
+            )
+            assert panel.get("gridPos", {}).get("y", 999) <= spec["max_y"], (
+                f"{dashboard_name}:{panel_title} must stay on the first screen"
+            )
+            description = str(panel.get("description", "")).lower()
+            assert description, (
+                f"{dashboard_name}:{panel_title} must define machine-readable description text"
+            )
+            for token in spec["tokens"]:
+                assert token in description, (
+                    f"{dashboard_name}:{panel_title} description must mention {token!r}"
+                )
+
+
+def test_navigation_bus_panels_document_handoff_policy() -> None:
+    """Top navigation text panels should expose machine-readable handoff semantics."""
+    required_tokens = (
+        "same-tab",
+        "current time range",
+        "scope",
+        "optional tracing profile",
+    )
+
+    for dashboard_path in get_dashboard_files():
+        dashboard = load_dashboard(dashboard_path)
+        panel = next(
+            (
+                candidate
+                for candidate in get_dashboard_panels(dashboard)
+                if candidate.get("title") == "Review Dashboard Navigation"
+            ),
+            None,
+        )
+        assert panel is not None, (
+            f"{dashboard_path.name} must expose top navigation guidance panel"
+        )
+        assert panel.get("gridPos", {}).get("y", 999) == 0, (
+            f"{dashboard_path.name}:Review Dashboard Navigation must remain at y=0"
+        )
+        description = str(panel.get("description", "")).lower()
+        assert description, (
+            f"{dashboard_path.name}:Review Dashboard Navigation must define "
+            "machine-readable description text"
+        )
+        for token in required_tokens:
+            assert token in description, (
+                f"{dashboard_path.name}:Review Dashboard Navigation description "
+                f"must mention {token!r}"
             )

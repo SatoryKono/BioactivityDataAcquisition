@@ -88,12 +88,14 @@ def push_metrics_to_gateway(
         push_metrics_to_gateway as push_metrics_to_gateway_impl,
     )
 
-    return push_metrics_to_gateway_impl(
-        run_label=run_label,
-        pipeline_name=pipeline_name,
-        run_type=run_type,
-        grouping_key_extra=grouping_key_extra,
-    )
+    gateway_kwargs: dict[str, object] = {
+        "run_label": run_label,
+        "pipeline_name": pipeline_name,
+        "run_type": run_type,
+    }
+    if grouping_key_extra is not None:
+        gateway_kwargs["grouping_key_extra"] = grouping_key_extra
+    return push_metrics_to_gateway_impl(**gateway_kwargs)
 
 
 def ensure_metrics_server_started() -> bool:

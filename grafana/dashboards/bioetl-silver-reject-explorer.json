@@ -32,6 +32,7 @@
         "mode": "html"
       },
       "title": "Review Dashboard Navigation",
+      "description": "Top navigation bus for the dashboard suite. Uses same-tab handoffs, preserves the current time range, resets unsupported dashboard-specific scope where needed, and exposes Explore Logs / Explore Traces links that require the optional tracing profile.",
       "type": "text",
       "links": [
         {
@@ -491,14 +492,17 @@
           },
           "links": [
             {
+              "targetBlank": false,
               "title": "Open same dashboard with this payload_hash",
               "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=${__data.fields.pipeline}&var-run_type=${__data.fields.run_type}&var-reason_code=${__data.fields.reason_code}&var-field=${__data.fields.field}&var-run_id=${__data.fields.run_id}&var-payload_hash=${__data.fields.payload_hash}&${__url_time_range}"
             },
             {
+              "targetBlank": true,
               "title": "Open quarantine CLI command",
               "url": "data:text/plain,bioetl%20quarantine%20inspect%20--pipeline%20${__data.fields.pipeline}%20--silver-filter-only%20--run-id%20${__data.fields.run_id}%20--limit%20200"
             },
             {
+              "targetBlank": true,
               "title": "Copy quarantine resolve command for this payload_hash",
               "url": "data:text/plain,bioetl%20quarantine%20resolve%20--pipeline%20${__data.fields.pipeline}%20--payload-hash%20${__data.fields.payload_hash}%20--status%20IGNORED"
             }

@@ -83,7 +83,7 @@ Pushgateway publication на завершении run. Это позволяет
 - **3. Provider Health**: `$provider` visible; `$adapter` hidden detail-only for
   cross-scope circuit-breaker diagnostics
 - **Silver Reject Explorer**: `$pipeline`, `$run_type`, `$reason_code`, `$field`, `$run_id`, `$payload_hash`
-- **5. Workflow**: `$workflow`, `$status`
+- **5. Workflow**: `$workflow`, `$status`, `$step_status`, `$step_kind`
 
 > **Важно**: shipped dashboards используют unified selector taxonomy by
 > dashboard family, а не один flat universal selector list.
@@ -372,6 +372,8 @@ operator-facing checkpoint store latency outside ordinary runtime resume paths.
 - CLI остаётся execution surface для replay/resolve:
   `bioetl quarantine inspect --pipeline <pipeline> --silver-filter-only --run-id <run-id> --limit 200` и
   `bioetl quarantine resolve --pipeline <pipeline> --payload-hash <payload-hash> --status IGNORED`.
+  Explorer table keeps payload-hash self-drilldown in the same tab, while the
+  CLI `data:text/plain` handoffs intentionally open in a new tab.
 
 ## 3. Alert-backed сигналы
 

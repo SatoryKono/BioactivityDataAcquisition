@@ -12,7 +12,7 @@
       }
     ]
   },
-  "description": "Prometheus-first selected-range workflow evidence for declarative workflow runs and step outcomes. Use this dashboard to answer whether a bounded workflow emitted failed or skipped run/step outcomes in the selected window, then hand off to Runtime, Data Quality, Provider Health, or Control Plane for deeper diagnostics. This dashboard does not provide current run state, run_id, stage, dependency, enricher, manifest, or trace-level evidence.",
+      "description": "Prometheus-first selected-range workflow evidence for declarative workflow runs and step outcomes. Use this dashboard to answer whether a bounded workflow emitted failed or skipped run/step outcomes in the selected window, then hand off to Runtime, Data Quality, Provider Health, or Control Plane for deeper diagnostics. Single-pipeline workflows emit hidden pipeline/run_type/provider handoff context; multi-pipeline workflows fail-close to pipeline=unknown, run_type=All, provider=unknown. Explore Logs and Explore Traces remain optional-profile adjuncts and can legitimately be empty when Loki ingestion is absent or the runtime uses NoOpTracing. This dashboard does not provide current run state, run_id, stage, dependency, enricher, manifest, or exact trace-level evidence.",
   "editable": true,
   "graphTooltip": 1,
   "id": null,
@@ -27,64 +27,65 @@
       },
       "id": 1000,
       "options": {
-        "content": "<div style=\"display:flex;gap:10px;flex-wrap:wrap;padding:10px;\"><a href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=unknown&amp;var-run_type=All&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">0. Control Plane</a><a href=\"/d/bioetl-overview-v2/bioetl-overview-v2?${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">1. Overview</a><a href=\"/d/bioetl-runtime/bioetl-runtime?var-pipeline=unknown&amp;var-run_type=All&amp;var-stage=unknown&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">2. Runtime</a><a href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&amp;var-pipeline_context=unknown&amp;var-adapter=unknown&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">3. Provider Health</a><a href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=unknown&amp;var-run_type=All&amp;var-stage=unknown&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">4. Data Quality</a><span aria-current=\"page\" style=\"padding:5px 10px;color:#4b5563;text-decoration:none;border:1px solid #4b5563;border-radius:3px;background:rgba(75,85,99,0.18);cursor:default;\">5. Workflow</span><a href=\"/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=unknown&amp;var-run_type=All&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Silver Reject Explorer</a><a href=\"/a/grafana-lokiexplore-app/explore?from=${__from}&amp;to=${__to}&amp;query=%7Bjob%3D%22bioetl%22%7D\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Explore Logs</a><a href=\"/a/grafana-exploretraces-app/?from=${__from}&amp;to=${__to}&amp;queryType=traceqlSearch&amp;query=%7B%7D\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Explore Traces</a></div>",
+        "content": "<div style=\"display:flex;gap:10px;flex-wrap:wrap;padding:10px;\"><a href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline_context&amp;var-run_type=$run_type_context&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">0. Control Plane</a><a href=\"/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline_context&amp;var-run_type=$run_type_context&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">1. Overview</a><a href=\"/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline_context&amp;var-run_type=$run_type_context&amp;var-stage=unknown&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">2. Runtime</a><a href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=$provider_context&amp;var-pipeline_context=$pipeline_context&amp;var-adapter=unknown&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">3. Provider Health</a><a href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline_context&amp;var-run_type=$run_type_context&amp;var-stage=unknown&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">4. Data Quality</a><span aria-current=\"page\" style=\"padding:5px 10px;color:#4b5563;text-decoration:none;border:1px solid #4b5563;border-radius:3px;background:rgba(75,85,99,0.18);cursor:default;\">5. Workflow</span><a href=\"/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline_context&amp;var-run_type=$run_type_context&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Silver Reject Explorer</a><a href=\"/a/grafana-lokiexplore-app/explore?from=${__from}&amp;to=${__to}&amp;query=%7Bjob%3D%22bioetl%22%7D\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Explore Logs</a><a href=\"/a/grafana-exploretraces-app/?from=${__from}&amp;to=${__to}&amp;queryType=traceqlSearch&amp;query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline_context:regex}%22%20%26%26%20span.%22bioetl.run_type%22%20%3D~%20%22${run_type_context:regex}%22%20%7D\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Explore Traces</a></div>",
         "mode": "html"
       },
       "title": "Review Dashboard Navigation",
+      "description": "Top navigation bus for the dashboard suite. Uses same-tab handoffs, preserves the current time range, resets unsupported dashboard-specific scope where needed, and exposes Explore Logs / Explore Traces links that require the optional tracing profile.",
       "type": "text",
       "links": [
         {
           "title": "0. Control Plane",
-          "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=unknown&var-run_type=All&${__url_time_range}",
+          "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline_context&var-run_type=$run_type_context&${__url_time_range}",
           "targetBlank": false,
           "includeVars": false
         },
         {
           "title": "1. Overview",
-          "url": "/d/bioetl-overview-v2/bioetl-overview-v2?${__url_time_range}",
+          "url": "/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline_context&var-run_type=$run_type_context&${__url_time_range}",
           "targetBlank": false,
           "includeVars": false
         },
         {
           "title": "2. Runtime",
-          "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=unknown&var-run_type=All&var-stage=unknown&${__url_time_range}",
+          "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline_context&var-run_type=$run_type_context&var-stage=unknown&${__url_time_range}",
           "targetBlank": false,
           "includeVars": false
         },
         {
           "title": "3. Provider Health",
-          "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&var-pipeline_context=unknown&var-adapter=unknown&${__url_time_range}",
+          "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=$provider_context&var-pipeline_context=$pipeline_context&var-adapter=unknown&${__url_time_range}",
           "targetBlank": false,
           "includeVars": false,
-          "tooltip": "Context mapping: provider=unknown, pipeline_context=unknown, adapter=unknown. Reset scope: provider=unknown."
+          "tooltip": "Context mapping: provider=$provider_context, pipeline_context=$pipeline_context, run_type=$run_type_context, adapter=unknown. Reset scope fallback: multi-pipeline workflows fail-close to provider=unknown."
         },
         {
           "title": "4. Data Quality",
-          "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=unknown&var-run_type=All&var-stage=unknown&${__url_time_range}",
+          "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline_context&var-run_type=$run_type_context&var-stage=unknown&${__url_time_range}",
           "targetBlank": false,
           "includeVars": false,
-          "tooltip": "Open the Data Quality dashboard in the same tab."
+          "tooltip": "Context mapping: pipeline=$pipeline_context, run_type=$run_type_context. Reset scope fallback: multi-pipeline workflows fail-close to pipeline=unknown and run_type=All."
         },
         {
           "title": "Silver Reject Explorer",
-          "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=unknown&var-run_type=All&${__url_time_range}",
+          "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline_context&var-run_type=$run_type_context&${__url_time_range}",
           "targetBlank": false,
           "includeVars": false,
-          "tooltip": "Reset scope: bounded Silver explorer opens with pipeline=unknown and run_type=All."
+          "tooltip": "Context mapping: pipeline=$pipeline_context, run_type=$run_type_context. Reset scope fallback: multi-pipeline workflows fail-close to pipeline=unknown and run_type=All."
         },
         {
           "title": "Explore Logs",
           "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D",
           "targetBlank": false,
           "includeVars": false,
-          "tooltip": "Requires optional tracing profile. Opens Logs Drilldown in the same tab with safe {job=\"bioetl\"} baseline."
+          "tooltip": "Tracing profile note: logs drilldown still uses a safe {job=\"bioetl\"} baseline because Loki label coverage can be broader than workflow evidence labels. Preserve the selected time range and refine in Explore when pipeline-scoped labels are available."
         },
         {
           "title": "Explore Traces",
-          "url": "/a/grafana-exploretraces-app/?from=${__from}&to=${__to}&queryType=traceqlSearch&query=%7B%7D",
+          "url": "/a/grafana-exploretraces-app/?from=${__from}&to=${__to}&queryType=traceqlSearch&query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline_context:regex}%22%20%26%26%20span.%22bioetl.run_type%22%20%3D~%20%22${run_type_context:regex}%22%20%7D",
           "targetBlank": false,
           "includeVars": false,
-          "tooltip": "Requires optional tracing profile. Opens Traces Drilldown in the same tab with reset-scope generic TraceQL context."
+          "tooltip": "Requires optional tracing profile. Context mapping: pipeline=$pipeline_context, run_type=$run_type_context. NoOpTracing or multi-pipeline workflows can still produce empty results."
         }
       ]
     },
@@ -102,7 +103,7 @@
       },
       "title": "Workflow Scope",
       "type": "text",
-      "description": "Shows selected-range workflow evidence only, not current live run state. Variables: `Workflow` filters bounded workflow name; `Run Status` filters workflow run outcomes; `Step Status` and `Step Kind` filter step evidence panels. No run_id, stage, dependency, enricher, merge, cross-validation, or manifest-level labels exist on these Prometheus metrics. If selected-range failures are non-zero, continue in `2. Runtime` for stage/runtime blockers, `4. Data Quality` for validation/quarantine signals, `3. Provider Health` for upstream provider incidents, or `0. Control Plane` for replay/resume and ledger evidence."
+      "description": "Shows selected-range workflow evidence only, not current live run state. Variables: `Workflow` filters bounded workflow name; `Run Status` filters workflow run outcomes; `Step Status` and `Step Kind` filter step evidence panels. Hidden context selectors preserve single-pipeline handoff scope as `pipeline_context`, `run_type_context`, and `provider_context`; multi-pipeline workflows fail-close those values. No run_id, stage, dependency, enricher, merge, cross-validation, or manifest-level labels exist on these Prometheus metrics. If selected-range failures are non-zero, continue in `2. Runtime` for stage/runtime blockers, `4. Data Quality` for validation/quarantine signals, `3. Provider Health` for upstream provider incidents, or `0. Control Plane` for replay/resume and ledger evidence."
     },
     {
       "datasource": {
@@ -160,7 +161,7 @@
       },
       "targets": [
         {
-          "expr": "round(sum(max_over_time(bioetl_workflow_runs_total{workflow=~\"$workflow\",status=\"failed\"}[$__range]))) or vector(0)",
+          "expr": "round(sum(increase(bioetl_workflow_runs_total{workflow=~\"$workflow\",status=\"failed\"}[$__range]))) or vector(0)",
           "refId": "A"
         }
       ],
@@ -224,7 +225,7 @@
       },
       "targets": [
         {
-          "expr": "round(sum(max_over_time(bioetl_workflow_step_events_total{workflow=~\"$workflow\",step_kind=\"pipeline\",status=\"failed\"}[$__range]))) or vector(0)",
+          "expr": "round(sum(increase(bioetl_workflow_step_events_total{workflow=~\"$workflow\",step_kind=\"pipeline\",status=\"failed\"}[$__range]))) or vector(0)",
           "refId": "A"
         }
       ],
@@ -288,7 +289,7 @@
       },
       "targets": [
         {
-          "expr": "round(sum(max_over_time(bioetl_workflow_step_events_total{workflow=~\"$workflow\",step_kind=\"transform\",status=\"failed\"}[$__range]))) or vector(0)",
+          "expr": "round(sum(increase(bioetl_workflow_step_events_total{workflow=~\"$workflow\",step_kind=\"transform\",status=\"failed\"}[$__range]))) or vector(0)",
           "refId": "A"
         }
       ],
@@ -352,7 +353,7 @@
       },
       "targets": [
         {
-          "expr": "round(sum(max_over_time(bioetl_workflow_step_events_total{workflow=~\"$workflow\",status=\"skipped\"}[$__range]))) or vector(0)",
+          "expr": "round(sum(increase(bioetl_workflow_step_events_total{workflow=~\"$workflow\",status=\"skipped\"}[$__range]))) or vector(0)",
           "refId": "A"
         }
       ],
@@ -423,27 +424,27 @@
         "dataLinks": [
           {
             "title": "Open 2. Runtime",
-            "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=unknown&var-run_type=All&var-stage=unknown&${__url_time_range}",
+            "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline_context&var-run_type=$run_type_context&var-stage=unknown&${__url_time_range}",
             "targetBlank": false
           },
           {
             "title": "Open 4. Data Quality",
-            "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=unknown&var-run_type=All&var-stage=unknown&${__url_time_range}",
+            "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline_context&var-run_type=$run_type_context&var-stage=unknown&${__url_time_range}",
             "targetBlank": false
           },
           {
             "title": "Open 3. Provider Health",
-            "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&var-pipeline_context=unknown&var-adapter=unknown&${__url_time_range}",
+            "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=$provider_context&var-pipeline_context=$pipeline_context&var-adapter=unknown&${__url_time_range}",
             "targetBlank": false
           },
           {
             "title": "Open 0. Control Plane",
-            "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=unknown&var-run_type=All&${__url_time_range}",
+            "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline_context&var-run_type=$run_type_context&${__url_time_range}",
             "targetBlank": false
           },
           {
             "title": "Open 1. Overview",
-            "url": "/d/bioetl-overview-v2/bioetl-overview-v2?${__url_time_range}",
+            "url": "/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline_context&var-run_type=$run_type_context&${__url_time_range}",
             "targetBlank": false
           }
         ],
@@ -451,7 +452,7 @@
       },
       "title": "Next Diagnostic Surface",
       "type": "text",
-      "description": "Static operator handoff guide for the selected-range workflow evidence above. This panel intentionally does not claim stage, run_id, dependency, enricher, merge, cross-validation, or Gold-write coverage because those dimensions are not present on `bioetl_workflow_*` metrics. It is the one justified panel-level CTA exception on this dashboard, so its bounded `Open ...` dataLinks duplicate the header bus intentionally while preserving the selected time range and resetting unsupported workflow-only scope."
+      "description": "Static operator handoff guide for the selected-range workflow evidence above. This panel intentionally does not claim stage, run_id, dependency, enricher, merge, cross-validation, or Gold-write coverage because those dimensions are not present on `bioetl_workflow_*` metrics. It is the one justified panel-level CTA exception on this dashboard, so its bounded `Open ...` dataLinks duplicate the header bus intentionally while preserving the selected time range and mapping single-pipeline workflow context into downstream dashboard scope."
     },
     {
       "collapsed": true,
@@ -501,7 +502,7 @@
             },
             "tooltip": {
               "mode": "multi",
-              "sort": "none"
+              "sort": "desc"
             }
           },
           "targets": [
@@ -553,7 +554,7 @@
             },
             "tooltip": {
               "mode": "multi",
-              "sort": "none"
+              "sort": "desc"
             }
           },
           "targets": [
@@ -629,6 +630,78 @@
         "sort": 1,
         "type": "query",
         "description": "Workflow scope: workflow-run status selector for run-outcome panels; fallback: All run statuses."
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": "unknown",
+          "value": "unknown"
+        },
+        "datasource": "Prometheus",
+        "definition": "label_values(bioetl_workflow_runs_total{workflow=~\"$workflow\"}, pipeline_context)",
+        "hide": 2,
+        "includeAll": false,
+        "label": "Pipeline Context",
+        "multi": false,
+        "name": "pipeline_context",
+        "options": [],
+        "query": {
+          "query": "label_values(bioetl_workflow_runs_total{workflow=~\"$workflow\"}, pipeline_context)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "sort": 1,
+        "type": "query",
+        "description": "Hidden handoff scope: preserves the single-pipeline workflow target for downstream pipeline-scoped dashboards; fail-closed value is `unknown`."
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "All"
+        },
+        "datasource": "Prometheus",
+        "definition": "label_values(bioetl_workflow_runs_total{workflow=~\"$workflow\"}, run_type_context)",
+        "hide": 2,
+        "includeAll": false,
+        "label": "Run Type Context",
+        "multi": false,
+        "name": "run_type_context",
+        "options": [],
+        "query": {
+          "query": "label_values(bioetl_workflow_runs_total{workflow=~\"$workflow\"}, run_type_context)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "sort": 1,
+        "type": "query",
+        "description": "Hidden handoff scope: preserves the effective run_type for single-pipeline workflows; fail-closed value is `All`."
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": "unknown",
+          "value": "unknown"
+        },
+        "datasource": "Prometheus",
+        "definition": "label_values(bioetl_workflow_runs_total{workflow=~\"$workflow\"}, provider_context)",
+        "hide": 2,
+        "includeAll": false,
+        "label": "Provider Context",
+        "multi": false,
+        "name": "provider_context",
+        "options": [],
+        "query": {
+          "query": "label_values(bioetl_workflow_runs_total{workflow=~\"$workflow\"}, provider_context)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "sort": 1,
+        "type": "query",
+        "description": "Hidden handoff scope: preserves the inferred provider for single-pipeline workflows; fail-closed value is `unknown`."
       },
       {
         "current": {

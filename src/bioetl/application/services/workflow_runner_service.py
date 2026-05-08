@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from time import perf_counter
 from typing import TYPE_CHECKING
@@ -104,6 +104,7 @@ class WorkflowRunnerService:
         step_outputs: dict[str, object] = {}
         status = "success"
         failed_step_id: str | None = None
+        workflow_context_labels = config.workflow_context_labels
 
         for step_id in config.topological_step_ids:
             step = config.get_step(step_id)
@@ -114,6 +115,7 @@ class WorkflowRunnerService:
                     workflow_name=config.name,
                     step=step,
                     failed_step_id=failed_step_id,
+                    context_labels=workflow_context_labels,
                 )
                 step_results.append(skipped)
                 if step_completed_callback is not None:
@@ -123,6 +125,7 @@ class WorkflowRunnerService:
                 skipped = self._build_resume_skipped_step_result(
                     workflow_name=config.name,
                     step=step,
+                    context_labels=workflow_context_labels,
                 )
                 step_results.append(skipped)
                 if step_completed_callback is not None:
@@ -132,6 +135,7 @@ class WorkflowRunnerService:
                 workflow_name=config.name,
                 step=step,
                 step_outputs=step_outputs,
+                workflow_context_labels=workflow_context_labels,
                 completed_transform_fingerprints=completed_transform_fingerprints,
                 step_started_callback=step_started_callback,
                 transform_commit_callback=transform_commit_callback,
@@ -147,7 +151,11 @@ class WorkflowRunnerService:
         self.metrics.increment_counter(
             _WORKFLOW_RUNS_TOTAL,
             1,
-            {"workflow": config.name, "status": status},
+            {
+                "workflow": config.name,
+                "status": status,
+                **workflow_context_labels,
+            },
         )
         return WorkflowRunExecutionResult(
             workflow_name=config.name,
@@ -161,6 +169,7 @@ class WorkflowRunnerService:
         workflow_name: str,
         step: WorkflowStepConfig | TransformStepConfig,
         step_outputs: dict[str, object],
+        workflow_context_labels: Mapping[str, str],
         completed_transform_fingerprints: dict[str, str] | None,
         step_started_callback: Callable[..., None] | None,
         transform_commit_callback: (
@@ -171,12 +180,14 @@ class WorkflowRunnerService:
             return await self._run_pipeline_step(
                 workflow_name=workflow_name,
                 step=step,
+                workflow_context_labels=workflow_context_labels,
                 step_started_callback=step_started_callback,
             )
         return await self._run_transform_step(
             workflow_name=workflow_name,
             step=step,
             step_outputs=step_outputs,
+            workflow_context_labels=workflow_context_labels,
             completed_transform_fingerprints=completed_transform_fingerprints,
             step_started_callback=step_started_callback,
             transform_commit_callback=transform_commit_callback,
@@ -187,6 +198,7 @@ class WorkflowRunnerService:
         *,
         workflow_name: str,
         step: WorkflowStepConfig,
+        workflow_context_labels: Mapping[str, str],
         step_started_callback: Callable[..., None] | None,
     ) -> WorkflowStepExecutionResult:
         if step_started_callback is not None:
@@ -203,6 +215,7 @@ class WorkflowRunnerService:
                 step_kind=_STEP_KIND_PIPELINE,
                 status="failed",
                 duration_seconds=self.monotonic() - started,
+                context_labels=workflow_context_labels,
             )
             return WorkflowStepExecutionResult(
                 step_id=step.step_id,
@@ -217,6 +230,7 @@ class WorkflowRunnerService:
             step_kind=_STEP_KIND_PIPELINE,
             status=status,
             duration_seconds=self.monotonic() - started,
+            context_labels=workflow_context_labels,
         )
         return WorkflowStepExecutionResult(
             step_id=step.step_id,
@@ -233,6 +247,7 @@ class WorkflowRunnerService:
         workflow_name: str,
         step: TransformStepConfig,
         step_outputs: dict[str, object],
+        workflow_context_labels: Mapping[str, str],
         completed_transform_fingerprints: dict[str, str] | None,
         step_started_callback: Callable[..., None] | None,
         transform_commit_callback: (
@@ -251,6 +266,7 @@ class WorkflowRunnerService:
             workflow_name=workflow_name,
             step=step,
             upstream_outputs=upstream_outputs,
+            context_labels=workflow_context_labels,
             completed_fingerprints=completed_transform_fingerprints,
             destructive_commit_callback=transform_commit_callback,
         )
@@ -262,6 +278,7 @@ class WorkflowRunnerService:
         workflow_name: str,
         step: WorkflowStepConfig | TransformStepConfig,
         failed_step_id: str,
+        context_labels: Mapping[str, str],
     ) -> WorkflowStepExecutionResult:
         step_kind = (
             _STEP_KIND_PIPELINE if isinstance(step, WorkflowStepConfig) else "transform"
@@ -271,6 +288,7 @@ class WorkflowRunnerService:
             step_kind=step_kind,
             status="skipped",
             duration_seconds=0.0,
+            context_labels=context_labels,
         )
         return WorkflowStepExecutionResult(
             step_id=step.step_id,
@@ -288,6 +306,7 @@ class WorkflowRunnerService:
         *,
         workflow_name: str,
         step: WorkflowStepConfig | TransformStepConfig,
+        context_labels: Mapping[str, str],
     ) -> WorkflowStepExecutionResult:
         step_kind = (
             _STEP_KIND_PIPELINE if isinstance(step, WorkflowStepConfig) else "transform"
@@ -297,6 +316,7 @@ class WorkflowRunnerService:
             step_kind=step_kind,
             status="skipped",
             duration_seconds=0.0,
+            context_labels=context_labels,
         )
         return WorkflowStepExecutionResult(
             step_id=step.step_id,
@@ -316,6 +336,7 @@ class WorkflowRunnerService:
         step_kind: str,
         status: str,
         duration_seconds: float,
+        context_labels: Mapping[str, str],
     ) -> None:
         self.metrics.increment_counter(
             _WORKFLOW_STEP_EVENTS_TOTAL,
@@ -324,6 +345,7 @@ class WorkflowRunnerService:
                 "workflow": workflow_name,
                 "step_kind": step_kind,
                 "status": status,
+                **context_labels,
             },
         )
         self.metrics.observe_histogram(
@@ -333,6 +355,7 @@ class WorkflowRunnerService:
                 "workflow": workflow_name,
                 "step_kind": step_kind,
                 "status": status,
+                **context_labels,
             },
         )
 

@@ -64,6 +64,7 @@ def test_pre_task_workflow_creates_session_note_and_uses_local_surfaces(
     )
 
     assert payload["kind"] == "pre-task"
+    assert payload["ok"] is True
     assert payload["refresh_report"] is None
     assert session_note_path.exists()
     assert len(payload["retrieval"]["results"]["rag"]) == 1
@@ -149,6 +150,7 @@ def test_pre_task_workflow_refreshes_if_manifests_are_missing(
 
     assert refresh_calls
     assert payload["refresh_output_root"] == str(tmp_path / "refresh")
+    assert payload["ok"] is True
     assert payload["refresh_report"] == {"ok": True, "artifacts": []}
     assert len(payload["retrieval"]["results"]["rag"]) == 1
 
@@ -172,6 +174,7 @@ def test_pre_task_workflow_skip_refresh_if_missing_degrades_to_empty_results(
     )
 
     assert payload["kind"] == "pre-task"
+    assert payload["ok"] is False
     assert payload["refresh_report"] is None
     assert payload["retrieval"]["degraded"] is True
     assert payload["retrieval"]["profile"] == "implementation"
@@ -184,6 +187,20 @@ def test_pre_task_workflow_skip_refresh_if_missing_degrades_to_empty_results(
         artifact["kind"] for artifact in payload["retrieval"]["missing_artifacts"]
     ] == ["rag_chunks", "timeline_events"]
     assert session_note_path.exists()
+
+
+def test_pre_task_workflow_degraded_payload_returns_nonzero_exit_code() -> None:
+    payload = {
+        "kind": "pre-task",
+        "task_id": "task-degraded",
+        "ok": False,
+        "retrieval": {
+            "degraded": True,
+            "results": {"catalog": [], "rag": [], "timeline": []},
+        },
+    }
+
+    assert workflow._emit(payload, as_json=False) == 1
 
 
 def test_pre_task_workflow_refreshes_if_event_projection_dir_is_empty(

@@ -25,6 +25,7 @@ def test_variable_reference_documents_all_shipped_dashboard_variables() -> None:
     text = _VARIABLE_REFERENCE.read_text(encoding="utf-8")
     required_tokens = {
         "Grafana Dashboard Variable Reference",
+        "selector-contracts.yaml",
         "$pipeline",
         "$run_type",
         "$stage",
@@ -37,6 +38,9 @@ def test_variable_reference_documents_all_shipped_dashboard_variables() -> None:
         "$payload_hash",
         "$workflow",
         "$status",
+        "$pipeline_context",
+        "$run_type_context",
+        "$provider_context",
         "$step_status",
         "$step_kind",
         "bioetl-overview-v2",
@@ -93,10 +97,24 @@ def test_variable_defaults_follow_repo_aligned_contract() -> None:
     assert provider["pipeline_context"].get("current", {}).get("value") == "unknown"
 
     workflow = _variables("bioetl-workflow-overview.json")
-    assert set(workflow) == {"workflow", "status", "step_status", "step_kind"}
-    for name in workflow:
+    assert set(workflow) == {
+        "workflow",
+        "status",
+        "pipeline_context",
+        "run_type_context",
+        "provider_context",
+        "step_status",
+        "step_kind",
+    }
+    for name in ("workflow", "status", "step_status", "step_kind"):
         assert workflow[name].get("includeAll") is True
         assert workflow[name].get("current", {}).get("value") == "$__all"
+    assert workflow["pipeline_context"].get("hide") == 2
+    assert workflow["pipeline_context"].get("current", {}).get("value") == "unknown"
+    assert workflow["run_type_context"].get("hide") == 2
+    assert workflow["run_type_context"].get("current", {}).get("value") == "All"
+    assert workflow["provider_context"].get("hide") == 2
+    assert workflow["provider_context"].get("current", {}).get("value") == "unknown"
 
     explorer = _variables("bioetl-silver-reject-explorer.json")
     assert explorer["run_id"].get("multi") is False
@@ -108,11 +126,17 @@ def test_variable_defaults_follow_repo_aligned_contract() -> None:
 def test_variable_reference_explains_role_specific_exceptions() -> None:
     text = _VARIABLE_REFERENCE.read_text(encoding="utf-8")
     required_tokens = {
-        "`bioetl-workflow-overview` does not use `$pipeline` / `$run_type`",
+        "`bioetl-workflow-overview` does not expose visible `$pipeline` / `$run_type` selectors",
+        "`$pipeline_context` | `bioetl-workflow-overview` | Hidden context var",
+        "`$run_type_context` | `bioetl-workflow-overview` | Hidden context var",
+        "`$provider_context` | `bioetl-workflow-overview` | Hidden context var",
         "`bioetl-silver-reject-explorer` requires single-select `$pipeline`",
+        "`$payload_hash` | `bioetl-silver-reject-explorer` | Visible textbox",
         "run_type` always uses include-all fallback",
         "Pipeline-scoped operator dashboards используют single-select `$pipeline`",
         "кроме `bioetl-overview-v2`",
     }
     missing = sorted(token for token in required_tokens if token not in text)
-    assert not missing, f"Variable reference must explain repo-specific exceptions: {missing}"
+    assert not missing, (
+        f"Variable reference must explain repo-specific exceptions: {missing}"
+    )

@@ -873,7 +873,7 @@ def test_runtime_pipeline_level_blocker_reasons_are_projected_to_run_type() -> N
         seen_reasons.add(reason)
         expr = str(rule.get("expr", ""))
         assert expectations[reason] in expr
-        assert "* on (pipeline) group_left(run_type)" in expr
+        assert "bioetl_runtime_pipeline_run_type_universe * on (pipeline) group_left()" in expr
         assert "bioetl_runtime_pipeline_run_type_universe" in expr
 
     assert seen_reasons == set(expectations)
@@ -958,10 +958,33 @@ def test_overview_runtime_and_dq_inputs_materialize_from_stable_projected_shapes
     assert "bioetl_runtime_alert_condition_stage_lag_high_15m" in runtime_expr
     assert "unless on (pipeline, run_type)" in runtime_expr
     assert "bioetl_dq_current_status" in dq_expr
-    assert (
-        "* on (pipeline) group_left(run_type) bioetl_overview_pipeline_run_type_universe"
-        in dq_expr
+    assert "bioetl_overview_pipeline_run_type_universe" in dq_expr
+    assert "* on (pipeline) group_left() bioetl_dq_current_status" in dq_expr
+
+
+def test_runtime_no_terminal_run_treats_success_as_terminal() -> None:
+    payload = _load_rules()
+    record_map = _build_record_map(payload)
+    expr = record_map["bioetl_runtime_alert_condition_no_terminal_run_30m"].get(
+        "expr", ""
     )
+
+    assert 'status=~"success|completed|failed"' in expr
+
+
+def test_control_plane_current_status_rules_project_pipeline_signals_to_run_type() -> None:
+    payload = _load_control_plane_current_status_rules()
+    record_map = _build_record_map(payload)
+
+    replay_expr = record_map["bioetl_replay_safety_blockers_15m"].get("expr", "")
+    failures_expr = record_map["bioetl_manifest_ledger_failures_15m"].get("expr", "")
+    telemetry_expr = record_map["bioetl_control_plane_telemetry_missing_5m"].get(
+        "expr", ""
+    )
+
+    assert "group_right (run_type) bioetl_control_plane_run_type_universe" in replay_expr
+    assert "group_right (run_type) bioetl_control_plane_run_type_universe" in failures_expr
+    assert "group_right (run_type) bioetl_control_plane_run_type_universe" in telemetry_expr
 
 
 def test_dq_current_status_splits_hard_failures_from_degraded_warnings() -> None:

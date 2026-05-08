@@ -46,6 +46,7 @@ def reset_chembl_policy_registry() -> Iterator[None]:
 
 
 def test_chembl_policy_surface_points_to_externalized_registry_sources() -> None:
+    action_type = chembl_policy_surface("activity", "action_type")
     units = chembl_policy_surface("activity", "units")
     is_oa = chembl_policy_surface("publication", "is_oa")
     standard_flag = chembl_policy_surface("activity", "standard_flag")
@@ -60,6 +61,11 @@ def test_chembl_policy_surface_points_to_externalized_registry_sources() -> None
     publication_doi = chembl_policy_surface("publication", "doi")
     publication_mesh_id = chembl_policy_surface("publication_term", "mesh_id")
     target_taxonomy_id = chembl_policy_surface("target", "taxonomy_id")
+
+    assert action_type is not None
+    assert action_type.category == "controlled_vocabulary"
+    assert action_type.registry_source == CHEMBL_CONTROLLED_VOCAB_CONFIG
+    assert action_type.invalid_value_mode == "preserve_unknown_uppercase_lexeme"
 
     assert units is not None
     assert units.category == "controlled_vocabulary"
@@ -142,6 +148,7 @@ def test_chembl_policy_registry_configs_cover_declared_policy_fields() -> None:
     }
 
     assert "chembl_activity.units" in controlled_fields
+    assert "chembl_activity.action_type" in controlled_fields
     assert "chembl_assay_parameters.type" in controlled_fields
     assert "chembl_publication.is_oa" in strict_boolean_fields
     assert "chembl_activity.standard_flag" in strict_flag_fields
@@ -176,6 +183,10 @@ def test_chembl_policy_registry_exposes_profile_authoring_field_sets() -> None:
     assert chembl_controlled_family_fields("raw_units", entity="activity") == frozenset(
         {"units"}
     )
+    assert chembl_controlled_family_fields(
+        "activity_action_types",
+        entity="activity",
+    ) == frozenset({"action_type"})
     assert chembl_controlled_family_fields(
         "standard_units", entity="activity"
     ) == frozenset({"standard_units"})

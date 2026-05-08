@@ -8,6 +8,7 @@ from pathlib import Path
 import pytest
 
 from tests.integration._grafana_test_support import (
+    get_dashboard_navigation_links,
     get_dashboard_panels,
     get_panel_expressions,
     load_dashboard,
@@ -427,7 +428,9 @@ def test_overview_uses_only_expected_variables_and_target_scoped_links() -> None
         for variable in dashboard.get("templating", {}).get("list", [])
         if variable.get("name")
     }
-    links = {link.get("title"): link for link in dashboard.get("links", [])}
+    links = {
+        link.get("title"): link for link in get_dashboard_navigation_links(dashboard)
+    }
 
     assert variables == {"pipeline", "run_type"}
     assert all(link.get("includeVars") is False for link in links.values())

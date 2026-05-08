@@ -778,6 +778,13 @@ ______________________________________________________________________
    echo $BIOETL_OBSERVABILITY__TRACING_ENABLED  # should be "true"
    ```
 
+1. Для `bioetl workflow run ...` включить workflow step tracing явно, если
+   нужен непустой `Explore Traces` handoff:
+
+   ```bash
+   bioetl workflow run chembl_assay --tracing --limit 1000
+   ```
+
 1. Проверить OTLP endpoint:
 
    ```bash

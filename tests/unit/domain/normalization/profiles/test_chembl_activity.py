@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from bioetl.domain.schemas.constants import ACTIVITY_ACTION_TYPES
+
 from bioetl.domain.normalization.profiles import (
     CHEMBL_ACTIVITY_PROFILE,
     CHEMBL_ACTIVITY_SCHEMA_FIELDS,
@@ -124,6 +126,17 @@ def test_chembl_activity_qudt_units_has_explicit_unit_normalization_rule() -> No
         assert standard_units_rule.normalizer(f" {raw_value} ") == expected
     assert standard_units_rule.normalizer("unknown-unit") is None
     assert "standard-unit enum" in (standard_units_rule.notes or "")
+
+
+def test_chembl_activity_action_type_is_governed_but_preserves_unknowns() -> None:
+    action_type_rule = CHEMBL_ACTIVITY_PROFILE.rule_for("action_type")
+
+    assert action_type_rule is not None
+    for value in ACTIVITY_ACTION_TYPES:
+        assert action_type_rule.normalizer(value.lower()) == value
+    assert action_type_rule.normalizer(" partial agonist ") == "PARTIAL AGONIST"
+    assert action_type_rule.normalizer("novel modulator") == "NOVEL MODULATOR"
+    assert "allowed-or-unknown" in (action_type_rule.notes or "")
 
 
 def test_chembl_activity_target_organism_uses_curated_organism_normalizer() -> None:

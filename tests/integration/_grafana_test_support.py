@@ -265,7 +265,7 @@ def _collect_dashboard_links(dashboard: dict) -> list[dict]:
 
 def get_dashboard_navigation_links(dashboard: dict) -> list[dict]:
     """Collect canonical dashboard-bus links from the navigation surface."""
-    links = list(dashboard.get("links", []))
+    links: list[dict] = []
     for panel in get_dashboard_panels(dashboard):
         if panel.get("id") != 1000:
             continue

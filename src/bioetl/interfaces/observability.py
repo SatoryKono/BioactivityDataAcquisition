@@ -87,13 +87,15 @@ def push_metrics_to_gateway(
     """Push metrics through the canonical composition API."""
     from bioetl.composition.observability_api import push_metrics_to_gateway as _impl
 
-    return _impl(
-        run_label=run_label,
-        pipeline_name=pipeline_name,
-        run_type=run_type,
-        grouping_key_extra=grouping_key_extra,
-        logger=logger,
-    )
+    gateway_kwargs: dict[str, object] = {
+        "run_label": run_label,
+        "pipeline_name": pipeline_name,
+        "run_type": run_type,
+        "logger": logger,
+    }
+    if grouping_key_extra is not None:
+        gateway_kwargs["grouping_key_extra"] = grouping_key_extra
+    return _impl(**gateway_kwargs)
 
 
 def delete_metrics_from_gateway(

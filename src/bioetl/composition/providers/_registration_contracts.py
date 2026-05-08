@@ -16,7 +16,7 @@ from bioetl.composition.providers._models import (
 
 if TYPE_CHECKING:
     from bioetl.composition.providers._registry_protocols import (
-        ProviderDataSourceRegistryProtocol,
+        ProviderDataSourceAccessProtocol,
     )
     from bioetl.domain.filtering import InputFilterConfig
     from bioetl.domain.ports import DataSourcePort, LoggerPort, MetricsPort
@@ -121,7 +121,7 @@ def _create_http_client_for_provider(
     *,
     metrics: MetricsPort | None = None,
     logger: LoggerPort | None = None,
-    provider_registry: ProviderDataSourceRegistryProtocol | None = None,
+    provider_registry: ProviderDataSourceAccessProtocol | None = None,
 ) -> UnifiedHTTPClient:
     """Resolve the canonical HTTP client factory lazily at the composition edge."""
     from bioetl.composition.factories.datasource.http_client import HttpClientFactory
@@ -141,7 +141,7 @@ def _create_adapter_for_provider(
     logger: LoggerPort | None = None,
     settings: ProviderSettingsProtocol | None = None,
     *,
-    provider_registry: ProviderDataSourceRegistryProtocol | None = None,
+    provider_registry: ProviderDataSourceAccessProtocol | None = None,
     **kwargs: object,
 ) -> DataSourcePort:
     """Resolve the canonical adapter factory lazily at the composition edge."""
@@ -194,7 +194,7 @@ def resolve_provider_assembly_support(
 
 def _resolve_provider_registry_candidate(
     provider_registry: object | None,
-) -> ProviderDataSourceRegistryProtocol | None:
+) -> ProviderDataSourceAccessProtocol | None:
     """Return registry candidate only when it exposes full registry surface."""
     required_methods = (
         "get_http_config",
@@ -209,7 +209,7 @@ def _resolve_provider_registry_candidate(
         hasattr(provider_registry, method_name) for method_name in required_methods
     ):
         return None
-    return cast("ProviderDataSourceRegistryProtocol", provider_registry)
+    return cast("ProviderDataSourceAccessProtocol", provider_registry)
 
 
 def bind_provider_data_source_creator(

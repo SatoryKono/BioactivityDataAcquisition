@@ -511,7 +511,10 @@ ______________________________________________________________________
 Опциональный профиль `tracing` добавляет:
 
 - `Loki` на `:3100` для поиска по структурированным логам
-- `Promtail` для ingestion локальных `logs/*.log` и `logs/*.jsonl`
+- `Promtail` для ingestion локальных `reports/logs/*.log` и
+  `reports/logs/*.jsonl`
+- legacy-совместимость с историческим `logs/*.log` / `logs/*.jsonl`, если
+  такие runtime surfaces всё ещё примонтированы
 - `Tempo` на `:3200` и OTLP gRPC `:4317` для trace storage
 - дополнительные Grafana datasources `Loki` и `Tempo`
 
@@ -732,8 +735,9 @@ Shipped dashboards используют несколько template variables в
   read-path и checkpoint-operator panels не несут pipeline/run_type labels,
   поэтому не фильтруются по этим переменным.
 
-- **`5. Workflow`** использует только `$workflow` и `$status` через
-  `label_values(bioetl_workflow_runs_total, workflow|status)`.
+- **`5. Workflow`** использует `$workflow` и `$status` через
+  `label_values(bioetl_workflow_runs_total, workflow|status)`, а также
+  `$step_status` и `$step_kind` через `bioetl_workflow_step_events_total`.
   Shipped workflow panels aggregate per-run published series with
   `max_over_time(...)`, because workflow jobs are short-lived and must remain
   queryable after the CLI process exits.
@@ -931,7 +935,8 @@ UNKNOWN/error until the backend is checked.
 
 **Drilldown:** canonical navigation bus `0. Control Plane`, `1. Overview`,
 `2. Runtime`, `3. Provider Health`, `4. Data Quality`, `5. Workflow`;
-table row links дают self-drilldown по `payload_hash` и CLI handoff.
+table row links дают self-drilldown по `payload_hash` в same tab и CLI
+handoff в новой вкладке.
 
 ______________________________________________________________________
 
@@ -951,9 +956,9 @@ first screen.
 | ID  | Название                                        | Тип            | PromQL                                                                                                               | Описание                                                  |
 | --- | ----------------------------------------------- | -------------- | -------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
 | 9100 | GLOBAL Provider Scope                          | Text           | n/a                                                                                                                  | Явно показывает GLOBAL provider scope, selected `$provider` и сохранённый `$pipeline_context`. |
-| 9101 | Monitor GLOBAL Provider Severity Matrix        | Table          | `bioetl_provider_current_status`                                                                                     | Current provider severity: `0=OK`, `1=DEGRADED`, `2=FAILING`, `null=UNKNOWN`; не фильтруется по pipeline. |
+| 9101 | Monitor GLOBAL Provider Severity Matrix        | Table          | `bioetl_provider_current_status`                                                                                     | Current provider severity: `0=OK`, `1=DEGRADED`, `2=FAILING`, `null=UNKNOWN`; derived summary semantics, не фильтруется по pipeline. Raw `bioetl_provider_health_status` uses a different contract: `0=UNHEALTHY`, `1=DEGRADED`, `2=HEALTHY`. |
 | 9102 | Inspect Critical Providers                     | Table          | `bioetl_provider_current_status >= 1`                                                                                | Только providers с current `DEGRADED`/`FAILING`; missing current-status telemetry остаётся в `Monitor GLOBAL Provider Severity Matrix` как `UNKNOWN`. Panel exposes direct provider incident runbook handoff. |
-| 9103 | Inspect Provider Top Causes                    | Table          | `topk(5, bioetl_provider_current_cause > 0)`                                                                         | Current cause chips: raw health status, failure rate, retry exhaustion, latency, HTTP errors, rate-limit pressure. Empty table means no active provider causes are currently above zero. Panel exposes direct provider incident runbook handoff. |
+| 9103 | Inspect Provider Top Causes                    | Table          | `topk(5, bioetl_provider_current_cause > 0)`                                                                         | Current cause chips: raw health status, failure rate, retry exhaustion, latency, HTTP errors, rate-limit pressure. Empty table means no active provider causes are currently above zero; this is consistent with `Monitor GLOBAL Provider Severity Matrix = 0 (OK)`. Panel exposes direct provider incident runbook handoff. |
 | 9002 | First Action                                   | Text           | n/a                                                                                                                  | CTA: review the GLOBAL severity matrix, inspect critical providers, or inspect provider top causes before leaving the dashboard. |
 | 1   | Track Health Check Latency by Provider (p95)    | Timeseries     | `histogram_quantile(0.95, sum by (le, provider) (increase(...[$__interval])))`                                       | Selected-range evidence: p95 latency trend по выбранным providers; `No data` сохраняется как diagnostic gap, не маскируется в `0s`. |
 | 114 | Monitor Current Provider Health Status          | Table          | `max by (provider) (bioetl_provider_health_status{provider=~"$provider"}) or ((bioetl_provider_health_check_provider_universe_15m{provider=~"$provider"} * 0) / (bioetl_provider_health_check_provider_universe_15m{provider=~"$provider"} * 0))` | Текущий raw status по provider с mapping `0=UNHEALTHY`, `1=DEGRADED`, `2=HEALTHY`; если provider universe существует без raw status sample, panel остаётся `UNKNOWN`. |
@@ -1073,8 +1078,11 @@ requires `bioetl_provider_current_status`. Missing anchor telemetry renders
   `level="warning"` parsed fields. Unstructured/global hygiene panels are
   explicitly marked GLOBAL because parse failures cannot be safely scoped by
   pipeline, and they render parsed `.__error__` from the LogQL JSON stage.
+  Empty Explore results can still be legitimate when Loki ingestion/profile
+  wiring is disabled or when the runtime emitted no matching structured logs.
 - Tempo handoff остаётся bounded по `pipeline/run_type`; forensic IDs в runtime
-  dashboard не протаскиваются
+  dashboard не протаскиваются. Empty trace drilldowns are legitimate when the
+  runtime used `NoOpTracing` or when no matching trace spans were exported.
 
 ### Drilldown
 
@@ -2037,6 +2045,24 @@ document. The canonical implementation contract is
 
 Do not add new active lifecycle walkthroughs here. Keep this README focused on
 stack setup, provisioning, dashboard inventory, and validation commands.
+
+### 27.1 Dashboard inventory, drift, and health checks
+
+Use the QA entrypoint below when validating shipped dashboards against docs,
+provisioning, or exported/deployed snapshots:
+
+```bash
+uv run python -m scripts.engineering.qa report-dashboard-inventory --json
+uv run python -m scripts.engineering.qa report-dashboard-inventory --check --json
+uv run python -m scripts.engineering.qa report-dashboard-inventory --health-summary --json
+uv run python -m scripts.engineering.qa report-dashboard-inventory --deployed-dir /path/to/grafana-exports --check --json
+```
+
+`--check` validates docs parity plus provisioning contract. `--health-summary`
+adds a machine-readable rollup for local dashboard health. `--deployed-dir`
+compares shipped JSON against exported/deployed snapshots while ignoring benign
+Grafana export noise such as root `id` / `version` and panel-level
+`pluginVersion`.
 
 ______________________________________________________________________
 

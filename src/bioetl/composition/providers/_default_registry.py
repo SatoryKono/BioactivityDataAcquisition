@@ -23,9 +23,7 @@ class _SupportsDefaultRegistry(Protocol):
     """Protocol for registries exposing a lazy default instance."""
 
     @classmethod
-    def _get_default(
-        cls,
-    ) -> Self:
+    def _get_default(cls) -> Self:
         """Return the lazy default registry instance."""
 
 
@@ -114,6 +112,8 @@ def get_default_provider_registry() -> _SupportsProviderRegistryStore:
     return _default_provider_registry
 
 
-def register_default_provider_config(name: str, config: ProviderConfig) -> None:
+def register_provider_config_in_default_registry(
+    name: str, config: ProviderConfig
+) -> None:
     """Register a provider config through the lazy default-registry seam."""
     get_default_provider_registry().register(name, config)

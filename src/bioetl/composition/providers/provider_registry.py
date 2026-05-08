@@ -1,9 +1,4 @@
-"""Provider registry facade over split helpers.
-
-Retained compatibility obligations are intentionally narrow:
-- class-level ``DefaultRegistryMethod`` mirror for legacy call sites;
-- ``register_default_provider_config()`` and ``ensure_provider_registry_ready()``.
-"""
+"""Provider registry facade. Retained compatibility obligations are intentionally narrow:"""
 
 from __future__ import annotations
 
@@ -16,7 +11,9 @@ from bioetl.composition.providers._default_registry import (
     DefaultRegistryMethod,
     ProvidersDescriptor,
     get_default_provider_registry,
-    register_default_provider_config,
+)
+from bioetl.composition.providers._default_registry import (
+    register_provider_config_in_default_registry as register_default_provider_config,
 )
 from bioetl.composition.providers._models import (
     AdapterCreator,
@@ -26,7 +23,7 @@ from bioetl.composition.providers._models import (
     ProviderSettingsProtocol,
 )
 from bioetl.composition.providers._registry_protocols import (
-    ProviderDataSourceRegistryProtocol,
+    ProviderDataSourceAccessProtocol,
     ProviderRegistrarProtocol,
 )
 from bioetl.composition.providers._store import ProviderStore
@@ -42,7 +39,7 @@ __all__ = [
     "DataSourceCreatorProtocol",
     "HttpConfig",
     "ProviderConfig",
-    "ProviderDataSourceRegistryProtocol",
+    "ProviderDataSourceAccessProtocol",
     "ProviderRegistrarProtocol",
     "ProviderRegistry",
     "create_provider_registry",
