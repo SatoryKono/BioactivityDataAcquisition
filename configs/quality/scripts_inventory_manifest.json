@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-05-08T09:02:37.622278+00:00",
+  "generated_at": "2026-05-08T11:07:38.594514+00:00",
   "summary": {
     "total_scripts": 354,
     "status_counts": {
@@ -4158,7 +4158,7 @@
       "references": [
         {
           "path": ".github/workflows/docs-kpi-weekly.yml",
-          "line": 26,
+          "line": 30,
           "source_group": "ci",
           "text": "uv run python -m scripts.docs check-kpi \\"
         },
@@ -5562,7 +5562,7 @@
       "references": [
         {
           "path": ".github/workflows/quality-debt-weekly.yml",
-          "line": 30,
+          "line": 34,
           "source_group": "ci",
           "text": "uv run python scripts/engineering/ci/report_quality_debt_weekly.py \\"
         },
@@ -7464,7 +7464,7 @@
       "references": [
         {
           "path": ".github/workflows/architecture-docs-nightly.yml",
-          "line": 25,
+          "line": 29,
           "source_group": "ci",
           "text": "run: uv run python scripts/engineering/qa/generate_architecture_dependency_map.py --update"
         },
@@ -8335,7 +8335,7 @@
       "references": [
         {
           "path": ".github/workflows/compiled-artifacts-block.yml",
-          "line": 47,
+          "line": 51,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.engineering.repo check-cleanliness"
         },
@@ -9038,7 +9038,7 @@
         },
         {
           "path": "tests/unit/memory/test_workflow_tooling.py",
-          "line": 200,
+          "line": 217,
           "source_group": "tests",
           "text": "\"source_path\": \"src/memory/query.py\","
         }
@@ -10508,7 +10508,7 @@
       "references": [
         {
           "path": ".github/workflows/quality-debt-weekly.yml",
-          "line": 39,
+          "line": 43,
           "source_group": "ci",
           "text": "uv run python -m scripts.schema analyze-gaps"
         },

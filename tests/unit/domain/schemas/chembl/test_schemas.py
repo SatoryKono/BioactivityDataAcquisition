@@ -278,3 +278,45 @@ class TestChemblSchemas:
 
         with pytest.raises(SchemaError, match=field_name):
             TissueSchema.validate(pd.DataFrame([record]))
+
+    def test_activity_schema_rejects_noncanonical_standard_units(
+        self,
+        base_etl_fields: dict[str, object],
+    ) -> None:
+        """Activity schema should enforce the externalized canonical unit enum."""
+        record = {
+            **base_etl_fields,
+            "_source_batch_id": "batch-1",
+            "_state": "validated",
+            "activity_id": "12345",
+            "assay_id": "CHEMBL123",
+            "molecule_id": "CHEMBL25",
+            "target_id": "CHEMBL1862",
+            "publication_id": "CHEMBL456",
+            "standard_relation": "=",
+            "standard_value": 10.5,
+            "standard_units": "nanomolar",
+            "standard_type": "IC50",
+            "standard_flag": 1,
+            "pchembl_value": 8.0,
+            "potential_duplicate": 0,
+            "bao_endpoint": "BAO_0000190",
+            "uo_units": "UO_0000065",
+            "src_id": 1,
+            "record_id": 100,
+            "relation": "=",
+            "value": 10.5,
+            "units": "nM",
+            "canonical_smiles": "CC",
+            "target_organism": "Homo sapiens",
+            "target_taxonomy_id": 9606.0,
+            "assay_type": "B",
+            "assay_description": "Binding assay",
+            "bao_format": "BAO_0000218",
+            "bao_label": "organism-based format",
+            "journal": "Test Journal",
+            "publication_year": 2024,
+        }
+
+        with pytest.raises(SchemaError, match="standard_units"):
+            ActivitySchema.validate(pd.DataFrame([record]))

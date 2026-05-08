@@ -136,7 +136,13 @@ async def test_workflow_runner_executes_pipeline_then_transform() -> None:
     assert metrics.counters[-1] == (
         "bioetl_workflow_runs_total",
         1,
-        {"workflow": "activity_workflow", "status": "success"},
+        {
+            "workflow": "activity_workflow",
+            "status": "success",
+            "pipeline_context": "chembl_activity",
+            "run_type_context": "incremental",
+            "provider_context": "chembl",
+        },
     )
     assert any(
         name == "bioetl_workflow_step_duration_seconds"
@@ -145,6 +151,9 @@ async def test_workflow_runner_executes_pipeline_then_transform() -> None:
             "workflow": "activity_workflow",
             "step_kind": "pipeline",
             "status": "success",
+            "pipeline_context": "chembl_activity",
+            "run_type_context": "incremental",
+            "provider_context": "chembl",
         }
         for name, _value, labels in metrics.histograms
     )
@@ -182,7 +191,13 @@ async def test_workflow_runner_returns_failed_step_result_for_pipeline_error() -
     assert metrics.counters[-1] == (
         "bioetl_workflow_runs_total",
         1,
-        {"workflow": "activity_workflow", "status": "failed"},
+        {
+            "workflow": "activity_workflow",
+            "status": "failed",
+            "pipeline_context": "chembl_activity",
+            "run_type_context": "incremental",
+            "provider_context": "chembl",
+        },
     )
 
 
@@ -228,6 +243,9 @@ async def test_workflow_runner_marks_downstream_steps_skipped_after_failure() ->
             "workflow": "activity_workflow",
             "step_kind": "transform",
             "status": "skipped",
+            "pipeline_context": "chembl_activity",
+            "run_type_context": "incremental",
+            "provider_context": "chembl",
         },
     ) in metrics.counters
 

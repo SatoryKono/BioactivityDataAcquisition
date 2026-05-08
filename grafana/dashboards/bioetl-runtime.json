@@ -31,6 +31,7 @@
         "mode": "html"
       },
       "title": "Review Dashboard Navigation",
+      "description": "Top navigation bus for the dashboard suite. Uses same-tab handoffs, preserves the current time range, resets unsupported dashboard-specific scope where needed, and exposes Explore Logs / Explore Traces links that require the optional tracing profile.",
       "type": "text",
       "links": [
         {
@@ -440,7 +441,7 @@
       "pluginVersion": "10.4.0",
       "targets": [
         {
-          "expr": "topk(3, bioetl_runtime_current_blocker_reason{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} > 0)",
+          "expr": "topk(3, bioetl_runtime_current_blocker_reason{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\"} > 0)",
           "format": "table",
           "instant": true,
           "legendFormat": "{{pipeline}} {{run_type}} {{reason}} {{severity}} {{action_target}}",
@@ -701,7 +702,7 @@
       },
       "targets": [
         {
-          "expr": "(sum(increase(bioetl_errors_total{pipeline=~\"$pipeline\",stage=~\"$stage\"}[30m])) / clamp_min(sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\",stage=\"bronze\"}[30m])), 1)) and (sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\",stage=\"bronze\"}[30m])) >= 20)",
+          "expr": "(sum(increase(bioetl_errors_total{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",stage=~\"$stage\"}[30m])) / clamp_min(sum(increase(bioetl_records_processed_total{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",stage=\"bronze\"}[30m])), 1)) and (sum(increase(bioetl_records_processed_total{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",stage=\"bronze\"}[30m])) >= 20)",
           "refId": "A"
         }
       ],
@@ -870,63 +871,63 @@
       "pluginVersion": "10.4.0",
       "targets": [
         {
-          "expr": "label_replace(bioetl_runtime_alert_condition_pipeline_preflight_failed_15m{pipeline=~\"$pipeline\"} > 0, \"blocker\", \"preflight_failed\", \"\", \"\")",
+          "expr": "label_replace(bioetl_runtime_alert_condition_pipeline_preflight_failed_15m{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\"} > 0, \"blocker\", \"preflight_failed\", \"\", \"\")",
           "legendFormat": "{{pipeline}} / {{blocker}}",
           "refId": "A",
           "instant": true,
           "format": "table"
         },
         {
-          "expr": "label_replace(bioetl_runtime_alert_condition_pipeline_infrastructure_failed_15m{pipeline=~\"$pipeline\"} > 0, \"blocker\", \"infrastructure_failed\", \"\", \"\")",
+          "expr": "label_replace(bioetl_runtime_alert_condition_pipeline_infrastructure_failed_15m{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\"} > 0, \"blocker\", \"infrastructure_failed\", \"\", \"\")",
           "legendFormat": "{{pipeline}} / {{blocker}}",
           "refId": "H",
           "instant": true,
           "format": "table"
         },
         {
-          "expr": "label_replace(bioetl_runtime_alert_condition_pipeline_runs_failed_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} > 0, \"blocker\", \"runs_failed\", \"\", \"\")",
+          "expr": "label_replace(bioetl_runtime_alert_condition_pipeline_runs_failed_15m{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\"} > 0, \"blocker\", \"runs_failed\", \"\", \"\")",
           "legendFormat": "{{pipeline}} / {{blocker}}",
           "refId": "B",
           "instant": true,
           "format": "table"
         },
         {
-          "expr": "label_replace(bioetl_runtime_alert_condition_stage_backlog_active_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} > 0, \"blocker\", \"stage_backlog_active\", \"\", \"\")",
+          "expr": "label_replace(bioetl_runtime_alert_condition_stage_backlog_active_15m{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\"} > 0, \"blocker\", \"stage_backlog_active\", \"\", \"\")",
           "legendFormat": "{{pipeline}} / {{stage}} / {{blocker}}",
           "refId": "C",
           "instant": true,
           "format": "table"
         },
         {
-          "expr": "label_replace(bioetl_runtime_alert_condition_stage_lag_high_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} > 0, \"blocker\", \"stage_lag_high\", \"\", \"\")",
+          "expr": "label_replace(bioetl_runtime_alert_condition_stage_lag_high_15m{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\"} > 0, \"blocker\", \"stage_lag_high\", \"\", \"\")",
           "legendFormat": "{{pipeline}} / {{stage}} / {{blocker}}",
           "refId": "D",
           "instant": true,
           "format": "table"
         },
         {
-          "expr": "label_replace(bioetl_runtime_alert_condition_gold_write_missing_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} > 0, \"blocker\", \"gold_write_missing\", \"\", \"\")",
+          "expr": "label_replace(bioetl_runtime_alert_condition_gold_write_missing_15m{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\"} > 0, \"blocker\", \"gold_write_missing\", \"\", \"\")",
           "legendFormat": "{{pipeline}} / {{blocker}}",
           "refId": "E",
           "instant": true,
           "format": "table"
         },
         {
-          "expr": "label_replace(bioetl_runtime_alert_condition_no_terminal_run_30m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} > 0, \"blocker\", \"no_terminal_run\", \"\", \"\")",
+          "expr": "label_replace(bioetl_runtime_alert_condition_no_terminal_run_30m{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\"} > 0, \"blocker\", \"no_terminal_run\", \"\", \"\")",
           "legendFormat": "{{pipeline}} / {{blocker}}",
           "refId": "F",
           "instant": true,
           "format": "table"
         },
         {
-          "expr": "label_replace(bioetl_runtime_alert_condition_ingestion_throughput_degraded_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} > 0, \"blocker\", \"ingestion_throughput_degraded\", \"\", \"\")",
+          "expr": "label_replace(bioetl_runtime_alert_condition_ingestion_throughput_degraded_15m{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\"} > 0, \"blocker\", \"ingestion_throughput_degraded\", \"\", \"\")",
           "legendFormat": "{{pipeline}} / {{blocker}}",
           "refId": "I",
           "instant": true,
           "format": "table"
         },
         {
-          "expr": "label_replace(bioetl_runtime_alert_condition_record_flow_invariant_violated_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} > 0, \"blocker\", \"flow_invariant_violated\", \"\", \"\")",
+          "expr": "label_replace(bioetl_runtime_alert_condition_record_flow_invariant_violated_15m{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\"} > 0, \"blocker\", \"flow_invariant_violated\", \"\", \"\")",
           "legendFormat": "{{pipeline}} / {{blocker}}",
           "refId": "G",
           "instant": true,
@@ -1057,12 +1058,11 @@
             "tooltip": {
               "mode": "multi",
               "sort": "desc"
-            },
-            "dataLinks": []
+            }
           },
           "targets": [
             {
-              "expr": "max by(stage) (bioetl_stage_backlog_records{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=~\"$stage\"})",
+              "expr": "max by(stage) (bioetl_stage_backlog_records{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\",stage=~\"$stage\"})",
               "legendFormat": "{{stage}}",
               "refId": "A"
             }
@@ -1132,7 +1132,6 @@
           "id": 243,
           "options": {
             "cellHeight": "sm",
-            "dataLinks": [],
             "footer": {
               "countRows": false,
               "fields": "",
@@ -1228,8 +1227,7 @@
             "tooltip": {
               "mode": "multi",
               "sort": "desc"
-            },
-            "dataLinks": []
+            }
           },
           "targets": [
             {
@@ -1412,17 +1410,17 @@
           },
           "targets": [
             {
-              "expr": "histogram_quantile(0.50, sum by (le, stage, status, run_type) (rate(bioetl_pipeline_duration_seconds_bucket{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=~\"$stage\"}[$__rate_interval])))",
+              "expr": "histogram_quantile(0.50, sum by (le, stage, status, run_type) (rate(bioetl_pipeline_duration_seconds_bucket{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\",stage=~\"$stage\"}[$__rate_interval])))",
               "legendFormat": "{{stage}} / {{status}} / {{run_type}} p50",
               "refId": "A"
             },
             {
-              "expr": "histogram_quantile(0.95, sum by (le, stage, status, run_type) (rate(bioetl_pipeline_duration_seconds_bucket{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=~\"$stage\"}[$__rate_interval])))",
+              "expr": "histogram_quantile(0.95, sum by (le, stage, status, run_type) (rate(bioetl_pipeline_duration_seconds_bucket{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\",stage=~\"$stage\"}[$__rate_interval])))",
               "legendFormat": "{{stage}} / {{status}} / {{run_type}} p95",
               "refId": "B"
             },
             {
-              "expr": "histogram_quantile(0.99, sum by (le, stage, status, run_type) (rate(bioetl_pipeline_duration_seconds_bucket{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=~\"$stage\"}[$__rate_interval])))",
+              "expr": "histogram_quantile(0.99, sum by (le, stage, status, run_type) (rate(bioetl_pipeline_duration_seconds_bucket{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\",stage=~\"$stage\"}[$__rate_interval])))",
               "legendFormat": "{{stage}} / {{status}} / {{run_type}} p99",
               "refId": "C"
             }
@@ -1552,8 +1550,7 @@
             },
             "showUnfilled": true,
             "text": {},
-            "textMode": "auto",
-            "dataLinks": []
+            "textMode": "auto"
           },
           "targets": [
             {
@@ -2309,7 +2306,7 @@
           "description": "Adaptive memory pressure state over the last 15m. 0=OK/no active pressure, 1=WARN/runtime memory pressure active, >=2=CRIT reserved for future severity recording rules, null=UNKNOWN/missing memory telemetry. This is stage-level and intentionally ignores run_type because the metric labels are pipeline/stage/reason/monitor_mode/status. Next action: open logs and inspect checkpoint/resume pressure before retrying.",
           "targets": [
             {
-              "expr": "max(max_over_time(bioetl_memory_pressure_state{pipeline=~\"$pipeline\",stage=~\"$stage\"}[15m]))",
+              "expr": "max(max_over_time(bioetl_memory_pressure_state{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",stage=~\"$stage\"}[15m]))",
               "refId": "A"
             }
           ],

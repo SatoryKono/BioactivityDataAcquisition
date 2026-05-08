@@ -7,6 +7,7 @@ import pytest
 from bioetl.domain.workflow import (
     TransformStepConfig,
     WorkflowConfig,
+    WorkflowRunOptionsConfig,
     WorkflowDagValidationError,
     WorkflowStepConfig,
     topologically_sorted_step_ids,
@@ -88,3 +89,56 @@ def test_workflow_config_rejects_dependency_cycles() -> None:
                 ),
             ),
         )
+
+
+@pytest.mark.unit
+def test_single_pipeline_workflow_exposes_concrete_handoff_context() -> None:
+    config = WorkflowConfig(
+        name="chembl_assay",
+        defaults=WorkflowRunOptionsConfig(run_type="backfill"),
+        steps=(
+            WorkflowStepConfig(
+                step_id="extract",
+                pipeline_name="chembl_assay",
+            ),
+            TransformStepConfig(
+                step_id="normalize",
+                transform_name="normalize_activity_snapshot",
+                depends_on=("extract",),
+            ),
+        ),
+    )
+
+    assert config.pipeline_names == ("chembl_assay",)
+    assert config.single_pipeline_name == "chembl_assay"
+    assert config.pipeline_context == "chembl_assay"
+    assert config.run_type_context == "backfill"
+    assert config.provider_context == "chembl"
+    assert config.workflow_context_labels == {
+        "pipeline_context": "chembl_assay",
+        "run_type_context": "backfill",
+        "provider_context": "chembl",
+    }
+
+
+@pytest.mark.unit
+def test_multi_pipeline_workflow_fail_closes_handoff_context() -> None:
+    config = WorkflowConfig(
+        name="publication_provider_pack",
+        steps=(
+            WorkflowStepConfig(
+                step_id="crossref",
+                pipeline_name="crossref_publication",
+            ),
+            WorkflowStepConfig(
+                step_id="openalex",
+                pipeline_name="openalex_publication",
+            ),
+        ),
+    )
+
+    assert config.pipeline_names == ("crossref_publication", "openalex_publication")
+    assert config.single_pipeline_name is None
+    assert config.pipeline_context == "unknown"
+    assert config.run_type_context == "All"
+    assert config.provider_context == "unknown"

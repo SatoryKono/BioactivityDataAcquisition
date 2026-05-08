@@ -23,3 +23,15 @@ scrape_configs:
           job: bioetl
           source: file
           __path__: /workspace-logs/*.jsonl
+      - targets:
+          - localhost
+        labels:
+          job: bioetl
+          source: file
+          __path__: /workspace-report-logs/*.log
+      - targets:
+          - localhost
+        labels:
+          job: bioetl
+          source: file
+          __path__: /workspace-report-logs/*.jsonl

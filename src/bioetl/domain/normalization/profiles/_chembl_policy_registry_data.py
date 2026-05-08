@@ -115,6 +115,11 @@ DEFAULT_CHEMBL_POLICY_REGISTRY_DATA = ChemblPolicyRegistryData(
     ),
     controlled_vocabularies=(
         ChemblControlledVocabularyFamily(
+            family_name="activity_action_types",
+            invalid_value_mode="preserve_unknown_uppercase_lexeme",
+            fields=("chembl_activity.action_type",),
+        ),
+        ChemblControlledVocabularyFamily(
             family_name="raw_units",
             invalid_value_mode="preserve_unknown_lexeme",
             fields=(

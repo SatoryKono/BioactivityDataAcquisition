@@ -9,6 +9,15 @@ from __future__ import annotations
 
 STANDARD_RELATIONS: frozenset[str] = frozenset(["=", "<", "<=", ">", ">=", "~"])
 
+ACTIVITY_ACTION_TYPES: frozenset[str] = frozenset(
+    [
+        "AGONIST",
+        "ANTAGONIST",
+        "INHIBITOR",
+        "PARTIAL AGONIST",
+    ]
+)
+
 ACTIVITY_STANDARD_TYPES: frozenset[str] = frozenset(
     [
         "IC50",
@@ -215,6 +224,7 @@ PUBLICATION_TERM_TYPES: frozenset[str] = frozenset(
 )
 
 CHEMBL_ENUM_CATALOG: dict[tuple[str, str], frozenset[str]] = {
+    ("activity", "action_type"): ACTIVITY_ACTION_TYPES,
     ("activity", "assay_type"): ASSAY_TYPES,
     ("activity", "data_validity_comment"): DATA_VALIDITY_COMMENTS,
     ("activity", "standard_relation"): STANDARD_RELATIONS,
@@ -240,6 +250,7 @@ CHEMBL_ENUM_CATALOG: dict[tuple[str, str], frozenset[str]] = {
 }
 
 __all__ = [
+    "ACTIVITY_ACTION_TYPES",
     "ACTIVITY_STANDARD_TYPES",
     "ACTIVITY_STANDARD_UNITS",
     "ASSAY_CATEGORIES",

@@ -108,6 +108,11 @@ bioetl workflow status <NAME> [OPTIONS]
   workflow execution state.
 - `workflow status` использует persisted workflow state, если он существует;
   если нет, команда честно возвращает bounded topology-only surface.
+- `workflow run --tracing` нужен, если оператор ожидает непустой handoff в
+  `Explore Traces`; без него runtime может использовать `NoOpTracing`.
+- `Explore Logs` для workflow runs опирается на CLI structured logs в
+  `reports/logs/bioetl.log`, которые должен ingest-ить optional `tracing`
+  profile через `promtail`.
 - `workflow run` starts the local metrics HTTP server on demand and performs a
   best-effort metrics publication flush on command completion so shipped
   Prometheus/Grafana workflow surfaces can observe completed workflow runs.

@@ -66,6 +66,7 @@ class WorkflowTransformService:
         workflow_name: str,
         step: TransformStepConfig,
         upstream_outputs: Mapping[str, object] | None = None,
+        context_labels: Mapping[str, str] | None = None,
         completed_fingerprints: Mapping[str, str] | None = None,
         destructive_commit_callback: (
             Callable[[WorkflowTransformDestructiveCommit], None] | None
@@ -81,6 +82,7 @@ class WorkflowTransformService:
                 workflow_name=workflow_name,
                 status="skipped",
                 duration_seconds=0.0,
+                context_labels=context_labels,
             )
             return WorkflowTransformExecutionResult(
                 step_id=step.step_id,
@@ -109,6 +111,7 @@ class WorkflowTransformService:
                 workflow_name=workflow_name,
                 status="failed",
                 duration_seconds=self.monotonic() - started,
+                context_labels=context_labels,
             )
             return WorkflowTransformExecutionResult(
                 step_id=step.step_id,
@@ -123,6 +126,7 @@ class WorkflowTransformService:
             workflow_name=workflow_name,
             status="success",
             duration_seconds=self.monotonic() - started,
+            context_labels=context_labels,
         )
         return WorkflowTransformExecutionResult(
             step_id=step.step_id,
@@ -138,11 +142,13 @@ class WorkflowTransformService:
         workflow_name: str,
         status: str,
         duration_seconds: float,
+        context_labels: Mapping[str, str] | None = None,
     ) -> None:
         labels = {
             "workflow": workflow_name,
             "step_kind": _STEP_KIND_TRANSFORM,
             "status": status,
+            **dict(context_labels or {}),
         }
         self.metrics.increment_counter(_WORKFLOW_STEP_EVENTS_TOTAL, 1, labels)
         self.metrics.observe_histogram(

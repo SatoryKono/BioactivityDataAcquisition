@@ -73,6 +73,13 @@ class TestYamlFileIntegrity:
 class TestActivitySync:
     """Activity enum constants must match YAML."""
 
+    def test_activity_action_types(self, chembl_yaml: dict[str, Any]) -> None:
+        from bioetl.domain.schemas.constants import ACTIVITY_ACTION_TYPES
+
+        assert ACTIVITY_ACTION_TYPES == frozenset(
+            chembl_yaml["activity"]["action_types"]
+        )
+
     def test_standard_relations(self, chembl_yaml: dict[str, Any]) -> None:
         from bioetl.domain.schemas.constants import STANDARD_RELATIONS
 

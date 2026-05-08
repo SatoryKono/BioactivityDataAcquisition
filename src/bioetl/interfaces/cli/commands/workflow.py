@@ -271,8 +271,8 @@ def run_workflow_command(
     )
     publish_metrics_safely(
         run_label="bioetl",
-        pipeline_name=f"workflow_{config.name}",
-        run_type=config.defaults.run_type,
+        pipeline_name=config.pipeline_context,
+        run_type=config.run_type_context,
         grouping_key_extra=(
             {"workflow_run_id": result.workflow_run_id}
             if result.workflow_run_id is not None

@@ -1124,3 +1124,90 @@ def test_selected_range_kpis_do_not_use_raw_counters() -> None:
                 f"Panel {panel_title!r} in {dashboard_name} must not use "
                 "last_over_time() for counter-range KPIs"
             )
+
+
+def test_exact_duplicate_promql_groups_are_only_explicitly_justified_reuse() -> None:
+    """Exact duplicate PromQL must stay limited to audited, role-justified reuse."""
+    observed_uses_by_expr: dict[str, set[tuple[str, str]]] = {}
+
+    for dashboard_path in get_dashboard_files():
+        dashboard = load_dashboard(dashboard_path)
+        for panel in get_dashboard_panels(dashboard):
+            title = panel.get("title")
+            if not isinstance(title, str):
+                continue
+            for target in panel.get("targets", []):
+                expr = target.get("expr")
+                if not isinstance(expr, str) or not expr.strip():
+                    continue
+                normalized_expr = " ".join(expr.split())
+                observed_uses_by_expr.setdefault(normalized_expr, set()).add(
+                    (dashboard_path.name, title)
+                )
+
+    duplicate_uses_by_expr = {
+        expr: uses for expr, uses in observed_uses_by_expr.items() if len(uses) > 1
+    }
+    expected_duplicate_uses = {
+        '((sum((bioetl_dq_validation_score{pipeline=~"$pipeline"} * '
+        'bioetl_dq_validation_record_count{pipeline=~"$pipeline"}))) / '
+        'clamp_min(sum(bioetl_dq_validation_record_count{pipeline=~"$pipeline"}), '
+        "1))": {
+            (
+                "bioetl-dq-v2.json",
+                "Monitor: Data Quality Score (Volume-weighted)",
+            ),
+            (
+                "bioetl-dq-v2.json",
+                "Track: Data Quality Score Trend (Volume-weighted)",
+            ),
+        },
+        'round(sum(increase(bioetl_lineage_refs_missing_total{pipeline=~"$pipeline"}'
+        "[$__range])) or vector(0))": {
+            ("bioetl-control-plane-v1.json", "Monitor: Lineage Refs Missing"),
+            ("bioetl-dq-v2.json", "Monitor: Lineage Refs Missing"),
+        },
+    }
+    assert duplicate_uses_by_expr == expected_duplicate_uses, (
+        "Dashboard exact PromQL duplication drifted outside the audited allowlist: "
+        f"{duplicate_uses_by_expr}"
+    )
+
+    dq_dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
+    dq_panels = {
+        panel.get("title"): panel
+        for panel in get_dashboard_panels(dq_dashboard)
+        if panel.get("title")
+    }
+    score_gauge = dq_panels["Monitor: Data Quality Score (Volume-weighted)"]
+    score_trend = dq_panels["Track: Data Quality Score Trend (Volume-weighted)"]
+    assert score_gauge.get("type") == "gauge"
+    assert score_gauge.get("options", {}).get("showThresholdMarkers") is True
+    assert score_trend.get("type") == "timeseries"
+    assert score_trend.get("options", {}).get("tooltip", {}).get("mode") == "single"
+    assert "review trend" in str(score_gauge.get("description", "")).lower()
+    assert (
+        "trend over selected time range"
+        in str(score_trend.get("description", "")).lower()
+    )
+
+    control_plane_dashboard = load_dashboard(
+        Path("grafana/dashboards/bioetl-control-plane-v1.json")
+    )
+    control_plane_panels = {
+        panel.get("title"): panel
+        for panel in get_dashboard_panels(control_plane_dashboard)
+        if panel.get("title")
+    }
+    dq_lineage = dq_panels["Monitor: Lineage Refs Missing"]
+    control_plane_lineage = control_plane_panels["Monitor: Lineage Refs Missing"]
+    assert dq_lineage.get("options", {}).get("graphMode") == "none"
+    assert control_plane_lineage.get("options", {}).get("graphMode") == "area"
+    assert (
+        "does not replace control plane diagnostics"
+        in str(dq_lineage.get("description", "")).lower()
+    )
+    assert (
+        "missing lineage can make replay evidence incomplete"
+        in str(control_plane_lineage.get("description", "")).lower()
+    )

@@ -12,7 +12,7 @@ from bioetl.composition.factories.pipeline.registry_manifest import (
     PipelineFactoryConfig,
 )
 from bioetl.composition.providers.provider_registry import (
-    ProviderDataSourceRegistryProtocol,
+    ProviderDataSourceAccessProtocol,
 )
 from bioetl.domain.types import GoldSchemaType
 from bioetl.infrastructure.config import load_pipeline_contract_policy
@@ -62,7 +62,7 @@ def _validate_contract_policy(config: PipelineFactoryConfig) -> None:
 def create_factory(
     config: PipelineFactoryConfig,
     *,
-    provider_registry: ProviderDataSourceRegistryProtocol | None = None,
+    provider_registry: ProviderDataSourceAccessProtocol | None = None,
 ) -> GenericPipelineFactory[GenericPipeline]:
     """Create a GenericPipelineFactory from configuration.
 

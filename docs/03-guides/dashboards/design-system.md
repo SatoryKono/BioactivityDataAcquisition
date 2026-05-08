@@ -76,6 +76,32 @@ DEGRADED / FAILING`, `CLOSED / HALF-OPEN / OPEN`) или на range-evidence car
 - BROKEN: `>= 2`
 - UNKNOWN: отсутствие данных/NaN/null отображается как unknown-состояние, а не как OK.
 
+### 2.3 Panel-type visualization standards (role-aware)
+
+Dashboard panel visualization settings are standardized by panel role, not by a
+blanket rule for every plugin type.
+
+| Panel role | Required visualization settings |
+| --- | --- |
+| Current-status `stat` | `fieldConfig.defaults.color.mode=thresholds`; `options.colorMode=background` for designated first-screen severity cards; `null -> UNKNOWN` mapping where the panel is fail-closed. |
+| Selected-range trend `stat` | `options.colorMode=value`; `options.graphMode=area`; threshold colors must match the measured operator risk. |
+| Selected-range count `stat` | `options.colorMode=value`; `options.graphMode=none`; `or vector(0)` only when missing series means zero events. |
+| Percentage, score, latency, or duration `gauge` | `options.showThresholdMarkers=true`; `options.showThresholdLabels=false` unless a panel-specific exception is documented with operator rationale. |
+| Status or route `table` column | Use `custom.cellOptions.type=color-background` for the status/route field override. |
+| Data or forensic `table` | Use `custom.cellOptions.type=auto` when an explicit default is configured; datasource/plugin defaults are allowed for HTTP-backed forensic tables. |
+| Comparative or multi-series `timeseries` | `options.tooltip.mode=multi`; `options.tooltip.sort=desc`. |
+| Scalar trend `timeseries` | `options.tooltip.mode=single`; `options.tooltip.sort=none` or omitted. |
+
+Allowed table `custom.cellOptions.type` values are `auto`, `color-background`,
+and `color-text`. Introducing a new table cell option type requires updating
+`scripts.engineering.qa check-dashboard-visual-semantics` and this design
+system in the same change.
+
+Implementation note: scalar trend exceptions are explicit, because panels such
+as volume-weighted DQ score trends and L0 mirror status trends are easier to
+read with single-point hover behavior. Do not apply `multi/desc` to every
+timeseries without checking whether the panel compares multiple series.
+
 ## 3) Единый стиль заголовков и описаний панелей (обязательно)
 
 ### 3.1 Заголовок (action-first)
@@ -276,6 +302,7 @@ datasource/query failure по роли панели.
 
 ```bash
 uv run python -m scripts.engineering.qa check-dashboard-visual-semantics
+uv run python -m scripts.engineering.qa report-dashboard-query-duplicates
 ```
 
 Проверка валидирует:
@@ -287,6 +314,47 @@ uv run python -m scripts.engineering.qa check-dashboard-visual-semantics
   `tests/integration/test_grafana_dashboard_first_screen_contract.py`
 - `background` colorMode + explicit `OK/WARN/CRIT` value mappings для
   designated current-status severity stat panels
+
+## 6.1) PromQL duplication policy (обязательно)
+
+Штатный audit surface для duplicate-query обзора:
+
+```bash
+uv run python -m scripts.engineering.qa report-dashboard-query-duplicates
+```
+
+Норматив:
+
+- Exact duplicate PromQL across more than one panel MUST быть либо:
+  - intentionally reused and audited with role-specific justification,
+  - либо consolidated into a recording rule or a single canonical panel surface.
+- Near-duplicate query families SHOULD оставаться panel-local only when они
+  выражают одну и ту же metric family как sibling breakdown:
+  - percentile triplets (`p50/p95/p99`) inside one latency panel,
+  - stage-specific or status-specific variants inside one comparison surface.
+- Если один и тот же query family повторяется across multiple panels or across
+  dashboards, приоритет такой:
+  1. recording rule / shared canonical metric,
+  2. explicit justification in dashboard audit/tests,
+  3. raw duplication only as a temporary exception.
+
+Current audited exact-duplicate reuse:
+
+- `Monitor: Data Quality Score (Volume-weighted)` and
+  `Track: Data Quality Score Trend (Volume-weighted)` in `bioetl-dq-v2` share
+  one weighted-score expression intentionally because they answer different UI
+  roles: current gauge verdict vs trend review.
+- `Monitor: Lineage Refs Missing` is intentionally reused between
+  `bioetl-control-plane-v1` and `bioetl-dq-v2` because the same counter
+  supports two different operator questions: replay/control-plane trust and DQ
+  completeness risk.
+
+Implementation guardrails:
+
+- Justified exact duplicates MUST remain audited in
+  `tests/integration/test_grafana_dashboard_metric_semantics.py`.
+- The report command is report-only; it is for discovery and review, not for
+  automatic JSON rewrites.
 
 ## 7) UI-лексика навигации (обязательно)
 
@@ -323,6 +391,33 @@ uv run python -m scripts.engineering.qa check-dashboard-visual-semantics
 
 - `Preserves selected scope and time range.`
 
+### 7.3) Role-based runbook CTA policy (обязательно)
+
+Покрытие runbook CTA управляется ролью dashboard-а, а не blanket-правилом
+“каждая current/error/blocker/failed/skipped panel обязана вести в runbook”.
+
+Норматив:
+
+- `bioetl-control-plane-v1`, `bioetl-runtime`, `bioetl-provider-health-v2`,
+  `bioetl-dq-v2` и `bioetl-silver-reject-explorer` считаются operator/forensic
+  surfaces. Их критичные панели SHOULD иметь actionable CTA; этот CTA MAY вести
+  в runbook, соседний dashboard, либо в оба target-а, если исключение явно
+  оправдано.
+- `bioetl-overview-v2` является dashboard-routing-first surface. Panel-level
+  CTA здесь MAY оставаться dashboard-only и по умолчанию не требует прямых
+  runbook links.
+- `bioetl-workflow-overview` является selected-range evidence surface. Его
+  четыре summary counters selected-range evidence не требуют panel-level
+  runbook links; shipped `Next Diagnostic Surface` остаётся единственным
+  оправданным dashboard-handoff CTA exception на этой странице.
+- Если используется runbook link, URL MUST follow canonical GitHub blob pattern:
+  `https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/<name>.md`
+- Названия runbook links SHOULD оставаться domain-specific (`Open Runtime
+  Troubleshooting Runbook`, `Open Provider Incident Runbook`, `Open Quarantine
+  Management Runbook`), а не схлопываться до generic `Open Runbook`.
+- Одна panel MUST NOT смешивать конфликтующие runbook families, если такое
+  исключение не задокументировано и не прошло review.
+
 ## 7.1) L1 layout rule: answer-first above fold (обязательно)
 
 Для L1 control-plane dashboards первый экран (above fold) MUST отвечать на
@@ -349,6 +444,47 @@ dashboard: для первичной навигации используется
   "timezone": "browser"
 }
 ```
+
+## 8.1) Metadata policy: refresh, schemaVersion, iteration, tags
+
+Metadata MUST follow repo policy rather than mechanical suite-wide rewrites:
+
+- `refresh` and default `time.from` are governed by the machine-readable contract
+  in `docs/03-guides/dashboards/contracts/navigation-links.yaml`.
+  Operator-facing dashboards keep the L0/L1 baseline `time.from=now-12h` and
+  `refresh=30s`; `bioetl-silver-reject-explorer` is the explicit forensic
+  exception with `time.from=now-24h` and `refresh=1m`.
+- `schemaVersion` MAY remain `30` or `39` until an explicit Grafana migration
+  decision is approved. Do not bulk-upgrade exported JSON mechanically just to
+  force one number across the suite.
+- `iteration` is optional. If present, it MUST be a positive integer and should
+  be used only for deliberate exported revision tracking, not added everywhere
+  as decoration.
+- `tags` MUST include the baseline suite tag `bioetl`. Additional role/domain
+  tags MAY vary by dashboard (`overview`, `runtime`, `control-plane`,
+  `provider`, `workflow`, `explorer`, etc.) when they improve search and
+  discoverability.
+
+## 8.2) Technical configuration policy: governed fields vs export noise
+
+Shipped dashboards MUST distinguish between meaningful root configuration
+invariants and benign Grafana export artifacts.
+
+Governed root fields:
+
+- `style` MUST be `"dark"` for every shipped dashboard.
+- `editable` MUST remain `true`.
+- `graphTooltip` MUST remain `1`.
+- `hideControls` is optional; if exported explicitly, it MUST be `false`.
+
+Benign export noise:
+
+- Mixed panel-level `pluginVersion` values are NOT a standalone correctness failure.
+- The repo MUST NOT bulk-rewrite shipped dashboard JSON just to force one
+  `pluginVersion` across every panel unless a real Grafana import/export,
+  rendering, or compatibility regression is proven first.
+- When such a regression is proven, the migration plan SHOULD be documented and
+  tested before any mechanical export rewrite lands.
 
 
 ## 9) Actionable links for critical panels (обязательно)

@@ -14,6 +14,12 @@ version: "chembl_35"
 # Activity
 # =============================================================================
 activity:
+    action_types:
+        - AGONIST
+        - ANTAGONIST
+        - INHIBITOR
+        - PARTIAL AGONIST
+
     standard_relations:
         - "="
         - "<"

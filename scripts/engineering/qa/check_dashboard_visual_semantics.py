@@ -56,6 +56,14 @@ BACKGROUND_SEVERITY_STAT_PANELS = {
     ("bioetl-control-plane-v1.json", "Monitor: Manifest / Ledger Integrity"),
     ("bioetl-control-plane-v1.json", "Inspect: Telemetry Missing"),
 }
+SCALAR_TREND_TIMESERIES_PANELS = {
+    ("bioetl-dq-v2.json", "Track: Data Quality Score Trend (Volume-weighted)"),
+    ("bioetl-dq-v2.json", "Track: DQ Impact on Deliverability Trend (Blocked Share %)"),
+    ("bioetl-overview-v2.json", "Runtime Blockers Trend"),
+    ("bioetl-overview-v2.json", "DQ Status Trend"),
+    ("bioetl-overview-v2.json", "Gold Lifecycle Trend"),
+}
+ALLOWED_TABLE_CELL_OPTION_TYPES = {"auto", "color-background", "color-text"}
 EXPLICIT_VALUE_MAPPING_STAT_PANELS = {
     ("bioetl-overview-v2.json", "System Status"): {
         "0": {"text": "OK", "color": "green"},
@@ -178,6 +186,81 @@ def _stat_panel_visual_semantics_errors(dashboard_path: Path, panel: dict) -> li
     return errors
 
 
+def _gauge_panel_visual_semantics_errors(
+    dashboard_path: Path, panel: dict
+) -> list[str]:
+    title = panel.get("title", "<untitled>")
+    options = panel.get("options", {})
+    errors: list[str] = []
+
+    if options.get("showThresholdMarkers") is not True:
+        errors.append(
+            f"{dashboard_path}: gauge panel '{title}' must show threshold markers"
+        )
+    if options.get("showThresholdLabels") is not False:
+        errors.append(
+            f"{dashboard_path}: gauge panel '{title}' must hide threshold labels"
+        )
+
+    return errors
+
+
+def _table_panel_visual_semantics_errors(
+    dashboard_path: Path, panel: dict
+) -> list[str]:
+    title = panel.get("title", "<untitled>")
+    field_config = panel.get("fieldConfig", {})
+    errors: list[str] = []
+
+    default_cell_options = (
+        field_config.get("defaults", {}).get("custom", {}).get("cellOptions")
+    )
+    if isinstance(default_cell_options, dict):
+        cell_type = default_cell_options.get("type")
+        if cell_type not in ALLOWED_TABLE_CELL_OPTION_TYPES:
+            errors.append(
+                f"{dashboard_path}: table panel '{title}' has unsupported default cellOptions.type={cell_type!r}"
+            )
+
+    for override in field_config.get("overrides", []):
+        matcher = override.get("matcher", {}).get("options", "<unknown>")
+        for prop in override.get("properties", []):
+            if prop.get("id") != "custom.cellOptions":
+                continue
+            value = prop.get("value")
+            cell_type = value.get("type") if isinstance(value, dict) else None
+            if cell_type not in ALLOWED_TABLE_CELL_OPTION_TYPES:
+                errors.append(
+                    f"{dashboard_path}: table panel '{title}' override {matcher!r} "
+                    f"has unsupported cellOptions.type={cell_type!r}"
+                )
+
+    return errors
+
+
+def _timeseries_panel_visual_semantics_errors(
+    dashboard_path: Path, panel: dict
+) -> list[str]:
+    title = str(panel.get("title", "<untitled>"))
+    tooltip = panel.get("options", {}).get("tooltip", {})
+    is_scalar_trend = (dashboard_path.name, title) in SCALAR_TREND_TIMESERIES_PANELS
+    expected_mode = "single" if is_scalar_trend else "multi"
+    expected_sort = "none" if is_scalar_trend else "desc"
+    actual_sort = tooltip.get("sort", "none")
+    errors: list[str] = []
+
+    if tooltip.get("mode") != expected_mode:
+        errors.append(
+            f"{dashboard_path}: timeseries panel '{title}' must use tooltip.mode={expected_mode!r}"
+        )
+    if actual_sort != expected_sort:
+        errors.append(
+            f"{dashboard_path}: timeseries panel '{title}' must use tooltip.sort={expected_sort!r}"
+        )
+
+    return errors
+
+
 def _expected_threshold_steps(dashboard_path: Path, title: str) -> list[dict] | None:
     custom_steps = EXPECTED_STEPS_BY_PANEL.get((dashboard_path.name, title))
     if custom_steps is not None:
@@ -219,10 +302,24 @@ def _panel_errors(dashboard_path: Path, panel: dict) -> list[str]:
     errors: list[str] = []
     title = str(panel.get("title", ""))
     panel_key = (dashboard_path.name, title)
+    panel_type = panel.get("type")
 
-    if panel.get("type") in {"stat", "gauge"} and _is_status_like_panel(panel):
+    if panel_type == "stat":
+        color_mode = panel.get("fieldConfig", {}).get("defaults", {}).get("color", {}).get("mode")
+        if color_mode != "thresholds":
+            errors.append(
+                f"{dashboard_path}: stat panel '{title}' must use color.mode=thresholds"
+            )
+
+    if panel_type in {"stat", "gauge"} and _is_status_like_panel(panel):
         errors.extend(_stat_panel_visual_semantics_errors(dashboard_path, panel))
         errors.extend(_l0_terminology_errors(dashboard_path, panel))
+    if panel_type == "gauge":
+        errors.extend(_gauge_panel_visual_semantics_errors(dashboard_path, panel))
+    if panel_type == "table":
+        errors.extend(_table_panel_visual_semantics_errors(dashboard_path, panel))
+    if panel_type == "timeseries":
+        errors.extend(_timeseries_panel_visual_semantics_errors(dashboard_path, panel))
 
     expected_no_value = FAIL_CLOSED_NO_ZERO_FALLBACK_PANELS.get(panel_key)
     if expected_no_value is not None:

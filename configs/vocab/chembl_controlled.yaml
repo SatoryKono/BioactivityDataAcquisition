@@ -34,6 +34,11 @@ strict_flag_families:
       - chembl_molecule.prodrug
 
 controlled_vocabularies:
+  activity_action_types:
+    canonicalizer: normalize_profile_governed_uppercase_vocabulary
+    invalid_value_mode: preserve_unknown_uppercase_lexeme
+    fields:
+      - chembl_activity.action_type
   raw_units:
     canonicalizer: normalize_unit
     invalid_value_mode: preserve_unknown_lexeme

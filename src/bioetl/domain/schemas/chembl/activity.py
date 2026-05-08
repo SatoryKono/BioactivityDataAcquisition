@@ -9,6 +9,7 @@ from pandera.typing import Series
 from bioetl.domain.schemas.base import ETLRecordSchema
 from bioetl.domain.schemas.constants import (
     ACTIVITY_STANDARD_TYPES,
+    ACTIVITY_STANDARD_UNITS,
     ASSAY_TYPES,
     BAO_ID_PATTERN,
     CHEMBL_ID_PATTERN,
@@ -73,7 +74,9 @@ class ActivitySchema(ETLRecordSchema):
         description="Standardized value.",
     )
     standard_units: Series[str] = pa.Field(
-        nullable=False, description="Standardized units."
+        nullable=False,
+        isin=list(ACTIVITY_STANDARD_UNITS),
+        description="Standardized units.",
     )
     standard_type: Series[str] = pa.Field(
         nullable=False,

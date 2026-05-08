@@ -153,5 +153,17 @@ uv run python -m scripts.engineering.qa report-dashboard-inventory --json
 uv run python -m scripts.engineering.qa report-dashboard-inventory --check --json
 ```
 
+Для локального health rollup shipped dashboards:
+
+```bash
+uv run python -m scripts.engineering.qa report-dashboard-inventory --health-summary --json
+```
+
+Для drift check против exported/deployed snapshot directory:
+
+```bash
+uv run python -m scripts.engineering.qa report-dashboard-inventory --deployed-dir /path/to/grafana-exports --check --json
+```
+
 CI gate запускает эту проверку в `docs.yml` и фейлит pipeline при расхождении
 канонических полей.

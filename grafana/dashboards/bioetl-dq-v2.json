@@ -32,6 +32,7 @@
         "mode": "html"
       },
       "title": "Review Dashboard Navigation",
+      "description": "Top navigation bus for the dashboard suite. Uses same-tab handoffs, preserves the current time range, resets unsupported dashboard-specific scope where needed, and exposes Explore Logs / Explore Traces links that require the optional tracing profile.",
       "type": "text",
       "links": [
         {
@@ -101,6 +102,7 @@
         "content": "<center><h2>4. Data Quality / $pipeline</h2><div><strong>Current window:</strong> 15m pipeline-wide DQ status. <strong>Run type:</strong> $run_type shapes selected-range evidence below.</div></center>",
         "mode": "html"
       },
+      "description": "Scope banner for the Data Quality dashboard. The first-screen answer row is current and pipeline-wide from fixed recording-rule windows; run_type and stage mostly shape selected-range evidence below, not the current-status verdict.",
       "title": "Review: Pipeline Scope",
       "type": "text"
     },
@@ -469,7 +471,7 @@
       "pluginVersion": "10.4.0",
       "targets": [
         {
-          "expr": "topk(5, bioetl_dq_current_reason{pipeline=~\"$pipeline\"} > 0)",
+          "expr": "topk(5, bioetl_dq_current_reason{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\"} > 0)",
           "format": "table",
           "instant": true,
           "legendFormat": "{{pipeline}} {{provider}} {{reason}} {{cause}}",
@@ -493,6 +495,7 @@
         "content": "<div style=\"padding:0.45rem 0.65rem;line-height:1.5\"><strong>CRIT:</strong> inspect DQ reasons and Gold/Silver diagnostics before replay. <strong>WARN:</strong> open Silver Reject Explorer. <strong>Scope:</strong> status above is pipeline-wide; <strong>$run_type</strong> and stage filters shape only range evidence below. <strong>invalid_record_policy</strong> visibility absent = UNKNOWN.</div>",
         "mode": "html"
       },
+      "description": "Operator CTA for first-pass DQ triage. It explains what to do for CRIT versus WARN states, clarifies that the answer row above is pipeline-wide current state while run_type and stage mainly shape selected-range evidence, and preserves bounded handoff to Silver Reject Explorer.",
       "links": [
         {
           "title": "Review current status",
@@ -1240,6 +1243,7 @@
           "refId": "A"
         }
       ],
+      "description": "Latest successful data timestamp for the selected pipeline scope. This is current freshness context rather than selected-range evidence. UNKNOWN means no freshness proof is available now; next action: inspect DQ Current Reasons and the DQ investigation runbook before treating stale or blank values as healthy.",
       "title": "Review: Latest Successful Data Timestamp",
       "type": "stat"
     },
@@ -1539,7 +1543,6 @@
           "options": {
             "displayMode": "gradient",
             "orientation": "horizontal",
-            "dataLinks": [],
             "reduceOptions": {
               "calcs": [
                 "lastNotNull"
@@ -1616,7 +1619,6 @@
           "options": {
             "displayMode": "gradient",
             "orientation": "horizontal",
-            "dataLinks": [],
             "reduceOptions": {
               "calcs": [
                 "lastNotNull"
@@ -1785,7 +1787,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Selected-range p95 duration of DQ checks. This is a diagnostics/performance surface, not a quality outcome; use it when DQ checks themselves look slow or noisy during an incident. No data means no DQ duration samples were observed in range or DQ timing telemetry is absent; it is not equivalent to fast checks.",
+          "description": "Selected-range p95 duration of DQ checks. This is a diagnostics/performance surface, not a quality outcome; use it when DQ checks themselves look slow or noisy during an incident. Samples exist only when the runtime emitted bioetl_dq_check_duration_ms, which requires an active DQ monitor path rather than disabled/noop monitoring. No data means no DQ duration samples were observed in range or DQ timing telemetry is absent; it is not equivalent to fast checks.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1848,7 +1850,7 @@
           },
           "targets": [
             {
-              "expr": "histogram_quantile(0.95, sum by (le, pipeline) (increase(bioetl_dq_check_duration_ms_bucket{pipeline=~\"$pipeline\"}[$__interval])))",
+              "expr": "histogram_quantile(0.95, sum by (le, pipeline) (increase(bioetl_dq_check_duration_ms_bucket{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\"}[$__interval])))",
               "legendFormat": "{{pipeline}} p95",
               "refId": "A"
             }

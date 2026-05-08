@@ -33,7 +33,11 @@ def test_overview_v2_semantics_contract():
     assert "Range Evidence" in row_labels
     assert "Diagnostics" in row_labels
 
-    links = " ".join(link.get("title", "") for link in d.get("links", []))
+    nav_links = list(d.get("links", []))
+    for panel in panels:
+        if panel.get("id") == 1000:
+            nav_links.extend(panel.get("links", []))
+    links = " ".join(link.get("title", "") for link in nav_links)
     for token in ["Runtime", "Data Quality", "Provider", "Control Plane", "Workflow"]:
         assert token in links
 

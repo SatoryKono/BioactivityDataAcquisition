@@ -25,7 +25,7 @@ groups:
                 (sum by (pipeline) (increase(bioetl_lineage_refs_missing_total[15m]))
                   or 0 * sum by (pipeline) (bioetl_control_plane_run_type_universe))
               )
-              * on (pipeline) group_left (run_type) bioetl_control_plane_run_type_universe
+              * on (pipeline) group_right (run_type) bioetl_control_plane_run_type_universe
               +
               (sum by (pipeline, run_type) (increase(bioetl_replay_drift_events_total[15m]))
                 or 0 * bioetl_control_plane_run_type_universe)
@@ -43,7 +43,7 @@ groups:
                 sum by (pipeline) (increase(bioetl_control_plane_ledger_appends_total{status="failed"}[15m]))
                 or 0 * sum by (pipeline) (bioetl_control_plane_run_type_universe)
               )
-              * on (pipeline) group_left (run_type) bioetl_control_plane_run_type_universe
+              * on (pipeline) group_right (run_type) bioetl_control_plane_run_type_universe
             )
           )
 
@@ -65,7 +65,7 @@ groups:
                 unless on (pipeline, run_type)
                 (
                   (sum by (pipeline) (count_over_time(bioetl_control_plane_ledger_appends_total[5m])) > bool 0)
-                  * on (pipeline) group_left (run_type) bioetl_control_plane_run_type_universe
+                  * on (pipeline) group_right (run_type) bioetl_control_plane_run_type_universe
                 )
               )
               or 0 * bioetl_control_plane_run_type_universe

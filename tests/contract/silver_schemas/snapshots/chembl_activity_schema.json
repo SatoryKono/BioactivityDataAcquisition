@@ -673,7 +673,12 @@
     "unique": false
   },
   "standard_units": {
-    "checks": [],
+    "checks": [
+      {
+        "name": "isin",
+        "type": "isin"
+      }
+    ],
     "coerce": false,
     "description": "Standardized units.",
     "dtype": "str",

@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-
 import pytest
 
 import bioetl.application.services.cli_run_orchestration_models as legacy_models
@@ -36,14 +34,11 @@ class TestRunExecutionRequest:
         assert "RunExecutionSpec" not in canonical_models.__all__
         assert not hasattr(canonical_models, "RunExecutionSpec")
 
-    def test_legacy_execution_context_alias_warns_and_resolves(self) -> None:
-        with pytest.warns(
-            DeprecationWarning,
-            match="RunExecutionContext is deprecated; use RunExecutionRequest instead",
-        ):
-            legacy_alias = legacy_models.RunExecutionContext
-
-        assert legacy_alias is RunExecutionRequest
+    def test_legacy_module_no_longer_exports_execution_context_alias(self) -> None:
+        removed_name = "RunExecution" + "Context"
+        assert removed_name not in legacy_models.__all__
+        assert not hasattr(legacy_models, removed_name)
+        assert removed_name not in dir(legacy_models)
 
     def test_execution_request_preserves_options_and_health_config(self) -> None:
         options = RunOptions(run_type="backfill", dry_run=True)
@@ -58,21 +53,6 @@ class TestRunExecutionRequest:
         assert request.options is options
         assert request.health_server is False
         assert request.health_port == 9090
-
-    def test_first_party_src_does_not_import_deprecated_execution_context(self) -> None:
-        root = Path(__file__).resolve().parents[4] / "src" / "bioetl"
-        compatibility_facade = (
-            root / "application" / "services" / "cli_run_orchestration_models.py"
-        )
-        offenders: list[str] = []
-        for path in root.rglob("*.py"):
-            if path == compatibility_facade:
-                continue
-            text = path.read_text(encoding="utf-8")
-            if "RunExecutionContext" in text:
-                offenders.append(str(path.relative_to(root.parent.parent)))
-
-        assert offenders == []
 
 
 @pytest.mark.unit

@@ -176,6 +176,10 @@ uv run python -m pytest -q tests/integration/test_grafana_config.py
 - [ ] Для всех status-панелей задано единое no-data поведение: `null -> UNKNOWN (gray)`.
 - [ ] Для first-screen current-status severity `stat` panels используется `options.colorMode=background`; range evidence и raw-state diagnostic panels не форсируются в этот стиль автоматически.
 - [ ] Для first-screen current-status severity `stat` panels заданы explicit value mappings `0=OK`, `1=WARN`, `2=CRIT`, `null=UNKNOWN`.
+- [ ] Для `gauge` panels используется `options.showThresholdMarkers=true` и `options.showThresholdLabels=false`, если panel-specific rationale не документирует другое поведение.
+- [ ] Для `table` panels используются только утверждённые `custom.cellOptions.type`: `auto`, `color-background`, `color-text`; status/route field overrides используют `color-background`.
+- [ ] Для comparative/multi-series `timeseries` используется `options.tooltip.mode=multi` и `options.tooltip.sort=desc`.
+- [ ] Для scalar trend `timeseries` используется `options.tooltip.mode=single` и sorting остаётся `none`/omitted.
 - [ ] Для терминов статусов применяется единая таблица mapping из `docs/03-guides/dashboards/design-system.md` (раздел **1.1 Canonical mapping: L0 vs diagnostic dashboards**).
 - [ ] В L0 dashboards используется только `OK/WARN/CRIT/UNKNOWN`; alias-термины (`DEGRADED/BROKEN/HEALTHY`) допустимы только в диагностических deep-dive поверхностях и с явным alias mapping в description.
 - [ ] Для Prometheus current-status/current-cause panels отсутствует invalid zero-fallback (`or vector(0)`); zero fallback допустим только для true event counters.

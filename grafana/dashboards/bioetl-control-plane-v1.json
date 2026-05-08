@@ -18,48 +18,7 @@
   "graphTooltip": 1,
   "id": null,
   "iteration": 2,
-  "links": [
-    {
-      "title": "1. Overview",
-      "url": "/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
-      "targetBlank": false,
-      "includeVars": false
-    },
-    {
-      "title": "2. Runtime",
-      "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=unknown&${__url_time_range}",
-      "targetBlank": false,
-      "includeVars": false
-    },
-    {
-      "title": "3. Provider Health",
-      "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&var-pipeline_context=$pipeline&${__url_time_range}",
-      "targetBlank": false,
-      "includeVars": false,
-      "tooltip": "Context mapping: provider=unknown, pipeline_context=$pipeline. Scope reset: provider=unknown."
-    },
-    {
-      "title": "4. Data Quality",
-      "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=unknown&${__url_time_range}",
-      "targetBlank": false,
-      "includeVars": false,
-      "tooltip": "Open the Data Quality dashboard in the same tab."
-    },
-    {
-      "title": "5. Workflow",
-      "url": "/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}",
-      "targetBlank": false,
-      "includeVars": false,
-      "tooltip": "Reset scope: workflow dashboard uses its own selected workflow/status context."
-    },
-    {
-      "title": "Silver Reject Explorer",
-      "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
-      "targetBlank": false,
-      "includeVars": false,
-      "tooltip": "Cross-scope handoff: bounded pipeline/run_type explorer scope. Reset scope: Silver Reject Explorer owns its own record-level filters. Opens in the same tab."
-    }
-  ],
+  "links": [],
   "panels": [
     {
       "gridPos": {
@@ -74,8 +33,50 @@
         "mode": "html"
       },
       "title": "Review Dashboard Navigation",
+      "description": "Top navigation bus for the dashboard suite. Uses same-tab handoffs, preserves the current time range, resets unsupported dashboard-specific scope where needed, and exposes Explore Logs / Explore Traces links that require the optional tracing profile.",
       "type": "text",
-      "links": []
+      "links": [
+        {
+          "title": "1. Overview",
+          "url": "/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
+          "targetBlank": false,
+          "includeVars": false
+        },
+        {
+          "title": "2. Runtime",
+          "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=unknown&${__url_time_range}",
+          "targetBlank": false,
+          "includeVars": false
+        },
+        {
+          "title": "3. Provider Health",
+          "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&var-pipeline_context=$pipeline&${__url_time_range}",
+          "targetBlank": false,
+          "includeVars": false,
+          "tooltip": "Context mapping: provider=unknown, pipeline_context=$pipeline. Scope reset: provider=unknown."
+        },
+        {
+          "title": "4. Data Quality",
+          "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=unknown&${__url_time_range}",
+          "targetBlank": false,
+          "includeVars": false,
+          "tooltip": "Open the Data Quality dashboard in the same tab."
+        },
+        {
+          "title": "5. Workflow",
+          "url": "/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}",
+          "targetBlank": false,
+          "includeVars": false,
+          "tooltip": "Reset scope: workflow dashboard uses its own selected workflow/status context."
+        },
+        {
+          "title": "Silver Reject Explorer",
+          "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
+          "targetBlank": false,
+          "includeVars": false,
+          "tooltip": "Cross-scope handoff: bounded pipeline/run_type explorer scope. Reset scope: Silver Reject Explorer owns its own record-level filters. Opens in the same tab."
+        }
+      ]
     },
     {
       "collapsed": false,
@@ -153,10 +154,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 5,
+        "h": 4,
         "w": 4,
         "x": 0,
-        "y": 3
+        "y": 4
       },
       "id": 891,
       "options": {
@@ -183,7 +184,7 @@
       "pluginVersion": "9.5.0",
       "targets": [
         {
-          "expr": "bioetl_replay_safety_blockers_15m{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}",
+          "expr": "max(bioetl_replay_safety_blockers_15m{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\", run_type=~\"$run_type\"})",
           "instant": true,
           "refId": "A"
         }
@@ -206,10 +207,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 5,
+        "h": 4,
         "w": 5,
         "x": 4,
-        "y": 3
+        "y": 4
       },
       "id": 892,
       "options": {
@@ -284,10 +285,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 5,
+        "h": 4,
         "w": 5,
         "x": 9,
-        "y": 3
+        "y": 4
       },
       "id": 893,
       "options": {
@@ -314,7 +315,7 @@
       "pluginVersion": "9.5.0",
       "targets": [
         {
-          "expr": "bioetl_manifest_ledger_failures_15m{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}",
+          "expr": "max(bioetl_manifest_ledger_failures_15m{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\", run_type=~\"$run_type\"})",
           "instant": true,
           "refId": "A"
         }
@@ -385,10 +386,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 5,
+        "h": 4,
         "w": 5,
         "x": 14,
-        "y": 3
+        "y": 4
       },
       "id": 907,
       "options": {
@@ -415,7 +416,7 @@
       "pluginVersion": "9.5.0",
       "targets": [
         {
-          "expr": "bioetl_control_plane_telemetry_missing_5m{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}",
+          "expr": "max(bioetl_control_plane_telemetry_missing_5m{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\", run_type=~\"$run_type\"})",
           "instant": true,
           "refId": "A"
         }
@@ -428,10 +429,10 @@
       "type": "text",
       "title": "Next Action: Replay Diagnostics",
       "gridPos": {
-        "h": 5,
+        "h": 4,
         "w": 5,
         "x": 19,
-        "y": 3
+        "y": 4
       },
       "options": {
         "content": "### Next step\nOpen Replay diagnostics for blockers. If telemetry is non-zero or UNKNOWN, validate scrape/rules before replay/resume. Use Manifest Inspection for proof.",
@@ -1242,8 +1243,8 @@
               "placement": "bottom"
             },
             "tooltip": {
-              "mode": "single",
-              "sort": "none"
+              "mode": "multi",
+              "sort": "desc"
             }
           },
           "targets": [
@@ -1307,8 +1308,8 @@
               "placement": "bottom"
             },
             "tooltip": {
-              "mode": "single",
-              "sort": "none"
+              "mode": "multi",
+              "sort": "desc"
             }
           },
           "targets": [
@@ -1375,8 +1376,8 @@
               "placement": "bottom"
             },
             "tooltip": {
-              "mode": "single",
-              "sort": "none"
+              "mode": "multi",
+              "sort": "desc"
             }
           },
           "targets": [
@@ -1443,8 +1444,8 @@
               "placement": "bottom"
             },
             "tooltip": {
-              "mode": "single",
-              "sort": "none"
+              "mode": "multi",
+              "sort": "desc"
             }
           },
           "targets": [
@@ -1521,8 +1522,8 @@
               "placement": "bottom"
             },
             "tooltip": {
-              "mode": "single",
-              "sort": "none"
+              "mode": "multi",
+              "sort": "desc"
             }
           },
           "targets": [
@@ -1829,8 +1830,8 @@
               "placement": "bottom"
             },
             "tooltip": {
-              "mode": "single",
-              "sort": "none"
+              "mode": "multi",
+              "sort": "desc"
             }
           },
           "targets": [
@@ -1880,8 +1881,8 @@
               "placement": "bottom"
             },
             "tooltip": {
-              "mode": "single",
-              "sort": "none"
+              "mode": "multi",
+              "sort": "desc"
             }
           },
           "targets": [
@@ -2309,8 +2310,8 @@
               "placement": "bottom"
             },
             "tooltip": {
-              "mode": "single",
-              "sort": "none"
+              "mode": "multi",
+              "sort": "desc"
             }
           },
           "targets": [
@@ -2377,8 +2378,8 @@
               "placement": "bottom"
             },
             "tooltip": {
-              "mode": "single",
-              "sort": "none"
+              "mode": "multi",
+              "sort": "desc"
             }
           },
           "targets": [
@@ -2703,8 +2704,8 @@
               "placement": "bottom"
             },
             "tooltip": {
-              "mode": "single",
-              "sort": "none"
+              "mode": "multi",
+              "sort": "desc"
             }
           },
           "targets": [
@@ -2754,8 +2755,8 @@
               "placement": "bottom"
             },
             "tooltip": {
-              "mode": "single",
-              "sort": "none"
+              "mode": "multi",
+              "sort": "desc"
             }
           },
           "targets": [
@@ -2822,8 +2823,8 @@
               "placement": "bottom"
             },
             "tooltip": {
-              "mode": "single",
-              "sort": "none"
+              "mode": "multi",
+              "sort": "desc"
             }
           },
           "targets": [
@@ -2900,8 +2901,8 @@
               "placement": "bottom"
             },
             "tooltip": {
-              "mode": "single",
-              "sort": "none"
+              "mode": "multi",
+              "sort": "desc"
             }
           },
           "targets": [
@@ -2961,8 +2962,8 @@
               "placement": "bottom"
             },
             "tooltip": {
-              "mode": "single",
-              "sort": "none"
+              "mode": "multi",
+              "sort": "desc"
             }
           },
           "targets": [
@@ -3014,6 +3015,7 @@
   "schemaVersion": 30,
   "style": "dark",
   "tags": [
+    "bioetl",
     "control-plane",
     "replay-safety",
     "dashboard",

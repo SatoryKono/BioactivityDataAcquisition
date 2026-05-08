@@ -37,7 +37,7 @@ class ProviderRegistrarProtocol(Protocol):
         ...
 
 
-class ProviderDataSourceRegistryProtocol(ProviderRegistrarProtocol, Protocol):
+class ProviderDataSourceAccessProtocol(ProviderRegistrarProtocol, Protocol):
     """Registry contract required by datasource and HTTP-client factories."""
 
     def get_http_config(self, name: str) -> HttpConfig | None:

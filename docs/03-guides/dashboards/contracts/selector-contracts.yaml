@@ -30,6 +30,8 @@ selector_taxonomy:
   context_hidden:
     shipped:
       - pipeline_context
+      - run_type_context
+      - provider_context
       - adapter
     reserved_future:
       - workflow_context
@@ -64,6 +66,9 @@ dashboard_families:
       Pipeline-summary dashboards answer pipeline-scoped operator questions and
       remain Prometheus-first. They MUST NOT expose forensic identifiers or
       claim exact run selection until a dedicated run catalog exists.
+      When a single-pipeline workflow hands off into these dashboards, shipped
+      PromQL may tolerate legacy `workflow_<pipeline>` emitted series as a
+      bounded compatibility alias for the selected entity pipeline scope.
   provider_first:
     uids:
       - bioetl-provider-health-v2
@@ -84,9 +89,17 @@ dashboard_families:
       - status
       - step_status
       - step_kind
+    hidden_context_selectors:
+      - pipeline_context
+      - run_type_context
+      - provider_context
     notes: |
       Workflow Overview is selected-range workflow evidence only. It does not
-      currently expose pipeline, run_type, run_id, or exact execution scope.
+      expose visible pipeline/run_type selectors, but it does preserve hidden
+      single-pipeline handoff context for downstream operator dashboards.
+      Downstream dashboards remain entity-scoped at the UX layer even when
+      some emitted series still require a temporary `workflow_<pipeline>` query
+      alias during migration.
   forensic_explorer:
     uids:
       - bioetl-silver-reject-explorer
@@ -182,7 +195,10 @@ shipped_selector_registry:
       - status
       - step_status
       - step_kind
-    hidden_context_selectors: []
+    hidden_context_selectors:
+      - pipeline_context
+      - run_type_context
+      - provider_context
     hidden_detail_selectors: []
     top_bar_order:
       - workflow
@@ -192,6 +208,9 @@ shipped_selector_registry:
     query_source_families:
       workflow: prometheus_workflow_runs_total
       status: prometheus_workflow_runs_total
+      pipeline_context: prometheus_workflow_runs_total
+      run_type_context: prometheus_workflow_runs_total
+      provider_context: prometheus_workflow_runs_total
       step_status: prometheus_workflow_step_events_total
       step_kind: prometheus_workflow_step_events_total
   bioetl-silver-reject-explorer:
@@ -257,6 +276,10 @@ ship_now_selector_contract_by_uid:
       - status
       - step_status
       - step_kind
+    hidden_context_selectors:
+      - pipeline_context
+      - run_type_context
+      - provider_context
     time_range: grafana_builtin
   bioetl-silver-reject-explorer:
     visible_selectors:

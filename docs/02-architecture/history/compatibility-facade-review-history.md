@@ -112,5 +112,7 @@ Review outcome for the remaining curated inventory rows:
 
 Wave decision:
 
-- No retained-entrypoint row graduates to removal in the current cycle.
-- Next action is policy enforcement and re-review by `2026-09-30`, not deprecation.
+- The `RunExecutionContext` compatibility export was retired early on `2026-05-08`
+  with explicit maintainer approval after first-party callers were eliminated.
+- Next action is absence enforcement through architecture tests, not a deferred
+  `2026-09-30` re-review.

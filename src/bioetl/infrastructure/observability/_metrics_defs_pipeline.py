@@ -328,18 +328,32 @@ COMPOSITE_SOURCE_SELECTION_TOTAL = Counter(
 WORKFLOW_RUNS_TOTAL = Counter(
     "bioetl_workflow_runs_total",
     "Total declarative workflow run outcomes by bounded workflow and status",
-    ["workflow", "status"],
+    ["workflow", "status", "pipeline_context", "run_type_context", "provider_context"],
 )
 
 WORKFLOW_STEP_EVENTS_TOTAL = Counter(
     "bioetl_workflow_step_events_total",
     "Total declarative workflow step outcomes by bounded workflow, step kind, and status",
-    ["workflow", "step_kind", "status"],
+    [
+        "workflow",
+        "step_kind",
+        "status",
+        "pipeline_context",
+        "run_type_context",
+        "provider_context",
+    ],
 )
 
 WORKFLOW_STEP_DURATION_SECONDS = Histogram(
     "bioetl_workflow_step_duration_seconds",
     "Duration of declarative workflow step execution by bounded workflow, step kind, and status",
-    ["workflow", "step_kind", "status"],
+    [
+        "workflow",
+        "step_kind",
+        "status",
+        "pipeline_context",
+        "run_type_context",
+        "provider_context",
+    ],
     buckets=[0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1.0, 5.0, 10.0, 30.0, 60.0],
 )

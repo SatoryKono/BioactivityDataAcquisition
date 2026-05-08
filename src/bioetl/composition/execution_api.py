@@ -94,14 +94,14 @@ def push_metrics_to_gateway(
         push_metrics_to_gateway as _impl,
     )
 
-    return bool(
-        _impl(
-            run_label=run_label,
-            pipeline_name=pipeline_name,
-            run_type=run_type,
-            grouping_key_extra=grouping_key_extra,
-        )
-    )
+    gateway_kwargs: dict[str, object] = {
+        "run_label": run_label,
+        "pipeline_name": pipeline_name,
+        "run_type": run_type,
+    }
+    if grouping_key_extra is not None:
+        gateway_kwargs["grouping_key_extra"] = grouping_key_extra
+    return bool(_impl(**gateway_kwargs))
 
 
 def __getattr__(name: str) -> object:

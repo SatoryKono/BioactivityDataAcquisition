@@ -17,6 +17,7 @@ from bioetl.domain.normalization.profiles import (
 )
 from bioetl.domain.schemas.constants import (
     ACTIVITY_STANDARD_TYPES,
+    ACTIVITY_STANDARD_UNITS,
     ASSAY_CATEGORIES,
     ASSAY_PARAMETER_STANDARD_TYPES,
     ASSAY_GROUPS,
@@ -46,6 +47,11 @@ _STRICT_CHEMBL_ENUM_POLICY = {
     ),
     ("activity", "standard_type"): (
         ACTIVITY_STANDARD_TYPES,
+        CHEMBL_ACTIVITY_PROFILE,
+        "chembl_activity",
+    ),
+    ("activity", "standard_units"): (
+        ACTIVITY_STANDARD_UNITS,
         CHEMBL_ACTIVITY_PROFILE,
         "chembl_activity",
     ),
@@ -97,6 +103,7 @@ _STRICT_CHEMBL_ENUM_POLICY = {
 _FILTER_ENUM_POLICY = {
     ("activity", "standard_relation"): STANDARD_RELATIONS,
     ("activity", "standard_type"): ACTIVITY_STANDARD_TYPES,
+    ("activity", "standard_units"): ACTIVITY_STANDARD_UNITS,
     ("activity", "assay_type"): ASSAY_TYPES,
     ("assay", "assay_type"): ASSAY_TYPES,
     ("assay", "relationship_type"): RELATIONSHIP_TYPES,

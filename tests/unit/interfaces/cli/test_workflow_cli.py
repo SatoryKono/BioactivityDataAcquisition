@@ -314,7 +314,7 @@ def test_workflow_run_starts_metrics_server_and_publishes_metrics(
     assert published_calls == [
         {
             "run_label": "bioetl",
-            "pipeline_name": "workflow_chembl_activity",
+            "pipeline_name": "chembl_activity",
             "run_type": "backfill",
             "grouping_key_extra": {
                 "workflow_run_id": "00000000-0000-0000-0000-000000000111"
@@ -379,7 +379,7 @@ def test_workflow_run_publishes_metrics_even_when_workflow_fails(
     assert published_calls == [
         {
             "run_label": "bioetl",
-            "pipeline_name": "workflow_chembl_activity",
+            "pipeline_name": "chembl_activity",
             "run_type": "backfill",
             "grouping_key_extra": {
                 "workflow_run_id": "00000000-0000-0000-0000-000000000222"
