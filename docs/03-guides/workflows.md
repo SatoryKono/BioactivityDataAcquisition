@@ -369,6 +369,70 @@ Present in the current tree:
 - destructive ambiguity detection with explicit repair / force intent surfaces;
 - workflow observability metrics for run and step outcomes.
 
+## Shipped Workflow Inventory
+
+Current shipped workflow configs under `configs/workflows/` now fall into three
+operator-facing families:
+
+1. single-pipeline workflow wrappers for every non-composite pipeline;
+2. optional provider-pack workflows that bundle multiple related pipelines;
+3. richer multi-step examples such as `chembl_core` that mix pipeline and
+   transform steps.
+
+### 1. Single-Pipeline Workflow Wrappers
+
+Every non-composite pipeline in `configs/entities/**` now has a matching
+single-step workflow wrapper named `configs/workflows/<pipeline_name>.yaml`.
+
+| Provider | Workflow wrappers |
+| --- | --- |
+| `chembl` | `chembl_activity`, `chembl_assay`, `chembl_assay_parameters`, `chembl_cell_line`, `chembl_compound_record`, `chembl_molecule`, `chembl_protein_class`, `chembl_publication`, `chembl_publication_similarity`, `chembl_publication_term`, `chembl_subcellular_fraction`, `chembl_target`, `chembl_target_component`, `chembl_tissue` |
+| `crossref` | `crossref_publication` |
+| `openalex` | `openalex_publication` |
+| `pubchem` | `pubchem_compound` |
+| `pubmed` | `pubmed_publication` |
+| `semanticscholar` | `semanticscholar_publication` |
+| `uniprot` | `uniprot_idmapping`, `uniprot_protein` |
+
+Canonical wrapper shape:
+
+- `workflow.name == pipeline_name`
+- one pipeline step only
+- `step_id == run_<pipeline_name>`
+- no transform logic bundled by default
+
+This is the minimum durable workflow coverage layer. Operators can now use the
+workflow control plane for ordinary pipeline executions without first authoring
+a custom multi-step DAG.
+
+### 2. Optional Provider-Pack Workflows
+
+The repo also ships additive provider-pack workflows that group related
+pipelines without replacing the single-pipeline wrappers:
+
+- `chembl_reference_pack`
+- `publication_provider_pack`
+- `uniprot_support_pack`
+
+These packs are:
+
+- optional orchestration bundles;
+- still declarative workflow configs under `configs/workflows/`;
+- intentionally separate from composite pipelines and composite configs;
+- allowed to express light dependency edges where the pack wants a stable
+  operator order, but they do not become the only supported entrypoint for the
+  child pipelines.
+
+### 3. Richer Multi-Step Example
+
+`configs/workflows/chembl_core.yaml` remains the canonical richer example for a
+workflow that mixes:
+
+- multiple pipeline steps;
+- built-in transform steps;
+- explicit dependency edges;
+- destructive repair semantics through the workflow control plane.
+
 Not yet fully shipped from the open backlog:
 
 - multi-runtime or distributed workflow coordination;

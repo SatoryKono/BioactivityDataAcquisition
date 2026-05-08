@@ -39,7 +39,9 @@ from bioetl.composition.factories.pipeline.factory_method_helpers import (
 from bioetl.composition.factories.pipeline.factory_method_helpers import (
     extract_entity_type as _extract_entity_type,
 )
-from bioetl.composition.providers.provider_registry import ProviderRegistry
+from bioetl.composition.providers._registry_protocols import (
+    ProviderDataSourceRegistryProtocol,
+)
 from bioetl.domain.behavior import EntityIdentityGenerator
 from bioetl.domain.filtering import (
     GoldFilterConfig,
@@ -94,7 +96,7 @@ class GenericPipelineFactory[TPipeline: "BasePipeline"]:
         pandera_silver_schema: object | None = None,
         data_source_creator: DataSourceCreatorProtocol | None = None,
         transformer_class: type[BaseTransformer] | None = None,
-        provider_registry: ProviderRegistry | None = None,
+        provider_registry: ProviderDataSourceRegistryProtocol | None = None,
     ) -> None:
         if gold_schema is None:
             raise ValueError(

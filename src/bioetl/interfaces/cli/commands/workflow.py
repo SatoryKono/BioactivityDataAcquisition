@@ -381,7 +381,9 @@ def _render_status_payload(payload: dict[str, object]) -> str:
                     f"depends_on={depends_rendered}"
                 )
             else:
-                summary = f"- {step['step_id']} [{kind}] -> {step.get('status', 'unknown')}"
+                summary = (
+                    f"- {step['step_id']} [{kind}] -> {step.get('status', 'unknown')}"
+                )
                 error_type = step.get("error_type")
                 error_message = step.get("error_message")
                 if error_type or error_message:

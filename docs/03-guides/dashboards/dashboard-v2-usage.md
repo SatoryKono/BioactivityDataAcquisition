@@ -40,7 +40,7 @@ Machine-readable navigation contract: `docs/03-guides/dashboards/contracts/navig
 | `bioetl-provider-health-v2` | canonical navigation bus `3. Provider Health` from every primary dashboard except itself |
 | `bioetl-dq-v2` | canonical navigation bus `4. Data Quality` from every primary dashboard except itself |
 | `bioetl-workflow-overview` | canonical navigation bus `5. Workflow` from every primary dashboard except itself |
-| `bioetl-silver-reject-explorer` | canonical navigation bus `Silver Reject Explorer` from `4. Data Quality` only |
+| `bioetl-silver-reject-explorer` | canonical global adjunct link `Silver Reject Explorer` from every shipped dashboard except itself |
 
 ## Фильтрация
 
@@ -210,18 +210,18 @@ Primary dashboards MUST follow the canonical navigation contract in
 
 The top-level dashboard bus is:
 `0. Control Plane`, `1. Overview`, `2. Runtime`, `3. Provider Health`,
-`4. Data Quality`, `5. Workflow`. Each page follows the usual omit-self rule
-for bus `0..5`, but sticky shortcuts `4. Data Quality` and
-`Silver Reject Explorer` may intentionally remain available on their own pages.
+`4. Data Quality`, `5. Workflow`. Each page renders the full visual bus in
+navigation panel `id=1000`; the current dashboard stays visible as a disabled
+dark-gray item, while machine-readable `panel.links` still omit self-links.
 The canonical shipped surface is navigation panel `id=1000`, so
 `dashboard.links[]` does not need to duplicate the same bus next to Grafana
 variables. Any duplicate dashboard-to-dashboard link from one dashboard to the
 same target dashboard is forbidden.
 
-Every shipped navigation panel `id=1000` also exposes sticky shortcuts
-`4. Data Quality`, `Explore Logs`, `Explore Traces`, and
-`Silver Reject Explorer`. These navigation-panel links open in the same window,
-not in a new tab.
+Every shipped navigation panel `id=1000` also exposes global adjunct links
+`Silver Reject Explorer`, `Explore Logs`, and `Explore Traces` after bus
+`0..5`. These navigation-panel links open in the same window, not in a new
+tab.
 
 Variable handoff policy for dashboard links remains strict and bounded:
 
@@ -303,16 +303,18 @@ Variable handoff policy for dashboard links remains strict and bounded:
   `Explore Logs`, `Explore Traces` дают переходы для DQ incidents и freshness
   investigation. Handoff в Explorer передаёт только bounded `$pipeline/$run_type`
   scope, а не generic `includeVars` leakage.
-- `bioetl-silver-reject-explorer`: dashboard bus links `0..5`; no Explore links
-  and no self-link to Silver Reject Explorer. Main table поддерживает data links
-  для self-drilldown по `payload_hash` и CLI handoff. Верхняя explanatory panel
-  явно показывает banner `default 24h forensic window`, чтобы оператор не
-  интерпретировал explorer как обычное `now-12h` окно.
+- `bioetl-silver-reject-explorer`: dashboard bus links `0..5` plus global
+  adjunct links `Explore Logs` и `Explore Traces`; self-link to
+  `Silver Reject Explorer` intentionally omitted. Main table поддерживает data
+  links для self-drilldown по `payload_hash` и CLI handoff. Верхняя
+  explanatory panel явно показывает banner `default 24h forensic window`,
+  чтобы оператор не интерпретировал explorer как обычное `now-12h` окно.
 
 ### Expected operator behavior for DQ -> Explorer handoff
 
-- Из `4. Data Quality` top-level переход в `Silver Reject Explorer` передаёт
-  только `$pipeline/$run_type`, но intentionally открывает более широкое окно
+- Любой pipeline-scoped dashboard handoff в `Silver Reject Explorer` передаёт
+  только `$pipeline/$run_type`, а provider/workflow surfaces fail-close'ятся к
+  bounded defaults. Explorer intentionally открывает более широкое окно
   `now-24h` (forensic default) для редких инцидентов и sparse reject events.
 - `Inspect: Top Silver Reject Reasons (Pareto)` и `Inspect: Top Silver Reject Fields` intentionally не
   дублируют второй dashboard-to-dashboard handoff: оператор использует их как

@@ -15,10 +15,12 @@ from bioetl.composition.providers._loading import (
     load_provider_registry,
     reset_provider_registry_loader,
 )
+from bioetl.composition.providers._registry_protocols import (
+    ProviderRegistrarProtocol,
+)
 from bioetl.composition.providers._registry_resolution import (
     resolve_provider_registry,
 )
-from bioetl.composition.providers.provider_registry import ProviderRegistry
 
 __all__ = [
     "ensure_providers_loaded",
@@ -28,7 +30,7 @@ __all__ = [
 ]
 
 
-def _get_loader_registry() -> ProviderRegistry:
+def _get_loader_registry() -> ProviderRegistrarProtocol:
     """Resolve the canonical default provider registry for loader entrypoints."""
     return resolve_provider_registry()
 

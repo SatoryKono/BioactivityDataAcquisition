@@ -31,9 +31,7 @@ Grafana dashboards в BioETL.
 
 - `0. Control Plane`, `1. Overview`, `2. Runtime`, `3. Provider Health`,
   `4. Data Quality`, `5. Workflow` — единая top-level шина.
-- На каждой странице шина показывает bus `0..5` с обычным omit-self правилом,
-  но sticky shortcuts `4. Data Quality` и `Silver Reject Explorer` могут
-  intentionally оставаться доступны даже на своих own pages.
+- На каждой странице navigation panel `id=1000` визуально показывает полный bus `0..5`; текущий dashboard рендерится как disabled dark-gray item, а machine-readable `panel.links` сохраняют omit-self contract.
 - Каноническая surface этой шины — navigation panel `id=1000`. Root
   `dashboard.links[]` MAY be empty, если те же handoff already shipped через
   panel `id=1000` и header row рядом с Grafana variables не должен дублировать
@@ -42,11 +40,15 @@ Grafana dashboards в BioETL.
   dashboard запрещены, если только machine-readable contract в
   `contracts/navigation-links.yaml` явно не требует repeated panel-level CTAs
   для critical surfaces.
-- Во всех shipped navigation panels `id=1000` должны присутствовать sticky
-  shortcuts `4. Data Quality`, `Explore Logs`, `Explore Traces`,
-  `Silver Reject Explorer`, even when some of them are self-links.
+- Во всех shipped navigation panels `id=1000` после bus `0..5` должны
+  присутствовать global adjunct links `Silver Reject Explorer`,
+  `Explore Logs`, `Explore Traces`; current dashboard item MUST stay visible and disabled instead of disappearing from the visual bus.
 - Navigation panel links MUST open in the same window; do not ship
   `target="_blank"` in panel `id=1000` HTML.
+- Layout hierarchy follows the dashboard design system:
+  `Tier 1` answer surface first, `Tier 2` current context second,
+  `Tier 3` selected-range evidence below fold, `Tier 4` collapsed diagnostics
+  only for secondary or noisy detail.
 - `1. Overview` intentionally ships with `Pipeline=All` / `Run Type=All` as its
   default entry scope.
 - Во всех остальных pipeline/provider dashboards `$pipeline` и `$provider`

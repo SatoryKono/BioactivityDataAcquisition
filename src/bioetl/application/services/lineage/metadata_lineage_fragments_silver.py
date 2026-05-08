@@ -82,7 +82,9 @@ def _build_silver_nodes(
     )
     return build_dataset_fragment_nodes(
         run_context=run_context,
-        dataset_node=silver_dataset_node(run_context=run_context, input_data=input_data),
+        dataset_node=silver_dataset_node(
+            run_context=run_context, input_data=input_data
+        ),
         records=input_data.records,
         composite_name=f"{run_context.provider}.{run_context.entity}",
         created_at=created_at,

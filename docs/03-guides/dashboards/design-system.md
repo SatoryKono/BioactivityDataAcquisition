@@ -142,10 +142,56 @@ Normative rules:
 - Top-level `gridPos` rectangles in a shipped dashboard MUST NOT overlap;
   navigation, scope, first-action, current-status, range evidence, and collapsed
   rows must occupy explicit non-overlapping grid bands.
+- Top-level root layout MUST NOT leave unexplained empty row gaps between
+  adjacent bands; if a dashboard intentionally adds vertical breathing room, the
+  exception must be justified in the dashboard audit or docs mirror.
 - `or vector(0)` is allowed only for event-count panels where missing series
   means zero events; status panels preserve `UNKNOWN`.
 - Deep details (`run_id`, `payload_hash`, record-level tables) MUST NOT appear
   on first-screen status rows.
+
+## 4.2) Layout grammar by dashboard role (обязательно)
+
+Shipped dashboards do not share identical geometry, but they MUST share the
+same answer-first reading order.
+
+| Dashboard role | Shipped dashboards | Above-the-fold responsibility | Lower bands |
+| --- | --- | --- | --- |
+| L0 answer-first hub | `bioetl-overview-v2` | current answer, next route, bounded mirrors | historical context, routing aids, collapsed diagnostics |
+| L1/L2 triage | `bioetl-runtime`, `bioetl-control-plane-v1`, `bioetl-provider-health-v2`, `bioetl-dq-v2` | current verdict, first action, causes, trust markers | selected-range evidence, collapsed diagnostics |
+| Selected-range operational evidence | `bioetl-workflow-overview` | selected-range operational verdict and immediate fallout | lower evidence bands, optional collapsed diagnostics |
+| Forensic explorer | `bioetl-silver-reject-explorer` | scope semantics, no-data guidance, bounded summary | row-level browsing, record details, forensic tables |
+
+Normative rules:
+- Every shipped dashboard MUST answer its primary operator question before the
+  first evidence-heavy row.
+- Historical or selected-range evidence MUST NOT visually precede current-state
+  answer surfaces on L0/L1/L2 dashboards.
+- Forensic explorer surfaces are exempt from Prometheus-style symmetry, but
+  they still MUST keep scope semantics and first action above row-level detail.
+
+## 4.3) Visibility tiers and collapse policy (обязательно)
+
+Every shipped dashboard should classify panels into one of four tiers:
+
+- `Tier 1`: always-visible answer surface
+- `Tier 2`: always-visible supporting current context
+- `Tier 3`: below-fold selected-range evidence
+- `Tier 4`: collapsed diagnostics, raw evidence, tracing-only detail, rare
+  forensic breakdowns
+
+Normative rules:
+- `Tier 1` MUST remain visible without extra clicks and MUST contain current
+  status / verdict, first action, or current causes needed for first-pass
+  triage.
+- `Tier 2` MAY add KPI context, trust markers, or bounded mirrors, but MUST
+  support `Tier 1` rather than compete with it.
+- `Tier 3` belongs below the answer bands unless the dashboard role is itself
+  selected-range evidence.
+- `Tier 4` SHOULD be collapsed when it is tracing-only, raw, verbose, or not
+  required for first-pass operator triage.
+- The only copy of a critical signal MUST NOT live exclusively inside a
+  collapsed row.
 
 ## 5) Единый unit/decimals для схожих KPI (обязательно)
 

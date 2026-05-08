@@ -153,6 +153,39 @@ def test_pre_task_workflow_refreshes_if_manifests_are_missing(
     assert len(payload["retrieval"]["results"]["rag"]) == 1
 
 
+def test_pre_task_workflow_skip_refresh_if_missing_degrades_to_empty_results(
+    tmp_path: Path,
+) -> None:
+    session_note_path = tmp_path / "session.md"
+
+    payload = workflow.pre_task_workflow(
+        task_id="task-skip-missing",
+        title="Skip missing memory artifacts",
+        query="missing artifacts",
+        source_refs=["src/memory/README.md"],
+        session_note_path=session_note_path,
+        chunks_path=tmp_path / "missing-rag" / "chunks.jsonl",
+        events_dir=tmp_path / "missing-timeline",
+        run_refresh_if_missing=False,
+        limit=5,
+        profile="implementation",
+    )
+
+    assert payload["kind"] == "pre-task"
+    assert payload["refresh_report"] is None
+    assert payload["retrieval"]["degraded"] is True
+    assert payload["retrieval"]["profile"] == "implementation"
+    assert payload["retrieval"]["results"] == {
+        "catalog": [],
+        "rag": [],
+        "timeline": [],
+    }
+    assert [
+        artifact["kind"] for artifact in payload["retrieval"]["missing_artifacts"]
+    ] == ["rag_chunks", "timeline_events"]
+    assert session_note_path.exists()
+
+
 def test_pre_task_workflow_refreshes_if_event_projection_dir_is_empty(
     tmp_path: Path, monkeypatch
 ) -> None:

@@ -134,9 +134,10 @@ L0 дашборд для одного operator question: что сейчас bro
   current-status panels дублируют этот handoff через panel `dataLinks`.
   Каноническая shipped surface этой шины — navigation panel `id=1000`; header
   row рядом с Grafana variables не обязан повторять те же dashboard links.
-  В каждом `id=1000` дополнительно закреплены sticky shortcuts
-  `4. Data Quality`, `Explore Logs`, `Explore Traces`,
-  `Silver Reject Explorer`; они открываются в том же окне.
+  В каждом `id=1000` после bus `0..5` дополнительно закреплены global adjunct
+  links `Silver Reject Explorer`, `Explore Logs`, `Explore Traces`; они
+  открываются в том же окне, а current dashboard item остаётся видимым как
+  disabled dark-gray button.
 
 #### 2. 2. Runtime
 

@@ -145,6 +145,56 @@ def _resolve_pre_task_surfaces(
     return resolved_chunks_path, resolved_events_dir, output_root, refresh_report
 
 
+def _pre_task_missing_artifacts(
+    chunks_path: Path, events_dir: Path
+) -> list[dict[str, str]]:
+    missing: list[dict[str, str]] = []
+    if not rag_chunks_ready(chunks_path):
+        missing.append(
+            {
+                "kind": "rag_chunks",
+                "path": str(chunks_path),
+                "reason": "missing_or_empty_rag_chunk_manifest",
+            }
+        )
+    if not timeline_events_ready(events_dir):
+        missing.append(
+            {
+                "kind": "timeline_events",
+                "path": str(events_dir),
+                "reason": "missing_or_empty_timeline_event_projections",
+            }
+        )
+    return missing
+
+
+def _empty_pre_task_retrieval(
+    *,
+    query: str,
+    profile: str,
+    chunks_path: Path,
+    events_dir: Path,
+    missing_artifacts: list[dict[str, str]],
+) -> dict[str, Any]:
+    return {
+        "kind": "all",
+        "query": query,
+        "profile": profile,
+        "chunks_path": str(chunks_path),
+        "events_dir": str(events_dir),
+        "refresh_output_root": None,
+        "refresh_report": None,
+        "results": {
+            "catalog": [],
+            "rag": [],
+            "timeline": [],
+        },
+        "file_relation_context": None,
+        "degraded": True,
+        "missing_artifacts": missing_artifacts,
+    }
+
+
 def pre_task_workflow(
     *,
     task_id: str,
@@ -173,13 +223,25 @@ def pre_task_workflow(
         )
     )
 
-    retrieval = query_all(
-        query=retrieval_query,
-        chunks_path=resolved_chunks_path,
-        events_dir=resolved_events_dir,
-        limit=limit,
-        profile=profile,
+    missing_artifacts = _pre_task_missing_artifacts(
+        resolved_chunks_path, resolved_events_dir
     )
+    if missing_artifacts and not run_refresh_if_missing:
+        retrieval = _empty_pre_task_retrieval(
+            query=retrieval_query,
+            profile=profile,
+            chunks_path=resolved_chunks_path,
+            events_dir=resolved_events_dir,
+            missing_artifacts=missing_artifacts,
+        )
+    else:
+        retrieval = query_all(
+            query=retrieval_query,
+            chunks_path=resolved_chunks_path,
+            events_dir=resolved_events_dir,
+            limit=limit,
+            profile=profile,
+        )
     session_path: Path | None = None
     if create_session_note:
         session_path = session_note_path or _default_note_path(task_id, kind="session")
@@ -388,6 +450,8 @@ def _emit(payload: dict[str, Any], *, as_json: bool) -> int:
         print(f"- catalog hits: {len(results['catalog'])}")
         print(f"- rag hits: {len(results['rag'])}")
         print(f"- timeline hits: {len(results['timeline'])}")
+        if payload["retrieval"].get("degraded"):
+            print("- degraded: missing retrieval artifacts; refresh was skipped")
     else:
         print(f"Post-task workflow: {payload['task_id']}")
         print(f"- summary note: {payload['summary_note']}")

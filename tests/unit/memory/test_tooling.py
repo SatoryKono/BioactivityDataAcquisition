@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import importlib
 import json
+import os
 import subprocess
 import sys
 from datetime import UTC, datetime
@@ -196,8 +197,17 @@ def test_memory_tooling_package_exports_submodules_lazily() -> None:
 
 
 def test_memory_workflow_module_help_does_not_emit_runpy_warning() -> None:
+    repo_root = Path(__file__).resolve().parents[3]
+    env = os.environ.copy()
+    pythonpath_entries = [str(repo_root / "scripts"), str(repo_root / "src")]
+    if env.get("PYTHONPATH"):
+        pythonpath_entries.append(env["PYTHONPATH"])
+    env["PYTHONPATH"] = os.pathsep.join(pythonpath_entries)
+
     result = subprocess.run(
         [sys.executable, "-m", "memory.tooling.workflow", "--help"],
+        cwd=repo_root,
+        env=env,
         capture_output=True,
         text=True,
         check=False,

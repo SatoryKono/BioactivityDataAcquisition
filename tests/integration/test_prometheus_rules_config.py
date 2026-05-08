@@ -916,7 +916,10 @@ def test_overview_l0_status_aggregates_selected_scope_rows() -> None:
     assert "bioetl_l0_input_status_selected == 1" in expr
     assert "bioetl_l0_input_status_selected == 3" in expr
     assert "bioetl_l0_input_status_selected == 0" in expr
-    assert "max by (pipeline, run_type) (\n            bioetl_l0_input_status_selected\n          )" not in expr
+    assert (
+        "max by (pipeline, run_type) (\n            bioetl_l0_input_status_selected\n          )"
+        not in expr
+    )
 
 
 def test_overview_next_action_routes_use_selected_scope_rows() -> None:
@@ -924,15 +927,17 @@ def test_overview_next_action_routes_use_selected_scope_rows() -> None:
     route_rules = _recording_rules_named(payload, "bioetl_l0_next_action_route")
     expressions = "\n".join(str(rule.get("expr", "")) for rule in route_rules)
 
-    assert "bioetl_l0_input_status_selected{input=\"runtime\"}" in expressions
-    assert "bioetl_l0_input_status_selected{input=\"control_plane\"}" in expressions
-    assert "bioetl_l0_input_status_selected{input=\"gold\"}" in expressions
-    assert "bioetl_l0_input_status_selected{input=\"dq\"}" in expressions
-    assert "bioetl_l0_input_status_selected{input=\"provider\"}" in expressions
-    assert "bioetl_l0_input_status_selected{input=\"workflow\"}" in expressions
+    assert 'bioetl_l0_input_status_selected{input="runtime"}' in expressions
+    assert 'bioetl_l0_input_status_selected{input="control_plane"}' in expressions
+    assert 'bioetl_l0_input_status_selected{input="gold"}' in expressions
+    assert 'bioetl_l0_input_status_selected{input="dq"}' in expressions
+    assert 'bioetl_l0_input_status_selected{input="provider"}' in expressions
+    assert 'bioetl_l0_input_status_selected{input="workflow"}' in expressions
 
 
-def test_overview_runtime_and_dq_inputs_materialize_from_stable_projected_shapes() -> None:
+def test_overview_runtime_and_dq_inputs_materialize_from_stable_projected_shapes() -> (
+    None
+):
     payload = _load_rules()
     runtime_rule = next(
         rule
@@ -953,7 +958,10 @@ def test_overview_runtime_and_dq_inputs_materialize_from_stable_projected_shapes
     assert "bioetl_runtime_alert_condition_stage_lag_high_15m" in runtime_expr
     assert "unless on (pipeline, run_type)" in runtime_expr
     assert "bioetl_dq_current_status" in dq_expr
-    assert "* on (pipeline) group_left(run_type) bioetl_overview_pipeline_run_type_universe" in dq_expr
+    assert (
+        "* on (pipeline) group_left(run_type) bioetl_overview_pipeline_run_type_universe"
+        in dq_expr
+    )
 
 
 def test_dq_current_status_splits_hard_failures_from_degraded_warnings() -> None:

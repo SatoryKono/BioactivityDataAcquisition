@@ -6,9 +6,10 @@ normative_source:
     allowed/required/forbidden var-* handoff, and time handoff policy.
     Markdown guides are explanatory mirrors and MUST reference this file
     instead of redefining normative rules.
-    Required "top-level" link titles refer to the canonical navigation bus
-    surface and do not require dashboard root `links[]` specifically; shipped
-    dashboards MAY surface the bus through panel `id=1000` links to avoid
+    Required "top-level" link titles refer to the canonical machine-readable
+    navigation bus surface and do not require dashboard root `links[]`
+    specifically; shipped dashboards MAY surface the visible bus through panel
+    `id=1000` HTML while omitting machine-readable self-links to avoid
     duplicating header-row links next to Grafana variables.
 
 version: 1

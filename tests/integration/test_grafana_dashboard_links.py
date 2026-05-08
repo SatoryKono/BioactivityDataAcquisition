@@ -1129,11 +1129,7 @@ def test_navigation_dashboards_expose_explore_drilldown_links() -> None:
 
 
 def test_dashboard_bus_self_links_are_omitted() -> None:
-    """Only sticky DQ/Silver shortcuts may self-link in canonical navigation."""
-    allowed_self_links = {
-        ("bioetl-dq-v2", "4. Data Quality"),
-        ("bioetl-silver-reject-explorer", "Silver Reject Explorer"),
-    }
+    """Canonical bus and global adjunct links must omit top-level self-links."""
     for dashboard_path in get_dashboard_files():
         dashboard = load_dashboard(dashboard_path)
         uid = dashboard.get("uid")
@@ -1141,10 +1137,9 @@ def test_dashboard_bus_self_links_are_omitted() -> None:
 
         for link in get_dashboard_navigation_links(dashboard):
             url = str(link.get("url", ""))
-            title = str(link.get("title", ""))
             if _extract_dashboard_uid(url) != uid:
                 continue
-            assert (uid, title) in allowed_self_links, (
+            assert False, (
                 f"{dashboard_path.name} must not expose unexpected top-level self-link: {url}"
             )
 
@@ -1157,10 +1152,63 @@ def test_navigation_panel_html_links_open_in_same_window() -> None:
             (item for item in dashboard.get("panels", []) if item.get("id") == 1000),
             None,
         )
-        assert panel is not None, f"{dashboard_path.name} must define navigation panel id=1000"
+        assert panel is not None, (
+            f"{dashboard_path.name} must define navigation panel id=1000"
+        )
         content = str((panel.get("options") or {}).get("content", ""))
         assert 'target="_blank"' not in content, (
             f"{dashboard_path.name} navigation panel must open links in the same window"
+        )
+
+def test_navigation_panel_renders_full_visual_bus_with_disabled_current_item() -> None:
+    """Visual id=1000 bus should show all titles and render current dashboard as disabled."""
+    expected_current_title = {
+        "bioetl-control-plane-v1": "0. Control Plane",
+        "bioetl-overview-v2": "1. Overview",
+        "bioetl-runtime": "2. Runtime",
+        "bioetl-provider-health-v2": "3. Provider Health",
+        "bioetl-dq-v2": "4. Data Quality",
+        "bioetl-workflow-overview": "5. Workflow",
+        "bioetl-silver-reject-explorer": "Silver Reject Explorer",
+    }
+    visual_titles = (
+        "0. Control Plane",
+        "1. Overview",
+        "2. Runtime",
+        "3. Provider Health",
+        "4. Data Quality",
+        "5. Workflow",
+        "Silver Reject Explorer",
+        "Explore Logs",
+        "Explore Traces",
+    )
+
+    for dashboard_path in get_dashboard_files():
+        dashboard = load_dashboard(dashboard_path)
+        uid = dashboard.get("uid")
+        assert isinstance(uid, str), f"{dashboard_path.name} must declare string uid"
+        panel = next(
+            (item for item in dashboard.get("panels", []) if item.get("id") == 1000),
+            None,
+        )
+        assert panel is not None, (
+            f"{dashboard_path.name} must define navigation panel id=1000"
+        )
+        content = str((panel.get("options") or {}).get("content", ""))
+        for title in visual_titles:
+            assert title in content, (
+                f"{dashboard_path.name} visual navigation bus must render '{title}'"
+            )
+
+        current_title = expected_current_title[uid]
+        disabled_pattern = re.compile(
+            rf'<span[^>]*aria-current="page"[^>]*color:#4b5563[^>]*border:1px solid #4b5563[^>]*>{re.escape(current_title)}</span>'
+        )
+        assert disabled_pattern.search(content), (
+            f"{dashboard_path.name} must render current dashboard '{current_title}' as dark-gray disabled item"
+        )
+        assert re.search(rf'<a[^>]*>{re.escape(current_title)}</a>', content) is None, (
+            f"{dashboard_path.name} must not render current dashboard '{current_title}' as active anchor"
         )
 
 
@@ -1273,7 +1321,9 @@ def test_tempo_drilldown_links_are_contextual() -> None:
         for link in get_dashboard_navigation_links(provider_dashboard)
         if _is_traces_drilldown_url(link.get("url", ""))
     ]
-    assert provider_links, "bioetl-provider-health-v2.json must expose Tempo drilldown links"
+    assert provider_links, (
+        "bioetl-provider-health-v2.json must expose Tempo drilldown links"
+    )
     for link in provider_links:
         url = str(link.get("url", ""))
         assert "queryType=traceqlSearch" in url
@@ -1292,7 +1342,9 @@ def test_tempo_drilldown_links_are_contextual() -> None:
         for link in get_dashboard_navigation_links(workflow_dashboard)
         if _is_traces_drilldown_url(link.get("url", ""))
     ]
-    assert workflow_links, "bioetl-workflow-overview.json must expose Tempo drilldown links"
+    assert workflow_links, (
+        "bioetl-workflow-overview.json must expose Tempo drilldown links"
+    )
     for link in workflow_links:
         url = str(link.get("url", ""))
         assert "queryType=traceqlSearch" in url
@@ -1352,11 +1404,7 @@ def test_overview_and_runtime_dashboards_expose_data_quality_handoff() -> None:
     for dashboard_name in expectations:
         dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
         navigation_links = get_dashboard_navigation_links(dashboard)
-        titles = {
-            link.get("title")
-            for link in navigation_links
-            if link.get("title")
-        }
+        titles = {link.get("title") for link in navigation_links if link.get("title")}
         urls = [link.get("url", "") for link in navigation_links]
 
         assert "4. Data Quality" in titles, (
@@ -1384,11 +1432,7 @@ def test_runtime_and_dq_dashboards_expose_control_plane_handoff() -> None:
     for dashboard_name in expectations:
         dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
         navigation_links = get_dashboard_navigation_links(dashboard)
-        titles = {
-            link.get("title")
-            for link in navigation_links
-            if link.get("title")
-        }
+        titles = {link.get("title") for link in navigation_links if link.get("title")}
         urls = [link.get("url", "") for link in navigation_links]
 
         assert "0. Control Plane" in titles, (
@@ -1414,9 +1458,17 @@ def test_navigation_dashboards_expose_silver_reject_explorer_handoff() -> None:
     """Every navigation panel should expose a Silver Reject Explorer handoff."""
     for dashboard_name in (path.name for path in get_dashboard_files()):
         dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
+        uid = dashboard.get("uid")
+        assert isinstance(uid, str), f"{dashboard_name} must declare string uid"
         links = get_dashboard_navigation_links(dashboard)
         titles = {link.get("title") for link in links if link.get("title")}
         urls = [link.get("url", "") for link in links]
+
+        if uid == "bioetl-silver-reject-explorer":
+            assert "Silver Reject Explorer" not in titles, (
+                "bioetl-silver-reject-explorer.json must omit top-level self-link"
+            )
+            continue
 
         assert "Silver Reject Explorer" in titles, (
             f"{dashboard_name} must expose a Silver Reject Explorer handoff"
@@ -1425,28 +1477,47 @@ def test_navigation_dashboards_expose_silver_reject_explorer_handoff() -> None:
             url.startswith("/d/bioetl-silver-reject-explorer") for url in urls
         ), f"{dashboard_name} handoff must target /d/bioetl-silver-reject-explorer"
 
-    dq_dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
-    dq_links = get_dashboard_navigation_links(dq_dashboard)
-    silver_link = next(
-        (
-            link
-            for link in dq_links
-            if str(link.get("url", "")).startswith("/d/bioetl-silver-reject-explorer")
-        ),
-        None,
-    )
-    assert silver_link is not None, "Silver Reject Explorer link must exist on DQ"
-    assert silver_link.get("includeVars") is False, (
-        "Data Quality handoff must not pass Prometheus variables into "
-        "Silver Reject Explorer"
-    )
-    url = str(silver_link.get("url", ""))
-    assert "var-pipeline=$pipeline" in url and "var-run_type=$run_type" in url, (
-        "Data Quality handoff must pass only bounded explorer pipeline/run_type scope"
-    )
-    assert "bounded pipeline/run_type" in str(silver_link.get("tooltip", "")), (
-        "Data Quality handoff tooltip should document bounded explorer handoff policy"
-    )
+    explicit_expectations = {
+        "bioetl-dq-v2.json": {
+            "url_tokens": ("var-pipeline=$pipeline", "var-run_type=$run_type"),
+            "tooltip_token": "bounded pipeline/run_type",
+        },
+        "bioetl-provider-health-v2.json": {
+            "url_tokens": ("var-pipeline=$pipeline_context", "var-run_type=All"),
+            "tooltip_token": "Context mapping",
+        },
+        "bioetl-workflow-overview.json": {
+            "url_tokens": ("var-pipeline=unknown", "var-run_type=All"),
+            "tooltip_token": "Reset scope",
+        },
+    }
+    for dashboard_name, expected in explicit_expectations.items():
+        dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
+        links = get_dashboard_navigation_links(dashboard)
+        silver_link = next(
+            (
+                link
+                for link in links
+                if str(link.get("url", "")).startswith(
+                    "/d/bioetl-silver-reject-explorer"
+                )
+            ),
+            None,
+        )
+        assert silver_link is not None, (
+            f"Silver Reject Explorer link must exist on {dashboard_name}"
+        )
+        assert silver_link.get("includeVars") is False, (
+            f"{dashboard_name} handoff must not pass generic Grafana includeVars into Silver Reject Explorer"
+        )
+        url = str(silver_link.get("url", ""))
+        for token in expected["url_tokens"]:
+            assert token in url, (
+                f"{dashboard_name} handoff must preserve expected bounded Silver explorer vars via token {token!r}"
+            )
+        assert expected["tooltip_token"] in str(silver_link.get("tooltip", "")), (
+            f"{dashboard_name} handoff tooltip should document {expected['tooltip_token']!r} policy"
+        )
 
 
 def test_runtime_incident_panels_do_not_duplicate_control_plane_dashboard_link() -> (

@@ -97,6 +97,9 @@ bioetl workflow status <NAME> [OPTIONS]
 **Примеры:**
 
 ```bash
+bioetl workflow run chembl_activity --dry-run
+bioetl workflow status chembl_activity
+bioetl workflow run publication_provider_pack --dry-run
 bioetl workflow run chembl_core --dry-run
 bioetl workflow run chembl_core --only-steps summarize_core_extracts
 bioetl workflow run chembl_core --resume-last

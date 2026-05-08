@@ -63,7 +63,9 @@ class FileWorkflowLedgerStore(WorkflowLedgerPort):
         try:
             self.base_path.mkdir(parents=True, exist_ok=True)
             run_index_dir.mkdir(parents=True, exist_ok=True)
-            existing_manifest_id = self._load_manifest_id_for_run_id(entry.workflow_run_id)
+            existing_manifest_id = self._load_manifest_id_for_run_id(
+                entry.workflow_run_id
+            )
             if (
                 existing_manifest_id is not None
                 and existing_manifest_id != entry.manifest_id
@@ -106,7 +108,9 @@ class FileWorkflowLedgerStore(WorkflowLedgerPort):
                 duration_seconds=perf_counter() - started_at,
             )
 
-    def list_entries_by_run_id(self, workflow_run_id: RunID) -> list[WorkflowLedgerEntry]:
+    def list_entries_by_run_id(
+        self, workflow_run_id: RunID
+    ) -> list[WorkflowLedgerEntry]:
         """Load all workflow-ledger entries linked to a workflow run identifier."""
         started_at = perf_counter()
         status = "success"

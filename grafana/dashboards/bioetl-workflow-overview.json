@@ -20,62 +20,71 @@
   "panels": [
     {
       "gridPos": {
-        "h": 2,
+        "h": 3,
         "w": 24,
         "x": 0,
         "y": 0
       },
       "id": 1000,
       "options": {
-        "content": "<div style=\"display:flex;gap:10px;flex-wrap:wrap;padding:10px;\"><a href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">0. Control Plane</a><a href=\"/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">1. Overview</a><a href=\"/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=unknown&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">2. Runtime</a><a href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&amp;var-pipeline_context=$pipeline&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">3. Provider Health</a><a href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=unknown&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">4. Data Quality</a><a href=\"/a/grafana-lokiexplore-app/explore?var-ds=grafanacloud-prom&amp;var-filters=\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">6. Explore Logs</a><a href=\"/a/grafana-exploretraces-app/explore?query=%7B%7D&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">7. Explore Traces</a><a href=\"/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=unknown&amp;var-run_type=All&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">8. Silver Reject Explorer</a></div>",
+        "content": "<div style=\"display:flex;gap:10px;flex-wrap:wrap;padding:10px;\"><a href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=unknown&amp;var-run_type=All&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">0. Control Plane</a><a href=\"/d/bioetl-overview-v2/bioetl-overview-v2?${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">1. Overview</a><a href=\"/d/bioetl-runtime/bioetl-runtime?var-pipeline=unknown&amp;var-run_type=All&amp;var-stage=unknown&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">2. Runtime</a><a href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&amp;var-pipeline_context=unknown&amp;var-adapter=unknown&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">3. Provider Health</a><a href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=unknown&amp;var-run_type=All&amp;var-stage=unknown&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">4. Data Quality</a><span aria-current=\"page\" style=\"padding:5px 10px;color:#4b5563;text-decoration:none;border:1px solid #4b5563;border-radius:3px;background:rgba(75,85,99,0.18);cursor:default;\">5. Workflow</span><a href=\"/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=unknown&amp;var-run_type=All&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Silver Reject Explorer</a><a href=\"/a/grafana-lokiexplore-app/explore?from=${__from}&amp;to=${__to}&amp;query=%7Bjob%3D%22bioetl%22%7D\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Explore Logs</a><a href=\"/a/grafana-exploretraces-app/?from=${__from}&amp;to=${__to}&amp;queryType=traceqlSearch&amp;query=%7B%7D\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Explore Traces</a></div>",
         "mode": "html"
       },
-      "title": "",
+      "title": "Review Dashboard Navigation",
       "type": "text",
       "links": [
         {
           "title": "0. Control Plane",
-          "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
-          "targetBlank": false
+          "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=unknown&var-run_type=All&${__url_time_range}",
+          "targetBlank": false,
+          "includeVars": false
         },
         {
           "title": "1. Overview",
-          "url": "/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
-          "targetBlank": false
+          "url": "/d/bioetl-overview-v2/bioetl-overview-v2?${__url_time_range}",
+          "targetBlank": false,
+          "includeVars": false
         },
         {
           "title": "2. Runtime",
-          "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=unknown&${__url_time_range}",
-          "targetBlank": false
+          "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=unknown&var-run_type=All&var-stage=unknown&${__url_time_range}",
+          "targetBlank": false,
+          "includeVars": false
         },
         {
           "title": "3. Provider Health",
-          "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&var-pipeline_context=$pipeline&${__url_time_range}",
-          "targetBlank": false
+          "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&var-pipeline_context=unknown&var-adapter=unknown&${__url_time_range}",
+          "targetBlank": false,
+          "includeVars": false,
+          "tooltip": "Context mapping: provider=unknown, pipeline_context=unknown, adapter=unknown. Reset scope: provider=unknown."
         },
         {
           "title": "4. Data Quality",
-          "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=unknown&${__url_time_range}",
+          "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=unknown&var-run_type=All&var-stage=unknown&${__url_time_range}",
           "targetBlank": false,
+          "includeVars": false,
           "tooltip": "Open the Data Quality dashboard in the same tab."
-        },
-        {
-          "title": "Explore Logs",
-          "url": "/a/grafana-lokiexplore-app/explore?var-ds=grafanacloud-prom&var-filters=",
-          "targetBlank": false,
-          "tooltip": "Requires Grafana Logs Drilldown / tracing profile; open the logs drilldown in the same tab."
-        },
-        {
-          "title": "Explore Traces",
-          "url": "/a/grafana-exploretraces-app/explore?query=%7B%7D&${__url_time_range}",
-          "targetBlank": false,
-          "tooltip": "Requires Grafana Traces Drilldown / tracing profile; open the TraceQL view in the same tab."
         },
         {
           "title": "Silver Reject Explorer",
           "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=unknown&var-run_type=All&${__url_time_range}",
           "targetBlank": false,
-          "tooltip": "Open the Silver Reject Explorer using bounded pipeline/run_type context in the same tab."
+          "includeVars": false,
+          "tooltip": "Reset scope: bounded Silver explorer opens with pipeline=unknown and run_type=All."
+        },
+        {
+          "title": "Explore Logs",
+          "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D",
+          "targetBlank": false,
+          "includeVars": false,
+          "tooltip": "Requires optional tracing profile. Opens Logs Drilldown in the same tab with safe {job=\"bioetl\"} baseline."
+        },
+        {
+          "title": "Explore Traces",
+          "url": "/a/grafana-exploretraces-app/?from=${__from}&to=${__to}&queryType=traceqlSearch&query=%7B%7D",
+          "targetBlank": false,
+          "includeVars": false,
+          "tooltip": "Requires optional tracing profile. Opens Traces Drilldown in the same tab with reset-scope generic TraceQL context."
         }
       ]
     },
@@ -84,7 +93,7 @@
         "h": 4,
         "w": 24,
         "x": 0,
-        "y": 2
+        "y": 3
       },
       "id": 1,
       "options": {
@@ -132,7 +141,7 @@
         "h": 5,
         "w": 6,
         "x": 0,
-        "y": 6
+        "y": 7
       },
       "id": 2,
       "options": {
@@ -196,7 +205,7 @@
         "h": 5,
         "w": 6,
         "x": 6,
-        "y": 6
+        "y": 7
       },
       "id": 3,
       "options": {
@@ -260,7 +269,7 @@
         "h": 5,
         "w": 6,
         "x": 12,
-        "y": 6
+        "y": 7
       },
       "id": 6,
       "options": {
@@ -324,7 +333,7 @@
         "h": 5,
         "w": 6,
         "x": 18,
-        "y": 6
+        "y": 7
       },
       "id": 7,
       "options": {
@@ -370,7 +379,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 11
+        "y": 12
       },
       "id": 4,
       "options": {
@@ -426,7 +435,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 11
+        "y": 12
       },
       "id": 5,
       "options": {
@@ -478,7 +487,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 19
+        "y": 20
       },
       "id": 8,
       "options": {
@@ -510,7 +519,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 19
+        "y": 20
       },
       "id": 9,
       "options": {

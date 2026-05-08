@@ -42,6 +42,40 @@ def _panels_overlap(
     )
 
 
+def _root_empty_segments(panels: list[dict[str, object]]) -> list[tuple[int, int]]:
+    spans: list[tuple[int, int]] = []
+    for panel in panels:
+        grid_pos = panel.get("gridPos", {})
+        assert isinstance(grid_pos, dict)
+        y = int(grid_pos.get("y", 0))
+        h = int(grid_pos.get("h", 0))
+        if h <= 0:
+            continue
+        spans.append((y, y + h - 1))
+
+    if not spans:
+        return []
+
+    occupied: set[int] = set()
+    for start, end in spans:
+        occupied.update(range(start, end + 1))
+
+    min_y = min(start for start, _ in spans)
+    max_y = max(end for _, end in spans)
+    gaps: list[tuple[int, int]] = []
+    gap_start: int | None = None
+    for row in range(min_y, max_y + 1):
+        if row not in occupied:
+            if gap_start is None:
+                gap_start = row
+        elif gap_start is not None:
+            gaps.append((gap_start, row - 1))
+            gap_start = None
+    if gap_start is not None:
+        gaps.append((gap_start, max_y))
+    return gaps
+
+
 def test_design_system_defines_first_screen_decision_matrix() -> None:
     """#3700: design docs must define first-screen responsibility explicitly."""
     text = _DESIGN_SYSTEM_PATH.read_text(encoding="utf-8")
@@ -55,6 +89,12 @@ def test_design_system_defines_first_screen_decision_matrix() -> None:
         "`bioetl_dq_current_status`",
         "Selected-range count/rate/trend",
         "First-screen current-status panels MUST NOT use `$__range`",
+        "Layout grammar by dashboard role",
+        "Visibility tiers and collapse policy",
+        "L0 answer-first hub",
+        "Forensic explorer",
+        "`Tier 1`",
+        "`Tier 4`",
     }
     missing = sorted(token for token in required_tokens if token not in text)
     assert not missing, (
@@ -162,6 +202,21 @@ def test_dashboard_top_level_grid_positions_do_not_overlap() -> None:
         assert not overlaps, (
             f"{dashboard_path.name} has overlapping top-level grid positions: "
             f"{overlaps}"
+        )
+
+
+def test_dashboard_top_level_grid_positions_do_not_leave_root_gaps() -> None:
+    """Top-level layout bands must pack cleanly unless a dashboard documents an exception."""
+    for dashboard_path in sorted(_DASHBOARD_DIR.glob("*.json")):
+        dashboard = load_dashboard(dashboard_path)
+        panels = [
+            panel
+            for panel in dashboard.get("panels", [])
+            if isinstance(panel, dict) and isinstance(panel.get("gridPos"), dict)
+        ]
+        gaps = _root_empty_segments(panels)
+        assert not gaps, (
+            f"{dashboard_path.name} has unexplained empty root row gaps: {gaps}"
         )
 
 
