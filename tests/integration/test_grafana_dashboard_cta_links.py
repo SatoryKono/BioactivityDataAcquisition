@@ -732,8 +732,7 @@ def test_workflow_range_cards_do_not_ship_panel_level_runbook_links() -> None:
 
     assert not offenders, (
         "Workflow selected-range summary cards must stay free of panel-level CTAs; "
-        "handoff belongs to Next Diagnostic Surface:\n"
-        + "\n".join(offenders)
+        "handoff belongs to Next Diagnostic Surface:\n" + "\n".join(offenders)
     )
 
     next_panel = next(
@@ -747,9 +746,9 @@ def test_workflow_range_cards_do_not_ship_panel_level_runbook_links() -> None:
     assert next_panel is not None
     next_links = _iter_panel_data_links(next_panel)
     assert next_links, "Workflow Next Diagnostic Surface must keep dashboard handoffs"
-    assert all(
-        str(link.get("url", "")).startswith("/d/") for link in next_links
-    ), "Workflow Next Diagnostic Surface must stay dashboard-handoff-only"
+    assert all(str(link.get("url", "")).startswith("/d/") for link in next_links), (
+        "Workflow Next Diagnostic Surface must stay dashboard-handoff-only"
+    )
 
 
 def test_design_system_documents_role_based_runbook_cta_policy() -> None:
@@ -766,8 +765,7 @@ def test_design_system_documents_role_based_runbook_cta_policy() -> None:
     }
     missing = sorted(token for token in required_tokens if token not in text)
     assert not missing, (
-        "design-system must document role-based runbook CTA policy; "
-        f"missing={missing}"
+        f"design-system must document role-based runbook CTA policy; missing={missing}"
     )
 
 
