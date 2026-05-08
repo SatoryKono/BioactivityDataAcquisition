@@ -38,7 +38,7 @@ from bioetl.composition.factories.pipeline.runner_assembly import (
     assemble_runner_impl as _rf014_assemble_runner_impl,
 )
 from bioetl.composition.observability import ObservabilityBundle
-from bioetl.composition.providers._registry_protocols import (
+from bioetl.composition.providers.provider_registry import (
     ProviderDataSourceRegistryProtocol,
 )
 from bioetl.domain.behavior import EntityIdentityGenerator

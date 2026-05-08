@@ -10,7 +10,7 @@ from collections.abc import Callable
 from dataclasses import fields, is_dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Any
+from typing import Any, Protocol
 
 from bioetl.domain.value_objects.dq_report import (
     DQCheckStatus,
@@ -70,12 +70,21 @@ def update_counts(
     return passed, failed, warnings + 1
 
 
-def run_serialized_checks(
+class _HasDQStatus(Protocol):
+    """Minimal protocol for DQ results used by shared check execution."""
+
+    status: DQCheckStatus
+
+
+def run_serialized_checks[
+    TCheckResult: _HasDQStatus,
+    TSerializedResult,
+](
     *,
     enabled_checks: set[object],
-    dispatch: list[tuple[object, str, Callable[[], Any]]],
-    checks: dict[str, Any],  # Any: DQ payloads are heterogeneous
-    serialize_result: Callable[[Any], Any],  # Any: check result types vary
+    dispatch: list[tuple[object, str, Callable[[], TCheckResult]]],
+    checks: dict[str, TSerializedResult],
+    serialize_result: Callable[[TCheckResult], TSerializedResult],
     passed: int,
     failed: int,
     warnings: int,

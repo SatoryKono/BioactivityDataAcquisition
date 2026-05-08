@@ -8,7 +8,6 @@ from uuid import UUID
 
 from bioetl.domain.control_plane import (
     WorkflowExecutionState,
-    WorkflowManifest,
 )
 from bioetl.domain.ports import (
     WorkflowExecutionStatePort,

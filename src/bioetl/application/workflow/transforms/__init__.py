@@ -2,10 +2,8 @@
 
 from __future__ import annotations
 
-from collections.abc import Awaitable, Callable, Mapping
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
-
-from bioetl.domain.workflow import WorkflowTransformSpec
 
 type WorkflowTransformOutput = object
 type WorkflowTransformCallable = Callable[
@@ -14,13 +12,16 @@ type WorkflowTransformCallable = Callable[
 
 
 @dataclass(frozen=True, slots=True)
-class WorkflowTransformDestructiveCommit:
+class WorkflowTransformDestructiveCommitSignal:
     """Persistable signal that a destructive transform mutation has committed."""
 
     step_id: str
     transform_name: str
     fingerprint: str
     details: dict[str, object]
+
+
+WorkflowTransformDestructiveCommit = WorkflowTransformDestructiveCommitSignal
 
 
 @dataclass(frozen=True, slots=True)
@@ -43,7 +44,7 @@ class WorkflowTransformRuntimeContext:
         if self.destructive_commit_callback is None:
             return
         self.destructive_commit_callback(
-            WorkflowTransformDestructiveCommit(
+            WorkflowTransformDestructiveCommitSignal(
                 step_id=step_id,
                 transform_name=transform_name,
                 fingerprint=fingerprint,
@@ -53,8 +54,9 @@ class WorkflowTransformRuntimeContext:
 
 
 __all__ = [
-    "WorkflowTransformDestructiveCommit",
     "WorkflowTransformCallable",
+    "WorkflowTransformDestructiveCommit",
+    "WorkflowTransformDestructiveCommitSignal",
     "WorkflowTransformOutput",
     "WorkflowTransformRegistry",
     "WorkflowTransformRuntimeContext",

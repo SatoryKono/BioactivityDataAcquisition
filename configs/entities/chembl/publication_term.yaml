@@ -14,12 +14,12 @@ pipeline:
   - term_type
   - term
 
-sink:
-  silver:
-    partition_by:
-    - term_type
-  gold:
-    mode: overwrite
+  sink:
+    silver:
+      partition_by:
+      - term_type
+    gold:
+      mode: overwrite
 schema:
   content_hash:
     include: []

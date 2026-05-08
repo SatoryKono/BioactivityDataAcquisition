@@ -19,16 +19,24 @@ if TYPE_CHECKING:
     from bioetl.application.services.control_plane.run_manifest_inspection_service import (
         RunManifestInspectionService,
     )
+    from bioetl.application.services.control_plane.workflow_execution_service import (
+        WorkflowExecutionService,
+    )
+    from bioetl.application.services.control_plane.workflow_inspection_service import (
+        WorkflowInspectionService,
+    )
     from bioetl.application.services.export_service import ExportService
     from bioetl.application.services.lineage.lineage_inspection_service import (
         LineageInspectionService,
     )
     from bioetl.application.services.lock_service import LockService
+    from bioetl.composition.registry_api import PipelineRegistry
     from bioetl.domain.control_plane import (
         ControlPlaneArtifactLifecycleApplyResult,
         ControlPlaneArtifactLifecyclePlan,
         ControlPlaneArtifactLifecyclePolicy,
     )
+    from bioetl.domain.workflow import WorkflowConfig
 
     class ControlPlaneArtifactLifecycleStoreProtocol(Protocol):
         def plan(
@@ -63,6 +71,14 @@ if TYPE_CHECKING:
 
     def get_run_manifest_service() -> RunManifestInspectionService: ...
 
+    def get_workflow_execution_service(
+        registry: PipelineRegistry | None = None,
+    ) -> WorkflowExecutionService: ...
+
+    def get_workflow_inspection_service() -> WorkflowInspectionService: ...
+
+    def load_workflow_config(name: str) -> WorkflowConfig: ...
+
 
 __all__ = [
     "bootstrap_control_plane_lifecycle_store",
@@ -74,9 +90,13 @@ __all__ = [
     "get_lineage_service",
     "get_lock_service",
     "get_run_manifest_service",
+    "get_workflow_execution_service",
+    "get_workflow_inspection_service",
+    "load_workflow_config",
 ]
 
 _SERVICES_MODULE = "bioetl.composition._services"
+_WORKFLOW_SERVICES_MODULE = "bioetl.composition._workflow_services"
 _RESOURCE_MANAGEMENT_MODULE = "bioetl.composition._resource_management"
 _CLI_CONTROL_PLANE_LIFECYCLE_MODULE = (
     "bioetl.composition.bootstrap.cli.control_plane_lifecycle"
@@ -91,6 +111,9 @@ _PUBLIC_EXPORTS = {
     "get_lineage_service": _SERVICES_MODULE,
     "get_lock_service": _SERVICES_MODULE,
     "get_run_manifest_service": _SERVICES_MODULE,
+    "get_workflow_execution_service": _WORKFLOW_SERVICES_MODULE,
+    "get_workflow_inspection_service": _WORKFLOW_SERVICES_MODULE,
+    "load_workflow_config": _WORKFLOW_SERVICES_MODULE,
 }
 
 

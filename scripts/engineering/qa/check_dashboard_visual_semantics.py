@@ -99,6 +99,26 @@ EXPLICIT_VALUE_MAPPING_STAT_PANELS = {
         "2": {"text": "CRIT", "color": "red"},
     },
 }
+FAIL_CLOSED_NO_ZERO_FALLBACK_PANELS = {
+    ("bioetl-overview-v2.json", "System Status"): "UNKNOWN",
+    ("bioetl-runtime.json", "Monitor Runtime Current Status"): "UNKNOWN",
+    ("bioetl-runtime.json", "Monitor Runtime Telemetry Gap"): "UNKNOWN",
+    ("bioetl-runtime.json", "Monitor Runtime Blockers"): "UNKNOWN",
+    ("bioetl-runtime.json", "Monitor Runtime Error Rate"): "UNKNOWN",
+    ("bioetl-runtime.json", "Monitor Worst Stage Lag"): "UNKNOWN",
+    ("bioetl-runtime.json", "Monitor Memory Pressure Active"): "UNKNOWN",
+    ("bioetl-provider-health-v2.json", "Monitor GLOBAL Provider Severity Matrix"): None,
+    ("bioetl-provider-health-v2.json", "Inspect Provider Top Causes"): None,
+    ("bioetl-dq-v2.json", "Monitor DQ Current Status"): "UNKNOWN",
+    ("bioetl-dq-v2.json", "Monitor DQ Threshold State"): "UNKNOWN",
+    ("bioetl-control-plane-v1.json", "Monitor: Replay Safety State"): "UNKNOWN",
+    ("bioetl-control-plane-v1.json", "Monitor: Manifest / Ledger Integrity"): "UNKNOWN",
+    ("bioetl-control-plane-v1.json", "Inspect: Telemetry Missing"): "UNKNOWN",
+}
+REQUIRED_TRUST_MARKER_PANELS = {
+    "bioetl-runtime.json": {"Monitor Runtime Telemetry Gap"},
+    "bioetl-control-plane-v1.json": {"Inspect: Telemetry Missing"},
+}
 
 
 def iter_panels(panels: list[dict]) -> list[dict]:
@@ -196,23 +216,59 @@ def _is_status_like_panel(panel: dict) -> bool:
 
 
 def _panel_errors(dashboard_path: Path, panel: dict) -> list[str]:
-    if panel.get("type") not in {"stat", "gauge"}:
-        return []
-    if not _is_status_like_panel(panel):
-        return []
-    return [
-        *_stat_panel_visual_semantics_errors(dashboard_path, panel),
-        *_l0_terminology_errors(dashboard_path, panel),
-    ]
+    errors: list[str] = []
+    title = str(panel.get("title", ""))
+    panel_key = (dashboard_path.name, title)
+
+    if panel.get("type") in {"stat", "gauge"} and _is_status_like_panel(panel):
+        errors.extend(_stat_panel_visual_semantics_errors(dashboard_path, panel))
+        errors.extend(_l0_terminology_errors(dashboard_path, panel))
+
+    expected_no_value = FAIL_CLOSED_NO_ZERO_FALLBACK_PANELS.get(panel_key)
+    if expected_no_value is not None:
+        expressions = [
+            str(target.get("expr", ""))
+            for target in panel.get("targets", [])
+            if isinstance(target, dict) and isinstance(target.get("expr"), str)
+        ]
+        if any("or vector(0)" in expr for expr in expressions):
+            errors.append(
+                f"{dashboard_path}: panel '{title}' must preserve UNKNOWN instead of zero fallback"
+            )
+        no_value = panel.get("fieldConfig", {}).get("defaults", {}).get("noValue")
+        if expected_no_value is not None and no_value != expected_no_value:
+            errors.append(
+                f"{dashboard_path}: panel '{title}' must use noValue={expected_no_value!r}"
+            )
+
+    return errors
 
 
 def _dashboard_errors(dashboard_path: Path) -> list[str]:
     payload = json.loads(dashboard_path.read_text(encoding="utf-8"))
-    return [
+    errors = [
         error
         for panel in iter_panels(payload.get("panels", []))
         for error in _panel_errors(dashboard_path, panel)
     ]
+    required_panels = REQUIRED_TRUST_MARKER_PANELS.get(dashboard_path.name, set())
+    if required_panels:
+        top_level_panels = {
+            str(panel.get("title", "")): panel for panel in payload.get("panels", [])
+        }
+        for title in required_panels:
+            panel = top_level_panels.get(title)
+            if panel is None:
+                errors.append(
+                    f"{dashboard_path}: required trust marker panel '{title}' is missing"
+                )
+                continue
+            grid_pos = panel.get("gridPos", {})
+            if not isinstance(grid_pos, dict) or int(grid_pos.get("y", 999)) > 12:
+                errors.append(
+                    f"{dashboard_path}: trust marker panel '{title}' must stay above fold"
+                )
+    return errors
 
 
 def _report_errors(errors: list[str]) -> int:

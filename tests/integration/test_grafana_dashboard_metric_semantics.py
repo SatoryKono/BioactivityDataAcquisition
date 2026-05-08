@@ -15,6 +15,27 @@ from tests.integration._grafana_test_support import (
 pytestmark = pytest.mark.integration
 
 
+def test_design_system_documents_missing_data_panel_class_contract() -> None:
+    """Design docs must preserve missing-data semantics by panel class."""
+    text = Path("docs/03-guides/dashboards/design-system.md").read_text(
+        encoding="utf-8"
+    )
+    required_tokens = {
+        "Missing-data semantics by panel class",
+        "Current-status / current-cause panels",
+        "Zero-valid event counters",
+        "Timeseries / latency / histogram evidence",
+        "Forensic tables and HTTP-backed explorer surfaces",
+        "Telemetry-gap / trust-marker policy",
+        "`or vector(0)` запрещён",
+    }
+    missing = sorted(token for token in required_tokens if token not in text)
+    assert not missing, (
+        "dashboard design-system must document missing-data semantics; "
+        f"missing={missing}"
+    )
+
+
 def test_summary_queries_use_zero_fallbacks() -> None:
     """Count summaries may synthesize zero only where absence means no events."""
     expected_panel_snippets = {
@@ -58,6 +79,12 @@ def test_summary_queries_use_zero_fallbacks() -> None:
             "Monitor: Lineage Fragment Persistence Failures": "or vector(0)",
             "Monitor: Lineage Refs Missing": "or vector(0)",
         },
+        "bioetl-workflow-overview.json": {
+            "Failed Workflow Runs / Range": "or vector(0)",
+            "Failed Pipeline Steps / Range": "or vector(0)",
+            "Failed Transform Steps / Range": "or vector(0)",
+            "Skipped Step Events / Range": "or vector(0)",
+        },
     }
 
     for dashboard_name, panel_expectations in expected_panel_snippets.items():
@@ -84,6 +111,46 @@ def test_summary_queries_use_zero_fallbacks() -> None:
                 f"Dashboard {dashboard_name} panel {panel_title!r} must include "
                 f"{expected_snippet!r} to render zero instead of no-data"
             )
+
+
+def test_workflow_selected_range_counters_use_zero_valid_empty_state() -> None:
+    """Workflow summary cards intentionally render empty selected ranges as zero events."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-workflow-overview.json"))
+    expected_panels = {
+        "Failed Workflow Runs / Range",
+        "Failed Pipeline Steps / Range",
+        "Failed Transform Steps / Range",
+        "Skipped Step Events / Range",
+    }
+    panels = {
+        panel.get("title"): panel
+        for panel in get_dashboard_panels(dashboard)
+        if panel.get("title") in expected_panels
+    }
+    assert set(panels) == expected_panels
+
+    for panel_title, panel in panels.items():
+        expressions = [
+            target.get("expr", "")
+            for target in panel.get("targets", [])
+            if isinstance(target.get("expr"), str)
+        ]
+        assert expressions
+        assert any(
+            "increase(" in expr and "[$__range]" in expr for expr in expressions
+        ), f"{panel_title} must stay selected-range evidence"
+        assert any("or vector(0)" in expr for expr in expressions), (
+            f"{panel_title} must keep zero-valid fallback for empty selected ranges"
+        )
+        defaults = panel.get("fieldConfig", {}).get("defaults", {})
+        assert defaults.get("noValue") == "0", (
+            f"{panel_title} must keep noValue='0' for zero-valid event-count semantics"
+        )
+        description = str(panel.get("description", "")).lower()
+        assert "selected" in description
+        assert "`0` means no" in str(
+            panel.get("description", "")
+        ) or "0` means no" in str(panel.get("description", ""))
 
 
 def test_runtime_selected_count_zeroes_are_scope_anchored() -> None:
@@ -254,6 +321,44 @@ def test_review_panels_explain_empty_state_explicitly(
     assert description_snippet in description
     defaults = panel.get("fieldConfig", {}).get("defaults", {})
     assert defaults.get("noValue") == expected_no_value
+
+
+def test_silver_reject_explorer_custom_no_value_copy_is_intentional_http_forensic_behavior() -> (
+    None
+):
+    """Explorer keeps datasource-specific noValue copy because panels distinguish forensic states."""
+    dashboard = load_dashboard(
+        Path("grafana/dashboards/bioetl-silver-reject-explorer.json")
+    )
+    expected_panels = {
+        "Monitor Filtered Records Total": "Verify Quarantine Explorer before treating this as OK.",
+        "Track Reject Rate vs Bronze": "Treat as UNKNOWN until Bronze denominator and quarantine API are confirmed.",
+        "Inspect Run Scope Summary": "Check pipeline selection and Quarantine Explorer availability.",
+        "Inspect Filtered Records Table": "No rejected records for current filters.",
+        "Inspect Selected Record Details": "Select a payload_hash from the table",
+    }
+    panels = {
+        panel.get("title"): panel
+        for panel in get_dashboard_panels(dashboard)
+        if panel.get("title") in expected_panels
+    }
+    assert set(panels) == set(expected_panels)
+
+    for panel_title, expected_no_value in expected_panels.items():
+        panel = panels[panel_title]
+        no_value = str(
+            panel.get("fieldConfig", {}).get("defaults", {}).get("noValue", "")
+        )
+        assert expected_no_value in no_value, (
+            f"{panel_title} must preserve datasource-specific noValue guidance"
+        )
+        description = str(panel.get("description", "")).lower()
+        assert any(
+            token in description
+            for token in ("quarantine explorer", "backend", "api", "unknown", "empty")
+        ), (
+            f"{panel_title} description must explain HTTP-forensic missing-data semantics"
+        )
 
 
 def test_count_like_summary_panels_use_rounding_or_boolean_conditions() -> None:

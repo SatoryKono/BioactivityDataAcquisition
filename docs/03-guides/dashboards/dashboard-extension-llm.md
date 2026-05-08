@@ -74,6 +74,9 @@ Grafana dashboards в BioETL.
   Prometheus dashboards, summary panels или generic drilldowns.
 - Не используй encoded Loki interpolation по `$pipeline/$provider` как источник истины.
 - Не превращай `Alert Conditions` в “real alert engine”, если datasource/state этого не поддерживает.
+- Не добавляй datasource health tiles по умолчанию. Сначала докажи, что без
+  trust marker оператор не сможет отличить empty scope, telemetry gap и backend
+  failure.
 
 ## 4. Query conventions
 
@@ -175,6 +178,8 @@ uv run python -m pytest -q tests/integration/test_grafana_config.py
 - [ ] Для first-screen current-status severity `stat` panels заданы explicit value mappings `0=OK`, `1=WARN`, `2=CRIT`, `null=UNKNOWN`.
 - [ ] Для терминов статусов применяется единая таблица mapping из `docs/03-guides/dashboards/design-system.md` (раздел **1.1 Canonical mapping: L0 vs diagnostic dashboards**).
 - [ ] В L0 dashboards используется только `OK/WARN/CRIT/UNKNOWN`; alias-термины (`DEGRADED/BROKEN/HEALTHY`) допустимы только в диагностических deep-dive поверхностях и с явным alias mapping в description.
+- [ ] Для Prometheus current-status/current-cause panels отсутствует invalid zero-fallback (`or vector(0)`); zero fallback допустим только для true event counters.
+- [ ] Для HTTP-backed forensic panels (`Quarantine Explorer`) descriptions/noValue copy различают zero matching rows, invalid scope/filter chain и backend failure.
 - [ ] Заголовки и описания новых панелей соответствуют шаблонам из design system.
 - [ ] Пройдена автоматическая проверка:
 

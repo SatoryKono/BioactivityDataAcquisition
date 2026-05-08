@@ -10,17 +10,17 @@ pipeline:
         - target_id
     batch_size: 1000
 
-sink:
-    silver:
-        partition_by:
-            - target_type
-    gold:
-        mode: scd2
-        scd_config:
-            valid_from_col: _valid_from
-            valid_to_col: _valid_to
-            current_flag_col: _is_current
-            version_col: _version
+    sink:
+        silver:
+            partition_by:
+                - target_type
+        gold:
+            mode: scd2
+            scd_config:
+                valid_from_col: _valid_from
+                valid_to_col: _valid_to
+                current_flag_col: _is_current
+                version_col: _version
 schema:
   content_hash:
     include: []

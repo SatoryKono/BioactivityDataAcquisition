@@ -2,15 +2,13 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal, TypeVar, cast, overload
+from typing import TYPE_CHECKING, Literal, TypeVar, overload
 
-from bioetl.composition.providers._default_registry import (
-    get_default_provider_registry,
-)
-from bioetl.composition.providers._loading import ensure_provider_registry_loaded
 from bioetl.composition.providers._registry_protocols import (
-    ProviderDataSourceRegistryProtocol,
     ProviderRegistrarProtocol,
+)
+from bioetl.composition.providers.provider_registry import (
+    resolve_provider_registry as _resolve_provider_registry,
 )
 
 if TYPE_CHECKING:
@@ -57,14 +55,4 @@ def resolve_provider_registry(
     ensure_ready: bool = False,
 ) -> ProviderRegistrarProtocol:
     """Resolve explicit-or-default registry access through one private seam."""
-    resolved_registry = (
-        provider_registry
-        if provider_registry is not None
-        else cast(
-            "ProviderDataSourceRegistryProtocol",
-            get_default_provider_registry(),
-        )
-    )
-    if ensure_ready:
-        ensure_provider_registry_loaded(resolved_registry)
-    return resolved_registry
+    return _resolve_provider_registry(provider_registry, ensure_ready=ensure_ready)

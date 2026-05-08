@@ -176,7 +176,7 @@ histogram_quantile(0.95, sum by (le, provider) (rate(bioetl_health_check_latency
 
 ## 2026-05-08 UX/layout consolidation
 
-UX report: [docs/reports/dashboard-ux-checks/2026-05-08.md](../../reports/dashboard-ux-checks/2026-05-08.md).
+UX report artifact: `docs/reports/dashboard-ux-checks/2026-05-08.md`.
 
 - All shipped dashboard JSON files now have non-overlapping top-level `gridPos`
   rectangles; navigation/scope/current-status/range/collapsed rows occupy

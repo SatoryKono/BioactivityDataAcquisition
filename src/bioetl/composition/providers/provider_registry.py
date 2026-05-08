@@ -25,6 +25,10 @@ from bioetl.composition.providers._models import (
     ProviderConfig,
     ProviderSettingsProtocol,
 )
+from bioetl.composition.providers._registry_protocols import (
+    ProviderDataSourceRegistryProtocol,
+    ProviderRegistrarProtocol,
+)
 from bioetl.composition.providers._store import ProviderStore
 
 if TYPE_CHECKING:
@@ -38,10 +42,13 @@ __all__ = [
     "DataSourceCreatorProtocol",
     "HttpConfig",
     "ProviderConfig",
+    "ProviderDataSourceRegistryProtocol",
+    "ProviderRegistrarProtocol",
     "ProviderRegistry",
     "create_provider_registry",
     "ensure_provider_registry_ready",
     "get_default_provider_registry",
+    "register_default_provider_config",
     "resolve_provider_registry",
 ]
 
@@ -221,7 +228,10 @@ class ProviderRegistry:
         """Check if provider is registered (unified API)."""
         return self.is_registered(key)
 
-def ensure_provider_registry_ready(registry: ProviderRegistry) -> ProviderRegistry:
+
+def ensure_provider_registry_ready(
+    registry: ProviderRegistrarProtocol,
+) -> ProviderRegistrarProtocol:
     """Ensure a provider registry instance is populated before use.
 
     This remains the sanctioned bootstrap seam for callers that need an
@@ -232,10 +242,10 @@ def ensure_provider_registry_ready(registry: ProviderRegistry) -> ProviderRegist
 
 
 def resolve_provider_registry(
-    provider_registry: ProviderRegistry | None = None,
+    provider_registry: ProviderRegistrarProtocol | None = None,
     *,
     ensure_ready: bool = False,
-) -> ProviderRegistry:
+) -> ProviderRegistrarProtocol:
     """Resolve explicit-or-default registry access through a public seam."""
     resolved_registry = (
         provider_registry

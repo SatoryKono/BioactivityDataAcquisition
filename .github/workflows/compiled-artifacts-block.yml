@@ -1,4 +1,8 @@
 name: Block Compiled Python Artifacts
+
+permissions:
+  contents: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -30,7 +34,7 @@ jobs:
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
         with:
-          python-version: "3.12"
+          python-version: "3.13"
           uv-extras: "dev"
 
       - name: Fail if *.pyc or __pycache__ exists

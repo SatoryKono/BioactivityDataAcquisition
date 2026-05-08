@@ -234,20 +234,29 @@ python -m json.tool grafana/dashboards/*.json > /dev/null
 - Configuration validation rules defined (required fields, forbidden patterns)
 
 **Current pluginVersion State:**
-- bioetl-control-plane-v1.json: 9.5.0 (needs upgrade)
-- bioetl-dq-v2.json: Mixed 10.4.0 and 12.2.0 (needs standardization)
-- bioetl-runtime.json: Mixed 10.4.0 and 12.2.0 (needs standardization)
-- bioetl-provider-health-v2.json: Mixed 10.4.0 and 12.2.0 (needs standardization)
-- bioetl-workflow-overview.json: TBD
-- bioetl-silver-reject-explorer.json: TBD
+- bioetl-control-plane-v1.json: 9.5.0 (21 instances) - needs upgrade
+- bioetl-dq-v2.json: Mixed 10.4.0 (1 instance) and 12.2.0 (1 instance) - needs standardization to 12.2.0
+- bioetl-runtime.json: Mixed 10.4.0 (3 instances) and 12.2.0 (2 instances) - needs standardization to 12.2.0
+- bioetl-provider-health-v2.json: Mixed 10.4.0 (3 instances) and 12.2.0 (2 instances) - needs standardization to 12.2.0
+- bioetl-overview-v2.json: TBD - needs review
+- bioetl-workflow-overview.json: TBD - needs review
+- bioetl-silver-reject-explorer.json: TBD - needs review
+
+**Current style State:**
+- Not all dashboards explicitly set style - needs verification and addition
 
 **Remaining:**
-- Upgrade all panels to pluginVersion 12.2.0
+- Upgrade control-plane-v1 from 9.5.0 to 12.2.0 (21 instances)
+- Standardize dq-v2 to 12.2.0 (upgrade 1 instance from 10.4.0)
+- Standardize runtime to 12.2.0 (upgrade 3 instances from 10.4.0)
+- Standardize provider-health-v2 to 12.2.0 (upgrade 3 instances from 10.4.0)
+- Review and standardize overview-v2, workflow-overview, silver-reject-explorer
 - Add explicit style configuration to all dashboards
 - Standardize base settings (editable, graphTooltip, hideControls)
 - Create configuration validator script
 - Run validation on all dashboards
 - Document configuration standards
+- Test plugin upgrade in staging
 
 ## 🎯 Notes
 

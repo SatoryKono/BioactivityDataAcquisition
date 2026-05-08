@@ -60,11 +60,6 @@ from bioetl.domain.ports.export import (
     ExportWriterPort,
 )
 from bioetl.domain.ports.filtering import InputFilterPort
-from bioetl.domain.ports.workflow_foreign_key_reconciliation import (
-    ForeignKeyReconciliationPort,
-    ForeignKeyReconciliationRequest,
-    ForeignKeyReconciliationResult,
-)
 from bioetl.domain.ports.health_check import (
     HealthCheckPort,
     HealthCheckResult,
@@ -160,6 +155,11 @@ from bioetl.domain.ports.storage import (
     StorageMaintenancePort,
     coerce_silver_write_request,
 )
+from bioetl.domain.ports.workflow_foreign_key_reconciliation import (
+    ForeignKeyReconciliationPort,
+    ForeignKeyReconciliationRequest,
+    ForeignKeyReconciliationResult,
+)
 
 __all__ = [
     "AdrDocument",
@@ -204,6 +204,9 @@ __all__ = [
     "ExportWriterPort",
     "FallbackPolicyPort",
     "FilterableDataSourcePort",
+    "ForeignKeyReconciliationPort",
+    "ForeignKeyReconciliationRequest",
+    "ForeignKeyReconciliationResult",
     "GoldDQAnalyzerPort",
     "GoldDQConfigPort",
     "GoldMetadataInput",
@@ -218,9 +221,6 @@ __all__ = [
     "IDMappingSourceReaderPort",
     "IdentifierResolverStrategy",
     "InputFilterPort",
-    "ForeignKeyReconciliationPort",
-    "ForeignKeyReconciliationRequest",
-    "ForeignKeyReconciliationResult",
     "JsonEncoderPort",
     "LineageStorePort",
     "LockPort",
@@ -255,9 +255,6 @@ __all__ = [
     "RegistryAccessorPort",
     "RunLedgerPort",
     "RunManifestPort",
-    "WorkflowExecutionStatePort",
-    "WorkflowLedgerPort",
-    "WorkflowManifestPort",
     "RunnablePort",
     "RunnerFactoryPort",
     "SettingsLoaderPort",
@@ -275,6 +272,9 @@ __all__ = [
     "StorageLifecyclePort",
     "StorageMaintenancePort",
     "TracingPort",
+    "WorkflowExecutionStatePort",
+    "WorkflowLedgerPort",
+    "WorkflowManifestPort",
     "coerce_silver_dq_analyze_request",
     "coerce_silver_write_request",
     "resolve_metric_labels",

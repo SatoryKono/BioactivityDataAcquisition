@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from uuid import uuid4
 
 from bioetl.composition.bootstrap.cli.metrics import bootstrap_metrics_service
@@ -20,6 +21,7 @@ def push_metrics_to_gateway(
     *,
     pipeline_name: str | None = None,
     run_type: str | None = None,
+    grouping_key_extra: Mapping[str, str] | None = None,
 ) -> bool:
     """Push current metrics to Prometheus Pushgateway via a leaf bootstrap seam."""
     settings = get_settings()
@@ -29,6 +31,8 @@ def push_metrics_to_gateway(
         grouping_key["pipeline"] = pipeline_name
     if run_type:
         grouping_key["run_type"] = run_type
+    if grouping_key_extra:
+        grouping_key.update(grouping_key_extra)
 
     metrics_service = bootstrap_metrics_service()
     metrics_service.logger = bootstrap_logger(

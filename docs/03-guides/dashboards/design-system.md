@@ -193,6 +193,76 @@ Normative rules:
 - The only copy of a critical signal MUST NOT live exclusively inside a
   collapsed row.
 
+## 4.4) Datasource trust semantics (обязательно)
+
+Shipped dashboards use more than one datasource class and MUST not flatten
+their trust semantics into a single generic `No data` story.
+
+Datasource categories:
+
+- **Primary operator datasource**: Prometheus for current verdict, current
+  causes, selected-range evidence, and KPI panels.
+- **Secondary forensic datasource**: Quarantine Explorer HTTP API for row-level
+  reject exploration and payload/detail inspection.
+- **Investigative handoff surfaces**: Loki / Tempo through `Explore Logs` and
+  `Explore Traces`; these are handoffs, not shipped dashboards.
+
+Normative rules:
+- Prometheus current-status and current-cause panels MUST remain fail-closed:
+  preserve `UNKNOWN`, MUST NOT use `or vector(0)`, and MUST NOT silently
+  convert missing telemetry into healthy state.
+- `or vector(0)` remains valid only for true zero-event counters where missing
+  series semantically means zero events.
+- A dashboard MUST add an explicit trust marker only when the operator could
+  otherwise confuse empty scope, telemetry gap, or backend failure.
+- HTTP-backed forensic surfaces MUST distinguish:
+  - valid scope with zero matching rows
+  - invalid or unsupported filter chain
+  - backend / datasource query failure
+- `Silver Reject Explorer` first-screen copy and detail descriptions MUST
+  explain this distinction before the operator treats an empty table as OK.
+
+## 4.5) Missing-data semantics by panel class (обязательно)
+
+Не существует одного универсального `noValue` текста для всех dashboards.
+Shipped surfaces MUST различать valid zero, empty result, `UNKNOWN` и
+datasource/query failure по роли панели.
+
+### 4.5.1 Current-status / current-cause panels
+
+- `null` MUST рендериться как `UNKNOWN`.
+- `or vector(0)` запрещён.
+- Missing telemetry MUST оставаться fail-closed, а не превращаться в synthetic
+  healthy state.
+
+### 4.5.2 Zero-valid event counters
+
+- `or vector(0)` допустим только тогда, когда отсутствие серии действительно
+  означает ноль событий.
+- Это MUST быть видно либо в query, либо в description.
+
+### 4.5.3 Timeseries / latency / histogram evidence
+
+- `No data` остаётся диагностическим сигналом.
+- Нельзя синтетически подменять отсутствие samples на `0s`, `0ms` или похожий
+  healthy-looking value.
+
+### 4.5.4 Forensic tables and HTTP-backed explorer surfaces
+
+- Valid empty result SHOULD описываться как empty result / no matching rows.
+- Unsupported filter chain, empty denominator, invalid scope или backend
+  failure MUST отличаться от empty result.
+- `Silver Reject Explorer` MUST объяснять это distinction в first-screen CTA и
+  в detail-table descriptions.
+
+### 4.5.5 Telemetry-gap / trust-marker policy
+
+- Trust-marker panels обязательны только там, где без них оператор не может
+  безопасно интерпретировать first-screen verdict.
+- Они required для surfaces наподобие `Runtime` и `Control Plane`, где zero
+  counters без telemetry health могут вводить в заблуждение.
+- Они не являются blanket requirement для всех dashboards.
+
 ## 5) Единый unit/decimals для схожих KPI (обязательно)
 
 - Для счётчиков событий (`... Missing`, `... Incompatibilities`, `... Failures`) использовать `unit=short`, `decimals=0`.

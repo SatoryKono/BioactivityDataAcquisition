@@ -24,7 +24,7 @@ on:
         type: boolean
 
 env:
-  PYTHON_VERSION: "3.12"
+  PYTHON_VERSION: "3.13"
   # Contract tests require network access
   BIOETL_LIVE_API_TESTS: "true"
   BIOETL_NETWORK_TESTS: "true"
@@ -73,7 +73,7 @@ jobs:
 
           # Run tests and capture exit code
           mkdir -p reports/junit
-          uv run pytest $PYTEST_ARGS --junit-xml=reports/junit/contract-results.xml || echo "TESTS_FAILED=true" >> $GITHUB_OUTPUT
+          uv run pytest $PYTEST_ARGS --junit-xml=reports/junit/contract-results.xml || echo "TESTS_FAILED=true" >> "$GITHUB_OUTPUT"
 
       - name: Upload Test Results
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4

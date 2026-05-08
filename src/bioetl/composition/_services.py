@@ -6,6 +6,13 @@ from collections.abc import Callable
 from importlib import import_module
 from typing import TYPE_CHECKING, Protocol, cast
 
+from bioetl.composition._workflow_services import (
+    get_workflow_execution_service,
+    get_workflow_inspection_service,
+    get_workflow_runner_service,
+    load_workflow_config,
+)
+
 if TYPE_CHECKING:
     from bioetl.application.services.audit_inspection_service import (
         AuditInspectionService,
@@ -36,18 +43,8 @@ if TYPE_CHECKING:
     )
     from bioetl.application.services.quarantine_service import QuarantineService
     from bioetl.application.services.vacuum_service import VacuumService
-    from bioetl.application.services.control_plane.workflow_execution_service import (
-        WorkflowExecutionService,
-    )
-    from bioetl.application.services.control_plane.workflow_inspection_service import (
-        WorkflowInspectionService,
-    )
-    from bioetl.application.services.workflow_runner_service import (
-        WorkflowRunnerService,
-    )
     from bioetl.composition.registry_api import PipelineRegistry
     from bioetl.domain.ports import HealthMonitorPort, MetricsPort, QuarantinePort
-    from bioetl.domain.workflow import WorkflowConfig
 
 
 class HealthServerDependenciesProtocol(Protocol):
@@ -232,15 +229,6 @@ def get_config_service() -> object:
     return _invoke_bootstrap("bootstrap_config_service")
 
 
-def load_workflow_config(name: str) -> WorkflowConfig:
-    """Load workflow YAML through the canonical composition service seam."""
-    from bioetl.infrastructure.config.workflow_config_api import (
-        load_workflow_config as load_workflow_config_impl,
-    )
-
-    return load_workflow_config_impl(name)
-
-
 def get_contract_migration_service() -> object:
     """Get the contract migration planner service."""
     _ensure_registrations()
@@ -283,142 +271,6 @@ def get_observability_workflow_service() -> ObservabilityWorkflowService:
     _ensure_registrations()
     bootstrap = _resolve_bootstrap_callable("bootstrap_observability_workflow_service")
     return cast("ObservabilityWorkflowService", bootstrap())
-
-
-def get_workflow_runner_service(
-    registry: PipelineRegistry | None = None,
-) -> WorkflowRunnerService:
-    """Build the baseline declarative workflow runner through composition seams."""
-    from bioetl.application.services.workflow_runner_service import (
-        WorkflowRunnerService,
-    )
-    from bioetl.application.services.workflow_transform_service import (
-        WorkflowTransformService,
-    )
-    from bioetl.application.workflow.transforms import WorkflowTransformRegistry
-    from bioetl.application.workflow.transforms.builtins import (
-        register_builtin_workflow_transforms,
-    )
-    from bioetl.composition.bootstrap.cli.noop import create_noop_logger
-    from bioetl.composition.factories.services.port_factories import create_metrics
-    from bioetl.infrastructure.config import get_settings
-    from bioetl.infrastructure.storage import (
-        SilverForeignKeyReconciliationAdapter,
-        SilverWriter,
-    )
-
-    settings = get_settings()
-    metrics = create_metrics(settings)
-    transform_storage = SilverWriter(
-        base_path=settings.silver_path,
-        logger=create_noop_logger(),
-        metrics=metrics,
-        pipeline_name="workflow_transforms",
-    )
-    transform_registry = register_builtin_workflow_transforms(
-        WorkflowTransformRegistry(),
-        foreign_key_reconciliation_port=SilverForeignKeyReconciliationAdapter(
-            silver_writer=transform_storage
-        ),
-    )
-    return WorkflowRunnerService(
-        pipeline_runner=get_pipeline_runner_service(registry=registry),
-        transform_service=WorkflowTransformService(
-            registry=transform_registry,
-            metrics=metrics,
-        ),
-        metrics=metrics,
-    )
-
-
-_WORKFLOW_MEMORY_LOCK: object | None = None
-
-
-def _get_workflow_memory_lock() -> object:
-    global _WORKFLOW_MEMORY_LOCK
-    if _WORKFLOW_MEMORY_LOCK is None:
-        from bioetl.infrastructure.locking import MemoryLock
-
-        _WORKFLOW_MEMORY_LOCK = MemoryLock()
-    return _WORKFLOW_MEMORY_LOCK
-
-
-def get_workflow_execution_service(
-    registry: PipelineRegistry | None = None,
-) -> WorkflowExecutionService:
-    """Build workflow execution orchestration with durable control-plane seams."""
-    from pathlib import Path
-
-    from bioetl.application.services.control_plane.workflow_execution_service import (
-        WorkflowExecutionService,
-    )
-    from bioetl.application.services.control_plane.workflow_manifest_service import (
-        WorkflowManifestService,
-    )
-    from bioetl.composition.factories.services.port_factories import create_metrics
-    from bioetl.infrastructure.config import get_settings
-    from bioetl.infrastructure.control_plane import (
-        FileWorkflowExecutionStateStore,
-        FileWorkflowLedgerStore,
-        FileWorkflowManifestStore,
-    )
-
-    settings = get_settings()
-    metrics = create_metrics(settings)
-    output_root = Path(settings.data_dir) / "output" / "control"
-    manifest_store = FileWorkflowManifestStore(
-        base_path=output_root / "workflow_manifest",
-        metrics=metrics,
-    )
-    ledger_store = FileWorkflowLedgerStore(
-        base_path=output_root / "workflow_ledger",
-        metrics=metrics,
-    )
-    state_store = FileWorkflowExecutionStateStore(
-        base_path=output_root / "workflow_state",
-        metrics=metrics,
-    )
-    return WorkflowExecutionService(
-        workflow_runner=get_workflow_runner_service(registry=registry),
-        manifest_service=WorkflowManifestService(manifest_port=manifest_store),
-        workflow_ledger_port=ledger_store,
-        workflow_state_port=state_store,
-        workflow_lock_port=cast("LockPort", _get_workflow_memory_lock()),
-    )
-
-
-def get_workflow_inspection_service() -> WorkflowInspectionService:
-    """Get workflow inspection service for operator diagnostics."""
-    from pathlib import Path
-
-    from bioetl.application.services.control_plane.workflow_inspection_service import (
-        WorkflowInspectionService,
-    )
-    from bioetl.composition.factories.services.port_factories import create_metrics
-    from bioetl.infrastructure.config import get_settings
-    from bioetl.infrastructure.control_plane import (
-        FileWorkflowExecutionStateStore,
-        FileWorkflowLedgerStore,
-        FileWorkflowManifestStore,
-    )
-
-    settings = get_settings()
-    metrics = create_metrics(settings)
-    output_root = Path(settings.data_dir) / "output" / "control"
-    return WorkflowInspectionService(
-        manifest_port=FileWorkflowManifestStore(
-            base_path=output_root / "workflow_manifest",
-            metrics=metrics,
-        ),
-        ledger_port=FileWorkflowLedgerStore(
-            base_path=output_root / "workflow_ledger",
-            metrics=metrics,
-        ),
-        state_port=FileWorkflowExecutionStateStore(
-            base_path=output_root / "workflow_state",
-            metrics=metrics,
-        ),
-    )
 
 
 def get_health_server_dependencies() -> HealthServerDependenciesProtocol:

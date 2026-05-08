@@ -16,7 +16,6 @@ from bioetl.interfaces.cli.commands.domains.shared.click_options import (
     with_yes_option,
 )
 
-
 CommandCallback = Callable[..., object]
 
 

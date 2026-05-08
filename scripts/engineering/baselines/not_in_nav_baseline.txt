@@ -98,12 +98,15 @@
 02-architecture/adr-registry/status-dashboard.md
 02-architecture/decisions/notes/2026-04-07-ledger-based-resume-spike.md
 02-architecture/decisions/ADR-046-checkpoint-vs-ledger-resume.md
+02-architecture/decisions/ADR-047-workflow-control-plane.md
 03-data-model/json-field-typing-inventory.md
 03-data-model/reference-identifier-families.md
 03-guides/cleanup.md
 03-guides/dashboards/design-system.md
 03-guides/dashboards/navigation-contract.md
 03-guides/dashboards/panel-title-inventory.md
+03-guides/dashboards/selector-architecture.md
+03-guides/dashboards/variable-reference.md
 03-guides/development/mistral-vibe-wsl2-setup.md
 03-guides/development/pycharm-setup.md
 03-guides/script-management/README.md
@@ -137,6 +140,7 @@
 05-operations/deployment/neo4j-audit-instance-quick-start.md
 05-operations/runbooks/neo4j-backend-recovery-quick-start.md
 05-operations/runbooks/neo4j-complete-recovery-guide.md
+05-operations/runbooks/workflow-control-plane.md
 05-operations/sli-slo-baseline.md
 05-operations/tooling/scripts-ops/00_START_HERE.md
 05-operations/tooling/scripts-ops/CODEX_QUICK_REF.md

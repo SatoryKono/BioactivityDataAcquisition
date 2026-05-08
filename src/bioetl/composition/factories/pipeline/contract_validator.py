@@ -11,7 +11,7 @@ from bioetl.composition.factories.datasource.data_source_factory import (
 from bioetl.composition.factories.pipeline.registry_manifest import (
     PipelineFactoryConfig,
 )
-from bioetl.composition.providers._registry_protocols import (
+from bioetl.composition.providers.provider_registry import (
     ProviderDataSourceRegistryProtocol,
 )
 from bioetl.domain.types import GoldSchemaType

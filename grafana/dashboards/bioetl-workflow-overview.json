@@ -160,7 +160,7 @@
       },
       "targets": [
         {
-          "expr": "round(sum(increase(bioetl_workflow_runs_total{workflow=~\"$workflow\",status=\"failed\"}[$__range]))) or vector(0)",
+          "expr": "round(sum(max_over_time(bioetl_workflow_runs_total{workflow=~\"$workflow\",status=\"failed\"}[$__range]))) or vector(0)",
           "refId": "A"
         }
       ],
@@ -224,7 +224,7 @@
       },
       "targets": [
         {
-          "expr": "round(sum(increase(bioetl_workflow_step_events_total{workflow=~\"$workflow\",step_kind=\"pipeline\",status=\"failed\"}[$__range]))) or vector(0)",
+          "expr": "round(sum(max_over_time(bioetl_workflow_step_events_total{workflow=~\"$workflow\",step_kind=\"pipeline\",status=\"failed\"}[$__range]))) or vector(0)",
           "refId": "A"
         }
       ],
@@ -288,7 +288,7 @@
       },
       "targets": [
         {
-          "expr": "round(sum(increase(bioetl_workflow_step_events_total{workflow=~\"$workflow\",step_kind=\"transform\",status=\"failed\"}[$__range]))) or vector(0)",
+          "expr": "round(sum(max_over_time(bioetl_workflow_step_events_total{workflow=~\"$workflow\",step_kind=\"transform\",status=\"failed\"}[$__range]))) or vector(0)",
           "refId": "A"
         }
       ],
@@ -352,7 +352,7 @@
       },
       "targets": [
         {
-          "expr": "round(sum(increase(bioetl_workflow_step_events_total{workflow=~\"$workflow\",status=\"skipped\"}[$__range]))) or vector(0)",
+          "expr": "round(sum(max_over_time(bioetl_workflow_step_events_total{workflow=~\"$workflow\",status=\"skipped\"}[$__range]))) or vector(0)",
           "refId": "A"
         }
       ],
@@ -401,7 +401,7 @@
       },
       "targets": [
         {
-          "expr": "sum by (status) (increase(bioetl_workflow_runs_total{workflow=~\"$workflow\",status=~\"$status\"}[$__range]))",
+          "expr": "sum by (status) (max_over_time(bioetl_workflow_runs_total{workflow=~\"$workflow\",status=~\"$status\"}[$__range]))",
           "legendFormat": "{{status}}",
           "refId": "A"
         }
@@ -411,124 +411,165 @@
       "description": "Shows selected-range workflow run counts split by workflow run status. Use this panel to see whether the chosen window contains `success`, `failed`, or other bounded run outcomes for the selected workflow. `No data` means no matching workflow runs were observed for the selected filters or telemetry is absent; it is not equivalent to workflow success. If failures dominate, continue in `2. Runtime` or `0. Control Plane` depending on whether you need execution or replay/ledger evidence."
     },
     {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "lineWidth": 2,
-            "showPoints": "never"
-          },
-          "mappings": [],
-          "unit": "short"
-        },
-        "overrides": []
-      },
       "gridPos": {
         "h": 8,
         "w": 12,
         "x": 12,
         "y": 12
       },
-      "id": 5,
-      "options": {
-        "legend": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "displayMode": "table",
-          "placement": "bottom"
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "none"
-        }
-      },
-      "targets": [
-        {
-          "expr": "sum by (step_kind, status) (increase(bioetl_workflow_step_events_total{workflow=~\"$workflow\",step_kind=~\"$step_kind\",status=~\"$step_status\"}[$__interval]))",
-          "legendFormat": "{{step_kind}} / {{status}}",
-          "refId": "A"
-        }
-      ],
-      "title": "Step Outcomes by Kind / Step Status / Range",
-      "type": "timeseries",
-      "description": "Shows selected-range step-event evidence split by `step_kind` and step `status`. Variables `Step Kind` and `Step Status` apply here. This panel does not identify the exact pipeline stage or transform step ID because the metric schema only exposes bounded `workflow`, `step_kind`, and `status` labels. If `pipeline / failed` dominates, continue in `2. Runtime`; if `transform / failed` or `skipped` dominates, inspect `4. Data Quality` when validation or filtering is suspected."
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "lineWidth": 2,
-            "showPoints": "never"
-          },
-          "mappings": [],
-          "unit": "s"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 20
-      },
-      "id": 8,
-      "options": {
-        "legend": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "displayMode": "table",
-          "placement": "bottom"
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "none"
-        }
-      },
-      "targets": [
-        {
-          "expr": "histogram_quantile(0.95, sum by (le, step_kind, status) (rate(bioetl_workflow_step_duration_seconds_bucket{workflow=~\"$workflow\",step_kind=~\"$step_kind\",status=~\"$step_status\"}[$__rate_interval])))",
-          "legendFormat": "p95 {{step_kind}} / {{status}}",
-          "refId": "A"
-        }
-      ],
-      "title": "Step Duration p95 by Kind / Step Status / Range",
-      "type": "timeseries",
-      "description": "Shows p95 step duration in seconds for the selected time range, filtered by `Workflow`, `Step Kind`, and `Step Status`. This is historical range evidence, not a current in-flight duration gauge. `No data` means no matching step events were observed for the selected filters or the histogram series is absent. Use this panel to spot which bounded step kind slowed down before handing off to `2. Runtime` for stage-level latency diagnostics."
-    },
-    {
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 20
-      },
       "id": 9,
       "options": {
         "content": "<h3>Next Diagnostic Surface</h3><ul><li><strong>2. Runtime</strong>: locate blocking stage, backlog, error-code, or logs/traces when pipeline-step failures appear.</li><li><strong>4. Data Quality</strong>: investigate validation failures, quarantine, filtered-out paths, or transform-side rejects.</li><li><strong>3. Provider Health</strong>: use when workflow failure correlates with upstream provider degradation.</li><li><strong>0. Control Plane</strong>: inspect manifest, ledger, replay/resume, checkpoint, and terminal run evidence.</li><li><strong>1. Overview</strong>: return to L0 when workflow evidence must be prioritized against other incident domains.</li></ul>",
+        "dataLinks": [
+          {
+            "title": "Open 2. Runtime",
+            "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=unknown&var-run_type=All&var-stage=unknown&${__url_time_range}",
+            "targetBlank": false
+          },
+          {
+            "title": "Open 4. Data Quality",
+            "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=unknown&var-run_type=All&var-stage=unknown&${__url_time_range}",
+            "targetBlank": false
+          },
+          {
+            "title": "Open 3. Provider Health",
+            "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&var-pipeline_context=unknown&var-adapter=unknown&${__url_time_range}",
+            "targetBlank": false
+          },
+          {
+            "title": "Open 0. Control Plane",
+            "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=unknown&var-run_type=All&${__url_time_range}",
+            "targetBlank": false
+          },
+          {
+            "title": "Open 1. Overview",
+            "url": "/d/bioetl-overview-v2/bioetl-overview-v2?${__url_time_range}",
+            "targetBlank": false
+          }
+        ],
         "mode": "html"
       },
       "title": "Next Diagnostic Surface",
       "type": "text",
-      "description": "Static operator handoff guide for the selected-range workflow evidence above. This panel intentionally does not claim stage, run_id, dependency, enricher, merge, cross-validation, or Gold-write coverage because those dimensions are not present on `bioetl_workflow_*` metrics. Use the dashboard links in the header to preserve the selected time range while moving to the deeper diagnostic layer."
+      "description": "Static operator handoff guide for the selected-range workflow evidence above. This panel intentionally does not claim stage, run_id, dependency, enricher, merge, cross-validation, or Gold-write coverage because those dimensions are not present on `bioetl_workflow_*` metrics. It is the one justified panel-level CTA exception on this dashboard, so its bounded `Open ...` dataLinks duplicate the header bus intentionally while preserving the selected time range and resetting unsupported workflow-only scope."
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 20
+      },
+      "id": 10,
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "lineWidth": 2,
+                "showPoints": "never"
+              },
+              "mappings": [],
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 0
+          },
+          "id": 5,
+          "options": {
+            "legend": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "displayMode": "table",
+              "placement": "bottom"
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "expr": "sum by (step_kind, status) (max_over_time(bioetl_workflow_step_events_total{workflow=~\"$workflow\",step_kind=~\"$step_kind\",status=~\"$step_status\"}[$__range]))",
+              "legendFormat": "{{step_kind}} / {{status}}",
+              "refId": "A"
+            }
+          ],
+          "title": "Step Outcomes by Kind / Step Status / Range",
+          "type": "timeseries",
+          "description": "Shows selected-range step-event evidence split by `step_kind` and step `status`. Variables `Step Kind` and `Step Status` apply here. This panel does not identify the exact pipeline stage or transform step ID because the metric schema only exposes bounded `workflow`, `step_kind`, and `status` labels. If `pipeline / failed` dominates, continue in `2. Runtime`; if `transform / failed` or `skipped` dominates, inspect `4. Data Quality` when validation or filtering is suspected."
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "lineWidth": 2,
+                "showPoints": "never"
+              },
+              "mappings": [],
+              "unit": "s"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 0
+          },
+          "id": 8,
+          "options": {
+            "legend": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "displayMode": "table",
+              "placement": "bottom"
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.95, sum by (le, step_kind, status) (max_over_time(bioetl_workflow_step_duration_seconds_bucket{workflow=~\"$workflow\",step_kind=~\"$step_kind\",status=~\"$step_status\"}[$__range])))",
+              "legendFormat": "p95 {{step_kind}} / {{status}}",
+              "refId": "A"
+            }
+          ],
+          "title": "Step Duration p95 by Kind / Step Status / Range",
+          "type": "timeseries",
+          "description": "Shows p95 step duration in seconds for the selected time range, filtered by `Workflow`, `Step Kind`, and `Step Status`. This is historical range evidence, not a current in-flight duration gauge. `No data` means no matching step events were observed for the selected filters or the histogram series is absent. Use this panel to spot which bounded step kind slowed down before handing off to `2. Runtime` for stage-level latency diagnostics."
+        }
+      ],
+      "title": "Step Diagnostics (collapsed)",
+      "type": "row"
     }
   ],
   "refresh": "30s",

@@ -48,6 +48,18 @@ def _push_metrics_kwargs(
     return (), {"run_label": "composite", "pipeline_name": "publication"}
 
 
+def _cli_metrics_publish_kwargs(
+    _module: ModuleType,
+) -> tuple[tuple[object, ...], dict[str, object]]:
+    """Build representative kwargs for CLI metrics publication wrappers."""
+    return (), {
+        "run_label": "bioetl",
+        "pipeline_name": "workflow_chembl_activity",
+        "run_type": None,
+        "grouping_key_extra": None,
+    }
+
+
 COMMAND_DELEGATION_CASES: tuple[
     tuple[
         str,
@@ -180,6 +192,14 @@ COMMAND_DELEGATION_CASES: tuple[
         True,
     ),
     (
+        "bioetl.interfaces.cli.commands.domains.health.metrics_publication_integration",
+        "publish_metrics_safely",
+        "bioetl.composition.execution_api.push_metrics_to_gateway",
+        _cli_metrics_publish_kwargs,
+        True,
+        True,
+    ),
+    (
         "bioetl.interfaces.cli.commands.vacuum",
         "get_lifecycle_service",
         "bioetl.composition.maintenance_api.get_lifecycle_service",
@@ -239,6 +259,7 @@ CLI_MAIN_LAZY_COMMAND_CASES = (
         "run-composite-config",
         "run-composite-bootstrap",
         "composite-support-push-metrics",
+        "cli-health-publish-metrics",
         "vacuum-lifecycle",
         "vacuum-service",
     ),

@@ -85,6 +85,7 @@ def test_system_status_panel_preserves_current_status_semantics() -> None:
     panel = _panels_by_title()["System Status"]
     expr = _panel_expr(panel)
     options = panel.get("options", {})
+    defaults = panel.get("fieldConfig", {}).get("defaults", {})
 
     assert panel.get("type") == "stat"
     assert "bioetl_l0_status" in expr
@@ -92,6 +93,7 @@ def test_system_status_panel_preserves_current_status_semantics() -> None:
     assert options.get("colorMode") == "background"
     assert options.get("textMode") == "value"
     assert options.get("graphMode") == "none"
+    assert defaults.get("noValue") == "UNKNOWN"
     _assert_status_mapping(panel)
 
 

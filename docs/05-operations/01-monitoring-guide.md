@@ -157,6 +157,9 @@ tracing-backed log hygiene живёт в collapsed row
   `Monitor Runtime Telemetry Gap` проверяет scrape plus runtime dashboard
   recording-rule evaluation failures, rule-group presence and evaluation
   freshness; non-zero/UNKNOWN делает zero-count panels inconclusive.
+  Это intentional datasource trust marker: runtime сохраняет явный first-screen
+  health signal только там, где без него zero-count cards можно спутать с
+  healthy state.
 
 - **Localization row**:
   `Stage Backlog Trend`, `Records by Stage / Interval`,
@@ -295,8 +298,17 @@ Record-level dashboard для `FILTERED_OUT_SILVER` записей (quarantine-b
 - **Selected Record Details**: exact reject context по выбранному `payload_hash`.
 - **Top Reject Reasons / Fields / Signatures**: агрегаты в том же scoped контексте.
 - **Review: First Action / No-Data Semantics**: поясняет, когда `0` rejects является OK,
-  а когда `No data`, `unknown` pipeline или `bronze_records=0` остаются UNKNOWN.
+  а когда `No data`, `unknown` pipeline, unsupported filter chain,
+  backend/plugin failure или `bronze_records=0` остаются UNKNOWN/error.
 - **Datasource**: `Quarantine Explorer` (JSON/Infinity), не Prometheus.
+- **Trust model**: Explorer intentionally uses explicit first-screen copy and
+  panel descriptions instead of a dedicated datasource-health stat tile; treat
+  empty tables as OK only after the CTA confirms valid scope and backend
+  availability.
+- **Custom noValue copy**: per-panel `noValue` strings here intentionally stay
+  datasource-specific instead of collapsing into plain `UNKNOWN`, because they
+  distinguish empty result, missing scoped summary, excluded record, and
+  backend/API ambiguity.
 - **Scope contract**: `$pipeline` всегда single-select/no-All; `run_id` и
   `payload_hash` остаются Explorer-only forensic filters.
 - **Drilldown**: navigation bus `0. Control Plane`, `1. Overview`,
@@ -310,10 +322,19 @@ Prometheus dashboard для declarative workflow orchestration. Использу
 step outcomes.
 
 - **Workflow Runs**: selected-range count по `bioetl_workflow_runs_total`.
+- **Missing data semantics**: first-screen workflow count cards intentionally
+  render `0` for empty selected ranges because they are bounded event counters,
+  not current-status panels. Этот `0` не доказывает, что workflow сейчас
+  healthy/running; live current state remains out of scope for this dashboard.
 - **Step Outcomes by Kind**: breakdown по bounded `step_kind/status` без
-  `run_id` или `step_id` labels; panel now respects selected `$status`.
+  `run_id` или `step_id` labels; panel now respects selected `$status` and
+  lives under collapsed row `Step Diagnostics (collapsed)`.
 - **Step Duration p95**: latency по `bioetl_workflow_step_duration_seconds`;
-  panel now also respects selected `$status`.
+  panel now also respects selected `$status` and lives under collapsed row
+  `Step Diagnostics (collapsed)`.
+- **First Screen**: keep run/step failure cards, `Workflow Run Outcomes / Range`,
+  and `Next Diagnostic Surface` visible before expanding detailed step
+  diagnostics.
 - **Drilldown**: links `0. Control Plane`, `1. Overview`, `2. Runtime`,
   `3. Provider Health`, `4. Data Quality`.
 
