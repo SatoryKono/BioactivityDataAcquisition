@@ -5985,6 +5985,36 @@ def _merge_storage_layer_config(
     return merged
 
 
+def _merge_sink_config(
+    base_sink: dict[str, object],
+    override_sink: dict[str, object],
+) -> dict[str, object]:
+    merged: dict[str, object] = dict(base_sink)
+    for raw_layer_name, override_layer in override_sink.items():
+        layer_name = str(raw_layer_name)
+        base_layer = merged.get(layer_name)
+        if isinstance(base_layer, dict) and isinstance(override_layer, dict):
+            layer_config = dict(base_layer)
+            layer_config.update(override_layer)
+            merged[layer_name] = layer_config
+        else:
+            merged[layer_name] = override_layer
+    return merged
+
+
+def _entity_pipeline_sink_config(payload: dict[str, object]) -> dict[str, object]:
+    direct_sink = payload.get("sink") if isinstance(payload.get("sink"), dict) else {}
+    pipeline_payload = (
+        payload.get("pipeline") if isinstance(payload.get("pipeline"), dict) else {}
+    )
+    nested_sink = (
+        pipeline_payload.get("sink")
+        if isinstance(pipeline_payload.get("sink"), dict)
+        else {}
+    )
+    return _merge_sink_config(direct_sink, nested_sink)
+
+
 def _storage_ref_from_output_path(raw_path: str) -> str:
     normalized = raw_path.strip().strip("/")
     if normalized.startswith("data/output/"):
@@ -7187,11 +7217,7 @@ def _entity_storage_context(
         config_version=_optional_text(payload.get("version")),
         quality_version=_optional_text(quality_payload.get("version")),
     )
-    pipeline_sink = (
-        pipeline_payload.get("sink")
-        if isinstance(pipeline_payload.get("sink"), dict)
-        else {}
-    )
+    pipeline_sink = _entity_pipeline_sink_config(payload)
     return context, pipeline_sink, _field_quality_index(payload)
 
 

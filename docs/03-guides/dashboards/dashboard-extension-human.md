@@ -48,14 +48,19 @@ ______________________________________________________________________
 
 - Top-level шина: `0. Control Plane` / `1. Overview` / `2. Runtime` /
   `3. Provider Health` / `4. Data Quality` / `5. Workflow`.
-- На текущей странице ссылка на саму себя отсутствует.
+- На текущей странице текущий dashboard остаётся видимым в navigation panel `id=1000` как disabled dark-gray item; machine-readable `panel.links` по-прежнему не содержат self-link.
 - Любые дубли dashboard-to-dashboard links из одного dashboard в один target
   dashboard запрещены.
-- Во всех shipped navigation panels `id=1000` закреплены sticky shortcuts
-  `4. Data Quality`, `Explore Logs`, `Explore Traces`,
-  `Silver Reject Explorer`.
+- Во всех shipped navigation panels `id=1000` после bus `0..5` закреплены
+  global adjunct links `Silver Reject Explorer`, `Explore Logs`,
+  `Explore Traces`.
 - Navigation panel links должны открываться в том же окне; не используйте
   `target="_blank"` в HTML top navigation.
+- Иерархия layout следует design system tiers:
+  `Tier 1` answer row,
+  `Tier 2` current-context support,
+  `Tier 3` selected-range evidence below fold,
+  `Tier 4` collapsed diagnostics только для secondary/noisy detail.
 
 ### Prometheus
 

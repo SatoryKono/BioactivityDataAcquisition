@@ -157,7 +157,9 @@ def test_runtime_alert_condition_summaries_are_telemetry_anchored() -> None:
         assert any("and on()" in expr for expr in expressions), (
             f"{panel_title} must join condition totals to a telemetry anchor"
         )
-        assert any(anchor_metric in expr and anchor_scope in expr for expr in expressions)
+        assert any(
+            anchor_metric in expr and anchor_scope in expr for expr in expressions
+        )
         defaults = panel.get("fieldConfig", {}).get("defaults", {})
         assert defaults.get("noValue") == "UNKNOWN"
 

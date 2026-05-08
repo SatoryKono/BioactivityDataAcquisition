@@ -2,21 +2,25 @@
 
 from __future__ import annotations
 
-from bioetl.composition.providers.provider_registry import (
-    ProviderRegistry,
+from typing import cast
+
+from bioetl.composition.providers._registry_protocols import (
+    ProviderDataSourceRegistryProtocol,
+)
+from bioetl.composition.providers._registry_resolution import (
     resolve_provider_registry,
 )
 
 
 def resolve_datasource_provider_registry(
-    provider_registry: ProviderRegistry | None = None,
-) -> ProviderRegistry:
+    provider_registry: ProviderDataSourceRegistryProtocol | None = None,
+) -> ProviderDataSourceRegistryProtocol:
     """Resolve and initialize the registry used by datasource factory helpers."""
     resolved_registry = resolve_provider_registry(
         provider_registry,
         ensure_ready=True,
     )
-    return resolved_registry
+    return cast("ProviderDataSourceRegistryProtocol", resolved_registry)
 
 
 __all__ = ["resolve_datasource_provider_registry", "resolve_provider_registry"]

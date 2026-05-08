@@ -233,7 +233,9 @@ def test_governed_chembl_enum_fields_keep_profile_and_dq_allowed_sets_in_sync(
     allowed_values, profile = _GOVERNED_CHEMBL_ENUM_POLICY[(entity, field_name)]
 
     rule = profile.rule_for(field_name)
-    assert rule is not None, f"Missing normalization rule for chembl.{entity}.{field_name}"
+    assert rule is not None, (
+        f"Missing normalization rule for chembl.{entity}.{field_name}"
+    )
     assert rule.normalizer(next(iter(allowed_values))) in allowed_values
     assert rule.normalizer("__bioetl novel token__") == "__BIOETL NOVEL TOKEN__"
     assert _dq_enum_allowed(entity, field_name) == allowed_values

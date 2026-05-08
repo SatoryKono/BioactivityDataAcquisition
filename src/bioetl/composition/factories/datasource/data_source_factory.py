@@ -10,9 +10,11 @@ from bioetl.composition.factories.datasource.adapter_helpers import (
 from bioetl.composition.factories.datasource.provider_registry_resolution import (
     resolve_datasource_provider_registry as _resolve_provider_registry,
 )
-from bioetl.composition.providers.provider_registry import (
+from bioetl.composition.providers._models import (
     DataSourceCreatorProtocol,
-    ProviderRegistry,
+)
+from bioetl.composition.providers._registry_protocols import (
+    ProviderDataSourceRegistryProtocol,
 )
 from bioetl.domain.ports import DataSourcePort
 
@@ -25,7 +27,7 @@ if TYPE_CHECKING:
 def get_data_source_creator(
     provider: str,
     *,
-    provider_registry: ProviderRegistry | None = None,
+    provider_registry: ProviderDataSourceRegistryProtocol | None = None,
 ) -> DataSourceCreatorProtocol:
     """Return the canonical provider-bound data-source creator callback."""
     registry = _resolve_provider_registry(provider_registry)
@@ -42,7 +44,7 @@ class DataSourceFactory:
         http_client: UnifiedHTTPClient | None = None,
         logger: LoggerPort | None = None,
         settings: Settings | None = None,
-        provider_registry: ProviderRegistry | None = None,
+        provider_registry: ProviderDataSourceRegistryProtocol | None = None,
         **kwargs: object,
     ) -> DataSourcePort:
         """Create a data source adapter."""

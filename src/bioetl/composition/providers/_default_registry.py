@@ -11,13 +11,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from functools import wraps
 from importlib import import_module
-from typing import (
-    TYPE_CHECKING,
-    Protocol,
-    Self,
-    TypeVar,
-    overload,
-)
+from typing import TYPE_CHECKING, Protocol, Self, TypeVar, overload
 
 if TYPE_CHECKING:
     from bioetl.composition.providers._models import ProviderConfig
@@ -118,3 +112,8 @@ def get_default_provider_registry() -> _SupportsProviderRegistryStore:
         module = import_module("bioetl.composition.providers.provider_registry")
         _default_provider_registry = module.ProviderRegistry()
     return _default_provider_registry
+
+
+def register_default_provider_config(name: str, config: ProviderConfig) -> None:
+    """Register a provider config through the lazy default-registry seam."""
+    get_default_provider_registry().register(name, config)

@@ -234,6 +234,8 @@ def _expected_provenance_only_summary_without_score(
         "replay_mode": "rebuild",
         "operator_replay_mode": "Incremental New Run",
         "snapshot_status": "none",
+        "source_posture": "live_or_unknown_inputs",
+        "input_snapshot_missing_source_refs": [],
         "continuation_mode": "rebuild_only",
         "resume_contract": _expected_resume_contract(manifest),
         "resume_diagnostics": None,

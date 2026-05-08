@@ -21,62 +21,72 @@
   "panels": [
     {
       "gridPos": {
-        "h": 2,
+        "h": 3,
         "w": 24,
         "x": 0,
         "y": 0
       },
       "id": 1000,
       "options": {
-        "content": "<div style=\"display:flex;gap:10px;flex-wrap:wrap;padding:10px;\"><a href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">0. Control Plane</a><a href=\"/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=unknown&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">2. Runtime</a><a href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&amp;var-pipeline_context=$pipeline&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">3. Provider Health</a><a href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=unknown&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">4. Data Quality</a><a href=\"/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">5. Workflow</a><a href=\"/a/grafana-lokiexplore-app/explore?var-ds=grafanacloud-prom&amp;var-filters=\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">6. Explore Logs</a><a href=\"/a/grafana-exploretraces-app/explore?query=%7Bresource.service.name%3D%22bioetl%22%20%26%26%20bioetl.pipeline%3D%22$pipeline%22%20%26%26%20bioetl.run_type%3D%22$run_type%22%7D&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">7. Explore Traces</a><a href=\"/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">8. Silver Reject Explorer</a></div>",
+        "content": "<div style=\"display:flex;gap:10px;flex-wrap:wrap;padding:10px;\"><a href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">0. Control Plane</a><span aria-current=\"page\" style=\"padding:5px 10px;color:#4b5563;text-decoration:none;border:1px solid #4b5563;border-radius:3px;background:rgba(75,85,99,0.18);cursor:default;\">1. Overview</span><a href=\"/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=unknown&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">2. Runtime</a><a href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&amp;var-pipeline_context=$pipeline&amp;var-adapter=unknown&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">3. Provider Health</a><a href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=unknown&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">4. Data Quality</a><a href=\"/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">5. Workflow</a><a href=\"/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Silver Reject Explorer</a><a href=\"/a/grafana-lokiexplore-app/explore?from=${__from}&amp;to=${__to}&amp;query=%7Bjob%3D%22bioetl%22%7D\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Explore Logs</a><a href=\"/a/grafana-exploretraces-app/?from=${__from}&amp;to=${__to}&amp;queryType=traceqlSearch&amp;query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline:regex}%22%20%26%26%20span.%22bioetl.run_type%22%20%3D~%20%22${run_type:regex}%22%20%7D\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Explore Traces</a></div>",
         "mode": "html"
       },
-      "title": "",
+      "title": "Review Dashboard Navigation",
       "type": "text",
       "links": [
         {
           "title": "0. Control Plane",
           "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
-          "targetBlank": false
+          "targetBlank": false,
+          "includeVars": false
         },
         {
           "title": "2. Runtime",
           "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=unknown&${__url_time_range}",
-          "targetBlank": false
+          "targetBlank": false,
+          "includeVars": false
         },
         {
           "title": "3. Provider Health",
-          "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&var-pipeline_context=$pipeline&${__url_time_range}",
-          "targetBlank": false
+          "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&var-pipeline_context=$pipeline&var-adapter=unknown&${__url_time_range}",
+          "targetBlank": false,
+          "includeVars": false,
+          "tooltip": "Context mapping: provider=unknown, pipeline_context=$pipeline, adapter=unknown. Scope reset: provider=unknown."
         },
         {
           "title": "4. Data Quality",
           "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=unknown&${__url_time_range}",
           "targetBlank": false,
+          "includeVars": false,
           "tooltip": "Open the Data Quality dashboard in the same tab."
         },
         {
           "title": "5. Workflow",
           "url": "/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}",
-          "targetBlank": false
-        },
-        {
-          "title": "Explore Logs",
-          "url": "/a/grafana-lokiexplore-app/explore?var-ds=grafanacloud-prom&var-filters=",
           "targetBlank": false,
-          "tooltip": "Requires Grafana Logs Drilldown / tracing profile; open the logs drilldown in the same tab."
-        },
-        {
-          "title": "Explore Traces",
-          "url": "/a/grafana-exploretraces-app/explore?query=%7Bresource.service.name%3D%22bioetl%22%20%26%26%20bioetl.pipeline%3D%22$pipeline%22%20%26%26%20bioetl.run_type%3D%22$run_type%22%7D&${__url_time_range}",
-          "targetBlank": false,
-          "tooltip": "Requires Grafana Traces Drilldown / tracing profile; open the TraceQL view in the same tab."
+          "includeVars": false,
+          "tooltip": "Reset scope: workflow dashboard uses its own selected workflow/status context."
         },
         {
           "title": "Silver Reject Explorer",
           "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
           "targetBlank": false,
-          "tooltip": "Open the Silver Reject Explorer using bounded pipeline/run_type context in the same tab."
+          "includeVars": false,
+          "tooltip": "Cross-scope handoff: bounded pipeline/run_type explorer scope. Opens in the same tab."
+        },
+        {
+          "title": "Explore Logs",
+          "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D",
+          "targetBlank": false,
+          "includeVars": false,
+          "tooltip": "Requires optional tracing profile. Opens Logs Drilldown in the same tab with safe {job=\"bioetl\"} baseline."
+        },
+        {
+          "title": "Explore Traces",
+          "url": "/a/grafana-exploretraces-app/?from=${__from}&to=${__to}&queryType=traceqlSearch&query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline:regex}%22%20%26%26%20span.%22bioetl.run_type%22%20%3D~%20%22${run_type:regex}%22%20%7D",
+          "targetBlank": false,
+          "includeVars": false,
+          "tooltip": "Requires optional tracing profile. Opens Traces Drilldown in the same tab with bounded pipeline/run_type TraceQL scope."
         }
       ]
     },
@@ -85,7 +95,7 @@
         "h": 4,
         "w": 24,
         "x": 0,
-        "y": 2
+        "y": 3
       },
       "id": 99,
       "options": {
@@ -165,7 +175,7 @@
         "h": 8,
         "w": 5,
         "x": 0,
-        "y": 6
+        "y": 7
       },
       "id": 214,
       "options": {
@@ -227,7 +237,7 @@
         "h": 8,
         "w": 11,
         "x": 5,
-        "y": 6
+        "y": 7
       },
       "datasource": {
         "type": "prometheus",
@@ -490,7 +500,7 @@
         "h": 8,
         "w": 8,
         "x": 16,
-        "y": 6
+        "y": 7
       },
       "datasource": {
         "type": "prometheus",
@@ -713,7 +723,7 @@
         "h": 7,
         "w": 6,
         "x": 0,
-        "y": 14
+        "y": 15
       },
       "datasource": {
         "type": "prometheus",
@@ -888,7 +898,7 @@
         "h": 7,
         "w": 6,
         "x": 6,
-        "y": 14
+        "y": 15
       },
       "datasource": {
         "type": "prometheus",
@@ -1063,7 +1073,7 @@
         "h": 7,
         "w": 6,
         "x": 18,
-        "y": 14
+        "y": 15
       },
       "datasource": {
         "type": "prometheus",
@@ -1238,7 +1248,7 @@
         "h": 7,
         "w": 6,
         "x": 12,
-        "y": 14
+        "y": 15
       },
       "datasource": {
         "type": "prometheus",
@@ -1413,7 +1423,7 @@
         "h": 7,
         "w": 8,
         "x": 0,
-        "y": 21
+        "y": 22
       },
       "datasource": {
         "type": "prometheus",
@@ -1588,7 +1598,7 @@
         "h": 7,
         "w": 8,
         "x": 8,
-        "y": 21
+        "y": 22
       },
       "datasource": {
         "type": "prometheus",
@@ -1763,7 +1773,7 @@
         "h": 7,
         "w": 8,
         "x": 16,
-        "y": 21
+        "y": 22
       },
       "datasource": {
         "type": "prometheus",
@@ -1938,7 +1948,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 28
+        "y": 29
       },
       "collapsed": false
     },
@@ -1950,7 +1960,7 @@
         "h": 8,
         "w": 8,
         "x": 0,
-        "y": 29
+        "y": 30
       },
       "datasource": {
         "type": "prometheus",
@@ -2059,7 +2069,7 @@
         "h": 8,
         "w": 8,
         "x": 8,
-        "y": 29
+        "y": 30
       },
       "datasource": {
         "type": "prometheus",
@@ -2166,7 +2176,7 @@
         "h": 8,
         "w": 8,
         "x": 16,
-        "y": 29
+        "y": 30
       },
       "datasource": {
         "type": "prometheus",
@@ -2273,7 +2283,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 37
+        "y": 38
       },
       "collapsed": true,
       "panels": [
@@ -2521,7 +2531,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 38
+        "y": 39
       },
       "collapsed": true,
       "panels": [

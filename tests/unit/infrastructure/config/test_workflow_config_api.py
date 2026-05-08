@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import fields
 from pathlib import Path
+import re
 from typing import Any
 
 import pytest
@@ -21,6 +22,21 @@ from bioetl.infrastructure.config.workflow_config_api import (
 from bioetl.infrastructure.schemas.workflow_config import (
     RUN_OPTIONS_OVERRIDE_FIELD_NAMES,
 )
+
+NON_COMPOSITE_ENTITY_DIR = Path("configs/entities")
+WORKFLOW_CONFIG_DIR = Path("configs/workflows")
+
+
+def _non_composite_pipeline_inventory() -> list[tuple[str, Path]]:
+    rows: list[tuple[str, Path]] = []
+    for path in sorted(NON_COMPOSITE_ENTITY_DIR.rglob("*.yaml")):
+        if "composite" in path.parts:
+            continue
+        text = path.read_text(encoding="utf-8")
+        match = re.search(r"^\s*pipeline_name:\s*([\w_]+)\s*$", text, re.MULTILINE)
+        assert match is not None, f"Expected pipeline_name in {path}"
+        rows.append((match.group(1), path))
+    return rows
 
 
 def _build_workflow_payload(name: str) -> dict[str, Any]:
@@ -147,3 +163,46 @@ def test_public_config_package_reexports_load_workflow_config(tmp_path: Path) ->
 
     assert public_load_workflow_config is load_workflow_config
     assert config.name == "example_activity_refresh"
+
+
+@pytest.mark.unit
+def test_every_non_composite_pipeline_has_matching_workflow_wrapper() -> None:
+    for pipeline_name, _config_path in _non_composite_pipeline_inventory():
+        wrapper_path = WORKFLOW_CONFIG_DIR / f"{pipeline_name}.yaml"
+        assert wrapper_path.exists(), (
+            "Every non-composite pipeline must publish a matching workflow wrapper: "
+            f"missing {wrapper_path}"
+        )
+
+
+@pytest.mark.unit
+def test_single_pipeline_workflow_wrappers_load_and_match_identity() -> None:
+    for pipeline_name, _config_path in _non_composite_pipeline_inventory():
+        config = load_workflow_config(pipeline_name, config_dir=WORKFLOW_CONFIG_DIR)
+        assert config.name == pipeline_name
+        assert len(config.steps) == 1
+        step = config.steps[0]
+        assert isinstance(step, WorkflowStepConfig)
+        assert step.step_id == f"run_{pipeline_name}"
+        assert step.pipeline_name == pipeline_name
+        assert step.depends_on == ()
+
+
+@pytest.mark.unit
+def test_all_shipped_workflow_configs_load_successfully() -> None:
+    for path in sorted(WORKFLOW_CONFIG_DIR.glob("*.yaml")):
+        config = load_workflow_config(path.stem, config_dir=WORKFLOW_CONFIG_DIR)
+        assert config.name == path.stem
+
+
+@pytest.mark.unit
+def test_provider_pack_workflows_are_additive_multi_step_configs() -> None:
+    expected_steps = {
+        "chembl_reference_pack": 9,
+        "publication_provider_pack": 4,
+        "uniprot_support_pack": 2,
+    }
+    for workflow_name, step_count in expected_steps.items():
+        config = load_workflow_config(workflow_name, config_dir=WORKFLOW_CONFIG_DIR)
+        assert config.name == workflow_name
+        assert len(config.steps) == step_count

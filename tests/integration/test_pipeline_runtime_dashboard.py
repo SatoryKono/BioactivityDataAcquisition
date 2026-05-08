@@ -131,7 +131,10 @@ def test_pipeline_runtime_localization_empty_states_are_explicit() -> None:
     assert "synthetic none/none=0 series" in records_description
     assert "empty-state placeholder" in records_description
     assert records_defaults.get("noValue") == "No processed-record samples"
-    assert "phase duration" not in f"{records_description} {records_defaults.get('noValue', '')}"
+    assert (
+        "phase duration"
+        not in f"{records_description} {records_defaults.get('noValue', '')}"
+    )
 
 
 def test_pipeline_runtime_data_panel_titles_are_action_first() -> None:

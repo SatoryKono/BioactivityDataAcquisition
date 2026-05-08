@@ -217,11 +217,11 @@ python -m json.tool grafana/dashboards/*.json > /dev/null
 - Variable passing rules documented (preserve_context, reset_context)
 - Navigation panels updated in: control-plane-v1, overview-v2, dq-v2, runtime, provider-health-v2, workflow-overview
 - Context preservation implemented (pipeline, run_type, stage variables)
-- Explore Logs and Explore Traces links added to DQ and Runtime dashboards
-- Silver Reject Explorer linked from DQ dashboard
+- Explore Logs and Explore Traces links added to DQ, Runtime, and Workflow dashboards
+- Silver Reject Explorer linked from DQ and Workflow dashboards
 
 **Remaining:**
-- Add numbered navigation order (6. Silver Reject Explorer, 7. Explore Logs, 8. Explore Traces)
+- Add numbered navigation order (6. Silver Reject Explorer, 7. Explore Logs, 8. Explore Traces) across all dashboards
 - Verify all navigation flows work correctly
 - Document navigation in dashboard guide
 - Manual testing and deployment

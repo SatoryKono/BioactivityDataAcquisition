@@ -532,7 +532,7 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
     ]
     assert activity_field.properties["required_in_quality"] is True
     assert activity_field.properties["contract_ref"] == CONTRACT_CHEMBL_ACTIVITY
-    assert activity_field.properties["drift_classification"] is None
+    assert activity_field.properties["drift_classification"] == "projected_to_gold"
 
     composite_field = snapshot.nodes[
         NodeKey("schema_field_surface", SILVER_COMPOSITE_ACTIVITY_FIELD)

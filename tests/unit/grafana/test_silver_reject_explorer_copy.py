@@ -14,9 +14,12 @@ def test_filtered_records_table_has_explicit_empty_and_failure_copy() -> None:
     )
 
     panel = next(
-        p for p in dashboard["panels"] if p.get("title") == "Filtered Records Table"
+        p
+        for p in dashboard["panels"]
+        if p.get("title") == "Inspect Filtered Records Table"
     )
 
+    assert panel["title"] == "Inspect Filtered Records Table"
     assert (
         panel["fieldConfig"]["defaults"]["noValue"]
         == "No rejected records for current filters."

@@ -38,7 +38,9 @@ from bioetl.composition.factories.pipeline.runner_assembly import (
     assemble_runner_impl as _rf014_assemble_runner_impl,
 )
 from bioetl.composition.observability import ObservabilityBundle
-from bioetl.composition.providers.provider_registry import ProviderRegistry
+from bioetl.composition.providers._registry_protocols import (
+    ProviderDataSourceRegistryProtocol,
+)
 from bioetl.domain.behavior import EntityIdentityGenerator
 from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
 from bioetl.domain.ports import (
@@ -73,7 +75,7 @@ def create_pipeline_factory[TPipeline: BasePipeline](
     pandera_silver_schema: object | None = None,
     data_source_creator: DataSourceCreatorProtocol | None = None,
     transformer_class: type[BaseTransformer] | None = None,
-    provider_registry: ProviderRegistry | None = None,
+    provider_registry: ProviderDataSourceRegistryProtocol | None = None,
 ) -> GenericPipelineFactory[TPipeline]:
     return GenericPipelineFactory(
         pipeline_name=pipeline_name,

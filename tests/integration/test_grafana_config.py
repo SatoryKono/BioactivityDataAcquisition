@@ -828,7 +828,9 @@ def test_silver_validation_panels_use_explicit_pipeline_label() -> None:
         ),
         None,
     )
-    assert panel is not None, "DQ dashboard missing 'Monitor: Silver Validation Failures' panel"
+    assert panel is not None, (
+        "DQ dashboard missing 'Monitor: Silver Validation Failures' panel"
+    )
 
     expressions = [
         target.get("expr", "")
@@ -1809,7 +1811,9 @@ def test_runtime_top_fold_text_panels_do_not_overlap() -> None:
     assert not overlaps, "Runtime top-fold text panels overlap:\n" + "\n".join(overlaps)
 
 
-def test_control_plane_root_layout_keeps_range_evidence_and_rows_non_overlapping() -> None:
+def test_control_plane_root_layout_keeps_range_evidence_and_rows_non_overlapping() -> (
+    None
+):
     """Control Plane root layout must not overlap the selected-range blocker panel with collapsed incident rows."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
     root_panels = [
@@ -1851,7 +1855,9 @@ def test_control_plane_collapsed_row_sequence_matches_operator_flow() -> None:
     ]
     row_pairs = [
         (panel.get("id"), panel.get("title"), panel.get("gridPos", {}).get("y"))
-        for panel in sorted(row_panels, key=lambda panel: panel.get("gridPos", {}).get("y", 0))
+        for panel in sorted(
+            row_panels, key=lambda panel: panel.get("gridPos", {}).get("y", 0)
+        )
     ]
     assert row_pairs == [
         (902, "Incident Drilldown: Replay Safety (Checkpoint / Replay)", 8),
@@ -1900,7 +1906,9 @@ def test_control_plane_long_first_screen_titles_keep_extra_width() -> None:
         panel = panels.get(panel_title)
         assert panel is not None
         grid_pos = panel.get("gridPos", {})
-        assert grid_pos.get("w", 0) >= 5, f"{panel_title} needs extra width for stable title/text rendering"
+        assert grid_pos.get("w", 0) >= 5, (
+            f"{panel_title} needs extra width for stable title/text rendering"
+        )
 
 
 def test_control_plane_terminal_events_table_has_readable_width() -> None:
@@ -1945,8 +1953,12 @@ def test_control_plane_manifest_evidence_top_band_uses_full_row_width() -> None:
 
     assert ys == {8}
     assert heights == {6}
-    assert sum(widths) == 24, f"Manifest/ledger top band should fill the row, got widths={widths}"
-    assert sorted(xs) == [0, 12, 18], f"Unexpected manifest/ledger top band placement: xs={xs}"
+    assert sum(widths) == 24, (
+        f"Manifest/ledger top band should fill the row, got widths={widths}"
+    )
+    assert sorted(xs) == [0, 12, 18], (
+        f"Unexpected manifest/ledger top band placement: xs={xs}"
+    )
 
 
 def test_control_plane_replay_safety_detail_top_bands_use_full_row_width() -> None:
@@ -1956,7 +1968,8 @@ def test_control_plane_replay_safety_detail_top_bands_use_full_row_width() -> No
         panel
         for panel in dashboard.get("panels", [])
         if panel.get("type") == "row"
-        and panel.get("title") == "Incident Drilldown: Replay Safety (Checkpoint / Replay)"
+        and panel.get("title")
+        == "Incident Drilldown: Replay Safety (Checkpoint / Replay)"
     )
     panels = {panel.get("id"): panel for panel in row_panel.get("panels", [])}
 
@@ -1970,8 +1983,12 @@ def test_control_plane_replay_safety_detail_top_bands_use_full_row_width() -> No
     trio_widths = [panel.get("gridPos", {}).get("w", 0) for panel in trio]
     trio_xs = sorted(panel.get("gridPos", {}).get("x", 0) for panel in trio)
     trio_ys = {panel.get("gridPos", {}).get("y", 0) for panel in trio}
-    assert sum(trio_widths) == 24, f"Replay-safety KPI trio should fill the row, got widths={trio_widths}"
-    assert trio_xs == [0, 8, 16], f"Unexpected replay-safety KPI placement: xs={trio_xs}"
+    assert sum(trio_widths) == 24, (
+        f"Replay-safety KPI trio should fill the row, got widths={trio_widths}"
+    )
+    assert trio_xs == [0, 8, 16], (
+        f"Unexpected replay-safety KPI placement: xs={trio_xs}"
+    )
     assert trio_ys == {16}
 
 
@@ -2178,9 +2195,7 @@ def test_control_plane_exposes_terminal_events_and_telemetry_gap() -> None:
     }
 
     expected = {
-        "Inspect: Telemetry Missing": (
-            "bioetl_control_plane_telemetry_missing_5m",
-        ),
+        "Inspect: Telemetry Missing": ("bioetl_control_plane_telemetry_missing_5m",),
         "Inspect: Terminal Run Events by Status in Range": (
             "bioetl_control_plane_terminal_events_total",
         ),
@@ -2316,7 +2331,8 @@ def test_provider_health_selected_provider_detail_row_is_collapsed() -> None:
         (
             panel
             for panel in panels
-            if panel.get("title") == "Inspect Provider Health Check Latency (p95) - $provider"
+            if panel.get("title")
+            == "Inspect Provider Health Check Latency (p95) - $provider"
         ),
         None,
     )

@@ -811,8 +811,9 @@ control-plane metrics, provider health metrics и `bioetl_workflow_runs_total`.
 `3. Provider Health`, `4. Data Quality`, `5. Workflow` используют текущее
 временное окно. Critical current-status panels also expose panel `dataLinks`
 to the same canonical dashboards. Navigation panel `id=1000` now also carries
-sticky `Explore Logs`, `Explore Traces`, and `Silver Reject Explorer`
-shortcuts in the same tab.
+global adjunct links `Silver Reject Explorer`, `Explore Logs`, and
+`Explore Traces` in the same tab. The current dashboard remains visible in
+`id=1000` as a disabled dark-gray item rather than disappearing from the bus.
 
 **Silver Rejects triage sequence:**
 

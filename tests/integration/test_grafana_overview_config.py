@@ -356,7 +356,9 @@ def test_provider_and_workflow_scope_are_explicit() -> None:
         provider.get("description", "")
     )
     provider_links = provider.get("options", {}).get("dataLinks", [])
-    assert any("var-provider=unknown" in str(link.get("url", "")) for link in provider_links)
+    assert any(
+        "var-provider=unknown" in str(link.get("url", "")) for link in provider_links
+    )
     assert "bioetl_l1_workflow_selected_status" in _panel_expr(workflow_selected)
     workflow_links = workflow_selected.get("options", {}).get("dataLinks", [])
     assert {link.get("title") for link in workflow_links} == {

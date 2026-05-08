@@ -80,6 +80,79 @@ class TestBuildRunAllCommandInput:
             health_port=9090,
         )
 
+    def test_run_all_module_maps_click_kwargs_into_policy_input(self) -> None:
+        from bioetl.interfaces.cli.commands import run_all as run_all_module
+
+        cli_input = run_all_module._build_run_all_command_input_from_options(
+            {
+                "source": "chembl",
+                "run_type": "incremental",
+                "limit": 10,
+                "dry_run": False,
+                "yes": True,
+                "list_only": False,
+                "debug": False,
+                "health_server": True,
+                "health_port": 8081,
+            }
+        )
+
+        assert cli_input == RunAllCommandInput(
+            source="chembl",
+            run_type="incremental",
+            limit=10,
+            dry_run=False,
+            yes=True,
+            list_only=False,
+            debug=False,
+            health_server=True,
+            health_port=8081,
+        )
+
+    def test_run_all_callback_delegates_to_input_builder_and_cli_policy(self) -> None:
+        """Run-all Click callback should stay a thin entrypoint over policy seams."""
+        from bioetl.interfaces.cli.commands import run_all as run_all_module
+
+        ctx = MagicMock(name="click_context")
+        cli_input = MagicMock(name="cli_input")
+
+        with (
+            patch.object(
+                run_all_module,
+                "build_run_all_command_input",
+                return_value=cli_input,
+            ) as mock_build_input,
+            patch.object(
+                run_all_module,
+                "_run_all_with_cli_policy",
+            ) as mock_run_with_policy,
+        ):
+            run_all_module.run_all.callback.__wrapped__(
+                ctx,
+                source="chembl",
+                run_type="incremental",
+                limit=10,
+                dry_run=False,
+                yes=True,
+                list_only=False,
+                debug=False,
+                health_server=True,
+                health_port=8081,
+            )
+
+        mock_build_input.assert_called_once_with(
+            source="chembl",
+            run_type="incremental",
+            limit=10,
+            dry_run=False,
+            yes=True,
+            list_only=False,
+            debug=False,
+            health_server=True,
+            health_port=8081,
+        )
+        mock_run_with_policy.assert_called_once_with(ctx, cli_input)
+
 
 class TestHandleRunAllCliFailure:
     """Tests for shared run-all failure handling helper."""

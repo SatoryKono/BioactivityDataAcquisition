@@ -12,7 +12,7 @@ from bioetl.composition.providers._models import (
     HttpConfig,
     ProviderConfig,
 )
-from bioetl.composition.providers.provider_registry import (
+from bioetl.composition.providers._default_registry import (
     register_default_provider_config,
 )
 
