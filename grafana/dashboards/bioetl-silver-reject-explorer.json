@@ -117,6 +117,20 @@
         "content": "<div style='padding:0.6rem 0.8rem;line-height:1.55'><strong>First action:</strong> if total rejects are non-zero, inspect top reason/field/signature, open a payload_hash drilldown from the table, then decide whether to fix transformer logic, schema/DQ rule configuration, provider drift, or replay/resolve via quarantine CLI. <strong>No-data:</strong> 0 rejects is OK only when Quarantine Explorer responds, one concrete pipeline is selected, and Bronze records are present. Zero matching rows for the active filters is an empty result, not a datasource failure; datasource/plugin errors, unsupported filter chains, unknown pipeline, or bronze_records=0 are UNKNOWN or error states until the backend is checked. <strong>Lineage:</strong> use run_id and batch/Bronze evidence where available before replay decisions. <a href='https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/quarantine-management.md' target='_blank' rel='noreferrer noopener'>Open Quarantine Management Runbook</a>.</div>",
         "mode": "html"
       },
+      "links": [
+        {
+          "title": "Review total rejects",
+          "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?viewPanel=2&var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
+          "targetBlank": false,
+          "includeVars": false
+        },
+        {
+          "title": "Review scoped summary",
+          "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?viewPanel=4&var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
+          "targetBlank": false,
+          "includeVars": false
+        }
+      ],
       "title": "Review: First Action / No-Data Semantics",
       "type": "text",
       "description": "Operator CTA for selected-range Silver reject triage. It explains how to interpret 0 vs No data, which filters affect the view, and when to move next to Data Quality, Runtime, Provider Health, Control Plane, or quarantine CLI."

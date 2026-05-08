@@ -157,15 +157,13 @@ def test_active_standard_provider_surface_has_dq_config_and_published_artifact(
 
 
 @pytest.mark.integration
-def test_gold_disabled_standard_surface_can_stay_registry_published_but_not_active() -> (
-    None
-):
-    """Gold-disabled standard surfaces may keep published artifacts without active status."""
+def test_gold_enabled_standard_surface_must_stay_registry_active() -> None:
+    """Gold-enabled standard surfaces must remain active in the contract registry."""
     activity_config = _ENTITY_CONFIGS_ROOT / "chembl" / "activity.yaml"
     registry = FileContractRegistryStore(_REGISTRY_PATH).load()
 
-    assert _gold_runtime_enabled(activity_config) is False
-    assert registry.entries["chembl.activity"].status.value == "deprecated"
+    assert _gold_runtime_enabled(activity_config) is True
+    assert registry.entries["chembl.activity"].status.value == "active"
 
 
 @pytest.mark.integration

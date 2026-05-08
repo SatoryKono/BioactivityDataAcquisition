@@ -18,7 +18,11 @@ ______________________________________________________________________
 
 Machine-readable navigation contract: `docs/03-guides/dashboards/contracts/navigation-links.yaml` (docs/tests должны соответствовать ему).
 
-Unified variable contract: `docs/03-guides/dashboards/variable-reference.md`.
+Machine-readable selector contract: `docs/03-guides/dashboards/contracts/selector-contracts.yaml`.
+
+Human-readable selector references:
+- `docs/03-guides/dashboards/variable-reference.md`
+- `docs/03-guides/dashboards/selector-architecture.md`
 
 ## Какие дашборды использовать
 
@@ -110,6 +114,9 @@ Unified variable contract: `docs/03-guides/dashboards/variable-reference.md`.
    отвечают на вопрос «какой provider degraded/failing и почему». Panel `id=114`
    остаётся raw source enum (`0=UNHEALTHY`, `1=DEGRADED`, `2=HEALTHY`) ниже
    first screen как evidence.
+   `First Action` is the bounded CTA surface for this dashboard: review the
+   severity matrix, inspect critical providers, or inspect provider top causes
+   before leaving the page.
 1. `bioetl-dq-v2`, first-screen answer row:
    `Monitor DQ Current Status`, `Monitor DQ Threshold State`,
    `Inspect DQ Current Reasons` и `Review: First Action`
@@ -120,6 +127,9 @@ Unified variable contract: `docs/03-guides/dashboards/variable-reference.md`.
    `Track: Records Quarantined in Range`, `Track: Soft Threshold Exceeded in Range`
    и `Track: Silver Filter Rejects in Range`. Полноширинный
    `Track Range Evidence: Bronze -> Silver -> Gold` идёт ниже как
+   `Review: First Action` stays the canonical DQ CTA: review current status,
+   inspect current reasons, or open `Silver Reject Explorer` without leaking
+   unsupported workflow/provider scope.
    selected-range evidence. Это pipeline-wide 15m snapshot; `$run_type` и stage
    filters ниже управляют только selected-range evidence.
 1. `bioetl-overview-v2`, routing and evidence rows:
@@ -351,6 +361,11 @@ Variable handoff policy for dashboard links remains strict and bounded:
   panel remains the sole first-screen workflow CTA and therefore exposes
   bounded `Open ...` dataLinks to neighboring dashboards while preserving the
   time range and resetting unsupported workflow-only scope.
+- `bioetl-silver-reject-explorer`: `Review: First Action / No-Data Semantics`
+  now also carries bounded CTA row links (`Review total rejects`,
+  `Review scoped summary`, `Open Data Quality`) so the first-screen forensic
+  interpretation panel remains actionable without leaking `run_id` or
+  `payload_hash` into cross-dashboard handoffs.
 
   **First 2 clicks (L1):**
   1. Click #1: открыть `bioetl-workflow-overview`, проверить `Failed Workflow Runs / Range` (`id=2`), `Failed Pipeline Steps / Range` (`id=3`) и `Failed Transform Steps / Range` (`id=6`).

@@ -23,6 +23,8 @@ ______________________________________________________________________
 - `dashboard-extension-human.md` — краткое руководство для инженера по расширению shipped dashboards.
 - `dashboard-extension-llm.md` — краткий playbook для LLM/AI-агента по безопасной правке dashboard JSON и docs cascade.
 - `variables-guide.md` — фактические Grafana variables и их PromQL.
+- `variable-reference.md` — человеческий contract для shipped dashboard variables: role, fallback, scope, propagation.
+- `selector-architecture.md` — selector taxonomy, dashboard families, hidden handoff model и future execution-selector design.
 - `dashboard-v2-updates.md` — что именно проверено и исправлено в JSON.
 
 Текущий shipped Explore handoff:
@@ -55,6 +57,13 @@ ______________________________________________________________________
   `pipeline_context=$pipeline`, но fail-close'ятся к `provider=unknown`; если у
   source dashboard нет adapter context, `adapter` не передаётся, а target
   dashboard раскрывает собственный fallback `All adapters`.
+
+Текущая selector model:
+
+- machine-readable SSOT: `contracts/selector-contracts.yaml`
+- human-readable mirrors: `variable-reference.md` и `selector-architecture.md`
+- shipped dashboards используют unified selector taxonomy by dashboard family,
+  а не один flat universal selector list
 
 `bioetl-overview-v2` is the L0 answer-first surface. It answers one question:
 what is currently broken or degraded in BioETL, and where should the operator

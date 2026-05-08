@@ -71,7 +71,7 @@
           "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
           "targetBlank": false,
           "includeVars": false,
-          "tooltip": "Cross-scope handoff: bounded pipeline/run_type explorer scope. Opens in the same tab."
+          "tooltip": "Cross-scope handoff: bounded pipeline/run_type explorer scope. Reset scope: Silver Reject Explorer owns its own record-level filters. Opens in the same tab."
         },
         {
           "title": "Explore Logs",
@@ -493,7 +493,26 @@
         "content": "<div style=\"padding:0.45rem 0.65rem;line-height:1.5\"><strong>CRIT:</strong> inspect DQ reasons and Gold/Silver diagnostics before replay. <strong>WARN:</strong> open Silver Reject Explorer. <strong>Scope:</strong> status above is pipeline-wide; <strong>$run_type</strong> and stage filters shape only range evidence below. <strong>invalid_record_policy</strong> visibility absent = UNKNOWN.</div>",
         "mode": "html"
       },
-      "links": [],
+      "links": [
+        {
+          "title": "Review current status",
+          "url": "/d/bioetl-dq-v2/bioetl-dq-v2?viewPanel=9100&var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&${__url_time_range}",
+          "targetBlank": false,
+          "includeVars": false
+        },
+        {
+          "title": "Inspect current reasons",
+          "url": "/d/bioetl-dq-v2/bioetl-dq-v2?viewPanel=9102&var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&${__url_time_range}",
+          "targetBlank": false,
+          "includeVars": false
+        },
+        {
+          "title": "Open Silver Reject Explorer",
+          "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
+          "targetBlank": false,
+          "includeVars": false
+        }
+      ],
       "pluginVersion": "12.2.0",
       "transparent": true
     },
@@ -2294,7 +2313,7 @@
         "tagsQuery": "",
         "type": "query",
         "useTags": false,
-        "description": "Core scope: pipeline selector for pipeline-centric dashboards; fallback: All pipelines when not passed by source dashboard. Single-select; no All scope. Unknown is the explicit fail-closed default."
+        "description": "Core scope: pipeline selector for pipeline-centric dashboards. Single-select; no All scope. Unknown is the explicit fail-closed default when source scope is absent or the operator has not selected a concrete pipeline."
       },
       {
         "allValue": null,

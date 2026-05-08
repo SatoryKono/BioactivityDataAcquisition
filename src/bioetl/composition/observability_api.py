@@ -6,9 +6,9 @@ helpers that need composition-owned dependency assembly.
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import datetime
-from collections.abc import Mapping
 from typing import TYPE_CHECKING
 from urllib.parse import urlunsplit
 from uuid import uuid4

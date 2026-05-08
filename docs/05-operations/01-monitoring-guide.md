@@ -85,15 +85,18 @@ Pushgateway publication на завершении run. Это позволяет
 - **Silver Reject Explorer**: `$pipeline`, `$run_type`, `$reason_code`, `$field`, `$run_id`, `$payload_hash`
 - **5. Workflow**: `$workflow`, `$status`
 
-> **Важно**: shipped dashboards не используют единый variable contract.
+> **Важно**: shipped dashboards используют unified selector taxonomy by
+> dashboard family, а не один flat universal selector list.
+> Канонический machine-readable selector contract:
+> `docs/03-guides/dashboards/contracts/selector-contracts.yaml`.
 > `1. Overview` допускает `Pipeline=All` и `Run Type=All` как shipped default
 > entry scope. Pipeline-scoped L1 dashboards сохраняют scoped handoff через
 > `$pipeline`/`$run_type`, а `3. Provider Health` получает hidden
 > `$pipeline_context` для обратного перехода и fail-closed `provider=unknown`,
 > если source dashboard не может доказать валидный provider label. Если
-> реального scoped значения нет, используйте только те
-> fallback-значения, которые разрешены
-> `docs/03-guides/dashboards/contracts/navigation-links.yaml`.
+> реального scoped значения нет, используйте только те fallback-значения,
+> которые разрешены `navigation-links.yaml`; если нужен role/family-level
+> selector contract, используйте `selector-contracts.yaml`.
 
 ### Основные Дашборды
 

@@ -18,14 +18,26 @@ ______________________________________________________________________
 
 ## Нормативный источник
 
-Единственный нормативный источник для переменных и time handoff: `docs/03-guides/dashboards/contracts/navigation-links.yaml`.
+Нормативные источники:
 
-Используйте YAML-секции:
+- переменные, selector taxonomy, hidden-hand-off classes:
+  `docs/03-guides/dashboards/contracts/selector-contracts.yaml`
+- dashboard-link vars и time handoff:
+  `docs/03-guides/dashboards/contracts/navigation-links.yaml`
+
+Используйте YAML-секции из `navigation-links.yaml`:
 - `required_link_vars_by_target_uid`
 - `allowed_dashboard_link_vars`
 - `forbidden_dashboard_link_vars_by_target_uid`
 - `time_handoff_requirements`
 - `default_time_refresh_policy` / `default_time_refresh_policy_exceptions`
+
+Используйте YAML-секции из `selector-contracts.yaml`:
+- `selector_taxonomy`
+- `dashboard_families`
+- `shipped_selector_registry`
+- `ship_now_selector_contract_by_uid`
+- `hidden_handoff_contract`
 
 Этот guide оставлен как explanatory reference (контекст и примеры), без повторного нормирования MUST/SHOULD правил.
 

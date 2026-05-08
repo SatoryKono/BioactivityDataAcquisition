@@ -401,7 +401,26 @@
         "content": "<div style=\"padding:0.45rem 0.7rem;line-height:1.55\"><strong>First action:</strong> start with the GLOBAL severity matrix, then open top causes for the degraded provider. If cause is retry/rate-limit/circuit-breaker, inspect control-plane safety before replay. If cause is latency/errors, correlate with Runtime impact, then logs/traces from the runtime or DQ dashboards.</div>",
         "mode": "html"
       },
-      "links": [],
+      "links": [
+        {
+          "title": "Review severity matrix",
+          "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?viewPanel=9101&var-provider=$provider&var-pipeline_context=$pipeline_context&var-adapter=$adapter&${__url_time_range}",
+          "targetBlank": false,
+          "includeVars": false
+        },
+        {
+          "title": "Inspect critical providers",
+          "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?viewPanel=9102&var-provider=$provider&var-pipeline_context=$pipeline_context&var-adapter=$adapter&${__url_time_range}",
+          "targetBlank": false,
+          "includeVars": false
+        },
+        {
+          "title": "Inspect provider top causes",
+          "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?viewPanel=9103&var-provider=$provider&var-pipeline_context=$pipeline_context&var-adapter=$adapter&${__url_time_range}",
+          "targetBlank": false,
+          "includeVars": false
+        }
+      ],
       "pluginVersion": "12.2.0",
       "transparent": true
     },
