@@ -13,19 +13,21 @@ groups:
                 or 0 * bioetl_control_plane_run_type_universe)
               +
               (
-                (sum by (pipeline) (increase(bioetl_control_plane_ledger_appends_total{status="failed"}[15m]))
-                  or 0 * sum by (pipeline) (bioetl_control_plane_run_type_universe))
-                +
-                (sum by (pipeline) (increase(bioetl_checkpoint_compatibility_events_total{disposition=~".*_incompatible"}[15m]))
-                  or 0 * sum by (pipeline) (bioetl_control_plane_run_type_universe))
-                +
-                (sum by (pipeline) (increase(bioetl_replay_reconstructability_events_total{status="not_reconstructable"}[15m]))
-                  or 0 * sum by (pipeline) (bioetl_control_plane_run_type_universe))
-                +
-                (sum by (pipeline) (increase(bioetl_lineage_refs_missing_total[15m]))
-                  or 0 * sum by (pipeline) (bioetl_control_plane_run_type_universe))
+                bioetl_control_plane_run_type_universe
+                * on (pipeline) group_left()
+                (
+                  (
+                    sum by (pipeline) (increase(bioetl_control_plane_ledger_appends_total{status="failed"}[15m]))
+                    +
+                    sum by (pipeline) (increase(bioetl_checkpoint_compatibility_events_total{disposition=~".*_incompatible"}[15m]))
+                    +
+                    sum by (pipeline) (increase(bioetl_replay_reconstructability_events_total{status="not_reconstructable"}[15m]))
+                    +
+                    sum by (pipeline) (increase(bioetl_lineage_refs_missing_total[15m]))
+                  )
+                  or 0 * max by (pipeline) (bioetl_control_plane_run_type_universe)
+                )
               )
-              * on (pipeline) group_right (run_type) bioetl_control_plane_run_type_universe
               +
               (sum by (pipeline, run_type) (increase(bioetl_replay_drift_events_total[15m]))
                 or 0 * bioetl_control_plane_run_type_universe)
@@ -40,10 +42,13 @@ groups:
                 or 0 * bioetl_control_plane_run_type_universe)
               +
               (
-                sum by (pipeline) (increase(bioetl_control_plane_ledger_appends_total{status="failed"}[15m]))
-                or 0 * sum by (pipeline) (bioetl_control_plane_run_type_universe)
+                bioetl_control_plane_run_type_universe
+                * on (pipeline) group_left()
+                (
+                  sum by (pipeline) (increase(bioetl_control_plane_ledger_appends_total{status="failed"}[15m]))
+                  or 0 * max by (pipeline) (bioetl_control_plane_run_type_universe)
+                )
               )
-              * on (pipeline) group_right (run_type) bioetl_control_plane_run_type_universe
             )
           )
 
@@ -64,8 +69,12 @@ groups:
                 bioetl_control_plane_run_type_universe
                 unless on (pipeline, run_type)
                 (
-                  (sum by (pipeline) (count_over_time(bioetl_control_plane_ledger_appends_total[5m])) > bool 0)
-                  * on (pipeline) group_right (run_type) bioetl_control_plane_run_type_universe
+                  bioetl_control_plane_run_type_universe
+                  * on (pipeline) group_left()
+                  (
+                    (sum by (pipeline) (count_over_time(bioetl_control_plane_ledger_appends_total[5m])) > bool 0)
+                    or 0 * max by (pipeline) (bioetl_control_plane_run_type_universe)
+                  )
                 )
               )
               or 0 * bioetl_control_plane_run_type_universe

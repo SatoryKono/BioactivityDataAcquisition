@@ -15,13 +15,13 @@ def test_build_exact_duplicate_groups_collects_cross_panel_reuse() -> None:
             dashboard="bioetl-dq-v2.json",
             panel_title="Monitor: Score",
             target_ref="target[1]",
-            expression="sum(metric_a{pipeline=~\"$pipeline\"})",
+            expression='sum(metric_a{pipeline=~"$pipeline"})',
         ),
         QueryUse(
             dashboard="bioetl-dq-v2.json",
             panel_title="Track: Score",
             target_ref="target[1]",
-            expression="sum(metric_a{pipeline=~\"$pipeline\"})",
+            expression='sum(metric_a{pipeline=~"$pipeline"})',
         ),
         QueryUse(
             dashboard="bioetl-runtime.json",
@@ -42,7 +42,9 @@ def test_build_exact_duplicate_groups_collects_cross_panel_reuse() -> None:
     )
 
 
-def test_build_near_duplicate_groups_excludes_single_panel_triplets_by_default() -> None:
+def test_build_near_duplicate_groups_excludes_single_panel_triplets_by_default() -> (
+    None
+):
     query_uses = (
         QueryUse(
             dashboard="bioetl-runtime.json",
@@ -80,7 +82,7 @@ def test_build_near_duplicate_groups_surfaces_cross_panel_stage_variants() -> No
             target_ref="target[1]",
             expression=(
                 "round(sum(increase(bioetl_records_processed_total"
-                "{pipeline=~\"$pipeline\",stage=\"bronze\"}[$__range])) or vector(0))"
+                '{pipeline=~"$pipeline",stage="bronze"}[$__range])) or vector(0))'
             ),
         ),
         QueryUse(
@@ -89,7 +91,7 @@ def test_build_near_duplicate_groups_surfaces_cross_panel_stage_variants() -> No
             target_ref="target[1]",
             expression=(
                 "round(sum(increase(bioetl_records_processed_total"
-                "{pipeline=~\"$pipeline\",stage=\"gold\"}[$__range])) or vector(0))"
+                '{pipeline=~"$pipeline",stage="gold"}[$__range])) or vector(0))'
             ),
         ),
     )
@@ -120,13 +122,13 @@ def test_render_markdown_includes_exact_and_near_sections() -> None:
             dashboard="bioetl-runtime.json",
             panel_title="Track Bronze",
             target_ref="target[1]",
-            expression="sum(metric_b{stage=\"bronze\"})",
+            expression='sum(metric_b{stage="bronze"})',
         ),
         QueryUse(
             dashboard="bioetl-runtime.json",
             panel_title="Track Gold",
             target_ref="target[1]",
-            expression="sum(metric_b{stage=\"gold\"})",
+            expression='sum(metric_b{stage="gold"})',
         ),
     )
 

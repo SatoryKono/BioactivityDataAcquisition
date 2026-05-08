@@ -52,7 +52,10 @@ def _write_canonical_test_layout(tmp_path: Path) -> tuple[Path, Path, Path, Path
                         "title": "0. Control Plane",
                         "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1",
                     },
-                    {"title": "5. Workflow", "url": "/d/bioetl-workflow-overview/bioetl-workflow-overview"},
+                    {
+                        "title": "5. Workflow",
+                        "url": "/d/bioetl-workflow-overview/bioetl-workflow-overview",
+                    },
                 ],
                 "panels": [],
             }
@@ -166,12 +169,18 @@ def test_compare_deployed_dashboards_ignores_benign_export_noise(
                     "title": "Review Dashboard Navigation",
                     "pluginVersion": "10.4.0",
                     "links": [
-                        {"title": "2. Runtime", "url": "/d/bioetl-runtime/bioetl-runtime"},
+                        {
+                            "title": "2. Runtime",
+                            "url": "/d/bioetl-runtime/bioetl-runtime",
+                        },
                         {
                             "title": "3. Provider Health",
                             "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2",
                         },
-                        {"title": "4. Data Quality", "url": "/d/bioetl-dq-v2/bioetl-dq-v2"},
+                        {
+                            "title": "4. Data Quality",
+                            "url": "/d/bioetl-dq-v2/bioetl-dq-v2",
+                        },
                         {
                             "title": "0. Control Plane",
                             "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1",
@@ -218,7 +227,9 @@ def test_build_health_summary_marks_noncanonical_root_config(
 
     inv = inventory._load_inventory()
     parity_errors, parity_by_dashboard = inventory._check_parity(inv)
-    provisioning_errors, provisioning_metadata = inventory._check_provisioning_contract()
+    provisioning_errors, provisioning_metadata = (
+        inventory._check_provisioning_contract()
+    )
     summary = inventory._build_health_summary(
         inv,
         parity_issues=parity_by_dashboard,

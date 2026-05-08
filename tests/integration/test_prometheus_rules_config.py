@@ -873,7 +873,10 @@ def test_runtime_pipeline_level_blocker_reasons_are_projected_to_run_type() -> N
         seen_reasons.add(reason)
         expr = str(rule.get("expr", ""))
         assert expectations[reason] in expr
-        assert "bioetl_runtime_pipeline_run_type_universe * on (pipeline) group_left()" in expr
+        assert (
+            "bioetl_runtime_pipeline_run_type_universe * on (pipeline) group_left()"
+            in expr
+        )
         assert "bioetl_runtime_pipeline_run_type_universe" in expr
 
     assert seen_reasons == set(expectations)
@@ -972,7 +975,9 @@ def test_runtime_no_terminal_run_treats_success_as_terminal() -> None:
     assert 'status=~"success|completed|failed"' in expr
 
 
-def test_control_plane_current_status_rules_project_pipeline_signals_to_run_type() -> None:
+def test_control_plane_current_status_rules_project_pipeline_signals_to_run_type() -> (
+    None
+):
     payload = _load_control_plane_current_status_rules()
     record_map = _build_record_map(payload)
 
@@ -982,9 +987,12 @@ def test_control_plane_current_status_rules_project_pipeline_signals_to_run_type
         "expr", ""
     )
 
-    assert "group_right (run_type) bioetl_control_plane_run_type_universe" in replay_expr
-    assert "group_right (run_type) bioetl_control_plane_run_type_universe" in failures_expr
-    assert "group_right (run_type) bioetl_control_plane_run_type_universe" in telemetry_expr
+    assert "bioetl_control_plane_run_type_universe" in replay_expr
+    assert "* on (pipeline) group_left()" in replay_expr
+    assert "bioetl_control_plane_run_type_universe" in failures_expr
+    assert "* on (pipeline) group_left()" in failures_expr
+    assert "bioetl_control_plane_run_type_universe" in telemetry_expr
+    assert "* on (pipeline) group_left()" in telemetry_expr
 
 
 def test_dq_current_status_splits_hard_failures_from_degraded_warnings() -> None:
