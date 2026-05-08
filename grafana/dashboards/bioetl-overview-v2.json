@@ -1766,7 +1766,7 @@
           }
         }
       ],
-      "description": "Compact selected-scope workflow summary. Each row keeps the worst current workflow status per pipeline across the selected run_type scope so the first-screen table stays readable without scroll. Status values are OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null). Open Workflow resets scope because the workflow dashboard does not accept pipeline/run_type variables."
+      "description": "Compact selected-scope workflow summary. Each row keeps the worst current workflow status per pipeline across the selected run_type scope so the first-screen table stays readable without scroll. Status values are OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null). Current workflow status is driven by the latest bounded terminal workflow signal for the selected scope, not by cumulative workflow-run counters. Open Workflow resets scope because the workflow dashboard does not accept pipeline/run_type variables."
     },
     {
       "id": 9013,
@@ -1941,7 +1941,7 @@
           }
         }
       ],
-      "description": "Compact GLOBAL workflow scope across pipelines. Each row keeps the worst current workflow status per pipeline so the first-screen table stays readable without scroll. Status values are OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null)."
+      "description": "Compact GLOBAL workflow scope across pipelines. Each row keeps the worst current workflow status per pipeline so the first-screen table stays readable without scroll. Status values are OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null). Current workflow status is driven by the latest bounded terminal workflow signal, not by cumulative workflow-run counters."
     },
     {
       "id": 9014,

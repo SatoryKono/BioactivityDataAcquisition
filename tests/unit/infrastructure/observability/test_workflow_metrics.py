@@ -8,15 +8,37 @@ import pytest
 
 from bioetl.infrastructure.observability.prometheus_metrics import (
     COUNTERS,
+    GAUGES,
     HISTOGRAMS,
     PrometheusMetrics,
 )
 
 
 def test_workflow_metrics_are_registered() -> None:
+    assert "bioetl_workflow_current_status" in GAUGES
     assert "bioetl_workflow_runs_total" in COUNTERS
     assert "bioetl_workflow_step_events_total" in COUNTERS
     assert "bioetl_workflow_step_duration_seconds" in HISTOGRAMS
+
+
+def test_workflow_current_status_uses_bounded_label_surface() -> None:
+    metrics = PrometheusMetrics()
+    with patch.dict(GAUGES, {"bioetl_workflow_current_status": MagicMock()}):
+        labels = {
+            "workflow": "activity_workflow",
+            "pipeline_context": "chembl_activity",
+            "run_type_context": "incremental",
+            "provider_context": "chembl",
+        }
+
+        metrics.set_gauge("bioetl_workflow_current_status", 0.0, labels)
+
+        GAUGES["bioetl_workflow_current_status"].labels.assert_called_once_with(
+            **labels
+        )
+        GAUGES["bioetl_workflow_current_status"].labels().set.assert_called_once_with(
+            0.0
+        )
 
 
 def test_workflow_step_metrics_use_bounded_label_surface() -> None:

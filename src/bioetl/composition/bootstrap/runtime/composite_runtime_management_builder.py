@@ -4,7 +4,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, cast
 
-from bioetl.application.composite.runtime_wiring_api import FSMStateHelperService
+from bioetl.application.composite.runtime_wiring_api import (
+    CompositeCheckpointServiceContext,
+    FSMStateHelperService,
+)
 from bioetl.composition.bootstrap.assembly.checkpoint import (
     bootstrap_composite_checkpoint_writer,
     bootstrap_quarantine_adapter,
@@ -136,28 +139,7 @@ def _create_checkpoint_manager(
     expected_contract_version = normalize_contract_version(
         getattr(config, "version", "")
     )
-    if checkpoint_clock is None:
-        return checkpoint_manager_cls(
-            composite_name=config.name,
-            run_id=run_id,
-            storage=checkpoint_storage,
-            logger=logger,
-            resume=runtime.resume,
-            expected_effective_config_hash=expected_effective_config_hash,
-            expected_contract_ref=expected_contract_ref,
-            expected_contract_version=expected_contract_version,
-            expected_manifest_id=expected_manifest_id,
-            expected_execution_fingerprint=expected_execution_fingerprint,
-            expected_dq_contract_compatibility_hash=(
-                expected_dq_contract_compatibility_hash
-            ),
-            expected_effective_config_artifact_id=(
-                expected_effective_config_artifact_id
-            ),
-            expected_input_snapshot_fingerprint=expected_input_snapshot_fingerprint,
-            run_ledger_port=run_ledger_port,
-        )
-    return checkpoint_manager_cls(
+    checkpoint_context = CompositeCheckpointServiceContext(
         composite_name=config.name,
         run_id=run_id,
         storage=checkpoint_storage,
@@ -176,6 +158,7 @@ def _create_checkpoint_manager(
         run_ledger_port=run_ledger_port,
         clock=checkpoint_clock,
     )
+    return checkpoint_manager_cls(checkpoint_context)
 
 
 def _resolve_expected_effective_config_hash(

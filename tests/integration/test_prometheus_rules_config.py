@@ -797,7 +797,7 @@ def test_canonical_current_status_recording_rules_exist() -> None:
         "bioetl_dq_current_activity_15m": "bioetl_records_processed_total",
         "bioetl_dq_current_failure_signals_15m": "bioetl_runtime_alert_condition_dq_hard_fail_15m",
         "bioetl_dq_current_degraded_signals_15m": "bioetl_runtime_alert_condition_dq_soft_threshold_15m",
-        "bioetl_dq_current_status": "bioetl_dq_current_failure_signals_15m",
+        "bioetl_dq_current_status": 'bioetl_dq_current_reason{severity="crit"}',
         "bioetl_dq_current_reason": "bioetl_runtime_alert_condition_dq_hard_fail_15m",
     }
 
@@ -814,7 +814,9 @@ def test_canonical_current_status_recording_rules_exist() -> None:
         )
 
 
-def test_overview_workflow_input_uses_workflow_evidence_not_pipeline_counter_delta() -> None:
+def test_overview_workflow_input_uses_workflow_evidence_not_pipeline_counter_delta() -> (
+    None
+):
     """Workflow overview summaries must stay queryable after short-lived CLI runs exit."""
     payload = _load_rules()
     workflow_rules = [
@@ -825,10 +827,9 @@ def test_overview_workflow_input_uses_workflow_evidence_not_pipeline_counter_del
     assert workflow_rules, "Missing workflow input projection rule"
 
     expr = "\n".join(str(rule.get("expr", "")) for rule in workflow_rules)
-    assert "bioetl_workflow_runs_total" in expr
-    assert "max_over_time" in expr
-    assert 'status="failed"' in expr
-    assert 'status=~"success|completed"' in expr
+    assert "bioetl_workflow_current_status" in expr
+    assert "bioetl_overview_pipeline_run_type_universe" in expr
+    assert "bioetl_workflow_runs_total" not in expr
     assert "bioetl_pipeline_runs_total" not in expr
 
 
@@ -1017,29 +1018,53 @@ def test_dq_current_status_splits_hard_failures_from_degraded_warnings() -> None
     payload = _load_rules()
     record_map = _build_record_map(payload)
 
+    silver_validation_expr = record_map[
+        "bioetl_runtime_alert_condition_silver_validation_failures_30m"
+    ].get("expr", "")
     failure_expr = record_map["bioetl_dq_current_failure_signals_15m"].get("expr", "")
     monitor_disabled_expr = record_map["bioetl_dq_monitor_disabled_current"].get(
         "expr", ""
     )
     degraded_expr = record_map["bioetl_dq_current_degraded_signals_15m"].get("expr", "")
     status_expr = record_map["bioetl_dq_current_status"].get("expr", "")
+    quarantined_reason_rules = [
+        rule
+        for rule in _recording_rules_named(payload, "bioetl_dq_current_reason")
+        if rule.get("labels", {}).get("reason") == "quarantined_records"
+    ]
     dq_disabled_reason_rules = [
         rule
         for rule in _recording_rules_named(payload, "bioetl_dq_current_reason")
         if rule.get("labels", {}).get("reason") == "dq_monitor_disabled"
     ]
 
+    assert "max_over_time(bioetl_silver_validation_failures_total[30m])" in (
+        silver_validation_expr
+    )
     assert "bioetl_runtime_alert_condition_dq_hard_fail_15m" in failure_expr
     assert "bioetl_runtime_alert_condition_dq_critical_anomaly_30m" in failure_expr
+    assert "bioetl_runtime_alert_condition_silver_validation_failures_30m" in (
+        failure_expr
+    )
+    assert "bioetl_overview_pipeline_universe * 0" in failure_expr
     assert "bioetl_dq_monitor_enabled == bool 0" in monitor_disabled_expr
     assert "bioetl_runtime_alert_condition_dq_soft_threshold_15m" in degraded_expr
+    assert "max_over_time(bioetl_dq_records_quarantined_total[15m])" in degraded_expr
+    assert "max_over_time(bioetl_silver_filter_rejections_total[15m])" in degraded_expr
+    assert "bioetl_overview_pipeline_universe * 0" in degraded_expr
     assert "bioetl_dq_monitor_disabled_current" in degraded_expr
-    assert "* 2" in status_expr
-    assert "* 0" in status_expr
+    assert 'bioetl_dq_current_reason{severity="crit"}' in status_expr
+    assert 'bioetl_dq_current_reason{severity="warn"}' in status_expr
+    assert "bioetl_dq_current_activity_15m * 0" in status_expr
     assert len(dq_disabled_reason_rules) == 1
+    assert len(quarantined_reason_rules) == 1
     assert (
         dq_disabled_reason_rules[0].get("expr", "")
         == "bioetl_dq_monitor_disabled_current"
+    )
+    assert (
+        quarantined_reason_rules[0].get("expr", "")
+        == "max by (pipeline) (max_over_time(bioetl_dq_records_quarantined_total[15m])) > bool 0"
     )
 
 

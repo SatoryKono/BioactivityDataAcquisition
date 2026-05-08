@@ -9,6 +9,9 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from bioetl.application.composite.checkpoint import CompositeCheckpointService
+from bioetl.application.composite.runtime_wiring_api import (
+    CompositeCheckpointServiceContext,
+)
 from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
 from bioetl.composition.bootstrap.runtime.composite_support_services_factory import (
     CompositeSupportServicesFactory,
@@ -176,23 +179,27 @@ def test_build_uses_canonical_composite_checkpoint_port(
     assert result.checkpoint_manager is checkpoint_manager
     mock_bootstrap_checkpoint_adapter.assert_called_once_with()
     factory._infra.logger.bind.assert_called_once_with(manifest_id="manifest-123")
-    cast(MagicMock, checkpoint_manager_cls).assert_called_once_with(
-        composite_name="composite_publication",
-        run_id="run-123",
-        storage=checkpoint_storage,
-        logger=factory._infra.logger.bind.return_value,
-        resume=False,
-        expected_effective_config_hash="",
-        expected_contract_ref="composite_publication",
-        expected_contract_version="1.0.0",
-        expected_manifest_id="manifest-123",
-        expected_execution_fingerprint="fingerprint-123",
-        expected_dq_contract_compatibility_hash="dq-hash-123",
-        expected_effective_config_artifact_id="artifact-123",
-        expected_input_snapshot_fingerprint="snapshot-fingerprint-123",
-        run_ledger_port=(
-            mock_build_control_plane_bundle.return_value.run_ledger_service.ledger_port
-        ),
+    checkpoint_manager_cls.assert_called_once()
+    checkpoint_context = checkpoint_manager_cls.call_args.args[0]
+    assert isinstance(checkpoint_context, CompositeCheckpointServiceContext)
+    assert checkpoint_context.composite_name == "composite_publication"
+    assert checkpoint_context.run_id == "run-123"
+    assert checkpoint_context.storage is checkpoint_storage
+    assert checkpoint_context.logger is factory._infra.logger.bind.return_value
+    assert checkpoint_context.resume is False
+    assert checkpoint_context.expected_effective_config_hash == ""
+    assert checkpoint_context.expected_contract_ref == "composite_publication"
+    assert checkpoint_context.expected_contract_version == "1.0.0"
+    assert checkpoint_context.expected_manifest_id == "manifest-123"
+    assert checkpoint_context.expected_execution_fingerprint == "fingerprint-123"
+    assert checkpoint_context.expected_dq_contract_compatibility_hash == "dq-hash-123"
+    assert checkpoint_context.expected_effective_config_artifact_id == "artifact-123"
+    assert (
+        checkpoint_context.expected_input_snapshot_fingerprint
+        == "snapshot-fingerprint-123"
+    )
+    assert checkpoint_context.run_ledger_port is (
+        mock_build_control_plane_bundle.return_value.run_ledger_service.ledger_port
     )
     assert result.manifest_id == "manifest-123"
     assert (

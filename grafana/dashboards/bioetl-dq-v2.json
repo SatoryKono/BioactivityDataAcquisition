@@ -305,7 +305,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Status mapping: 0=OK, 1=WARN, 2=CRIT; null=UNKNOWN. Threshold state stays bounded: hard-fail reasons map to CRIT, warning-only reasons map to WARN, and explicit current OK stays OK. Current threshold state is pipeline-wide; use selected-range panels below for scoped evidence.",
+      "description": "Status mapping: 0=OK, 1=WARN, 2=CRIT; null=UNKNOWN. Threshold state stays bounded: hard-fail reasons map to CRIT, warning-only reasons map to WARN, and explicit current OK stays OK. Disabled or noop DQ monitoring is treated as a warning-state reason, not unconditional green. Current threshold state is pipeline-wide; use selected-range panels below for scoped evidence.",
       "fieldConfig": {
         "defaults": {
           "color": {

@@ -35,6 +35,7 @@ __all__ = [
 ]
 
 _WORKFLOW_RUNS_TOTAL = "bioetl_workflow_runs_total"
+_WORKFLOW_CURRENT_STATUS = "bioetl_workflow_current_status"
 _WORKFLOW_STEP_EVENTS_TOTAL = "bioetl_workflow_step_events_total"
 _WORKFLOW_STEP_DURATION_SECONDS = "bioetl_workflow_step_duration_seconds"
 _STEP_KIND_PIPELINE = "pipeline"
@@ -148,6 +149,14 @@ class WorkflowRunnerService:
                 status = "failed"
                 failed_step_id = step.step_id
 
+        self.metrics.set_gauge(
+            _WORKFLOW_CURRENT_STATUS,
+            _workflow_status_to_gauge_value(status),
+            {
+                "workflow": config.name,
+                **workflow_context_labels,
+            },
+        )
         self.metrics.increment_counter(
             _WORKFLOW_RUNS_TOTAL,
             1,
@@ -375,3 +384,12 @@ def _step_result_from_transform_result(
 
 def _run_options_from_config(config: WorkflowRunOptionsConfig) -> RunOptions:
     return RunOptions(**config.to_mapping())
+
+
+def _workflow_status_to_gauge_value(status: str) -> float:
+    """Map terminal workflow states onto the canonical L0 severity enum."""
+    if status in {"success", "completed"}:
+        return 0.0
+    if status == "failed":
+        return 2.0
+    return 1.0

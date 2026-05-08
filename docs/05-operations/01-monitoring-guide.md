@@ -108,7 +108,9 @@ L0 дашборд для одного operator question: что сейчас bro
 - **Answer row**: `System Status`, `Next Action`, `L0 Inputs`,
   `Runtime Blockers`, `DQ Status`, `Gold Lifecycle`, `Control Plane`,
   `Provider GLOBAL`, `Workflow Selected`, `Workflow GLOBAL`. `OK` requires
-  recent signal; no recent samples stay `UNKNOWN`, not green.
+  recent signal; no recent samples stay `UNKNOWN`, not green. Workflow
+  summaries are current-state surfaces and must follow the latest bounded
+  terminal workflow signal rather than cumulative workflow-run counters.
 - **Above-the-fold layout**: first screen without scroll contains the scope
   header, the answer row (`System Status`, `Next Action`, `L0 Inputs`) and the
   first-screen subsystem current-status tables (`Runtime Blockers`, `DQ Status`,
@@ -275,7 +277,8 @@ tracing-backed log hygiene живёт в collapsed row
 - **First answer row**: `Monitor DQ Current Status`,
   `Monitor DQ Threshold State`, `Inspect DQ Current Reasons` и
   `Review: First Action` отвечают, является ли DQ сейчас
-  `OK`, `WARN`, `CRIT` или `UNKNOWN`.
+  `OK`, `WARN`, `CRIT` или `UNKNOWN`. Disabled/noop DQ monitoring must appear
+  as `WARN` or `UNKNOWN`, not as unconditional green.
 - **Current-context row below the answer row**: `Monitor: Data Quality Score
   (Volume-weighted)`, `Monitor: Worst-Entity DQ Score`,
   `Monitor: Worst Data Freshness Lag (seconds)`, `Track: Records Quarantined in Range`,
@@ -477,6 +480,7 @@ uv run python -m pytest -q tests/integration/test_prometheus_rules_config.py
 - **Loki drilldown не находит событие**:
   1. Сначала проверьте, что общий запрос `{job="bioetl"}` вообще возвращает строки.
   1. Zero lines могут быть легитимны, если Loki shipping/profile выключен или выбранный run не отгрузил BioETL streams в текущем окне.
+  1. Если локальный `reports/logs/bioetl.log` содержит свежие строки BioETL run, а `{job="bioetl"}` пуст, считайте это ingestion defect и проверьте Promtail positions, container mounts и Loki ingestion limits.
   1. После этого сузьте запрос вручную по `pipeline`, `provider` или `stage` уже в Explore.
   1. Не полагайтесь на `$pipeline/$provider` interpolation внутри encoded Explore payload.
 - **Метрики показывают UNHEALTHY для storage**: Проверьте права доступа к папкам `data/`.

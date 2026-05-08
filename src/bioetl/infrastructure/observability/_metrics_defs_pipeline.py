@@ -49,6 +49,7 @@ __all__ = [
     "TRACED_RUNS_TOTAL",
     "TRANSFORM_DURATION_SECONDS",
     "TRANSFORM_ERRORS_TOTAL",
+    "WORKFLOW_CURRENT_STATUS",
     "WORKFLOW_RUNS_TOTAL",
     "WORKFLOW_STEP_DURATION_SECONDS",
     "WORKFLOW_STEP_EVENTS_TOTAL",
@@ -329,6 +330,12 @@ WORKFLOW_RUNS_TOTAL = Counter(
     "bioetl_workflow_runs_total",
     "Total declarative workflow run outcomes by bounded workflow and status",
     ["workflow", "status", "pipeline_context", "run_type_context", "provider_context"],
+)
+
+WORKFLOW_CURRENT_STATUS = Gauge(
+    "bioetl_workflow_current_status",
+    "Current terminal workflow status by bounded workflow context: 0=OK, 1=WARN, 2=CRIT",
+    ["workflow", "pipeline_context", "run_type_context", "provider_context"],
 )
 
 WORKFLOW_STEP_EVENTS_TOTAL = Counter(

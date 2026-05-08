@@ -8,6 +8,9 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from bioetl.application.composite.runtime_wiring_api import (
+    CompositeCheckpointServiceContext,
+)
 from bioetl.application.composite.join_key_normalization import (
     JOIN_KEY_NORMALIZATION_POLICIES,
 )
@@ -163,22 +166,23 @@ def test_build_runtime_management_services_enables_quarantine_when_configured(
     assert result.quarantine_port is quarantine_port
     mock_checkpoint_port.assert_called_once_with()
     mock_quarantine_port.assert_called_once_with()
-    cast(MagicMock, checkpoint_manager_cls).assert_called_once_with(
-        composite_name="composite_publication",
-        run_id="run-123",
-        storage=checkpoint_storage,
-        logger=logger,
-        resume=True,
-        expected_effective_config_hash="",
-        expected_contract_ref="composite_publication",
-        expected_contract_version="1.0.0",
-        expected_manifest_id=None,
-        expected_execution_fingerprint=None,
-        expected_dq_contract_compatibility_hash=None,
-        expected_effective_config_artifact_id=None,
-        expected_input_snapshot_fingerprint=None,
-        run_ledger_port=None,
-    )
+    checkpoint_manager_cls.assert_called_once()
+    checkpoint_context = checkpoint_manager_cls.call_args.args[0]
+    assert isinstance(checkpoint_context, CompositeCheckpointServiceContext)
+    assert checkpoint_context.composite_name == "composite_publication"
+    assert checkpoint_context.run_id == "run-123"
+    assert checkpoint_context.storage is checkpoint_storage
+    assert checkpoint_context.logger is logger
+    assert checkpoint_context.resume is True
+    assert checkpoint_context.expected_effective_config_hash == ""
+    assert checkpoint_context.expected_contract_ref == "composite_publication"
+    assert checkpoint_context.expected_contract_version == "1.0.0"
+    assert checkpoint_context.expected_manifest_id is None
+    assert checkpoint_context.expected_execution_fingerprint is None
+    assert checkpoint_context.expected_dq_contract_compatibility_hash is None
+    assert checkpoint_context.expected_effective_config_artifact_id is None
+    assert checkpoint_context.expected_input_snapshot_fingerprint is None
+    assert checkpoint_context.run_ledger_port is None
     create_dq_report_service.assert_called_once_with(
         logger,
         settings,
@@ -272,8 +276,9 @@ def test_build_runtime_management_services_propagates_config_hash_when_available
         create_dq_report_service=MagicMock(return_value=MagicMock()),
     )
 
-    kwargs = cast(MagicMock, checkpoint_manager_cls).call_args.kwargs
-    config_hash = kwargs["expected_effective_config_hash"]
+    checkpoint_context = checkpoint_manager_cls.call_args.args[0]
+    assert isinstance(checkpoint_context, CompositeCheckpointServiceContext)
+    config_hash = checkpoint_context.expected_effective_config_hash
     assert isinstance(config_hash, str)
     assert len(config_hash) == 64
 
@@ -325,9 +330,10 @@ def test_build_runtime_management_services_prefers_control_plane_effective_hash(
         ),
     )
 
-    kwargs = cast(MagicMock, checkpoint_manager_cls).call_args.kwargs
-    assert kwargs["expected_effective_config_hash"] == ("f" * 64)
-    assert kwargs["expected_input_snapshot_fingerprint"] == "snapshot-fp-123"
+    checkpoint_context = checkpoint_manager_cls.call_args.args[0]
+    assert isinstance(checkpoint_context, CompositeCheckpointServiceContext)
+    assert checkpoint_context.expected_effective_config_hash == ("f" * 64)
+    assert checkpoint_context.expected_input_snapshot_fingerprint == "snapshot-fp-123"
 
 
 @pytest.mark.unit

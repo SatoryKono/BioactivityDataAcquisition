@@ -5,8 +5,8 @@
 
 ## Summary
 
-- Scanned modules: `1807`
-- Internal import edges (raw): `7161`
+- Scanned modules: `1808`
+- Internal import edges (raw): `7170`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `324`
@@ -24,11 +24,11 @@ flowchart LR
     application -->|1190 OK| application
     application -->|1066 OK| domain
     composition -->|270 OK| application
-    composition -->|581 OK| composition
-    composition -->|405 OK| domain
-    composition -->|324 OK| infrastructure
+    composition -->|582 OK| composition
+    composition -->|412 OK| domain
+    composition -->|326 OK| infrastructure
     domain -->|1213 OK| domain
-    infrastructure -->|779 OK| domain
+    infrastructure -->|778 OK| domain
     infrastructure -->|944 OK| infrastructure
     interfaces -->|77 OK| application
     interfaces -->|72 OK| composition
@@ -43,11 +43,11 @@ flowchart LR
 | `application`    | `application`    |    1190 | allowed |
 | `application`    | `domain`         |    1066 | allowed |
 | `composition`    | `application`    |     270 | allowed |
-| `composition`    | `composition`    |     581 | allowed |
-| `composition`    | `domain`         |     405 | allowed |
-| `composition`    | `infrastructure` |     324 | allowed |
+| `composition`    | `composition`    |     582 | allowed |
+| `composition`    | `domain`         |     412 | allowed |
+| `composition`    | `infrastructure` |     326 | allowed |
 | `domain`         | `domain`         |    1213 | allowed |
-| `infrastructure` | `domain`         |     779 | allowed |
+| `infrastructure` | `domain`         |     778 | allowed |
 | `infrastructure` | `infrastructure` |     944 | allowed |
 | `interfaces`     | `application`    |      77 | allowed |
 | `interfaces`     | `composition`    |      72 | allowed |
@@ -83,7 +83,7 @@ flowchart LR
 | `application.core`             | `domain.context`                |      36 |
 | `composition.factories`        | `domain.types`                  |      36 |
 | `infrastructure.adapters`      | `domain.exceptions`             |      34 |
-| `infrastructure.storage`       | `domain.models`                 |      33 |
+| `infrastructure.storage`       | `domain.models`                 |      32 |
 | `composition.factories`        | `infrastructure.adapters`       |      31 |
 | `application.services`         | `domain.value_objects`          |      29 |
 | `composition.factories`        | `infrastructure.schemas`        |      28 |
@@ -93,12 +93,12 @@ flowchart LR
 | `composition.bootstrap`        | `domain.composite`              |      24 |
 | `composition.factories`        | `application.services`          |      21 |
 | `composition.factories`        | `domain.schemas`                |      21 |
+| `composition.runtime_builders` | `domain.control_plane`          |      21 |
 | `infrastructure.config`        | `domain.types`                  |      21 |
 | `composition.providers`        | `infrastructure.adapters`       |      20 |
+| `composition.runtime_builders` | `domain.context`                |      20 |
 | `application.pipelines`        | `domain.value_objects`          |      18 |
 | `application.services`         | `domain.exceptions`             |      18 |
-| `composition.runtime_builders` | `domain.context`                |      18 |
-| `composition.runtime_builders` | `domain.control_plane`          |      18 |
 | `application.core`             | `domain.config`                 |      17 |
 | `composition.factories`        | `domain.config`                 |      16 |
 | `interfaces.observability`     | `composition.observability_api` |      16 |
@@ -115,9 +115,9 @@ flowchart LR
 | `application.pipelines`        | `domain.context`                |      13 |
 | `application.services`         | `domain.lineage`                |      13 |
 | `composition.factories`        | `domain.behavior`               |      13 |
+| `composition.runtime_builders` | `infrastructure.config`         |      13 |
 | `application.services`         | `domain.behavior`               |      12 |
 | `composition.factories`        | `domain.context`                |      12 |
-| `composition.runtime_builders` | `infrastructure.config`         |      12 |
 
 ## Policy Violations
 
