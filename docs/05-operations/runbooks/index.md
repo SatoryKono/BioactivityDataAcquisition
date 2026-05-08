@@ -75,6 +75,7 @@ ______________________________________________________________________
 | ------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------- | -------- |
 | [Observability Checklist](observability-checklist.md)                    | Operator validation checklist for metrics, log correlation, dashboards, and diagnostics routing | P2       |
 | [Run Manifest Inspection](run-manifest-inspection.md)                    | Mandatory runbook for the supported RunManifest / RunLedger inspection surface                  | P1       |
+| [Workflow Control-Plane Recovery](workflow-control-plane.md)             | Workflow manifest/ledger/state triage, resume, repair, and force procedures                     | P1       |
 | [Traceability Signal Ownership](traceability-signal-ownership.md)        | Ownership and escalation matrix for traceability signals                                        | P1       |
 | [Traceability Tabletop Drills](traceability-tabletop-drills.md)          | Recurring drill catalog, cadence, and scoring model                                             | P2       |
 | [Traceability Adoption Checklist](traceability-adoption-checklist.md)    | Evidence log and exit-gate checklist for operator adoption                                      | P2       |
@@ -92,8 +93,11 @@ ______________________________________________________________________
   `bioetl run-manifest diff <left> <right>`.
 - Use [Run Manifest Inspection](run-manifest-inspection.md) as the mandatory
   operator runbook for the supported inspection surface.
+- Use [Workflow Control-Plane Recovery](workflow-control-plane.md) for
+  declarative workflow manifest / ledger / execution-state triage.
 - Use [ADR-044](../../02-architecture/decisions/ADR-044-run-manifest-ledger-control-plane.md)
   and [ADR-045](../../02-architecture/decisions/ADR-045-dq-contract-system.md)
+  and [ADR-047](../../02-architecture/decisions/ADR-047-workflow-control-plane.md)
   when triage depends on the intended control-plane or DQ rollout posture.
 
 ### See Also

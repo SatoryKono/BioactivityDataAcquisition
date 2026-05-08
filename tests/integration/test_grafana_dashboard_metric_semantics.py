@@ -214,6 +214,46 @@ def test_latency_p95_panels_preserve_no_data_state() -> None:
             )
 
 
+@pytest.mark.parametrize(
+    ("dashboard_name", "panel_title", "description_snippet", "expected_no_value"),
+    [
+        (
+            "bioetl-control-plane-v1.json",
+            "Track: Replay Drift by Type",
+            "No data means no replay drift events were observed in range or replay drift telemetry is absent",
+            "No replay drift samples",
+        ),
+        (
+            "bioetl-dq-v2.json",
+            "Track: DQ Check Duration (p95)",
+            "No data means no DQ duration samples were observed in range or DQ timing telemetry is absent",
+            "No DQ duration samples",
+        ),
+    ],
+)
+def test_review_panels_explain_empty_state_explicitly(
+    dashboard_name: str,
+    panel_title: str,
+    description_snippet: str,
+    expected_no_value: str,
+) -> None:
+    """Panels with ambiguous empty-state semantics should explain no-data behavior explicitly."""
+    dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
+    panel = next(
+        (
+            item
+            for item in get_dashboard_panels(dashboard)
+            if item.get("title") == panel_title
+        ),
+        None,
+    )
+    assert panel is not None, f"Panel '{panel_title}' not found in {dashboard_name}"
+    description = panel.get("description", "")
+    assert description_snippet in description
+    defaults = panel.get("fieldConfig", {}).get("defaults", {})
+    assert defaults.get("noValue") == expected_no_value
+
+
 def test_count_like_summary_panels_use_rounding_or_boolean_conditions() -> None:
     """Count-like summary panels should avoid fractional event semantics."""
     expected_panel_snippets = {

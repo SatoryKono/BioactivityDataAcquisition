@@ -10,9 +10,14 @@ import pytest
 from bioetl.application.services.dq.dq_report_builders import (
     build_summary,
     convert_value,
+    run_serialized_checks,
     update_counts,
 )
-from bioetl.domain.value_objects.dq_report import DQCheckStatus, DQReportStatus
+from bioetl.domain.value_objects.dq_report import (
+    DQCheckStatus,
+    DQReportStatus,
+    RecordCountResult,
+)
 
 
 @dataclass(frozen=True)
@@ -92,3 +97,37 @@ class TestDqReportBuilders:
 
         assert result.total_checks == 4
         assert result.overall_status == DQReportStatus.PASS
+
+    def test_run_serialized_checks_updates_counts_and_payloads(self) -> None:
+        checks: dict[str, object] = {}
+
+        passed, failed, warnings = run_serialized_checks(
+            enabled_checks={"record_count", "warn_count"},
+            dispatch=[
+                (
+                    "record_count",
+                    "record_count",
+                    lambda: RecordCountResult(value=3, status=DQCheckStatus.PASS),
+                ),
+                (
+                    "warn_count",
+                    "warn_count",
+                    lambda: RecordCountResult(value=2, status=DQCheckStatus.WARN),
+                ),
+                (
+                    "skipped",
+                    "skipped",
+                    lambda: RecordCountResult(value=1, status=DQCheckStatus.FAIL),
+                ),
+            ],
+            checks=checks,
+            serialize_result=convert_value,
+            passed=0,
+            failed=0,
+            warnings=0,
+        )
+
+        assert set(checks) == {"record_count", "warn_count"}
+        assert checks["record_count"]["status"] == DQCheckStatus.PASS.value
+        assert checks["warn_count"]["status"] == DQCheckStatus.WARN.value
+        assert (passed, failed, warnings) == (1, 0, 1)

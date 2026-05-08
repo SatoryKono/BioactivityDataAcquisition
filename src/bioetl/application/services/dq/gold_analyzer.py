@@ -37,7 +37,7 @@ from bioetl.application.services.dq._checks_statistical import (
 )
 from bioetl.application.services.dq.dq_report_builders import (
     build_summary,
-    update_counts,
+    run_serialized_checks,
 )
 from bioetl.domain.behavior.dq_serializer import to_dict
 from bioetl.domain.ports import GoldDQConfigPort
@@ -119,14 +119,15 @@ class GoldDQAnalyzer:
                 lambda: check_scd_integrity(df, scd_config),
             ),
         ]
-        for check_type, key, handler in dispatch:
-            if check_type in enabled_checks:
-                result = handler()
-                checks[key] = to_dict(result)
-                passed, failed, warnings = update_counts(
-                    result.status, passed, failed, warnings
-                )
-
+        passed, failed, warnings = run_serialized_checks(
+            enabled_checks=enabled_checks,
+            dispatch=dispatch,
+            checks=checks,
+            serialize_result=to_dict,
+            passed=passed,
+            failed=failed,
+            warnings=warnings,
+        )
         return checks, passed, failed, warnings
 
     def analyze(

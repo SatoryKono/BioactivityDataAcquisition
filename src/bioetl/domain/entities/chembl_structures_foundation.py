@@ -46,7 +46,7 @@ class ChemblPublicationTerm(BaseEntity):
 
     def _validate_term_type(self) -> None:
         """Validate controlled vocabulary membership for term_type."""
-        valid_term_types = {"MESH_HEADING", "MESH_QUALIFIER", "KEYWORD", "CONCEPT"}
+        valid_term_types = {"MESH_HEADING", "MESH_QUALIFIER", "KEYWORD"}
         if self.term_type not in valid_term_types:
             raise ValueError(
                 f"term_type must be one of {valid_term_types}, got {self.term_type}"

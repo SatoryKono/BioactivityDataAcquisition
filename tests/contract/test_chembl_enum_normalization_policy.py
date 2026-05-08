@@ -10,17 +10,21 @@ import yaml
 from bioetl.domain.normalization.profiles import (
     CHEMBL_ACTIVITY_PROFILE,
     CHEMBL_ASSAY_PROFILE,
+    CHEMBL_ASSAY_PARAMETERS_PROFILE,
     CHEMBL_MOLECULE_PROFILE,
+    CHEMBL_PUBLICATION_TERM_PROFILE,
     CHEMBL_TARGET_PROFILE,
 )
 from bioetl.domain.schemas.constants import (
     ACTIVITY_STANDARD_TYPES,
     ASSAY_CATEGORIES,
+    ASSAY_PARAMETER_STANDARD_TYPES,
     ASSAY_GROUPS,
     ASSAY_TEST_TYPES,
     ASSAY_TYPES,
     DATA_VALIDITY_COMMENTS,
     MOLECULE_TYPES,
+    PUBLICATION_TERM_TYPES,
     RELATIONSHIP_TYPES,
     STANDARD_RELATIONS,
     STRUCTURE_TYPES,
@@ -72,6 +76,11 @@ _STRICT_CHEMBL_ENUM_POLICY = {
         CHEMBL_ASSAY_PROFILE,
         "chembl_assay",
     ),
+    ("publication_term", "term_type"): (
+        PUBLICATION_TERM_TYPES,
+        CHEMBL_PUBLICATION_TERM_PROFILE,
+        "chembl_publication_term",
+    ),
     ("molecule", "molecule_type"): (
         MOLECULE_TYPES,
         CHEMBL_MOLECULE_PROFILE,
@@ -91,9 +100,17 @@ _FILTER_ENUM_POLICY = {
     ("activity", "assay_type"): ASSAY_TYPES,
     ("assay", "assay_type"): ASSAY_TYPES,
     ("assay", "relationship_type"): RELATIONSHIP_TYPES,
+    ("publication_term", "term_type"): PUBLICATION_TERM_TYPES,
     ("molecule", "molecule_type"): MOLECULE_TYPES,
     ("molecule", "structure_type"): STRUCTURE_TYPES,
     ("target", "target_type"): TARGET_TYPES,
+}
+
+_GOVERNED_CHEMBL_ENUM_POLICY = {
+    ("assay_parameters", "type"): (
+        ASSAY_PARAMETER_STANDARD_TYPES,
+        CHEMBL_ASSAY_PARAMETERS_PROFILE,
+    ),
 }
 
 _STRICT_CHEMBL_ENUM_CASE_CANONICALIZATION = {
@@ -205,6 +222,21 @@ def test_chembl_filter_enum_values_are_canonical_operational_subsets(
         f"Filter values for chembl.{entity}.{field_name} must stay within the "
         f"canonical enum set: {sorted(filter_values - allowed_values)}"
     )
+
+
+@pytest.mark.parametrize(("entity", "field_name"), sorted(_GOVERNED_CHEMBL_ENUM_POLICY))
+def test_governed_chembl_enum_fields_keep_profile_and_dq_allowed_sets_in_sync(
+    entity: str,
+    field_name: str,
+) -> None:
+    """Governed uppercase-vocabulary fields must share one allowed set across profile and DQ."""
+    allowed_values, profile = _GOVERNED_CHEMBL_ENUM_POLICY[(entity, field_name)]
+
+    rule = profile.rule_for(field_name)
+    assert rule is not None, f"Missing normalization rule for chembl.{entity}.{field_name}"
+    assert rule.normalizer(next(iter(allowed_values))) in allowed_values
+    assert rule.normalizer("__bioetl novel token__") == "__BIOETL NOVEL TOKEN__"
+    assert _dq_enum_allowed(entity, field_name) == allowed_values
 
 
 @pytest.mark.parametrize(

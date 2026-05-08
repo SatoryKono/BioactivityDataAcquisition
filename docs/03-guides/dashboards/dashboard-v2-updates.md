@@ -128,10 +128,10 @@ histogram_quantile(0.95, sum by (le, provider) (rate(bioetl_health_check_latency
 8. Синхронизирована dashboard-навигация:
 
 - `1. Overview` содержит links `2. Runtime`, `3. Provider Health`,
-  `4. Data Quality`, `5. Control Plane`, `6. Workflow Overview`, `Explore Logs`,
+  `4. Data Quality`, `0. Control Plane`, `5. Workflow`, `Explore Logs`,
   `Explore Traces`;
 - `2. Runtime`, `3. Provider Health`, `4. Data Quality` и
-  `6. Workflow Overview` встроены в shipped operator flow и используют
+  `5. Workflow` встроены в shipped operator flow и используют
   target-scoped handoffs без variable leakage.
 
 
@@ -173,6 +173,23 @@ histogram_quantile(0.95, sum by (le, provider) (rate(bioetl_health_check_latency
   provider current-status telemetry; missing scope остаётся `UNKNOWN`.
 - `Inspect GLOBAL Unstructured Logs` использует корректное LogQL поле
   `{{.__error__}}` после `| json`.
+
+## 2026-05-08 UX/layout consolidation
+
+UX report: [docs/reports/dashboard-ux-checks/2026-05-08.md](../../reports/dashboard-ux-checks/2026-05-08.md).
+
+- All shipped dashboard JSON files now have non-overlapping top-level `gridPos`
+  rectangles; navigation/scope/current-status/range/collapsed rows occupy
+  explicit bands.
+- Data Quality keeps current status and current reasons on the first screen,
+  while selected-range evidence starts below the first-screen current-state
+  band.
+- Provider Health first-screen tables start below the GLOBAL scope banner and
+  expose a provider incident runbook CTA from the severity matrix.
+- Silver Reject Explorer summary/reason/field/signature panels expose explicit
+  Quarantine Management runbook CTAs without duplicating the dashboard bus.
+- Data Quality Explore links disclose the optional tracing profile dependency
+  via tooltips.
 
 ## Актуальные ключевые панели
 
@@ -217,9 +234,9 @@ dashboard links или Explore handoff.
 3. **DQ regression**: оператор из `1. Overview` должен перейти в
    `4. Data Quality` и найти failing dimension/pipeline.
 4. **Replay safety/blocker**: оператор из `1. Overview` должен перейти в
-   `5. Control Plane` и подтвердить blocker state.
+   `0. Control Plane` и подтвердить blocker state.
 5. **Workflow failure/skip** (если затронут workflow surface): оператор должен
-   перейти в `6. Workflow Overview` и локализовать failing step/status.
+   перейти в `5. Workflow` и локализовать failing step/status.
 
 ### KPI фиксация по каждому сценарию
 

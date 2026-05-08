@@ -4,8 +4,8 @@ Aligned with RULES.md v5.24 and ChEMBL 34 schema.
 Renamed from DocumentTermSchema per ADR-024 (Entity Naming Unification).
 
 PublicationTerms are derived entities extracted from Publication (ChEMBL Document)
-records by flattening the 1:M relationship between publications and their
-associated terms (MeSH headings, keywords, concepts).
+    records by flattening the 1:M relationship between publications and their
+    associated terms (MeSH headings, qualifiers, and keywords).
 """
 
 from __future__ import annotations
@@ -31,7 +31,6 @@ class PublicationTermSchema(ETLRecordSchema):
     - MESH_HEADING: MeSH descriptor term
     - MESH_QUALIFIER: MeSH qualifier/subheading
     - KEYWORD: Author-provided keyword
-    - CONCEPT: ChEMBL-derived concept
     """
 
     # === Composite Key Fields ===

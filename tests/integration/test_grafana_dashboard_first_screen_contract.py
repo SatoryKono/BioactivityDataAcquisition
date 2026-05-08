@@ -15,6 +15,31 @@ pytestmark = pytest.mark.integration
 
 _DESIGN_SYSTEM_PATH = Path("docs/03-guides/dashboards/design-system.md")
 _OBSERVABILITY_RULES_PATH = Path("grafana/prometheus-rules/bioetl_observability.yml")
+_DASHBOARD_DIR = Path("grafana/dashboards")
+
+
+def _panels_overlap(
+    left: dict[str, object],
+    right: dict[str, object],
+) -> bool:
+    left_pos = left.get("gridPos", {})
+    right_pos = right.get("gridPos", {})
+    assert isinstance(left_pos, dict)
+    assert isinstance(right_pos, dict)
+    left_x = int(left_pos.get("x", 0))
+    left_y = int(left_pos.get("y", 0))
+    left_w = int(left_pos.get("w", 0))
+    left_h = int(left_pos.get("h", 0))
+    right_x = int(right_pos.get("x", 0))
+    right_y = int(right_pos.get("y", 0))
+    right_w = int(right_pos.get("w", 0))
+    right_h = int(right_pos.get("h", 0))
+    return (
+        left_x < right_x + right_w
+        and right_x < left_x + left_w
+        and left_y < right_y + right_h
+        and right_y < left_y + left_h
+    )
 
 
 def test_design_system_defines_first_screen_decision_matrix() -> None:
@@ -114,6 +139,30 @@ def test_runtime_provider_dq_first_screens_use_canonical_current_status() -> Non
             assert all("$__range" not in expr for expr in expressions), (
                 f"{dashboard_name}:{panel_title} must not use selected range for current status"
             )
+
+
+def test_dashboard_top_level_grid_positions_do_not_overlap() -> None:
+    """Shipped dashboards must not hide cards under navigation/scope rows."""
+    for dashboard_path in sorted(_DASHBOARD_DIR.glob("*.json")):
+        dashboard = load_dashboard(dashboard_path)
+        panels = [
+            panel
+            for panel in dashboard.get("panels", [])
+            if isinstance(panel, dict) and isinstance(panel.get("gridPos"), dict)
+        ]
+        overlaps: list[str] = []
+        for index, left in enumerate(panels):
+            for right in panels[index + 1 :]:
+                if _panels_overlap(left, right):
+                    overlaps.append(
+                        f"{left.get('id')}:{left.get('title')} overlaps "
+                        f"{right.get('id')}:{right.get('title')}"
+                    )
+
+        assert not overlaps, (
+            f"{dashboard_path.name} has overlapping top-level grid positions: "
+            f"{overlaps}"
+        )
 
 
 def test_provider_and_dq_range_evidence_panels_are_below_first_screen() -> None:

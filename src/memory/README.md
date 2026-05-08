@@ -36,6 +36,7 @@ Run:
 
 ```bash
 python -m memory.tooling.validate
+python -m memory.tooling.validate --include-working-tree-junk
 ```
 
 The validator checks:
@@ -46,6 +47,7 @@ The validator checks:
 - source priority references valid source-registry entries
 - storage policy covers every retained artifact class and keeps memory paths under
   `src/memory/`
+- optional working-tree hygiene mode flags Python cache files under `src/memory/`
 
 ## Graph entrypoints
 
@@ -147,6 +149,7 @@ Dry-run prune for episodic memory:
 
 ```bash
 python -m memory.tooling.prune
+python -m memory.tooling.prune --max-active 100 --json
 ```
 
 Apply pruning:
@@ -167,7 +170,7 @@ python -m memory.tooling.workflow review-curated --json
 Run the canonical daily agent/engineering workflow:
 
 ```bash
-python -m memory.tooling.workflow pre-task --task-id task-123 --title "Investigate chembl memory"
+python -m memory.tooling.workflow pre-task --task-id task-123 --title "Investigate chembl memory" --profile audit
 python -m memory.tooling.workflow post-task --task-id task-123 --title "Investigate chembl memory" --summary "Validated and refreshed memory surfaces."
 ```
 
@@ -210,7 +213,8 @@ starts from a semantic graph entity such as a pipeline, config, ADR, doc, or
 test target.
 
 Generated RAG and timeline artifacts are rebuild-only. If they are absent,
-either refresh them explicitly or use the query facade's temporary refresh mode:
+or if the timeline directory has no generated `*.jsonl` projections, either
+refresh them explicitly or use the query facade's temporary refresh mode:
 
 ```bash
 python -m memory.tooling.refresh_all

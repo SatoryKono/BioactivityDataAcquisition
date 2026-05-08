@@ -144,7 +144,7 @@ async def test_chembl_publication_term_types(e2e_data_dir: Path):
     except SILVER_READ_SKIP_ERRORS as exc:
         pytest.skip(f"No Silver publication_term table for cassette sample: {exc}")
 
-    valid_term_types = {"MESH_HEADING", "MESH_QUALIFIER", "KEYWORD", "CONCEPT"}
+    valid_term_types = {"MESH_HEADING", "MESH_QUALIFIER", "KEYWORD"}
 
     for record in records:
         term_type = record.get("term_type")

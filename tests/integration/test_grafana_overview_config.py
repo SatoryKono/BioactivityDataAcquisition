@@ -89,6 +89,7 @@ def test_system_status_panel_preserves_current_status_semantics() -> None:
     assert panel.get("type") == "stat"
     assert "bioetl_l0_status" in expr
     assert "$__range" not in expr
+    assert options.get("colorMode") == "background"
     assert options.get("textMode") == "value"
     assert options.get("graphMode") == "none"
     _assert_status_mapping(panel)

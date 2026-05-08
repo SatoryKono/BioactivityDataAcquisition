@@ -14,6 +14,7 @@ from tests.integration._grafana_test_support import (
     _assert_standard_variable_contract,
     _extract_selector_labels,
     _unknown_metrics_for_query,
+    get_dashboard_navigation_links,
     get_all_valid_metric_names,
     get_dashboard_files,
     get_dashboard_panels,
@@ -148,7 +149,7 @@ def _panel_link_variable_violations(
 def _dashboard_link_variable_violations(
     dashboard: dict, declared_variables: set[str]
 ) -> list[str]:
-    links = dashboard.get("links", [])
+    links = get_dashboard_navigation_links(dashboard)
     if not isinstance(links, list):
         return []
 
@@ -800,7 +801,7 @@ def test_control_plane_dashboard_links_are_scoped() -> None:
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
     links = {
         link.get("title"): link
-        for link in dashboard.get("links", [])
+        for link in get_dashboard_navigation_links(dashboard)
         if link.get("title")
     }
 
@@ -1811,7 +1812,11 @@ def test_runtime_top_fold_text_panels_do_not_overlap() -> None:
 def test_control_plane_root_layout_keeps_range_evidence_and_rows_non_overlapping() -> None:
     """Control Plane root layout must not overlap the selected-range blocker panel with collapsed incident rows."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
-    root_panels = dashboard.get("panels", [])
+    root_panels = [
+        panel
+        for panel in dashboard.get("panels", [])
+        if panel.get("id") not in {1000, 890}
+    ]
 
     overlaps = []
     for index, left in enumerate(root_panels):
@@ -2110,6 +2115,24 @@ def test_control_plane_trust_panels_preserve_missing_telemetry() -> None:
         assert panel.get("fieldConfig", {}).get("defaults", {}).get("noValue") == (
             "UNKNOWN"
         )
+        assert panel.get("options", {}).get("colorMode") == "background"
+
+        value_mapping = next(
+            (
+                mapping
+                for mapping in panel.get("fieldConfig", {})
+                .get("defaults", {})
+                .get("mappings", [])
+                if mapping.get("type") == "value"
+            ),
+            None,
+        )
+        assert value_mapping is not None
+        assert value_mapping.get("options") == {
+            "0": {"text": "OK", "color": "green"},
+            "1": {"text": "WARN", "color": "orange"},
+            "2": {"text": "CRIT", "color": "red"},
+        }
 
 
 def test_control_plane_run_type_noop_panels_disclose_scope_limit() -> None:

@@ -10,7 +10,10 @@ from typing import Any
 
 import polars as pl
 
-from bioetl.application.services.dq.dq_report_builders import update_counts
+from bioetl.application.services.dq.dq_report_builders import (
+    run_serialized_checks,
+    update_counts,
+)
 from bioetl.application.services.dq.silver_statistics import SilverStatisticsCalculator
 from bioetl.application.services.dq.silver_threshold import SilverThresholdChecker
 from bioetl.domain.behavior.dq_serializer import to_dict
@@ -139,14 +142,15 @@ class SilverCheckExecutor:
                 lambda: stats.check_content_hash_integrity(df),
             ),
         ]
-        for check_type, key, handler in standard_checks:
-            if check_type in enabled_checks:
-                result = handler()
-                checks[key] = to_dict(result)
-                passed, failed, warnings = update_counts(
-                    result.status, passed, failed, warnings
-                )
-        return passed, failed, warnings
+        return run_serialized_checks(
+            enabled_checks=enabled_checks,
+            dispatch=standard_checks,
+            checks=checks,
+            serialize_result=to_dict,
+            passed=passed,
+            failed=failed,
+            warnings=warnings,
+        )
 
     def _run_null_rate_check(
         self,

@@ -11,7 +11,10 @@ from bioetl.application.services.workflow_transform_service import (
     WorkflowTransformService,
     should_skip_transform_step,
 )
-from bioetl.application.workflow.transforms import WorkflowTransformRegistry
+from bioetl.application.workflow.transforms import (
+    WorkflowTransformDestructiveCommit,
+    WorkflowTransformRegistry,
+)
 from bioetl.domain.workflow import TransformStepConfig, WorkflowTransformSpec
 
 
@@ -171,3 +174,45 @@ async def test_transform_step_returns_failed_result_for_unknown_transform() -> N
     assert result.status == "failed"
     assert result.error_type == "KeyError"
     assert metrics.counters[0][2]["status"] == "failed"
+
+
+@pytest.mark.asyncio
+async def test_transform_step_emits_destructive_commit_callback() -> None:
+    metrics = _RecordingMetrics()
+    registry = WorkflowTransformRegistry()
+
+    def _destructive(
+        spec: WorkflowTransformSpec,
+        _upstream: dict[str, Any],
+        runtime_context: object,
+    ) -> object:
+        assert hasattr(runtime_context, "record_destructive_commit")
+        runtime_context.record_destructive_commit(
+            step_id=spec.step_id,
+            transform_name=spec.transform_name,
+            fingerprint=spec.fingerprint,
+            details={"orphan_rows_deleted": 3},
+        )
+        return {"fingerprint": spec.fingerprint, "mutated": True}
+
+    registry.register("reconcile_foreign_keys", _destructive)
+    service = WorkflowTransformService(
+        registry=registry,
+        metrics=metrics,
+        monotonic=iter([2.0, 2.5]).__next__,
+    )
+    commits: list[WorkflowTransformDestructiveCommit] = []
+
+    result = await service.run_step(
+        workflow_name="activity_workflow",
+        step=TransformStepConfig(
+            step_id="repair_orphans",
+            transform_name="reconcile_foreign_keys",
+        ),
+        destructive_commit_callback=commits.append,
+    )
+
+    assert result.status == "success"
+    assert len(commits) == 1
+    assert commits[0].step_id == "repair_orphans"
+    assert commits[0].details["orphan_rows_deleted"] == 3

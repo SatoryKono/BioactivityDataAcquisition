@@ -60,7 +60,7 @@ class ChemblPublicationRecord(BaseModel):
 class ChemblPublicationTermRecord(BaseModel):
     """Publication term DTO from ChEMBL.
 
-    Represents a term (MeSH heading, keyword, concept) associated with
+    Represents a term (MeSH heading, qualifier, or keyword) associated with
     a ChEMBL publication. This is a derived entity extracted from Publication
     records by flattening the 1:M relationship.
 
@@ -75,7 +75,7 @@ class ChemblPublicationTermRecord(BaseModel):
     publication_id: str = Field(description="FK → Document ChEMBL ID")
     term: str = Field(min_length=1, description="Term text (e.g., 'Aspirin')")
     term_type: str = Field(
-        description="Term type: MESH_HEADING, MESH_QUALIFIER, KEYWORD, CONCEPT"
+        description="Term type: MESH_HEADING, MESH_QUALIFIER, KEYWORD"
     )
 
     # === MeSH-specific Fields ===

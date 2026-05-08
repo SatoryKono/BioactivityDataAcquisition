@@ -63,6 +63,19 @@ def test_review_curated_notes_marks_due_and_stale_records(tmp_path: Path) -> Non
         },
         body=_lesson_body(),
     )
+    write_markdown_note(
+        curated_root / "lessons" / "thin-current.md",
+        metadata={
+            "id": "thin-current",
+            "title": "Thin current lesson",
+            "kind": "lesson",
+            "source_refs": ["src/memory/README.md"],
+            "confidence": "curated",
+            "last_verified": "2026-04-15T00:00:00Z",
+            "summary": "Current lesson with thin provenance.",
+        },
+        body=_lesson_body(),
+    )
 
     report = review_curated_notes(
         curated_root,
@@ -77,6 +90,9 @@ def test_review_curated_notes_marks_due_and_stale_records(tmp_path: Path) -> Non
     assert records["stale"]["review_status"] == "stale"
     assert records["stale"]["recommendation"] == "review_or_archive"
     assert "source_refs:thin" in records["stale"]["review_reasons"]
+    assert records["thin-current"]["review_status"] == "current"
+    assert records["thin-current"]["recommendation"] == "review"
+    assert "source_refs:thin" in records["thin-current"]["review_reasons"]
 
 
 def test_review_curated_notes_flags_duplicate_titles(tmp_path: Path) -> None:

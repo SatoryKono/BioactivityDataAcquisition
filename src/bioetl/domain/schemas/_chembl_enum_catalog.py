@@ -211,7 +211,7 @@ OA_STATUS_VALUES: tuple[str, ...] = (
     "diamond",
 )
 PUBLICATION_TERM_TYPES: frozenset[str] = frozenset(
-    ["MESH_HEADING", "MESH_QUALIFIER", "KEYWORD", "CONCEPT"]
+    ["MESH_HEADING", "MESH_QUALIFIER", "KEYWORD"]
 )
 
 CHEMBL_ENUM_CATALOG: dict[tuple[str, str], frozenset[str]] = {

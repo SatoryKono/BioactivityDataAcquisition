@@ -53,7 +53,7 @@ architecture section focuses on structure, boundaries, and design rationale.
 
 See [decisions/README.md](decisions/README.md) for full index with categories.
 
-46 ADRs documenting key architectural decisions:
+47 ADRs documenting key architectural decisions:
 
 | ADR                                                                | Topic                                     | RULES.md Reference |
 | ------------------------------------------------------------------ | ----------------------------------------- | ------------------ |
@@ -103,6 +103,7 @@ See [decisions/README.md](decisions/README.md) for full index with categories.
 | [ADR-044](decisions/ADR-044-run-manifest-ledger-control-plane.md)  | Run Manifest and Run Ledger Control Plane | -                  |
 | [ADR-045](decisions/ADR-045-dq-contract-system.md)                 | Data Quality Contract System              | -                  |
 | [ADR-046](decisions/ADR-046-checkpoint-vs-ledger-resume.md)        | Checkpoint Versus Ledger-Based Resume     | -                  |
+| [ADR-047](decisions/ADR-047-workflow-control-plane.md)             | Workflow Control Plane for Declarative Workflows | -           |
 
 ______________________________________________________________________
 

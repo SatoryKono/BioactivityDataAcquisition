@@ -51,9 +51,11 @@ ______________________________________________________________________
 - На текущей странице ссылка на саму себя отсутствует.
 - Любые дубли dashboard-to-dashboard links из одного dashboard в один target
   dashboard запрещены.
-- `Explore Logs` и `Explore Traces` доступны только на `2. Runtime` и
-  `4. Data Quality`.
-- `Silver Reject Explorer` доступен только на `4. Data Quality`.
+- Во всех shipped navigation panels `id=1000` закреплены sticky shortcuts
+  `4. Data Quality`, `Explore Logs`, `Explore Traces`,
+  `Silver Reject Explorer`.
+- Navigation panel links должны открываться в том же окне; не используйте
+  `target="_blank"` в HTML top navigation.
 
 ### Prometheus
 

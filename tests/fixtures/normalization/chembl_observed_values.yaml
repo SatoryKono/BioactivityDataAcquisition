@@ -255,7 +255,6 @@ observed_values:
       - MESH_HEADING
       - MESH_QUALIFIER
       - KEYWORD
-      - CONCEPT
 
 policy_values:
   activity:

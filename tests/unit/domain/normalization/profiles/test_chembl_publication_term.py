@@ -14,7 +14,6 @@ from bioetl.domain.schemas.constants import PUBLICATION_TERM_TYPES
         ("MESH_HEADING", "MESH_HEADING"),
         ("mesh_qualifier", "MESH_QUALIFIER"),
         (" keyword ", "KEYWORD"),
-        ("concept", "CONCEPT"),
     ],
 )
 def test_publication_term_type_profile_canonicalizes_allowed_values(
@@ -36,7 +35,5 @@ def test_publication_term_type_profile_rejects_unknown_values() -> None:
 def test_publication_term_type_uses_shared_schema_enum_source() -> None:
     rule = CHEMBL_PUBLICATION_TERM_PROFILE.field_rules["term_type"]
 
-    assert PUBLICATION_TERM_TYPES == frozenset(
-        {"MESH_HEADING", "MESH_QUALIFIER", "KEYWORD", "CONCEPT"}
-    )
+    assert PUBLICATION_TERM_TYPES == frozenset({"MESH_HEADING", "MESH_QUALIFIER", "KEYWORD"})
     assert "enum" in (rule.notes or "").lower()

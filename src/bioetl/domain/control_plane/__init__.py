@@ -50,6 +50,15 @@ from bioetl.domain.control_plane.run_manifest import (
     RunManifest,
     RunSourceRef,
 )
+from bioetl.domain.control_plane.workflow_execution_state import (
+    WorkflowExecutionState,
+    WorkflowStepState,
+)
+from bioetl.domain.control_plane.workflow_ledger import WorkflowLedgerEntry
+from bioetl.domain.control_plane.workflow_manifest import (
+    WorkflowManifest,
+    WorkflowManifestStep,
+)
 
 __all__ = [
     "ConfigResolutionPolicy",
@@ -80,6 +89,11 @@ __all__ = [
     "RuntimeOverrideSnapshot",
     "SnapshotEnvelopeStatus",
     "SourceClassProvenance",
+    "WorkflowExecutionState",
+    "WorkflowLedgerEntry",
+    "WorkflowManifest",
+    "WorkflowManifestStep",
+    "WorkflowStepState",
     "assess_reproducibility_policy",
     "build_lineage_closure_boundary",
     "build_replay_family_contract",

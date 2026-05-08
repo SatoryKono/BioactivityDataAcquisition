@@ -776,8 +776,8 @@ ______________________________________________________________________
 
 **Файл:** `grafana/dashboards/bioetl-overview-v2.json`
 **UID:** `bioetl-overview-v2`
-**Refresh:** 30 секунд
-**Time range:** Последние 12 часов
+**Refresh:** 1 минута
+**Time range:** Последние 24 часа
 **Назначение:** L0 answer-first surface. Primary question: what is currently broken or degraded in BioETL, and where should the operator drill down first?
 
 ### Панели
@@ -807,10 +807,12 @@ ______________________________________________________________________
 `bioetl_dq_validation_failures_total`, `bioetl_dq_records_quarantined_total`,
 control-plane metrics, provider health metrics и `bioetl_workflow_runs_total`.
 
-**Drilldown:** top-level dashboard bus links `0. Control Plane`, `2. Runtime`,
+**Drilldown:** canonical navigation bus `0. Control Plane`, `2. Runtime`,
 `3. Provider Health`, `4. Data Quality`, `5. Workflow` используют текущее
 временное окно. Critical current-status panels also expose panel `dataLinks`
-to the same canonical dashboards. Overview не содержит Explore links.
+to the same canonical dashboards. Navigation panel `id=1000` now also carries
+sticky `Explore Logs`, `Explore Traces`, and `Silver Reject Explorer`
+shortcuts in the same tab.
 
 **Silver Rejects triage sequence:**
 
@@ -842,7 +844,7 @@ DQ сейчас `OK`/`WARN`/`CRIT`/`UNKNOWN`, какая threshold/reason state
 | 100 | Run Type                                     | Stat       | `max(label_values(..., run_type)) or vector(0)`                                                                                        | Информационная панель типа запуска.                                                                                                                                        |
 | 9100 | Monitor DQ Current Status                   | Stat       | `max(bioetl_dq_current_status{pipeline=~"$pipeline"})`                                                                                | Pipeline-wide current DQ state: `0=OK`, `1=WARN`, `2=CRIT`, `null=UNKNOWN`; selected-range evidence ниже не меняет этот first-screen статус.                               |
 | 9101 | Monitor DQ Threshold State                  | Stat       | `max(bioetl_dq_current_reason{severity=...})` + explicit `OK` fallback                                                                | Bounded current threshold summary: warning reasons map to WARN, hard reasons map to CRIT, explicit current OK stays `0=OK`.                                                |
-| 9102 | Inspect DQ Current Reasons                  | Table      | `topk(5, bioetl_dq_current_reason{pipeline=~"$pipeline"} > 0)`                                                                        | Current DQ reasons table with `severity` and `action_target`.                                                                                                              |
+| 9102 | Inspect DQ Current Reasons                  | Table      | `topk(5, bioetl_dq_current_reason{pipeline=~"$pipeline"} > 0)`                                                                        | Current DQ reasons table with `severity` and `action_target`; empty table means no active DQ reasons for the selected pipeline snapshot.                                   |
 | 9103 | Review: First Action                         | Text      | n/a                                                                                                                                    | Operator CTA: inspect DQ reasons, Gold/Silver diagnostics, or Silver Reject Explorer; absent policy visibility is UNKNOWN, not OK.                                        |
 | 1   | Track Range Evidence: Bronze -> Silver -> Gold | Timeseries | `sum by (pipeline, stage) (increase(bioetl_records_processed_total{pipeline=~"$pipeline", run_type=~"$run_type"}[$__interval]))` | Full-width selected-range evidence panel that now sits below the compact current-context band; не определяет current DQ status.                                            |
 | 2   | Monitor: Data Quality Score (Volume-weighted) | Gauge      | `sum(score * record_count) / clamp_min(sum(record_count), 1)`                                                                          | Канонический DQ gauge на базе `bioetl_dq_validation_score` и `bioetl_dq_validation_record_count`; в layout он входит в compact current-context row сразу под answer row.   |
@@ -871,7 +873,7 @@ DQ сейчас `OK`/`WARN`/`CRIT`/`UNKNOWN`, какая threshold/reason state
 - неизвестные значения схлопываются в `other`
 - raw `message` не используется как Prometheus label
 
-**Drilldown:** dashboard links `0. Control Plane`, `1. Overview`, `2. Runtime`,
+**Drilldown:** canonical navigation bus `0. Control Plane`, `1. Overview`, `2. Runtime`,
 `3. Provider Health`, `5. Workflow`, `Silver Reject Explorer`, `Explore Logs`,
 `Explore Traces` используют текущее временное окно. Panel-level
 dashboard-to-dashboard handoffs удалены; replay/checkpoint расследование
@@ -890,15 +892,16 @@ ______________________________________________________________________
 
 ### Панели
 
-| Название                                 | Тип               | Источник                                         |
-| ---------------------------------------- | ----------------- | ------------------------------------------------ |
-| First Action / No-Data Semantics         | Text              | Operator CTA / interpretation                   |
-| Filtered Records Total                   | Stat              | `/ops/quarantine/filtered-stats`                 |
-| Reject Rate vs Bronze                    | Gauge             | `/ops/quarantine/filtered-stats`                 |
-| Top Reject Reasons / Fields / Signatures | Bar gauge / Table | `/ops/quarantine/filtered-stats`                 |
-| Filtered Records Table                   | Table             | `/ops/quarantine/filtered-records`               |
-| Selected Record Details                  | Table             | `/ops/quarantine/filtered-records?...&payload_hash=<hash>` |
-| Run Scope Summary                        | Stat              | `/ops/quarantine/filtered-stats`                 |
+| Название                                          | Тип   | Источник                                                   |
+| ------------------------------------------------- | ----- | ---------------------------------------------------------- |
+| Inspect Explorer Scope                            | Text  | Pipeline banner / forensic scope note                      |
+| Review: First Action / No-Data Semantics          | Text  | Operator CTA / interpretation                              |
+| Monitor Filtered Records Total                    | Table | `/ops/quarantine/filtered-stats`                           |
+| Track Reject Rate vs Bronze                       | Table | `/ops/quarantine/filtered-stats`                           |
+| Inspect Run Scope Summary                         | Table | `/ops/quarantine/filtered-stats`                           |
+| Inspect Top Reject Reasons / Fields / Signatures  | Table | `/ops/quarantine/filtered-stats`                           |
+| Inspect Filtered Records Table                    | Table | `/ops/quarantine/filtered-records`                         |
+| Inspect Selected Record Details                   | Table | `/ops/quarantine/filtered-records?...&payload_hash=<hash>` |
 
 **Datasource:** `Quarantine Explorer` (`yesoreyeram-infinity-datasource`, provisioning: `grafana/provisioning/datasources-core/quarantine-explorer.yml`).
 
@@ -914,7 +917,7 @@ Prometheus labels, summary dashboards или cross-dashboard handoffs.
 `$pipeline` is selected, and Bronze denominator evidence is present; plugin
 errors, unknown pipeline, or `bronze_records=0` are treated as UNKNOWN.
 
-**Drilldown:** top-level bus links `0. Control Plane`, `1. Overview`,
+**Drilldown:** canonical navigation bus `0. Control Plane`, `1. Overview`,
 `2. Runtime`, `3. Provider Health`, `4. Data Quality`, `5. Workflow`;
 table row links дают self-drilldown по `payload_hash` и CLI handoff.
 
@@ -938,7 +941,7 @@ first screen.
 | 9100 | GLOBAL Provider Scope                          | Text           | n/a                                                                                                                  | Явно показывает GLOBAL provider scope, selected `$provider` и сохранённый `$pipeline_context`. |
 | 9101 | Monitor GLOBAL Provider Severity Matrix        | Table          | `bioetl_provider_current_status`                                                                                     | Current provider severity: `0=OK`, `1=DEGRADED`, `2=FAILING`, `null=UNKNOWN`; не фильтруется по pipeline. |
 | 9102 | Inspect Critical Providers                     | Table          | `bioetl_provider_current_status >= 1`                                                                                | Только providers с current `DEGRADED`/`FAILING`; missing current-status telemetry остаётся в `Monitor GLOBAL Provider Severity Matrix` как `UNKNOWN`. Panel exposes direct provider incident runbook handoff. |
-| 9103 | Inspect Provider Top Causes                    | Table          | `topk(5, bioetl_provider_current_cause > 0)`                                                                         | Current cause chips: raw health status, failure rate, retry exhaustion, latency, HTTP errors, rate-limit pressure. Panel exposes direct provider incident runbook handoff. |
+| 9103 | Inspect Provider Top Causes                    | Table          | `topk(5, bioetl_provider_current_cause > 0)`                                                                         | Current cause chips: raw health status, failure rate, retry exhaustion, latency, HTTP errors, rate-limit pressure. Empty table means no active provider causes are currently above zero. Panel exposes direct provider incident runbook handoff. |
 | 9002 | First Action                                   | Text           | n/a                                                                                                                  | CTA: start from GLOBAL matrix, inspect causes, then correlate Runtime/Control Plane if provider symptoms affect pipeline execution. |
 | 1   | Track Health Check Latency by Provider (p95)    | Timeseries     | `histogram_quantile(0.95, sum by (le, provider) (increase(...[$__interval])))`                                       | Selected-range evidence: p95 latency trend по выбранным providers; `No data` сохраняется как diagnostic gap, не маскируется в `0s`. |
 | 114 | Monitor Current Provider Health Status          | Table          | `max by (provider) (bioetl_provider_health_status{provider=~"$provider"}) or ((bioetl_provider_health_check_provider_universe_15m{provider=~"$provider"} * 0) / (bioetl_provider_health_check_provider_universe_15m{provider=~"$provider"} * 0))` | Текущий raw status по provider с mapping `0=UNHEALTHY`, `1=DEGRADED`, `2=HEALTHY`; если provider universe существует без raw status sample, panel остаётся `UNKNOWN`. |
@@ -956,10 +959,11 @@ first screen.
 
 **Фильтрация:** только `$provider`. Health-check counters и histograms в текущем инструментировании являются provider-labeled, поэтому pipeline filter здесь намеренно не используется.
 
-**Drilldown:** dashboard links `0. Control Plane`, `1. Overview`,
-`2. Runtime`, `4. Data Quality`, `5. Workflow`. Explore links на Provider
-Health отсутствуют; correlation идёт через Runtime/Data Quality или runbook
-links без дублирования dashboard handoffs.
+**Drilldown:** canonical navigation bus `0. Control Plane`, `1. Overview`,
+`2. Runtime`, `4. Data Quality`, `5. Workflow`, `Explore Logs`,
+`Explore Traces`, `Silver Reject Explorer`. Sticky shortcuts в navigation panel
+не заменяют canonical provider triage flow; correlation по-прежнему идёт через
+Runtime/Data Quality или runbook links без дублирования dashboard handoffs.
 
 ______________________________________________________________________
 
@@ -981,7 +985,7 @@ collapsed row `Tracing-only Log Hygiene (requires optional tracing profile)`.
 - **Primary question:** где runtime теряет время, падает, копит backlog или даёт warning/error signals
 - **Variables:** только bounded `$pipeline`, `$run_type`, `$stage`
 - **Forbidden variables:** `run_id`, `payload_hash`, `record_id`
-- **Top links:** `0. Control Plane`, `1. Overview`, `3. Provider Health`,
+- **Top links:** navigation bus `0. Control Plane`, `1. Overview`, `3. Provider Health`,
   `4. Data Quality`, `5. Workflow`, `Explore Logs`, `Explore Traces`
 - **Known blocked panels:** `Retry vs Failure` и `Batch Size Distribution`
   сознательно не shipped, потому что в текущем metric surface нет подтверждённых
@@ -1063,7 +1067,7 @@ requires `bioetl_provider_current_status`. Missing anchor telemetry renders
 ### Drilldown
 
 - Cross-dashboard links передают только target-scoped variables
-- Cross-dashboard panel-level handoffs intentionally absent; only top-level bus
+- Cross-dashboard panel-level handoffs intentionally absent; only canonical navigation bus
   links route to other dashboards. Same-dashboard first-screen drilldowns are
   allowed for blocker inspection.
 - `Inspect Control-plane Alert Conditions` и `Monitor No-Records Runs` локализуют

@@ -360,7 +360,7 @@ class TestManyToOneAggregation:
         expr = aggregator._parse_filter_condition("term_type != 'KEYWORD'")
         assert expr is not None
 
-        df = pl.DataFrame({"term_type": ["MESH_HEADING", "KEYWORD", "CONCEPT"]})
+        df = pl.DataFrame({"term_type": ["MESH_HEADING", "KEYWORD", "MESH_QUALIFIER"]})
         result = df.filter(expr)
         assert len(result) == 2
 

@@ -16,7 +16,8 @@ as a replacement for runtime truth.
 
 ## Required Workflow
 
-1. Run `python -m memory.tooling.workflow pre-task ...` before substantial work.
+1. Run `python -m memory.tooling.workflow pre-task ...` before substantial work,
+   using `--profile` when a task-specific ranking profile applies.
 1. Read retrieved context in the order `catalog -> graph -> rag -> source`.
 1. Cross-check important claims with repo search, active docs, configs, tests,
    and accepted ADRs.

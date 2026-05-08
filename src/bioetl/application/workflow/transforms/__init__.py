@@ -9,14 +9,55 @@ from bioetl.domain.workflow import WorkflowTransformSpec
 
 type WorkflowTransformOutput = object
 type WorkflowTransformCallable = Callable[
-    [WorkflowTransformSpec, Mapping[str, object]],
-    WorkflowTransformOutput | Awaitable[WorkflowTransformOutput],
+    ..., WorkflowTransformOutput | Awaitable[WorkflowTransformOutput]
 ]
 
+
+@dataclass(frozen=True, slots=True)
+class WorkflowTransformDestructiveCommit:
+    """Persistable signal that a destructive transform mutation has committed."""
+
+    step_id: str
+    transform_name: str
+    fingerprint: str
+    details: dict[str, object]
+
+
+@dataclass(frozen=True, slots=True)
+class WorkflowTransformRuntimeContext:
+    """Optional runtime callbacks exposed to transform executors."""
+
+    destructive_commit_callback: (
+        Callable[[WorkflowTransformDestructiveCommit], None] | None
+    ) = None
+
+    def record_destructive_commit(
+        self,
+        *,
+        step_id: str,
+        transform_name: str,
+        fingerprint: str,
+        details: dict[str, object],
+    ) -> None:
+        """Publish one destructive-commit marker when a callback is present."""
+        if self.destructive_commit_callback is None:
+            return
+        self.destructive_commit_callback(
+            WorkflowTransformDestructiveCommit(
+                step_id=step_id,
+                transform_name=transform_name,
+                fingerprint=fingerprint,
+                details=details,
+            )
+        )
+
+
 __all__ = [
+    "WorkflowTransformDestructiveCommit",
     "WorkflowTransformCallable",
     "WorkflowTransformOutput",
     "WorkflowTransformRegistry",
+    "WorkflowTransformRuntimeContext",
 ]
 
 

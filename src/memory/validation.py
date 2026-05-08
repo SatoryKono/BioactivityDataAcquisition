@@ -159,6 +159,26 @@ def _validate_tracked_generated_artifacts(
             )
 
 
+def _is_working_tree_junk(path: Path) -> bool:
+    return "__pycache__" in path.parts or path.suffix == ".pyc"
+
+
+def _validate_working_tree_junk(
+    memory_root: Path,
+    issues: list[ValidationIssue],
+) -> None:
+    if not memory_root.exists():
+        return
+    for path in sorted(memory_root.rglob("*")):
+        if path.is_file() and _is_working_tree_junk(path):
+            issues.append(
+                ValidationIssue(
+                    path=str(path),
+                    message="working-tree Python cache should not live under src/memory",
+                )
+            )
+
+
 def _validate_storage_modes(
     storage_policy: dict[str, Any],
     issues: list[ValidationIssue],
@@ -828,7 +848,11 @@ def _validate_note_files(
     _validate_curated_duplicates(curated_notes, issues)
 
 
-def validate_memory_scaffold(root: Path | None = None) -> list[ValidationIssue]:
+def validate_memory_scaffold(
+    root: Path | None = None,
+    *,
+    include_working_tree_junk: bool = False,
+) -> list[ValidationIssue]:
     """Validate the baseline project-memory scaffold and note contracts."""
     memory_root = _memory_root(root)
     issues: list[ValidationIssue] = []
@@ -865,6 +889,8 @@ def validate_memory_scaffold(root: Path | None = None) -> list[ValidationIssue]:
     if isinstance(storage_policy, dict) and isinstance(retention_policy, dict):
         _validate_storage_policy(storage_policy, retention_policy, issues)
     _validate_tracked_generated_artifacts(memory_root, issues)
+    if include_working_tree_junk:
+        _validate_working_tree_junk(memory_root, issues)
 
     if not issues:
         _validate_note_files(

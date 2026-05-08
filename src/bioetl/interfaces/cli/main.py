@@ -104,6 +104,11 @@ _LAZY_COMMAND_SPECS: dict[str, tuple[str, str, str]] = {
         "run_manifest",
         "Inspect run manifests and ledgers",
     ),
+    "workflow": (
+        "bioetl.interfaces.cli.commands.workflow",
+        "workflow",
+        "Run and inspect declarative workflows",
+    ),
 }
 
 

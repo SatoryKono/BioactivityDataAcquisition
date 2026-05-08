@@ -17,6 +17,7 @@
   "gnetId": null,
   "graphTooltip": 1,
   "id": null,
+  "links": [],
   "panels": [
     {
       "gridPos": {
@@ -27,11 +28,48 @@
       },
       "id": 1000,
       "options": {
-        "content": "<div style=\"display:flex;gap:10px;flex-wrap:wrap;padding:10px;\"><a href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline_context&var-run_type=All&${__url_time_range}\" target=\"_blank\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">0. Control Plane</a><a href=\"/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline_context&var-run_type=All&${__url_time_range}\" target=\"_blank\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">1. Overview</a><a href=\"/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline_context&var-run_type=All&var-stage=unknown&${__url_time_range}\" target=\"_blank\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">2. Runtime</a><a href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline_context&var-run_type=All&var-stage=unknown&${__url_time_range}\" target=\"_blank\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">4. Data Quality</a><a href=\"/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}\" target=\"_blank\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">5. Workflow</a></div>",
+        "content": "<div style=\"display:flex;gap:10px;flex-wrap:wrap;padding:10px;\"><a href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline_context&var-run_type=All&${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">0. Control Plane</a><a href=\"/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline_context&var-run_type=All&${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">1. Overview</a><a href=\"/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline_context&var-run_type=All&var-stage=unknown&${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">2. Runtime</a><a href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline_context&var-run_type=All&var-stage=unknown&${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">4. Data Quality</a><a href=\"/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">5. Workflow</a></div>",
         "mode": "html"
       },
       "title": "",
-      "type": "text"
+      "type": "text",
+      "links": [
+        {
+          "includeVars": false,
+          "keepTime": true,
+          "title": "0. Control Plane",
+          "type": "link",
+          "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline_context&var-run_type=All&${__url_time_range}"
+        },
+        {
+          "includeVars": false,
+          "keepTime": true,
+          "title": "1. Overview",
+          "type": "link",
+          "url": "/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline_context&var-run_type=All&${__url_time_range}"
+        },
+        {
+          "includeVars": false,
+          "keepTime": true,
+          "title": "2. Runtime",
+          "type": "link",
+          "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline_context&var-run_type=All&var-stage=unknown&${__url_time_range}"
+        },
+        {
+          "includeVars": false,
+          "keepTime": true,
+          "title": "4. Data Quality",
+          "type": "link",
+          "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline_context&var-run_type=All&var-stage=unknown&${__url_time_range}"
+        },
+        {
+          "includeVars": false,
+          "keepTime": true,
+          "title": "5. Workflow",
+          "type": "link",
+          "url": "/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}"
+        }
+      ]
     },
     {
       "id": 9100,
@@ -116,11 +154,18 @@
         "h": 7,
         "w": 7,
         "x": 0,
-        "y": 3
+        "y": 5
       },
       "id": 9101,
       "options": {
         "cellHeight": "sm",
+        "dataLinks": [
+          {
+            "targetBlank": true,
+            "title": "Open Provider Incident Runbook",
+            "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/incident-response.md?provider=${provider:queryparam}&pipeline_context=${pipeline_context:queryparam}&${__url_time_range}"
+          }
+        ],
         "footer": {
           "countRows": false,
           "fields": "",
@@ -199,7 +244,7 @@
         "h": 7,
         "w": 7,
         "x": 7,
-        "y": 3
+        "y": 5
       },
       "id": 9102,
       "options": {
@@ -239,7 +284,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Current top provider causes from canonical cause recording rules: raw status, failure rate, retry exhaustion, latency, HTTP errors, or rate-limit pressure.",
+      "description": "Current top provider causes from canonical cause recording rules: raw status, failure rate, retry exhaustion, latency, HTTP errors, or rate-limit pressure. Empty table means no active provider causes are currently above zero.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -289,7 +334,7 @@
         "h": 7,
         "w": 10,
         "x": 14,
-        "y": 3
+        "y": 5
       },
       "id": 9103,
       "options": {
@@ -332,7 +377,7 @@
         "h": 5,
         "w": 24,
         "x": 0,
-        "y": 10
+        "y": 12
       },
       "options": {
         "content": "<div style=\"padding:0.45rem 0.7rem;line-height:1.55\"><strong>First action:</strong> start with the GLOBAL severity matrix, then open top causes for the degraded provider. If cause is retry/rate-limit/circuit-breaker, inspect control-plane safety before replay. If cause is latency/errors, correlate with Runtime impact, then logs/traces from the runtime or DQ dashboards.</div>",
@@ -389,7 +434,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 18
+        "y": 20
       },
       "id": 1,
       "options": {
@@ -497,7 +542,7 @@
         "h": 8,
         "w": 8,
         "x": 12,
-        "y": 18
+        "y": 20
       },
       "id": 114,
       "options": {
@@ -568,7 +613,7 @@
         "h": 8,
         "w": 4,
         "x": 20,
-        "y": 18
+        "y": 20
       },
       "id": 2,
       "options": {
@@ -646,7 +691,7 @@
         "h": 8,
         "w": 8,
         "x": 16,
-        "y": 26
+        "y": 28
       },
       "id": 104,
       "options": {
@@ -719,7 +764,7 @@
         "h": 8,
         "w": 8,
         "x": 0,
-        "y": 26
+        "y": 28
       },
       "id": 7,
       "options": {
@@ -787,7 +832,7 @@
         "h": 8,
         "w": 8,
         "x": 8,
-        "y": 26
+        "y": 28
       },
       "id": 105,
       "options": {
@@ -862,7 +907,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 34
+        "y": 36
       },
       "id": 106,
       "options": {
@@ -940,7 +985,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 34
+        "y": 36
       },
       "id": 107,
       "options": {
@@ -1006,7 +1051,7 @@
         "h": 14,
         "w": 12,
         "x": 0,
-        "y": 42
+        "y": 44
       },
       "id": 108,
       "options": {
@@ -1087,7 +1132,7 @@
         "h": 14,
         "w": 12,
         "x": 12,
-        "y": 42
+        "y": 44
       },
       "id": 109,
       "options": {
@@ -1121,7 +1166,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 56
+        "y": 58
       },
       "id": 91,
       "panels": [],
@@ -1182,7 +1227,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 57
+        "y": 59
       },
       "id": 102,
       "options": {
@@ -1249,7 +1294,7 @@
         "h": 14,
         "w": 12,
         "x": 0,
-        "y": 65
+        "y": 67
       },
       "id": 110,
       "options": {
@@ -1331,7 +1376,7 @@
         "h": 14,
         "w": 12,
         "x": 12,
-        "y": 65
+        "y": 67
       },
       "id": 111,
       "options": {
@@ -1417,7 +1462,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 79
+        "y": 81
       },
       "id": 112,
       "options": {
@@ -1492,7 +1537,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 79
+        "y": 81
       },
       "id": 113,
       "options": {
@@ -1566,7 +1611,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 87
+        "y": 89
       },
       "id": 31,
       "options": {
@@ -1640,7 +1685,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 87
+        "y": 89
       },
       "id": 32,
       "options": {

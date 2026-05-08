@@ -16,6 +16,7 @@
   "editable": true,
   "graphTooltip": 1,
   "id": null,
+  "links": [],
   "panels": [
     {
       "gridPos": {
@@ -26,11 +27,65 @@
       },
       "id": 1000,
       "options": {
-        "content": "<div style=\"display:flex;gap:10px;flex-wrap:wrap;padding:10px;\"><a href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}\" target=\"_blank\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">0. Control Plane</a><a href=\"/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}\" target=\"_blank\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">1. Overview</a><a href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&var-pipeline_context=$pipeline&var-adapter=unknown&${__url_time_range}\" target=\"_blank\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">3. Provider Health</a><a href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&${__url_time_range}\" target=\"_blank\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">4. Data Quality</a><a href=\"/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}\" target=\"_blank\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">5. Workflow</a><a href=\"/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D\" target=\"_blank\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Explore Logs</a><a href=\"/a/grafana-exploretraces-app/?from=${__from}&to=${__to}&queryType=traceqlSearch&query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline:regex}%22%20%26%26%20span.%22bioetl.run_type%22%20%3D~%20%22${run_type:regex}%22%20%7D\" target=\"_blank\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Explore Traces</a></div>",
+        "content": "<div style=\"display:flex;gap:10px;flex-wrap:wrap;padding:10px;\"><a href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">0. Control Plane</a><a href=\"/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">1. Overview</a><a href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&var-pipeline_context=$pipeline&var-adapter=unknown&${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">3. Provider Health</a><a href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">4. Data Quality</a><a href=\"/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">5. Workflow</a><a href=\"/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Explore Logs</a><a href=\"/a/grafana-exploretraces-app/?from=${__from}&to=${__to}&queryType=traceqlSearch&query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline:regex}%22%20%26%26%20span.%22bioetl.run_type%22%20%3D~%20%22${run_type:regex}%22%20%7D\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Explore Traces</a></div>",
         "mode": "html"
       },
-      "title": "",
-      "type": "text"
+      "title": "Review Runtime Navigation",
+      "type": "text",
+      "links": [
+        {
+          "includeVars": false,
+          "keepTime": true,
+          "title": "0. Control Plane",
+          "type": "link",
+          "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
+        },
+        {
+          "includeVars": false,
+          "keepTime": true,
+          "title": "1. Overview",
+          "type": "link",
+          "url": "/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
+        },
+        {
+          "includeVars": false,
+          "keepTime": true,
+          "title": "3. Provider Health",
+          "tooltip": "Context mapping: provider=unknown, pipeline_context=$pipeline, adapter=unknown. Scope reset: provider=unknown.",
+          "type": "link",
+          "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&var-pipeline_context=$pipeline&var-adapter=unknown&${__url_time_range}"
+        },
+        {
+          "includeVars": false,
+          "keepTime": true,
+          "title": "4. Data Quality",
+          "type": "link",
+          "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&${__url_time_range}"
+        },
+        {
+          "includeVars": false,
+          "keepTime": true,
+          "title": "5. Workflow",
+          "type": "link",
+          "url": "/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}"
+        },
+        {
+          "includeVars": false,
+          "keepTime": true,
+          "title": "Explore Logs",
+          "tooltip": "Requires optional tracing profile. Opens Logs Drilldown in the same tab with safe {job=\"bioetl\"} baseline.",
+          "type": "link",
+          "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D"
+        },
+        {
+          "includeVars": false,
+          "keepTime": true,
+          "title": "Explore Traces",
+          "tooltip": "Requires optional tracing profile. Opens Traces Drilldown in the same tab with bounded pipeline/run_type TraceQL scope.",
+          "type": "link",
+          "url": "/a/grafana-exploretraces-app/?from=${__from}&to=${__to}&queryType=traceqlSearch&query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline:regex}%22%20%26%26%20span.%22bioetl.run_type%22%20%3D~%20%22${run_type:regex}%22%20%7D"
+        }
+      ]
     },
     {
       "gridPos": {
@@ -64,7 +119,7 @@
         "h": 6,
         "w": 8,
         "x": 8,
-        "y": 9
+        "y": 11
       },
       "id": 298,
       "options": {
@@ -140,7 +195,7 @@
         "h": 6,
         "w": 6,
         "x": 6,
-        "y": 3
+        "y": 5
       },
       "id": 9100,
       "options": {
@@ -249,7 +304,7 @@
         "h": 6,
         "w": 8,
         "x": 0,
-        "y": 9
+        "y": 11
       },
       "id": 9102,
       "options": {
@@ -287,7 +342,7 @@
         "h": 6,
         "w": 8,
         "x": 16,
-        "y": 9
+        "y": 11
       },
       "id": 222,
       "description": "Range-evidence summary note for the KPI cards below. The cards support runtime localization after the current-status answer row; they do not replace the current blocker recording rules. UNKNOWN means missing status telemetry or scrape/rule gap until proven otherwise.",
@@ -353,7 +408,7 @@
         "h": 6,
         "w": 7,
         "x": 17,
-        "y": 3
+        "y": 5
       },
       "id": 9101,
       "options": {
@@ -438,7 +493,7 @@
         "h": 6,
         "w": 5,
         "x": 12,
-        "y": 3
+        "y": 5
       },
       "id": 16,
       "options": {
@@ -519,7 +574,7 @@
         "h": 6,
         "w": 8,
         "x": 0,
-        "y": 15
+        "y": 17
       },
       "id": 205,
       "options": {
@@ -615,7 +670,7 @@
         "h": 6,
         "w": 8,
         "x": 8,
-        "y": 15
+        "y": 17
       },
       "id": 220,
       "options": {
@@ -700,7 +755,7 @@
         "h": 6,
         "w": 8,
         "x": 16,
-        "y": 15
+        "y": 17
       },
       "id": 237,
       "options": {
@@ -773,7 +828,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 21
+        "y": 23
       },
       "id": 242,
       "options": {
@@ -891,10 +946,10 @@
       "title": "First Action",
       "description": "First operator action for Runtime triage. Uses current snapshot panels before selected-range evidence. UNKNOWN means missing status telemetry or scrape/rule gap until proven otherwise.",
       "gridPos": {
-        "h": 6,
+        "h": 4,
         "w": 6,
         "x": 0,
-        "y": 3
+        "y": 5
       },
       "options": {
         "content": "<div style=\"padding:0.45rem 0.7rem;line-height:1.55\"><strong>First action:</strong> read <em>Monitor Runtime Current Status</em>, then inspect the top blocker reason. If status is CRIT, open <em>Inspect Active Runtime Blocker Detail</em>; if WARN, inspect terminal-run/stage lag evidence; if UNKNOWN, verify <em>Monitor Runtime Telemetry Gap</em> before treating zero as OK.</div>",
@@ -938,14 +993,14 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 30
+        "y": 32
       },
       "panels": [
         {
           "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "description": "Sustained backlog accumulation by stage.",
           "fieldConfig": {
             "defaults": {
@@ -1015,9 +1070,9 @@
         },
         {
           "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "description": "Shows expected vs observed stage status per entity config. Gold status is contextual: expected (scd2/append/overwrite config), disabled (gold_enabled=false), pending (run active, gold not yet written), or missing (run completed, gold=0).",
           "fieldConfig": {
             "defaults": {
@@ -1114,9 +1169,9 @@
         },
         {
           "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "description": "Processed records by stage over the active Grafana interval.",
           "fieldConfig": {
             "defaults": {
@@ -1195,14 +1250,14 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 31
+        "y": 33
       },
       "panels": [
         {
           "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "description": "Phase latency distribution across p50, p95, and p99.",
           "fieldConfig": {
             "defaults": {
@@ -1287,9 +1342,9 @@
         },
         {
           "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "description": "Pipeline duration percentiles by stage. \"No terminal pipeline duration samples\" means no completed pipeline runs emitted duration histogram buckets in the selected range. Possible causes: run still active, terminal metric not emitted, query label mismatch.",
           "fieldConfig": {
             "defaults": {
@@ -1375,9 +1430,9 @@
         },
         {
           "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "description": "Error breakdown by stage and error code over the selected Grafana time range. If no selected-range error samples exist, the synthetic none/none=0 series is an empty-state placeholder, not real telemetry evidence.",
           "fieldConfig": {
             "defaults": {
@@ -1451,9 +1506,9 @@
         },
         {
           "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "description": "Processed-record totals over the active range, grouped by stage and run_type. If no selected-range processed-record samples exist, the synthetic none/none=0 series is an empty-state placeholder, not real telemetry evidence.",
           "fieldConfig": {
             "defaults": {
@@ -1510,9 +1565,9 @@
         },
         {
           "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "description": "GLOBAL graceful-shutdown initiation events over the active Grafana interval, grouped by reason and not filtered by $pipeline/$run_type because the source metric has only reason. Use this as process-level shutdown context, not pipeline-scoped runtime evidence.",
           "fieldConfig": {
             "defaults": {
@@ -1591,9 +1646,9 @@
         },
         {
           "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "description": "GLOBAL graceful-shutdown completion events over the active Grafana interval, grouped by reason and not filtered by $pipeline/$run_type because the source metric has only reason. Compare with initiated events for process-level shutdown completion context.",
           "fieldConfig": {
             "defaults": {
@@ -1681,14 +1736,14 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 32
+        "y": 34
       },
       "panels": [
         {
           "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "description": "Runtime-owned selected-window handoff summary from shipped 15m/30m recording rules for preflight, infrastructure, failed-run, and error-rate blockers. 0 means no condition rule is firing only when the selected runtime pipeline/run_type universe exists; UNKNOWN or telemetry gap means inconclusive. Next action: use Inspect Active Runtime Blocker Detail or the pipeline failure runbook.",
           "fieldConfig": {
             "defaults": {
@@ -1771,9 +1826,9 @@
         },
         {
           "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "description": "DQ handoff only. Uses shipped 15m/30m DQ recording rules to show whether runtime symptoms may be downstream of data-quality failures. Runtime does not diagnose record-level DQ here; open Data Quality for reasons, thresholds, and Silver rejects. 0 is normal only when the selected runtime pipeline universe exists; UNKNOWN or telemetry gap means inconclusive.",
           "fieldConfig": {
             "defaults": {
@@ -1852,9 +1907,9 @@
         },
         {
           "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "description": "Control Plane / Replay Safety handoff only. Uses shipped 15m/30m recording rules for manifest, checkpoint, replay, and lineage blockers. Runtime does not decide replay/resume safety here; open Control Plane for manifest, checkpoint, and ledger evidence. 0 is normal only when the selected runtime pipeline/run_type universe exists; UNKNOWN or telemetry gap means inconclusive.",
           "fieldConfig": {
             "defaults": {
@@ -1933,9 +1988,9 @@
         },
         {
           "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "description": "GLOBAL Provider Health handoff only. Uses shipped 15m/30m/1h provider recording rules without pipeline filtering because provider failures can block multiple pipelines. Runtime does not diagnose provider root cause here; open Provider Health for provider/current-cause evidence. 0 is normal only when provider current-status telemetry exists; UNKNOWN or telemetry gap means inconclusive.",
           "fieldConfig": {
             "defaults": {
@@ -2014,9 +2069,9 @@
         },
         {
           "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "description": "Freshness handoff only. Counts selected-pipeline entities older than 24h using data freshness telemetry; this supports source/DQ escalation and is not a Runtime execution blocker by itself. 0 means no stale entity when freshness telemetry is available; UNKNOWN means missing freshness telemetry.",
           "fieldConfig": {
             "defaults": {
@@ -2095,9 +2150,9 @@
         },
         {
           "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "description": "No-records runs detected over the last 30m for selected pipeline/run_type. This is a runtime blocker candidate when runs occurred but no records were processed. 0 is valid only when the selected runtime pipeline/run_type universe exists; telemetry gaps are inconclusive. Next action: inspect checkpoint/resume and stage expectedness.",
           "fieldConfig": {
             "defaults": {
@@ -2176,9 +2231,9 @@
         },
         {
           "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2270,7 +2325,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 34
+        "y": 36
       },
       "panels": [
         {

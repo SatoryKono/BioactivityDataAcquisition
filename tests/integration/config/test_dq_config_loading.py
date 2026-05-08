@@ -291,6 +291,23 @@ class TestPipelineConfigLoaderWithDQResolution:
         assert unit_rules, "Missing assay_parameters.units DQ pattern rule"
         assert unit_rules[0].nullable is True
 
+    def test_chembl_assay_parameters_type_has_explicit_enum_dq_rule(
+        self, dq_loader: DQConfigLoader
+    ) -> None:
+        """assay_parameters.type should be enum-governed against the canonical parameter universe."""
+        config = dq_loader.load("chembl", "assay_parameters")
+
+        type_rules = [
+            rule
+            for rule in config.field_validations
+            if rule.field == "type" and rule.validation_type == "enum"
+        ]
+
+        assert type_rules, "Missing assay_parameters.type enum rule"
+        assert type_rules[0].nullable is False
+        assert "CONC" in type_rules[0].allowed
+        assert "SERUM" in type_rules[0].allowed
+
     def test_chembl_molecule_ro3_pass_has_explicit_enum_dq_rule(
         self, dq_loader: DQConfigLoader
     ) -> None:

@@ -78,6 +78,12 @@ ENUM_POLICIES: tuple[EnumPolicy, ...] = (
     ),
     EnumPolicy(
         "assay_parameters",
+        "type",
+        ("assay", "parameter_standard_type_universe"),
+        surfaces=frozenset({"quality"}),
+    ),
+    EnumPolicy(
+        "assay_parameters",
         "standard_type",
         ("assay", "parameter_standard_type_universe"),
         surfaces=frozenset({"quality"}),
@@ -113,6 +119,11 @@ ENUM_POLICIES: tuple[EnumPolicy, ...] = (
         ("publication", "native_doc_types"),
         surfaces=frozenset({"extraction_params"}),
         extraction_param="doc_type",
+    ),
+    EnumPolicy(
+        "publication_term",
+        "term_type",
+        ("publication_term", "term_types"),
     ),
     EnumPolicy(
         "target_component",

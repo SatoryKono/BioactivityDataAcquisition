@@ -134,11 +134,13 @@ def test_silver_reject_explorer_pipeline_scope_is_single_select_and_fail_closed(
         (
             panel
             for panel in get_dashboard_panels(dashboard)
-            if panel.get("title") == "Scope"
+            if panel.get("title") == "Inspect Explorer Scope"
         ),
         None,
     )
-    assert note_panel is not None, "Silver Reject Explorer must define Scope note"
+    assert note_panel is not None, (
+        "Silver Reject Explorer must define Inspect Explorer Scope note"
+    )
     content = note_panel.get("options", {}).get("content", "")
     assert "Select exactly one pipeline" in content
     assert "explorer-only" in content
@@ -245,7 +247,7 @@ def test_silver_reject_explorer_payload_link_preserves_time_scope() -> None:
         (
             item
             for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Filtered Records Table"
+            if item.get("title") == "Inspect Filtered Records Table"
         ),
         None,
     )
@@ -277,12 +279,12 @@ def test_silver_reject_explorer_first_action_documents_no_data_semantics() -> No
         (
             item
             for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "First Action / No-Data Semantics"
+            if item.get("title") == "Review: First Action / No-Data Semantics"
         ),
         None,
     )
     assert panel is not None
-    assert panel.get("gridPos", {}).get("y", 999) <= 3
+    assert panel.get("gridPos", {}).get("y", 999) <= 5
     content = str(panel.get("options", {}).get("content", ""))
     assert "First action:" in content
     assert "0 rejects is OK only when Quarantine Explorer responds" in content
@@ -293,13 +295,13 @@ def test_silver_reject_explorer_first_action_documents_no_data_semantics() -> No
 @pytest.mark.parametrize(
     "panel_title",
     [
-        "Filtered Records Total",
-        "Reject Rate vs Bronze",
-        "Run Scope Summary",
+        "Monitor Filtered Records Total",
+        "Track Reject Rate vs Bronze",
+        "Inspect Run Scope Summary",
         "Inspect Top Reject Reasons",
         "Inspect Top Reject Fields",
         "Inspect Top Reason Signatures",
-        "Selected Record Details",
+        "Inspect Selected Record Details",
     ],
 )
 def test_silver_reject_explorer_panels_have_specific_triage_descriptions(

@@ -26,6 +26,7 @@ __all__ = [
     "_extract_selector_labels",
     "_infer_recording_rule_labels",
     "_unknown_metrics_for_query",
+    "get_dashboard_navigation_links",
     "get_all_valid_metric_names",
     "get_dashboard_files",
     "get_dashboard_panels",
@@ -262,6 +263,18 @@ def _collect_dashboard_links(dashboard: dict) -> list[dict]:
     return links
 
 
+def get_dashboard_navigation_links(dashboard: dict) -> list[dict]:
+    """Collect canonical dashboard-bus links from the navigation surface."""
+    links = list(dashboard.get("links", []))
+    for panel in get_dashboard_panels(dashboard):
+        if panel.get("id") != 1000:
+            continue
+        panel_links = panel.get("links", [])
+        if isinstance(panel_links, list):
+            links.extend(link for link in panel_links if isinstance(link, dict))
+    return links
+
+
 def _unknown_metrics_for_query(query: str, valid_metrics: set[str]) -> list[str]:
     """Return metric-like tokens that are not present in the known metric set."""
     unknown_metrics: list[str] = []
@@ -311,7 +324,7 @@ def _assert_standard_variable_contract(
         pipeline_query.get("query", "") if isinstance(pipeline_query, dict) else ""
     )
     expected_pipeline_metric_by_dashboard = {
-        "bioetl-control-plane-v1.json": "bioetl_control_plane_manifest_writes_total",
+        "bioetl-control-plane-v1.json": "bioetl_control_plane_run_type_universe",
         "bioetl-runtime.json": "bioetl_runtime_pipeline_run_type_universe",
     }
     expected_pipeline_metric = expected_pipeline_metric_by_dashboard.get(

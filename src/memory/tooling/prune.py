@@ -111,9 +111,13 @@ def prune_episodic_notes(
     *,
     apply: bool = False,
     now: datetime | None = None,
+    max_active: int | None = None,
 ) -> dict[str, Any]:
     """Report or prune expired episodic notes."""
     candidates = find_prunable_episodic_notes(root, now=now)
+    resolved_root = root or _episodic_root()
+    total_count = _count_episodic_notes(resolved_root)
+    active_count = max(total_count - len(candidates), 0)
     removed_paths: list[str] = []
     if apply:
         for candidate in candidates:
@@ -121,13 +125,35 @@ def prune_episodic_notes(
             if candidate_path.exists():
                 candidate_path.unlink()
                 removed_paths.append(candidate.path)
+    density_status = "not_checked"
+    density_excess = 0
+    if max_active is not None:
+        density_excess = max(active_count - max_active, 0)
+        density_status = "review" if density_excess else "ok"
     return {
         "apply": apply,
         "candidate_count": len(candidates),
+        "total_count": total_count,
+        "active_count": active_count,
+        "max_active": max_active,
+        "density_status": density_status,
+        "density_excess": density_excess,
         "removed_count": len(removed_paths),
         "candidates": [asdict(candidate) for candidate in candidates],
         "removed_paths": removed_paths,
     }
+
+
+def _count_episodic_notes(root: Path) -> int:
+    if not root.exists():
+        return 0
+    return sum(
+        1
+        for path in root.rglob("*")
+        if path.is_file()
+        and path.suffix in SUPPORTED_NOTE_EXTENSIONS
+        and path.name != "README.md"
+    )
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -146,6 +172,12 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Delete expired notes. Default mode is report-only.",
     )
     parser.add_argument(
+        "--max-active",
+        type=int,
+        default=None,
+        help="Report review status when active episodic notes exceed this count.",
+    )
+    parser.add_argument(
         "--json",
         action="store_true",
         help="Emit prune report as JSON.",
@@ -156,12 +188,20 @@ def _build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     parser = _build_parser()
     args = parser.parse_args(argv)
-    report = prune_episodic_notes(args.root.resolve(), apply=args.apply)
+    report = prune_episodic_notes(
+        args.root.resolve(), apply=args.apply, max_active=args.max_active
+    )
     if args.json:
         print(json.dumps(report, indent=2, sort_keys=True))
     else:
         mode = "apply" if args.apply else "dry-run"
         print(f"Episodic prune {mode}: {report['candidate_count']} candidate(s)")
+        if args.max_active is not None:
+            print(
+                "Episodic density: "
+                f"{report['active_count']} active "
+                f"(max_active={args.max_active}, status={report['density_status']})"
+            )
         if args.apply:
             print(f"Removed: {report['removed_count']}")
         for candidate in report["candidates"]:

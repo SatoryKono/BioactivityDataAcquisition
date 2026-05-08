@@ -132,7 +132,11 @@ L0 дашборд для одного operator question: что сейчас bro
 - **Drilldown**: top-level шина содержит `0. Control Plane`, `2. Runtime`,
   `3. Provider Health`, `4. Data Quality`, `5. Workflow`, и ключевые
   current-status panels дублируют этот handoff через panel `dataLinks`.
-  Overview intentionally не содержит Explore links.
+  Каноническая shipped surface этой шины — navigation panel `id=1000`; header
+  row рядом с Grafana variables не обязан повторять те же dashboard links.
+  В каждом `id=1000` дополнительно закреплены sticky shortcuts
+  `4. Data Quality`, `Explore Logs`, `Explore Traces`,
+  `Silver Reject Explorer`; они открываются в том же окне.
 
 #### 2. 2. Runtime
 
@@ -184,7 +188,7 @@ tracing-backed log hygiene живёт в collapsed row
   parser failures нельзя безопасно scoped by `$pipeline`.
 
 - **Drilldown contract**:
-  top-level links `0. Control Plane`, `1. Overview`, `3. Provider Health`,
+  navigation bus `0. Control Plane`, `1. Overview`, `3. Provider Health`,
   `4. Data Quality`, `5. Workflow`, `Explore Logs`, `Explore Traces`.
   Panel-level dashboard handoffs запрещены, если target уже доступен в
   top-level шине. `run_id`, `payload_hash`, `record_id` в runtime dashboard
@@ -246,10 +250,11 @@ tracing-backed log hygiene живёт в collapsed row
   implicit `CLOSED` evidence.
 - Для provider/control-plane/runtime/DQ latency panels `No data` нужно читать
   как “в окне нет latency samples”, а не как нормализованный `0s`.
-- **Drilldown**: dashboard links `0. Control Plane`, `1. Overview`,
-  `2. Runtime`, `4. Data Quality`, `5. Workflow`. Explore links на Provider
-  Health отсутствуют; provider correlation идёт через top-level Runtime/DQ
-  переходы и runbook links.
+- **Drilldown**: navigation bus `0. Control Plane`, `1. Overview`,
+  `2. Runtime`, `4. Data Quality`, `5. Workflow`, `Explore Logs`,
+  `Explore Traces`, `Silver Reject Explorer`. Provider correlation по-прежнему
+  идёт через Runtime/DQ переходы и runbook links; sticky shortcuts в `id=1000`
+  не заменяют canonical provider triage flow.
 
 #### 4. 4. Data Quality
 
@@ -274,7 +279,7 @@ tracing-backed log hygiene живёт в collapsed row
   `Review: Latest Successful Data Timestamp` остаётся отдельным latest-success anchor.
   Это intentionally разные сигналы: latest success не должен маскировать worst
   freshness lag.
-- **Drilldown**: dashboard links `0. Control Plane`, `1. Overview`,
+- **Drilldown**: navigation bus `0. Control Plane`, `1. Overview`,
   `2. Runtime`, `3. Provider Health`, `5. Workflow`, `Silver Reject Explorer`,
   `Explore Logs`, `Explore Traces`. Panel-level dashboard handoffs запрещены:
   replay/checkpoint traceability открывается через `0. Control Plane` в
@@ -288,12 +293,12 @@ Record-level dashboard для `FILTERED_OUT_SILVER` записей (quarantine-b
 - **Filtered Records Table**: полный список отфильтрованных записей с server-side filtering/pagination.
 - **Selected Record Details**: exact reject context по выбранному `payload_hash`.
 - **Top Reject Reasons / Fields / Signatures**: агрегаты в том же scoped контексте.
-- **First Action / No-Data Semantics**: поясняет, когда `0` rejects является OK,
+- **Review: First Action / No-Data Semantics**: поясняет, когда `0` rejects является OK,
   а когда `No data`, `unknown` pipeline или `bronze_records=0` остаются UNKNOWN.
 - **Datasource**: `Quarantine Explorer` (JSON/Infinity), не Prometheus.
 - **Scope contract**: `$pipeline` всегда single-select/no-All; `run_id` и
   `payload_hash` остаются Explorer-only forensic filters.
-- **Drilldown**: top-level bus links `0. Control Plane`, `1. Overview`,
+- **Drilldown**: navigation bus `0. Control Plane`, `1. Overview`,
   `2. Runtime`, `3. Provider Health`, `4. Data Quality`, `5. Workflow`;
   row-level link в CLI-команду остаётся для action handoff.
 

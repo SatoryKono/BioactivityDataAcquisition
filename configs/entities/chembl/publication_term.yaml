@@ -80,7 +80,6 @@ quality:
     - MESH_HEADING
     - MESH_QUALIFIER
     - KEYWORD
-    - CONCEPT
     nullable: false
     error_message: term_type is required and must be valid
   - field: term
@@ -132,7 +131,6 @@ filters:
       - MESH_HEADING
       - MESH_QUALIFIER
       - KEYWORD
-      - CONCEPT
     required_fields:
     - publication_id
     - term
