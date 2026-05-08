@@ -27,14 +27,14 @@ def _discover_all_port_classes() -> list[str]:
 
 
 ALL_PORT_NAMES = _discover_all_port_classes()
-EXPECTED_PORT_COUNT = 75
+EXPECTED_PORT_COUNT = 79
 
 
 class TestAllPortsRuntimeCheckable:
     """Every port protocol MUST be @runtime_checkable (TYPE-004)."""
 
     def test_port_count_matches_live_baseline(self) -> None:
-        """Sanity check: the facade currently exports 75 port protocols."""
+        """Sanity check: the facade currently exports 79 port protocols."""
         assert len(ALL_PORT_NAMES) == EXPECTED_PORT_COUNT, (
             f"Expected {EXPECTED_PORT_COUNT} ports, found {len(ALL_PORT_NAMES)}. "
             f"If you added/removed a port, update this test. "

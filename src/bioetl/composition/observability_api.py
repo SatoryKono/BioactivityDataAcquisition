@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime
+from collections.abc import Mapping
 from typing import TYPE_CHECKING
 from urllib.parse import urlunsplit
 from uuid import uuid4
@@ -139,6 +140,7 @@ def push_metrics_to_gateway(
     *,
     pipeline_name: str | None = None,
     run_type: str | None = None,
+    grouping_key_extra: Mapping[str, str] | None = None,
     logger: LoggerPort | None = None,
 ) -> bool:
     """Push metrics through the canonical composition-owned observability seam."""
@@ -152,6 +154,8 @@ def push_metrics_to_gateway(
         grouping_key["pipeline"] = pipeline_name
     if run_type:
         grouping_key["run_type"] = run_type
+    if grouping_key_extra:
+        grouping_key.update(grouping_key_extra)
     metrics_service = get_metrics_service()
     metrics_service.logger = logger or bootstrap_logger(
         pipeline=pipeline_name or "metrics_publication",

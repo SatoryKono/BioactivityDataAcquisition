@@ -1,9 +1,9 @@
 # Externalize Enum Configurations for ChEMBL Activity Fields
 
-**Status**: Open
+**Status**: In Progress 🚧
 **Priority**: P1 (High)
 **Labels**: `normalization`, `configuration`, `DQ`
-**Epic**: Data Quality Improvements 2024Q2
+**Epic**: Data Quality Improvements 2026Q2
 
 ## 🎯 Problem
 
@@ -174,8 +174,8 @@ mypy src/bioetl/domain/normalization/ --strict
 ## ⏳ Time Estimate
 
 **Total**: 9 days
-**Start Date**: 2024-05-20
-**Target Completion**: 2024-06-03
+**Start Date**: 2026-05-08
+**Target Completion**: 2026-05-20
 
 ## 👥 Assignee
 
@@ -190,6 +190,29 @@ mypy src/bioetl/domain/normalization/ --strict
 - [ ] Documentation updated
 - [ ] Backward compatibility verified
 
+### Current Implementation Status
+
+**Completed:**
+- Enum configuration infrastructure created (`configs/enums/chembl.yaml`, `configs/enums/pubchem.yaml`, `configs/enums/uniprot.yaml`)
+- Enum loader utility implemented (`src/bioetl/domain/config/enum_loader.py`)
+- Enum catalog created (`src/bioetl/domain/schemas/_chembl_enum_catalog.py`)
+- Activity enum fields partially externalized (standard_types, standard_relations)
+
+**Current State:**
+- `configs/enums/chembl.yaml`: Contains activity, assay, molecule, target, publication enums
+- `enum_loader.py`: Provides `get_chembl_enum()` and `get_chembl_enum_set()` functions
+- Activity profile: Uses externalized enums for standard_type and standard_relation
+- Assay profile: Partially integrated with enum loader (backup file suggests transition in progress)
+- Other pipelines (molecule, target, cell_line, tissue): Not yet integrated
+
+**Remaining:**
+- Complete assay profile enum integration
+- Integrate enum loader into remaining pipelines (molecule, target, cell_line, tissue)
+- Update all Pandera schemas to use externalized enums
+- Add comprehensive enum validation tests
+- Document enum configuration patterns
+- Verify backward compatibility
+
 ## 🎯 Notes
 
-This issue is foundational for improving data quality in the ChEMBL activity processing pipeline. By externalizing enum configurations, we establish a maintainable and consistent approach to handling enumerated values throughout the system.
+This issue is foundational for improving data quality in the ChEMBL activity processing pipeline. By externalizing enum configurations, we establish a maintainable and consistent approach to handling enumerated values throughout the system. The pattern established here is being extended across all pipelines in CROSS-001.

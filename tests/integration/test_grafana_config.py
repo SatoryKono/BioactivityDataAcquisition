@@ -1052,6 +1052,60 @@ def test_workflow_dashboard_descriptions_explain_selected_range_limits() -> None
             )
 
 
+def test_workflow_dashboard_collapses_step_diagnostics_below_first_screen() -> None:
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-workflow-overview.json"))
+
+    panels = dashboard.get("panels", [])
+    row_panel = next(
+        (
+            panel
+            for panel in panels
+            if panel.get("title") == "Step Diagnostics (collapsed)"
+        ),
+        None,
+    )
+    assert row_panel is not None, "Workflow dashboard must expose step diagnostics row"
+    assert row_panel.get("type") == "row"
+    assert row_panel.get("collapsed") is True
+
+    row_titles = {
+        panel.get("title")
+        for panel in row_panel.get("panels", [])
+        if panel.get("title")
+    }
+    assert "Step Outcomes by Kind / Step Status / Range" in row_titles
+    assert "Step Duration p95 by Kind / Step Status / Range" in row_titles
+
+    top_level_titles = {panel.get("title") for panel in panels if panel.get("title")}
+    assert "Step Outcomes by Kind / Step Status / Range" not in top_level_titles
+    assert "Step Duration p95 by Kind / Step Status / Range" not in top_level_titles
+
+    next_panel = next(
+        (panel for panel in panels if panel.get("title") == "Next Diagnostic Surface"),
+        None,
+    )
+    assert next_panel is not None
+    assert next_panel.get("gridPos", {}).get("y") == 12
+    data_links = next_panel.get("options", {}).get("dataLinks", [])
+    assert data_links, "Workflow Next Diagnostic Surface must expose actionable dataLinks"
+    observed_titles = {
+        str(link.get("title"))
+        for link in data_links
+        if isinstance(link, dict) and link.get("title")
+    }
+    expected_titles = {
+        "Open 2. Runtime",
+        "Open 4. Data Quality",
+        "Open 3. Provider Health",
+        "Open 0. Control Plane",
+        "Open 1. Overview",
+    }
+    assert expected_titles <= observed_titles
+    for link in data_links:
+        assert link.get("targetBlank") is False
+        assert "${__url_time_range}" in str(link.get("url", ""))
+
+
 @pytest.mark.parametrize(
     ("dashboard_file", "variable_name"),
     [

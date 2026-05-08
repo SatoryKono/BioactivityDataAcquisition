@@ -9,6 +9,7 @@ import pytest
 
 from bioetl.application.services.control_plane import (
     WorkflowExecutionService,
+    WorkflowLedgerService,
     WorkflowManifestService,
 )
 from bioetl.application.services.workflow_runner_service import (
@@ -62,6 +63,18 @@ class _InMemoryWorkflowLedgerPort:
             for entry in self.entries
             if str(entry.workflow_run_id) == str(workflow_run_id)
         ]
+
+
+def _create_workflow_ledger_service(
+    ledger_port: _InMemoryWorkflowLedgerPort,
+    manifest: WorkflowManifest,
+) -> WorkflowLedgerService:
+    return WorkflowLedgerService(
+        ledger_port=ledger_port,
+        manifest_id=manifest.manifest_id,
+        workflow_run_id=manifest.workflow_run_id,
+        workflow_name=manifest.workflow_name,
+    )
 
 
 @dataclass
@@ -243,6 +256,7 @@ async def test_workflow_execution_service_persists_manifest_ledger_and_state() -
             _manifest_id_factory=lambda: "workflow-manifest-1",
         ),
         workflow_ledger_port=ledger_port,
+        workflow_ledger_factory=_create_workflow_ledger_service,
         workflow_state_port=state_port,
         workflow_lock_port=lock_port,
         now_factory=lambda: FIXED_TEST_TIME,
@@ -328,6 +342,7 @@ async def test_workflow_execution_service_resume_last_skips_completed_steps() ->
             _manifest_id_factory=lambda: "workflow-manifest-2",
         ),
         workflow_ledger_port=ledger_port,
+        workflow_ledger_factory=_create_workflow_ledger_service,
         workflow_state_port=state_port,
         workflow_lock_port=lock_port,
         now_factory=lambda: FIXED_TEST_TIME,
@@ -357,6 +372,7 @@ async def test_workflow_execution_service_fails_when_lock_is_held() -> None:
             _manifest_id_factory=lambda: "workflow-manifest-1",
         ),
         workflow_ledger_port=_InMemoryWorkflowLedgerPort(),
+        workflow_ledger_factory=_create_workflow_ledger_service,
         workflow_state_port=state_port,
         workflow_lock_port=lock_port,
         now_factory=lambda: FIXED_TEST_TIME,
@@ -418,6 +434,7 @@ async def test_workflow_execution_service_requires_explicit_repair_after_ambiguo
             _manifest_id_factory=lambda: "workflow-manifest-crash",
         ),
         workflow_ledger_port=ledger_port,
+        workflow_ledger_factory=_create_workflow_ledger_service,
         workflow_state_port=state_port,
         workflow_lock_port=lock_port,
         now_factory=lambda: FIXED_TEST_TIME,
@@ -444,6 +461,7 @@ async def test_workflow_execution_service_requires_explicit_repair_after_ambiguo
             _manifest_id_factory=lambda: "workflow-manifest-resume",
         ),
         workflow_ledger_port=ledger_port,
+        workflow_ledger_factory=_create_workflow_ledger_service,
         workflow_state_port=state_port,
         workflow_lock_port=_FakeLockPort(),
         now_factory=lambda: FIXED_TEST_TIME,

@@ -39,7 +39,7 @@ from bioetl.composition.factories.pipeline.factory_method_helpers import (
 from bioetl.composition.factories.pipeline.factory_method_helpers import (
     extract_entity_type as _extract_entity_type,
 )
-from bioetl.composition.providers._registry_protocols import (
+from bioetl.composition.providers.provider_registry import (
     ProviderDataSourceRegistryProtocol,
 )
 from bioetl.domain.behavior import EntityIdentityGenerator

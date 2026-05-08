@@ -10,11 +10,11 @@ pipeline:
         - activity_id
     batch_size: 1000
 
-sink:
-    silver:
-        mode: merge
-    gold:
-        enabled: true
+    sink:
+        silver:
+            mode: merge
+        gold:
+            enabled: true
 schema:
     content_hash:
         include: []

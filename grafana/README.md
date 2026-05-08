@@ -734,6 +734,9 @@ Shipped dashboards используют несколько template variables в
 
 - **`5. Workflow`** использует только `$workflow` и `$status` через
   `label_values(bioetl_workflow_runs_total, workflow|status)`.
+  Shipped workflow panels aggregate per-run published series with
+  `max_over_time(...)`, because workflow jobs are short-lived and must remain
+  queryable after the CLI process exits.
 
 - **`Provider Health`** использует single-select `$provider`, hidden
   `$pipeline_context` и hidden detail-only `$adapter`. Переходы из pipeline-scoped dashboards
@@ -744,6 +747,8 @@ Shipped dashboards используют несколько template variables в
   передаёт `adapter`, и target dashboard сам раскрывает fallback `All adapters`.
 
 **Каскадная зависимость:** Значения `$run_type` зависят от выбранного `$pipeline`. При смене пайплайна список доступных run types автоматически обновляется.
+
+Canonical unified variable reference: `docs/03-guides/dashboards/variable-reference.md`.
 
 **Какие метрики поддерживают `run_type`:**
 
@@ -915,8 +920,10 @@ Prometheus labels, summary dashboards или cross-dashboard handoffs.
 `1-4` dashboards остаются Prometheus summary/bounded-breakdown поверхностями;
 `Silver Reject Explorer` закрывает exact record-level drilldown gap.
 `0` rejects is OK only when the Quarantine Explorer API responds, one concrete
-`$pipeline` is selected, and Bronze denominator evidence is present; plugin
-errors, unknown pipeline, or `bronze_records=0` are treated as UNKNOWN.
+`$pipeline` is selected, and Bronze denominator evidence is present. Zero
+matching rows remain an empty-result state; plugin/query errors, unsupported
+filter chains, unknown pipeline, or `bronze_records=0` are treated as
+UNKNOWN/error until the backend is checked.
 
 **Drilldown:** canonical navigation bus `0. Control Plane`, `1. Overview`,
 `2. Runtime`, `3. Provider Health`, `4. Data Quality`, `5. Workflow`;
@@ -2011,8 +2018,9 @@ ______________________________________________________________________
 | 2. Runtime                | `bioetl-runtime`                | 2            | 26     | 30s     | 12h        | Prometheus + optional Loki/Tempo links | L2 runtime triage: blockers, latency, backlog, handoffs |
 | 3. Provider Health        | `bioetl-provider-health-v2`     | 6            | 17     | 30s     | 12h        | Prometheus      | Provider latency, health, retries, failure ratios |
 | 4. Data Quality           | `bioetl-dq-v2`                  | 4            | 21     | 30s     | 12h        | Prometheus      | DQ score, quarantine, freshness, validation failures |
+| 5. Workflow               | `bioetl-workflow-overview`      | 2            | 8      | 30s     | 12h        | Prometheus      | Selected-range workflow run and step evidence with one justified panel-level CTA surface (`Next Diagnostic Surface`) plus collapsed step diagnostics |
 | Silver Reject Explorer | `bioetl-silver-reject-explorer` | 1001         | 10     | 1m      | 24h        | Quarantine Explorer API | Record-level browsing and action handoff for Silver rejects |
-| 5. Workflow      | `bioetl-workflow-overview`      | 2            | 8      | 30s     | 12h        | Prometheus      | Selected-range workflow run and step evidence with explicit diagnostic handoff |
+| 5. Workflow      | `bioetl-workflow-overview`      | 2            | 8      | 30s     | 12h        | Prometheus      | Selected-range workflow run and step evidence built from per-run published series with explicit diagnostic handoff; `Workflow Run Outcomes / Range` plus `Next Diagnostic Surface` stay visible while step outcome/duration detail lives under collapsed row `Step Diagnostics (collapsed)` |
 
 ______________________________________________________________________
 

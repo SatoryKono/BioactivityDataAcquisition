@@ -288,6 +288,8 @@ def test_silver_reject_explorer_first_action_documents_no_data_semantics() -> No
     content = str(panel.get("options", {}).get("content", ""))
     assert "First action:" in content
     assert "0 rejects is OK only when Quarantine Explorer responds" in content
+    assert "Zero matching rows" in content
+    assert "unsupported filter chains" in content
     assert "bronze_records=0" in content
     assert "UNKNOWN" in content
 
@@ -325,6 +327,62 @@ def test_silver_reject_explorer_panels_have_specific_triage_descriptions(
     assert "Status mapping: 0 = healthy/ok" not in description
     assert any(
         token in description for token in ("No data", "UNKNOWN", "Empty", "empty", "0")
+    )
+
+
+@pytest.mark.parametrize(
+    "panel_title",
+    [
+        "Monitor Filtered Records Total",
+        "Track Reject Rate vs Bronze",
+        "Inspect Run Scope Summary",
+        "Inspect Filtered Records Table",
+        "Inspect Selected Record Details",
+    ],
+)
+def test_silver_reject_explorer_datasource_trust_copy_distinguishes_empty_scope_and_backend_failure(
+    panel_title: str,
+) -> None:
+    """HTTP-backed explorer panels must explain empty-result vs backend-failure semantics."""
+    dashboard = load_dashboard(
+        Path("grafana/dashboards/bioetl-silver-reject-explorer.json")
+    )
+    panel = next(
+        (
+            item
+            for item in get_dashboard_panels(dashboard)
+            if item.get("title") == panel_title
+        ),
+        None,
+    )
+    assert panel is not None
+    description = str(panel.get("description", ""))
+    no_value = str(panel.get("fieldConfig", {}).get("defaults", {}).get("noValue", ""))
+    combined = f"{description} {no_value}"
+    assert any(
+        token in combined
+        for token in ("Quarantine Explorer", "backend", "API", "datasource")
+    )
+    assert any(
+        token in combined
+        for token in (
+            "zero matching rows",
+            "No rejected records for current filters",
+            "No data",
+            "missing/empty",
+            "empty summary",
+            "excluded record",
+        )
+    )
+    assert any(
+        token in combined
+        for token in (
+            "UNKNOWN",
+            "error state",
+            "datasource",
+            "datasource failure",
+            "filter chain",
+        )
     )
 
 

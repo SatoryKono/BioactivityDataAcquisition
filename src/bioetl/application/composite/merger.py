@@ -76,8 +76,8 @@ class MergeService(
     _get_field_aliases = staticmethod(resolve_field_aliases_from_registry)
     _extract_base_column = staticmethod(extract_base_column)
     _priority_orderer: (
-        _ColumnPriorityOrderingStrategy | Any | None
-    )  # Any: deprecated orderer
+        _ColumnPriorityOrderingStrategy | Any | None  # Any: deprecated orderer
+    )
 
     def __init__(
         self,

@@ -957,11 +957,15 @@ def test_first_action_rows_match_navigation_contract() -> None:
             f"first_action_contract.{source_uid} must be mapping"
         )
         panel_id = spec.get("panel_id")
+        panel_title = spec.get("panel_title", "First Action")
         min_cta = spec.get("min_cta", 0)
         max_cta = spec.get("max_cta", 0)
         ctas = spec.get("ctas", [])
         assert isinstance(panel_id, int), (
             f"first_action_contract.{source_uid}.panel_id must be integer"
+        )
+        assert isinstance(panel_title, str), (
+            f"first_action_contract.{source_uid}.panel_title must be string"
         )
         assert isinstance(min_cta, int), (
             f"first_action_contract.{source_uid}.min_cta must be integer"
@@ -990,8 +994,8 @@ def test_first_action_rows_match_navigation_contract() -> None:
         assert panel is not None, (
             f"{source_uid} missing First Action panel with id={panel_id}"
         )
-        assert panel.get("title") == "First Action", (
-            f"{source_uid} first action panel id={panel_id} must be titled 'First Action'"
+        assert panel.get("title") == panel_title, (
+            f"{source_uid} first action panel id={panel_id} must be titled {panel_title!r}"
         )
 
         links = panel.get("links")
@@ -1160,6 +1164,7 @@ def test_navigation_panel_html_links_open_in_same_window() -> None:
             f"{dashboard_path.name} navigation panel must open links in the same window"
         )
 
+
 def test_navigation_panel_renders_full_visual_bus_with_disabled_current_item() -> None:
     """Visual id=1000 bus should show all titles and render current dashboard as disabled."""
     expected_current_title = {
@@ -1207,7 +1212,7 @@ def test_navigation_panel_renders_full_visual_bus_with_disabled_current_item() -
         assert disabled_pattern.search(content), (
             f"{dashboard_path.name} must render current dashboard '{current_title}' as dark-gray disabled item"
         )
-        assert re.search(rf'<a[^>]*>{re.escape(current_title)}</a>', content) is None, (
+        assert re.search(rf"<a[^>]*>{re.escape(current_title)}</a>", content) is None, (
             f"{dashboard_path.name} must not render current dashboard '{current_title}' as active anchor"
         )
 

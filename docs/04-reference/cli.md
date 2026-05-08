@@ -71,6 +71,24 @@ bioetl workflow status <NAME> [OPTIONS]
 | `--dry-run` | Включить dry-run для pipeline steps |
 | `--only-steps a,b` | Выполнить только указанные шаги и их обязательные зависимости |
 | `--run-type` | Override для `incremental`, `backfill`, `rebuild` |
+| `--start-offset` | Override для `start_offset` у pipeline steps |
+| `--limit` | Override для `limit` у pipeline steps |
+| `--input-csv` | Override для CSV filter input у pipeline steps |
+| `--filter-column` | Override для CSV filter column у pipeline steps |
+| `--filter-field` | Override для source filter field у pipeline steps |
+| `--vacuum-after-run` | Override VACUUM execution for pipeline steps |
+| `--vacuum-retention-days` | Override VACUUM retention for pipeline steps |
+| `--log-level` | Override log level for pipeline steps |
+| `--ignore-yaml-filter` | Игнорировать YAML filter defaults у pipeline steps |
+| `--skip-gold` | Пропустить Gold writes у pipeline steps |
+| `--execution-context` | Override execution context у pipeline steps |
+| `--use-cached-bronze/--no-cached-bronze` | Override Bronze cache usage у pipeline steps |
+| `--cached-bronze-path` | Явный Bronze cache path у pipeline steps |
+| `--cached-bronze-date` | Bronze cache date filter у pipeline steps |
+| `--exact-replay/--no-exact-replay` | Override strict exact replay request у pipeline steps |
+| `--replay-of-run-id` | Explicit parent `run_id` for exact replay pipeline steps |
+| `--replay-of-manifest-id` | Explicit parent `manifest_id` for exact replay pipeline steps |
+| `--tracing/--no-tracing` | Override distributed tracing for pipeline steps |
 | `--resume-last` | Возобновить последний `failed` или `incomplete` workflow run с тем же execution fingerprint |
 | `--force-steps a,b` | Явно форсировать указанные шаги при resume вместо обычного skip поведения |
 | `--repair-steps a,b` | Явно пометить шаги как repair path для destructive ambiguity recovery |
@@ -90,6 +108,17 @@ bioetl workflow status <NAME> [OPTIONS]
   workflow execution state.
 - `workflow status` использует persisted workflow state, если он существует;
   если нет, команда честно возвращает bounded topology-only surface.
+- `workflow run` starts the local metrics HTTP server on demand and performs a
+  best-effort metrics publication flush on command completion so shipped
+  Prometheus/Grafana workflow surfaces can observe completed workflow runs.
+- workflow telemetry is published with per-run grouping identity so selected-range
+  workflow dashboard panels can retain completed short-lived workflow evidence
+  after the CLI process exits.
+- `workflow run` now accepts the same non-conflicting pipeline runtime
+  overrides as `bioetl run`, such as `--limit`, CSV/filter options,
+  cache/replay options, vacuum overrides, and tracing overrides.
+- pipeline-level `--resume` is intentionally not exposed on `workflow run`;
+  workflow control-plane resume stays on `--resume-last`.
 - `--resume-last` использует semantic `execution_fingerprint`, а не только имя workflow.
 - destructive ambiguity recovery не делает silent replay: при `repair_required`
   оператор должен использовать `--repair-steps` или `--force-steps`.
@@ -98,6 +127,9 @@ bioetl workflow status <NAME> [OPTIONS]
 
 ```bash
 bioetl workflow run chembl_activity --dry-run
+bioetl workflow run chembl_activity --limit 1000
+bioetl workflow run chembl_activity --input-csv data/filter-ids.csv --filter-column molecule_id --filter-field molecule_chembl_id
+bioetl workflow run chembl_activity --use-cached-bronze --exact-replay --replay-of-run-id parent-run-1 --replay-of-manifest-id manifest-parent-1
 bioetl workflow status chembl_activity
 bioetl workflow run publication_provider_pack --dry-run
 bioetl workflow run chembl_core --dry-run

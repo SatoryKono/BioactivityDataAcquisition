@@ -150,8 +150,8 @@ jq '.panels | length' grafana/dashboards/*.json
 
 ## ✅ Success Criteria
 
-- [ ] All dashboards follow first-screen standard (≤8 panels)
-- [ ] Collapsible rows used consistently where appropriate
+- [ ] All dashboards follow first-screen standard (≤8 panels) - CURRENT STATE: Not verified across all dashboards
+- [ ] Collapsible rows used consistently where appropriate - CURRENT STATE: Used in control-plane-v1 (5 collapsed), provider-health-v2 (1 collapsed), others not using
 - [ ] Panel grouping follows defined hierarchy
 - [ ] Important status panels always visible
 - [ ] Detailed diagnostics properly organized
@@ -209,20 +209,40 @@ python -m json.tool grafana/dashboards/*.json > /dev/null
 
 ## 📋 Checklist
 
-- [ ] Panel organization standard documented
-- [ ] Collapsible row strategy defined
-- [ ] Panel grouping rules established
+- [x] Panel organization standard documented
+- [x] Collapsible row strategy defined
+- [x] Panel grouping rules established
 - [ ] Overview dashboard reorganized
 - [ ] Runtime dashboard reorganized
-- [ ] Control Plane dashboard reorganized
+- [x] Control Plane dashboard reorganized - CURRENT STATE: Has 5 collapsed rows for replay/checkpoint diagnostics
 - [ ] DQ dashboard reorganized
-- [ ] Provider Health dashboard reorganized
+- [x] Provider Health dashboard reorganized - CURRENT STATE: Has 1 collapsed row
 - [ ] Workflow dashboard reorganized
 - [ ] Silver Reject Explorer reorganized
 - [ ] First-screen layouts verified
 - [ ] Collapsible rows tested
 - [ ] Documentation updated
 - [ ] Changes deployed to staging
+
+### Current Implementation Status
+
+**Completed:**
+- Panel organization standard defined (first_screen_max_panels: 8, first_screen content hierarchy)
+- Collapsible row strategy defined (runtime: logs/traces drilldown, control-plane: replay/checkpoint diagnostics)
+- Panel grouping rules established (level_1: current_status, level_2: kpi_summary, level_3: detailed_evidence, level_4: forensic_drilldown)
+
+**Current State Analysis:**
+- bioetl-control-plane-v1.json: Has 5 collapsed rows for replay and checkpoint diagnostics sections
+- bioetl-provider-health-v2.json: Has 1 collapsed row
+- bioetl-workflow-overview.json: Recently updated navigation panel height (h: 2 to h: 3) for better visibility
+- Other dashboards: Not using collapsible rows, need verification of first-screen panel count
+
+**Remaining:**
+- Verify first-screen panel count (≤8) across all dashboards
+- Implement collapsible rows in runtime dashboard for logs/traces drilldown
+- Reorganize overview, DQ, workflow, and silver explorer dashboards per standard
+- Test collapsible row functionality
+- Document layout standards in dashboard guide
 
 ## 🎯 Notes
 

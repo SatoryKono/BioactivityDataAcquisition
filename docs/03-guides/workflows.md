@@ -360,6 +360,10 @@ Present in the current tree:
 - workflow-level manifest, ledger, and execution-state persistence;
 - workflow CLI with `bioetl workflow run`, `--resume-last`,
   `--repair-steps`, `--force-steps`, and persisted `workflow status`;
+- best-effort workflow metrics publication at the CLI command boundary so
+  shipped workflow dashboards can observe completed workflow runs;
+- workflow metrics are published with per-run grouping identity so selected-range
+  dashboard evidence survives short-lived CLI process exit;
 - workflow inspection by workflow name or explicit `--run-id`;
 - local single-runtime workflow locking through `MemoryLock`;
 - canonical example workflow config in `configs/workflows/chembl_core.yaml`;

@@ -17,7 +17,38 @@
   "gnetId": null,
   "graphTooltip": 1,
   "id": null,
-  "links": [],
+  "links": [
+    {
+      "title": "0. Control Plane",
+      "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
+      "targetBlank": false,
+      "includeVars": false
+    },
+    {
+      "title": "2. Runtime",
+      "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=unknown&${__url_time_range}",
+      "targetBlank": false,
+      "includeVars": false
+    },
+    {
+      "title": "3. Provider Health",
+      "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&var-pipeline_context=$pipeline&var-adapter=unknown&${__url_time_range}",
+      "targetBlank": false,
+      "includeVars": false
+    },
+    {
+      "title": "4. Data Quality",
+      "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=unknown&${__url_time_range}",
+      "targetBlank": false,
+      "includeVars": false
+    },
+    {
+      "title": "5. Workflow",
+      "url": "/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}",
+      "targetBlank": false,
+      "includeVars": false
+    }
+  ],
   "panels": [
     {
       "gridPos": {
@@ -149,6 +180,7 @@
               }
             }
           ],
+          "noValue": "UNKNOWN",
           "thresholds": {
             "mode": "absolute",
             "steps": [

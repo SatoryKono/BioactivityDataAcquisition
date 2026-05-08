@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from importlib import import_module
 from typing import TYPE_CHECKING
 
@@ -86,6 +87,7 @@ def push_metrics_to_gateway(
     *,
     pipeline_name: str | None = None,
     run_type: str | None = None,
+    grouping_key_extra: Mapping[str, str] | None = None,
 ) -> bool:
     """Push metrics through the composition-owned observability seam."""
     from bioetl.composition.observability_api import (
@@ -97,6 +99,7 @@ def push_metrics_to_gateway(
             run_label=run_label,
             pipeline_name=pipeline_name,
             run_type=run_type,
+            grouping_key_extra=grouping_key_extra,
         )
     )
 

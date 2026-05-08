@@ -1,0 +1,352 @@
+normative_source:
+  scope: selector_taxonomy_registry_semantics
+  authority: single_source_of_truth
+  narrative_minimal: |
+    This YAML is the only normative contract for Grafana selector taxonomy,
+    dashboard-family selector eligibility, shipped selector registry, hidden
+    handoff semantics, and future execution-selector design gates.
+    Markdown guides are explanatory mirrors and MUST reference this file
+    instead of redefining normative selector behavior.
+
+version: 1
+
+selector_taxonomy:
+  scope:
+    - pipeline
+    - workflow
+    - provider
+    - stage
+  state:
+    - run_type
+    - status
+    - step_status
+    - step_kind
+  execution_future:
+    - run_selector_mode
+    - started_at
+    - run_id
+    - manifest_id
+    - execution_fingerprint
+  context_hidden:
+    shipped:
+      - pipeline_context
+      - adapter
+    reserved_future:
+      - workflow_context
+      - selected_run_id
+      - selected_manifest_id
+      - selected_started_at
+  forensic_only:
+    - reason_code
+    - field
+    - run_id
+    - payload_hash
+    - manifest_id
+    - execution_fingerprint
+
+operator_safe_visible_classes:
+  - scope
+  - state
+
+dashboard_families:
+  pipeline_summary:
+    uids:
+      - bioetl-control-plane-v1
+      - bioetl-overview-v2
+      - bioetl-runtime
+      - bioetl-dq-v2
+    allowed_visible_selectors:
+      - pipeline
+      - run_type
+    optional_visible_selectors:
+      - stage
+    notes: |
+      Pipeline-summary dashboards answer pipeline-scoped operator questions and
+      remain Prometheus-first. They MUST NOT expose forensic identifiers or
+      claim exact run selection until a dedicated run catalog exists.
+  provider_first:
+    uids:
+      - bioetl-provider-health-v2
+    allowed_visible_selectors:
+      - provider
+    hidden_context_selectors:
+      - pipeline_context
+    hidden_detail_selectors:
+      - adapter
+    notes: |
+      Provider Health is provider-first. pipeline_context preserves return-path
+      context and MUST NOT be treated as a first-class provider business filter.
+  workflow_evidence:
+    uids:
+      - bioetl-workflow-overview
+    allowed_visible_selectors:
+      - workflow
+      - status
+      - step_status
+      - step_kind
+    notes: |
+      Workflow Overview is selected-range workflow evidence only. It does not
+      currently expose pipeline, run_type, run_id, or exact execution scope.
+  forensic_explorer:
+    uids:
+      - bioetl-silver-reject-explorer
+    allowed_visible_selectors:
+      - pipeline
+      - run_type
+      - reason_code
+      - field
+      - run_id
+      - payload_hash
+    notes: |
+      Silver Reject Explorer is the only shipped forensic explorer. It may
+      surface exact reject/run selectors, but those selectors MUST NOT leak
+      into Prometheus dashboards or dashboard-to-dashboard links.
+
+shipped_selector_registry:
+  bioetl-control-plane-v1:
+    family: pipeline_summary
+    visible_selectors:
+      - pipeline
+      - run_type
+    hidden_context_selectors: []
+    hidden_detail_selectors: []
+    top_bar_order:
+      - pipeline
+      - run_type
+    query_source_families:
+      pipeline: prometheus_control_plane_universe
+      run_type: prometheus_control_plane_universe
+  bioetl-overview-v2:
+    family: pipeline_summary
+    visible_selectors:
+      - pipeline
+      - run_type
+    hidden_context_selectors: []
+    hidden_detail_selectors: []
+    top_bar_order:
+      - pipeline
+      - run_type
+    query_source_families:
+      pipeline: prometheus_records_processed_total
+      run_type: prometheus_records_processed_total
+  bioetl-runtime:
+    family: pipeline_summary
+    visible_selectors:
+      - pipeline
+      - run_type
+      - stage
+    hidden_context_selectors: []
+    hidden_detail_selectors: []
+    top_bar_order:
+      - pipeline
+      - run_type
+      - stage
+    query_source_families:
+      pipeline: prometheus_runtime_pipeline_run_type_universe
+      run_type: prometheus_runtime_pipeline_run_type_universe
+      stage: prometheus_pipeline_stage_expected
+  bioetl-provider-health-v2:
+    family: provider_first
+    visible_selectors:
+      - provider
+    hidden_context_selectors:
+      - pipeline_context
+    hidden_detail_selectors:
+      - adapter
+    top_bar_order:
+      - provider
+    query_source_families:
+      provider: prometheus_provider_health_union
+      pipeline_context: textbox_navigation_context
+      adapter: prometheus_circuit_breaker_state
+  bioetl-dq-v2:
+    family: pipeline_summary
+    visible_selectors:
+      - pipeline
+      - run_type
+      - stage
+    hidden_context_selectors: []
+    hidden_detail_selectors: []
+    top_bar_order:
+      - pipeline
+      - run_type
+      - stage
+    query_source_families:
+      pipeline: prometheus_records_processed_total
+      run_type: prometheus_records_processed_total
+      stage: prometheus_records_processed_total
+  bioetl-workflow-overview:
+    family: workflow_evidence
+    visible_selectors:
+      - workflow
+      - status
+      - step_status
+      - step_kind
+    hidden_context_selectors: []
+    hidden_detail_selectors: []
+    top_bar_order:
+      - workflow
+      - status
+      - step_status
+      - step_kind
+    query_source_families:
+      workflow: prometheus_workflow_runs_total
+      status: prometheus_workflow_runs_total
+      step_status: prometheus_workflow_step_events_total
+      step_kind: prometheus_workflow_step_events_total
+  bioetl-silver-reject-explorer:
+    family: forensic_explorer
+    visible_selectors:
+      - pipeline
+      - run_type
+      - reason_code
+      - field
+      - run_id
+      - payload_hash
+    hidden_context_selectors: []
+    hidden_detail_selectors: []
+    top_bar_order:
+      - pipeline
+      - run_type
+      - reason_code
+      - field
+      - run_id
+      - payload_hash
+    query_source_families:
+      pipeline: prometheus_records_processed_total
+      run_type: quarantine_filter_options_api
+      reason_code: quarantine_filter_options_api
+      field: quarantine_filter_options_api
+      run_id: quarantine_filter_options_api
+      payload_hash: textbox_forensic_selector
+
+ship_now_selector_contract_by_uid:
+  bioetl-control-plane-v1:
+    visible_selectors:
+      - pipeline
+      - run_type
+    time_range: grafana_builtin
+  bioetl-overview-v2:
+    visible_selectors:
+      - pipeline
+      - run_type
+    time_range: grafana_builtin
+  bioetl-runtime:
+    visible_selectors:
+      - pipeline
+      - run_type
+      - stage
+    time_range: grafana_builtin
+  bioetl-provider-health-v2:
+    visible_selectors:
+      - provider
+    hidden_context_selectors:
+      - pipeline_context
+    hidden_detail_selectors:
+      - adapter
+    time_range: grafana_builtin
+  bioetl-dq-v2:
+    visible_selectors:
+      - pipeline
+      - run_type
+      - stage
+    time_range: grafana_builtin
+  bioetl-workflow-overview:
+    visible_selectors:
+      - workflow
+      - status
+      - step_status
+      - step_kind
+    time_range: grafana_builtin
+  bioetl-silver-reject-explorer:
+    visible_selectors:
+      - pipeline
+      - run_type
+      - reason_code
+      - field
+      - run_id
+      - payload_hash
+    time_range: grafana_builtin
+
+hidden_handoff_contract:
+  allowed_shipped_vars:
+    - pipeline_context
+  detail_only_shipped_vars:
+    - adapter
+  reserved_future_vars:
+    - workflow_context
+    - selected_run_id
+    - selected_manifest_id
+    - selected_started_at
+  forbidden_cross_dashboard_forensic_vars:
+    - run_id
+    - payload_hash
+    - manifest_id
+    - execution_fingerprint
+  rules:
+    - Hidden vars preserve navigation or detail-only scope and do not
+      automatically become visible top-level selectors.
+    - Visible selectors MUST NOT be propagated implicitly with blanket
+      includeVars semantics.
+
+run_catalog_future_contract:
+  status: design_only
+  local_only: true
+  required_source_properties:
+    - local_manifest_or_ledger_backed
+    - no_prometheus_label_explosion
+    - supports_latest_previous_exact_resolution
+  minimum_fields:
+    - run_id
+    - pipeline_name
+    - workflow_name
+    - run_type
+    - started_at
+    - manifest_id
+    - status
+  optional_fields:
+    - provider
+    - execution_fingerprint
+  source_candidates:
+    - manifest_index
+    - ledger_index
+    - local_api
+    - lightweight_table_backed_index
+
+execution_selector_future_contract:
+  status: design_only
+  selector_name: run_selector_mode
+  supported_modes:
+    - latest
+    - previous
+    - exact
+  resolved_hidden_context:
+    - selected_run_id
+    - selected_manifest_id
+    - selected_started_at
+  rollout_candidates:
+    - bioetl-runtime
+    - bioetl-dq-v2
+    - bioetl-control-plane-v1
+    - bioetl-overview-v2
+  excluded_by_default:
+    - bioetl-provider-health-v2
+    - bioetl-workflow-overview
+    - bioetl-silver-reject-explorer
+
+dual_scope_evaluation:
+  workflow_plus_pipeline:
+    status: future_candidate_only
+    prerequisites:
+      - truthful_intersection_semantics
+      - run_catalog_support
+      - explicit_empty_intersection_no_data
+    candidate_uids:
+      - bioetl-runtime
+      - bioetl-dq-v2
+      - bioetl-control-plane-v1
+      - bioetl-overview-v2
+    excluded_default_uids:
+      - bioetl-provider-health-v2
+      - bioetl-workflow-overview
+      - bioetl-silver-reject-explorer

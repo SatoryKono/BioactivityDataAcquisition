@@ -132,6 +132,8 @@ uv run python -m pytest -q tests/integration/test_grafana_config.py
 - [ ] Для всех status-панелей задано единое no-data поведение: `null -> UNKNOWN (gray)`.
 - [ ] Для терминов статусов применяется единая таблица mapping из `docs/03-guides/dashboards/design-system.md` (раздел **1.1 Canonical mapping: L0 vs diagnostic dashboards**).
 - [ ] В L0 dashboards используется только `OK/WARN/CRIT/UNKNOWN`; alias-термины (`DEGRADED/BROKEN/HEALTHY`) допустимы только в диагностических deep-dive поверхностях и с явным alias mapping в description.
+- [ ] Для Prometheus current-status/current-cause panels не используется invalid `or vector(0)`; missing telemetry остаётся `UNKNOWN`.
+- [ ] Для HTTP-backed forensic panels copy различает empty result, invalid filter chain и backend failure.
 - [ ] Для схожих KPI в разных dashboards совпадают `unit` и `decimals` (например, event counts = `short/0`, timestamps = `dateTimeAsIso/0`).
 - [ ] Заголовки новых/переименованных панелей соответствуют action-first шаблону (`Monitor/Inspect/Track/...: ...`).
 - [ ] Заголовки и описания новых панелей соответствуют шаблонам из design system.

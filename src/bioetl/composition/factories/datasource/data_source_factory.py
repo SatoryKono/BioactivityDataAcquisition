@@ -10,10 +10,8 @@ from bioetl.composition.factories.datasource.adapter_helpers import (
 from bioetl.composition.factories.datasource.provider_registry_resolution import (
     resolve_datasource_provider_registry as _resolve_provider_registry,
 )
-from bioetl.composition.providers._models import (
+from bioetl.composition.providers.provider_registry import (
     DataSourceCreatorProtocol,
-)
-from bioetl.composition.providers._registry_protocols import (
     ProviderDataSourceRegistryProtocol,
 )
 from bioetl.domain.ports import DataSourcePort

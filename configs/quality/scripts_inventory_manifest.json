@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-05-07T14:14:34.092429+00:00",
+  "generated_at": "2026-05-08T09:02:37.622278+00:00",
   "summary": {
     "total_scripts": 354,
     "status_counts": {
@@ -9004,7 +9004,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 6,
       "references": [
         {
           "path": "docs/05-operations/runbooks/neo4j-complete-recovery-guide.md",
@@ -9032,9 +9032,15 @@
         },
         {
           "path": "tests/unit/memory/test_review_curated.py",
-          "line": 105,
+          "line": 121,
           "source_group": "tests",
           "text": "\"source_refs\": [\"src/memory/query.py\", \"src/memory/README.md\"],"
+        },
+        {
+          "path": "tests/unit/memory/test_workflow_tooling.py",
+          "line": 200,
+          "source_group": "tests",
+          "text": "\"source_path\": \"src/memory/query.py\","
         }
       ]
     },

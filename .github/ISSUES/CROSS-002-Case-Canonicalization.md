@@ -3,7 +3,7 @@
 **Status**: In Progress 🚧
 **Priority**: P1 (High)
 **Labels**: `normalization`, `data-quality`, `architecture`, `cross-pipeline`
-**Epic**: Cross-Pipeline Normalization Improvements 2024Q3
+**Epic**: Cross-Pipeline Normalization Improvements 2026Q2
 
 ## 🎯 Problem
 
@@ -196,8 +196,8 @@ python scripts/validate_data_quality.py --case-check
 ## ⏳ Time Estimate
 
 **Total**: 8 days
-**Start Date**: 2024-08-21
-**Target Completion**: 2024-09-05
+**Start Date**: 2026-05-15
+**Target Completion**: 2026-05-25
 
 ## 👥 Assignee
 

@@ -181,6 +181,85 @@ def test_runtime_provider_dq_first_screens_use_canonical_current_status() -> Non
             )
 
 
+def test_current_status_and_current_cause_panels_do_not_use_zero_fallback() -> None:
+    """Fail-closed current-status surfaces must not hide missing telemetry behind or vector(0)."""
+    expectations = {
+        "bioetl-runtime.json": [
+            "Monitor Runtime Current Status",
+            "Inspect Top Runtime Blockers",
+        ],
+        "bioetl-provider-health-v2.json": [
+            "Monitor GLOBAL Provider Severity Matrix",
+            "Inspect Provider Top Causes",
+        ],
+        "bioetl-dq-v2.json": [
+            "Monitor DQ Current Status",
+            "Inspect DQ Current Reasons",
+        ],
+    }
+
+    for dashboard_name, panel_titles in expectations.items():
+        dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
+        panels = {
+            panel.get("title"): panel
+            for panel in get_dashboard_panels(dashboard)
+            if panel.get("title")
+        }
+        for panel_title in panel_titles:
+            panel = panels.get(panel_title)
+            assert panel is not None, (
+                f"{dashboard_name} must expose current panel {panel_title!r}"
+            )
+            expressions = [
+                target.get("expr", "")
+                for target in panel.get("targets", [])
+                if isinstance(target.get("expr"), str)
+            ]
+            assert expressions, (
+                f"{dashboard_name}:{panel_title} must define query expressions"
+            )
+            assert all("or vector(0)" not in expr for expr in expressions), (
+                f"{dashboard_name}:{panel_title} must preserve UNKNOWN instead of zero fallback"
+            )
+
+
+def test_required_trust_markers_stay_visible_on_target_dashboards() -> None:
+    """Datasource trust surfaces are targeted: Runtime/Control Plane need explicit first-screen markers."""
+    expectations = {
+        "bioetl-runtime.json": (
+            "Monitor Runtime Telemetry Gap",
+            ("treat zero count panels as inconclusive", "prometheus targets"),
+        ),
+        "bioetl-control-plane-v1.json": (
+            "Inspect: Telemetry Missing",
+            ("do not trust zero blocker cards", "prometheus scrape/rules"),
+        ),
+    }
+
+    for dashboard_name, (panel_title, required_tokens) in expectations.items():
+        dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
+        panels = {
+            panel.get("title"): panel
+            for panel in get_dashboard_panels(dashboard)
+            if panel.get("title")
+        }
+        panel = panels.get(panel_title)
+        assert panel is not None, (
+            f"{dashboard_name} must expose required trust marker {panel_title!r}"
+        )
+        assert panel.get("gridPos", {}).get("y", 999) <= 12, (
+            f"{dashboard_name}:{panel_title} must stay above fold"
+        )
+        assert panel.get("fieldConfig", {}).get("defaults", {}).get("noValue") == (
+            "UNKNOWN"
+        )
+        description = str(panel.get("description", "")).lower()
+        for token in required_tokens:
+            assert token in description, (
+                f"{dashboard_name}:{panel_title} description must mention {token!r}"
+            )
+
+
 def test_dashboard_top_level_grid_positions_do_not_overlap() -> None:
     """Shipped dashboards must not hide cards under navigation/scope rows."""
     for dashboard_path in sorted(_DASHBOARD_DIR.glob("*.json")):

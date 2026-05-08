@@ -4,10 +4,8 @@ from __future__ import annotations
 
 from typing import cast
 
-from bioetl.composition.providers._registry_protocols import (
+from bioetl.composition.providers.provider_registry import (
     ProviderDataSourceRegistryProtocol,
-)
-from bioetl.composition.providers._registry_resolution import (
     resolve_provider_registry,
 )
 

@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Callable, Protocol
+from typing import Protocol
 from uuid import uuid4
 
 from bioetl.application.services.control_plane.workflow_manifest_models import (

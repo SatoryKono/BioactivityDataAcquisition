@@ -18,6 +18,8 @@ ______________________________________________________________________
 
 Machine-readable navigation contract: `docs/03-guides/dashboards/contracts/navigation-links.yaml` (docs/tests должны соответствовать ему).
 
+Unified variable contract: `docs/03-guides/dashboards/variable-reference.md`.
+
 ## Какие дашборды использовать
 
 | Dashboard                 | UID                             | Для чего                                                                                   |
@@ -81,6 +83,11 @@ Machine-readable navigation contract: `docs/03-guides/dashboards/contracts/navig
    выполнение сейчас и куда идти дальше». Selected-range evidence начинается
    ниже и не определяет current status; non-zero/UNKNOWN telemetry gap делает
    ниже расположенные zero-count cards недоказательными.
+   Datasource trust markers are targeted: `Runtime` keeps this explicit
+   telemetry-gap panel first-screen, `Control Plane` uses
+   `Inspect: Telemetry Missing`, while `Silver Reject Explorer` relies on
+   explicit no-data/backend-failure copy instead of a generic datasource-health
+   stat tile.
 1. `bioetl-runtime`, collapsed row-группы по сценарию:
    `Backlog Trends`, `Durations`, `Shutdown Diagnostics`,
    `Tracing-only Log Hygiene`. Открывайте ровно одну нужную группу после
@@ -183,7 +190,7 @@ Panel-level dashboard handoffs и `First Action` dashboard CTAs намеренн
      severity и первое действие.
   1. **L1 cause narrowing:** раскройте collapsed rows `Reject / Pareto / Fields` и `Validation Diagnostics`, проверьте `Inspect: Top Silver Reject Reasons (Pareto)` / `Inspect: Top Silver Reject Fields` и связанные diagnostics.
   1. **L2 explorer:** откройте `Silver Reject Explorer` через top-level link в `4. Data Quality` для record-level списка, выбора `reason_code/field/run_id` и detail по `payload_hash`.
-  1. **L2 no-data gate:** считайте `0` rejects нормой только когда `Review: First Action / No-Data Semantics` подтверждает конкретный pipeline, доступный Quarantine Explorer и ненулевой Bronze denominator; plugin errors, `unknown` pipeline или `bronze_records=0` остаются UNKNOWN.
+  1. **L2 no-data gate:** считайте `0` rejects нормой только когда `Review: First Action / No-Data Semantics` подтверждает конкретный pipeline, доступный Quarantine Explorer и ненулевой Bronze denominator; zero matching rows остаются empty-result состоянием, а plugin errors, unsupported filter chains, `unknown` pipeline или `bronze_records=0` остаются UNKNOWN/error.
   1. Используйте quarantine CLI для action-операций (`replay/resolve/purge`) и финального подтверждения remediation.
 - Эти панели отвечают на вопросы:
   - растёт ли объём `filtered_out`;
@@ -332,6 +339,18 @@ Variable handoff policy for dashboard links remains strict and bounded:
   `1. Overview`, `2. Runtime`, `3. Provider Health`, `4. Data Quality`;
   cross-dashboard handoffs не leaking `$workflow/$status` into non-workflow
   targets.
+- `bioetl-workflow-overview`: first screen keeps `Failed Workflow Runs / Range`,
+  `Failed Pipeline Steps / Range`, `Failed Transform Steps / Range`,
+  `Skipped Step Events / Range`, `Workflow Run Outcomes / Range`, and
+  `Next Diagnostic Surface`; deeper step evidence now lives under collapsed
+  row `Step Diagnostics (collapsed)` with
+  `Step Outcomes by Kind / Step Status / Range` and
+  `Step Duration p95 by Kind / Step Status / Range`.
+- `bioetl-workflow-overview`: `Next Diagnostic Surface` is the only justified
+  panel-level handoff exception. Although the header bus already exists, this
+  panel remains the sole first-screen workflow CTA and therefore exposes
+  bounded `Open ...` dataLinks to neighboring dashboards while preserving the
+  time range and resetting unsupported workflow-only scope.
 
   **First 2 clicks (L1):**
   1. Click #1: открыть `bioetl-workflow-overview`, проверить `Failed Workflow Runs / Range` (`id=2`), `Failed Pipeline Steps / Range` (`id=3`) и `Failed Transform Steps / Range` (`id=6`).
@@ -442,7 +461,8 @@ Variable handoff policy for dashboard links remains strict and bounded:
 1. Пустой `$run_type`:
    нет метрик `bioetl_records_processed_total` для выбранного `$pipeline`.
 1. `bioetl-silver-reject-explorer` показывает plugin error или `No data`:
-   проверьте, что выбран конкретный `$pipeline` (не `All`) и что backend отвечает на
+   сначала различите zero matching rows и backend failure. Затем проверьте, что
+   выбран конкретный `$pipeline` (не `All`) и что backend отвечает на
    `/ops/quarantine/filter-options?pipeline=<pipeline_name>`.
 
 

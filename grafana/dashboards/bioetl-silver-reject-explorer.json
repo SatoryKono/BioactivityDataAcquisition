@@ -114,7 +114,7 @@
       },
       "id": 10,
       "options": {
-        "content": "<div style='padding:0.6rem 0.8rem;line-height:1.55'><strong>First action:</strong> if total rejects are non-zero, inspect top reason/field/signature, open a payload_hash drilldown from the table, then decide whether to fix transformer logic, schema/DQ rule configuration, provider drift, or replay/resolve via quarantine CLI. <strong>No-data:</strong> 0 rejects is OK only when Quarantine Explorer responds, one concrete pipeline is selected, and Bronze records are present; datasource errors, unknown pipeline, or bronze_records=0 are UNKNOWN. <strong>Lineage:</strong> use run_id and batch/Bronze evidence where available before replay decisions. <a href='https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/quarantine-management.md' target='_blank' rel='noreferrer noopener'>Open Quarantine Management Runbook</a>.</div>",
+        "content": "<div style='padding:0.6rem 0.8rem;line-height:1.55'><strong>First action:</strong> if total rejects are non-zero, inspect top reason/field/signature, open a payload_hash drilldown from the table, then decide whether to fix transformer logic, schema/DQ rule configuration, provider drift, or replay/resolve via quarantine CLI. <strong>No-data:</strong> 0 rejects is OK only when Quarantine Explorer responds, one concrete pipeline is selected, and Bronze records are present. Zero matching rows for the active filters is an empty result, not a datasource failure; datasource/plugin errors, unsupported filter chains, unknown pipeline, or bronze_records=0 are UNKNOWN or error states until the backend is checked. <strong>Lineage:</strong> use run_id and batch/Bronze evidence where available before replay decisions. <a href='https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/quarantine-management.md' target='_blank' rel='noreferrer noopener'>Open Quarantine Management Runbook</a>.</div>",
         "mode": "html"
       },
       "title": "Review: First Action / No-Data Semantics",
@@ -322,7 +322,7 @@
       ],
       "title": "Inspect Run Scope Summary",
       "type": "table",
-      "description": "Full selected-range stats payload for the current explorer scope. Use total, bronze_records, reject_ratio, and by_reason_code/by_field/by_reason_signature together to decide whether the issue is isolated, systemic, or missing telemetry. No data or an empty summary is UNKNOWN until the API, pipeline, and Bronze denominator are confirmed. This panel is forensic context, not a replay approval signal; open Control Plane and CLI before replay/resolve actions."
+      "description": "Full selected-range stats payload for the current explorer scope. Use total, bronze_records, reject_ratio, and by_reason_code/by_field/by_reason_signature together to decide whether the issue is isolated, systemic, or missing telemetry. No data or an empty summary is UNKNOWN until the API, pipeline, Bronze denominator, and filter-option chain are confirmed. This panel is forensic context, not a replay approval signal; open Control Plane and CLI before replay/resolve actions."
     },
     {
       "datasource": "Quarantine Explorer",
@@ -525,7 +525,7 @@
           "expr": ""
         }
       ],
-      "description": "Shows latest 100 Silver FILTERED_OUT_SILVER records for the selected pipeline/run_type/reason_code/field/run_id scope, sorted by ingestion_ts descending. Columns include payload_hash, run_id, run_type, reason_code, rule_type, field, operator, expected/actual, dq_status, and reason when the backend provides them; raw payload is intentionally not shown in this list. Empty-state copy: No rejected records for current filters. Backend/query failure copy: If data source query fails, treat this as an error state and inspect Grafana query error details. Use payload_hash self-drilldown for one-record focus and CLI handoff for inspect/resolve actions; verify Bronze/run/batch lineage before replay decisions.",
+      "description": "Shows latest 100 Silver FILTERED_OUT_SILVER records for the selected pipeline/run_type/reason_code/field/run_id scope, sorted by ingestion_ts descending. Columns include payload_hash, run_id, run_type, reason_code, rule_type, field, operator, expected/actual, dq_status, and reason when the backend provides them; raw payload is intentionally not shown in this list. Empty-state copy: No rejected records for current filters means zero matching rows only after the pipeline/filter scope is confirmed. Backend/query failure copy: If data source query fails, treat this as an error state and inspect Grafana query error details. Use payload_hash self-drilldown for one-record focus and CLI handoff for inspect/resolve actions; verify Bronze/run/batch lineage before replay decisions.",
       "title": "Inspect Filtered Records Table",
       "type": "table"
     },
@@ -566,7 +566,7 @@
           "expr": ""
         }
       ],
-      "description": "Selected-range one-record projection filtered by payload_hash plus the active pipeline/run_type/reason_code/field/run_id scope. Blank payload_hash returns the latest matching record because this panel uses the safe list endpoint; set payload_hash from the table for exact focus. This view does not mutate payload and does not prove replay safety. If detail is empty, distinguish an excluded record from datasource failure before resolving; use run_id/Bronze linkage and Control Plane evidence for replay decisions.",
+      "description": "Selected-range one-record projection filtered by payload_hash plus the active pipeline/run_type/reason_code/field/run_id scope. Blank payload_hash returns the latest matching record because this panel uses the safe list endpoint; set payload_hash from the table for exact focus. This view does not mutate payload and does not prove replay safety. If detail is empty, distinguish an excluded record or zero matching row from datasource failure before resolving; use run_id/Bronze linkage and Control Plane evidence for replay decisions.",
       "title": "Inspect Selected Record Details",
       "type": "table"
     }

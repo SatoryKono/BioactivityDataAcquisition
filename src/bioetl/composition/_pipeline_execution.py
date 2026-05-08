@@ -1,8 +1,4 @@
-"""Pipeline execution entrypoints.
-
-Core functions for building, configuring, and running ETL pipelines.
-Split from entrypoints.py per audit-package-structure-2026-02-07.
-"""
+"""Pipeline execution entrypoints for building, configuring, and running ETL."""
 
 from __future__ import annotations
 
@@ -76,6 +72,7 @@ def push_metrics_to_gateway(
     run_label: str = "bioetl",
     pipeline_name: str | None = None,
     run_type: str | None = None,
+    grouping_key_extra: dict[str, str] | None = None,
 ) -> bool:
     """Push current metrics to Prometheus Pushgateway via composition.
 
@@ -95,6 +92,7 @@ def push_metrics_to_gateway(
         run_label=run_label,
         pipeline_name=pipeline_name,
         run_type=run_type,
+        grouping_key_extra=grouping_key_extra,
     )
 
 

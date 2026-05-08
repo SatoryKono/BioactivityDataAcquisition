@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 from bioetl.composition.factories.datasource.provider_registry_resolution import (
     resolve_datasource_provider_registry as _resolve_provider_registry,
 )
-from bioetl.composition.providers._registry_protocols import (
+from bioetl.composition.providers.provider_registry import (
     ProviderDataSourceRegistryProtocol,
 )
 from bioetl.composition.source_config_access import load_source_config

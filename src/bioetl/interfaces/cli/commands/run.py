@@ -10,6 +10,9 @@ from typing import TYPE_CHECKING, NoReturn, cast
 
 import click
 
+from bioetl.interfaces.cli.commands.domains.health.metrics_publication_integration import (
+    publish_metrics_safely,
+)
 from bioetl.interfaces.cli.commands.domains.health.metrics_server_integration import (
     ensure_metrics_server_started as _ensure_metrics_server_started_impl,
 )
@@ -161,29 +164,6 @@ def execute_run(
     registry: PipelineRegistry | None = None,
 ) -> RunResult:
     """Execute run and flush metrics at command boundary."""
-    from bioetl.composition.execution_api import push_metrics_to_gateway
-
-    def _flush_metrics_safely(
-        run_label: str = "bioetl",
-        pipeline_name: str | None = None,
-    ) -> bool:
-        try:
-            push_metrics_to_gateway(
-                run_label=run_label,
-                pipeline_name=pipeline_name,
-            )
-            return True
-        except (
-            OSError,
-            ConnectionError,
-            TimeoutError,
-            RuntimeError,
-            ValueError,
-            TypeError,
-        ):
-            # Metrics publication must never turn a completed CLI run into failure.
-            return False
-
     return get_cli_run_orchestration_service().execute_pipeline(
         request=request,
         run_pipeline_async=_build_run_pipeline_callable(
@@ -191,7 +171,7 @@ def execute_run(
             run_pipeline_async_callable=_run_pipeline_async,
         ),
         run_coroutine=asyncio.run,
-        flush_metrics=_flush_metrics_safely,
+        flush_metrics=publish_metrics_safely,
     )
 
 

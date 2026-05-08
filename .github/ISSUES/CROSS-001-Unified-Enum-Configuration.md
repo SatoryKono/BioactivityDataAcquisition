@@ -3,7 +3,7 @@
 **Status**: In Progress 🚧
 **Priority**: P0 (Critical)
 **Labels**: `normalization`, `configuration`, `architecture`, `cross-pipeline`
-**Epic**: Cross-Pipeline Normalization Improvements 2024Q3
+**Epic**: Cross-Pipeline Normalization Improvements 2026Q2
 
 ## 🎯 Problem
 
@@ -210,8 +210,8 @@ mypy src/bioetl/domain/normalization/profiles/ --strict
 ## ⏳ Time Estimate
 
 **Total**: 11 days
-**Start Date**: 2024-08-01
-**Target Completion**: 2024-08-20
+**Start Date**: 2026-05-01
+**Target Completion**: 2026-05-15
 
 ## 👥 Assignee
 

@@ -39,7 +39,7 @@ on:
   workflow_dispatch:
 
 env:
-  PYTHON_VERSION: "3.12"
+  PYTHON_VERSION: "3.13"
   VCR_RECORD_MODE: "none"
 
 jobs:

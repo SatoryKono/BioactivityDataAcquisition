@@ -12,9 +12,9 @@ pipeline:
   business_primary_keys:
   - sim_id
 
-sink:
-  gold:
-    mode: overwrite
+  sink:
+    gold:
+      mode: overwrite
 schema:
   content_hash:
     include: []
