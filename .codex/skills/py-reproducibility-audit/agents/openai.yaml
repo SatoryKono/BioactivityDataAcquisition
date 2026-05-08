@@ -1,0 +1,7 @@
+interface:
+  display_name: "Py Reproducibility Audit"
+  short_description: "Audit BioETL replay determinism"
+  default_prompt: "Use $py-reproducibility-audit to audit BioETL pipeline reproducibility and turn confirmed findings into GitHub issues."
+
+policy:
+  allow_implicit_invocation: true

@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import hashlib
-from pathlib import PurePath
 
 from bioetl.domain.lineage import LineageGraphFragment, MetadataLineageBundleResult
 from bioetl.domain.models.metadata import (
@@ -101,11 +100,10 @@ def build_bronze_file_output_metadata(
 
 
 def build_bronze_output_content_hash(input_data: BronzeMetadataInput) -> str:
-    """Build deterministic Bronze output identity from emitted file evidence."""
+    """Build semantic Bronze output identity from emitted file evidence."""
     payload = {
         "files": [
             {
-                "path": PurePath(input_data.output_path).as_posix(),
                 "record_count": input_data.record_count,
                 "size_bytes": input_data.compressed_size,
                 "content_hash": input_data.output_content_hash,

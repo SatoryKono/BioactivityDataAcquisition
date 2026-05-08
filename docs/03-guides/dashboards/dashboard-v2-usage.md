@@ -113,7 +113,10 @@ Human-readable selector references:
    `Inspect Critical Providers`, `Inspect Provider Top Causes` и `First Action`
    отвечают на вопрос «какой provider degraded/failing и почему». Panel `id=114`
    остаётся raw source enum (`0=UNHEALTHY`, `1=DEGRADED`, `2=HEALTHY`) ниже
-   first screen как evidence.
+   first screen как evidence. Если status остаётся non-OK, а canonical cause
+   projection пуста, `Inspect Provider Top Causes` теперь показывает synthetic
+   `status_without_projected_cause` вместо silent empty table; это telemetry/rule
+   gap, а не healthy state.
    `First Action` is the bounded CTA surface for this dashboard: review the
    severity matrix, inspect critical providers, or inspect provider top causes
    before leaving the page.
@@ -200,7 +203,7 @@ Panel-level dashboard handoffs и `First Action` dashboard CTAs намеренн
      severity и первое действие.
   1. **L1 cause narrowing:** раскройте collapsed rows `Reject / Pareto / Fields` и `Validation Diagnostics`, проверьте `Inspect: Top Silver Reject Reasons (Pareto)` / `Inspect: Top Silver Reject Fields` и связанные diagnostics.
   1. **L2 explorer:** откройте `Silver Reject Explorer` через top-level link в `4. Data Quality` для record-level списка, выбора `reason_code/field/run_id` и detail по `payload_hash`.
-  1. **L2 no-data gate:** считайте `0` rejects нормой только когда `Review: First Action / No-Data Semantics` подтверждает конкретный pipeline, доступный Quarantine Explorer и ненулевой Bronze denominator; zero matching rows остаются empty-result состоянием, а plugin errors, unsupported filter chains, `unknown` pipeline или `bronze_records=0` остаются UNKNOWN/error.
+  1. **L2 no-data gate:** считайте `0` rejects нормой только когда `Review: First Action / No-Data Semantics` подтверждает конкретный pipeline, доступный Quarantine Explorer и ненулевой Bronze denominator; zero-reject workflow run is a valid empty explorer state only after those checks pass. Zero matching rows остаются empty-result состоянием, а plugin errors, unsupported filter chains, `unknown` pipeline или `bronze_records=0` остаются UNKNOWN/error.
   1. Используйте quarantine CLI для action-операций (`replay/resolve/purge`) и финального подтверждения remediation.
 - Эти панели отвечают на вопросы:
   - растёт ли объём `filtered_out`;
@@ -239,6 +242,11 @@ Every shipped navigation panel `id=1000` also exposes global adjunct links
 `Silver Reject Explorer`, `Explore Logs`, and `Explore Traces` after bus
 `0..5`. These navigation-panel links open in the same window, not in a new
 tab.
+`Explore Logs` is a baseline-first adjunct surface: zero lines can legitimately
+mean Loki shipping is disabled, no BioETL streams were shipped in range, or the
+operator still needs to refine scope inside Explore.
+`Explore Traces` is a traced-run-only adjunct surface; if the runtime used
+`NoOpTracing`, empty Tempo results are expected rather than a dashboard defect.
 
 Variable handoff policy for dashboard links remains strict and bounded:
 
@@ -290,6 +298,10 @@ Variable handoff policy for dashboard links remains strict and bounded:
   Переход в `3. Provider Health` передаёт `provider=unknown` и
   `pipeline_context=$pipeline`; `adapter` не передаётся, чтобы target dashboard
   использовал собственный fallback `All adapters`.
+  First-screen current-status cards normalize a manually selected
+  `workflow_<pipeline>` value back to the entity pipeline before reading
+  current-state recording rules, so `workflow_chembl_assay` resolves to the
+  same trust verdict as `chembl_assay`.
 
   **First 2 clicks (L1):**
   1. Click #1: открыть `bioetl-control-plane-v1`, проверить `Monitor: Replay Safety State` (`id=891`), `Inspect: Telemetry Missing` (`id=907`) и `Next Action: Replay Diagnostics` (`id=906`).
@@ -318,7 +330,10 @@ Variable handoff policy for dashboard links remains strict and bounded:
 - `bioetl-dq-v2`: dashboard links `0. Control Plane`, `1. Overview`,
   `2. Runtime`, `3. Provider Health`, `5. Workflow`, `Silver Reject Explorer`,
   `Explore Logs`, `Explore Traces` дают переходы для DQ incidents и freshness
-  investigation. Handoff в Explorer передаёт только bounded `$pipeline/$run_type`
+  investigation. `Explore Traces` здесь остаётся traced-run-only adjunct;
+  включайте tracing через `--tracing` или
+  `BIOETL_OBSERVABILITY__TRACING_ENABLED=true`, если ожидаете Tempo evidence.
+  Handoff в Explorer передаёт только bounded `$pipeline/$run_type`
   scope, а не generic `includeVars` leakage.
 - `bioetl-silver-reject-explorer`: dashboard bus links `0..5` plus global
   adjunct links `Explore Logs` и `Explore Traces`; self-link to
@@ -400,6 +415,7 @@ Variable handoff policy for dashboard links remains strict and bounded:
 
 - `overview.id=214 (System Status)`: `CRIT` при runtime blocker `>0`, DQ hard fail `>0`, blocking gold lifecycle или control-plane blocker `>0`; `WARN` при non-fatal warning-only сигналах; `UNKNOWN` при no recent samples. Panel links route directly to Runtime / Control Plane / Data Quality / Provider Health / Workflow with the current time range.
 - `overview.id=215 (Next Action)`: priority order `Runtime > Control Plane > Gold Lifecycle > DQ > Provider > Workflow > Monitor`. If the selected scope is missing from `bioetl_overview_pipeline_run_type_universe` (aliased from the runtime pipeline/run_type universe), the panel falls back to `NO_ROUTE` instead of rendering empty. Next action: open the first non-OK surface via the matching panel link. Runtime / Control Plane / DQ handoffs preserve `$pipeline/$run_type`; Provider Health fail-closes to `provider=unknown` while preserving `pipeline_context`; Workflow resets scope because the target dashboard does not accept pipeline/run_type variables.
+- `overview` first-screen selected-scope cards normalize a manually selected `workflow_<pipeline>` value back to the entity pipeline before reading `bioetl_l0_*` / `bioetl_l1_*` summary recording rules. For example, `workflow_chembl_assay` resolves to the same current-state summary rows as `chembl_assay`.
 - `dq.id=2 (DQ Score Snapshot)`: no-data остается `UNKNOWN`, не `0`; hard-fail signals блокируют promotion, warning-only означает drift. Next action: hard-fail -> reject/quarantine diagnostics; warning-only -> trend + top reasons.
 - `overview.id=9002 (L0 Inputs)`: использует `max by (input) (bioetl_l0_input_status_selected{pipeline=~"$pipeline",run_type=~"$run_type"})`. Это compact projected selected-scope surface: first-screen таблица держит одну worst-status строку на operator input, чтобы не требовать scroll на default `All/All`.
 - `dq.id=154 (Blocked Share Trend)`: numerator = `filtered_out + quarantined`,
@@ -433,6 +449,11 @@ Variable handoff policy for dashboard links remains strict and bounded:
   current gold lifecycle status by `pipeline` across the selected `run_type`
   scope. Exact `lifecycle_state` detail remains available in Runtime / trend
   surfaces; the Overview card stays compact so it does not require scroll.
+- `overview.Workflow Selected / Workflow Global`: workflow summaries are
+  projected from `bioetl_workflow_runs_total` via fixed-window
+  `max_over_time(...)` evidence so short-lived successful workflow runs remain
+  visible after the CLI process exits. `UNKNOWN` is valid only when the
+  selected scope has no recent workflow evidence at all.
 - `overview.Recent Terminal Runs`: range-evidence table now
   shows only non-success terminal statuses grouped by `pipeline/status`; success
   completions are intentionally omitted because they create scroll without

@@ -119,6 +119,61 @@ def _build_ledger_entries(
     return tuple(store.items)
 
 
+def test_build_diagnostics_summary_merges_ledger_derived_input_snapshots() -> None:
+    manifest = _make_manifest()
+    entry = RunLedgerEntry(
+        entry_id="entry-input-snapshot",
+        manifest_id=manifest.manifest_id,
+        run_id=manifest.run_id,
+        event_type="input_snapshot_published",
+        event_family="input_snapshot",
+        occurred_at=datetime(2026, 1, 1, 12, 5, tzinfo=UTC),
+        status="published",
+        stage="bronze",
+        details={
+            "provider": "chembl",
+            "entity": "activity",
+            "pipeline_name": "chembl_activity",
+            "snapshot_id": "snapshot-1",
+            "content_hash": "sha256:snapshot-1",
+            "immutable_uri": "file:///bronze/snapshot-1.jsonl",
+            "query_fingerprint": "query-fingerprint-1",
+        },
+    )
+
+    summary = build_diagnostics_summary(manifest, (entry,))
+
+    assert summary["input_snapshot_materialization_mode"] == (
+        "live_capture_snapshot_materialized"
+    )
+    assert summary["source_posture"] == "live_capture_snapshot_materialized"
+    assert summary["snapshot_status"] == "ledger_derived"
+    assert summary["input_snapshot_count"] == 1
+    assert summary["input_snapshot_ids"] == ["snapshot-1"]
+    assert summary["input_snapshot_content_hashes"] == ["sha256:snapshot-1"]
+    assert summary["input_snapshots"] == [
+        {
+            "provider": "chembl",
+            "entity": "activity",
+            "pipeline_name": "chembl_activity",
+            "query": None,
+            "snapshot_id": "snapshot-1",
+            "content_hash": "sha256:snapshot-1",
+            "immutable_uri": "file:///bronze/snapshot-1.jsonl",
+            "query_fingerprint": "query-fingerprint-1",
+            "storage_provider": None,
+            "object_bucket": None,
+            "object_key": None,
+            "object_version_id": None,
+            "etag": None,
+            "last_modified": None,
+            "captured_at": None,
+            "materialization_mode": "live_capture_snapshot_materialized",
+            "source_event_id": "entry-input-snapshot",
+        }
+    ]
+
+
 def _assert_provenance_only_score(
     summary: dict[str, object], manifest: RunManifest
 ) -> None:
@@ -1067,6 +1122,60 @@ def test_build_diagnostics_summary_projects_composite_dossier_correlation() -> N
             "forensic_grade_supported": False,
         },
     }
+
+
+def test_build_diagnostics_summary_enables_composite_rich_replay_only_when_complete() -> (
+    None
+):
+    base_manifest = _make_manifest()
+    manifest = replace(
+        base_manifest,
+        provider="composite",
+        entity="composite_activity",
+        launch_context={
+            **base_manifest.launch_context,
+            "execution_context": "composite",
+        },
+    )
+    entries = (
+        RunLedgerEntry(
+            entry_id="entry-dependency",
+            manifest_id=manifest.manifest_id,
+            run_id=manifest.run_id,
+            event_type="composite_dependency_completed",
+            event_family="composite",
+            occurred_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
+            status="success",
+        ),
+        RunLedgerEntry(
+            entry_id="entry-enricher",
+            manifest_id=manifest.manifest_id,
+            run_id=manifest.run_id,
+            event_type="composite_enricher_completed",
+            event_family="composite",
+            occurred_at=datetime(2026, 1, 1, 12, 1, tzinfo=UTC),
+            status="success",
+        ),
+        RunLedgerEntry(
+            entry_id="entry-merge",
+            manifest_id=manifest.manifest_id,
+            run_id=manifest.run_id,
+            event_type="composite_merge_completed",
+            event_family="composite",
+            occurred_at=datetime(2026, 1, 1, 12, 2, tzinfo=UTC),
+            status="success",
+        ),
+    )
+
+    summary = build_diagnostics_summary(manifest, entries)
+
+    assert (
+        summary["composite_dossier_projection"]["resume_reconstructability"][
+            "forensic_grade_supported"
+        ]
+        is True
+    )
+    assert summary["alert_signals"]["composite_resume_reconstructability_gap"] is False
 
 
 def test_replay_surfaces_ignore_occurrence_only_manifest_drift() -> None:

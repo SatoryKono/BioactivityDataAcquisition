@@ -200,6 +200,8 @@ def _make_run_ledger_entry(
     event_type: str = "stage_completed",
     stage: str | None = None,
     occurred_at: datetime | None = None,
+    status: str = "completed",
+    details: dict[str, object] | None = None,
 ) -> RunLedgerEntry:
     return RunLedgerEntry(
         entry_id=entry_id,
@@ -208,7 +210,8 @@ def _make_run_ledger_entry(
         event_type=event_type,
         stage=stage,
         occurred_at=occurred_at or FIXED_CHECKPOINT_TIME,
-        status="completed",
+        status=status,
+        details=details,
     )
 
 
@@ -840,6 +843,88 @@ class TestLoadResume:
         assert state.completed_enrichers == frozenset({"crossref"})
         assert state.merge_completed is True
         assert state.last_event_id == "entry-3"
+
+    @pytest.mark.asyncio
+    async def test_resume_replay_reconstructs_rich_composite_payloads(
+        self,
+    ) -> None:
+        """Resume replay reconstructs bounded dependency/enricher/merge payloads."""
+        ledger_port = MagicMock()
+        ledger_port.list_entries_after.return_value = [
+            _make_run_ledger_entry(
+                entry_id="entry-2",
+                event_type="composite_dependency_completed",
+                occurred_at=datetime(2024, 6, 1, 10, 0, tzinfo=UTC),
+                status="success",
+                details={
+                    "dependency_name": "chembl_molecule",
+                    "pipeline_name": "chembl_molecule",
+                    "status": "success",
+                    "records_extracted": 8,
+                    "records_silver": 7,
+                    "duration_seconds": 1.5,
+                },
+            ),
+            _make_run_ledger_entry(
+                entry_id="entry-3",
+                event_type="composite_enricher_completed",
+                occurred_at=datetime(2024, 6, 1, 10, 1, tzinfo=UTC),
+                status="partial",
+                details={
+                    "enricher_name": "pubmed_publication",
+                    "status": "partial",
+                    "records_input": 10,
+                    "records_enriched": 6,
+                    "records_not_found": 3,
+                    "records_errored": 1,
+                    "dq_error_rate": 0.1,
+                    "duration_seconds": 2.0,
+                },
+            ),
+            _make_run_ledger_entry(
+                entry_id="entry-4",
+                event_type="composite_merge_completed",
+                occurred_at=datetime(2024, 6, 1, 10, 2, tzinfo=UTC),
+                status="completed",
+                details={
+                    "records_merged": 10,
+                    "records_enriched": 6,
+                    "output_silver_path": "silver/composite/publication",
+                },
+            ),
+        ]
+        svc, storage, _ = _make_service(
+            resume=True,
+            run_id="run-old",
+            expected_anchors=_anchors(manifest_id="manifest-123"),
+            run_ledger_port=ledger_port,
+        )
+        state_data = CompositeCheckpointState(
+            composite_name="my_composite",
+            run_id="run-old",
+            state=CompositePipelineState.SEED_COMPLETED,
+            seed_completed=True,
+            manifest_id="manifest-123",
+            composite_run_identity="run-old",
+            last_event_id="entry-1",
+            last_event_occurred_at=datetime(2024, 6, 1, 9, 0, tzinfo=UTC),
+        )
+        storage.exists.return_value = True
+        storage.read.return_value = json.dumps(state_data.to_dict())
+
+        state = await svc.load()
+
+        assert state.completed_dependencies == frozenset({"chembl_molecule"})
+        assert state.dependency_results["chembl_molecule"].records_silver == 7
+        assert state.completed_enrichers == frozenset({"pubmed_publication"})
+        assert state.enrichment_results["pubmed_publication"].records_errored == 1
+        assert state.merge_completed is True
+        assert state.merge_result == {
+            "output_silver_path": "silver/composite/publication",
+            "records_enriched": 6,
+            "records_merged": 10,
+        }
+        assert state.last_event_id == "entry-4"
 
     @pytest.mark.asyncio
     async def test_resume_emits_replay_not_needed_when_no_suffix_entries_exist(

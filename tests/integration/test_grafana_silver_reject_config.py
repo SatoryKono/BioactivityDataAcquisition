@@ -304,11 +304,37 @@ def test_silver_reject_explorer_first_action_documents_no_data_semantics() -> No
     assert panel.get("gridPos", {}).get("y", 999) <= 5
     content = str(panel.get("options", {}).get("content", ""))
     assert "First action:" in content
-    assert "0 rejects is OK only when Quarantine Explorer responds" in content
+    assert "zero-reject workflow run is an intentional empty explorer state" in content
     assert "Zero matching rows" in content
     assert "unsupported filter chains" in content
     assert "bronze_records=0" in content
     assert "UNKNOWN" in content
+
+
+def test_silver_reject_explorer_scope_banner_documents_zero_reject_workflow_case() -> (
+    None
+):
+    """Scope note must explain the intentional zero-reject workflow empty state."""
+    dashboard = load_dashboard(
+        Path("grafana/dashboards/bioetl-silver-reject-explorer.json")
+    )
+    panel = next(
+        (
+            item
+            for item in get_dashboard_panels(dashboard)
+            if item.get("title") == "Inspect Explorer Scope"
+        ),
+        None,
+    )
+    assert panel is not None
+    combined = " ".join(
+        (
+            str(panel.get("description", "")),
+            str(panel.get("options", {}).get("content", "")),
+        )
+    ).lower()
+    assert "zero-reject workflow run" in combined
+    assert "bronze denominator" in combined
 
 
 @pytest.mark.parametrize(
@@ -401,6 +427,35 @@ def test_silver_reject_explorer_datasource_trust_copy_distinguishes_empty_scope_
             "filter chain",
         )
     )
+
+
+def test_silver_reject_summary_panels_use_quarantine_explorer_stats_endpoint() -> None:
+    """Summary panels must validate the real Quarantine Explorer stats path."""
+    dashboard = load_dashboard(
+        Path("grafana/dashboards/bioetl-silver-reject-explorer.json")
+    )
+    expected_titles = {
+        "Monitor Filtered Records Total",
+        "Track Reject Rate vs Bronze",
+        "Inspect Run Scope Summary",
+    }
+    panels = {
+        panel.get("title"): panel
+        for panel in get_dashboard_panels(dashboard)
+        if panel.get("title") in expected_titles
+    }
+    assert set(panels) == expected_titles
+
+    for title, panel in panels.items():
+        assert panel.get("datasource") == "Quarantine Explorer", (
+            f"{title} must use Quarantine Explorer datasource"
+        )
+        targets = panel.get("targets", [])
+        assert targets, f"{title} must define a query target"
+        url = str(targets[0].get("url", ""))
+        assert "/ops/quarantine/filtered-stats" in url, (
+            f"{title} must read from the real filtered-stats datasource path"
+        )
 
 
 def test_dq_reject_panels_link_to_silver_reject_explorer() -> None:

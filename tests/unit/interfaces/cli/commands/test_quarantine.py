@@ -56,7 +56,37 @@ class TestQuarantineGroup:
         assert "replay" in result.output
         assert "purge" in result.output
         assert "resolve" in result.output
+        assert "serve" in result.output
         assert "Manage quarantine" in result.output
+
+    def test_quarantine_serve_help_displays_options(
+        self, cli_runner: CliRunner
+    ) -> None:
+        """Quarantine serve should expose dedicated backend options."""
+        result = cli_runner.invoke(cli, ["quarantine", "serve", "--help"])
+
+        assert result.exit_code == 0
+        assert "--host" in result.output
+        assert "--port" in result.output
+        assert "8081" in result.output
+
+    @patch("bioetl.interfaces.cli.commands.quarantine.run_health_server_command")
+    def test_quarantine_serve_delegates_to_long_lived_backend(
+        self,
+        mock_run_health_server_command: MagicMock,
+        cli_runner: CliRunner,
+    ) -> None:
+        """Quarantine serve must reuse the long-lived health/quarantine backend."""
+        result = cli_runner.invoke(
+            cli,
+            ["quarantine", "serve", "--host", "127.0.0.1", "--port", "18081"],
+        )
+
+        assert result.exit_code == ExitCode.OK.value
+        mock_run_health_server_command.assert_called_once_with(
+            host="127.0.0.1",
+            port=18081,
+        )
 
 
 class TestQuarantineInspect:

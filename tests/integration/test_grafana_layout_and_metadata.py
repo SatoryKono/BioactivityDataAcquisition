@@ -485,6 +485,35 @@ def test_control_plane_exposes_terminal_events_and_telemetry_gap() -> None:
     )
 
 
+def test_control_plane_first_screen_normalizes_workflow_pipeline_aliases() -> None:
+    """Current-state trust cards must resolve workflow_<pipeline> selectors back to entity scope."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
+    panels = {
+        panel.get("title"): panel
+        for panel in get_dashboard_panels(dashboard)
+        if panel.get("title")
+    }
+
+    for title in (
+        "Monitor: Replay Safety State",
+        "Monitor: Manifest / Ledger Integrity",
+        "Inspect: Telemetry Missing",
+    ):
+        panel = panels.get(title)
+        assert panel is not None, f"Control Plane dashboard missing {title!r}"
+        expr = "\n".join(
+            target.get("expr", "")
+            for target in panel.get("targets", [])
+            if isinstance(target.get("expr"), str)
+        )
+        assert "and on(pipeline)" in expr, (
+            f"{title!r} must filter current-state metrics through a normalized "
+            "pipeline selector"
+        )
+        assert 'label_replace(vector(1), "pipeline_raw", "$pipeline"' in expr
+        assert '"^(?:workflow_)?(.*)$"' in expr
+
+
 def test_control_plane_failure_ratio_thresholds_match_descriptions() -> None:
     """Manifest/ledger ratio panels should project >10% into CRIT severity."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))

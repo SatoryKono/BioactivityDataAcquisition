@@ -58,9 +58,24 @@ class AggregationSchema(BaseModel):
     """Pydantic schema for 1:M enricher aggregation config."""
 
     group_by: str = Field(..., min_length=1, description="Join key to group by")
+    order_by: list[str] = Field(
+        default_factory=list,
+        description="Canonical ordering columns used before deterministic aggregation",
+    )
     fields: dict[str, AggregationFieldSchema] = Field(
         ..., min_length=1, description="Map of output_field -> aggregation spec"
     )
+
+    @field_validator("order_by")
+    @classmethod
+    def validate_order_by(cls, value: list[str]) -> list[str]:
+        """Normalize and reject empty/duplicate deterministic ordering columns."""
+        normalized = [item.strip() for item in value]
+        if any(not item for item in normalized):
+            raise ValueError("aggregation.order_by cannot contain empty column names")
+        if len(set(normalized)) != len(normalized):
+            raise ValueError("aggregation.order_by cannot contain duplicate columns")
+        return normalized
 
     def to_domain(self) -> AggregationConfig:
         """Convert to domain AggregationConfig.
@@ -70,6 +85,7 @@ class AggregationSchema(BaseModel):
         """
         return AggregationConfig(
             group_by=self.group_by,
+            order_by=tuple(self.order_by),
             fields=tuple(
                 spec.to_domain(output_field=name) for name, spec in self.fields.items()
             ),

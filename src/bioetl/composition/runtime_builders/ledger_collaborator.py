@@ -57,13 +57,60 @@ def _record_artifact(
         lineage_fragment_id = (
             None if raw_lineage_fragment_id is None else str(raw_lineage_fragment_id)
         )
-    return service.record_artifact_published(
+    entry = service.record_artifact_published(
         layer=layer,
         artifact_path=artifact_path,
         dataset_ref=dataset_ref,
         lineage_fragment_id=lineage_fragment_id,
         details=details,
     )
+    _record_input_snapshots_from_artifact(
+        service,
+        layer=layer,
+        artifact_path=artifact_path,
+        details=details,
+    )
+    return entry
+
+
+def _record_input_snapshots_from_artifact(
+    service: RunLedgerService,
+    *,
+    layer: str,
+    artifact_path: str,
+    details: dict[str, object] | None,
+) -> None:
+    """Record immutable input snapshots published with Bronze metadata."""
+    if layer != "bronze" or not details:
+        return
+    raw_snapshots = details.get("input_snapshots")
+    if not isinstance(raw_snapshots, list):
+        return
+    for snapshot in raw_snapshots:
+        if not isinstance(snapshot, dict):
+            continue
+        immutable_uri = snapshot.get("immutable_uri")
+        if immutable_uri is None:
+            continue
+        service.record_input_snapshot_published(
+            provider=str(details.get("provider") or ""),
+            entity=str(details.get("entity") or ""),
+            pipeline_name=str(details.get("pipeline_name") or ""),
+            snapshot_id=str(snapshot.get("snapshot_id") or ""),
+            content_hash=str(snapshot.get("content_hash") or ""),
+            immutable_uri=str(immutable_uri),
+            bronze_batch_ref=artifact_path,
+            query_fingerprint=(
+                None
+                if snapshot.get("query_fingerprint") is None
+                else str(snapshot.get("query_fingerprint"))
+            ),
+            details={
+                key: value
+                for key, value in snapshot.items()
+                if key not in {"snapshot_id", "content_hash", "immutable_uri"}
+            },
+        )
 
 
 def _attach_artifact_recorder(

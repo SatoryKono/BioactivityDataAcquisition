@@ -32,7 +32,7 @@
         "mode": "html"
       },
       "title": "Review Dashboard Navigation",
-      "description": "Top navigation bus for the dashboard suite. Uses same-tab handoffs, preserves the current time range, resets unsupported dashboard-specific scope where needed, and exposes Explore Logs / Explore Traces links that require the optional tracing profile.",
+      "description": "Top navigation bus for the dashboard suite. Uses same-tab handoffs, preserves the current time range, resets unsupported dashboard-specific scope where needed, and exposes Explore Logs plus an Explore Traces adjunct that is available only for traced runs.",
       "type": "text",
       "links": [
         {
@@ -79,14 +79,14 @@
           "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D",
           "targetBlank": false,
           "includeVars": false,
-          "tooltip": "Requires optional tracing profile. Opens Logs Drilldown in the same tab with safe {job=\"bioetl\"} baseline."
+          "tooltip": "Requires optional tracing profile. Opens Logs Drilldown in the same tab with safe {job=\"bioetl\"} baseline. Zero lines can legitimately mean Loki shipping is disabled, no BioETL log streams were shipped in range, or the baseline query still needs refinement inside Explore."
         },
         {
           "title": "Explore Traces",
           "url": "/a/grafana-exploretraces-app/?from=${__from}&to=${__to}&queryType=traceqlSearch&query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline:regex}%22%20%26%26%20span.%22bioetl.run_type%22%20%3D~%20%22${run_type:regex}%22%20%7D",
           "targetBlank": false,
           "includeVars": false,
-          "tooltip": "Requires optional tracing profile. Opens Traces Drilldown in the same tab with bounded pipeline/run_type TraceQL scope."
+          "tooltip": "Available only for traced runs. Enable tracing with --tracing or BIOETL_OBSERVABILITY__TRACING_ENABLED=true. Opens Traces Drilldown in the same tab with bounded pipeline/run_type TraceQL scope; NoOpTracing or tracing-off runs can legitimately be empty, so treat this as adjunct evidence rather than first-screen proof."
         }
       ]
     },
@@ -99,12 +99,12 @@
       },
       "id": 1,
       "options": {
-        "content": "<center><h2>Pipeline: $pipeline | Run Type: $run_type | Reason: $reason_code | Field: $field | Run ID: $run_id</h2><div><strong style='color:#ffb347'>default 24h forensic window</strong></div><div><small>Select exactly one pipeline. This explorer is read-only and scoped to Silver FILTERED_OUT_SILVER rows. Quarantine Explorer is fail-closed and forensic filters like run_id/payload_hash stay explorer-only, not Prometheus labels.</small></div></center>",
+        "content": "<center><h2>Pipeline: $pipeline | Run Type: $run_type | Reason: $reason_code | Field: $field | Run ID: $run_id</h2><div><strong style='color:#ffb347'>default 24h forensic window</strong></div><div><small>Select exactly one pipeline. This explorer is read-only and scoped to Silver FILTERED_OUT_SILVER rows. Quarantine Explorer is fail-closed and forensic filters like run_id/payload_hash stay explorer-only, not Prometheus labels. A zero-reject workflow run is an intentional empty explorer state only after the datasource responds and scope is confirmed.</small></div></center>",
         "mode": "html"
       },
       "title": "Inspect Explorer Scope",
       "type": "text",
-      "description": "Scope banner for the selected-range Silver reject explorer. This dashboard covers only Silver FILTERED_OUT_SILVER quarantine-backed rows; DQ quarantine, skipped records, warning/nullification, and Gold validation failures belong in Data Quality. If pipeline is unknown or Quarantine Explorer returns no data, choose one concrete pipeline before treating empty panels as OK."
+      "description": "Scope banner for the selected-range Silver reject explorer. This dashboard covers only Silver FILTERED_OUT_SILVER quarantine-backed rows; DQ quarantine, skipped records, warning/nullification, and Gold validation failures belong in Data Quality. A zero-reject workflow run can legitimately produce 0 totals and empty record tables, but only after one concrete pipeline, a responding Quarantine Explorer, and a valid Bronze denominator are confirmed."
     },
     {
       "gridPos": {
@@ -115,7 +115,7 @@
       },
       "id": 10,
       "options": {
-        "content": "<div style='padding:0.6rem 0.8rem;line-height:1.55'><strong>First action:</strong> if total rejects are non-zero, inspect top reason/field/signature, open a payload_hash drilldown from the table, then decide whether to fix transformer logic, schema/DQ rule configuration, provider drift, or replay/resolve via quarantine CLI. <strong>No-data:</strong> 0 rejects is OK only when Quarantine Explorer responds, one concrete pipeline is selected, and Bronze records are present. Zero matching rows for the active filters is an empty result, not a datasource failure; datasource/plugin errors, unsupported filter chains, unknown pipeline, or bronze_records=0 are UNKNOWN or error states until the backend is checked. <strong>Lineage:</strong> use run_id and batch/Bronze evidence where available before replay decisions. <a href='https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/quarantine-management.md' target='_blank' rel='noreferrer noopener'>Open Quarantine Management Runbook</a>.</div>",
+        "content": "<div style='padding:0.6rem 0.8rem;line-height:1.55'><strong>First action:</strong> if total rejects are non-zero, inspect top reason/field/signature, open a payload_hash drilldown from the table, then decide whether to fix transformer logic, schema/DQ rule configuration, provider drift, or replay/resolve via quarantine CLI. <strong>No-data:</strong> a zero-reject workflow run is an intentional empty explorer state only when Quarantine Explorer responds, one concrete pipeline is selected, and Bronze records are present. Zero matching rows for the active filters is an empty result, not a datasource failure; datasource/plugin errors, unsupported filter chains, unknown pipeline, or bronze_records=0 are UNKNOWN or error states until the backend is checked. <strong>Lineage:</strong> use run_id and batch/Bronze evidence where available before replay decisions. <a href='https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/quarantine-management.md' target='_blank' rel='noreferrer noopener'>Open Quarantine Management Runbook</a>.</div>",
         "mode": "html"
       },
       "links": [
@@ -143,7 +143,7 @@
           "color": {
             "mode": "palette-classic"
           },
-          "noValue": "No Silver reject count returned for current filters. Verify Quarantine Explorer before treating this as OK."
+          "noValue": "No Silver reject count returned for current filters. A zero-reject workflow run is valid only after Quarantine Explorer and scoped pipeline context are confirmed."
         },
         "overrides": []
       },
@@ -205,7 +205,7 @@
       ],
       "title": "Monitor Filtered Records Total",
       "type": "table",
-      "description": "Selected-range total Silver FILTERED_OUT_SILVER records from /ops/quarantine/filtered-stats for the current pipeline/run_type/reason_code/field/run_id filters. 0 is normal only when Quarantine Explorer responds and the selected pipeline has valid scope; No data or datasource errors are UNKNOWN and require checking the health server/quarantine datasource before declaring no rejects. Non-zero means inspect top reason/field/signature and row samples."
+      "description": "Selected-range total Silver FILTERED_OUT_SILVER records from /ops/quarantine/filtered-stats for the current pipeline/run_type/reason_code/field/run_id filters. 0 is normal only when Quarantine Explorer responds and the selected pipeline has valid scope; a zero-reject workflow run is therefore a legitimate empty explorer state only after the datasource responds. No data or datasource errors are UNKNOWN and require checking the health server/quarantine datasource before declaring no rejects. Non-zero means inspect top reason/field/signature and row samples."
     },
     {
       "datasource": "Quarantine Explorer",
@@ -214,7 +214,7 @@
           "color": {
             "mode": "palette-classic"
           },
-          "noValue": "No reject ratio returned. Treat as UNKNOWN until Bronze denominator and quarantine API are confirmed."
+          "noValue": "No reject ratio returned. Treat as UNKNOWN until Bronze denominator and quarantine API are confirmed; zero-reject workflow runs must still prove a valid denominator."
         },
         "overrides": [
           {

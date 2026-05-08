@@ -36,7 +36,36 @@ def resolve_contract_identity(
                 f"for '{contract_ref}' in configs/base/contract_registry.yaml"
             )
         return contract_ref, None, None, None, None
-    return (contract_ref, *_extract_contract_identity_fields(entry))
+    fields = _extract_contract_identity_fields(entry)
+    if strict:
+        _validate_complete_contract_identity(contract_ref, fields)
+    return (contract_ref, *fields)
+
+
+def _validate_complete_contract_identity(
+    contract_ref: str,
+    fields: tuple[str | None, str | None, str | None, str | None],
+) -> None:
+    missing = [
+        name
+        for name, value in zip(
+            (
+                "contract_version",
+                "contract_schema_hash",
+                "dq_policy_ref",
+                "rule_bundle_version",
+            ),
+            fields,
+            strict=True,
+        )
+        if value is None
+    ]
+    if missing:
+        missing_text = ", ".join(missing)
+        raise RuntimeError(
+            "Strict reproducibility contexts require complete contract identity "
+            f"for '{contract_ref}'; missing: {missing_text}"
+        )
 
 
 def _load_contract_registry_entry(

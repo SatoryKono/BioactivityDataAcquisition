@@ -102,6 +102,57 @@ def test_record_manifest_created_appends_first_control_plane_event() -> None:
     assert store.list_entries("manifest-1") == [entry]
 
 
+def test_record_input_snapshot_published_appends_bounded_snapshot_event() -> None:
+    run_id = RunID(uuid4())
+    store = _InMemoryRunLedgerStore()
+    service = RunLedgerService(
+        ledger_port=store,
+        manifest_id="manifest-1",
+        run_id=run_id,
+        _entry_id_factory=lambda: "entry-input-snapshot",
+    )
+
+    entry = service.record_input_snapshot_published(
+        provider="chembl",
+        entity="activity",
+        pipeline_name="chembl_activity",
+        snapshot_id="snapshot-1",
+        content_hash="sha256:snapshot-1",
+        immutable_uri="file:///bronze/snapshot-1.jsonl",
+        bronze_batch_ref="data/bronze/chembl/activity/batch-1",
+        query_fingerprint="query-fingerprint-1",
+    )
+
+    assert entry.entry_id == "entry-input-snapshot"
+    assert entry.event_type == "input_snapshot_published"
+    assert entry.event_family == "input_snapshot"
+    assert entry.status == "published"
+    assert entry.stage == "bronze"
+    assert entry.details["snapshot_id"] == "snapshot-1"
+    assert entry.details["content_hash"] == "sha256:snapshot-1"
+    assert entry.details["immutable_uri"] == "file:///bronze/snapshot-1.jsonl"
+
+
+def test_record_input_snapshot_published_rejects_missing_required_identity() -> None:
+    run_id = RunID(uuid4())
+    service = RunLedgerService(
+        ledger_port=_InMemoryRunLedgerStore(),
+        manifest_id="manifest-1",
+        run_id=run_id,
+    )
+
+    with pytest.raises(ValueError, match="content_hash is required"):
+        service.record_input_snapshot_published(
+            provider="chembl",
+            entity="activity",
+            pipeline_name="chembl_activity",
+            snapshot_id="snapshot-1",
+            content_hash=" ",
+            immutable_uri="file:///bronze/snapshot-1.jsonl",
+            bronze_batch_ref="data/bronze/chembl/activity/batch-1",
+        )
+
+
 def test_record_manifest_created_rejects_mismatched_manifest_identity() -> None:
     run_id = RunID(uuid4())
     store = _InMemoryRunLedgerStore()

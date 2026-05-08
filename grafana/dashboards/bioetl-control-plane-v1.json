@@ -33,7 +33,7 @@
         "mode": "html"
       },
       "title": "Review Dashboard Navigation",
-      "description": "Top navigation bus for the dashboard suite. Uses same-tab handoffs, preserves the current time range, resets unsupported dashboard-specific scope where needed, and exposes Explore Logs / Explore Traces links that require the optional tracing profile.",
+      "description": "Top navigation bus for the dashboard suite. Uses same-tab handoffs, preserves the current time range, resets unsupported dashboard-specific scope where needed, and keeps Explore Traces as a traced-run-only adjunct surface that requires the optional tracing profile in the visual bus.",
       "type": "text",
       "links": [
         {
@@ -184,7 +184,7 @@
       "pluginVersion": "9.5.0",
       "targets": [
         {
-          "expr": "max(bioetl_replay_safety_blockers_15m{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\", run_type=~\"$run_type\"})",
+          "expr": "max((bioetl_replay_safety_blockers_15m{run_type=~\"$run_type\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))",
           "instant": true,
           "refId": "A"
         }
@@ -315,7 +315,7 @@
       "pluginVersion": "9.5.0",
       "targets": [
         {
-          "expr": "max(bioetl_manifest_ledger_failures_15m{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\", run_type=~\"$run_type\"})",
+          "expr": "max((bioetl_manifest_ledger_failures_15m{run_type=~\"$run_type\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))",
           "instant": true,
           "refId": "A"
         }
@@ -416,7 +416,7 @@
       "pluginVersion": "9.5.0",
       "targets": [
         {
-          "expr": "max(bioetl_control_plane_telemetry_missing_5m{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\", run_type=~\"$run_type\"})",
+          "expr": "max((bioetl_control_plane_telemetry_missing_5m{run_type=~\"$run_type\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))",
           "instant": true,
           "refId": "A"
         }

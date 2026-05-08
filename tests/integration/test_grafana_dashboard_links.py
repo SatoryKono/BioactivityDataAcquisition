@@ -1269,6 +1269,54 @@ def test_explore_links_use_drilldown_routes_and_time_range() -> None:
             )
 
 
+def test_explore_traces_navigation_is_explicitly_traced_run_only() -> None:
+    """Explore Traces must be described as traced-run-only in shipped navigation."""
+    for dashboard_path in get_dashboard_files():
+        dashboard = load_dashboard(dashboard_path)
+        uid = dashboard.get("uid")
+
+        if uid == "bioetl-control-plane-v1":
+            panel = next(
+                (
+                    item
+                    for item in dashboard.get("panels", [])
+                    if item.get("id") == 1000
+                ),
+                None,
+            )
+            assert panel is not None, (
+                f"{dashboard_path.name} must define navigation panel id=1000"
+            )
+            description = str(panel.get("description", ""))
+            assert (
+                "traced-run-only" in description
+                or "available only for traced runs" in description
+            ), f"{dashboard_path.name} must describe Explore Traces as traced-run-only"
+            continue
+
+        traces_link = next(
+            (
+                link
+                for link in get_dashboard_navigation_links(dashboard)
+                if str(link.get("title", "")) == "Explore Traces"
+            ),
+            None,
+        )
+        assert traces_link is not None, (
+            f"{dashboard_path.name} must expose Explore Traces in navigation"
+        )
+        tooltip = str(traces_link.get("tooltip", ""))
+        assert "Available only for traced runs" in tooltip, (
+            f"{dashboard_path.name} Explore Traces tooltip must say it is traced-run-only"
+        )
+        assert "--tracing" in tooltip, (
+            f"{dashboard_path.name} Explore Traces tooltip must explain how to enable tracing"
+        )
+        assert "adjunct evidence" in tooltip, (
+            f"{dashboard_path.name} Explore Traces tooltip must disclose adjunct-only semantics"
+        )
+
+
 def test_tempo_drilldown_routes_to_traces_drilldown_app() -> None:
     """Tempo drilldown links should route to Grafana Traces Drilldown app."""
     for dashboard_name in (path.name for path in get_dashboard_files()):
@@ -1312,6 +1360,15 @@ def test_loki_drilldown_links_use_safe_bioetl_baseline_query() -> None:
             assert "${pipeline" not in url and "${provider" not in url, (
                 f"{dashboard_name} Loki drilldown must not bake dashboard variables "
                 "into encoded query payload"
+            )
+            tooltip = str(link.get("tooltip", ""))
+            assert "Zero lines can legitimately mean" in tooltip, (
+                f"{dashboard_name} Loki drilldown must disclose that empty results can be legitimate"
+            )
+            assert (
+                "refine in Explore" in tooltip or "refinement inside Explore" in tooltip
+            ), (
+                f"{dashboard_name} Loki drilldown must disclose baseline-first refinement workflow"
             )
 
 

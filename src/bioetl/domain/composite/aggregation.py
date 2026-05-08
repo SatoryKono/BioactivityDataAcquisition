@@ -96,6 +96,32 @@ def _require_non_empty(value: str | tuple[object, ...], name: str) -> None:
         raise ValueError(f"{name} cannot be empty")
 
 
+def _coerce_text_sequence(value: object, name: str) -> tuple[object, ...]:
+    """Coerce supported config shapes into a tuple before text normalization."""
+    if isinstance(value, str):
+        return (value,)
+    if isinstance(value, list | tuple):
+        return tuple(value)
+    raise TypeError(f"{name} must be a string or sequence of strings")
+
+
+def _validate_text_tuple(normalized: tuple[str, ...], name: str) -> None:
+    """Validate normalized tuple values."""
+    if any(not item for item in normalized):
+        raise ValueError(f"{name} cannot contain empty values")
+    if len(set(normalized)) != len(normalized):
+        raise ValueError(f"{name} cannot contain duplicate values")
+
+
+def _coerce_text_tuple(value: object, name: str) -> tuple[str, ...]:
+    """Coerce a string/list/tuple config value into a normalized text tuple."""
+    if value is None:
+        return ()
+    normalized = tuple(str(item).strip() for item in _coerce_text_sequence(value, name))
+    _validate_text_tuple(normalized, name)
+    return normalized
+
+
 @dataclass(frozen=True, slots=True)
 class AggregationFieldSpec:
     """Specification for a single aggregated field.
@@ -146,10 +172,12 @@ class AggregationConfig:
     Attributes:
         group_by: Join key to group by (e.g., "document_chembl_id").
         fields: Tuple of field specifications defining aggregations.
+        order_by: Canonical row-order columns applied before aggregation.
     """
 
     group_by: str
     fields: tuple[AggregationFieldSpec, ...]
+    order_by: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
         """Validate and convert types."""
@@ -159,6 +187,11 @@ class AggregationConfig:
                 for f in self.fields
             )
             object.__setattr__(self, "fields", converted)
+        object.__setattr__(
+            self,
+            "order_by",
+            _coerce_text_tuple(self.order_by, "aggregation.order_by"),
+        )
         self._validate()
 
     def _validate(self) -> None:

@@ -29,6 +29,17 @@ def test_quarantine_explorer_datasource_is_repo_provisioned() -> None:
     assert ":-" not in content
 
 
+def test_quarantine_explorer_backend_contract_is_documented() -> None:
+    """Docs and env template must declare the long-lived backend contract."""
+    readme = Path("grafana/README.md").read_text(encoding="utf-8")
+    env_example = Path(".env.example").read_text(encoding="utf-8")
+
+    assert "bioetl quarantine serve --port 8081" in readme
+    assert "dedicated long-lived BioETL HTTP" in readme
+    assert "compatibility entrypoint" in readme
+    assert "bioetl quarantine serve --port 8081" in env_example
+
+
 def test_grafana_compose_installs_infinity_plugin() -> None:
     """Grafana container must install the Infinity datasource plugin."""
     compose_path = Path("docker-compose.monitoring.yml")

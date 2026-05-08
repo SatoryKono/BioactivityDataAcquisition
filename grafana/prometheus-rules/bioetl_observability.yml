@@ -171,7 +171,13 @@ groups:
       - record: bioetl_l0_input_status
         labels:
           input: workflow
-        expr: (sum by (pipeline, run_type) (increase(bioetl_pipeline_runs_total{status="failed"}[15m])) > bool 0) * 2 + ((sum by (pipeline, run_type) (increase(bioetl_pipeline_runs_total{status="failed"}[15m])) == bool 0) * (sum by (pipeline, run_type) (increase(bioetl_pipeline_runs_total[15m])) > bool 0)) * 0
+        expr: >-
+          (max by (pipeline, run_type) (max_over_time(bioetl_workflow_runs_total{status="failed"}[15m])) > bool 0) * 2
+          or (
+            ((max by (pipeline, run_type) (max_over_time(bioetl_workflow_runs_total{status=~"success|completed"}[15m])) > bool 0) * 0)
+            unless on (pipeline, run_type)
+            (max by (pipeline, run_type) (max_over_time(bioetl_workflow_runs_total{status="failed"}[15m])) > bool 0)
+          )
       - record: bioetl_l0_input_status
         labels:
           input: gold
@@ -482,8 +488,11 @@ groups:
       - record: bioetl_dq_current_failure_signals_15m
         expr: max by (pipeline) (bioetl_runtime_alert_condition_dq_hard_fail_15m or bioetl_runtime_alert_condition_dq_critical_anomaly_30m or bioetl_runtime_alert_condition_silver_validation_failures_30m) > 0
 
+      - record: bioetl_dq_monitor_disabled_current
+        expr: max by (pipeline) (bioetl_dq_monitor_enabled == bool 0) > 0
+
       - record: bioetl_dq_current_degraded_signals_15m
-        expr: max by (pipeline) (bioetl_runtime_alert_condition_dq_soft_threshold_15m or (sum by (pipeline) (increase(bioetl_dq_records_quarantined_total[15m])) > bool 0) or (sum by (pipeline) (increase(bioetl_silver_filter_rejections_total[15m])) > bool 0) or (sum by (pipeline) (increase(bioetl_dq_monitor_disabled_total[15m])) > bool 0)) > 0
+        expr: max by (pipeline) (bioetl_runtime_alert_condition_dq_soft_threshold_15m or (sum by (pipeline) (increase(bioetl_dq_records_quarantined_total[15m])) > bool 0) or (sum by (pipeline) (increase(bioetl_silver_filter_rejections_total[15m])) > bool 0) or bioetl_dq_monitor_disabled_current) > 0
 
       - record: bioetl_dq_current_status
         expr: (bioetl_dq_current_failure_signals_15m * 2) or (bioetl_dq_current_degraded_signals_15m unless on (pipeline) bioetl_dq_current_failure_signals_15m) or (((bioetl_dq_current_activity_15m * 0) unless on (pipeline) bioetl_dq_current_failure_signals_15m) unless on (pipeline) bioetl_dq_current_degraded_signals_15m)
@@ -517,7 +526,7 @@ groups:
           reason: dq_monitor_disabled
           severity: warn
           action_target: data_quality
-        expr: sum by (pipeline) (increase(bioetl_dq_monitor_disabled_total[15m])) > bool 0
+        expr: bioetl_dq_monitor_disabled_current
       - record: bioetl_dq_current_reason
         labels:
           reason: quarantined_records

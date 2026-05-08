@@ -301,13 +301,20 @@ def _build_alert_bundle(
 ) -> tuple[dict[str, bool], list[str]]:
     """Return alert signals and operator next steps for final summary."""
     latest_entry = request.ledger_entries[-1]
+    composite_execution_context = _is_composite_execution_context(request.manifest)
+    composite_rich_replay_supported = bool(
+        request.base_summary.get(
+            "composite_resume_rich_replay_supported",
+            not composite_execution_context,
+        )
+    )
     alert_signals = build_alert_signals(
         latest_status=latest_entry.status,
         artifact_refs=request.artifact_refs,
         lineage_fragment_ids=request.lineage_fragment_ids,
         missing_link_count=request.missing_link_count,
-        composite_resume_reconstructability_gap=_is_composite_execution_context(
-            request.manifest
+        composite_resume_reconstructability_gap=(
+            composite_execution_context and not composite_rich_replay_supported
         ),
         dq_signal_present=request.dq_signal_present,
         cross_validation_signal_present=request.cross_validation_signal_present,

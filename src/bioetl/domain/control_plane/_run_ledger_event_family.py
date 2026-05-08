@@ -10,6 +10,7 @@ RUN_SHUTDOWN_EVENT = "run_shutdown"
 STAGE_STARTED_EVENT = "stage_started"
 STAGE_COMPLETED_EVENT = "stage_completed"
 ARTIFACT_PUBLISHED_EVENT = "artifact_published"
+INPUT_SNAPSHOT_PUBLISHED_EVENT = "input_snapshot_published"
 _DIAGNOSTIC_FAMILY = "diagnostic"
 _PIPELINE_LIFECYCLE_FAMILY = "pipeline.lifecycle"
 _PIPELINE_PHASE_FAMILY = "pipeline.phase"
@@ -23,6 +24,7 @@ _LEDGER_EVENT_FAMILY_EXACT: dict[str, str] = {
     STAGE_STARTED_EVENT: _PIPELINE_PHASE_FAMILY,
     STAGE_COMPLETED_EVENT: _PIPELINE_PHASE_FAMILY,
     ARTIFACT_PUBLISHED_EVENT: "artifact",
+    INPUT_SNAPSHOT_PUBLISHED_EVENT: "input_snapshot",
 }
 _LEDGER_EVENT_FAMILY_PREFIXES: tuple[tuple[str, str], ...] = (
     ("dq_", "dq"),

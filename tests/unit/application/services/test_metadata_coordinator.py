@@ -183,7 +183,7 @@ class TestBronzeMetadata:
     def test_bronze_output_content_hash_is_deterministic(
         self, coordinator: MetadataCoordinator
     ) -> None:
-        """Bronze output content_hash should track emitted file identity."""
+        """Bronze output content_hash should track semantic emitted file identity."""
         started_at = _FIXED_TIME
         completed_at = started_at + timedelta(seconds=1)
         batch_id = BatchID(uuid4())
@@ -205,6 +205,15 @@ class TestBronzeMetadata:
             completed_at=completed_at,
             output_content_hash="a" * 64,
         )
+        same_content_different_path = BronzeMetadataInput(
+            batch_id=batch_id,
+            record_count=1000,
+            compressed_size=50000,
+            output_path="v1/chembl/activity/2024-01-15/batch_456.jsonl.zst",
+            started_at=started_at,
+            completed_at=completed_at,
+            output_content_hash="a" * 64,
+        )
         changed_input = BronzeMetadataInput(
             batch_id=batch_id,
             record_count=1000,
@@ -217,9 +226,11 @@ class TestBronzeMetadata:
 
         first = coordinator.create_bronze_metadata(input_data)
         second = coordinator.create_bronze_metadata(same_input)
+        moved = coordinator.create_bronze_metadata(same_content_different_path)
         changed = coordinator.create_bronze_metadata(changed_input)
 
         assert first.output.content_hash == second.output.content_hash
+        assert first.output.content_hash == moved.output.content_hash
         assert first.output.content_hash != changed.output.content_hash
 
     def test_bronze_runtime_metadata(self, coordinator: MetadataCoordinator) -> None:

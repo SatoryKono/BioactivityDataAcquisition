@@ -814,6 +814,24 @@ def test_canonical_current_status_recording_rules_exist() -> None:
         )
 
 
+def test_overview_workflow_input_uses_workflow_evidence_not_pipeline_counter_delta() -> None:
+    """Workflow overview summaries must stay queryable after short-lived CLI runs exit."""
+    payload = _load_rules()
+    workflow_rules = [
+        rule
+        for rule in _recording_rules_named(payload, "bioetl_l0_input_status")
+        if rule.get("labels", {}).get("input") == "workflow"
+    ]
+    assert workflow_rules, "Missing workflow input projection rule"
+
+    expr = "\n".join(str(rule.get("expr", "")) for rule in workflow_rules)
+    assert "bioetl_workflow_runs_total" in expr
+    assert "max_over_time" in expr
+    assert 'status="failed"' in expr
+    assert 'status=~"success|completed"' in expr
+    assert "bioetl_pipeline_runs_total" not in expr
+
+
 def test_canonical_current_status_rules_do_not_use_grafana_range_or_zero_fallback() -> (
     None
 ):
@@ -1000,14 +1018,29 @@ def test_dq_current_status_splits_hard_failures_from_degraded_warnings() -> None
     record_map = _build_record_map(payload)
 
     failure_expr = record_map["bioetl_dq_current_failure_signals_15m"].get("expr", "")
+    monitor_disabled_expr = record_map["bioetl_dq_monitor_disabled_current"].get(
+        "expr", ""
+    )
     degraded_expr = record_map["bioetl_dq_current_degraded_signals_15m"].get("expr", "")
     status_expr = record_map["bioetl_dq_current_status"].get("expr", "")
+    dq_disabled_reason_rules = [
+        rule
+        for rule in _recording_rules_named(payload, "bioetl_dq_current_reason")
+        if rule.get("labels", {}).get("reason") == "dq_monitor_disabled"
+    ]
 
     assert "bioetl_runtime_alert_condition_dq_hard_fail_15m" in failure_expr
     assert "bioetl_runtime_alert_condition_dq_critical_anomaly_30m" in failure_expr
+    assert "bioetl_dq_monitor_enabled == bool 0" in monitor_disabled_expr
     assert "bioetl_runtime_alert_condition_dq_soft_threshold_15m" in degraded_expr
+    assert "bioetl_dq_monitor_disabled_current" in degraded_expr
     assert "* 2" in status_expr
     assert "* 0" in status_expr
+    assert len(dq_disabled_reason_rules) == 1
+    assert (
+        dq_disabled_reason_rules[0].get("expr", "")
+        == "bioetl_dq_monitor_disabled_current"
+    )
 
 
 def test_rule_expressions_use_real_metric_label_schemas() -> None:

@@ -314,7 +314,12 @@ def _resolve_persistence_inputs(
         produced_artifact_trace_present=bool(artifact_refs),
         artifact_lineage_links_complete=not artifact_refs
         or (missing_link_count == 0 and bool(lineage_fragment_ids)),
-        composite_resume_rich_replay_supported=not composite_execution_context,
+        composite_resume_rich_replay_supported=bool(
+            base_summary.get(
+                "composite_resume_rich_replay_supported",
+                not composite_execution_context,
+            )
+        ),
     )
 
 

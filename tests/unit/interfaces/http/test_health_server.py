@@ -745,6 +745,26 @@ class TestHealthServerQuarantineExplorer:
             pipeline="chembl_activity",
         )
 
+    @pytest.mark.asyncio(loop_scope="module")
+    async def test_stats_endpoint_returns_500_when_service_crashes(
+        self,
+        running_server_with_quarantine: tuple[HealthServer, MagicMock],
+    ) -> None:
+        """Unexpected quarantine service errors must return HTTP 500."""
+        server, service = running_server_with_quarantine
+        service.get_filtered_stats = AsyncMock(side_effect=AssertionError("boom"))
+        port = self._get_server_port(server)
+
+        status_code, status_text, body = await self._send_request(
+            port,
+            "GET",
+            "/ops/quarantine/filtered-stats?pipeline=chembl_activity",
+        )
+
+        assert status_code == 500
+        assert status_text == "Internal Server Error"
+        assert "Internal Server Error" in body
+
 
 class TestHealthServerWithMonitor:
     """Tests for health server with health monitor configured."""
@@ -870,6 +890,40 @@ class TestHealthServerErrorHandling:
             "health_server_error",
             error="Test exception",
             error_type="RuntimeError",
+            reason="request_processing_failed",
+            reason_code="HEALTH_REQUEST_PROCESSING_FAILED",
+        )
+
+    @pytest.mark.asyncio
+    async def test_handle_connection_unexpected_exception(self) -> None:
+        """Unexpected request exceptions should also return HTTP 500."""
+        from unittest.mock import AsyncMock, patch
+
+        mock_logger = MagicMock()
+        server = HealthServer(host="127.0.0.1", port=0, logger=mock_logger)
+
+        mock_reader = AsyncMock()
+        mock_writer = MagicMock()
+        mock_writer.write = MagicMock()
+        mock_writer.drain = AsyncMock()
+        mock_writer.close = MagicMock()
+        mock_writer.wait_closed = AsyncMock()
+
+        with patch.object(
+            server,
+            "_process_request",
+            side_effect=AssertionError("Unexpected exception"),
+        ):
+            await server._handle_connection(mock_reader, mock_writer)
+
+        mock_writer.write.assert_called()
+        call_data = mock_writer.write.call_args[0][0]
+        assert b"500" in call_data
+
+        mock_logger.error.assert_called_with(
+            "health_server_error",
+            error="Unexpected exception",
+            error_type="AssertionError",
             reason="request_processing_failed",
             reason_code="HEALTH_REQUEST_PROCESSING_FAILED",
         )

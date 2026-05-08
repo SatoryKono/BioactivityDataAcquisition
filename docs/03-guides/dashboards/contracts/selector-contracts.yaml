@@ -69,6 +69,11 @@ dashboard_families:
       When a single-pipeline workflow hands off into these dashboards, shipped
       PromQL may tolerate legacy `workflow_<pipeline>` emitted series as a
       bounded compatibility alias for the selected entity pipeline scope.
+      Control Plane first-screen current-status queries additionally normalize
+      a manually selected `workflow_<pipeline>` value back to the entity
+      pipeline before reading current-state recording rules. Overview first-
+      screen current-state summaries apply the same normalization for selected-
+      scope L0/L1 cards and routes.
   provider_first:
     uids:
       - bioetl-provider-health-v2
@@ -294,6 +299,8 @@ ship_now_selector_contract_by_uid:
 hidden_handoff_contract:
   allowed_shipped_vars:
     - pipeline_context
+    - run_type_context
+    - provider_context
   detail_only_shipped_vars:
     - adapter
   reserved_future_vars:

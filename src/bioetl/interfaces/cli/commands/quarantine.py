@@ -15,6 +15,10 @@ from bioetl.interfaces.cli.commands.domains.quarantine.support import (
     _QuarantineRuntimeService,
     _QuarantineService,
 )
+from bioetl.interfaces.cli.commands.health import (
+    DEFAULT_HEALTH_SERVER_PORT,
+    run_health_server_command,
+)
 
 SILVER_FILTER_ERROR_CODE = "FILTERED_OUT_SILVER"
 
@@ -45,6 +49,26 @@ def get_quarantine_service() -> _QuarantineService:
 @click.group()
 def quarantine() -> None:
     """Manage quarantine (failed records)."""
+
+
+@quarantine.command("serve")
+@click.option(
+    "--host",
+    default="127.0.0.1",
+    help="Host to bind the Quarantine Explorer backend to.",
+    show_default=True,
+)
+@click.option(
+    "--port",
+    "-p",
+    default=DEFAULT_HEALTH_SERVER_PORT,
+    type=int,
+    help="Port for the long-lived Quarantine Explorer backend.",
+    show_default=True,
+)
+def quarantine_serve(host: str, port: int) -> None:
+    """Start the long-lived backend used by Grafana Silver Reject Explorer."""
+    run_health_server_command(host=host, port=port)
 
 
 @quarantine.command("inspect")
@@ -223,6 +247,7 @@ COMMANDS = (
     quarantine_purge,
     quarantine_replay,
     quarantine_resolve,
+    quarantine_serve,
     quarantine_stats,
 )
 

@@ -22,6 +22,9 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_persist
 from bioetl.application.services.control_plane._run_manifest_diagnostics_replay import (
     _is_composite_execution_context,
 )
+from bioetl.application.services.control_plane._run_manifest_diagnostics_snapshot_support import (
+    merge_ledger_input_snapshots_into_summary,
+)
 from bioetl.application.services.control_plane._run_manifest_diagnostics_summary import (
     _build_final_summary,
     _FinalSummaryRequest,
@@ -30,6 +33,11 @@ from bioetl.application.services.control_plane.run_manifest_reproducibility_scor
     build_reproducibility_audit_scoring,
 )
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
+from bioetl.domain.control_plane.run_ledger import (
+    COMPOSITE_DEPENDENCY_COMPLETED_EVENT,
+    COMPOSITE_ENRICHER_COMPLETED_EVENT,
+    COMPOSITE_MERGE_COMPLETED_EVENT,
+)
 
 
 def _attach_base_summary_runtime_views(
@@ -179,6 +187,14 @@ def build_diagnostics_summary(
 
     if not ledger_entries:
         return base_summary
+    base_summary = merge_ledger_input_snapshots_into_summary(
+        base_summary,
+        ledger_entries,
+    )
+    base_summary = _attach_rich_composite_replay_support(
+        base_summary,
+        ledger_entries,
+    )
 
     (
         family_counter,
@@ -233,3 +249,28 @@ def build_diagnostics_summary(
 
 
 __all__ = ["build_diagnostics_summary"]
+
+_RICH_COMPOSITE_REPLAY_EVENTS = frozenset(
+    {
+        COMPOSITE_DEPENDENCY_COMPLETED_EVENT,
+        COMPOSITE_ENRICHER_COMPLETED_EVENT,
+        COMPOSITE_MERGE_COMPLETED_EVENT,
+    }
+)
+
+
+def _attach_rich_composite_replay_support(
+    summary: dict[str, object],
+    ledger_entries: tuple[RunLedgerEntry, ...],
+) -> dict[str, object]:
+    """Mark composite rich replay support only when ledger evidence is present."""
+    observed_events = {
+        entry.event_type
+        for entry in ledger_entries
+        if entry.event_type in _RICH_COMPOSITE_REPLAY_EVENTS
+    }
+    if not _RICH_COMPOSITE_REPLAY_EVENTS.issubset(observed_events):
+        return summary
+    updated = dict(summary)
+    updated["composite_resume_rich_replay_supported"] = True
+    return updated

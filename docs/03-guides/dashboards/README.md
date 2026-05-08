@@ -51,6 +51,9 @@ ______________________________________________________________________
 - Во всех shipped navigation panels `id=1000` после bus `0..5` закреплены
   global adjunct links: `Silver Reject Explorer`, `Explore Logs`,
   `Explore Traces`.
+- `Explore Traces` остаётся optional adjunct surface и считается доступным
+  только для traced runs; если runtime использовал `NoOpTracing`, пустой Tempo
+  result считается корректным поведением.
 - Navigation panel links intentionally открываются в том же окне, а не в новой
   вкладке.
 - Переходы pipeline-scoped dashboards -> `3. Provider Health` сохраняют

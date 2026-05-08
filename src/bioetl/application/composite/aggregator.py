@@ -18,6 +18,26 @@ from bioetl.domain.ports import LoggerPort
 __all__ = ["EnricherAggregator"]
 
 
+_ORDER_SENSITIVE_FUNCTIONS = frozenset(
+    {
+        AggregationFunction.COLLECT_LIST,
+        AggregationFunction.COLLECT_SET,
+        AggregationFunction.FIRST,
+        AggregationFunction.CONCAT_STR,
+    }
+)
+
+
+def _deduplicate_columns(columns: list[str]) -> list[str]:
+    """Return columns in first-seen order with duplicates removed."""
+    deduped: list[str] = []
+    for column in columns:
+        if column in deduped:
+            continue
+        deduped.append(column)
+    return deduped
+
+
 class EnricherAggregator:
     """Aggregates 1:M enricher data into 1:1 before join."""
 
@@ -50,16 +70,21 @@ class EnricherAggregator:
             enricher=enricher_name,
             rows_before=len(df),
             group_by=config.group_by,
+            order_by=config.order_by,
             field_count=len(config.fields),
         )
 
+        ordered_df = self._sort_for_deterministic_aggregation(df, config)
         agg_exprs: list[pl.Expr] = []
 
         for field_spec in config.fields:
             expr = self._build_aggregation_expr(field_spec)
             agg_exprs.append(expr)
 
-        result = df.group_by(config.group_by).agg(agg_exprs)
+        result = ordered_df.group_by(config.group_by, maintain_order=True).agg(
+            agg_exprs
+        )
+        result = result.sort(config.group_by)
 
         self._logger.info(
             "Aggregated enricher data",
@@ -67,9 +92,33 @@ class EnricherAggregator:
             rows_before=len(df),
             rows_after=len(result),
             group_by=config.group_by,
+            order_by=config.order_by,
         )
 
         return result
+
+    def _sort_for_deterministic_aggregation(
+        self,
+        df: pl.DataFrame,
+        config: AggregationConfig,
+    ) -> pl.DataFrame:
+        """Sort rows before group aggregation so list/first/string outputs are stable."""
+        sort_columns = self._resolve_sort_columns(config)
+        available_columns = [column for column in sort_columns if column in df.columns]
+        if not available_columns:
+            return df
+        return df.sort(available_columns)
+
+    def _resolve_sort_columns(self, config: AggregationConfig) -> list[str]:
+        """Return canonical sort keys, defaulting to aggregated source fields."""
+        order_columns = list(config.order_by)
+        if not order_columns:
+            order_columns.extend(
+                field.source_field
+                for field in config.fields
+                if field.agg_function in _ORDER_SENSITIVE_FUNCTIONS
+            )
+        return _deduplicate_columns([config.group_by, *order_columns])
 
     def _build_aggregation_expr(self, spec: AggregationFieldSpec) -> pl.Expr:
         """Build Polars expression for a single aggregation field."""
@@ -87,7 +136,7 @@ class EnricherAggregator:
             case AggregationFunction.COLLECT_LIST:
                 expr = base_col.drop_nulls()
             case AggregationFunction.COLLECT_SET:
-                expr = base_col.drop_nulls().unique()
+                expr = base_col.drop_nulls().unique().sort()
             case AggregationFunction.COUNT:
                 expr = base_col.count()
             case AggregationFunction.FIRST:
