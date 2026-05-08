@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 import asyncio
-from typing import TYPE_CHECKING
+from collections.abc import Mapping
+from typing import TYPE_CHECKING, cast
 
 import click
 
@@ -212,31 +213,32 @@ def _run_batch_with_policy(
 
 def _run_all_callback(
     click_context: click.Context,
-    source: str,
-    run_type: str,
-    limit: int | None,
-    dry_run: bool,
-    yes: bool,
-    list_only: bool,
-    debug: bool,
-    health_server: bool,
-    health_port: int,
+    /,
+    **options: object,
 ) -> None:
     """Canonical callback implementation for the run-all Click command."""
+    cli_input = _build_run_all_command_input_from_options(options)
     dispatch_cli_callback(
         click_context,
-        build_cli_input=lambda: build_run_all_command_input(
-            source=source,
-            run_type=run_type,
-            limit=limit,
-            dry_run=dry_run,
-            yes=yes,
-            list_only=list_only,
-            debug=debug,
-            health_server=health_server,
-            health_port=health_port,
-        ),
+        build_cli_input=lambda: cli_input,
         run_with_cli_policy=_run_all_with_cli_policy,
+    )
+
+
+def _build_run_all_command_input_from_options(
+    options: Mapping[str, object],
+) -> RunAllCommandInput:
+    """Build typed run-all input from Click's object-valued kwargs mapping."""
+    return build_run_all_command_input(
+        source=cast("str", options["source"]),
+        run_type=cast("str", options["run_type"]),
+        limit=cast(int | None, options["limit"]),
+        dry_run=cast("bool", options["dry_run"]),
+        yes=cast("bool", options["yes"]),
+        list_only=cast("bool", options["list_only"]),
+        debug=cast("bool", options["debug"]),
+        health_server=cast("bool", options["health_server"]),
+        health_port=cast("int", options["health_port"]),
     )
 
 

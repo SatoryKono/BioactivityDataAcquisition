@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from typing import Protocol
 
 import click
@@ -16,24 +17,13 @@ from bioetl.interfaces.cli.commands.domains.shared.click_options import (
 )
 
 
+CommandCallback = Callable[..., object]
+
+
 class RunAllCommandCallback(Protocol):
     """Typed callback signature consumed by the run-all Click entrypoint."""
 
-    def __call__(
-        self,
-        click_context: click.Context,
-        /,
-        *,
-        source: str,
-        run_type: str,
-        limit: int | None,
-        dry_run: bool,
-        yes: bool,
-        list_only: bool,
-        debug: bool,
-        health_server: bool,
-        health_port: int,
-    ) -> None: ...
+    def __call__(self, click_context: click.Context, /, **kwargs: object) -> None: ...
 
 
 def build_run_all_click_command(
@@ -61,32 +51,9 @@ def build_run_all_click_command(
     @with_debug_option("Enable DEBUG level logging")
     @with_health_server_options(default_health_server_port)
     @click.pass_context
-    def run_all_command(
-        click_context: click.Context,
-        /,
-        source: str,
-        run_type: str,
-        limit: int | None,
-        dry_run: bool,
-        yes: bool,
-        list_only: bool,
-        debug: bool,
-        health_server: bool,
-        health_port: int,
-    ) -> None:
+    def run_all_command(click_context: click.Context, /, **kwargs: object) -> None:
         """Run all registered pipelines for one provider sequentially."""
-        run_callback(
-            click_context,
-            source=source,
-            run_type=run_type,
-            limit=limit,
-            dry_run=dry_run,
-            yes=yes,
-            list_only=list_only,
-            debug=debug,
-            health_server=health_server,
-            health_port=health_port,
-        )
+        run_callback(click_context, **kwargs)
 
     return run_all_command
 
