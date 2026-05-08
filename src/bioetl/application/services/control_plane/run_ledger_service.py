@@ -9,6 +9,7 @@ from datetime import datetime
 from hashlib import sha256
 from uuid import uuid4
 
+from bioetl.application.services.control_plane import _run_ledger_rich_events
 from bioetl.application.services.control_plane._run_ledger_diagnostic_support import (
     _RunLedgerDiagnosticRequest,
     build_run_ledger_diagnostic_details,
@@ -65,6 +66,105 @@ def _build_run_ledger_idempotency_key(payload: Mapping[str, object]) -> str:
         ensure_ascii=True,
     )
     return f"sha256:{sha256(serialized.encode('utf-8')).hexdigest()}"
+
+
+def _validate_manifest_linkage(service: RunLedgerService) -> None:
+    """Reject lifecycle events that are not tied to a persisted manifest."""
+    manifest_id = service.manifest_id.strip()
+    if not manifest_id or manifest_id == "pending":
+        raise RuntimeError(
+            "Run ledger events require a persisted manifest_id before append"
+        )
+
+
+def _append_run_ledger_entry(
+    service: RunLedgerService,
+    *,
+    event_type: str,
+    status: str | None,
+    stage: str | None = None,
+    message: str | None = None,
+    error_type: str | None = None,
+    dataset_ref: str | None = None,
+    lineage_fragment_id: str | None = None,
+    metrics_snapshot: dict[str, int] | None = None,
+    details: dict[str, object] | None = None,
+) -> RunLedgerEntry:
+    """Create and append one ledger entry."""
+    _validate_manifest_linkage(service)
+    event_family = infer_ledger_event_family(event_type)
+    payload = normalize_run_ledger_payload(
+        {
+            "entry_id": service._entry_id_factory(),
+            "manifest_id": service.manifest_id,
+            "run_id": service.run_id,
+            "event_type": event_type,
+            "event_family": event_family,
+            "occurred_at": service._occurred_at_factory(),
+            "status": status,
+            "stage": stage,
+            "message": message,
+            "error_type": error_type,
+            "dataset_ref": dataset_ref,
+            "lineage_fragment_id": lineage_fragment_id,
+            "metrics_snapshot": metrics_snapshot,
+            "details": build_run_ledger_diagnostic_details(
+                _RunLedgerDiagnosticRequest(
+                    event_type=event_type,
+                    event_family=event_family,
+                    manifest_id=service.manifest_id,
+                    run_id=service.run_id,
+                    pipeline_name=service.pipeline_name,
+                    provider=service.provider,
+                    entity=service.entity,
+                    run_type=service.run_type,
+                    resolved_config_hash=service.resolved_config_hash,
+                    effective_config_hash=service.effective_config_hash,
+                    contract_ref=service.contract_ref,
+                    contract_version=service.contract_version,
+                    dq_policy_ref=service.dq_policy_ref,
+                    rule_bundle_version=service.rule_bundle_version,
+                    dq_contract_compatibility_hash=(
+                        service.dq_contract_compatibility_hash
+                    ),
+                    effective_config_artifact_id=service.effective_config_artifact_id,
+                    composite_run_id=service.composite_run_id,
+                    status=status,
+                    stage=stage,
+                    error_type=error_type,
+                    dataset_ref=dataset_ref,
+                    lineage_fragment_id=lineage_fragment_id,
+                    details=details,
+                )
+            ),
+        }
+    )
+    payload["idempotency_key"] = _build_run_ledger_idempotency_key(payload)
+    entry = RunLedgerEntry.from_dict(payload)
+    service.ledger_port.append(entry)
+    return entry
+
+
+def _append_run_outcome(
+    service: RunLedgerService,
+    *,
+    event_type: str,
+    status: str,
+    metrics_snapshot: dict[str, int],
+    message: str | None = None,
+    error_type: str | None = None,
+    details: dict[str, object] | None = None,
+) -> RunLedgerEntry:
+    """Append one terminal run outcome with the canonical payload shape."""
+    return _append_run_ledger_entry(
+        service,
+        event_type=event_type,
+        status=status,
+        message=message,
+        error_type=error_type,
+        metrics_snapshot=metrics_snapshot,
+        details=details,
+    )
 
 
 @dataclass(slots=True)
@@ -159,7 +259,8 @@ class RunLedgerService:
         details: dict[str, object] | None = None,
     ) -> RunLedgerEntry:
         """Record successful run completion."""
-        return self._append_run_outcome(
+        return _append_run_outcome(
+            self,
             event_type=RUN_FINISHED_EVENT,
             status="success",
             metrics_snapshot=metrics_snapshot,
@@ -175,7 +276,8 @@ class RunLedgerService:
         details: dict[str, object] | None = None,
     ) -> RunLedgerEntry:
         """Record failed run completion."""
-        return self._append_run_outcome(
+        return _append_run_outcome(
+            self,
             event_type=RUN_FAILED_EVENT,
             status="failed",
             metrics_snapshot=metrics_snapshot,
@@ -206,7 +308,8 @@ class RunLedgerService:
         details: dict[str, object] | None = None,
     ) -> RunLedgerEntry:
         """Record graceful shutdown completion."""
-        return self._append_run_outcome(
+        return _append_run_outcome(
+            self,
             event_type=RUN_SHUTDOWN_EVENT,
             status="shutdown",
             metrics_snapshot=metrics_snapshot,
@@ -266,6 +369,70 @@ class RunLedgerService:
             details=payload,
         )
 
+    def record_composite_dependency_completed(
+        self,
+        *,
+        dependency_name: str,
+        result: Mapping[str, object],
+    ) -> RunLedgerEntry:
+        """Record bounded dependency result evidence for rich composite replay."""
+        return _run_ledger_rich_events.record_composite_dependency_completed(
+            self,
+            dependency_name=dependency_name,
+            result=result,
+        )
+
+    def record_composite_enricher_completed(
+        self,
+        *,
+        enricher_name: str,
+        result: Mapping[str, object],
+    ) -> RunLedgerEntry:
+        """Record bounded enricher result evidence for rich composite replay."""
+        return _run_ledger_rich_events.record_composite_enricher_completed(
+            self,
+            enricher_name=enricher_name,
+            result=result,
+        )
+
+    def record_composite_merge_completed(
+        self,
+        *,
+        result: Mapping[str, object],
+    ) -> RunLedgerEntry:
+        """Record bounded merge result evidence for rich composite replay."""
+        return _run_ledger_rich_events.record_composite_merge_completed(
+            self,
+            result=result,
+        )
+
+    def record_input_snapshot_published(
+        self,
+        *,
+        provider: str,
+        entity: str,
+        pipeline_name: str,
+        snapshot_id: str,
+        content_hash: str,
+        immutable_uri: str,
+        bronze_batch_ref: str,
+        query_fingerprint: str | None = None,
+        details: Mapping[str, object] | None = None,
+    ) -> RunLedgerEntry:
+        """Record immutable input snapshot evidence published after Bronze write."""
+        return _run_ledger_rich_events.record_input_snapshot_published(
+            self,
+            provider=provider,
+            entity=entity,
+            pipeline_name=pipeline_name,
+            snapshot_id=snapshot_id,
+            content_hash=content_hash,
+            immutable_uri=immutable_uri,
+            bronze_batch_ref=bronze_batch_ref,
+            query_fingerprint=query_fingerprint,
+            details=details,
+        )
+
     def _append(
         self,
         *,
@@ -280,85 +447,15 @@ class RunLedgerService:
         details: dict[str, object] | None = None,
     ) -> RunLedgerEntry:
         """Create and append one ledger entry."""
-        self._validate_manifest_linkage()
-        event_family = infer_ledger_event_family(event_type)
-        payload = normalize_run_ledger_payload(
-            {
-                "entry_id": self._entry_id_factory(),
-                "manifest_id": self.manifest_id,
-                "run_id": self.run_id,
-                "event_type": event_type,
-                "event_family": event_family,
-                "occurred_at": self._occurred_at_factory(),
-                "status": status,
-                "stage": stage,
-                "message": message,
-                "error_type": error_type,
-                "dataset_ref": dataset_ref,
-                "lineage_fragment_id": lineage_fragment_id,
-                "metrics_snapshot": metrics_snapshot,
-                "details": build_run_ledger_diagnostic_details(
-                    _RunLedgerDiagnosticRequest(
-                        event_type=event_type,
-                        event_family=event_family,
-                        manifest_id=self.manifest_id,
-                        run_id=self.run_id,
-                        pipeline_name=self.pipeline_name,
-                        provider=self.provider,
-                        entity=self.entity,
-                        run_type=self.run_type,
-                        resolved_config_hash=self.resolved_config_hash,
-                        effective_config_hash=self.effective_config_hash,
-                        contract_ref=self.contract_ref,
-                        contract_version=self.contract_version,
-                        dq_policy_ref=self.dq_policy_ref,
-                        rule_bundle_version=self.rule_bundle_version,
-                        dq_contract_compatibility_hash=(
-                            self.dq_contract_compatibility_hash
-                        ),
-                        effective_config_artifact_id=(
-                            self.effective_config_artifact_id
-                        ),
-                        composite_run_id=self.composite_run_id,
-                        status=status,
-                        stage=stage,
-                        error_type=error_type,
-                        dataset_ref=dataset_ref,
-                        lineage_fragment_id=lineage_fragment_id,
-                        details=details,
-                    )
-                ),
-            }
-        )
-        payload["idempotency_key"] = _build_run_ledger_idempotency_key(payload)
-        entry = RunLedgerEntry.from_dict(payload)
-        self.ledger_port.append(entry)
-        return entry
-
-    def _validate_manifest_linkage(self) -> None:
-        """Reject lifecycle events that are not tied to a persisted manifest."""
-        manifest_id = self.manifest_id.strip()
-        if not manifest_id or manifest_id == "pending":
-            raise RuntimeError(
-                "Run ledger events require a persisted manifest_id before append"
-            )
-
-    def _append_run_outcome(
-        self,
-        *,
-        event_type: str,
-        status: str,
-        metrics_snapshot: dict[str, int],
-        message: str | None = None,
-        error_type: str | None = None,
-        details: dict[str, object] | None = None,
-    ) -> RunLedgerEntry:
-        """Append one terminal run outcome with the canonical payload shape."""
-        return self._append(
+        return _append_run_ledger_entry(
+            self,
             event_type=event_type,
             status=status,
+            stage=stage,
             message=message,
             error_type=error_type,
+            dataset_ref=dataset_ref,
+            lineage_fragment_id=lineage_fragment_id,
             metrics_snapshot=metrics_snapshot,
             details=details,
         )

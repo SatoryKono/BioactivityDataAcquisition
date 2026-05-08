@@ -484,6 +484,10 @@ Current event baseline for ledger-backed runs:
 - `run_failed`
 - `run_shutdown`
 - `dq_policy_applied`
+- `composite_dependency_completed`
+- `composite_enricher_completed`
+- `composite_merge_completed`
+- `input_snapshot_published`
 
 #### `run-manifest show` — Показать manifest и ledger
 

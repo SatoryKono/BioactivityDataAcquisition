@@ -93,6 +93,23 @@ def _validate_manifest_contract_alignment(
     return ["Contract identity missing contract reference"]
 
 
+def _validate_contract_identity_completeness(
+    contract_identity: ContractIdentity,
+) -> list[str]:
+    """Return missing-field issues for contract identity provenance anchors."""
+    required_fields = (
+        ("contract_version", contract_identity.contract_version),
+        ("contract_schema_hash", contract_identity.schema_hash),
+        ("dq_policy_ref", contract_identity.dq_policy_ref),
+        ("rule_bundle_version", contract_identity.rule_bundle_version),
+    )
+    return [
+        f"Contract identity missing {field_name}"
+        for field_name, value in required_fields
+        if not str(value or "").strip()
+    ]
+
+
 @dataclass(frozen=True, slots=True)
 class PipelineContext:
     """In-run processing context for record, batch, and write execution paths."""
@@ -267,6 +284,11 @@ class PipelineRunContext:
         issues = _validate_dq_contract_alignment(
             contract_identity=self.contract_identity,
             dq_contract_compatibility=self.dq_contract_compatibility,
+        )
+        issues.extend(
+            _validate_contract_identity_completeness(
+                contract_identity=self.contract_identity
+            )
         )
         issues.extend(
             _validate_manifest_contract_alignment(

@@ -2,12 +2,10 @@
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass, replace
+from dataclasses import asdict, dataclass
 from datetime import datetime
-from typing import TypedDict, cast
 from uuid import UUID
 
-from bioetl.domain.composite.state import CompositePipelineState
 from bioetl.domain.control_plane._run_ledger_event_family import (
     infer_ledger_event_family,
 )
@@ -23,8 +21,12 @@ from bioetl.domain.types import RunID
 __all__ = [
     "ARTIFACT_PUBLISHED_EVENT",
     "CANONICAL_RUN_LEDGER_STAGE_NAMES",
+    "COMPOSITE_DEPENDENCY_COMPLETED_EVENT",
+    "COMPOSITE_ENRICHER_COMPLETED_EVENT",
+    "COMPOSITE_MERGE_COMPLETED_EVENT",
     "COMPOSITE_RUN_LEDGER_STAGE_NAMES",
     "DQ_POLICY_APPLIED_EVENT",
+    "INPUT_SNAPSHOT_PUBLISHED_EVENT",
     "MANIFEST_CREATED_EVENT",
     "ORDINARY_RUN_LEDGER_STAGE_NAMES",
     "RUN_FAILED_EVENT",
@@ -52,6 +54,10 @@ STAGE_STARTED_EVENT = "stage_started"
 STAGE_COMPLETED_EVENT = "stage_completed"
 ARTIFACT_PUBLISHED_EVENT = "artifact_published"
 DQ_POLICY_APPLIED_EVENT = "dq_policy_applied"
+COMPOSITE_DEPENDENCY_COMPLETED_EVENT = "composite_dependency_completed"
+COMPOSITE_ENRICHER_COMPLETED_EVENT = "composite_enricher_completed"
+COMPOSITE_MERGE_COMPLETED_EVENT = "composite_merge_completed"
+INPUT_SNAPSHOT_PUBLISHED_EVENT = "input_snapshot_published"
 
 RUN_LEDGER_BASELINE_EVENT_TYPES: tuple[str, ...] = (
     MANIFEST_CREATED_EVENT,
@@ -63,6 +69,10 @@ RUN_LEDGER_BASELINE_EVENT_TYPES: tuple[str, ...] = (
     RUN_FAILED_EVENT,
     RUN_SHUTDOWN_EVENT,
     DQ_POLICY_APPLIED_EVENT,
+    COMPOSITE_DEPENDENCY_COMPLETED_EVENT,
+    COMPOSITE_ENRICHER_COMPLETED_EVENT,
+    COMPOSITE_MERGE_COMPLETED_EVENT,
+    INPUT_SNAPSHOT_PUBLISHED_EVENT,
 )
 
 RUN_LEDGER_STAGE_EVENT_TYPES: frozenset[str] = frozenset(
@@ -116,102 +126,6 @@ def slice_ledger_entries_after(
     raise ValueError(
         f"Ledger watermark entry_id {after_entry_id!r} was not found in append order"
     )
-
-
-@dataclass(frozen=True, slots=True)
-class RunLedgerReplayProjection:
-    """Deterministic replay delta for durable lifecycle milestones only."""
-
-    state: CompositePipelineState | None = None
-    seed_completed: bool | None = None
-    merge_completed: bool | None = None
-    last_event_id: str | None = None
-    last_event_occurred_at: datetime | None = None
-    replayed_entry_count: int = 0
-
-
-class _StageCompletionUpdate(TypedDict, total=False):
-    state: CompositePipelineState
-    seed_completed: bool
-    merge_completed: bool
-
-
-_STAGE_COMPLETION_UPDATES: dict[str, _StageCompletionUpdate] = {
-    "seed": {
-        "state": CompositePipelineState.SEED_COMPLETED,
-        "seed_completed": True,
-    },
-    "dependencies": {
-        "state": CompositePipelineState.DEPENDENCIES_COMPLETED,
-    },
-    "enrichment": {
-        "state": CompositePipelineState.ENRICHMENT_COMPLETED,
-    },
-    "merge": {
-        "state": CompositePipelineState.MERGING,
-        "merge_completed": True,
-    },
-}
-
-
-def _project_stage_completed(
-    projection: RunLedgerReplayProjection,
-    entry: RunLedgerEntry,
-) -> RunLedgerReplayProjection:
-    stage = (entry.stage or "").strip().lower()
-    update = _STAGE_COMPLETION_UPDATES.get(stage)
-    if update is None:
-        return projection
-    updated_projection: RunLedgerReplayProjection = cast(  # type: ignore[redundant-cast]
-        RunLedgerReplayProjection,
-        replace(projection, **update),
-    )
-    return updated_projection
-
-
-def _apply_replay_entry(
-    projection: RunLedgerReplayProjection,
-    entry: RunLedgerEntry,
-) -> RunLedgerReplayProjection:
-    replayed: RunLedgerReplayProjection = cast(  # type: ignore[redundant-cast]
-        RunLedgerReplayProjection,
-        replace(
-            projection,
-            last_event_id=entry.entry_id,
-            last_event_occurred_at=entry.occurred_at,
-        ),
-    )
-    if entry.event_type == STAGE_COMPLETED_EVENT:
-        return _project_stage_completed(replayed, entry)
-    if entry.event_type == RUN_FINISHED_EVENT:
-        completed_projection: RunLedgerReplayProjection = cast(  # type: ignore[redundant-cast]
-            RunLedgerReplayProjection,
-            replace(
-                replayed,
-                state=CompositePipelineState.COMPLETED,
-            ),
-        )
-        return completed_projection
-    if entry.event_type == RUN_FAILED_EVENT:
-        failed_projection: RunLedgerReplayProjection = cast(  # type: ignore[redundant-cast]
-            RunLedgerReplayProjection,
-            replace(
-                replayed,
-                state=CompositePipelineState.FAILED,
-            ),
-        )
-        return failed_projection
-    return replayed
-
-
-def project_run_ledger_replay(
-    entries: tuple[RunLedgerEntry, ...] | list[RunLedgerEntry],
-) -> RunLedgerReplayProjection:
-    """Project append-ordered ledger entries into a deterministic replay delta."""
-    projection = RunLedgerReplayProjection(replayed_entry_count=len(entries))
-    for entry in entries:
-        projection = _apply_replay_entry(projection, entry)
-    return projection
 
 
 @dataclass(frozen=True, slots=True)
@@ -285,3 +199,9 @@ class RunLedgerEntry:
             metrics_snapshot=load_metrics_snapshot(payload.get("metrics_snapshot")),
             details=load_details(payload.get("details")),
         )
+
+
+from bioetl.domain.control_plane.run_ledger_replay import (  # noqa: E402
+    RunLedgerReplayProjection,
+    project_run_ledger_replay,
+)

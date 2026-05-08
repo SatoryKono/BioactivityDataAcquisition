@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from pathlib import Path
 from uuid import uuid4
+
+import pytest
 
 from bioetl.domain.config import RuntimeConfig
 from bioetl.composition.factories.pipeline.run_context_factory import RunContextFactory
@@ -109,3 +112,70 @@ def test_run_context_factory_uses_explicit_started_at_anchor() -> None:
     )
 
     assert context.started_at == started_at
+
+
+def test_run_context_factory_fails_closed_for_strict_contract_identity(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    """Exact replay metadata must not silently carry partial contract identity."""
+    registry_dir = tmp_path / "configs" / "base"
+    registry_dir.mkdir(parents=True)
+    (registry_dir / "contract_registry.yaml").write_text(
+        """
+entries:
+  chembl.activity:
+    identity:
+      contract_version: "1.2.3"
+      schema_hash: deadbeef
+""".strip(),
+        encoding="utf-8",
+    )
+    monkeypatch.chdir(tmp_path)
+    factory = RunContextFactory(
+        pipeline_name="chembl_activity",
+        provider="chembl",
+        entity_type_extractor=lambda _pipeline_name: "activity",
+        config_hash_getter=lambda _yaml_config: "resolved-hash",
+    )
+
+    with pytest.raises(RuntimeError, match="complete contract identity"):
+        factory.create(
+            run_id=RunID(uuid4()),
+            runtime=RuntimeConfig(
+                run_type=RunType.INCREMENTAL,
+                exact_replay=True,
+            ),
+            started_at=datetime(2026, 4, 24, 12, 0, tzinfo=UTC),
+            yaml_config=_yaml_config(),
+        )
+
+
+def test_run_context_factory_allows_degraded_partial_contract_identity(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    """Degraded runs may retain compatibility fallback without exact-replay claim."""
+    registry_dir = tmp_path / "configs" / "base"
+    registry_dir.mkdir(parents=True)
+    (registry_dir / "contract_registry.yaml").write_text(
+        "entries: [invalid",
+        encoding="utf-8",
+    )
+    monkeypatch.chdir(tmp_path)
+    factory = RunContextFactory(
+        pipeline_name="chembl_activity",
+        provider="chembl",
+        entity_type_extractor=lambda _pipeline_name: "activity",
+        config_hash_getter=lambda _yaml_config: "resolved-hash",
+    )
+
+    context = factory.create(
+        run_id=RunID(uuid4()),
+        runtime=_runtime(),
+        started_at=datetime(2026, 4, 24, 12, 0, tzinfo=UTC),
+        yaml_config=_yaml_config(),
+    )
+
+    assert context.contract_ref == "chembl.activity"
+    assert context.contract_version is None

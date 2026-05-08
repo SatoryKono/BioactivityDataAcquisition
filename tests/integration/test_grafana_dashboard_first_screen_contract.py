@@ -453,7 +453,10 @@ def test_navigation_bus_panels_document_handoff_policy() -> None:
         "same-tab",
         "current time range",
         "scope",
+    )
+    tracing_tokens = (
         "optional tracing profile",
+        "available only for traced runs",
     )
 
     for dashboard_path in get_dashboard_files():
@@ -482,3 +485,7 @@ def test_navigation_bus_panels_document_handoff_policy() -> None:
                 f"{dashboard_path.name}:Review Dashboard Navigation description "
                 f"must mention {token!r}"
             )
+        assert any(token in description for token in tracing_tokens), (
+            f"{dashboard_path.name}:Review Dashboard Navigation description "
+            "must document traced-run-only Explore Traces semantics"
+        )

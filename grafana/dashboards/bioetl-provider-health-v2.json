@@ -32,7 +32,7 @@
         "mode": "html"
       },
       "title": "Review Dashboard Navigation",
-      "description": "Top navigation bus for the dashboard suite. Uses same-tab handoffs, preserves the current time range, resets unsupported dashboard-specific scope where needed, and exposes Explore Logs / Explore Traces links that require the optional tracing profile.",
+      "description": "Top navigation bus for the dashboard suite. Uses same-tab handoffs, preserves the current time range, resets unsupported dashboard-specific scope where needed, and exposes Explore Logs plus an Explore Traces adjunct that is available only for traced runs.",
       "type": "text",
       "links": [
         {
@@ -79,14 +79,14 @@
           "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D",
           "targetBlank": false,
           "includeVars": false,
-          "tooltip": "Requires optional tracing profile. Opens Logs Drilldown in the same tab with safe {job=\"bioetl\"} baseline."
+          "tooltip": "Requires optional tracing profile. Opens Logs Drilldown in the same tab with safe {job=\"bioetl\"} baseline. Zero lines can legitimately mean Loki shipping is disabled, no BioETL log streams were shipped in range, or the baseline query still needs refinement inside Explore."
         },
         {
           "title": "Explore Traces",
           "url": "/a/grafana-exploretraces-app/?from=${__from}&to=${__to}&queryType=traceqlSearch&query=%7B%20span.%22bioetl.provider%22%20%3D~%20%22${provider:regex}%22%20%7D",
           "targetBlank": false,
           "includeVars": false,
-          "tooltip": "Requires optional tracing profile. Opens Traces Drilldown in the same tab with provider-scoped TraceQL context."
+          "tooltip": "Available only for traced runs. Enable tracing with --tracing or BIOETL_OBSERVABILITY__TRACING_ENABLED=true. Opens Traces Drilldown in the same tab with provider-scoped TraceQL context; NoOpTracing or tracing-off runs can legitimately be empty, so treat this as adjunct evidence rather than first-screen proof."
         }
       ]
     },
@@ -304,7 +304,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Current top provider causes from canonical cause recording rules: raw status, failure rate, retry exhaustion, latency, HTTP errors, or rate-limit pressure. Empty table means no active provider causes are currently above zero.",
+      "description": "Current top provider causes from canonical cause recording rules: raw status, failure rate, retry exhaustion, latency, HTTP errors, or rate-limit pressure. If provider severity is DEGRADED/FAILING but no positive cause projection exists, this panel emits a synthetic status_without_projected_cause row so operator triage does not go blank. Treat that synthetic row as a telemetry/rule gap and inspect raw provider status plus optional rate-limit/circuit-breaker evidence before leaving the dashboard.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -329,6 +329,7 @@
               }
             }
           ],
+          "noValue": "No provider causes projected. If critical providers remain visible, treat this as a cause-projection gap and inspect raw provider status plus optional telemetry.",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -379,7 +380,7 @@
       "pluginVersion": "10.4.0",
       "targets": [
         {
-          "expr": "topk(5, bioetl_provider_current_cause > 0)",
+          "expr": "topk(5, (bioetl_provider_current_cause > 0) or label_replace(label_replace(((bioetl_provider_current_status >= 1) unless on (provider) max by (provider) (bioetl_provider_current_cause > bool 0)), \"cause\", \"status_without_projected_cause\", \"__name__\", \".*\"), \"severity\", \"unknown\", \"__name__\", \".*\"))",
           "format": "table",
           "instant": true,
           "legendFormat": "{{pipeline}} {{provider}} {{reason}} {{cause}}",
@@ -401,7 +402,7 @@
         "y": 13
       },
       "options": {
-        "content": "<div style=\"padding:0.45rem 0.7rem;line-height:1.55\"><strong>First action:</strong> start with the GLOBAL severity matrix, then open top causes for the degraded provider. If cause is retry/rate-limit/circuit-breaker, inspect control-plane safety before replay. If cause is latency/errors, correlate with Runtime impact, then logs/traces from the runtime or DQ dashboards.</div>",
+        "content": "<div style=\"padding:0.45rem 0.7rem;line-height:1.55\"><strong>First action:</strong> start with the GLOBAL severity matrix, then open top causes for the degraded provider. If the top-cause table shows <code>status_without_projected_cause</code>, treat that as a provider explainability gap: confirm raw provider status, then inspect optional rate-limit/circuit-breaker panels before leaving the page. If cause is retry/rate-limit/circuit-breaker, inspect control-plane safety before replay. If cause is latency/errors, correlate with Runtime impact, then logs/traces from the runtime or DQ dashboards.</div>",
         "mode": "html"
       },
       "links": [
@@ -1526,7 +1527,7 @@
       ],
       "title": "Track Rate Limiter Wait by Provider (p95)",
       "type": "timeseries",
-      "description": "Selected-range evidence: p95 wait time imposed by provider rate limiting. No data means no observed wait samples in range. The provider degraded-rule surface starts at p95 > 1s; this panel keeps a lower yellow band for earlier-warning inspection."
+      "description": "Selected-range evidence: p95 wait time imposed by provider rate limiting. No data means no observed wait samples in range, not a healthy wait time. This optional telemetry can stay empty even when current provider severity is non-OK. The provider degraded-rule surface starts at p95 > 1s; this panel keeps a lower yellow band for earlier-warning inspection."
     },
     {
       "datasource": {
@@ -1551,6 +1552,7 @@
               }
             }
           ],
+          "noValue": "No rate-limiter token samples in range. This remains diagnostic and does not disprove provider pressure.",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -1600,7 +1602,7 @@
       ],
       "title": "Monitor Minimum Rate Limiter Tokens Available",
       "type": "bargauge",
-      "description": "Selected-range evidence: minimum provider tokens available in the active Grafana range. Lower values indicate higher rate-limit pressure; 0 means requests can be blocked. No data remains diagnostic and means no token samples were observed in range."
+      "description": "Selected-range evidence: minimum provider tokens available in the active Grafana range. Lower values indicate higher rate-limit pressure; 0 means requests can be blocked. No data remains diagnostic and means no token samples were observed in range. This optional telemetry can stay empty even when current provider severity is non-OK."
     },
     {
       "datasource": {
@@ -1625,6 +1627,7 @@
               }
             }
           ],
+          "noValue": "No circuit-breaker state samples in range. Adapter-scoped telemetry is optional and does not imply CLOSED.",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -1675,7 +1678,7 @@
       ],
       "title": "Monitor Cross-Scope Adapter Circuit Breaker State (max)",
       "type": "stat",
-      "description": "Cross-scope adapter diagnostics over the active Grafana range: 0=CLOSED, 1=HALF_OPEN, 2=OPEN. Uses the adapter selector because the shipped metric family is adapter-labelled rather than provider-labelled. No data remains diagnostic and does not imply a synthetic CLOSED state."
+      "description": "Cross-scope adapter diagnostics over the active Grafana range: 0=CLOSED, 1=HALF_OPEN, 2=OPEN. Uses the adapter selector because the shipped metric family is adapter-labelled rather than provider-labelled. No data remains diagnostic and does not imply a synthetic CLOSED state. This adapter-scoped telemetry can stay empty even when current provider severity is non-OK."
     },
     {
       "datasource": {
@@ -1707,6 +1710,7 @@
             }
           },
           "mappings": [],
+          "noValue": "No circuit-breaker trip samples in range. Adapter-scoped telemetry is optional and remains diagnostic.",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -1750,7 +1754,7 @@
       ],
       "title": "Track Cross-Scope Adapter Circuit Breaker Trips",
       "type": "timeseries",
-      "description": "Cross-scope adapter diagnostics: selected-range circuit-breaker trip count by adapter over the active Grafana interval. This panel is intentionally adapter-scoped because the shipped metric family is adapter-labelled rather than provider-labelled. No data remains diagnostic and does not create synthetic adapter rows."
+      "description": "Cross-scope adapter diagnostics: selected-range circuit-breaker trip count by adapter over the active Grafana interval. This panel is intentionally adapter-scoped because the shipped metric family is adapter-labelled rather than provider-labelled. No data remains diagnostic and does not create synthetic adapter rows. Empty adapter telemetry does not refute current provider severity on its own."
     }
   ],
   "refresh": "30s",

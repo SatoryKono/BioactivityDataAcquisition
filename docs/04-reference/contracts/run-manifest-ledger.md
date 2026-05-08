@@ -655,7 +655,7 @@ identity, not semantic manifest identity.
 | `run_id`              | `uuid`     |      yes | Execution run identifier                                                                                                             |
 | `event_type`          | `str`      |      yes | Lifecycle / diagnostic event name                                                                                                    |
 | `occurred_at`         | `datetime` |      yes | Event timestamp                                                                                                                      |
-| `event_family`        | `str`      |       no | Stable event taxonomy (`diagnostic`, `pipeline.lifecycle`, `pipeline.phase`, `artifact`, `dq`, `lineage`, `checkpoint`, `composite`) |
+| `event_family`        | `str`      |       no | Stable event taxonomy (`diagnostic`, `pipeline.lifecycle`, `pipeline.phase`, `artifact`, `dq`, `lineage`, `checkpoint`, `composite`, `input_snapshot`) |
 | `status`              | `str`      |       no | Outcome/status snapshot                                                                                                              |
 | `stage`               | `str`      |       no | Stage identifier when applicable                                                                                                     |
 | `message`             | `str`      |       no | Human-readable event note                                                                                                            |
@@ -692,6 +692,10 @@ The current baseline ledger records these events:
 - `run_failed`
 - `run_shutdown`
 - `dq_policy_applied`
+- `composite_dependency_completed`
+- `composite_enricher_completed`
+- `composite_merge_completed`
+- `input_snapshot_published`
 
 Event taxonomy behavior:
 
@@ -700,6 +704,12 @@ Event taxonomy behavior:
 - Prefix-based families are supported (`dq_*`, `lineage_*`, `checkpoint_*`,
   `composite_*`, `artifact_*`), and suffix-based phase events
   (`*_started`, `*_completed`) map to `pipeline.phase`.
+- `input_snapshot_published` records immutable live-capture Bronze input
+  snapshot evidence after manifest creation; inspection treats it as
+  ledger-derived evidence and does not mutate the original manifest.
+- `composite_dependency_completed`, `composite_enricher_completed`, and
+  `composite_merge_completed` carry bounded rich composite resume evidence
+  used by checkpoint snapshot plus ledger suffix replay.
 - file-backed ledger reads are corruption-visible and fail closed: a truncated
   tail line or malformed JSONL entry is treated as ledger corruption rather
   than silently ignored during inspection or resume-time replay.

@@ -7,10 +7,13 @@ from typing import TYPE_CHECKING, Protocol
 
 from bioetl.application.composite.runner_pkg.runner_stage_payloads import (
     build_composite_run_completion_metrics,
+    build_dependency_result_payload,
     build_dependency_stage_details,
     build_dependency_stage_metrics,
+    build_enrichment_result_payload,
     build_enrichment_stage_details,
     build_enrichment_stage_metrics,
+    build_merge_result_payload,
     build_merge_stage_metrics,
     build_seed_stage_metrics,
 )
@@ -314,6 +317,16 @@ class _CompositeRunnerPhaseCompletionMixin:
             retry_kind="resume",
             count=resumed,
         )
+        for dependency_name, result in sorted(dependency_results.items()):
+            payload = build_dependency_result_payload(result)
+            self._record_with_ledger_service(
+                lambda ledger_service, name=dependency_name, data=payload: (
+                    ledger_service.record_composite_dependency_completed(
+                        dependency_name=name,
+                        result=data,
+                    )
+                )
+            )
         self._record_stage_completed(
             stage=_DEPENDENCIES_STAGE_NAME,
             metrics_snapshot=build_dependency_stage_metrics(dependency_results),
@@ -377,6 +390,16 @@ class _CompositeRunnerPhaseCompletionMixin:
             error_kind="timeout",
             count=timed_out,
         )
+        for enricher_name, result in sorted(enrichment_results.items()):
+            payload = build_enrichment_result_payload(result)
+            self._record_with_ledger_service(
+                lambda ledger_service, name=enricher_name, data=payload: (
+                    ledger_service.record_composite_enricher_completed(
+                        enricher_name=name,
+                        result=data,
+                    )
+                )
+            )
         self._record_stage_completed(
             stage=_ENRICHMENT_STAGE_NAME,
             metrics_snapshot=build_enrichment_stage_metrics(enrichment_results),
@@ -416,6 +439,12 @@ class _CompositeRunnerPhaseCompletionMixin:
             phase="merge",
             loss_kind="quarantined",
             count=len(merge_result.quarantine_payloads),
+        )
+        merge_payload = build_merge_result_payload(merge_result)
+        self._record_with_ledger_service(
+            lambda ledger_service: ledger_service.record_composite_merge_completed(
+                result=merge_payload,
+            )
         )
         self._record_stage_completed(
             stage=_MERGE_STAGE_NAME,

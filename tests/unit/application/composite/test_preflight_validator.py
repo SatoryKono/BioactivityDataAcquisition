@@ -19,10 +19,14 @@ from bioetl.application.composite.preflight_validator import (
     ValidationIssue,
 )
 from bioetl.domain.composite.config import (
+    AggregationConfig,
+    AggregationFieldSpec,
+    AggregationFunction,
     CompositeConfig,
     CompositeDQConfig,
     DependencyConfig,
     EnricherConfig,
+    EnricherCardinality,
     MergeConfig,
     SeedConfig,
 )
@@ -416,6 +420,97 @@ class TestCompositePreflightValidationServiceValidation:
 
         assert exc_info.value.result.is_valid is False
         assert len(exc_info.value.result.errors) >= 1
+
+    def test_validate_rejects_many_to_one_aggregation_without_order_by(
+        self,
+        validator: CompositePreflightValidationService,
+    ) -> None:
+        """Order-sensitive many-to-one aggregation must declare deterministic order."""
+        config = CompositeConfig(
+            name="test_composite",
+            version="1.0.0",
+            seed=SeedConfig(
+                pipeline="chembl_publication",
+                output_keys=("publication_id",),
+                silver_table="silver/chembl/publication",
+            ),
+            enrichers=(
+                EnricherConfig(
+                    pipeline="publication_terms",
+                    join_keys=("publication_id",),
+                    cardinality=EnricherCardinality.MANY_TO_ONE,
+                    aggregation=AggregationConfig(
+                        group_by="publication_id",
+                        fields=(
+                            AggregationFieldSpec(
+                                source_field="term",
+                                agg_function=AggregationFunction.COLLECT_LIST,
+                            ),
+                        ),
+                    ),
+                ),
+            ),
+            merge=MergeConfig(
+                strategy=MergeStrategy.LEFT_OUTER,
+                conflict_resolution=ConflictResolution.SEED_PRIORITY,
+                output_silver_path="silver/composite/test",
+                output_gold_path="gold/composite/test",
+                field_priorities={},
+            ),
+        )
+
+        result = validator.validate(config, fail_on_error=False)
+
+        issues = [
+            issue
+            for issue in result.errors
+            if issue.issue_type == "missing_deterministic_order"
+        ]
+        assert len(issues) == 1
+        assert issues[0].field == "aggregation.order_by"
+
+    def test_validate_accepts_many_to_one_aggregation_with_order_by(
+        self,
+        validator: CompositePreflightValidationService,
+    ) -> None:
+        """Explicit order_by makes order-sensitive many-to-one aggregation valid."""
+        config = CompositeConfig(
+            name="test_composite",
+            version="1.0.0",
+            seed=SeedConfig(
+                pipeline="chembl_publication",
+                output_keys=("publication_id",),
+                silver_table="silver/chembl/publication",
+            ),
+            enrichers=(
+                EnricherConfig(
+                    pipeline="publication_terms",
+                    join_keys=("publication_id",),
+                    cardinality=EnricherCardinality.MANY_TO_ONE,
+                    aggregation=AggregationConfig(
+                        group_by="publication_id",
+                        order_by=("rank",),
+                        fields=(
+                            AggregationFieldSpec(
+                                source_field="term",
+                                agg_function=AggregationFunction.COLLECT_LIST,
+                            ),
+                        ),
+                    ),
+                ),
+            ),
+            merge=MergeConfig(
+                strategy=MergeStrategy.LEFT_OUTER,
+                conflict_resolution=ConflictResolution.SEED_PRIORITY,
+                output_silver_path="silver/composite/test",
+                output_gold_path="gold/composite/test",
+                field_priorities={},
+            ),
+        )
+
+        result = validator.validate(config, fail_on_error=False)
+
+        assert result.errors == []
 
 
 class TestCompositePreflightValidationServiceWithSchemas:

@@ -233,6 +233,12 @@ def _execute_health_server(host: str, port: int) -> None:
             coro.close()
 
 
+def run_health_server_command(host: str, port: int) -> None:
+    """Start the long-lived health/quarantine explorer backend."""
+    _echo_health_server_info(host, port)
+    _execute_health_server(host, port)
+
+
 async def _run_health_checks(provider: tuple[str, ...]) -> HealthResults:
     """Execute health checks and return results as serializable dictionary."""
     service = get_health_service()
@@ -346,8 +352,7 @@ def health_server_command(host: str, port: int) -> None:
         host: IP address to bind the server to (e.g., '127.0.0.1' or '0.0.0.0').
         port: TCP port for the health server to listen on.
     """
-    _echo_health_server_info(host, port)
-    _execute_health_server(host, port)
+    run_health_server_command(host, port)
 
 
 @health.command("check")
@@ -388,4 +393,4 @@ def health_check(provider: tuple[str, ...], output_json: bool) -> None:
 
 COMMANDS = (health_server_command,)
 
-__all__ = ["health"]
+__all__ = ["health", "run_health_server_command"]

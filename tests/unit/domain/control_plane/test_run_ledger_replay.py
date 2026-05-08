@@ -9,7 +9,11 @@ import pytest
 
 from bioetl.domain.composite.state import CompositePipelineState
 from bioetl.domain.control_plane.run_ledger import (
+    COMPOSITE_DEPENDENCY_COMPLETED_EVENT,
+    COMPOSITE_ENRICHER_COMPLETED_EVENT,
+    COMPOSITE_MERGE_COMPLETED_EVENT,
     COMPOSITE_RUN_LEDGER_STAGE_NAMES,
+    INPUT_SNAPSHOT_PUBLISHED_EVENT,
     ORDINARY_RUN_LEDGER_STAGE_NAMES,
     RunLedgerEntry,
     project_run_ledger_replay,
@@ -25,6 +29,7 @@ def _entry(
     event_type: str,
     stage: str | None = None,
     occurred_at: datetime,
+    details: dict[str, object] | None = None,
 ) -> RunLedgerEntry:
     return RunLedgerEntry(
         entry_id=entry_id,
@@ -33,6 +38,7 @@ def _entry(
         event_type=event_type,
         stage=stage,
         occurred_at=occurred_at,
+        details=details,
     )
 
 
@@ -212,3 +218,89 @@ class TestRunLedgerReplayProjection:
         )
 
         assert entry.idempotency_key == "sha256:abc"
+
+    def test_projects_rich_composite_payloads_deterministically(self) -> None:
+        projection = project_run_ledger_replay(
+            [
+                _entry(
+                    entry_id="entry-dependency",
+                    event_type=COMPOSITE_DEPENDENCY_COMPLETED_EVENT,
+                    occurred_at=datetime(2024, 6, 1, 9, 0, tzinfo=UTC),
+                    details={
+                        "dependency_name": "chembl_molecule",
+                        "pipeline_name": "chembl_molecule",
+                        "status": "success",
+                        "records_extracted": 8,
+                        "records_silver": 7,
+                        "duration_seconds": 1.5,
+                    },
+                ),
+                _entry(
+                    entry_id="entry-enricher",
+                    event_type=COMPOSITE_ENRICHER_COMPLETED_EVENT,
+                    occurred_at=datetime(2024, 6, 1, 9, 1, tzinfo=UTC),
+                    details={
+                        "enricher_name": "pubmed_publication",
+                        "status": "partial",
+                        "records_input": 10,
+                        "records_enriched": 6,
+                        "records_not_found": 3,
+                        "records_errored": 1,
+                        "dq_error_rate": 0.1,
+                        "duration_seconds": 2.0,
+                    },
+                ),
+                _entry(
+                    entry_id="entry-merge",
+                    event_type=COMPOSITE_MERGE_COMPLETED_EVENT,
+                    occurred_at=datetime(2024, 6, 1, 9, 2, tzinfo=UTC),
+                    details={
+                        "records_merged": 10,
+                        "records_enriched": 6,
+                        "output_silver_path": "silver/composite/publication",
+                    },
+                ),
+            ]
+        )
+
+        assert projection.completed_dependencies == frozenset({"chembl_molecule"})
+        assert projection.dependency_results["chembl_molecule"].records_silver == 7
+        assert projection.completed_enrichers == frozenset({"pubmed_publication"})
+        assert projection.enrichment_results["pubmed_publication"].records_errored == 1
+        assert projection.merge_completed is True
+        assert projection.merge_result == {
+            "output_silver_path": "silver/composite/publication",
+            "records_enriched": 6,
+            "records_merged": 10,
+        }
+
+    def test_projects_input_snapshot_publication_events_deterministically(self) -> None:
+        projection = project_run_ledger_replay(
+            [
+                _entry(
+                    entry_id="entry-snapshot-b",
+                    event_type=INPUT_SNAPSHOT_PUBLISHED_EVENT,
+                    occurred_at=datetime(2024, 6, 1, 9, 0, tzinfo=UTC),
+                    details={
+                        "snapshot_id": "snapshot-b",
+                        "content_hash": "sha256:b",
+                        "immutable_uri": "file:///bronze/b.jsonl",
+                    },
+                ),
+                _entry(
+                    entry_id="entry-snapshot-a",
+                    event_type=INPUT_SNAPSHOT_PUBLISHED_EVENT,
+                    occurred_at=datetime(2024, 6, 1, 9, 1, tzinfo=UTC),
+                    details={
+                        "snapshot_id": "snapshot-a",
+                        "content_hash": "sha256:a",
+                        "immutable_uri": "file:///bronze/a.jsonl",
+                    },
+                ),
+            ]
+        )
+
+        assert [item["snapshot_id"] for item in projection.input_snapshots] == [
+            "snapshot-a",
+            "snapshot-b",
+        ]

@@ -476,6 +476,34 @@ def test_resolve_contract_identity_fails_closed_for_strict_context_when_registry
 
 
 @pytest.mark.unit
+def test_resolve_contract_identity_fails_closed_when_strict_identity_incomplete(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    registry_dir = tmp_path / "configs" / "base"
+    registry_dir.mkdir(parents=True)
+    registry_path = registry_dir / "contract_registry.yaml"
+    registry_path.write_text(
+        """
+entries:
+  chembl.activity:
+    identity:
+      contract_version: "1.2.3"
+      schema_hash: deadbeef
+""".strip(),
+        encoding="utf-8",
+    )
+    monkeypatch.chdir(tmp_path)
+
+    with pytest.raises(RuntimeError, match="missing: dq_policy_ref"):
+        resolve_contract_identity(
+            provider="chembl",
+            entity="activity",
+            strict=True,
+        )
+
+
+@pytest.mark.unit
 def test_replay_reconstructability_metric_is_reconstructable_for_non_strict_runs() -> (
     None
 ):

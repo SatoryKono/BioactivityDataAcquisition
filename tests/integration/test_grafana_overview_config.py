@@ -349,6 +349,25 @@ def test_l0_inputs_panel_uses_selected_scope_projection() -> None:
     }
 
 
+def test_overview_current_state_panels_normalize_workflow_pipeline_aliases() -> None:
+    """Workflow-prefixed pipeline selectors must resolve back to entity-scoped overview summaries."""
+    titles = (
+        "System Status",
+        "Next Action",
+        "L0 Inputs",
+        "Runtime Blockers",
+        "DQ Status",
+        "Gold Lifecycle",
+        "Control Plane",
+        "Workflow Selected",
+    )
+
+    for title in titles:
+        expr = _panel_expr(_panels_by_title()[title])
+        assert 'label_replace(vector(1), "pipeline_raw", "$pipeline"' in expr
+        assert '"^(?:workflow_)?(.*)$"' in expr
+
+
 def test_provider_and_workflow_scope_are_explicit() -> None:
     provider = _panels_by_title()["Provider Global"]
     workflow_selected = _panels_by_title()["Workflow Selected"]
@@ -500,3 +519,4 @@ def test_overview_hero_logic_uses_selected_scope_projection_contract() -> None:
     assert "bioetl_l0_status" in expressions
     assert "bioetl_l0_next_action_route" in expressions
     assert "bioetl_l0_input_status_selected" in expressions
+    assert '"^(?:workflow_)?(.*)$"' in expressions

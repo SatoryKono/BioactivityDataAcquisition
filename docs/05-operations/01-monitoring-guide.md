@@ -141,6 +141,8 @@ L0 дашборд для одного operator question: что сейчас bro
   links `Silver Reject Explorer`, `Explore Logs`, `Explore Traces`; они
   открываются в том же окне, а current dashboard item остаётся видимым как
   disabled dark-gray button.
+  `Explore Traces` remains optional and is available only for traced runs; a
+  run using `NoOpTracing` can legitimately return an empty Tempo search.
 
 #### 2. 2. Runtime
 
@@ -227,7 +229,10 @@ tracing-backed log hygiene живёт в collapsed row
   показывает только active `DEGRADED`/`FAILING`; providers с missing telemetry
   остаются в severity matrix как `UNKNOWN`. `Inspect Critical Providers` и
   `Inspect Provider Top Causes` дают direct handoff в canonical provider
-  incident runbook.
+  incident runbook. Если provider severity non-OK, а canonical cause projection
+  пуста, top-cause table показывает synthetic `status_without_projected_cause`;
+  трактуйте это как explainability gap и проверяйте raw provider status plus
+  optional rate-limit/circuit-breaker telemetry before replay or escalation.
 - **Monitor Current Provider Health Status**: table panel по
   `bioetl_provider_health_status{provider}` с fail-closed fallback через
   provider universe и явным mapping: `0=UNHEALTHY`, `1=DEGRADED`,
@@ -471,6 +476,7 @@ uv run python -m pytest -q tests/integration/test_prometheus_rules_config.py
   1. Проверьте доступность endpoint метрик на порту 8000 (`/metrics`).
 - **Loki drilldown не находит событие**:
   1. Сначала проверьте, что общий запрос `{job="bioetl"}` вообще возвращает строки.
+  1. Zero lines могут быть легитимны, если Loki shipping/profile выключен или выбранный run не отгрузил BioETL streams в текущем окне.
   1. После этого сузьте запрос вручную по `pipeline`, `provider` или `stage` уже в Explore.
   1. Не полагайтесь на `$pipeline/$provider` interpolation внутри encoded Explore payload.
 - **Метрики показывают UNHEALTHY для storage**: Проверьте права доступа к папкам `data/`.

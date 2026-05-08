@@ -90,6 +90,41 @@ class TestAggregateCollectList:
         assert len(terms) == 2
         assert None not in terms
 
+    def test_collect_list_is_stable_across_input_permutations(
+        self, aggregator: EnricherAggregator
+    ):
+        """Permutation of input rows must not change list aggregation output."""
+        rows = {
+            "doc_id": ["D1", "D1", "D1"],
+            "rank": [2, 1, 3],
+            "term": ["oncology", "cancer", "tumor"],
+        }
+        reversed_rows = {
+            "doc_id": list(reversed(rows["doc_id"])),
+            "rank": list(reversed(rows["rank"])),
+            "term": list(reversed(rows["term"])),
+        }
+        config = AggregationConfig(
+            group_by="doc_id",
+            order_by=("rank",),
+            fields=(
+                AggregationFieldSpec(
+                    source_field="term",
+                    agg_function=AggregationFunction.COLLECT_LIST,
+                ),
+            ),
+        )
+
+        first = aggregator.aggregate(pl.DataFrame(rows), config, "test_enricher")
+        second = aggregator.aggregate(
+            pl.DataFrame(reversed_rows),
+            config,
+            "test_enricher",
+        )
+
+        assert first.to_dict(as_series=False) == second.to_dict(as_series=False)
+        assert first["term"].to_list()[0] == ["cancer", "oncology", "tumor"]
+
 
 @pytest.mark.unit
 class TestAggregateCollectSet:
@@ -164,6 +199,30 @@ class TestAggregateFirst:
         )
         config = AggregationConfig(
             group_by="doc_id",
+            fields=(
+                AggregationFieldSpec(
+                    source_field="term",
+                    agg_function=AggregationFunction.FIRST,
+                ),
+            ),
+        )
+
+        result = aggregator.aggregate(df, config, "test_enricher")
+
+        assert result["term"].to_list()[0] == "first"
+
+    def test_first_uses_explicit_order_by(self, aggregator: EnricherAggregator):
+        """FIRST uses the canonical order, not incidental input order."""
+        df = pl.DataFrame(
+            {
+                "doc_id": ["D1", "D1"],
+                "rank": [2, 1],
+                "term": ["second", "first"],
+            }
+        )
+        config = AggregationConfig(
+            group_by="doc_id",
+            order_by=("rank",),
             fields=(
                 AggregationFieldSpec(
                     source_field="term",

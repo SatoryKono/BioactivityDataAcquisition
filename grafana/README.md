@@ -825,7 +825,8 @@ control-plane metrics, provider health metrics и `bioetl_workflow_runs_total`.
 временное окно. Critical current-status panels also expose panel `dataLinks`
 to the same canonical dashboards. Navigation panel `id=1000` now also carries
 global adjunct links `Silver Reject Explorer`, `Explore Logs`, and
-`Explore Traces` in the same tab. The current dashboard remains visible in
+`Explore Traces` in the same tab. `Explore Traces` is a traced-run-only adjunct
+surface, so `NoOpTracing` runs can legitimately return empty Tempo results. The current dashboard remains visible in
 `id=1000` as a disabled dark-gray item rather than disappearing from the bus.
 
 **Silver Rejects triage sequence:**
@@ -918,6 +919,13 @@ ______________________________________________________________________
 | Inspect Selected Record Details                   | Table | `/ops/quarantine/filtered-records?...&payload_hash=<hash>` |
 
 **Datasource:** `Quarantine Explorer` (`yesoreyeram-infinity-datasource`, provisioning: `grafana/provisioning/datasources-core/quarantine-explorer.yml`).
+
+**Backend contract:** this datasource expects a dedicated long-lived BioETL HTTP
+backend, not a transient per-run companion server. Recommended launcher:
+`bioetl quarantine serve --port 8081`. `bioetl health server --port 8081`
+remains a compatibility entrypoint, but operators should treat the Quarantine
+Explorer backend as a stable observability surface for Grafana rather than a
+temporary workflow-run helper.
 
 **Фильтры:** `$pipeline`, `$run_type`, `$reason_code`, `$field`, `$run_id`, `$payload_hash` + стандартный Grafana time picker.
 `$pipeline` здесь intentionally single-select/no-All. `$run_id` и

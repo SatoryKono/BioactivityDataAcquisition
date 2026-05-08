@@ -17,10 +17,13 @@ from bioetl.domain.composite.result import (
 
 __all__ = [
     "build_composite_run_completion_metrics",
+    "build_dependency_result_payload",
     "build_dependency_stage_details",
     "build_dependency_stage_metrics",
+    "build_enrichment_result_payload",
     "build_enrichment_stage_details",
     "build_enrichment_stage_metrics",
+    "build_merge_result_payload",
     "build_merge_stage_metrics",
     "build_seed_stage_metrics",
 ]
@@ -80,6 +83,19 @@ def build_dependency_stage_metrics(
     }
 
 
+def build_dependency_result_payload(result: DependencyResult) -> dict[str, object]:
+    """Build bounded dependency result evidence for run-ledger replay."""
+    return {
+        "pipeline_name": result.pipeline_name,
+        "status": result.status.value,
+        "records_extracted": int(result.records_extracted),
+        "records_silver": int(result.records_silver),
+        "duration_seconds": float(result.duration_seconds),
+        "error_message": result.error_message,
+        "resumed": bool(result.resumed),
+    }
+
+
 def build_enrichment_stage_metrics(
     enrichment_results: dict[str, EnrichmentResult],
 ) -> dict[str, int]:
@@ -104,6 +120,21 @@ def build_enrichment_stage_metrics(
     }
 
 
+def build_enrichment_result_payload(result: EnrichmentResult) -> dict[str, object]:
+    """Build bounded enricher result evidence for run-ledger replay."""
+    return {
+        "enricher_name": result.enricher_name,
+        "status": result.status.value,
+        "records_input": int(result.records_input),
+        "records_enriched": int(result.records_enriched),
+        "records_not_found": int(result.records_not_found),
+        "records_errored": int(result.records_errored),
+        "dq_error_rate": float(result.dq_error_rate),
+        "duration_seconds": float(result.duration_seconds),
+        "error_message": result.error_message,
+    }
+
+
 def build_merge_stage_metrics(merge_result: MergeResult) -> dict[str, int]:
     """Build merge-stage metrics for run-ledger payloads."""
     return {
@@ -111,6 +142,23 @@ def build_merge_stage_metrics(merge_result: MergeResult) -> dict[str, int]:
         "records_from_seed": int(merge_result.records_from_seed),
         "records_enriched": int(merge_result.records_enriched),
         "records_fully_enriched": int(merge_result.records_fully_enriched),
+    }
+
+
+def build_merge_result_payload(merge_result: MergeResult) -> dict[str, object]:
+    """Build bounded merge result evidence for run-ledger replay."""
+    return {
+        "records_merged": int(merge_result.records_merged),
+        "records_from_seed": int(merge_result.records_from_seed),
+        "records_enriched": int(merge_result.records_enriched),
+        "records_fully_enriched": int(merge_result.records_fully_enriched),
+        "sources_used": list(merge_result.sources_used),
+        "field_coverage": dict(sorted(merge_result.field_coverage.items())),
+        "duration_seconds": float(merge_result.duration_seconds),
+        "output_silver_path": merge_result.output_silver_path,
+        "output_gold_path": merge_result.output_gold_path,
+        "lineage_summary": dict(sorted(merge_result.lineage_summary.items())),
+        "quarantine_count": len(merge_result.quarantine_payloads),
     }
 
 

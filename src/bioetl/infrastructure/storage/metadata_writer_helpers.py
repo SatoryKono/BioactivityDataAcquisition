@@ -10,7 +10,12 @@ from pathlib import Path
 import yaml
 
 from bioetl.domain.lineage import DatasetRef
-from bioetl.domain.models.metadata import BronzeMetadata, GoldMetadata, SilverMetadata
+from bioetl.domain.models.metadata import (
+    BronzeMetadata,
+    GoldMetadata,
+    InputSnapshotRef,
+    SilverMetadata,
+)
 from bioetl.domain.ports import LoggerPort, MetricsPort
 from bioetl.infrastructure.storage.delta.resilience import AdaptiveRetryPolicy
 from bioetl.infrastructure.storage.metadata import writer_operations as _operations
@@ -212,6 +217,29 @@ def _attach_input_snapshot_details(
     details["input_snapshot_content_hashes"] = [
         snapshot.content_hash for snapshot in input_snapshots
     ]
+    details["input_snapshots"] = [
+        _serialize_input_snapshot_ref(snapshot) for snapshot in input_snapshots
+    ]
+
+
+def _serialize_input_snapshot_ref(snapshot: InputSnapshotRef) -> dict[str, object]:
+    """Return the bounded input snapshot evidence persisted in run ledger."""
+    captured_at = getattr(snapshot, "captured_at", None)
+    return {
+        "snapshot_id": str(snapshot.snapshot_id),
+        "content_hash": str(snapshot.content_hash),
+        "immutable_uri": getattr(snapshot, "immutable_uri", None),
+        "query_fingerprint": getattr(snapshot, "query_fingerprint", None),
+        "storage_provider": getattr(snapshot, "storage_provider", None),
+        "object_bucket": getattr(snapshot, "object_bucket", None),
+        "object_key": getattr(snapshot, "object_key", None),
+        "object_version_id": getattr(snapshot, "object_version_id", None),
+        "etag": getattr(snapshot, "etag", None),
+        "last_modified": getattr(snapshot, "last_modified", None),
+        "captured_at": captured_at.isoformat()
+        if isinstance(captured_at, datetime)
+        else None,
+    }
 
 
 def _apply_common_metadata_finalization(

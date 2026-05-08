@@ -869,6 +869,45 @@ def test_provider_health_status_panel_fails_closed_to_unknown() -> None:
     assert {"null", "nan"} <= matches
 
 
+def test_provider_top_causes_panel_surfaces_projection_gap_instead_of_silent_empty() -> (
+    None
+):
+    """Provider explainability must stay actionable even if cause projection drifts."""
+    dashboard = load_dashboard(
+        Path("grafana/dashboards/bioetl-provider-health-v2.json")
+    )
+    panel = next(
+        (
+            item
+            for item in get_dashboard_panels(dashboard)
+            if item.get("title") == "Inspect Provider Top Causes"
+        ),
+        None,
+    )
+    assert panel is not None, "Panel 'Inspect Provider Top Causes' not found"
+
+    expressions = [target.get("expr", "") for target in panel.get("targets", [])]
+    assert any("bioetl_provider_current_cause" in expr for expr in expressions)
+    assert any("bioetl_provider_current_status >= 1" in expr for expr in expressions), (
+        "Provider top causes must fallback to current-status explainability gap rows"
+    )
+    assert any("status_without_projected_cause" in expr for expr in expressions), (
+        "Provider top causes must surface synthetic status_without_projected_cause fallback"
+    )
+    assert any("unless on (provider)" in expr for expr in expressions), (
+        "Provider top causes fallback must trigger only when provider status has no cause projection"
+    )
+
+    combined = " ".join(
+        (
+            str(panel.get("description", "")),
+            str(panel.get("fieldConfig", {}).get("defaults", {}).get("noValue", "")),
+        )
+    )
+    assert "status_without_projected_cause" in combined
+    assert "cause-projection gap" in combined or "telemetry/rule gap" in combined
+
+
 def test_provider_diagnostic_panels_preserve_no_data_for_tokens_and_circuit_breakers() -> (
     None
 ):
@@ -907,6 +946,44 @@ def test_provider_diagnostic_panels_preserve_no_data_for_tokens_and_circuit_brea
         assert any(required_snippet in expr for expr in expressions)
         assert all(forbidden_snippet not in expr for expr in expressions), (
             f"Panel '{panel_title}' must preserve diagnostic no-data instead of synthetic fallback"
+        )
+
+
+def test_provider_optional_telemetry_panels_explain_empty_samples_do_not_refute_status() -> (
+    None
+):
+    """Optional provider telemetry must disclose no-sample semantics explicitly."""
+    dashboard = load_dashboard(
+        Path("grafana/dashboards/bioetl-provider-health-v2.json")
+    )
+    expectations = {
+        "Track Rate Limiter Wait by Provider (p95)": "optional telemetry can stay empty",
+        "Monitor Minimum Rate Limiter Tokens Available": "optional telemetry can stay empty",
+        "Monitor Cross-Scope Adapter Circuit Breaker State (max)": "adapter-scoped telemetry can stay empty",
+        "Track Cross-Scope Adapter Circuit Breaker Trips": "does not refute current provider severity",
+    }
+
+    panels = {
+        panel.get("title"): panel
+        for panel in get_dashboard_panels(dashboard)
+        if panel.get("title") in expectations
+    }
+    assert panels.keys() == expectations.keys()
+
+    for title, token in expectations.items():
+        combined = " ".join(
+            (
+                str(panels[title].get("description", "")),
+                str(
+                    panels[title]
+                    .get("fieldConfig", {})
+                    .get("defaults", {})
+                    .get("noValue", "")
+                ),
+            )
+        ).lower()
+        assert token in combined, (
+            f"{title} must explain its empty optional-telemetry semantics"
         )
 
 
