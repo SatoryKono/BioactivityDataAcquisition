@@ -143,7 +143,7 @@
           "color": {
             "mode": "palette-classic"
           },
-          "noValue": "No Silver reject count returned for current filters. A zero-reject workflow run is valid only after Quarantine Explorer and scoped pipeline context are confirmed."
+          "noValue": "No Silver reject count returned for current filters. Verify Quarantine Explorer before treating this as OK. A zero-reject workflow run is valid only after Quarantine Explorer and scoped pipeline context are confirmed."
         },
         "overrides": []
       },
@@ -214,7 +214,7 @@
           "color": {
             "mode": "palette-classic"
           },
-          "noValue": "No reject ratio returned. Treat as UNKNOWN until Bronze denominator and quarantine API are confirmed; zero-reject workflow runs must still prove a valid denominator."
+          "noValue": "No reject ratio returned. Treat as UNKNOWN until Bronze denominator and quarantine API are confirmed. Zero-reject workflow runs must still prove a valid denominator."
         },
         "overrides": [
           {

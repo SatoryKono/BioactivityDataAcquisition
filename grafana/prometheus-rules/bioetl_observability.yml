@@ -148,6 +148,7 @@ groups:
               or bioetl_runtime_alert_condition_ledger_append_failed_15m
               or bioetl_runtime_alert_condition_checkpoint_incompatible_30m
               or bioetl_runtime_alert_condition_lineage_refs_missing_15m
+              or (bioetl_overview_pipeline_run_type_universe * 0)
             ) > bool 0)
           ) * 2)
           +
@@ -160,6 +161,7 @@ groups:
                 or bioetl_runtime_alert_condition_ledger_append_failed_15m
                 or bioetl_runtime_alert_condition_checkpoint_incompatible_30m
                 or bioetl_runtime_alert_condition_lineage_refs_missing_15m
+                or (bioetl_overview_pipeline_run_type_universe * 0)
               ) == bool 0)
               * (sum by (pipeline) (increase(bioetl_pipeline_runs_total[15m])) > bool 0)
             )

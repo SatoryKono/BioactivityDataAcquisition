@@ -402,7 +402,7 @@
       },
       "targets": [
         {
-          "expr": "sum by (status) (max_over_time(bioetl_workflow_runs_total{workflow=~\"$workflow\",status=~\"$status\"}[$__range]))",
+          "expr": "sum by (status) (increase(bioetl_workflow_runs_total{workflow=~\"$workflow\",status=~\"$status\"}[$__range]))",
           "legendFormat": "{{status}}",
           "refId": "A"
         }

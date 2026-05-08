@@ -192,9 +192,15 @@ def _build_cached_bronze_context(options: RunOptions) -> CachedBronzeContext:
             path=options.cached_bronze_path,
             date=options.cached_bronze_date,
         )
-    if options.exact_replay:
+    if (
+        options.exact_replay
+        and options.replay_of_run_id is None
+        and options.replay_of_manifest_id is None
+    ):
         raise ValueError(
-            "exact replay currently requires --use-cached-bronze with snapshot-backed Bronze inputs"
+            "exact replay currently requires --use-cached-bronze or "
+            "replay_of_run_id/replay_of_manifest_id with published "
+            "snapshot-backed Bronze inputs"
         )
     return CachedBronzeContext.disabled()
 

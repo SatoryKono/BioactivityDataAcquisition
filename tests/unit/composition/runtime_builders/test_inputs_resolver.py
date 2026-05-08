@@ -2,12 +2,20 @@
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
+from pathlib import Path
 from types import SimpleNamespace
 from uuid import uuid4
 
 import pytest
 
 from bioetl.composition.runtime_builders import inputs_resolver
+from bioetl.application.services.run_ledger_service import RunLedgerService
+from bioetl.domain.types import RunID
+from bioetl.infrastructure.control_plane import FileRunLedgerStore, FileRunManifestStore
+from tests.unit.application.services.run_manifest_test_support import (
+    make_run_manifest,
+)
 
 
 def _make_context(**overrides: object) -> SimpleNamespace:
@@ -134,6 +142,68 @@ def test_prepare_runner_inputs_applies_tracing_override_before_bundle_build() ->
 
     assert observed["tracing_enabled"] is True
     assert result.settings.observability.tracing_enabled is True
+
+
+@pytest.mark.unit
+def test_prepare_runner_inputs_auto_resolves_cached_bronze_for_exact_replay_parent(
+    tmp_path: Path,
+) -> None:
+    logger = SimpleNamespace(info=lambda *_, **__: None)
+    bronze_root = tmp_path / "output" / "bronze"
+    settings = SimpleNamespace(
+        data_dir=tmp_path,
+        bronze_path=bronze_root,
+        test_mode=False,
+        pipeline=SimpleNamespace(heartbeat_interval=30, health_check_mode="strict"),
+        observability=SimpleNamespace(tracing_enabled=False),
+    )
+    yaml_config = _make_yaml_config()
+    parent_manifest = make_run_manifest(
+        manifest_id="manifest-parent",
+        run_id=RunID(uuid4()),
+        created_at=datetime(2026, 5, 8, 18, 0, tzinfo=UTC),
+    )
+    manifest_store = FileRunManifestStore(
+        base_path=tmp_path / "output" / "control" / "run_manifest"
+    )
+    manifest_store.save(parent_manifest)
+    ledger_store = FileRunLedgerStore(
+        base_path=tmp_path / "output" / "control" / "run_ledger"
+    )
+    ledger_service = RunLedgerService(
+        ledger_port=ledger_store,
+        manifest_id=parent_manifest.manifest_id,
+        run_id=parent_manifest.run_id,
+        _entry_id_factory=lambda: "entry-input-snapshot",
+    )
+    ledger_service.record_input_snapshot_published(
+        provider="chembl",
+        entity="activity",
+        pipeline_name="chembl_activity",
+        snapshot_id="sha256:snapshot-1",
+        content_hash="snapshot-1",
+        immutable_uri="bronze://2026-05-08/batch_2026-05-08_abc.jsonl.zst",
+        bronze_batch_ref=str(bronze_root / "chembl" / "activity"),
+    )
+
+    result = inputs_resolver.prepare_runner_inputs(
+        ctx=_make_context(
+            exact_replay=True,
+            replay_of_manifest_id=parent_manifest.manifest_id,
+        ),
+        get_settings_fn=lambda: settings,
+        load_pipeline_config_fn=lambda _pipeline: yaml_config,
+        build_observability_bundle_fn=lambda **_: SimpleNamespace(logger=logger),
+        assemble_vacuum_settings_fn=inputs_resolver.assemble_vacuum_settings,
+        assemble_runtime_config_fn=inputs_resolver.assemble_runtime_config,
+        assemble_filter_config_fn=inputs_resolver.assemble_filter_config,
+        assemble_cached_bronze_context_fn=inputs_resolver.assemble_cached_bronze_context,
+    )
+
+    assert result.cached_bronze.enabled is True
+    assert result.cached_bronze.bronze_path == str(bronze_root / "chembl" / "activity")
+    assert result.cached_bronze.bronze_date == "2026-05-08"
+    assert result.runtime_config.replay_anchor_date == "2026-05-08"
 
 
 @pytest.mark.unit

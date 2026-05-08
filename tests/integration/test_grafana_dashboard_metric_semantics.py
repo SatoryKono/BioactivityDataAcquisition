@@ -869,10 +869,8 @@ def test_provider_health_status_panel_fails_closed_to_unknown() -> None:
     assert {"null", "nan"} <= matches
 
 
-def test_provider_top_causes_panel_surfaces_projection_gap_instead_of_silent_empty() -> (
-    None
-):
-    """Provider explainability must stay actionable even if cause projection drifts."""
+def test_provider_top_causes_panel_preserves_canonical_cause_only_semantics() -> None:
+    """Provider top causes must not fabricate synthetic rows when canonical causes are absent."""
     dashboard = load_dashboard(
         Path("grafana/dashboards/bioetl-provider-health-v2.json")
     )
@@ -888,15 +886,9 @@ def test_provider_top_causes_panel_surfaces_projection_gap_instead_of_silent_emp
 
     expressions = [target.get("expr", "") for target in panel.get("targets", [])]
     assert any("bioetl_provider_current_cause" in expr for expr in expressions)
-    assert any("bioetl_provider_current_status >= 1" in expr for expr in expressions), (
-        "Provider top causes must fallback to current-status explainability gap rows"
-    )
-    assert any("status_without_projected_cause" in expr for expr in expressions), (
-        "Provider top causes must surface synthetic status_without_projected_cause fallback"
-    )
-    assert any("unless on (provider)" in expr for expr in expressions), (
-        "Provider top causes fallback must trigger only when provider status has no cause projection"
-    )
+    assert all("bioetl_provider_current_status >= 1" not in expr for expr in expressions)
+    assert all("status_without_projected_cause" not in expr for expr in expressions)
+    assert all("unless on (provider)" not in expr for expr in expressions)
 
     combined = " ".join(
         (
@@ -904,8 +896,9 @@ def test_provider_top_causes_panel_surfaces_projection_gap_instead_of_silent_emp
             str(panel.get("fieldConfig", {}).get("defaults", {}).get("noValue", "")),
         )
     )
-    assert "status_without_projected_cause" in combined
-    assert "cause-projection gap" in combined or "telemetry/rule gap" in combined
+    combined_lower = combined.lower()
+    assert "canonical provider cause" in combined_lower
+    assert "explainability gap" in combined_lower
 
 
 def test_provider_diagnostic_panels_preserve_no_data_for_tokens_and_circuit_breakers() -> (
