@@ -1751,6 +1751,36 @@ def test_run_all_callback_delegates_to_input_builder_and_cli_policy() -> None:
     mock_run_with_policy.assert_called_once_with(ctx, cli_input)
 
 
+@pytest.mark.unit
+def test_build_run_all_command_input_from_options_maps_click_kwargs() -> None:
+    """Run-all helper should narrow Click kwargs into typed policy input."""
+    from bioetl.interfaces.cli.commands import run_all as run_all_module
+
+    cli_input = run_all_module._build_run_all_command_input_from_options(
+        {
+            "source": "chembl",
+            "run_type": "incremental",
+            "limit": 10,
+            "dry_run": False,
+            "yes": True,
+            "list_only": False,
+            "debug": False,
+            "health_server": True,
+            "health_port": 8081,
+        }
+    )
+
+    assert cli_input.source == "chembl"
+    assert cli_input.run_type == "incremental"
+    assert cli_input.limit == 10
+    assert cli_input.dry_run is False
+    assert cli_input.yes is True
+    assert cli_input.list_only is False
+    assert cli_input.debug is False
+    assert cli_input.health_server is True
+    assert cli_input.health_port == 8081
+
+
 # =============================================================================
 # run.py Tests - Exception handlers in run command
 # =============================================================================
