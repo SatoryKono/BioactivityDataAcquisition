@@ -2,6 +2,10 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
+pytestmark = pytest.mark.integration
+
 
 def test_design_system_documents_query_duplication_policy() -> None:
     """Dashboard design docs must define duplicate-query governance."""

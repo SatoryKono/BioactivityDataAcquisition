@@ -29,6 +29,7 @@ from tests.helpers.clock import FIXED_TEST_TIME
 @dataclass
 class _RecordingMetrics:
     counters: list[tuple[str, int, dict[str, str]]] = field(default_factory=list)
+    gauges: list[tuple[str, float, dict[str, str]]] = field(default_factory=list)
     histograms: list[tuple[str, float, dict[str, str]]] = field(default_factory=list)
 
     def increment_counter(
@@ -53,7 +54,7 @@ class _RecordingMetrics:
         value: float,
         labels: dict[str, str] | None = None,
     ) -> None:
-        del name, value, labels
+        self.gauges.append((name, value, labels or {}))
 
     def close(self) -> None:
         return None
@@ -133,6 +134,16 @@ async def test_workflow_runner_executes_pipeline_then_transform() -> None:
     assert result.status == "success"
     assert [step.step_id for step in result.steps] == ["extract", "normalize"]
     assert pipeline_runner.calls[0][0] == "chembl_activity"
+    assert metrics.gauges[-1] == (
+        "bioetl_workflow_current_status",
+        0.0,
+        {
+            "workflow": "activity_workflow",
+            "pipeline_context": "chembl_activity",
+            "run_type_context": "incremental",
+            "provider_context": "chembl",
+        },
+    )
     assert metrics.counters[-1] == (
         "bioetl_workflow_runs_total",
         1,
@@ -186,6 +197,16 @@ async def test_workflow_runner_returns_failed_step_result_for_pipeline_error() -
     result = await service.run_workflow(config)
 
     assert result.status == "failed"
+    assert metrics.gauges[-1] == (
+        "bioetl_workflow_current_status",
+        2.0,
+        {
+            "workflow": "activity_workflow",
+            "pipeline_context": "chembl_activity",
+            "run_type_context": "incremental",
+            "provider_context": "chembl",
+        },
+    )
     assert result.steps[0].status == "failed"
     assert result.steps[0].error_type == "RuntimeError"
     assert metrics.counters[-1] == (

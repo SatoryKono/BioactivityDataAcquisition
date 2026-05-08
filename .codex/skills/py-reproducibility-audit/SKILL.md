@@ -11,6 +11,22 @@ Run a source-first BioETL reproducibility audit and, only after confirmed
 findings exist, prepare root-cause GitHub issues with file-level implementation
 plans.
 
+## Required Inputs
+
+- `target_type`: `pipeline` | `workflow`
+  Default: `pipeline`
+- `target_name`: canonical target name
+  Default: `chembl_assay`
+- `execution_mode`: `fresh_run` | `existing_run_ids`
+  Default: `fresh_run`
+- `run_count`: number of independent audit runs to compare
+  Default: `2`
+- `limit`: bounded-run limit when `execution_mode=fresh_run`
+  Default: `1000`
+
+When the user does not override these values, audit the `chembl_assay`
+pipeline via two fresh bounded runs.
+
 ## Source Of Truth
 
 - Root runtime contract: `AGENTS.md`
@@ -31,6 +47,18 @@ plans.
    `memory-py-*.md` sheet when a role-specific memory page is relevant.
 1. Read [references/reproducibility-audit.md](references/reproducibility-audit.md)
    before making any architectural claims about reproducibility.
+1. Resolve the audit target before any run:
+   - if `target_type=pipeline`, audit the named pipeline directly
+   - if `target_type=workflow`, audit the named workflow and the pipeline steps
+     it actually executes
+   - if the target is not provided, use the defaults from `Required Inputs`
+   - if the canonical command for the target is ambiguous, stop and report the
+     ambiguity instead of guessing
+1. Resolve the execution lane before collecting evidence:
+   - `fresh_run`: perform `run_count` sequential bounded executions using the
+     canonical CLI for the resolved target
+   - `existing_run_ids`: audit existing manifests / ledgers / sidecars / output
+     artifacts without starting a new run
 1. Audit only against confirmed repository evidence:
    - code
    - configs
@@ -44,6 +72,12 @@ plans.
      `config_hash`, `effective_config_hash`, `git_commit`, `contract_ref`,
      `contract_version`, `content_hash`, checkpoint identity, and lineage
      metadata as current architectural baseline, not optional ideas
+1. For `workflow` targets, report both:
+   - workflow-level reproducibility findings
+   - per-pipeline findings for every executed pipeline step
+1. For `pipeline` targets, prefer the direct pipeline CLI surface when the
+   project exposes one; use a workflow wrapper only when the pipeline is
+   workflow-managed by design and no direct supported CLI exists.
 1. Produce the audit in the mandatory section order defined in
    `references/reproducibility-audit.md`.
 1. Create issues only if the audit produced confirmed problems with concrete

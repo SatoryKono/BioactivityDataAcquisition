@@ -80,6 +80,7 @@ PIPELINE_RUNTIME_REGISTRY = MetricRegistryFamily(
         "bioetl_stage_backlog_records": _metrics.STAGE_BACKLOG_RECORDS,
         "bioetl_stage_lag_seconds": _metrics.STAGE_LAG_SECONDS,
         "bioetl_replay_lag_seconds": _metrics.REPLAY_LAG_SECONDS,
+        "bioetl_workflow_current_status": _metrics.WORKFLOW_CURRENT_STATUS,
     },
     histograms={
         "bioetl_pipeline_duration_seconds": _metrics.PIPELINE_DURATION_SECONDS,

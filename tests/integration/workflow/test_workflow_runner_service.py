@@ -33,6 +33,7 @@ pytestmark = pytest.mark.integration
 @dataclass
 class _RecordingMetrics:
     counters: list[tuple[str, int, dict[str, str]]] = field(default_factory=list)
+    gauges: list[tuple[str, float, dict[str, str]]] = field(default_factory=list)
     histograms: list[tuple[str, float, dict[str, str]]] = field(default_factory=list)
 
     def increment_counter(
@@ -57,7 +58,7 @@ class _RecordingMetrics:
         value: float,
         labels: dict[str, str] | None = None,
     ) -> None:
-        del name, value, labels
+        self.gauges.append((name, value, labels or {}))
 
     def close(self) -> None:
         return None
@@ -143,6 +144,15 @@ async def test_workflow_runner_roundtrips_pipeline_transform_and_metrics() -> No
 
     assert result.is_success
     assert [step.status for step in result.steps] == ["success", "success"]
+    assert any(
+        name == "bioetl_workflow_current_status"
+        and value == 0.0
+        and labels["workflow"] == "activity_workflow"
+        and labels["pipeline_context"] == "chembl_activity"
+        and labels["run_type_context"] == "incremental"
+        and labels["provider_context"] == "chembl"
+        for name, value, labels in metrics.gauges
+    )
     transform_payload = result.steps[1].payload
     assert isinstance(transform_payload, WorkflowTransformExecutionResult)
     assert transform_payload.status == "success"

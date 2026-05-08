@@ -73,7 +73,9 @@ dashboard_families:
       a manually selected `workflow_<pipeline>` value back to the entity
       pipeline before reading current-state recording rules. Overview first-
       screen current-state summaries apply the same normalization for selected-
-      scope L0/L1 cards and routes.
+      scope L0/L1 cards and routes. Runtime current-triage panels apply the
+      same normalization for current status, blocker, error-rate, lag, and
+      active-blocker drilldown queries.
   provider_first:
     uids:
       - bioetl-provider-health-v2

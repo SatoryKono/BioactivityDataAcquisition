@@ -64,7 +64,7 @@ groups:
         expr: sum by (pipeline) (increase(bioetl_dq_anomaly_detected{severity="critical"}[30m])) > bool 0
 
       - record: bioetl_runtime_alert_condition_silver_validation_failures_30m
-        expr: sum by (pipeline) (increase(bioetl_silver_validation_failures_total[30m])) > bool 0
+        expr: max by (pipeline) (max_over_time(bioetl_silver_validation_failures_total[30m])) > bool 0
 
       - record: bioetl_runtime_alert_condition_manifest_write_failed_15m
         expr: sum by (pipeline, run_type) (increase(bioetl_control_plane_manifest_writes_total{status="failed"}[15m])) > bool 0
@@ -172,11 +172,16 @@ groups:
         labels:
           input: workflow
         expr: >-
-          (max by (pipeline, run_type) (max_over_time(bioetl_workflow_runs_total{status="failed"}[15m])) > bool 0) * 2
-          or (
-            ((max by (pipeline, run_type) (max_over_time(bioetl_workflow_runs_total{status=~"success|completed"}[15m])) > bool 0) * 0)
-            unless on (pipeline, run_type)
-            (max by (pipeline, run_type) (max_over_time(bioetl_workflow_runs_total{status="failed"}[15m])) > bool 0)
+          max by (pipeline, run_type) (bioetl_workflow_current_status)
+          or label_replace(
+            (
+              bioetl_overview_pipeline_run_type_universe
+              unless on (pipeline, run_type) max by (pipeline, run_type) (bioetl_workflow_current_status)
+            ) * 3,
+            "input",
+            "workflow",
+            "",
+            ""
           )
       - record: bioetl_l0_input_status
         labels:
@@ -483,19 +488,37 @@ groups:
         expr: bioetl_runtime_alert_condition_provider_rate_limiter_tokens_depleted_15m
 
       - record: bioetl_dq_current_activity_15m
-        expr: sum by (pipeline) (increase(bioetl_records_processed_total{stage="bronze"}[15m])) > bool 0
+        expr: >-
+          (
+            (sum by (pipeline) (increase(bioetl_records_processed_total{stage="bronze"}[15m])) > bool 0)
+            +
+            (max by (pipeline) (max_over_time(bioetl_records_processed_total{stage="bronze"}[15m])) > bool 0)
+          ) > bool 0
 
       - record: bioetl_dq_current_failure_signals_15m
-        expr: max by (pipeline) (bioetl_runtime_alert_condition_dq_hard_fail_15m or bioetl_runtime_alert_condition_dq_critical_anomaly_30m or bioetl_runtime_alert_condition_silver_validation_failures_30m) > 0
+        expr: >-
+          (
+            (bioetl_runtime_alert_condition_dq_hard_fail_15m or on (pipeline) (bioetl_overview_pipeline_universe * 0))
+            +
+            (bioetl_runtime_alert_condition_dq_critical_anomaly_30m or on (pipeline) (bioetl_overview_pipeline_universe * 0))
+            +
+            (bioetl_runtime_alert_condition_silver_validation_failures_30m or on (pipeline) (bioetl_overview_pipeline_universe * 0))
+          ) > bool 0
 
       - record: bioetl_dq_monitor_disabled_current
         expr: max by (pipeline) (bioetl_dq_monitor_enabled == bool 0) > 0
 
       - record: bioetl_dq_current_degraded_signals_15m
-        expr: max by (pipeline) (bioetl_runtime_alert_condition_dq_soft_threshold_15m or (sum by (pipeline) (increase(bioetl_dq_records_quarantined_total[15m])) > bool 0) or (sum by (pipeline) (increase(bioetl_silver_filter_rejections_total[15m])) > bool 0) or bioetl_dq_monitor_disabled_current) > 0
-
-      - record: bioetl_dq_current_status
-        expr: (bioetl_dq_current_failure_signals_15m * 2) or (bioetl_dq_current_degraded_signals_15m unless on (pipeline) bioetl_dq_current_failure_signals_15m) or (((bioetl_dq_current_activity_15m * 0) unless on (pipeline) bioetl_dq_current_failure_signals_15m) unless on (pipeline) bioetl_dq_current_degraded_signals_15m)
+        expr: >-
+          (
+            (bioetl_runtime_alert_condition_dq_soft_threshold_15m or on (pipeline) (bioetl_overview_pipeline_universe * 0))
+            +
+            ((max by (pipeline) (max_over_time(bioetl_dq_records_quarantined_total[15m])) > bool 0) or on (pipeline) (bioetl_overview_pipeline_universe * 0))
+            +
+            ((max by (pipeline) (max_over_time(bioetl_silver_filter_rejections_total[15m])) > bool 0) or on (pipeline) (bioetl_overview_pipeline_universe * 0))
+            +
+            (bioetl_dq_monitor_disabled_current or on (pipeline) (bioetl_overview_pipeline_universe * 0))
+          ) > bool 0
 
       - record: bioetl_dq_current_reason
         labels:
@@ -532,13 +555,26 @@ groups:
           reason: quarantined_records
           severity: warn
           action_target: silver_reject_explorer
-        expr: sum by (pipeline) (increase(bioetl_dq_records_quarantined_total[15m])) > bool 0
+        expr: max by (pipeline) (max_over_time(bioetl_dq_records_quarantined_total[15m])) > bool 0
       - record: bioetl_dq_current_reason
         labels:
           reason: silver_filter_rejects
           severity: warn
           action_target: silver_reject_explorer
-        expr: sum by (pipeline) (increase(bioetl_silver_filter_rejections_total[15m])) > bool 0
+        expr: max by (pipeline) (max_over_time(bioetl_silver_filter_rejections_total[15m])) > bool 0
+
+      - record: bioetl_dq_current_status
+        expr: >-
+          (max by (pipeline) (bioetl_dq_current_reason{severity="crit"} > 0) * 2)
+          or (
+            (max by (pipeline) (bioetl_dq_current_reason{severity="warn"} > 0))
+            unless on (pipeline) (max by (pipeline) (bioetl_dq_current_reason{severity="crit"} > 0))
+          )
+          or (
+            ((bioetl_dq_current_activity_15m * 0)
+            unless on (pipeline) (max by (pipeline) (bioetl_dq_current_reason{severity="crit"} > 0)))
+            unless on (pipeline) (max by (pipeline) (bioetl_dq_current_reason{severity="warn"} > 0))
+          )
 
       - record: bioetl_provider_health_check_provider_universe_15m
         expr: (sum by (provider) (increase(bioetl_health_check_success_total[15m]))) or (sum by (provider) (increase(bioetl_health_check_degraded_total[15m]))) or (sum by (provider) (increase(bioetl_health_check_failures_total[15m])))

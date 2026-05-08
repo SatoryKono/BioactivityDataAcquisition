@@ -184,7 +184,7 @@ cat data/output/control/run_manifest/_by_run_id/<run_id>.txt
 cat data/output/control/run_manifest/<manifest_id>.json
 tail -n 20 data/output/control/run_ledger/<manifest_id>.jsonl
 cat data/output/control/run_ledger/_by_run_id/<run_id>.txt
-rg -n '"event_type":"(manifest_created|run_started|stage_started|stage_completed|artifact_published|run_finished|run_failed|run_shutdown|dq_policy_applied)"' \
+rg -n '"event_type":"(manifest_created|run_started|stage_started|stage_completed|artifact_published|run_finished|run_failed|run_shutdown|dq_policy_applied|composite_dependency_completed|composite_enricher_completed|composite_merge_completed|input_snapshot_published)"' \
   data/output/control/run_ledger/<manifest_id>.jsonl
 rg -n '"_diagnostic"|"effective_config_hash"|"contract_ref"|"dq_policy_ref"|"effective_config_artifact_id"' \
   data/output/control/run_ledger/<manifest_id>.jsonl
@@ -250,8 +250,12 @@ Interpretation:
   ledger suffix state; their supported resume source is the checkpoint snapshot;
 - replay is only applied after compatibility anchors are validated;
 - replay consumes only ledger entries strictly after `last_event_id`;
-- replay is intentionally coarse-grained: it restores lifecycle milestones and
-  watermark metadata, not rich checkpoint payloads;
+- replay restores lifecycle milestones, watermark metadata, and bounded rich
+  composite payloads from `composite_dependency_completed`,
+  `composite_enricher_completed`, and `composite_merge_completed` events when
+  that evidence is present;
+- forensic-grade composite resume must fail closed or classify the run as
+  degraded when required rich composite replay evidence is incomplete;
 - `execution_fingerprint` remains the canonical compatibility anchor for both
   ordinary and composite resume; composite occurrence metadata is diagnostic
   evidence only and must not override a matching canonical execution identity;
@@ -268,6 +272,7 @@ For a healthy successful run with ledger enabled, expect the baseline event fami
 - one or more `stage_started`
 - one or more `stage_completed`
 - zero or more `artifact_published`
+- zero or more `input_snapshot_published`
 - `run_finished`
 
 For interrupted or failing runs, inspect for:
@@ -275,6 +280,12 @@ For interrupted or failing runs, inspect for:
 - `run_failed`
 - `run_shutdown`
 - `dq_policy_applied` when DQ enforcement participated in the outcome
+
+For composite runs, inspect for bounded rich resume evidence:
+
+- `composite_dependency_completed`
+- `composite_enricher_completed`
+- `composite_merge_completed`
 
 ### 7. Interpret diagnostics output
 

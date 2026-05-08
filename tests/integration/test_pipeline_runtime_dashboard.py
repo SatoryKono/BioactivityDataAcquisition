@@ -353,6 +353,30 @@ def test_runtime_blockers_preserves_unknown_without_inline_conditions() -> None:
     assert defaults.get("noValue") == "UNKNOWN"
 
 
+def test_runtime_current_panels_normalize_workflow_pipeline_aliases() -> None:
+    """Runtime current-triage panels must resolve workflow_<pipeline> selectors back to entity scope."""
+    panels = {p.get("title"): p for p in _runtime_data_panels()}
+    expected_titles = {
+        "Monitor Runtime Current Status",
+        "Inspect Top Runtime Blockers",
+        "Monitor Runtime Blockers",
+        "Monitor Runtime Error Rate",
+        "Monitor Worst Stage Lag",
+        "Inspect Active Runtime Blocker Detail",
+    }
+
+    for title in expected_titles:
+        panel = panels.get(title)
+        assert panel is not None, f"Runtime dashboard missing {title!r}"
+        expr = "\n".join(
+            target.get("expr", "")
+            for target in panel.get("targets", [])
+            if isinstance(target.get("expr"), str)
+        )
+        assert 'label_replace(vector(1), "pipeline_raw", "$pipeline"' in expr
+        assert '"^(?:workflow_)?(.*)$"' in expr
+
+
 def test_active_runtime_blocker_detail_panel_exists() -> None:
     """Inspect Active Runtime Blocker Detail table panel must be present."""
     panels = {p.get("title"): p for p in _runtime_data_panels()}
