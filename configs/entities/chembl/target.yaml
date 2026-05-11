@@ -15,6 +15,7 @@ pipeline:
             partition_by:
                 - target_type
         gold:
+            enabled: true
             mode: scd2
             scd_config:
                 valid_from_col: _valid_from

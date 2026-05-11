@@ -271,6 +271,9 @@ def test_explore_traces_links_use_safe_search_first_handoff(
     assert "/a/grafana-exploretraces-app/explore?actionView=search" in content, (
         f"{dashboard_path.name} must use the explicit Explore Traces route"
     )
+    assert "from=now-150m&to=now" in content, (
+        f"{dashboard_path.name} must bound the Explore Traces handoff to the locally safe Tempo breakdown window"
+    )
     assert "var-ds=tempo" in content, (
         f"{dashboard_path.name} must pin the Tempo datasource for Explore Traces"
     )
@@ -279,6 +282,9 @@ def test_explore_traces_links_use_safe_search_first_handoff(
     )
     assert "/a/grafana-exploretraces-app/?from=" not in content, (
         f"{dashboard_path.name} still uses the legacy Explore Traces root route"
+    )
+    assert "/a/grafana-exploretraces-app/explore?actionView=search&from=${__from}&to=${__to}" not in content, (
+        f"{dashboard_path.name} must not forward the dashboard time range into Explore Traces"
     )
     assert "var-groupBy=undefined" not in content, (
         f"{dashboard_path.name} must not encode an invalid Explore Traces groupBy"

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+import json
 
 from bioetl.domain.filtering.column_filter import FilterOperator, GoldColumnFilter
 from bioetl.domain.filtering.list_filters import (
@@ -127,8 +128,23 @@ def is_empty_value(val: object) -> bool:
     return isinstance(val, (list, dict, set)) and len(val) == 0
 
 
+def _decode_json_list_like(val: object) -> object:
+    """Decode a JSON-encoded list string when filter inputs arrive serialized."""
+    if not isinstance(val, str):
+        return val
+    stripped = val.strip()
+    if not stripped.startswith("[") or not stripped.endswith("]"):
+        return val
+    try:
+        decoded = json.loads(stripped)
+    except json.JSONDecodeError:
+        return val
+    return decoded if isinstance(decoded, list) else val
+
+
 def get_list_length(val: object) -> int:
     """Compute the length of a value treated as a list."""
+    val = _decode_json_list_like(val)
     if val is None:
         return 0
     if isinstance(val, list):
@@ -149,6 +165,7 @@ def length_in_bounds(
 
 def to_string_set(val: object) -> set[str]:
     """Convert a value to a set of strings."""
+    val = _decode_json_list_like(val)
     if not isinstance(val, list):
         val = [val]
     return {str(item) for item in val}

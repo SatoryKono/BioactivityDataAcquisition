@@ -234,6 +234,14 @@ class TestGoldFilterConfigListLengthFilters:
         )
         assert config.should_include({"tags": "single"}) is True
 
+    def test_json_string_list_uses_decoded_length(self) -> None:
+        """Test JSON-encoded list strings use list semantics for length checks."""
+        config = GoldFilterConfig(
+            list_length_filters=(GoldListLengthFilter(column="tags", max_length=2),),
+        )
+        assert config.should_include({"tags": '["a", "b"]'}) is True
+        assert config.should_include({"tags": '["a", "b", "c"]'}) is False
+
 
 @pytest.mark.unit
 class TestGoldFilterConfigListContainsFilters:
@@ -330,6 +338,58 @@ class TestGoldFilterConfigListContainsFilters:
         )
         assert config.should_include({"tag": "valid"}) is True
         assert config.should_include({"tag": "invalid"}) is False
+
+    def test_json_string_list_matches_contains_filters(self) -> None:
+        """Test JSON-encoded list strings are decoded for contains checks."""
+        config = GoldFilterConfig(
+            list_contains_filters=(
+                GoldListContainsFilter(
+                    column="component_types",
+                    values=frozenset({"PROTEIN"}),
+                    mode="all",
+                ),
+            ),
+        )
+        assert config.should_include({"component_types": '["PROTEIN"]'}) is True
+        assert (
+            config.should_include({"component_types": '["PROTEIN", "RNA"]'}) is False
+        )
+
+    def test_chembl_target_gold_filters_accept_stringified_component_lists(self) -> None:
+        """Test chembl_target Gold filters accept stringified list fields."""
+        config = GoldFilterConfig(
+            column_filters=(
+                GoldColumnFilter(
+                    column="target_type",
+                    values=frozenset({"SINGLE PROTEIN"}),
+                ),
+            ),
+            list_length_filters=(
+                GoldListLengthFilter(
+                    column="component_accessions",
+                    min_length=1,
+                    max_length=1,
+                ),
+                GoldListLengthFilter(column="component_ids", min_length=1),
+            ),
+            list_contains_filters=(
+                GoldListContainsFilter(
+                    column="component_types",
+                    values=frozenset({"PROTEIN"}),
+                    mode="all",
+                ),
+            ),
+            required_fields=("pref_name", "organism"),
+        )
+        record = {
+            "target_type": "SINGLE PROTEIN",
+            "pref_name": "Cytochrome b",
+            "organism": "Plasmodium falciparum",
+            "component_accessions": '["Q02768"]',
+            "component_ids": "[67]",
+            "component_types": '["PROTEIN"]',
+        }
+        assert config.should_include(record) is True
 
 
 @pytest.mark.unit

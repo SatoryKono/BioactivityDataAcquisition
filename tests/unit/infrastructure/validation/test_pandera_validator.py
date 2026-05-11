@@ -131,25 +131,6 @@ class TestPanderaSilverValidator:
         result = validator.validate(records)
         assert result.valid is True
 
-    def test_validate_with_nullable_boolean_columns(self):
-        """Nullable bool columns should validate when pandas builds object dtype."""
-        import pandera as pa
-
-        schema = pa.DataFrameSchema(
-            {
-                "entity_id": pa.Column(str),
-                "downgraded": pa.Column(bool, nullable=True),
-            }
-        )
-        validator = PanderaSilverValidator(schema=schema)
-        records = [
-            {"entity_id": "CHEMBL123", "downgraded": None},
-            {"entity_id": "CHEMBL456", "downgraded": True},
-        ]
-        result = validator.validate(records)
-        assert result.valid is True
-        assert result.errors == []
-
     def test_validate_with_ordered_schema_reorders_columns(self):
         """Columns in wrong order pass validation after reorder."""
         import pandera as pa
@@ -168,6 +149,52 @@ class TestPanderaSilverValidator:
         records = [{"c": 1.0, "a": "x", "b": 1}]
         result = validator.validate(records)
         assert result.valid is True
+
+    def test_validate_chembl_target_all_null_nullable_boolean_batch(self):
+        """chembl.target accepts batches where nullable bool stays null for all rows."""
+        from bioetl.domain.schemas.chembl.target import TargetSchema
+
+        validator = PanderaSilverValidator(schema=TargetSchema.to_schema())
+        records = [
+            {
+                "entity_id": "chembl_target:CHEMBL1",
+                "content_hash": "a" * 64,
+                "_run_id": "run-1",
+                "_run_type": "backfill",
+                "_source_batch_id": "batch-1",
+                "_ingestion_ts": "2026-05-11T14:55:44Z",
+                "_index": 0,
+                "_dq_warn": False,
+                "_dq_error": False,
+                "target_id": "CHEMBL1",
+                "target_type": "SINGLE PROTEIN",
+                "pref_name": "Target one",
+                "organism": "Homo sapiens",
+                "species_group_flag": False,
+                "downgraded": None,
+            },
+            {
+                "entity_id": "chembl_target:CHEMBL2",
+                "content_hash": "b" * 64,
+                "_run_id": "run-1",
+                "_run_type": "backfill",
+                "_source_batch_id": "batch-1",
+                "_ingestion_ts": "2026-05-11T14:55:45Z",
+                "_index": 1,
+                "_dq_warn": False,
+                "_dq_error": False,
+                "target_id": "CHEMBL2",
+                "target_type": "SINGLE PROTEIN",
+                "pref_name": "Target two",
+                "organism": "Homo sapiens",
+                "species_group_flag": False,
+                "downgraded": None,
+            },
+        ]
+
+        result = validator.validate(records)
+        assert result.valid is True
+        assert result.errors == []
 
 
 @pytest.mark.unit
