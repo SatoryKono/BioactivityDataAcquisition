@@ -187,7 +187,8 @@ def test_build_uses_canonical_composite_checkpoint_port(
     assert checkpoint_context.storage is checkpoint_storage
     assert checkpoint_context.logger is factory._infra.logger.bind.return_value
     assert checkpoint_context.resume is False
-    assert checkpoint_context.expected_effective_config_hash == ""
+    assert isinstance(checkpoint_context.expected_effective_config_hash, str)
+    assert len(checkpoint_context.expected_effective_config_hash) == 64
     assert checkpoint_context.expected_contract_ref == "composite_publication"
     assert checkpoint_context.expected_contract_version == "1.0.0"
     assert checkpoint_context.expected_manifest_id == "manifest-123"

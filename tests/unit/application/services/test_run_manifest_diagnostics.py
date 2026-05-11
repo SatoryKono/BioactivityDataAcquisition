@@ -783,11 +783,10 @@ def test_build_diagnostics_summary_coerces_observe_for_replay_ready_profile() ->
 
     resume_contract = summary["resume_contract"]
     assert resume_contract["requested_checkpoint_compatibility_policy"] == "observe"
-    assert resume_contract["applied_checkpoint_compatibility_policy"] == "soft_fail"
+    assert resume_contract["applied_checkpoint_compatibility_policy"] == "hard_fail"
     score = summary["reproducibility_audit_score"]
-    assert (
-        "checkpoint_policy_below_profile_minimum"
-        in score["category_scores"]["checkpoint_safety"]["blockers"]
+    assert "checkpoint_policy_below_profile_minimum" not in (
+        score["category_scores"]["checkpoint_safety"]["blockers"]
     )
 
 

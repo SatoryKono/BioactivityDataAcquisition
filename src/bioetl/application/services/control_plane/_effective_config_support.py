@@ -34,7 +34,9 @@ from bioetl.domain.normalization import serialize_json_canonical
 from bioetl.domain.types import JsonDict
 from bioetl.domain.types.dq_contracts import DQDisposition, DQPolicyRef
 
-ALLOWLISTED_SEMANTIC_ENV_OVERRIDE_KEYS: frozenset[str] = frozenset()
+ALLOWLISTED_SEMANTIC_ENV_OVERRIDE_KEYS: frozenset[str] = frozenset(
+    {"execution_environment"}
+)
 EFFECTIVE_CONFIG_SCHEMA_VERSION = "1.0"
 
 

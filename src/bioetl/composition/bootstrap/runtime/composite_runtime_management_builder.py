@@ -166,7 +166,7 @@ def _resolve_expected_effective_config_hash(
     config: CompositeConfig,
     control_plane_bundle: CompositeControlPlaneBundle | None,
 ) -> str:
-    """Best-effort hash for checkpoint compatibility anchors."""
+    """Resolve the effective-config hash used as a composite checkpoint anchor."""
     bundle_effective_hash = (
         None
         if control_plane_bundle is None
@@ -176,22 +176,37 @@ def _resolve_expected_effective_config_hash(
         return str(bundle_effective_hash)
     to_dict = getattr(config, "to_dict", None)
     if not callable(to_dict):
-        return ""
+        raise ValueError(
+            "Composite runtime requires config.to_dict() to derive "
+            "expected_effective_config_hash for checkpoint compatibility"
+        )
     try:
         payload = to_dict()
     except (AttributeError, TypeError, ValueError):
-        return ""
+        raise ValueError(
+            "Composite runtime failed to serialize config for "
+            "expected_effective_config_hash checkpoint anchor"
+        ) from None
     if not isinstance(payload, dict):
-        return ""
-    try:
-        return (
-            normalize_control_plane_sha256(
-                compute_config_hash(cast(dict[str, object], payload))
-            )
-            or ""
+        raise ValueError(
+            "Composite runtime config serialization must return a mapping to "
+            "derive expected_effective_config_hash"
         )
-    except (TypeError, ValueError):
-        return ""
+    try:
+        config_hash = normalize_control_plane_sha256(
+            compute_config_hash(cast(dict[str, object], payload))
+        )
+    except (TypeError, ValueError) as exc:
+        raise ValueError(
+            "Composite runtime failed to compute expected_effective_config_hash "
+            "from serialized config"
+        ) from exc
+    if not config_hash:
+        raise ValueError(
+            "Composite runtime produced an empty expected_effective_config_hash "
+            "checkpoint anchor"
+        )
+    return config_hash
 
 
 __all__ = ["build_runtime_management_services"]
