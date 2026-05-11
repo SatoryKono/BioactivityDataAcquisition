@@ -429,6 +429,10 @@ def _assert_critical_panel_entry(
     allowed_vars = _ALLOWED_DASHBOARD_LINK_VARS[target_uid]
     for link in matching_links:
         url = str(link.get("url", ""))
+        assert link.get("includeVars") is False, (
+            f"{dashboard_path.name} panel id={panel_id} link {link.get('title')!r} "
+            "must keep includeVars=false"
+        )
         _assert_required_time_tokens(
             url,
             tokens=_DASHBOARD_TIME_HANDOFF_TOKENS,
@@ -814,6 +818,29 @@ def test_cross_dashboard_links_pass_only_target_scoped_variables() -> None:
             )
 
 
+def test_dashboard_owned_dashboard_links_pin_include_vars_false() -> None:
+    """Dashboard-owned /d/ links must disable generic Grafana variable carry-over."""
+    offenders: list[str] = []
+
+    for dashboard_path in get_dashboard_files():
+        dashboard = load_dashboard(dashboard_path)
+        for link in _collect_dashboard_links(dashboard):
+            if not isinstance(link, dict):
+                continue
+            url = str(link.get("url", ""))
+            if not url.startswith("/d/"):
+                continue
+            if link.get("includeVars") is not False:
+                offenders.append(
+                    f"{dashboard_path.name}:{link.get('title')!r} -> {url}"
+                )
+
+    assert not offenders, (
+        "Shipped dashboard-owned /d/ links must pin includeVars=false:\n"
+        + "\n".join(offenders)
+    )
+
+
 def test_dashboard_top_level_navigation_contract_by_uid() -> None:
     """Each dashboard UID must expose required top-level navigation links."""
     for dashboard_path in get_dashboard_files():
@@ -1116,8 +1143,6 @@ def test_navigation_dashboards_expose_explore_drilldown_links() -> None:
     """Every shipped navigation panel should expose Logs and Traces drilldowns."""
     for dashboard_path in get_dashboard_files():
         dashboard_name = dashboard_path.name
-        if dashboard_name == "bioetl-control-plane-v1.json":
-            continue
         dashboard = load_dashboard(dashboard_path)
         links = get_dashboard_navigation_links(dashboard)
         urls = [link.get("url", "") for link in links]
@@ -1244,8 +1269,6 @@ def test_navigation_panel_renders_full_visual_bus_with_disabled_current_item() -
 def test_explore_links_use_drilldown_routes_and_time_range() -> None:
     """Explore links should target Drilldown apps and preserve current time range."""
     for dashboard_name in (path.name for path in get_dashboard_files()):
-        if dashboard_name == "bioetl-control-plane-v1.json":
-            continue
         dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
         drilldown_links = [
             link
@@ -1320,8 +1343,6 @@ def test_explore_traces_navigation_is_explicitly_traced_run_only() -> None:
 def test_tempo_drilldown_routes_to_traces_drilldown_app() -> None:
     """Tempo drilldown links should route to Grafana Traces Drilldown app."""
     for dashboard_name in (path.name for path in get_dashboard_files()):
-        if dashboard_name == "bioetl-control-plane-v1.json":
-            continue
         dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
         tempo_links = [
             link
@@ -1343,8 +1364,6 @@ def test_tempo_drilldown_routes_to_traces_drilldown_app() -> None:
 def test_loki_drilldown_links_use_safe_bioetl_baseline_query() -> None:
     """Loki drilldown links should start from a low-cardinality baseline query."""
     for dashboard_name in (path.name for path in get_dashboard_files()):
-        if dashboard_name == "bioetl-control-plane-v1.json":
-            continue
         dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
         loki_links = [
             link
@@ -1474,8 +1493,6 @@ def test_loki_drilldown_uses_grafana_logs_drilldown_entrypoint() -> None:
     assert re.search(r'"stage"\s*:\s*"extract"', sample_line)
 
     for dashboard_name in (path.name for path in get_dashboard_files()):
-        if dashboard_name == "bioetl-control-plane-v1.json":
-            continue
         dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
         loki_links = [
             link

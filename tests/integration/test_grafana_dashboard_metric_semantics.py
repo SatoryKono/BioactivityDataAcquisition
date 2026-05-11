@@ -58,7 +58,7 @@ def test_summary_queries_use_zero_fallbacks() -> None:
         "bioetl-dq-v2.json": {
             "Track: Records Quarantined in Range": "or vector(0)",
             "Track: Silver Filter Rejects in Range": "or vector(0)",
-            "Track: Soft Threshold Exceeded in Range": "or vector(0)",
+            "Track: Silver Validation Failures in Range": "or vector(0)",
             "Monitor: Silver Validation Failures": "or vector(0)",
             "Monitor: Gold Strict Validation Failures": "or vector(0)",
         },
@@ -373,7 +373,7 @@ def test_count_like_summary_panels_use_rounding_or_boolean_conditions() -> None:
         "bioetl-dq-v2.json": {
             "Track: Records Quarantined in Range": "round(",
             "Track: Silver Filter Rejects in Range": "round(",
-            "Track: Soft Threshold Exceeded in Range": "round(",
+            "Track: Silver Validation Failures in Range": "round(",
             "Monitor: Silver Validation Failures": "round(",
             "Monitor: Lineage Refs Missing": "round(",
         },
@@ -1011,7 +1011,7 @@ def test_dq_selected_range_evidence_panels_use_neutral_thresholds() -> None:
         "Track: Source Records in Range (Bronze)",
         "Track: Clean Records in Range (Gold)",
         "Track: Records Quarantined in Range",
-        "Track: Soft Threshold Exceeded in Range",
+        "Track: Silver Validation Failures in Range",
         "Track: Silver Filter Rejects in Range",
     }
 

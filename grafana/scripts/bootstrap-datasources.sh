@@ -6,6 +6,8 @@ CORE_DIR="/etc/bioetl-grafana/datasources-core"
 TRACING_DIR="/etc/bioetl-grafana/datasources-tracing"
 PRUNE_FILE="${TARGET_DIR}/tracing-prune.yml"
 TRACING_FLAG="$(printf '%s' "${BIOETL_ENABLE_TRACING_DATASOURCES:-auto}" | tr -d '\r' | xargs)"
+AUTO_WAIT_SECONDS=8
+AUTO_POLL_SECONDS=1
 RENDERING_SERVER_URL="${GF_RENDERING_SERVER_URL:-}"
 STALE_RENDERER_PLUGIN_DIR="/var/lib/grafana/plugins/grafana-image-renderer"
 ENABLE_LOKI="false"
@@ -19,6 +21,24 @@ probe_ready() {
   wget --quiet --tries=1 --timeout=2 -O /dev/null "$1"
 }
 
+wait_for_auto_tracing_ready() {
+  elapsed=0
+
+  while [ "${elapsed}" -lt "${AUTO_WAIT_SECONDS}" ]; do
+    if [ "${ENABLE_LOKI}" != "true" ] && probe_ready "http://loki:3100/ready"; then
+      ENABLE_LOKI="true"
+    fi
+    if [ "${ENABLE_TEMPO}" != "true" ] && probe_ready "http://tempo:3200/ready"; then
+      ENABLE_TEMPO="true"
+    fi
+    if [ "${ENABLE_LOKI}" = "true" ] && [ "${ENABLE_TEMPO}" = "true" ]; then
+      break
+    fi
+    sleep "${AUTO_POLL_SECONDS}"
+    elapsed=$((elapsed + AUTO_POLL_SECONDS))
+  done
+}
+
 case "${TRACING_FLAG}" in
   true)
     ENABLE_LOKI="true"
@@ -27,21 +47,11 @@ case "${TRACING_FLAG}" in
   false)
     ;;
   auto|"")
-    if probe_ready "http://loki:3100/ready"; then
-      ENABLE_LOKI="true"
-    fi
-    if probe_ready "http://tempo:3200/ready"; then
-      ENABLE_TEMPO="true"
-    fi
+    wait_for_auto_tracing_ready
     ;;
   *)
     echo "[bioetl-grafana] unknown tracing datasource mode '${TRACING_FLAG}', falling back to auto-detect"
-    if probe_ready "http://loki:3100/ready"; then
-      ENABLE_LOKI="true"
-    fi
-    if probe_ready "http://tempo:3200/ready"; then
-      ENABLE_TEMPO="true"
-    fi
+    wait_for_auto_tracing_ready
     ;;
 esac
 

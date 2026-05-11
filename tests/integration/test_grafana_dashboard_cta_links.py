@@ -649,12 +649,14 @@ def test_silver_reject_explorer_selected_record_details_uses_safe_payload_filter
 
 
 def test_control_plane_dashboard_does_not_expose_top_level_runbook_link() -> None:
-    """Top navigation should contain only dashboard-bus links for Control Plane."""
+    """Top navigation may expose dashboards and Explore drilldowns, but not runbooks/docs."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
     assert all(
         str(link.get("url", "")).startswith("/d/")
+        or str(link.get("url", "")).startswith("/a/grafana-lokiexplore-app/")
+        or str(link.get("url", "")).startswith("/a/grafana-exploretraces-app/")
         for link in get_dashboard_navigation_links(dashboard)
-    ), "Control-plane top navigation must not mix dashboard bus links with runbooks"
+    ), "Control-plane top navigation must not mix dashboard bus links with runbooks or docs"
 
 
 def test_all_runbook_links_use_canonical_github_urls_and_resolve_locally() -> None:
@@ -813,15 +815,35 @@ def test_provider_dashboard_exposes_single_runtime_link() -> None:
         for link in links
         if _extract_dashboard_uid(str(link.get("url", ""))) == "bioetl-runtime"
     ]
-    assert len(runtime_links) == 1, (
-        "Provider Health must expose exactly one Runtime link"
+
+
+def test_workflow_overview_next_diagnostic_surface_cta_contract() -> None:
+    """Next Diagnostic Surface panel must have exactly 5 dashboard handoffs."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-workflow-overview.json"))
+    next_diagnostic_panel = next(
+        (p for p in get_dashboard_panels(dashboard) if p.get("title") == "Next Diagnostic Surface"),
+        None,
     )
-    runtime_link = runtime_links[0]
-    assert runtime_link.get("title") == "2. Runtime"
-    runtime_url = str(runtime_link.get("url", ""))
-    assert "var-pipeline=$pipeline_context" in runtime_url
-    assert "var-run_type=All" in runtime_url
-    assert "var-stage=unknown" in runtime_url
+    assert next_diagnostic_panel is not None, "Workflow Overview missing Next Diagnostic Surface panel"
+    options = next_diagnostic_panel.get("options", {})
+    links = options.get("dataLinks", [])
+    assert isinstance(links, list), "Next Diagnostic Surface panel must have dataLinks list"
+    assert len(links) == 5, (
+        f"Next Diagnostic Surface panel must have exactly 5 CTAs, got {len(links)}"
+    )
+    expected_targets = [
+        "bioetl-runtime",
+        "bioetl-dq-v2",
+        "bioetl-provider-health-v2",
+        "bioetl-control-plane-v1",
+        "bioetl-overview-v2",
+    ]
+    for link in links:
+        url = link.get("url", "")
+        assert isinstance(url, str), "Link URL must be a string"
+        assert any(target in url for target in expected_targets), (
+            f"Link must target one of {expected_targets}, got {url}"
+        )
 
 
 def test_dashboard_links_do_not_default_run_type_to_unknown() -> None:

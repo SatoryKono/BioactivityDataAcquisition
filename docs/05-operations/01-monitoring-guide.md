@@ -145,6 +145,9 @@ L0 дашборд для одного operator question: что сейчас bro
   disabled dark-gray button.
   `Explore Traces` remains optional and is available only for traced runs; a
   run using `NoOpTracing` can legitimately return an empty Tempo search.
+  The shipped trace handoff uses an explicit search-first Tempo route with
+  `var-ds=tempo` and `var-groupBy=resource.service.name`, so an empty trace
+  store fails closed as an empty search instead of an invalid breakdown query.
 
 #### 2. 2. Runtime
 

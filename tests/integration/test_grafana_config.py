@@ -260,6 +260,32 @@ def test_dashboard_prometheus_datasource_contract(dashboard_path: Path) -> None:
 
 
 @pytest.mark.parametrize("dashboard_path", get_dashboard_files(), ids=lambda p: p.name)
+def test_explore_traces_links_use_safe_search_first_handoff(
+    dashboard_path: Path,
+) -> None:
+    """Explore Traces links must open the explicit search-first Tempo handoff."""
+    content = dashboard_path.read_text(encoding="utf-8")
+    if "grafana-exploretraces-app" not in content:
+        return
+
+    assert "/a/grafana-exploretraces-app/explore?actionView=search" in content, (
+        f"{dashboard_path.name} must use the explicit Explore Traces route"
+    )
+    assert "var-ds=tempo" in content, (
+        f"{dashboard_path.name} must pin the Tempo datasource for Explore Traces"
+    )
+    assert "var-groupBy=resource.service.name" in content, (
+        f"{dashboard_path.name} must use a safe default groupBy for Explore Traces"
+    )
+    assert "/a/grafana-exploretraces-app/?from=" not in content, (
+        f"{dashboard_path.name} still uses the legacy Explore Traces root route"
+    )
+    assert "var-groupBy=undefined" not in content, (
+        f"{dashboard_path.name} must not encode an invalid Explore Traces groupBy"
+    )
+
+
+@pytest.mark.parametrize("dashboard_path", get_dashboard_files(), ids=lambda p: p.name)
 def test_panel_title_vocabulary_matches_group_by_vocabulary(
     dashboard_path: Path,
 ) -> None:
@@ -1633,7 +1659,7 @@ def test_runtime_and_control_plane_operator_panels_use_active_time_windows(
             "Track: GLOBAL Control-Plane Read Latency p50/p95/p99",
         ),
         ("bioetl-dq-v2.json", "Track: Records Quarantined in Range"),
-        ("bioetl-dq-v2.json", "Track: Soft Threshold Exceeded in Range"),
+        ("bioetl-dq-v2.json", "Track: Silver Validation Failures in Range"),
         ("bioetl-dq-v2.json", "Inspect: Quarantine by Error Type"),
         ("bioetl-dq-v2.json", "Monitor: Silver Validation Failures"),
         ("bioetl-dq-v2.json", "Monitor: Lineage Refs Missing"),

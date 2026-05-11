@@ -826,7 +826,11 @@ control-plane metrics, provider health metrics и `bioetl_workflow_runs_total`.
 to the same canonical dashboards. Navigation panel `id=1000` now also carries
 global adjunct links `Silver Reject Explorer`, `Explore Logs`, and
 `Explore Traces` in the same tab. `Explore Traces` is a traced-run-only adjunct
-surface, so `NoOpTracing` runs can legitimately return empty Tempo results. The current dashboard remains visible in
+surface, so `NoOpTracing` runs can legitimately return empty Tempo results. The
+shipped trace handoff opens an explicit search-first Tempo route, pins
+`var-ds=tempo`, and uses `var-groupBy=resource.service.name` so empty trace
+stores fail closed as empty search results instead of invalid breakdown-state
+queries. The current dashboard remains visible in
 `id=1000` as a disabled dark-gray item rather than disappearing from the bus.
 
 **Silver Rejects triage sequence:**
@@ -859,13 +863,15 @@ DQ сейчас `OK`/`WARN`/`CRIT`/`UNKNOWN`, какая threshold/reason state
 | 100 | Run Type                                     | Stat       | `max(label_values(..., run_type)) or vector(0)`                                                                                        | Информационная панель типа запуска.                                                                                                                                        |
 | 9100 | Monitor DQ Current Status                   | Stat       | `max(bioetl_dq_current_status{pipeline=~"$pipeline"})`                                                                                | Pipeline-wide current DQ state: `0=OK`, `1=WARN`, `2=CRIT`, `null=UNKNOWN`; disabled/noop DQ monitoring contributes WARN rather than unconditional green. Selected-range evidence ниже не меняет этот first-screen статус. |
 | 9101 | Monitor DQ Threshold State                  | Stat       | `max(bioetl_dq_current_reason{severity=...})` + explicit `OK` fallback                                                                | Bounded current threshold summary: warning reasons map to WARN, hard reasons map to CRIT, explicit current OK stays `0=OK`.                                                |
-| 9102 | Inspect DQ Current Reasons                  | Table      | `topk(5, bioetl_dq_current_reason{pipeline=~"$pipeline"} > 0)`                                                                        | Current DQ reasons table with `severity` and `action_target`; empty table means no active DQ reasons for the selected pipeline snapshot.                                   |
-| 9103 | Review: First Action                         | Text      | n/a                                                                                                                                    | Operator CTA: review current status, inspect current reasons, or open `Silver Reject Explorer`; absent policy visibility is UNKNOWN, not OK.                             |
+| 9102 | Inspect DQ Current Reasons                  | Table      | `topk(5, bioetl_dq_current_reason{pipeline=~"$pipeline"} > 0)`                                                                        | Current DQ reasons table with `severity` and `action_target`; `CRIT` can come from quarantine/validation blockers even when `filtered_out=0`.                             |
+| 9103 | Review: First Action                         | Text      | n/a                                                                                                                                    | Operator CTA: review current status and reasons first; if `filtered_out=0`, inspect quarantine, silver validation failures, and blocked share before assuming reject-path only. |
 | 1   | Track Range Evidence: Bronze -> Silver -> Gold | Timeseries | `sum by (pipeline, stage) (max_over_time(bioetl_records_processed_total{pipeline=~"$pipeline", run_type=~"$run_type"}[$__interval]))` | Full-width selected-range evidence panel that now sits below the compact current-context band; не определяет current DQ status.                                            |
 | 2   | Monitor: Data Quality Score (Volume-weighted) | Gauge      | `sum(score * record_count) / clamp_min(sum(record_count), 1)`                                                                          | Канонический DQ gauge на базе `bioetl_dq_validation_score` и `bioetl_dq_validation_record_count`; в layout он входит в compact current-context row сразу под answer row.   |
 | 3   | Track: Source Records in Range (Bronze)      | Stat       | `round(sum(max_over_time(bioetl_records_processed_total{...stage="bronze"}[$__range])) or vector(0))`                                  | Суммарный Bronze input для pushed-counter evidence внутри активного Grafana окна; это bounded range evidence, а не latest-value snapshot.                                   |
 | 4   | Track: Clean Records in Range (Gold)         | Stat       | `round(sum(max_over_time(bioetl_records_processed_total{...stage="gold"}[$__range])) or vector(0))`                                    | Суммарный Gold output для pushed-counter evidence внутри активного Grafana окна; это bounded range evidence, а не latest-value snapshot.                                    |
 | 5   | Monitor: Worst-Entity DQ Score               | Gauge      | `min(bioetl_dq_validation_score{pipeline=~"$pipeline"})`                                                                                | Худший observed DQ score по сущностям внутри выбранного pipeline scope. При отсутствии DQ samples panel должен оставаться в состоянии `No data`, а не показывать synthetic `0`. |
+| 6   | Track: Records Quarantined in Range          | Stat       | `round(sum(max_over_time(bioetl_dq_records_quarantined_total{...}[$__range])) or vector(0))`                                           | Selected-range quarantine evidence; non-zero here can explain current DQ pressure even when Silver filter rejects remain zero.                                               |
+| 7   | Track: Silver Validation Failures in Range   | Stat       | `round(sum(max_over_time(bioetl_silver_validation_failures_total{pipeline=~"$pipeline", run_type=~"$run_type"}[$__range])) or vector(0))` | Visible selected-range validation blocker count; non-zero can drive current `CRIT` even when `filtered_out=0`.                                                               |
 | 117 | Track: Silver Filter Rejects in Range        | Stat       | `round(sum(max_over_time(bioetl_records_processed_total{...stage="filtered_out"}[$__range])) or vector(0))`                             | Отдельный счётчик Silver filter rejects внутри выбранного временного окна; не заменяет `Track: Records Quarantined in Range`.                                              |
 | 118 | Inspect: Silver Filter Rejects by Pipeline   | Bar gauge  | `sum by (pipeline) (max_over_time(bioetl_records_processed_total{...stage="filtered_out"}[$__range]))`                                  | Breakdown intentional Silver exclusions по выбранным pipeline values через selected-range pushed-counter evidence.                                                         |
 | 121 | Inspect: Top Silver Reject Reasons (Pareto) | Bar gauge  | `topk(10, sum by (reason_code) (increase(bioetl_silver_filter_rejections_total{...}[$__range])))`                                      | Bounded top-10 summary по `reason_code`; use the top-level `Silver Reject Explorer` handoff for record-level narrowing inside the explorer.                                  |
@@ -906,8 +912,8 @@ ______________________________________________________________________
 
 **Файл:** `grafana/dashboards/bioetl-silver-reject-explorer.json`
 **UID:** `bioetl-silver-reject-explorer`
-**Refresh:** 30 секунд
-**Time range:** Последние 12 часов
+**Refresh:** 1 минута
+**Time range:** Последние 24 часа
 **Назначение:** Record-level browsing для Silver `filtered_out` записей на read-only quarantine API.
 
 ### Панели
@@ -1104,8 +1110,12 @@ requires `bioetl_provider_current_status`. Missing anchor telemetry renders
   but a fresh local BioETL run with shipped log files should be discoverable
   through this baseline query when Promtail/Loki wiring is healthy.
 - Tempo handoff остаётся bounded по `pipeline/run_type`; forensic IDs в runtime
-  dashboard не протаскиваются. Empty trace drilldowns are legitimate when the
-  runtime used `NoOpTracing` or when no matching trace spans were exported.
+  dashboard не протаскиваются. Shipped trace links now open the explicit
+  search-first Explore Traces route with `var-ds=tempo` and safe
+  `var-groupBy=resource.service.name`, so missing trace data stays an empty
+  Tempo search rather than failing in a generated breakdown query. Empty trace
+  drilldowns are legitimate when the runtime used `NoOpTracing` or when no
+  matching trace spans were exported.
 
 ### Drilldown
 

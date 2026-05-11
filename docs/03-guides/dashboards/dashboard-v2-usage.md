@@ -252,6 +252,9 @@ mean Loki shipping is disabled, no BioETL streams were shipped in range, or the
 operator still needs to refine scope inside Explore.
 `Explore Traces` is a traced-run-only adjunct surface; if the runtime used
 `NoOpTracing`, empty Tempo results are expected rather than a dashboard defect.
+Shipped trace handoff opens the explicit search-first Tempo route and pins a
+safe default `groupBy=resource.service.name`, so empty trace stores stay empty
+instead of failing in breakdown mode before the operator changes grouping.
 
 Variable handoff policy for dashboard links remains strict and bounded:
 

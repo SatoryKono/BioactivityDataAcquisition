@@ -28,7 +28,7 @@
       },
       "id": 1000,
       "options": {
-        "content": "<div style=\"display:flex;gap:10px;flex-wrap:wrap;padding:10px;\"><a href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">0. Control Plane</a><span aria-current=\"page\" style=\"padding:5px 10px;color:#4b5563;text-decoration:none;border:1px solid #4b5563;border-radius:3px;background:rgba(75,85,99,0.18);cursor:default;\">1. Overview</span><a href=\"/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=unknown&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">2. Runtime</a><a href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&amp;var-pipeline_context=$pipeline&amp;var-adapter=unknown&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">3. Provider Health</a><a href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=unknown&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">4. Data Quality</a><a href=\"/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">5. Workflow</a><a href=\"/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Silver Reject Explorer</a><a href=\"/a/grafana-lokiexplore-app/explore?from=${__from}&amp;to=${__to}&amp;query=%7Bjob%3D%22bioetl%22%7D\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Explore Logs</a><a href=\"/a/grafana-exploretraces-app/?from=${__from}&amp;to=${__to}&amp;queryType=traceqlSearch&amp;query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline:regex}%22%20%26%26%20span.%22bioetl.run_type%22%20%3D~%20%22${run_type:regex}%22%20%7D\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Explore Traces</a></div>",
+        "content": "<div style=\"display:flex;gap:10px;flex-wrap:wrap;padding:10px;\"><a href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">0. Control Plane</a><span aria-current=\"page\" style=\"padding:5px 10px;color:#4b5563;text-decoration:none;border:1px solid #4b5563;border-radius:3px;background:rgba(75,85,99,0.18);cursor:default;\">1. Overview</span><a href=\"/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=unknown&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">2. Runtime</a><a href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&amp;var-pipeline_context=$pipeline&amp;var-adapter=unknown&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">3. Provider Health</a><a href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=unknown&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">4. Data Quality</a><a href=\"/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">5. Workflow</a><a href=\"/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Silver Reject Explorer</a><a href=\"/a/grafana-lokiexplore-app/explore?from=${__from}&amp;to=${__to}&amp;query=%7Bjob%3D%22bioetl%22%7D\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Explore Logs</a><a href=\"/a/grafana-exploretraces-app/explore?actionView=search&amp;from=${__from}&amp;to=${__to}&amp;var-ds=tempo&amp;var-groupBy=resource.service.name&amp;queryType=traceqlSearch&amp;query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline:regex}%22%20%26%26%20span.%22bioetl.run_type%22%20%3D~%20%22${run_type:regex}%22%20%7D\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Explore Traces</a></div>",
         "mode": "html"
       },
       "title": "Review Dashboard Navigation",
@@ -84,7 +84,7 @@
         },
         {
           "title": "Explore Traces",
-          "url": "/a/grafana-exploretraces-app/?from=${__from}&to=${__to}&queryType=traceqlSearch&query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline:regex}%22%20%26%26%20span.%22bioetl.run_type%22%20%3D~%20%22${run_type:regex}%22%20%7D",
+          "url": "/a/grafana-exploretraces-app/explore?actionView=search&from=${__from}&to=${__to}&var-ds=tempo&var-groupBy=resource.service.name&queryType=traceqlSearch&query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline:regex}%22%20%26%26%20span.%22bioetl.run_type%22%20%3D~%20%22${run_type:regex}%22%20%7D",
           "targetBlank": false,
           "includeVars": false,
           "tooltip": "Available only for traced runs. Enable tracing with --tracing or BIOETL_OBSERVABILITY__TRACING_ENABLED=true. Opens Traces Drilldown in the same tab with bounded pipeline/run_type TraceQL scope; NoOpTracing or tracing-off runs can legitimately be empty, so treat this as adjunct evidence rather than first-screen proof."
@@ -198,27 +198,32 @@
           {
             "title": "Open Runtime",
             "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=unknown&${__url_time_range}",
-            "targetBlank": false
+            "targetBlank": false,
+            "includeVars": false
           },
           {
             "title": "Open Control Plane",
             "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
-            "targetBlank": false
+            "targetBlank": false,
+            "includeVars": false
           },
           {
             "title": "Open Data Quality",
             "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=unknown&${__url_time_range}",
-            "targetBlank": false
+            "targetBlank": false,
+            "includeVars": false
           },
           {
             "title": "Open Provider Health",
             "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&var-pipeline_context=$pipeline&var-adapter=unknown&${__url_time_range}",
-            "targetBlank": false
+            "targetBlank": false,
+            "includeVars": false
           },
           {
             "title": "Open Workflow (Reset Scope)",
             "url": "/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}",
-            "targetBlank": false
+            "targetBlank": false,
+            "includeVars": false
           }
         ]
       },
@@ -447,27 +452,32 @@
           {
             "title": "Open Runtime",
             "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=unknown&${__url_time_range}",
-            "targetBlank": false
+            "targetBlank": false,
+            "includeVars": false
           },
           {
             "title": "Open Control Plane",
             "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
-            "targetBlank": false
+            "targetBlank": false,
+            "includeVars": false
           },
           {
             "title": "Open Data Quality",
             "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=unknown&${__url_time_range}",
-            "targetBlank": false
+            "targetBlank": false,
+            "includeVars": false
           },
           {
             "title": "Open Provider Health",
             "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&var-pipeline_context=$pipeline&var-adapter=unknown&${__url_time_range}",
-            "targetBlank": false
+            "targetBlank": false,
+            "includeVars": false
           },
           {
             "title": "Open Workflow (Reset Scope)",
             "url": "/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}",
-            "targetBlank": false
+            "targetBlank": false,
+            "includeVars": false
           }
         ]
       },
@@ -671,27 +681,32 @@
           {
             "title": "Open Runtime",
             "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=unknown&${__url_time_range}",
-            "targetBlank": false
+            "targetBlank": false,
+            "includeVars": false
           },
           {
             "title": "Open Control Plane",
             "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
-            "targetBlank": false
+            "targetBlank": false,
+            "includeVars": false
           },
           {
             "title": "Open Data Quality",
             "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=unknown&${__url_time_range}",
-            "targetBlank": false
+            "targetBlank": false,
+            "includeVars": false
           },
           {
             "title": "Open Provider Health",
             "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&var-pipeline_context=$pipeline&var-adapter=unknown&${__url_time_range}",
-            "targetBlank": false
+            "targetBlank": false,
+            "includeVars": false
           },
           {
             "title": "Open Workflow (Reset Scope)",
             "url": "/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}",
-            "targetBlank": false
+            "targetBlank": false,
+            "includeVars": false
           }
         ]
       },
@@ -866,7 +881,8 @@
           {
             "title": "Open Runtime",
             "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=unknown&${__url_time_range}",
-            "targetBlank": false
+            "targetBlank": false,
+            "includeVars": false
           }
         ]
       },
@@ -1041,7 +1057,8 @@
           {
             "title": "Open Data Quality",
             "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=unknown&${__url_time_range}",
-            "targetBlank": false
+            "targetBlank": false,
+            "includeVars": false
           }
         ]
       },
@@ -1216,7 +1233,8 @@
           {
             "title": "Open Runtime",
             "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=unknown&${__url_time_range}",
-            "targetBlank": false
+            "targetBlank": false,
+            "includeVars": false
           }
         ]
       },
@@ -1391,7 +1409,8 @@
           {
             "title": "Open Control Plane",
             "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
-            "targetBlank": false
+            "targetBlank": false,
+            "includeVars": false
           }
         ]
       },
@@ -1566,7 +1585,8 @@
           {
             "title": "Open Provider Health",
             "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&var-pipeline_context=$pipeline&var-adapter=unknown&${__url_time_range}",
-            "targetBlank": false
+            "targetBlank": false,
+            "includeVars": false
           }
         ]
       },
@@ -1741,7 +1761,8 @@
           {
             "title": "Open Workflow (Reset Scope)",
             "url": "/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}",
-            "targetBlank": false
+            "targetBlank": false,
+            "includeVars": false
           }
         ]
       },
@@ -1916,7 +1937,8 @@
           {
             "title": "Open Workflow",
             "url": "/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}",
-            "targetBlank": false
+            "targetBlank": false,
+            "includeVars": false
           }
         ]
       },

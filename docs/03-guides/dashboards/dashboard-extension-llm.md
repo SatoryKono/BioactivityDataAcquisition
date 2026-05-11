@@ -108,10 +108,10 @@ sum(increase(metric_name[24h])) or vector(0)
 
 ### Tempo
 
-Используй минимальный, но contextual handoff:
+Используй explicit search-first, но contextual handoff:
 
 ```text
-datasource = tempo
+route = /a/grafana-exploretraces-app/explore?actionView=search&var-ds=tempo&var-groupBy=resource.service.name
 queryType = traceqlSearch
 query = { span."bioetl.pipeline" =~ "${pipeline:regex}" && span."bioetl.run_type" =~ "${run_type:regex}" }
 ```
@@ -136,8 +136,11 @@ query = { span."bioetl.provider" =~ "${provider:regex}" }
 
 - Loki drilldown links стартуют с `{job="bioetl"}` и не encode'ят
   `$pipeline/$provider` в query payload.
-- Tempo drilldown links используют `queryType=traceqlSearch` и contextual
-  TraceQL scope (`bioetl.pipeline`/`bioetl.run_type` либо `bioetl.provider`).
+- Tempo drilldown links используют explicit search-first route
+  `/a/grafana-exploretraces-app/explore?actionView=search`, фиксируют
+  `var-ds=tempo`, задают safe `var-groupBy=resource.service.name` и сохраняют
+  contextual TraceQL scope (`bioetl.pipeline`/`bioetl.run_type` либо
+  `bioetl.provider`).
 - Runtime condition-summary panels не теряют direct runbook links.
 
 то обнови минимум:
