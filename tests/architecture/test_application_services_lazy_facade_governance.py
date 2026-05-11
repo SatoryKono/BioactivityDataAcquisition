@@ -106,14 +106,20 @@ def _collect_imports(root: Path) -> dict[str, frozenset[str]]:
     collected: dict[str, set[str]] = {}
 
     for path in sorted(root.rglob("*.py")):
-        imported_names = _collect_imports_from_tree(_parse_import_tree(path))
-        if imported_names:
-            collected[path.relative_to(ROOT).as_posix()] = imported_names
+        _collect_imports_for_path(path, collected=collected)
 
     return {
         relative_path: frozenset(sorted(imported_names))
         for relative_path, imported_names in collected.items()
     }
+
+
+def _collect_imports_for_path(
+    path: Path, *, collected: dict[str, set[str]]
+) -> None:
+    imported_names = _collect_imports_from_tree(_parse_import_tree(path))
+    if imported_names:
+        collected[path.relative_to(ROOT).as_posix()] = imported_names
 
 
 def _parse_import_tree(path: Path) -> ast.Module:

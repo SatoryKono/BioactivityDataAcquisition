@@ -37,6 +37,7 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import TracingPort
     from bioetl.domain.types import BatchID
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
+    from bioetl.domain.value_objects.silver_result import SilverWriteResult
 
 
 _PROCESSING_SPAN_ERRORS = OPERATION_ERRORS
@@ -104,13 +105,17 @@ class RecordProcessor:
         result = await self._execute_transform_with_span(records, batch_id, start_index)
         self._track_transform_metrics(result)
         bronze_refs = self._build_bronze_refs(bronze_result)
-        await self._write_silver_if_present(
+        silver_result = await self._write_silver_if_present(
             result=result,
             batch_id=batch_id,
             ingestion_ts=ingestion_ts,
             bronze_refs=bronze_refs,
         )
-        await self._write_gold_if_present(result=result, batch_id=batch_id)
+        await self._write_gold_if_present(
+            result=result,
+            batch_id=batch_id,
+            silver_refs=[silver_result] if silver_result is not None else None,
+        )
 
         return BatchResult(
             bronze_count=len(records),
@@ -141,10 +146,10 @@ class RecordProcessor:
         batch_id: BatchID,
         ingestion_ts: datetime,
         bronze_refs: list[BronzeWriteResult] | None,
-    ) -> None:
+    ) -> SilverWriteResult | None:
         if not result.silver_records:
-            return
-        await self._execute_with_span(
+            return None
+        silver_result = await self._execute_with_span(
             "write_silver",
             self._writer.write_silver(
                 result.silver_records,
@@ -158,18 +163,20 @@ class RecordProcessor:
                 "silver", e, batch_id
             ),
         )
+        return cast("SilverWriteResult | None", silver_result)
 
     async def _write_gold_if_present(
         self,
         *,
         result: TransformResult,
         batch_id: BatchID,
+        silver_refs: list[SilverWriteResult] | None = None,
     ) -> None:
         if not result.gold_records:
             return
         await self._execute_with_span(
             "write_gold",
-            self._writer.write_gold(result.gold_records),
+            self._writer.write_gold(result.gold_records, silver_refs=silver_refs),
             batch_id,
             len(result.gold_records),
             on_error=lambda e: self._writer.log_and_track_write_error(

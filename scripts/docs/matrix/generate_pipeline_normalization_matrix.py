@@ -1059,14 +1059,20 @@ def _dq_allowed_values(
     dq_config = _load_dq_config(provider, entity)
     if dq_config is None:
         return frozenset()
-    matches = [
-        rule
-        for rule in dq_config.field_validations
-        if rule.field == field_name and rule.validation_type == "enum"
-    ]
+    matches = _matching_dq_enum_rules(dq_config.field_validations, field_name=field_name)
     if len(matches) != 1:
         return frozenset()
     return frozenset(str(value) for value in matches[0].allowed)
+
+
+def _matching_dq_enum_rules(
+    field_validations: list[object], *, field_name: str
+) -> list[object]:
+    return [
+        rule
+        for rule in field_validations
+        if rule.field == field_name and rule.validation_type == "enum"
+    ]
 
 
 def _filter_value_set(raw_values: object) -> frozenset[str]:
@@ -1083,6 +1089,34 @@ def _filter_value_set(raw_values: object) -> frozenset[str]:
     return frozenset({str(raw_values).strip()})
 
 
+def _filter_mapping(config: dict[str, object]) -> dict[str, object]:
+    filters = config.get("filters") or {}
+    return filters if isinstance(filters, dict) else {}
+
+
+def _extraction_param_values(
+    filters: dict[str, object], *, field_name: str
+) -> frozenset[str]:
+    extraction_params = filters.get("extraction_params") or {}
+    if not isinstance(extraction_params, dict):
+        return frozenset()
+    return _filter_value_set(extraction_params.get(field_name)) | _filter_value_set(
+        extraction_params.get(f"{field_name}__in")
+    )
+
+
+def _column_filter_values(
+    filters: dict[str, object], *, filter_key: str, field_name: str
+) -> frozenset[str]:
+    filter_config = filters.get(filter_key) or {}
+    if not isinstance(filter_config, dict):
+        return frozenset()
+    columns = filter_config.get("columns") or {}
+    if not isinstance(columns, dict):
+        return frozenset()
+    return _filter_value_set(columns.get(field_name))
+
+
 def _filter_values(
     *,
     provider: str,
@@ -1092,26 +1126,19 @@ def _filter_values(
     config = _load_entity_config(provider, entity)
     if not config:
         return frozenset()
-    filters = config.get("filters") or {}
-    if not isinstance(filters, dict):
+    filters = _filter_mapping(config)
+    if not filters:
         return frozenset()
 
-    values: set[str] = set()
-    extraction_params = filters.get("extraction_params") or {}
-    if isinstance(extraction_params, dict):
-        values.update(_filter_value_set(extraction_params.get(field_name)))
-        values.update(_filter_value_set(extraction_params.get(f"{field_name}__in")))
-
-    for filter_key in ("silver_filters", "gold_filters"):
-        filter_config = filters.get(filter_key) or {}
-        if not isinstance(filter_config, dict):
-            continue
-        columns = filter_config.get("columns") or {}
-        if not isinstance(columns, dict):
-            continue
-        values.update(_filter_value_set(columns.get(field_name)))
-
-    return frozenset(values)
+    return (
+        _extraction_param_values(filters, field_name=field_name)
+        | _column_filter_values(
+            filters, filter_key="silver_filters", field_name=field_name
+        )
+        | _column_filter_values(
+            filters, filter_key="gold_filters", field_name=field_name
+        )
+    )
 
 
 def _policy_scope(

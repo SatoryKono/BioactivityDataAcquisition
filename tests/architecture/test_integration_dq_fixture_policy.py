@@ -54,6 +54,20 @@ def _fixture_call_metadata(decorator: ast.Call) -> tuple[str | None, bool]:
     return scope, autouse
 
 
+def _fixture_decorator_metadata(
+    decorator: ast.expr,
+    *,
+    current_scope: str | None,
+    current_autouse: bool,
+) -> tuple[bool, str | None, bool]:
+    if not _is_fixture_target(decorator):
+        return False, current_scope, current_autouse
+    if not isinstance(decorator, ast.Call):
+        return True, current_scope, current_autouse
+    scope, autouse = _fixture_call_metadata(decorator)
+    return True, scope, autouse
+
+
 def _fixture_metadata(
     function: ast.FunctionDef,
 ) -> tuple[bool, str | None, bool]:
@@ -61,12 +75,12 @@ def _fixture_metadata(
     autouse = False
     is_fixture = False
     for decorator in function.decorator_list:
-        if not _is_fixture_target(decorator):
-            continue
-        is_fixture = True
-        if not isinstance(decorator, ast.Call):
-            continue
-        scope, autouse = _fixture_call_metadata(decorator)
+        matched, scope, autouse = _fixture_decorator_metadata(
+            decorator,
+            current_scope=scope,
+            current_autouse=autouse,
+        )
+        is_fixture = is_fixture or matched
     return is_fixture, scope, autouse
 
 

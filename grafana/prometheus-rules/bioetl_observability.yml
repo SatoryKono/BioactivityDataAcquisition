@@ -64,7 +64,11 @@ groups:
         expr: sum by (pipeline) (increase(bioetl_dq_anomaly_detected{severity="critical"}[30m])) > bool 0
 
       - record: bioetl_runtime_alert_condition_silver_validation_failures_30m
-        expr: max by (pipeline) (max_over_time(bioetl_silver_validation_failures_total[30m])) > bool 0
+        expr: |
+          (
+            sum by (pipeline) (increase(bioetl_silver_validation_failures_total[30m])) > bool 0
+          )
+          or on (pipeline) (bioetl_overview_pipeline_universe * 0)
 
       - record: bioetl_runtime_alert_condition_manifest_write_failed_15m
         expr: sum by (pipeline, run_type) (increase(bioetl_control_plane_manifest_writes_total{status="failed"}[15m])) > bool 0
@@ -1000,7 +1004,7 @@ groups:
           runbook: "docs/05-operations/runbooks/dq-failure-investigation.md"
 
       - alert: BioETLSilverValidationFailuresDetected
-        expr: sum by (pipeline, table) (max_over_time(bioetl_silver_validation_failures_total[30m])) > 0
+        expr: sum by (pipeline, table) (increase(bioetl_silver_validation_failures_total[30m])) > 0
         for: 5m
         labels:
           severity: warning

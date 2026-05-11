@@ -21,6 +21,7 @@ from bioetl.domain.exceptions import DataQualityError, DataQualityThresholdError
 from bioetl.domain.ports import MetricsPort
 from bioetl.domain.ports.noop import NoOpTracing
 from bioetl.domain.types import BatchID, ValidationResult
+from bioetl.domain.value_objects.silver_result import SilverWriteResult
 from bioetl.infrastructure.config import get_pipeline_config
 
 pytest_plugins = ("tests.unit.application.core.transformer_test_support",)
@@ -289,6 +290,26 @@ class TestRecordProcessorProcessBatch:
         for record in silver_records:
             assert "_run_id" not in record
             assert "_run_type" not in record
+
+    async def test_process_batch_passes_silver_refs_to_gold_write(
+        self, record_processor, mock_storage
+    ):
+        """Gold write receives lineage refs from the preceding Silver write."""
+        silver_result = SilverWriteResult(
+            table_name="test_provider.test_entity",
+            table_path="/tmp/silver/test_provider/test_entity",
+            delta_version=7,
+            record_count=1,
+        )
+        mock_storage.write_silver.return_value = silver_result
+
+        await record_processor.process_batch(
+            [{"id": "1", "value": 10}],
+            BatchID(uuid4()),
+        )
+
+        gold_call_kwargs = mock_storage.write_gold.call_args.kwargs
+        assert gold_call_kwargs["silver_refs"] == [silver_result]
 
     async def test_process_batch_no_gold_records(self, record_processor, mock_storage):
         """Test process_batch when no records pass gold filter."""

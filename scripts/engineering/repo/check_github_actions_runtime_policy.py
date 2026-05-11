@@ -27,21 +27,36 @@ def iter_yaml_files() -> list[Path]:
     return [*sorted(WORKFLOWS_DIR.glob("*.yml")), *sorted(COMPOSITE_ACTIONS_DIR.rglob("action.yml"))]
 
 
+def _parsed_uses_reference(line: str) -> tuple[str, str] | None:
+    match = USES_PATTERN.match(line)
+    if match is None:
+        return None
+    uses_ref = match.group(1)
+    return uses_ref, uses_ref.partition("@")[0]
+
+
+def _validate_allowed_uses_ref(uses_ref: str, action: str) -> str | None:
+    allowed_refs = ALLOWED_USES.get(action)
+    if allowed_refs is None:
+        return None
+    _, _, ref = uses_ref.partition("@")
+    if ref and ref in allowed_refs:
+        return None
+    return f"disallowed {uses_ref}; expected one of {sorted(allowed_refs)}"
+
+
 def _uses_violations_in_file(file_path: Path) -> list[str]:
     violations: list[str] = []
     rel_path = file_path.relative_to(ROOT)
     for line_no, line in enumerate(file_path.read_text(encoding="utf-8").splitlines(), 1):
-        m = USES_PATTERN.match(line)
-        if not m:
+        parsed = _parsed_uses_reference(line)
+        if parsed is None:
             continue
-        uses_ref = m.group(1)
-        action, _, ref = uses_ref.partition("@")
-        if action not in ALLOWED_USES:
+        uses_ref, action = parsed
+        violation = _validate_allowed_uses_ref(uses_ref, action)
+        if violation is None:
             continue
-        if not ref or ref not in ALLOWED_USES[action]:
-            violations.append(
-                f"{rel_path}:{line_no}: disallowed {uses_ref}; expected one of {sorted(ALLOWED_USES[action])}"
-            )
+        violations.append(f"{rel_path}:{line_no}: {violation}")
     return violations
 
 
