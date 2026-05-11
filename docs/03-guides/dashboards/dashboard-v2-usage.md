@@ -113,11 +113,15 @@ Human-readable selector references:
    `Inspect Critical Providers`, `Inspect Provider Top Causes` и `First Action`
    отвечают на вопрос «какой provider degraded/failing и почему». Panel `id=114`
    остаётся raw source enum (`0=UNHEALTHY`, `1=DEGRADED`, `2=HEALTHY`) ниже
-   first screen как evidence. Если status остаётся non-OK, а canonical cause
-   projection пуста, `Inspect Provider Top Causes` остаётся empty table; это
-   explainability gap, а не healthy state. В таком случае расследование нужно
-   продолжать по severity matrix и optional provider diagnostics, а не
-   трактовать пустую таблицу как отсутствие инцидента.
+   first screen как evidence. `Inspect Provider Top Causes` может оставаться
+   непустой даже при `GLOBAL severity = OK`, потому что canonical cause
+   projection включает early-warning provider signals независимо от
+   current-status projection; это diagnostic lead, а не самостоятельное
+   доказательство current non-OK severity. Если status остаётся non-OK, а
+   canonical cause projection пуста, `Inspect Provider Top Causes` остаётся
+   empty table; это explainability gap, а не healthy state. В таком случае
+   расследование нужно продолжать по severity matrix и optional provider
+   diagnostics, а не трактовать пустую таблицу как отсутствие инцидента.
    `First Action` is the bounded CTA surface for this dashboard: review the
    severity matrix, inspect critical providers, or inspect provider top causes
    before leaving the page.

@@ -351,4 +351,43 @@ The audit was completed without the benefit of automated test execution due to e
 ---
 
 **Audit Completed**: 2026-05-08  
+**Last Updated**: 2026-05-11 (post-audit changes)
 **Next Audit Recommended**: After next dashboard modification cycle
+
+---
+
+## Post-Audit Changes (2026-05-11)
+
+### bioetl-workflow-overview - PromQL Query Changes
+
+The following PromQL queries were modified after the initial audit:
+
+**Changed from `increase()` to `max_over_time()`**:
+
+1. **Panel 2 (Failed Workflow Runs / Range)**:
+   - Before: `round(sum(increase(bioetl_workflow_runs_total{workflow=~"$workflow",status="failed"}[$__range]))) or vector(0)`
+   - After: `round(sum(max_over_time(bioetl_workflow_runs_total{workflow=~"$workflow",status="failed"}[$__range]))) or vector(0)`
+
+2. **Panel 3 (Failed Pipeline Steps / Range)**:
+   - Before: `round(sum(increase(bioetl_workflow_step_events_total{workflow=~"$workflow",step_kind="pipeline",status="failed"}[$__range]))) or vector(0)`
+   - After: `round(sum(max_over_time(bioetl_workflow_step_events_total{workflow=~"$workflow",step_kind="pipeline",status="failed"}[$__range]))) or vector(0)`
+
+3. **Panel 6 (Failed Transform Steps / Range)**:
+   - Before: `round(sum(increase(bioetl_workflow_step_events_total{workflow=~"$workflow",step_kind="transform",status="failed"}[$__range]))) or vector(0)`
+   - After: `round(sum(max_over_time(bioetl_workflow_step_events_total{workflow=~"$workflow",step_kind="transform",status="failed"}[$__range]))) or vector(0)`
+
+4. **Panel 7 (Skipped Step Events / Range)**:
+   - Before: `round(sum(increase(bioetl_workflow_step_events_total{workflow=~"$workflow",status="skipped"}[$__range]))) or vector(0)`
+   - After: `round(sum(max_over_time(bioetl_workflow_step_events_total{workflow=~"$workflow",status="skipped"}[$__range]))) or vector(0)`
+
+5. **Panel 4 (Workflow Run Outcomes / Range)**:
+   - Before: `sum by (status) (increase(bioetl_workflow_runs_total{workflow=~"$workflow",status=~"$status"}[$__range]))`
+   - After: `sum by (status) (max_over_time(bioetl_workflow_runs_total{workflow=~"$workflow",status=~"$status"}[$__range]))`
+
+**⚠️ SEMANTIC IMPACT**:
+- `increase()` computes the counter delta over the selected time range (standard for cumulative counters)
+- `max_over_time()` returns the maximum value observed over the selected time range
+- For `_total` metrics (counters), `increase()` is the correct function for counting events
+- `max_over_time()` on counters may produce incorrect results if counters reset or if the maximum value does not represent the event count
+
+**Recommendation**: Verify whether this change is intentional. If the metrics are cumulative counters (as the `_total` suffix suggests), revert to `increase()` for correct event counting semantics. If the metrics are gauges (non-cumulative), then `max_over_time()` may be appropriate.

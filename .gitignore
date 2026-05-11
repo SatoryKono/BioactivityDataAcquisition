@@ -295,3 +295,4 @@ docs/reports/evidence/documentation-internal-surface-governance/02-evidence/inte
 !/docs/99-archive/legacy-05-architecture/
 !/docs/99-archive/legacy-05-architecture/**
 /docs/reports
+/.npm-cache/_cacache

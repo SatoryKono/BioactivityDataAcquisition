@@ -92,14 +92,14 @@
     },
     {
       "gridPos": {
-        "h": 2,
+        "h": 4,
         "w": 24,
         "x": 0,
         "y": 3
       },
       "id": 1,
       "options": {
-        "content": "<center><h2>Pipeline: $pipeline | Run Type: $run_type | Reason: $reason_code | Field: $field | Run ID: $run_id</h2><div><strong style='color:#ffb347'>default 24h forensic window</strong></div><div><small>Select exactly one pipeline. This explorer is read-only and scoped to Silver FILTERED_OUT_SILVER rows. Quarantine Explorer is fail-closed and forensic filters like run_id/payload_hash stay explorer-only, not Prometheus labels. A zero-reject workflow run is an intentional empty explorer state only after the datasource responds and scope is confirmed.</small></div></center>",
+        "content": "<div style='padding:0.7rem 0.85rem;text-align:center;line-height:1.45'><div style='display:flex;flex-wrap:wrap;justify-content:center;gap:0.5rem 1rem;font-size:1.05rem;font-weight:600'><span>Pipeline: <strong>$pipeline</strong></span><span>Run Type: <strong>$run_type</strong></span><span>Reason: <strong>$reason_code</strong></span><span>Field: <strong>$field</strong></span><span>Run ID: <strong>$run_id</strong></span></div><div style='margin-top:0.35rem'><strong style='color:#ffb347'>default 24h forensic window</strong></div><div style='margin-top:0.3rem'><small>Select exactly one pipeline. This explorer is read-only and scoped to Silver FILTERED_OUT_SILVER rows. Quarantine Explorer is fail-closed and forensic filters like run_id/payload_hash stay explorer-only, not Prometheus labels. A zero-reject workflow run is an intentional empty explorer state only after the datasource responds and scope is confirmed.</small></div></div>",
         "mode": "html"
       },
       "title": "Inspect Explorer Scope",

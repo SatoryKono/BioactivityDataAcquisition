@@ -304,7 +304,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Current top provider causes from canonical cause recording rules: raw status, failure rate, retry exhaustion, latency, HTTP errors, or rate-limit pressure. Empty table means no canonical provider cause is currently above zero for any provider. If the GLOBAL severity matrix is non-OK while this table stays empty, treat that as a provider explainability gap and inspect the raw status matrix plus optional rate-limit/circuit-breaker evidence before leaving the dashboard.",
+      "description": "Current top provider causes from canonical cause recording rules: raw status, failure rate, retry exhaustion, latency, HTTP errors, or rate-limit pressure. This panel can surface early-warning provider causes even while the GLOBAL severity matrix still reads OK, because the cause projection is evaluated independently from the current-status projection. Empty table means no canonical provider cause is currently above zero for any provider. If the GLOBAL severity matrix is non-OK while this table stays empty, treat that as a provider explainability gap and inspect the raw status matrix plus optional rate-limit/circuit-breaker evidence before leaving the dashboard.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -394,7 +394,7 @@
       "id": 9002,
       "type": "text",
       "title": "First Action",
-      "description": "First operator CTA for global provider incidents. Start with the current severity matrix, then inspect critical providers and top causes. Use this after the current answer row; selected-range latency/error evidence stays below and downstream Runtime or Control Plane follow-up depends on the diagnosed cause.",
+      "description": "First operator CTA for global provider incidents and early-warning provider causes. Start with the current severity matrix, then inspect critical providers and top causes. Use this after the current answer row; selected-range latency/error evidence stays below and downstream Runtime or Control Plane follow-up depends on the diagnosed cause.",
       "gridPos": {
         "h": 5,
         "w": 24,
@@ -402,7 +402,7 @@
         "y": 13
       },
       "options": {
-        "content": "<div style=\"padding:0.45rem 0.7rem;line-height:1.55\"><strong>First action:</strong> start with the GLOBAL severity matrix, then open top causes for the degraded provider. If the top-cause table stays empty while severity is non-OK, treat that as a provider explainability gap: confirm raw provider status, then inspect optional rate-limit/circuit-breaker panels before leaving the page. If cause is retry/rate-limit/circuit-breaker, inspect control-plane safety before replay. If cause is latency/errors, correlate with Runtime impact, then logs/traces from the runtime or DQ dashboards.</div>",
+        "content": "<div style=\"padding:0.45rem 0.7rem;line-height:1.55\"><strong>First action:</strong> start with the GLOBAL severity matrix, then inspect critical providers and top causes. If top causes are visible while GLOBAL severity still reads OK, treat that as an early-warning provider lead rather than proof of a current degraded/failing provider: confirm raw provider status first, then inspect selected-range latency/error evidence before escalating. If the top-cause table stays empty while severity is non-OK, treat that as a provider explainability gap: confirm raw provider status, then inspect optional rate-limit/circuit-breaker panels before leaving the page. If cause is retry/rate-limit/circuit-breaker, inspect control-plane safety before replay. If cause is latency/errors, correlate with Runtime impact, then logs/traces from the runtime or DQ dashboards.</div>",
         "mode": "html"
       },
       "links": [

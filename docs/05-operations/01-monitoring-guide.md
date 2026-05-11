@@ -231,10 +231,15 @@ tracing-backed log hygiene живёт в collapsed row
   показывает только active `DEGRADED`/`FAILING`; providers с missing telemetry
   остаются в severity matrix как `UNKNOWN`. `Inspect Critical Providers` и
   `Inspect Provider Top Causes` дают direct handoff в canonical provider
-  incident runbook. Если provider severity non-OK, а canonical cause projection
-  пуста, top-cause table показывает synthetic `status_without_projected_cause`;
-  трактуйте это как explainability gap и проверяйте raw provider status plus
-  optional rate-limit/circuit-breaker telemetry before replay or escalation.
+  incident runbook. `Inspect Provider Top Causes` может оставаться непустой
+  даже при `GLOBAL severity = OK`, потому что canonical cause projection
+  deliberately включает early-warning provider signals независимо от
+  current-status projection; трактуйте это как diagnostic lead и сначала
+  подтверждайте raw provider status plus selected-range provider evidence before
+  replay or escalation. Если provider severity non-OK, а canonical cause
+  projection пуста, трактуйте это как explainability gap и проверяйте raw
+  provider status plus optional rate-limit/circuit-breaker telemetry before
+  replay or escalation.
 - **Monitor Current Provider Health Status**: table panel по
   `bioetl_provider_health_status{provider}` с fail-closed fallback через
   provider universe и явным mapping: `0=UNHEALTHY`, `1=DEGRADED`,
@@ -470,10 +475,13 @@ uv run python -m pytest -q tests/integration/test_prometheus_rules_config.py
   1. Для Grafana 12+ используйте `GF_PLUGINS_PREINSTALL=yesoreyeram-infinity-datasource`
      (legacy `GF_INSTALL_PLUGINS` оставляем только для обратной совместимости).
   1. Убедитесь, что Grafana datasource `Quarantine Explorer` указывает на
-     `http://bioetl-app:8081` через shared monitoring network alias
-     (или ваш override `BIOETL_QUARANTINE_EXPLORER_URL`).
-  1. Проверьте, что сервис `bioetl-app` подключён к сети `bioetl-monitoring`
-     и слушает `0.0.0.0:8081` внутри контейнера.
+     `http://host.docker.internal:8081` через host-gateway mapping Grafana
+     container (или ваш override `BIOETL_QUARANTINE_EXPLORER_URL`).
+  1. Проверьте, что host-side backend запущен как
+     `bioetl quarantine serve --host 0.0.0.0 --port 8081`.
+  1. Если Grafana уходит в restart loop, проверьте `docker logs bioetl-grafana`:
+     shipped bootstrap entrypoint удаляет stale local `grafana-image-renderer`
+     plugin из persistent volume, когда включён remote renderer sidecar.
 - **Дашборд пустой**:
   1. Проверьте, что пайплайн-процесс запущен и не завершился с ошибкой.
   1. Убедитесь, что пайплайн запущен с метриками (`BIOETL_METRICS_ENABLED=true`).
