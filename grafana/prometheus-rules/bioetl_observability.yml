@@ -20,7 +20,7 @@ groups:
         expr: (max by (pipeline, run_type) (max_over_time(bioetl_stage_backlog_records{stage="ingestion"}[15m])) > bool 0) and on (pipeline, run_type) (max by (pipeline, run_type) (max_over_time(bioetl_stage_lag_seconds{stage="ingestion"}[15m])) >= bool 300)
 
       - record: bioetl_runtime_alert_condition_stage_backlog_active_15m
-        expr: max by (pipeline, run_type, stage) (max_over_time(bioetl_stage_backlog_records[15m])) > bool 0
+        expr: max by (pipeline, run_type, stage) (bioetl_stage_backlog_records) > bool 0
 
       - record: bioetl_runtime_alert_condition_stage_lag_high_15m
         expr: max by (pipeline, run_type, stage) (max_over_time(bioetl_stage_lag_seconds[15m])) >= bool 300
@@ -40,7 +40,7 @@ groups:
       - record: bioetl_runtime_alert_condition_gold_write_missing_15m
         expr: >-
           (
-            (max by (pipeline, run_type) (max_over_time(bioetl_stage_backlog_records{stage="output"}[15m])) > bool 0)
+            (max by (pipeline, run_type) (bioetl_stage_backlog_records{stage="output"}) > bool 0)
             and on (pipeline) (bioetl_pipeline_stage_expected{stage="gold"} == bool 1)
           )
           or on (pipeline, run_type) (bioetl_overview_pipeline_run_type_universe * 0)
@@ -746,13 +746,13 @@ groups:
           runbook: "docs/05-operations/runbooks/observability-checklist.md"
 
       - alert: BioETLStageBacklogActive
-        expr: max by (pipeline, run_type, stage) (max_over_time(bioetl_stage_backlog_records[15m])) > 0
+        expr: max by (pipeline, run_type, stage) (bioetl_stage_backlog_records) > 0
         for: 5m
         labels:
           severity: warning
         annotations:
           summary: "Stage backlog remains active"
-          description: "bioetl_stage_backlog_records stayed above zero for pipeline={{ $labels.pipeline }} run_type={{ $labels.run_type }} stage={{ $labels.stage }} within the last 15m."
+          description: "bioetl_stage_backlog_records is above zero for pipeline={{ $labels.pipeline }} run_type={{ $labels.run_type }} stage={{ $labels.stage }}."
           runbook: "docs/05-operations/runbooks/observability-checklist.md"
 
       - alert: BioETLStageLagHigh

@@ -78,6 +78,10 @@ Those fields normalize against the shared publication classification taxonomy in
 Rule: downstream business logic should key off the derived taxonomy fields, not
 the raw provider labels.
 
+Exception: `chembl_publication` may preserve provider value `PUBLICATION` in
+`publication_class` before downstream taxonomy reconciliation, so consumers
+must not assume only `EXP|REV|PEER` at every intermediate Silver surface.
+
 ## OA Status
 
 | Field | Governance category | Current rule |

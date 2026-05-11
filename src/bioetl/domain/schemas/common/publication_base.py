@@ -125,8 +125,11 @@ class PublicationBaseSchema(ETLRecordSchema):
     )
     publication_class: Series[str] = pa.Field(
         nullable=True,
-        isin=["EXP", "REV", "PEER"],
-        description="Class Level 1: EXP (experimental), REV (reviews/secondary), PEER (peer review)",
+        isin=["EXP", "REV", "PEER", "PUBLICATION"],
+        description=(
+            "Class Level 1: EXP (experimental), REV (reviews/secondary), "
+            "PEER (peer review), or provider-preserved PUBLICATION."
+        ),
     )
     language: Series[str] = pa.Field(
         nullable=True,

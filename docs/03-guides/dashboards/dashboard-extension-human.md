@@ -88,7 +88,7 @@ sum(increase(metric_name[24h])) or vector(0)
 
 ```text
 queryType = traceqlSearch
-query = { span."bioetl.pipeline" =~ "${pipeline:regex}" && span."bioetl.run_type" =~ "${run_type:regex}" }
+query = { span."bioetl.pipeline" =~ "${pipeline:regex}" }
 ```
 
 - Для provider-only surface используйте:

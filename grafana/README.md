@@ -828,11 +828,12 @@ global adjunct links `Silver Reject Explorer`, `Explore Logs`, and
 `Explore Traces` in the same tab. `Explore Traces` is a traced-run-only adjunct
 surface, so `NoOpTracing` runs can legitimately return empty Tempo results. The
 shipped trace handoff opens an explicit search-first Tempo route, bounds the
-initial window to `now-150m..now`, pins `var-ds=tempo`, and uses
-`var-groupBy=resource.service.name` so Tempo metrics queries stay under the
-local limit and empty trace stores fail closed as empty search results instead
-of invalid breakdown-state queries. The current dashboard remains visible in
-`id=1000` as a disabled dark-gray item rather than disappearing from the bus.
+initial window to `now-150m..now`, pins `var-ds=tempo`, uses
+`var-groupBy=resource.service.name`, and keeps only stable pipeline/provider
+TraceQL scope so Tempo metrics queries stay under the local limit and
+`includeAll` run-type selectors cannot collapse into an empty regex. The
+current dashboard remains visible in `id=1000` as a disabled dark-gray item
+rather than disappearing from the bus.
 
 **Silver Rejects triage sequence:**
 
@@ -905,8 +906,11 @@ BioETL run may first appear to Prometheus as an already non-zero sample; plain
 `Explore Traces` открывается с безопасным bounded окном `now-150m..now`, а не
 наследует текущее окно dashboard. Panel-level
 dashboard-to-dashboard handoffs удалены; replay/checkpoint расследование
-открывается через `0. Control Plane` в top-level шине. Tempo drilldown предфильтрован по
-`span."bioetl.pipeline"` и `span."bioetl.run_type"`.
+открывается через `0. Control Plane` в top-level шине. Tempo drilldown
+предфильтрован по `span."bioetl.pipeline"` для pipeline-scoped dashboards и по
+`span."bioetl.provider"` для provider-only dashboard; `run_type` intentionally
+not shipped in TraceQL handoff because `includeAll` Grafana selectors can
+collapse to an empty regex.
 
 ______________________________________________________________________
 

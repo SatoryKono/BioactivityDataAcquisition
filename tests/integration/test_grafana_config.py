@@ -280,6 +280,20 @@ def test_explore_traces_links_use_safe_search_first_handoff(
     assert "var-groupBy=resource.service.name" in content, (
         f"{dashboard_path.name} must use a safe default groupBy for Explore Traces"
     )
+    assert (
+        'span.%22bioetl.run_type%22%20%3D~%20%22${run_type:regex}%22' not in content
+    ), (
+        f"{dashboard_path.name} must not couple Explore Traces to ${run_type:regex}; "
+        "includeAll run_type selectors can collapse into an empty regex"
+    )
+    assert (
+        'span.%22bioetl.run_type%22%20%3D~%20%22${run_type_context:regex}%22'
+        not in content
+    ), (
+        f"{dashboard_path.name} must not couple Explore Traces to "
+        "${run_type_context:regex}; includeAll run_type selectors can collapse "
+        "into an empty regex"
+    )
     assert "/a/grafana-exploretraces-app/?from=" not in content, (
         f"{dashboard_path.name} still uses the legacy Explore Traces root route"
     )

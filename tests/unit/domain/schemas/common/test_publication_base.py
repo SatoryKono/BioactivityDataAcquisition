@@ -106,6 +106,18 @@ class TestPublicationBaseSchemaValidation:
         assert pd.isna(validated["pmid"].iloc[0])
         assert pd.isna(validated["doi"].iloc[0])
 
+    def test_record_with_provider_preserved_publication_class(self, valid_base_record: dict) -> None:
+        """Provider-preserved PUBLICATION class should pass base publication schema."""
+        record = valid_base_record.copy()
+        record["publication_class"] = "PUBLICATION"
+
+        df = pd.DataFrame([record])
+
+        validated = PublicationBaseSchema.validate(df)
+
+        assert len(validated) == 1
+        assert validated["publication_class"].iloc[0] == "PUBLICATION"
+
     def test_extra_columns_allowed(self, valid_base_record: dict) -> None:
         """Extra columns should be allowed (strict=False)."""
         valid_base_record["extra_field"] = "extra_value"

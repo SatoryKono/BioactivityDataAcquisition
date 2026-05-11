@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from typing import cast
-
 from bioetl.application.composite.checkpoint._anchor_context import (
     ExpectedCheckpointContext,
     fresh_checkpoint_state,
@@ -419,10 +417,7 @@ class CompositeCheckpointLoadService:
             self._emit_checkpoint_load_status("incompatible")
             raise
         merged_state = merge_expected_anchors(state, self._expected_context)
-        replayed_state = cast(
-            CompositeCheckpointState,
-            self._replay_checkpoint_suffix(merged_state),
-        )
+        replayed_state = self._replay_checkpoint_suffix(merged_state)
         warn_if_checkpoint_stale(
             logger=self._logger,
             composite_name=self._composite_name,
@@ -430,7 +425,7 @@ class CompositeCheckpointLoadService:
             state=replayed_state,
             clock=self._clock,
         )
-        return cast(CompositeCheckpointState, replayed_state)
+        return replayed_state
 
     def _warn_if_overwrite_would_drop_progress(self) -> None:
         warn_if_checkpoint_exists_with_progress(
