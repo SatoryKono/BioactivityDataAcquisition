@@ -158,32 +158,64 @@ def _line_regex_violation(line: str) -> str | None:
     return None
 
 
+def _line_violation(
+    *,
+    relative_path: str,
+    line_number: int,
+    line: str,
+    allowed_examples: dict[str, tuple[str, ...]],
+) -> BroadCleanupViolation | None:
+    if _allowed_on_line(
+        relative_path=relative_path,
+        line=line,
+        allowed_examples=allowed_examples,
+    ):
+        return None
+    pattern = _line_literal_violation(line) or _line_regex_violation(line)
+    if pattern is None:
+        return None
+    return BroadCleanupViolation(
+        path=relative_path,
+        line_number=line_number,
+        pattern=pattern,
+        line=line.strip(),
+    )
+
+
+def _file_broad_cleanup_violations(
+    file_path: Path,
+    *,
+    repo_root: Path,
+    allowed_examples: dict[str, tuple[str, ...]],
+) -> list[BroadCleanupViolation]:
+    relative_path = file_path.relative_to(repo_root).as_posix()
+    violations: list[BroadCleanupViolation] = []
+    for line_number, line in enumerate(
+        file_path.read_text(encoding="utf-8", errors="replace").splitlines(),
+        start=1,
+    ):
+        violation = _line_violation(
+            relative_path=relative_path,
+            line_number=line_number,
+            line=line,
+            allowed_examples=allowed_examples,
+        )
+        if violation is not None:
+            violations.append(violation)
+    return violations
+
+
 def collect_broad_cleanup_violations(repo_root: Path) -> list[BroadCleanupViolation]:
     allowed_examples = _load_allowed_examples(repo_root)
     violations: list[BroadCleanupViolation] = []
     for file_path in _iter_scanned_files(repo_root):
-        relative_path = file_path.relative_to(repo_root).as_posix()
-        for line_number, line in enumerate(
-            file_path.read_text(encoding="utf-8", errors="replace").splitlines(),
-            start=1,
-        ):
-            if _allowed_on_line(
-                relative_path=relative_path,
-                line=line,
+        violations.extend(
+            _file_broad_cleanup_violations(
+                file_path,
+                repo_root=repo_root,
                 allowed_examples=allowed_examples,
-            ):
-                continue
-            pattern = _line_literal_violation(line) or _line_regex_violation(line)
-            if pattern is None:
-                continue
-            violations.append(
-                BroadCleanupViolation(
-                    path=relative_path,
-                    line_number=line_number,
-                    pattern=pattern,
-                    line=line.strip(),
-                )
             )
+        )
     return violations
 
 

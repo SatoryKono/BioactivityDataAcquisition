@@ -23,13 +23,18 @@ def _iter_python_files() -> list[Path]:
     return [path for path in SRC_ROOT.rglob("*.py") if path != ENTRYPOINTS_FILE]
 
 
+def _entrypoint_aliases_for_node(node: ast.AST) -> set[str]:
+    if isinstance(node, ast.Import):
+        return _entrypoint_aliases_from_import(node)
+    if isinstance(node, ast.ImportFrom):
+        return _entrypoint_aliases_from_import_from(node)
+    return set()
+
+
 def _entrypoint_aliases(tree: ast.Module) -> set[str]:
     aliases: set[str] = set()
     for node in ast.walk(tree):
-        if isinstance(node, ast.Import):
-            aliases.update(_entrypoint_aliases_from_import(node))
-        elif isinstance(node, ast.ImportFrom):
-            aliases.update(_entrypoint_aliases_from_import_from(node))
+        aliases.update(_entrypoint_aliases_for_node(node))
     return aliases
 
 
@@ -78,6 +83,23 @@ def _deprecated_attribute_violation(
     return f"{rel}:{node.lineno}: {node.value.id}.{node.attr}"
 
 
+def _deprecated_node_violations(
+    path: Path,
+    node: ast.AST,
+    *,
+    legacy_symbols: set[str],
+    entrypoint_aliases: set[str],
+) -> list[str]:
+    if isinstance(node, ast.ImportFrom):
+        return _deprecated_import_from_violations(path, node, legacy_symbols)
+    if isinstance(node, ast.Attribute):
+        violation = _deprecated_attribute_violation(
+            path, node, legacy_symbols, entrypoint_aliases
+        )
+        return [] if violation is None else [violation]
+    return []
+
+
 def _deprecated_entrypoint_violations_for_path(
     path: Path, legacy_symbols: set[str]
 ) -> list[str]:
@@ -85,16 +107,14 @@ def _deprecated_entrypoint_violations_for_path(
     entrypoint_aliases = _entrypoint_aliases(tree)
     violations: list[str] = []
     for node in ast.walk(tree):
-        if isinstance(node, ast.ImportFrom):
-            violations.extend(
-                _deprecated_import_from_violations(path, node, legacy_symbols)
+        violations.extend(
+            _deprecated_node_violations(
+                path,
+                node,
+                legacy_symbols=legacy_symbols,
+                entrypoint_aliases=entrypoint_aliases,
             )
-        elif isinstance(node, ast.Attribute):
-            violation = _deprecated_attribute_violation(
-                path, node, legacy_symbols, entrypoint_aliases
-            )
-            if violation is not None:
-                violations.append(violation)
+        )
     return violations
 
 

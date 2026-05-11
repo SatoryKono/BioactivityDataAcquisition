@@ -298,47 +298,79 @@ def _is_status_like_panel(panel: dict) -> bool:
     return any(token in title or token in description for token in STATUS_PANEL_TOKENS)
 
 
-def _panel_errors(dashboard_path: Path, panel: dict) -> list[str]:
+def _stat_threshold_color_errors(dashboard_path: Path, panel: dict) -> list[str]:
+    if panel.get("type") != "stat":
+        return []
+
+    title = str(panel.get("title", ""))
+    color_mode = (
+        panel.get("fieldConfig", {}).get("defaults", {}).get("color", {}).get("mode")
+    )
+    if color_mode == "thresholds":
+        return []
+    return [
+        f"{dashboard_path}: stat panel '{title}' must use color.mode=thresholds"
+    ]
+
+
+def _status_panel_errors(dashboard_path: Path, panel: dict) -> list[str]:
+    if panel.get("type") not in {"stat", "gauge"} or not _is_status_like_panel(panel):
+        return []
+    return _stat_panel_visual_semantics_errors(
+        dashboard_path, panel
+    ) + _l0_terminology_errors(dashboard_path, panel)
+
+
+def _panel_type_errors(dashboard_path: Path, panel: dict) -> list[str]:
+    panel_type = panel.get("type")
+    if panel_type == "gauge":
+        return _gauge_panel_visual_semantics_errors(dashboard_path, panel)
+    if panel_type == "table":
+        return _table_panel_visual_semantics_errors(dashboard_path, panel)
+    if panel_type == "timeseries":
+        return _timeseries_panel_visual_semantics_errors(dashboard_path, panel)
+    return []
+
+
+def _panel_expressions(panel: dict) -> list[str]:
+    return [
+        str(target.get("expr", ""))
+        for target in panel.get("targets", [])
+        if isinstance(target, dict) and isinstance(target.get("expr"), str)
+    ]
+
+
+def _fail_closed_panel_errors(
+    dashboard_path: Path, panel: dict, expected_no_value: str | None
+) -> list[str]:
+    if expected_no_value is None:
+        return []
+
+    title = str(panel.get("title", ""))
     errors: list[str] = []
+    if any("or vector(0)" in expr for expr in _panel_expressions(panel)):
+        errors.append(
+            f"{dashboard_path}: panel '{title}' must preserve UNKNOWN instead of zero fallback"
+        )
+
+    no_value = panel.get("fieldConfig", {}).get("defaults", {}).get("noValue")
+    if no_value != expected_no_value:
+        errors.append(
+            f"{dashboard_path}: panel '{title}' must use noValue={expected_no_value!r}"
+        )
+    return errors
+
+
+def _panel_errors(dashboard_path: Path, panel: dict) -> list[str]:
     title = str(panel.get("title", ""))
     panel_key = (dashboard_path.name, title)
-    panel_type = panel.get("type")
-
-    if panel_type == "stat":
-        color_mode = panel.get("fieldConfig", {}).get("defaults", {}).get("color", {}).get("mode")
-        if color_mode != "thresholds":
-            errors.append(
-                f"{dashboard_path}: stat panel '{title}' must use color.mode=thresholds"
-            )
-
-    if panel_type in {"stat", "gauge"} and _is_status_like_panel(panel):
-        errors.extend(_stat_panel_visual_semantics_errors(dashboard_path, panel))
-        errors.extend(_l0_terminology_errors(dashboard_path, panel))
-    if panel_type == "gauge":
-        errors.extend(_gauge_panel_visual_semantics_errors(dashboard_path, panel))
-    if panel_type == "table":
-        errors.extend(_table_panel_visual_semantics_errors(dashboard_path, panel))
-    if panel_type == "timeseries":
-        errors.extend(_timeseries_panel_visual_semantics_errors(dashboard_path, panel))
-
     expected_no_value = FAIL_CLOSED_NO_ZERO_FALLBACK_PANELS.get(panel_key)
-    if expected_no_value is not None:
-        expressions = [
-            str(target.get("expr", ""))
-            for target in panel.get("targets", [])
-            if isinstance(target, dict) and isinstance(target.get("expr"), str)
-        ]
-        if any("or vector(0)" in expr for expr in expressions):
-            errors.append(
-                f"{dashboard_path}: panel '{title}' must preserve UNKNOWN instead of zero fallback"
-            )
-        no_value = panel.get("fieldConfig", {}).get("defaults", {}).get("noValue")
-        if expected_no_value is not None and no_value != expected_no_value:
-            errors.append(
-                f"{dashboard_path}: panel '{title}' must use noValue={expected_no_value!r}"
-            )
-
-    return errors
+    return (
+        _stat_threshold_color_errors(dashboard_path, panel)
+        + _status_panel_errors(dashboard_path, panel)
+        + _panel_type_errors(dashboard_path, panel)
+        + _fail_closed_panel_errors(dashboard_path, panel, expected_no_value)
+    )
 
 
 def _dashboard_errors(dashboard_path: Path) -> list[str]:

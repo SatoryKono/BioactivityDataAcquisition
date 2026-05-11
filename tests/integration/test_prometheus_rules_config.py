@@ -1073,6 +1073,15 @@ def test_dq_current_status_splits_hard_failures_from_degraded_warnings() -> None
         "expr", ""
     )
     degraded_expr = record_map["bioetl_dq_current_degraded_signals_15m"].get("expr", "")
+
+    assert "increase(bioetl_silver_validation_failures_total[30m])" in (
+        silver_validation_expr
+    )
+    assert "bioetl_overview_pipeline_universe * 0" in silver_validation_expr
+    assert "or on (pipeline)" in silver_validation_expr
+    assert "max_over_time(bioetl_silver_validation_failures_total[30m])" not in (
+        silver_validation_expr
+    )
     status_expr = record_map["bioetl_dq_current_status"].get("expr", "")
     quarantined_reason_rules = [
         rule
@@ -1085,9 +1094,6 @@ def test_dq_current_status_splits_hard_failures_from_degraded_warnings() -> None
         if rule.get("labels", {}).get("reason") == "dq_monitor_disabled"
     ]
 
-    assert "max_over_time(bioetl_silver_validation_failures_total[30m])" in (
-        silver_validation_expr
-    )
     assert "bioetl_runtime_alert_condition_dq_hard_fail_15m" in failure_expr
     assert "bioetl_runtime_alert_condition_dq_critical_anomaly_30m" in failure_expr
     assert "bioetl_runtime_alert_condition_silver_validation_failures_30m" in (
@@ -1521,6 +1527,8 @@ def test_silver_validation_alert_groups_by_pipeline_and_table() -> None:
     description = rule.get("annotations", {}).get("description", "")
 
     assert "sum by (pipeline, table)" in expr
+    assert "increase(bioetl_silver_validation_failures_total[30m])" in expr
+    assert "max_over_time(bioetl_silver_validation_failures_total[30m])" not in expr
     assert "{{ $labels.pipeline }}" in description
     assert "{{ $labels.table }}" in description
 

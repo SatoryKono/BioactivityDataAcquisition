@@ -722,8 +722,13 @@ def _iter_python_files_without_pycache(layer_roots: tuple[Path, ...]) -> list[Pa
     return [
         py_file
         for layer_root in layer_roots
-        for py_file in layer_root.rglob("*.py")
-        if "__pycache__" not in py_file.parts
+        for py_file in _python_files_under_root(layer_root)
+    ]
+
+
+def _python_files_under_root(layer_root: Path) -> list[Path]:
+    return [
+        py_file for py_file in layer_root.rglob("*.py") if "__pycache__" not in py_file.parts
     ]
 
 

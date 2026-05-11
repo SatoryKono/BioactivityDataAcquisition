@@ -111,6 +111,16 @@ def _public_cli_path_for_module(module_name: str, commands_root: Path) -> Path:
     return commands_root / f"{module_name.replace('.', '/')}.py"
 
 
+def _public_cli_path_from_wrapper_line(line: str, *, commands_root: Path) -> str | None:
+    module_name = _public_cli_module_from_wrapper(line)
+    if module_name is None:
+        return None
+    public_path = _public_cli_path_for_module(module_name, commands_root)
+    if not public_path.exists():
+        return None
+    return public_path.relative_to(ROOT).as_posix()
+
+
 def _iter_public_cli_paths_for_wrapper(path: Path, *, commands_root: Path) -> set[str]:
     text = path.read_text(encoding="utf-8")
     if not _domain_wrapper_points_to_public_cli(text):
@@ -118,12 +128,11 @@ def _iter_public_cli_paths_for_wrapper(path: Path, *, commands_root: Path) -> se
 
     paths: set[str] = set()
     for line in text.splitlines():
-        module_name = _public_cli_module_from_wrapper(line)
-        if module_name is None:
-            continue
-        public_path = _public_cli_path_for_module(module_name, commands_root)
-        if public_path.exists():
-            paths.add(public_path.relative_to(ROOT).as_posix())
+        public_path = _public_cli_path_from_wrapper_line(
+            line, commands_root=commands_root
+        )
+        if public_path is not None:
+            paths.add(public_path)
     return paths
 
 

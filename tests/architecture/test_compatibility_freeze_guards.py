@@ -837,18 +837,23 @@ def _assert_no_violations(violations: list[str], failure_message: str) -> None:
     assert not violations, failure_message + "\n" + "\n".join(violations)
 
 
+def _assignment_target_names(node: ast.Assign) -> frozenset[str]:
+    return frozenset(
+        target.id for target in node.targets if isinstance(target, ast.Name)
+    )
+
+
+def _ann_assignment_matches(node: ast.AnnAssign, assignment_name: str) -> bool:
+    return isinstance(node.target, ast.Name) and node.target.id == assignment_name
+
+
 def _literal_assignment_value(node: ast.stmt, assignment_name: str) -> ast.expr | None:
     if isinstance(node, ast.Assign):
-        if any(
-            isinstance(target, ast.Name) and target.id == assignment_name
-            for target in node.targets
-        ):
+        if assignment_name in _assignment_target_names(node):
             return node.value
         return None
-    if (
-        isinstance(node, ast.AnnAssign)
-        and isinstance(node.target, ast.Name)
-        and node.target.id == assignment_name
+    if isinstance(node, ast.AnnAssign) and _ann_assignment_matches(
+        node, assignment_name
     ):
         return node.value
     return None

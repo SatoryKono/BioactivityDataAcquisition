@@ -21,6 +21,7 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.ports import LoggerPort
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
+    from bioetl.domain.value_objects.silver_result import SilverWriteResult
 
 
 def emit_domain_event(
@@ -95,12 +96,13 @@ async def safe_write_layer(
     batch_id: BatchID,
     ingestion_ts: datetime,
     bronze_refs: list[BronzeWriteResult] | None,
+    silver_refs: list[SilverWriteResult] | None = None,
     operation_errors: tuple[type[BaseException], ...],
-) -> None:
+) -> object | None:
     """Execute one layer write and quarantine schema-invalid outputs."""
     try:
         if layer == "silver":
-            await execute_with_span(
+            write_result = await execute_with_span(
                 "write_silver",
                 writer.write_silver(
                     records,
@@ -118,9 +120,9 @@ async def safe_write_layer(
                 ),
             )
         else:
-            await execute_with_span(
+            write_result = await execute_with_span(
                 "write_gold",
-                writer.write_gold(records),
+                writer.write_gold(records, silver_refs=silver_refs),
                 batch_id,
                 len(records),
                 on_error=lambda error: writer.log_and_track_write_error(
@@ -139,6 +141,7 @@ async def safe_write_layer(
             record_count=len(records),
             occurred_at=ingestion_ts,
         )
+        return write_result
     except SchemaViolationError as error:
         writer._batch_metrics.track_batch_failed(stage=layer, count=len(records))
         emit_batch_failed(
@@ -166,6 +169,7 @@ async def safe_write_layer(
             batch_id,
             ingestion_ts=ingestion_ts,
         )
+        return None
     except operation_errors as error:
         if isinstance(error, Exception):
             writer._batch_metrics.track_batch_failed(stage=layer, count=len(records))

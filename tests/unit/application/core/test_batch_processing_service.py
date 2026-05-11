@@ -25,6 +25,7 @@ from bioetl.application.core.batch_transformer import TransformResult
 from bioetl.domain.aggregates.events import BatchCreated, BatchFailed, BatchSealed
 from bioetl.domain.exceptions import BioETLError, SchemaViolationError
 from bioetl.domain.types import BatchID, BronzeRecord, RunType
+from bioetl.domain.value_objects.silver_result import SilverWriteResult
 
 
 # ---------------------------------------------------------------------------
@@ -433,6 +434,51 @@ class TestProcessBatchHappyPath:
         await svc.process_batch(records=[{"id": "1"}], start_index=0, query_string=None)
 
         mock_writer.write_gold.assert_awaited_once()
+
+    async def test_passes_silver_refs_to_gold_write_when_silver_present(
+        self,
+        mock_context,
+        mock_services,
+        mock_config,
+        mock_logger,
+        mock_batch_metrics,
+        mock_transformer,
+        mock_writer,
+        mock_tracing,
+        mock_batch_id_factory,
+    ):
+        """Gold write receives SilverWriteResult lineage from the preceding Silver write."""
+        silver_result = SilverWriteResult(
+            table_name="chembl.publication",
+            table_path="/tmp/silver/chembl/publication",
+            delta_version=129,
+            record_count=1,
+        )
+        mock_writer.write_silver = AsyncMock(return_value=silver_result)
+        mock_transformer.transform_batch = AsyncMock(
+            return_value=_make_transform_result(
+                silver=[{"entity_id": "s1"}],
+                gold=[{"entity_id": "g1"}],
+            )
+        )
+        svc = _make_service(
+            mock_context,
+            mock_services,
+            mock_config,
+            mock_logger,
+            mock_batch_metrics,
+            mock_transformer,
+            mock_writer,
+            mock_tracing,
+            mock_batch_id_factory,
+        )
+
+        await svc.process_batch(records=[{"id": "1"}], start_index=0, query_string=None)
+
+        mock_writer.write_gold.assert_awaited_once_with(
+            [{"entity_id": "g1"}],
+            silver_refs=[silver_result],
+        )
 
     async def test_skips_write_gold_when_no_gold_records(
         self,

@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 from collections.abc import Awaitable, Callable
 from datetime import datetime
 from typing import TYPE_CHECKING, TypeVar
@@ -46,6 +45,7 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.ports import LoggerPort
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
+    from bioetl.domain.value_objects.silver_result import SilverWriteResult
 
 _ResultT = TypeVar("_ResultT")
 _SHARED_FAILURE_POLICY = _RF005_SHARED_FAILURE_POLICY
@@ -163,43 +163,42 @@ class BatchProcessingSupportService:
         ingestion_ts: datetime,
         bronze_refs: list[BronzeWriteResult] | None,
     ) -> None:
-        write_coros: list[Awaitable[object]] = []
+        """Write Silver first, then pass its lineage refs into Gold.
+
+        The historical method name is preserved for caller compatibility.
+        """
+        silver_result: SilverWriteResult | None = None
         if transform_result.silver_records:
-            write_coros.append(
-                safe_write_layer(
-                    execute_with_span=self._execute_with_span,
-                    writer=self._writer,
-                    quarantine_manager=self._quarantine_manager,
-                    logger=self._logger,
-                    run_id=self._run_id,
-                    domain_event_emitter=self._domain_event_emitter,
-                    layer="silver",
-                    records=transform_result.silver_records,
-                    batch_id=batch_id,
-                    ingestion_ts=ingestion_ts,
-                    bronze_refs=bronze_refs,
-                    operation_errors=_OPERATION_ERRORS,
-                )
+            silver_result = await safe_write_layer(
+                execute_with_span=self._execute_with_span,
+                writer=self._writer,
+                quarantine_manager=self._quarantine_manager,
+                logger=self._logger,
+                run_id=self._run_id,
+                domain_event_emitter=self._domain_event_emitter,
+                layer="silver",
+                records=transform_result.silver_records,
+                batch_id=batch_id,
+                ingestion_ts=ingestion_ts,
+                bronze_refs=bronze_refs,
+                operation_errors=_OPERATION_ERRORS,
             )
         if transform_result.gold_records:
-            write_coros.append(
-                safe_write_layer(
-                    execute_with_span=self._execute_with_span,
-                    writer=self._writer,
-                    quarantine_manager=self._quarantine_manager,
-                    logger=self._logger,
-                    run_id=self._run_id,
-                    domain_event_emitter=self._domain_event_emitter,
-                    layer="gold",
-                    records=transform_result.gold_records,
-                    batch_id=batch_id,
-                    ingestion_ts=ingestion_ts,
-                    bronze_refs=None,
-                    operation_errors=_OPERATION_ERRORS,
-                )
+            await safe_write_layer(
+                execute_with_span=self._execute_with_span,
+                writer=self._writer,
+                quarantine_manager=self._quarantine_manager,
+                logger=self._logger,
+                run_id=self._run_id,
+                domain_event_emitter=self._domain_event_emitter,
+                layer="gold",
+                records=transform_result.gold_records,
+                batch_id=batch_id,
+                ingestion_ts=ingestion_ts,
+                bronze_refs=None,
+                silver_refs=[silver_result] if silver_result is not None else None,
+                operation_errors=_OPERATION_ERRORS,
             )
-        if write_coros:
-            await asyncio.gather(*write_coros)
         self._batch_metrics.track_stage_records(
             stage="storage",
             outcome="silver_written",
