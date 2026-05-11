@@ -161,7 +161,7 @@
       },
       "targets": [
         {
-          "expr": "round(sum(increase(bioetl_workflow_runs_total{workflow=~\"$workflow\",status=\"failed\"}[$__range]))) or vector(0)",
+          "expr": "round(sum(max_over_time(bioetl_workflow_runs_total{workflow=~\"$workflow\",status=\"failed\"}[$__range]))) or vector(0)",
           "refId": "A"
         }
       ],
@@ -225,7 +225,7 @@
       },
       "targets": [
         {
-          "expr": "round(sum(increase(bioetl_workflow_step_events_total{workflow=~\"$workflow\",step_kind=\"pipeline\",status=\"failed\"}[$__range]))) or vector(0)",
+          "expr": "round(sum(max_over_time(bioetl_workflow_step_events_total{workflow=~\"$workflow\",step_kind=\"pipeline\",status=\"failed\"}[$__range]))) or vector(0)",
           "refId": "A"
         }
       ],
@@ -289,7 +289,7 @@
       },
       "targets": [
         {
-          "expr": "round(sum(increase(bioetl_workflow_step_events_total{workflow=~\"$workflow\",step_kind=\"transform\",status=\"failed\"}[$__range]))) or vector(0)",
+          "expr": "round(sum(max_over_time(bioetl_workflow_step_events_total{workflow=~\"$workflow\",step_kind=\"transform\",status=\"failed\"}[$__range]))) or vector(0)",
           "refId": "A"
         }
       ],
@@ -353,7 +353,7 @@
       },
       "targets": [
         {
-          "expr": "round(sum(increase(bioetl_workflow_step_events_total{workflow=~\"$workflow\",status=\"skipped\"}[$__range]))) or vector(0)",
+          "expr": "round(sum(max_over_time(bioetl_workflow_step_events_total{workflow=~\"$workflow\",status=\"skipped\"}[$__range]))) or vector(0)",
           "refId": "A"
         }
       ],
@@ -402,7 +402,7 @@
       },
       "targets": [
         {
-          "expr": "sum by (status) (increase(bioetl_workflow_runs_total{workflow=~\"$workflow\",status=~\"$status\"}[$__range]))",
+          "expr": "sum by (status) (max_over_time(bioetl_workflow_runs_total{workflow=~\"$workflow\",status=~\"$status\"}[$__range]))",
           "legendFormat": "{{status}}",
           "refId": "A"
         }

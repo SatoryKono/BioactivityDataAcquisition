@@ -861,13 +861,13 @@ DQ сейчас `OK`/`WARN`/`CRIT`/`UNKNOWN`, какая threshold/reason state
 | 9101 | Monitor DQ Threshold State                  | Stat       | `max(bioetl_dq_current_reason{severity=...})` + explicit `OK` fallback                                                                | Bounded current threshold summary: warning reasons map to WARN, hard reasons map to CRIT, explicit current OK stays `0=OK`.                                                |
 | 9102 | Inspect DQ Current Reasons                  | Table      | `topk(5, bioetl_dq_current_reason{pipeline=~"$pipeline"} > 0)`                                                                        | Current DQ reasons table with `severity` and `action_target`; empty table means no active DQ reasons for the selected pipeline snapshot.                                   |
 | 9103 | Review: First Action                         | Text      | n/a                                                                                                                                    | Operator CTA: review current status, inspect current reasons, or open `Silver Reject Explorer`; absent policy visibility is UNKNOWN, not OK.                             |
-| 1   | Track Range Evidence: Bronze -> Silver -> Gold | Timeseries | `sum by (pipeline, stage) (increase(bioetl_records_processed_total{pipeline=~"$pipeline", run_type=~"$run_type"}[$__interval]))` | Full-width selected-range evidence panel that now sits below the compact current-context band; не определяет current DQ status.                                            |
+| 1   | Track Range Evidence: Bronze -> Silver -> Gold | Timeseries | `sum by (pipeline, stage) (max_over_time(bioetl_records_processed_total{pipeline=~"$pipeline", run_type=~"$run_type"}[$__interval]))` | Full-width selected-range evidence panel that now sits below the compact current-context band; не определяет current DQ status.                                            |
 | 2   | Monitor: Data Quality Score (Volume-weighted) | Gauge      | `sum(score * record_count) / clamp_min(sum(record_count), 1)`                                                                          | Канонический DQ gauge на базе `bioetl_dq_validation_score` и `bioetl_dq_validation_record_count`; в layout он входит в compact current-context row сразу под answer row.   |
-| 3   | Track: Source Records in Range (Bronze)      | Stat       | `round(sum(increase(bioetl_records_processed_total{...stage="bronze"}[$__range])) or vector(0))`                                       | Суммарный Bronze input внутри активного Grafana окна; это bounded range evidence, а не latest-value snapshot.                                                               |
-| 4   | Track: Clean Records in Range (Gold)         | Stat       | `round(sum(increase(bioetl_records_processed_total{...stage="gold"}[$__range])) or vector(0))`                                         | Суммарный Gold output внутри активного Grafana окна; это bounded range evidence, а не latest-value snapshot.                                                                |
+| 3   | Track: Source Records in Range (Bronze)      | Stat       | `round(sum(max_over_time(bioetl_records_processed_total{...stage="bronze"}[$__range])) or vector(0))`                                  | Суммарный Bronze input для pushed-counter evidence внутри активного Grafana окна; это bounded range evidence, а не latest-value snapshot.                                   |
+| 4   | Track: Clean Records in Range (Gold)         | Stat       | `round(sum(max_over_time(bioetl_records_processed_total{...stage="gold"}[$__range])) or vector(0))`                                    | Суммарный Gold output для pushed-counter evidence внутри активного Grafana окна; это bounded range evidence, а не latest-value snapshot.                                    |
 | 5   | Monitor: Worst-Entity DQ Score               | Gauge      | `min(bioetl_dq_validation_score{pipeline=~"$pipeline"})`                                                                                | Худший observed DQ score по сущностям внутри выбранного pipeline scope. При отсутствии DQ samples panel должен оставаться в состоянии `No data`, а не показывать synthetic `0`. |
-| 117 | Track: Silver Filter Rejects in Range        | Stat       | `round(sum(increase(bioetl_records_processed_total{...stage="filtered_out"}[$__range])) or vector(0))`                                  | Отдельный счётчик Silver filter rejects внутри выбранного временного окна; не заменяет `Track: Records Quarantined in Range`.                                              |
-| 118 | Inspect: Silver Filter Rejects by Pipeline   | Bar gauge  | `sum by (pipeline) (increase(bioetl_records_processed_total{...stage="filtered_out"}[$__range]))`                                       | Breakdown intentional Silver exclusions по выбранным pipeline values через selected-range increase.                                                                        |
+| 117 | Track: Silver Filter Rejects in Range        | Stat       | `round(sum(max_over_time(bioetl_records_processed_total{...stage="filtered_out"}[$__range])) or vector(0))`                             | Отдельный счётчик Silver filter rejects внутри выбранного временного окна; не заменяет `Track: Records Quarantined in Range`.                                              |
+| 118 | Inspect: Silver Filter Rejects by Pipeline   | Bar gauge  | `sum by (pipeline) (max_over_time(bioetl_records_processed_total{...stage="filtered_out"}[$__range]))`                                  | Breakdown intentional Silver exclusions по выбранным pipeline values через selected-range pushed-counter evidence.                                                         |
 | 121 | Inspect: Top Silver Reject Reasons (Pareto) | Bar gauge  | `topk(10, sum by (reason_code) (increase(bioetl_silver_filter_rejections_total{...}[$__range])))`                                      | Bounded top-10 summary по `reason_code`; use the top-level `Silver Reject Explorer` handoff for record-level narrowing inside the explorer.                                  |
 | 122 | Inspect: Top Silver Reject Fields            | Bar gauge  | `topk(10, sum by (field) (increase(bioetl_silver_filter_rejections_total{...}[$__range])))`                                            | Bounded top-10 summary по `field`; use the top-level `Silver Reject Explorer` handoff for record-level narrowing inside the explorer.                                        |
 | 152 | Monitor: Silver Filter Reject Accounting Mismatch | Stat  | `round(sum(max_over_time(bioetl_silver_filter_reject_total_mismatch_15m{...}[$__range])))`                                              | Reconciliation guard между stage-total `filtered_out` surface и bounded breakdown metric. `0` = healthy, non-zero = расследовать drift, `No data` = recording rule не публикуется. |
@@ -881,6 +881,11 @@ DQ сейчас `OK`/`WARN`/`CRIT`/`UNKNOWN`, какая threshold/reason state
 - Silver filter rejects = `bioetl_records_processed_total{stage="filtered_out"}`
 - blocked-share impact = `(filtered_out + quarantined) / bronze` inside the
   selected pipeline/run_type window
+
+Для Pushgateway-published final counters shipped dashboards use
+`max_over_time(...[$__range])` instead of `increase(...[$__range])`. A completed
+BioETL run may first appear to Prometheus as an already non-zero sample; plain
+`increase()` then returns `0` and hides real Bronze/DQ/reject evidence.
 
 Для bounded reason-level summary dashboard дополнительно использует:
 
@@ -926,6 +931,10 @@ backend, not a transient per-run companion server. Recommended launcher:
 remains a compatibility entrypoint, but operators should treat the Quarantine
 Explorer backend as a stable observability surface for Grafana rather than a
 temporary workflow-run helper.
+The default Docker-backed Grafana datasource URL is
+`http://bioetl-app:8081`, so the Grafana container reaches the BioETL
+Quarantine Explorer backend through the shared `bioetl-monitoring` Docker
+network.
 
 **Фильтры:** `$pipeline`, `$run_type`, `$reason_code`, `$field`, `$run_id`, `$payload_hash` + стандартный Grafana time picker.
 `$pipeline` здесь intentionally single-select/no-All. `$run_id` и

@@ -164,8 +164,11 @@ def get_audit_service() -> AuditInspectionService:
 
 
 def get_quarantine_service() -> QuarantineService:
-    """Get quarantine administration service."""
-    _ensure_registrations()
+    """Get quarantine administration service.
+
+    Quarantine admin/explorer operations read shared storage directly and do not
+    require provider or pipeline registration before bootstrap.
+    """
     return cast(
         "QuarantineService",
         _invoke_bootstrap("bootstrap_quarantine_service"),
@@ -274,8 +277,11 @@ def get_observability_workflow_service() -> ObservabilityWorkflowService:
 
 
 def get_health_server_dependencies() -> HealthServerDependenciesProtocol:
-    """Get dependencies for the health server."""
-    _ensure_registrations()
+    """Get dependencies for the health server.
+
+    Health listener startup must stay independent from pipeline registration so
+    the server can bind quickly even when registration is slow or broken.
+    """
     return cast(
         "HealthServerDependenciesProtocol",
         _invoke_bootstrap("bootstrap_health_server_dependencies"),
@@ -295,6 +301,9 @@ def get_adr_service() -> object:
 
 
 def get_quarantine_port() -> QuarantinePort:
-    """Get the shared low-level quarantine port."""
-    _ensure_registrations()
+    """Get the shared low-level quarantine port.
+
+    The shared quarantine table is configuration-backed and does not depend on
+    runtime pipeline registration.
+    """
     return cast("QuarantinePort", _invoke_bootstrap("bootstrap_quarantine_adapter"))

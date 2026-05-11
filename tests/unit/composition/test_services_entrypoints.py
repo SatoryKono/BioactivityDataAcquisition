@@ -62,8 +62,8 @@ class TestGetCheckpointService:
 class TestGetQuarantineService:
     """Tests for get_quarantine_service function."""
 
-    def test_calls_ensure_registrations_and_bootstrap(self) -> None:
-        """Test that get_quarantine_service calls _ensure_registrations and bootstrap."""
+    def test_bootstraps_without_registration_gate(self) -> None:
+        """Quarantine admin service must not block on pipeline registration."""
         mock_service = MagicMock(name="QuarantineService")
 
         with (
@@ -77,7 +77,7 @@ class TestGetQuarantineService:
 
             result = get_quarantine_service()
 
-        mock_ensure.assert_called_once()
+        mock_ensure.assert_not_called()
         mock_bootstrap.assert_called_once_with("bootstrap_quarantine_service")
         assert result is mock_service
 
@@ -394,8 +394,8 @@ class TestGetHealthService:
 class TestGetHealthServerDependencies:
     """Tests for get_health_server_dependencies function."""
 
-    def test_calls_ensure_registrations_and_bootstrap(self) -> None:
-        """Test that get_health_server_dependencies calls _ensure_registrations and bootstrap."""
+    def test_bootstraps_without_registration_gate(self) -> None:
+        """Health listener bootstrap must not block on pipeline registration."""
         mock_deps = MagicMock(name="HealthServerDependencies")
 
         with (
@@ -409,7 +409,7 @@ class TestGetHealthServerDependencies:
 
             result = get_health_server_dependencies()
 
-        mock_ensure.assert_called_once()
+        mock_ensure.assert_not_called()
         mock_bootstrap.assert_called_once_with("bootstrap_health_server_dependencies")
         assert result is mock_deps
 
@@ -481,8 +481,8 @@ class TestGetAdrService:
 class TestGetQuarantinePort:
     """Tests for get_quarantine_port function."""
 
-    def test_calls_ensure_registrations_and_bootstrap_quarantine_adapter(self) -> None:
-        """Test that get_quarantine_port calls _ensure_registrations and bootstrap_quarantine_adapter."""
+    def test_bootstraps_without_registration_gate(self) -> None:
+        """Shared quarantine storage must not depend on pipeline registration."""
         mock_port = MagicMock(name="QuarantinePort")
 
         with (
@@ -496,7 +496,7 @@ class TestGetQuarantinePort:
 
             result = get_quarantine_port()
 
-        mock_ensure.assert_called_once()
+        mock_ensure.assert_not_called()
         mock_bootstrap.assert_called_once_with("bootstrap_quarantine_adapter")
         assert result is mock_port
 

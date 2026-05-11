@@ -40,6 +40,9 @@ from bioetl.application.services._quarantine_service_sync_mixin import (
 if TYPE_CHECKING:
     from opentelemetry.trace import Span
 
+    from bioetl.application.services.control_plane.run_manifest_inspection_service import (
+        RunManifestInspectionService,
+    )
     from bioetl.domain.ports import (
         ClockPort,
         LoggerPort,
@@ -77,6 +80,7 @@ class QuarantineService(
     clock: ClockPort
     metrics: MetricsPort | None = None
     tracer: TracingPort | None = None
+    run_manifest_service: RunManifestInspectionService | None = None
     TRACER_NAME = "bioetl.quarantine_admin"
 
     def _trace_attributes(

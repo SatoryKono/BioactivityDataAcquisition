@@ -21,15 +21,17 @@ services:
       NEO4J_USERNAME: ${NEO4J_AUTH_USERNAME:-neo4j}
       NEO4J_PASSWORD: ${NEO4J_AUTH_PASSWORD:-bioetl_secure_password}
       PYTHONUNBUFFERED: "1"
+      PYTHONPYCACHEPREFIX: /tmp/bioetl-pycache
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       BIOETL_LOG_FILE: /app/logs/bioetl.log
       BIOETL_METRICS_PORT: "8000"
       BIOETL_METRICS_ADDR: 0.0.0.0
       BIOETL_OBSERVABILITY__METRICS_ENABLED: "true"
       BIOETL_OBSERVABILITY__METRICS_SERVER_ENABLED: "true"
-    command: ["health", "server", "--host", "0.0.0.0", "--port", "8081"]
+    command: ["quarantine", "serve", "--host", "0.0.0.0", "--port", "8081"]
     networks:
       - warp-network
+      - monitoring
     healthcheck:
       test:
         [
@@ -165,6 +167,9 @@ services:
 networks:
   warp-network:
     driver: bridge
+  monitoring:
+    external: true
+    name: bioetl-monitoring
 
 volumes:
   warp-data:

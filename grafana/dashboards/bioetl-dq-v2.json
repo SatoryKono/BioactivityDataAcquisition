@@ -188,7 +188,7 @@
       },
       "targets": [
         {
-          "expr": "sum by (pipeline, stage) (increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=~\"$stage\"}[$__interval]))",
+          "expr": "sum by (pipeline, stage) (max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=~\"$stage\"}[$__interval]))",
           "legendFormat": "{{pipeline}} / {{stage}}",
           "refId": "A"
         },
@@ -668,7 +668,7 @@
       },
       "targets": [
         {
-          "expr": "round(sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"bronze\"}[$__range])) or vector(0))",
+          "expr": "round(sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"bronze\"}[$__range])) or vector(0))",
           "instant": true,
           "legendFormat": "Bronze",
           "refId": "A"
@@ -737,7 +737,7 @@
       },
       "targets": [
         {
-          "expr": "round(sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"gold\"}[$__range])) or vector(0))",
+          "expr": "round(sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"gold\"}[$__range])) or vector(0))",
           "instant": true,
           "legendFormat": "Gold",
           "refId": "A"
@@ -902,7 +902,7 @@
       },
       "targets": [
         {
-          "expr": "round(sum(increase(bioetl_dq_records_quarantined_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])) or vector(0))",
+          "expr": "round(sum(max_over_time(bioetl_dq_records_quarantined_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])) or vector(0))",
           "legendFormat": "Quarantined",
           "refId": "A"
         }
@@ -1151,7 +1151,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "(((sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__range])) or vector(0)) + (sum(increase(bioetl_dq_records_quarantined_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])) or vector(0))) / clamp_min((sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"bronze\"}[$__range])) or vector(0)), 1))",
+          "expr": "(((sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__range])) or vector(0)) + (sum(max_over_time(bioetl_dq_records_quarantined_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])) or vector(0))) / clamp_min((sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"bronze\"}[$__range])) or vector(0)), 1))",
           "legendFormat": "blocked share",
           "range": true,
           "refId": "A"
@@ -1314,7 +1314,7 @@
       },
       "targets": [
         {
-          "expr": "round(sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__range])) or vector(0))",
+          "expr": "round(sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__range])) or vector(0))",
           "instant": true,
           "legendFormat": "Filtered Out",
           "refId": "A"
@@ -1480,7 +1480,7 @@
           },
           "targets": [
             {
-              "expr": "sum by (pipeline) (increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__range])) or label_replace(vector(0), \"pipeline\", \"no_events\", \"\", \"\")",
+              "expr": "sum by (pipeline) (max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__range])) or label_replace(vector(0), \"pipeline\", \"no_events\", \"\", \"\")",
               "instant": true,
               "legendFormat": "{{pipeline}}",
               "refId": "A"
@@ -1699,7 +1699,7 @@
           },
           "targets": [
             {
-              "expr": "sum by (error_type) (increase(bioetl_dq_records_quarantined_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])) or label_replace(vector(0), \"error_type\", \"none\", \"\", \"\")",
+              "expr": "sum by (error_type) (max_over_time(bioetl_dq_records_quarantined_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])) or label_replace(vector(0), \"error_type\", \"none\", \"\", \"\")",
               "legendFormat": "{{error_type}}",
               "refId": "A"
             }
@@ -1925,7 +1925,7 @@
           },
           "targets": [
             {
-              "expr": "round(sum(increase(bioetl_silver_validation_failures_total{pipeline=~\"$pipeline\"}[$__range])) or vector(0))",
+              "expr": "round(sum(max_over_time(bioetl_silver_validation_failures_total{pipeline=~\"$pipeline\"}[$__range])) or vector(0))",
               "legendFormat": "Validation Failures",
               "refId": "A"
             }
@@ -2161,7 +2161,7 @@
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "(((sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__interval])) or vector(0)) + (sum(increase(bioetl_dq_records_quarantined_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__interval])) or vector(0))) / clamp_min((sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"bronze\"}[$__interval])) or vector(0)), 1))",
+              "expr": "(((sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__interval])) or vector(0)) + (sum(max_over_time(bioetl_dq_records_quarantined_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__interval])) or vector(0))) / clamp_min((sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"bronze\"}[$__interval])) or vector(0)), 1))",
               "legendFormat": "blocked share",
               "range": true,
               "refId": "A"

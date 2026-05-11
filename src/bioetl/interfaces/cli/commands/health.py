@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import os
 import sys
 from typing import TYPE_CHECKING, cast
 
@@ -84,8 +85,10 @@ def _start_metrics_server_via_interface(
     retry_delay: float,
     logger: LoggerPort | None,
 ) -> bool:
-    """Start the metrics server through the canonical observability facade."""
-    from bioetl.interfaces.observability import start_metrics_server as _impl
+    """Start the metrics server through the lightweight runtime server seam."""
+    from bioetl.infrastructure.observability.server import (
+        start_metrics_server as _impl,
+    )
 
     return _impl(
         port=port,
@@ -171,6 +174,7 @@ async def _run_health_server(host: str, port: int) -> None:
     """Start and keep the health server alive until interrupted."""
     from bioetl.interfaces.http.health_server import HealthServer
 
+    os.environ.setdefault("PYTHONPYCACHEPREFIX", "/tmp/bioetl-pycache")
     deps = get_health_server_dependencies()
     _start_health_observability()
     quarantine_service: QuarantineService | None = None

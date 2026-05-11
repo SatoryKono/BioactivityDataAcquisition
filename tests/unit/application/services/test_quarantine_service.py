@@ -329,6 +329,80 @@ class TestQuarantineServiceFilteredExplorer:
         )
 
     @pytest.mark.asyncio
+    async def test_get_filtered_stats_enriches_bronze_records_from_run_manifests(
+        self, mock_quarantine_port, mock_logger, mock_metrics, mock_tracer
+    ) -> None:
+        """Filtered stats should derive Bronze denominator from scoped run manifests."""
+        mock_quarantine_port.get_filtered_stats.return_value = {
+            "total": 12,
+            "bronze_records": 0,
+            "reject_ratio": 0.0,
+            "run_ids": ["run-2", "run-1", "run-2"],
+        }
+        mock_run_manifest_service = MagicMock()
+        mock_run_manifest_service.show.side_effect = [
+            MagicMock(
+                ledger_entries=(
+                    MagicMock(metrics_snapshot={"records_bronze": 100}),
+                    MagicMock(metrics_snapshot={"records_bronze": 90}),
+                )
+            ),
+            MagicMock(
+                ledger_entries=(MagicMock(metrics_snapshot={"records_bronze": 50}),)
+            ),
+        ]
+        service = QuarantineService(
+            quarantine_port=mock_quarantine_port,
+            logger=mock_logger,
+            clock=FixedClock(datetime(2026, 4, 24, 12, 0, tzinfo=UTC)),
+            metrics=mock_metrics,
+            tracer=mock_tracer,
+            run_manifest_service=mock_run_manifest_service,
+        )
+
+        result = await service.get_filtered_stats(pipeline="pipeline1")
+
+        assert result["total"] == 12
+        assert result["bronze_records"] == 150
+        assert result["reject_ratio"] == pytest.approx(12 / 150)
+        assert "run_ids" not in result
+        assert mock_run_manifest_service.show.call_args_list[0].args == ("run-1",)
+        assert mock_run_manifest_service.show.call_args_list[1].args == ("run-2",)
+
+    @pytest.mark.asyncio
+    async def test_get_filtered_stats_uses_explicit_run_id_for_empty_scope(
+        self, mock_quarantine_port, mock_logger, mock_metrics, mock_tracer
+    ) -> None:
+        """Explicit run_id should still resolve Bronze denominator without reject rows."""
+        mock_quarantine_port.get_filtered_stats.return_value = {
+            "total": 0,
+            "bronze_records": 0,
+            "reject_ratio": 0.0,
+            "run_ids": [],
+        }
+        mock_run_manifest_service = MagicMock()
+        mock_run_manifest_service.show.return_value = MagicMock(
+            ledger_entries=(MagicMock(metrics_snapshot={"records_bronze": 80}),)
+        )
+        service = QuarantineService(
+            quarantine_port=mock_quarantine_port,
+            logger=mock_logger,
+            clock=FixedClock(datetime(2026, 4, 24, 12, 0, tzinfo=UTC)),
+            metrics=mock_metrics,
+            tracer=mock_tracer,
+            run_manifest_service=mock_run_manifest_service,
+        )
+
+        result = await service.get_filtered_stats(
+            pipeline="pipeline1",
+            run_id="run-1",
+        )
+
+        assert result["bronze_records"] == 80
+        assert result["reject_ratio"] == 0.0
+        mock_run_manifest_service.show.assert_called_once_with("run-1")
+
+    @pytest.mark.asyncio
     async def test_get_filtered_filter_options(
         self, quarantine_service, mock_quarantine_port
     ):

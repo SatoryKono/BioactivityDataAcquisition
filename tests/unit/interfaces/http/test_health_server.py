@@ -517,6 +517,30 @@ class TestHealthServerHTTP:
             writer.close()
             await writer.wait_closed()
 
+    @pytest.mark.asyncio(loop_scope="module")
+    async def test_http_incomplete_headers_timeout(
+        self, running_server: HealthServer
+    ) -> None:
+        """Test that incomplete headers return 408 instead of hanging forever."""
+        port = self._get_server_port(running_server)
+        original_timeout = running_server._header_line_timeout_seconds
+        running_server._header_line_timeout_seconds = 0.01
+        reader, writer = await asyncio.open_connection("127.0.0.1", port)
+        try:
+            writer.write(b"GET /health HTTP/1.1\r\nHost: localhost\r\n")
+            await writer.drain()
+
+            response_line = await asyncio.wait_for(reader.readline(), timeout=1.0)
+            response_str = response_line.decode("utf-8").strip()
+            parts = response_str.split(" ", 2)
+            status_code = int(parts[1])
+
+            assert status_code == 408
+        finally:
+            running_server._header_line_timeout_seconds = original_timeout
+            writer.close()
+            await writer.wait_closed()
+
 
 class TestHealthServerQuarantineExplorer:
     """Tests for /ops/quarantine/* explorer endpoints."""

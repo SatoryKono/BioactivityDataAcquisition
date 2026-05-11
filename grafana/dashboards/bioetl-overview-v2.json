@@ -2322,7 +2322,7 @@
           },
           "targets": [
             {
-              "expr": "sum by (pipeline, run_type) (increase(bioetl_pipeline_runs_total{status=\"failed\",pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\"}[$__range]))",
+              "expr": "sum by (pipeline, run_type) (max_over_time(bioetl_pipeline_runs_total{status=\"failed\",pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\"}[$__range]))",
               "refId": "A",
               "format": "table",
               "instant": true
@@ -2389,7 +2389,7 @@
           },
           "targets": [
             {
-              "expr": "sum by (pipeline, status) (increase(bioetl_pipeline_runs_total{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\",status!=\"success\"}[$__range]))",
+              "expr": "sum by (pipeline, status) (max_over_time(bioetl_pipeline_runs_total{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\",status!=\"success\"}[$__range]))",
               "refId": "A",
               "format": "table",
               "instant": true
@@ -2496,13 +2496,13 @@
           },
           "targets": [
             {
-              "expr": "round(sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=\"filtered_out\"}[$__range])) or vector(0))",
+              "expr": "round(sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=\"filtered_out\"}[$__range])) or vector(0))",
               "refId": "A",
               "legendFormat": "Reject Count",
               "instant": true
             },
             {
-              "expr": "(sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=\"filtered_out\"}[$__range])) or vector(0)) / clamp_min(sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=\"bronze\"}[$__range])), 1)",
+              "expr": "(sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=\"filtered_out\"}[$__range])) or vector(0)) / clamp_min((sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=\"bronze\"}[$__range])) or vector(0)), 1)",
               "refId": "B",
               "legendFormat": "Reject Rate",
               "instant": true
