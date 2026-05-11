@@ -131,6 +131,25 @@ class TestPanderaSilverValidator:
         result = validator.validate(records)
         assert result.valid is True
 
+    def test_validate_with_nullable_boolean_columns(self):
+        """Nullable bool columns should validate when pandas builds object dtype."""
+        import pandera as pa
+
+        schema = pa.DataFrameSchema(
+            {
+                "entity_id": pa.Column(str),
+                "downgraded": pa.Column(bool, nullable=True),
+            }
+        )
+        validator = PanderaSilverValidator(schema=schema)
+        records = [
+            {"entity_id": "CHEMBL123", "downgraded": None},
+            {"entity_id": "CHEMBL456", "downgraded": True},
+        ]
+        result = validator.validate(records)
+        assert result.valid is True
+        assert result.errors == []
+
     def test_validate_with_ordered_schema_reorders_columns(self):
         """Columns in wrong order pass validation after reorder."""
         import pandera as pa

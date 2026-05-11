@@ -28,7 +28,7 @@
       },
       "id": 1000,
       "options": {
-        "content": "<div style=\"display:flex;gap:10px;flex-wrap:wrap;padding:10px;\"><a href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline_context&amp;var-run_type=All&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">0. Control Plane</a><a href=\"/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline_context&amp;var-run_type=All&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">1. Overview</a><a href=\"/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline_context&amp;var-run_type=All&amp;var-stage=unknown&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">2. Runtime</a><span aria-current=\"page\" style=\"padding:5px 10px;color:#4b5563;text-decoration:none;border:1px solid #4b5563;border-radius:3px;background:rgba(75,85,99,0.18);cursor:default;\">3. Provider Health</span><a href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline_context&amp;var-run_type=All&amp;var-stage=unknown&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">4. Data Quality</a><a href=\"/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">5. Workflow</a><a href=\"/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline_context&amp;var-run_type=All&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Silver Reject Explorer</a><a href=\"/a/grafana-lokiexplore-app/explore?from=${__from}&amp;to=${__to}&amp;query=%7Bjob%3D%22bioetl%22%7D\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Explore Logs</a><a href=\"/a/grafana-exploretraces-app/?from=${__from}&amp;to=${__to}&amp;queryType=traceqlSearch&amp;query=%7B%20span.%22bioetl.provider%22%20%3D~%20%22${provider:regex}%22%20%7D\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Explore Traces</a></div>",
+        "content": "<div style=\"display:flex;gap:10px;flex-wrap:wrap;padding:10px;\"><a href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline_context&amp;var-run_type=All&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">0. Control Plane</a><a href=\"/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline_context&amp;var-run_type=All&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">1. Overview</a><a href=\"/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline_context&amp;var-run_type=All&amp;var-stage=unknown&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">2. Runtime</a><span aria-current=\"page\" style=\"padding:5px 10px;color:#4b5563;text-decoration:none;border:1px solid #4b5563;border-radius:3px;background:rgba(75,85,99,0.18);cursor:default;\">3. Provider Health</span><a href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline_context&amp;var-run_type=All&amp;var-stage=unknown&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">4. Data Quality</a><a href=\"/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">5. Workflow</a><a href=\"/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline_context&amp;var-run_type=All&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Silver Reject Explorer</a><a href=\"/a/grafana-lokiexplore-app/explore?from=${__from}&amp;to=${__to}&amp;query=%7Bjob%3D%22bioetl%22%7D\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Explore Logs</a><a href=\"/a/grafana-exploretraces-app/explore?actionView=search&amp;from=${__from}&amp;to=${__to}&amp;var-ds=tempo&amp;var-groupBy=resource.service.name&amp;queryType=traceqlSearch&amp;query=%7B%20span.%22bioetl.provider%22%20%3D~%20%22${provider:regex}%22%20%7D\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Explore Traces</a></div>",
         "mode": "html"
       },
       "title": "Review Dashboard Navigation",
@@ -83,7 +83,7 @@
         },
         {
           "title": "Explore Traces",
-          "url": "/a/grafana-exploretraces-app/?from=${__from}&to=${__to}&queryType=traceqlSearch&query=%7B%20span.%22bioetl.provider%22%20%3D~%20%22${provider:regex}%22%20%7D",
+          "url": "/a/grafana-exploretraces-app/explore?actionView=search&from=${__from}&to=${__to}&var-ds=tempo&var-groupBy=resource.service.name&queryType=traceqlSearch&query=%7B%20span.%22bioetl.provider%22%20%3D~%20%22${provider:regex}%22%20%7D",
           "targetBlank": false,
           "includeVars": false,
           "tooltip": "Available only for traced runs. Enable tracing with --tracing or BIOETL_OBSERVABILITY__TRACING_ENABLED=true. Opens Traces Drilldown in the same tab with provider-scoped TraceQL context; NoOpTracing or tracing-off runs can legitimately be empty, so treat this as adjunct evidence rather than first-screen proof."
@@ -204,6 +204,27 @@
           "instant": true,
           "legendFormat": "{{pipeline}} {{provider}} {{reason}} {{cause}}",
           "refId": "A"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "__name__": true
+            },
+            "indexByName": {
+              "provider": 0,
+              "Value": 1,
+              "bioetl_provider_current_status": 1
+            },
+            "renameByName": {
+              "provider": "Provider",
+              "Value": "Severity",
+              "bioetl_provider_current_status": "Severity"
+            }
+          }
         }
       ],
       "title": "Monitor GLOBAL Provider Severity Matrix",
@@ -385,6 +406,29 @@
           "instant": true,
           "legendFormat": "{{pipeline}} {{provider}} {{reason}} {{cause}}",
           "refId": "A"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "__name__": true,
+              "Value": true,
+              "bioetl_provider_current_cause": true
+            },
+            "indexByName": {
+              "provider": 0,
+              "cause": 1,
+              "severity": 2
+            },
+            "renameByName": {
+              "provider": "Provider",
+              "cause": "Cause",
+              "severity": "Severity"
+            }
+          }
         }
       ],
       "title": "Inspect Provider Top Causes",
@@ -1779,7 +1823,7 @@
           "type": "prometheus",
           "uid": "prometheus"
         },
-        "definition": "label_values({__name__=~\"bioetl_health_check_(success|degraded|failures)_total\"}, provider)",
+        "definition": "label_values(bioetl_provider_health_check_provider_universe_15m, provider)",
         "hide": 0,
         "includeAll": false,
         "label": "Provider",
@@ -1787,7 +1831,7 @@
         "name": "provider",
         "options": [],
         "query": {
-          "query": "label_values({__name__=~\"bioetl_health_check_(success|degraded|failures)_total\"}, provider)",
+          "query": "label_values(bioetl_provider_health_check_provider_universe_15m, provider)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 1,

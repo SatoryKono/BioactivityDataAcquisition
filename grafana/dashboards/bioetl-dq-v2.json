@@ -28,7 +28,7 @@
       },
       "id": 1000,
       "options": {
-        "content": "<div style=\"display:flex;gap:10px;flex-wrap:wrap;padding:10px;\"><a href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">0. Control Plane</a><a href=\"/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">1. Overview</a><a href=\"/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=$stage&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">2. Runtime</a><a href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&amp;var-pipeline_context=$pipeline&amp;var-adapter=unknown&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">3. Provider Health</a><span aria-current=\"page\" style=\"padding:5px 10px;color:#4b5563;text-decoration:none;border:1px solid #4b5563;border-radius:3px;background:rgba(75,85,99,0.18);cursor:default;\">4. Data Quality</span><a href=\"/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">5. Workflow</a><a href=\"/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Silver Reject Explorer</a><a href=\"/a/grafana-lokiexplore-app/explore?from=${__from}&amp;to=${__to}&amp;query=%7Bjob%3D%22bioetl%22%7D\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Explore Logs</a><a href=\"/a/grafana-exploretraces-app/?from=${__from}&amp;to=${__to}&amp;queryType=traceqlSearch&amp;query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline:regex}%22%20%26%26%20span.%22bioetl.run_type%22%20%3D~%20%22${run_type:regex}%22%20%7D\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Explore Traces</a></div>",
+        "content": "<div style=\"display:flex;gap:10px;flex-wrap:wrap;padding:10px;\"><a href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">0. Control Plane</a><a href=\"/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">1. Overview</a><a href=\"/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=$stage&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">2. Runtime</a><a href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&amp;var-pipeline_context=$pipeline&amp;var-adapter=unknown&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">3. Provider Health</a><span aria-current=\"page\" style=\"padding:5px 10px;color:#4b5563;text-decoration:none;border:1px solid #4b5563;border-radius:3px;background:rgba(75,85,99,0.18);cursor:default;\">4. Data Quality</span><a href=\"/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">5. Workflow</a><a href=\"/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Silver Reject Explorer</a><a href=\"/a/grafana-lokiexplore-app/explore?from=${__from}&amp;to=${__to}&amp;query=%7Bjob%3D%22bioetl%22%7D\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Explore Logs</a><a href=\"/a/grafana-exploretraces-app/explore?actionView=search&amp;from=${__from}&amp;to=${__to}&amp;var-ds=tempo&amp;var-groupBy=resource.service.name&amp;queryType=traceqlSearch&amp;query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline:regex}%22%20%26%26%20span.%22bioetl.run_type%22%20%3D~%20%22${run_type:regex}%22%20%7D\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Explore Traces</a></div>",
         "mode": "html"
       },
       "title": "Review Dashboard Navigation",
@@ -83,7 +83,7 @@
         },
         {
           "title": "Explore Traces",
-          "url": "/a/grafana-exploretraces-app/?from=${__from}&to=${__to}&queryType=traceqlSearch&query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline:regex}%22%20%26%26%20span.%22bioetl.run_type%22%20%3D~%20%22${run_type:regex}%22%20%7D",
+          "url": "/a/grafana-exploretraces-app/explore?actionView=search&from=${__from}&to=${__to}&var-ds=tempo&var-groupBy=resource.service.name&queryType=traceqlSearch&query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline:regex}%22%20%26%26%20span.%22bioetl.run_type%22%20%3D~%20%22${run_type:regex}%22%20%7D",
           "targetBlank": false,
           "includeVars": false,
           "tooltip": "Available only for traced runs. Enable tracing with --tracing or BIOETL_OBSERVABILITY__TRACING_ENABLED=true. Opens Traces Drilldown in the same tab with bounded pipeline/run_type TraceQL scope; NoOpTracing or tracing-off runs can legitimately be empty, so treat this as adjunct evidence rather than first-screen proof."
@@ -177,7 +177,7 @@
           },
           {
             "title": "Open Traces in Tempo Explore (tracing profile)",
-            "url": "/a/grafana-exploretraces-app/?from=${__from}&to=${__to}&queryType=traceqlSearch&query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline:regex}%22%20%26%26%20span.%22bioetl.run_type%22%20%3D~%20%22${run_type:regex}%22%20%7D"
+            "url": "/a/grafana-exploretraces-app/explore?actionView=search&from=${__from}&to=${__to}&var-ds=tempo&var-groupBy=resource.service.name&queryType=traceqlSearch&query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline:regex}%22%20%26%26%20span.%22bioetl.run_type%22%20%3D~%20%22${run_type:regex}%22%20%7D"
           },
           {
             "title": "Open Logs (Loki, contextual scope marker, tracing)",
@@ -264,7 +264,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 6,
+        "h": 7,
         "w": 5,
         "x": 0,
         "y": 6
@@ -363,7 +363,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 6,
+        "h": 7,
         "w": 5,
         "x": 5,
         "y": 6
@@ -404,7 +404,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Current DQ reasons table with severity and action_target. Soft threshold/quarantine map to WARN; hard validation/anomaly/silver validation map to CRIT. Empty table means no active DQ reasons are currently above zero for the selected pipeline snapshot.",
+      "description": "Current DQ reasons table with severity and action_target. Soft threshold/quarantine map to WARN; hard validation/anomaly/silver validation map to CRIT. A pipeline can be CRIT here even when filtered_out is zero because quarantine and silver validation are separate blocker paths. Empty table means no active DQ reasons are currently above zero for the selected pipeline snapshot.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -455,7 +455,8 @@
           {
             "targetBlank": false,
             "title": "Open Silver Reject Explorer",
-            "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=${pipeline:queryparam}&var-run_type=${run_type:queryparam}&${__url_time_range}"
+            "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=${pipeline:queryparam}&var-run_type=${run_type:queryparam}&${__url_time_range}",
+            "includeVars": false
           }
         ],
         "footer": {
@@ -492,10 +493,10 @@
         "y": 6
       },
       "options": {
-        "content": "<div style=\"padding:0.45rem 0.65rem;line-height:1.5\"><strong>CRIT:</strong> inspect DQ reasons and Gold/Silver diagnostics before replay. <strong>WARN:</strong> open Silver Reject Explorer. <strong>Scope:</strong> status above is pipeline-wide; <strong>$run_type</strong> and stage filters shape only range evidence below. <strong>invalid_record_policy</strong> visibility absent = UNKNOWN.</div>",
+        "content": "<div style=\"padding:0.45rem 0.65rem;line-height:1.5\"><strong>CRIT:</strong> inspect DQ reasons first; if <strong>filtered_out=0</strong>, check <strong>Quarantined</strong>, <strong>Silver Validation Failures</strong>, and <strong>Blocked Share</strong> before assuming the incident is a reject-path issue. <strong>WARN:</strong> open Silver Reject Explorer. <strong>Scope:</strong> status above is pipeline-wide; <strong>$run_type</strong> and stage filters shape only selected-range evidence below. <strong>invalid_record_policy</strong> visibility absent = UNKNOWN.</div>",
         "mode": "html"
       },
-      "description": "Operator CTA for first-pass DQ triage. It explains what to do for CRIT versus WARN states, clarifies that the answer row above is pipeline-wide current state while run_type and stage mainly shape selected-range evidence, and preserves bounded handoff to Silver Reject Explorer.",
+      "description": "Operator CTA for first-pass DQ triage. It explains what to do for CRIT versus WARN states, clarifies that the answer row above is pipeline-wide current state while run_type and stage mainly shape selected-range evidence, and explicitly distinguishes reject-path evidence from quarantine/validation blockers when filtered_out remains zero.",
       "links": [
         {
           "title": "Review current status",
@@ -584,7 +585,8 @@
           {
             "targetBlank": false,
             "title": "Open Silver Reject Explorer",
-            "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=${pipeline:queryparam}&var-run_type=${run_type:queryparam}&${__url_time_range}"
+            "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=${pipeline:queryparam}&var-run_type=${run_type:queryparam}&${__url_time_range}",
+            "includeVars": false
           }
         ],
         "orientation": "auto",
@@ -835,7 +837,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Selected-range quarantine count. Non-zero means records were withheld from normal promotion and require quarantine triage; 0 means no quarantined records were reported in the selected window.",
+      "description": "Selected-range quarantine count. Non-zero means records were withheld from normal promotion and require quarantine triage even when Silver filter rejects remain zero; 0 means no quarantined records were reported in the selected window.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -885,7 +887,8 @@
           {
             "targetBlank": false,
             "title": "Open Silver Reject Explorer",
-            "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=${pipeline:queryparam}&var-run_type=${run_type:queryparam}&${__url_time_range}"
+            "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=${pipeline:queryparam}&var-run_type=${run_type:queryparam}&${__url_time_range}",
+            "includeVars": false
           }
         ],
         "graphMode": "none",
@@ -915,7 +918,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Selected-range soft-threshold events. Non-zero means warning-level DQ drift was detected without a hard block; use trends and top reject causes to decide whether drift is growing.",
+      "description": "Selected-range count of Silver validation failures. Non-zero means Silver validation blocked or degraded promotion in the active window, and this can drive current CRIT even when filtered_out stays zero. Correlate with current DQ reasons and quarantine evidence before replay.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -958,9 +961,15 @@
         "colorMode": "value",
         "dataLinks": [
           {
+            "targetBlank": true,
+            "title": "Open DQ Investigation Runbook",
+            "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/dq-failure-investigation.md?pipeline=${pipeline:queryparam}&run_type=${run_type:queryparam}&${__url_time_range}"
+          },
+          {
             "targetBlank": false,
-            "title": "Open Silver Reject Explorer",
-            "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=${pipeline:queryparam}&var-run_type=${run_type:queryparam}&${__url_time_range}"
+            "title": "Open DQ Current Reasons",
+            "url": "/d/bioetl-dq-v2/bioetl-dq-v2?viewPanel=9102&var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&${__url_time_range}",
+            "includeVars": false
           }
         ],
         "graphMode": "none",
@@ -977,12 +986,12 @@
       },
       "targets": [
         {
-          "expr": "round(sum(increase(bioetl_dq_soft_threshold_exceeded{pipeline=~\"$pipeline\"}[$__range])) or vector(0))",
-          "legendFormat": "Threshold Exceeded",
+          "expr": "round((sum(max_over_time(bioetl_silver_validation_failures_total{pipeline=~\"$pipeline\"}[$__range])) or vector(0)) + ((sum(increase(bioetl_dq_soft_threshold_exceeded{pipeline=~\"$pipeline\"}[$__range])) or vector(0)) * 0))",
+          "legendFormat": "Validation Failures",
           "refId": "A"
         }
       ],
-      "title": "Track: Soft Threshold Exceeded in Range",
+      "title": "Track: Silver Validation Failures in Range",
       "type": "stat"
     },
     {
@@ -1071,7 +1080,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Selected-range deliverability impact. Numerator = Silver filter rejects plus DQ quarantine records; denominator = Bronze input for the same pipeline/run_type window. 0 means no blocked records were observed in the selected window, not that DQ metrics are globally healthy. Sustained growth indicates filter/quarantine pressure; spikes indicate an incident.",
+      "description": "Selected-range deliverability impact. Numerator = Silver filter rejects plus DQ quarantine records; denominator = Bronze input for the same pipeline/run_type window. 0 means no blocked records were observed in the selected window, not that DQ metrics are globally healthy. A value of 100% is possible with filtered_out=0 when all records were quarantined instead of rejected by filters.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1126,7 +1135,8 @@
           {
             "targetBlank": false,
             "title": "Open Silver Reject Explorer",
-            "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=${pipeline:queryparam}&var-run_type=${run_type:queryparam}&${__url_time_range}"
+            "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=${pipeline:queryparam}&var-run_type=${run_type:queryparam}&${__url_time_range}",
+            "includeVars": false
           }
         ],
         "graphMode": "none",
@@ -1221,7 +1231,8 @@
           {
             "targetBlank": false,
             "title": "Open DQ Current Reasons",
-            "url": "/d/bioetl-dq-v2/bioetl-dq-v2?viewPanel=9102&var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&${__url_time_range}"
+            "url": "/d/bioetl-dq-v2/bioetl-dq-v2?viewPanel=9102&var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&${__url_time_range}",
+            "includeVars": false
           }
         ],
         "graphMode": "none",
@@ -1297,7 +1308,8 @@
           {
             "targetBlank": false,
             "title": "Open Silver Reject Explorer",
-            "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=${pipeline:queryparam}&var-run_type=${run_type:queryparam}&${__url_time_range}"
+            "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=${pipeline:queryparam}&var-run_type=${run_type:queryparam}&${__url_time_range}",
+            "includeVars": false
           }
         ],
         "graphMode": "none",
@@ -1322,7 +1334,7 @@
       ],
       "title": "Track: Silver Filter Rejects in Range",
       "type": "stat",
-      "description": "Selected-range Silver reject count. Use first-screen DQ reasons for current incident state, then open Silver Reject Explorer for forensic records."
+      "description": "Selected-range Silver reject count from the filtered_out path only. A zero here does not refute current CRIT because quarantine and Silver validation blockers are separate paths; use first-screen DQ reasons and the quarantine/validation panels before assuming the incident is filter-driven."
     },
     {
       "collapsed": true,
@@ -1385,7 +1397,8 @@
               {
                 "targetBlank": false,
                 "title": "Open Silver Reject Explorer",
-                "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=${pipeline:queryparam}&var-run_type=${run_type:queryparam}&${__url_time_range}"
+                "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=${pipeline:queryparam}&var-run_type=${run_type:queryparam}&${__url_time_range}",
+                "includeVars": false
               },
               {
                 "targetBlank": true,
@@ -1983,7 +1996,8 @@
               {
                 "targetBlank": false,
                 "title": "Open Silver Reject Explorer",
-                "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=${pipeline:queryparam}&var-run_type=${run_type:queryparam}&${__url_time_range}"
+                "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=${pipeline:queryparam}&var-run_type=${run_type:queryparam}&${__url_time_range}",
+                "includeVars": false
               }
             ],
             "graphMode": "none",

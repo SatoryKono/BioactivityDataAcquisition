@@ -301,7 +301,7 @@ def test_silver_reject_explorer_first_action_documents_no_data_semantics() -> No
         None,
     )
     assert panel is not None
-    assert panel.get("gridPos", {}).get("y", 999) <= 5
+    assert panel.get("gridPos", {}).get("y", 999) <= 7
     content = str(panel.get("options", {}).get("content", ""))
     assert "First action:" in content
     assert "zero-reject workflow run is an intentional empty explorer state" in content

@@ -376,11 +376,11 @@ def _assert_provider_health_variable_contract(
     provider_query_text = (
         provider_query.get("query", "") if isinstance(provider_query, dict) else ""
     )
-    assert "bioetl_health_check_(success|degraded|failures)_total" in (
+    assert "bioetl_provider_health_check_provider_universe_15m" in (
         provider_query_text
     ), (
         f"Dashboard {dashboard_path.name} 'provider' query must use "
-        "the union of health-check outcome counters"
+        "the canonical provider-universe recording rule"
     )
     adapter_var = variable_map.get("adapter")
     assert adapter_var is not None, (

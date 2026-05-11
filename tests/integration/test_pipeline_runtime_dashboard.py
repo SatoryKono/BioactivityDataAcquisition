@@ -443,3 +443,29 @@ def test_runtime_row_sequence_is_fixed_detect_localize_escalate() -> None:
         (253, "Localize (collapsed)"),
         (254, "Escalate (collapsed)"),
     ], f"Runtime row order/title drifted: {row_pairs}"
+
+
+def test_runtime_first_action_cta_contract() -> None:
+    """Panel 9991 (First Action) must have exactly 4 CTAs with specific titles."""
+    panels = {p.get("id"): p for p in get_dashboard_panels(_dashboard())}
+    first_action_panel = panels.get(9991)
+    assert first_action_panel is not None, "Runtime dashboard missing First Action panel (id=9991)"
+    assert first_action_panel.get("title") == "First Action", (
+        f"Panel 9991 must have title 'First Action', got {first_action_panel.get('title')!r}"
+    )
+    # First Action panel uses panel-level links, not options.dataLinks
+    links = first_action_panel.get("links", [])
+    assert isinstance(links, list), "First Action panel must have links list"
+    assert len(links) == 4, (
+        f"First Action panel must have exactly 4 CTAs, got {len(links)}"
+    )
+    link_titles = {link.get("title") for link in links if isinstance(link, dict)}
+    expected_ctas = {
+        "Review current status",
+        "Review incident summary",
+        "Inspect top blockers",
+        "Inspect active blocker",
+    }
+    assert link_titles == expected_ctas, (
+        f"First Action CTAs must be {expected_ctas}, got {link_titles}"
+    )

@@ -54,6 +54,10 @@ ______________________________________________________________________
 - `Explore Traces` остаётся optional adjunct surface и считается доступным
   только для traced runs; если runtime использовал `NoOpTracing`, пустой Tempo
   result считается корректным поведением.
+- Shipped `Explore Traces` handoff opens the explicit search-first Tempo route,
+  pins `var-ds=tempo`, and uses `var-groupBy=resource.service.name` so empty
+  trace stores fail closed as empty search results instead of invalid
+  breakdown-state queries.
 - Navigation panel links intentionally открываются в том же окне, а не в новой
   вкладке.
 - Переходы pipeline-scoped dashboards -> `3. Provider Health` сохраняют
