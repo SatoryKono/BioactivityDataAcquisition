@@ -22,8 +22,10 @@ from collections.abc import Sequence
 from typing import TYPE_CHECKING, Any
 
 from deltalake import DeltaTable
+from deltalake.exceptions import CommitFailedError
 from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 
+from bioetl.domain.exceptions import DeltaWriteConflictError
 from bioetl.domain.exceptions import TableNotFoundError
 from bioetl.domain.normalization import (
     normalize_hash_identity_record,
@@ -133,12 +135,18 @@ def _deduplicate_delta_rows(
 
     duplicates_removed = total_before - len(deduped_rows)
     if duplicates_removed > 0:
-        write_deltalake(
-            table_or_uri=table_path,
-            data=pa.Table.from_pylist(deduped_rows, schema=table.schema),
-            mode="overwrite",
-            schema_mode="overwrite",
-        )
+        try:
+            write_deltalake(
+                table_or_uri=table_path,
+                data=pa.Table.from_pylist(deduped_rows, schema=table.schema),
+                mode="overwrite",
+                schema_mode="overwrite",
+            )
+        except CommitFailedError as exc:
+            raise DeltaWriteConflictError(
+                table_path=table_path,
+                operation="deduplicate",
+            ) from exc
     return int(duplicates_removed)
 
 

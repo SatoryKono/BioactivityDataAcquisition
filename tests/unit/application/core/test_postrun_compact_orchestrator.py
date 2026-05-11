@@ -10,6 +10,7 @@ from bioetl.application.core.postrun.compact_orchestrator import (
     CompactionResult,
     PostrunCompactService,
 )
+from bioetl.domain.exceptions import BioETLError, DeltaWriteConflictError
 from bioetl.domain.medallion import SilverWriteMode
 
 
@@ -94,6 +95,31 @@ async def test_catches_allowlisted_exceptions() -> None:
     )
     result = await svc.run_if_needed()
     assert result == CompactionResult(status="failed", error="boom")
+    logger.warning.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_catches_allowlisted_delta_write_conflicts() -> None:
+    config = _make_config()
+    storage = MagicMock()
+    storage.deduplicate_silver = AsyncMock(
+        side_effect=DeltaWriteConflictError(
+            "/tmp/chembl/activity",
+            operation="deduplicate",
+        )
+    )
+    storage.optimize = AsyncMock()
+    logger = MagicMock()
+    svc = PostrunCompactService(
+        config=config,
+        storage=storage,
+        logger=logger,
+        warning_allowlist=(BioETLError,),
+    )
+    result = await svc.run_if_needed()
+    assert result.status == "failed"
+    assert result.error is not None
+    assert "during deduplicate" in result.error
     logger.warning.assert_called_once()
 
 

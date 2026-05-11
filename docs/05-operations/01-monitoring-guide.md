@@ -147,9 +147,10 @@ L0 дашборд для одного operator question: что сейчас bro
   run using `NoOpTracing` can legitimately return an empty Tempo search.
   The shipped trace handoff uses an explicit search-first Tempo route with a
   bounded initial window `now-150m..now`, `var-ds=tempo`, and
-  `var-groupBy=resource.service.name`, so Tempo metrics queries stay under the
-  local limit and an empty trace store fails closed as an empty search instead
-  of an invalid breakdown query.
+  `var-groupBy=resource.service.name`, keeps only stable pipeline/provider
+  TraceQL scope, and avoids `${run_type:regex}` on `includeAll` selectors so an
+  empty trace store fails closed as an empty search instead of an invalid
+  breakdown query.
 
 #### 2. 2. Runtime
 

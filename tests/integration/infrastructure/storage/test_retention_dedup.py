@@ -8,7 +8,9 @@ from pathlib import Path
 import pyarrow as pa
 import pytest
 from deltalake import write_deltalake
+from deltalake.exceptions import CommitFailedError
 
+from bioetl.domain.exceptions import StorageError
 from bioetl.domain.normalization import (
     normalize_hash_identity_record,
     serialize_hash_identity_canonical_json,
@@ -320,3 +322,45 @@ async def test_deduplicate_times_out_for_stuck_executor(tmp_delta_dir: Path) -> 
             await mgr.deduplicate_silver("test_entity", primary_keys=["activity_id"])
     finally:
         deltalake.DeltaTable = original_delta_table
+
+
+@pytest.mark.asyncio
+async def test_deduplicate_translates_commit_conflict_to_storage_error(
+    tmp_delta_dir: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Commit conflicts during dedup should surface as canonical storage errors."""
+    import deltalake
+
+    table_path = tmp_delta_dir / "test_entity_conflict"
+    _write_test_table(
+        table_path,
+        [
+            {
+                "activity_id": "1",
+                "value": 10.0,
+                "_ingestion_ts": "2024-01-01T00:00:00Z",
+            },
+            {
+                "activity_id": "1",
+                "value": 15.0,
+                "_ingestion_ts": "2024-01-02T00:00:00Z",
+            },
+        ],
+    )
+
+    original_write = deltalake.write_deltalake
+
+    def _raise_conflict(*args: object, **kwargs: object) -> None:
+        raise CommitFailedError("conflict")
+
+    monkeypatch.setattr(deltalake, "write_deltalake", _raise_conflict)
+    try:
+        mgr = RetentionPolicy(base_path=str(tmp_delta_dir))
+        with pytest.raises(StorageError, match="during deduplicate"):
+            await mgr.deduplicate_silver(
+                "test_entity_conflict",
+                primary_keys=["activity_id"],
+            )
+    finally:
+        monkeypatch.setattr(deltalake, "write_deltalake", original_write)

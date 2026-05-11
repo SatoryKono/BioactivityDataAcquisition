@@ -253,10 +253,11 @@ operator still needs to refine scope inside Explore.
 `Explore Traces` is a traced-run-only adjunct surface; if the runtime used
 `NoOpTracing`, empty Tempo results are expected rather than a dashboard defect.
 Shipped trace handoff opens the explicit search-first Tempo route, bounds the
-initial window to `now-150m..now`, and pins a safe default
-`groupBy=resource.service.name`, so Tempo metrics queries stay under the local
-limit and empty trace stores stay empty instead of failing in breakdown mode
-before the operator changes grouping.
+initial window to `now-150m..now`, pins a safe default
+`groupBy=resource.service.name`, and keeps stable pipeline/provider TraceQL
+scope, so Tempo metrics queries stay under the local limit and `All` run-type
+selectors do not collapse into an empty regex before the operator changes
+grouping.
 
 Variable handoff policy for dashboard links remains strict and bounded:
 
@@ -397,7 +398,13 @@ Variable handoff policy for dashboard links remains strict and bounded:
   1. Click #1: открыть `bioetl-workflow-overview`, проверить `Failed Workflow Runs / Range` (`id=2`), `Failed Pipeline Steps / Range` (`id=3`) и `Failed Transform Steps / Range` (`id=6`).
   2. Click #2: перейти в `2. Runtime` для incident triage по pipeline impact, в `4. Data Quality` для transform/filtering fallout, или в `0. Control Plane` для replay/resume trust verification. Prometheus panels use only bounded workflow labels (`workflow`, `status`, `step_status`, `step_kind`) and never require `run_id`/`step_id` labels.
 - Loki drilldown использует безопасный low-cardinality entrypoint `{job="bioetl"}` без dashboard-variable interpolation внутри encoded Explore payload. Это сознательный baseline: Grafana надёжно не подставляет `$pipeline/$provider` в `left=...`, поэтому дополнительное сужение оператор делает уже в самом Explore. Tempo drilldown открывает trace search в том же временном окне; детальная correlation идёт через `trace_id` / `span_id`, а не через Prometheus labels.
-- Tempo drilldown теперь тоже открывается contextual: dashboards с `$pipeline/$run_type` предварительно фильтруют TraceQL по `span."bioetl.pipeline"` и `span."bioetl.run_type"`, а provider dashboard — по `span."bioetl.provider"`. Это не заменяет correlation по `trace_id` / `span_id`, но убирает пустой `{}` и делает handoff полезнее уже на первом клике.
+- Tempo drilldown теперь тоже открывается contextual: pipeline-scoped
+  dashboards предварительно фильтруют TraceQL по `span."bioetl.pipeline"`, а
+  provider dashboard — по `span."bioetl.provider"`. `run_type` intentionally
+  не шиппится в TraceQL handoff, потому что `includeAll` Grafana selector может
+  схлопнуться в пустой regex. Это не заменяет correlation по `trace_id` /
+  `span_id`, но убирает пустой `{}` и делает handoff полезнее уже на первом
+  клике.
 - `bioetl-runtime` row `Tracing-only Log Hygiene` содержит Loki-backed panels
   `Inspect Warning Logs`, `Inspect GLOBAL Unstructured Logs`,
   `Inspect Top Warning Events by Message / Range` и

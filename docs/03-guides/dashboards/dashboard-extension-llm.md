@@ -113,7 +113,7 @@ sum(increase(metric_name[24h])) or vector(0)
 ```text
 route = /a/grafana-exploretraces-app/explore?actionView=search&from=now-150m&to=now&var-ds=tempo&var-groupBy=resource.service.name
 queryType = traceqlSearch
-query = { span."bioetl.pipeline" =~ "${pipeline:regex}" && span."bioetl.run_type" =~ "${run_type:regex}" }
+query = { span."bioetl.pipeline" =~ "${pipeline:regex}" }
 ```
 
 Для provider-only dashboards замени pipeline/run_type filter на:
@@ -140,7 +140,9 @@ query = { span."bioetl.provider" =~ "${provider:regex}" }
   `/a/grafana-exploretraces-app/explore?actionView=search`, фиксируют safe
   bounded window `from=now-150m&to=now`, pin'ят `var-ds=tempo`, задают
   `var-groupBy=resource.service.name` и сохраняют contextual TraceQL scope
-  (`bioetl.pipeline`/`bioetl.run_type` либо `bioetl.provider`).
+  (`bioetl.pipeline` либо `bioetl.provider`). Не привязывай shipped
+  TraceQL handoff к `${run_type:regex}` для `includeAll` variables: Grafana
+  может схлопнуть `All` в пустой regex `()`.
 - Runtime condition-summary panels не теряют direct runbook links.
 
 то обнови минимум:

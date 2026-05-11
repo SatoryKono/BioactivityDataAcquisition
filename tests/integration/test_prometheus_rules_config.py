@@ -984,6 +984,32 @@ def test_overview_runtime_and_dq_inputs_materialize_from_stable_projected_shapes
     assert "* on (pipeline) group_left() bioetl_dq_current_status" in dq_expr
 
 
+def test_runtime_backlog_and_gold_missing_current_status_rules_use_current_gauges() -> (
+    None
+):
+    payload = _load_rules()
+    record_map = _build_record_map(payload)
+
+    backlog_expr = str(
+        record_map["bioetl_runtime_alert_condition_stage_backlog_active_15m"].get(
+            "expr", ""
+        )
+    )
+    gold_expr = str(
+        record_map["bioetl_runtime_alert_condition_gold_write_missing_15m"].get(
+            "expr", ""
+        )
+    )
+
+    assert "bioetl_stage_backlog_records" in backlog_expr
+    assert "max_over_time(bioetl_stage_backlog_records" not in backlog_expr
+    assert "bioetl_stage_backlog_records{stage=\"output\"}" in gold_expr
+    assert (
+        "max_over_time(bioetl_stage_backlog_records{stage=\"output\"}[15m])"
+        not in gold_expr
+    )
+
+
 def test_overview_control_plane_input_coalesces_absent_alert_series_to_zero() -> (
     None
 ):

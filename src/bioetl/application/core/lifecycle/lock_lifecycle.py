@@ -6,6 +6,7 @@ import time
 from typing import TYPE_CHECKING, Protocol, cast
 
 from bioetl.application.core.lifecycle.shutdown import PipelineShutdownError
+from bioetl.domain.ports import LoggerPort
 
 
 class _HeartbeatTaskProtocol(Protocol):
@@ -39,7 +40,7 @@ class _LockRuntimeHostProtocol(Protocol):
     _config: object
     _run_id: object
     _context_holder: _LockContextHolderProtocol | None
-    _logger: object
+    _logger: LoggerPort
     _heartbeat_factory: _HeartbeatFactoryProtocol
     _shutdown_signal: object
     _heartbeat: _HeartbeatTaskProtocol | None

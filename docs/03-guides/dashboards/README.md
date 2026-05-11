@@ -55,10 +55,10 @@ ______________________________________________________________________
   только для traced runs; если runtime использовал `NoOpTracing`, пустой Tempo
   result считается корректным поведением.
 - Shipped `Explore Traces` handoff opens the explicit search-first Tempo route,
-  bounds the initial window to `now-150m..now`, pins `var-ds=tempo`, and uses
-  `var-groupBy=resource.service.name` so Tempo metrics queries stay under the
-  local limit and empty trace stores fail closed as empty search results
-  instead of invalid breakdown-state queries.
+  bounds the initial window to `now-150m..now`, pins `var-ds=tempo`, uses
+  `var-groupBy=resource.service.name`, and keeps only stable pipeline/provider
+  TraceQL scope so Tempo metrics queries stay under the local limit and
+  `includeAll` run-type selectors cannot collapse into an invalid empty regex.
 - Navigation panel links intentionally открываются в том же окне, а не в новой
   вкладке.
 - Переходы pipeline-scoped dashboards -> `3. Provider Health` сохраняют

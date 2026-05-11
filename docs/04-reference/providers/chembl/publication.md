@@ -84,6 +84,8 @@ Current Silver contract жёстко опирается на:
 - тип публикации:
   - `doc_type -> publication_type`
   - затем `normalize_publication_type(...)`
+  - `publication_class` допускает provider-preserved `PUBLICATION`, потому что
+    transformer сохраняет сырой classification seam до downstream taxonomy mapping
 
 ### 3.3. Runtime/service поля в Silver
 

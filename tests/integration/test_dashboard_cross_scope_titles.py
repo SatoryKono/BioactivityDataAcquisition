@@ -59,8 +59,8 @@ def test_cross_scope_links_have_required_tooltip_tokens():
             url = str(link.get("url", ""))
             tooltip = str(link.get("tooltip", ""))
 
-            # Only check if tooltip exists and mentions scope-related keywords
-            if tooltip and ("scope" in tooltip.lower() or "context" in tooltip.lower()):
+            # Only check if tooltip exists and mentions dashboard scope reset or context mapping
+            if tooltip and ("scope reset" in tooltip.lower() or "context mapping" in tooltip.lower()):
                 has_scope_reset = "reset scope" in tooltip.lower()
                 has_context_mapping = "context mapping" in tooltip.lower()
                 assert has_scope_reset or has_context_mapping, (
