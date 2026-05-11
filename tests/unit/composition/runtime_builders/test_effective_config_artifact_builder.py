@@ -109,7 +109,7 @@ def test_build_effective_config_source_refs_include_dependency_provenance_files(
         encoding="utf-8",
     )
     (tmp_path / "pyproject.toml").write_text(
-        "[project]\nname = \"bioetl\"\n",
+        '[project]\nname = "bioetl"\n',
         encoding="utf-8",
     )
     (tmp_path / "uv.lock").write_text("version = 1\n", encoding="utf-8")

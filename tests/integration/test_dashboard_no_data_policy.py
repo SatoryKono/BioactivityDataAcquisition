@@ -23,8 +23,7 @@ def test_panels_using_zero_fallback_have_explicit_descriptions():
             # Check if any target uses "or vector(0)"
             targets = panel.get("targets", [])
             uses_zero_fallback = any(
-                "or vector(0)" in str(target.get("expr", ""))
-                for target in targets
+                "or vector(0)" in str(target.get("expr", "")) for target in targets
             )
             if uses_zero_fallback:
                 # Panels using zero fallback should mention this in description
@@ -41,7 +40,11 @@ def test_status_panels_do_not_use_zero_fallback():
         for panel in get_dashboard_panels(dashboard):
             title = panel.get("title", "")
             # Check for status/current-cause panels
-            if "Status" in title or "Current Cause" in title or "Current Status" in title:
+            if (
+                "Status" in title
+                or "Current Cause" in title
+                or "Current Status" in title
+            ):
                 targets = panel.get("targets", [])
                 for target in targets:
                     expr = str(target.get("expr", ""))

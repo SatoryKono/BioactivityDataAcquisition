@@ -114,9 +114,7 @@ def _collect_imports(root: Path) -> dict[str, frozenset[str]]:
     }
 
 
-def _collect_imports_for_path(
-    path: Path, *, collected: dict[str, set[str]]
-) -> None:
+def _collect_imports_for_path(path: Path, *, collected: dict[str, set[str]]) -> None:
     imported_names = _collect_imports_from_tree(_parse_import_tree(path))
     if imported_names:
         collected[path.relative_to(ROOT).as_posix()] = imported_names

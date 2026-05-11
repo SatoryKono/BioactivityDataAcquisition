@@ -28,7 +28,11 @@ def test_cross_scope_links_have_explicit_tooltip_markers():
                     f"{dashboard_path.name}: link {link.get('title')} changes scope but has no tooltip"
                 )
                 # Tooltip should mention scope reset or context mapping
-                assert "Scope reset" in tooltip or "Context mapping" in tooltip or "Reset scope" in tooltip, (
+                assert (
+                    "Scope reset" in tooltip
+                    or "Context mapping" in tooltip
+                    or "Reset scope" in tooltip
+                ), (
                     f"{dashboard_path.name}: link {link.get('title')} tooltip should mention 'Scope reset' or 'Context mapping', got {tooltip}"
                 )
 

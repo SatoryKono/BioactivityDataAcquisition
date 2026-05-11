@@ -99,9 +99,7 @@ def test_published_control_plane_docs_describe_exact_replay_hard_fail_policy() -
         )
 
 
-def test_published_control_plane_docs_describe_manifest_required_for_new_runs() -> (
-    None
-):
+def test_published_control_plane_docs_describe_manifest_required_for_new_runs() -> None:
     expectations = {
         CONTRACT_DOC: (
             "require `run_manifest_enabled=true`",

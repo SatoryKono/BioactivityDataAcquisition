@@ -62,9 +62,7 @@ def test_p1_p2_panels_have_data_links():
 
 def test_runbook_links_follow_canonical_format():
     """Runbook links must use canonical GitHub blob pattern."""
-    canonical_prefix = (
-        "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/"
-    )
+    canonical_prefix = "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/"
     for dashboard_path in get_dashboard_files():
         dashboard = load_dashboard(dashboard_path)
         for panel in get_dashboard_panels(dashboard):
@@ -86,8 +84,7 @@ def test_critical_panels_have_open_target_pattern():
             title = panel.get("title", "")
             # Check for critical panels
             if any(
-                kw in title
-                for kw in ["Status", "Blockers", "Severity", "Top Causes"]
+                kw in title for kw in ["Status", "Blockers", "Severity", "Top Causes"]
             ):
                 data_links = _iter_panel_data_links(panel)
                 for link in data_links:

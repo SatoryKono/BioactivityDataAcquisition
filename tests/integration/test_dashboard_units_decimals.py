@@ -60,6 +60,17 @@ def test_fraction_panels_have_consistent_units():
                 defaults = field_config.get("defaults", {})
                 unit = defaults.get("unit")
                 # Allow percentunit, percent, short, time units, or None (for rate panels)
-                assert unit in ("percentunit", "percent", "percent(0)", "percent(0-100)", "short", "s", "ms", "d", "h", None), (
+                assert unit in (
+                    "percentunit",
+                    "percent",
+                    "percent(0)",
+                    "percent(0-100)",
+                    "short",
+                    "s",
+                    "ms",
+                    "d",
+                    "h",
+                    None,
+                ), (
                     f"{dashboard_path.name}:{title} should use percentunit, percent, short, time unit, or None, got {unit!r}"
                 )

@@ -656,7 +656,9 @@ def test_control_plane_dashboard_does_not_expose_top_level_runbook_link() -> Non
         or str(link.get("url", "")).startswith("/a/grafana-lokiexplore-app/")
         or str(link.get("url", "")).startswith("/a/grafana-exploretraces-app/")
         for link in get_dashboard_navigation_links(dashboard)
-    ), "Control-plane top navigation must not mix dashboard bus links with runbooks or docs"
+    ), (
+        "Control-plane top navigation must not mix dashboard bus links with runbooks or docs"
+    )
 
 
 def test_all_runbook_links_use_canonical_github_urls_and_resolve_locally() -> None:
@@ -821,13 +823,21 @@ def test_workflow_overview_next_diagnostic_surface_cta_contract() -> None:
     """Next Diagnostic Surface panel must have exactly 5 dashboard handoffs."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-workflow-overview.json"))
     next_diagnostic_panel = next(
-        (p for p in get_dashboard_panels(dashboard) if p.get("title") == "Next Diagnostic Surface"),
+        (
+            p
+            for p in get_dashboard_panels(dashboard)
+            if p.get("title") == "Next Diagnostic Surface"
+        ),
         None,
     )
-    assert next_diagnostic_panel is not None, "Workflow Overview missing Next Diagnostic Surface panel"
+    assert next_diagnostic_panel is not None, (
+        "Workflow Overview missing Next Diagnostic Surface panel"
+    )
     options = next_diagnostic_panel.get("options", {})
     links = options.get("dataLinks", [])
-    assert isinstance(links, list), "Next Diagnostic Surface panel must have dataLinks list"
+    assert isinstance(links, list), (
+        "Next Diagnostic Surface panel must have dataLinks list"
+    )
     assert len(links) == 5, (
         f"Next Diagnostic Surface panel must have exactly 5 CTAs, got {len(links)}"
     )
@@ -979,7 +989,9 @@ def test_dashboard_links_do_not_use_all_for_pipeline_or_provider() -> None:
 
 def test_provider_health_first_action_cta_contract() -> None:
     """bioetl-provider-health-v2 First Action panel (9002) must have exactly 3 CTAs."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-provider-health-v2.json"))
+    dashboard = load_dashboard(
+        Path("grafana/dashboards/bioetl-provider-health-v2.json")
+    )
     panels_by_id = {
         panel.get("id"): panel
         for panel in get_dashboard_panels(dashboard)
@@ -1035,7 +1047,9 @@ def test_dq_first_action_cta_contract() -> None:
 
 def test_silver_reject_explorer_first_action_cta_contract() -> None:
     """bioetl-silver-reject-explorer First Action panel (10) must have exactly 2 CTAs."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-silver-reject-explorer.json"))
+    dashboard = load_dashboard(
+        Path("grafana/dashboards/bioetl-silver-reject-explorer.json")
+    )
     panels_by_id = {
         panel.get("id"): panel
         for panel in get_dashboard_panels(dashboard)

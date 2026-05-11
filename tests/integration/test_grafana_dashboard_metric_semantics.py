@@ -887,7 +887,9 @@ def test_provider_top_causes_panel_preserves_canonical_cause_only_semantics() ->
 
     expressions = [target.get("expr", "") for target in panel.get("targets", [])]
     assert any("bioetl_provider_current_cause" in expr for expr in expressions)
-    assert all("bioetl_provider_current_status >= 1" not in expr for expr in expressions)
+    assert all(
+        "bioetl_provider_current_status >= 1" not in expr for expr in expressions
+    )
     assert all("status_without_projected_cause" not in expr for expr in expressions)
     assert all("unless on (provider)" not in expr for expr in expressions)
 
