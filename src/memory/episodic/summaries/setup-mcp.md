@@ -1,26 +1,25 @@
 ---
 id: setup-mcp
-title: Setup MCP runtime
+title: Setup MCP for BioETL workspace
 task_id: setup-mcp
-created_at: '2026-05-07T11:50:30Z'
+created_at: '2026-05-11T12:51:03Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
-- scripts/ai/codex/setup_mcp.py
-summary: Ran canonical scripts.engineering.dev setup-mcp, synchronized workspace MCP
-  configs and ~/.codex/config.toml, and validated readiness with ensure-mcp --check
-  plus codex mcp list --json.
+- .codex/settings.json
+summary: Verified Codex MCP runtime against workspace config and current checkout
+  paths.
 ---
 
 # Episodic summary
 
 ## Task
 
-- Title: Setup MCP runtime
+- Title: Setup MCP for BioETL workspace
 
 ## Outcome
 
-- Ran canonical scripts.engineering.dev setup-mcp, synchronized workspace MCP configs and ~/.codex/config.toml, and validated readiness with ensure-mcp --check plus codex mcp list --json.
+- Verified Codex MCP runtime against workspace config and current checkout paths.
 
 ## Lessons learned
 

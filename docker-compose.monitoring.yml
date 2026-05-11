@@ -105,15 +105,16 @@ services:
       - GF_SERVER_SERVE_FROM_SUB_PATH=false
       - GF_RENDERING_SERVER_URL=http://renderer:8081/render
       - GF_RENDERING_CALLBACK_URL=http://grafana:3000/
-      - BIOETL_ENABLE_TRACING_DATASOURCES=${BIOETL_ENABLE_TRACING_DATASOURCES:-false}
-      - BIOETL_QUARANTINE_EXPLORER_URL=${BIOETL_QUARANTINE_EXPLORER_URL:-http://bioetl-app:8081}
+      - BIOETL_ENABLE_TRACING_DATASOURCES=${BIOETL_ENABLE_TRACING_DATASOURCES:-auto}
+      - BIOETL_QUARANTINE_EXPLORER_URL=${BIOETL_QUARANTINE_EXPLORER_URL:-http://host.docker.internal:8081}
     volumes:
       - grafana-data:/var/lib/grafana
-      - ./grafana/provisioning/datasources-core:/etc/grafana/provisioning/datasources:ro
+      - ./grafana/provisioning/datasources-core:/etc/bioetl-grafana/datasources-core:ro
+      - ./grafana/provisioning/datasources-tracing:/etc/bioetl-grafana/datasources-tracing:ro
+      - ./grafana/scripts/bootstrap-datasources.sh:/usr/local/bin/bioetl-bootstrap-grafana.sh:ro
       - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
       - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
-    # Bootstrap script runs during container startup; use standard entrypoint
-    # entrypoint: ["/bin/sh", "/usr/local/bin/bioetl-bootstrap-grafana.sh"]
+    entrypoint: ["/bin/sh", "/usr/local/bin/bioetl-bootstrap-grafana.sh"]
     depends_on:
       prometheus:
         condition: service_healthy
@@ -134,7 +135,7 @@ services:
     restart: unless-stopped
 
   renderer:
-    image: grafana/grafana-image-renderer:4.1.5
+    image: grafana/grafana-image-renderer:latest
     container_name: bioetl-grafana-renderer
     environment:
       - ENABLE_METRICS=true
@@ -152,5 +153,5 @@ volumes:
 
 networks:
   monitoring:
+    external: true
     name: bioetl-monitoring
-    driver: bridge

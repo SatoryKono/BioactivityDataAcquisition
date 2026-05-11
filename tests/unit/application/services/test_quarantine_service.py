@@ -329,10 +329,10 @@ class TestQuarantineServiceFilteredExplorer:
         )
 
     @pytest.mark.asyncio
-    async def test_get_filtered_stats_enriches_bronze_records_from_run_manifests(
+    async def test_get_filtered_stats_skips_manifest_fanout_for_pipeline_scope(
         self, mock_quarantine_port, mock_logger, mock_metrics, mock_tracer
     ) -> None:
-        """Filtered stats should derive Bronze denominator from scoped run manifests."""
+        """Pipeline-scoped stats should not scan every run manifest interactively."""
         mock_quarantine_port.get_filtered_stats.return_value = {
             "total": 12,
             "bronze_records": 0,
@@ -363,11 +363,10 @@ class TestQuarantineServiceFilteredExplorer:
         result = await service.get_filtered_stats(pipeline="pipeline1")
 
         assert result["total"] == 12
-        assert result["bronze_records"] == 150
-        assert result["reject_ratio"] == pytest.approx(12 / 150)
+        assert result["bronze_records"] == 0
+        assert result["reject_ratio"] == 0.0
         assert "run_ids" not in result
-        assert mock_run_manifest_service.show.call_args_list[0].args == ("run-1",)
-        assert mock_run_manifest_service.show.call_args_list[1].args == ("run-2",)
+        mock_run_manifest_service.show.assert_not_called()
 
     @pytest.mark.asyncio
     async def test_get_filtered_stats_uses_explicit_run_id_for_empty_scope(

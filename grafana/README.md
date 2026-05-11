@@ -457,7 +457,7 @@ curl -s http://localhost:8000/metrics | grep bioetl_
 | `BIOETL_OBSERVABILITY__METRICS_RETRY_COUNT`    | `3`                   | Количество попыток запуска (1-10)                       |
 | `BIOETL_OBSERVABILITY__METRICS_RETRY_DELAY`    | `1.0`                 | Задержка между попытками (0.1-10.0 с)                   |
 | `GF_SECURITY_ADMIN_PASSWORD`                   | `admin`               | Пароль администратора Grafana                           |
-| `BIOETL_ENABLE_TRACING_DATASOURCES`            | `false`               | Подключать Loki/Tempo datasource в Grafana provisioning |
+| `BIOETL_ENABLE_TRACING_DATASOURCES`            | `auto`                | Авто-подключать Loki/Tempo datasource в Grafana provisioning по live reachability (`true`/`false` override доступны) |
 | `BIOETL_OBSERVABILITY__TRACING_ENABLED`        | `false`               | Включить OpenTelemetry spans и log-trace correlation    |
 
 ______________________________________________________________________
@@ -932,9 +932,12 @@ remains a compatibility entrypoint, but operators should treat the Quarantine
 Explorer backend as a stable observability surface for Grafana rather than a
 temporary workflow-run helper.
 The default Docker-backed Grafana datasource URL is
-`http://bioetl-app:8081`, so the Grafana container reaches the BioETL
-Quarantine Explorer backend through the shared `bioetl-monitoring` Docker
-network.
+`http://host.docker.internal:8081`, which matches the host-gateway mapping that
+the Grafana container already provisions.
+The shipped Grafana bootstrap entrypoint also removes a stale local
+`grafana-image-renderer` plugin from `/var/lib/grafana/plugins/` when remote
+renderer mode is active, preventing restart loops caused by old persistent
+plugin state.
 
 **Фильтры:** `$pipeline`, `$run_type`, `$reason_code`, `$field`, `$run_id`, `$payload_hash` + стандартный Grafana time picker.
 `$pipeline` здесь intentionally single-select/no-All. `$run_id` и
@@ -975,7 +978,7 @@ first screen.
 | 9100 | GLOBAL Provider Scope                          | Text           | n/a                                                                                                                  | Явно показывает GLOBAL provider scope, selected `$provider` и сохранённый `$pipeline_context`. |
 | 9101 | Monitor GLOBAL Provider Severity Matrix        | Table          | `bioetl_provider_current_status`                                                                                     | Current provider severity: `0=OK`, `1=DEGRADED`, `2=FAILING`, `null=UNKNOWN`; derived summary semantics, не фильтруется по pipeline. Raw `bioetl_provider_health_status` uses a different contract: `0=UNHEALTHY`, `1=DEGRADED`, `2=HEALTHY`. |
 | 9102 | Inspect Critical Providers                     | Table          | `bioetl_provider_current_status >= 1`                                                                                | Только providers с current `DEGRADED`/`FAILING`; missing current-status telemetry остаётся в `Monitor GLOBAL Provider Severity Matrix` как `UNKNOWN`. Panel exposes direct provider incident runbook handoff. |
-| 9103 | Inspect Provider Top Causes                    | Table          | `topk(5, bioetl_provider_current_cause > 0)`                                                                         | Current cause chips: raw health status, failure rate, retry exhaustion, latency, HTTP errors, rate-limit pressure. Empty table means no active provider causes are currently above zero; this is consistent with `Monitor GLOBAL Provider Severity Matrix = 0 (OK)`. Panel exposes direct provider incident runbook handoff. |
+| 9103 | Inspect Provider Top Causes                    | Table          | `topk(5, bioetl_provider_current_cause > 0)`                                                                         | Current cause chips: raw health status, failure rate, retry exhaustion, latency, HTTP errors, rate-limit pressure. This panel can stay non-empty while `Monitor GLOBAL Provider Severity Matrix` still reads `0 (OK)` because cause projection includes early-warning provider signals independent of current-status projection. Empty table means no active provider causes are currently above zero; if severity is still non-OK, treat that as an explainability gap. Panel exposes direct provider incident runbook handoff. |
 | 9002 | First Action                                   | Text           | n/a                                                                                                                  | CTA: review the GLOBAL severity matrix, inspect critical providers, or inspect provider top causes before leaving the dashboard. |
 | 1   | Track Health Check Latency by Provider (p95)    | Timeseries     | `histogram_quantile(0.95, sum by (le, provider) (increase(...[$__interval])))`                                       | Selected-range evidence: p95 latency trend по выбранным providers; `No data` сохраняется как diagnostic gap, не маскируется в `0s`. |
 | 114 | Monitor Current Provider Health Status          | Table          | `max by (provider) (bioetl_provider_health_status{provider=~"$provider"}) or ((bioetl_provider_health_check_provider_universe_15m{provider=~"$provider"} * 0) / (bioetl_provider_health_check_provider_universe_15m{provider=~"$provider"} * 0))` | Текущий raw status по provider с mapping `0=UNHEALTHY`, `1=DEGRADED`, `2=HEALTHY`; если provider universe существует без raw status sample, panel остаётся `UNKNOWN`. |
@@ -1649,9 +1652,12 @@ sum(rate(bioetl_circuit_breaker_success_total{adapter="chembl"}[5m]))
 - `Inspect Critical Providers` — только providers с текущим severity `>=1`.
 - `Inspect Provider Top Causes` — active cause chips из canonical recording
   rules: raw health-status degradation, failure rate, retry exhaustion, adapter
-  latency, HTTP errors, rate-limit pressure. Empty table means no canonical
-  provider cause is currently above zero; if severity is still non-OK, treat
-  that as an explainability gap and continue triage from the severity matrix.
+  latency, HTTP errors, rate-limit pressure. Эта панель может оставаться
+  непустой даже при `GLOBAL severity = OK`, потому что cause projection
+  deliberately включает early-warning provider signals независимо от
+  current-status projection. Empty table means no canonical provider cause is
+  currently above zero; if severity is still non-OK, treat that as an
+  explainability gap and continue triage from the severity matrix.
 - Ниже первого экрана идут только selected-range evidence panels:
   health-check counters, failure/degraded trends, retry exhaustion, repeated
   per-provider p95 gauge, adapter endpoint latency, HTTP error volume,

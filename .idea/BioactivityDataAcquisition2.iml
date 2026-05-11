@@ -245,6 +245,8 @@
       <excludeFolder url="file://$MODULE_DIR$/scripts/ai/gemini/.benchmarks" />
       <excludeFolder url="file://$MODULE_DIR$/.vibe" />
       <excludeFolder url="file://$MODULE_DIR$/.windsurf" />
+      <excludeFolder url="file://$MODULE_DIR$/.npm-cache/_cacache" />
+      <excludeFolder url="file://$MODULE_DIR$/.npm-cache/_cacache/tmp" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.13 (BioactivityDataAcquisition2)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
