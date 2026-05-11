@@ -64,8 +64,9 @@ class TargetSchema(ETLRecordSchema):
     description: Series[str] | None = pa.Field(
         nullable=True, description="Target description."
     )
-    downgraded: Series[bool] | None = pa.Field(
+    downgraded: Series[pd.BooleanDtype] | None = pa.Field(
         nullable=True,
+        coerce=True,
         description="Downgraded flag.",
     )
 

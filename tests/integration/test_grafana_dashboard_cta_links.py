@@ -975,3 +975,86 @@ def test_dashboard_links_do_not_use_all_for_pipeline_or_provider() -> None:
             url = str(link.get("url", ""))
             assert "var-pipeline=All" not in url
             assert "var-provider=All" not in url
+
+
+def test_provider_health_first_action_cta_contract() -> None:
+    """bioetl-provider-health-v2 First Action panel (9002) must have exactly 3 CTAs."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-provider-health-v2.json"))
+    panels_by_id = {
+        panel.get("id"): panel
+        for panel in get_dashboard_panels(dashboard)
+        if panel.get("id") is not None
+    }
+
+    first_action_panel = panels_by_id[9002]
+    links = first_action_panel.get("links", [])
+
+    assert len(links) == 3, (
+        f"Provider Health First Action panel must have exactly 3 CTAs, got {len(links)}"
+    )
+
+    link_titles = {link.get("title") for link in links}
+    required_titles = {
+        "Review severity matrix",
+        "Inspect critical providers",
+        "Inspect provider top causes",
+    }
+    assert required_titles.issubset(link_titles), (
+        f"Provider Health First Action panel missing required CTAs. "
+        f"Required: {required_titles}, Got: {link_titles}"
+    )
+
+
+def test_dq_first_action_cta_contract() -> None:
+    """bioetl-dq-v2 First Action panel (9103) must have exactly 3 CTAs."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
+    panels_by_id = {
+        panel.get("id"): panel
+        for panel in get_dashboard_panels(dashboard)
+        if panel.get("id") is not None
+    }
+
+    first_action_panel = panels_by_id[9103]
+    links = first_action_panel.get("links", [])
+
+    assert len(links) == 3, (
+        f"DQ First Action panel must have exactly 3 CTAs, got {len(links)}"
+    )
+
+    link_titles = {link.get("title") for link in links}
+    required_titles = {
+        "Review current status",
+        "Inspect current reasons",
+        "Open Silver Reject Explorer",
+    }
+    assert required_titles.issubset(link_titles), (
+        f"DQ First Action panel missing required CTAs. "
+        f"Required: {required_titles}, Got: {link_titles}"
+    )
+
+
+def test_silver_reject_explorer_first_action_cta_contract() -> None:
+    """bioetl-silver-reject-explorer First Action panel (10) must have exactly 2 CTAs."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-silver-reject-explorer.json"))
+    panels_by_id = {
+        panel.get("id"): panel
+        for panel in get_dashboard_panels(dashboard)
+        if panel.get("id") is not None
+    }
+
+    first_action_panel = panels_by_id[10]
+    links = first_action_panel.get("links", [])
+
+    assert len(links) == 2, (
+        f"Silver Reject Explorer First Action panel must have exactly 2 CTAs, got {len(links)}"
+    )
+
+    link_titles = {link.get("title") for link in links}
+    required_titles = {
+        "Review total rejects",
+        "Review scoped summary",
+    }
+    assert required_titles.issubset(link_titles), (
+        f"Silver Reject Explorer First Action panel missing required CTAs. "
+        f"Required: {required_titles}, Got: {link_titles}"
+    )

@@ -827,10 +827,11 @@ to the same canonical dashboards. Navigation panel `id=1000` now also carries
 global adjunct links `Silver Reject Explorer`, `Explore Logs`, and
 `Explore Traces` in the same tab. `Explore Traces` is a traced-run-only adjunct
 surface, so `NoOpTracing` runs can legitimately return empty Tempo results. The
-shipped trace handoff opens an explicit search-first Tempo route, pins
-`var-ds=tempo`, and uses `var-groupBy=resource.service.name` so empty trace
-stores fail closed as empty search results instead of invalid breakdown-state
-queries. The current dashboard remains visible in
+shipped trace handoff opens an explicit search-first Tempo route, bounds the
+initial window to `now-150m..now`, pins `var-ds=tempo`, and uses
+`var-groupBy=resource.service.name` so Tempo metrics queries stay under the
+local limit and empty trace stores fail closed as empty search results instead
+of invalid breakdown-state queries. The current dashboard remains visible in
 `id=1000` as a disabled dark-gray item rather than disappearing from the bus.
 
 **Silver Rejects triage sequence:**
@@ -901,7 +902,8 @@ BioETL run may first appear to Prometheus as an already non-zero sample; plain
 
 **Drilldown:** canonical navigation bus `0. Control Plane`, `1. Overview`, `2. Runtime`,
 `3. Provider Health`, `5. Workflow`, `Silver Reject Explorer`, `Explore Logs`,
-`Explore Traces` используют текущее временное окно. Panel-level
+`Explore Traces` открывается с безопасным bounded окном `now-150m..now`, а не
+наследует текущее окно dashboard. Panel-level
 dashboard-to-dashboard handoffs удалены; replay/checkpoint расследование
 открывается через `0. Control Plane` в top-level шине. Tempo drilldown предфильтрован по
 `span."bioetl.pipeline"` и `span."bioetl.run_type"`.
@@ -1111,11 +1113,12 @@ requires `bioetl_provider_current_status`. Missing anchor telemetry renders
   through this baseline query when Promtail/Loki wiring is healthy.
 - Tempo handoff остаётся bounded по `pipeline/run_type`; forensic IDs в runtime
   dashboard не протаскиваются. Shipped trace links now open the explicit
-  search-first Explore Traces route with `var-ds=tempo` and safe
-  `var-groupBy=resource.service.name`, so missing trace data stays an empty
-  Tempo search rather than failing in a generated breakdown query. Empty trace
-  drilldowns are legitimate when the runtime used `NoOpTracing` or when no
-  matching trace spans were exported.
+search-first Explore Traces route with bounded initial window `now-150m..now`,
+`var-ds=tempo`, and safe `var-groupBy=resource.service.name`, so Tempo metrics
+queries stay under the local limit and missing trace data stays an empty Tempo
+search rather than failing in a generated breakdown query. Empty trace
+drilldowns are legitimate when the runtime used `NoOpTracing` or when no
+matching trace spans were exported.
 
 ### Drilldown
 

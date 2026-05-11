@@ -140,41 +140,6 @@ class BasePanderaValidator:
 
         return normalized
 
-    def _normalize_nullable_boolean_columns(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Cast nullable boolean schema columns away from pandas object dtype.
-
-        Single-record and sparse batches commonly build DataFrames where nullable
-        boolean fields become `object` because rows contain `None`. Pandera then
-        rejects the column before semantic checks run. Normalize only columns the
-        schema explicitly marks as nullable booleans, and leave non-castable
-        values untouched so validation can still fail normally.
-        """
-        assert self._schema is not None
-        if not hasattr(self._schema, "columns"):
-            return df
-
-        normalized = df.copy()
-        for name, column in self._schema.columns.items():
-            if name not in normalized.columns:
-                continue
-            if not getattr(column, "nullable", False):
-                continue
-
-            dtype_name = str(getattr(column, "dtype", "")).lower()
-            if "bool" not in dtype_name:
-                continue
-
-            series = normalized[name]
-            if str(series.dtype) != "object":
-                continue
-
-            try:
-                normalized[name] = series.astype("boolean")
-            except (TypeError, ValueError):
-                continue
-
-        return normalized
-
     def _validate_with_schema(self, df: pd.DataFrame) -> ValidationResult:
         """Validate DataFrame against schema.
 
@@ -206,9 +171,6 @@ class BasePanderaValidator:
                         if getattr(column, "nullable", False):
                             df_to_validate[name] = None
             df_to_validate = self._normalize_nullable_integer_columns(df_to_validate)
-            df_to_validate = self._normalize_nullable_boolean_columns(
-                df_to_validate
-            )
             df_to_validate = self._reorder_to_schema(df_to_validate)
             self._schema.validate(df_to_validate, lazy=True)
             return ValidationResult(valid=True)
