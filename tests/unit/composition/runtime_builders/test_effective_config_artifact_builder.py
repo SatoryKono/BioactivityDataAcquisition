@@ -18,6 +18,9 @@ from bioetl.composition.runtime_builders._effective_config_artifact_builder_supp
 from bioetl.composition.runtime_builders._effective_config_artifact_builder_support import (
     build_execution_settings_snapshot as _build_execution_settings_snapshot,
 )
+from bioetl.composition.runtime_builders._effective_config_artifact_builder_support import (
+    build_runtime_overrides_snapshot as _build_runtime_overrides_snapshot,
+)
 from bioetl.composition.runtime_builders.effective_config_artifact_builder import (
     create_and_persist_composite_effective_config_artifact,
     create_and_persist_effective_config_artifact,
@@ -86,6 +89,39 @@ def test_build_effective_config_source_refs_persists_semantic_and_raw_source_has
         compute_canonical_yaml_sha256(entity_quality.read_bytes()),
         compute_canonical_yaml_sha256(contract_registry.read_bytes()),
     ]
+
+
+def test_build_effective_config_source_refs_include_dependency_provenance_files(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "configs" / "base").mkdir(parents=True, exist_ok=True)
+    (tmp_path / "configs" / "entities" / "chembl").mkdir(parents=True, exist_ok=True)
+    (tmp_path / "configs" / "base" / "pipeline.yaml").write_text(
+        "pipeline:\n  version: 1\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "configs" / "base" / "contract_registry.yaml").write_text(
+        "contracts:\n  chembl.activity: 1.0.0\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "configs" / "entities" / "chembl" / "activity.yaml").write_text(
+        "entity:\n  provider: chembl\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "pyproject.toml").write_text(
+        "[project]\nname = \"bioetl\"\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "uv.lock").write_text("version = 1\n", encoding="utf-8")
+
+    refs = _build_effective_config_source_refs(
+        provider="chembl",
+        entity="activity",
+        repo_root=tmp_path,
+    )
+
+    assert "pyproject.toml" in [ref.source_path for ref in refs]
+    assert "uv.lock" in [ref.source_path for ref in refs]
 
 
 def _build_runner_inputs(
@@ -172,6 +208,25 @@ def test_effective_config_artifact_publishes_semantic_runtime_env_dependencies()
         artifact.execution_environment.non_materialized_semantic_env_dependencies
         == (SEMANTIC_RUNTIME_ENV_DEPENDENCIES)
     )
+
+
+def test_runtime_overrides_snapshot_materializes_execution_environment_provenance() -> (
+    None
+):
+    settings = Settings(env="prod", data_dir=Path("data"), debug=True)
+
+    snapshot = _build_runtime_overrides_snapshot(
+        _build_pipeline_run_context(),
+        settings,
+    )
+
+    env_snapshot = snapshot["env"]["execution_environment"]
+    assert env_snapshot["schema_version"] == "execution-environment-v1"
+    assert env_snapshot["settings_env"] == "prod"
+    assert env_snapshot["debug"] is True
+    assert env_snapshot["data_root_mode"] in {"repo_data", "custom_data_dir"}
+    assert "settings_snapshot_hash" in env_snapshot
+    assert env_snapshot["settings_snapshot_hash"].startswith("sha256:")
 
 
 def test_build_effective_config_source_refs_is_stable_across_equivalent_calls(
@@ -386,8 +441,11 @@ def test_create_and_persist_effective_config_artifact_forwards_required_profile(
     assert captured["required_persistence_profile"] == "degraded_observable"
     assert captured["resolution_policy"].strict_validation is True
     settings_snapshot = captured["runtime_overrides"]["runtime"]["settings_snapshot"]
+    env_snapshot = captured["runtime_overrides"]["env"]["execution_environment"]
     assert settings_snapshot["schema_version"] == "execution-settings-v1"
     assert settings_snapshot["settings"]["data_dir"] == "data"
+    assert env_snapshot["schema_version"] == "execution-environment-v1"
+    assert env_snapshot["dependency_lock_present"] in {True, False}
     assert (
         "settings.pipeline.control_plane.required_persistence_profile"
         in settings_snapshot["materialized_surfaces"]

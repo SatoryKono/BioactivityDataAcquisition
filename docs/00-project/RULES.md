@@ -1073,7 +1073,8 @@ RetryConfig(
 
 ```python
 hash_input = f"{attempt}:{url}:{seed}"
-jitter_factor = (hash(hash_input) % 1000) / 1000.0
+jitter_digest = md5(hash_input.encode("utf-8")).hexdigest()
+jitter_factor = (int(jitter_digest[:8], 16) % 1000) / 1000.0
 ```
 
 #### Единый Источник Времени

@@ -92,7 +92,13 @@ class _FakeRunManifestService:
                 "dq_contract_compatibility_hash": "compat-hash-1",
                 "operator_replay_mode": "Exact Replay",
                 "requested_exact_replay": True,
+                "replay_readiness_verdict": "exact_replay_ready",
                 "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
+                "strict_replay_runtime_verdict": (
+                    "allowed_with_snapshot_backed_source_refs"
+                ),
+                "replay_support_scope": "operator_grade_trace_debug",
+                "replay_support_reason": "family_within_supported_boundary",
                 "replay_capability_reason": "immutable_input_snapshots_present",
                 "exact_replay_blockers": [],
                 "snapshot_status": "full",
@@ -153,7 +159,13 @@ class _FakeRunManifestService:
                     "replay_capability": "exact_replay_supported",
                     "operator_replay_mode": "Exact Replay",
                     "requested_exact_replay": True,
+                    "replay_readiness_verdict": "exact_replay_ready",
                     "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
+                    "strict_replay_runtime_verdict": (
+                        "allowed_with_snapshot_backed_source_refs"
+                    ),
+                    "replay_support_scope": "operator_grade_trace_debug",
+                    "replay_support_reason": "family_within_supported_boundary",
                     "replay_capability_reason": "immutable_input_snapshots_present",
                     "exact_replay_eligible": True,
                     "exact_replay_blockers": [],
@@ -775,10 +787,15 @@ class TestRunManifestCommands:
         assert "contract_version: 1.2.0" in result.output
         assert "dq_policy_ref: chembl_activity.gold" in result.output
         assert "requested_exact_replay: true" in result.output
+        assert "replay_readiness_verdict: exact_replay_ready" in result.output
         assert "mode: Exact Replay" in result.output
         assert "snapshot_status: full" in result.output
         assert (
             "exact_replay_support_boundary: snapshot_backed_source_runs_only"
+            in result.output
+        )
+        assert (
+            "strict_replay_runtime_verdict: allowed_with_snapshot_backed_source_refs"
             in result.output
         )
         assert (

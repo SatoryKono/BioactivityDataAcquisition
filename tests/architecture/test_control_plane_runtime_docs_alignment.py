@@ -99,6 +99,49 @@ def test_published_control_plane_docs_describe_exact_replay_hard_fail_policy() -
         )
 
 
+def test_published_control_plane_docs_describe_manifest_required_for_new_runs() -> (
+    None
+):
+    expectations = {
+        CONTRACT_DOC: (
+            "require `run_manifest_enabled=true`",
+            "without manifest creation",
+        ),
+        CLI_DOC: (
+            "требуют `run_manifest_enabled=true`",
+            "без manifest",
+        ),
+        RUNBOOK_DOC: (
+            "require `run_manifest_enabled=true`",
+            "without a manifest",
+        ),
+    }
+    for path, expected_fragments in expectations.items():
+        text = path.read_text(encoding="utf-8").lower()
+        missing = [fragment for fragment in expected_fragments if fragment not in text]
+        assert not missing, (
+            f"{path.relative_to(PROJECT_ROOT)} is missing mandatory-manifest "
+            f"runtime fragments: {missing}"
+        )
+
+
+def test_published_control_plane_docs_describe_strict_profile_resume_hard_fail() -> (
+    None
+):
+    expected_fragments = (
+        "replay_ready",
+        "forensic_grade",
+        "hard_fail",
+    )
+    for path in (CONTRACT_DOC, CLI_DOC, RUNBOOK_DOC):
+        text = path.read_text(encoding="utf-8").lower()
+        missing = [fragment for fragment in expected_fragments if fragment not in text]
+        assert not missing, (
+            f"{path.relative_to(PROJECT_ROOT)} is missing strict-profile "
+            f"hard-fail fragments: {missing}"
+        )
+
+
 def test_contract_doc_enumerates_supported_execution_paths() -> None:
     """The published contract doc should freeze the supported execution matrix."""
     text = CONTRACT_DOC.read_text(encoding="utf-8").lower()

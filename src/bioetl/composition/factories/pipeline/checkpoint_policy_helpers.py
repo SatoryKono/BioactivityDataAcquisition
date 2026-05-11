@@ -96,12 +96,12 @@ def resolve_checkpoint_compatibility_policy(
         and requested_policy in {"observe", "legacy_observe"}
     ):
         logger_port.warning(
-            "Required persistence profile enforces at least soft_fail "
+            "Required persistence profile enforces hard_fail "
             "checkpoint compatibility policy; coercing requested policy.",
             pipeline=pipeline.config.pipeline_name,
             required_persistence_profile=required_persistence_profile,
             requested_policy=requested_policy,
-            applied_policy="soft_fail",
+            applied_policy="hard_fail",
         )
-        return "soft_fail"
+        return "hard_fail"
     return requested_policy

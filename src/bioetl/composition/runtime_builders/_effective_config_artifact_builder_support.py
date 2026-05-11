@@ -17,6 +17,7 @@ from bioetl.composition.runtime_builders._run_manifest_refs import (
 from bioetl.composition.runtime_builders._run_manifest_support import (
     to_serializable_mapping as _to_serializable_mapping,
 )
+from bioetl.composition.services.versioning import get_dependency_lock_hash
 from bioetl.domain.control_plane.config_source_hashing import (
     ConfigSourceHashStrategy,
     compute_config_source_hashes,
@@ -142,6 +143,22 @@ def build_execution_settings_snapshot(settings: Settings) -> dict[str, object]:
     return snapshot
 
 
+def _build_execution_environment_snapshot(settings: Settings) -> dict[str, object]:
+    """Materialize sanitized environment/dependency provenance for env overrides."""
+    settings_snapshot = build_execution_settings_snapshot(settings)
+    dependency_lock_hash = get_dependency_lock_hash()
+    return {
+        "schema_version": "execution-environment-v1",
+        "settings_env": _setting_attr(settings, "env"),
+        "debug": _setting_attr(settings, "debug", False),
+        "test_mode": _setting_attr(settings, "test_mode", False),
+        "data_root_mode": resolve_data_root_mode(settings),
+        "dependency_lock_hash": dependency_lock_hash,
+        "dependency_lock_present": dependency_lock_hash is not None,
+        "settings_snapshot_hash": settings_snapshot["snapshot_hash"],
+    }
+
+
 def build_runtime_overrides_snapshot(
     ctx: PipelineRunContext,
     settings: Settings,
@@ -176,7 +193,9 @@ def build_runtime_overrides_snapshot(
     }
     return {
         "cli": cli_overrides,
-        "env": {},
+        "env": {
+            "execution_environment": _build_execution_environment_snapshot(settings)
+        },
         "runtime": {
             "pipeline_name": str(getattr(ctx, "pipeline_name", "unknown")),
             "run_type": run_type_value,
@@ -220,7 +239,9 @@ def build_composite_runtime_overrides_snapshot(
     )
     return {
         "cli": dict(runtime_payload),
-        "env": {},
+        "env": {
+            "execution_environment": _build_execution_environment_snapshot(settings)
+        },
         "runtime": runtime_payload,
     }
 
@@ -278,6 +299,9 @@ def build_effective_config_source_refs(
         f"configs/quality/entities/{provider}/{entity}.yaml",
         f"configs/contracts/{provider}/{entity}.yaml",
         "configs/base/contract_registry.yaml",
+        "pyproject.toml",
+        "uv.lock",
+        "poetry.lock",
     ]
     if provider == "composite":
         candidate_paths[2:2] = [

@@ -59,9 +59,8 @@ rg -n "run_manifest_enabled|run_ledger_enabled|required_persistence_profile|chec
 
 Interpretation:
 
-- if `run_manifest_enabled=false`, no new control-plane artifact is expected for new runs;
-- if `run_manifest_enabled=true` and `run_ledger_enabled=false`, manifest inspection still works but ledger history is intentionally absent;
-- if `run_manifest_enabled=false`, runtime assembly also coerces ledger attachment off for new runs;
+- executable standard and composite runs require `run_manifest_enabled=true`; if a new run was launched without a manifest, treat it as a contract violation or a stale historical assumption rather than an expected modern runtime mode;
+- if `run_manifest_enabled=true` and `run_ledger_enabled=false`, manifest inspection still works but ledger history is intentionally absent where that degraded mode is still allowed;
 - if `required_persistence_profile=replay_ready`, runtime bootstrap requires
   `run_manifest_enabled=true` and an execution context inside the strict
   exact-replay support boundary;
@@ -76,7 +75,7 @@ Interpretation:
   but identity continuity must already be proven or resume remains blocked.
 - if `required_persistence_profile` is `replay_ready` or `forensic_grade`,
   runtime does not allow `observe` / `legacy_observe` to remain effective; the
-  applied policy is coerced to at least `soft_fail`.
+  applied policy is coerced to `hard_fail`.
 - if the current run is `exact_replay=true`, runtime coerces checkpoint
   compatibility handling to `hard_fail`; exact replay is not allowed to
   continue after any compatibility mismatch.

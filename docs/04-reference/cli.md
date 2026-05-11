@@ -437,9 +437,12 @@ ______________________________________________________________________
 
 Operational semantics:
 
-- если `run_manifest_enabled=false`, новые control-plane artifacts не создаются;
+- executable standard/composite runs требуют `run_manifest_enabled=true`; если
+  новый run появился без manifest, это уже нарушение текущего runtime
+  контракта, а не штатный режим;
 - если `run_manifest_enabled=true` и `run_ledger_enabled=false`, `show`
-  вернёт manifest payload, но без ledger history;
+  вернёт manifest payload, но без ledger history там, где такой degraded mode
+  ещё допускается;
 - `run_ledger_enabled=true` допустим только при `run_manifest_enabled=true`;
 - `required_persistence_profile=replay_ready` требует
   `run_manifest_enabled=true` и execution context внутри опубликованной strict
@@ -455,9 +458,7 @@ Operational semantics:
 - `legacy_observe` остаётся migration-only degraded mode и также не
   разрешает resume, если identity continuity не доказана.
 - strict persistence profiles (`replay_ready`, `forensic_grade`) поднимают
-  effective resume policy минимум до `soft_fail`.
-- при `run_manifest_enabled=false` runtime builder также эффективно отключает
-  ledger attachment для новых запусков.
+  effective resume policy до `hard_fail`.
 
 Resume contract:
 

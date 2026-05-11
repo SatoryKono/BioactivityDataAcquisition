@@ -26,10 +26,9 @@ def _make_config(
     *,
     quarantine_enabled: bool = False,
     column_groups: tuple[str, ...] | None = None,
+    include_to_dict: bool = True,
 ) -> Any:
-    return cast(
-        Any,
-        SimpleNamespace(
+    config = SimpleNamespace(
             name="composite_publication",
             version="1.0.0",
             enrichers=(),
@@ -41,7 +40,18 @@ def _make_config(
                 strategy=MergeStrategy.LEFT_OUTER,
                 column_groups=column_groups,
             ),
-        ),
+        )
+    if include_to_dict:
+        config.to_dict = lambda: {
+            "name": "composite_publication",
+            "version": "1.0.0",
+            "enrichers": [],
+            "dependencies": [],
+            "merge": {"strategy": "left_outer"},
+        }
+    return cast(
+        Any,
+        config,
     )
 
 
@@ -174,7 +184,8 @@ def test_build_runtime_management_services_enables_quarantine_when_configured(
     assert checkpoint_context.storage is checkpoint_storage
     assert checkpoint_context.logger is logger
     assert checkpoint_context.resume is True
-    assert checkpoint_context.expected_effective_config_hash == ""
+    assert isinstance(checkpoint_context.expected_effective_config_hash, str)
+    assert len(checkpoint_context.expected_effective_config_hash) == 64
     assert checkpoint_context.expected_contract_ref == "composite_publication"
     assert checkpoint_context.expected_contract_version == "1.0.0"
     assert checkpoint_context.expected_manifest_id is None
@@ -334,6 +345,44 @@ def test_build_runtime_management_services_prefers_control_plane_effective_hash(
     assert isinstance(checkpoint_context, CompositeCheckpointServiceContext)
     assert checkpoint_context.expected_effective_config_hash == ("f" * 64)
     assert checkpoint_context.expected_input_snapshot_fingerprint == "snapshot-fp-123"
+
+
+@pytest.mark.unit
+@patch(
+    "bioetl.composition.bootstrap.runtime.composite_runtime_management_builder.FSMStateHelperService"
+)
+@patch(
+    "bioetl.composition.bootstrap.runtime.composite_runtime_management_builder.bootstrap_quarantine_adapter"
+)
+@patch(
+    "bioetl.composition.bootstrap.runtime.composite_runtime_management_builder.bootstrap_composite_checkpoint_writer"
+)
+def test_build_runtime_management_services_fails_when_effective_hash_cannot_be_resolved(
+    mock_checkpoint_port: MagicMock,
+    mock_quarantine_port: MagicMock,
+    mock_fsm_state_helper_cls: MagicMock,
+) -> None:
+    infra_context = cast(
+        Any, SimpleNamespace(metrics=MagicMock(name="metrics"), clock=None)
+    )
+    mock_checkpoint_port.return_value = MagicMock(name="checkpoint_storage")
+    mock_quarantine_port.return_value = MagicMock(name="quarantine_port")
+    mock_fsm_state_helper_cls.return_value = MagicMock(name="fsm_state_helper")
+
+    with pytest.raises(
+        ValueError,
+        match="expected_effective_config_hash",
+    ):
+        build_runtime_management_services(
+            config=_make_config(quarantine_enabled=False, include_to_dict=False),
+            runtime=cast(Any, SimpleNamespace(resume=False)),
+            infra_context=infra_context,
+            settings=MagicMock(),
+            logger=MagicMock(),
+            run_id="run-123",
+            checkpoint_manager_cls=cast(Any, MagicMock(return_value=MagicMock())),
+            create_dq_report_service=MagicMock(return_value=MagicMock()),
+        )
 
 
 @pytest.mark.unit

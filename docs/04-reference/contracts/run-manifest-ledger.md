@@ -152,8 +152,10 @@ The control-plane runtime is governed by the runtime object path
 
 Current rollout semantics:
 
-1. `run_manifest_enabled=false` disables both manifest creation and ledger attachment for new runs because runtime assembly coerces the effective flag set to `(False, False)`.
-1. `run_manifest_enabled=true`, `run_ledger_enabled=false` keeps manifest creation but suppresses ledger writes.
+1. Executable standard and composite runs require `run_manifest_enabled=true`;
+   current runtime does not support launching a new pipeline/composite execution
+   without manifest creation.
+1. `run_manifest_enabled=true`, `run_ledger_enabled=false` keeps manifest creation but suppresses ledger writes where that degraded mode is still allowed.
 1. `run_ledger_enabled=true` is only valid when `run_manifest_enabled=true`.
 1. Supported production and debug-critical launches inherit the published
    family default when the configured profile remains
@@ -175,6 +177,11 @@ Current rollout semantics:
    `hard_fail` raises an error; `legacy_observe` remains a legacy degraded mode
    for v1.x-era migration periods but does not permit resume when identity
    continuity is unproven.
+1. `required_persistence_profile=replay_ready` or
+   `required_persistence_profile=forensic_grade` is stricter than the requested
+   compatibility policy: runtime coerces `observe` / `legacy_observe` up to
+   `hard_fail` so strict persistence contexts never continue on an unproven
+   resume identity.
 1. `exact_replay=true` is stricter than the requested compatibility policy:
    runtime coerces checkpoint compatibility handling to `hard_fail` so an
    exact replay attempt cannot continue after any compatibility mismatch.

@@ -258,6 +258,14 @@ def test_reproducibility_rubric_declares_repeatable_7x5_scoring_matrix() -> None
     assert "| 0 | Absent, unsafe, fail-open, or not evidenced |" in text
     assert "| 2 | Implemented, documented, and test-backed |" in text
     assert "Reviewers MUST cite evidence for every non-zero score" in text
+
+
+@pytest.mark.architecture
+def test_rules_doc_uses_stable_digest_jitter_example() -> None:
+    text = _read("docs/00-project/RULES.md")
+
+    assert "md5(hash_input.encode(\"utf-8\")).hexdigest()" in text
+    assert "hash(hash_input)" not in text
     assert "## Evidence Matrix" in text
     assert "## Criterion Evidence Index" in text
     assert "docs/05-operations/control-plane-lifecycle.md" in text
