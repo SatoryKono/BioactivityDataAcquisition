@@ -61,6 +61,13 @@ quality:
   version: 1.0.0
   provider: chembl
   entity: subcellular_fraction
+  metadata:
+    subcellular_fraction_policy:
+      scope: raw_plus_canonical_derived_vocabulary
+      description: RAW-PLUS-CANONICAL ChEMBL subcellular-fraction policy. The pipeline preserves the source lexeme in subcellular_fraction_raw while subcellular_fraction stores the normalized derived vocabulary used by Silver/Gold contracts. Unknown source lexemes remain reviewable rather than being fail-closed into a strict enum.
+      field_semantics:
+        subcellular_fraction_raw: Preserve the raw/source ChEMBL subcellular-fraction label as trimmed text for traceability and synonym review.
+        subcellular_fraction: Store the canonical normalized subcellular-fraction label used for downstream Silver/Gold semantics; unknown reviewed labels are preserved after canonical text normalization instead of being discarded.
   entity_field_validations:
   - field: entity_id
     type: pattern

@@ -12,7 +12,9 @@ pytestmark = pytest.mark.integration
 def test_runtime_variable_dependencies():
     """bioetl-runtime: $run_type depends on $pipeline, $stage depends on runtime-selected scope."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
-    variables = {v.get("name"): v for v in dashboard.get("templating", {}).get("list", [])}
+    variables = {
+        v.get("name"): v for v in dashboard.get("templating", {}).get("list", [])
+    }
 
     # Check that pipeline and run_type exist
     assert "pipeline" in variables, "bioetl-runtime must have $pipeline variable"
@@ -29,7 +31,9 @@ def test_runtime_variable_dependencies():
 def test_dq_variable_dependencies():
     """bioetl-dq-v2: $run_type depends on $pipeline, $stage depends on $pipeline and $run_type."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
-    variables = {v.get("name"): v for v in dashboard.get("templating", {}).get("list", [])}
+    variables = {
+        v.get("name"): v for v in dashboard.get("templating", {}).get("list", [])
+    }
 
     # Check that pipeline and run_type exist
     assert "pipeline" in variables, "bioetl-dq-v2 must have $pipeline variable"
@@ -39,14 +43,22 @@ def test_dq_variable_dependencies():
 
 def test_provider_health_variable_dependencies():
     """bioetl-provider-health-v2: has provider selector and hidden pipeline_context."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-provider-health-v2.json"))
-    variables = {v.get("name"): v for v in dashboard.get("templating", {}).get("list", [])}
+    dashboard = load_dashboard(
+        Path("grafana/dashboards/bioetl-provider-health-v2.json")
+    )
+    variables = {
+        v.get("name"): v for v in dashboard.get("templating", {}).get("list", [])
+    }
 
     # Check that provider exists (visible selector)
-    assert "provider" in variables, "bioetl-provider-health-v2 must have $provider variable"
+    assert "provider" in variables, (
+        "bioetl-provider-health-v2 must have $provider variable"
+    )
 
     # Check that pipeline_context exists (hidden context selector)
-    assert "pipeline_context" in variables, "bioetl-provider-health-v2 must have $pipeline_context variable"
+    assert "pipeline_context" in variables, (
+        "bioetl-provider-health-v2 must have $pipeline_context variable"
+    )
 
     # pipeline_context should be hidden (hide can be True or 2 in Grafana)
     pipeline_context = variables["pipeline_context"]
@@ -56,13 +68,25 @@ def test_provider_health_variable_dependencies():
 
 def test_silver_reject_explorer_variable_dependencies():
     """bioetl-silver-reject-explorer: has pipeline, run_type, and forensic variables."""
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-silver-reject-explorer.json"))
-    variables = {v.get("name"): v for v in dashboard.get("templating", {}).get("list", [])}
+    dashboard = load_dashboard(
+        Path("grafana/dashboards/bioetl-silver-reject-explorer.json")
+    )
+    variables = {
+        v.get("name"): v for v in dashboard.get("templating", {}).get("list", [])
+    }
 
     # Check that pipeline and run_type exist
-    assert "pipeline" in variables, "bioetl-silver-reject-explorer must have $pipeline variable"
-    assert "run_type" in variables, "bioetl-silver-reject-explorer must have $run_type variable"
+    assert "pipeline" in variables, (
+        "bioetl-silver-reject-explorer must have $pipeline variable"
+    )
+    assert "run_type" in variables, (
+        "bioetl-silver-reject-explorer must have $run_type variable"
+    )
 
     # Check forensic variables
-    assert "run_id" in variables, "bioetl-silver-reject-explorer must have $run_id variable"
-    assert "payload_hash" in variables, "bioetl-silver-reject-explorer must have $payload_hash variable"
+    assert "run_id" in variables, (
+        "bioetl-silver-reject-explorer must have $run_id variable"
+    )
+    assert "payload_hash" in variables, (
+        "bioetl-silver-reject-explorer must have $payload_hash variable"
+    )

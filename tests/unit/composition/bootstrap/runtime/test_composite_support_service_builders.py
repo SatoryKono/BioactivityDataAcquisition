@@ -29,18 +29,18 @@ def _make_config(
     include_to_dict: bool = True,
 ) -> Any:
     config = SimpleNamespace(
-            name="composite_publication",
-            version="1.0.0",
-            enrichers=(),
-            dependencies=(),
-            dq=SimpleNamespace(),
-            execution=SimpleNamespace(max_concurrency=3),
-            cross_validation=SimpleNamespace(enabled=quarantine_enabled),
-            merge=SimpleNamespace(
-                strategy=MergeStrategy.LEFT_OUTER,
-                column_groups=column_groups,
-            ),
-        )
+        name="composite_publication",
+        version="1.0.0",
+        enrichers=(),
+        dependencies=(),
+        dq=SimpleNamespace(),
+        execution=SimpleNamespace(max_concurrency=3),
+        cross_validation=SimpleNamespace(enabled=quarantine_enabled),
+        merge=SimpleNamespace(
+            strategy=MergeStrategy.LEFT_OUTER,
+            column_groups=column_groups,
+        ),
+    )
     if include_to_dict:
         config.to_dict = lambda: {
             "name": "composite_publication",

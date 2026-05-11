@@ -16,7 +16,13 @@ pytestmark = pytest.mark.integration
 def test_panels_have_descriptions():
     """All panels should have non-empty descriptions (where applicable)."""
     # Skip navigation bus panels and other text-only panels
-    skip_patterns = ["Navigation", "Scope", "Dashboard Navigation", "Trust Summary", "Known"]
+    skip_patterns = [
+        "Navigation",
+        "Scope",
+        "Dashboard Navigation",
+        "Trust Summary",
+        "Known",
+    ]
     for dashboard_path in get_dashboard_files():
         dashboard = load_dashboard(dashboard_path)
         for panel in get_dashboard_panels(dashboard):

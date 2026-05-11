@@ -1,0 +1,44 @@
+{
+  "fixtures": {
+    "chembl/assay:sample_edge_ontology_namespaces_2026-05-11.jsonl": {
+      "fields": {
+        "bao_format": [
+          "BAO_0000219",
+          "bao:0000190"
+        ]
+      },
+      "pipeline": "chembl_assay"
+    },
+    "chembl/cell_line:sample_edge_ontology_namespaces_2026-05-11.jsonl": {
+      "fields": {
+        "clo_id": [
+          "CLO_0008331",
+          "clo:0003684"
+        ],
+        "efo_id": [
+          "EFO_0002312",
+          "efo:0002312"
+        ]
+      },
+      "pipeline": "chembl_cell_line"
+    },
+    "chembl/tissue:sample_edge_ontology_namespaces_2026-05-11.jsonl": {
+      "fields": {
+        "bto_id": [
+          "BTO_0000840",
+          "bto:0000142"
+        ],
+        "efo_id": [
+          "EFO:0000856",
+          "efo_0000408"
+        ],
+        "uberon_id": [
+          "UBERON_0000004",
+          "uberon:0002107"
+        ]
+      },
+      "pipeline": "chembl_tissue"
+    }
+  },
+  "version": 1
+}

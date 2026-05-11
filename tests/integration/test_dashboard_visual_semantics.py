@@ -37,7 +37,11 @@ def test_status_panels_have_correct_value_mapping():
                             f"{dashboard_name}:{title} mappings must be a list"
                         )
                         # Check for at least some status mappings
-                        mapping_values = {m.get("value") for m in mappings if m.get("value") is not None}
+                        mapping_values = {
+                            m.get("value")
+                            for m in mappings
+                            if m.get("value") is not None
+                        }
                         # Don't enforce specific values, just ensure mappings exist
                         assert len(mapping_values) >= 1, (
                             f"{dashboard_name}:{title} must have at least one mapping"
@@ -114,7 +118,15 @@ def test_threshold_steps_have_canonical_colors():
                 if steps:
                     # Check for canonical color pattern (green, orange, red)
                     # This is a SHOULD, not MUST - just verify colors are valid
-                    valid_colors = {"green", "orange", "red", "yellow", "blue", "purple", "gray"}
+                    valid_colors = {
+                        "green",
+                        "orange",
+                        "red",
+                        "yellow",
+                        "blue",
+                        "purple",
+                        "gray",
+                    }
                     for step in steps:
                         color = step.get("color")
                         if color:

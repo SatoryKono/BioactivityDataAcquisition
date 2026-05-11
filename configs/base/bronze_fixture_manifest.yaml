@@ -1,5 +1,5 @@
 version: 1.3.0
-updated_at: "2026-04-30"
+updated_at: "2026-05-11"
 fixtures:
   chembl/activity:
     fixture_kind: tracked_ci_sample
@@ -9,6 +9,14 @@ fixtures:
     owner: "data-platform"
     last_refresh: "2026-03-25"
     validation_status: valid
+    edge_fixtures:
+      - fixture_kind: tracked_edge_case_sample
+        fixture_path: tests/fixtures/bronze/chembl/activity/sample_edge_ontology_units_2026-05-11.jsonl
+        records: 2
+        provenance: "Targeted ChEMBL activity Bronze sample covering BAO/UO/QUDT identifier-family edge values and unit namespace variants."
+        owner: "data-platform"
+        last_refresh: "2026-05-11"
+        validation_status: valid
   chembl/assay:
     fixture_kind: tracked_ci_sample
     fixture_path: tests/fixtures/bronze/chembl/assay/sample_ci_2026-04-24.jsonl
@@ -17,6 +25,14 @@ fixtures:
     owner: "data-platform"
     last_refresh: "2026-04-24"
     validation_status: valid
+    edge_fixtures:
+      - fixture_kind: tracked_edge_case_sample
+        fixture_path: tests/fixtures/bronze/chembl/assay/sample_edge_ontology_namespaces_2026-05-11.jsonl
+        records: 2
+        provenance: "Targeted edge-case ChEMBL assay Bronze sample for BAO namespace normalization and ontology companion governance."
+        owner: "data-platform"
+        last_refresh: "2026-05-11"
+        validation_status: valid
   chembl/assay_parameters:
     fixture_kind: tracked_ci_sample
     fixture_path: tests/fixtures/bronze/chembl/assay_parameters/sample_ci_2026-04-30.jsonl
@@ -36,6 +52,22 @@ fixtures:
     owner: "data-platform"
     last_refresh: "2026-04-29"
     validation_status: valid
+    edge_fixtures:
+      - fixture_kind: tracked_edge_case_sample
+        fixture_path: tests/fixtures/bronze/chembl/cell_line/sample_edge_ontology_ids_2026-05-11.jsonl
+        records: 2
+        provenance: "Targeted ChEMBL cell_line Bronze sample covering Cellosaurus/CLO/EFO/taxonomy identifier namespace variants."
+        owner: "data-platform"
+        last_refresh: "2026-05-11"
+        validation_status: valid
+    edge_fixtures:
+      - fixture_kind: tracked_edge_case_sample
+        fixture_path: tests/fixtures/bronze/chembl/cell_line/sample_edge_ontology_namespaces_2026-05-11.jsonl
+        records: 2
+        provenance: "Targeted edge-case ChEMBL cell_line Bronze sample for CLO/EFO namespace normalization governance."
+        owner: "data-platform"
+        last_refresh: "2026-05-11"
+        validation_status: valid
   chembl/compound_record:
     fixture_kind: tracked_ci_sample
     fixture_path: tests/fixtures/bronze/chembl/compound_record/sample_ci_2026-04-29.jsonl
@@ -117,6 +149,14 @@ fixtures:
     owner: "data-platform"
     last_refresh: "2026-04-29"
     validation_status: valid
+    edge_fixtures:
+      - fixture_kind: tracked_edge_case_sample
+        fixture_path: tests/fixtures/bronze/chembl/target_component/sample_edge_reference_ids_2026-05-11.jsonl
+        records: 2
+        provenance: "Targeted ChEMBL target_component Bronze sample covering accession, taxonomy, and nested reference-identifier namespaces."
+        owner: "data-platform"
+        last_refresh: "2026-05-11"
+        validation_status: valid
   chembl/tissue:
     fixture_kind: tracked_ci_sample
     fixture_path: tests/fixtures/bronze/chembl/tissue/sample_ci_2026-04-29.jsonl
@@ -125,6 +165,22 @@ fixtures:
     owner: "data-platform"
     last_refresh: "2026-04-29"
     validation_status: valid
+    edge_fixtures:
+      - fixture_kind: tracked_edge_case_sample
+        fixture_path: tests/fixtures/bronze/chembl/tissue/sample_edge_ontology_ids_2026-05-11.jsonl
+        records: 2
+        provenance: "Targeted ChEMBL tissue Bronze sample covering BTO/CALOHA/EFO/UBERON namespace variants."
+        owner: "data-platform"
+        last_refresh: "2026-05-11"
+        validation_status: valid
+    edge_fixtures:
+      - fixture_kind: tracked_edge_case_sample
+        fixture_path: tests/fixtures/bronze/chembl/tissue/sample_edge_ontology_namespaces_2026-05-11.jsonl
+        records: 2
+        provenance: "Targeted edge-case ChEMBL tissue Bronze sample for BTO/EFO/UBERON namespace normalization governance."
+        owner: "data-platform"
+        last_refresh: "2026-05-11"
+        validation_status: valid
   crossref/publication:
     fixture_kind: tracked_ci_sample
     fixture_path: tests/fixtures/bronze/crossref/publication/sample_ci_2026-03-25.jsonl

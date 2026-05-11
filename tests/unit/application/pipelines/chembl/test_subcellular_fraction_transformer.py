@@ -393,9 +393,31 @@ class TestExtractFractionFromAssay:
         result = transformer.extract_fraction_from_assay(assay)
 
         assert result is not None
+        assert result["subcellular_fraction_raw"] == "Microsomes"
         assert result["subcellular_fraction"] == "Microsomes"
         assert result["example_assay_id"] == "CHEMBL123456"
         assert result["assay_count"] == 1
+
+    def test_extract_fraction_keeps_raw_and_canonical_fields_distinct(
+        self,
+        transformer: SubcellularFractionTransformer,
+    ) -> None:
+        """Derived fraction contract keeps raw text sidecar plus canonical field."""
+        assay = {
+            "assay_id": "CHEMBL123456",
+            "assay_subcellular_fraction": "  microsomes  ",
+        }
+
+        extracted = transformer.extract_fraction_from_assay(assay)
+        assert extracted is not None
+
+        normalized = RecordNormalizationProcessor(
+            provider="chembl",
+            entity_type="subcellular_fraction",
+        ).normalize_business_data(extracted)
+
+        assert normalized["subcellular_fraction_raw"] == "microsomes"
+        assert normalized["subcellular_fraction"] == "Microsomes"
 
     def test_extract_missing_fraction(
         self,

@@ -140,6 +140,30 @@ REGISTRY_UNIONS: dict[tuple[str, ...], tuple[tuple[str, ...], ...]] = {
     )
 }
 
+EXACT_DQ_ENUM_POLICIES: tuple[EnumPolicy, ...] = (
+    EnumPolicy("activity", "standard_type", ("activity", "standard_types"), surfaces=frozenset({"quality"})),
+    EnumPolicy("activity", "standard_relation", ("activity", "standard_relations"), surfaces=frozenset({"quality"})),
+    EnumPolicy("activity", "standard_units", ("activity", "standard_units"), surfaces=frozenset({"quality"})),
+    EnumPolicy("activity", "assay_type", ("assay", "types"), surfaces=frozenset({"quality"})),
+    EnumPolicy("assay", "assay_type", ("assay", "types"), surfaces=frozenset({"quality"})),
+    EnumPolicy("assay", "assay_test_type", ("assay", "test_types"), surfaces=frozenset({"quality"})),
+    EnumPolicy("assay", "assay_category", ("assay", "categories"), surfaces=frozenset({"quality"})),
+    EnumPolicy("assay", "assay_group", ("assay", "assay_groups"), surfaces=frozenset({"quality"})),
+    EnumPolicy("assay", "relationship_type", ("assay", "relationship_types"), surfaces=frozenset({"quality"})),
+    EnumPolicy("assay", "confidence_description", ("assay", "confidence_descriptions"), surfaces=frozenset({"quality"})),
+    EnumPolicy("assay_parameters", "type", ("assay", "parameter_standard_type_universe"), surfaces=frozenset({"quality"})),
+    EnumPolicy("assay_parameters", "standard_type", ("assay", "parameter_standard_type_universe"), surfaces=frozenset({"quality"})),
+    EnumPolicy("assay_parameters", "standard_relation", ("activity", "standard_relations"), surfaces=frozenset({"quality"})),
+    EnumPolicy("assay_parameters", "standard_units", ("activity", "standard_units"), surfaces=frozenset({"quality"})),
+    EnumPolicy("molecule", "molecule_type", ("molecule", "types"), surfaces=frozenset({"quality"})),
+    EnumPolicy("molecule", "structure_type", ("molecule", "structure_types"), surfaces=frozenset({"quality"})),
+    EnumPolicy("molecule", "max_phase", ("molecule", "max_phase_values"), surfaces=frozenset({"quality"})),
+    EnumPolicy("molecule", "ro3_pass", ("molecule", "ro3_pass_values"), surfaces=frozenset({"quality"})),
+    EnumPolicy("target", "target_type", ("target", "types"), surfaces=frozenset({"quality"})),
+    EnumPolicy("target_component", "component_type", ("target", "component_types"), surfaces=frozenset({"quality"})),
+    EnumPolicy("publication_term", "term_type", ("publication_term", "term_types"), surfaces=frozenset({"quality"})),
+)
+
 
 @pytest.fixture(scope="module")
 def chembl_enums() -> dict[str, Any]:
@@ -221,6 +245,20 @@ def _assert_subset(
     )
 
 
+def _assert_exact_match(
+    *,
+    label: str,
+    config_path: str,
+    values: Iterable[str],
+    registry_values: frozenset[str],
+) -> None:
+    observed = frozenset(values)
+    assert observed == registry_values, (
+        f"{label} must exactly match {config_path}; "
+        f"missing={sorted(registry_values - observed)} extra={sorted(observed - registry_values)}"
+    )
+
+
 @pytest.mark.integration
 @pytest.mark.parametrize("policy", ENUM_POLICIES, ids=lambda policy: policy.label)
 def test_chembl_config_enum_surfaces_are_registry_subsets(
@@ -260,3 +298,54 @@ def test_chembl_config_enum_surfaces_are_registry_subsets(
             values=_extraction_values(config, policy),
             registry_values=registry_values,
         )
+
+
+@pytest.mark.integration
+@pytest.mark.parametrize(
+    "policy", EXACT_DQ_ENUM_POLICIES, ids=lambda policy: f"exact:{policy.label}"
+)
+def test_chembl_strict_dq_enum_surfaces_match_registry_exactly(
+    chembl_enums: dict[str, Any],
+    entity_configs: dict[str, dict[str, Any]],
+    policy: EnumPolicy,
+) -> None:
+    config = entity_configs[policy.entity]
+    registry_values = _registry_values(chembl_enums, policy.registry_path)
+    registry_label = ".".join(policy.registry_path)
+
+    _assert_exact_match(
+        label=f"{policy.label} quality.entity_field_validations.allowed",
+        config_path=registry_label,
+        values=_quality_allowed_values(config, policy.field),
+        registry_values=registry_values,
+    )
+
+
+@pytest.mark.integration
+def test_chembl_publication_source_specific_doc_type_surfaces_remain_reviewed_subsets(
+    chembl_enums: dict[str, Any],
+    entity_configs: dict[str, dict[str, Any]],
+) -> None:
+    config = entity_configs["publication"]
+    global_types = _registry_values(chembl_enums, ("publication", "types"))
+    native_doc_types = _registry_values(chembl_enums, ("publication", "native_doc_types"))
+
+    publication_type_values = frozenset(_quality_allowed_values(config, "publication_type"))
+    extraction_doc_types = frozenset(
+        _extraction_values(
+            config,
+            EnumPolicy(
+                "publication",
+                "doc_type",
+                ("publication", "native_doc_types"),
+                surfaces=frozenset({"extraction_params"}),
+                extraction_param="doc_type",
+            ),
+        )
+    )
+
+    assert publication_type_values < global_types
+    assert publication_type_values == frozenset(
+        {"journal-article", "book", "dataset", "patent"}
+    )
+    assert extraction_doc_types <= native_doc_types

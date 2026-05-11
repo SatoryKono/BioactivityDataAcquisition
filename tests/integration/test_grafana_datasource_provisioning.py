@@ -39,8 +39,7 @@ def test_quarantine_explorer_backend_contract_is_documented() -> None:
     assert "compatibility entrypoint" in readme
     assert "bioetl quarantine serve --port 8081" in env_example
     assert (
-        "BIOETL_QUARANTINE_EXPLORER_URL=http://host.docker.internal:8081"
-        in env_example
+        "BIOETL_QUARANTINE_EXPLORER_URL=http://host.docker.internal:8081" in env_example
     )
 
 
@@ -94,11 +93,13 @@ def test_grafana_uses_remote_renderer_sidecar() -> None:
     renderer = monitoring["services"]["renderer"]
 
     assert (
-        "GF_RENDERING_SERVER_URL=http://renderer:8081/render"
-        in grafana["environment"]
+        "GF_RENDERING_SERVER_URL=http://renderer:8081/render" in grafana["environment"]
     )
     assert "GF_RENDERING_CALLBACK_URL=http://grafana:3000/" in grafana["environment"]
-    assert grafana["entrypoint"] == ["/bin/sh", "/usr/local/bin/bioetl-bootstrap-grafana.sh"]
+    assert grafana["entrypoint"] == [
+        "/bin/sh",
+        "/usr/local/bin/bioetl-bootstrap-grafana.sh",
+    ]
     assert renderer["image"] == "grafana/grafana-image-renderer:latest"
 
 
@@ -152,5 +153,8 @@ def test_bootstrap_script_prunes_stale_local_renderer_plugin_in_remote_mode() ->
         encoding="utf-8"
     )
     assert 'RENDERING_SERVER_URL="${GF_RENDERING_SERVER_URL:-}"' in content
-    assert 'STALE_RENDERER_PLUGIN_DIR="/var/lib/grafana/plugins/grafana-image-renderer"' in content
+    assert (
+        'STALE_RENDERER_PLUGIN_DIR="/var/lib/grafana/plugins/grafana-image-renderer"'
+        in content
+    )
     assert 'rm -rf "${STALE_RENDERER_PLUGIN_DIR}"' in content

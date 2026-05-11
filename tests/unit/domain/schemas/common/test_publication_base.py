@@ -106,7 +106,9 @@ class TestPublicationBaseSchemaValidation:
         assert pd.isna(validated["pmid"].iloc[0])
         assert pd.isna(validated["doi"].iloc[0])
 
-    def test_record_with_provider_preserved_publication_class(self, valid_base_record: dict) -> None:
+    def test_record_with_provider_preserved_publication_class(
+        self, valid_base_record: dict
+    ) -> None:
         """Provider-preserved PUBLICATION class should pass base publication schema."""
         record = valid_base_record.copy()
         record["publication_class"] = "PUBLICATION"

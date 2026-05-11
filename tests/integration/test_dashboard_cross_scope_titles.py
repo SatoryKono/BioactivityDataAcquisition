@@ -19,15 +19,39 @@ def test_cross_scope_links_use_required_titles():
     required_transitions = {
         # From Overview to other dashboards
         ("bioetl-overview-v2", "bioetl-runtime"): ["2. Runtime", "Open Runtime"],
-        ("bioetl-overview-v2", "bioetl-control-plane-v1"): ["0. Control Plane", "Open Control Plane"],
-        ("bioetl-overview-v2", "bioetl-dq-v2"): ["4. Data Quality", "Open Data Quality"],
-        ("bioetl-overview-v2", "bioetl-provider-health-v2"): ["3. Provider Health", "Open Provider Health"],
-        ("bioetl-overview-v2", "bioetl-workflow-overview"): ["5. Workflow", "Open Workflow"],
+        ("bioetl-overview-v2", "bioetl-control-plane-v1"): [
+            "0. Control Plane",
+            "Open Control Plane",
+        ],
+        ("bioetl-overview-v2", "bioetl-dq-v2"): [
+            "4. Data Quality",
+            "Open Data Quality",
+        ],
+        ("bioetl-overview-v2", "bioetl-provider-health-v2"): [
+            "3. Provider Health",
+            "Open Provider Health",
+        ],
+        ("bioetl-overview-v2", "bioetl-workflow-overview"): [
+            "5. Workflow",
+            "Open Workflow",
+        ],
         # From Runtime to other dashboards
-        ("bioetl-runtime", "bioetl-dq-v2"): ["Open Data Quality", "Inspect DQ", "4. Data Quality"],
-        ("bioetl-runtime", "bioetl-provider-health-v2"): ["Open Provider Health", "Inspect Provider", "3. Provider Health"],
+        ("bioetl-runtime", "bioetl-dq-v2"): [
+            "Open Data Quality",
+            "Inspect DQ",
+            "4. Data Quality",
+        ],
+        ("bioetl-runtime", "bioetl-provider-health-v2"): [
+            "Open Provider Health",
+            "Inspect Provider",
+            "3. Provider Health",
+        ],
         # From DQ to other dashboards
-        ("bioetl-dq-v2", "bioetl-silver-reject-explorer"): ["Open Silver Reject Explorer", "Inspect Rejects", "Silver Reject Explorer"],
+        ("bioetl-dq-v2", "bioetl-silver-reject-explorer"): [
+            "Open Silver Reject Explorer",
+            "Inspect Rejects",
+            "Silver Reject Explorer",
+        ],
     }
 
     for (source_uid, target_uid), allowed_titles in required_transitions.items():
@@ -60,11 +84,12 @@ def test_cross_scope_links_have_required_tooltip_tokens():
             tooltip = str(link.get("tooltip", ""))
 
             # Only check if tooltip exists and mentions dashboard scope reset or context mapping
-            if tooltip and ("scope reset" in tooltip.lower() or "context mapping" in tooltip.lower()):
+            if tooltip and (
+                "scope reset" in tooltip.lower() or "context mapping" in tooltip.lower()
+            ):
                 has_scope_reset = "reset scope" in tooltip.lower()
                 has_context_mapping = "context mapping" in tooltip.lower()
                 assert has_scope_reset or has_context_mapping, (
                     f"{dashboard_path.name}: link {link.get('title')} has scope-related tooltip "
                     f"but doesn't mention 'reset scope' or 'context mapping', got '{tooltip}'"
                 )
-

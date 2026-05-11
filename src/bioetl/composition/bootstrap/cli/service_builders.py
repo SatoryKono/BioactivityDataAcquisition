@@ -214,7 +214,8 @@ def build_cli_quarantine_service(
     logger_factory: Callable[[], LoggerPort],
     metrics_resolver: Callable[..., MetricsPort],
     tracing_resolver: Callable[..., TracingPort],
-    run_manifest_service_factory: Callable[[], RunManifestInspectionService] | None = None,
+    run_manifest_service_factory: Callable[[], RunManifestInspectionService]
+    | None = None,
     clock_factory: Callable[[], SystemClock] = SystemClock,
 ) -> QuarantineService:
     """Build the CLI quarantine administration service graph."""

@@ -93,6 +93,13 @@ providers:
       - Retracted Publication
       - Dataset
       - Preprint
+    publication_status:
+      source: NLM/PubMed publication status lifecycle registry
+      preserve_unknown: true
+      values:
+      - ppublish
+      - epublish
+      - aheadofprint
   semanticscholar:
     publication_types:
       source: Semantic Scholar publicationTypes array observed registry

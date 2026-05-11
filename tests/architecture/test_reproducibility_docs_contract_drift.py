@@ -264,7 +264,7 @@ def test_reproducibility_rubric_declares_repeatable_7x5_scoring_matrix() -> None
 def test_rules_doc_uses_stable_digest_jitter_example() -> None:
     text = _read("docs/00-project/RULES.md")
 
-    assert "md5(hash_input.encode(\"utf-8\")).hexdigest()" in text
+    assert 'md5(hash_input.encode("utf-8")).hexdigest()' in text
     assert "hash(hash_input)" not in text
     assert "## Evidence Matrix" in text
     assert "## Criterion Evidence Index" in text

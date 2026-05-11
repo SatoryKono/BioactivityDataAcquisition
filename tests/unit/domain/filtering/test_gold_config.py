@@ -351,11 +351,11 @@ class TestGoldFilterConfigListContainsFilters:
             ),
         )
         assert config.should_include({"component_types": '["PROTEIN"]'}) is True
-        assert (
-            config.should_include({"component_types": '["PROTEIN", "RNA"]'}) is False
-        )
+        assert config.should_include({"component_types": '["PROTEIN", "RNA"]'}) is False
 
-    def test_chembl_target_gold_filters_accept_stringified_component_lists(self) -> None:
+    def test_chembl_target_gold_filters_accept_stringified_component_lists(
+        self,
+    ) -> None:
         """Test chembl_target Gold filters accept stringified list fields."""
         config = GoldFilterConfig(
             column_filters=(

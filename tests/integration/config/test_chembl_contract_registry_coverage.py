@@ -11,6 +11,9 @@ from bioetl.infrastructure.config.dq_contract_config_loader import (
     DQContractConfigLoader,
 )
 from bioetl.infrastructure.control_plane import FileContractRegistryStore
+from bioetl.composition.factories.pipeline._registry_manifest_chembl import (
+    CHEMBL_PIPELINE_CONFIGS,
+)
 
 _REGISTRY_PATH = Path("configs/base/contract_registry.yaml")
 _CONFIGS_ROOT = Path("configs")
@@ -247,3 +250,45 @@ def test_chembl_semantic_rules_are_governed_by_dq_contracts(
 
     assert expected_rule_ids <= configured_rule_ids
     assert dq_config.soft_fail_threshold < dq_config.hard_fail_threshold
+
+
+@pytest.mark.integration
+def test_chembl_registry_fixture_and_contract_surfaces_stay_in_dynamic_parity() -> None:
+    """Every shipped ChEMBL pipeline must stay aligned across registry, fixture, and contract surfaces."""
+    manifest_payload = (
+        yaml.safe_load(_FIXTURE_MANIFEST_PATH.read_text(encoding="utf-8")) or {}
+    )
+    fixtures = manifest_payload.get("fixtures", {})
+    assert isinstance(fixtures, dict)
+
+    store = FileContractRegistryStore(_REGISTRY_PATH)
+    registry = store.load()
+
+    for config in CHEMBL_PIPELINE_CONFIGS:
+        fixture_key = f"{config.provider}/{config.entity_type}"
+        contract_ref = f"{config.provider}.{config.entity_type}"
+        pipeline_name = config.pipeline_name
+
+        fixture_entry = fixtures.get(fixture_key)
+        assert isinstance(fixture_entry, dict), (
+            f"{pipeline_name}: missing Bronze fixture manifest entry {fixture_key}"
+        )
+        assert fixture_entry.get("fixture_kind") == "tracked_ci_sample"
+        assert fixture_entry.get("validation_status") == "valid"
+        fixture_path = fixture_entry.get("fixture_path")
+        assert isinstance(fixture_path, str)
+        assert (_CONFIGS_ROOT.parent / fixture_path).exists(), (
+            f"{pipeline_name}: missing tracked fixture file {fixture_path}"
+        )
+        assert fixture_entry.get("records") == 20
+
+        registry_entry = registry.entries.get(contract_ref)
+        assert registry_entry is not None, (
+            f"{pipeline_name}: missing contract registry entry {contract_ref}"
+        )
+        assert registry_entry.status.value == "active"
+
+        dq_config = DQContractConfigLoader(_CONFIGS_ROOT).load_dq_config_for_pipeline(
+            pipeline_name
+        )
+        assert dq_config.contract_ref == contract_ref

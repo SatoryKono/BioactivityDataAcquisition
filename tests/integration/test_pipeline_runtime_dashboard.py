@@ -449,7 +449,9 @@ def test_runtime_first_action_cta_contract() -> None:
     """Panel 9991 (First Action) must have exactly 4 CTAs with specific titles."""
     panels = {p.get("id"): p for p in get_dashboard_panels(_dashboard())}
     first_action_panel = panels.get(9991)
-    assert first_action_panel is not None, "Runtime dashboard missing First Action panel (id=9991)"
+    assert first_action_panel is not None, (
+        "Runtime dashboard missing First Action panel (id=9991)"
+    )
     assert first_action_panel.get("title") == "First Action", (
         f"Panel 9991 must have title 'First Action', got {first_action_panel.get('title')!r}"
     )

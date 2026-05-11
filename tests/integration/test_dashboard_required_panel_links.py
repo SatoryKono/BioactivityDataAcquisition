@@ -21,7 +21,13 @@ def test_overview_dashboard_required_panel_links():
     panel_214 = panels.get(214)
     assert panel_214 is not None, "Panel 214 (System Status) must exist"
     data_links_214 = panel_214.get("options", {}).get("dataLinks", [])
-    required_links_214 = ["Open Runtime", "Open Control Plane", "Open Data Quality", "Open Provider Health", "Open Workflow"]
+    required_links_214 = [
+        "Open Runtime",
+        "Open Control Plane",
+        "Open Data Quality",
+        "Open Provider Health",
+        "Open Workflow",
+    ]
     for required_link in required_links_214:
         assert any(required_link in link.get("title", "") for link in data_links_214), (
             f"Panel 214 must have dataLink '{required_link}'"
@@ -46,9 +52,9 @@ def test_dq_dashboard_required_panel_links():
     panel_9102 = panels.get(9102)
     assert panel_9102 is not None, "Panel 9102 (Inspect DQ Current Reasons) must exist"
     data_links_9102 = panel_9102.get("options", {}).get("dataLinks", [])
-    assert any("Silver Reject Explorer" in link.get("title", "") for link in data_links_9102), (
-        "Panel 9102 must have dataLink to 'Open Silver Reject Explorer'"
-    )
+    assert any(
+        "Silver Reject Explorer" in link.get("title", "") for link in data_links_9102
+    ), "Panel 9102 must have dataLink to 'Open Silver Reject Explorer'"
 
 
 def test_workflow_overview_required_panel_links():
@@ -60,7 +66,13 @@ def test_workflow_overview_required_panel_links():
     panel_9 = panels.get(9)
     assert panel_9 is not None, "Panel 9 (Next Diagnostic Surface) must exist"
     data_links_9 = panel_9.get("options", {}).get("dataLinks", [])
-    required_links_9 = ["Open 2. Runtime", "Open 4. Data Quality", "Open 3. Provider Health", "Open 0. Control Plane", "Open 1. Overview"]
+    required_links_9 = [
+        "Open 2. Runtime",
+        "Open 4. Data Quality",
+        "Open 3. Provider Health",
+        "Open 0. Control Plane",
+        "Open 1. Overview",
+    ]
     for required_link in required_links_9:
         assert any(required_link in link.get("title", "") for link in data_links_9), (
             f"Panel 9 must have dataLink '{required_link}'"

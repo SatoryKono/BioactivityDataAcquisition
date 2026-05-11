@@ -1003,16 +1003,14 @@ def test_runtime_backlog_and_gold_missing_current_status_rules_use_current_gauge
 
     assert "bioetl_stage_backlog_records" in backlog_expr
     assert "max_over_time(bioetl_stage_backlog_records" not in backlog_expr
-    assert "bioetl_stage_backlog_records{stage=\"output\"}" in gold_expr
+    assert 'bioetl_stage_backlog_records{stage="output"}' in gold_expr
     assert (
-        "max_over_time(bioetl_stage_backlog_records{stage=\"output\"}[15m])"
+        'max_over_time(bioetl_stage_backlog_records{stage="output"}[15m])'
         not in gold_expr
     )
 
 
-def test_overview_control_plane_input_coalesces_absent_alert_series_to_zero() -> (
-    None
-):
+def test_overview_control_plane_input_coalesces_absent_alert_series_to_zero() -> None:
     payload = _load_rules()
     control_plane_rule = next(
         rule

@@ -85,9 +85,7 @@ def _enrich_filtered_stats_with_bronze_denominator(
     total = enriched.get("total", 0)
     enriched["bronze_records"] = bronze_records
     enriched["reject_ratio"] = (
-        float(total / bronze_records)
-        if isinstance(total, int) and total > 0
-        else 0.0
+        float(total / bronze_records) if isinstance(total, int) and total > 0 else 0.0
     )
     return enriched
 

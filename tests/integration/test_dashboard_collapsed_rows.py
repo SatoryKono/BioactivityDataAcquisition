@@ -24,8 +24,6 @@ def test_collapsed_rows_have_descriptive_titles():
                 title = panel.get("title", "")
                 # Collapsed rows should have descriptive titles
                 # Common patterns: "Incident Drilldown: ...", "Diagnostics: ...", etc.
-                assert title, (
-                    f"{dashboard_path.name}: collapsed row must have title"
-                )
+                assert title, f"{dashboard_path.name}: collapsed row must have title"
                 # Check for incident scenario patterns (optional but recommended)
                 # This is a SHOULD, not MUST, so we just check title exists
