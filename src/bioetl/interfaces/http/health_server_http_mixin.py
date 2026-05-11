@@ -28,6 +28,9 @@ class HealthServerHTTPMixin:
     _logger: LoggerPort | None
     _request_error_allowlist: tuple[type[BaseException], ...]
     _writer_close_allowlist: tuple[type[BaseException], ...]
+    _request_line_timeout_seconds: float = 5.0
+    _header_line_timeout_seconds: float = 5.0
+    _max_header_lines: int = 100
 
     async def _handle_connection(
         self,
@@ -64,7 +67,10 @@ class HealthServerHTTPMixin:
             reader: Async stream reader providing the raw HTTP request bytes.
             writer: Async stream writer for sending the HTTP response.
         """
-        request_line = await asyncio.wait_for(reader.readline(), timeout=5.0)
+        request_line = await asyncio.wait_for(
+            reader.readline(),
+            timeout=self._request_line_timeout_seconds,
+        )
         if not request_line:
             return
 
@@ -103,10 +109,15 @@ class HealthServerHTTPMixin:
         Args:
             reader: Async stream reader positioned after the request line.
         """
-        while True:
-            line = await reader.readline()
+        for _ in range(self._max_header_lines):
+            line = await asyncio.wait_for(
+                reader.readline(),
+                timeout=self._header_line_timeout_seconds,
+            )
             if line in (b"\r\n", b"\n", b""):
                 break
+        else:
+            raise ValueError("Too many request headers")
 
     async def _handle_request_error(
         self,

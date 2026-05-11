@@ -8,6 +8,9 @@ from typing import TYPE_CHECKING, Protocol
 from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
+    from bioetl.application.services.control_plane.run_manifest_inspection_service import (
+        RunManifestInspectionService,
+    )
     from bioetl.domain.ports import LoggerPort, QuarantinePort
 
 
@@ -19,6 +22,7 @@ class _FilteredQuarantineHost(Protocol):
 
     logger: LoggerPort
     quarantine_port: QuarantinePort
+    run_manifest_service: RunManifestInspectionService | None
 
     def _record_operator_metrics(
         self,
@@ -27,6 +31,65 @@ class _FilteredQuarantineHost(Protocol):
         status: str,
         duration_seconds: float,
     ) -> None: ...
+
+
+def _resolve_bronze_records_from_inspection(inspection: object) -> int | None:
+    """Return one run-scoped Bronze denominator from manifest ledger entries."""
+    bronze_records: int | None = None
+    for entry in getattr(inspection, "ledger_entries", ()):
+        metrics_snapshot = getattr(entry, "metrics_snapshot", None)
+        if not isinstance(metrics_snapshot, dict):
+            continue
+        value = metrics_snapshot.get("records_bronze")
+        if not isinstance(value, int) or value <= 0:
+            continue
+        bronze_records = value if bronze_records is None else max(bronze_records, value)
+    return bronze_records
+
+
+def _enrich_filtered_stats_with_bronze_denominator(
+    stats: JsonDict,
+    *,
+    run_id: str | None,
+    run_manifest_service: object,
+) -> JsonDict:
+    """Attach a bounded Bronze denominator when manifest evidence is available."""
+    enriched = dict(stats)
+    scoped_run_ids = enriched.pop("run_ids", None)
+    if run_manifest_service is None:
+        return enriched
+
+    resolved_run_ids: list[str] = []
+    if run_id is not None:
+        resolved_run_ids = [run_id]
+    elif isinstance(scoped_run_ids, list):
+        resolved_run_ids = [
+            candidate.strip()
+            for candidate in scoped_run_ids
+            if isinstance(candidate, str) and candidate.strip()
+        ]
+
+    bronze_records = 0
+    for candidate_run_id in sorted(set(resolved_run_ids)):
+        try:
+            inspection = run_manifest_service.show(candidate_run_id)
+        except ValueError:
+            continue
+        resolved = _resolve_bronze_records_from_inspection(inspection)
+        if resolved is not None:
+            bronze_records += resolved
+
+    if bronze_records <= 0:
+        return enriched
+
+    total = enriched.get("total", 0)
+    enriched["bronze_records"] = bronze_records
+    enriched["reject_ratio"] = (
+        float(total / bronze_records)
+        if isinstance(total, int) and total > 0
+        else 0.0
+    )
+    return enriched
 
 
 class QuarantineServiceFilteredMixin:
@@ -195,6 +258,11 @@ class QuarantineServiceFilteredMixin:
             "Got filtered quarantine stats",
             pipeline=pipeline,
             total=stats.get("total", 0),
+        )
+        stats = _enrich_filtered_stats_with_bronze_denominator(
+            stats,
+            run_id=run_id,
+            run_manifest_service=getattr(self, "run_manifest_service", None),
         )
         self._record_operator_metrics(
             operation="filtered_stats",

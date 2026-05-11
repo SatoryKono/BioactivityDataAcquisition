@@ -137,7 +137,8 @@ def test_workflow_selected_range_counters_use_zero_valid_empty_state() -> None:
         ]
         assert expressions
         assert any(
-            "increase(" in expr and "[$__range]" in expr for expr in expressions
+            ("increase(" in expr or "max_over_time(" in expr) and "[$__range]" in expr
+            for expr in expressions
         ), f"{panel_title} must stay selected-range evidence"
         assert any("or vector(0)" in expr for expr in expressions), (
             f"{panel_title} must keep zero-valid fallback for empty selected ranges"
@@ -1147,20 +1148,35 @@ def test_selected_range_kpis_do_not_use_raw_counters() -> None:
     """Selected-range KPI panels must use windowed counter semantics."""
     allowed_panel_snippets = {
         "bioetl-overview-v2.json": {
-            "Historical Failures": ("increase(",),
-            "Recent Terminal Runs": ("increase(",),
+            "Historical Failures": ("increase(", "max_over_time("),
+            "Recent Terminal Runs": ("increase(", "max_over_time("),
         },
         "bioetl-dq-v2.json": {
             "Track Range Evidence: Bronze -> Silver -> Gold": (
                 "increase(",
+                "max_over_time(",
                 "last_over_time(",
             ),
-            "Track: Source Records in Range (Bronze)": ("increase(", "last_over_time("),
-            "Track: Clean Records in Range (Gold)": ("increase(", "last_over_time("),
+            "Track: Source Records in Range (Bronze)": (
+                "increase(",
+                "max_over_time(",
+                "last_over_time(",
+            ),
+            "Track: Clean Records in Range (Gold)": (
+                "increase(",
+                "max_over_time(",
+                "last_over_time(",
+            ),
         },
         "bioetl-runtime.json": {
-            "Inspect Errors by Stage / Error Code / Range": ("increase(",),
-            "Track Records by Stage / Run Type / Range": ("increase(",),
+            "Inspect Errors by Stage / Error Code / Range": (
+                "increase(",
+                "max_over_time(",
+            ),
+            "Track Records by Stage / Run Type / Range": (
+                "increase(",
+                "max_over_time(",
+            ),
             "Track GLOBAL Shutdown Initiated by Reason / Interval": ("increase(",),
             "Track GLOBAL Shutdown Completed by Reason / Interval": ("increase(",),
         },

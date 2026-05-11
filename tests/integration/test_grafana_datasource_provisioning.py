@@ -38,6 +38,32 @@ def test_quarantine_explorer_backend_contract_is_documented() -> None:
     assert "dedicated long-lived BioETL HTTP" in readme
     assert "compatibility entrypoint" in readme
     assert "bioetl quarantine serve --port 8081" in env_example
+    assert (
+        "BIOETL_QUARANTINE_EXPLORER_URL=http://bioetl-app:8081"
+        in env_example
+    )
+
+
+def test_quarantine_explorer_compose_uses_shared_network_backend() -> None:
+    """Grafana must resolve the Quarantine Explorer backend through Docker DNS."""
+    monitoring = _load_monitoring_compose()
+    grafana = monitoring["services"]["grafana"]
+    root = yaml.safe_load(Path("docker-compose.yml").read_text(encoding="utf-8"))
+    bioetl = root["services"]["bioetl"]
+
+    assert (
+        "BIOETL_QUARANTINE_EXPLORER_URL=${BIOETL_QUARANTINE_EXPLORER_URL:-http://bioetl-app:8081}"
+        in grafana["environment"]
+    )
+    assert "monitoring" in bioetl["networks"]
+    assert bioetl["command"] == [
+        "quarantine",
+        "serve",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "8081",
+    ]
 
 
 def test_grafana_compose_installs_infinity_plugin() -> None:
@@ -46,6 +72,31 @@ def test_grafana_compose_installs_infinity_plugin() -> None:
     content = compose_path.read_text(encoding="utf-8")
     assert "GF_PLUGINS_PREINSTALL=yesoreyeram-infinity-datasource" in content
     assert "GF_INSTALL_PLUGINS=yesoreyeram-infinity-datasource" in content
+
+
+def test_quarantine_explorer_defaults_to_shared_network_backend() -> None:
+    """Monitoring compose should route explorer traffic through Docker DNS by default."""
+    compose_path = Path("docker-compose.monitoring.yml")
+    content = compose_path.read_text(encoding="utf-8")
+    assert (
+        "BIOETL_QUARANTINE_EXPLORER_URL=${BIOETL_QUARANTINE_EXPLORER_URL:-http://bioetl-app:8081}"
+        in content
+    )
+    assert "name: bioetl-monitoring" in content
+
+
+def test_grafana_uses_remote_renderer_sidecar() -> None:
+    """Grafana monitoring stack should use a supported remote renderer service."""
+    monitoring = _load_monitoring_compose()
+    grafana = monitoring["services"]["grafana"]
+    renderer = monitoring["services"]["renderer"]
+
+    assert (
+        "GF_RENDERING_SERVER_URL=http://renderer:8081/render"
+        in grafana["environment"]
+    )
+    assert "GF_RENDERING_CALLBACK_URL=http://grafana:3000/" in grafana["environment"]
+    assert renderer["image"] == "grafana/grafana-image-renderer:4.1.5"
 
 
 def test_tracing_datasource_default_matches_optional_tracing_profile() -> None:

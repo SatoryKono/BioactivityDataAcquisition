@@ -170,4 +170,5 @@ def bootstrap_quarantine_service() -> QuarantineService:
         logger_factory=create_noop_logger,
         metrics_resolver=resolve_metrics_port,
         tracing_resolver=resolve_tracing_port,
+        run_manifest_service_factory=bootstrap_run_manifest_service,
     )

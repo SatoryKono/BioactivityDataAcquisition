@@ -462,7 +462,7 @@ uv run python -m pytest -q tests/integration/test_prometheus_rules_config.py
   1. Убедитесь, что в dashboard выбран конкретный `$pipeline` (single-select),
      а не общий scope.
   1. Проверьте, что сервер поднят с внешним bind для Grafana container:
-     `bioetl health server --host 0.0.0.0 --port 8081`.
+     `bioetl quarantine serve --host 0.0.0.0 --port 8081`.
   1. Проверьте наличие Infinity plugin и datasource:
      `curl -u admin:<password> http://localhost:3000/api/datasources` должен содержать `Quarantine Explorer`,
      а `curl -u admin:<password> http://localhost:3000/api/plugins/yesoreyeram-infinity-datasource/settings`
@@ -470,9 +470,10 @@ uv run python -m pytest -q tests/integration/test_prometheus_rules_config.py
   1. Для Grafana 12+ используйте `GF_PLUGINS_PREINSTALL=yesoreyeram-infinity-datasource`
      (legacy `GF_INSTALL_PLUGINS` оставляем только для обратной совместимости).
   1. Убедитесь, что Grafana datasource `Quarantine Explorer` указывает на
-     `http://host.docker.internal:8081` (или ваш override `BIOETL_QUARANTINE_EXPLORER_URL`).
-  1. Если используется Linux Docker engine, проверьте что у Grafana есть
-     `host.docker.internal` (`extra_hosts: host-gateway`).
+     `http://bioetl-app:8081` через shared monitoring network alias
+     (или ваш override `BIOETL_QUARANTINE_EXPLORER_URL`).
+  1. Проверьте, что сервис `bioetl-app` подключён к сети `bioetl-monitoring`
+     и слушает `0.0.0.0:8081` внутри контейнера.
 - **Дашборд пустой**:
   1. Проверьте, что пайплайн-процесс запущен и не завершился с ошибкой.
   1. Убедитесь, что пайплайн запущен с метриками (`BIOETL_METRICS_ENABLED=true`).
