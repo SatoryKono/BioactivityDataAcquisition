@@ -12,7 +12,7 @@ from bioetl.application.core.wiring.registry import (
     UniProtProteinTransformer,
 )
 from bioetl.composition.factories.pipeline.config_types import PipelineFactoryConfig
-from bioetl.domain.contracts import (
+from bioetl.domain.contracts.gold import (
     CrossRefPublicationGoldSchema,
     OpenAlexPublicationGoldSchema,
     PubChemCompoundGoldSchema,

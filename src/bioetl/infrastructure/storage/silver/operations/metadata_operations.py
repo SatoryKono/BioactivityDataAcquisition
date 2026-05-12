@@ -204,16 +204,12 @@ class SilverMetadataOperations:
 
     async def _write_silver_metadata(
         self,
-        request: _SilverMetadataWriteRequest | str | None = None,
-        *args: object,
-        **kwargs: object,
+        request: _SilverMetadataWriteRequest,
     ) -> None:
         """Canonical Silver metadata publication path for composition-backed ops."""
         await write_internal_silver_metadata_operation(
             self,
             request,
-            args=args,
-            kwargs=kwargs,
             execute_silver_metadata_write=_execute_silver_metadata_write,
         )
 

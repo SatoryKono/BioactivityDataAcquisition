@@ -7,7 +7,6 @@ from dataclasses import dataclass
 from bioetl.domain.control_plane._reproducibility_policy_profiles import (
     DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
     is_critical_reproducibility_runtime,
-    legacy_config_hash_from_resolved_config_hash,
     normalize_required_persistence_profile,
     resolve_replay_capability,
 )
@@ -202,7 +201,6 @@ __all__ = [
     "assess_reproducibility_policy",
     "build_snapshot_envelope_status",
     "is_critical_reproducibility_runtime",
-    "legacy_config_hash_from_resolved_config_hash",
     "normalize_required_persistence_profile",
     "resolve_effective_required_persistence_profile",
     "resolve_replay_capability",

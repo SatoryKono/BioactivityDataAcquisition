@@ -15,7 +15,7 @@ from unittest.mock import patch
 
 import pytest
 
-from bioetl.composition.bootstrap import bootstrap_pipeline_runner
+from bioetl.composition.bootstrap.runtime.pipeline import bootstrap_pipeline_runner
 from bioetl.composition.factories.storage import StorageBundle, StorageContext
 from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter

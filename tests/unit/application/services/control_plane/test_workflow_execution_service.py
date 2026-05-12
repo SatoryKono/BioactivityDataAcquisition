@@ -470,3 +470,132 @@ async def test_workflow_execution_service_requires_explicit_repair_after_ambiguo
 
     with pytest.raises(RuntimeError, match="explicit --repair-steps or --force-steps"):
         await resume_service.run_workflow(_build_transform_config(), resume_last=True)
+
+
+@pytest.mark.asyncio
+async def test_workflow_execution_service_incremental_offset_progression() -> None:
+    """Test that incremental runs correctly progress offset across multiple executions."""
+    manifest_port = _InMemoryWorkflowManifestPort()
+    ledger_port = _InMemoryWorkflowLedgerPort()
+    state_port = _InMemoryWorkflowStatePort()
+    lock_port = _FakeLockPort()
+
+    # Build config with limit
+    from bioetl.domain.workflow import WorkflowRunOptionsConfig
+
+    config_with_limit = WorkflowConfig(
+        name="chembl_core",
+        steps=(
+            WorkflowStepConfig(
+                step_id="chembl_activity_ingest",
+                pipeline_name="chembl_activity",
+                run_options=WorkflowRunOptionsConfig(limit=1000),
+            ),
+            WorkflowStepConfig(
+                step_id="chembl_assay_ingest",
+                pipeline_name="chembl_assay",
+                depends_on=("chembl_activity_ingest",),
+                run_options=WorkflowRunOptionsConfig(limit=1000),
+            ),
+        ),
+    )
+
+    # First incremental run
+    service1 = WorkflowExecutionService(
+        workflow_runner=_FakeWorkflowRunner(),  # type: ignore[arg-type]
+        manifest_service=WorkflowManifestService(
+            manifest_port=manifest_port,
+            created_at_factory=lambda: FIXED_TEST_TIME,
+            _manifest_id_factory=lambda: "workflow-manifest-1",
+        ),
+        workflow_ledger_port=ledger_port,
+        workflow_ledger_factory=_create_workflow_ledger_service,
+        workflow_state_port=state_port,
+        workflow_lock_port=lock_port,
+        now_factory=lambda: FIXED_TEST_TIME,
+        run_id_factory=lambda: RunID(UUID("00000000-0000-0000-0000-000000000111")),
+    )
+
+    result1 = await service1.run_workflow(config_with_limit, incremental=True)
+    assert result1.status == "success"
+
+    # Check state after first run
+    state1 = state_port.get_latest("chembl_core")
+    assert state1 is not None
+    assert state1.status == "success"
+    assert state1.last_start_offset == 0  # None treated as 0
+    assert state1.last_limit == 1000
+
+    # Second incremental run with different limit
+    config_with_limit_2 = WorkflowConfig(
+        name="chembl_core",
+        steps=(
+            WorkflowStepConfig(
+                step_id="chembl_activity_ingest",
+                pipeline_name="chembl_activity",
+                run_options=WorkflowRunOptionsConfig(limit=500),
+            ),
+            WorkflowStepConfig(
+                step_id="chembl_assay_ingest",
+                pipeline_name="chembl_assay",
+                depends_on=("chembl_activity_ingest",),
+                run_options=WorkflowRunOptionsConfig(limit=500),
+            ),
+        ),
+    )
+
+    service2 = WorkflowExecutionService(
+        workflow_runner=_FakeWorkflowRunner(),  # type: ignore[arg-type]
+        manifest_service=WorkflowManifestService(
+            manifest_port=manifest_port,
+            created_at_factory=lambda: FIXED_TEST_TIME,
+            _manifest_id_factory=lambda: "workflow-manifest-2",
+        ),
+        workflow_ledger_port=ledger_port,
+        workflow_ledger_factory=_create_workflow_ledger_service,
+        workflow_state_port=state_port,
+        workflow_lock_port=_FakeLockPort(),
+        now_factory=lambda: FIXED_TEST_TIME,
+        run_id_factory=lambda: RunID(UUID("00000000-0000-0000-0000-000000000222")),
+    )
+
+    result2 = await service2.run_workflow(config_with_limit_2, incremental=True)
+    assert result2.status == "success"
+
+    # Check state after second run
+    state2 = state_port.get_latest("chembl_core")
+    assert state2 is not None
+    assert state2.status == "success"
+    # Debug: print values
+    print(f"DEBUG state1.last_start_offset: {state1.last_start_offset}, state1.last_limit: {state1.last_limit}")
+    print(f"DEBUG state2.last_start_offset: {state2.last_start_offset}, state2.last_limit: {state2.last_limit}")
+    # Offset should be 0 + 1000 = 1000 from first run, limit should be 500 from second run
+    assert state2.last_start_offset == 1000
+    assert state2.last_limit == 500
+
+    # Third incremental run
+    service3 = WorkflowExecutionService(
+        workflow_runner=_FakeWorkflowRunner(),  # type: ignore[arg-type]
+        manifest_service=WorkflowManifestService(
+            manifest_port=manifest_port,
+            created_at_factory=lambda: FIXED_TEST_TIME,
+            _manifest_id_factory=lambda: "workflow-manifest-3",
+        ),
+        workflow_ledger_port=ledger_port,
+        workflow_ledger_factory=_create_workflow_ledger_service,
+        workflow_state_port=state_port,
+        workflow_lock_port=_FakeLockPort(),
+        now_factory=lambda: FIXED_TEST_TIME,
+        run_id_factory=lambda: RunID(UUID("00000000-0000-0000-0000-000000000333")),
+    )
+
+    result3 = await service3.run_workflow(config_with_limit_2, incremental=True)
+    assert result3.status == "success"
+
+    # Check state after third run
+    state3 = state_port.get_latest("chembl_core")
+    assert state3 is not None
+    assert state3.status == "success"
+    # Offset should be 1000 + 500 = 1500 from second run
+    assert state3.last_start_offset == 1500
+    assert state3.last_limit == 500

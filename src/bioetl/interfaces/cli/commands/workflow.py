@@ -204,6 +204,121 @@ def workflow() -> None:
     help="Auto-increment start_offset from last successful execution. "
     "Cannot be used with --resume-last or --start-offset.",
 )
+def _validate_run_workflow_options(
+    incremental: bool,
+    resume_last: bool,
+    start_offset: int | None,
+) -> None:
+    """Validate mutually exclusive workflow run options."""
+    if incremental and resume_last:
+        echo_error(
+            "Invalid options",
+            "--incremental cannot be used together with --resume-last",
+        )
+        raise click.exceptions.Exit(ExitCode.CONFIG_ERROR)
+    if incremental and start_offset is not None:
+        echo_error(
+            "Invalid options",
+            "--incremental cannot be used when --start-offset is explicitly set. "
+            "Either use --incremental for auto-increment or --start-offset for "
+            "manual control.",
+        )
+        raise click.exceptions.Exit(ExitCode.CONFIG_ERROR)
+
+
+def _load_and_apply_workflow_config(
+    name: str,
+    only_steps: str | None,
+    dry_run: bool,
+    run_type: str | None,
+    start_offset: int | None,
+    limit: int | None,
+    input_csv: str | None,
+    filter_column: str | None,
+    filter_field: str | None,
+    vacuum_after_run: bool | None,
+    vacuum_retention_days: int | None,
+    log_level: str | None,
+    ignore_yaml_filter: bool | None,
+    skip_gold: bool | None,
+    execution_context: str | None,
+    use_cached_bronze: bool | None,
+    cached_bronze_path: str | None,
+    cached_bronze_date: str | None,
+    exact_replay: bool | None,
+    replay_of_run_id: str | None,
+    replay_of_manifest_id: str | None,
+    enable_tracing: bool | None,
+) -> object:
+    """Load workflow config and apply CLI overrides."""
+    try:
+        config = load_workflow_config(name)
+        config = select_workflow_steps(config, only_steps)
+        config = apply_cli_overrides(
+            config,
+            dry_run=dry_run,
+            run_type=run_type,
+            start_offset=start_offset,
+            limit=limit,
+            input_csv=input_csv,
+            filter_column=filter_column,
+            filter_field=filter_field,
+            vacuum_after_run=vacuum_after_run,
+            vacuum_retention_days=vacuum_retention_days,
+            log_level=log_level,
+            ignore_yaml_filter=ignore_yaml_filter,
+            skip_gold=skip_gold,
+            execution_context=execution_context,
+            use_cached_bronze=use_cached_bronze,
+            cached_bronze_path=cached_bronze_path,
+            cached_bronze_date=cached_bronze_date,
+            exact_replay=exact_replay,
+            replay_of_run_id=replay_of_run_id,
+            replay_of_manifest_id=replay_of_manifest_id,
+            enable_tracing=enable_tracing,
+        )
+        return config
+    except (FileNotFoundError, ValueError) as exc:
+        echo_error("Workflow configuration error", str(exc))
+        raise click.exceptions.Exit(ExitCode.CONFIG_ERROR) from exc
+
+
+def _execute_workflow_and_publish_metrics(
+    config: object,
+    registry: PipelineRegistry | None,
+    only_steps: str | None,
+    resume_last: bool,
+    force_steps: str | None,
+    repair_steps: str | None,
+    incremental: bool,
+) -> object:
+    """Execute workflow and publish metrics."""
+    parsed_force_steps = parse_only_steps(force_steps) or ()
+    parsed_repair_steps = parse_only_steps(repair_steps) or ()
+    ensure_metrics_server_started()
+    result = asyncio.run(
+        get_workflow_execution_service(registry=registry).run_workflow(
+            config,
+            launch_context={"only_steps": list(parse_only_steps(only_steps) or ())},
+            resume_last=resume_last,
+            force_steps=parsed_force_steps,
+            repair_steps=parsed_repair_steps,
+            incremental=incremental,
+        )
+    )
+    publish_metrics_safely(
+        run_label="bioetl",
+        pipeline_name=config.pipeline_context,
+        run_type=config.run_type_context,
+        grouping_key_extra=(
+            {"workflow_run_id": result.workflow_run_id}
+            if result.workflow_run_id is not None
+            else None
+        ),
+    )
+    return result
+
+
 @click.pass_obj
 def run_workflow_command(
     registry: PipelineRegistry | None,
@@ -235,74 +350,39 @@ def run_workflow_command(
     incremental: bool,
 ) -> None:
     """Execute one declarative workflow config sequentially."""
-    # CRITICAL: Validation BEFORE apply_cli_overrides, while we can
-    # distinguish user parameters from computed ones
-    if incremental and resume_last:
-        echo_error(
-            "Invalid options",
-            "--incremental cannot be used together with --resume-last",
-        )
-        raise click.exceptions.Exit(ExitCode.CONFIG_ERROR)
-    if incremental and start_offset is not None:
-        echo_error(
-            "Invalid options",
-            "--incremental cannot be used when --start-offset is explicitly set. "
-            "Either use --incremental for auto-increment or --start-offset for "
-            "manual control.",
-        )
-        raise click.exceptions.Exit(ExitCode.CONFIG_ERROR)
-    try:
-        config = load_workflow_config(name)
-        config = select_workflow_steps(config, only_steps)
-        config = apply_cli_overrides(
-            config,
-            dry_run=dry_run,
-            run_type=run_type,
-            start_offset=start_offset,
-            limit=limit,
-            input_csv=input_csv,
-            filter_column=filter_column,
-            filter_field=filter_field,
-            vacuum_after_run=vacuum_after_run,
-            vacuum_retention_days=vacuum_retention_days,
-            log_level=log_level,
-            ignore_yaml_filter=ignore_yaml_filter,
-            skip_gold=skip_gold,
-            execution_context=execution_context,
-            use_cached_bronze=use_cached_bronze,
-            cached_bronze_path=cached_bronze_path,
-            cached_bronze_date=cached_bronze_date,
-            exact_replay=exact_replay,
-            replay_of_run_id=replay_of_run_id,
-            replay_of_manifest_id=replay_of_manifest_id,
-            enable_tracing=enable_tracing,
-        )
-    except (FileNotFoundError, ValueError) as exc:
-        echo_error("Workflow configuration error", str(exc))
-        raise click.exceptions.Exit(ExitCode.CONFIG_ERROR) from exc
-
-    parsed_force_steps = parse_only_steps(force_steps) or ()
-    parsed_repair_steps = parse_only_steps(repair_steps) or ()
-    ensure_metrics_server_started()
-    result = asyncio.run(
-        get_workflow_execution_service(registry=registry).run_workflow(
-            config,
-            launch_context={"only_steps": list(parse_only_steps(only_steps) or ())},
-            resume_last=resume_last,
-            force_steps=parsed_force_steps,
-            repair_steps=parsed_repair_steps,
-            incremental=incremental,
-        )
+    _validate_run_workflow_options(incremental, resume_last, start_offset)
+    config = _load_and_apply_workflow_config(
+        name=name,
+        only_steps=only_steps,
+        dry_run=dry_run,
+        run_type=run_type,
+        start_offset=start_offset,
+        limit=limit,
+        input_csv=input_csv,
+        filter_column=filter_column,
+        filter_field=filter_field,
+        vacuum_after_run=vacuum_after_run,
+        vacuum_retention_days=vacuum_retention_days,
+        log_level=log_level,
+        ignore_yaml_filter=ignore_yaml_filter,
+        skip_gold=skip_gold,
+        execution_context=execution_context,
+        use_cached_bronze=use_cached_bronze,
+        cached_bronze_path=cached_bronze_path,
+        cached_bronze_date=cached_bronze_date,
+        exact_replay=exact_replay,
+        replay_of_run_id=replay_of_run_id,
+        replay_of_manifest_id=replay_of_manifest_id,
+        enable_tracing=enable_tracing,
     )
-    publish_metrics_safely(
-        run_label="bioetl",
-        pipeline_name=config.pipeline_context,
-        run_type=config.run_type_context,
-        grouping_key_extra=(
-            {"workflow_run_id": result.workflow_run_id}
-            if result.workflow_run_id is not None
-            else None
-        ),
+    result = _execute_workflow_and_publish_metrics(
+        config=config,
+        registry=registry,
+        only_steps=only_steps,
+        resume_last=resume_last,
+        force_steps=force_steps,
+        repair_steps=repair_steps,
+        incremental=incremental,
     )
     render_run_result(
         config,

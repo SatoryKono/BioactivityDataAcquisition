@@ -10,7 +10,6 @@ from bioetl.domain.control_plane import (
 )
 from bioetl.domain.control_plane.reproducibility_policy import (
     assess_reproducibility_policy,
-    legacy_config_hash_from_resolved_config_hash,
     resolve_effective_required_persistence_profile,
     resolve_replay_capability,
 )
@@ -211,10 +210,4 @@ def test_non_exact_launch_preserves_configured_default_profile() -> None:
             exact_replay_requested=False,
         )
         == "degraded_observable"
-    )
-
-
-def test_legacy_config_hash_alias_is_resolved_config_hash() -> None:
-    assert legacy_config_hash_from_resolved_config_hash("resolved-hash") == (
-        "resolved-hash"
     )

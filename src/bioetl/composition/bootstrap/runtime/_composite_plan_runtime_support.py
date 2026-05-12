@@ -50,22 +50,6 @@ class _NamedRuntimeBundle(Protocol):
     lock: LockPort
 
 
-def _coerce_legacy_runtime_bundle(
-    resolved_bundle: object,
-) -> (
-    tuple[str, Settings, LoggerPort, MetricsPort, TracingPort, object, LockPort] | None
-):
-    """Return the legacy positional runtime bundle shape when present."""
-    if not isinstance(resolved_bundle, tuple | list):
-        return None
-    if len(resolved_bundle) != 7:
-        return None
-    return cast(
-        "tuple[str, Settings, LoggerPort, MetricsPort, TracingPort, object, LockPort]",
-        tuple(resolved_bundle),
-    )
-
-
 def build_bootstrap_runtime_resources(
     *,
     bootstrap_runtime_basics_fn: Callable[..., object],
@@ -89,21 +73,10 @@ def build_bootstrap_runtime_resources(
             clock=getattr(named_bundle, "clock", None),
             infra_context=named_bundle,
         )
-    legacy_bundle = _coerce_legacy_runtime_bundle(resolved_bundle)
-    if legacy_bundle is None:
-        raise TypeError(
-            "bootstrap_runtime_basics_fn must return a named runtime bundle or "
-            "legacy 7-tuple runtime bundle"
-        )
-    effective_run_id, settings, logger, metrics, tracer, storage, lock = legacy_bundle
-    return BootstrapRuntimeResources(
-        run_id=effective_run_id,
-        settings=settings,
-        logger=logger,
-        metrics=metrics,
-        tracer=tracer,
-        storage=storage,
-        lock=lock,
+    raise TypeError(
+        "bootstrap_runtime_basics_fn must return CompositeInfrastructureContext "
+        "or another named runtime bundle exposing run_id/settings/logger/"
+        "metrics/tracer/storage/lock"
     )
 
 
@@ -113,25 +86,16 @@ def build_bootstrap_support_services(
     config: CompositeConfig,
     runtime: CompositeRuntimeConfig,
     resources: BootstrapRuntimeResources,
-    include_legacy_runtime_kwargs: bool = False,
 ) -> object:
     """Resolve support services from the shared resource bundle."""
-    call_kwargs: dict[str, object] = {
-        "config": config,
-        "runtime": runtime,
-        "infra_context": resources.infra_context or resources,
-    }
-    if include_legacy_runtime_kwargs:
-        call_kwargs.update(
-            run_id=resources.run_id,
-            settings=resources.settings,
-            logger=resources.logger,
-            metrics=resources.metrics,
-            tracer=resources.tracer,
-            storage=resources.storage,
-            lock=resources.lock,
-        )
-    return _call_supported_kwargs(build_support_services_fn, call_kwargs)
+    return _call_supported_kwargs(
+        build_support_services_fn,
+        {
+            "config": config,
+            "runtime": runtime,
+            "infra_context": resources.infra_context or resources,
+        },
+    )
 
 
 def _has_named_bundle(resolved_bundle: object) -> TypeGuard[_NamedRuntimeBundle]:

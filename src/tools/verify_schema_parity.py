@@ -13,7 +13,7 @@ from pathlib import Path
 
 import yaml
 
-from bioetl.domain.contracts import (
+from bioetl.domain.contracts.gold import (
     ChEMBLActivityGoldSchema,
     ChEMBLAssayGoldSchema,
     ChEMBLAssayParametersGoldSchema,

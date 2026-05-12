@@ -524,6 +524,33 @@ def _expected_diagnostics_without_ledger(
         "replay_support_state": "exact_replay_supported",
         "source_posture": "immutable_snapshot_envelope",
         "input_snapshot_missing_source_refs": [],
+        "historical_live_run_upgrade_policy": (
+            "input_snapshot_published_ledger_evidence_only"
+        ),
+        "historical_live_run_upgrade_boundary": (
+            "input_snapshot_published_ledger_evidence"
+        ),
+        "historical_live_run_upgrade_reason": (
+            "historical_live_runs_require_input_snapshot_published_ledger_evidence_before_parent_promotion"
+        ),
+        "broader_historical_exact_replay_policy": (
+            "certified_historical_exact_replay_tranche_supported"
+        ),
+        "broader_historical_exact_replay_boundary": (
+            "historical_source_snapshot_certification"
+        ),
+        "broader_historical_exact_replay_reason": (
+            "retained_historical_source_runs_can_gain_certified_exact_replay_parent_evidence_via_backfilled_snapshot_certification"
+        ),
+        "broader_historical_exact_replay_state": (
+            "within_launch_time_snapshot_boundary"
+        ),
+        "historical_live_run_upgrade_state": ("not_needed_snapshot_backed_at_launch"),
+        "replay_occurrence_kind": "launch_time_snapshot_backed_run",
+        "post_capture_replayable_parent_supported": True,
+        "post_capture_replayable_parent_boundary": (
+            "ledger_materialized_live_capture_parent"
+        ),
         "replay_capability_reason": ("full_immutable_input_snapshot_envelope_present"),
         "exact_replay_eligible": True,
         "exact_replay_blockers": [],

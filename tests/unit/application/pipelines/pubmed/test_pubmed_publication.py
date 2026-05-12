@@ -183,24 +183,21 @@ async def test_transform_bronze_to_silver(pipeline, pipeline_context):
 
 @pytest.mark.asyncio
 async def test_transform_bronze_to_silver_invalid_xml(pipeline, pipeline_context):
-    """Test transformation with invalid XML handles error gracefully.
+    """Invalid XML must surface validation failure through the pipeline wrapper.
 
     After refactoring to BasePublicationTransformer pattern:
     - XML parsing happens in _pre_extract_validation
     - ET.ParseError is caught and logged as XML_parse_error
-    - Then ValueError is raised, which BaseTransformer catches and logs as entity_validation_failed
-    - The last warning logged is entity_validation_failed (unified behavior)
+    - Then ValueError is raised, which BaseTransformer logs as
+      entity_validation_failed before propagating to the caller
     """
     bronze_record: BronzeRecord = cast(
         "BronzeRecord",
         {"pmid": "12345", "_raw_xml": "<Invalid>XML", "source_batch_id": "test_batch"},
     )
 
-    silver_record = await pipeline.transform_bronze_to_silver(
-        pipeline_context, bronze_record
-    )
-
-    assert silver_record is None
+    with pytest.raises(ValueError, match="XML parse error"):
+        await pipeline.transform_bronze_to_silver(pipeline_context, bronze_record)
     # Verify warning was logged - unified BasePublicationTransformer pattern
     # logs entity_validation_failed when ValueError is raised from _pre_extract_validation
     args, kwargs = pipeline.logger.warning.call_args

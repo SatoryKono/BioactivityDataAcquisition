@@ -186,7 +186,7 @@ class TestBootstrapPipeline:
         mock_logger: MagicMock,
     ):
         """Test that unknown pipeline name raises ValueError."""
-        from bioetl.composition.bootstrap import bootstrap_pipeline_runner
+        from bioetl.composition.bootstrap.runtime.pipeline import bootstrap_pipeline_runner
 
         settings = _create_bootstrap_settings(
             metrics_enabled=True,
@@ -222,7 +222,7 @@ class TestBootstrapPipeline:
         This test verifies that bootstrap_pipeline_runner creates a runner successfully
         regardless of metrics server state.
         """
-        from bioetl.composition.bootstrap import bootstrap_pipeline_runner
+        from bioetl.composition.bootstrap.runtime.pipeline import bootstrap_pipeline_runner
 
         mock_get_settings.return_value = _create_bootstrap_settings(
             metrics_enabled=True,
@@ -266,7 +266,7 @@ class TestBootstrapPipeline:
         mock_logger,
     ):
         """Test bootstrap_pipeline_runner creates chembl_activity pipeline."""
-        from bioetl.composition.bootstrap import bootstrap_pipeline_runner
+        from bioetl.composition.bootstrap.runtime.pipeline import bootstrap_pipeline_runner
 
         mock_get_settings.return_value = mock_settings
 
@@ -309,7 +309,7 @@ class TestBootstrapVacuumConfig:
         mock_create_registry: MagicMock,
     ) -> None:
         """Test that YAML auto_vacuum config is used when CLI doesn't override."""
-        from bioetl.composition.bootstrap import bootstrap_pipeline_runner
+        from bioetl.composition.bootstrap.runtime.pipeline import bootstrap_pipeline_runner
 
         settings = _create_bootstrap_settings()
         mock_get_settings.return_value = settings
@@ -355,7 +355,7 @@ class TestBootstrapVacuumConfig:
         mock_create_registry: MagicMock,
     ) -> None:
         """Test that CLI vacuum options override YAML config."""
-        from bioetl.composition.bootstrap import bootstrap_pipeline_runner
+        from bioetl.composition.bootstrap.runtime.pipeline import bootstrap_pipeline_runner
 
         settings = _create_bootstrap_settings()
         mock_get_settings.return_value = settings

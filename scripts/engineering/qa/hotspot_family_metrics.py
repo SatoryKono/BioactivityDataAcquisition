@@ -55,7 +55,7 @@ def iter_hotspot_families(
 ) -> list[dict[str, object]]:
     """Return hotspot-family rows from the scorecard."""
     source = scorecard if scorecard is not None else load_scorecard()
-    hotspot_policy = source.get("report_only_hotspot_families", {})
+    hotspot_policy = source.get("hotspot_family_ratchets", {})
     assert isinstance(hotspot_policy, dict)
     families = hotspot_policy.get("families", [])
     assert isinstance(families, list)
@@ -333,7 +333,7 @@ def _duplication_baseline_path(
     """Resolve duplication baseline path from explicit arg or scorecard policy."""
     if duplication_baseline_path is not None:
         return duplication_baseline_path
-    artifact_policy = source.get("report_only_hotspot_families", {})
+    artifact_policy = source.get("hotspot_family_ratchets", {})
     if not isinstance(artifact_policy, dict):
         return None
     baseline_artifact = artifact_policy.get("artifact_policy", {})

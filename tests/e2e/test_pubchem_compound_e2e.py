@@ -14,7 +14,7 @@ from typing import Any
 import pytest
 from tests.helpers.vcr_config import build_base_vcr_config
 
-from bioetl.composition.bootstrap import bootstrap_pipeline_runner
+from bioetl.composition.bootstrap.runtime.pipeline import bootstrap_pipeline_runner
 
 from .conftest import (
     assert_bronze_files_exist,

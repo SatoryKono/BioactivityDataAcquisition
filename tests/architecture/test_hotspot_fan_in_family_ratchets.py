@@ -12,7 +12,7 @@ from scripts.engineering.qa.hotspot_family_metrics import (
 def test_active_hotspot_family_internal_fan_in_budgets_hold_reviewed_baseline() -> None:
     """Selected active hotspot families must not exceed their internal fan-in cap."""
     scorecard = load_scorecard()
-    hotspot_policy = scorecard.get("report_only_hotspot_families", {})
+    hotspot_policy = scorecard.get("hotspot_family_ratchets", {})
     assert isinstance(hotspot_policy, dict)
 
     families = hotspot_policy.get("families", [])

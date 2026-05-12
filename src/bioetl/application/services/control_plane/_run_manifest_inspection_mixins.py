@@ -224,6 +224,37 @@ class RunManifestInspectionIdentityGraphMixin:
             ),
             "replay_family_contract": diagnostics.get("replay_family_contract"),
             "replay_support_state": diagnostics.get("replay_support_state"),
+            "post_capture_replayable_parent_supported": diagnostics.get(
+                "post_capture_replayable_parent_supported"
+            ),
+            "post_capture_replayable_parent_boundary": diagnostics.get(
+                "post_capture_replayable_parent_boundary"
+            ),
+            "historical_live_run_upgrade_policy": diagnostics.get(
+                "historical_live_run_upgrade_policy"
+            ),
+            "historical_live_run_upgrade_boundary": diagnostics.get(
+                "historical_live_run_upgrade_boundary"
+            ),
+            "historical_live_run_upgrade_reason": diagnostics.get(
+                "historical_live_run_upgrade_reason"
+            ),
+            "broader_historical_exact_replay_policy": diagnostics.get(
+                "broader_historical_exact_replay_policy"
+            ),
+            "broader_historical_exact_replay_boundary": diagnostics.get(
+                "broader_historical_exact_replay_boundary"
+            ),
+            "broader_historical_exact_replay_reason": diagnostics.get(
+                "broader_historical_exact_replay_reason"
+            ),
+            "broader_historical_exact_replay_state": diagnostics.get(
+                "broader_historical_exact_replay_state"
+            ),
+            "historical_live_run_upgrade_state": diagnostics.get(
+                "historical_live_run_upgrade_state"
+            ),
+            "replay_occurrence_kind": diagnostics.get("replay_occurrence_kind"),
             "source_posture": diagnostics.get("source_posture"),
             "input_snapshot_missing_source_refs": diagnostics.get(
                 "input_snapshot_missing_source_refs",

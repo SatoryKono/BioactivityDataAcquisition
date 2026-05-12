@@ -224,9 +224,9 @@ def test_run_manifest_config_hash_legacy_alias_contract_is_documented_and_wired(
     assert "`config_hash` as a synonym for `effective_config_hash`" in contract
     assert "`config_hash`" in runbook
     assert "legacy compatibility" in runbook
-    assert "legacy_config_hash_from_resolved_config_hash" in policy
-    assert "config_hash=legacy_config_hash_from_resolved_config_hash(" in builder
-    assert "config_hash=legacy_config_hash_from_resolved_config_hash(" in refs
+    assert "direct resolved_config_hash mapping" in policy
+    assert "config_hash=direct resolved_config_hash mapping(" in builder
+    assert "config_hash=direct resolved_config_hash mapping(" in refs
 
 
 @pytest.mark.architecture

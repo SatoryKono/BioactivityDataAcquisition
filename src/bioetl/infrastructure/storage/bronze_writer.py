@@ -114,28 +114,14 @@ class BronzeWriter(
         validate_json: bool = True,
         runtime_services: BronzeWriterRuntimeServices | None = None,
         flat_structure: bool = False,
-        **legacy_kwargs: object,
+        tracing: TracingPort | None = None,
+        audit: AuditPort | None = None,
+        metadata_writer: MetadataWriterPort | None = None,
+        save_metadata: bool = False,
+        metadata_coordinator: MetadataCoordinatorPort | None = None,
+        lineage_store: LineageStorePort | None = None,
     ) -> None:
         """Initialize Bronze writer."""
-        tracing = cast("TracingPort | None", legacy_kwargs.pop("tracing", None))
-        audit = cast("AuditPort | None", legacy_kwargs.pop("audit", None))
-        metadata_writer = cast(
-            "MetadataWriterPort | None",
-            legacy_kwargs.pop("metadata_writer", None),
-        )
-        save_metadata = legacy_kwargs.pop("save_metadata", False)
-        metadata_coordinator = cast(
-            "MetadataCoordinatorPort | None",
-            legacy_kwargs.pop("metadata_coordinator", None),
-        )
-        lineage_store = cast(
-            "LineageStorePort | None",
-            legacy_kwargs.pop("lineage_store", None),
-        )
-        if legacy_kwargs:
-            unexpected = ", ".join(sorted(legacy_kwargs))
-            raise TypeError(f"Unexpected BronzeWriter options: {unexpected}")
-
         if metadata_writer is None:
             from bioetl.domain.ports.noop import NoOpMetadataWriter
 

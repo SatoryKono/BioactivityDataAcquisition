@@ -101,6 +101,6 @@ class TestPipelineEventImportFromDomain:
 
     def test_can_import_from_domain_facade(self) -> None:
         """Verify PipelineEvent is exported from domain module."""
-        from bioetl.domain import PipelineEvent as DomainPipelineEvent
+        from bioetl.domain.events import PipelineEvent as DomainPipelineEvent
 
         assert DomainPipelineEvent.START == "pipeline_started"

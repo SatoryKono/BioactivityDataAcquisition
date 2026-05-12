@@ -86,12 +86,12 @@ The `bootstrap` module is used by multiple entry points:
 
 ```python
 # CLI (interfaces/cli/main.py)
-from bioetl.composition.bootstrap import bootstrap_pipeline_runner
+from bioetl.composition.bootstrap.runtime.pipeline import bootstrap_pipeline_runner
 
 runner = bootstrap_pipeline_runner(...)
 
 # Integration Tests
-from bioetl.composition.bootstrap import bootstrap_pipeline_runner
+from bioetl.composition.bootstrap.runtime.pipeline import bootstrap_pipeline_runner
 
 runner = bootstrap_pipeline_runner(...)
 

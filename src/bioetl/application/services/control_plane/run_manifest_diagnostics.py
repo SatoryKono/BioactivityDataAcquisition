@@ -49,6 +49,7 @@ from bioetl.application.services.control_plane.run_manifest_reproducibility_scor
     build_reproducibility_audit_scoring,
 )
 from bioetl.domain.control_plane import (
+    ReplayCapability,
     RunInputSnapshotRef,
     RunLedgerEntry,
     RunManifest,
@@ -197,15 +198,12 @@ def build_diagnostics_summary(
     return final_summary
 
 
-def _refresh_replay_summary_from_materialized_snapshots(
-    *,
+def _refresh_replay_summary_build_policy_assessment(
     manifest: RunManifest,
     summary: dict[str, object],
-) -> dict[str, object]:
-    """Recompute replay policy after ledger-derived snapshots are merged."""
-    input_snapshots = summary.get("input_snapshots")
-    if not isinstance(input_snapshots, list) or not input_snapshots:
-        return summary
+    input_snapshots: list[object],
+) -> tuple[RunManifest, object, bool]:
+    """Build policy assessment from materialized snapshots."""
     source_refs = _build_effective_source_refs(
         manifest=manifest,
         input_snapshots=input_snapshots,
@@ -219,6 +217,9 @@ def _refresh_replay_summary_from_materialized_snapshots(
     )
     requested_exact_replay = bool(summary.get("requested_exact_replay", False))
     resume_requested = bool(manifest.launch_context.get("resume"))
+    replay_capability_seed: ReplayCapability | None = None
+    if any(source_ref.input_snapshots for source_ref in source_refs):
+        replay_capability_seed = ReplayCapability.EXACT_REPLAY_SUPPORTED
     policy_assessment = assess_reproducibility_policy(
         source_refs=source_refs,
         required_persistence_profile=summary.get(
@@ -228,7 +229,7 @@ def _refresh_replay_summary_from_materialized_snapshots(
         strict_exact_replay_supported=strict_exact_replay_supported,
         exact_replay_requested=requested_exact_replay,
         resume_requested=resume_requested,
-        replay_capability=None,
+        replay_capability=replay_capability_seed,
         run_type=manifest.run_type.value,
         debug_only=False,
         lifecycle_projection_only=False,
@@ -238,7 +239,18 @@ def _refresh_replay_summary_from_materialized_snapshots(
         replay_capability=policy_assessment.replay_capability,
         source_refs=source_refs,
     )
-    updated = dict(summary)
+    return effective_manifest, policy_assessment, resume_requested
+
+
+def _refresh_replay_summary_update_replay_fields(
+    updated: dict[str, object],
+    effective_manifest: RunManifest,
+    policy_assessment: object,
+    input_snapshots: list[object],
+    resume_requested: bool,
+    requested_exact_replay: bool,
+) -> tuple[dict[str, object], bool, str, str]:
+    """Update replay-related fields in summary."""
     updated["replay_capability"] = policy_assessment.replay_capability.value
     updated["replay_capability_assessment"] = policy_assessment.to_dict()
     updated["replay_capability_reason"] = _resolve_replay_capability_reason(
@@ -296,6 +308,17 @@ def _refresh_replay_summary_from_materialized_snapshots(
         )
     )
     updated["source_posture"] = _resolve_source_posture(policy_assessment)
+    return updated, exact_replay_eligible, replay_mode, continuation_mode
+
+
+def _refresh_replay_summary_update_snapshot_fields(
+    updated: dict[str, object],
+    input_snapshots: list[object],
+    exact_replay_eligible: bool,
+    replay_mode: str,
+    policy_assessment: object,
+) -> dict[str, object]:
+    """Update snapshot-related fields in summary."""
     materialization_mode = resolve_post_manifest_input_snapshot_materialization_mode(
         cast("list[dict[str, object]]", input_snapshots)
     )
@@ -314,6 +337,49 @@ def _refresh_replay_summary_from_materialized_snapshots(
         input_snapshots=cast("list[dict[str, object]]", input_snapshots),
         exact_replay_eligible=exact_replay_eligible,
         replay_mode=replay_mode,
+    )
+    return updated
+
+
+def _refresh_replay_summary_from_materialized_snapshots(
+    *,
+    manifest: RunManifest,
+    summary: dict[str, object],
+) -> dict[str, object]:
+    """Recompute replay policy after ledger-derived snapshots are merged."""
+    input_snapshots = summary.get("input_snapshots")
+    if not isinstance(input_snapshots, list) or not input_snapshots:
+        return summary
+    (
+        effective_manifest,
+        policy_assessment,
+        resume_requested,
+    ) = _refresh_replay_summary_build_policy_assessment(
+        manifest=manifest,
+        summary=summary,
+        input_snapshots=cast("list[object]", input_snapshots),
+    )
+    requested_exact_replay = bool(summary.get("requested_exact_replay", False))
+    updated = dict(summary)
+    (
+        updated,
+        exact_replay_eligible,
+        replay_mode,
+        continuation_mode,
+    ) = _refresh_replay_summary_update_replay_fields(
+        updated=updated,
+        effective_manifest=effective_manifest,
+        policy_assessment=policy_assessment,
+        input_snapshots=cast("list[object]", input_snapshots),
+        resume_requested=resume_requested,
+        requested_exact_replay=requested_exact_replay,
+    )
+    updated = _refresh_replay_summary_update_snapshot_fields(
+        updated=updated,
+        input_snapshots=cast("list[object]", input_snapshots),
+        exact_replay_eligible=exact_replay_eligible,
+        replay_mode=replay_mode,
+        policy_assessment=policy_assessment,
     )
     updated["resume_contract"] = _build_resume_contract(
         manifest=effective_manifest,
@@ -378,11 +444,12 @@ def _merge_manifest_source_refs(
     """Attach grouped snapshot refs to manifest-declared source refs."""
     effective_refs: list[RunSourceRef] = []
     for source_ref in manifest.source_refs:
-        key = (
-            source_ref.provider,
-            source_ref.entity,
-            source_ref.pipeline_name,
-            source_ref.query,
+        snapshots = _pop_matching_source_snapshots(
+            snapshots_by_source=snapshots_by_source,
+            provider=source_ref.provider,
+            entity=source_ref.entity,
+            pipeline_name=source_ref.pipeline_name,
+            query=source_ref.query,
         )
         effective_refs.append(
             RunSourceRef(
@@ -390,10 +457,43 @@ def _merge_manifest_source_refs(
                 entity=source_ref.entity,
                 pipeline_name=source_ref.pipeline_name,
                 query=source_ref.query,
-                input_snapshots=tuple(snapshots_by_source.pop(key, [])),
+                input_snapshots=tuple(snapshots),
             )
         )
     return effective_refs
+
+
+def _pop_matching_source_snapshots(
+    *,
+    snapshots_by_source: dict[
+        tuple[str, str, str, str | None], list[RunInputSnapshotRef]
+    ],
+    provider: str,
+    entity: str,
+    pipeline_name: str,
+    query: str | None,
+) -> list[RunInputSnapshotRef]:
+    """Resolve ledger-derived snapshots back onto a manifest-declared source.
+
+    Manifest source refs often omit `query` while post-manifest ledger evidence
+    can carry a concrete query string. In that case, all snapshots for the same
+    provider/entity/pipeline triple belong to the declared source and should not
+    create an extra synthetic source ref that would incorrectly mark the
+    envelope as partial.
+    """
+    exact_key = (provider, entity, pipeline_name, query)
+    if query is not None:
+        return snapshots_by_source.pop(exact_key, [])
+
+    matched_keys = [
+        key
+        for key in snapshots_by_source
+        if key[:3] == (provider, entity, pipeline_name)
+    ]
+    snapshots: list[RunInputSnapshotRef] = []
+    for key in matched_keys:
+        snapshots.extend(snapshots_by_source.pop(key, []))
+    return snapshots
 
 
 def _build_additional_source_refs(

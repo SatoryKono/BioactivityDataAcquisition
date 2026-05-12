@@ -66,12 +66,7 @@ if TYPE_CHECKING:
     )
     from bioetl.infrastructure.config import Settings
 
-    type BootstrapRuntimeBasicsTuple = tuple[
-        str, Settings, LoggerPort, MetricsPort, TracingPort, object, LockPort
-    ]
-    type BootstrapRuntimeBasicsResult = (
-        BootstrapRuntimeBasicsTuple | CompositeInfrastructureContext
-    )
+    type BootstrapRuntimeBasicsResult = CompositeInfrastructureContext
     type SeedRunnerFactory = Callable[[], PipelineRunner]
     type DataFrameRunnerFactory = Callable[[str, pl.DataFrame], PipelineRunner]
     type RunnerFactoryBundle = tuple[

@@ -85,7 +85,7 @@ async def _run_runtime_pipeline(
     contract_policy: PipelineContractPolicy,
     limit: int,
 ) -> None:
-    from bioetl.composition.bootstrap import bootstrap_pipeline_runner
+    from bioetl.composition.bootstrap.runtime.pipeline import bootstrap_pipeline_runner
     from bioetl.domain.context import InputFilterContext, PipelineRunContext
     from bioetl.domain.types import RunID, RunType
 

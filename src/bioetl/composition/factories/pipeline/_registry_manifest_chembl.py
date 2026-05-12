@@ -19,7 +19,7 @@ from bioetl.application.core.wiring.registry import (
     TissueTransformer,
 )
 from bioetl.composition.factories.pipeline.config_types import PipelineFactoryConfig
-from bioetl.domain.contracts import (
+from bioetl.domain.contracts.gold import (
     ChEMBLActivityGoldSchema,
     ChEMBLAssayGoldSchema,
     ChEMBLAssayParametersGoldSchema,

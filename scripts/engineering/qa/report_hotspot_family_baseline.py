@@ -42,7 +42,7 @@ DEFAULT_MD_OUTPUT = PROJECT_ROOT / "reports/quality/hotspot-family-baseline.md"
 
 
 def _resolve_snapshot_date(scorecard: dict[str, object]) -> str:
-    report_only = scorecard.get("report_only_hotspot_families", {})
+    report_only = scorecard.get("hotspot_family_ratchets", {})
     if isinstance(report_only, dict):
         snapshot_date = report_only.get("snapshot_date")
         if isinstance(snapshot_date, str) and snapshot_date.strip():

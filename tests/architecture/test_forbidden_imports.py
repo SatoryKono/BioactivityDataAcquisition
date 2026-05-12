@@ -547,7 +547,7 @@ class TestInterfacesBootstrapIsolation:
             "Correct:\n"
             "  from bioetl.composition.execution_api import create_pipeline_runner\n\n"
             "Wrong:\n"
-            "  from bioetl.composition.bootstrap import bootstrap_pipeline_runner\n\n"
+            "  from bioetl.composition.bootstrap.runtime.pipeline import bootstrap_pipeline_runner\n\n"
             "Violations:\n" + "\n".join(f"  - {v}" for v in violations)
         )
 

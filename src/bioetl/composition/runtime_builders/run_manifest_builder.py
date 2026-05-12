@@ -27,7 +27,6 @@ from bioetl.composition.runtime_builders._runner_builder_support import (
 )
 from bioetl.domain.control_plane.reproducibility_policy import (
     STRICT_PERSISTENCE_PROFILES,
-    legacy_config_hash_from_resolved_config_hash,
 )
 
 if TYPE_CHECKING:
@@ -196,9 +195,7 @@ def _build_manifest_create_request(
             entity=entity,
             run_type_value=run_type_value,
             execution_context_value=execution_context_value,
-            config_hash=legacy_config_hash_from_resolved_config_hash(
-                resolved_config_hash
-            ),
+            config_hash=resolved_config_hash,
             resolved_config_hash=resolved_config_hash,
             effective_config_hash=effective_config_hash,
             contract_ref=contract_ref,

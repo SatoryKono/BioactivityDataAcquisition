@@ -12,7 +12,7 @@ from pathlib import Path
 
 import pytest
 
-from bioetl.composition.bootstrap import bootstrap_pipeline_runner
+from bioetl.composition.bootstrap.runtime.pipeline import bootstrap_pipeline_runner
 
 from .conftest import (
     assert_bronze_files_exist,

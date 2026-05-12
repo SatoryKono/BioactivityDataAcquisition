@@ -15,10 +15,10 @@ from bioetl.application.workflow.transforms.builtins import (
     register_builtin_workflow_transforms,
 )
 from bioetl.domain.workflow import TransformStepConfig
-from bioetl.infrastructure.storage import (
-    SilverForeignKeyReconciliationAdapter,
-    SilverWriter,
-)
+from bioetl.infrastructure.storage.silver_writer import SilverWriter
+    from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation import (
+        SilverForeignKeyReconciliationAdapter,
+    )
 
 pytestmark = pytest.mark.integration
 
