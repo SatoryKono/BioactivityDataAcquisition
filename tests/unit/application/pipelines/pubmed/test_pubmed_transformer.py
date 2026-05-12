@@ -14,6 +14,8 @@ from uuid import uuid4
 
 import pytest
 
+from bioetl.application.core.base_transformer import FilteredOutError
+
 if TYPE_CHECKING:
     from bioetl.application.pipelines.pubmed.transformer import (
         PubMedPublicationTransformer,

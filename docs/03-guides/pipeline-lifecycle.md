@@ -46,7 +46,7 @@ Medallion архитектура требует идемпотентности �
 1. **Graceful release**: Освобождение в `finally` даже при ошибках
 
 ```python
-async with self._services, self._lock_manager:
+async with self._services, self._lock_runtime_service:
     # Блокировка захвачена, инфраструктура и lifecycle подготовлены
     await self._preflight_service.validate_infrastructure(self._services)
     await self._lifecycle_service.prepare_for_run(

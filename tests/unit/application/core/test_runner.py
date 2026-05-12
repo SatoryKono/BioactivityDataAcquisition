@@ -398,7 +398,7 @@ class TestPipelineRunnerInit:
         assert runner.shutdown_signal == shutdown_signal
         assert runner.run_id == str(mock_context.run_id)
         # Verify services are stored directly
-        assert runner._lock_manager == mock_lock_manager
+        assert runner._lock_runtime_service == mock_lock_manager
         assert runner._preflight_service == mock_preflight_service
         assert runner._postrun_service == mock_postrun_service
         assert runner._lifecycle_service == mock_lifecycle_service
@@ -439,7 +439,7 @@ class TestPipelineRunnerInit:
         )
 
         # The exact same instances should be used (DI)
-        assert runner._lock_manager is mock_lock_manager
+        assert runner._lock_runtime_service is mock_lock_manager
         assert runner._preflight_service is mock_preflight_service
         assert runner._postrun_service is mock_postrun_service
         assert runner._lifecycle_service is mock_lifecycle_service
@@ -594,15 +594,15 @@ class TestPipelineRunnerRun:
         assert labels["status"] == "shutdown"
 
     @pytest.mark.asyncio
-    async def test_run_uses_lock_manager_context(
+    async def test_run_uses_lock_runtime_service_context(
         self, runner, mock_lock_manager, mock_executor
     ):
         """Test run uses lock manager as context manager."""
         await runner.run()
 
         # Lock manager should be used as async context manager
-        runner._lock_manager.__aenter__.assert_called_once()
-        runner._lock_manager.__aexit__.assert_called_once()
+        runner._lock_runtime_service.__aenter__.assert_called_once()
+        runner._lock_runtime_service.__aexit__.assert_called_once()
 
     @pytest.mark.asyncio
     async def test_run_records_run_ledger_success(self, runner) -> None:

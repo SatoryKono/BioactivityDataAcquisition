@@ -396,7 +396,7 @@ class CompositeCheckpointLoadService:
             self._emit_checkpoint_load_status("missing")
             return None
 
-        state = load_checkpoint_state(
+        state: CompositeCheckpointState | None = load_checkpoint_state(
             storage=self._storage,
             logger=self._logger,
             composite_name=self._composite_name,
@@ -416,8 +416,13 @@ class CompositeCheckpointLoadService:
         except CheckpointConflictError:
             self._emit_checkpoint_load_status("incompatible")
             raise
-        merged_state = merge_expected_anchors(state, self._expected_context)
-        replayed_state = self._replay_checkpoint_suffix(merged_state)
+        merged_state: CompositeCheckpointState = merge_expected_anchors(
+            state,
+            self._expected_context,
+        )
+        replayed_state: CompositeCheckpointState = self._replay_checkpoint_suffix(
+            merged_state
+        )
         warn_if_checkpoint_stale(
             logger=self._logger,
             composite_name=self._composite_name,
@@ -461,8 +466,10 @@ class CompositeCheckpointLoadService:
             self._emit_checkpoint_load_status("replay_not_needed")
             return state
 
-        replay_projection = project_run_ledger_replay(replay_entries)
-        replayed_state = _merge_replay_projection_state(
+        replay_projection: RunLedgerReplayProjection = project_run_ledger_replay(
+            replay_entries
+        )
+        replayed_state: CompositeCheckpointState = _merge_replay_projection_state(
             state=state,
             replay_projection=replay_projection,
         )

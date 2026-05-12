@@ -26,6 +26,36 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort, MetricsPort
 
 
+_REASON_PATTERNS: tuple[tuple[tuple[str, ...], ShutdownReason], ...] = (
+    (("sigterm", "signal 15"), ShutdownReason.SIGNAL_SIGTERM),
+    (("sigint", "signal 2"), ShutdownReason.SIGNAL_SIGINT),
+    (("timeout",), ShutdownReason.TIMEOUT),
+    (("user",), ShutdownReason.USER_REQUESTED),
+)
+
+
+def _contains_any_keyword(text: str, keywords: tuple[str, ...]) -> bool:
+    """Return whether the normalized reason contains any keyword."""
+    return any(keyword in text for keyword in keywords)
+
+
+def _match_reason_pattern(reason_lower: str) -> ShutdownReason | None:
+    """Return the direct keyword-based shutdown reason match, if any."""
+    for keywords, result in _REASON_PATTERNS:
+        if _contains_any_keyword(reason_lower, keywords):
+            return result
+    return None
+
+
+def _match_compound_reason(reason_lower: str) -> ShutdownReason | None:
+    """Return a shutdown reason that depends on compound keyword checks."""
+    if "lock" in reason_lower and "lost" in reason_lower:
+        return ShutdownReason.LOCK_LOST
+    if "dq" in reason_lower or "threshold" in reason_lower:
+        return ShutdownReason.DQ_THRESHOLD_EXCEEDED
+    return None
+
+
 @dataclass
 class ShutdownService:
     """Unified service for coordinating graceful shutdown.
@@ -214,26 +244,13 @@ class ShutdownService:
             Matching ShutdownReason, or UNKNOWN if not recognized.
         """
         reason_lower = reason.lower()
+        matched_reason = _match_reason_pattern(reason_lower)
+        if matched_reason is not None:
+            return matched_reason
 
-        # Pattern matching table: (keywords, result)
-        patterns: list[tuple[tuple[str, ...], ShutdownReason]] = [
-            (("sigterm", "signal 15"), ShutdownReason.SIGNAL_SIGTERM),
-            (("sigint", "signal 2"), ShutdownReason.SIGNAL_SIGINT),
-            (("timeout",), ShutdownReason.TIMEOUT),
-            (("user",), ShutdownReason.USER_REQUESTED),
-        ]
-
-        for keywords, result in patterns:
-            if any(kw in reason_lower for kw in keywords):
-                return result
-
-        # Special case: requires both "lock" and "lost"
-        if "lock" in reason_lower and "lost" in reason_lower:
-            return ShutdownReason.LOCK_LOST
-
-        # DQ threshold check
-        if "dq" in reason_lower or "threshold" in reason_lower:
-            return ShutdownReason.DQ_THRESHOLD_EXCEEDED
+        matched_compound_reason = _match_compound_reason(reason_lower)
+        if matched_compound_reason is not None:
+            return matched_compound_reason
 
         return ShutdownReason.UNKNOWN
 
