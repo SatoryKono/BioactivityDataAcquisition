@@ -179,7 +179,7 @@ PubMedAdapter                         (pubchempy)
 
 **Расположение:** `src/bioetl/infrastructure/storage/`
 
-Реализует `StoragePort` для работы с различными уровнями данных (Bronze, Silver, Gold).
+Реализует narrow storage ports (`BronzeStoragePort`, `SilverStoragePort`, `GoldStoragePort`, `MergedStoragePort`) для работы с различными уровнями данных.
 
 Реализация разделена на три writer-а, каждый декомпозирован на mixins:
 

@@ -4,7 +4,7 @@
 %% Title: High-Level System Architecture
 %% Covers: RULES.md §1.1 (Five-Layer Architecture)
 %% Updated: 2026-02-17
-%% Components: CLI, Bootstrap, PipelineFactory, PipelineRunner, BaseTransformer, BaseHttpAdapter, StoragePort
+%% Components: CLI, Bootstrap, PipelineFactory, PipelineRunner, BatchExecutor, BaseTransformer, BaseHttpAdapter, BronzeStoragePort, SilverStoragePort, GoldStoragePort
 
 %% @version 1.0.0
 %% @date    2026-02-24
@@ -45,7 +45,7 @@ flowchart TD
 
     subgraph Application["Application Layer"]
         Runner[PipelineRunner<br/>]
-        Executor[PipelineExecutor<br/>]
+        Executor[BatchExecutor<br/>]
         Trans[BaseTransformer<br/>]
     end
 

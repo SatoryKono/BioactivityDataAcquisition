@@ -73,6 +73,7 @@ class ReproducibilityFamilyProfile:
     historical_live_run_upgrade_boundary: str | None
     historical_live_run_upgrade_reason: str
     broader_historical_exact_replay_policy: str
+    broader_historical_exact_replay_boundary: str | None
     broader_historical_exact_replay_reason: str
     replay_family_contract: ReplayFamilyContractName
     default_required_persistence_profile: str
@@ -175,10 +176,13 @@ def _build_composite_reproducibility_family_profile(
             "composite_launches_do_not_define_historical_live_source_upgrade_path"
         ),
         broader_historical_exact_replay_policy=(
-            "ratified_snapshot_backed_boundary_is_final_supported_scope"
+            "certified_historical_exact_replay_tranche_supported"
+        ),
+        broader_historical_exact_replay_boundary=(
+            "historical_composite_certified_source_lineage"
         ),
         broader_historical_exact_replay_reason=(
-            "future_broader_historical_exact_replay_requires_new_contract_revision"
+            "historical_composite_runs_can_gain_certified_exact_replay_parent_evidence_via_certified_source_lineage"
         ),
         replay_family_contract="composite_snapshot_backed_exact_replay",
         default_required_persistence_profile="replay_ready",
@@ -225,10 +229,13 @@ def _build_source_reproducibility_family_profile(
             else "family_outside_supported_exact_replay_boundary"
         ),
         broader_historical_exact_replay_policy=(
-            "ratified_snapshot_backed_boundary_is_final_supported_scope"
+            "certified_historical_exact_replay_tranche_supported"
+        ),
+        broader_historical_exact_replay_boundary=(
+            "historical_source_snapshot_certification" if supported else None
         ),
         broader_historical_exact_replay_reason=(
-            "future_broader_historical_exact_replay_requires_new_contract_revision"
+            "retained_historical_source_runs_can_gain_certified_exact_replay_parent_evidence_via_backfilled_snapshot_certification"
         ),
         replay_family_contract=_source_replay_family_contract(supported=supported),
         default_required_persistence_profile=_source_default_required_profile(
@@ -370,6 +377,9 @@ def build_replay_family_contract(
         ),
         "broader_historical_exact_replay_policy": (
             profile.broader_historical_exact_replay_policy
+        ),
+        "broader_historical_exact_replay_boundary": (
+            profile.broader_historical_exact_replay_boundary
         ),
         "broader_historical_exact_replay_reason": (
             profile.broader_historical_exact_replay_reason

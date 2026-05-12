@@ -104,11 +104,11 @@ context = self._build_context(
 )
 ```
 
-### 2. Формализация API очистки в StoragePort
+### 2. Формализация API очистки в historical `StoragePort` / current narrow storage ports
 
-Cleanup был переведён на явный async port-контракт. В текущем коде
-канонические методы объявлены в узких storage ports и доступны через
-aggregate-facade `StoragePort`:
+Cleanup был переведён на явный async port-контракт. Исторический
+aggregate-facade `StoragePort` больше retired; в текущем коде канонические
+методы объявлены в narrow storage ports:
 
 ```python
 async def clear_silver(self, table_name: str, dry_run: bool = False) -> int:
@@ -157,7 +157,7 @@ Post-run maintenance идёт отдельным путём:
 ### Positive
 
 - **Трассируемость**: Один `run_id` во всех слоях и компонентах
-- **Типобезопасность**: Явные методы в `StoragePort` вместо reflection
+- **Типобезопасность**: Явные методы в narrow storage ports вместо reflection
 - **Data Integrity**: Incremental runs не удаляют существующие данные
 - **Тестируемость**: Можно проверить контракт через type checking
 

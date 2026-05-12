@@ -5,6 +5,10 @@ from __future__ import annotations
 import hashlib
 from collections.abc import Mapping
 
+from bioetl.application.services.control_plane._historical_replay_certification import (
+    LIVE_CAPTURE_SNAPSHOT_MATERIALIZED,
+    MIXED_POST_MANIFEST_SNAPSHOT_MATERIALIZATION,
+)
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
 from bioetl.domain.control_plane.run_ledger import INPUT_SNAPSHOT_PUBLISHED_EVENT
 from bioetl.domain.normalization import serialize_json_canonical
@@ -129,10 +133,45 @@ def collect_ledger_input_snapshot_refs(
             "etag": _snapshot_required_text(details.get("etag")),
             "last_modified": _snapshot_required_text(details.get("last_modified")),
             "captured_at": _snapshot_required_text(details.get("captured_at")),
-            "materialization_mode": "live_capture_snapshot_materialized",
+            "materialization_mode": _snapshot_required_text(
+                details.get("materialization_mode")
+            )
+            or LIVE_CAPTURE_SNAPSHOT_MATERIALIZED,
+            "certification_scope": _snapshot_required_text(
+                details.get("certification_scope")
+            ),
+            "certification_basis": _snapshot_required_text(
+                details.get("certification_basis")
+            ),
+            "certification_artifact_ref": _snapshot_required_text(
+                details.get("certification_artifact_ref")
+            ),
+            "upstream_run_id": _snapshot_required_text(details.get("upstream_run_id")),
+            "upstream_manifest_id": _snapshot_required_text(
+                details.get("upstream_manifest_id")
+            ),
             "source_event_id": entry.entry_id,
         }
     return [refs[key] for key in sorted(refs)]
+
+
+def resolve_post_manifest_input_snapshot_materialization_mode(
+    input_snapshots: list[dict[str, object]],
+) -> str | None:
+    """Return the deterministic post-manifest materialization mode summary."""
+    modes = sorted(
+        {
+            str(snapshot.get("materialization_mode") or "").strip()
+            for snapshot in input_snapshots
+            if isinstance(snapshot, Mapping)
+            and str(snapshot.get("materialization_mode") or "").strip()
+        }
+    )
+    if not modes:
+        return None
+    if len(modes) == 1:
+        return modes[0]
+    return MIXED_POST_MANIFEST_SNAPSHOT_MATERIALIZATION
 
 
 def merge_ledger_input_snapshots_into_summary(
@@ -161,9 +200,13 @@ def merge_ledger_input_snapshots_into_summary(
     merged["input_snapshot_identity_fingerprint"] = (
         compute_input_snapshot_identity_fingerprint(input_snapshots)
     )
-    merged["input_snapshot_materialization_mode"] = "live_capture_snapshot_materialized"
+    merged["input_snapshot_materialization_mode"] = (
+        resolve_post_manifest_input_snapshot_materialization_mode(input_snapshots)
+    )
     if merged.get("source_posture") == "live_or_unknown_inputs":
-        merged["source_posture"] = "live_capture_snapshot_materialized"
+        merged["source_posture"] = str(
+            merged.get("input_snapshot_materialization_mode") or "ledger_derived"
+        )
     if merged.get("snapshot_status") == "none":
         merged["snapshot_status"] = "ledger_derived"
     return merged

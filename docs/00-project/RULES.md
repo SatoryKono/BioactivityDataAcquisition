@@ -79,7 +79,7 @@ ______________________________________________________________________
   - `DataSourcePort` — для проверки адаптеров при регистрации
   - `FilterableDataSourcePort` — для проверки расширенных адаптеров
   - `HealthCheckPort` — для проверки health_check capability
-  - `StoragePort` — для проверки storage backends
+  - `BronzeStoragePort`, `SilverStoragePort`, `GoldStoragePort`, `MergedStoragePort` — для проверки storage backends
 
   Остальные порты (`LoggerPort`, `MetricsPort`, `TracingPort` и т.д.) **MAY** не иметь `@runtime-checkable`.
 

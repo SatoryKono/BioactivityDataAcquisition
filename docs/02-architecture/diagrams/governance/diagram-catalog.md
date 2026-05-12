@@ -285,7 +285,7 @@ ______________________________________________________________________
 001. **RunContext VO** - Class - Execution context
 001. **CompoundIds VO** - Class - Compound identifiers
 001. **TaxonomyId VO** - Class - Taxonomy ID handling
-001. **StoragePort Interface** - Interface - Storage contract
+001. **Storage Port Family Interfaces** - Interface - Bronze/Silver/Gold/Merged storage contracts
 001. **DataSourcePort Interface** - Interface - Data fetch contract
 001. **LockPort Interface** - Interface - Locking contract
 001. **CheckpointPort Interface** - Interface - State persistence

@@ -22,14 +22,14 @@ sequenceDiagram
     participant Boot as Bootstrap
     participant Runner as PipelineRunner
     participant Preflight as PreflightService
-    participant Lock as LockCoordinator
+    participant Lock as LockRuntimeService
     participant Exec as BatchExecutor
     participant Trans as BatchTransformer
     participant Writer as BatchWriter
     participant Postrun as PostrunService
     participant Observer as PipelineObserver
     participant DS as DataSourcePort
-    participant Storage as StoragePort
+    participant Storage as Storage Port Family
 
     CLI->>Boot: create_pipeline(config, runtime)
     Boot->>Boot: assemble DI container

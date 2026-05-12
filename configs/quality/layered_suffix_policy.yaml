@@ -50,8 +50,14 @@ canonical_family_registry:
         reason: Compatibility helper retained while tests migrate to runtime naming.
   - family_id: storage_boundary
     canonical_symbols:
-      - symbol: StoragePort
-        path: src/bioetl/domain/ports/storage_port.py
+      - symbol: BronzeStoragePort
+        path: src/bioetl/domain/ports/storage/bronze_port.py
+      - symbol: SilverStoragePort
+        path: src/bioetl/domain/ports/storage/silver_port.py
+      - symbol: GoldStoragePort
+        path: src/bioetl/domain/ports/storage/gold_port.py
+      - symbol: MergedStoragePort
+        path: src/bioetl/domain/ports/storage/merged_port.py
     compatibility_symbols: []
 
 function_suffix_rules:

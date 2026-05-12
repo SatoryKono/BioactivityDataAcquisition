@@ -18,6 +18,7 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_replay 
     _resolve_continuation_mode,
     _resolve_exact_replay_blockers,
     _resolve_exact_replay_support_boundary,
+    _resolve_broader_historical_exact_replay_state,
     _resolve_historical_live_run_upgrade_state,
     _resolve_manifest_replay_readiness_verdict,
     _resolve_replay_capability_reason,
@@ -342,9 +343,21 @@ def _build_base_summary_core_payload(
                 "broader_historical_exact_replay_policy"
             )
         ),
+        "broader_historical_exact_replay_boundary": (
+            replay_context.replay_family_contract.get(
+                "broader_historical_exact_replay_boundary"
+            )
+        ),
         "broader_historical_exact_replay_reason": (
             replay_context.replay_family_contract.get(
                 "broader_historical_exact_replay_reason"
+            )
+        ),
+        "broader_historical_exact_replay_state": (
+            _resolve_broader_historical_exact_replay_state(
+                manifest=manifest,
+                input_snapshots=replay_context.input_snapshots,
+                policy_assessment=replay_context.policy_assessment,
             )
         ),
         "historical_live_run_upgrade_state": (

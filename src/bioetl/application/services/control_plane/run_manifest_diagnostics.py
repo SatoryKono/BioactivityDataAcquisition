@@ -27,6 +27,7 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_persist
 from bioetl.application.services.control_plane._run_manifest_diagnostics_replay import (
     _build_resume_contract,
     _is_composite_execution_context,
+    _resolve_broader_historical_exact_replay_state,
     _resolve_continuation_mode,
     _resolve_exact_replay_blockers,
     _resolve_historical_live_run_upgrade_state,
@@ -36,6 +37,7 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_replay 
 )
 from bioetl.application.services.control_plane._run_manifest_diagnostics_snapshot_support import (
     merge_ledger_input_snapshots_into_summary,
+    resolve_post_manifest_input_snapshot_materialization_mode,
 )
 from bioetl.application.services.control_plane._run_manifest_diagnostics_summary import (
     _build_final_summary,
@@ -166,8 +168,14 @@ def _build_unified_reproducibility_diagnostics(
             "broader_historical_exact_replay_policy": summary.get(
                 "broader_historical_exact_replay_policy"
             ),
+            "broader_historical_exact_replay_boundary": summary.get(
+                "broader_historical_exact_replay_boundary"
+            ),
             "broader_historical_exact_replay_reason": summary.get(
                 "broader_historical_exact_replay_reason"
+            ),
+            "broader_historical_exact_replay_state": summary.get(
+                "broader_historical_exact_replay_state"
             ),
             "historical_live_run_upgrade_state": summary.get(
                 "historical_live_run_upgrade_state"
@@ -388,7 +396,29 @@ def _refresh_replay_summary_from_materialized_snapshots(
             policy_assessment=policy_assessment,
         )
     )
+    updated["broader_historical_exact_replay_state"] = (
+        _resolve_broader_historical_exact_replay_state(
+            manifest=effective_manifest,
+            input_snapshots=cast("list[dict[str, object]]", input_snapshots),
+            policy_assessment=policy_assessment,
+        )
+    )
     updated["source_posture"] = _resolve_source_posture(policy_assessment)
+    materialization_mode = resolve_post_manifest_input_snapshot_materialization_mode(
+        cast("list[dict[str, object]]", input_snapshots)
+    )
+    if materialization_mode is not None:
+        updated["input_snapshot_materialization_mode"] = materialization_mode
+        if materialization_mode == "historical_source_snapshot_certified":
+            updated["source_posture"] = "historical_source_replay_certified_envelope"
+        elif materialization_mode == (
+            "historical_composite_replay_envelope_certified"
+        ):
+            updated["source_posture"] = (
+                "historical_composite_replay_certified_envelope"
+            )
+        elif materialization_mode == "live_capture_snapshot_materialized":
+            updated["source_posture"] = "live_capture_snapshot_materialized"
     updated["input_snapshot_missing_source_refs"] = list(
         policy_assessment.snapshot_envelope.missing_snapshot_source_refs
     )

@@ -121,7 +121,7 @@ import paths.
 | `pipeline/runner.py`                | `RunnerFactory`                                 | Создание `PipelineRunner` с DI                                 |
 | `datasource/data_source_factory.py` | `DataSourceFactory`                             | Создает `DataSourcePort` для провайдера                        |
 | `datasource/http_client.py`         | `HttpClientFactory`                             | Настроенные `UnifiedHTTPClient` с Rate Limits, Circuit Breaker |
-| `storage/factory.py`                | `StorageFactory`                                | Сборка `StoragePort` (Bronze + Silver + Gold)                  |
+| `storage/factory.py`                | `StorageFactory`                                | Сборка narrow storage ports (`BronzeStoragePort`, `SilverStoragePort`, `GoldStoragePort`, `MergedStoragePort`) |
 | `storage/adapter.py`                | `StorageBundle`                                 | Создание отдельных storage адаптеров                           |
 | `services/factory.py`               | `BaseServicesFactory`                           | Создание core сервисов                                         |
 | `services/builder.py`               | `ServicesBuilder`                               | Создание `PipelineService` bundle                              |
@@ -233,7 +233,7 @@ data_source = DataSourceFactory.create("chembl", settings=settings, logger=logge
 ## 3. Принципы Работы
 
 - **Composition Root:** Вся логика создания объектов должна находиться как можно ближе к точке входа в приложение. В BioETL это `src/bioetl/composition/`.
-- **Dependency Injection (DI):** Объекты никогда не создают свои зависимости сами. Если пайплайну нужен доступ к базе данных, он запрашивает `StoragePort` в конструкторе, а фабрика из слоя Composition предоставляет ему конкретную реализацию.
+- **Dependency Injection (DI):** Объекты никогда не создают свои зависимости сами. Если пайплайну нужен доступ к storage boundary, он запрашивает narrow ports (`BronzeStoragePort`, `SilverStoragePort`, `GoldStoragePort`, `MergedStoragePort`) в конструкторе, а фабрика из слоя Composition предоставляет конкретные реализации.
 - **Декларативность:** `GenericPipelineFactory`, `PIPELINE_CONFIGS` и `factories/pipeline/registry.py` позволяют добавлять новые пайплайны без дублирования шаблонного assembly-кода.
 
 ### 3.1. Composite Pipeline Bootstrap (ADR-026)
