@@ -1,0 +1,1331 @@
+{
+  "schema_version": "1.0.0",
+  "generated_by": "scripts/data_quality/inventory_silver_filters_migration.py",
+  "totals": {
+    "entities_total": 21,
+    "entities_with_silver_filters": 21,
+    "entities_with_gold_filters": 21,
+    "rules_total": 100,
+    "keep_in_silver": 81,
+    "move_to_gold": 5,
+    "duplicate": 14,
+    "conflict": 0
+  },
+  "entities": [
+    {
+      "provider": "chembl",
+      "entity": "activity",
+      "path": "configs/entities/chembl/activity.yaml",
+      "has_silver_filters": true,
+      "has_gold_filters": true,
+      "counts_by_action": {
+        "keep_in_silver": 28,
+        "move_to_gold": 3,
+        "duplicate": 6,
+        "conflict": 0
+      },
+      "rules": [
+        {
+          "provider": "chembl",
+          "entity": "activity",
+          "rule_type": "required_fields",
+          "field": "activity_id",
+          "silver_value": "\"activity_id\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "activity",
+          "rule_type": "required_fields",
+          "field": "molecule_id",
+          "silver_value": "\"molecule_id\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "activity",
+          "rule_type": "required_fields",
+          "field": "assay_id",
+          "silver_value": "\"assay_id\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "activity",
+          "rule_type": "required_fields",
+          "field": "target_id",
+          "silver_value": "\"target_id\"",
+          "gold_value": "\"target_id\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        },
+        {
+          "provider": "chembl",
+          "entity": "activity",
+          "rule_type": "required_fields",
+          "field": "publication_id",
+          "silver_value": "\"publication_id\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "activity",
+          "rule_type": "required_fields",
+          "field": "record_id",
+          "silver_value": "\"record_id\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "activity",
+          "rule_type": "required_fields",
+          "field": "src_id",
+          "silver_value": "\"src_id\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "activity",
+          "rule_type": "required_fields",
+          "field": "canonical_smiles",
+          "silver_value": "\"canonical_smiles\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "activity",
+          "rule_type": "required_fields",
+          "field": "target_organism",
+          "silver_value": "\"target_organism\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "activity",
+          "rule_type": "required_fields",
+          "field": "assay_description",
+          "silver_value": "\"assay_description\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "activity",
+          "rule_type": "required_fields",
+          "field": "bao_endpoint",
+          "silver_value": "\"bao_endpoint\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "activity",
+          "rule_type": "required_fields",
+          "field": "bao_format",
+          "silver_value": "\"bao_format\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "activity",
+          "rule_type": "required_fields",
+          "field": "bao_label",
+          "silver_value": "\"bao_label\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "activity",
+          "rule_type": "required_fields",
+          "field": "relation",
+          "silver_value": "\"relation\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "activity",
+          "rule_type": "required_fields",
+          "field": "value",
+          "silver_value": "\"value\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "activity",
+          "rule_type": "required_fields",
+          "field": "units",
+          "silver_value": "\"units\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "activity",
+          "rule_type": "required_fields",
+          "field": "standard_value",
+          "silver_value": "\"standard_value\"",
+          "gold_value": "\"standard_value\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        },
+        {
+          "provider": "chembl",
+          "entity": "activity",
+          "rule_type": "required_fields",
+          "field": "standard_units",
+          "silver_value": "\"standard_units\"",
+          "gold_value": "\"standard_units\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        },
+        {
+          "provider": "chembl",
+          "entity": "activity",
+          "rule_type": "required_fields",
+          "field": "standard_flag",
+          "silver_value": "\"standard_flag\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "activity",
+          "rule_type": "required_fields",
+          "field": "pchembl_value",
+          "silver_value": "\"pchembl_value\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "activity",
+          "rule_type": "required_fields",
+          "field": "uo_units",
+          "silver_value": "\"uo_units\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "activity",
+          "rule_type": "required_fields",
+          "field": "journal",
+          "silver_value": "\"journal\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "activity",
+          "rule_type": "required_fields",
+          "field": "publication_year",
+          "silver_value": "\"publication_year\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "activity",
+          "rule_type": "required_fields",
+          "field": "_state",
+          "silver_value": "\"_state\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "activity",
+          "rule_type": "required_fields",
+          "field": "assay_type",
+          "silver_value": "\"assay_type\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "activity",
+          "rule_type": "required_fields",
+          "field": "potential_duplicate",
+          "silver_value": "\"potential_duplicate\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "activity",
+          "rule_type": "required_fields",
+          "field": "standard_relation",
+          "silver_value": "\"standard_relation\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "activity",
+          "rule_type": "exclude_if_present",
+          "field": "data_validity_comment",
+          "silver_value": "\"data_validity_comment\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "activity",
+          "rule_type": "columns",
+          "field": "standard_type",
+          "silver_value": "[\"IC50\", \"Ki\"]",
+          "gold_value": "[\"IC50\", \"Ki\"]",
+          "action": "duplicate",
+          "notes": "identical rule in gold_filters - drop from silver"
+        },
+        {
+          "provider": "chembl",
+          "entity": "activity",
+          "rule_type": "columns",
+          "field": "standard_relation",
+          "silver_value": "[\"=\"]",
+          "gold_value": "[\"=\"]",
+          "action": "duplicate",
+          "notes": "identical rule in gold_filters - drop from silver"
+        },
+        {
+          "provider": "chembl",
+          "entity": "activity",
+          "rule_type": "columns",
+          "field": "standard_units",
+          "silver_value": "[\"nM\"]",
+          "gold_value": "[\"nM\"]",
+          "action": "duplicate",
+          "notes": "identical rule in gold_filters - drop from silver"
+        },
+        {
+          "provider": "chembl",
+          "entity": "activity",
+          "rule_type": "columns",
+          "field": "assay_type",
+          "silver_value": "[\"B\", \"F\"]",
+          "gold_value": "[\"B\", \"F\"]",
+          "action": "duplicate",
+          "notes": "identical rule in gold_filters - drop from silver"
+        },
+        {
+          "provider": "chembl",
+          "entity": "activity",
+          "rule_type": "columns",
+          "field": "potential_duplicate",
+          "silver_value": "[0]",
+          "gold_value": "[0]",
+          "action": "duplicate",
+          "notes": "identical rule in gold_filters - drop from silver"
+        },
+        {
+          "provider": "chembl",
+          "entity": "activity",
+          "rule_type": "ranges",
+          "field": "activity_id",
+          "silver_value": "{\"max\": 10000000000, \"min\": 1}",
+          "gold_value": "",
+          "action": "move_to_gold",
+          "notes": "no rule in gold_filters - move from silver"
+        },
+        {
+          "provider": "chembl",
+          "entity": "activity",
+          "rule_type": "ranges",
+          "field": "standard_value",
+          "silver_value": "{\"include_min\": false, \"min\": 0}",
+          "gold_value": "{\"include_min\": false, \"min\": 0}",
+          "action": "duplicate",
+          "notes": "identical rule in gold_filters - drop from silver"
+        },
+        {
+          "provider": "chembl",
+          "entity": "activity",
+          "rule_type": "ranges",
+          "field": "pchembl_value",
+          "silver_value": "{\"max\": 10, \"min\": 3}",
+          "gold_value": "",
+          "action": "move_to_gold",
+          "notes": "no rule in gold_filters - move from silver"
+        },
+        {
+          "provider": "chembl",
+          "entity": "activity",
+          "rule_type": "ranges",
+          "field": "publication_year",
+          "silver_value": "{\"max\": 2050, \"min\": 1950}",
+          "gold_value": "",
+          "action": "move_to_gold",
+          "notes": "no rule in gold_filters - move from silver"
+        }
+      ]
+    },
+    {
+      "provider": "chembl",
+      "entity": "assay",
+      "path": "configs/entities/chembl/assay.yaml",
+      "has_silver_filters": true,
+      "has_gold_filters": true,
+      "counts_by_action": {
+        "keep_in_silver": 9,
+        "move_to_gold": 2,
+        "duplicate": 2,
+        "conflict": 0
+      },
+      "rules": [
+        {
+          "provider": "chembl",
+          "entity": "assay",
+          "rule_type": "required_fields",
+          "field": "assay_id",
+          "silver_value": "\"assay_id\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "assay",
+          "rule_type": "required_fields",
+          "field": "assay_type",
+          "silver_value": "\"assay_type\"",
+          "gold_value": "\"assay_type\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        },
+        {
+          "provider": "chembl",
+          "entity": "assay",
+          "rule_type": "required_fields",
+          "field": "description",
+          "silver_value": "\"description\"",
+          "gold_value": "\"description\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        },
+        {
+          "provider": "chembl",
+          "entity": "assay",
+          "rule_type": "required_fields",
+          "field": "target_id",
+          "silver_value": "\"target_id\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "assay",
+          "rule_type": "required_fields",
+          "field": "publication_id",
+          "silver_value": "\"publication_id\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "assay",
+          "rule_type": "required_fields",
+          "field": "bao_format",
+          "silver_value": "\"bao_format\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "assay",
+          "rule_type": "required_fields",
+          "field": "assay_type_description",
+          "silver_value": "\"assay_type_description\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "assay",
+          "rule_type": "required_fields",
+          "field": "relationship_type",
+          "silver_value": "\"relationship_type\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "assay",
+          "rule_type": "required_fields",
+          "field": "confidence_score",
+          "silver_value": "\"confidence_score\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "assay",
+          "rule_type": "columns",
+          "field": "assay_type",
+          "silver_value": "[\"B\", \"F\"]",
+          "gold_value": "[\"B\", \"F\"]",
+          "action": "duplicate",
+          "notes": "identical rule in gold_filters - drop from silver"
+        },
+        {
+          "provider": "chembl",
+          "entity": "assay",
+          "rule_type": "columns",
+          "field": "relationship_type",
+          "silver_value": "[\"D\"]",
+          "gold_value": "[\"D\"]",
+          "action": "duplicate",
+          "notes": "identical rule in gold_filters - drop from silver"
+        },
+        {
+          "provider": "chembl",
+          "entity": "assay",
+          "rule_type": "columns",
+          "field": "src_id",
+          "silver_value": "[\"1\"]",
+          "gold_value": "",
+          "action": "move_to_gold",
+          "notes": "no rule in gold_filters - move from silver"
+        },
+        {
+          "provider": "chembl",
+          "entity": "assay",
+          "rule_type": "ranges",
+          "field": "confidence_score",
+          "silver_value": "{\"max\": 9, \"min\": 8}",
+          "gold_value": "",
+          "action": "move_to_gold",
+          "notes": "no rule in gold_filters - move from silver"
+        }
+      ]
+    },
+    {
+      "provider": "chembl",
+      "entity": "assay_parameters",
+      "path": "configs/entities/chembl/assay_parameters.yaml",
+      "has_silver_filters": true,
+      "has_gold_filters": true,
+      "counts_by_action": {
+        "keep_in_silver": 3,
+        "move_to_gold": 0,
+        "duplicate": 0,
+        "conflict": 0
+      },
+      "rules": [
+        {
+          "provider": "chembl",
+          "entity": "assay_parameters",
+          "rule_type": "required_fields",
+          "field": "assay_id",
+          "silver_value": "\"assay_id\"",
+          "gold_value": "\"assay_id\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        },
+        {
+          "provider": "chembl",
+          "entity": "assay_parameters",
+          "rule_type": "required_fields",
+          "field": "assay_param_id",
+          "silver_value": "\"assay_param_id\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "assay_parameters",
+          "rule_type": "required_fields",
+          "field": "type",
+          "silver_value": "\"type\"",
+          "gold_value": "\"type\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        }
+      ]
+    },
+    {
+      "provider": "chembl",
+      "entity": "cell_line",
+      "path": "configs/entities/chembl/cell_line.yaml",
+      "has_silver_filters": true,
+      "has_gold_filters": true,
+      "counts_by_action": {
+        "keep_in_silver": 2,
+        "move_to_gold": 0,
+        "duplicate": 0,
+        "conflict": 0
+      },
+      "rules": [
+        {
+          "provider": "chembl",
+          "entity": "cell_line",
+          "rule_type": "required_fields",
+          "field": "cell_id",
+          "silver_value": "\"cell_id\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "cell_line",
+          "rule_type": "required_fields",
+          "field": "cell_name",
+          "silver_value": "\"cell_name\"",
+          "gold_value": "\"cell_name\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        }
+      ]
+    },
+    {
+      "provider": "chembl",
+      "entity": "compound_record",
+      "path": "configs/entities/chembl/compound_record.yaml",
+      "has_silver_filters": true,
+      "has_gold_filters": true,
+      "counts_by_action": {
+        "keep_in_silver": 3,
+        "move_to_gold": 0,
+        "duplicate": 0,
+        "conflict": 0
+      },
+      "rules": [
+        {
+          "provider": "chembl",
+          "entity": "compound_record",
+          "rule_type": "required_fields",
+          "field": "molecule_id",
+          "silver_value": "\"molecule_id\"",
+          "gold_value": "\"molecule_id\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        },
+        {
+          "provider": "chembl",
+          "entity": "compound_record",
+          "rule_type": "required_fields",
+          "field": "publication_id",
+          "silver_value": "\"publication_id\"",
+          "gold_value": "\"publication_id\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        },
+        {
+          "provider": "chembl",
+          "entity": "compound_record",
+          "rule_type": "required_fields",
+          "field": "record_id",
+          "silver_value": "\"record_id\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        }
+      ]
+    },
+    {
+      "provider": "chembl",
+      "entity": "molecule",
+      "path": "configs/entities/chembl/molecule.yaml",
+      "has_silver_filters": true,
+      "has_gold_filters": true,
+      "counts_by_action": {
+        "keep_in_silver": 2,
+        "move_to_gold": 0,
+        "duplicate": 3,
+        "conflict": 0
+      },
+      "rules": [
+        {
+          "provider": "chembl",
+          "entity": "molecule",
+          "rule_type": "required_fields",
+          "field": "molecule_id",
+          "silver_value": "\"molecule_id\"",
+          "gold_value": "\"molecule_id\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        },
+        {
+          "provider": "chembl",
+          "entity": "molecule",
+          "rule_type": "required_fields",
+          "field": "molecule_type",
+          "silver_value": "\"molecule_type\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "molecule",
+          "rule_type": "columns",
+          "field": "molecule_type",
+          "silver_value": "[\"Small molecule\"]",
+          "gold_value": "[\"Small molecule\"]",
+          "action": "duplicate",
+          "notes": "identical rule in gold_filters - drop from silver"
+        },
+        {
+          "provider": "chembl",
+          "entity": "molecule",
+          "rule_type": "columns",
+          "field": "structure_type",
+          "silver_value": "[\"MOL\"]",
+          "gold_value": "[\"MOL\"]",
+          "action": "duplicate",
+          "notes": "identical rule in gold_filters - drop from silver"
+        },
+        {
+          "provider": "chembl",
+          "entity": "molecule",
+          "rule_type": "columns",
+          "field": "inorganic_flag",
+          "silver_value": "[0]",
+          "gold_value": "[0]",
+          "action": "duplicate",
+          "notes": "identical rule in gold_filters - drop from silver"
+        }
+      ]
+    },
+    {
+      "provider": "chembl",
+      "entity": "protein_class",
+      "path": "configs/entities/chembl/protein_class.yaml",
+      "has_silver_filters": true,
+      "has_gold_filters": true,
+      "counts_by_action": {
+        "keep_in_silver": 3,
+        "move_to_gold": 0,
+        "duplicate": 0,
+        "conflict": 0
+      },
+      "rules": [
+        {
+          "provider": "chembl",
+          "entity": "protein_class",
+          "rule_type": "required_fields",
+          "field": "class_level",
+          "silver_value": "\"class_level\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "protein_class",
+          "rule_type": "required_fields",
+          "field": "pref_name",
+          "silver_value": "\"pref_name\"",
+          "gold_value": "\"pref_name\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        },
+        {
+          "provider": "chembl",
+          "entity": "protein_class",
+          "rule_type": "required_fields",
+          "field": "protein_class_id",
+          "silver_value": "\"protein_class_id\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        }
+      ]
+    },
+    {
+      "provider": "chembl",
+      "entity": "publication",
+      "path": "configs/entities/chembl/publication.yaml",
+      "has_silver_filters": true,
+      "has_gold_filters": true,
+      "counts_by_action": {
+        "keep_in_silver": 3,
+        "move_to_gold": 0,
+        "duplicate": 2,
+        "conflict": 0
+      },
+      "rules": [
+        {
+          "provider": "chembl",
+          "entity": "publication",
+          "rule_type": "required_fields",
+          "field": "publication_id",
+          "silver_value": "\"publication_id\"",
+          "gold_value": "\"publication_id\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        },
+        {
+          "provider": "chembl",
+          "entity": "publication",
+          "rule_type": "required_fields",
+          "field": "publication_type",
+          "silver_value": "\"publication_type\"",
+          "gold_value": "\"publication_type\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        },
+        {
+          "provider": "chembl",
+          "entity": "publication",
+          "rule_type": "required_fields",
+          "field": "title",
+          "silver_value": "\"title\"",
+          "gold_value": "\"title\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        },
+        {
+          "provider": "chembl",
+          "entity": "publication",
+          "rule_type": "columns",
+          "field": "publication_type",
+          "silver_value": "[\"journal-article\"]",
+          "gold_value": "[\"journal-article\"]",
+          "action": "duplicate",
+          "notes": "identical rule in gold_filters - drop from silver"
+        },
+        {
+          "provider": "chembl",
+          "entity": "publication",
+          "rule_type": "ranges",
+          "field": "publication_year",
+          "silver_value": "{\"max\": 2050, \"min\": 1950}",
+          "gold_value": "{\"max\": 2050, \"min\": 1950}",
+          "action": "duplicate",
+          "notes": "identical rule in gold_filters - drop from silver"
+        }
+      ]
+    },
+    {
+      "provider": "chembl",
+      "entity": "publication_similarity",
+      "path": "configs/entities/chembl/publication_similarity.yaml",
+      "has_silver_filters": true,
+      "has_gold_filters": true,
+      "counts_by_action": {
+        "keep_in_silver": 3,
+        "move_to_gold": 0,
+        "duplicate": 0,
+        "conflict": 0
+      },
+      "rules": [
+        {
+          "provider": "chembl",
+          "entity": "publication_similarity",
+          "rule_type": "required_fields",
+          "field": "sim_id",
+          "silver_value": "\"sim_id\"",
+          "gold_value": "\"sim_id\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        },
+        {
+          "provider": "chembl",
+          "entity": "publication_similarity",
+          "rule_type": "required_fields",
+          "field": "doc_1",
+          "silver_value": "\"doc_1\"",
+          "gold_value": "\"doc_1\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        },
+        {
+          "provider": "chembl",
+          "entity": "publication_similarity",
+          "rule_type": "required_fields",
+          "field": "doc_2",
+          "silver_value": "\"doc_2\"",
+          "gold_value": "\"doc_2\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        }
+      ]
+    },
+    {
+      "provider": "chembl",
+      "entity": "publication_term",
+      "path": "configs/entities/chembl/publication_term.yaml",
+      "has_silver_filters": true,
+      "has_gold_filters": true,
+      "counts_by_action": {
+        "keep_in_silver": 3,
+        "move_to_gold": 0,
+        "duplicate": 0,
+        "conflict": 0
+      },
+      "rules": [
+        {
+          "provider": "chembl",
+          "entity": "publication_term",
+          "rule_type": "required_fields",
+          "field": "publication_id",
+          "silver_value": "\"publication_id\"",
+          "gold_value": "\"publication_id\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        },
+        {
+          "provider": "chembl",
+          "entity": "publication_term",
+          "rule_type": "required_fields",
+          "field": "term",
+          "silver_value": "\"term\"",
+          "gold_value": "\"term\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        },
+        {
+          "provider": "chembl",
+          "entity": "publication_term",
+          "rule_type": "required_fields",
+          "field": "term_type",
+          "silver_value": "\"term_type\"",
+          "gold_value": "\"term_type\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        }
+      ]
+    },
+    {
+      "provider": "chembl",
+      "entity": "subcellular_fraction",
+      "path": "configs/entities/chembl/subcellular_fraction.yaml",
+      "has_silver_filters": true,
+      "has_gold_filters": true,
+      "counts_by_action": {
+        "keep_in_silver": 1,
+        "move_to_gold": 0,
+        "duplicate": 0,
+        "conflict": 0
+      },
+      "rules": [
+        {
+          "provider": "chembl",
+          "entity": "subcellular_fraction",
+          "rule_type": "required_fields",
+          "field": "subcellular_fraction",
+          "silver_value": "\"subcellular_fraction\"",
+          "gold_value": "\"subcellular_fraction\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        }
+      ]
+    },
+    {
+      "provider": "chembl",
+      "entity": "target",
+      "path": "configs/entities/chembl/target.yaml",
+      "has_silver_filters": true,
+      "has_gold_filters": true,
+      "counts_by_action": {
+        "keep_in_silver": 4,
+        "move_to_gold": 0,
+        "duplicate": 1,
+        "conflict": 0
+      },
+      "rules": [
+        {
+          "provider": "chembl",
+          "entity": "target",
+          "rule_type": "required_fields",
+          "field": "target_id",
+          "silver_value": "\"target_id\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "target",
+          "rule_type": "required_fields",
+          "field": "pref_name",
+          "silver_value": "\"pref_name\"",
+          "gold_value": "\"pref_name\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        },
+        {
+          "provider": "chembl",
+          "entity": "target",
+          "rule_type": "required_fields",
+          "field": "organism",
+          "silver_value": "\"organism\"",
+          "gold_value": "\"organism\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        },
+        {
+          "provider": "chembl",
+          "entity": "target",
+          "rule_type": "required_fields",
+          "field": "target_type",
+          "silver_value": "\"target_type\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "target",
+          "rule_type": "columns",
+          "field": "target_type",
+          "silver_value": "[\"SINGLE PROTEIN\"]",
+          "gold_value": "[\"SINGLE PROTEIN\"]",
+          "action": "duplicate",
+          "notes": "identical rule in gold_filters - drop from silver"
+        }
+      ]
+    },
+    {
+      "provider": "chembl",
+      "entity": "target_component",
+      "path": "configs/entities/chembl/target_component.yaml",
+      "has_silver_filters": true,
+      "has_gold_filters": true,
+      "counts_by_action": {
+        "keep_in_silver": 2,
+        "move_to_gold": 0,
+        "duplicate": 0,
+        "conflict": 0
+      },
+      "rules": [
+        {
+          "provider": "chembl",
+          "entity": "target_component",
+          "rule_type": "required_fields",
+          "field": "component_id",
+          "silver_value": "\"component_id\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        },
+        {
+          "provider": "chembl",
+          "entity": "target_component",
+          "rule_type": "required_fields",
+          "field": "organism",
+          "silver_value": "\"organism\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        }
+      ]
+    },
+    {
+      "provider": "chembl",
+      "entity": "tissue",
+      "path": "configs/entities/chembl/tissue.yaml",
+      "has_silver_filters": true,
+      "has_gold_filters": true,
+      "counts_by_action": {
+        "keep_in_silver": 2,
+        "move_to_gold": 0,
+        "duplicate": 0,
+        "conflict": 0
+      },
+      "rules": [
+        {
+          "provider": "chembl",
+          "entity": "tissue",
+          "rule_type": "required_fields",
+          "field": "tissue_id",
+          "silver_value": "\"tissue_id\"",
+          "gold_value": "\"tissue_id\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        },
+        {
+          "provider": "chembl",
+          "entity": "tissue",
+          "rule_type": "required_fields",
+          "field": "pref_name",
+          "silver_value": "\"pref_name\"",
+          "gold_value": "",
+          "action": "keep_in_silver",
+          "notes": "structural rule stays in silver_filters"
+        }
+      ]
+    },
+    {
+      "provider": "crossref",
+      "entity": "publication",
+      "path": "configs/entities/crossref/publication.yaml",
+      "has_silver_filters": true,
+      "has_gold_filters": true,
+      "counts_by_action": {
+        "keep_in_silver": 2,
+        "move_to_gold": 0,
+        "duplicate": 0,
+        "conflict": 0
+      },
+      "rules": [
+        {
+          "provider": "crossref",
+          "entity": "publication",
+          "rule_type": "required_fields",
+          "field": "doi",
+          "silver_value": "\"doi\"",
+          "gold_value": "\"doi\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        },
+        {
+          "provider": "crossref",
+          "entity": "publication",
+          "rule_type": "required_fields",
+          "field": "title",
+          "silver_value": "\"title\"",
+          "gold_value": "\"title\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        }
+      ]
+    },
+    {
+      "provider": "openalex",
+      "entity": "publication",
+      "path": "configs/entities/openalex/publication.yaml",
+      "has_silver_filters": true,
+      "has_gold_filters": true,
+      "counts_by_action": {
+        "keep_in_silver": 2,
+        "move_to_gold": 0,
+        "duplicate": 0,
+        "conflict": 0
+      },
+      "rules": [
+        {
+          "provider": "openalex",
+          "entity": "publication",
+          "rule_type": "required_fields",
+          "field": "openalex_id",
+          "silver_value": "\"openalex_id\"",
+          "gold_value": "\"openalex_id\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        },
+        {
+          "provider": "openalex",
+          "entity": "publication",
+          "rule_type": "required_fields",
+          "field": "title",
+          "silver_value": "\"title\"",
+          "gold_value": "\"title\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        }
+      ]
+    },
+    {
+      "provider": "pubchem",
+      "entity": "compound",
+      "path": "configs/entities/pubchem/compound.yaml",
+      "has_silver_filters": true,
+      "has_gold_filters": true,
+      "counts_by_action": {
+        "keep_in_silver": 1,
+        "move_to_gold": 0,
+        "duplicate": 0,
+        "conflict": 0
+      },
+      "rules": [
+        {
+          "provider": "pubchem",
+          "entity": "compound",
+          "rule_type": "required_fields",
+          "field": "molecule_id",
+          "silver_value": "\"molecule_id\"",
+          "gold_value": "\"molecule_id\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        }
+      ]
+    },
+    {
+      "provider": "pubmed",
+      "entity": "publication",
+      "path": "configs/entities/pubmed/publication.yaml",
+      "has_silver_filters": true,
+      "has_gold_filters": true,
+      "counts_by_action": {
+        "keep_in_silver": 2,
+        "move_to_gold": 0,
+        "duplicate": 0,
+        "conflict": 0
+      },
+      "rules": [
+        {
+          "provider": "pubmed",
+          "entity": "publication",
+          "rule_type": "required_fields",
+          "field": "pmid",
+          "silver_value": "\"pmid\"",
+          "gold_value": "\"pmid\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        },
+        {
+          "provider": "pubmed",
+          "entity": "publication",
+          "rule_type": "required_fields",
+          "field": "title",
+          "silver_value": "\"title\"",
+          "gold_value": "\"title\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        }
+      ]
+    },
+    {
+      "provider": "semanticscholar",
+      "entity": "publication",
+      "path": "configs/entities/semanticscholar/publication.yaml",
+      "has_silver_filters": true,
+      "has_gold_filters": true,
+      "counts_by_action": {
+        "keep_in_silver": 2,
+        "move_to_gold": 0,
+        "duplicate": 0,
+        "conflict": 0
+      },
+      "rules": [
+        {
+          "provider": "semanticscholar",
+          "entity": "publication",
+          "rule_type": "required_fields",
+          "field": "paper_id",
+          "silver_value": "\"paper_id\"",
+          "gold_value": "\"paper_id\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        },
+        {
+          "provider": "semanticscholar",
+          "entity": "publication",
+          "rule_type": "required_fields",
+          "field": "title",
+          "silver_value": "\"title\"",
+          "gold_value": "\"title\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        }
+      ]
+    },
+    {
+      "provider": "uniprot",
+      "entity": "idmapping",
+      "path": "configs/entities/uniprot/idmapping.yaml",
+      "has_silver_filters": true,
+      "has_gold_filters": true,
+      "counts_by_action": {
+        "keep_in_silver": 2,
+        "move_to_gold": 0,
+        "duplicate": 0,
+        "conflict": 0
+      },
+      "rules": [
+        {
+          "provider": "uniprot",
+          "entity": "idmapping",
+          "rule_type": "required_fields",
+          "field": "target_id",
+          "silver_value": "\"target_id\"",
+          "gold_value": "\"target_id\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        },
+        {
+          "provider": "uniprot",
+          "entity": "idmapping",
+          "rule_type": "required_fields",
+          "field": "mapping_status",
+          "silver_value": "\"mapping_status\"",
+          "gold_value": "\"mapping_status\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        }
+      ]
+    },
+    {
+      "provider": "uniprot",
+      "entity": "protein",
+      "path": "configs/entities/uniprot/protein.yaml",
+      "has_silver_filters": true,
+      "has_gold_filters": true,
+      "counts_by_action": {
+        "keep_in_silver": 2,
+        "move_to_gold": 0,
+        "duplicate": 0,
+        "conflict": 0
+      },
+      "rules": [
+        {
+          "provider": "uniprot",
+          "entity": "protein",
+          "rule_type": "required_fields",
+          "field": "accession",
+          "silver_value": "\"accession\"",
+          "gold_value": "\"accession\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        },
+        {
+          "provider": "uniprot",
+          "entity": "protein",
+          "rule_type": "required_fields",
+          "field": "organism_scientific",
+          "silver_value": "\"organism_scientific\"",
+          "gold_value": "\"organism_scientific\"",
+          "action": "keep_in_silver",
+          "notes": "also present in gold_filters (informational)"
+        }
+      ]
+    }
+  ]
+}

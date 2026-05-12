@@ -181,6 +181,10 @@ D-07 Observability Specification.md
 D-08 Security & Compliance dossier.md
 D-09 Requirements Traceability.md
 config-discrepancies-report.md
+filters/ADR-048-silver-filters-structural-scope.md
+filters/README.md
+filters/inventory-baseline.md
+filters/migration-plan.md
 fixes/cross_platform_test_setup.md
 fixes/test_dependency_fixes.md
 plugins/link_checker/INTEGRATION_GUIDE.md

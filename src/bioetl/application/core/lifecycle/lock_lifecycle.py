@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import time
-from typing import TYPE_CHECKING, Protocol, cast
+from typing import TYPE_CHECKING, Protocol
 
 from bioetl.application.core.lifecycle.shutdown import PipelineShutdownError
 from bioetl.domain.ports import LoggerPort
@@ -143,8 +143,7 @@ async def release_lock(host: _LockRuntimeHostProtocol) -> None:
 
 async def start_heartbeat(host: _LockRuntimeHostProtocol) -> None:
     """Start the background heartbeat task for the acquired lock."""
-    heartbeat_factory = cast(_HeartbeatFactoryProtocol, host._heartbeat_factory)
-    host._heartbeat = heartbeat_factory(
+    host._heartbeat = host._heartbeat_factory(
         lock_port=host._lock,
         lock_key=host._config.lock_key,
         owner_id=host._run_id,

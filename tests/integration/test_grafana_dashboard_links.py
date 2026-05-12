@@ -1544,7 +1544,7 @@ def test_loki_baseline_guidance_matches_shipped_structured_log_fields() -> None:
         (grafana_readme, "grafana/README.md"),
         (monitoring_guide, "docs/05-operations/01-monitoring-guide.md"),
     ):
-        assert "{job=\"bioetl\"}" in content, (
+        assert '{job="bioetl"}' in content, (
             f"{label} must document the canonical Loki baseline query"
         )
         assert "Zero lines" in content or "Empty Explore results" in content, (

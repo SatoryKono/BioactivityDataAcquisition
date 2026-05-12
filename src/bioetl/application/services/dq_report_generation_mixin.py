@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
+from collections.abc import Awaitable, Callable
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -31,6 +31,7 @@ if TYPE_CHECKING:
 _SkippedMetricEmitter = Callable[[str, str, str], None]
 _GeneratedMetricEmitter = Callable[[str, str], None]
 _CheckFailureMetricEmitter = Callable[[str, str, str, str], None]
+_DQLayerFlow = Callable[..., Awaitable[Path | None]]
 
 
 class DQReportGenerationMixin:
@@ -175,18 +176,11 @@ class DQReportGenerationMixin:
         config: BronzeDQConfigPort,
     ) -> Path | None:
         """Generate Bronze DQ report."""
-        skipped_metric, generated_metric, check_failure_metric = (
-            self._dq_report_metric_emitters()
-        )
-        return await generate_bronze_report(
+        return await self._generate_layer_report(
             context=context,
             config=config,
             analyzer=self._bronze_analyzer,
-            report_writer=self._report_writer,
-            logger=self._logger,
-            emit_skipped_metric=skipped_metric,
-            emit_generated_metric=generated_metric,
-            emit_check_failure_metric=check_failure_metric,
+            flow=generate_bronze_report,
         )
 
     async def _generate_silver_report(
@@ -195,18 +189,11 @@ class DQReportGenerationMixin:
         config: SilverDQConfigPort,
     ) -> Path | None:
         """Generate Silver DQ report."""
-        skipped_metric, generated_metric, check_failure_metric = (
-            self._dq_report_metric_emitters()
-        )
-        return await generate_silver_report(
+        return await self._generate_layer_report(
             context=context,
             config=config,
             analyzer=self._silver_analyzer,
-            report_writer=self._report_writer,
-            logger=self._logger,
-            emit_skipped_metric=skipped_metric,
-            emit_generated_metric=generated_metric,
-            emit_check_failure_metric=check_failure_metric,
+            flow=generate_silver_report,
         )
 
     async def _generate_gold_report(
@@ -215,13 +202,29 @@ class DQReportGenerationMixin:
         config: GoldDQConfigPort,
     ) -> Path | None:
         """Generate Gold DQ report."""
-        skipped_metric, generated_metric, check_failure_metric = (
-            self._dq_report_metric_emitters()
-        )
-        return await generate_gold_report(
+        return await self._generate_layer_report(
             context=context,
             config=config,
             analyzer=self._gold_analyzer,
+            flow=generate_gold_report,
+        )
+
+    async def _generate_layer_report(
+        self,
+        *,
+        context: DQReportContext,
+        config: object,
+        analyzer: object | None,
+        flow: _DQLayerFlow,
+    ) -> Path | None:
+        """Run one layer-specific DQ report flow with shared emitters."""
+        skipped_metric, generated_metric, check_failure_metric = (
+            self._dq_report_metric_emitters()
+        )
+        return await flow(
+            context=context,
+            config=config,
+            analyzer=analyzer,
             report_writer=self._report_writer,
             logger=self._logger,
             emit_skipped_metric=skipped_metric,
