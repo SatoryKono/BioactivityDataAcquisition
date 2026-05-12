@@ -17,6 +17,7 @@ from bioetl.domain.normalization import (
 )
 from bioetl.infrastructure.storage.support.retention import (
     RetentionPolicy,
+    _resolve_deduplication_timeout_seconds,
     _content_identity,
 )
 
@@ -290,6 +291,23 @@ def test_content_identity_fallback_uses_canonical_hash_identity_contract() -> No
     assert _content_identity(row) == serialize_hash_identity_canonical_json(
         normalize_hash_identity_record(row)
     )
+
+
+def test_dedup_timeout_is_clamped_in_test_mode(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Test mode should shrink the default dedup budget to fail fast in CI."""
+
+    class _Settings:
+        test_mode = True
+        silver_dedup_timeout_seconds = 60.0
+
+    monkeypatch.setattr(
+        "bioetl.infrastructure.storage.support.retention.get_settings",
+        lambda: _Settings(),
+    )
+
+    assert _resolve_deduplication_timeout_seconds() == pytest.approx(10.0)
 
 
 @pytest.mark.asyncio

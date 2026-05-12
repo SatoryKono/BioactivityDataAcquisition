@@ -150,3 +150,18 @@ families:
       - dash_form
     fields:
       - chembl_cell_line.cellosaurus_id
+
+unit_companion_policies:
+  chembl_assay_parameters:
+    companion_governance: standard_unit_only_no_ontology_companion_bundle
+    fields:
+      - chembl_assay_parameters.standard_units
+      - chembl_assay_parameters.units
+    ontology_families:
+      - uo
+      - qudt
+    rationale: >
+      ChEMBL assay_parameters shares canonical unit-token normalization with
+      activity, but it does not currently publish UO/QUDT IRI, mapping-status,
+      or ontology-version sidecars. Keep the boundary explicit until a reviewed
+      additive schema/contract migration approves a companion bundle.

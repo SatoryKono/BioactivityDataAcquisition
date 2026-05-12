@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import TYPE_CHECKING
 
 import click
 
@@ -17,25 +16,19 @@ from bioetl.interfaces.cli.commands._inspection_output import (
 from bioetl.interfaces.cli.commands._run_manifest_historical_support import (
     _coerce_bulk_certification_specs,
     _load_residual_dispositions,
+    _load_universe_external_records,
+)
+from bioetl.interfaces.cli.commands._run_manifest_services import (
+    get_forensic_run_diff_service,
+    get_historical_replay_closure_service,
+    get_historical_replay_corpus_service,
+    get_historical_replay_universe_service,
+    get_run_manifest_service,
 )
 from bioetl.interfaces.cli.commands.run_manifest_output import (
     render_text_payload,
 )
 from bioetl.interfaces.cli.formatters import echo_error
-
-if TYPE_CHECKING:
-    from bioetl.application.services.control_plane.forensic_diff_service import (
-        ForensicRunDiffService,
-    )
-    from bioetl.application.services.control_plane.historical_replay_closure_service import (
-        HistoricalReplayClosureService,
-    )
-    from bioetl.application.services.control_plane.historical_replay_corpus_service import (
-        HistoricalReplayCorpusService,
-    )
-    from bioetl.application.services.control_plane.run_manifest_inspection_service import (
-        RunManifestInspectionService,
-    )
 
 __all__ = [
     "COMMANDS",
@@ -47,46 +40,11 @@ __all__ = [
     "run_manifest",
     "score_command",
     "show_command",
+    "universe_report_command",
     "verify_command",
 ]
 
 RUN_MANIFEST_STORE_CORRUPTION = "Run manifest store corruption"
-
-
-def get_run_manifest_service() -> RunManifestInspectionService:
-    """Load the run-manifest inspection service through composition on demand."""
-    from bioetl.composition.control_plane_api import (
-        get_run_manifest_service as _impl,
-    )
-
-    return _impl()
-
-
-def get_forensic_run_diff_service() -> ForensicRunDiffService:
-    """Load the forensic run-diff service through composition on demand."""
-    from bioetl.composition.control_plane_api import (
-        get_forensic_run_diff_service as _impl,
-    )
-
-    return _impl()
-
-
-def get_historical_replay_corpus_service() -> HistoricalReplayCorpusService:
-    """Load retained-corpus replay workflows through composition on demand."""
-    from bioetl.composition.control_plane_api import (
-        get_historical_replay_corpus_service as _impl,
-    )
-
-    return _impl()
-
-
-def get_historical_replay_closure_service() -> HistoricalReplayClosureService:
-    """Load retained-corpus closure workflows through composition on demand."""
-    from bioetl.composition.control_plane_api import (
-        get_historical_replay_closure_service as _impl,
-    )
-
-    return _impl()
 
 
 @click.group()
@@ -354,6 +312,57 @@ def closure_report_command(
     )
 
 
+@run_manifest.command("universe-report")
+@click.option(
+    "--external-pack",
+    "external_pack_paths",
+    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    multiple=True,
+    help="Authoritative archived/offline historical-run pack to merge into the full-universe report.",
+)
+@click.option(
+    "--write",
+    "write_artifact",
+    is_flag=True,
+    help="Persist the full-universe report under data/output/control/historical_replay_universe.",
+)
+@click.option(
+    "--format",
+    "output_format",
+    type=click.Choice(["text", "json", "yaml"]),
+    default="text",
+    help="Output format",
+)
+def universe_report_command(
+    external_pack_paths: tuple[Path, ...],
+    write_artifact: bool,
+    output_format: str,
+) -> None:
+    """Build one full-universe historical replay report from retained and archived corpora."""
+    service = get_historical_replay_universe_service()
+    try:
+        external_records = _load_universe_external_records(external_pack_paths)
+        report = service.build_universe_closure_report(
+            external_records=external_records,
+        )
+        payload = report.to_dict()
+        if write_artifact:
+            from bioetl.composition.control_plane_api import (
+                persist_historical_replay_universe_report,
+            )
+
+            artifact_path = persist_historical_replay_universe_report(report)
+            payload = {**payload, "artifact_path": str(artifact_path)}
+    except (OSError, TypeError, ValueError, json.JSONDecodeError) as exc:
+        echo_error("Historical replay universe report failed", str(exc))
+        return
+    emit_inspection_payload(
+        payload,
+        output_format,
+        text_renderer=render_text_payload,
+    )
+
+
 COMMANDS = (
     certify_historical_bulk_command,
     closure_report_command,
@@ -362,5 +371,6 @@ COMMANDS = (
     inventory_command,
     score_command,
     show_command,
+    universe_report_command,
     verify_command,
 )

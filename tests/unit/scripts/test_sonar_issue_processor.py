@@ -187,7 +187,7 @@ sonar.exclusions=\\
     assert report["program"]["wave_breakdown"]["unmapped_entry_count"] == 0
 
 
-def test_fetch_live_issue_summary_reports_http_errors(monkeypatch) -> None:
+def test_fetch_live_issue_summary_reports_auth_failures(monkeypatch) -> None:
     class _Response:
         status_code = 401
         text = "Unauthorized"
@@ -209,7 +209,7 @@ def test_fetch_live_issue_summary_reports_http_errors(monkeypatch) -> None:
     )
 
     assert summary["status"] == "error"
-    assert summary["reason"] == "http_error"
+    assert summary["reason"] == "auth_failed"
     assert summary["status_code"] == 401
 
 

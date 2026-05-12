@@ -367,5 +367,10 @@
     "content_hash",
     "doi",
     "entity_id"
-  ]
+  ],
+  "normalization_profile": {
+    "ref": "crossref.publication",
+    "version": "1.0.0",
+    "hash": "cd84c4aed4391053193599c8427e0631e344c07c0c1ab6473f26bae56e072dd2"
+  }
 }

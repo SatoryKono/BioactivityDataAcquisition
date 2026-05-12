@@ -25,6 +25,9 @@ def test_normalization_profile_exposes_hash_and_set_like_views() -> None:
     assert profile.hash_included_fields == frozenset({"title", "tags"})
     assert profile.hash_excluded_fields == frozenset({"_meta"})
     assert profile.set_like_fields == frozenset({"tags"})
+    assert profile.profile_version == "1.0.0"
+    assert profile.field_identity("title") is not None
+    assert len(profile.identity.profile_hash) == 64
 
 
 def test_normalization_profile_detects_schema_coverage_gaps() -> None:
@@ -49,3 +52,25 @@ def test_field_rule_apply_does_not_treat_keyword_only_params_as_record_context()
     )
 
     assert rule.apply("=", record={"activity_id": "31864"}) == "="
+
+
+def test_field_rule_identity_is_stable_for_semantically_equal_rules() -> None:
+    left = FieldRule("title")
+    right = FieldRule("title")
+
+    assert left.identity == right.identity
+
+
+def test_normalization_profile_identity_changes_when_field_hash_policy_changes() -> (
+    None
+):
+    left = NormalizationProfile(
+        profile_name="test.entity",
+        field_rules={"title": FieldRule("title", include_in_hash=True)},
+    )
+    right = NormalizationProfile(
+        profile_name="test.entity",
+        field_rules={"title": FieldRule("title", include_in_hash=False)},
+    )
+
+    assert left.identity.profile_hash != right.identity.profile_hash

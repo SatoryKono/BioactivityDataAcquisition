@@ -451,5 +451,10 @@
     "content_hash",
     "entity_id",
     "molecule_id"
-  ]
+  ],
+  "normalization_profile": {
+    "ref": "chembl.molecule",
+    "version": "1.0.0",
+    "hash": "aa73cd334929a47be95cabf131b18f5c19bcaac49a6d17beeba3dcc65d31e57d"
+  }
 }

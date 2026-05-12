@@ -2,11 +2,15 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
 from collections.abc import Iterable
 from dataclasses import dataclass
 
 __all__ = [
     "CHEMBL_JSON_ORDERING_POLICY",
+    "CHEMBL_JSON_ORDERING_POLICY_HASH",
+    "CHEMBL_JSON_ORDERING_POLICY_VERSION",
     "ChemblJsonOrderingPolicy",
     "chembl_hash_config_field_ordering",
     "chembl_json_fields",
@@ -202,6 +206,24 @@ CHEMBL_JSON_ORDERING_POLICY: tuple[ChemblJsonOrderingPolicy, ...] = (
         rationale=REFERENCE_PAYLOADS_KEEP_PROVIDER_ORDER,
     ),
 )
+
+
+def _compute_policy_hash() -> str:
+    payload = [
+        {
+            "pipeline_name": policy.pipeline_name,
+            "field_name": policy.field_name,
+            "order_semantics": policy.order_semantics,
+            "rationale": policy.rationale,
+        }
+        for policy in CHEMBL_JSON_ORDERING_POLICY
+    ]
+    serialized = json.dumps(payload, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(serialized.encode("utf-8")).hexdigest()
+
+
+CHEMBL_JSON_ORDERING_POLICY_VERSION = "2026.05.12"
+CHEMBL_JSON_ORDERING_POLICY_HASH = _compute_policy_hash()
 
 
 def chembl_json_fields(pipeline_name: str) -> frozenset[str]:

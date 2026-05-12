@@ -14,10 +14,14 @@ from bioetl.application.services.control_plane.historical_replay_closure_service
 from bioetl.application.services.control_plane.historical_replay_corpus_service import (
     HistoricalReplayBulkCertificationSpec,
 )
+from bioetl.application.services.control_plane.historical_replay_universe_service import (
+    HistoricalReplayUniverseExternalRecord,
+)
 
 __all__ = [
     "_coerce_bulk_certification_specs",
     "_load_residual_dispositions",
+    "_load_universe_external_records",
 ]
 
 
@@ -143,3 +147,68 @@ def _load_residual_dispositions(
             )
         )
     return tuple(dispositions)
+
+
+def _load_universe_external_records(
+    pack_paths: tuple[Path, ...],
+) -> tuple[HistoricalReplayUniverseExternalRecord, ...]:
+    """Load authoritative archived/offline historical-run packs for universe reports."""
+    records: list[HistoricalReplayUniverseExternalRecord] = []
+    for pack_path in pack_paths:
+        payload = json.loads(pack_path.read_text(encoding="utf-8"))
+        if not isinstance(payload, dict):
+            raise ValueError("Universe pack must be a JSON object")
+        pack_ref = str(payload.get("pack_id") or pack_path.name).strip()
+        raw_records = payload.get("records")
+        if not isinstance(raw_records, list) or not raw_records:
+            raise ValueError(
+                f"Universe pack {pack_path} requires a non-empty records list"
+            )
+        for item in raw_records:
+            records.append(_coerce_universe_external_record(item, pack_ref=pack_ref))
+    return tuple(records)
+
+
+def _coerce_universe_external_record(
+    payload: object,
+    *,
+    pack_ref: str,
+) -> HistoricalReplayUniverseExternalRecord:
+    if not isinstance(payload, dict):
+        raise ValueError("Universe pack entries must be JSON objects")
+    required_fields = (
+        "manifest_id",
+        "run_id",
+        "pipeline_name",
+        "provider",
+        "entity",
+        "execution_context",
+        "certification_status",
+        "replay_occurrence_kind",
+    )
+    missing = [
+        field for field in required_fields if not str(payload.get(field) or "").strip()
+    ]
+    if missing:
+        raise ValueError(
+            "Universe pack entry is missing fields: " + ", ".join(sorted(missing))
+        )
+    blocking_reasons = payload.get("blocking_reasons", [])
+    if not isinstance(blocking_reasons, list):
+        raise ValueError("Universe pack blocking_reasons must be a list")
+    return HistoricalReplayUniverseExternalRecord(
+        manifest_id=str(payload["manifest_id"]).strip(),
+        run_id=str(payload["run_id"]).strip(),
+        pipeline_name=str(payload["pipeline_name"]).strip(),
+        provider=str(payload["provider"]).strip(),
+        entity=str(payload["entity"]).strip(),
+        execution_context=str(payload["execution_context"]).strip(),
+        certification_status=str(payload["certification_status"]).strip(),
+        replay_occurrence_kind=str(payload["replay_occurrence_kind"]).strip(),
+        blocking_reasons=tuple(
+            str(value).strip() for value in blocking_reasons if str(value).strip()
+        ),
+        evidence_residency=str(payload.get("evidence_residency") or "archived").strip(),
+        durable_evidence_coverage=bool(payload.get("durable_evidence_coverage", False)),
+        source_pack_ref=pack_ref,
+    )

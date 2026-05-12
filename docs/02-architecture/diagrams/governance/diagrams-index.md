@@ -22,7 +22,7 @@ ______________________________________________________________________
 ## Repository Layout
 
 - Canonical `.mmd` sources:
-  - `architecture/` — 52 files
+  - `architecture/` — 82 files
   - `class-diagrams/` — 19 files
   - `foundation/` — 55 files
 - Decomposed `.mermaid` views:
@@ -41,7 +41,7 @@ ______________________________________________________________________
 
 ## Canonical Families
 
-- Architecture core (18 primary topics; 52 `.mmd` files including decomposed sub-diagrams):
+- Architecture core (48 primary topics; 82 `.mmd` files including decomposed sub-diagrams):
   - `architecture/01-high-level-hexagonal.mmd`
   - `architecture/02-layer-dependency-matrix.mmd`
   - `architecture/03-medallion-data-flow.mmd`
@@ -87,3 +87,8 @@ uv run python -m scripts.diagrams check-quality-gates --manifest docs/02-archite
 - Decomposed views are maintained in `diagrams/views/*.mermaid`.
 - Rendered `svg/` artifacts are the primary maintained publication output; sibling `png/` trees remain compatibility/export outputs and should be refreshed where those surfaces are still used.
 - Legacy snapshots may still exist in `docs/02-architecture/diagrams/mermaid/`, but they are not canonical for new work.
+
+## 2026-05-12 Expansion Batch
+
+- Planning artifact: [diagram-expansion-2026-05-12.md](diagram-expansion-2026-05-12.md)
+- Added 25 new canonical architecture diagrams focused on control-plane, composite preflight, provider-specific runtime flows, and config/traceability surfaces.

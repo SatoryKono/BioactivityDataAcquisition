@@ -38,17 +38,25 @@ if TYPE_CHECKING:
     from pathlib import Path
 
 _DEFAULT_DEDUPLICATION_TIMEOUT_SECONDS = 60.0
+_TEST_MODE_DEDUPLICATION_TIMEOUT_SECONDS = 10.0
 
 
 def _resolve_deduplication_timeout_seconds() -> float:
     """Return the centralized dedup timeout setting with a safe fallback."""
-    return float(
+    settings = get_settings()
+    configured_timeout = float(
         getattr(
-            get_settings(),
+            settings,
             "silver_dedup_timeout_seconds",
             _DEFAULT_DEDUPLICATION_TIMEOUT_SECONDS,
         )
     )
+    if (
+        getattr(settings, "test_mode", False)
+        and configured_timeout >= _DEFAULT_DEDUPLICATION_TIMEOUT_SECONDS
+    ):
+        return _TEST_MODE_DEDUPLICATION_TIMEOUT_SECONDS
+    return configured_timeout
 
 
 def _primary_key_tuple(

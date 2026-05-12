@@ -49,6 +49,7 @@ ______________________________________________________________________
 | Inspect run traceability           | [run-manifest-ledger.md](../04-reference/contracts/run-manifest-ledger.md)             |
 | Use inspection CLI                 | [cli.md](../04-reference/cli.md)                                                       |
 | Check normalization governance     | [chembl-normalization-overview.md](../04-reference/normalization/chembl-normalization-overview.md) |
+| Review ontology companion policy   | [ontology-governance.md](../04-reference/schemas/domain/chembl/ontology-governance.md)             |
 | Review identifier family policy    | [reference-identifiers.md](../04-reference/normalization/reference-identifiers.md)     |
 | Run control-plane triage           | [run-manifest-inspection.md](../05-operations/runbooks/run-manifest-inspection.md)     |
 | Understand control-plane decision  | [ADR-044](../02-architecture/decisions/ADR-044-run-manifest-ledger-control-plane.md)   |

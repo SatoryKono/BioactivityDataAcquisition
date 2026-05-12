@@ -99,6 +99,24 @@ async def test_catches_allowlisted_exceptions() -> None:
 
 
 @pytest.mark.asyncio
+async def test_catches_allowlisted_timeout_error() -> None:
+    config = _make_config()
+    storage = MagicMock()
+    storage.deduplicate_silver = AsyncMock(side_effect=TimeoutError("timed out"))
+    storage.optimize = AsyncMock()
+    logger = MagicMock()
+    svc = PostrunCompactService(
+        config=config,
+        storage=storage,
+        logger=logger,
+        warning_allowlist=(TimeoutError,),
+    )
+    result = await svc.run_if_needed()
+    assert result == CompactionResult(status="failed", error="timed out")
+    logger.warning.assert_called_once()
+
+
+@pytest.mark.asyncio
 async def test_catches_allowlisted_delta_write_conflicts() -> None:
     config = _make_config()
     storage = MagicMock()

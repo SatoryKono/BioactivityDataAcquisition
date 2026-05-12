@@ -78,27 +78,7 @@
       "diff": {
         "added_properties": [],
         "removed_properties": [],
-        "changed_properties": [
-          {
-            "property": "is_oa",
-            "before": {
-              "type": [
-                "object",
-                "null"
-              ],
-              "nullable": true,
-              "description": ""
-            },
-            "after": {
-              "type": [
-                "boolean",
-                "null"
-              ],
-              "nullable": true,
-              "description": ""
-            }
-          }
-        ],
+        "changed_properties": [],
         "required_changed": false
       }
     },
@@ -148,27 +128,7 @@
       "diff": {
         "added_properties": [],
         "removed_properties": [],
-        "changed_properties": [
-          {
-            "property": "downgraded",
-            "before": {
-              "type": [
-                "object",
-                "null"
-              ],
-              "nullable": true,
-              "description": ""
-            },
-            "after": {
-              "type": [
-                "boolean",
-                "null"
-              ],
-              "nullable": true,
-              "description": ""
-            }
-          }
-        ],
+        "changed_properties": [],
         "required_changed": false
       }
     },
@@ -238,27 +198,7 @@
       "diff": {
         "added_properties": [],
         "removed_properties": [],
-        "changed_properties": [
-          {
-            "property": "content_domain_crossmark_restriction",
-            "before": {
-              "type": [
-                "object",
-                "null"
-              ],
-              "nullable": true,
-              "description": ""
-            },
-            "after": {
-              "type": [
-                "boolean",
-                "null"
-              ],
-              "nullable": true,
-              "description": ""
-            }
-          }
-        ],
+        "changed_properties": [],
         "required_changed": false
       }
     },
@@ -268,27 +208,7 @@
       "diff": {
         "added_properties": [],
         "removed_properties": [],
-        "changed_properties": [
-          {
-            "property": "is_oa",
-            "before": {
-              "type": [
-                "object",
-                "null"
-              ],
-              "nullable": true,
-              "description": ""
-            },
-            "after": {
-              "type": [
-                "boolean",
-                "null"
-              ],
-              "nullable": true,
-              "description": ""
-            }
-          }
-        ],
+        "changed_properties": [],
         "required_changed": false
       }
     },
@@ -318,27 +238,7 @@
       "diff": {
         "added_properties": [],
         "removed_properties": [],
-        "changed_properties": [
-          {
-            "property": "is_oa",
-            "before": {
-              "type": [
-                "object",
-                "null"
-              ],
-              "nullable": true,
-              "description": ""
-            },
-            "after": {
-              "type": [
-                "boolean",
-                "null"
-              ],
-              "nullable": true,
-              "description": ""
-            }
-          }
-        ],
+        "changed_properties": [],
         "required_changed": false
       }
     },
@@ -348,27 +248,7 @@
       "diff": {
         "added_properties": [],
         "removed_properties": [],
-        "changed_properties": [
-          {
-            "property": "reviewed",
-            "before": {
-              "type": [
-                "object",
-                "null"
-              ],
-              "nullable": true,
-              "description": ""
-            },
-            "after": {
-              "type": [
-                "boolean",
-                "null"
-              ],
-              "nullable": true,
-              "description": ""
-            }
-          }
-        ],
+        "changed_properties": [],
         "required_changed": false
       }
     },
@@ -378,27 +258,7 @@
       "diff": {
         "added_properties": [],
         "removed_properties": [],
-        "changed_properties": [
-          {
-            "property": "reviewed",
-            "before": {
-              "type": [
-                "object",
-                "null"
-              ],
-              "nullable": true,
-              "description": ""
-            },
-            "after": {
-              "type": [
-                "boolean",
-                "null"
-              ],
-              "nullable": true,
-              "description": ""
-            }
-          }
-        ],
+        "changed_properties": [],
         "required_changed": false
       }
     }

@@ -40,6 +40,7 @@ _POSTRUN_WARNING_ALLOWLIST = (
     BioETLError,
     OSError,
     RuntimeError,
+    TimeoutError,
     ValueError,
 )
 _METADATA_VERSION_ALLOWLIST = (

@@ -49,6 +49,9 @@ def _registry_entry(*, status: str) -> dict[str, object]:
             "schema_hash": "abc123",
             "dq_policy_ref": "chembl.dq.v1",
             "rule_bundle_version": "dq-rules.v1.0",
+            "normalization_profile_ref": "chembl.assay_parameters",
+            "normalization_profile_version": "1.0.0",
+            "normalization_profile_hash": "d" * 64,
         },
         "status": status,
         "source_path": "../../src/bioetl/domain/contracts/gold/_chembl_activity_assay_schemas.py",
@@ -61,6 +64,9 @@ def _registry_entry(*, status: str) -> dict[str, object]:
         "owners": ["chembl-team"],
         "dq_policy_ref": "chembl.dq.v1",
         "rule_bundle_version": "dq-rules.v1.0",
+        "normalization_profile_ref": "chembl.assay_parameters",
+        "normalization_profile_version": "1.0.0",
+        "normalization_profile_hash": "d" * 64,
     }
 
 

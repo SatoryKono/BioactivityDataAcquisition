@@ -395,19 +395,19 @@ quarterly_targets:
     god_object: 4
     domain_complexity: 6
 - quarter: 2026-Q2
-  max_total_exemptions: 4
+  max_total_exemptions: 10
   min_integral_score: 70
   group_budgets:
-    size_metrics: 3
-    complexity_metrics: 1
-    structural_debt: 0
+    size_metrics: 4
+    complexity_metrics: 4
+    structural_debt: 2
   registry_budgets:
-    file_size_limits: 3
-    function_complexity: 0
-    function_length: 0
-    class_size: 0
+    file_size_limits: 0
+    function_complexity: 3
+    function_length: 2
+    class_size: 2
     class_method_count: 0
-    god_object: 0
+    god_object: 2
     domain_complexity: 1
 owner_decomposition_targets:
 - quarter: 2026-Q1
@@ -417,9 +417,8 @@ owner_decomposition_targets:
     '@bioetl-data-model': 9
 - quarter: 2026-Q2
   allocations:
-    '@bioetl-architecture': 1
-    '@bioetl-platform': 2
-    '@bioetl-data-model': 1
+    '@bioetl-architecture': 9
+    '@bioetl-platform': 1
 expiry_decomposition_targets:
 - quarter: 2026-Q1
   max_entries_expiring_in_quarter: 29

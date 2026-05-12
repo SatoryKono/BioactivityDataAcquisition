@@ -331,5 +331,10 @@
     "assay_id",
     "content_hash",
     "entity_id"
-  ]
+  ],
+  "normalization_profile": {
+    "ref": "chembl.assay",
+    "version": "1.0.0",
+    "hash": "8c878e0bae4755cbfee0b7b13981c7841abc5b3ff03d4f44f0a008465c2e1972"
+  }
 }

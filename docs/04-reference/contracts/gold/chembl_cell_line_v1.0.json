@@ -105,5 +105,10 @@
     "cell_name",
     "content_hash",
     "entity_id"
-  ]
+  ],
+  "normalization_profile": {
+    "ref": "chembl.cell_line",
+    "version": "1.0.0",
+    "hash": "9976d62f7fb013352423ee915de51a93335a3a7e778640a3454e1202a3c6c5bf"
+  }
 }

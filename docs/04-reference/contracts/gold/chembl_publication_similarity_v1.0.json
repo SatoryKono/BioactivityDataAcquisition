@@ -103,5 +103,10 @@
     "doc_2",
     "entity_id",
     "sim_id"
-  ]
+  ],
+  "normalization_profile": {
+    "ref": "chembl.publication_similarity",
+    "version": "1.0.0",
+    "hash": "cdf4b9a18dd2589734fddd8f1ce2026043d02a99d4da095cc1a789898cafc93d"
+  }
 }

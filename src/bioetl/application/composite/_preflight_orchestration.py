@@ -4,9 +4,14 @@ from __future__ import annotations
 
 from importlib import import_module
 
-from bioetl.application.composite._preflight_types import FieldInfo, SchemaFields
+from bioetl.application.composite._preflight_types import (
+    FieldInfo,
+    ProfileInfo,
+    SchemaFields,
+)
 from bioetl.domain.composite.config import CompositeConfig
 from bioetl.domain.exceptions import BioETLError, DataQualityError
+from bioetl.domain.normalization.profiles import resolve_normalization_profile
 from bioetl.domain.ports import LoggerPort
 
 
@@ -99,6 +104,40 @@ class PreflightSchemaOrchestrationMixin:
 
         return result
 
+    def _load_source_profiles(self, config: CompositeConfig) -> dict[str, ProfileInfo]:
+        """Load deterministic normalization-profile identities for source pipelines."""
+        result: dict[str, ProfileInfo] = {}
+
+        seed_pipeline = config.seed.pipeline
+        seed_profile = self._load_pipeline_profile(seed_pipeline)
+        if seed_profile is not None:
+            self._register_source_aliases(
+                result,
+                pipeline_name=seed_pipeline,
+                fields=seed_profile,
+                is_seed=True,
+            )
+
+        for dependency in config.dependencies:
+            dependency_profile = self._load_pipeline_profile(dependency.pipeline)
+            if dependency_profile is not None:
+                self._register_source_aliases(
+                    result,
+                    pipeline_name=dependency.pipeline,
+                    fields=dependency_profile,
+                )
+
+        for enricher in config.enrichers:
+            enricher_profile = self._load_pipeline_profile(enricher.pipeline)
+            if enricher_profile is not None:
+                self._register_source_aliases(
+                    result,
+                    pipeline_name=enricher.pipeline,
+                    fields=enricher_profile,
+                )
+
+        return result
+
     def _load_pipeline_schema_fields(self, pipeline_name: str) -> SchemaFields | None:
         """Load schema fields for a specific pipeline."""
         registry = self._get_schema_registry()
@@ -121,6 +160,36 @@ class PreflightSchemaOrchestrationMixin:
 
         return self._extract_fields_from_schema(
             schema_class, source=f"{provider}.{entity}"
+        )
+
+    def _load_pipeline_profile(self, pipeline_name: str) -> ProfileInfo | None:
+        """Load deterministic profile metadata for one pipeline."""
+        identity = self._parse_pipeline_identity(pipeline_name)
+        if identity is None:
+            return None
+        provider, entity = identity
+        profile = resolve_normalization_profile(provider, entity)
+        if profile is None:
+            self._logger.debug(
+                "No normalization profile found for pipeline",
+                provider=provider,
+                entity=entity,
+                pipeline=pipeline_name,
+            )
+            return None
+
+        profile_identity = profile.identity
+        return ProfileInfo(
+            source=f"{provider}.{entity}",
+            profile_name=profile_identity.profile_name,
+            profile_version=profile_identity.profile_version,
+            profile_hash=profile_identity.profile_hash,
+            field_hashes={
+                field_name: rule_identity.compatibility_hash
+                for field_name in sorted(profile.fields)
+                for rule_identity in (profile.field_identity(field_name),)
+                if rule_identity is not None
+            },
         )
 
     def _extract_fields_from_schema(

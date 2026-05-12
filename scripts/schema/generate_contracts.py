@@ -21,6 +21,9 @@ if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
 
 from bioetl.domain.contracts import gold as gold_contracts  # noqa: E402
+from bioetl.domain.normalization.profiles import (  # noqa: E402
+    resolve_normalization_profile_identity,
+)
 
 CONTRACT_VERSION = "1.0.0"
 JSON_SCHEMA_DRAFT7_URI = urlunsplit(
@@ -129,7 +132,9 @@ def _build_contract(schema_cls: type[Any], entity: str) -> dict[str, Any]:
         if not column.nullable:
             required.append(export_name)
 
-    return {
+    provider, entity_type = entity.split("_", maxsplit=1)
+    profile_identity = resolve_normalization_profile_identity(provider, entity_type)
+    contract_payload = {
         "$schema": f"{JSON_SCHEMA_DRAFT7_URI}#",
         "$version": CONTRACT_VERSION,
         "title": f"{schema_cls.__name__} Contract",
@@ -141,6 +146,13 @@ def _build_contract(schema_cls: type[Any], entity: str) -> dict[str, Any]:
         "properties": properties,
         "required": sorted(required),
     }
+    if profile_identity is not None:
+        contract_payload["normalization_profile"] = {
+            "ref": profile_identity.profile_name,
+            "version": profile_identity.profile_version,
+            "hash": profile_identity.profile_hash,
+        }
+    return contract_payload
 
 
 def _load_previous_contract(path: Path) -> dict[str, Any]:

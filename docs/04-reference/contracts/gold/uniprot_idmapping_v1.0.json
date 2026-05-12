@@ -145,5 +145,10 @@
     "entity_id",
     "mapping_status",
     "target_id"
-  ]
+  ],
+  "normalization_profile": {
+    "ref": "uniprot.idmapping",
+    "version": "1.0.0",
+    "hash": "237855bebc49825d7711a40b5d55d9602460633f1ddd65d1c055f5d251330c10"
+  }
 }

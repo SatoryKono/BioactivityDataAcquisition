@@ -42,7 +42,9 @@ Grafana dashboards в BioETL.
   для critical surfaces.
 - Во всех shipped navigation panels `id=1000` после bus `0..5` должны
   присутствовать global adjunct links `Silver Reject Explorer`,
-  `Explore Logs`, `Explore Traces`; current dashboard item MUST stay visible and disabled instead of disappearing from the visual bus.
+  `Explore Logs`, `Explore Traces`; исключение — `0. Control Plane`, где
+  top-level Explore handoffs намеренно отсутствуют, чтобы first screen оставался
+  на runbook/dashboard surfaces. Current dashboard item MUST stay visible and disabled instead of disappearing from the visual bus.
 - Navigation panel links MUST open in the same window; do not ship
   `target="_blank"` in panel `id=1000` HTML.
 - Layout hierarchy follows the dashboard design system:

@@ -138,6 +138,21 @@ def _build_dq_identity_alignment_issues(
             entry.identity.rule_bundle_version,
             entry.rule_bundle_version,
         ),
+        (
+            "normalization_profile_ref",
+            entry.identity.normalization_profile_ref,
+            entry.normalization_profile_ref,
+        ),
+        (
+            "normalization_profile_version",
+            entry.identity.normalization_profile_version,
+            entry.normalization_profile_version,
+        ),
+        (
+            "normalization_profile_hash",
+            entry.identity.normalization_profile_hash,
+            entry.normalization_profile_hash,
+        ),
     )
     issues: list[RegistryValidationIssue] = []
     for field_name, identity_value, entry_value in checks:
@@ -171,6 +186,9 @@ class ContractRegistryEntry:
     owners: list[str] = field(default_factory=list)
     dq_policy_ref: str | None = None
     rule_bundle_version: str | None = None
+    normalization_profile_ref: str | None = None
+    normalization_profile_version: str | None = None
+    normalization_profile_hash: str | None = None
 
     def validate(self) -> list[RegistryValidationIssue]:
         """Validate the registry entry."""

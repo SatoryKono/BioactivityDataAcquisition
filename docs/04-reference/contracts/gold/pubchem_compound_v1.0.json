@@ -307,5 +307,10 @@
     "content_hash",
     "entity_id",
     "molecule_id"
-  ]
+  ],
+  "normalization_profile": {
+    "ref": "pubchem.compound",
+    "version": "1.0.0",
+    "hash": "62ec664302f41a35eca439980d4bdaee353c38b975ff20fb14830bb624fff11a"
+  }
 }

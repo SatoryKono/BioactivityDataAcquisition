@@ -153,6 +153,7 @@ _CANONICAL_PAGE_UIDS = frozenset(
     }
 )
 _EXPLORE_ALLOWED_UIDS = frozenset({"bioetl-runtime", "bioetl-dq-v2"})
+_DRILLDOWN_TOP_LEVEL_EXEMPT_UIDS = frozenset({"bioetl-control-plane-v1"})
 
 
 def _extract_dashboard_uid(url: str) -> str | None:
@@ -1355,6 +1356,8 @@ def test_tempo_drilldown_routes_to_traces_drilldown_app() -> None:
     """Tempo drilldown links should route to Grafana Traces Drilldown app."""
     for dashboard_name in (path.name for path in get_dashboard_files()):
         dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
+        if dashboard.get("uid") in _DRILLDOWN_TOP_LEVEL_EXEMPT_UIDS:
+            continue
         tempo_links = [
             link
             for link in get_dashboard_navigation_links(dashboard)
@@ -1376,6 +1379,8 @@ def test_loki_drilldown_links_use_safe_bioetl_baseline_query() -> None:
     """Loki drilldown links should start from a low-cardinality baseline query."""
     for dashboard_name in (path.name for path in get_dashboard_files()):
         dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
+        if dashboard.get("uid") in _DRILLDOWN_TOP_LEVEL_EXEMPT_UIDS:
+            continue
         loki_links = [
             link
             for link in get_dashboard_navigation_links(dashboard)
@@ -1505,6 +1510,8 @@ def test_loki_drilldown_uses_grafana_logs_drilldown_entrypoint() -> None:
 
     for dashboard_name in (path.name for path in get_dashboard_files()):
         dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
+        if dashboard.get("uid") in _DRILLDOWN_TOP_LEVEL_EXEMPT_UIDS:
+            continue
         loki_links = [
             link
             for link in get_dashboard_navigation_links(dashboard)

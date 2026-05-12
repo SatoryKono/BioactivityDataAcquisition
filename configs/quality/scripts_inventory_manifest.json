@@ -1,17 +1,17 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-05-12T14:57:44.224380+00:00",
+  "generated_at": "2026-05-12T17:16:23.850146+00:00",
   "summary": {
-    "total_scripts": 366,
+    "total_scripts": 367,
     "status_counts": {
       "active": 332,
-      "supporting": 34
+      "supporting": 35
     },
     "reference_group_coverage": {
       "agents": 4,
       "build": 2,
       "ci": 51,
-      "docs": 131,
+      "docs": 132,
       "scripts": 299,
       "skills": 8,
       "tests": 143
@@ -2773,6 +2773,21 @@
       ]
     },
     {
+      "path": "scripts/data_quality/export_chembl_observed_vocab.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "docs/04-reference/schemas/domain/chembl/observed-vocab-inventory.md",
+          "line": 9,
+          "source_group": "docs",
+          "text": "./.venv/bin/python scripts/data_quality/export_chembl_observed_vocab.py"
+        }
+      ]
+    },
+    {
       "path": "scripts/diagrams/__main__.py",
       "type": "py",
       "status": "active",
@@ -3125,7 +3140,7 @@
       "references": [
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 304,
+          "line": 334,
           "source_group": "docs",
           "text": "- post-check: `scripts/diagrams/check_pdf_image_bounds.py`"
         },
@@ -3269,7 +3284,7 @@
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 388,
+          "line": 418,
           "source_group": "docs",
           "text": "`scripts/diagrams/enforce_diagram_quality_budget.py`."
         },
@@ -3488,7 +3503,7 @@
       "references": [
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 120,
+          "line": 150,
           "source_group": "docs",
           "text": "- Supplemental generator: `scripts/diagrams/generate_package_family_class_diagrams.py`"
         },
@@ -3515,7 +3530,7 @@
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 301,
+          "line": 331,
           "source_group": "docs",
           "text": "- `scripts/diagrams/generate_with_descriptions_docx.py`"
         },
@@ -3566,7 +3581,7 @@
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 300,
+          "line": 330,
           "source_group": "docs",
           "text": "- `scripts/diagrams/generate_with_descriptions_pdf.py`"
         },
@@ -3688,7 +3703,7 @@
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 409,
+          "line": 439,
           "source_group": "docs",
           "text": "uv run python scripts/diagrams/lint_diagrams.py docs/02-architecture/diagrams --json \\"
         }
@@ -3703,7 +3718,7 @@
       "references": [
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 262,
+          "line": 292,
           "source_group": "docs",
           "text": "- repo scripts now use `scripts/diagrams/mmdc_wrapper.sh` as the default `mmdc` entrypoint;"
         },
@@ -3766,25 +3781,25 @@
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 476,
+          "line": 506,
           "source_group": "docs",
           "text": "`scripts/diagrams/prune_orphan_nodes.py` detects nodes defined in a diagram but not"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 484,
+          "line": 514,
           "source_group": "docs",
           "text": "python scripts/diagrams/prune_orphan_nodes.py --check"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 487,
+          "line": 517,
           "source_group": "docs",
           "text": "python scripts/diagrams/prune_orphan_nodes.py --check --json"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 490,
+          "line": 520,
           "source_group": "docs",
           "text": "python scripts/diagrams/prune_orphan_nodes.py --fix"
         }
@@ -3832,13 +3847,13 @@
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 424,
+          "line": 454,
           "source_group": "docs",
           "text": "bash scripts/diagrams/run_diagram_checks.sh --profile pr --enforce-budget"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 425,
+          "line": 455,
           "source_group": "docs",
           "text": "bash scripts/diagrams/run_diagram_checks.sh --profile nightly --enforce-budget"
         },
@@ -3883,7 +3898,7 @@
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 302,
+          "line": 332,
           "source_group": "docs",
           "text": "- unified orchestrator: `scripts/diagrams/run_diagram_docs_agent.sh`"
         },
@@ -4096,19 +4111,19 @@
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 432,
+          "line": 462,
           "source_group": "docs",
           "text": "Use `scripts/diagrams/uniform_diagram_sizes.py` to normalize class/flowchart object sizes:"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 436,
+          "line": 466,
           "source_group": "docs",
           "text": "python3 scripts/diagrams/uniform_diagram_sizes.py --check"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 439,
+          "line": 469,
           "source_group": "docs",
           "text": "python3 scripts/diagrams/uniform_diagram_sizes.py --fix -f docs/02-architecture/diagrams/class-diagrams/07-application-core-services.mmd"
         },
@@ -4179,7 +4194,7 @@
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 339,
+          "line": 369,
           "source_group": "docs",
           "text": "bash scripts/diagrams/validate_mermaid_syntax.sh --puppeteer /tmp/puppeteer-config.json"
         },
@@ -8129,19 +8144,19 @@
       "references": [
         {
           "path": "docs/05-operations/runbooks/run-manifest-inspection.md",
-          "line": 216,
+          "line": 217,
           "source_group": "docs",
           "text": "./.venv/bin/python scripts/engineering/qa/run_historical_replay_closure_campaign.py --auto-certify-sources --auto-certify-composites --claim-scope-mode retained_certifiable_historical_runs --write-dis"
         },
         {
           "path": "docs/05-operations/runbooks/run-manifest-inspection.md",
-          "line": 238,
+          "line": 242,
           "source_group": "docs",
           "text": "- `run_historical_replay_closure_campaign.py` is the deterministic batch path"
         },
         {
           "path": "tests/architecture/test_reproducibility_docs_contract_drift.py",
-          "line": 197,
+          "line": 201,
           "source_group": "tests",
           "text": "assert \"run_historical_replay_closure_campaign.py\" in runbook"
         }
@@ -8156,31 +8171,31 @@
       "references": [
         {
           "path": "docs/04-reference/contracts/run-manifest-ledger.md",
-          "line": 187,
+          "line": 191,
           "source_group": "docs",
           "text": "- `scripts/engineering/qa/run_historical_replay_universe_campaign.py` persists"
         },
         {
           "path": "docs/05-operations/runbooks/run-manifest-inspection.md",
-          "line": 217,
+          "line": 218,
           "source_group": "docs",
           "text": "./.venv/bin/python scripts/engineering/qa/run_historical_replay_universe_campaign.py --external-pack path/to/archive-pack.json --write-report"
         },
         {
           "path": "docs/05-operations/runbooks/run-manifest-inspection.md",
-          "line": 243,
+          "line": 247,
           "source_group": "docs",
           "text": "- `run_historical_replay_universe_campaign.py` is the full-universe path: it"
         },
         {
           "path": "tests/architecture/test_reproducibility_docs_contract_drift.py",
-          "line": 123,
+          "line": 124,
           "source_group": "tests",
           "text": "assert \"run_historical_replay_universe_campaign.py\" in text"
         },
         {
           "path": "tests/architecture/test_reproducibility_docs_contract_drift.py",
-          "line": 203,
+          "line": 207,
           "source_group": "tests",
           "text": "assert \"run_historical_replay_universe_campaign.py\" in runbook"
         }
@@ -10119,7 +10134,7 @@
         },
         {
           "path": "tests/architecture/test_test_structural_debt.py",
-          "line": 20,
+          "line": 19,
           "source_group": "tests",
           "text": "\"tests/testing_support/neo4j_memory_sync.py::test_snapshot_contains_core_repo_surfaces\": 295,"
         }

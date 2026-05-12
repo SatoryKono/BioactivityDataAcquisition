@@ -4,8 +4,12 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from importlib import import_module
-from typing import TYPE_CHECKING, Protocol, cast
+from typing import TYPE_CHECKING, cast
 
+from bioetl.composition._service_protocols import (
+    BronzeCleanupServiceProtocol,
+    HealthServerDependenciesProtocol,
+)
 from bioetl.composition._workflow_services import (
     get_workflow_execution_service,
     get_workflow_inspection_service,
@@ -31,6 +35,9 @@ if TYPE_CHECKING:
     from bioetl.application.services.control_plane.historical_replay_corpus_service import (
         HistoricalReplayCorpusService,
     )
+    from bioetl.application.services.control_plane.historical_replay_universe_service import (
+        HistoricalReplayUniverseService,
+    )
     from bioetl.application.services.control_plane.run_manifest_inspection_service import (
         RunManifestInspectionService,
     )
@@ -50,22 +57,7 @@ if TYPE_CHECKING:
     from bioetl.application.services.quarantine_service import QuarantineService
     from bioetl.application.services.vacuum_service import VacuumService
     from bioetl.composition.registry_api import PipelineRegistry
-    from bioetl.domain.ports import HealthMonitorPort, MetricsPort, QuarantinePort
-
-
-class HealthServerDependenciesProtocol(Protocol):
-    """Typed view of health-server dependencies returned by bootstrap."""
-
-    health_monitor: HealthMonitorPort
-    metrics: MetricsPort
-
-
-class _BronzeCleanupServiceProtocol(Protocol):
-    async def cleanup(
-        self,
-        retention_days: int = 90,
-        dry_run: bool = False,
-    ) -> BronzeCleanupResult: ...
+    from bioetl.domain.ports import QuarantinePort
 
 
 __all__ = [
@@ -82,6 +74,7 @@ __all__ = [
     "get_health_service",
     "get_historical_replay_closure_service",
     "get_historical_replay_corpus_service",
+    "get_historical_replay_universe_service",
     "get_lineage_service",
     "get_lock_service",
     "get_metrics_service",
@@ -115,6 +108,9 @@ _BOOTSTRAP_EXPORT_MODULES: dict[str, str] = {
         "bioetl.composition.bootstrap.cli.run_manifest"
     ),
     "bootstrap_historical_replay_closure_service": (
+        "bioetl.composition.bootstrap.cli.run_manifest"
+    ),
+    "bootstrap_historical_replay_universe_service": (
         "bioetl.composition.bootstrap.cli.run_manifest"
     ),
     "bootstrap_health_server_dependencies": ("bioetl.composition.bootstrap.cli.health"),
@@ -221,7 +217,7 @@ async def cleanup_bronze(
     dry_run: bool = False,
 ) -> BronzeCleanupResult:
     """Clean up Bronze files based on retention policy."""
-    service = cast(_BronzeCleanupServiceProtocol, get_bronze_cleanup_service())
+    service = cast(BronzeCleanupServiceProtocol, get_bronze_cleanup_service())
     result = await service.cleanup(
         retention_days=retention_days,
         dry_run=dry_run,
@@ -286,6 +282,15 @@ def get_historical_replay_closure_service() -> HistoricalReplayClosureService:
         "bootstrap_historical_replay_closure_service"
     )
     return cast("HistoricalReplayClosureService", bootstrap())
+
+
+def get_historical_replay_universe_service() -> HistoricalReplayUniverseService:
+    """Get full-universe historical replay workflows for CLI operations."""
+    _ensure_registrations()
+    bootstrap = _resolve_bootstrap_callable(
+        "bootstrap_historical_replay_universe_service"
+    )
+    return cast("HistoricalReplayUniverseService", bootstrap())
 
 
 def get_lineage_service() -> LineageInspectionService:

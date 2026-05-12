@@ -2,7 +2,12 @@
 
 from __future__ import annotations
 
-from bioetl.domain.normalization.profiles.base import FieldRule, NormalizationProfile
+from bioetl.domain.normalization.profiles.base import (
+    FieldRule,
+    FieldRuleIdentity,
+    NormalizationProfile,
+    NormalizationProfileIdentity,
+)
 from bioetl.domain.normalization.profiles.chembl_activity import (
     CHEMBL_ACTIVITY_PROFILE,
     CHEMBL_ACTIVITY_SCHEMA_FIELDS,
@@ -80,6 +85,7 @@ from bioetl.domain.normalization.profiles.registry import (
     build_normalization_profile_registry,
     normalize_normalization_profile_coordinates,
     resolve_normalization_profile,
+    resolve_normalization_profile_identity,
 )
 from bioetl.domain.normalization.profiles.semanticscholar_publication import (
     SEMANTICSCHOLAR_PUBLICATION_PROFILE,
@@ -139,8 +145,11 @@ __all__ = [
     "UNIPROT_PROTEIN_PROFILE",
     "UNIPROT_PROTEIN_SCHEMA_FIELDS",
     "FieldRule",
+    "FieldRuleIdentity",
     "NormalizationProfile",
+    "NormalizationProfileIdentity",
     "build_normalization_profile_registry",
     "normalize_normalization_profile_coordinates",
     "resolve_normalization_profile",
+    "resolve_normalization_profile_identity",
 ]

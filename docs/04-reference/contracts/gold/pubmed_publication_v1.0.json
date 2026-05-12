@@ -517,5 +517,10 @@
     "entity_id",
     "pmid",
     "title"
-  ]
+  ],
+  "normalization_profile": {
+    "ref": "pubmed.publication",
+    "version": "1.0.0",
+    "hash": "913191c71608ee47f702be4b34dc1b3fc93c231211e773db7312cb0225811ed6"
+  }
 }

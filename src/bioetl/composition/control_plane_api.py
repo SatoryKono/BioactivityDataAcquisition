@@ -23,6 +23,10 @@ if TYPE_CHECKING:
     from bioetl.application.services.control_plane.historical_replay_corpus_service import (
         HistoricalReplayCorpusService,
     )
+    from bioetl.application.services.control_plane.historical_replay_universe_service import (
+        HistoricalReplayUniverseClosureReport,
+        HistoricalReplayUniverseService,
+    )
     from bioetl.application.services.control_plane.run_manifest_inspection_service import (
         RunManifestInspectionService,
     )
@@ -76,8 +80,14 @@ if TYPE_CHECKING:
 
     def get_historical_replay_corpus_service() -> HistoricalReplayCorpusService: ...
 
+    def get_historical_replay_universe_service() -> HistoricalReplayUniverseService: ...
+
     def persist_historical_replay_closure_report(
         report: HistoricalReplayClosureReport,
+    ) -> object: ...
+
+    def persist_historical_replay_universe_report(
+        report: HistoricalReplayUniverseClosureReport,
     ) -> object: ...
 
     def get_lineage_service() -> LineageInspectionService: ...
@@ -104,6 +114,7 @@ __all__ = [
     "get_forensic_run_diff_service",
     "get_historical_replay_closure_service",
     "get_historical_replay_corpus_service",
+    "get_historical_replay_universe_service",
     "get_lineage_service",
     "get_lock_service",
     "get_run_manifest_service",
@@ -111,6 +122,7 @@ __all__ = [
     "get_workflow_inspection_service",
     "load_workflow_config",
     "persist_historical_replay_closure_report",
+    "persist_historical_replay_universe_report",
 ]
 
 _SERVICES_MODULE = "bioetl.composition._services"
@@ -129,9 +141,11 @@ _PUBLIC_EXPORTS = {
     "get_forensic_run_diff_service": _SERVICES_MODULE,
     "get_historical_replay_closure_service": _SERVICES_MODULE,
     "get_historical_replay_corpus_service": _SERVICES_MODULE,
+    "get_historical_replay_universe_service": _SERVICES_MODULE,
     "get_lineage_service": _SERVICES_MODULE,
     "get_lock_service": _SERVICES_MODULE,
     "persist_historical_replay_closure_report": _RUN_MANIFEST_BOOTSTRAP_MODULE,
+    "persist_historical_replay_universe_report": _RUN_MANIFEST_BOOTSTRAP_MODULE,
     "get_run_manifest_service": _SERVICES_MODULE,
     "get_workflow_execution_service": _WORKFLOW_SERVICES_MODULE,
     "get_workflow_inspection_service": _WORKFLOW_SERVICES_MODULE,

@@ -307,5 +307,10 @@
     "content_hash",
     "entity_id",
     "publication_id"
-  ]
+  ],
+  "normalization_profile": {
+    "ref": "chembl.publication",
+    "version": "1.0.0",
+    "hash": "7b78a001bd25f2891bcb3d4164384d20062a281d578a9a18c0f2fa6002988b6d"
+  }
 }

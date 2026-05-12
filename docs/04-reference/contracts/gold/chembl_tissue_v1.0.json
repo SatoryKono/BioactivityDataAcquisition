@@ -81,5 +81,10 @@
     "entity_id",
     "pref_name",
     "tissue_id"
-  ]
+  ],
+  "normalization_profile": {
+    "ref": "chembl.tissue",
+    "version": "1.0.0",
+    "hash": "3fda2707b70b619f566678a9821a827883153870f5bb6374ff8d337b2c293875"
+  }
 }

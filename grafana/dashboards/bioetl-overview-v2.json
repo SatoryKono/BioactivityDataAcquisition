@@ -2561,6 +2561,7 @@
       "collapsed": true,
       "panels": [
         {
+          "description": "Operator note for raw metric starting points and cross-dashboard diagnostics handoffs; no datasource query is expected.",
           "id": 9021,
           "type": "text",
           "title": "Diagnostics Navigation",

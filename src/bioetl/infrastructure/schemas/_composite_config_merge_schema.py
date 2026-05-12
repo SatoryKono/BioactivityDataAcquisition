@@ -96,6 +96,10 @@ class MergeSchema(BaseModel):
     field_priorities: dict[str, list[str]] = Field(
         default_factory=dict, description="Mapping of field to source priority list"
     )
+    normalization_compatibility_overrides: dict[str, str] = Field(
+        default_factory=dict,
+        description="Explicit justification map for intentional field-level normalization mismatches",
+    )
     field_mappings: dict[str, str] = Field(
         default_factory=dict, description="Mapping to rename fields during merge"
     )
@@ -151,6 +155,7 @@ class MergeSchema(BaseModel):
             sort_by_silver=tuple(self.sort_by.silver),
             sort_by_gold=tuple(self.sort_by.gold),
             field_priorities=field_priorities_tuples,
+            normalization_compatibility_overrides=self.normalization_compatibility_overrides,
             field_mappings=self.field_mappings,
             preserve_all_sources=self.preserve_all_sources,
             column_groups=column_groups_domain,

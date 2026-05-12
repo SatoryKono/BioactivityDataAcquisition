@@ -59,5 +59,10 @@
     "content_hash",
     "entity_id",
     "subcellular_fraction"
-  ]
+  ],
+  "normalization_profile": {
+    "ref": "chembl.subcellular_fraction",
+    "version": "1.0.0",
+    "hash": "90e6aaf74af813f7e3563e7742e587fd6004dbc7e1e48a3991401136e4c98901"
+  }
 }

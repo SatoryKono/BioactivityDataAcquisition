@@ -158,6 +158,12 @@
       "review_by": "2026-07-15",
       "next_step": "Retain as the governed vocabulary-extraction helper while UniProt semantic payload inventory docs and parity checks still consume this generated support surface; only fold it into a broader schema/docs generator when that pipeline is consolidated."
     },
+    "scripts/data_quality/export_chembl_observed_vocab.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as the deterministic ChEMBL observed-vocabulary export helper while docs-generated inventory artifacts and normalization parity checks still consume this surface; fold it into broader QA/docs generation only if that reporting pipeline is consolidated."
+    },
     "scripts/memory/mcp_smoke.py": {
       "owner": "@bioetl-platform",
       "decision": "compatibility_wrapper",

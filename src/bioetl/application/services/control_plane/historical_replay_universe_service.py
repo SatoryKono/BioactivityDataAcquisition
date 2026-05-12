@@ -319,6 +319,7 @@ class HistoricalReplayUniverseService:
         return f"historical-replay-universe-{digest[:16]}"
 
 
-# Compatibility aliases for existing imports/call sites.
+# Public aliases keep the exported control-plane surface stable while allowing
+# the internal record/snapshot names to stay descriptive.
 HistoricalReplayUniverseInventory = HistoricalReplayUniverseInventorySnapshot
 HistoricalReplayUniverseClosureReport = HistoricalReplayUniverseClosureReportRecord

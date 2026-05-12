@@ -71,5 +71,10 @@
     "publication_id",
     "term",
     "term_type"
-  ]
+  ],
+  "normalization_profile": {
+    "ref": "chembl.publication_term",
+    "version": "1.0.0",
+    "hash": "70bcfcb8b34857e1f5eed5939a1e872f9b885e0ed0debe5b5e149bbc215df9e8"
+  }
 }
