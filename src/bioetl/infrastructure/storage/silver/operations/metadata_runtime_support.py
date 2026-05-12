@@ -276,7 +276,7 @@ async def write_silver_metadata_file(
     elif "table_path" in parameters:
         kwargs["table_path"] = table_path
     else:
-        legacy_write = cast(
+        legacy_write = cast(  # Any: legacy signature compatibility
             Any,
             write_silver_metadata,
         )

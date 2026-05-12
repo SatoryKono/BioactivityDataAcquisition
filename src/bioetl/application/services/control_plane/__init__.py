@@ -14,6 +14,14 @@ from bioetl.application.services.control_plane.historical_replay_certification_s
     HistoricalReplayCertificationService,
     HistoricalReplaySnapshotCertification,
 )
+from bioetl.application.services.control_plane.historical_replay_corpus_service import (
+    HistoricalReplayBulkCertificationRecord,
+    HistoricalReplayBulkCertificationResult,
+    HistoricalReplayBulkCertificationSpec,
+    HistoricalReplayCertifiabilityInventory,
+    HistoricalReplayCertifiabilityRecord,
+    HistoricalReplayCorpusService,
+)
 from bioetl.application.services.control_plane.run_ledger_service import (
     RunLedgerService,
 )
@@ -55,6 +63,12 @@ __all__ = [
     "HistoricalReplayCertificationResult",
     "HistoricalReplayCertificationService",
     "HistoricalReplaySnapshotCertification",
+    "HistoricalReplayBulkCertificationRecord",
+    "HistoricalReplayBulkCertificationResult",
+    "HistoricalReplayBulkCertificationSpec",
+    "HistoricalReplayCertifiabilityInventory",
+    "HistoricalReplayCertifiabilityRecord",
+    "HistoricalReplayCorpusService",
     "RunLedgerService",
     "RunManifestCreateSpec",
     "RunManifestDiffEntry",

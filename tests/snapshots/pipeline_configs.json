@@ -299,7 +299,6 @@
         "src_id",
         "canonical_smiles",
         "target_organism",
-        "target_taxonomy_id",
         "assay_description",
         "bao_endpoint",
         "bao_format",

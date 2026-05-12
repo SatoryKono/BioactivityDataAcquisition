@@ -35,6 +35,7 @@ DQ alignment:
 | `semantic_scholar_corpus` | numeric scalar | scalar | numeric corpusId | `semanticscholar_publication.corpus_id` |
 | `ncbi_taxonomy` | numeric scalar | scalar | numeric taxonomy id | `chembl_activity.target_tax_id`, `chembl_assay.tax_id`, `chembl_target.tax_id` |
 | `uniprot_accession` | string | scalar or set-like | uppercase accession | `uniprot_idmapping.uniprot_accession`, `uniprot_idmapping.all_mappings`, `uniprot_protein.secondary_accessions` |
+| `mixed_identifier_set` | string | set-like | varies (ChEMBL, UniProt, DrugBank, or normalized text) | `uniprot_idmapping.all_mappings` |
 | `go` | json array | set-like | `GO:0000000` | `uniprot_protein.go_terms`, `uniprot_protein.cellular_component`, `uniprot_protein.molecular_function` |
 | `interpro` | json array | set-like | `IPR000000` | `uniprot_protein.interpro_xrefs` |
 | `pfam` | json array | set-like | `PF00000` | `uniprot_protein.pfam_xrefs` |

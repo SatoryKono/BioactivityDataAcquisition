@@ -198,6 +198,38 @@ class FileRunManifestStore(RunManifestPort):
                 duration_seconds=perf_counter() - started_at,
             )
 
+    def list_all(self) -> tuple[RunManifest, ...]:
+        """Enumerate every persisted manifest in deterministic order."""
+        started_at = perf_counter()
+        status = "success"
+        try:
+            manifests = tuple(
+                sorted(
+                    (
+                        manifest
+                        for path in sorted(self.base_path.glob("*.json"))
+                        if path.is_file()
+                        for manifest in (self._load_manifest(path.stem),)
+                        if manifest is not None
+                    ),
+                    key=lambda manifest: (manifest.created_at, manifest.manifest_id),
+                )
+            )
+            if not manifests:
+                status = "miss"
+            return manifests
+        except (OSError, TypeError, ValueError):
+            status = "failed"
+            raise
+        finally:
+            emit_control_plane_read_metrics(
+                self.metrics,
+                store="manifest",
+                operation="list_all",
+                status=status,
+                duration_seconds=perf_counter() - started_at,
+            )
+
     def _load_manifest(self, manifest_id: str) -> RunManifest | None:
         """Load one manifest payload without emitting public lookup metrics."""
         manifest_path = self.base_path / f"{manifest_id}.json"

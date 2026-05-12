@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, cast
 from bioetl.composition.runtime_builders._cached_bronze_snapshot_support import (
     build_cached_bronze_input_snapshot_refs,
 )
-from bioetl.composition.runtime_builders._run_manifest_contract_identity import (
+from bioetl.composition.runtime_builders.run_manifest_contract_identity import (
     resolve_contract_identity,
 )
 from bioetl.composition.runtime_builders._run_manifest_refs import (

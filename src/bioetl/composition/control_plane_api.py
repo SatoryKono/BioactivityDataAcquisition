@@ -16,6 +16,9 @@ if TYPE_CHECKING:
     from bioetl.application.services.control_plane.forensic_diff_service import (
         ForensicRunDiffService,
     )
+    from bioetl.application.services.control_plane.historical_replay_corpus_service import (
+        HistoricalReplayCorpusService,
+    )
     from bioetl.application.services.control_plane.run_manifest_inspection_service import (
         RunManifestInspectionService,
     )
@@ -65,6 +68,8 @@ if TYPE_CHECKING:
 
     def get_forensic_run_diff_service() -> ForensicRunDiffService: ...
 
+    def get_historical_replay_corpus_service() -> HistoricalReplayCorpusService: ...
+
     def get_lineage_service() -> LineageInspectionService: ...
 
     def get_lock_service() -> LockService: ...
@@ -87,6 +92,7 @@ __all__ = [
     "get_config_service",
     "get_export_service",
     "get_forensic_run_diff_service",
+    "get_historical_replay_corpus_service",
     "get_lineage_service",
     "get_lock_service",
     "get_run_manifest_service",
@@ -108,6 +114,7 @@ _PUBLIC_EXPORTS = {
     "get_config_service": _SERVICES_MODULE,
     "get_export_service": _SERVICES_MODULE,
     "get_forensic_run_diff_service": _SERVICES_MODULE,
+    "get_historical_replay_corpus_service": _SERVICES_MODULE,
     "get_lineage_service": _SERVICES_MODULE,
     "get_lock_service": _SERVICES_MODULE,
     "get_run_manifest_service": _SERVICES_MODULE,
