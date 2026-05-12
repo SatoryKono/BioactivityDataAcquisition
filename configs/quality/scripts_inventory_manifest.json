@@ -1,18 +1,20 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-05-08T17:26:35.459407+00:00",
+  "generated_at": "2026-05-11T17:29:17.566084+00:00",
   "summary": {
-    "total_scripts": 355,
+    "total_scripts": 362,
     "status_counts": {
-      "active": 329,
-      "supporting": 26
+      "active": 330,
+      "orphan": 4,
+      "supporting": 26,
+      "unknown": 2
     },
     "reference_group_coverage": {
       "agents": 4,
       "build": 2,
       "ci": 51,
-      "docs": 126,
-      "scripts": 298,
+      "docs": 129,
+      "scripts": 299,
       "skills": 8,
       "tests": 141
     }
@@ -1820,8 +1822,14 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
+        {
+          "path": "docs/CODEX_WSL_SETUP.md",
+          "line": 51,
+          "source_group": "docs",
+          "text": "\"args\": [\"exec\", \"-i\", \"bioetl-mcp-docker\", \"/mcp_docker_wrapper.sh\"]"
+        },
         {
           "path": "scripts/ai/.mcp.json",
           "line": 70,
@@ -2721,6 +2729,48 @@
           "line": 201,
           "source_group": "scripts",
           "text": "\"scripts/ci_check_docs_parity.sh\","
+        }
+      ]
+    },
+    {
+      "path": "scripts/codex-start-wsl.ps1",
+      "type": "ps1",
+      "status": "unknown",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "docs/CODEX_QUICK_START.md",
+          "line": 32,
+          "source_group": "docs",
+          "text": ".\\scripts\\codex-start-wsl.ps1"
+        },
+        {
+          "path": "docs/CODEX_QUICK_START.md",
+          "line": 145,
+          "source_group": "docs",
+          "text": "- `scripts/codex-start-wsl.ps1` - PowerShell startup script"
+        }
+      ]
+    },
+    {
+      "path": "scripts/codex-start-wsl.sh",
+      "type": "sh",
+      "status": "unknown",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "docs/CODEX_QUICK_START.md",
+          "line": 35,
+          "source_group": "docs",
+          "text": "bash scripts/codex-start-wsl.sh"
+        },
+        {
+          "path": "docs/CODEX_QUICK_START.md",
+          "line": 144,
+          "source_group": "docs",
+          "text": "- `scripts/codex-start-wsl.sh` - Bash startup script"
         }
       ]
     },
@@ -5931,7 +5981,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 35,
+      "reference_count": 36,
       "references": [
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
@@ -7007,7 +7057,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 128,
+      "reference_count": 138,
       "references": [
         {
           "path": ".github/workflows/docs.yml",
@@ -7074,7 +7124,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 78,
+          "line": 80,
           "source_group": "scripts",
           "text": "\"analyze-duplicate-functions\": \"analyze_duplicate_functions.py\","
         }
@@ -7095,7 +7145,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 79,
+          "line": 81,
           "source_group": "scripts",
           "text": "\"calibrate-hotspots\": \"calibrate_hotspot_budgets.py\","
         }
@@ -7116,7 +7166,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 55,
+          "line": 56,
           "source_group": "scripts",
           "text": "\"check-app-deps\": \"check_application_deps.py\","
         }
@@ -7137,7 +7187,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 54,
+          "line": 55,
           "source_group": "scripts",
           "text": "\"check-architecture\": \"check_architecture.py\","
         }
@@ -7215,7 +7265,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 56,
+          "line": 57,
           "source_group": "scripts",
           "text": "\"check-constructor-args\": \"check_constructor_args.py\","
         }
@@ -7230,7 +7280,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 83,
+          "line": 85,
           "source_group": "scripts",
           "text": "\"check-dashboard-visual-semantics\": \"check_dashboard_visual_semantics.py\","
         }
@@ -7245,7 +7295,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 60,
+          "line": 61,
           "source_group": "scripts",
           "text": "\"check-docs-drift\": \"check_docs_drift.py\","
         }
@@ -7284,7 +7334,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 58,
+          "line": 59,
           "source_group": "scripts",
           "text": "\"check-naming-pkg\": \"check_naming_package_consistency.py\","
         },
@@ -7335,7 +7385,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 59,
+          "line": 60,
           "source_group": "scripts",
           "text": "\"check-exemptions\": \"check_quality_exemptions.py\","
         }
@@ -7368,7 +7418,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 61,
+          "line": 62,
           "source_group": "scripts",
           "text": "\"check-xwalk-missing-backlog\": \"check_xwalk_missing_backlog.py\","
         }
@@ -7389,7 +7439,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 69,
+          "line": 70,
           "source_group": "scripts",
           "text": "\"report-pubchem-property-vocab\": \"extract_pubchem_property_vocab.py\","
         }
@@ -7404,13 +7454,13 @@
       "references": [
         {
           "path": "docs/04-reference/normalization/publication-normalization.md",
-          "line": 110,
+          "line": 114,
           "source_group": "docs",
           "text": "and the extractor `scripts/engineering/qa/extract_publication_nested_vocab.py`."
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 70,
+          "line": 71,
           "source_group": "scripts",
           "text": "\"report-publication-nested-vocab\": \"extract_publication_nested_vocab.py\","
         }
@@ -7437,7 +7487,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 63,
+          "line": 64,
           "source_group": "scripts",
           "text": "\"generate-debt-tasks\": \"generate_architecture_debt_tasks.py\","
         },
@@ -7494,7 +7544,7 @@
         },
         {
           "path": "docs/00-project/RULES.md",
-          "line": 1473,
+          "line": 1474,
           "source_group": "docs",
           "text": "- `python scripts/engineering/qa/generate_architecture_dependency_map.py --update`"
         },
@@ -7596,7 +7646,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 73,
+          "line": 74,
           "source_group": "scripts",
           "text": "\"report-hotspots\": \"generate_hotspot_degradation_report.py\","
         }
@@ -7715,7 +7765,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 53,
+          "line": 54,
           "source_group": "scripts",
           "text": "\"check-naming\": \"naming_audit.py\","
         },
@@ -7768,7 +7818,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 64,
+          "line": 65,
           "source_group": "scripts",
           "text": "\"reduce-architecture-debt\": \"reduce_architecture_debt.py\","
         },
@@ -7787,6 +7837,21 @@
       ]
     },
     {
+      "path": "scripts/engineering/qa/report_chembl_observed_value_inventory.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/engineering/qa/__main__.py",
+          "line": 78,
+          "source_group": "scripts",
+          "text": "\"report-chembl-observed-value-inventory\": \"report_chembl_observed_value_inventory.py\","
+        }
+      ]
+    },
+    {
       "path": "scripts/engineering/qa/report_dashboard_inventory.py",
       "type": "py",
       "status": "active",
@@ -7801,7 +7866,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 84,
+          "line": 86,
           "source_group": "scripts",
           "text": "\"report-dashboard-inventory\": \"report_dashboard_inventory.py\","
         }
@@ -7816,7 +7881,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 85,
+          "line": 87,
           "source_group": "scripts",
           "text": "\"report-dashboard-query-duplicates\": \"report_dashboard_query_duplicates.py\","
         }
@@ -7849,7 +7914,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 74,
+          "line": 75,
           "source_group": "scripts",
           "text": "\"report-duplication-baseline\": \"report_duplication_baseline.py\","
         }
@@ -7864,7 +7929,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 75,
+          "line": 76,
           "source_group": "scripts",
           "text": "\"report-function-length-inventory\": \"report_function_length_inventory.py\","
         }
@@ -7885,7 +7950,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 72,
+          "line": 73,
           "source_group": "scripts",
           "text": "\"report-family-baseline\": \"report_hotspot_family_baseline.py\","
         }
@@ -7912,7 +7977,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 76,
+          "line": 77,
           "source_group": "scripts",
           "text": "\"report-normalization-fallback-inventory\": \"report_normalization_fallback_inventory.py\","
         },
@@ -7933,7 +7998,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 77,
+          "line": 79,
           "source_group": "scripts",
           "text": "\"report-observability-metric-inventory\": \"report_observability_metric_inventory.py\","
         },
@@ -7978,7 +8043,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 68,
+          "line": 69,
           "source_group": "scripts",
           "text": "\"report-provider-contract-drift\": \"report_provider_contract_drift.py\","
         }
@@ -8023,7 +8088,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 67,
+          "line": 68,
           "source_group": "scripts",
           "text": "\"report-vcr-metadata\": \"report_vcr_metadata_catalog.py\","
         },
@@ -8050,7 +8115,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 71,
+          "line": 72,
           "source_group": "scripts",
           "text": "\"sync-integration-vcr-policy\": \"sync_integration_vcr_policy.py\","
         }
@@ -8083,7 +8148,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 50,
+          "line": 51,
           "source_group": "scripts",
           "text": "_TEST_HEALTH_SCRIPT = \"test_health.py\""
         }
@@ -8098,7 +8163,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 62,
+          "line": 63,
           "source_group": "scripts",
           "text": "\"validate-dq-consistency\": \"validate_dq_consistency.py\","
         }
@@ -11029,6 +11094,38 @@
           "text": "\"validate-unified-configs\": \"validate_unified_configs.py\","
         }
       ]
+    },
+    {
+      "path": "scripts/shutdown.ps1",
+      "type": "ps1",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/shutdown.sh",
+      "type": "sh",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/startup.ps1",
+      "type": "ps1",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/startup.sh",
+      "type": "sh",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/test_selection_strategy.py",

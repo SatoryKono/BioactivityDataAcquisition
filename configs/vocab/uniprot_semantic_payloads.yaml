@@ -1,0 +1,33 @@
+version: 1.0.0
+description: >
+  Reviewed observed inventory for semantic-sensitive UniProt feature/comment
+  payload vocabularies. This registry governs nested term families carried
+  inside canonical JSON payloads such as features_json; it does not replace the
+  raw/canonical sidecar contract for the payload envelope itself.
+protein:
+  feature_types:
+  - Active site
+  - Binding site
+  - Domain
+  - Modified residue
+  comment_types:
+  - ALTERNATIVE PRODUCTS
+  - CAUTION
+  - COFACTOR
+  - DISEASE
+  - FUNCTION
+  - INDUCTION
+  - SIMILARITY
+  - SUBCELLULAR LOCATION
+  - SUBUNIT
+  - TISSUE SPECIFICITY
+  keyword_categories:
+  - Biological process
+  - Cellular component
+  - Coding sequence diversity
+  - Disease
+  - Domain
+  - Ligand
+  - Molecular function
+  - PTM
+  - Technical term

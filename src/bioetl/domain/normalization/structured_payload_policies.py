@@ -49,6 +49,7 @@ class StructuredPayloadPolicy:
     raw_sidecar_field: str
     canonical_sidecar_field: str
     rationale: str
+    controlled_vocabulary_source: str | None = None
 
     @property
     def requires_raw_sidecar_before_semantic_transform(self) -> bool:
@@ -178,6 +179,7 @@ _POLICIES: tuple[StructuredPayloadPolicy, ...] = (
             "UniProt features are forensic sequence annotations; derived feature "
             "projections must keep the raw feature envelope."
         ),
+        controlled_vocabulary_source="configs/vocab/uniprot_semantic_payloads.yaml",
     ),
 )
 

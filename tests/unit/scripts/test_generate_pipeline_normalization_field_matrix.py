@@ -451,6 +451,13 @@ def test_build_field_matrix_rows_covers_entity_profile_and_generic_rules() -> No
         "configs/vocab/chembl_controlled.yaml"
     )
 
+    chembl_publication_oa_status = _row(rows, "chembl_publication", "oa_status")
+    assert chembl_publication_oa_status["normalizer"] == "normalize_oa_status"
+    assert chembl_publication_oa_status["strictness"] == "strict_enum"
+    assert chembl_publication_oa_status["controlled_vocabulary_source"] == (
+        "domain.schemas.common.publication_base.OA_STATUS_VALUES"
+    )
+
     chembl_target_component_organism = _row(rows, "chembl_target_component", "organism")
     assert (
         chembl_target_component_organism["normalizer"]
@@ -563,6 +570,14 @@ def test_build_field_matrix_rows_exposes_non_chembl_governance_sources() -> None
         "configs/vocab/publication_controlled.yaml"
     )
 
+    pubmed_publication_status = _row(rows, "pubmed_publication", "publication_status")
+    assert pubmed_publication_status["controlled_vocabulary_source"] == (
+        "configs/vocab/publication_controlled.yaml"
+    )
+    assert pubmed_publication_status["strictness"] == "strict_enum"
+    assert pubmed_publication_status["dq_coverage"] == "enum:error"
+    assert pubmed_publication_status["policy_scope"] == "provider_full_universe"
+
     openalex_ror_ids = _row(rows, "openalex_publication", "ror_ids")
     assert openalex_ror_ids["normalizer"] == "normalize_profile_openalex_ror_ids"
     assert openalex_ror_ids["controlled_vocabulary_source"] == (
@@ -603,6 +618,13 @@ def test_build_field_matrix_rows_exposes_non_chembl_governance_sources() -> None
         "domain.normalization.reference_ids"
     )
     assert uniprot_go_terms["semantic_category"] == "ontology_reference_identifier"
+
+    uniprot_features = _row(rows, "uniprot_protein", "features_json")
+    assert uniprot_features["classification"] == "structured_json_sidecar"
+    assert uniprot_features["controlled_vocabulary_source"] == (
+        "configs/vocab/uniprot_semantic_payloads.yaml"
+    )
+    assert uniprot_features["policy_scope"] == "provider_full_universe"
 
     uniprot_all_mappings = _row(rows, "uniprot_idmapping", "all_mappings")
     assert uniprot_all_mappings["normalizer"] == "normalize_profile_uniprot_accessions"
@@ -733,6 +755,11 @@ def test_build_field_matrix_rows_documents_structured_payload_sidecar_policy() -
         assert policy.raw_sidecar_field in row["notes"]
         assert policy.canonical_sidecar_field in row["notes"]
         assert "not a raw provider substitute" in row["notes"]
+        if policy.controlled_vocabulary_source is not None:
+            assert (
+                row["controlled_vocabulary_source"]
+                == policy.controlled_vocabulary_source
+            )
         assert raw_row["normalizer"] == "normalize_profile_passthrough"
         assert canonical_row["field_type"] == "string"
 

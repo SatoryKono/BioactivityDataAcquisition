@@ -64,13 +64,19 @@ def test_audited_chembl_dq_enum_fields_are_synced_to_catalog_rows() -> None:
                 f"Expected enum DQ coverage for chembl_{entity}.{field_name}, "
                 f"got {row['dq_coverage']!r}"
             )
-            assert source_path.startswith("configs/"), (
+            assert source_path != "", (
                 f"chembl_{entity}.{field_name} missing governed catalog source"
             )
-            assert (ROOT / source_path).exists(), (
-                f"Catalog source path does not exist for chembl_{entity}.{field_name}: "
-                f"{source_path}"
-            )
+            if source_path.startswith("configs/"):
+                assert (ROOT / source_path).exists(), (
+                    "Catalog source path does not exist for "
+                    f"chembl_{entity}.{field_name}: {source_path}"
+                )
+            else:
+                assert source_path.startswith(("domain.", "profile:")), (
+                    f"chembl_{entity}.{field_name} uses unexpected catalog source "
+                    f"{source_path!r}"
+                )
             assert row["policy_scope"] != "", (
                 f"Policy scope must be declared for chembl_{entity}.{field_name}"
             )

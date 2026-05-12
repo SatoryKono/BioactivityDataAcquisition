@@ -53,7 +53,12 @@ def test_chembl_assay_ontology_edge_fixture_normalizes_bao_namespace_variants() 
     processor = RecordNormalizationProcessor(provider="chembl", entity_type="assay")
     rows = _project_rows(
         _edge_fixture_rows("chembl/assay"),
-        fields=("bao_format", "bao_label"),
+        fields=(
+            "bao_format",
+            "bao_label",
+            "bao_format_iri",
+            "bao_format_mapping_status",
+        ),
     )
 
     normalized = [processor.normalize_business_data(row) for row in rows]
@@ -72,7 +77,13 @@ def test_chembl_cell_line_ontology_edge_fixture_normalizes_namespace_variants() 
     processor = RecordNormalizationProcessor(provider="chembl", entity_type="cell_line")
     rows = _project_rows(
         _edge_fixture_rows("chembl/cell_line"),
-        fields=("clo_id", "efo_id", "cellosaurus_id"),
+        fields=(
+            "clo_id",
+            "efo_id",
+            "cellosaurus_id",
+            "clo_mapping_status",
+            "efo_mapping_status",
+        ),
     )
 
     normalized = [processor.normalize_business_data(row) for row in rows]
@@ -90,7 +101,14 @@ def test_chembl_tissue_ontology_edge_fixture_normalizes_namespace_variants() -> 
     processor = RecordNormalizationProcessor(provider="chembl", entity_type="tissue")
     rows = _project_rows(
         _edge_fixture_rows("chembl/tissue"),
-        fields=("bto_id", "efo_id", "uberon_id"),
+        fields=(
+            "bto_id",
+            "efo_id",
+            "uberon_id",
+            "bto_mapping_status",
+            "efo_mapping_status",
+            "uberon_mapping_status",
+        ),
     )
 
     normalized = [processor.normalize_business_data(row) for row in rows]

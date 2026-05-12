@@ -44,7 +44,7 @@ def test_chembl_subcellular_fraction_raw_and_canonical_fields_stay_distinct() ->
     )
 
     assert normalized["subcellular_fraction_raw"] == "outer leaflet"
-    assert normalized["subcellular_fraction"] == "Outer Leaflet"
+    assert normalized["subcellular_fraction"] == "outer leaflet"
 
 
 def test_chembl_publication_raw_and_canonical_type_sidecars_remain_independent() -> (

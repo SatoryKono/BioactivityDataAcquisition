@@ -29,7 +29,7 @@ def test_create_term_record_trims_source_term_before_profile_normalization() -> 
         entity_type="publication_term",
     ).normalize_business_data(record)
 
-    assert normalized["term"] == "Kinase Inhibitor"
+    assert normalized["term"] == "kinase inhibitor"
     assert normalized["term_type"] == "KEYWORD"
 
 

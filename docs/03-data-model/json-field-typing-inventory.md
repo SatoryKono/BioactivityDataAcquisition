@@ -53,7 +53,7 @@ Related:
 | `semanticscholar_publication` | `citation_contexts` | `canonical JSON string` | semantic-sensitive; persisted with `citation_contexts_raw_json` and `citation_contexts_canonical_json` companions |
 | `semanticscholar_publication` | `publication_types` | `canonical JSON string` | semantic-sensitive set-like classification evidence |
 | `semanticscholar_publication` | `subject_fields` | `canonical JSON string` | semantic-sensitive set-like classification evidence |
-| `uniprot_protein` | `features_json` | `canonical JSON string` | semantic-sensitive ordered feature payload with `features_raw_json` and `features_canonical_json` companions |
+| `uniprot_protein` | `features_json` | `canonical JSON string` | semantic-sensitive ordered feature payload with `features_raw_json` and `features_canonical_json` companions; nested `feature.type`, `comment.commentType`, and keyword `category` terms are governed by `configs/vocab/uniprot_semantic_payloads.yaml` |
 
 Sidecar companion policy:
 - semantic-sensitive fields keep the current canonical JSON field for compatibility
