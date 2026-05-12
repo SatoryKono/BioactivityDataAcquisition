@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-05-12T05:35:56.277150+00:00",
+  "generated_at": "2026-05-12T09:46:13.165854+00:00",
   "summary": {
     "total_scripts": 364,
     "status_counts": {
@@ -7789,7 +7789,7 @@
         },
         {
           "path": "scripts/engineering/qa/check_naming_package_consistency.py",
-          "line": 174,
+          "line": 203,
           "source_group": "scripts",
           "text": "location=\"scripts/engineering/qa/naming_audit.py --check\","
         }
@@ -8941,13 +8941,13 @@
         },
         {
           "path": "docs/02-architecture/07-compatibility-facade-snapshot.md",
-          "line": 51,
+          "line": 49,
           "source_group": "docs",
           "text": "- `src/bioetl/interfaces/cli/commands/run.py`"
         },
         {
           "path": "docs/02-architecture/07-compatibility-facade-snapshot.md",
-          "line": 58,
+          "line": 56,
           "source_group": "docs",
           "text": "- `src/bioetl/interfaces/cli/commands/run.py` — external breaking change required: `true`, internal callers zero: `false`"
         },

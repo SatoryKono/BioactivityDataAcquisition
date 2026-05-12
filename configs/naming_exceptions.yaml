@@ -141,6 +141,8 @@ class_suffix_exceptions:
         - RetryPolicy
         - LineageRecord
         - BatchLineage
+        - HistoricalReplaySnapshotCertification  # Application-layer value object for certification evidence
+        - HistoricalReplayCertifiabilityInventory  # Application-layer value object for certifiability state
 
     # Context and configuration objects
     contexts:

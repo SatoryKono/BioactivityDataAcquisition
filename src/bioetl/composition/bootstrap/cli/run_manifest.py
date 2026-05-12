@@ -7,6 +7,9 @@ from pathlib import Path
 from bioetl.application.services.control_plane.forensic_diff_service import (
     ForensicRunDiffService,
 )
+from bioetl.application.services.control_plane.historical_replay_corpus_service import (
+    HistoricalReplayCorpusService,
+)
 from bioetl.application.services.control_plane.run_manifest_inspection_service import (
     RunManifestInspectionService,
 )
@@ -19,7 +22,11 @@ from bioetl.infrastructure.control_plane import (
     FileRunManifestStore,
 )
 
-__all__ = ["bootstrap_forensic_run_diff_service", "bootstrap_run_manifest_service"]
+__all__ = [
+    "bootstrap_forensic_run_diff_service",
+    "bootstrap_historical_replay_corpus_service",
+    "bootstrap_run_manifest_service",
+]
 
 
 def _create_control_plane_stores() -> tuple[
@@ -72,4 +79,13 @@ def bootstrap_forensic_run_diff_service() -> ForensicRunDiffService:
             ledger_port=ledger_store,
             effective_config_artifact_port=effective_config_store,
         ),
+    )
+
+
+def bootstrap_historical_replay_corpus_service() -> HistoricalReplayCorpusService:
+    """Bootstrap retained-corpus historical replay workflows for CLI use."""
+    manifest_store, ledger_store, _effective_config_store = _create_control_plane_stores()
+    return HistoricalReplayCorpusService(
+        manifest_port=manifest_store,
+        ledger_port=ledger_store,
     )

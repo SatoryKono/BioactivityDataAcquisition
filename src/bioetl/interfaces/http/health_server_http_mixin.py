@@ -51,6 +51,8 @@ class HealthServerHTTPMixin:
             await self._handle_request_error(writer, error)
         except (ConnectionError, OSError, ValueError, UnicodeDecodeError) as error:
             await self._handle_request_error(writer, error)
+        except Exception as error:
+            await self._handle_request_error(writer, error)
         finally:
             await self._close_writer(writer)
 

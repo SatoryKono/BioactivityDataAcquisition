@@ -2,10 +2,18 @@
 
 from __future__ import annotations
 
+import json
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import click
 
+from bioetl.application.services.control_plane.historical_replay_corpus_service import (
+    HistoricalReplayBulkCertificationSpec,
+)
+from bioetl.application.services.control_plane.historical_replay_certification_service import (
+    HistoricalReplaySnapshotCertification,
+)
 from bioetl.application.services.run_manifest_inspection_service import (
     RunManifestInspectionCorruptionError,
 )
@@ -21,6 +29,9 @@ if TYPE_CHECKING:
     from bioetl.application.services.control_plane.forensic_diff_service import (
         ForensicRunDiffService,
     )
+    from bioetl.application.services.control_plane.historical_replay_corpus_service import (
+        HistoricalReplayCorpusService,
+    )
     from bioetl.application.services.control_plane.run_manifest_inspection_service import (
         RunManifestInspectionService,
     )
@@ -29,7 +40,9 @@ __all__ = [
     "COMMANDS",
     "diff_command",
     "forensic_diff_command",
+    "inventory_command",
     "run_manifest",
+    "certify_historical_bulk_command",
     "score_command",
     "show_command",
     "verify_command",
@@ -51,6 +64,15 @@ def get_forensic_run_diff_service() -> ForensicRunDiffService:
     """Load the forensic run-diff service through composition on demand."""
     from bioetl.composition.control_plane_api import (
         get_forensic_run_diff_service as _impl,
+    )
+
+    return _impl()
+
+
+def get_historical_replay_corpus_service() -> HistoricalReplayCorpusService:
+    """Load retained-corpus replay workflows through composition on demand."""
+    from bioetl.composition.control_plane_api import (
+        get_historical_replay_corpus_service as _impl,
     )
 
     return _impl()
@@ -220,9 +242,141 @@ def forensic_diff_command(
     )
 
 
+@run_manifest.command("inventory")
+@click.option(
+    "--format",
+    "output_format",
+    type=click.Choice(["text", "json", "yaml"]),
+    default="text",
+    help="Output format",
+)
+def inventory_command(output_format: str) -> None:
+    """Inventory retained manifests against the certified historical tranche."""
+    service = get_historical_replay_corpus_service()
+    result = service.build_certifiability_inventory()
+    emit_inspection_payload(
+        result.to_dict(),
+        output_format,
+        text_renderer=render_text_payload,
+    )
+
+
+@run_manifest.command("certify-historical-bulk")
+@click.argument("plan_path", type=click.Path(exists=True, dir_okay=False, path_type=Path))
+@click.option(
+    "--format",
+    "output_format",
+    type=click.Choice(["text", "json", "yaml"]),
+    default="text",
+    help="Output format",
+)
+def certify_historical_bulk_command(
+    plan_path: Path,
+    output_format: str,
+) -> None:
+    """Apply one JSON bulk-certification plan across retained manifests."""
+    service = get_historical_replay_corpus_service()
+    try:
+        payload = json.loads(plan_path.read_text(encoding="utf-8"))
+        specs = _coerce_bulk_certification_specs(payload)
+        result = service.certify_retained_corpus(specs=specs)
+    except (OSError, TypeError, ValueError, json.JSONDecodeError) as exc:
+        echo_error("Historical replay bulk certification failed", str(exc))
+        return
+    emit_inspection_payload(
+        result.to_dict(),
+        output_format,
+        text_renderer=render_text_payload,
+    )
+
+
+def _coerce_bulk_certification_specs(
+    payload: object,
+) -> tuple[HistoricalReplayBulkCertificationSpec, ...]:
+    if not isinstance(payload, dict):
+        raise ValueError("Bulk certification plan must be a JSON object")
+    raw_specs = payload.get("specs")
+    if not isinstance(raw_specs, list) or not raw_specs:
+        raise ValueError("Bulk certification plan requires a non-empty specs list")
+    specs: list[HistoricalReplayBulkCertificationSpec] = []
+    for item in raw_specs:
+        if not isinstance(item, dict):
+            raise ValueError("Bulk certification specs must be JSON objects")
+        manifest_id = str(item.get("manifest_id") or "").strip()
+        if not manifest_id:
+            raise ValueError("Bulk certification spec is missing manifest_id")
+        raw_certifications = item.get("certifications")
+        if not isinstance(raw_certifications, list) or not raw_certifications:
+            raise ValueError(
+                f"Bulk certification spec {manifest_id!r} requires certifications"
+            )
+        specs.append(
+            HistoricalReplayBulkCertificationSpec(
+                manifest_id=manifest_id,
+                certifications=tuple(
+                    _coerce_snapshot_certification(manifest_id, certification)
+                    for certification in raw_certifications
+                ),
+            )
+        )
+    return tuple(specs)
+
+
+def _coerce_snapshot_certification(
+    manifest_id: str,
+    payload: object,
+) -> HistoricalReplaySnapshotCertification:
+    if not isinstance(payload, dict):
+        raise ValueError(
+            f"Bulk certification entries for {manifest_id!r} must be JSON objects"
+        )
+    required_fields = (
+        "provider",
+        "entity",
+        "pipeline_name",
+        "snapshot_id",
+        "content_hash",
+        "immutable_uri",
+        "bronze_batch_ref",
+    )
+    missing = [
+        field for field in required_fields if not str(payload.get(field) or "").strip()
+    ]
+    if missing:
+        raise ValueError(
+            f"Bulk certification entry for {manifest_id!r} is missing fields: "
+            + ", ".join(missing)
+        )
+    return HistoricalReplaySnapshotCertification(
+        provider=str(payload["provider"]).strip(),
+        entity=str(payload["entity"]).strip(),
+        pipeline_name=str(payload["pipeline_name"]).strip(),
+        snapshot_id=str(payload["snapshot_id"]).strip(),
+        content_hash=str(payload["content_hash"]).strip(),
+        immutable_uri=str(payload["immutable_uri"]).strip(),
+        bronze_batch_ref=str(payload["bronze_batch_ref"]).strip(),
+        query=_optional_text(payload.get("query")),
+        query_fingerprint=_optional_text(payload.get("query_fingerprint")),
+        certification_artifact_ref=_optional_text(
+            payload.get("certification_artifact_ref")
+        ),
+        certification_basis=_optional_text(payload.get("certification_basis"))
+        or "retained_bronze_artifact",
+        upstream_run_id=_optional_text(payload.get("upstream_run_id")),
+        upstream_manifest_id=_optional_text(payload.get("upstream_manifest_id")),
+    )
+
+
+def _optional_text(value: object) -> str | None:
+    text = str(value or "").strip()
+    return text or None
+
+
 COMMANDS = (
+    certify_historical_bulk_command,
     diff_command,
     forensic_diff_command,
+    inventory_command,
     score_command,
     show_command,
     verify_command,

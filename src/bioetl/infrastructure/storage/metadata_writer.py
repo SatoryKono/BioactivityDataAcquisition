@@ -79,14 +79,14 @@ class MetadataWriter(_BaseMetadataWriter):
         metrics: object | None = None,
     ) -> None:
         super().__init__(
-            logger=cast("Any", logger),
-            atomic_replace_retry_policy=cast("Any", atomic_replace_retry_policy),
-            metrics=cast("Any", metrics),
+            logger=cast("Any", logger),  # Any: facade preserves legacy patch seam
+            atomic_replace_retry_policy=cast("Any", atomic_replace_retry_policy),  # Any: helper owns concrete retry-policy implementation
+            metrics=cast("Any", metrics),  # Any: optional metrics backend is dynamic
         )
         self._operations = _FacadeMetadataWriterOperations(
-            logger=cast("Any", self._logger),
-            metrics=cast("Any", self._metrics),
-            retry_policy=cast("Any", self._atomic_replace_retry_policy),
+            logger=cast("Any", self._logger),  # Any: facade preserves legacy patch seam
+            metrics=cast("Any", self._metrics),  # Any: optional metrics backend is dynamic
+            retry_policy=cast("Any", self._atomic_replace_retry_policy),  # Any: helper owns concrete retry-policy implementation
             artifact_recorder_provider=lambda: self._artifact_recorder,
         )
 

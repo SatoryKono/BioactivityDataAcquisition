@@ -40,6 +40,12 @@ class _HealthResponseSupport(Protocol):
         payload: dict[str, object],
     ) -> None: ...
 
+    async def _handle_request_error(
+        self,
+        writer: asyncio.StreamWriter,
+        error: BaseException,
+    ) -> None: ...
+
 
 class _HealthStateSupport(Protocol):
     """Typed support contract for state aggregation helpers."""
@@ -176,6 +182,8 @@ class HealthServerRoutingMixin:
             await response_support._send_response(writer, 404, _NOT_FOUND_MESSAGE)
         except ValueError as exc:
             await response_support._send_response(writer, 400, str(exc))
+        except Exception as exc:
+            await response_support._handle_request_error(writer, exc)
 
     async def _handle_filtered_records(
         self,

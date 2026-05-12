@@ -42,7 +42,7 @@ from bioetl.composition.bootstrap.runtime._composite_control_plane_support impor
 from bioetl.composition.bootstrap.runtime.composite_support_service_bundles import (
     CompositeControlPlaneBundle,
 )
-from bioetl.composition.runtime_builders._run_manifest_contract_identity import (
+from bioetl.composition.runtime_builders.run_manifest_contract_identity import (
     resolve_contract_identity,
 )
 from bioetl.composition.runtime_builders.effective_config_artifact_builder import (

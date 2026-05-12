@@ -24,7 +24,7 @@ def _default_enum_path(provider: str, base_path: Path | None = None) -> Path:
     return root / "configs" / "enums" / f"{provider}.yaml"
 
 
-def _freeze_sequences(value: Any) -> Any:
+def _freeze_sequences(value: Any) -> Any:  # Any: recursive function handles arbitrary YAML structures
     if isinstance(value, dict):
         return {str(key): _freeze_sequences(item) for key, item in value.items()}
     if isinstance(value, list):

@@ -16,6 +16,9 @@ from bioetl.domain.control_plane import (
 from bioetl.domain.control_plane.reproducibility_policy import (
     STRICT_PERSISTENCE_PROFILES,
 )
+from bioetl.domain.control_plane.reproducibility_profiles import (
+    resolve_reproducibility_family_profile,
+)
 from bioetl.infrastructure.control_plane.file_artifact_lifecycle_payloads import (
     _artifact_id,
     _effective_config_artifact_id,
@@ -190,7 +193,9 @@ def _record_manifest_protections(
 def _requires_evidence_floor(payload: dict[str, object]) -> bool:
     """Return whether one stale manifest declares a replay/forensic floor."""
     profile = _required_persistence_profile(payload)
-    return profile in _EVIDENCE_FLOOR_PROFILES
+    return profile in _EVIDENCE_FLOOR_PROFILES or _supports_historical_replay_floor(
+        payload
+    )
 
 
 def _required_persistence_profile(payload: dict[str, object]) -> str:
@@ -200,6 +205,48 @@ def _required_persistence_profile(payload: dict[str, object]) -> str:
         if profile is not None:
             return profile
     return _optional_text(payload.get("required_persistence_profile")) or ""
+
+
+def _supports_historical_replay_floor(payload: dict[str, object]) -> bool:
+    """Protect retained replay-supported families from aging into uncertifiable runs."""
+    provider = _optional_text(payload.get("provider"))
+    entity = _optional_text(payload.get("entity"))
+    if provider is None or entity is None:
+        return False
+    contract_ref = _payload_contract_ref(payload) or f"{provider}.{entity}"
+    try:
+        profile = resolve_reproducibility_family_profile(
+            provider=provider,
+            entity=entity,
+            contract_ref=contract_ref,
+            execution_context=_payload_execution_context(payload),
+        )
+    except ValueError:
+        return False
+    return (
+        profile.broader_historical_exact_replay_policy
+        == "certified_historical_exact_replay_tranche_supported"
+    )
+
+
+def _payload_contract_ref(payload: dict[str, object]) -> str | None:
+    provenance = payload.get("code_provenance")
+    if not isinstance(provenance, dict):
+        return None
+    return _optional_text(provenance.get("contract_ref"))
+
+
+def _payload_execution_context(
+    payload: dict[str, object],
+) -> str:
+    launch_context = payload.get("launch_context")
+    if isinstance(launch_context, dict):
+        execution_context = _optional_text(launch_context.get("execution_context"))
+        if execution_context is not None:
+            return execution_context
+    if _optional_text(payload.get("provider")) == "composite":
+        return "composite"
+    return "source"
 
 
 def _collect_checkpoint_protections(

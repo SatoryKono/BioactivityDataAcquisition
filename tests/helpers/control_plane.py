@@ -29,6 +29,14 @@ class InMemoryRunManifestStore(RunManifestPort):
         manifest_id = self._by_run_id.get(str(run_id))
         return None if manifest_id is None else self._items.get(manifest_id)
 
+    def list_all(self) -> tuple[RunManifest, ...]:
+        return tuple(
+            sorted(
+                self._items.values(),
+                key=lambda manifest: (manifest.created_at, manifest.manifest_id),
+            )
+        )
+
 
 class InMemoryRunLedgerStore(RunLedgerPort):
     def __init__(self) -> None:

@@ -10,17 +10,33 @@ from bioetl.application.services.control_plane._historical_replay_certification 
     HISTORICAL_SOURCE_SNAPSHOT_CERTIFIED,
     LIVE_CAPTURE_SNAPSHOT_MATERIALIZED,
 )
+from bioetl.application.services.control_plane._run_manifest_diagnostics_replay_helpers import (
+    _append_mode_exact_replay_blockers,
+    _collect_append_mode_semantic_sinks,
+    _dependency_lock_exact_replay_blockers,
+    _has_historical_composite_certified_snapshots,
+    _has_historical_source_certified_snapshots,
+    _has_live_capture_materialized_snapshots,
+    _has_partial_input_snapshot_envelope,
+    _is_composite_execution_context,
+    _is_full_scan_idempotent_rebuild,
+    _profile_exact_replay_blockers,
+    _requires_dependency_lock_provenance,
+    _requires_resume_without_snapshot_reason,
+    _resolve_applied_checkpoint_compatibility_policy,
+    _resolve_exact_replay_supported_reason,
+    _resolve_requested_checkpoint_compatibility_policy,
+    _resolve_required_persistence_profile,
+    _snapshot_exact_replay_blockers,
+)
 from bioetl.application.services.control_plane._run_manifest_diagnostics_snapshot_support import (
     lookup_mapping_path,
 )
 from bioetl.domain.control_plane import ReplayCapability, RunManifest
 from bioetl.domain.control_plane.reproducibility_policy import (
-    DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
-    STRICT_PERSISTENCE_PROFILES,
     ReplayReadinessVerdict,
     ReproducibilityPolicyAssessment,
     assess_reproducibility_policy,
-    normalize_required_persistence_profile,
     resolve_replay_readiness_verdict,
 )
 from bioetl.domain.control_plane.reproducibility_profiles import (
@@ -109,37 +125,6 @@ def _resolve_replay_capability_reason(
     if _is_composite_execution_context(manifest):
         return "composite_snapshot_envelope_missing"
     return "immutable_input_snapshots_missing"
-
-
-def _has_partial_input_snapshot_envelope(snapshot_envelope: object) -> bool:
-    any_snapshots = bool(getattr(snapshot_envelope, "any_input_snapshots", False))
-    full_envelope = bool(getattr(snapshot_envelope, "full_snapshot_envelope", False))
-    return any_snapshots and not full_envelope
-
-
-def _resolve_exact_replay_supported_reason(
-    *,
-    manifest: RunManifest,
-    input_snapshots: list[dict[str, object]],
-    snapshot_envelope: object,
-) -> str | None:
-    if manifest.replay_capability != ReplayCapability.EXACT_REPLAY_SUPPORTED:
-        return None
-    if not bool(getattr(snapshot_envelope, "full_snapshot_envelope", False)):
-        return None
-    if _has_live_capture_materialized_snapshots(input_snapshots):
-        return "materialized_live_capture_snapshot_envelope_present"
-    return "full_immutable_input_snapshot_envelope_present"
-
-
-def _requires_resume_without_snapshot_reason(
-    *,
-    manifest: RunManifest,
-    resume_requested: bool,
-) -> bool:
-    return (
-        manifest.replay_capability == ReplayCapability.RESUME_ONLY or resume_requested
-    )
 
 
 def _resolve_replay_occurrence_kind(
@@ -248,149 +233,6 @@ def _resolve_exact_replay_blockers(
     return blockers
 
 
-def _profile_exact_replay_blockers(
-    profile: ReproducibilityFamilyProfile,
-) -> list[str]:
-    if profile.strict_exact_replay_supported:
-        return []
-    return ["family_outside_supported_exact_replay_boundary"]
-
-
-def _append_mode_exact_replay_blockers(append_mode_sinks: list[str]) -> list[str]:
-    if not append_mode_sinks:
-        return []
-    return ["append_mode_semantic_outputs"]
-
-
-def _snapshot_exact_replay_blockers(
-    *,
-    manifest: RunManifest,
-    policy_assessment: ReproducibilityPolicyAssessment,
-) -> list[str]:
-    snapshot_envelope = policy_assessment.snapshot_envelope
-    if not snapshot_envelope.any_input_snapshots:
-        return ["immutable_input_snapshots_missing"]
-    if not snapshot_envelope.full_snapshot_envelope:
-        return [
-            "partial_input_snapshot_envelope",
-            *(
-                f"input_snapshot_missing:{source_ref}"
-                for source_ref in snapshot_envelope.missing_snapshot_source_refs
-            ),
-        ]
-    if manifest.replay_capability != ReplayCapability.EXACT_REPLAY_SUPPORTED:
-        return ["exact_replay_capability_unavailable"]
-    return []
-
-
-def _dependency_lock_exact_replay_blockers(
-    *,
-    manifest: RunManifest,
-    profile: ReproducibilityFamilyProfile,
-    policy_assessment: ReproducibilityPolicyAssessment,
-) -> list[str]:
-    if not _requires_dependency_lock_provenance(
-        manifest=manifest,
-        profile=profile,
-        policy_assessment=policy_assessment,
-    ):
-        return []
-    return ["dependency_lock_provenance_missing"]
-
-
-def _requires_dependency_lock_provenance(
-    *,
-    manifest: RunManifest,
-    profile: ReproducibilityFamilyProfile,
-    policy_assessment: ReproducibilityPolicyAssessment,
-) -> bool:
-    if not profile.strict_exact_replay_supported:
-        return False
-    if (
-        not policy_assessment.strict_requirement_requested
-        and manifest.replay_capability != ReplayCapability.EXACT_REPLAY_SUPPORTED
-    ):
-        return False
-    return not manifest.code_provenance.dependency_lock_hash
-
-
-def _collect_append_mode_semantic_sinks(manifest: RunManifest) -> list[str]:
-    """Return enabled Silver/Gold sinks that use append mode."""
-    blocked: set[str] = set()
-    for payload in (manifest.runtime_config, manifest.resolved_config):
-        for sink in _candidate_sink_mappings(payload):
-            for layer_name in ("silver", "gold"):
-                layer_config = sink.get(layer_name)
-                if not isinstance(layer_config, Mapping):
-                    continue
-                if (
-                    _sink_layer_enabled(layer_config)
-                    and _sink_layer_mode(layer_config) == "append"
-                ):
-                    blocked.add(f"sink.{layer_name}.mode=append")
-    return sorted(blocked)
-
-
-def _has_live_capture_materialized_snapshots(
-    input_snapshots: list[dict[str, object]],
-) -> bool:
-    """Return whether snapshots were materialized after live capture via ledger."""
-    return any(
-        str(snapshot.get("materialization_mode") or "").strip()
-        == LIVE_CAPTURE_SNAPSHOT_MATERIALIZED
-        for snapshot in input_snapshots
-        if isinstance(snapshot, Mapping)
-    )
-
-
-def _has_historical_source_certified_snapshots(
-    input_snapshots: list[dict[str, object]],
-) -> bool:
-    """Return whether snapshots were certified for historical source replay."""
-    return any(
-        str(snapshot.get("materialization_mode") or "").strip()
-        == HISTORICAL_SOURCE_SNAPSHOT_CERTIFIED
-        for snapshot in input_snapshots
-        if isinstance(snapshot, Mapping)
-    )
-
-
-def _has_historical_composite_certified_snapshots(
-    input_snapshots: list[dict[str, object]],
-) -> bool:
-    """Return whether composite snapshots were certified from source lineage."""
-    return any(
-        str(snapshot.get("materialization_mode") or "").strip()
-        == HISTORICAL_COMPOSITE_REPLAY_ENVELOPE_CERTIFIED
-        for snapshot in input_snapshots
-        if isinstance(snapshot, Mapping)
-    )
-
-
-def _candidate_sink_mappings(
-    payload: Mapping[str, object],
-) -> list[Mapping[str, object]]:
-    """Return possible sink mappings from known config payload shapes."""
-    candidates: list[Mapping[str, object]] = []
-    direct_sink = payload.get("sink")
-    if isinstance(direct_sink, Mapping):
-        candidates.append(direct_sink)
-    pipeline = payload.get("pipeline")
-    if isinstance(pipeline, Mapping):
-        nested_sink = pipeline.get("sink")
-        if isinstance(nested_sink, Mapping):
-            candidates.append(nested_sink)
-    return candidates
-
-
-def _sink_layer_enabled(layer_config: Mapping[str, object]) -> bool:
-    return bool(layer_config.get("enabled", True))
-
-
-def _sink_layer_mode(layer_config: Mapping[str, object]) -> str:
-    return str(layer_config.get("mode") or "").strip().lower()
-
-
 def _resolve_exact_replay_support_boundary(manifest: RunManifest) -> str:
     """Return the supported exact-replay boundary for one manifested run."""
     return _resolve_reproducibility_profile(manifest).exact_replay_support_boundary
@@ -472,24 +314,6 @@ def _resolve_manifest_replay_readiness_verdict(
     )
 
 
-def _is_composite_execution_context(manifest: RunManifest) -> bool:
-    """Return whether the manifest represents composite execution."""
-    execution_context = str(manifest.launch_context.get("execution_context") or "")
-    return execution_context == "composite" or manifest.provider == "composite"
-
-
-def _is_full_scan_idempotent_rebuild(manifest: RunManifest) -> bool:
-    """Return whether manifest config declares the full-scan rebuild strategy."""
-    for payload in (manifest.runtime_config, manifest.resolved_config):
-        for candidate in (
-            payload.get("loading_strategy"),
-            lookup_mapping_path(payload, "loading", "strategy"),
-            lookup_mapping_path(payload, "pipeline", "loading_strategy"),
-            lookup_mapping_path(payload, "pipeline", "loading", "strategy"),
-        ):
-            if str(candidate or "").strip().lower() == "full_scan_only":
-                return True
-    return False
 
 
 def _resolve_reproducibility_profile(
@@ -571,76 +395,3 @@ def _build_resume_contract(
     }
 
 
-def _resolve_required_persistence_profile(manifest: RunManifest) -> str:
-    """Resolve the declared minimum persistence profile from manifest context."""
-    candidates = (
-        manifest.launch_context.get("required_persistence_profile"),
-        lookup_mapping_path(
-            manifest.runtime_config,
-            "pipeline",
-            "control_plane",
-            "required_persistence_profile",
-        ),
-        lookup_mapping_path(
-            manifest.runtime_config,
-            "control_plane",
-            "required_persistence_profile",
-        ),
-        lookup_mapping_path(
-            manifest.runtime_config,
-            "required_persistence_profile",
-        ),
-    )
-    for candidate in candidates:
-        if isinstance(candidate, str):
-            normalized = normalize_required_persistence_profile(candidate).lower()
-            if normalized in {
-                DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
-                *STRICT_PERSISTENCE_PROFILES,
-            }:
-                return normalized
-    return DEFAULT_REQUIRED_PERSISTENCE_PROFILE
-
-
-def _resolve_applied_checkpoint_compatibility_policy(
-    *,
-    requested_exact_replay: bool,
-    requested_policy: str | None,
-    required_persistence_profile: str,
-) -> str:
-    """Resolve the effective checkpoint policy shown in diagnostics."""
-    if requested_exact_replay:
-        return "hard_fail"
-    if required_persistence_profile in STRICT_PERSISTENCE_PROFILES:
-        return "hard_fail" if requested_policy != "hard_fail" else requested_policy
-    return requested_policy or "observe"
-
-
-def _resolve_requested_checkpoint_compatibility_policy(
-    manifest: RunManifest,
-) -> str | None:
-    """Resolve requested checkpoint compatibility policy from manifest context."""
-    candidates = (
-        manifest.launch_context.get("checkpoint_compatibility_policy"),
-        lookup_mapping_path(
-            manifest.runtime_config,
-            "pipeline",
-            "control_plane",
-            "checkpoint_compatibility_policy",
-        ),
-        lookup_mapping_path(
-            manifest.runtime_config,
-            "control_plane",
-            "checkpoint_compatibility_policy",
-        ),
-        lookup_mapping_path(
-            manifest.runtime_config,
-            "checkpoint_compatibility_policy",
-        ),
-    )
-    for candidate in candidates:
-        if isinstance(candidate, str):
-            normalized = candidate.strip().lower()
-            if normalized in {"observe", "legacy_observe", "soft_fail", "hard_fail"}:
-                return normalized
-    return None

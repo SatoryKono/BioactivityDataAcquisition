@@ -25,3 +25,7 @@ class RunManifestPort(Protocol):
     def get_by_run_id(self, run_id: RunID) -> RunManifest | None:
         """Load the manifest linked to a run identifier."""
         ...
+
+    def list_all(self) -> tuple[RunManifest, ...]:
+        """Return every persisted manifest in deterministic enumeration order."""
+        ...

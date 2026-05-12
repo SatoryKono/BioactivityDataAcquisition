@@ -111,7 +111,7 @@ class _SilverWritePipelineCompleter(Protocol):
     ) -> Awaitable[SilverWriteResult | None]: ...
 
 
-class _SilverWritePipelineExecutor(Protocol):
+class _SilverWritePipelineRunner(Protocol):
     """Async contract for running one Silver write pipeline within a span."""
 
     def __call__(
@@ -267,7 +267,7 @@ async def execute_silver_write_with_tracing(
     invocation: _SilverWriteInvocation,
     started_at: datetime,
     start_perf: float,
-    execute_pipeline: _SilverWritePipelineExecutor,
+    execute_pipeline: _SilverWritePipelineRunner,
 ) -> SilverWriteResult | None:
     """Create the tracing span/context and delegate the Silver write pipeline."""
     span_context = (

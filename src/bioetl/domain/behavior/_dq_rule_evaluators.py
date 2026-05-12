@@ -5,8 +5,25 @@ Extracted from dq_rule_evaluator.py to meet file size limits.
 
 from __future__ import annotations
 
-import json
 from typing import TYPE_CHECKING
+
+from bioetl.domain.behavior._dq_condition_matchers import (
+    _CONDITIONAL_MATCHERS,
+)
+from bioetl.domain.behavior._dq_rule_evaluators_cross import (
+    _all_present_rule_violated,
+    _any_present_rule_violated,
+    _conditional_required_rule_violated,
+    _custom_cross_field_rule_violated,
+    _mutually_exclusive_rule_violated,
+)
+from bioetl.domain.behavior._dq_value_coercion import (
+    _coerce_list_like,
+    _coerce_numeric_value,
+    _is_present,
+    _violates_maximum,
+    _violates_minimum,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.config.validation import (
@@ -99,20 +116,6 @@ def _custom_cross_rule_violated(
     return False
 
 
-def _is_present(value: object) -> bool:
-    return value is not None
-
-
-def _coerce_list_like(value: object) -> list[object] | None:
-    if isinstance(value, list):
-        return list(value)
-    if isinstance(value, tuple | set):
-        return list(value)
-    if not isinstance(value, str):
-        return None
-    return _coerce_string_list_like(value)
-
-
 def _required_rule_violated(
     record: JsonDict,
     rule: FieldValidation,
@@ -185,87 +188,6 @@ def _custom_field_rule_violated(
     return _custom_rule_violated(record, value, rule.validator)
 
 
-def _all_present_rule_violated(
-    record: JsonDict,
-    rule: CrossFieldValidation,
-    present_count: int,
-) -> bool:
-    del record
-    return present_count != len(rule.fields)
-
-
-def _any_present_rule_violated(
-    record: JsonDict,
-    rule: CrossFieldValidation,
-    present_count: int,
-) -> bool:
-    del record, rule
-    return present_count == 0
-
-
-def _mutually_exclusive_rule_violated(
-    record: JsonDict,
-    rule: CrossFieldValidation,
-    present_count: int,
-) -> bool:
-    del record, rule
-    return present_count > 1
-
-
-def _conditional_required_rule_violated(
-    record: JsonDict,
-    rule: CrossFieldValidation,
-    present_count: int,
-) -> bool:
-    del present_count
-    if rule.trigger_field is None or rule.required_field is None:
-        return True
-    if not _is_present(record.get(rule.trigger_field)):
-        return False
-    return not _is_present(record.get(rule.required_field))
-
-
-def _custom_cross_field_rule_violated(
-    record: JsonDict,
-    rule: CrossFieldValidation,
-    present_count: int,
-) -> bool:
-    del present_count
-    return _custom_cross_rule_violated(record, rule.validator)
-
-
-def _eq_condition_matches(
-    value: object,
-    condition_value: str | tuple[str, ...],
-) -> bool:
-    return value == condition_value
-
-
-def _ne_condition_matches(
-    value: object,
-    condition_value: str | tuple[str, ...],
-) -> bool:
-    return value != condition_value
-
-
-def _in_condition_matches(
-    value: object,
-    condition_value: str | tuple[str, ...],
-) -> bool:
-    return value in _condition_options(condition_value)
-
-
-def _not_in_condition_matches(
-    value: object,
-    condition_value: str | tuple[str, ...],
-) -> bool:
-    return value not in _condition_options(condition_value)
-
-
-def _condition_options(condition_value: str | tuple[str, ...]) -> tuple[str, ...]:
-    if isinstance(condition_value, tuple):
-        return condition_value
-    return (condition_value,)
 
 
 def _coerce_numeric_value(value: object) -> float | None:
@@ -324,14 +246,6 @@ _CROSS_RULE_EVALUATORS = {
     "mutually_exclusive": _mutually_exclusive_rule_violated,
     "conditional_required": _conditional_required_rule_violated,
     "custom": _custom_cross_field_rule_violated,
-}
-
-
-_CONDITIONAL_MATCHERS = {
-    "eq": _eq_condition_matches,
-    "ne": _ne_condition_matches,
-    "in": _in_condition_matches,
-    "not_in": _not_in_condition_matches,
 }
 
 
