@@ -98,36 +98,32 @@ def test_resource_management_api_module_is_removed() -> None:
 
 @pytest.mark.unit
 def test_composition_package_root_surface_stays_frozen() -> None:
-    """Package root should keep the reviewed lazy-export budget exactly bounded."""
+    """Package root should stay empty after lazy-export retirement."""
     composition_module = importlib.import_module("bioetl.composition")
 
-    assert set(composition_module.__all__) == {
-        "PipelineDefinition",
-        "PipelineRegistry",
-        "composite_api",
-        "control_plane_api",
-        "create_registry",
-        "entrypoints",
-        "execution_api",
-        "get_default_registry",
-        "health_api",
-        "maintenance_api",
-        "observability_api",
-        "registry_api",
-        "resources_api",
-        "types",
-    }
-    assert len(composition_module.__all__) <= 14
+    assert composition_module.__all__ == []
 
 
 @pytest.mark.unit
-def test_composition_package_root_exports_resources_api_module() -> None:
-    """Package root should expose canonical resources_api lazy export."""
+@pytest.mark.parametrize(
+    "removed_name",
+    (
+        "create_registry",
+        "get_default_registry",
+        "PipelineRegistry",
+        "PipelineDefinition",
+        "types",
+    ),
+)
+def test_composition_package_root_removed_lazy_exports_fail_fast(
+    removed_name: str,
+) -> None:
+    """Removed package-root lazy exports should no longer resolve implicitly."""
     composition_module = importlib.import_module("bioetl.composition")
-    resources_api_module = importlib.import_module("bioetl.composition.resources_api")
 
-    assert "resources_api" in composition_module.__all__
-    assert composition_module.resources_api is resources_api_module
+    assert removed_name not in composition_module.__all__
+    with pytest.raises(AttributeError):
+        getattr(composition_module, removed_name)
 
 
 @pytest.mark.unit
@@ -141,19 +137,10 @@ def test_composition_package_root_budget_excludes_legacy_facade_modules() -> Non
 
 
 @pytest.mark.unit
-def test_composition_package_root_exports_registry_api_module() -> None:
-    """Package root should expose canonical registry_api lazy export."""
-    composition_module = importlib.import_module("bioetl.composition")
+def test_canonical_composition_owner_modules_remain_directly_importable() -> None:
+    """Owner-focused composition APIs stay importable without package-root re-exports."""
+    resources_api_module = importlib.import_module("bioetl.composition.resources_api")
     registry_api_module = importlib.import_module("bioetl.composition.registry_api")
-
-    assert "registry_api" in composition_module.__all__
-    assert composition_module.registry_api is registry_api_module
-
-
-@pytest.mark.unit
-def test_composition_package_root_exports_narrow_service_api_modules() -> None:
-    """Package root should expose the sanctioned narrow service API modules."""
-    composition_module = importlib.import_module("bioetl.composition")
     control_plane_api_module = importlib.import_module(
         "bioetl.composition.control_plane_api"
     )
@@ -162,9 +149,8 @@ def test_composition_package_root_exports_narrow_service_api_modules() -> None:
         "bioetl.composition.maintenance_api"
     )
 
-    assert "control_plane_api" in composition_module.__all__
-    assert "health_api" in composition_module.__all__
-    assert "maintenance_api" in composition_module.__all__
-    assert composition_module.control_plane_api is control_plane_api_module
-    assert composition_module.health_api is health_api_module
-    assert composition_module.maintenance_api is maintenance_api_module
+    assert resources_api_module is not None
+    assert registry_api_module is not None
+    assert control_plane_api_module is not None
+    assert health_api_module is not None
+    assert maintenance_api_module is not None
