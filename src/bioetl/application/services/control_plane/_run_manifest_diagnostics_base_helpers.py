@@ -94,9 +94,9 @@ def _build_planned_artifact_refs(manifest: RunManifest) -> list[dict[str, object
 
 
 __all__ = [
-    "_resolve_snapshot_status",
-    "_resolve_source_posture",
-    "_resolve_operator_replay_mode",
     "_build_code_provenance_state",
     "_build_planned_artifact_refs",
+    "_resolve_operator_replay_mode",
+    "_resolve_snapshot_status",
+    "_resolve_source_posture",
 ]

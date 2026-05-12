@@ -2,14 +2,8 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
 from typing import Literal
 
-from bioetl.application.services.control_plane._historical_replay_certification import (
-    HISTORICAL_COMPOSITE_REPLAY_ENVELOPE_CERTIFIED,
-    HISTORICAL_SOURCE_SNAPSHOT_CERTIFIED,
-    LIVE_CAPTURE_SNAPSHOT_MATERIALIZED,
-)
 from bioetl.application.services.control_plane._run_manifest_diagnostics_replay_helpers import (
     _append_mode_exact_replay_blockers,
     _collect_append_mode_semantic_sinks,
@@ -21,7 +15,6 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_replay_
     _is_composite_execution_context,
     _is_full_scan_idempotent_rebuild,
     _profile_exact_replay_blockers,
-    _requires_dependency_lock_provenance,
     _requires_resume_without_snapshot_reason,
     _resolve_applied_checkpoint_compatibility_policy,
     _resolve_exact_replay_supported_reason,
@@ -29,11 +22,9 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_replay_
     _resolve_required_persistence_profile,
     _snapshot_exact_replay_blockers,
 )
-from bioetl.application.services.control_plane._run_manifest_diagnostics_snapshot_support import (
-    lookup_mapping_path,
-)
 from bioetl.domain.control_plane import ReplayCapability, RunManifest
 from bioetl.domain.control_plane.reproducibility_policy import (
+    STRICT_PERSISTENCE_PROFILES,
     ReplayReadinessVerdict,
     ReproducibilityPolicyAssessment,
     assess_reproducibility_policy,

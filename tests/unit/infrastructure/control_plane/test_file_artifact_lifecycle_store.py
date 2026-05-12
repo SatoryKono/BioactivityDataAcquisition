@@ -341,6 +341,120 @@ def test_lifecycle_profile_floor_override_allows_stale_replay_ready_deletion(
     assert by_name["manifest-replay-ready.json"].reason == "retention_expired"
 
 
+def test_lifecycle_retains_stale_replay_supported_family_evidence_floor(
+    tmp_path: Path,
+) -> None:
+    control_root = tmp_path / "control"
+    now = datetime(2026, 4, 22, tzinfo=UTC)
+    old = datetime(2026, 1, 1, tzinfo=UTC)
+    cached_bronze_bytes = b"historical-certified-family snapshot bytes"
+    cached_bronze_snapshot_id = (
+        f"sha256:{hashlib.sha256(cached_bronze_bytes).hexdigest()}"
+    )
+    stale_manifest = _write_json(
+        control_root / "run_manifest" / "manifest-supported-family.json",
+        {
+            "created_at": old.isoformat(),
+            "manifest_id": "manifest-supported-family",
+            "run_id": "run-supported-family",
+            "pipeline_name": "pubmed_publication",
+            "provider": "pubmed",
+            "entity": "publication",
+            "launch_context": {"execution_context": "source"},
+            "code_provenance": {
+                "contract_ref": "pubmed.publication",
+                "effective_config_artifact_id": "effective-config-supported-family",
+            },
+            "source_refs": [
+                {
+                    "provider": "pubmed",
+                    "entity": "publication",
+                    "pipeline_name": "pubmed_publication",
+                    "input_snapshots": [
+                        {
+                            "snapshot_id": cached_bronze_snapshot_id,
+                            "content_hash": cached_bronze_snapshot_id.removeprefix(
+                                "sha256:"
+                            ),
+                        }
+                    ],
+                }
+            ],
+        },
+    )
+    stale_ledger = _write_text(
+        control_root / "run_ledger" / "manifest-supported-family.jsonl",
+        json.dumps(
+            {
+                "occurred_at": old.isoformat(),
+                "manifest_id": "manifest-supported-family",
+                "run_id": "run-supported-family",
+            },
+            sort_keys=True,
+        )
+        + "\n",
+    )
+    stale_effective_config = _write_json(
+        control_root / "effective_config" / "effective-config-supported-family.json",
+        {"artifact_id": "effective-config-supported-family"},
+    )
+    stale_lineage = _write_json(
+        control_root / "lineage" / "fragments" / "fragment-supported-family.json",
+        {
+            "stored_fragment_id": "fragment-supported-family",
+            "run_id": "run-supported-family",
+            "manifest_id": "manifest-supported-family",
+        },
+    )
+    stale_checkpoint = _write_json(
+        control_root.parent / "checkpoints" / "pubmed_publication.json",
+        {
+            "created_at": old.isoformat(),
+            "metadata": {
+                "run_id": "run-supported-family",
+                "manifest_id": "manifest-supported-family",
+                "effective_config_artifact_id": "effective-config-supported-family",
+            },
+        },
+    )
+    stale_cached_bronze = _write_bytes(
+        control_root.parent / "bronze" / "pubmed_publication.jsonl.zst",
+        cached_bronze_bytes,
+    )
+    for path in (
+        stale_manifest,
+        stale_ledger,
+        stale_effective_config,
+        stale_lineage,
+        stale_checkpoint,
+        stale_cached_bronze,
+    ):
+        _set_mtime(path, old)
+
+    store = FileControlPlaneArtifactLifecycleStore(base_path=control_root)
+    plan = store.plan(
+        ControlPlaneArtifactLifecyclePolicy(retention_days=30, now=now),
+        dry_run=True,
+    )
+
+    by_name = {Path(artifact.path).name: artifact for artifact in plan.artifacts}
+    retained_names = (
+        "manifest-supported-family.json",
+        "manifest-supported-family.jsonl",
+        "effective-config-supported-family.json",
+        "fragment-supported-family.json",
+        "pubmed_publication.json",
+        "pubmed_publication.jsonl.zst",
+    )
+    for name in retained_names:
+        assert by_name[name].decision is ControlPlaneArtifactLifecycleDecision.RETAIN
+        assert by_name[name].reason == "reproducibility_evidence_floor"
+        assert any(
+            reason.startswith("evidence_floor:")
+            for reason in by_name[name].protected_by
+        )
+
+
 def test_lifecycle_apply_deletes_only_expired_unprotected_files(tmp_path: Path) -> None:
     control_root = tmp_path / "control"
     now = datetime(2026, 4, 22, tzinfo=UTC)

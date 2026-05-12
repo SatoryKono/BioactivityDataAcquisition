@@ -5,9 +5,6 @@ Extracted from _run_manifest_diagnostics_replay.py to meet file size limits.
 
 from __future__ import annotations
 
-from collections.abc import Mapping
-from typing import Literal
-
 from bioetl.application.services.control_plane._historical_replay_certification import (
     HISTORICAL_COMPOSITE_REPLAY_ENVELOPE_CERTIFIED,
     HISTORICAL_SOURCE_SNAPSHOT_CERTIFIED,
@@ -236,21 +233,21 @@ def _resolve_requested_checkpoint_compatibility_policy(
 
 
 __all__ = [
-    "_has_partial_input_snapshot_envelope",
-    "_resolve_exact_replay_supported_reason",
-    "_requires_resume_without_snapshot_reason",
+    "_append_mode_exact_replay_blockers",
+    "_collect_append_mode_semantic_sinks",
+    "_dependency_lock_exact_replay_blockers",
     "_has_historical_composite_certified_snapshots",
     "_has_historical_source_certified_snapshots",
     "_has_live_capture_materialized_snapshots",
-    "_is_full_scan_idempotent_rebuild",
+    "_has_partial_input_snapshot_envelope",
     "_is_composite_execution_context",
-    "_collect_append_mode_semantic_sinks",
+    "_is_full_scan_idempotent_rebuild",
     "_profile_exact_replay_blockers",
-    "_append_mode_exact_replay_blockers",
-    "_snapshot_exact_replay_blockers",
-    "_dependency_lock_exact_replay_blockers",
     "_requires_dependency_lock_provenance",
-    "_resolve_required_persistence_profile",
+    "_requires_resume_without_snapshot_reason",
     "_resolve_applied_checkpoint_compatibility_policy",
+    "_resolve_exact_replay_supported_reason",
     "_resolve_requested_checkpoint_compatibility_policy",
+    "_resolve_required_persistence_profile",
+    "_snapshot_exact_replay_blockers",
 ]

@@ -110,6 +110,9 @@ def test_run_manifest_contract_documents_lifecycle_snapshot_and_scoring_surfaces
     assert "broader certified historical" in text
     assert "historical_source_snapshot_certification" in text
     assert "historical_composite_certified_source_lineage" in text
+    assert "no new retained run can age into" in text
+    assert "bioetl run-manifest inventory" in text
+    assert "bioetl run-manifest certify-historical-bulk" in text
     assert "## Reproducibility Scoring Rubric" in text
     assert "|   100 | `forensic_grade`" in text
     assert "| Evidence surface" in text
@@ -175,6 +178,8 @@ def test_run_manifest_docs_define_replay_equivalence_levels() -> None:
     assert "certified_historical_exact_replay_tranche_supported" in contract
     assert "historical_source_replay_certified" in runbook
     assert "historical_composite_replay_certified" in runbook
+    assert "no-new-uncertifiable-runs" in runbook
+    assert "certify-historical-bulk" in runbook
 
 
 @pytest.mark.architecture

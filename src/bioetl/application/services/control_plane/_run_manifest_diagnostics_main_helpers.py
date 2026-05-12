@@ -173,7 +173,7 @@ def _build_resume_anchor_comparison(
 
 
 __all__ = [
-    "_build_unified_reproducibility_diagnostics",
     "_build_current_checkpoint_anchor_payload",
     "_build_resume_anchor_comparison",
+    "_build_unified_reproducibility_diagnostics",
 ]
