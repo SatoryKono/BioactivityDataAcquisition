@@ -9,6 +9,11 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
+from bioetl.domain.medallion import SilverWriteMode
+from bioetl.infrastructure.storage.silver.metadata_operations import (
+    _SilverMetadataWriteRequest,
+)
+
 from .test_silver_writer import mock_metadata_coordinator, noop_logger, valid_records
 
 # Re-export shared fixtures for pytest discovery in this module.
@@ -303,13 +308,15 @@ class TestSilverWriterDQMetrics:
         )
 
         await writer._write_silver_metadata(
-            table_path=_silver_table_path("test.table"),
-            table_name="test_table",
-            records=valid_records,
-            primary_keys=["entity_id"],
-            mode=SilverWriteMode.MERGE,
-            bronze_refs=None,
-            dq_metrics=dq_metrics,
+            _SilverMetadataWriteRequest(
+                table_path=_silver_table_path("test.table"),
+                table_name="test_table",
+                records=valid_records,
+                primary_keys=["entity_id"],
+                mode=SilverWriteMode.MERGE,
+                bronze_refs=None,
+                dq_metrics=dq_metrics,
+            )
         )
 
         # Verify DQ metrics are in metadata
@@ -371,13 +378,15 @@ class TestSilverWriterDQMetrics:
         )
 
         await writer._write_silver_metadata(
-            table_path=_silver_table_path("test.table"),
-            table_name="test_table",
-            records=valid_records,
-            primary_keys=["entity_id"],
-            mode=SilverWriteMode.MERGE,
-            bronze_refs=None,
-            dq_metrics=None,  # No DQ metrics
+            _SilverMetadataWriteRequest(
+                table_path=_silver_table_path("test.table"),
+                table_name="test_table",
+                records=valid_records,
+                primary_keys=["entity_id"],
+                mode=SilverWriteMode.MERGE,
+                bronze_refs=None,
+                dq_metrics=None,
+            )
         )
 
         # Verify fallback DQ summary

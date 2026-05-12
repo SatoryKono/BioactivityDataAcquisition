@@ -95,8 +95,8 @@ compatibility_debt_metrics:
   sunset_source: tests/architecture/test_compat_sunset.py
   metrics:
     retained_public_facade_count:
-      current_count: 17
-      max_count: 17
+      current_count: 16
+      max_count: 16
       owner: '@bioetl-architecture'
       linked_issue: '3354'
       rationale: Sanctioned public facades are retained compatibility obligations;

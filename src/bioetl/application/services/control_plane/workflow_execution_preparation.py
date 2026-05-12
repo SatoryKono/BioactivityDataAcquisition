@@ -285,24 +285,19 @@ def _apply_incremental_offset(
     - Otherwise leaves configuration unchanged (first run or error)
     """
     latest_state = workflow_state_port.get_latest(config.name)
-    print(f"DEBUG _apply_incremental_offset: config.name={config.name}, latest_state={latest_state}")
     if latest_state is None:
-        print("DEBUG _apply_incremental_offset: no latest state, returning config unchanged")
         return config
 
     # Use offset only from successful runs
     if latest_state.status != "success":
-        print(f"DEBUG _apply_incremental_offset: status is {latest_state.status}, not success")
         return config
 
     if latest_state.last_limit is None:
-        print("DEBUG _apply_incremental_offset: last_limit is None")
         return config
 
     # Treat None start_offset as 0 for incremental tracking
     last_offset = latest_state.last_start_offset or 0
     new_offset = last_offset + latest_state.last_limit
-    print(f"DEBUG _apply_incremental_offset: last_offset={last_offset}, last_limit={latest_state.last_limit}, new_offset={new_offset}")
 
     updated_steps = []
     for step in config.steps:

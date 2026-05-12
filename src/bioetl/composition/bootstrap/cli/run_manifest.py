@@ -10,6 +10,9 @@ from bioetl.application.services.control_plane.forensic_diff_service import (
 from bioetl.application.services.control_plane.historical_replay_corpus_service import (
     HistoricalReplayCorpusService,
 )
+from bioetl.application.services.control_plane.historical_replay_closure_service import (
+    HistoricalReplayClosureService,
+)
 from bioetl.application.services.control_plane.run_manifest_inspection_service import (
     RunManifestInspectionService,
 )
@@ -18,6 +21,7 @@ from bioetl.infrastructure.config import get_settings
 from bioetl.infrastructure.control_plane import (
     FileArtifactByteComparisonAdapter,
     FileEffectiveConfigArtifactStore,
+    FileHistoricalReplayClosureStore,
     FileRunLedgerStore,
     FileRunManifestStore,
 )
@@ -25,6 +29,7 @@ from bioetl.infrastructure.control_plane import (
 __all__ = [
     "bootstrap_forensic_run_diff_service",
     "bootstrap_historical_replay_corpus_service",
+    "bootstrap_historical_replay_closure_service",
     "bootstrap_run_manifest_service",
 ]
 
@@ -88,4 +93,18 @@ def bootstrap_historical_replay_corpus_service() -> HistoricalReplayCorpusServic
     return HistoricalReplayCorpusService(
         manifest_port=manifest_store,
         ledger_port=ledger_store,
+    )
+
+
+def bootstrap_historical_replay_closure_service() -> HistoricalReplayClosureService:
+    """Bootstrap retained-corpus closure reporting for CLI use."""
+    settings = get_settings()
+    output_root = Path(settings.data_dir) / "output" / "control"
+    manifest_store, ledger_store, _effective_config_store = _create_control_plane_stores()
+    corpus_service = HistoricalReplayCorpusService(
+        manifest_port=manifest_store,
+        ledger_port=ledger_store,
+    )
+    return HistoricalReplayClosureService(
+        corpus_service=corpus_service,
     )

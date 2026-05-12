@@ -14,6 +14,9 @@ from bioetl.domain.medallion import SilverWriteMode
 from bioetl.domain.types import RunID, RunType
 from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
 from bioetl.domain.value_objects.run_context import RunContext
+from bioetl.infrastructure.storage.silver.metadata_operations import (
+    _SilverMetadataWriteRequest,
+)
 from bioetl.infrastructure.storage.silver.operations.metadata_operations import (
     SilverMetadataOperations,
 )
@@ -338,11 +341,13 @@ async def test_internal_write_silver_metadata_uses_canonical_execution_path(
         execute_silver_metadata_write,
     ):
         await ops._write_silver_metadata(
-            table_path=str(tmp_path / "silver" / "chembl" / "activity"),
-            table_name="chembl.activity",
-            records=[{"activity_id": "A1"}],
-            primary_keys=["activity_id"],
-            mode=SilverWriteMode.MERGE,
+            _SilverMetadataWriteRequest(
+                table_path=str(tmp_path / "silver" / "chembl" / "activity"),
+                table_name="chembl.activity",
+                records=[{"activity_id": "A1"}],
+                primary_keys=["activity_id"],
+                mode=SilverWriteMode.MERGE,
+            )
         )
 
     execute_silver_metadata_write.assert_awaited_once()

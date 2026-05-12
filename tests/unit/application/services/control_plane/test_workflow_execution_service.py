@@ -566,9 +566,6 @@ async def test_workflow_execution_service_incremental_offset_progression() -> No
     state2 = state_port.get_latest("chembl_core")
     assert state2 is not None
     assert state2.status == "success"
-    # Debug: print values
-    print(f"DEBUG state1.last_start_offset: {state1.last_start_offset}, state1.last_limit: {state1.last_limit}")
-    print(f"DEBUG state2.last_start_offset: {state2.last_start_offset}, state2.last_limit: {state2.last_limit}")
     # Offset should be 0 + 1000 = 1000 from first run, limit should be 500 from second run
     assert state2.last_start_offset == 1000
     assert state2.last_limit == 500

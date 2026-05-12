@@ -10,6 +10,9 @@ import pytest
 
 from bioetl.application.services.lineage import MetadataLineageBundleResult
 from bioetl.domain.medallion import SilverWriteMode
+from bioetl.infrastructure.storage.silver.metadata_operations import (
+    _SilverMetadataWriteRequest,
+)
 from tests.unit.infrastructure.storage._lineage_fragment_helpers import (
     make_produced_artifact_fragment,
 )
@@ -362,12 +365,14 @@ class TestSilverWriterLineage:
         )
 
         await writer._write_silver_metadata(
-            table_path=silver_table_path("test.table"),
-            table_name="test_table",
-            records=valid_records,
-            primary_keys=["entity_id"],
-            mode=SilverWriteMode.MERGE,
-            bronze_refs=[bronze_result_1, bronze_result_2],
+            _SilverMetadataWriteRequest(
+                table_path=silver_table_path("test.table"),
+                table_name="test_table",
+                records=valid_records,
+                primary_keys=["entity_id"],
+                mode=SilverWriteMode.MERGE,
+                bronze_refs=[bronze_result_1, bronze_result_2],
+            )
         )
 
         # Verify metadata writer was called with bronze_paths
@@ -398,12 +403,14 @@ class TestSilverWriterLineage:
         )
 
         await writer._write_silver_metadata(
-            table_path=silver_table_path("test.table"),
-            table_name="test_table",
-            records=valid_records,
-            primary_keys=["entity_id"],
-            mode=SilverWriteMode.MERGE,
-            bronze_refs=None,  # No bronze refs
+            _SilverMetadataWriteRequest(
+                table_path=silver_table_path("test.table"),
+                table_name="test_table",
+                records=valid_records,
+                primary_keys=["entity_id"],
+                mode=SilverWriteMode.MERGE,
+                bronze_refs=None,
+            )
         )
 
         # Verify metadata writer was called with empty bronze_paths
@@ -447,12 +454,14 @@ class TestSilverWriterLineage:
         )
 
         await writer._write_silver_metadata(
-            table_path=silver_table_path("chembl.activity"),
-            table_name="chembl.activity",
-            records=valid_records,
-            primary_keys=["entity_id"],
-            mode=SilverWriteMode.MERGE,
-            version_after=7,
+            _SilverMetadataWriteRequest(
+                table_path=silver_table_path("chembl.activity"),
+                table_name="chembl.activity",
+                records=valid_records,
+                primary_keys=["entity_id"],
+                mode=SilverWriteMode.MERGE,
+                version_after=7,
+            )
         )
 
         silver_input = _require_captured_input(
@@ -500,12 +509,14 @@ class TestSilverWriterLineage:
         writer._write_silver_metadata_file = AsyncMock()  # type: ignore[method-assign]
 
         await writer._write_silver_metadata(
-            table_path=silver_table_path("chembl.activity"),
-            table_name="chembl.activity",
-            records=valid_records,
-            primary_keys=["entity_id"],
-            mode=SilverWriteMode.MERGE,
-            version_after=7,
+            _SilverMetadataWriteRequest(
+                table_path=silver_table_path("chembl.activity"),
+                table_name="chembl.activity",
+                records=valid_records,
+                primary_keys=["entity_id"],
+                mode=SilverWriteMode.MERGE,
+                version_after=7,
+            )
         )
 
         writer._write_silver_metadata_file.assert_awaited_once_with(
@@ -557,12 +568,14 @@ class TestSilverWriterLineage:
         writer._write_silver_metadata_file = AsyncMock()  # type: ignore[method-assign]
 
         await writer._write_silver_metadata(
-            table_path=silver_table_path("chembl.activity"),
-            table_name="chembl.activity",
-            records=valid_records,
-            primary_keys=["entity_id"],
-            mode=SilverWriteMode.MERGE,
-            version_after=7,
+            _SilverMetadataWriteRequest(
+                table_path=silver_table_path("chembl.activity"),
+                table_name="chembl.activity",
+                records=valid_records,
+                primary_keys=["entity_id"],
+                mode=SilverWriteMode.MERGE,
+                version_after=7,
+            )
         )
 
         lineage_store.save.assert_called_once_with(fragment)
@@ -762,11 +775,13 @@ class TestSilverWriterLineage:
         ):
             writer._metadata_writer = MagicMock()
             await writer._write_silver_metadata(
-                table_path=silver_table_path("chembl.activity"),
-                table_name="chembl.activity",
-                records=valid_records,
-                primary_keys=["entity_id"],
-                mode=SilverWriteMode.MERGE,
+                _SilverMetadataWriteRequest(
+                    table_path=silver_table_path("chembl.activity"),
+                    table_name="chembl.activity",
+                    records=valid_records,
+                    primary_keys=["entity_id"],
+                    mode=SilverWriteMode.MERGE,
+                )
             )
         with pytest.raises(
             RuntimeError,

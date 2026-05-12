@@ -8,6 +8,9 @@ from typing import TYPE_CHECKING
 
 import click
 
+from bioetl.application.services.control_plane.historical_replay_closure_service import (
+    HistoricalReplayResidualDisposition,
+)
 from bioetl.application.services.control_plane.historical_replay_certification_service import (
     HistoricalReplaySnapshotCertification,
 )
@@ -29,6 +32,9 @@ if TYPE_CHECKING:
     from bioetl.application.services.control_plane.forensic_diff_service import (
         ForensicRunDiffService,
     )
+    from bioetl.application.services.control_plane.historical_replay_closure_service import (
+        HistoricalReplayClosureService,
+    )
     from bioetl.application.services.control_plane.historical_replay_corpus_service import (
         HistoricalReplayCorpusService,
     )
@@ -39,6 +45,7 @@ if TYPE_CHECKING:
 __all__ = [
     "COMMANDS",
     "certify_historical_bulk_command",
+    "closure_report_command",
     "diff_command",
     "forensic_diff_command",
     "inventory_command",
@@ -73,6 +80,15 @@ def get_historical_replay_corpus_service() -> HistoricalReplayCorpusService:
     """Load retained-corpus replay workflows through composition on demand."""
     from bioetl.composition.control_plane_api import (
         get_historical_replay_corpus_service as _impl,
+    )
+
+    return _impl()
+
+
+def get_historical_replay_closure_service() -> HistoricalReplayClosureService:
+    """Load retained-corpus closure workflows through composition on demand."""
+    from bioetl.composition.control_plane_api import (
+        get_historical_replay_closure_service as _impl,
     )
 
     return _impl()
@@ -290,6 +306,62 @@ def certify_historical_bulk_command(
     )
 
 
+@run_manifest.command("closure-report")
+@click.option(
+    "--dispositions",
+    "dispositions_path",
+    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    default=None,
+    help="Optional JSON residual-disposition file.",
+)
+@click.option(
+    "--write",
+    "write_artifact",
+    is_flag=True,
+    help="Persist the closure report under data/output/control/historical_replay_closure.",
+)
+@click.option(
+    "--format",
+    "output_format",
+    type=click.Choice(["text", "json", "yaml"]),
+    default="text",
+    help="Output format",
+)
+def closure_report_command(
+    dispositions_path: Path | None,
+    write_artifact: bool,
+    output_format: str,
+) -> None:
+    """Build one retained-corpus closure report and optional persisted artifact."""
+    service = get_historical_replay_closure_service()
+    try:
+        dispositions = _load_residual_dispositions(dispositions_path)
+        report = service.build_closure_report(
+            residual_dispositions=dispositions,
+        )
+        payload = report.to_dict()
+        if write_artifact:
+            from bioetl.infrastructure.config import get_settings
+            from bioetl.infrastructure.control_plane import (
+                FileHistoricalReplayClosureStore,
+            )
+
+            output_root = Path(get_settings().data_dir) / "output" / "control"
+            store = FileHistoricalReplayClosureStore(
+                base_path=output_root / "historical_replay_closure"
+            )
+            artifact_path = store.save(report)
+            payload = {**payload, "artifact_path": str(artifact_path)}
+    except (OSError, TypeError, ValueError, json.JSONDecodeError) as exc:
+        echo_error("Historical replay closure report failed", str(exc))
+        return
+    emit_inspection_payload(
+        payload,
+        output_format,
+        text_renderer=render_text_payload,
+    )
+
+
 def _coerce_bulk_certification_specs(
     payload: object,
 ) -> tuple[HistoricalReplayBulkCertificationSpec, ...]:
@@ -372,8 +444,51 @@ def _optional_text(value: object) -> str | None:
     return text or None
 
 
+def _load_residual_dispositions(
+    dispositions_path: Path | None,
+) -> tuple[HistoricalReplayResidualDisposition, ...]:
+    if dispositions_path is None:
+        return ()
+    payload = json.loads(dispositions_path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        raise ValueError("Residual disposition file must be a JSON object")
+    raw_dispositions = payload.get("dispositions")
+    if not isinstance(raw_dispositions, list):
+        raise ValueError("Residual disposition file requires a dispositions list")
+    dispositions: list[HistoricalReplayResidualDisposition] = []
+    for item in raw_dispositions:
+        if not isinstance(item, dict):
+            raise ValueError("Residual disposition entries must be JSON objects")
+        manifest_id = str(item.get("manifest_id") or "").strip()
+        disposition = str(item.get("disposition") or "").strip()
+        rationale = str(item.get("rationale") or "").strip()
+        if not manifest_id or not disposition or not rationale:
+            raise ValueError(
+                "Residual disposition entries require manifest_id, disposition, and rationale"
+            )
+        evidence_refs = item.get("evidence_refs")
+        if evidence_refs is None:
+            evidence_ref_values: tuple[str, ...] = ()
+        elif isinstance(evidence_refs, list):
+            evidence_ref_values = tuple(
+                str(value).strip() for value in evidence_refs if str(value).strip()
+            )
+        else:
+            raise ValueError("Residual disposition evidence_refs must be a list")
+        dispositions.append(
+            HistoricalReplayResidualDisposition(
+                manifest_id=manifest_id,
+                disposition=disposition,
+                rationale=rationale,
+                evidence_refs=evidence_ref_values,
+            )
+        )
+    return tuple(dispositions)
+
+
 COMMANDS = (
     certify_historical_bulk_command,
+    closure_report_command,
     diff_command,
     forensic_diff_command,
     inventory_command,
