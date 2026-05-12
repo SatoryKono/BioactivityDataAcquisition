@@ -91,12 +91,33 @@ def _resolve_replay_capability_reason(
         manifest.replay_capability == ReplayCapability.EXACT_REPLAY_SUPPORTED
         and snapshot_envelope.full_snapshot_envelope
     ):
+        if _has_live_capture_materialized_snapshots(input_snapshots):
+            return "materialized_live_capture_snapshot_envelope_present"
         return "full_immutable_input_snapshot_envelope_present"
     if manifest.replay_capability == ReplayCapability.RESUME_ONLY or resume_requested:
         return "resume_requested_without_snapshot_backed_inputs"
     if _is_composite_execution_context(manifest):
         return "composite_snapshot_envelope_missing"
     return "immutable_input_snapshots_missing"
+
+
+def _resolve_replay_occurrence_kind(
+    *,
+    manifest: RunManifest,
+    input_snapshots: list[dict[str, object]],
+    policy_assessment: ReproducibilityPolicyAssessment,
+) -> str:
+    """Return the bounded replay-role classification for one manifested run."""
+    replay_parentage = _build_replay_parentage(manifest)
+    if bool(replay_parentage["is_exact_replay"]):
+        return "exact_replay_child_run"
+    if _has_live_capture_materialized_snapshots(input_snapshots):
+        if policy_assessment.snapshot_envelope.full_snapshot_envelope:
+            return "materialized_replayable_parent"
+        return "materialized_parent_incomplete"
+    if policy_assessment.snapshot_envelope.full_snapshot_envelope:
+        return "launch_time_snapshot_backed_run"
+    return "ordinary_live_capture"
 
 
 def _resolve_exact_replay_blockers(
@@ -204,6 +225,18 @@ def _collect_append_mode_semantic_sinks(manifest: RunManifest) -> list[str]:
                 ):
                     blocked.add(f"sink.{layer_name}.mode=append")
     return sorted(blocked)
+
+
+def _has_live_capture_materialized_snapshots(
+    input_snapshots: list[dict[str, object]],
+) -> bool:
+    """Return whether snapshots were materialized after live capture via ledger."""
+    return any(
+        str(snapshot.get("materialization_mode") or "").strip()
+        == "live_capture_snapshot_materialized"
+        for snapshot in input_snapshots
+        if isinstance(snapshot, Mapping)
+    )
 
 
 def _candidate_sink_mappings(
@@ -451,9 +484,7 @@ def _resolve_applied_checkpoint_compatibility_policy(
     if requested_exact_replay:
         return "hard_fail"
     if required_persistence_profile in STRICT_PERSISTENCE_PROFILES:
-        if requested_policy in {"observe", "legacy_observe"}:
-            return "soft_fail"
-        return requested_policy or "soft_fail"
+        return "hard_fail" if requested_policy != "hard_fail" else requested_policy
     return requested_policy or "observe"
 
 

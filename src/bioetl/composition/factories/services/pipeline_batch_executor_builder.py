@@ -28,7 +28,7 @@ from bioetl.composition.factories.services.runtime_managers import (
 from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.observability_contract import normalize_observability_pipeline_label
 from bioetl.infrastructure.observability.metrics import GOLD_LIFECYCLE_STATE_TOTAL
-from bioetl.infrastructure.validation import PanderaGoldValidator
+from bioetl.infrastructure.validation import ContractAwareGoldValidator
 
 if TYPE_CHECKING:
     from bioetl.application.core.wiring.runtime import (
@@ -59,7 +59,7 @@ def create_batch_executor_from_pipeline(
         silver_output_path=request.silver_output_path,
         gold_output_path=request.gold_output_path,
         flat_structure=request.flat_structure,
-        gold_validator_factory=PanderaGoldValidator,
+        gold_validator_factory=ContractAwareGoldValidator,
     )
     runtime_managers = build_runtime_managers(
         pipeline=request.pipeline,

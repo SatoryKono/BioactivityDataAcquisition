@@ -61,7 +61,7 @@ async def test_read_silver_delegates() -> None:
 @pytest.mark.unit
 @pytest.mark.asyncio
 async def test_write_silver_merged_delegates() -> None:
-    """write_silver_merged delegates to silver writer."""
+    """write_silver_merged delegates with registered core schema."""
     mixin = _make_mixin()
     records = [{"id": 1, "name": "test"}]
     await mixin.write_silver_merged(
@@ -74,10 +74,21 @@ async def test_write_silver_merged_delegates() -> None:
         "test.table",
         records,
         ["id"],
+        schema=mixin._COMPOSITE_GOLD_SCHEMAS["test.table"],
         run_id="run-1",
         sources_used=None,
         preserve_column_order=False,
     )
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_write_silver_merged_unknown_table_fails_fast() -> None:
+    """write_silver_merged requires a registered schema for composite paths."""
+    mixin = _make_mixin()
+    with pytest.raises(ValueError, match="registered validation schema"):
+        await mixin.write_silver_merged("unknown.table", [{"id": 1}])
+    mixin.silver.write_silver_merged.assert_not_called()
 
 
 @pytest.mark.unit

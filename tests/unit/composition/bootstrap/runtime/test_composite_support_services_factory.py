@@ -42,6 +42,13 @@ def _make_factory(
             cross_validation=SimpleNamespace(enabled=False),
             dq=SimpleNamespace(),
             execution=SimpleNamespace(max_concurrency=3),
+            to_dict=lambda: {
+                "name": "composite_publication",
+                "version": "1.0.0",
+                "enrichers": [],
+                "dependencies": [],
+                "merge": {"strategy": "left_outer"},
+            },
         ),
     )
     runtime = CompositeRuntimeConfig(resume=False)
@@ -156,6 +163,7 @@ def test_build_uses_canonical_composite_checkpoint_port(
         execution_fingerprint="fingerprint-123",
         run_ledger_service=MagicMock(name="run_ledger_service"),
         config_hash="hash-123",
+        effective_config_hash="e" * 64,
         dq_contract_compatibility_hash="dq-hash-123",
         effective_config_artifact_id="artifact-123",
         input_snapshot_fingerprint="snapshot-fingerprint-123",

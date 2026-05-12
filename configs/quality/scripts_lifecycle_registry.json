@@ -140,17 +140,65 @@
       "review_by": "2026-07-15",
       "next_step": "Retain as the canonical reproducibility support-matrix generator while architecture/docs drift tests and operator policy docs depend on this generated surface; only fold it into broader docs tooling if the reproducibility policy generator layer is consolidated."
     },
+    "scripts/engineering/qa/report_non_chembl_observed_value_inventory.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as the deterministic reporting helper for non-ChEMBL observed-value inventory generation while docs-generated inventory artifacts and normalization parity checks still consume this surface; fold it into broader QA/docs generation only if that reporting pipeline is consolidated."
+    },
     "scripts/engineering/qa/hotspot_family_metrics.py": {
       "owner": "@bioetl-platform",
       "decision": "shared_helper_module",
       "review_by": "2026-07-15",
       "next_step": "Retain as the hotspot-family metrics helper consumed by QA report generation and architecture ratchet tests; only move or inline it if the hotspot baseline/report flow is consolidated into a different canonical helper surface."
     },
+    "scripts/engineering/qa/extract_uniprot_semantic_payload_vocab.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as the governed vocabulary-extraction helper while UniProt semantic payload inventory docs and parity checks still consume this generated support surface; only fold it into a broader schema/docs generator when that pipeline is consolidated."
+    },
     "scripts/memory/mcp_smoke.py": {
       "owner": "@bioetl-platform",
       "decision": "compatibility_wrapper",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a backward-compatible import shim while the canonical Neo4j memory smoke implementation lives under scripts.ai.mcp.neo4j_memory_mcp_smoke; remove it only after tests and historical import paths stop referencing scripts.memory.mcp_smoke."
+    },
+    "scripts/codex-start-wsl.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "windows_compatibility_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a legacy root Windows wrapper while Codex runtime launchers migrate toward canonical scripts.ai and scripts.ops surfaces; remove it after caller audit confirms no direct root-script consumers remain."
+    },
+    "scripts/codex-start-wsl.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a legacy root shell wrapper while Codex runtime launchers migrate toward canonical scripts.ai and scripts.ops surfaces; remove it after caller audit confirms no direct root-script consumers remain."
+    },
+    "scripts/shutdown.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "windows_compatibility_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a legacy root Windows shutdown wrapper while canonical ops/runtime launchers move under governed scripts.ops surfaces; remove it after direct root-script usage is eliminated."
+    },
+    "scripts/shutdown.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a legacy root shell shutdown wrapper while canonical ops/runtime launchers move under governed scripts.ops surfaces; remove it after direct root-script usage is eliminated."
+    },
+    "scripts/startup.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "windows_compatibility_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a legacy root Windows startup wrapper while canonical ops/runtime launchers move under governed scripts.ops surfaces; remove it after direct root-script usage is eliminated."
+    },
+    "scripts/startup.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a legacy root shell startup wrapper while canonical ops/runtime launchers move under governed scripts.ops surfaces; remove it after direct root-script usage is eliminated."
     },
     "src/tools/neo4j_audit.py": {
       "owner": "@bioetl-platform",

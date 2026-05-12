@@ -111,6 +111,7 @@ class BatchTransformer:
             transform=self._transform,
             gold_filter=self._gold_filter,
             gold_transform=self._gold_transform,
+            dq_config=self._config.dq_config,
             normalization_processor=self._normalization_processor,
             raw_record=raw_record,
             batch_id=batch_id,

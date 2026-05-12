@@ -22,7 +22,7 @@ from bioetl.composition.factories.services.pipeline_processing_components_builde
     create_batch_processing_components as build_batch_processing_components,
 )
 from bioetl.domain.config import TableConfig
-from bioetl.infrastructure.validation import PanderaGoldValidator
+from bioetl.infrastructure.validation import ContractAwareGoldValidator
 
 if TYPE_CHECKING:
     import pandera as pdr
@@ -47,7 +47,7 @@ def build_record_processor_config_and_validator(
     silver_output_path: str | None,
     gold_output_path: str | None,
     flat_structure: bool,
-    gold_validator_factory: Callable[..., GoldValidatorPort] = PanderaGoldValidator,
+    gold_validator_factory: Callable[..., GoldValidatorPort] = ContractAwareGoldValidator,
 ) -> tuple[RecordProcessorConfig, GoldValidatorPort]:
     """Build RecordProcessorConfig plus Gold validator from pipeline state."""
     include_fields, exclude_fields = extract_hash_policy(pipeline)
@@ -88,6 +88,7 @@ def build_record_processor_config_and_validator(
     gold_validator = gold_validator_factory(
         cast("pdr.DataFrameSchema | None", active_gold_schema),
         strict=strict_gold_validation,
+        dq_config=cast("DQConfig | None", pipeline.config.dq),
     )
     return processor_config, gold_validator
 
@@ -146,7 +147,7 @@ def create_record_processor_from_pipeline(
             gold_schema_policy_by_version=gold_schema_policy_by_version,
             record_processor_config_cls=RecordProcessorConfig,
             table_config_cls=TableConfig,
-            gold_validator_factory=PanderaGoldValidator,
+            gold_validator_factory=ContractAwareGoldValidator,
             record_processor_cls=RecordProcessor,
         ),
     )

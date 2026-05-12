@@ -43,6 +43,10 @@ pipelines:
         category: strict_enum
         collection_semantics: scalar
         composite_usage: composite_molecule:upstream_inherited
+      iupac_name:
+        category: provider_term_variant
+        collection_semantics: scalar
+        composite_usage: composite_molecule:upstream_inherited
 
   uniprot_protein:
     primary_key: accession
@@ -134,11 +138,23 @@ pipelines:
         - Evidence at transcript level
         - Inferred from homology
     structured_json_shapes:
+      alternative_products:
+        semantic_policy: canonical_json_comment_projection
+        collection_semantics: ordered_sequence
+      biophysicochemical_properties:
+        semantic_policy: canonical_json_comment_projection
+        collection_semantics: ordered_sequence
+      cofactors:
+        semantic_policy: canonical_json_comment_projection
+        collection_semantics: unordered_set
       features_json:
         semantic_policy: raw_json_plus_canonical_json_before_semantic_transform
         collection_semantics: ordered_sequence
         raw_sidecar_field: features_raw_json
         canonical_sidecar_field: features_canonical_json
+      reactions:
+        semantic_policy: canonical_json_comment_projection
+        collection_semantics: ordered_sequence
     classification:
       accession:
         category: identifier_namespace
@@ -211,6 +227,26 @@ pipelines:
         collection_semantics: ordered_sequence
         raw_sidecar: features_raw_json
         canonical_sidecar: features_canonical_json
+        composite_usage: composite_target:upstream_inherited
+      alternative_products:
+        category: structured_json_canonical_only
+        collection_semantics: ordered_sequence
+        canonical_sidecar: alternative_products
+        composite_usage: composite_target:upstream_inherited
+      biophysicochemical_properties:
+        category: structured_json_canonical_only
+        collection_semantics: ordered_sequence
+        canonical_sidecar: biophysicochemical_properties
+        composite_usage: composite_target:upstream_inherited
+      cofactors:
+        category: structured_json_canonical_only
+        collection_semantics: unordered_set
+        canonical_sidecar: cofactors
+        composite_usage: composite_target:upstream_inherited
+      reactions:
+        category: structured_json_canonical_only
+        collection_semantics: ordered_sequence
+        canonical_sidecar: reactions
         composite_usage: composite_target:upstream_inherited
 
   uniprot_idmapping:
@@ -410,6 +446,17 @@ pipelines:
       publication_class:
         - article_like
         - chapter_like
+    structured_json_shapes:
+      author_details:
+        semantic_policy: hashed_pii_canonical_json_only
+        collection_semantics: ordered_sequence
+        raw_sidecar_field: null
+        canonical_sidecar_field: author_details
+      references:
+        semantic_policy: canonical_json_bibliographic_evidence
+        collection_semantics: ordered_sequence
+        raw_sidecar_field: null
+        canonical_sidecar_field: references
     classification:
       doi:
         category: identifier_namespace
@@ -431,6 +478,16 @@ pipelines:
       publication_class:
         category: derived_vocabulary
         collection_semantics: scalar
+        composite_usage: composite_publication:upstream_inherited
+      author_details:
+        category: structured_json_canonical_only
+        collection_semantics: ordered_sequence
+        canonical_sidecar: author_details
+        composite_usage: composite_publication:upstream_inherited
+      references:
+        category: structured_json_canonical_only
+        collection_semantics: ordered_sequence
+        canonical_sidecar: references
         composite_usage: composite_publication:upstream_inherited
 
   openalex_publication:

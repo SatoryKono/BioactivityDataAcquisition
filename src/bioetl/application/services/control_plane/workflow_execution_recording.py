@@ -168,11 +168,19 @@ def record_workflow_finished(
     result: WorkflowRunExecutionResult,
     *,
     completed_at: datetime,
+    last_start_offset: int | None = None,
+    last_limit: int | None = None,
 ) -> None:
     """Record the final workflow result and persist terminal state."""
     summary = _build_result_summary(result)
     if result.status == "success":
-        _record_workflow_success(context, completed_at=completed_at, summary=summary)
+        _record_workflow_success(
+            context,
+            completed_at=completed_at,
+            summary=summary,
+            last_start_offset=last_start_offset,
+            last_limit=last_limit,
+        )
         return
     _record_workflow_failure(
         context,
@@ -187,6 +195,8 @@ def _record_workflow_success(
     *,
     completed_at: datetime,
     summary: dict[str, object],
+    last_start_offset: int | None = None,
+    last_limit: int | None = None,
 ) -> None:
     entry = context.ledger.record_workflow_finished(details=summary)
     context.state = replace(
@@ -197,6 +207,8 @@ def _record_workflow_success(
         last_event_id=entry.entry_id,
         last_error_type=None,
         last_error_message=None,
+        last_start_offset=last_start_offset,
+        last_limit=last_limit,
     )
     context.state_port.save(context.state)
 

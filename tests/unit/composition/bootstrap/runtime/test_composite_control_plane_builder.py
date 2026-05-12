@@ -33,7 +33,7 @@ _VALID_RUN_ID = "12345678-1234-5678-1234-567812345678"
 class _MockCompositeConfig:
     def __init__(self) -> None:
         self.name = "composite_publication"
-        self.version = "1.0.0"
+        self.version = "1.1.0"
 
     def to_dict(self) -> dict[str, object]:
         return {
@@ -135,21 +135,26 @@ def test_build_composite_manifest_create_request_wires_control_plane_payloads() 
             effective_config_hash="effective-hash-123",
             dq_contract_compatibility_hash="dq-compat-123",
             effective_config_artifact_id="eca-123",
-            contract_ref="composite_publication",
+            contract_ref="composite.publication",
             contract_version="1.0.0",
+            contract_schema_hash="schema-hash-123",
+            dq_policy_ref="composite.dq.v1",
+            rule_bundle_version="dq-rules.v1.0",
+            pipeline_version="1.1.0",
+            entity="publication",
             required_persistence_profile="replay_ready",
         )
 
     assert str(request.run_id) == _VALID_RUN_ID
     assert request.pipeline_name == "composite_publication"
     assert request.provider == "composite"
-    assert request.entity == "composite_publication"
+    assert request.entity == "publication"
     assert request.launch_context == {"resume": True}
     assert request.runtime_config == runtime_snapshot
     assert request.resolved_config == resolved_snapshot
     assert request.source_refs == source_refs
     assert request.planned_artifacts == planned_artifacts
-    assert request.pipeline_version == "1.0.0"
+    assert request.pipeline_version == "1.1.0"
     assert request.git_commit == "abc1234"
     assert request.source_revision_state == "clean"
     assert request.config_hash == "resolved-hash-123"
@@ -157,8 +162,11 @@ def test_build_composite_manifest_create_request_wires_control_plane_payloads() 
     assert request.effective_config_hash == "effective-hash-123"
     assert request.dq_contract_compatibility_hash == "dq-compat-123"
     assert request.effective_config_artifact_id == "eca-123"
-    assert request.contract_ref == "composite_publication"
+    assert request.contract_ref == "composite.publication"
     assert request.contract_version == "1.0.0"
+    assert request.contract_schema_hash == "schema-hash-123"
+    assert request.dq_policy_ref == "composite.dq.v1"
+    assert request.rule_bundle_version == "dq-rules.v1.0"
     assert request.replay_capability == ReplayCapability.EXACT_REPLAY_SUPPORTED
 
 
@@ -169,7 +177,7 @@ def test_normalize_object_delegates_to_shared_manifest_support() -> None:
 
     assert result == {
         "name": "composite_publication",
-        "version": "1.0.0",
+        "version": "1.1.0",
     }
 
 
@@ -354,7 +362,7 @@ def test_build_composite_control_plane_bundle_requires_ledger_for_forensic_grade
     assert not (tmp_path / "output" / "control" / "run_ledger").exists()
 
 
-def test_build_composite_control_plane_bundle_rejects_forensic_grade_without_rich_checkpoint_evidence(
+def test_build_composite_control_plane_bundle_allows_forensic_grade_with_full_snapshot_envelope(
     tmp_path: Path,
 ) -> None:
     config = cast(Any, _RichMockCompositeConfig())
@@ -396,15 +404,33 @@ def test_build_composite_control_plane_bundle_rejects_forensic_grade_without_ric
         ),
     )
 
-    with pytest.raises(RuntimeError, match="rich checkpoint evidence"):
-        build_composite_control_plane_bundle(
+    with patch(
+        "bioetl.composition.bootstrap.runtime.composite_control_plane_builder.get_code_revision_provenance",
+        return_value=SimpleNamespace(
+            git_commit="abc1234",
+            source_revision_state="clean",
+            dependency_lock_hash="sha256:deps-abc1234",
+        ),
+    ):
+        bundle = build_composite_control_plane_bundle(
             config=config,
             runtime=runtime,
             infra_context=infra_context,
         )
 
-    assert not (tmp_path / "output" / "control" / "run_manifest").exists()
-    assert not (tmp_path / "output" / "control" / "run_ledger").exists()
+    manifest_path = (
+        tmp_path / "output" / "control" / "run_manifest" / f"{bundle.manifest_id}.json"
+    )
+    manifest = RunManifest.from_dict(json.loads(manifest_path.read_text("utf-8")))
+    assert manifest.replay_capability == ReplayCapability.EXACT_REPLAY_SUPPORTED
+    assert manifest.provider == "composite"
+    assert manifest.entity == "publication"
+    assert manifest.code_provenance.pipeline_version == "1.1.0"
+    assert manifest.code_provenance.contract_ref == "composite.publication"
+    assert manifest.code_provenance.contract_version == "1.0.0"
+    assert manifest.code_provenance.contract_schema_hash is not None
+    assert manifest.code_provenance.dq_policy_ref == "composite.dq.v1"
+    assert manifest.code_provenance.rule_bundle_version == "dq-rules.v1.0"
 
 
 def test_build_composite_control_plane_bundle_rejects_replay_ready_profile(
@@ -509,6 +535,13 @@ def test_build_composite_control_plane_bundle_allows_replay_ready_with_full_snap
     manifest = RunManifest.from_dict(json.loads(manifest_path.read_text("utf-8")))
     assert manifest.replay_capability == ReplayCapability.EXACT_REPLAY_SUPPORTED
     assert all(source_ref.input_snapshots for source_ref in manifest.source_refs)
+    assert manifest.entity == "publication"
+    assert manifest.code_provenance.pipeline_version == "1.1.0"
+    assert manifest.code_provenance.contract_ref == "composite.publication"
+    assert manifest.code_provenance.contract_version == "1.0.0"
+    assert manifest.code_provenance.contract_schema_hash is not None
+    assert manifest.code_provenance.dq_policy_ref == "composite.dq.v1"
+    assert manifest.code_provenance.rule_bundle_version == "dq-rules.v1.0"
     assert (
         manifest.code_provenance.effective_config_artifact_id
         == bundle.effective_config_artifact_id

@@ -1,3 +1,4 @@
+# Compatibility wrapper for the legacy root startup launcher.
 # Stable startup script for BioETL + MCP servers
 # Usage: .\scripts\startup.ps1 -Environment prod
 

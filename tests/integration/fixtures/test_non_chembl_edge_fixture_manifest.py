@@ -9,11 +9,13 @@ import yaml
 
 MANIFEST_PATH = Path("configs/base/bronze_fixture_manifest.yaml")
 EDGE_PIPELINES = {
+    "crossref/publication",
     "openalex/publication",
     "pubchem/compound",
     "pubmed/publication",
     "semanticscholar/publication",
     "uniprot/idmapping",
+    "uniprot/protein",
 }
 
 

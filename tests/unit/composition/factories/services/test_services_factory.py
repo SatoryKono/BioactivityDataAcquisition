@@ -339,7 +339,7 @@ def test_create_dq_services_builds_enabled_stack(
     "bioetl.composition.factories.services.pipeline_record_processor_builder.RecordProcessor"
 )
 @patch(
-    "bioetl.composition.factories.services.pipeline_record_processor_builder.PanderaGoldValidator"
+    "bioetl.composition.factories.services.pipeline_record_processor_builder.ContractAwareGoldValidator"
 )
 @patch(
     "bioetl.composition.factories.services.pipeline_record_processor_builder.RecordProcessorConfig"

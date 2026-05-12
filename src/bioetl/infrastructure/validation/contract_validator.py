@@ -19,6 +19,7 @@ from bioetl.domain.types.dq_contracts import (
 )
 from bioetl.infrastructure.validation.pandera_validator import (
     PanderaGoldValidator,
+    PanderaSilverValidator,
 )
 
 if TYPE_CHECKING:
@@ -291,7 +292,7 @@ class ContractAwareGoldValidator(PanderaGoldValidator):
         return {"contract_ref": None, "policy_hash": None}
 
 
-class ContractAwareSilverValidator:
+class ContractAwareSilverValidator(PanderaSilverValidator):
     """Silver validator with contract-based DQ policy integration.
 
     Placeholder for future Silver contract validation.
@@ -306,11 +307,7 @@ class ContractAwareSilverValidator:
         dq_config: DQConfig | None = None,
     ) -> None:
         """Initialize contract-aware Silver validator."""
-        from bioetl.infrastructure.validation.pandera_validator import (
-            PanderaSilverValidator,
-        )
-
-        self._base_validator = PanderaSilverValidator(schema=schema, strict=strict)
+        super().__init__(schema=schema, strict=strict)
         self._dq_config = dq_config
         self._policy_resolver = DQPolicyResolver(dq_config) if dq_config else None
         self._policy_ref = (
@@ -328,7 +325,7 @@ class ContractAwareSilverValidator:
     ) -> tuple[bool, list[DQRuleOutcome]]:
         """Validate records and return rule-level DQ outcomes."""
         # Basic validation
-        basic_result = self._base_validator.validate(records)
+        basic_result = self.validate(records)
 
         # For now, return basic result with empty outcomes
         # Future implementation will add Silver-specific contract validation

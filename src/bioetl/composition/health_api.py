@@ -2,9 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 from importlib import import_module
-from pathlib import Path
 from typing import TYPE_CHECKING, Protocol
 
 if TYPE_CHECKING:
@@ -61,7 +59,10 @@ _BOOTSTRAP_HEALTH_MODULE = "bioetl.composition.bootstrap.cli.health"
 _RESOURCE_MANAGEMENT_MODULE = "bioetl.composition._resource_management"
 _PUBLIC_EXPORTS = {
     "HealthServerDependencies": _BOOTSTRAP_HEALTH_MODULE,
+    "get_health_server_dependencies": _SERVICES_MODULE,
     "get_health_service": _SERVICES_MODULE,
+    "get_quarantine_port": _SERVICES_MODULE,
+    "get_quarantine_service": _SERVICES_MODULE,
     "get_quarantine_runtime_service": _RESOURCE_MANAGEMENT_MODULE,
 }
 
@@ -71,31 +72,6 @@ class HealthServerDependenciesProtocol(Protocol):
 
     health_monitor: HealthMonitorPort
     metrics: MetricsPort
-
-
-@dataclass(frozen=True, slots=True)
-class _DirectHealthServerDependencies:
-    """Minimal dependency bundle for health listener startup."""
-
-    health_monitor: object
-    metrics: object
-
-
-class _NoOpLogger:
-    """Local no-op logger for lightweight health/quarantine bootstrap."""
-
-    def bind(self, **_: object) -> "_NoOpLogger":
-        return self
-
-    def debug(self, *_: object, **__: object) -> None:
-        return None
-
-    def info(self, *_: object, **__: object) -> None:
-        return None
-
-    def warning(self, *_: object, **__: object) -> None:
-        return None
-
 
 def __getattr__(name: str) -> object:
     """Resolve health exports lazily to avoid CLI import fan-out."""
@@ -114,60 +90,25 @@ def get_runtime_settings() -> object:
     return get_settings()
 
 
-def get_health_server_dependencies() -> object:
-    """Bootstrap health-listener dependencies without heavy CLI bootstrap imports."""
-    return _DirectHealthServerDependencies(
-        health_monitor=None,
-        metrics=None,
-    )
+def get_health_server_dependencies() -> HealthServerDependenciesProtocol:
+    """Load health-listener dependencies from the canonical composition services seam."""
+    from bioetl.composition._services import get_health_server_dependencies as _impl
+
+    return _impl()
 
 
 def get_quarantine_port() -> object:
-    """Bootstrap the shared quarantine adapter without service-graph imports."""
-    from bioetl.infrastructure.config import get_settings
-    from bioetl.infrastructure.quarantine.unified import UnifiedQuarantineAdapter
+    """Load the shared quarantine adapter through the canonical services seam."""
+    from bioetl.composition._services import get_quarantine_port as _impl
 
-    settings = get_settings()
-    return UnifiedQuarantineAdapter(base_path=str(settings.quarantine_path))
+    return _impl()
 
 
 def get_quarantine_service() -> object:
-    """Bootstrap quarantine admin service without heavy CLI bootstrap imports."""
-    from bioetl.application.services.control_plane.run_manifest_inspection_service import (
-        RunManifestInspectionService,
-    )
-    from bioetl.application.services.quarantine_service import QuarantineService
-    from bioetl.infrastructure.config import get_settings
-    from bioetl.infrastructure.control_plane import (
-        FileEffectiveConfigArtifactStore,
-        FileRunLedgerStore,
-        FileRunManifestStore,
-    )
-    from bioetl.infrastructure.time import SystemClock
+    """Load quarantine admin service through the canonical services seam."""
+    from bioetl.composition._services import get_quarantine_service as _impl
 
-    settings = get_settings()
-    output_root = Path(settings.data_dir) / "output" / "control"
-    run_manifest_service = RunManifestInspectionService(
-        manifest_port=FileRunManifestStore(
-            base_path=output_root / "run_manifest",
-            metrics=None,
-        ),
-        ledger_port=FileRunLedgerStore(
-            base_path=output_root / "run_ledger",
-            metrics=None,
-        ),
-        effective_config_artifact_port=FileEffectiveConfigArtifactStore(
-            base_path=output_root / "effective_config",
-        ),
-    )
-    return QuarantineService(
-        quarantine_port=get_quarantine_port(),
-        logger=_NoOpLogger(),
-        clock=SystemClock(),
-        metrics=None,
-        tracer=None,
-        run_manifest_service=run_manifest_service,
-    )
+    return _impl()
 
 
 def __dir__() -> list[str]:

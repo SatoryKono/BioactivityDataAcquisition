@@ -50,7 +50,7 @@ def test_normalize_join_key_scalar_preserves_non_string_values() -> None:
         ("pmc_id", " PMC123 ", "pmc123"),
         ("target_id", " chembl0203 ", "CHEMBL203"),
         ("uniprot_accession", " p12345 ", "P12345"),
-        ("title", "  Mixed Case Title  ", "Mixed Case Title"),
+        ("title", "  Mixed\t Case\nTitle  ", "Mixed Case Title"),
         ("canonical_smiles", " C[C@H](O)C ", "C[C@H](O)C"),
     ),
 )
@@ -81,7 +81,7 @@ def test_stringify_join_key_value_handles_none_empty_and_real_float_stably() -> 
 def test_compound_join_key_components_normalize_to_equivalent_values() -> None:
     tuple_a = (
         stringify_join_key_value(" 10.1000/ABC ", key="doi"),
-        stringify_join_key_value("  Mixed Case Title  ", key="title"),
+        stringify_join_key_value("  Mixed\t Case\nTitle  ", key="title"),
     )
     tuple_b = (
         stringify_join_key_value("10.1000/abc", key="doi"),

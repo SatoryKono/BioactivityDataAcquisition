@@ -24,7 +24,9 @@ def test_chembl_activity_edge_fixture_covers_bao_uo_and_qudt_variants() -> None:
     assert {row["qudt_units"] for row in rows} == {"nM", "mg.kg-1"}
 
 
-def test_chembl_cell_line_edge_fixture_covers_cellosaurus_clo_efo_and_taxonomy() -> None:
+def test_chembl_cell_line_edge_fixture_covers_cellosaurus_clo_efo_and_taxonomy() -> (
+    None
+):
     rows = _load_jsonl(
         "tests/fixtures/bronze/chembl/cell_line/sample_edge_ontology_ids_2026-05-11.jsonl"
     )
@@ -46,7 +48,9 @@ def test_chembl_tissue_edge_fixture_covers_bto_caloha_efo_and_uberon_variants() 
     assert {"uberon:0002107", "UBERON_0002113"} == {row["uberon_id"] for row in rows}
 
 
-def test_chembl_target_component_edge_fixture_covers_accession_taxonomy_and_nested_reference_namespaces() -> None:
+def test_chembl_target_component_edge_fixture_covers_accession_taxonomy_and_nested_reference_namespaces() -> (
+    None
+):
     rows = _load_jsonl(
         "tests/fixtures/bronze/chembl/target_component/sample_edge_reference_ids_2026-05-11.jsonl"
     )

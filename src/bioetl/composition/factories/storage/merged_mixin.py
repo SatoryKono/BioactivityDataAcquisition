@@ -26,6 +26,7 @@ class _SilverMergedWriteProtocol(Protocol):
         records: list[JsonDict],
         primary_keys: list[str] | None = None,
         *,
+        schema: object | None = None,
         run_id: str | None = None,
         sources_used: list[str] | None = None,
         preserve_column_order: bool = False,
@@ -105,22 +106,32 @@ class StorageBundleMergedMixin:
         ],
         primary_keys: list[str] | None = None,
         *,
+        schema: object | None = None,
         run_id: str | None = None,
         sources_used: list[str] | None = None,
         preserve_column_order: bool = False,
     ) -> None:
-        """Write merged records to Silver layer without explicit schema.
+        """Write merged records to Silver layer with mandatory core-schema validation.
 
-        Used by composite pipelines where schema is dynamically determined.
+        Composite pipelines validate merged Silver outputs against a registered
+        core schema in non-strict mode before persisting layer-specific extras.
 
         Args:
             table_name: The name of the table to write to.
             records: A list of dictionaries representing merged records.
             primary_keys: Optional list of column names for sorting.
+            schema: Optional caller-provided validation schema. If omitted, a
+                registered composite schema must exist for ``table_name``.
             run_id: Optional composite run ID for metadata tracking.
             sources_used: Optional list of source pipelines used in merge.
             preserve_column_order: If True, skip canonical reordering.
         """
+        composite_schema = schema or self._COMPOSITE_GOLD_SCHEMAS.get(table_name)
+        if composite_schema is None:
+            raise ValueError(
+                "Composite Silver write requires a registered validation schema: "
+                f"table_name={table_name}"
+            )
         await cast(
             _SilverMergedWriteProtocol,
             self.silver,
@@ -128,6 +139,7 @@ class StorageBundleMergedMixin:
             table_name,
             records,
             primary_keys,
+            schema=composite_schema,
             run_id=run_id,
             sources_used=sources_used,
             preserve_column_order=preserve_column_order,

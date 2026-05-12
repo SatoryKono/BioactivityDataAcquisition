@@ -42,6 +42,9 @@ from bioetl.composition.bootstrap.runtime._composite_control_plane_support impor
 from bioetl.composition.bootstrap.runtime.composite_support_service_bundles import (
     CompositeControlPlaneBundle,
 )
+from bioetl.composition.runtime_builders._run_manifest_contract_identity import (
+    resolve_contract_identity,
+)
 from bioetl.composition.runtime_builders.effective_config_artifact_builder import (
     create_and_persist_composite_effective_config_artifact,
 )
@@ -50,6 +53,7 @@ from bioetl.composition.runtime_builders.runner_builder_support import (
 )
 from bioetl.composition.services.versioning import get_code_revision_provenance
 from bioetl.domain.control_plane.reproducibility_policy import (
+    STRICT_PERSISTENCE_PROFILES,
     is_critical_reproducibility_runtime,
     legacy_config_hash_from_resolved_config_hash,
     resolve_effective_required_persistence_profile,
@@ -96,7 +100,7 @@ def resolve_composite_control_plane_flags(settings: object) -> tuple[bool, bool]
         required_profile=effective_required_profile,
         execution_label="Composite execution",
         exact_replay_execution_context_supported=True,
-        composite_resume_rich_replay_supported=False,
+        composite_resume_rich_replay_supported=True,
     )
     return True, ledger_enabled
 
@@ -149,8 +153,19 @@ def build_composite_control_plane_bundle(
         infra_context.settings,
         configured_required_profile=required_profile,
     )
-    contract_ref = config.name
-    contract_version = getattr(config, "version", "") or ""
+    contract_ref, contract_entity = _resolve_composite_contract_coordinates(config)
+    (
+        _resolved_contract_ref,
+        contract_version,
+        contract_schema_hash,
+        dq_policy_ref,
+        rule_bundle_version,
+    ) = resolve_contract_identity(
+        provider="composite",
+        entity=contract_entity,
+        strict=effective_required_profile in STRICT_PERSISTENCE_PROFILES,
+    )
+    pipeline_version = getattr(config, "version", "") or ""
     (
         effective_config_artifact_id,
         resolved_config_hash,
@@ -182,7 +197,12 @@ def build_composite_control_plane_bundle(
             dq_contract_compatibility_hash=dq_contract_compatibility_hash,
             effective_config_artifact_id=effective_config_artifact_id,
             contract_ref=contract_ref,
-            contract_version=contract_version,
+            contract_version=contract_version or None,
+            contract_schema_hash=contract_schema_hash,
+            dq_policy_ref=dq_policy_ref,
+            rule_bundle_version=rule_bundle_version,
+            pipeline_version=pipeline_version or None,
+            entity=contract_entity,
             required_persistence_profile=effective_required_profile,
         )
     )
@@ -229,7 +249,12 @@ def _build_composite_manifest_create_request(
     dq_contract_compatibility_hash: str,
     effective_config_artifact_id: str,
     contract_ref: str,
-    contract_version: str,
+    contract_version: str | None,
+    contract_schema_hash: str | None,
+    dq_policy_ref: str | None,
+    rule_bundle_version: str | None,
+    pipeline_version: str | None,
+    entity: str,
     required_persistence_profile: str,
 ) -> RunManifestCreateSpec:
     """Build the manifest creation payload for one composite execution."""
@@ -247,7 +272,7 @@ def _build_composite_manifest_create_request(
         run_type=RunType.INCREMENTAL,
         pipeline_name=config.name,
         provider="composite",
-        entity=config.name,
+        entity=entity,
         launch_context=build_composite_launch_context_snapshot(
             config,
             runtime,
@@ -257,7 +282,7 @@ def _build_composite_manifest_create_request(
         resolved_config=build_composite_resolved_config_snapshot(config),
         source_refs=source_refs,
         planned_artifacts=build_composite_planned_artifacts(config),
-        pipeline_version=contract_version or None,
+        pipeline_version=pipeline_version,
         git_commit=code_revision.git_commit,
         source_revision_state=code_revision.source_revision_state,
         dependency_lock_hash=dependency_lock_hash,
@@ -267,8 +292,31 @@ def _build_composite_manifest_create_request(
         resolved_config_hash=resolved_config_hash or None,
         effective_config_hash=effective_config_hash or None,
         contract_ref=contract_ref,
-        contract_version=contract_version or None,
+        contract_version=contract_version,
+        contract_schema_hash=contract_schema_hash,
+        dq_policy_ref=dq_policy_ref,
+        rule_bundle_version=rule_bundle_version,
         dq_contract_compatibility_hash=dq_contract_compatibility_hash or None,
         effective_config_artifact_id=effective_config_artifact_id or None,
         replay_capability=replay_capability,
     )
+
+
+def _resolve_composite_contract_coordinates(
+    config: CompositeConfig,
+) -> tuple[str, str]:
+    """Resolve canonical dotted contract identity for one composite pipeline."""
+    pipeline_name = str(getattr(config, "name", "") or "").strip()
+    if not pipeline_name:
+        raise RuntimeError("Composite config requires a non-empty name")
+    entity = (
+        pipeline_name.removeprefix("composite_")
+        if pipeline_name.startswith("composite_")
+        else pipeline_name
+    )
+    entity = entity.strip()
+    if not entity:
+        raise RuntimeError(
+            f"Composite config name '{pipeline_name}' does not resolve a contract entity"
+        )
+    return f"composite.{entity}", entity

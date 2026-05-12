@@ -141,27 +141,123 @@ REGISTRY_UNIONS: dict[tuple[str, ...], tuple[tuple[str, ...], ...]] = {
 }
 
 EXACT_DQ_ENUM_POLICIES: tuple[EnumPolicy, ...] = (
-    EnumPolicy("activity", "standard_type", ("activity", "standard_types"), surfaces=frozenset({"quality"})),
-    EnumPolicy("activity", "standard_relation", ("activity", "standard_relations"), surfaces=frozenset({"quality"})),
-    EnumPolicy("activity", "standard_units", ("activity", "standard_units"), surfaces=frozenset({"quality"})),
-    EnumPolicy("activity", "assay_type", ("assay", "types"), surfaces=frozenset({"quality"})),
-    EnumPolicy("assay", "assay_type", ("assay", "types"), surfaces=frozenset({"quality"})),
-    EnumPolicy("assay", "assay_test_type", ("assay", "test_types"), surfaces=frozenset({"quality"})),
-    EnumPolicy("assay", "assay_category", ("assay", "categories"), surfaces=frozenset({"quality"})),
-    EnumPolicy("assay", "assay_group", ("assay", "assay_groups"), surfaces=frozenset({"quality"})),
-    EnumPolicy("assay", "relationship_type", ("assay", "relationship_types"), surfaces=frozenset({"quality"})),
-    EnumPolicy("assay", "confidence_description", ("assay", "confidence_descriptions"), surfaces=frozenset({"quality"})),
-    EnumPolicy("assay_parameters", "type", ("assay", "parameter_standard_type_universe"), surfaces=frozenset({"quality"})),
-    EnumPolicy("assay_parameters", "standard_type", ("assay", "parameter_standard_type_universe"), surfaces=frozenset({"quality"})),
-    EnumPolicy("assay_parameters", "standard_relation", ("activity", "standard_relations"), surfaces=frozenset({"quality"})),
-    EnumPolicy("assay_parameters", "standard_units", ("activity", "standard_units"), surfaces=frozenset({"quality"})),
-    EnumPolicy("molecule", "molecule_type", ("molecule", "types"), surfaces=frozenset({"quality"})),
-    EnumPolicy("molecule", "structure_type", ("molecule", "structure_types"), surfaces=frozenset({"quality"})),
-    EnumPolicy("molecule", "max_phase", ("molecule", "max_phase_values"), surfaces=frozenset({"quality"})),
-    EnumPolicy("molecule", "ro3_pass", ("molecule", "ro3_pass_values"), surfaces=frozenset({"quality"})),
-    EnumPolicy("target", "target_type", ("target", "types"), surfaces=frozenset({"quality"})),
-    EnumPolicy("target_component", "component_type", ("target", "component_types"), surfaces=frozenset({"quality"})),
-    EnumPolicy("publication_term", "term_type", ("publication_term", "term_types"), surfaces=frozenset({"quality"})),
+    EnumPolicy(
+        "activity",
+        "standard_type",
+        ("activity", "standard_types"),
+        surfaces=frozenset({"quality"}),
+    ),
+    EnumPolicy(
+        "activity",
+        "standard_relation",
+        ("activity", "standard_relations"),
+        surfaces=frozenset({"quality"}),
+    ),
+    EnumPolicy(
+        "activity",
+        "standard_units",
+        ("activity", "standard_units"),
+        surfaces=frozenset({"quality"}),
+    ),
+    EnumPolicy(
+        "activity", "assay_type", ("assay", "types"), surfaces=frozenset({"quality"})
+    ),
+    EnumPolicy(
+        "assay", "assay_type", ("assay", "types"), surfaces=frozenset({"quality"})
+    ),
+    EnumPolicy(
+        "assay",
+        "assay_test_type",
+        ("assay", "test_types"),
+        surfaces=frozenset({"quality"}),
+    ),
+    EnumPolicy(
+        "assay",
+        "assay_category",
+        ("assay", "categories"),
+        surfaces=frozenset({"quality"}),
+    ),
+    EnumPolicy(
+        "assay",
+        "assay_group",
+        ("assay", "assay_groups"),
+        surfaces=frozenset({"quality"}),
+    ),
+    EnumPolicy(
+        "assay",
+        "relationship_type",
+        ("assay", "relationship_types"),
+        surfaces=frozenset({"quality"}),
+    ),
+    EnumPolicy(
+        "assay",
+        "confidence_description",
+        ("assay", "confidence_descriptions"),
+        surfaces=frozenset({"quality"}),
+    ),
+    EnumPolicy(
+        "assay_parameters",
+        "type",
+        ("assay", "parameter_standard_type_universe"),
+        surfaces=frozenset({"quality"}),
+    ),
+    EnumPolicy(
+        "assay_parameters",
+        "standard_type",
+        ("assay", "parameter_standard_type_universe"),
+        surfaces=frozenset({"quality"}),
+    ),
+    EnumPolicy(
+        "assay_parameters",
+        "standard_relation",
+        ("activity", "standard_relations"),
+        surfaces=frozenset({"quality"}),
+    ),
+    EnumPolicy(
+        "assay_parameters",
+        "standard_units",
+        ("activity", "standard_units"),
+        surfaces=frozenset({"quality"}),
+    ),
+    EnumPolicy(
+        "molecule",
+        "molecule_type",
+        ("molecule", "types"),
+        surfaces=frozenset({"quality"}),
+    ),
+    EnumPolicy(
+        "molecule",
+        "structure_type",
+        ("molecule", "structure_types"),
+        surfaces=frozenset({"quality"}),
+    ),
+    EnumPolicy(
+        "molecule",
+        "max_phase",
+        ("molecule", "max_phase_values"),
+        surfaces=frozenset({"quality"}),
+    ),
+    EnumPolicy(
+        "molecule",
+        "ro3_pass",
+        ("molecule", "ro3_pass_values"),
+        surfaces=frozenset({"quality"}),
+    ),
+    EnumPolicy(
+        "target", "target_type", ("target", "types"), surfaces=frozenset({"quality"})
+    ),
+    EnumPolicy(
+        "target_component",
+        "component_type",
+        ("target", "component_types"),
+        surfaces=frozenset({"quality"}),
+    ),
+    EnumPolicy(
+        "publication_term",
+        "term_type",
+        ("publication_term", "term_types"),
+        surfaces=frozenset({"quality"}),
+    ),
 )
 
 
@@ -328,9 +424,13 @@ def test_chembl_publication_source_specific_doc_type_surfaces_remain_reviewed_su
 ) -> None:
     config = entity_configs["publication"]
     global_types = _registry_values(chembl_enums, ("publication", "types"))
-    native_doc_types = _registry_values(chembl_enums, ("publication", "native_doc_types"))
+    native_doc_types = _registry_values(
+        chembl_enums, ("publication", "native_doc_types")
+    )
 
-    publication_type_values = frozenset(_quality_allowed_values(config, "publication_type"))
+    publication_type_values = frozenset(
+        _quality_allowed_values(config, "publication_type")
+    )
     extraction_doc_types = frozenset(
         _extraction_values(
             config,

@@ -60,7 +60,7 @@ class TestCreateBatchExecutorFromPipeline:
     """Tests for batch-executor assembly from pipeline context."""
 
     @patch(
-        "bioetl.composition.factories.services.pipeline_batch_executor_builder.PanderaGoldValidator"
+        "bioetl.composition.factories.services.pipeline_batch_executor_builder.ContractAwareGoldValidator"
     )
     @patch(
         "bioetl.composition.factories.services.pipeline_batch_executor_builder.BatchExecutor"
@@ -129,7 +129,7 @@ class TestCreateBatchExecutorFromPipeline:
         mock_extraction_loop.assert_called_once()
 
     @patch(
-        "bioetl.composition.factories.services.pipeline_batch_executor_builder.PanderaGoldValidator"
+        "bioetl.composition.factories.services.pipeline_batch_executor_builder.ContractAwareGoldValidator"
     )
     @patch(
         "bioetl.composition.factories.services.pipeline_batch_executor_builder.BatchExecutor"
@@ -199,7 +199,7 @@ class TestCreateBatchExecutorFromPipeline:
         mock_batch_executor.assert_called_once()
 
     @patch(
-        "bioetl.composition.factories.services.pipeline_batch_executor_builder.PanderaGoldValidator"
+        "bioetl.composition.factories.services.pipeline_batch_executor_builder.ContractAwareGoldValidator"
     )
     @patch(
         "bioetl.composition.factories.services.pipeline_batch_executor_builder.BatchExecutor"
@@ -251,7 +251,7 @@ class TestCreateBatchExecutorFromPipeline:
         )
 
     @patch(
-        "bioetl.composition.factories.services.pipeline_batch_executor_builder.PanderaGoldValidator"
+        "bioetl.composition.factories.services.pipeline_batch_executor_builder.ContractAwareGoldValidator"
     )
     @patch(
         "bioetl.composition.factories.services.pipeline_batch_executor_builder.BatchExecutor"
@@ -308,7 +308,7 @@ class TestCreateBatchExecutorFromPipeline:
         mock_extraction_loop.assert_called_once()
 
     @patch(
-        "bioetl.composition.factories.services.pipeline_batch_executor_builder.PanderaGoldValidator"
+        "bioetl.composition.factories.services.pipeline_batch_executor_builder.ContractAwareGoldValidator"
     )
     @patch(
         "bioetl.composition.factories.services.pipeline_batch_executor_builder.BatchExecutor"

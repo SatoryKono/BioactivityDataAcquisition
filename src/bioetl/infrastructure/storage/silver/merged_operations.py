@@ -11,6 +11,7 @@ from typing import Protocol
 import pyarrow as pa
 from deltalake import write_deltalake
 
+from bioetl.domain.exceptions import SchemaViolationError
 from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.export.csv_exporter_contract import CsvExporterProtocol
@@ -21,6 +22,7 @@ from bioetl.infrastructure.storage.delta.schema_ops import (
 from bioetl.infrastructure.storage.silver.merged_request_support import (
     _build_merged_write_request_from_mapping,
 )
+from bioetl.infrastructure.validation.pandera_validator import PanderaGoldValidator
 
 __all__ = [
     "_MergedSilverMetadataWriterProtocol",
@@ -46,6 +48,7 @@ class _MergedSilverWriteRequest:
     run_id: str | None = None
     sources_used: list[str] | None = None
     preserve_column_order: bool = False
+    schema: object | None = None
 
 
 def _build_merged_silver_write_request(
@@ -57,12 +60,14 @@ def _build_merged_silver_write_request(
     run_id: str | None = None,
     sources_used: list[str] | None = None,
     preserve_column_order: bool = False,
+    schema: object | None = None,
 ) -> _MergedSilverWriteRequest:
     """Build the canonical merged-write request from legacy keyword arguments."""
     return _build_merged_write_request_from_mapping(
         _MergedSilverWriteRequest,
         locals(),
         preserve_column_order=preserve_column_order,
+        schema=schema,
     )
 
 
@@ -132,6 +137,16 @@ def _prepare_merged_silver_write(
     request: _MergedSilverWriteRequest,
 ) -> _PreparedMergedSilverWrite:
     """Prepare normalized Arrow payload and resolved table path for merged writes."""
+    if request.schema is not None:
+        schema = request.schema
+        if hasattr(schema, "to_schema"):
+            schema = schema.to_schema()
+        result = PanderaGoldValidator(schema=schema, strict=False).validate(
+            request.records
+        )
+        if not result.valid:
+            raise SchemaViolationError(request.table_name, result.errors)
+
     arrow_table = host._arrow_converter.convert_records_to_arrow(
         request.records,
         primary_keys=request.primary_keys,

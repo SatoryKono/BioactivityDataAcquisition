@@ -25,8 +25,7 @@ from deltalake import DeltaTable
 from deltalake.exceptions import CommitFailedError
 from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 
-from bioetl.domain.exceptions import DeltaWriteConflictError
-from bioetl.domain.exceptions import TableNotFoundError
+from bioetl.domain.exceptions import DeltaWriteConflictError, TableNotFoundError
 from bioetl.domain.normalization import (
     normalize_hash_identity_record,
     serialize_hash_identity_canonical_json,

@@ -171,6 +171,11 @@ def _create_pipeline_with_services_impl(
             effective_config_artifact_id=request.effective_config_artifact_id,
         )
     )
+    domain_config = resolve_domain_pipeline_config(
+        yaml_config,
+        relaxed_dq=request.settings.pipeline.relaxed_dq,
+        domain_mapper=deps.yaml_config_to_domain,
+    )
 
     services = build_pipeline_services_fn(
         pipeline_name=inputs.pipeline_name,
@@ -184,12 +189,10 @@ def _create_pipeline_with_services_impl(
         dq_monitor=request.dq_monitor,
         metadata_coordinator=metadata_coordinator,
         cached_bronze=request.cached_bronze,
-        silver_validator=_create_silver_validator(inputs.pandera_silver_schema),
-    )
-    domain_config = resolve_domain_pipeline_config(
-        yaml_config,
-        relaxed_dq=request.settings.pipeline.relaxed_dq,
-        domain_mapper=deps.yaml_config_to_domain,
+        silver_validator=_create_silver_validator(
+            inputs.pandera_silver_schema,
+            cast("DQConfig | None", domain_config.dq),
+        ),
     )
     transformer = TransformerBuilder(
         provider=inputs.provider,
@@ -218,23 +221,24 @@ def _create_pipeline_with_services_impl(
 
 def _create_silver_validator(
     pandera_silver_schema: object | None,
+    dq_config: DQConfig | None = None,
 ) -> SilverValidatorPort | None:
-    """Create Pandera silver validator when schema is configured.
+    """Create contract-aware silver validator when schema is configured.
 
     Args:
         pandera_silver_schema: Optional Pandera DataFrameModel class with a
             to_schema() method; returns None when not provided.
 
     Returns:
-        PanderaSilverValidator wrapping the schema, or None if schema is absent.
+        ContractAwareSilverValidator wrapping the schema, or None if schema is absent.
     """
     if pandera_silver_schema is None:
         return None
 
-    from bioetl.infrastructure.validation.pandera_validator import (
-        PanderaSilverValidator,
+    from bioetl.infrastructure.validation import (
+        ContractAwareSilverValidator,
     )
 
     schema_builder = cast(_SchemaBuilder, pandera_silver_schema)
     typed_schema = cast("pa.DataFrameSchema | None", schema_builder.to_schema())
-    return PanderaSilverValidator(typed_schema)
+    return ContractAwareSilverValidator(typed_schema, dq_config=dq_config)

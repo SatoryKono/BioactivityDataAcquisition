@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 
@@ -73,6 +74,19 @@ def _normalize_join_key_uniprot_accession(value: str) -> str | None:
     return None if normalized is None else normalized.value
 
 
+_TITLE_WHITESPACE_RE = re.compile(r"\s+")
+
+
+def _normalize_join_key_title(value: str) -> str:
+    """Normalize title join text with whitespace-only canonicalization.
+
+    Title fallback remains case-preserving on purpose. Only trim and repeated
+    whitespace collapsing are allowed here so composite joins stay stable across
+    provider formatting drift without erasing source title semantics.
+    """
+    return _TITLE_WHITESPACE_RE.sub(" ", value.strip())
+
+
 _NOOP_POLICY = JoinKeyNormalizationPolicy()  # EXC-002: immutable module constant
 
 JOIN_KEY_NORMALIZATION_POLICIES: Mapping[str, JoinKeyNormalizationPolicy] = {
@@ -105,7 +119,10 @@ JOIN_KEY_NORMALIZATION_POLICIES: Mapping[str, JoinKeyNormalizationPolicy] = {
         trim=True,
         domain_canonicalizer=_normalize_join_key_target_id,
     ),
-    "title": JoinKeyNormalizationPolicy(trim=True),
+    "title": JoinKeyNormalizationPolicy(
+        trim=True,
+        domain_canonicalizer=_normalize_join_key_title,
+    ),
     "tissue_id": _NOOP_POLICY,
     "uniprot_accession": JoinKeyNormalizationPolicy(
         trim=True,

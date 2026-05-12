@@ -12,21 +12,23 @@ from bioetl.composition._services import (
     get_contract_migration_service,
     get_export_service,
     get_forensic_run_diff_service,
-    get_health_server_dependencies,
     get_health_service,
     get_lineage_service,
     get_lock_service,
     get_metrics_service,
     get_observability_workflow_service,
     get_pipeline_runner_service,
-    get_quarantine_port,
-    get_quarantine_service,
     get_run_manifest_service,
     get_vacuum_service,
     get_workflow_execution_service,
     get_workflow_inspection_service,
     get_workflow_runner_service,
     load_workflow_config,
+)
+from bioetl.composition.health_api import (
+    get_health_server_dependencies,
+    get_quarantine_port,
+    get_quarantine_service,
 )
 
 __all__ = [

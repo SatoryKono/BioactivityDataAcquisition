@@ -452,8 +452,8 @@ def test_build_field_matrix_rows_covers_entity_profile_and_generic_rules() -> No
     )
 
     chembl_publication_oa_status = _row(rows, "chembl_publication", "oa_status")
-    assert chembl_publication_oa_status["normalizer"] == "normalize_oa_status"
-    assert chembl_publication_oa_status["strictness"] == "strict_enum"
+    assert chembl_publication_oa_status["normalizer"] == "normalize_profile_null"
+    assert chembl_publication_oa_status["strictness"] == "normalization_only"
     assert chembl_publication_oa_status["controlled_vocabulary_source"] == (
         "domain.schemas.common.publication_base.OA_STATUS_VALUES"
     )
@@ -627,8 +627,11 @@ def test_build_field_matrix_rows_exposes_non_chembl_governance_sources() -> None
     assert uniprot_features["policy_scope"] == "provider_full_universe"
 
     uniprot_all_mappings = _row(rows, "uniprot_idmapping", "all_mappings")
-    assert uniprot_all_mappings["normalizer"] == "normalize_profile_uniprot_accessions"
+    assert uniprot_all_mappings["normalizer"] == (
+        "normalize_profile_uniprot_mixed_mappings"
+    )
     assert uniprot_all_mappings["hash_ordering"] == "set_like"
+    assert uniprot_all_mappings["identifier_family"] == "mixed_identifier_set"
 
 
 def test_non_chembl_offline_fixture_cases_are_visible_in_matrix() -> None:

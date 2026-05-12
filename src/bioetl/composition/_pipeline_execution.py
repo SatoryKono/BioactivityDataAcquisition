@@ -110,12 +110,7 @@ def ensure_metrics_server_started() -> bool:
 
 @dataclass(frozen=True)
 class VacuumOptions:
-    """Options for vacuum operation.
-
-    Attributes:
-        retention_days: Minimum age of files to remove (days).
-        dry_run: Preview mode showing what would be removed.
-    """
+    """Options for vacuum operation."""
 
     retention_days: int = 7
     dry_run: bool = False
@@ -123,12 +118,7 @@ class VacuumOptions:
 
 @dataclass(frozen=True)
 class ArchiveOptions:
-    """Options for archive operation.
-
-    Attributes:
-        target_path: Destination path for archive.
-        remove_source: Remove source table after archiving.
-    """
+    """Options for archive operation."""
 
     target_path: str
     remove_source: bool = False
@@ -222,6 +212,8 @@ def build_pipeline_context(name: str, options: RunOptions) -> PipelineRunContext
         run_id=cast(RunID, uuid4()),
         run_type=RunType(options.run_type),
         started_at=started_at,
+        replay_of_run_id=options.replay_of_run_id,
+        replay_of_manifest_id=options.replay_of_manifest_id,
         resume=options.resume,
         limit=options.limit,
         dry_run=options.dry_run,

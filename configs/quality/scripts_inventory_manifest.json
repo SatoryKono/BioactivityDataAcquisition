@@ -1,13 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-05-11T17:29:17.566084+00:00",
+  "generated_at": "2026-05-12T05:35:56.277150+00:00",
   "summary": {
-    "total_scripts": 362,
+    "total_scripts": 364,
     "status_counts": {
       "active": 330,
-      "orphan": 4,
-      "supporting": 26,
-      "unknown": 2
+      "supporting": 34
     },
     "reference_group_coverage": {
       "agents": 4,
@@ -2735,7 +2733,7 @@
     {
       "path": "scripts/codex-start-wsl.ps1",
       "type": "ps1",
-      "status": "unknown",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 2,
       "references": [
@@ -2756,7 +2754,7 @@
     {
       "path": "scripts/codex-start-wsl.sh",
       "type": "sh",
-      "status": "unknown",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 2,
       "references": [
@@ -7467,6 +7465,14 @@
       ]
     },
     {
+      "path": "scripts/engineering/qa/extract_uniprot_semantic_payload_vocab.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
       "path": "scripts/engineering/qa/generate_architecture_debt_tasks.py",
       "type": "py",
       "status": "active",
@@ -7955,6 +7961,14 @@
           "text": "\"report-family-baseline\": \"report_hotspot_family_baseline.py\","
         }
       ]
+    },
+    {
+      "path": "scripts/engineering/qa/report_non_chembl_observed_value_inventory.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/engineering/qa/report_normalization_fallback_inventory.py",
@@ -11098,7 +11112,7 @@
     {
       "path": "scripts/shutdown.ps1",
       "type": "ps1",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
@@ -11106,7 +11120,7 @@
     {
       "path": "scripts/shutdown.sh",
       "type": "sh",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
@@ -11114,7 +11128,7 @@
     {
       "path": "scripts/startup.ps1",
       "type": "ps1",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
@@ -11122,7 +11136,7 @@
     {
       "path": "scripts/startup.sh",
       "type": "sh",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 0,
       "references": []

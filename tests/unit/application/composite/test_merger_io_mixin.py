@@ -131,6 +131,28 @@ class TestRunCrossValidation:
         assert result_df is df
         assert stats is None
 
+    def test_filters_quarantined_rows_from_persisted_output(self) -> None:
+        mixin = _make_mixin(_cross_validator=MagicMock())
+        validated_df = pl.DataFrame(
+            {
+                "doi": ["10.1/a", "10.1/b"],
+                "_cv_quarantine": [False, True],
+            }
+        )
+        cv_stats = MagicMock()
+        mixin._cross_validator.validate.return_value = (validated_df, cv_stats)
+
+        result_df, stats, quarantine = mixin._run_cross_validation(
+            merged_df=pl.DataFrame({"doi": ["10.1/a", "10.1/b"]}),
+            enrichers=[_enricher_config("e1")],
+            enricher_dfs={"e1": pl.DataFrame({"doi": ["10.1/a"]})},
+            effective_seed_pipeline="seed_pub",
+        )
+
+        assert stats is cv_stats
+        assert result_df.to_dicts() == [{"doi": "10.1/a", "_cv_quarantine": False}]
+        assert quarantine == [{"doi": "10.1/b", "_cv_quarantine": True}]
+
 
 @pytest.mark.unit
 class TestExtractQuarantinePayloads:
@@ -149,6 +171,20 @@ class TestExtractQuarantinePayloads:
         payloads = MergeIOMixin._extract_quarantine_payloads(df)
         assert len(payloads) == 2
         assert payloads[0]["a"] == 2
+
+
+@pytest.mark.unit
+class TestDropQuarantinedRows:
+    """Test static _drop_quarantined_rows."""
+
+    def test_returns_unchanged_when_marker_missing(self) -> None:
+        df = pl.DataFrame({"a": [1, 2]})
+        assert MergeIOMixin._drop_quarantined_rows(df) is df
+
+    def test_removes_quarantined_rows(self) -> None:
+        df = pl.DataFrame({"a": [1, 2], "_cv_quarantine": [False, True]})
+        result = MergeIOMixin._drop_quarantined_rows(df)
+        assert result.to_dicts() == [{"a": 1, "_cv_quarantine": False}]
 
 
 @pytest.mark.unit

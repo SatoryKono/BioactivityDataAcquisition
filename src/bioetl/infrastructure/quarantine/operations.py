@@ -32,7 +32,6 @@ from bioetl.domain.types import JsonDict, QuarantineRecordStatus
 from bioetl.infrastructure.quarantine.filtered_reads import (
     _increment_counter,
     _load_filtered_rows,
-    _normalize_filter_values,
     _single_filter_value,
     get_filtered_filter_options,
     get_filtered_record,

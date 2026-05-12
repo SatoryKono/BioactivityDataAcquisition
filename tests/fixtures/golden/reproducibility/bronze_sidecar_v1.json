@@ -9,7 +9,7 @@
   "output": {
     "artifact_id": "bronze_batch:00000000-0000-0000-0000-000000000903",
     "composite_run_id": null,
-    "content_hash": "ba08242523cc519588b7a91e4712b53bde529c5cf4442b86e3988ff478d77ce2",
+    "content_hash": "3bf78ac7e70566ffb9650734be8ae172e599434b6a6bd305042abccf162e72c7",
     "lineage_fragment_id": null,
     "record_count": 100,
     "total_bytes": 5000,

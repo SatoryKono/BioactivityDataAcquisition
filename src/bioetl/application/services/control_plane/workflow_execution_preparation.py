@@ -19,7 +19,11 @@ from bioetl.domain.control_plane import (
 )
 from bioetl.domain.ports import WorkflowExecutionStatePort
 from bioetl.domain.types import RunID
-from bioetl.domain.workflow import WorkflowConfig
+from bioetl.domain.workflow import (
+    WorkflowConfig,
+    WorkflowRunOptionsConfig,
+    WorkflowStepConfig,
+)
 
 __all__ = ["WorkflowExecutionPreparationResult", "prepare_workflow_execution"]
 
@@ -46,8 +50,16 @@ def prepare_workflow_execution(
     workflow_state_port: WorkflowExecutionStatePort,
     now_factory: Callable[[], datetime],
     run_id_factory: Callable[[], RunID],
+    incremental: bool = False,
 ) -> WorkflowExecutionPreparationResult:
     """Prepare manifest, execution state, and resume cursor."""
+    # Apply incremental offset before creating request so fingerprint
+    # includes the new start_offset
+    if incremental and not resume_last:
+        config = _apply_incremental_offset(
+            config=config,
+            workflow_state_port=workflow_state_port,
+        )
     request = WorkflowManifestCreateSpec(
         workflow_run_id=run_id_factory(),
         config=config,
@@ -253,4 +265,49 @@ def _build_initial_state(manifest: WorkflowManifest) -> WorkflowExecutionState:
         selected_step_ids=manifest.selected_step_ids,
         steps=steps,
         completed_transform_fingerprints={},
+    )
+
+
+def _apply_incremental_offset(
+    *,
+    config: WorkflowConfig,
+    workflow_state_port: WorkflowExecutionStatePort,
+) -> WorkflowConfig:
+    """Apply incremental offset from last successful execution.
+
+    Semantics:
+    - Loads last state by workflow name
+    - Uses offset only if status="success" and both fields are populated
+    - Otherwise leaves configuration unchanged (first run or error)
+    """
+    latest_state = workflow_state_port.get_latest(config.name)
+    if latest_state is None:
+        return config
+
+    # Use offset only from successful runs
+    if latest_state.status != "success":
+        return config
+
+    if latest_state.last_start_offset is None or latest_state.last_limit is None:
+        return config
+
+    new_offset = latest_state.last_start_offset + latest_state.last_limit
+    override = WorkflowRunOptionsConfig(start_offset=new_offset)
+
+    updated_steps = []
+    for step in config.steps:
+        if isinstance(step, WorkflowStepConfig):
+            updated_steps.append(
+                replace(
+                    step,
+                    run_options=step.run_options.merged_with(override),
+                )
+            )
+        else:
+            updated_steps.append(step)
+
+    return replace(
+        config,
+        defaults=config.defaults.merged_with(override),
+        steps=tuple(updated_steps),
     )

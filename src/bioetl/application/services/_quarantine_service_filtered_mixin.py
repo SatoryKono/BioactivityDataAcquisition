@@ -47,6 +47,36 @@ def _resolve_bronze_records_from_inspection(inspection: object) -> int | None:
     return bronze_records
 
 
+def _resolve_filtered_stats_run_ids(
+    *,
+    run_id: str | None,
+    scoped_run_ids: object,
+) -> list[str]:
+    """Resolve unique run identifiers used to derive Bronze denominators."""
+    if run_id is not None:
+        return [run_id]
+    del scoped_run_ids
+    return []
+
+
+def _sum_bronze_records_for_runs(
+    *,
+    run_ids: list[str],
+    run_manifest_service: object,
+) -> int:
+    """Sum resolved Bronze record counts across the selected runs."""
+    bronze_records = 0
+    for candidate_run_id in sorted(set(run_ids)):
+        try:
+            inspection = run_manifest_service.show(candidate_run_id)
+        except ValueError:
+            continue
+        resolved = _resolve_bronze_records_from_inspection(inspection)
+        if resolved is not None:
+            bronze_records += resolved
+    return bronze_records
+
+
 def _enrich_filtered_stats_with_bronze_denominator(
     stats: JsonDict,
     *,
@@ -59,26 +89,14 @@ def _enrich_filtered_stats_with_bronze_denominator(
     if run_manifest_service is None:
         return enriched
 
-    resolved_run_ids: list[str] = []
-    if run_id is not None:
-        resolved_run_ids = [run_id]
-    elif isinstance(scoped_run_ids, list):
-        resolved_run_ids = [
-            candidate.strip()
-            for candidate in scoped_run_ids
-            if isinstance(candidate, str) and candidate.strip()
-        ]
-
-    bronze_records = 0
-    for candidate_run_id in sorted(set(resolved_run_ids)):
-        try:
-            inspection = run_manifest_service.show(candidate_run_id)
-        except ValueError:
-            continue
-        resolved = _resolve_bronze_records_from_inspection(inspection)
-        if resolved is not None:
-            bronze_records += resolved
-
+    resolved_run_ids = _resolve_filtered_stats_run_ids(
+        run_id=run_id,
+        scoped_run_ids=scoped_run_ids,
+    )
+    bronze_records = _sum_bronze_records_for_runs(
+        run_ids=resolved_run_ids,
+        run_manifest_service=run_manifest_service,
+    )
     if bronze_records <= 0:
         return enriched
 

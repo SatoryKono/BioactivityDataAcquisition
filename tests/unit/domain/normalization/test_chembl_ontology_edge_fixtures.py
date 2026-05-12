@@ -2,42 +2,54 @@
 
 from __future__ import annotations
 
-import json
-from pathlib import Path
 from typing import Any
 
 import pytest
-import yaml
 
-from bioetl.application.core.record_normalization_processor import (
-    RecordNormalizationProcessor,
-)
+from bioetl.domain.normalization.profiles import resolve_normalization_profile
 
-ROOT = Path(".")
-MANIFEST_PATH = ROOT / "configs" / "base" / "bronze_fixture_manifest.yaml"
+_ASSAY_EDGE_ROWS: list[dict[str, Any]] = [
+    {
+        "assay_chembl_id": "CHEMBL_EDGE_BAO_1",
+        "bao_format": "bao:0000190",
+        "bao_label": "assay format",
+    },
+    {
+        "assay_chembl_id": "CHEMBL_EDGE_BAO_2",
+        "bao_format": "BAO_0000219",
+        "bao_label": "cell-based format",
+    },
+]
 
+_CELL_LINE_EDGE_ROWS: list[dict[str, Any]] = [
+    {
+        "cell_chembl_id": "CHEMBL3307999",
+        "cellosaurus_id": "cvcl:4704",
+        "clo_id": "clo:0003684",
+        "efo_id": "efo:0002312",
+    },
+    {
+        "cell_chembl_id": "CHEMBL3307998",
+        "cellosaurus_id": "CVCL_2676",
+        "clo_id": "CLO_0008331",
+        "efo_id": "EFO_0002312",
+    },
+]
 
-def _load_manifest() -> dict[str, dict[str, Any]]:
-    payload = yaml.safe_load(MANIFEST_PATH.read_text(encoding="utf-8")) or {}
-    fixtures = payload.get("fixtures")
-    assert isinstance(fixtures, dict)
-    return {
-        str(key): value for key, value in fixtures.items() if isinstance(value, dict)
-    }
-
-
-def _edge_fixture_rows(fixture_key: str) -> list[dict[str, Any]]:
-    manifest = _load_manifest()
-    edge_fixtures = manifest[fixture_key].get("edge_fixtures")
-    assert isinstance(edge_fixtures, list) and edge_fixtures
-    edge_fixture = edge_fixtures[0]
-    assert isinstance(edge_fixture, dict)
-    path = ROOT / str(edge_fixture["fixture_path"])
-    rows: list[dict[str, Any]] = []
-    for line in path.read_text(encoding="utf-8").splitlines():
-        if line.strip():
-            rows.append(json.loads(line))
-    return rows
+_TISSUE_EDGE_ROWS: list[dict[str, Any]] = [
+    {
+        "tissue_chembl_id": "CHEMBL3988991",
+        "bto_id": "bto:0000142",
+        "efo_id": "efo_0000408",
+        "uberon_id": "uberon:0002107",
+    },
+    {
+        "tissue_chembl_id": "CHEMBL3988992",
+        "bto_id": "BTO_0000840",
+        "efo_id": "EFO:0000856",
+        "uberon_id": "UBERON_0000004",
+    },
+]
 
 
 def _project_rows(
@@ -48,11 +60,27 @@ def _project_rows(
     return [{field: row.get(field) for field in fields} for row in rows]
 
 
+def _normalize_rows(
+    *,
+    entity_type: str,
+    rows: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    profile = resolve_normalization_profile("chembl", entity_type)
+    assert profile is not None
+    normalized_rows: list[dict[str, Any]] = []
+    for row in rows:
+        normalized_row = {}
+        for field, value in row.items():
+            rule = profile.rule_for(field)
+            normalized_row[field] = value if rule is None else rule.apply(value, record=row)
+        normalized_rows.append(normalized_row)
+    return normalized_rows
+
+
 @pytest.mark.unit
 def test_chembl_assay_ontology_edge_fixture_normalizes_bao_namespace_variants() -> None:
-    processor = RecordNormalizationProcessor(provider="chembl", entity_type="assay")
     rows = _project_rows(
-        _edge_fixture_rows("chembl/assay"),
+        _ASSAY_EDGE_ROWS,
         fields=(
             "bao_format",
             "bao_label",
@@ -61,7 +89,7 @@ def test_chembl_assay_ontology_edge_fixture_normalizes_bao_namespace_variants() 
         ),
     )
 
-    normalized = [processor.normalize_business_data(row) for row in rows]
+    normalized = _normalize_rows(entity_type="assay", rows=rows)
 
     assert normalized[0]["bao_format"] == "BAO_0000190"
     assert normalized[0]["bao_format_mapping_status"] == "mapped"
@@ -74,9 +102,8 @@ def test_chembl_assay_ontology_edge_fixture_normalizes_bao_namespace_variants() 
 
 @pytest.mark.unit
 def test_chembl_cell_line_ontology_edge_fixture_normalizes_namespace_variants() -> None:
-    processor = RecordNormalizationProcessor(provider="chembl", entity_type="cell_line")
     rows = _project_rows(
-        _edge_fixture_rows("chembl/cell_line"),
+        _CELL_LINE_EDGE_ROWS,
         fields=(
             "clo_id",
             "efo_id",
@@ -86,7 +113,7 @@ def test_chembl_cell_line_ontology_edge_fixture_normalizes_namespace_variants() 
         ),
     )
 
-    normalized = [processor.normalize_business_data(row) for row in rows]
+    normalized = _normalize_rows(entity_type="cell_line", rows=rows)
 
     assert normalized[0]["clo_id"] == "CLO_0003684"
     assert normalized[0]["efo_id"] == "EFO_0002312"
@@ -98,9 +125,8 @@ def test_chembl_cell_line_ontology_edge_fixture_normalizes_namespace_variants() 
 
 @pytest.mark.unit
 def test_chembl_tissue_ontology_edge_fixture_normalizes_namespace_variants() -> None:
-    processor = RecordNormalizationProcessor(provider="chembl", entity_type="tissue")
     rows = _project_rows(
-        _edge_fixture_rows("chembl/tissue"),
+        _TISSUE_EDGE_ROWS,
         fields=(
             "bto_id",
             "efo_id",
@@ -111,7 +137,7 @@ def test_chembl_tissue_ontology_edge_fixture_normalizes_namespace_variants() -> 
         ),
     )
 
-    normalized = [processor.normalize_business_data(row) for row in rows]
+    normalized = _normalize_rows(entity_type="tissue", rows=rows)
 
     assert normalized[0]["bto_id"] == "BTO_0000142"
     assert normalized[0]["efo_id"] == "EFO_0000408"

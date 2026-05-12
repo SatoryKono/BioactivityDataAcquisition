@@ -95,7 +95,8 @@ class MergeIOMixin(MergeOutputWriterMixin):
             effective_seed_pipeline,
         )
         quarantine_payloads = self._extract_quarantine_payloads(validated_df)
-        return validated_df, cv_stats, quarantine_payloads
+        output_df = self._drop_quarantined_rows(validated_df)
+        return output_df, cv_stats, quarantine_payloads
 
     @staticmethod
     def _extract_quarantine_payloads(df: pl.DataFrame) -> list[dict[str, object]]:
@@ -111,6 +112,15 @@ class MergeIOMixin(MergeOutputWriterMixin):
 
         quarantined_records: list[dict[str, object]] = quarantine_df.to_dicts()
         return quarantined_records
+
+    @staticmethod
+    def _drop_quarantined_rows(df: pl.DataFrame) -> pl.DataFrame:
+        """Remove rows marked for cross-validation quarantine from persisted outputs."""
+        import polars as pl
+
+        if "_cv_quarantine" not in df.columns:
+            return df
+        return df.filter(~pl.col("_cv_quarantine"))
 
     async def _write_outputs(
         self,

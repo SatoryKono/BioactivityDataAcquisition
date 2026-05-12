@@ -30,8 +30,11 @@ from bioetl.composition.factories.storage.write_mixin import (
     StorageBundleWriteMixin,
 )
 from bioetl.domain.contracts.gold.composite import (
+    CompositeActivityGoldSchema,
+    CompositeAssayGoldSchema,
     CompositeMoleculeGoldSchema,
     CompositePublicationGoldSchema,
+    CompositeTargetGoldSchema,
 )
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
@@ -54,6 +57,12 @@ class StorageBundle(
     """
 
     _COMPOSITE_GOLD_SCHEMAS: ClassVar[dict[str, object]] = {
+        "composite/activity": CompositeActivityGoldSchema,
+        "composite_activity": CompositeActivityGoldSchema,
+        "composite/assay": CompositeAssayGoldSchema,
+        "composite_assay": CompositeAssayGoldSchema,
+        "composite/target": CompositeTargetGoldSchema,
+        "composite_target": CompositeTargetGoldSchema,
         "composite/publication": CompositePublicationGoldSchema,
         "composite_publication": CompositePublicationGoldSchema,
         "composite/molecule": CompositeMoleculeGoldSchema,

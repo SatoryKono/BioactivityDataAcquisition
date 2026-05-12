@@ -197,6 +197,13 @@ def workflow() -> None:
     "--repair-steps",
     help="Comma-separated step IDs to explicitly repair before resume proceeds",
 )
+@click.option(
+    "--incremental",
+    is_flag=True,
+    default=False,
+    help="Auto-increment start_offset from last successful execution. "
+         "Cannot be used with --resume-last or --start-offset.",
+)
 @click.pass_obj
 def run_workflow_command(
     registry: PipelineRegistry | None,
@@ -225,8 +232,25 @@ def run_workflow_command(
     resume_last: bool,
     force_steps: str | None,
     repair_steps: str | None,
+    incremental: bool,
 ) -> None:
     """Execute one declarative workflow config sequentially."""
+    # CRITICAL: Validation BEFORE apply_cli_overrides, while we can
+    # distinguish user parameters from computed ones
+    if incremental and resume_last:
+        echo_error(
+            "Invalid options",
+            "--incremental cannot be used together with --resume-last",
+        )
+        raise click.exceptions.Exit(ExitCode.CONFIG_ERROR)
+    if incremental and start_offset is not None:
+        echo_error(
+            "Invalid options",
+            "--incremental cannot be used when --start-offset is explicitly set. "
+            "Either use --incremental for auto-increment or --start-offset for "
+            "manual control.",
+        )
+        raise click.exceptions.Exit(ExitCode.CONFIG_ERROR)
     try:
         config = load_workflow_config(name)
         config = select_workflow_steps(config, only_steps)
@@ -267,6 +291,7 @@ def run_workflow_command(
             resume_last=resume_last,
             force_steps=parsed_force_steps,
             repair_steps=parsed_repair_steps,
+            incremental=incremental,
         )
     )
     publish_metrics_safely(

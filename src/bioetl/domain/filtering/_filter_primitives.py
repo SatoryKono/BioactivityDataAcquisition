@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
 import json
+from collections.abc import Callable
 
 from bioetl.domain.filtering.column_filter import FilterOperator, GoldColumnFilter
 from bioetl.domain.filtering.list_filters import (
@@ -128,12 +128,17 @@ def is_empty_value(val: object) -> bool:
     return isinstance(val, (list, dict, set)) and len(val) == 0
 
 
+def _is_json_list_candidate(value: str) -> bool:
+    """Return whether a string looks like a serialized JSON list."""
+    return value.startswith("[") and value.endswith("]")
+
+
 def _decode_json_list_like(val: object) -> object:
     """Decode a JSON-encoded list string when filter inputs arrive serialized."""
     if not isinstance(val, str):
         return val
     stripped = val.strip()
-    if not stripped.startswith("[") or not stripped.endswith("]"):
+    if not _is_json_list_candidate(stripped):
         return val
     try:
         decoded = json.loads(stripped)

@@ -148,7 +148,8 @@ _SPECIAL_RULES = {
     **publication_classification_rules(),
     "publication_status": (
         _normalize_pubmed_publication_status,
-        "Normalize PubMed publication-status lifecycle values against allowed values while preserving unknown provider lexemes for drift visibility.",
+        "Normalize PubMed publication-status lifecycle values against allowed "
+        "values while preserving unknown provider lexemes for drift visibility.",
     ),
     "author_orcids": (
         normalize_profile_orcid_ids,
@@ -174,7 +175,10 @@ _SPECIAL_RULES = {
 
 PUBMED_PUBLICATION_PROFILE = build_standard_profile(
     profile_name="pubmed.publication",
-    description="Canonical field-level normalization policy for the PubMed Publication Silver schema.",
+    description=(
+        "Canonical field-level normalization policy for the PubMed Publication "
+        "Silver schema."
+    ),
     schema_fields=PUBMED_PUBLICATION_SCHEMA_FIELDS,
     meta_fields=_META_FIELDS,
     title_fields=_TITLE_FIELDS,

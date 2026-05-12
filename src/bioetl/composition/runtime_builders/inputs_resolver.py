@@ -216,6 +216,22 @@ def prepare_runner_inputs(
         settings=get_settings_fn(),
         enabled=getattr(ctx, "tracing_enabled_override", None),
     )
+    pipeline_settings = getattr(settings, "pipeline", None)
+    control_plane = getattr(pipeline_settings, "control_plane", None)
+    required_profile = getattr(
+        control_plane,
+        "required_persistence_profile",
+        "degraded_observable",
+    )
+    from bioetl.composition.runtime_builders._runner_builder_support import (
+        validate_strict_data_root_policy as _validate_strict_data_root_policy,
+    )
+
+    _validate_strict_data_root_policy(
+        settings=settings,
+        required_profile=required_profile,
+        exact_replay=bool(getattr(ctx, "exact_replay", False)),
+    )
     cached_bronze = _resolve_exact_replay_cached_bronze_context(
         ctx=ctx,
         settings=settings,
