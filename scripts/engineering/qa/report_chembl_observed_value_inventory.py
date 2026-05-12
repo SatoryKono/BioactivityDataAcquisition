@@ -9,6 +9,7 @@ import json
 import sys
 from collections import defaultdict
 from dataclasses import dataclass
+from io import StringIO
 from pathlib import Path
 from typing import Any
 
@@ -210,9 +211,8 @@ def _write_json(path: Path, payload: dict[str, object]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
-
-def _write_csv(path: Path, rows: list[dict[str, object]]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
+def _render_csv(rows: list[dict[str, object]]) -> str:
+    buffer = StringIO(newline="")
     fieldnames = [
         "pipeline_name",
         "fixture_key",
@@ -223,10 +223,15 @@ def _write_csv(path: Path, rows: list[dict[str, object]]) -> None:
         "observed_examples",
         "fixture_path",
     ]
-    with path.open("w", encoding="utf-8", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=fieldnames)
-        writer.writeheader()
-        writer.writerows(rows)
+    writer = csv.DictWriter(buffer, fieldnames=fieldnames, lineterminator="\n")
+    writer.writeheader()
+    writer.writerows(rows)
+    return buffer.getvalue()
+
+
+def _write_csv(path: Path, rows: list[dict[str, object]]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(_render_csv(rows), encoding="utf-8")
 
 
 def _write_text(path: Path, content: str) -> None:
@@ -275,26 +280,7 @@ def main(argv: list[str] | None = None) -> int:
         current_json = args.json_out.read_text(encoding="utf-8") if args.json_out.exists() else ""
         current_md = args.markdown_out.read_text(encoding="utf-8") if args.markdown_out.exists() else ""
         current_csv = args.csv_out.read_text(encoding="utf-8") if args.csv_out.exists() else ""
-
-        from io import StringIO
-
-        csv_buffer = StringIO()
-        writer = csv.DictWriter(
-            csv_buffer,
-            fieldnames=[
-                "pipeline_name",
-                "fixture_key",
-                "field_name",
-                "non_null_count",
-                "null_count",
-                "distinct_count",
-                "observed_examples",
-                "fixture_path",
-            ],
-        )
-        writer.writeheader()
-        writer.writerows(csv_rows)
-        rendered_csv = csv_buffer.getvalue()
+        rendered_csv = _render_csv(csv_rows)
 
         if current_json != rendered_json or current_md != markdown or current_csv != rendered_csv:
             print("ChEMBL observed value inventory is stale. Re-run the report generator.", file=sys.stderr)

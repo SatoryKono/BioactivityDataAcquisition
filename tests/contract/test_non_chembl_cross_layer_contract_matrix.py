@@ -196,6 +196,37 @@ def test_publication_raw_type_rows_remain_open_world_not_fixture_enum_driven() -
         assert row["strictness"] != "strict_enum"
 
 
+def test_pubmed_publication_status_aligns_fixture_config_and_matrix() -> None:
+    fixture = _load_fixture()
+    rows_by_key = {
+        (row["pipeline_name"], row["field_name"]): row
+        for row in build_field_matrix_rows()
+    }
+    observed = set(
+        fixture["pipelines"]["pubmed_publication"]["observed_values"][
+            "publication_status"
+        ]
+    )
+    expected = set(
+        fixture["pipelines"]["pubmed_publication"]["expected_controlled_values"][
+            "publication_status"
+        ]
+    )
+    configured = _config_allowed_values(
+        Path("configs/entities/pubmed/publication.yaml"),
+        "publication_status",
+    )
+    row = rows_by_key[("pubmed_publication", "publication_status")]
+
+    assert observed == expected
+    assert configured == expected
+    assert row["controlled_vocabulary_source"] == (
+        "configs/vocab/publication_controlled.yaml"
+    )
+    assert row["strictness"] == "strict_enum"
+    assert row["dq_coverage"] == "enum:error"
+
+
 def test_uniprot_protein_matrix_uses_canonical_taxonomy_and_gene_fields() -> None:
     config_fields = _config_fields(Path("configs/entities/uniprot/protein.yaml"))
     silver_fields = _arrow_fields(ENTITY_SILVER_SCHEMA_REGISTRY["uniprot_protein"])
@@ -244,6 +275,25 @@ def test_structured_payload_observed_shapes_match_policy_registry() -> None:
             assert shape["collection_semantics"] == policy.collection_semantics
             assert shape["raw_sidecar_field"] == policy.raw_sidecar_field
             assert shape["canonical_sidecar_field"] == policy.canonical_sidecar_field
+
+
+def test_uniprot_feature_payload_matrix_links_semantic_vocabulary_inventory() -> None:
+    rows_by_key = {
+        (row["pipeline_name"], row["field_name"]): row
+        for row in build_field_matrix_rows()
+    }
+    row = rows_by_key[("uniprot_protein", "features_json")]
+    policy = structured_payload_policy("uniprot.protein", "features_json")
+
+    assert policy is not None
+    assert policy.controlled_vocabulary_source == (
+        "configs/vocab/uniprot_semantic_payloads.yaml"
+    )
+    assert row["classification"] == "structured_json_sidecar"
+    assert row["controlled_vocabulary_source"] == (
+        "configs/vocab/uniprot_semantic_payloads.yaml"
+    )
+    assert row["policy_scope"] == "provider_full_universe"
 
 
 def test_governed_non_chembl_structured_fields_are_string_typed_cross_layer() -> None:

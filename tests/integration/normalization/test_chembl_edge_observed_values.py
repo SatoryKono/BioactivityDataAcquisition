@@ -35,9 +35,7 @@ def test_chembl_cell_line_edge_fixture_covers_cellosaurus_clo_efo_and_taxonomy()
     assert {9606, 10090} == {row["cell_source_tax_id"] for row in rows}
 
 
-def test_chembl_tissue_edge_fixture_covers_bto_caloha_efo_and_uberon_variants() -> (
-    None
-) -> None:
+def test_chembl_tissue_edge_fixture_covers_bto_caloha_efo_and_uberon_variants() -> None:
     rows = _load_jsonl(
         "tests/fixtures/bronze/chembl/tissue/sample_edge_ontology_ids_2026-05-11.jsonl"
     )
@@ -48,9 +46,7 @@ def test_chembl_tissue_edge_fixture_covers_bto_caloha_efo_and_uberon_variants() 
     assert {"uberon:0002107", "UBERON_0002113"} == {row["uberon_id"] for row in rows}
 
 
-def test_chembl_target_component_edge_fixture_covers_accession_taxonomy_and_nested_reference_namespaces() -> (
-    None
-) -> None:
+def test_chembl_target_component_edge_fixture_covers_accession_taxonomy_and_nested_reference_namespaces() -> None:
     rows = _load_jsonl(
         "tests/fixtures/bronze/chembl/target_component/sample_edge_reference_ids_2026-05-11.jsonl"
     )

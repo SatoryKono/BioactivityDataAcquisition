@@ -11,6 +11,7 @@ from bioetl.domain.normalization.profiles._standard_profile_builder import (
     build_standard_profile,
 )
 from bioetl.domain.normalization.profiles.profile_normalizers import (
+    normalize_profile_governed_vocabulary,
     normalize_profile_issn_id,
     normalize_profile_issn_ids,
     normalize_profile_orcid_ids,
@@ -92,6 +93,13 @@ _INT_FIELDS = frozenset(
     }
 )
 _BOOLEAN_FIELDS = frozenset({"abstract_structured", "is_oa"})
+_PUBMED_PUBLICATION_STATUS_VALUES = frozenset(
+    {
+        "ppublish",
+        "epublish",
+        "aheadofprint",
+    }
+)
 _SET_LIKE_FIELDS = frozenset(
     {
         "affiliation_list",
@@ -125,8 +133,23 @@ _JSON_STRING_FIELDS = frozenset(
         "issn_list",
     }
 )
+
+
+def _normalize_pubmed_publication_status(value: object) -> object:
+    """Normalize PubMed publication-status lifecycle values against allowed values."""
+    return normalize_profile_governed_vocabulary(
+        value,
+        allowed_values=_PUBMED_PUBLICATION_STATUS_VALUES,
+        preserve_unknown=True,
+    )
+
+
 _SPECIAL_RULES = {
     **publication_classification_rules(),
+    "publication_status": (
+        _normalize_pubmed_publication_status,
+        "Normalize PubMed publication-status lifecycle values against allowed values while preserving unknown provider lexemes for drift visibility.",
+    ),
     "author_orcids": (
         normalize_profile_orcid_ids,
         "Canonicalize ORCID identifiers inside a set-like canonical JSON array.",

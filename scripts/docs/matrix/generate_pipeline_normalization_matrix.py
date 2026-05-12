@@ -271,6 +271,7 @@ _CHEMBL_ENUM_CONFIG = "configs/enums/chembl.yaml"
 _PUBCHEM_ENUM_CONFIG = "configs/enums/pubchem.yaml"
 _UNIPROT_ENUM_CONFIG = "configs/enums/uniprot.yaml"
 _PUBLICATION_CONTROLLED_CONFIG = "configs/vocab/publication_controlled.yaml"
+_UNIPROT_SEMANTIC_PAYLOADS_CONFIG = "configs/vocab/uniprot_semantic_payloads.yaml"
 _PUBLICATION_TYPE_CLASSIFICATION_SOURCE = (
     "configs/enums/publication_type_classification.csv"
 )
@@ -325,6 +326,7 @@ ENUM_CONFIG_SOURCES: dict[tuple[str, str, str], str] = {
     ("pubmed", "publication", "publication_type"): _PUBLICATION_CONTROLLED_CONFIG,
     ("pubmed", "publication", "publication_type_list"): _PUBLICATION_CONTROLLED_CONFIG,
     ("pubmed", "publication", "publication_types"): _PUBLICATION_CONTROLLED_CONFIG,
+    ("pubmed", "publication", "publication_status"): _PUBLICATION_CONTROLLED_CONFIG,
     (
         "semanticscholar",
         "publication",
@@ -562,6 +564,12 @@ ENUM_REGISTRY_PATHS: dict[tuple[str, str, str], tuple[str, ...]] = {
         "publication_types",
         "values",
     ),
+    ("pubmed", "publication", "publication_status"): (
+        "providers",
+        "pubmed",
+        "publication_status",
+        "values",
+    ),
     ("semanticscholar", "publication", "publication_type"): (
         "providers",
         "semanticscholar",
@@ -573,6 +581,10 @@ ENUM_REGISTRY_PATHS: dict[tuple[str, str, str], tuple[str, ...]] = {
         "semanticscholar",
         "publication_types",
         "values",
+    ),
+    ("uniprot", "protein", "features_json"): (
+        "protein",
+        "semantic_payload_terms",
     ),
 }
 
@@ -588,6 +600,14 @@ ENUM_REGISTRY_UNIONS: dict[tuple[str, tuple[str, ...]], tuple[tuple[str, ...], .
         _PUBLICATION_CONTROLLED_CONFIG,
         ("providers", "openalex", "type_crossref", "values"),
     ): (("providers", "crossref", "publication_type", "values"),),
+    (
+        _UNIPROT_SEMANTIC_PAYLOADS_CONFIG,
+        ("protein", "semantic_payload_terms"),
+    ): (
+        ("protein", "feature_types"),
+        ("protein", "comment_types"),
+        ("protein", "keyword_categories"),
+    ),
 }
 
 COMPOSITE_GOLD_SCHEMA_TYPE_REGISTRY: dict[str, str] = {
@@ -680,6 +700,8 @@ def _registered_controlled_vocabulary_source(
     entity: str,
     field_name: str,
 ) -> str | None:
+    if field_name == "oa_status":
+        return _OA_STATUS_SOURCE
     if entity == "publication" and _is_publication_taxonomy_field(field_name):
         return _PUBLICATION_TYPE_CLASSIFICATION_SOURCE
     configured_source = ENUM_CONFIG_SOURCES.get((provider, entity, field_name))
@@ -695,6 +717,17 @@ def _registered_controlled_vocabulary_source(
     )
     if structured_policy is not None and structured_policy.identifier_family:
         return _REFERENCE_ID_SOURCE
+
+    semantic_sensitive_policy = structured_payload_policy(
+        f"{provider}.{entity}",
+        field_name,
+    )
+    if semantic_sensitive_policy is not None:
+        controlled_vocabulary_source = (
+            semantic_sensitive_policy.controlled_vocabulary_source
+        )
+        if controlled_vocabulary_source is not None:
+            return controlled_vocabulary_source
 
     if provider == "chembl":
         policy_surface = chembl_policy_surface(entity, field_name)
@@ -721,7 +754,7 @@ def _inferred_controlled_vocabulary_source(
         return "domain.normalization.ontology_id_prefixes"
     if "ontology id" in normalized_notes or "ontology_id" in normalizer_name:
         return "domain.normalization.ontology_id_prefixes"
-    if normalizer_name == "normalize_profile_oa_status":
+    if normalizer_name in {"normalize_profile_oa_status", "normalize_oa_status"}:
         return _OA_STATUS_SOURCE
     return ""
 
@@ -1309,7 +1342,7 @@ def _strictness(
         return "strict_json"
     if normalizer_name == "normalize_profile_boolean":
         return "strict_boolean"
-    if normalizer_name == "normalize_profile_oa_status":
+    if normalizer_name in {"normalize_profile_oa_status", "normalize_oa_status"}:
         return "strict_enum"
     return "normalization_only"
 
