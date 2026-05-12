@@ -15,13 +15,13 @@ from bioetl.application.services.execution.pipeline_runner_models import (
     RunOptions,
     RunResult,
 )
-from bioetl.composition.bootstrap.runtime.pipeline_context_builder import (
-    build_pipeline_context,
-)
 from bioetl.composition.bootstrap.runtime.observability import (
     maybe_start_metrics_server,
 )
 from bioetl.composition.bootstrap.runtime.pipeline import bootstrap_pipeline_runner
+from bioetl.composition.bootstrap.runtime.pipeline_context_builder import (
+    build_pipeline_context,
+)
 from bioetl.composition.factories.pipeline.registry import register_all_pipelines
 from bioetl.composition.factories.pipeline.runner import create_metrics_extractor
 from bioetl.composition.providers import ensure_providers_loaded
