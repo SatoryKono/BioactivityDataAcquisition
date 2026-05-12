@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 from uuid import uuid4
 
 from bioetl.application.runtime_timestamps import (
@@ -15,6 +15,9 @@ from bioetl.application.services.execution.pipeline_runner_models import (
     RunOptions,
     RunResult,
 )
+from bioetl.composition.bootstrap.runtime.pipeline_context_builder import (
+    build_pipeline_context,
+)
 from bioetl.composition.bootstrap.runtime.observability import (
     maybe_start_metrics_server,
 )
@@ -23,15 +26,8 @@ from bioetl.composition.factories.pipeline.registry import register_all_pipeline
 from bioetl.composition.factories.pipeline.runner import create_metrics_extractor
 from bioetl.composition.providers import ensure_providers_loaded
 from bioetl.composition.registry_api import PipelineRegistry
-from bioetl.domain.context import (
-    CachedBronzeContext,
-    InputFilterContext,
-    PipelineRunContext,
-    VacuumSettings,
-)
 from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.exceptions.pipeline_shutdown import PipelineShutdownError
-from bioetl.domain.types import ExecutionContext, RunID, RunType
 from bioetl.infrastructure.config import get_settings
 from bioetl.infrastructure.time import SystemClock
 
@@ -122,112 +118,6 @@ class ArchiveOptions:
 
     target_path: str
     remove_source: bool = False
-
-
-def _build_input_filter_context(options: RunOptions) -> InputFilterContext:
-    """Build input filter context from CLI options.
-
-    Args:
-        options: User-facing run options containing filter configuration.
-
-    Returns:
-        InputFilterContext configured for multi-field, single-field, or CSV filtering.
-    """
-    if options.multi_filter_ids:
-        return InputFilterContext.from_multi_ids(
-            multi_filter_ids=options.multi_filter_ids,
-        )
-    if options.filter_ids:
-        return InputFilterContext.from_ids(
-            filter_ids=options.filter_ids,
-            filter_field=options.filter_field or "doi",
-            fallback_mapping=options.fallback_mapping,
-        )
-    if options.input_csv:
-        return InputFilterContext(
-            enabled=True,
-            source_path=options.input_csv,
-            column_name=options.filter_column or "",
-            filter_field=options.filter_field or "",
-        )
-    return InputFilterContext.disabled()
-
-
-def _build_vacuum_config(options: RunOptions) -> VacuumSettings:
-    """Build vacuum config from CLI overrides (preserving tri-state).
-
-    Args:
-        options: User-facing run options containing vacuum configuration.
-
-    Returns:
-        VacuumSettings with enabled flag and retention_days.
-    """
-    return VacuumSettings(
-        enabled=options.vacuum_after_run,
-        retention_days=options.vacuum_retention_days or 7,
-    )
-
-
-def _build_cached_bronze_context(options: RunOptions) -> CachedBronzeContext:
-    """Build cached bronze context from CLI options.
-
-    Args:
-        options: User-facing run options containing cached bronze settings.
-
-    Returns:
-        CachedBronzeContext enabled with path/date, or disabled if not requested.
-    """
-    if options.use_cached_bronze:
-        return CachedBronzeContext.from_options(
-            path=options.cached_bronze_path,
-            date=options.cached_bronze_date,
-        )
-    if (
-        options.exact_replay
-        and options.replay_of_run_id is None
-        and options.replay_of_manifest_id is None
-    ):
-        raise ValueError(
-            "exact replay currently requires --use-cached-bronze or "
-            "replay_of_run_id/replay_of_manifest_id with published "
-            "snapshot-backed Bronze inputs"
-        )
-    return CachedBronzeContext.disabled()
-
-
-def build_pipeline_context(name: str, options: RunOptions) -> PipelineRunContext:
-    """Build a PipelineRunContext from user-facing options.
-
-    Args:
-        name: Pipeline name (e.g., 'chembl_activity').
-        options: User-facing run options.
-
-    Returns:
-        PipelineRunContext ready for bootstrap_pipeline_runner.
-    """
-    clock = SystemClock()
-    started_at, _ = capture_runtime_timing_anchor(clock=clock)
-    return PipelineRunContext(
-        pipeline_name=name,
-        run_id=cast(RunID, uuid4()),
-        run_type=RunType(options.run_type),
-        started_at=started_at,
-        replay_of_run_id=options.replay_of_run_id,
-        replay_of_manifest_id=options.replay_of_manifest_id,
-        resume=options.resume,
-        limit=options.limit,
-        dry_run=options.dry_run,
-        input_filter=_build_input_filter_context(options),
-        vacuum=_build_vacuum_config(options),
-        log_level=options.log_level,
-        ignore_yaml_filter=options.ignore_yaml_filter,
-        skip_gold=options.skip_gold,
-        cached_bronze=_build_cached_bronze_context(options),
-        exact_replay=options.exact_replay,
-        execution_context=ExecutionContext(options.execution_context),
-    )
-
-
 def create_pipeline_runner(
     name: str,
     options: RunOptions,

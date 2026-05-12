@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, replace
+from dataclasses import dataclass
 from datetime import datetime
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 from bioetl.application.composite.checkpoint.state import CompositeCheckpointState
 from bioetl.domain.context import MISSING_RUNTIME_TIMESTAMP
@@ -121,6 +121,77 @@ def _build_merged_anchor_payload(
     }
 
 
+def _copy_checkpoint_state(
+    state: CompositeCheckpointState,
+    *,
+    effective_config_hash: str | None = None,
+    effective_config_artifact_id: str | None = None,
+    execution_fingerprint: str | None = None,
+    dq_contract_compatibility_hash: str | None = None,
+    input_snapshot_fingerprint: str | None = None,
+    contract_ref: str | None = None,
+    contract_version: str | None = None,
+    manifest_id: str | None = None,
+    composite_run_identity: str | None = None,
+) -> CompositeCheckpointState:
+    """Clone checkpoint state while preserving the concrete state type."""
+    return CompositeCheckpointState(
+        composite_name=state.composite_name,
+        run_id=state.run_id,
+        state=state.state,
+        seed_completed=state.seed_completed,
+        seed_result=state.seed_result,
+        completed_dependencies=state.completed_dependencies,
+        dependency_results=state.dependency_results,
+        completed_enrichers=state.completed_enrichers,
+        enrichment_results=state.enrichment_results,
+        merge_completed=state.merge_completed,
+        merge_result=state.merge_result,
+        checkpoint_schema_version=state.checkpoint_schema_version,
+        effective_config_hash=(
+            state.effective_config_hash
+            if effective_config_hash is None
+            else effective_config_hash
+        ),
+        effective_config_artifact_id=(
+            state.effective_config_artifact_id
+            if effective_config_artifact_id is None
+            else effective_config_artifact_id
+        ),
+        execution_fingerprint=(
+            state.execution_fingerprint
+            if execution_fingerprint is None
+            else execution_fingerprint
+        ),
+        dq_contract_compatibility_hash=(
+            state.dq_contract_compatibility_hash
+            if dq_contract_compatibility_hash is None
+            else dq_contract_compatibility_hash
+        ),
+        input_snapshot_fingerprint=(
+            state.input_snapshot_fingerprint
+            if input_snapshot_fingerprint is None
+            else input_snapshot_fingerprint
+        ),
+        contract_ref=state.contract_ref if contract_ref is None else contract_ref,
+        contract_version=(
+            state.contract_version
+            if contract_version is None
+            else contract_version
+        ),
+        manifest_id=state.manifest_id if manifest_id is None else manifest_id,
+        composite_run_identity=(
+            state.composite_run_identity
+            if composite_run_identity is None
+            else composite_run_identity
+        ),
+        last_event_id=state.last_event_id,
+        last_event_occurred_at=state.last_event_occurred_at,
+        created_at=state.created_at,
+        updated_at=state.updated_at,
+    )
+
+
 def merge_expected_anchors(
     state: CompositeCheckpointState,
     anchors: ExpectedCheckpointContext,
@@ -129,22 +200,19 @@ def merge_expected_anchors(
     merged = normalize_runtime_anchor_payload(
         _build_merged_anchor_payload(state=state, anchors=anchors)
     )
-    return cast(
-        CompositeCheckpointState,
-        replace(
-            state,
-            effective_config_hash=merged["effective_config_hash"] or "",
-            effective_config_artifact_id=(merged["effective_config_artifact_id"] or ""),
-            execution_fingerprint=merged["execution_fingerprint"] or "",
-            dq_contract_compatibility_hash=(
-                merged["dq_contract_compatibility_hash"] or ""
-            ),
-            input_snapshot_fingerprint=merged["input_snapshot_fingerprint"] or "",
-            contract_ref=merged["contract_ref"] or "",
-            contract_version=merged["contract_version"] or "",
-            manifest_id=merged["manifest_id"] or "",
-            composite_run_identity=merged["composite_run_identity"] or "",
+    return _copy_checkpoint_state(
+        state,
+        effective_config_hash=merged["effective_config_hash"] or "",
+        effective_config_artifact_id=merged["effective_config_artifact_id"] or "",
+        execution_fingerprint=merged["execution_fingerprint"] or "",
+        dq_contract_compatibility_hash=(
+            merged["dq_contract_compatibility_hash"] or ""
         ),
+        input_snapshot_fingerprint=merged["input_snapshot_fingerprint"] or "",
+        contract_ref=merged["contract_ref"] or "",
+        contract_version=merged["contract_version"] or "",
+        manifest_id=merged["manifest_id"] or "",
+        composite_run_identity=merged["composite_run_identity"] or "",
     )
 
 

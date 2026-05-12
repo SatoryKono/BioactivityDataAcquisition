@@ -181,6 +181,14 @@ def _simple_composition_cycles(module_imports: dict[str, set[str]]) -> list[str]
     return cycles
 
 
+_ALLOWED_COMPOSITION_CYCLES: frozenset[str] = frozenset(
+    {
+        "_services <-> _workflow_services",
+        "bootstrap_logger <-> bootstrap_logger",
+    }
+)
+
+
 def _class_init_segments(
     content: str,
     tree: ast.AST,
@@ -473,13 +481,14 @@ class TestCompositionRootIntegrity:
 
         module_imports = _composition_module_imports(composition_path)
         cycles = _simple_composition_cycles(module_imports)
-
-        # Note: Some circular imports in composition may be acceptable
-        # This test is informational to track them
-        if cycles:
-            # Warning only, not failure - circular imports in composition
-            # can be resolved with TYPE_CHECKING
-            pass
+        unexpected_cycles = sorted(set(cycles) - _ALLOWED_COMPOSITION_CYCLES)
+        assert not unexpected_cycles, (
+            "Composition layer introduced unexpected circular imports.\n"
+            "Allowed compatibility cycles:\n"
+            + "\n".join(f"  - {cycle}" for cycle in sorted(_ALLOWED_COMPOSITION_CYCLES))
+            + "\nUnexpected cycles:\n"
+            + "\n".join(f"  - {cycle}" for cycle in unexpected_cycles)
+        )
 
 
 class TestInfrastructureIsolation:
