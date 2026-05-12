@@ -117,6 +117,8 @@ def test_run_manifest_contract_documents_lifecycle_snapshot_and_scoring_surfaces
     assert "Historical replay closure reports" in text
     assert "global_universal_historical_replay_claim" in text
     assert "irrecoverable_missing_immutable_evidence" in text
+    assert "all_retained_historical_runs" in text
+    assert "retained_certifiable_historical_runs" in text
     assert "## Reproducibility Scoring Rubric" in text
     assert "|   100 | `forensic_grade`" in text
     assert "| Evidence surface" in text
@@ -189,6 +191,8 @@ def test_run_manifest_docs_define_replay_equivalence_levels() -> None:
     assert "global_universal_historical_replay_claim" in runbook
     assert "retained_corpus_claim" in runbook
     assert "irrecoverable_missing_immutable_evidence" in runbook
+    assert "claim_scope_mode" in runbook
+    assert "retained_certifiable_historical_runs" in runbook
 
 
 @pytest.mark.architecture
