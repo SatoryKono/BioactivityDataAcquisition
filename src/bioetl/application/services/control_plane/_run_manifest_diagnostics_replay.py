@@ -5,6 +5,11 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Literal
 
+from bioetl.application.services.control_plane._historical_replay_certification import (
+    HISTORICAL_COMPOSITE_REPLAY_ENVELOPE_CERTIFIED,
+    HISTORICAL_SOURCE_SNAPSHOT_CERTIFIED,
+    LIVE_CAPTURE_SNAPSHOT_MATERIALIZED,
+)
 from bioetl.application.services.control_plane._run_manifest_diagnostics_snapshot_support import (
     lookup_mapping_path,
 )
@@ -85,6 +90,10 @@ def _resolve_replay_capability_reason(
         return "append_mode_semantic_outputs_block_exact_replay"
     if _has_partial_input_snapshot_envelope(snapshot_envelope):
         return "partial_input_snapshot_envelope"
+    if _has_historical_composite_certified_snapshots(input_snapshots):
+        return "certified_historical_composite_snapshot_envelope_present"
+    if _has_historical_source_certified_snapshots(input_snapshots):
+        return "certified_historical_source_snapshot_envelope_present"
     exact_replay_reason = _resolve_exact_replay_supported_reason(
         manifest=manifest,
         input_snapshots=input_snapshots,
@@ -143,6 +152,14 @@ def _resolve_replay_occurrence_kind(
     replay_parentage = _build_replay_parentage(manifest)
     if bool(replay_parentage["is_exact_replay"]):
         return "exact_replay_child_run"
+    if _has_historical_composite_certified_snapshots(input_snapshots):
+        if policy_assessment.snapshot_envelope.full_snapshot_envelope:
+            return "historical_composite_replay_certified_parent"
+        return "historical_composite_certification_incomplete"
+    if _has_historical_source_certified_snapshots(input_snapshots):
+        if policy_assessment.snapshot_envelope.full_snapshot_envelope:
+            return "historical_source_replay_certified_parent"
+        return "historical_source_certification_incomplete"
     if _has_live_capture_materialized_snapshots(input_snapshots):
         if policy_assessment.snapshot_envelope.full_snapshot_envelope:
             return "materialized_replayable_parent"
@@ -165,6 +182,10 @@ def _resolve_historical_live_run_upgrade_state(
         replay_parentage["is_exact_replay"]
     ):
         return "not_applicable"
+    if _has_historical_source_certified_snapshots(input_snapshots):
+        if policy_assessment.snapshot_envelope.full_snapshot_envelope:
+            return "historical_source_replay_certified"
+        return "historical_source_certification_incomplete"
     if _has_live_capture_materialized_snapshots(input_snapshots):
         if policy_assessment.snapshot_envelope.full_snapshot_envelope:
             return "already_materialized_replayable_parent"
@@ -174,6 +195,33 @@ def _resolve_historical_live_run_upgrade_state(
     if not profile.post_capture_replayable_parent_supported:
         return "outside_supported_boundary"
     return "awaiting_input_snapshot_published_evidence"
+
+
+def _resolve_broader_historical_exact_replay_state(
+    *,
+    manifest: RunManifest,
+    input_snapshots: list[dict[str, object]],
+    policy_assessment: ReproducibilityPolicyAssessment,
+) -> str:
+    """Return the bounded state for the broader certified historical tranche."""
+    replay_parentage = _build_replay_parentage(manifest)
+    if bool(replay_parentage["is_exact_replay"]):
+        return "exact_replay_child_run"
+    if _has_historical_composite_certified_snapshots(input_snapshots):
+        if policy_assessment.snapshot_envelope.full_snapshot_envelope:
+            return "historical_composite_replay_certified"
+        return "historical_composite_certification_incomplete"
+    if _has_historical_source_certified_snapshots(input_snapshots):
+        if policy_assessment.snapshot_envelope.full_snapshot_envelope:
+            return "historical_source_replay_certified"
+        return "historical_source_certification_incomplete"
+    if _has_live_capture_materialized_snapshots(input_snapshots):
+        return "within_post_capture_parent_boundary"
+    if policy_assessment.snapshot_envelope.full_snapshot_envelope:
+        return "within_launch_time_snapshot_boundary"
+    if _is_composite_execution_context(manifest):
+        return "awaiting_certified_source_lineage"
+    return "awaiting_historical_snapshot_certification"
 
 
 def _resolve_exact_replay_blockers(
@@ -289,7 +337,31 @@ def _has_live_capture_materialized_snapshots(
     """Return whether snapshots were materialized after live capture via ledger."""
     return any(
         str(snapshot.get("materialization_mode") or "").strip()
-        == "live_capture_snapshot_materialized"
+        == LIVE_CAPTURE_SNAPSHOT_MATERIALIZED
+        for snapshot in input_snapshots
+        if isinstance(snapshot, Mapping)
+    )
+
+
+def _has_historical_source_certified_snapshots(
+    input_snapshots: list[dict[str, object]],
+) -> bool:
+    """Return whether snapshots were certified for historical source replay."""
+    return any(
+        str(snapshot.get("materialization_mode") or "").strip()
+        == HISTORICAL_SOURCE_SNAPSHOT_CERTIFIED
+        for snapshot in input_snapshots
+        if isinstance(snapshot, Mapping)
+    )
+
+
+def _has_historical_composite_certified_snapshots(
+    input_snapshots: list[dict[str, object]],
+) -> bool:
+    """Return whether composite snapshots were certified from source lineage."""
+    return any(
+        str(snapshot.get("materialization_mode") or "").strip()
+        == HISTORICAL_COMPOSITE_REPLAY_ENVELOPE_CERTIFIED
         for snapshot in input_snapshots
         if isinstance(snapshot, Mapping)
     )

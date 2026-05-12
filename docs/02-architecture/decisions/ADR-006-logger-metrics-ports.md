@@ -42,7 +42,7 @@ All external dependencies should be abstracted through ports:
 | Dependency  | Port             | Location        |
 | ----------- | ---------------- | --------------- |
 | Data Source | `DataSourcePort` | `domain/ports/` |
-| Storage     | `StoragePort`    | `domain/ports/` |
+| Storage     | `BronzeStoragePort` / `SilverStoragePort` / `GoldStoragePort` / `MergedStoragePort` | `domain/ports/storage/` |
 | Lock        | `LockPort`       | `domain/ports/` |
 | Checkpoint  | `CheckpointPort` | `domain/ports/` |
 | Quarantine  | `QuarantinePort` | `domain/ports/` |
@@ -128,7 +128,7 @@ All code now uses `LoggerPort` directly from `bioetl.domain.ports`.
 @dataclass(frozen=True)
 class PipelineServices:
     data - source: DataSourcePort
-    storage: StoragePort
+    storage: BronzeStoragePort | SilverStoragePort | GoldStoragePort | MergedStoragePort
     lock: LockPort
     checkpoint: CheckpointPort
     quarantine: QuarantinePort

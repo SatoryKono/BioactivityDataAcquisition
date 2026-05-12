@@ -109,7 +109,7 @@ Ports & Adapters паттерн - ключевой архитектурный п
 
 **Port families and protocol surfaces:**
 
-- DataSourcePort, StoragePort
+- DataSourcePort, BronzeStoragePort, SilverStoragePort, GoldStoragePort, MergedStoragePort
 - LockPort, CheckpointPort, QuarantinePort
 - TracingPort, MetricsPort, LoggerPort
 - И другие...
@@ -400,7 +400,7 @@ Port protocol families — контракты между Domain и Infrastructur
 
 **Категории портов:**
 
-1. **Data Flow (4):** DataSourcePort, FilterableDataSourcePort, StoragePort, DeltaReaderPort
+1. **Data Flow (7):** DataSourcePort, FilterableDataSourcePort, BronzeStoragePort, SilverStoragePort, GoldStoragePort, MergedStoragePort, DeltaReaderPort
 1. **Coordination (3):** LockPort, CheckpointPort, ShutdownPort
 1. **Resilience (2):** RateLimiterPort, CircuitBreakerPort
 1. **Observability (4):** TracingPort, MetricsPort, LoggerPort, DQMonitorPort
@@ -416,7 +416,9 @@ Port protocol families — контракты между Domain и Infrastructur
 
 - ChemblAdapter → DataSourcePort
 - MemoryLock → LockPort
-- BronzeWriter/SilverWriter/GoldWriter → StoragePort
+- BronzeWriter → BronzeStoragePort
+- SilverWriter → SilverStoragePort
+- GoldWriter / composite write path → GoldStoragePort / MergedStoragePort
 - StructlogLogger → LoggerPort
 - NoOpTracing/NoOpMetrics → Null Object Pattern
 

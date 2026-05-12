@@ -137,6 +137,34 @@ def test_canonical_pipeline_execution_family_is_published() -> None:
     }
 
 
+def test_canonical_storage_boundary_family_uses_narrow_ports() -> None:
+    """Storage boundary canon must stay on narrow ports, not the retired aggregate."""
+    module = _load_gate_module()
+    policy = module._load_layer_aware_suffix_policy(ROOT)
+    registry = {item.family_id: item for item in policy.canonical_family_registry}
+    family = registry["storage_boundary"]
+
+    canonical = {(item.symbol, item.path) for item in family.canonical_symbols}
+    assert canonical == {
+        (
+            "BronzeStoragePort",
+            "src/bioetl/domain/ports/storage/bronze_port.py",
+        ),
+        (
+            "SilverStoragePort",
+            "src/bioetl/domain/ports/storage/silver_port.py",
+        ),
+        (
+            "GoldStoragePort",
+            "src/bioetl/domain/ports/storage/gold_port.py",
+        ),
+        (
+            "MergedStoragePort",
+            "src/bioetl/domain/ports/storage/merged_port.py",
+        ),
+    }
+
+
 def test_layer_aware_suffix_gate_detects_alias_assignments() -> None:
     """Alias assignments and public re-exports must be inspected."""
     module = _load_gate_module()

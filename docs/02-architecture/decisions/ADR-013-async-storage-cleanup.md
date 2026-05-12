@@ -21,7 +21,8 @@ ______________________________________________________________________
 
 На момент принятия ADR путь очистки в `PipelineRunner` был представлен через
 приватный метод `_clear_exports()`, который вызывал асинхронные методы
-`StoragePort.clear_silver()` и `StoragePort.clear_gold()`. Изначально этот путь
+исторического aggregate-facade `StoragePort.clear_silver()` и
+`StoragePort.clear_gold()`. Изначально этот путь
 был определён как синхронный (`def`), что приводило к синтаксической ошибке при
 использовании `await`.
 
@@ -104,7 +105,7 @@ gold_cleared = await self.storage.clear_gold(gold_table, dry_run=dry_run)
 
 ### Positive
 
-- **Корректная работа** с асинхронным `StoragePort`
+- **Корректная работа** с асинхронной storage boundary family
 - **Явные инварианты** Medallion архитектуры зафиксированы в коде
 - **Тестируемость** через `CallRecorder` pattern в интеграционных тестах
 - **Dry-run** позволяет preview очистки без изменения данных

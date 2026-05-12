@@ -109,7 +109,7 @@ classDiagram
     }
 
     namespace Services {
-        class LockCoordinator {
+        class LockRuntimeService {
             -_lock
             -_run_id
             -_config
@@ -120,7 +120,7 @@ classDiagram
             +release()
         }
 
-        class CheckpointManagerService {
+        class CheckpointRuntimeService {
             -_checkpoint
             -_pipeline_name
             -_run_id
@@ -174,7 +174,7 @@ classDiagram
             +end_span(...)
         }
 
-        class QuarantineManagerService {
+        class QuarantineRuntimeService {
             -_quarantine
             -_pipeline_name
             +quarantine_record(...)
@@ -194,8 +194,8 @@ classDiagram
     PipelineRunner --> PipelineService
     PipelineRunner --> PipelineRunnerDependencies
     PipelineRunnerDependencies --> BatchExecutor
-    PipelineRunnerDependencies --> CheckpointManagerService
-    PipelineRunnerDependencies --> LockCoordinator
+    PipelineRunnerDependencies --> CheckpointRuntimeService
+    PipelineRunnerDependencies --> LockRuntimeService
     PipelineRunnerDependencies --> PreflightService
     PipelineRunnerDependencies --> PostrunService
     PipelineRunnerDependencies --> MedallionLifecycleService
@@ -210,5 +210,5 @@ classDiagram
     BatchProcessingService ..> BatchTracingManagerService
     BatchProcessingService ..> BatchMetricsRecorderService
     BatchTransformer --> BaseTransformer
-    BatchTransformer --> QuarantineManagerService
+    BatchTransformer --> QuarantineRuntimeService
     BatchWriter ..> BatchMetricsRecorderService

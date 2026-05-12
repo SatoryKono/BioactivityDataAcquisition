@@ -142,7 +142,7 @@ canonical owner фиксируется отдельно. Новый символ
 | `pipeline_execution` | `PipelineRunner`, `PipelineService`, `PipelineRunnerService` | временные dependency shims и doc aliases до удаления |
 | `composite_execution` | `CompositePipelineRunner`, `MergeService` | исторические `*Builder`/`*Join*` helper-модули только по registry |
 | `lock_runtime_admin` | `LockRuntimeService`, `LockService` | constructor kwargs и helper seams до закрытия migration window |
-| `storage_boundary` | `StoragePort`, `*Adapter`, `*Client` | compatibility re-exports only if registry-backed |
+| `storage_boundary` | `BronzeStoragePort`, `SilverStoragePort`, `GoldStoragePort`, `MergedStoragePort`, `*Adapter`, `*Client` | compatibility re-exports only if registry-backed |
 
 ______________________________________________________________________
 

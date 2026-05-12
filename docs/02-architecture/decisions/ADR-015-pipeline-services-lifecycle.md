@@ -38,7 +38,7 @@ Introduce a centralized lifecycle management pattern through `PipelineServices`:
 @dataclass(frozen=True)
 class PipelineServices:
     data-source: DataSourcePort
-    storage: StoragePort
+    storage: BronzeStoragePort | SilverStoragePort | GoldStoragePort | MergedStoragePort
     lock: LockPort
     checkpoint: CheckpointPort
     quarantine: QuarantinePort
@@ -75,7 +75,7 @@ class PipelineServices:
 | Port Type      | Lifecycle Method | Sync/Async | Notes                                  |
 | -------------- | ---------------- | ---------- | -------------------------------------- |
 | DataSourcePort | `aclose()`       | async      | Also supports `--aenter--`/`--aexit--` |
-| StoragePort    | `aclose()`       | async      | MUST release Delta table locks         |
+| BronzeStoragePort / SilverStoragePort / GoldStoragePort / MergedStoragePort | `aclose()` | async | MUST release storage resources / Delta locks where applicable |
 | LockPort       | `aclose()`       | async      | MUST release held locks                |
 | CheckpointPort | `aclose()`       | async      | MUST flush pending writes              |
 | QuarantinePort | `aclose()`       | async      | MUST flush buffer                      |
@@ -128,7 +128,8 @@ Lifecycle contracts are enforced by architecture tests:
 
 class TestAsyncPortLifecycle:
     ASYNC-IO-PORTS = [
-        "DataSourcePort", "StoragePort", "LockPort",
+        "DataSourcePort", "BronzeStoragePort", "SilverStoragePort",
+        "GoldStoragePort", "MergedStoragePort", "LockPort",
         "CheckpointPort", "QuarantinePort"
     ]
 

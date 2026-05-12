@@ -264,7 +264,7 @@ src/bioetl/
 │   ├── ports/                   # Protocol interfaces
 │   │   ├── __init__.py          # Facade — single import point (ARCH-008)
 │   │   ├── data_source.py       # DataSourcePort, FilterableDataSourcePort
-│   │   ├── storage.py           # StoragePort
+│   │   ├── storage/            # BronzeStoragePort, SilverStoragePort, GoldStoragePort, MergedStoragePort
 │   │   ├── locking.py           # LockPort
 │   │   ├── checkpoint.py        # CheckpointPort
 │   │   ├── quarantine.py        # QuarantinePort
