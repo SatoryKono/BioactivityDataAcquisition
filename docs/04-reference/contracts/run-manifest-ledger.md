@@ -179,6 +179,9 @@ Certified historical replay is therefore bounded but operationalized:
 - `bioetl run-manifest closure-report --write` persists one retained-corpus
   closure artifact with a deterministic `report_id`, global claim gate, and
   explicit residual resolution queue for any blocked historical manifests;
+- the closure artifact supports two published claim-scope modes:
+  `all_retained_historical_runs` and
+  `retained_certifiable_historical_runs`;
 - bulk certification never mutates manifests in place; it appends new
   `input_snapshot_published` ledger evidence and then re-derives diagnostics
   from the same append-only control-plane surfaces.
@@ -186,6 +189,11 @@ Certified historical replay is therefore bounded but operationalized:
   `global_universal_historical_replay_claim`; it remains blocked until the
   retained corpus has no unresolved blocked manifests, no out-of-scope
   retained runs, and no explicitly irrecoverable legacy subset.
+- when `claim_scope_mode=retained_certifiable_historical_runs`, explicit
+  residual dispositions
+  `irrecoverable_missing_immutable_evidence` and
+  `outside_universal_claim_scope` remove those legacy occurrences from the
+  strong claim scope instead of silently treating them as replayable.
 - the retained-corpus closure artifact may still persist while the claim gate
   is blocked. In that state, operators must either certify more immutable
   evidence or attach explicit residual dispositions such as
