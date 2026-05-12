@@ -119,11 +119,40 @@ class FunctionSuffixRule:
 
 
 @dataclass(frozen=True)
+class LayerSuffixMatrixEntry:
+    """Allowed/forbidden suffix contract for one architectural layer."""
+
+    layer: str
+    allowed_suffixes: tuple[str, ...]
+    forbidden_suffixes: tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class CanonicalFamilySymbol:
+    """Published canonical or compatibility symbol owner."""
+
+    symbol: str
+    path: str
+    reason: str = ""
+
+
+@dataclass(frozen=True)
+class CanonicalFamilyRegistryEntry:
+    """Canonical naming family with explicit owners and compatibility seams."""
+
+    family_id: str
+    canonical_symbols: tuple[CanonicalFamilySymbol, ...]
+    compatibility_symbols: tuple[CanonicalFamilySymbol, ...]
+
+
+@dataclass(frozen=True)
 class LayerAwareNamingPolicy:
     """Structured layer-aware naming policy loaded from YAML."""
 
     version: int
     policy_scope: str
+    layer_suffix_matrix: tuple[LayerSuffixMatrixEntry, ...]
+    canonical_family_registry: tuple[CanonicalFamilyRegistryEntry, ...]
     function_suffix_rules: tuple[FunctionSuffixRule, ...]
     suffix_boundary_rules: tuple[SuffixBoundaryRule, ...]
     family_freeze_rules: tuple[FamilyFreezeRule, ...]
@@ -181,9 +210,7 @@ def _flatten_string_sequence(raw: object) -> tuple[str, ...]:
     if not isinstance(raw, list):
         return ()
     return tuple(
-        value.strip()
-        for value in raw
-        if isinstance(value, str) and value.strip()
+        value.strip() for value in raw if isinstance(value, str) and value.strip()
     )
 
 
@@ -259,6 +286,149 @@ def _load_allowed_modules(raw: object) -> tuple[AllowedModule, ...]:
                 )
             )
     return tuple(allowed)
+
+
+def _validate_allowed_metadata(
+    *,
+    issue: str,
+    owner: str,
+    expires_on: str,
+    location: str,
+) -> None:
+    if not issue.startswith("#"):
+        raise ValueError(f"{location} must use an issue reference like #1234")
+    if not owner.startswith("@"):
+        raise ValueError(f"{location} must use an owner handle like @bioetl-team")
+    try:
+        expiry = date.fromisoformat(expires_on)
+    except ValueError as exc:
+        raise ValueError(f"{location} must use ISO expires_on metadata") from exc
+    if expiry < date.today():
+        raise ValueError(f"{location} has stale expires_on={expires_on}")
+
+
+def _load_canonical_family_symbols(raw: object) -> tuple[CanonicalFamilySymbol, ...]:
+    if not isinstance(raw, list):
+        return ()
+
+    symbols: list[CanonicalFamilySymbol] = []
+    for item in raw:
+        if not isinstance(item, dict):
+            continue
+        symbol = str(item.get("symbol", "")).strip()
+        path = str(item.get("path", "")).strip()
+        reason = str(item.get("reason", "")).strip()
+        if symbol and path:
+            symbols.append(
+                CanonicalFamilySymbol(
+                    symbol=symbol,
+                    path=path,
+                    reason=reason,
+                )
+            )
+    return tuple(symbols)
+
+
+def _load_layer_suffix_matrix(raw: object) -> tuple[LayerSuffixMatrixEntry, ...]:
+    if not isinstance(raw, list):
+        return ()
+
+    entries: list[LayerSuffixMatrixEntry] = []
+    for item in raw:
+        if not isinstance(item, dict):
+            continue
+        layer = str(item.get("layer", "")).strip()
+        allowed_suffixes = _flatten_string_sequence(item.get("allowed_suffixes", []))
+        forbidden_suffixes = _flatten_string_sequence(
+            item.get("forbidden_suffixes", [])
+        )
+        if layer and allowed_suffixes and forbidden_suffixes:
+            entries.append(
+                LayerSuffixMatrixEntry(
+                    layer=layer,
+                    allowed_suffixes=allowed_suffixes,
+                    forbidden_suffixes=forbidden_suffixes,
+                )
+            )
+    return tuple(entries)
+
+
+def _load_canonical_family_registry(
+    raw: object,
+) -> tuple[CanonicalFamilyRegistryEntry, ...]:
+    if not isinstance(raw, list):
+        return ()
+
+    entries: list[CanonicalFamilyRegistryEntry] = []
+    for item in raw:
+        if not isinstance(item, dict):
+            continue
+        family_id = str(item.get("family_id", "")).strip()
+        canonical_symbols = _load_canonical_family_symbols(
+            item.get("canonical_symbols", [])
+        )
+        compatibility_symbols = _load_canonical_family_symbols(
+            item.get("compatibility_symbols", [])
+        )
+        if family_id and canonical_symbols:
+            entries.append(
+                CanonicalFamilyRegistryEntry(
+                    family_id=family_id,
+                    canonical_symbols=canonical_symbols,
+                    compatibility_symbols=compatibility_symbols,
+                )
+            )
+    return tuple(entries)
+
+
+def _validate_layer_suffix_matrix(
+    entries: tuple[LayerSuffixMatrixEntry, ...],
+) -> None:
+    if not entries:
+        raise ValueError("layer_suffix_matrix must not be empty")
+
+    expected_layers = {
+        "domain",
+        "application",
+        "infrastructure",
+        "composition",
+        "interfaces",
+    }
+    actual_layers = {entry.layer for entry in entries}
+    if actual_layers != expected_layers:
+        raise ValueError(
+            "layer_suffix_matrix must define exactly the canonical layers: "
+            + ", ".join(sorted(expected_layers))
+        )
+    for entry in entries:
+        overlap = set(entry.allowed_suffixes) & set(entry.forbidden_suffixes)
+        if overlap:
+            raise ValueError(
+                f"layer_suffix_matrix[{entry.layer}] overlaps allowed/forbidden "
+                f"suffixes: {sorted(overlap)}"
+            )
+
+
+def _validate_canonical_family_registry(
+    entries: tuple[CanonicalFamilyRegistryEntry, ...],
+) -> None:
+    if not entries:
+        raise ValueError("canonical_family_registry must not be empty")
+    seen_family_ids: set[str] = set()
+    for entry in entries:
+        if entry.family_id in seen_family_ids:
+            raise ValueError(
+                f"canonical_family_registry duplicates family_id={entry.family_id}"
+            )
+        seen_family_ids.add(entry.family_id)
+        for symbol in entry.canonical_symbols:
+            if not symbol.symbol.endswith(
+                ("Runner", "Service", "Port", "Adapter", "Client")
+            ):
+                raise ValueError(
+                    "canonical_family_registry canonical symbol must publish an "
+                    f"explicit role suffix: {entry.family_id}:{symbol.symbol}"
+                )
 
 
 def _base_suffix_rule_parts(
@@ -374,6 +544,12 @@ def _load_layer_aware_suffix_policy(repo_root: Path) -> LayerAwareNamingPolicy:
 
     version = int(payload.get("version", 0))
     policy_scope = str(payload.get("policy_scope", "")).strip()
+    layer_suffix_matrix = _load_layer_suffix_matrix(
+        payload.get("layer_suffix_matrix", [])
+    )
+    canonical_family_registry = _load_canonical_family_registry(
+        payload.get("canonical_family_registry", [])
+    )
 
     function_rules = [
         rule
@@ -391,9 +567,46 @@ def _load_layer_aware_suffix_policy(repo_root: Path) -> LayerAwareNamingPolicy:
         if (rule := _family_freeze_rule_from_config(item)) is not None
     ]
 
+    _validate_layer_suffix_matrix(layer_suffix_matrix)
+    _validate_canonical_family_registry(canonical_family_registry)
+
+    for rule in function_rules:
+        for item in rule.allowed_symbols:
+            _validate_allowed_metadata(
+                issue=item.issue,
+                owner=item.owner,
+                expires_on=item.expires_on,
+                location=f"{rule.rule_id}:{item.symbol}",
+            )
+    for rule in suffix_rules:
+        for item in rule.allowed_symbols:
+            _validate_allowed_metadata(
+                issue=item.issue,
+                owner=item.owner,
+                expires_on=item.expires_on,
+                location=f"{rule.rule_id}:{item.symbol}",
+            )
+        for item in rule.allowed_modules:
+            _validate_allowed_metadata(
+                issue=item.issue,
+                owner=item.owner,
+                expires_on=item.expires_on,
+                location=f"{rule.rule_id}:{item.path}",
+            )
+    for rule in family_rules:
+        for item in rule.allowed_symbols:
+            _validate_allowed_metadata(
+                issue=item.issue,
+                owner=item.owner,
+                expires_on=item.expires_on,
+                location=f"{rule.rule_id}:{item.symbol}",
+            )
+
     return LayerAwareNamingPolicy(
         version=version,
         policy_scope=policy_scope,
+        layer_suffix_matrix=layer_suffix_matrix,
+        canonical_family_registry=canonical_family_registry,
         function_suffix_rules=tuple(function_rules),
         suffix_boundary_rules=tuple(suffix_rules),
         family_freeze_rules=tuple(family_rules),
@@ -763,9 +976,7 @@ def _layer_aware_suffix_violations(repo_root: Path) -> list[Violation]:
             continue
         relative_path = py_file.relative_to(repo_root).as_posix()
         violations.extend(
-            _layer_aware_module_violations(
-                relative_path=relative_path, policy=policy
-            )
+            _layer_aware_module_violations(relative_path=relative_path, policy=policy)
         )
         tree = _parse_python_file(py_file)
         if tree is None:

@@ -712,6 +712,55 @@ class TestBatchTransformerTransform:
                 BatchID(uuid4()),
             )
 
+    async def test_transform_batch_quarantines_plain_value_error(
+        self,
+        mock_context,
+        mock_error_classifier,
+        mock_quarantine_manager,
+        mock_batch_metrics,
+        gold_filter_callback,
+        gold_transform_callback,
+    ) -> None:
+        """Batch path must stay disposition-aware for plain ValueError failures."""
+
+        async def failing_transform(ctx, record, index):
+            await asyncio.sleep(0)
+            if record.get("id") == "bad":
+                raise ValueError("compat validation failure")
+            return {"entity_id": record.get("id"), "value": record.get("value")}
+
+        transformer = BatchTransformer(
+            context=mock_context,
+            config=RecordProcessorConfig(
+                pipeline_name="test",
+                provider="test",
+                entity_type="test",
+                silver_schema=MagicMock(),
+                gold_schema=MagicMock(),
+                dq_config=DQConfig(
+                    soft_fail_threshold=0.6,
+                    hard_fail_threshold=0.8,
+                    invalid_record_policy="quarantine",
+                ),
+            ),
+            error_classifier=mock_error_classifier,
+            quarantine_manager=mock_quarantine_manager,
+            batch_metrics=mock_batch_metrics,
+            transform_callback=failing_transform,
+            gold_filter_callback=gold_filter_callback,
+            gold_transform_callback=gold_transform_callback,
+        )
+
+        result = await transformer.transform_batch(
+            [{"id": "good", "value": 1}, {"id": "bad", "value": -1}],
+            BatchID(uuid4()),
+        )
+
+        assert len(result.silver_records) == 1
+        assert result.gold_records == []
+        assert result.quarantined_count == 1
+        mock_quarantine_manager.quarantine_records.assert_called_once()
+
     async def test_transform_batch_filtered_skip_policy_drops_record(
         self,
         mock_context,

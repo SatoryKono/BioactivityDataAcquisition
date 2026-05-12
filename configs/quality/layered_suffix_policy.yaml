@@ -1,6 +1,59 @@
 version: 1
 policy_scope: adr_041_layer_aware_naming
 
+layer_suffix_matrix:
+  - layer: domain
+    allowed_suffixes: [Port, Protocol, ABC, Schema, ValueObject]
+    forbidden_suffixes: [Service, Manager, Handler, Adapter, Factory, Runner]
+  - layer: application
+    allowed_suffixes: [Service, RuntimeService, Runner, Coordinator, Handler]
+    forbidden_suffixes: [Adapter, Client]
+  - layer: infrastructure
+    allowed_suffixes: [Adapter, Client, Factory, Writer, Reader]
+    forbidden_suffixes: [Service, Manager, Runner]
+  - layer: composition
+    allowed_suffixes: [Factory, Builder, Module, Registry]
+    forbidden_suffixes: [Adapter, Client]
+  - layer: interfaces
+    allowed_suffixes: [Command, Handler, Adapter, Registry]
+    forbidden_suffixes: [Service, Manager, Runner]
+
+canonical_family_registry:
+  - family_id: pipeline_execution
+    canonical_symbols:
+      - symbol: PipelineRunner
+        path: src/bioetl/application/core/runner.py
+      - symbol: PipelineService
+        path: src/bioetl/application/core/pipeline_services.py
+      - symbol: PipelineRunnerService
+        path: src/bioetl/application/services/execution/pipeline_runner_service.py
+    compatibility_symbols:
+      - symbol: lock_manager
+        path: src/bioetl/application/core/_runner_dependency_support.py
+        reason: Legacy dependency kwarg/property retained during staged migration.
+  - family_id: composite_execution
+    canonical_symbols:
+      - symbol: CompositePipelineRunner
+        path: src/bioetl/application/composite/runner_pkg/runner.py
+      - symbol: MergeService
+        path: src/bioetl/application/composite/merge_service.py
+    compatibility_symbols: []
+  - family_id: lock_runtime_admin
+    canonical_symbols:
+      - symbol: LockRuntimeService
+        path: src/bioetl/application/core/lifecycle/lock_runtime_service.py
+      - symbol: LockService
+        path: src/bioetl/application/services/lock_service.py
+    compatibility_symbols:
+      - symbol: lock_manager
+        path: src/bioetl/composition/factories/pipeline/runner_assembly.py
+        reason: Compatibility helper retained while tests migrate to runtime naming.
+  - family_id: storage_boundary
+    canonical_symbols:
+      - symbol: StoragePort
+        path: src/bioetl/domain/ports/storage_port.py
+    compatibility_symbols: []
+
 function_suffix_rules:
   - rule_id: composition_bootstrap_port_factories
     description: >

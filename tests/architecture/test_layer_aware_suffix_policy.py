@@ -47,6 +47,19 @@ def test_layer_aware_suffix_policy_registers_expected_rule_ids() -> None:
 
     assert policy.version == 1
     assert policy.policy_scope == "adr_041_layer_aware_naming"
+    assert {entry.layer for entry in policy.layer_suffix_matrix} == {
+        "domain",
+        "application",
+        "infrastructure",
+        "composition",
+        "interfaces",
+    }
+    assert {entry.family_id for entry in policy.canonical_family_registry} == {
+        "pipeline_execution",
+        "composite_execution",
+        "lock_runtime_admin",
+        "storage_boundary",
+    }
 
     function_rule_ids = {rule.rule_id for rule in policy.function_suffix_rules}
     assert {"composition_bootstrap_port_factories"} <= function_rule_ids
@@ -79,6 +92,49 @@ def test_layer_aware_suffix_policy_registers_expected_rule_ids() -> None:
     assert allowed_service_symbols == set(), (
         "composition/infrastructure *Service suffix boundary must stay exception-free"
     )
+
+
+def test_layer_suffix_matrix_has_no_allowed_forbidden_overlap() -> None:
+    """Published layer suffix matrix must stay internally coherent."""
+    module = _load_gate_module()
+    policy = module._load_layer_aware_suffix_policy(ROOT)
+
+    for entry in policy.layer_suffix_matrix:
+        assert set(entry.allowed_suffixes).isdisjoint(entry.forbidden_suffixes), (
+            f"Layer suffix matrix overlap detected for {entry.layer}: "
+            f"{set(entry.allowed_suffixes) & set(entry.forbidden_suffixes)}"
+        )
+
+
+def test_canonical_pipeline_execution_family_is_published() -> None:
+    """Pipeline execution naming canon must be published machine-readably."""
+    module = _load_gate_module()
+    policy = module._load_layer_aware_suffix_policy(ROOT)
+    registry = {item.family_id: item for item in policy.canonical_family_registry}
+    family = registry["pipeline_execution"]
+
+    canonical = {(item.symbol, item.path) for item in family.canonical_symbols}
+    compatibility = {
+        (item.symbol, item.path, item.reason) for item in family.compatibility_symbols
+    }
+    assert canonical == {
+        ("PipelineRunner", "src/bioetl/application/core/runner.py"),
+        (
+            "PipelineService",
+            "src/bioetl/application/core/pipeline_services.py",
+        ),
+        (
+            "PipelineRunnerService",
+            "src/bioetl/application/services/execution/pipeline_runner_service.py",
+        ),
+    }
+    assert compatibility == {
+        (
+            "lock_manager",
+            "src/bioetl/application/core/_runner_dependency_support.py",
+            "Legacy dependency kwarg/property retained during staged migration.",
+        ),
+    }
 
 
 def test_layer_aware_suffix_gate_detects_alias_assignments() -> None:
@@ -498,6 +554,10 @@ def test_layer_aware_suffix_policy_exceptions_require_structured_expiry_metadata
     assert allowed_symbols, "Expected at least one reviewed naming exception symbol"
     today = date.today()
     for item in allowed_symbols:
+        assert item.issue.startswith("#"), (
+            f"Naming exception issue must be an explicit tracker reference: "
+            f"{item.symbol} ({item.path})"
+        )
         assert item.owner.startswith("@"), (
             f"Naming exception owner must be an explicit handle: {item.symbol} "
             f"({item.path})"
@@ -511,6 +571,10 @@ def test_layer_aware_suffix_policy_exceptions_require_structured_expiry_metadata
             f"{item.symbol} ({item.path}) expires_on={item.expires_on}"
         )
     for item in allowed_modules:
+        assert item.issue.startswith("#"), (
+            f"Naming module exception issue must be an explicit tracker reference: "
+            f"{item.path}"
+        )
         assert item.owner.startswith("@"), (
             f"Naming module exception owner must be an explicit handle: {item.path}"
         )

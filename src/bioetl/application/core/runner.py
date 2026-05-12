@@ -88,7 +88,6 @@ class PipelineRunner(PipelineRunnerSupportMixin):
 
         # Services injected directly via DI (created in composition layer)
         self._lock_runtime_service = dependencies.lock_runtime_service
-        self._lock_manager = self._lock_runtime_service
         self._preflight_service = dependencies.preflight
         self._postrun_service = dependencies.postrun
         self._lifecycle_service = dependencies.lifecycle_service

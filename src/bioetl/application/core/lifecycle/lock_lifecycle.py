@@ -35,9 +35,39 @@ class _LockContextHolderProtocol(Protocol):
     def clear(self) -> None: ...
 
 
+class _LockPortProtocol(Protocol):
+    async def acquire(
+        self,
+        *,
+        key: str,
+        owner_id: object,
+        ttl: object,
+        wait: object,
+        wait_timeout: object,
+        exclusive: bool,
+    ) -> FencingToken | None: ...
+
+    async def release(
+        self,
+        key: str,
+        owner_id: object,
+        *,
+        exclusive: bool,
+    ) -> bool: ...
+
+
+class _LockConfigProtocol(Protocol):
+    lock_key: str
+    lock_ttl: object
+    wait_for_lock: object
+    wait_timeout: object
+    exclusive: bool
+    heartbeat_interval: object
+
+
 class _LockRuntimeHostProtocol(Protocol):
-    _lock: object
-    _config: object
+    _lock: _LockPortProtocol
+    _config: _LockConfigProtocol
     _run_id: object
     _context_holder: _LockContextHolderProtocol | None
     _logger: LoggerPort
