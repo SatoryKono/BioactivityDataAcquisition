@@ -24,6 +24,14 @@ def _default_enum_path(provider: str, base_path: Path | None = None) -> Path:
     return root / "configs" / "enums" / f"{provider}.yaml"
 
 
+def _freeze_sequences(value: Any) -> Any:
+    if isinstance(value, dict):
+        return {str(key): _freeze_sequences(item) for key, item in value.items()}
+    if isinstance(value, list):
+        return tuple(_freeze_sequences(item) for item in value)
+    return value
+
+
 def load_provider_enums_from_file(
     provider: str,
     yaml_path: Path | None = None,
@@ -49,7 +57,10 @@ def load_provider_enums_from_file(
         return {}
     if not isinstance(payload, dict):
         raise ValueError(f"Enum config must be a YAML mapping: {yaml_path}")
-    return {str(key): value for key, value in payload.items()}
+    normalized = {str(key): value for key, value in payload.items()}
+    if yaml_path == _default_enum_path(normalized_provider):
+        return _freeze_sequences(normalized)
+    return normalized
 
 
 def load_chembl_enums_from_file(

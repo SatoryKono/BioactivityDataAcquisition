@@ -313,7 +313,6 @@ composite:
 # -----------------------------------------------------------------------------
 # Filter Configuration (ADR-028)
 # -----------------------------------------------------------------------------
-# Gold filters resolve from:
-#   1. configs/base/pipeline.yaml (`filter_defaults`)
-#   2. local `gold_filters` in this composite config (if present)
-# No separate composite filter file is used here.
+# Composite-local top-level `gold_filters` are unsupported.
+# Entity pipeline filter config remains authoritative unless explicit
+# composite runtime support is introduced.

@@ -29,6 +29,7 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_replay 
     _is_composite_execution_context,
     _resolve_continuation_mode,
     _resolve_exact_replay_blockers,
+    _resolve_historical_live_run_upgrade_state,
     _resolve_replay_capability_reason,
     _resolve_replay_mode,
     _resolve_replay_occurrence_kind,
@@ -152,6 +153,24 @@ def _build_unified_reproducibility_diagnostics(
             ),
             "post_capture_replayable_parent_boundary": summary.get(
                 "post_capture_replayable_parent_boundary"
+            ),
+            "historical_live_run_upgrade_policy": summary.get(
+                "historical_live_run_upgrade_policy"
+            ),
+            "historical_live_run_upgrade_boundary": summary.get(
+                "historical_live_run_upgrade_boundary"
+            ),
+            "historical_live_run_upgrade_reason": summary.get(
+                "historical_live_run_upgrade_reason"
+            ),
+            "broader_historical_exact_replay_policy": summary.get(
+                "broader_historical_exact_replay_policy"
+            ),
+            "broader_historical_exact_replay_reason": summary.get(
+                "broader_historical_exact_replay_reason"
+            ),
+            "historical_live_run_upgrade_state": summary.get(
+                "historical_live_run_upgrade_state"
             ),
             "replay_occurrence_kind": summary.get("replay_occurrence_kind"),
             "exact_replay_blockers": summary.get("exact_replay_blockers", []),
@@ -361,6 +380,13 @@ def _refresh_replay_summary_from_materialized_snapshots(
         manifest=effective_manifest,
         input_snapshots=cast("list[dict[str, object]]", input_snapshots),
         policy_assessment=policy_assessment,
+    )
+    updated["historical_live_run_upgrade_state"] = (
+        _resolve_historical_live_run_upgrade_state(
+            manifest=effective_manifest,
+            input_snapshots=cast("list[dict[str, object]]", input_snapshots),
+            policy_assessment=policy_assessment,
+        )
     )
     updated["source_posture"] = _resolve_source_posture(policy_assessment)
     updated["input_snapshot_missing_source_refs"] = list(

@@ -94,6 +94,8 @@ class PubMedAdapter(
 
     http_client: UnifiedHTTPClient
     logger: LoggerPort
+    # Technical NCBI contact email for API identification; record-level hashing
+    # and anonymization apply to extracted payload fields, not this credential.
     email: str
     api_key: str | None = None
     batch_size: int = 200

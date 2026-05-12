@@ -69,6 +69,11 @@ class ReproducibilityFamilyProfile:
     post_capture_replayable_parent_supported: bool
     post_capture_replayable_parent_boundary: str | None
     post_capture_replayable_parent_reason: str
+    historical_live_run_upgrade_policy: str
+    historical_live_run_upgrade_boundary: str | None
+    historical_live_run_upgrade_reason: str
+    broader_historical_exact_replay_policy: str
+    broader_historical_exact_replay_reason: str
     replay_family_contract: ReplayFamilyContractName
     default_required_persistence_profile: str
     support_scope: str
@@ -164,6 +169,17 @@ def _build_composite_reproducibility_family_profile(
         post_capture_replayable_parent_reason=(
             "composite_launches_do_not_use_post_capture_parent_promotion"
         ),
+        historical_live_run_upgrade_policy="not_applicable",
+        historical_live_run_upgrade_boundary=None,
+        historical_live_run_upgrade_reason=(
+            "composite_launches_do_not_define_historical_live_source_upgrade_path"
+        ),
+        broader_historical_exact_replay_policy=(
+            "ratified_snapshot_backed_boundary_is_final_supported_scope"
+        ),
+        broader_historical_exact_replay_reason=(
+            "future_broader_historical_exact_replay_requires_new_contract_revision"
+        ),
         replay_family_contract="composite_snapshot_backed_exact_replay",
         default_required_persistence_profile="replay_ready",
         support_scope="snapshot_backed_composite_trace_debug",
@@ -194,6 +210,25 @@ def _build_source_reproducibility_family_profile(
             "family_can_promote_materialized_live_capture_into_replayable_parent_evidence"
             if supported
             else "family_outside_supported_exact_replay_boundary"
+        ),
+        historical_live_run_upgrade_policy=(
+            "input_snapshot_published_ledger_evidence_only"
+            if supported
+            else "outside_supported_boundary"
+        ),
+        historical_live_run_upgrade_boundary=(
+            "input_snapshot_published_ledger_evidence" if supported else None
+        ),
+        historical_live_run_upgrade_reason=(
+            "historical_live_runs_require_input_snapshot_published_ledger_evidence_before_parent_promotion"
+            if supported
+            else "family_outside_supported_exact_replay_boundary"
+        ),
+        broader_historical_exact_replay_policy=(
+            "ratified_snapshot_backed_boundary_is_final_supported_scope"
+        ),
+        broader_historical_exact_replay_reason=(
+            "future_broader_historical_exact_replay_requires_new_contract_revision"
         ),
         replay_family_contract=_source_replay_family_contract(supported=supported),
         default_required_persistence_profile=_source_default_required_profile(
@@ -323,6 +358,21 @@ def build_replay_family_contract(
         ),
         "post_capture_replayable_parent_reason": (
             profile.post_capture_replayable_parent_reason
+        ),
+        "historical_live_run_upgrade_policy": (
+            profile.historical_live_run_upgrade_policy
+        ),
+        "historical_live_run_upgrade_boundary": (
+            profile.historical_live_run_upgrade_boundary
+        ),
+        "historical_live_run_upgrade_reason": (
+            profile.historical_live_run_upgrade_reason
+        ),
+        "broader_historical_exact_replay_policy": (
+            profile.broader_historical_exact_replay_policy
+        ),
+        "broader_historical_exact_replay_reason": (
+            profile.broader_historical_exact_replay_reason
         ),
         "support_scope": profile.support_scope,
         "reason": profile.reason,

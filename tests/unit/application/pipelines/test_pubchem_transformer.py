@@ -8,6 +8,7 @@ from uuid import uuid4
 
 import pytest
 
+from bioetl.application.core.base_transformer import FilteredOutError
 from bioetl.application.core.pre_silver_record import PreSilverRecord
 from bioetl.application.core.record_normalization_processor import (
     RecordNormalizationProcessor,
@@ -79,17 +80,22 @@ class TestPubChemCompoundTransformer:
         assert "_ingestion_ts" in result
 
     @pytest.mark.asyncio
-    async def test_transform_missing_molecule_id(self, transformer, mock_context):
-        """Test transformation returns None when molecule_id is missing."""
+    async def test_transform_missing_molecule_id_raises_filtered_out_error(
+        self, transformer, mock_context
+    ):
+        """Missing molecule_id should flow through runtime disposition."""
         record = {
             "molecular_formula": "C9H8O4",
             "canonical_smiles": "CC(=O)OC1=CC=CC=C1C(=O)O",
         }
 
-        result = await transformer.transform(mock_context, record, index=0)
+        with pytest.raises(FilteredOutError) as exc_info:
+            await transformer.transform(mock_context, record, index=0)
 
-        assert result is None
         mock_context.logger.warning.assert_called()
+        assert exc_info.value.details["policy_stage"] == "structural"
+        assert exc_info.value.details["reason_code"] == "missing_compound_identifier"
+        assert exc_info.value.details["field"] == "molecule_id"
 
     @pytest.mark.asyncio
     async def test_transform_missing_structural_identifiers(
@@ -339,18 +345,19 @@ class TestPubChemCompoundTransformer:
         assert "custom_pubchem" in result["entity_id"]
 
     @pytest.mark.asyncio
-    async def test_transform_empty_molecule_id_rejected(
+    async def test_transform_empty_molecule_id_raises_filtered_out_error(
         self, transformer, mock_context
     ):
-        """Test that empty string molecule_id is rejected."""
+        """Empty molecule_id should not disappear silently."""
         record = {
             "molecule_id": "",
             "canonical_smiles": "C",
         }
 
-        result = await transformer.transform(mock_context, record, index=0)
+        with pytest.raises(FilteredOutError) as exc_info:
+            await transformer.transform(mock_context, record, index=0)
 
-        assert result is None
+        assert exc_info.value.details["reason_code"] == "missing_compound_identifier"
 
     @pytest.mark.asyncio
     async def test_transform_lineage_fields_present(self, transformer, mock_context):

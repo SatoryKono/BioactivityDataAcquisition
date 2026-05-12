@@ -1,0 +1,428 @@
+version: 1
+safe_first_wave_candidates: []
+safe_first_wave_rationale: >-
+  No currently active business-only Silver filter is composite-independent on
+  main. Every confirmed business-only Silver rule is either on a composite seed
+  or a direct composite dependency and therefore requires downstream widening
+  analysis before movement to Gold. Blocked pipelines below must carry explicit
+  shadow-analysis metric references and composite impact checks before any rule
+  can advance to candidate_for_gold.
+pipelines:
+  chembl_activity:
+    downstream_role: composite_seed
+    downstream_pipelines: [composite_activity]
+    business_only_migration:
+      state: blocked_by_downstream_composite
+      blocked_by: [composite_activity]
+    shadow_analysis:
+      candidate_business_rules:
+        required_fields:
+          - standard_units
+          - pchembl_value
+          - journal
+          - publication_year
+          - assay_type
+          - potential_duplicate
+          - standard_relation
+        columns:
+          - standard_type
+          - standard_relation
+          - standard_units
+          - assay_type
+          - potential_duplicate
+        ranges:
+          - standard_value
+          - pchembl_value
+          - publication_year
+        exclude_if_present:
+          - data_validity_comment
+      shadow_metrics:
+        current_rejections:
+          metric: bioetl_silver_filter_rejections_total
+          labels: [pipeline, run_type, reason_code, rule_type, field]
+        structural_shadow_comparisons:
+          metric: bioetl_structural_policy_shadow_comparisons_total
+          labels: [provider, entity_type, comparison]
+      composite_impact_checks:
+        - composite_pipeline: composite_activity
+          check_type: join_cardinality
+          keys: [molecule_id, assay_id, target_id, publication_id]
+        - composite_pipeline: composite_activity
+          check_type: field_sparsity
+          fields: [standard_type, standard_relation, standard_units, pchembl_value]
+        - composite_pipeline: composite_activity
+          check_type: gold_projection_delta
+          fields: [standard_units, pchembl_value, journal, publication_year, assay_type]
+    filters:
+      required_fields:
+        structural:
+          - activity_id
+          - record_id
+          - src_id
+          - canonical_smiles
+          - bao_endpoint
+          - bao_format
+          - bao_label
+          - relation
+          - value
+          - units
+          - standard_value
+          - standard_flag
+          - uo_units
+          - _state
+        join_safety:
+          - molecule_id
+          - assay_id
+          - target_id
+          - publication_id
+          - target_organism
+          - assay_description
+        business_only:
+          - standard_units
+          - pchembl_value
+          - journal
+          - publication_year
+          - assay_type
+          - potential_duplicate
+          - standard_relation
+      columns:
+        business_only:
+          - standard_type
+          - standard_relation
+          - standard_units
+          - assay_type
+          - potential_duplicate
+      ranges:
+        structural:
+          - activity_id
+        business_only:
+          - standard_value
+          - pchembl_value
+          - publication_year
+      exclude_if_present:
+        business_only:
+          - data_validity_comment
+  chembl_assay:
+    downstream_role: composite_seed
+    downstream_pipelines: [composite_assay]
+    business_only_migration:
+      state: blocked_by_downstream_composite
+      blocked_by: [composite_assay]
+    shadow_analysis:
+      candidate_business_rules:
+        required_fields:
+          - assay_type
+          - assay_type_description
+          - relationship_type
+          - confidence_score
+        columns:
+          - assay_type
+          - relationship_type
+          - src_id
+        ranges:
+          - confidence_score
+      shadow_metrics:
+        current_rejections:
+          metric: bioetl_silver_filter_rejections_total
+          labels: [pipeline, run_type, reason_code, rule_type, field]
+        structural_shadow_comparisons:
+          metric: bioetl_structural_policy_shadow_comparisons_total
+          labels: [provider, entity_type, comparison]
+      composite_impact_checks:
+        - composite_pipeline: composite_assay
+          check_type: join_cardinality
+          keys: [assay_id, target_id, publication_id]
+        - composite_pipeline: composite_assay
+          check_type: field_sparsity
+          fields: [assay_type, assay_type_description, relationship_type, confidence_score]
+        - composite_pipeline: composite_assay
+          check_type: gold_projection_delta
+          fields: [assay_type, assay_type_description, relationship_type, confidence_score]
+    filters:
+      required_fields:
+        structural:
+          - assay_id
+          - description
+          - bao_format
+        join_safety:
+          - target_id
+          - publication_id
+        business_only:
+          - assay_type
+          - assay_type_description
+          - relationship_type
+          - confidence_score
+      columns:
+        business_only:
+          - assay_type
+          - relationship_type
+          - src_id
+      ranges:
+        business_only:
+          - confidence_score
+  chembl_assay_parameters:
+    downstream_role: standalone
+    downstream_pipelines: []
+    filters:
+      required_fields:
+        structural:
+          - assay_id
+          - assay_param_id
+          - type
+  chembl_cell_line:
+    downstream_role: composite_enricher
+    downstream_pipelines: [composite_assay]
+    filters:
+      required_fields:
+        structural:
+          - cell_id
+          - cell_name
+  chembl_compound_record:
+    downstream_role: composite_dependency
+    downstream_pipelines: [composite_activity]
+    filters:
+      required_fields:
+        structural:
+          - record_id
+        join_safety:
+          - molecule_id
+          - publication_id
+  chembl_molecule:
+    downstream_role: composite_seed
+    downstream_pipelines: [composite_molecule]
+    business_only_migration:
+      state: blocked_by_downstream_composite
+      blocked_by: [composite_molecule]
+    shadow_analysis:
+      candidate_business_rules:
+        required_fields:
+          - molecule_type
+        columns:
+          - molecule_type
+          - structure_type
+          - inorganic_flag
+      shadow_metrics:
+        current_rejections:
+          metric: bioetl_silver_filter_rejections_total
+          labels: [pipeline, run_type, reason_code, rule_type, field]
+        structural_shadow_comparisons:
+          metric: bioetl_structural_policy_shadow_comparisons_total
+          labels: [provider, entity_type, comparison]
+      composite_impact_checks:
+        - composite_pipeline: composite_molecule
+          check_type: join_cardinality
+          keys: [molecule_id]
+        - composite_pipeline: composite_molecule
+          check_type: field_sparsity
+          fields: [molecule_type, structure_type, inorganic_flag]
+        - composite_pipeline: composite_molecule
+          check_type: gold_projection_delta
+          fields: [molecule_type, structure_type, inorganic_flag]
+    filters:
+      required_fields:
+        structural:
+          - molecule_id
+        business_only:
+          - molecule_type
+      columns:
+        business_only:
+          - molecule_type
+          - structure_type
+          - inorganic_flag
+  chembl_protein_class:
+    downstream_role: composite_dependency
+    downstream_pipelines: [composite_target]
+    filters:
+      required_fields:
+        structural:
+          - protein_class_id
+          - class_level
+          - pref_name
+  chembl_publication:
+    downstream_role: composite_seed
+    downstream_pipelines: [composite_publication]
+    business_only_migration:
+      state: blocked_by_downstream_composite
+      blocked_by: [composite_publication]
+    shadow_analysis:
+      candidate_business_rules:
+        required_fields:
+          - publication_type
+        columns:
+          - publication_type
+        ranges:
+          - publication_year
+      shadow_metrics:
+        current_rejections:
+          metric: bioetl_silver_filter_rejections_total
+          labels: [pipeline, run_type, reason_code, rule_type, field]
+        structural_shadow_comparisons:
+          metric: bioetl_structural_policy_shadow_comparisons_total
+          labels: [provider, entity_type, comparison]
+      composite_impact_checks:
+        - composite_pipeline: composite_publication
+          check_type: join_cardinality
+          keys: [publication_id]
+        - composite_pipeline: composite_publication
+          check_type: field_sparsity
+          fields: [publication_type, publication_year, title]
+        - composite_pipeline: composite_publication
+          check_type: gold_projection_delta
+          fields: [publication_type, publication_year]
+    filters:
+      required_fields:
+        structural:
+          - publication_id
+        join_safety:
+          - title
+        business_only:
+          - publication_type
+      columns:
+        business_only:
+          - publication_type
+      ranges:
+        business_only:
+          - publication_year
+  chembl_publication_similarity:
+    downstream_role: standalone
+    downstream_pipelines: []
+    filters:
+      required_fields:
+        structural:
+          - sim_id
+        join_safety:
+          - doc_1
+          - doc_2
+  chembl_publication_term:
+    downstream_role: standalone_derived
+    downstream_pipelines: []
+    filters:
+      required_fields:
+        join_safety:
+          - publication_id
+        derived_child:
+          - term
+          - term_type
+  chembl_subcellular_fraction:
+    downstream_role: standalone_derived
+    downstream_pipelines: []
+    filters:
+      required_fields:
+        derived_child:
+          - subcellular_fraction
+  chembl_target:
+    downstream_role: composite_seed
+    downstream_pipelines: [composite_target]
+    business_only_migration:
+      state: blocked_by_downstream_composite
+      blocked_by: [composite_target]
+    shadow_analysis:
+      candidate_business_rules:
+        required_fields:
+          - target_type
+        columns:
+          - target_type
+      shadow_metrics:
+        current_rejections:
+          metric: bioetl_silver_filter_rejections_total
+          labels: [pipeline, run_type, reason_code, rule_type, field]
+        structural_shadow_comparisons:
+          metric: bioetl_structural_policy_shadow_comparisons_total
+          labels: [provider, entity_type, comparison]
+      composite_impact_checks:
+        - composite_pipeline: composite_target
+          check_type: join_cardinality
+          keys: [target_id]
+        - composite_pipeline: composite_target
+          check_type: field_sparsity
+          fields: [target_type, pref_name, organism]
+        - composite_pipeline: composite_target
+          check_type: gold_projection_delta
+          fields: [target_type]
+    filters:
+      required_fields:
+        structural:
+          - target_id
+          - pref_name
+          - organism
+        business_only:
+          - target_type
+      columns:
+        business_only:
+          - target_type
+  chembl_target_component:
+    downstream_role: composite_dependency
+    downstream_pipelines: [composite_target]
+    filters:
+      required_fields:
+        structural:
+          - component_id
+          - organism
+  chembl_tissue:
+    downstream_role: composite_enricher
+    downstream_pipelines: [composite_assay]
+    filters:
+      required_fields:
+        structural:
+          - tissue_id
+          - pref_name
+  crossref_publication:
+    downstream_role: composite_enricher
+    downstream_pipelines: [composite_publication]
+    filters:
+      required_fields:
+        structural:
+          - doi
+        join_safety:
+          - title
+  openalex_publication:
+    downstream_role: composite_enricher
+    downstream_pipelines: [composite_publication]
+    filters:
+      required_fields:
+        structural:
+          - openalex_id
+        join_safety:
+          - title
+  pubchem_compound:
+    downstream_role: composite_enricher
+    downstream_pipelines: [composite_molecule]
+    filters:
+      required_fields:
+        structural:
+          - molecule_id
+  pubmed_publication:
+    downstream_role: composite_enricher
+    downstream_pipelines: [composite_publication]
+    filters:
+      required_fields:
+        structural:
+          - pmid
+        join_safety:
+          - title
+  semanticscholar_publication:
+    downstream_role: composite_enricher
+    downstream_pipelines: [composite_publication]
+    filters:
+      required_fields:
+        structural:
+          - paper_id
+        join_safety:
+          - title
+  uniprot_idmapping:
+    downstream_role: composite_dependency
+    downstream_pipelines: [composite_target]
+    filters:
+      required_fields:
+        structural:
+          - mapping_status
+        join_safety:
+          - target_id
+  uniprot_protein:
+    downstream_role: composite_dependency
+    downstream_pipelines: [composite_target]
+    filters:
+      required_fields:
+        structural:
+          - accession
+          - organism_scientific

@@ -750,7 +750,7 @@ groups:
           runbook: "docs/05-operations/runbooks/observability-checklist.md"
 
       - alert: BioETLStageBacklogActive
-        expr: max by (pipeline, run_type, stage) (bioetl_stage_backlog_records) > 0
+        expr: max by (pipeline, run_type, stage) (max_over_time(bioetl_stage_backlog_records[15m])) > 0
         for: 5m
         labels:
           severity: warning

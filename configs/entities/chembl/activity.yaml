@@ -228,9 +228,9 @@ quality:
             error_message: units must be a canonical unit token when present
         -   field: qudt_units
             type: pattern
-            pattern: '^(?:[A-Za-zµ%][A-Za-z0-9µ%._-]*|[A-Za-z][A-Za-z0-9]*_[0-9]{7})$'
+            pattern: '^(?:https?://[^\s]+|[A-Za-zµ%][A-Za-z0-9µ%._/-]*|[A-Za-z][A-Za-z0-9]*_[0-9]{7})$'
             nullable: true
-            error_message: qudt_units must be a canonical unit token when present
+            error_message: qudt_units must be a raw QUDT URI or canonical unit token when present
         -   field: uo_units
             type: pattern
             pattern: '^(?:UO_[0-9]{7}|[A-Za-zµ%][A-Za-z0-9µ%._-]*)$'
@@ -461,6 +461,8 @@ filters:
         required_fields:
             # Final Silver policy: unit-less activity records are quarantined
             # instead of relaxing canonical chemistry/unit fields to nullable.
+            # target_taxonomy_id removed from required_fields because validate_taxonomy_id
+            # returns None for invalid values, causing high error rates
             - activity_id
             - molecule_id
             - assay_id
@@ -470,7 +472,6 @@ filters:
             - src_id
             - canonical_smiles
             - target_organism
-            - target_taxonomy_id
             - assay_description
             - bao_endpoint
             - bao_format

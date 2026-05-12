@@ -18,6 +18,7 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_replay 
     _resolve_continuation_mode,
     _resolve_exact_replay_blockers,
     _resolve_exact_replay_support_boundary,
+    _resolve_historical_live_run_upgrade_state,
     _resolve_manifest_replay_readiness_verdict,
     _resolve_replay_capability_reason,
     _resolve_replay_family_contract,
@@ -319,6 +320,38 @@ def _build_base_summary_core_payload(
         "post_capture_replayable_parent_boundary": (
             replay_context.replay_family_contract.get(
                 "post_capture_replayable_parent_boundary"
+            )
+        ),
+        "historical_live_run_upgrade_policy": (
+            replay_context.replay_family_contract.get(
+                "historical_live_run_upgrade_policy"
+            )
+        ),
+        "historical_live_run_upgrade_boundary": (
+            replay_context.replay_family_contract.get(
+                "historical_live_run_upgrade_boundary"
+            )
+        ),
+        "historical_live_run_upgrade_reason": (
+            replay_context.replay_family_contract.get(
+                "historical_live_run_upgrade_reason"
+            )
+        ),
+        "broader_historical_exact_replay_policy": (
+            replay_context.replay_family_contract.get(
+                "broader_historical_exact_replay_policy"
+            )
+        ),
+        "broader_historical_exact_replay_reason": (
+            replay_context.replay_family_contract.get(
+                "broader_historical_exact_replay_reason"
+            )
+        ),
+        "historical_live_run_upgrade_state": (
+            _resolve_historical_live_run_upgrade_state(
+                manifest=manifest,
+                input_snapshots=replay_context.input_snapshots,
+                policy_assessment=replay_context.policy_assessment,
             )
         ),
         "exact_replay_eligible": exact_replay_eligible,

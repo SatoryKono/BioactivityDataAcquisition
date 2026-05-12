@@ -19,7 +19,7 @@ report:
   output_path: null
 
 common_field_validations:
-  - field: _content_hash
+  - field: content_hash
     type: required
     nullable: false
     error_message: "Content hash is required for deduplication"

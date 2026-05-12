@@ -15,6 +15,7 @@ from typing import TYPE_CHECKING, cast
 
 from bioetl.application.core.base_transformer import (
     BaseTransformer,
+    FilteredOutError,
     TransformerDependencyContext,
 )
 from bioetl.application.core.pre_silver_adapter_mixin import (
@@ -97,8 +98,6 @@ class PubChemCompoundTransformer(PreSilverAdapterMixin, BaseTransformer):
 
         """
         prepared = self._build_compound_business_data(context, record, index)
-        if prepared is None:
-            return None
         cid, business_data = prepared
         return cast(
             "SilverRecord",
@@ -119,8 +118,6 @@ class PubChemCompoundTransformer(PreSilverAdapterMixin, BaseTransformer):
     ) -> PreSilverRecord | None:
         """Build an intermediate PubChem payload for application finalization."""
         prepared = self._build_compound_business_data(context, record, index)
-        if prepared is None:
-            return None
         cid, business_data = prepared
         return self._build_pre_silver_from_business_data(
             source_id=str(cid),
@@ -133,7 +130,7 @@ class PubChemCompoundTransformer(PreSilverAdapterMixin, BaseTransformer):
         context: PipelineContext,
         record: BronzeRecord,
         index: int,
-    ) -> tuple[object, dict[str, object]] | None:
+    ) -> tuple[object, dict[str, object]]:
         """Build PubChem business data prior to hash finalization."""
         prepared = build_compound_business_data(
             record,
@@ -145,5 +142,13 @@ class PubChemCompoundTransformer(PreSilverAdapterMixin, BaseTransformer):
                 "Skipping PubChem compound: missing compound identifier",
                 index=index,
             )
-            return None
+            raise FilteredOutError(
+                "Record missing required PubChem compound identifier",
+                details={
+                    "policy_stage": "structural",
+                    "reason_code": "missing_compound_identifier",
+                    "rule_type": "required_fields",
+                    "field": "molecule_id",
+                },
+            )
         return prepared

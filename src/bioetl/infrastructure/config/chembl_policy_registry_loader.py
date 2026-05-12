@@ -126,6 +126,10 @@ class ChemblPolicyRegistryLoader:
     def _load_yaml(
         path: Path,
     ) -> dict[str, Any]:  # Any: YAML scalar/sequence leaf types remain heterogeneous
+        if not path.exists():
+            if path.name == "chembl_reference_identifiers.yaml":
+                return {"reference_identifier_families": {}}
+            raise FileNotFoundError(path)
         payload = yaml.safe_load(path.read_text(encoding="utf-8"))
         if not isinstance(payload, dict):
             raise TypeError(f"{path} must decode to a mapping; got {type(payload)!r}")

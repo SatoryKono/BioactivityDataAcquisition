@@ -162,6 +162,41 @@ Equivalence interpretation:
   sidecar bytes differ only in occurrence metadata, diagnose the run as
   semantically equivalent rather than byte-identical.
 
+Replay occurrence interpretation:
+
+- `replay_occurrence_kind=exact_replay_child_run` means the run was launched as
+  an explicit replay child of an earlier parent capture lineage.
+- `replay_occurrence_kind=materialized_replayable_parent` means the original
+  live capture occurrence later gained a full immutable snapshot envelope via
+  `input_snapshot_published` ledger evidence and may now serve as replayable
+  parent evidence.
+- `replay_occurrence_kind=launch_time_snapshot_backed_run` means immutable
+  snapshots were already present at launch time.
+- `replay_occurrence_kind=ordinary_live_capture` means no replayable parent
+  evidence has yet been materialized.
+
+Treat `materialized_replayable_parent` as a bounded replayability claim for the
+captured input lineage, not as proof that the original occurrence was itself an
+exact replay execution.
+
+Historical live-run upgrade interpretation:
+
+- `historical_live_run_upgrade_policy=input_snapshot_published_ledger_evidence_only`
+  means historical live captures without immutable snapshot evidence are not
+  silently upgraded from retained Bronze files or path heuristics.
+- `historical_live_run_upgrade_state=awaiting_input_snapshot_published_evidence`
+  means the run still lacks the only published parent-promotion evidence path.
+- `historical_live_run_upgrade_state=already_materialized_replayable_parent`
+  means explicit `input_snapshot_published` ledger evidence has materialized a
+  bounded immutable parent snapshot envelope for later child replay.
+- `historical_live_run_upgrade_state=incomplete_materialization_evidence` means
+  some ledger evidence exists but the immutable snapshot envelope is still not
+  complete enough for parent promotion.
+- `broader_historical_exact_replay_policy=ratified_snapshot_backed_boundary_is_final_supported_scope`
+  means the current published contract does not promise a wider historical
+  exact-replay class beyond the snapshot-backed boundary and bounded
+  parent-promotion states already documented here.
+
 ### 4. Inspect storage layout directly when needed
 
 Canonical filesystem paths:

@@ -24,6 +24,23 @@ explicitly published snapshot-backed support boundary. The platform does not
 currently claim universal exact reproducibility for every pipeline family and
 every historical run occurrence.
 
+The current snapshot-backed boundary is the final supported exact-replay scope
+of the published contract. Any broader historical exact-replay claim requires a
+future contract revision with an explicit evidence model and fail-closed rules;
+it is not implied by retained Bronze files, partial lineage, or operator
+reconstruction heuristics.
+
+For supported source families, a completed live source capture may later gain
+immutable snapshot evidence via ledger materialization. That state is published
+as post-capture replayable parent evidence, not as proof that the original live
+capture occurrence was itself an exact replay execution.
+
+Historical live runs without immutable snapshot evidence remain outside the
+strict replay claim until explicit `input_snapshot_published` ledger evidence
+materializes a bounded immutable parent snapshot envelope. BioETL does not
+silently upgrade such runs from retained Bronze files, path heuristics, or
+other implicit reconstruction signals.
+
 It is the contract leg of the published traceability documentation pack
 required by [D-01](../../00-project/governance/01-documentation-governance-style-guide.md).
 
@@ -529,6 +546,39 @@ locator metadata:
 - `captured_at`, `last_modified`, `etag`, and `query_fingerprint` are
   occurrence or lookup metadata; changing them must not change `snapshot_id`
   when the captured bytes are unchanged.
+
+### Post-capture replayable parent evidence
+
+When a live source run starts without launch-time immutable snapshots but later
+emits `input_snapshot_published` ledger events with a complete immutable input
+snapshot envelope, the published contract distinguishes three states:
+
+- `ordinary_live_capture`: a live source occurrence without sufficient
+  immutable snapshot evidence yet;
+- `materialized_replayable_parent`: the original live capture occurrence is now
+  backed by immutable snapshot evidence and may serve as the replayable parent
+  for a later child exact replay run;
+- `exact_replay_child_run`: a later run explicitly launched as replay of a
+  parent capture lineage.
+
+The operator-facing diagnostic marker for the middle state is
+`replay_occurrence_kind=materialized_replayable_parent`. The original live
+capture occurrence remains distinct from any child exact replay execution even
+after `live_capture_snapshot_materialized` evidence is present.
+
+Historical live runs without immutable snapshot evidence therefore follow one
+bounded upgrade policy only:
+
+- `historical_live_run_upgrade_policy=input_snapshot_published_ledger_evidence_only`
+- `historical_live_run_upgrade_boundary=input_snapshot_published_ledger_evidence`
+- `historical_live_run_upgrade_state=awaiting_input_snapshot_published_evidence`
+  until a complete immutable snapshot envelope is explicitly materialized.
+
+Once that evidence is present, diagnostics upgrade the state to
+`historical_live_run_upgrade_state=already_materialized_replayable_parent` and
+`replay_occurrence_kind=materialized_replayable_parent`. Partial or malformed
+materialization remains bounded as
+`historical_live_run_upgrade_state=incomplete_materialization_evidence`.
 
 ### Effective-config provenance baseline
 

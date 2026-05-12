@@ -154,6 +154,6 @@ class _BaseTransformerExecutionMixin:
             return None
         except ValueError as error:
             error_type = self._handle_validation_error(error, context, span)
-            return None
+            raise
         finally:
             self._record_metrics_and_close_span(start_time, error_type, span)

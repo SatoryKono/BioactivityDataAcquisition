@@ -46,6 +46,14 @@ class ConcreteTransformer(BaseTransformer):
         return {"id": pk, "value": record.get("value")}
 
 
+class ValueErrorTransformer(BaseTransformer):
+    """Concrete transformer that fails with a plain ValueError."""
+
+    async def _transform_impl(self, context, record, index):
+        await asyncio.sleep(0)
+        raise ValueError("Entity validation failed")
+
+
 class _FakeStructuralPolicy:
     def __init__(self, outcome: StructuralPolicyOutcome) -> None:
         self.outcome = outcome
@@ -325,20 +333,15 @@ class TestTemplateMethodPattern:
     async def test_transform_handles_value_error(
         self, mock_context: PipelineContext
     ) -> None:
-        """Test transform() handles ValueError and returns None."""
-
-        class FailingTransformer(BaseTransformer):
-            async def _transform_impl(self, context, record, index):
-                await asyncio.sleep(0)
-                raise ValueError("Entity validation failed")
-
-        transformer = FailingTransformer(
+        """Direct transform() must expose ValueError instead of returning None."""
+        transformer = ValueErrorTransformer(
             provider="test",
             dependencies=build_test_transformer_dependencies(),
         )
-        result = await transformer.transform(mock_context, {"id": "123"}, index=0)
 
-        assert result is None
+        with pytest.raises(ValueError, match="Entity validation failed"):
+            await transformer.transform(mock_context, {"id": "123"}, index=0)
+
         mock_context.logger.warning.assert_called_once()
         call_args = mock_context.logger.warning.call_args
         assert "entity_validation_failed" in call_args[0]

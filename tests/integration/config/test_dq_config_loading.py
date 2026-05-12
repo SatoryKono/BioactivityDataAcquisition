@@ -62,7 +62,7 @@ class TestDQConfigIntegration:
         field_names = [fv.field for fv in config.field_validations]
 
         # From base/quality.yaml
-        assert "_content_hash" in field_names
+        assert "content_hash" in field_names
 
         # From entities/chembl/activity.yaml
         assert "activity_id" in field_names
@@ -272,6 +272,9 @@ class TestPipelineConfigLoaderWithDQResolution:
         assert rules["units"].validation_type == "pattern"
         assert rules["qudt_units"].validation_type == "pattern"
         assert rules["uo_units"].validation_type == "pattern"
+        assert rules["qudt_units"].pattern == (
+            r"^(?:https?://[^\s]+|[A-Za-zµ%][A-Za-z0-9µ%._/-]*|[A-Za-z][A-Za-z0-9]*_[0-9]{7})$"
+        )
         assert rules["uo_units"].pattern == (
             r"^(?:UO_[0-9]{7}|[A-Za-zµ%][A-Za-z0-9µ%._-]*)$"
         )
