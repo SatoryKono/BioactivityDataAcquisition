@@ -49,7 +49,7 @@ class HealthServerHTTPMixin:
             await self._send_response(writer, 408, "Request Timeout")
         except self._request_error_allowlist as error:
             await self._handle_request_error(writer, error)
-        except Exception as error:
+        except (ConnectionError, OSError, ValueError, UnicodeDecodeError) as error:
             await self._handle_request_error(writer, error)
         finally:
             await self._close_writer(writer)

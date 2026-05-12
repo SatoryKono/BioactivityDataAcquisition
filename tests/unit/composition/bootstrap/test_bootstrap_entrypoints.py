@@ -333,7 +333,9 @@ class TestBootstrapVacuumConfig:
 
         # Verify runtime config was passed with YAML values
         call_args = mock_factory.create_runner.call_args
-        runtime = call_args.kwargs.get("runtime") or call_args[1].get("runtime")
+        request = call_args[0][0] if call_args[0] else call_args.kwargs.get("request")
+        runtime = request.runtime if hasattr(request, "runtime") else None
+        assert runtime is not None
         assert runtime.vacuum_after_run is True
         assert runtime.vacuum_retention_days == 14
 
@@ -380,6 +382,8 @@ class TestBootstrapVacuumConfig:
 
         # Verify runtime config was passed with CLI values (overriding YAML)
         call_args = mock_factory.create_runner.call_args
-        runtime = call_args.kwargs.get("runtime") or call_args[1].get("runtime")
+        request = call_args[0][0] if call_args[0] else call_args.kwargs.get("request")
+        runtime = request.runtime if hasattr(request, "runtime") else None
+        assert runtime is not None
         assert runtime.vacuum_after_run is True  # CLI enabled=True
         assert runtime.vacuum_retention_days == 30

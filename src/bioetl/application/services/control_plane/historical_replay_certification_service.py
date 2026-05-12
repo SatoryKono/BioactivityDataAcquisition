@@ -241,6 +241,18 @@ class HistoricalReplayCertificationService:
     ) -> None:
         if not certifications:
             raise ValueError("At least one certification snapshot is required")
+        expected = self._build_expected_source_keys(manifest)
+        actual = self._build_actual_source_keys(certifications)
+        missing = self._find_missing_source_keys(expected, actual)
+        if missing:
+            raise ValueError(
+                "Historical replay certification is missing sources: "
+                + ", ".join(" / ".join(part or "-" for part in key) for key in missing)
+            )
+
+    def _build_expected_source_keys(
+        self, manifest: RunManifest
+    ) -> set[tuple[str, str, str, str | None]]:
         expected = {
             self._source_key(
                 provider=ref.provider,
@@ -259,7 +271,13 @@ class HistoricalReplayCertificationService:
                     query=None,
                 )
             }
-        actual = {
+        return expected
+
+    def _build_actual_source_keys(
+        self,
+        certifications: tuple[HistoricalReplaySnapshotCertification, ...],
+    ) -> set[tuple[str, str, str, str | None]]:
+        return {
             self._source_key(
                 provider=item.provider,
                 entity=item.entity,
@@ -268,52 +286,84 @@ class HistoricalReplayCertificationService:
             )
             for item in certifications
         }
+
+    def _find_missing_source_keys(
+        self,
+        expected: set[tuple[str, str, str, str | None]],
+        actual: set[tuple[str, str, str, str | None]],
+    ) -> list[tuple[str, str, str, str | None]]:
         actual_without_query = {(a, b, c) for a, b, c, _ in actual}
-        missing = sorted(
+        return sorted(
             key
             for key in expected
             if key not in actual and key[:3] not in actual_without_query
         )
-        if missing:
-            raise ValueError(
-                "Historical replay certification is missing sources: "
-                + ", ".join(" / ".join(part or "-" for part in key) for key in missing)
-            )
 
     def _validate_upstream_certified_lineage(
         self,
         certifications: tuple[HistoricalReplaySnapshotCertification, ...],
     ) -> None:
         for certification in certifications:
-            upstream_manifest_id = str(certification.upstream_manifest_id or "").strip()
-            upstream_run_id = str(certification.upstream_run_id or "").strip()
-            if not upstream_manifest_id or not upstream_run_id:
-                raise ValueError(
-                    "Composite certification requires upstream_run_id and upstream_manifest_id"
-                )
-            upstream_manifest = self.manifest_port.get(upstream_manifest_id)
-            if upstream_manifest is None:
-                raise ValueError(
-                    f"Upstream manifest {upstream_manifest_id!r} was not found"
-                )
-            upstream_summary = build_diagnostics_summary(
-                upstream_manifest,
-                tuple(self.ledger_port.list_entries(upstream_manifest.manifest_id)),
+            self._validate_upstream_presence(certification)
+            upstream_manifest = self._load_upstream_manifest(certification)
+            self._validate_upstream_run_id_match(
+                certification=certification,
+                upstream_manifest=upstream_manifest,
             )
-            if str(upstream_summary.get("run_id") or "") != upstream_run_id:
-                raise ValueError(
-                    "Composite certification upstream run_id does not match manifest"
-                )
-            if str(
-                upstream_summary.get("broader_historical_exact_replay_state") or ""
-            ) not in {
-                "within_launch_time_snapshot_boundary",
-                "within_post_capture_parent_boundary",
-                "historical_source_replay_certified",
-            }:
-                raise ValueError(
-                    "Composite certification requires certified or snapshot-backed upstream lineage"
-                )
+            self._validate_upstream_certification_state(upstream_manifest)
+
+    def _validate_upstream_presence(
+        self, certification: HistoricalReplaySnapshotCertification
+    ) -> None:
+        upstream_manifest_id = str(certification.upstream_manifest_id or "").strip()
+        upstream_run_id = str(certification.upstream_run_id or "").strip()
+        if not upstream_manifest_id or not upstream_run_id:
+            raise ValueError(
+                "Composite certification requires upstream_run_id and upstream_manifest_id"
+            )
+
+    def _load_upstream_manifest(
+        self, certification: HistoricalReplaySnapshotCertification
+    ) -> RunManifest:
+        upstream_manifest_id = str(certification.upstream_manifest_id or "").strip()
+        upstream_manifest = self.manifest_port.get(upstream_manifest_id)
+        if upstream_manifest is None:
+            raise ValueError(
+                f"Upstream manifest {upstream_manifest_id!r} was not found"
+            )
+        return upstream_manifest
+
+    def _validate_upstream_run_id_match(
+        self,
+        certification: HistoricalReplaySnapshotCertification,
+        upstream_manifest: RunManifest,
+    ) -> None:
+        upstream_run_id = str(certification.upstream_run_id or "").strip()
+        upstream_summary = build_diagnostics_summary(
+            upstream_manifest,
+            tuple(self.ledger_port.list_entries(upstream_manifest.manifest_id)),
+        )
+        if str(upstream_summary.get("run_id") or "") != upstream_run_id:
+            raise ValueError(
+                "Composite certification upstream run_id does not match manifest"
+            )
+
+    def _validate_upstream_certification_state(
+        self, upstream_manifest: RunManifest
+    ) -> None:
+        upstream_summary = build_diagnostics_summary(
+            upstream_manifest,
+            tuple(self.ledger_port.list_entries(upstream_manifest.manifest_id)),
+        )
+        valid_states = {
+            "within_launch_time_snapshot_boundary",
+            "within_post_capture_parent_boundary",
+            "historical_source_replay_certified",
+        }
+        if str(upstream_summary.get("broader_historical_exact_replay_state") or "") not in valid_states:
+            raise ValueError(
+                "Composite certification requires certified or snapshot-backed upstream lineage"
+            )
 
     def _resolve_certification_query(
         self,
@@ -324,19 +374,36 @@ class HistoricalReplayCertificationService:
         query = str(certification.query or "").strip()
         if query:
             return query
-        matching_queries = sorted(
-            {
-                str(ref.query or "").strip()
-                for ref in manifest.source_refs
-                if str(ref.provider or "").strip() == certification.provider
-                and str(ref.entity or "").strip() == certification.entity
-                and str(ref.pipeline_name or "").strip() == certification.pipeline_name
-                and str(ref.query or "").strip()
-            }
-        )
+        matching_queries = self._find_matching_queries(manifest, certification)
         if len(matching_queries) == 1:
             return matching_queries[0]
         return None
+
+    def _find_matching_queries(
+        self,
+        manifest: RunManifest,
+        certification: HistoricalReplaySnapshotCertification,
+    ) -> list[str]:
+        return sorted(
+            {
+                str(ref.query or "").strip()
+                for ref in manifest.source_refs
+                if self._source_ref_matches_certification(ref, certification)
+            }
+        )
+
+    def _source_ref_matches_certification(
+        self,
+        ref: object,
+        certification: HistoricalReplaySnapshotCertification,
+    ) -> bool:
+        return (
+            str(getattr(ref, "provider", "") or "").strip() == certification.provider
+            and str(getattr(ref, "entity", "") or "").strip() == certification.entity
+            and str(getattr(ref, "pipeline_name", "") or "").strip()
+            == certification.pipeline_name
+            and str(getattr(ref, "query", "") or "").strip()
+        )
 
     @staticmethod
     def _source_key(

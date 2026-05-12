@@ -324,25 +324,25 @@ class TestApplicationServicesExist:
 
 @pytest.mark.architecture
 class TestEntrypointsLegacyServiceCompatibility:
-    """Test service getter compatibility behavior in composition entrypoints."""
+    """Test removed service getter behavior in composition entrypoints."""
 
     def test_entrypoints_exports_services(self):
-        """Test that entrypoints exports getter functions for services."""
+        """Legacy service getters must stay removed from composition entrypoints."""
         from bioetl.composition import entrypoints
 
         entrypoint_names = set(dir(entrypoints))
-        assert "get_checkpoint_service" in entrypoint_names, (
-            "entrypoints should expose get_checkpoint_service for legacy discovery"
+        assert "get_checkpoint_service" not in entrypoint_names, (
+            "entrypoints should not expose get_checkpoint_service anymore"
         )
-        assert "get_quarantine_service" in entrypoint_names, (
-            "entrypoints should expose get_quarantine_service for legacy discovery"
+        assert "get_quarantine_service" not in entrypoint_names, (
+            "entrypoints should not expose get_quarantine_service anymore"
         )
-        assert "get_bronze_cleanup_service" in entrypoint_names, (
-            "entrypoints should expose get_bronze_cleanup_service for legacy discovery"
+        assert "get_bronze_cleanup_service" not in entrypoint_names, (
+            "entrypoints should not expose get_bronze_cleanup_service anymore"
         )
 
     def test_entrypoints_all_excludes_legacy_service_getters(self):
-        """Legacy service getters should be accessible but excluded from __all__."""
+        """Legacy service getters stay on services_api only, not on entrypoints."""
         from bioetl.composition import entrypoints, services_api
 
         assert "get_checkpoint_service" not in entrypoints.__all__
