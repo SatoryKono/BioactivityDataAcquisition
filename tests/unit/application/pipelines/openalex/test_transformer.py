@@ -12,6 +12,7 @@ from uuid import uuid4
 import json
 import pytest
 
+from bioetl.application.core.base_transformer import FilteredOutError
 from bioetl.application.pipelines.openalex.transformer import (
     OpenAlexPublicationTransformer,
 )
@@ -170,20 +171,19 @@ class TestOpenAlexPublicationTransformer:
         assert grants[0]["funder"] == "F4320337670"
 
     @pytest.mark.asyncio
-    async def test_transform_record_without_id_returns_none(
+    async def test_transform_record_without_id_raises_filtered_out_error(
         self,
         transformer: OpenAlexPublicationTransformer,
         pipeline_context: PipelineContext,
     ) -> None:
-        """Should return None for record without OpenAlex ID."""
+        """Missing OpenAlex ID must use runtime filtered-out disposition."""
         record = {
             "id": None,
             "title": "Record Without ID",
         }
 
-        result = await transformer.transform(pipeline_context, record, 0)
-
-        assert result is None
+        with pytest.raises(FilteredOutError, match="primary identifier"):
+            await transformer.transform(pipeline_context, record, 0)
 
     @pytest.mark.asyncio
     async def test_transform_with_fallback_lookup(

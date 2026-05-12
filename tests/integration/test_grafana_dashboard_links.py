@@ -1140,12 +1140,22 @@ def test_dashboard_links_forbid_universal_handoff_patterns() -> None:
 
 
 def test_navigation_dashboards_expose_explore_drilldown_links() -> None:
-    """Every shipped navigation panel should expose Logs and Traces drilldowns."""
+    """Non-control-plane navigation panels should expose Logs and Traces drilldowns."""
     for dashboard_path in get_dashboard_files():
         dashboard_name = dashboard_path.name
         dashboard = load_dashboard(dashboard_path)
         links = get_dashboard_navigation_links(dashboard)
         urls = [link.get("url", "") for link in links]
+        uid = str(dashboard.get("uid", ""))
+
+        if uid == "bioetl-control-plane-v1":
+            assert not any("/a/grafana-lokiexplore-app/" in url for url in urls), (
+                f"{dashboard_name} must not expose top-level Logs Drilldown links"
+            )
+            assert not any("/a/grafana-exploretraces-app/" in url for url in urls), (
+                f"{dashboard_name} must not expose top-level Traces Drilldown links"
+            )
+            continue
 
         titles = {link.get("title") for link in links if link.get("title")}
         assert any("Logs" in title for title in titles), (
@@ -1224,7 +1234,7 @@ def test_navigation_panel_renders_full_visual_bus_with_disabled_current_item() -
         "bioetl-workflow-overview": "5. Workflow",
         "bioetl-silver-reject-explorer": "Silver Reject Explorer",
     }
-    visual_titles = (
+    base_visual_titles = (
         "0. Control Plane",
         "1. Overview",
         "2. Runtime",
@@ -1232,9 +1242,8 @@ def test_navigation_panel_renders_full_visual_bus_with_disabled_current_item() -
         "4. Data Quality",
         "5. Workflow",
         "Silver Reject Explorer",
-        "Explore Logs",
-        "Explore Traces",
     )
+    explore_visual_titles = ("Explore Logs", "Explore Traces")
 
     for dashboard_path in get_dashboard_files():
         dashboard = load_dashboard(dashboard_path)
@@ -1248,10 +1257,18 @@ def test_navigation_panel_renders_full_visual_bus_with_disabled_current_item() -
             f"{dashboard_path.name} must define navigation panel id=1000"
         )
         content = str((panel.get("options") or {}).get("content", ""))
+        visual_titles = base_visual_titles
+        if uid != "bioetl-control-plane-v1":
+            visual_titles += explore_visual_titles
         for title in visual_titles:
             assert title in content, (
                 f"{dashboard_path.name} visual navigation bus must render '{title}'"
             )
+        if uid == "bioetl-control-plane-v1":
+            for title in explore_visual_titles:
+                assert title not in content, (
+                    f"{dashboard_path.name} visual navigation bus must not render '{title}'"
+                )
 
         current_title = expected_current_title[uid]
         disabled_pattern = re.compile(
@@ -1267,8 +1284,9 @@ def test_navigation_panel_renders_full_visual_bus_with_disabled_current_item() -
 
 
 def test_explore_links_use_drilldown_routes_and_time_range() -> None:
-    """Explore links should target Drilldown apps and preserve current time range."""
-    for dashboard_name in (path.name for path in get_dashboard_files()):
+    """Non-control-plane Explore links should target Drilldown apps and preserve time range."""
+    for dashboard_path in get_dashboard_files():
+        dashboard_name = dashboard_path.name
         dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
         drilldown_links = [
             link
@@ -1276,6 +1294,11 @@ def test_explore_links_use_drilldown_routes_and_time_range() -> None:
             if _is_logs_drilldown_url(link.get("url", ""))
             or _is_traces_drilldown_url(link.get("url", ""))
         ]
+        if dashboard.get("uid") == "bioetl-control-plane-v1":
+            assert not drilldown_links, (
+                f"{dashboard_name} must not expose top-level Drilldown app links"
+            )
+            continue
         assert drilldown_links, (
             f"{dashboard_name} must expose at least one Drilldown app link"
         )
@@ -1299,22 +1322,10 @@ def test_explore_traces_navigation_is_explicitly_traced_run_only() -> None:
         uid = dashboard.get("uid")
 
         if uid == "bioetl-control-plane-v1":
-            panel = next(
-                (
-                    item
-                    for item in dashboard.get("panels", [])
-                    if item.get("id") == 1000
-                ),
-                None,
-            )
-            assert panel is not None, (
-                f"{dashboard_path.name} must define navigation panel id=1000"
-            )
-            description = str(panel.get("description", ""))
-            assert (
-                "traced-run-only" in description
-                or "available only for traced runs" in description
-            ), f"{dashboard_path.name} must describe Explore Traces as traced-run-only"
+            links = get_dashboard_navigation_links(dashboard)
+            assert not any(
+                str(link.get("title", "")) == "Explore Traces" for link in links
+            ), f"{dashboard_path.name} must not expose Explore Traces in top navigation"
             continue
 
         traces_link = next(

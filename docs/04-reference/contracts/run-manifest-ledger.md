@@ -108,6 +108,7 @@ File-backed control-plane persistence uses the following canonical paths:
 | Lineage fragment payload             | `data/output/control/lineage/fragments/{stable_fragment_key}.json` |
 | Lineage lookup indexes               | `data/output/control/lineage/_by_*/*.jsonl`                        |
 | Historical replay closure reports    | `data/output/control/historical_replay_closure/{report_id}.json`   |
+| Historical replay universe artifacts | `data/output/control/historical_replay_universe/{report_id}.json`  |
 | Checkpoint payloads                  | `data/output/checkpoints/**/*.json`                                |
 | Cached Bronze input snapshots        | `data/output/bronze/**/*`                                          |
 
@@ -149,6 +150,10 @@ Protected-reference rules are fail-closed:
   also retain their replay evidence floor so no new retained run can age into
   an uncertifiable historical state merely because lifecycle cleanup deleted its
   immutable replay evidence before certification or later child replay;
+- the same permanence rule extends to archived and future replay-supported
+  history: universal exact replay must keep a declared durable evidence path
+  instead of relying on ephemeral local reconstruction that would later decay
+  back into uncertifiable historical states;
 - checkpoints inside the retention window protect their `run_id`,
   `manifest_id`, and `effective_config_artifact_id` anchors;
 - explicit protected manifest/run/effective-config/lineage/snapshot identifiers
@@ -179,6 +184,16 @@ Certified historical replay is therefore bounded but operationalized:
 - `bioetl run-manifest closure-report --write` persists one retained-corpus
   closure artifact with a deterministic `report_id`, global claim gate, and
   explicit residual resolution queue for any blocked historical manifests;
+- `scripts/engineering/qa/run_historical_replay_universe_campaign.py` persists
+  a full-universe closure artifact by merging the local retained corpus with
+  one or more authoritative external universe packs for archived/offline runs;
+- each external universe pack is the authoritative bridge from retained local
+  control-plane evidence to the full historical-run universe and must carry one
+  record per historical occurrence with
+  `manifest_id`, `run_id`, `pipeline_name`, `provider`, `entity`,
+  `execution_context`, `certification_status`, `replay_occurrence_kind`,
+  blocking reasons when unresolved, `evidence_residency`,
+  `durable_evidence_coverage`, and a `source_pack_ref`;
 - the closure artifact supports two published claim-scope modes:
   `all_retained_historical_runs` and
   `retained_certifiable_historical_runs`;
@@ -194,6 +209,21 @@ Certified historical replay is therefore bounded but operationalized:
   `irrecoverable_missing_immutable_evidence` and
   `outside_universal_claim_scope` remove those legacy occurrences from the
   strong claim scope instead of silently treating them as replayable.
+- a literal universal exact replay claim for **any historical run** is only
+  supported from the full-universe artifact, not from the retained-corpus
+  artifact alone. That artifact must merge locally retained runs with
+  authoritative archived/offline historical records and publish both
+  `universal_claim` and `durable_evidence_coverage_claim`.
+- the full-universe artifact uses `scope=all_known_historical_runs`. It is the
+  only published scope that may back literal wording about **any historical
+  run** rather than retained-only or retained-certifiable subsets.
+- top-level project wording may claim universal historical exact replay only
+  when the latest full-universe artifact reports
+  `universal_claim.claimed=true` and
+  `durable_evidence_coverage_claim.claimed=true`.
+- `durable_evidence_coverage_claim` is the permanence gate for guarantees that
+  must survive retained, archived, and future history rather than a one-off
+  closure campaign snapshot.
 - the retained-corpus closure artifact may still persist while the claim gate
   is blocked. In that state, operators must either certify more immutable
   evidence or attach explicit residual dispositions such as

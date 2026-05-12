@@ -484,17 +484,15 @@ class TestPreExtractValidation:
         self,
         mock_context: PipelineContext,
     ) -> None:
-        """Should return None when pre-validation raises ValueError."""
+        """Direct transform() must re-raise pre-validation ValueError."""
         transformer = _create_stub_transformer(StubWithPreValidation)
         record = {
             "id": None,  # Will fail pre-validation
             "title": "Test",
         }
 
-        result = await transformer.transform(mock_context, record, 0)
-
-        # ValueError is caught by BaseTransformer.transform and returns None
-        assert result is None
+        with pytest.raises(ValueError, match="ID is required for test publication"):
+            await transformer.transform(mock_context, record, 0)
 
     @pytest.mark.asyncio
     async def test_pre_validation_passes(

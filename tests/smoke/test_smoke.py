@@ -104,7 +104,7 @@ class TestCoreImports:
 
     def test_cli_imports(self) -> None:
         """CLI module imports successfully."""
-        from bioetl.interfaces import cli  # noqa: F401
+        import bioetl.interfaces.cli  # noqa: F401
 
 
 @pytest.mark.smoke

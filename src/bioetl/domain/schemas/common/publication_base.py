@@ -161,7 +161,7 @@ class PublicationBaseSchema(ETLRecordSchema):
     )
 
     # === Open Access (common to all providers) ===
-    is_oa: Series[bool] = pa.Field(
+    is_oa: Series[pd.BooleanDtype] = pa.Field(
         nullable=True,
         description="Is Open Access (provider-dependent availability)",
     )

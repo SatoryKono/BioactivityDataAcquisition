@@ -13,10 +13,12 @@ TEST_FILE_LOC_EXEMPTIONS = {
     "tests/testing_support/neo4j_memory_sync.py": 3250,
     "tests/integration/test_grafana_dashboard_links.py": 2350,
     "tests/integration/test_grafana_config.py": 2460,
+    "tests/integration/ci/test_reproducibility_contract_suite.py": 2100,
 }
 
 TEST_FUNCTION_LOC_EXEMPTIONS = {
     "tests/testing_support/neo4j_memory_sync.py::test_snapshot_contains_core_repo_surfaces": 295,
+    "tests/unit/application/services/test_run_manifest_diagnostics.py::test_build_diagnostics_summary_exposes_required_operator_fields": 235,
 }
 
 

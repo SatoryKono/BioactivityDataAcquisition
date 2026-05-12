@@ -214,6 +214,7 @@ bioetl run-manifest inventory --format json
 bioetl run-manifest certify-historical-bulk path/to/plan.json --format json
 bioetl run-manifest closure-report --write --format json
 ./.venv/bin/python scripts/engineering/qa/run_historical_replay_closure_campaign.py --auto-certify-sources --auto-certify-composites --claim-scope-mode retained_certifiable_historical_runs --write-dispositions --write-report
+./.venv/bin/python scripts/engineering/qa/run_historical_replay_universe_campaign.py --external-pack path/to/archive-pack.json --write-report
 ```
 
 Interpretation:
@@ -239,6 +240,16 @@ Interpretation:
   residual-disposition artifact, may auto-certify retained source/composite
   runs when trustworthy evidence exists, and persists the matching closure
   report in one pass.
+- `run_historical_replay_universe_campaign.py` is the full-universe path: it
+  merges the local retained corpus with authoritative external universe packs
+  for archived/offline historical runs and persists a full-universe closure
+  artifact.
+- each external universe pack must be authoritative for its archived slice and
+  include one record per historical occurrence with
+  `manifest_id`, `run_id`, `pipeline_name`, `provider`, `entity`,
+  `execution_context`, `certification_status`, `replay_occurrence_kind`,
+  `blocking_reasons`, `evidence_residency`, `durable_evidence_coverage`, and
+  `source_pack_ref`.
 - the closure artifact publishes
   `global_universal_historical_replay_claim` and `retained_corpus_claim`
   separately. The first is the strong governance gate for broad universal
@@ -251,6 +262,20 @@ Interpretation:
   be explicitly excluded through
   `irrecoverable_missing_immutable_evidence` or
   `outside_universal_claim_scope`.
+- for a literal universal historical replay claim, use the full-universe
+  artifact rather than the retained-corpus artifact. The full-universe
+  artifact publishes both `universal_claim` and
+  `durable_evidence_coverage_claim`; both must be `claimed=true` before
+  top-level project wording can say that **any historical run** is exact
+  replayable.
+- in the full-universe artifact, `universal_claim.scope=all_known_historical_runs`
+  is the only published scope that may justify wording about **any historical
+  run**. Retained-only and narrowed certifiable scopes are weaker and must stay
+  labeled as such in operator reports.
+- `durable_evidence_coverage_claim` is the permanence gate: even if every
+  known historical run is currently closed, the universal claim must remain
+  blocked when some archived, retained, or future-supported history still
+  relies on non-durable evidence paths.
 - if `closure_verdict=residual_disposition_required`, operators must attach an
   explicit residual disposition file with entries for every blocked manifest.
   Supported disposition values are:
@@ -264,6 +289,10 @@ Interpretation:
   `irrecoverable_missing_immutable_evidence`, the global universal claim gate
   remains blocked even though the closure artifact itself is valid and
   persisted.
+- when the full-universe artifact remains blocked, inspect
+  `inventory.unresolved_count`, `inventory.durable_coverage_gap_count`,
+  `inventory.local_retained_count`, and `inventory.external_archived_count`
+  before changing any top-level reproducibility wording.
 
 ### 4. Inspect storage layout directly when needed
 

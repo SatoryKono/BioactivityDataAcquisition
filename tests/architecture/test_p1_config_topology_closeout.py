@@ -250,12 +250,13 @@ def test_runtime_inputs_resolver_uses_runtime_config_access_seam() -> None:
 def test_composition_source_config_consumers_use_composition_seam(
     relative_path: str,
 ) -> None:
-    """Composition source-config consumers should route through one local seam."""
+    """Composition source-config consumers should import the infrastructure owner."""
     imported_modules = _imported_modules(relative_path)
-    assert "bioetl.composition.source_config_access" in imported_modules, (
-        f"{relative_path} must route source-config access through the sanctioned "
-        "composition seam."
+    assert "bioetl.infrastructure.config.source_config_loader" in imported_modules, (
+        f"{relative_path} should import bioetl.infrastructure.config.source_config_loader "
+        "as the canonical owner for source-config loading."
     )
-    assert (
-        "bioetl.infrastructure.config.source_config_loader" not in imported_modules
-    ), f"{relative_path} must not import source_config_loader directly."
+    assert "bioetl.composition.source_config_access" not in imported_modules, (
+        f"{relative_path} should not depend on the retired "
+        "bioetl.composition.source_config_access seam."
+    )

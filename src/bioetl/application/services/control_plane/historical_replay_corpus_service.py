@@ -239,6 +239,7 @@ class HistoricalReplayCorpusService:
 
     manifest_port: RunManifestPort
     ledger_port: RunLedgerPort
+    certification_service: HistoricalReplayCertificationService
 
     def build_certifiability_inventory(self) -> HistoricalReplayCertifiabilityInventory:
         """Inventory retained manifests against the certified replay tranche."""
@@ -260,10 +261,6 @@ class HistoricalReplayCorpusService:
         manifest_by_id = {
             manifest.manifest_id: manifest for manifest in self._iter_manifests()
         }
-        certification_service = HistoricalReplayCertificationService(
-            manifest_port=self.manifest_port,
-            ledger_port=self.ledger_port,
-        )
         ordered_specs = tuple(
             sorted(
                 specs,
@@ -310,7 +307,7 @@ class HistoricalReplayCorpusService:
                     f"certified tranche for manifest {spec.manifest_id!r}"
                 )
             result = self._apply_one_certification(
-                certification_service=certification_service,
+                certification_service=self.certification_service,
                 manifest=manifest,
                 spec=spec,
             )

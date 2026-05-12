@@ -11,11 +11,11 @@ from bioetl.composition.factories.datasource.provider_registry_resolution import
 from bioetl.composition.providers.provider_registry import (
     ProviderDataSourceAccessProtocol,
 )
-from bioetl.composition.source_config_access import load_source_config
 from bioetl.domain.resilience import RetryConfig
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
+from bioetl.infrastructure.config.source_config_loader import load_source_config
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort, MetricsPort, TracingPort

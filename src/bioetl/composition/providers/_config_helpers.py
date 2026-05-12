@@ -11,9 +11,9 @@ from bioetl.composition.bootstrap_contexts import (
     RateLimitContext,
 )
 from bioetl.composition.providers._models import ProviderSettingsProtocol
-from bioetl.composition.source_config_access import load_source_config
 from bioetl.domain.resilience import AdapterConfig
 from bioetl.infrastructure.adapters.input.csv_filter_reader import CsvFilterReader
+from bioetl.infrastructure.config.source_config_loader import load_source_config
 
 if TYPE_CHECKING:
     from bioetl.composition.bootstrap_contexts import RateLimitContext

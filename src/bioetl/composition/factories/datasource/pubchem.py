@@ -11,7 +11,6 @@ from typing import cast
 from bioetl.composition.factories.datasource.adapter_helpers import (
     AdapterHelpersFactory,
 )
-from bioetl.composition.source_config_access import load_source_config
 from bioetl.domain.ports import ErrorHandlerPort, LoggerPort, MetricsPort
 from bioetl.infrastructure.adapters.common import SyncAdapterDependencyContext
 from bioetl.infrastructure.adapters.common.api_request_collector import (
@@ -24,6 +23,7 @@ from bioetl.infrastructure.adapters.pubchem.entity_mapper import PubChemEntityMa
 from bioetl.infrastructure.adapters.pubchem.fetch_strategies import (
     PubChemFetchStrategies,
 )
+from bioetl.infrastructure.config.source_config_loader import load_source_config
 
 __all__ = ["PubChemRuntimeDependencies", "create_pubchem_adapter"]
 

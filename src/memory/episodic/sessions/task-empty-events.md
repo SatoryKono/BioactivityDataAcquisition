@@ -2,7 +2,7 @@
 id: task-empty-events
 title: Refresh empty events
 task_id: task-empty-events
-created_at: '2026-05-12T10:24:51Z'
+created_at: '2026-05-12T13:21:32Z'
 ttl_days: 14
 confidence: episodic
 source_refs:

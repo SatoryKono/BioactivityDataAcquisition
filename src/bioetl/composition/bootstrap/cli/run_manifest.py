@@ -7,7 +7,11 @@ from pathlib import Path
 from bioetl.application.services.control_plane.forensic_diff_service import (
     ForensicRunDiffService,
 )
+from bioetl.application.services.control_plane.historical_replay_certification_service import (
+    HistoricalReplayCertificationService,
+)
 from bioetl.application.services.control_plane.historical_replay_closure_service import (
+    HistoricalReplayClosureReport,
     HistoricalReplayClosureService,
 )
 from bioetl.application.services.control_plane.historical_replay_corpus_service import (
@@ -21,6 +25,7 @@ from bioetl.infrastructure.config import get_settings
 from bioetl.infrastructure.control_plane import (
     FileArtifactByteComparisonAdapter,
     FileEffectiveConfigArtifactStore,
+    FileHistoricalReplayClosureStore,
     FileRunLedgerStore,
     FileRunManifestStore,
 )
@@ -30,6 +35,7 @@ __all__ = [
     "bootstrap_historical_replay_closure_service",
     "bootstrap_historical_replay_corpus_service",
     "bootstrap_run_manifest_service",
+    "persist_historical_replay_closure_report",
 ]
 
 
@@ -94,6 +100,10 @@ def bootstrap_historical_replay_corpus_service() -> HistoricalReplayCorpusServic
     return HistoricalReplayCorpusService(
         manifest_port=manifest_store,
         ledger_port=ledger_store,
+        certification_service=HistoricalReplayCertificationService(
+            manifest_port=manifest_store,
+            ledger_port=ledger_store,
+        ),
     )
 
 
@@ -105,7 +115,23 @@ def bootstrap_historical_replay_closure_service() -> HistoricalReplayClosureServ
     corpus_service = HistoricalReplayCorpusService(
         manifest_port=manifest_store,
         ledger_port=ledger_store,
+        certification_service=HistoricalReplayCertificationService(
+            manifest_port=manifest_store,
+            ledger_port=ledger_store,
+        ),
     )
     return HistoricalReplayClosureService(
         corpus_service=corpus_service,
     )
+
+
+def persist_historical_replay_closure_report(
+    report: HistoricalReplayClosureReport,
+) -> Path:
+    """Persist one historical replay closure report via composition-owned wiring."""
+    settings = get_settings()
+    output_root = Path(settings.data_dir) / "output" / "control"
+    store = FileHistoricalReplayClosureStore(
+        base_path=output_root / "historical_replay_closure"
+    )
+    return store.save(report)

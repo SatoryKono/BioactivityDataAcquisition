@@ -135,22 +135,14 @@ L0 дашборд для одного operator question: что сейчас bro
   `Diagnostics & Docs (Logs / Traces / Raw Metrics)` остаётся отдельной
   collapsed navigation/support surface.
 - **Drilldown**: top-level шина содержит `0. Control Plane`, `2. Runtime`,
-  `3. Provider Health`, `4. Data Quality`, `5. Workflow`, и ключевые
-  current-status panels дублируют этот handoff через panel `dataLinks`.
+  `3. Provider Health`, `4. Data Quality`, `5. Workflow`, `Silver Reject Explorer`;
+  ключевые current-status panels дублируют этот handoff через panel `dataLinks`.
   Каноническая shipped surface этой шины — navigation panel `id=1000`; header
   row рядом с Grafana variables не обязан повторять те же dashboard links.
-  В каждом `id=1000` после bus `0..5` дополнительно закреплены global adjunct
-  links `Silver Reject Explorer`, `Explore Logs`, `Explore Traces`; они
-  открываются в том же окне, а current dashboard item остаётся видимым как
-  disabled dark-gray button.
-  `Explore Traces` remains optional and is available only for traced runs; a
-  run using `NoOpTracing` can legitimately return an empty Tempo search.
-  The shipped trace handoff uses an explicit search-first Tempo route with a
-  bounded initial window `now-150m..now`, `var-ds=tempo`, and
-  `var-groupBy=resource.service.name`, keeps only stable pipeline/provider
-  TraceQL scope, and avoids `${run_type:regex}` on `includeAll` selectors so an
-  empty trace store fails closed as an empty search instead of an invalid
-  breakdown query.
+  Для `bioetl-control-plane-v1` top-level navigation намеренно не уводит
+  оператора напрямую в Grafana Explore apps: first screen остаётся dashboard +
+  runbook surface, а logs/traces расследование начинается из связанных
+  dashboard handoff и runbook-пути.
 
 #### 2. 2. Runtime
 

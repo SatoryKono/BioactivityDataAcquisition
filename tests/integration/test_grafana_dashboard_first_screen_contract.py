@@ -485,6 +485,12 @@ def test_navigation_bus_panels_document_handoff_policy() -> None:
                 f"{dashboard_path.name}:Review Dashboard Navigation description "
                 f"must mention {token!r}"
             )
+        if dashboard.get("uid") == "bioetl-control-plane-v1":
+            assert "explore traces" not in description, (
+                f"{dashboard_path.name}:Review Dashboard Navigation must not "
+                "document direct Explore Traces handoff"
+            )
+            continue
         assert any(token in description for token in tracing_tokens), (
             f"{dashboard_path.name}:Review Dashboard Navigation description "
             "must document traced-run-only Explore Traces semantics"
