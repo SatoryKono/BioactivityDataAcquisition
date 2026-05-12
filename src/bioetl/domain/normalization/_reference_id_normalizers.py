@@ -6,7 +6,6 @@ Extracted from reference_ids.py to meet file size limits.
 from __future__ import annotations
 
 from bioetl.domain.normalization._reference_id_support import (
-    _canonical_or_text,
     _CHEMBL_ID_RE,
     _DRUGBANK_ID_RE,
     _GO_RE,
@@ -31,6 +30,7 @@ from bioetl.domain.normalization._reference_id_support import (
     _S2_HEX_RE,
     _SEMANTIC_SCHOLAR_PREFIXES,
     _UNIPROT_ACCESSION_RE,
+    _canonical_or_text,
     _normalized_text,
     _strip_prefixes,
 )
@@ -183,18 +183,18 @@ def normalize_chembl_reference_id(value: object) -> object:
 
 
 __all__ = [
+    "normalize_chembl_reference_id",
+    "normalize_drugbank_reference_id",
     "normalize_go_reference_id",
     "normalize_interpro_reference_id",
-    "normalize_pfam_reference_id",
-    "normalize_reactome_reference_id",
-    "normalize_pdb_reference_id",
-    "normalize_orcid_reference_id",
     "normalize_issn_reference_id",
-    "normalize_uniprot_accession_reference_id",
-    "normalize_pmcid_reference_id",
     "normalize_mesh_reference_id",
-    "normalize_drugbank_reference_id",
-    "normalize_semantic_scholar_reference_id",
+    "normalize_orcid_reference_id",
+    "normalize_pdb_reference_id",
+    "normalize_pfam_reference_id",
+    "normalize_pmcid_reference_id",
+    "normalize_reactome_reference_id",
     "normalize_ror_reference_id",
-    "normalize_chembl_reference_id",
+    "normalize_semantic_scholar_reference_id",
+    "normalize_uniprot_accession_reference_id",
 ]

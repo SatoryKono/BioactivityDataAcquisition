@@ -5,7 +5,12 @@ Extracted from reproducibility_profiles.py to meet file size limits.
 
 from __future__ import annotations
 
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
+
+if TYPE_CHECKING:
+    from bioetl.domain.control_plane.reproducibility_profiles import (
+        ReproducibilityFamilyProfile,
+    )
 
 ReproducibilityExecutionContext = Literal["source", "composite"]
 ReplayFamilyContractName = Literal[
@@ -92,7 +97,7 @@ def _build_composite_reproducibility_family_profile(
     *,
     family: str | None,
     execution_context: ReproducibilityExecutionContext,
-) -> "ReproducibilityFamilyProfile":
+) -> ReproducibilityFamilyProfile:
     from bioetl.domain.control_plane.reproducibility_profiles import (
         ReproducibilityFamilyProfile,
     )
@@ -252,10 +257,10 @@ def _source_broader_boundary(*, supported: bool) -> str | None:
 
 
 __all__ = [
-    "resolve_reproducibility_family",
+    "_PUBLISHED_COMPOSITE_FAMILIES",
+    "_PUBLISHED_SOURCE_FAMILIES",
+    "_PUBLISHED_SUPPORTED_SOURCE_FAMILIES",
     "_build_composite_reproducibility_family_profile",
     "_build_source_reproducibility_family_profile",
-    "_PUBLISHED_SOURCE_FAMILIES",
-    "_PUBLISHED_COMPOSITE_FAMILIES",
-    "_PUBLISHED_SUPPORTED_SOURCE_FAMILIES",
+    "resolve_reproducibility_family",
 ]

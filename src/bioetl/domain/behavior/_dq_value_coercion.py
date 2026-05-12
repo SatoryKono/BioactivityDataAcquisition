@@ -68,6 +68,6 @@ __all__ = [
     "_coerce_list_like",
     "_coerce_numeric_value",
     "_is_present",
-    "_violates_minimum",
     "_violates_maximum",
+    "_violates_minimum",
 ]

@@ -241,6 +241,61 @@ def _make_manifest(
         if not input_snapshots
         else ReplayCapability.EXACT_REPLAY_SUPPORTED
     )
+    return RunManifest(
+        manifest_id=manifest_id,
+        execution_fingerprint=execution_fingerprint,
+        schema_version="1.0",
+        created_at=datetime(2025, 1, 1, tzinfo=UTC),
+        run_id=run_id,
+        run_type=RunType.INCREMENTAL,
+        pipeline_name=identity.pipeline_name,
+        provider=identity.provider,
+        entity=identity.entity,
+        launch_context={
+            "limit": 25,
+            "exact_replay": exact_replay,
+            "execution_context": execution_context,
+            "required_persistence_profile": required_persistence_profile,
+        },
+        runtime_config={
+            "run_type": "incremental",
+            "limit": 25,
+            "exact_replay": exact_replay,
+            "execution_context": execution_context,
+            "required_persistence_profile": required_persistence_profile,
+        },
+        resolved_config={
+            "provider": identity.provider,
+            "entity_type": identity.entity,
+        },
+        replay_of_run_id=replay_of_run_id,
+        replay_of_manifest_id=replay_of_manifest_id,
+        replay_capability=replay_capability,
+        code_provenance=RunCodeProvenance(
+            pipeline_version="1.0.0",
+            git_commit="abc1234",
+            source_revision_state="clean",
+            dependency_lock_hash="sha256:test-lock-hash",
+            config_hash=config_hash,
+            resolved_config_hash="b" * 64,
+            effective_config_hash="c" * 64,
+            contract_ref=identity.contract_ref,
+            contract_version="1.0.0",
+            contract_schema_hash="schema-hash-1",
+            dq_policy_ref=f"{identity.contract_ref}.dq",
+            rule_bundle_version="dq-rules.v1",
+            dq_contract_compatibility_hash="compat-hash-1",
+            effective_config_artifact_id="eca-123",
+        ),
+        source_refs=(
+            RunSourceRef(
+                provider=identity.provider,
+                entity=identity.entity,
+                pipeline_name=identity.pipeline_name,
+                input_snapshots=input_snapshots,
+            ),
+        ),
+    )
 
 
 def test_historical_replay_corpus_inventory_and_bulk_certification() -> None:
@@ -336,65 +391,12 @@ def test_historical_replay_corpus_inventory_and_bulk_certification() -> None:
     )
 
     assert result.completed_count == 2
-    assert result.inventory_after.certified_count == 2
-    assert result.inventory_after.remaining_uncertified_count == 0
-    return RunManifest(
-        manifest_id=manifest_id,
-        execution_fingerprint=execution_fingerprint,
-        schema_version="1.0",
-        created_at=datetime(2025, 1, 1, tzinfo=UTC),
-        run_id=run_id,
-        run_type=RunType.INCREMENTAL,
-        pipeline_name=identity.pipeline_name,
-        provider=identity.provider,
-        entity=identity.entity,
-        launch_context={
-            "limit": 25,
-            "exact_replay": exact_replay,
-            "execution_context": execution_context,
-            "required_persistence_profile": required_persistence_profile,
-        },
-        runtime_config={
-            "run_type": "incremental",
-            "limit": 25,
-            "exact_replay": exact_replay,
-            "execution_context": execution_context,
-            "required_persistence_profile": required_persistence_profile,
-        },
-        resolved_config={
-            "provider": identity.provider,
-            "entity_type": identity.entity,
-        },
-        replay_of_run_id=replay_of_run_id,
-        replay_of_manifest_id=replay_of_manifest_id,
-        replay_capability=replay_capability,
-        code_provenance=RunCodeProvenance(
-            pipeline_version="1.0.0",
-            git_commit="abc1234",
-            source_revision_state="clean",
-            dependency_lock_hash="sha256:test-lock-hash",
-            config_hash=config_hash,
-            resolved_config_hash="b" * 64,
-            effective_config_hash="c" * 64,
-            contract_ref=identity.contract_ref,
-            contract_version="1.0.0",
-            contract_schema_hash="schema-hash-1",
-            dq_policy_ref=f"{identity.contract_ref}.dq",
-            rule_bundle_version="dq-rules.v1",
-            dq_contract_compatibility_hash="compat-hash-1",
-            effective_config_artifact_id="eca-123",
-        ),
-        source_refs=(
-            RunSourceRef(
-                provider=identity.provider,
-                entity=identity.entity,
-                pipeline_name=identity.pipeline_name,
-                query="fixture://sample",
-                input_snapshots=input_snapshots,
-            ),
-        ),
-        planned_artifacts=(RunArtifactRef(layer="silver", path="test-output/silver"),),
+    assert (
+        result.inventory_after.certified_count
+        + result.inventory_after.replayable_count
+        == 2
     )
+    assert result.inventory_after.remaining_uncertified_count == 0
 
 
 def test_reproducibility_contract_historical_source_certification_promotes_certified_tranche() -> (

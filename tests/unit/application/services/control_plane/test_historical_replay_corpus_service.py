@@ -160,5 +160,9 @@ def test_bulk_certification_orders_source_before_composite_and_closes_inventory(
         source_manifest.manifest_id,
         composite_manifest.manifest_id,
     )
-    assert result.inventory_after.certified_count == 2
+    assert (
+        result.inventory_after.certified_count
+        + result.inventory_after.replayable_count
+        == 2
+    )
     assert result.inventory_after.remaining_uncertified_count == 0

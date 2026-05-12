@@ -22,3 +22,23 @@ See Also:
 from __future__ import annotations
 
 __all__: list[str] = []
+
+_LAZY_MODULE_EXPORTS = {
+    "composite_api",
+    "control_plane_api",
+    "entrypoints",
+    "execution_api",
+    "health_api",
+    "maintenance_api",
+    "observability_api",
+    "registry_api",
+    "resources_api",
+    "types",
+}
+
+_LAZY_ATTR_EXPORTS = {
+    "PipelineDefinition",
+    "PipelineRegistry",
+    "create_registry",
+    "get_default_registry",
+}

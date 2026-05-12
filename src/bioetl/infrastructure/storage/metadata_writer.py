@@ -18,6 +18,8 @@ from bioetl.infrastructure.storage.metadata.writer_operations import (
 from . import metadata_writer_helpers as _helpers
 from .metadata_writer_impl import (
     MetadataWriter as _BaseMetadataWriter,
+)
+from .metadata_writer_impl import (
     _MetadataWriterOperations as _BaseMetadataWriterOperations,
 )
 
@@ -80,13 +82,17 @@ class MetadataWriter(_BaseMetadataWriter):
     ) -> None:
         super().__init__(
             logger=cast("Any", logger),  # Any: facade preserves legacy patch seam
-            atomic_replace_retry_policy=cast("Any", atomic_replace_retry_policy),  # Any: helper owns concrete retry-policy implementation
+            atomic_replace_retry_policy=cast(
+                "Any", atomic_replace_retry_policy
+            ),  # Any: helper owns concrete retry-policy implementation
             metrics=cast("Any", metrics),  # Any: optional metrics backend is dynamic
         )
         self._operations = _FacadeMetadataWriterOperations(
             logger=cast("Any", self._logger),  # Any: facade preserves legacy patch seam
             metrics=cast("Any", self._metrics),  # Any: optional metrics backend is dynamic
-            retry_policy=cast("Any", self._atomic_replace_retry_policy),  # Any: helper owns concrete retry-policy implementation
+            retry_policy=cast(
+                "Any", self._atomic_replace_retry_policy
+            ),  # Any: helper owns concrete retry-policy implementation
             artifact_recorder_provider=lambda: self._artifact_recorder,
         )
 

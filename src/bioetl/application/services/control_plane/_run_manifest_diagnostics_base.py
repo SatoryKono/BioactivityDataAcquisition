@@ -193,23 +193,13 @@ def _build_base_summary_payload(
     )
 
 
-def _build_base_summary_core_payload(
-    *,
-    manifest: RunManifest,
-    replay_context: _BaseSummaryReplayContext,
-    exact_replay_eligible: bool,
-    code_provenance_state: dict[str, object],
+def _build_base_summary_code_provenance_payload(
+    code_provenance: object,
     dependency_lock_state: object,
+    code_provenance_state: dict[str, object],
 ) -> dict[str, object]:
-    code_provenance = manifest.code_provenance
+    """Build code provenance section of base summary payload."""
     return {
-        "manifest_id": manifest.manifest_id,
-        "manifest_created_at": manifest.created_at.isoformat(),
-        "run_id": str(manifest.run_id),
-        "pipeline_name": manifest.pipeline_name,
-        "provider": manifest.provider,
-        "entity": manifest.entity,
-        "execution_fingerprint": manifest.execution_fingerprint,
         "config_hash": code_provenance.config_hash,
         "resolved_config_hash": code_provenance.resolved_config_hash,
         "effective_config_hash": code_provenance.effective_config_hash,
@@ -226,6 +216,50 @@ def _build_base_summary_core_payload(
             code_provenance.dq_contract_compatibility_hash
         ),
         "effective_config_artifact_id": code_provenance.effective_config_artifact_id,
+    }
+
+
+def _build_base_summary_replay_family_contract_payload(
+    replay_family_contract: dict[str, object],
+) -> dict[str, object]:
+    """Build replay family contract section of base summary payload."""
+    return {
+        "replay_support_state": replay_family_contract.get("support_state"),
+        "post_capture_replayable_parent_supported": replay_family_contract.get(
+            "post_capture_replayable_parent_supported"
+        ),
+        "post_capture_replayable_parent_boundary": replay_family_contract.get(
+            "post_capture_replayable_parent_boundary"
+        ),
+        "historical_live_run_upgrade_policy": replay_family_contract.get(
+            "historical_live_run_upgrade_policy"
+        ),
+        "historical_live_run_upgrade_boundary": replay_family_contract.get(
+            "historical_live_run_upgrade_boundary"
+        ),
+        "historical_live_run_upgrade_reason": replay_family_contract.get(
+            "historical_live_run_upgrade_reason"
+        ),
+        "broader_historical_exact_replay_policy": replay_family_contract.get(
+            "broader_historical_exact_replay_policy"
+        ),
+        "broader_historical_exact_replay_boundary": replay_family_contract.get(
+            "broader_historical_exact_replay_boundary"
+        ),
+        "broader_historical_exact_replay_reason": replay_family_contract.get(
+            "broader_historical_exact_replay_reason"
+        ),
+    }
+
+
+def _build_base_summary_replay_payload(
+    manifest: RunManifest,
+    replay_context: _BaseSummaryReplayContext,
+    exact_replay_eligible: bool,
+    replay_family_contract_payload: dict[str, object],
+) -> dict[str, object]:
+    """Build replay-related fields for base summary payload."""
+    return {
         "replay_of_run_id": manifest.replay_of_run_id,
         "replay_of_manifest_id": manifest.replay_of_manifest_id,
         "replay_parentage": _build_replay_parentage(manifest),
@@ -241,49 +275,7 @@ def _build_base_summary_core_payload(
         "requested_exact_replay": replay_context.requested_exact_replay,
         "exact_replay_support_boundary": replay_context.exact_replay_support_boundary,
         "replay_capability_reason": replay_context.replay_capability_reason,
-        "replay_support_state": replay_context.replay_family_contract.get(
-            "support_state"
-        ),
-        "post_capture_replayable_parent_supported": (
-            replay_context.replay_family_contract.get(
-                "post_capture_replayable_parent_supported"
-            )
-        ),
-        "post_capture_replayable_parent_boundary": (
-            replay_context.replay_family_contract.get(
-                "post_capture_replayable_parent_boundary"
-            )
-        ),
-        "historical_live_run_upgrade_policy": (
-            replay_context.replay_family_contract.get(
-                "historical_live_run_upgrade_policy"
-            )
-        ),
-        "historical_live_run_upgrade_boundary": (
-            replay_context.replay_family_contract.get(
-                "historical_live_run_upgrade_boundary"
-            )
-        ),
-        "historical_live_run_upgrade_reason": (
-            replay_context.replay_family_contract.get(
-                "historical_live_run_upgrade_reason"
-            )
-        ),
-        "broader_historical_exact_replay_policy": (
-            replay_context.replay_family_contract.get(
-                "broader_historical_exact_replay_policy"
-            )
-        ),
-        "broader_historical_exact_replay_boundary": (
-            replay_context.replay_family_contract.get(
-                "broader_historical_exact_replay_boundary"
-            )
-        ),
-        "broader_historical_exact_replay_reason": (
-            replay_context.replay_family_contract.get(
-                "broader_historical_exact_replay_reason"
-            )
-        ),
+        **replay_family_contract_payload,
         "broader_historical_exact_replay_state": (
             _resolve_broader_historical_exact_replay_state(
                 manifest=manifest,
@@ -301,16 +293,6 @@ def _build_base_summary_core_payload(
         "exact_replay_eligible": exact_replay_eligible,
         "exact_replay_blockers": replay_context.exact_replay_blockers,
         "replay_readiness_verdict": replay_context.replay_readiness_verdict,
-        "append_mode_semantic_sinks": _collect_append_mode_semantic_sinks(manifest),
-        "input_snapshot_ids": _collect_input_snapshot_ids(
-            replay_context.input_snapshots
-        ),
-        "input_snapshot_content_hashes": _collect_input_snapshot_content_hashes(
-            replay_context.input_snapshots
-        ),
-        "input_snapshot_identity_fingerprint": (
-            _compute_input_snapshot_identity_fingerprint(replay_context.input_snapshots)
-        ),
         "replay_mode": replay_context.replay_mode,
         "operator_replay_mode": _resolve_operator_replay_mode(
             replay_mode=replay_context.replay_mode,
@@ -320,16 +302,29 @@ def _build_base_summary_core_payload(
         "continuation_mode": replay_context.continuation_mode,
         "replay_family_contract": replay_context.replay_family_contract,
         "source_posture": _resolve_source_posture(replay_context.policy_assessment),
-        "input_snapshot_missing_source_refs": list(
-            replay_context.policy_assessment.snapshot_envelope.missing_snapshot_source_refs
-        ),
         "replay_capability_assessment": (replay_context.policy_assessment.to_dict()),
         "resume_contract": replay_context.resume_contract,
         "resume_diagnostics": None,
-        "lineage_closure_boundary": build_lineage_closure_boundary(
-            provider=manifest.provider,
-            entity=manifest.entity,
-            contract_ref=code_provenance.contract_ref,
+    }
+
+
+def _build_base_summary_snapshot_payload(
+    replay_context: _BaseSummaryReplayContext,
+    exact_replay_eligible: bool,
+) -> dict[str, object]:
+    """Build snapshot-related fields for base summary payload."""
+    return {
+        "append_mode_semantic_sinks": _collect_append_mode_semantic_sinks(
+            replay_context.policy_assessment.manifest
+        ),
+        "input_snapshot_ids": _collect_input_snapshot_ids(
+            replay_context.input_snapshots
+        ),
+        "input_snapshot_content_hashes": _collect_input_snapshot_content_hashes(
+            replay_context.input_snapshots
+        ),
+        "input_snapshot_identity_fingerprint": (
+            _compute_input_snapshot_identity_fingerprint(replay_context.input_snapshots)
         ),
         "input_snapshot_count": len(replay_context.input_snapshots),
         "snapshot_status": _resolve_snapshot_status(
@@ -338,6 +333,56 @@ def _build_base_summary_core_payload(
             replay_mode=replay_context.replay_mode,
         ),
         "input_snapshots": replay_context.input_snapshots,
+    }
+
+
+def _build_base_summary_core_payload(
+    *,
+    manifest: RunManifest,
+    replay_context: _BaseSummaryReplayContext,
+    exact_replay_eligible: bool,
+    code_provenance_state: dict[str, object],
+    dependency_lock_state: object,
+) -> dict[str, object]:
+    code_provenance = manifest.code_provenance
+    code_provenance_payload = _build_base_summary_code_provenance_payload(
+        code_provenance=code_provenance,
+        dependency_lock_state=dependency_lock_state,
+        code_provenance_state=code_provenance_state,
+    )
+    replay_family_contract_payload = _build_base_summary_replay_family_contract_payload(
+        replay_family_contract=replay_context.replay_family_contract,
+    )
+    replay_payload = _build_base_summary_replay_payload(
+        manifest=manifest,
+        replay_context=replay_context,
+        exact_replay_eligible=exact_replay_eligible,
+        replay_family_contract_payload=replay_family_contract_payload,
+    )
+    snapshot_payload = _build_base_summary_snapshot_payload(
+        manifest=manifest,
+        replay_context=replay_context,
+        exact_replay_eligible=exact_replay_eligible,
+    )
+    return {
+        "manifest_id": manifest.manifest_id,
+        "manifest_created_at": manifest.created_at.isoformat(),
+        "run_id": str(manifest.run_id),
+        "pipeline_name": manifest.pipeline_name,
+        "provider": manifest.provider,
+        "entity": manifest.entity,
+        "execution_fingerprint": manifest.execution_fingerprint,
+        **code_provenance_payload,
+        **replay_payload,
+        "input_snapshot_missing_source_refs": list(
+            replay_context.policy_assessment.snapshot_envelope.missing_snapshot_source_refs
+        ),
+        **snapshot_payload,
+        "lineage_closure_boundary": build_lineage_closure_boundary(
+            provider=manifest.provider,
+            entity=manifest.entity,
+            contract_ref=code_provenance.contract_ref,
+        ),
         "planned_artifacts": _build_planned_artifact_refs(manifest),
         "occurrence_only_diagnostics": [],
     }

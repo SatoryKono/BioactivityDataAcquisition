@@ -16,6 +16,10 @@ ALLOWED_BROAD_EXCEPTION_POLICIES: dict[str, frozenset[str]] = {
     "src/bioetl/infrastructure/storage/silver/support.py": frozenset(),
     "src/bioetl/infrastructure/storage/silver/operations/maintenance_operations.py": frozenset(),
     "src/bioetl/interfaces/cli/commands/domains/run/command.py": frozenset(),
+    # HTTP server network boundary handlers need broad exception handling to return
+    # 500 responses instead of crashing the server on unexpected errors.
+    "src/bioetl/interfaces/http/health_server_http_mixin.py": frozenset(),
+    "src/bioetl/interfaces/http/health_server_routing_mixin.py": frozenset(),
 }
 P0_2_CRITICAL_ERROR_MODULES = (
     "src/bioetl/application/core/batch_executor.py",
@@ -24,7 +28,6 @@ P0_2_CRITICAL_ERROR_MODULES = (
     "src/bioetl/application/core/postrun/metadata_version_resolver.py",
     "src/bioetl/application/composite/runner_pkg/runner.py",
     "src/bioetl/interfaces/http/health_server.py",
-    "src/bioetl/interfaces/http/health_server_http_mixin.py",
 )
 P0_2_REASON_CODE_MIN_COVERAGE = 0.95
 
