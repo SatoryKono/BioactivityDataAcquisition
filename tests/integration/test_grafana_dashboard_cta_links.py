@@ -649,12 +649,10 @@ def test_silver_reject_explorer_selected_record_details_uses_safe_payload_filter
 
 
 def test_control_plane_dashboard_does_not_expose_top_level_runbook_link() -> None:
-    """Top navigation may expose dashboards and Explore drilldowns, but not runbooks/docs."""
+    """Top navigation may expose only dashboard bus links, not runbooks/docs/Explore."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
     assert all(
         str(link.get("url", "")).startswith("/d/")
-        or str(link.get("url", "")).startswith("/a/grafana-lokiexplore-app/")
-        or str(link.get("url", "")).startswith("/a/grafana-exploretraces-app/")
         for link in get_dashboard_navigation_links(dashboard)
     ), (
         "Control-plane top navigation must not mix dashboard bus links with runbooks or docs"

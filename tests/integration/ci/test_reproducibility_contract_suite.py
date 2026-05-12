@@ -340,6 +340,10 @@ def test_historical_replay_corpus_inventory_and_bulk_certification() -> None:
     service = HistoricalReplayCorpusService(
         manifest_port=manifest_store,
         ledger_port=ledger_store,
+        certification_service=HistoricalReplayCertificationService(
+            manifest_port=manifest_store,
+            ledger_port=ledger_store,
+        ),
     )
 
     inventory_before = service.build_certifiability_inventory()

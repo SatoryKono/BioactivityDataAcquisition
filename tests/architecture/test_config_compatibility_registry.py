@@ -132,6 +132,17 @@ def test_config_compatibility_entries_are_bounded_or_justified() -> None:
             assert entry.get("permanent_rationale"), (
                 f"{entry_id} must define permanent_rationale"
             )
+            assert entry.get("review_decision") == "retain-permanent", (
+                f"{entry_id} permanent aliases must record review_decision="
+                "'retain-permanent'"
+            )
+            decision_recorded_on = entry.get("decision_recorded_on")
+            assert isinstance(decision_recorded_on, str) and decision_recorded_on, (
+                f"{entry_id} permanent aliases must define decision_recorded_on"
+            )
+            assert date.fromisoformat(decision_recorded_on), (
+                f"{entry_id} decision_recorded_on must be ISO date"
+            )
 
 
 def test_config_compatibility_entries_reference_existing_files() -> None:

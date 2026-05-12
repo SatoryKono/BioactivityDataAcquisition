@@ -7,8 +7,12 @@ import pytest
 from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
 
+from bioetl.application.core.config import RecordProcessorConfig
 from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
+from bioetl.domain.context import PipelineContext
+from bioetl.domain.config import DQConfig
 from bioetl.domain.types import HealthStatus
+from bioetl.domain.types import RunType
 from tests.unit.application.core.test_batch_executor_memory import (
     _create_batch_executor,
 )
@@ -100,20 +104,31 @@ class TestBatchExecutorRecoveryInvariants:
         services.storage.write_bronze = AsyncMock()
         services.storage.write_silver = AsyncMock()
         services.storage.write_gold = AsyncMock()
+        mock_logger = MagicMock()
+        mock_logger.bind = MagicMock(return_value=mock_logger)
+        context = PipelineContext(
+            run_id=uuid4(),
+            run_type=RunType.INCREMENTAL,
+            logger=mock_logger,
+        )
+        config = RecordProcessorConfig(
+            pipeline_name="test_pipeline",
+            provider="test",
+            entity_type="ent",
+            silver_schema=None,
+            gold_schema=MagicMock(),
+            dq_config=DQConfig(
+                soft_fail_threshold=0.1,
+                hard_fail_threshold=0.3,
+            ),
+            normalization_enabled=False,
+        )
 
         # Run 1: Should fail exactly at record 550.
         executor_run1 = _create_batch_executor(
             services=services,
-            context=MagicMock(run_id=uuid4()),
-            config=MagicMock(
-                pipeline_name="test_pipeline",
-                provider="test",
-                entity_type="ent",
-                dq_config=MagicMock(
-                    soft_fail_threshold=0.1,
-                    hard_fail_threshold=0.3,
-                ),
-            ),
+            context=context,
+            config=config,
             callbacks={
                 "transform": lambda ctx, rec, idx: {"entity_id": str(rec["id"])},
                 "gold_filter": lambda ctx, rec: True,
@@ -144,16 +159,12 @@ class TestBatchExecutorRecoveryInvariants:
 
         executor_run2 = _create_batch_executor(
             services=services,
-            context=MagicMock(run_id=uuid4()),
-            config=MagicMock(
-                pipeline_name="test_pipeline",
-                provider="test",
-                entity_type="ent",
-                dq_config=MagicMock(
-                    soft_fail_threshold=0.1,
-                    hard_fail_threshold=0.3,
-                ),
+            context=PipelineContext(
+                run_id=uuid4(),
+                run_type=RunType.INCREMENTAL,
+                logger=mock_logger,
             ),
+            config=config,
             callbacks={
                 "transform": lambda ctx, rec, idx: {"entity_id": str(rec["id"])},
                 "gold_filter": lambda ctx, rec: True,

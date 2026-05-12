@@ -10,6 +10,7 @@ from uuid import UUID
 
 import pytest
 
+from bioetl.application.core.base_transformer import FilteredOutError
 from bioetl.application.pipelines.semanticscholar.transformer import (
     SemanticScholarPublicationTransformer,
 )
@@ -224,20 +225,19 @@ class TestSemanticScholarPublicationTransformer:
         assert result["publication_type_unified"] == "Review"
 
     @pytest.mark.asyncio
-    async def test_transform_missing_paper_id_skips_record(
+    async def test_transform_missing_paper_id_raises_filtered_out_error(
         self,
         transformer: SemanticScholarPublicationTransformer,
         mock_context: PipelineContext,
     ) -> None:
-        """Test that records without paper_id are skipped."""
+        """Missing paper_id must use runtime filtered-out disposition."""
         record = {
             "title": "Some Title",
             "_lookup_method": "title_fallback",
         }
 
-        result = await transformer.transform(mock_context, record, 0)
-
-        assert result is None
+        with pytest.raises(FilteredOutError, match="primary identifier"):
+            await transformer.transform(mock_context, record, 0)
         mock_context.logger.warning.assert_called()
 
     @pytest.mark.asyncio

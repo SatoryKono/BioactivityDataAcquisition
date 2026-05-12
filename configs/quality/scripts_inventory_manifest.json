@@ -1,20 +1,20 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-05-12T12:08:47.277346+00:00",
+  "generated_at": "2026-05-12T14:57:44.224380+00:00",
   "summary": {
-    "total_scripts": 365,
+    "total_scripts": 366,
     "status_counts": {
-      "active": 331,
+      "active": 332,
       "supporting": 34
     },
     "reference_group_coverage": {
       "agents": 4,
       "build": 2,
       "ci": 51,
-      "docs": 130,
+      "docs": 131,
       "scripts": 299,
       "skills": 8,
-      "tests": 142
+      "tests": 143
     }
   },
   "scripts": [
@@ -8131,19 +8131,58 @@
           "path": "docs/05-operations/runbooks/run-manifest-inspection.md",
           "line": 216,
           "source_group": "docs",
-          "text": "./.venv/bin/python scripts/engineering/qa/run_historical_replay_closure_campaign.py --write-dispositions --write-report"
+          "text": "./.venv/bin/python scripts/engineering/qa/run_historical_replay_closure_campaign.py --auto-certify-sources --auto-certify-composites --claim-scope-mode retained_certifiable_historical_runs --write-dis"
         },
         {
           "path": "docs/05-operations/runbooks/run-manifest-inspection.md",
-          "line": 237,
+          "line": 238,
           "source_group": "docs",
           "text": "- `run_historical_replay_closure_campaign.py` is the deterministic batch path"
         },
         {
           "path": "tests/architecture/test_reproducibility_docs_contract_drift.py",
-          "line": 188,
+          "line": 197,
           "source_group": "tests",
           "text": "assert \"run_historical_replay_closure_campaign.py\" in runbook"
+        }
+      ]
+    },
+    {
+      "path": "scripts/engineering/qa/run_historical_replay_universe_campaign.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 5,
+      "references": [
+        {
+          "path": "docs/04-reference/contracts/run-manifest-ledger.md",
+          "line": 187,
+          "source_group": "docs",
+          "text": "- `scripts/engineering/qa/run_historical_replay_universe_campaign.py` persists"
+        },
+        {
+          "path": "docs/05-operations/runbooks/run-manifest-inspection.md",
+          "line": 217,
+          "source_group": "docs",
+          "text": "./.venv/bin/python scripts/engineering/qa/run_historical_replay_universe_campaign.py --external-pack path/to/archive-pack.json --write-report"
+        },
+        {
+          "path": "docs/05-operations/runbooks/run-manifest-inspection.md",
+          "line": 243,
+          "source_group": "docs",
+          "text": "- `run_historical_replay_universe_campaign.py` is the full-universe path: it"
+        },
+        {
+          "path": "tests/architecture/test_reproducibility_docs_contract_drift.py",
+          "line": 123,
+          "source_group": "tests",
+          "text": "assert \"run_historical_replay_universe_campaign.py\" in text"
+        },
+        {
+          "path": "tests/architecture/test_reproducibility_docs_contract_drift.py",
+          "line": 203,
+          "source_group": "tests",
+          "text": "assert \"run_historical_replay_universe_campaign.py\" in runbook"
         }
       ]
     },
@@ -10080,7 +10119,7 @@
         },
         {
           "path": "tests/architecture/test_test_structural_debt.py",
-          "line": 19,
+          "line": 20,
           "source_group": "tests",
           "text": "\"tests/testing_support/neo4j_memory_sync.py::test_snapshot_contains_core_repo_surfaces\": 295,"
         }

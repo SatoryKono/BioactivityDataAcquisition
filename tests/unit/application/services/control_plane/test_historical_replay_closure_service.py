@@ -15,6 +15,7 @@ from bioetl.application.services.control_plane.historical_replay_corpus_service 
     HistoricalReplayCorpusService,
 )
 from bioetl.application.services.control_plane.historical_replay_certification_service import (
+    HistoricalReplayCertificationService,
     HistoricalReplaySnapshotCertification,
 )
 from bioetl.domain.control_plane import RunManifest, RunSourceRef
@@ -86,6 +87,10 @@ def test_closure_report_blocks_claim_without_explicit_residual_dispositions() ->
         corpus_service=HistoricalReplayCorpusService(
             manifest_port=manifest_store,
             ledger_port=ledger_store,
+            certification_service=HistoricalReplayCertificationService(
+                manifest_port=manifest_store,
+                ledger_port=ledger_store,
+            ),
         )
     )
 
@@ -110,6 +115,10 @@ def test_closure_report_supports_global_claim_after_bulk_certification() -> None
     corpus_service = HistoricalReplayCorpusService(
         manifest_port=manifest_store,
         ledger_port=ledger_store,
+        certification_service=HistoricalReplayCertificationService(
+            manifest_port=manifest_store,
+            ledger_port=ledger_store,
+        ),
     )
     closure_service = HistoricalReplayClosureService(corpus_service=corpus_service)
 
@@ -187,6 +196,10 @@ def test_closure_report_classifies_irrecoverable_legacy_subset() -> None:
         corpus_service=HistoricalReplayCorpusService(
             manifest_port=manifest_store,
             ledger_port=ledger_store,
+            certification_service=HistoricalReplayCertificationService(
+                manifest_port=manifest_store,
+                ledger_port=ledger_store,
+            ),
         )
     )
 
@@ -217,6 +230,10 @@ def test_closure_report_can_flip_claim_for_narrowed_certifiable_scope() -> None:
         corpus_service=HistoricalReplayCorpusService(
             manifest_port=manifest_store,
             ledger_port=ledger_store,
+            certification_service=HistoricalReplayCertificationService(
+                manifest_port=manifest_store,
+                ledger_port=ledger_store,
+            ),
         )
     )
 

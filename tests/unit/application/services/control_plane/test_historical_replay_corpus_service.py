@@ -11,6 +11,7 @@ from bioetl.application.services.control_plane.historical_replay_corpus_service 
     HistoricalReplayCorpusService,
 )
 from bioetl.application.services.control_plane.historical_replay_certification_service import (
+    HistoricalReplayCertificationService,
     HistoricalReplaySnapshotCertification,
 )
 from bioetl.domain.control_plane import RunManifest, RunSourceRef
@@ -81,6 +82,10 @@ def test_inventory_distinguishes_pending_and_certified_historical_records() -> N
     service = HistoricalReplayCorpusService(
         manifest_port=manifest_store,
         ledger_port=ledger_store,
+        certification_service=HistoricalReplayCertificationService(
+            manifest_port=manifest_store,
+            ledger_port=ledger_store,
+        ),
     )
 
     inventory = service.build_certifiability_inventory()
@@ -109,6 +114,10 @@ def test_bulk_certification_orders_source_before_composite_and_closes_inventory(
     service = HistoricalReplayCorpusService(
         manifest_port=manifest_store,
         ledger_port=ledger_store,
+        certification_service=HistoricalReplayCertificationService(
+            manifest_port=manifest_store,
+            ledger_port=ledger_store,
+        ),
     )
 
     result = service.certify_retained_corpus(

@@ -29,11 +29,22 @@ def test_composite_api_reexports_bootstrap_entrypoints() -> None:
 
 
 @pytest.mark.unit
-def test_bootstrap_package_root_no_longer_reexports_runtime_helpers() -> None:
-    """Package bootstrap root should stay importable without facade exports."""
+def test_bootstrap_package_root_exposes_sanctioned_lazy_runtime_helpers() -> None:
+    """Package bootstrap root should expose the frozen lazy compatibility surface."""
     bootstrap_module = importlib.import_module("bioetl.composition.bootstrap")
 
-    assert bootstrap_module.__all__ == []
+    assert set(bootstrap_module.__all__) == {
+        "bootstrap_composite_runner",
+        "bootstrap_dq_monitor",
+        "bootstrap_logger",
+        "bootstrap_metrics",
+        "bootstrap_observability_bundle",
+        "bootstrap_pipeline_runner",
+        "bootstrap_tracer",
+        "load_composite_config",
+        "load_pipeline_config",
+        "maybe_start_metrics_server",
+    }
 
 
 @pytest.mark.unit

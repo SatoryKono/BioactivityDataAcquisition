@@ -15,12 +15,83 @@ policy:
     - removal_step
 registries:
   file_size_limits: {}
-  function_complexity: {}
+  function_complexity:
+    src/bioetl/application/services/control_plane/_run_manifest_diagnostics_replay_helpers.py::_collect_append_mode_semantic_sinks:
+      value: 14
+      owner: "@bioetl-architecture"
+      reason: "Replay sink discovery must normalize multiple historical config shapes and append-mode variants during the current diagnostics compatibility window."
+      classification: "technical_debt"
+      linked_rf: "RF-000"
+      expires_on: "2026-09-30"
+      removal_step: "Collapse sink-shape normalization behind a dedicated helper so append-mode detection can return under CC 10."
+    src/bioetl/application/services/control_plane/historical_replay_closure_service.py::_build_universal_scope_global_claim:
+      value: 11
+      owner: "@bioetl-architecture"
+      reason: "Historical replay claim gating still carries explicit branch coverage for closure-state semantics that are scheduled for rule-table extraction."
+      classification: "technical_debt"
+      linked_rf: "RF-000"
+      expires_on: "2026-09-30"
+      removal_step: "Move claim-verdict branching to smaller predicate helpers or a rule table so the function returns under CC 10."
+    src/bioetl/application/services/workflow_runner_service.py::run_workflow:
+      value: 14
+      owner: "@bioetl-architecture"
+      reason: "Workflow runner still owns resume/skip/failure propagation across step execution until orchestration-state transitions are extracted."
+      classification: "technical_debt"
+      linked_rf: "RF-000"
+      expires_on: "2026-09-30"
+      removal_step: "Extract skip/failure state transitions into helper methods so the main workflow loop returns under CC 10."
   function_length:
-    {}
-  class_size: {}
+    src/bioetl/application/services/control_plane/_run_manifest_diagnostics_summary.py::_build_identity_graph:
+      value: 130
+      owner: "@bioetl-architecture"
+      reason: "Identity-graph assembly still enumerates a wide compatibility payload surface for replay diagnostics and operator forensics."
+      classification: "technical_debt"
+      linked_rf: "RF-000"
+      expires_on: "2026-09-30"
+      removal_step: "Extract identity-graph sections into smaller builders so the coordinating function returns below 100 lines."
+    src/bioetl/application/services/control_plane/workflow_execution_preparation.py::_apply_incremental_offset:
+      value: 110
+      owner: "@bioetl-architecture"
+      reason: "Incremental offset preparation still rebuilds the full WorkflowRunOptionsConfig until run-option update helpers are shared across workflow preparation paths."
+      classification: "technical_debt"
+      linked_rf: "RF-000"
+      expires_on: "2026-09-30"
+      removal_step: "Introduce a run-options update helper and shrink the incremental adjustment function below 100 lines."
+  class_size:
+    src/bioetl/application/services/control_plane/_run_manifest_inspection_mixins.py::RunManifestInspectionIdentityGraphMixin:
+      value: 330
+      owner: "@bioetl-architecture"
+      reason: "The identity-graph mixin still houses fallback payload construction and compatibility projections pending a dedicated inspection identity builder."
+      classification: "technical_debt"
+      linked_rf: "RF-000"
+      expires_on: "2026-09-30"
+      removal_step: "Extract identity-graph sub-builders into a dedicated service/module and reduce the mixin below 300 lines."
+    src/bioetl/application/services/control_plane/historical_replay_certification_service.py::HistoricalReplayCertificationService:
+      value: 390
+      owner: "@bioetl-architecture"
+      reason: "Historical replay certification still combines validation, ledger write orchestration, and diagnostics projection in one service during rollout."
+      classification: "technical_debt"
+      linked_rf: "RF-000"
+      expires_on: "2026-09-30"
+      removal_step: "Split certification validation and result projection into collaborators so the service returns below 300 lines."
   class_method_count: {}
-  god_object: {}
+  god_object:
+    src/bioetl/application/services/control_plane/_run_manifest_inspection_mixins.py::RunManifestInspectionIdentityGraphMixin:
+      value: 1
+      owner: "@bioetl-architecture"
+      reason: "This mixin is intentionally transitional while identity-graph assembly is being migrated out of the inspection facade into delegated builders."
+      classification: "technical_debt"
+      linked_rf: "RF-000"
+      expires_on: "2026-09-30"
+      removal_step: "Extract identity-graph sections into delegated collaborators so the mixin no longer qualifies as a large low-delegation object."
+    src/bioetl/application/services/control_plane/historical_replay_certification_service.py::HistoricalReplayCertificationService:
+      value: 1
+      owner: "@bioetl-architecture"
+      reason: "The service currently centralizes certification validation and ledger publication semantics before planned collaborator extraction."
+      classification: "technical_debt"
+      linked_rf: "RF-000"
+      expires_on: "2026-09-30"
+      removal_step: "Introduce delegated validation/projection collaborators so the service no longer appears as a large low-delegation object."
   domain_complexity:
     src/bioetl/domain/config/memory.py::MemoryConfig:
       value: 6

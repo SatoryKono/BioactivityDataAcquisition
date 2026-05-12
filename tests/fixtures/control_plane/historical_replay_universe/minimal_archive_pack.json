@@ -1,0 +1,18 @@
+{
+  "pack_id": "archive-pack-minimal",
+  "records": [
+    {
+      "manifest_id": "archived-manifest-minimal",
+      "run_id": "archived-run-minimal",
+      "pipeline_name": "chembl_activity",
+      "provider": "chembl",
+      "entity": "activity",
+      "execution_context": "isolated",
+      "certification_status": "already_certified",
+      "replay_occurrence_kind": "historical_source_replay_certified_parent",
+      "blocking_reasons": [],
+      "evidence_residency": "authoritative_archive",
+      "durable_evidence_coverage": true
+    }
+  ]
+}

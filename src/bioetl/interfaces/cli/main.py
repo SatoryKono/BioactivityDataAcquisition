@@ -18,12 +18,8 @@ from bioetl.interfaces.cli.registry_helpers import (
     create_registry,
     register_all_pipelines,
 )
-from bioetl.interfaces.cli.registry_helpers import (
-    build_cli_registry as _build_cli_registry_impl,
-)
 
 __all__ = [
-    "build_cli_registry",
     "cli",
     "main",
 ]
@@ -179,11 +175,6 @@ def _build_main_registry() -> object:
         create_registry_fn=create_registry,
         register_all_pipelines_fn=register_all_pipelines,
     )
-
-
-def build_cli_registry() -> object:
-    """Compatibility alias for legacy CLI tests patching this seam."""
-    return _build_cli_registry_impl()
 
 
 @click.group(cls=_LazyCliGroup)

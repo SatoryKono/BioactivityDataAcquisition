@@ -119,6 +119,13 @@ def test_run_manifest_contract_documents_lifecycle_snapshot_and_scoring_surfaces
     assert "irrecoverable_missing_immutable_evidence" in text
     assert "all_retained_historical_runs" in text
     assert "retained_certifiable_historical_runs" in text
+    assert "Historical replay universe artifacts" in text
+    assert "run_historical_replay_universe_campaign.py" in text
+    assert "durable_evidence_coverage_claim" in text
+    assert "all_known_historical_runs" in text
+    assert "source_pack_ref" in text
+    assert "evidence_residency" in text
+    assert "durable evidence path" in text
     assert "## Reproducibility Scoring Rubric" in text
     assert "|   100 | `forensic_grade`" in text
     assert "| Evidence surface" in text
@@ -193,6 +200,11 @@ def test_run_manifest_docs_define_replay_equivalence_levels() -> None:
     assert "irrecoverable_missing_immutable_evidence" in runbook
     assert "claim_scope_mode" in runbook
     assert "retained_certifiable_historical_runs" in runbook
+    assert "run_historical_replay_universe_campaign.py" in runbook
+    assert "durable_evidence_coverage_claim" in runbook
+    assert "all_known_historical_runs" in runbook
+    assert "source_pack_ref" in runbook
+    assert "evidence_residency" in runbook
 
 
 @pytest.mark.architecture

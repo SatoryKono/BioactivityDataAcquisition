@@ -17,6 +17,7 @@ if TYPE_CHECKING:
         ForensicRunDiffService,
     )
     from bioetl.application.services.control_plane.historical_replay_closure_service import (
+        HistoricalReplayClosureReport,
         HistoricalReplayClosureService,
     )
     from bioetl.application.services.control_plane.historical_replay_corpus_service import (
@@ -75,6 +76,10 @@ if TYPE_CHECKING:
 
     def get_historical_replay_corpus_service() -> HistoricalReplayCorpusService: ...
 
+    def persist_historical_replay_closure_report(
+        report: HistoricalReplayClosureReport,
+    ) -> object: ...
+
     def get_lineage_service() -> LineageInspectionService: ...
 
     def get_lock_service() -> LockService: ...
@@ -105,6 +110,7 @@ __all__ = [
     "get_workflow_execution_service",
     "get_workflow_inspection_service",
     "load_workflow_config",
+    "persist_historical_replay_closure_report",
 ]
 
 _SERVICES_MODULE = "bioetl.composition._services"
@@ -113,6 +119,7 @@ _RESOURCE_MANAGEMENT_MODULE = "bioetl.composition._resource_management"
 _CLI_CONTROL_PLANE_LIFECYCLE_MODULE = (
     "bioetl.composition.bootstrap.cli.control_plane_lifecycle"
 )
+_RUN_MANIFEST_BOOTSTRAP_MODULE = "bioetl.composition.bootstrap.cli.run_manifest"
 _PUBLIC_EXPORTS = {
     "bootstrap_control_plane_lifecycle_store": _CLI_CONTROL_PLANE_LIFECYCLE_MODULE,
     "get_adr_service": _SERVICES_MODULE,
@@ -124,6 +131,7 @@ _PUBLIC_EXPORTS = {
     "get_historical_replay_corpus_service": _SERVICES_MODULE,
     "get_lineage_service": _SERVICES_MODULE,
     "get_lock_service": _SERVICES_MODULE,
+    "persist_historical_replay_closure_report": _RUN_MANIFEST_BOOTSTRAP_MODULE,
     "get_run_manifest_service": _SERVICES_MODULE,
     "get_workflow_execution_service": _WORKFLOW_SERVICES_MODULE,
     "get_workflow_inspection_service": _WORKFLOW_SERVICES_MODULE,
