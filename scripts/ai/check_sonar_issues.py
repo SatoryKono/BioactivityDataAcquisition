@@ -175,6 +175,9 @@ def _handle_missing_live_issue_summary(
     """Print non-ready live Sonar status and return the correct process exit code."""
     print("Live baseline status: not ready")
     print(f"Reason: {live_issues.get('reason', 'unknown')}")
+    status_code = live_issues.get("status_code")
+    if status_code is not None:
+        print(f"Status code: {status_code}")
     message = live_issues.get("message")
     if message:
         print(f"Message: {message}")

@@ -107,6 +107,7 @@ File-backed control-plane persistence uses the following canonical paths:
 | Effective config run-id index        | `data/output/control/effective_config/_by_run_id/{run_id}.txt`     |
 | Lineage fragment payload             | `data/output/control/lineage/fragments/{stable_fragment_key}.json` |
 | Lineage lookup indexes               | `data/output/control/lineage/_by_*/*.jsonl`                        |
+| Historical replay closure reports    | `data/output/control/historical_replay_closure/{report_id}.json`   |
 | Checkpoint payloads                  | `data/output/checkpoints/**/*.json`                                |
 | Cached Bronze input snapshots        | `data/output/bronze/**/*`                                          |
 
@@ -175,9 +176,24 @@ Certified historical replay is therefore bounded but operationalized:
 - `bioetl run-manifest certify-historical-bulk <plan.json>` applies a
   deterministic source-first certification pass across retained manifests using
   explicit immutable snapshot evidence from the provided plan;
+- `bioetl run-manifest closure-report --write` persists one retained-corpus
+  closure artifact with a deterministic `report_id`, global claim gate, and
+  explicit residual resolution queue for any blocked historical manifests;
 - bulk certification never mutates manifests in place; it appends new
   `input_snapshot_published` ledger evidence and then re-derives diagnostics
   from the same append-only control-plane surfaces.
+- the global claim gate is published as
+  `global_universal_historical_replay_claim`; it remains blocked until the
+  retained corpus has no unresolved blocked manifests, no out-of-scope
+  retained runs, and no explicitly irrecoverable legacy subset.
+- the retained-corpus closure artifact may still persist while the claim gate
+  is blocked. In that state, operators must either certify more immutable
+  evidence or attach explicit residual dispositions such as
+  `reconstruct_immutable_evidence`,
+  `expand_retention_and_publish_evidence`,
+  `certify_upstream_source_lineage`,
+  `irrecoverable_missing_immutable_evidence`, or
+  `outside_universal_claim_scope`.
 
 Lifecycle planning is intentionally independent from read APIs: expired
 unprotected files can be selected for deletion even if higher-level lookup

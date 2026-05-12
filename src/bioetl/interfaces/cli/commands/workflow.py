@@ -204,6 +204,82 @@ def workflow() -> None:
     help="Auto-increment start_offset from last successful execution. "
     "Cannot be used with --resume-last or --start-offset.",
 )
+@click.pass_obj
+def run_workflow_command(
+    registry: PipelineRegistry | None,
+    name: str,
+    dry_run: bool,
+    only_steps: str | None,
+    run_type: str | None,
+    start_offset: int | None,
+    limit: int | None,
+    input_csv: str | None,
+    filter_column: str | None,
+    filter_field: str | None,
+    vacuum_after_run: bool | None,
+    vacuum_retention_days: int | None,
+    log_level: str | None,
+    ignore_yaml_filter: bool | None,
+    skip_gold: bool | None,
+    execution_context: str | None,
+    use_cached_bronze: bool | None,
+    cached_bronze_path: str | None,
+    cached_bronze_date: str | None,
+    exact_replay: bool | None,
+    replay_of_run_id: str | None,
+    replay_of_manifest_id: str | None,
+    enable_tracing: bool | None,
+    resume_last: bool,
+    force_steps: str | None,
+    repair_steps: str | None,
+    incremental: bool,
+) -> None:
+    """Execute one declarative workflow config sequentially."""
+    _validate_run_workflow_options(incremental, resume_last, start_offset)
+    config = _load_and_apply_workflow_config(
+        name=name,
+        only_steps=only_steps,
+        dry_run=dry_run,
+        run_type=run_type,
+        start_offset=start_offset,
+        limit=limit,
+        input_csv=input_csv,
+        filter_column=filter_column,
+        filter_field=filter_field,
+        vacuum_after_run=vacuum_after_run,
+        vacuum_retention_days=vacuum_retention_days,
+        log_level=log_level,
+        ignore_yaml_filter=ignore_yaml_filter,
+        skip_gold=skip_gold,
+        execution_context=execution_context,
+        use_cached_bronze=use_cached_bronze,
+        cached_bronze_path=cached_bronze_path,
+        cached_bronze_date=cached_bronze_date,
+        exact_replay=exact_replay,
+        replay_of_run_id=replay_of_run_id,
+        replay_of_manifest_id=replay_of_manifest_id,
+        enable_tracing=enable_tracing,
+    )
+    result = _execute_workflow_and_publish_metrics(
+        config,
+        registry,
+        dry_run,
+        only_steps,
+        resume_last,
+        force_steps,
+        repair_steps,
+        incremental,
+    )
+    render_run_result(
+        config,
+        result,
+        dry_run=dry_run,
+        only_steps=only_steps,
+        resume_last=resume_last,
+    )
+    _handle_workflow_result(result)
+
+
 def _validate_run_workflow_options(
     incremental: bool,
     resume_last: bool,
@@ -286,6 +362,7 @@ def _load_and_apply_workflow_config(
 def _execute_workflow_and_publish_metrics(
     config: object,
     registry: PipelineRegistry | None,
+    dry_run: bool,
     only_steps: str | None,
     resume_last: bool,
     force_steps: str | None,
@@ -295,7 +372,6 @@ def _execute_workflow_and_publish_metrics(
     """Execute workflow and publish metrics."""
     parsed_force_steps = parse_only_steps(force_steps) or ()
     parsed_repair_steps = parse_only_steps(repair_steps) or ()
-    ensure_metrics_server_started()
     result = asyncio.run(
         get_workflow_execution_service(registry=registry).run_workflow(
             config,
@@ -306,10 +382,14 @@ def _execute_workflow_and_publish_metrics(
             incremental=incremental,
         )
     )
+    if dry_run:
+        return result
+
+    ensure_metrics_server_started()
     publish_metrics_safely(
         run_label="bioetl",
-        pipeline_name=config.pipeline_context,
-        run_type=config.run_type_context,
+        pipeline_name=_workflow_metrics_pipeline_name(config),
+        run_type=_workflow_metrics_run_type(config),
         grouping_key_extra=(
             {"workflow_run_id": result.workflow_run_id}
             if result.workflow_run_id is not None
@@ -319,80 +399,52 @@ def _execute_workflow_and_publish_metrics(
     return result
 
 
-@click.pass_obj
-def run_workflow_command(
-    registry: PipelineRegistry | None,
-    name: str,
-    dry_run: bool,
-    only_steps: str | None,
-    run_type: str | None,
-    start_offset: int | None,
-    limit: int | None,
-    input_csv: str | None,
-    filter_column: str | None,
-    filter_field: str | None,
-    vacuum_after_run: bool | None,
-    vacuum_retention_days: int | None,
-    log_level: str | None,
-    ignore_yaml_filter: bool | None,
-    skip_gold: bool | None,
-    execution_context: str | None,
-    use_cached_bronze: bool | None,
-    cached_bronze_path: str | None,
-    cached_bronze_date: str | None,
-    exact_replay: bool | None,
-    replay_of_run_id: str | None,
-    replay_of_manifest_id: str | None,
-    enable_tracing: bool | None,
-    resume_last: bool,
-    force_steps: str | None,
-    repair_steps: str | None,
-    incremental: bool,
-) -> None:
-    """Execute one declarative workflow config sequentially."""
-    _validate_run_workflow_options(incremental, resume_last, start_offset)
-    config = _load_and_apply_workflow_config(
-        name=name,
-        only_steps=only_steps,
-        dry_run=dry_run,
-        run_type=run_type,
-        start_offset=start_offset,
-        limit=limit,
-        input_csv=input_csv,
-        filter_column=filter_column,
-        filter_field=filter_field,
-        vacuum_after_run=vacuum_after_run,
-        vacuum_retention_days=vacuum_retention_days,
-        log_level=log_level,
-        ignore_yaml_filter=ignore_yaml_filter,
-        skip_gold=skip_gold,
-        execution_context=execution_context,
-        use_cached_bronze=use_cached_bronze,
-        cached_bronze_path=cached_bronze_path,
-        cached_bronze_date=cached_bronze_date,
-        exact_replay=exact_replay,
-        replay_of_run_id=replay_of_run_id,
-        replay_of_manifest_id=replay_of_manifest_id,
-        enable_tracing=enable_tracing,
-    )
-    result = _execute_workflow_and_publish_metrics(
-        config=config,
-        registry=registry,
-        only_steps=only_steps,
-        resume_last=resume_last,
-        force_steps=force_steps,
-        repair_steps=repair_steps,
-        incremental=incremental,
-    )
-    render_run_result(
-        config,
-        result,
-        dry_run=dry_run,
-        only_steps=only_steps,
-        resume_last=resume_last,
-    )
-    if result.status == "failed":
-        raise click.exceptions.Exit(ExitCode.PIPELINE_ERROR)
+def _handle_workflow_result(result: object) -> None:
+    """Handle workflow execution result and exit with appropriate code."""
+    if result.status == "success":
+        raise click.exceptions.Exit(ExitCode.OK)
+    error_message = _workflow_failure_message(result)
+    echo_error("Workflow failed", error_message)
+    raise click.exceptions.Exit(ExitCode.PIPELINE_ERROR)
+
+
+def _workflow_metrics_pipeline_name(config: object) -> str:
+    """Resolve a bounded pipeline/workflow label for metrics publication."""
+    single_pipeline_name = getattr(config, "single_pipeline_name", None)
+    if isinstance(single_pipeline_name, str) and single_pipeline_name:
+        return single_pipeline_name
+    workflow_name = getattr(config, "name", None)
+    if isinstance(workflow_name, str) and workflow_name:
+        return workflow_name
+    pipeline_context = getattr(config, "pipeline_context", None)
+    if isinstance(pipeline_context, str) and pipeline_context:
+        return pipeline_context
+    return "unknown"
+
+
+def _workflow_metrics_run_type(config: object) -> str:
+    """Resolve the effective workflow run_type for metrics publication."""
+    defaults = getattr(config, "defaults", None)
+    default_run_type = getattr(defaults, "run_type", None)
+    if isinstance(default_run_type, str) and default_run_type:
+        return default_run_type
+    run_type_context = getattr(config, "run_type_context", None)
+    if isinstance(run_type_context, str) and run_type_context:
+        return run_type_context
+    return "incremental"
+
+
+def _workflow_failure_message(result: object) -> str:
+    """Extract one human-readable failure message from a workflow result."""
+    top_level_error = getattr(result, "error_message", None)
+    if isinstance(top_level_error, str) and top_level_error:
+        return top_level_error
+    steps = getattr(result, "steps", ())
+    for step in steps:
+        error_message = getattr(step, "error_message", None)
+        if isinstance(error_message, str) and error_message:
+            return error_message
+    return "Unknown error"
 
 
 @workflow.command("status")

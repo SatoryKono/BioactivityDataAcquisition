@@ -11,6 +11,11 @@ from bioetl.composition.factories.pipeline.assembler import (
     GenericPipelineFactory,
 )
 from bioetl.composition.factories.pipeline.contract_validator import create_factory
+from bioetl.composition.registry import (
+    PipelineDefinition,
+    PipelineRegistry,
+    create_registry,
+)
 from bioetl.composition.factories.pipeline.registry_manifest import (
     PIPELINE_CONFIGS,
 )
@@ -218,6 +223,8 @@ _PIPELINE_FACTORY_API = (
 )
 
 __all__ = [
+    "PipelineDefinition",
+    "PipelineRegistry",
     "chembl_activity_factory",
     "chembl_assay_factory",
     "chembl_assay_parameters_factory",
@@ -233,6 +240,7 @@ __all__ = [
     "chembl_target_factory",
     "chembl_tissue_factory",
     "crossref_publication_factory",
+    "create_registry",
     "get_factory",
     "is_registered",
     "list_available_pipelines",

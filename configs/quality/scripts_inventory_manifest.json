@@ -1,20 +1,20 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-05-12T09:46:13.165854+00:00",
+  "generated_at": "2026-05-12T11:32:01.850281+00:00",
   "summary": {
-    "total_scripts": 364,
+    "total_scripts": 365,
     "status_counts": {
-      "active": 330,
+      "active": 331,
       "supporting": 34
     },
     "reference_group_coverage": {
       "agents": 4,
       "build": 2,
       "ci": 51,
-      "docs": 129,
+      "docs": 130,
       "scripts": 299,
       "skills": 8,
-      "tests": 141
+      "tests": 142
     }
   },
   "scripts": [
@@ -8121,6 +8121,33 @@
       ]
     },
     {
+      "path": "scripts/engineering/qa/run_historical_replay_closure_campaign.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 3,
+      "references": [
+        {
+          "path": "docs/05-operations/runbooks/run-manifest-inspection.md",
+          "line": 216,
+          "source_group": "docs",
+          "text": "./.venv/bin/python scripts/engineering/qa/run_historical_replay_closure_campaign.py --write-dispositions --write-report"
+        },
+        {
+          "path": "docs/05-operations/runbooks/run-manifest-inspection.md",
+          "line": 237,
+          "source_group": "docs",
+          "text": "- `run_historical_replay_closure_campaign.py` is the deterministic batch path"
+        },
+        {
+          "path": "tests/architecture/test_reproducibility_docs_contract_drift.py",
+          "line": 188,
+          "source_group": "tests",
+          "text": "assert \"run_historical_replay_closure_campaign.py\" in runbook"
+        }
+      ]
+    },
+    {
       "path": "scripts/engineering/qa/sync_integration_vcr_policy.py",
       "type": "py",
       "status": "active",
@@ -8941,13 +8968,13 @@
         },
         {
           "path": "docs/02-architecture/07-compatibility-facade-snapshot.md",
-          "line": 49,
+          "line": 48,
           "source_group": "docs",
           "text": "- `src/bioetl/interfaces/cli/commands/run.py`"
         },
         {
           "path": "docs/02-architecture/07-compatibility-facade-snapshot.md",
-          "line": 56,
+          "line": 55,
           "source_group": "docs",
           "text": "- `src/bioetl/interfaces/cli/commands/run.py` — external breaking change required: `true`, internal callers zero: `false`"
         },

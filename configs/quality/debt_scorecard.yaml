@@ -106,7 +106,7 @@ compatibility_debt_metrics:
         public-API consolidation PR updates the compatibility inventory.
       ratchet_schedule:
       - effective_on: '2026-04-30'
-        max_count: 17
+        max_count: 16
         milestone: freeze-baseline
       - effective_on: '2026-06-30'
         max_count: 15

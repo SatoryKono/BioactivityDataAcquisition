@@ -50,6 +50,9 @@ class _NamedRuntimeBundle(Protocol):
     lock: LockPort
 
 
+_LEGACY_RUNTIME_BASICS_TUPLE_LEN = 7
+
+
 def build_bootstrap_runtime_resources(
     *,
     bootstrap_runtime_basics_fn: Callable[..., object],
@@ -58,6 +61,17 @@ def build_bootstrap_runtime_resources(
 ) -> BootstrapRuntimeResources:
     """Resolve the canonical runtime-basics resource bundle."""
     resolved_bundle = bootstrap_runtime_basics_fn(config=config, run_id=run_id)
+    if _is_legacy_runtime_basics_tuple(resolved_bundle):
+        legacy_bundle = resolved_bundle
+        return BootstrapRuntimeResources(
+            run_id=legacy_bundle[0],
+            settings=legacy_bundle[1],
+            logger=legacy_bundle[2],
+            metrics=legacy_bundle[3],
+            tracer=legacy_bundle[4],
+            storage=legacy_bundle[5],
+            lock=legacy_bundle[6],
+        )
     if isinstance(resolved_bundle, CompositeInfrastructureContext) or _has_named_bundle(
         resolved_bundle
     ):
@@ -110,6 +124,16 @@ def _has_named_bundle(resolved_bundle: object) -> TypeGuard[_NamedRuntimeBundle]
             "storage",
             "lock",
         )
+    )
+
+
+def _is_legacy_runtime_basics_tuple(
+    resolved_bundle: object,
+) -> TypeGuard[
+    tuple[str, Settings, LoggerPort, MetricsPort, TracingPort, object, LockPort]
+]:
+    return isinstance(resolved_bundle, tuple) and len(resolved_bundle) == (
+        _LEGACY_RUNTIME_BASICS_TUPLE_LEN
     )
 
 
