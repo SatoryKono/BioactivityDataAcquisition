@@ -69,7 +69,6 @@ def bootstrap_composite_runner_via_wiring(
         config=config,
         runtime=runtime,
         resources=runtime_resources,
-        include_legacy_runtime_kwargs=True,
     )
     return create_composite_runner_fn(
         config=config,

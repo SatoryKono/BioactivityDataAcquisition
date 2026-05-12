@@ -40,7 +40,7 @@ def _count_files_ge_loc(*, files: list[Path], min_lines: int) -> int:
 def test_active_hotspot_family_file_growth_budgets_hold_reviewed_baseline() -> None:
     """Selected active hotspot families must not exceed their bounded file-growth cap."""
     scorecard = _load_scorecard()
-    hotspot_policy = scorecard.get("report_only_hotspot_families", {})
+    hotspot_policy = scorecard.get("hotspot_family_ratchets", {})
     assert isinstance(hotspot_policy, dict)
 
     families = hotspot_policy.get("families", [])

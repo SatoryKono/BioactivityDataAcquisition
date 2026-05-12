@@ -55,7 +55,6 @@ from bioetl.composition.services.versioning import get_code_revision_provenance
 from bioetl.domain.control_plane.reproducibility_policy import (
     STRICT_PERSISTENCE_PROFILES,
     is_critical_reproducibility_runtime,
-    legacy_config_hash_from_resolved_config_hash,
     resolve_effective_required_persistence_profile,
 )
 from bioetl.domain.types import RunType
@@ -131,16 +130,25 @@ def _normalize_object(value: object) -> dict[str, object]:
     return _support_normalize_object(value)
 
 
-def build_composite_control_plane_bundle(
+def _build_composite_control_plane_config_artifacts(
     *,
     config: CompositeConfig,
     runtime: CompositeRuntimeConfig,
     infra_context: CompositeInfrastructureContext,
-) -> CompositeControlPlaneBundle:
-    """Materialize manifest/ledger artifacts for one composite execution."""
-    _manifest_enabled, ledger_enabled = resolve_composite_control_plane_flags(
-        infra_context.settings
-    )
+) -> tuple[
+    str,
+    str,
+    str,
+    str,
+    str,
+    str | None,
+    str | None,
+    str | None,
+    str | None,
+    str,
+    str,
+]:
+    """Build configuration and contract artifacts for composite control plane."""
     control_plane = getattr(
         getattr(infra_context.settings, "pipeline", None), "control_plane", None
     )
@@ -180,11 +188,46 @@ def build_composite_control_plane_bundle(
         logger=infra_context.logger,
         run_id=_coerce_run_id(infra_context.run_id),
     )
+    return (
+        effective_config_artifact_id,
+        resolved_config_hash,
+        effective_config_hash,
+        dq_contract_compatibility_hash,
+        contract_ref,
+        contract_entity,
+        contract_version,
+        contract_schema_hash,
+        dq_policy_ref,
+        rule_bundle_version,
+        pipeline_version,
+        effective_required_profile,
+    )
+
+
+def _build_composite_control_plane_manifest(
+    *,
+    config: CompositeConfig,
+    runtime: CompositeRuntimeConfig,
+    infra_context: CompositeInfrastructureContext,
+    effective_config_artifact_id: str,
+    resolved_config_hash: str,
+    effective_config_hash: str,
+    dq_contract_compatibility_hash: str,
+    contract_ref: str,
+    contract_entity: str,
+    contract_version: str | None,
+    contract_schema_hash: str | None,
+    dq_policy_ref: str | None,
+    rule_bundle_version: str | None,
+    pipeline_version: str | None,
+    required_persistence_profile: str,
+) -> RunManifest:
+    """Create manifest for composite control plane."""
     manifest_store = FileRunManifestStore(
         base_path=_control_plane_root(infra_context.settings, "run_manifest"),
         metrics=infra_context.metrics,
     )
-    manifest = RunManifestService(
+    return RunManifestService(
         manifest_port=manifest_store,
         clock=SystemClock(),
     ).create_manifest(
@@ -197,14 +240,61 @@ def build_composite_control_plane_bundle(
             dq_contract_compatibility_hash=dq_contract_compatibility_hash,
             effective_config_artifact_id=effective_config_artifact_id,
             contract_ref=contract_ref,
-            contract_version=contract_version or None,
+            contract_version=contract_version,
             contract_schema_hash=contract_schema_hash,
             dq_policy_ref=dq_policy_ref,
             rule_bundle_version=rule_bundle_version,
-            pipeline_version=pipeline_version or None,
+            pipeline_version=pipeline_version,
             entity=contract_entity,
-            required_persistence_profile=effective_required_profile,
+            required_persistence_profile=required_persistence_profile,
         )
+    )
+
+
+def build_composite_control_plane_bundle(
+    *,
+    config: CompositeConfig,
+    runtime: CompositeRuntimeConfig,
+    infra_context: CompositeInfrastructureContext,
+) -> CompositeControlPlaneBundle:
+    """Materialize manifest/ledger artifacts for one composite execution."""
+    _manifest_enabled, ledger_enabled = resolve_composite_control_plane_flags(
+        infra_context.settings
+    )
+    (
+        effective_config_artifact_id,
+        resolved_config_hash,
+        effective_config_hash,
+        dq_contract_compatibility_hash,
+        contract_ref,
+        contract_entity,
+        contract_version,
+        contract_schema_hash,
+        dq_policy_ref,
+        rule_bundle_version,
+        pipeline_version,
+        required_persistence_profile,
+    ) = _build_composite_control_plane_config_artifacts(
+        config=config,
+        runtime=runtime,
+        infra_context=infra_context,
+    )
+    manifest = _build_composite_control_plane_manifest(
+        config=config,
+        runtime=runtime,
+        infra_context=infra_context,
+        effective_config_artifact_id=effective_config_artifact_id,
+        resolved_config_hash=resolved_config_hash,
+        effective_config_hash=effective_config_hash,
+        dq_contract_compatibility_hash=dq_contract_compatibility_hash,
+        contract_ref=contract_ref,
+        contract_entity=contract_entity,
+        contract_version=contract_version,
+        contract_schema_hash=contract_schema_hash,
+        dq_policy_ref=dq_policy_ref,
+        rule_bundle_version=rule_bundle_version,
+        pipeline_version=pipeline_version,
+        required_persistence_profile=required_persistence_profile,
     )
     run_ledger_service = _build_run_ledger_service(
         manifest_id=manifest.manifest_id,
@@ -224,9 +314,7 @@ def build_composite_control_plane_bundle(
         manifest_id=manifest.manifest_id,
         execution_fingerprint=manifest.execution_fingerprint,
         run_ledger_service=run_ledger_service,
-        config_hash=legacy_config_hash_from_resolved_config_hash(
-            resolved_config_hash or None
-        ),
+        config_hash=resolved_config_hash or None,
         resolved_config_hash=resolved_config_hash or None,
         effective_config_hash=effective_config_hash or None,
         dq_contract_compatibility_hash=dq_contract_compatibility_hash or None,
@@ -286,9 +374,7 @@ def _build_composite_manifest_create_request(
         git_commit=code_revision.git_commit,
         source_revision_state=code_revision.source_revision_state,
         dependency_lock_hash=dependency_lock_hash,
-        config_hash=legacy_config_hash_from_resolved_config_hash(
-            resolved_config_hash or None
-        ),
+        config_hash=resolved_config_hash or None,
         resolved_config_hash=resolved_config_hash or None,
         effective_config_hash=effective_config_hash or None,
         contract_ref=contract_ref,

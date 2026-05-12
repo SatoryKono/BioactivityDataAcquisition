@@ -9,7 +9,7 @@ from uuid import uuid4
 
 import pytest
 
-from bioetl.composition.bootstrap import bootstrap_pipeline_runner
+from bioetl.composition.bootstrap.runtime.pipeline import bootstrap_pipeline_runner
 from bioetl.composition.factories import _observability_wiring
 from bioetl.domain.types import RunID
 from bioetl.infrastructure.config import get_pipeline_config, get_settings

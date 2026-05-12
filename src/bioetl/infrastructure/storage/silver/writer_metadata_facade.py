@@ -24,7 +24,6 @@ from bioetl.domain.value_objects.dq_metrics import (
 from bioetl.domain.value_objects.silver_result import SilverWriteResult
 from bioetl.infrastructure.storage.base_delta_writer import BaseDeltaWriter
 from bioetl.infrastructure.storage.silver.metadata_operations import (
-    _coerce_silver_metadata_write_request,
     _execute_silver_metadata_write,
     _prepare_silver_metadata_write,
     _read_delta_version,
@@ -152,23 +151,16 @@ class SilverWriterMetadataFacade:
 
     async def _write_silver_metadata(
         self,
-        request: object | str | None = None,
-        *args: object,
-        **kwargs: object,
+        request: _SilverMetadataWriteRequest,
     ) -> None:
         """Publish canonical Silver metadata through metadata operations."""
         if self._metadata is None:
             raise RuntimeError(self._SILVER_METADATA_OPERATIONS_REQUIRED)
-        resolved_request = _coerce_silver_metadata_write_request(
-            cast(_SilverMetadataWriteRequest | str | None, request),
-            args=args,
-            kwargs=kwargs,
-        )
-        if self._should_skip_silver_metadata_write(records=resolved_request.records):
+        if self._should_skip_silver_metadata_write(records=request.records):
             return
         await _execute_silver_metadata_write(
             cast(_SilverMetadataWriteHostProtocol, self),
-            request=resolved_request,
+            request=request,
             prepare=_prepare_silver_metadata_write,
         )
 
@@ -273,18 +265,20 @@ class SilverWriterMetadataFacade:
             start_perf=start_perf,
         )
         await self._write_silver_metadata(
-            table_path=table_path,
-            table_name=table_name,
-            records=records,
-            primary_keys=primary_keys,
-            mode=validated_mode,
-            bronze_refs=bronze_refs,
-            dq_metrics=context.dq_metrics,
-            partition_by=partition_cols,
-            source_batch_ids=([str(source_batch_id)] if source_batch_id else None),
-            started_at=started_at,
-            completed_at=context.completed_at,
-            version_after=context.version_after,
+            _SilverMetadataWriteRequest(
+                table_path=table_path,
+                table_name=table_name,
+                records=records,
+                primary_keys=primary_keys,
+                mode=validated_mode,
+                bronze_refs=bronze_refs,
+                dq_metrics=context.dq_metrics,
+                partition_by=partition_cols,
+                source_batch_ids=([str(source_batch_id)] if source_batch_id else None),
+                started_at=started_at,
+                completed_at=context.completed_at,
+                version_after=context.version_after,
+            )
         )
         return (
             None

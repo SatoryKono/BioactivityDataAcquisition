@@ -30,7 +30,6 @@ from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
 from bioetl.domain.value_objects.silver_result import SilverWriteResult
 from bioetl.infrastructure.storage.silver.metadata_operations import (
     _build_silver_write_result,
-    _coerce_silver_metadata_write_request,
     _execute_silver_metadata_write,
     _prepare_silver_merged_metadata_write,
     _prepare_silver_metadata_write,
@@ -95,9 +94,7 @@ class _SilverWriterMetadataRuntimeProtocol(
 
     async def _write_silver_metadata(
         self,
-        request: _SilverMetadataWriteRequest | str | None = None,
-        *args: object,
-        **kwargs: object,
+        request: _SilverMetadataWriteRequest,
     ) -> None: ...
 
     async def _maybe_log_silver_audit(
@@ -216,25 +213,18 @@ class SilverWriterMetadataMixin:
 
     async def _write_silver_metadata(
         self: _SilverWriterMetadataRuntimeProtocol,
-        request: _SilverMetadataWriteRequest | str | None = None,
-        *args: object,
-        **kwargs: object,
+        request: _SilverMetadataWriteRequest,
     ) -> None:
         """Write Silver layer metadata sidecar file."""
-        resolved_request = _coerce_silver_metadata_write_request(
-            request,
-            args=args,
-            kwargs=kwargs,
-        )
         if self._should_skip_silver_metadata_write(
-            records=resolved_request.records,
-            table_path=resolved_request.table_path,
+            records=request.records,
+            table_path=request.table_path,
             event_name="silver_metadata_skipped",
         ):
             return
         await _execute_silver_metadata_write(
             self,
-            request=resolved_request,
+            request=request,
             prepare=_prepare_silver_metadata_write,
         )
 
@@ -334,22 +324,24 @@ class SilverWriterMetadataMixin:
         )
 
         await self._write_silver_metadata(
-            table_path=resolved_request.table_path,
-            table_name=resolved_request.table_name,
-            records=resolved_request.records,
-            primary_keys=resolved_request.primary_keys,
-            mode=resolved_request.validated_mode,
-            bronze_refs=resolved_request.bronze_refs,
-            dq_metrics=context.dq_metrics,
-            partition_by=resolved_request.partition_cols,
-            source_batch_ids=(
-                [str(resolved_request.source_batch_id)]
-                if resolved_request.source_batch_id is not None
-                else None
-            ),
-            started_at=resolved_request.started_at,
-            completed_at=context.completed_at,
-            version_after=context.version_after,
+            _SilverMetadataWriteRequest(
+                table_path=resolved_request.table_path,
+                table_name=resolved_request.table_name,
+                records=resolved_request.records,
+                primary_keys=resolved_request.primary_keys,
+                mode=resolved_request.validated_mode,
+                bronze_refs=resolved_request.bronze_refs,
+                dq_metrics=context.dq_metrics,
+                partition_by=resolved_request.partition_cols,
+                source_batch_ids=(
+                    [str(resolved_request.source_batch_id)]
+                    if resolved_request.source_batch_id is not None
+                    else None
+                ),
+                started_at=resolved_request.started_at,
+                completed_at=context.completed_at,
+                version_after=context.version_after,
+            )
         )
         return _build_silver_write_result(
             table_name=resolved_request.table_name,

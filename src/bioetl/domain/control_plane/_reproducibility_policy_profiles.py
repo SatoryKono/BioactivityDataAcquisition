@@ -15,8 +15,6 @@ def normalize_required_persistence_profile(required_profile: object) -> str:
         else DEFAULT_REQUIRED_PERSISTENCE_PROFILE
     )
     return profile or DEFAULT_REQUIRED_PERSISTENCE_PROFILE
-
-
 def resolve_effective_required_persistence_profile(
     *,
     configured_required_profile: object,
@@ -44,13 +42,6 @@ def is_critical_reproducibility_runtime(
 ) -> bool:
     """Return whether runtime should inherit published strict family defaults."""
     return str(runtime_environment or "").strip().lower() == "prod" or bool(debug_mode)
-
-
-def legacy_config_hash_from_resolved_config_hash(
-    resolved_config_hash: str | None,
-) -> str | None:
-    """Return the documented legacy config_hash compatibility alias."""
-    return resolved_config_hash
 
 
 def build_snapshot_envelope_status(

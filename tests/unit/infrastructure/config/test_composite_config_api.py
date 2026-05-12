@@ -8,7 +8,7 @@ from typing import Any
 import pytest
 import yaml
 
-from bioetl.domain.contracts import CompositePublicationGoldSchema
+from bioetl.domain.contracts.gold import CompositePublicationGoldSchema
 from bioetl.infrastructure.config import (
     load_composite_config as public_load_composite_config,
 )

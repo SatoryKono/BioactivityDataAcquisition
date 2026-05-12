@@ -196,6 +196,21 @@ def _add_identity_graph_optional_fields(
         "input_snapshot_missing_source_refs", []
     )
     identity_graph["input_snapshots"] = request.base_summary["input_snapshots"]
+    for field_name in (
+        "historical_live_run_upgrade_policy",
+        "historical_live_run_upgrade_boundary",
+        "historical_live_run_upgrade_reason",
+        "broader_historical_exact_replay_policy",
+        "broader_historical_exact_replay_boundary",
+        "broader_historical_exact_replay_reason",
+        "broader_historical_exact_replay_state",
+        "historical_live_run_upgrade_state",
+        "replay_occurrence_kind",
+        "post_capture_replayable_parent_supported",
+        "post_capture_replayable_parent_boundary",
+    ):
+        if field_name in request.base_summary:
+            identity_graph[field_name] = request.base_summary.get(field_name)
 
 
 def _build_identity_graph(
@@ -238,6 +253,37 @@ def _build_identity_graph(
         ),
         "replay_family_contract": request.base_summary.get("replay_family_contract"),
         "replay_support_state": request.base_summary.get("replay_support_state"),
+        "post_capture_replayable_parent_supported": request.base_summary.get(
+            "post_capture_replayable_parent_supported"
+        ),
+        "post_capture_replayable_parent_boundary": request.base_summary.get(
+            "post_capture_replayable_parent_boundary"
+        ),
+        "historical_live_run_upgrade_policy": request.base_summary.get(
+            "historical_live_run_upgrade_policy"
+        ),
+        "historical_live_run_upgrade_boundary": request.base_summary.get(
+            "historical_live_run_upgrade_boundary"
+        ),
+        "historical_live_run_upgrade_reason": request.base_summary.get(
+            "historical_live_run_upgrade_reason"
+        ),
+        "broader_historical_exact_replay_policy": request.base_summary.get(
+            "broader_historical_exact_replay_policy"
+        ),
+        "broader_historical_exact_replay_boundary": request.base_summary.get(
+            "broader_historical_exact_replay_boundary"
+        ),
+        "broader_historical_exact_replay_reason": request.base_summary.get(
+            "broader_historical_exact_replay_reason"
+        ),
+        "broader_historical_exact_replay_state": request.base_summary.get(
+            "broader_historical_exact_replay_state"
+        ),
+        "historical_live_run_upgrade_state": request.base_summary.get(
+            "historical_live_run_upgrade_state"
+        ),
+        "replay_occurrence_kind": request.base_summary.get("replay_occurrence_kind"),
         "source_posture": request.base_summary.get("source_posture"),
         "input_snapshot_missing_source_refs": request.base_summary.get(
             "input_snapshot_missing_source_refs",

@@ -67,9 +67,9 @@ def get_workflow_runner_service(
     from bioetl.composition.bootstrap.cli.noop import create_noop_logger
     from bioetl.composition.factories.services.port_factories import create_metrics
     from bioetl.infrastructure.config import get_settings
-    from bioetl.infrastructure.storage import (
+    from bioetl.infrastructure.storage.silver_writer import SilverWriter
+    from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation import (
         SilverForeignKeyReconciliationAdapter,
-        SilverWriter,
     )
 
     settings = get_settings()

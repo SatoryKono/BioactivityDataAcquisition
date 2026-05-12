@@ -16,7 +16,7 @@ import pytest
 from deltalake.exceptions import DeltaError, TableNotFoundError
 from tests.helpers.vcr_config import build_cassette_dir
 
-from bioetl.composition.bootstrap import bootstrap_pipeline_runner
+from bioetl.composition.bootstrap.runtime.pipeline import bootstrap_pipeline_runner
 from .conftest import (
     assert_silver_table_has_records,
     create_test_context,

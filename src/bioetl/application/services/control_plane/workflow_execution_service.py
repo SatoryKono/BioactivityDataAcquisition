@@ -116,7 +116,7 @@ class WorkflowExecutionService:
                 completed_transform_fingerprints=(
                     prepared.completed_transform_fingerprints
                 ),
-                config=config,
+                config=prepared.config,
                 resumed=prepared.resumed,
                 repair_steps=repair_steps,
                 force_steps=force_steps,
@@ -155,10 +155,18 @@ def _extract_incremental_metadata(
     """Extract start_offset and limit from the first pipeline step.
 
     These values are saved in state for the next incremental run.
+    If start_offset is None, treat it as 0 for incremental tracking.
     """
     for step in config.steps:
         if isinstance(step, WorkflowStepConfig):
-            return (step.run_options.start_offset, step.run_options.limit)
+            offset = step.run_options.start_offset
+            limit = step.run_options.limit
+            # Treat None as 0 for incremental tracking
+            if offset is None:
+                offset = 0
+            print(f"DEBUG _extract_incremental_metadata: offset={offset}, limit={limit}")
+            return (offset, limit)
+    print("DEBUG _extract_incremental_metadata: no pipeline steps found")
     return (None, None)
 
 

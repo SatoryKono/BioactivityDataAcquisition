@@ -309,13 +309,14 @@ def _build_base_summary_replay_payload(
 
 
 def _build_base_summary_snapshot_payload(
+    manifest: RunManifest,
     replay_context: _BaseSummaryReplayContext,
     exact_replay_eligible: bool,
 ) -> dict[str, object]:
     """Build snapshot-related fields for base summary payload."""
     return {
         "append_mode_semantic_sinks": _collect_append_mode_semantic_sinks(
-            replay_context.policy_assessment.manifest
+            manifest
         ),
         "input_snapshot_ids": _collect_input_snapshot_ids(
             replay_context.input_snapshots

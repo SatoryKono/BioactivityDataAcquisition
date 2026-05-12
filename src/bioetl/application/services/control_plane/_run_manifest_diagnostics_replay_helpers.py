@@ -102,7 +102,15 @@ def _resolve_snapshot_materialization_mode(snapshot: dict[str, object]) -> str |
 
 
 def _is_full_scan_idempotent_rebuild(manifest: RunManifest) -> bool:
-    return manifest.launch_context.get("full_scan_idempotent_rebuild", False)
+    if manifest.launch_context.get("full_scan_idempotent_rebuild", False):
+        return True
+    candidates = (
+        manifest.runtime_config.get("loading_strategy"),
+        lookup_mapping_path(manifest.runtime_config, "pipeline", "loading_strategy"),
+        manifest.resolved_config.get("loading_strategy"),
+        lookup_mapping_path(manifest.resolved_config, "pipeline", "loading_strategy"),
+    )
+    return any(str(candidate or "").strip().lower() == "full_scan_only" for candidate in candidates)
 
 
 def _is_composite_execution_context(manifest: RunManifest) -> bool:
@@ -111,7 +119,27 @@ def _is_composite_execution_context(manifest: RunManifest) -> bool:
 
 def _collect_append_mode_semantic_sinks(manifest: RunManifest) -> list[str]:
     sinks = manifest.launch_context.get("append_mode_semantic_sinks")
-    return sinks if isinstance(sinks, list) else []
+    if isinstance(sinks, list):
+        normalized = [
+            str(sink).strip()
+            for sink in sinks
+            if isinstance(sink, str) and str(sink).strip()
+        ]
+        if normalized:
+            return normalized
+    derived: list[str] = []
+    for config in (manifest.runtime_config, manifest.resolved_config):
+        sink_config = lookup_mapping_path(config, "sink")
+        if not isinstance(sink_config, dict):
+            continue
+        for sink_name, sink_settings in sink_config.items():
+            if not isinstance(sink_name, str) or not isinstance(sink_settings, dict):
+                continue
+            mode = str(sink_settings.get("mode") or "").strip().lower()
+            enabled = sink_settings.get("enabled")
+            if mode == "append" and enabled is not False:
+                derived.append(f"sink.{sink_name}.mode=append")
+    return sorted(set(derived))
 
 
 def _profile_exact_replay_blockers(profile: object) -> list[str]:

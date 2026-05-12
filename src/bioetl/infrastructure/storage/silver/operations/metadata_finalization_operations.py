@@ -14,6 +14,7 @@ from bioetl.infrastructure.storage.silver.metadata_request_models import (
     _coerce_silver_write_finalization_preparation_request,
     _coerce_silver_write_result_finalization_request,
     _PreparedSilverWriteFinalizationContext,
+    _SilverMetadataWriteRequest,
     _SilverWriteFinalizationPreparationRequest,
     _SilverWriteResultFinalizationRequest,
 )
@@ -32,9 +33,7 @@ class _SilverMetadataFinalizationOps(Protocol):
 
     async def _write_silver_metadata(
         self,
-        request: object | None = None,
-        *args: object,
-        **kwargs: object,
+        request: _SilverMetadataWriteRequest,
     ) -> None: ...
 
 
@@ -94,22 +93,24 @@ async def finalize_silver_write_result_from_request(
     )
 
     await metadata_ops._write_silver_metadata(
-        table_path=request.table_path,
-        table_name=request.table_name,
-        records=request.records,
-        primary_keys=request.primary_keys,
-        mode=request.validated_mode,
-        bronze_refs=request.bronze_refs,
-        dq_metrics=context.dq_metrics,
-        partition_by=request.partition_cols,
-        source_batch_ids=(
-            [str(request.source_batch_id)]
-            if request.source_batch_id is not None
-            else None
-        ),
-        started_at=request.started_at,
-        completed_at=context.completed_at,
-        version_after=context.version_after,
+        _SilverMetadataWriteRequest(
+            table_path=request.table_path,
+            table_name=request.table_name,
+            records=request.records,
+            primary_keys=request.primary_keys,
+            mode=request.validated_mode,
+            bronze_refs=request.bronze_refs,
+            dq_metrics=context.dq_metrics,
+            partition_by=request.partition_cols,
+            source_batch_ids=(
+                [str(request.source_batch_id)]
+                if request.source_batch_id is not None
+                else None
+            ),
+            started_at=request.started_at,
+            completed_at=context.completed_at,
+            version_after=context.version_after,
+        )
     )
     return _build_silver_write_result(
         table_name=request.table_name,

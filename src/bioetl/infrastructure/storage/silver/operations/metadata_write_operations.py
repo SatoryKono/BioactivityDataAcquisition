@@ -12,7 +12,6 @@ from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
 from bioetl.domain.value_objects.silver_result import SilverWriteResult
 from bioetl.infrastructure.storage.silver.metadata_operations import (
-    _coerce_silver_metadata_write_request,
     _prepare_silver_merged_metadata_write,
     _prepare_silver_metadata_write,
     _SilverMetadataWriteHostProtocol,
@@ -88,27 +87,20 @@ async def write_silver_metadata_via_support_request(
 
 async def write_internal_silver_metadata_operation(
     metadata_ops: _SilverMetadataWriteOps,
-    request: _SilverMetadataWriteRequest | str | None = None,
+    request: _SilverMetadataWriteRequest,
     *,
-    args: tuple[object, ...] = (),
-    kwargs: dict[str, object] | None = None,
     execute_silver_metadata_write: _ExecuteSilverMetadataWrite,
 ) -> None:
     """Canonical Silver metadata publication path for composition-backed ops."""
-    resolved_request = _coerce_silver_metadata_write_request(
-        request,
-        args=args,
-        kwargs=kwargs or {},
-    )
     if metadata_ops._should_skip_silver_metadata_write(
-        records=resolved_request.records,
-        table_path=resolved_request.table_path,
+        records=request.records,
+        table_path=request.table_path,
         event_name="silver_metadata_skipped",
     ):
         return
     await execute_silver_metadata_write(
         cast(_SilverMetadataWriteHostProtocol, metadata_ops),
-        resolved_request,
+        request,
         _prepare_silver_metadata_write,
     )
 

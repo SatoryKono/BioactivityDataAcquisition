@@ -160,7 +160,7 @@ class TestResolveCompositeGoldSchema:
         # because removeprefix("composite_") on "activity" returns "activity"
         # which IS in the registry, so this should succeed
         # Let's check the actual behavior:
-        from bioetl.domain.contracts import CompositeActivityGoldSchema
+        from bioetl.domain.contracts.gold import CompositeActivityGoldSchema
 
         assert result is CompositeActivityGoldSchema
 

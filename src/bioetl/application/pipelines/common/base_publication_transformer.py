@@ -14,7 +14,6 @@ Reduces code duplication by extracting shared logic:
 
 from __future__ import annotations
 
-import xml.etree.ElementTree
 from dataclasses import dataclass
 from functools import partial
 from typing import TYPE_CHECKING, Any, cast
@@ -23,7 +22,6 @@ from bioetl.application.core.base_transformer import (
     BaseTransformer,
     TransformerDependencyContext,
 )
-from bioetl.application.core.base_transformer.errors import FilteredOutError
 from bioetl.application.core.pre_silver_record import PreSilverRecord
 from bioetl.application.core.record_normalization_processor import (
     RecordNormalizationProcessor,
@@ -459,26 +457,17 @@ class BasePublicationTransformer(BaseTransformer):  # type: ignore[misc]
         index: int,
     ) -> SilverRecord | None:
         """Unified publication transformation flow (Facade execution)."""
-        try:
-            prepared = prepare_publication_payload(self, context, record, index)
-            normalized_business_data = normalize_publication_business_data(
-                self, prepared.business_data
-            )
-            return _assemble_publication_silver_record(
-                self,
-                context,
-                index=index,
-                prepared=prepared,
-                normalized_business_data=normalized_business_data,
-            )
-        except (FilteredOutError, ValueError, xml.etree.ElementTree.ParseError) as e:
-            context.logger.warning(
-                "entity_validation_failed",
-                error=str(e),
-                index=index,
-                provider=self.provider,
-            )
-            return None
+        prepared = prepare_publication_payload(self, context, record, index)
+        normalized_business_data = normalize_publication_business_data(
+            self, prepared.business_data
+        )
+        return _assemble_publication_silver_record(
+            self,
+            context,
+            index=index,
+            prepared=prepared,
+            normalized_business_data=normalized_business_data,
+        )
 
     def _classify_publication_type(
         self,

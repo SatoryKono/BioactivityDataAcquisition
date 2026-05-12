@@ -396,7 +396,7 @@ class TestCompositeMoleculeConfig:
 
     def test_config_loads_successfully(self) -> None:
         """Verify configuration loads without validation errors."""
-        from bioetl.composition.bootstrap import load_composite_config
+        from bioetl.composition.composite_api import load_composite_config
 
         try:
             config = load_composite_config("molecule")

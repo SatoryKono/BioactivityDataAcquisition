@@ -241,7 +241,7 @@ class _SilverDeltaOperationFacade:
     @staticmethod
     def _load_silver_writer_module() -> Any:  # Any: return type varies at runtime
         """Load silver_writer module for backward-compatible patch points."""
-        from bioetl.infrastructure.storage import silver_writer as silver_writer_module
+        import bioetl.infrastructure.storage.silver_writer as silver_writer_module
 
         return silver_writer_module
 

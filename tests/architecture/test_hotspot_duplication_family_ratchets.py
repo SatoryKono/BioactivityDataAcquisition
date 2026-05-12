@@ -63,7 +63,7 @@ def test_active_hotspot_family_duplication_ratchets_require_confirmed_clean_hist
 ):
     """Active family ratchets must stay bounded to zero-duplication seams only."""
     scorecard = _load_scorecard()
-    hotspot_policy = scorecard.get("report_only_hotspot_families", {})
+    hotspot_policy = scorecard.get("hotspot_family_ratchets", {})
     assert isinstance(hotspot_policy, dict)
     assert hotspot_policy.get("mode") == "fail-fast"
 

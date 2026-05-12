@@ -11,7 +11,7 @@ import pytest
 import yaml
 import zstandard as zstd
 
-from bioetl.composition.bootstrap import bootstrap_pipeline_runner
+from bioetl.composition.bootstrap.runtime.pipeline import bootstrap_pipeline_runner
 from bioetl.composition.services.versioning import CodeRevisionProvenance
 from bioetl.domain.context import CachedBronzeContext, PipelineRunContext
 from bioetl.domain.types import RunID, RunType

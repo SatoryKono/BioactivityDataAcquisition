@@ -153,7 +153,7 @@ class MyAdapter:
   registries: `file_size_limits`, `function_complexity`, `function_length`,
   `class_size`, `class_method_count`, `god_object`, `domain_complexity`.
 - Если изменённый путь попадает в `hotspot_budgets` или
-  `report_only_hotspot_families` из `configs/quality/debt_scorecard.yaml`,
+  `hotspot_family_ratchets` из `configs/quality/debt_scorecard.yaml`,
   исполнитель **SHOULD** дополнительно отслеживать family-level параметры,
   включая `duplication_clusters`, `files_ge_250_loc`,
   `max_internal_fan_in` и другие bounded-growth поля для этой family.
