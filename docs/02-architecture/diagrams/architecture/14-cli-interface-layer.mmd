@@ -42,7 +42,7 @@ graph LR
 
     subgraph Runtime["Created runtime services"]
         PRUN["PipelineRunnerService"]:::size-md
-        CRUN["CompositePipelineRunnerService"]:::size-md
+        CRUN["CompositePipelineRunner"]:::size-md
         ISVC["Inspection services<br/>run-manifest / lineage"]:::size-md
         ASVC["Admin services<br/>health / export / checkpoint / vacuum"]:::size-md
         HSRV["HTTP HealthServer<br/>optional command mode"]:::size-md

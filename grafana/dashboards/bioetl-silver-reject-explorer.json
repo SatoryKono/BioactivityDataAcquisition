@@ -354,7 +354,7 @@
       ],
       "title": "Inspect Run Scope Summary",
       "type": "table",
-      "description": "Human-readable selected-range summary for the current explorer scope. It keeps the scalar fields filtered_records_total, bronze_records, and reject_ratio, while the reason/field/signature breakdowns stay in panels 5-7 where they are readable as dedicated tables. No data or an empty summary is UNKNOWN until the API, pipeline, Bronze denominator, and filter-option chain are confirmed. This panel is forensic context, not a replay approval signal; open Control Plane and CLI before replay/resolve actions."
+      "description": "Human-readable selected-range summary for the current explorer scope. It keeps the scalar fields filtered_records_total, bronze_records, and reject_ratio, while the reason/field/signature breakdowns stay in panels 5-7 where they are readable as dedicated tables. A zero-reject workflow run is a legitimate empty explorer state only after Quarantine Explorer responds, one concrete pipeline is confirmed, and the Bronze denominator is present. No data or an empty summary is UNKNOWN until the API, pipeline, Bronze denominator, and filter-option chain are confirmed. This panel is forensic context, not a replay approval signal; open Control Plane and CLI before replay/resolve actions."
     },
     {
       "datasource": "Quarantine Explorer",

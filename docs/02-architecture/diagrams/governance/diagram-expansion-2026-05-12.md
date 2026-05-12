@@ -602,14 +602,14 @@
 | 12 | PipelineRun Aggregate Stage Result And Terminal Transition Model | `architecture/34-pipelinerun-aggregate-stage-result-and-terminal-transition-model.mmd` | `png/34-pipelinerun-aggregate-stage-result-and-terminal-transition-model.png` |
 | 13 | Composite Dependency Join Planning And Join Key Resolution | `` | `(not generated)` |
 | 14 | CompositePipelineRunner Stage State And Merge Boundaries | `` | `(not generated)` |
-| 15 | ChEMBL Activity Extraction To Bronze Artifact Publication | `architecture/38-chembl-activity-extraction-to-bronze-artifact-publication.mmd` | `png/38-chembl-activity-extraction-to-bronze-artifact-publication.png` |
+| 15 | ChEMBL Activity Extraction To Bronze Artifact Publication | `architecture/38-chembl-bronze-activity-extraction-to-artifact-publication.mmd` | `png/38-chembl-bronze-activity-extraction-to-artifact-publication.png` |
 | 16 | DQ Contract Config Loading And Policy Resolution | `architecture/45-dq-contract-config-loading-and-policy-resolution.mmd` | `png/45-dq-contract-config-loading-and-policy-resolution.png` |
 | 17 | UnifiedHTTPClient Retry Policy And Circuit Breaker Interaction | `` | `(not generated)` |
-| 18 | CrossRef Publication Search Fallback And Batch DOI Fetch | `architecture/39-crossref-publication-search-fallback-and-batch-doi-fetch.mmd` | `png/39-crossref-publication-search-fallback-and-batch-doi-fetch.png` |
+| 18 | CrossRef Publication Search Fallback And Batch DOI Fetch | `architecture/39-crossref-search-fallback-and-batch-doi-fetch-publications.mmd` | `png/39-crossref-search-fallback-and-batch-doi-fetch-publications.png` |
 | 19 | EnrichmentCoordinatorService Dependency Fan-Out And Result Reduction | `` | `(not generated)` |
 | 20 | OpenAlex Cursor Pagination And Response Mapping Path | `architecture/41-openalex-cursor-pagination-and-response-mapping-path.mmd` | `png/41-openalex-cursor-pagination-and-response-mapping-path.png` |
 | 21 | PubMed Search Fetch XML Parse And Publication Mapping | `architecture/40-pubmed-search-fetch-xml-parse-and-publication-mapping.mmd` | `png/40-pubmed-search-fetch-xml-parse-and-publication-mapping.png` |
-| 22 | UniProt IDMapping To Protein Fetch Enrichment | `architecture/43-uniprot-idmapping-to-protein-fetch-enrichment.mmd` | `png/43-uniprot-idmapping-to-protein-fetch-enrichment.png` |
+| 22 | UniProt IDMapping To Protein Fetch Enrichment | `architecture/43-uniprot-mapping-job-to-protein-fetch-enrichment.mmd` | `png/43-uniprot-mapping-job-to-protein-fetch-enrichment.png` |
 | 23 | Data Traceability Runtime Path For Manifest Effective Config And Lineage | `` | `(not generated)` |
 | 24 | Runtime Builder Control Plane Inputs To Effective Config Artifact | `` | `(not generated)` |
 | 25 | SemanticScholar Search Fallback And Batch Request Flow | `architecture/42-semanticscholar-search-fallback-and-batch-request-flow.mmd` | `png/42-semanticscholar-search-fallback-and-batch-request-flow.png` |

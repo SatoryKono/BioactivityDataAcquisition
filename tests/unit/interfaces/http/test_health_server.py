@@ -707,6 +707,44 @@ class TestHealthServerQuarantineExplorer:
         )
 
     @pytest.mark.asyncio(loop_scope="module")
+    async def test_stats_endpoint_delegates_to_quarantine_service_and_returns_shape(
+        self,
+        running_server_with_quarantine: tuple[HealthServer, MagicMock],
+    ) -> None:
+        """Stats endpoint should expose the zero-reject contract used by Grafana."""
+        server, service = running_server_with_quarantine
+        port = self._get_server_port(server)
+        status_code, _, body = await self._send_request(
+            port,
+            "GET",
+            "/ops/quarantine/filtered-stats?"
+            "pipeline=chembl_activity&run_type=incremental&reason_code=missing_required_field&"
+            "field=canonical_smiles&run_id=run-1&from=2026-04-01T00%3A00%3A00Z&"
+            "to=2026-04-02T00%3A00%3A00Z",
+        )
+
+        assert status_code == 200
+        data = json.loads(body)
+        assert data == {
+            "total": 0,
+            "by_reason_code": [],
+            "by_field": [],
+            "by_reason_signature": [],
+            "bronze_records": 0,
+            "reject_ratio": 0.0,
+        }
+        service.get_filtered_stats.assert_awaited_once_with(
+            pipeline="chembl_activity",
+            run_type="incremental",
+            reason_code="missing_required_field",
+            field="canonical_smiles",
+            run_id="run-1",
+            payload_hash=None,
+            from_ts="2026-04-01T00:00:00Z",
+            to_ts="2026-04-02T00:00:00Z",
+        )
+
+    @pytest.mark.asyncio(loop_scope="module")
     async def test_stats_endpoint_requires_pipeline_scope(
         self,
         running_server_with_quarantine: tuple[HealthServer, MagicMock],

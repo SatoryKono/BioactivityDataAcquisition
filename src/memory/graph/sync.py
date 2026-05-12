@@ -187,6 +187,7 @@ DEFAULT_FILE_STRUCTURE_EXCLUDED_PREFIXES: tuple[str, ...] = (
     "docs/02-architecture/generated",
     "docs/02-architecture/diagrams/bundles",
     "docs/02-architecture/diagrams/manifests",
+    "docs/02-architecture/diagrams/png",
     "docs/02-architecture/diagrams/tooling",
     "docs/02-architecture/diagrams/architecture/png",
     "docs/02-architecture/diagrams/architecture/svg",

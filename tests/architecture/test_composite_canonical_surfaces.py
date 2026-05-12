@@ -15,6 +15,10 @@ from bioetl.application.composite.runner_pkg import runner as runner_module
 ROOT = Path(__file__).resolve().parents[2]
 SRC_ROOT = ROOT / "src"
 TEST_ROOT = ROOT / "tests"
+DOC_ROOTS = (
+    ROOT / "docs" / "02-architecture" / "diagrams",
+    ROOT / "docs" / "reports" / "knowledge-graphs",
+)
 DEPRECATED_COMPOSITE_SYMBOLS = (
     "CompositeCheckpointManager",
     "CompositePipelineRunnerService",
@@ -26,6 +30,14 @@ def _python_files(root: Path) -> list[Path]:
     return sorted(root.rglob("*.py"))
 
 
+def _text_files(root: Path) -> list[Path]:
+    patterns = ("*.py", "*.mmd", "*.mermaid", "*.md", "*.json", "*.svg")
+    files: set[Path] = set()
+    for pattern in patterns:
+        files.update(root.rglob(pattern))
+    return sorted(files)
+
+
 def _symbol_hits(root: Path, allowlist: frozenset[Path]) -> list[str]:
     hits: list[str] = []
     for py_file in _python_files(root):
@@ -35,6 +47,19 @@ def _symbol_hits(root: Path, allowlist: frozenset[Path]) -> list[str]:
         for symbol in DEPRECATED_COMPOSITE_SYMBOLS:
             if symbol in source:
                 hits.append(f"{py_file.relative_to(ROOT)} -> {symbol}")
+    return hits
+
+
+def _doc_symbol_hits() -> list[str]:
+    hits: list[str] = []
+    for root in DOC_ROOTS:
+        for doc_file in _text_files(root):
+            if "legacy" in doc_file.parts:
+                continue
+            source = doc_file.read_text(encoding="utf-8")
+            for symbol in DEPRECATED_COMPOSITE_SYMBOLS:
+                if symbol in source:
+                    hits.append(f"{doc_file.relative_to(ROOT)} -> {symbol}")
     return hits
 
 
@@ -60,6 +85,15 @@ def test_first_party_composite_tests_use_canonical_names_by_default() -> None:
     assert hits == [], (
         "First-party composite tests must use canonical composite names by "
         "default:\n" + "\n".join(f"  - {hit}" for hit in hits)
+    )
+
+
+@pytest.mark.architecture
+def test_active_composite_docs_and_generated_graphs_use_canonical_names() -> None:
+    hits = _doc_symbol_hits()
+    assert hits == [], (
+        "Active composite docs and generated knowledge graphs must use canonical "
+        "composite names:\n" + "\n".join(f"  - {hit}" for hit in hits)
     )
 
 

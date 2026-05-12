@@ -75,7 +75,7 @@ flowchart TB
 
     subgraph Infrastructure["Infrastructure Layer"]
         Adapters["Provider adapters"]
-        StorageAdapters["Bronze / Delta / Gold"]
+        StorageRuntime["Bronze / Delta / Gold storage"]
         RuntimeAdapters["Locks / checkpoints"]
         Observability["Metrics / tracing"]
     end
@@ -88,11 +88,11 @@ flowchart TB
     Runner --> Errors
 
     Adapters -.->|"implements"| Ports
-    StorageAdapters -.->|"implements"| Ports
+    StorageRuntime -.->|"implements"| Ports
     RuntimeAdapters -.->|"implements"| Ports
     Observability -.->|"implements"| Ports
 
-    StorageFactory --> StorageAdapters
+    StorageFactory --> StorageRuntime
     Builder --> RuntimeAdapters
     Builder --> Observability
 

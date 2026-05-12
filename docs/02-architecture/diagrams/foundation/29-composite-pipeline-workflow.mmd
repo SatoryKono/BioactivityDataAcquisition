@@ -32,7 +32,7 @@
 flowchart TB
     subgraph Init["Phase 1: Initialization"]
         CFG["[S] Load CompositeConfig<br/>from YAML<br/><br/>"]
-        PFV["[S] CompositePreflightValidator<br/>• validate seed<br/>• validate enrichers<br/>• check silver tables"]
+        PFV["[S] CompositePreflightValidationService<br/>• validate seed<br/>• validate enrichers<br/>• check silver tables"]
         BOOT["[S] bootstrap_composite_runner()<br/>runtime assembly composes runner factories<br/>+ support services + manifest/ledger"]
     end
 

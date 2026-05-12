@@ -1525,6 +1525,40 @@ def test_loki_drilldown_uses_grafana_logs_drilldown_entrypoint() -> None:
         ), f"{dashboard_name} must not keep legacy Loki Explore payload links"
 
 
+def test_loki_baseline_guidance_matches_shipped_structured_log_fields() -> None:
+    """Docs and drilldowns should match the shipped structured-log refinement path."""
+    sample_line = _emit_sample_structured_log(
+        pipeline="chembl_activity",
+        provider="chembl",
+    )
+    assert re.search(r'"pipeline"\s*:\s*"chembl_activity"', sample_line)
+    assert re.search(r'"provider"\s*:\s*"chembl"', sample_line)
+    assert re.search(r'"stage"\s*:\s*"extract"', sample_line)
+
+    grafana_readme = Path("grafana/README.md").read_text(encoding="utf-8")
+    monitoring_guide = Path("docs/05-operations/01-monitoring-guide.md").read_text(
+        encoding="utf-8"
+    )
+
+    for content, label in (
+        (grafana_readme, "grafana/README.md"),
+        (monitoring_guide, "docs/05-operations/01-monitoring-guide.md"),
+    ):
+        assert "{job=\"bioetl\"}" in content, (
+            f"{label} must document the canonical Loki baseline query"
+        )
+        assert "Zero lines" in content or "Empty Explore results" in content, (
+            f"{label} must disclose legitimate empty-result scenarios"
+        )
+
+    assert "reports/logs/bioetl.log" in monitoring_guide, (
+        "Monitoring guide must explain the local shipped-log fallback for Loki triage"
+    )
+    assert "pipeline" in monitoring_guide and "provider" in monitoring_guide, (
+        "Monitoring guide must direct refinement by structured-log fields after the baseline query"
+    )
+
+
 def test_overview_and_runtime_dashboards_expose_data_quality_handoff() -> None:
     """Overview and Runtime should offer an explicit handoff into DQ triage."""
     expectations = (
