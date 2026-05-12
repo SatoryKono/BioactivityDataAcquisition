@@ -122,8 +122,6 @@ def _build_base_summary(
     return summary
 
 
-
-
 def build_diagnostics_summary(
     manifest: RunManifest,
     ledger_entries: tuple[RunLedgerEntry, ...],
@@ -365,7 +363,7 @@ def _refresh_replay_summary_from_materialized_snapshots(
         updated,
         exact_replay_eligible,
         replay_mode,
-        continuation_mode,
+        _continuation_mode,
     ) = _refresh_replay_summary_update_replay_fields(
         updated=updated,
         effective_manifest=effective_manifest,

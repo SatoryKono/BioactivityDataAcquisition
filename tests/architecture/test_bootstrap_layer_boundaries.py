@@ -223,7 +223,9 @@ class TestBootstrapLayerBoundaries:
 
         assert "from bioetl.composition.bootstrap.runtime." in content or (
             "from bioetl.composition.composite_api import" in content
-        ), "_bootstrap/__init__.py should re-export through owner-focused bootstrap APIs"
+        ), (
+            "_bootstrap/__init__.py should re-export through owner-focused bootstrap APIs"
+        )
 
 
 class TestBootstrapFunctionCategorization:

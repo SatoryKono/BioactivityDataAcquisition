@@ -6,7 +6,7 @@
 ## Summary
 
 - Scanned modules: `1822`
-- Internal import edges (raw): `7244`
+- Internal import edges (raw): `7248`
 - Aggregated layer edges: `14`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `322`
@@ -23,9 +23,9 @@ flowchart LR
     interfaces[interfaces]
     application -->|1194 OK| application
     application -->|1085 OK| domain
-    composition -->|276 OK| application
-    composition -->|589 OK| composition
-    composition -->|411 OK| domain
+    composition -->|277 OK| application
+    composition -->|590 OK| composition
+    composition -->|413 OK| domain
     composition -->|327 OK| infrastructure
     domain -->|1263 OK| domain
     infrastructure -->|780 OK| domain
@@ -43,9 +43,9 @@ flowchart LR
 | ---------------- | ---------------- | ------: | ------- |
 | `application`    | `application`    |    1194 | allowed |
 | `application`    | `domain`         |    1085 | allowed |
-| `composition`    | `application`    |     276 | allowed |
-| `composition`    | `composition`    |     589 | allowed |
-| `composition`    | `domain`         |     411 | allowed |
+| `composition`    | `application`    |     277 | allowed |
+| `composition`    | `composition`    |     590 | allowed |
+| `composition`    | `domain`         |     413 | allowed |
 | `composition`    | `infrastructure` |     327 | allowed |
 | `domain`         | `domain`         |    1263 | allowed |
 | `infrastructure` | `domain`         |     780 | allowed |
@@ -78,7 +78,7 @@ flowchart LR
 | `application.services`         | `domain.control_plane`          |      52 |
 | `infrastructure.storage`       | `domain.value_objects`          |      48 |
 | `composition.bootstrap`        | `domain.ports`                  |      47 |
-| `composition.bootstrap`        | `application.composite`         |      42 |
+| `composition.bootstrap`        | `application.composite`         |      43 |
 | `composition.bootstrap`        | `infrastructure.config`         |      42 |
 | `composition.factories`        | `infrastructure.storage`        |      38 |
 | `composition.factories`        | `infrastructure.config`         |      37 |

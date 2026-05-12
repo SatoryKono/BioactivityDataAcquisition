@@ -392,8 +392,7 @@ def test_historical_replay_corpus_inventory_and_bulk_certification() -> None:
 
     assert result.completed_count == 2
     assert (
-        result.inventory_after.certified_count
-        + result.inventory_after.replayable_count
+        result.inventory_after.certified_count + result.inventory_after.replayable_count
         == 2
     )
     assert result.inventory_after.remaining_uncertified_count == 0

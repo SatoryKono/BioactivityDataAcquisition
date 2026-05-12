@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import threading
+from importlib import import_module
 from types import MappingProxyType
 from typing import Protocol, cast
 
@@ -11,16 +12,16 @@ from bioetl.composition.factories.pipeline.assembler import (
     GenericPipelineFactory,
 )
 from bioetl.composition.factories.pipeline.contract_validator import create_factory
-from bioetl.composition.registry import (
-    PipelineDefinition,
-    PipelineRegistry,
-    create_registry,
-)
 from bioetl.composition.factories.pipeline.registry_manifest import (
     PIPELINE_CONFIGS,
 )
 from bioetl.composition.registry_default import get_default_registry
 from bioetl.domain.ports import PipelineFactoryPort
+
+_registry_module = import_module("bioetl.composition.registry")
+PipelineDefinition = _registry_module.PipelineDefinition
+PipelineRegistry = _registry_module.PipelineRegistry
+create_registry = _registry_module.create_registry
 
 
 class PipelineRegistryProtocol(Protocol):
@@ -239,8 +240,8 @@ __all__ = [
     "chembl_target_component_factory",
     "chembl_target_factory",
     "chembl_tissue_factory",
-    "crossref_publication_factory",
     "create_registry",
+    "crossref_publication_factory",
     "get_factory",
     "is_registered",
     "list_available_pipelines",

@@ -1,7 +1,7 @@
 {
   "summary": {
     "scanned_modules": 1822,
-    "total_internal_imports": 7244,
+    "total_internal_imports": 7248,
     "layer_edges": 14,
     "cross_layer_group_edges": 60,
     "cross_layer_group_edges_total": 322,
@@ -23,19 +23,19 @@
     {
       "source": "composition",
       "target": "application",
-      "imports": 276,
+      "imports": 277,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "composition",
-      "imports": 589,
+      "imports": 590,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "domain",
-      "imports": 411,
+      "imports": 413,
       "allowed": true
     },
     {
@@ -187,7 +187,7 @@
     {
       "source": "composition.bootstrap",
       "target": "application.composite",
-      "imports": 42
+      "imports": 43
     },
     {
       "source": "composition.bootstrap",

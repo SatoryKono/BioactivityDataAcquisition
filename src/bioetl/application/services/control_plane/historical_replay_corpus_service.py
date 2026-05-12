@@ -166,9 +166,7 @@ class HistoricalReplayCertifiabilityInventory:
             "awaiting_source_certification_count": (
                 self.awaiting_source_certification_count
             ),
-            "awaiting_composite_lineage_count": (
-                self.awaiting_composite_lineage_count
-            ),
+            "awaiting_composite_lineage_count": (self.awaiting_composite_lineage_count),
             "unsupported_count": self.unsupported_count,
             "remaining_uncertified_count": self.remaining_uncertified_count,
             "records": [record.to_dict() for record in self.records],

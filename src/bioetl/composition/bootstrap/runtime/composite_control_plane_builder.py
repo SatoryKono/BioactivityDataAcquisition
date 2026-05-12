@@ -57,6 +57,7 @@ from bioetl.domain.control_plane.reproducibility_policy import (
     is_critical_reproducibility_runtime,
     resolve_effective_required_persistence_profile,
 )
+from bioetl.domain.control_plane.run_manifest import RunManifest
 from bioetl.domain.types import RunType
 from bioetl.infrastructure.control_plane import FileRunManifestStore
 from bioetl.infrastructure.time import SystemClock

@@ -110,7 +110,10 @@ def _is_full_scan_idempotent_rebuild(manifest: RunManifest) -> bool:
         manifest.resolved_config.get("loading_strategy"),
         lookup_mapping_path(manifest.resolved_config, "pipeline", "loading_strategy"),
     )
-    return any(str(candidate or "").strip().lower() == "full_scan_only" for candidate in candidates)
+    return any(
+        str(candidate or "").strip().lower() == "full_scan_only"
+        for candidate in candidates
+    )
 
 
 def _is_composite_execution_context(manifest: RunManifest) -> bool:
@@ -167,7 +170,9 @@ def _snapshot_exact_replay_blockers(
             "partial_input_snapshot_envelope",
             *(
                 f"input_snapshot_missing:{source_ref}"
-                for source_ref in getattr(snapshot_envelope, "missing_snapshot_source_refs", [])
+                for source_ref in getattr(
+                    snapshot_envelope, "missing_snapshot_source_refs", []
+                )
             ),
         ]
     if manifest.replay_capability != ReplayCapability.EXACT_REPLAY_SUPPORTED:

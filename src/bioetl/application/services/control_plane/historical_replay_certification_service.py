@@ -360,7 +360,10 @@ class HistoricalReplayCertificationService:
             "within_post_capture_parent_boundary",
             "historical_source_replay_certified",
         }
-        if str(upstream_summary.get("broader_historical_exact_replay_state") or "") not in valid_states:
+        if (
+            str(upstream_summary.get("broader_historical_exact_replay_state") or "")
+            not in valid_states
+        ):
             raise ValueError(
                 "Composite certification requires certified or snapshot-backed upstream lineage"
             )

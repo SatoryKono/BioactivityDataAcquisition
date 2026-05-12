@@ -189,8 +189,6 @@ def _custom_field_rule_violated(
     return _custom_rule_violated(record, value, rule.validator)
 
 
-
-
 def _coerce_string_list_like(value: str) -> list[object] | None:
     stripped = value.strip()
     if not stripped:

@@ -305,8 +305,6 @@ def _resolve_manifest_replay_readiness_verdict(
     )
 
 
-
-
 def _resolve_reproducibility_profile(
     manifest: RunManifest,
 ) -> ReproducibilityFamilyProfile:
@@ -384,5 +382,3 @@ def _build_resume_contract(
         "semantic_identity_anchor": "execution_fingerprint",
         "occurrence_identity_anchor": "run_id",
     }
-
-

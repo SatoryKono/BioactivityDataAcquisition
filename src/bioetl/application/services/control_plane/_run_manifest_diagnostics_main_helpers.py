@@ -33,9 +33,7 @@ def _build_unified_reproducibility_diagnostics_policy_payload(
         "replay_mode": summary.get("replay_mode"),
         "continuation_mode": summary.get("continuation_mode"),
         "replay_family_contract": summary.get("replay_family_contract"),
-        "exact_replay_support_boundary": summary.get(
-            "exact_replay_support_boundary"
-        ),
+        "exact_replay_support_boundary": summary.get("exact_replay_support_boundary"),
         "post_capture_replayable_parent_supported": summary.get(
             "post_capture_replayable_parent_supported"
         ),
@@ -119,9 +117,7 @@ def _build_unified_reproducibility_diagnostics_checkpoint_anchors(
     return {
         "resume_contract": summary.get("resume_contract"),
         "resume_diagnostics": summary.get("resume_diagnostics"),
-        "current_manifest_anchors": _build_current_checkpoint_anchor_payload(
-            summary
-        ),
+        "current_manifest_anchors": _build_current_checkpoint_anchor_payload(summary),
         "resume_anchor_comparison": _build_resume_anchor_comparison(summary),
     }
 

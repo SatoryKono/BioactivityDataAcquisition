@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import inspect
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Protocol, TypeGuard, cast
+from typing import TYPE_CHECKING, Protocol, TypeGuard
 
 from bioetl.composition.bootstrap.composite_infrastructure_context import (
     CompositeInfrastructureContext,
@@ -102,13 +102,27 @@ def build_bootstrap_support_services(
     resources: BootstrapRuntimeResources,
 ) -> object:
     """Resolve support services from the shared resource bundle."""
+    call_kwargs: dict[str, object] = {
+        "config": config,
+        "runtime": runtime,
+        "infra_context": resources.infra_context or resources,
+    }
+    if resources.infra_context is None:
+        call_kwargs.update(
+            {
+                "run_id": resources.run_id,
+                "settings": resources.settings,
+                "logger": resources.logger,
+                "metrics": resources.metrics,
+                "tracer": resources.tracer,
+                "storage": resources.storage,
+                "lock": resources.lock,
+                "clock": resources.clock,
+            }
+        )
     return _call_supported_kwargs(
         build_support_services_fn,
-        {
-            "config": config,
-            "runtime": runtime,
-            "infra_context": resources.infra_context or resources,
-        },
+        call_kwargs,
     )
 
 

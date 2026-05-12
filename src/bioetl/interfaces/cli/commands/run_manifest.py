@@ -8,11 +8,11 @@ from typing import TYPE_CHECKING
 
 import click
 
-from bioetl.application.services.control_plane.historical_replay_closure_service import (
-    HistoricalReplayResidualDisposition,
-)
 from bioetl.application.services.control_plane.historical_replay_certification_service import (
     HistoricalReplaySnapshotCertification,
+)
+from bioetl.application.services.control_plane.historical_replay_closure_service import (
+    HistoricalReplayResidualDisposition,
 )
 from bioetl.application.services.control_plane.historical_replay_corpus_service import (
     HistoricalReplayBulkCertificationSpec,
@@ -278,7 +278,9 @@ def inventory_command(output_format: str) -> None:
 
 
 @run_manifest.command("certify-historical-bulk")
-@click.argument("plan_path", type=click.Path(exists=True, dir_okay=False, path_type=Path))
+@click.argument(
+    "plan_path", type=click.Path(exists=True, dir_okay=False, path_type=Path)
+)
 @click.option(
     "--format",
     "output_format",

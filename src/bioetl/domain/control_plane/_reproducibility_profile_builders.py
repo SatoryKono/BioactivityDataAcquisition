@@ -140,7 +140,7 @@ def _build_source_reproducibility_family_profile(
     *,
     family: str | None,
     execution_context: ReproducibilityExecutionContext,
-) -> "ReproducibilityFamilyProfile":
+) -> ReproducibilityFamilyProfile:
     from bioetl.domain.control_plane.reproducibility_profiles import (
         ReproducibilityFamilyProfile,
     )
@@ -239,7 +239,11 @@ def _source_post_capture_reason(*, supported: bool) -> str:
 
 
 def _source_historical_upgrade_policy(*, supported: bool) -> str:
-    return "input_snapshot_published_ledger_evidence_only" if supported else "outside_supported_boundary"
+    return (
+        "input_snapshot_published_ledger_evidence_only"
+        if supported
+        else "outside_supported_boundary"
+    )
 
 
 def _source_historical_upgrade_boundary(*, supported: bool) -> str | None:
