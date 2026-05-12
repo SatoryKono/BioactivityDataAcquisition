@@ -337,12 +337,11 @@ class TestPubMedPublicationTransformer:
         transformer: PubMedPublicationTransformer,
         mock_context: PipelineContext,
     ) -> None:
-        """Test that transformation returns None when _raw_xml is missing."""
+        """Direct transform() must expose missing _raw_xml validation failures."""
         record: dict[str, Any] = {"pmid": "12345678"}
 
-        result = await transformer.transform(mock_context, record, index=0)
-
-        assert result is None
+        with pytest.raises(ValueError, match="Missing or invalid _raw_xml field"):
+            await transformer.transform(mock_context, record, index=0)
 
     @pytest.mark.asyncio
     async def test_transform_empty_raw_xml(
@@ -350,12 +349,11 @@ class TestPubMedPublicationTransformer:
         transformer: PubMedPublicationTransformer,
         mock_context: PipelineContext,
     ) -> None:
-        """Test that transformation returns None for empty _raw_xml."""
+        """Direct transform() must expose empty _raw_xml validation failures."""
         record: dict[str, Any] = {"_raw_xml": ""}
 
-        result = await transformer.transform(mock_context, record, index=0)
-
-        assert result is None
+        with pytest.raises(ValueError, match="Missing or invalid _raw_xml field"):
+            await transformer.transform(mock_context, record, index=0)
 
     @pytest.mark.asyncio
     async def test_transform_invalid_xml(
@@ -363,12 +361,11 @@ class TestPubMedPublicationTransformer:
         transformer: PubMedPublicationTransformer,
         mock_context: PipelineContext,
     ) -> None:
-        """Test that transformation returns None for invalid XML."""
+        """Direct transform() must expose invalid XML parse failures."""
         record: dict[str, Any] = {"_raw_xml": "<invalid><xml>"}
 
-        result = await transformer.transform(mock_context, record, index=0)
-
-        assert result is None
+        with pytest.raises(ValueError, match="XML parse error"):
+            await transformer.transform(mock_context, record, index=0)
         mock_context.logger.warning.assert_called()
 
     @pytest.mark.asyncio
@@ -377,7 +374,7 @@ class TestPubMedPublicationTransformer:
         transformer: PubMedPublicationTransformer,
         mock_context: PipelineContext,
     ) -> None:
-        """Test that transformation returns None when PMID is missing."""
+        """Missing publication primary identifier must raise FilteredOutError."""
         xml_without_pmid = """<?xml version="1.0"?>
         <PubmedArticle>
           <MedlineCitation>
@@ -389,9 +386,8 @@ class TestPubMedPublicationTransformer:
         """
         record: dict[str, Any] = {"_raw_xml": xml_without_pmid}
 
-        result = await transformer.transform(mock_context, record, index=0)
-
-        assert result is None
+        with pytest.raises(FilteredOutError, match="primary identifier"):
+            await transformer.transform(mock_context, record, index=0)
 
     @pytest.mark.asyncio
     async def test_transform_no_article_element(

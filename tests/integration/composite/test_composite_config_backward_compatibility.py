@@ -53,3 +53,18 @@ def test_legacy_composite_yaml_without_version_is_rejected() -> None:
 
     with pytest.raises(ValidationError, match="version"):
         validate_composite_config_payload(payload)
+
+
+def test_composite_local_gold_filters_are_rejected() -> None:
+    """Top-level composite gold_filters must not drift ahead of runtime support."""
+    payload = yaml.safe_load(
+        _base_composite_yaml(with_version=True)
+        + "gold_filters:\n"
+        + "  required_fields: [title]\n"
+    )
+
+    with pytest.raises(
+        ValidationError,
+        match="Composite-local top-level gold_filters are unsupported",
+    ):
+        validate_composite_config_payload(payload)

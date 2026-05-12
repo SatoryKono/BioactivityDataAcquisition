@@ -433,5 +433,6 @@ composite:
 # -----------------------------------------------------------------------------
 # Filter Configuration (ADR-028)
 # -----------------------------------------------------------------------------
-# Gold filters and filter rules loaded from hierarchical config files.
-# No inline gold_filters needed — filter entity config is authoritative.
+# Composite-local top-level `gold_filters` are unsupported.
+# Entity pipeline filter config remains authoritative unless explicit
+# composite runtime support is introduced.

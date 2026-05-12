@@ -25,6 +25,9 @@ from bioetl.application.services.checkpoint_compatibility_service import (
 from bioetl.application.services.control_plane.forensic_diff_service import (
     ForensicRunDiffService,
 )
+from bioetl.application.services.control_plane.run_manifest_diagnostics import (
+    build_diagnostics_summary,
+)
 from bioetl.application.services.control_plane.run_ledger_service import (
     RunLedgerService,
 )
@@ -460,6 +463,58 @@ def test_reproducibility_contract_manifest_diff_exposes_exact_replay_parentage()
     assert "replay_of_manifest_id" in result.noncanonical_difference_fields
 
 
+def test_reproducibility_contract_live_capture_materialized_snapshot_parent_state() -> (
+    None
+):
+    manifest = _make_manifest(
+        manifest_id="manifest-live-parent",
+        run_id=RunID(UUID("00000000-0000-0000-0000-000000000611")),
+        execution_fingerprint="fp-live-parent",
+        input_snapshots=(),
+        exact_replay=False,
+        required_persistence_profile="degraded_observable",
+        execution_context="ordinary",
+    )
+    ledger_entry = RunLedgerEntry(
+        entry_id="entry-input-snapshot",
+        manifest_id=manifest.manifest_id,
+        run_id=manifest.run_id,
+        event_type="input_snapshot_published",
+        event_family="input_snapshot",
+        occurred_at=datetime(2026, 1, 2, 12, 0, tzinfo=UTC),
+        status="published",
+        stage="bronze",
+        details={
+            "provider": "chembl",
+            "entity": "activity",
+            "pipeline_name": "chembl_activity",
+            "query": "fixture://sample",
+            "snapshot_id": "snapshot-1",
+            "content_hash": "sha256:snapshot-1",
+            "immutable_uri": "bronze://chembl/activity/2026-01-02/batch_1.jsonl.zst",
+        },
+    )
+
+    summary = build_diagnostics_summary(manifest, (ledger_entry,))
+
+    assert summary["replay_capability"] == "exact_replay_supported"
+    assert summary["replay_capability_reason"] == (
+        "materialized_live_capture_snapshot_envelope_present"
+    )
+    assert summary["replay_occurrence_kind"] == "materialized_replayable_parent"
+    assert summary["replay_mode"] == "same_data_state_recovery"
+    assert summary["replay_parentage"]["is_exact_replay"] is False
+    assert summary["input_snapshot_materialization_mode"] == (
+        "live_capture_snapshot_materialized"
+    )
+    assert summary["replay_family_contract"][
+        "post_capture_replayable_parent_supported"
+    ] is True
+    assert summary["replay_family_contract"][
+        "post_capture_replayable_parent_boundary"
+    ] == "ledger_materialized_live_capture_parent"
+
+
 def test_reproducibility_contract_lineage_store_preserves_occurrence_history(
     tmp_path: Path,
 ) -> None:
@@ -642,6 +697,35 @@ def test_reproducibility_contract_gold_bundle_keeps_sidecar_and_fragment_identit
         node.node_id == bundle.metadata.output.artifact_id
         for node in bundle.lineage_fragment.nodes
     )
+
+
+def test_reproducibility_contract_historical_live_runs_without_snapshot_evidence_stay_bounded() -> (
+    None
+):
+    manifest = _make_manifest(
+        manifest_id="manifest-historical-live-no-snapshots",
+        run_id=RunID(UUID("00000000-0000-0000-0000-000000000412")),
+        execution_fingerprint="fp-historical-live-no-snapshots",
+        exact_replay=False,
+    )
+
+    summary = build_diagnostics_summary(manifest, ())
+
+    assert summary["replay_occurrence_kind"] == "ordinary_live_capture"
+    assert summary["historical_live_run_upgrade_policy"] == (
+        "input_snapshot_published_ledger_evidence_only"
+    )
+    assert summary["historical_live_run_upgrade_boundary"] == (
+        "input_snapshot_published_ledger_evidence"
+    )
+    assert summary["broader_historical_exact_replay_policy"] == (
+        "ratified_snapshot_backed_boundary_is_final_supported_scope"
+    )
+    assert summary["historical_live_run_upgrade_state"] == (
+        "awaiting_input_snapshot_published_evidence"
+    )
+    assert summary["replay_capability"] == "rebuild_only"
+    assert summary["replay_capability_reason"] == "immutable_input_snapshots_missing"
 
 
 def test_reproducibility_contract_supported_gold_trace_path_resolves_run_context() -> (

@@ -658,19 +658,11 @@ composite:
             - subject_keywords
 
 # -----------------------------------------------------------------------------
-# Gold Filters (applied to merged output)
-# -----------------------------------------------------------------------------
-gold_filters:
-    # Only include publications with title
-    required_fields:
-        - title
-
-# -----------------------------------------------------------------------------
 # Filter Configuration (ADR-028)
 # -----------------------------------------------------------------------------
-# Filter rules resolve from:
-#   1. configs/base/pipeline.yaml (`filter_defaults`)
-#   2. local `gold_filters` in this composite config
+# Composite-local top-level `gold_filters` are intentionally unsupported.
+# Entity pipeline filter config remains the authoritative source unless
+# explicit composite runtime support is introduced.
 
 # -----------------------------------------------------------------------------
 # Maintenance Configuration

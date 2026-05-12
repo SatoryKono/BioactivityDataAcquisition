@@ -15,6 +15,7 @@ from uuid import uuid4
 
 import pytest
 
+from bioetl.application.core.base_transformer import FilteredOutError
 from bioetl.application.core.pre_silver_record import PreSilverRecord
 from bioetl.application.core.record_normalization_processor import (
     RecordNormalizationProcessor,
@@ -324,20 +325,25 @@ class TestMissingPrimaryId:
     """Tests for handling missing primary ID."""
 
     @pytest.mark.asyncio
-    async def test_missing_id_returns_none(
+    async def test_missing_id_raises_filtered_out_error(
         self,
         transformer: StubPublicationTransformer,
         mock_context: PipelineContext,
     ) -> None:
-        """Should return None when primary ID is missing."""
+        """Missing primary ID should use runtime disposition, not silent drop."""
         record = {
             "id": None,
             "title": "No ID Record",
         }
 
-        result = await transformer.transform(mock_context, record, 0)
+        with pytest.raises(FilteredOutError) as exc_info:
+            await transformer.transform(mock_context, record, 0)
 
-        assert result is None
+        assert exc_info.value.details["policy_stage"] == "structural"
+        assert exc_info.value.details["reason_code"] == (
+            "missing_publication_primary_id"
+        )
+        assert exc_info.value.details["rule_type"] == "required_fields"
 
     @pytest.mark.asyncio
     async def test_missing_id_logs_warning(
@@ -352,27 +358,32 @@ class TestMissingPrimaryId:
             "_lookup_method": "title_fallback",
         }
 
-        await transformer.transform(mock_context, record, 0)
+        with pytest.raises(FilteredOutError) as exc_info:
+            await transformer.transform(mock_context, record, 0)
 
         mock_context.logger.warning.assert_called_once()
         call_args = mock_context.logger.warning.call_args
         assert call_args[0][0] == "record_skipped_no_id"
+        assert exc_info.value.details["lookup_method"] == "title_fallback"
 
     @pytest.mark.asyncio
-    async def test_empty_string_id_returns_none(
+    async def test_empty_string_id_raises_filtered_out_error(
         self,
         transformer: StubPublicationTransformer,
         mock_context: PipelineContext,
     ) -> None:
-        """Should return None when primary ID is empty string."""
+        """Empty-string primary ID should not disappear silently."""
         record = {
             "id": "",
             "title": "Empty ID Record",
         }
 
-        result = await transformer.transform(mock_context, record, 0)
+        with pytest.raises(FilteredOutError) as exc_info:
+            await transformer.transform(mock_context, record, 0)
 
-        assert result is None
+        assert exc_info.value.details["reason_code"] == (
+            "missing_publication_primary_id"
+        )
 
 
 # =============================================================================

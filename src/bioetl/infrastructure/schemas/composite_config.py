@@ -118,7 +118,7 @@ class CompositeConfigFileSchema(BaseModel):
     """Pydantic schema for complete composite configuration file.
 
     Validates the entire YAML file structure including schema_version
-    and optional sections like gold_filters and maintenance.
+    and maintenance metadata.
     """
 
     schema_version: str = Field(
@@ -127,16 +127,26 @@ class CompositeConfigFileSchema(BaseModel):
     composite: CompositeConfigSchema = Field(
         ..., description="The composite pipeline configuration"
     )
-    gold_filters: JsonDict | None = (  # Any: YAML config has heterogeneous values
-        Field(  # Any: YAML config has heterogeneous values
-            default=None, description="Optional gold layer filters"
-        )
+    gold_filters: JsonDict | None = Field(
+        default=None,
+        description="Deprecated legacy field; composite-local gold_filters are unsupported",
     )
     maintenance: JsonDict | None = (  # Any: YAML config has heterogeneous values
         Field(  # Any: YAML config has heterogeneous values
             default=None, description="Optional maintenance configuration"
         )
     )
+
+    @model_validator(mode="after")
+    def reject_composite_local_gold_filters(self) -> Self:
+        """Reject unsupported top-level composite gold_filters with a clear error."""
+        if self.gold_filters is not None:
+            raise ValueError(
+                "Composite-local top-level gold_filters are unsupported; "
+                "move filtering policy to entity pipeline configs or implement "
+                "explicit runtime support first."
+            )
+        return self
 
     def to_domain(self) -> CompositeConfig:
         """Convert to immutable domain CompositeConfig.

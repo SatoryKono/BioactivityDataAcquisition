@@ -103,6 +103,11 @@ def test_run_manifest_contract_documents_lifecycle_snapshot_and_scoring_surfaces
     assert "Supported production and debug-critical launches inherit" in text
     assert "this effective default is `replay_ready`" in text
     assert "The effective default is fail-closed" in text
+    assert "post-capture replayable parent evidence" in text
+    assert "live_capture_snapshot_materialized" in text
+    assert "input_snapshot_published_ledger_evidence_only" in text
+    assert "awaiting_input_snapshot_published_evidence" in text
+    assert "final supported exact-replay scope" in text
     assert "## Reproducibility Scoring Rubric" in text
     assert "|   100 | `forensic_grade`" in text
     assert "| Evidence surface" in text
@@ -161,6 +166,12 @@ def test_run_manifest_docs_define_replay_equivalence_levels() -> None:
 
     assert "not as a byte-identical artifact claim" in contract
     assert "semantically equivalent rather than byte-identical" in runbook
+    assert "materialized_replayable_parent" in contract
+    assert "materialized_replayable_parent" in runbook
+    assert "input_snapshot_published_ledger_evidence_only" in contract
+    assert "awaiting_input_snapshot_published_evidence" in runbook
+    assert "final supported exact-replay scope" in contract
+    assert "ratified_snapshot_backed_boundary_is_final_supported_scope" in runbook
 
 
 @pytest.mark.architecture

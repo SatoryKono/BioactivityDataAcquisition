@@ -448,8 +448,6 @@ class BasePublicationTransformer(BaseTransformer):  # type: ignore[misc]
     ) -> PreSilverRecord | None:
         """Build an intermediate publication payload for application finalization."""
         prepared = prepare_publication_payload(self, context, record, index)
-        if prepared is None:
-            return None
         return _build_pre_silver_publication_record(self, prepared)
 
     async def _transform_impl(
@@ -460,8 +458,6 @@ class BasePublicationTransformer(BaseTransformer):  # type: ignore[misc]
     ) -> SilverRecord | None:
         """Unified publication transformation flow (Facade execution)."""
         prepared = prepare_publication_payload(self, context, record, index)
-        if prepared is None:
-            return None
         normalized_business_data = normalize_publication_business_data(
             self, prepared.business_data
         )

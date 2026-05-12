@@ -245,6 +245,8 @@ role_suffix_families:
     Coordinator: [Coordinator]
     Runner: [Runner]
     Executor: [Executor]
+    RuntimeService: [RuntimeService]
+    Command: [Command]
     Orderer: [Orderer]
     Renamer: [Renamer]
     Deduplicator: [Deduplicator]

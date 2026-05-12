@@ -204,17 +204,18 @@ async def test_transform_minimal_record(
 
 
 @pytest.mark.asyncio
-async def test_transform_missing_doi_returns_none(transformer, pipeline_context):
-    """Test that missing DOI results in None (skipped record)."""
+async def test_transform_missing_doi_raises_value_error(transformer, pipeline_context):
+    """Direct transform() must expose missing DOI validation failures."""
     invalid_work = {"title": ["No DOI"]}
-    result = await transformer.transform(pipeline_context, invalid_work, index=0)
-
-    assert result is None
+    with pytest.raises(ValueError, match="DOI is required for CrossRef Publication"):
+        await transformer.transform(pipeline_context, invalid_work, index=0)
 
 
 @pytest.mark.asyncio
-async def test_transform_invalid_doi_format_returns_none(transformer, pipeline_context):
-    """Test that malformed DOI results in None (skipped record).
+async def test_transform_invalid_doi_format_raises_value_error(
+    transformer, pipeline_context
+):
+    """Direct transform() must expose malformed DOI validation failures.
 
     DOI must follow the pattern: 10.{registrant}/{suffix}
     Invalid DOIs like "invalid", "10.1234" (no suffix), or "not-a-doi"
@@ -229,8 +230,8 @@ async def test_transform_invalid_doi_format_returns_none(transformer, pipeline_c
     ]
 
     for record in invalid_doi_records:
-        result = await transformer.transform(pipeline_context, record, index=0)
-        assert result is None, f"Expected None for invalid DOI: {record['DOI']!r}"
+        with pytest.raises(ValueError):
+            await transformer.transform(pipeline_context, record, index=0)
 
 
 @pytest.mark.asyncio

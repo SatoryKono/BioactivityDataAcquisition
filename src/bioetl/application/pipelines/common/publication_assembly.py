@@ -5,6 +5,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Protocol
 
+from bioetl.application.core.base_transformer.errors import FilteredOutError
+
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.entities import BaseEntity
@@ -95,7 +97,7 @@ def prepare_publication_payload(
     context: PipelineContext,
     record: BronzeRecord,
     index: int,
-) -> PreparedPublicationOutcome | None:
+) -> PreparedPublicationOutcome:
     """Prepare publication business data and validate the primary identifier."""
     transformer._data_extractor.pre_extract_validation(context, record, index)
     business_data = transformer._data_extractor.extract_business_data(record)
@@ -107,7 +109,16 @@ def prepare_publication_payload(
         index,
     )
     if id_result is None:
-        return None
+        raise FilteredOutError(
+            "Record missing required publication primary identifier",
+            details={
+                "policy_stage": "structural",
+                "reason_code": "missing_publication_primary_id",
+                "rule_type": "required_fields",
+                "lookup_method": business_data.get("_lookup_method"),
+                "original_id": business_data.get("_original_id"),
+            },
+        )
     primary_id_field, primary_id = id_result
 
     transformer._log_fallback_if_needed(

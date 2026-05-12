@@ -115,6 +115,35 @@ policy-backed external IDs, хотя domain использует `PubchemMolecul
 - **SHOULD**: Предпочитать `*Service` для стандартных сервисов.
 - **MUST**: Быть зафиксированным в `configs/naming_exceptions.yaml`, если используется вместо `*Service`.
 
+### 2.5. Layer-Aware Suffix Contract
+
+ADR-041 naming governance дополняется явным layer-aware suffix contract. Новые
+first-party символы **MUST** укладываться в разрешённую матрицу слоя и в
+canonical family registry, опубликованные в machine-readable policy:
+`configs/quality/layered_suffix_policy.yaml`.
+
+| Слой | Разрешённые суффиксы | Запрещённые first-party суффиксы |
+| :--- | :--- | :--- |
+| `domain` | `Port`, `Protocol`, `ABC`, `Schema`, `ValueObject` | `Service`, `Manager`, `Handler`, `Adapter`, `Factory`, `Runner` |
+| `application` | `Service`, `RuntimeService`, `Runner`, `Coordinator`, `Handler` | `Adapter`, `Client` |
+| `infrastructure` | `Adapter`, `Client`, `Factory`, `Writer`, `Reader` | `Service`, `Manager`, `Runner` |
+| `composition` | `Factory`, `Builder`, `Module`, `Registry` | `Adapter`, `Client` |
+| `interfaces` | `Command`, `Handler`, `Adapter`, `Registry` | `Service`, `Manager`, `Runner` |
+
+### 2.6. Canonical Family Registry
+
+Для naming-debt семейств, где исторически сосуществовали разные суффиксы,
+canonical owner фиксируется отдельно. Новый символ из такого семейства
+**MUST NOT** появляться без обновления canonical family registry и
+архитектурных тестов.
+
+| Family ID | Канонические символы | Разрешённый legacy/compatibility след |
+| :--- | :--- | :--- |
+| `pipeline_execution` | `PipelineRunner`, `PipelineService`, `PipelineRunnerService` | временные dependency shims и doc aliases до удаления |
+| `composite_execution` | `CompositePipelineRunner`, `MergeService` | исторические `*Builder`/`*Join*` helper-модули только по registry |
+| `lock_runtime_admin` | `LockRuntimeService`, `LockService` | constructor kwargs и helper seams до закрытия migration window |
+| `storage_boundary` | `StoragePort`, `*Adapter`, `*Client` | compatibility re-exports only if registry-backed |
+
 ______________________________________________________________________
 
 ## 3. Таблицы и Файлы

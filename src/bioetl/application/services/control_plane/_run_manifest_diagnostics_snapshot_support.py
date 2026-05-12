@@ -111,7 +111,7 @@ def collect_ledger_input_snapshot_refs(
             "provider": _snapshot_required_text(details.get("provider")),
             "entity": _snapshot_required_text(details.get("entity")),
             "pipeline_name": _snapshot_required_text(details.get("pipeline_name")),
-            "query": None,
+            "query": _snapshot_required_text(details.get("query")),
             "snapshot_id": snapshot_id,
             "content_hash": content_hash,
             "immutable_uri": immutable_uri,

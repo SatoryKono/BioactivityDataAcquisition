@@ -153,11 +153,20 @@ def test_build_diagnostics_summary_merges_ledger_derived_input_snapshots() -> No
     assert summary["input_snapshot_content_hashes"] == ["sha256:snapshot-1"]
     assert summary["replay_capability"] == "exact_replay_supported"
     assert summary["replay_capability_reason"] == (
-        "full_immutable_input_snapshot_envelope_present"
+        "materialized_live_capture_snapshot_envelope_present"
+    )
+    assert summary["replay_occurrence_kind"] == "materialized_replayable_parent"
+    assert summary["post_capture_replayable_parent_supported"] is True
+    assert summary["post_capture_replayable_parent_boundary"] == (
+        "ledger_materialized_live_capture_parent"
     )
     assert summary["exact_replay_eligible"] is False
     assert summary["exact_replay_blockers"] == ["dependency_lock_provenance_missing"]
     assert summary["replay_mode"] == "same_data_state_recovery"
+    assert summary["replay_parentage"]["is_exact_replay"] is False
+    assert summary["reproducibility_diagnostics"]["policy"][
+        "replay_occurrence_kind"
+    ] == "materialized_replayable_parent"
     assert summary["input_snapshots"] == [
         {
             "provider": "chembl",
@@ -179,6 +188,37 @@ def test_build_diagnostics_summary_merges_ledger_derived_input_snapshots() -> No
             "source_event_id": "entry-input-snapshot",
         }
     ]
+
+
+def test_build_diagnostics_summary_exposes_bounded_historical_upgrade_policy() -> (
+    None
+):
+    manifest = _make_manifest()
+
+    summary = build_diagnostics_summary(manifest, ())
+
+    assert summary["replay_occurrence_kind"] == "ordinary_live_capture"
+    assert summary["historical_live_run_upgrade_policy"] == (
+        "input_snapshot_published_ledger_evidence_only"
+    )
+    assert summary["historical_live_run_upgrade_boundary"] == (
+        "input_snapshot_published_ledger_evidence"
+    )
+    assert summary["historical_live_run_upgrade_reason"] == (
+        "historical_live_runs_require_input_snapshot_published_ledger_evidence_before_parent_promotion"
+    )
+    assert summary["broader_historical_exact_replay_policy"] == (
+        "ratified_snapshot_backed_boundary_is_final_supported_scope"
+    )
+    assert summary["broader_historical_exact_replay_reason"] == (
+        "future_broader_historical_exact_replay_requires_new_contract_revision"
+    )
+    assert summary["historical_live_run_upgrade_state"] == (
+        "awaiting_input_snapshot_published_evidence"
+    )
+    assert summary["reproducibility_diagnostics"]["policy"][
+        "historical_live_run_upgrade_state"
+    ] == "awaiting_input_snapshot_published_evidence"
 
 
 def _assert_provenance_only_score(

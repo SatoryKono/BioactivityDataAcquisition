@@ -41,7 +41,7 @@ report:
   sample_size: 10
 
 common_field_validations:
-  - field: _content_hash
+  - field: content_hash
     type: required
     nullable: false
     error_message: "Content hash required"
@@ -124,7 +124,7 @@ class TestDQConfigLoaderBasics:
         assert config.hard_fail_threshold == pytest.approx(0.20)
         assert config.strict_validation is False
         # Only common validations (from base/quality.yaml)
-        assert len(config.field_validations) == 2  # _content_hash + common_field
+        assert len(config.field_validations) == 2  # content_hash + common_field
 
     def test_load_with_provider(self, loader: DQConfigLoader) -> None:
         """Load with provider should merge provider config."""
@@ -265,7 +265,7 @@ class TestDQConfigLoaderMerge:
         config = loader.load("test_provider", "test_entity")
 
         field_names = [fv.field for fv in config.field_validations]
-        assert "_content_hash" in field_names  # common
+        assert "content_hash" in field_names  # common
         assert "common_field" in field_names  # common
         assert "provider_field" in field_names  # provider
         assert "entity_field" in field_names  # entity

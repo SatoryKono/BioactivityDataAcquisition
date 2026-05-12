@@ -83,22 +83,54 @@ def _resolve_replay_capability_reason(
         return "family_outside_supported_exact_replay_boundary"
     if _collect_append_mode_semantic_sinks(manifest):
         return "append_mode_semantic_outputs_block_exact_replay"
-    if snapshot_envelope.any_input_snapshots and not (
-        snapshot_envelope.full_snapshot_envelope
-    ):
+    if _has_partial_input_snapshot_envelope(snapshot_envelope):
         return "partial_input_snapshot_envelope"
-    if (
-        manifest.replay_capability == ReplayCapability.EXACT_REPLAY_SUPPORTED
-        and snapshot_envelope.full_snapshot_envelope
+    exact_replay_reason = _resolve_exact_replay_supported_reason(
+        manifest=manifest,
+        input_snapshots=input_snapshots,
+        snapshot_envelope=snapshot_envelope,
+    )
+    if exact_replay_reason is not None:
+        return exact_replay_reason
+    if _requires_resume_without_snapshot_reason(
+        manifest=manifest,
+        resume_requested=resume_requested,
     ):
-        if _has_live_capture_materialized_snapshots(input_snapshots):
-            return "materialized_live_capture_snapshot_envelope_present"
-        return "full_immutable_input_snapshot_envelope_present"
-    if manifest.replay_capability == ReplayCapability.RESUME_ONLY or resume_requested:
         return "resume_requested_without_snapshot_backed_inputs"
     if _is_composite_execution_context(manifest):
         return "composite_snapshot_envelope_missing"
     return "immutable_input_snapshots_missing"
+
+
+def _has_partial_input_snapshot_envelope(snapshot_envelope: object) -> bool:
+    any_snapshots = bool(getattr(snapshot_envelope, "any_input_snapshots", False))
+    full_envelope = bool(getattr(snapshot_envelope, "full_snapshot_envelope", False))
+    return any_snapshots and not full_envelope
+
+
+def _resolve_exact_replay_supported_reason(
+    *,
+    manifest: RunManifest,
+    input_snapshots: list[dict[str, object]],
+    snapshot_envelope: object,
+) -> str | None:
+    if manifest.replay_capability != ReplayCapability.EXACT_REPLAY_SUPPORTED:
+        return None
+    if not bool(getattr(snapshot_envelope, "full_snapshot_envelope", False)):
+        return None
+    if _has_live_capture_materialized_snapshots(input_snapshots):
+        return "materialized_live_capture_snapshot_envelope_present"
+    return "full_immutable_input_snapshot_envelope_present"
+
+
+def _requires_resume_without_snapshot_reason(
+    *,
+    manifest: RunManifest,
+    resume_requested: bool,
+) -> bool:
+    return (
+        manifest.replay_capability == ReplayCapability.RESUME_ONLY or resume_requested
+    )
 
 
 def _resolve_replay_occurrence_kind(
@@ -118,6 +150,30 @@ def _resolve_replay_occurrence_kind(
     if policy_assessment.snapshot_envelope.full_snapshot_envelope:
         return "launch_time_snapshot_backed_run"
     return "ordinary_live_capture"
+
+
+def _resolve_historical_live_run_upgrade_state(
+    *,
+    manifest: RunManifest,
+    input_snapshots: list[dict[str, object]],
+    policy_assessment: ReproducibilityPolicyAssessment,
+) -> str:
+    """Return the bounded upgrade path for live runs lacking launch-time snapshots."""
+    profile = _resolve_reproducibility_profile(manifest)
+    replay_parentage = _build_replay_parentage(manifest)
+    if _is_composite_execution_context(manifest) or bool(
+        replay_parentage["is_exact_replay"]
+    ):
+        return "not_applicable"
+    if _has_live_capture_materialized_snapshots(input_snapshots):
+        if policy_assessment.snapshot_envelope.full_snapshot_envelope:
+            return "already_materialized_replayable_parent"
+        return "incomplete_materialization_evidence"
+    if policy_assessment.snapshot_envelope.full_snapshot_envelope:
+        return "not_needed_snapshot_backed_at_launch"
+    if not profile.post_capture_replayable_parent_supported:
+        return "outside_supported_boundary"
+    return "awaiting_input_snapshot_published_evidence"
 
 
 def _resolve_exact_replay_blockers(

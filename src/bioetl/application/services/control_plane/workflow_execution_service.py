@@ -38,7 +38,6 @@ from bioetl.domain.ports import (
 )
 from bioetl.domain.types import RunID
 from bioetl.domain.workflow import (
-    TransformStepConfig,
     WorkflowConfig,
     WorkflowStepConfig,
 )

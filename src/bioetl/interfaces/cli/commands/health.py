@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import asyncio
-import os
 import sys
 from typing import TYPE_CHECKING, cast
 
@@ -172,7 +171,8 @@ async def _run_health_server(host: str, port: int) -> None:
     """Start and keep the health server alive until interrupted."""
     from bioetl.interfaces.http.health_server import HealthServer
 
-    os.environ.setdefault("PYTHONPYCACHEPREFIX", "/tmp/bioetl-pycache")
+    if sys.pycache_prefix is None:
+        sys.pycache_prefix = "/tmp/bioetl-pycache"
     deps = get_health_server_dependencies()
     _start_health_observability()
     quarantine_service: QuarantineService | None = None

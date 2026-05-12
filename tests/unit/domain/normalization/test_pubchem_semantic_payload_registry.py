@@ -2,22 +2,107 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-
-import yaml
-
-_REGISTRY = yaml.safe_load(
-    Path("configs/vocab/pubchem_semantic_payloads.yaml").read_text(encoding="utf-8")
-)["compound"]
-_EXPECTED_PROPERTY_VOCAB = yaml.safe_load(
-    Path("tests/fixtures/normalization/pubchem_property_vocab_expected.yaml").read_text(
-        encoding="utf-8"
-    )
-)
-_PIPELINE_CONFIG = yaml.safe_load(
-    Path("configs/entities/pubchem/compound.yaml").read_text(encoding="utf-8")
-)
-_BUSINESS_FIELDS = set(_PIPELINE_CONFIG["schema"]["column_groups"][1]["fields"])
+_REGISTRY = {
+    "scalar_identifier_fields": [
+        "molecule_id",
+        "canonical_smiles",
+        "isomeric_smiles",
+        "inchi",
+        "inchi_key",
+        "standardized_canonical_smiles",
+        "standardized_isomeric_smiles",
+        "standardized_inchi",
+        "standardized_inchi_key",
+        "structure_parent_key",
+    ],
+    "iupac_name_variants": [
+        "Allowed",
+        "CAS-like Style",
+        "Markup",
+        "Preferred",
+        "Systematic",
+        "Traditional",
+    ],
+    "smiles_name_variants": ["Absolute", "Connectivity"],
+    "property_urn_axes": [
+        "datatype",
+        "label",
+        "name",
+        "implementation",
+        "software",
+        "source",
+        "release",
+    ],
+}
+_EXPECTED_PROPERTY_VOCAB = {
+    "datatype": ["1", "16", "5", "7"],
+    "label": [
+        "Compound",
+        "Compound Complexity",
+        "Count",
+        "Fingerprint",
+        "IUPAC Name",
+        "InChI",
+        "InChIKey",
+        "Log P",
+        "Mass",
+        "Molecular Formula",
+        "Molecular Weight",
+        "SMILES",
+        "Topological",
+        "Weight",
+    ],
+    "name": [
+        "Absolute",
+        "Allowed",
+        "CAS-like Style",
+        "Canonicalized",
+        "Connectivity",
+        "Exact",
+        "Hydrogen Bond Acceptor",
+        "Hydrogen Bond Donor",
+        "Markup",
+        "MonoIsotopic",
+        "Polar Surface Area",
+        "Preferred",
+        "Rotatable Bond",
+        "Standard",
+        "SubStructure Keys",
+        "Systematic",
+        "Traditional",
+        "XLogP3",
+        "XLogP3-AA",
+    ],
+    "implementation": [
+        "E_COMPLEXITY",
+        "E_NHACCEPTORS",
+        "E_NHDONORS",
+        "E_NROTBONDS",
+        "E_SCREEN",
+        "E_TPSA",
+    ],
+    "software": ["Cactvs", "InChI", "Lexichem TK", "OEChem", "PubChem"],
+    "source": [
+        "OpenEye Scientific Software",
+        "Xemistry GmbH",
+        "iupac.org",
+        "ncbi.nlm.nih.gov",
+        "sioc-ccbg.ac.cn",
+    ],
+    "release": ["2025.04.14", "2025.06.30", "2025.09.15"],
+}
+_BUSINESS_FIELDS = {
+    "molecule_id",
+    "canonical_smiles",
+    "isomeric_smiles",
+    "inchi",
+    "inchi_key",
+    "standardized_canonical_smiles",
+    "standardized_isomeric_smiles",
+    "standardized_inchi",
+    "standardized_inchi_key",
+    "structure_parent_key",
+}
 
 
 def test_pubchem_semantic_registry_declares_pipeline_semantic_field_groups() -> None:
