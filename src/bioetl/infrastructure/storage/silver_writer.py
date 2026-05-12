@@ -141,7 +141,7 @@ class SilverWriter(
                     runtime_dependencies.pop("merge_resilience_policy", None),
                 ),
                 contract_rollout_policy=cast(  # Any: policy type is dynamic
-                    Any,
+                    Any,  # Any: policy type is dynamic
                     runtime_dependencies.pop("contract_rollout_policy", None),
                 ),
             )

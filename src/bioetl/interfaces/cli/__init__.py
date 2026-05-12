@@ -43,12 +43,12 @@ def create_pipeline_runner(
 
 
 _main_module = import_module("bioetl.interfaces.cli.main")
-cli = getattr(_main_module, "cli")
+cli = _main_module.cli
 
 
 def _main_entrypoint() -> None:
     """Invoke the canonical CLI entry point."""
-    _impl = getattr(_main_module, "main")
+    _impl = _main_module.main
 
     _impl()
 

@@ -51,7 +51,9 @@ class TestMaybeStartMetricsServer:
         mock_bootstrap_metrics_service: MagicMock,
     ) -> None:
         """Runtime wrapper should pass settings through to server startup."""
-        from bioetl.composition.bootstrap.runtime.observability import maybe_start_metrics_server
+        from bioetl.composition.bootstrap.runtime.observability import (
+            maybe_start_metrics_server,
+        )
 
         settings = MagicMock()
         settings.metrics_port = 9090
@@ -85,7 +87,9 @@ class TestMaybeStartMetricsServer:
         mock_bootstrap_metrics_service: MagicMock,
     ) -> None:
         """Fail-fast mode should propagate MetricsServerError to callers."""
-        from bioetl.composition.bootstrap.runtime.observability import maybe_start_metrics_server
+        from bioetl.composition.bootstrap.runtime.observability import (
+            maybe_start_metrics_server,
+        )
         from bioetl.composition.observability_api import MetricsServerError
 
         settings = MagicMock()
@@ -117,7 +121,9 @@ class TestMaybeStartMetricsServer:
         mock_bootstrap_metrics_service: MagicMock,
     ) -> None:
         """Unexpected startup errors should still bubble up to entrypoints."""
-        from bioetl.composition.bootstrap.runtime.observability import maybe_start_metrics_server
+        from bioetl.composition.bootstrap.runtime.observability import (
+            maybe_start_metrics_server,
+        )
 
         settings = MagicMock()
         settings.metrics_port = 8000
@@ -136,7 +142,9 @@ class TestMaybeStartMetricsServer:
 
     def test_disabled_metrics_returns_false(self) -> None:
         """Disabled metrics should short-circuit without server startup."""
-        from bioetl.composition.bootstrap.runtime.observability import maybe_start_metrics_server
+        from bioetl.composition.bootstrap.runtime.observability import (
+            maybe_start_metrics_server,
+        )
 
         settings = MagicMock()
         settings.observability.metrics_enabled = False
@@ -147,7 +155,9 @@ class TestMaybeStartMetricsServer:
 
     def test_disabled_metrics_server_returns_false(self) -> None:
         """Disabled metrics server should short-circuit without startup."""
-        from bioetl.composition.bootstrap.runtime.observability import maybe_start_metrics_server
+        from bioetl.composition.bootstrap.runtime.observability import (
+            maybe_start_metrics_server,
+        )
 
         settings = MagicMock()
         settings.observability.metrics_enabled = True

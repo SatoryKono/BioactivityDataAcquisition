@@ -155,8 +155,6 @@ def _resolve_base_summary_replay_context(
     )
 
 
-
-
 def _is_exact_replay_eligible(
     manifest: RunManifest,
     replay_context: _BaseSummaryReplayContext,
@@ -166,8 +164,6 @@ def _is_exact_replay_eligible(
         manifest.replay_capability.value == "exact_replay_supported"
         and not replay_context.exact_replay_blockers
     )
-
-
 
 
 def _build_base_summary_payload(
@@ -315,9 +311,7 @@ def _build_base_summary_snapshot_payload(
 ) -> dict[str, object]:
     """Build snapshot-related fields for base summary payload."""
     return {
-        "append_mode_semantic_sinks": _collect_append_mode_semantic_sinks(
-            manifest
-        ),
+        "append_mode_semantic_sinks": _collect_append_mode_semantic_sinks(manifest),
         "input_snapshot_ids": _collect_input_snapshot_ids(
             replay_context.input_snapshots
         ),

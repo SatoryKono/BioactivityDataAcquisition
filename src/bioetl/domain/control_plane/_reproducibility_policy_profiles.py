@@ -15,6 +15,8 @@ def normalize_required_persistence_profile(required_profile: object) -> str:
         else DEFAULT_REQUIRED_PERSISTENCE_PROFILE
     )
     return profile or DEFAULT_REQUIRED_PERSISTENCE_PROFILE
+
+
 def resolve_effective_required_persistence_profile(
     *,
     configured_required_profile: object,

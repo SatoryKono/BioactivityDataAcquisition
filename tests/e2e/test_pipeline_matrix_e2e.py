@@ -377,7 +377,9 @@ def vcr_config() -> dict[str, object]:
 
 def test_pipeline_matrix_declares_all_entity_pipelines() -> None:
     configured = _iter_entity_pipelines()
-    declared = set(PIPELINE_CASE_BY_NAME.keys())
+    declared = {
+        case.pipeline_name for case in PIPELINE_CASES if case.provider != "composite"
+    }
     assert declared == configured
 
 

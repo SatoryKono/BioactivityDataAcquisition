@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Literal
 
 from bioetl.domain.control_plane import RunArtifactRef
+
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineRunContext
     from bioetl.infrastructure.config import Settings

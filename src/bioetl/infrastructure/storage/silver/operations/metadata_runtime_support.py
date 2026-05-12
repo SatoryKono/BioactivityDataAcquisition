@@ -268,7 +268,7 @@ async def write_silver_metadata_file(
         for parameter in parameters.values()
     )
 
-    kwargs: dict[str, Any] = {
+    kwargs: dict[str, Any] = {  # Any: dynamic metadata writer kwargs
         "metadata": metadata
     }  # Any: dynamic metadata writer kwargs
     if "base_path" in parameters or accepts_var_kwargs:
@@ -277,7 +277,7 @@ async def write_silver_metadata_file(
         kwargs["table_path"] = table_path
     else:
         legacy_write = cast(  # Any: legacy signature compatibility
-            Any,
+            Any,  # Any: legacy signature compatibility
             write_silver_metadata,
         )
         await legacy_write(

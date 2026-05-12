@@ -1,11 +1,12 @@
-"""Closure reporting and global claim gating for historical replay."""
+"""Closure reporting and claim gating for historical replay."""
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from datetime import UTC, datetime
 import hashlib
 import json
+from dataclasses import dataclass
+from datetime import UTC, datetime
+from typing import Literal
 
 from bioetl.application.services.control_plane.historical_replay_corpus_service import (
     HistoricalReplayCertifiabilityInventory,
@@ -17,6 +18,11 @@ __all__ = [
     "HistoricalReplayClosureReport",
     "HistoricalReplayClosureService",
     "HistoricalReplayResidualDisposition",
+]
+
+HistoricalReplayClaimScopeMode = Literal[
+    "all_retained_historical_runs",
+    "retained_certifiable_historical_runs",
 ]
 
 _FULLY_CLOSED_STATUSES = frozenset({"already_certified", "already_replayable"})
@@ -76,6 +82,7 @@ class HistoricalReplayClosureReport:
     suggested_resolution_queue: tuple[dict[str, object], ...]
     closure_verdict: str
     closure_reason: str
+    claim_scope_mode: HistoricalReplayClaimScopeMode
     global_universal_historical_replay_claim: dict[str, object]
     retained_corpus_claim: dict[str, object]
 
@@ -90,6 +97,7 @@ class HistoricalReplayClosureReport:
             "suggested_resolution_queue": list(self.suggested_resolution_queue),
             "closure_verdict": self.closure_verdict,
             "closure_reason": self.closure_reason,
+            "claim_scope_mode": self.claim_scope_mode,
             "global_universal_historical_replay_claim": (
                 self.global_universal_historical_replay_claim
             ),
@@ -107,6 +115,9 @@ class HistoricalReplayClosureService:
         self,
         *,
         residual_dispositions: tuple[HistoricalReplayResidualDisposition, ...] = (),
+        claim_scope_mode: HistoricalReplayClaimScopeMode = (
+            "all_retained_historical_runs"
+        ),
     ) -> HistoricalReplayClosureReport:
         """Build one deterministic retained-corpus closure report."""
         inventory = self.corpus_service.build_certifiability_inventory()
@@ -131,11 +142,13 @@ class HistoricalReplayClosureService:
             inventory=inventory,
             unresolved_records=unresolved_records,
             disposition_map=disposition_map,
+            claim_scope_mode=claim_scope_mode,
         )
         global_claim = self._build_global_claim_gate(
             inventory=inventory,
             unresolved_records=unresolved_records,
             disposition_map=disposition_map,
+            claim_scope_mode=claim_scope_mode,
         )
         retained_corpus_claim = self._build_retained_corpus_claim(
             inventory=inventory,
@@ -147,6 +160,7 @@ class HistoricalReplayClosureService:
             residual_dispositions=residual_dispositions,
             closure_verdict=closure_verdict,
             closure_reason=closure_reason,
+            claim_scope_mode=claim_scope_mode,
             global_claim=global_claim,
             retained_corpus_claim=retained_corpus_claim,
         )
@@ -163,6 +177,7 @@ class HistoricalReplayClosureService:
             suggested_resolution_queue=suggested_resolution_queue,
             closure_verdict=closure_verdict,
             closure_reason=closure_reason,
+            claim_scope_mode=claim_scope_mode,
             global_universal_historical_replay_claim=global_claim,
             retained_corpus_claim=retained_corpus_claim,
         )
@@ -195,6 +210,7 @@ class HistoricalReplayClosureService:
         inventory: HistoricalReplayCertifiabilityInventory,
         unresolved_records: tuple[HistoricalReplayCertifiabilityRecord, ...],
         disposition_map: dict[str, HistoricalReplayResidualDisposition],
+        claim_scope_mode: HistoricalReplayClaimScopeMode,
     ) -> tuple[str, str]:
         if (
             inventory.certified_count + inventory.replayable_count
@@ -209,6 +225,14 @@ class HistoricalReplayClosureService:
             return (
                 "residual_disposition_required",
                 "blocked_historical_runs_require_explicit_resolution_disposition",
+            )
+        if (
+            claim_scope_mode == "retained_certifiable_historical_runs"
+            and self._narrowed_scope_blockers(disposition_map) == ()
+        ):
+            return (
+                "scope_narrowed_closed",
+                "retained_certifiable_historical_scope_is_closed_after_explicit_legacy_scope_narrowing",
             )
         if any(
             disposition.disposition == "irrecoverable_missing_immutable_evidence"
@@ -234,7 +258,27 @@ class HistoricalReplayClosureService:
         inventory: HistoricalReplayCertifiabilityInventory,
         unresolved_records: tuple[HistoricalReplayCertifiabilityRecord, ...],
         disposition_map: dict[str, HistoricalReplayResidualDisposition],
+        claim_scope_mode: HistoricalReplayClaimScopeMode,
     ) -> dict[str, object]:
+        narrowed_scope_blockers = self._narrowed_scope_blockers(disposition_map)
+        if claim_scope_mode == "retained_certifiable_historical_runs":
+            claimed = not unresolved_records and not narrowed_scope_blockers
+            if claimed:
+                reason = "retained_certifiable_historical_scope_has_no_remaining_unresolved_runs"
+            elif unresolved_records:
+                reason = "residual_historical_runs_lack_explicit_resolution_disposition"
+            else:
+                reason = "retained_certifiable_scope_still_contains_in_scope_blockers"
+            return {
+                "claimed": claimed,
+                "verdict": "claim_supported" if claimed else "claim_blocked",
+                "reason": reason,
+                "scope": "retained_certifiable_historical_runs",
+                "blocked_manifest_ids": [
+                    *[record.manifest_id for record in unresolved_records],
+                    *narrowed_scope_blockers,
+                ],
+            }
         claimed = (
             inventory.manifest_count > 0
             and inventory.certified_count + inventory.replayable_count
@@ -247,13 +291,9 @@ class HistoricalReplayClosureService:
             )
         )
         if claimed:
-            reason = (
-                "all_retained_historical_runs_have_exact_replay_evidence_or_certified_parent_state"
-            )
+            reason = "all_retained_historical_runs_have_exact_replay_evidence_or_certified_parent_state"
         elif unresolved_records:
-            reason = (
-                "residual_historical_runs_lack_explicit_resolution_disposition"
-            )
+            reason = "residual_historical_runs_lack_explicit_resolution_disposition"
         elif any(
             disposition.disposition == "irrecoverable_missing_immutable_evidence"
             for disposition in disposition_map.values()
@@ -272,6 +312,22 @@ class HistoricalReplayClosureService:
                 record.manifest_id for record in unresolved_records
             ],
         }
+
+    def _narrowed_scope_blockers(
+        self,
+        disposition_map: dict[str, HistoricalReplayResidualDisposition],
+    ) -> tuple[str, ...]:
+        excluded_dispositions = {
+            "irrecoverable_missing_immutable_evidence",
+            "outside_universal_claim_scope",
+        }
+        return tuple(
+            sorted(
+                manifest_id
+                for manifest_id, disposition in disposition_map.items()
+                if disposition.disposition not in excluded_dispositions
+            )
+        )
 
     def _build_retained_corpus_claim(
         self,
@@ -326,6 +382,7 @@ class HistoricalReplayClosureService:
         residual_dispositions: tuple[HistoricalReplayResidualDisposition, ...],
         closure_verdict: str,
         closure_reason: str,
+        claim_scope_mode: HistoricalReplayClaimScopeMode,
         global_claim: dict[str, object],
         retained_corpus_claim: dict[str, object],
     ) -> str:
@@ -340,6 +397,7 @@ class HistoricalReplayClosureService:
             ],
             "closure_verdict": closure_verdict,
             "closure_reason": closure_reason,
+            "claim_scope_mode": claim_scope_mode,
             "global_universal_historical_replay_claim": global_claim,
             "retained_corpus_claim": retained_corpus_claim,
         }

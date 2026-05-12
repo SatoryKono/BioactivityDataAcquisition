@@ -206,3 +206,39 @@ def test_closure_report_classifies_irrecoverable_legacy_subset() -> None:
     assert report.global_universal_historical_replay_claim["reason"] == (
         "irrecoverable_legacy_runs_block_universal_historical_claim"
     )
+
+
+def test_closure_report_can_flip_claim_for_narrowed_certifiable_scope() -> None:
+    source_manifest = _make_source_manifest()
+    manifest_store = InMemoryRunManifestStore()
+    manifest_store.save(source_manifest)
+    ledger_store = InMemoryRunLedgerStore()
+    closure_service = HistoricalReplayClosureService(
+        corpus_service=HistoricalReplayCorpusService(
+            manifest_port=manifest_store,
+            ledger_port=ledger_store,
+        )
+    )
+
+    report = closure_service.build_closure_report(
+        residual_dispositions=(
+            HistoricalReplayResidualDisposition(
+                manifest_id=source_manifest.manifest_id,
+                disposition="irrecoverable_missing_immutable_evidence",
+                rationale="legacy corpus no longer retains trustworthy immutable snapshot evidence",
+                evidence_refs=("ops://historical-replay/closure-campaign.json",),
+            ),
+        ),
+        claim_scope_mode="retained_certifiable_historical_runs",
+    )
+
+    assert report.claim_scope_mode == "retained_certifiable_historical_runs"
+    assert report.closure_verdict == "scope_narrowed_closed"
+    assert report.global_universal_historical_replay_claim == {
+        "claimed": True,
+        "verdict": "claim_supported",
+        "reason": "retained_certifiable_historical_scope_has_no_remaining_unresolved_runs",
+        "scope": "retained_certifiable_historical_runs",
+        "blocked_manifest_ids": [],
+    }
+    assert report.retained_corpus_claim["claimed"] is False
