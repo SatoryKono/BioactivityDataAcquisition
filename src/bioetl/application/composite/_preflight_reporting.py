@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from bioetl.application.composite._preflight_types import (
     PreflightValidationResult,
+    ProfileInfo,
     SchemaFields,
 )
 from bioetl.domain.composite.config import CompositeConfig
@@ -27,6 +28,25 @@ class PreflightValidationReportingMixin:
             },
         )
 
+    def _log_profile_loading_summary(
+        self, source_profiles: dict[str, ProfileInfo]
+    ) -> None:
+        """Log normalization-profile loading summary before compatibility checks."""
+        if not source_profiles:
+            return
+        self._logger.debug(
+            "Preflight validator loaded source normalization profiles",
+            sources=list(source_profiles.keys()),
+            profile_refs={
+                source: {
+                    "profile_name": profile.profile_name,
+                    "profile_version": profile.profile_version,
+                    "profile_hash": profile.profile_hash,
+                }
+                for source, profile in source_profiles.items()
+            },
+        )
+
     def _log_validation_result(
         self,
         *,
@@ -42,6 +62,14 @@ class PreflightValidationReportingMixin:
                 composite=config.name,
                 fields_validated=field_priorities_count,
                 resolved_fields=result.resolved_fields,
+                profile_refs={
+                    source: {
+                        "profile_name": profile.profile_name,
+                        "profile_version": profile.profile_version,
+                        "profile_hash": profile.profile_hash,
+                    }
+                    for source, profile in result.profile_refs.items()
+                },
             )
             return
 

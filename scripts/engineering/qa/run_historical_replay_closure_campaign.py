@@ -20,6 +20,7 @@ from bioetl.application.services.control_plane.historical_replay_corpus_service 
     HistoricalReplayCorpusService,
 )
 from bioetl.application.services.control_plane.historical_replay_certification_service import (
+    HistoricalReplayCertificationService,
     HistoricalReplaySnapshotCertification,
 )
 from bioetl.application.services.control_plane.run_manifest_diagnostics import (
@@ -446,6 +447,10 @@ def main() -> int:
     corpus_service = HistoricalReplayCorpusService(
         manifest_port=manifest_store,
         ledger_port=ledger_store,
+        certification_service=HistoricalReplayCertificationService(
+            manifest_port=manifest_store,
+            ledger_port=ledger_store,
+        ),
     )
     closure_service = HistoricalReplayClosureService(corpus_service=corpus_service)
     bronze_root = Path(settings.data_dir) / "output" / "bronze"

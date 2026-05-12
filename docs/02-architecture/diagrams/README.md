@@ -56,7 +56,7 @@ These artifacts are intentionally outside primary nav but linked here for discov
 
 ______________________________________________________________________
 
-## Architecture Diagrams (23 core)
+## Architecture Diagrams (48 core)
 
 | #   | Diagram                                | File                                                | Description                                                                           |
 | --- | -------------------------------------- | --------------------------------------------------- | ------------------------------------------------------------------------------------- |
@@ -83,6 +83,36 @@ ______________________________________________________________________
 | 21  | Idempotent Processing Guards           | `architecture/21-idempotent-processing-guards.mmd`  | Lock ownership, checkpoint identity, resume policy, and safe rerun guards             |
 | 22  | Data Operations Observability          | `architecture/22-data-operations-observability.mmd` | Logs, metrics, tracing, and low-cardinality control-plane signals                     |
 | 23  | Reproducible Run Contract              | `architecture/23-reproducible-run-contract.mmd`     | Config resolution, effective-config artifacts, and execution fingerprint identity     |
+
+### Architecture Expansion Batch (24-48)
+
+| #   | Diagram                                                         | File                                                                                             | Description |
+| --- | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ | ----------- |
+| 24  | Control Plane Artifact Publication Pipeline                     | `architecture/24-control-plane-artifact-publication-pipeline.mmd`                                | Run manifest, effective config, workflow manifest, and ledger publication path |
+| 25  | Effective Execution Config Resolution And Artifact Hashing      | `architecture/25-effective-execution-config-resolution-and-artifact-hashing.mmd`                 | Config resolution and stable hash attachment sequence |
+| 26  | Reproducible Run Contract Across Manifest Ledger And Metadata   | `architecture/26-reproducible-run-contract-across-manifest-ledger-and-output-metadata.mmd`      | Unified reproducibility contract across artifacts and medallion metadata |
+| 27  | Composite Preflight Field Priority And Compatibility Resolution | `architecture/27-composite-preflight-field-priority-and-normalization-compatibility-resolution.mmd` | Composite publication preflight semantics |
+| 28  | Historical Replay Universe Inventory And Closure Report         | `architecture/28-historical-replay-universe-inventory-and-closure-report.mmd`                    | Replay inventory and closure-report generation |
+| 29  | Provider Registry Loading To Data Source Creation               | `architecture/29-provider-registry-loading-to-data-source-creation.mmd`                          | Provider registry readiness to data-source creation |
+| 30  | Postrun Retention Deduplication And Vacuum Warning Path         | `architecture/30-postrun-retention-deduplication-and-vacuum-warning-path.mmd`                    | Postrun compaction and warning degradation path |
+| 31  | Workflow Control Plane Manifest And Ledger Publication          | `architecture/31-workflow-control-plane-manifest-and-ledger-publication.mmd`                     | Workflow-level control-plane publication path |
+| 32  | Lock Heartbeat Checkpoint And Shutdown Collaboration            | `architecture/32-lock-heartbeat-checkpoint-and-shutdown-collaboration.mmd`                       | Runtime collaboration among lock, heartbeat, checkpoint, and shutdown |
+| 33  | Pipeline Service Bundle And Runner Dependencies                 | `architecture/33-pipeline-service-bundle-and-runner-dependencies.mmd`                            | Runner and service-bundle dependency graph |
+| 34  | PipelineRun Aggregate Stage Result And Terminal Transition Model| `architecture/34-pipelinerun-aggregate-stage-result-and-terminal-transition-model.mmd`           | PipelineRun lifecycle with stage results |
+| 35  | Batch Aggregate Seal Write Commit Failure Lifecycle             | `architecture/35-batch-aggregate-seal-write-commit-failure-lifecycle.mmd`                        | Batch aggregate lifecycle |
+| 36  | Quarantine Entry Review Resolution And Discard Flow             | `architecture/36-quarantine-entry-review-resolution-and-discard-flow.mmd`                        | Quarantine entry state transitions |
+| 37  | Observability Bootstrap Bundle From Settings To Ports           | `architecture/37-observability-bootstrap-bundle-from-settings-to-ports.mmd`                      | Logger/metrics/tracer bootstrap bundle |
+| 38  | ChEMBL Activity Extraction To Bronze Artifact Publication       | `architecture/38-chembl-activity-extraction-to-bronze-artifact-publication.mmd`                  | ChEMBL activity bronze publication path |
+| 39  | CrossRef Publication Search Fallback And Batch DOI Fetch        | `architecture/39-crossref-publication-search-fallback-and-batch-doi-fetch.mmd`                   | CrossRef publication fallback path |
+| 40  | PubMed Search Fetch XML Parse And Publication Mapping           | `architecture/40-pubmed-search-fetch-xml-parse-and-publication-mapping.mmd`                      | PubMed XML publication mapping path |
+| 41  | OpenAlex Cursor Pagination And Response Mapping Path            | `architecture/41-openalex-cursor-pagination-and-response-mapping-path.mmd`                       | OpenAlex cursor pagination path |
+| 42  | SemanticScholar Search Fallback And Batch Request Flow          | `architecture/42-semanticscholar-search-fallback-and-batch-request-flow.mmd`                     | Semantic Scholar search and batch flow |
+| 43  | UniProt IDMapping To Protein Fetch Enrichment                   | `architecture/43-uniprot-idmapping-to-protein-fetch-enrichment.mmd`                              | UniProt idmapping and protein enrichment path |
+| 44  | PubChem Compound Fetch Strategy Resolution                      | `architecture/44-pubchem-compound-fetch-strategy-resolution.mmd`                                 | PubChem strategy resolution path |
+| 45  | DQ Contract Config Loading And Policy Resolution                | `architecture/45-dq-contract-config-loading-and-policy-resolution.mmd`                            | DQ contract runtime config path |
+| 46  | Filter Config Resolution And Column Filter Evaluation           | `architecture/46-filter-config-resolution-and-column-filter-evaluation.mmd`                       | Filter config load and evaluation path |
+| 47  | Run Manifest Domain Model And Serialization Surface             | `architecture/47-run-manifest-domain-model-and-serialization-surface.mmd`                         | Run manifest model structure |
+| 48  | Effective Config Artifact Domain Model                          | `architecture/48-effective-config-artifact-domain-model.mmd`                                      | Effective config model structure |
 
 ## Decomposed Architecture Diagrams
 

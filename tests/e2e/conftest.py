@@ -539,7 +539,7 @@ async def run_pipeline_or_skip_transient(context: PipelineRunContext) -> Any:
     import httpx
     from bioetl.domain.exceptions.network import ExternalServiceError
 
-    from bioetl.composition.bootstrap.runtime.pipeline import bootstrap_pipeline_runner
+    from bioetl.composition.bootstrap import bootstrap_pipeline_runner
 
     retry_config = _get_retry_config()
     transient_exc: Exception | None = None

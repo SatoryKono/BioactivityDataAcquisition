@@ -184,6 +184,10 @@ Certified historical replay is therefore bounded but operationalized:
 - `bioetl run-manifest closure-report --write` persists one retained-corpus
   closure artifact with a deterministic `report_id`, global claim gate, and
   explicit residual resolution queue for any blocked historical manifests;
+- `bioetl run-manifest universe-report --external-pack ... --write` persists
+  one full-universe closure artifact by merging the retained local corpus with
+  authoritative archived/offline historical packs through the supported CLI
+  surface;
 - `scripts/engineering/qa/run_historical_replay_universe_campaign.py` persists
   a full-universe closure artifact by merging the local retained corpus with
   one or more authoritative external universe packs for archived/offline runs;

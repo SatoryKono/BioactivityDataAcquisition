@@ -17,12 +17,15 @@ from bioetl.domain.normalization.profiles import (
     UNIPROT_PROTEIN_PROFILE,
 )
 from bioetl.domain.normalization.profiles.registry import (
+    NORMALIZATION_PROFILE_IDENTITIES,
     NORMALIZATION_PROFILE_MODULE_PATHS,
     NORMALIZATION_PROFILE_REGISTRY,
+    build_normalization_profile_identities,
     build_normalization_profile_module_paths,
     build_normalization_profile_registry,
     normalize_normalization_profile_coordinates,
     resolve_normalization_profile,
+    resolve_normalization_profile_identity,
     resolve_normalization_profile_module_path,
 )
 
@@ -82,10 +85,15 @@ def test_build_module_paths_match_exported_mapping() -> None:
     )
 
 
+def test_build_profile_identities_match_exported_mapping() -> None:
+    assert build_normalization_profile_identities() == NORMALIZATION_PROFILE_IDENTITIES
+
+
 def test_profile_registry_and_module_paths_share_same_coordinates() -> None:
     assert set(NORMALIZATION_PROFILE_REGISTRY) == set(
         NORMALIZATION_PROFILE_MODULE_PATHS
     )
+    assert set(NORMALIZATION_PROFILE_REGISTRY) == set(NORMALIZATION_PROFILE_IDENTITIES)
 
 
 def test_registry_exports_canonical_profile_module_paths() -> None:
@@ -195,6 +203,15 @@ def test_resolve_profile_module_path_uses_registry_coordinates() -> None:
         == "src/bioetl/domain/normalization/profiles/semanticscholar_publication.py"
     )
     assert resolve_normalization_profile_module_path("chembl", None) is None
+
+
+def test_resolve_profile_identity_uses_registry_coordinates() -> None:
+    identity = resolve_normalization_profile_identity(" ChEMBL ", " Activity ")
+
+    assert identity is not None
+    assert identity.profile_name == "chembl.activity"
+    assert identity.profile_version == "1.0.0"
+    assert len(identity.profile_hash) == 64
 
 
 def test_profile_and_module_path_resolution_share_coordinate_normalization() -> None:

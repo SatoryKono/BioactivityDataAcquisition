@@ -707,5 +707,10 @@
     "accession",
     "content_hash",
     "entity_id"
-  ]
+  ],
+  "normalization_profile": {
+    "ref": "uniprot.protein",
+    "version": "1.0.0",
+    "hash": "ec1ddaa0d0c8e6390fd9564f96b65d4488f78c448c8d6728d7f547f9009a62aa"
+  }
 }

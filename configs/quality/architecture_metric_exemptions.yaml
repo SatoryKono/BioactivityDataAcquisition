@@ -34,7 +34,7 @@ registries:
       removal_step: "Move claim-verdict branching to smaller predicate helpers or a rule table so the function returns under CC 10."
     src/bioetl/application/services/workflow_runner_service.py::run_workflow:
       value: 14
-      owner: "@bioetl-architecture"
+      owner: "@bioetl-platform"
       reason: "Workflow runner still owns resume/skip/failure propagation across step execution until orchestration-state transitions are extracted."
       classification: "technical_debt"
       linked_rf: "RF-000"

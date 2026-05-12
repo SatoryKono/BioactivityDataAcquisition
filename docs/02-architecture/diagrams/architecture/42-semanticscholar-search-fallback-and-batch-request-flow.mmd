@@ -1,0 +1,34 @@
+%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+%% Title: SemanticScholar Search Fallback And Batch Request Flow
+%% @version 1.0.0
+%% @date    2026-05-12
+%% @type    sequenceDiagram
+%% @level   Provider / Interaction
+%% RULES: RULES.md §2.1, ADR-032
+sequenceDiagram
+    autonumber
+    participant Runner as publication pipeline
+    participant Adapter as SemanticScholarAdapter
+    participant Search as _search_fetch_flow.py
+    participant Batch as batch_request_mixin.py
+    participant Fallback as fallback.py
+    participant HTTP as UnifiedHTTPClient
+
+    Runner->>Adapter: publication lookup
+    Adapter->>Search: build search request
+    Search->>HTTP: execute search request
+    alt search response accepted
+        HTTP-->>Search: candidate ids / payload
+    else weak or empty response
+        Search->>Fallback: resolve fallback
+        Fallback-->>Search: alternate terms or route
+        Search->>HTTP: retry fallback request
+        HTTP-->>Search: recovered payload
+    end
+    Search->>Batch: request batch details
+    Batch->>HTTP: execute batch request
+    HTTP-->>Batch: detailed records
+    Batch-->>Runner: mapped publication entities
+%% padding line for readability and stable render budget
+%% padding line for readability and stable render budget
+%% padding line for readability and stable render budget

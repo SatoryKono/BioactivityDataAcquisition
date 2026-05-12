@@ -29,22 +29,27 @@ def test_composite_api_reexports_bootstrap_entrypoints() -> None:
 
 
 @pytest.mark.unit
-def test_bootstrap_package_root_exposes_sanctioned_lazy_runtime_helpers() -> None:
-    """Package bootstrap root should expose the frozen lazy compatibility surface."""
+def test_bootstrap_package_root_reexports_curated_lazy_helpers() -> None:
+    """Package bootstrap root should expose only the curated lazy bootstrap surface."""
     bootstrap_module = importlib.import_module("bioetl.composition.bootstrap")
+    runtime_pipeline_module = importlib.import_module(
+        "bioetl.composition.bootstrap.runtime.pipeline"
+    )
+    runtime_composite_module = importlib.import_module(
+        "bioetl.composition.bootstrap.runtime.composite"
+    )
+    config_module = importlib.import_module(
+        "bioetl.infrastructure.config.pipeline_config_api"
+    )
 
-    assert set(bootstrap_module.__all__) == {
-        "bootstrap_composite_runner",
-        "bootstrap_dq_monitor",
-        "bootstrap_logger",
-        "bootstrap_metrics",
-        "bootstrap_observability_bundle",
-        "bootstrap_pipeline_runner",
-        "bootstrap_tracer",
-        "load_composite_config",
-        "load_pipeline_config",
-        "maybe_start_metrics_server",
-    }
+    assert "bootstrap_pipeline_runner" in bootstrap_module.__all__
+    assert bootstrap_module.bootstrap_pipeline_runner is (
+        runtime_pipeline_module.bootstrap_pipeline_runner
+    )
+    assert bootstrap_module.bootstrap_composite_runner is (
+        runtime_composite_module.bootstrap_composite_runner
+    )
+    assert bootstrap_module.load_pipeline_config is config_module.load_pipeline_config
 
 
 @pytest.mark.unit

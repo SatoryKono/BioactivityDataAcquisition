@@ -2,14 +2,18 @@
 
 from __future__ import annotations
 
+import hashlib
 import inspect
+import json
 from collections.abc import Callable, Collection, Mapping
 from dataclasses import dataclass, field
 from functools import cache
 
 __all__ = [
     "FieldRule",
+    "FieldRuleIdentity",
     "NormalizationProfile",
+    "NormalizationProfileIdentity",
 ]
 
 FieldNormalizer = Callable[..., object]
@@ -29,6 +33,46 @@ def _normalizer_accepts_record_context(normalizer: FieldNormalizer) -> bool:
 
 def _identity(value: object) -> object:
     return value
+
+
+def _normalizer_ref(normalizer: FieldNormalizer) -> str:
+    """Return a deterministic reference string for one field normalizer."""
+    module_name = getattr(normalizer, "__module__", None)
+    qualname = getattr(normalizer, "__qualname__", None)
+    if isinstance(module_name, str) and isinstance(qualname, str):
+        return f"{module_name}:{qualname}"
+    return repr(normalizer)
+
+
+def _sha256_hex(payload: object) -> str:
+    """Return canonical SHA256 hex digest for one JSON-serializable payload."""
+    serialized = json.dumps(
+        payload,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=True,
+    )
+    return hashlib.sha256(serialized.encode("utf-8")).hexdigest()
+
+
+@dataclass(frozen=True, slots=True)
+class FieldRuleIdentity:
+    """Deterministic compatibility surface for one normalized field."""
+
+    field_name: str
+    normalizer_ref: str
+    include_in_hash: bool
+    set_like: bool
+    compatibility_hash: str
+
+
+@dataclass(frozen=True, slots=True)
+class NormalizationProfileIdentity:
+    """Deterministic identity for one normalization profile."""
+
+    profile_name: str
+    profile_version: str
+    profile_hash: str
 
 
 @dataclass(frozen=True, slots=True)
@@ -52,6 +96,23 @@ class FieldRule:
             return self.normalizer(value, record=record)
         return self.normalizer(value)
 
+    @property
+    def identity(self) -> FieldRuleIdentity:
+        """Return deterministic compatibility metadata for one field rule."""
+        payload = {
+            "field_name": self.field_name,
+            "normalizer_ref": _normalizer_ref(self.normalizer),
+            "include_in_hash": self.include_in_hash,
+            "set_like": self.set_like,
+        }
+        return FieldRuleIdentity(
+            field_name=self.field_name,
+            normalizer_ref=payload["normalizer_ref"],
+            include_in_hash=self.include_in_hash,
+            set_like=self.set_like,
+            compatibility_hash=_sha256_hex(payload),
+        )
+
 
 @dataclass(frozen=True, slots=True)
 class NormalizationProfile:
@@ -59,6 +120,7 @@ class NormalizationProfile:
 
     profile_name: str
     field_rules: Mapping[str, FieldRule]
+    profile_version: str = "1.0.0"
     meta_fields: frozenset[str] = field(default_factory=frozenset)
     description: str | None = None
 
@@ -83,6 +145,11 @@ class NormalizationProfile:
     def rule_for(self, field_name: str) -> FieldRule | None:
         """Return the rule for one field when present."""
         return self.field_rules.get(field_name)
+
+    def field_identity(self, field_name: str) -> FieldRuleIdentity | None:
+        """Return deterministic compatibility metadata for one field."""
+        rule = self.rule_for(field_name)
+        return None if rule is None else rule.identity
 
     @property
     def fields(self) -> frozenset[str]:
@@ -112,6 +179,30 @@ class NormalizationProfile:
         """Return fields whose list-like values are order-insensitive for hashing."""
         return frozenset(
             field_name for field_name, rule in self.field_rules.items() if rule.set_like
+        )
+
+    @property
+    def identity(self) -> NormalizationProfileIdentity:
+        """Return deterministic identity for the full profile surface."""
+        payload = {
+            "profile_name": self.profile_name,
+            "profile_version": self.profile_version,
+            "meta_fields": sorted(self.meta_fields),
+            "field_rules": [
+                {
+                    "field_name": rule_identity.field_name,
+                    "normalizer_ref": rule_identity.normalizer_ref,
+                    "include_in_hash": rule_identity.include_in_hash,
+                    "set_like": rule_identity.set_like,
+                }
+                for _, rule in sorted(self.field_rules.items())
+                for rule_identity in (rule.identity,)
+            ],
+        }
+        return NormalizationProfileIdentity(
+            profile_name=self.profile_name,
+            profile_version=self.profile_version,
+            profile_hash=_sha256_hex(payload),
         )
 
     def coverage_gaps(

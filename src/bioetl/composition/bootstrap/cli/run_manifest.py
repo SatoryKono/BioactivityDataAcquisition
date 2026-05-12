@@ -17,6 +17,10 @@ from bioetl.application.services.control_plane.historical_replay_closure_service
 from bioetl.application.services.control_plane.historical_replay_corpus_service import (
     HistoricalReplayCorpusService,
 )
+from bioetl.application.services.control_plane.historical_replay_universe_service import (
+    HistoricalReplayUniverseClosureReport,
+    HistoricalReplayUniverseService,
+)
 from bioetl.application.services.control_plane.run_manifest_inspection_service import (
     RunManifestInspectionService,
 )
@@ -26,6 +30,7 @@ from bioetl.infrastructure.control_plane import (
     FileArtifactByteComparisonAdapter,
     FileEffectiveConfigArtifactStore,
     FileHistoricalReplayClosureStore,
+    FileHistoricalReplayUniverseStore,
     FileRunLedgerStore,
     FileRunManifestStore,
 )
@@ -34,8 +39,10 @@ __all__ = [
     "bootstrap_forensic_run_diff_service",
     "bootstrap_historical_replay_closure_service",
     "bootstrap_historical_replay_corpus_service",
+    "bootstrap_historical_replay_universe_service",
     "bootstrap_run_manifest_service",
     "persist_historical_replay_closure_report",
+    "persist_historical_replay_universe_report",
 ]
 
 
@@ -125,6 +132,24 @@ def bootstrap_historical_replay_closure_service() -> HistoricalReplayClosureServ
     )
 
 
+def bootstrap_historical_replay_universe_service() -> HistoricalReplayUniverseService:
+    """Bootstrap full-universe historical replay workflows for CLI use."""
+    manifest_store, ledger_store, _effective_config_store = (
+        _create_control_plane_stores()
+    )
+    corpus_service = HistoricalReplayCorpusService(
+        manifest_port=manifest_store,
+        ledger_port=ledger_store,
+        certification_service=HistoricalReplayCertificationService(
+            manifest_port=manifest_store,
+            ledger_port=ledger_store,
+        ),
+    )
+    return HistoricalReplayUniverseService(
+        corpus_service=corpus_service,
+    )
+
+
 def persist_historical_replay_closure_report(
     report: HistoricalReplayClosureReport,
 ) -> Path:
@@ -133,5 +158,17 @@ def persist_historical_replay_closure_report(
     output_root = Path(settings.data_dir) / "output" / "control"
     store = FileHistoricalReplayClosureStore(
         base_path=output_root / "historical_replay_closure"
+    )
+    return store.save(report)
+
+
+def persist_historical_replay_universe_report(
+    report: HistoricalReplayUniverseClosureReport,
+) -> Path:
+    """Persist one historical replay universe report via composition-owned wiring."""
+    settings = get_settings()
+    output_root = Path(settings.data_dir) / "output" / "control"
+    store = FileHistoricalReplayUniverseStore(
+        base_path=output_root / "historical_replay_universe"
     )
     return store.save(report)

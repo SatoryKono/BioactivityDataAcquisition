@@ -8,6 +8,7 @@ __all__ = [
     "FieldInfo",
     "PreflightValidationError",
     "PreflightValidationResult",
+    "ProfileInfo",
     "SchemaFields",
     "ValidationIssue",
 ]
@@ -21,6 +22,17 @@ class FieldInfo:
     dtype: str
     nullable: bool
     source: str
+
+
+@dataclass(frozen=True, slots=True)
+class ProfileInfo:
+    """Deterministic normalization-profile metadata for one source."""
+
+    source: str
+    profile_name: str
+    profile_version: str
+    profile_hash: str
+    field_hashes: dict[str, str]
 
 
 @dataclass(frozen=True, slots=True)
@@ -41,6 +53,7 @@ class PreflightValidationResult:
     is_valid: bool
     issues: list[ValidationIssue] = field(default_factory=list)
     resolved_fields: dict[str, str] = field(default_factory=dict)
+    profile_refs: dict[str, ProfileInfo] = field(default_factory=dict)
 
     @property
     def errors(self) -> list[ValidationIssue]:

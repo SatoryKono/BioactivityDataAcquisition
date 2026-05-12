@@ -115,5 +115,10 @@
     "content_hash",
     "entity_id",
     "protein_class_id"
-  ]
+  ],
+  "normalization_profile": {
+    "ref": "chembl.protein_class",
+    "version": "1.0.0",
+    "hash": "231bf94319bdcd6e2d1c8b6015a751494044cd63188544f0ee570a8715e94439"
+  }
 }

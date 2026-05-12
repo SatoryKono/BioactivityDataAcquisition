@@ -59,6 +59,9 @@ class TestContractRegistryEntry:
             contract_version="1.0.0",
             compatibility_level=CompatibilityLevel.PATCH,
             schema_hash="a" * 64,
+            normalization_profile_ref="test.entity",
+            normalization_profile_version="1.0.0",
+            normalization_profile_hash="b" * 64,
         )
 
         # Valid entry
@@ -69,6 +72,9 @@ class TestContractRegistryEntry:
             supported_versions=["1.0.0"],
             last_updated=_ts(),
             owners=["test-team"],
+            normalization_profile_ref="test.entity",
+            normalization_profile_version="1.0.0",
+            normalization_profile_hash="b" * 64,
         )
         assert valid_entry.validate() == []
 
@@ -80,6 +86,9 @@ class TestContractRegistryEntry:
             supported_versions=["1.0.0"],
             last_updated="",
             owners=[],
+            normalization_profile_ref="test.entity",
+            normalization_profile_version="1.0.0",
+            normalization_profile_hash="b" * 64,
         )
         issues = invalid_entry.validate()
         assert len(issues) == 3  # source_path, last_updated, owners
@@ -327,6 +336,9 @@ class TestContractRegistry:
             contract_version="1.0.0",
             compatibility_level=CompatibilityLevel.PATCH,
             schema_hash="a" * 64,
+            normalization_profile_ref="test.entity",
+            normalization_profile_version="1.0.0",
+            normalization_profile_hash="b" * 64,
         )
 
         entry = ContractRegistryEntry(
@@ -336,6 +348,9 @@ class TestContractRegistry:
             supported_versions=["2.0.0", "1.0.0"],
             last_updated="2024-01-01T00:00:00Z",
             owners=["test-team"],
+            normalization_profile_ref="test.entity",
+            normalization_profile_version="1.0.0",
+            normalization_profile_hash="b" * 64,
         )
 
         registry.register_contract(entry)
@@ -344,6 +359,9 @@ class TestContractRegistry:
                 "identity": {
                     "contract_version": "1.0.0",
                     "schema_hash": "a" * 64,
+                    "normalization_profile_ref": "test.entity",
+                    "normalization_profile_version": "1.0.0",
+                    "normalization_profile_hash": "b" * 64,
                 },
                 "status": "active",
                 "supported_versions": ["1.0.0", "2.0.0"],

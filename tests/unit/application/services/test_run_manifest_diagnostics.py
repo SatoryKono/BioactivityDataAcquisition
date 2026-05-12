@@ -873,50 +873,10 @@ def test_build_diagnostics_summary_coerces_observe_for_replay_ready_profile() ->
     )
 
 
-@pytest.mark.parametrize(
-    ("terminal_status", "expected_event_type", "signal_key"),
-    [
-        ("success", "run_finished", None),
-        ("failed", "run_failed", "run_failed"),
-        ("shutdown", "run_shutdown", "run_shutdown"),
-    ],
-)
-def test_build_diagnostics_summary_exposes_required_operator_fields(
-    terminal_status: str,
-    expected_event_type: str,
-    signal_key: str | None,
+def _assert_required_operator_identity_graph(
+    summary: dict[str, object],
+    manifest: RunManifest,
 ) -> None:
-    manifest = _make_manifest()
-    ledger_entries = _build_ledger_entries(
-        manifest,
-        terminal_status=terminal_status,
-    )
-
-    summary = build_diagnostics_summary(manifest, ledger_entries)
-
-    assert summary["latest_status"] == terminal_status
-    assert summary["latest_event_type"] == expected_event_type
-    assert summary["event_family_counts"] == {
-        "artifact": 1,
-        "diagnostic": 1,
-        "pipeline.lifecycle": 2,
-        "pipeline.phase": 1,
-    }
-    assert summary["event_type_counts"][expected_event_type] == 1
-    assert summary["artifact_refs"] == [
-        {
-            "event_type": "artifact_published",
-            "stage": "silver",
-            "artifact_id": "silver:chembl.activity@1",
-            "dataset_ref": "silver:chembl.activity@1",
-            "lineage_fragment_id": "silver:fragment-1",
-            "artifact_path": "data/output/silver/chembl/activity",
-        }
-    ]
-    assert summary["planned_artifact_count"] == 0
-    assert summary["published_artifact_count"] == 1
-    assert summary["missing_artifact_links"] == 0
-    assert summary["identity_graph_complete"] is True
     assert summary["identity_graph"] == {
         "run_id": str(manifest.run_id),
         "manifest_id": "manifest-diagnostics",
@@ -1013,6 +973,21 @@ def test_build_diagnostics_summary_exposes_required_operator_fields(
         "produced_artifact_trace": _expected_produced_artifact_trace(manifest),
         "occurrence_only_diagnostics": [],
     }
+    assert summary["exact_replay_anchors"] == _expected_exact_replay_anchors(
+        manifest,
+        published_artifact_ids=["silver:chembl.activity@1"],
+        published_artifact_paths=["data/output/silver/chembl/activity"],
+        lineage_fragment_ids=["silver:fragment-1"],
+    )
+    assert summary["produced_artifact_trace"] == _expected_produced_artifact_trace(
+        manifest
+    )
+
+
+def _assert_required_operator_persistence_profile(
+    summary: dict[str, object],
+    manifest: RunManifest,
+) -> None:
     assert summary["persistence_profile"] == {
         "attained_profile": "degraded_observable",
         "required_profile": "degraded_observable",
@@ -1064,24 +1039,12 @@ def test_build_diagnostics_summary_exposes_required_operator_fields(
         },
         "lineage_closure_boundary": _expected_lineage_closure_boundary(manifest),
     }
-    assert summary["correlation_anchor_gaps"] == {
-        "resolved_config_hash": 0,
-        "effective_config_hash": 0,
-        "contract_ref": 0,
-        "contract_version": 0,
-        "composite_run_id": 0,
-    }
-    assert summary["cross_validation_signal_present"] is False
-    assert summary["occurrence_only_diagnostics"] == []
-    assert summary["exact_replay_anchors"] == _expected_exact_replay_anchors(
-        manifest,
-        published_artifact_ids=["silver:chembl.activity@1"],
-        published_artifact_paths=["data/output/silver/chembl/activity"],
-        lineage_fragment_ids=["silver:fragment-1"],
-    )
-    assert summary["produced_artifact_trace"] == _expected_produced_artifact_trace(
-        manifest
-    )
+
+
+def _assert_required_operator_alert_signals(
+    summary: dict[str, object],
+    signal_key: str | None,
+) -> None:
     alert_signals = summary["alert_signals"]
     assert isinstance(alert_signals, dict)
     assert alert_signals["artifact_linkage_gap"] is False
@@ -1108,6 +1071,64 @@ def test_build_diagnostics_summary_exposes_required_operator_fields(
     else:
         assert alert_signals[signal_key] is True
         assert "No alert signals detected" not in summary["next_steps"]
+
+
+@pytest.mark.parametrize(
+    ("terminal_status", "expected_event_type", "signal_key"),
+    [
+        ("success", "run_finished", None),
+        ("failed", "run_failed", "run_failed"),
+        ("shutdown", "run_shutdown", "run_shutdown"),
+    ],
+)
+def test_build_diagnostics_summary_exposes_required_operator_fields(
+    terminal_status: str,
+    expected_event_type: str,
+    signal_key: str | None,
+) -> None:
+    manifest = _make_manifest()
+    ledger_entries = _build_ledger_entries(
+        manifest,
+        terminal_status=terminal_status,
+    )
+
+    summary = build_diagnostics_summary(manifest, ledger_entries)
+
+    assert summary["latest_status"] == terminal_status
+    assert summary["latest_event_type"] == expected_event_type
+    assert summary["event_family_counts"] == {
+        "artifact": 1,
+        "diagnostic": 1,
+        "pipeline.lifecycle": 2,
+        "pipeline.phase": 1,
+    }
+    assert summary["event_type_counts"][expected_event_type] == 1
+    assert summary["artifact_refs"] == [
+        {
+            "event_type": "artifact_published",
+            "stage": "silver",
+            "artifact_id": "silver:chembl.activity@1",
+            "dataset_ref": "silver:chembl.activity@1",
+            "lineage_fragment_id": "silver:fragment-1",
+            "artifact_path": "data/output/silver/chembl/activity",
+        }
+    ]
+    assert summary["planned_artifact_count"] == 0
+    assert summary["published_artifact_count"] == 1
+    assert summary["missing_artifact_links"] == 0
+    assert summary["identity_graph_complete"] is True
+    _assert_required_operator_identity_graph(summary, manifest)
+    assert summary["correlation_anchor_gaps"] == {
+        "resolved_config_hash": 0,
+        "effective_config_hash": 0,
+        "contract_ref": 0,
+        "contract_version": 0,
+        "composite_run_id": 0,
+    }
+    assert summary["cross_validation_signal_present"] is False
+    assert summary["occurrence_only_diagnostics"] == []
+    _assert_required_operator_persistence_profile(summary, manifest)
+    _assert_required_operator_alert_signals(summary, signal_key)
 
 
 def test_build_diagnostics_summary_surfaces_persisted_resume_diagnostics() -> None:

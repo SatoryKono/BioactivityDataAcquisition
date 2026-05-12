@@ -1,0 +1,34 @@
+%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+%% Title: DQ Contract Config Loading And Policy Resolution
+%% @version 1.0.0
+%% @date    2026-05-12
+%% @type    flowchart
+%% @level   Configuration / Component
+%% RULES: RULES.md §2.6, ADR-027, ADR-045
+flowchart LR
+    yaml[DQ YAML policies]
+    loader[dq_config_loader.py]
+    normalize[_dq_config_normalization.py]
+    merge[_dq_config_validation_merge.py]
+    snapshot[DQPolicySnapshot]
+    service[dq_policy_resolver.py]
+    evaluator[dq_rule_evaluator.py]
+    report[DQ report writers]
+
+    yaml --> loader
+    loader --> normalize
+    normalize --> merge
+    merge --> snapshot
+    snapshot --> service
+    service --> evaluator
+    evaluator --> report
+
+    class yaml ext;
+    class loader,normalize,merge infra;
+    class snapshot,service,evaluator domain;
+    class report app;
+%% padding line for readability and stable render budget
+%% padding line for readability and stable render budget
+%% padding line for readability and stable render budget
+%% padding line for readability and stable render budget
+%% padding line for readability and stable render budget

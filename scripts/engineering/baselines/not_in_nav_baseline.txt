@@ -104,6 +104,7 @@
 02-architecture/adr-registry/status-dashboard.md
 02-architecture/decisions/ADR-047-workflow-control-plane.md
 02-architecture/decisions/notes/2026-04-07-ledger-based-resume-spike.md
+02-architecture/diagrams/governance/diagram-expansion-2026-05-12.md
 03-data-model/json-field-typing-inventory.md
 03-data-model/reference-identifier-families.md
 03-guides/cleanup.md
@@ -128,6 +129,8 @@
 04-reference/internalextended/internal-type-mappings.md
 04-reference/internalextended/provider-registration-internal.md
 04-reference/providers/publication-normalization.md
+04-reference/schemas/domain/chembl/observed-vocab-inventory.md
+04-reference/schemas/domain/chembl/ontology-governance.md
 04-reference/templates/adr-template.md
 04-reference/templates/contract-spec-template.md
 04-reference/templates/control-plane-contract-spec-template.md

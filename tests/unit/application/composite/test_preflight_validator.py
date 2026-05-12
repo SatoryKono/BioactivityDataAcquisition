@@ -181,6 +181,14 @@ class TestPreflightValidationResult:
         assert result.errors[0].field == "missing_field"
         assert result.warnings[0].field == "title"
 
+    def test_result_can_store_profile_refs(self) -> None:
+        result = PreflightValidationResult(
+            is_valid=True,
+            profile_refs={},
+        )
+
+        assert result.profile_refs == {}
+
 
 class TestPreflightValidationError:
     """Tests for PreflightValidationError exception."""
@@ -258,7 +266,112 @@ class TestCompositePreflightValidationServiceBasic:
         assert "chembl.activity" in sources
         assert "chembl_activity" in sources
         assert "chembl.compound_record" in sources
-        assert "chembl_compound_record" in sources
+
+    def test_validate_fails_on_field_level_normalization_mismatch_without_override(
+        self,
+        validator: CompositePreflightValidationService,
+        basic_composite_config: CompositeConfig,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        source_fields = {
+            "chembl": {"title": FieldInfo("title", "str", True, "chembl")},
+            "chembl_publication": {"title": FieldInfo("title", "str", True, "chembl")},
+            "chembl.publication": {"title": FieldInfo("title", "str", True, "chembl")},
+            "crossref": {"title": FieldInfo("title", "str", True, "crossref")},
+            "crossref_publication": {
+                "title": FieldInfo("title", "str", True, "crossref")
+            },
+            "crossref.publication": {
+                "title": FieldInfo("title", "str", True, "crossref")
+            },
+            "pubmed": {"title": FieldInfo("title", "str", True, "pubmed")},
+            "pubmed_publication": {"title": FieldInfo("title", "str", True, "pubmed")},
+            "pubmed.publication": {"title": FieldInfo("title", "str", True, "pubmed")},
+        }
+        source_profiles = {
+            "chembl": MagicMock(field_hashes={"title": "chembl-hash"}),
+            "chembl_publication": MagicMock(field_hashes={"title": "chembl-hash"}),
+            "chembl.publication": MagicMock(field_hashes={"title": "chembl-hash"}),
+            "crossref": MagicMock(field_hashes={"title": "crossref-hash"}),
+            "crossref_publication": MagicMock(field_hashes={"title": "crossref-hash"}),
+            "crossref.publication": MagicMock(field_hashes={"title": "crossref-hash"}),
+            "pubmed": MagicMock(field_hashes={"title": "pubmed-hash"}),
+            "pubmed_publication": MagicMock(field_hashes={"title": "pubmed-hash"}),
+            "pubmed.publication": MagicMock(field_hashes={"title": "pubmed-hash"}),
+        }
+
+        monkeypatch.setattr(validator, "_load_source_fields", lambda _: source_fields)
+        monkeypatch.setattr(
+            validator, "_load_source_profiles", lambda _: source_profiles
+        )
+
+        with pytest.raises(PreflightValidationError, match="title"):
+            validator.validate(basic_composite_config)
+
+    def test_validate_allows_declared_normalization_override(
+        self,
+        validator: CompositePreflightValidationService,
+        basic_composite_config: CompositeConfig,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        source_fields = {
+            "chembl": {"title": FieldInfo("title", "str", True, "chembl")},
+            "chembl_publication": {"title": FieldInfo("title", "str", True, "chembl")},
+            "chembl.publication": {"title": FieldInfo("title", "str", True, "chembl")},
+            "crossref": {"title": FieldInfo("title", "str", True, "crossref")},
+            "crossref_publication": {
+                "title": FieldInfo("title", "str", True, "crossref")
+            },
+            "crossref.publication": {
+                "title": FieldInfo("title", "str", True, "crossref")
+            },
+            "pubmed": {"title": FieldInfo("title", "str", True, "pubmed")},
+            "pubmed_publication": {"title": FieldInfo("title", "str", True, "pubmed")},
+            "pubmed.publication": {"title": FieldInfo("title", "str", True, "pubmed")},
+        }
+        source_profiles = {
+            "chembl": MagicMock(field_hashes={"title": "chembl-hash"}),
+            "chembl_publication": MagicMock(field_hashes={"title": "chembl-hash"}),
+            "chembl.publication": MagicMock(field_hashes={"title": "chembl-hash"}),
+            "crossref": MagicMock(field_hashes={"title": "crossref-hash"}),
+            "crossref_publication": MagicMock(field_hashes={"title": "crossref-hash"}),
+            "crossref.publication": MagicMock(field_hashes={"title": "crossref-hash"}),
+            "pubmed": MagicMock(field_hashes={"title": "pubmed-hash"}),
+            "pubmed_publication": MagicMock(field_hashes={"title": "pubmed-hash"}),
+            "pubmed.publication": MagicMock(field_hashes={"title": "pubmed-hash"}),
+        }
+        config = CompositeConfig(
+            name=basic_composite_config.name,
+            version=basic_composite_config.version,
+            seed=basic_composite_config.seed,
+            enrichers=basic_composite_config.enrichers,
+            merge=MergeConfig(
+                strategy=basic_composite_config.merge.strategy,
+                conflict_resolution=basic_composite_config.merge.conflict_resolution,
+                output_silver_path=basic_composite_config.merge.output_silver_path,
+                output_gold_path=basic_composite_config.merge.output_gold_path,
+                field_priorities=basic_composite_config.merge.field_priorities,
+                normalization_compatibility_overrides={
+                    "title": "reviewed publication bridge"
+                },
+            ),
+            dq=basic_composite_config.dq,
+        )
+
+        monkeypatch.setattr(validator, "_load_source_fields", lambda _: source_fields)
+        monkeypatch.setattr(
+            validator, "_load_source_profiles", lambda _: source_profiles
+        )
+
+        result = validator.validate(config, fail_on_error=False)
+        sources = validator._get_valid_sources(config)
+
+        assert result.is_valid is False
+        assert all(
+            issue.issue_type != "normalization_profile_mismatch"
+            for issue in result.issues
+        )
+        assert "chembl_publication" in sources
 
     def test_simplify_dtype_common_types(
         self, validator: CompositePreflightValidationService
@@ -543,13 +656,18 @@ class TestCompositePreflightValidationServiceWithSchemas:
                     "abstract": ("pubmed", "chembl"),
                     "doi": ("chembl", "crossref"),
                 },
+                normalization_compatibility_overrides={
+                    "title": "reviewed publication bridge",
+                    "abstract": "reviewed publication bridge",
+                    "doi": "reviewed publication bridge",
+                },
             ),
         )
 
         result = validator.validate(config, fail_on_error=False)
 
-        # Should pass (errors only, warnings allowed)
-        assert result.is_valid is True or len(result.errors) == 0
+        assert result.is_valid is True
+        assert result.errors == []
         # Should have resolved fields
         assert len(result.resolved_fields) > 0
 

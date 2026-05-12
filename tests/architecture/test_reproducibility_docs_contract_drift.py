@@ -114,6 +114,7 @@ def test_run_manifest_contract_documents_lifecycle_snapshot_and_scoring_surfaces
     assert "bioetl run-manifest inventory" in text
     assert "bioetl run-manifest certify-historical-bulk" in text
     assert "bioetl run-manifest closure-report --write" in text
+    assert "bioetl run-manifest universe-report --external-pack ... --write" in text
     assert "Historical replay closure reports" in text
     assert "global_universal_historical_replay_claim" in text
     assert "irrecoverable_missing_immutable_evidence" in text
@@ -194,6 +195,9 @@ def test_run_manifest_docs_define_replay_equivalence_levels() -> None:
     assert "no-new-uncertifiable-runs" in runbook
     assert "certify-historical-bulk" in runbook
     assert "closure-report --write" in runbook
+    assert (
+        "universe-report --external-pack path/to/archive-pack.json --write" in runbook
+    )
     assert "run_historical_replay_closure_campaign.py" in runbook
     assert "global_universal_historical_replay_claim" in runbook
     assert "retained_corpus_claim" in runbook

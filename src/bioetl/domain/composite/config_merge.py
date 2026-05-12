@@ -106,6 +106,7 @@ class MergeConfig:
     sort_by_silver: tuple[str, ...] = ()
     sort_by_gold: tuple[str, ...] = ()
     field_priorities: dict[str, tuple[str, ...]] = field(default_factory=dict)
+    normalization_compatibility_overrides: dict[str, str] = field(default_factory=dict)
     field_mappings: dict[str, str] = field(default_factory=dict)
     column_groups: tuple[ColumnGroupConfig, ...] = ()
     exclude_fields: tuple[str, ...] = ()
@@ -117,6 +118,7 @@ class MergeConfig:
         self._convert_conflict_resolution()
         self._convert_sort_policies()
         self._convert_field_priorities()
+        self._convert_normalization_compatibility_overrides()
         self._convert_column_groups()
         self._convert_exclude_fields()
         self._validate()
@@ -139,12 +141,25 @@ class MergeConfig:
 
     def _convert_field_priorities(self) -> None:
         """Convert list values in field_priorities to tuples."""
-        if self.field_priorities:
-            converted = {
-                k: tuple(v) if isinstance(v, list) else v
-                for k, v in self.field_priorities.items()
-            }
-            object.__setattr__(self, "field_priorities", converted)
+        if not self.field_priorities:
+            return
+        converted = {
+            k: tuple(v) if isinstance(v, list) else v
+            for k, v in self.field_priorities.items()
+        }
+        object.__setattr__(self, "field_priorities", converted)
+
+    def _convert_normalization_compatibility_overrides(self) -> None:
+        """Convert normalization compatibility override keys and values to strings."""
+        if self.normalization_compatibility_overrides:
+            object.__setattr__(
+                self,
+                "normalization_compatibility_overrides",
+                {
+                    str(key): str(value)
+                    for key, value in self.normalization_compatibility_overrides.items()
+                },
+            )
 
     def _convert_sort_policies(self) -> None:
         """Convert sort policy lists to tuples for immutability."""
@@ -202,3 +217,7 @@ class MergeConfig:
             Tuple of source names in priority order, or None if not configured.
         """
         return self.field_priorities.get(field_name)
+
+    def allows_normalization_compatibility_override(self, field_name: str) -> bool:
+        """Return whether one field declares an explicit compatibility override."""
+        return field_name in self.normalization_compatibility_overrides

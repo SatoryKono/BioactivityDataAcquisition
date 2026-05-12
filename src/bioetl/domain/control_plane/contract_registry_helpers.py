@@ -72,6 +72,11 @@ def _parse_identity(contract_ref: str, identity_data: JsonDict) -> ContractIdent
         schema_hash=str(identity_data.get("schema_hash", "")),
         dq_policy_ref=identity_data.get("dq_policy_ref"),
         rule_bundle_version=identity_data.get("rule_bundle_version"),
+        normalization_profile_ref=identity_data.get("normalization_profile_ref"),
+        normalization_profile_version=identity_data.get(
+            "normalization_profile_version"
+        ),
+        normalization_profile_hash=identity_data.get("normalization_profile_hash"),
     )
 
 
@@ -108,6 +113,9 @@ def parse_entry_payload(contract_ref: str, data: JsonDict) -> ContractRegistryEn
         owners=as_string_list(data.get("owners"), "owners"),
         dq_policy_ref=data.get("dq_policy_ref"),
         rule_bundle_version=data.get("rule_bundle_version"),
+        normalization_profile_ref=data.get("normalization_profile_ref"),
+        normalization_profile_version=data.get("normalization_profile_version"),
+        normalization_profile_hash=data.get("normalization_profile_hash"),
     )
 
 
@@ -120,6 +128,9 @@ def entry_payload(entry: ContractRegistryEntry) -> JsonDict:
             "schema_hash": entry.identity.schema_hash,
             "dq_policy_ref": entry.identity.dq_policy_ref,
             "rule_bundle_version": entry.identity.rule_bundle_version,
+            "normalization_profile_ref": entry.identity.normalization_profile_ref,
+            "normalization_profile_version": entry.identity.normalization_profile_version,
+            "normalization_profile_hash": entry.identity.normalization_profile_hash,
         },
         "status": entry.status.value,
         "source_path": entry.source_path,
@@ -130,6 +141,9 @@ def entry_payload(entry: ContractRegistryEntry) -> JsonDict:
         "owners": entry.owners,
         "dq_policy_ref": entry.dq_policy_ref,
         "rule_bundle_version": entry.rule_bundle_version,
+        "normalization_profile_ref": entry.normalization_profile_ref,
+        "normalization_profile_version": entry.normalization_profile_version,
+        "normalization_profile_hash": entry.normalization_profile_hash,
     }
 
 

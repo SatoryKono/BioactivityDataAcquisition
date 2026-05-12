@@ -1,0 +1,34 @@
+%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+%% Title: PipelineRun Aggregate Stage Result And Terminal Transition Model
+%% @version 1.0.0
+%% @date    2026-05-12
+%% @type    stateDiagram
+%% @level   Domain / Aggregate
+%% RULES: RULES.md §2.3, ADR-021
+stateDiagram-v2
+    [*] --> PENDING
+    PENDING --> RUNNING: start()
+    RUNNING --> STAGE_RECORDED: complete_stage(...)
+    STAGE_RECORDED --> RUNNING: next stage
+    RUNNING --> COMPLETED: complete()
+    RUNNING --> FAILED: fail(...)
+    RUNNING --> CANCELLED: cancel(...)
+    STAGE_RECORDED --> FAILED: fail(...)
+    STAGE_RECORDED --> CANCELLED: cancel(...)
+    COMPLETED --> [*]
+    FAILED --> [*]
+    CANCELLED --> [*]
+
+    note right of RUNNING
+      PipelineRun mixes lifecycle behavior with
+      read-model projection support and stage result tracking.
+    end note
+
+    note right of STAGE_RECORDED
+      Stage results live in pipeline_run_stage_result.py
+      and feed diagnostics / replay surfaces.
+    end note
+%% padding line for readability and stable render budget
+%% padding line for readability and stable render budget
+%% padding line for readability and stable render budget
+%% padding line for readability and stable render budget

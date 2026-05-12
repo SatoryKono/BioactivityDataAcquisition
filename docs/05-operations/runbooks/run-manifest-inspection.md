@@ -213,6 +213,7 @@ bioetl run-manifest inventory
 bioetl run-manifest inventory --format json
 bioetl run-manifest certify-historical-bulk path/to/plan.json --format json
 bioetl run-manifest closure-report --write --format json
+bioetl run-manifest universe-report --external-pack path/to/archive-pack.json --write --format json
 ./.venv/bin/python scripts/engineering/qa/run_historical_replay_closure_campaign.py --auto-certify-sources --auto-certify-composites --claim-scope-mode retained_certifiable_historical_runs --write-dispositions --write-report
 ./.venv/bin/python scripts/engineering/qa/run_historical_replay_universe_campaign.py --external-pack path/to/archive-pack.json --write-report
 ```
@@ -235,6 +236,9 @@ Interpretation:
   `historical_composite_replay_certified_parent`.
 - `closure-report --write` persists one retained-corpus closure artifact under
   `data/output/control/historical_replay_closure/{report_id}.json`.
+- `universe-report --external-pack ... --write` is the supported operator path
+  for persisting a full-universe artifact from retained local evidence plus one
+  or more authoritative archived/offline packs.
 - `run_historical_replay_closure_campaign.py` is the deterministic batch path
   for retained-corpus campaigns: it builds the inventory, optionally emits a
   residual-disposition artifact, may auto-certify retained source/composite

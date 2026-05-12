@@ -187,5 +187,10 @@
     "content_hash",
     "entity_id",
     "target_id"
-  ]
+  ],
+  "normalization_profile": {
+    "ref": "chembl.target",
+    "version": "1.0.0",
+    "hash": "02e19dfe636610c557a6439eedb497a7d4bb65f09bd86b3c4d1fb7c4d9d665a4"
+  }
 }

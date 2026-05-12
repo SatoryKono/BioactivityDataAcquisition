@@ -191,6 +191,7 @@ tracked_suite_inventory:
     - tests/integration/config/test_chembl_bronze_observed_value_inventory_snapshot.py
     - tests/integration/config/test_chembl_contract_registry_coverage.py
     - tests/integration/config/test_chembl_dq_catalog_sync.py
+    - tests/integration/config/test_chembl_dq_profile_parity.py
     - tests/integration/config/test_chembl_enum_parity.py
     - tests/integration/config/test_chembl_observed_value_fixtures.py
     - tests/integration/config/test_chembl_policy_surface_parity.py

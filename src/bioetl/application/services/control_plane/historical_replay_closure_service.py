@@ -441,5 +441,9 @@ class HistoricalReplayClosureService:
         return f"historical-replay-closure-{digest[:16]}"
 
 
+HistoricalReplayClosureReport = HistoricalReplayClosureReportRecord
+HistoricalReplayResidualDisposition = HistoricalReplayResidualDispositionRecord
+
+
 HistoricalReplayResidualDisposition = HistoricalReplayResidualDispositionRecord
 HistoricalReplayClosureReport = HistoricalReplayClosureReportRecord

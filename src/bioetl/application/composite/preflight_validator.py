@@ -9,6 +9,11 @@ See ADR-026 for composite pipeline architectural decisions.
 
 from __future__ import annotations
 
+from bioetl.application.composite._preflight_field_priority import (
+    missing_from_all_sources_issue,
+    normalization_profile_mismatch_issue,
+    scan_field_priority,
+)
 from bioetl.application.composite._preflight_orchestration import (
     PreflightSchemaOrchestrationMixin,
 )
@@ -19,6 +24,7 @@ from bioetl.application.composite._preflight_types import (
     FieldInfo,
     PreflightValidationError,
     PreflightValidationResult,
+    ProfileInfo,
     SchemaFields,
     ValidationIssue,
 )
@@ -100,63 +106,39 @@ class CompositePreflightValidationService(
         priorities: tuple[str, ...],
         valid_sources: frozenset[str],
         source_fields: dict[str, SchemaFields],
+        source_profiles: dict[str, ProfileInfo] | None = None,
+        compatibility_overrides: dict[str, str] | None = None,
     ) -> tuple[list[ValidationIssue], str | None]:
         """Validate a single field_priority entry."""
-        issues: list[ValidationIssue] = []
-        resolved_source: str | None = None
-        field_dtypes: dict[str, str] = {}
+        source_profiles = source_profiles or {}
+        compatibility_overrides = compatibility_overrides or {}
+        scan = scan_field_priority(
+            field_name=field_name,
+            priorities=priorities,
+            valid_sources=valid_sources,
+            source_fields=source_fields,
+            source_profiles=source_profiles,
+        )
+        issues = list(scan.issues)
 
-        for source in priorities:
-            source_lower = source.lower()
+        if not scan.field_dtypes:
+            issues.append(missing_from_all_sources_issue(field_name, priorities))
 
-            if source_lower not in valid_sources:
-                issues.append(
-                    ValidationIssue(
-                        field=field_name,
-                        source=source,
-                        issue_type="unknown_source",
-                        message=f"Source '{source}' not found in composite config "
-                        f"(valid: {sorted(valid_sources)})",
-                    )
-                )
-                continue
-
-            schema_fields = source_fields.get(source_lower, {})
-            if field_name not in schema_fields:
-                issues.append(
-                    ValidationIssue(
-                        field=field_name,
-                        source=source,
-                        issue_type="missing_field",
-                        message=f"Field '{field_name}' not found in {source} schema",
-                        severity="warning",
-                    )
-                )
-                continue
-
-            field_info = schema_fields[field_name]
-            field_dtypes[source] = field_info.dtype
-            if resolved_source is None:
-                resolved_source = source
-
-        if not field_dtypes:
-            issues.append(
-                ValidationIssue(
-                    field=field_name,
-                    source=",".join(priorities),
-                    issue_type="missing_field",
-                    message=f"Field '{field_name}' not found in ANY source schema "
-                    f"(checked: {list(priorities)})",
-                    severity="error",
-                )
-            )
-
-        if len(field_dtypes) > 1:
-            type_issue = self._check_type_compatibility(field_name, field_dtypes)
+        if len(scan.field_dtypes) > 1:
+            type_issue = self._check_type_compatibility(field_name, scan.field_dtypes)
             if type_issue:
                 issues.append(type_issue)
 
-        return issues, resolved_source
+        profile_issue = normalization_profile_mismatch_issue(
+            field_name=field_name,
+            priorities=priorities,
+            field_profile_hashes=scan.field_profile_hashes,
+            compatibility_overrides=compatibility_overrides,
+        )
+        if profile_issue is not None:
+            issues.append(profile_issue)
+
+        return issues, scan.resolved_source
 
     def _check_type_compatibility(
         self, field_name: str, field_dtypes: dict[str, str]
@@ -238,15 +220,20 @@ class CompositePreflightValidationService(
 
         valid_sources = self._get_valid_sources(config)
         source_fields = self._load_source_fields(config)
+        source_profiles = self._load_source_profiles(config)
         self._log_schema_loading_summary(source_fields)
+        self._log_profile_loading_summary(source_profiles)
 
         field_priorities = config.merge.field_priorities
+        compatibility_overrides = config.merge.normalization_compatibility_overrides
         for field_name, priorities in field_priorities.items():
             field_issues, resolved_source = self._validate_field_priority(
                 field_name=field_name,
                 priorities=priorities,
                 valid_sources=valid_sources,
                 source_fields=source_fields,
+                source_profiles=source_profiles,
+                compatibility_overrides=compatibility_overrides,
             )
             issues.extend(field_issues)
             if resolved_source:
@@ -259,6 +246,7 @@ class CompositePreflightValidationService(
             is_valid=is_valid,
             issues=issues,
             resolved_fields=resolved_fields,
+            profile_refs=source_profiles,
         )
         self._log_validation_result(
             is_valid=is_valid,

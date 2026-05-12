@@ -2203,6 +2203,7 @@
             "y": 70
           },
           "id": 150,
+          "description": "Operator note that redirects aggregate control-plane symptoms to the Control Plane dashboard and runbook surfaces; no datasource query is expected.",
           "options": {
             "content": "### Control-plane aggregates available\n- Open `0. Control Plane` for aggregated manifest writes, ledger appends, checkpoint compatibility outcomes, and control-plane read failures.\n- Use the `Observability Checklist (runbook)` dashboard link when `BioETLControlPlaneReadFailureRate` or related aggregate signals require operator follow-up.\n",
             "mode": "markdown"

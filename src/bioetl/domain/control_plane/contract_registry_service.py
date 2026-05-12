@@ -64,6 +64,9 @@ class ContractRegistry:
                 "identity": {
                     "contract_version": entry.identity.contract_version,
                     "schema_hash": entry.identity.schema_hash,
+                    "normalization_profile_ref": entry.identity.normalization_profile_ref,
+                    "normalization_profile_version": entry.identity.normalization_profile_version,
+                    "normalization_profile_hash": entry.identity.normalization_profile_hash,
                 },
                 "status": entry.status.value,
                 "supported_versions": sorted(entry.supported_versions),

@@ -156,10 +156,15 @@ def test_merge_and_column_group_validation_paths() -> None:
             "conflict_resolution": "coalesce",
             "output": {"silver": "silver/path", "gold": "gold/path"},
             "sort_by": {"silver": ["entity_id"], "gold": ["entity_id"]},
+            "normalization_compatibility_overrides": {"title": "reviewed bridge"},
             "column_groups": [{"name": "ids", "fields": ["doi"]}],
         }
     )
     assert merge.to_domain().output_silver_path == "silver/path"
+    assert (
+        merge.to_domain().normalization_compatibility_overrides["title"]
+        == "reviewed bridge"
+    )
 
 
 def test_dq_and_execution_schema_to_domain_paths() -> None:
