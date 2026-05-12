@@ -7,9 +7,6 @@ from dataclasses import dataclass
 from bioetl.application.services.control_plane._run_manifest_diagnostics_artifact_support import (
     build_produced_artifact_trace as _build_produced_artifact_trace,
 )
-from bioetl.application.services.control_plane._run_manifest_diagnostics_persistence import (
-    build_lineage_closure_boundary,
-)
 from bioetl.application.services.control_plane._run_manifest_diagnostics_base_helpers import (
     _build_code_provenance_state,
     _build_planned_artifact_refs,
@@ -17,20 +14,26 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_base_he
     _resolve_snapshot_status,
     _resolve_source_posture,
 )
+from bioetl.application.services.control_plane._run_manifest_diagnostics_persistence import (
+    build_lineage_closure_boundary,
+)
 from bioetl.application.services.control_plane._run_manifest_diagnostics_replay import (
     _assess_manifest_reproducibility_policy,
     _build_replay_parentage,
     _build_resume_contract,
+    _resolve_broader_historical_exact_replay_state,
     _resolve_continuation_mode,
     _resolve_exact_replay_blockers,
     _resolve_exact_replay_support_boundary,
-    _resolve_broader_historical_exact_replay_state,
     _resolve_historical_live_run_upgrade_state,
     _resolve_manifest_replay_readiness_verdict,
     _resolve_replay_capability_reason,
     _resolve_replay_family_contract,
     _resolve_replay_mode,
     _resolve_replay_occurrence_kind,
+)
+from bioetl.application.services.control_plane._run_manifest_diagnostics_replay_helpers import (
+    _collect_append_mode_semantic_sinks,
 )
 from bioetl.application.services.control_plane._run_manifest_diagnostics_snapshot_support import (
     collect_input_snapshot_content_hashes as _collect_input_snapshot_content_hashes,

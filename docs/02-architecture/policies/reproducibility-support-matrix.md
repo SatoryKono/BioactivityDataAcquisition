@@ -15,6 +15,9 @@
 > require certified immutable source snapshot backfill; historical composite
 > runs require certified source lineage before composite replay-envelope
 > certification.
+> Replay-supported families are also protected by a no-new-uncertifiable-runs
+> evidence floor so lifecycle cleanup does not delete retained replay evidence
+> before that broader historical tranche can be exercised.
 
 | Family | Context | Support State | Strict Exact Replay | Post-Capture Parent | Parent Boundary | Historical Upgrade Policy | Historical Upgrade Boundary | Broader Scope Policy | Broader Scope Boundary | Required Profile | Snapshot Requirement | Lineage Closure | Contract | Blocker Reason | Diagnostics |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |

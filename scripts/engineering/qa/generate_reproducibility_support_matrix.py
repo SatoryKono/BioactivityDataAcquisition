@@ -41,6 +41,9 @@ _HEADER = """# Reproducibility Support Matrix (Auto-Generated)
 > require certified immutable source snapshot backfill; historical composite
 > runs require certified source lineage before composite replay-envelope
 > certification.
+> Replay-supported families are also protected by a no-new-uncertifiable-runs
+> evidence floor so lifecycle cleanup does not delete retained replay evidence
+> before that broader historical tranche can be exercised.
 
 """
 

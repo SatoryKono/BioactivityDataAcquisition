@@ -9,7 +9,7 @@ def test_get_health_server_dependencies_delegates_to_services_seam() -> None:
     expected_dependencies = MagicMock(name="HealthServerDependencies")
     with (
         patch(
-            "bioetl.composition._services.get_health_server_dependencies",
+            "bioetl.composition.health_api.get_health_server_dependencies",
             return_value=expected_dependencies,
         ) as mock_impl,
         patch("bioetl.composition.health_api.import_module") as mock_import_module,
@@ -26,7 +26,7 @@ def test_get_quarantine_port_delegates_to_services_seam() -> None:
 
     with (
         patch(
-            "bioetl.composition._services.get_quarantine_port",
+            "bioetl.composition.health_api.get_quarantine_port",
             return_value=expected_port,
         ) as mock_impl,
         patch("bioetl.composition.health_api.import_module") as mock_import_module,
@@ -43,7 +43,7 @@ def test_get_quarantine_service_delegates_to_services_seam() -> None:
 
     with (
         patch(
-            "bioetl.composition._services.get_quarantine_service",
+            "bioetl.composition.health_api.get_quarantine_service",
             return_value=expected_service,
         ) as mock_impl,
         patch("bioetl.composition.health_api.import_module") as mock_import_module,

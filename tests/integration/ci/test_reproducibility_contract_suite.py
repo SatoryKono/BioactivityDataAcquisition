@@ -29,6 +29,10 @@ from bioetl.application.services.control_plane.historical_replay_certification_s
     HistoricalReplayCertificationService,
     HistoricalReplaySnapshotCertification,
 )
+from bioetl.application.services.control_plane.historical_replay_corpus_service import (
+    HistoricalReplayBulkCertificationSpec,
+    HistoricalReplayCorpusService,
+)
 from bioetl.application.services.control_plane.run_manifest_diagnostics import (
     build_diagnostics_summary,
 )
@@ -237,6 +241,103 @@ def _make_manifest(
         if not input_snapshots
         else ReplayCapability.EXACT_REPLAY_SUPPORTED
     )
+
+
+def test_historical_replay_corpus_inventory_and_bulk_certification() -> None:
+    source_manifest = _make_manifest(
+        manifest_id="historical-source-manifest",
+        run_id=RunID(uuid4()),
+        execution_fingerprint="historical-source-fingerprint",
+        identity=_ManifestIdentity(
+            pipeline_name="pubmed_publication",
+            provider="pubmed",
+            entity="publication",
+            contract_ref="pubmed.publication",
+        ),
+        execution_context="source",
+    )
+    composite_manifest = _make_manifest(
+        manifest_id="historical-composite-manifest",
+        run_id=RunID(uuid4()),
+        execution_fingerprint="historical-composite-fingerprint",
+        identity=_ManifestIdentity(
+            pipeline_name="composite_publication",
+            provider="composite",
+            entity="publication",
+            contract_ref="composite.publication",
+        ),
+        execution_context="composite",
+    )
+    composite_manifest = replace(
+        composite_manifest,
+        source_refs=(
+            RunSourceRef(
+                provider="pubmed",
+                entity="publication",
+                pipeline_name="pubmed_publication",
+            ),
+        ),
+    )
+    manifest_store = _InMemoryRunManifestStore()
+    manifest_store.save(source_manifest)
+    manifest_store.save(composite_manifest)
+    ledger_store = _InMemoryRunLedgerStore()
+    service = HistoricalReplayCorpusService(
+        manifest_port=manifest_store,
+        ledger_port=ledger_store,
+    )
+
+    inventory_before = service.build_certifiability_inventory()
+
+    assert inventory_before.awaiting_source_certification_count == 1
+    assert inventory_before.awaiting_composite_lineage_count == 1
+
+    result = service.certify_retained_corpus(
+        specs=(
+            HistoricalReplayBulkCertificationSpec(
+                manifest_id=composite_manifest.manifest_id,
+                certifications=(
+                    HistoricalReplaySnapshotCertification(
+                        provider="pubmed",
+                        entity="publication",
+                        pipeline_name="pubmed_publication",
+                        snapshot_id="snapshot-certified-composite-1",
+                        content_hash="sha256:composite-certified-1",
+                        immutable_uri="file:///historical/composite/snapshot-1.jsonl",
+                        bronze_batch_ref=(
+                            "bronze://historical/composite/batch-1.jsonl"
+                        ),
+                        certification_artifact_ref=(
+                            "control://historical/composite-certification-1.json"
+                        ),
+                        upstream_run_id=str(source_manifest.run_id),
+                        upstream_manifest_id=source_manifest.manifest_id,
+                    ),
+                ),
+            ),
+            HistoricalReplayBulkCertificationSpec(
+                manifest_id=source_manifest.manifest_id,
+                certifications=(
+                    HistoricalReplaySnapshotCertification(
+                        provider="pubmed",
+                        entity="publication",
+                        pipeline_name="pubmed_publication",
+                        snapshot_id="snapshot-certified-source-1",
+                        content_hash="sha256:source-certified-1",
+                        immutable_uri="file:///historical/source/snapshot-1.jsonl",
+                        bronze_batch_ref="bronze://historical/source/batch-1.jsonl",
+                        certification_artifact_ref=(
+                            "control://historical/source-certification-1.json"
+                        ),
+                    ),
+                ),
+            ),
+        )
+    )
+
+    assert result.completed_count == 2
+    assert result.inventory_after.certified_count == 2
+    assert result.inventory_after.remaining_uncertified_count == 0
     return RunManifest(
         manifest_id=manifest_id,
         execution_fingerprint=execution_fingerprint,

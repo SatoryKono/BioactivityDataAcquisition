@@ -143,6 +143,11 @@ Protected-reference rules are fail-closed:
   `required_persistence_profile=forensic_grade` retain their replay evidence
   floor unless `ControlPlaneArtifactLifecyclePolicy.allow_profile_floor_violation`
   is explicitly enabled;
+- stale manifests whose published family profile advertises
+  `broader_historical_exact_replay_policy=certified_historical_exact_replay_tranche_supported`
+  also retain their replay evidence floor so no new retained run can age into
+  an uncertifiable historical state merely because lifecycle cleanup deleted its
+  immutable replay evidence before certification or later child replay;
 - checkpoints inside the retention window protect their `run_id`,
   `manifest_id`, and `effective_config_artifact_id` anchors;
 - explicit protected manifest/run/effective-config/lineage/snapshot identifiers
@@ -160,6 +165,19 @@ Protected-reference rules are fail-closed:
   `reason=reproducibility_evidence_floor` with `protected_by` entries prefixed
   by `evidence_floor:` so dry-run/apply output distinguishes replay evidence
   violations from ordinary protected references.
+
+Certified historical replay is therefore bounded but operationalized:
+
+- `bioetl run-manifest inventory` emits a retained-corpus certifiability
+  inventory so operators can see which manifests are already replayable,
+  already certified, awaiting source snapshot certification, or awaiting
+  certified source lineage;
+- `bioetl run-manifest certify-historical-bulk <plan.json>` applies a
+  deterministic source-first certification pass across retained manifests using
+  explicit immutable snapshot evidence from the provided plan;
+- bulk certification never mutates manifests in place; it appends new
+  `input_snapshot_published` ledger evidence and then re-derives diagnostics
+  from the same append-only control-plane surfaces.
 
 Lifecycle planning is intentionally independent from read APIs: expired
 unprotected files can be selected for deletion even if higher-level lookup

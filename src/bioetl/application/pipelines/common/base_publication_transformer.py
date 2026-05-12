@@ -15,7 +15,6 @@ Reduces code duplication by extracting shared logic:
 from __future__ import annotations
 
 import xml.etree.ElementTree
-
 from dataclasses import dataclass
 from functools import partial
 from typing import TYPE_CHECKING, Any, cast

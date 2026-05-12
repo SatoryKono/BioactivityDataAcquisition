@@ -199,6 +199,48 @@ def test_file_store_emits_manifest_read_metric_on_get_failure(tmp_path) -> None:
     metrics.observe_histogram.assert_called_once()
 
 
+def test_file_store_lists_all_manifests_in_deterministic_order(tmp_path) -> None:
+    store = FileRunManifestStore(base_path=tmp_path / "run_manifest")
+    older = RunManifest(
+        manifest_id="manifest-b",
+        execution_fingerprint="fingerprint-b",
+        schema_version="1.0",
+        created_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
+        run_id=RunID(uuid4()),
+        run_type=RunType.INCREMENTAL,
+        pipeline_name="chembl_activity",
+        provider="chembl",
+        entity="activity",
+        launch_context={},
+        runtime_config={},
+        resolved_config={},
+        code_provenance=RunCodeProvenance(),
+    )
+    newer = RunManifest(
+        manifest_id="manifest-a",
+        execution_fingerprint="fingerprint-a",
+        schema_version="1.0",
+        created_at=datetime(2026, 1, 2, 12, 0, tzinfo=UTC),
+        run_id=RunID(uuid4()),
+        run_type=RunType.INCREMENTAL,
+        pipeline_name="chembl_activity",
+        provider="chembl",
+        entity="activity",
+        launch_context={},
+        runtime_config={},
+        resolved_config={},
+        code_provenance=RunCodeProvenance(),
+    )
+
+    store.save(newer)
+    store.save(older)
+
+    assert tuple(manifest.manifest_id for manifest in store.list_all()) == (
+        "manifest-b",
+        "manifest-a",
+    )
+
+
 def test_file_store_rolls_back_manifest_when_run_index_write_fails(
     tmp_path,
     monkeypatch: pytest.MonkeyPatch,

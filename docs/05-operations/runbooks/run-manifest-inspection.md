@@ -201,6 +201,35 @@ Historical live-run upgrade interpretation:
 - `broader_historical_exact_replay_state=historical_composite_replay_certified`
   means a historical composite run gained certified replay-envelope evidence
   from already certified source lineage.
+- stale replay-supported families are protected by a no-new-uncertifiable-runs
+  evidence floor during control-plane lifecycle cleanup; retained immutable
+  snapshot evidence must not be deleted before the run is either already
+  replayable or explicitly certified.
+
+Retained corpus triage and certification:
+
+```bash
+bioetl run-manifest inventory
+bioetl run-manifest inventory --format json
+bioetl run-manifest certify-historical-bulk path/to/plan.json --format json
+```
+
+Interpretation:
+
+- `inventory` emits a corpus-wide certifiability report with counts for already
+  certified runs, already replayable runs, runs awaiting historical source
+  snapshot certification, runs awaiting certified composite lineage, and
+  remaining operator-review cases.
+- `certify-historical-bulk` consumes a JSON object with a top-level `specs`
+  list. Each item must declare `manifest_id` plus one or more immutable snapshot
+  certification entries.
+- bulk certification is deterministic and source-first: source manifests are
+  certified before composite manifests so composite lineage checks see the
+  updated certified parent state in the same pass.
+- successful certification appends new `input_snapshot_published` ledger events
+  and reclassifies runs into
+  `historical_source_replay_certified_parent` or
+  `historical_composite_replay_certified_parent`.
 
 ### 4. Inspect storage layout directly when needed
 
