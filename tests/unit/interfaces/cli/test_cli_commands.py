@@ -1256,7 +1256,9 @@ class TestMapStatusToExitCode:
 
     def test_success_status(self):
         """Test SUCCESS status maps to OK."""
-        from bioetl.application.services import PipelineRunResult
+        from bioetl.application.services.execution.pipeline_runner_models import (
+            PipelineRunResult,
+        )
         from bioetl.interfaces.cli.commands.run import _map_status_to_exit_code
         from bioetl.interfaces.cli.exit_codes import ExitCode
 
@@ -1266,7 +1268,9 @@ class TestMapStatusToExitCode:
 
     def test_dry_run_status(self):
         """Test DRY_RUN status maps to OK."""
-        from bioetl.application.services import PipelineRunResult
+        from bioetl.application.services.execution.pipeline_runner_models import (
+            PipelineRunResult,
+        )
         from bioetl.interfaces.cli.commands.run import _map_status_to_exit_code
         from bioetl.interfaces.cli.exit_codes import ExitCode
 
@@ -1276,7 +1280,9 @@ class TestMapStatusToExitCode:
 
     def test_shutdown_status(self):
         """Test SHUTDOWN status maps to SIGINT."""
-        from bioetl.application.services import PipelineRunResult
+        from bioetl.application.services.execution.pipeline_runner_models import (
+            PipelineRunResult,
+        )
         from bioetl.interfaces.cli.commands.run import _map_status_to_exit_code
         from bioetl.interfaces.cli.exit_codes import ExitCode
 
@@ -1286,7 +1292,9 @@ class TestMapStatusToExitCode:
 
     def test_failed_with_value_error(self):
         """Test FAILED with ValueError maps to CONFIG_ERROR."""
-        from bioetl.application.services import PipelineRunResult
+        from bioetl.application.services.execution.pipeline_runner_models import (
+            PipelineRunResult,
+        )
         from bioetl.interfaces.cli.commands.run import _map_status_to_exit_code
         from bioetl.interfaces.cli.exit_codes import ExitCode
 
@@ -1296,7 +1304,9 @@ class TestMapStatusToExitCode:
 
     def test_failed_with_data_quality_error(self):
         """Test FAILED with DataQualityError maps to DATA_QUALITY_ERROR."""
-        from bioetl.application.services import PipelineRunResult
+        from bioetl.application.services.execution.pipeline_runner_models import (
+            PipelineRunResult,
+        )
         from bioetl.interfaces.cli.commands.run import _map_status_to_exit_code
         from bioetl.interfaces.cli.exit_codes import ExitCode
 
@@ -1306,7 +1316,9 @@ class TestMapStatusToExitCode:
 
     def test_failed_with_lock_error(self):
         """Test FAILED with LockAcquisitionError maps to LOCK_ERROR."""
-        from bioetl.application.services import PipelineRunResult
+        from bioetl.application.services.execution.pipeline_runner_models import (
+            PipelineRunResult,
+        )
         from bioetl.interfaces.cli.commands.run import _map_status_to_exit_code
         from bioetl.interfaces.cli.exit_codes import ExitCode
 
@@ -1318,7 +1330,9 @@ class TestMapStatusToExitCode:
 
     def test_failed_with_network_error(self):
         """Test FAILED with NetworkError maps to NETWORK_ERROR."""
-        from bioetl.application.services import PipelineRunResult
+        from bioetl.application.services.execution.pipeline_runner_models import (
+            PipelineRunResult,
+        )
         from bioetl.interfaces.cli.commands.run import _map_status_to_exit_code
         from bioetl.interfaces.cli.exit_codes import ExitCode
 
@@ -1328,7 +1342,9 @@ class TestMapStatusToExitCode:
 
     def test_failed_with_unknown_error(self):
         """Test FAILED with unknown error type maps to PIPELINE_ERROR."""
-        from bioetl.application.services import PipelineRunResult
+        from bioetl.application.services.execution.pipeline_runner_models import (
+            PipelineRunResult,
+        )
         from bioetl.interfaces.cli.commands.run import _map_status_to_exit_code
         from bioetl.interfaces.cli.exit_codes import ExitCode
 
@@ -1338,7 +1354,9 @@ class TestMapStatusToExitCode:
 
     def test_failed_without_error_type(self):
         """Test FAILED without error type maps to PIPELINE_ERROR."""
-        from bioetl.application.services import PipelineRunResult
+        from bioetl.application.services.execution.pipeline_runner_models import (
+            PipelineRunResult,
+        )
         from bioetl.interfaces.cli.commands.run import _map_status_to_exit_code
         from bioetl.interfaces.cli.exit_codes import ExitCode
 
@@ -1352,7 +1370,10 @@ def test_run_prepared_request_async_uses_compat_runtime_path():
     """Prepared CLI request should still delegate through _run_pipeline_async."""
     import asyncio
 
-    from bioetl.application.services import PipelineRunResult, RunResult
+    from bioetl.application.services.execution.pipeline_runner_models import (
+        PipelineRunResult,
+        RunResult,
+    )
     from bioetl.application.services.cli_run_orchestration_models import (
         RunExecutionRequest,
     )
@@ -1492,7 +1513,10 @@ def test_execute_run_uses_canonical_runtime_callable_builder() -> None:
 @pytest.mark.unit
 def test_finalize_run_result_presents_and_exits() -> None:
     """CLI finalizer should render output before terminating with mapped exit code."""
-    from bioetl.application.services import PipelineRunResult, RunResult
+    from bioetl.application.services.execution.pipeline_runner_models import (
+        PipelineRunResult,
+        RunResult,
+    )
     from bioetl.interfaces.cli.commands import run as run_module
     from bioetl.interfaces.cli.exit_codes import ExitCode
 
@@ -1725,7 +1749,9 @@ class TestRunCommandExceptionHandlers:
 
     def test_run_pipeline_not_found(self, cli_runner):
         """Test run command handles PipelineNotFoundError."""
-        from bioetl.application.services import PipelineNotFoundError
+        from bioetl.application.services.execution.pipeline_runner_models import (
+            PipelineNotFoundError,
+        )
 
         mock_service = MagicMock()
         mock_service.run = AsyncMock(

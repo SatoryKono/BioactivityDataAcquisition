@@ -9,7 +9,10 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from bioetl.application.services import PipelineRunResult, RunResult
+from bioetl.application.services.execution.pipeline_runner_models import (
+    PipelineRunResult,
+    RunResult,
+)
 from bioetl.application.services.cli_run_orchestration_contracts import (
     MetricsFlushCallable as CanonicalMetricsFlushCallable,
     RunCoroutineCallable as CanonicalRunCoroutineCallable,

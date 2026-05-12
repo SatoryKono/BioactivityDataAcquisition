@@ -33,7 +33,7 @@ flowchart TB
         subgraph DataPorts["Data Ports"]
             DSP["DataSourcePort<br/>• fetch() → AsyncIterator<br/>• health_check() → HealthStatus<br/>"]
             FDSP["FilterableDataSourcePort<br/>• fetch_filtered()<br/><br/>"]
-            SP["StoragePort<br/>• write_bronze()<br/>• write_silver()<br/>• write_gold()"]
+            SP["Bronze/Silver/GoldStoragePorts<br/>• layer-specific write/cleanup ops<br/>• merged output uses MergedStoragePort<br/>"]
             DRP["DeltaReaderPort<br/>• read_table()<br/>• get_schema()<br/>"]
         end
 

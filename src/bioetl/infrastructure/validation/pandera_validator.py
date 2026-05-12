@@ -206,9 +206,7 @@ class BasePanderaValidator:
                         if getattr(column, "nullable", False):
                             df_to_validate[name] = None
             df_to_validate = self._normalize_nullable_integer_columns(df_to_validate)
-            df_to_validate = self._normalize_nullable_boolean_columns(
-                df_to_validate
-            )
+            df_to_validate = self._normalize_nullable_boolean_columns(df_to_validate)
             df_to_validate = self._reorder_to_schema(df_to_validate)
             self._schema.validate(df_to_validate, lazy=True)
             return ValidationResult(valid=True)

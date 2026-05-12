@@ -8,13 +8,13 @@ author_orcids,MISSING,MISSING,MISSING,transformer.py:221,MISSING (inherited base
 authors,§3.2,MISSING,MISSING,transformer.py:190,MISSING (inherited base),publications.py:175,/works/,string,true,false,OK
 citations_made,§3.2,MISSING,MISSING,transformer.py:202,MISSING (inherited base),publications.py:199,/works/,number,true,false,OK
 citations_received,§3.2,MISSING,MISSING,transformer.py:201,MISSING (inherited base),publications.py:198,/works/,number,true,false,OK
-content_domain_crossmark_restriction,MISSING,MISSING,MISSING,MISSING,crossref.py:183,publications.py:206,/works/,boolean,true,false,MISSING_DOC MISSING_TRANSFORMER
-content_domain_domains,MISSING,MISSING,MISSING,MISSING,crossref.py:182,publications.py:205,/works/,object,true,false,MISSING_DOC MISSING_TRANSFORMER
+content_domain_crossmark_restriction,MISSING,MISSING,MISSING,_publication_field_extractors.py:83,crossref.py:183,publications.py:206,/works/,boolean,true,false,MISSING_DOC
+content_domain_domains,MISSING,MISSING,MISSING,_publication_field_extractors.py:82,crossref.py:182,publications.py:205,/works/,object,true,false,MISSING_DOC
 is_oa,MISSING,MISSING,MISSING,transformer.py:208,MISSING (inherited base),MISSING,/works/,boolean,true,false,MISSING_DOC
 issn,§3.2,MISSING,MISSING,MISSING,crossref.py:160,publications.py:177,/works/,string,true,false,OK
-issn_electronic,MISSING,MISSING,MISSING,MISSING,crossref.py:196,publications.py:221,/works/,string,true,false,MISSING_DOC MISSING_TRANSFORMER
-issn_list,MISSING,MISSING,MISSING,MISSING,MISSING,publications.py:178,/works/,string,true,false,MISSING_DOC MISSING_TRANSFORMER MISSING_ENTITY
-issn_print,MISSING,MISSING,MISSING,MISSING,crossref.py:195,publications.py:220,/works/,string,true,false,MISSING_DOC MISSING_TRANSFORMER
+issn_electronic,MISSING,MISSING,MISSING,_publication_field_extractors.py:113,crossref.py:196,publications.py:221,/works/,string,true,false,MISSING_DOC
+issn_list,MISSING,MISSING,MISSING,_publication_field_extractors.py:34,crossref.py:160,publications.py:178,/works/,string,true,false,MISSING_DOC
+issn_print,MISSING,MISSING,MISSING,_publication_field_extractors.py:112,crossref.py:195,publications.py:220,/works/,string,true,false,MISSING_DOC
 journal,§3.2,MISSING,MISSING,MISSING,MISSING (inherited base),publications.py:176,/works/,string,true,false,OK
 journal_name_short,MISSING,MISSING,MISSING,transformer.py:214,crossref.py:192,publications.py:217,/works/,string,true,false,MISSING_DOC
 language,§3.2,MISSING,MISSING,transformer.py:203,MISSING (inherited base),publications.py:200,/works/,string,true,false,OK
@@ -25,8 +25,8 @@ publication_date,§3.2,MISSING,MISSING,transformer.py:198,MISSING (inherited bas
 publication_type,§3.2,MISSING,MISSING,transformer.py:199,MISSING (inherited base),publications.py:195,/works/,string,true,false,OK
 publication_year,§3.2,MISSING,MISSING,transformer.py:195,MISSING (inherited base),publications.py:186,/works/,number,true,false,OK
 published,MISSING,MISSING,MISSING,transformer.py:217,crossref.py:189,publications.py:214,/works/,string,true,false,MISSING_DOC
-published_online,MISSING,MISSING,MISSING,MISSING,crossref.py:169,publications.py:191,/works/,string,true,false,MISSING_DOC MISSING_TRANSFORMER
-published_print,MISSING,MISSING,MISSING,MISSING,crossref.py:168,publications.py:190,/works/,string,true,false,MISSING_DOC MISSING_TRANSFORMER
+published_online,MISSING,MISSING,MISSING,_publication_field_extractors.py:65,crossref.py:169,publications.py:191,/works/,string,true,false,MISSING_DOC
+published_print,MISSING,MISSING,MISSING,_publication_field_extractors.py:60,crossref.py:168,publications.py:190,/works/,string,true,false,MISSING_DOC
 publisher,§3.2,MISSING,MISSING,MISSING,MISSING (inherited base),publications.py:179,/works/,string,true,false,OK
 references,MISSING,MISSING,MISSING,transformer.py:223,MISSING,publications.py:231,/works/,string,true,false,MISSING_DOC
 subject_keywords,§3.2,MISSING,MISSING,transformer.py:205,crossref.py:177,publications.py:202,/works/,object,true,false,OK

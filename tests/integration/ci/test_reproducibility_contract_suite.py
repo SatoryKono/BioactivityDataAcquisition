@@ -25,6 +25,10 @@ from bioetl.application.services.checkpoint_compatibility_service import (
 from bioetl.application.services.control_plane.forensic_diff_service import (
     ForensicRunDiffService,
 )
+from bioetl.application.services.control_plane.historical_replay_certification_service import (
+    HistoricalReplayCertificationService,
+    HistoricalReplaySnapshotCertification,
+)
 from bioetl.application.services.control_plane.run_manifest_diagnostics import (
     build_diagnostics_summary,
 )
@@ -292,6 +296,209 @@ def _make_manifest(
     )
 
 
+def test_reproducibility_contract_historical_source_certification_promotes_certified_tranche() -> (
+    None
+):
+    manifest = _make_manifest(
+        manifest_id="historical-source-manifest",
+        run_id=RunID(UUID("00000000-0000-0000-0000-000000000701")),
+        execution_fingerprint="historical-source-fingerprint",
+        input_snapshots=(),
+        required_persistence_profile="degraded_observable",
+        exact_replay=False,
+    )
+    manifest_store = _InMemoryRunManifestStore()
+    manifest_store.save(manifest)
+    ledger_store = _InMemoryRunLedgerStore()
+    certification_service = HistoricalReplayCertificationService(
+        manifest_port=manifest_store,
+        ledger_port=ledger_store,
+    )
+
+    result = certification_service.certify_historical_source_run(
+        manifest_id=manifest.manifest_id,
+        certifications=(
+            HistoricalReplaySnapshotCertification(
+                provider=manifest.provider,
+                entity=manifest.entity,
+                pipeline_name=manifest.pipeline_name,
+                snapshot_id="historical-source-snapshot-1",
+                content_hash="sha256:historical-source-snapshot-1",
+                immutable_uri="file:///historical/source/snapshot-1.jsonl",
+                bronze_batch_ref="bronze://historical/source/batch-1.jsonl",
+                certification_artifact_ref=(
+                    "control://historical/source-certification-1.json"
+                ),
+            ),
+        ),
+    )
+
+    diagnostics = build_diagnostics_summary(
+        manifest,
+        tuple(ledger_store.list_entries(manifest.manifest_id)),
+    )
+
+    assert result.replay_occurrence_kind == "historical_source_replay_certified_parent"
+    assert (
+        result.broader_historical_exact_replay_state
+        == "historical_source_replay_certified"
+    )
+    assert diagnostics["replay_occurrence_kind"] == (
+        "historical_source_replay_certified_parent"
+    )
+    assert diagnostics["broader_historical_exact_replay_policy"] == (
+        "certified_historical_exact_replay_tranche_supported"
+    )
+    assert diagnostics["broader_historical_exact_replay_boundary"] == (
+        "historical_source_snapshot_certification"
+    )
+    assert diagnostics["broader_historical_exact_replay_state"] == (
+        "historical_source_replay_certified"
+    )
+
+
+def test_reproducibility_contract_historical_composite_certification_requires_certified_source_lineage() -> (
+    None
+):
+    source_manifest = _make_manifest(
+        manifest_id="historical-composite-upstream-manifest",
+        run_id=RunID(UUID("00000000-0000-0000-0000-000000000702")),
+        execution_fingerprint="historical-composite-upstream-fingerprint",
+        input_snapshots=(),
+        required_persistence_profile="degraded_observable",
+        exact_replay=False,
+    )
+    composite_manifest = replace(
+        _make_manifest(
+            manifest_id="historical-composite-manifest",
+            run_id=RunID(UUID("00000000-0000-0000-0000-000000000703")),
+            execution_fingerprint="historical-composite-fingerprint",
+            input_snapshots=(),
+            required_persistence_profile="degraded_observable",
+            exact_replay=False,
+        ),
+        pipeline_name="composite_activity",
+        provider="composite",
+        entity="activity",
+        launch_context={
+            "limit": 25,
+            "exact_replay": False,
+            "execution_context": "composite",
+            "required_persistence_profile": "degraded_observable",
+        },
+        runtime_config={
+            "run_type": "incremental",
+            "limit": 25,
+            "exact_replay": False,
+            "execution_context": "composite",
+            "required_persistence_profile": "degraded_observable",
+        },
+        resolved_config={
+            "provider": "composite",
+            "entity": "activity",
+            "run_type": "incremental",
+            "required_persistence_profile": "degraded_observable",
+            "execution_context": "composite",
+        },
+        source_refs=(
+            RunSourceRef(
+                provider="chembl",
+                entity="activity",
+                pipeline_name="chembl_activity",
+                query=None,
+                input_snapshots=(),
+            ),
+        ),
+        code_provenance=RunCodeProvenance(
+            pipeline_version="1.0.0",
+            git_commit="f" * 40,
+            source_revision_state="clean",
+            dependency_lock_hash="d" * 64,
+            config_hash=_VALID_CONFIG_HASH,
+            resolved_config_hash=_VALID_CONFIG_HASH,
+            effective_config_hash=_VALID_CONFIG_HASH,
+            contract_ref="composite.activity",
+            contract_version="1.0.0",
+            contract_schema_hash="schema:composite.activity@1.0.0",
+            dq_policy_ref="dq.policy.composite_activity",
+            rule_bundle_version="bundle:composite.activity@1.0.0",
+            dq_contract_compatibility_hash="c" * 64,
+            effective_config_artifact_id="effective:composite.activity",
+        ),
+    )
+    manifest_store = _InMemoryRunManifestStore()
+    manifest_store.save(source_manifest)
+    manifest_store.save(composite_manifest)
+    ledger_store = _InMemoryRunLedgerStore()
+    certification_service = HistoricalReplayCertificationService(
+        manifest_port=manifest_store,
+        ledger_port=ledger_store,
+    )
+
+    certification_service.certify_historical_source_run(
+        manifest_id=source_manifest.manifest_id,
+        certifications=(
+            HistoricalReplaySnapshotCertification(
+                provider=source_manifest.provider,
+                entity=source_manifest.entity,
+                pipeline_name=source_manifest.pipeline_name,
+                snapshot_id="historical-composite-upstream-snapshot-1",
+                content_hash="sha256:historical-composite-upstream-snapshot-1",
+                immutable_uri="file:///historical/source/upstream-snapshot-1.jsonl",
+                bronze_batch_ref="bronze://historical/source/upstream-batch-1.jsonl",
+                certification_artifact_ref=(
+                    "control://historical/source-upstream-certification.json"
+                ),
+            ),
+        ),
+    )
+
+    result = certification_service.certify_historical_composite_run(
+        manifest_id=composite_manifest.manifest_id,
+        certifications=(
+            HistoricalReplaySnapshotCertification(
+                provider="chembl",
+                entity="activity",
+                pipeline_name="chembl_activity",
+                snapshot_id="historical-composite-snapshot-1",
+                content_hash="sha256:historical-composite-snapshot-1",
+                immutable_uri="file:///historical/composite/snapshot-1.jsonl",
+                bronze_batch_ref="bronze://historical/composite/batch-1.jsonl",
+                certification_artifact_ref=(
+                    "control://historical/composite-certification-1.json"
+                ),
+                upstream_run_id=str(source_manifest.run_id),
+                upstream_manifest_id=source_manifest.manifest_id,
+            ),
+        ),
+    )
+
+    diagnostics = build_diagnostics_summary(
+        composite_manifest,
+        tuple(ledger_store.list_entries(composite_manifest.manifest_id)),
+    )
+
+    assert result.replay_occurrence_kind == (
+        "historical_composite_replay_certified_parent"
+    )
+    assert (
+        result.broader_historical_exact_replay_state
+        == "historical_composite_replay_certified"
+    )
+    assert diagnostics["replay_occurrence_kind"] == (
+        "historical_composite_replay_certified_parent"
+    )
+    assert diagnostics["broader_historical_exact_replay_policy"] == (
+        "certified_historical_exact_replay_tranche_supported"
+    )
+    assert diagnostics["broader_historical_exact_replay_boundary"] == (
+        "historical_composite_certified_source_lineage"
+    )
+    assert diagnostics["broader_historical_exact_replay_state"] == (
+        "historical_composite_replay_certified"
+    )
+
+
 def _family_context(family: str) -> tuple[str, str, str]:
     provider, entity = family.split(".", maxsplit=1)
     return provider, entity, f"{provider}_{entity}"
@@ -507,12 +714,14 @@ def test_reproducibility_contract_live_capture_materialized_snapshot_parent_stat
     assert summary["input_snapshot_materialization_mode"] == (
         "live_capture_snapshot_materialized"
     )
-    assert summary["replay_family_contract"][
-        "post_capture_replayable_parent_supported"
-    ] is True
-    assert summary["replay_family_contract"][
-        "post_capture_replayable_parent_boundary"
-    ] == "ledger_materialized_live_capture_parent"
+    assert (
+        summary["replay_family_contract"]["post_capture_replayable_parent_supported"]
+        is True
+    )
+    assert (
+        summary["replay_family_contract"]["post_capture_replayable_parent_boundary"]
+        == "ledger_materialized_live_capture_parent"
+    )
 
 
 def test_reproducibility_contract_lineage_store_preserves_occurrence_history(
@@ -719,7 +928,13 @@ def test_reproducibility_contract_historical_live_runs_without_snapshot_evidence
         "input_snapshot_published_ledger_evidence"
     )
     assert summary["broader_historical_exact_replay_policy"] == (
-        "ratified_snapshot_backed_boundary_is_final_supported_scope"
+        "certified_historical_exact_replay_tranche_supported"
+    )
+    assert summary["broader_historical_exact_replay_boundary"] == (
+        "historical_source_snapshot_certification"
+    )
+    assert summary["broader_historical_exact_replay_state"] == (
+        "awaiting_historical_snapshot_certification"
     )
     assert summary["historical_live_run_upgrade_state"] == (
         "awaiting_input_snapshot_published_evidence"

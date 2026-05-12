@@ -60,7 +60,7 @@ graph TB
     end
 
     subgraph Domain["domain layer (pure, no I/O)"]
-        PORTS["Port Protocols<br/>(DataSourcePort, StoragePort,<br/>LockPort, MetricsPort, ...)"]:::size-md
+        PORTS["Port Protocols<br/>(DataSourcePort, Bronze/Silver/Gold/MergedStoragePorts,<br/>LockPort, MetricsPort, ...)"]:::size-md
         ENTITIES["Entities & Aggregates<br/>(Batch, PipelineRun,<br/>BaseEntity)"]:::size-md
         VO["Value Objects<br/>(BronzeWriteResult,<br/>SilverWriteResult, ...)"]:::size-md
         CFG["Configuration<br/>(PipelineConfig,<br/>RuntimeConfig, DQConfig)"]:::size-md

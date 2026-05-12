@@ -18,16 +18,13 @@ Config compatibility shapes are not implicit: accepted aliases, rejected
 retired forms, removal dates, and permanent rationales are governed by
 `configs/quality/config_compatibility_registry.yaml`.
 
-- pipeline `filter_batch_size`: transitional migration-only field and explicitly
-  deprecated; removal policy is tracked in
-  `configs/quality/config_compatibility_registry.yaml`
 - pipeline `page_size_override`: canonical pipeline-level pagination override
 - source `provider_config.batch_size/page_size/max_url_length/cursor_pagination`:
   retired source provider pagination aliases
 - source `batch_size`: retired source root alias
 - provider source `pagination.*`: canonical source pagination contract
-- source `api`, `client`, and `batch`: accepted migration aliases only while
-  registered in `configs/quality/config_compatibility_registry.yaml`
+- source `api`, `client`, and `batch`: retired migration aliases and rejected
+  by normalization before schema validation
 - composite `merge.column_groups_file`: retired legacy merge alias
 - composite `composite.version`: required composite schema field
 

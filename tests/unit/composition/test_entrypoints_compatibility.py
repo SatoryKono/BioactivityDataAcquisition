@@ -41,53 +41,23 @@ def test_entrypoints_all_is_execution_focused_budget() -> None:
 
 
 @pytest.mark.unit
-def test_entrypoints_legacy_symbol_budget_stays_frozen() -> None:
-    """Legacy compatibility lookup surface should stay intentionally bounded."""
+@pytest.mark.parametrize(
+    "removed_name",
+    (
+        "get_checkpoint_service",
+        "preview_cleanup",
+    ),
+)
+def test_entrypoints_legacy_service_and_resource_symbols_are_removed(
+    removed_name: str,
+) -> None:
+    """Legacy service/resource entrypoint shims should fail fast."""
     entrypoints = _reload_entrypoints_module()
 
-    assert len(entrypoints._LEGACY_SYMBOL_TARGETS) == 22
-    target_modules = {
-        value[0] if isinstance(value, tuple) else value
-        for value in entrypoints._LEGACY_SYMBOL_TARGETS.values()
-    }
-    assert target_modules == {
-        "bioetl.composition.resources_api",
-        "bioetl.composition.services_api",
-    }
-    assert set(entrypoints._LEGACY_SYMBOL_TARGETS.values()) == {
-        "bioetl.composition.resources_api",
-        "bioetl.composition.services_api",
-    }
-
-
-@pytest.mark.unit
-def test_entrypoints_legacy_service_symbol_warns_and_delegates() -> None:
-    """Legacy service symbol should resolve via services_api with deprecation warning."""
-    entrypoints = _reload_entrypoints_module()
-    from bioetl.composition import services_api
-
-    assert "get_checkpoint_service" not in entrypoints.__all__
-
-    with pytest.deprecated_call(
-        match=r"entrypoints\.get_checkpoint_service.*services_api"
-    ):
-        resolved = entrypoints.get_checkpoint_service
-
-    assert resolved is services_api.get_checkpoint_service
-
-
-@pytest.mark.unit
-def test_entrypoints_legacy_resource_symbol_warns_and_delegates() -> None:
-    """Legacy resource symbol should resolve via resources_api with warning."""
-    entrypoints = _reload_entrypoints_module()
-    from bioetl.composition import resources_api
-
-    assert "preview_cleanup" not in entrypoints.__all__
-
-    with pytest.deprecated_call(match=r"entrypoints\.preview_cleanup.*resources_api"):
-        resolved = entrypoints.preview_cleanup
-
-    assert resolved is resources_api.preview_cleanup
+    assert removed_name not in entrypoints.__all__
+    assert removed_name not in dir(entrypoints)
+    with pytest.raises(AttributeError):
+        getattr(entrypoints, removed_name)
 
 
 @pytest.mark.unit
@@ -104,7 +74,6 @@ def test_entrypoints_manager_aliases_are_removed_from_compatibility_surface(
     """Manager-style entrypoint aliases should not survive as official shims."""
     entrypoints = _reload_entrypoints_module()
 
-    assert removed_name not in entrypoints._LEGACY_SYMBOL_TARGETS
     assert removed_name not in dir(entrypoints)
     with pytest.raises(AttributeError):
         getattr(entrypoints, removed_name)

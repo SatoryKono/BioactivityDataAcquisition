@@ -4,7 +4,7 @@
 %% Title: Domain Layer Class Diagram
 %% Covers: RULES.md §1.1 (Domain Layer), §1.2 (Ports), §1.3 (Entities)
 %% Updated: 2026-02-17
-%% Components: DataSourcePort, StoragePort, LockPort, Activity, Molecule, Assay, Target, RunType, HealthStatus
+%% Components: DataSourcePort, BronzeStoragePort, SilverStoragePort, GoldStoragePort, MergedStoragePort, StorageLifecyclePort, LockPort, Activity, Molecule, Assay, Target, RunType, HealthStatus
 
 %% @version 1.0.0
 %% @date    2026-02-24
@@ -41,16 +41,37 @@ classDiagram
 
         }
 
-        class StoragePort {
+        class StorageLifecyclePort {
+            <<Protocol>>
+            +aclose() None
+            +health_check() bool
+        }
+
+        class BronzeStoragePort {
             <<Protocol>>
             +write_bronze(records, provider, entity) BronzeWriteResult
+            +cleanup_bronze(cutoff_date, dry_run) dict
+        }
+
+        class SilverStoragePort {
+            <<Protocol>>
             +write_silver(records, table, mode) WriteResult
-            +write_gold(records, table, schema) WriteResult
+            +read_silver(table, columns, limit) DataFrame
             +clear_silver(table) int
+        }
+
+        class GoldStoragePort {
+            <<Protocol>>
+            +write_gold(records, table, schema) WriteResult
             +clear_gold(table) int
+        }
+
+        class MergedStoragePort {
+            <<Protocol>>
+            +write_merged_silver(records, table) WriteResult
+            +write_merged_gold(records, table) WriteResult
             +vacuum(table, retention_days) None
             +archive(source, dest) None
-            +health_check() bool
         }
 
         class LockPort {

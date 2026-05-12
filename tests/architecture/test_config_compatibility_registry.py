@@ -49,8 +49,7 @@ REQUIRED_MARKERS = {
     SOURCE_NORMALIZER: {
         "_sync_timeout_aliases": "source.timeout_timeout_sec_alias",
         "_normalize_rate_limit": "source.rate_limit_with_api_key_alias",
-        "_normalize_source_endpoints": "source.api_section_to_provider_config",
-        "_apply_batch_to_pagination": "source.batch_to_provider_pagination",
+        "_RETIRED_SOURCE_ALIAS_SECTIONS": "source.retired_transport_alias_sections",
         "_RETIRED_PROVIDER_PAGINATION_KEYS": "source.retired_provider_pagination_aliases",
         "_RETIRED_SOURCE_ROOT_KEYS": "source.retired_root_batch_size_alias",
     },
@@ -59,12 +58,8 @@ REQUIRED_MARKERS = {
             "pipeline.inline_source_pagination_overrides_rejected"
         ),
     },
-    PIPELINE_SCHEMA: {
-        '"filter_batch_size"': "pipeline.filter_batch_size_deprecated_migration",
-    },
-    CONFIG_CI_CONTRACT: {
-        "TRANSITIONAL_PIPELINE_KEYS": "pipeline.filter_batch_size_deprecated_migration",
-    },
+    PIPELINE_SCHEMA: {},
+    CONFIG_CI_CONTRACT: {},
 }
 
 

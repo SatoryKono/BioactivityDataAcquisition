@@ -95,8 +95,8 @@ compatibility_debt_metrics:
   sunset_source: tests/architecture/test_compat_sunset.py
   metrics:
     retained_public_facade_count:
-      current_count: 19
-      max_count: 19
+      current_count: 17
+      max_count: 17
       owner: '@bioetl-architecture'
       linked_issue: '3354'
       rationale: Sanctioned public facades are retained compatibility obligations;
@@ -106,7 +106,7 @@ compatibility_debt_metrics:
         public-API consolidation PR updates the compatibility inventory.
       ratchet_schedule:
       - effective_on: '2026-04-30'
-        max_count: 19
+        max_count: 17
         milestone: freeze-baseline
       - effective_on: '2026-06-30'
         max_count: 15
@@ -214,7 +214,7 @@ hotspot_budgets:
     god_object: 1
 report_only_hotspot_families:
   snapshot_date: '2026-03-24'
-  mode: report-only
+  mode: fail-fast
   artifact_policy:
     duplication_command: make qa-hotspot-report
     baseline_artifact: reports/quality/hotspot-duplication-baseline.json
@@ -230,7 +230,7 @@ report_only_hotspot_families:
     owner: '@bioetl-architecture'
     linked_rf: RF-023
     ratchet_stage: active
-    ratchet_scope: duplication-only
+    ratchet_scope: duplication-plus-bounded-growth
     expected_action: Hold duplication at zero via an active family-level ratchet and
       cap both file-growth and fan-in at the reviewed baseline during core orchestration
       changes.
@@ -256,7 +256,7 @@ report_only_hotspot_families:
     owner: '@bioetl-platform'
     linked_rf: RF-023
     ratchet_stage: active
-    ratchet_scope: duplication-only
+    ratchet_scope: duplication-plus-bounded-growth
     expected_action: Hold duplication at zero via an active family-level ratchet and
       cap both file-growth and fan-in at the reviewed baseline during runtime/bootstrap
       changes.
@@ -281,7 +281,7 @@ report_only_hotspot_families:
     owner: '@bioetl-platform'
     linked_rf: RF-023
     ratchet_stage: active
-    ratchet_scope: duplication-only
+    ratchet_scope: duplication-plus-bounded-growth
     expected_action: Hold duplication at zero via an active family-level ratchet and
       cap both file-growth and fan-in at the reviewed baseline during pipeline-factory
       changes.

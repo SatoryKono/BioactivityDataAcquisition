@@ -14,9 +14,11 @@ import click
 import pytest
 from click.testing import CliRunner
 
-from bioetl.application.services import (
+from bioetl.application.services.execution.pipeline_runner_models import (
     PipelineRunResult,
     RunResult,
+)
+from bioetl.application.services.vacuum_service import (
     TableVacuumResult,
     VacuumAllResult,
 )
@@ -1080,7 +1082,11 @@ class TestRunAllPipelinesAsync:
     @pytest.mark.asyncio
     async def test_run_all_pipelines_handles_success(self):
         """Test _run_all_pipelines_async with successful run."""
-        from bioetl.application.services import RunOptions, RunResult, PipelineRunResult
+        from bioetl.application.services.execution.pipeline_runner_models import (
+            RunOptions,
+            RunResult,
+            PipelineRunResult,
+        )
         from bioetl.interfaces.cli.commands.run_all import _run_all_pipelines_async
 
         mock_service = MagicMock()
@@ -1108,7 +1114,11 @@ class TestRunAllPipelinesAsync:
     @pytest.mark.asyncio
     async def test_run_all_pipelines_handles_dry_run_status(self):
         """Test _run_all_pipelines_async with DRY_RUN status."""
-        from bioetl.application.services import RunOptions, RunResult, PipelineRunResult
+        from bioetl.application.services.execution.pipeline_runner_models import (
+            RunOptions,
+            RunResult,
+            PipelineRunResult,
+        )
         from bioetl.interfaces.cli.commands.run_all import _run_all_pipelines_async
 
         mock_service = MagicMock()
@@ -1135,7 +1145,11 @@ class TestRunAllPipelinesAsync:
     @pytest.mark.asyncio
     async def test_run_all_pipelines_handles_shutdown_status(self):
         """Test _run_all_pipelines_async stops on SHUTDOWN status."""
-        from bioetl.application.services import RunOptions, RunResult, PipelineRunResult
+        from bioetl.application.services.execution.pipeline_runner_models import (
+            RunOptions,
+            RunResult,
+            PipelineRunResult,
+        )
         from bioetl.interfaces.cli.commands.run_all import _run_all_pipelines_async
 
         mock_service = MagicMock()
@@ -1165,7 +1179,11 @@ class TestRunAllPipelinesAsync:
     @pytest.mark.asyncio
     async def test_run_all_pipelines_handles_failed_status(self):
         """Test _run_all_pipelines_async with FAILED status."""
-        from bioetl.application.services import RunOptions, RunResult, PipelineRunResult
+        from bioetl.application.services.execution.pipeline_runner_models import (
+            RunOptions,
+            RunResult,
+            PipelineRunResult,
+        )
         from bioetl.interfaces.cli.commands.run_all import _run_all_pipelines_async
 
         mock_service = MagicMock()
@@ -1193,7 +1211,10 @@ class TestRunAllPipelinesAsync:
     @pytest.mark.asyncio
     async def test_run_all_pipelines_handles_not_found_error(self):
         """Test _run_all_pipelines_async with PipelineNotFoundError."""
-        from bioetl.application.services import PipelineNotFoundError, RunOptions
+        from bioetl.application.services.execution.pipeline_runner_models import (
+            PipelineNotFoundError,
+            RunOptions,
+        )
         from bioetl.interfaces.cli.commands.run_all import _run_all_pipelines_async
 
         mock_service = MagicMock()
@@ -1215,7 +1236,9 @@ class TestRunAllPipelinesAsync:
     @pytest.mark.asyncio
     async def test_run_all_pipelines_handles_unexpected_exception(self):
         """Test _run_all_pipelines_async with unexpected exception."""
-        from bioetl.application.services import RunOptions
+        from bioetl.application.services.execution.pipeline_runner_models import (
+            RunOptions,
+        )
         from bioetl.interfaces.cli.commands.run_all import _run_all_pipelines_async
 
         mock_service = MagicMock()

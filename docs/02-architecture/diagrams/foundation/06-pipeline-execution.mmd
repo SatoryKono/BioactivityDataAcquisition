@@ -1,7 +1,7 @@
 %% Title: Pipeline Execution Sequence — Runner to Postrun
 %% Covers: application/core/{runner,batch_executor,batch_processing_service}.py, preflight/service.py, postrun/service.py
 %% Updated: 2026-03-24
-%% Components: CLI, build_pipeline_runner, PipelineRunner, PipelineService, LockCoordinator, PreflightService, MedallionLifecycleService, CheckpointManagerService, BatchExecutor, BatchProcessingService, BaseTransformer, StoragePort, PostrunService
+%% Components: CLI, build_pipeline_runner, PipelineRunner, PipelineService, LockRuntimeService, PreflightService, MedallionLifecycleService, CheckpointRuntimeService, BatchExecutor, BatchProcessingService, BaseTransformer, SilverStoragePort, GoldStoragePort, PostrunService
 
 %% @version 1.1.0
 %% @date    2026-03-24
@@ -16,14 +16,14 @@ sequenceDiagram
     participant Builder as build_pipeline_runner
     participant Runner as PipelineRunner
     participant Services as PipelineService
-    participant Lock as LockCoordinator
+    participant Lock as LockRuntimeService
     participant Preflight as PreflightService
     participant Lifecycle as MedallionLifecycleService
-    participant Checkpoint as CheckpointManagerService
+    participant Checkpoint as CheckpointRuntimeService
     participant Executor as BatchExecutor
     participant Processing as BatchProcessingService
     participant Transformer as BaseTransformer
-    participant Storage as StoragePort
+    participant Storage as SilverStoragePort / GoldStoragePort
     participant Postrun as PostrunService
 
     CLI->>Builder: create runner for pipeline/runtime

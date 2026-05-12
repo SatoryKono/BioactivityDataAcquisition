@@ -1439,22 +1439,6 @@
       "title": "Batch Size",
       "type": "integer"
     },
-    "filter_batch_size": {
-      "anyOf": [
-        {
-          "maximum": 5000,
-          "minimum": 1,
-          "type": "integer"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "default": null,
-      "deprecated": true,
-      "description": "Deprecated: use source pagination.id_batch_size instead. Batch size when input_filter is active. Overrides batch_size.",
-      "title": "Filter Batch Size"
-    },
     "page_size_override": {
       "anyOf": [
         {

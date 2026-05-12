@@ -90,7 +90,10 @@ class TestCliRunIncremental:
 
         Uses mocked service to verify CLI bootstrapping and execution flow.
         """
-        from bioetl.application.services import PipelineRunResult, RunResult
+        from bioetl.application.services.execution.pipeline_runner_models import (
+            PipelineRunResult,
+            RunResult,
+        )
 
         with patch(
             "bioetl.interfaces.cli.commands.run.asyncio.run"
@@ -118,7 +121,10 @@ class TestCliRunIncremental:
         temp_env: dict[str, str],
     ):
         """Test incremental run with --resume flag."""
-        from bioetl.application.services import PipelineRunResult, RunResult
+        from bioetl.application.services.execution.pipeline_runner_models import (
+            PipelineRunResult,
+            RunResult,
+        )
 
         with patch(
             "bioetl.interfaces.cli.commands.run.asyncio.run"
@@ -223,7 +229,9 @@ class TestCliRunTypes:
         temp_env: dict[str, str],
     ):
         """Test that -y skips confirmation for backfill."""
-        from bioetl.application.services import PipelineRunResult
+        from bioetl.application.services.execution.pipeline_runner_models import (
+            PipelineRunResult,
+        )
 
         with patch(
             "bioetl.interfaces.cli.commands.run.asyncio.run"

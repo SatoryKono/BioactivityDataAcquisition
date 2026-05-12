@@ -149,14 +149,6 @@ class PipelineYamlConfig(BaseModel):
         default=None, description="Human-readable pipeline description"
     )
     batch_size: int = Field(default=100, ge=1, le=5000)
-    filter_batch_size: int | None = Field(
-        default=None,
-        ge=1,
-        le=5000,
-        description="Deprecated: use source pagination.id_batch_size instead. "
-        "Batch size when input_filter is active. Overrides batch_size.",
-        deprecated=True,
-    )
     page_size_override: int | None = Field(
         default=None,
         ge=1,

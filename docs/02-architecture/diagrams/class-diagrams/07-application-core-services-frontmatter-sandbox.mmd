@@ -15,8 +15,8 @@ config:
 %% @uniform-group core    nodes=PipelineRunner,PipelineService,BatchExecutor
 %% @uniform-group batch   nodes=BatchTransformer,BatchWriter
 %% @uniform-group infra   nodes=BatchMemoryManagerService,BatchMetricsRecorderService,BatchTracingManagerService
-%% @uniform-group manager nodes=CheckpointManagerService,LockCoordinator
-%% @uniform-group support nodes=PreflightService,PostrunService,QuarantineManagerService,MedallionLifecycleService,PipelineObserver,ShutdownSignal,HeartbeatTask,ErrorClassifier
+%% @uniform-group manager nodes=CheckpointRuntimeService,LockRuntimeService
+%% @uniform-group support nodes=PreflightService,PostrunService,QuarantineRuntimeService,MedallionLifecycleService,PipelineObserver,ShutdownSignal,HeartbeatTask,ErrorClassifier
 
 %% @uniform-width group
 %% @uniform class width=592 groups=5 width_strategy=group
@@ -146,7 +146,7 @@ classDiagram
     }
 
     namespace Execution_Managers {
-        class CheckpointManagerService {
+        class CheckpointRuntimeService {
             -_checkpoint
             -_logger
             -_pipeline_name
@@ -158,7 +158,7 @@ classDiagram
             +list_all()
         }
 
-        class LockCoordinator {
+        class LockRuntimeService {
             -_lock
             -_run_id
             -_config
@@ -187,7 +187,7 @@ classDiagram
             +cleanup(tracer)
         }
 
-        class QuarantineManagerService {
+        class QuarantineRuntimeService {
             -_quarantine
             -_pipeline_name
             +quarantine_record(raw, error_type, batch_id, msg, ts)
@@ -225,8 +225,8 @@ classDiagram
 
     PipelineRunner *-- BatchExecutor
     PipelineRunner *-- PipelineService
-    PipelineRunner *-- CheckpointManagerService
-    PipelineRunner *-- LockCoordinator
+    PipelineRunner *-- CheckpointRuntimeService
+    PipelineRunner *-- LockRuntimeService
     PipelineRunner *-- PreflightService
     PipelineRunner *-- PostrunService
     PipelineRunner *-- MedallionLifecycleService
@@ -240,12 +240,12 @@ classDiagram
     BatchExecutor *-- BatchMetricsRecorderService
     BatchExecutor *-- BatchTracingManagerService
 
-    BatchTransformer ..> QuarantineManagerService
+    BatchTransformer ..> QuarantineRuntimeService
     BatchTransformer ..> BatchMetricsRecorderService
     BatchTransformer ..> ErrorClassifier
 
     BatchWriter ..> ErrorClassifier
-    LockCoordinator *-- HeartbeatTask
+    LockRuntimeService *-- HeartbeatTask
 
     style PipelineRunner fill:#eef2ff,stroke:#4f46e5,stroke-width:2px
     style PipelineService fill:#eff6ff,stroke:#2563eb,stroke-width:2px

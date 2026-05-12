@@ -33,13 +33,13 @@ graph TB
         LTYPE["FencingToken +<br/>LockNotHeldError"]:::size-lg
     end
 
-    subgraph AppLock["Application: LockCoordinator"]
-        LM["LockCoordinator<br/>lock + run_id + shutdown_signal<br/>acquire/release/validate"]:::size-lg
+    subgraph AppLock["Application: LockRuntimeService"]
+        LM["LockRuntimeService<br/>lock + run_id + shutdown_signal<br/>acquire/release/validate"]:::size-lg
         HB["HeartbeatTask<br/>━━━━━━━━━━━━━━━━━<br/>Background async task<br/>periodically calls<br/>lock.heartbeat()"]:::size-lg
     end
 
     subgraph AppCheckpoint["Application: Checkpoint Services"]
-        CM["CheckpointManagerService<br/>standard pipeline checkpoints"]:::size-lg
+        CM["CheckpointRuntimeService<br/>standard pipeline checkpoints"]:::size-lg
         CCS["CompositeCheckpointService<br/>thin facade for composite persistence"]:::size-lg
         CLOAD["CompositeCheckpointLoadService<br/>current run-id or latest matching<br/>checkpoint + stale resume guard"]:::size-lg
         CPERSIST["CompositeCheckpointPersistenceService<br/>atomic save/list/delete/orphan cleanup"]:::size-lg
@@ -64,7 +64,7 @@ graph TB
 
     subgraph CompositePath["Composite runtime caveat"]
         CPR["CompositePipelineRunnerService"]:::size-lg
-        NOTE["Composite path acquires LockPort directly<br/>and does not use LockCoordinator heartbeat"]:::size-lg
+        NOTE["Composite path acquires LockPort directly<br/>and does not use LockRuntimeService heartbeat"]:::size-lg
     end
 
     subgraph Lifecycle["Pipeline Lifecycle Integration"]

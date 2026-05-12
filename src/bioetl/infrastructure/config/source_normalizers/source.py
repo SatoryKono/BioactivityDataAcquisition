@@ -12,7 +12,6 @@ from bioetl.infrastructure.config_merge import config_merge
 
 _ENDPOINT_KEYS: tuple[str, ...] = ("base_url", "api_version")
 _AUTH_KEYS: tuple[str, ...] = ("auth_type", "api_key")
-_BATCH_KEYS: tuple[str, ...] = ("batch_size", "page_size", "max_url_length")
 _RETIRED_PROVIDER_PAGINATION_KEYS: tuple[str, ...] = (
     "batch_size",
     "page_size",
@@ -20,6 +19,7 @@ _RETIRED_PROVIDER_PAGINATION_KEYS: tuple[str, ...] = (
     "cursor_pagination",
 )
 _RETIRED_SOURCE_ROOT_KEYS: tuple[str, ...] = ("batch_size",)
+_RETIRED_SOURCE_ALIAS_SECTIONS: tuple[str, ...] = ("api", "client", "batch")
 
 
 def _deep_merge(
@@ -106,54 +106,6 @@ def _normalize_source_rate_limits(
     _normalize_health_check(source)
 
 
-def _normalize_source_endpoints(
-    source: JsonDict,  # Any: normalizer; input types vary
-    provider_config: JsonDict,  # Any: normalizer; input types vary
-    api: JsonDict,  # Any: normalizer; input types vary
-) -> None:
-    """Normalize endpoint/URL and client configuration."""
-    _copy_keys(api, provider_config, _ENDPOINT_KEYS)
-
-    if isinstance(provider_config.get("client"), dict):
-        client_norm = _get_dict_or_empty(source, "client")
-        legacy_client = _sync_timeout_aliases(provider_config["client"])
-        source["client"] = _deep_merge(legacy_client, client_norm)
-
-    client = source.pop("client", None)
-    if isinstance(client, dict):
-        existing = _get_dict_or_empty(provider_config, "client")
-        existing = _sync_timeout_aliases(existing) if existing else {}
-        provider_config["client"] = _deep_merge(existing, _sync_timeout_aliases(client))
-
-
-def _normalize_source_auth(
-    provider_config: JsonDict,  # Any: normalizer; input types vary
-    api: JsonDict,  # Any: normalizer; input types vary
-) -> None:
-    """Normalize authentication configuration."""
-    _copy_keys(api, provider_config, _AUTH_KEYS)
-
-
-def _apply_batch_to_pagination(
-    batch: JsonDict | int | None,  # Any: normalizer; input types vary
-    pagination: JsonDict,  # Any: normalizer; input types vary
-) -> None:
-    """Extract batch_size, page_size, max_url_length from legacy batch config."""
-    if isinstance(batch, dict):
-        if "batch_size" in batch:
-            pagination.setdefault("id_batch_size", batch["batch_size"])
-        elif "size" in batch:
-            pagination.setdefault("id_batch_size", batch["size"])
-        elif "api_batch_size" in batch:
-            pagination.setdefault("id_batch_size", batch["api_batch_size"])
-        if "page_size" in batch:
-            pagination.setdefault("page_size", batch["page_size"])
-        if "max_url_length" in batch:
-            pagination.setdefault("max_url_length", batch["max_url_length"])
-    elif isinstance(batch, int):
-        pagination.setdefault("id_batch_size", batch)
-
-
 def _reject_retired_source_pagination_aliases(
     source: JsonDict,  # Any: normalizer; input types vary
     provider_config: JsonDict,  # Any: normalizer; input types vary
@@ -178,21 +130,28 @@ def _reject_retired_source_pagination_aliases(
         )
 
 
+def _reject_retired_source_transport_aliases(
+    source: JsonDict,  # Any: normalizer; input types vary
+) -> None:
+    """Reject retired source transport aliases before normalization."""
+    retired_aliases = [key for key in _RETIRED_SOURCE_ALIAS_SECTIONS if key in source]
+    if retired_aliases:
+        raise ValueError(
+            "Retired source transport aliases are not supported: "
+            f"{', '.join(sorted(retired_aliases))}. "
+            "Use source.provider_config.{base_url,api_version,auth_type,api_key,"
+            "client,pagination} instead."
+        )
+
+
 def _normalize_source_pagination(
     source: JsonDict,  # Any: normalizer; input types vary
     provider_config: JsonDict,  # Any: normalizer; input types vary
 ) -> None:
     """Normalize pagination and batch configuration."""
     _reject_retired_source_pagination_aliases(source, provider_config)
-
-    pagination: JsonDict = _get_dict_or_empty(  # Any: values are heterogeneous
-        provider_config, "pagination"
-    )  # Any: normalizer; input types vary
-
-    batch = source.pop("batch", None)
-    _apply_batch_to_pagination(batch, pagination)
-
-    if pagination:
+    pagination = provider_config.get("pagination")
+    if isinstance(pagination, dict) and pagination:
         provider_config["pagination"] = pagination
 
 
@@ -201,37 +160,26 @@ def _prepare_source_transport_sections(
 ) -> tuple[
     JsonDict,  # Any: normalizer; input types vary
     JsonDict,  # Any: normalizer; input types vary
-    JsonDict,  # Any: normalizer; input types vary
 ]:
-    """Split source payload into mutable source, provider_config, and api sections."""
+    """Split source payload into mutable source and provider_config sections."""
     source_norm = source.copy()
+    _reject_retired_source_transport_aliases(source_norm)
 
     provider_config = source_norm.get("provider_config")
     if not isinstance(provider_config, dict):
         provider_config = {}
-
-    api_norm = _get_dict_or_empty(source_norm, "api")
-    if provider_config:
-        _copy_keys(provider_config, api_norm, (*_ENDPOINT_KEYS, *_AUTH_KEYS))
-    if api_norm:
-        source_norm["api"] = api_norm
-
-    api = source_norm.pop("api", None)
-    if not isinstance(api, dict):
-        api = {}
-
-    return source_norm, provider_config, api
+    return source_norm, provider_config
 
 
 def _normalize_source_transport(
     source: JsonDict,  # Any: normalizer; input types vary
     provider_config: JsonDict,  # Any: normalizer; input types vary
-    api: JsonDict,  # Any: normalizer; input types vary
 ) -> None:
     """Normalize accepted transport-facing source sections."""
     _normalize_source_rate_limits(source)
-    _normalize_source_endpoints(source, provider_config, api)
-    _normalize_source_auth(provider_config, api)
+    client = provider_config.get("client")
+    if isinstance(client, dict):
+        provider_config["client"] = _sync_timeout_aliases(client)
     _normalize_source_pagination(source, provider_config)
 
 
@@ -261,8 +209,8 @@ def normalize_source_config(
     if not isinstance(source, dict):
         return config
 
-    source_norm, provider_config, api = _prepare_source_transport_sections(source)
-    _normalize_source_transport(source_norm, provider_config, api)
+    source_norm, provider_config = _prepare_source_transport_sections(source)
+    _normalize_source_transport(source_norm, provider_config)
     return _finalize_source_sections(config, source_norm, provider_config)
 
 

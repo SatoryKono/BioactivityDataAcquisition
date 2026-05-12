@@ -352,9 +352,7 @@ alert `BioETLControlPlaneReadFailureRate` (см. `docs/05-operations/runbooks/ob
 
 Operator diagnostics не ограничиваются только `health` и metrics server.
 Канонический public seam для observability-related bootstrap и diagnostics —
-`bioetl.composition.observability_api`. `bioetl.interfaces.observability`
-сохраняется как compatibility facade для interface-layer consumers и делегирует
-в composition API.
+`bioetl.composition.observability_api`.
 
 `bioetl.composition.observability_api` экспортирует единый diagnostics bundle и
 service getters:

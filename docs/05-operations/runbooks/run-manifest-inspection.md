@@ -192,10 +192,15 @@ Historical live-run upgrade interpretation:
 - `historical_live_run_upgrade_state=incomplete_materialization_evidence` means
   some ledger evidence exists but the immutable snapshot envelope is still not
   complete enough for parent promotion.
-- `broader_historical_exact_replay_policy=ratified_snapshot_backed_boundary_is_final_supported_scope`
-  means the current published contract does not promise a wider historical
-  exact-replay class beyond the snapshot-backed boundary and bounded
-  parent-promotion states already documented here.
+- `broader_historical_exact_replay_policy=certified_historical_exact_replay_tranche_supported`
+  means the current published contract defines one broader certified historical
+  replay tranche beyond the launch-time snapshot boundary.
+- `broader_historical_exact_replay_state=historical_source_replay_certified`
+  means a retained historical source run gained certified immutable snapshot
+  evidence through explicit backfill and may now serve as a replayable parent.
+- `broader_historical_exact_replay_state=historical_composite_replay_certified`
+  means a historical composite run gained certified replay-envelope evidence
+  from already certified source lineage.
 
 ### 4. Inspect storage layout directly when needed
 

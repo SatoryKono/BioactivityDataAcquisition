@@ -6,7 +6,7 @@ from unittest.mock import ANY, MagicMock, patch
 
 import pytest
 
-from bioetl.application.services import RunOptions
+from bioetl.application.services.execution.pipeline_runner_models import RunOptions
 from bioetl.domain.exceptions import NetworkError
 from bioetl.interfaces.cli.commands.domains.run_all.command_policy import (
     RunAllCommandInput,

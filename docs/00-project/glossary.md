@@ -172,7 +172,7 @@ ______________________________________________________________________
 | **Composite Pipeline**     | Multi-source pipeline combining seed + enrichers into unified Gold entity                                             | `merged pipeline`, `combined workflow` |
 | **Seed Pipeline**          | Primary pipeline providing base entities for enrichment                                                               | `source pipeline`, `base pipeline`     |
 | **Enricher**               | Pipeline that adds supplemental data from external source                                                             | `enhancer`, `augmenter`                |
-| **MergeService**           | Application service that joins seed and enricher data                                                                 | `Joiner`, `Combiner`                   |
+| **MergeService**           | Application service that joins seed and enricher data                                                                 | historical aliases `Joiner`, `Combiner` |
 | **Preserve All Sources**   | MergeConfig flag to keep all provider-qualified columns                                                               | `keep-all-columns`                     |
 | **Qualified Column**       | Column name in `{provider}.{entity}.{field}` format                                                                   | `prefixed column`, `namespaced column` |
 | **Column Group**           | Semantic grouping of columns for output ordering                                                                      | `field group`                          |

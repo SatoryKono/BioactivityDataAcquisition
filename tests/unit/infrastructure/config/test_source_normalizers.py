@@ -6,7 +6,6 @@ import pytest
 
 from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.config.source_normalizers.source import (
-    _apply_batch_to_pagination,
     _copy_keys,
     _get_dict_or_empty,
     _normalize_health_check,
@@ -135,52 +134,6 @@ class TestCopyKeys:
         assert dst == {"a": 1}
 
 
-class TestApplyBatchToPagination:
-    """Tests for _apply_batch_to_pagination."""
-
-    def test_batch_dict_with_batch_size(self) -> None:
-        """Should extract batch_size from dict."""
-        pagination: JsonDict = {}
-        _apply_batch_to_pagination({"batch_size": 500}, pagination)
-        assert pagination.get("id_batch_size") == 500
-
-    def test_batch_dict_with_size_alias(self) -> None:
-        """Should use 'size' as alias for batch_size."""
-        pagination: JsonDict = {}
-        _apply_batch_to_pagination({"size": 200}, pagination)
-        assert pagination.get("id_batch_size") == 200
-
-    def test_batch_dict_with_api_batch_size(self) -> None:
-        """Should use 'api_batch_size' as alias."""
-        pagination: JsonDict = {}
-        _apply_batch_to_pagination({"api_batch_size": 100}, pagination)
-        assert pagination.get("id_batch_size") == 100
-
-    def test_batch_dict_with_page_size(self) -> None:
-        """Should extract page_size."""
-        pagination: JsonDict = {}
-        _apply_batch_to_pagination({"page_size": 50}, pagination)
-        assert pagination.get("page_size") == 50
-
-    def test_batch_dict_with_max_url_length(self) -> None:
-        """Should extract max_url_length."""
-        pagination: JsonDict = {}
-        _apply_batch_to_pagination({"max_url_length": 2000}, pagination)
-        assert pagination.get("max_url_length") == 2000
-
-    def test_batch_int(self) -> None:
-        """Should use int batch as batch_size and id_batch_size."""
-        pagination: JsonDict = {}
-        _apply_batch_to_pagination(300, pagination)
-        assert pagination.get("id_batch_size") == 300
-
-    def test_batch_none(self) -> None:
-        """Should be a no-op when batch is None."""
-        pagination: JsonDict = {}
-        _apply_batch_to_pagination(None, pagination)
-        assert pagination == {}
-
-
 class TestRejectRetiredSourcePaginationAliases:
     """Tests for explicit retired pagination alias rejection."""
 
@@ -231,17 +184,17 @@ class TestNormalizeSourceConfig:
         assert result["source"] == "invalid"
 
     def test_normalizes_complete_source(self) -> None:
-        """Should normalize a complete source config."""
+        """Should normalize a canonical source config."""
         raw = {
             "source": {
                 "type": "api",
-                "api": {"base_url": "https://api.example.com"},
-                "client": {"timeout": 30},
-                "rate_limit": {"with_api_key": {"rate": 10}},
-                "health_check": {"timeout": 5},
                 "provider_config": {
+                    "base_url": "https://api.example.com",
+                    "client": {"timeout": 30},
                     "pagination": {"id_batch_size": 100},
                 },
+                "rate_limit": {"with_api_key": {"rate": 10}},
+                "health_check": {"timeout": 5},
             }
         }
         result = normalize_source_config(raw)
@@ -249,19 +202,19 @@ class TestNormalizeSourceConfig:
         assert "rate_limit" in source
         assert source["rate_limit"].get("authenticated") == {"rate": 10}
 
-    def test_normalizes_api_config(self) -> None:
-        """Should normalize API endpoint config."""
+    def test_rejects_retired_source_transport_alias_sections(self) -> None:
+        """Retired source.api/source.client/source.batch aliases should fail fast."""
         raw = {
             "source": {
-                "type": "api",
                 "api": {"base_url": "https://example.com", "api_version": "v1"},
-                "provider_config": {},
+                "client": {"timeout": 30},
+                "batch": {"batch_size": 100},
+                "provider_config": {"provider": "chembl"},
             }
         }
-        result = normalize_source_config(raw)
-        source = result["source"]
-        provider_config = source.get("provider_config", {})
-        assert provider_config.get("base_url") == "https://example.com"
+
+        with pytest.raises(ValueError, match="Retired source transport aliases"):
+            normalize_source_config(raw)
 
     def test_rejects_retired_provider_pagination_aliases(self) -> None:
         """Retired provider pagination aliases should fail fast."""

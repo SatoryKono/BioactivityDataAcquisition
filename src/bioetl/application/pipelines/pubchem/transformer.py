@@ -97,18 +97,26 @@ class PubChemCompoundTransformer(PreSilverAdapterMixin, BaseTransformer):
             SilverRecord if transformation successful, None if skipped.
 
         """
-        prepared = self._build_compound_business_data(context, record, index)
-        cid, business_data = prepared
-        return cast(
-            "SilverRecord",
-            self._finalize_prepared_business_data(
-                context=context,
-                source_id=str(cid),
-                identity_record={"molecule_id": cid},
+        try:
+            prepared = self._build_compound_business_data(context, record, index)
+            cid, business_data = prepared
+            return cast(
+                "SilverRecord",
+                self._finalize_prepared_business_data(
+                    context=context,
+                    source_id=str(cid),
+                    identity_record={"molecule_id": cid},
+                    index=index,
+                    business_data=cast(JsonDict, business_data),
+                ),
+            )
+        except (FilteredOutError, ValueError) as e:
+            context.logger.warning(
+                "Skipping PubChem compound: validation failed",
+                error=str(e),
                 index=index,
-                business_data=cast(JsonDict, business_data),
-            ),
-        )
+            )
+            return None
 
     async def transform_pre_silver(
         self,
@@ -117,13 +125,21 @@ class PubChemCompoundTransformer(PreSilverAdapterMixin, BaseTransformer):
         index: int,
     ) -> PreSilverRecord | None:
         """Build an intermediate PubChem payload for application finalization."""
-        prepared = self._build_compound_business_data(context, record, index)
-        cid, business_data = prepared
-        return self._build_pre_silver_from_business_data(
-            source_id=str(cid),
-            identity_record={"molecule_id": cid},
-            business_data=cast(JsonDict, business_data),
-        )
+        try:
+            prepared = self._build_compound_business_data(context, record, index)
+            cid, business_data = prepared
+            return self._build_pre_silver_from_business_data(
+                source_id=str(cid),
+                identity_record={"molecule_id": cid},
+                business_data=cast(JsonDict, business_data),
+            )
+        except (FilteredOutError, ValueError) as e:
+            context.logger.warning(
+                "Skipping PubChem compound: validation failed",
+                error=str(e),
+                index=index,
+            )
+            return None
 
     def _build_compound_business_data(
         self,

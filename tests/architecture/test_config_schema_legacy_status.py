@@ -39,18 +39,12 @@ def test_pipeline_schema_does_not_advertise_retired_file_reference_keys() -> Non
     )
 
 
-def test_pipeline_schema_marks_filter_batch_size_as_deprecated_transition() -> None:
-    """Transitional filter_batch_size must stay explicitly deprecated."""
+def test_pipeline_schema_does_not_advertise_filter_batch_size() -> None:
+    """Pipeline JSON schema must not expose retired filter_batch_size."""
     schema = _load_schema("pipeline.json")
     properties = schema["properties"]
-    filter_batch_size = properties.get("filter_batch_size")
-
-    assert isinstance(filter_batch_size, dict), (
-        "pipeline.json is missing filter_batch_size property"
-    )
-    assert filter_batch_size.get("deprecated") is True, (
-        "pipeline.filter_batch_size must be marked deprecated=true "
-        "as transitional migration-only field"
+    assert "filter_batch_size" not in properties, (
+        "pipeline.json still advertises retired filter_batch_size"
     )
 
 
@@ -135,10 +129,6 @@ def test_configs_readme_tracks_current_legacy_status_policy() -> None:
     """Active config docs must describe the same field-status policy as schemas."""
     readme = CONFIG_README.read_text(encoding="utf-8")
 
-    assert "pipeline `filter_batch_size`" in readme, (
-        "configs/README.md must list pipeline.filter_batch_size as transitional "
-        "migration-only field"
-    )
     assert (
         "source `provider_config.batch_size/page_size/max_url_length/cursor_pagination`"
         in readme
@@ -155,6 +145,10 @@ def test_configs_readme_tracks_current_legacy_status_policy() -> None:
     assert "provider source `pagination.*`" in readme, (
         "configs/README.md must describe provider_config.pagination.* as the "
         "canonical source pagination contract"
+    )
+    assert "source `api`, `client`, and `batch`: retired migration aliases" in readme, (
+        "configs/README.md must describe source.api/source.client/source.batch "
+        "as retired aliases"
     )
     assert "pipeline `page_size_override`" in readme, (
         "configs/README.md must describe pipeline.page_size_override as the "

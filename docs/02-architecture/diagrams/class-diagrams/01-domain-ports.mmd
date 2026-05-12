@@ -34,13 +34,36 @@ classDiagram
 
     }
 
-    class StoragePort {
-        <<Protocol / compat facade>>
-        +write_bronze(records, config, metadata): BronzeWriteResult
-        +write_silver(records, config): SilverWriteResult
+    class StorageLifecyclePort {
+        <<Protocol>>
+        +aclose(): None
+        +health_check(): HealthCheckResult
+    }
+
+    class BronzeStoragePort {
+        <<Protocol>>
+        +write_bronze(records, provider, entity, date, batch_id, run_id, run_type, ingestion_ts): BronzeWriteResult
+        +cleanup_bronze(cutoff_date, dry_run): dict~str, int~
+    }
+
+    class SilverStoragePort {
+        <<Protocol>>
+        +write_silver(request): SilverWriteResult
+        +read_silver(table_name, columns, limit): DataFrame
+        +clear_silver(table_name): None
+    }
+
+    class GoldStoragePort {
+        <<Protocol>>
         +write_gold(records, config): None
+        +clear_gold(table_name): None
+    }
+
+    class MergedStoragePort {
+        <<Protocol>>
+        +write_silver(records, table_name, metadata): SilverWriteResult
+        +write_gold(records, table_name, schema): None
         +preview_cleanup(silver_table, gold_table): MetaDict
-        +aggregates narrow storage ports
     }
 
     class LockPort {
@@ -238,14 +261,17 @@ classDiagram
 
     DataSourcePort <|-- FilterableDataSourcePort
 
-    note for StoragePort "Backward-compatible aggregate facade. New consumers SHOULD use narrow storage ports."
     note for QuarantinePort "See L2 for secondary ops"
     note for LoggerPort "See L2 for extra log methods"
     note for InputFilterPort "See L2 for multi-column helpers"
 
     style DataSourcePort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
     style FilterableDataSourcePort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
-    style StoragePort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style StorageLifecyclePort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style BronzeStoragePort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style SilverStoragePort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style GoldStoragePort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style MergedStoragePort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
     style LockPort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
     style CheckpointPort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
     style QuarantinePort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px

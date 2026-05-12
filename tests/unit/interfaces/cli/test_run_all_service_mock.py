@@ -15,13 +15,13 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from click.testing import CliRunner
 
-from bioetl.application.services import (
+from bioetl.application.services.execution.pipeline_runner_models import (
     PipelineNotFoundError,
-    RunResult,
-    RunOptions,
     PipelineRunResult,
+    RunOptions,
+    RunResult,
 )
-from bioetl.composition import PipelineRegistry
+from bioetl.composition.registry_api import PipelineRegistry
 from bioetl.interfaces.cli.commands.run_all import (
     _run_all_pipelines_async,
 )

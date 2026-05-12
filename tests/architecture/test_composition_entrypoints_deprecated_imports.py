@@ -16,7 +16,8 @@ ENTRYPOINTS_FILE = SRC_ROOT / "composition" / "entrypoints.py"
 
 def _legacy_entrypoint_symbols() -> set[str]:
     module = importlib.import_module(ENTRYPOINTS_MODULE)
-    return set(module._LEGACY_SYMBOL_TARGETS)
+    legacy_targets = getattr(module, "_LEGACY_SYMBOL_TARGETS", None)
+    return set() if legacy_targets is None else set(legacy_targets)
 
 
 def _iter_python_files() -> list[Path]:
@@ -120,8 +121,9 @@ def _deprecated_entrypoint_violations_for_path(
 
 @pytest.mark.architecture
 def test_first_party_src_does_not_import_deprecated_entrypoint_symbols() -> None:
-    """Production code must use canonical services/resources APIs directly."""
+    """Production code must not depend on removed entrypoint shims."""
     legacy_symbols = _legacy_entrypoint_symbols()
+    assert legacy_symbols == set()
     violations = [
         violation
         for path in _iter_python_files()
@@ -131,7 +133,6 @@ def test_first_party_src_does_not_import_deprecated_entrypoint_symbols() -> None
     ]
 
     assert not violations, (
-        "Deprecated bioetl.composition.entrypoints symbols leaked into first-party "
-        "src. Import the canonical services_api/resources_api targets instead:\n"
-        + "\n".join(sorted(violations))
+        "Removed bioetl.composition.entrypoints symbols leaked into first-party "
+        "src. Import canonical owner APIs instead:\n" + "\n".join(sorted(violations))
     )

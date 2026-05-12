@@ -5,7 +5,7 @@ Currently provides CLI and observability interfaces.
 
 Components:
     cli: Command-line interface (Click-based).
-    observability: User-facing observability utilities.
+    http: User-facing HTTP helpers.
 
 The interfaces layer sits at the outermost ring of the hexagonal
 architecture and depends on all other layers per RULES.md.
@@ -19,7 +19,6 @@ from types import ModuleType
 _LAZY_MODULE_EXPORTS: dict[str, str] = {
     "cli": "bioetl.interfaces.cli",
     "http": "bioetl.interfaces.http",
-    "observability": "bioetl.interfaces.observability",
 }
 
 __all__ = list(_LAZY_MODULE_EXPORTS.keys())

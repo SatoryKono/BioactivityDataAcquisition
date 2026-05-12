@@ -24,11 +24,23 @@ explicitly published snapshot-backed support boundary. The platform does not
 currently claim universal exact reproducibility for every pipeline family and
 every historical run occurrence.
 
-The current snapshot-backed boundary is the final supported exact-replay scope
-of the published contract. Any broader historical exact-replay claim requires a
-future contract revision with an explicit evidence model and fail-closed rules;
-it is not implied by retained Bronze files, partial lineage, or operator
-reconstruction heuristics.
+The current snapshot-backed boundary remains the default exact-replay path of
+the published contract. BioETL also supports one broader certified historical
+tranche: retained historical source runs may gain certified parent evidence via
+explicit immutable snapshot backfill, and historical composite runs may gain
+certified parent evidence only from already certified source lineage.
+
+This broader tranche is still fail-closed. It is never implied by retained
+Bronze files, partial lineage, or operator reconstruction heuristics without
+explicit certification evidence appended to the run ledger.
+
+Published policy markers for this tranche are:
+
+- `broader_historical_exact_replay_policy=certified_historical_exact_replay_tranche_supported`
+- `broader_historical_exact_replay_boundary=historical_source_snapshot_certification`
+  for retained historical source runs
+- `broader_historical_exact_replay_boundary=historical_composite_certified_source_lineage`
+  for historical composite runs
 
 For supported source families, a completed live source capture may later gain
 immutable snapshot evidence via ledger materialization. That state is published
@@ -37,9 +49,10 @@ capture occurrence was itself an exact replay execution.
 
 Historical live runs without immutable snapshot evidence remain outside the
 strict replay claim until explicit `input_snapshot_published` ledger evidence
-materializes a bounded immutable parent snapshot envelope. BioETL does not
-silently upgrade such runs from retained Bronze files, path heuristics, or
-other implicit reconstruction signals.
+materializes either a bounded immutable parent snapshot envelope or a certified
+historical snapshot envelope. BioETL does not silently upgrade such runs from
+retained Bronze files, path heuristics, or other implicit reconstruction
+signals.
 
 It is the contract leg of the published traceability documentation pack
 required by [D-01](../../00-project/governance/01-documentation-governance-style-guide.md).

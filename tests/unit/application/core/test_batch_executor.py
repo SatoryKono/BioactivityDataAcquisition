@@ -1,7 +1,7 @@
 """Unit tests for BatchExecutor.
 
 Tests the unified BatchExecutor that combines functionality from
-PipelineExecutor and RecordProcessor.
+the retired pipeline execution loop and RecordProcessor-era helpers.
 """
 
 from __future__ import annotations

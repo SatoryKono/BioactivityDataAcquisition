@@ -267,8 +267,6 @@ helpers directly.
 
 Remaining explicit compatibility layers:
 
-- `bioetl.interfaces.observability` stays as an interface-layer facade over
-  `bioetl.composition.observability_api`
 - `UnifiedLogger` accepts `extra={...}` compatibility input, but runtime emits
   flat top-level fields and canonical `timestamp`
 - downstream log normalization may still accept `ts`, but `ts` is not a

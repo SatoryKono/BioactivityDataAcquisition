@@ -10,7 +10,10 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from bioetl.application.services import PipelineRunResult, RunResult
+from bioetl.application.services.execution.pipeline_runner_models import (
+    PipelineRunResult,
+    RunResult,
+)
 from bioetl.interfaces.cli.commands.domains.run_all.support import (
     BatchRunResult,
     create_run_all_options,

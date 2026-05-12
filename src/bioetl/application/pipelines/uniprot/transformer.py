@@ -15,6 +15,7 @@ from bioetl.application.core.base_transformer import (
     TransformationError,
     TransformerDependencyContext,
 )
+from bioetl.application.core.base_transformer.errors import FilteredOutError
 from bioetl.application.core.pre_silver_adapter_mixin import (
     PreSilverAdapterMixin,
 )
@@ -72,16 +73,24 @@ class UniProtProteinTransformer(
         index: int,
     ) -> SilverRecord | None:
         """Transform raw UniProt record to Silver format."""
-        accession = str(self._get_required_field(record, "primaryAccession"))
-        entry_name = self._get_entry_name(record)
-        business_data = self._build_business_data(record, accession, entry_name)
-        return self._transform_identity_business_data(
-            context=context,
-            source_id=accession,
-            identity_field="accession",
-            index=index,
-            business_data=cast(JsonDict, business_data),
-        )
+        try:
+            accession = str(self._get_required_field(record, "primaryAccession"))
+            entry_name = self._get_entry_name(record)
+            business_data = self._build_business_data(record, accession, entry_name)
+            return self._transform_identity_business_data(
+                context=context,
+                source_id=accession,
+                identity_field="accession",
+                index=index,
+                business_data=cast(JsonDict, business_data),
+            )
+        except (FilteredOutError, ValueError) as e:
+            context.logger.warning(
+                "Skipping UniProt record: validation failed",
+                error=str(e),
+                index=index,
+            )
+            return None
 
     async def transform_pre_silver(
         self,

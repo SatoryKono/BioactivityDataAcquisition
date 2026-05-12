@@ -12,7 +12,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from bioetl.application.services import (
+from bioetl.application.services.export_models import (
     ExportOptions,
     ExportResult,
     TableInfo,

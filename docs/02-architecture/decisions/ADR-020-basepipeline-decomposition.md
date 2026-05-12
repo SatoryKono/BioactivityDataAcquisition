@@ -32,7 +32,7 @@ def __init__(
     entity_type: str,
     run-type: RunType,
     data-source: DataSourcePort,
-    storage: StoragePort,
+    storage: BronzeStoragePort | SilverStoragePort | GoldStoragePort | MergedStoragePort,
     lock: LockPort,
     checkpoint: CheckpointPort,
     quarantine: QuarantinePort,
@@ -112,7 +112,7 @@ class RuntimeConfig:
 class PipelineServices:
     """I/O port dependencies with lifecycle management."""
     data-source: DataSourcePort
-    storage: StoragePort
+    storage: BronzeStoragePort | SilverStoragePort | GoldStoragePort | MergedStoragePort
     lock: LockPort
     checkpoint: CheckpointPort
     quarantine: QuarantinePort

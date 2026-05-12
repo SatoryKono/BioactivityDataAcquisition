@@ -379,9 +379,9 @@ classDiagram
     UniprotAdapter ..|> DataSourcePort : implements
     PubmedAdapter ..|> DataSourcePort : implements
 
-    BronzeWriter ..|> StoragePort : implements
-    SilverWriter ..|> StoragePort : implements
-    GoldWriter ..|> StoragePort : implements
+    BronzeWriter ..|> BronzeStoragePort : implements
+    SilverWriter ..|> SilverStoragePort : implements
+    GoldWriter ..|> GoldStoragePort : implements
 
     MemoryLock ..|> LockPort : implements
     FileCheckpointManager ..|> CheckpointPort : implements

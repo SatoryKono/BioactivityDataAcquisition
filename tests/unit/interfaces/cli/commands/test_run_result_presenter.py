@@ -8,7 +8,10 @@ from __future__ import annotations
 
 import pytest
 
-from bioetl.application.services import PipelineRunResult, RunResult
+from bioetl.application.services.execution.pipeline_runner_models import (
+    PipelineRunResult,
+    RunResult,
+)
 from bioetl.interfaces.cli.commands.domains.run.result_presenter import (
     echo_run_result,
 )

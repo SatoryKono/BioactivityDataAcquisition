@@ -59,7 +59,9 @@ def test_cli_rebuild_requires_confirmation(cli_runner, mock_registry):
 
 def test_cli_rebuild_with_yes(cli_runner, mock_registry):
     """Test that rebuild works with --yes."""
-    from bioetl.application.services import PipelineRunResult
+    from bioetl.application.services.execution.pipeline_runner_models import (
+        PipelineRunResult,
+    )
     from bioetl.application.services.pipeline_runner_service import RunResult
 
     with (

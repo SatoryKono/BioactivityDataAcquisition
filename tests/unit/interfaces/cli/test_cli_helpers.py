@@ -285,7 +285,10 @@ class TestCliCommands:
         self, mock_asyncio_run, mock_register, cli_runner, mock_registry
     ):
         """Test that valid pipeline is executed."""
-        from bioetl.application.services import PipelineRunResult, RunResult
+        from bioetl.application.services.execution.pipeline_runner_models import (
+            PipelineRunResult,
+            RunResult,
+        )
 
         # _run_pipeline_async returns RunResult
         mock_asyncio_run.return_value = RunResult(
@@ -313,7 +316,11 @@ class TestCliCommands:
         mock_registry,
     ):
         """Test that --limit is passed correctly."""
-        from bioetl.application.services import RunOptions, RunResult, PipelineRunResult
+        from bioetl.application.services.execution.pipeline_runner_models import (
+            RunOptions,
+            RunResult,
+            PipelineRunResult,
+        )
 
         mock_service = MagicMock()
         mock_result = RunResult(
@@ -365,7 +372,11 @@ class TestCliCommands:
         mock_registry,
     ):
         """Test that --resume flag is passed correctly."""
-        from bioetl.application.services import RunOptions, RunResult, PipelineRunResult
+        from bioetl.application.services.execution.pipeline_runner_models import (
+            RunOptions,
+            RunResult,
+            PipelineRunResult,
+        )
 
         mock_service = MagicMock()
         mock_result = RunResult(
@@ -410,7 +421,10 @@ class TestCliCommands:
         self, mock_asyncio_run, mock_register, cli_runner, mock_registry
     ):
         """Exact replay without cached Bronze warns and exits with config error."""
-        from bioetl.application.services import PipelineRunResult, RunResult
+        from bioetl.application.services.execution.pipeline_runner_models import (
+            PipelineRunResult,
+            RunResult,
+        )
         from bioetl.interfaces.cli.exit_codes import ExitCode
 
         mock_asyncio_run.return_value = RunResult(
@@ -440,7 +454,10 @@ class TestCliCommands:
         self, mock_asyncio_run, mock_register, cli_runner, mock_registry
     ):
         """Snapshot-backed exact-replay intent should not emit the no-cache warning."""
-        from bioetl.application.services import PipelineRunResult, RunResult
+        from bioetl.application.services.execution.pipeline_runner_models import (
+            PipelineRunResult,
+            RunResult,
+        )
 
         mock_asyncio_run.return_value = RunResult(
             status=PipelineRunResult.SUCCESS,

@@ -52,81 +52,21 @@ accepted_shapes:
       widening runtime behavior or metric labels.
     risk: low
 
-  - id: source.api_section_to_provider_config
-    status: migration-supported
-    canonical_target: source.provider_config.{base_url,api_version,auth_type,api_key}
-    aliases:
-      - source.api.base_url
-      - source.api.api_version
-      - source.api.auth_type
-      - source.api.api_key
-    remove_after: "2026-09-30"
-    exit_criteria: >
-      All provider YAML files and tests use source.provider_config for endpoint
-      and auth fields; source.api appears only in migration tests or docs.
-    source_files:
-      - src/bioetl/infrastructure/config/source_normalizers/source.py
-    test_files:
-      - tests/unit/infrastructure/config/test_source_config_legacy_normalization.py
-      - tests/unit/infrastructure/config/source_normalizers/test_source.py
-    risk: medium
-
-  - id: source.client_root_to_provider_config_client
-    status: migration-supported
-    canonical_target: source.provider_config.client
-    aliases:
-      - source.client
-    remove_after: "2026-09-30"
-    exit_criteria: >
-      All provider YAML files and first-party tests place transport client
-      settings under source.provider_config.client.
-    source_files:
-      - src/bioetl/infrastructure/config/source_normalizers/source.py
-    test_files:
-      - tests/unit/infrastructure/config/test_source_config_legacy_normalization.py
-      - tests/unit/infrastructure/config/source_normalizers/test_source.py
-    risk: medium
-
-  - id: source.batch_to_provider_pagination
-    status: migration-supported
-    canonical_target: source.provider_config.pagination.{id_batch_size,page_size,max_url_length}
-    aliases:
-      - source.batch
-      - source.batch.batch_size
-      - source.batch.size
-      - source.batch.api_batch_size
-      - source.batch.page_size
-      - source.batch.max_url_length
-    remove_after: "2026-09-30"
-    exit_criteria: >
-      Provider source configs and tests use source.provider_config.pagination.*
-      directly; source.batch appears only in migration tests or docs.
-    source_files:
-      - src/bioetl/infrastructure/config/source_normalizers/source.py
-    test_files:
-      - tests/unit/infrastructure/config/test_source_config_legacy_normalization.py
-      - tests/unit/infrastructure/config/test_source_normalizers.py
-    risk: medium
-
-  - id: pipeline.filter_batch_size_deprecated_migration
-    status: deprecated-migration
-    canonical_target: pipeline.page_size_override or source.provider_config.pagination.id_batch_size
-    aliases:
-      - pipeline.filter_batch_size
-    remove_after: "2026-09-30"
-    exit_criteria: >
-      First-party pipeline configs and runtime-builder tests no longer depend on
-      pipeline.filter_batch_size; schema keeps no transitional field.
-    source_files:
-      - configs/_schema/pipeline.json
-      - src/bioetl/infrastructure/config/config_ci_contract.py
-      - src/bioetl/composition/runtime_builders/_inputs_resolution_support.py
-    test_files:
-      - tests/architecture/test_config_schema_legacy_status.py
-      - tests/unit/composition/runtime_builders/test_inputs_resolver.py
-    risk: medium
-
 retired_rejected_shapes:
+  - id: source.retired_transport_alias_sections
+    status: rejected
+    canonical_target: source.provider_config.{base_url,api_version,auth_type,api_key,client,pagination}
+    aliases:
+      - source.api
+      - source.client
+      - source.batch
+    source_files:
+      - src/bioetl/infrastructure/config/source_normalizers/source.py
+    test_files:
+      - tests/unit/infrastructure/config/test_source_normalizers.py
+      - tests/unit/infrastructure/test_config_dynamic.py
+    risk: low
+
   - id: source.retired_provider_pagination_aliases
     status: rejected
     canonical_target: source.provider_config.pagination.*

@@ -202,7 +202,7 @@ def workflow() -> None:
     is_flag=True,
     default=False,
     help="Auto-increment start_offset from last successful execution. "
-         "Cannot be used with --resume-last or --start-offset.",
+    "Cannot be used with --resume-last or --start-offset.",
 )
 @click.pass_obj
 def run_workflow_command(

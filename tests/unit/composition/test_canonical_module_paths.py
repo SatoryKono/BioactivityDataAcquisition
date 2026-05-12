@@ -53,18 +53,18 @@ def test_pipeline_configs_import_warns_and_reexports_registry_manifest() -> None
 
 def test_registry_api_reexports_canonical_registry_symbols() -> None:
     """Canonical registry API should expose the package-root registry types."""
-    from bioetl.composition import (
-        PipelineDefinition,
-        PipelineRegistry,
-        create_registry,
-        get_default_registry,
-    )
     from bioetl.composition.registry_api import (
         PipelineDefinition as CanonicalPipelineDefinition,
         PipelineRegistry as CanonicalPipelineRegistry,
         create_registry as canonical_create_registry,
         get_default_registry as canonical_get_default_registry,
     )
+    from bioetl.composition.registry import (
+        PipelineDefinition,
+        PipelineRegistry,
+        create_registry,
+    )
+    from bioetl.composition.registry_default import get_default_registry
 
     assert CanonicalPipelineDefinition is PipelineDefinition
     assert CanonicalPipelineRegistry is PipelineRegistry

@@ -26,17 +26,37 @@ classDiagram
         +fetch_filtered_with_fallback(entity_type, ids, field, limit): AsyncIterator~dict~
     }
 
-    class StoragePort {
+    class StorageLifecyclePort {
         <<Protocol>>
-        +write_bronze(records, config, metadata): BronzeWriteResult
-        +write_silver(records, config): SilverWriteResult
-        +write_gold(records, config): None
+        +aclose(): None
+        +health_check(): HealthCheckResult
+    }
+
+    class BronzeStoragePort {
+        <<Protocol>>
+        +write_bronze(records, provider, entity, date, batch_id, run_id, run_type, ingestion_ts): BronzeWriteResult
+        +cleanup_bronze(cutoff_date, dry_run): dict~str, int~
+    }
+
+    class SilverStoragePort {
+        <<Protocol>>
+        +write_silver(request): SilverWriteResult
         +read_silver(table_name, columns, limit): DataFrame
         +clear_silver(table_name): None
+    }
+
+    class GoldStoragePort {
+        <<Protocol>>
+        +write_gold(records, table_name, schema): None
         +clear_gold(table_name): None
+    }
+
+    class MergedStoragePort {
+        <<Protocol>>
+        +write_silver(records, table_name, metadata): SilverWriteResult
+        +write_gold(records, table_name, schema): None
         +vacuum(table_name, retention_hours): None
         +archive(table_name, target_path): None
-        +health_check(): HealthCheckResult
     }
 
     class LockPort {
@@ -127,7 +147,11 @@ classDiagram
 
     style DataSourcePort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
     style FilterableDataSourcePort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
-    style StoragePort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style StorageLifecyclePort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style BronzeStoragePort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style SilverStoragePort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style GoldStoragePort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style MergedStoragePort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
     style LockPort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
     style CheckpointPort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
     style QuarantinePort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px

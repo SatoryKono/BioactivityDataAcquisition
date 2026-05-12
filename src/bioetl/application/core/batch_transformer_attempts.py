@@ -238,9 +238,7 @@ async def _build_transform_success_outcome(
     gold_transform: GoldTransformCallback,
     dq_config: DQConfig | None,
 ) -> RecordTransformOutcome:
-    transformed = await _resolve_transform_result(
-        transform(context, raw_record, index)
-    )
+    transformed = await _resolve_transform_result(transform(context, raw_record, index))
     finalized_record = _finalize_transformed_record(
         transformed=transformed,
         normalization_processor=normalization_processor,

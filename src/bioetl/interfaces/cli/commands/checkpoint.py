@@ -55,7 +55,7 @@ def get_checkpoint_runtime_service(pipeline: str) -> CheckpointRuntimeService:
 
 def get_observability_workflow_service() -> ObservabilityWorkflowService:
     """Load observability workflows through the canonical public interface."""
-    from bioetl.interfaces.observability import (
+    from bioetl.composition.observability_api import (
         get_observability_workflow_service as _impl,
     )
 

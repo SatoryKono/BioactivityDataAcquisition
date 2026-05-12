@@ -9,8 +9,11 @@ import pytest
 from click.testing import CliRunner
 
 from bioetl.application.core.lifecycle.cleanup_service import CleanupPreview, LayerInfo
-from bioetl.application.services import PipelineRunResult, RunResult
-from bioetl.composition import PipelineRegistry
+from bioetl.application.services.execution.pipeline_runner_models import (
+    PipelineRunResult,
+    RunResult,
+)
+from bioetl.composition.registry_api import PipelineRegistry
 from bioetl.composition.factories.pipeline.registry import register_all_pipelines
 from bioetl.interfaces.cli import cli, main
 from bioetl.interfaces.cli.exit_codes import ExitCode
@@ -327,7 +330,9 @@ class TestRunCommandAdvanced:
     @patch("bioetl.interfaces.cli.commands.run.asyncio.run")
     def test_run_command_bootstrap_value_error(self, mock_asyncio_run, runner):
         """Test run command handles PipelineNotFoundError during execution."""
-        from bioetl.application.services import PipelineNotFoundError
+        from bioetl.application.services.execution.pipeline_runner_models import (
+            PipelineNotFoundError,
+        )
 
         # PipelineNotFoundError is caught at the CLI level when asyncio.run raises it
         mock_asyncio_run.side_effect = PipelineNotFoundError(
@@ -381,7 +386,10 @@ class TestRunCommandAdvanced:
         tmp_path,
     ):
         """Test run command with CSV filter options."""
-        from bioetl.application.services import RunOptions, PipelineRunResult
+        from bioetl.application.services.execution.pipeline_runner_models import (
+            RunOptions,
+            PipelineRunResult,
+        )
 
         # Create a temporary CSV file
         csv_file = tmp_path / "filter.csv"

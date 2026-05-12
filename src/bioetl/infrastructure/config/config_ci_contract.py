@@ -38,7 +38,6 @@ PIPELINE_ALLOWED_KEYS: Final[frozenset[str]] = frozenset(
         "version",
         "description",
         "batch_size",
-        "filter_batch_size",
         "checkpoint_interval",
         "business_primary_keys",
         "field_policy",
@@ -73,7 +72,7 @@ RETIRED_PIPELINE_KEYS: Final[frozenset[str]] = frozenset(
     }
 )
 
-TRANSITIONAL_PIPELINE_KEYS: Final[frozenset[str]] = frozenset({"filter_batch_size"})
+TRANSITIONAL_PIPELINE_KEYS: Final[frozenset[str]] = frozenset()
 
 ENTITY_ALLOWED_KEYS: Final[frozenset[str]] = frozenset(
     {

@@ -247,20 +247,6 @@ def test_resolve_health_check_mode_defaults_to_strict_when_pipeline_mode_missing
 
 
 @pytest.mark.unit
-def test_resolve_filter_batch_size_prefers_explicit_yaml_value() -> None:
-    calls: list[str] = []
-    yaml_config = _make_yaml_config(filter_batch_size=25)
-
-    result = inputs_resolver.resolve_filter_batch_size(
-        yaml_config,
-        load_source_config_fn=lambda provider: calls.append(provider),
-    )
-
-    assert result == 25
-    assert calls == []
-
-
-@pytest.mark.unit
 def test_resolve_filter_batch_size_falls_back_to_source_config_pagination() -> None:
     calls: list[str] = []
     yaml_config = _make_yaml_config()
@@ -300,7 +286,7 @@ def test_adjust_batch_size_for_filter_mutates_yaml_and_logs_when_filter_is_activ
     None
 ):
     events: list[tuple[str, dict[str, object]]] = []
-    yaml_config = _make_yaml_config(batch_size=100, filter_batch_size=25)
+    yaml_config = _make_yaml_config(batch_size=100)
     observability = SimpleNamespace(
         logger=SimpleNamespace(
             info=lambda event, **kwargs: events.append((event, kwargs))
@@ -311,6 +297,9 @@ def test_adjust_batch_size_for_filter_mutates_yaml_and_logs_when_filter_is_activ
         yaml_config=yaml_config,
         filter_config=SimpleNamespace(source_path="ids.csv"),
         observability=observability,
+        load_source_config_fn=lambda _provider: SimpleNamespace(
+            pagination=SimpleNamespace(id_batch_size=25)
+        ),
     )
 
     assert yaml_config.batch_size == 25

@@ -1,17 +1,13 @@
 %% Title: Package Family: domain/ports/storage
-%% Covers: AST-derived supplemental package-family inventory for src/bioetl/domain/ports/storage; modules: aggregate_port, bronze_port, gold_port, lifecycle_port, merged_port, silver_port.
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/domain/ports/storage; modules: bronze_port, gold_port, lifecycle_port, merged_port, silver_port.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
 %% @date    2026-03-27
 %% @level   Package Family / Inventory Slice
-%% @nodes   6
+%% @nodes   5
 %% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
 classDiagram
-
-    namespace aggregate_port {
-        class StoragePort
-    }
 
     namespace bronze_port {
         class BronzeStoragePort
@@ -33,8 +29,7 @@ classDiagram
         class SilverStoragePort
     }
 
-    BronzeStoragePort <|-- StoragePort
-    GoldStoragePort <|-- StoragePort
-    MergedStoragePort <|-- StoragePort
-    SilverStoragePort <|-- StoragePort
-    StorageLifecyclePort <|-- StoragePort
+    BronzeStoragePort ..> StorageLifecyclePort : lifecycle ops
+    GoldStoragePort ..> StorageLifecyclePort : lifecycle ops
+    MergedStoragePort ..> StorageLifecyclePort : lifecycle ops
+    SilverStoragePort ..> StorageLifecyclePort : lifecycle ops

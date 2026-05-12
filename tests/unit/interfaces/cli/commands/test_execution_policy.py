@@ -6,7 +6,10 @@ from dataclasses import dataclass
 
 import pytest
 
-from bioetl.application.services import PipelineNotFoundError, PipelineRunResult
+from bioetl.application.services.execution.pipeline_runner_models import (
+    PipelineNotFoundError,
+    PipelineRunResult,
+)
 from bioetl.domain.exceptions import NetworkError
 from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
     ExecutionFailureReasonCodes,

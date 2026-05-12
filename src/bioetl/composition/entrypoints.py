@@ -1,16 +1,11 @@
 """Public composition entrypoint focused on execution-oriented APIs.
 
-`bioetl.composition.entrypoints` remains a stable import seam, but its explicit
-public surface (`__all__`) is intentionally narrow and execution-focused.
-
-Service and resource-management helpers remain available through compatibility
-lookup in ``__getattr__`` and emit deprecation warnings with canonical import
-targets (`services_api` / `resources_api`).
+`bioetl.composition.entrypoints` remains a stable import seam with an explicit
+execution-focused public surface.
 """
 
 from __future__ import annotations
 
-import warnings
 from importlib import import_module
 from typing import TYPE_CHECKING, Any
 
@@ -37,9 +32,6 @@ if TYPE_CHECKING:
 
 _COMPOSITION_EXECUTION_API_MODULE = "bioetl.composition.execution_api"
 _COMPOSITION_COMPOSITE_API_MODULE = "bioetl.composition.composite_api"
-_COMPOSITION_SERVICES_API_MODULE = "bioetl.composition.services_api"
-_COMPOSITION_RESOURCES_API_MODULE = "bioetl.composition.resources_api"
-
 __all__ = [
     "ArchiveOptions",
     "PipelineRunResult",
@@ -76,38 +68,11 @@ _PUBLIC_SYMBOL_TARGETS: dict[str, str] = {
     "start_metrics_server": "bioetl.composition.observability_api",
 }
 
-_LEGACY_SYMBOL_TARGETS: dict[str, str | tuple[str, str]] = {
-    # services_api
-    "cleanup_bronze": _COMPOSITION_SERVICES_API_MODULE,
-    "get_adr_service": _COMPOSITION_SERVICES_API_MODULE,
-    "get_bronze_cleanup_service": _COMPOSITION_SERVICES_API_MODULE,
-    "get_checkpoint_service": _COMPOSITION_SERVICES_API_MODULE,
-    "get_config_service": _COMPOSITION_SERVICES_API_MODULE,
-    "get_export_service": _COMPOSITION_SERVICES_API_MODULE,
-    "get_health_server_dependencies": _COMPOSITION_SERVICES_API_MODULE,
-    "get_health_service": _COMPOSITION_SERVICES_API_MODULE,
-    "get_lock_service": _COMPOSITION_SERVICES_API_MODULE,
-    "get_metrics_service": _COMPOSITION_SERVICES_API_MODULE,
-    "get_pipeline_runner_service": _COMPOSITION_SERVICES_API_MODULE,
-    "get_quarantine_port": _COMPOSITION_SERVICES_API_MODULE,
-    "get_quarantine_service": _COMPOSITION_SERVICES_API_MODULE,
-    "get_vacuum_service": _COMPOSITION_SERVICES_API_MODULE,
-    # resources_api
-    "archive_table": _COMPOSITION_RESOURCES_API_MODULE,
-    "get_checkpoint_runtime_service": _COMPOSITION_RESOURCES_API_MODULE,
-    "get_lifecycle_service": _COMPOSITION_RESOURCES_API_MODULE,
-    "get_quarantine_runtime_service": _COMPOSITION_RESOURCES_API_MODULE,
-    "inspect_quarantine": _COMPOSITION_RESOURCES_API_MODULE,
-    "list_checkpoints": _COMPOSITION_RESOURCES_API_MODULE,
-    "preview_cleanup": _COMPOSITION_RESOURCES_API_MODULE,
-    "vacuum_table": _COMPOSITION_RESOURCES_API_MODULE,
-}
-
 
 def __getattr__(
     name: str,
 ) -> Any:  # Any: lazy compatibility exports resolve to heterogeneous symbol types.
-    """Resolve public and deprecated entrypoint symbols lazily."""
+    """Resolve public entrypoint symbols lazily."""
     module_name = _PUBLIC_SYMBOL_TARGETS.get(name)
     if module_name is not None:
         module = import_module(module_name)
@@ -115,32 +80,9 @@ def __getattr__(
         globals()[name] = value
         return value
 
-    legacy_target = _LEGACY_SYMBOL_TARGETS.get(name)
-    if legacy_target is None:
-        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-    canonical_name = name
-    if isinstance(legacy_target, tuple):
-        module_name, canonical_name = legacy_target
-    else:
-        module_name = legacy_target
-    module = import_module(module_name)
-    value = getattr(module, canonical_name)
-    warnings.warn(
-        (
-            f"`bioetl.composition.entrypoints.{name}` is deprecated; "
-            f"import `{canonical_name}` from `{module_name}` instead."
-        ),
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    return value
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
 def __dir__() -> list[str]:
-    """Return stable introspection results including legacy compatibility names."""
-    return sorted(
-        set(globals())
-        | set(__all__)
-        | set(_PUBLIC_SYMBOL_TARGETS)
-        | set(_LEGACY_SYMBOL_TARGETS)
-    )
+    """Return stable introspection results for the explicit public surface."""
+    return sorted(set(globals()) | set(__all__) | set(_PUBLIC_SYMBOL_TARGETS))

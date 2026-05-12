@@ -13,7 +13,11 @@ from pathlib import Path
 
 import pytest
 
-from bioetl.composition import PipelineRegistry, create_registry, get_default_registry
+from bioetl.composition.registry_api import (
+    PipelineRegistry,
+    create_registry,
+    get_default_registry,
+)
 from bioetl.domain.ports import PipelineFactoryPort
 
 

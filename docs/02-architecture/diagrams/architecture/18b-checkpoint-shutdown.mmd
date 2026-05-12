@@ -27,7 +27,7 @@ graph TB
     end
 
     subgraph Application["Application services"]
-        CMS["CheckpointManagerService"]:::size-sm
+        CMS["CheckpointRuntimeService"]:::size-sm
         CCS["CompositeCheckpointService<br/>thin facade"]:::size-sm
         CLOAD["CompositeCheckpointLoadService"]:::size-sm
         CPERSIST["CompositeCheckpointPersistenceService"]:::size-sm

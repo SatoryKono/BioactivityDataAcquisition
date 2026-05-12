@@ -65,7 +65,7 @@ def test_active_hotspot_family_duplication_ratchets_require_confirmed_clean_hist
     scorecard = _load_scorecard()
     hotspot_policy = scorecard.get("report_only_hotspot_families", {})
     assert isinstance(hotspot_policy, dict)
-    assert hotspot_policy.get("mode") == "report-only"
+    assert hotspot_policy.get("mode") == "fail-fast"
 
     artifact_policy = hotspot_policy.get("artifact_policy", {})
     assert isinstance(artifact_policy, dict)
@@ -103,7 +103,7 @@ def test_active_hotspot_family_duplication_ratchets_require_confirmed_clean_hist
         artifact_policy["confirming_clean_snapshots_required"]
     )
     for family in active_families:
-        assert family.get("ratchet_scope") == "duplication-only"
+        assert family.get("ratchet_scope") == "duplication-plus-bounded-growth"
         metrics = family.get("metrics", {})
         assert isinstance(metrics, dict)
         assert metrics.get("duplication_clusters") == 0

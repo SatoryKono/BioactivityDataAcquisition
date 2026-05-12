@@ -33,7 +33,9 @@ EXPECTED_SHADOW_METRICS = {
 
 def _load_inventory() -> dict[str, Any]:
     payload = yaml.safe_load(INVENTORY_PATH.read_text(encoding="utf-8")) or {}
-    assert isinstance(payload, dict), "silver_filter_boundary_inventory.yaml must be a mapping"
+    assert isinstance(payload, dict), (
+        "silver_filter_boundary_inventory.yaml must be a mapping"
+    )
     return payload
 
 
@@ -107,8 +109,8 @@ def test_every_active_silver_filter_pipeline_has_inventory_row() -> None:
         if pipeline_id not in inventory_rows:
             missing.append(f"{pipeline_id} ({relative_path})")
 
-    assert not missing, (
-        "Missing Silver filter boundary inventory rows:\n" + "\n".join(missing)
+    assert not missing, "Missing Silver filter boundary inventory rows:\n" + "\n".join(
+        missing
     )
 
 
