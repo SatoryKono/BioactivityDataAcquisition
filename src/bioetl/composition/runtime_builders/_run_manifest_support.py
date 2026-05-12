@@ -8,9 +8,6 @@ from typing import TYPE_CHECKING, cast
 from bioetl.composition.runtime_builders._cached_bronze_snapshot_support import (
     build_cached_bronze_input_snapshot_refs,
 )
-from bioetl.composition.runtime_builders.run_manifest_contract_identity import (
-    resolve_contract_identity,
-)
 from bioetl.composition.runtime_builders._run_manifest_refs import (
     ManifestControlPlaneRefs,
     build_planned_artifacts,
@@ -24,6 +21,9 @@ from bioetl.composition.runtime_builders._run_manifest_snapshot_support import (
     resolve_provider_entity,
     resolve_replay_parentage,
     to_serializable_mapping,
+)
+from bioetl.composition.runtime_builders.run_manifest_contract_identity import (
+    resolve_contract_identity,
 )
 from bioetl.domain.control_plane import (
     ReplayCapability,

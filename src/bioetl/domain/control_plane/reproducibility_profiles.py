@@ -6,7 +6,7 @@ from dataclasses import asdict, dataclass
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import Literal
+    pass
 
 from bioetl.domain.control_plane._reproducibility_profile_builders import (
     _PUBLISHED_COMPOSITE_FAMILIES,
@@ -20,9 +20,9 @@ from bioetl.domain.control_plane._reproducibility_profile_builders import (
 # Re-export for type checking
 if TYPE_CHECKING:
     from bioetl.domain.control_plane._reproducibility_profile_builders import (
-        ReproducibilityExecutionContext,
         ReplayFamilyContractName,
         ReplaySupportState,
+        ReproducibilityExecutionContext,
         StrictReplayRuntimeVerdict,
     )
 
@@ -32,11 +32,11 @@ class ReproducibilityFamilyProfile:
     """Published per-family reproducibility profile."""
 
     family: str | None
-    execution_context: "ReproducibilityExecutionContext"
+    execution_context: ReproducibilityExecutionContext
     lineage_closure_supported: bool
     strict_exact_replay_supported: bool
-    support_state: "ReplaySupportState"
-    strict_replay_runtime_verdict: "StrictReplayRuntimeVerdict"
+    support_state: ReplaySupportState
+    strict_replay_runtime_verdict: StrictReplayRuntimeVerdict
     exact_replay_support_boundary: str
     post_capture_replayable_parent_supported: bool
     post_capture_replayable_parent_boundary: str | None
@@ -47,7 +47,7 @@ class ReproducibilityFamilyProfile:
     broader_historical_exact_replay_policy: str
     broader_historical_exact_replay_boundary: str | None
     broader_historical_exact_replay_reason: str
-    replay_family_contract: "ReplayFamilyContractName"
+    replay_family_contract: ReplayFamilyContractName
     default_required_persistence_profile: str
     support_scope: str
     reason: str

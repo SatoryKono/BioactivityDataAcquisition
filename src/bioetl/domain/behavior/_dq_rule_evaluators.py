@@ -5,6 +5,7 @@ Extracted from dq_rule_evaluator.py to meet file size limits.
 
 from __future__ import annotations
 
+import json
 from typing import TYPE_CHECKING
 
 from bioetl.domain.behavior._dq_condition_matchers import (
@@ -190,23 +191,6 @@ def _custom_field_rule_violated(
 
 
 
-def _coerce_numeric_value(value: object) -> float | None:
-    if isinstance(value, bool):
-        return None
-    try:
-        return float(value)
-    except (TypeError, ValueError):
-        return None
-
-
-def _violates_minimum(numeric_value: float, rule: FieldValidation) -> bool:
-    return rule.min_value is not None and numeric_value < rule.min_value
-
-
-def _violates_maximum(numeric_value: float, rule: FieldValidation) -> bool:
-    return rule.max_value is not None and numeric_value > rule.max_value
-
-
 def _coerce_string_list_like(value: str) -> list[object] | None:
     stripped = value.strip()
     if not stripped:
@@ -250,7 +234,7 @@ _CROSS_RULE_EVALUATORS = {
 
 
 __all__ = [
-    "_field_rule_violated",
-    "_cross_rule_violated",
     "_conditional_matches",
+    "_cross_rule_violated",
+    "_field_rule_violated",
 ]

@@ -59,7 +59,7 @@ def test_registry_api_reexports_canonical_registry_symbols() -> None:
         create_registry as canonical_create_registry,
         get_default_registry as canonical_get_default_registry,
     )
-    from bioetl.composition.registry import (
+    from bioetl.composition.factories.pipeline.registry import (
         PipelineDefinition,
         PipelineRegistry,
         create_registry,

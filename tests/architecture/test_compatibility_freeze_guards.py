@@ -872,6 +872,10 @@ def _literal_names_from_value(value: ast.expr) -> frozenset[str]:
             for item in value.elts
             if isinstance(item, ast.Constant) and isinstance(item.value, str)
         )
+    if isinstance(value, ast.Call):
+        # Handle frozenset({...}) and similar calls
+        if len(value.args) == 1:
+            return _literal_names_from_value(value.args[0])
     return frozenset()
 
 

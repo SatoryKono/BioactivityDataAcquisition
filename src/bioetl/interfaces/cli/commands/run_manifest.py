@@ -8,11 +8,11 @@ from typing import TYPE_CHECKING
 
 import click
 
-from bioetl.application.services.control_plane.historical_replay_corpus_service import (
-    HistoricalReplayBulkCertificationSpec,
-)
 from bioetl.application.services.control_plane.historical_replay_certification_service import (
     HistoricalReplaySnapshotCertification,
+)
+from bioetl.application.services.control_plane.historical_replay_corpus_service import (
+    HistoricalReplayBulkCertificationSpec,
 )
 from bioetl.application.services.run_manifest_inspection_service import (
     RunManifestInspectionCorruptionError,
@@ -38,11 +38,11 @@ if TYPE_CHECKING:
 
 __all__ = [
     "COMMANDS",
+    "certify_historical_bulk_command",
     "diff_command",
     "forensic_diff_command",
     "inventory_command",
     "run_manifest",
-    "certify_historical_bulk_command",
     "score_command",
     "show_command",
     "verify_command",

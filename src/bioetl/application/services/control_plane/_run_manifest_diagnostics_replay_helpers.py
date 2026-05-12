@@ -56,8 +56,10 @@ def _requires_resume_without_snapshot_reason(
 def _has_historical_composite_certified_snapshots(
     input_snapshots: list[dict[str, object]],
 ) -> bool:
+    """Return whether ledger/manifest snapshots carry composite certification."""
     return any(
-        snapshot.get("certification") == HISTORICAL_COMPOSITE_REPLAY_ENVELOPE_CERTIFIED
+        _resolve_snapshot_materialization_mode(snapshot)
+        == HISTORICAL_COMPOSITE_REPLAY_ENVELOPE_CERTIFIED
         for snapshot in input_snapshots
     )
 
@@ -65,8 +67,10 @@ def _has_historical_composite_certified_snapshots(
 def _has_historical_source_certified_snapshots(
     input_snapshots: list[dict[str, object]],
 ) -> bool:
+    """Return whether ledger/manifest snapshots carry source certification."""
     return any(
-        snapshot.get("certification") == HISTORICAL_SOURCE_SNAPSHOT_CERTIFIED
+        _resolve_snapshot_materialization_mode(snapshot)
+        == HISTORICAL_SOURCE_SNAPSHOT_CERTIFIED
         for snapshot in input_snapshots
     )
 
@@ -74,10 +78,27 @@ def _has_historical_source_certified_snapshots(
 def _has_live_capture_materialized_snapshots(
     input_snapshots: list[dict[str, object]],
 ) -> bool:
+    """Return whether ledger/manifest snapshots were materialized post-launch."""
     return any(
-        snapshot.get("certification") == LIVE_CAPTURE_SNAPSHOT_MATERIALIZED
+        _resolve_snapshot_materialization_mode(snapshot)
+        == LIVE_CAPTURE_SNAPSHOT_MATERIALIZED
         for snapshot in input_snapshots
     )
+
+
+def _resolve_snapshot_materialization_mode(snapshot: dict[str, object]) -> str | None:
+    """Read the canonical snapshot promotion/materialization marker.
+
+    Historical fixtures used `certification`; current ledger-derived projections
+    populate `materialization_mode`. Accept both to keep diagnostics backward
+    compatible.
+    """
+    for field_name in ("materialization_mode", "certification"):
+        value = snapshot.get(field_name)
+        text = str(value or "").strip()
+        if text:
+            return text
+    return None
 
 
 def _is_full_scan_idempotent_rebuild(manifest: RunManifest) -> bool:

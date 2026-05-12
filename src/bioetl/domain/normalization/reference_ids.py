@@ -48,9 +48,7 @@ from bioetl.domain.normalization._reference_id_registry import (
 )
 from bioetl.domain.normalization._reference_id_support import (
     _CHEMBL_ID_RE,
-    _canonical_or_text,
     _normalized_text,
-    _strip_prefixes,
 )
 from bioetl.domain.normalization.identifiers import normalize_doi, normalize_pmid
 
