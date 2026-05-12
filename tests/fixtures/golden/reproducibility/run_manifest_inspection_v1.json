@@ -19,6 +19,10 @@
     },
     "append_mode_semantic_sinks": [],
     "artifact_refs": [],
+    "broader_historical_exact_replay_boundary": "historical_source_snapshot_certification",
+    "broader_historical_exact_replay_policy": "certified_historical_exact_replay_tranche_supported",
+    "broader_historical_exact_replay_reason": "retained_historical_source_runs_can_gain_certified_exact_replay_parent_evidence_via_backfilled_snapshot_certification",
+    "broader_historical_exact_replay_state": "within_launch_time_snapshot_boundary",
     "code_provenance_state": {
       "dependency_lock_state": "missing",
       "git_commit": "abc1234",
@@ -69,8 +73,16 @@
     "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
     "execution_fingerprint": "fp-golden-001",
     "git_commit": "abc1234",
+    "historical_live_run_upgrade_boundary": "input_snapshot_published_ledger_evidence",
+    "historical_live_run_upgrade_policy": "input_snapshot_published_ledger_evidence_only",
+    "historical_live_run_upgrade_reason": "historical_live_runs_require_input_snapshot_published_ledger_evidence_before_parent_promotion",
+    "historical_live_run_upgrade_state": "not_needed_snapshot_backed_at_launch",
     "identity_graph": {
       "append_mode_semantic_sinks": [],
+      "broader_historical_exact_replay_boundary": "historical_source_snapshot_certification",
+      "broader_historical_exact_replay_policy": "certified_historical_exact_replay_tranche_supported",
+      "broader_historical_exact_replay_reason": "retained_historical_source_runs_can_gain_certified_exact_replay_parent_evidence_via_backfilled_snapshot_certification",
+      "broader_historical_exact_replay_state": "within_launch_time_snapshot_boundary",
       "canonical_execution_identity": {
         "execution_fingerprint": "fp-golden-001",
         "payload": {
@@ -144,6 +156,10 @@
       "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
       "execution_fingerprint": "fp-golden-001",
       "git_commit": "abc1234",
+      "historical_live_run_upgrade_boundary": "input_snapshot_published_ledger_evidence",
+      "historical_live_run_upgrade_policy": "input_snapshot_published_ledger_evidence_only",
+      "historical_live_run_upgrade_reason": "historical_live_runs_require_input_snapshot_published_ledger_evidence_before_parent_promotion",
+      "historical_live_run_upgrade_state": "not_needed_snapshot_backed_at_launch",
       "input_snapshot_content_hashes": [
         "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
       ],
@@ -181,6 +197,8 @@
           "path": "silver/chembl/activity"
         }
       ],
+      "post_capture_replayable_parent_boundary": "ledger_materialized_live_capture_parent",
+      "post_capture_replayable_parent_supported": true,
       "produced_artifact_trace": {
         "artifact_count": 0,
         "artifacts": [],
@@ -197,11 +215,20 @@
       "replay_capability": "exact_replay_supported",
       "replay_capability_reason": "full_immutable_input_snapshot_envelope_present",
       "replay_family_contract": {
+        "broader_historical_exact_replay_boundary": "historical_source_snapshot_certification",
+        "broader_historical_exact_replay_policy": "certified_historical_exact_replay_tranche_supported",
+        "broader_historical_exact_replay_reason": "retained_historical_source_runs_can_gain_certified_exact_replay_parent_evidence_via_backfilled_snapshot_certification",
         "contract": "snapshot_backed_exact_replay",
         "default_required_persistence_profile": "replay_ready",
         "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
         "execution_context": "source",
         "family": "chembl.activity",
+        "historical_live_run_upgrade_boundary": "input_snapshot_published_ledger_evidence",
+        "historical_live_run_upgrade_policy": "input_snapshot_published_ledger_evidence_only",
+        "historical_live_run_upgrade_reason": "historical_live_runs_require_input_snapshot_published_ledger_evidence_before_parent_promotion",
+        "post_capture_replayable_parent_boundary": "ledger_materialized_live_capture_parent",
+        "post_capture_replayable_parent_reason": "family_can_promote_materialized_live_capture_into_replayable_parent_evidence",
+        "post_capture_replayable_parent_supported": true,
         "reason": "family_within_supported_boundary",
         "strict_exact_replay_supported": true,
         "strict_replay_runtime_verdict": "allowed_with_snapshot_backed_source_refs",
@@ -232,6 +259,7 @@
         ]
       },
       "replay_mode": "exact_replay",
+      "replay_occurrence_kind": "launch_time_snapshot_backed_run",
       "replay_of_manifest_id": null,
       "replay_of_run_id": null,
       "replay_parentage": {
@@ -420,6 +448,8 @@
         "path": "silver/chembl/activity"
       }
     ],
+    "post_capture_replayable_parent_boundary": "ledger_materialized_live_capture_parent",
+    "post_capture_replayable_parent_supported": true,
     "produced_artifact_trace": {
       "artifact_count": 0,
       "artifacts": [],
@@ -454,11 +484,20 @@
     },
     "replay_capability_reason": "full_immutable_input_snapshot_envelope_present",
     "replay_family_contract": {
+      "broader_historical_exact_replay_boundary": "historical_source_snapshot_certification",
+      "broader_historical_exact_replay_policy": "certified_historical_exact_replay_tranche_supported",
+      "broader_historical_exact_replay_reason": "retained_historical_source_runs_can_gain_certified_exact_replay_parent_evidence_via_backfilled_snapshot_certification",
       "contract": "snapshot_backed_exact_replay",
       "default_required_persistence_profile": "replay_ready",
       "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
       "execution_context": "source",
       "family": "chembl.activity",
+      "historical_live_run_upgrade_boundary": "input_snapshot_published_ledger_evidence",
+      "historical_live_run_upgrade_policy": "input_snapshot_published_ledger_evidence_only",
+      "historical_live_run_upgrade_reason": "historical_live_runs_require_input_snapshot_published_ledger_evidence_before_parent_promotion",
+      "post_capture_replayable_parent_boundary": "ledger_materialized_live_capture_parent",
+      "post_capture_replayable_parent_reason": "family_can_promote_materialized_live_capture_into_replayable_parent_evidence",
+      "post_capture_replayable_parent_supported": true,
       "reason": "family_within_supported_boundary",
       "strict_exact_replay_supported": true,
       "strict_replay_runtime_verdict": "allowed_with_snapshot_backed_source_refs",
@@ -489,6 +528,7 @@
       ]
     },
     "replay_mode": "exact_replay",
+    "replay_occurrence_kind": "launch_time_snapshot_backed_run",
     "replay_of_manifest_id": null,
     "replay_of_run_id": null,
     "replay_parentage": {
@@ -850,6 +890,10 @@
       },
       "policy": {
         "attained_profile": "degraded_observable",
+        "broader_historical_exact_replay_boundary": "historical_source_snapshot_certification",
+        "broader_historical_exact_replay_policy": "certified_historical_exact_replay_tranche_supported",
+        "broader_historical_exact_replay_reason": "retained_historical_source_runs_can_gain_certified_exact_replay_parent_evidence_via_backfilled_snapshot_certification",
+        "broader_historical_exact_replay_state": "within_launch_time_snapshot_boundary",
         "capability_assessment": {
           "blocking_gaps": [],
           "replay_capability": "exact_replay_supported",
@@ -872,14 +916,29 @@
           "dependency_lock_provenance_missing"
         ],
         "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
+        "historical_live_run_upgrade_boundary": "input_snapshot_published_ledger_evidence",
+        "historical_live_run_upgrade_policy": "input_snapshot_published_ledger_evidence_only",
+        "historical_live_run_upgrade_reason": "historical_live_runs_require_input_snapshot_published_ledger_evidence_before_parent_promotion",
+        "historical_live_run_upgrade_state": "not_needed_snapshot_backed_at_launch",
         "operator_replay_mode": "Exact Replay Blocked",
+        "post_capture_replayable_parent_boundary": "ledger_materialized_live_capture_parent",
+        "post_capture_replayable_parent_supported": true,
         "replay_capability": "exact_replay_supported",
         "replay_family_contract": {
+          "broader_historical_exact_replay_boundary": "historical_source_snapshot_certification",
+          "broader_historical_exact_replay_policy": "certified_historical_exact_replay_tranche_supported",
+          "broader_historical_exact_replay_reason": "retained_historical_source_runs_can_gain_certified_exact_replay_parent_evidence_via_backfilled_snapshot_certification",
           "contract": "snapshot_backed_exact_replay",
           "default_required_persistence_profile": "replay_ready",
           "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
           "execution_context": "source",
           "family": "chembl.activity",
+          "historical_live_run_upgrade_boundary": "input_snapshot_published_ledger_evidence",
+          "historical_live_run_upgrade_policy": "input_snapshot_published_ledger_evidence_only",
+          "historical_live_run_upgrade_reason": "historical_live_runs_require_input_snapshot_published_ledger_evidence_before_parent_promotion",
+          "post_capture_replayable_parent_boundary": "ledger_materialized_live_capture_parent",
+          "post_capture_replayable_parent_reason": "family_can_promote_materialized_live_capture_into_replayable_parent_evidence",
+          "post_capture_replayable_parent_supported": true,
           "reason": "family_within_supported_boundary",
           "strict_exact_replay_supported": true,
           "strict_replay_runtime_verdict": "allowed_with_snapshot_backed_source_refs",
@@ -910,6 +969,7 @@
           ]
         },
         "replay_mode": "exact_replay",
+        "replay_occurrence_kind": "launch_time_snapshot_backed_run",
         "replay_readiness_verdict": "exact_replay_blocked",
         "required_persistence_profile": "replay_ready",
         "required_profile_missing_requirements": [
@@ -960,6 +1020,10 @@
   },
   "identity_graph": {
     "append_mode_semantic_sinks": [],
+    "broader_historical_exact_replay_boundary": "historical_source_snapshot_certification",
+    "broader_historical_exact_replay_policy": "certified_historical_exact_replay_tranche_supported",
+    "broader_historical_exact_replay_reason": "retained_historical_source_runs_can_gain_certified_exact_replay_parent_evidence_via_backfilled_snapshot_certification",
+    "broader_historical_exact_replay_state": "within_launch_time_snapshot_boundary",
     "canonical_execution_identity": {
       "execution_fingerprint": "fp-golden-001",
       "payload": {
@@ -1033,6 +1097,10 @@
     "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
     "execution_fingerprint": "fp-golden-001",
     "git_commit": "abc1234",
+    "historical_live_run_upgrade_boundary": "input_snapshot_published_ledger_evidence",
+    "historical_live_run_upgrade_policy": "input_snapshot_published_ledger_evidence_only",
+    "historical_live_run_upgrade_reason": "historical_live_runs_require_input_snapshot_published_ledger_evidence_before_parent_promotion",
+    "historical_live_run_upgrade_state": "not_needed_snapshot_backed_at_launch",
     "input_snapshot_content_hashes": [
       "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
     ],
@@ -1070,6 +1138,8 @@
         "path": "silver/chembl/activity"
       }
     ],
+    "post_capture_replayable_parent_boundary": "ledger_materialized_live_capture_parent",
+    "post_capture_replayable_parent_supported": true,
     "produced_artifact_trace": {
       "artifact_count": 0,
       "artifacts": [],
@@ -1086,11 +1156,20 @@
     "replay_capability": "exact_replay_supported",
     "replay_capability_reason": "full_immutable_input_snapshot_envelope_present",
     "replay_family_contract": {
+      "broader_historical_exact_replay_boundary": "historical_source_snapshot_certification",
+      "broader_historical_exact_replay_policy": "certified_historical_exact_replay_tranche_supported",
+      "broader_historical_exact_replay_reason": "retained_historical_source_runs_can_gain_certified_exact_replay_parent_evidence_via_backfilled_snapshot_certification",
       "contract": "snapshot_backed_exact_replay",
       "default_required_persistence_profile": "replay_ready",
       "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
       "execution_context": "source",
       "family": "chembl.activity",
+      "historical_live_run_upgrade_boundary": "input_snapshot_published_ledger_evidence",
+      "historical_live_run_upgrade_policy": "input_snapshot_published_ledger_evidence_only",
+      "historical_live_run_upgrade_reason": "historical_live_runs_require_input_snapshot_published_ledger_evidence_before_parent_promotion",
+      "post_capture_replayable_parent_boundary": "ledger_materialized_live_capture_parent",
+      "post_capture_replayable_parent_reason": "family_can_promote_materialized_live_capture_into_replayable_parent_evidence",
+      "post_capture_replayable_parent_supported": true,
       "reason": "family_within_supported_boundary",
       "strict_exact_replay_supported": true,
       "strict_replay_runtime_verdict": "allowed_with_snapshot_backed_source_refs",
@@ -1121,6 +1200,7 @@
       ]
     },
     "replay_mode": "exact_replay",
+    "replay_occurrence_kind": "launch_time_snapshot_backed_run",
     "replay_of_manifest_id": null,
     "replay_of_run_id": null,
     "replay_parentage": {

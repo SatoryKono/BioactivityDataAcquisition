@@ -212,6 +212,8 @@ Retained corpus triage and certification:
 bioetl run-manifest inventory
 bioetl run-manifest inventory --format json
 bioetl run-manifest certify-historical-bulk path/to/plan.json --format json
+bioetl run-manifest closure-report --write --format json
+./.venv/bin/python scripts/engineering/qa/run_historical_replay_closure_campaign.py --write-dispositions --write-report
 ```
 
 Interpretation:
@@ -230,6 +232,30 @@ Interpretation:
   and reclassifies runs into
   `historical_source_replay_certified_parent` or
   `historical_composite_replay_certified_parent`.
+- `closure-report --write` persists one retained-corpus closure artifact under
+  `data/output/control/historical_replay_closure/{report_id}.json`.
+- `run_historical_replay_closure_campaign.py` is the deterministic batch path
+  for retained-corpus campaigns: it builds the inventory, optionally emits a
+  residual-disposition artifact, and persists the matching closure report in
+  one pass.
+- the closure artifact publishes
+  `global_universal_historical_replay_claim` and `retained_corpus_claim`
+  separately. The first is the strong governance gate for broad universal
+  historical replay language; the second is the narrower retained-corpus
+  closure gate.
+- if `closure_verdict=residual_disposition_required`, operators must attach an
+  explicit residual disposition file with entries for every blocked manifest.
+  Supported disposition values are:
+  `reconstruct_immutable_evidence`,
+  `expand_retention_and_publish_evidence`,
+  `certify_upstream_source_lineage`,
+  `irrecoverable_missing_immutable_evidence`,
+  `outside_universal_claim_scope`,
+  `manual_review_required`.
+- if any residual disposition uses
+  `irrecoverable_missing_immutable_evidence`, the global universal claim gate
+  remains blocked even though the closure artifact itself is valid and
+  persisted.
 
 ### 4. Inspect storage layout directly when needed
 

@@ -20,7 +20,10 @@ groups:
         expr: (max by (pipeline, run_type) (max_over_time(bioetl_stage_backlog_records{stage="ingestion"}[15m])) > bool 0) and on (pipeline, run_type) (max by (pipeline, run_type) (max_over_time(bioetl_stage_lag_seconds{stage="ingestion"}[15m])) >= bool 300)
 
       - record: bioetl_runtime_alert_condition_stage_backlog_active_15m
-        expr: max by (pipeline, run_type, stage) (bioetl_stage_backlog_records) > bool 0
+        expr: max by (pipeline, run_type, stage) (bioetl_stage_backlog_records{stage!="validation"}) > bool 0
+
+      - record: bioetl_runtime_alert_condition_validation_backlog_active_15m
+        expr: max by (pipeline, run_type) (bioetl_stage_backlog_records{stage="validation"}) > bool 0
 
       - record: bioetl_runtime_alert_condition_stage_lag_high_15m
         expr: max by (pipeline, run_type, stage) (max_over_time(bioetl_stage_lag_seconds[15m])) >= bool 300
@@ -389,7 +392,7 @@ groups:
           ) > 0
 
       - record: bioetl_runtime_current_degraded_signals_15m
-        expr: max by (pipeline, run_type) (bioetl_runtime_alert_condition_no_terminal_run_30m or bioetl_runtime_alert_condition_ingestion_throughput_degraded_15m or bioetl_runtime_alert_condition_record_flow_invariant_violated_15m) > 0
+        expr: max by (pipeline, run_type) (bioetl_runtime_alert_condition_no_terminal_run_30m or bioetl_runtime_alert_condition_ingestion_throughput_degraded_15m or bioetl_runtime_alert_condition_record_flow_invariant_violated_15m or bioetl_runtime_alert_condition_validation_backlog_active_15m) > 0
 
       - record: bioetl_runtime_current_status
         expr: (bioetl_runtime_current_failure_signals_15m * 2) or (bioetl_runtime_current_degraded_signals_15m unless on (pipeline, run_type) bioetl_runtime_current_failure_signals_15m) or (((bioetl_runtime_current_activity_15m * 0) unless on (pipeline, run_type) bioetl_runtime_current_failure_signals_15m) unless on (pipeline, run_type) bioetl_runtime_current_degraded_signals_15m)
@@ -418,6 +421,12 @@ groups:
           severity: failing
           action_target: runtime
         expr: bioetl_runtime_alert_condition_stage_backlog_active_15m
+      - record: bioetl_runtime_current_blocker_reason
+        labels:
+          reason: validation_backlog
+          severity: degraded
+          action_target: data_quality
+        expr: bioetl_runtime_alert_condition_validation_backlog_active_15m
       - record: bioetl_runtime_current_blocker_reason
         labels:
           reason: stage_lag

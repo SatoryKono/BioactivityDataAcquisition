@@ -519,7 +519,8 @@ class TestSilverWriterDQMetrics:
         assert result.delta_version == 7
         assert writer._get_delta_version.await_count == 1
         writer._write_silver_metadata.assert_awaited_once()
-        assert writer._write_silver_metadata.await_args.kwargs["version_after"] == 7
+        request = writer._write_silver_metadata.await_args.args[0]
+        assert request.version_after == 7
 
     @pytest.mark.asyncio
     async def test_prepare_silver_write_finalization_context_returns_named_context(

@@ -70,6 +70,8 @@ class WorkflowRunExecutionResult:
     workflow_run_id: str | None = None
     manifest_id: str | None = None
     execution_fingerprint: str | None = None
+    error_type: str | None = None
+    error_message: str | None = None
     resumed: bool = False
 
     @property
@@ -166,10 +168,16 @@ class WorkflowRunnerService:
                 **workflow_context_labels,
             },
         )
+        failed_step = next(
+            (step for step in step_results if step.status == "failed"),
+            None,
+        )
         return WorkflowRunExecutionResult(
             workflow_name=config.name,
             status=status,
             steps=tuple(step_results),
+            error_type=None if failed_step is None else failed_step.error_type,
+            error_message=None if failed_step is None else failed_step.error_message,
         )
 
     async def _run_step(

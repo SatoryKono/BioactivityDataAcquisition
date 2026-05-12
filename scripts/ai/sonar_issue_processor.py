@@ -438,6 +438,17 @@ def fetch_live_issue_summary(
             }
 
         if response.status_code != 200:
+            if response.status_code in {401, 403}:
+                return {
+                    "status": "error",
+                    "reason": "auth_failed",
+                    "status_code": response.status_code,
+                    "message": (
+                        "Sonar API rejected the configured token or project access. "
+                        "Refresh SONARQUBE_TOKEN / SONAR_TOKEN and verify project "
+                        "permissions."
+                    ),
+                }
             return {
                 "status": "error",
                 "reason": "http_error",

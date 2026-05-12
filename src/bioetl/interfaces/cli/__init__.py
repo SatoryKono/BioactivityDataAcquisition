@@ -42,11 +42,18 @@ def create_pipeline_runner(
     return impl(name, options)
 
 
-def main() -> None:
+_main_module = import_module("bioetl.interfaces.cli.main")
+cli = getattr(_main_module, "cli")
+
+
+def _main_entrypoint() -> None:
     """Invoke the canonical CLI entry point."""
-    from bioetl.interfaces.cli.main import main as _impl
+    _impl = getattr(_main_module, "main")
 
     _impl()
+
+
+main = _main_entrypoint
 
 
 def __dir__() -> list[str]:
@@ -62,7 +69,6 @@ __all__ = [
 ]
 
 _PUBLIC_EXPORTS = {
-    "cli": ("bioetl.interfaces.cli.main", "cli"),
     "validate_pipeline_name": (
         "bioetl.interfaces.cli.commands.domains.run.support",
         "validate_pipeline_name",
