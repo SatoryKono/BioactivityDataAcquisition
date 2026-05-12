@@ -25,6 +25,9 @@ if TYPE_CHECKING:
     from bioetl.application.services.control_plane.forensic_diff_service import (
         ForensicRunDiffService,
     )
+    from bioetl.application.services.control_plane.historical_replay_closure_service import (
+        HistoricalReplayClosureService,
+    )
     from bioetl.application.services.control_plane.historical_replay_corpus_service import (
         HistoricalReplayCorpusService,
     )
@@ -75,6 +78,7 @@ __all__ = [
     "get_contract_migration_service",
     "get_export_service",
     "get_forensic_run_diff_service",
+    "get_historical_replay_closure_service",
     "get_health_server_dependencies",
     "get_health_service",
     "get_historical_replay_corpus_service",
@@ -108,6 +112,9 @@ _BOOTSTRAP_EXPORT_MODULES: dict[str, str] = {
         "bioetl.composition.bootstrap.cli.run_manifest"
     ),
     "bootstrap_historical_replay_corpus_service": (
+        "bioetl.composition.bootstrap.cli.run_manifest"
+    ),
+    "bootstrap_historical_replay_closure_service": (
         "bioetl.composition.bootstrap.cli.run_manifest"
     ),
     "bootstrap_health_server_dependencies": ("bioetl.composition.bootstrap.cli.health"),
@@ -270,6 +277,15 @@ def get_historical_replay_corpus_service() -> HistoricalReplayCorpusService:
         "bootstrap_historical_replay_corpus_service"
     )
     return cast("HistoricalReplayCorpusService", bootstrap())
+
+
+def get_historical_replay_closure_service() -> HistoricalReplayClosureService:
+    """Get retained-corpus closure reporting workflows for CLI operations."""
+    _ensure_registrations()
+    bootstrap = _resolve_bootstrap_callable(
+        "bootstrap_historical_replay_closure_service"
+    )
+    return cast("HistoricalReplayClosureService", bootstrap())
 
 
 def get_lineage_service() -> LineageInspectionService:

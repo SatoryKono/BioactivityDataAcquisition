@@ -160,13 +160,10 @@ def _extract_incremental_metadata(
     for step in config.steps:
         if isinstance(step, WorkflowStepConfig):
             offset = step.run_options.start_offset
-            limit = step.run_options.limit
             # Treat None as 0 for incremental tracking
             if offset is None:
                 offset = 0
-            print(f"DEBUG _extract_incremental_metadata: offset={offset}, limit={limit}")
-            return (offset, limit)
-    print("DEBUG _extract_incremental_metadata: no pipeline steps found")
+            return (offset, step.run_options.limit)
     return (None, None)
 
 

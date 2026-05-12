@@ -17,6 +17,9 @@ from bioetl.infrastructure.control_plane.file_effective_config_artifact_store im
     EffectiveConfigArtifactConflictError,
     FileEffectiveConfigArtifactStore,
 )
+from bioetl.infrastructure.control_plane.file_historical_replay_closure_store import (
+    FileHistoricalReplayClosureStore,
+)
 from bioetl.infrastructure.control_plane.file_lineage_store import (
     FileLineageStore,
 )
@@ -43,6 +46,7 @@ __all__ = [
     "FileContractRegistryStore",
     "FileControlPlaneArtifactLifecycleStore",
     "FileEffectiveConfigArtifactStore",
+    "FileHistoricalReplayClosureStore",
     "FileLineageStore",
     "FileRunLedgerStore",
     "FileRunManifestStore",
