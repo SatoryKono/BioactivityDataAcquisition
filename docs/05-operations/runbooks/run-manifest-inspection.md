@@ -213,7 +213,7 @@ bioetl run-manifest inventory
 bioetl run-manifest inventory --format json
 bioetl run-manifest certify-historical-bulk path/to/plan.json --format json
 bioetl run-manifest closure-report --write --format json
-./.venv/bin/python scripts/engineering/qa/run_historical_replay_closure_campaign.py --write-dispositions --write-report
+./.venv/bin/python scripts/engineering/qa/run_historical_replay_closure_campaign.py --auto-certify-sources --auto-certify-composites --claim-scope-mode retained_certifiable_historical_runs --write-dispositions --write-report
 ```
 
 Interpretation:
@@ -236,13 +236,21 @@ Interpretation:
   `data/output/control/historical_replay_closure/{report_id}.json`.
 - `run_historical_replay_closure_campaign.py` is the deterministic batch path
   for retained-corpus campaigns: it builds the inventory, optionally emits a
-  residual-disposition artifact, and persists the matching closure report in
-  one pass.
+  residual-disposition artifact, may auto-certify retained source/composite
+  runs when trustworthy evidence exists, and persists the matching closure
+  report in one pass.
 - the closure artifact publishes
   `global_universal_historical_replay_claim` and `retained_corpus_claim`
   separately. The first is the strong governance gate for broad universal
   historical replay language; the second is the narrower retained-corpus
   closure gate.
+- the closure artifact also publishes `claim_scope_mode`. Use
+  `all_retained_historical_runs` only when every retained run is expected to
+  close inside the same strong claim. Use
+  `retained_certifiable_historical_runs` when the remaining legacy subset must
+  be explicitly excluded through
+  `irrecoverable_missing_immutable_evidence` or
+  `outside_universal_claim_scope`.
 - if `closure_verdict=residual_disposition_required`, operators must attach an
   explicit residual disposition file with entries for every blocked manifest.
   Supported disposition values are:
