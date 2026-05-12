@@ -12,7 +12,7 @@ from bioetl.application.composite._preflight_types import (
 
 
 @dataclass(frozen=True, slots=True)
-class FieldPriorityScan:
+class FieldPriorityScanResult:
     """Collected schema facts for one field-priority declaration."""
 
     issues: list[ValidationIssue]
@@ -28,7 +28,7 @@ def scan_field_priority(
     valid_sources: frozenset[str],
     source_fields: dict[str, SchemaFields],
     source_profiles: dict[str, ProfileInfo],
-) -> FieldPriorityScan:
+) -> FieldPriorityScanResult:
     """Collect schema, dtype, and profile facts for one priority list."""
     issues: list[ValidationIssue] = []
     resolved_source: str | None = None
@@ -75,7 +75,7 @@ def scan_field_priority(
         if resolved_source is None:
             resolved_source = source
 
-    return FieldPriorityScan(
+    return FieldPriorityScanResult(
         issues=issues,
         resolved_source=resolved_source,
         field_dtypes=field_dtypes,

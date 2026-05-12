@@ -144,7 +144,7 @@ classDiagram
         +list_all() list~str~
     }
 
-    class CompositePreflightValidator {
+    class CompositePreflightValidationService {
         -_delta_reader: DeltaReaderPort
         -_logger: LoggerPort
         +validate(config) list~str~
@@ -159,6 +159,6 @@ classDiagram
     CompositeRunnerDependencyGroup --> EnrichmentCoordinatorService
     CompositeRunnerDependencyGroup --> MergeService
     CompositeRunnerDependencyGroup --> FSMStateHelperService
-    CompositeRunnerDependencyGroup --> CompositePreflightValidator
+    CompositeRunnerDependencyGroup --> CompositePreflightValidationService
     CompositeCheckpointService --> CompositeCheckpointLoadService
     CompositeCheckpointService --> CompositeCheckpointPersistenceService

@@ -68,7 +68,7 @@ flowchart TB
         direction TB
         ProviderAdapters["Provider adapters"]
         HTTPStack["Unified HTTP stack"]
-        StorageAdapters["Bronze / Delta / Gold adapters"]
+        StorageRuntime["Bronze / Delta / Gold storage"]
         StateAdapters["Lock / checkpoint adapters"]
         ControlPlaneStores["FileRunManifestStore / FileRunLedgerStore /<br/>FileLineageStore"]
         Observability["Metrics / tracing adapters"]
@@ -120,22 +120,22 @@ flowchart TB
     PipelineRunner --> Errors
 
     ProviderAdapters -.->|"implement"| Ports
-    StorageAdapters -.->|"implement"| Ports
+    StorageRuntime -.->|"implement"| Ports
     StateAdapters -.->|"implement"| Ports
     ControlPlaneStores -.->|"implement"| Ports
     Observability -.->|"implement"| Ports
 
     ProviderAdapters --> HTTPStack
-    StorageFactory --> StorageAdapters
+    StorageFactory --> StorageRuntime
     BuildRunner --> StateAdapters
     ControlPlaneBuild --> ControlPlaneStores
     BuildRunner --> Observability
 
-    StorageAdapters ==> Bronze
-    StorageAdapters ==> Silver
-    StorageAdapters ==> Gold
+    StorageRuntime ==> Bronze
+    StorageRuntime ==> Silver
+    StorageRuntime ==> Gold
     StateAdapters --> ControlPlane
-    StorageAdapters -.-> ControlPlane
+    StorageRuntime -.-> ControlPlane
     ControlPlaneStores --> ControlPlane
     ControlPlaneServices --> ConfigArtifacts
 

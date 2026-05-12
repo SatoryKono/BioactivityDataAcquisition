@@ -63,7 +63,7 @@ graph TB
     end
 
     subgraph CompositePath["Composite runtime caveat"]
-        CPR["CompositePipelineRunnerService"]:::size-lg
+        CPR["CompositePipelineRunner"]:::size-lg
         NOTE["Composite path acquires LockPort directly<br/>and does not use LockRuntimeService heartbeat"]:::size-lg
     end
 

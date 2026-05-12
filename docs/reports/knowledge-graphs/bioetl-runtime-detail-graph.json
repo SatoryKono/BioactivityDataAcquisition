@@ -139,7 +139,7 @@
         },
         {
           "id": "composite-runner-service",
-          "label": "CompositePipelineRunnerService",
+          "label": "CompositePipelineRunner",
           "type": "technology",
           "description": "Сервис composite execution, который координирует seed, dependency и enricher runner factories через typed dependency bundle."
         },
@@ -338,7 +338,7 @@
           "source": "runtime-runner-assembly",
           "target": "composite-runner-service",
           "type": "dependency",
-          "description": "Runner Assembly materializes CompositePipelineRunnerService by bundling typed dependencies such as coordinator, merger, checkpoint manager, factories, and optional ledger collaborators."
+          "description": "Runner Assembly materializes CompositePipelineRunner by bundling typed dependencies such as coordinator, merger, checkpoint manager, factories, and optional ledger collaborators."
         },
         {
           "id": "e-runtime-composite-bootstrap-control-plane",
@@ -352,7 +352,7 @@
           "source": "composite-runner-service",
           "target": "pipeline-runner-instance",
           "type": "related",
-          "description": "CompositePipelineRunnerService coordinates multiple PipelineRunner Instance factories for seed, dependency, and enricher phases instead of duplicating single-pipeline runtime logic."
+          "description": "CompositePipelineRunner coordinates multiple PipelineRunner Instance factories for seed, dependency, and enricher phases instead of duplicating single-pipeline runtime logic."
         },
         {
           "id": "e-core-preflight-config-access",

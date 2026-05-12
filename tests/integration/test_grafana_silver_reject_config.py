@@ -458,6 +458,37 @@ def test_silver_reject_summary_panels_use_quarantine_explorer_stats_endpoint() -
         )
 
 
+def test_silver_reject_summary_panels_tie_zero_state_to_datasource_response() -> None:
+    """Explorer copy must distinguish real zero-reject results from datasource UNKNOWN."""
+    dashboard = load_dashboard(
+        Path("grafana/dashboards/bioetl-silver-reject-explorer.json")
+    )
+    expected_phrases = {
+        "Monitor Filtered Records Total": (
+            "0 is normal only when Quarantine Explorer responds",
+            "No data or datasource errors are UNKNOWN",
+        ),
+        "Track Reject Rate vs Bronze": (
+            "Selected-range reject_ratio, bronze_records, and total from /ops/quarantine/filtered-stats",
+            "bronze_records=0 means the denominator is missing/empty and the signal is UNKNOWN",
+        ),
+        "Inspect Run Scope Summary": (
+            "Quarantine Explorer responds",
+            "zero-reject workflow run is therefore a legitimate empty explorer state",
+        ),
+    }
+
+    for panel in get_dashboard_panels(dashboard):
+        title = panel.get("title")
+        if title not in expected_phrases:
+            continue
+        description = str(panel.get("description", ""))
+        for phrase in expected_phrases[title]:
+            assert phrase in description, (
+                f"{title} must document datasource-backed zero-state semantics: {phrase}"
+            )
+
+
 def test_dq_reject_panels_link_to_silver_reject_explorer() -> None:
     """DQ reject count panel should hand off directly; breakdown panels should guide the same handoff."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))

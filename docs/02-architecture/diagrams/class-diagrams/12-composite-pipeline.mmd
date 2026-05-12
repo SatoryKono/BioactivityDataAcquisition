@@ -76,7 +76,7 @@ classDiagram
         +get_completed_stages()
     }
 
-    class CompositePreflightValidator {
+    class CompositePreflightValidationService {
         +validate(config)
     }
 
@@ -93,7 +93,7 @@ classDiagram
     CompositePipelineRunner *-- DependencyCoordinator
     CompositePipelineRunner *-- MergeService
     CompositePipelineRunner *-- CompositeCheckpointService
-    CompositePipelineRunner *-- CompositePreflightValidator
+    CompositePipelineRunner *-- CompositePreflightValidationService
     CompositePipelineRunner o-- CompositeRuntimeConfig
 
     MergeService *-- EnricherDeduplicator

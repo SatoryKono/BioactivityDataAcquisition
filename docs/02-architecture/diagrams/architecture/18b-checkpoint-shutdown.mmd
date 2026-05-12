@@ -41,7 +41,7 @@ graph TB
 
     subgraph Lifecycle["Lifecycle integration"]
         PIPE["Pipeline run lifecycle"]:::size-sm
-        CPR["CompositePipelineRunnerService"]:::size-sm
+        CPR["CompositePipelineRunner"]:::size-sm
         NOTE["Composite resume may load current run-id file<br/>or latest matching checkpoint."]:::size-sm
     end
 
