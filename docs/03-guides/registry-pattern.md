@@ -61,7 +61,7 @@ than calling methods on the class itself.
 
 ```python
 from bioetl.composition.factories.pipeline.registry import register_all_pipelines
-from bioetl.composition import create_registry
+from bioetl.composition.registry_api import create_registry
 
 registry = create_registry()
 register_all_pipelines(registry=registry)
@@ -204,7 +204,7 @@ of mutating private registry state.
 import pytest
 
 from bioetl.composition.factories.pipeline.registry import register_all_pipelines
-from bioetl.composition import create_registry
+from bioetl.composition.registry_api import create_registry
 
 
 @pytest.fixture

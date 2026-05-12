@@ -106,7 +106,7 @@ COMMAND_DELEGATION_CASES: tuple[
     (
         "bioetl.interfaces.cli.commands.diagnostics",
         "get_observability_diagnostics_bundle",
-        "bioetl.interfaces.observability.get_observability_diagnostics_bundle",
+        "bioetl.composition.observability_api.get_observability_diagnostics_bundle",
         _no_args,
         object(),
         "identity",

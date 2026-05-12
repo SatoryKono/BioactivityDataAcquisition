@@ -22,7 +22,7 @@ from bioetl.composition.bootstrap.cli.storage import (
     bootstrap_vacuum_service,
 )
 from bioetl.composition.factories.storage import StorageBundle
-from bioetl.composition import PipelineRegistry
+from bioetl.composition.registry_api import PipelineRegistry
 from bioetl.infrastructure.export.csv_exporter import CsvExporter
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.time import SystemClock
@@ -171,7 +171,9 @@ class TestBootstrapBronzeCleanupService:
 
         result = bootstrap_bronze_cleanup_service()
 
-        from bioetl.application.services import BronzeCleanupService
+        from bioetl.application.services.bronze_cleanup_service import (
+            BronzeCleanupService,
+        )
 
         assert isinstance(result, BronzeCleanupService)
 
@@ -203,7 +205,7 @@ class TestBootstrapVacuumService:
 
         result = bootstrap_vacuum_service()
 
-        from bioetl.application.services import VacuumService
+        from bioetl.application.services.vacuum_service import VacuumService
 
         assert isinstance(result, VacuumService)
 

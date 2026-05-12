@@ -34,7 +34,7 @@ classDiagram
 
         class MedallionLifecycleService {
             <<dataclass>>
-            +storage: StoragePort
+            +storage: MedallionStorageProtocol
             +logger: LoggerPort
             +prepare_for_run(config, runtime): PrepareResult
             +finalize_run(config, runtime): VacuumResult
@@ -42,7 +42,7 @@ classDiagram
 
         class VacuumService {
             <<dataclass>>
-            +storage: StoragePort
+            +lifecycle: MedallionLifecycleService
             +logger: LoggerPort
             +vacuum_all(): None
         }

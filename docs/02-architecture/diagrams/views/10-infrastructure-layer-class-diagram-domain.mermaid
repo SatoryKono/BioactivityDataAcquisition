@@ -6,7 +6,7 @@ flowchart TB
     subgraph Domain["Domain Layer"]
         direction TB
         N1["DataSourcePort"]
-        N2["StoragePort"]
+        N2["Bronze/Silver/GoldStoragePorts"]
         N3["CsvExporter"]
         N4["MetricsPort"]
         N5["RetryPolicy"]

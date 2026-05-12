@@ -84,19 +84,6 @@ rules:
           - published_online
           - published_print
           - references
-      MISSING_TRANSFORMER:
-        classification: should_fix
-        owner_issue: 3217
-        rationale: Contract drift gates should decide whether these Crossref fields are implemented or removed.
-        fields:
-          - content_domain_crossmark_restriction
-          - content_domain_domains
-          - issn_electronic
-          - issn_list
-          - issn_print
-          - published_online
-          - published_print
-
   - path: docs/04-reference/pipelines/openalex/publication-xwalk.csv
     markers:
       MISSING_DOC:

@@ -13,7 +13,7 @@ stateDiagram-v2
     [*] --> PENDING: PipelineRun created
 
     PENDING --> LOCKING: runner.run()
-    LOCKING --> LOCKED: LockCoordinator.acquire()
+    LOCKING --> LOCKED: LockRuntimeService.acquire()
     LOCKING --> FAILED: LockAcquisitionError
 
     LOCKED --> PREFLIGHT: PreflightService.run()
@@ -31,7 +31,7 @@ stateDiagram-v2
         VALIDATING --> QUARANTINING: DQ error rate > threshold
         QUARANTINING --> WRITING: QuarantineManager.route()
         WRITING --> CHECKPOINTING: BatchWriter.write()
-        CHECKPOINTING --> EXTRACTING: CheckpointManagerService.save()\nmore batches
+        CHECKPOINTING --> EXTRACTING: CheckpointRuntimeService.save()\nmore batches
         CHECKPOINTING --> BATCH_DONE: no more batches
     }
 
@@ -49,7 +49,7 @@ stateDiagram-v2
     COMPLETED --> RELEASING: success
     FAILED --> RELEASING: error path
     CANCELLED --> [*]
-    RELEASING ==> [*]: LockCoordinator.release()\nHeartbeatTask.stop()
+    RELEASING ==> [*]: LockRuntimeService.release()\nHeartbeatTask.stop()
 
     note right of LOCKED
         HeartbeatTask starts

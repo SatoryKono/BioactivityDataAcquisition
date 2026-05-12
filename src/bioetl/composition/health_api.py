@@ -73,6 +73,7 @@ class HealthServerDependenciesProtocol(Protocol):
     health_monitor: HealthMonitorPort
     metrics: MetricsPort
 
+
 def __getattr__(name: str) -> object:
     """Resolve health exports lazily to avoid CLI import fan-out."""
     module_name = _PUBLIC_EXPORTS.get(name)

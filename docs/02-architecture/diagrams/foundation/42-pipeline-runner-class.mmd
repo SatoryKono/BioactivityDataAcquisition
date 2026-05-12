@@ -18,8 +18,8 @@ classDiagram
         -_context: PipelineContext
         -_tracer: TracingPort
         -_executor: BatchExecutor
-        -_checkpoint_manager: CheckpointManagerService
-        -_lock_manager: LockCoordinator
+        -_checkpoint_runtime_service: CheckpointRuntimeService
+        -_lock_runtime_service: LockRuntimeService
         -_preflight_service: PreflightService
         -_postrun_service: PostrunService
         -_lifecycle_service: MedallionLifecycleService
@@ -33,8 +33,8 @@ classDiagram
     class PipelineRunnerDependencies {
         <<frozen dataclass>>
         +executor: BatchExecutor
-        +checkpoint_manager: CheckpointManagerService
-        +lock_manager: LockCoordinator
+        +checkpoint_runtime_service: CheckpointRuntimeService
+        +lock_runtime_service: LockRuntimeService
         +preflight: PreflightService
         +postrun: PostrunService
         +lifecycle_service: MedallionLifecycleService
@@ -45,7 +45,7 @@ classDiagram
     class PipelineService {
         <<frozen dataclass>>
         +data_source: DataSourcePort
-        +storage: StoragePort
+        +storage: BronzeStoragePort | SilverStoragePort | GoldStoragePort | MergedStoragePort
         +lock: LockPort
         +checkpoint: CheckpointPort
         +quarantine: QuarantinePort
@@ -65,7 +65,7 @@ classDiagram
         +get_dq_context() DQReportContext?
     }
 
-    class LockCoordinator {
+    class LockRuntimeService {
         +acquire() FencingToken?
         +start_heartbeat() None
         +validate() bool
@@ -85,7 +85,7 @@ classDiagram
         +cleanup(tracer) None
     }
 
-    class CheckpointManagerService {
+    class CheckpointRuntimeService {
         +load_checkpoint() JsonDict?
         +save_checkpoint(records_processed) None
         +delete_checkpoint() None
@@ -111,8 +111,8 @@ classDiagram
     PipelineRunner --> PipelineService : uses
     PipelineRunner --> PipelineRunnerDependencies : resolves from ctor
     PipelineRunnerDependencies --> BatchExecutor
-    PipelineRunnerDependencies --> CheckpointManagerService
-    PipelineRunnerDependencies --> LockCoordinator
+    PipelineRunnerDependencies --> CheckpointRuntimeService
+    PipelineRunnerDependencies --> LockRuntimeService
     PipelineRunnerDependencies --> PreflightService
     PipelineRunnerDependencies --> PostrunService
     PipelineRunnerDependencies --> MedallionLifecycleService

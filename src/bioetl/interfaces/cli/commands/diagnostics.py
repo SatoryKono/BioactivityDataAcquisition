@@ -77,7 +77,7 @@ _UNAVAILABLE_LINE = "  - unavailable"
 
 def get_observability_diagnostics_bundle() -> ObservabilityDiagnosticsBundle:
     """Load the canonical operator diagnostics bundle on demand."""
-    from bioetl.interfaces.observability import (
+    from bioetl.composition.observability_api import (
         get_observability_diagnostics_bundle as _impl,
     )
 
@@ -86,7 +86,9 @@ def get_observability_diagnostics_bundle() -> ObservabilityDiagnosticsBundle:
 
 def get_metrics_operator_profile() -> MetricsOperatorProfile:
     """Load the canonical operator-facing metrics diagnostics profile."""
-    from bioetl.interfaces.observability import get_metrics_operator_profile as _impl
+    from bioetl.composition.observability_api import (
+        get_metrics_operator_profile as _impl,
+    )
 
     return _impl()
 

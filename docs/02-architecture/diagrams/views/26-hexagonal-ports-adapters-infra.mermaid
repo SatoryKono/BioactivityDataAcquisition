@@ -5,7 +5,7 @@ flowchart TB
     subgraph Domain["Domain Layer"]
         direction TB
         N1["DataSourcePort"]
-        N9["StoragePort"]
+        N9["Bronze/Silver/GoldStoragePorts"]
         N13["DeltaReaderPort"]
         N15["LockPort"]
         N17["CheckpointPort"]

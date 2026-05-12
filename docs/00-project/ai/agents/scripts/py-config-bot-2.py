@@ -46,12 +46,11 @@ def _find_composite_files(composites_dir: Path) -> list[Path]:
 
 
 def _is_legacy_composite_entity_stub(config_path: Path) -> bool:
-    """Return True for compatibility stubs under configs/entities/composite/.
+    """Return True for historical composite-shaped entity payloads, if any remain.
 
-    Composite runtime is sourced from ``configs/composites/*.yaml``. The legacy
-    ``configs/entities/composite/*.yaml`` files exist only as lightweight
-    compatibility shims and intentionally do not satisfy the unified entity
-    schema/invariants enforced by this validator.
+    Composite runtime is sourced from ``configs/composites/*.yaml``. This helper
+    now acts as a defensive guard in case an old composite-shaped entity file is
+    reintroduced under ``configs/entities``.
     """
     try:
         payload = _load_yaml_payload(config_path)

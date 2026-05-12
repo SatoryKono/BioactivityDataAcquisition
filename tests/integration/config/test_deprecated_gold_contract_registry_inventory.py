@@ -152,3 +152,9 @@ def test_compatibility_alias_deprecated_contracts_point_to_active_replacements()
             registry.entries[contract_ref].published_artifacts
             == registry.entries[replacement_contract_ref].published_artifacts
         )
+
+
+@pytest.mark.integration
+def test_deprecated_gold_contract_inventory_can_be_empty_after_alias_cleanup() -> None:
+    """Inventory should permit a fully cleaned standard-provider registry."""
+    assert _inventory_entries() == {}

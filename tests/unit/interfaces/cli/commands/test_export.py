@@ -11,7 +11,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from click.testing import CliRunner
 
-from bioetl.application.services import (
+from bioetl.application.services.export_models import (
     ColumnInfo,
     ExportResult,
     TableInfo,

@@ -86,7 +86,7 @@ class TestMaybeStartMetricsServer:
     ) -> None:
         """Fail-fast mode should propagate MetricsServerError to callers."""
         from bioetl.composition.bootstrap import maybe_start_metrics_server
-        from bioetl.interfaces.observability import MetricsServerError
+        from bioetl.composition.observability_api import MetricsServerError
 
         settings = MagicMock()
         settings.metrics_port = 8000

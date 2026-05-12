@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from bioetl.application.services import RunOptions
+from bioetl.application.services.execution.pipeline_runner_models import RunOptions
 
 
 class TestRunOptionsSeverityContext:

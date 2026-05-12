@@ -10,7 +10,7 @@ from typing import Any
 import pytest
 import yaml
 
-from bioetl.application.services import RunOptions
+from bioetl.application.services.execution.pipeline_runner_models import RunOptions
 from bioetl.domain.workflow import TransformStepConfig, WorkflowStepConfig
 from bioetl.infrastructure.config import (
     load_workflow_config as public_load_workflow_config,

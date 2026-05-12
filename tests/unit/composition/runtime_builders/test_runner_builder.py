@@ -16,6 +16,7 @@ from bioetl.composition.observability import ObservabilityBundle
 from bioetl.composition.runtime_builders import inputs_resolver
 from bioetl.composition.runtime_builders import observability_builder
 from bioetl.composition.runtime_builders import runner_builder
+from bioetl.domain.ports import PipelineCreateRunnerRequest
 
 SILVER_OUTPUT_PATH = "test-output/silver/chembl/activity"
 SILVER_METADATA_PATH = "test-output/silver/chembl/activity/_metadata.yaml"
@@ -38,11 +39,34 @@ class _FakeRunner:
 
 class _FakeFactory:
     def __init__(self) -> None:
+        self.request: PipelineCreateRunnerRequest | None = None
         self.kwargs: dict[str, object] | None = None
         self.runner = _FakeRunner()
 
-    def create_runner(self, **kwargs: object) -> object:
-        self.kwargs = kwargs
+    def create_runner(self, request: PipelineCreateRunnerRequest) -> object:
+        self.request = request
+        control_plane = request.control_plane
+        self.kwargs = {
+            "run_id": request.run_id,
+            "runtime": request.runtime,
+            "started_at": request.started_at,
+            "settings": request.settings,
+            "observability": request.observability,
+            "manifest_id": control_plane.manifest_id,
+            "execution_fingerprint": control_plane.execution_fingerprint,
+            "config_hash": control_plane.config_hash,
+            "resolved_config_hash": control_plane.resolved_config_hash,
+            "effective_config_hash": control_plane.effective_config_hash,
+            "dq_contract_compatibility_hash": (
+                control_plane.dq_contract_compatibility_hash
+            ),
+            "effective_config_artifact_id": (
+                control_plane.effective_config_artifact_id
+            ),
+            "filter_config": request.filter_config,
+            "config": request.config,
+            "cached_bronze": request.cached_bronze,
+        }
         return self.runner
 
 

@@ -282,10 +282,10 @@ ______________________________________________________________________
 ### Config Compatibility Registry
 
 Legacy/new-shape compatibility in config loading is bounded by
-`configs/quality/config_compatibility_registry.yaml`. The registry lists accepted
-source aliases such as `source.api`, `source.client`, and `source.batch`, rejected
-retired forms such as `source.provider_config.batch_size`, and removal criteria
-for transitional fields such as `filter_batch_size`.
+`configs/quality/config_compatibility_registry.yaml`. The registry lists the
+remaining accepted timeout and rate-limit aliases, plus rejected retired forms
+such as `source.api`, `source.client`, `source.batch`, and
+`source.provider_config.batch_size`.
 
 New compatibility normalization rules must be added to that registry before they
 are accepted in `src/bioetl/infrastructure/config/*`. The canonical source

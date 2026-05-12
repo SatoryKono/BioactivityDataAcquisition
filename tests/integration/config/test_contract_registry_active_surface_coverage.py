@@ -187,12 +187,12 @@ def test_specialized_chembl_fixture_surfaces_are_active_contracts_when_gold_runs
 
 
 @pytest.mark.integration
-def test_crossref_works_is_compatibility_only_not_active_runtime_surface() -> None:
-    """Legacy Crossref works ref must not compete with crossref.publication."""
+def test_crossref_publication_is_the_only_crossref_runtime_contract_surface() -> None:
+    """Crossref runtime governance should expose only the canonical publication ref."""
     registry = FileContractRegistryStore(_REGISTRY_PATH).load()
 
     assert registry.entries["crossref.publication"].status.value == "active"
-    assert registry.entries["crossref.works"].status.value == "deprecated"
+    assert "crossref.works" not in registry.entries
 
 
 @pytest.mark.integration

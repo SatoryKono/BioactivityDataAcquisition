@@ -571,7 +571,7 @@ Infrastructure → Adapters (7 providers), Storage (Bronze/Silver/Gold), HTTP, L
 ### 24 доменных порта
 
 ```
-DataSourcePort, FilterableDataSourcePort, StoragePort, LockPort,
+DataSourcePort, FilterableDataSourcePort, BronzeStoragePort, SilverStoragePort, GoldStoragePort, MergedStoragePort, LockPort,
 CheckpointPort, QuarantinePort, TracingPort, MetricsPort, LoggerPort,
 HealthCheckPort, AuditPort, DQMonitorPort, DQReportWriterPort,
 PIIHasherPort, DataNormalizationPort, ValidationPort, MetadataPort,

@@ -7,7 +7,7 @@ import re
 
 import pytest
 
-from bioetl.composition import PipelineRegistry, create_registry
+from bioetl.composition.registry_api import PipelineRegistry, create_registry
 from bioetl.composition.factories.pipeline.registry import (
     PIPELINE_CONFIGS,
     list_available_pipelines,

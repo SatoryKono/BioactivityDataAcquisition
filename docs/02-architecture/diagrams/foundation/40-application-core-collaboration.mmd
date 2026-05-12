@@ -26,9 +26,9 @@ flowchart TB
     end
 
     subgraph Lifecycle["Lifecycle Services"]
-        LM["LockCoordinator<br/>• acquire(key, owner, ttl=90s)<br/>• release(key, owner)<br/>• validate_ownership()"]
+        LM["LockRuntimeService<br/>• acquire(key, owner, ttl=90s)<br/>• release(key, owner)<br/>• validate_ownership()"]
         HB["HeartbeatService<br/>• start()<br/>• stop()"]
-        CM["CheckpointManagerService<br/>• load_checkpoint()<br/>• save_checkpoint()"]
+        CM["CheckpointRuntimeService<br/>• load_checkpoint()<br/>• save_checkpoint()"]
         SD["ShutdownService<br/>• is_shutting_down()<br/>• initiate_shutdown()"]
     end
 
@@ -41,7 +41,7 @@ flowchart TB
         BE["BatchExecutor<br/>• execute()<br/>• _run_extraction_loop()<br/>• _process_batch_and_update_state()"]
         BT["BatchTransformer<br/>• transform(records)<br/>→ TransformResult"]
         BWR["BatchWriter<br/>• write(batch_data)<br/>• write_bronze()<br/>• write_silver()<br/>• write_gold()"]
-        QM["QuarantineManagerService<br/>• route_failed_records()<br/>• create_entry()"]
+        QM["QuarantineRuntimeService<br/>• route_failed_records()<br/>• create_entry()"]
     end
 
     subgraph Observability["Observability"]

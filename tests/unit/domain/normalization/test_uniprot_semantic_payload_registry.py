@@ -163,11 +163,7 @@ def _extract_uniprot_semantic_payload_vocab(
         for keyword in payload.get("keywords", []):
             if isinstance(keyword, dict) and keyword.get("category") is not None:
                 observed["keyword_categories"].add(str(keyword["category"]))
-    return {
-        key: sorted(values)
-        for key, values in observed.items()
-        if values
-    }
+    return {key: sorted(values) for key, values in observed.items() if values}
 
 
 def test_uniprot_semantic_payload_registry_covers_observed_fixture_vocab() -> None:

@@ -376,8 +376,6 @@ assembly is `bioetl.composition.observability_api`.
 
 Remaining compatibility layers are explicit:
 
-- `bioetl.interfaces.observability` remains a compatibility facade for
-  interface-layer consumers and delegates back to the composition API
 - `UnifiedLogger` accepts `extra={...}` compatibility input but emits flat
   top-level structured fields
 - downstream log normalization may still accept `ts`, but runtime emission uses

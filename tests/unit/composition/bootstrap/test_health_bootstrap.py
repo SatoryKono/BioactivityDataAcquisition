@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import pytest
 
-from bioetl.application.services import HealthService
+from bioetl.application.services.health_service import HealthService
 from bioetl.composition.bootstrap.cli.health import (
     HealthServerDependencies,
     bootstrap_health_server_dependencies,

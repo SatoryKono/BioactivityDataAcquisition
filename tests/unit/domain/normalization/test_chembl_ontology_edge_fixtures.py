@@ -72,7 +72,9 @@ def _normalize_rows(
         normalized_row = {}
         for field, value in row.items():
             rule = profile.rule_for(field)
-            normalized_row[field] = value if rule is None else rule.apply(value, record=row)
+            normalized_row[field] = (
+                value if rule is None else rule.apply(value, record=row)
+            )
         normalized_rows.append(normalized_row)
     return normalized_rows
 

@@ -12,6 +12,7 @@ Implements Template Method pattern to eliminate duplication across:
 
 from __future__ import annotations
 
+from bioetl.application.core.base_transformer.errors import FilteredOutError
 from bioetl.domain.types import JsonDict
 
 __all__ = ["BaseChemblTransformer"]
@@ -153,16 +154,25 @@ class BaseChemblTransformer(PreSilverAdapterMixin, BaseTransformer):
         index: int,
     ) -> SilverRecord | None:
         """Template method implementing common ChEMBL transformation flow."""
-        record = self._prepare_record(record)
-        primary_id = self._resolve_primary_id(record)
-        business_data = self._extract_business_data(record, primary_id)
-        return self._transform_identity_business_data(
-            context=context,
-            source_id=str(primary_id),
-            identity_field=self.primary_id_field,
-            index=index,
-            business_data=business_data,
-        )
+        try:
+            record = self._prepare_record(record)
+            primary_id = self._resolve_primary_id(record)
+            business_data = self._extract_business_data(record, primary_id)
+            return self._transform_identity_business_data(
+                context=context,
+                source_id=str(primary_id),
+                identity_field=self.primary_id_field,
+                index=index,
+                business_data=business_data,
+            )
+        except (FilteredOutError, ValueError) as e:
+            context.logger.warning(
+                "entity_validation_failed",
+                error=str(e),
+                index=index,
+                provider="chembl",
+            )
+            return None
 
     @abstractmethod
     def _extract_business_data(

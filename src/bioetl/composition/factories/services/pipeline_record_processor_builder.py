@@ -47,7 +47,9 @@ def build_record_processor_config_and_validator(
     silver_output_path: str | None,
     gold_output_path: str | None,
     flat_structure: bool,
-    gold_validator_factory: Callable[..., GoldValidatorPort] = ContractAwareGoldValidator,
+    gold_validator_factory: Callable[
+        ..., GoldValidatorPort
+    ] = ContractAwareGoldValidator,
 ) -> tuple[RecordProcessorConfig, GoldValidatorPort]:
     """Build RecordProcessorConfig plus Gold validator from pipeline state."""
     include_fields, exclude_fields = extract_hash_policy(pipeline)

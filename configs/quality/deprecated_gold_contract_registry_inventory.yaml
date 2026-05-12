@@ -1,9 +1,3 @@
 version: 1
 policy_scope: deprecated_gold_contract_registry
-entries:
-  crossref.works:
-    classification: compatibility_alias
-    provider: crossref
-    entity: works
-    replacement_contract_ref: crossref.publication
-    rationale: Legacy contract alias retained only to avoid competing with the canonical publication surface.
+entries: {}

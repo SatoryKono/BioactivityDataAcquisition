@@ -153,9 +153,6 @@ def resolve_filter_batch_size_impl(
     *,
     source_loader: Callable[..., object],
 ) -> int | None:
-    filter_batch_size = getattr(yaml_config, "filter_batch_size", None)
-    if isinstance(filter_batch_size, int):
-        return filter_batch_size
     try:
         source_cfg = cast(SourceConfigLike, source_loader(yaml_config.provider))
         batch_size = source_cfg.pagination.id_batch_size

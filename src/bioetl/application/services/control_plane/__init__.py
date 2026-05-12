@@ -9,6 +9,11 @@ from bioetl.application.services.control_plane.forensic_diff_service import (
     ForensicRunDiffResult,
     ForensicRunDiffService,
 )
+from bioetl.application.services.control_plane.historical_replay_certification_service import (
+    HistoricalReplayCertificationResult,
+    HistoricalReplayCertificationService,
+    HistoricalReplaySnapshotCertification,
+)
 from bioetl.application.services.control_plane.run_ledger_service import (
     RunLedgerService,
 )
@@ -47,6 +52,9 @@ __all__ = [
     "EffectiveConfigService",
     "ForensicRunDiffResult",
     "ForensicRunDiffService",
+    "HistoricalReplayCertificationResult",
+    "HistoricalReplayCertificationService",
+    "HistoricalReplaySnapshotCertification",
     "RunLedgerService",
     "RunManifestCreateSpec",
     "RunManifestDiffEntry",

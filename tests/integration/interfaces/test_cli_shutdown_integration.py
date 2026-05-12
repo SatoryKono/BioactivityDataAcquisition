@@ -108,7 +108,10 @@ class TestCliGracefulShutdownExitCode:
         temp_env: dict[str, str],
     ):
         """Test that SHUTDOWN status results in exit code 130."""
-        from bioetl.application.services import PipelineRunResult, RunResult
+        from bioetl.application.services.execution.pipeline_runner_models import (
+            PipelineRunResult,
+            RunResult,
+        )
 
         with patch(
             "bioetl.interfaces.cli.commands.run.asyncio.run"
@@ -134,7 +137,10 @@ class TestCliGracefulShutdownExitCode:
         temp_env: dict[str, str],
     ):
         """Test that normal completion returns exit code 0."""
-        from bioetl.application.services import PipelineRunResult, RunResult
+        from bioetl.application.services.execution.pipeline_runner_models import (
+            PipelineRunResult,
+            RunResult,
+        )
 
         with patch(
             "bioetl.interfaces.cli.commands.run.asyncio.run"
@@ -233,7 +239,10 @@ class TestRunnerShutdownIntegration:
         temp_env: dict[str, str],
     ):
         """Test that SHUTDOWN status results in shutdown warning."""
-        from bioetl.application.services import PipelineRunResult, RunResult
+        from bioetl.application.services.execution.pipeline_runner_models import (
+            PipelineRunResult,
+            RunResult,
+        )
 
         with patch(
             "bioetl.interfaces.cli.commands.run.asyncio.run"
@@ -263,7 +272,10 @@ class TestRunnerShutdownIntegration:
         temp_env: dict[str, str],
     ):
         """Test that service-based architecture handles shutdown correctly."""
-        from bioetl.application.services import PipelineRunResult, RunResult
+        from bioetl.application.services.execution.pipeline_runner_models import (
+            PipelineRunResult,
+            RunResult,
+        )
 
         with patch(
             "bioetl.interfaces.cli.commands.run.asyncio.run"
@@ -300,7 +312,10 @@ class TestLockReleaseOnShutdown:
         temp_env: dict[str, str],
     ):
         """Test that lock is released even after shutdown error."""
-        from bioetl.application.services import PipelineRunResult, RunResult
+        from bioetl.application.services.execution.pipeline_runner_models import (
+            PipelineRunResult,
+            RunResult,
+        )
 
         with patch(
             "bioetl.interfaces.cli.commands.run.asyncio.run"

@@ -205,37 +205,16 @@ def test_load_name_without_separator_raises(setup_configs):
         load_pipeline_config("simple")
 
 
-def test_load_source_config_canonical_and_shorthand_format_equivalent_chembl(
+def test_load_source_config_rejects_retired_transport_alias_sections_chembl(
     tmp_path, monkeypatch
 ):
-    """Canonical and shorthand source formats should normalize equivalently."""
+    """Legacy source.api/source.client/source.batch aliases should fail fast."""
     load_source_config.cache_clear()
 
     providers_dir = tmp_path / "configs" / "providers"
     providers_dir.mkdir(parents=True)
 
-    canonical = {
-        "source": {
-            "type": "api",
-            "load_strategy": "full",
-            "provider_config": {
-                "provider": "chembl",
-                "base_url": "https://example.chembl/api",
-                "auth_type": "public",
-                "api_version": "v1",
-                "client": {"timeout_sec": 60.0, "max_retries": 3},
-                "pagination": {"id_batch_size": 25},
-            },
-            "rate_limit": {
-                "requests_per_second": 3.0,
-                "burst": 10,
-                "with_api_key": {"requests_per_second": 6.0, "burst": 20},
-            },
-            "circuit_breaker": {"failure_threshold": 5, "recovery_timeout": 300},
-            "health_check": {"endpoint": "/health", "timeout": 5},
-        }
-    }
-    new = {
+    legacy = {
         "source": {
             "type": "api",
             "load_strategy": "full",
@@ -258,16 +237,13 @@ def test_load_source_config_canonical_and_shorthand_format_equivalent_chembl(
     }
 
     monkeypatch.chdir(tmp_path)
-    (providers_dir / "chembl_canonical.yaml").write_text(yaml.dump(canonical))
-    (providers_dir / "chembl_new.yaml").write_text(yaml.dump(new))
+    (providers_dir / "chembl_legacy.yaml").write_text(yaml.dump(legacy))
 
-    assert normalize_source_config(canonical) == normalize_source_config(new)
+    with pytest.raises(ValueError, match="Retired source transport aliases"):
+        normalize_source_config(legacy)
 
-    cfg_canonical = load_source_config("chembl_canonical")
-    load_source_config.cache_clear()
-    cfg_new = load_source_config("chembl_new")
-
-    assert _dump_source_config(cfg_canonical) == _dump_source_config(cfg_new)
+    with pytest.raises(ValueError, match="Retired source transport aliases"):
+        load_source_config("chembl_legacy")
 
 
 def test_load_source_config_from_unified_provider_file(tmp_path, monkeypatch):
@@ -306,37 +282,16 @@ def test_load_source_config_from_unified_provider_file(tmp_path, monkeypatch):
     assert cfg.batch_size == 22
 
 
-def test_load_source_config_canonical_and_shorthand_format_equivalent_pubmed(
+def test_load_source_config_rejects_retired_transport_alias_sections_pubmed(
     tmp_path, monkeypatch
 ):
-    """Canonical and shorthand source formats should normalize equivalently."""
+    """Legacy PubMed source aliases should fail fast."""
     load_source_config.cache_clear()
 
     providers_dir = tmp_path / "configs" / "providers"
     providers_dir.mkdir(parents=True)
 
-    canonical = {
-        "source": {
-            "type": "api",
-            "load_strategy": "full",
-            "provider_config": {
-                "provider": "pubmed",
-                "base_url": "https://example.pubmed/api",
-                "auth_type": "api_key",
-                "api_key": "${BIOETL_PUBMED_API_KEY}",
-                "client": {"timeout": 45.0, "max_retries": 4},
-                "pagination": {"id_batch_size": 100},
-            },
-            "rate_limit": {
-                "requests_per_second": 5.0,
-                "burst": 15,
-                "with_api_key": {"requests_per_second": 9.0, "burst": 25},
-            },
-            "circuit_breaker": {"failure_threshold": 5, "recovery_timeout": 300},
-            "health_check": {"endpoint": "/health", "timeout": 5},
-        }
-    }
-    new = {
+    legacy = {
         "source": {
             "type": "api",
             "load_strategy": "full",
@@ -359,16 +314,13 @@ def test_load_source_config_canonical_and_shorthand_format_equivalent_pubmed(
     }
 
     monkeypatch.chdir(tmp_path)
-    (providers_dir / "pubmed_canonical.yaml").write_text(yaml.dump(canonical))
-    (providers_dir / "pubmed_new.yaml").write_text(yaml.dump(new))
+    (providers_dir / "pubmed_legacy.yaml").write_text(yaml.dump(legacy))
 
-    assert normalize_source_config(canonical) == normalize_source_config(new)
+    with pytest.raises(ValueError, match="Retired source transport aliases"):
+        normalize_source_config(legacy)
 
-    cfg_canonical = load_source_config("pubmed_canonical")
-    load_source_config.cache_clear()
-    cfg_new = load_source_config("pubmed_new")
-
-    assert _dump_source_config(cfg_canonical) == _dump_source_config(cfg_new)
+    with pytest.raises(ValueError, match="Retired source transport aliases"):
+        load_source_config("pubmed_legacy")
 
 
 def test_normalize_source_config_maps_rate_limit_and_timeout_aliases() -> None:
@@ -378,8 +330,8 @@ def test_normalize_source_config_maps_rate_limit_and_timeout_aliases() -> None:
             "provider_config": {
                 "provider": "pubmed",
                 "client": {"timeout": 42.0, "max_retries": 3},
+                "pagination": {"id_batch_size": 30},
             },
-            "batch": {"batch_size": 30},
             "rate_limit": {
                 "requests_per_second": 5.0,
                 "with_api_key": {"requests_per_second": 8.0, "burst": 20},

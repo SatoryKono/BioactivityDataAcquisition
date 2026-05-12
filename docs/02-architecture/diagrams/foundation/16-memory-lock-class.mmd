@@ -1,7 +1,7 @@
 %% Title: MemoryLock Class Diagram
 %% Covers: RULES.md §3.3 (Locking), ADR-010
 %% Updated: 2026-02-17
-%% Components: LockPort, MemoryLock, LockEntry, LockResult, LockNotHeldError, LockCoordinator, BackfillLock
+%% Components: LockPort, MemoryLock, LockEntry, LockResult, LockNotHeldError, LockRuntimeService, BackfillLock
 
 %% @version 1.0.0
 %% @date    2026-02-24
@@ -103,7 +103,7 @@ classDiagram
 
     }
 
-    class LockCoordinator {
+    class LockRuntimeService {
         -_lock: LockPort
         -_logger: LoggerPort
         -_ttl: int = 90
@@ -144,12 +144,12 @@ classDiagram
     MemoryLock --> LockEntry : stores
     MemoryLock ..> LockNotHeldError : throws
 
-    LockCoordinator --> LockPort : uses
-    LockCoordinator --> LockResult : returns
+    LockRuntimeService --> LockPort : uses
+    LockRuntimeService --> LockResult : returns
     BackfillLock --> LockPort : uses
 
     note for MemoryLock "Local-only lock<br/>single-process runtime<br/>TTL expiry + heartbeat<br/>defaults: ttl=90s, hb=30s"
 
-    note for LockCoordinator "Lock wrapper<br/>heartbeat + key build<br/>log integration<br/>key: lock:{provider}_{entity}"
+    note for LockRuntimeService "Lock wrapper<br/>heartbeat + key build<br/>log integration<br/>key: lock:{provider}_{entity}"
 
     note for BackfillLock "Exclusive BACKFILL/REBUILD lock<br/>prevents concurrent modification<br/>suffix: :exclusive"

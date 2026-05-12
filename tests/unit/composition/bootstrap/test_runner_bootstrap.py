@@ -10,14 +10,16 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from bioetl.application.services import PipelineRunnerService
+from bioetl.application.services.execution.pipeline_runner_service import (
+    PipelineRunnerService,
+)
 from bioetl.application.services.pipeline_run_context_service import (
     PipelineRunContextService,
 )
 from bioetl.application.services.pipeline_run_execution_service import (
     PipelineRunExecutionService,
 )
-from bioetl.composition import PipelineRegistry
+from bioetl.composition.registry_api import PipelineRegistry
 from bioetl.composition.bootstrap.runtime.runner import (
     bootstrap_pipeline_runner_service,
 )

@@ -10,7 +10,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import click
 import pytest
 
-from bioetl.composition import PipelineRegistry
+from bioetl.composition.registry_api import PipelineRegistry
 from bioetl.interfaces.cli.commands.domains.run.support import (
     get_runner_logger,
     handle_destructive_run_confirmation,

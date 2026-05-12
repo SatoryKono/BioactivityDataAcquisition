@@ -107,7 +107,9 @@ def test_run_manifest_contract_documents_lifecycle_snapshot_and_scoring_surfaces
     assert "live_capture_snapshot_materialized" in text
     assert "input_snapshot_published_ledger_evidence_only" in text
     assert "awaiting_input_snapshot_published_evidence" in text
-    assert "final supported exact-replay scope" in text
+    assert "broader certified historical" in text
+    assert "historical_source_snapshot_certification" in text
+    assert "historical_composite_certified_source_lineage" in text
     assert "## Reproducibility Scoring Rubric" in text
     assert "|   100 | `forensic_grade`" in text
     assert "| Evidence surface" in text
@@ -170,8 +172,9 @@ def test_run_manifest_docs_define_replay_equivalence_levels() -> None:
     assert "materialized_replayable_parent" in runbook
     assert "input_snapshot_published_ledger_evidence_only" in contract
     assert "awaiting_input_snapshot_published_evidence" in runbook
-    assert "final supported exact-replay scope" in contract
-    assert "ratified_snapshot_backed_boundary_is_final_supported_scope" in runbook
+    assert "certified_historical_exact_replay_tranche_supported" in contract
+    assert "historical_source_replay_certified" in runbook
+    assert "historical_composite_replay_certified" in runbook
 
 
 @pytest.mark.architecture

@@ -146,7 +146,7 @@ def test_build_diagnostics_summary_merges_ledger_derived_input_snapshots() -> No
     assert summary["input_snapshot_materialization_mode"] == (
         "live_capture_snapshot_materialized"
     )
-    assert summary["source_posture"] == "immutable_snapshot_envelope"
+    assert summary["source_posture"] == "live_capture_snapshot_materialized"
     assert summary["snapshot_status"] == "full"
     assert summary["input_snapshot_count"] == 1
     assert summary["input_snapshot_ids"] == ["snapshot-1"]
@@ -164,9 +164,10 @@ def test_build_diagnostics_summary_merges_ledger_derived_input_snapshots() -> No
     assert summary["exact_replay_blockers"] == ["dependency_lock_provenance_missing"]
     assert summary["replay_mode"] == "same_data_state_recovery"
     assert summary["replay_parentage"]["is_exact_replay"] is False
-    assert summary["reproducibility_diagnostics"]["policy"][
-        "replay_occurrence_kind"
-    ] == "materialized_replayable_parent"
+    assert (
+        summary["reproducibility_diagnostics"]["policy"]["replay_occurrence_kind"]
+        == "materialized_replayable_parent"
+    )
     assert summary["input_snapshots"] == [
         {
             "provider": "chembl",
@@ -185,14 +186,17 @@ def test_build_diagnostics_summary_merges_ledger_derived_input_snapshots() -> No
             "last_modified": None,
             "captured_at": None,
             "materialization_mode": "live_capture_snapshot_materialized",
+            "certification_scope": None,
+            "certification_basis": None,
+            "certification_artifact_ref": None,
+            "upstream_run_id": None,
+            "upstream_manifest_id": None,
             "source_event_id": "entry-input-snapshot",
         }
     ]
 
 
-def test_build_diagnostics_summary_exposes_bounded_historical_upgrade_policy() -> (
-    None
-):
+def test_build_diagnostics_summary_exposes_bounded_historical_upgrade_policy() -> None:
     manifest = _make_manifest()
 
     summary = build_diagnostics_summary(manifest, ())
@@ -208,17 +212,26 @@ def test_build_diagnostics_summary_exposes_bounded_historical_upgrade_policy() -
         "historical_live_runs_require_input_snapshot_published_ledger_evidence_before_parent_promotion"
     )
     assert summary["broader_historical_exact_replay_policy"] == (
-        "ratified_snapshot_backed_boundary_is_final_supported_scope"
+        "certified_historical_exact_replay_tranche_supported"
+    )
+    assert summary["broader_historical_exact_replay_boundary"] == (
+        "historical_source_snapshot_certification"
     )
     assert summary["broader_historical_exact_replay_reason"] == (
-        "future_broader_historical_exact_replay_requires_new_contract_revision"
+        "retained_historical_source_runs_can_gain_certified_exact_replay_parent_evidence_via_backfilled_snapshot_certification"
+    )
+    assert summary["broader_historical_exact_replay_state"] == (
+        "awaiting_historical_snapshot_certification"
     )
     assert summary["historical_live_run_upgrade_state"] == (
         "awaiting_input_snapshot_published_evidence"
     )
-    assert summary["reproducibility_diagnostics"]["policy"][
-        "historical_live_run_upgrade_state"
-    ] == "awaiting_input_snapshot_published_evidence"
+    assert (
+        summary["reproducibility_diagnostics"]["policy"][
+            "historical_live_run_upgrade_state"
+        ]
+        == "awaiting_input_snapshot_published_evidence"
+    )
 
 
 def _assert_provenance_only_score(

@@ -46,7 +46,7 @@ graph TB
         MET["BatchMetricsRecorderService<br/>--------<br/>batch size / processed / errors<br/>DQ validation failures"]:::size-md
         TRANS["BatchTransformer<br/>--------<br/>transform_batch()<br/>quarantine + DQ thresholds"]:::size-md
         WRITE["BatchWriter<br/>--------<br/>write_bronze/silver/gold<br/>lock-safe validation path"]:::size-md
-        QM["QuarantineManagerService<br/>--------<br/>quarantine_record()<br/>quarantine_records()"]:::size-md
+        QM["QuarantineRuntimeService<br/>--------<br/>quarantine_record()<br/>quarantine_records()"]:::size-md
         OUT["BatchProcessingOutcome<br/>--------<br/>batch_id + bronze_result<br/>silver/gold records<br/>quarantined + filtered counts"]:::size-md
     end
 

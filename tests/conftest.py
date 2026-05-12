@@ -244,7 +244,7 @@ def pyproject_toml(project_root: Path) -> Path:
 @pytest.fixture
 def isolated_registry() -> Any:
     """Return a fresh pipeline registry instance for test isolation."""
-    from bioetl.composition import create_registry
+    from bioetl.composition.registry_api import create_registry
 
     return create_registry()
 

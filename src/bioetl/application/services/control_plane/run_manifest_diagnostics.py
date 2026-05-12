@@ -411,12 +411,8 @@ def _refresh_replay_summary_from_materialized_snapshots(
         updated["input_snapshot_materialization_mode"] = materialization_mode
         if materialization_mode == "historical_source_snapshot_certified":
             updated["source_posture"] = "historical_source_replay_certified_envelope"
-        elif materialization_mode == (
-            "historical_composite_replay_envelope_certified"
-        ):
-            updated["source_posture"] = (
-                "historical_composite_replay_certified_envelope"
-            )
+        elif materialization_mode == ("historical_composite_replay_envelope_certified"):
+            updated["source_posture"] = "historical_composite_replay_certified_envelope"
         elif materialization_mode == "live_capture_snapshot_materialized":
             updated["source_posture"] = "live_capture_snapshot_materialized"
     updated["input_snapshot_missing_source_refs"] = list(
@@ -483,7 +479,9 @@ def _group_input_snapshots_by_source(
 def _merge_manifest_source_refs(
     *,
     manifest: RunManifest,
-    snapshots_by_source: dict[tuple[str, str, str, str | None], list[RunInputSnapshotRef]],
+    snapshots_by_source: dict[
+        tuple[str, str, str, str | None], list[RunInputSnapshotRef]
+    ],
 ) -> list[RunSourceRef]:
     """Attach grouped snapshot refs to manifest-declared source refs."""
     effective_refs: list[RunSourceRef] = []
@@ -507,7 +505,9 @@ def _merge_manifest_source_refs(
 
 
 def _build_additional_source_refs(
-    snapshots_by_source: dict[tuple[str, str, str, str | None], list[RunInputSnapshotRef]],
+    snapshots_by_source: dict[
+        tuple[str, str, str, str | None], list[RunInputSnapshotRef]
+    ],
 ) -> list[RunSourceRef]:
     """Build source refs discovered only from input snapshots."""
     return [

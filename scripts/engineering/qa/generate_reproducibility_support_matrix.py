@@ -36,9 +36,11 @@ _HEADER = """# Reproducibility Support Matrix (Auto-Generated)
 > Historical live runs without immutable snapshot evidence remain outside that
 > stronger claim until explicit `input_snapshot_published` ledger evidence
 > materializes a bounded parent snapshot envelope.
-> The current snapshot-backed boundary is the final supported exact-replay scope
-> of the published contract; any broader historical replay claim requires a new
-> contract revision.
+> A broader certified historical replay tranche is also supported when explicit
+> certification evidence is appended into the ledger. Historical source runs
+> require certified immutable source snapshot backfill; historical composite
+> runs require certified source lineage before composite replay-envelope
+> certification.
 
 """
 
@@ -92,6 +94,10 @@ def _broader_scope_policy(row: dict[str, object]) -> str:
     return str(row["broader_historical_exact_replay_policy"])
 
 
+def _broader_scope_boundary(row: dict[str, object]) -> str:
+    return str(row["broader_historical_exact_replay_boundary"] or "n/a")
+
+
 def _matrix_rows() -> list[dict[str, object]]:
     return sorted(
         published_reproducibility_family_inventory(),
@@ -107,8 +113,8 @@ def build_reproducibility_support_matrix_markdown() -> str:
     lines = [_HEADER.rstrip(), ""]
     lines.extend(
         [
-            "| Family | Context | Support State | Strict Exact Replay | Post-Capture Parent | Parent Boundary | Historical Upgrade Policy | Historical Upgrade Boundary | Broader Scope Policy | Required Profile | Snapshot Requirement | Lineage Closure | Contract | Blocker Reason | Diagnostics |",
-            "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+            "| Family | Context | Support State | Strict Exact Replay | Post-Capture Parent | Parent Boundary | Historical Upgrade Policy | Historical Upgrade Boundary | Broader Scope Policy | Broader Scope Boundary | Required Profile | Snapshot Requirement | Lineage Closure | Contract | Blocker Reason | Diagnostics |",
+            "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
         ]
     )
     for row in _matrix_rows():
@@ -123,6 +129,7 @@ def build_reproducibility_support_matrix_markdown() -> str:
             f"`{_historical_upgrade_policy(row)}` | "
             f"`{row['historical_live_run_upgrade_boundary'] or 'n/a'}` | "
             f"`{_broader_scope_policy(row)}` | "
+            f"`{_broader_scope_boundary(row)}` | "
             f"`{row['default_required_persistence_profile']}` | "
             f"`{_snapshot_requirement(row)}` | "
             f"`{_lineage_closure(row)}` | "

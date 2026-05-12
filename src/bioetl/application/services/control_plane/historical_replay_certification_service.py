@@ -80,6 +80,10 @@ class HistoricalReplayCertificationService:
         )
         ledger_service = self._build_ledger_service(manifest)
         for certification in certifications:
+            normalized_query = self._resolve_certification_query(
+                manifest=manifest,
+                certification=certification,
+            )
             ledger_service.record_input_snapshot_published(
                 provider=certification.provider,
                 entity=certification.entity,
@@ -90,7 +94,7 @@ class HistoricalReplayCertificationService:
                 bronze_batch_ref=certification.bronze_batch_ref,
                 query_fingerprint=certification.query_fingerprint,
                 details={
-                    "query": certification.query,
+                    "query": normalized_query,
                     "materialization_mode": HISTORICAL_SOURCE_SNAPSHOT_CERTIFIED,
                     "certification_scope": "historical_source_replay",
                     "certification_basis": certification.certification_basis,
@@ -121,6 +125,10 @@ class HistoricalReplayCertificationService:
         self._validate_upstream_certified_lineage(certifications)
         ledger_service = self._build_ledger_service(manifest)
         for certification in certifications:
+            normalized_query = self._resolve_certification_query(
+                manifest=manifest,
+                certification=certification,
+            )
             ledger_service.record_input_snapshot_published(
                 provider=certification.provider,
                 entity=certification.entity,
@@ -131,7 +139,7 @@ class HistoricalReplayCertificationService:
                 bronze_batch_ref=certification.bronze_batch_ref,
                 query_fingerprint=certification.query_fingerprint,
                 details={
-                    "query": certification.query,
+                    "query": normalized_query,
                     "materialization_mode": (
                         HISTORICAL_COMPOSITE_REPLAY_ENVELOPE_CERTIFIED
                     ),
@@ -192,9 +200,7 @@ class HistoricalReplayCertificationService:
             contract_version=provenance.contract_version,
             dq_policy_ref=provenance.dq_policy_ref,
             rule_bundle_version=provenance.rule_bundle_version,
-            dq_contract_compatibility_hash=(
-                provenance.dq_contract_compatibility_hash
-            ),
+            dq_contract_compatibility_hash=(provenance.dq_contract_compatibility_hash),
             effective_config_artifact_id=provenance.effective_config_artifact_id,
         )
 
@@ -262,7 +268,12 @@ class HistoricalReplayCertificationService:
             )
             for item in certifications
         }
-        missing = sorted(expected - actual)
+        actual_without_query = {(a, b, c) for a, b, c, _ in actual}
+        missing = sorted(
+            key
+            for key in expected
+            if key not in actual and key[:3] not in actual_without_query
+        )
         if missing:
             raise ValueError(
                 "Historical replay certification is missing sources: "
@@ -303,6 +314,29 @@ class HistoricalReplayCertificationService:
                 raise ValueError(
                     "Composite certification requires certified or snapshot-backed upstream lineage"
                 )
+
+    def _resolve_certification_query(
+        self,
+        *,
+        manifest: RunManifest,
+        certification: HistoricalReplaySnapshotCertification,
+    ) -> str | None:
+        query = str(certification.query or "").strip()
+        if query:
+            return query
+        matching_queries = sorted(
+            {
+                str(ref.query or "").strip()
+                for ref in manifest.source_refs
+                if str(ref.provider or "").strip() == certification.provider
+                and str(ref.entity or "").strip() == certification.entity
+                and str(ref.pipeline_name or "").strip() == certification.pipeline_name
+                and str(ref.query or "").strip()
+            }
+        )
+        if len(matching_queries) == 1:
+            return matching_queries[0]
+        return None
 
     @staticmethod
     def _source_key(

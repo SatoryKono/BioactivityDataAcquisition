@@ -10,7 +10,10 @@ from unittest.mock import MagicMock, patch
 import pytest
 from click.testing import CliRunner
 
-from bioetl.application.services import PipelineRunResult, RunResult
+from bioetl.application.services.execution.pipeline_runner_models import (
+    PipelineRunResult,
+    RunResult,
+)
 from bioetl.application.services.pipeline_debug_service import DebugAbortError
 from bioetl.interfaces.cli import cli
 from bioetl.interfaces.cli.exit_codes import ExitCode

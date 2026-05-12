@@ -4,7 +4,7 @@
 %% Title: Domain Layer — DDD Components
 %% Covers: RULES.md §1.1 (Domain Layer), §1.3 (DDD Aggregates), ADR-021
 %% Updated: 2026-02-17
-%% Components: PipelineRun, Batch, QuarantineEntry, DataSourcePort, StoragePort, LockPort
+%% Components: PipelineRun, Batch, QuarantineEntry, DataSourcePort, BronzeStoragePort, SilverStoragePort, GoldStoragePort, MergedStoragePort, StorageLifecyclePort, LockPort
 
 %% @version 1.0.0
 %% @date    2026-02-24
@@ -24,11 +24,15 @@
 }}%%
 
 flowchart TB
-%% keep-orphan: CheckpointPort, CriticalError, DataQualityError, DataSourcePort, HealthStatus, InvalidStateError, LockPort, Measurement, MetricsPort, QuarantinePort, RecoverableError, RunType, StoragePort, TracingPort
+%% keep-orphan: BronzeStoragePort, SilverStoragePort, GoldStoragePort, MergedStoragePort, StorageLifecyclePort, CheckpointPort, CriticalError, DataQualityError, DataSourcePort, HealthStatus, InvalidStateError, LockPort, Measurement, MetricsPort, QuarantinePort, RecoverableError, RunType, TracingPort
     subgraph domain["Domain Layer (DDD)"]
         subgraph ports["ports/"]
             DataSourcePort
-            StoragePort
+            BronzeStoragePort
+            SilverStoragePort
+            GoldStoragePort
+            MergedStoragePort
+            StorageLifecyclePort
             LockPort
             CheckpointPort
             QuarantinePort

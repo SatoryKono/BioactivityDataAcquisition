@@ -58,8 +58,7 @@ requirements, use:
 
 Compatibility note for operators:
 
-- `bioetl.interfaces.observability` may still exist as an interface-layer
-  facade, but canonical diagnostics/bootstrap discovery is
+- canonical diagnostics/bootstrap discovery is
   `bioetl.composition.observability_api`
 - runtime logs emit canonical `timestamp`; downstream tooling may still accept
   `ts`, but `ts` is not the canonical emitted field name

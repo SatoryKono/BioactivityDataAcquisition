@@ -17,7 +17,7 @@ from unittest.mock import MagicMock
 import pyarrow as pa
 import pytest
 
-from bioetl.composition import PipelineRegistry, create_registry
+from bioetl.composition.registry_api import PipelineRegistry, create_registry
 from bioetl.composition.factories.pipeline.registry import register_all_pipelines
 
 if TYPE_CHECKING:

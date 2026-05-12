@@ -287,19 +287,11 @@ class TestInterfacesNoDIrectInfrastructure:
         )
 
     def test_observability_no_infrastructure_imports(self):
-        """Observability interface should route through composition, not infrastructure."""
+        """Legacy observability facade must stay removed."""
         obs_path = SRC_PATH / "interfaces" / "observability.py"
-        assert obs_path.exists(), "observability.py not found"
-
-        imports = get_imports_from_file(obs_path)
-
-        infrastructure_imports = [
-            imp for imp in imports if "bioetl.infrastructure" in imp
-        ]
-
-        assert infrastructure_imports == [], (
-            "interfaces/observability.py should not import infrastructure directly. "
-            f"Found: {infrastructure_imports}"
+        assert not obs_path.exists(), (
+            "interfaces/observability.py should stay removed; use "
+            "bioetl.composition.observability_api instead."
         )
 
 

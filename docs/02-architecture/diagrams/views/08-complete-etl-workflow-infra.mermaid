@@ -10,7 +10,7 @@ flowchart LR
 
     subgraph Infrastructure["Infrastructure"]
         Source["DataSourcePort impl"]
-        Storage["StoragePort impl"]
+        Storage["Bronze/Silver/Gold/Merged storage adapters"]
         Runtime["Lock + checkpoint"]
         Obs["Metrics / tracing"]
         Reports["DQ report + metadata"]

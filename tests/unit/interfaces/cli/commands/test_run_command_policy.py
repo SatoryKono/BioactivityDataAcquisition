@@ -13,7 +13,7 @@ from unittest.mock import MagicMock, patch
 import click
 import pytest
 
-from bioetl.application.services import (
+from bioetl.application.services.execution.pipeline_runner_models import (
     PipelineNotFoundError,
     PipelineRunResult,
     RunResult,
