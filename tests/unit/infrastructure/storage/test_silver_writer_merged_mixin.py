@@ -4,9 +4,11 @@ from __future__ import annotations
 
 from unittest.mock import AsyncMock, MagicMock
 
+import pandera.pandas as pa
 import pytest
 
 from bioetl.domain.schemas.column_order import canonical_column_order
+from bioetl.domain.exceptions import SchemaViolationError
 from bioetl.infrastructure.storage.delta.arrow_converter import ArrowDataConverter
 from bioetl.infrastructure.storage.silver.merged_mixin import (
     _MergedSilverWriteRequest,
@@ -98,3 +100,25 @@ class TestSilverWriterMergedMixin:
         )
 
         assert prepared.arrow_table.column("id").to_pylist() == [1, 2, 3]
+
+    def test_prepare_merged_silver_write_validates_against_schema_when_provided(
+        self,
+    ) -> None:
+        """Merged Silver prep should reject rows that violate registered core schema."""
+        host = _MergedHost()
+        schema = pa.DataFrameSchema(
+            {
+                "id": pa.Column(int),
+                "name": pa.Column(str),
+            }
+        )
+
+        with pytest.raises(SchemaViolationError, match="test.table"):
+            host._prepare_merged_silver_write(
+                request=_MergedSilverWriteRequest(
+                    table_name="test.table",
+                    records=[{"id": "not-int", "name": "Alice"}],
+                    primary_keys=["id"],
+                    schema=schema,
+                )
+            )

@@ -189,6 +189,14 @@ fixtures:
     owner: "data-platform"
     last_refresh: "2026-03-25"
     validation_status: valid
+    edge_fixtures:
+      - fixture_kind: tracked_edge_case_sample
+        fixture_path: tests/fixtures/bronze/crossref/publication/sample_edge_structured_payloads_2026-05-12.jsonl
+        records: 2
+        provenance: "VCR-derived CrossRef edge payloads for author_details and references governance."
+        owner: "data-platform"
+        last_refresh: "2026-05-12"
+        validation_status: valid
   openalex/publication:
     fixture_kind: tracked_ci_sample
     fixture_path: tests/fixtures/bronze/openalex/publication/sample_ci_2026-04-29.jsonl
@@ -264,6 +272,14 @@ fixtures:
     owner: "data-platform"
     last_refresh: "2026-04-24"
     validation_status: valid
+    edge_fixtures:
+      - fixture_kind: tracked_edge_case_sample
+        fixture_path: tests/fixtures/bronze/uniprot/protein/sample_edge_semantic_payloads_2026-05-12.jsonl
+        records: 2
+        provenance: "VCR-derived UniProt edge payloads for nested semantic comment/feature vocabularies."
+        owner: "data-platform"
+        last_refresh: "2026-05-12"
+        validation_status: valid
   uniprot/idmapping:
     fixture_kind: tracked_ci_sample
     fixture_path: tests/fixtures/bronze/uniprot/idmapping/sample_ci_2026-04-29.jsonl

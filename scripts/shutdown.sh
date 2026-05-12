@@ -1,4 +1,5 @@
 #!/bin/bash
+# Compatibility wrapper for the legacy root shutdown launcher.
 # Graceful shutdown script for BioETL + MCP servers
 
 set -e

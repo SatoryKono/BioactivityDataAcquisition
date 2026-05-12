@@ -63,3 +63,50 @@ def test_semanticscholar_edge_fixture_covers_nested_author_and_citation_variants
         for row in rows
         for author in row.get("authors", [])
     )
+
+
+def test_crossref_edge_fixture_covers_structured_author_and_reference_payloads() -> (
+    None
+):
+    rows = _load_jsonl(
+        "tests/fixtures/bronze/crossref/publication/sample_edge_structured_payloads_2026-05-12.jsonl"
+    )
+    assert {"posted-content", "journal-article"} == {row["type"] for row in rows}
+    assert all(isinstance(row.get("author"), list) and row["author"] for row in rows)
+    assert all(
+        isinstance(row.get("reference"), list) and row["reference"] for row in rows
+    )
+
+
+def test_uniprot_protein_edge_fixture_covers_nested_comment_feature_and_keyword_vocab() -> (
+    None
+):
+    rows = _load_jsonl(
+        "tests/fixtures/bronze/uniprot/protein/sample_edge_semantic_payloads_2026-05-12.jsonl"
+    )
+    comment_types = {
+        comment["commentType"]
+        for row in rows
+        for comment in row.get("comments", [])
+        if isinstance(comment, dict) and comment.get("commentType") is not None
+    }
+    feature_types = {
+        feature["type"]
+        for row in rows
+        for feature in row.get("features", [])
+        if isinstance(feature, dict) and feature.get("type") is not None
+    }
+    keyword_categories = {
+        keyword["category"]
+        for row in rows
+        for keyword in row.get("keywords", [])
+        if isinstance(keyword, dict) and keyword.get("category") is not None
+    }
+
+    assert {"COFACTOR", "PATHWAY", "CATALYTIC ACTIVITY"} <= comment_types
+    assert {"Active site", "Binding site", "Domain", "Modified residue"} <= (
+        feature_types
+    )
+    assert {"Ligand", "Technical term", "Biological process", "PTM"} <= (
+        keyword_categories
+    )

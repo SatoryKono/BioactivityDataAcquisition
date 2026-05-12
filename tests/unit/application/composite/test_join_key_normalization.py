@@ -26,7 +26,7 @@ def test_normalize_join_key_text_applies_trim_and_lowercase_for_doi() -> None:
 
 @pytest.mark.unit
 def test_normalize_join_key_dataframe_columns_trims_title_without_lowercase() -> None:
-    df = pl.DataFrame({"title": ["  Mixed Case Title  "]})
+    df = pl.DataFrame({"title": ["  Mixed\t Case\nTitle  "]})
 
     result = normalize_join_key_dataframe_columns(df=df, join_keys=("title",))
 
@@ -45,7 +45,7 @@ def test_normalize_join_key_dataframe_columns_covers_supported_mutating_families
             "pmc_id": [" PMC123 "],
             "target_id": [" chembl0203 "],
             "uniprot_accession": [" p12345 "],
-            "title": ["  Mixed Case Title  "],
+            "title": ["  Mixed\t Case\nTitle  "],
             "canonical_smiles": [" C[C@H](O)C "],
         }
     )
@@ -95,7 +95,7 @@ def test_normalize_join_key_dataframe_columns_preserves_non_mutating_policies() 
 def test_compound_join_key_tuple_normalizes_equivalent_values() -> None:
     tuple_a = (
         stringify_join_key_value(" 10.1000/ABC ", key="doi"),
-        stringify_join_key_value("  Mixed Case Title  ", key="title"),
+        stringify_join_key_value("  Mixed\t Case\nTitle  ", key="title"),
     )
     tuple_b = (
         stringify_join_key_value("10.1000/abc", key="doi"),

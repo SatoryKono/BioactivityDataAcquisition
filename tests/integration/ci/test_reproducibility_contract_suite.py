@@ -1139,6 +1139,14 @@ def test_reproducibility_contract_composite_full_snapshot_envelope_exact_replay_
     assert first["manifest_id"] != second["manifest_id"]
     assert first["replay_capability"] == "exact_replay_supported"
     assert second["replay_capability"] == "exact_replay_supported"
+    assert first["provider"] == "composite"
+    assert first["entity"] == "publication"
+    assert first["code_provenance"]["pipeline_version"] == "1.0.0"
+    assert first["code_provenance"]["contract_ref"] == "composite.publication"
+    assert first["code_provenance"]["contract_version"] == "1.0.0"
+    assert first["code_provenance"]["contract_schema_hash"]
+    assert first["code_provenance"]["dq_policy_ref"] == "composite.dq.v1"
+    assert first["code_provenance"]["rule_bundle_version"] == "dq-rules.v1.0"
     assert first["execution_fingerprint"] == second["execution_fingerprint"]
     assert (
         first["code_provenance"]["effective_config_artifact_id"]
@@ -1193,6 +1201,65 @@ def test_reproducibility_contract_composite_full_snapshot_envelope_exact_replay_
     evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
     assert evidence["case"] == "composite_full_snapshot_envelope_exact_replay"
     assert len(evidence["occurrences"]) == 2
+
+
+def test_reproducibility_contract_composite_forensic_grade_matrix_allows_full_snapshot_envelope(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Composite forensic-grade should succeed once the full replay envelope exists."""
+    data_dir = tmp_path / "runtime"
+    bronze_root = tmp_path / "cached-bronze"
+    _write_composite_snapshot_envelope(bronze_root)
+    monkeypatch.setattr(
+        "bioetl.composition.bootstrap.runtime.composite_control_plane_builder.get_code_revision_provenance",
+        lambda: SimpleNamespace(
+            git_commit="test-clean-composite-forensic",
+            source_revision_state="clean",
+            dependency_lock_hash="sha256:test-lock-composite-forensic",
+        ),
+    )
+    config = _build_replay_matrix_composite_config()
+    runtime = CompositeRuntimeConfig(
+        resume=True,
+        use_cached_bronze=True,
+        cached_bronze_path=str(bronze_root),
+        cached_bronze_date="2026-01-01",
+    )
+    settings = Settings(
+        data_dir=data_dir,
+        pipeline={
+            "control_plane": {
+                "run_manifest_enabled": True,
+                "run_ledger_enabled": True,
+                "required_persistence_profile": "forensic_grade",
+            }
+        },
+    )
+    infra_context = CompositeInfrastructureContext(
+        run_id=str(UUID("00000000-0000-0000-0000-000000000599")),
+        settings=settings,
+        logger=MagicMock(),
+        metrics=MagicMock(),
+        tracer=MagicMock(),
+        storage=MagicMock(),
+        lock=MagicMock(),
+    )
+
+    bundle = build_composite_control_plane_bundle(
+        config=config,
+        runtime=runtime,
+        infra_context=infra_context,
+    )
+
+    manifest = _load_manifest_payload(data_dir, bundle.manifest_id)
+    assert manifest["launch_context"]["required_persistence_profile"] == (
+        "forensic_grade"
+    )
+    assert manifest["replay_capability"] == "exact_replay_supported"
+    assert manifest["code_provenance"]["contract_ref"] == "composite.publication"
+    assert manifest["code_provenance"]["contract_version"] == "1.0.0"
+    assert manifest["code_provenance"]["contract_schema_hash"]
 
 
 def test_reproducibility_contract_forensic_diff_exposes_byte_mismatch_inside_semantic_equivalence(

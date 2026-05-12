@@ -86,9 +86,7 @@ def _start_metrics_server_via_interface(
     logger: LoggerPort | None,
 ) -> bool:
     """Start the metrics server through the lightweight runtime server seam."""
-    from bioetl.infrastructure.observability.server import (
-        start_metrics_server as _impl,
-    )
+    from bioetl.composition.observability_api import start_metrics_server as _impl
 
     return _impl(
         port=port,

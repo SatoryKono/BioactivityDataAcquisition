@@ -10,9 +10,9 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_base im
     _build_base_summary_payload,
     _build_current_checkpoint_anchor_payload,
     _build_effective_config_diagnostics,
-    _resolve_operator_replay_mode,
     _build_resume_anchor_comparison,
     _resolve_base_summary_replay_context,
+    _resolve_operator_replay_mode,
     _resolve_snapshot_status,
     _resolve_source_posture,
 )
@@ -31,6 +31,7 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_replay 
     _resolve_exact_replay_blockers,
     _resolve_replay_capability_reason,
     _resolve_replay_mode,
+    _resolve_replay_occurrence_kind,
 )
 from bioetl.application.services.control_plane._run_manifest_diagnostics_snapshot_support import (
     merge_ledger_input_snapshots_into_summary,
@@ -146,6 +147,13 @@ def _build_unified_reproducibility_diagnostics(
             "exact_replay_support_boundary": summary.get(
                 "exact_replay_support_boundary"
             ),
+            "post_capture_replayable_parent_supported": summary.get(
+                "post_capture_replayable_parent_supported"
+            ),
+            "post_capture_replayable_parent_boundary": summary.get(
+                "post_capture_replayable_parent_boundary"
+            ),
+            "replay_occurrence_kind": summary.get("replay_occurrence_kind"),
             "exact_replay_blockers": summary.get("exact_replay_blockers", []),
             "capability_assessment": summary.get(
                 "replay_capability_assessment",
@@ -349,6 +357,11 @@ def _refresh_replay_summary_from_materialized_snapshots(
         continuation_mode=continuation_mode,
         replay_readiness_verdict=policy_assessment.replay_readiness_verdict.value,
     )
+    updated["replay_occurrence_kind"] = _resolve_replay_occurrence_kind(
+        manifest=effective_manifest,
+        input_snapshots=cast("list[dict[str, object]]", input_snapshots),
+        policy_assessment=policy_assessment,
+    )
     updated["source_posture"] = _resolve_source_posture(policy_assessment)
     updated["input_snapshot_missing_source_refs"] = list(
         policy_assessment.snapshot_envelope.missing_snapshot_source_refs
@@ -372,6 +385,26 @@ def _build_effective_source_refs(
     manifest: RunManifest,
     input_snapshots: list[object],
 ) -> tuple[RunSourceRef, ...]:
+    snapshots_by_source = _group_input_snapshots_by_source(
+        manifest=manifest,
+        input_snapshots=input_snapshots,
+    )
+    if not snapshots_by_source:
+        return manifest.source_refs
+    effective_refs = _merge_manifest_source_refs(
+        manifest=manifest,
+        snapshots_by_source=snapshots_by_source,
+    )
+    effective_refs.extend(_build_additional_source_refs(snapshots_by_source))
+    return tuple(effective_refs)
+
+
+def _group_input_snapshots_by_source(
+    *,
+    manifest: RunManifest,
+    input_snapshots: list[object],
+) -> dict[tuple[str, str, str, str | None], list[RunInputSnapshotRef]]:
+    """Group input snapshots by their effective source identity."""
     snapshots_by_source: dict[
         tuple[str, str, str, str | None],
         list[RunInputSnapshotRef],
@@ -388,39 +421,51 @@ def _build_effective_source_refs(
             (provider, entity, pipeline_name, query),
             [],
         ).append(_build_snapshot_ref(item))
-    if not snapshots_by_source:
-        return manifest.source_refs
+    return snapshots_by_source
+
+
+def _merge_manifest_source_refs(
+    *,
+    manifest: RunManifest,
+    snapshots_by_source: dict[tuple[str, str, str, str | None], list[RunInputSnapshotRef]],
+) -> list[RunSourceRef]:
+    """Attach grouped snapshot refs to manifest-declared source refs."""
     effective_refs: list[RunSourceRef] = []
-    if manifest.source_refs:
-        for source_ref in manifest.source_refs:
-            key = (
-                source_ref.provider,
-                source_ref.entity,
-                source_ref.pipeline_name,
-                source_ref.query,
-            )
-            effective_refs.append(
-                RunSourceRef(
-                    provider=source_ref.provider,
-                    entity=source_ref.entity,
-                    pipeline_name=source_ref.pipeline_name,
-                    query=source_ref.query,
-                    input_snapshots=tuple(snapshots_by_source.pop(key, [])),
-                )
-            )
-    for (provider, entity, pipeline_name, query), snapshots in sorted(
-        snapshots_by_source.items()
-    ):
+    for source_ref in manifest.source_refs:
+        key = (
+            source_ref.provider,
+            source_ref.entity,
+            source_ref.pipeline_name,
+            source_ref.query,
+        )
         effective_refs.append(
             RunSourceRef(
-                provider=provider,
-                entity=entity,
-                pipeline_name=pipeline_name,
-                query=query,
-                input_snapshots=tuple(snapshots),
+                provider=source_ref.provider,
+                entity=source_ref.entity,
+                pipeline_name=source_ref.pipeline_name,
+                query=source_ref.query,
+                input_snapshots=tuple(snapshots_by_source.pop(key, [])),
             )
         )
-    return tuple(effective_refs)
+    return effective_refs
+
+
+def _build_additional_source_refs(
+    snapshots_by_source: dict[tuple[str, str, str, str | None], list[RunInputSnapshotRef]],
+) -> list[RunSourceRef]:
+    """Build source refs discovered only from input snapshots."""
+    return [
+        RunSourceRef(
+            provider=provider,
+            entity=entity,
+            pipeline_name=pipeline_name,
+            query=query,
+            input_snapshots=tuple(snapshots),
+        )
+        for (provider, entity, pipeline_name, query), snapshots in sorted(
+            snapshots_by_source.items()
+        )
+    ]
 
 
 def _build_snapshot_ref(snapshot: dict[str, object]) -> RunInputSnapshotRef:

@@ -1,3 +1,4 @@
+# Compatibility wrapper for the legacy root Codex WSL launcher.
 # Start Codex MCP servers under WSL2
 # Usage: .\scripts\codex-start-wsl.ps1
 

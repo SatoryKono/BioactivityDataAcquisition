@@ -8,6 +8,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from bioetl.domain.config import DQConfig
 from bioetl.composition.factories.pipeline._creation_wiring import (
     _PipelineCreationInputs,
     _PipelineCreationRequest,
@@ -80,18 +81,22 @@ class TestCreateSilverValidator:
         result = _create_silver_validator(None)
         assert result is None
 
-    @patch("bioetl.infrastructure.validation.pandera_validator.PanderaSilverValidator")
+    @patch("bioetl.infrastructure.validation.ContractAwareSilverValidator")
     def test_creates_validator_with_schema(self, mock_validator_cls: MagicMock) -> None:
-        """Creates PanderaSilverValidator when schema is provided."""
+        """Creates ContractAwareSilverValidator when schema is provided."""
         schema = MagicMock()
         schema.to_schema.return_value = MagicMock()
         expected = MagicMock()
         mock_validator_cls.return_value = expected
+        dq_config = DQConfig(contract_ref="chembl_activity")
 
-        result = _create_silver_validator(schema)
+        result = _create_silver_validator(schema, dq_config)
 
         assert result is expected
-        mock_validator_cls.assert_called_once()
+        mock_validator_cls.assert_called_once_with(
+            schema.to_schema.return_value,
+            dq_config=dq_config,
+        )
 
 
 @pytest.mark.unit

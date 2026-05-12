@@ -8,7 +8,7 @@ from bioetl.domain.normalization.profiles._standard_profile_builder import (
 from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_chembl_id,
     normalize_profile_uniprot_accession,
-    normalize_profile_uniprot_accessions,
+    normalize_profile_uniprot_mixed_mappings,
 )
 from bioetl.domain.schemas.constants import UNIPROT_MAPPING_STATUSES
 from bioetl.domain.schemas.uniprot.idmapping import IDMappingSchema
@@ -43,8 +43,8 @@ _BOOLEAN_FIELDS = frozenset({"reviewed"})
 _ENUM_FIELDS = {"mapping_status": frozenset(UNIPROT_MAPPING_STATUSES)}
 _SPECIAL_RULES = {
     "all_mappings": (
-        normalize_profile_uniprot_accessions,
-        "Canonicalize UniProt accession identifiers inside a set-like canonical JSON array.",
+        normalize_profile_uniprot_mixed_mappings,
+        "Canonicalize mixed UniProt mapping identifiers inside a set-like canonical JSON array.",
     ),
     "target_id": (
         normalize_profile_chembl_id,

@@ -66,6 +66,9 @@ class ReproducibilityFamilyProfile:
     support_state: ReplaySupportState
     strict_replay_runtime_verdict: StrictReplayRuntimeVerdict
     exact_replay_support_boundary: str
+    post_capture_replayable_parent_supported: bool
+    post_capture_replayable_parent_boundary: str | None
+    post_capture_replayable_parent_reason: str
     replay_family_contract: ReplayFamilyContractName
     default_required_persistence_profile: str
     support_scope: str
@@ -156,6 +159,11 @@ def _build_composite_reproducibility_family_profile(
         support_state="exact_replay_supported",
         strict_replay_runtime_verdict="requires_full_composite_snapshot_envelope",
         exact_replay_support_boundary="composite_snapshot_backed_input_envelope",
+        post_capture_replayable_parent_supported=False,
+        post_capture_replayable_parent_boundary=None,
+        post_capture_replayable_parent_reason=(
+            "composite_launches_do_not_use_post_capture_parent_promotion"
+        ),
         replay_family_contract="composite_snapshot_backed_exact_replay",
         default_required_persistence_profile="replay_ready",
         support_scope="snapshot_backed_composite_trace_debug",
@@ -178,6 +186,15 @@ def _build_source_reproducibility_family_profile(
         support_state=_source_support_state(supported=supported, published=published),
         strict_replay_runtime_verdict=_source_runtime_verdict(supported=supported),
         exact_replay_support_boundary="snapshot_backed_source_runs_only",
+        post_capture_replayable_parent_supported=supported,
+        post_capture_replayable_parent_boundary=(
+            "ledger_materialized_live_capture_parent" if supported else None
+        ),
+        post_capture_replayable_parent_reason=(
+            "family_can_promote_materialized_live_capture_into_replayable_parent_evidence"
+            if supported
+            else "family_outside_supported_exact_replay_boundary"
+        ),
         replay_family_contract=_source_replay_family_contract(supported=supported),
         default_required_persistence_profile=_source_default_required_profile(
             supported=supported
@@ -298,6 +315,15 @@ def build_replay_family_contract(
         "strict_exact_replay_supported": profile.strict_exact_replay_supported,
         "strict_replay_runtime_verdict": profile.strict_replay_runtime_verdict,
         "exact_replay_support_boundary": profile.exact_replay_support_boundary,
+        "post_capture_replayable_parent_supported": (
+            profile.post_capture_replayable_parent_supported
+        ),
+        "post_capture_replayable_parent_boundary": (
+            profile.post_capture_replayable_parent_boundary
+        ),
+        "post_capture_replayable_parent_reason": (
+            profile.post_capture_replayable_parent_reason
+        ),
         "support_scope": profile.support_scope,
         "reason": profile.reason,
         "supported_families": published_supported_reproducibility_families(),

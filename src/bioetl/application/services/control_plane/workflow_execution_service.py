@@ -37,7 +37,11 @@ from bioetl.domain.ports import (
     WorkflowLedgerPort,
 )
 from bioetl.domain.types import RunID
-from bioetl.domain.workflow import WorkflowConfig
+from bioetl.domain.workflow import (
+    TransformStepConfig,
+    WorkflowConfig,
+    WorkflowStepConfig,
+)
 
 __all__ = ["WorkflowExecutionService", "WorkflowLedgerFactory"]
 
@@ -68,6 +72,7 @@ class WorkflowExecutionService:
         resume_last: bool = False,
         force_steps: tuple[str, ...] = (),
         repair_steps: tuple[str, ...] = (),
+        incremental: bool = False,
     ) -> WorkflowRunExecutionResult:
         """Execute a workflow with durable manifest, ledger, state, and lock."""
         resolved_launch_context = _resolve_launch_context(
@@ -86,6 +91,7 @@ class WorkflowExecutionService:
             workflow_state_port=self.workflow_state_port,
             now_factory=self.now_factory,
             run_id_factory=self.run_id_factory,
+            incremental=incremental,
         )
         ledger = self.workflow_ledger_factory(
             self.workflow_ledger_port,
@@ -116,6 +122,7 @@ class WorkflowExecutionService:
                 repair_steps=repair_steps,
                 force_steps=force_steps,
                 now_factory=self.now_factory,
+                incremental=incremental,
             )
         finally:
             await self.workflow_lock_port.release(
@@ -141,6 +148,19 @@ def _resolve_launch_context(
 
 def _workflow_lock_key(config: WorkflowConfig) -> str:
     return f"workflow:{config.name}"
+
+
+def _extract_incremental_metadata(
+    config: WorkflowConfig,
+) -> tuple[int | None, int | None]:
+    """Extract start_offset and limit from the first pipeline step.
+
+    These values are saved in state for the next incremental run.
+    """
+    for step in config.steps:
+        if isinstance(step, WorkflowStepConfig):
+            return (step.run_options.start_offset, step.run_options.limit)
+    return (None, None)
 
 
 async def _acquire_workflow_lock(
@@ -175,6 +195,7 @@ async def _run_locked_workflow(
     repair_steps: tuple[str, ...],
     force_steps: tuple[str, ...],
     now_factory: Callable[[], datetime],
+    incremental: bool = False,
 ) -> WorkflowRunExecutionResult:
     if not resumed:
         recorder.ledger.record_manifest_created(prepared_manifest)
@@ -192,7 +213,19 @@ async def _run_locked_workflow(
         step_completed_callback=partial(record_step_completed, recorder),
         transform_commit_callback=partial(record_transform_commit, recorder),
     )
-    record_workflow_finished(recorder, result, completed_at=now_factory())
+
+    # Extract offset/limit for saving only if incremental is enabled
+    last_offset, last_limit = (None, None)
+    if incremental:
+        last_offset, last_limit = _extract_incremental_metadata(config)
+
+    record_workflow_finished(
+        recorder,
+        result,
+        completed_at=now_factory(),
+        last_start_offset=last_offset,
+        last_limit=last_limit,
+    )
     return replace(
         result,
         workflow_run_id=str(prepared_manifest.workflow_run_id),

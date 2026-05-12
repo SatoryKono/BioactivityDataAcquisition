@@ -1,4 +1,5 @@
 #!/bin/bash
+# Compatibility wrapper for the legacy root startup launcher.
 # Stable startup script for BioETL + MCP servers
 # Usage: ./scripts/startup.sh [prod|dev]
 

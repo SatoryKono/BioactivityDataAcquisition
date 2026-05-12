@@ -1044,6 +1044,11 @@ def _validate_non_chembl_row_structured_evidence(
 ) -> None:
     if row.get("raw_sidecar") and row.get("canonical_sidecar"):
         return
+    if (
+        row.get("classification") == "structured_json_canonical_only"
+        and row.get("canonical_sidecar")
+    ):
+        return
     raise ValueError(
         f"Missing structured sidecar evidence for {pipeline_name}.{field_name}"
     )

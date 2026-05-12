@@ -32,6 +32,7 @@ from bioetl.application.core.quarantine_manager import (
     FilteredQuarantineEntry,
 )
 from bioetl.domain.config import DQConfig
+from bioetl.domain.config.validation import FieldValidation
 from bioetl.domain.exceptions import DataQualityError, DataQualityThresholdError
 from bioetl.domain.transformations import generate_content_hash
 from bioetl.domain.types import BatchID
@@ -556,6 +557,202 @@ class TestBatchTransformerTransform:
         assert result.quarantined_count >= 0
         assert result.records_quarantine_failed >= 0
         mock_context.logger.error.assert_called()
+
+    async def test_transform_batch_runtime_dq_quarantines_invalid_record(
+        self,
+        mock_context,
+        mock_error_classifier,
+        mock_quarantine_manager,
+        mock_batch_metrics,
+        gold_filter_callback,
+        gold_transform_callback,
+    ) -> None:
+        """Runtime DQ field rules should quarantine invalid normalized records."""
+
+        async def transform(ctx, record, index):
+            await asyncio.sleep(0)
+            return {"entity_id": record.get("id"), "value": record.get("value")}
+
+        transformer = BatchTransformer(
+            context=mock_context,
+            config=RecordProcessorConfig(
+                pipeline_name="test",
+                provider="test",
+                entity_type="test",
+                silver_schema=MagicMock(),
+                gold_schema=MagicMock(),
+                dq_config=DQConfig(
+                    soft_fail_threshold=0.75,
+                    hard_fail_threshold=1.0,
+                    field_validations=(
+                        FieldValidation(
+                            field="value",
+                            validation_type="range",
+                            min_value=0,
+                        ),
+                    ),
+                    invalid_record_policy="quarantine",
+                ),
+            ),
+            error_classifier=mock_error_classifier,
+            quarantine_manager=mock_quarantine_manager,
+            batch_metrics=mock_batch_metrics,
+            transform_callback=transform,
+            gold_filter_callback=gold_filter_callback,
+            gold_transform_callback=gold_transform_callback,
+        )
+
+        result = await transformer.transform_batch(
+            [{"id": "good", "value": 1}, {"id": "bad", "value": -1}],
+            BatchID(uuid4()),
+        )
+
+        assert len(result.silver_records) == 1
+        assert len(result.gold_records) == 0
+        assert result.quarantined_count == 1
+        mock_quarantine_manager.quarantine_records.assert_called_once()
+
+    async def test_transform_batch_runtime_dq_skip_policy_drops_invalid_record(
+        self,
+        mock_context,
+        mock_error_classifier,
+        mock_quarantine_manager,
+        mock_batch_metrics,
+        gold_filter_callback,
+        gold_transform_callback,
+    ) -> None:
+        """Runtime DQ should honor skip disposition for invalid records."""
+
+        async def transform(ctx, record, index):
+            await asyncio.sleep(0)
+            return {"entity_id": record.get("id"), "value": record.get("value")}
+
+        transformer = BatchTransformer(
+            context=mock_context,
+            config=RecordProcessorConfig(
+                pipeline_name="test",
+                provider="test",
+                entity_type="test",
+                silver_schema=MagicMock(),
+                gold_schema=MagicMock(),
+                dq_config=DQConfig(
+                    field_validations=(
+                        FieldValidation(
+                            field="value",
+                            validation_type="range",
+                            min_value=0,
+                        ),
+                    ),
+                    invalid_record_policy="skip",
+                ),
+            ),
+            error_classifier=mock_error_classifier,
+            quarantine_manager=mock_quarantine_manager,
+            batch_metrics=mock_batch_metrics,
+            transform_callback=transform,
+            gold_filter_callback=gold_filter_callback,
+            gold_transform_callback=gold_transform_callback,
+        )
+
+        result = await transformer.transform_batch(
+            [{"id": "bad", "value": -1}],
+            BatchID(uuid4()),
+        )
+
+        assert result.silver_records == []
+        assert result.gold_records == []
+        assert result.quarantined_count == 0
+        mock_quarantine_manager.quarantine_records.assert_not_called()
+
+    async def test_transform_batch_runtime_dq_fail_policy_raises(
+        self,
+        mock_context,
+        mock_error_classifier,
+        mock_quarantine_manager,
+        mock_batch_metrics,
+        gold_filter_callback,
+        gold_transform_callback,
+    ) -> None:
+        """Runtime DQ should hard-fail when policy is set to fail."""
+
+        async def transform(ctx, record, index):
+            await asyncio.sleep(0)
+            return {"entity_id": record.get("id"), "value": record.get("value")}
+
+        transformer = BatchTransformer(
+            context=mock_context,
+            config=RecordProcessorConfig(
+                pipeline_name="test",
+                provider="test",
+                entity_type="test",
+                silver_schema=MagicMock(),
+                gold_schema=MagicMock(),
+                dq_config=DQConfig(
+                    field_validations=(
+                        FieldValidation(
+                            field="value",
+                            validation_type="range",
+                            min_value=0,
+                        ),
+                    ),
+                    invalid_record_policy="fail",
+                ),
+            ),
+            error_classifier=mock_error_classifier,
+            quarantine_manager=mock_quarantine_manager,
+            batch_metrics=mock_batch_metrics,
+            transform_callback=transform,
+            gold_filter_callback=gold_filter_callback,
+            gold_transform_callback=gold_transform_callback,
+        )
+
+        with pytest.raises(DataQualityError, match="Runtime DQ validation failed"):
+            await transformer.transform_batch(
+                [{"id": "bad", "value": -1}],
+                BatchID(uuid4()),
+            )
+
+    async def test_transform_batch_filtered_skip_policy_drops_record(
+        self,
+        mock_context,
+        mock_error_classifier,
+        mock_quarantine_manager,
+        mock_batch_metrics,
+        gold_filter_callback,
+        gold_transform_callback,
+    ) -> None:
+        """Filtered-out records should obey skip invalid-record policy."""
+        from bioetl.application.core.base_transformer import FilteredOutError
+
+        async def filtered_transform(ctx, record, index):
+            await asyncio.sleep(0)
+            raise FilteredOutError("Record excluded by silver filters")
+
+        transformer = BatchTransformer(
+            context=mock_context,
+            config=RecordProcessorConfig(
+                pipeline_name="test",
+                provider="test",
+                entity_type="test",
+                silver_schema=MagicMock(),
+                gold_schema=MagicMock(),
+                dq_config=DQConfig(invalid_record_policy="skip"),
+            ),
+            error_classifier=mock_error_classifier,
+            quarantine_manager=mock_quarantine_manager,
+            batch_metrics=mock_batch_metrics,
+            transform_callback=filtered_transform,
+            gold_filter_callback=gold_filter_callback,
+            gold_transform_callback=gold_transform_callback,
+        )
+
+        result = await transformer.transform_batch(
+            [{"id": "filtered", "value": 5}],
+            BatchID(uuid4()),
+        )
+
+        assert result.filtered_out_count == 0
+        mock_quarantine_manager.quarantine_filtered_records.assert_not_called()
 
 
 @pytest.mark.unit

@@ -119,6 +119,7 @@ def create_record_processor_impl(
         gold_validator=request.gold_validator_factory(
             cast("pdr.DataFrameSchema | None", active_gold_schema),
             strict=request.strict_gold_validation,
+            dq_config=request.dq_config,
         ),
         tracer=effective_tracer,
         lock_validator=request.lock_validator,

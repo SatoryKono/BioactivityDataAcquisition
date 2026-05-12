@@ -30,6 +30,7 @@ from bioetl.domain.normalization.reference_ids import (
     normalize_ror_reference_id,
     normalize_semantic_scholar_reference_id,
     normalize_uniprot_accession_reference_id,
+    normalize_uniprot_mixed_mapping_reference_id,
 )
 from bioetl.domain.normalization.text import normalize_string
 
@@ -61,6 +62,7 @@ __all__ = [
     "normalize_profile_uniprot_accessions_ordered",
     "normalize_profile_uniprot_go_references",
     "normalize_profile_uniprot_interpro_references",
+    "normalize_profile_uniprot_mixed_mappings",
 ]
 
 
@@ -199,6 +201,14 @@ def normalize_profile_uniprot_accessions(value: object) -> object:
     return normalize_json_string_reference_ids(
         value,
         item_normalizer=normalize_uniprot_accession_reference_id,
+    )
+
+
+def normalize_profile_uniprot_mixed_mappings(value: object) -> object:
+    """Canonicalize mixed UniProt mapping arrays across governed ID families."""
+    return normalize_json_string_reference_ids(
+        value,
+        item_normalizer=normalize_uniprot_mixed_mapping_reference_id,
     )
 
 

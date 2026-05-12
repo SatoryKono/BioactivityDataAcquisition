@@ -56,6 +56,8 @@ class WorkflowExecutionState:
     repair_required: bool = False
     repair_hint: str | None = None
     ambiguous_step_ids: tuple[str, ...] = ()
+    last_start_offset: int | None = None
+    last_limit: int | None = None
 
     def to_dict(self) -> dict[str, object]:
         """Return a JSON-serializable execution-state payload."""
@@ -123,6 +125,8 @@ def _workflow_execution_state_to_dict(
         "repair_required": state.repair_required,
         "repair_hint": state.repair_hint,
         "ambiguous_step_ids": list(state.ambiguous_step_ids),
+        "last_start_offset": state.last_start_offset,
+        "last_limit": state.last_limit,
     }
 
 
@@ -157,12 +161,24 @@ def _workflow_execution_state_from_dict(
         ambiguous_step_ids=tuple(
             str(item) for item in _load_list(payload.get("ambiguous_step_ids"))
         ),
+        last_start_offset=_load_optional_int(payload, "last_start_offset"),
+        last_limit=_load_optional_int(payload, "last_limit"),
     )
 
 
 def _load_optional_str(payload: dict[str, object], key: str) -> str | None:
     value = payload.get(key)
     return None if value is None else str(value)
+
+
+def _load_optional_int(payload: dict[str, object], key: str) -> int | None:
+    value = payload.get(key)
+    if value is None:
+        return None
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return None
 
 
 def _serialize_optional_datetime(value: datetime | None) -> str | None:

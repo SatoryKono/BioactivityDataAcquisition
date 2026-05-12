@@ -22,6 +22,7 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_replay 
     _resolve_replay_capability_reason,
     _resolve_replay_family_contract,
     _resolve_replay_mode,
+    _resolve_replay_occurrence_kind,
 )
 from bioetl.application.services.control_plane._run_manifest_diagnostics_snapshot_support import (
     collect_input_snapshot_content_hashes as _collect_input_snapshot_content_hashes,
@@ -295,6 +296,11 @@ def _build_base_summary_core_payload(
         "replay_of_run_id": manifest.replay_of_run_id,
         "replay_of_manifest_id": manifest.replay_of_manifest_id,
         "replay_parentage": _build_replay_parentage(manifest),
+        "replay_occurrence_kind": _resolve_replay_occurrence_kind(
+            manifest=manifest,
+            input_snapshots=replay_context.input_snapshots,
+            policy_assessment=replay_context.policy_assessment,
+        ),
         "replay_capability": manifest.replay_capability.value,
         "required_persistence_profile": (
             replay_context.policy_assessment.required_persistence_profile
@@ -304,6 +310,16 @@ def _build_base_summary_core_payload(
         "replay_capability_reason": replay_context.replay_capability_reason,
         "replay_support_state": replay_context.replay_family_contract.get(
             "support_state"
+        ),
+        "post_capture_replayable_parent_supported": (
+            replay_context.replay_family_contract.get(
+                "post_capture_replayable_parent_supported"
+            )
+        ),
+        "post_capture_replayable_parent_boundary": (
+            replay_context.replay_family_contract.get(
+                "post_capture_replayable_parent_boundary"
+            )
         ),
         "exact_replay_eligible": exact_replay_eligible,
         "exact_replay_blockers": replay_context.exact_replay_blockers,

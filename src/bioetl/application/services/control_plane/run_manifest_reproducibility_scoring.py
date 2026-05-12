@@ -206,9 +206,6 @@ def _score_checkpoint_safety(summary: JsonDict) -> _ScoreCard:
     resume_contract = summary.get("resume_contract")
     if isinstance(resume_contract, dict):
         applied_policy = resume_contract.get("applied_checkpoint_compatibility_policy")
-        requested_policy = resume_contract.get(
-            "requested_checkpoint_compatibility_policy"
-        )
         if applied_policy == "hard_fail":
             score += 1
             evidence.append("hard_fail_checkpoint_policy")
@@ -216,10 +213,10 @@ def _score_checkpoint_safety(summary: JsonDict) -> _ScoreCard:
             score -= 2
             evidence.append("legacy_observe_checkpoint_policy")
             blockers.append("legacy_observe_checkpoint_policy")
-        if required_profile in STRICT_PERSISTENCE_PROFILES and requested_policy in {
-            "observe",
-            "legacy_observe",
-        }:
+        if (
+            required_profile in STRICT_PERSISTENCE_PROFILES
+            and applied_policy != "hard_fail"
+        ):
             score -= 1
             evidence.append("checkpoint_policy_below_profile_minimum")
             blockers.append("checkpoint_policy_below_profile_minimum")

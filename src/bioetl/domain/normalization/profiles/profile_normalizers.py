@@ -60,6 +60,7 @@ from bioetl.domain.normalization.profiles._profile_reference_normalizers import 
     normalize_profile_uniprot_accessions_ordered,
     normalize_profile_uniprot_go_references,
     normalize_profile_uniprot_interpro_references,
+    normalize_profile_uniprot_mixed_mappings,
 )
 from bioetl.domain.normalization.profiles._profile_textual_normalizers import (
     normalize_profile_abstract,
@@ -168,6 +169,7 @@ __all__ = [
     "normalize_profile_uniprot_accessions_ordered",
     "normalize_profile_uniprot_go_references",
     "normalize_profile_uniprot_interpro_references",
+    "normalize_profile_uniprot_mixed_mappings",
     "normalize_profile_unit",
 ]
 

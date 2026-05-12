@@ -9,6 +9,7 @@ import pandas as pd
 import pandera.pandas as pa
 from pandera.typing import Series
 
+from bioetl.domain.normalization.rules import normalize_boolean
 from bioetl.domain.schemas.base import ETLRecordSchema
 from bioetl.domain.schemas.constants import CHEMBL_ID_PATTERN, TARGET_TYPES
 
@@ -19,6 +20,49 @@ __all__ = [
 
 class TargetSchema(ETLRecordSchema):
     """Target validation schema for Silver layer."""
+
+    @staticmethod
+    def _normalize_nullable_boolean_series(series: pd.Series) -> pd.Series:
+        """Normalize sparse bool-like values without masking invalid lexemes."""
+        normalized_values: list[object] = []
+        can_cast_to_boolean = True
+
+        for value in series.tolist():
+            if pd.isna(value):
+                normalized_values.append(pd.NA)
+                continue
+
+            normalized = normalize_boolean(value)
+            if normalized is None:
+                normalized_values.append(value)
+                can_cast_to_boolean = False
+                continue
+
+            normalized_values.append(normalized)
+
+        if can_cast_to_boolean:
+            return pd.Series(
+                normalized_values,
+                index=series.index,
+                dtype=pd.BooleanDtype(),
+            )
+
+        return pd.Series(normalized_values, index=series.index, dtype="object")
+
+    @pa.dataframe_parser
+    def _normalize_sparse_nullable_booleans(
+        cls,
+        dataframe: pd.DataFrame,
+    ) -> pd.DataFrame:
+        """Normalize nullable bool-like target fields before dtype validation."""
+        if "downgraded" not in dataframe.columns:
+            return dataframe
+
+        normalized = dataframe.copy()
+        normalized["downgraded"] = cls._normalize_nullable_boolean_series(
+            normalized["downgraded"]
+        )
+        return normalized
 
     # === Primary Key ===
     # tid: Series[int] = pa.Field(

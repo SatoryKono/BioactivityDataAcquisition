@@ -128,7 +128,9 @@ def test_chembl_set_like_and_order_sensitive_hash_contracts_hold() -> None:
         activity_left
     ) == activity_processor.compute_content_hash(activity_right)
 
-    target_processor = RecordNormalizationProcessor(provider="chembl", entity_type="target")
+    target_processor = RecordNormalizationProcessor(
+        provider="chembl", entity_type="target"
+    )
     target_left = target_processor.normalize_business_data(
         {"component_types": '["DNA","PROTEIN"]'}
     )

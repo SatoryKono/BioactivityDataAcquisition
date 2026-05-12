@@ -31,6 +31,8 @@ _HEADER = """# Reproducibility Support Matrix (Auto-Generated)
 > Exact replay is supported only inside the published boundary shown here and only
 > when runtime diagnostics also prove full immutable input snapshots, code/config
 > provenance, dependency-lock provenance, and produced artifact trace anchors.
+> Supported source families may also promote a completed live capture with
+> ledger-materialized immutable snapshots into replayable parent evidence.
 
 """
 
@@ -56,6 +58,7 @@ def _diagnostics_surface(row: dict[str, object]) -> str:
     diagnostics = [
         "replay_readiness_verdict",
         "replay_capability",
+        "replay_occurrence_kind",
         "exact_replay_blockers",
         "source_posture",
         "manifest_id",
@@ -66,6 +69,12 @@ def _diagnostics_surface(row: dict[str, object]) -> str:
     if row["execution_context"] == "composite":
         diagnostics.append("composite_dossier_projection")
     return ", ".join(f"`{item}`" for item in diagnostics)
+
+
+def _post_capture_parent_state(row: dict[str, object]) -> str:
+    if bool(row["post_capture_replayable_parent_supported"]):
+        return "supported"
+    return "not_applicable"
 
 
 def _matrix_rows() -> list[dict[str, object]]:
@@ -83,8 +92,8 @@ def build_reproducibility_support_matrix_markdown() -> str:
     lines = [_HEADER.rstrip(), ""]
     lines.extend(
         [
-            "| Family | Context | Support State | Strict Exact Replay | Required Profile | Snapshot Requirement | Lineage Closure | Contract | Blocker Reason | Diagnostics |",
-            "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+            "| Family | Context | Support State | Strict Exact Replay | Post-Capture Parent | Parent Boundary | Required Profile | Snapshot Requirement | Lineage Closure | Contract | Blocker Reason | Diagnostics |",
+            "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
         ]
     )
     for row in _matrix_rows():
@@ -94,6 +103,8 @@ def build_reproducibility_support_matrix_markdown() -> str:
             f"`{row['execution_context']}` | "
             f"`{row['support_state']}` | "
             f"`{str(row['strict_exact_replay_supported']).lower()}` | "
+            f"`{_post_capture_parent_state(row)}` | "
+            f"`{row['post_capture_replayable_parent_boundary'] or 'n/a'}` | "
             f"`{row['default_required_persistence_profile']}` | "
             f"`{_snapshot_requirement(row)}` | "
             f"`{_lineage_closure(row)}` | "

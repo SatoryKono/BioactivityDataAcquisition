@@ -1488,6 +1488,25 @@ ratchets.
   не использовать `docs/99-archive/` как нормативный источник текущего
   состояния.
 
+## Evidence Matrix
+
+Нормативные evidence-поверхности для воспроизводимости и control-plane
+diagnostics **MUST** отслеживаться явно, а не оставаться только в narrative
+описаниях.
+
+Минимум для reproducibility/doc audits:
+
+- scoring rubric: `docs/04-reference/contracts/reproducibility-scoring-rubric.md`
+- operator lifecycle/runbook: `docs/05-operations/control-plane-lifecycle.md`
+- architecture policy: текущий `RULES.md`
+
+## Criterion Evidence Index
+
+Каждый criterion-level verdict или score выше нуля **MUST** иметь явную
+evidence-ссылку на code/doc/config/test surface. Для control-plane и replay
+readiness это включает run-manifest, run-ledger, reproducibility rubric и
+операционный lifecycle runbook в `docs/05-operations/control-plane-lifecycle.md`.
+
 ### 7.2. Обновление Документации
 
 При обнаружении ложного утверждения **MUST**:

@@ -81,18 +81,20 @@ class _MergedWriteFacade:
         records: list[BronzeRecord],
         primary_keys: list[str] | None = None,
         *,
+        schema: object | None = None,
         completed_at: datetime | None = None,
         run_id: str | None = None,
         sources_used: list[str] | None = None,
         preserve_column_order: bool = False,
     ) -> None:
-        """Write merged records to Silver layer without explicit schema."""
+        """Write merged records to Silver layer with optional core-schema validation."""
         await _execute_merged_silver_write_flow(
             cast(_MergedSilverWriteExecutorProtocol, self),
             _build_merged_silver_write_request(
                 table_name=table_name,
                 records=records,
                 primary_keys=primary_keys,
+                schema=schema,
                 completed_at=completed_at,
                 run_id=run_id,
                 sources_used=sources_used,

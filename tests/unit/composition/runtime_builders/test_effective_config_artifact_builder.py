@@ -224,7 +224,7 @@ def test_runtime_overrides_snapshot_materializes_execution_environment_provenanc
     assert env_snapshot["schema_version"] == "execution-environment-v1"
     assert env_snapshot["settings_env"] == "prod"
     assert env_snapshot["debug"] is True
-    assert env_snapshot["data_root_mode"] in {"repo_data", "custom_data_dir"}
+    assert env_snapshot["data_root_mode"] == "explicit"
     assert "settings_snapshot_hash" in env_snapshot
     assert env_snapshot["settings_snapshot_hash"].startswith("sha256:")
 

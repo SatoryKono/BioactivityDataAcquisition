@@ -23,6 +23,7 @@ def test_reference_identifier_registry_covers_non_chembl_provider_families() -> 
         "interpro",
         "issn",
         "mesh",
+        "mixed_identifier_set",
         "ncbi_taxonomy",
         "openalex_author",
         "openalex_institution",
@@ -50,6 +51,12 @@ def test_reference_identifier_registry_covers_non_chembl_provider_families() -> 
     assert reactome.normalizer("https://reactome.org/content/detail/r-hsa-164843") == (
         "R-HSA-164843"
     )
+
+    mixed = registry["mixed_identifier_set"]
+    assert mixed.normalizer is not None
+    assert mixed.normalizer(" p12345 ") == "P12345"
+    assert mixed.normalizer("chembl0203") == "CHEMBL203"
+    assert mixed.normalizer("db00001") == "DB00001"
 
 
 def test_reference_identifier_registry_normalizes_legacy_transport_aliases() -> None:

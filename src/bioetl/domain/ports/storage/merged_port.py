@@ -24,20 +24,24 @@ class MergedStoragePort(Protocol):
         records: list[BronzeRecord],  # BronzeRecord: merged Silver records
         primary_keys: list[str] | None = None,
         *,
+        schema: object | None = None,
         completed_at: datetime | None = None,
         run_id: str | None = None,
         sources_used: list[str] | None = None,
         preserve_column_order: bool = False,
     ) -> None:
-        """Write merged records to Silver layer without explicit schema.
+        """Write merged records to Silver layer with optional core-schema validation.
 
-        Used by composite pipelines where schema is dynamically determined
-        by the merge operation. Schema is inferred from the records.
+        Used by composite pipelines where merged Silver records may carry
+        layer-specific extra columns but must still satisfy a registered
+        core contract before write.
 
         Args:
             table_name: The name of the table to write to.
             records: A list of dictionaries representing merged records.
             primary_keys: Optional list of column names for sorting.
+            schema: Optional strict-schema payload used as a non-strict
+                validation surface for core merged columns before Silver write.
             completed_at: Optional deterministic metadata timestamp for merged sidecars.
             run_id: Optional composite run ID for metadata tracking.
             sources_used: Optional list of source pipelines used in merge.

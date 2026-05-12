@@ -85,6 +85,7 @@ __all__ = [
     "normalize_ror_reference_id",
     "normalize_semantic_scholar_reference_id",
     "normalize_uniprot_accession_reference_id",
+    "normalize_uniprot_mixed_mapping_reference_id",
     "reference_identifier_families",
     "reference_identifier_family",
 ]
@@ -174,6 +175,43 @@ def _normalize_uniprot_accession_text(value: str) -> str | None:
 def normalize_uniprot_accession_reference_id(value: object) -> object:
     """Normalize UniProt accessions to uppercase canonical accession text."""
     return _canonical_or_text(value, normalizer=_normalize_uniprot_accession_text)
+
+
+def normalize_uniprot_mixed_mapping_reference_id(value: object) -> object:
+    """Normalize one mixed UniProt mapping token across known ID families.
+
+    ``uniprot_idmapping.all_mappings`` is not a pure UniProt accession list.
+    It primarily carries accessions, but tracked edge cases also include other
+    provider IDs such as ChEMBL anchors. The normalizer therefore tries the
+    canonical governed families in descending specificity and otherwise
+    preserves the normalized source text.
+    """
+    text = _normalized_text(value)
+    if text is None:
+        return None if value is None else value
+    return (
+        _normalize_mixed_mapping_chembl(text)
+        or _normalize_mixed_mapping_fallback(text)
+        or text
+    )
+
+
+def _normalize_mixed_mapping_chembl(text: str) -> str | None:
+    chembl_match = _CHEMBL_ID_RE.fullmatch(text.strip())
+    if chembl_match is None:
+        return None
+    return f"CHEMBL{int(chembl_match.group(1))}"
+
+
+def _normalize_mixed_mapping_fallback(text: str) -> object | None:
+    for normalizer in (
+        normalize_uniprot_accession_reference_id,
+        normalize_drugbank_reference_id,
+    ):
+        normalized = normalizer(text)
+        if normalized != text:
+            return normalized
+    return None
 
 
 def _normalize_chembl_text(value: str) -> str | None:
@@ -267,6 +305,7 @@ _REFERENCE_IDENTIFIER_FAMILIES = build_reference_identifier_families(
         "semantic_scholar_paper": normalize_semantic_scholar_reference_id,
         "ncbi_taxonomy": normalize_ncbi_taxonomy_reference_id,
         "uniprot_accession": normalize_uniprot_accession_reference_id,
+        "mixed_identifier_set": normalize_uniprot_mixed_mapping_reference_id,
         "go": normalize_go_reference_id,
         "interpro": normalize_interpro_reference_id,
         "pfam": normalize_pfam_reference_id,

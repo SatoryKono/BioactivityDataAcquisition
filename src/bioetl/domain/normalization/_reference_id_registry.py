@@ -93,6 +93,13 @@ _REFERENCE_IDENTIFIER_FAMILY_SPECS: tuple[tuple[str, str, str, str, str], ...] =
         "UniProt accession identifiers.",
     ),
     (
+        "mixed_identifier_set",
+        "json_array",
+        "set_like",
+        "mixed_identifier_set",
+        "Mixed provider identifier arrays anchored on UniProt mapping outputs.",
+    ),
+    (
         "go",
         "json_array",
         "set_like",

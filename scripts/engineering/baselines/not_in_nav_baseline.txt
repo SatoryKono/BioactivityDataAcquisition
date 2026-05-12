@@ -108,6 +108,10 @@
 03-data-model/reference-identifier-families.md
 03-guides/cleanup.md
 03-guides/dashboards/design-system.md
+03-guides/dashboards/dashboard-audit-checklist.md
+03-guides/dashboards/dashboard-checklist-per-dashboard.md
+03-guides/dashboards/dashboard-requirements-comprehensive.md
+03-guides/dashboards/dashboard-test-proposals.md
 03-guides/dashboards/navigation-contract.md
 03-guides/dashboards/panel-title-inventory.md
 03-guides/dashboards/selector-architecture.md
@@ -162,6 +166,8 @@
 05-operations/verification/ci-failure-triage-2026-05-05.md
 05-operations/verification/neo4j-memory-qa-examples.md
 05-operations/verification/neo4j-memory-windows-verification.md
+CODEX_QUICK_START.md
+CODEX_WSL_SETUP.md
 D-01 Governance & Style Guide.md
 D-02 Provider Integration Handbook.md
 D-03 Data Contracts & Schema Specification.md
