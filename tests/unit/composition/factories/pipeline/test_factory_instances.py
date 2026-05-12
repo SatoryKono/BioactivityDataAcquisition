@@ -184,7 +184,19 @@ class TestChemblActivityFactory:
 
         mock_load_config.return_value = mock_pipeline_config
         mock_base_services.create_common_services.return_value = mock_services
+        from bioetl.domain.types.dq_contracts import DQDisposition
+
         mock_domain_config = MagicMock()
+        mock_domain_config.dq = MagicMock()
+        mock_domain_config.dq.default_disposition_policy = DQDisposition.WARN
+        mock_domain_config.dq.disposition_overrides = {}
+        mock_domain_config.dq.strictness_mode = "moderate"
+        mock_domain_config.dq.contract_ref = None
+        mock_domain_config.dq.contract_version = None
+        mock_domain_config.dq.rule_bundle_version = None
+        mock_domain_config.dq.soft_fail_threshold = 0.05
+        mock_domain_config.dq.hard_fail_threshold = 0.20
+        mock_domain_config.dq.strict_validation = False
         mock_yaml_to_domain.return_value = mock_domain_config
         mock_compute_hash.return_value = "mock_config_hash_12345"
         chembl_activity_factory._create_data_source = MagicMock(

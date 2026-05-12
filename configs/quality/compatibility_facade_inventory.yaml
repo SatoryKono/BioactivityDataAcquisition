@@ -266,7 +266,7 @@ retained_entrypoints:
     seam; do not import `bioetl.composition._pipeline_execution`, `bioetl.composition._resource_management`,
     or `bioetl.composition._services` directly outside dedicated entrypoint-boundary
     coverage.
-  exit_criteria: The public entrypoint remains sanctioned, deprecated service/resource
+  exit_criteria: The public entrypoint remains sanctioned, removed service/resource
     symbol imports in first-party source stay at zero, internal implementation-module
     imports outside `composition/` stay at zero, and internal-module patch coverage
     remains confined to the dedicated entrypoint-boundary tests.
