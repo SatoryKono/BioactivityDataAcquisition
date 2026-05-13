@@ -18,7 +18,8 @@ Commands:
     split-testing-roadmap  Create or preview #2511 child issues
     sync-docs-issues   Preview or apply docs-sync issue metadata
     cleanup-branch-candidates  Preview or apply curated branch cleanup plan
-    all                Run all checks sequentially
+    check-all          Run read-only checks sequentially
+    all                Alias for check-all
 """
 
 from __future__ import annotations
@@ -60,7 +61,32 @@ COMMAND_SPECS["cleanup-branch-candidates"] = shell_command(
     COMMANDS["cleanup-branch-candidates"]
 )
 
+CHECK_COMMANDS = (
+    "check-inventory",
+    "check-catalog",
+    "check-versions",
+    "check-actions-runtime-policy",
+    "check-cleanliness",
+    "check-cleanup-governance",
+    "check-root-review-registry",
+)
+
 _DIR = Path(__file__).parent
+
+
+def _run_check_all(rest: list[str]) -> int:
+    for name in CHECK_COMMANDS:
+        print(f"\n{'=' * 60}")
+        print(f"  {name}")
+        print(f"{'=' * 60}\n")
+        rc = run_command(COMMAND_SPECS[name], rest, base_dir=_DIR)
+        if rc != 0:
+            print(f"\n[FAIL] {name} exited with code {rc}", file=sys.stderr)
+            return rc
+    print(f"\n{'=' * 60}")
+    print("  All read-only checks passed.")
+    print(f"{'=' * 60}")
+    return 0
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -72,29 +98,22 @@ def main(argv: list[str] | None = None) -> int:
 
     cmd, rest = args[0], args[1:]
 
-    if cmd == "all":
-        for name, script in COMMANDS.items():
-            print(f"\n{'=' * 60}")
-            print(f"  {name}")
-            print(f"{'=' * 60}\n")
-            rc = run_command(python_command(script), rest, base_dir=_DIR)
-            if rc != 0:
-                print(f"\n[FAIL] {name} exited with code {rc}", file=sys.stderr)
-                return rc
-        print(f"\n{'=' * 60}")
-        print("  All checks passed.")
-        print(f"{'=' * 60}")
-        return 0
+    if cmd in {"all", "check-all"}:
+        return _run_check_all(rest)
 
     if cmd not in COMMAND_SPECS:
-        return print_unknown_command(cmd, COMMAND_SPECS, extra_available=("all",))
+        return print_unknown_command(
+            cmd,
+            COMMAND_SPECS,
+            extra_available=("all", "check-all"),
+        )
 
     return dispatch_cli(
         [cmd, *rest],
         help_text=__doc__ or "",
         commands=COMMAND_SPECS,
         base_dir=_DIR,
-        extra_available=("all",),
+        extra_available=("all", "check-all"),
     )
 
 

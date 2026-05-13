@@ -541,7 +541,16 @@ def test_variable_query_sources(dashboard_path):
         assert "run_type" in run_type_query_text
 
         run_id_var = variable_map["run_id"]
-        assert run_id_var.get("type") == "textbox"
+        assert run_id_var.get("type") == "query"
+        assert run_id_var.get("datasource") == "Quarantine Explorer"
+        run_id_query = run_id_var.get("query", {})
+        assert isinstance(run_id_query, dict)
+        infinity_query = run_id_query.get("infinityQuery", {})
+        assert isinstance(infinity_query, dict)
+        run_id_query_url = str(infinity_query.get("url", ""))
+        assert "dimension=run_id" in run_id_query_url
+        assert "pipeline=${pipeline}" in run_id_query_url
+        assert "run_type=${run_type:csv}" not in run_id_query_url
         return
 
     if dashboard_path.name == "bioetl-provider-health-v2.json":

@@ -609,7 +609,7 @@
                         "text": "Data Quality"
                       },
                       "gold": {
-                        "text": "Gold"
+                        "text": "Data Validation"
                       },
                       "provider": {
                         "text": "Provider"
@@ -668,7 +668,7 @@
       },
       "targets": [
         {
-          "expr": "max by (input) (bioetl_l0_input_status_selected{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} or ((bioetl_l0_input_status_selected{run_type=~\"$run_type\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\")))",
+          "expr": "label_replace(max by (input) (bioetl_l0_input_status_selected{pipeline=~\"$pipeline\",run_type=~\"$run_type\",input=\"control_plane\"} or ((bioetl_l0_input_status_selected{run_type=~\"$run_type\",input=\"control_plane\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))), \"input_order\", \"10\", \"input\", \".*\") or label_replace(max by (input) (bioetl_l0_input_status_selected{pipeline=~\"$pipeline\",run_type=~\"$run_type\",input=\"runtime\"} or ((bioetl_l0_input_status_selected{run_type=~\"$run_type\",input=\"runtime\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))), \"input_order\", \"20\", \"input\", \".*\") or label_replace(max by (input) (bioetl_l0_input_status_selected{pipeline=~\"$pipeline\",run_type=~\"$run_type\",input=\"provider\"} or ((bioetl_l0_input_status_selected{run_type=~\"$run_type\",input=\"provider\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))), \"input_order\", \"30\", \"input\", \".*\") or label_replace(max by (input) (bioetl_l0_input_status_selected{pipeline=~\"$pipeline\",run_type=~\"$run_type\",input=\"dq\"} or ((bioetl_l0_input_status_selected{run_type=~\"$run_type\",input=\"dq\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))), \"input_order\", \"40\", \"input\", \".*\") or label_replace(max by (input) (bioetl_l0_input_status_selected{pipeline=~\"$pipeline\",run_type=~\"$run_type\",input=\"gold\"} or ((bioetl_l0_input_status_selected{run_type=~\"$run_type\",input=\"gold\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))), \"input_order\", \"50\", \"input\", \".*\") or label_replace(max by (input) (bioetl_l0_input_status_selected{pipeline=~\"$pipeline\",run_type=~\"$run_type\",input=\"workflow\"} or ((bioetl_l0_input_status_selected{run_type=~\"$run_type\",input=\"workflow\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))), \"input_order\", \"60\", \"input\", \".*\")",
           "refId": "A",
           "format": "table",
           "instant": true
@@ -714,10 +714,23 @@
       },
       "transformations": [
         {
+          "id": "sortBy",
+          "options": {
+            "fields": {},
+            "sort": [
+              {
+                "field": "input_order",
+                "desc": false
+              }
+            ]
+          }
+        },
+        {
           "id": "organize",
           "options": {
             "excludeByName": {
               "Time": true,
+              "input_order": true,
               "__name__": true
             },
             "indexByName": {
@@ -733,7 +746,7 @@
           }
         }
       ],
-      "description": "Compact L0 input summary for the selected pipeline/run_type scope. Each row keeps the worst current status for one operator input (Runtime, DQ, Gold, Control Plane, Provider, Workflow) so the landing row fits without scroll. Status values are OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null). Use the panel links to open the matching drilldown; Workflow resets scope on handoff."
+      "description": "Compact L0 input summary for the selected pipeline/run_type scope. Rows are shown in the canonical operator order: Control Plane, Runtime, Provider, Data Quality, Data Validation, Workflow. Status values are OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null). Use the panel links to open the matching drilldown; Workflow resets scope on handoff."
     },
     {
       "id": 9003,
@@ -1748,7 +1761,7 @@
       },
       "targets": [
         {
-          "expr": "max by (pipeline) (bioetl_l1_workflow_global_status)",
+          "expr": "max by (pipeline) (bioetl_l1_workflow_global_status{pipeline!=\"test_pipe\"})",
           "refId": "A",
           "format": "table",
           "instant": true
@@ -1789,7 +1802,7 @@
           }
         }
       ],
-      "description": "Compact GLOBAL workflow scope across pipelines. Each row keeps the worst current workflow status per pipeline so the first-screen table stays readable without scroll. Status values are OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null). Current workflow status is driven by the latest bounded terminal workflow signal, not by cumulative workflow-run counters."
+      "description": "Compact GLOBAL workflow scope across pipelines, excluding the synthetic `test_pipe` surface from the first-screen overview. Each row keeps the worst current workflow status per pipeline so the first-screen table stays readable without scroll. Status values are OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null). Current workflow status is driven by the latest bounded terminal workflow signal, not by cumulative workflow-run counters."
     },
     {
       "id": 9014,
@@ -2747,19 +2760,33 @@
         "description": "Core scope: run_type selector bounded by pipeline; fallback: All run types for selected pipeline."
       },
       {
-        "current": {
-          "selected": true,
-          "text": "-",
-          "value": "-"
-        },
-        "description": "Visible execution-hint bridge only. Operators may paste one run_id to keep manual context across triage, but Overview v3 does not yet claim catalog-backed exact-run resolution from this selector.",
+        "allValue": null,
+        "current": {},
+        "datasource": "Quarantine Explorer",
+        "definition": "/ops/quarantine/filter-options?dimension=run_id&pipeline=${pipeline}",
+        "description": "Run ID selector sourced from Quarantine Explorer filter options for current pipeline/run_type scope. Empty list means no run_id evidence in selected range; Overview v3 still does not claim exact catalog-backed run resolution.",
         "hide": 0,
+        "includeAll": false,
         "label": "Run ID",
+        "multi": false,
         "name": "run_id",
         "options": [],
-        "query": "-",
+        "query": {
+          "infinityQuery": {
+            "type": "json",
+            "source": "url",
+            "url": "/ops/quarantine/filter-options?dimension=run_id&pipeline=${pipeline}"
+          }
+        },
+        "refresh": 1,
+        "regex": "",
         "skipUrlSync": false,
-        "type": "textbox"
+        "sort": 1,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
       }
     ]
   },
