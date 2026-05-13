@@ -24,6 +24,7 @@ from bioetl.infrastructure.schemas.pipeline_config_common_schemas import (
     GoldRangeFilterConfig,
     InputFilterYamlConfig,
     MaintenanceConfig,
+    SilverFiltersConfig,
     SinkDQReportConfig,
     SinkLayerConfig,
     TransformConfig,
@@ -66,6 +67,7 @@ __all__ = [
     "PipelineYamlConfig",
     "ProviderSourceConfig",
     "RateLimitSourceConfig",
+    "SilverFiltersConfig",
     "SinkDQReportConfig",
     "SinkLayerConfig",
     "SourceConfig",
@@ -190,7 +192,7 @@ class PipelineYamlConfig(BaseModel):
         description="Silver table name. Auto-computed as {provider}.{entity_type} if empty.",
     )
     gold_table: str | None = Field(default=None, min_length=1)
-    silver_filters: GoldFiltersConfig = Field(default_factory=GoldFiltersConfig)
+    silver_filters: SilverFiltersConfig = Field(default_factory=SilverFiltersConfig)
     gold_filters: GoldFiltersConfig = Field(default_factory=GoldFiltersConfig)
     sink: dict[str, SinkLayerConfig] = Field(default_factory=dict)
     source: SourceConfig = Field(default_factory=SourceConfig)
@@ -247,6 +249,18 @@ class PipelineYamlConfig(BaseModel):
         if not value.islower():
             raise ValueError("provider must be lowercase")
         return value
+
+    @model_validator(mode="before")
+    @classmethod
+    def promote_semantic_silver_filters(cls, data: object) -> object:
+        """Normalize legacy semantic Silver rules before strict field validation."""
+        if not isinstance(data, dict):
+            return data
+        from bioetl.infrastructure.config.silver_filter_migration import (
+            normalize_silver_gold_filter_payload,
+        )
+
+        return normalize_silver_gold_filter_payload(data)
 
     def _validate_primary_key_presence(self) -> None:
         """Ensure business primary keys are specified."""

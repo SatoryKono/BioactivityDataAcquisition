@@ -62,6 +62,7 @@ class CheckpointIdentityRecord:
     effective_config_artifact_id: str | None = None
     exact_replay: bool | None = None
     input_snapshot_fingerprint: str | None = None
+    silver_filter_compatibility_mode: str | None = None
 
 
 @dataclass(frozen=True)
@@ -215,6 +216,9 @@ class CheckpointCompatibilityV2Service:
                 effective_config_artifact_id=identity.effective_config_artifact_id,
                 exact_replay=identity.exact_replay,
                 input_snapshot_fingerprint=identity.input_snapshot_fingerprint,
+                silver_filter_compatibility_mode=(
+                    identity.silver_filter_compatibility_mode
+                ),
             ),
         )
 
@@ -239,6 +243,9 @@ class CheckpointCompatibilityV2Service:
                 effective_config_artifact_id=identity.effective_config_artifact_id,
                 exact_replay=identity.exact_replay,
                 input_snapshot_fingerprint=identity.input_snapshot_fingerprint,
+                silver_filter_compatibility_mode=(
+                    identity.silver_filter_compatibility_mode
+                ),
             )
         )
 

@@ -57,7 +57,7 @@ class _BaseTransformerExecutionMixin:
         self,
         result: SilverRecord | None,
     ) -> FilterDecision | None:
-        """Evaluate semantic Silver filters for shadow comparison only."""
+        """Evaluate structural Silver filters for shadow comparison only."""
         return evaluate_semantic_shadow_decision(
             cast("TransformerExecutionOwner", self),
             result,
@@ -82,7 +82,7 @@ class _BaseTransformerExecutionMixin:
         result: SilverRecord | None,
         index: int,
     ) -> SilverRecord | None:
-        """Apply schema-aware structural policy before semantic Silver filters."""
+        """Apply schema-aware structural policy before structural Silver filters."""
         return apply_structural_policy(
             cast("TransformerExecutionOwner", self),
             context,

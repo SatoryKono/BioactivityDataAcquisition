@@ -21,6 +21,9 @@ if __package__ in {None, ""}:
     sys.path.insert(0, str(repo_root / "src"))
 
 from bioetl.domain.normalization.profiles import resolve_normalization_profile
+from bioetl.domain.normalization.profiles._chembl_policy_registry import (
+    chembl_policy_surface,
+)
 from bioetl.domain.schemas._chembl_enum_catalog import CHEMBL_ENUM_CATALOG
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -57,24 +60,86 @@ class ObservedVocabRow:
         }
 
 
+@dataclass(frozen=True, slots=True)
+class TrackedFixtureSource:
+    fixture_key: str
+    fixture_path: str
+    layer_hint: str
+
+
+@dataclass(frozen=True, slots=True)
+class GovernedFieldCoverage:
+    pipeline_name: str
+    fixture_key: str
+    field_name: str
+    classification_hint: str
+    fixture_paths: tuple[str, ...]
+    raw_field_present: bool
+    observed_distinct_count: int
+    normalized_distinct_count: int
+    observed_examples: tuple[str, ...]
+    normalized_examples: tuple[str, ...]
+
+    def as_dict(self) -> dict[str, object]:
+        return {
+            "pipeline_name": self.pipeline_name,
+            "fixture_key": self.fixture_key,
+            "field_name": self.field_name,
+            "classification_hint": self.classification_hint,
+            "fixture_paths": list(self.fixture_paths),
+            "raw_field_present": self.raw_field_present,
+            "observed_distinct_count": self.observed_distinct_count,
+            "normalized_distinct_count": self.normalized_distinct_count,
+            "observed_examples": list(self.observed_examples),
+            "normalized_examples": list(self.normalized_examples),
+        }
+
+
 def _load_yaml(path: Path) -> dict[str, Any]:
     payload = yaml.safe_load(path.read_text(encoding="utf-8"))
     assert isinstance(payload, dict), f"{path} must decode to a mapping"
     return payload
 
 
-def _tracked_fixture_entries() -> list[tuple[str, dict[str, Any]]]:
+def _tracked_fixture_sources() -> list[TrackedFixtureSource]:
     fixtures = _load_yaml(MANIFEST_PATH).get("fixtures", {})
     assert isinstance(fixtures, dict)
-    entries = [
-        (fixture_key, entry)
-        for fixture_key, entry in fixtures.items()
-        if isinstance(fixture_key, str)
-        and fixture_key.startswith("chembl/")
-        and isinstance(entry, dict)
-        and entry.get("fixture_kind") == "tracked_ci_sample"
-    ]
-    return sorted(entries, key=lambda item: item[0])
+    entries: list[TrackedFixtureSource] = []
+    for fixture_key, entry in fixtures.items():
+        if (
+            not isinstance(fixture_key, str)
+            or not fixture_key.startswith("chembl/")
+            or not isinstance(entry, dict)
+            or entry.get("fixture_kind") != "tracked_ci_sample"
+        ):
+            continue
+        fixture_path = entry.get("fixture_path")
+        assert isinstance(fixture_path, str), f"{fixture_key}: fixture_path missing"
+        entries.append(
+            TrackedFixtureSource(
+                fixture_key=fixture_key,
+                fixture_path=fixture_path,
+                layer_hint="bronze_fixture",
+            )
+        )
+        edge_fixtures = entry.get("edge_fixtures") or []
+        assert isinstance(edge_fixtures, list), (
+            f"{fixture_key}: edge_fixtures must be a list when present"
+        )
+        for edge_fixture in edge_fixtures:
+            if not isinstance(edge_fixture, dict):
+                continue
+            edge_path = edge_fixture.get("fixture_path")
+            if not isinstance(edge_path, str):
+                continue
+            entries.append(
+                TrackedFixtureSource(
+                    fixture_key=fixture_key,
+                    fixture_path=edge_path,
+                    layer_hint="edge_fixture",
+                )
+            )
+    return sorted(entries, key=lambda item: (item.fixture_key, item.fixture_path))
 
 
 def _pipeline_name_from_fixture_key(fixture_key: str) -> str:
@@ -151,14 +216,62 @@ def _classification_hint(
     return "normalized_field"
 
 
+def _governed_field_classification(
+    pipeline_name: str,
+    entity_type: str,
+    field_name: str,
+    *,
+    ontology_fields: dict[tuple[str, str], str],
+) -> str | None:
+    if (entity_type, field_name) in CHEMBL_ENUM_CATALOG:
+        return "enum"
+    ontology_hint = ontology_fields.get((pipeline_name, field_name))
+    if ontology_hint is not None:
+        return ontology_hint
+    policy_surface = chembl_policy_surface(entity_type, field_name)
+    if policy_surface is None:
+        return None
+    if policy_surface.category == "reference_identifier":
+        return "reference_identifier"
+    if policy_surface.category == "derived_vocabulary":
+        return "derived_vocabulary"
+    return policy_surface.category
+
+
+def _governed_profile_fields(
+    pipeline_name: str,
+    entity_type: str,
+    *,
+    ontology_fields: dict[tuple[str, str], str],
+) -> dict[str, str]:
+    profile = resolve_normalization_profile("chembl", entity_type)
+    if profile is None:
+        return {}
+    governed: dict[str, str] = {}
+    for field_name in sorted(profile.fields):
+        classification = _governed_field_classification(
+            pipeline_name,
+            entity_type,
+            field_name,
+            ontology_fields=ontology_fields,
+        )
+        if classification is not None:
+            governed[field_name] = classification
+    return governed
+
+
 def build_inventory_payload() -> dict[str, object]:
     ontology_fields = _ontology_field_map()
     rows: list[ObservedVocabRow] = []
-    scanned_pipelines: list[str] = []
+    scanned_pipelines: set[str] = set()
+    governed_field_states: dict[
+        tuple[str, str],
+        dict[str, object],
+    ] = {}
 
-    for fixture_key, entry in _tracked_fixture_entries():
-        fixture_path_raw = entry.get("fixture_path")
-        assert isinstance(fixture_path_raw, str), f"{fixture_key}: fixture_path missing"
+    for fixture_source in _tracked_fixture_sources():
+        fixture_key = fixture_source.fixture_key
+        fixture_path_raw = fixture_source.fixture_path
         fixture_path = PROJECT_ROOT / fixture_path_raw
         if not fixture_path.exists():
             raise FileNotFoundError(f"Missing declared fixture path: {fixture_path_raw}")
@@ -166,7 +279,29 @@ def build_inventory_payload() -> dict[str, object]:
         pipeline_name = _pipeline_name_from_fixture_key(fixture_key)
         entity_type = fixture_key.split("/", maxsplit=1)[1]
         profile = resolve_normalization_profile("chembl", entity_type)
-        scanned_pipelines.append(pipeline_name)
+        scanned_pipelines.add(pipeline_name)
+        governed_fields = _governed_profile_fields(
+            pipeline_name,
+            entity_type,
+            ontology_fields=ontology_fields,
+        )
+        for field_name, classification in governed_fields.items():
+            state = governed_field_states.setdefault(
+                (pipeline_name, field_name),
+                {
+                    "pipeline_name": pipeline_name,
+                    "fixture_key": fixture_key,
+                    "field_name": field_name,
+                    "classification_hint": classification,
+                    "fixture_paths": set(),
+                    "raw_field_present": False,
+                    "observed_values": set(),
+                    "normalized_values": set(),
+                },
+            )
+            cast_fixture_paths = state["fixture_paths"]
+            assert isinstance(cast_fixture_paths, set)
+            cast_fixture_paths.add(fixture_path_raw)
 
         field_counters: dict[tuple[str, str, str], Counter[str]] = {}
         for record in _load_jsonl(fixture_path):
@@ -188,10 +323,22 @@ def build_inventory_payload() -> dict[str, object]:
                     else value
                 )
                 normalized_value = (
-                    "" if normalized_value_obj is None else _canonical_value(normalized_value_obj)
+                    ""
+                    if normalized_value_obj is None
+                    else _canonical_value(normalized_value_obj)
                 )
                 counter_key = (field_name, classification, normalized_value)
                 field_counters.setdefault(counter_key, Counter())[observed_value] += 1
+                governed_state = governed_field_states.get((pipeline_name, field_name))
+                if governed_state is not None:
+                    governed_state["raw_field_present"] = True
+                    observed_values = governed_state["observed_values"]
+                    normalized_values = governed_state["normalized_values"]
+                    assert isinstance(observed_values, set)
+                    assert isinstance(normalized_values, set)
+                    observed_values.add(observed_value)
+                    if normalized_value:
+                        normalized_values.add(normalized_value)
 
         for (field_name, classification, normalized_value), counter in sorted(
             field_counters.items()
@@ -202,7 +349,7 @@ def build_inventory_payload() -> dict[str, object]:
                         pipeline_name=pipeline_name,
                         fixture_key=fixture_key,
                         field_name=field_name,
-                        layer_hint="bronze_fixture",
+                        layer_hint=fixture_source.layer_hint,
                         observed_value=observed_value,
                         count=count,
                         normalized_value=normalized_value,
@@ -215,14 +362,42 @@ def build_inventory_payload() -> dict[str, object]:
         key=lambda row: (
             row.pipeline_name,
             row.field_name,
+            row.fixture_path,
             row.normalized_value,
             row.observed_value,
         )
     )
+    governed_fields = [
+        GovernedFieldCoverage(
+            pipeline_name=str(state["pipeline_name"]),
+            fixture_key=str(state["fixture_key"]),
+            field_name=str(state["field_name"]),
+            classification_hint=str(state["classification_hint"]),
+            fixture_paths=tuple(sorted(str(path) for path in state["fixture_paths"])),
+            raw_field_present=bool(state["raw_field_present"]),
+            observed_distinct_count=len(state["observed_values"]),
+            normalized_distinct_count=len(state["normalized_values"]),
+            observed_examples=tuple(
+                sorted(str(value) for value in state["observed_values"])[:10]
+            ),
+            normalized_examples=tuple(
+                sorted(str(value) for value in state["normalized_values"])[:10]
+            ),
+        )
+        for _, state in sorted(governed_field_states.items())
+    ]
     return {
         "source": "tracked_chembl_bronze_fixtures",
         "manifest_path": str(MANIFEST_PATH.relative_to(PROJECT_ROOT)),
         "pipelines_scanned": sorted(scanned_pipelines),
+        "governed_fields_count": len(governed_fields),
+        "governed_fields_with_observations_count": sum(
+            1 for field in governed_fields if field.raw_field_present
+        ),
+        "governed_fields_missing_from_fixtures_count": sum(
+            1 for field in governed_fields if not field.raw_field_present
+        ),
+        "governed_fields": [field.as_dict() for field in governed_fields],
         "rows_count": len(rows),
         "rows": [row.as_dict() for row in rows],
     }

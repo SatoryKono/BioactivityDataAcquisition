@@ -25,6 +25,7 @@ _CANONICAL_ONLY_IDENTITY_FIELDS: Final[frozenset[str]] = frozenset(
         "dq_contract_compatibility_hash",
         "exact_replay",
         "input_snapshot_fingerprint",
+        "silver_filter_compatibility_mode",
     }
 )
 
@@ -43,6 +44,7 @@ class CheckpointExecutionIdentityFallbackContext:
     effective_config_artifact_id: str | None
     exact_replay: bool | None
     input_snapshot_fingerprint: str | None
+    silver_filter_compatibility_mode: str | None = "structural_only_auto_promote"
     dependency_lock_hash: str | None = None
 
 
@@ -171,6 +173,7 @@ def _build_checkpoint_execution_identity_payload(
     effective_config_artifact_id: str | None,
     exact_replay: bool | None,
     input_snapshot_fingerprint: str | None,
+    silver_filter_compatibility_mode: str | None = "structural_only_auto_promote",
 ) -> JsonDict:
     """Build the canonical checkpoint execution-identity fallback payload."""
     if all(
@@ -183,6 +186,7 @@ def _build_checkpoint_execution_identity_payload(
             dq_contract_compatibility_hash,
             exact_replay,
             input_snapshot_fingerprint,
+            silver_filter_compatibility_mode,
         )
     ):
         return {}
@@ -199,6 +203,7 @@ def _build_checkpoint_execution_identity_payload(
         effective_config_artifact_id=effective_config_artifact_id,
         exact_replay=exact_replay,
         input_snapshot_fingerprint=input_snapshot_fingerprint,
+        silver_filter_compatibility_mode=silver_filter_compatibility_mode,
     )
     return {
         key: value for key, value in normalized_payload.items() if value is not None
@@ -221,6 +226,7 @@ def _compute_checkpoint_execution_identity_fallback_fingerprint(
         effective_config_artifact_id=request.effective_config_artifact_id,
         exact_replay=request.exact_replay,
         input_snapshot_fingerprint=request.input_snapshot_fingerprint,
+        silver_filter_compatibility_mode=request.silver_filter_compatibility_mode,
     )
     if not payload or not any(
         field in payload for field in _CANONICAL_ONLY_IDENTITY_FIELDS

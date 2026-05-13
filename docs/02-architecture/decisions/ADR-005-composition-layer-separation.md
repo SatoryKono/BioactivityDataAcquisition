@@ -61,21 +61,16 @@ domain                 ✅        ❌             ❌             ❌           
 application            ✅        ✅             ❌             ❌           ❌
 infrastructure         ✅        ❌             ✅             ❌           ❌
 composition            ✅        ✅             ✅             ✅           ❌
-interfaces             ✅        ✅             ✅             ✅           ✅
+interfaces             ✅        ✅             ❌             ✅           ✅
 ```
 
-> **Note (2026-01-05):** The import matrix allows `interfaces → infrastructure`. This is intentional
-> and consistent with CLAUDE.md §2.1. The `interfaces` layer (CLI, API handlers) may occasionally
-> need direct infrastructure access for:
->
-> - Health monitoring endpoints (`health.py` → `health-monitor`, `prometheus-metrics`)
-> - Observability setup (`observability.py` → infrastructure adapters)
->
-> However, **best practice** is to route through Application layer services when possible
-> for better testability and consistency. See architecture tests in
-> `tests/architecture/test_interfaces_no_infrastructure.py` for tracked legacy violations.
+> **Note (2026-05-13):** Direct `interfaces → infrastructure` imports are no longer
+> part of the active import matrix. The `interfaces` layer (CLI, API handlers) must
+> obtain concrete runtime wiring through `composition` entrypoints or call
+> application services behind ports. `tests/architecture/test_interfaces_no_infrastructure.py`
+> and `.importlinter` enforce this policy with no active legacy allowlist.
 
-Key observation: `composition/` remains the primary DI layer. While `interfaces/` *can* import from `infrastructure/`, it *should prefer* using `composition/` to get fully assembled objects. If we merge composition into interfaces, we:
+Key observation: `composition/` remains the primary DI layer. `interfaces/` must not import from `infrastructure/`; it uses `composition/` to get fully assembled objects. If we merge composition into interfaces, we:
 
 - Lose the explicit separation of wiring concern
 - Make it harder to identify where dependency assembly happens
@@ -197,7 +192,7 @@ src/bioetl/
 - [ADR-010](ADR-010-local-only-deployment.md): Local-Only Deployment — simplified composition factories
 - [ADR-011](ADR-011-remove-watermark-mechanism.md): Remove Watermark — removed watermark factories from composition
 - [ADR-015](ADR-015-pipeline-services-lifecycle.md): Pipeline Services Lifecycle — services assembled in composition
-- [ADR-019](ADR-019-observability-port-enforcement.md): Observability Port Enforcement — clarifies that interfaces must use LoggerPort (not structlog directly), even though interfaces→infrastructure is allowed in the import matrix
+- [ADR-019](ADR-019-observability-port-enforcement.md): Observability Port Enforcement — clarifies that interfaces must use LoggerPort (not structlog directly), and direct interfaces→infrastructure imports are forbidden in the active import matrix
 - [ADR-020](ADR-020-basepipeline-decomposition.md): BasePipeline Decomposition — defines components that composition/ assembles
 - **RULES.md §1.1**: Ports & Adapters architecture — composition implements the "glue" layer
 

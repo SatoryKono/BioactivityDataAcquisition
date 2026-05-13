@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from tests.helpers.vcr_config import is_vcr_recording_mode
+from tests.helpers.vcr_config import build_base_vcr_config, is_vcr_recording_mode
 
 
 def test_is_vcr_recording_mode_uses_env(monkeypatch) -> None:
@@ -25,3 +25,9 @@ def test_is_vcr_recording_mode_defaults_to_replay(monkeypatch) -> None:
     monkeypatch.setattr("sys.argv", ["pytest"])
 
     assert is_vcr_recording_mode() is False
+
+
+def test_build_base_vcr_config_defaults_to_replay_only(monkeypatch) -> None:
+    monkeypatch.delenv("VCR_RECORD_MODE", raising=False)
+
+    assert build_base_vcr_config()["record_mode"] == "none"

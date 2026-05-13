@@ -17,7 +17,6 @@ from bioetl.application.core.dict_transformers import (
 from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
 )
-from bioetl.domain.behavior import OrganismClassifier
 from bioetl.domain.entities import Target
 from bioetl.domain.transformations import safe_int
 from bioetl.domain.types import GoldRecord, JsonDict
@@ -27,24 +26,11 @@ if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord, PrimaryId
 
 
-def _create_default_organism_classifier() -> OrganismClassifier:
-    """Create default organism classifier used by target transformer."""
-    return OrganismClassifier(
-        organism_field="organism",
-        taxonomy_id_field="tax_id",
-    )
-
-
-_DEFAULT_ORGANISM_CLASSIFIER = _create_default_organism_classifier()
-
-
 class TargetTransformer(BaseChemblTransformer):
     """Transforms ChEMBL bronze target records to silver."""
 
     entity_class = Target
     primary_id_field = "target_id"
-
-    _organism_classifier: OrganismClassifier = _DEFAULT_ORGANISM_CLASSIFIER
 
     def _prepare_record(
         self,
@@ -183,14 +169,7 @@ class TargetTransformer(BaseChemblTransformer):
         )
         taxonomy_id = taxonomy_id_vo.value if taxonomy_id_vo else None
 
-        # Classify organism cellularity using OrganismClassifier
         organism_name = cast("str | None", record.get("organism"))
-        classification = self._organism_classifier.classify(organism_name, raw_tax_id)
-        organism_class = (
-            classification.organism_class.value
-            if classification.organism_class
-            else None
-        )
 
         return {
             # Primary identifier
@@ -203,8 +182,8 @@ class TargetTransformer(BaseChemblTransformer):
             "organism": organism_name,
             # Standardized to 'taxonomy_id' for NCBI consistency (was 'tax_id')
             "taxonomy_id": taxonomy_id,
-            # Organism cellularity classification
-            "organism_class": organism_class,
+            # Shared domain normalization owns deterministic cellularity derivation.
+            "organism_class": record.get("organism_class"),
             "species_group_flag": record.get("species_group_flag"),
             "description": record.get("target_description")
             or record.get("description"),

@@ -14,41 +14,39 @@ __all__ = [
     "maintenance",
 ]
 
-_MAINTENANCE_COMMAND_PACKAGE = "bioetl.interfaces.cli.commands.domains.maintenance"
-
 _LAZY_MAINTENANCE_COMMANDS: dict[str, tuple[str, str, str]] = {
     "vacuum": (
-        "vacuum",
+        "bioetl.interfaces.cli.commands.vacuum",
         "vacuum_command",
         "Vacuum one Delta table",
     ),
     "vacuum-all": (
-        "vacuum",
+        "bioetl.interfaces.cli.commands.vacuum",
         "vacuum_all_command",
         "Vacuum multiple Delta tables",
     ),
     "archive": (
-        "archive",
+        "bioetl.interfaces.cli.commands.archive",
         "archive_command",
         "Archive a Delta table",
     ),
     "bronze-cleanup": (
-        "cleanup",
+        "bioetl.interfaces.cli.commands.cleanup",
         "bronze_cleanup_command",
         "Remove expired Bronze artifacts",
     ),
     "cleanup-preview": (
-        "cleanup",
+        "bioetl.interfaces.cli.commands.cleanup",
         "cleanup_preview_command",
         "Preview pipeline cleanup scope",
     ),
     "control-plane-lifecycle": (
-        "control_plane_lifecycle",
+        "bioetl.interfaces.cli.commands.domains.maintenance.control_plane_lifecycle",
         "control_plane_lifecycle_command",
         "Plan/apply control-plane artifact cleanup",
     ),
     "plan": (
-        "plan",
+        "bioetl.interfaces.cli.commands.domains.maintenance.plan",
         "plan_command",
         "Plan contract migration actions",
     ),
@@ -60,8 +58,7 @@ def _load_maintenance_command(name: str) -> click.Command | click.Group | None:
     spec = _LAZY_MAINTENANCE_COMMANDS.get(name)
     if spec is None:
         return None
-    module_suffix, attribute_name, _help_text = spec
-    module_name = f"{_MAINTENANCE_COMMAND_PACKAGE}.{module_suffix}"
+    module_name, attribute_name, _help_text = spec
     command = getattr(import_module(module_name), attribute_name)
     if not isinstance(command, click.Command):
         raise TypeError(

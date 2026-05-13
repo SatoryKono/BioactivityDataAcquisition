@@ -7,6 +7,9 @@ from types import SimpleNamespace
 from typing import TYPE_CHECKING, Literal, Protocol, cast
 
 from bioetl.domain.config import RuntimeConfig
+from bioetl.infrastructure.config.silver_filter_migration import (
+    resolve_silver_filter_compatibility_mode,
+)
 
 # Keep typing protocols imported at runtime because these helpers define them
 # in module scope and the Windows shared-drive bytecode cache can otherwise lag.
@@ -108,6 +111,7 @@ def assemble_runtime_config_impl(
         vacuum_retention_days=vacuum_retention_days,
         skip_gold=skip_gold,
         health_check_mode=health_check_mode,
+        silver_filter_compatibility_mode=resolve_silver_filter_compatibility_mode(),
     )
 
 

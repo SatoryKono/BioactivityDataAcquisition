@@ -277,6 +277,7 @@ class TestIntegrationVcrPolicy:
         assert vcr_policy["supported_refresh_record_modes"] == ["new_episodes"]
         assert vcr_policy["legacy_compatibility_record_modes"] == ["all"]
         assert 'os.environ["VCR_RECORD_MODE"] = "none"' in conftest
+        assert 'record_mode="once"' not in conftest
         assert "control-plane-e2e:" in tests_workflow
         assert policy["supported_scopes"]["e2e"]["ci_smoke_target"] in tests_workflow
         assert "VCR_RECORD_MODE=none uv run pytest" in tests_workflow

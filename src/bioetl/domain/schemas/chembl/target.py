@@ -11,7 +11,11 @@ from pandera.typing import Series
 
 from bioetl.domain.normalization.rules import normalize_boolean
 from bioetl.domain.schemas.base import ETLRecordSchema
-from bioetl.domain.schemas.constants import CHEMBL_ID_PATTERN, TARGET_TYPES
+from bioetl.domain.schemas.constants import (
+    CHEMBL_ID_PATTERN,
+    TARGET_ORGANISM_CLASSES,
+    TARGET_TYPES,
+)
 
 __all__ = [
     "TargetSchema",
@@ -97,7 +101,7 @@ class TargetSchema(ETLRecordSchema):
     organism: Series[str] = pa.Field(nullable=False, description="Organism.")
     organism_class: Series[str] | None = pa.Field(
         nullable=True,
-        isin=["acellular", "unicellular", "multicellular"],
+        isin=list(TARGET_ORGANISM_CLASSES),
         description="Organism cellularity classification.",
     )
     species_group_flag: Series[bool] = pa.Field(

@@ -365,6 +365,40 @@ class TestCheckpointMetadata:
             != drifted.checkpoint_execution_identity_fingerprint()
         )
 
+    def test_checkpoint_execution_identity_payload_includes_silver_filter_mode(
+        self,
+    ) -> None:
+        """Silver filter compatibility mode must drift strict checkpoint identity."""
+        metadata = CheckpointMetadata(
+            records_processed=100,
+            pipeline_name="chembl_activity",
+            run_type="incremental",
+            contract_ref="chembl.activity",
+            contract_version="1.0.0",
+            effective_config_hash="a" * 64,
+            silver_filter_compatibility_mode="structural_only_auto_promote",
+        )
+        drifted = CheckpointMetadata(
+            records_processed=100,
+            pipeline_name="chembl_activity",
+            run_type="incremental",
+            contract_ref="chembl.activity",
+            contract_version="1.0.0",
+            effective_config_hash="a" * 64,
+            silver_filter_compatibility_mode="legacy_semantic_silver",
+        )
+
+        payload = metadata.checkpoint_execution_identity_payload()
+
+        assert (
+            payload["silver_filter_compatibility_mode"]
+            == "structural_only_auto_promote"
+        )
+        assert (
+            metadata.checkpoint_execution_identity_fingerprint()
+            != drifted.checkpoint_execution_identity_fingerprint()
+        )
+
 
 class TestCheckpointCompatibilityResult:
     """Test CheckpointCompatibilityResult domain type."""

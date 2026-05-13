@@ -1,8 +1,8 @@
 # Dashboard Audit Checklist
 
-**Version**: 1.0.0  
+**Version**: 1.1.0  
 **Status**: active  
-**Date**: 2026-05-08  
+**Date**: 2026-05-13  
 **Source of truth**: `grafana/dashboards/*.json`, `docs/03-guides/dashboards/contracts/*.yaml`
 
 ## Usage
@@ -18,34 +18,61 @@ uv run python -m scripts.engineering.qa report-dashboard-inventory --check --jso
 
 ---
 
-## 1. Navigation and Top-Level Structure
+## 1. One Big Question and First-Screen Preamble
 
-### 1.1 Navigation Bus (MUST)
+### 1.1 Dashboard Question (MUST)
+- [ ] Dashboard answers exactly one `ONE BIG QUESTION`
+- [ ] Secondary questions stay in supporting panels, collapsed rows, tabs, or drilldowns
+- [ ] Primary KPI/verdict is visible on the first screen without scroll
+
+### 1.2 Scope / Provenance Block (MUST for operator dashboards)
+- [ ] First screen shows current scope in dashboard-family terms (`pipeline`, `run_type`, `provider`, `workflow`, etc.)
+- [ ] First screen or adjacent context row shows provenance:
+  - [ ] sources / systems / tables / endpoints / metric families
+  - [ ] update cadence / schedule
+  - [ ] transformation or runtime version (`git_commit`, artifact or equivalent)
+  - [ ] last successful run / last refresh in UTC
+  - [ ] owner / contact
+
+### 1.3 Availability / Risk Block (MUST)
+- [ ] SLA or expected freshness window is stated
+- [ ] Known limitations / source lag / partial-scope caveats are stated
+- [ ] Sensitivity / access classification is stated or explicitly delegated to the monitoring guide/runbook
+
+### 1.4 First Action (MUST)
+- [ ] First screen contains a concise `What to do next` / `First action`
+- [ ] `CRIT` and `WARN` paths are distinguishable
+
+---
+
+## 2. Navigation and Top-Level Structure
+
+### 2.1 Navigation Bus (MUST)
 - [ ] Dashboard has navigation panel with `id=1000`
 - [ ] Navigation panel includes full bus: `0. Control Plane`, `1. Overview`, `2. Runtime`, `3. Provider Health`, `4. Data Quality`, `5. Workflow`
 - [ ] Current dashboard is rendered as disabled dark-gray item
 - [ ] Machine-readable `panel.links` omit self-links (no duplicate navigation)
 - [ ] All navigation links open in same tab (`targetBlank: false`)
 
-### 1.2 Global Adjunct Links (MUST)
+### 2.2 Global Adjunct Links (MUST)
 - [ ] After bus `0..5`, includes `Silver Reject Explorer`
 - [ ] Includes `Explore Logs` with safe baseline `{job="bioetl"}`
 - [ ] Includes `Explore Traces` (adjunct, traced-run-only)
 - [ ] Explore Traces tooltip mentions traced-run-only requirement
 
-### 1.3 Link Semantics (MUST)
+### 2.3 Link Semantics (MUST)
 - [ ] No duplicate dashboard-to-dashboard links to same target
 - [ ] No legacy link titles: `Back to Overview`, `5. Control Plane`, `Explore Logs (Loki, tracing profile)`, `Next Recommended Drilldown`
 - [ ] All links use canonical titles from `navigation-contract.md`
 
-### 1.4 Variable Handoff in Links (MUST)
+### 2.4 Variable Handoff in Links (MUST)
 - [ ] All links have `includeVars: false`
 - [ ] Target-scoped variables passed explicitly in URL (`var-*`)
 - [ ] Forensic IDs (`run_id`, `payload_hash`) NOT passed to non-target dashboards
 - [ ] Cross-scope links have tooltip with `Scope reset: ...` suffix
 - [ ] Same-scope links have tooltip: `Preserves selected scope and time range.`
 
-### 1.5 Required Top-Level Links by UID (MUST)
+### 2.5 Required Top-Level Links by UID (MUST)
 Check against `contracts/navigation-links.yaml` → `required_top_level_links_by_uid`:
 - [ ] `bioetl-overview-v2`: 0. Control Plane, 2. Runtime, 3. Provider Health, 4. Data Quality, 5. Workflow, Explore Logs, Explore Traces, Silver Reject Explorer
 - [ ] `bioetl-runtime`: 0. Control Plane, 1. Overview, 3. Provider Health, 4. Data Quality, 5. Workflow, Explore Logs, Explore Traces, Silver Reject Explorer
@@ -57,12 +84,12 @@ Check against `contracts/navigation-links.yaml` → `required_top_level_links_by
 
 ---
 
-## 2. Variables and Selectors
+## 3. Variables and Selectors
 
-### 2.1 Variable Descriptions (MUST)
+### 3.1 Variable Descriptions (MUST)
 - [ ] Every variable in `templating.list` has non-empty `description`
 
-### 2.2 Selector Contract Compliance (MUST)
+### 3.2 Selector Contract Compliance (MUST)
 Check against `contracts/selector-contracts.yaml` → `shipped_selector_registry`:
 
 **Pipeline summary dashboards** (`bioetl-control-plane-v1`, `bioetl-overview-v2`, `bioetl-runtime`, `bioetl-dq-v2`):
@@ -84,19 +111,19 @@ Check against `contracts/selector-contracts.yaml` → `shipped_selector_registry
 - [ ] Visible selectors: `pipeline`, `run_type`, `reason_code`, `field`, `run_id`, `payload_hash`
 - [ ] Forensic selectors do NOT leak into Prometheus dashboards
 
-### 2.3 Variable Defaults and Selection Modes (MUST)
+### 3.3 Variable Defaults and Selection Modes (MUST)
 - [ ] `$pipeline`: single-select, default `All` only on `bioetl-overview-v2`, otherwise `unknown`
 - [ ] `$run_type`: multi-select with Include All, default `All`/`$__all` (NOT `unknown`)
 - [ ] `$provider`: single-select, default `unknown` (provider-health only)
 - [ ] `$stage`: multi-select with Include All (runtime/dq only)
 - [ ] Forensic variables (`run_id`, `payload_hash`): local to explorer, NOT in cross-dashboard links
 
-### 2.4 Hidden Context Variables (MUST)
+### 3.4 Hidden Context Variables (MUST)
 - [ ] Hidden vars justified by return-path or detail-only scope
 - [ ] Hidden vars do NOT automatically become visible selectors
 - [ ] No blanket `includeVars=true` semantics for cross-dashboard navigation
 
-### 2.5 Variable Dependency Chains (MUST)
+### 3.5 Variable Dependency Chains (MUST)
 - [ ] `bioetl-runtime`: `$run_type` depends on `$pipeline`, `$stage` depends on runtime-selected scope
 - [ ] `bioetl-dq-v2`: `$run_type` depends on `$pipeline`, `$stage` depends on `$pipeline` and `$run_type`
 - [ ] `bioetl-provider-health-v2`: `$pipeline_context` preserved from source, `$adapter` optional
@@ -105,9 +132,9 @@ Check against `contracts/selector-contracts.yaml` → `shipped_selector_registry
 
 ---
 
-## 3. Design System and Visualization
+## 4. Design System and Visualization
 
-### 3.1 Status Semantics (MUST)
+### 4.1 Status Semantics (MUST)
 **L0 operator dashboards** (`1. Overview`, `2. Runtime`, `3. Provider Health`, `4. Data Quality`):
 - [ ] `0` maps to `OK` (green)
 - [ ] `1` maps to `WARN` (orange)
@@ -117,7 +144,7 @@ Check against `contracts/selector-contracts.yaml` → `shipped_selector_registry
 **Diagnostic dashboards only**:
 - [ ] If using alias terms (`DEGRADED`, `BROKEN`, `HEALTHY`), description includes alias mapping
 
-### 3.2 Threshold Configuration (MUST)
+### 4.2 Threshold Configuration (MUST)
 For all status panels (`stat`/`gauge`):
 - [ ] `fieldConfig.defaults.color.mode = thresholds`
 - [ ] `fieldConfig.defaults.thresholds.mode = absolute`
@@ -126,7 +153,7 @@ For all status panels (`stat`/`gauge`):
   - [ ] `options.colorMode = background`
   - [ ] Explicit value mapping exists: `0 -> OK`, `1 -> WARN`, `2 -> CRIT`, `null -> UNKNOWN`
 
-### 3.3 Panel-Type Visualization Standards (MUST)
+### 4.3 Panel-Type Visualization Standards (MUST)
 - [ ] **Current-status stat**: `colorMode=thresholds`, `background` for designated severity cards, `null -> UNKNOWN` mapping where fail-closed
 - [ ] **Selected-range trend stat**: `colorMode=value`, `graphMode=area`
 - [ ] **Selected-range count stat**: `colorMode=value`, `graphMode=none`, `or vector(0)` only if missing series = zero events
@@ -136,13 +163,13 @@ For all status panels (`stat`/`gauge`):
 - [ ] **Comparative timeseries**: `tooltip.mode=multi`, `tooltip.sort=desc`
 - [ ] **Scalar trend timeseries**: `tooltip.mode=single`, `tooltip.sort=none` or omitted
 
-### 3.4 Panel Titles (MUST)
+### 4.4 Panel Titles (MUST)
 - [ ] All new panels use action-first titles with verb at start
 - [ ] Template: `<Action Verb>: <Object/Signal> [<Window>]`
 - [ ] Verbs: `Monitor`, `Inspect`, `Track`, `Compare`, `Review`
 - [ ] Examples: `Monitor: Runtime Failure Rate [24h]`, `Inspect: Provider Retry Saturation [1h]`
 
-### 3.5 Panel Descriptions (MUST)
+### 4.5 Panel Descriptions (MUST)
 For each panel:
 - [ ] Description includes what is measured (1 sentence)
 - [ ] Description includes how to interpret `OK/WARN/CRIT/UNKNOWN`
@@ -150,9 +177,9 @@ For each panel:
 
 ---
 
-## 4. Layout and Structure
+## 5. Layout and Structure
 
-### 4.1 First-Screen Responsibility (MUST)
+### 5.1 First-Screen Responsibility (MUST)
 - [ ] Dashboard answers its primary operator question on first screen (no scroll)
 - [ ] Current-status/verdict panels do NOT use `$__range`
 - [ ] Range panels include selected-range wording in title or description
@@ -165,53 +192,53 @@ For each panel:
 - [ ] `bioetl-dq-v2`: What is current DQ state and first action?
 - [ ] `bioetl-control-plane-v1`: Can we trust control plane and safely replay/resume?
 
-### 4.2 Panel Decision Matrix (MUST)
+### 5.2 Panel Decision Matrix (MUST)
 - [ ] Current status / current reason panels: on first screen, fixed current windows, NOT `$__range`
 - [ ] Next action / route panels: on first screen, low-cardinality route/action rules
 - [ ] Selected-range count/rate/trend panels: below first screen (except compact L0 context), MUST use `$__range`
 - [ ] Raw counter / histogram / latency evidence panels: below first screen
 - [ ] Forensic row/table/details panels: below first screen or in dedicated explorer
 
-### 4.3 Layout Grammar by Dashboard Role (MUST)
+### 5.3 Layout Grammar by Dashboard Role (MUST)
 - [ ] Every shipped dashboard answers primary operator question before first evidence-heavy row
 - [ ] Historical or selected-range evidence does NOT visually precede current-state answer on L0/L1/L2 dashboards
 - [ ] Forensic explorer surfaces keep scope semantics and first action above row-level detail
 
-### 4.4 Visibility Tiers (MUST)
+### 5.4 Visibility Tiers (MUST)
 - [ ] **Tier 1** (always-visible answer surface): current status, verdict, first action, current causes
 - [ ] **Tier 2** (always-visible supporting context): KPI context, trust markers, bounded mirrors
 - [ ] **Tier 3** (below-fold evidence): selected-range evidence
 - [ ] **Tier 4** (collapsed diagnostics): tracing-only, raw, verbose, rare forensic breakdowns
 - [ ] Critical signal does NOT live exclusively inside a collapsed row
 
-### 4.5 GridPos Layout (MUST)
+### 5.5 GridPos Layout (MUST)
 - [ ] Top-level `gridPos` rectangles do NOT overlap
 - [ ] Navigation, scope, first-action, current-status, range evidence, collapsed rows occupy explicit non-overlapping bands
 - [ ] No unexplained empty row gaps between adjacent bands (unless justified in audit/docs)
 
-### 4.6 Collapsed Row Policy (MUST)
+### 5.6 Collapsed Row Policy (MUST)
 - [ ] Tracing-only, raw, verbose, or not-required-for-first-pass-triage panels are collapsed
 - [ ] Collapsed rows have descriptive titles by incident scenario (e.g., `Incident Drilldown: ...`)
 
 ---
 
-## 5. Data and Metrics
+## 6. Data and Metrics
 
-### 5.1 No-Data/Unknown Policy (MUST)
+### 6.1 No-Data/Unknown Policy (MUST)
 - [ ] No silent treatment of no-data as OK for status panels
 - [ ] If no-data truly equals zero events, query uses explicit `... or vector(0)` and description confirms this
 - [ ] In all other cases, no-data remains `UNKNOWN`
 - [ ] `null` renders as `UNKNOWN` with gray color
 - [ ] `or vector(0)` used only for true zero-event counters where missing series semantically means zero events
 
-### 5.2 Missing-Data Semantics by Panel Class (MUST)
+### 6.2 Missing-Data Semantics by Panel Class (MUST)
 - [ ] **Current-status / current-cause panels**: `null` → `UNKNOWN`, `or vector(0)` forbidden
 - [ ] **Zero-valid event counters**: `or vector(0)` allowed only if missing series = zero events, visible in query or description
 - [ ] **Timeseries / latency / histogram evidence**: `No data` remains diagnostic signal, NOT synthetic healthy value
 - [ ] **Forensic tables / HTTP-backed explorer**: distinguish valid empty result vs unsupported filter chain vs backend failure
 - [ ] **Trust-marker panels**: present only where operator cannot safely interpret first-screen verdict without them
 
-### 5.3 Datasource Trust Semantics (MUST)
+### 6.3 Datasource Trust Semantics (MUST)
 - [ ] Prometheus current-status and current-cause panels remain fail-closed (preserve `UNKNOWN`, no `or vector(0)`)
 - [ ] `or vector(0)` valid only for true zero-event counters
 - [ ] Explicit trust marker added only when operator could otherwise confuse empty scope, telemetry gap, or backend failure
@@ -219,7 +246,7 @@ For each panel:
 
 ---
 
-## 6. Units and Decimals (MUST)
+## 7. Units and Decimals (MUST)
 - [ ] Event counters (`... Missing`, `... Incompatibilities`, `... Failures`): `unit=short`, `decimals=0`
 - [ ] Timestamp KPI (`Latest Successful Data Timestamp`): `unit=dateTimeAsIso`, `decimals=0`
 - [ ] Fractions/percentages (`... Rate`, `... Ratio`): consistent unit within dashboard family (`percentunit` or `percent`), consistent `decimals` (usually `0` or `2`)
@@ -227,16 +254,16 @@ For each panel:
 
 ---
 
-## 7. JSON Invariants
+## 8. JSON Invariants
 
-### 7.1 Root Fields (MUST)
+### 8.1 Root Fields (MUST)
 - [ ] `timezone`: `"browser"`
 - [ ] `style`: `"dark"`
 - [ ] `editable`: `true`
 - [ ] `graphTooltip`: `1`
 - [ ] `hideControls`: if present, MUST be `false`
 
-### 7.2 Metadata Policy (MUST)
+### 8.2 Metadata Policy (MUST)
 - [ ] `refresh` and default `time.from` follow `contracts/navigation-links.yaml`:
   - [ ] L0/L1 dashboards: `time.from=now-12h`, `refresh=30s`
   - [ ] L2 forensic (`silver-reject-explorer`): `time.from=now-24h`, `refresh=1m`
@@ -244,15 +271,15 @@ For each panel:
 - [ ] `iteration`: if present, MUST be positive integer
 - [ ] `tags`: MUST include `bioetl`, MAY include role/domain tags
 
-### 7.3 Export Noise (NOT correctness failure)
+### 8.3 Export Noise (NOT correctness failure)
 - [ ] Mixed panel-level `pluginVersion` values NOT treated as standalone correctness failure
 - [ ] No bulk-rewrite of shipped dashboard JSON just to force one `pluginVersion` across suite without proven regression
 
 ---
 
-## 8. Navigation Link Details
+## 9. Navigation Link Details
 
-### 8.1 Link Title Style (MUST)
+### 9.1 Link Title Style (MUST)
 - [ ] Top-level links use canonical names from navigation contract
 - [ ] Action-link vocabulary: `Back to <Dashboard>`, `Open <Target>`, `Investigate <Target>`
 - [ ] `Back to <Dashboard>` only for return to previous L0 level

@@ -32,6 +32,7 @@ from bioetl.domain.schemas._chembl_enum_catalog import (
     SUBCELLULAR_FRACTIONS,
     TARGET_COMPONENT_RELATIONSHIPS,
     TARGET_COMPONENT_TYPES,
+    TARGET_ORGANISM_CLASSES,
     TARGET_TYPES,
 )
 from bioetl.domain.schemas._schema_validation_patterns import (
@@ -122,6 +123,7 @@ __all__ = [
     "SUBCELLULAR_FRACTIONS",
     "TARGET_COMPONENT_RELATIONSHIPS",
     "TARGET_COMPONENT_TYPES",
+    "TARGET_ORGANISM_CLASSES",
     "TARGET_TYPES",
     "UBERON_ID_PATTERN",
     "UNIPROT_ENTRY_TYPES",

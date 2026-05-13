@@ -40,9 +40,7 @@ LAYER_IMPORT_MATRIX: dict[str, frozenset[str]] = {
     "composition": frozenset(
         {"domain", "application", "infrastructure", "composition"}
     ),
-    "interfaces": frozenset(
-        {"domain", "application", "infrastructure", "composition", "interfaces"}
-    ),
+    "interfaces": frozenset({"domain", "application", "composition", "interfaces"}),
 }
 
 LAYER_ORDER = tuple(LAYER_IMPORT_MATRIX.keys())

@@ -121,9 +121,21 @@ ENUM_POLICIES: tuple[EnumPolicy, ...] = (
         extraction_param="doc_type",
     ),
     EnumPolicy(
+        "publication",
+        "oa_status",
+        ("publication", "oa_status_values"),
+        surfaces=frozenset({"quality"}),
+    ),
+    EnumPolicy(
         "publication_term",
         "term_type",
         ("publication_term", "term_types"),
+    ),
+    EnumPolicy(
+        "target",
+        "organism_class",
+        ("target", "organism_classes"),
+        surfaces=frozenset({"quality"}),
     ),
     EnumPolicy(
         "target_component",
@@ -244,7 +256,19 @@ EXACT_DQ_ENUM_POLICIES: tuple[EnumPolicy, ...] = (
         surfaces=frozenset({"quality"}),
     ),
     EnumPolicy(
+        "publication",
+        "oa_status",
+        ("publication", "oa_status_values"),
+        surfaces=frozenset({"quality"}),
+    ),
+    EnumPolicy(
         "target", "target_type", ("target", "types"), surfaces=frozenset({"quality"})
+    ),
+    EnumPolicy(
+        "target",
+        "organism_class",
+        ("target", "organism_classes"),
+        surfaces=frozenset({"quality"}),
     ),
     EnumPolicy(
         "target_component",

@@ -44,14 +44,14 @@ def classify_structural_action(
 def classify_structural_shadow_comparison(
     *,
     structural_rejected: bool,
-    semantic_decision: FilterDecision | None,
+    silver_filter_decision: FilterDecision | None,
 ) -> str | None:
-    """Build a bounded comparison label for structural vs semantic filtering."""
-    if semantic_decision is None:
+    """Build a bounded comparison label for structural vs Silver filtering."""
+    if silver_filter_decision is None:
         return None
-    semantic_state = "reject" if not semantic_decision.include else "pass"
+    silver_state = "reject" if not silver_filter_decision.include else "pass"
     structural_state = "reject" if structural_rejected else "pass"
-    return f"structural_{structural_state}_semantic_{semantic_state}"
+    return f"structural_{structural_state}_silver_filter_{silver_state}"
 
 
 def apply_silver_filter(
@@ -85,7 +85,7 @@ def apply_silver_filter(
     )
     raise FilteredOutError(
         decision.message or "Record excluded by silver filters",
-        details={"policy_stage": "semantic", **decision.to_dict()},
+        details={"policy_stage": "structural", **decision.to_dict()},
     )
 
 
@@ -93,7 +93,7 @@ def evaluate_semantic_shadow_decision(
     owner: TransformerExecutionOwner,
     result: SilverRecord | None,
 ) -> FilterDecision | None:
-    """Evaluate semantic Silver filters for shadow comparison only."""
+    """Evaluate structural Silver filters for shadow comparison only."""
     if (
         result is None
         or owner._silver_filters is None
@@ -138,14 +138,14 @@ def apply_structural_policy(
     result: SilverRecord | None,
     index: int,
 ) -> SilverRecord | None:
-    """Apply schema-aware structural policy before semantic Silver filters."""
+    """Apply schema-aware structural policy before structural Silver filters."""
     from bioetl.application.core.base_transformer.errors import FilteredOutError
 
     if result is None:
         return None
 
     outcome = owner._structural_policy.apply(result)
-    semantic_shadow_decision = evaluate_semantic_shadow_decision(
+    silver_filter_shadow_decision = evaluate_semantic_shadow_decision(
         owner,
         outcome.record if not outcome.should_quarantine else result,
     )
@@ -155,7 +155,7 @@ def apply_structural_policy(
     )
     shadow_comparison = classify_structural_shadow_comparison(
         structural_rejected=outcome.should_quarantine,
-        semantic_decision=semantic_shadow_decision,
+        silver_filter_decision=silver_filter_shadow_decision,
     )
     record_structural_policy_metrics(
         owner,
@@ -186,9 +186,9 @@ def apply_structural_policy(
         field=details.get("field"),
         action_taken=details.get("action_taken"),
         shadow_comparison=shadow_comparison,
-        semantic_shadow_reason_code=(
-            semantic_shadow_decision.reason_code
-            if semantic_shadow_decision is not None
+        silver_filter_shadow_reason_code=(
+            silver_filter_shadow_decision.reason_code
+            if silver_filter_shadow_decision is not None
             else None
         ),
     )
@@ -198,9 +198,9 @@ def apply_structural_policy(
             **details,
             "policy_stage": "structural",
             "shadow_comparison": shadow_comparison,
-            "semantic_shadow_reason_code": (
-                semantic_shadow_decision.reason_code
-                if semantic_shadow_decision is not None
+            "silver_filter_shadow_reason_code": (
+                silver_filter_shadow_decision.reason_code
+                if silver_filter_shadow_decision is not None
                 else None
             ),
         },

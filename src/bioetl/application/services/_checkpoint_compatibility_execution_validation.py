@@ -112,6 +112,9 @@ def _build_execution_identity_context(
             effective_config_artifact_id=metadata.effective_config_artifact_id,
             exact_replay=metadata.exact_replay,
             input_snapshot_fingerprint=metadata.input_snapshot_fingerprint,
+            silver_filter_compatibility_mode=(
+                metadata.silver_filter_compatibility_mode
+            ),
         ),
     )
 

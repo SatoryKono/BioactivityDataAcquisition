@@ -170,6 +170,10 @@ def enrich_metadata_with_execution_identity(
             metadata.input_snapshot_fingerprint,
             identity.input_snapshot_fingerprint,
         ),
+        silver_filter_compatibility_mode=_prefer_identity_value(
+            metadata.silver_filter_compatibility_mode,
+            identity.silver_filter_compatibility_mode,
+        ),
         memory_decision_trace=(
             metadata.memory_decision_trace or identity.memory_decision_trace
         ),

@@ -8,6 +8,7 @@ from typing import Literal
 
 from pydantic import AliasChoices, BaseModel, ConfigDict, Field, field_validator
 
+from bioetl.domain.filtering import SilverFilterConfig
 from bioetl.domain.types import ScdConfig as DomainScdConfig
 from bioetl.infrastructure.schemas.base_schemas import (
     BaseFilterColumnSchema,
@@ -35,6 +36,7 @@ __all__ = [
     "InputFilterYamlConfig",
     "MaintenanceConfig",
     "ScdConfigYamlConfig",
+    "SilverFiltersConfig",
     "SinkDQReportConfig",
     "SinkLayerConfig",
     "TransformConfig",
@@ -217,6 +219,18 @@ class GoldColumnFilterConfig(BaseGoldColumnFilterConfig):
 
 class GoldFiltersConfig(BaseGoldFiltersConfig):
     """Schema for gold_filters in YAML."""
+
+
+class SilverFiltersConfig(BaseGoldFiltersConfig):
+    """Schema for structural Silver filters in YAML."""
+
+    def to_domain(self) -> SilverFilterConfig:  # type: ignore[override]
+        """Convert to a structural-only SilverFilterConfig."""
+        from bioetl.infrastructure.config.silver_filter_migration import (
+            build_silver_filter_config_for_compatibility,
+        )
+
+        return build_silver_filter_config_for_compatibility(super().to_domain())
 
 
 SEMVER_PATTERN = re.compile(

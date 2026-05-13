@@ -1,19 +1,19 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-04-13'
+  Last verified: '2026-05-13'
 
 ______________________________________________________________________
 
 # Dashboards Docs Index
 
-Дата сверки: **2026-04-13**
+Дата сверки: **2026-05-13**
 Источник истины: `grafana/dashboards/*.json`
 
 ## Актуальные документы
@@ -22,6 +22,7 @@ ______________________________________________________________________
 - `dashboard-v2-usage.md` — как использовать дашборды в операционной работе, включая runtime adaptive-memory triage.
 - `dashboard-extension-human.md` — краткое руководство для инженера по расширению shipped dashboards.
 - `dashboard-extension-llm.md` — краткий playbook для LLM/AI-агента по безопасной правке dashboard JSON и docs cascade.
+- `v3.0/` — draft-spec ветка для следующей линии дашбордов: execution-aware template, selector-resolution mirror и `1. Overview` hybrid L0 plan.
 - `variables-guide.md` — фактические Grafana variables и их PromQL.
 - `variable-reference.md` — человеческий contract для shipped dashboard variables: role, fallback, scope, propagation.
 - `selector-architecture.md` — selector taxonomy, dashboard families, hidden handoff model и future execution-selector design.
@@ -72,6 +73,21 @@ ______________________________________________________________________
 - human-readable mirrors: `variable-reference.md` и `selector-architecture.md`
 - shipped dashboards используют unified selector taxonomy by dashboard family,
   а не один flat universal selector list
+
+## First-screen policy header
+
+Для всех operator dashboards действует единая policy-шапка:
+
+- `ONE BIG QUESTION`
+- current scope
+- provenance summary
+- availability / risk notes
+- `First action`
+
+Для shipped v2 dashboards эта политика может быть распределена между scope
+panel, current-status row, panel descriptions и monitoring guide. Для новых
+v3 dashboards policy header SHOULD быть materialized explicitly as a dedicated
+first-screen text/context block.
 
 `bioetl-overview-v2` is the L0 answer-first surface. It answers one question:
 what is currently broken or degraded in BioETL, and where should the operator

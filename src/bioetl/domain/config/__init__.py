@@ -47,7 +47,7 @@ from bioetl.domain.config.pipeline import (
     FieldPolicyConfig,
     PipelineConfig,
 )
-from bioetl.domain.config.runtime import RuntimeConfig
+from bioetl.domain.config.runtime import RuntimeConfig, SilverFilterCompatibilityMode
 from bioetl.domain.config.table import TableConfig
 from bioetl.domain.config.validation import (
     DEFAULT_VALIDATION_CONFIG,
@@ -73,6 +73,7 @@ __all__ = [
     "PipelineConfig",
     "RateLimitConfig",
     "RuntimeConfig",
+    "SilverFilterCompatibilityMode",
     "TableConfig",
     "ValidationConfig",
     "convert_write_mode",

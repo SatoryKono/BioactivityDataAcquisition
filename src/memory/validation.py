@@ -483,7 +483,7 @@ def _validate_note_placement(
     expected_dir = str(rule.get("target_dir") or "")
     expected_rel = _normalize_target_dir(expected_dir)
     try:
-        relative_path = path.resolve().relative_to(memory_root)
+        relative_path = path.relative_to(memory_root)
     except ValueError:
         issues.append(
             ValidationIssue(path=str(path), message="note path is outside memory root")

@@ -168,6 +168,7 @@ def test_checkpoint_execution_identity_payload_matches_domain_contract() -> None
         "effective_config_artifact_id": " artifact-42 ",
         "exact_replay": True,
         "input_snapshot_fingerprint": " FACE ",
+        "silver_filter_compatibility_mode": " structural_only_auto_promote ",
     }
     expected_payload = build_execution_identity_payload(**raw_inputs)
 
@@ -184,6 +185,9 @@ def test_checkpoint_execution_identity_payload_matches_domain_contract() -> None
         effective_config_artifact_id=raw_inputs["effective_config_artifact_id"],
         exact_replay=raw_inputs["exact_replay"],
         input_snapshot_fingerprint=raw_inputs["input_snapshot_fingerprint"],
+        silver_filter_compatibility_mode=raw_inputs[
+            "silver_filter_compatibility_mode"
+        ],
     )
 
     assert metadata.checkpoint_execution_identity_payload() == {

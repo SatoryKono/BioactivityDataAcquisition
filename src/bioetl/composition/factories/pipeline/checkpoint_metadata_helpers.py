@@ -15,6 +15,9 @@ from bioetl.domain.normalization import (
 )
 from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
 from bioetl.infrastructure.config import get_settings
+from bioetl.infrastructure.config.silver_filter_migration import (
+    resolve_silver_filter_compatibility_mode,
+)
 
 if TYPE_CHECKING:
     from bioetl.application.core.base import BasePipeline
@@ -51,6 +54,7 @@ def _normalize_execution_identity_payload(
     effective_config_artifact_id: str | None,
     exact_replay: bool,
     input_snapshot_fingerprint: str | None,
+    silver_filter_compatibility_mode: str | None,
 ) -> dict[str, str | None]:
     """Return the canonical checkpoint execution-identity payload."""
     del manifest_id
@@ -67,6 +71,7 @@ def _normalize_execution_identity_payload(
         effective_config_artifact_id=effective_config_artifact_id,
         exact_replay=exact_replay,
         input_snapshot_fingerprint=input_snapshot_fingerprint,
+        silver_filter_compatibility_mode=silver_filter_compatibility_mode,
     )
 
 
@@ -114,6 +119,7 @@ def _resolve_run_context_metadata(
         "effective_config_artifact_id",
         "composite_run_identity",
         "execution_fingerprint",
+        "silver_filter_compatibility_mode",
     )
     return {
         field_name: (
@@ -136,6 +142,13 @@ def build_current_checkpoint_metadata(pipeline: BasePipeline) -> CheckpointMetad
 
     run_type = pipeline.runtime.run_type
     run_type_value = run_type.value if hasattr(run_type, "value") else str(run_type)
+    silver_filter_compatibility_mode = (
+        run_context_metadata["silver_filter_compatibility_mode"]
+        or _coerce_optional_str(
+            getattr(pipeline.runtime, "silver_filter_compatibility_mode", None)
+        )
+        or resolve_silver_filter_compatibility_mode()
+    )
     identity_payload = _normalize_execution_identity_payload(
         pipeline_name=pipeline.config.pipeline_name,
         run_type=run_type_value,
@@ -154,6 +167,7 @@ def build_current_checkpoint_metadata(pipeline: BasePipeline) -> CheckpointMetad
         ],
         exact_replay=exact_replay,
         input_snapshot_fingerprint=input_snapshot_fingerprint,
+        silver_filter_compatibility_mode=silver_filter_compatibility_mode,
     )
     execution_fingerprint = run_context_metadata["execution_fingerprint"] or (
         compute_execution_identity_fingerprint(identity_payload)
@@ -181,10 +195,12 @@ def build_current_checkpoint_metadata(pipeline: BasePipeline) -> CheckpointMetad
         exact_replay=exact_replay,
         input_snapshot_ids=input_snapshot_ids,
         input_snapshot_fingerprint=input_snapshot_fingerprint,
+        silver_filter_compatibility_mode=silver_filter_compatibility_mode,
         run_context={
             "pipeline_name": pipeline.config.pipeline_name,
             "manifest_id": run_context_metadata["manifest_id"],
             "execution_fingerprint": execution_fingerprint,
+            "silver_filter_compatibility_mode": silver_filter_compatibility_mode,
             "git_commit": run_context_metadata["git_commit"],
             "dependency_lock_hash": run_context_metadata["dependency_lock_hash"],
             "effective_config_hash": identity_payload["effective_config_hash"],

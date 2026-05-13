@@ -59,13 +59,12 @@ def _extract_write_modes(
 
 
 def _build_silver_filters(yaml_config: PipelineYamlConfig) -> SilverFilterConfig:
-    """Build Silver layer filter config from YAML config.
+    """Build structural Silver layer filter config from YAML config.
 
     Returns:
         SilverFilterConfig instance built from the YAML filter configuration.
     """
-    base_filters = yaml_config.silver_filters.to_domain()
-    return SilverFilterConfig.from_base(base_filters)
+    return yaml_config.silver_filters.to_domain()
 
 
 def _build_gold_filters(yaml_config: PipelineYamlConfig) -> GoldFilterConfig:

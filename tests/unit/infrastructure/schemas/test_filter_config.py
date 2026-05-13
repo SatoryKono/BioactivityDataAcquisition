@@ -142,3 +142,58 @@ class TestExtractionParamsToDomain:
         result = config.to_domain()
 
         assert len(result) == 4
+
+
+class TestSilverFilterMigration:
+    """Tests for Silver semantic rule promotion at the schema boundary."""
+
+    def test_semantic_silver_rules_promoted_to_gold_before_domain_conversion(
+        self,
+    ) -> None:
+        config = FilterConfigFile.model_validate(
+            {
+                "silver_filters": {
+                    "required_fields": ["activity_id"],
+                    "columns": {"standard_type": ["IC50"]},
+                    "ranges": {"pchembl_value": {"min": 5}},
+                    "list_contains": {"tags": {"values": ["curated"], "mode": "any"}},
+                },
+                "gold_filters": {
+                    "columns": {"standard_units": ["nM"]},
+                },
+            }
+        )
+
+        _, silver_filters, gold_filters, _ = config.to_domain()
+
+        assert silver_filters.required_fields == ("activity_id",)
+        assert silver_filters.column_filters == ()
+        assert silver_filters.range_filters == ()
+        assert silver_filters.list_contains_filters == ()
+        assert {rule.column for rule in gold_filters.column_filters} == {
+            "standard_type",
+            "standard_units",
+        }
+        assert [rule.column for rule in gold_filters.range_filters] == [
+            "pchembl_value"
+        ]
+        assert [rule.column for rule in gold_filters.list_contains_filters] == ["tags"]
+
+    def test_existing_gold_rule_wins_when_promoted_silver_field_overlaps(self) -> None:
+        config = FilterConfigFile.model_validate(
+            {
+                "silver_filters": {
+                    "columns": {"standard_type": ["IC50"]},
+                },
+                "gold_filters": {
+                    "columns": {"standard_type": ["Ki"]},
+                },
+            }
+        )
+
+        _, silver_filters, gold_filters, _ = config.to_domain()
+
+        assert silver_filters.column_filters == ()
+        assert len(gold_filters.column_filters) == 1
+        assert gold_filters.column_filters[0].column == "standard_type"
+        assert gold_filters.column_filters[0].values == frozenset({"Ki"})

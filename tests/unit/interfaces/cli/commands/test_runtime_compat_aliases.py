@@ -10,21 +10,6 @@ import pytest
 
 CLI_INTERNAL_WRAPPER_CASES = (
     (
-        "bioetl.interfaces.cli.commands.domains.maintenance.archive",
-        "bioetl.interfaces.cli.commands.archive",
-        ("archive_command", "get_lifecycle_service"),
-    ),
-    (
-        "bioetl.interfaces.cli.commands.domains.maintenance.cleanup",
-        "bioetl.interfaces.cli.commands.cleanup",
-        (
-            "bronze_cleanup_command",
-            "cleanup_preview_command",
-            "get_bronze_cleanup_service",
-            "preview_pipeline_cleanup",
-        ),
-    ),
-    (
         "bioetl.interfaces.cli.commands.domains.diagnostics.command",
         "bioetl.interfaces.cli.commands.diagnostics",
         (
@@ -68,11 +53,6 @@ CLI_INTERNAL_WRAPPER_CASES = (
         "bioetl.interfaces.cli.commands.domains.composite.command",
         "bioetl.interfaces.cli.commands.run_composite",
         ("run_composite", "load_composite_config", "bootstrap_composite_runner"),
-    ),
-    (
-        "bioetl.interfaces.cli.commands.domains.maintenance.vacuum",
-        "bioetl.interfaces.cli.commands.vacuum",
-        ("vacuum_command", "get_vacuum_service"),
     ),
 )
 

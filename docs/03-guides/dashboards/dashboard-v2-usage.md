@@ -1,24 +1,28 @@
 ______________________________________________________________________
 
-Version: 1.3.0
+Version: 1.4.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-04-13'
+  Last verified: '2026-05-13'
 
 ______________________________________________________________________
 
 # BioETL Dashboards v2: Usage
 
-Дата сверки: **2026-04-13**
+Дата сверки: **2026-05-13**
 Источник истины: `grafana/dashboards/*.json`
 
 Machine-readable navigation contract: `docs/03-guides/dashboards/contracts/navigation-links.yaml` (docs/tests должны соответствовать ему).
 
 Machine-readable selector contract: `docs/03-guides/dashboards/contracts/selector-contracts.yaml`.
+
+Draft v3 planning surfaces:
+- `docs/03-guides/dashboards/v3.0/README.md`
+- `docs/03-guides/dashboards/v3.0/1-overview.md`
 
 Human-readable selector references:
 - `docs/03-guides/dashboards/variable-reference.md`
@@ -74,6 +78,12 @@ Human-readable selector references:
   forensic filters, а не как Prometheus labels.
 
 ## Что смотреть в первую очередь
+
+Policy reminder for shipped v2:
+- every dashboard still needs one `ONE BIG QUESTION`
+- first-screen scope and `First Action` remain mandatory
+- provenance/risk context may stay distributed across scope panels, current
+  status surfaces, descriptions and linked runbooks
 
 1. `bioetl-overview-v2`, first-screen KPI row (no scroll):
    `System Status`, `Next Action` и `L0 Inputs` отвечают на L0 вопрос: что

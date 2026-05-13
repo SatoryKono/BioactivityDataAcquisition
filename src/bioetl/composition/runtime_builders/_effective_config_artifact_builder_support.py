@@ -17,6 +17,11 @@ from bioetl.composition.runtime_builders._run_manifest_refs import (
 from bioetl.composition.runtime_builders._run_manifest_support import (
     to_serializable_mapping as _to_serializable_mapping,
 )
+from bioetl.composition.runtime_builders._silver_filter_compatibility_support import (
+    add_silver_filter_compatibility_defaults,
+    current_silver_filter_compatibility_mode,
+    current_silver_filter_compatibility_snapshot,
+)
 from bioetl.composition.services.versioning import get_dependency_lock_hash
 from bioetl.domain.control_plane.config_source_hashing import (
     ConfigSourceHashStrategy,
@@ -84,6 +89,7 @@ def build_execution_settings_snapshot(settings: Settings) -> dict[str, object]:
     snapshot: dict[str, object] = {
         "schema_version": "execution-settings-v1",
         "materialized_surfaces": list(_EXECUTION_AFFECTING_SETTINGS_SURFACES),
+        "silver_filter_compatibility": current_silver_filter_compatibility_snapshot(),
         "settings": {
             "env": _setting_attr(settings, "env"),
             "debug": _setting_attr(settings, "debug", False),
@@ -190,7 +196,9 @@ def build_runtime_overrides_snapshot(
         "vacuum": _to_serializable_mapping(getattr(ctx, "vacuum", None)),
         "replay_of_run_id": getattr(ctx, "replay_of_run_id", None),
         "replay_of_manifest_id": getattr(ctx, "replay_of_manifest_id", None),
+        "silver_filter_compatibility_mode": current_silver_filter_compatibility_mode(),
     }
+    silver_filter_compatibility = current_silver_filter_compatibility_snapshot()
     return {
         "cli": cli_overrides,
         "env": {
@@ -216,6 +224,8 @@ def build_runtime_overrides_snapshot(
                 getattr(ctx, "cached_bronze", None)
             ),
             "settings_snapshot": build_execution_settings_snapshot(settings),
+            "silver_filter_compatibility": silver_filter_compatibility,
+            "silver_filter_compatibility_mode": silver_filter_compatibility["mode"],
         },
     }
 
@@ -237,6 +247,7 @@ def build_composite_runtime_overrides_snapshot(
     runtime_payload.setdefault(
         "settings_snapshot", build_execution_settings_snapshot(settings)
     )
+    add_silver_filter_compatibility_defaults(runtime_payload)
     return {
         "cli": dict(runtime_payload),
         "env": {

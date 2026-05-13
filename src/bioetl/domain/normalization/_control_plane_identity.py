@@ -120,6 +120,7 @@ def build_execution_identity_payload(
     exact_replay: bool | str | None,
     input_snapshot_fingerprint: str | None,
     dependency_lock_hash: str | None = None,
+    silver_filter_compatibility_mode: str | None = None,
 ) -> dict[str, str | None]:
     """Build the canonical execution-identity payload shared across layers."""
     payload: dict[str, object | None] = {
@@ -134,6 +135,7 @@ def build_execution_identity_payload(
         "effective_config_artifact_id": effective_config_artifact_id,
         "exact_replay": exact_replay,
         "input_snapshot_fingerprint": input_snapshot_fingerprint,
+        "silver_filter_compatibility_mode": silver_filter_compatibility_mode,
     }
     if dependency_lock_hash is not None:
         payload["dependency_lock_hash"] = dependency_lock_hash

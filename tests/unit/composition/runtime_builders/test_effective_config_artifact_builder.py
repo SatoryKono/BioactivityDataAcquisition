@@ -229,6 +229,34 @@ def test_runtime_overrides_snapshot_materializes_execution_environment_provenanc
     assert env_snapshot["settings_snapshot_hash"].startswith("sha256:")
 
 
+def test_runtime_overrides_snapshot_materializes_silver_filter_compatibility(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Silver compatibility mode must be part of effective-config identity."""
+    monkeypatch.setenv("BIOETL_LEGACY_SILVER_SEMANTIC", "1")
+    settings = Settings(env="prod", data_dir=Path("data"), debug=True)
+
+    snapshot = _build_runtime_overrides_snapshot(
+        _build_pipeline_run_context(),
+        settings,
+    )
+
+    assert snapshot["cli"]["silver_filter_compatibility_mode"] == (
+        "legacy_semantic_silver"
+    )
+    assert snapshot["runtime"]["silver_filter_compatibility_mode"] == (
+        "legacy_semantic_silver"
+    )
+    assert snapshot["runtime"]["silver_filter_compatibility"] == {
+        "schema_version": "silver-filter-compatibility-v1",
+        "mode": "legacy_semantic_silver",
+        "source": "environment:BIOETL_LEGACY_SILVER_SEMANTIC",
+    }
+    assert snapshot["runtime"]["settings_snapshot"]["silver_filter_compatibility"][
+        "mode"
+    ] == "legacy_semantic_silver"
+
+
 def test_build_effective_config_source_refs_is_stable_across_equivalent_calls(
     tmp_path: Path,
 ) -> None:

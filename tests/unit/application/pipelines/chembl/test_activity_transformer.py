@@ -341,7 +341,7 @@ class TestActivityTransformerSilverContract:
         assert details["reason_code"] == "required_field_missing"
         assert details["field"] == missing_field
         assert details["optional_sources"] == ["silver_required_fields"]
-        assert details["semantic_shadow_reason_code"] == "required_field_missing"
+        assert details["silver_filter_shadow_reason_code"] == "required_field_missing"
 
     @pytest.mark.asyncio
     async def test_required_field_quarantine_details_cover_all_config_required_fields(
@@ -401,9 +401,7 @@ class TestActivityTransformerSilverContract:
                     )
                 details = exc_info.value.details
 
-            expected_policy_stage = (
-                "semantic" if field_name == "_state" else "structural"
-            )
+            expected_policy_stage = "structural"
             if details.get("policy_stage") != expected_policy_stage:
                 assertion_failures.append(
                     f"{field_name}: unexpected policy_stage={details.get('policy_stage')!r}"

@@ -62,6 +62,9 @@ from bioetl.domain.normalization.profiles._profile_reference_normalizers import 
     normalize_profile_uniprot_interpro_references,
     normalize_profile_uniprot_mixed_mappings,
 )
+from bioetl.domain.normalization.profiles._profile_target_normalizers import (
+    normalize_profile_target_organism_class,
+)
 from bioetl.domain.normalization.profiles._profile_textual_normalizers import (
     normalize_profile_abstract,
     normalize_profile_canonical_smiles,
@@ -162,6 +165,7 @@ __all__ = [
     "normalize_profile_standard_unit_enum",
     "normalize_profile_target_component_relationships",
     "normalize_profile_target_component_types",
+    "normalize_profile_target_organism_class",
     "normalize_profile_text",
     "normalize_profile_title",
     "normalize_profile_uniprot_accession",

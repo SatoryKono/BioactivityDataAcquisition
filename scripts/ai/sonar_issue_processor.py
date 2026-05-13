@@ -88,6 +88,19 @@ def _normalize_url(url: str) -> str:
     return url.rstrip("/")
 
 
+def normalize_sonar_token(token: str | None) -> str | None:
+    """Normalize a Sonar token loaded from the environment."""
+    if token is None:
+        return None
+    normalized = token.strip()
+    if len(normalized) >= 2 and normalized[0] == normalized[-1] and normalized[0] in {
+        '"',
+        "'",
+    }:
+        normalized = normalized[1:-1].strip()
+    return normalized or None
+
+
 def _commit_property(
     properties: dict[str, str],
     *,
@@ -403,6 +416,7 @@ def fetch_live_issue_summary(
     quarantine_patterns: list[str],
 ) -> dict[str, Any]:
     """Fetch a compact unresolved-issues summary from SonarCloud/SonarQube."""
+    token = normalize_sonar_token(token)
     if not token:
         return {
             "status": "skipped",
@@ -608,7 +622,7 @@ def _build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     parser = _build_parser()
     args = parser.parse_args(argv)
-    token = os.getenv(args.token_env_var)
+    token = normalize_sonar_token(os.getenv(args.token_env_var))
     report = build_baseline_report(
         config_path=args.config,
         sonar_url=args.sonar_url,

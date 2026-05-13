@@ -1,22 +1,22 @@
 ---
 id: sonar-issues-dup-tangles-plan
-title: Analyze Sonar issues, duplication, and tangles
+title: Audit Sonar issues, duplication, and tangles
 task_id: sonar-issues-dup-tangles-plan
-created_at: '2026-05-12T18:25:23Z'
+created_at: '2026-05-13T04:27:25Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
-- <add-source-ref>
+- src/memory/README.md
 summary: Active task session context.
-query: Analyze Sonar issues, duplication, and tangles
+query: sonar issues duplication tangles
 ---
 
 # Session note
 
 ## Task
 
-- Title: Analyze Sonar issues, duplication, and tangles
-- Retrieval query: Analyze Sonar issues, duplication, and tangles
+- Title: Audit Sonar issues, duplication, and tangles
+- Retrieval query: sonar issues duplication tangles
 
 ## Retrieved context
 

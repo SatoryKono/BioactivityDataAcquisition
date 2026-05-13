@@ -1,12 +1,46 @@
 # Исчерпывающий список требований к дашбордам BioETL
 
-**Дата**: 2026-05-11  
+**Дата**: 2026-05-13  
 **Источник**: docs/03-guides/dashboards/*, contracts/*.yaml, grafana/dashboards/*.json  
-**Версия**: 1.0.0
+**Версия**: 1.1.0
 
 ---
 
 ## Общие требования (ко всем дашбордам)
+
+### Политика-шапка и first-screen preamble
+
+**MUST:**
+- Каждый operator dashboard отвечает ровно на один `ONE BIG QUESTION`
+- First screen без скролла явно показывает основной вопрос, current scope и
+  главный KPI/verdict dashboard family
+- First-screen preamble содержит краткий `First action` / `What to do next`
+- Provenance и risk context не должны вытеснять главный verdict ниже fold
+
+**Provenance block (MUST для operator dashboards):**
+- Источники данных: systems/tables/endpoints или metric families
+- Update cadence / schedule
+- Transformation/runtime version: `git_commit`, artifact version, pipeline or
+  reporter version, либо другой воспроизводимый control-plane reference
+- Last successful refresh / latest run timestamp in UTC
+- Owner / contact
+
+**Availability / risk block (MUST):**
+- SLA / expected freshness window
+- Known limitations / lag / partial-scope caveats
+- Sensitivity classification (`public`, `internal`, `commercial`, `PII` или
+  project-approved equivalent)
+
+**Placement policy:**
+- `ONE BIG QUESTION`, scope и `First action` находятся above the fold
+- Provenance / availability / risk MAY жить в том же text block или в
+  adjacent first-screen context row
+- Shipped v2 dashboards MAY удовлетворять этому правилу через комбинацию scope
+  panel, current-status row, panel descriptions и monitoring guide references
+- New v3 dashboards SHOULD materialize policy header explicitly as a dedicated
+  first-screen block
+
+**Источник:** `dashboard-audit-checklist.md`, `01-monitoring-guide.md`
 
 ### Навигация
 

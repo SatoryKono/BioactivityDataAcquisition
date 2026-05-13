@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import os
+import subprocess
 from fnmatch import fnmatch
 from pathlib import Path
 
@@ -132,11 +134,40 @@ def _candidate_source_paths(
     source_dir = root / base
     if not source_dir.exists():
         return []
-    return [
-        path
-        for path in sorted(source_dir.rglob("*"))
-        if path.is_file() and path.suffix.lower() in suffixes
-    ]
+    tracked_paths = _git_tracked_source_paths(root=root, base=base)
+    if tracked_paths:
+        return [
+            rel_path
+            for rel_path in tracked_paths
+            if Path(rel_path).suffix.lower() in suffixes
+        ]
+    candidates: list[Path] = []
+    for current_root, dirnames, filenames in os.walk(source_dir):
+        dirnames.sort()
+        current_path = Path(current_root)
+        rel_dir = current_path.relative_to(source_dir)
+        for filename in sorted(filenames):
+            if Path(filename).suffix.lower() not in suffixes:
+                continue
+            candidates.append(base / rel_dir / filename)
+    return candidates
+
+
+def _git_tracked_source_paths(*, root: Path, base: Path) -> list[Path]:
+    git_dir = root / ".git"
+    if not git_dir.exists():
+        return []
+    try:
+        result = subprocess.run(
+            ["git", "ls-files", "--", base.as_posix()],
+            cwd=root,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+    except (OSError, subprocess.CalledProcessError):
+        return []
+    return [Path(line) for line in result.stdout.splitlines() if line.strip()]
 
 
 def _should_include_source(
@@ -153,13 +184,13 @@ def _should_include_source(
 
 
 def iter_rag_sources(root: Path) -> list[Path]:
-    """Return deterministic RAG sources across docs, code, tests, and configs."""
+    """Return deterministic repository-relative RAG source paths."""
     exclusion_patterns = _load_exclusion_patterns()
     results: list[Path] = []
     seen: set[str] = set()
     for source_id, base in _load_source_specs():
         for path in _candidate_source_paths(root=root, source_id=source_id, base=base):
-            rel_path = path.relative_to(root).as_posix()
+            rel_path = path.as_posix()
             if not _should_include_source(
                 rel_path=rel_path,
                 seen=seen,

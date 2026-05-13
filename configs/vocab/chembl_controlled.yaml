@@ -72,6 +72,16 @@ controlled_vocabularies:
     invalid_value_mode: reject_unknown_lexeme
     fields:
       - chembl_assay.confidence_description
+  publication_oa_statuses:
+    canonicalizer: normalize_profile_oa_status
+    invalid_value_mode: reject_unknown_lexeme
+    fields:
+      - chembl_publication.oa_status
+  target_organism_classes:
+    canonicalizer: normalize_profile_target_organism_class
+    invalid_value_mode: reject_unknown_lexeme
+    fields:
+      - chembl_target.organism_class
   target_component_types:
     canonicalizer: normalize_profile_json_string_list_vocabulary_strict
     invalid_value_mode: reject_unknown_json_array_element

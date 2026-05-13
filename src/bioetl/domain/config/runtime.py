@@ -13,9 +13,14 @@ from bioetl.domain.types import RunType
 
 __all__ = [
     "RuntimeConfig",
+    "SilverFilterCompatibilityMode",
 ]
 
 HealthCheckMode = Literal["strict", "probe"]
+SilverFilterCompatibilityMode = Literal[
+    "structural_only_auto_promote",
+    "legacy_semantic_silver",
+]
 
 
 @dataclass(frozen=True, slots=True)
@@ -76,11 +81,17 @@ class RuntimeConfig:
     # Requires run_type=incremental to avoid clearing already-loaded data.
     start_offset: int | None = None
 
+    # Silver filter migration behavior captured for run-manifest identity.
+    silver_filter_compatibility_mode: SilverFilterCompatibilityMode = (
+        "structural_only_auto_promote"
+    )
+
     def __post_init__(self) -> None:
         """Validate runtime config."""
         self._validate_positive_values()
         self._validate_health_check_mode()
         self._validate_replay_anchor_date()
+        self._validate_silver_filter_compatibility_mode()
 
     def _validate_positive_values(self) -> None:
         """Validate that numeric fields have positive values."""
@@ -129,6 +140,18 @@ class RuntimeConfig:
                 "replay_anchor_date must be an ISO date string (YYYY-MM-DD), "
                 f"got {self.replay_anchor_date!r}"
             ) from exc
+
+    def _validate_silver_filter_compatibility_mode(self) -> None:
+        """Validate the Silver-filter migration compatibility mode."""
+        if self.silver_filter_compatibility_mode not in {
+            "structural_only_auto_promote",
+            "legacy_semantic_silver",
+        }:
+            raise ValueError(
+                "silver_filter_compatibility_mode must be "
+                "'structural_only_auto_promote' or 'legacy_semantic_silver', "
+                f"got {self.silver_filter_compatibility_mode!r}"
+            )
 
     @property
     def effective_lock_ttl(self) -> int:

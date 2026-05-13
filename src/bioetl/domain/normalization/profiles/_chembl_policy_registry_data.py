@@ -159,6 +159,16 @@ DEFAULT_CHEMBL_POLICY_REGISTRY_DATA = ChemblPolicyRegistryData(
             fields=("chembl_assay.confidence_description",),
         ),
         ChemblControlledVocabularyFamily(
+            family_name="publication_oa_statuses",
+            invalid_value_mode="reject_unknown_lexeme",
+            fields=("chembl_publication.oa_status",),
+        ),
+        ChemblControlledVocabularyFamily(
+            family_name="target_organism_classes",
+            invalid_value_mode="reject_unknown_lexeme",
+            fields=("chembl_target.organism_class",),
+        ),
+        ChemblControlledVocabularyFamily(
             family_name="target_component_types",
             invalid_value_mode="reject_unknown_json_array_element",
             fields=("chembl_target.component_types",),

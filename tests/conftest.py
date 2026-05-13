@@ -285,7 +285,6 @@ def vcr_config() -> dict[str, object]:
         filter_headers=["authorization", "x-api-key", "cookie"],
         filter_query_parameters=["api_key", "key"],
         ignore_localhost=True,
-        record_mode="once",
     )
 
 

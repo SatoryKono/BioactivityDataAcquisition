@@ -1,0 +1,95 @@
+schema_version: 1
+source: configs/quality/config_validation_surface.yaml
+policy:
+  purpose: classify every tracked config surface by owner, semantic family, and validation mechanism so config growth cannot bypass governance.
+  coverage_scope:
+    - configs/**/*.yaml
+    - configs/**/*.json
+    - configs/**/*.csv
+    - configs/**/*.md
+  excluded_paths: []
+families:
+  - family_id: schema_contracts
+    path_prefixes:
+      - configs/_schema/
+    owner: "@bioetl-config"
+    validation_mechanism: json_schema_self_describing
+    enforcing_surfaces:
+      - tests/architecture/test_config_validation_surface.py
+  - family_id: base_runtime
+    path_prefixes:
+      - configs/base/
+    owner: "@bioetl-platform"
+    validation_mechanism: pydantic_and_registry_guards
+    enforcing_surfaces:
+      - tests/architecture/test_config_golden_master.py
+  - family_id: composite_runtime
+    path_prefixes:
+      - configs/composites/
+    owner: "@bioetl-composite"
+    validation_mechanism: composite_config_loader_and_schema_tests
+    enforcing_surfaces:
+      - tests/architecture/test_config_validation_surface.py
+  - family_id: provider_contracts
+    path_prefixes:
+      - configs/contracts/
+    owner: "@bioetl-contracts"
+    validation_mechanism: contract_registry_and_schema_tests
+    enforcing_surfaces:
+      - tests/architecture/test_config_validation_surface.py
+  - family_id: entity_pipelines
+    path_prefixes:
+      - configs/entities/
+    owner: "@bioetl-pipelines"
+    validation_mechanism: pipeline_config_loader_schema
+    enforcing_surfaces:
+      - tests/architecture/test_config_validation_surface.py
+  - family_id: enum_sources
+    path_prefixes:
+      - configs/enums/
+    owner: "@bioetl-domain"
+    validation_mechanism: enum_externalization_tests
+    enforcing_surfaces:
+      - tests/unit/domain/schemas/test_constants_yaml.py
+  - family_id: provider_runtime
+    path_prefixes:
+      - configs/providers/
+    owner: "@bioetl-infrastructure"
+    validation_mechanism: provider_registry_and_config_loader
+    enforcing_surfaces:
+      - tests/architecture/test_config_validation_surface.py
+  - family_id: quality_governance
+    path_prefixes:
+      - configs/quality/
+    owner: "@bioetl-architecture"
+    validation_mechanism: architecture_quality_guardrails
+    enforcing_surfaces:
+      - tests/architecture/
+  - family_id: vocabulary_sources
+    path_prefixes:
+      - configs/vocab/
+    owner: "@bioetl-domain"
+    validation_mechanism: vocabulary_snapshot_tests
+    enforcing_surfaces:
+      - tests/architecture/test_config_validation_surface.py
+  - family_id: workflow_runtime
+    path_prefixes:
+      - configs/workflows/
+    owner: "@bioetl-platform"
+    validation_mechanism: workflow_config_loader_schema
+    enforcing_surfaces:
+      - tests/architecture/test_config_validation_surface.py
+  - family_id: config_readme
+    path_prefixes:
+      - configs/README.md
+    owner: "@bioetl-docs"
+    validation_mechanism: documentation_link_guardrails
+    enforcing_surfaces:
+      - tests/architecture/test_config_validation_surface.py
+  - family_id: naming_exceptions
+    path_prefixes:
+      - configs/naming_exceptions.yaml
+    owner: "@bioetl-architecture"
+    validation_mechanism: naming_package_consistency_gate
+    enforcing_surfaces:
+      - tests/architecture/test_naming_package_consistency_gate.py

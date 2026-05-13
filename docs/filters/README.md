@@ -4,7 +4,7 @@ Version: 0.1.0
 Status: Draft
 Class: working-document
 Owner: BioETL Team
-Last updated: '2026-05-12'
+Last updated: '2026-05-13'
 
 ______________________________________________________________________
 
@@ -19,7 +19,7 @@ canonical locations (`docs/02-architecture/decisions/` for the ADR).
 
 Narrow `silver_filters` scope to structural integrity only
 (`required_fields`, `exclude_if_present`); consolidate semantic filters
-(`columns`, `ranges`, `list_length_filters`, `list_contains_filters`) into
+(`columns`, `ranges`, `list_lengths`, `list_contains`) into
 `gold_filters`.
 
 See: `ADR-048-silver-filters-structural-scope.md` (in this folder, draft).
@@ -89,13 +89,17 @@ The script is read-only and produces three artifacts:
    - Index ADR-048 in `docs/02-architecture/00-overview.md`.
 1. **Baseline measurements (Phase 0.3)** — capture rejection rates per entity
    for a representative E2E run before any code changes.
-1. **Implement Phase 1-2** — Domain + Infrastructure changes (auto-promotion
-   with DeprecationWarning, new SilverFiltersConfig scope).
+1. **Implement Phase 1-2** — Domain/runtime identity + Infrastructure
+   compatibility changes: schema/loader auto-promotion, structural-only
+   `SilverFiltersConfig.to_domain()`, and explicit rollback mode in effective
+   config / run manifest / checkpoint identity.
 1. **Generate per-entity migration diff** — author
    `scripts/migrations/migrate_silver_to_gold_filters.py` (Phase 4.1) and
    produce `docs/filters/migration-diff-{date}.md`.
-1. **Per-entity manual review** (Phase 4.2) — only for entities with
-   `move_to_gold` rules (5 entities total per baseline).
+1. **Per-entity manual review** (Phase 4.2) — only `chembl.activity` and
+   `chembl.assay` have `move_to_gold` rules; `chembl.molecule`,
+   `chembl.publication`, and `chembl.target` still need duplicate semantic
+   cleanup.
 1. **Tests + Observability + Documentation** — Phases 5-7.
 1. **Phased rollout** — Phase 8.
 

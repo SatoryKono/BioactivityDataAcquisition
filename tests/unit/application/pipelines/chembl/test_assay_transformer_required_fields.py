@@ -102,4 +102,4 @@ class TestAssayTransformerRequiredFields:
         assert details["reason_code"] == "required_field_missing"
         assert details["field"] == missing_field
         assert details["optional_sources"] == ["silver_required_fields"]
-        assert details["semantic_shadow_reason_code"] == "required_field_missing"
+        assert details["silver_filter_shadow_reason_code"] == "required_field_missing"

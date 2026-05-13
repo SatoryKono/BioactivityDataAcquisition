@@ -56,6 +56,8 @@ class CheckpointMetadata:
         contract_version: Canonical contract version for checkpoint compatibility.
         exact_replay: Whether the checkpoint was created under exact-replay mode.
         input_snapshot_ids: Snapshot identities required for replay-safe resume.
+        silver_filter_compatibility_mode: Silver/Gold filter migration mode included
+            in canonical execution identity.
         memory_decision_trace: Bounded adaptive-memory sizing decisions used as
             replay-visible anchors for pressure/relief behavior.
         run_context: Additional run context information.
@@ -80,6 +82,7 @@ class CheckpointMetadata:
     exact_replay: _OPTIONAL_BOOL = None
     input_snapshot_ids: tuple[str, ...] = ()
     input_snapshot_fingerprint: _OPTIONAL_STR = None
+    silver_filter_compatibility_mode: _OPTIONAL_STR = None
     memory_decision_trace: tuple[JsonDict, ...] = ()
     run_context: JsonDict | None = None  # Any: run context has heterogeneous values
 
@@ -139,6 +142,14 @@ class CheckpointMetadata:
             input_snapshot_fingerprint=cast(
                 _OPTIONAL_STR, legacy_metadata.get("input_snapshot_fingerprint")
             ),
+            silver_filter_compatibility_mode=cast(
+                _OPTIONAL_STR,
+                legacy_metadata.get("silver_filter_compatibility_mode")
+                or extract_run_context_anchor(
+                    legacy_metadata,
+                    "silver_filter_compatibility_mode",
+                ),
+            ),
             memory_decision_trace=_coerce_json_dict_sequence(
                 legacy_metadata.get("memory_decision_trace")
             ),
@@ -171,6 +182,10 @@ class CheckpointMetadata:
             ("exact_replay", self.exact_replay),
             ("input_snapshot_ids", list(self.input_snapshot_ids)),
             ("input_snapshot_fingerprint", self.input_snapshot_fingerprint),
+            (
+                "silver_filter_compatibility_mode",
+                self.silver_filter_compatibility_mode,
+            ),
             ("memory_decision_trace", list(self.memory_decision_trace)),
             ("run_context", self.run_context),
         )
@@ -224,6 +239,14 @@ class CheckpointMetadata:
             input_snapshot_fingerprint=cast(
                 _OPTIONAL_STR, data.get("input_snapshot_fingerprint")
             ),
+            silver_filter_compatibility_mode=cast(
+                _OPTIONAL_STR,
+                data.get("silver_filter_compatibility_mode")
+                or extract_run_context_anchor(
+                    data,
+                    "silver_filter_compatibility_mode",
+                ),
+            ),
             memory_decision_trace=_coerce_json_dict_sequence(
                 data.get("memory_decision_trace")
             ),
@@ -259,6 +282,9 @@ class CheckpointMetadata:
                 "effective_config_artifact_id": self.effective_config_artifact_id,
                 "exact_replay": self.exact_replay,
                 "input_snapshot_fingerprint": snapshot_fingerprint,
+                "silver_filter_compatibility_mode": (
+                    self.silver_filter_compatibility_mode
+                ),
             }
         )
         return {

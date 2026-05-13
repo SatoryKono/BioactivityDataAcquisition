@@ -28,8 +28,8 @@ ______________________________________________________________________
 ADR-028 externalized filter rules into a hierarchical configuration system with
 four sections: `input_filter`, `silver_filters`, `gold_filters`, and
 `extraction_params`. The `silver_filters` and `gold_filters` sections share the
-same `BaseFilterConfig` shape (`columns`, `ranges`, `list_length_filters`,
-`list_contains_filters`, `required_fields`, `exclude_if_present`) but apply at
+same `BaseFilterConfig` shape (`columns`, `ranges`, `list_lengths`,
+`list_contains`, `required_fields`, `exclude_if_present`) but apply at
 different pipeline stages:
 
 - **silver_filters**: applied via `apply_silver_filter()` in
@@ -94,8 +94,8 @@ gold_filters:
   required_fields: [...]      # business-critical fields
   columns: {...}              # semantic value filtering
   ranges: {...}               # semantic range filtering
-  list_length_filters: {...}
-  list_contains_filters: {...}
+  list_lengths: {...}
+  list_contains: {...}
   exclude_if_present: [...]
 ```
 
@@ -112,15 +112,19 @@ gold_filters:
 
 1. Keep `SilverFilterConfig` extending `BaseFilterConfig` (no domain breaking
    change).
-1. Add validation in `SilverFiltersFileConfig.model_validate` (Pydantic): when
-   `columns` / `ranges` / `list_lengths` / `list_contains` are non-empty, emit
-   `DeprecationWarning`.
-1. In `FilterConfigLoader.load()`, auto-promote semantic rules from
-   silver_filters to gold_filters (merge):
-   - Log event `silver_semantic_filter_auto_promoted` with structured details.
-   - Increment metric `bioetl_silver_filter_auto_promotions_total`.
-1. Add CI invariant in `config_ci_contract.py`: warn (later: error) when entity
-   configs use semantic fields under `silver_filters`.
+1. Normalize config payloads at infrastructure boundaries:
+   `FilterConfigFile`, `PipelineYamlConfig`, `FilterConfigLoader.load()`, and
+   `FilterConfigLoader.load_as_dict()` auto-promote semantic rules from
+   `silver_filters` to `gold_filters` before domain conversion.
+1. Keep `SilverFiltersFileConfig` / `SilverFiltersConfig` Pydantic-compatible
+   with legacy semantic keys, but make `to_domain()` return structural-only
+   Silver config in the default mode.
+1. Add runtime identity mode `silver_filter_compatibility_mode` so effective
+   config, run manifests, execution fingerprints, and checkpoint compatibility
+   can distinguish default auto-promotion from legacy rollback mode.
+1. Add CI invariant for committed inventory artifacts and later harden entity
+   configs to reject semantic fields under `silver_filters` after the YAML
+   rewrite window closes.
 1. Provide migration script (`scripts/migrations/migrate_silver_to_gold_filters.py`)
    for one-time YAML rewrite per entity.
 
@@ -215,10 +219,11 @@ See `docs/filters/migration-plan.md` for the detailed phased plan.
 Summary of phases:
 
 1. **Phase 0**: ADR + inventory script + baseline measurements.
-1. **Phase 1**: Domain layer (no breaking change).
-1. **Phase 2**: Infrastructure (Pydantic schema, loader auto-promotion, CI
-   invariant).
-1. **Phase 3**: Application layer (no code change, only type narrowing).
+1. **Phase 1**: Runtime identity + domain compatibility mode (no breaking
+   SilverFilterConfig change).
+1. **Phase 2**: Infrastructure schema/loader auto-promotion and structural
+   Silver domain conversion.
+1. **Phase 3**: Application/checkpoint/control-plane identity alignment.
 1. **Phase 4**: Configs migration (auto-script + per-entity review).
 1. **Phase 5**: Observability (relabel "structural" semantics).
 1. **Phase 6**: Tests.
@@ -230,7 +235,8 @@ Summary of phases:
 - Phased: Domain → Infrastructure → Configs → Tests → Observability →
   Hardening.
 - Feature flag `BIOETL_LEGACY_SILVER_SEMANTIC=1` disables auto-promotion for
-  emergency rollback.
+  emergency rollback and is captured as `legacy_semantic_silver` in effective
+  config, run manifests, execution fingerprints, and checkpoint identity.
 - Auto-promotion period: 1-2 release cycles before hardening CI invariant
   from warning to error.
 
@@ -250,14 +256,15 @@ Summary of phases:
 
 ## Verification
 
-- `tests/integration/test_silver_to_gold_migration_parity.py` (NEW) — for each
-  entity, assert: pre-migration silver+gold filter outcome == post-migration
-  silver(structural)+gold(extended) outcome on representative sample.
-- `tests/architecture/test_silver_filter_boundary_inventory.py` — assert that
-  no entity config uses semantic fields under `silver_filters` after
-  migration.
+- `tests/integration/test_silver_to_gold_migration_parity.py` (planned) — for
+  each entity, assert: pre-migration silver+gold filter outcome ==
+  post-migration silver(structural)+gold(extended) outcome on representative
+  sample.
+- `tests/architecture/test_silver_filter_boundary_inventory.py` — validates
+  committed inventory shape, business-only migration metadata, shadow-analysis
+  metadata, and that `inventory-baseline.{csv,json,md}` match generator output.
 - `tests/unit/infrastructure/config/test_filter_config_loader.py` — assert
-  auto-promotion + deprecation warning behavior.
+  auto-promotion and legacy rollback behavior.
 - `tests/unit/application/core/test_optionality.py` — assert
   `silver_required_fields` source unchanged.
 

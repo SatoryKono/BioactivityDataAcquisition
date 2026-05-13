@@ -9,6 +9,9 @@ from bioetl.composition.runtime_builders.inputs_resolver import ResolvedVacuumSe
 from bioetl.domain.config import RuntimeConfig
 from bioetl.domain.context import CachedBronzeContext
 from bioetl.domain.types import RunType
+from bioetl.infrastructure.config.silver_filter_migration import (
+    resolve_silver_filter_compatibility_mode,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineRunContext
@@ -72,6 +75,7 @@ def assemble_runtime_config(
         vacuum_retention_days=vacuum.retention_days,
         skip_gold=skip_gold,
         health_check_mode=health_check_mode,
+        silver_filter_compatibility_mode=resolve_silver_filter_compatibility_mode(),
     )
 
 

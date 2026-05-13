@@ -55,7 +55,7 @@ CMD ["bioetl", "--help"]
 FROM base AS development
 
 # Copy development workspace explicitly to avoid recursive context import.
-COPY pyproject.toml uv.lock README.md mkdocs.yml pytest.ini /app/
+COPY pyproject.toml uv.lock README.md mkdocs.yml /app/
 COPY src/ /app/src/
 COPY scripts/ /app/scripts/
 COPY docs/ /app/docs/

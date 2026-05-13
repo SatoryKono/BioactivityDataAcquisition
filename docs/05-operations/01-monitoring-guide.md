@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.4
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-04-10'
+  Last verified: '2026-05-13'
 
 ______________________________________________________________________
 
@@ -73,6 +73,22 @@ Pushgateway publication на завершении run. Это позволяет
 ## 2. Использование Дашбордов
 
 Все дашборды в BioETL v5.1+ поддерживают **динамическую фильтрацию**.
+
+### Policy header для operator dashboards
+
+Любой operator dashboard в BioETL должен с первого экрана отвечать на один
+главный вопрос и явно показывать:
+
+- `ONE BIG QUESTION`
+- current scope
+- provenance summary: source systems / metric families, cadence, transformation
+  or runtime version, last successful run/refresh in UTC, owner/contact
+- availability/risk notes: SLA, known limitations, sensitivity
+- `First action`: что делать при `CRIT` и `WARN`
+
+В shipped v2 suite эта информация частично распределена между scope text-panel,
+first-screen status row, panel descriptions и linked runbooks. В draft v3.0
+она должна материализоваться как явный header contract.
 
 ### Фильтрация и Изоляция данных
 
