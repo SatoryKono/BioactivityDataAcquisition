@@ -24,7 +24,8 @@ python -m scripts.engineering.repo cleanup-branch-candidates --help
 | `preflight-cleanup`     | `preflight_cleanup.sh`           | Preview/apply the bounded release-preflight cleanup set               |
 | `split-testing-roadmap` | `split_testing_roadmap_issue.py` | Preview or create child issues for testing roadmap issue `#2511`      |
 | `sync-docs-issues`      | `sync_docs_issues.py`            | Preview or apply labels, milestone, and comments for docs-sync issues |
-| `all`                   | *(all above)*                    | Run all checks sequentially                                           |
+| `check-all`             | *(read-only checks)*             | Run the repository governance checks without sync/apply commands      |
+| `all`                   | *(alias)*                        | Alias for `check-all`; intentionally read-only                        |
 
 ## Shell Wrapper
 
@@ -67,7 +68,8 @@ the risky local branches.
 | `split-testing-roadmap`     | When converting a roadmap issue into executable GitHub child issues                      | Manual maintenance workflow  |
 | `sync-docs-issues`          | When applying the documentation-sync issue package metadata and execution-order comments | Manual maintenance workflow  |
 | `cleanup-branch-candidates` | When applying the agreed local-branch cleanup set with optional remote deletion          | Manual maintenance workflow  |
-| `all`                       | Quick local sanity check before PR                                                       | Manual                       |
+| `check-all`                 | Quick local sanity check before PR without refreshing manifests or applying cleanup plans | Manual                       |
+| `all`                       | Backward-compatible alias for `check-all`; never runs sync/apply commands                | Manual                       |
 
 ## Other Files
 

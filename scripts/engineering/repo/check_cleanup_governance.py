@@ -113,10 +113,15 @@ def _is_skipped_dir(relative_path: Path) -> bool:
 
 
 def _is_scanned_file(candidate: Path, *, repo_root: Path) -> bool:
-    if candidate.is_dir():
-        return False
     relative = candidate.relative_to(repo_root)
-    return not _is_skipped_dir(relative.parent) and candidate.suffix in SCANNED_SUFFIXES
+    if _is_skipped_dir(relative) or _is_skipped_dir(relative.parent):
+        return False
+    try:
+        if candidate.is_dir():
+            return False
+    except OSError:
+        return False
+    return candidate.suffix in SCANNED_SUFFIXES
 
 
 def _scanned_files_for_root(path: Path, *, repo_root: Path) -> list[Path]:

@@ -1,7 +1,7 @@
 version: 1.0.0
 status: active
 owner: Engineering / Architecture
-last_verified: "2026-04-28"
+last_verified: "2026-05-13"
 
 current_live_root_baseline:
   tracked_root_audit_status: pass
@@ -11,9 +11,9 @@ current_live_root_baseline:
     --strict-untracked
   note: >-
     The current local repository root satisfies the published allowlist and
-    approved-root policy. The 2026-04-28 audit snapshot remains valid as
-    historical trigger evidence, but most previously cited root candidates are
-    absent from the live tracked root baseline.
+    approved-root policy. Local AI/editor/cache root directories may exist as
+    untracked local-only surfaces; this registry tracks their live state so the
+    review gate does not drift from the current workspace.
 
 review_lanes:
   - lane_id: root_env_security
@@ -51,7 +51,7 @@ review_lanes:
       - .venv/bin/python scripts/engineering/repo/audit_root_cleanliness.py --strict-untracked
     candidates:
       - path: .ai
-        current_live_state: absent_from_root_baseline
+        current_live_state: present_local_only_root_surface
         canonical_path: null
         action_if_reintroduced: keep_untracked_or_reclassify_through_explicit_structure_governance
       - path: .claude
@@ -84,7 +84,7 @@ review_lanes:
       - rg -n "\\.agent-work/|\\.agentbridge/|\\.cache/" .gitignore docs scripts .github tests configs
     candidates:
       - path: .agent-work
-        current_live_state: absent_from_root_baseline
+        current_live_state: present_local_only_root_surface
         canonical_path: null
         action_if_reintroduced: keep_untracked_or_reclassify_through_explicit_structure_governance
       - path: .agentbridge
@@ -92,7 +92,7 @@ review_lanes:
         canonical_path: null
         action_if_reintroduced: keep_untracked_or_reclassify_through_explicit_structure_governance
       - path: .cache
-        current_live_state: absent_from_root_baseline
+        current_live_state: present_local_only_root_surface
         canonical_path: null
         action_if_reintroduced: keep_untracked_or_scope_to_a_documented_cache_surface
 
@@ -105,15 +105,15 @@ review_lanes:
       - rg -n "\\.junie/|\\.sonarlint/|\\.windsurf/" .gitignore docs scripts .github tests configs
     candidates:
       - path: .junie
-        current_live_state: absent_from_root_baseline
+        current_live_state: present_local_only_root_surface
         canonical_path: null
         action_if_reintroduced: keep_untracked_or_move_curated_shared_content_to_an_approved_root_surface
       - path: .sonarlint
-        current_live_state: absent_from_root_baseline
+        current_live_state: present_local_only_root_surface
         canonical_path: null
         action_if_reintroduced: keep_untracked_or_reclassify_through_explicit_owner_review
       - path: .windsurf
-        current_live_state: absent_from_root_baseline
+        current_live_state: present_local_only_root_surface
         canonical_path: null
         action_if_reintroduced: keep_untracked_or_move_curated_shared_content_to_an_approved_root_surface
 
