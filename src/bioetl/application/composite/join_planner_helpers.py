@@ -156,7 +156,8 @@ def build_join_key_set(
 
 def find_missing_keys(columns: list[str], keys: list[str]) -> list[str]:
     """Return keys that are absent from the given column list."""
-    return [key for key in keys if key not in columns]
+    columns_set = set(columns)
+    return [key for key in keys if key not in columns_set]
 
 
 def prepare_qualified_right_join_dataframe(
