@@ -149,6 +149,7 @@ tracked_suite_inventory:
     - tests/integration/test_dashboard_visual_semantics.py
     - tests/integration/test_json_hash_stability.py
     - tests/integration/test_runtime_metric_emission_consistency.py
+    - tests/integration/test_uniprot_idmapping_pipeline.py
     - tests/integration/workflow/test_workflow_foreign_key_reconciliation.py
     - tests/integration/workflow/test_workflow_runner_service.py
     governance_and_runtime_surfaces:
@@ -262,6 +263,7 @@ tracked_suite_inventory:
     - tests/e2e/test_contract_rollout_runtime_e2e.py
     - tests/e2e/test_e2e_stability_policy.py
     - tests/e2e/test_pipeline_matrix_e2e.py
+    - tests/e2e/test_uniprot_idmapping_e2e.py
     resilience_and_failure_surfaces:
     - tests/e2e/test_network_failure_e2e.py
     - tests/e2e/test_pipeline_circuit_breaker_e2e.py

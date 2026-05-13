@@ -223,7 +223,7 @@ class TestLoadRealConfig:
         if not real_config_path.exists():
             pytest.skip("Real config not available")
 
-        from bioetl.domain.value_objects.publication_field_groups import (
+        from bioetl.domain.value_objects._publication_field_group_types import (
             FIELD_TO_GROUP_MAPPING,
         )
 

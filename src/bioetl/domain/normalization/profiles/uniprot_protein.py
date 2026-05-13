@@ -8,6 +8,7 @@ from bioetl.domain.normalization.profiles._standard_profile_builder import (
 from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_chembl_ids,
     normalize_profile_drugbank_ids,
+    normalize_profile_ncbi_taxonomy_id,
     normalize_profile_passthrough,
     normalize_profile_pdb_references,
     normalize_profile_pfam_references,
@@ -176,6 +177,10 @@ _SPECIAL_RULES = {
     "secondary_accessions": (
         normalize_profile_uniprot_accessions,
         "Canonicalize UniProt secondary accessions inside a set-like canonical JSON array.",
+    ),
+    "taxonomy_id": (
+        normalize_profile_ncbi_taxonomy_id,
+        "Canonicalize NCBI Taxonomy identifiers through the shared reference-ID registry.",
     ),
 }
 

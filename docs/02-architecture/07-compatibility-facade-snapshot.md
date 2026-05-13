@@ -37,11 +37,9 @@
 - `src/bioetl/composition/entrypoints.py`
 - `src/bioetl/domain/composite/config.py`
 - `src/bioetl/domain/value_objects/activity_values.py`
-- `src/bioetl/domain/value_objects/publication_field_groups.py`
 - `src/bioetl/interfaces/cli/commands/diagnostics.py`
 - `src/bioetl/interfaces/cli/commands/health.py`
 - `src/bioetl/interfaces/cli/commands/maintenance.py`
-- `src/bioetl/interfaces/cli/commands/plan.py`
 - `src/bioetl/interfaces/cli/commands/quarantine.py`
 - `src/bioetl/interfaces/cli/commands/run.py`
 - `src/bioetl/interfaces/cli/commands/run_all.py`
@@ -56,11 +54,9 @@
 - `src/bioetl/interfaces/cli/commands/diagnostics.py` — external breaking change required: `true`, internal callers zero: `false`
 - `src/bioetl/interfaces/cli/commands/quarantine.py` — external breaking change required: `true`, internal callers zero: `false`
 - `src/bioetl/interfaces/cli/commands/maintenance.py` — external breaking change required: `true`, internal callers zero: `false`
-- `src/bioetl/interfaces/cli/commands/plan.py` — external breaking change required: `true`, internal callers zero: `false`
 - `src/bioetl/composition/entrypoints.py` — external breaking change required: `true`, internal callers zero: `false`
 - `src/bioetl/domain/composite/config.py` — external breaking change required: `true`, internal callers zero: `false`
 - `src/bioetl/domain/value_objects/activity_values.py` — external breaking change required: `true`, internal callers zero: `false`
-- `src/bioetl/domain/value_objects/publication_field_groups.py` — external breaking change required: `true`, internal callers zero: `false`
 - `src/bioetl/application/composite/merger.py` — external breaking change required: `true`, internal callers zero: `false`
 
 ## Measured-Only Allowlist

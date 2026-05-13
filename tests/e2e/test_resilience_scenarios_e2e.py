@@ -12,6 +12,7 @@ Part of architecture review refactoring plan (R2).
 from __future__ import annotations
 
 import asyncio
+from itertools import chain, repeat
 from pathlib import Path
 from uuid import uuid4
 
@@ -297,9 +298,9 @@ async def test_circuit_breaker_half_open_recovery(monkeypatch: pytest.MonkeyPatc
         recovery_timeout=1,  # 1 second for testing (must be > 0.5 for reliable sleep)
     )
 
-    monotonic_ticks = iter((100.0, 101.1))
+    monotonic_ticks = chain((100.0, 101.1), repeat(101.1))
     monkeypatch.setattr(
-        "bioetl.infrastructure.adapters.http.circuit_breaker.time.monotonic",
+        "bioetl.infrastructure.adapters.http.circuit_breaker._now",
         lambda: next(monotonic_ticks),
     )
 
@@ -307,7 +308,6 @@ async def test_circuit_breaker_half_open_recovery(monkeypatch: pytest.MonkeyPatc
     assert breaker.get_state() == CircuitBreakerState.OPEN
 
     async def dummy_func() -> str:
-        await asyncio.sleep(0)
         return "success"
 
     result = await breaker.call(dummy_func)
